@@ -1,5 +1,17 @@
 import { getDb, isDatabaseConfigured } from './connection.js';
-import { companies, departments, designations, locations, onboardingCases } from './schema.js';
+import {
+  companies,
+  departments,
+  designations,
+  locations,
+  onboardingCases,
+  onboardingGeneralSettings,
+  onboardingStageConfigs,
+  onboardingFieldConfigs,
+  onboardingDocumentRequirements,
+  onboardingChecklistTemplates,
+  onboardingConversionSettings,
+} from './schema.js';
 import { eq } from 'drizzle-orm';
 
 /**
@@ -142,6 +154,337 @@ export async function seedDatabase() {
         status: 'active',
       });
     }
+  }
+
+  // 6. Onboarding Settings for comp_demo_01
+  const existingGen = await db
+    .select()
+    .from(onboardingGeneralSettings)
+    .where(eq(onboardingGeneralSettings.companyId, companyId));
+  if (existingGen.length === 0) {
+    await db.insert(onboardingGeneralSettings).values({
+      id: 'gen_sett_demo_01',
+      tenantId,
+      companyId,
+      onboardingEnabled: true,
+      defaultDurationDays: 30,
+      idPrefix: 'NH-',
+      defaultLocationId: 'loc_chn_01',
+    });
+  }
+
+  const stageData = [
+    {
+      id: 'stg_cfg_preboarding',
+      stageKey: 'preboarding',
+      name: 'Pre-boarding',
+      description: 'Pre-boarding activities prior to day 1',
+      displayOrder: 1,
+      isRequired: true,
+      isActive: true,
+      isSystem: true,
+    },
+    {
+      id: 'stg_cfg_documents',
+      stageKey: 'documents',
+      name: 'Document Collection',
+      description: 'Collection and verification of employee credentials',
+      displayOrder: 2,
+      isRequired: true,
+      isActive: true,
+      isSystem: true,
+    },
+    {
+      id: 'stg_cfg_induction',
+      stageKey: 'induction',
+      name: 'Induction & Orientation',
+      description: 'Welcome session and team orientation',
+      displayOrder: 3,
+      isRequired: true,
+      isActive: true,
+      isSystem: true,
+    },
+    {
+      id: 'stg_cfg_completed',
+      stageKey: 'completed',
+      name: 'Completed',
+      description: 'Onboarding process successfully finalized',
+      displayOrder: 4,
+      isRequired: true,
+      isActive: true,
+      isSystem: true,
+    },
+  ];
+
+  for (const s of stageData) {
+    const exists = await db
+      .select()
+      .from(onboardingStageConfigs)
+      .where(eq(onboardingStageConfigs.id, s.id));
+    if (exists.length === 0) {
+      await db.insert(onboardingStageConfigs).values({
+        ...s,
+        tenantId,
+        companyId,
+      });
+    }
+  }
+
+  const fieldData = [
+    {
+      id: 'fld_cfg_first_name',
+      fieldKey: 'firstName',
+      label: 'First Name',
+      isRequired: true,
+      isEnabled: true,
+      displayOrder: 1,
+      isSystem: true,
+    },
+    {
+      id: 'fld_cfg_last_name',
+      fieldKey: 'lastName',
+      label: 'Last Name',
+      isRequired: false,
+      isEnabled: true,
+      displayOrder: 2,
+      isSystem: false,
+    },
+    {
+      id: 'fld_cfg_email',
+      fieldKey: 'email',
+      label: 'Work / Personal Email',
+      isRequired: true,
+      isEnabled: true,
+      displayOrder: 3,
+      isSystem: true,
+    },
+    {
+      id: 'fld_cfg_phone',
+      fieldKey: 'phone',
+      label: 'Phone Number',
+      isRequired: false,
+      isEnabled: true,
+      displayOrder: 4,
+      isSystem: false,
+    },
+    {
+      id: 'fld_cfg_company_id',
+      fieldKey: 'companyId',
+      label: 'Company',
+      isRequired: true,
+      isEnabled: true,
+      displayOrder: 5,
+      isSystem: true,
+    },
+    {
+      id: 'fld_cfg_dept_id',
+      fieldKey: 'departmentId',
+      label: 'Department',
+      isRequired: true,
+      isEnabled: true,
+      displayOrder: 6,
+      isSystem: true,
+    },
+    {
+      id: 'fld_cfg_desig_id',
+      fieldKey: 'designationId',
+      label: 'Designation',
+      isRequired: true,
+      isEnabled: true,
+      displayOrder: 7,
+      isSystem: true,
+    },
+    {
+      id: 'fld_cfg_loc_id',
+      fieldKey: 'locationId',
+      label: 'Work Location',
+      isRequired: false,
+      isEnabled: true,
+      displayOrder: 8,
+      isSystem: false,
+    },
+    {
+      id: 'fld_cfg_joining_date',
+      fieldKey: 'joiningDate',
+      label: 'Date of Joining',
+      isRequired: true,
+      isEnabled: true,
+      displayOrder: 9,
+      isSystem: true,
+    },
+    {
+      id: 'fld_cfg_emp_type',
+      fieldKey: 'employmentType',
+      label: 'Employment Type',
+      isRequired: true,
+      isEnabled: true,
+      displayOrder: 10,
+      isSystem: true,
+    },
+  ];
+
+  for (const f of fieldData) {
+    const exists = await db
+      .select()
+      .from(onboardingFieldConfigs)
+      .where(eq(onboardingFieldConfigs.id, f.id));
+    if (exists.length === 0) {
+      await db.insert(onboardingFieldConfigs).values({
+        ...f,
+        tenantId,
+        companyId,
+      });
+    }
+  }
+
+  const docData = [
+    {
+      id: 'doc_req_id_proof',
+      documentType: 'id_proof',
+      name: 'Government ID Proof',
+      description: 'National ID, Passport, or Driver License',
+      isRequired: true,
+      verificationRequired: true,
+      expiryTracking: false,
+      displayOrder: 1,
+      isActive: true,
+    },
+    {
+      id: 'doc_req_edu_cert',
+      documentType: 'educational_certificates',
+      name: 'Degree & Educational Certificates',
+      description: 'Highest degree completion certificates',
+      isRequired: true,
+      verificationRequired: true,
+      expiryTracking: false,
+      displayOrder: 2,
+      isActive: true,
+    },
+    {
+      id: 'doc_req_relieving',
+      documentType: 'experience_letters',
+      name: 'Previous Employment Relieving Letters',
+      description: 'Relieving & experience letters from past employers',
+      isRequired: false,
+      verificationRequired: true,
+      expiryTracking: false,
+      displayOrder: 3,
+      isActive: true,
+    },
+    {
+      id: 'doc_req_bank',
+      documentType: 'bank_details',
+      name: 'Bank Account Passbook / Cancelled Cheque',
+      description: 'Bank details for salary processing',
+      isRequired: true,
+      verificationRequired: true,
+      expiryTracking: false,
+      displayOrder: 4,
+      isActive: true,
+    },
+  ];
+
+  for (const doc of docData) {
+    const exists = await db
+      .select()
+      .from(onboardingDocumentRequirements)
+      .where(eq(onboardingDocumentRequirements.id, doc.id));
+    if (exists.length === 0) {
+      await db.insert(onboardingDocumentRequirements).values({
+        ...doc,
+        tenantId,
+        companyId,
+      });
+    }
+  }
+
+  const chkData = [
+    {
+      id: 'chk_tpl_welcome',
+      name: 'Send Welcome Email',
+      description: 'Send onboarding email and first-day details to new hire',
+      stageKey: 'preboarding',
+      assigneeType: 'hr',
+      dueOffsetDays: -3,
+      isRequired: true,
+      displayOrder: 1,
+      isActive: true,
+    },
+    {
+      id: 'chk_tpl_hardware',
+      name: 'Prepare IT Hardware & Accounts',
+      description: 'Provision laptop, email account, and access rights',
+      stageKey: 'preboarding',
+      assigneeType: 'it_admin',
+      dueOffsetDays: -1,
+      isRequired: true,
+      displayOrder: 2,
+      isActive: true,
+    },
+    {
+      id: 'chk_tpl_submit_docs',
+      name: 'Submit Personal & Banking Information',
+      description: 'Upload required documents and enter bank details',
+      stageKey: 'documents',
+      assigneeType: 'employee',
+      dueOffsetDays: 1,
+      isRequired: true,
+      displayOrder: 3,
+      isActive: true,
+    },
+    {
+      id: 'chk_tpl_verify_docs',
+      name: 'Verify Submitted Documents',
+      description: 'Review and verify identity and background documents',
+      stageKey: 'documents',
+      assigneeType: 'hr',
+      dueOffsetDays: 3,
+      isRequired: true,
+      displayOrder: 4,
+      isActive: true,
+    },
+    {
+      id: 'chk_tpl_induction',
+      name: 'Team Introduction & Induction Session',
+      description: 'Conduct welcome meeting and introduce team buddy',
+      stageKey: 'induction',
+      assigneeType: 'manager',
+      dueOffsetDays: 1,
+      isRequired: true,
+      displayOrder: 5,
+      isActive: true,
+    },
+  ];
+
+  for (const chk of chkData) {
+    const exists = await db
+      .select()
+      .from(onboardingChecklistTemplates)
+      .where(eq(onboardingChecklistTemplates.id, chk.id));
+    if (exists.length === 0) {
+      await db.insert(onboardingChecklistTemplates).values({
+        ...chk,
+        tenantId,
+        companyId,
+      });
+    }
+  }
+
+  const existingConv = await db
+    .select()
+    .from(onboardingConversionSettings)
+    .where(eq(onboardingConversionSettings.companyId, companyId));
+  if (existingConv.length === 0) {
+    await db.insert(onboardingConversionSettings).values({
+      id: 'conv_sett_demo_01',
+      tenantId,
+      companyId,
+      autoConvertOnJoining: false,
+      requireDocumentVerification: true,
+      requireChecklistCompletion: true,
+      employeeIdPrefix: 'EMP-',
+      defaultEmploymentStatus: 'probation',
+    });
   }
 
   console.log('[Seed] Database seeded successfully for BEZENT Demo Pvt Ltd.');
