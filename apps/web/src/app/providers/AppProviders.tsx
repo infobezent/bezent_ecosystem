@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { ThemeProvider } from './ThemeProvider';
+import { DevContextProvider } from '../../platform/context/DevContext';
 
 interface AppProvidersProps {
   children: ReactNode;
@@ -11,5 +12,9 @@ interface AppProvidersProps {
  * implemented, so `App.tsx` never has to change to accommodate them.
  */
 export function AppProviders({ children }: AppProvidersProps) {
-  return <ThemeProvider>{children}</ThemeProvider>;
+  return (
+    <ThemeProvider>
+      <DevContextProvider>{children}</DevContextProvider>
+    </ThemeProvider>
+  );
 }

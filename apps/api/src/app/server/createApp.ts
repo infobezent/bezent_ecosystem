@@ -4,13 +4,15 @@ import helmet from 'helmet';
 import { healthRouter } from './health.route.js';
 import { notFoundHandler } from '../middleware/notFound.js';
 import { errorHandler } from '../errors/errorHandler.js';
+import { contextRouter, devContextMiddleware } from '../../platform/context/devContext.js';
+import { organizationRouter } from '../../applications/hrms/organization/routes/organization.route.js';
+import { onboardingRouter } from '../../applications/hrms/onboarding/routes/onboarding.route.js';
 
 /**
  * Builds the Express application. Kept separate from `main.ts` so it can be
  * imported directly in tests without binding a port.
  *
- * Module routers (e.g. HRMS) are mounted under /api/v1 here as they are
- * introduced. None exist yet in Phase 0.
+ * Module routers (e.g. HRMS) and Platform capabilities are mounted under /api/v1.
  */
 export function createApp(): Express {
   const app = express();
@@ -19,7 +21,14 @@ export function createApp(): Express {
   app.use(cors());
   app.use(express.json());
 
+  // Development context middleware (Milestone 1)
+  app.use(devContextMiddleware);
+
+  // Platform & Domain routers under /api/v1
   app.use('/api/v1', healthRouter);
+  app.use('/api/v1', contextRouter);
+  app.use('/api/v1', organizationRouter);
+  app.use('/api/v1', onboardingRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

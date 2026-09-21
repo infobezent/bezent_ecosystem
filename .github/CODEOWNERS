@@ -1,0 +1,48 @@
+﻿# BEZENT CODEOWNERS
+#
+# GitHub uses the LAST matching pattern for a given file.
+# Rules are ordered from most general to most specific so that
+# specific rules take precedence over broader ones.
+#
+# Ownership = primary reviewer + maintainer for that area.
+# It does NOT mean exclusive commit rights.
+# See docs/COLLABORATION.md for the full ownership model.
+
+# ---------------------------------------------------------------------------
+# Repository / CI configuration
+# ---------------------------------------------------------------------------
+/.github/                        @mukeshm2002 @sabinrahul
+/package.json                    @mukeshm2002 @sabinrahul
+/package-lock.json               @mukeshm2002 @sabinrahul
+/tsconfig.json                   @mukeshm2002 @sabinrahul
+
+# ---------------------------------------------------------------------------
+# Architecture governance & documentation
+# ---------------------------------------------------------------------------
+/docs/                           @mukeshm2002 @Soundhranayaki1 @sabinrahul
+/AGENTS.md                       @mukeshm2002 @Soundhranayaki1 @sabinrahul
+/CLAUDE.md                       @mukeshm2002 @Soundhranayaki1 @sabinrahul
+
+# ---------------------------------------------------------------------------
+# Backend — Developer 1 (@mukeshm2002)
+# ---------------------------------------------------------------------------
+/apps/api/                       @mukeshm2002
+
+# ---------------------------------------------------------------------------
+# Frontend — shared app bootstrap / router (Dev 1 + Dev 3)
+# ---------------------------------------------------------------------------
+/apps/web/src/app/               @mukeshm2002 @sabinrahul
+
+# ---------------------------------------------------------------------------
+# HRMS domain — Developer 2 (@Soundhranayaki1)
+# Placed after /apps/web/src/app/ so this specific path is not shadowed.
+# ---------------------------------------------------------------------------
+/apps/web/src/applications/hrms/ @Soundhranayaki1
+
+# ---------------------------------------------------------------------------
+# Frontend Foundation — Developer 3 (@sabinrahul)
+# ---------------------------------------------------------------------------
+/apps/web/src/design-system/     @sabinrahul
+/apps/web/src/layouts/           @sabinrahul
+/apps/web/src/platform/          @sabinrahul
+/apps/web/src/shared/            @sabinrahul
