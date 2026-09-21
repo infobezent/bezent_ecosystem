@@ -60,10 +60,10 @@
    * "application canvas containing a white working surface" hierarchy.
    * Radius 18px on all corners: the workspace is visually a card floating
    * inside the canvas rather than a flush rectangular region.
-   * No border, no shadow — surface colour contrast does the separation.
    */
   margin: 8px 12px 12px 8px;
   border-radius: 16px;
+  box-shadow: var(--shadow-workspace);
 }
 
 @media (prefers-reduced-motion: reduce) {
