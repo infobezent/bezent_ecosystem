@@ -1,0 +1,251 @@
+.personal-info {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Group Card Section */
+.personal-info__group {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--card-border, #f1f5f9);
+}
+
+.personal-info__group:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.personal-info__group-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Profile Photo Uploader */
+.personal-info__photo-container {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background-color: var(--bg-surface-secondary, #f8fafc);
+  padding: 16px 20px;
+  border-radius: 10px;
+  border: 1px dashed var(--card-border, #cbd5e1);
+}
+
+.personal-info__photo-preview {
+  width: 72px;
+  height: 72px;
+  border-radius: 9999px;
+  object-fit: cover;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.personal-info__photo-placeholder {
+  width: 72px;
+  height: 72px;
+  border-radius: 9999px;
+  background-color: #e2e8f0;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.personal-info__photo-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.personal-info__photo-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.personal-info__upload-btn {
+  background-color: var(--bg-surface, #ffffff);
+  border: 1px solid var(--card-border, #cbd5e1);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary, #2563eb);
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.personal-info__upload-btn:hover {
+  background-color: #eff6ff;
+}
+
+.personal-info__remove-photo-btn {
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  color: #ef4444;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.personal-info__remove-photo-btn:hover {
+  text-decoration: underline;
+}
+
+.personal-info__photo-hint {
+  font-size: 12px;
+  color: var(--text-muted, #64748b);
+}
+
+/* Phone Input Group with Country Code */
+.personal-info__phone-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.personal-info__country-code-select {
+  width: 90px;
+  height: 40px;
+  padding: 0 8px;
+  background-color: var(--bg-surface, #ffffff);
+  border: 1px solid var(--card-border, #cbd5e1);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-primary, #0f172a);
+  outline: none;
+}
+
+/* Full Width Grid Span */
+.personal-info__field--full {
+  grid-column: 1 / -1;
+}
+
+/* Repeatable List (Family / Nominees) */
+.personal-info__repeatable-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.personal-info__repeatable-card {
+  background-color: var(--bg-surface-secondary, #f8fafc);
+  border: 1px solid var(--card-border, #e2e8f0);
+  border-radius: 10px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+}
+
+.personal-info__repeatable-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.personal-info__repeatable-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #0f172a);
+}
+
+.personal-info__remove-item-btn {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.personal-info__remove-item-btn:hover {
+  text-decoration: underline;
+}
+
+.personal-info__add-repeatable-btn {
+  align-self: flex-start;
+  background-color: #eff6ff;
+  color: var(--color-primary, #2563eb);
+  border: 1px dashed #93c5fd;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 150ms ease;
+}
+
+.personal-info__add-repeatable-btn:hover {
+  background-color: #dbeafe;
+}
+
+/* Address Postal Status Pill */
+.personal-info__postal-status {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #059669;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.personal-info__error-hint {
+  font-size: 12px;
+  color: #ef4444;
+  margin-top: 2px;
+}
+
+.personal-info__photo-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.personal-info__file-input {
+  display: none;
+}
+
+.employee-registration__input--disabled {
+  background-color: #f1f5f9;
+  cursor: not-allowed;
+}
+
+.personal-info__label-margin {
+  margin-bottom: 8px;
+}
+
+.personal-info__repeatable-section-gap {
+  margin-top: 16px;
+}
+
+.personal-info__dropdown-margin {
+  margin-top: 4px;
+}
+
+.personal-info__pincode-select {
+  font-size: 12px;
+  height: 34px;
+}
