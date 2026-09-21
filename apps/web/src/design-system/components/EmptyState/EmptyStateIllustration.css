@@ -11,24 +11,36 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  max-width: 100%;
+  margin: 0 auto;
   user-select: none;
   pointer-events: auto;
   cursor: default;
 }
 
 .bezent-empty-illustration-container--default {
-  width: 210px;
+  width: 160px;
+  max-width: 160px;
 }
 
 .bezent-empty-illustration-container--compact {
-  width: 150px;
+  width: 110px;
+  max-width: 110px;
 }
 
-.bezent-sleeping-raccoon-svg {
-  overflow: visible;
+.bezent-sleeping-raccoon-img {
+  width: 100%;
+  max-width: 160px;
+  max-height: 120px;
+  height: auto;
   display: block;
+  object-fit: contain;
+  border-radius: 8px;
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bezent-empty-illustration-container--compact .bezent-sleeping-raccoon-img {
+  max-width: 110px;
+  max-height: 85px;
 }
 
 .bezent-empty-illustration-container:hover .bezent-sleeping-raccoon-svg {
