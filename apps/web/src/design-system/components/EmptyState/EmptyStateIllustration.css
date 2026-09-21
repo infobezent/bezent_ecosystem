@@ -1,13 +1,13 @@
 /*
- * BEZENT Empty-State Futuristic Spider-Web Network Illustration — Animations & Styling.
+ * BEZENT Empty-State Omnitrix-Inspired Transformation Core — Animations & Styling.
  *
- * Premium Digital Network / Engineered Spider-Web aesthetic:
- * - Center glowing energy core pulse
- * - Subtle outward energy ripple wave traveling through the web
- * - Staggered glowing connection points (organization/employee nodes)
- * - Slow background HUD rotation
- * - Subtle floating ambient particles
- * - Responsive hover glow
+ * Premium Futuristic Transformation Technology Aesthetic:
+ * - Green core gentle energy pulsing
+ * - Inner activation matrix slow rotation
+ * - Outer HUD ring mechanical rotation
+ * - Circumferential conduit energy sweep
+ * - Four cardinal status LEDs sequential illumination
+ * - Hover glow expansion & core brightening
  */
 
 .bezent-empty-illustration-container {
@@ -21,100 +21,74 @@
 }
 
 .bezent-empty-illustration-container--default {
-  width: 190px;
+  width: 185px;
 }
 
 .bezent-empty-illustration-container--compact {
-  width: 135px;
+  width: 132px;
 }
 
-.bezent-spider-web {
+.bezent-omnitrix-device {
   overflow: visible;
   display: block;
-  transition: filter 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    filter 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.bezent-empty-illustration-container:hover .bezent-spider-web {
-  filter: drop-shadow(0 0 14px rgba(0, 242, 254, 0.5));
+.bezent-empty-illustration-container:hover .bezent-omnitrix-device {
+  transform: scale(1.03);
+  filter: drop-shadow(0 0 16px rgba(34, 197, 94, 0.55));
 }
 
-/* ── Center Core Energy Pulse ── */
-.bezent-web-core {
+.bezent-empty-illustration-container:hover .bezent-omni-core-glow {
+  opacity: 1;
+  filter: drop-shadow(0 0 10px rgba(74, 222, 128, 0.9));
+}
+
+/* ── Central Green Energy Core Pulse ── */
+.bezent-omni-symbol {
   transform-origin: 120px 110px;
-  animation: bezentWebCorePulse 3s ease-in-out infinite;
-  will-change: transform, opacity;
+  animation: bezentOmniSymbolPulse 3.2s ease-in-out infinite;
+  will-change: transform, filter;
 }
 
-@keyframes bezentWebCorePulse {
+@keyframes bezentOmniSymbolPulse {
   0%,
   100% {
-    transform: scale(0.96);
-    opacity: 0.9;
+    transform: scale(0.97);
+    filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.7));
   }
   50% {
-    transform: scale(1.06);
-    opacity: 1;
-    filter: drop-shadow(0 0 6px rgba(0, 242, 254, 0.8));
+    transform: scale(1.04);
+    filter: drop-shadow(0 0 12px rgba(74, 222, 128, 0.95));
   }
 }
 
-/* ── Center Outward Energy Wave Ripple ── */
-.bezent-web-ripple {
-  transform-origin: 120px 110px;
-  will-change: transform, opacity;
+.bezent-omni-center-diamond {
+  animation: bezentOmniDiamondBlink 2.4s ease-in-out infinite;
 }
 
-.bezent-web-ripple--1 {
-  animation: bezentWebRipple 4s cubic-bezier(0.1, 0.4, 0.6, 1) infinite;
-}
-
-.bezent-web-ripple--2 {
-  animation: bezentWebRipple 4s cubic-bezier(0.1, 0.4, 0.6, 1) infinite 2s;
-}
-
-@keyframes bezentWebRipple {
-  0% {
-    transform: scale(0.8);
+@keyframes bezentOmniDiamondBlink {
+  0%,
+  100% {
     opacity: 0.85;
-    stroke-width: 1.5;
-  }
-  70% {
-    opacity: 0.35;
-    stroke-width: 0.8;
-  }
-  100% {
-    transform: scale(6.2);
-    opacity: 0;
-    stroke-width: 0.3;
-  }
-}
-
-/* ── Symmetrical Web Structure Gentle Breathing ── */
-.bezent-web-structure {
-  transform-origin: 120px 110px;
-  animation: bezentWebBreathe 6s ease-in-out infinite;
-}
-
-@keyframes bezentWebBreathe {
-  0%,
-  100% {
-    opacity: 0.88;
-    transform: scale(0.99);
+    fill: #ffffff;
   }
   50% {
     opacity: 1;
-    transform: scale(1.01);
+    fill: #bbf7d0;
   }
 }
 
-/* ── Background HUD Ring Slow Subtle Rotation ── */
-.bezent-web-hud-ring {
+/* ── Inner Dial Slow Rotation ── */
+.bezent-omni-inner-dial {
   transform-origin: 120px 110px;
-  animation: bezentWebHudRotate 36s linear infinite;
+  animation: bezentOmniInnerRotate 28s linear infinite;
   will-change: transform;
 }
 
-@keyframes bezentWebHudRotate {
+@keyframes bezentOmniInnerRotate {
   from {
     transform: rotate(0deg);
   }
@@ -123,68 +97,91 @@
   }
 }
 
-/* ── Connection Nodes Staggered Illumination Pulses ── */
-.bezent-node {
-  will-change: transform, opacity;
+/* ── Outer HUD Ring Mechanical Rotation (Counter-Clockwise) ── */
+.bezent-omni-hud-outer {
+  transform-origin: 120px 110px;
+  animation: bezentOmniOuterRotate 34s linear infinite;
+  will-change: transform;
+}
+
+@keyframes bezentOmniOuterRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+/* ── Circumferential Green Energy Conduit Sweep ── */
+.bezent-omni-conduit-glow {
+  transform-origin: 120px 110px;
+  animation: bezentOmniConduitSweep 12s linear infinite;
+}
+
+@keyframes bezentOmniConduitSweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Four Cardinal Status LEDs Sequential Illumination ── */
+.bezent-omni-led {
+  will-change: opacity, transform;
   transform-box: fill-box;
   transform-origin: center;
 }
 
-.bezent-node--1 {
-  animation: bezentNodePulse 3s ease-in-out infinite 0s;
+.bezent-omni-led--1 {
+  animation: bezentOmniLedPulse 2.8s ease-in-out infinite 0s;
 }
 
-.bezent-node--2 {
-  animation: bezentNodePulse 3s ease-in-out infinite 0.5s;
+.bezent-omni-led--2 {
+  animation: bezentOmniLedPulse 2.8s ease-in-out infinite 0.7s;
 }
 
-.bezent-node--3 {
-  animation: bezentNodePulse 3s ease-in-out infinite 1s;
+.bezent-omni-led--3 {
+  animation: bezentOmniLedPulse 2.8s ease-in-out infinite 1.4s;
 }
 
-.bezent-node--4 {
-  animation: bezentNodePulse 3s ease-in-out infinite 1.5s;
+.bezent-omni-led--4 {
+  animation: bezentOmniLedPulse 2.8s ease-in-out infinite 2.1s;
 }
 
-.bezent-node--5 {
-  animation: bezentNodePulse 3s ease-in-out infinite 2s;
-}
-
-.bezent-node--6 {
-  animation: bezentNodePulse 3s ease-in-out infinite 2.5s;
-}
-
-@keyframes bezentNodePulse {
+@keyframes bezentOmniLedPulse {
   0%,
   100% {
-    transform: scale(0.85);
-    opacity: 0.65;
+    opacity: 0.45;
+    transform: scale(0.9);
   }
   50% {
-    transform: scale(1.3);
     opacity: 1;
-    filter: drop-shadow(0 0 4px rgba(0, 242, 254, 0.9));
+    transform: scale(1.25);
+    filter: drop-shadow(0 0 5px rgba(74, 222, 128, 0.95));
   }
 }
 
-/* ── Floating Ambient Particles ── */
-.bezent-p1 {
-  animation: bezentWebParticleFloat1 4s ease-in-out infinite;
+/* ── Floating Green Energy Particles ── */
+.bezent-omni-p1 {
+  animation: bezentOmniParticleFloat1 3.8s ease-in-out infinite;
 }
 
-.bezent-p2 {
-  animation: bezentWebParticleFloat2 4.6s ease-in-out infinite 0.6s;
+.bezent-omni-p2 {
+  animation: bezentOmniParticleFloat2 4.4s ease-in-out infinite 0.5s;
 }
 
-.bezent-p3 {
-  animation: bezentWebParticleFloat1 4.2s ease-in-out infinite 1.2s;
+.bezent-omni-p3 {
+  animation: bezentOmniParticleFloat1 4.1s ease-in-out infinite 1.1s;
 }
 
-.bezent-p4 {
-  animation: bezentWebParticleFloat2 5s ease-in-out infinite 0.9s;
+.bezent-omni-p4 {
+  animation: bezentOmniParticleFloat2 4.8s ease-in-out infinite 0.8s;
 }
 
-@keyframes bezentWebParticleFloat1 {
+@keyframes bezentOmniParticleFloat1 {
   0%,
   100% {
     transform: translate(0, 0);
@@ -192,11 +189,11 @@
   }
   50% {
     transform: translate(2px, -3px);
-    opacity: 0.85;
+    opacity: 0.9;
   }
 }
 
-@keyframes bezentWebParticleFloat2 {
+@keyframes bezentOmniParticleFloat2 {
   0%,
   100% {
     transform: translate(0, 0);
@@ -209,12 +206,12 @@
 }
 
 /* ── Ambient Aura Breathing ── */
-.bezent-web-aura {
+.bezent-omni-aura {
   transform-origin: 120px 110px;
-  animation: bezentWebAuraBreathe 4.5s ease-in-out infinite;
+  animation: bezentOmniAuraBreathe 4s ease-in-out infinite;
 }
 
-@keyframes bezentWebAuraBreathe {
+@keyframes bezentOmniAuraBreathe {
   0%,
   100% {
     transform: scale(0.96);
@@ -228,21 +225,22 @@
 
 /* ── Reduced Motion Accessibility ── */
 @media (prefers-reduced-motion: reduce) {
-  .bezent-web-core,
-  .bezent-web-ripple,
-  .bezent-web-structure,
-  .bezent-web-hud-ring,
-  .bezent-node,
-  .bezent-p1,
-  .bezent-p2,
-  .bezent-p3,
-  .bezent-p4,
-  .bezent-web-aura {
+  .bezent-omni-symbol,
+  .bezent-omni-center-diamond,
+  .bezent-omni-inner-dial,
+  .bezent-omni-hud-outer,
+  .bezent-omni-conduit-glow,
+  .bezent-omni-led,
+  .bezent-omni-p1,
+  .bezent-omni-p2,
+  .bezent-omni-p3,
+  .bezent-omni-p4,
+  .bezent-omni-aura {
     animation: none !important;
     transform: none !important;
   }
 
-  .bezent-spider-web {
+  .bezent-omnitrix-device {
     transition: none !important;
   }
 }
