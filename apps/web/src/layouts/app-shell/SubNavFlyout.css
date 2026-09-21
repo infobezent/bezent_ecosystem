@@ -1,0 +1,190 @@
+/*
+ * BEZENT SubNavFlyout — source: old approved UI (`App.tsx` 1021-1390,
+ * `index.css` `.subnav-flyout-enter`). Fixed positioning with `top: auto`
+ * keeps the flyout at its item's own vertical position while escaping the
+ * sidebar list's overflow clipping.
+ */
+
+.subnav-flyout {
+  position: fixed;
+  left: calc(var(--shell-sidebar-width) + 4px);
+  margin-top: 4px;
+  width: var(--shell-subnav-flyout-width);
+  min-height: 220px;
+  max-height: 360px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  background: var(--floating-surface-bg);
+  border: 1px solid var(--floating-surface-border);
+  border-radius: 14px;
+  box-shadow: var(--floating-surface-shadow);
+  z-index: var(--z-flyout);
+  /* Mounted only while it owns the sidebar flyout; open/close is LeftSidebar state. */
+  animation: subnavFlyoutEnter var(--motion-duration-flyout-enter) var(--motion-ease-standard) both;
+}
+
+/* Old `subnavFlyoutEnter` (140ms). */
+@keyframes subnavFlyoutEnter {
+  from {
+    opacity: 0;
+    transform: translateX(-5px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+ * Bottom-aligned variant, used when the default (top-aligned) panel would
+ * run under the bottom bar: shifts the panel up so its bottom edge meets the
+ * bottom of the owning item. The individual `translate` property avoids
+ * fighting the enter animation's `transform`.
+ */
+.subnav-flyout--up {
+  translate: 0 calc(-100% + var(--shell-nav-item-height) - 4px);
+}
+
+.subnav-flyout--up .subnav-flyout__pointer {
+  top: auto;
+  bottom: 34px;
+  transform: translateY(50%) rotate(45deg);
+  background: var(--floating-surface-bg);
+}
+
+/* Invisible hover bridge between the rail and the flyout. */
+.subnav-flyout__bridge {
+  position: absolute;
+  left: -18px;
+  top: 0;
+  width: 18px;
+  height: 100%;
+}
+
+/* Left-edge notch aligned with the hovered item's centre. */
+.subnav-flyout__pointer {
+  position: absolute;
+  left: -6px;
+  top: 30px;
+  width: 10px;
+  height: 10px;
+  background: var(--floating-surface-header-bg);
+  border-left: 1px solid var(--floating-surface-border);
+  border-bottom: 1px solid var(--floating-surface-border);
+  transform: translateY(-50%) rotate(45deg);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.subnav-flyout__header {
+  flex-shrink: 0;
+  padding: 12px 16px 10px;
+  background: var(--floating-surface-header-bg);
+  border-bottom: 1px solid var(--floating-surface-divider);
+  border-top-left-radius: 13px;
+  border-top-right-radius: 13px;
+}
+
+.subnav-flyout__title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  line-height: 1.2;
+  color: var(--popup-header-title, var(--text-primary));
+}
+
+.subnav-flyout__subtitle {
+  margin-top: 2px;
+  font-size: 11.5px;
+  line-height: 1.2;
+  color: var(--popup-header-subtitle, var(--text-muted));
+}
+
+.subnav-flyout__body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  background: var(--floating-surface-bg);
+  border-bottom-left-radius: 13px;
+  border-bottom-right-radius: 13px;
+}
+
+.subnav-flyout__row {
+  width: 100%;
+  min-height: 34px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 9px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  outline: none;
+  color: var(--popup-item-icon, var(--text-muted));
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.subnav-flyout__row:hover {
+  background: var(--popup-row-hover, var(--floating-row-hover));
+  color: var(--popup-hover-icon, var(--accent-primary));
+}
+
+.subnav-flyout__row.is-selected {
+  background: var(--popup-row-selected, var(--floating-row-selected));
+  color: var(--popup-selected-icon, var(--accent-primary));
+}
+
+.subnav-flyout__row:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
+}
+
+.subnav-flyout__row-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.subnav-flyout__row-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--popup-item-text, var(--text-primary));
+}
+
+.subnav-flyout__row.is-selected .subnav-flyout__row-label {
+  font-weight: 600;
+}
+
+.subnav-flyout__row-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--popup-selected-icon, var(--accent-primary));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .subnav-flyout {
+    animation: none;
+  }
+}

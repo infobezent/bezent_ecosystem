@@ -1,0 +1,166 @@
+/*
+ * BEZENT TopNav — matches the clean Google Workspace / Gmail top navigation.
+ */
+
+.top-nav {
+  grid-area: top;
+  position: relative;
+  z-index: var(--z-topbar);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  padding: 8px 16px;
+  background: var(--app-canvas, #f6f8fc);
+  box-sizing: border-box;
+  font-family: 'Google Sans', sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: 'GRAD' 0;
+}
+
+.top-nav__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.top-nav__logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--brand-logo-bg, var(--bezent-logo-surface, #c2e7ff));
+  color: var(--brand-logo-text, var(--bezent-logo-text, #001d35));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-family: var(--font-family-base);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  line-height: 1;
+  transition: background-color 0.14s ease;
+}
+
+.top-nav__logo:hover {
+  background: #b3defa;
+}
+
+.top-nav__wordmark {
+  font-family: var(--font-family-base);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text-brand, #444746);
+  letter-spacing: -0.3px;
+  line-height: 1;
+  user-select: none;
+}
+
+/* ── Search slot ─────────────────────────────────────────────────────── */
+
+.top-nav__search-slot {
+  flex: 0 1 720px;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto 0 40px;
+}
+
+/* ── Utility controls ────────────────────────────────────────────────── */
+
+.top-nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Positions the design-system Badge on the bell's top-right corner. */
+.top-nav__bell-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  pointer-events: none;
+}
+
+.top-nav__ai {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 16px;
+  margin: 0 2px;
+  background: var(--primary, #d3e3fd);
+  color: var(--nav-label-active, #041e49);
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  font-family: var(--font-family-base);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  outline: none;
+  user-select: none;
+  transition:
+    background-color 0.14s ease,
+    box-shadow 0.14s ease;
+}
+
+.top-nav__ai:hover {
+  background: #c2e7ff;
+  box-shadow:
+    0 1px 2px rgba(60, 64, 67, 0.3),
+    0 1px 3px 1px rgba(60, 64, 67, 0.15);
+}
+
+.top-nav__ai:active {
+  background: #b3defa;
+}
+
+.top-nav__profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: 6px;
+  transition: box-shadow 0.14s ease;
+}
+
+.top-nav__profile:hover {
+  box-shadow: 0 0 0 4px #c2e7ff;
+}
+
+.top-nav__profile:focus-visible,
+.top-nav__ai:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* Bell open state: joined to the notifications panel below. */
+.top-nav__bell {
+  position: relative;
+  display: inline-flex;
+}
+
+.top-nav__bell.is-open .bezent-icon-btn {
+  border-radius: 10px 10px 0 0;
+}
+
+.top-nav__bell-connector {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -13px;
+  height: 14px;
+  background: var(--nav-selected);
+  z-index: var(--z-notification-panel);
+  pointer-events: none;
+}

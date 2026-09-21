@@ -1,0 +1,120 @@
+/*
+ * Search result row — source: old approved UI `SearchResultRow.tsx`.
+ * Old hardcoded hex values mapped to --search-* / text tokens (deltas in
+ * docs/architecture/GLOBAL-SEARCH.md §14).
+ */
+
+.search-result-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color 100ms ease,
+    border-left-color 100ms ease;
+}
+
+.search-result-row.is-highlighted {
+  background: var(--search-row-hover);
+  border-left-color: var(--accent-primary);
+}
+
+.search-result-row__main {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  flex: 1;
+  min-width: 0;
+}
+
+.search-result-row__icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: var(--icon-surface);
+  color: var(--search-row-icon);
+  transition: background-color 100ms ease;
+}
+
+.search-result-row.is-highlighted .search-result-row__icon {
+  background: var(--search-row-selected);
+}
+
+.search-result-row__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-result-row__title,
+.search-result-row__subtitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+.search-result-row__title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--search-row-text);
+}
+
+.search-result-row__subtitle {
+  margin-top: 1px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.search-result-row__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.search-result-row__badge {
+  padding: 2px 7px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: var(--text-primary);
+  background: var(--icon-surface);
+}
+
+/* Tones use existing status/accent tokens; the tint is derived from the token itself. */
+.search-result-row__badge--success {
+  background: color-mix(in srgb, var(--status-success) 16%, transparent);
+}
+
+.search-result-row__badge--accent {
+  background: color-mix(in srgb, var(--accent-primary) 14%, transparent);
+}
+
+.search-result-row__meta-right {
+  font-size: 11px;
+  font-weight: 450;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
+.search-result-row__source {
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--icon-surface);
+}

@@ -1,0 +1,568 @@
+/*
+ * More launcher — source: old approved UI `MoreLauncher.tsx` (fixed at
+ * left 96 / bottom 48, 710px wide, height 100vh-120px, radius 16, z 350)
+ * and index.css `moreFlyoutEnter` / `bezentDrillIn/Out`. Colours are the
+ * existing --more-* tokens.
+ */
+
+.more-launcher {
+  position: fixed;
+  left: calc(var(--shell-sidebar-width) + 6px);
+  bottom: calc(var(--shell-bottom-bar-height) + 12px);
+  z-index: var(--z-launcher);
+  width: var(--shell-launcher-width);
+  max-width: calc(100vw - 140px);
+  height: calc(100vh - 120px);
+  height: calc(100dvh - 120px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  user-select: none;
+  background: var(--more-panel-bg);
+  border: 1px solid var(--more-panel-border);
+  border-radius: 16px;
+  box-shadow: var(--more-panel-shadow);
+  animation: moreLauncherEnter var(--motion-duration-launcher-enter) var(--motion-ease-standard)
+    forwards;
+}
+
+@keyframes moreLauncherEnter {
+  from {
+    opacity: 0;
+    transform: translateX(-8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.more-launcher__header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  background: var(--more-panel-header-bg);
+  border-bottom: 1px solid var(--more-panel-divider);
+}
+
+.more-launcher__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 24px;
+  letter-spacing: -0.2px;
+  color: var(--text-brand);
+}
+
+.more-launcher__subtitle {
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 18px;
+  letter-spacing: -0.1px;
+  color: var(--text-tertiary);
+}
+
+.more-launcher__close {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.more-launcher__close:hover {
+  background: var(--bg-hover);
+}
+
+.more-launcher__close:focus-visible,
+.more-launcher__category:focus-visible,
+.more-launcher__row:focus-visible,
+.more-launcher__tile:focus-visible,
+.more-launcher__view-all:focus-visible,
+.more-launcher__back:focus-visible,
+.more-launcher__search-clear:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
+}
+
+.more-launcher__search-row {
+  flex-shrink: 0;
+  padding: 12px 20px;
+  background: var(--more-panel-header-bg);
+  border-bottom: 1px solid var(--more-panel-divider);
+}
+
+.more-launcher__search {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: var(--search-icon);
+  background: var(--search-bg);
+  border: 1px solid var(--search-border);
+  transition: border-color 0.15s ease;
+}
+
+.more-launcher__search:focus-within {
+  border-color: var(--search-border-focus);
+}
+
+.more-launcher__search-input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--search-text);
+  caret-color: var(--accent-primary);
+}
+
+.more-launcher__search-input::placeholder {
+  color: var(--search-placeholder);
+  opacity: 1;
+}
+
+.more-launcher__search-clear {
+  display: flex;
+  padding: 2px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.more-launcher__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+}
+
+/* ── Category rail ───────────────────────────────────────────────────── */
+
+.more-launcher__categories {
+  width: 200px;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 8px;
+  overflow-y: auto;
+  background: var(--more-rail-bg);
+  border-right: 1px solid var(--more-panel-divider);
+}
+
+.more-launcher__category {
+  position: relative;
+  width: 100%;
+  height: 38px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  color: var(--icon-default);
+}
+
+.more-launcher__category:hover:not(.is-selected) {
+  background: var(--more-cat-hover-bg);
+  color: var(--icon-hover);
+}
+
+.more-launcher__category.is-selected {
+  background: var(--more-cat-selected-bg);
+  color: var(--icon-active);
+}
+
+.more-launcher__category.is-selected::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  bottom: 7px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--icon-active);
+}
+
+.more-launcher__category-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 18px;
+  color: var(--text-primary);
+}
+
+.more-launcher__category.is-selected .more-launcher__category-label {
+  font-weight: 600;
+}
+
+.more-launcher__count {
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--more-badge-bg);
+}
+
+.more-launcher__category.is-selected .more-launcher__count {
+  color: var(--text-primary);
+  background: var(--icon-surface-active);
+}
+
+/* ── Content ─────────────────────────────────────────────────────────── */
+
+.more-launcher__content {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding: 16px 20px 24px;
+}
+
+.more-launcher__pane {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.more-launcher__pane--in {
+  animation: moreLauncherDrill var(--motion-duration-launcher-drill) var(--motion-ease-standard)
+    forwards;
+}
+
+.more-launcher__pane--out {
+  animation: moreLauncherDrill var(--motion-duration-launcher-drill) var(--motion-ease-standard)
+    forwards;
+}
+
+@keyframes moreLauncherDrill {
+  from {
+    opacity: 0;
+    transform: translateX(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.more-launcher__section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.more-launcher__section-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.more-launcher__section-title.is-accent {
+  color: var(--accent-primary);
+}
+
+.more-launcher__muted {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text-muted);
+}
+
+.more-launcher__view-all,
+.more-launcher__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent-primary);
+}
+
+.more-launcher__back {
+  width: fit-content;
+  color: var(--text-muted);
+}
+
+.more-launcher__empty {
+  padding: 24px 0;
+  font-size: 13px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+/* Quick Access tiles */
+.more-launcher__tiles {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.more-launcher__tile {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--icon-default);
+  background: var(--more-card-bg);
+  border: 1px solid var(--more-card-border);
+  transition:
+    transform 140ms ease,
+    background-color 140ms ease,
+    border-color 140ms ease;
+}
+
+.more-launcher__tile:hover {
+  background: var(--more-card-hover-bg);
+  border-color: var(--more-card-hover-border);
+  color: var(--icon-hover);
+}
+
+.more-launcher__tile.is-active {
+  background: var(--icon-surface-active);
+  color: var(--icon-active);
+}
+
+.more-launcher__tile-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--icon-surface);
+}
+
+.more-launcher__tile-label {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  color: var(--text-primary);
+}
+
+.more-launcher__tile.is-active .more-launcher__tile-label {
+  font-weight: 600;
+}
+
+/* Rows */
+.more-launcher__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.more-launcher__row {
+  position: relative;
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  color: var(--icon-container-color);
+}
+
+.more-launcher__row.has-description {
+  min-height: 50px;
+  padding: 6px 10px;
+}
+
+.more-launcher__row:hover:not(.is-active) {
+  background: var(--icon-row-hover);
+  color: var(--icon-hover);
+}
+
+.more-launcher__row.is-active {
+  background: var(--icon-row-selected);
+  color: var(--icon-active);
+}
+
+.more-launcher__row-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--icon-surface);
+  transition: background-color 0.14s ease;
+}
+
+.more-launcher__row:hover .more-launcher__row-icon {
+  background: var(--icon-surface-hover);
+}
+
+.more-launcher__row.is-active .more-launcher__row-icon {
+  background: var(--icon-surface-active);
+}
+
+.more-launcher__row-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.more-launcher__row-title-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.more-launcher__row-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 18px;
+  letter-spacing: -0.1px;
+  color: var(--text-primary);
+}
+
+.more-launcher__row.is-active .more-launcher__row-title {
+  font-weight: 600;
+}
+
+.more-launcher__row-badge {
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--more-badge-bg);
+}
+
+.more-launcher__row-desc {
+  margin-top: 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--text-tertiary);
+}
+
+.more-launcher__row-chevron {
+  display: flex;
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.more-launcher__row:hover .more-launcher__row-chevron,
+.more-launcher__row.is-active .more-launcher__row-chevron {
+  color: inherit;
+}
+
+/* Category view header */
+.more-launcher__category-view {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.more-launcher__category-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.more-launcher__category-tile {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: var(--icon-active);
+  background: var(--icon-surface);
+}
+
+.more-launcher__category-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: var(--text-primary);
+}
+
+.more-launcher__category-count {
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--more-badge-bg);
+}
+
+.more-launcher__category-desc {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .more-launcher,
+  .more-launcher__pane--in,
+  .more-launcher__pane--out {
+    animation: none;
+  }
+}

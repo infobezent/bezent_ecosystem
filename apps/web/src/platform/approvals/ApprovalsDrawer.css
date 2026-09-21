@@ -1,0 +1,97 @@
+/* Global Approvals drawer — source: old approved UI `ApprovalDrawer` / `ApprovalRow`. */
+
+.approvals-drawer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--drawer-bg);
+}
+
+.approvals-drawer__list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.approval-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--drawer-border-divider);
+  transition: background 0.12s;
+}
+
+.approval-row:hover {
+  background: var(--drawer-row-hover);
+}
+
+.approval-row__icon {
+  width: 32px;
+  height: 32px;
+  margin-top: 1px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--drawer-icon-container-bg);
+  border: 1px solid var(--drawer-icon-container-border);
+  color: var(--drawer-icon-container-color);
+}
+
+.approval-row__icon.is-urgent {
+  background: var(--status-danger-bg);
+  border-color: var(--status-danger-bg);
+  color: var(--status-danger-fg);
+}
+
+.approval-row__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.approval-row__name-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.approval-row__name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--drawer-row-title);
+}
+
+.approval-row__type {
+  margin-bottom: 2px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--drawer-row-title);
+}
+
+.approval-row__summary {
+  margin-bottom: 5px;
+  font-size: 11px;
+  color: var(--drawer-row-secondary);
+}
+
+.approval-row__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.approval-row__submitted {
+  font-size: 10px;
+  color: var(--drawer-row-due);
+}
+
+.approval-row__dot {
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: var(--drawer-border-divider);
+}

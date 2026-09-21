@@ -1,0 +1,121 @@
+/*
+ * Styling for the Phase 0 development placeholder page only. Not part of
+ * the BEZENT design system — consumes its tokens (proving theme
+ * resolution works end to end) but defines no reusable pattern. Deleted
+ * once a real BEZENT page replaces this placeholder.
+ */
+
+.dev-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 2rem;
+  max-width: 40rem;
+}
+
+.dev-placeholder__badge {
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.dev-icon-check {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-default);
+  width: 100%;
+}
+
+.dev-icon-check__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.dev-icon-check__cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--card-border, #dde3ea);
+  background: var(--card-bg, #f0f4f9);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.dev-icon-check__cell:hover {
+  background: var(--card-hover-bg, #e9eff8);
+  border-color: var(--card-hover-border, #c4c7c5);
+  box-shadow: 0 1px 3px rgba(60, 64, 67, 0.08);
+}
+
+.dev-icon-check__label {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+}
+
+.dev-component-check__row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.dev-component-check__tooltip-demo {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--card-border, #dde3ea);
+  background: var(--card-bg, #f0f4f9);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.dev-component-check__tooltip-demo:hover {
+  background: var(--card-hover-bg, #e9eff8);
+  border-color: var(--card-hover-border, #c4c7c5);
+}
+
+.dev-component-check__badge-demo {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--card-border, #dde3ea);
+  background: var(--card-bg, #f0f4f9);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.dev-component-check__badge-demo:hover {
+  background: var(--card-hover-bg, #e9eff8);
+  border-color: var(--card-hover-border, #c4c7c5);
+}
+
+.dev-component-check__badge-demo .bezent-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+}
+
+.dev-component-check__empty-state {
+  border: 1px solid var(--card-border, #dde3ea);
+  border-radius: 16px;
+  background: var(--bg-surface);
+}

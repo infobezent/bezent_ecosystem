@@ -1,0 +1,149 @@
+/*
+ * BEZENT Global Search — source: old approved UI `GlobalSearch.tsx`
+ * (collapsed bar + State A discovery panel). The old panel hardcoded
+ * light-mode hex values; here every value maps onto an existing semantic
+ * token so light/dark/system work through the global theme (mappings and
+ * deltas: docs/architecture/GLOBAL-SEARCH.md §14).
+ *
+ * Layering: the bar and panel live inside the TopNav stacking context;
+ * their z-index values are the old ones, named in tokens/layout.css.
+ */
+
+.global-search {
+  position: relative;
+  width: 100%;
+  height: 48px;
+}
+
+.global-search__bar {
+  position: relative;
+  width: 100%;
+  height: 48px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px 0 20px;
+  background: var(--search-bg);
+  /* Transparent border at rest — no visible ring on the idle search bar;
+     becomes visible on hover/focus so the shape is still discoverable. */
+  border: 1px solid transparent;
+  border-radius: 24px;
+  color: var(--search-icon);
+  cursor: text;
+  transition:
+    background-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.global-search__bar:hover {
+  background: var(--search-hover);
+  border-color: transparent;
+  box-shadow: 0 1px 3px rgba(60, 64, 67, 0.15);
+}
+
+.global-search--open .global-search__bar {
+  z-index: var(--z-search-trigger);
+  background: var(--search-expanded-bg);
+  border-color: transparent;
+  border-radius: 24px 24px 0 0;
+  box-shadow: var(--search-shadow);
+}
+
+.global-search__bar:focus-within {
+  border-color: transparent;
+  outline: none;
+}
+
+.global-search__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.global-search__input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-family-base);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--search-text);
+  caret-color: var(--accent-primary);
+}
+
+.global-search__input::placeholder {
+  color: var(--search-placeholder);
+  opacity: 1;
+}
+
+.global-search__clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
+  margin-right: 4px;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--text-secondary);
+  outline: none;
+}
+
+.global-search__clear:focus-visible,
+.global-search__filter-toggle:focus-visible {
+  outline: 2px solid var(--border-focus);
+}
+
+.global-search__divider {
+  display: none;
+}
+
+.global-search__filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  user-select: none;
+  color: var(--search-filter-text, #444746);
+  outline: none;
+  transition: background-color 0.14s ease;
+}
+
+.global-search__filter-toggle:hover {
+  background: rgba(68, 71, 70, 0.08);
+}
+
+.global-search__filter-toggle span {
+  display: none;
+}
+
+.global-search__panel {
+  position: absolute;
+  top: 48px;
+  left: 0;
+  right: 0;
+  z-index: var(--z-search-panel);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--search-expanded-bg);
+  color: var(--search-row-text);
+  border: none;
+  border-radius: 0 0 24px 24px;
+  box-shadow: var(--search-panel-shadow);
+}

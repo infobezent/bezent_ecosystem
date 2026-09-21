@@ -1,0 +1,63 @@
+/*
+ * BEZENT Button — primary variant.
+ *
+ * Colors: old approved UI's `.btn-primary` / `button[data-variant="primary"]`
+ * (index.css lines 663-680), confirmed by the "Quick Create" button in
+ * `App.tsx` (identical background/hover/active values). Height/radius:
+ * the 34px / 10px control band shared by every evidenced BEZENT top-nav
+ * control (Quick Create, BEZENT AI button, profile avatar).
+ *
+ * Text size/weight (12px/600) and horizontal padding are borrowed from
+ * the "BEZENT AI" button — the only other evidenced top-nav control with
+ * a text label — since no old-UI instance of `.btn-primary` itself was
+ * ever rendered with a text label to source typography from directly.
+ * Documented, not invented: see docs/architecture/DESIGN-SYSTEM-COMPONENTS.md.
+ *
+ * :hover/:active use real CSS pseudo-classes (keyboard-accessible),
+ * replacing the old UI's mouse-only onMouseDown/onMouseUp JS state.
+ */
+
+.bezent-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.1px;
+  transition:
+    background-color 0.14s ease,
+    transform 0.08s ease;
+  outline: none;
+}
+
+.bezent-btn--primary {
+  background: var(--accent-primary);
+  color: var(--icon-on-solid);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.bezent-btn--primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.bezent-btn--primary:active:not(:disabled) {
+  background: var(--accent-pressed);
+  transform: scale(0.98);
+}
+
+.bezent-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bezent-btn:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}

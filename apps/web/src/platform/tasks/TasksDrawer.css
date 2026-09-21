@@ -1,0 +1,155 @@
+/* Global Tasks drawer — source: old approved UI `TaskDrawer` / `TaskRow`. */
+
+.tasks-drawer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--drawer-bg);
+}
+
+.tasks-drawer__list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.task-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--drawer-border-divider);
+  transition:
+    background 0.12s,
+    opacity 0.3s;
+}
+
+.task-row:hover {
+  background: var(--drawer-row-hover);
+}
+
+.task-row.is-completing {
+  opacity: 0;
+}
+
+.task-row__check {
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1.5px solid var(--drawer-checkbox-border);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-inverse);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.task-row__check:hover:not(:disabled) {
+  border-color: var(--drawer-checkbox-hover);
+}
+
+.task-row__check:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.task-row__check.is-checked {
+  background: var(--drawer-checkbox-checked-bg);
+  border-color: var(--drawer-checkbox-checked-border);
+  cursor: default;
+}
+
+.task-row__icon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  background: var(--drawer-icon-container-bg);
+  border: 1px solid var(--drawer-icon-container-border);
+  color: var(--drawer-icon-container-color);
+}
+
+.task-row__icon.is-overdue {
+  background: var(--status-danger-bg);
+  border-color: var(--status-danger-bg);
+  color: var(--status-danger-fg);
+}
+
+.task-row__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.task-row__title-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.task-row__title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--drawer-row-title);
+}
+
+.task-row__title.is-done {
+  color: var(--drawer-desc);
+  text-decoration: line-through;
+}
+
+.task-row__related {
+  margin-bottom: 4px;
+  font-size: 11px;
+  color: var(--drawer-row-secondary);
+}
+
+.task-row__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.task-row__due {
+  font-size: 10px;
+  color: var(--drawer-row-due);
+}
+
+.task-row__overdue {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--status-danger-fg);
+}
+
+.task-row__dot {
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: var(--drawer-border-divider);
+}
+
+.task-row__warn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid var(--drawer-border-divider);
+  border-radius: 6px;
+  background: var(--drawer-card-bg);
+  font-size: 11px;
+  color: var(--drawer-row-action);
+}

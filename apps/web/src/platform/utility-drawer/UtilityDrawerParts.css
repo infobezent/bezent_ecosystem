@@ -1,0 +1,268 @@
+/*
+ * Shared utility-drawer parts — source: the header / tab strip / filter
+ * panel / footer that each old drawer (TaskDrawer, ApprovalDrawer,
+ * ScheduleDrawer, NotesDrawer) repeated. All colours are the existing
+ * --drawer-* tokens (the old per-drawer blue/green/orange hex values were
+ * only var() fallbacks and never rendered).
+ */
+
+.ud-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 12px 12px 16px;
+  background: var(--drawer-header-bg);
+  border-bottom: 1px solid var(--drawer-border-divider);
+}
+
+.ud-header__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.ud-header__title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 3px;
+}
+
+.ud-header__heading {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: var(--drawer-title);
+}
+
+.ud-header__chip {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: var(--drawer-icon-container-bg);
+  border: 1px solid var(--drawer-icon-container-border);
+  color: var(--drawer-icon-container-color);
+}
+
+.ud-header__count {
+  padding: 1px 6px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--drawer-badge-text);
+  background: var(--drawer-badge-bg);
+}
+
+.ud-header__desc {
+  font-size: 11px;
+  color: var(--drawer-desc);
+}
+
+.ud-header__actions {
+  display: flex;
+  gap: 1px;
+}
+
+.ud-icon-action {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--drawer-header-icon);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.ud-icon-action:hover {
+  background: var(--drawer-header-hover);
+}
+
+.ud-icon-action.is-active {
+  background: var(--drawer-badge-bg);
+  color: var(--drawer-tab-active-text);
+}
+
+.ud-icon-action:focus-visible,
+.ud-tabs__tab:focus-visible,
+.ud-filters__chip:focus-visible,
+.ud-footer__link:focus-visible,
+.ud-link:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
+}
+
+/* ── Tabs ────────────────────────────────────────────────────────────── */
+
+.ud-tabs {
+  flex-shrink: 0;
+  display: flex;
+  padding: 0 16px;
+  background: var(--drawer-header-bg);
+  border-bottom: 1px solid var(--drawer-border-divider);
+}
+
+.ud-tabs__tab {
+  margin-bottom: -1px;
+  padding: 9px 12px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 6px 6px 0 0;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--drawer-tab-inactive);
+  transition:
+    color 0.15s,
+    background-color 0.15s;
+}
+
+.ud-tabs__tab:hover:not(.is-active) {
+  background: var(--drawer-tab-hover);
+}
+
+.ud-tabs__tab.is-active {
+  font-weight: 600;
+  color: var(--drawer-tab-active-text);
+  border-bottom-color: var(--drawer-tab-active-indicator);
+}
+
+/* ── Filter panel ────────────────────────────────────────────────────── */
+
+.ud-filters {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--drawer-filter-panel-bg);
+  border-bottom: 1px solid var(--drawer-border-divider);
+}
+
+.ud-filters__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.ud-filters__label {
+  width: 54px;
+  flex-shrink: 0;
+  padding-top: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--drawer-desc);
+}
+
+.ud-filters__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ud-filters__chip {
+  padding: 2px 8px;
+  border: none;
+  border-radius: 99px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--drawer-row-title);
+  background: var(--drawer-badge-bg);
+  transition: all 0.12s;
+}
+
+.ud-filters__chip.is-selected {
+  color: var(--text-inverse);
+  background: var(--drawer-tab-active-indicator);
+}
+
+/* ── Footer / links / chips ──────────────────────────────────────────── */
+
+.ud-footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--drawer-footer-bg);
+  border-top: 1px solid var(--drawer-footer-border);
+}
+
+.ud-footer__link {
+  padding: 4px 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--drawer-footer-action-text);
+  transition: background-color 0.12s;
+}
+
+.ud-footer__link:hover {
+  background: var(--drawer-footer-action-hover);
+}
+
+.ud-link {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--drawer-row-action);
+}
+
+.ud-chip {
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ud-chip--caps {
+  padding: 1px 6px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ud-chip--danger {
+  color: var(--status-danger-fg);
+  background: var(--status-danger-bg);
+}
+
+.ud-chip--warning {
+  color: var(--status-warning-fg);
+  background: var(--status-warning-bg);
+}
+
+.ud-chip--success {
+  color: var(--status-success-fg);
+  background: var(--status-success-bg);
+}
+
+.ud-chip--neutral {
+  color: var(--status-neutral-fg);
+  background: var(--status-neutral-bg);
+}

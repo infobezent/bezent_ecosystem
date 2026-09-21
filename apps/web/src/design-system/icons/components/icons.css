@@ -1,0 +1,321 @@
+/*
+ * BEZENT Icon System — Component CSS
+ *
+ * Source: the approved old BEZENT UI (`src/index.css` lines 915-947,
+ * `.bezent-duotone-icon` and its state selectors) plus the container
+ * styling BezentNavIcon.tsx previously applied via inline `style={{}}`.
+ *
+ * Updated under ADR-015 to support Google Material Symbols Outlined
+ * as the primary icon system engine across the BEZENT ecosystem.
+ */
+
+/* ── Google Material Symbols Outlined (ADR-015) ───────────────────────── */
+
+.bezent-material-icon,
+span.material-symbols-outlined {
+  --icon-fill-val: 0;
+  --icon-opsz-val: 24;
+  --icon-wght-val: 400;
+  font-family: 'Material Symbols Outlined', sans-serif !important;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'liga';
+  font-variation-settings:
+    'FILL' var(--icon-fill-val, 0),
+    'wght' var(--icon-wght-val, 400),
+    'GRAD' 0,
+    'opsz' var(--icon-opsz-val, 24);
+  user-select: none;
+  flex-shrink: 0;
+  vertical-align: middle;
+  width: 20px;
+  height: 20px;
+  color: var(--icon-stroke);
+  transition:
+    color var(--motion-duration-icon, 0.2s) ease,
+    transform var(--motion-duration-icon, 0.2s) ease;
+}
+
+/* Solid / Active State: Converts icon to solid (FILL 1) */
+.bezent-material-icon.is-solid,
+.bezent-material-icon[data-variant='solid'],
+.bezent-material-icon.is-active,
+.bezent-nav-icon-box.is-selected .bezent-material-icon,
+.left-sidebar__item.is-active .bezent-material-icon {
+  --icon-fill-val: 1 !important;
+  font-variation-settings:
+    'FILL' 1,
+    'wght' var(--icon-wght-val, 400),
+    'GRAD' 0,
+    'opsz' var(--icon-opsz-val, 24) !important;
+}
+
+.bezent-material-icon.is-active {
+  color: var(--icon-stroke-active);
+}
+
+/* Sizing scale — controls font-size, width, height, and optical size (opsz) */
+.bezent-icon-sz-10,
+.bezent-material-icon[data-size='10'] {
+  font-size: 10px;
+  width: 10px;
+  height: 10px;
+  --icon-opsz-val: 20;
+}
+.bezent-icon-sz-11,
+.bezent-material-icon[data-size='11'] {
+  font-size: 11px;
+  width: 11px;
+  height: 11px;
+  --icon-opsz-val: 20;
+}
+.bezent-icon-sz-12,
+.bezent-material-icon[data-size='12'] {
+  font-size: 12px;
+  width: 12px;
+  height: 12px;
+  --icon-opsz-val: 20;
+}
+.bezent-icon-sz-13,
+.bezent-material-icon[data-size='13'] {
+  font-size: 13px;
+  width: 13px;
+  height: 13px;
+  --icon-opsz-val: 20;
+}
+.bezent-icon-sz-14,
+.bezent-material-icon[data-size='14'] {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  --icon-opsz-val: 20;
+}
+.bezent-icon-sz-15,
+.bezent-material-icon[data-size='15'] {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+  --icon-opsz-val: 20;
+}
+.bezent-icon-sz-16,
+.bezent-material-icon[data-size='16'] {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  --icon-opsz-val: 20;
+}
+.bezent-icon-sz-17,
+.bezent-material-icon[data-size='17'] {
+  font-size: 17px;
+  width: 17px;
+  height: 17px;
+  --icon-opsz-val: 20;
+}
+.bezent-icon-sz-18,
+.bezent-material-icon[data-size='18'] {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  --icon-opsz-val: 20;
+}
+.bezent-icon-sz-19,
+.bezent-material-icon[data-size='19'] {
+  font-size: 19px;
+  width: 19px;
+  height: 19px;
+  --icon-opsz-val: 20;
+}
+.bezent-icon-sz-20,
+.bezent-material-icon[data-size='20'] {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  --icon-opsz-val: 24;
+}
+.bezent-icon-sz-22,
+.bezent-material-icon[data-size='22'] {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+  --icon-opsz-val: 24;
+}
+.bezent-icon-sz-24,
+.bezent-material-icon[data-size='24'] {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  --icon-opsz-val: 24;
+}
+.bezent-icon-sz-28,
+.bezent-material-icon[data-size='28'] {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  --icon-opsz-val: 28;
+}
+.bezent-icon-sz-32,
+.bezent-material-icon[data-size='32'] {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  --icon-opsz-val: 32;
+}
+.bezent-icon-sz-40,
+.bezent-material-icon[data-size='40'] {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  --icon-opsz-val: 40;
+}
+.bezent-icon-sz-48,
+.bezent-material-icon[data-size='48'] {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  --icon-opsz-val: 48;
+}
+
+/* Color mapping utilities */
+.bezent-material-icon[data-color='current'] {
+  color: currentColor;
+}
+.bezent-material-icon[data-color='top-utility'] {
+  color: var(--top-utility-icon);
+}
+.bezent-material-icon[data-color='accent'] {
+  color: var(--accent-primary);
+}
+.bezent-material-icon[data-color='right-rail'] {
+  color: var(--right-rail-icon-default);
+}
+.bezent-material-icon[data-color='logo-text'] {
+  color: var(--bezent-logo-text, #001d35);
+}
+.bezent-material-icon[data-color='nav-active'] {
+  color: var(--nav-icon-active);
+}
+.bezent-material-icon[data-color='nav-default'] {
+  color: var(--nav-icon-default);
+}
+.bezent-material-icon[data-color='primary'] {
+  color: var(--text-primary);
+}
+.bezent-material-icon[data-color='secondary'] {
+  color: var(--text-secondary);
+}
+
+/* Button contextual colors */
+button:hover .bezent-material-icon,
+[role='button']:hover .bezent-material-icon {
+  color: var(--icon-hover);
+}
+
+button.is-active .bezent-material-icon,
+[role='button'].is-active .bezent-material-icon {
+  color: var(--icon-active);
+}
+
+/* ── Legacy BezentIcon (duotone SVG fallback) ─────────────────────────── */
+
+.bezent-duotone-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition:
+    color var(--motion-duration-icon) ease,
+    fill var(--motion-duration-icon) ease;
+}
+
+.bezent-duotone-icon svg {
+  overflow: visible;
+  display: block;
+}
+
+.bezent-duotone-icon svg path,
+.bezent-duotone-icon svg circle,
+.bezent-duotone-icon svg rect,
+.bezent-duotone-icon svg polygon {
+  transition:
+    stroke var(--motion-duration-icon) ease,
+    fill var(--motion-duration-icon) ease;
+}
+
+button:hover .bezent-duotone-icon,
+[role='button']:hover .bezent-duotone-icon {
+  --icon-fill: var(--icon-fill-hover);
+  --icon-stroke: var(--icon-hover);
+}
+
+button.is-active .bezent-duotone-icon,
+[role='button'].is-active .bezent-duotone-icon {
+  --icon-fill: var(--icon-fill-active);
+  --icon-stroke: var(--icon-active);
+}
+
+/* ── BezentNavIcon (navigation container) ────────────────────────────── */
+
+.bezent-nav-icon-anchor {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.bezent-nav-icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+  background: transparent;
+  transition: background-color var(--motion-duration-nav-icon) ease;
+  color: var(--nav-icon-default);
+}
+
+.bezent-nav-icon-box.is-hovered {
+  background: var(--nav-icon-bg-hover);
+  color: var(--nav-icon-hover);
+}
+
+.bezent-nav-icon-box.is-selected {
+  background: var(--nav-icon-bg-selected);
+  color: var(--nav-icon-active);
+}
+
+.bezent-nav-icon-box .bezent-material-icon {
+  color: inherit;
+}
+
+.bezent-nav-icon-box.is-selected .bezent-material-icon {
+  color: var(--nav-icon-active);
+  --icon-fill-val: 1 !important;
+}
+
+.bezent-nav-icon-box.is-hovered .bezent-material-icon {
+  color: var(--nav-icon-hover);
+}
+
+.bezent-nav-icon-box.is-default .bezent-material-icon {
+  color: var(--nav-icon-default);
+  --icon-fill-val: 0 !important;
+}

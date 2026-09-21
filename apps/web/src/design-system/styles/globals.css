@@ -1,0 +1,16 @@
+/*
+ * BEZENT Design System — Global Stylesheet Entry Point
+ *
+ * The only stylesheet `apps/web/src/main.tsx` imports directly. Pulls in
+ * the token foundation, then the reset, then base element styles, in
+ * that order. No business/component/module styling belongs here — see
+ * docs/architecture/DESIGN-SYSTEM.md.
+ */
+
+@import '../tokens/theme.css';
+@import '../tokens/typography.css';
+@import '../tokens/motion.css';
+@import '../tokens/layout.css';
+
+@import './reset.css';
+@import './base.css';

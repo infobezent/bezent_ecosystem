@@ -1,0 +1,40 @@
+/*
+ * BEZENT Avatar — source: old approved UI's profile avatar (`App.tsx`
+ * lines 471-497). `--icon-on-solid` is used for the initials color
+ * rather than a literal `#FFFFFF` — it's the token for exactly this
+ * case (light text on a solid colored surface, unconditionally white in
+ * both themes), and it's what the old code's hardcoded `#FFFFFF` really
+ * meant.
+ */
+
+.bezent-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--avatar-bg, #001d35);
+  color: var(--icon-on-solid, #ffffff);
+  font-family: var(--font-family-base);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  flex-shrink: 0;
+  user-select: none;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  transition: opacity 0.14s ease;
+}
+
+.bezent-avatar:hover {
+  opacity: 0.92;
+}
+
+.bezent-avatar__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}

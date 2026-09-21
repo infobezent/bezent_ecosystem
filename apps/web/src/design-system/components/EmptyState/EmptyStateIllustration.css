@@ -1,0 +1,126 @@
+/*
+ * BEZENT Empty-State Illustration — animation keyframes.
+ *
+ * Source: old approved UI's `BezentEmptyStateIllustration.tsx`, which
+ * embedded this exact CSS in a `<style>` tag inside the component. Moved
+ * to a real stylesheet for consistency with the rest of the design
+ * system — a `<style>` JSX tag isn't the `style={{...}}` prop the
+ * no-inline-CSS rule targets, but colocated `.css` files are this
+ * project's established convention.
+ */
+
+@keyframes bezent-plane-glide {
+  0%,
+  100% {
+    transform: translate(0px, 0px);
+  }
+  50% {
+    transform: translate(11px, -11px);
+  }
+}
+
+@keyframes bezent-path-reveal {
+  0%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dashoffset: -14;
+  }
+}
+
+@keyframes bezent-plus-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+@keyframes bezent-card-float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes bezent-particle-pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.15);
+  }
+}
+
+.bezent-empty-illustration-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  user-select: none;
+  pointer-events: none;
+}
+
+.bezent-empty-illustration-container--default {
+  width: 180px;
+}
+
+.bezent-empty-illustration-container--compact {
+  width: 135px;
+}
+
+.bezent-empty-illustration-container svg {
+  overflow: visible;
+  display: block;
+}
+
+.bezent-empty-plane {
+  animation: bezent-plane-glide 2.8s ease-in-out infinite;
+  will-change: transform;
+}
+
+.bezent-empty-path {
+  animation: bezent-path-reveal 2.8s ease-in-out infinite;
+}
+
+.bezent-empty-plus {
+  animation: bezent-plus-breathe 2.2s ease-in-out infinite;
+  transform-origin: 210px 108px;
+  will-change: transform;
+}
+
+.bezent-empty-card {
+  animation: bezent-card-float 3.6s ease-in-out infinite;
+  will-change: transform;
+}
+
+.bezent-empty-p1 {
+  animation: bezent-particle-pulse 2.8s ease-in-out infinite;
+  transform-origin: 108px 38px;
+}
+
+.bezent-empty-p2 {
+  animation: bezent-particle-pulse 3.2s ease-in-out infinite 0.6s;
+  transform-origin: 280px 102px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bezent-empty-plane,
+  .bezent-empty-path,
+  .bezent-empty-plus,
+  .bezent-empty-card,
+  .bezent-empty-p1,
+  .bezent-empty-p2 {
+    animation: none !important;
+    transform: none !important;
+  }
+}

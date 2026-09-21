@@ -1,0 +1,60 @@
+/*
+ * BEZENT Design System — Motion Tokens
+ *
+ * Source: the approved old BEZENT UI (`src/index.css`) — see
+ * docs/architecture/UI-MIGRATION-INVENTORY.md §6, §13.
+ *
+ * Only values that were genuinely REUSED across multiple places in the old
+ * UI are promoted to tokens here. Per-component entrance/exit durations
+ * (e.g. the drawer circular-reveal's 360ms, the notification dropdown's
+ * 260ms, the sub-nav flyout's 140ms, the search dropdown's 160ms, the
+ * More-launcher's 200ms, the drill transition's 135ms) are NOT normalized
+ * into one invented scale here — the old UI tunes each of these
+ * individually and they are not identical, so unifying them now would
+ * misrepresent the source. Those durations are extracted alongside their
+ * owning component in its own migration phase (0B.4 design-system
+ * components, 0B.5 AppShell, 0B.6 search, 0B.7 platform capabilities).
+ *
+ * Two durations were added during Phase 0B.3 (icon system migration),
+ * for the same reason: they are now directly evidenced by the component
+ * being migrated, not invented — see
+ * docs/architecture/DESIGN-SYSTEM-TOKENS.md §12 and
+ * docs/architecture/ICON-SYSTEM.md.
+ */
+
+:root {
+  /* Global light/dark transition — index.css lines 11 & 19, applied to
+     html/body/#root and header/aside/footer/nav/main, used verbatim twice
+     for the exact same purpose (smooth theme switching). */
+  --motion-duration-theme: 180ms;
+
+  /* Entrance/reveal easing — reused 7× across the old UI's dropdown/flyout
+     entrance animations (notification dropdown, notification content,
+     more-flyout, drill in/out, sub-nav flyout, search dropdown). */
+  --motion-ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Drawer circular-reveal easing — reused 3× (circle expand, icon
+     sequence, content reveal) for the utility-drawer loading transition. */
+  --motion-ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Dropdown-exit easing — the notification dropdown's leave transition. */
+  --motion-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  /* Icon fill/stroke color transition — index.css `.bezent-duotone-icon`
+     (used 2× for its own color/fill transition; a 3rd use on the not-yet-
+     migrated `.bezent-right-rail-btn` is deferred to that component's own
+     phase). */
+  --motion-duration-icon: 160ms;
+
+  /* Nav-icon container background transition — the old UI's
+     `BezentNavIcon.tsx` inline style (140ms), now a real CSS class rule
+     in icons.css. */
+  --motion-duration-nav-icon: 140ms;
+  --motion-duration-drawer-reveal: 360ms;
+  --motion-duration-drawer-content: 180ms;
+  --motion-duration-panel-enter: 260ms;
+  --motion-duration-panel-leave: 180ms;
+  --motion-duration-launcher-enter: 200ms;
+  --motion-duration-launcher-drill: 135ms;
+  --motion-duration-flyout-enter: 140ms;
+}

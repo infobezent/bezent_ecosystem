@@ -1,0 +1,161 @@
+/*
+ * Search filter chips — source: old approved UI `SearchFilters.tsx`.
+ * The old component hardcoded light hex values; each is mapped onto the
+ * existing semantic --search-* / popup tokens (see
+ * docs/architecture/GLOBAL-SEARCH.md §14 for every mapping and delta).
+ */
+
+.search-filters {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px 10px;
+  background: var(--search-expanded-bg);
+  border-bottom: 1px solid var(--search-divider);
+}
+
+.search-filters__chip-wrap {
+  position: relative;
+}
+
+.search-filters__chip {
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 10px;
+  background: var(--search-chip-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--search-chip-border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 500;
+  outline: none;
+  user-select: none;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease;
+}
+
+.search-filters__chip:hover:not(.is-active) {
+  background: var(--search-chip-hover);
+  border-color: var(--search-chip-hover-border);
+}
+
+.search-filters__chip.is-open:not(.is-active) {
+  border-color: var(--search-chip-hover-border);
+}
+
+.search-filters__chip.is-active {
+  background: var(--search-chip-selected-bg);
+  border-color: var(--search-chip-selected-border);
+  color: var(--search-chip-selected-text);
+  font-weight: 600;
+}
+
+.search-filters__chip:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
+.search-filters__chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--search-chip-arrow);
+}
+
+.search-filters__chevron {
+  transition: transform 140ms ease;
+}
+
+.search-filters__chevron.is-open {
+  transform: rotate(180deg);
+}
+
+/* Sibling of the chip (not nested inside it) so no interactive element contains another. */
+.search-filters__clear {
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--search-chip-arrow);
+}
+
+.search-filters__clear:focus-visible {
+  outline: 2px solid var(--border-focus);
+}
+
+.search-filters__chip.is-active {
+  padding-right: 26px;
+}
+
+.search-filters__menu {
+  position: absolute;
+  top: 34px;
+  left: 0;
+  z-index: var(--z-search-filter-menu);
+  min-width: 160px;
+  max-width: 240px;
+  padding: 4px 0;
+  background: var(--bg-popup);
+  border: 1px solid var(--search-border-hover);
+  border-radius: 8px;
+  box-shadow: var(--shadow-dropdown);
+}
+
+.search-filters__menu-title {
+  padding: 5px 12px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--search-row-separator);
+}
+
+.search-filters__option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 450;
+  text-align: left;
+  color: var(--text-primary);
+  outline: none;
+  transition: background-color 100ms ease;
+}
+
+.search-filters__option:hover:not(.is-selected),
+.search-filters__option:focus-visible:not(.is-selected) {
+  background: var(--search-chip-hover);
+}
+
+.search-filters__option.is-selected {
+  background: var(--search-chip-selected-bg);
+  font-weight: 600;
+}
+
+.search-filters__check {
+  display: inline-flex;
+  color: var(--accent-primary);
+}

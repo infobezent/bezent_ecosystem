@@ -1,0 +1,198 @@
+/*
+ * Utility drawer shell — source: old approved UI `UtilityDrawerShell`
+ * (App.tsx 6077-6096), `DrawerLoader` (6003-6066) and `index.css`
+ * 70-112. The old shell was `position: fixed; top:60; bottom:36;
+ * right: railWidth; width: 370; z-index: 45` and the workspace's `right`
+ * grew by the drawer width; here that geometry is the AppShell grid's
+ * drawer column (--shell-utility-drawer-width, --z-utility-drawer).
+ */
+
+.utility-drawer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--drawer-bg);
+  border-left: 1px solid var(--drawer-border);
+  box-shadow: var(--shadow-utility-drawer);
+}
+
+/* Content: hidden until the reveal has played, then fades in. */
+.utility-drawer__content {
+  position: absolute;
+  inset: 0;
+  animation: utilityDrawerContentIn var(--motion-duration-drawer-content)
+    var(--motion-ease-emphasized) var(--motion-duration-drawer-reveal) both;
+}
+
+@keyframes utilityDrawerContentIn {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reveal layer: covers the content, then removes itself. */
+.utility-drawer__loader {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  background: var(--drawer-bg);
+  animation: utilityDrawerLoaderOut 0s linear var(--motion-duration-drawer-reveal) forwards;
+}
+
+@keyframes utilityDrawerLoaderOut {
+  to {
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+.utility-drawer__loader-header {
+  position: relative;
+  z-index: 2;
+  height: 50px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 12px 0 16px;
+  background: var(--drawer-header-bg);
+  border-bottom: 1px solid var(--drawer-border-divider);
+}
+
+.utility-drawer__loader-chip {
+  width: 26px;
+  height: 26px;
+  margin-right: 8px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  background: var(--drawer-icon-container-bg);
+  border: 1px solid var(--drawer-icon-container-border);
+  color: var(--drawer-icon-container-color);
+}
+
+.utility-drawer__loader-title {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: var(--drawer-title);
+}
+
+.utility-drawer__loader-close {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--drawer-header-icon);
+  cursor: pointer;
+}
+
+.utility-drawer__loader-body {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--drawer-bg);
+}
+
+/* Single expanding circle. */
+.utility-drawer__circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--drawer-reveal-surface);
+  pointer-events: none;
+  animation: utilityDrawerCircleExpand var(--motion-duration-drawer-reveal)
+    var(--motion-ease-emphasized) forwards;
+}
+
+@keyframes utilityDrawerCircleExpand {
+  0% {
+    transform: translate(-50%, -50%) scale(0.6);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(5.5);
+    opacity: 1;
+  }
+  75% {
+    transform: translate(-50%, -50%) scale(10);
+    opacity: 0.9;
+  }
+  90% {
+    transform: translate(-50%, -50%) scale(11);
+    opacity: 0.45;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(11);
+    opacity: 0;
+  }
+}
+
+/* Capability icon tile above the circle: fades in, holds, fades out. */
+.utility-drawer__loader-icon {
+  position: relative;
+  z-index: 1;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: var(--drawer-reveal-icon-bg);
+  border: 1px solid var(--drawer-reveal-icon-border);
+  /* Old: 0 8px 24px rgba(0,0,0,0.24) — neutral black, not a brand colour. */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+  color: var(--drawer-reveal-icon);
+  animation: utilityDrawerIconSequence var(--motion-duration-drawer-reveal)
+    var(--motion-ease-emphasized) forwards;
+}
+
+@keyframes utilityDrawerIconSequence {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  15% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .utility-drawer__content {
+    animation: none;
+  }
+
+  .utility-drawer__loader {
+    display: none;
+  }
+}

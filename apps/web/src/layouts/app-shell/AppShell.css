@@ -1,0 +1,73 @@
+/*
+ * BEZENT AppShell — global page composition.
+ *
+ * Source: old approved UI `App.tsx` — fixed-position TopNav (60px),
+ * LeftNav (90px), RightNav (48px, animated width 0.2s), BottomBar (36px),
+ * workspace `fixed` between them. Rebuilt as a CSS grid so regions cannot
+ * overlap by construction; dimensions come from tokens/layout.css.
+ *
+ * Scroll ownership: the viewport never scrolls (`overflow: hidden`); the
+ * ONLY scroller in the shell is `.app-shell__workspace`.
+ */
+
+.app-shell {
+  --app-shell-rail-width: 0px;
+  --app-shell-drawer-width: 0px;
+
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns:
+    var(--shell-sidebar-width) minmax(0, 1fr) var(--app-shell-drawer-width)
+    var(--app-shell-rail-width);
+  grid-template-rows: var(--shell-topbar-height) minmax(0, 1fr) var(--shell-bottom-bar-height);
+  grid-template-areas:
+    'top top top top'
+    'left main drawer right'
+    'bottom bottom bottom bottom';
+  background: var(--bg-app);
+  transition: grid-template-columns 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-shell--rail-open {
+  --app-shell-rail-width: var(--shell-right-rail-width);
+}
+
+.app-shell--drawer-open {
+  --app-shell-drawer-width: var(--shell-utility-drawer-width);
+}
+
+/* Docked utility drawer column: only the drawer's own body scrolls (see utility-drawer). */
+.app-shell__drawer {
+  grid-area: drawer;
+  position: relative;
+  z-index: var(--z-utility-drawer);
+  min-width: 0;
+  min-height: 0;
+}
+
+.app-shell__workspace {
+  grid-area: main;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  background: var(--bg-surface);
+  /*
+   * Workspace inset — a 6px gutter on every side lets the blue-grey app
+   * canvas (#F6F8FC) show around the white surface, creating the
+   * "application canvas containing a white working surface" hierarchy.
+   * Radius 18px on all corners: the workspace is visually a card floating
+   * inside the canvas rather than a flush rectangular region.
+   * No border, no shadow — surface colour contrast does the separation.
+   */
+  margin: 8px 12px 12px 8px;
+  border-radius: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell {
+    transition: none;
+  }
+}

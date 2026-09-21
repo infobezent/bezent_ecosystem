@@ -1,0 +1,49 @@
+/*
+ * BEZENT Design System — Shell Layout Dimension Tokens
+ *
+ * Source: the approved old BEZENT UI's `App.tsx` shell measurements — see
+ * docs/architecture/UI-MIGRATION-INVENTORY.md §9, §12 (`leftW`, `railW`,
+ * `DRAWER_W`, `AI_PANEL_W`, and the fixed TopNav/BottomBar heights).
+ *
+ * These are stable, approved visual measurements. They are exposed as
+ * tokens now so the AppShell built in a later phase (0B.5) consumes fixed
+ * values from one place rather than each component re-declaring the same
+ * pixel numbers. No shell components are built in this phase.
+ */
+
+:root {
+  --shell-topbar-height: 64px;
+  --shell-sidebar-width: 90px;
+  --shell-right-rail-width: 56px;
+  --shell-bottom-bar-height: 36px;
+  --shell-utility-drawer-width: 370px;
+  --shell-ai-panel-width: 340px;
+
+  /* Left-nav item geometry — old `SIDEBAR_NAV_TOKENS` (Phase 0B.5). */
+  --shell-nav-item-width: 78px;
+  --shell-nav-item-height: 68px;
+  --shell-nav-item-gap: 2px;
+  --shell-nav-label-max-width: 74px;
+  --shell-nav-label-area-height: 24px;
+  --shell-subnav-flyout-width: 250px;
+  --shell-launcher-width: 710px;
+
+  /*
+   * Layering — the old shell's literal z-index values, named once
+   * (Phase 0B.5). Order: rail < sidebar < top/bottom bars < tooltip <
+   * flyout. Future drawers slot between --z-rail and --z-sidebar.
+   */
+  --z-right-rail: 50;
+  --z-right-rail-tab: 60;
+  --z-sidebar: 90;
+  --z-topbar: 100;
+  --z-bottombar: 100;
+  --z-tooltip: 300;
+  --z-utility-drawer: 45;
+  --z-notification-panel: 150;
+  --z-flyout: 340;
+  --z-launcher: 350;
+  --z-search-panel: 250;
+  --z-search-trigger: 260;
+  --z-search-filter-menu: 300;
+}

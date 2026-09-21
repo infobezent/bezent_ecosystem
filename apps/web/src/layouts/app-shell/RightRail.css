@@ -1,0 +1,232 @@
+/*
+ * BEZENT RightRail — matches Google Workspace right companion rail.
+ */
+
+.right-rail {
+  grid-area: right;
+  position: relative;
+  z-index: var(--z-right-rail);
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--app-canvas, #f6f8fc);
+  padding: 16px 0 12px;
+}
+
+/* Open: let tooltips extend left over the workspace */
+.app-shell--rail-open .right-rail {
+  overflow: visible;
+}
+
+.right-rail__top {
+  display: flex;
+  justify-content: center;
+  padding: 0 0 12px;
+  width: 100%;
+}
+
+.right-rail__action-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--bezent-logo-surface, #c2e7ff);
+  color: var(--bezent-logo-text, #001d35);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.2);
+  transition:
+    background-color 0.14s ease,
+    box-shadow 0.14s ease,
+    transform 0.14s ease;
+}
+
+.right-rail__action-btn:hover {
+  background: #b3defa;
+  box-shadow:
+    0 1px 3px 1px rgba(60, 64, 67, 0.25),
+    0 2px 6px rgba(60, 64, 67, 0.15);
+  transform: translateY(-1px);
+}
+
+.right-rail__action-btn:active {
+  background: #a0d3f8;
+  transform: translateY(0);
+}
+
+.right-rail__action-btn:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.right-rail__items {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 4px 0;
+  width: 100%;
+}
+
+.right-rail__divider {
+  width: 20px;
+  height: 1px;
+  background-color: var(--border-subtle, #dde3ea);
+  margin: 4px 0;
+}
+
+.right-rail__footer {
+  width: 100%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 0 4px;
+}
+
+.right-rail__anchor {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.bezent-right-rail-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--right-rail-icon-default, #444746);
+  cursor: pointer;
+  outline: none;
+  transition:
+    color 140ms ease,
+    background-color 140ms ease;
+}
+
+/* Specific Google companion app icon colors */
+.bezent-right-rail-btn[data-item-id='calendar'] {
+  color: #1a73e8;
+}
+
+.bezent-right-rail-btn[data-item-id='notes'] {
+  color: #f4b400;
+}
+
+.bezent-right-rail-btn[data-item-id='tasks'] {
+  color: #1a73e8;
+}
+
+.bezent-right-rail-btn[data-item-id='approvals'] {
+  color: #1a73e8;
+}
+
+.bezent-right-rail-btn:hover {
+  background-color: var(--right-rail-btn-hover-bg, #c2e7ff);
+}
+
+.bezent-right-rail-btn.is-active,
+.bezent-right-rail-btn.is-active:hover {
+  background-color: var(--primary, #d3e3fd);
+}
+
+.right-rail__badge-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #b3261e;
+  box-shadow: 0 0 0 2px var(--app-canvas, #f6f8fc);
+  pointer-events: none;
+}
+
+.bezent-right-rail-btn:focus-visible,
+.right-rail__theme:focus-visible,
+.right-rail__collapse:focus-visible,
+.right-rail__edge-tab:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
+}
+
+/* Appearance (theme) control */
+.right-rail__theme {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--right-rail-icon-default, #444746);
+  cursor: pointer;
+  outline: none;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.right-rail__theme:hover {
+  background: var(--right-rail-btn-hover-bg, #c2e7ff);
+  color: var(--right-rail-icon-hover, #1f1f1f);
+}
+
+.right-rail__collapse {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--right-rail-icon-default, #444746);
+  cursor: pointer;
+  outline: none;
+  transition:
+    background 0.13s,
+    color 0.13s;
+}
+
+.right-rail__collapse:hover {
+  background: var(--top-utility-hover, #c2e7ff);
+  color: var(--right-rail-icon-hover, #1f1f1f);
+}
+
+/* Collapsed state: minimal edge tab above the bottom bar. */
+.right-rail__edge-tab {
+  position: absolute;
+  right: 0;
+  bottom: calc(var(--shell-bottom-bar-height) + 10px);
+  z-index: var(--z-right-rail-tab);
+  width: 18px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: var(--bg-sidebar, var(--bg-header));
+  border: 1px solid var(--border-default);
+  border-right: none;
+  border-radius: 6px 0 0 6px;
+  box-shadow: -1px 0 4px rgba(15, 23, 42, 0.06);
+  cursor: pointer;
+  outline: none;
+}

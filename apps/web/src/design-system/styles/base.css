@@ -1,0 +1,72 @@
+/*
+ * BEZENT Design System — Base Element Styles
+ *
+ * Source: the approved old BEZENT UI (`src/index.css` lines 4-20) — see
+ * docs/architecture/UI-MIGRATION-INVENTORY.md §6, §14. Only true global,
+ * element-level defaults live here — no component or business styling.
+ */
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  font-family: var(--font-family-base);
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  transition:
+    background-color var(--motion-duration-theme) ease,
+    color var(--motion-duration-theme) ease,
+    border-color var(--motion-duration-theme) ease;
+}
+
+/* The BEZENT shell regions all cross-fade on a theme switch, not just the
+   page background — same transition, same duration, applied to every
+   region the old UI named explicitly. */
+header,
+aside,
+footer,
+nav,
+main {
+  transition:
+    background-color var(--motion-duration-theme) ease,
+    color var(--motion-duration-theme) ease,
+    border-color var(--motion-duration-theme) ease;
+}
+
+/* Form controls and buttons inherit the BEZENT font instead of the
+   browser default — consolidates a pattern the old UI applied ad hoc
+   (`fontFamily: "inherit"`) on nearly every interactive control. */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+/* Native controls/scrollbars follow the resolved theme (set here, not via inline style). */
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+/*
+ * Global reduced-motion safety net: every transition/animation collapses to
+ * (effectively) instant. Components with meaningful motion also carry their
+ * own reduced-motion rules; this guarantees the rest (hover fades, theme
+ * cross-fades, nav icon transitions) follow. Durations stay non-zero so
+ * `animationend`-driven logic (e.g. the notifications panel's leave) still fires.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

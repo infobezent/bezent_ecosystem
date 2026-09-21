@@ -1,0 +1,45 @@
+/*
+ * BEZENT Tooltip — source: old approved UI `App.tsx` `Tooltip` (lines
+ * 200-222). Positioned via plain CSS relative to a `position: relative`
+ * ancestor (the consumer's wrapper) — no JS positioning engine.
+ */
+
+.bezent-tooltip {
+  position: absolute;
+  background: var(--bg-popup);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  padding: 5px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: var(--z-tooltip);
+  box-shadow: var(--shadow-dropdown);
+}
+
+.bezent-tooltip--left {
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.bezent-tooltip--right {
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.bezent-tooltip--down {
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.bezent-tooltip--up {
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+}

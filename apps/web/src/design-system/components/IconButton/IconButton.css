@@ -1,0 +1,65 @@
+/*
+ * BEZENT IconButton — source: old approved UI's `NavIconBtn`
+ * (`App.tsx` lines 515-546).
+ */
+
+.bezent-icon-btn-anchor {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bezent-icon-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  transition: background-color 0.14s ease;
+}
+
+.bezent-icon-btn:hover:not(:disabled) {
+  background: var(--top-utility-hover, var(--nav-hover));
+}
+
+.bezent-icon-btn.is-active {
+  background: var(--nav-selected);
+}
+
+.bezent-icon-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* solid — replaces dark blue with light blue surface matching 2nd ref */
+.bezent-icon-btn--solid {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary, #d3e3fd);
+  color: var(--nav-label-active, #041e49);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  transition:
+    background-color 0.14s ease,
+    transform 0.08s ease;
+}
+
+.bezent-icon-btn--solid:hover:not(:disabled) {
+  background: #c2e7ff;
+}
+
+.bezent-icon-btn--solid:active:not(:disabled) {
+  background: #b3defa;
+}
+
+.bezent-icon-btn:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}

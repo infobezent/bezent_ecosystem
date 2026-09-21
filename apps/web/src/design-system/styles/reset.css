@@ -1,0 +1,20 @@
+/*
+ * BEZENT Design System — Reset
+ *
+ * Source: the approved old BEZENT UI (`src/index.css` lines 22-27) — see
+ * docs/architecture/UI-MIGRATION-INVENTORY.md §6. Minimal, box-model and
+ * scrollbar reset only — no component styling belongs here.
+ */
+
+* {
+  box-sizing: border-box;
+}
+
+/* BEZENT hides the native scrollbar chrome everywhere — an approved,
+   global visual decision from the old UI, not a per-component choice. */
+* {
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
