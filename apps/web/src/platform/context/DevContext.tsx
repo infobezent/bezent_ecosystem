@@ -2,20 +2,21 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { appConfig } from '../../app/config/env';
 
 /**
- * TEMPORARY DEVELOPMENT CONTEXT (Frontend)
+ * TEMPORARY DEVELOPMENT APPLICATION CONTEXT (Frontend)
  *
- * Supplies centralized company and user context for development (Milestone 1).
+ * Supplies centralized company context for pre-authentication development.
+ * Represents unrestricted development access to the BEZENT application.
  * Avoids scattering hardcoded company/tenant IDs across components.
  *
- * When real authentication and tenant resolution are introduced in future
- * phases, this context will be replaced by the authenticated session provider.
+ * This temporary context will later be replaced by:
+ * Authenticated User -> Tenant / Company Membership -> Role -> Permissions -> Application / Module Access.
+ *
+ * DO NOT use role or user persona checks to determine application business behavior.
  */
 export interface DevContextValue {
   tenantId: string;
   companyId: string;
   companyName: string;
-  userId: string;
-  role: string;
   loading: boolean;
 }
 
@@ -23,8 +24,6 @@ const DEFAULT_DEV_CONTEXT: DevContextValue = {
   tenantId: 'tenant_demo_01',
   companyId: 'comp_demo_01',
   companyName: 'BEZENT Demo Pvt Ltd',
-  userId: 'user_dev_01',
-  role: 'HR',
   loading: true,
 };
 

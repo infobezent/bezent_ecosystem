@@ -12,7 +12,6 @@ describe('HRMS Onboarding & Organization API', () => {
     expect(res.body.data).toBeDefined();
     expect(res.body.data.companyId).toBe('comp_demo_01');
     expect(res.body.data.companyName).toBe('BEZENT Demo Pvt Ltd');
-    expect(res.body.data.role).toBe('HR');
   });
 
   it('GET /api/v1/hrms/organization/masters returns company and master lists', async () => {
