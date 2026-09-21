@@ -9,17 +9,14 @@ export interface EmptyStateIllustrationProps {
 }
 
 /**
- * Premium Futuristic Transformation / Activation Core Empty-State Illustration.
- * (Omnitrix-inspired original futuristic technology graphic)
+ * Clean 2D Flat-Vector Arc Reactor Empty-State Illustration.
  *
- * Features:
- * - Straight-on circular wrist-device / activation interface housing
- * - Dark titanium / gunmetal metallic outer bezel with mechanical notches and calibration ticks
- * - Concentric rotary dial rings with neon emerald energy conduits
- * - Central geometric transformation matrix / hourglass energy core
- * - Vivid emerald / lime green glowing energy blooms
- * - Micro-machined HUD markings, sequential status LEDs, and floating ambient particles
- * - Clean enterprise aesthetic with 3D glass and metallic depth
+ * Designed strictly as a crisp 2D flat-vector / blueprint SVG:
+ * - Symmetrical concentric geometric rings & precision calibration tracks
+ * - 10-segment radial energy core containment blocks
+ * - Central 2D geometric energy nucleus
+ * - Sky blue primary, cyan accents, and very light blue technical details
+ * - No 3D perspective, no metallic shaders, no heavy drop shadows
  */
 export function EmptyStateIllustration({
   size = 'default',
@@ -31,331 +28,231 @@ export function EmptyStateIllustration({
     (typeof document !== 'undefined' &&
       document.documentElement.getAttribute('data-theme') === 'dark');
 
+  // Palette constants for clean 2D flat-vector rendering
+  const primarySky = '#0284c7';
+  const cyanAccent = '#06b6d4';
+  const lightBlueBg = isDark ? '#0f172a' : '#f0f9ff';
+  const lightBlueSecondary = isDark ? '#1e293b' : '#e0f2fe';
+  const lineSubtle = isDark ? '#334155' : '#bae6fd';
+  const lineContrast = isDark ? '#38bdf8' : '#0ea5e9';
+  const coreFill = isDark ? '#082f49' : '#e0f2fe';
+
   return (
     <div
       className={`bezent-empty-illustration-container bezent-empty-illustration-container--${size} ${isDark ? 'is-dark' : ''} ${className || ''}`.trim()}
       aria-hidden="true"
     >
       <svg
-        viewBox="0 0 240 220"
+        viewBox="0 0 220 220"
         width="100%"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="bezent-omnitrix-device"
+        className="bezent-arc-reactor"
       >
-        <defs>
-          {/* Ambient soft green aura behind the device */}
-          <radialGradient id="omni-ambient-aura" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#22c55e" stopOpacity={isDark ? '0.35' : '0.18'} />
-            <stop offset="45%" stopColor="#10b981" stopOpacity={isDark ? '0.18' : '0.08'} />
-            <stop offset="75%" stopColor="#059669" stopOpacity={isDark ? '0.06' : '0.02'} />
-            <stop offset="100%" stopColor="#047857" stopOpacity="0" />
-          </radialGradient>
-
-          {/* Central Vivid Green Energy Core Gradient */}
-          <radialGradient id="omni-core-glow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
-            <stop offset="25%" stopColor="#bbf7d0" stopOpacity="0.95" />
-            <stop offset="55%" stopColor="#22c55e" stopOpacity="0.9" />
-            <stop offset="85%" stopColor="#15803d" stopOpacity="0.5" />
-            <stop offset="100%" stopColor="#14532d" stopOpacity="0" />
-          </radialGradient>
-
-          {/* Dark Metallic Bezel Outer Gradient */}
-          <linearGradient id="omni-metal-outer" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor={isDark ? '#334155' : '#475569'} />
-            <stop offset="30%" stopColor={isDark ? '#1e293b' : '#334155'} />
-            <stop offset="50%" stopColor={isDark ? '#475569' : '#64748b'} />
-            <stop offset="70%" stopColor={isDark ? '#0f172a' : '#1e293b'} />
-            <stop offset="100%" stopColor={isDark ? '#1e293b' : '#334155'} />
-          </linearGradient>
-
-          {/* Inner Gunmetal Dial Ring Gradient */}
-          <linearGradient id="omni-metal-inner" x1="100%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor={isDark ? '#64748b' : '#94a3b8'} />
-            <stop offset="40%" stopColor={isDark ? '#1e293b' : '#334155'} />
-            <stop offset="70%" stopColor={isDark ? '#0f172a' : '#1e293b'} />
-            <stop offset="100%" stopColor={isDark ? '#334155' : '#475569'} />
-          </linearGradient>
-
-          {/* Geometric Hourglass Symbol Core Gradient */}
-          <linearGradient id="omni-symbol-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#4ade80" />
-            <stop offset="50%" stopColor="#22c55e" />
-            <stop offset="100%" stopColor="#16a34a" />
-          </linearGradient>
-
-          {/* Glass Lens Specular Highlight */}
-          <linearGradient id="omni-glass-glare" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.45" />
-            <stop offset="35%" stopColor="#ffffff" stopOpacity="0.1" />
-            <stop offset="65%" stopColor="#ffffff" stopOpacity="0" />
-          </linearGradient>
-
-          {/* Glow Filters */}
-          <filter id="omni-glow-strong" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="3.5" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-          </filter>
-
-          <filter id="omni-glow-subtle" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="1.5" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-          </filter>
-        </defs>
-
-        {/* ── Layer 1: Ambient Emerald Aura ── */}
-        <circle
-          cx="120"
-          cy="110"
-          r="104"
-          fill="url(#omni-ambient-aura)"
-          className="bezent-omni-aura"
-        />
-
-        {/* ── Layer 2: Outer Wrist-Device Metallic Housing & Mechanical Grips ── */}
-        <g className="bezent-omni-outer-housing">
-          {/* Mechanical Bezel Notches (Cardinal & Diagonal Interface Nodes) */}
-          <rect
-            x="114"
-            y="14"
-            width="12"
-            height="10"
-            rx="3"
-            fill="url(#omni-metal-outer)"
-            stroke="#64748b"
-            strokeWidth="0.8"
-          />
-          <rect
-            x="114"
-            y="196"
-            width="12"
-            height="10"
-            rx="3"
-            fill="url(#omni-metal-outer)"
-            stroke="#64748b"
-            strokeWidth="0.8"
-          />
-          <rect
-            x="24"
-            y="104"
-            width="10"
-            height="12"
-            rx="3"
-            fill="url(#omni-metal-outer)"
-            stroke="#64748b"
-            strokeWidth="0.8"
-          />
-          <rect
-            x="206"
-            y="104"
-            width="10"
-            height="12"
-            rx="3"
-            fill="url(#omni-metal-outer)"
-            stroke="#64748b"
-            strokeWidth="0.8"
-          />
-
-          {/* Outer Housing Ring Chassis (R = 86) */}
+        {/* ── Layer 1: Outermost HUD Calibration & Alignment Markings ── */}
+        <g className="bezent-reactor-hud-outer">
+          {/* Subtle Outer Boundary Orbit */}
           <circle
-            cx="120"
+            cx="110"
             cy="110"
-            r="86"
-            fill="url(#omni-metal-outer)"
-            stroke={isDark ? '#475569' : '#94a3b8'}
-            strokeWidth="2.5"
-            className="bezent-omni-chassis-shadow"
+            r="98"
+            stroke={lineSubtle}
+            strokeWidth="0.8"
+            strokeDasharray="2 6"
           />
-
-          {/* Precision Housing Inset Track */}
           <circle
-            cx="120"
+            cx="110"
             cy="110"
-            r="80"
-            stroke="#0f172a"
-            strokeWidth="2"
-            fill="none"
-            opacity="0.8"
+            r="92"
+            stroke={lineContrast}
+            strokeWidth="0.9"
+            strokeDasharray="24 8 4 8"
+            strokeOpacity="0.85"
           />
-          <circle cx="120" cy="110" r="78" stroke="#334155" strokeWidth="0.75" fill="none" />
+          <circle cx="110" cy="110" r="86" stroke={lineSubtle} strokeWidth="0.6" />
+
+          {/* 12 Outer Precision Calibration Ticks (30° intervals) */}
+          {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => (
+            <g key={deg} transform={`rotate(${deg} 110 110)`}>
+              <line
+                x1="110"
+                y1="13"
+                x2="110"
+                y2={deg % 90 === 0 ? '22' : '18'}
+                stroke={deg % 90 === 0 ? primarySky : lineContrast}
+                strokeWidth={deg % 90 === 0 ? '1.4' : '0.8'}
+              />
+            </g>
+          ))}
+
+          {/* 4 Cardinal Crosshair Dots */}
+          <circle cx="110" cy="7" r="1.5" fill={primarySky} />
+          <circle cx="110" cy="213" r="1.5" fill={primarySky} />
+          <circle cx="7" cy="110" r="1.5" fill={primarySky} />
+          <circle cx="213" cy="110" r="1.5" fill={primarySky} />
+
+          {/* 4 Ordinal Diagonal Micro-Nodes */}
+          <circle cx="48" cy="48" r="1.2" fill={cyanAccent} />
+          <circle cx="172" cy="48" r="1.2" fill={cyanAccent} />
+          <circle cx="48" cy="172" r="1.2" fill={cyanAccent} />
+          <circle cx="172" cy="172" r="1.2" fill={cyanAccent} />
         </g>
 
-        {/* ── Layer 3: Rotating Outer HUD Calibration Ring ── */}
-        <g className="bezent-omni-hud-outer">
-          {/* Outer Calibration Ring */}
+        {/* ── Layer 2: Outer Reactor Chassis & Radial Energy Coils ── */}
+        <g className="bezent-reactor-chassis">
+          {/* Main Outer 2D Annular Ring Surface */}
           <circle
-            cx="120"
+            cx="110"
             cy="110"
-            r="74"
-            stroke="#22c55e"
+            r="76"
+            stroke={lineContrast}
             strokeWidth="1.2"
-            strokeDasharray="6 8 2 8"
-            opacity="0.7"
-            fill="none"
+            fill={lightBlueSecondary}
           />
           <circle
-            cx="120"
+            cx="110"
             cy="110"
-            r="70"
-            stroke="#10b981"
-            strokeWidth="0.6"
-            strokeDasharray="3 4"
-            opacity="0.5"
-            fill="none"
-          />
-
-          {/* Precision Calibration Ticks */}
-          <circle cx="120" cy="38" r="1.5" fill="#4ade80" />
-          <circle cx="120" cy="182" r="1.5" fill="#4ade80" />
-          <circle cx="48" cy="110" r="1.5" fill="#4ade80" />
-          <circle cx="192" cy="110" r="1.5" fill="#4ade80" />
-        </g>
-
-        {/* ── Layer 4: Middle Gunmetal Rotary Bezel (R = 64) ── */}
-        <g className="bezent-omni-rotary-bezel">
-          <circle
-            cx="120"
-            cy="110"
-            r="64"
-            fill="url(#omni-metal-inner)"
-            stroke="#1e293b"
-            strokeWidth="1.5"
-          />
-
-          {/* Circumferential Green Energy Conduits / Arc Channels */}
-          <circle
-            cx="120"
-            cy="110"
-            r="56"
-            stroke="#22c55e"
-            strokeWidth="2.2"
-            strokeDasharray="28 14"
-            className="bezent-omni-conduit-glow"
-            fill="none"
-            filter="url(#omni-glow-subtle)"
-          />
-
-          {/* Inner Titanium Ring */}
-          <circle
-            cx="120"
-            cy="110"
-            r="50"
-            fill={isDark ? '#090d16' : '#0f172a'}
-            stroke="#475569"
+            r="62"
+            stroke={primarySky}
             strokeWidth="1.2"
+            fill={lightBlueBg}
           />
+
+          {/* 10 Symmetrical 2D Radial Energy Containment Blocks */}
+          {[0, 36, 72, 108, 144, 180, 216, 252, 288, 324].map((deg) => (
+            <g key={deg} transform={`rotate(${deg} 110 110)`}>
+              {/* Radial Division Channel Line */}
+              <line x1="110" y1="34" x2="110" y2="48" stroke={lineSubtle} strokeWidth="1" />
+              {/* Flat 2D Energy Segment Block */}
+              <rect
+                x="106"
+                y="36"
+                width="8"
+                height="10"
+                rx="1"
+                fill={isDark ? '#0284c7' : '#ffffff'}
+                stroke={primarySky}
+                strokeWidth="1"
+              />
+              {/* Cyan Energy Indicator Stripe */}
+              <line
+                x1="110"
+                y1="38"
+                x2="110"
+                y2="44"
+                stroke={cyanAccent}
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+              {/* Outer Micro Fastener Dot */}
+              <circle cx="110" cy="30" r="0.9" fill={primarySky} />
+            </g>
+          ))}
         </g>
 
-        {/* ── Layer 5: Inner Activation Dial & Transformation Matrix (R = 46) ── */}
-        <g className="bezent-omni-inner-dial">
-          {/* Glowing Green Core Lens Underlay */}
+        {/* ── Layer 3: Mid Interlock & Guide Ring (Counter-Rotating) ── */}
+        <g className="bezent-reactor-hud-mid">
           <circle
-            cx="120"
+            cx="110"
             cy="110"
-            r="44"
-            fill="url(#omni-core-glow)"
-            className="bezent-omni-core-glow"
+            r="54"
+            stroke={cyanAccent}
+            strokeWidth="1.2"
+            strokeDasharray="28 10 8 10"
           />
-
-          {/* Dark Contrast Segments (Four Interlocking Outer Grip Flanges) */}
-          <path
-            d="M 120 66 A 44 44 0 0 1 151.1 78.9 L 140 94 A 24 24 0 0 0 120 86 Z"
-            fill="#090d16"
-            opacity="0.9"
+          <circle
+            cx="110"
+            cy="110"
+            r="48"
+            stroke={lineContrast}
+            strokeWidth="0.8"
+            strokeDasharray="4 4"
           />
-          <path
-            d="M 164 110 A 44 44 0 0 1 151.1 141.1 L 140 126 A 24 24 0 0 0 144 110 Z"
-            fill="#090d16"
-            opacity="0.9"
-          />
-          <path
-            d="M 120 154 A 44 44 0 0 1 88.9 141.1 L 100 126 A 24 24 0 0 0 120 134 Z"
-            fill="#090d16"
-            opacity="0.9"
-          />
-          <path
-            d="M 76 110 A 44 44 0 0 1 88.9 78.9 L 100 94 A 24 24 0 0 0 96 110 Z"
-            fill="#090d16"
-            opacity="0.9"
-          />
-
-          {/* ── Center Transformation Symbol: Dual-Chevron / Hourglass Matrix ── */}
-          <g className="bezent-omni-symbol" filter="url(#omni-glow-strong)">
-            {/* Top Chevron / Wing */}
-            <polygon
-              points="96,78 144,78 128,102 112,102"
-              fill="url(#omni-symbol-gradient)"
-              stroke="#86efac"
-              strokeWidth="0.8"
-            />
-            {/* Bottom Chevron / Wing */}
-            <polygon
-              points="128,118 144,142 96,142 112,118"
-              fill="url(#omni-symbol-gradient)"
-              stroke="#86efac"
-              strokeWidth="0.8"
-            />
-            {/* Center Core Activation Diamond */}
-            <polygon
-              points="120,103 127,110 120,117 113,110"
-              fill="#ffffff"
-              stroke="#86efac"
-              strokeWidth="0.6"
-              className="bezent-omni-center-diamond"
-            />
-          </g>
-
-          {/* 3D Glass Specular Reflection Highlight */}
-          <path
-            d="M 78 100 A 44 44 0 0 1 162 100 A 44 32 0 0 0 78 100 Z"
-            fill="url(#omni-glass-glare)"
-            opacity="0.65"
-          />
+          {/* 8 Inner Interlock Anchor Points */}
+          {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
+            <g key={deg} transform={`rotate(${deg} 110 110)`}>
+              <circle cx="110" cy="54" r="1.2" fill={primarySky} />
+            </g>
+          ))}
         </g>
 
-        {/* ── Layer 6: Status LED Nodes (Four Cardinal Activation Points) ── */}
-        <g className="bezent-omni-leds">
+        {/* ── Layer 4: Inner Magnetic Confinement Ring ── */}
+        <g className="bezent-reactor-inner-ring">
+          <circle cx="110" cy="110" r="40" stroke={primarySky} strokeWidth="1.2" fill={coreFill} />
           <circle
-            cx="120"
-            cy="52"
-            r="2.4"
-            fill="#22c55e"
-            className="bezent-omni-led bezent-omni-led--1"
-            filter="url(#omni-glow-subtle)"
-          />
-          <circle
-            cx="178"
+            cx="110"
             cy="110"
-            r="2.4"
-            fill="#22c55e"
-            className="bezent-omni-led bezent-omni-led--2"
-            filter="url(#omni-glow-subtle)"
+            r="32"
+            stroke={cyanAccent}
+            strokeWidth="1"
+            strokeDasharray="16 6"
           />
-          <circle
-            cx="120"
-            cy="168"
-            r="2.4"
-            fill="#22c55e"
-            className="bezent-omni-led bezent-omni-led--3"
-            filter="url(#omni-glow-subtle)"
-          />
-          <circle
-            cx="62"
-            cy="110"
-            r="2.4"
-            fill="#22c55e"
-            className="bezent-omni-led bezent-omni-led--4"
-            filter="url(#omni-glow-subtle)"
-          />
+
+          {/* 6 Inner Radial Flux Teeth */}
+          {[0, 60, 120, 180, 240, 300].map((deg) => (
+            <g key={deg} transform={`rotate(${deg} 110 110)`}>
+              <line
+                x1="110"
+                y1="70"
+                x2="110"
+                y2="76"
+                stroke={primarySky}
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+              <circle cx="110" cy="74" r="1" fill={cyanAccent} />
+            </g>
+          ))}
         </g>
 
-        {/* ── Layer 7: Floating Ambient Green Energy Particles ── */}
-        <g className="bezent-omni-particles" opacity={isDark ? 0.85 : 0.65}>
-          <circle cx="34" cy="42" r="1.4" fill="#4ade80" className="bezent-omni-p1" />
-          <circle cx="206" cy="38" r="1.2" fill="#22c55e" className="bezent-omni-p2" />
-          <circle cx="212" cy="176" r="1.3" fill="#86efac" className="bezent-omni-p3" />
-          <circle cx="28" cy="172" r="1.5" fill="#22c55e" className="bezent-omni-p4" />
+        {/* ── Layer 5: Central 2D Arc Reactor Core Nexus ── */}
+        <g className="bezent-reactor-core">
+          {/* Core Boundary Circle */}
+          <circle
+            cx="110"
+            cy="110"
+            r="24"
+            fill={isDark ? '#0369a1' : '#bae6fd'}
+            stroke={primarySky}
+            strokeWidth="1.4"
+          />
+          <circle
+            cx="110"
+            cy="110"
+            r="18"
+            fill={isDark ? '#0284c7' : '#e0f2fe'}
+            stroke={cyanAccent}
+            strokeWidth="1"
+          />
+
+          {/* Central 2D Inverted Geometric Matrix Triangle */}
+          <polygon
+            points="110,98 120.4,116 99.6,116"
+            stroke={primarySky}
+            strokeWidth="1.2"
+            fill={isDark ? '#0c4a6e' : '#ffffff'}
+            strokeLinejoin="round"
+            className="bezent-reactor-matrix"
+          />
+          {/* Central Upright Cyan Geometric Nexus Triangle */}
+          <polygon
+            points="110,122 99.6,104 120.4,104"
+            stroke={cyanAccent}
+            strokeWidth="1"
+            fill="none"
+            strokeLinejoin="round"
+            className="bezent-reactor-matrix-invert"
+          />
+
+          {/* Center Power Core Node */}
+          <circle
+            cx="110"
+            cy="110"
+            r="4"
+            fill={isDark ? '#38bdf8' : '#0284c7'}
+            stroke="#ffffff"
+            strokeWidth="1"
+          />
         </g>
       </svg>
     </div>
