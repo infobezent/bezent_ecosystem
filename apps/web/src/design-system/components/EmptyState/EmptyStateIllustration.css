@@ -1,10 +1,10 @@
 /*
- * BEZENT Empty-State 2D Arc Reactor Illustration — Animations & Styling.
+ * BEZENT Empty-State Sleeping Raccoon Illustration — Animations & Styling.
  *
- * Clean 2D flat-vector Stark-tech blueprint aesthetic:
- * - Center reactor gentle energy breathing
- * - Concentric HUD calibration tracks rotating smoothly
- * - Light sky-blue & cyan vector strokes on clean white canvas
+ * Blue graphic illustration of a cozy sleeping raccoon with floating Zs:
+ * - Subtle breathing motion on body
+ * - Soft tail sway
+ * - 2 floating Z characters drifting smoothly upward
  */
 
 .bezent-empty-illustration-container {
@@ -18,82 +18,116 @@
 }
 
 .bezent-empty-illustration-container--default {
-  width: 180px;
+  width: 210px;
 }
 
 .bezent-empty-illustration-container--compact {
-  width: 130px;
+  width: 150px;
 }
 
-.bezent-arc-reactor {
+.bezent-sleeping-raccoon-svg {
   overflow: visible;
   display: block;
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.bezent-empty-illustration-container:hover .bezent-arc-reactor {
-  transform: scale(1.03);
+.bezent-empty-illustration-container:hover .bezent-sleeping-raccoon-svg {
+  transform: scale(1.02);
 }
 
-/* ── Center Core Energy Breathing ── */
-.bezent-reactor-core {
-  transform-origin: 110px 110px;
-  animation: bezentCorePulse 3.5s ease-in-out infinite;
+/* ── Gentle Sleeping Breathing ── */
+.bezent-raccoon-body {
+  transform-origin: 120px 145px;
+  animation: bezentRaccoonBreathe 3.6s ease-in-out infinite;
   will-change: transform;
 }
 
-@keyframes bezentCorePulse {
+@keyframes bezentRaccoonBreathe {
   0%,
   100% {
-    transform: scale(0.97);
+    transform: scaleY(1) translateY(0);
   }
   50% {
-    transform: scale(1.03);
+    transform: scaleY(1.025) translateY(-1.5px);
   }
 }
 
-/* ── Middle HUD Track Rotation (Clockwise) ── */
-.bezent-reactor-hud-mid {
-  transform-origin: 110px 110px;
-  animation: bezentRotateCw 24s linear infinite;
+/* ── Soft Tail Relaxation Sway ── */
+.bezent-raccoon-tail {
+  transform-origin: 32px 142px;
+  animation: bezentRaccoonTail 4.8s ease-in-out infinite;
   will-change: transform;
 }
 
-@keyframes bezentRotateCw {
-  from {
+@keyframes bezentRaccoonTail {
+  0%,
+  100% {
     transform: rotate(0deg);
   }
-  to {
-    transform: rotate(360deg);
+  50% {
+    transform: rotate(-1.5deg);
   }
 }
 
-/* ── Outer HUD Ring Rotation (Counter-Clockwise) ── */
-.bezent-reactor-hud-outer {
-  transform-origin: 110px 110px;
-  animation: bezentRotateCcw 32s linear infinite;
-  will-change: transform;
+/* ── Floating 'Z' Letters Animation ── */
+.bezent-z1 {
+  animation: bezentFloatZ1 2.8s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
-@keyframes bezentRotateCcw {
-  from {
-    transform: rotate(0deg);
+.bezent-z2 {
+  animation: bezentFloatZ2 2.8s ease-in-out infinite 0.9s;
+  will-change: transform, opacity;
+}
+
+@keyframes bezentFloatZ1 {
+  0% {
+    transform: translate(0, 8px) scale(0.65);
+    opacity: 0;
   }
-  to {
-    transform: rotate(-360deg);
+  25% {
+    opacity: 0.95;
+  }
+  75% {
+    opacity: 0.8;
+    transform: translate(6px, -12px) scale(1.05) rotate(4deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(10px, -20px) scale(1.15) rotate(8deg);
+  }
+}
+
+@keyframes bezentFloatZ2 {
+  0% {
+    transform: translate(0, 6px) scale(0.6);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.9;
+  }
+  75% {
+    opacity: 0.75;
+    transform: translate(4px, -10px) scale(1) rotate(-3deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(8px, -18px) scale(1.1) rotate(-6deg);
   }
 }
 
 /* ── Reduced Motion Accessibility ── */
 @media (prefers-reduced-motion: reduce) {
-  .bezent-reactor-core,
-  .bezent-reactor-hud-mid,
-  .bezent-reactor-hud-outer {
+  .bezent-raccoon-body,
+  .bezent-raccoon-tail,
+  .bezent-z1,
+  .bezent-z2 {
     animation: none !important;
     transform: none !important;
+    opacity: 1 !important;
   }
 
-  .bezent-arc-reactor {
+  .bezent-sleeping-raccoon-svg {
     transition: none !important;
   }
 }
