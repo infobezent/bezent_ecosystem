@@ -1,65 +1,12 @@
 /*
- * BEZENT Empty-State Illustration — animation keyframes.
+ * BEZENT Empty-State Arc Reactor Illustration — Animations & Styling.
  *
- * Source: old approved UI's `BezentEmptyStateIllustration.tsx`, which
- * embedded this exact CSS in a `<style>` tag inside the component. Moved
- * to a real stylesheet for consistency with the rest of the design
- * system — a `<style>` JSX tag isn't the `style={{...}}` prop the
- * no-inline-CSS rule targets, but colocated `.css` files are this
- * project's established convention.
+ * Premium Stark-tech futuristic engineering aesthetic:
+ * - Center reactor gentle energy pulsing
+ * - Inner blue core slow illumination shifts
+ * - Outer concentric HUD rings counter-rotating smoothly
+ * - Micro HUD ambient particle orbital floating
  */
-
-@keyframes bezent-plane-glide {
-  0%,
-  100% {
-    transform: translate(0px, 0px);
-  }
-  50% {
-    transform: translate(11px, -11px);
-  }
-}
-
-@keyframes bezent-path-reveal {
-  0%,
-  100% {
-    stroke-dashoffset: 0;
-  }
-  50% {
-    stroke-dashoffset: -14;
-  }
-}
-
-@keyframes bezent-plus-breathe {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.04);
-  }
-}
-
-@keyframes bezent-card-float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-2px);
-  }
-}
-
-@keyframes bezent-particle-pulse {
-  0%,
-  100% {
-    opacity: 0.3;
-    transform: scale(0.85);
-  }
-  50% {
-    opacity: 0.85;
-    transform: scale(1.15);
-  }
-}
 
 .bezent-empty-illustration-container {
   display: inline-flex;
@@ -67,7 +14,8 @@
   justify-content: center;
   max-width: 100%;
   user-select: none;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: default;
 }
 
 .bezent-empty-illustration-container--default {
@@ -75,52 +23,170 @@
 }
 
 .bezent-empty-illustration-container--compact {
-  width: 135px;
+  width: 130px;
 }
 
-.bezent-empty-illustration-container svg {
+.bezent-arc-reactor {
   overflow: visible;
   display: block;
+  transition: filter 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.bezent-empty-plane {
-  animation: bezent-plane-glide 2.8s ease-in-out infinite;
+.bezent-empty-illustration-container:hover .bezent-arc-reactor {
+  filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.45));
+}
+
+/* ── Center Core Energy Pulse ── */
+.bezent-reactor-core {
+  transform-origin: 120px 110px;
+  animation: bezentCorePulse 3.2s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes bezentCorePulse {
+  0%,
+  100% {
+    transform: scale(0.97);
+    opacity: 0.92;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+    filter: drop-shadow(0 0 6px rgba(0, 242, 254, 0.7));
+  }
+}
+
+/* ── Inner Geometric Energy Matrix ── */
+.bezent-reactor-matrix {
+  transform-origin: 120px 110px;
+  animation: bezentMatrixBreathe 4.5s ease-in-out infinite;
+}
+
+.bezent-reactor-matrix-invert {
+  transform-origin: 120px 110px;
+  animation: bezentMatrixBreathe 4.5s ease-in-out infinite reverse;
+}
+
+@keyframes bezentMatrixBreathe {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(0.96);
+    opacity: 0.75;
+  }
+  50% {
+    transform: rotate(180deg) scale(1.04);
+    opacity: 1;
+  }
+}
+
+/* ── Middle HUD Track Rotation (Clockwise) ── */
+.bezent-reactor-hud-mid {
+  transform-origin: 120px 110px;
+  animation: bezentRotateCw 20s linear infinite;
   will-change: transform;
 }
 
-.bezent-empty-path {
-  animation: bezent-path-reveal 2.8s ease-in-out infinite;
+@keyframes bezentRotateCw {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.bezent-empty-plus {
-  animation: bezent-plus-breathe 2.2s ease-in-out infinite;
-  transform-origin: 210px 108px;
+/* ── Outer HUD Ring Rotation (Counter-Clockwise) ── */
+.bezent-reactor-hud-outer {
+  transform-origin: 120px 110px;
+  animation: bezentRotateCcw 28s linear infinite;
   will-change: transform;
 }
 
-.bezent-empty-card {
-  animation: bezent-card-float 3.6s ease-in-out infinite;
-  will-change: transform;
+@keyframes bezentRotateCcw {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
 }
 
-.bezent-empty-p1 {
-  animation: bezent-particle-pulse 2.8s ease-in-out infinite;
-  transform-origin: 108px 38px;
+/* ── Floating Engineering Particles ── */
+.bezent-p1 {
+  animation: bezentParticleFloat1 3.6s ease-in-out infinite;
 }
 
-.bezent-empty-p2 {
-  animation: bezent-particle-pulse 3.2s ease-in-out infinite 0.6s;
-  transform-origin: 280px 102px;
+.bezent-p2 {
+  animation: bezentParticleFloat2 4.2s ease-in-out infinite 0.5s;
 }
 
+.bezent-p3 {
+  animation: bezentParticleFloat1 3.8s ease-in-out infinite 1.1s;
+}
+
+.bezent-p4 {
+  animation: bezentParticleFloat2 4.6s ease-in-out infinite 0.8s;
+}
+
+@keyframes bezentParticleFloat1 {
+  0%,
+  100% {
+    transform: translate(0, 0);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translate(2px, -3px);
+    opacity: 0.9;
+  }
+}
+
+@keyframes bezentParticleFloat2 {
+  0%,
+  100% {
+    transform: translate(0, 0);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translate(-3px, 2px);
+    opacity: 0.95;
+  }
+}
+
+/* ── Ambient Aura Breathing ── */
+.bezent-reactor-aura {
+  transform-origin: 120px 110px;
+  animation: bezentAuraBreathe 4s ease-in-out infinite;
+}
+
+@keyframes bezentAuraBreathe {
+  0%,
+  100% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+/* ── Reduced Motion Accessibility ── */
 @media (prefers-reduced-motion: reduce) {
-  .bezent-empty-plane,
-  .bezent-empty-path,
-  .bezent-empty-plus,
-  .bezent-empty-card,
-  .bezent-empty-p1,
-  .bezent-empty-p2 {
+  .bezent-reactor-core,
+  .bezent-reactor-matrix,
+  .bezent-reactor-matrix-invert,
+  .bezent-reactor-hud-mid,
+  .bezent-reactor-hud-outer,
+  .bezent-p1,
+  .bezent-p2,
+  .bezent-p3,
+  .bezent-p4,
+  .bezent-reactor-aura {
     animation: none !important;
     transform: none !important;
+  }
+
+  .bezent-arc-reactor {
+    transition: none !important;
   }
 }

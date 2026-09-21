@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { BezentIcon, type BezentIconName } from '../../design-system/icons';
+import { BezentIcon, CompanionIcon, type BezentIconName } from '../../design-system/icons';
 import './UtilityDrawerShell.css';
 
 export interface UtilityDrawerShellProps {
@@ -37,7 +37,7 @@ export function UtilityDrawerShell({ title, icon, onClose, children }: UtilityDr
       <div className="utility-drawer__loader" aria-hidden="true">
         <div className="utility-drawer__loader-header">
           <span className="utility-drawer__loader-chip">
-            <BezentIcon name={icon} size={15} color="currentColor" active />
+            <CompanionIcon name={icon} size={16} active />
           </span>
           <span className="utility-drawer__loader-title">{title}</span>
           <button
@@ -52,7 +52,7 @@ export function UtilityDrawerShell({ title, icon, onClose, children }: UtilityDr
         <div className="utility-drawer__loader-body">
           <span className="utility-drawer__circle" />
           <span className="utility-drawer__loader-icon">
-            <BezentIcon name={icon} size={32} color="currentColor" active strokeWidth={1.8} />
+            <CompanionIcon name={icon} size={36} active />
           </span>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BezentIcon, type BezentIconName } from '../../design-system/icons';
+import { BezentIcon, CompanionIcon, type BezentIconName } from '../../design-system/icons';
 import type { ShellRailItem } from './types';
 import { Tooltip } from '../../design-system/components';
 import './RightRail.css';
@@ -152,6 +152,7 @@ function RailButton({
   onClick: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
+
   return (
     <div className="right-rail__anchor">
       <button
@@ -164,14 +165,7 @@ function RailButton({
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        <BezentIcon
-          name={icon}
-          size={20}
-          variant={active ? 'solid' : 'outline'}
-          active={active}
-          color="currentColor"
-          strokeWidth={1.8}
-        />
+        <CompanionIcon name={id || icon} size={22} active={active} />
         {typeof badge === 'number' && badge > 0 && (
           <span className="right-rail__badge-dot" aria-label={`${badge} updates`} />
         )}

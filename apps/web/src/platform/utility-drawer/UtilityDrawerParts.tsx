@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { BezentIcon, type BezentIconName } from '../../design-system/icons';
+import { BezentIcon, CompanionIcon, type BezentIconName } from '../../design-system/icons';
 import './UtilityDrawerParts.css';
 
 /**
@@ -36,7 +36,7 @@ export function UtilityDrawerHeader({
         <div className="ud-header__title">
           {icon && (
             <span className="ud-header__chip">
-              <BezentIcon name={icon} size={14} color="currentColor" active />
+              <CompanionIcon name={icon} size={16} active />
             </span>
           )}
           <h2 className="ud-header__heading">{title}</h2>

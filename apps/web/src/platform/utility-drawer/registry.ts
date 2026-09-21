@@ -27,9 +27,8 @@ export interface UtilityCapabilityDefinition {
 }
 
 export const UTILITY_CAPABILITIES: readonly UtilityCapabilityDefinition[] = [
-  // Order = rail order in the old UI. The old rail labelled the Notes button
-  // "Documents"; renamed to "Notes" in Phase 0B.8 (HRMS Documents is a separate
-  // business destination — see docs/architecture/HRMS-NAVIGATION.md).
+  { id: 'calendar', label: 'Calendar', title: 'Calendar', icon: 'calendar', placement: 'rail' },
+  { id: 'notes', label: 'Notes', title: 'Notes', icon: 'notes', placement: 'rail' },
   { id: 'tasks', label: 'My Tasks', title: 'My Tasks', icon: 'tasks', placement: 'rail' },
   {
     id: 'approvals',
@@ -38,8 +37,6 @@ export const UTILITY_CAPABILITIES: readonly UtilityCapabilityDefinition[] = [
     icon: 'approvals',
     placement: 'rail',
   },
-  { id: 'calendar', label: 'Calendar', title: 'Calendar', icon: 'calendar', placement: 'rail' },
-  { id: 'notes', label: 'Notes', title: 'Notes', icon: 'notes', placement: 'rail' },
   {
     id: 'notifications',
     label: 'Notifications',

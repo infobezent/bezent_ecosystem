@@ -25,7 +25,7 @@
   /* Core Google Workspace-Inspired Surfaces */
   --bezent-logo-surface: #c2e7ff;
   --bezent-logo-text: #001d35;
-  --primary: #d3e3fd;
+  --primary: #c2e7ff;
   --app-canvas: #f6f8fc;
   --workspace: #ffffff;
 
@@ -52,10 +52,10 @@
 
   /* Interactive Surfaces */
   --bg-hover: #c2e7ff;
-  --bg-selected: var(--primary);
+  --bg-selected: #c2e7ff;
   --nav-hover: #c2e7ff;
-  --nav-selected: var(--primary);
-  --nav-icon-bg-selected: var(--primary);
+  --nav-selected: #c2e7ff;
+  --nav-icon-bg-selected: #c2e7ff;
   --nav-icon-bg-hover: #c2e7ff;
   --nav-icon-default: #444746;
   --nav-icon-hover: #1f1f1f;
@@ -171,6 +171,7 @@
   /* Shadows */
   --shadow-popup: var(--floating-surface-shadow);
   --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+  --shadow-workspace: 0 1px 3px rgba(60, 64, 67, 0.12), 0 2px 6px 2px rgba(60, 64, 67, 0.06);
   /* Neutral lift for buttons and count badges */
   --shadow-brand-sm: 0 1px 2px rgba(11, 87, 208, 0.24);
   --shadow-dropdown: 0 10px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.06);
@@ -478,6 +479,7 @@
   /* Shadows */
   --shadow-popup: 0 10px 30px rgba(0, 0, 0, 0.3);
   --shadow-card: 0 4px 14px rgba(0, 0, 0, 0.45);
+  --shadow-workspace: 0 2px 8px rgba(0, 0, 0, 0.38), 0 6px 20px rgba(0, 0, 0, 0.45);
   --shadow-brand-sm: 0 1px 3px rgba(147, 28, 245, 0.25);
   --shadow-dropdown: 0 12px 28px rgba(0, 0, 0, 0.55);
 
