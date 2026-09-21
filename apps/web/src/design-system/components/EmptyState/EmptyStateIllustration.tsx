@@ -225,33 +225,14 @@ export function EmptyStateIllustration({
             strokeWidth="1"
           />
 
-          {/* Central 2D Inverted Geometric Matrix Triangle */}
-          <polygon
-            points="110,98 120.4,116 99.6,116"
-            stroke={primarySky}
-            strokeWidth="1.2"
-            fill={isDark ? '#0c4a6e' : '#ffffff'}
+          {/* Central 2D 'b' Lettermark */}
+          <path
+            d="M103 97 V121 M103 108.5 C105 106.8 107.8 105.5 111 105.5 C115.5 105.5 119 109 119 113.5 C119 118 115.5 121.5 111 121.5 C107.8 121.5 105 120.2 103 118.5"
+            stroke={isDark ? '#38bdf8' : '#0284c7'}
+            strokeWidth="2.8"
+            strokeLinecap="round"
             strokeLinejoin="round"
-            className="bezent-reactor-matrix"
-          />
-          {/* Central Upright Cyan Geometric Nexus Triangle */}
-          <polygon
-            points="110,122 99.6,104 120.4,104"
-            stroke={cyanAccent}
-            strokeWidth="1"
             fill="none"
-            strokeLinejoin="round"
-            className="bezent-reactor-matrix-invert"
-          />
-
-          {/* Center Power Core Node */}
-          <circle
-            cx="110"
-            cy="110"
-            r="4"
-            fill={isDark ? '#38bdf8' : '#0284c7'}
-            stroke="#ffffff"
-            strokeWidth="1"
           />
         </g>
       </svg>

@@ -52,29 +52,6 @@
   }
 }
 
-/* ── Inner Geometric Energy Matrix ── */
-.bezent-reactor-matrix {
-  transform-origin: 110px 110px;
-  animation: bezentMatrixBreathe 5s ease-in-out infinite;
-}
-
-.bezent-reactor-matrix-invert {
-  transform-origin: 110px 110px;
-  animation: bezentMatrixBreathe 5s ease-in-out infinite reverse;
-}
-
-@keyframes bezentMatrixBreathe {
-  0%,
-  100% {
-    transform: rotate(0deg) scale(0.96);
-    opacity: 0.85;
-  }
-  50% {
-    transform: rotate(180deg) scale(1.04);
-    opacity: 1;
-  }
-}
-
 /* ── Middle HUD Track Rotation (Clockwise) ── */
 .bezent-reactor-hud-mid {
   transform-origin: 110px 110px;
@@ -110,8 +87,6 @@
 /* ── Reduced Motion Accessibility ── */
 @media (prefers-reduced-motion: reduce) {
   .bezent-reactor-core,
-  .bezent-reactor-matrix,
-  .bezent-reactor-matrix-invert,
   .bezent-reactor-hud-mid,
   .bezent-reactor-hud-outer {
     animation: none !important;
