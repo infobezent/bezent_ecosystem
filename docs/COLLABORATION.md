@@ -1,4 +1,4 @@
-﻿# BEZENT — Team Collaboration Guide
+# BEZENT — Team Collaboration Guide
 
 > **3-person engineering team.** This document is the single reference
 > for how we collaborate on the BEZENT monorepo. Keep it practical —
@@ -365,39 +365,37 @@ genuinely urgent and minimal.
 
 ---
 
-## 13. CODEOWNERS — DEFERRED
+## 13. CODEOWNERS
 
-**GitHub usernames for all 3 developers are not yet confirmed.**
+`.github/CODEOWNERS` is active. GitHub will automatically request reviews
+from the assigned owners whenever a PR touches their area.
 
-A CODEOWNERS file has not been created to avoid invalid/fake usernames.
+**Confirmed GitHub usernames:**
 
-**Intended ownership mapping** (for reference when usernames are available):
+| Developer   | GitHub username    | Primary area                            |
+| ----------- | ------------------ | --------------------------------------- |
+| Developer 1 | `@mukeshm2002`     | Platform & Backend Foundation           |
+| Developer 2 | `@Soundhranayaki1` | HRMS Domain & Workflows                 |
+| Developer 3 | `@sabinrahul`      | Frontend Foundation & Shared Experience |
 
-`
+**Active ownership mapping (`.github/CODEOWNERS`):**
 
-# apps/api/ → Developer 1
+| Path                                                    | Owners                                          |
+| ------------------------------------------------------- | ----------------------------------------------- |
+| `/.github/`                                             | `@mukeshm2002` `@sabinrahul`                    |
+| `/package.json`, `/package-lock.json`, `/tsconfig.json` | `@mukeshm2002` `@sabinrahul`                    |
+| `/docs/`, `/AGENTS.md`, `/CLAUDE.md`                    | `@mukeshm2002` `@Soundhranayaki1` `@sabinrahul` |
+| `/apps/api/`                                            | `@mukeshm2002`                                  |
+| `/apps/web/src/app/`                                    | `@mukeshm2002` `@sabinrahul`                    |
+| `/apps/web/src/applications/hrms/`                      | `@Soundhranayaki1`                              |
+| `/apps/web/src/design-system/`                          | `@sabinrahul`                                   |
+| `/apps/web/src/layouts/`                                | `@sabinrahul`                                   |
+| `/apps/web/src/platform/`                               | `@sabinrahul`                                   |
+| `/apps/web/src/shared/`                                 | `@sabinrahul`                                   |
 
-apps/api/ @<dev1-github-username>
-
-# apps/web/src/applications/hrms/ → Developer 2
-
-apps/web/src/applications/hrms/ @<dev2-github-username>
-
-# Shared frontend / design-system → Developer 3
-
-apps/web/src/design-system/ @<dev3-github-username>
-apps/web/src/layouts/ @<dev3-github-username>
-apps/web/src/platform/ @<dev3-github-username>
-apps/web/src/shared/ @<dev3-github-username>
-
-# Architecture/governance docs → all owners
-
-docs/ @<dev1> @<dev2> @<dev3>
-AGENTS.md @<dev1> @<dev2> @<dev3>
-`
-
-Once GitHub usernames are confirmed, create .github/CODEOWNERS using the
-mapping above.
+**Precedence note:** CODEOWNERS uses last-match wins. Rules in `.github/CODEOWNERS`
+are ordered from general to specific so that specific paths (e.g. `hrms/`)
+take precedence over broader ones (e.g. `app/`).
 
 ---
 
