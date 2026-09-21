@@ -21,3 +21,13 @@ export class NotFoundError extends AppError {
     this.name = 'NotFoundError';
   }
 }
+
+export class ValidationError extends AppError {
+  readonly details?: Record<string, string>;
+
+  constructor(message = 'Validation failed', details?: Record<string, string>) {
+    super(message, 400, 'VALIDATION_ERROR');
+    this.name = 'ValidationError';
+    this.details = details;
+  }
+}

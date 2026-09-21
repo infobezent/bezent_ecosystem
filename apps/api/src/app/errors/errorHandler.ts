@@ -1,11 +1,12 @@
 import type { NextFunction, Request, Response } from 'express';
-import { AppError } from './AppError.js';
+import { AppError, ValidationError } from './AppError.js';
 import { env } from '../config/env.js';
 
 interface ErrorResponseBody {
   error: {
     code: string;
     message: string;
+    details?: Record<string, string>;
     stack?: string;
   };
 }
@@ -29,6 +30,10 @@ export function errorHandler(
   const body: ErrorResponseBody = {
     error: { code, message },
   };
+
+  if (err instanceof ValidationError && err.details) {
+    body.error.details = err.details;
+  }
 
   if (env.nodeEnv !== 'production' && err instanceof Error) {
     body.error.stack = err.stack;
