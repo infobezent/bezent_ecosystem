@@ -71,12 +71,38 @@ export interface OnboardingCaseListItem {
   status: OnboardingStatus;
   version: number;
   draftPayload?: Record<string, unknown> | null;
+  withdrawalReason?: string | null;
+  withdrawnAt?: Date | null;
+  completedAt?: Date | null;
   departmentId: string | null;
   departmentName?: string | null;
   designationId: string | null;
   designationName?: string | null;
-  locationId?: string | null;
+  locationId: string | null;
   locationName?: string | null;
   createdAt: Date;
   updatedAt?: Date;
+}
+
+export interface TransitionStageDto {
+  toStage: string;
+  notes?: string;
+  version: number;
+}
+
+export interface WithdrawCaseDto {
+  reason: string;
+  version: number;
+}
+
+export interface OnboardingCaseHistoryItem {
+  id: string;
+  tenantId: string;
+  companyId: string;
+  caseId: string;
+  fromStage: string | null;
+  toStage: string;
+  action: 'transition' | 'revert' | 'withdraw' | 'complete';
+  notes: string | null;
+  createdAt: Date;
 }

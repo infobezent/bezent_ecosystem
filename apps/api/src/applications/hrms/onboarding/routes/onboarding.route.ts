@@ -16,3 +16,8 @@ onboardingRouter.get('/hrms/onboarding/cases/:caseId', controller.getCaseById);
 onboardingRouter.patch('/hrms/onboarding/cases/:caseId/draft', controller.updateDraft);
 onboardingRouter.post('/hrms/onboarding/cases/:caseId/submit', controller.submitCase);
 onboardingRouter.delete('/hrms/onboarding/cases/:caseId', controller.deleteDraft);
+
+// PR2 Stage progression, withdrawal, and history routes
+onboardingRouter.post('/hrms/onboarding/cases/:caseId/stage', controller.transitionStage);
+onboardingRouter.post('/hrms/onboarding/cases/:caseId/withdraw', controller.withdrawCase);
+onboardingRouter.get('/hrms/onboarding/cases/:caseId/history', controller.getCaseHistory);

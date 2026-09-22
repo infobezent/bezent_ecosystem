@@ -1,14 +1,19 @@
+import { randomUUID } from 'node:crypto';
 import { getDb, isDatabaseConfigured } from '../../../../db/connection.js';
 import {
   onboardingCases,
+  onboardingCaseStageHistory,
   departments,
   designations,
   locations,
   type NewOnboardingCase,
   type OnboardingCase,
 } from '../../../../db/schema.js';
-import { eq, and, desc } from 'drizzle-orm';
-import type { OnboardingCaseListItem } from '../types/onboarding.types.js';
+import { eq, and, desc, asc } from 'drizzle-orm';
+import type {
+  OnboardingCaseListItem,
+  OnboardingCaseHistoryItem,
+} from '../types/onboarding.types.js';
 
 const INITIAL_FALLBACK_CASES: OnboardingCaseListItem[] = [
   {
@@ -101,6 +106,9 @@ export class OnboardingRepository {
         status: onboardingCases.status,
         version: onboardingCases.version,
         draftPayload: onboardingCases.draftPayload,
+        withdrawalReason: onboardingCases.withdrawalReason,
+        withdrawnAt: onboardingCases.withdrawnAt,
+        completedAt: onboardingCases.completedAt,
         departmentId: onboardingCases.departmentId,
         departmentName: departments.name,
         designationId: onboardingCases.designationId,
@@ -155,6 +163,9 @@ export class OnboardingRepository {
         status: onboardingCases.status,
         version: onboardingCases.version,
         draftPayload: onboardingCases.draftPayload,
+        withdrawalReason: onboardingCases.withdrawalReason,
+        withdrawnAt: onboardingCases.withdrawnAt,
+        completedAt: onboardingCases.completedAt,
         departmentId: onboardingCases.departmentId,
         departmentName: departments.name,
         designationId: onboardingCases.designationId,
@@ -208,6 +219,9 @@ export class OnboardingRepository {
         status: data.status ?? 'active',
         version: data.version ?? 1,
         draftPayload: (data.draftPayload as Record<string, unknown>) ?? null,
+        withdrawalReason: null,
+        withdrawnAt: null,
+        completedAt: null,
         departmentId: data.departmentId ?? null,
         departmentName: 'Engineering',
         designationId: data.designationId ?? null,
@@ -235,6 +249,9 @@ export class OnboardingRepository {
         status: data.status ?? 'active',
         version: data.version ?? 1,
         draftPayload: (data.draftPayload as Record<string, unknown>) ?? null,
+        withdrawalReason: null,
+        withdrawnAt: null,
+        completedAt: null,
         createdAt: item.createdAt,
         updatedAt: item.createdAt,
       };
@@ -338,5 +355,148 @@ export class OnboardingRepository {
 
     const header = result[0] as unknown as { affectedRows?: number };
     return (header?.affectedRows ?? 0) > 0;
+  }
+
+  async transitionStageWithHistory(
+    tenantId: string,
+    companyId: string,
+    caseId: string,
+    expectedVersion: number,
+    fromStage: string,
+    toStage: string,
+    action: 'transition' | 'revert' | 'complete',
+    notes?: string,
+  ): Promise<boolean> {
+    const db = getDb();
+    return db.transaction(async (tx) => {
+      const isComplete = toStage === 'completed';
+      const now = new Date();
+
+      const updateValues: Record<string, unknown> = {
+        stage: toStage,
+        status: isComplete ? 'completed' : 'active',
+        version: expectedVersion + 1,
+        updatedAt: now,
+      };
+
+      if (isComplete) {
+        updateValues.completedAt = now;
+      }
+
+      const result = await tx
+        .update(onboardingCases)
+        .set(updateValues)
+        .where(
+          and(
+            eq(onboardingCases.tenantId, tenantId),
+            eq(onboardingCases.companyId, companyId),
+            eq(onboardingCases.id, caseId),
+            eq(onboardingCases.version, expectedVersion),
+          ),
+        );
+
+      const header = result[0] as unknown as { affectedRows?: number };
+      if ((header?.affectedRows ?? 0) === 0) {
+        return false;
+      }
+
+      const historyId = `hist_${Date.now()}_${randomUUID().slice(0, 8)}`;
+      await tx.insert(onboardingCaseStageHistory).values({
+        id: historyId,
+        tenantId,
+        companyId,
+        caseId,
+        fromStage,
+        toStage,
+        action,
+        notes: notes ?? null,
+        createdAt: now,
+      });
+
+      return true;
+    });
+  }
+
+  async withdrawWithHistory(
+    tenantId: string,
+    companyId: string,
+    caseId: string,
+    expectedVersion: number,
+    currentStage: string,
+    reason: string,
+  ): Promise<boolean> {
+    const db = getDb();
+    return db.transaction(async (tx) => {
+      const now = new Date();
+
+      const result = await tx
+        .update(onboardingCases)
+        .set({
+          status: 'withdrawn',
+          withdrawalReason: reason,
+          withdrawnAt: now,
+          version: expectedVersion + 1,
+          updatedAt: now,
+        })
+        .where(
+          and(
+            eq(onboardingCases.tenantId, tenantId),
+            eq(onboardingCases.companyId, companyId),
+            eq(onboardingCases.id, caseId),
+            eq(onboardingCases.version, expectedVersion),
+          ),
+        );
+
+      const header = result[0] as unknown as { affectedRows?: number };
+      if ((header?.affectedRows ?? 0) === 0) {
+        return false;
+      }
+
+      const historyId = `hist_${Date.now()}_${randomUUID().slice(0, 8)}`;
+      await tx.insert(onboardingCaseStageHistory).values({
+        id: historyId,
+        tenantId,
+        companyId,
+        caseId,
+        fromStage: currentStage,
+        toStage: currentStage,
+        action: 'withdraw',
+        notes: reason,
+        createdAt: now,
+      });
+
+      return true;
+    });
+  }
+
+  async getHistoryByCaseId(
+    tenantId: string,
+    companyId: string,
+    caseId: string,
+  ): Promise<OnboardingCaseHistoryItem[]> {
+    const db = getDb();
+    const rows = await db
+      .select({
+        id: onboardingCaseStageHistory.id,
+        tenantId: onboardingCaseStageHistory.tenantId,
+        companyId: onboardingCaseStageHistory.companyId,
+        caseId: onboardingCaseStageHistory.caseId,
+        fromStage: onboardingCaseStageHistory.fromStage,
+        toStage: onboardingCaseStageHistory.toStage,
+        action: onboardingCaseStageHistory.action,
+        notes: onboardingCaseStageHistory.notes,
+        createdAt: onboardingCaseStageHistory.createdAt,
+      })
+      .from(onboardingCaseStageHistory)
+      .where(
+        and(
+          eq(onboardingCaseStageHistory.tenantId, tenantId),
+          eq(onboardingCaseStageHistory.companyId, companyId),
+          eq(onboardingCaseStageHistory.caseId, caseId),
+        ),
+      )
+      .orderBy(asc(onboardingCaseStageHistory.createdAt), asc(onboardingCaseStageHistory.id));
+
+    return rows;
   }
 }
