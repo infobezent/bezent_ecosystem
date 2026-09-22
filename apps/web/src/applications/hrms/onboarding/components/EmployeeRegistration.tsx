@@ -3,6 +3,8 @@ import { Button } from '../../../../design-system/components/Button';
 import { BezentIcon } from '../../../../design-system/icons';
 import { PersonalInformation } from './PersonalInformation';
 import { OnboardingSection } from './OnboardingSection';
+import { SkillsSection } from './SkillsSection';
+import { EmergencyContactSection } from './EmergencyContactSection';
 import './EmployeeRegistration.css';
 
 export type RegistrationSectionId =
@@ -740,6 +742,10 @@ export function EmployeeRegistration({ onCancel }: EmployeeRegistrationProps) {
               {/* Form-Based Onboarding Tasks & Assets */}
               <OnboardingSection />
             </>
+          ) : activeSection === 'skills' ? (
+            <SkillsSection />
+          ) : activeSection === 'emergency' ? (
+            <EmergencyContactSection />
           ) : (
             /* Placeholder for remaining sections */
             <div className="employee-registration__placeholder">
