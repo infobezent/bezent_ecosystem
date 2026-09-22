@@ -7,6 +7,7 @@ import {
   boolean,
   int,
   uniqueIndex,
+  json,
 } from 'drizzle-orm/mysql-core';
 
 /**
@@ -94,6 +95,7 @@ export const locations = mysqlTable(
 /**
  * HRMS Domain: Onboarding Cases (New Hires)
  * Represents individuals in the onboarding workflow prior to employee record creation.
+ * Draft is an OnboardingCase lifecycle state (status = 'draft').
  */
 export const onboardingCases = mysqlTable(
   'onboarding_cases',
@@ -103,25 +105,25 @@ export const onboardingCases = mysqlTable(
     companyId: varchar('company_id', { length: 64 })
       .notNull()
       .references(() => companies.id),
-    departmentId: varchar('department_id', { length: 64 })
-      .notNull()
-      .references(() => departments.id),
-    designationId: varchar('designation_id', { length: 64 })
-      .notNull()
-      .references(() => designations.id),
+    departmentId: varchar('department_id', { length: 64 }).references(() => departments.id),
+    designationId: varchar('designation_id', { length: 64 }).references(() => designations.id),
     locationId: varchar('location_id', { length: 64 }).references(() => locations.id),
-    firstName: varchar('first_name', { length: 100 }).notNull(),
+    firstName: varchar('first_name', { length: 100 }),
     lastName: varchar('last_name', { length: 100 }),
-    email: varchar('email', { length: 255 }).notNull(),
+    email: varchar('email', { length: 255 }),
     phone: varchar('phone', { length: 50 }),
-    joiningDate: varchar('joining_date', { length: 10 }).notNull(),
+    joiningDate: varchar('joining_date', { length: 10 }),
     employmentType: mysqlEnum('employment_type', ['full_time', 'part_time', 'contract', 'intern'])
       .default('full_time')
       .notNull(),
     stage: mysqlEnum('stage', ['preboarding', 'documents', 'induction', 'completed'])
       .default('preboarding')
       .notNull(),
-    status: mysqlEnum('status', ['active', 'withdrawn', 'completed']).default('active').notNull(),
+    status: mysqlEnum('status', ['draft', 'active', 'withdrawn', 'completed'])
+      .default('active')
+      .notNull(),
+    version: int('version').default(1).notNull(),
+    draftPayload: json('draft_payload').$type<Record<string, unknown>>(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
   },
@@ -129,6 +131,7 @@ export const onboardingCases = mysqlTable(
     index('idx_onboarding_tenant_company').on(table.tenantId, table.companyId),
     index('idx_onboarding_email').on(table.email),
     index('idx_onboarding_stage').on(table.stage),
+    index('idx_onboarding_status').on(table.status),
   ],
 );
 
