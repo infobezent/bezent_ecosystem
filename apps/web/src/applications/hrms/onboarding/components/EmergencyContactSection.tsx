@@ -2,42 +2,6 @@ import { useState } from 'react';
 import { BezentIcon } from '../../../../design-system/icons';
 import './EmergencyContactSection.css';
 
-export interface SavedContactPreset {
-  name: string;
-  relationship: string;
-  phone: string;
-  countryCode: string;
-  email: string;
-  address: string;
-}
-
-const SAVED_PRESETS: SavedContactPreset[] = [
-  {
-    name: 'Ramesh Kumar',
-    relationship: 'Father',
-    phone: '9876543210',
-    countryCode: '+91',
-    email: 'ramesh.kumar@example.com',
-    address: 'No. 42, Green Park Avenue, T. Nagar, Chennai - 600017, Tamil Nadu',
-  },
-  {
-    name: 'Lakshmi Kumar',
-    relationship: 'Mother',
-    phone: '9876543211',
-    countryCode: '+91',
-    email: 'lakshmi.k@example.com',
-    address: 'No. 42, Green Park Avenue, T. Nagar, Chennai - 600017, Tamil Nadu',
-  },
-  {
-    name: 'Siddharth V',
-    relationship: 'Spouse',
-    phone: '9876543212',
-    countryCode: '+91',
-    email: 'siddharth.v@example.com',
-    address: 'Flat 302, Cyber Heights, Hitec City, Hyderabad - 500081, Telangana',
-  },
-];
-
 export function EmergencyContactSection() {
   // PRIMARY CONTACT STATE
   const [primaryName, setPrimaryName] = useState('Ramesh Kumar');
@@ -64,11 +28,6 @@ export function EmergencyContactSection() {
   const [primaryEmailError, setPrimaryEmailError] = useState('');
   const [secondaryMobileError, setSecondaryMobileError] = useState('');
   const [secondaryEmailError, setSecondaryEmailError] = useState('');
-
-  // Quick Preset Selection Modal
-  const [activePresetPicker, setActivePresetPicker] = useState<'primary' | 'secondary' | null>(
-    null,
-  );
 
   const validatePhone = (value: string): boolean => {
     const cleanNum = value.replace(/\D/g, '');
@@ -117,28 +76,6 @@ export function EmergencyContactSection() {
     }
   };
 
-  const handleApplyPreset = (preset: SavedContactPreset) => {
-    if (activePresetPicker === 'primary') {
-      setPrimaryName(preset.name);
-      setPrimaryRelationship(preset.relationship);
-      setPrimaryCountryCode(preset.countryCode);
-      setPrimaryPhone(preset.phone);
-      setPrimaryEmail(preset.email);
-      setPrimaryAddress(preset.address);
-      setPrimaryPhoneError('');
-      setPrimaryEmailError('');
-    } else if (activePresetPicker === 'secondary') {
-      setSecondaryName(preset.name);
-      setSecondaryRelationship(preset.relationship);
-      setSecondaryCountryCode(preset.countryCode);
-      setSecondaryMobile(preset.phone);
-      setSecondaryEmail(preset.email);
-      setSecondaryMobileError('');
-      setSecondaryEmailError('');
-    }
-    setActivePresetPicker(null);
-  };
-
   return (
     <div className="emergency-contact-section">
       {/* Banner Header */}
@@ -166,13 +103,6 @@ export function EmergencyContactSection() {
               </span>
               <h3 className="emergency-contact-section__card-title">Primary Emergency Contact</h3>
             </div>
-            <button
-              type="button"
-              className="emergency-contact-section__preset-btn"
-              onClick={() => setActivePresetPicker('primary')}
-            >
-              🔍 Select Saved Contact
-            </button>
           </div>
 
           <form className="emergency-contact-section__grid" onSubmit={(e) => e.preventDefault()}>
@@ -333,13 +263,6 @@ export function EmergencyContactSection() {
               </span>
               <h3 className="emergency-contact-section__card-title">Secondary Emergency Contact</h3>
             </div>
-            <button
-              type="button"
-              className="emergency-contact-section__preset-btn"
-              onClick={() => setActivePresetPicker('secondary')}
-            >
-              🔍 Select Saved Contact
-            </button>
           </div>
 
           <form className="emergency-contact-section__grid" onSubmit={(e) => e.preventDefault()}>
@@ -442,50 +365,6 @@ export function EmergencyContactSection() {
           </form>
         </div>
       </div>
-
-      {/* Preset Contact Selection Modal */}
-      {activePresetPicker && (
-        <div className="skills-section__modal-overlay">
-          <div className="skills-section__modal">
-            <div className="skills-section__modal-header">
-              <h4 className="skills-section__modal-title">
-                Select Saved Contact ({activePresetPicker === 'primary' ? 'Primary' : 'Secondary'})
-              </h4>
-              <button
-                type="button"
-                className="skills-section__modal-close"
-                onClick={() => setActivePresetPicker(null)}
-              >
-                ✕
-              </button>
-            </div>
-            <div className="skills-section__modal-body">
-              <p className="skills-section__emp-sub">
-                Select a saved family or relative contact to auto-populate fields:
-              </p>
-              <div className="skills-section__employee-list">
-                {SAVED_PRESETS.map((p) => (
-                  <div
-                    key={p.name}
-                    className="skills-section__employee-item"
-                    onClick={() => handleApplyPreset(p)}
-                  >
-                    <span className="employee-registration__pill-avatar">
-                      {p.name.slice(0, 2).toUpperCase()}
-                    </span>
-                    <div className="skills-section__emp-info">
-                      <span className="skills-section__emp-name">{p.name}</span>
-                      <span className="skills-section__emp-sub">
-                        {p.relationship} • {p.countryCode} {p.phone}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
