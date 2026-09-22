@@ -58,35 +58,35 @@
 .utility-drawer__loader-header {
   position: relative;
   z-index: 2;
-  height: 50px;
+  height: 52px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0 12px 0 16px;
   background: var(--drawer-header-bg);
   border-bottom: 1px solid var(--drawer-border-divider);
 }
 
-.utility-drawer__loader-chip {
-  width: 26px;
-  height: 26px;
-  margin-right: 8px;
-  flex-shrink: 0;
+.utility-drawer__loader-title-group {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 7px;
-  background: var(--drawer-icon-container-bg);
-  border: 1px solid var(--drawer-icon-container-border);
-  color: var(--drawer-icon-container-color);
+  flex-direction: column;
+  gap: 1px;
 }
 
-.utility-drawer__loader-title {
-  flex: 1;
+.utility-drawer__loader-app {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.utility-drawer__loader-status {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
+  color: var(--text-primary);
   letter-spacing: -0.2px;
-  color: var(--drawer-title);
 }
 
 .utility-drawer__loader-close {
@@ -112,85 +112,59 @@
   background: var(--drawer-bg);
 }
 
-/* Expanding radial bubble. */
+/* Expanding radial disc (matches Google Workspace side panel loading flow). */
 .utility-drawer__circle {
   position: absolute;
   top: 50%;
   left: 50%;
   z-index: 0;
-  width: 160px;
-  height: 160px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  background: var(--drawer-reveal-surface);
   pointer-events: none;
   animation: utilityDrawerCircleExpand var(--motion-duration-drawer-reveal)
-    var(--motion-ease-emphasized) forwards;
+    cubic-bezier(0.0, 0.0, 0.2, 1) forwards;
 }
 
 .utility-drawer__circle--notes {
-  background: radial-gradient(
-    circle,
-    rgba(251, 188, 4, 0.42) 0%,
-    rgba(251, 188, 4, 0.18) 45%,
-    rgba(251, 188, 4, 0.03) 75%,
-    transparent 100%
-  );
+  background-color: #feefc3;
 }
 
-.utility-drawer__circle--calendar {
-  background: radial-gradient(
-    circle,
-    rgba(26, 115, 232, 0.38) 0%,
-    rgba(26, 115, 232, 0.16) 45%,
-    rgba(26, 115, 232, 0.03) 75%,
-    transparent 100%
-  );
-}
-
-.utility-drawer__circle--tasks {
-  background: radial-gradient(
-    circle,
-    rgba(66, 133, 244, 0.38) 0%,
-    rgba(66, 133, 244, 0.16) 45%,
-    rgba(66, 133, 244, 0.03) 75%,
-    transparent 100%
-  );
-}
-
+.utility-drawer__circle--calendar,
+.utility-drawer__circle--tasks,
 .utility-drawer__circle--approvals {
-  background: radial-gradient(
-    circle,
-    rgba(26, 115, 232, 0.38) 0%,
-    rgba(138, 180, 248, 0.2) 45%,
-    rgba(26, 115, 232, 0.03) 75%,
-    transparent 100%
-  );
+  background-color: #e8f0fe;
+}
+
+[data-theme='dark'] .utility-drawer__circle--notes {
+  background-color: rgba(254, 239, 195, 0.16);
+}
+
+[data-theme='dark'] .utility-drawer__circle--calendar,
+[data-theme='dark'] .utility-drawer__circle--tasks,
+[data-theme='dark'] .utility-drawer__circle--approvals {
+  background-color: rgba(232, 240, 254, 0.16);
 }
 
 @keyframes utilityDrawerCircleExpand {
   0% {
-    transform: translate(-50%, -50%) scale(0.6);
+    transform: translate(-50%, -50%) scale(0.25);
+    opacity: 0.6;
+  }
+  20% {
     opacity: 1;
   }
-  50% {
-    transform: translate(-50%, -50%) scale(5.5);
+  85% {
+    transform: translate(-50%, -50%) scale(8.5);
     opacity: 1;
-  }
-  75% {
-    transform: translate(-50%, -50%) scale(10);
-    opacity: 0.9;
-  }
-  90% {
-    transform: translate(-50%, -50%) scale(11);
-    opacity: 0.45;
   }
   100% {
-    transform: translate(-50%, -50%) scale(11);
-    opacity: 0;
+    transform: translate(-50%, -50%) scale(9);
+    opacity: 1;
   }
 }
 
-/* Floating capability icon above the bubble: mild jump/pop animation without square border. */
+/* Floating capability icon above the expanding disc. */
 .utility-drawer__loader-icon {
   position: relative;
   z-index: 1;
@@ -200,35 +174,34 @@
   background: transparent;
   border: none;
   box-shadow: none;
-  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.16));
-  animation: utilityDrawerIconJumpSequence var(--motion-duration-drawer-reveal)
-    cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+  animation: utilityDrawerIconGentlePop var(--motion-duration-drawer-reveal)
+    cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes utilityDrawerIconJumpSequence {
+@keyframes utilityDrawerIconGentlePop {
   0% {
     opacity: 0;
-    transform: scale(0.45) translateY(18px);
+    transform: scale(0.7);
   }
-  28% {
+  25% {
     opacity: 1;
-    transform: scale(1.14) translateY(-12px);
+    transform: scale(1.05);
   }
-  48% {
+  45% {
     opacity: 1;
-    transform: scale(0.97) translateY(2px);
+    transform: scale(0.99);
   }
-  68% {
+  65% {
     opacity: 1;
-    transform: scale(1.02) translateY(-1px);
+    transform: scale(1);
   }
-  84% {
+  88% {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: scale(1);
   }
   100% {
     opacity: 0;
-    transform: scale(0.94) translateY(-4px);
+    transform: scale(0.96);
   }
 }
 

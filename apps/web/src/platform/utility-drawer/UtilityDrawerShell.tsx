@@ -36,10 +36,10 @@ export function UtilityDrawerShell({ title, icon, onClose, children }: UtilityDr
       {/* Reveal layer: header + expanding circle; hides itself after the reveal. */}
       <div className="utility-drawer__loader" aria-hidden="true">
         <div className="utility-drawer__loader-header">
-          <span className="utility-drawer__loader-chip">
-            <CompanionIcon name={icon} size={16} active />
-          </span>
-          <span className="utility-drawer__loader-title">{title}</span>
+          <div className="utility-drawer__loader-title-group">
+            <span className="utility-drawer__loader-app">{title.toUpperCase()}</span>
+            <span className="utility-drawer__loader-status">Loading...</span>
+          </div>
           <button
             type="button"
             className="utility-drawer__loader-close"
@@ -54,7 +54,7 @@ export function UtilityDrawerShell({ title, icon, onClose, children }: UtilityDr
             className={`utility-drawer__circle utility-drawer__circle--${icon.toLowerCase()}`}
           />
           <span className="utility-drawer__loader-icon">
-            <CompanionIcon name={icon} size={112} active />
+            <CompanionIcon name={icon} size={52} active />
           </span>
         </div>
       </div>
