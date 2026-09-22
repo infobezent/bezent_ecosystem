@@ -21,6 +21,7 @@ export interface TopNavProps {
   onSignOut?: () => void;
   onSwitchAccount?: () => void;
   onHelp?: () => void;
+  onSettingsClick?: () => void;
 }
 
 /**
@@ -42,8 +43,10 @@ export function TopNav({
   onSignOut,
   onSwitchAccount,
   onHelp,
+  onSettingsClick,
 }: TopNavProps) {
   const [profileOpen, setProfileOpen] = useState(false);
+  const handleSettingsClick = onSettingsClick || onAccountSettings;
 
   return (
     <header className="top-nav">
@@ -80,7 +83,7 @@ export function TopNav({
           {notificationsOpen && <span className="top-nav__bell-connector" aria-hidden="true" />}
         </div>
 
-        <IconButton label="Settings" onClick={onAccountSettings}>
+        <IconButton label="Settings" onClick={handleSettingsClick} data-settings-button="">
           <BezentIcon name="settings" size={20} color="var(--top-utility-icon)" strokeWidth={1.8} />
         </IconButton>
 

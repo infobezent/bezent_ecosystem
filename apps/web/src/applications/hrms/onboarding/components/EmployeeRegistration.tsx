@@ -38,7 +38,7 @@ export interface RegistrationSection {
 export const REGISTRATION_SECTIONS: readonly RegistrationSection[] = [
   { id: 'general', label: 'General' },
   { id: 'personal', label: 'Personal Information' },
-  { id: 'onboarding', label: 'Onboarding' },
+  { id: 'onboarding', label: 'Administration' },
   { id: 'skills', label: 'Skills' },
   { id: 'emergency', label: 'Emergency Contact' },
   { id: 'accounts', label: 'Accounts' },
@@ -54,11 +54,29 @@ interface EmployeeRegistrationProps {
   initialDraft?: EmployeeRegistrationDraft | null;
 }
 
+import { useCustomFields } from '../../settings/context/CustomFieldsContext';
+
 export function EmployeeRegistration({
   onCancel,
   onSave,
   initialDraft,
 }: EmployeeRegistrationProps) {
+  let customFields: Array<{
+    id: string;
+    sectionId: string;
+    label: string;
+    fieldType: string;
+    required?: boolean;
+    readOnly?: boolean;
+    defaultValue?: string;
+    options?: string[];
+  }> = [];
+  try {
+    const customCtx = useCustomFields();
+    customFields = customCtx.fields;
+  } catch {
+    // fallback if outside context
+  }
   const [activeSection, setActiveSection] = useState<RegistrationSectionId>(
     initialDraft ? initialDraft.activeSection : 'general',
   );
@@ -640,6 +658,37 @@ export function EmployeeRegistration({
                 className="employee-registration__form-grid"
                 onSubmit={(e) => e.preventDefault()}
               >
+                {/* Dynamically rendered custom fields from Administration Customization Builder */}
+                {customFields
+                  .filter((f) => f.sectionId === 'general')
+                  .map((f) => (
+                    <div key={f.id} className="employee-registration__field">
+                      <label className="employee-registration__label">
+                        {f.label}{' '}
+                        {f.required && <span className="employee-registration__required">*</span>}
+                      </label>
+                      {f.fieldType === 'select' ? (
+                        <div className="employee-registration__select-wrapper">
+                          <select className="employee-registration__select" disabled={f.readOnly}>
+                            <option value="">Select {f.label}</option>
+                            {f.options?.map((opt: string, idx: number) => (
+                              <option key={idx} value={opt}>
+                                {opt}
+                              </option>
+                            ))}
+                          </select>
+                          <span className="employee-registration__select-icon">▼</span>
+                        </div>
+                      ) : (
+                        <input
+                          type={f.fieldType === 'date' ? 'date' : 'text'}
+                          className="employee-registration__input"
+                          placeholder={f.defaultValue || `Enter ${f.label}`}
+                          disabled={f.readOnly}
+                        />
+                      )}
+                    </div>
+                  ))}
                 {/* 1. Employee ID */}
                 <div className="employee-registration__field">
                   <label className="employee-registration__label">

@@ -42,14 +42,17 @@ export function devContextMiddleware(req: Request, _res: Response, next: NextFun
   const headerCompanyId = req.headers['x-company-id'];
   const headerTenantId = req.headers['x-tenant-id'];
 
-  if (typeof headerCompanyId === 'string' && headerCompanyId.trim()) {
+  const hasCompany = typeof headerCompanyId === 'string' && headerCompanyId.trim();
+  const hasTenant = typeof headerTenantId === 'string' && headerTenantId.trim();
+
+  if (hasCompany || hasTenant) {
+    const tenantId = hasTenant ? (headerTenantId as string).trim() : DEFAULT_DEV_CONTEXT.tenantId;
+    const companyId = hasCompany ? (headerCompanyId as string).trim() : `comp_${tenantId}`;
+
     req.devContext = {
-      tenantId:
-        typeof headerTenantId === 'string' && headerTenantId.trim()
-          ? headerTenantId.trim()
-          : DEFAULT_DEV_CONTEXT.tenantId,
-      companyId: headerCompanyId.trim(),
-      companyName: `Company ${headerCompanyId.trim()}`,
+      tenantId,
+      companyId,
+      companyName: `Company ${companyId}`,
     };
   } else {
     req.devContext = getDevContext();
