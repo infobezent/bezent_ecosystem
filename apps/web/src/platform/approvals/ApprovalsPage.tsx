@@ -82,16 +82,6 @@ export function ApprovalsPage() {
 
   return (
     <div className="approvals-page">
-      {/* ── Top Header Toolbar ────────────────────────────────────────── */}
-      <header className="approvals-page__header">
-        <div className="approvals-page__brand">
-          <span className="approvals-page__brand-icon">
-            <BezentIcon name="approvals" size={20} active color="currentColor" />
-          </span>
-          <span className="approvals-page__brand-text">Approvals Hub</span>
-        </div>
-      </header>
-
       {/* ── Main Layout (Sidebar + Grid Content) ──────────────────────── */}
       <div className="approvals-page__body">
         {/* Left Filter Sidebar */}

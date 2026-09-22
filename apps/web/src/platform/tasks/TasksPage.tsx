@@ -109,16 +109,6 @@ export function TasksPage() {
 
   return (
     <div className="tasks-page">
-      {/* ── Top Header Toolbar ────────────────────────────────────────── */}
-      <header className="tasks-page__header">
-        <div className="tasks-page__brand">
-          <span className="tasks-page__brand-icon">
-            <BezentIcon name="tasks" size={20} active color="currentColor" />
-          </span>
-          <span className="tasks-page__brand-text">Tasks</span>
-        </div>
-      </header>
-
       {/* ── Main Layout (Sidebar + Content) ───────────────────────────── */}
       <div className="tasks-page__body">
         {/* Left Navigation Sidebar */}

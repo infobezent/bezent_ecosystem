@@ -138,13 +138,6 @@ export function CalendarPage() {
       {/* ── Top Header Toolbar ────────────────────────────────────────── */}
       <header className="cal-page__header">
         <div className="cal-page__header-left">
-          <div className="cal-page__app-badge">
-            <span className="cal-page__app-icon">
-              <BezentIcon name="calendar" size={18} active color="currentColor" />
-            </span>
-            <span className="cal-page__app-title">Calendar</span>
-          </div>
-
           <button type="button" className="cal-page__today-btn" onClick={handleToday}>
             Today
           </button>

@@ -151,16 +151,6 @@ export function NotesPage() {
 
   return (
     <div className="notes-page">
-      {/* ── Top Header Toolbar ────────────────────────────────────────── */}
-      <header className="notes-page__header">
-        <div className="notes-page__brand">
-          <span className="notes-page__brand-icon">
-            <BezentIcon name="notes" size={20} active color="currentColor" />
-          </span>
-          <span className="notes-page__brand-text">Notes</span>
-        </div>
-      </header>
-
       {/* ── Main Layout (Sidebar + Content Canvas) ────────────────────── */}
       <div className="notes-page__body">
         {/* Left Sidebar */}
