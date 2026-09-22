@@ -78,6 +78,7 @@ export const THEME_TOKENS = {
   shadow: {
     popup: 'var(--shadow-popup)',
     card: 'var(--shadow-card)',
+    workspace: 'var(--shadow-workspace)',
     dropdown: 'var(--shadow-dropdown)',
   },
   status: {

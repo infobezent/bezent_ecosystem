@@ -3,40 +3,21 @@ import './EmptyStateIllustration.css';
 export type EmptyStateIllustrationSize = 'default' | 'compact';
 
 export interface EmptyStateIllustrationProps {
-  /**
-   * The old UI exposed five size names (`small`/`medium`/`large`/
-   * `compact`/`default`) that only ever produced two distinct outputs
-   * (135px vs 180px) — simplified to the two names that actually differ.
-   */
   size?: EmptyStateIllustrationSize;
   className?: string;
   isDark?: boolean;
 }
 
 /**
- * Universal BEZENT SaaS Workspace Empty-State Illustration.
+ * Premium Futuristic Arc Reactor Empty-State Illustration.
  *
- * Faithfully extracted from the old approved UI's
- * `BezentEmptyStateIllustration.tsx` — ambient aura, a floating workspace
- * card, a potted plant, a stack of three books, a breathing "+" button, a
- * gliding paper plane on a dotted flight path, and two pulsing accent
- * particles. Respects `prefers-reduced-motion`.
- *
- * Bug fixed during migration: the old `<svg>` had a literal `height="auto"`
- * attribute — invalid as an SVG presentation attribute (only valid in
- * CSS), which Chrome logs as a console error. Dropped; the SVG already
- * sizes its height from the `viewBox` aspect ratio once `width` is set.
- *
- * This illustration has genuine per-theme branching baked into its
- * artwork itself — dozens of bespoke gradient/shadow/fill hex values,
- * not semantic UI-state colors — preserved exactly as approved rather
- * than forced into the token system (the same documented exception as
- * the icon system's `assets` icon; see
- * docs/architecture/ICON-SYSTEM.md §8 and
- * docs/architecture/DESIGN-SYSTEM-COMPONENTS.md). `isDark` defaults to a
- * direct read of `document.documentElement`'s `data-theme` attribute —
- * the same pattern `BezentIcon` uses — so this component never imports
- * `ThemeProvider`/`useTheme` and stays a `design-system` dependency leaf.
+ * An advanced AI-powered activation core graphic featuring:
+ * - Electric blue / cyan glowing energy core at the center
+ * - Multi-layered concentric brushed-metallic alloy rings
+ * - Holographic HUD orbital markings and calibration ticks
+ * - Micro-machined magnetic confinement coils
+ * - Gentle energy pulsing, counter-rotating HUD tracks, and floating ambient particles
+ * - Clean, minimalistic Stark-tech engineering aesthetic on light canvas
  */
 export function EmptyStateIllustration({
   size = 'default',
@@ -50,467 +31,341 @@ export function EmptyStateIllustration({
 
   return (
     <div
-      className={`bezent-empty-illustration-container bezent-empty-illustration-container--${size} ${className || ''}`.trim()}
+      className={`bezent-empty-illustration-container bezent-empty-illustration-container--${size} ${isDark ? 'is-dark' : ''} ${className || ''}`.trim()}
+      aria-hidden="true"
     >
       <svg
-        viewBox="0 0 340 215"
+        viewBox="0 0 240 220"
         width="100%"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
+        className="bezent-arc-reactor"
       >
         <defs>
-          <radialGradient id="bezentAura" cx="50%" cy="52%" r="50%" fx="50%" fy="52%">
-            <stop
-              offset="0%"
-              stopColor={isDark ? '#4C1D95' : '#D3E3FD'}
-              stopOpacity={isDark ? '0.35' : '0.65'}
-            />
-            <stop
-              offset="65%"
-              stopColor={isDark ? '#3B0B62' : '#EAF1FB'}
-              stopOpacity={isDark ? '0.15' : '0.35'}
-            />
-            <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+          {/* Energy core radial gradient */}
+          <radialGradient id="reactor-core-glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
+            <stop offset="25%" stopColor="#67e8f9" stopOpacity="0.95" />
+            <stop offset="55%" stopColor="#00c6ff" stopOpacity="0.85" />
+            <stop offset="85%" stopColor="#0284c7" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="#0369a1" stopOpacity="0" />
           </radialGradient>
 
-          <linearGradient
-            id="bezentPlusGrad"
-            x1="190"
-            y1="88"
-            x2="230"
-            y2="128"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop offset="0%" stopColor={isDark ? '#A855F7' : '#1A73E8'} />
-            <stop offset="50%" stopColor={isDark ? '#931CF5' : '#0B57D0'} />
-            <stop offset="100%" stopColor={isDark ? '#7E22CE' : '#0842A0'} />
+          {/* Ambient soft background aura */}
+          <radialGradient id="reactor-ambient-aura" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#38bdf8" stopOpacity={isDark ? '0.35' : '0.18'} />
+            <stop offset="45%" stopColor="#0ea5e9" stopOpacity={isDark ? '0.18' : '0.08'} />
+            <stop offset="75%" stopColor="#0284c7" stopOpacity={isDark ? '0.06' : '0.02'} />
+            <stop offset="100%" stopColor="#0284c7" stopOpacity="0" />
+          </radialGradient>
+
+          {/* Metallic outer ring gradient */}
+          <linearGradient id="reactor-metal-ring" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={isDark ? '#475569' : '#f8fafc'} />
+            <stop offset="25%" stopColor={isDark ? '#334155' : '#e2e8f0'} />
+            <stop offset="50%" stopColor={isDark ? '#64748b' : '#cbd5e1'} />
+            <stop offset="75%" stopColor={isDark ? '#1e293b' : '#94a3b8'} />
+            <stop offset="100%" stopColor={isDark ? '#475569' : '#e2e8f0'} />
           </linearGradient>
 
-          <linearGradient
-            id="bezentCardGrad"
-            x1="165"
-            y1="52"
-            x2="165"
-            y2="178"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop offset="0%" stopColor={isDark ? '#1E0B36' : '#FFFFFF'} />
-            <stop offset="100%" stopColor={isDark ? '#150626' : '#F8FAFD'} />
+          {/* Inner titanium bezel gradient */}
+          <linearGradient id="reactor-inner-bezel" x1="100%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor={isDark ? '#64748b' : '#ffffff'} />
+            <stop offset="40%" stopColor={isDark ? '#334155' : '#cbd5e1'} />
+            <stop offset="70%" stopColor={isDark ? '#1e293b' : '#94a3b8'} />
+            <stop offset="100%" stopColor={isDark ? '#475569' : '#e2e8f0'} />
           </linearGradient>
 
-          <linearGradient
-            id="bezentInnerGrad"
-            x1="185"
-            y1="85"
-            x2="185"
-            y2="165"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop offset="0%" stopColor={isDark ? '#281045' : '#FFFFFF'} />
-            <stop offset="100%" stopColor={isDark ? '#200A38' : '#F1F4F9'} />
+          {/* Magnetic coil copper/cyan energy gradient */}
+          <linearGradient id="reactor-coil-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#38bdf8" />
+            <stop offset="100%" stopColor="#0284c7" />
           </linearGradient>
 
-          <filter
-            id="bezentCardShadow"
-            x="65"
-            y="40"
-            width="205"
-            height="155"
-            filterUnits="userSpaceOnUse"
-          >
-            <feDropShadow
-              dx="0"
-              dy="8"
-              stdDeviation="10"
-              floodColor={isDark ? '#000000' : '#0B57D0'}
-              floodOpacity={isDark ? '0.45' : '0.07'}
-            />
+          {/* Glow filter for energy elements */}
+          <filter id="reactor-glow-filter" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="3.5" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>
 
-          <filter
-            id="bezentPlusShadow"
-            x="175"
-            y="78"
-            width="70"
-            height="70"
-            filterUnits="userSpaceOnUse"
-          >
-            <feDropShadow
-              dx="0"
-              dy="6"
-              stdDeviation="7"
-              floodColor={isDark ? '#931CF5' : '#0B57D0'}
-              floodOpacity={isDark ? '0.55' : '0.28'}
-            />
-          </filter>
-
-          <filter
-            id="bezentPotShadow"
-            x="45"
-            y="130"
-            width="60"
-            height="50"
-            filterUnits="userSpaceOnUse"
-          >
-            <feDropShadow
-              dx="0"
-              dy="4"
-              stdDeviation="5"
-              floodColor={isDark ? '#000000' : '#0B57D0'}
-              floodOpacity={isDark ? '0.3' : '0.06'}
-            />
+          <filter id="reactor-subtle-glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="1.5" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>
         </defs>
 
-        {/* Ambient background aura & soft clouds */}
-        <ellipse cx="170" cy="112" rx="145" ry="92" fill="url(#bezentAura)" />
-        <path
-          d="M 52 174 C 52 165 60 156 70 156 C 72 156 75 157 77 158 C 82 150 91 146 100 148 C 108 150 114 157 116 165 C 122 165 128 168 128 174 Z"
-          fill={isDark ? '#2A0E47' : '#EAF1FB'}
-          opacity={isDark ? '0.45' : '0.6'}
-        />
-        <path
-          d="M 226 174 C 226 165 234 157 244 157 C 247 157 251 159 253 161 C 258 152 268 147 278 150 C 286 153 292 160 294 167 C 300 167 306 170 306 174 Z"
-          fill={isDark ? '#2A0E47' : '#EAF1FB'}
-          opacity={isDark ? '0.4' : '0.55'}
+        {/* ── Layer 1: Ambient Energy Aura ── */}
+        <circle
+          cx="120"
+          cy="110"
+          r="92"
+          fill="url(#reactor-ambient-aura)"
+          className="bezent-reactor-aura"
         />
 
-        {/* Workspace window card */}
-        <g className="bezent-empty-card">
-          <rect
-            x="85"
-            y="52"
-            width="165"
-            height="126"
-            rx="12"
-            fill="url(#bezentCardGrad)"
-            stroke={isDark ? '#3D1368' : '#D3E3FD'}
-            strokeWidth="1.2"
-            filter="url(#bezentCardShadow)"
-          />
-          <circle cx="98" cy="64" r="2.4" fill={isDark ? '#581093' : '#A8C7FA'} />
-          <circle cx="105.5" cy="64" r="2.4" fill={isDark ? '#581093' : '#A8C7FA'} />
-          <circle cx="113" cy="64" r="2.4" fill={isDark ? '#581093' : '#A8C7FA'} />
-          <line
-            x1="85"
-            y1="73"
-            x2="250"
-            y2="73"
-            stroke={isDark ? '#310D55' : '#E7EBF0'}
-            strokeWidth="1"
-          />
-
-          <rect
-            x="94"
-            y="83"
-            width="22"
-            height="4.5"
-            rx="2"
-            fill={isDark ? '#4C1D95' : '#A8C7FA'}
-            opacity="0.85"
-          />
-          <rect
-            x="94"
-            y="93"
-            width="18"
-            height="4.5"
-            rx="2"
-            fill={isDark ? '#4C1D95' : '#D3E3FD'}
-            opacity="0.6"
-          />
-          <rect
-            x="94"
-            y="103"
-            width="20"
-            height="4.5"
-            rx="2"
-            fill={isDark ? '#4C1D95' : '#D3E3FD'}
-            opacity="0.6"
-          />
-          <rect
-            x="94"
-            y="113"
-            width="16"
-            height="4.5"
-            rx="2"
-            fill={isDark ? '#4C1D95' : '#D3E3FD'}
-            opacity="0.45"
-          />
-
-          <line
-            x1="124"
-            y1="73"
-            x2="124"
-            y2="178"
-            stroke={isDark ? '#310D55' : '#E7EBF0'}
-            strokeWidth="1"
-          />
-
-          <rect
-            x="132"
-            y="81"
-            width="110"
-            height="88"
-            rx="8"
-            fill="url(#bezentInnerGrad)"
-            stroke={isDark ? '#36105E' : '#E7EBF0'}
-            strokeWidth="0.8"
-          />
-
-          <circle cx="144" cy="94" r="5" fill={isDark ? '#4C1D95' : '#A8C7FA'} />
-          <rect
-            x="154"
-            y="92"
-            width="34"
-            height="4.5"
-            rx="2"
-            fill={isDark ? '#581093' : '#A8C7FA'}
-            opacity="0.8"
-          />
-          <rect
-            x="193"
-            y="92"
-            width="24"
-            height="4.5"
-            rx="2"
-            fill={isDark ? '#4C1D95' : '#D3E3FD'}
-            opacity="0.6"
-          />
-
-          <circle cx="144" cy="112" r="5" fill={isDark ? '#3B0B62' : '#D3E3FD'} />
-          <rect
-            x="154"
-            y="110"
-            width="40"
-            height="4.5"
-            rx="2"
-            fill={isDark ? '#4C1D95' : '#A8C7FA'}
-            opacity="0.75"
-          />
-          <rect
-            x="199"
-            y="110"
-            width="16"
-            height="4.5"
-            rx="2"
-            fill={isDark ? '#3B0B62' : '#D3E3FD'}
-            opacity="0.6"
-          />
-
-          <circle cx="144" cy="130" r="5" fill={isDark ? '#4C1D95' : '#A8C7FA'} />
-          <rect
-            x="154"
-            y="128"
-            width="28"
-            height="4.5"
-            rx="2"
-            fill={isDark ? '#4C1D95' : '#A8C7FA'}
-            opacity="0.7"
-          />
-          <rect
-            x="187"
-            y="128"
-            width="26"
-            height="4.5"
-            rx="2"
-            fill={isDark ? '#3B0B62' : '#D3E3FD'}
-            opacity="0.7"
-          />
-
-          <rect
-            x="154"
-            y="146"
-            width="36"
-            height="4"
-            rx="2"
-            fill={isDark ? '#3B0B62' : '#EAF1FB'}
-            opacity="0.8"
-          />
-        </g>
-
-        {/* Potted plant */}
-        <g filter="url(#bezentPotShadow)">
-          <path
-            d="M 60 144 L 64 167 C 65 173, 83 173, 84 167 L 88 144 Z"
-            fill={isDark ? '#281045' : '#FFFFFF'}
-            stroke={isDark ? '#441470' : '#D3E3FD'}
-            strokeWidth="1"
-          />
-          <ellipse cx="74" cy="144" rx="14" ry="4" fill={isDark ? '#3D1368' : '#EAF1FB'} />
-          <path
-            d="M 74 142 C 68 120, 72 104, 74 100 C 76 104, 80 120, 74 142 Z"
-            fill="#10B981"
-            opacity="0.9"
-          />
-          <path
-            d="M 72 142 C 56 132, 45 120, 44 116 C 54 115, 67 124, 72 142 Z"
-            fill="#059669"
-            opacity="0.85"
-          />
-          <path
-            d="M 76 142 C 92 130, 102 120, 104 116 C 96 114, 82 124, 76 142 Z"
-            fill="#34D399"
-            opacity="0.85"
-          />
-          <path d="M 74 143 C 67 136, 67 129, 71 125 C 76 129, 77 136, 74 143 Z" fill="#6EE7B7" />
-        </g>
-
-        {/* Stack of three books */}
-        <g>
-          <rect
-            x="220"
-            y="156"
-            width="62"
-            height="14"
-            rx="3"
-            fill={isDark ? '#281045' : '#EAF1FB'}
-            stroke={isDark ? '#4C1D95' : '#A8C7FA'}
-            strokeWidth="0.8"
-          />
-          <text
-            x="251"
-            y="166.5"
-            fontSize="7"
-            fontWeight="600"
-            fontFamily="Inter, system-ui, sans-serif"
-            fill={isDark ? '#BD74F9' : '#0B57D0'}
-            textAnchor="middle"
-            letterSpacing="0.04em"
-          >
-            Achieve
-          </text>
-
-          <rect
-            x="223"
-            y="142"
-            width="56"
-            height="14"
-            rx="3"
-            fill={isDark ? '#1E0B36' : '#F1F4F9'}
-            stroke={isDark ? '#3D1368' : '#D3E3FD'}
-            strokeWidth="0.8"
-          />
-          <text
-            x="251"
-            y="152.5"
-            fontSize="7"
-            fontWeight="600"
-            fontFamily="Inter, system-ui, sans-serif"
-            fill={isDark ? '#DEB9FC' : '#1A73E8'}
-            textAnchor="middle"
-            letterSpacing="0.04em"
-          >
-            Organize
-          </text>
-
-          <rect
-            x="226"
-            y="128"
-            width="50"
-            height="14"
-            rx="3"
-            fill={isDark ? '#2E0E54' : '#FFFFFF'}
-            stroke={isDark ? '#441470' : '#D3E3FD'}
-            strokeWidth="0.8"
-          />
-          <text
-            x="251"
-            y="138.5"
-            fontSize="7"
-            fontWeight="600"
-            fontFamily="Inter, system-ui, sans-serif"
-            fill={isDark ? '#E9D0FD' : '#0B57D0'}
-            textAnchor="middle"
-            letterSpacing="0.04em"
-          >
-            Plan
-          </text>
-        </g>
-
-        {/* Dotted flight trail */}
-        <g className="bezent-empty-path">
-          <path
-            d="M 198 86 C 214 62, 236 48, 252 60 C 263 69, 262 82, 250 82 C 238 82, 238 65, 256 52 C 270 42, 282 40, 290 42"
-            fill="none"
-            stroke={isDark ? '#A855F7' : '#A8C7FA'}
-            strokeWidth="1.6"
-            strokeDasharray="3.5 4"
-            strokeLinecap="round"
-          />
-        </g>
-
-        {/* Paper airplane */}
-        <g className="bezent-empty-plane">
-          <g transform="translate(288, 38) rotate(6)">
-            <polygon points="0,12 24,0 10,18" fill={isDark ? '#C084FC' : '#1A73E8'} />
-            <polygon points="0,12 24,0 6,10" fill={isDark ? '#E9D0FD' : '#D3E3FD'} opacity="0.95" />
-            <polygon points="10,18 24,0 14,21" fill={isDark ? '#931CF5' : '#0B57D0'} />
-            <polygon points="6,14 10,18 14,21" fill={isDark ? '#6B21A8' : '#0842A0'} />
-            <line x1="0" y1="12" x2="24" y2="0" stroke="#FFFFFF" strokeWidth="0.75" opacity="0.9" />
-          </g>
-        </g>
-
-        {/* Floating "+" button */}
-        <g className="bezent-empty-plus">
-          <line
-            x1="230"
-            y1="93"
-            x2="238"
-            y2="85"
-            stroke={isDark ? '#C084FC' : '#1A73E8'}
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            opacity="0.85"
-          />
-          <line
-            x1="237"
-            y1="103"
-            x2="246"
-            y2="100"
-            stroke={isDark ? '#C084FC' : '#1A73E8'}
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            opacity="0.75"
-          />
-          <line
-            x1="221"
-            y1="85"
-            x2="224"
-            y2="77"
-            stroke={isDark ? '#C084FC' : '#1A73E8'}
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            opacity="0.8"
-          />
-
+        {/* ── Layer 2: Outermost Technical HUD Calibration Ring (Counter-Clockwise) ── */}
+        <g className="bezent-reactor-hud-outer">
           <circle
-            cx="210"
-            cy="108"
-            r="23"
-            fill="url(#bezentPlusGrad)"
-            filter="url(#bezentPlusShadow)"
+            cx="120"
+            cy="110"
+            r="84"
+            stroke="#38bdf8"
+            strokeWidth="0.85"
+            strokeDasharray="2 8"
+            strokeOpacity={isDark ? '0.45' : '0.35'}
+          />
+          <circle
+            cx="120"
+            cy="110"
+            r="80"
+            stroke="#0ea5e9"
+            strokeWidth="0.6"
+            strokeDasharray="28 12 8 12 18 12"
+            strokeOpacity={isDark ? '0.5' : '0.4'}
+          />
+          {/* Compass / Angle Tick Marks */}
+          <line
+            x1="120"
+            y1="23"
+            x2="120"
+            y2="28"
+            stroke="#0ea5e9"
+            strokeWidth="1.2"
+            strokeOpacity="0.7"
+          />
+          <line
+            x1="120"
+            y1="192"
+            x2="120"
+            y2="197"
+            stroke="#0ea5e9"
+            strokeWidth="1.2"
+            strokeOpacity="0.7"
+          />
+          <line
+            x1="33"
+            y1="110"
+            x2="38"
+            y2="110"
+            stroke="#0ea5e9"
+            strokeWidth="1.2"
+            strokeOpacity="0.7"
+          />
+          <line
+            x1="202"
+            y1="110"
+            x2="207"
+            y2="110"
+            stroke="#0ea5e9"
+            strokeWidth="1.2"
+            strokeOpacity="0.7"
+          />
+          {/* Diagonal Tick Nodes */}
+          <circle cx="58" cy="48" r="1.5" fill="#38bdf8" fillOpacity="0.6" />
+          <circle cx="182" cy="48" r="1.5" fill="#38bdf8" fillOpacity="0.6" />
+          <circle cx="58" cy="172" r="1.5" fill="#38bdf8" fillOpacity="0.6" />
+          <circle cx="182" cy="172" r="1.5" fill="#38bdf8" fillOpacity="0.6" />
+        </g>
+
+        {/* ── Layer 3: Main Outer Metallic Alloy Chassis Ring ── */}
+        <g className="bezent-reactor-chassis">
+          {/* Shadow behind chassis */}
+          <circle
+            cx="120"
+            cy="111"
+            r="68"
+            stroke="rgba(0, 0, 0, 0.08)"
+            strokeWidth="8"
+            fill="none"
+          />
+          {/* Solid brushed titanium outer body */}
+          <circle
+            cx="120"
+            cy="110"
+            r="68"
+            stroke="url(#reactor-metal-ring)"
+            strokeWidth="7"
+            fill="none"
+          />
+          {/* Outer ring precision border lines */}
+          <circle
+            cx="120"
+            cy="110"
+            r="71.5"
+            stroke={isDark ? '#475569' : '#cbd5e1'}
+            strokeWidth="0.75"
+            fill="none"
+          />
+          <circle
+            cx="120"
+            cy="110"
+            r="64.5"
+            stroke={isDark ? '#334155' : '#94a3b8'}
+            strokeWidth="0.75"
+            fill="none"
           />
 
-          <path
-            d="M 210 97 L 210 119 M 199 108 L 221 108"
-            stroke="#FFFFFF"
-            strokeWidth="3.2"
+          {/* 8 Outer Structural Coil Anchors (Mechanical Details) */}
+          {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => (
+            <g key={angle} transform={`rotate(${angle} 120 110)`}>
+              <rect
+                x="117.5"
+                y="38.5"
+                width="5"
+                height="7"
+                rx="1.2"
+                fill={isDark ? '#1e293b' : '#ffffff'}
+                stroke={isDark ? '#64748b' : '#94a3b8'}
+                strokeWidth="0.8"
+              />
+              <circle cx="120" cy="42" r="1" fill="#0284c7" />
+            </g>
+          ))}
+        </g>
+
+        {/* ── Layer 4: Middle Segmented HUD Energy Track (Rotating Clockwise) ── */}
+        <g className="bezent-reactor-hud-mid">
+          <circle
+            cx="120"
+            cy="110"
+            r="56"
+            stroke="#0284c7"
+            strokeWidth="1.8"
+            strokeDasharray="42 16 18 16 32 16"
             strokeLinecap="round"
+            filter="url(#reactor-subtle-glow)"
+          />
+          <circle
+            cx="120"
+            cy="110"
+            r="52"
+            stroke="#38bdf8"
+            strokeWidth="0.8"
+            strokeDasharray="6 6"
+            strokeOpacity="0.7"
           />
         </g>
 
-        {/* Accent sparkle particles */}
-        <path
-          className="bezent-empty-p1"
-          d="M 108 34 Q 108 38 104 38 Q 108 38 108 42 Q 108 38 112 38 Q 108 38 108 34 Z"
-          fill={isDark ? '#A855F7' : '#1A73E8'}
+        {/* ── Layer 5: Inner Magnetic Confinement Chamber & Coils ── */}
+        <g className="bezent-reactor-inner-ring">
+          {/* Inner metallic housing */}
+          <circle
+            cx="120"
+            cy="110"
+            r="44"
+            stroke="url(#reactor-inner-bezel)"
+            strokeWidth="6"
+            fill={isDark ? '#0f172a' : '#f8fafc'}
+          />
+          <circle
+            cx="120"
+            cy="110"
+            r="47"
+            stroke={isDark ? '#475569' : '#cbd5e1'}
+            strokeWidth="0.75"
+            fill="none"
+          />
+          <circle
+            cx="120"
+            cy="110"
+            r="41"
+            stroke="#0284c7"
+            strokeWidth="1"
+            fill="none"
+            strokeOpacity="0.8"
+          />
+
+          {/* 10 Radial Magnetic Energy Coils */}
+          {[0, 36, 72, 108, 144, 180, 216, 252, 288, 324].map((angle) => (
+            <g key={angle} transform={`rotate(${angle} 120 110)`}>
+              <path
+                d="M118 69 L122 69 L121.2 75 L118.8 75 Z"
+                fill="url(#reactor-coil-gradient)"
+                stroke={isDark ? '#0284c7' : '#38bdf8'}
+                strokeWidth="0.5"
+              />
+            </g>
+          ))}
+        </g>
+
+        {/* ── Layer 6: Glass Confinement Ring & Inner Optical Halo ── */}
+        <circle
+          cx="120"
+          cy="110"
+          r="32"
+          stroke="#00c6ff"
+          strokeWidth="1.6"
+          fill="none"
+          strokeOpacity="0.8"
+          filter="url(#reactor-subtle-glow)"
         />
-        <path
-          className="bezent-empty-p2"
-          d="M 280 99 Q 280 102 277 102 Q 280 102 280 105 Q 280 102 283 102 Q 280 102 280 99 Z"
-          fill={isDark ? '#C084FC' : '#0B57D0'}
+        <circle
+          cx="120"
+          cy="110"
+          r="28"
+          stroke="#38bdf8"
+          strokeWidth="0.75"
+          strokeDasharray="4 4"
+          fill="none"
+          strokeOpacity="0.6"
         />
+
+        {/* ── Layer 7: Central High-Energy Arc Reactor Core (Pulsing Center) ── */}
+        <g className="bezent-reactor-core">
+          {/* Core glow background */}
+          <circle
+            cx="120"
+            cy="110"
+            r="23"
+            fill="url(#reactor-core-glow)"
+            filter="url(#reactor-glow-filter)"
+          />
+          <circle cx="120" cy="110" r="16" fill="url(#reactor-core-glow)" />
+
+          {/* Core Central Geometric Energy Matrix */}
+          <polygon
+            points="120,98 130.4,116 109.6,116"
+            stroke="#ffffff"
+            strokeWidth="1.4"
+            fill="rgba(255, 255, 255, 0.25)"
+            strokeLinejoin="round"
+            className="bezent-reactor-matrix"
+          />
+          <polygon
+            points="120,122 109.6,104 130.4,104"
+            stroke="#00f2fe"
+            strokeWidth="1"
+            fill="none"
+            strokeLinejoin="round"
+            strokeOpacity="0.8"
+            className="bezent-reactor-matrix-invert"
+          />
+          {/* Bright White Center Core Node */}
+          <circle cx="120" cy="110" r="3.8" fill="#ffffff" filter="url(#reactor-subtle-glow)" />
+        </g>
+
+        {/* ── Layer 8: Floating Engineering Particles & HUD Dots ── */}
+        <g className="bezent-reactor-particles">
+          <circle cx="36" cy="72" r="1.5" fill="#38bdf8" className="bezent-particle bezent-p1" />
+          <circle cx="204" cy="62" r="1.2" fill="#00f2fe" className="bezent-particle bezent-p2" />
+          <circle cx="212" cy="148" r="1.6" fill="#38bdf8" className="bezent-particle bezent-p3" />
+          <circle cx="28" cy="154" r="1.2" fill="#0ea5e9" className="bezent-particle bezent-p4" />
+          {/* Micro HUD lines */}
+          <path
+            d="M24 100 L14 100 L10 106"
+            stroke="#38bdf8"
+            strokeWidth="0.8"
+            strokeOpacity="0.45"
+            fill="none"
+          />
+          <path
+            d="M216 100 L226 100 L230 94"
+            stroke="#38bdf8"
+            strokeWidth="0.8"
+            strokeOpacity="0.45"
+            fill="none"
+          />
+        </g>
       </svg>
     </div>
   );
