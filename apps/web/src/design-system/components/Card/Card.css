@@ -1,0 +1,80 @@
+/*
+ * BEZENT Card & Surface Containers — Semantic Token System.
+ */
+
+.bezent-card {
+  position: relative;
+  background: var(--bg-card, #f0f4f9);
+  border: 1px solid var(--card-border, #dde3ea);
+  border-radius: var(--card-radius, 16px);
+  box-shadow: var(--card-shadow, 0 1px 2px rgba(60, 64, 67, 0.08));
+  overflow: hidden;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+/* ── Padding ── */
+.bezent-card--padding-none {
+  padding: 0;
+}
+
+.bezent-card--padding-sm {
+  padding: 12px;
+}
+
+.bezent-card--padding-md {
+  padding: 20px;
+}
+
+.bezent-card--padding-lg {
+  padding: 28px;
+}
+
+/* ── Variants ── */
+.bezent-card--flat {
+  box-shadow: none;
+  background: var(--bg-surface, #ffffff);
+}
+
+.bezent-card--interactive {
+  cursor: pointer;
+}
+
+.bezent-card--interactive:hover {
+  background: var(--card-hover-bg, #e9eff8);
+  border-color: var(--card-hover-border, #c4c7c5);
+  box-shadow: var(--card-hover-shadow, 0 1px 3px 1px rgba(60, 64, 67, 0.15));
+}
+
+/* ── Sub-sections ── */
+.bezent-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.bezent-card__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary, #1f1f1f);
+  letter-spacing: -0.2px;
+  margin: 0;
+}
+
+.bezent-card__body {
+  width: 100%;
+}
+
+.bezent-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle, #e7ebf0);
+}

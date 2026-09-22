@@ -189,7 +189,8 @@
   --btn-ai-active-bg: var(--primary);
   --btn-ai-active-border: #041e49;
   --btn-ai-active-text: #041e49;
-  --avatar-bg: #001d35;
+  --avatar-bg: #c2e7ff;
+  --avatar-text: #041e49;
   --badge-bg: #b3261e;
 
   /* Sidebar Navigation Specific Tokens */
@@ -496,6 +497,8 @@
   --btn-ai-active-bg: rgba(160, 32, 240, 0.24);
   --btn-ai-active-border: rgba(160, 32, 240, 0.55);
   --btn-ai-active-text: #ffffff;
+  --avatar-bg: #35104f;
+  --avatar-text: #c084fc;
 
   /* Semantic Status Accents */
   --status-success: #10b981;

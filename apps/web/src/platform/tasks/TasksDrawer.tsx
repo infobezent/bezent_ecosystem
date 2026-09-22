@@ -71,6 +71,7 @@ export function TasksDrawer({
         description="Your assigned work and follow-ups"
         icon="tasks"
         count={badgeCount}
+        onFullScreen={onViewAll}
         onClose={onClose}
         actions={
           <>

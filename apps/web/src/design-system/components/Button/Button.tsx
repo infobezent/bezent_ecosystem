@@ -1,35 +1,57 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import './Button.css';
 
-export type ButtonVariant = 'primary';
+export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'text' | 'danger' | 'ghost';
+export type ButtonSize = 'sm' | 'md' | 'lg';
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className'> {
-  /**
-   * Only `primary` is evidenced in the approved old UI (the global
-   * `.btn-primary` / `button[data-variant="primary"]` CSS rule — see
-   * docs/architecture/DESIGN-SYSTEM-COMPONENTS.md). Additional variants
-   * (secondary/ghost/danger) are not added speculatively — see that doc
-   * for why the "BEZENT AI" button's bordered style was NOT generalized
-   * into a second variant.
-   */
   variant?: ButtonVariant;
-  children: ReactNode;
+  size?: ButtonSize;
+  loading?: boolean;
+  leftIcon?: ReactNode;
+  rightIcon?: ReactNode;
+  className?: string;
+  children?: ReactNode;
 }
 
 /**
- * The canonical BEZENT button. Native `<button>` semantics (keyboard
- * activation, `:disabled`, focus) — no reinvented click/press handling.
- * Source: old approved UI's `.btn-primary` CSS class (`index.css`
- * lines 663-680), whose exact colors match the old `App.tsx` "Quick
- * Create" button's inline styles verbatim (background `#931CF5`, hover
- * `#8418DC`, active `#7114BD` + `scale(0.98)`) — confirming the class was
- * the intended reusable contract, even though nothing in the old UI
- * actually consumed it via `data-variant="primary"`.
+ * The canonical BEZENT button primitive. Native `<button>` semantics,
+ * full keyboard accessibility, token-driven states, and zero inline CSS.
  */
-export function Button({ variant = 'primary', children, ...rest }: ButtonProps) {
+export function Button({
+  variant = 'primary',
+  size = 'md',
+  loading = false,
+  leftIcon,
+  rightIcon,
+  disabled,
+  className,
+  children,
+  type = 'button',
+  ...rest
+}: ButtonProps) {
+  const isDisabled = disabled || loading;
+
   return (
-    <button type="button" className={`bezent-btn bezent-btn--${variant}`} {...rest}>
-      {children}
+    <button
+      type={type}
+      disabled={isDisabled}
+      aria-busy={loading}
+      className={`bezent-btn bezent-btn--${variant} bezent-btn--${size} ${loading ? 'bezent-btn--loading' : ''} ${className || ''}`.trim()}
+      {...rest}
+    >
+      {loading && <span className="bezent-btn__spinner" aria-hidden="true" />}
+      {!loading && leftIcon && (
+        <span className="bezent-btn__icon bezent-btn__icon--left" aria-hidden="true">
+          {leftIcon}
+        </span>
+      )}
+      {children && <span className="bezent-btn__label">{children}</span>}
+      {!loading && rightIcon && (
+        <span className="bezent-btn__icon bezent-btn__icon--right" aria-hidden="true">
+          {rightIcon}
+        </span>
+      )}
     </button>
   );
 }

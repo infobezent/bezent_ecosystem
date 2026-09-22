@@ -1,0 +1,124 @@
+/*
+ * BEZENT Select — Semantic Token System.
+ */
+
+.bezent-select-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.bezent-select-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #444746);
+  letter-spacing: -0.1px;
+}
+
+.bezent-select-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: 10px;
+  transition:
+    border-color 0.14s ease,
+    box-shadow 0.14s ease;
+}
+
+.bezent-select-box:hover:not(.is-disabled) {
+  border-color: var(--border-focus, #1a73e8);
+}
+
+.bezent-select-box:focus-within {
+  border-color: var(--border-focus, #1a73e8);
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.18);
+}
+
+/* ── Sizes ── */
+.bezent-select-wrapper--sm .bezent-select-box {
+  height: 30px;
+  border-radius: 8px;
+}
+
+.bezent-select-wrapper--sm .bezent-select-field {
+  font-size: 12px;
+  padding: 0 28px 0 10px;
+}
+
+.bezent-select-wrapper--md .bezent-select-box {
+  height: 36px;
+  border-radius: 10px;
+}
+
+.bezent-select-wrapper--md .bezent-select-field {
+  font-size: 13px;
+  padding: 0 34px 0 14px;
+}
+
+.bezent-select-wrapper--lg .bezent-select-box {
+  height: 42px;
+  border-radius: 12px;
+}
+
+.bezent-select-wrapper--lg .bezent-select-field {
+  font-size: 14px;
+  padding: 0 38px 0 16px;
+}
+
+/* ── Native Select Field ── */
+.bezent-select-field {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary, #1f1f1f);
+  font: inherit;
+  letter-spacing: -0.1px;
+  appearance: none;
+  cursor: pointer;
+}
+
+.bezent-select-field option {
+  background: var(--bg-surface, #ffffff);
+  color: var(--text-primary, #1f1f1f);
+}
+
+.bezent-select-arrow {
+  position: absolute;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--icon-default, #444746);
+  pointer-events: none;
+}
+
+/* ── Feedback & Validation ── */
+.bezent-select-feedback {
+  font-size: 11px;
+  color: var(--text-muted, #747775);
+}
+
+.bezent-select-feedback.is-error {
+  color: var(--status-danger-fg, #b91c1c);
+  font-weight: 500;
+}
+
+.bezent-select-wrapper.has-error .bezent-select-box {
+  border-color: var(--status-danger-fg, #b91c1c);
+}
+
+.bezent-select-wrapper.is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.bezent-select-wrapper.is-disabled .bezent-select-box {
+  background: var(--bg-surface-secondary, #f0f4f9);
+  pointer-events: none;
+}

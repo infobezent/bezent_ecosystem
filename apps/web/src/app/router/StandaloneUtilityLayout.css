@@ -1,0 +1,317 @@
+/*
+ * Standalone Utility Layout — Full-page experience for Calendar, Tasks,
+ * Approvals, and Notes without the global HRMS navigation bars.
+ * Includes an expandable companion rail showing the remaining utilities.
+ */
+
+.standalone-layout {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-canvas);
+  color: var(--text-primary);
+  overflow: hidden;
+}
+
+/* ── Top Header ───────────────────────────────────────────────────────── */
+.standalone-header {
+  height: 56px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+  z-index: 10;
+}
+
+.standalone-header__left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.standalone-header__back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-canvas);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.standalone-header__back-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+.standalone-header__divider {
+  width: 1px;
+  height: 22px;
+  background: var(--border-subtle);
+}
+
+.standalone-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.standalone-header__title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.25px;
+}
+
+.standalone-header__right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.standalone-header__action-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: var(--bg-canvas);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.standalone-header__action-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.standalone-header__profile-anchor {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.standalone-header__profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    box-shadow 0.14s ease,
+    transform 0.12s ease;
+  outline: none;
+}
+
+.standalone-header__profile:hover {
+  box-shadow: 0 0 0 4px var(--bg-hover, #c2e7ff);
+}
+
+.standalone-header__profile.is-active {
+  box-shadow: 0 0 0 3px var(--border-focus, #1a73e8);
+}
+
+.standalone-header__profile:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.standalone-header__side-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-canvas);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.standalone-header__side-toggle:hover,
+.standalone-header__side-toggle.is-active {
+  background: var(--brand-subtle);
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+
+/* ── Main Layout Body ─────────────────────────────────────────────────── */
+.standalone-layout__body {
+  position: relative;
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+  height: calc(100vh - 56px);
+}
+
+.standalone-layout__main {
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  min-width: 0;
+}
+
+/* ── Side Drawer for active utility ──────────────────────────────────── */
+.standalone-layout__drawer {
+  width: 370px;
+  flex-shrink: 0;
+  height: 100%;
+  position: relative;
+  border-left: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  z-index: 5;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Expandable Companion Rail (Remaining Icons) ─────────────────────── */
+.standalone-companion-rail {
+  width: 56px;
+  flex-shrink: 0;
+  height: 100%;
+  background: var(--bg-surface);
+  border-left: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  z-index: 6;
+  transition:
+    width 220ms cubic-bezier(0.2, 0, 0, 1),
+    opacity 200ms ease,
+    transform 220ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.standalone-companion-rail.is-collapsed {
+  width: 0;
+  padding: 0;
+  border-left: none;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.standalone-companion-rail__items {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.standalone-companion-rail__btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  position: relative;
+  transition: all 140ms ease;
+}
+
+.standalone-companion-rail__btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.standalone-companion-rail__btn.is-active {
+  background: var(--brand-subtle);
+  color: var(--brand-primary);
+}
+
+.standalone-companion-rail__btn.is-active::after {
+  content: '';
+  position: absolute;
+  right: -8px;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--brand-primary);
+}
+
+.standalone-companion-rail__footer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.standalone-companion-rail__collapse-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.standalone-companion-rail__collapse-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* Floating expand trigger button when collapsed */
+.standalone-collapsed-trigger {
+  position: absolute;
+  right: 12px;
+  bottom: 16px;
+  z-index: 10;
+  height: 36px;
+  padding: 0 12px 0 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 18px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.standalone-collapsed-trigger:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14);
+}
