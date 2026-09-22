@@ -65,6 +65,16 @@ export const MATERIAL_SYMBOLS_MAP: Record<string, string> = {
   delete: 'delete',
   security: 'security',
   sop: 'menu_book',
+  user: 'person',
+  profile: 'person',
+  account: 'account_circle',
+  account_circle: 'account_circle',
+  logout: 'logout',
+  logOut: 'logout',
+  signout: 'logout',
+  signOut: 'logout',
+  switchaccount: 'switch_account',
+  switchAccount: 'switch_account',
 
   // Shell Utilities & Micro-actions
   whatsnew: 'new_releases',

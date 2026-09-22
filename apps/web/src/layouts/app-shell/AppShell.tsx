@@ -20,6 +20,14 @@ export interface AppShellProps {
   launcher?: ShellLauncher;
   /** Initials shown in the profile avatar. */
   userInitials: string;
+  userName?: string;
+  userEmail?: string;
+  userRole?: string;
+  onMyProfile?: () => void;
+  onAccountSettings?: () => void;
+  onSignOut?: () => void;
+  onSwitchAccount?: () => void;
+  onHelp?: () => void;
   /** Unread count for the top-nav bell; the badge is hidden when 0/undefined. */
   notificationCount?: number;
   /** Theme is owned by ThemeProvider (app/providers); the shell only renders the control. */
@@ -58,6 +66,14 @@ export function AppShell({
   onSubSelect,
   launcher,
   userInitials,
+  userName,
+  userEmail,
+  userRole,
+  onMyProfile,
+  onAccountSettings,
+  onSignOut,
+  onSwitchAccount,
+  onHelp,
   notificationCount,
   isDarkTheme,
   onToggleTheme,
@@ -91,6 +107,14 @@ export function AppShell({
     >
       <TopNav
         userInitials={userInitials}
+        userName={userName}
+        userEmail={userEmail}
+        userRole={userRole}
+        onMyProfile={onMyProfile}
+        onAccountSettings={onAccountSettings}
+        onSignOut={onSignOut}
+        onSwitchAccount={onSwitchAccount}
+        onHelp={onHelp}
         notificationCount={notificationCount}
         search={topNavSearch}
         notificationsPanel={notificationsPanel}

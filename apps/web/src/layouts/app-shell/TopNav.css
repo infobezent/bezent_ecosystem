@@ -120,6 +120,12 @@
   background: #b3defa;
 }
 
+.top-nav__profile-anchor {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
 .top-nav__profile {
   display: flex;
   align-items: center;
@@ -131,11 +137,18 @@
   cursor: pointer;
   flex-shrink: 0;
   margin-left: 6px;
-  transition: box-shadow 0.14s ease;
+  transition:
+    box-shadow 0.14s ease,
+    transform 0.12s ease;
+  outline: none;
 }
 
 .top-nav__profile:hover {
-  box-shadow: 0 0 0 4px #c2e7ff;
+  box-shadow: 0 0 0 4px var(--bg-hover, #c2e7ff);
+}
+
+.top-nav__profile.is-active {
+  box-shadow: 0 0 0 3px var(--border-focus, #1a73e8);
 }
 
 .top-nav__profile:focus-visible,

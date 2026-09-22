@@ -132,6 +132,19 @@ export function ShellLayout() {
       }}
       launcher={application ? toShellLauncher(application, active, navigate) : undefined}
       userInitials="SD"
+      userName="Sabin Davis"
+      userEmail="sabin.d@bezent.com"
+      userRole="Administrator • HRMS"
+      onMyProfile={() => {
+        if (application) {
+          navigate(`${application.basePath}/employees`);
+        }
+      }}
+      onAccountSettings={() => {
+        if (application) {
+          navigate(`${application.basePath}/settings`);
+        }
+      }}
       notificationCount={data.notifications.filter((n) => !n.read).length}
       notificationsOpen={utility.activeId === 'notifications'}
       onNotificationsToggle={() => utility.toggle('notifications')}
