@@ -1330,4 +1330,21 @@ export const GLOBAL_ICON_DEFINITIONS: Record<string, IconDefinition> = {
       <path d="M16 3.13a4 4 0 0 1 0 7.75" />
     </g>
   )),
+  fullscreen: glyph('fullscreen', 'Full screen', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+    </g>
+  )),
+  openInNew: glyph('openInNew', 'Open in new tab', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" y1="14" x2="21" y2="3" />
+    </g>
+  )),
+  openInFull: glyph('openInFull', 'Open in full screen', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M3 21 10 14m0 0v5m0-5H5M21 3l-7 7m0 0V5m0 5h5" />
+    </g>
+  )),
 };

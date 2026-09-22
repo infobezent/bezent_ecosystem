@@ -107,6 +107,7 @@ export function CalendarDrawer({
           >
             <BezentIcon name="chevronRight" size={16} color="currentColor" />
           </button>
+          <UtilityIconAction icon="openInNew" label="Full screen" onClick={onOpenFullCalendar} />
           <UtilityIconAction icon="close" label="Close" onClick={onClose} />
         </div>
         <div className="calendar-drawer__date">{headerDate}</div>

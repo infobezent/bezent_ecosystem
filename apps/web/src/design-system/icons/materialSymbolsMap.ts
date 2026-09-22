@@ -75,6 +75,15 @@ export const MATERIAL_SYMBOLS_MAP: Record<string, string> = {
   signOut: 'logout',
   switchaccount: 'switch_account',
   switchAccount: 'switch_account',
+  fullscreen: 'fullscreen',
+  fullScreen: 'fullscreen',
+  'full screen': 'fullscreen',
+  open_in_new: 'open_in_new',
+  openInNew: 'open_in_new',
+  open_in_full: 'open_in_full',
+  openInFull: 'open_in_full',
+  expand: 'fullscreen',
+  maximize: 'fullscreen',
 
   // Shell Utilities & Micro-actions
   whatsnew: 'new_releases',
