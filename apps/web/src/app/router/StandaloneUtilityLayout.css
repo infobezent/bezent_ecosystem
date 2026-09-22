@@ -100,6 +100,41 @@
   color: var(--text-primary);
 }
 
+.standalone-header__profile-anchor {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.standalone-header__profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    box-shadow 0.14s ease,
+    transform 0.12s ease;
+  outline: none;
+}
+
+.standalone-header__profile:hover {
+  box-shadow: 0 0 0 4px var(--bg-hover, #c2e7ff);
+}
+
+.standalone-header__profile.is-active {
+  box-shadow: 0 0 0 3px var(--border-focus, #1a73e8);
+}
+
+.standalone-header__profile:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
 .standalone-header__side-toggle {
   display: inline-flex;
   align-items: center;

@@ -13,9 +13,14 @@ import {
 } from '../../platform/utility-drawer';
 import { useTheme } from '../providers/ThemeProvider';
 import { useDevUtilityData } from './devUtilityFixtures';
+import { ProfileMenu } from '../../layouts/app-shell/ProfileMenu';
 import './StandaloneUtilityLayout.css';
 
 const RAIL_CAPABILITIES = UTILITY_CAPABILITIES.filter((c) => c.placement === 'rail');
+const DEFAULT_INITIALS = 'SD';
+const DEFAULT_NAME = 'Sabin Dani';
+const DEFAULT_EMAIL = 'sabin.dani@bezent.com';
+const DEFAULT_ROLE = 'Platform Lead';
 
 export function StandaloneUtilityLayout() {
   const { resolvedTheme, toggleTheme } = useTheme();
@@ -26,6 +31,7 @@ export function StandaloneUtilityLayout() {
   // Side panel expand / collapse state
   const [panelOpen, setPanelOpen] = useState(true);
   const [activeDrawerId, setActiveDrawerId] = useState<UtilityCapabilityId | null>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   // Identify current page capability
   const currentCapabilityId: UtilityCapabilityId = useMemo(() => {
@@ -140,7 +146,7 @@ export function StandaloneUtilityLayout() {
           <span className="standalone-header__divider" aria-hidden="true" />
 
           <div className="standalone-header__brand">
-            <CompanionIcon name={currentCapability.icon} size={24} active />
+            <CompanionIcon name={currentCapability.icon} size={26} active />
             <span className="standalone-header__title">{currentCapability.title}</span>
           </div>
         </div>
@@ -159,7 +165,38 @@ export function StandaloneUtilityLayout() {
             />
           </button>
 
-          <Avatar initials="SD" size="sm" />
+          <div className="standalone-header__profile-anchor">
+            <button
+              type="button"
+              className={`standalone-header__profile ${profileOpen ? 'is-active' : ''}`.trim()}
+              aria-label="Profile and account menu"
+              aria-expanded={profileOpen}
+              aria-haspopup="menu"
+              onClick={() => setProfileOpen((prev) => !prev)}
+            >
+              <Avatar initials={DEFAULT_INITIALS} />
+            </button>
+
+            <ProfileMenu
+              isOpen={profileOpen}
+              onClose={() => setProfileOpen(false)}
+              userInitials={DEFAULT_INITIALS}
+              userName={DEFAULT_NAME}
+              userEmail={DEFAULT_EMAIL}
+              userRole={DEFAULT_ROLE}
+              onMyProfile={() => {
+                setProfileOpen(false);
+                navigate('/hrms/employees');
+              }}
+              onAccountSettings={() => {
+                setProfileOpen(false);
+                navigate('/hrms/settings');
+              }}
+              onSignOut={() => setProfileOpen(false)}
+              onSwitchAccount={() => setProfileOpen(false)}
+              onHelp={() => setProfileOpen(false)}
+            />
+          </div>
 
           <button
             type="button"
