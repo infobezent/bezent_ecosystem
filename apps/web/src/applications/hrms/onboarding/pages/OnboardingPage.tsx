@@ -6,26 +6,74 @@ import { useDevContext } from '../../../../platform/context/DevContext';
 import {
   fetchOrganizationMasters,
   fetchNewHires,
-  createNewHire,
   type OrganizationMasters,
   type OnboardingCaseItem,
-  type CreateNewHirePayload,
 } from '../api/onboardingApi';
-import { NewHireModal } from '../components/NewHireModal';
+import { EmployeeRegistration } from '../components/EmployeeRegistration';
+import { DraftsModal, EmployeeRegistrationDraft } from '../components/DraftsModal';
 import './OnboardingPage.css';
 
-export function OnboardingPage() {
+interface OnboardingPageProps {
+  title?: string;
+}
+
+export function OnboardingPage({ title = 'Onboarding' }: OnboardingPageProps) {
   const devContext = useDevContext();
-  const [masters, setMasters] = useState<OrganizationMasters | null>(null);
+  const [, setMasters] = useState<OrganizationMasters | null>(null);
   const [cases, setCases] = useState<OnboardingCaseItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'registration'>('list');
   const [activeTab, setActiveTab] = useState<'all' | 'preboarding' | 'documents' | 'completed'>(
     'all',
   );
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Drafts State
+  const [isDraftsModalOpen, setIsDraftsModalOpen] = useState(false);
+  const [selectedDraft, setSelectedDraft] = useState<EmployeeRegistrationDraft | null>(null);
+  const [draftsList, setDraftsList] = useState<EmployeeRegistrationDraft[]>(() => {
+    try {
+      const saved = localStorage.getItem('bezent_hrms_registration_drafts');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const refreshDrafts = useCallback(() => {
+    try {
+      const saved = localStorage.getItem('bezent_hrms_registration_drafts');
+      setDraftsList(saved ? JSON.parse(saved) : []);
+    } catch {
+      setDraftsList([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (viewMode === 'list') {
+      refreshDrafts();
+    }
+  }, [viewMode, refreshDrafts]);
+
+  const handleContinueDraft = (draft: EmployeeRegistrationDraft) => {
+    setSelectedDraft(draft);
+    setIsDraftsModalOpen(false);
+    setViewMode('registration');
+  };
+
+  const handleDeleteDraft = (draftId: string) => {
+    setDraftsList((prev) => {
+      const updated = prev.filter((d) => d.id !== draftId);
+      try {
+        localStorage.setItem('bezent_hrms_registration_drafts', JSON.stringify(updated));
+      } catch {
+        // fallback
+      }
+      return updated;
+    });
+  };
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -47,12 +95,6 @@ export function OnboardingPage() {
   useEffect(() => {
     loadData();
   }, [loadData]);
-
-  const handleCreateNewHire = async (payload: CreateNewHirePayload) => {
-    await createNewHire(payload);
-    // Reload data to reflect persisted record from MySQL
-    await loadData();
-  };
 
   const getInitials = (name: string): string => {
     const parts = name.trim().split(/\s+/);
@@ -100,13 +142,27 @@ export function OnboardingPage() {
     };
   }, [cases]);
 
+  if (viewMode === 'registration') {
+    return (
+      <div className="onboarding-page">
+        <EmployeeRegistration
+          initialDraft={selectedDraft}
+          onCancel={() => {
+            setSelectedDraft(null);
+            setViewMode('list');
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="onboarding-page">
       {/* Header Banner */}
       <header className="onboarding-page__header">
         <div className="onboarding-page__title-group">
           <div className="onboarding-page__title-row">
-            <h1 className="onboarding-page__title">Onboarding</h1>
+            <h1 className="onboarding-page__title">{title}</h1>
             <span className="onboarding-page__company-badge">
               <BezentIcon name="company" size={14} />
               {devContext.companyName}
@@ -118,7 +174,24 @@ export function OnboardingPage() {
         </div>
 
         <div className="onboarding-page__actions">
-          <Button variant="primary" onClick={() => setIsModalOpen(true)}>
+          <button
+            type="button"
+            className="onboarding-page__drafts-btn"
+            onClick={() => {
+              refreshDrafts();
+              setIsDraftsModalOpen(true);
+            }}
+          >
+            <BezentIcon name="documents" size={16} />
+            <span>View Drafts ({draftsList.length})</span>
+          </button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              setSelectedDraft(null);
+              setViewMode('registration');
+            }}
+          >
             <span className="onboarding-page__btn-content">
               <BezentIcon name="plusSign" size={16} />
               Add New Hire
@@ -209,7 +282,7 @@ export function OnboardingPage() {
                 : 'Get started by creating your first onboarding case for a new hire.'}
             </p>
             {!searchQuery && (
-              <Button variant="primary" onClick={() => setIsModalOpen(true)}>
+              <Button variant="primary" onClick={() => setViewMode('registration')}>
                 Add New Hire
               </Button>
             )}
@@ -256,12 +329,13 @@ export function OnboardingPage() {
         )}
       </div>
 
-      {/* Add New Hire Modal */}
-      <NewHireModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        masters={masters}
-        onSubmit={handleCreateNewHire}
+      {/* Saved Drafts Modal */}
+      <DraftsModal
+        isOpen={isDraftsModalOpen}
+        drafts={draftsList}
+        onClose={() => setIsDraftsModalOpen(false)}
+        onContinueDraft={handleContinueDraft}
+        onDeleteDraft={handleDeleteDraft}
       />
     </div>
   );

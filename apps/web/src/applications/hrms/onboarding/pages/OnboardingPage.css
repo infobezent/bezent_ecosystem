@@ -68,6 +68,28 @@
   gap: 12px;
 }
 
+.onboarding-page__drafts-btn {
+  background-color: #ffffff;
+  color: #1e3a8a;
+  border: 1px solid #bfdbfe;
+  padding: 0 16px;
+  height: 36px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 150ms ease;
+}
+
+.onboarding-page__drafts-btn:hover {
+  background-color: #eff6ff;
+  border-color: #93c5fd;
+}
+
 .onboarding-page__btn-content {
   display: inline-flex;
   align-items: center;

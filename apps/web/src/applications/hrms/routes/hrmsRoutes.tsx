@@ -40,7 +40,7 @@ export const hrmsRoutes: RouteObject[] = [
           {
             path: destination.segment,
             element: isOnboarding ? (
-              <OnboardingPage />
+              <OnboardingPage title={destination.label} />
             ) : isSettings ? (
               <SettingsPage />
             ) : (
@@ -54,10 +54,10 @@ export const hrmsRoutes: RouteObject[] = [
           ...(destination.children ?? []).map((child): RouteObject => ({
             path: `${destination.segment}/${child.id}`,
             element:
-              isOnboarding && child.id === 'new-hires' ? (
-                <OnboardingPage />
-              ) : isOnboarding && child.id === 'workflow-settings' ? (
+              isOnboarding && child.id === 'workflow-settings' ? (
                 <SettingsPage />
+              ) : isOnboarding ? (
+                <OnboardingPage title={destination.label} />
               ) : (
                 <ModulePlaceholder
                   application={APPLICATION}
