@@ -19,6 +19,8 @@ export interface UtilityDrawerHeaderProps {
   count?: number;
   /** Icon actions before the close button. */
   actions?: ReactNode;
+  /** Optional full screen / open in full page action. */
+  onFullScreen?: () => void;
   onClose: () => void;
 }
 
@@ -28,6 +30,7 @@ export function UtilityDrawerHeader({
   icon,
   count,
   actions,
+  onFullScreen,
   onClose,
 }: UtilityDrawerHeaderProps) {
   return (
@@ -46,6 +49,9 @@ export function UtilityDrawerHeader({
       </div>
       <div className="ud-header__actions">
         {actions}
+        {onFullScreen && (
+          <UtilityIconAction icon="openInNew" label="Full screen" onClick={onFullScreen} />
+        )}
         <UtilityIconAction icon="close" label="Close" onClick={onClose} />
       </div>
     </div>

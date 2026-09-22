@@ -1,0 +1,113 @@
+/*
+ * BEZENT Tabs — Semantic Token System.
+ */
+
+.bezent-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+
+/* Underline variant: sits on a baseline border */
+.bezent-tabs--underline {
+  border-bottom: 1px solid var(--border-default, #dde3ea);
+  gap: 16px;
+}
+
+/* ── Individual Tab ── */
+.bezent-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary, #444746);
+  letter-spacing: -0.1px;
+  transition:
+    color 0.14s ease,
+    background-color 0.14s ease;
+  outline: none;
+}
+
+.bezent-tab:hover:not(:disabled) {
+  color: var(--text-primary, #1f1f1f);
+}
+
+.bezent-tab.is-active {
+  color: var(--accent-interactive, #1a73e8);
+  font-weight: 600;
+}
+
+/* Active indicator underline */
+.bezent-tabs--underline .bezent-tab {
+  padding: 10px 4px;
+}
+
+.bezent-tabs--underline .bezent-tab::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: transparent;
+  border-radius: 2px 2px 0 0;
+  transition: background-color 0.15s ease;
+}
+
+.bezent-tabs--underline .bezent-tab.is-active::after {
+  background: var(--accent-interactive, #1a73e8);
+}
+
+/* Pills variant */
+.bezent-tabs--pills .bezent-tab {
+  border-radius: 8px;
+  padding: 6px 12px;
+}
+
+.bezent-tabs--pills .bezent-tab:hover:not(:disabled) {
+  background: var(--bg-hover, #c2e7ff);
+}
+
+.bezent-tabs--pills .bezent-tab.is-active {
+  background: var(--bg-hover, #c2e7ff);
+  color: var(--accent-primary, #041e49);
+}
+
+/* Tab count badge */
+.bezent-tab__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  background: var(--bg-surface-secondary, #f0f4f9);
+  color: var(--text-muted, #747775);
+}
+
+.bezent-tab.is-active .bezent-tab__count {
+  background: rgba(26, 115, 232, 0.12);
+  color: var(--accent-interactive, #1a73e8);
+}
+
+.bezent-tab:focus-visible {
+  outline: 2px solid var(--border-focus, #1a73e8);
+  outline-offset: 2px;
+}
+
+.bezent-tab:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

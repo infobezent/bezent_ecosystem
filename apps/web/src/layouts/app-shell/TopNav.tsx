@@ -1,10 +1,14 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { BezentIcon } from '../../design-system/icons';
 import { Avatar, Badge, IconButton } from '../../design-system/components';
+import { ProfileMenu } from './ProfileMenu';
 import './TopNav.css';
 
 export interface TopNavProps {
   userInitials: string;
+  userName?: string;
+  userEmail?: string;
+  userRole?: string;
   notificationCount?: number;
   /** Global Search (or any replacement), supplied by the host. */
   search?: ReactNode;
@@ -12,6 +16,11 @@ export interface TopNavProps {
   notificationsPanel?: ReactNode;
   notificationsOpen?: boolean;
   onNotificationsToggle?: () => void;
+  onMyProfile?: () => void;
+  onAccountSettings?: () => void;
+  onSignOut?: () => void;
+  onSwitchAccount?: () => void;
+  onHelp?: () => void;
 }
 
 /**
@@ -20,12 +29,22 @@ export interface TopNavProps {
  */
 export function TopNav({
   userInitials,
+  userName = 'Sabin Davis',
+  userEmail = 'sabin.d@bezent.com',
+  userRole = 'Administrator • HRMS',
   notificationCount = 0,
   search,
   notificationsPanel,
   notificationsOpen = false,
   onNotificationsToggle,
+  onMyProfile,
+  onAccountSettings,
+  onSignOut,
+  onSwitchAccount,
+  onHelp,
 }: TopNavProps) {
+  const [profileOpen, setProfileOpen] = useState(false);
+
   return (
     <header className="top-nav">
       <div className="top-nav__brand">
@@ -61,7 +80,7 @@ export function TopNav({
           {notificationsOpen && <span className="top-nav__bell-connector" aria-hidden="true" />}
         </div>
 
-        <IconButton label="Settings">
+        <IconButton label="Settings" onClick={onAccountSettings}>
           <BezentIcon name="settings" size={20} color="var(--top-utility-icon)" strokeWidth={1.8} />
         </IconButton>
 
@@ -78,9 +97,32 @@ export function TopNav({
           <BezentIcon name="apps" size={20} color="var(--top-utility-icon)" strokeWidth={1.8} />
         </IconButton>
 
-        <button type="button" className="top-nav__profile" aria-label="Profile">
-          <Avatar initials={userInitials} />
-        </button>
+        <div className="top-nav__profile-anchor">
+          <button
+            type="button"
+            className={`top-nav__profile ${profileOpen ? 'is-active' : ''}`.trim()}
+            aria-label="Profile and account menu"
+            aria-expanded={profileOpen}
+            aria-haspopup="menu"
+            onClick={() => setProfileOpen((prev) => !prev)}
+          >
+            <Avatar initials={userInitials} />
+          </button>
+
+          <ProfileMenu
+            isOpen={profileOpen}
+            onClose={() => setProfileOpen(false)}
+            userInitials={userInitials}
+            userName={userName}
+            userEmail={userEmail}
+            userRole={userRole}
+            onMyProfile={onMyProfile}
+            onAccountSettings={onAccountSettings}
+            onSignOut={onSignOut}
+            onSwitchAccount={onSwitchAccount}
+            onHelp={onHelp}
+          />
+        </div>
       </div>
 
       {notificationsPanel}

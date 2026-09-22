@@ -1,45 +1,56 @@
 /*
- * BEZENT Button — primary variant.
- *
- * Colors: old approved UI's `.btn-primary` / `button[data-variant="primary"]`
- * (index.css lines 663-680), confirmed by the "Quick Create" button in
- * `App.tsx` (identical background/hover/active values). Height/radius:
- * the 34px / 10px control band shared by every evidenced BEZENT top-nav
- * control (Quick Create, BEZENT AI button, profile avatar).
- *
- * Text size/weight (12px/600) and horizontal padding are borrowed from
- * the "BEZENT AI" button — the only other evidenced top-nav control with
- * a text label — since no old-UI instance of `.btn-primary` itself was
- * ever rendered with a text label to source typography from directly.
- * Documented, not invented: see docs/architecture/DESIGN-SYSTEM-COMPONENTS.md.
- *
- * :hover/:active use real CSS pseudo-classes (keyboard-accessible),
- * replacing the old UI's mouse-only onMouseDown/onMouseUp JS state.
+ * BEZENT Button — Complete Semantic Token System.
  */
 
 .bezent-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  height: 34px;
-  padding: 0 16px;
-  border: none;
-  border-radius: 10px;
+  gap: 8px;
+  border: 1px solid transparent;
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
   font-weight: 600;
   letter-spacing: -0.1px;
+  user-select: none;
+  white-space: nowrap;
   transition:
     background-color 0.14s ease,
+    border-color 0.14s ease,
+    color 0.14s ease,
+    box-shadow 0.14s ease,
     transform 0.08s ease;
   outline: none;
 }
 
+/* ── Sizes ── */
+.bezent-btn--sm {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 11px;
+}
+
+.bezent-btn--md {
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+.bezent-btn--lg {
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+/* ── Variants ── */
+
+/* Primary */
 .bezent-btn--primary {
   background: var(--accent-primary);
-  color: var(--icon-on-solid);
+  color: var(--icon-on-solid, #ffffff);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
@@ -52,12 +63,130 @@
   transform: scale(0.98);
 }
 
+/* Secondary */
+.bezent-btn--secondary {
+  background: var(--bg-hover, #c2e7ff);
+  color: var(--text-brand, #001d35);
+  border-color: transparent;
+}
+
+.bezent-btn--secondary:hover:not(:disabled) {
+  background: #a8dbfc;
+}
+
+.bezent-btn--secondary:active:not(:disabled) {
+  background: #90cefa;
+  transform: scale(0.98);
+}
+
+/* Outline */
+.bezent-btn--outline {
+  background: transparent;
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+.bezent-btn--outline:hover:not(:disabled) {
+  background: var(--bg-surface-secondary);
+  border-color: var(--border-default);
+}
+
+.bezent-btn--outline:active:not(:disabled) {
+  background: var(--bg-hover);
+  transform: scale(0.98);
+}
+
+/* Text */
+.bezent-btn--text {
+  background: transparent;
+  color: var(--accent-interactive, #1a73e8);
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.bezent-btn--text:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+
+.bezent-btn--text:active:not(:disabled) {
+  background: var(--accent-subtle);
+  transform: scale(0.98);
+}
+
+/* Danger */
+.bezent-btn--danger {
+  background: var(--status-danger-bg, #fee2e2);
+  color: var(--status-danger-fg, #b91c1c);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.bezent-btn--danger:hover:not(:disabled) {
+  background: var(--status-danger, #ef4444);
+  color: #ffffff;
+}
+
+.bezent-btn--danger:active:not(:disabled) {
+  background: #dc2626;
+  color: #ffffff;
+  transform: scale(0.98);
+}
+
+/* Ghost */
+.bezent-btn--ghost {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.bezent-btn--ghost:hover:not(:disabled) {
+  background: var(--bg-surface-secondary);
+  color: var(--text-primary);
+}
+
+.bezent-btn--ghost:active:not(:disabled) {
+  background: var(--bg-hover);
+  transform: scale(0.98);
+}
+
+/* ── States ── */
 .bezent-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none !important;
 }
 
 .bezent-btn:focus-visible {
   outline: 2px solid var(--border-focus);
   outline-offset: 2px;
+}
+
+.bezent-btn--loading {
+  cursor: wait;
+}
+
+/* ── Spinner & Icon Slots ── */
+.bezent-btn__spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: bezentBtnSpin 0.65s linear infinite;
+}
+
+@keyframes bezentBtnSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.bezent-btn__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.bezent-btn__label {
+  display: inline-flex;
+  align-items: center;
 }
