@@ -31,3 +31,10 @@ export class ValidationError extends AppError {
     this.details = details;
   }
 }
+
+export class ConflictError extends AppError {
+  constructor(message = 'Resource conflict', code = 'CONFLICT') {
+    super(message, 409, code);
+    this.name = 'ConflictError';
+  }
+}
