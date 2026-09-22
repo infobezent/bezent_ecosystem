@@ -1,10 +1,9 @@
 /*
  * BEZENT Empty-State Sleeping Raccoon Illustration — Animations & Styling.
  *
- * Blue graphic illustration of a cozy sleeping raccoon with floating Zs:
- * - Subtle breathing motion on body
- * - Soft tail sway
- * - 2 floating Z characters drifting smoothly upward
+ * Vector graphic illustration of a cozy sleeping raccoon with animated floating Zs:
+ * - 3 floating cartoon Zs drifting smoothly upward in a staggered loop
+ * - Fully responsive with GPU-accelerated translate3d motion
  */
 
 .bezent-empty-illustration-container {
@@ -27,6 +26,12 @@
   max-width: 110px;
 }
 
+.bezent-sleeping-raccoon-stage {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
 .bezent-sleeping-raccoon-img {
   width: 100%;
   max-width: 160px;
@@ -43,103 +48,140 @@
   max-height: 85px;
 }
 
-.bezent-empty-illustration-container:hover .bezent-sleeping-raccoon-svg {
+.bezent-empty-illustration-container:hover .bezent-sleeping-raccoon-img {
   transform: scale(1.02);
 }
 
-/* ── Gentle Sleeping Breathing ── */
-.bezent-raccoon-body {
-  transform-origin: 120px 145px;
-  animation: bezentRaccoonBreathe 3.6s ease-in-out infinite;
-  will-change: transform;
+/* ── Z-Layer & Floating Cartoon Z Elements ── */
+.bezent-z-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
 }
 
-@keyframes bezentRaccoonBreathe {
-  0%,
-  100% {
-    transform: scaleY(1) translateY(0);
-  }
-  50% {
-    transform: scaleY(1.025) translateY(-1.5px);
-  }
+.bezent-z-float {
+  position: absolute;
+  pointer-events: none;
+  will-change: transform, opacity;
 }
 
-/* ── Soft Tail Relaxation Sway ── */
-.bezent-raccoon-tail {
-  transform-origin: 32px 142px;
-  animation: bezentRaccoonTail 4.8s ease-in-out infinite;
-  will-change: transform;
+.bezent-z-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 1px 2px rgba(2, 132, 199, 0.25));
 }
 
-@keyframes bezentRaccoonTail {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  50% {
-    transform: rotate(-1.5deg);
-  }
-}
-
-/* ── Floating 'Z' Letters Animation ── */
+/* z1: Small Z rising from near raccoon head */
 .bezent-z1 {
-  animation: bezentFloatZ1 2.8s ease-in-out infinite;
-  will-change: transform, opacity;
+  width: 16px;
+  height: 16px;
+  left: 26%;
+  top: 24%;
+  animation: bezentFloatZ1 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
+/* z2: Medium Z floating upward with stagger delay */
 .bezent-z2 {
-  animation: bezentFloatZ2 2.8s ease-in-out infinite 0.9s;
-  will-change: transform, opacity;
+  width: 21px;
+  height: 21px;
+  left: 31%;
+  top: 15%;
+  animation: bezentFloatZ2 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite 1.05s;
 }
 
+/* z3: Larger Z ascending into the air */
+.bezent-z3 {
+  width: 26px;
+  height: 26px;
+  left: 35%;
+  top: 8%;
+  animation: bezentFloatZ3 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite 2.1s;
+}
+
+.bezent-empty-illustration-container--compact .bezent-z1 {
+  width: 12px;
+  height: 12px;
+}
+
+.bezent-empty-illustration-container--compact .bezent-z2 {
+  width: 16px;
+  height: 16px;
+}
+
+.bezent-empty-illustration-container--compact .bezent-z3 {
+  width: 19px;
+  height: 19px;
+}
+
+/* Keyframes with gentle swaying drift, subtle scale expansion, and gentle fade */
 @keyframes bezentFloatZ1 {
   0% {
-    transform: translate(0, 8px) scale(0.65);
+    transform: translate3d(0, 10px, 0) scale(0.6) rotate(-14deg);
     opacity: 0;
   }
-  25% {
+  20% {
     opacity: 0.95;
   }
-  75% {
-    opacity: 0.8;
-    transform: translate(6px, -12px) scale(1.05) rotate(4deg);
+  70% {
+    opacity: 0.85;
+    transform: translate3d(-5px, -12px, 0) scale(0.95) rotate(-6deg);
   }
   100% {
+    transform: translate3d(-10px, -24px, 0) scale(1.08) rotate(0deg);
     opacity: 0;
-    transform: translate(10px, -20px) scale(1.15) rotate(8deg);
   }
 }
 
 @keyframes bezentFloatZ2 {
   0% {
-    transform: translate(0, 6px) scale(0.6);
+    transform: translate3d(0, 10px, 0) scale(0.65) rotate(-8deg);
     opacity: 0;
   }
-  30% {
-    opacity: 0.9;
+  20% {
+    opacity: 0.95;
   }
-  75% {
-    opacity: 0.75;
-    transform: translate(4px, -10px) scale(1) rotate(-3deg);
+  70% {
+    opacity: 0.85;
+    transform: translate3d(6px, -15px, 0) scale(1.02) rotate(4deg);
   }
   100% {
+    transform: translate3d(10px, -29px, 0) scale(1.15) rotate(9deg);
     opacity: 0;
-    transform: translate(8px, -18px) scale(1.1) rotate(-6deg);
+  }
+}
+
+@keyframes bezentFloatZ3 {
+  0% {
+    transform: translate3d(0, 10px, 0) scale(0.7) rotate(-4deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.95;
+  }
+  70% {
+    opacity: 0.8;
+    transform: translate3d(-4px, -16px, 0) scale(1.1) rotate(-10deg);
+  }
+  100% {
+    transform: translate3d(-8px, -33px, 0) scale(1.22) rotate(-15deg);
+    opacity: 0;
   }
 }
 
 /* ── Reduced Motion Accessibility ── */
 @media (prefers-reduced-motion: reduce) {
-  .bezent-raccoon-body,
-  .bezent-raccoon-tail,
   .bezent-z1,
-  .bezent-z2 {
+  .bezent-z2,
+  .bezent-z3 {
     animation: none !important;
     transform: none !important;
     opacity: 1 !important;
   }
 
-  .bezent-sleeping-raccoon-svg {
+  .bezent-sleeping-raccoon-img {
     transition: none !important;
   }
 }

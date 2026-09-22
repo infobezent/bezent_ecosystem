@@ -1,0 +1,137 @@
+/*
+ * BEZENT Modal Dialog — Semantic Token System.
+ */
+
+.bezent-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-overlay, rgba(15, 23, 42, 0.4));
+  backdrop-filter: blur(4px);
+  padding: 20px;
+  animation: bezentModalFadeIn 0.18s ease-out;
+}
+
+@keyframes bezentModalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.bezent-modal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: calc(100vh - 40px);
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--card-radius, 16px);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+  animation: bezentModalZoomIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes bezentModalZoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ── Sizes ── */
+.bezent-modal--sm {
+  max-width: 440px;
+}
+
+.bezent-modal--md {
+  max-width: 580px;
+}
+
+.bezent-modal--lg {
+  max-width: 760px;
+}
+
+.bezent-modal--xl {
+  max-width: 960px;
+}
+
+/* ── Header ── */
+.bezent-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border-subtle, #e7ebf0);
+}
+
+.bezent-modal__title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bezent-modal__title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary, #1f1f1f);
+  letter-spacing: -0.2px;
+}
+
+.bezent-modal__desc {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted, #747775);
+}
+
+.bezent-modal__close-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  color: var(--icon-muted, #5f6368);
+  cursor: pointer;
+  transition:
+    background-color 0.14s ease,
+    color 0.14s ease;
+}
+
+.bezent-modal__close-btn:hover {
+  background: var(--bg-hover, #c2e7ff);
+  color: var(--icon-active, #041e49);
+}
+
+/* ── Body ── */
+.bezent-modal__body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* ── Footer ── */
+.bezent-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-subtle, #e7ebf0);
+  background: var(--bg-surface-secondary, #f0f4f9);
+}

@@ -1,6 +1,9 @@
 import { useState, type FormEvent, useEffect } from 'react';
 import { Button } from '../../../../design-system/components/Button';
-import { BezentIcon } from '../../../../design-system/icons';
+import { Modal } from '../../../../design-system/components/Modal';
+import { Input } from '../../../../design-system/components/Input';
+import { Select } from '../../../../design-system/components/Select';
+import { Alert } from '../../../../design-system/components/Alert';
 import type {
   OrganizationMasters,
   CreateNewHirePayload,
@@ -44,10 +47,6 @@ export function NewHireModal({ isOpen, onClose, masters, onSubmit }: NewHireModa
     }
   }, [masters, departmentId, designationId, locationId]);
 
-  if (!isOpen) {
-    return null;
-  }
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!masters?.company) {
@@ -87,228 +86,154 @@ export function NewHireModal({ isOpen, onClose, masters, onSubmit }: NewHireModa
   };
 
   return (
-    <div
-      className="new-hire-modal-backdrop"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="new-hire-title"
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Add New Hire"
+      description="Initiate the onboarding process for a new employee."
+      size="lg"
+      footer={
+        <>
+          <Button variant="secondary" type="button" onClick={onClose} disabled={submitting}>
+            Cancel
+          </Button>
+          <Button variant="primary" type="submit" form="new-hire-form" loading={submitting}>
+            Create New Hire
+          </Button>
+        </>
+      }
     >
-      <div className="new-hire-modal">
-        <div className="new-hire-modal__header">
-          <div className="new-hire-modal__title-group">
-            <h2 id="new-hire-title" className="new-hire-modal__title">
-              Add New Hire
-            </h2>
-            <p className="new-hire-modal__subtitle">
-              Initiate the onboarding process for a new employee.
-            </p>
+      <form id="new-hire-form" onSubmit={handleSubmit} className="new-hire-form">
+        {errorMessage && (
+          <Alert variant="danger" dismissible onDismiss={() => setErrorMessage(null)}>
+            {errorMessage}
+          </Alert>
+        )}
+
+        {/* Personal Details */}
+        <div className="new-hire-modal__section">
+          <h3 className="new-hire-modal__section-title">Personal Details</h3>
+          <div className="new-hire-modal__row">
+            <Input
+              id="nh-first-name"
+              label="First Name *"
+              required
+              placeholder="e.g. Arun"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+            <Input
+              id="nh-last-name"
+              label="Last Name"
+              placeholder="e.g. Kumar"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+            />
           </div>
-          <button
-            type="button"
-            className="new-hire-modal__close-btn"
-            onClick={onClose}
-            aria-label="Close modal"
-          >
-            <BezentIcon name="close" size={18} />
-          </button>
+
+          <div className="new-hire-modal__row">
+            <Input
+              id="nh-email"
+              type="email"
+              label="Email Address *"
+              required
+              placeholder="e.g. arun.kumar@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <Input
+              id="nh-phone"
+              type="tel"
+              label="Phone Number"
+              placeholder="e.g. +91 98765 43210"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="new-hire-modal__body">
-          {errorMessage && (
-            <div className="new-hire-modal__error-alert" role="alert">
-              {errorMessage}
-            </div>
-          )}
+        {/* Employment Details */}
+        <div className="new-hire-modal__section">
+          <h3 className="new-hire-modal__section-title">Employment Details</h3>
 
-          {/* Personal Information */}
-          <div className="new-hire-modal__section">
-            <h3 className="new-hire-modal__section-title">Personal Details</h3>
-            <div className="new-hire-modal__row">
-              <div className="new-hire-modal__field">
-                <label className="new-hire-modal__label" htmlFor="nh-first-name">
-                  First Name <span className="new-hire-modal__required">*</span>
-                </label>
-                <input
-                  id="nh-first-name"
-                  type="text"
-                  required
-                  className="new-hire-modal__input"
-                  placeholder="e.g. Arun"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                />
-              </div>
-              <div className="new-hire-modal__field">
-                <label className="new-hire-modal__label" htmlFor="nh-last-name">
-                  Last Name
-                </label>
-                <input
-                  id="nh-last-name"
-                  type="text"
-                  className="new-hire-modal__input"
-                  placeholder="e.g. Kumar"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                />
-              </div>
-            </div>
+          <Input
+            id="nh-company"
+            label="Company *"
+            disabled
+            value={masters?.company?.name || 'Loading company...'}
+          />
 
-            <div className="new-hire-modal__row">
-              <div className="new-hire-modal__field">
-                <label className="new-hire-modal__label" htmlFor="nh-email">
-                  Email Address <span className="new-hire-modal__required">*</span>
-                </label>
-                <input
-                  id="nh-email"
-                  type="email"
-                  required
-                  className="new-hire-modal__input"
-                  placeholder="e.g. arun.kumar@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="new-hire-modal__field">
-                <label className="new-hire-modal__label" htmlFor="nh-phone">
-                  Phone Number
-                </label>
-                <input
-                  id="nh-phone"
-                  type="tel"
-                  className="new-hire-modal__input"
-                  placeholder="e.g. +91 98765 43210"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Employment Details */}
-          <div className="new-hire-modal__section">
-            <h3 className="new-hire-modal__section-title">Employment Details</h3>
-
-            <div className="new-hire-modal__field">
-              <label className="new-hire-modal__label" htmlFor="nh-company">
-                Company <span className="new-hire-modal__required">*</span>
-              </label>
-              <input
-                id="nh-company"
-                type="text"
-                disabled
-                className="new-hire-modal__input"
-                value={masters?.company?.name || 'Loading company...'}
-              />
-            </div>
-
-            <div className="new-hire-modal__row">
-              <div className="new-hire-modal__field">
-                <label className="new-hire-modal__label" htmlFor="nh-department">
-                  Department <span className="new-hire-modal__required">*</span>
-                </label>
-                <select
-                  id="nh-department"
-                  required
-                  className="new-hire-modal__select"
-                  value={departmentId}
-                  onChange={(e) => setDepartmentId(e.target.value)}
-                >
-                  {masters?.departments.map((dept) => (
-                    <option key={dept.id} value={dept.id}>
-                      {dept.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="new-hire-modal__field">
-                <label className="new-hire-modal__label" htmlFor="nh-designation">
-                  Designation <span className="new-hire-modal__required">*</span>
-                </label>
-                <select
-                  id="nh-designation"
-                  required
-                  className="new-hire-modal__select"
-                  value={designationId}
-                  onChange={(e) => setDesignationId(e.target.value)}
-                >
-                  {masters?.designations.map((desig) => (
-                    <option key={desig.id} value={desig.id}>
-                      {desig.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="new-hire-modal__row">
-              <div className="new-hire-modal__field">
-                <label className="new-hire-modal__label" htmlFor="nh-location">
-                  Location
-                </label>
-                <select
-                  id="nh-location"
-                  className="new-hire-modal__select"
-                  value={locationId}
-                  onChange={(e) => setLocationId(e.target.value)}
-                >
-                  <option value="">None / Not Assigned</option>
-                  {masters?.locations.map((loc) => (
-                    <option key={loc.id} value={loc.id}>
-                      {loc.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="new-hire-modal__field">
-                <label className="new-hire-modal__label" htmlFor="nh-joining-date">
-                  Joining Date <span className="new-hire-modal__required">*</span>
-                </label>
-                <input
-                  id="nh-joining-date"
-                  type="date"
-                  required
-                  className="new-hire-modal__input"
-                  value={joiningDate}
-                  onChange={(e) => setJoiningDate(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="new-hire-modal__field">
-              <label className="new-hire-modal__label" htmlFor="nh-emp-type">
-                Employment Type <span className="new-hire-modal__required">*</span>
-              </label>
-              <select
-                id="nh-emp-type"
-                className="new-hire-modal__select"
-                value={employmentType}
-                onChange={(e) => setEmploymentType(e.target.value as EmploymentType)}
-              >
-                <option value="full_time">Full Time</option>
-                <option value="part_time">Part Time</option>
-                <option value="contract">Contract</option>
-                <option value="intern">Intern</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="new-hire-modal__footer">
-            <button
-              type="button"
-              className="new-hire-modal__cancel-btn"
-              onClick={onClose}
-              disabled={submitting}
+          <div className="new-hire-modal__row">
+            <Select
+              id="nh-department"
+              label="Department *"
+              required
+              value={departmentId}
+              onChange={(e) => setDepartmentId(e.target.value)}
             >
-              Cancel
-            </button>
-            <Button variant="primary" type="submit" disabled={submitting}>
-              {submitting ? 'Creating...' : 'Create New Hire'}
-            </Button>
+              {masters?.departments.map((dept) => (
+                <option key={dept.id} value={dept.id}>
+                  {dept.name}
+                </option>
+              ))}
+            </Select>
+
+            <Select
+              id="nh-designation"
+              label="Designation *"
+              required
+              value={designationId}
+              onChange={(e) => setDesignationId(e.target.value)}
+            >
+              {masters?.designations.map((desig) => (
+                <option key={desig.id} value={desig.id}>
+                  {desig.name}
+                </option>
+              ))}
+            </Select>
           </div>
-        </form>
-      </div>
-    </div>
+
+          <div className="new-hire-modal__row">
+            <Select
+              id="nh-location"
+              label="Location"
+              value={locationId}
+              onChange={(e) => setLocationId(e.target.value)}
+            >
+              <option value="">None / Not Assigned</option>
+              {masters?.locations.map((loc) => (
+                <option key={loc.id} value={loc.id}>
+                  {loc.name}
+                </option>
+              ))}
+            </Select>
+
+            <Input
+              id="nh-joining-date"
+              type="date"
+              label="Joining Date *"
+              required
+              value={joiningDate}
+              onChange={(e) => setJoiningDate(e.target.value)}
+            />
+          </div>
+
+          <Select
+            id="nh-emp-type"
+            label="Employment Type *"
+            required
+            value={employmentType}
+            onChange={(e) => setEmploymentType(e.target.value as EmploymentType)}
+          >
+            <option value="full_time">Full Time</option>
+            <option value="part_time">Part Time</option>
+            <option value="contract">Contract</option>
+            <option value="intern">Intern</option>
+          </Select>
+        </div>
+      </form>
+    </Modal>
   );
 }
+
+export default NewHireModal;

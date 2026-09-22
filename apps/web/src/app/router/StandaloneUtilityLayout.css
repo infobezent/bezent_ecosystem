@@ -201,9 +201,10 @@
   justify-content: space-between;
   padding: 12px 0;
   z-index: 6;
-  transition: width 220ms cubic-bezier(0.2, 0, 0, 1),
-              opacity 200ms ease,
-              transform 220ms cubic-bezier(0.2, 0, 0, 1);
+  transition:
+    width 220ms cubic-bezier(0.2, 0, 0, 1),
+    opacity 200ms ease,
+    transform 220ms cubic-bezier(0.2, 0, 0, 1);
 }
 
 .standalone-companion-rail.is-collapsed {

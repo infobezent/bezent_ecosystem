@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { BezentIcon } from '../../design-system/icons';
+import { Button, Input, Textarea, Select, EmptyState } from '../../design-system/components';
 import type { GlobalTaskItem } from './types';
 import './TasksPage.css';
 
@@ -183,17 +184,14 @@ export function TasksPage() {
             {/* Inline Add Task Input */}
             {isAdding ? (
               <div className="tasks-card__add-box">
-                <input
-                  type="text"
-                  placeholder="Title"
-                  className="tasks-card__input-title"
+                <Input
+                  placeholder="Task title..."
                   value={newTaskTitle}
                   onChange={(e) => setNewTaskTitle(e.target.value)}
                   autoFocus
                 />
-                <textarea
+                <Textarea
                   placeholder="Details (optional)"
-                  className="tasks-card__input-desc"
                   rows={2}
                   value={newTaskDesc}
                   onChange={(e) => setNewTaskDesc(e.target.value)}
@@ -201,8 +199,8 @@ export function TasksPage() {
 
                 <div className="tasks-card__add-controls">
                   <div className="tasks-card__chips">
-                    <select
-                      className="tasks-card__select"
+                    <Select
+                      size="sm"
                       value={newTaskDue}
                       onChange={(e) => setNewTaskDue(e.target.value)}
                     >
@@ -210,10 +208,10 @@ export function TasksPage() {
                       <option value="Tomorrow">Due: Tomorrow</option>
                       <option value="This Week">Due: This Week</option>
                       <option value="Next Week">Due: Next Week</option>
-                    </select>
+                    </Select>
 
-                    <select
-                      className="tasks-card__select"
+                    <Select
+                      size="sm"
                       value={newTaskPriority}
                       onChange={(e) =>
                         setNewTaskPriority(e.target.value as 'High' | 'Medium' | 'Low')
@@ -222,25 +220,27 @@ export function TasksPage() {
                       <option value="High">Priority: High</option>
                       <option value="Medium">Priority: Medium</option>
                       <option value="Low">Priority: Low</option>
-                    </select>
+                    </Select>
                   </div>
 
                   <div className="tasks-card__btn-group">
-                    <button
+                    <Button
+                      variant="secondary"
+                      size="sm"
                       type="button"
-                      className="tasks-card__btn-secondary"
                       onClick={() => setIsAdding(false)}
                     >
                       Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="primary"
+                      size="sm"
                       type="button"
-                      className="tasks-card__btn-primary"
                       onClick={handleAddTask}
                       disabled={!newTaskTitle.trim()}
                     >
                       Save
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -316,18 +316,14 @@ export function TasksPage() {
 
               {/* Empty State when no tasks */}
               {openTasks.length === 0 && !isAdding && (
-                <div className="tasks-empty">
-                  <div className="tasks-empty__graphic" aria-hidden="true">
-                    <span className="tasks-empty__pill" />
-                    <span className="tasks-empty__illustration-icon">
-                      <BezentIcon name="tasks" size={36} color="#1a73e8" active />
-                    </span>
-                  </div>
-                  <h3 className="tasks-empty__title">No tasks yet</h3>
-                  <p className="tasks-empty__desc">
-                    Add your to-dos and keep track of them across BEZENT Workspace.
-                  </p>
-                </div>
+                <EmptyState
+                  title="No tasks yet"
+                  description="Add your to-dos and keep track of them across BEZENT Workspace."
+                  primaryAction={{
+                    label: 'Add a task',
+                    onClick: () => setIsAdding(true),
+                  }}
+                />
               )}
 
               {/* Completed Tasks Accordion */}

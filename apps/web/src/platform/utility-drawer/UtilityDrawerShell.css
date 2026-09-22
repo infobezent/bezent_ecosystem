@@ -18,23 +18,12 @@
   box-shadow: var(--shadow-utility-drawer);
 }
 
-/* Content: hidden until the reveal has played, then fades in. */
+/* Content: directly displayed immediately without splash delay */
 .utility-drawer__content {
   position: absolute;
   inset: 0;
-  animation: utilityDrawerContentIn var(--motion-duration-drawer-content)
-    var(--motion-ease-emphasized) var(--motion-duration-drawer-reveal) both;
-}
-
-@keyframes utilityDrawerContentIn {
-  from {
-    opacity: 0;
-    transform: translateY(3px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  width: 100%;
+  height: 100%;
 }
 
 /* Reveal layer: covers the content, then removes itself. */
@@ -112,69 +101,168 @@
   background: var(--drawer-bg);
 }
 
-/* Expanding radial disc (matches Google Workspace side panel loading flow). */
-.utility-drawer__circle {
+/* ── Bespoke Spread Animations for each capability ────────────────────────── */
+.utility-drawer__spread {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 0;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
+  inset: 0;
   pointer-events: none;
-  animation: utilityDrawerCircleExpand var(--motion-duration-drawer-reveal)
-    cubic-bezier(0.1, 0, 0.2, 1) forwards;
+  z-index: 0;
+  overflow: hidden;
 }
 
-.utility-drawer__circle--notes {
-  background-color: #feefc3;
+/* 1. Calendar Spread */
+.utility-drawer__spread--calendar {
+  background: radial-gradient(circle at 100% 100%, #dbeafe 0%, #eff6ff 50%, transparent 85%);
+  clip-path: polygon(100% 100%, 100% 100%, 100% 100%);
+  animation: spreadPeelOrigami var(--motion-duration-drawer-reveal) cubic-bezier(0.2, 0.8, 0.25, 1)
+    forwards;
 }
 
-.utility-drawer__circle--calendar,
-.utility-drawer__circle--tasks,
-.utility-drawer__circle--approvals {
-  background-color: #e8f0fe;
+.utility-drawer__spread--calendar .utility-drawer__spread-fx {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 180px;
+  height: 180px;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.4) 0%, transparent 65%);
+  filter: blur(14px);
+  animation: spreadPeelGlow var(--motion-duration-drawer-reveal) ease-out forwards;
 }
 
-[data-theme='dark'] .utility-drawer__circle--notes {
-  background-color: rgba(254, 239, 195, 0.16);
+/* 2. Notes Spread */
+.utility-drawer__spread--notes {
+  background: radial-gradient(circle at 100% 100%, #fef3c7 0%, #fffbeb 50%, transparent 85%);
+  clip-path: polygon(100% 100%, 100% 100%, 100% 100%);
+  animation: spreadPeelOrigami var(--motion-duration-drawer-reveal) cubic-bezier(0.2, 0.8, 0.25, 1)
+    forwards;
 }
 
-[data-theme='dark'] .utility-drawer__circle--calendar,
-[data-theme='dark'] .utility-drawer__circle--tasks,
-[data-theme='dark'] .utility-drawer__circle--approvals {
-  background-color: rgba(232, 240, 254, 0.16);
+.utility-drawer__spread--notes .utility-drawer__spread-fx {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 180px;
+  height: 180px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.45) 0%, transparent 65%);
+  filter: blur(14px);
+  animation: spreadPeelGlow var(--motion-duration-drawer-reveal) ease-out forwards;
 }
 
-@keyframes utilityDrawerCircleExpand {
+/* 3. Tasks Spread */
+.utility-drawer__spread--tasks {
+  background: radial-gradient(circle at 100% 100%, #ecfdf5 0%, #d1fae5 50%, transparent 85%);
+  clip-path: polygon(100% 100%, 100% 100%, 100% 100%);
+  animation: spreadPeelOrigami var(--motion-duration-drawer-reveal) cubic-bezier(0.2, 0.8, 0.25, 1)
+    forwards;
+}
+
+.utility-drawer__spread--tasks .utility-drawer__spread-fx {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 180px;
+  height: 180px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.4) 0%, transparent 65%);
+  filter: blur(14px);
+  animation: spreadPeelGlow var(--motion-duration-drawer-reveal) ease-out forwards;
+}
+
+/* 4. Approvals Spread */
+.utility-drawer__spread--approvals {
+  background: radial-gradient(circle at 100% 100%, #ede9fe 0%, #f3e8ff 50%, transparent 85%);
+  clip-path: polygon(100% 100%, 100% 100%, 100% 100%);
+  animation: spreadPeelOrigami var(--motion-duration-drawer-reveal) cubic-bezier(0.2, 0.8, 0.25, 1)
+    forwards;
+}
+
+.utility-drawer__spread--approvals .utility-drawer__spread-fx {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 180px;
+  height: 180px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.4) 0%, transparent 65%);
+  filter: blur(14px);
+  animation: spreadPeelGlow var(--motion-duration-drawer-reveal) ease-out forwards;
+}
+
+@keyframes spreadPeelOrigami {
   0% {
-    transform: translate(-50%, -50%) scale(0.15);
-    opacity: 0.7;
+    clip-path: polygon(100% 100%, 100% 100%, 100% 100%);
+    opacity: 0.95;
   }
-  25% {
-    transform: translate(-50%, -50%) scale(1.6);
-    opacity: 1;
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(4.2);
-    opacity: 1;
+  36% {
+    clip-path: polygon(100% 100%, -40% 100%, 100% -40%);
+    opacity: 0.98;
   }
   75% {
-    transform: translate(-50%, -50%) scale(8.5);
-    opacity: 0.85;
-  }
-  90% {
-    transform: translate(-50%, -50%) scale(10.5);
-    opacity: 0.35;
+    clip-path: polygon(100% 100%, -80% 100%, 100% -80%);
+    opacity: 0.7;
   }
   100% {
-    transform: translate(-50%, -50%) scale(11.5);
+    clip-path: polygon(100% 100%, -100% 100%, 100% -100%);
     opacity: 0;
   }
 }
 
+@keyframes spreadPeelGlow {
+  0% {
+    transform: scale(0.2);
+    opacity: 0.9;
+  }
+  40% {
+    transform: scale(1.6);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+/* Dark mode theme support for spreads */
+[data-theme='dark'] .utility-drawer__spread--calendar {
+  background: radial-gradient(
+    circle at 100% 100%,
+    rgba(37, 99, 235, 0.28) 0%,
+    rgba(30, 58, 138, 0.14) 50%,
+    transparent 85%
+  );
+}
+
+[data-theme='dark'] .utility-drawer__spread--notes {
+  background: radial-gradient(
+    circle at 100% 100%,
+    rgba(245, 158, 11, 0.28) 0%,
+    rgba(217, 119, 6, 0.14) 50%,
+    transparent 85%
+  );
+}
+
+[data-theme='dark'] .utility-drawer__spread--tasks {
+  background: radial-gradient(
+    circle at 100% 100%,
+    rgba(16, 185, 129, 0.28) 0%,
+    rgba(4, 120, 87, 0.14) 50%,
+    transparent 85%
+  );
+}
+
+[data-theme='dark'] .utility-drawer__spread--approvals {
+  background: radial-gradient(
+    circle at 100% 100%,
+    rgba(139, 92, 246, 0.35) 0%,
+    rgba(109, 40, 217, 0.18) 40%,
+    transparent 85%
+  );
+}
+
 /* Floating capability icon above the expanding disc. */
-.utility-drawer__loader-icon {
+.utility-drawer__loader-icon,
+.utility-drawer__loader-icon--calendar,
+.utility-drawer__loader-icon--notes,
+.utility-drawer__loader-icon--tasks,
+.utility-drawer__loader-icon--approvals {
   position: relative;
   z-index: 1;
   display: flex;
@@ -183,47 +271,57 @@
   background: transparent;
   border: none;
   box-shadow: none;
-  animation: utilityDrawerIconChoreography var(--motion-duration-drawer-reveal)
-    cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+  animation: animCompanionPeelFloat var(--motion-duration-drawer-reveal)
+    cubic-bezier(0.2, 0.8, 0.25, 1) forwards;
 }
 
-@keyframes utilityDrawerIconChoreography {
+@keyframes animCompanionPeelFloat {
   0% {
     opacity: 0;
-    transform: scale(0.15) translateY(0);
+    transform: scale(0.3) rotate(-14deg) translateY(12px);
   }
-  15% {
-    opacity: 0.9;
-    transform: scale(0.55) translateY(0);
+  24% {
+    opacity: 1;
+    transform: scale(1.07) rotate(4deg) translateY(-4px);
+  }
+  42% {
+    opacity: 1;
+    transform: scale(0.98) rotate(-1.5deg) translateY(1px);
+  }
+  56% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg) translateY(0);
+  }
+  86% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95) rotate(0deg) translateY(0);
+  }
+}
+
+@keyframes utilityDrawerIconDefault {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
   }
   30% {
     opacity: 1;
-    transform: scale(0.95) translateY(0);
+    transform: scale(1.04);
   }
-  42% {
-    /* Very mild buoyant jump at on-state */
+  50% {
     opacity: 1;
-    transform: scale(1.04) translateY(-3px);
-  }
-  54% {
-    /* Gentle return */
-    opacity: 1;
-    transform: scale(0.99) translateY(0.5px);
-  }
-  62% {
-    /* Stop in place */
-    opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: scale(1);
   }
   86% {
-    /* Hold still while background spread continues */
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: scale(1);
   }
   100% {
-    /* Fade out as drawer content arrives */
     opacity: 0;
-    transform: scale(0.97) translateY(0);
+    transform: scale(0.96);
   }
 }
 

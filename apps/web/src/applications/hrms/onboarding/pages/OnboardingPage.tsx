@@ -1,6 +1,19 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Button } from '../../../../design-system/components/Button';
-import { Avatar } from '../../../../design-system/components/Avatar';
+import {
+  Button,
+  Avatar,
+  Tabs,
+  SearchInput,
+  StatusPill,
+  EmptyState,
+  Alert,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableHeaderCell,
+  TableCell,
+} from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { useDevContext } from '../../../../platform/context/DevContext';
 import {
@@ -50,7 +63,6 @@ export function OnboardingPage() {
 
   const handleCreateNewHire = async (payload: CreateNewHirePayload) => {
     await createNewHire(payload);
-    // Reload data to reflect persisted record from MySQL
     await loadData();
   };
 
@@ -118,118 +130,83 @@ export function OnboardingPage() {
         </div>
 
         <div className="onboarding-page__actions">
-          <Button variant="primary" onClick={() => setIsModalOpen(true)}>
-            <span className="onboarding-page__btn-content">
-              <BezentIcon name="plusSign" size={16} />
-              Add New Hire
-            </span>
+          <Button
+            variant="primary"
+            leftIcon={<BezentIcon name="plusSign" size={16} />}
+            onClick={() => setIsModalOpen(true)}
+          >
+            Add New Hire
           </Button>
         </div>
       </header>
 
       {/* Toolbar & Filters */}
       <div className="onboarding-page__toolbar">
-        <div className="onboarding-page__tabs" role="tablist">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'all'}
-            className={`onboarding-page__tab ${
-              activeTab === 'all' ? 'onboarding-page__tab--active' : ''
-            }`}
-            onClick={() => setActiveTab('all')}
-          >
-            All <span className="onboarding-page__tab-count">{counts.all}</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'preboarding'}
-            className={`onboarding-page__tab ${
-              activeTab === 'preboarding' ? 'onboarding-page__tab--active' : ''
-            }`}
-            onClick={() => setActiveTab('preboarding')}
-          >
-            Preboarding <span className="onboarding-page__tab-count">{counts.preboarding}</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'documents'}
-            className={`onboarding-page__tab ${
-              activeTab === 'documents' ? 'onboarding-page__tab--active' : ''
-            }`}
-            onClick={() => setActiveTab('documents')}
-          >
-            Documents <span className="onboarding-page__tab-count">{counts.documents}</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'completed'}
-            className={`onboarding-page__tab ${
-              activeTab === 'completed' ? 'onboarding-page__tab--active' : ''
-            }`}
-            onClick={() => setActiveTab('completed')}
-          >
-            Completed <span className="onboarding-page__tab-count">{counts.completed}</span>
-          </button>
-        </div>
+        <Tabs
+          items={[
+            { id: 'all', label: 'All', count: counts.all },
+            { id: 'preboarding', label: 'Preboarding', count: counts.preboarding },
+            { id: 'documents', label: 'Documents', count: counts.documents },
+            { id: 'completed', label: 'Completed', count: counts.completed },
+          ]}
+          activeId={activeTab}
+          onChange={(id) => setActiveTab(id as typeof activeTab)}
+        />
 
-        <div className="onboarding-page__search-box">
-          <BezentIcon name="search" size={16} />
-          <input
-            type="text"
-            className="onboarding-page__search-input"
-            placeholder="Search by name, email, department..."
+        <div className="onboarding-page__search-wrap">
+          <SearchInput
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onClear={() => setSearchQuery('')}
+            placeholder="Search by name, email, department..."
           />
         </div>
       </div>
 
-      {/* Error state */}
+      {/* Error Alert */}
       {error && (
-        <div className="new-hire-modal__error-alert" role="alert">
+        <Alert variant="error" onDismiss={() => setError(null)}>
           {error}
-        </div>
+        </Alert>
       )}
 
       {/* Main Table */}
-      <div className="onboarding-page__table-container">
+      <div className="onboarding-page__table-section">
         {loading ? (
           <div className="onboarding-page__loading">Loading onboarding records...</div>
         ) : filteredCases.length === 0 ? (
-          <div className="onboarding-page__empty">
-            <BezentIcon name="onboarding" size={40} />
-            <h3 className="onboarding-page__empty-title">No New Hires Found</h3>
-            <p className="onboarding-page__empty-desc">
-              {searchQuery
+          <EmptyState
+            title="No New Hires Found"
+            description={
+              searchQuery
                 ? `No candidates match "${searchQuery}". Try clearing your search.`
-                : 'Get started by creating your first onboarding case for a new hire.'}
-            </p>
-            {!searchQuery && (
-              <Button variant="primary" onClick={() => setIsModalOpen(true)}>
-                Add New Hire
-              </Button>
-            )}
-          </div>
+                : 'Get started by creating your first onboarding case for a new hire.'
+            }
+            primaryAction={
+              !searchQuery
+                ? {
+                    label: 'Add New Hire',
+                    onClick: () => setIsModalOpen(true),
+                  }
+                : undefined
+            }
+          />
         ) : (
-          <table className="onboarding-page__table">
-            <thead>
-              <tr>
-                <th className="onboarding-page__th">Name</th>
-                <th className="onboarding-page__th">Department</th>
-                <th className="onboarding-page__th">Designation</th>
-                <th className="onboarding-page__th">Location</th>
-                <th className="onboarding-page__th">Stage</th>
-                <th className="onboarding-page__th">Joining Date</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table hoverable>
+            <TableHead>
+              <TableRow>
+                <TableHeaderCell>Name</TableHeaderCell>
+                <TableHeaderCell>Department</TableHeaderCell>
+                <TableHeaderCell>Designation</TableHeaderCell>
+                <TableHeaderCell>Location</TableHeaderCell>
+                <TableHeaderCell>Stage</TableHeaderCell>
+                <TableHeaderCell>Joining Date</TableHeaderCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
               {filteredCases.map((item) => (
-                <tr key={item.id} className="onboarding-page__tr">
-                  <td className="onboarding-page__td">
+                <TableRow key={item.id}>
+                  <TableCell>
                     <div className="onboarding-page__person-cell">
                       <Avatar initials={getInitials(item.fullName)} alt={item.fullName} />
                       <div className="onboarding-page__person-info">
@@ -237,22 +214,18 @@ export function OnboardingPage() {
                         <span className="onboarding-page__person-email">{item.email}</span>
                       </div>
                     </div>
-                  </td>
-                  <td className="onboarding-page__td">{item.departmentName}</td>
-                  <td className="onboarding-page__td">{item.designationName}</td>
-                  <td className="onboarding-page__td">{item.locationName || '—'}</td>
-                  <td className="onboarding-page__td">
-                    <span
-                      className={`onboarding-page__stage-tag onboarding-page__stage-tag--${item.stage}`}
-                    >
-                      {item.stage}
-                    </span>
-                  </td>
-                  <td className="onboarding-page__td">{formatDate(item.joiningDate)}</td>
-                </tr>
+                  </TableCell>
+                  <TableCell>{item.departmentName}</TableCell>
+                  <TableCell>{item.designationName}</TableCell>
+                  <TableCell>{item.locationName || '—'}</TableCell>
+                  <TableCell>
+                    <StatusPill status={item.stage} />
+                  </TableCell>
+                  <TableCell>{formatDate(item.joiningDate)}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         )}
       </div>
 
@@ -266,4 +239,5 @@ export function OnboardingPage() {
     </div>
   );
 }
+
 export default OnboardingPage;

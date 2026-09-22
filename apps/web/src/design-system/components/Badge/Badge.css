@@ -1,11 +1,5 @@
 /*
- * BEZENT Badge — source: the old approved UI's notification unread-count
- * badge (`App.tsx` lines 349-369). The `1.5px solid` ring used
- * `var(--bg-header)` in the old instance because that badge always sat
- * on the header background specifically; generalized here to
- * `var(--bg-surface)`, the more broadly applicable "content surface"
- * token, since Badge is meant to be composable onto any surface — see
- * docs/architecture/DESIGN-SYSTEM-COMPONENTS.md.
+ * BEZENT Badge & StatusPill — Semantic Token System.
  */
 
 .bezent-badge {
@@ -33,4 +27,84 @@
   width: 8px;
   height: 8px;
   padding: 0;
+}
+
+.bezent-badge--sm {
+  min-width: 18px;
+  height: 18px;
+  font-size: 11px;
+  padding: 0 5px;
+  line-height: 18px;
+}
+
+.bezent-badge--neutral {
+  background: var(--status-neutral-bg, #f1f4f9);
+  color: var(--status-neutral-fg, #5f6368);
+  border-color: var(--border-default, #dde3ea);
+}
+
+.bezent-badge--danger {
+  background: var(--status-danger-bg, #fee2e2);
+  color: var(--status-danger-fg, #b91c1c);
+  border-color: transparent;
+}
+
+/* ── Status Pills ── */
+.bezent-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.1px;
+  line-height: 1;
+  white-space: nowrap;
+  user-select: none;
+  border: 1px solid transparent;
+}
+
+.bezent-status-pill__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.bezent-status-pill__label {
+  text-transform: capitalize;
+}
+
+/* Variants using exact theme tokens */
+.bezent-status-pill--success {
+  background: var(--status-success-bg, #ecfdf5);
+  color: var(--status-success-fg, #059669);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.bezent-status-pill--warning {
+  background: var(--status-warning-bg, #fef3c7);
+  color: var(--status-warning-fg, #b45309);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.bezent-status-pill--danger {
+  background: var(--status-danger-bg, #fee2e2);
+  color: var(--status-danger-fg, #b91c1c);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.bezent-status-pill--info {
+  background: var(--status-info-bg, #eff6ff);
+  color: var(--status-info-fg, #1d4ed8);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.bezent-status-pill--neutral {
+  background: var(--status-neutral-bg, #f1f4f9);
+  color: var(--status-neutral-fg, #5f6368);
+  border-color: var(--border-default, #dde3ea);
 }

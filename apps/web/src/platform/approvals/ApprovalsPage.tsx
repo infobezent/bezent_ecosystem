@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { BezentIcon } from '../../design-system/icons';
-import { Avatar } from '../../design-system/components';
+import {
+  Avatar,
+  Button,
+  Card,
+  StatusPill,
+  Badge,
+  EmptyState,
+} from '../../design-system/components';
 import type { ApprovalItem } from './types';
 import './ApprovalsPage.css';
 
@@ -95,7 +102,7 @@ export function ApprovalsPage() {
             >
               <BezentIcon name="clock" size={18} color="currentColor" />
               <span>Pending Review</span>
-              <span className="approvals-page__count-badge">{pendingCount}</span>
+              <Badge count={pendingCount} variant="danger" size="sm" />
             </button>
 
             <button
@@ -105,7 +112,7 @@ export function ApprovalsPage() {
             >
               <BezentIcon name="check" size={18} color="currentColor" />
               <span>Approved</span>
-              <span className="approvals-page__count-badge is-neutral">{approvedCount}</span>
+              <Badge count={approvedCount} variant="neutral" size="sm" />
             </button>
 
             <button
@@ -115,7 +122,7 @@ export function ApprovalsPage() {
             >
               <BezentIcon name="close" size={18} color="currentColor" />
               <span>Rejected</span>
-              <span className="approvals-page__count-badge is-neutral">{rejectedCount}</span>
+              <Badge count={rejectedCount} variant="neutral" size="sm" />
             </button>
 
             <button
@@ -152,23 +159,23 @@ export function ApprovalsPage() {
           <div className="approvals-container">
             {/* KPI Metric Cards */}
             <div className="approvals-kpi-grid">
-              <div className="approvals-kpi-card">
+              <Card className="approvals-kpi-card">
                 <span className="approvals-kpi-card__label">Pending Review</span>
                 <span className="approvals-kpi-card__val is-pending">{pendingCount}</span>
                 <span className="approvals-kpi-card__sub">Action required by administrator</span>
-              </div>
+              </Card>
 
-              <div className="approvals-kpi-card">
+              <Card className="approvals-kpi-card">
                 <span className="approvals-kpi-card__label">Approved this Month</span>
                 <span className="approvals-kpi-card__val is-approved">{approvedCount + 14}</span>
                 <span className="approvals-kpi-card__sub">Avg. turnaround 1.2 hrs</span>
-              </div>
+              </Card>
 
-              <div className="approvals-kpi-card">
+              <Card className="approvals-kpi-card">
                 <span className="approvals-kpi-card__label">Audit Compliance</span>
                 <span className="approvals-kpi-card__val is-compliance">100%</span>
                 <span className="approvals-kpi-card__sub">All actions logged securely</span>
-              </div>
+              </Card>
             </div>
 
             {/* List Table / Cards */}
@@ -187,7 +194,7 @@ export function ApprovalsPage() {
                   .slice(0, 2);
 
                 return (
-                  <div key={item.id} className="approval-card">
+                  <Card key={item.id} hoverable className="approval-card">
                     <div className="approval-card__top">
                       <Avatar initials={initials} size="md" />
                       <div className="approval-card__meta">
@@ -208,43 +215,36 @@ export function ApprovalsPage() {
 
                       {item.status === 'Pending' ? (
                         <div className="approval-card__actions">
-                          <button
+                          <Button
+                            variant="secondary"
+                            size="sm"
                             type="button"
-                            className="approval-card__btn-reject"
                             onClick={() => handleReject(item.id)}
                           >
                             Reject
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            variant="primary"
+                            size="sm"
                             type="button"
-                            className="approval-card__btn-approve"
                             onClick={() => handleApprove(item.id)}
                           >
                             Approve
-                          </button>
+                          </Button>
                         </div>
                       ) : (
-                        <span
-                          className={`approval-card__status-badge is-${item.status.toLowerCase()}`}
-                        >
-                          {item.status}
-                        </span>
+                        <StatusPill status={item.status.toLowerCase()} />
                       )}
                     </div>
-                  </div>
+                  </Card>
                 );
               })}
 
               {filteredItems.length === 0 && (
-                <div className="approvals-empty">
-                  <span className="approvals-empty__icon">
-                    <BezentIcon name="check" size={32} color="#059669" active />
-                  </span>
-                  <h3 className="approvals-empty__title">No requests found</h3>
-                  <p className="approvals-empty__desc">
-                    There are no {statusFilter.toLowerCase()} approval requests in this view.
-                  </p>
-                </div>
+                <EmptyState
+                  title="No requests found"
+                  description={`There are no ${statusFilter.toLowerCase()} approval requests in this view.`}
+                />
               )}
             </div>
           </div>
