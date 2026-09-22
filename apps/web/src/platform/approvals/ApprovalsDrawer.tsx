@@ -65,9 +65,10 @@ export function ApprovalsDrawer({
     <div className="approvals-drawer">
       <UtilityDrawerHeader
         title="Approvals"
-        description="Requests waiting for your review"
+        description="Requests waiting for your decision"
         icon="approvals"
         count={pendingCount}
+        onFullScreen={onViewAll}
         onClose={onClose}
         actions={
           <UtilityIconAction

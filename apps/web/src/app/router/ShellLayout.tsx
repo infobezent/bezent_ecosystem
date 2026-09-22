@@ -85,12 +85,34 @@ export function ShellLayout() {
             tasks={data.tasks}
             onClose={utility.close}
             onCompleteTask={data.completeTask}
+            onViewAll={() => {
+              utility.close();
+              navigate('/tasks');
+            }}
           />
         );
       case 'approvals':
-        return <ApprovalsDrawer approvals={data.approvals} onClose={utility.close} />;
+        return (
+          <ApprovalsDrawer
+            approvals={data.approvals}
+            onClose={utility.close}
+            onViewAll={() => {
+              utility.close();
+              navigate('/approvals');
+            }}
+          />
+        );
       case 'calendar':
-        return <CalendarDrawer events={data.events} onClose={utility.close} />;
+        return (
+          <CalendarDrawer
+            events={data.events}
+            onClose={utility.close}
+            onOpenFullCalendar={() => {
+              utility.close();
+              navigate('/calendar');
+            }}
+          />
+        );
       case 'notes':
         return (
           <NotesDrawer
@@ -99,6 +121,10 @@ export function ShellLayout() {
             onSave={data.saveNote}
             onDelete={data.deleteNote}
             onTogglePin={data.toggleNotePin}
+            onViewAll={() => {
+              utility.close();
+              navigate('/notes');
+            }}
           />
         );
       default:
@@ -179,7 +205,7 @@ export function ShellLayout() {
         ) : undefined
       }
     >
-      <Outlet />
+      <Outlet context={data} />
     </AppShell>
   );
 }

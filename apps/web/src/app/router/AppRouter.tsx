@@ -1,6 +1,10 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import { destinationPath } from '../../shared/utils/navigation';
 import { APPLICATIONS, DEFAULT_APPLICATION } from '../config/applications';
+import { CalendarPage } from '../../platform/calendar';
+import { TasksPage } from '../../platform/tasks';
+import { ApprovalsPage } from '../../platform/approvals';
+import { NotesPage } from '../../platform/notes';
 import { DevPlaceholderPage } from './DevPlaceholderPage';
 import { NotFoundPage } from './NotFoundPage';
 import { ShellLayout } from './ShellLayout';
@@ -22,6 +26,14 @@ const router = createBrowserRouter([
     children: [
       { path: '/', element: <Navigate to={homePath} replace /> },
       ...APPLICATIONS.flatMap((application) => application.routes),
+      { path: '/calendar', element: <CalendarPage /> },
+      { path: '/tasks', element: <TasksPage /> },
+      { path: '/approvals', element: <ApprovalsPage /> },
+      { path: '/notes', element: <NotesPage /> },
+      { path: '/hrms/calendar', element: <CalendarPage /> },
+      { path: '/hrms/tasks', element: <TasksPage /> },
+      { path: '/hrms/approvals', element: <ApprovalsPage /> },
+      { path: '/hrms/notes', element: <NotesPage /> },
       // Development-only design-system verification page. Registered only in
       // dev builds, so it is absent from production bundles and navigation.
       ...(import.meta.env.DEV ? [{ path: '/dev', element: <DevPlaceholderPage /> }] : []),

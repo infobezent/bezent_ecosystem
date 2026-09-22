@@ -59,6 +59,7 @@ export function NotesDrawer({
       <UtilityDrawerHeader
         title="Notes"
         description="Quick personal notes"
+        onFullScreen={onViewAll}
         onClose={onClose}
         actions={
           <UtilityIconAction icon="plusSign" label="New Note" onClick={() => setEditingId('new')} />
