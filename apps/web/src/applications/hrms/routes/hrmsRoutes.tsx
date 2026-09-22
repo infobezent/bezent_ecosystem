@@ -37,7 +37,7 @@ export const hrmsRoutes: RouteObject[] = [
           {
             path: destination.segment,
             element: isOnboarding ? (
-              <OnboardingPage />
+              <OnboardingPage title={destination.label} />
             ) : (
               <ModulePlaceholder
                 application={APPLICATION}
@@ -48,18 +48,17 @@ export const hrmsRoutes: RouteObject[] = [
           },
           ...(destination.children ?? []).map((child): RouteObject => ({
             path: `${destination.segment}/${child.id}`,
-            element:
-              isOnboarding && child.id === 'new-hires' ? (
-                <OnboardingPage />
-              ) : (
-                <ModulePlaceholder
-                  application={APPLICATION}
-                  destinationId={destination.id}
-                  title={destination.label}
-                  section={child.label}
-                  sectionId={child.id}
-                />
-              ),
+            element: isOnboarding ? (
+              <OnboardingPage title={destination.label} />
+            ) : (
+              <ModulePlaceholder
+                application={APPLICATION}
+                destinationId={destination.id}
+                title={destination.label}
+                section={child.label}
+                sectionId={child.id}
+              />
+            ),
           })),
         ];
       }),
