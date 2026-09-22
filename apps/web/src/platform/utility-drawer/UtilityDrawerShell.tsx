@@ -54,7 +54,7 @@ export function UtilityDrawerShell({ title, icon, onClose, children }: UtilityDr
             className={`utility-drawer__circle utility-drawer__circle--${icon.toLowerCase()}`}
           />
           <span className="utility-drawer__loader-icon">
-            <CompanionIcon name={icon} size={84} active />
+            <CompanionIcon name={icon} size={112} active />
           </span>
         </div>
       </div>

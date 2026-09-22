@@ -118,8 +118,8 @@
   top: 50%;
   left: 50%;
   z-index: 0;
-  width: 120px;
-  height: 120px;
+  width: 160px;
+  height: 160px;
   border-radius: 50%;
   background: var(--drawer-reveal-surface);
   pointer-events: none;
@@ -200,7 +200,7 @@
   background: transparent;
   border: none;
   box-shadow: none;
-  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.14));
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.16));
   animation: utilityDrawerIconJumpSequence var(--motion-duration-drawer-reveal)
     cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
 }
