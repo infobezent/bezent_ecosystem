@@ -5,6 +5,17 @@ import { PersonalInformation } from './PersonalInformation';
 import { OnboardingSection } from './OnboardingSection';
 import { SkillsSection } from './SkillsSection';
 import { EmergencyContactSection } from './EmergencyContactSection';
+import { AccountsSection } from './AccountsSection';
+import { OnlineAccessSection } from './OnlineAccessSection';
+import { WorkingHoursSection } from './WorkingHoursSection';
+import {
+  DocumentsSection,
+  INITIAL_DOCUMENTS,
+  DocumentItemState,
+  PassportPhotoState,
+} from './DocumentsSection';
+import { ReviewSection, ReviewSectionData } from './ReviewSection';
+import { DraftsModal, EmployeeRegistrationDraft } from './DraftsModal';
 import './EmployeeRegistration.css';
 
 export type RegistrationSectionId =
@@ -40,13 +51,20 @@ export const REGISTRATION_SECTIONS: readonly RegistrationSection[] = [
 interface EmployeeRegistrationProps {
   onCancel: () => void;
   onSave?: (data: Record<string, unknown>) => void;
+  initialDraft?: EmployeeRegistrationDraft | null;
 }
 
-export function EmployeeRegistration({ onCancel }: EmployeeRegistrationProps) {
-  const [activeSection, setActiveSection] = useState<RegistrationSectionId>('general');
+export function EmployeeRegistration({
+  onCancel,
+  onSave,
+  initialDraft,
+}: EmployeeRegistrationProps) {
+  const [activeSection, setActiveSection] = useState<RegistrationSectionId>(
+    initialDraft ? initialDraft.activeSection : 'general',
+  );
 
   // General Form State
-  const [employeeId, setEmployeeId] = useState('EMP2026001');
+  const [employeeId, setEmployeeId] = useState(initialDraft?.employeeId || 'EMP2026001');
 
   // Employment Type
   const [employmentType, setEmploymentType] = useState('full_time');
@@ -104,9 +122,377 @@ export function EmployeeRegistration({ onCancel }: EmployeeRegistrationProps) {
   const [customNoticeUnit, setCustomNoticeUnit] = useState<'days' | 'months'>('days');
   const [otherNoticePeriod, setOtherNoticePeriod] = useState('');
 
+  // Document Section State
+  const [documentsList, setDocumentsList] = useState<DocumentItemState[]>(
+    initialDraft?.reviewData?.documents?.items || INITIAL_DOCUMENTS,
+  );
+  const [isExperiencedHire, setIsExperiencedHire] = useState(
+    initialDraft?.reviewData?.documents?.isExperiencedHire !== undefined
+      ? initialDraft.reviewData.documents.isExperiencedHire
+      : true,
+  );
+  const [passportPhoto, setPassportPhoto] = useState<PassportPhotoState>(
+    initialDraft?.reviewData?.documents?.passportPhoto
+      ? { file: null, ...initialDraft.reviewData.documents.passportPhoto }
+      : {
+          file: null,
+          fileName: 'Passport_Photo.png',
+          previewUrl:
+            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+          status: 'Verified',
+        },
+  );
+
+  // Repeatable lists state for Personal, Onboarding, Skills, Emergency
+  const [familyMembers, setFamilyMembers] = useState([
+    {
+      id: 'fam-1',
+      name: 'Sunita Kumar',
+      relationship: 'Spouse',
+      dob: '1996-08-14',
+      dependent: true,
+    },
+    { id: 'fam-2', name: 'Aarav Kumar', relationship: 'Child', dob: '2023-01-10', dependent: true },
+  ]);
+
+  const [nominationDetails, setNominationDetails] = useState([
+    {
+      id: 'nom-1',
+      nomineeName: 'Sunita Kumar',
+      relationship: 'Spouse',
+      percentage: 100,
+      isMinor: false,
+    },
+  ]);
+
+  const [onboardingTasks, setOnboardingTasks] = useState([
+    {
+      id: 'tsk-1',
+      taskDescription: 'Submit signed NDA & Confidentiality Agreement',
+      assignedTo: 'Arun Kumar',
+      dueDate: '2026-04-02',
+      status: 'Completed',
+    },
+    {
+      id: 'tsk-2',
+      taskDescription: 'Complete IT & Security Orientation Module',
+      assignedTo: 'Arun Kumar',
+      dueDate: '2026-04-05',
+      status: 'Pending',
+    },
+    {
+      id: 'tsk-3',
+      taskDescription: 'Collect Work Laptop & Security Keycard',
+      assignedTo: 'IT Admin (Ramesh P)',
+      dueDate: '2026-04-01',
+      status: 'In Progress',
+    },
+  ]);
+
+  const [assignedAssets, setAssignedAssets] = useState([
+    {
+      id: 'ast-1',
+      assetName: 'MacBook Pro 16" M3 Max',
+      category: 'Laptop',
+      serialNumber: 'MBP-2026-9901',
+      issueDate: '2026-04-01',
+      quantity: 1,
+    },
+    {
+      id: 'ast-2',
+      assetName: 'YubiKey 5C NFC Security Key',
+      category: 'Security Token',
+      serialNumber: 'YK-88912',
+      issueDate: '2026-04-01',
+      quantity: 1,
+    },
+  ]);
+
+  const [skillsList, setSkillsList] = useState([
+    {
+      id: 'skl-1',
+      skill: 'TypeScript / React Framework',
+      skillType: 'Technical',
+      levelType: 'Advanced',
+      level: 'Level 4',
+      levelDate: '2025-11-20',
+      yearsExperience: 4,
+      examiner: 'Karthik V (Tech Lead)',
+      verifiedBy: 'Priya S (HR)',
+      mentor: 'Rakesh Kumar',
+    },
+    {
+      id: 'skl-2',
+      skill: 'Node.js & Microservices Architecture',
+      skillType: 'Backend',
+      levelType: 'Intermediate',
+      level: 'Level 3',
+      levelDate: '2025-09-15',
+      yearsExperience: 3,
+      examiner: 'Karthik V (Tech Lead)',
+      verifiedBy: 'Priya S (HR)',
+      mentor: 'Rakesh Kumar',
+    },
+  ]);
+
+  const [secondaryContact, setSecondaryContact] = useState<{
+    name: string;
+    relationship: string;
+    phone: string;
+    altPhone: string;
+    email: string;
+    address: string;
+  } | null>({
+    name: 'Rajesh Kumar',
+    relationship: 'Brother',
+    phone: '+91 98765 43211',
+    altPhone: '',
+    email: 'rajesh.k@gmail.com',
+    address: 'Block B, Green Acres, Chennai',
+  });
+
+  // Deletion Handlers for Repeatable Items
+  const handleDeleteFamilyMember = (id: string) => {
+    setFamilyMembers((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const handleDeleteNominee = (id: string) => {
+    setNominationDetails((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const handleDeleteTask = (id: string) => {
+    setOnboardingTasks((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const handleDeleteAsset = (id: string) => {
+    setAssignedAssets((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const handleDeleteSkill = (id: string) => {
+    setSkillsList((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const handleDeleteSecondaryContact = () => {
+    setSecondaryContact(null);
+  };
+
+  const handleDeleteDocument = (id: string) => {
+    setDocumentsList((prev) =>
+      prev.map((doc) =>
+        doc.id === id
+          ? {
+              ...doc,
+              file: null,
+              fileName: '',
+              filePreviewUrl: '',
+              docNumber: '',
+              status: 'Pending' as const,
+            }
+          : doc,
+      ),
+    );
+  };
+
+  // Consolidated Data Object for Review Section
+  const reviewData: ReviewSectionData = {
+    general: {
+      employeeId,
+      employmentType:
+        employmentType === 'other'
+          ? otherEmploymentType || 'Custom'
+          : employmentType.replace('_', ' ').toUpperCase(),
+      employmentStatus:
+        employmentStatus === 'other'
+          ? otherEmploymentStatus || 'Custom'
+          : employmentStatus.replace('_', ' ').toUpperCase(),
+      department: department === 'other' ? otherDepartment : department,
+      team: team === 'other' ? otherTeam : team,
+      designation: designation === 'other' ? otherDesignation : designation,
+      gradeLevel: gradeLevel === 'other' ? otherGradeLevel : gradeLevel,
+      reportingManager,
+      organisationUnit: organisationUnit === 'other' ? otherOrganisationUnit : organisationUnit,
+      officeLocation: officeLocation === 'other' ? otherOfficeLocation : officeLocation,
+      joiningDate,
+      confirmedJoiningDate,
+      endDate,
+      sourceOfHire:
+        sourceOfHire === 'other' ? otherSourceOfHire : sourceOfHire.replace('_', ' ').toUpperCase(),
+      probationPeriod:
+        probationPeriod === 'custom'
+          ? `${customProbationNumber} ${customProbationUnit}`
+          : probationPeriod.replace('_', ' '),
+      noticePeriod:
+        noticePeriod === 'custom'
+          ? `${customNoticeNumber} ${customNoticeUnit}`
+          : noticePeriod.replace('_', ' '),
+    },
+    personal: {
+      fullName: 'Arun Kumar',
+      gender: 'Male',
+      dob: '1995-05-18',
+      maritalStatus: 'Married',
+      nationality: 'Indian',
+      bloodGroup: 'O+ Positive',
+      differentlyAbled: 'No',
+      aadhaarNumber: '5482 9102 3341',
+      panNumber: 'ABCDE1234F',
+      personalEmail: 'arun.kumar@gmail.com',
+      mobilePhone: '+91 98765 43210',
+      emergencyPhone: '+91 98765 43211',
+      currentStreet: '123 Anna Salai, T. Nagar',
+      currentCity: 'Chennai',
+      currentState: 'Tamil Nadu',
+      currentPin: '600017',
+      currentCountry: 'India',
+      permanentStreet: '123 Anna Salai, T. Nagar',
+      permanentCity: 'Chennai',
+      permanentState: 'Tamil Nadu',
+      permanentPin: '600017',
+      permanentCountry: 'India',
+      familyMembers,
+      nominationDetails,
+    },
+    onboarding: {
+      tasks: onboardingTasks,
+      assets: assignedAssets,
+    },
+    skills: skillsList,
+    emergency: {
+      primaryContact: {
+        name: 'Sunita Kumar',
+        relationship: 'Spouse',
+        phone: '+91 98765 43210',
+        altPhone: '+91 98765 43212',
+        email: 'sunita.k@gmail.com',
+        address: '123 Anna Salai, T. Nagar, Chennai',
+      },
+      secondaryContact,
+    },
+    accounts: {
+      ifscCode: 'HDFC0001234',
+      bankName: 'HDFC Bank Ltd',
+      branchName: 'T. Nagar Branch',
+      accountHolderName: 'Arun Kumar',
+      accountNumber: '50100012345678',
+      reEnterAccountNumber: '50100012345678',
+      salaryStructure: 'Executive Tech Band (Grade L2)',
+      payGrade: 'L2 - Senior Software Engineer',
+      annualCtc: 1800000,
+      monthlyBasic: 75000,
+      hra: 30000,
+      specialAllowance: 45000,
+      grossSalary: 150000,
+      employerPf: 9000,
+      gratuity: 3608,
+      payrollGroup: 'Executive India Payroll',
+      salaryEffectiveDate: '2026-04-01',
+      paymentFrequency: 'Monthly',
+      pfApplicable: true,
+      esiApplicable: false,
+      ptApplicable: true,
+      taxRegime: 'New Tax Regime',
+      benefits: {
+        Medical: true,
+        Life: true,
+        Accident: true,
+        Gratuity: true,
+        Bonus: true,
+        Incentive: true,
+        Travel: false,
+        Mobile: true,
+        Internet: true,
+        Meal: true,
+        WFH: true,
+        CompanyVehicle: false,
+      },
+      medicalDetails: {
+        provider: 'Star Health & Allied Insurance',
+        policyNumber: 'SH-POL-2026-88912',
+        coverage: '₹500,000 Family Floater',
+        effectiveDate: '2026-04-01',
+        expiryDate: '2027-03-31',
+      },
+    },
+    onlineAccess: {
+      username: 'arun.kumar',
+      officialEmail: 'arun.kumar@bezent.com',
+      invitationStatus: 'Sent',
+      invitationSentDate: '2026-03-22',
+      mfaRequired: true,
+      forcePasswordSetup: true,
+      accountActive: true,
+      employeeRole: 'Software Engineer',
+      portalRoleScope: 'Employee',
+      moduleAccess: {
+        Dashboard: true,
+        Attendance: true,
+        Leave: true,
+        Calendar: true,
+        Tasks: true,
+        Meetings: true,
+        Projects: true,
+        Performance: true,
+        Documents: true,
+      },
+    },
+    workingHours: {
+      workSchedule: 'Standard General Shift (9:00 AM – 6:00 PM)',
+      workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      startTime: '09:00',
+      endTime: '18:00',
+      standardHours: '8 hours / day (40 hours / week)',
+      breakMinutes: 15,
+      lunchMinutes: 45,
+      assignedCalendar: 'India Corporate Calendar 2026',
+      timeZone: 'Asia/Kolkata (IST, UTC+5:30)',
+      assignedSchedule: 'Standard General Shift',
+      holidays: [
+        { name: "New Year's Day", date: '2026-01-01', type: 'Public' },
+        { name: 'Republic Day', date: '2026-01-26', type: 'National' },
+        { name: 'Independence Day', date: '2026-08-15', type: 'National' },
+        { name: 'Gandhi Jayanti', date: '2026-10-02', type: 'National' },
+        { name: 'Diwali', date: '2026-11-08', type: 'Festival' },
+      ],
+    },
+    documents: {
+      isExperiencedHire,
+      passportPhoto,
+      items: documentsList,
+    },
+  };
+
+  // Drafts & Unsaved Changes State
+  const [currentDraftId, setCurrentDraftId] = useState<string | null>(
+    initialDraft ? initialDraft.id : null,
+  );
+  const [isDraftsModalOpen, setIsDraftsModalOpen] = useState(false);
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  const [draftsList, setDraftsList] = useState<EmployeeRegistrationDraft[]>(() => {
+    try {
+      const saved = localStorage.getItem('bezent_hrms_registration_drafts');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3500);
+  };
+
   const handleAutoGenerateId = () => {
     const randomNum = Math.floor(100000 + Math.random() * 900000);
     setEmployeeId(`EMP${randomNum}`);
+  };
+
+  const handleBack = () => {
+    const currentIndex = REGISTRATION_SECTIONS.findIndex((s) => s.id === activeSection);
+    if (currentIndex > 0) {
+      setActiveSection(REGISTRATION_SECTIONS[currentIndex - 1]!.id);
+    }
   };
 
   const handleNext = () => {
@@ -114,6 +500,86 @@ export function EmployeeRegistration({ onCancel }: EmployeeRegistrationProps) {
     if (currentIndex < REGISTRATION_SECTIONS.length - 1) {
       setActiveSection(REGISTRATION_SECTIONS[currentIndex + 1]!.id);
     }
+  };
+
+  const handleSaveDraft = (overrideExit = false) => {
+    const draftId = currentDraftId || `draft-${Date.now()}`;
+    if (!currentDraftId) {
+      setCurrentDraftId(draftId);
+    }
+
+    const empName = reviewData.personal.fullName || 'Arun Kumar';
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const lastUpdated = `Today at ${timeStr}`;
+
+    const newDraft: EmployeeRegistrationDraft = {
+      id: draftId,
+      employeeId,
+      employeeName: empName,
+      activeSection,
+      completedSectionsCount: 8,
+      pendingSectionLabels: ['Personal Information', 'Documents'],
+      lastUpdated,
+      reviewData,
+    };
+
+    setDraftsList((prev) => {
+      const exists = prev.some((d) => d.id === draftId);
+      const nextList = exists
+        ? prev.map((d) => (d.id === draftId ? newDraft : d))
+        : [newDraft, ...prev];
+      try {
+        localStorage.setItem('bezent_hrms_registration_drafts', JSON.stringify(nextList));
+      } catch {
+        // fallback
+      }
+      return nextList;
+    });
+
+    showToast('Draft saved successfully.');
+
+    if (overrideExit) {
+      setShowUnsavedModal(false);
+      onCancel();
+    }
+  };
+
+  const handleContinueDraft = (draft: EmployeeRegistrationDraft) => {
+    setCurrentDraftId(draft.id);
+    setActiveSection(draft.activeSection);
+
+    if (draft.reviewData?.general?.employeeId) {
+      setEmployeeId(draft.reviewData.general.employeeId);
+    }
+    if (draft.reviewData?.documents?.items) {
+      setDocumentsList(draft.reviewData.documents.items);
+    }
+    if (draft.reviewData?.documents?.passportPhoto) {
+      setPassportPhoto({ file: null, ...draft.reviewData.documents.passportPhoto });
+    }
+    if (draft.reviewData?.documents?.isExperiencedHire !== undefined) {
+      setIsExperiencedHire(draft.reviewData.documents.isExperiencedHire);
+    }
+
+    setIsDraftsModalOpen(false);
+    showToast(`Draft restored for ${draft.employeeName || draft.employeeId}.`);
+  };
+
+  const handleDeleteDraft = (draftId: string) => {
+    setDraftsList((prev) => {
+      const updated = prev.filter((d) => d.id !== draftId);
+      try {
+        localStorage.setItem('bezent_hrms_registration_drafts', JSON.stringify(updated));
+      } catch {
+        // fallback
+      }
+      return updated;
+    });
+    if (currentDraftId === draftId) {
+      setCurrentDraftId(null);
+    }
+    showToast('Draft deleted.');
   };
 
   return (
@@ -746,31 +1212,115 @@ export function EmployeeRegistration({ onCancel }: EmployeeRegistrationProps) {
             <SkillsSection />
           ) : activeSection === 'emergency' ? (
             <EmergencyContactSection />
+          ) : activeSection === 'accounts' ? (
+            <AccountsSection />
+          ) : activeSection === 'online_access' ? (
+            <OnlineAccessSection />
+          ) : activeSection === 'working_hours' ? (
+            <WorkingHoursSection />
+          ) : activeSection === 'documents' ? (
+            <DocumentsSection
+              documents={documentsList}
+              isExperiencedHire={isExperiencedHire}
+              passportPhoto={passportPhoto}
+              onDocumentsChange={setDocumentsList}
+              onClassificationChange={setIsExperiencedHire}
+              onPassportPhotoChange={setPassportPhoto}
+            />
           ) : (
-            /* Placeholder for remaining sections */
-            <div className="employee-registration__placeholder">
-              <BezentIcon name="documents" size={44} />
-              <h3 className="employee-registration__placeholder-title">
-                {REGISTRATION_SECTIONS.find((s) => s.id === activeSection)?.label} Section
-              </h3>
-              <p className="employee-registration__placeholder-desc">
-                Configure and manage{' '}
-                {REGISTRATION_SECTIONS.find((s) => s.id === activeSection)?.label.toLowerCase()}{' '}
-                details for the employee.
-              </p>
-            </div>
+            <ReviewSection
+              data={reviewData}
+              onEditSection={(sectionId) => setActiveSection(sectionId)}
+              onDeleteFamilyMember={handleDeleteFamilyMember}
+              onDeleteNominee={handleDeleteNominee}
+              onDeleteTask={handleDeleteTask}
+              onDeleteAsset={handleDeleteAsset}
+              onDeleteSkill={handleDeleteSkill}
+              onDeleteSecondaryContact={handleDeleteSecondaryContact}
+              onDeleteDocument={handleDeleteDocument}
+              onCreateEmployee={() => onSave?.(reviewData as unknown as Record<string, unknown>)}
+            />
           )}
 
           {/* Bottom Actions Bar */}
           <div className="employee-registration__actions">
-            <button type="button" className="employee-registration__cancel-btn" onClick={onCancel}>
+            <button
+              type="button"
+              className="employee-registration__back-btn"
+              disabled={activeSection === 'general'}
+              onClick={handleBack}
+            >
+              ← Back
+            </button>
+            <button
+              type="button"
+              className="employee-registration__save-draft-btn"
+              onClick={() => handleSaveDraft(false)}
+            >
+              💾 Save Draft
+            </button>
+            <button
+              type="button"
+              className="employee-registration__cancel-btn"
+              onClick={() => setShowUnsavedModal(true)}
+            >
               Cancel
             </button>
-            <Button variant="primary" onClick={handleNext}>
-              Save &amp; Next →
-            </Button>
+            {activeSection !== 'review' && (
+              <Button variant="primary" onClick={handleNext}>
+                Save &amp; Next →
+              </Button>
+            )}
           </div>
         </div>
+
+        {/* Toast Banner */}
+        {toastMsg && (
+          <div className="employee-registration__toast">
+            <span>✓</span>
+            <span>{toastMsg}</span>
+          </div>
+        )}
+
+        {/* Drafts Modal */}
+        <DraftsModal
+          isOpen={isDraftsModalOpen}
+          drafts={draftsList}
+          onClose={() => setIsDraftsModalOpen(false)}
+          onContinueDraft={handleContinueDraft}
+          onDeleteDraft={handleDeleteDraft}
+        />
+
+        {/* Unsaved Changes Modal */}
+        {showUnsavedModal && (
+          <div className="employee-registration__unsaved-overlay">
+            <div className="employee-registration__unsaved-card">
+              <h3 className="employee-registration__unsaved-title">Unsaved Changes</h3>
+              <p className="employee-registration__unsaved-desc">
+                You have unsaved changes. Save as draft before leaving?
+              </p>
+              <div className="employee-registration__unsaved-actions">
+                <button
+                  type="button"
+                  className="employee-registration__cancel-btn"
+                  onClick={() => setShowUnsavedModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="employee-registration__leave-btn"
+                  onClick={onCancel}
+                >
+                  Leave Without Saving
+                </button>
+                <Button variant="primary" onClick={() => handleSaveDraft(true)}>
+                  Save Draft
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

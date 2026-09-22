@@ -10,6 +10,7 @@ import {
   type OnboardingCaseItem,
 } from '../api/onboardingApi';
 import { EmployeeRegistration } from '../components/EmployeeRegistration';
+import { DraftsModal, EmployeeRegistrationDraft } from '../components/DraftsModal';
 import './OnboardingPage.css';
 
 interface OnboardingPageProps {
@@ -28,6 +29,51 @@ export function OnboardingPage({ title = 'Onboarding' }: OnboardingPageProps) {
     'all',
   );
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Drafts State
+  const [isDraftsModalOpen, setIsDraftsModalOpen] = useState(false);
+  const [selectedDraft, setSelectedDraft] = useState<EmployeeRegistrationDraft | null>(null);
+  const [draftsList, setDraftsList] = useState<EmployeeRegistrationDraft[]>(() => {
+    try {
+      const saved = localStorage.getItem('bezent_hrms_registration_drafts');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const refreshDrafts = useCallback(() => {
+    try {
+      const saved = localStorage.getItem('bezent_hrms_registration_drafts');
+      setDraftsList(saved ? JSON.parse(saved) : []);
+    } catch {
+      setDraftsList([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (viewMode === 'list') {
+      refreshDrafts();
+    }
+  }, [viewMode, refreshDrafts]);
+
+  const handleContinueDraft = (draft: EmployeeRegistrationDraft) => {
+    setSelectedDraft(draft);
+    setIsDraftsModalOpen(false);
+    setViewMode('registration');
+  };
+
+  const handleDeleteDraft = (draftId: string) => {
+    setDraftsList((prev) => {
+      const updated = prev.filter((d) => d.id !== draftId);
+      try {
+        localStorage.setItem('bezent_hrms_registration_drafts', JSON.stringify(updated));
+      } catch {
+        // fallback
+      }
+      return updated;
+    });
+  };
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -99,7 +145,13 @@ export function OnboardingPage({ title = 'Onboarding' }: OnboardingPageProps) {
   if (viewMode === 'registration') {
     return (
       <div className="onboarding-page">
-        <EmployeeRegistration onCancel={() => setViewMode('list')} />
+        <EmployeeRegistration
+          initialDraft={selectedDraft}
+          onCancel={() => {
+            setSelectedDraft(null);
+            setViewMode('list');
+          }}
+        />
       </div>
     );
   }
@@ -122,7 +174,24 @@ export function OnboardingPage({ title = 'Onboarding' }: OnboardingPageProps) {
         </div>
 
         <div className="onboarding-page__actions">
-          <Button variant="primary" onClick={() => setViewMode('registration')}>
+          <button
+            type="button"
+            className="onboarding-page__drafts-btn"
+            onClick={() => {
+              refreshDrafts();
+              setIsDraftsModalOpen(true);
+            }}
+          >
+            <BezentIcon name="documents" size={16} />
+            <span>View Drafts ({draftsList.length})</span>
+          </button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              setSelectedDraft(null);
+              setViewMode('registration');
+            }}
+          >
             <span className="onboarding-page__btn-content">
               <BezentIcon name="plusSign" size={16} />
               Add New Hire
@@ -259,6 +328,15 @@ export function OnboardingPage({ title = 'Onboarding' }: OnboardingPageProps) {
           </table>
         )}
       </div>
+
+      {/* Saved Drafts Modal */}
+      <DraftsModal
+        isOpen={isDraftsModalOpen}
+        drafts={draftsList}
+        onClose={() => setIsDraftsModalOpen(false)}
+        onContinueDraft={handleContinueDraft}
+        onDeleteDraft={handleDeleteDraft}
+      />
     </div>
   );
 }
