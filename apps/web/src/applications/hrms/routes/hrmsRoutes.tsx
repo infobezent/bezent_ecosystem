@@ -2,6 +2,7 @@ import { Navigate, type RouteObject } from 'react-router-dom';
 import { hrmsNavigation } from '../navigation';
 import { ModulePlaceholder } from '../pages/ModulePlaceholder';
 import { OnboardingPage } from '../onboarding';
+import { SettingsPage } from '../settings';
 import { destinationPath } from '../../../shared/utils/navigation';
 
 export const HRMS_BASE_PATH = '/hrms';
@@ -15,6 +16,7 @@ const APPLICATION = 'HRMS';
  *
  * Milestone 1 renders the real OnboardingPage for `/hrms/onboarding` and its
  * primary child `/hrms/onboarding/new-hires`.
+ * HRMS Settings renders the real SettingsPage for `/hrms/settings` and `/hrms/onboarding/workflow-settings`.
  * Every other destination and sub-destination renders the development placeholder.
  */
 const basePath = HRMS_BASE_PATH.replace(/^\//, '');
@@ -32,12 +34,15 @@ export const hrmsRoutes: RouteObject[] = [
       },
       ...hrmsNavigation.destinations.flatMap((destination): RouteObject[] => {
         const isOnboarding = destination.id === 'onboarding';
+        const isSettings = destination.id === 'settings';
 
         return [
           {
             path: destination.segment,
             element: isOnboarding ? (
               <OnboardingPage />
+            ) : isSettings ? (
+              <SettingsPage />
             ) : (
               <ModulePlaceholder
                 application={APPLICATION}
@@ -51,6 +56,8 @@ export const hrmsRoutes: RouteObject[] = [
             element:
               isOnboarding && child.id === 'new-hires' ? (
                 <OnboardingPage />
+              ) : isOnboarding && child.id === 'workflow-settings' ? (
+                <SettingsPage />
               ) : (
                 <ModulePlaceholder
                   application={APPLICATION}
