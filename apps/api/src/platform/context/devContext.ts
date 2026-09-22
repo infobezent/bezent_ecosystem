@@ -39,7 +39,21 @@ export function getDevContext(): DevContext {
 }
 
 export function devContextMiddleware(req: Request, _res: Response, next: NextFunction) {
-  req.devContext = getDevContext();
+  const headerCompanyId = req.headers['x-company-id'];
+  const headerTenantId = req.headers['x-tenant-id'];
+
+  if (typeof headerCompanyId === 'string' && headerCompanyId.trim()) {
+    req.devContext = {
+      tenantId:
+        typeof headerTenantId === 'string' && headerTenantId.trim()
+          ? headerTenantId.trim()
+          : DEFAULT_DEV_CONTEXT.tenantId,
+      companyId: headerCompanyId.trim(),
+      companyName: `Company ${headerCompanyId.trim()}`,
+    };
+  } else {
+    req.devContext = getDevContext();
+  }
   next();
 }
 

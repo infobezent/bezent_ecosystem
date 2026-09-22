@@ -7,6 +7,7 @@ import { errorHandler } from '../errors/errorHandler.js';
 import { contextRouter, devContextMiddleware } from '../../platform/context/devContext.js';
 import { organizationRouter } from '../../applications/hrms/organization/routes/organization.route.js';
 import { onboardingRouter } from '../../applications/hrms/onboarding/routes/onboarding.route.js';
+import { onboardingSettingsRouter } from '../../applications/hrms/settings/onboarding/routes/settings.route.js';
 
 /**
  * Builds the Express application. Kept separate from `main.ts` so it can be
@@ -29,6 +30,7 @@ export function createApp(): Express {
   app.use('/api/v1', contextRouter);
   app.use('/api/v1', organizationRouter);
   app.use('/api/v1', onboardingRouter);
+  app.use('/api/v1', onboardingSettingsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
