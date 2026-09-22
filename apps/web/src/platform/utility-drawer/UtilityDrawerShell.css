@@ -118,8 +118,8 @@
   top: 50%;
   left: 50%;
   z-index: 0;
-  width: 90px;
-  height: 90px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   background: var(--drawer-reveal-surface);
   pointer-events: none;
