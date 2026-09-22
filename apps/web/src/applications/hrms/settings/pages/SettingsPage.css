@@ -1,0 +1,134 @@
+.settings-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .settings-page {
+    padding: 16px;
+    gap: 16px;
+  }
+}
+
+.settings-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.settings-page__title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-page__title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-page__title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  letter-spacing: -0.02em;
+}
+
+.settings-page__company-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background-color: var(--bg-hover, #c2e7ff);
+  color: var(--text-primary, #001d35);
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.settings-page__subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary, #64748b);
+}
+
+.settings-page__domain-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border-default, #dde3ea);
+  padding-bottom: 0;
+  overflow-x: auto;
+}
+
+.settings-page__domain-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary, #444746);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.settings-page__domain-tab:hover {
+  color: var(--text-primary, #1f1f1f);
+  background-color: var(--bg-surface-secondary, #f0f4f9);
+}
+
+.settings-page__domain-tab--active {
+  color: var(--accent-primary, #041e49);
+  border-bottom-color: var(--accent-primary, #041e49);
+  font-weight: 600;
+}
+
+.settings-page__loading {
+  padding: 48px;
+  text-align: center;
+  color: var(--text-secondary, #444746);
+  font-size: 14px;
+}
+
+.settings-page__uninitialized {
+  padding: 48px 24px;
+  background-color: var(--bg-surface, #ffffff);
+  border: 1px dashed var(--border-default, #dde3ea);
+  border-radius: var(--card-radius, 16px);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 600px;
+  margin: 20px auto;
+}
+
+.settings-page__uninit-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary, #1f1f1f);
+}
+
+.settings-page__uninit-desc {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary, #444746);
+  line-height: 1.5;
+}
