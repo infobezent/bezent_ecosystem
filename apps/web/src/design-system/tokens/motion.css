@@ -50,8 +50,8 @@
      `BezentNavIcon.tsx` inline style (140ms), now a real CSS class rule
      in icons.css. */
   --motion-duration-nav-icon: 140ms;
-  --motion-duration-drawer-reveal: 360ms;
-  --motion-duration-drawer-content: 180ms;
+  --motion-duration-drawer-reveal: 680ms;
+  --motion-duration-drawer-content: 240ms;
   --motion-duration-panel-enter: 260ms;
   --motion-duration-panel-leave: 180ms;
   --motion-duration-launcher-enter: 200ms;
