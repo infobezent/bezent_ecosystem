@@ -182,18 +182,21 @@ export function CompanionIcon({ name, size = 20, active, className }: CompanionI
             </filter>
           </defs>
           <g filter="url(#bezent-approvals-shadow)">
-            {/* Head circle */}
-            <circle cx="12" cy="7.2" r="3.6" fill="url(#bezent-approvals-grad)" />
-            {/* Soft shoulders base */}
-            <path
-              d="M5.5 19.2a6.5 6.5 0 0 1 13 0v.3a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1v-.3z"
-              fill="#8ab4f8"
-              opacity="0.65"
-            />
-            {/* Upper torso */}
-            <path
-              d="M7.5 18.2a4.5 4.5 0 0 1 9 0v1.3a.8.8 0 0 1-.8.8H8.3a.8.8 0 0 1-.8-.8v-1.3z"
+            {/* Smooth rounded square avatar card — simple box feel */}
+            <rect
+              x="3.5"
+              y="3.5"
+              width="17"
+              height="17"
+              rx="4"
               fill="url(#bezent-approvals-grad)"
+            />
+            {/* Crisp white avatar head */}
+            <circle cx="12" cy="8.8" r="2.8" fill="#ffffff" />
+            {/* Crisp white avatar shoulders */}
+            <path
+              d="M7 17.4c0-2.5 2.2-4.2 5-4.2s5 1.7 5 4.2v.4H7v-.4z"
+              fill="#ffffff"
             />
           </g>
         </svg>
