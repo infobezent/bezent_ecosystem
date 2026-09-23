@@ -162,6 +162,9 @@
   /* Shared Floating Surface Tokens */
   --floating-surface-bg: #ffffff;
   --floating-surface-header-bg: #ffffff;
+  --subnav-header-bg: var(--nav-selected, #c2e7ff);
+  --subnav-header-title: #041e49;
+  --subnav-header-subtitle: #444746;
   --floating-surface-border: #dde3ea;
   --floating-surface-divider: #e7ebf0;
   --floating-surface-shadow: 0 4px 16px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
@@ -453,6 +456,9 @@
   /* Floating Surfaces & Shadows */
   --floating-surface-bg: #081b3a;
   --floating-surface-header-bg: #081b3a;
+  --subnav-header-bg: var(--nav-selected, #0b254e);
+  --subnav-header-title: #ffffff;
+  --subnav-header-subtitle: #94a3b8;
   --floating-surface-border: rgba(56, 189, 248, 0.16);
   --floating-surface-divider: rgba(56, 189, 248, 0.08);
   --floating-surface-shadow: 0 16px 40px rgba(2, 11, 28, 0.75), 0 0 1px rgba(56, 189, 248, 0.2);
