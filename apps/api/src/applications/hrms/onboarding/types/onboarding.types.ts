@@ -106,3 +106,30 @@ export interface OnboardingCaseHistoryItem {
   notes: string | null;
   createdAt: Date;
 }
+
+export interface PaginationMetadata {
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+}
+
+export interface StageCounts {
+  all: number;
+  preboarding: number;
+  documents: number;
+  completed: number;
+}
+
+export interface PaginatedNewHiresResult {
+  items: OnboardingCaseListItem[];
+  pagination: PaginationMetadata;
+  counts: StageCounts;
+}
+
+export interface ListNewHiresParams {
+  page?: number;
+  pageSize?: number;
+  stage?: string;
+  search?: string;
+}

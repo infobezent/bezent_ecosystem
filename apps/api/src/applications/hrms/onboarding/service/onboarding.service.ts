@@ -10,6 +10,8 @@ import type {
   WithdrawCaseDto,
   OnboardingCaseListItem,
   OnboardingCaseHistoryItem,
+  PaginatedNewHiresResult,
+  ListNewHiresParams,
 } from '../types/onboarding.types.js';
 import {
   NotFoundError,
@@ -35,8 +37,19 @@ export class OnboardingService {
     }
   }
 
-  async listNewHires(tenantId: string, companyId: string): Promise<OnboardingCaseListItem[]> {
-    return this.repo.listByCompany(tenantId, companyId);
+  async listNewHires(
+    tenantId: string,
+    companyId: string,
+    params?: ListNewHiresParams,
+  ): Promise<PaginatedNewHiresResult> {
+    const page = params?.page ?? 1;
+    const pageSize = params?.pageSize ?? 25;
+    return this.repo.listNewHiresPaginated(tenantId, companyId, {
+      page,
+      pageSize,
+      stage: params?.stage,
+      search: params?.search,
+    });
   }
 
   async listCases(

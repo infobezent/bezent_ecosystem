@@ -7,6 +7,7 @@ import {
   validateSubmitCase,
   validateTransitionStage,
   validateWithdrawCase,
+  validateListNewHiresQuery,
 } from '../validation/onboarding.schema.js';
 import { AppError } from '../../../../app/errors/AppError.js';
 
@@ -20,10 +21,18 @@ export class OnboardingController {
         throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
       }
 
-      const items = await this.service.listNewHires(devContext.tenantId, devContext.companyId);
+      const queryParams = validateListNewHiresQuery(req.query as Record<string, unknown>);
+
+      const result = await this.service.listNewHires(
+        devContext.tenantId,
+        devContext.companyId,
+        queryParams,
+      );
 
       res.json({
-        data: items,
+        data: result.items,
+        pagination: result.pagination,
+        counts: result.counts,
       });
     } catch (err) {
       next(err);
