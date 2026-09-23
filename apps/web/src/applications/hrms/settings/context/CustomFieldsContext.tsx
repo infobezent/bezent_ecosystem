@@ -1029,7 +1029,7 @@ interface CustomFieldsContextType {
   sections: OnboardingSectionConfig[];
   cards: OnboardingCardConfig[];
   fields: OnboardingFieldConfig[];
-  addSection: (title: string) => void;
+  addSection: (title: string) => { sectionId: string; cardId: string };
   toggleHideSection: (id: string) => void;
   reorderSection: (index: number, direction: 'up' | 'down') => void;
   deleteSection: (id: string) => void;
@@ -1054,9 +1054,12 @@ export function CustomFieldsProvider({ children }: { children: ReactNode }) {
   const [fields, setFields] = useState<OnboardingFieldConfig[]>(INITIAL_FIELDS);
 
   // Section Operations
-  const addSection = (title: string) => {
+  const addSection = (title: string): { sectionId: string; cardId: string } => {
+    const timestamp = Date.now();
+    const newSecId = `custom_sec_${timestamp}`;
+    const newCardId = `card_${timestamp}`;
     const newSec: OnboardingSectionConfig = {
-      id: `custom_sec_${Date.now()}`,
+      id: newSecId,
       title: title.trim(),
       hidden: false,
       isCustom: true,
@@ -1064,12 +1067,13 @@ export function CustomFieldsProvider({ children }: { children: ReactNode }) {
     setSections((prev) => [...prev, newSec]);
     // Automatically add a default card for custom section
     const defaultCard: OnboardingCardConfig = {
-      id: `card_${Date.now()}`,
-      sectionId: newSec.id,
+      id: newCardId,
+      sectionId: newSecId,
       title: `${title.trim().toUpperCase()} DETAILS`,
       isCustom: true,
     };
     setCards((prev) => [...prev, defaultCard]);
+    return { sectionId: newSecId, cardId: newCardId };
   };
 
   const toggleHideSection = (id: string) => {

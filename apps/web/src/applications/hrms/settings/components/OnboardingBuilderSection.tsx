@@ -60,6 +60,7 @@ export function OnboardingBuilderSection() {
   // Field modal state
   const [showFieldModal, setShowFieldModal] = useState(false);
   const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
+  const [editingTargetSectionId, setEditingTargetSectionId] = useState<string>('general');
   const [selectedTargetCardId, setSelectedTargetCardId] = useState<string>('');
   const [fieldLabel, setFieldLabel] = useState('');
   const [fieldType, setFieldType] = useState<'text' | 'select' | 'date' | 'number' | 'file'>(
@@ -70,6 +71,12 @@ export function OnboardingBuilderSection() {
   const [fieldDefaultValue, setFieldDefaultValue] = useState('');
   const [fieldOptions, setFieldOptions] = useState<string[]>([]);
   const [newOptionInput, setNewOptionInput] = useState('');
+
+  // Inline card & section creation inside Field modal
+  const [showInlineCardModal, setShowInlineCardModal] = useState(false);
+  const [inlineCardTitle, setInlineCardTitle] = useState('');
+  const [showInlineSectionModal, setShowInlineSectionModal] = useState(false);
+  const [inlineSectionTitle, setInlineSectionTitle] = useState('');
 
   // Delete Confirmation Modal State
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
@@ -85,13 +92,27 @@ export function OnboardingBuilderSection() {
   // Currently selected section info
   const selectedSection = sections.find((s) => s.id === selectedSectionId) || sections[0];
   const currentCards = cards.filter((c) => c.sectionId === selectedSection?.id);
+  const availableCardsForModal = cards.filter(
+    (c) => c.sectionId === (editingTargetSectionId || selectedSectionId),
+  );
 
   // Handlers for Sections
   const handleAddSection = () => {
     const title = prompt('Enter new section title:');
     if (title && title.trim()) {
-      addSection(title.trim());
+      const { sectionId } = addSection(title.trim());
+      setSelectedSectionId(sectionId);
     }
+  };
+
+  const handleCreateInlineSection = () => {
+    if (!inlineSectionTitle.trim()) return;
+    const { sectionId: newSecId, cardId: newCardId } = addSection(inlineSectionTitle.trim());
+    setEditingTargetSectionId(newSecId);
+    setSelectedSectionId(newSecId);
+    setSelectedTargetCardId(newCardId);
+    setShowInlineSectionModal(false);
+    setInlineSectionTitle('');
   };
 
   const handleSaveSectionRename = (id: string) => {
@@ -109,9 +130,19 @@ export function OnboardingBuilderSection() {
 
   const handleCreateCard = () => {
     if (!newCardTitle.trim() || !selectedSection) return;
-    addCard(selectedSection.id, newCardTitle.trim());
+    const createdId = addCard(selectedSection.id, newCardTitle.trim());
     setShowCardModal(false);
     setNewCardTitle('');
+    setSelectedTargetCardId(createdId);
+  };
+
+  const handleCreateInlineCard = () => {
+    if (!inlineCardTitle.trim()) return;
+    const targetSecId = editingTargetSectionId || selectedSectionId;
+    const newCardId = addCard(targetSecId, inlineCardTitle.trim());
+    setSelectedTargetCardId(newCardId);
+    setShowInlineCardModal(false);
+    setInlineCardTitle('');
   };
 
   const handleSaveCardRename = (cardId: string) => {
@@ -124,7 +155,10 @@ export function OnboardingBuilderSection() {
   // Handlers for Fields
   const handleOpenAddField = (cardId?: string) => {
     setEditingFieldId(null);
-    setSelectedTargetCardId(cardId || currentCards[0]?.id || '');
+    const secId = selectedSectionId;
+    setEditingTargetSectionId(secId);
+    const cardsInSec = cards.filter((c) => c.sectionId === secId);
+    setSelectedTargetCardId(cardId || cardsInSec[0]?.id || '');
     setFieldLabel('');
     setFieldType('text');
     setFieldRequired(false);
@@ -137,6 +171,8 @@ export function OnboardingBuilderSection() {
 
   const handleOpenEditField = (field: OnboardingFieldConfig) => {
     setEditingFieldId(field.id);
+    const secId = field.sectionId || selectedSectionId;
+    setEditingTargetSectionId(secId);
     setSelectedTargetCardId(field.cardId);
     setFieldLabel(field.label);
     setFieldType(field.fieldType);
@@ -160,10 +196,15 @@ export function OnboardingBuilderSection() {
   };
 
   const handleSaveField = () => {
-    if (!fieldLabel.trim() || !selectedTargetCardId) return;
+    if (!fieldLabel.trim()) return;
+    const targetSecId = editingTargetSectionId || selectedSectionId;
+    const targetCardId = selectedTargetCardId || availableCardsForModal[0]?.id || '';
+    if (!targetCardId) return;
 
     if (editingFieldId) {
       updateField(editingFieldId, {
+        sectionId: targetSecId,
+        cardId: targetCardId,
         label: fieldLabel.trim(),
         fieldType,
         required: fieldRequired,
@@ -173,8 +214,8 @@ export function OnboardingBuilderSection() {
       });
     } else {
       addField({
-        sectionId: selectedSection?.id || 'general',
-        cardId: selectedTargetCardId,
+        sectionId: targetSecId,
+        cardId: targetCardId,
         label: fieldLabel.trim(),
         fieldType,
         required: fieldRequired,
@@ -324,9 +365,6 @@ export function OnboardingBuilderSection() {
               <Actions align="end" gap="sm">
                 <Button variant="secondary" type="button" onClick={handleOpenAddCard}>
                   + Create New Card
-                </Button>
-                <Button variant="primary" type="button" onClick={() => handleOpenAddField()}>
-                  + Add Field
                 </Button>
               </Actions>
             }
@@ -544,6 +582,75 @@ export function OnboardingBuilderSection() {
         </Modal>
       )}
 
+      {/* Inline Create New Card Sub-Modal */}
+      {showInlineCardModal && (
+        <Modal
+          isOpen={showInlineCardModal}
+          onClose={() => setShowInlineCardModal(false)}
+          title="Create New Card"
+          size="sm"
+          footer={
+            <Actions align="end" gap="sm">
+              <Button variant="secondary" type="button" onClick={() => setShowInlineCardModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary" type="button" onClick={handleCreateInlineCard}>
+                Create Card
+              </Button>
+            </Actions>
+          }
+        >
+          <Stack gap="md">
+            <Input
+              label="Target Section"
+              value={sections.find((s) => s.id === (editingTargetSectionId || selectedSectionId))?.title || ''}
+              disabled
+            />
+            <Input
+              label="Card Name *"
+              value={inlineCardTitle}
+              onChange={(e) => setInlineCardTitle(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleCreateInlineCard()}
+              placeholder="e.g. Government Documents"
+              autoFocus
+              required
+            />
+          </Stack>
+        </Modal>
+      )}
+
+      {/* Inline Create New Section Sub-Modal */}
+      {showInlineSectionModal && (
+        <Modal
+          isOpen={showInlineSectionModal}
+          onClose={() => setShowInlineSectionModal(false)}
+          title="Create New Section"
+          size="sm"
+          footer={
+            <Actions align="end" gap="sm">
+              <Button variant="secondary" type="button" onClick={() => setShowInlineSectionModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary" type="button" onClick={handleCreateInlineSection}>
+                Create Section
+              </Button>
+            </Actions>
+          }
+        >
+          <Stack gap="md">
+            <Input
+              label="Section Name *"
+              value={inlineSectionTitle}
+              onChange={(e) => setInlineSectionTitle(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleCreateInlineSection()}
+              placeholder="e.g. Certifications"
+              autoFocus
+              required
+            />
+          </Stack>
+        </Modal>
+      )}
+
       {/* Add / Edit Field Modal */}
       {showFieldModal && (
         <Modal
@@ -562,13 +669,41 @@ export function OnboardingBuilderSection() {
           }
         >
           <Stack gap="md">
-            <Input label="Target Section" value={selectedSection?.title || ''} disabled />
+            <Select
+              label="Target Section *"
+              value={editingTargetSectionId}
+              options={[
+                ...sections.map((sec) => ({ value: sec.id, label: sec.title })),
+                { value: '__ADD_NEW_SECTION__', label: '+ Add New Section' },
+              ]}
+              onChange={(e) => {
+                if (e.target.value === '__ADD_NEW_SECTION__') {
+                  setShowInlineSectionModal(true);
+                  setInlineSectionTitle('');
+                } else {
+                  const newSecId = e.target.value;
+                  setEditingTargetSectionId(newSecId);
+                  const cardsInNewSec = cards.filter((c) => c.sectionId === newSecId);
+                  setSelectedTargetCardId(cardsInNewSec[0]?.id || '');
+                }
+              }}
+            />
 
             <Select
               label="Add to Existing Card *"
               value={selectedTargetCardId}
-              options={currentCards.map((c) => ({ value: c.id, label: c.title }))}
-              onChange={(e) => setSelectedTargetCardId(e.target.value)}
+              options={[
+                ...availableCardsForModal.map((c) => ({ value: c.id, label: c.title })),
+                { value: '__ADD_NEW_CARD__', label: '+ Add New Card' },
+              ]}
+              onChange={(e) => {
+                if (e.target.value === '__ADD_NEW_CARD__') {
+                  setShowInlineCardModal(true);
+                  setInlineCardTitle('');
+                } else {
+                  setSelectedTargetCardId(e.target.value);
+                }
+              }}
             />
 
             <Input
