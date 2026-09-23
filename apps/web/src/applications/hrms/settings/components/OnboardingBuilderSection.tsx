@@ -591,7 +591,11 @@ export function OnboardingBuilderSection() {
           size="sm"
           footer={
             <Actions align="end" gap="sm">
-              <Button variant="secondary" type="button" onClick={() => setShowInlineCardModal(false)}>
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={() => setShowInlineCardModal(false)}
+              >
                 Cancel
               </Button>
               <Button variant="primary" type="button" onClick={handleCreateInlineCard}>
@@ -603,7 +607,10 @@ export function OnboardingBuilderSection() {
           <Stack gap="md">
             <Input
               label="Target Section"
-              value={sections.find((s) => s.id === (editingTargetSectionId || selectedSectionId))?.title || ''}
+              value={
+                sections.find((s) => s.id === (editingTargetSectionId || selectedSectionId))
+                  ?.title || ''
+              }
               disabled
             />
             <Input
@@ -628,7 +635,11 @@ export function OnboardingBuilderSection() {
           size="sm"
           footer={
             <Actions align="end" gap="sm">
-              <Button variant="secondary" type="button" onClick={() => setShowInlineSectionModal(false)}>
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={() => setShowInlineSectionModal(false)}
+              >
                 Cancel
               </Button>
               <Button variant="primary" type="button" onClick={handleCreateInlineSection}>
