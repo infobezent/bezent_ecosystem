@@ -150,13 +150,17 @@
   font-weight: 550;
   line-height: 14px;
   text-align: center;
-  color: #000000;
+  color: var(--nav-label-default);
   transition: color var(--motion-duration-icon) ease;
+}
+
+.left-sidebar__item:hover .left-sidebar__label {
+  color: var(--nav-label-hover);
 }
 
 .left-sidebar__item.is-active .left-sidebar__label {
   font-weight: 650;
-  color: #000000;
+  color: var(--nav-label-active);
 }
 
 /* Dimmed current-page indicator when More launcher takes active rail focus (BZ-03) */
@@ -238,9 +242,17 @@
   filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.45));
 }
 
-[data-theme='dark'] .left-sidebar__item.is-active .bezent-nav-label {
-  color: #ffffff;
-  font-weight: 600;
+[data-theme='dark'] .left-sidebar__label {
+  color: var(--nav-label-default, #94a3b8);
+}
+
+[data-theme='dark'] .left-sidebar__item:hover .left-sidebar__label {
+  color: var(--nav-label-hover, #f8fafc);
+}
+
+[data-theme='dark'] .left-sidebar__item.is-active .left-sidebar__label {
+  color: var(--nav-label-active, #ffffff);
+  font-weight: 650;
 }
 
 [data-theme='dark'] .left-sidebar__badge-dot {
