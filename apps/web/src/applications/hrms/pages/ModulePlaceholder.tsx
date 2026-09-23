@@ -23,6 +23,11 @@ interface EmptyStateCopy {
  * Keeps domain copy out of the generic design-system EmptyState primitive.
  */
 const HRMS_EMPTY_COPY: Record<string, EmptyStateCopy> = {
+  administrative: {
+    emptyTitle: 'No administrative records yet',
+    emptyDescription:
+      'Employee administration, onboarding, and workforce documents will appear here.',
+  },
   employees: {
     emptyTitle: 'No employees yet',
     emptyDescription:
