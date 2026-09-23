@@ -99,7 +99,12 @@ export function EmptyStateIllustration({
       aria-hidden="true"
     >
       <div className="bezent-sleeping-raccoon-stage">
-        <img src={activeImage} alt="" className="bezent-sleeping-raccoon-img" draggable={false} />
+        <img
+          src={activeImage}
+          alt=""
+          className={`bezent-sleeping-raccoon-img bezent-sleeping-raccoon-img--${variant}`}
+          draggable={false}
+        />
 
         {/* Floating Contextual Theme Badge for pages without dedicated full-body art */}
         {accent && activeImage === sleepingRaccoonImg && (

@@ -33,6 +33,7 @@
 }
 
 .bezent-sleeping-raccoon-img {
+  --raccoon-scale: 1;
   width: 100%;
   max-width: 160px;
   max-height: 160px;
@@ -41,6 +42,7 @@
   object-fit: contain;
   border-radius: 8px;
   transform-origin: bottom center;
+  transform: scale(var(--raccoon-scale, 1));
   animation: bezentRaccoonBreathe 3.8s ease-in-out infinite;
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -51,17 +53,18 @@
 }
 
 .bezent-empty-illustration-container:hover .bezent-sleeping-raccoon-img {
-  transform: scale(1.03);
+  transform: scale(calc(var(--raccoon-scale, 1) * 1.03));
 }
 
-/* Gentle synchronized breathing motion */
+/* Gentle synchronized breathing motion respecting per-variant scale */
 @keyframes bezentRaccoonBreathe {
   0%,
   100% {
-    transform: scale(1) translateY(0);
+    transform: scale(var(--raccoon-scale, 1)) translateY(0);
   }
   50% {
-    transform: scale(1.012, 1.02) translateY(-0.8px);
+    transform: scale(calc(var(--raccoon-scale, 1) * 1.012), calc(var(--raccoon-scale, 1) * 1.02))
+      translateY(-0.8px);
   }
 }
 
