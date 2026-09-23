@@ -46,6 +46,23 @@
   }
 }
 
+/* Horizontal FormGrid modifiers — propagate label width token to child fields */
+.bezent-form-grid--layout-horizontal {
+  --form-grid-label-width: var(--form-label-width-md, 180px);
+}
+
+.bezent-form-grid--label-width-sm {
+  --form-grid-label-width: var(--form-label-width-sm, 140px);
+}
+
+.bezent-form-grid--label-width-md {
+  --form-grid-label-width: var(--form-label-width-md, 180px);
+}
+
+.bezent-form-grid--label-width-lg {
+  --form-grid-label-width: var(--form-label-width-lg, 220px);
+}
+
 /* FieldGroup Primitive */
 .bezent-field-group {
   display: flex;
@@ -53,6 +70,57 @@
   gap: 6px;
   width: 100%;
   box-sizing: border-box;
+}
+
+.bezent-field-group--vertical {
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Horizontal FieldGroup layout */
+.bezent-field-group--horizontal {
+  display: grid;
+  grid-template-columns:
+    var(--field-group-label-width, var(--form-grid-label-width, var(--form-label-width-md, 180px)))
+    minmax(0, 1fr);
+  column-gap: var(--space-3, 12px);
+  row-gap: var(--space-1, 4px);
+  align-items: start;
+}
+
+.bezent-field-group--label-width-sm {
+  --field-group-label-width: var(--form-label-width-sm, 140px);
+}
+
+.bezent-field-group--label-width-md {
+  --field-group-label-width: var(--form-label-width-md, 180px);
+}
+
+.bezent-field-group--label-width-lg {
+  --field-group-label-width: var(--form-label-width-lg, 220px);
+}
+
+.bezent-field-group--horizontal > .bezent-field-group__label {
+  grid-column: 1;
+  padding-top: var(--space-2, 8px);
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
+  line-height: var(--line-height-normal, 1.4);
+}
+
+.bezent-field-group--horizontal
+  > :not(.bezent-field-group__label):not(.bezent-field-group__helper):not(
+    .bezent-field-group__error
+  ) {
+  grid-column: 2;
+  min-width: 0;
+}
+
+.bezent-field-group--horizontal > .bezent-field-group__helper,
+.bezent-field-group--horizontal > .bezent-field-group__error {
+  grid-column: 2;
+  margin: 0;
 }
 
 .bezent-field-group__label {
@@ -91,6 +159,28 @@
 @media (max-width: 640px) {
   .bezent-field-group--span-2 {
     grid-column: span 1;
+  }
+
+  .bezent-field-group--horizontal {
+    grid-template-columns: 1fr;
+    row-gap: var(--space-1-5, 6px);
+  }
+
+  .bezent-field-group--horizontal > .bezent-field-group__label {
+    grid-column: 1;
+    padding-top: 0;
+  }
+
+  .bezent-field-group--horizontal
+    > :not(.bezent-field-group__label):not(.bezent-field-group__helper):not(
+      .bezent-field-group__error
+    ) {
+    grid-column: 1;
+  }
+
+  .bezent-field-group--horizontal > .bezent-field-group__helper,
+  .bezent-field-group--horizontal > .bezent-field-group__error {
+    grid-column: 1;
   }
 }
 

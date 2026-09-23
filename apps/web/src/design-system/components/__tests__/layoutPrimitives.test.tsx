@@ -89,6 +89,41 @@ describe('Design System Layout Primitives', () => {
     expect(html).toContain('Name is required');
   });
 
+  it('FormGrid supports opt-in horizontal layout with semantic labelWidth variants', () => {
+    const html = renderToStaticMarkup(
+      <FormGrid columns={2} layout="horizontal" labelWidth="lg">
+        <FieldGroup label="Reporting Manager" htmlFor="mgr-input">
+          <input id="mgr-input" type="text" />
+        </FieldGroup>
+        <FieldGroup label="Work Notes" span={2}>
+          <textarea />
+        </FieldGroup>
+      </FormGrid>,
+    );
+
+    expect(html).toContain('bezent-form-grid--layout-horizontal');
+    expect(html).toContain('bezent-form-grid--label-width-lg');
+    expect(html).toContain('bezent-field-group--horizontal');
+    expect(html).toContain('bezent-field-group--label-width-lg');
+    expect(html).toContain('bezent-field-group--span-2');
+  });
+
+  it('FieldGroup allows overriding layout orientation and labelWidth explicitly', () => {
+    const html = renderToStaticMarkup(
+      <FormGrid columns={2} layout="horizontal" labelWidth="md">
+        <FieldGroup label="Custom Width Field" labelWidth="sm">
+          <input type="text" />
+        </FieldGroup>
+        <FieldGroup label="Vertical Field in Horizontal Grid" orientation="vertical">
+          <textarea />
+        </FieldGroup>
+      </FormGrid>,
+    );
+
+    expect(html).toContain('bezent-field-group--label-width-sm');
+    expect(html).toContain('bezent-field-group--vertical');
+  });
+
   it('Section renders card container with title and action header', () => {
     const html = renderToStaticMarkup(
       <Section title="Section Title" subtitle="Section Subtitle">
