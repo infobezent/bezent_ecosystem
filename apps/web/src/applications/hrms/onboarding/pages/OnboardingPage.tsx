@@ -506,12 +506,7 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                         {p}
                       </Button>
                     ) : (
-                      <Label
-                        key={`ellipsis-${idx}`}
-                        as="span"
-                        size="sm"
-                        aria-hidden="true"
-                      >
+                      <Label key={`ellipsis-${idx}`} as="span" size="sm" aria-hidden="true">
                         …
                       </Label>
                     ),

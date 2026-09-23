@@ -1,6 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { Label, FormField, Checkbox, Spinner, LoadingState, Select, Toolbar, Inline } from '../index';
+import {
+  Label,
+  FormField,
+  Checkbox,
+  Spinner,
+  LoadingState,
+  Select,
+  Toolbar,
+  Inline,
+} from '../index';
 import * as RootDesignSystem from '../../index';
 
 describe('Design System Core Primitives', () => {
@@ -48,11 +57,7 @@ describe('Design System Core Primitives', () => {
   describe('Select', () => {
     it('renders width-auto modifier class when width is auto', () => {
       const html = renderToStaticMarkup(
-        <Select
-          width="auto"
-          size="sm"
-          options={[{ value: '25', label: '25' }]}
-        />,
+        <Select width="auto" size="sm" options={[{ value: '25', label: '25' }]} />,
       );
       expect(html).toContain('bezent-select-wrapper--width-auto');
       expect(html).toContain('bezent-select-wrapper--sm');
