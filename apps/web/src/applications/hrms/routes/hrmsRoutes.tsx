@@ -33,14 +33,14 @@ export const hrmsRoutes: RouteObject[] = [
         element: <Navigate to={destinationPath(HRMS_BASE_PATH, defaultDestination)} replace />,
       },
       ...hrmsNavigation.destinations.flatMap((destination): RouteObject[] => {
-        const isOnboarding = destination.id === 'onboarding';
+        const isAdministration = destination.id === 'administration';
         const isSettings = destination.id === 'settings';
 
         return [
           {
             path: destination.segment,
-            element: isOnboarding ? (
-              <OnboardingPage title={destination.label} />
+            element: isAdministration ? (
+              <Navigate to="/hrms/administration/employee-administration" replace />
             ) : isSettings ? (
               <SettingsPage />
             ) : (
@@ -54,10 +54,10 @@ export const hrmsRoutes: RouteObject[] = [
           ...(destination.children ?? []).map((child): RouteObject => ({
             path: `${destination.segment}/${child.id}`,
             element:
-              isOnboarding && child.id === 'workflow-settings' ? (
+              isAdministration && child.id === 'onboarding' ? (
+                <OnboardingPage title={child.label} />
+              ) : isSettings ? (
                 <SettingsPage />
-              ) : isOnboarding ? (
-                <OnboardingPage title={destination.label} />
               ) : (
                 <ModulePlaceholder
                   application={APPLICATION}
@@ -70,6 +70,23 @@ export const hrmsRoutes: RouteObject[] = [
           })),
         ];
       }),
+      // Backward-compatible routes for existing Onboarding URLs
+      {
+        path: 'onboarding',
+        element: <OnboardingPage title="Onboarding" />,
+      },
+      {
+        path: 'onboarding/new-hires',
+        element: <OnboardingPage title="Onboarding" />,
+      },
+      {
+        path: 'onboarding/workflow-settings',
+        element: <SettingsPage />,
+      },
+      {
+        path: 'onboarding/*',
+        element: <Navigate to="/hrms/administration/onboarding" replace />,
+      },
       {
         path: '*',
         element: (
