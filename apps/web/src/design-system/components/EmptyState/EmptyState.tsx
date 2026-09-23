@@ -1,5 +1,9 @@
 import type { ReactNode } from 'react';
-import { EmptyStateIllustration, type EmptyStateIllustrationSize } from './EmptyStateIllustration';
+import {
+  EmptyStateIllustration,
+  type EmptyStateIllustrationSize,
+  type RaccoonVariant,
+} from './EmptyStateIllustration';
 import './EmptyState.css';
 
 export interface EmptyStateAction {
@@ -20,12 +24,13 @@ export interface EmptyStateProps {
   /** Optional decoration inside the primary action button (e.g. an icon). */
   primaryActionIcon?: ReactNode;
   secondaryAction?: EmptyStateAction;
-  /** Optional custom action node. */
-  action?: ReactNode;
   size?: EmptyStateIllustrationSize;
   hideIllustration?: boolean;
+  /** Custom mascot illustration image override */
+  imageSrc?: string;
+  /** Page or module contextual mascot variant (e.g. 'onboarding', 'attendance', 'leave', etc.) */
+  variant?: RaccoonVariant | string;
   className?: string;
-  children?: ReactNode;
 }
 
 /**
@@ -58,11 +63,11 @@ export function EmptyState({
   primaryAction,
   primaryActionIcon,
   secondaryAction,
-  action,
   size = 'default',
   hideIllustration = false,
+  imageSrc,
+  variant,
   className,
-  children,
 }: EmptyStateProps) {
   const isCompact = size === 'compact';
 
@@ -74,7 +79,9 @@ export function EmptyState({
     >
       {!hideIllustration && (
         <div className="bezent-empty-state__illustration">
-          {illustration ?? <EmptyStateIllustration size={size} />}
+          {illustration ?? (
+            <EmptyStateIllustration size={size} imageSrc={imageSrc} variant={variant} />
+          )}
         </div>
       )}
 
@@ -82,9 +89,8 @@ export function EmptyState({
 
       {description && <p className="bezent-empty-state__description">{description}</p>}
 
-      {(primaryAction || secondaryAction || action || children) && (
+      {(primaryAction || secondaryAction) && (
         <div className="bezent-empty-state__actions">
-          {action}
           {primaryAction && (
             <button
               type="button"
@@ -104,7 +110,6 @@ export function EmptyState({
               {secondaryAction.label}
             </button>
           )}
-          {children}
         </div>
       )}
       {!isCompact && (

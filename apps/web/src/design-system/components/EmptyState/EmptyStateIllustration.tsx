@@ -1,17 +1,44 @@
 import sleepingRaccoonImg from '../../../assets/sleeping_blue_raccoon.png';
+import onboardingRaccoonImg from '../../../assets/raccoon_onboarding.png';
+import leaveRaccoonImg from '../../../assets/raccoon_leave.png';
+import attendanceRaccoonImg from '../../../assets/raccoon_attendance.png';
+import timesheetsRaccoonImg from '../../../assets/raccoon_timesheets.png';
+import performanceRaccoonImg from '../../../assets/raccoon_performance.png';
+import employeesRaccoonImg from '../../../assets/raccoon_employees.png';
+import { BezentIcon } from '../../icons';
 import './EmptyStateIllustration.css';
 
 export type EmptyStateIllustrationSize = 'default' | 'compact';
+
+export type RaccoonVariant =
+  | 'default'
+  | 'onboarding'
+  | 'attendance'
+  | 'leave'
+  | 'timesheets'
+  | 'payroll'
+  | 'performance'
+  | 'employees'
+  | 'employee'
+  | 'organization'
+  | 'recruitment'
+  | 'documents'
+  | 'learning'
+  | 'career'
+  | 'tasks'
+  | 'calendar'
+  | 'approvals'
+  | 'notes'
+  | 'dashboard';
 
 export interface EmptyStateIllustrationProps {
   size?: EmptyStateIllustrationSize;
   className?: string;
   isDark?: boolean;
-  /**
-   * Optional custom image source URL.
-   * Defaults to the canonical BEZENT sleeping raccoon transparent PNG.
-   */
+  /** Explicit custom image source override */
   imageSrc?: string;
+  /** Page or module contextual mascot variant */
+  variant?: RaccoonVariant | string;
   /**
    * Optional alt text for the illustration image.
    * Defaults to empty string (decorative illustration).
@@ -19,11 +46,43 @@ export interface EmptyStateIllustrationProps {
   imageAlt?: string;
 }
 
+/** Registry of dedicated mascot illustrations mapped by page/module variant */
+export const RACCOON_ILLUSTRATIONS: Record<string, string> = {
+  default: sleepingRaccoonImg,
+  onboarding: onboardingRaccoonImg,
+  leave: leaveRaccoonImg,
+  attendance: attendanceRaccoonImg,
+  timesheets: timesheetsRaccoonImg,
+  performance: performanceRaccoonImg,
+  employees: employeesRaccoonImg,
+  employee: employeesRaccoonImg,
+};
+
+/** Contextual badge accents for pages awaiting dedicated AI generation */
+export const VARIANT_ACCENTS: Record<string, { icon: string; label: string; color: string }> = {
+  timesheets: { icon: 'timesheets', label: 'Timesheets', color: '#0284c7' },
+  performance: { icon: 'performance', label: 'Performance', color: '#d97706' },
+  employees: { icon: 'employees', label: 'Employees', color: '#4f46e5' },
+  payroll: { icon: 'payroll', label: 'Payroll', color: '#059669' },
+  documents: { icon: 'documents', label: 'Documents', color: '#7c3aed' },
+  learning: { icon: 'learning', label: 'Learning', color: '#2563eb' },
+  career: { icon: 'career', label: 'Career', color: '#db2777' },
+  recruitment: { icon: 'recruitment', label: 'Recruitment', color: '#0891b2' },
+  organization: { icon: 'organization', label: 'Organization', color: '#6366f1' },
+  reports: { icon: 'reports', label: 'Reports', color: '#854d0e' },
+  tasks: { icon: 'tasks', label: 'Tasks', color: '#1a73e8' },
+  calendar: { icon: 'calendar', label: 'Calendar', color: '#ea4335' },
+  approvals: { icon: 'approvals', label: 'Approvals', color: '#9333ea' },
+  notes: { icon: 'notes', label: 'Notes', color: '#f59e0b' },
+};
+
 /**
- * Sleeping Blue Raccoon Empty-State Illustration.
+ * Contextual Blue Raccoon Empty-State Illustration.
  *
- * Vector graphic illustration of a cozy sleeping blue raccoon with
+ * Vector graphic illustration of the BEZENT blue raccoon mascot with
  * gentle floating starlight sparkles and subtle breathing motion.
+ * Renders page-specific variants (onboarding, attendance, leave, etc.)
+ * with contextual theme badges for pages awaiting dedicated full-body art.
  * Supports generic custom illustration image sources while preserving the
  * synchronized breathing animation and starlight atmosphere.
  */
@@ -32,9 +91,11 @@ export function EmptyStateIllustration({
   className,
   isDark: isDarkProp,
   imageSrc,
+  variant = 'default',
   imageAlt = '',
 }: EmptyStateIllustrationProps) {
-  const activeImage = imageSrc || sleepingRaccoonImg;
+  const activeImage = imageSrc || RACCOON_ILLUSTRATIONS[variant] || sleepingRaccoonImg;
+  const accent = VARIANT_ACCENTS[variant];
   const isDark =
     isDarkProp ??
     (typeof document !== 'undefined' &&
@@ -49,9 +110,22 @@ export function EmptyStateIllustration({
         <img
           src={activeImage}
           alt={imageAlt}
-          className="bezent-sleeping-raccoon-img"
+          className={`bezent-sleeping-raccoon-img bezent-sleeping-raccoon-img--${variant}`}
           draggable={false}
         />
+
+        {/* Floating Contextual Theme Badge for pages without dedicated full-body art */}
+        {accent && activeImage === sleepingRaccoonImg && (
+          <div
+            className={`bezent-stage-accent-badge bezent-stage-accent-badge--${variant}`}
+            title={accent.label}
+          >
+            <span className="bezent-stage-accent-badge__icon">
+              <BezentIcon name={accent.icon} size={15} color={accent.color} strokeWidth={2} />
+            </span>
+            <span className="bezent-stage-accent-badge__label">{accent.label}</span>
+          </div>
+        )}
 
         {/* Floating Dream Sparkles Layer */}
         <div className="bezent-sparkles-layer" aria-hidden="true">

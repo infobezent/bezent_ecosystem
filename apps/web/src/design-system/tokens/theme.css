@@ -318,279 +318,289 @@
 }
 
 [data-theme='dark'] {
-  /* BEZENT Dark Mode — Official Purple Palette */
+  /* Core Brand & Canvas Surfaces */
+  --bezent-logo-surface: #0b254e;
+  --bezent-logo-text: #38bdf8;
+  --primary: #0b254e;
+  --app-canvas: #020b1c;
+  --workspace: #061633;
 
-  /* Surfaces — layered hierarchy from deepest to elevated */
-  --bg-app: #0f0318;
-  --bg-surface: #0f0318;
-  --bg-surface-secondary: #1d0531;
-  --bg-header: #490d7a;
-  --bg-sidebar: #2c0849;
-  --bg-footer: #2c0849;
-  --bg-popup: #3b0b62;
-  --bg-popup-header: #3b0b62;
-  --bg-search: #1d0531;
-  --bg-drawer: #1d0531;
-  --bg-overlay: rgba(15, 3, 24, 0.75);
+  /* Surfaces Hierarchy — Deep Midnight Navy */
+  --bg-app: #020b1c;
+  --bg-surface: #061633;
+  --bg-surface-secondary: #081b3a;
+  --bg-card: #081b3a;
+  --card-bg: #081b3a;
+  --card-border: rgba(56, 189, 248, 0.14);
+  --card-hover-bg: #0b2347;
+  --card-hover-border: rgba(56, 189, 248, 0.28);
+  --card-shadow: 0 4px 20px rgba(2, 11, 28, 0.5);
+  --card-hover-shadow: 0 8px 30px rgba(2, 11, 28, 0.65), 0 0 16px rgba(22, 131, 255, 0.2);
+  --card-radius: 16px;
+  --bg-header: #020b1c;
+  --bg-sidebar: #020b1c;
+  --bg-footer: #020b1c;
+  --bg-popup: #081b3a;
+  --bg-popup-header: #081b3a;
+  --bg-search: #081b3a;
+  --bg-drawer: #081b3a;
+  --bg-overlay: rgba(2, 11, 28, 0.82);
 
   /* Interactive Surfaces */
-  --bg-hover: rgba(160, 32, 240, 0.1);
-  --bg-selected: rgba(160, 32, 240, 0.18);
-  --nav-hover: rgba(160, 32, 240, 0.1);
-  --nav-selected: rgba(160, 32, 240, 0.1);
-  --nav-icon-bg-selected: #35104f;
-  --nav-icon-bg-hover: rgba(160, 32, 240, 0.1);
-  --nav-icon-default: #b8a7c7;
-  --nav-icon-hover: #b56cff;
-  --nav-icon-active: #c084fc;
-  --nav-icon-active-structural: #7c24b8;
-  --nav-icon-active-secondary: #7c24b8;
-  /* See the light-theme block above for provenance. */
-  --nav-icon-cutout: #35104f;
-  --nav-label-default: #ffffff;
-  --nav-label-hover: #ffffff;
+  --bg-hover: rgba(22, 131, 255, 0.12);
+  --bg-selected: rgba(22, 131, 255, 0.22);
+  --nav-hover: rgba(22, 131, 255, 0.12);
+  --nav-selected: #0b254e;
+  --nav-icon-bg-selected: #0b254e;
+  --nav-icon-bg-hover: rgba(22, 131, 255, 0.12);
+  --nav-icon-default: #94a3b8;
+  --nav-icon-hover: #e2e8f0;
+  --nav-icon-active: #38bdf8;
+  --nav-icon-active-structural: #1683ff;
+  --nav-icon-active-secondary: #38bdf8;
+  --nav-icon-cutout: #061633;
+  --nav-label-default: #94a3b8;
+  --nav-label-hover: #f8fafc;
   --nav-label-active: #ffffff;
 
-  /* Typography */
+  /* Typography — Near-White / Cool Gray */
   --text-brand: #ffffff;
-  --text-primary: #ffffff;
-  --text-body: #cfc5d6;
-  --text-secondary: #cfc5d6;
-  --text-tertiary: #b8a7c7;
-  --text-muted: #a99caf;
-  --text-disabled: #766b7d;
-  --text-inverse: #17111d;
+  --text-primary: #f8fafc;
+  --text-body: #94a3b8;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  --text-muted: #64748b;
+  --text-disabled: #475569;
+  --text-inverse: #020b1c;
 
   /* Borders & Dividers */
-  --border-default: rgba(255, 255, 255, 0.07);
-  --border-subtle: rgba(255, 255, 255, 0.05);
-  --border-divider: rgba(255, 255, 255, 0.05);
-  --border-focus: #a847f7;
-  --header-border-bottom: rgba(255, 255, 255, 0.07);
+  --border-default: rgba(56, 189, 248, 0.14);
+  --border-subtle: rgba(56, 189, 248, 0.08);
+  --border-divider: rgba(56, 189, 248, 0.1);
+  --border-focus: #1683ff;
+  --header-border-bottom: rgba(56, 189, 248, 0.08);
 
-  /* BEZENT Global Icon System — Dark Theme Tokens */
-  --icon-default: #b8a7c7;
-  --icon-muted: #8e7e9e;
-  --icon-hover: #b56cff;
-  --icon-active: #a020f0;
+  /* Global Icon System */
+  --icon-default: #94a3b8;
+  --icon-muted: #64748b;
+  --icon-hover: #e2e8f0;
+  --icon-active: #38bdf8;
   --icon-on-solid: #ffffff;
-  --icon-surface: rgba(160, 32, 240, 0.1);
-  --icon-surface-hover: rgba(160, 32, 240, 0.14);
-  --icon-surface-active: rgba(160, 32, 240, 0.18);
-  --icon-container-color: #b8a7c7;
-  --icon-row-selected: rgba(160, 32, 240, 0.1);
-  --icon-row-hover: rgba(160, 32, 240, 0.05);
+  --icon-surface: #081b3a;
+  --icon-surface-hover: #0b2347;
+  --icon-surface-active: #0b254e;
+  --icon-container-color: #94a3b8;
+  --icon-row-selected: #0b254e;
+  --icon-row-hover: rgba(22, 131, 255, 0.12);
 
-  /* Duotone Compatibility */
-  --icon-stroke-default: #b8a7c7;
-  --icon-fill-default: rgba(184, 167, 199, 0.2);
-  --icon-stroke-hover: #b56cff;
-  --icon-fill-hover: rgba(181, 108, 255, 0.3);
-  --icon-stroke-active: #a020f0;
-  --icon-fill-active: rgba(160, 32, 240, 0.35);
-  --icon-accent-active: #a020f0;
+  /* Duotone Semi-Filled Compatibility */
+  --icon-stroke-default: #94a3b8;
+  --icon-fill-default: rgba(56, 189, 248, 0.08);
+  --icon-stroke-hover: #e2e8f0;
+  --icon-fill-hover: rgba(56, 189, 248, 0.15);
+  --icon-stroke-active: #38bdf8;
+  --icon-fill-active: rgba(22, 131, 255, 0.25);
+  --icon-accent-active: #1683ff;
   --icon-stroke: var(--icon-default);
   --icon-fill: var(--icon-fill-default);
-  --icon-accent: #a020f0;
-
-  /* Left Sidebar Navigation */
-
-  /* Right Utility Navigation Rail */
-  --right-rail-icon-default: var(--icon-default);
-  --right-rail-icon-hover: var(--icon-hover);
-  --right-rail-icon-active: var(--icon-active);
-  --right-rail-btn-hover-bg: var(--icon-surface);
-  --right-rail-btn-active-bg: var(--icon-surface-active);
-
-  /* Bottom Bar */
-  --footer-icon: var(--icon-muted);
-  --footer-text: #cfc5d6;
-  --footer-hover-icon: var(--icon-active);
-  --footer-hover-text: #ffffff;
-
-  /* Popup / Flyout Row States */
-  --popup-row-selected: #6713ab;
-  --popup-row-hover: rgba(147, 28, 245, 0.09);
-  --popup-row-pressed: #581093;
-  --popup-selected-icon: #b25df8;
-  --popup-selected-text: #ffffff;
-  --popup-hover-icon: #9d31f6;
-  --popup-hover-text: #ffffff;
-  --popup-item-text: #ffffff;
-  --popup-item-icon: #aaa3b5;
-  --popup-header-title: #ffffff;
-  --popup-header-subtitle: #cfc5d6;
-
-  /* Semantic Dark Tokens */
+  --icon-accent: #1683ff;
 
   /* Search Tokens */
-  --search-bg: #1d0531;
-  --search-expanded-bg: #3b0b62;
-  --search-text: #ffffff;
-  --search-placeholder: #a99caf;
-  --search-icon: #aaa3b5;
-  --search-filter-icon: #c8c2d5;
-  --search-filter-text: #cfc5d6;
-  --search-border: rgba(255, 255, 255, 0.07);
-  --search-border-hover: rgba(255, 255, 255, 0.1);
-  --search-border-focus: #a847f7;
-  --search-row-separator: rgba(255, 255, 255, 0.05);
-  --search-filter-separator: rgba(255, 255, 255, 0.05);
-  --search-hover: #2c0849;
-  --search-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  /* Dark: the old panel had no dark variant; reuses the dark dropdown shadow. */
-  --search-panel-shadow: var(--shadow-dropdown);
-  --search-chip-bg: #1d0531;
-  --search-chip-border: rgba(255, 255, 255, 0.07);
-  --search-chip-text: #cfc5d6;
-  --search-chip-hover: #2c0849;
-  --search-chip-hover-border: rgba(255, 255, 255, 0.12);
+  --search-bg: #081b3a;
+  --search-expanded-bg: #061633;
+  --search-text: #f8fafc;
+  --search-placeholder: #64748b;
+  --search-icon: #38bdf8;
+  --search-filter-icon: #94a3b8;
+  --search-filter-text: #94a3b8;
+  --search-border: rgba(56, 189, 248, 0.18);
+  --search-border-hover: rgba(56, 189, 248, 0.35);
+  --search-border-focus: #1683ff;
+  --search-row-separator: rgba(56, 189, 248, 0.06);
+  --search-filter-separator: rgba(56, 189, 248, 0.06);
+  --search-hover: rgba(22, 131, 255, 0.12);
+  --search-shadow: 0 8px 32px rgba(2, 11, 28, 0.7);
+  --search-panel-shadow: 0 12px 48px rgba(2, 11, 28, 0.8), 0 0 1px rgba(56, 189, 248, 0.3);
+  --search-chip-bg: #081b3a;
+  --search-chip-border: rgba(56, 189, 248, 0.15);
+  --search-chip-text: #cbd5e1;
+  --search-chip-hover: #0b2347;
+  --search-chip-hover-border: rgba(56, 189, 248, 0.3);
   --search-chip-hover-text: #ffffff;
-  --search-chip-arrow: #aaa3b5;
-  --search-chip-selected-bg: #6713ab;
-  --search-chip-selected-border: #931cf5;
+  --search-chip-arrow: #94a3b8;
+  --search-chip-selected-bg: #0b254e;
+  --search-chip-selected-border: #1683ff;
   --search-chip-selected-text: #ffffff;
-  --search-row-hover: rgba(147, 28, 245, 0.09);
-  --search-row-selected: #6713ab;
-  --search-row-text: #ffffff;
-  --search-row-icon: #aaa3b5;
-  --search-divider: rgba(255, 255, 255, 0.07);
+  --search-row-hover: rgba(22, 131, 255, 0.12);
+  --search-row-selected: #0b254e;
+  --search-row-text: #f8fafc;
+  --search-row-icon: #38bdf8;
+  --search-divider: rgba(56, 189, 248, 0.1);
 
-  /* Accent & Brand */
-  --brand-primary: #931cf5;
-  --brand-logo-bg: #931cf5;
+  /* Brand & Accents — Electric Blue & Cyan */
+  --brand-primary: #1683ff;
+  --brand-logo-bg: linear-gradient(135deg, #1683ff 0%, #0353b3 100%);
   --brand-logo-text: #ffffff;
-  --accent-primary: #931cf5;
-  --accent-hover: #9d31f6;
-  --accent-pressed: #7516c4;
-  --accent-soft: #c88bfa;
-  --accent-subtle: rgba(160, 32, 240, 0.1);
-  --accent-dark: #5d109c;
-  --accent-heading: #ffffff;
+  --accent-primary: #1683ff;
+  --accent-hover: #38bdf8;
+  --accent-pressed: #0d65cb;
+  --accent-soft: rgba(22, 131, 255, 0.2);
+  --accent-subtle: rgba(56, 189, 248, 0.12);
+  --accent-dark: #081b3a;
+  --accent-heading: #f8fafc;
+  --accent-interactive: #1683ff;
 
-  /* Shared Floating Surface Tokens */
-  --floating-surface-bg: #3b0b62;
-  --floating-surface-header-bg: #3b0b62;
-  --floating-surface-border: rgba(255, 255, 255, 0.08);
-  --floating-surface-divider: rgba(255, 255, 255, 0.06);
-  --floating-surface-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  --floating-row-hover: rgba(147, 28, 245, 0.09);
-  --floating-row-selected: #581093;
+  /* Floating Surfaces & Shadows */
+  --floating-surface-bg: #081b3a;
+  --floating-surface-header-bg: #081b3a;
+  --floating-surface-border: rgba(56, 189, 248, 0.16);
+  --floating-surface-divider: rgba(56, 189, 248, 0.08);
+  --floating-surface-shadow: 0 16px 40px rgba(2, 11, 28, 0.75), 0 0 1px rgba(56, 189, 248, 0.2);
+  --floating-row-hover: rgba(22, 131, 255, 0.12);
+  --floating-row-selected: #0b254e;
 
-  /* Shadows */
-  --shadow-popup: 0 10px 30px rgba(0, 0, 0, 0.3);
-  --shadow-card: 0 4px 14px rgba(0, 0, 0, 0.45);
-  --shadow-workspace: 0 2px 8px rgba(0, 0, 0, 0.38), 0 6px 20px rgba(0, 0, 0, 0.45);
-  --shadow-brand-sm: 0 1px 3px rgba(147, 28, 245, 0.25);
-  --shadow-dropdown: 0 12px 28px rgba(0, 0, 0, 0.55);
+  --shadow-popup: var(--floating-surface-shadow);
+  --shadow-card: 0 4px 16px rgba(2, 11, 28, 0.45);
+  --shadow-workspace:
+    0 8px 32px rgba(2, 11, 28, 0.65), 0 0 0 1px rgba(56, 189, 248, 0.14),
+    0 0 24px rgba(22, 131, 255, 0.08);
+  --shadow-brand-sm: 0 2px 8px rgba(22, 131, 255, 0.35);
+  --shadow-dropdown: 0 16px 48px rgba(2, 11, 28, 0.8), 0 0 1px rgba(56, 189, 248, 0.2);
 
-  /* TopNav Action Controls */
-  --top-utility-icon: var(--icon-default);
-  --top-utility-hover: var(--icon-surface);
-  --btn-create-hover: #8418dc;
-  --btn-ai-bg: rgba(160, 32, 240, 0.1);
-  --btn-ai-border: rgba(160, 32, 240, 0.4);
-  --btn-ai-text: #ffffff;
-  --btn-ai-icon: #b56cff;
-  --btn-ai-hover-bg: rgba(160, 32, 240, 0.16);
-  --btn-ai-hover-border: rgba(160, 32, 240, 0.55);
-  --btn-ai-active-bg: rgba(160, 32, 240, 0.24);
-  --btn-ai-active-border: rgba(160, 32, 240, 0.55);
+  /* TopNav Controls */
+  --top-utility-icon: #94a3b8;
+  --top-utility-hover: rgba(22, 131, 255, 0.14);
+  --btn-create-hover: rgba(22, 131, 255, 0.18);
+  --btn-ai-bg: #081b3a;
+  --btn-ai-border: rgba(56, 189, 248, 0.2);
+  --btn-ai-text: #f8fafc;
+  --btn-ai-icon: #38bdf8;
+  --btn-ai-hover-bg: #0b254e;
+  --btn-ai-hover-border: #1683ff;
+  --btn-ai-active-bg: #1683ff;
+  --btn-ai-active-border: #38bdf8;
   --btn-ai-active-text: #ffffff;
-  --avatar-bg: #35104f;
-  --avatar-text: #c084fc;
+  --avatar-bg: #0b254e;
+  --avatar-text: #ffffff;
+  --badge-bg: #ef4444;
 
-  /* Semantic Status Accents */
+  /* Right Rail */
+  --right-rail-icon-default: #94a3b8;
+  --right-rail-icon-hover: #e2e8f0;
+  --right-rail-icon-active: #38bdf8;
+  --right-rail-btn-hover-bg: rgba(22, 131, 255, 0.12);
+  --right-rail-btn-active-bg: #0b254e;
+
+  /* Bottom Bar */
+  --footer-icon: #64748b;
+  --footer-text: #94a3b8;
+  --footer-hover-icon: #38bdf8;
+  --footer-hover-text: #f8fafc;
+
+  /* Popup Row Tokens */
+  --popup-row-selected: #0b254e;
+  --popup-row-hover: rgba(22, 131, 255, 0.12);
+  --popup-row-pressed: rgba(22, 131, 255, 0.2);
+  --popup-selected-icon: #38bdf8;
+  --popup-selected-text: #ffffff;
+  --popup-hover-icon: #e2e8f0;
+  --popup-hover-text: #ffffff;
+  --popup-item-text: #e2e8f0;
+  --popup-item-icon: #94a3b8;
+  --popup-header-title: #f8fafc;
+  --popup-header-subtitle: #94a3b8;
+
+  /* More Apps Launcher */
+  --more-panel-bg: #081b3a;
+  --more-panel-header-bg: #081b3a;
+  --more-panel-border: rgba(56, 189, 248, 0.16);
+  --more-panel-divider: rgba(56, 189, 248, 0.08);
+  --more-panel-shadow: 0 20px 60px rgba(2, 11, 28, 0.85), 0 0 1px rgba(56, 189, 248, 0.25);
+  --more-rail-bg: #061633;
+  --more-cat-selected-bg: #0b254e;
+  --more-cat-selected-text: #ffffff;
+  --more-cat-hover-bg: rgba(22, 131, 255, 0.12);
+  --more-badge-bg: rgba(56, 189, 248, 0.1);
+  --more-discover-bg: #081b3a;
+  --more-discover-border: rgba(56, 189, 248, 0.16);
+  --more-card-bg: #061633;
+  --more-card-border: rgba(56, 189, 248, 0.1);
+  --more-card-hover-bg: #0b2347;
+  --more-card-hover-border: rgba(56, 189, 248, 0.25);
+  --more-row-bg: transparent;
+  --more-row-border: transparent;
+  --more-row-hover-bg: rgba(22, 131, 255, 0.12);
+  --more-row-hover-border: transparent;
+  --more-row-selected-bg: #0b254e;
+  --more-row-selected-border: rgba(56, 189, 248, 0.2);
+  --more-row-selected-text: #ffffff;
+  --more-row-selected-icon: #38bdf8;
+  --more-row-icon: #94a3b8;
+  --more-row-text: #f8fafc;
+  --search-kbd-bg: rgba(56, 189, 248, 0.08);
+  --search-kbd-border: rgba(56, 189, 248, 0.16);
+
+  /* Status Accents */
   --status-success: #10b981;
   --status-warning: #f59e0b;
   --status-danger: #ef4444;
-  --status-info: #3b82f6;
+  --status-info: #38bdf8;
 
   /* Right Utility Drawer */
-  --drawer-bg: #1d0531;
-  --drawer-header-bg: #490d7a;
-  --drawer-footer-bg: #1d0531;
-  --drawer-card-bg: #2c0849;
-  --drawer-border: rgba(255, 255, 255, 0.07);
-  --drawer-border-divider: rgba(255, 255, 255, 0.06);
-  --drawer-title: #ffffff;
-  --drawer-desc: #cfc5d6;
-  --drawer-badge-bg: rgba(160, 32, 240, 0.18);
-  --drawer-badge-text: #c88bfa;
-  --drawer-header-icon: var(--icon-default);
-  --drawer-header-hover: rgba(255, 255, 255, 0.06);
-  --drawer-tab-inactive: #cfc5d6;
-  --drawer-tab-active-text: #ffffff;
-  --drawer-tab-active-indicator: var(--icon-active);
-  --drawer-tab-hover: rgba(160, 32, 240, 0.08);
-  --drawer-row-hover: rgba(255, 255, 255, 0.04);
-  --drawer-row-selected: var(--icon-surface-active);
-  --drawer-row-title: #ffffff;
-  --drawer-row-secondary: #cfc5d6;
-  --drawer-row-due: #a99caf;
-  --drawer-row-action: var(--icon-active);
-  --drawer-icon-container-bg: var(--icon-surface);
-  --drawer-icon-container-color: var(--icon-default);
-  --drawer-icon-container-border: rgba(160, 32, 240, 0.18);
-  --drawer-checkbox-border: rgba(255, 255, 255, 0.25);
-  --drawer-checkbox-hover: var(--icon-hover);
-  --drawer-checkbox-checked-bg: var(--icon-active);
-  --drawer-checkbox-checked-border: var(--icon-active);
-  --drawer-badge-high-bg: rgba(239, 68, 68, 0.16);
+  --drawer-bg: #081b3a;
+  --drawer-header-bg: #081b3a;
+  --drawer-footer-bg: #081b3a;
+  --drawer-card-bg: #061633;
+  --drawer-border: rgba(56, 189, 248, 0.16);
+  --drawer-border-divider: rgba(56, 189, 248, 0.08);
+  --drawer-title: #f8fafc;
+  --drawer-desc: #94a3b8;
+  --drawer-badge-bg: rgba(22, 131, 255, 0.18);
+  --drawer-badge-text: #38bdf8;
+  --drawer-header-icon: #94a3b8;
+  --drawer-header-hover: rgba(22, 131, 255, 0.14);
+  --drawer-tab-inactive: #64748b;
+  --drawer-tab-active-text: #38bdf8;
+  --drawer-tab-active-indicator: #1683ff;
+  --drawer-tab-hover: rgba(22, 131, 255, 0.12);
+  --drawer-row-hover: rgba(22, 131, 255, 0.12);
+  --drawer-row-selected: #0b254e;
+  --drawer-row-title: #f8fafc;
+  --drawer-row-secondary: #94a3b8;
+  --drawer-row-due: #64748b;
+  --drawer-row-action: #94a3b8;
+  --drawer-icon-container-bg: #061633;
+  --drawer-icon-container-color: #94a3b8;
+  --drawer-icon-container-border: transparent;
+  --drawer-checkbox-border: #475569;
+  --drawer-checkbox-hover: #38bdf8;
+  --drawer-checkbox-checked-bg: #1683ff;
+  --drawer-checkbox-checked-border: #1683ff;
+  --drawer-badge-high-bg: rgba(239, 68, 68, 0.18);
   --drawer-badge-high-color: #fca5a5;
-  --drawer-badge-med-bg: rgba(245, 158, 11, 0.16);
+  --drawer-badge-med-bg: rgba(245, 158, 11, 0.18);
   --drawer-badge-med-color: #fde68a;
-  --drawer-badge-low-bg: rgba(160, 32, 240, 0.12);
-  --drawer-badge-low-color: #cfc5d6;
-  --drawer-footer-action-bg: #1d0531;
-  --drawer-footer-action-text: var(--icon-active);
-  --drawer-footer-action-hover: rgba(160, 32, 240, 0.08);
-  --drawer-footer-border: rgba(255, 255, 255, 0.06);
-  --drawer-filter-panel-bg: #490d7a;
-  --drawer-reveal-surface: #3b0b62;
-  --drawer-reveal-icon: var(--icon-active);
-  --drawer-reveal-icon-bg: var(--icon-surface);
-  --drawer-reveal-icon-border: rgba(160, 32, 240, 0.22);
+  --drawer-badge-low-bg: rgba(56, 189, 248, 0.12);
+  --drawer-badge-low-color: #93c5fd;
+  --drawer-footer-action-bg: #061633;
+  --drawer-footer-action-text: #f8fafc;
+  --drawer-footer-action-hover: rgba(22, 131, 255, 0.14);
+  --drawer-footer-border: rgba(56, 189, 248, 0.14);
+  --drawer-filter-panel-bg: #061633;
+  --drawer-reveal-surface: #061633;
+  --drawer-reveal-icon: #94a3b8;
+  --drawer-reveal-icon-bg: rgba(56, 189, 248, 0.08);
+  --drawer-reveal-icon-border: rgba(56, 189, 248, 0.14);
 
-  --status-danger-fg: var(--drawer-badge-high-color);
-  --status-danger-bg: var(--drawer-badge-high-bg);
-  --status-warning-fg: var(--drawer-badge-med-color);
-  --status-warning-bg: var(--drawer-badge-med-bg);
-  --status-neutral-fg: var(--drawer-badge-low-color);
-  --status-neutral-bg: var(--drawer-badge-low-bg);
-  --status-success-fg: #6ee7b7;
-  --status-success-bg: rgba(16, 185, 129, 0.16);
-  --status-info-fg: #93c5fd;
-  --status-info-bg: rgba(59, 130, 246, 0.16);
-  --shadow-utility-drawer: -4px 0 20px rgba(0, 0, 0, 0.25);
-
-  /* BEZENT More Services Panel — Dark Mode */
-  --more-panel-bg: #120a1a;
-  --more-panel-header-bg: #150b20;
-  --more-panel-border: rgba(160, 32, 240, 0.22);
-  --more-panel-divider: rgba(255, 255, 255, 0.07);
-  --more-panel-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.35);
-  --more-rail-bg: #160d22;
-  --more-cat-selected-bg: var(--icon-surface-active);
-  --more-cat-selected-text: #ffffff;
-  --more-cat-hover-bg: var(--icon-surface);
-  --more-badge-bg: rgba(255, 255, 255, 0.07);
-  --more-discover-bg: #1a0e27;
-  --more-discover-border: rgba(160, 32, 240, 0.2);
-  --more-card-bg: #1c0f2b;
-  --more-card-border: rgba(255, 255, 255, 0.06);
-  --more-card-hover-bg: #28143d;
-  --more-card-hover-border: rgba(160, 32, 240, 0.35);
-  --more-row-bg: transparent;
-  --more-row-border: transparent;
-  --more-row-hover-bg: var(--icon-row-hover);
-  --more-row-hover-border: transparent;
-  --more-row-selected-bg: var(--icon-row-selected);
-  --more-row-selected-border: rgba(160, 32, 240, 0.35);
-  --more-row-selected-text: #ffffff;
-  --more-row-selected-icon: var(--icon-active);
-  --more-row-icon: var(--icon-container-color);
-  --more-row-text: #ffffff;
-  --search-kbd-bg: rgba(255, 255, 255, 0.08);
-  --search-kbd-border: rgba(255, 255, 255, 0.12);
+  --status-danger-fg: #fca5a5;
+  --status-danger-bg: rgba(239, 68, 68, 0.18);
+  --status-warning-fg: #fde68a;
+  --status-warning-bg: rgba(245, 158, 11, 0.18);
+  --status-neutral-fg: #94a3b8;
+  --status-neutral-bg: rgba(56, 189, 248, 0.08);
+  --status-success-fg: #86efac;
+  --status-success-bg: rgba(16, 185, 129, 0.18);
+  --status-info-fg: #38bdf8;
+  --status-info-bg: rgba(22, 131, 255, 0.18);
+  --shadow-utility-drawer: -4px 0 28px rgba(2, 11, 28, 0.8), 0 0 1px rgba(56, 189, 248, 0.2);
 }

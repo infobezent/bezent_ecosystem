@@ -277,56 +277,6 @@
   opacity: 0.6;
 }
 
-/* ── Dark Mode ───────────────────────────────────────────────────────── */
-
-[data-theme='dark'] .profile-menu {
-  background: var(--bg-popup, #3b0b62);
-  border-color: var(--border-default, rgba(255, 255, 255, 0.08));
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
-}
-
-[data-theme='dark'] .profile-menu__role-badge {
-  background: rgba(160, 32, 240, 0.25);
-  color: #c084fc;
-}
-
-[data-theme='dark'] .profile-menu__manage-btn {
-  border-color: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
-}
-
-[data-theme='dark'] .profile-menu__manage-btn:hover {
-  background: rgba(160, 32, 240, 0.2);
-  border-color: rgba(160, 32, 240, 0.4);
-  color: #ffffff;
-}
-
-[data-theme='dark'] .profile-menu__item:hover {
-  background: rgba(160, 32, 240, 0.12);
-}
-
-[data-theme='dark'] .profile-menu__item-icon {
-  background: rgba(160, 32, 240, 0.15);
-  color: #b8a7c7;
-}
-
-[data-theme='dark'] .profile-menu__item:hover .profile-menu__item-icon {
-  background: rgba(160, 32, 240, 0.3);
-  color: #ffffff;
-}
-
-[data-theme='dark'] .profile-menu__logout-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-}
-
-[data-theme='dark'] .profile-menu__logout-btn:hover {
-  background: rgba(239, 68, 68, 0.2);
-  border-color: rgba(239, 68, 68, 0.4);
-  color: #fca5a5;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .profile-menu {
     animation: none;

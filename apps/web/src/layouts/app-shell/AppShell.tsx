@@ -117,12 +117,8 @@ export function AppShell({
         onSignOut={onSignOut}
         onSwitchAccount={onSwitchAccount}
         onHelp={onHelp}
-        notificationCount={notificationCount}
         search={topNavSearch}
         notificationsPanel={notificationsPanel}
-        notificationsOpen={notificationsOpen}
-        onNotificationsToggle={onNotificationsToggle}
-        onSettingsClick={onSettingsClick}
       />
       <LeftSidebar
         items={navItems}
@@ -158,6 +154,10 @@ export function AppShell({
         items={railItems}
         activeItemId={activeRailItemId}
         onItemSelect={onRailItemSelect}
+        notificationCount={notificationCount}
+        notificationsOpen={notificationsOpen}
+        onNotificationsToggle={onNotificationsToggle}
+        onAccountSettings={onSettingsClick || onAccountSettings}
       />
       <BottomBar />
     </div>

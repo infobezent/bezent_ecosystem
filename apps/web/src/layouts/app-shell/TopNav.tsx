@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { BezentIcon } from '../../design-system/icons';
-import { Avatar, Badge, IconButton } from '../../design-system/components';
+import { Avatar, IconButton } from '../../design-system/components';
 import { ProfileMenu } from './ProfileMenu';
 import './TopNav.css';
 
@@ -33,20 +33,15 @@ export function TopNav({
   userName = 'Sabin Davis',
   userEmail = 'sabin.d@bezent.com',
   userRole = 'Administrator • HRMS',
-  notificationCount = 0,
   search,
   notificationsPanel,
-  notificationsOpen = false,
-  onNotificationsToggle,
   onMyProfile,
   onAccountSettings,
   onSignOut,
   onSwitchAccount,
   onHelp,
-  onSettingsClick,
 }: TopNavProps) {
   const [profileOpen, setProfileOpen] = useState(false);
-  const handleSettingsClick = onSettingsClick || onAccountSettings;
 
   return (
     <header className="top-nav">
@@ -61,41 +56,6 @@ export function TopNav({
       <div className="top-nav__search-slot">{search}</div>
 
       <div className="top-nav__actions">
-        <div className={`top-nav__bell ${notificationsOpen ? 'is-open' : ''}`.trim()}>
-          <IconButton
-            label="Notifications"
-            active={notificationsOpen}
-            onClick={onNotificationsToggle}
-            data-notifications-toggle=""
-          >
-            <BezentIcon
-              name="notifications"
-              size={20}
-              color="var(--top-utility-icon)"
-              strokeWidth={1.8}
-            />
-            {notificationCount > 0 && (
-              <span className="top-nav__bell-badge">
-                <Badge count={notificationCount} />
-              </span>
-            )}
-          </IconButton>
-          {notificationsOpen && <span className="top-nav__bell-connector" aria-hidden="true" />}
-        </div>
-
-        <IconButton label="Settings" onClick={handleSettingsClick} data-settings-button="">
-          <BezentIcon name="settings" size={20} color="var(--top-utility-icon)" strokeWidth={1.8} />
-        </IconButton>
-
-        <IconButton label="Quick Create" variant="solid">
-          <BezentIcon name="plusSign" size={20} color="currentColor" strokeWidth={2} />
-        </IconButton>
-
-        <button type="button" className="top-nav__ai" aria-label="BEZENT AI">
-          <BezentIcon name="sparkles" size={16} color="currentColor" />
-          <span>BEZENT AI</span>
-        </button>
-
         <IconButton label="App Launcher">
           <BezentIcon name="apps" size={20} color="var(--top-utility-icon)" strokeWidth={1.8} />
         </IconButton>

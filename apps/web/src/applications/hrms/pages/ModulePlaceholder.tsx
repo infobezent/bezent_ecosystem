@@ -150,7 +150,12 @@ export function ModulePlaceholder({
     <Page gap="lg">
       <PageHeader eyebrow={application} title={section ? `${title} · ${section}` : title} />
       <Stack align="center" justify="center">
-        <EmptyState title={emptyTitle} description={emptyDescription} size="default" />
+        <EmptyState
+          title={emptyTitle}
+          description={emptyDescription}
+          size="default"
+          variant={destinationId}
+        />
       </Stack>
     </Page>
   );

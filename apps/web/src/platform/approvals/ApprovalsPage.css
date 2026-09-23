@@ -304,31 +304,3 @@
   align-items: center;
   gap: 8px;
 }
-
-/* ── Dark Mode ───────────────────────────────────────────────────────── */
-
-[data-theme='dark'] .approvals-page {
-  background: var(--bg-surface, #0f0318);
-  color: #ffffff;
-}
-
-[data-theme='dark'] .approvals-page__header,
-[data-theme='dark'] .approvals-page__sidebar {
-  background: #160a22;
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-[data-theme='dark'] .approvals-page__nav-item.is-active {
-  background: #3b0b62;
-  color: #ffffff;
-}
-
-[data-theme='dark'] .approval-card,
-[data-theme='dark'] .approvals-kpi-card {
-  background: #1c0f2b;
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-[data-theme='dark'] .approval-card__summary {
-  background: rgba(255, 255, 255, 0.05);
-}

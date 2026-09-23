@@ -102,11 +102,7 @@ export function DocumentsSection({
           <EmptyState
             title="No document requirements defined yet."
             description="Add requirements to request mandatory or optional documents during candidate onboarding."
-            action={
-              <Button variant="primary" type="button" onClick={openCreateModal}>
-                Add First Document
-              </Button>
-            }
+            primaryAction={{ label: 'Add First Document', onClick: openCreateModal }}
           />
         ) : (
           <Table>
