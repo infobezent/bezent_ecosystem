@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Button } from '../../../../design-system/components/Button';
 import { Avatar } from '../../../../design-system/components/Avatar';
+import { EmptyState } from '../../../../design-system/components/EmptyState';
 import { BezentIcon } from '../../../../design-system/icons';
 import { useDevContext } from '../../../../platform/context/DevContext';
 import {
@@ -273,20 +274,23 @@ export function OnboardingPage({ title = 'Onboarding' }: OnboardingPageProps) {
         {loading ? (
           <div className="onboarding-page__loading">Loading onboarding records...</div>
         ) : filteredCases.length === 0 ? (
-          <div className="onboarding-page__empty">
-            <BezentIcon name="onboarding" size={40} />
-            <h3 className="onboarding-page__empty-title">No New Hires Found</h3>
-            <p className="onboarding-page__empty-desc">
-              {searchQuery
+          <EmptyState
+            variant="onboarding"
+            title={searchQuery ? 'No matching new hires' : 'No New Hires Found'}
+            description={
+              searchQuery
                 ? `No candidates match "${searchQuery}". Try clearing your search.`
-                : 'Get started by creating your first onboarding case for a new hire.'}
-            </p>
-            {!searchQuery && (
-              <Button variant="primary" onClick={() => setViewMode('registration')}>
-                Add New Hire
-              </Button>
-            )}
-          </div>
+                : 'Get started by creating your first onboarding case for a new hire.'
+            }
+            primaryAction={
+              !searchQuery
+                ? {
+                    label: 'Add New Hire',
+                    onClick: () => setViewMode('registration'),
+                  }
+                : undefined
+            }
+          />
         ) : (
           <table className="onboarding-page__table">
             <thead>
