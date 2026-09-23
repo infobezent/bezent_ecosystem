@@ -140,8 +140,15 @@ export function CompanionIcon({ name, size = 20, active, className }: CompanionI
             </filter>
           </defs>
           <g filter="url(#bezent-tasks-shadow)">
-            {/* Perfectly centered vibrant blue task circular disc */}
-            <circle cx="12" cy="12" r="9.5" fill="url(#bezent-tasks-grad)" />
+            {/* Smooth rounded square task box — simple box feel */}
+            <rect
+              x="3.5"
+              y="3.5"
+              width="17"
+              height="17"
+              rx="4"
+              fill="url(#bezent-tasks-grad)"
+            />
             {/* Bold energetic white checkmark */}
             <path
               d="M7.8 12.2l2.9 3 5.8-6.2"

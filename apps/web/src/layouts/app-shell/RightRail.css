@@ -79,11 +79,10 @@
 
 .right-rail__badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
+  top: 2px;
+  right: 2px;
   display: flex;
   pointer-events: none;
-  z-index: 2;
 }
 
 .right-rail__action-btn {
@@ -127,13 +126,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   padding: 4px 0;
   width: 100%;
 }
 
 .right-rail__divider {
-  width: 24px;
+  width: 20px;
   height: 1px;
   background-color: var(--border-subtle, #dde3ea);
   margin: 4px 0;
@@ -156,7 +155,6 @@
   justify-content: center;
 }
 
-/* Simple Box Feel for Utility Buttons */
 .bezent-right-rail-btn {
   position: relative;
   width: 40px;
@@ -165,19 +163,15 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: 1px solid var(--border-default, #dde3ea);
-  border-radius: 10px;
-  background: var(--workspace, #ffffff);
+  border: none;
+  border-radius: 50%;
+  background: transparent;
   color: var(--right-rail-icon-default, #444746);
   cursor: pointer;
   outline: none;
-  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.08);
   transition:
     color 140ms ease,
-    background-color 140ms ease,
-    border-color 140ms ease,
-    box-shadow 140ms ease,
-    transform 140ms ease;
+    background-color 140ms ease;
 }
 
 /* Specific Google companion app icon colors */
@@ -198,58 +192,24 @@
 }
 
 .bezent-right-rail-btn:hover {
-  background-color: var(--card-hover-bg, #f0f4f9);
-  border-color: var(--card-hover-border, #c4c7c5);
-  box-shadow: 0 1px 3px 1px rgba(60, 64, 67, 0.12);
-  transform: translateY(-1px);
-}
-
-.bezent-right-rail-btn:active {
-  transform: translateY(0);
+  background-color: var(--right-rail-btn-hover-bg, #c2e7ff);
 }
 
 .bezent-right-rail-btn.is-active,
 .bezent-right-rail-btn.is-active:hover {
-  background-color: var(--primary, #c2e7ff);
-  border-color: rgba(4, 30, 73, 0.22);
-  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.15);
-  color: var(--nav-icon-active, #041e49);
-}
-
-[data-theme='dark'] .bezent-right-rail-btn {
-  background: var(--bg-surface-elevated, #1e293b);
-  border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
-  color: #e2e8f0;
-}
-
-[data-theme='dark'] .bezent-right-rail-btn:hover {
-  background: #273549;
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-[data-theme='dark'] .bezent-right-rail-btn.is-active,
-[data-theme='dark'] .bezent-right-rail-btn.is-active:hover {
-  background: #1e3a8a;
-  border-color: #3b82f6;
-  color: #d3e3fd;
+  background-color: var(--primary, #d3e3fd);
 }
 
 .right-rail__badge-dot {
   position: absolute;
-  top: -3px;
-  right: -3px;
-  width: 9px;
-  height: 9px;
+  top: 5px;
+  right: 5px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background-color: #d93025;
-  box-shadow: 0 0 0 2px var(--workspace, #ffffff);
+  background-color: #b3261e;
+  box-shadow: 0 0 0 2px var(--app-canvas, #f6f8fc);
   pointer-events: none;
-  z-index: 2;
-}
-
-[data-theme='dark'] .right-rail__badge-dot {
-  box-shadow: 0 0 0 2px #1e293b;
 }
 
 .bezent-right-rail-btn:focus-visible,
@@ -260,7 +220,7 @@
   outline-offset: -2px;
 }
 
-/* Appearance (theme) control with matching box styling */
+/* Appearance (theme) control */
 .right-rail__theme {
   width: 40px;
   height: 40px;
@@ -268,67 +228,42 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: 1px solid var(--border-default, #dde3ea);
-  border-radius: 10px;
-  background: var(--workspace, #ffffff);
+  border: none;
+  border-radius: 50%;
+  background: transparent;
   color: var(--right-rail-icon-default, #444746);
   cursor: pointer;
   outline: none;
-  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.08);
   transition:
-    background-color 140ms ease,
-    border-color 140ms ease,
-    box-shadow 140ms ease,
-    transform 140ms ease,
-    color 140ms ease;
+    background-color 180ms ease,
+    color 180ms ease;
 }
 
 .right-rail__theme:hover {
-  background: var(--card-hover-bg, #f0f4f9);
-  border-color: var(--card-hover-border, #c4c7c5);
-  box-shadow: 0 1px 3px 1px rgba(60, 64, 67, 0.12);
+  background: var(--right-rail-btn-hover-bg, #c2e7ff);
   color: var(--right-rail-icon-hover, #1f1f1f);
-  transform: translateY(-1px);
-}
-
-.right-rail__theme:active {
-  transform: translateY(0);
-}
-
-[data-theme='dark'] .right-rail__theme {
-  background: var(--bg-surface-elevated, #1e293b);
-  border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
-  color: #e2e8f0;
-}
-
-[data-theme='dark'] .right-rail__theme:hover {
-  background: #273549;
-  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .right-rail__collapse {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: 1px solid transparent;
-  border-radius: 8px;
+  border: none;
+  border-radius: 50%;
   background: transparent;
   color: var(--right-rail-icon-default, #444746);
   cursor: pointer;
   outline: none;
   transition:
     background 0.13s,
-    border-color 0.13s,
     color 0.13s;
 }
 
 .right-rail__collapse:hover {
-  background: var(--card-hover-bg, #e9eff8);
-  border-color: var(--border-subtle, #dde3ea);
+  background: var(--top-utility-hover, #c2e7ff);
   color: var(--right-rail-icon-hover, #1f1f1f);
 }
 
