@@ -1,5 +1,20 @@
 import { useState } from 'react';
-import { Button } from '../../../../design-system/components/Button';
+import {
+  Button,
+  Card,
+  Input,
+  Select,
+  Tabs,
+  Page,
+  PageHeader,
+  Toolbar,
+  Actions,
+  Stack,
+  Inline,
+  FormGrid,
+  Modal,
+  Alert,
+} from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { PersonalInformation } from './PersonalInformation';
 import { OnboardingSection } from './OnboardingSection';
@@ -85,38 +100,30 @@ export function EmployeeRegistration({
 
   // Employment Type
   const [employmentType, setEmploymentType] = useState('full_time');
-  const [otherEmploymentType, setOtherEmploymentType] = useState('');
 
   // Employment Status
   const [employmentStatus, setEmploymentStatus] = useState('pending_activation');
-  const [otherEmploymentStatus, setOtherEmploymentStatus] = useState('');
 
   // Department
   const [department, setDepartment] = useState('Engineering');
-  const [otherDepartment, setOtherDepartment] = useState('');
 
   // Team
   const [team, setTeam] = useState('Product Development');
-  const [otherTeam, setOtherTeam] = useState('');
 
   // Designation
   const [designation, setDesignation] = useState('Software Engineer');
-  const [otherDesignation, setOtherDesignation] = useState('');
 
   // Grade / Level
   const [gradeLevel, setGradeLevel] = useState('L2 - Mid Level');
-  const [otherGradeLevel, setOtherGradeLevel] = useState('');
 
   // Reporting Manager
-  const [reportingManager, setReportingManager] = useState<string | null>('Rakesh Kumar');
+  const [reportingManager] = useState<string | null>('Rakesh Kumar');
 
   // Organisation Unit
   const [organisationUnit, setOrganisationUnit] = useState('Technology');
-  const [otherOrganisationUnit, setOtherOrganisationUnit] = useState('');
 
   // Office Location
   const [officeLocation, setOfficeLocation] = useState('Chennai - Main Office');
-  const [otherOfficeLocation, setOtherOfficeLocation] = useState('');
 
   // Dates
   const [joiningDate, setJoiningDate] = useState('2026-04-01');
@@ -125,19 +132,12 @@ export function EmployeeRegistration({
 
   // Source of Hire
   const [sourceOfHire, setSourceOfHire] = useState('direct_applicant');
-  const [otherSourceOfHire, setOtherSourceOfHire] = useState('');
 
   // Probation Period
   const [probationPeriod, setProbationPeriod] = useState('6_months');
-  const [customProbationNumber, setCustomProbationNumber] = useState('');
-  const [customProbationUnit, setCustomProbationUnit] = useState<'days' | 'months'>('months');
-  const [otherProbationPeriod, setOtherProbationPeriod] = useState('');
 
   // Notice Period
   const [noticePeriod, setNoticePeriod] = useState('30_days');
-  const [customNoticeNumber, setCustomNoticeNumber] = useState('');
-  const [customNoticeUnit, setCustomNoticeUnit] = useState<'days' | 'months'>('days');
-  const [otherNoticePeriod, setOtherNoticePeriod] = useState('');
 
   // Document Section State
   const [documentsList, setDocumentsList] = useState<DocumentItemState[]>(
@@ -314,34 +314,21 @@ export function EmployeeRegistration({
   const reviewData: ReviewSectionData = {
     general: {
       employeeId,
-      employmentType:
-        employmentType === 'other'
-          ? otherEmploymentType || 'Custom'
-          : employmentType.replace('_', ' ').toUpperCase(),
-      employmentStatus:
-        employmentStatus === 'other'
-          ? otherEmploymentStatus || 'Custom'
-          : employmentStatus.replace('_', ' ').toUpperCase(),
-      department: department === 'other' ? otherDepartment : department,
-      team: team === 'other' ? otherTeam : team,
-      designation: designation === 'other' ? otherDesignation : designation,
-      gradeLevel: gradeLevel === 'other' ? otherGradeLevel : gradeLevel,
+      employmentType: employmentType.replace('_', ' ').toUpperCase(),
+      employmentStatus: employmentStatus.replace('_', ' ').toUpperCase(),
+      department,
+      team,
+      designation,
+      gradeLevel,
       reportingManager,
-      organisationUnit: organisationUnit === 'other' ? otherOrganisationUnit : organisationUnit,
-      officeLocation: officeLocation === 'other' ? otherOfficeLocation : officeLocation,
+      organisationUnit,
+      officeLocation,
       joiningDate,
       confirmedJoiningDate,
       endDate,
-      sourceOfHire:
-        sourceOfHire === 'other' ? otherSourceOfHire : sourceOfHire.replace('_', ' ').toUpperCase(),
-      probationPeriod:
-        probationPeriod === 'custom'
-          ? `${customProbationNumber} ${customProbationUnit}`
-          : probationPeriod.replace('_', ' '),
-      noticePeriod:
-        noticePeriod === 'custom'
-          ? `${customNoticeNumber} ${customNoticeUnit}`
-          : noticePeriod.replace('_', ' '),
+      sourceOfHire: sourceOfHire.replace('_', ' ').toUpperCase(),
+      probationPeriod: probationPeriod.replace('_', ' '),
+      noticePeriod: noticePeriod.replace('_', ' '),
     },
     personal: {
       fullName: 'Arun Kumar',
@@ -600,662 +587,317 @@ export function EmployeeRegistration({
   };
 
   return (
-    <div className="employee-registration--full-screen">
-      <div className="employee-registration">
-        {/* Breadcrumb Navigation */}
-        <nav className="employee-registration__breadcrumb" aria-label="Breadcrumb">
-          <span>HRMS</span>
-          <span className="employee-registration__breadcrumb-separator">&gt;</span>
-          <span className="employee-registration__breadcrumb-item--active">
-            Employee Registration
-          </span>
-        </nav>
+    <Page maxWidth="full" gap="lg">
+      {/* Page Header */}
+      <PageHeader
+        breadcrumbs={
+          <Inline gap="xs">
+            <span>HRMS</span>
+            <span>&gt;</span>
+            <span>Employee Registration</span>
+          </Inline>
+        }
+        title="Employee Registration"
+        subtitle="Add and manage new employee information"
+      />
 
-        {/* Page Header */}
-        <header className="employee-registration__header">
-          <h1 className="employee-registration__title">Employee Registration</h1>
-          <p className="employee-registration__subtitle">Add and manage new employee information</p>
-        </header>
+      {/* Dynamic Section Horizontal Navigation */}
+      <Tabs
+        items={allSections.map((s) => ({ id: s.id, label: s.label }))}
+        activeId={activeSection}
+        onChange={(id) => setActiveSection(id)}
+        variant="underline"
+      />
 
-        {/* Dynamic Section Horizontal Navigation */}
-        <div className="employee-registration__nav-bar" role="tablist">
-          {allSections.map((section) => (
-            <button
-              key={section.id}
-              type="button"
-              role="tab"
-              aria-selected={activeSection === section.id}
-              className={`employee-registration__nav-tab ${
-                activeSection === section.id ? 'employee-registration__nav-tab--active' : ''
-              }`}
-              onClick={() => setActiveSection(section.id)}
-            >
-              {section.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Workspace Card Content */}
-        <div className="employee-registration__card">
+      {/* Workspace Content Card */}
+      <Card padding="lg">
+        <Stack gap="lg">
           {activeSection === 'general' ? (
-            <>
+            <Stack gap="lg">
               {/* General Section Banner */}
-              <div className="employee-registration__section-header">
-                <div className="employee-registration__section-icon-badge">
-                  <BezentIcon name="documents" size={22} />
-                </div>
-                <div className="employee-registration__section-title-group">
-                  <h2 className="employee-registration__section-title">General Information</h2>
-                  <p className="employee-registration__section-subtitle">
-                    Basic employment details for the employee.
-                  </p>
-                </div>
-              </div>
+              <Toolbar
+                left={
+                  <Inline gap="md" align="center">
+                    <BezentIcon name="documents" size={22} />
+                    <div>
+                      <h3 className="bezent-card__title">General Information</h3>
+                      <p className="bezent-card__desc">
+                        Basic employment details for the employee.
+                      </p>
+                    </div>
+                  </Inline>
+                }
+              />
 
               {/* 16 General Section Fields Grid */}
-              <form
-                className="employee-registration__form-grid"
-                onSubmit={(e) => e.preventDefault()}
-              >
+              <FormGrid columns={2}>
                 {/* Dynamically rendered custom fields from Administration Customization Builder */}
                 {customFields
                   .filter((f) => f.sectionId === 'general')
                   .map((f) => (
-                    <div key={f.id} className="employee-registration__field">
-                      <label className="employee-registration__label">
-                        {f.label}{' '}
-                        {f.required && <span className="employee-registration__required">*</span>}
-                      </label>
+                    <div key={f.id}>
                       {f.fieldType === 'select' ? (
-                        <div className="employee-registration__select-wrapper">
-                          <select className="employee-registration__select" disabled={f.readOnly}>
-                            <option value="">Select {f.label}</option>
-                            {f.options?.map((opt: string, idx: number) => (
-                              <option key={idx} value={opt}>
-                                {opt}
-                              </option>
-                            ))}
-                          </select>
-                          <span className="employee-registration__select-icon">▼</span>
-                        </div>
+                        <Select
+                          label={`${f.label}${f.required ? ' *' : ''}`}
+                          disabled={f.readOnly}
+                          options={[
+                            { value: '', label: `Select ${f.label}` },
+                            ...(f.options?.map((opt: string) => ({ value: opt, label: opt })) ||
+                              []),
+                          ]}
+                        />
                       ) : (
-                        <input
+                        <Input
                           type={f.fieldType === 'date' ? 'date' : 'text'}
-                          className="employee-registration__input"
+                          label={`${f.label}${f.required ? ' *' : ''}`}
                           placeholder={f.defaultValue || `Enter ${f.label}`}
                           disabled={f.readOnly}
                         />
                       )}
                     </div>
                   ))}
+
                 {/* 1. Employee ID */}
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">
-                    Employee ID <span className="employee-registration__required">*</span>
-                  </label>
-                  <div className="employee-registration__input-row">
-                    <input
-                      type="text"
-                      className="employee-registration__input"
-                      value={employeeId}
-                      onChange={(e) => setEmployeeId(e.target.value)}
-                      placeholder="EMP2026001"
-                    />
-                    <button
+                <Input
+                  label="Employee ID *"
+                  value={employeeId}
+                  onChange={(e) => setEmployeeId(e.target.value)}
+                  placeholder="EMP2026001"
+                  rightIcon={
+                    <Button
+                      variant="secondary"
+                      size="sm"
                       type="button"
-                      className="employee-registration__auto-btn"
                       onClick={handleAutoGenerateId}
                     >
-                      <BezentIcon name="clock" size={14} />
-                      Auto Generate
-                    </button>
-                  </div>
-                </div>
+                      Auto
+                    </Button>
+                  }
+                />
 
                 {/* 2. Employment Type */}
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">
-                    Employment Type <span className="employee-registration__required">*</span>
-                  </label>
-                  <div className="employee-registration__select-wrapper">
-                    <select
-                      className="employee-registration__select"
-                      value={employmentType}
-                      onChange={(e) => setEmploymentType(e.target.value)}
-                    >
-                      <option value="full_time">Full Time</option>
-                      <option value="part_time">Part Time</option>
-                      <option value="contract">Contract</option>
-                      <option value="intern">Intern</option>
-                      <option value="other">Other</option>
-                    </select>
-                    <span className="employee-registration__select-icon">▼</span>
-                  </div>
-                  {employmentType === 'other' && (
-                    <div className="employee-registration__other-container">
-                      <input
-                        type="text"
-                        className="employee-registration__input"
-                        placeholder="Enter Employment Type..."
-                        value={otherEmploymentType}
-                        onChange={(e) => setOtherEmploymentType(e.target.value)}
-                      />
-                    </div>
-                  )}
-                </div>
+                <Select
+                  label="Employment Type *"
+                  value={employmentType}
+                  onChange={(e) => setEmploymentType(e.target.value)}
+                  options={[
+                    { value: 'full_time', label: 'Full Time' },
+                    { value: 'part_time', label: 'Part Time' },
+                    { value: 'contract', label: 'Contract' },
+                    { value: 'intern', label: 'Intern' },
+                    { value: 'other', label: 'Other' },
+                  ]}
+                />
 
                 {/* 3. Employment Status */}
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">
-                    Employment Status <span className="employee-registration__required">*</span>
-                  </label>
-                  <div className="employee-registration__select-wrapper">
-                    <select
-                      className="employee-registration__select"
-                      value={employmentStatus}
-                      onChange={(e) => setEmploymentStatus(e.target.value)}
-                    >
-                      <option value="pending_activation">Pending Activation</option>
-                      <option value="active">Active</option>
-                      <option value="probation">Probation</option>
-                      <option value="other">Other</option>
-                    </select>
-                    <span className="employee-registration__select-icon">▼</span>
-                  </div>
-                  {employmentStatus === 'other' && (
-                    <div className="employee-registration__other-container">
-                      <input
-                        type="text"
-                        className="employee-registration__input"
-                        placeholder="Enter Employment Status..."
-                        value={otherEmploymentStatus}
-                        onChange={(e) => setOtherEmploymentStatus(e.target.value)}
-                      />
-                    </div>
-                  )}
-                </div>
+                <Select
+                  label="Employment Status *"
+                  value={employmentStatus}
+                  onChange={(e) => setEmploymentStatus(e.target.value)}
+                  options={[
+                    { value: 'pending_activation', label: 'Pending Activation' },
+                    { value: 'active', label: 'Active' },
+                    { value: 'probation', label: 'Probation' },
+                    { value: 'other', label: 'Other' },
+                  ]}
+                />
 
                 {/* 4. Department */}
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">
-                    Department <span className="employee-registration__required">*</span>
-                  </label>
-                  <div className="employee-registration__select-wrapper">
-                    <span className="employee-registration__search-prefix">🔍</span>
-                    <select
-                      className="employee-registration__select employee-registration__select--with-search"
-                      value={department}
-                      onChange={(e) => setDepartment(e.target.value)}
-                    >
-                      <option value="Engineering">Engineering</option>
-                      <option value="Human Resources">Human Resources</option>
-                      <option value="Finance">Finance</option>
-                      <option value="Operations">Operations</option>
-                      <option value="other">Other</option>
-                    </select>
-                    <span className="employee-registration__select-icon">▼</span>
-                  </div>
-                  {department === 'other' ? (
-                    <div className="employee-registration__other-container">
-                      <input
-                        type="text"
-                        className="employee-registration__input"
-                        placeholder="Enter Department Name..."
-                        value={otherDepartment}
-                        onChange={(e) => setOtherDepartment(e.target.value)}
-                      />
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      className="employee-registration__add-link"
-                      onClick={() => setDepartment('other')}
-                    >
-                      + Add New
-                    </button>
-                  )}
-                </div>
+                <Select
+                  label="Department *"
+                  value={department}
+                  onChange={(e) => setDepartment(e.target.value)}
+                  options={[
+                    { value: 'Engineering', label: 'Engineering' },
+                    { value: 'Human Resources', label: 'Human Resources' },
+                    { value: 'Finance', label: 'Finance' },
+                    { value: 'Operations', label: 'Operations' },
+                    { value: 'other', label: 'Other' },
+                  ]}
+                />
 
                 {/* 5. Team */}
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">
-                    Team <span className="employee-registration__required">*</span>
-                  </label>
-                  <div className="employee-registration__select-wrapper">
-                    <span className="employee-registration__search-prefix">🔍</span>
-                    <select
-                      className="employee-registration__select employee-registration__select--with-search"
-                      value={team}
-                      onChange={(e) => setTeam(e.target.value)}
-                    >
-                      <option value="Product Development">Product Development</option>
-                      <option value="Frontend">Frontend Engineering</option>
-                      <option value="Backend">Backend Engineering</option>
-                      <option value="QA">Quality Assurance</option>
-                      <option value="other">Other</option>
-                    </select>
-                    <span className="employee-registration__select-icon">▼</span>
-                  </div>
-                  {team === 'other' ? (
-                    <div className="employee-registration__other-container">
-                      <input
-                        type="text"
-                        className="employee-registration__input"
-                        placeholder="Enter Team Name..."
-                        value={otherTeam}
-                        onChange={(e) => setOtherTeam(e.target.value)}
-                      />
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      className="employee-registration__add-link"
-                      onClick={() => setTeam('other')}
-                    >
-                      + Add New
-                    </button>
-                  )}
-                </div>
+                <Select
+                  label="Team *"
+                  value={team}
+                  onChange={(e) => setTeam(e.target.value)}
+                  options={[
+                    { value: 'Product Development', label: 'Product Development' },
+                    { value: 'Frontend', label: 'Frontend Engineering' },
+                    { value: 'Backend', label: 'Backend Engineering' },
+                    { value: 'QA', label: 'Quality Assurance' },
+                    { value: 'other', label: 'Other' },
+                  ]}
+                />
 
                 {/* 6. Designation */}
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">
-                    Designation <span className="employee-registration__required">*</span>
-                  </label>
-                  <div className="employee-registration__select-wrapper">
-                    <span className="employee-registration__search-prefix">🔍</span>
-                    <select
-                      className="employee-registration__select employee-registration__select--with-search"
-                      value={designation}
-                      onChange={(e) => setDesignation(e.target.value)}
-                    >
-                      <option value="Software Engineer">Software Engineer</option>
-                      <option value="Financial Analyst">Financial Analyst</option>
-                      <option value="Senior HR Specialist">Senior HR Specialist</option>
-                      <option value="Product Manager">Product Manager</option>
-                      <option value="other">Other</option>
-                    </select>
-                    <span className="employee-registration__select-icon">▼</span>
-                  </div>
-                  {designation === 'other' ? (
-                    <div className="employee-registration__other-container">
-                      <input
-                        type="text"
-                        className="employee-registration__input"
-                        placeholder="Enter Designation Name..."
-                        value={otherDesignation}
-                        onChange={(e) => setOtherDesignation(e.target.value)}
-                      />
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      className="employee-registration__add-link"
-                      onClick={() => setDesignation('other')}
-                    >
-                      + Add New
-                    </button>
-                  )}
-                </div>
+                <Select
+                  label="Designation *"
+                  value={designation}
+                  onChange={(e) => setDesignation(e.target.value)}
+                  options={[
+                    { value: 'Software Engineer', label: 'Software Engineer' },
+                    { value: 'Financial Analyst', label: 'Financial Analyst' },
+                    { value: 'Senior HR Specialist', label: 'Senior HR Specialist' },
+                    { value: 'Product Manager', label: 'Product Manager' },
+                    { value: 'other', label: 'Other' },
+                  ]}
+                />
 
                 {/* 7. Grade / Level */}
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">
-                    Grade / Level <span className="employee-registration__required">*</span>
-                  </label>
-                  <div className="employee-registration__select-wrapper">
-                    <select
-                      className="employee-registration__select"
-                      value={gradeLevel}
-                      onChange={(e) => setGradeLevel(e.target.value)}
-                    >
-                      <option value="L1 - Entry Level">L1 - Entry Level</option>
-                      <option value="L2 - Mid Level">L2 - Mid Level</option>
-                      <option value="L3 - Senior Level">L3 - Senior Level</option>
-                      <option value="L4 - Lead">L4 - Lead</option>
-                      <option value="L5 - Executive">L5 - Executive</option>
-                      <option value="other">Other</option>
-                    </select>
-                    <span className="employee-registration__select-icon">▼</span>
-                  </div>
-                  {gradeLevel === 'other' && (
-                    <div className="employee-registration__other-container">
-                      <input
-                        type="text"
-                        className="employee-registration__input"
-                        placeholder="Enter Grade / Level..."
-                        value={otherGradeLevel}
-                        onChange={(e) => setOtherGradeLevel(e.target.value)}
-                      />
-                    </div>
-                  )}
-                </div>
+                <Select
+                  label="Grade / Level *"
+                  value={gradeLevel}
+                  onChange={(e) => setGradeLevel(e.target.value)}
+                  options={[
+                    { value: 'L1 - Entry Level', label: 'L1 - Entry Level' },
+                    { value: 'L2 - Mid Level', label: 'L2 - Mid Level' },
+                    { value: 'L3 - Senior Level', label: 'L3 - Senior Level' },
+                    { value: 'L4 - Lead', label: 'L4 - Lead' },
+                    { value: 'L5 - Executive', label: 'L5 - Executive' },
+                    { value: 'other', label: 'Other' },
+                  ]}
+                />
 
                 {/* 8. Reporting Manager */}
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">
-                    Reporting Manager <span className="employee-registration__required">*</span>
-                  </label>
-                  <div className="employee-registration__pill-select">
-                    {reportingManager ? (
-                      <div className="employee-registration__pill-tag">
-                        <span className="employee-registration__pill-avatar">RK</span>
-                        <span>{reportingManager}</span>
-                        <button
-                          type="button"
-                          className="employee-registration__pill-close"
-                          onClick={() => setReportingManager(null)}
-                          aria-label="Remove manager"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ) : (
-                      <span className="employee-registration__placeholder-text">
-                        Select Manager...
-                      </span>
-                    )}
-                    <button
-                      type="button"
-                      className="employee-registration__pill-search-btn"
-                      aria-label="Search manager"
-                    >
-                      🔍
-                    </button>
-                  </div>
-                </div>
+                <Input
+                  label="Reporting Manager *"
+                  value={reportingManager || ''}
+                  placeholder="Select Manager..."
+                  disabled
+                />
 
                 {/* 9. Organisation Unit */}
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">
-                    Organisation Unit <span className="employee-registration__required">*</span>
-                  </label>
-                  <div className="employee-registration__select-wrapper">
-                    <select
-                      className="employee-registration__select"
-                      value={organisationUnit}
-                      onChange={(e) => setOrganisationUnit(e.target.value)}
-                    >
-                      <option value="Technology">Technology</option>
-                      <option value="Operations">Operations</option>
-                      <option value="Corporate">Corporate</option>
-                      <option value="other">Other</option>
-                    </select>
-                    <span className="employee-registration__select-icon">▼</span>
-                  </div>
-                  {organisationUnit === 'other' ? (
-                    <div className="employee-registration__other-container">
-                      <input
-                        type="text"
-                        className="employee-registration__input"
-                        placeholder="Enter Organisation Unit..."
-                        value={otherOrganisationUnit}
-                        onChange={(e) => setOtherOrganisationUnit(e.target.value)}
-                      />
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      className="employee-registration__add-link"
-                      onClick={() => setOrganisationUnit('other')}
-                    >
-                      + Add New
-                    </button>
-                  )}
-                </div>
+                <Select
+                  label="Organisation Unit *"
+                  value={organisationUnit}
+                  onChange={(e) => setOrganisationUnit(e.target.value)}
+                  options={[
+                    { value: 'Technology', label: 'Technology' },
+                    { value: 'Operations', label: 'Operations' },
+                    { value: 'Corporate', label: 'Corporate' },
+                    { value: 'other', label: 'Other' },
+                  ]}
+                />
 
                 {/* 10. Office Location */}
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">
-                    Office Location <span className="employee-registration__required">*</span>
-                  </label>
-                  <div className="employee-registration__select-wrapper">
-                    <select
-                      className="employee-registration__select"
-                      value={officeLocation}
-                      onChange={(e) => setOfficeLocation(e.target.value)}
-                    >
-                      <option value="Chennai - Main Office">Chennai - Main Office</option>
-                      <option value="Bengaluru">Bengaluru</option>
-                      <option value="Hyderabad">Hyderabad</option>
-                      <option value="other">Other</option>
-                    </select>
-                    <span className="employee-registration__select-icon">▼</span>
-                  </div>
-                  {officeLocation === 'other' ? (
-                    <div className="employee-registration__other-container">
-                      <input
-                        type="text"
-                        className="employee-registration__input"
-                        placeholder="Enter Office Location..."
-                        value={otherOfficeLocation}
-                        onChange={(e) => setOtherOfficeLocation(e.target.value)}
-                      />
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      className="employee-registration__add-link"
-                      onClick={() => setOfficeLocation('other')}
-                    >
-                      + Add New
-                    </button>
-                  )}
-                </div>
+                <Select
+                  label="Office Location *"
+                  value={officeLocation}
+                  onChange={(e) => setOfficeLocation(e.target.value)}
+                  options={[
+                    { value: 'Chennai - Main Office', label: 'Chennai - Main Office' },
+                    { value: 'Bengaluru', label: 'Bengaluru' },
+                    { value: 'Hyderabad', label: 'Hyderabad' },
+                    { value: 'other', label: 'Other' },
+                  ]}
+                />
 
                 {/* 11. Joining Date */}
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">
-                    Joining Date <span className="employee-registration__required">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    className="employee-registration__input"
-                    value={joiningDate}
-                    onChange={(e) => setJoiningDate(e.target.value)}
-                  />
-                </div>
+                <Input
+                  label="Joining Date *"
+                  type="date"
+                  value={joiningDate}
+                  onChange={(e) => setJoiningDate(e.target.value)}
+                />
 
                 {/* 12. Confirmed Date of Joining */}
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">Confirmed Date of Joining</label>
-                  <input
-                    type="date"
-                    className="employee-registration__input"
-                    value={confirmedJoiningDate}
-                    onChange={(e) => setConfirmedJoiningDate(e.target.value)}
-                  />
-                </div>
+                <Input
+                  label="Confirmed Date of Joining"
+                  type="date"
+                  value={confirmedJoiningDate}
+                  onChange={(e) => setConfirmedJoiningDate(e.target.value)}
+                />
 
                 {/* 13. End Date */}
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">End Date</label>
-                  <input
-                    type="date"
-                    className="employee-registration__input"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    placeholder="DD/MM/YYYY"
-                  />
-                </div>
+                <Input
+                  label="End Date"
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
 
                 {/* 14. Source of Hire */}
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">
-                    Source of Hire <span className="employee-registration__required">*</span>
-                  </label>
-                  <div className="employee-registration__select-wrapper">
-                    <select
-                      className="employee-registration__select"
-                      value={sourceOfHire}
-                      onChange={(e) => setSourceOfHire(e.target.value)}
-                    >
-                      <option value="direct_applicant">Direct Applicant</option>
-                      <option value="referral">Referral</option>
-                      <option value="agency">Agency</option>
-                      <option value="campus">Campus</option>
-                      <option value="linkedin">LinkedIn</option>
-                      <option value="other">Other</option>
-                    </select>
-                    <span className="employee-registration__select-icon">▼</span>
-                  </div>
-                  {sourceOfHire === 'other' && (
-                    <div className="employee-registration__other-container">
-                      <input
-                        type="text"
-                        className="employee-registration__input"
-                        placeholder="Enter Source of Hire..."
-                        value={otherSourceOfHire}
-                        onChange={(e) => setOtherSourceOfHire(e.target.value)}
-                      />
-                    </div>
-                  )}
-                </div>
+                <Select
+                  label="Source of Hire *"
+                  value={sourceOfHire}
+                  onChange={(e) => setSourceOfHire(e.target.value)}
+                  options={[
+                    { value: 'direct_applicant', label: 'Direct Applicant' },
+                    { value: 'referral', label: 'Referral' },
+                    { value: 'agency', label: 'Agency' },
+                    { value: 'campus', label: 'Campus' },
+                    { value: 'linkedin', label: 'LinkedIn' },
+                    { value: 'other', label: 'Other' },
+                  ]}
+                />
 
                 {/* 15. Probation Period */}
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">
-                    Probation Period <span className="employee-registration__required">*</span>
-                  </label>
-                  <div className="employee-registration__select-wrapper">
-                    <select
-                      className="employee-registration__select"
-                      value={probationPeriod}
-                      onChange={(e) => setProbationPeriod(e.target.value)}
-                    >
-                      <option value="3_months">3 Months</option>
-                      <option value="6_months">6 Months</option>
-                      <option value="12_months">12 Months</option>
-                      <option value="no_probation">No Probation</option>
-                      <option value="custom">Custom</option>
-                      <option value="other">Other</option>
-                    </select>
-                    <span className="employee-registration__select-icon">▼</span>
-                  </div>
-                  {probationPeriod === 'custom' && (
-                    <div className="employee-registration__other-container">
-                      <input
-                        type="number"
-                        className="employee-registration__input employee-registration__input--narrow"
-                        placeholder="Number..."
-                        value={customProbationNumber}
-                        onChange={(e) => setCustomProbationNumber(e.target.value)}
-                      />
-                      <select
-                        className="employee-registration__custom-unit-select"
-                        value={customProbationUnit}
-                        onChange={(e) =>
-                          setCustomProbationUnit(e.target.value as 'days' | 'months')
-                        }
-                      >
-                        <option value="days">Days</option>
-                        <option value="months">Months</option>
-                      </select>
-                    </div>
-                  )}
-                  {probationPeriod === 'other' && (
-                    <div className="employee-registration__other-container">
-                      <input
-                        type="text"
-                        className="employee-registration__input"
-                        placeholder="Enter Other Probation Period..."
-                        value={otherProbationPeriod}
-                        onChange={(e) => setOtherProbationPeriod(e.target.value)}
-                      />
-                    </div>
-                  )}
-                </div>
+                <Select
+                  label="Probation Period *"
+                  value={probationPeriod}
+                  onChange={(e) => setProbationPeriod(e.target.value)}
+                  options={[
+                    { value: '3_months', label: '3 Months' },
+                    { value: '6_months', label: '6 Months' },
+                    { value: '12_months', label: '12 Months' },
+                    { value: 'no_probation', label: 'No Probation' },
+                    { value: 'custom', label: 'Custom' },
+                    { value: 'other', label: 'Other' },
+                  ]}
+                />
 
                 {/* 16. Notice Period */}
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">
-                    Notice Period <span className="employee-registration__required">*</span>
-                  </label>
-                  <div className="employee-registration__select-wrapper">
-                    <select
-                      className="employee-registration__select"
-                      value={noticePeriod}
-                      onChange={(e) => setNoticePeriod(e.target.value)}
-                    >
-                      <option value="15_days">15 Days</option>
-                      <option value="30_days">30 Days</option>
-                      <option value="60_days">60 Days</option>
-                      <option value="90_days">90 Days</option>
-                      <option value="no_notice">No Notice Period</option>
-                      <option value="custom">Custom</option>
-                      <option value="other">Other</option>
-                    </select>
-                    <span className="employee-registration__select-icon">▼</span>
-                  </div>
-                  {noticePeriod === 'custom' && (
-                    <div className="employee-registration__other-container">
-                      <input
-                        type="number"
-                        className="employee-registration__input employee-registration__input--narrow"
-                        placeholder="Number..."
-                        value={customNoticeNumber}
-                        onChange={(e) => setCustomNoticeNumber(e.target.value)}
-                      />
-                      <select
-                        className="employee-registration__custom-unit-select"
-                        value={customNoticeUnit}
-                        onChange={(e) => setCustomNoticeUnit(e.target.value as 'days' | 'months')}
-                      >
-                        <option value="days">Days</option>
-                        <option value="months">Months</option>
-                      </select>
-                    </div>
-                  )}
-                  {noticePeriod === 'other' && (
-                    <div className="employee-registration__other-container">
-                      <input
-                        type="text"
-                        className="employee-registration__input"
-                        placeholder="Enter Other Notice Period..."
-                        value={otherNoticePeriod}
-                        onChange={(e) => setOtherNoticePeriod(e.target.value)}
-                      />
-                    </div>
-                  )}
-                </div>
-              </form>
-            </>
+                <Select
+                  label="Notice Period *"
+                  value={noticePeriod}
+                  onChange={(e) => setNoticePeriod(e.target.value)}
+                  options={[
+                    { value: '15_days', label: '15 Days' },
+                    { value: '30_days', label: '30 Days' },
+                    { value: '60_days', label: '60 Days' },
+                    { value: '90_days', label: '90 Days' },
+                    { value: 'no_notice', label: 'No Notice Period' },
+                    { value: 'custom', label: 'Custom' },
+                    { value: 'other', label: 'Other' },
+                  ]}
+                />
+              </FormGrid>
+            </Stack>
           ) : activeSection === 'personal' ? (
-            <>
-              {/* Personal Information Section Banner */}
-              <div className="employee-registration__section-header">
-                <div className="employee-registration__section-icon-badge">
-                  <BezentIcon name="employees" size={22} />
-                </div>
-                <div className="employee-registration__section-title-group">
-                  <h2 className="employee-registration__section-title">Personal Information</h2>
-                  <p className="employee-registration__section-subtitle">
-                    Basic personal information about the employee.
-                  </p>
-                </div>
-              </div>
-
-              {/* All 27 Personal Information Fields */}
+            <Stack gap="lg">
+              <Toolbar
+                left={
+                  <Inline gap="md" align="center">
+                    <BezentIcon name="employees" size={22} />
+                    <div>
+                      <h3 className="bezent-card__title">Personal Information</h3>
+                      <p className="bezent-card__desc">
+                        Basic personal information about the employee.
+                      </p>
+                    </div>
+                  </Inline>
+                }
+              />
               <PersonalInformation employeeId={employeeId} />
-            </>
+            </Stack>
           ) : activeSection === 'onboarding' ? (
-            <>
-              {/* Onboarding Section Banner */}
-              <div className="employee-registration__section-header">
-                <div className="employee-registration__section-icon-badge">
-                  <BezentIcon name="tasks" size={22} />
-                </div>
-                <div className="employee-registration__section-title-group">
-                  <h2 className="employee-registration__section-title">Onboarding</h2>
-                  <p className="employee-registration__section-subtitle">
-                    Onboarding tasks and assigned assets for the employee.
-                  </p>
-                </div>
-              </div>
-
-              {/* Form-Based Onboarding Tasks & Assets */}
+            <Stack gap="lg">
+              <Toolbar
+                left={
+                  <Inline gap="md" align="center">
+                    <BezentIcon name="tasks" size={22} />
+                    <div>
+                      <h3 className="bezent-card__title">Administration / Onboarding</h3>
+                      <p className="bezent-card__desc">
+                        Onboarding tasks and assigned assets for the employee.
+                      </p>
+                    </div>
+                  </Inline>
+                }
+              />
               <OnboardingSection />
-            </>
+            </Stack>
           ) : activeSection === 'skills' ? (
             <SkillsSection />
           ) : activeSection === 'emergency' ? (
@@ -1289,164 +931,142 @@ export function EmployeeRegistration({
               onCreateEmployee={() => onSave?.(reviewData as unknown as Record<string, unknown>)}
             />
           ) : (
-            <>
-              {/* Dynamic Custom Section View */}
-              <div className="employee-registration__section-header">
-                <div className="employee-registration__section-icon-badge">
-                  <BezentIcon name="documents" size={22} />
-                </div>
-                <div className="employee-registration__section-title-group">
-                  <h2 className="employee-registration__section-title">
-                    {allSections.find((s) => s.id === activeSection)?.label || 'Custom Section'}
-                  </h2>
-                  <p className="employee-registration__section-subtitle">
-                    Configured custom fields and section details.
-                  </p>
-                </div>
-              </div>
+            <Stack gap="lg">
+              <Toolbar
+                left={
+                  <Inline gap="md" align="center">
+                    <BezentIcon name="documents" size={22} />
+                    <div>
+                      <h3 className="bezent-card__title">
+                        {allSections.find((s) => s.id === activeSection)?.label || 'Custom Section'}
+                      </h3>
+                      <p className="bezent-card__desc">
+                        Configured custom fields and section details.
+                      </p>
+                    </div>
+                  </Inline>
+                }
+              />
 
-              <div className="employee-registration__custom-section-body">
+              <Stack gap="md">
                 {customCards
                   .filter((c) => c.sectionId === activeSection)
                   .map((c) => {
                     const cardFields = customFields.filter((f) => f.cardId === c.id);
                     return (
-                      <div key={c.id} className="employee-registration__card-group">
-                        <h3 className="employee-registration__card-group-title">{c.title}</h3>
-                        <div className="employee-registration__form-grid">
-                          {cardFields.map((f) => (
-                            <div key={f.id} className="employee-registration__field">
-                              <label className="employee-registration__label">
-                                {f.label}{' '}
-                                {f.required && (
-                                  <span className="employee-registration__required">*</span>
-                                )}
-                              </label>
-                              {f.fieldType === 'select' ? (
-                                <div className="employee-registration__select-wrapper">
-                                  <select
-                                    className="employee-registration__select"
+                      <Card key={c.id} padding="md">
+                        <Stack gap="sm">
+                          <h4 className="bezent-card__title">{c.title}</h4>
+                          <FormGrid columns={2}>
+                            {cardFields.map((f) => (
+                              <div key={f.id}>
+                                {f.fieldType === 'select' ? (
+                                  <Select
+                                    label={`${f.label}${f.required ? ' *' : ''}`}
                                     disabled={f.readOnly}
-                                  >
-                                    <option value="">Select {f.label}</option>
-                                    {f.options?.map((opt: string, idx: number) => (
-                                      <option key={idx} value={opt}>
-                                        {opt}
-                                      </option>
-                                    ))}
-                                  </select>
-                                  <span className="employee-registration__select-icon">▼</span>
-                                </div>
-                              ) : f.fieldType === 'file' ? (
-                                <input
-                                  type="file"
-                                  className="employee-registration__input"
-                                  disabled={f.readOnly}
-                                />
-                              ) : (
-                                <input
-                                  type={
-                                    f.fieldType === 'date'
-                                      ? 'date'
-                                      : f.fieldType === 'number'
-                                        ? 'number'
-                                        : 'text'
-                                  }
-                                  className="employee-registration__input"
-                                  placeholder={f.defaultValue || `Enter ${f.label}`}
-                                  disabled={f.readOnly}
-                                />
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                                    options={[
+                                      { value: '', label: `Select ${f.label}` },
+                                      ...(f.options?.map((opt: string) => ({
+                                        value: opt,
+                                        label: opt,
+                                      })) || []),
+                                    ]}
+                                  />
+                                ) : (
+                                  <Input
+                                    type={
+                                      f.fieldType === 'date'
+                                        ? 'date'
+                                        : f.fieldType === 'number'
+                                          ? 'number'
+                                          : 'text'
+                                    }
+                                    label={`${f.label}${f.required ? ' *' : ''}`}
+                                    placeholder={f.defaultValue || `Enter ${f.label}`}
+                                    disabled={f.readOnly}
+                                  />
+                                )}
+                              </div>
+                            ))}
+                          </FormGrid>
+                        </Stack>
+                      </Card>
                     );
                   })}
-              </div>
-            </>
+              </Stack>
+            </Stack>
           )}
 
-          {/* Bottom Actions Bar */}
-          <div className="employee-registration__actions">
-            <button
-              type="button"
-              className="employee-registration__back-btn"
-              disabled={activeSection === 'general'}
-              onClick={handleBack}
-            >
-              ← Back
-            </button>
-            <button
-              type="button"
-              className="employee-registration__save-draft-btn"
-              onClick={() => handleSaveDraft(false)}
-            >
-              💾 Save Draft
-            </button>
-            <button
-              type="button"
-              className="employee-registration__cancel-btn"
-              onClick={() => setShowUnsavedModal(true)}
-            >
-              Cancel
-            </button>
-            {activeSection !== 'review' && (
-              <Button variant="primary" onClick={handleNext}>
-                Save &amp; Next →
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Toast Banner */}
-        {toastMsg && (
-          <div className="employee-registration__toast">
-            <span>✓</span>
-            <span>{toastMsg}</span>
-          </div>
-        )}
-
-        {/* Drafts Modal */}
-        <DraftsModal
-          isOpen={isDraftsModalOpen}
-          drafts={draftsList}
-          onClose={() => setIsDraftsModalOpen(false)}
-          onContinueDraft={handleContinueDraft}
-          onDeleteDraft={handleDeleteDraft}
-        />
-
-        {/* Unsaved Changes Modal */}
-        {showUnsavedModal && (
-          <div className="employee-registration__unsaved-overlay">
-            <div className="employee-registration__unsaved-card">
-              <h3 className="employee-registration__unsaved-title">Unsaved Changes</h3>
-              <p className="employee-registration__unsaved-desc">
-                You have unsaved changes. Save as draft before leaving?
-              </p>
-              <div className="employee-registration__unsaved-actions">
-                <button
+          {/* Bottom Actions Toolbar */}
+          <Toolbar
+            left={
+              <Actions gap="sm">
+                <Button
+                  variant="secondary"
                   type="button"
-                  className="employee-registration__cancel-btn"
-                  onClick={() => setShowUnsavedModal(false)}
+                  disabled={activeSection === 'general'}
+                  onClick={handleBack}
                 >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="employee-registration__leave-btn"
-                  onClick={onCancel}
-                >
-                  Leave Without Saving
-                </button>
-                <Button variant="primary" onClick={() => handleSaveDraft(true)}>
-                  Save Draft
+                  ← Back
                 </Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+                <Button variant="secondary" type="button" onClick={() => handleSaveDraft(false)}>
+                  💾 Save Draft
+                </Button>
+                <Button variant="secondary" type="button" onClick={() => setShowUnsavedModal(true)}>
+                  Cancel
+                </Button>
+              </Actions>
+            }
+            right={
+              activeSection !== 'review' ? (
+                <Button variant="primary" type="button" onClick={handleNext}>
+                  Save &amp; Next →
+                </Button>
+              ) : undefined
+            }
+          />
+        </Stack>
+      </Card>
+
+      {/* Toast Alert Banner */}
+      {toastMsg && (
+        <Alert variant="info" onDismiss={() => setToastMsg(null)}>
+          {toastMsg}
+        </Alert>
+      )}
+
+      {/* Drafts Modal */}
+      <DraftsModal
+        isOpen={isDraftsModalOpen}
+        drafts={draftsList}
+        onClose={() => setIsDraftsModalOpen(false)}
+        onContinueDraft={handleContinueDraft}
+        onDeleteDraft={handleDeleteDraft}
+      />
+
+      {/* Unsaved Changes Modal */}
+      {showUnsavedModal && (
+        <Modal
+          isOpen={showUnsavedModal}
+          onClose={() => setShowUnsavedModal(false)}
+          title="Unsaved Changes"
+          footer={
+            <Actions align="end" gap="sm">
+              <Button variant="secondary" type="button" onClick={() => setShowUnsavedModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="secondary" type="button" onClick={onCancel}>
+                Leave Without Saving
+              </Button>
+              <Button variant="primary" type="button" onClick={() => handleSaveDraft(true)}>
+                Save Draft
+              </Button>
+            </Actions>
+          }
+        >
+          <p>You have unsaved changes. Save as draft before leaving?</p>
+        </Modal>
+      )}
+    </Page>
   );
 }
