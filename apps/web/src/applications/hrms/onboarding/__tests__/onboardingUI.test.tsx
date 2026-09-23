@@ -103,7 +103,7 @@ describe('HRMS Onboarding UI Components', () => {
     expect(html).toContain('Search employees...');
   });
 
-  it('hrmsRoutes routes administration/onboarding directly to Employee Registration form', () => {
+  it('hrmsRoutes routes administration/onboarding directly to Employee Registration modal workspace', () => {
     const basePathRoute = hrmsRoutes[0];
     const onboardingFormRoute = basePathRoute?.children?.find(
       (r) => r.path === 'administration/onboarding',
@@ -114,8 +114,28 @@ describe('HRMS Onboarding UI Components', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>{onboardingFormRoute!.element as React.ReactElement}</MemoryRouter>,
     );
+    // Modal workspace structure & tokens
+    expect(html).toContain('bezent-modal');
+    expect(html).toContain('bezent-modal--xl');
     expect(html).toContain('Employee Registration');
+    expect(html).toContain('Add and manage new employee information');
+    // Persistent header close button
+    expect(html).toContain('bezent-modal__close-btn');
+    // Tabs
+    expect(html).toContain('General');
+    expect(html).toContain('Personal Information');
+    expect(html).toContain('Skills');
+    expect(html).toContain('Emergency Contact');
+    expect(html).toContain('Accounts');
+    expect(html).toContain('Online Access');
+    expect(html).toContain('Working Hours');
+    expect(html).toContain('Review');
+    // Form body
     expect(html).toContain('General Information');
+    // Persistent footer toolbar actions
+    expect(html).toContain('Save Draft');
+    expect(html).toContain('Cancel');
+    expect(html).toContain('Save &amp; Next →');
   });
 
   it('hrmsRoutes routes administration/documents to Documents destination', () => {
