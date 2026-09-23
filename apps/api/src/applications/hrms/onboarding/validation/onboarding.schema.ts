@@ -417,3 +417,82 @@ export function validateSubmitCase(
     version: typeof data.version === 'number' ? data.version : undefined,
   };
 }
+
+export function validateTransitionStage(
+  input: unknown,
+): import('../types/onboarding.types.js').TransitionStageDto {
+  if (!input || typeof input !== 'object') {
+    throw new ValidationError('Request body must be a JSON object');
+  }
+
+  const data = input as Record<string, unknown>;
+  const errors: Record<string, string> = {};
+
+  if (!data.toStage || typeof data.toStage !== 'string' || !data.toStage.trim()) {
+    errors.toStage = 'Target stage (toStage) is required';
+  }
+
+  if (data.notes !== undefined && data.notes !== null && data.notes !== '') {
+    if (typeof data.notes !== 'string') {
+      errors.notes = 'Notes must be a string';
+    } else if (data.notes.trim().length > 500) {
+      errors.notes = 'Notes must not exceed 500 characters';
+    }
+  }
+
+  if (data.version === undefined || data.version === null) {
+    errors.version = 'Version is required for optimistic concurrency check';
+  } else if (
+    typeof data.version !== 'number' ||
+    !Number.isInteger(data.version) ||
+    data.version < 1
+  ) {
+    errors.version = 'Version must be a positive integer';
+  }
+
+  if (Object.keys(errors).length > 0) {
+    throw new ValidationError('Validation failed for stage transition', errors);
+  }
+
+  return {
+    toStage: (data.toStage as string).trim(),
+    notes: data.notes ? (data.notes as string).trim() : undefined,
+    version: data.version as number,
+  };
+}
+
+export function validateWithdrawCase(
+  input: unknown,
+): import('../types/onboarding.types.js').WithdrawCaseDto {
+  if (!input || typeof input !== 'object') {
+    throw new ValidationError('Request body must be a JSON object');
+  }
+
+  const data = input as Record<string, unknown>;
+  const errors: Record<string, string> = {};
+
+  if (!data.reason || typeof data.reason !== 'string' || !data.reason.trim()) {
+    errors.reason = 'Withdrawal reason is required';
+  } else if (data.reason.trim().length > 500) {
+    errors.reason = 'Withdrawal reason must not exceed 500 characters';
+  }
+
+  if (data.version === undefined || data.version === null) {
+    errors.version = 'Version is required for optimistic concurrency check';
+  } else if (
+    typeof data.version !== 'number' ||
+    !Number.isInteger(data.version) ||
+    data.version < 1
+  ) {
+    errors.version = 'Version must be a positive integer';
+  }
+
+  if (Object.keys(errors).length > 0) {
+    throw new ValidationError('Validation failed for case withdrawal', errors);
+  }
+
+  return {
+    reason: (data.reason as string).trim(),
+    version: data.version as number,
+  };
+}

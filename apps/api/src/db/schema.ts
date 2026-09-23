@@ -124,6 +124,9 @@ export const onboardingCases = mysqlTable(
       .notNull(),
     version: int('version').default(1).notNull(),
     draftPayload: json('draft_payload').$type<Record<string, unknown>>(),
+    withdrawalReason: varchar('withdrawal_reason', { length: 500 }),
+    withdrawnAt: timestamp('withdrawn_at'),
+    completedAt: timestamp('completed_at'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
   },
@@ -325,3 +328,34 @@ export type NewOnboardingChecklistTemplate = typeof onboardingChecklistTemplates
 
 export type OnboardingConversionSettings = typeof onboardingConversionSettings.$inferSelect;
 export type NewOnboardingConversionSettings = typeof onboardingConversionSettings.$inferInsert;
+
+/**
+ * HRMS Domain: Onboarding Case Stage & Status History
+ * Audit trail for stage progressions, reversions, withdrawals, and completions.
+ */
+export const onboardingCaseStageHistory = mysqlTable(
+  'onboarding_case_stage_history',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    caseId: varchar('case_id', { length: 64 })
+      .notNull()
+      .references(() => onboardingCases.id),
+    fromStage: varchar('from_stage', { length: 50 }),
+    toStage: varchar('to_stage', { length: 50 }).notNull(),
+    action: mysqlEnum('action', ['transition', 'revert', 'withdraw', 'complete']).notNull(),
+    notes: varchar('notes', { length: 500 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_case_history_tenant_company').on(table.tenantId, table.companyId),
+    index('idx_case_history_case_id').on(table.caseId),
+    index('idx_case_history_created_at').on(table.createdAt),
+  ],
+);
+
+export type OnboardingCaseStageHistory = typeof onboardingCaseStageHistory.$inferSelect;
+export type NewOnboardingCaseStageHistory = typeof onboardingCaseStageHistory.$inferInsert;
