@@ -1,5 +1,9 @@
 import type { ReactNode } from 'react';
-import { EmptyStateIllustration, type EmptyStateIllustrationSize } from './EmptyStateIllustration';
+import {
+  EmptyStateIllustration,
+  type EmptyStateIllustrationSize,
+  type RaccoonVariant,
+} from './EmptyStateIllustration';
 import './EmptyState.css';
 
 export interface EmptyStateAction {
@@ -16,6 +20,10 @@ export interface EmptyStateProps {
   secondaryAction?: EmptyStateAction;
   size?: EmptyStateIllustrationSize;
   hideIllustration?: boolean;
+  /** Custom mascot illustration image override */
+  imageSrc?: string;
+  /** Page or module contextual mascot variant (e.g. 'onboarding', 'attendance', 'leave', etc.) */
+  variant?: RaccoonVariant | string;
   className?: string;
 }
 
@@ -50,6 +58,8 @@ export function EmptyState({
   secondaryAction,
   size = 'default',
   hideIllustration = false,
+  imageSrc,
+  variant,
   className,
 }: EmptyStateProps) {
   const isCompact = size === 'compact';
@@ -62,7 +72,7 @@ export function EmptyState({
     >
       {!hideIllustration && (
         <div className="bezent-empty-state__illustration">
-          <EmptyStateIllustration size={size} />
+          <EmptyStateIllustration size={size} imageSrc={imageSrc} variant={variant} />
         </div>
       )}
 

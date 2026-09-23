@@ -158,7 +158,12 @@ export function ModulePlaceholder({
         <h1 className="module-placeholder__title">{section ? `${title} · ${section}` : title}</h1>
       </div>
       <div className="module-placeholder__body">
-        <EmptyState title={emptyTitle} description={emptyDescription} size="default" />
+        <EmptyState
+          title={emptyTitle}
+          description={emptyDescription}
+          size="default"
+          variant={destinationId}
+        />
       </div>
     </div>
   );

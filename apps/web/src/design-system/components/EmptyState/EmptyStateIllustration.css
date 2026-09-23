@@ -35,7 +35,7 @@
 .bezent-sleeping-raccoon-img {
   width: 100%;
   max-width: 160px;
-  max-height: 120px;
+  max-height: 160px;
   height: auto;
   display: block;
   object-fit: contain;
@@ -47,7 +47,7 @@
 
 .bezent-empty-illustration-container--compact .bezent-sleeping-raccoon-img {
   max-width: 110px;
-  max-height: 85px;
+  max-height: 110px;
 }
 
 .bezent-empty-illustration-container:hover .bezent-sleeping-raccoon-img {
@@ -264,6 +264,51 @@
 .bezent-empty-illustration-container.is-dark .bezent-sparkle-svg,
 [data-theme='dark'] .bezent-empty-illustration-container .bezent-sparkle-svg {
   filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));
+}
+
+/* ── Contextual Theme Accent Badge ── */
+.bezent-stage-accent-badge {
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--bg-surface-elevated, #ffffff);
+  border: 1px solid var(--border-default, #e2e8f0);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  font-family: var(--font-family-base, sans-serif);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: -0.1px;
+  color: var(--text-primary, #0f172a);
+  animation: bezentAccentFloat 3.2s ease-in-out infinite alternate;
+  z-index: 2;
+  backdrop-filter: blur(8px);
+}
+
+.bezent-stage-accent-badge__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme='dark'] .bezent-stage-accent-badge {
+  background: rgba(30, 41, 59, 0.92);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  color: #f1f5f9;
+}
+
+@keyframes bezentAccentFloat {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-4px);
+  }
 }
 
 /* ── Reduced Motion Accessibility ── */
