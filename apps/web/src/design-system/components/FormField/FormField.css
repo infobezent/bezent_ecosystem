@@ -11,17 +11,56 @@
   gap: var(--space-1-5, 6px);
 }
 
-/* Horizontal — label left, control right */
+/* Horizontal — aligned label left, control right */
 .bezent-form-field--horizontal {
-  flex-direction: row;
-  align-items: flex-start;
-  gap: var(--space-3, 12px);
+  display: grid;
+  grid-template-columns:
+    var(--form-field-label-width, var(--form-grid-label-width, var(--form-label-width-md, 180px)))
+    minmax(0, 1fr);
+  column-gap: var(--space-3, 12px);
+  row-gap: var(--space-1, 4px);
+  align-items: start;
+  width: 100%;
 }
 
+/* Semantic label width variants */
+.bezent-form-field--label-width-sm {
+  --form-field-label-width: var(--form-label-width-sm, 140px);
+}
+
+.bezent-form-field--label-width-md {
+  --form-field-label-width: var(--form-label-width-md, 180px);
+}
+
+.bezent-form-field--label-width-lg {
+  --form-field-label-width: var(--form-label-width-lg, 220px);
+}
+
+/* Grid column spanning */
+.bezent-form-field--span-2 {
+  grid-column: span 2;
+}
+
+.bezent-form-field--span-full {
+  grid-column: 1 / -1;
+}
+
+/* Scoped label styling for horizontal layout:
+   - align baseline with input (padding-top 8px)
+   - allow normal word wrapping so long enterprise labels never clip or overlap
+   - preserve inline asterisk indicator */
 .bezent-form-field--horizontal > .bezent-label {
-  flex-shrink: 0;
-  padding-top: var(--space-2, 8px); /* aligns label baseline with input */
-  min-width: 8rem;
+  grid-column: 1;
+  display: block;
+  padding-top: var(--space-2, 8px);
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
+  line-height: var(--line-height-normal, 1.4);
+}
+
+.bezent-form-field--horizontal > .bezent-label .bezent-label__required {
+  display: inline;
 }
 
 /* Control slot */
@@ -32,6 +71,10 @@
   min-width: 0;
 }
 
+.bezent-form-field--horizontal > .bezent-form-field__control {
+  grid-column: 2;
+}
+
 /* Helper / error text */
 .bezent-form-field__helper {
   margin: 0;
@@ -39,6 +82,10 @@
   font-size: var(--font-size-xs);
   line-height: var(--line-height-normal);
   color: var(--color-text-tertiary);
+}
+
+.bezent-form-field--horizontal > .bezent-form-field__helper {
+  grid-column: 2;
 }
 
 .bezent-form-field__helper--error {
@@ -69,4 +116,30 @@
 
 [data-theme='dark'] .bezent-form-field__helper--error {
   color: var(--color-danger-400, #f87171);
+}
+
+/* Responsive collapse on narrow viewports:
+   Collapse from horizontal (label | control) to vertical stack (label / control) */
+@media (max-width: 640px) {
+  .bezent-form-field--horizontal {
+    grid-template-columns: 1fr;
+    row-gap: var(--space-1-5, 6px);
+  }
+
+  .bezent-form-field--horizontal > .bezent-label {
+    grid-column: 1;
+    padding-top: 0;
+  }
+
+  .bezent-form-field--horizontal > .bezent-form-field__control {
+    grid-column: 1;
+  }
+
+  .bezent-form-field--horizontal > .bezent-form-field__helper {
+    grid-column: 1;
+  }
+
+  .bezent-form-field--span-2 {
+    grid-column: span 1;
+  }
 }

@@ -13,6 +13,11 @@
 
 import type { ReactNode } from 'react';
 import { Label } from '../Label';
+import {
+  useFormGridContext,
+  type FormLayout,
+  type FormLabelWidth,
+} from '../FormGrid/FormGridContext';
 import './FormField.css';
 
 export interface FormFieldProps {
@@ -30,8 +35,12 @@ export interface FormFieldProps {
   error?: string;
   /** Dims the label for disabled controls */
   disabled?: boolean;
-  /** Layout orientation — 'vertical' stacks label above control (default) */
-  orientation?: 'vertical' | 'horizontal';
+  /** Layout orientation — 'vertical' stacks label above control, 'horizontal' aligns label left */
+  orientation?: FormLayout;
+  /** Semantic label column width in horizontal layout — 'sm' (140px), 'md' (180px), 'lg' (220px) */
+  labelWidth?: FormLabelWidth;
+  /** Column span within a FormGrid (e.g. span={2} for full width in 2-column grid) */
+  span?: 1 | 2 | 'full';
   /** Passed to the wrapping element */
   className?: string;
   children: ReactNode;
@@ -45,14 +54,27 @@ export function FormField({
   helperText,
   error,
   disabled,
-  orientation = 'vertical',
+  orientation,
+  labelWidth,
+  span,
   className,
   children,
 }: FormFieldProps) {
+  const gridContext = useFormGridContext();
+  const effectiveOrientation = orientation ?? gridContext.layout ?? 'vertical';
+  const effectiveLabelWidth = labelWidth ?? gridContext.labelWidth ?? 'md';
+  const isHorizontal = effectiveOrientation === 'horizontal';
+
   const hasError = Boolean(error);
   const classes = [
     'bezent-form-field',
-    `bezent-form-field--${orientation}`,
+    `bezent-form-field--${effectiveOrientation}`,
+    isHorizontal ? `bezent-form-field--label-width-${effectiveLabelWidth}` : '',
+    span
+      ? span === 'full'
+        ? 'bezent-form-field--span-full'
+        : `bezent-form-field--span-${span}`
+      : '',
     hasError ? 'bezent-form-field--error' : '',
     disabled ? 'bezent-form-field--disabled' : '',
     className ?? '',

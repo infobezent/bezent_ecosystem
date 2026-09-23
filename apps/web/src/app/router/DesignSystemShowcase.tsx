@@ -509,6 +509,23 @@ export function DesignSystemShowcase() {
               </FormGrid>
             </ShowcaseBlock>
 
+            <ShowcaseBlock title="FormGrid (Horizontal Enterprise Layout)">
+              <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                <FormField label="Short Label" htmlFor="hfg-short">
+                  <Input id="hfg-short" placeholder="Aligned input" />
+                </FormField>
+                <FormField label="Employment Type" htmlFor="hfg-type" required>
+                  <Input id="hfg-type" placeholder="Aligned input" />
+                </FormField>
+                <FormField label="Reporting Manager" htmlFor="hfg-manager" required>
+                  <Input id="hfg-manager" placeholder="Aligned input" />
+                </FormField>
+                <FormField label="Confirmed Date of Joining" htmlFor="hfg-date">
+                  <Input id="hfg-date" placeholder="Aligned input" />
+                </FormField>
+              </FormGrid>
+            </ShowcaseBlock>
+
             <ShowcaseBlock title="Card">
               <Card className="bds-card-demo">
                 <CardHeader>
