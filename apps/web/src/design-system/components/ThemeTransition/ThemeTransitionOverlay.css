@@ -1,0 +1,210 @@
+/*
+ * BEZENT Premium Day/Night Mode Transition — Arc Reactor + Circular Eclipse Reveal
+ */
+
+.bezent-theme-transition-portal {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: var(--z-theme-transition, 9999);
+  overflow: hidden;
+}
+
+/* ── Phase 1 & 2: Arc Reactor Energy Pulse Ring ────────────────────────── */
+
+.bezent-theme-transition__reactor-pulse {
+  position: absolute;
+  top: var(--eclipse-origin-y, 50%);
+  left: var(--eclipse-origin-x, 50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0.8);
+  animation: bezentReactorPulse var(--motion-duration-reactor-pulse, 450ms)
+    var(--motion-ease-arc-reactor, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
+}
+
+.bezent-theme-transition--to-dark .bezent-theme-transition__reactor-pulse {
+  border: 2px solid rgba(56, 189, 248, 0.95);
+  box-shadow:
+    0 0 20px rgba(22, 131, 255, 0.8),
+    0 0 40px rgba(56, 189, 248, 0.5),
+    inset 0 0 14px rgba(56, 189, 248, 0.6);
+}
+
+.bezent-theme-transition--to-light .bezent-theme-transition__reactor-pulse {
+  border: 2px solid rgba(255, 214, 102, 0.95);
+  box-shadow:
+    0 0 20px rgba(255, 170, 0, 0.75),
+    0 0 40px rgba(255, 214, 102, 0.5),
+    inset 0 0 14px rgba(255, 255, 255, 0.8);
+}
+
+@keyframes bezentReactorPulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 1;
+  }
+  40% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(5.5);
+    opacity: 0;
+  }
+}
+
+/* ── Phase 3: Circular Eclipse Reveal Layer ───────────────────────────── */
+
+.bezent-theme-transition__eclipse {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  clip-path: circle(0px at var(--eclipse-origin-x, 50%) var(--eclipse-origin-y, 50%));
+  animation: bezentEclipseExpand var(--motion-duration-theme-reveal, 600ms)
+    var(--motion-ease-eclipse, cubic-bezier(0.2, 0, 0, 1)) forwards;
+}
+
+@keyframes bezentEclipseExpand {
+  0% {
+    clip-path: circle(0px at var(--eclipse-origin-x, 50%) var(--eclipse-origin-y, 50%));
+  }
+  100% {
+    clip-path: circle(
+      var(--eclipse-max-radius, 2500px) at var(--eclipse-origin-x, 50%) var(--eclipse-origin-y, 50%)
+    );
+  }
+}
+
+/* Day → Night: Midnight Navy Eclipse Surface */
+.bezent-theme-transition--to-dark .bezent-theme-transition__eclipse {
+  background: radial-gradient(
+    circle at var(--eclipse-origin-x, 50%) var(--eclipse-origin-y, 50%),
+    #081b3a 0%,
+    #020b1c 65%,
+    #010612 100%
+  );
+}
+
+/* Night → Day: Soft Daylight Canvas Eclipse Surface */
+.bezent-theme-transition--to-light .bezent-theme-transition__eclipse {
+  background: radial-gradient(
+    circle at var(--eclipse-origin-x, 50%) var(--eclipse-origin-y, 50%),
+    #ffffff 0%,
+    #f6f8fc 65%,
+    #ebf1f8 100%
+  );
+}
+
+/* ── Luminous Wavefront Leading Ring ──────────────────────────────────── */
+
+.bezent-theme-transition__wavefront {
+  position: absolute;
+  top: var(--eclipse-origin-y, 50%);
+  left: var(--eclipse-origin-x, 50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: bezentWavefrontExpand var(--motion-duration-theme-reveal, 600ms)
+    var(--motion-ease-eclipse, cubic-bezier(0.2, 0, 0, 1)) forwards;
+}
+
+.bezent-theme-transition--to-dark .bezent-theme-transition__wavefront {
+  border: 2px solid rgba(56, 189, 248, 0.7);
+  box-shadow:
+    0 0 32px rgba(22, 131, 255, 0.6),
+    0 0 60px rgba(56, 189, 248, 0.4);
+}
+
+.bezent-theme-transition--to-light .bezent-theme-transition__wavefront {
+  border: 2px solid rgba(255, 214, 102, 0.85);
+  box-shadow:
+    0 0 32px rgba(255, 170, 0, 0.6),
+    0 0 60px rgba(255, 214, 102, 0.4);
+}
+
+@keyframes bezentWavefrontExpand {
+  0% {
+    width: 0px;
+    height: 0px;
+    opacity: 1;
+  }
+  85% {
+    opacity: 0.85;
+  }
+  100% {
+    width: calc(var(--eclipse-max-radius, 2500px) * 2);
+    height: calc(var(--eclipse-max-radius, 2500px) * 2);
+    opacity: 0;
+  }
+}
+
+/* ── Night Mode Atmosphere (Transient Particles during reveal) ────────── */
+
+.bezent-theme-transition__atmosphere {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  animation: bezentAtmosphereFade var(--motion-duration-theme-reveal, 600ms) ease-out forwards;
+}
+
+.bezent-theme-transition__particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.9);
+}
+
+@keyframes bezentAtmosphereFade {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.75;
+  }
+  80% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ── Settling Fade Out ─────────────────────────────────────────────────── */
+
+.bezent-theme-transition-portal.is-settling {
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+
+/* ── Reduced Motion Preference ────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .bezent-theme-transition__reactor-pulse,
+  .bezent-theme-transition__wavefront,
+  .bezent-theme-transition__atmosphere {
+    display: none !important;
+    animation: none !important;
+  }
+
+  .bezent-theme-transition__eclipse {
+    clip-path: none !important;
+    animation: none !important;
+    opacity: 0;
+    transition: opacity 150ms ease-out;
+  }
+
+  .bezent-theme-transition-portal.is-settling {
+    transition: opacity 100ms ease-out;
+  }
+}

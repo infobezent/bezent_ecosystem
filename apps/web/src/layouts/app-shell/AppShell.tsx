@@ -32,7 +32,7 @@ export interface AppShellProps {
   notificationCount?: number;
   /** Theme is owned by ThemeProvider (app/providers); the shell only renders the control. */
   isDarkTheme: boolean;
-  onToggleTheme: () => void;
+  onToggleTheme: (options?: { origin?: { x: number; y: number } }) => void;
   /** Right-rail buttons, active one, and selection callback. */
   railItems: ShellRailItem[];
   activeRailItemId?: string;

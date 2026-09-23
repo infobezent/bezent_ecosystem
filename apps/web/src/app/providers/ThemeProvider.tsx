@@ -4,31 +4,32 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
+import {
+  ThemeTransitionOverlay,
+  type ThemeTransitionOrigin,
+} from '../../design-system/components/ThemeTransition';
 
 /**
- * Theme state/provider foundation. Conceptually preserved from the
- * approved old BEZENT UI's `theme/ThemeContext.tsx` (see
- * docs/architecture/UI-MIGRATION-INVENTORY.md §8, §9) — mode/resolution
- * state only. Visual theme controls (a toggle button, a right-rail
- * control) are a later design-system component phase, not this one.
- *
- * Lives in `app/providers` rather than a new `platform/appearance`
- * boundary: nothing here is HRMS/business-specific, nothing yet needs a
- * dedicated platform capability, and creating one now would be
- * speculative scaffolding (AGENTS.md, Article 5).
+ * Theme state/provider foundation with premium Arc Reactor + Circular Eclipse Reveal transition.
  */
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 export type ResolvedTheme = 'light' | 'dark';
 
+export interface ToggleThemeOptions {
+  origin?: ThemeTransitionOrigin;
+}
+
 export interface ThemeContextValue {
   mode: ThemeMode;
   resolvedTheme: ResolvedTheme;
   setMode: (mode: ThemeMode) => void;
-  toggleTheme: () => void;
+  toggleTheme: (options?: ToggleThemeOptions) => void;
+  isTransitioning?: boolean;
 }
 
 /**
@@ -57,11 +58,18 @@ function getSystemTheme(): ResolvedTheme {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
+interface ActiveTransition {
+  targetTheme: ResolvedTheme;
+  origin: ThemeTransitionOrigin;
+}
+
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>(getStoredMode);
   const [systemTheme, setSystemTheme] = useState<ResolvedTheme>(getSystemTheme);
+  const [activeTransition, setActiveTransition] = useState<ActiveTransition | null>(null);
+  const isTransitioningRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return;
@@ -89,25 +97,77 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const toggleTheme = useCallback(() => {
-    setModeState((prev) => {
-      const currentResolved: ResolvedTheme = prev === 'system' ? getSystemTheme() : prev;
-      const next: ThemeMode = currentResolved === 'dark' ? 'light' : 'dark';
+  const handleMidpoint = useCallback(() => {
+    if (activeTransition) {
+      setModeState(activeTransition.targetTheme);
       try {
-        localStorage.setItem(STORAGE_KEY, next);
+        localStorage.setItem(STORAGE_KEY, activeTransition.targetTheme);
       } catch {
         // Ignore write failures.
       }
-      return next;
-    });
+    }
+  }, [activeTransition]);
+
+  const handleComplete = useCallback(() => {
+    setActiveTransition(null);
+    isTransitioningRef.current = false;
   }, []);
 
-  const contextValue = useMemo<ThemeContextValue>(
-    () => ({ mode, resolvedTheme, setMode, toggleTheme }),
-    [mode, resolvedTheme, setMode, toggleTheme],
+  const toggleTheme = useCallback(
+    (options?: ToggleThemeOptions) => {
+      // Rapid click protection: avoid stacking animations or desyncing
+      if (isTransitioningRef.current) return;
+
+      const currentResolved: ResolvedTheme =
+        mode === 'system' ? getSystemTheme() : (mode as ResolvedTheme);
+      const next: ResolvedTheme = currentResolved === 'dark' ? 'light' : 'dark';
+
+      const prefersReducedMotion =
+        typeof window !== 'undefined' &&
+        window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+
+      if (prefersReducedMotion) {
+        setMode(next);
+        return;
+      }
+
+      const fallbackOrigin: ThemeTransitionOrigin =
+        typeof window !== 'undefined'
+          ? { x: window.innerWidth - 30, y: window.innerHeight - 30 }
+          : { x: 0, y: 0 };
+
+      const origin = options?.origin || fallbackOrigin;
+
+      isTransitioningRef.current = true;
+      setActiveTransition({ targetTheme: next, origin });
+    },
+    [mode, setMode],
   );
 
-  return <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>;
+  const contextValue = useMemo<ThemeContextValue>(
+    () => ({
+      mode,
+      resolvedTheme,
+      setMode,
+      toggleTheme,
+      isTransitioning: activeTransition !== null,
+    }),
+    [mode, resolvedTheme, setMode, toggleTheme, activeTransition],
+  );
+
+  return (
+    <ThemeContext.Provider value={contextValue}>
+      {children}
+      {activeTransition && (
+        <ThemeTransitionOverlay
+          targetTheme={activeTransition.targetTheme}
+          origin={activeTransition.origin}
+          onMidpoint={handleMidpoint}
+          onComplete={handleComplete}
+        />
+      )}
+    </ThemeContext.Provider>
+  );
 }
 
 export function useTheme(): ThemeContextValue {

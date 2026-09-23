@@ -41,6 +41,7 @@ export * from './LoadingState';
 
 /* ─── Overlay ─────────────────────────────────────────────────────────────── */
 export * from './Modal';
+export * from './ThemeTransition';
 
 /* ─── Navigation ──────────────────────────────────────────────────────────── */
 export * from './Tabs';

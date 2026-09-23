@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { BezentIcon, CompanionIcon, type BezentIconName } from '../../design-system/icons';
 import type { ShellRailItem } from './types';
 import { Badge, Tooltip } from '../../design-system/components';
@@ -8,7 +8,7 @@ export interface RightRailProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   isDarkTheme: boolean;
-  onToggleTheme: () => void;
+  onToggleTheme: (options?: { origin?: { x: number; y: number } }) => void;
   /** Utility capability buttons, supplied by the host. */
   items: ShellRailItem[];
   activeItemId?: string;
@@ -255,25 +255,64 @@ function RailButton({
   );
 }
 
-function ThemeButton({ isDark, onToggle }: { isDark: boolean; onToggle: () => void }) {
+function ThemeButton({
+  isDark,
+  onToggle,
+}: {
+  isDark: boolean;
+  onToggle: (options?: { origin?: { x: number; y: number } }) => void;
+}) {
   const [hovered, setHovered] = useState(false);
+  const [isActivating, setIsActivating] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
   const label = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    let origin: { x: number; y: number } | undefined;
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      origin = {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+      };
+    } else if (e.clientX && e.clientY) {
+      origin = { x: e.clientX, y: e.clientY };
+    }
+
+    setIsActivating(true);
+    window.setTimeout(() => setIsActivating(false), 600);
+
+    onToggle({ origin });
+  };
+
   return (
     <div className="right-rail__anchor">
       <button
+        ref={buttonRef}
         type="button"
-        className="right-rail__theme"
+        className={`right-rail__theme ${isActivating ? 'is-activating' : ''}`.trim()}
         aria-label={label}
-        onClick={onToggle}
+        onClick={handleClick}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        <BezentIcon
-          name={isDark ? 'sun' : 'moon'}
-          size={19}
-          color="currentColor"
-          strokeWidth={1.8}
-        />
+        <span className="right-rail__theme-reactor-ring" aria-hidden="true" />
+        <span className="right-rail__theme-icon-container" aria-hidden="true">
+          <span
+            className={`right-rail__theme-icon right-rail__theme-icon--sun ${
+              !isDark ? 'is-active' : ''
+            }`.trim()}
+          >
+            <BezentIcon name="sun" size={19} color="currentColor" strokeWidth={1.8} />
+          </span>
+          <span
+            className={`right-rail__theme-icon right-rail__theme-icon--moon ${
+              isDark ? 'is-active' : ''
+            }`.trim()}
+          >
+            <BezentIcon name="moon" size={19} color="currentColor" strokeWidth={1.8} />
+          </span>
+        </span>
       </button>
       {hovered && <Tooltip label={label} direction="left" />}
     </div>
