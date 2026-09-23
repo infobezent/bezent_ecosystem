@@ -27,9 +27,10 @@ import { DraftsModal, EmployeeRegistrationDraft } from '../components/DraftsModa
 
 interface OnboardingPageProps {
   title?: string;
+  onAddNewHire?: () => void;
 }
 
-export function OnboardingPage({ title = 'Onboarding' }: OnboardingPageProps) {
+export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: OnboardingPageProps) {
   const devContext = useDevContext();
   const [, setMasters] = useState<OrganizationMasters | null>(null);
   const [cases, setCases] = useState<OnboardingCaseItem[]>([]);
@@ -156,15 +157,13 @@ export function OnboardingPage({ title = 'Onboarding' }: OnboardingPageProps) {
 
   if (viewMode === 'registration') {
     return (
-      <Page className="onboarding-page" maxWidth="full">
-        <EmployeeRegistration
-          initialDraft={selectedDraft}
-          onCancel={() => {
-            setSelectedDraft(null);
-            setViewMode('list');
-          }}
-        />
-      </Page>
+      <EmployeeRegistration
+        initialDraft={selectedDraft}
+        onCancel={() => {
+          setSelectedDraft(null);
+          setViewMode('list');
+        }}
+      />
     );
   }
 
@@ -198,7 +197,11 @@ export function OnboardingPage({ title = 'Onboarding' }: OnboardingPageProps) {
               variant="primary"
               onClick={() => {
                 setSelectedDraft(null);
-                setViewMode('registration');
+                if (onAddNewHire) {
+                  onAddNewHire();
+                } else {
+                  setViewMode('registration');
+                }
               }}
             >
               <span className="onboarding-page__btn-content">
@@ -305,7 +308,14 @@ export function OnboardingPage({ title = 'Onboarding' }: OnboardingPageProps) {
               !searchQuery
                 ? {
                     label: 'Add New Hire',
-                    onClick: () => setViewMode('registration'),
+                    onClick: () => {
+                      setSelectedDraft(null);
+                      if (onAddNewHire) {
+                        onAddNewHire();
+                      } else {
+                        setViewMode('registration');
+                      }
+                    },
                   }
                 : undefined
             }
