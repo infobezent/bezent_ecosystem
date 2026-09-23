@@ -325,3 +325,40 @@
     transition: none !important;
   }
 }
+
+/* ── Dark Mode Ambient Glow for Mascot ───────────────────────────────── */
+
+[data-theme='dark'] .bezent-sleeping-raccoon-stage::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(22, 131, 255, 0.24) 0%,
+    rgba(56, 189, 248, 0.08) 45%,
+    transparent 70%
+  );
+  filter: blur(14px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+[data-theme='dark'] .bezent-sleeping-raccoon-img {
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 4px 20px rgba(2, 11, 28, 0.6);
+  border: 1px solid rgba(56, 189, 248, 0.12);
+}
+
+[data-theme='dark'] .bezent-stage-accent-badge {
+  background: #081b3a;
+  border-color: rgba(56, 189, 248, 0.2);
+  color: #f8fafc;
+  box-shadow: 0 4px 14px rgba(2, 11, 28, 0.6), 0 0 10px rgba(22, 131, 255, 0.15);
+}
+

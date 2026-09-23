@@ -182,3 +182,28 @@
   outline: 2px solid var(--border-focus);
   outline-offset: 2px;
 }
+
+/* ── Dark Mode Empty State Accents ───────────────────────────────────── */
+
+[data-theme='dark'] .bezent-empty-state__tagline {
+  color: #38bdf8;
+  letter-spacing: 0.14em;
+  opacity: 0.9;
+}
+
+[data-theme='dark'] .bezent-empty-state__tagline-dash {
+  background: #1683ff;
+  box-shadow: 0 0 8px rgba(22, 131, 255, 0.6);
+}
+
+[data-theme='dark'] .bezent-empty-state__primary-action {
+  background: linear-gradient(135deg, #1683ff 0%, #0353b3 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(22, 131, 255, 0.4);
+}
+
+[data-theme='dark'] .bezent-empty-state__primary-action:hover {
+  background: linear-gradient(135deg, #38bdf8 0%, #1683ff 100%);
+  box-shadow: 0 6px 18px rgba(56, 189, 248, 0.5);
+}
+

@@ -83,6 +83,24 @@
   box-shadow: var(--shadow-workspace);
 }
 
+/* ── Dark Mode Ambient Illuminations & Workspace Glass Surface ─────── */
+
+[data-theme='dark'] .app-shell {
+  background:
+    radial-gradient(ellipse 90% 50% at 50% -10%, rgba(22, 131, 255, 0.08) 0%, transparent 60%),
+    radial-gradient(circle at 10% 20%, rgba(11, 37, 78, 0.4) 0%, transparent 50%),
+    var(--bg-app);
+}
+
+[data-theme='dark'] .app-shell__workspace {
+  background: linear-gradient(180deg, #071a3d 0%, #05142f 100%);
+  border: 1px solid rgba(56, 189, 248, 0.16);
+  box-shadow:
+    0 12px 36px rgba(1, 8, 20, 0.7),
+    0 0 24px rgba(22, 131, 255, 0.08),
+    inset 0 1px 0 rgba(56, 189, 248, 0.2);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .app-shell,
   .app-shell__drawer {
@@ -90,3 +108,4 @@
     animation: none;
   }
 }
+

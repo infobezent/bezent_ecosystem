@@ -216,3 +216,35 @@
   box-shadow: 0 0 0 2px var(--app-canvas, #f6f8fc);
   pointer-events: none;
 }
+
+/* ── Dark Mode Navigation & Active State ─────────────────────────────── */
+
+[data-theme='dark'] .left-sidebar__item:hover::before {
+  background: rgba(22, 131, 255, 0.12);
+}
+
+[data-theme='dark'] .left-sidebar__item.is-active::before {
+  background: linear-gradient(135deg, rgba(22, 131, 255, 0.22) 0%, rgba(11, 37, 78, 0.95) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.55);
+  box-shadow:
+    0 2px 8px rgba(2, 11, 28, 0.5),
+    0 0 14px rgba(22, 131, 255, 0.28),
+    inset 0 1px 0 rgba(56, 189, 248, 0.3);
+  transform: translateX(-50%) translateY(-1px);
+}
+
+[data-theme='dark'] .left-sidebar__item.is-active .bezent-material-icon {
+  color: #38bdf8;
+  filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.45));
+}
+
+[data-theme='dark'] .left-sidebar__item.is-active .bezent-nav-label {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+[data-theme='dark'] .left-sidebar__badge-dot {
+  background: #ef4444;
+  box-shadow: 0 0 0 2px #020b1c;
+}
+

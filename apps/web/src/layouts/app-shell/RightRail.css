@@ -277,3 +277,80 @@
   cursor: pointer;
   outline: none;
 }
+
+/* ── Dark Mode Right Rail Styling ────────────────────────────────────── */
+
+[data-theme='dark'] .right-rail__ai-btn {
+  background: linear-gradient(135deg, #113875 0%, #081d3d 100%);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  box-shadow:
+    0 4px 14px rgba(2, 11, 28, 0.6),
+    0 0 14px rgba(22, 131, 255, 0.28),
+    inset 0 1px 0 rgba(56, 189, 248, 0.35);
+}
+
+[data-theme='dark'] .right-rail__ai-btn:hover {
+  background: linear-gradient(135deg, #1683ff 0%, #0b2f66 100%);
+  color: #ffffff;
+  border-color: #38bdf8;
+  box-shadow:
+    0 6px 18px rgba(2, 11, 28, 0.7),
+    0 0 20px rgba(56, 189, 248, 0.45);
+}
+
+[data-theme='dark'] .right-rail__action-btn {
+  background: linear-gradient(135deg, #113875 0%, #081d3d 100%);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  box-shadow:
+    0 4px 14px rgba(2, 11, 28, 0.6),
+    0 0 14px rgba(22, 131, 255, 0.28),
+    inset 0 1px 0 rgba(56, 189, 248, 0.35);
+}
+
+[data-theme='dark'] .right-rail__action-btn:hover {
+  background: linear-gradient(135deg, #1683ff 0%, #0b2f66 100%);
+  color: #ffffff;
+  border-color: #38bdf8;
+  box-shadow:
+    0 6px 18px rgba(2, 11, 28, 0.7),
+    0 0 20px rgba(56, 189, 248, 0.45);
+}
+
+[data-theme='dark'] .bezent-right-rail-btn {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-right-rail-btn:hover {
+  color: #f8fafc;
+  background-color: rgba(22, 131, 255, 0.14);
+}
+
+[data-theme='dark'] .bezent-right-rail-btn.is-active {
+  background-color: #0b254e;
+  color: #38bdf8;
+}
+
+[data-theme='dark'] .right-rail__theme {
+  color: #38bdf8;
+}
+
+[data-theme='dark'] .right-rail__theme:hover {
+  background: rgba(22, 131, 255, 0.16);
+  color: #ffffff;
+}
+
+[data-theme='dark'] .right-rail__collapse {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .right-rail__collapse:hover {
+  background: rgba(22, 131, 255, 0.14);
+  color: #ffffff;
+}
+
+[data-theme='dark'] .right-rail__divider {
+  background-color: rgba(56, 189, 248, 0.12);
+}
+
