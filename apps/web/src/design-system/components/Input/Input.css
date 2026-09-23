@@ -71,6 +71,180 @@
 }
 
 /* ── Native Input Field ── */
+.bezent-input--narrow {
+  width: 120px;
+}
+
+/* Generic Select Wrapper & Decorators */
+.bezent-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.bezent-select-wrapper .bezent-select {
+  padding-right: 32px;
+  appearance: none;
+  cursor: pointer;
+}
+
+.bezent-select-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  color: var(--text-muted, #94a3b8);
+  pointer-events: none;
+}
+
+.bezent-select--with-search {
+  padding-left: 34px !important;
+}
+
+.bezent-select-prefix {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  color: var(--accent-interactive, #1a73e8);
+  pointer-events: none;
+}
+
+/* Generic Addon Button for Inputs (e.g. Auto Generate) */
+.bezent-btn-addon {
+  height: 40px;
+  padding: 0 14px;
+  background-color: var(--color-primary-light, #eff6ff);
+  border: 1px solid var(--color-primary-border, #bfdbfe);
+  border-radius: var(--radius-sm, 6px);
+  color: var(--accent-interactive, #1a73e8);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 150ms ease;
+  flex-shrink: 0;
+}
+
+.bezent-btn-addon:hover {
+  background-color: #dbeafe;
+  border-color: #93c5fd;
+}
+
+/* Pill Select (e.g. Entity Picker with Chip) */
+.bezent-pill-select {
+  width: 100%;
+  height: 40px;
+  border: 1px solid var(--border-default, #cbd5e1);
+  border-radius: var(--radius-sm, 6px);
+  background-color: var(--bg-surface, #ffffff);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px 0 6px;
+  box-sizing: border-box;
+}
+
+.bezent-pill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--bg-surface-secondary, #f1f5f9);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: 20px;
+  padding: 3px 10px 3px 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary, #0f172a);
+}
+
+.bezent-pill-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: #dbeafe;
+  color: #1d4ed8;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bezent-pill-close {
+  background: none;
+  border: none;
+  color: var(--text-muted, #94a3b8);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 2px;
+  line-height: 1;
+}
+
+.bezent-pill-close:hover {
+  color: var(--status-danger-fg, #ef4444);
+}
+
+.bezent-pill-search-btn {
+  background: none;
+  border: none;
+  color: var(--accent-interactive, #1a73e8);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Link Button */
+.bezent-link-btn {
+  display: block;
+  width: 100%;
+  text-align: right;
+  margin-top: 4px;
+  color: var(--accent-interactive, #1a73e8);
+  font-size: 12px;
+  font-weight: 600;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.bezent-link-btn:hover {
+  text-decoration: underline;
+}
+
+/* Search Bar */
+.bezent-search-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+  padding: 0 12px;
+  height: 36px;
+  background-color: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-default, #cbd5e1);
+  border-radius: var(--radius-sm, 6px);
+  min-width: 240px;
+}
+
+.bezent-search-bar__input {
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  font-size: 13px;
+  color: var(--text-primary, #0f172a);
+}
+
+.bezent-search-bar__input::placeholder {
+  color: var(--text-muted, #94a3b8);
+}
+
 .bezent-input-field {
   width: 100%;
   height: 100%;
@@ -181,4 +355,59 @@
 .bezent-input-wrapper.is-disabled .bezent-input-box {
   background: var(--bg-surface-secondary, #f0f4f9);
   pointer-events: none;
+}
+
+/* ── Standalone Form Controls ── */
+.bezent-input,
+.bezent-select {
+  width: 100%;
+  height: 38px;
+  padding: 0 14px;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-md, 8px);
+  color: var(--text-primary, #1f1f1f);
+  font: inherit;
+  font-size: 13px;
+  box-sizing: border-box;
+  transition:
+    border-color 0.14s ease,
+    box-shadow 0.14s ease;
+}
+
+.bezent-input:focus,
+.bezent-select:focus {
+  outline: none;
+  border-color: var(--border-focus, #1a73e8);
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.18);
+}
+
+.bezent-input:disabled,
+.bezent-select:disabled {
+  background: var(--bg-surface-secondary, #f0f4f9);
+  color: var(--text-muted, #747775);
+  cursor: not-allowed;
+}
+
+.bezent-textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 10px 14px;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-md, 8px);
+  color: var(--text-primary, #1f1f1f);
+  font: inherit;
+  font-size: 13px;
+  box-sizing: border-box;
+  resize: vertical;
+  transition:
+    border-color 0.14s ease,
+    box-shadow 0.14s ease;
+}
+
+.bezent-textarea:focus {
+  outline: none;
+  border-color: var(--border-focus, #1a73e8);
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.18);
 }

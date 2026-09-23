@@ -1,11 +1,17 @@
 import { useState, useEffect, type FormEvent } from 'react';
-import { Button } from '../../../../design-system/components/Button';
-import { BezentIcon } from '../../../../design-system/icons';
+import {
+  Button,
+  Card,
+  Input,
+  Switch,
+  Alert,
+  Stack,
+  Actions,
+} from '../../../../design-system/components';
 import type {
   OnboardingGeneralSettings,
   UpdateOnboardingGeneralSettingsDto,
 } from '../types/settings';
-import './GeneralSettingsSection.css';
 
 interface GeneralSettingsSectionProps {
   initialData: OnboardingGeneralSettings | null;
@@ -79,100 +85,70 @@ export function GeneralSettingsSection({
   };
 
   return (
-    <div className="settings-card">
-      <div className="settings-card__header">
-        <h2 className="settings-card__title">General Onboarding Settings</h2>
-        <p className="settings-card__subtitle">
-          Configure overarching pipeline defaults, case identifiers, and workflow activation.
-        </p>
-      </div>
-
-      {feedback && (
-        <div className={`settings-alert settings-alert--${feedback.type}`} role="alert">
-          <BezentIcon name={feedback.type === 'success' ? 'check' : 'warning'} size={16} />
-          <span>{feedback.message}</span>
+    <Card padding="lg">
+      <Stack gap="lg">
+        <div>
+          <h2 className="bezent-card__title">General Onboarding Settings</h2>
+          <p className="bezent-card__desc">
+            Configure overarching pipeline defaults, case identifiers, and workflow activation.
+          </p>
         </div>
-      )}
 
-      <form className="settings-form" onSubmit={handleSubmit}>
-        <div className="settings-form__row settings-form__row--toggle">
-          <div className="settings-form__toggle-info">
-            <span className="settings-form__label">Enable Onboarding Module</span>
-            <span className="settings-form__hint">
-              Controls whether new hire onboarding flows are active for your company
-            </span>
-          </div>
-          <label className="settings-toggle-switch">
-            <input
-              type="checkbox"
+        {feedback && (
+          <Alert variant={feedback.type === 'success' ? 'success' : 'danger'}>
+            {feedback.message}
+          </Alert>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <Stack gap="lg">
+            <Switch
+              label="Enable Onboarding Module (Controls whether new hire onboarding flows are active for your company)"
               checked={onboardingEnabled}
               onChange={(e) => setOnboardingEnabled(e.target.checked)}
-              aria-label="Enable Onboarding Module"
             />
-            <span className="settings-toggle-slider" />
-          </label>
-        </div>
 
-        <div className="settings-form__row">
-          <label htmlFor="gen-id-prefix" className="settings-form__label">
-            New Hire ID Prefix
-          </label>
-          <span className="settings-form__hint">
-            Prefix assigned to new onboarding cases (e.g., NH-)
-          </span>
-          <input
-            id="gen-id-prefix"
-            type="text"
-            className="settings-form__input"
-            value={idPrefix}
-            maxLength={20}
-            required
-            onChange={(e) => setIdPrefix(e.target.value)}
-          />
-        </div>
+            <Input
+              id="gen-id-prefix"
+              label="New Hire ID Prefix"
+              helperText="Prefix assigned to new onboarding cases (e.g., NH-)"
+              value={idPrefix}
+              maxLength={20}
+              required
+              onChange={(e) => setIdPrefix(e.target.value)}
+            />
 
-        <div className="settings-form__row">
-          <label htmlFor="gen-duration" className="settings-form__label">
-            Default Onboarding Duration (Days)
-          </label>
-          <span className="settings-form__hint">
-            Expected total timeline for a candidate to complete all onboarding stages (1-365 days)
-          </span>
-          <input
-            id="gen-duration"
-            type="number"
-            className="settings-form__input"
-            min={1}
-            max={365}
-            value={defaultDurationDays}
-            required
-            onChange={(e) => setDefaultDurationDays(parseInt(e.target.value, 10) || 0)}
-          />
-        </div>
+            <Input
+              id="gen-duration"
+              label="Default Onboarding Duration (Days)"
+              helperText="Expected total timeline for a candidate to complete all onboarding stages (1-365 days)"
+              type="number"
+              min={1}
+              max={365}
+              value={defaultDurationDays}
+              required
+              onChange={(e) => setDefaultDurationDays(parseInt(e.target.value, 10) || 0)}
+            />
 
-        <div className="settings-form__row">
-          <label htmlFor="gen-location" className="settings-form__label">
-            Default Location ID (Optional)
-          </label>
-          <span className="settings-form__hint">
-            Fallback location assigned to new candidates when unassigned
-          </span>
-          <input
-            id="gen-location"
-            type="text"
-            className="settings-form__input"
-            placeholder="e.g., loc_chn_01"
-            value={defaultLocationId}
-            onChange={(e) => setDefaultLocationId(e.target.value)}
-          />
-        </div>
+            <Input
+              id="gen-location"
+              label="Default Location ID (Optional)"
+              helperText="Fallback location assigned to new candidates when unassigned"
+              placeholder="e.g., loc_chn_01"
+              value={defaultLocationId}
+              onChange={(e) => setDefaultLocationId(e.target.value)}
+            />
 
-        <div className="settings-card__actions">
-          <Button variant="primary" type="submit" disabled={saving}>
-            {saving ? 'Saving...' : 'Save General Settings'}
-          </Button>
-        </div>
-      </form>
-    </div>
+            <Actions align="start">
+              <Button variant="primary" type="submit" disabled={saving}>
+                {saving ? 'Saving...' : 'Save General Settings'}
+              </Button>
+            </Actions>
+          </Stack>
+        </form>
+      </Stack>
+    </Card>
   );
 }
+
+export default GeneralSettingsSection;

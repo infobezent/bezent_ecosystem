@@ -14,9 +14,12 @@ export interface EmptyStateProps {
   /** Optional decoration inside the primary action button (e.g. an icon). */
   primaryActionIcon?: ReactNode;
   secondaryAction?: EmptyStateAction;
+  /** Optional custom action node. */
+  action?: ReactNode;
   size?: EmptyStateIllustrationSize;
   hideIllustration?: boolean;
   className?: string;
+  children?: ReactNode;
 }
 
 /**
@@ -48,9 +51,11 @@ export function EmptyState({
   primaryAction,
   primaryActionIcon,
   secondaryAction,
+  action,
   size = 'default',
   hideIllustration = false,
   className,
+  children,
 }: EmptyStateProps) {
   const isCompact = size === 'compact';
 
@@ -70,8 +75,9 @@ export function EmptyState({
 
       {description && <p className="bezent-empty-state__description">{description}</p>}
 
-      {(primaryAction || secondaryAction) && (
+      {(primaryAction || secondaryAction || action || children) && (
         <div className="bezent-empty-state__actions">
+          {action}
           {primaryAction && (
             <button
               type="button"
@@ -91,6 +97,7 @@ export function EmptyState({
               {secondaryAction.label}
             </button>
           )}
+          {children}
         </div>
       )}
       {!isCompact && (

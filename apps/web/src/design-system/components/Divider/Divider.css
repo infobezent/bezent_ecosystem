@@ -1,0 +1,45 @@
+/*
+ * BEZENT Design System — Divider Component Styles
+ */
+
+.bezent-divider {
+  border: none;
+  background-color: var(--border-divider, #dde3ea);
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.bezent-divider--horizontal {
+  width: 100%;
+  height: 1px;
+}
+
+.bezent-divider--vertical {
+  width: 1px;
+  height: 100%;
+  align-self: stretch;
+}
+
+.bezent-divider--horizontal.bezent-divider--spacing-sm {
+  margin: 8px 0;
+}
+
+.bezent-divider--horizontal.bezent-divider--spacing-md {
+  margin: 16px 0;
+}
+
+.bezent-divider--horizontal.bezent-divider--spacing-lg {
+  margin: 24px 0;
+}
+
+.bezent-divider--vertical.bezent-divider--spacing-sm {
+  margin: 0 8px;
+}
+
+.bezent-divider--vertical.bezent-divider--spacing-md {
+  margin: 0 16px;
+}
+
+.bezent-divider--vertical.bezent-divider--spacing-lg {
+  margin: 0 24px;
+}

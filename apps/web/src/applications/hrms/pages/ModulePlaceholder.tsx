@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
-import { EmptyState } from '../../../design-system/components/EmptyState';
-import './ModulePlaceholder.css';
+import { EmptyState, Page, PageHeader, Stack } from '../../../design-system/components';
 
 export interface ModulePlaceholderProps {
   application: string;
@@ -120,18 +119,14 @@ export function ModulePlaceholder({
 }: ModulePlaceholderProps) {
   if (!title) {
     return (
-      <div className="module-placeholder module-placeholder--not-found" role="status">
-        <span className="module-placeholder__eyebrow">{application}</span>
-        <h1 className="module-placeholder__title">Page not available</h1>
-        <p className="module-placeholder__text">
-          This {application} address does not match any destination.
-        </p>
-        {homePath && (
-          <Link className="module-placeholder__link" to={homePath}>
-            Go to {application} home
-          </Link>
-        )}
-      </div>
+      <Page maxWidth="narrow" gap="sm">
+        <PageHeader
+          eyebrow={application}
+          title="Page not available"
+          subtitle={`This ${application} address does not match any destination.`}
+        />
+        {homePath && <Link to={homePath}>Go to {application} home</Link>}
+      </Page>
     );
   }
 
@@ -152,14 +147,11 @@ export function ModulePlaceholder({
   }
 
   return (
-    <div className="module-placeholder">
-      <div className="module-placeholder__header">
-        <span className="module-placeholder__eyebrow">{application}</span>
-        <h1 className="module-placeholder__title">{section ? `${title} · ${section}` : title}</h1>
-      </div>
-      <div className="module-placeholder__body">
+    <Page gap="lg">
+      <PageHeader eyebrow={application} title={section ? `${title} · ${section}` : title} />
+      <Stack align="center" justify="center">
         <EmptyState title={emptyTitle} description={emptyDescription} size="default" />
-      </div>
-    </div>
+      </Stack>
+    </Page>
   );
 }

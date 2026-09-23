@@ -1,0 +1,99 @@
+/*
+ * BEZENT Design System — Grid Component Styles
+ * Standard responsive CSS grid layout.
+ */
+
+.bezent-grid {
+  display: grid;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bezent-grid--cols-1 {
+  grid-template-columns: 1fr;
+}
+
+.bezent-grid--cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.bezent-grid--cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.bezent-grid--cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.bezent-grid--cols-sidebar-main {
+  grid-template-columns: 280px 1fr;
+}
+
+@media (max-width: 768px) {
+  .bezent-grid--cols-sidebar-main {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bezent-grid--cols-auto-fill-sm {
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.bezent-grid--cols-auto-fill-md {
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+}
+
+.bezent-grid--cols-auto-fill-lg {
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+}
+
+.bezent-grid--cols-auto-fit-sm {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.bezent-grid--cols-auto-fit-md {
+  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+}
+
+.bezent-grid--cols-auto-fit-lg {
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+}
+
+.bezent-grid--gap-none {
+  gap: 0;
+}
+
+.bezent-grid--gap-xs {
+  gap: 4px;
+}
+
+.bezent-grid--gap-sm {
+  gap: 8px;
+}
+
+.bezent-grid--gap-md {
+  gap: 16px;
+}
+
+.bezent-grid--gap-lg {
+  gap: 20px;
+}
+
+.bezent-grid--gap-xl {
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .bezent-grid--cols-3,
+  .bezent-grid--cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .bezent-grid--cols-2,
+  .bezent-grid--cols-3,
+  .bezent-grid--cols-4 {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,5 +1,18 @@
 import { useState } from 'react';
-import { Button } from '../../../../design-system/components/Button';
+import {
+  Button,
+  Card,
+  CardIcon,
+  CardTitle,
+  CardDescription,
+  Grid,
+  Page,
+  PageHeader,
+  Badge,
+  Toolbar,
+  Inline,
+  Stack,
+} from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { useDevContext } from '../../../../platform/context/DevContext';
 import { SETTINGS_MODULE_CARDS, type SettingsModuleId } from '../types/settingsCenter';
@@ -11,7 +24,6 @@ import { TimesheetsSettingsSection } from '../components/TimesheetsSettingsSecti
 import { PerformanceSettingsSection } from '../components/PerformanceSettingsSection';
 import { EmployeesSettingsSection } from '../components/EmployeesSettingsSection';
 import { HRSettingsSection } from '../components/HRSettingsSection';
-import './SettingsPage.css';
 
 export function SettingsPage() {
   const devContext = useDevContext();
@@ -20,64 +32,74 @@ export function SettingsPage() {
   const selectedModuleInfo = SETTINGS_MODULE_CARDS.find((m) => m.id === activeModule);
 
   return (
-    <div className="settings-page">
-      {/* Settings Center Top Header */}
-      <header className="settings-page__header">
-        <div className="settings-page__title-group">
-          <div className="settings-page__title-row">
-            <h1 className="settings-page__title">Settings</h1>
-            <span className="settings-page__company-badge">
-              <BezentIcon name="hrSettings" size={14} />
-              {devContext.companyName}
-            </span>
-          </div>
-          <p className="settings-page__subtitle">
-            Configure and manage settings across the BEZENT portal.
-          </p>
-        </div>
-      </header>
+    <Page maxWidth="default">
+      <Stack gap="lg">
+        {/* Settings Center Top Header */}
+        <PageHeader
+          title="Settings"
+          subtitle="Configure and manage settings across the BEZENT portal."
+          actions={
+            <Badge variant="info">
+              <Inline gap="xs" align="center">
+                <BezentIcon name="hrSettings" size={14} />
+                <span>{devContext.companyName}</span>
+              </Inline>
+            </Badge>
+          }
+        />
 
-      <main className="settings-page__content">
         {/* View 1: Overview Grid of 8 Enterprise Cards (Clean main content without duplicate top sub-nav) */}
         {activeModule === 'overview' ? (
-          <div className="settings-overview-grid">
+          <Grid columns={3} gap="lg">
             {SETTINGS_MODULE_CARDS.map((mod) => (
-              <div
+              <Card
                 key={mod.id}
-                className="settings-module-card"
+                variant="interactive"
+                padding="md"
                 onClick={() => setActiveModule(mod.id)}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => e.key === 'Enter' && setActiveModule(mod.id)}
               >
-                <div className="settings-module-card__icon-wrap">
-                  <BezentIcon name={mod.icon} size={24} color="var(--primary-color, #1a73e8)" />
-                </div>
-                <div className="settings-module-card__body">
-                  <h3 className="settings-module-card__title">{mod.name}</h3>
-                  <p className="settings-module-card__desc">{mod.description}</p>
-                </div>
-                <div className="settings-module-card__arrow">
+                <div className="bezent-toolbar">
+                  <Inline gap="md" align="center">
+                    <CardIcon>
+                      <BezentIcon name={mod.icon} size={24} />
+                    </CardIcon>
+                    <div>
+                      <CardTitle>{mod.name}</CardTitle>
+                      <CardDescription>{mod.description}</CardDescription>
+                    </div>
+                  </Inline>
                   <BezentIcon name="chevronRight" size={18} />
                 </div>
-              </div>
+              </Card>
             ))}
-          </div>
+          </Grid>
         ) : (
           /* View 2: Active Module Configuration Workspace */
-          <div className="settings-workspace">
-            <div className="settings-workspace__top-bar">
-              <Button type="button" onClick={() => setActiveModule('overview')}>
-                <BezentIcon name="chevronLeft" size={16} />
-                Back to Settings
-              </Button>
-              <div className="settings-breadcrumb">
-                <span>Settings</span> /{' '}
-                <strong className="active-breadcrumb">{selectedModuleInfo?.name}</strong>
-              </div>
-            </div>
+          <Stack gap="lg">
+            <Toolbar
+              left={
+                <Button
+                  variant="secondary"
+                  type="button"
+                  onClick={() => setActiveModule('overview')}
+                >
+                  <BezentIcon name="chevronLeft" size={16} />
+                  Back to Settings
+                </Button>
+              }
+              right={
+                <Inline gap="xs" align="center">
+                  <span>Settings</span>
+                  <span>/</span>
+                  <strong>{selectedModuleInfo?.name}</strong>
+                </Inline>
+              }
+            />
 
-            <div className="settings-workspace__body">
+            <div>
               {activeModule === 'dashboard' && <DashboardSettingsSection />}
               {activeModule === 'onboarding' && <OnboardingBuilderSection />}
               {activeModule === 'leave' && <LeaveSettingsSection />}
@@ -87,10 +109,10 @@ export function SettingsPage() {
               {activeModule === 'employees' && <EmployeesSettingsSection />}
               {activeModule === 'hr-settings' && <HRSettingsSection />}
             </div>
-          </div>
+          </Stack>
         )}
-      </main>
-    </div>
+      </Stack>
+    </Page>
   );
 }
 

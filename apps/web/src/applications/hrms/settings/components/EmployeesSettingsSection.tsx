@@ -1,5 +1,15 @@
 import { useState } from 'react';
-import { Button } from '../../../../design-system/components/Button';
+import {
+  Button,
+  Card,
+  Grid,
+  Input,
+  Badge,
+  Toolbar,
+  Stack,
+  Inline,
+} from '../../../../design-system/components';
+import { BezentIcon } from '../../../../design-system/icons';
 
 export function EmployeesSettingsSection() {
   const [departments, setDepartments] = useState([
@@ -45,90 +55,106 @@ export function EmployeesSettingsSection() {
   };
 
   return (
-    <div className="settings-section">
-      <div className="settings-section__header">
-        <div>
-          <h2 className="settings-section__title">Employees Settings</h2>
-          <p className="settings-section__subtitle">
-            Configure employee directory fields, departments, employment types, designations, and
-            grade levels.
-          </p>
-        </div>
-        <Button type="button" onClick={handleSave}>
-          {saved ? '✓ Saved' : 'Save Employee Config'}
-        </Button>
-      </div>
-
-      <div className="settings-card-grid">
-        <div className="settings-card">
-          <h3 className="settings-card__title">Departments</h3>
-          <div className="dropdown-input-row">
-            <input
-              type="text"
-              className="settings-input"
-              placeholder="New department"
-              value={newDept}
-              onChange={(e) => setNewDept(e.target.value)}
-            />
-            <Button type="button" onClick={handleAddDept}>
-              + Add
-            </Button>
+    <Stack gap="lg">
+      <Toolbar
+        left={
+          <div>
+            <h2 className="bezent-card__title">Employees Settings</h2>
+            <p className="bezent-card__desc">
+              Configure employee directory fields, departments, employment types, designations, and
+              grade levels.
+            </p>
           </div>
-          <ul className="dropdown-option-tag-list">
-            {departments.map((dept, idx) => (
-              <li key={idx} className="dropdown-option-tag">
-                <span>{dept}</span>
-                <button
-                  type="button"
-                  onClick={() => setDepartments(departments.filter((_, i) => i !== idx))}
-                >
-                  ✕
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
+        }
+        right={
+          <Button variant="primary" type="button" onClick={handleSave}>
+            {saved ? '✓ Saved' : 'Save Employee Config'}
+          </Button>
+        }
+      />
 
-        <div className="settings-card">
-          <h3 className="settings-card__title">Employment Types</h3>
-          <div className="dropdown-input-row">
-            <input
-              type="text"
-              className="settings-input"
-              placeholder="New employment type"
-              value={newType}
-              onChange={(e) => setNewType(e.target.value)}
-            />
-            <Button type="button" onClick={handleAddType}>
-              + Add
-            </Button>
-          </div>
-          <ul className="dropdown-option-tag-list">
-            {employmentTypes.map((type, idx) => (
-              <li key={idx} className="dropdown-option-tag">
-                <span>{type}</span>
-                <button
-                  type="button"
-                  onClick={() => setEmploymentTypes(employmentTypes.filter((_, i) => i !== idx))}
-                >
-                  ✕
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
+      <Grid columns={2} gap="lg">
+        <Card padding="lg">
+          <Stack gap="md">
+            <h3 className="bezent-card__title">Departments</h3>
+            <Inline gap="sm" align="center">
+              <Input
+                placeholder="New department"
+                value={newDept}
+                onChange={(e) => setNewDept(e.target.value)}
+              />
+              <Button variant="secondary" type="button" onClick={handleAddDept}>
+                + Add
+              </Button>
+            </Inline>
+            <Inline gap="xs" wrap>
+              {departments.map((dept, idx) => (
+                <Badge key={idx} variant="neutral">
+                  <Inline gap="xs" align="center">
+                    <span>{dept}</span>
+                    <button
+                      type="button"
+                      aria-label={`Remove ${dept}`}
+                      onClick={() => setDepartments(departments.filter((_, i) => i !== idx))}
+                    >
+                      <BezentIcon name="close" size={12} />
+                    </button>
+                  </Inline>
+                </Badge>
+              ))}
+            </Inline>
+          </Stack>
+        </Card>
 
-        <div className="settings-card">
-          <h3 className="settings-card__title">Grades & Band Levels</h3>
-          <ul className="dropdown-option-tag-list">
-            {grades.map((g, idx) => (
-              <li key={idx} className="dropdown-option-tag">
-                <span>{g}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
+        <Card padding="lg">
+          <Stack gap="md">
+            <h3 className="bezent-card__title">Employment Types</h3>
+            <Inline gap="sm" align="center">
+              <Input
+                placeholder="New employment type"
+                value={newType}
+                onChange={(e) => setNewType(e.target.value)}
+              />
+              <Button variant="secondary" type="button" onClick={handleAddType}>
+                + Add
+              </Button>
+            </Inline>
+            <Inline gap="xs" wrap>
+              {employmentTypes.map((type, idx) => (
+                <Badge key={idx} variant="neutral">
+                  <Inline gap="xs" align="center">
+                    <span>{type}</span>
+                    <button
+                      type="button"
+                      aria-label={`Remove ${type}`}
+                      onClick={() =>
+                        setEmploymentTypes(employmentTypes.filter((_, i) => i !== idx))
+                      }
+                    >
+                      <BezentIcon name="close" size={12} />
+                    </button>
+                  </Inline>
+                </Badge>
+              ))}
+            </Inline>
+          </Stack>
+        </Card>
+
+        <Card padding="lg">
+          <Stack gap="md">
+            <h3 className="bezent-card__title">Grades & Band Levels</h3>
+            <Inline gap="xs" wrap>
+              {grades.map((g, idx) => (
+                <Badge key={idx} variant="info">
+                  {g}
+                </Badge>
+              ))}
+            </Inline>
+          </Stack>
+        </Card>
+      </Grid>
+    </Stack>
   );
 }
+
+export default EmployeesSettingsSection;

@@ -44,6 +44,26 @@ export function CardTitle({ className, children, ...rest }: HTMLAttributes<HTMLH
   );
 }
 
+export function CardDescription({
+  className,
+  children,
+  ...rest
+}: HTMLAttributes<HTMLParagraphElement>) {
+  return (
+    <p className={`bezent-card__desc ${className || ''}`.trim()} {...rest}>
+      {children}
+    </p>
+  );
+}
+
+export function CardIcon({ className, children, ...rest }: HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={`bezent-card__icon ${className || ''}`.trim()} {...rest}>
+      {children}
+    </div>
+  );
+}
+
 export function CardBody({ className, children, ...rest }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={`bezent-card__body ${className || ''}`.trim()} {...rest}>

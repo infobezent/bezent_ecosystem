@@ -1,7 +1,17 @@
+import {
+  Modal,
+  Button,
+  Badge,
+  Card,
+  EmptyState,
+  Actions,
+  Toolbar,
+  Stack,
+  Inline,
+} from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
-import { RegistrationSectionId, REGISTRATION_SECTIONS } from './EmployeeRegistration';
-import { ReviewSectionData } from './ReviewSection';
-import './DraftsModal.css';
+import { type RegistrationSectionId, REGISTRATION_SECTIONS } from './EmployeeRegistration';
+import type { ReviewSectionData } from './ReviewSection';
 
 export interface EmployeeRegistrationDraft {
   id: string;
@@ -39,113 +49,104 @@ export function DraftsModal({
   };
 
   return (
-    <div className="drafts-modal__overlay">
-      <div className="drafts-modal__card">
-        {/* Modal Header */}
-        <div className="drafts-modal__header">
-          <div className="drafts-modal__header-title-group">
-            <BezentIcon name="documents" size={20} />
-            <h3 className="drafts-modal__title">Saved Registration Drafts</h3>
-            <span className="drafts-modal__count-badge">{drafts.length} Saved</span>
-          </div>
-          <button type="button" className="drafts-modal__close-btn" onClick={onClose}>
-            ✕
-          </button>
-        </div>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Saved Registration Drafts"
+      description={`${drafts.length} Saved`}
+      size="lg"
+      footer={
+        <Actions align="end">
+          <Button variant="secondary" type="button" onClick={onClose}>
+            Close
+          </Button>
+        </Actions>
+      }
+    >
+      <Stack gap="md">
+        {drafts.length === 0 ? (
+          <EmptyState
+            title="No Saved Drafts"
+            description="When HR saves an incomplete employee registration using Save Draft, it will appear here for seamless continuation."
+          />
+        ) : (
+          <Stack gap="md">
+            {drafts.map((draft) => {
+              const activeSectionObj = REGISTRATION_SECTIONS.find(
+                (s) => s.id === draft.activeSection,
+              );
+              return (
+                <Card key={draft.id} padding="md">
+                  <Stack gap="sm">
+                    <Toolbar
+                      left={
+                        <div>
+                          <strong>{draft.employeeName || 'Unnamed Draft'}</strong>
+                          <span className="bezent-card__desc"> (ID: {draft.employeeId})</span>
+                        </div>
+                      }
+                      right={
+                        <Badge variant="neutral" size="sm">
+                          Draft
+                        </Badge>
+                      }
+                    />
 
-        {/* Modal Body */}
-        <div className="drafts-modal__body">
-          {drafts.length === 0 ? (
-            <div className="drafts-modal__empty-state">
-              <BezentIcon name="documents" size={44} />
-              <h4>No Saved Drafts</h4>
-              <p>
-                When HR saves an incomplete employee registration using <strong>Save Draft</strong>,
-                it will appear here for seamless continuation.
-              </p>
-            </div>
-          ) : (
-            <div className="drafts-modal__list">
-              {drafts.map((draft) => {
-                const activeSectionObj = REGISTRATION_SECTIONS.find(
-                  (s) => s.id === draft.activeSection,
-                );
-                return (
-                  <div key={draft.id} className="drafts-modal__item-card">
-                    <div className="drafts-modal__item-top">
-                      <div className="drafts-modal__item-identity">
-                        <span className="drafts-modal__item-name">
-                          {draft.employeeName || 'Unnamed Draft'}
-                        </span>
-                        <span className="drafts-modal__item-id">ID: {draft.employeeId}</span>
+                    <Stack gap="xs">
+                      <div className="bezent-card__desc">
+                        <span>Current Section: </span>
+                        <strong>{activeSectionObj?.label || 'General'}</strong>
                       </div>
-                      <span className="drafts-modal__status-pill">Draft</span>
-                    </div>
-
-                    <div className="drafts-modal__item-details">
-                      <div className="drafts-modal__detail-row">
-                        <span className="drafts-modal__label">Current Section:</span>
-                        <strong className="drafts-modal__val">
-                          {activeSectionObj?.label || 'General'}
-                        </strong>
+                      <div className="bezent-card__desc">
+                        <span>Progress: </span>
+                        <strong>{draft.completedSectionsCount} / 10 Sections Completed</strong>
                       </div>
-                      <div className="drafts-modal__detail-row">
-                        <span className="drafts-modal__label">Progress:</span>
-                        <strong className="drafts-modal__val">
-                          {draft.completedSectionsCount} / 10 Sections Completed
-                        </strong>
+                      <div className="bezent-card__desc">
+                        <span>Last Saved: </span>
+                        <span>{draft.lastUpdated}</span>
                       </div>
-                      <div className="drafts-modal__detail-row">
-                        <span className="drafts-modal__label">Last Saved:</span>
-                        <span className="drafts-modal__val-muted">{draft.lastUpdated}</span>
-                      </div>
-                    </div>
+                    </Stack>
 
                     {/* Pending Sections Chips */}
                     {draft.pendingSectionLabels.length > 0 && (
-                      <div className="drafts-modal__pending-chips-row">
-                        <span className="drafts-modal__pending-label">Pending Sections:</span>
-                        <div className="drafts-modal__chips-flex">
-                          {draft.pendingSectionLabels.map((sec, idx) => (
-                            <span key={idx} className="drafts-modal__pending-chip">
-                              ⚠ {sec}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
+                      <Inline gap="xs" wrap align="center">
+                        <span className="bezent-card__desc">Pending Sections:</span>
+                        {draft.pendingSectionLabels.map((sec, idx) => (
+                          <Badge key={idx} variant="warning" size="sm">
+                            <BezentIcon name="warning" size={12} /> {sec}
+                          </Badge>
+                        ))}
+                      </Inline>
                     )}
 
                     {/* Draft Actions */}
-                    <div className="drafts-modal__item-actions">
-                      <button
+                    <Actions align="end" gap="sm">
+                      <Button
                         type="button"
-                        className="drafts-modal__delete-btn"
+                        variant="danger"
+                        size="sm"
                         onClick={() => confirmAndDeleteDraft(draft)}
                       >
-                        🗑 Delete Draft
-                      </button>
-                      <button
+                        <BezentIcon name="delete" size={14} /> Delete Draft
+                      </Button>
+                      <Button
                         type="button"
-                        className="drafts-modal__continue-btn"
+                        variant="primary"
+                        size="sm"
                         onClick={() => onContinueDraft(draft)}
                       >
                         Continue Registration →
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Modal Footer */}
-        <div className="drafts-modal__footer">
-          <button type="button" className="employee-registration__cancel-btn" onClick={onClose}>
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
+                      </Button>
+                    </Actions>
+                  </Stack>
+                </Card>
+              );
+            })}
+          </Stack>
+        )}
+      </Stack>
+    </Modal>
   );
 }
+
+export default DraftsModal;

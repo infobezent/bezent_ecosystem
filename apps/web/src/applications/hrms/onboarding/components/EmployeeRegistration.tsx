@@ -16,7 +16,6 @@ import {
 } from './DocumentsSection';
 import { ReviewSection, ReviewSectionData } from './ReviewSection';
 import { DraftsModal, EmployeeRegistrationDraft } from './DraftsModal';
-import './EmployeeRegistration.css';
 
 export type RegistrationSectionId =
   | 'general'

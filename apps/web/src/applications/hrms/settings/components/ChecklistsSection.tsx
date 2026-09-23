@@ -1,5 +1,21 @@
 import { useState } from 'react';
-import { Button } from '../../../../design-system/components/Button';
+import {
+  Button,
+  Card,
+  Tabs,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableHeaderCell,
+  TableCell,
+  Badge,
+  Alert,
+  EmptyState,
+  Toolbar,
+  Actions,
+  Stack,
+} from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import {
   SUPPORTED_STAGE_KEYS,
@@ -8,7 +24,6 @@ import {
   type UpdateOnboardingChecklistTemplateDto,
 } from '../types/settings';
 import { ChecklistModal } from './ChecklistModal';
-import './ChecklistsSection.css';
 
 interface ChecklistsSectionProps {
   checklists: OnboardingChecklistTemplate[];
@@ -69,148 +84,134 @@ export function ChecklistsSection({
     .filter((t) => activeStageFilter === 'all' || t.stageKey === activeStageFilter)
     .sort((a, b) => a.displayOrder - b.displayOrder);
 
+  const stageTabs = [
+    {
+      id: 'all',
+      label: `All Stages (${checklists.length})`,
+    },
+    ...SUPPORTED_STAGE_KEYS.map((key) => {
+      const count = checklists.filter((c) => c.stageKey === key).length;
+      return {
+        id: key,
+        label: `${key.charAt(0).toUpperCase() + key.slice(1)} (${count})`,
+      };
+    }),
+  ];
+
   return (
-    <div className="settings-card">
-      <div className="settings-card__header">
-        <div className="checklists-toolbar">
-          <div>
-            <h2 className="settings-card__title">Checklist Task Templates</h2>
-            <p className="settings-card__subtitle">
-              Standard tasks automatically generated for HR, candidates, managers, and IT.
-            </p>
-          </div>
-          <Button variant="primary" type="button" onClick={openCreateModal}>
-            <BezentIcon name="plusSign" size={14} />
-            Add Task Template
-          </Button>
-        </div>
+    <Card padding="lg">
+      <Stack gap="lg">
+        <Toolbar
+          left={
+            <div>
+              <h2 className="bezent-card__title">Checklist Task Templates</h2>
+              <p className="bezent-card__desc">
+                Standard tasks automatically generated for HR, candidates, managers, and IT.
+              </p>
+            </div>
+          }
+          right={
+            <Button variant="primary" type="button" onClick={openCreateModal}>
+              <BezentIcon name="plusSign" size={14} />
+              Add Task Template
+            </Button>
+          }
+        />
 
-        <div className="checklists-filter-row">
-          <button
-            type="button"
-            className={`checklists-tab ${activeStageFilter === 'all' ? 'checklists-tab--active' : ''}`}
-            onClick={() => setActiveStageFilter('all')}
-          >
-            All Stages ({checklists.length})
-          </button>
-          {SUPPORTED_STAGE_KEYS.map((key) => {
-            const count = checklists.filter((c) => c.stageKey === key).length;
-            return (
-              <button
-                key={key}
-                type="button"
-                className={`checklists-tab ${activeStageFilter === key ? 'checklists-tab--active' : ''}`}
-                onClick={() => setActiveStageFilter(key)}
-              >
-                {key.charAt(0).toUpperCase() + key.slice(1)} ({count})
-              </button>
-            );
-          })}
-        </div>
-      </div>
+        <Tabs
+          items={stageTabs}
+          activeId={activeStageFilter}
+          onChange={(id) => setActiveStageFilter(id)}
+          variant="pills"
+        />
 
-      {success && (
-        <div className="settings-alert settings-alert--success" role="alert">
-          <BezentIcon name="check" size={16} />
-          <span>{success}</span>
-        </div>
-      )}
+        {success && <Alert variant="success">{success}</Alert>}
 
-      {error && (
-        <div className="settings-alert settings-alert--error" role="alert">
-          <BezentIcon name="warning" size={16} />
-          <span>{error}</span>
-        </div>
-      )}
+        {error && <Alert variant="danger">{error}</Alert>}
 
-      {filteredTasks.length === 0 ? (
-        <div className="docs-empty">
-          <BezentIcon name="tasks" size={36} />
-          <span>No checklist tasks found for this stage.</span>
-          <Button variant="primary" type="button" onClick={openCreateModal}>
-            Add First Task
-          </Button>
-        </div>
-      ) : (
-        <div className="fields-table-container">
-          <table className="fields-table">
-            <thead>
-              <tr>
-                <th>Task Name</th>
-                <th>Stage</th>
-                <th>Assignee Responsibility</th>
-                <th>Due Relative</th>
-                <th>Required</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
+        {filteredTasks.length === 0 ? (
+          <EmptyState
+            title="No checklist tasks found for this stage."
+            description="Add task templates to assign responsibilities automatically across onboarding stages."
+            action={
+              <Button variant="primary" type="button" onClick={openCreateModal}>
+                Add First Task
+              </Button>
+            }
+          />
+        ) : (
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableHeaderCell>Task Name</TableHeaderCell>
+                <TableHeaderCell>Stage</TableHeaderCell>
+                <TableHeaderCell>Assignee Responsibility</TableHeaderCell>
+                <TableHeaderCell>Due Relative</TableHeaderCell>
+                <TableHeaderCell>Required</TableHeaderCell>
+                <TableHeaderCell>Status</TableHeaderCell>
+                <TableHeaderCell>Actions</TableHeaderCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
               {filteredTasks.map((task) => (
-                <tr key={task.id}>
-                  <td>
+                <TableRow key={task.id}>
+                  <TableCell>
                     <div>
                       <strong>{task.name}</strong>
-                      {task.description && <p className="stage-item__desc">{task.description}</p>}
+                      {task.description && <p className="bezent-card__desc">{task.description}</p>}
                     </div>
-                  </td>
-                  <td>
-                    <span className="fields-key">{task.stageKey}</span>
-                  </td>
-                  <td>
-                    <span className="assignee-badge">{task.assigneeType}</span>
-                  </td>
-                  <td>
-                    <span className="stage-pill stage-pill--optional">
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="neutral">{task.stageKey}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="info">{task.assigneeType}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="neutral" size="sm">
                       {formatOffset(task.dueOffsetDays)}
-                    </span>
-                  </td>
-                  <td>
-                    <span
-                      className={`stage-pill ${
-                        task.isRequired ? 'stage-pill--required' : 'stage-pill--optional'
-                      }`}
-                    >
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={task.isRequired ? 'warning' : 'neutral'} size="sm">
                       {task.isRequired ? 'Required' : 'Optional'}
-                    </span>
-                  </td>
-                  <td>
-                    <span
-                      className={`stage-pill ${
-                        task.isActive ? 'stage-pill--protected' : 'stage-pill--optional'
-                      }`}
-                    >
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge status={task.isActive ? 'active' : 'inactive'} size="sm">
                       {task.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="stage-item__actions">
-                      <button
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Actions align="start" gap="xs">
+                      <Button
                         type="button"
-                        className="stage-btn-secondary"
+                        variant="secondary"
+                        size="sm"
                         onClick={() => openEditModal(task)}
                       >
                         <BezentIcon name="edit" size={13} />
                         Edit
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         type="button"
-                        className="stage-btn-secondary btn-danger-icon"
+                        variant="danger"
+                        size="sm"
                         onClick={() => handleDelete(task)}
                         disabled={deletingId === task.id}
                         aria-label={`Delete ${task.name}`}
                       >
                         <BezentIcon name="delete" size={13} />
                         Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                      </Button>
+                    </Actions>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+            </TableBody>
+          </Table>
+        )}
+      </Stack>
 
       <ChecklistModal
         isOpen={modalOpen}
@@ -220,6 +221,8 @@ export function ChecklistsSection({
         onSubmitCreate={onCreateChecklist}
         onSubmitUpdate={onUpdateChecklist}
       />
-    </div>
+    </Card>
   );
 }
+
+export default ChecklistsSection;

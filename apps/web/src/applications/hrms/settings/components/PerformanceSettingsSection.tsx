@@ -1,5 +1,37 @@
 import { useState } from 'react';
-import { Button } from '../../../../design-system/components/Button';
+import {
+  Button,
+  Card,
+  Grid,
+  Select,
+  Input,
+  Badge,
+  Toolbar,
+  Stack,
+  Inline,
+} from '../../../../design-system/components';
+import { BezentIcon } from '../../../../design-system/icons';
+
+const RATING_OPTIONS = [
+  {
+    value: '5-Point Scale (1-5)',
+    label: '5-Point Scale (1: Unsatisfactory to 5: Outstanding)',
+  },
+  {
+    value: '3-Point Scale (Exceeds/Meets/Needs Imp.)',
+    label: '3-Point Performance Scale',
+  },
+  {
+    value: 'Percentage Grade (0-100%)',
+    label: 'Percentage Grade (0% - 100%)',
+  },
+];
+
+const CYCLE_OPTIONS = [
+  { value: 'Quarterly (Q1-Q4)', label: 'Quarterly Reviews (Q1, Q2, Q3, Q4)' },
+  { value: 'Bi-Annual (H1/H2)', label: 'Bi-Annual Reviews (H1 & H2)' },
+  { value: 'Annual', label: 'Annual Appraisal Cycle' },
+];
 
 export function PerformanceSettingsSection() {
   const [ratingScale, setRatingScale] = useState('5-Point Scale (1-5)');
@@ -30,80 +62,77 @@ export function PerformanceSettingsSection() {
   };
 
   return (
-    <div className="settings-section">
-      <div className="settings-section__header">
-        <div>
-          <h2 className="settings-section__title">Performance Settings</h2>
-          <p className="settings-section__subtitle">
-            Configure appraisal rating options, review cycles, goal categories, and competency
-            evaluation criteria.
-          </p>
-        </div>
-        <Button type="button" onClick={handleSave}>
-          {saved ? '✓ Saved' : 'Save Performance Config'}
-        </Button>
-      </div>
+    <Stack gap="lg">
+      <Toolbar
+        left={
+          <div>
+            <h2 className="bezent-card__title">Performance Settings</h2>
+            <p className="bezent-card__desc">
+              Configure appraisal rating options, review cycles, goal categories, and competency
+              evaluation criteria.
+            </p>
+          </div>
+        }
+        right={
+          <Button variant="primary" type="button" onClick={handleSave}>
+            {saved ? '✓ Saved' : 'Save Performance Config'}
+          </Button>
+        }
+      />
 
-      <div className="settings-card-grid">
-        <div className="settings-card">
-          <h3 className="settings-card__title">Appraisal & Rating Cycles</h3>
-          <div className="settings-field-group">
-            <label className="settings-label">Default Rating Scale</label>
-            <select
-              className="settings-input"
+      <Grid columns={2} gap="lg">
+        <Card padding="lg">
+          <Stack gap="md">
+            <h3 className="bezent-card__title">Appraisal & Rating Cycles</h3>
+            <Select
+              label="Default Rating Scale"
               value={ratingScale}
+              options={RATING_OPTIONS}
               onChange={(e) => setRatingScale(e.target.value)}
-            >
-              <option value="5-Point Scale (1-5)">
-                5-Point Scale (1: Unsatisfactory to 5: Outstanding)
-              </option>
-              <option value="3-Point Scale (Exceeds/Meets/Needs Imp.)">
-                3-Point Performance Scale
-              </option>
-              <option value="Percentage Grade (0-100%)">Percentage Grade (0% - 100%)</option>
-            </select>
-          </div>
-
-          <div className="settings-field-group">
-            <label className="settings-label">Review Cycle Frequency</label>
-            <select
-              className="settings-input"
-              value={reviewCycle}
-              onChange={(e) => setReviewCycle(e.target.value)}
-            >
-              <option value="Quarterly (Q1-Q4)">Quarterly Reviews (Q1, Q2, Q3, Q4)</option>
-              <option value="Bi-Annual (H1/H2)">Bi-Annual Reviews (H1 & H2)</option>
-              <option value="Annual">Annual Appraisal Cycle</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="settings-card">
-          <h3 className="settings-card__title">Evaluation Competencies</h3>
-          <div className="dropdown-input-row">
-            <input
-              type="text"
-              className="settings-input"
-              placeholder="New competency area"
-              value={newCompInput}
-              onChange={(e) => setNewCompInput(e.target.value)}
             />
-            <Button type="button" onClick={handleAddCompetency}>
-              + Add
-            </Button>
-          </div>
-          <ul className="dropdown-option-tag-list">
-            {competencies.map((comp, idx) => (
-              <li key={idx} className="dropdown-option-tag">
-                <span>{comp}</span>
-                <button type="button" onClick={() => handleDeleteCompetency(idx)}>
-                  ✕
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
+            <Select
+              label="Review Cycle Frequency"
+              value={reviewCycle}
+              options={CYCLE_OPTIONS}
+              onChange={(e) => setReviewCycle(e.target.value)}
+            />
+          </Stack>
+        </Card>
+
+        <Card padding="lg">
+          <Stack gap="md">
+            <h3 className="bezent-card__title">Evaluation Competencies</h3>
+            <Inline gap="sm" align="center">
+              <Input
+                placeholder="New competency area"
+                value={newCompInput}
+                onChange={(e) => setNewCompInput(e.target.value)}
+              />
+              <Button variant="secondary" type="button" onClick={handleAddCompetency}>
+                + Add
+              </Button>
+            </Inline>
+            <Inline gap="xs" wrap>
+              {competencies.map((comp, idx) => (
+                <Badge key={idx} variant="neutral">
+                  <Inline gap="xs" align="center">
+                    <span>{comp}</span>
+                    <button
+                      type="button"
+                      aria-label={`Remove ${comp}`}
+                      onClick={() => handleDeleteCompetency(idx)}
+                    >
+                      <BezentIcon name="close" size={12} />
+                    </button>
+                  </Inline>
+                </Badge>
+              ))}
+            </Inline>
+          </Stack>
+        </Card>
+      </Grid>
+    </Stack>
   );
 }
+
+export default PerformanceSettingsSection;

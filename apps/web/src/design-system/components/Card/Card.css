@@ -65,6 +65,25 @@
   margin: 0;
 }
 
+.bezent-card__desc {
+  font-size: 13px;
+  color: var(--text-secondary, #444746);
+  margin: 4px 0 0 0;
+  line-height: 1.45;
+}
+
+.bezent-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md, 10px);
+  background-color: var(--accent-subtle, #e8f0fe);
+  color: var(--accent-primary, #1a73e8);
+  flex-shrink: 0;
+}
+
 .bezent-card__body {
   width: 100%;
 }

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { BezentIcon } from '../../../../design-system/icons';
 import { RegistrationSectionId } from './EmployeeRegistration';
 import { DocumentItemState } from './DocumentsSection';
-import './ReviewSection.css';
 
 export interface PendingFieldItem {
   sectionId: RegistrationSectionId;
