@@ -1,26 +1,43 @@
 # BEZENT CODE OWNERS
 
-# Repository / collaboration
+# ============================================================
+# Repository / Collaboration
+# ============================================================
+
 /.github/ @mukeshm2002
 /docs/ @mukeshm2002 @Soundhranayaki1 @sabinrahul
 /AGENTS.md @mukeshm2002 @Soundhranayaki1 @sabinrahul
 /CLAUDE.md @mukeshm2002 @Soundhranayaki1 @sabinrahul
 
-# Backend / API / Database — Dev1
+
+# ============================================================
+# Backend / API / Database — Mukesh
+# ============================================================
+
 /apps/api/ @mukeshm2002
 
-# HRMS Business Frontend — Dev2
-/apps/web/src/applications/hrms/ @Soundhranayaki1
 
-# HRMS Settings — Dev1
-# IMPORTANT: keep this AFTER the broader HRMS rule so it overrides it.
-/apps/web/src/applications/hrms/settings/ @mukeshm2002
+# ============================================================
+# HRMS Application — Mukesh
+# Includes HRMS business frontend, onboarding, employees,
+# recruitment, attendance, leave, settings, etc.
+# ============================================================
 
-# Global Frontend Foundation — Dev3
+/apps/web/src/applications/hrms/ @mukeshm2002
+
+
+# ============================================================
+# Global Frontend Foundation — Sabin
+# ============================================================
+
 /apps/web/src/design-system/ @sabinrahul
 /apps/web/src/layouts/ @sabinrahul
 /apps/web/src/platform/ @sabinrahul
 /apps/web/src/shared/ @sabinrahul
 
-# Shared App Composition
-/apps/web/src/app/ @mukeshm2002 @sabinrahul
+
+# ============================================================
+# Shared Application Composition — Mukesh + Sabin
+# ============================================================
+
+/apps/web/src/app/ @mukeshm2002 @sabinrahul
