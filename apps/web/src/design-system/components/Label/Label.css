@@ -1,0 +1,47 @@
+/* ─── BEZENT Label ────────────────────────────────────────────────────────── */
+
+.bezent-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  cursor: default;
+  transition: color var(--motion-duration-fast) var(--motion-easing-default);
+}
+
+/* Sizes */
+.bezent-label--md {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+}
+
+.bezent-label--sm {
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+}
+
+/* Required asterisk */
+.bezent-label__required {
+  color: var(--color-danger-500, #ef4444);
+  font-size: var(--font-size-sm);
+  line-height: 1;
+  margin-left: var(--space-0-5, 2px);
+  user-select: none;
+}
+
+/* Disabled state */
+.bezent-label--disabled {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+/* Dark mode */
+[data-theme='dark'] .bezent-label {
+  color: var(--color-text-secondary);
+}
+
+[data-theme='dark'] .bezent-label--disabled {
+  color: var(--color-text-disabled);
+}

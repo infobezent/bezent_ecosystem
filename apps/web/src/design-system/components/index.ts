@@ -2,28 +2,49 @@
  * BEZENT global design-system components. See
  * docs/architecture/DESIGN-SYSTEM-COMPONENTS.md.
  */
+
+/* ─── Actions ─────────────────────────────────────────────────────────────── */
 export * from './Button';
 export * from './IconButton';
-export * from './Tooltip';
-export * from './Badge';
-export * from './Avatar';
-export * from './EmptyState';
+export * from './Actions';
+export * from './Toolbar';
+
+/* ─── Forms ───────────────────────────────────────────────────────────────── */
+export * from './Label';
+export * from './FormField';
 export * from './Input';
 export * from './Select';
 export * from './Switch';
-export * from './Tabs';
-export * from './Card';
-export * from './Modal';
-export * from './Table';
-export * from './Alert';
+export * from './Checkbox';
+
+/* ─── Layout ──────────────────────────────────────────────────────────────── */
 export * from './Stack';
 export * from './Inline';
 export * from './Grid';
-export * from './PageHeader';
 export * from './FormGrid';
+export * from './FormSection';
 export * from './Section';
 export * from './Divider';
 export * from './Page';
-export * from './Toolbar';
-export * from './Actions';
-export * from './FormSection';
+export * from './PageHeader';
+
+/* ─── Data ────────────────────────────────────────────────────────────────── */
+export * from './Table';
+export * from './EmptyState';
+
+/* ─── Feedback ────────────────────────────────────────────────────────────── */
+export * from './Alert';
+export * from './Badge';
+export * from './Tooltip';
+export * from './Spinner';
+export * from './LoadingState';
+
+/* ─── Overlay ─────────────────────────────────────────────────────────────── */
+export * from './Modal';
+
+/* ─── Navigation ──────────────────────────────────────────────────────────── */
+export * from './Tabs';
+
+/* ─── Display ─────────────────────────────────────────────────────────────── */
+export * from './Avatar';
+export * from './Card';

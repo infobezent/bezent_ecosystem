@@ -1,0 +1,72 @@
+/* ─── BEZENT FormField ────────────────────────────────────────────────────── */
+
+.bezent-form-field {
+  display: flex;
+  width: 100%;
+}
+
+/* Vertical (default) — label on top */
+.bezent-form-field--vertical {
+  flex-direction: column;
+  gap: var(--space-1-5, 6px);
+}
+
+/* Horizontal — label left, control right */
+.bezent-form-field--horizontal {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: var(--space-3, 12px);
+}
+
+.bezent-form-field--horizontal > .bezent-label {
+  flex-shrink: 0;
+  padding-top: var(--space-2, 8px); /* aligns label baseline with input */
+  min-width: 8rem;
+}
+
+/* Control slot */
+.bezent-form-field__control {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Helper / error text */
+.bezent-form-field__helper {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-tertiary);
+}
+
+.bezent-form-field__helper--error {
+  color: var(--color-danger-500, #ef4444);
+}
+
+/* Error state — propagates a CSS property child controls can react to */
+.bezent-form-field--error .bezent-input,
+.bezent-form-field--error .bezent-select {
+  border-color: var(--color-danger-500, #ef4444);
+}
+
+.bezent-form-field--error .bezent-input:focus,
+.bezent-form-field--error .bezent-select:focus {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-danger-500, #ef4444) 25%, transparent);
+}
+
+/* Disabled */
+.bezent-form-field--disabled {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Dark mode */
+[data-theme='dark'] .bezent-form-field__helper {
+  color: var(--color-text-tertiary);
+}
+
+[data-theme='dark'] .bezent-form-field__helper--error {
+  color: var(--color-danger-400, #f87171);
+}
