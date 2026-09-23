@@ -67,7 +67,13 @@ export function SettingsPage() {
           /* View 2: Active Module Configuration Workspace */
           <div className="settings-workspace">
             <div className="settings-workspace__top-bar">
-              <Button type="button" onClick={() => setActiveModule('overview')}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="btn-back-settings"
+                onClick={() => setActiveModule('overview')}
+              >
                 <BezentIcon name="chevronLeft" size={16} />
                 Back to Settings
               </Button>

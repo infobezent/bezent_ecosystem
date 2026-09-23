@@ -18,17 +18,7 @@ import { ReviewSection, ReviewSectionData } from './ReviewSection';
 import { DraftsModal, EmployeeRegistrationDraft } from './DraftsModal';
 import './EmployeeRegistration.css';
 
-export type RegistrationSectionId =
-  | 'general'
-  | 'personal'
-  | 'onboarding'
-  | 'skills'
-  | 'emergency'
-  | 'accounts'
-  | 'online_access'
-  | 'working_hours'
-  | 'documents'
-  | 'review';
+export type RegistrationSectionId = string;
 
 export interface RegistrationSection {
   id: RegistrationSectionId;
@@ -55,15 +45,18 @@ interface EmployeeRegistrationProps {
 }
 
 import { useCustomFields } from '../../settings/context/CustomFieldsContext';
+import type { OnboardingCardConfig } from '../../settings/types/settingsCenter';
 
 export function EmployeeRegistration({
   onCancel,
   onSave,
   initialDraft,
 }: EmployeeRegistrationProps) {
+  let allSections: Array<{ id: string; label: string }> = [...REGISTRATION_SECTIONS];
   let customFields: Array<{
     id: string;
     sectionId: string;
+    cardId: string;
     label: string;
     fieldType: string;
     required?: boolean;
@@ -71,9 +64,16 @@ export function EmployeeRegistration({
     defaultValue?: string;
     options?: string[];
   }> = [];
+  let customCards: OnboardingCardConfig[] = [];
   try {
     const customCtx = useCustomFields();
     customFields = customCtx.fields;
+    customCards = customCtx.cards;
+    if (customCtx.sections && customCtx.sections.length > 0) {
+      allSections = customCtx.sections
+        .filter((s) => !s.hidden)
+        .map((s) => ({ id: s.id, label: s.title }));
+    }
   } catch {
     // fallback if outside context
   }
@@ -507,16 +507,16 @@ export function EmployeeRegistration({
   };
 
   const handleBack = () => {
-    const currentIndex = REGISTRATION_SECTIONS.findIndex((s) => s.id === activeSection);
+    const currentIndex = allSections.findIndex((s) => s.id === activeSection);
     if (currentIndex > 0) {
-      setActiveSection(REGISTRATION_SECTIONS[currentIndex - 1]!.id);
+      setActiveSection(allSections[currentIndex - 1]!.id);
     }
   };
 
   const handleNext = () => {
-    const currentIndex = REGISTRATION_SECTIONS.findIndex((s) => s.id === activeSection);
-    if (currentIndex < REGISTRATION_SECTIONS.length - 1) {
-      setActiveSection(REGISTRATION_SECTIONS[currentIndex + 1]!.id);
+    const currentIndex = allSections.findIndex((s) => s.id === activeSection);
+    if (currentIndex < allSections.length - 1) {
+      setActiveSection(allSections[currentIndex + 1]!.id);
     }
   };
 
@@ -618,9 +618,9 @@ export function EmployeeRegistration({
           <p className="employee-registration__subtitle">Add and manage new employee information</p>
         </header>
 
-        {/* 10-Section Horizontal Navigation */}
+        {/* Dynamic Section Horizontal Navigation */}
         <div className="employee-registration__nav-bar" role="tablist">
-          {REGISTRATION_SECTIONS.map((section) => (
+          {allSections.map((section) => (
             <button
               key={section.id}
               type="button"
@@ -1247,9 +1247,9 @@ export function EmployeeRegistration({
                   <BezentIcon name="tasks" size={22} />
                 </div>
                 <div className="employee-registration__section-title-group">
-                  <h2 className="employee-registration__section-title">Onboarding</h2>
+                  <h2 className="employee-registration__section-title">Administration</h2>
                   <p className="employee-registration__section-subtitle">
-                    Onboarding tasks and assigned assets for the employee.
+                    Administration tasks and assigned assets for the employee.
                   </p>
                 </div>
               </div>
@@ -1276,7 +1276,7 @@ export function EmployeeRegistration({
               onClassificationChange={setIsExperiencedHire}
               onPassportPhotoChange={setPassportPhoto}
             />
-          ) : (
+          ) : activeSection === 'review' ? (
             <ReviewSection
               data={reviewData}
               onEditSection={(sectionId) => setActiveSection(sectionId)}
@@ -1289,6 +1289,83 @@ export function EmployeeRegistration({
               onDeleteDocument={handleDeleteDocument}
               onCreateEmployee={() => onSave?.(reviewData as unknown as Record<string, unknown>)}
             />
+          ) : (
+            <>
+              {/* Dynamic Custom Section View */}
+              <div className="employee-registration__section-header">
+                <div className="employee-registration__section-icon-badge">
+                  <BezentIcon name="documents" size={22} />
+                </div>
+                <div className="employee-registration__section-title-group">
+                  <h2 className="employee-registration__section-title">
+                    {allSections.find((s) => s.id === activeSection)?.label || 'Custom Section'}
+                  </h2>
+                  <p className="employee-registration__section-subtitle">
+                    Configured custom fields and section details.
+                  </p>
+                </div>
+              </div>
+
+              <div className="employee-registration__custom-section-body">
+                {customCards
+                  .filter((c) => c.sectionId === activeSection)
+                  .map((c) => {
+                    const cardFields = customFields.filter((f) => f.cardId === c.id);
+                    return (
+                      <div key={c.id} className="employee-registration__card-group">
+                        <h3 className="employee-registration__card-group-title">{c.title}</h3>
+                        <div className="employee-registration__form-grid">
+                          {cardFields.map((f) => (
+                            <div key={f.id} className="employee-registration__field">
+                              <label className="employee-registration__label">
+                                {f.label}{' '}
+                                {f.required && (
+                                  <span className="employee-registration__required">*</span>
+                                )}
+                              </label>
+                              {f.fieldType === 'select' ? (
+                                <div className="employee-registration__select-wrapper">
+                                  <select
+                                    className="employee-registration__select"
+                                    disabled={f.readOnly}
+                                  >
+                                    <option value="">Select {f.label}</option>
+                                    {f.options?.map((opt: string, idx: number) => (
+                                      <option key={idx} value={opt}>
+                                        {opt}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  <span className="employee-registration__select-icon">▼</span>
+                                </div>
+                              ) : f.fieldType === 'file' ? (
+                                <input
+                                  type="file"
+                                  className="employee-registration__input"
+                                  disabled={f.readOnly}
+                                />
+                              ) : (
+                                <input
+                                  type={
+                                    f.fieldType === 'date'
+                                      ? 'date'
+                                      : f.fieldType === 'number'
+                                        ? 'number'
+                                        : 'text'
+                                  }
+                                  className="employee-registration__input"
+                                  placeholder={f.defaultValue || `Enter ${f.label}`}
+                                  disabled={f.readOnly}
+                                />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </>
           )}
 
           {/* Bottom Actions Bar */}

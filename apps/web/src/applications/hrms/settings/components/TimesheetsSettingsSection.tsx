@@ -39,7 +39,7 @@ export function TimesheetsSettingsSection() {
             tracking rules.
           </p>
         </div>
-        <Button type="button" onClick={handleSave}>
+        <Button variant="primary" size="sm" className="btn-primary-blue" type="button" onClick={handleSave}>
           {saved ? '✓ Saved' : 'Save Timesheet Rules'}
         </Button>
       </div>
@@ -79,7 +79,13 @@ export function TimesheetsSettingsSection() {
               value={newCatInput}
               onChange={(e) => setNewCatInput(e.target.value)}
             />
-            <Button type="button" onClick={handleAddCategory}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="btn-light-blue-action"
+              onClick={handleAddCategory}
+            >
               + Add
             </Button>
           </div>

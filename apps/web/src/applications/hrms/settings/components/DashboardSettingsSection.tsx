@@ -32,7 +32,7 @@ export function DashboardSettingsSection() {
             Configure default widget visibility, refresh frequency, and overview layouts.
           </p>
         </div>
-        <Button variant="primary" type="button" onClick={handleSave}>
+        <Button variant="primary" size="sm" className="btn-primary-blue" type="button" onClick={handleSave}>
           {saved ? '✓ Saved' : 'Save Dashboard Settings'}
         </Button>
       </div>

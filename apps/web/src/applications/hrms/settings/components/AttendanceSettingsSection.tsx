@@ -35,7 +35,7 @@ export function AttendanceSettingsSection() {
             late policies.
           </p>
         </div>
-        <Button variant="primary" type="button" onClick={handleSave}>
+        <Button variant="primary" size="sm" className="btn-primary-blue" type="button" onClick={handleSave}>
           {saved ? '✓ Saved' : 'Save Attendance Rules'}
         </Button>
       </div>

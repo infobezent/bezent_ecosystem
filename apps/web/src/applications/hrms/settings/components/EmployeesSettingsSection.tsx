@@ -54,7 +54,7 @@ export function EmployeesSettingsSection() {
             grade levels.
           </p>
         </div>
-        <Button type="button" onClick={handleSave}>
+        <Button variant="primary" size="sm" className="btn-primary-blue" type="button" onClick={handleSave}>
           {saved ? '✓ Saved' : 'Save Employee Config'}
         </Button>
       </div>
@@ -70,7 +70,13 @@ export function EmployeesSettingsSection() {
               value={newDept}
               onChange={(e) => setNewDept(e.target.value)}
             />
-            <Button type="button" onClick={handleAddDept}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="btn-light-blue-action"
+              onClick={handleAddDept}
+            >
               + Add
             </Button>
           </div>
@@ -99,7 +105,13 @@ export function EmployeesSettingsSection() {
               value={newType}
               onChange={(e) => setNewType(e.target.value)}
             />
-            <Button type="button" onClick={handleAddType}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="btn-light-blue-action"
+              onClick={handleAddType}
+            >
               + Add
             </Button>
           </div>

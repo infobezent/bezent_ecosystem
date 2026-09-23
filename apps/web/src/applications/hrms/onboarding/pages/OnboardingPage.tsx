@@ -17,7 +17,7 @@ interface OnboardingPageProps {
   title?: string;
 }
 
-export function OnboardingPage({ title = 'Onboarding' }: OnboardingPageProps) {
+export function OnboardingPage({ title = 'Administration' }: OnboardingPageProps) {
   const devContext = useDevContext();
   const [, setMasters] = useState<OrganizationMasters | null>(null);
   const [cases, setCases] = useState<OnboardingCaseItem[]>([]);

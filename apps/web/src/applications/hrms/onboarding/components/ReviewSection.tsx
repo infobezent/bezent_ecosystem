@@ -724,7 +724,7 @@ export function ReviewSection({
           <div className="review-section__card-header">
             <div className="review-section__card-title-group">
               <span className="review-section__card-icon">🚀</span>
-              <h3 className="review-section__card-title">3. Onboarding Tasks &amp; Assets</h3>
+              <h3 className="review-section__card-title">3. Administration Tasks &amp; Assets</h3>
               <span className="review-section__section-status-badge review-section__section-status-badge--complete">
                 ✓ Complete
               </span>
@@ -741,7 +741,7 @@ export function ReviewSection({
           {/* Onboarding Tasks */}
           <div className="review-section__sub-block">
             <h4 className="review-section__sub-heading">
-              Onboarding Tasks ({data.onboarding.tasks.length})
+              Administration Tasks ({data.onboarding.tasks.length})
             </h4>
             <div className="review-section__repeatable-list">
               {data.onboarding.tasks.map((tsk) => (

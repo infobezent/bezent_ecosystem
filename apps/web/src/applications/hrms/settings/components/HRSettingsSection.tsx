@@ -249,15 +249,33 @@ export function HRSettingsSection() {
                   <td>
                     {req.status === 'Pending' ? (
                       <div className="settings-action-row">
-                        <Button type="button" onClick={() => handleApproveRequest(req.id)}>
+                        <Button
+                          type="button"
+                          variant="primary"
+                          size="sm"
+                          className="btn-primary-blue"
+                          onClick={() => handleApproveRequest(req.id)}
+                        >
                           Approve
                         </Button>
-                        <Button type="button" onClick={() => handleRejectRequest(req.id)}>
+                        <Button
+                          type="button"
+                          variant="danger"
+                          size="sm"
+                          className="btn-restrained-danger"
+                          onClick={() => handleRejectRequest(req.id)}
+                        >
                           Reject
                         </Button>
                       </div>
                     ) : (
-                      <Button type="button" onClick={() => setSelectedRequest(req)}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="btn-subtle-secondary"
+                        onClick={() => setSelectedRequest(req)}
+                      >
                         View Log
                       </Button>
                     )}
@@ -279,7 +297,13 @@ export function HRSettingsSection() {
                 Publish organizational guidelines, terms, and employee handbooks.
               </p>
             </div>
-            <Button type="button" onClick={handleOpenAddPolicy}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="btn-light-blue-action"
+              onClick={handleOpenAddPolicy}
+            >
               + Create Policy
             </Button>
           </div>
@@ -322,10 +346,22 @@ export function HRSettingsSection() {
                   </td>
                   <td>
                     <div className="settings-action-row">
-                      <Button type="button" onClick={() => handleOpenEditPolicy(pol)}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="btn-subtle-secondary"
+                        onClick={() => handleOpenEditPolicy(pol)}
+                      >
                         Edit
                       </Button>
-                      <Button type="button" onClick={() => handleDeletePolicy(pol.id)}>
+                      <Button
+                        type="button"
+                        variant="danger"
+                        size="sm"
+                        className="btn-restrained-danger"
+                        onClick={() => handleDeletePolicy(pol.id)}
+                      >
                         Delete
                       </Button>
                     </div>
@@ -399,10 +435,22 @@ export function HRSettingsSection() {
               </div>
             </div>
             <div className="settings-modal__footer">
-              <Button type="button" onClick={() => setShowPolicyModal(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="btn-subtle-secondary"
+                onClick={() => setShowPolicyModal(false)}
+              >
                 Cancel
               </Button>
-              <Button type="button" onClick={handleSavePolicy}>
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                className="btn-primary-blue"
+                onClick={handleSavePolicy}
+              >
                 Save Policy
               </Button>
             </div>
@@ -446,7 +494,13 @@ export function HRSettingsSection() {
               </p>
             </div>
             <div className="settings-modal__footer">
-              <Button type="button" onClick={() => setSelectedRequest(null)}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="btn-subtle-secondary"
+                onClick={() => setSelectedRequest(null)}
+              >
                 Close Log
               </Button>
             </div>

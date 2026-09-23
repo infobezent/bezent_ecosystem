@@ -106,10 +106,22 @@ export function LeaveSettingsSection() {
           </p>
         </div>
         <div className="settings-action-row">
-          <Button type="button" onClick={handleAddLeaveType}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="btn-light-blue-action"
+            onClick={handleAddLeaveType}
+          >
             + Add Leave Type
           </Button>
-          <Button type="button" onClick={handleSave}>
+          <Button
+            type="button"
+            variant="primary"
+            size="sm"
+            className="btn-primary-blue"
+            onClick={handleSave}
+          >
             Save Leave Policies
           </Button>
         </div>

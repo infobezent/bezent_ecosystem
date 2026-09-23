@@ -39,7 +39,7 @@ export function PerformanceSettingsSection() {
             evaluation criteria.
           </p>
         </div>
-        <Button type="button" onClick={handleSave}>
+        <Button variant="primary" size="sm" className="btn-primary-blue" type="button" onClick={handleSave}>
           {saved ? '✓ Saved' : 'Save Performance Config'}
         </Button>
       </div>
@@ -88,7 +88,13 @@ export function PerformanceSettingsSection() {
               value={newCompInput}
               onChange={(e) => setNewCompInput(e.target.value)}
             />
-            <Button type="button" onClick={handleAddCompetency}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="btn-light-blue-action"
+              onClick={handleAddCompetency}
+            >
               + Add
             </Button>
           </div>

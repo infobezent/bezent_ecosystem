@@ -102,7 +102,7 @@ export const HRMS_ICON_DEFINITIONS: Record<string, IconDefinition> = {
   },
   onboarding: {
     name: 'onboarding',
-    label: 'Onboarding',
+    label: 'Administration',
     category: 'hrms',
     outline: ({ size, color, strokeWidth = 1.8 }) => (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">

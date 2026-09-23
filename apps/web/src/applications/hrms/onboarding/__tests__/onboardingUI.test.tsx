@@ -59,7 +59,7 @@ describe('HRMS Onboarding UI Components', () => {
   it('OnboardingPage renders header, add button, and filter tabs', () => {
     const html = renderToStaticMarkup(<OnboardingPage />);
 
-    expect(html).toContain('Onboarding');
+    expect(html).toContain('Administration');
     expect(html).toContain('Add New Hire');
     expect(html).toContain('Preboarding');
     expect(html).toContain('Documents');
@@ -77,7 +77,7 @@ describe('HRMS Onboarding UI Components', () => {
 
     // Render the route element to verify it renders the real OnboardingPage
     const html = renderToStaticMarkup(onboardingRoute!.element as React.ReactElement);
-    expect(html).toContain('Onboarding');
+    expect(html).toContain('Administration');
     expect(html).toContain('Add New Hire');
   });
 });

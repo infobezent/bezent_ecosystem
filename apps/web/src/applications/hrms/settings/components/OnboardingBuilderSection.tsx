@@ -36,6 +36,7 @@ export function OnboardingBuilderSection() {
   // Field modal state
   const [showFieldModal, setShowFieldModal] = useState(false);
   const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
+  const [editingTargetSectionId, setEditingTargetSectionId] = useState<string>('general');
   const [selectedTargetCardId, setSelectedTargetCardId] = useState<string>('');
   const [fieldLabel, setFieldLabel] = useState('');
   const [fieldType, setFieldType] = useState<'text' | 'select' | 'date' | 'number' | 'file'>(
@@ -46,6 +47,14 @@ export function OnboardingBuilderSection() {
   const [fieldDefaultValue, setFieldDefaultValue] = useState('');
   const [fieldOptions, setFieldOptions] = useState<string[]>([]);
   const [newOptionInput, setNewOptionInput] = useState('');
+
+  // Inline card creation inside Field modal
+  const [showInlineCardModal, setShowInlineCardModal] = useState(false);
+  const [inlineCardTitle, setInlineCardTitle] = useState('');
+
+  // Inline section creation inside Field modal
+  const [showInlineSectionModal, setShowInlineSectionModal] = useState(false);
+  const [inlineSectionTitle, setInlineSectionTitle] = useState('');
 
   // Delete Confirmation Modal State
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
@@ -60,13 +69,27 @@ export function OnboardingBuilderSection() {
 
   const selectedSection = sections.find((s) => s.id === selectedSectionId);
   const currentCards = cards.filter((c) => c.sectionId === selectedSectionId);
+  const availableCardsForModal = cards.filter(
+    (c) => c.sectionId === (editingTargetSectionId || selectedSectionId),
+  );
 
   // Section handlers
   const handleAddSection = () => {
     const title = prompt('Enter new section title:');
     if (title && title.trim()) {
-      addSection(title.trim());
+      const { sectionId } = addSection(title.trim());
+      setSelectedSectionId(sectionId);
     }
+  };
+
+  const handleCreateInlineSection = () => {
+    if (!inlineSectionTitle.trim()) return;
+    const { sectionId: newSecId, cardId: newCardId } = addSection(inlineSectionTitle.trim());
+    setEditingTargetSectionId(newSecId);
+    setSelectedSectionId(newSecId);
+    setSelectedTargetCardId(newCardId);
+    setShowInlineSectionModal(false);
+    setInlineSectionTitle('');
   };
 
   const handleSaveSectionRename = (id: string) => {
@@ -89,6 +112,15 @@ export function OnboardingBuilderSection() {
     setSelectedTargetCardId(createdId);
   };
 
+  const handleCreateInlineCard = () => {
+    if (!inlineCardTitle.trim()) return;
+    const targetSecId = editingTargetSectionId || selectedSectionId;
+    const newCardId = addCard(targetSecId, inlineCardTitle.trim());
+    setSelectedTargetCardId(newCardId);
+    setShowInlineCardModal(false);
+    setInlineCardTitle('');
+  };
+
   const handleSaveCardRename = (cardId: string) => {
     if (editingCardTitle.trim()) {
       renameCard(cardId, editingCardTitle.trim());
@@ -99,6 +131,7 @@ export function OnboardingBuilderSection() {
   // Field handlers
   const handleOpenAddField = (preselectedCardId?: string) => {
     setEditingFieldId(null);
+    setEditingTargetSectionId(selectedSectionId);
     setFieldLabel('');
     setFieldType('text');
     setFieldRequired(false);
@@ -112,6 +145,8 @@ export function OnboardingBuilderSection() {
 
   const handleOpenEditField = (f: OnboardingFieldConfig) => {
     setEditingFieldId(f.id);
+    const secId = f.sectionId || selectedSectionId;
+    setEditingTargetSectionId(secId);
     setSelectedTargetCardId(f.cardId);
     setFieldLabel(f.label);
     setFieldType(f.fieldType);
@@ -124,12 +159,13 @@ export function OnboardingBuilderSection() {
 
   const handleSaveField = () => {
     if (!fieldLabel.trim()) return;
-    const targetCardId = selectedTargetCardId || currentCards[0]?.id || '';
+    const targetSecId = editingTargetSectionId || selectedSectionId;
+    const targetCardId = selectedTargetCardId || availableCardsForModal[0]?.id || '';
 
     if (editingFieldId) {
       updateField(editingFieldId, {
         cardId: targetCardId,
-        sectionId: selectedSectionId,
+        sectionId: targetSecId,
         label: fieldLabel.trim(),
         fieldType,
         required: fieldRequired,
@@ -139,7 +175,7 @@ export function OnboardingBuilderSection() {
       });
     } else {
       addField({
-        sectionId: selectedSectionId,
+        sectionId: targetSecId,
         cardId: targetCardId,
         label: fieldLabel.trim(),
         fieldType,
@@ -185,7 +221,13 @@ export function OnboardingBuilderSection() {
           </p>
         </div>
         <div className="settings-action-row">
-          <Button type="button" onClick={() => setShowPreviewModal(true)}>
+          <Button
+            type="button"
+            variant="primary"
+            size="md"
+            className="btn-primary-blue"
+            onClick={() => setShowPreviewModal(true)}
+          >
             <BezentIcon name="edit" size={16} />
             Preview Form
           </Button>
@@ -197,7 +239,13 @@ export function OnboardingBuilderSection() {
         <div className="builder-sidebar">
           <div className="builder-sidebar__header">
             <h3 className="builder-sidebar__title">Sections ({sections.length})</h3>
-            <Button type="button" onClick={handleAddSection}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="btn-light-blue-action"
+              onClick={handleAddSection}
+            >
               + Add Section
             </Button>
           </div>
@@ -285,11 +333,14 @@ export function OnboardingBuilderSection() {
               </p>
             </div>
             <div className="builder-content__actions">
-              <Button type="button" onClick={handleOpenAddCard}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="btn-light-blue-action"
+                onClick={handleOpenAddCard}
+              >
                 + Create New Card
-              </Button>
-              <Button type="button" onClick={() => handleOpenAddField()}>
-                + Add Field
               </Button>
             </div>
           </div>
@@ -297,7 +348,13 @@ export function OnboardingBuilderSection() {
           {currentCards.length === 0 ? (
             <div className="settings-empty-box">
               <p>No cards configured for {selectedSection?.title}.</p>
-              <Button type="button" onClick={handleOpenAddCard}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="btn-light-blue-action"
+                onClick={handleOpenAddCard}
+              >
                 + Create First Card
               </Button>
             </div>
@@ -427,11 +484,20 @@ export function OnboardingBuilderSection() {
                             )}
 
                             <div className="builder-field-card__footer">
-                              <Button type="button" onClick={() => handleOpenEditField(f)}>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="btn-subtle-secondary"
+                                onClick={() => handleOpenEditField(f)}
+                              >
                                 Edit Field
                               </Button>
                               <Button
                                 type="button"
+                                variant="danger"
+                                size="sm"
+                                className="btn-restrained-danger"
                                 onClick={() =>
                                   setDeleteConfirmation({
                                     type: 'field',
@@ -492,11 +558,139 @@ export function OnboardingBuilderSection() {
               </div>
             </div>
             <div className="settings-modal__footer">
-              <Button type="button" onClick={() => setShowCardModal(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="btn-subtle-secondary"
+                onClick={() => setShowCardModal(false)}
+              >
                 Cancel
               </Button>
-              <Button type="button" onClick={handleCreateCard}>
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                className="btn-primary-blue"
+                onClick={handleCreateCard}
+              >
                 Create Card
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Inline Create New Card Sub-Modal (Triggered from Add to Existing Card Dropdown) */}
+      {showInlineCardModal && (
+        <div className="settings-modal-backdrop settings-modal-backdrop--high-z">
+          <div className="settings-modal settings-modal--sm">
+            <div className="settings-modal__header">
+              <h3>Create New Card</h3>
+              <button
+                type="button"
+                className="settings-modal__close"
+                onClick={() => setShowInlineCardModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="settings-modal__body">
+              <div className="settings-field-group">
+                <label className="settings-label">Target Section</label>
+                <input
+                  type="text"
+                  className="settings-input settings-input--disabled"
+                  value={
+                    sections.find((s) => s.id === (editingTargetSectionId || selectedSectionId))
+                      ?.title || ''
+                  }
+                  disabled
+                />
+              </div>
+              <div className="settings-field-group">
+                <label className="settings-label">Card Name *</label>
+                <input
+                  type="text"
+                  className="settings-input"
+                  value={inlineCardTitle}
+                  onChange={(e) => setInlineCardTitle(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleCreateInlineCard()}
+                  placeholder="e.g. Government Documents"
+                  autoFocus
+                />
+              </div>
+            </div>
+            <div className="settings-modal__footer">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="btn-subtle-secondary"
+                onClick={() => setShowInlineCardModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                className="btn-primary-blue"
+                onClick={handleCreateInlineCard}
+              >
+                Create Card
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Inline Create New Section Sub-Modal (Triggered from Target Section Dropdown) */}
+      {showInlineSectionModal && (
+        <div className="settings-modal-backdrop settings-modal-backdrop--high-z">
+          <div className="settings-modal settings-modal--sm">
+            <div className="settings-modal__header">
+              <h3>Create New Section</h3>
+              <button
+                type="button"
+                className="settings-modal__close"
+                onClick={() => setShowInlineSectionModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="settings-modal__body">
+              <div className="settings-field-group">
+                <label className="settings-label">Section Name *</label>
+                <input
+                  type="text"
+                  className="settings-input"
+                  value={inlineSectionTitle}
+                  onChange={(e) => setInlineSectionTitle(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleCreateInlineSection()}
+                  placeholder="e.g. Certifications"
+                  autoFocus
+                />
+              </div>
+            </div>
+            <div className="settings-modal__footer">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="btn-subtle-secondary"
+                onClick={() => setShowInlineSectionModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                className="btn-primary-blue"
+                onClick={handleCreateInlineSection}
+              >
+                Create Section
               </Button>
             </div>
           </div>
@@ -519,13 +713,29 @@ export function OnboardingBuilderSection() {
             </div>
             <div className="settings-modal__body">
               <div className="settings-field-group">
-                <label className="settings-label">Target Section</label>
-                <input
-                  type="text"
-                  className="settings-input settings-input--disabled"
-                  value={selectedSection?.title || ''}
-                  disabled
-                />
+                <label className="settings-label">Target Section *</label>
+                <select
+                  className="settings-input"
+                  value={editingTargetSectionId}
+                  onChange={(e) => {
+                    if (e.target.value === '__ADD_NEW_SECTION__') {
+                      setShowInlineSectionModal(true);
+                      setInlineSectionTitle('');
+                    } else {
+                      const newSecId = e.target.value;
+                      setEditingTargetSectionId(newSecId);
+                      const cardsInNewSec = cards.filter((c) => c.sectionId === newSecId);
+                      setSelectedTargetCardId(cardsInNewSec[0]?.id || '');
+                    }
+                  }}
+                >
+                  {sections.map((sec) => (
+                    <option key={sec.id} value={sec.id}>
+                      {sec.title}
+                    </option>
+                  ))}
+                  <option value="__ADD_NEW_SECTION__">+ Add New Section</option>
+                </select>
               </div>
 
               <div className="settings-field-group">
@@ -533,13 +743,21 @@ export function OnboardingBuilderSection() {
                 <select
                   className="settings-input"
                   value={selectedTargetCardId}
-                  onChange={(e) => setSelectedTargetCardId(e.target.value)}
+                  onChange={(e) => {
+                    if (e.target.value === '__ADD_NEW_CARD__') {
+                      setShowInlineCardModal(true);
+                      setInlineCardTitle('');
+                    } else {
+                      setSelectedTargetCardId(e.target.value);
+                    }
+                  }}
                 >
-                  {currentCards.map((c) => (
+                  {availableCardsForModal.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.title}
                     </option>
                   ))}
+                  <option value="__ADD_NEW_CARD__">+ Add New Card</option>
                 </select>
               </div>
 
@@ -612,7 +830,13 @@ export function OnboardingBuilderSection() {
                         value={newOptionInput}
                         onChange={(e) => setNewOptionInput(e.target.value)}
                       />
-                      <Button type="button" onClick={handleAddOption}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="btn-light-blue-action"
+                        onClick={handleAddOption}
+                      >
                         + Add Option
                       </Button>
                     </div>
@@ -631,10 +855,22 @@ export function OnboardingBuilderSection() {
               )}
             </div>
             <div className="settings-modal__footer">
-              <Button type="button" onClick={() => setShowFieldModal(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="btn-subtle-secondary"
+                onClick={() => setShowFieldModal(false)}
+              >
                 Cancel
               </Button>
-              <Button type="button" onClick={handleSaveField}>
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                className="btn-primary-blue"
+                onClick={handleSaveField}
+              >
                 Save Field
               </Button>
             </div>
@@ -667,10 +903,22 @@ export function OnboardingBuilderSection() {
               </p>
             </div>
             <div className="settings-modal__footer">
-              <Button type="button" onClick={() => setDeleteConfirmation(null)}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="btn-subtle-secondary"
+                onClick={() => setDeleteConfirmation(null)}
+              >
                 Cancel
               </Button>
-              <Button type="button" onClick={handleConfirmDelete}>
+              <Button
+                type="button"
+                variant="danger"
+                size="sm"
+                className="btn-restrained-danger"
+                onClick={handleConfirmDelete}
+              >
                 Confirm Delete
               </Button>
             </div>
@@ -772,7 +1020,13 @@ export function OnboardingBuilderSection() {
               </div>
             </div>
             <div className="settings-modal__footer">
-              <Button type="button" onClick={() => setShowPreviewModal(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="btn-subtle-secondary"
+                onClick={() => setShowPreviewModal(false)}
+              >
                 Close Preview
               </Button>
             </div>
