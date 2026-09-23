@@ -94,9 +94,13 @@ describe('HRMS Onboarding UI Components', () => {
       <MemoryRouter>{empAdminRoute!.element as React.ReactElement}</MemoryRouter>,
     );
     expect(html).toContain('Employee Administration');
+    expect(html).toContain('Manage employee administration, new hires, and employment records.');
+    expect(html).toContain('View Drafts');
     expect(html).toContain('Add New Hire');
     expect(html).toContain('Preboarding');
     expect(html).toContain('Documents');
+    expect(html).toContain('Completed');
+    expect(html).toContain('Search employees...');
   });
 
   it('hrmsRoutes routes administration/onboarding directly to Employee Registration form', () => {

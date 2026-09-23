@@ -13,6 +13,8 @@ import {
   TableRow,
   TableHeaderCell,
   TableCell,
+  Inline,
+  SearchInput,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { useDevContext } from '../../../../platform/context/DevContext';
@@ -168,7 +170,7 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
   }
 
   return (
-    <Page className="onboarding-page" maxWidth="default" gap="lg">
+    <Page className="onboarding-page" maxWidth="full" gap="lg">
       {/* Header Banner */}
       <PageHeader
         className="onboarding-page__header"
@@ -179,9 +181,13 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
             {devContext.companyName}
           </span>
         }
-        subtitle="Manage candidates and new hires progressing through the onboarding pipeline."
+        subtitle={
+          title === 'Employee Administration'
+            ? 'Manage employee administration, new hires, and employment records.'
+            : 'Manage candidates and new hires progressing through the onboarding pipeline.'
+        }
         actions={
-          <div className="onboarding-page__actions">
+          <Inline gap="md" align="center" className="onboarding-page__actions">
             <button
               type="button"
               className="onboarding-page__drafts-btn bezent-btn-draft"
@@ -209,80 +215,86 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                 Add New Hire
               </span>
             </Button>
-          </div>
+          </Inline>
         }
       />
 
       {/* Toolbar & Filters */}
-      <Toolbar className="onboarding-page__toolbar">
-        <div className="onboarding-page__tabs bezent-filter-tabs" role="tablist">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'all'}
-            className={`onboarding-page__tab bezent-filter-tab ${
-              activeTab === 'all' ? 'onboarding-page__tab--active is-active' : ''
-            }`}
-            onClick={() => setActiveTab('all')}
-          >
-            All{' '}
-            <span className="onboarding-page__tab-count bezent-filter-tab-count">{counts.all}</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'preboarding'}
-            className={`onboarding-page__tab bezent-filter-tab ${
-              activeTab === 'preboarding' ? 'onboarding-page__tab--active is-active' : ''
-            }`}
-            onClick={() => setActiveTab('preboarding')}
-          >
-            Preboarding{' '}
-            <span className="onboarding-page__tab-count bezent-filter-tab-count">
-              {counts.preboarding}
-            </span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'documents'}
-            className={`onboarding-page__tab bezent-filter-tab ${
-              activeTab === 'documents' ? 'onboarding-page__tab--active is-active' : ''
-            }`}
-            onClick={() => setActiveTab('documents')}
-          >
-            Documents{' '}
-            <span className="onboarding-page__tab-count bezent-filter-tab-count">
-              {counts.documents}
-            </span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'completed'}
-            className={`onboarding-page__tab bezent-filter-tab ${
-              activeTab === 'completed' ? 'onboarding-page__tab--active is-active' : ''
-            }`}
-            onClick={() => setActiveTab('completed')}
-          >
-            Completed{' '}
-            <span className="onboarding-page__tab-count bezent-filter-tab-count">
-              {counts.completed}
-            </span>
-          </button>
-        </div>
-
-        <div className="onboarding-page__search-box bezent-search-bar">
-          <BezentIcon name="search" size={16} />
-          <input
-            type="text"
-            className="onboarding-page__search-input bezent-search-bar__input"
-            placeholder="Search by name, email, department..."
+      <Toolbar
+        className="onboarding-page__toolbar"
+        left={
+          <div className="onboarding-page__tabs bezent-filter-tabs" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'all'}
+              className={`onboarding-page__tab bezent-filter-tab ${
+                activeTab === 'all' ? 'onboarding-page__tab--active is-active' : ''
+              }`}
+              onClick={() => setActiveTab('all')}
+            >
+              All{' '}
+              <span className="onboarding-page__tab-count bezent-filter-tab-count">
+                {counts.all}
+              </span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'preboarding'}
+              className={`onboarding-page__tab bezent-filter-tab ${
+                activeTab === 'preboarding' ? 'onboarding-page__tab--active is-active' : ''
+              }`}
+              onClick={() => setActiveTab('preboarding')}
+            >
+              Preboarding{' '}
+              <span className="onboarding-page__tab-count bezent-filter-tab-count">
+                {counts.preboarding}
+              </span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'documents'}
+              className={`onboarding-page__tab bezent-filter-tab ${
+                activeTab === 'documents' ? 'onboarding-page__tab--active is-active' : ''
+              }`}
+              onClick={() => setActiveTab('documents')}
+            >
+              Documents{' '}
+              <span className="onboarding-page__tab-count bezent-filter-tab-count">
+                {counts.documents}
+              </span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'completed'}
+              className={`onboarding-page__tab bezent-filter-tab ${
+                activeTab === 'completed' ? 'onboarding-page__tab--active is-active' : ''
+              }`}
+              onClick={() => setActiveTab('completed')}
+            >
+              Completed{' '}
+              <span className="onboarding-page__tab-count bezent-filter-tab-count">
+                {counts.completed}
+              </span>
+            </button>
+          </div>
+        }
+        right={
+          <SearchInput
+            placeholder={
+              title === 'Employee Administration'
+                ? 'Search employees...'
+                : 'Search by name, email, department...'
+            }
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onClear={() => setSearchQuery('')}
           />
-        </div>
-      </Toolbar>
+        }
+      />
 
       {/* Error state */}
       {error && (
@@ -292,79 +304,77 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
       )}
 
       {/* Main Table */}
-      <div className="onboarding-page__table-container">
-        {loading ? (
-          <LoadingState label="Loading onboarding records…" fill />
-        ) : filteredCases.length === 0 ? (
-          <EmptyState
-            variant="onboarding"
-            title={searchQuery ? 'No matching new hires' : 'No New Hires Found'}
-            description={
-              searchQuery
-                ? `No candidates match "${searchQuery}". Try clearing your search.`
-                : 'Get started by creating your first onboarding case for a new hire.'
-            }
-            primaryAction={
-              !searchQuery
-                ? {
-                    label: 'Add New Hire',
-                    onClick: () => {
-                      setSelectedDraft(null);
-                      if (onAddNewHire) {
-                        onAddNewHire();
-                      } else {
-                        setViewMode('registration');
-                      }
-                    },
-                  }
-                : undefined
-            }
-          />
-        ) : (
-          <Table hoverable>
-            <TableHead>
-              <TableRow>
-                <TableHeaderCell>Name</TableHeaderCell>
-                <TableHeaderCell>Department</TableHeaderCell>
-                <TableHeaderCell>Designation</TableHeaderCell>
-                <TableHeaderCell>Location</TableHeaderCell>
-                <TableHeaderCell>Stage</TableHeaderCell>
-                <TableHeaderCell>Joining Date</TableHeaderCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredCases.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>
-                    <div className="onboarding-page__person-cell bezent-table-cell--avatar-meta">
-                      <Avatar initials={getInitials(item.fullName)} alt={item.fullName} />
-                      <div className="onboarding-page__person-info bezent-table-meta-group">
-                        <span className="onboarding-page__person-name bezent-table-meta-title">
-                          {item.fullName}
-                        </span>
-                        <span className="onboarding-page__person-email bezent-table-meta-subtitle">
-                          {item.email}
-                        </span>
-                      </div>
+      {loading ? (
+        <LoadingState label="Loading onboarding records…" fill />
+      ) : filteredCases.length === 0 ? (
+        <EmptyState
+          variant="onboarding"
+          title={searchQuery ? 'No matching new hires' : 'No New Hires Found'}
+          description={
+            searchQuery
+              ? `No candidates match "${searchQuery}". Try clearing your search.`
+              : 'Get started by creating your first onboarding case for a new hire.'
+          }
+          primaryAction={
+            !searchQuery
+              ? {
+                  label: 'Add New Hire',
+                  onClick: () => {
+                    setSelectedDraft(null);
+                    if (onAddNewHire) {
+                      onAddNewHire();
+                    } else {
+                      setViewMode('registration');
+                    }
+                  },
+                }
+              : undefined
+          }
+        />
+      ) : (
+        <Table hoverable>
+          <TableHead>
+            <TableRow>
+              <TableHeaderCell>Name</TableHeaderCell>
+              <TableHeaderCell>Department</TableHeaderCell>
+              <TableHeaderCell>Designation</TableHeaderCell>
+              <TableHeaderCell>Location</TableHeaderCell>
+              <TableHeaderCell>Stage</TableHeaderCell>
+              <TableHeaderCell>Joining Date</TableHeaderCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredCases.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell>
+                  <div className="onboarding-page__person-cell bezent-table-cell--avatar-meta">
+                    <Avatar initials={getInitials(item.fullName)} alt={item.fullName} />
+                    <div className="onboarding-page__person-info bezent-table-meta-group">
+                      <span className="onboarding-page__person-name bezent-table-meta-title">
+                        {item.fullName}
+                      </span>
+                      <span className="onboarding-page__person-email bezent-table-meta-subtitle">
+                        {item.email}
+                      </span>
                     </div>
-                  </TableCell>
-                  <TableCell>{item.departmentName}</TableCell>
-                  <TableCell>{item.designationName}</TableCell>
-                  <TableCell>{item.locationName || '—'}</TableCell>
-                  <TableCell>
-                    <span
-                      className={`onboarding-page__stage-tag bezent-stage-tag bezent-stage-tag--${item.stage}`}
-                    >
-                      {item.stage}
-                    </span>
-                  </TableCell>
-                  <TableCell>{formatDate(item.joiningDate)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </div>
+                  </div>
+                </TableCell>
+                <TableCell>{item.departmentName}</TableCell>
+                <TableCell>{item.designationName}</TableCell>
+                <TableCell>{item.locationName || '—'}</TableCell>
+                <TableCell>
+                  <span
+                    className={`onboarding-page__stage-tag bezent-stage-tag bezent-stage-tag--${item.stage}`}
+                  >
+                    {item.stage}
+                  </span>
+                </TableCell>
+                <TableCell>{formatDate(item.joiningDate)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
 
       {/* Saved Drafts Modal */}
       <DraftsModal
