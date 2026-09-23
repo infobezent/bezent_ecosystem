@@ -18,6 +18,7 @@ export interface SelectProps extends Omit<
   helperText?: string;
   error?: string;
   size?: SelectSize;
+  width?: 'full' | 'auto';
   options?: SelectOption[];
   className?: string;
   children?: ReactNode;
@@ -28,7 +29,19 @@ export interface SelectProps extends Omit<
  * with accessible focus states, custom arrow icon, and token styling.
  */
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
-  { label, helperText, error, size = 'md', options, id, disabled, className, children, ...rest },
+  {
+    label,
+    helperText,
+    error,
+    size = 'md',
+    width = 'full',
+    options,
+    id,
+    disabled,
+    className,
+    children,
+    ...rest
+  },
   ref,
 ) {
   const selectId =
@@ -36,7 +49,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
 
   return (
     <div
-      className={`bezent-select-wrapper bezent-select-wrapper--${size} ${error ? 'has-error' : ''} ${disabled ? 'is-disabled' : ''} ${className || ''}`.trim()}
+      className={`bezent-select-wrapper bezent-select-wrapper--${size} bezent-select-wrapper--width-${width} ${error ? 'has-error' : ''} ${disabled ? 'is-disabled' : ''} ${className || ''}`.trim()}
     >
       {label && (
         <label htmlFor={selectId} className="bezent-select-label">

@@ -16,6 +16,7 @@ import {
   Inline,
   SearchInput,
   Select,
+  Label,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { useDevContext } from '../../../../platform/context/DevContext';
@@ -362,13 +363,22 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
           />
           <Toolbar
             className="onboarding-page__pagination"
-            left={<span className="onboarding-page__pagination-info">{resultRangeText}</span>}
+            align="center"
+            left={
+              <Label as="span" size="sm" aria-live="polite">
+                {resultRangeText}
+              </Label>
+            }
             right={
               <Inline gap="lg" align="center">
                 <Inline gap="xs" align="center">
-                  <span>Rows per page:</span>
+                  <Label htmlFor="employee-admin-empty-page-size" size="sm">
+                    Rows per page:
+                  </Label>
                   <Select
+                    id="employee-admin-empty-page-size"
                     size="sm"
+                    width="auto"
                     value={String(pageSize)}
                     onChange={(e) => handlePageSizeChange(Number(e.target.value))}
                     options={[
@@ -448,13 +458,22 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
           {/* Pagination Footer */}
           <Toolbar
             className="onboarding-page__pagination"
-            left={<span className="onboarding-page__pagination-info">{resultRangeText}</span>}
+            align="center"
+            left={
+              <Label as="span" size="sm" aria-live="polite">
+                {resultRangeText}
+              </Label>
+            }
             right={
               <Inline gap="lg" align="center">
                 <Inline gap="xs" align="center">
-                  <span>Rows per page:</span>
+                  <Label htmlFor="employee-admin-page-size" size="sm">
+                    Rows per page:
+                  </Label>
                   <Select
+                    id="employee-admin-page-size"
                     size="sm"
+                    width="auto"
                     value={String(pageSize)}
                     onChange={(e) => handlePageSizeChange(Number(e.target.value))}
                     options={[
@@ -487,9 +506,9 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                         {p}
                       </Button>
                     ) : (
-                      <span key={`ellipsis-${idx}`} aria-hidden="true">
+                      <Label key={`ellipsis-${idx}`} as="span" size="sm" aria-hidden="true">
                         …
-                      </span>
+                      </Label>
                     ),
                   )}
                   <Button
