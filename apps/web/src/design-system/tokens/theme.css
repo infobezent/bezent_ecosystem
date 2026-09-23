@@ -334,9 +334,10 @@
   --bg-surface-secondary: #081b3a;
   --bg-card: #081b3a;
   --card-bg: #081b3a;
-  --card-border: rgba(56, 189, 248, 0.14);
+  --card-border: rgba(56, 189, 248, 0.32);
+  --table-border: rgba(56, 189, 248, 0.35);
   --card-hover-bg: #0b2347;
-  --card-hover-border: rgba(56, 189, 248, 0.28);
+  --card-hover-border: rgba(56, 189, 248, 0.45);
   --card-shadow: 0 4px 20px rgba(2, 11, 28, 0.5);
   --card-hover-shadow: 0 8px 30px rgba(2, 11, 28, 0.65), 0 0 16px rgba(22, 131, 255, 0.2);
   --card-radius: 16px;
@@ -371,17 +372,17 @@
   --text-primary: #f8fafc;
   --text-body: #94a3b8;
   --text-secondary: #94a3b8;
-  --text-tertiary: #64748b;
-  --text-muted: #64748b;
+  --text-tertiary: #94a3b8;
+  --text-muted: #94a3b8;
   --text-disabled: #475569;
   --text-inverse: #020b1c;
 
   /* Borders & Dividers */
-  --border-default: rgba(56, 189, 248, 0.14);
-  --border-subtle: rgba(56, 189, 248, 0.08);
-  --border-divider: rgba(56, 189, 248, 0.1);
+  --border-default: rgba(56, 189, 248, 0.3);
+  --border-subtle: rgba(56, 189, 248, 0.16);
+  --border-divider: rgba(56, 189, 248, 0.18);
   --border-focus: #1683ff;
-  --header-border-bottom: rgba(56, 189, 248, 0.08);
+  --header-border-bottom: rgba(56, 189, 248, 0.12);
 
   /* Global Icon System */
   --icon-default: #94a3b8;
