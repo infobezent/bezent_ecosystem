@@ -1,5 +1,21 @@
 import { useState } from 'react';
-import { Button } from '../../../../design-system/components/Button';
+import {
+  Button,
+  Card,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableHeaderCell,
+  TableCell,
+  Badge,
+  Alert,
+  EmptyState,
+  Toolbar,
+  Actions,
+  Inline,
+  Stack,
+} from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import type {
   OnboardingDocumentRequirement,
@@ -7,7 +23,6 @@ import type {
   UpdateOnboardingDocumentRequirementDto,
 } from '../types/settings';
 import { DocumentModal } from './DocumentModal';
-import './DocumentsSection.css';
 
 interface DocumentsSectionProps {
   documents: OnboardingDocumentRequirement[];
@@ -60,120 +75,118 @@ export function DocumentsSection({
   const sortedDocs = [...documents].sort((a, b) => a.displayOrder - b.displayOrder);
 
   return (
-    <div className="settings-card">
-      <div className="settings-card__header">
-        <div className="docs-toolbar">
-          <div>
-            <h2 className="settings-card__title">Document Requirements</h2>
-            <p className="settings-card__subtitle">
-              Define required proofs, certificates, and compliance forms candidates must submit.
-            </p>
-          </div>
-          <Button variant="primary" type="button" onClick={openCreateModal}>
-            <BezentIcon name="plusSign" size={14} />
-            Add Requirement
-          </Button>
-        </div>
-      </div>
+    <Card padding="lg">
+      <Stack gap="lg">
+        <Toolbar
+          left={
+            <div>
+              <h2 className="bezent-card__title">Document Requirements</h2>
+              <p className="bezent-card__desc">
+                Define required proofs, certificates, and compliance forms candidates must submit.
+              </p>
+            </div>
+          }
+          right={
+            <Button variant="primary" type="button" onClick={openCreateModal}>
+              <BezentIcon name="plusSign" size={14} />
+              Add Requirement
+            </Button>
+          }
+        />
 
-      {success && (
-        <div className="settings-alert settings-alert--success" role="alert">
-          <BezentIcon name="check" size={16} />
-          <span>{success}</span>
-        </div>
-      )}
+        {success && <Alert variant="success">{success}</Alert>}
 
-      {error && (
-        <div className="settings-alert settings-alert--error" role="alert">
-          <BezentIcon name="warning" size={16} />
-          <span>{error}</span>
-        </div>
-      )}
+        {error && <Alert variant="danger">{error}</Alert>}
 
-      {sortedDocs.length === 0 ? (
-        <div className="docs-empty">
-          <BezentIcon name="documents" size={36} />
-          <span>No document requirements defined yet.</span>
-          <Button variant="primary" type="button" onClick={openCreateModal}>
-            Add First Document
-          </Button>
-        </div>
-      ) : (
-        <div className="fields-table-container">
-          <table className="fields-table">
-            <thead>
-              <tr>
-                <th>Document Type</th>
-                <th>Name</th>
-                <th>Validation Flags</th>
-                <th>Order</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
+        {sortedDocs.length === 0 ? (
+          <EmptyState
+            title="No document requirements defined yet."
+            description="Add requirements to request mandatory or optional documents during candidate onboarding."
+            action={
+              <Button variant="primary" type="button" onClick={openCreateModal}>
+                Add First Document
+              </Button>
+            }
+          />
+        ) : (
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableHeaderCell>Document Type</TableHeaderCell>
+                <TableHeaderCell>Name</TableHeaderCell>
+                <TableHeaderCell>Validation Flags</TableHeaderCell>
+                <TableHeaderCell>Order</TableHeaderCell>
+                <TableHeaderCell>Status</TableHeaderCell>
+                <TableHeaderCell>Actions</TableHeaderCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
               {sortedDocs.map((doc) => (
-                <tr key={doc.id}>
-                  <td>
-                    <span className="fields-key">{doc.documentType}</span>
-                  </td>
-                  <td>
+                <TableRow key={doc.id}>
+                  <TableCell>
+                    <Badge variant="neutral">{doc.documentType}</Badge>
+                  </TableCell>
+                  <TableCell>
                     <div>
                       <strong>{doc.name}</strong>
-                      {doc.description && <p className="stage-item__desc">{doc.description}</p>}
+                      {doc.description && <p className="bezent-card__desc">{doc.description}</p>}
                     </div>
-                  </td>
-                  <td>
-                    <div className="docs-badge-cell">
+                  </TableCell>
+                  <TableCell>
+                    <Inline gap="xs" wrap>
                       {doc.isRequired && (
-                        <span className="stage-pill stage-pill--required">Mandatory</span>
+                        <Badge variant="warning" size="sm">
+                          Mandatory
+                        </Badge>
                       )}
                       {doc.verificationRequired && (
-                        <span className="stage-pill stage-pill--protected">Verification</span>
+                        <Badge variant="info" size="sm">
+                          Verification
+                        </Badge>
                       )}
                       {doc.expiryTracking && (
-                        <span className="stage-pill stage-pill--optional">Expiry Tracked</span>
+                        <Badge variant="neutral" size="sm">
+                          Expiry Tracked
+                        </Badge>
                       )}
-                    </div>
-                  </td>
-                  <td>{doc.displayOrder}</td>
-                  <td>
-                    <span
-                      className={`stage-pill ${
-                        doc.isActive ? 'stage-pill--protected' : 'stage-pill--optional'
-                      }`}
-                    >
+                    </Inline>
+                  </TableCell>
+                  <TableCell>{doc.displayOrder}</TableCell>
+                  <TableCell>
+                    <Badge status={doc.isActive ? 'active' : 'inactive'} size="sm">
                       {doc.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="stage-item__actions">
-                      <button
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Actions align="start" gap="xs">
+                      <Button
                         type="button"
-                        className="stage-btn-secondary"
+                        variant="secondary"
+                        size="sm"
                         onClick={() => openEditModal(doc)}
                       >
                         <BezentIcon name="edit" size={13} />
                         Edit
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         type="button"
-                        className="stage-btn-secondary btn-danger-icon"
+                        variant="danger"
+                        size="sm"
                         onClick={() => handleDelete(doc)}
                         disabled={deletingId === doc.id}
                         aria-label={`Delete ${doc.name}`}
                       >
                         <BezentIcon name="delete" size={13} />
                         Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                      </Button>
+                    </Actions>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+            </TableBody>
+          </Table>
+        )}
+      </Stack>
 
       <DocumentModal
         isOpen={modalOpen}
@@ -182,6 +195,8 @@ export function DocumentsSection({
         onSubmitCreate={onCreateDocument}
         onSubmitUpdate={onUpdateDocument}
       />
-    </div>
+    </Card>
   );
 }
+
+export default DocumentsSection;

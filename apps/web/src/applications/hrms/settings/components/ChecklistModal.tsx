@@ -1,13 +1,20 @@
 import { useState, useEffect, type FormEvent } from 'react';
-import { Button } from '../../../../design-system/components/Button';
-import { BezentIcon } from '../../../../design-system/icons';
+import {
+  Button,
+  Modal,
+  Input,
+  Select,
+  Switch,
+  Alert,
+  Stack,
+  Actions,
+} from '../../../../design-system/components';
 import {
   SUPPORTED_STAGE_KEYS,
   type OnboardingChecklistTemplate,
   type CreateOnboardingChecklistTemplateDto,
   type UpdateOnboardingChecklistTemplateDto,
 } from '../types/settings';
-import './DocumentModal.css';
 
 interface ChecklistModalProps {
   isOpen: boolean;
@@ -70,8 +77,6 @@ export function ChecklistModal({
     setErrorMessage(null);
   }, [checklist, defaultStageKey, isOpen]);
 
-  if (!isOpen) return null;
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
@@ -119,171 +124,108 @@ export function ChecklistModal({
     }
   };
 
+  const stageOptions = SUPPORTED_STAGE_KEYS.map((k) => ({
+    value: k,
+    label: k.charAt(0).toUpperCase() + k.slice(1),
+  }));
+
+  const assigneeOptions = COMMON_ASSIGNEES.map((a) => ({
+    value: a.value,
+    label: `${a.label} (${a.value})`,
+  }));
+
   return (
-    <div className="settings-modal-backdrop" role="dialog" aria-modal="true">
-      <div className="settings-modal">
-        <div className="settings-modal__header">
-          <h3 className="settings-modal__title">
-            {isEditing ? 'Edit Checklist Task' : 'Add Checklist Task'}
-          </h3>
-          <button
-            type="button"
-            className="settings-modal__close-btn"
-            onClick={onClose}
-            aria-label="Close dialog"
-          >
-            <BezentIcon name="close" size={18} />
-          </button>
-        </div>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={isEditing ? 'Edit Checklist Task' : 'Add Checklist Task'}
+      footer={
+        <Actions align="end" gap="sm">
+          <Button variant="secondary" type="button" onClick={onClose} disabled={submitting}>
+            Cancel
+          </Button>
+          <Button variant="primary" type="submit" disabled={submitting} form="checklist-modal-form">
+            {submitting ? 'Saving...' : isEditing ? 'Update Task' : 'Create Task'}
+          </Button>
+        </Actions>
+      }
+    >
+      <form id="checklist-modal-form" onSubmit={handleSubmit}>
+        <Stack gap="md">
+          {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
 
-        <form onSubmit={handleSubmit}>
-          <div className="settings-modal__body">
-            {errorMessage && (
-              <div className="settings-alert settings-alert--error" role="alert">
-                <BezentIcon name="warning" size={16} />
-                <span>{errorMessage}</span>
-              </div>
-            )}
+          <Input
+            id="chk-name-input"
+            label="Task Name *"
+            placeholder="e.g., Send Welcome Kit, Provision Laptop"
+            value={name}
+            maxLength={150}
+            required
+            onChange={(e) => setName(e.target.value)}
+          />
 
-            <div className="settings-form__row">
-              <label htmlFor="chk-name-input" className="settings-form__label">
-                Task Name *
-              </label>
-              <input
-                id="chk-name-input"
-                type="text"
-                className="settings-form__input"
-                placeholder="e.g., Send Welcome Kit, Provision Laptop"
-                value={name}
-                maxLength={150}
-                required
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
+          <Select
+            id="chk-stage-select"
+            label="Assigned Stage *"
+            value={stageKey}
+            options={stageOptions}
+            onChange={(e) => setStageKey(e.target.value)}
+          />
 
-            <div className="settings-form__row">
-              <label htmlFor="chk-stage-select" className="settings-form__label">
-                Assigned Stage *
-              </label>
-              <select
-                id="chk-stage-select"
-                className="settings-form__input"
-                value={stageKey}
-                onChange={(e) => setStageKey(e.target.value)}
-              >
-                {SUPPORTED_STAGE_KEYS.map((k) => (
-                  <option key={k} value={k}>
-                    {k.charAt(0).toUpperCase() + k.slice(1)}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <Select
+            id="chk-assignee-select"
+            label="Assignee Responsibility Category"
+            value={assigneeType}
+            options={assigneeOptions}
+            onChange={(e) => setAssigneeType(e.target.value)}
+          />
 
-            <div className="settings-form__row">
-              <label htmlFor="chk-assignee-select" className="settings-form__label">
-                Assignee Responsibility Category
-              </label>
-              <select
-                id="chk-assignee-select"
-                className="settings-form__input"
-                value={assigneeType}
-                onChange={(e) => setAssigneeType(e.target.value)}
-              >
-                {COMMON_ASSIGNEES.map((a) => (
-                  <option key={a.value} value={a.value}>
-                    {a.label} ({a.value})
-                  </option>
-                ))}
-              </select>
-            </div>
+          <Input
+            id="chk-offset-input"
+            label="Due Offset (Days Relative to Joining Date)"
+            helperText="0 = Due on joining day; -3 = 3 days before joining; 5 = 5 days after joining"
+            type="number"
+            min={-90}
+            max={365}
+            value={dueOffsetDays}
+            onChange={(e) => setDueOffsetDays(parseInt(e.target.value, 10) || 0)}
+          />
 
-            <div className="settings-form__row">
-              <label htmlFor="chk-offset-input" className="settings-form__label">
-                Due Offset (Days Relative to Joining Date)
-              </label>
-              <span className="settings-form__hint">
-                0 = Due on joining day; -3 = 3 days before joining; 5 = 5 days after joining
-              </span>
-              <input
-                id="chk-offset-input"
-                type="number"
-                min={-90}
-                max={365}
-                className="settings-form__input"
-                value={dueOffsetDays}
-                onChange={(e) => setDueOffsetDays(parseInt(e.target.value, 10) || 0)}
-              />
-            </div>
+          <Input
+            id="chk-desc-input"
+            label="Description / Action Instructions"
+            placeholder="e.g., Ship hardware to candidate address"
+            value={description}
+            maxLength={255}
+            onChange={(e) => setDescription(e.target.value)}
+          />
 
-            <div className="settings-form__row">
-              <label htmlFor="chk-desc-input" className="settings-form__label">
-                Description / Action Instructions
-              </label>
-              <input
-                id="chk-desc-input"
-                type="text"
-                className="settings-form__input"
-                placeholder="e.g., Ship hardware to candidate address"
-                value={description}
-                maxLength={255}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
+          <Input
+            id="chk-order-input"
+            label="Display Order"
+            type="number"
+            min={0}
+            value={displayOrder}
+            onChange={(e) => setDisplayOrder(parseInt(e.target.value, 10) || 0)}
+          />
 
-            <div className="settings-form__row">
-              <label htmlFor="chk-order-input" className="settings-form__label">
-                Display Order
-              </label>
-              <input
-                id="chk-order-input"
-                type="number"
-                min={0}
-                className="settings-form__input"
-                value={displayOrder}
-                onChange={(e) => setDisplayOrder(parseInt(e.target.value, 10) || 0)}
-              />
-            </div>
+          <Switch
+            id="chk-required-switch"
+            label="Mandatory Task (Must be completed before stage closure)"
+            checked={isRequired}
+            onChange={(e) => setIsRequired(e.target.checked)}
+          />
 
-            <label className="settings-form__row--toggle">
-              <div className="settings-form__toggle-info">
-                <span className="settings-form__label">Mandatory Task</span>
-                <span className="settings-form__hint">Must be completed before stage closure</span>
-              </div>
-              <input
-                type="checkbox"
-                checked={isRequired}
-                onChange={(e) => setIsRequired(e.target.checked)}
-              />
-            </label>
-
-            <label className="settings-form__row--toggle">
-              <div className="settings-form__toggle-info">
-                <span className="settings-form__label">Active Status</span>
-                <span className="settings-form__hint">Task template enabled for new cases</span>
-              </div>
-              <input
-                type="checkbox"
-                checked={isActive}
-                onChange={(e) => setIsActive(e.target.checked)}
-              />
-            </label>
-          </div>
-
-          <div className="settings-modal__footer">
-            <button
-              type="button"
-              className="stage-btn-secondary"
-              onClick={onClose}
-              disabled={submitting}
-            >
-              Cancel
-            </button>
-            <Button variant="primary" type="submit" disabled={submitting}>
-              {submitting ? 'Saving...' : isEditing ? 'Update Task' : 'Create Task'}
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
+          <Switch
+            id="chk-active-switch"
+            label="Active Status (Task template enabled for new cases)"
+            checked={isActive}
+            onChange={(e) => setIsActive(e.target.checked)}
+          />
+        </Stack>
+      </form>
+    </Modal>
   );
 }
+
+export default ChecklistModal;

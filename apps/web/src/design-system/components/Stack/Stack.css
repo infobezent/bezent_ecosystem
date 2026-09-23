@@ -1,0 +1,71 @@
+/*
+ * BEZENT Design System — Stack Component Styles
+ * Standard vertical flex layout with tokenized gap spacing.
+ */
+
+.bezent-stack {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.bezent-stack--gap-none {
+  gap: 0;
+}
+
+.bezent-stack--gap-xs {
+  gap: 4px;
+}
+
+.bezent-stack--gap-sm {
+  gap: 8px;
+}
+
+.bezent-stack--gap-md {
+  gap: 16px;
+}
+
+.bezent-stack--gap-lg {
+  gap: 24px;
+}
+
+.bezent-stack--gap-xl {
+  gap: 32px;
+}
+
+.bezent-stack--gap-2xl {
+  gap: 48px;
+}
+
+.bezent-stack--align-start {
+  align-items: flex-start;
+}
+
+.bezent-stack--align-center {
+  align-items: center;
+}
+
+.bezent-stack--align-end {
+  align-items: flex-end;
+}
+
+.bezent-stack--align-stretch {
+  align-items: stretch;
+}
+
+.bezent-stack--justify-start {
+  justify-content: flex-start;
+}
+
+.bezent-stack--justify-center {
+  justify-content: center;
+}
+
+.bezent-stack--justify-end {
+  justify-content: flex-end;
+}
+
+.bezent-stack--justify-between {
+  justify-content: space-between;
+}

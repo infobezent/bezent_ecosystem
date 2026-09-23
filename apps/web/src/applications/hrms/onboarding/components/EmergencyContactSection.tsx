@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { BezentIcon } from '../../../../design-system/icons';
-import './EmergencyContactSection.css';
 
 export function EmergencyContactSection() {
   // PRIMARY CONTACT STATE

@@ -1,6 +1,21 @@
 import { useState } from 'react';
-import { Button } from '../../../../design-system/components/Button';
+import {
+  Button,
+  Card,
+  Grid,
+  Select,
+  Switch,
+  Toolbar,
+  Stack,
+} from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
+
+const REFRESH_OPTIONS = [
+  { value: '1m', label: 'Every 1 minute' },
+  { value: '5m', label: 'Every 5 minutes' },
+  { value: '15m', label: 'Every 15 minutes' },
+  { value: 'manual', label: 'Manual Refresh Only' },
+];
 
 export function DashboardSettingsSection() {
   const [refreshInterval, setRefreshInterval] = useState('5m');
@@ -24,62 +39,66 @@ export function DashboardSettingsSection() {
   };
 
   return (
-    <div className="settings-section">
-      <div className="settings-section__header">
-        <div>
-          <h2 className="settings-section__title">Dashboard Settings</h2>
-          <p className="settings-section__subtitle">
-            Configure default widget visibility, refresh frequency, and overview layouts.
-          </p>
-        </div>
-        <Button variant="primary" type="button" onClick={handleSave}>
-          {saved ? '✓ Saved' : 'Save Dashboard Settings'}
-        </Button>
-      </div>
+    <Stack gap="lg">
+      <Toolbar
+        left={
+          <div>
+            <h2 className="bezent-card__title">Dashboard Settings</h2>
+            <p className="bezent-card__desc">
+              Configure default widget visibility, refresh frequency, and overview layouts.
+            </p>
+          </div>
+        }
+        right={
+          <Button variant="primary" type="button" onClick={handleSave}>
+            {saved ? '✓ Saved' : 'Save Dashboard Settings'}
+          </Button>
+        }
+      />
 
-      <div className="settings-card-grid">
-        <div className="settings-card">
-          <h3 className="settings-card__title">General Configuration</h3>
-          <div className="settings-field-group">
-            <label className="settings-label" htmlFor="refresh-interval">
-              Auto-Refresh Interval
-            </label>
-            <select
+      <Grid columns={2} gap="lg">
+        <Card padding="lg">
+          <Stack gap="md">
+            <h3 className="bezent-card__title">General Configuration</h3>
+            <Select
               id="refresh-interval"
-              className="settings-input"
+              label="Auto-Refresh Interval"
               value={refreshInterval}
+              options={REFRESH_OPTIONS}
               onChange={(e) => setRefreshInterval(e.target.value)}
-            >
-              <option value="1m">Every 1 minute</option>
-              <option value="5m">Every 5 minutes</option>
-              <option value="15m">Every 15 minutes</option>
-              <option value="manual">Manual Refresh Only</option>
-            </select>
-          </div>
-        </div>
+            />
+          </Stack>
+        </Card>
 
-        <div className="settings-card">
-          <h3 className="settings-card__title">Available Dashboard Widgets</h3>
-          <p className="settings-card__desc">
-            Enable or disable default widgets for authorized users.
-          </p>
-          <div className="settings-toggle-list">
-            {widgets.map((widget) => (
-              <label key={widget.id} className="settings-toggle-item">
-                <span className="settings-toggle-label">
-                  <BezentIcon name="dashboard" size={16} />
-                  {widget.name}
-                </span>
-                <input
-                  type="checkbox"
-                  checked={widget.enabled}
-                  onChange={() => toggleWidget(widget.id)}
-                />
-              </label>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+        <Card padding="lg">
+          <Stack gap="md">
+            <div>
+              <h3 className="bezent-card__title">Available Dashboard Widgets</h3>
+              <p className="bezent-card__desc">
+                Enable or disable default widgets for authorized users.
+              </p>
+            </div>
+            <Stack gap="sm">
+              {widgets.map((widget) => (
+                <Card key={widget.id} variant="flat" padding="sm">
+                  <div className="bezent-toolbar">
+                    <span className="bezent-switch-label">
+                      <BezentIcon name="dashboard" size={16} /> {widget.name}
+                    </span>
+                    <Switch
+                      checked={widget.enabled}
+                      onChange={() => toggleWidget(widget.id)}
+                      aria-label={`Enable ${widget.name}`}
+                    />
+                  </div>
+                </Card>
+              ))}
+            </Stack>
+          </Stack>
+        </Card>
+      </Grid>
+    </Stack>
   );
 }
+
+export default DashboardSettingsSection;

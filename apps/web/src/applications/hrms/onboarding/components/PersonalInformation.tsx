@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, type ChangeEvent } from 'react';
-import './PersonalInformation.css';
 import { useCustomFields } from '../../settings/context/CustomFieldsContext';
+
 import type {
   OnboardingCardConfig,
   OnboardingFieldConfig,

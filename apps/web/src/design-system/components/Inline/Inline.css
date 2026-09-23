@@ -1,0 +1,74 @@
+/*
+ * BEZENT Design System — Inline Component Styles
+ * Standard horizontal flex layout with tokenized gap spacing.
+ */
+
+.bezent-inline {
+  display: flex;
+  flex-direction: row;
+  box-sizing: border-box;
+}
+
+.bezent-inline--nowrap {
+  flex-wrap: nowrap;
+}
+
+.bezent-inline--wrap {
+  flex-wrap: wrap;
+}
+
+.bezent-inline--gap-none {
+  gap: 0;
+}
+
+.bezent-inline--gap-xs {
+  gap: 4px;
+}
+
+.bezent-inline--gap-sm {
+  gap: 8px;
+}
+
+.bezent-inline--gap-md {
+  gap: 16px;
+}
+
+.bezent-inline--gap-lg {
+  gap: 24px;
+}
+
+.bezent-inline--gap-xl {
+  gap: 32px;
+}
+
+.bezent-inline--align-start {
+  align-items: flex-start;
+}
+
+.bezent-inline--align-center {
+  align-items: center;
+}
+
+.bezent-inline--align-end {
+  align-items: flex-end;
+}
+
+.bezent-inline--align-baseline {
+  align-items: baseline;
+}
+
+.bezent-inline--justify-start {
+  justify-content: flex-start;
+}
+
+.bezent-inline--justify-center {
+  justify-content: center;
+}
+
+.bezent-inline--justify-end {
+  justify-content: flex-end;
+}
+
+.bezent-inline--justify-between {
+  justify-content: space-between;
+}

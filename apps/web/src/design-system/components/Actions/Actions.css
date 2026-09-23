@@ -1,0 +1,44 @@
+/*
+ * BEZENT Actions Primitive — Semantic Token System.
+ */
+
+.bezent-actions {
+  display: flex;
+  align-items: center;
+}
+
+.bezent-actions.is-wrapped {
+  flex-wrap: wrap;
+}
+
+.bezent-actions--align-start {
+  justify-content: flex-start;
+}
+
+.bezent-actions--align-center {
+  justify-content: center;
+}
+
+.bezent-actions--align-end {
+  justify-content: flex-end;
+}
+
+.bezent-actions--align-between {
+  justify-content: space-between;
+}
+
+.bezent-actions--gap-xs {
+  gap: var(--space-1, 4px);
+}
+
+.bezent-actions--gap-sm {
+  gap: var(--space-2, 8px);
+}
+
+.bezent-actions--gap-md {
+  gap: var(--space-3, 12px);
+}
+
+.bezent-actions--gap-lg {
+  gap: var(--space-4, 16px);
+}

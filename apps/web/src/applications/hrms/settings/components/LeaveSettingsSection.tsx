@@ -1,6 +1,21 @@
 import { useState } from 'react';
-import { Button } from '../../../../design-system/components/Button';
-import { BezentIcon } from '../../../../design-system/icons';
+import {
+  Button,
+  Card,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableHeaderCell,
+  TableCell,
+  Badge,
+  Switch,
+  Input,
+  Alert,
+  Toolbar,
+  Actions,
+  Stack,
+} from '../../../../design-system/components';
 import type { LeaveTypeConfig } from '../types/settingsCenter';
 
 const DEFAULT_LEAVE_TYPES: LeaveTypeConfig[] = [
@@ -96,97 +111,103 @@ export function LeaveSettingsSection() {
   };
 
   return (
-    <div className="settings-section">
-      <div className="settings-section__header">
-        <div>
-          <h2 className="settings-section__title">Leave Settings</h2>
-          <p className="settings-section__subtitle">
-            Configure leave types, paid/unpaid status, annual balances, eligibility criteria,
-            half-day options, and approval workflows.
-          </p>
-        </div>
-        <div className="settings-action-row">
-          <Button type="button" onClick={handleAddLeaveType}>
-            + Add Leave Type
-          </Button>
-          <Button type="button" onClick={handleSave}>
-            Save Leave Policies
-          </Button>
-        </div>
-      </div>
+    <Stack gap="lg">
+      <Toolbar
+        left={
+          <div>
+            <h2 className="bezent-card__title">Leave Settings</h2>
+            <p className="bezent-card__desc">
+              Configure leave types, paid/unpaid status, annual balances, eligibility criteria,
+              half-day options, and approval workflows.
+            </p>
+          </div>
+        }
+        right={
+          <Actions align="end" gap="sm">
+            <Button variant="secondary" type="button" onClick={handleAddLeaveType}>
+              + Add Leave Type
+            </Button>
+            <Button variant="primary" type="button" onClick={handleSave}>
+              Save Leave Policies
+            </Button>
+          </Actions>
+        }
+      />
 
-      {statusMsg && (
-        <div className="settings-alert settings-alert--success">
-          <BezentIcon name="checkMark" size={16} />
-          <span>{statusMsg}</span>
-        </div>
-      )}
+      {statusMsg && <Alert variant="success">{statusMsg}</Alert>}
 
-      <div className="settings-card">
-        <h3 className="settings-card__title">Configured Leave Types ({leaves.length})</h3>
-        <table className="settings-table">
-          <thead>
-            <tr>
-              <th>Leave Name</th>
-              <th>Paid / Unpaid</th>
-              <th>Annual Balance</th>
-              <th>Eligibility</th>
-              <th>Half-Day Allowed</th>
-              <th>Doc Required</th>
-              <th>Approval Settings</th>
-            </tr>
-          </thead>
-          <tbody>
-            {leaves.map((l) => (
-              <tr key={l.id}>
-                <td>
-                  <strong>{l.name}</strong>
-                </td>
-                <td>
-                  <button
-                    type="button"
-                    className={`settings-badge ${l.isPaid ? 'settings-badge--req' : 'settings-badge--muted'}`}
-                    onClick={() => handleTogglePaid(l.id)}
-                  >
-                    {l.isPaid ? 'Paid' : 'Unpaid'}
-                  </button>
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    className="settings-input settings-input--sm"
-                    value={l.annualBalance}
-                    onChange={(e) => {
-                      const val = Number(e.target.value);
-                      setLeaves((prev) =>
-                        prev.map((item) =>
-                          item.id === l.id ? { ...item, annualBalance: val } : item,
-                        ),
-                      );
-                    }}
-                  />
-                </td>
-                <td>{l.eligibility}</td>
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={l.halfDayAllowed}
-                    onChange={() => handleToggleHalfDay(l.id)}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={l.docRequired}
-                    onChange={() => handleToggleDocRequired(l.id)}
-                  />
-                </td>
-                <td>{l.approvalFlow}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+      <Card padding="lg">
+        <Stack gap="md">
+          <h3 className="bezent-card__title">Configured Leave Types ({leaves.length})</h3>
+
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableHeaderCell>Leave Name</TableHeaderCell>
+                <TableHeaderCell>Paid / Unpaid</TableHeaderCell>
+                <TableHeaderCell>Annual Balance</TableHeaderCell>
+                <TableHeaderCell>Eligibility</TableHeaderCell>
+                <TableHeaderCell>Half-Day Allowed</TableHeaderCell>
+                <TableHeaderCell>Doc Required</TableHeaderCell>
+                <TableHeaderCell>Approval Settings</TableHeaderCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {leaves.map((l) => (
+                <TableRow key={l.id}>
+                  <TableCell>
+                    <strong>{l.name}</strong>
+                  </TableCell>
+                  <TableCell>
+                    <button
+                      type="button"
+                      onClick={() => handleTogglePaid(l.id)}
+                      aria-label={`Toggle paid status for ${l.name}`}
+                    >
+                      <Badge variant={l.isPaid ? 'success' : 'neutral'}>
+                        {l.isPaid ? 'Paid' : 'Unpaid'}
+                      </Badge>
+                    </button>
+                  </TableCell>
+                  <TableCell>
+                    <Input
+                      size="sm"
+                      type="number"
+                      value={l.annualBalance}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        setLeaves((prev) =>
+                          prev.map((item) =>
+                            item.id === l.id ? { ...item, annualBalance: val } : item,
+                          ),
+                        );
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell>{l.eligibility}</TableCell>
+                  <TableCell>
+                    <Switch
+                      checked={l.halfDayAllowed}
+                      onChange={() => handleToggleHalfDay(l.id)}
+                      aria-label={`Half-day allowed for ${l.name}`}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Switch
+                      checked={l.docRequired}
+                      onChange={() => handleToggleDocRequired(l.id)}
+                      aria-label={`Document required for ${l.name}`}
+                    />
+                  </TableCell>
+                  <TableCell>{l.approvalFlow}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Stack>
+      </Card>
+    </Stack>
   );
 }
+
+export default LeaveSettingsSection;

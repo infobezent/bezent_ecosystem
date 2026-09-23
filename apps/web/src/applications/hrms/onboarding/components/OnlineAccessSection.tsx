@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { BezentIcon } from '../../../../design-system/icons';
-import './OnlineAccessSection.css';
 
 export interface ModulePermission {
   id: string;

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import './OnboardingSection.css';
 
 export interface OnboardingTaskItem {
   id: string;

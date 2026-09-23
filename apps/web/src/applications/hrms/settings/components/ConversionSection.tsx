@@ -1,6 +1,13 @@
 import { useState, useEffect, type FormEvent } from 'react';
-import { Button } from '../../../../design-system/components/Button';
-import { BezentIcon } from '../../../../design-system/icons';
+import {
+  Button,
+  Card,
+  Input,
+  Switch,
+  Alert,
+  Stack,
+  Actions,
+} from '../../../../design-system/components';
 import type {
   OnboardingConversionSettings,
   UpdateOnboardingConversionSettingsDto,
@@ -81,108 +88,72 @@ export function ConversionSection({ initialData, onSave, saving }: ConversionSec
   };
 
   return (
-    <div className="settings-card">
-      <div className="settings-card__header">
-        <h2 className="settings-card__title">Employee Conversion Rules</h2>
-        <p className="settings-card__subtitle">
-          Configure prerequisites and defaults when transitioning an onboarding candidate into an
-          active employee record.
-        </p>
-      </div>
-
-      {feedback && (
-        <div className={`settings-alert settings-alert--${feedback.type}`} role="alert">
-          <BezentIcon name={feedback.type === 'success' ? 'check' : 'warning'} size={16} />
-          <span>{feedback.message}</span>
-        </div>
-      )}
-
-      <form className="settings-form" onSubmit={handleSubmit}>
-        <label className="settings-form__row--toggle">
-          <div className="settings-form__toggle-info">
-            <span className="settings-form__label">Auto-Convert on Joining Date</span>
-            <span className="settings-form__hint">
-              Automatically promote candidates on their effective joining date if prerequisites are
-              met
-            </span>
-          </div>
-          <input
-            type="checkbox"
-            checked={autoConvertOnJoining}
-            onChange={(e) => setAutoConvertOnJoining(e.target.checked)}
-          />
-        </label>
-
-        <label className="settings-form__row--toggle">
-          <div className="settings-form__toggle-info">
-            <span className="settings-form__label">Mandate Document Verification</span>
-            <span className="settings-form__hint">
-              Require all mandatory documents to be verified before employee conversion is permitted
-            </span>
-          </div>
-          <input
-            type="checkbox"
-            checked={requireDocumentVerification}
-            onChange={(e) => setRequireDocumentVerification(e.target.checked)}
-          />
-        </label>
-
-        <label className="settings-form__row--toggle">
-          <div className="settings-form__toggle-info">
-            <span className="settings-form__label">Mandate Checklist Completion</span>
-            <span className="settings-form__hint">
-              Require all mandatory onboarding checklist items to be signed off before conversion
-            </span>
-          </div>
-          <input
-            type="checkbox"
-            checked={requireChecklistCompletion}
-            onChange={(e) => setRequireChecklistCompletion(e.target.checked)}
-          />
-        </label>
-
-        <div className="settings-form__row">
-          <label htmlFor="conv-prefix-input" className="settings-form__label">
-            Generated Employee ID Prefix
-          </label>
-          <span className="settings-form__hint">
-            Prefix for newly generated Employee IDs (e.g., EMP-, BZ-)
-          </span>
-          <input
-            id="conv-prefix-input"
-            type="text"
-            className="settings-form__input"
-            value={employeeIdPrefix}
-            maxLength={20}
-            required
-            onChange={(e) => setEmployeeIdPrefix(e.target.value)}
-          />
+    <Card padding="lg">
+      <Stack gap="lg">
+        <div>
+          <h2 className="bezent-card__title">Employee Conversion Rules</h2>
+          <p className="bezent-card__desc">
+            Configure prerequisites and defaults when transitioning an onboarding candidate into an
+            active employee record.
+          </p>
         </div>
 
-        <div className="settings-form__row">
-          <label htmlFor="conv-status-input" className="settings-form__label">
-            Initial Employment Status
-          </label>
-          <span className="settings-form__hint">
-            Initial status assigned upon conversion (e.g., probation, confirmed, contract)
-          </span>
-          <input
-            id="conv-status-input"
-            type="text"
-            className="settings-form__input"
-            value={defaultEmploymentStatus}
-            maxLength={50}
-            required
-            onChange={(e) => setDefaultEmploymentStatus(e.target.value)}
-          />
-        </div>
+        {feedback && (
+          <Alert variant={feedback.type === 'success' ? 'success' : 'danger'}>
+            {feedback.message}
+          </Alert>
+        )}
 
-        <div className="settings-card__actions">
-          <Button variant="primary" type="submit" disabled={saving}>
-            {saving ? 'Saving...' : 'Save Conversion Rules'}
-          </Button>
-        </div>
-      </form>
-    </div>
+        <form onSubmit={handleSubmit}>
+          <Stack gap="lg">
+            <Switch
+              label="Auto-Convert on Joining Date (Automatically promote candidates on their effective joining date if prerequisites are met)"
+              checked={autoConvertOnJoining}
+              onChange={(e) => setAutoConvertOnJoining(e.target.checked)}
+            />
+
+            <Switch
+              label="Mandate Document Verification (Require all mandatory documents to be verified before employee conversion is permitted)"
+              checked={requireDocumentVerification}
+              onChange={(e) => setRequireDocumentVerification(e.target.checked)}
+            />
+
+            <Switch
+              label="Mandate Checklist Completion (Require all mandatory onboarding checklist items to be signed off before conversion)"
+              checked={requireChecklistCompletion}
+              onChange={(e) => setRequireChecklistCompletion(e.target.checked)}
+            />
+
+            <Input
+              id="conv-prefix-input"
+              label="Generated Employee ID Prefix"
+              helperText="Prefix for newly generated Employee IDs (e.g., EMP-, BZ-)"
+              value={employeeIdPrefix}
+              maxLength={20}
+              required
+              onChange={(e) => setEmployeeIdPrefix(e.target.value)}
+            />
+
+            <Input
+              id="conv-status-input"
+              label="Initial Employment Status"
+              helperText="Initial status assigned upon conversion (e.g., probation, confirmed, contract)"
+              value={defaultEmploymentStatus}
+              maxLength={50}
+              required
+              onChange={(e) => setDefaultEmploymentStatus(e.target.value)}
+            />
+
+            <Actions align="start">
+              <Button variant="primary" type="submit" disabled={saving}>
+                {saving ? 'Saving...' : 'Save Conversion Rules'}
+              </Button>
+            </Actions>
+          </Stack>
+        </form>
+      </Stack>
+    </Card>
   );
 }
+
+export default ConversionSection;

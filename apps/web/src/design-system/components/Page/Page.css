@@ -1,0 +1,325 @@
+/*
+ * BEZENT Design System — Page Container Styles
+ * Standard workspace page canvas layout with tokenized spacing and responsive padding.
+ */
+
+.bezent-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 24px 32px;
+}
+
+.bezent-page--max-width-default {
+  max-width: 1400px;
+}
+
+.bezent-page--max-width-narrow {
+  max-width: 1024px;
+}
+
+.bezent-page--max-width-full {
+  max-width: 100%;
+}
+
+.bezent-page--gap-none {
+  gap: 0;
+}
+
+.bezent-page--gap-sm {
+  gap: 16px;
+}
+
+.bezent-page--gap-md {
+  gap: 20px;
+}
+
+.bezent-page--gap-lg {
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .bezent-page {
+    padding: 16px;
+    gap: 16px;
+  }
+}
+
+/* Fullscreen Workspace Overlay */
+.bezent-fullscreen-workspace {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal, 500);
+  background-color: var(--bg-surface-secondary, #f8fafc);
+  overflow-y: auto;
+  padding: 24px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 20px);
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .bezent-fullscreen-workspace {
+    padding: 16px;
+    gap: 16px;
+  }
+}
+
+/* Notification Toast */
+.bezent-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: calc(var(--z-modal, 500) + 10);
+  background-color: var(--status-success-bg, #ecfdf5);
+  color: var(--status-success-fg, #065f46);
+  border: 1px solid var(--status-success-border, #a7f3d0);
+  padding: 12px 20px;
+  border-radius: var(--radius-md, 8px);
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+}
+
+/* Multi-Step Wizard Tabs */
+.bezent-step-tabs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+  overflow-x: auto;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--border-default, #e2e8f0);
+}
+
+.bezent-step-tab {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+  background: none;
+  border: none;
+  padding: 10px 16px;
+  font-size: var(--font-size-sm, 13px);
+  font-weight: 500;
+  color: var(--text-secondary, #64748b);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.bezent-step-tab:hover {
+  color: var(--text-primary, #0f172a);
+}
+
+.bezent-step-tab.is-active,
+.bezent-step-tab--active {
+  color: var(--accent-interactive, #1a73e8);
+  border-bottom-color: var(--accent-interactive, #1a73e8);
+  font-weight: 600;
+}
+
+/* Breadcrumbs */
+.bezent-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+  font-size: 13px;
+  color: var(--text-muted, #64748b);
+  font-weight: 500;
+}
+
+.bezent-breadcrumb-item--active {
+  color: var(--text-primary, #0f172a);
+  font-weight: 600;
+}
+
+.bezent-breadcrumb-separator {
+  color: var(--text-muted, #94a3b8);
+}
+
+/* Company / Tenant Badge */
+.bezent-company-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background-color: var(--bg-hover, #c2e7ff);
+  color: var(--text-primary, #001d35);
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Confirmation Dialog Overlay & Card */
+.bezent-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-modal, 500) + 10);
+  background-color: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.bezent-confirm-card {
+  background-color: var(--bg-surface, #ffffff);
+  border-radius: var(--radius-lg, 12px);
+  width: 100%;
+  max-width: 440px;
+  padding: 24px;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bezent-confirm-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+}
+
+.bezent-confirm-desc {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary, #475569);
+  line-height: 1.5;
+}
+
+.bezent-confirm-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* Form Action Buttons */
+.bezent-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3, 12px);
+  padding-top: var(--space-4, 20px);
+  border-top: 1px solid var(--border-default, #e2e8f0);
+}
+
+.bezent-btn-back {
+  height: 40px;
+  padding: 0 18px;
+  background-color: var(--bg-surface, #ffffff);
+  color: var(--text-primary, #334155);
+  border: 1px solid var(--border-default, #cbd5e1);
+  border-radius: var(--radius-md, 8px);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.bezent-btn-back:hover:not(:disabled) {
+  background-color: var(--bg-surface-secondary, #f1f5f9);
+}
+
+.bezent-btn-back:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bezent-btn-draft {
+  height: 40px;
+  padding: 0 18px;
+  background-color: var(--color-primary-light, #eff6ff);
+  color: #1e40af;
+  border: 1px solid var(--color-primary-border, #bfdbfe);
+  border-radius: var(--radius-md, 8px);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 150ms ease;
+}
+
+.bezent-btn-draft:hover {
+  background-color: #dbeafe;
+}
+
+.bezent-btn-cancel {
+  height: 40px;
+  padding: 0 18px;
+  background-color: var(--bg-surface, #ffffff);
+  color: var(--text-primary, #334155);
+  border: 1px solid var(--border-default, #cbd5e1);
+  border-radius: var(--radius-md, 8px);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.bezent-btn-cancel:hover {
+  background-color: var(--bg-surface-secondary, #f8fafc);
+}
+
+.bezent-btn-leave {
+  height: 40px;
+  padding: 0 18px;
+  background-color: var(--bg-surface, #ffffff);
+  color: var(--status-danger-fg, #dc2626);
+  border: 1px solid #fca5a5;
+  border-radius: var(--radius-md, 8px);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.bezent-btn-leave:hover {
+  background-color: #fef2f2;
+}
+
+/* Stage Tag variants */
+.bezent-stage-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.bezent-stage-tag--preboarding {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.bezent-stage-tag--documents {
+  background-color: #e0e7ff;
+  color: #3730a3;
+}
+
+.bezent-stage-tag--induction {
+  background-color: #fce7f3;
+  color: #9d174d;
+}
+
+.bezent-stage-tag--completed {
+  background-color: #dcfce7;
+  color: #166534;
+}

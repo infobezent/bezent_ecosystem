@@ -1,11 +1,26 @@
 import { useState } from 'react';
+import {
+  Button,
+  Card,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableHeaderCell,
+  TableCell,
+  Badge,
+  Switch,
+  Input,
+  Alert,
+  Actions,
+  Stack,
+} from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import {
   PROTECTED_SYSTEM_FIELD_KEYS,
   type OnboardingFieldConfig,
   type UpdateOnboardingFieldConfigDto,
 } from '../types/settings';
-import './FieldsSection.css';
 
 interface FieldsSectionProps {
   fields: OnboardingFieldConfig[];
@@ -86,57 +101,46 @@ export function FieldsSection({ fields, onUpdateField }: FieldsSectionProps) {
   const sortedFields = [...fields].sort((a, b) => a.displayOrder - b.displayOrder);
 
   return (
-    <div className="settings-card">
-      <div className="settings-card__header">
-        <h2 className="settings-card__title">Onboarding Form Fields</h2>
-        <p className="settings-card__subtitle">
-          Configure field visibility, requirement rules, and custom labels. Protected fields are
-          mandated by core business logic.
-        </p>
-      </div>
-
-      {success && (
-        <div className="settings-alert settings-alert--success" role="alert">
-          <BezentIcon name="check" size={16} />
-          <span>{success}</span>
+    <Card padding="lg">
+      <Stack gap="lg">
+        <div>
+          <h2 className="bezent-card__title">Onboarding Form Fields</h2>
+          <p className="bezent-card__desc">
+            Configure field visibility, requirement rules, and custom labels. Protected fields are
+            mandated by core business logic.
+          </p>
         </div>
-      )}
 
-      {error && (
-        <div className="settings-alert settings-alert--error" role="alert">
-          <BezentIcon name="warning" size={16} />
-          <span>{error}</span>
-        </div>
-      )}
+        {success && <Alert variant="success">{success}</Alert>}
 
-      <div className="fields-table-container">
-        <table className="fields-table">
-          <thead>
-            <tr>
-              <th>Field Key</th>
-              <th>Display Label</th>
-              <th>Classification</th>
-              <th>Required</th>
-              <th>Enabled</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+        {error && <Alert variant="danger">{error}</Alert>}
+
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableHeaderCell>Field Key</TableHeaderCell>
+              <TableHeaderCell>Display Label</TableHeaderCell>
+              <TableHeaderCell>Classification</TableHeaderCell>
+              <TableHeaderCell>Required</TableHeaderCell>
+              <TableHeaderCell>Enabled</TableHeaderCell>
+              <TableHeaderCell>Actions</TableHeaderCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {sortedFields.map((f) => {
               const protectedField = isProtectedField(f.fieldKey);
               const isEditingThisLabel = editingLabelKey === f.fieldKey;
               const isWorking = updatingKey === f.fieldKey;
 
               return (
-                <tr key={f.id}>
-                  <td>
-                    <span className="fields-key">{f.fieldKey}</span>
-                  </td>
-                  <td>
+                <TableRow key={f.id}>
+                  <TableCell>
+                    <Badge variant="neutral">{f.fieldKey}</Badge>
+                  </TableCell>
+                  <TableCell>
                     {isEditingThisLabel ? (
-                      <input
-                        type="text"
-                        className="fields-edit-input"
+                      <Input
+                        size="sm"
                         value={tempLabel}
                         maxLength={100}
                         onChange={(e) => setTempLabel(e.target.value)}
@@ -148,78 +152,71 @@ export function FieldsSection({ fields, onUpdateField }: FieldsSectionProps) {
                     ) : (
                       <span>{f.label}</span>
                     )}
-                  </td>
-                  <td>
-                    <span
-                      className={`fields-badge ${
-                        protectedField ? 'fields-badge--system' : 'fields-badge--custom'
-                      }`}
-                    >
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={protectedField ? 'info' : 'neutral'} size="sm">
                       {protectedField ? 'System Protected' : 'Standard'}
-                    </span>
-                  </td>
-                  <td>
-                    <label className="settings-toggle-switch">
-                      <input
-                        type="checkbox"
-                        checked={f.isRequired}
-                        disabled={protectedField || isWorking}
-                        onChange={() => handleToggleRequired(f)}
-                        aria-label={`Mark ${f.label} as required`}
-                      />
-                      <span className="settings-toggle-slider" />
-                    </label>
-                  </td>
-                  <td>
-                    <label className="settings-toggle-switch">
-                      <input
-                        type="checkbox"
-                        checked={f.isEnabled}
-                        disabled={protectedField || isWorking}
-                        onChange={() => handleToggleEnabled(f)}
-                        aria-label={`Enable ${f.label}`}
-                      />
-                      <span className="settings-toggle-slider" />
-                    </label>
-                  </td>
-                  <td>
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Switch
+                      checked={f.isRequired}
+                      disabled={protectedField || isWorking}
+                      onChange={() => handleToggleRequired(f)}
+                      aria-label={`Mark ${f.label} as required`}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Switch
+                      checked={f.isEnabled}
+                      disabled={protectedField || isWorking}
+                      onChange={() => handleToggleEnabled(f)}
+                      aria-label={`Enable ${f.label}`}
+                    />
+                  </TableCell>
+                  <TableCell>
                     {isEditingThisLabel ? (
-                      <div className="stage-item__actions">
-                        <button
+                      <Actions align="start" gap="xs">
+                        <Button
                           type="button"
-                          className="stage-btn-secondary"
+                          variant="primary"
+                          size="sm"
                           onClick={() => saveLabel(f.fieldKey)}
                           disabled={isWorking}
                         >
                           Save
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
-                          className="stage-btn-secondary"
+                          variant="secondary"
+                          size="sm"
                           onClick={() => setEditingLabelKey(null)}
                           disabled={isWorking}
                         >
                           Cancel
-                        </button>
-                      </div>
+                        </Button>
+                      </Actions>
                     ) : (
-                      <button
+                      <Button
                         type="button"
-                        className="stage-btn-secondary"
+                        variant="secondary"
+                        size="sm"
                         onClick={() => startEditLabel(f)}
                         disabled={isWorking}
                       >
                         <BezentIcon name="edit" size={13} />
                         Rename
-                      </button>
+                      </Button>
                     )}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               );
             })}
-          </tbody>
-        </table>
-      </div>
-    </div>
+          </TableBody>
+        </Table>
+      </Stack>
+    </Card>
   );
 }
+
+export default FieldsSection;

@@ -1,0 +1,69 @@
+/*
+ * BEZENT Design System — PageHeader Component Styles
+ * Standardized page header primitive with title, eyebrow, subtitle, badge, and actions.
+ */
+
+.bezent-page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bezent-page-header__breadcrumbs {
+  font-size: 13px;
+  color: var(--text-muted, #747775);
+}
+
+.bezent-page-header__main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.bezent-page-header__title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bezent-page-header__eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary, #5f6368);
+}
+
+.bezent-page-header__title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.bezent-page-header__title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary, #1f1f1f);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.bezent-page-header__subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary, #444746);
+  line-height: 1.4;
+}
+
+.bezent-page-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}

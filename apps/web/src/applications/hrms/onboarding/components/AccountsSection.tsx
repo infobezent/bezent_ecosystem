@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
 import { BezentIcon } from '../../../../design-system/icons';
-import './AccountsSection.css';
 
 interface BankInfo {
   bankName: string;

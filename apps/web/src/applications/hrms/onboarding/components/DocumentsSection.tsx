@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { BezentIcon } from '../../../../design-system/icons';
-import './DocumentsSection.css';
 
 export interface DocumentItemState {
   id: string;
