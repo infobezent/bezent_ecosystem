@@ -96,3 +96,14 @@
   outline: 2px solid var(--border-focus);
   outline-offset: -2px;
 }
+
+/* ── Dark Mode Footer Accents ────────────────────────────────────────── */
+
+[data-theme='dark'] .bottom-bar__status-dot {
+  background: #38bdf8;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.75);
+}
+
+[data-theme='dark'] .bottom-bar__button:hover {
+  background: rgba(22, 131, 255, 0.14);
+}

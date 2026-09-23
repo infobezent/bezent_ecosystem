@@ -133,11 +133,7 @@ export function ChecklistsSection({
           <EmptyState
             title="No checklist tasks found for this stage."
             description="Add task templates to assign responsibilities automatically across onboarding stages."
-            action={
-              <Button variant="primary" type="button" onClick={openCreateModal}>
-                Add First Task
-              </Button>
-            }
+            primaryAction={{ label: 'Add First Task', onClick: openCreateModal }}
           />
         ) : (
           <Table>
