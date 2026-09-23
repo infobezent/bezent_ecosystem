@@ -1,10 +1,10 @@
-import sleepingRaccoonImg from '../../../assets/sleeping_blue_raccoon.jpg';
-import onboardingRaccoonImg from '../../../assets/raccoon_onboarding.jpg';
-import leaveRaccoonImg from '../../../assets/raccoon_leave.jpg';
-import attendanceRaccoonImg from '../../../assets/raccoon_attendance.jpg';
-import timesheetsRaccoonImg from '../../../assets/raccoon_timesheets.jpg';
-import performanceRaccoonImg from '../../../assets/raccoon_performance.jpg';
-import employeesRaccoonImg from '../../../assets/raccoon_employees.jpg';
+import sleepingRaccoonImg from '../../../assets/sleeping_blue_raccoon.png';
+import onboardingRaccoonImg from '../../../assets/raccoon_onboarding.png';
+import leaveRaccoonImg from '../../../assets/raccoon_leave.png';
+import attendanceRaccoonImg from '../../../assets/raccoon_attendance.png';
+import timesheetsRaccoonImg from '../../../assets/raccoon_timesheets.png';
+import performanceRaccoonImg from '../../../assets/raccoon_performance.png';
+import employeesRaccoonImg from '../../../assets/raccoon_employees.png';
 import { BezentIcon } from '../../icons';
 import './EmptyStateIllustration.css';
 

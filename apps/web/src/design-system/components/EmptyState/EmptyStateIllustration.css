@@ -40,11 +40,11 @@
   height: auto;
   display: block;
   object-fit: contain;
-  border-radius: 8px;
   transform-origin: bottom center;
   transform: scale(var(--raccoon-scale, 1));
   animation: bezentRaccoonBreathe 3.8s ease-in-out infinite;
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.06));
 }
 
 .bezent-empty-illustration-container--compact .bezent-sleeping-raccoon-img {
@@ -351,8 +351,9 @@
 [data-theme='dark'] .bezent-sleeping-raccoon-img {
   position: relative;
   z-index: 1;
-  box-shadow: 0 4px 20px rgba(2, 11, 28, 0.6);
-  border: 1px solid rgba(56, 189, 248, 0.12);
+  border: none;
+  box-shadow: none;
+  filter: drop-shadow(0 8px 24px rgba(2, 11, 28, 0.75));
 }
 
 [data-theme='dark'] .bezent-stage-accent-badge {
