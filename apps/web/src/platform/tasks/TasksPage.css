@@ -450,35 +450,3 @@
   margin-bottom: 4px;
 }
 
-/* ── Dark Mode ───────────────────────────────────────────────────────── */
-
-[data-theme='dark'] .tasks-page {
-  background: var(--bg-surface, #0f0318);
-  color: #ffffff;
-}
-
-[data-theme='dark'] .tasks-page__header,
-[data-theme='dark'] .tasks-page__sidebar {
-  background: #160a22;
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-[data-theme='dark'] .tasks-page__create-btn {
-  background: #28143d;
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-}
-
-[data-theme='dark'] .tasks-page__nav-item.is-active {
-  background: #3b0b62;
-  color: #ffffff;
-}
-
-[data-theme='dark'] .tasks-item {
-  background: #1c0f2b;
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-[data-theme='dark'] .tasks-item:hover {
-  background: #25133a;
-}

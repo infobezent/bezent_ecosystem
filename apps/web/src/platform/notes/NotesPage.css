@@ -492,27 +492,3 @@
   max-width: 320px;
 }
 
-/* ── Dark Mode ───────────────────────────────────────────────────────── */
-
-[data-theme='dark'] .notes-page {
-  background: var(--bg-surface, #0f0318);
-  color: #ffffff;
-}
-
-[data-theme='dark'] .notes-page__header,
-[data-theme='dark'] .notes-page__sidebar {
-  background: #160a22;
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-[data-theme='dark'] .notes-page__nav-item.is-active {
-  background: #3b0b62;
-  color: #ffffff;
-}
-
-[data-theme='dark'] .notes-take-box__collapsed,
-[data-theme='dark'] .notes-take-box__expanded,
-[data-theme='dark'] .note-card {
-  background: #1c0f2b;
-  border-color: rgba(255, 255, 255, 0.08);
-}

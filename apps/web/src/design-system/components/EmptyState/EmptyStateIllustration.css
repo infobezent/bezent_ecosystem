@@ -263,12 +263,6 @@
   }
 }
 
-/* ── Dark Mode ── */
-.bezent-empty-illustration-container.is-dark .bezent-sparkle-svg,
-[data-theme='dark'] .bezent-empty-illustration-container .bezent-sparkle-svg {
-  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));
-}
-
 /* ── Contextual Theme Accent Badge ── */
 .bezent-stage-accent-badge {
   position: absolute;
@@ -296,13 +290,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-}
-
-[data-theme='dark'] .bezent-stage-accent-badge {
-  background: rgba(30, 41, 59, 0.92);
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
-  color: #f1f5f9;
 }
 
 @keyframes bezentAccentFloat {

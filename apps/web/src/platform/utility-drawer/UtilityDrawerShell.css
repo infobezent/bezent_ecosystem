@@ -220,42 +220,6 @@
   }
 }
 
-/* Dark mode theme support for spreads */
-[data-theme='dark'] .utility-drawer__spread--calendar {
-  background: radial-gradient(
-    circle at 100% 100%,
-    rgba(37, 99, 235, 0.28) 0%,
-    rgba(30, 58, 138, 0.14) 50%,
-    transparent 85%
-  );
-}
-
-[data-theme='dark'] .utility-drawer__spread--notes {
-  background: radial-gradient(
-    circle at 100% 100%,
-    rgba(245, 158, 11, 0.28) 0%,
-    rgba(217, 119, 6, 0.14) 50%,
-    transparent 85%
-  );
-}
-
-[data-theme='dark'] .utility-drawer__spread--tasks {
-  background: radial-gradient(
-    circle at 100% 100%,
-    rgba(16, 185, 129, 0.28) 0%,
-    rgba(4, 120, 87, 0.14) 50%,
-    transparent 85%
-  );
-}
-
-[data-theme='dark'] .utility-drawer__spread--approvals {
-  background: radial-gradient(
-    circle at 100% 100%,
-    rgba(139, 92, 246, 0.35) 0%,
-    rgba(109, 40, 217, 0.18) 40%,
-    transparent 85%
-  );
-}
 
 /* Floating capability icon above the expanding disc. */
 .utility-drawer__loader-icon,

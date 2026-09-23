@@ -66,16 +66,6 @@
   outline-offset: 2px;
 }
 
-[data-theme='dark'] .right-rail__ai-btn {
-  background: linear-gradient(135deg, #0b325b 0%, #004a77 100%);
-  color: #d3e3fd;
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-}
-
-[data-theme='dark'] .right-rail__ai-btn:hover {
-  background: linear-gradient(135deg, #0f4072 0%, #005a91 100%);
-}
 
 .right-rail__badge {
   position: absolute;
