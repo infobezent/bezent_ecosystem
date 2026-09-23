@@ -20,6 +20,7 @@ import { useTheme } from '../providers/ThemeProvider';
 import { toShellLauncher, toShellNavItems } from './shellNavigation';
 import { DEV_SEARCH_PROVIDER } from './devSearchFixtures';
 import { useDevUtilityData } from './devUtilityFixtures';
+import { CustomFieldsProvider } from '../../applications/hrms/settings/context/CustomFieldsContext';
 
 /** Rail buttons come from the one capability registry — never listed by hand. */
 const RAIL_CAPABILITIES = UTILITY_CAPABILITIES.filter((c) => c.placement === 'rail');
@@ -133,79 +134,82 @@ export function ShellLayout() {
   }
 
   return (
-    <AppShell
-      topNavSearch={
-        <GlobalSearch
-          provider={DEV_SEARCH_PROVIDER}
-          contextKey={active?.destinationId}
-          contextLabel={activeDestination?.label}
-        />
-      }
-      navItems={navItems}
-      activeNavId={active?.destinationId}
-      onNavSelect={(id) => {
-        const destination = application?.navigation.destinations.find((d) => d.id === id);
-        if (application && destination) {
-          navigate(destinationPath(application.basePath, destination));
-        }
-      }}
-      activeSubId={active?.childId}
-      onSubSelect={(itemId, subId) => {
-        const destination = application?.navigation.destinations.find((d) => d.id === itemId);
-        if (application && destination) {
-          navigate(destinationPath(application.basePath, destination, subId));
-        }
-      }}
-      launcher={application ? toShellLauncher(application, active, navigate) : undefined}
-      userInitials="SD"
-      userName="Sabin Davis"
-      userEmail="sabin.d@bezent.com"
-      userRole="Administrator • HRMS"
-      onMyProfile={() => {
-        if (application) {
-          navigate(`${application.basePath}/employees`);
-        }
-      }}
-      onAccountSettings={() => {
-        if (application) {
-          navigate(`${application.basePath}/settings`);
-        }
-      }}
-      notificationCount={data.notifications.filter((n) => !n.read).length}
-      notificationsOpen={utility.activeId === 'notifications'}
-      onNotificationsToggle={() => utility.toggle('notifications')}
-      notificationsPanel={
-        utility.activeId === 'notifications' ? (
-          <NotificationsPanel
-            notifications={data.notifications}
-            onClose={utility.close}
-            onMarkRead={data.markNotificationRead}
-            onMarkAllRead={data.markAllNotificationsRead}
+    <CustomFieldsProvider>
+      <AppShell
+        topNavSearch={
+          <GlobalSearch
+            provider={DEV_SEARCH_PROVIDER}
+            contextKey={active?.destinationId}
+            contextLabel={activeDestination?.label}
           />
-        ) : undefined
-      }
-      isDarkTheme={resolvedTheme === 'dark'}
-      onToggleTheme={toggleTheme}
-      railItems={railItems}
-      activeRailItemId={drawerCapability?.id}
-      onRailItemSelect={(id) => {
-        const capability = RAIL_CAPABILITIES.find((c) => c.id === id);
-        if (capability) utility.toggle(capability.id);
-      }}
-      utilityDrawer={
-        drawerCapability ? (
-          <UtilityDrawerShell
-            key={drawerCapability.id}
-            title={drawerCapability.title}
-            icon={drawerCapability.icon}
-            onClose={utility.close}
-          >
-            {renderDrawer(drawerCapability.id)}
-          </UtilityDrawerShell>
-        ) : undefined
-      }
-    >
-      <Outlet context={data} />
-    </AppShell>
+        }
+        navItems={navItems}
+        activeNavId={active?.destinationId}
+        onNavSelect={(id) => {
+          const destination = application?.navigation.destinations.find((d) => d.id === id);
+          if (application && destination) {
+            navigate(destinationPath(application.basePath, destination));
+          }
+        }}
+        activeSubId={active?.childId}
+        onSubSelect={(itemId, subId) => {
+          const destination = application?.navigation.destinations.find((d) => d.id === itemId);
+          if (application && destination) {
+            navigate(destinationPath(application.basePath, destination, subId));
+          }
+        }}
+        launcher={application ? toShellLauncher(application, active, navigate) : undefined}
+        userInitials="SD"
+        userName="Sabin Davis"
+        userEmail="sabin.d@bezent.com"
+        userRole="Administrator • HRMS"
+        onMyProfile={() => {
+          if (application) {
+            navigate(`${application.basePath}/employees`);
+          }
+        }}
+        onAccountSettings={() => {
+          if (application) {
+            navigate(`${application.basePath}/settings`);
+          }
+        }}
+        onSettingsClick={() => navigate('/hrms/settings')}
+        notificationCount={data.notifications.filter((n) => !n.read).length}
+        notificationsOpen={utility.activeId === 'notifications'}
+        onNotificationsToggle={() => utility.toggle('notifications')}
+        notificationsPanel={
+          utility.activeId === 'notifications' ? (
+            <NotificationsPanel
+              notifications={data.notifications}
+              onClose={utility.close}
+              onMarkRead={data.markNotificationRead}
+              onMarkAllRead={data.markAllNotificationsRead}
+            />
+          ) : undefined
+        }
+        isDarkTheme={resolvedTheme === 'dark'}
+        onToggleTheme={toggleTheme}
+        railItems={railItems}
+        activeRailItemId={drawerCapability?.id}
+        onRailItemSelect={(id) => {
+          const capability = RAIL_CAPABILITIES.find((c) => c.id === id);
+          if (capability) utility.toggle(capability.id);
+        }}
+        utilityDrawer={
+          drawerCapability ? (
+            <UtilityDrawerShell
+              key={drawerCapability.id}
+              title={drawerCapability.title}
+              icon={drawerCapability.icon}
+              onClose={utility.close}
+            >
+              {renderDrawer(drawerCapability.id)}
+            </UtilityDrawerShell>
+          ) : undefined
+        }
+      >
+        <Outlet context={data} />
+      </AppShell>
+    </CustomFieldsProvider>
   );
 }

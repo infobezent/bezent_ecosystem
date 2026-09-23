@@ -43,6 +43,7 @@ export interface AppShellProps {
   notificationsPanel?: ReactNode;
   notificationsOpen?: boolean;
   onNotificationsToggle?: () => void;
+  onSettingsClick?: () => void;
   /** Main workspace content (the router outlet). */
   children: ReactNode;
 }
@@ -84,6 +85,7 @@ export function AppShell({
   notificationsPanel,
   notificationsOpen,
   onNotificationsToggle,
+  onSettingsClick,
   children,
 }: AppShellProps) {
   const [railOpen, setRailOpen] = useState(true);
@@ -120,6 +122,7 @@ export function AppShell({
         notificationsPanel={notificationsPanel}
         notificationsOpen={notificationsOpen}
         onNotificationsToggle={onNotificationsToggle}
+        onSettingsClick={onSettingsClick}
       />
       <LeftSidebar
         items={navItems}

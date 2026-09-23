@@ -1,5 +1,10 @@
 import { useState, useEffect, useRef, type ChangeEvent } from 'react';
 import './PersonalInformation.css';
+import { useCustomFields } from '../../settings/context/CustomFieldsContext';
+import type {
+  OnboardingCardConfig,
+  OnboardingFieldConfig,
+} from '../../settings/types/settingsCenter';
 
 // Comprehensive Head/GPO PIN Code & State map for major Indian cities
 // Comprehensive Head/GPO PIN Code & State map for major Indian cities
@@ -524,6 +529,47 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
 
   const updateNominee = (id: string, field: keyof NomineeRecord, value: string | number) => {
     setNominees(nominees.map((n) => (n.id === id ? { ...n, [field]: value } : n)));
+  };
+
+  let customCards: OnboardingCardConfig[] = [];
+  let customFields: OnboardingFieldConfig[] = [];
+  try {
+    const ctx = useCustomFields();
+    customCards = ctx.cards.filter((c) => c.sectionId === 'personal');
+    customFields = ctx.fields.filter((f) => f.sectionId === 'personal');
+  } catch {
+    // fallback if context is not present
+  }
+
+  const renderCustomFieldsForCard = (cardId: string) => {
+    const fieldsInCard = customFields.filter((f) => f.cardId === cardId && f.isCustom);
+    return fieldsInCard.map((f) => (
+      <div key={f.id} className="employee-registration__field">
+        <label className="employee-registration__label">
+          {f.label} {f.required && <span className="employee-registration__required">*</span>}
+        </label>
+        {f.fieldType === 'select' ? (
+          <div className="employee-registration__select-wrapper">
+            <select className="employee-registration__select" disabled={f.readOnly}>
+              <option value="">Select {f.label}</option>
+              {f.options?.map((opt, idx) => (
+                <option key={idx} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+            <span className="employee-registration__select-icon">▼</span>
+          </div>
+        ) : (
+          <input
+            type={f.fieldType === 'date' ? 'date' : f.fieldType === 'number' ? 'number' : 'text'}
+            className="employee-registration__input"
+            placeholder={f.defaultValue || `Enter ${f.label}`}
+            disabled={f.readOnly}
+          />
+        )}
+      </div>
+    ));
   };
 
   return (
@@ -1320,8 +1366,58 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
               <span className="employee-registration__select-icon">▼</span>
             </div>
           </div>
+          {/* Custom Fields in Address Details */}
+          {renderCustomFieldsForCard('c_pers_address')}
         </div>
       </div>
+
+      {/* Render Newly Created Custom Cards */}
+      {customCards
+        .filter((c) => c.isCustom)
+        .map((card) => {
+          const cardFields = customFields.filter((f) => f.cardId === card.id);
+          return (
+            <div key={card.id} className="personal-info__group">
+              <h3 className="personal-info__group-title">{card.title}</h3>
+              <div className="employee-registration__form-grid">
+                {cardFields.map((f) => (
+                  <div key={f.id} className="employee-registration__field">
+                    <label className="employee-registration__label">
+                      {f.label}{' '}
+                      {f.required && <span className="employee-registration__required">*</span>}
+                    </label>
+                    {f.fieldType === 'select' ? (
+                      <div className="employee-registration__select-wrapper">
+                        <select className="employee-registration__select" disabled={f.readOnly}>
+                          <option value="">Select {f.label}</option>
+                          {f.options?.map((opt, idx) => (
+                            <option key={idx} value={opt}>
+                              {opt}
+                            </option>
+                          ))}
+                        </select>
+                        <span className="employee-registration__select-icon">▼</span>
+                      </div>
+                    ) : (
+                      <input
+                        type={
+                          f.fieldType === 'date'
+                            ? 'date'
+                            : f.fieldType === 'number'
+                              ? 'number'
+                              : 'text'
+                        }
+                        className="employee-registration__input"
+                        placeholder={f.defaultValue || `Enter ${f.label}`}
+                        disabled={f.readOnly}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
     </div>
   );
 }

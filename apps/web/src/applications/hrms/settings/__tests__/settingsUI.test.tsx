@@ -2,156 +2,39 @@ import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { ReactElement } from 'react';
 import { SettingsPage } from '../pages/SettingsPage';
-import { GeneralSettingsSection } from '../components/GeneralSettingsSection';
-import { StagesSection } from '../components/StagesSection';
-import { FieldsSection } from '../components/FieldsSection';
-import { DocumentsSection } from '../components/DocumentsSection';
-import { DocumentModal } from '../components/DocumentModal';
-import { ChecklistsSection } from '../components/ChecklistsSection';
-import { ChecklistModal } from '../components/ChecklistModal';
-import { ConversionSection } from '../components/ConversionSection';
+import { DashboardSettingsSection } from '../components/DashboardSettingsSection';
+import { OnboardingBuilderSection } from '../components/OnboardingBuilderSection';
+import { LeaveSettingsSection } from '../components/LeaveSettingsSection';
+import { AttendanceSettingsSection } from '../components/AttendanceSettingsSection';
+import { TimesheetsSettingsSection } from '../components/TimesheetsSettingsSection';
+import { PerformanceSettingsSection } from '../components/PerformanceSettingsSection';
+import { EmployeesSettingsSection } from '../components/EmployeesSettingsSection';
+import { HRSettingsSection } from '../components/HRSettingsSection';
+import { CustomFieldsProvider } from '../context/CustomFieldsContext';
 import { hrmsRoutes } from '../../routes/hrmsRoutes';
-import type {
-  OnboardingGeneralSettings,
-  OnboardingStageConfig,
-  OnboardingFieldConfig,
-  OnboardingDocumentRequirement,
-  OnboardingChecklistTemplate,
-  OnboardingConversionSettings,
-} from '../types/settings';
 
-const mockGeneral: OnboardingGeneralSettings = {
-  id: 'gen_01',
-  tenantId: 'tenant_demo_01',
-  companyId: 'comp_demo_01',
-  onboardingEnabled: true,
-  defaultDurationDays: 45,
-  idPrefix: 'NH-',
-  defaultLocationId: 'loc_chn_01',
-  createdAt: '2026-09-01T00:00:00Z',
-  updatedAt: '2026-09-01T00:00:00Z',
-};
-
-const mockStages: OnboardingStageConfig[] = [
-  {
-    id: 'stg_1',
-    tenantId: 'tenant_demo_01',
-    companyId: 'comp_demo_01',
-    stageKey: 'preboarding',
-    name: 'Pre-boarding',
-    description: 'Initial checks before day 1',
-    displayOrder: 1,
-    isRequired: true,
-    isActive: true,
-    isSystem: true,
-    createdAt: '2026-09-01T00:00:00Z',
-    updatedAt: '2026-09-01T00:00:00Z',
-  },
-  {
-    id: 'stg_4',
-    tenantId: 'tenant_demo_01',
-    companyId: 'comp_demo_01',
-    stageKey: 'completed',
-    name: 'Completed',
-    description: 'Onboarding finalized',
-    displayOrder: 4,
-    isRequired: true,
-    isActive: true,
-    isSystem: true,
-    createdAt: '2026-09-01T00:00:00Z',
-    updatedAt: '2026-09-01T00:00:00Z',
-  },
-];
-
-const mockFields: OnboardingFieldConfig[] = [
-  {
-    id: 'fld_1',
-    tenantId: 'tenant_demo_01',
-    companyId: 'comp_demo_01',
-    fieldKey: 'firstName',
-    label: 'First Name',
-    isRequired: true,
-    isEnabled: true,
-    displayOrder: 1,
-    isSystem: true,
-    createdAt: '2026-09-01T00:00:00Z',
-    updatedAt: '2026-09-01T00:00:00Z',
-  },
-  {
-    id: 'fld_2',
-    tenantId: 'tenant_demo_01',
-    companyId: 'comp_demo_01',
-    fieldKey: 'phone',
-    label: 'Phone Number',
-    isRequired: false,
-    isEnabled: true,
-    displayOrder: 2,
-    isSystem: false,
-    createdAt: '2026-09-01T00:00:00Z',
-    updatedAt: '2026-09-01T00:00:00Z',
-  },
-];
-
-const mockDocs: OnboardingDocumentRequirement[] = [
-  {
-    id: 'doc_1',
-    tenantId: 'tenant_demo_01',
-    companyId: 'comp_demo_01',
-    documentType: 'national_id',
-    name: 'National ID Card',
-    description: 'Government issued photo identity',
-    isRequired: true,
-    verificationRequired: true,
-    expiryTracking: false,
-    displayOrder: 1,
-    isActive: true,
-    createdAt: '2026-09-01T00:00:00Z',
-    updatedAt: '2026-09-01T00:00:00Z',
-  },
-];
-
-const mockChecklists: OnboardingChecklistTemplate[] = [
-  {
-    id: 'chk_1',
-    tenantId: 'tenant_demo_01',
-    companyId: 'comp_demo_01',
-    name: 'Send Welcome Email',
-    description: 'Welcome email with login credentials',
-    stageKey: 'preboarding',
-    assigneeType: 'hr',
-    dueOffsetDays: -2,
-    isRequired: true,
-    displayOrder: 1,
-    isActive: true,
-    createdAt: '2026-09-01T00:00:00Z',
-    updatedAt: '2026-09-01T00:00:00Z',
-  },
-];
-
-const mockConversion: OnboardingConversionSettings = {
-  id: 'conv_01',
-  tenantId: 'tenant_demo_01',
-  companyId: 'comp_demo_01',
-  autoConvertOnJoining: false,
-  requireDocumentVerification: true,
-  requireChecklistCompletion: true,
-  employeeIdPrefix: 'EMP-',
-  defaultEmploymentStatus: 'probation',
-  createdAt: '2026-09-01T00:00:00Z',
-  updatedAt: '2026-09-01T00:00:00Z',
-};
-
-describe('HRMS Settings UI Components', () => {
-  it('SettingsPage renders header, subtitle, and all 6 navigation tabs', () => {
+describe('BEZENT Common Portal Settings Center UI', () => {
+  it('SettingsPage renders common portal header and clean content without duplicate top sub-nav', () => {
     const html = renderToStaticMarkup(<SettingsPage />);
 
+    expect(html).toContain('Settings');
+    expect(html).toContain('Configure and manage settings across the BEZENT portal.');
+    expect(html).not.toContain('settings-page__domain-nav');
+  });
+
+  it('SettingsPage Overview view displays Administration module card', () => {
+    const html = renderToStaticMarkup(<SettingsPage />);
+
+    expect(html).toContain('Administration');
+    expect(html).toContain(
+      'Customize employee registration sections, fields, options, and requirements.',
+    );
+    expect(html).toContain('Leave');
+    expect(html).toContain('Attendance');
+    expect(html).toContain('Timesheets');
+    expect(html).toContain('Performance');
+    expect(html).toContain('Employees');
     expect(html).toContain('HR Settings');
-    expect(html).toContain('General');
-    expect(html).toContain('Stages');
-    expect(html).toContain('Fields');
-    expect(html).toContain('Documents');
-    expect(html).toContain('Checklists');
-    expect(html).toContain('Employee Conversion');
   });
 
   it('hrmsRoutes routes /hrms/settings to real SettingsPage', () => {
@@ -162,154 +45,81 @@ describe('HRMS Settings UI Components', () => {
     expect(settingsRoute?.element).toBeDefined();
 
     const html = renderToStaticMarkup(settingsRoute!.element as ReactElement);
-    expect(html).toContain('HR Settings');
+    expect(html).toContain('Settings');
+    expect(html).toContain('Configure and manage settings across the BEZENT portal.');
+  });
+
+  it('DashboardSettingsSection renders auto-refresh choices and widget toggles', () => {
+    const html = renderToStaticMarkup(<DashboardSettingsSection />);
+
+    expect(html).toContain('Dashboard Settings');
+    expect(html).toContain('Auto-Refresh Interval');
+    expect(html).toContain('Workforce Overview');
+    expect(html).toContain('Attendance Today');
+  });
+
+  it('Administration Customization Builder renders section management without Publish button', () => {
+    const html = renderToStaticMarkup(
+      <CustomFieldsProvider>
+        <OnboardingBuilderSection />
+      </CustomFieldsProvider>,
+    );
+
+    expect(html).toContain('Administration Customization Builder');
+    expect(html).toContain('Preview Form');
+    expect(html).not.toContain('Publish Customization');
     expect(html).toContain('General');
+    expect(html).toContain('Personal Information');
+    expect(html).toContain('Administration');
   });
 
-  it('hrmsRoutes routes /hrms/onboarding/workflow-settings to SettingsPage', () => {
-    const basePathRoute = hrmsRoutes[0];
-    const workflowSettingsRoute = basePathRoute?.children?.find(
-      (r) => r.path === 'onboarding/workflow-settings',
-    );
+  it('LeaveSettingsSection renders leave types table', () => {
+    const html = renderToStaticMarkup(<LeaveSettingsSection />);
 
-    expect(workflowSettingsRoute).toBeDefined();
-    expect(workflowSettingsRoute?.element).toBeDefined();
-
-    const html = renderToStaticMarkup(workflowSettingsRoute!.element as ReactElement);
-    expect(html).toContain('HR Settings');
+    expect(html).toContain('Leave Settings');
+    expect(html).toContain('Annual Leave');
+    expect(html).toContain('Sick Leave');
+    expect(html).toContain('+ Add Leave Type');
   });
 
-  it('GeneralSettingsSection renders form controls and current values', () => {
-    const html = renderToStaticMarkup(
-      <GeneralSettingsSection initialData={mockGeneral} onSave={async () => {}} saving={false} />,
-    );
+  it('AttendanceSettingsSection renders check-in rules and attendance modes', () => {
+    const html = renderToStaticMarkup(<AttendanceSettingsSection />);
 
-    expect(html).toContain('General Onboarding Settings');
-    expect(html).toContain('Enable Onboarding Module');
-    expect(html).toContain('NH-');
-    expect(html).toContain('45');
-    expect(html).toContain('loc_chn_01');
-    expect(html).toContain('Save General Settings');
+    expect(html).toContain('Attendance Settings');
+    expect(html).toContain('Grace Period for Late Arrival');
+    expect(html).toContain('On-site Office Check-in');
   });
 
-  it('StagesSection renders stages in order and marks completed stage as protected', () => {
-    const html = renderToStaticMarkup(
-      <StagesSection stages={mockStages} onUpdateStage={async () => {}} />,
-    );
+  it('TimesheetsSettingsSection renders entry rules and time categories', () => {
+    const html = renderToStaticMarkup(<TimesheetsSettingsSection />);
 
-    expect(html).toContain('Onboarding Pipeline Stages');
-    expect(html).toContain('Pre-boarding');
-    expect(html).toContain('Completed');
-    expect(html).toContain('Protected System');
+    expect(html).toContain('Timesheets Settings');
+    expect(html).toContain('Require Project Selection');
+    expect(html).toContain('Software Development');
   });
 
-  it('FieldsSection indicates system protected fields with locked toggles', () => {
-    const html = renderToStaticMarkup(
-      <FieldsSection fields={mockFields} onUpdateField={async () => {}} />,
-    );
+  it('PerformanceSettingsSection renders rating scale choices and competencies', () => {
+    const html = renderToStaticMarkup(<PerformanceSettingsSection />);
 
-    expect(html).toContain('Onboarding Form Fields');
-    expect(html).toContain('First Name');
-    expect(html).toContain('Phone Number');
-    expect(html).toContain('System Protected');
-    expect(html).toContain('Standard');
+    expect(html).toContain('Performance Settings');
+    expect(html).toContain('Default Rating Scale');
+    expect(html).toContain('Leadership &amp; Ownership');
   });
 
-  it('DocumentsSection renders document requirement items and action buttons', () => {
-    const html = renderToStaticMarkup(
-      <DocumentsSection
-        documents={mockDocs}
-        onCreateDocument={async () => {}}
-        onUpdateDocument={async () => {}}
-        onDeleteDocument={async () => {}}
-      />,
-    );
+  it('EmployeesSettingsSection renders departments and employment types', () => {
+    const html = renderToStaticMarkup(<EmployeesSettingsSection />);
 
-    expect(html).toContain('Document Requirements');
-    expect(html).toContain('National ID Card');
-    expect(html).toContain('Mandatory');
-    expect(html).toContain('Add Requirement');
+    expect(html).toContain('Employees Settings');
+    expect(html).toContain('Engineering');
+    expect(html).toContain('Full-Time Permanent');
   });
 
-  it('DocumentModal renders nothing when isOpen is false', () => {
-    const html = renderToStaticMarkup(
-      <DocumentModal
-        isOpen={false}
-        onClose={() => {}}
-        document={null}
-        onSubmitCreate={async () => {}}
-        onSubmitUpdate={async () => {}}
-      />,
-    );
+  it('HRSettingsSection renders employee change requests and company policies', () => {
+    const html = renderToStaticMarkup(<HRSettingsSection />);
 
-    expect(html).toBe('');
-  });
-
-  it('DocumentModal renders complete input structure when open', () => {
-    const html = renderToStaticMarkup(
-      <DocumentModal
-        isOpen={true}
-        onClose={() => {}}
-        document={null}
-        onSubmitCreate={async () => {}}
-        onSubmitUpdate={async () => {}}
-      />,
-    );
-
-    expect(html).toContain('Add Document Requirement');
-    expect(html).toContain('Document Type Key');
-    expect(html).toContain('Document Display Name');
-    expect(html).toContain('Mandatory Submission');
-    expect(html).toContain('HR Verification Required');
-  });
-
-  it('ChecklistsSection renders stage filter tabs and tasks with due offsets', () => {
-    const html = renderToStaticMarkup(
-      <ChecklistsSection
-        checklists={mockChecklists}
-        onCreateChecklist={async () => {}}
-        onUpdateChecklist={async () => {}}
-        onDeleteChecklist={async () => {}}
-      />,
-    );
-
-    expect(html).toContain('Checklist Task Templates');
-    expect(html).toContain('All Stages (1)');
-    expect(html).toContain('Send Welcome Email');
-    expect(html).toContain('2d before joining');
-    expect(html).toContain('Add Task Template');
-  });
-
-  it('ChecklistModal renders task name, stage, and assignee responsibility options', () => {
-    const html = renderToStaticMarkup(
-      <ChecklistModal
-        isOpen={true}
-        onClose={() => {}}
-        checklist={null}
-        onSubmitCreate={async () => {}}
-        onSubmitUpdate={async () => {}}
-      />,
-    );
-
-    expect(html).toContain('Add Checklist Task');
-    expect(html).toContain('Task Name');
-    expect(html).toContain('Assigned Stage');
-    expect(html).toContain('Assignee Responsibility Category');
-    expect(html).toContain('HR Team');
-    expect(html).toContain('IT Administrator');
-  });
-
-  it('ConversionSection renders employee conversion switches and prefix fields', () => {
-    const html = renderToStaticMarkup(
-      <ConversionSection initialData={mockConversion} onSave={async () => {}} saving={false} />,
-    );
-
-    expect(html).toContain('Employee Conversion Rules');
-    expect(html).toContain('Auto-Convert on Joining Date');
-    expect(html).toContain('Mandate Document Verification');
-    expect(html).toContain('Mandate Checklist Completion');
-    expect(html).toContain('EMP-');
-    expect(html).toContain('probation');
-    expect(html).toContain('Save Conversion Rules');
+    expect(html).toContain('HR Settings &amp; Governance');
+    expect(html).toContain('Employee Change Requests');
+    expect(html).toContain('Company Policies');
+    expect(html).toContain('Sarah Jenkins');
   });
 });
