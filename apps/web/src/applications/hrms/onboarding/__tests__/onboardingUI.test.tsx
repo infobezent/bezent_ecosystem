@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { MemoryRouter } from 'react-router-dom';
 import { NewHireModal } from '../components/NewHireModal';
 import { OnboardingPage } from '../pages/OnboardingPage';
 import { hrmsRoutes } from '../../routes/hrmsRoutes';
@@ -79,5 +80,47 @@ describe('HRMS Onboarding UI Components', () => {
     const html = renderToStaticMarkup(onboardingRoute!.element as React.ReactElement);
     expect(html).toContain('Onboarding');
     expect(html).toContain('Add New Hire');
+  });
+
+  it('hrmsRoutes routes administration/employee-administration to candidate listing with Employee Administration', () => {
+    const basePathRoute = hrmsRoutes[0];
+    const empAdminRoute = basePathRoute?.children?.find(
+      (r) => r.path === 'administration/employee-administration',
+    );
+    expect(empAdminRoute).toBeDefined();
+    expect(empAdminRoute?.element).toBeDefined();
+
+    const html = renderToStaticMarkup(
+      <MemoryRouter>{empAdminRoute!.element as React.ReactElement}</MemoryRouter>,
+    );
+    expect(html).toContain('Employee Administration');
+    expect(html).toContain('Add New Hire');
+    expect(html).toContain('Preboarding');
+    expect(html).toContain('Documents');
+  });
+
+  it('hrmsRoutes routes administration/onboarding directly to Employee Registration form', () => {
+    const basePathRoute = hrmsRoutes[0];
+    const onboardingFormRoute = basePathRoute?.children?.find(
+      (r) => r.path === 'administration/onboarding',
+    );
+    expect(onboardingFormRoute).toBeDefined();
+    expect(onboardingFormRoute?.element).toBeDefined();
+
+    const html = renderToStaticMarkup(
+      <MemoryRouter>{onboardingFormRoute!.element as React.ReactElement}</MemoryRouter>,
+    );
+    expect(html).toContain('Employee Registration');
+    expect(html).toContain('General Information');
+  });
+
+  it('hrmsRoutes routes administration/documents to Documents destination', () => {
+    const basePathRoute = hrmsRoutes[0];
+    const docsRoute = basePathRoute?.children?.find((r) => r.path === 'administration/documents');
+    expect(docsRoute).toBeDefined();
+    expect(docsRoute?.element).toBeDefined();
+
+    const html = renderToStaticMarkup(docsRoute!.element as React.ReactElement);
+    expect(html).toContain('Documents');
   });
 });
