@@ -5,6 +5,8 @@ import {
   validateCreateCase,
   validateUpdateDraft,
   validateSubmitCase,
+  validateTransitionStage,
+  validateWithdrawCase,
 } from '../validation/onboarding.schema.js';
 import { AppError } from '../../../../app/errors/AppError.js';
 
@@ -198,6 +200,93 @@ export class OnboardingController {
       await this.service.deleteDraft(devContext.tenantId, devContext.companyId, caseId);
 
       res.status(204).send();
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  transitionStage = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const devContext = req.devContext;
+      if (!devContext) {
+        throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
+      }
+
+      const rawId = req.params.caseId;
+      const caseId = Array.isArray(rawId) ? rawId[0] : rawId;
+      if (!caseId) {
+        throw new AppError('Onboarding case ID is required', 400, 'VALIDATION_ERROR');
+      }
+
+      const validatedDto = validateTransitionStage(req.body);
+
+      const updated = await this.service.transitionStage(
+        devContext.tenantId,
+        devContext.companyId,
+        caseId,
+        validatedDto,
+      );
+
+      res.json({
+        data: updated,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  withdrawCase = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const devContext = req.devContext;
+      if (!devContext) {
+        throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
+      }
+
+      const rawId = req.params.caseId;
+      const caseId = Array.isArray(rawId) ? rawId[0] : rawId;
+      if (!caseId) {
+        throw new AppError('Onboarding case ID is required', 400, 'VALIDATION_ERROR');
+      }
+
+      const validatedDto = validateWithdrawCase(req.body);
+
+      const withdrawn = await this.service.withdrawCase(
+        devContext.tenantId,
+        devContext.companyId,
+        caseId,
+        validatedDto,
+      );
+
+      res.json({
+        data: withdrawn,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  getCaseHistory = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const devContext = req.devContext;
+      if (!devContext) {
+        throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
+      }
+
+      const rawId = req.params.caseId;
+      const caseId = Array.isArray(rawId) ? rawId[0] : rawId;
+      if (!caseId) {
+        throw new AppError('Onboarding case ID is required', 400, 'VALIDATION_ERROR');
+      }
+
+      const history = await this.service.getCaseHistory(
+        devContext.tenantId,
+        devContext.companyId,
+        caseId,
+      );
+
+      res.json({
+        data: history,
+      });
     } catch (err) {
       next(err);
     }
