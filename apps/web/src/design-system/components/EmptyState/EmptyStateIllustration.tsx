@@ -1,4 +1,4 @@
-import sleepingRaccoonImg from '../../../assets/sleeping_blue_raccoon.jpg';
+import sleepingRaccoonImg from '../../../assets/sleeping_blue_raccoon.png';
 import './EmptyStateIllustration.css';
 
 export type EmptyStateIllustrationSize = 'default' | 'compact';
@@ -7,6 +7,16 @@ export interface EmptyStateIllustrationProps {
   size?: EmptyStateIllustrationSize;
   className?: string;
   isDark?: boolean;
+  /**
+   * Optional custom image source URL.
+   * Defaults to the canonical BEZENT sleeping raccoon transparent PNG.
+   */
+  imageSrc?: string;
+  /**
+   * Optional alt text for the illustration image.
+   * Defaults to empty string (decorative illustration).
+   */
+  imageAlt?: string;
 }
 
 /**
@@ -14,12 +24,17 @@ export interface EmptyStateIllustrationProps {
  *
  * Vector graphic illustration of a cozy sleeping blue raccoon with
  * gentle floating starlight sparkles and subtle breathing motion.
+ * Supports generic custom illustration image sources while preserving the
+ * synchronized breathing animation and starlight atmosphere.
  */
 export function EmptyStateIllustration({
   size = 'default',
   className,
   isDark: isDarkProp,
+  imageSrc,
+  imageAlt = '',
 }: EmptyStateIllustrationProps) {
+  const activeImage = imageSrc || sleepingRaccoonImg;
   const isDark =
     isDarkProp ??
     (typeof document !== 'undefined' &&
@@ -32,8 +47,8 @@ export function EmptyStateIllustration({
     >
       <div className="bezent-sleeping-raccoon-stage">
         <img
-          src={sleepingRaccoonImg}
-          alt=""
+          src={activeImage}
+          alt={imageAlt}
           className="bezent-sleeping-raccoon-img"
           draggable={false}
         />
