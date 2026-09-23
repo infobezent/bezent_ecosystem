@@ -289,4 +289,111 @@ describe('HRMS Onboarding & Organization API', () => {
       expect(resDeleteActive.body.error.code).toBe('CONFLICT');
     });
   });
+
+  describe('Server-Side Pagination & Filtering (GET /api/v1/hrms/onboarding/new-hires)', () => {
+    it('returns default pagination metadata (page=1, pageSize=25) and stage counts', async () => {
+      const res = await request(app).get('/api/v1/hrms/onboarding/new-hires');
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body.data)).toBe(true);
+      expect(res.body.pagination).toBeDefined();
+      expect(res.body.pagination.page).toBe(1);
+      expect(res.body.pagination.pageSize).toBe(25);
+      expect(res.body.pagination.totalItems).toBeGreaterThanOrEqual(1);
+      expect(res.body.pagination.totalPages).toBeGreaterThanOrEqual(1);
+
+      expect(res.body.counts).toBeDefined();
+      expect(res.body.counts.all).toBe(res.body.pagination.totalItems);
+      expect(typeof res.body.counts.preboarding).toBe('number');
+      expect(typeof res.body.counts.documents).toBe('number');
+      expect(typeof res.body.counts.completed).toBe('number');
+    });
+
+    it('supports allowed page sizes (25, 50, 100)', async () => {
+      for (const size of [25, 50, 100]) {
+        const res = await request(app).get(`/api/v1/hrms/onboarding/new-hires?pageSize=${size}`);
+        expect(res.status).toBe(200);
+        expect(res.body.pagination.pageSize).toBe(size);
+        expect(res.body.data.length).toBeLessThanOrEqual(size);
+      }
+    });
+
+    it('rejects invalid page or pageSize with 400 VALIDATION_ERROR', async () => {
+      const invalidPage = await request(app).get('/api/v1/hrms/onboarding/new-hires?page=0');
+      expect(invalidPage.status).toBe(400);
+      expect(invalidPage.body.error.code).toBe('VALIDATION_ERROR');
+
+      const invalidPageSize = await request(app).get(
+        '/api/v1/hrms/onboarding/new-hires?pageSize=10',
+      );
+      expect(invalidPageSize.status).toBe(400);
+      expect(invalidPageSize.body.error.code).toBe('VALIDATION_ERROR');
+
+      const invalidStage = await request(app).get(
+        '/api/v1/hrms/onboarding/new-hires?stage=unknown_stage',
+      );
+      expect(invalidStage.status).toBe(400);
+      expect(invalidStage.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('filters by stage correctly while keeping total company stage counts', async () => {
+      const res = await request(app).get('/api/v1/hrms/onboarding/new-hires?stage=preboarding');
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.every((item: { stage: string }) => item.stage === 'preboarding')).toBe(
+        true,
+      );
+      expect(res.body.pagination.totalItems).toBe(res.body.counts.preboarding);
+      // Stage counts reflect entire company dataset, not just filtered page
+      expect(res.body.counts.all).toBeGreaterThanOrEqual(res.body.counts.preboarding);
+    });
+
+    it('searches by keyword and paginates matching results', async () => {
+      const res = await request(app).get('/api/v1/hrms/onboarding/new-hires?search=Arun');
+
+      expect(res.status).toBe(200);
+      expect(res.body.pagination.page).toBe(1);
+      expect(
+        res.body.data.some(
+          (item: { fullName: string; email: string }) =>
+            item.fullName.includes('Arun') || item.email.includes('arun'),
+        ),
+      ).toBe(true);
+    });
+
+    it('returns empty result cleanly for non-matching search', async () => {
+      const res = await request(app).get(
+        '/api/v1/hrms/onboarding/new-hires?search=nonexistent_xyz_query',
+      );
+
+      expect(res.status).toBe(200);
+      expect(res.body.data).toEqual([]);
+      expect(res.body.pagination.totalItems).toBe(0);
+      expect(res.body.pagination.totalPages).toBe(0);
+      // Counts across company remain valid
+      expect(res.body.counts.all).toBeGreaterThanOrEqual(1);
+    });
+
+    it('handles out of range page gracefully', async () => {
+      const res = await request(app).get('/api/v1/hrms/onboarding/new-hires?page=999&pageSize=25');
+
+      expect(res.status).toBe(200);
+      expect(res.body.data).toEqual([]);
+      expect(res.body.pagination.page).toBe(999);
+      expect(res.body.pagination.totalItems).toBeGreaterThanOrEqual(1);
+    });
+
+    it('enforces tenant/company isolation in pagination and count queries', async () => {
+      const res = await request(app)
+        .get('/api/v1/hrms/onboarding/new-hires')
+        .set('x-company-id', 'comp_isolated_other')
+        .set('x-tenant-id', 'tenant_isolated_other');
+
+      expect(res.status).toBe(200);
+      expect(res.body.data).toEqual([]);
+      expect(res.body.pagination.totalItems).toBe(0);
+      expect(res.body.pagination.totalPages).toBe(0);
+      expect(res.body.counts.all).toBe(0);
+    });
+  });
 });

@@ -15,14 +15,16 @@ import {
   TableCell,
   Inline,
   SearchInput,
+  Select,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { useDevContext } from '../../../../platform/context/DevContext';
 import {
   fetchOrganizationMasters,
-  fetchNewHires,
+  fetchNewHiresPaginated,
   type OrganizationMasters,
   type OnboardingCaseItem,
+  type StageCounts,
 } from '../api/onboardingApi';
 import { EmployeeRegistration } from '../components/EmployeeRegistration';
 import { DraftsModal, EmployeeRegistrationDraft } from '../components/DraftsModal';
@@ -44,6 +46,33 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
     'all',
   );
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Pagination State
+  const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(25);
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(0);
+  const [counts, setCounts] = useState<StageCounts>({
+    all: 0,
+    preboarding: 0,
+    documents: 0,
+    completed: 0,
+  });
+
+  const handleTabChange = (newTab: 'all' | 'preboarding' | 'documents' | 'completed') => {
+    setActiveTab(newTab);
+    setPage(1);
+  };
+
+  const handleSearchChange = (val: string) => {
+    setSearchQuery(val);
+    setPage(1);
+  };
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setPage(1);
+  };
 
   // Drafts State
   const [isDraftsModalOpen, setIsDraftsModalOpen] = useState(false);
@@ -94,18 +123,31 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
     setLoading(true);
     setError(null);
     try {
-      const [mastersData, casesData] = await Promise.all([
+      const [mastersData, res] = await Promise.all([
         fetchOrganizationMasters(),
-        fetchNewHires(),
+        fetchNewHiresPaginated({
+          page,
+          pageSize,
+          stage: activeTab,
+          search: searchQuery,
+        }),
       ]);
       setMasters(mastersData);
-      setCases(casesData);
+      setCases(res.data);
+      setTotalItems(res.pagination.totalItems);
+      setTotalPages(res.pagination.totalPages);
+      setCounts(res.counts);
+
+      // Out-of-range safety: if page > totalPages when totalPages > 0, reset to totalPages
+      if (res.pagination.totalPages > 0 && page > res.pagination.totalPages) {
+        setPage(res.pagination.totalPages);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load onboarding data');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page, pageSize, activeTab, searchQuery]);
 
   useEffect(() => {
     loadData();
@@ -134,28 +176,26 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
     }
   };
 
-  const filteredCases = useMemo(() => {
-    return cases.filter((c) => {
-      const matchesTab = activeTab === 'all' || c.stage === activeTab;
-      const q = searchQuery.toLowerCase().trim();
-      const matchesSearch =
-        !q ||
-        c.fullName.toLowerCase().includes(q) ||
-        c.email.toLowerCase().includes(q) ||
-        c.departmentName.toLowerCase().includes(q) ||
-        c.designationName.toLowerCase().includes(q);
-      return matchesTab && matchesSearch;
-    });
-  }, [cases, activeTab, searchQuery]);
+  const pageNumbers = useMemo(() => {
+    if (totalPages <= 1) return [1];
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (page <= 4) {
+      return [1, 2, 3, 4, 5, '...', totalPages];
+    }
+    if (page >= totalPages - 3) {
+      return [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [1, '...', page - 1, page, page + 1, '...', totalPages];
+  }, [page, totalPages]);
 
-  const counts = useMemo(() => {
-    return {
-      all: cases.length,
-      preboarding: cases.filter((c) => c.stage === 'preboarding').length,
-      documents: cases.filter((c) => c.stage === 'documents').length,
-      completed: cases.filter((c) => c.stage === 'completed').length,
-    };
-  }, [cases]);
+  const resultRangeText = useMemo(() => {
+    if (totalItems === 0) return 'Showing 0 of 0';
+    const start = (page - 1) * pageSize + 1;
+    const end = Math.min(page * pageSize, totalItems);
+    return `Showing ${start}–${end} of ${totalItems}`;
+  }, [page, pageSize, totalItems]);
 
   if (viewMode === 'registration') {
     return (
@@ -231,7 +271,7 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
               className={`onboarding-page__tab bezent-filter-tab ${
                 activeTab === 'all' ? 'onboarding-page__tab--active is-active' : ''
               }`}
-              onClick={() => setActiveTab('all')}
+              onClick={() => handleTabChange('all')}
             >
               All{' '}
               <span className="onboarding-page__tab-count bezent-filter-tab-count">
@@ -245,7 +285,7 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
               className={`onboarding-page__tab bezent-filter-tab ${
                 activeTab === 'preboarding' ? 'onboarding-page__tab--active is-active' : ''
               }`}
-              onClick={() => setActiveTab('preboarding')}
+              onClick={() => handleTabChange('preboarding')}
             >
               Preboarding{' '}
               <span className="onboarding-page__tab-count bezent-filter-tab-count">
@@ -259,7 +299,7 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
               className={`onboarding-page__tab bezent-filter-tab ${
                 activeTab === 'documents' ? 'onboarding-page__tab--active is-active' : ''
               }`}
-              onClick={() => setActiveTab('documents')}
+              onClick={() => handleTabChange('documents')}
             >
               Documents{' '}
               <span className="onboarding-page__tab-count bezent-filter-tab-count">
@@ -273,7 +313,7 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
               className={`onboarding-page__tab bezent-filter-tab ${
                 activeTab === 'completed' ? 'onboarding-page__tab--active is-active' : ''
               }`}
-              onClick={() => setActiveTab('completed')}
+              onClick={() => handleTabChange('completed')}
             >
               Completed{' '}
               <span className="onboarding-page__tab-count bezent-filter-tab-count">
@@ -290,8 +330,8 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                 : 'Search by name, email, department...'
             }
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onClear={() => setSearchQuery('')}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            onClear={() => handleSearchChange('')}
           />
         }
       />
@@ -303,77 +343,181 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
         </div>
       )}
 
-      {/* Main Table */}
+      {/* Main Table & Pagination */}
       {loading ? (
         <LoadingState label="Loading onboarding records…" fill />
-      ) : filteredCases.length === 0 ? (
-        <EmptyState
-          variant="onboarding"
-          title={searchQuery ? 'No matching new hires' : 'No New Hires Found'}
-          description={
-            searchQuery
-              ? `No candidates match "${searchQuery}". Try clearing your search.`
-              : 'Get started by creating your first onboarding case for a new hire.'
-          }
-          primaryAction={
-            !searchQuery
-              ? {
-                  label: 'Add New Hire',
-                  onClick: () => {
-                    setSelectedDraft(null);
-                    if (onAddNewHire) {
-                      onAddNewHire();
-                    } else {
-                      setViewMode('registration');
-                    }
-                  },
-                }
-              : undefined
-          }
-        />
-      ) : (
-        <Table hoverable>
-          <TableHead>
-            <TableRow>
-              <TableHeaderCell>Name</TableHeaderCell>
-              <TableHeaderCell>Department</TableHeaderCell>
-              <TableHeaderCell>Designation</TableHeaderCell>
-              <TableHeaderCell>Location</TableHeaderCell>
-              <TableHeaderCell>Stage</TableHeaderCell>
-              <TableHeaderCell>Joining Date</TableHeaderCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredCases.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell>
-                  <div className="onboarding-page__person-cell bezent-table-cell--avatar-meta">
-                    <Avatar initials={getInitials(item.fullName)} alt={item.fullName} />
-                    <div className="onboarding-page__person-info bezent-table-meta-group">
-                      <span className="onboarding-page__person-name bezent-table-meta-title">
-                        {item.fullName}
-                      </span>
-                      <span className="onboarding-page__person-email bezent-table-meta-subtitle">
-                        {item.email}
-                      </span>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>{item.departmentName}</TableCell>
-                <TableCell>{item.designationName}</TableCell>
-                <TableCell>{item.locationName || '—'}</TableCell>
-                <TableCell>
-                  <span
-                    className={`onboarding-page__stage-tag bezent-stage-tag bezent-stage-tag--${item.stage}`}
+      ) : cases.length === 0 ? (
+        <>
+          <EmptyState
+            variant="onboarding"
+            title={searchQuery ? 'No matching new hires' : 'No New Hires Found'}
+            description={
+              searchQuery
+                ? `No candidates match "${searchQuery}". Try clearing your search.`
+                : 'Get started by creating your first onboarding case for a new hire.'
+            }
+            primaryAction={
+              !searchQuery
+                ? {
+                    label: 'Add New Hire',
+                    onClick: () => {
+                      setSelectedDraft(null);
+                      if (onAddNewHire) {
+                        onAddNewHire();
+                      } else {
+                        setViewMode('registration');
+                      }
+                    },
+                  }
+                : undefined
+            }
+          />
+          <Toolbar
+            className="onboarding-page__pagination"
+            left={<span className="onboarding-page__pagination-info">{resultRangeText}</span>}
+            right={
+              <Inline gap="lg" align="center">
+                <Inline gap="xs" align="center">
+                  <span>Rows per page:</span>
+                  <Select
+                    size="sm"
+                    value={String(pageSize)}
+                    onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+                    options={[
+                      { value: '25', label: '25' },
+                      { value: '50', label: '50' },
+                      { value: '100', label: '100' },
+                    ]}
+                    aria-label="Rows per page"
+                  />
+                </Inline>
+                <Inline gap="xs" align="center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={page <= 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    aria-label="Previous page"
                   >
-                    {item.stage}
-                  </span>
-                </TableCell>
-                <TableCell>{formatDate(item.joiningDate)}</TableCell>
+                    ‹
+                  </Button>
+                  <Button variant="primary" size="sm" disabled aria-current="page">
+                    1
+                  </Button>
+                  <Button variant="outline" size="sm" disabled aria-label="Next page">
+                    ›
+                  </Button>
+                </Inline>
+              </Inline>
+            }
+          />
+        </>
+      ) : (
+        <>
+          <Table hoverable>
+            <TableHead>
+              <TableRow>
+                <TableHeaderCell>Name</TableHeaderCell>
+                <TableHeaderCell>Department</TableHeaderCell>
+                <TableHeaderCell>Designation</TableHeaderCell>
+                <TableHeaderCell>Location</TableHeaderCell>
+                <TableHeaderCell>Stage</TableHeaderCell>
+                <TableHeaderCell>Joining Date</TableHeaderCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHead>
+            <TableBody>
+              {cases.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell>
+                    <div className="onboarding-page__person-cell bezent-table-cell--avatar-meta">
+                      <Avatar initials={getInitials(item.fullName)} alt={item.fullName} />
+                      <div className="onboarding-page__person-info bezent-table-meta-group">
+                        <span className="onboarding-page__person-name bezent-table-meta-title">
+                          {item.fullName}
+                        </span>
+                        <span className="onboarding-page__person-email bezent-table-meta-subtitle">
+                          {item.email}
+                        </span>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>{item.departmentName}</TableCell>
+                  <TableCell>{item.designationName}</TableCell>
+                  <TableCell>{item.locationName || '—'}</TableCell>
+                  <TableCell>
+                    <span
+                      className={`onboarding-page__stage-tag bezent-stage-tag bezent-stage-tag--${item.stage}`}
+                    >
+                      {item.stage}
+                    </span>
+                  </TableCell>
+                  <TableCell>{formatDate(item.joiningDate)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+
+          {/* Pagination Footer */}
+          <Toolbar
+            className="onboarding-page__pagination"
+            left={<span className="onboarding-page__pagination-info">{resultRangeText}</span>}
+            right={
+              <Inline gap="lg" align="center">
+                <Inline gap="xs" align="center">
+                  <span>Rows per page:</span>
+                  <Select
+                    size="sm"
+                    value={String(pageSize)}
+                    onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+                    options={[
+                      { value: '25', label: '25' },
+                      { value: '50', label: '50' },
+                      { value: '100', label: '100' },
+                    ]}
+                    aria-label="Rows per page"
+                  />
+                </Inline>
+                <Inline gap="xs" align="center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={page <= 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    aria-label="Previous page"
+                  >
+                    ‹
+                  </Button>
+                  {pageNumbers.map((p, idx) =>
+                    typeof p === 'number' ? (
+                      <Button
+                        key={p}
+                        variant={p === page ? 'primary' : 'outline'}
+                        size="sm"
+                        onClick={() => setPage(p)}
+                        aria-current={p === page ? 'page' : undefined}
+                      >
+                        {p}
+                      </Button>
+                    ) : (
+                      <span key={`ellipsis-${idx}`} aria-hidden="true">
+                        …
+                      </span>
+                    ),
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={page >= totalPages || totalPages === 0}
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    aria-label="Next page"
+                  >
+                    ›
+                  </Button>
+                </Inline>
+              </Inline>
+            }
+          />
+        </>
       )}
 
       {/* Saved Drafts Modal */}
