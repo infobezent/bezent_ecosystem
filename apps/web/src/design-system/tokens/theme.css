@@ -83,6 +83,9 @@
   --border-subtle: #e7ebf0;
   --border-divider: #dde3ea;
   --border-focus: #1a73e8;
+  --table-border: #dde3ea;
+  --table-head-divider: #dde3ea;
+  --table-row-divider: #e7ebf0;
   /* Chrome separator between TopNav and workspace: deliberately softer than
      --border-default so the top bar reads as part of the app canvas rather
      than a structural frame edge. */
@@ -378,11 +381,14 @@
   --text-inverse: #020b1c;
 
   /* Borders & Dividers */
-  --border-default: rgba(56, 189, 248, 0.3);
-  --border-subtle: rgba(56, 189, 248, 0.16);
-  --border-divider: rgba(56, 189, 248, 0.18);
+  --border-default: rgba(56, 189, 248, 0.32);
+  --border-subtle: rgba(56, 189, 248, 0.24);
+  --border-divider: rgba(56, 189, 248, 0.28);
   --border-focus: #1683ff;
-  --header-border-bottom: rgba(56, 189, 248, 0.12);
+  --header-border-bottom: rgba(56, 189, 248, 0.16);
+  --table-border: rgba(56, 189, 248, 0.35);
+  --table-head-divider: rgba(56, 189, 248, 0.32);
+  --table-row-divider: rgba(56, 189, 248, 0.26);
 
   /* Global Icon System */
   --icon-default: #94a3b8;

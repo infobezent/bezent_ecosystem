@@ -22,7 +22,7 @@
 /* ── Head ── */
 .bezent-table__head {
   background: var(--bg-surface-secondary, #f0f4f9);
-  border-bottom: 1px solid var(--border-default, #dde3ea);
+  border-bottom: 1px solid var(--table-head-divider, var(--border-default, #dde3ea));
 }
 
 .bezent-table__th {
@@ -37,7 +37,7 @@
 
 /* ── Body Rows ── */
 .bezent-table__row {
-  border-bottom: 1px solid var(--border-subtle, #e7ebf0);
+  border-bottom: 1px solid var(--table-row-divider, var(--border-subtle, #e7ebf0));
   transition: background-color 0.12s ease;
 }
 
@@ -135,7 +135,7 @@
 
 [data-theme='dark'] .bezent-table__head {
   background: rgba(8, 27, 58, 0.75);
-  border-bottom: 1px solid rgba(56, 189, 248, 0.22);
+  border-bottom: 1px solid var(--table-head-divider, rgba(56, 189, 248, 0.32));
 }
 
 [data-theme='dark'] .bezent-table__th {
@@ -143,7 +143,7 @@
 }
 
 [data-theme='dark'] .bezent-table__row {
-  border-bottom: 1px solid rgba(56, 189, 248, 0.14);
+  border-bottom: 1px solid var(--table-row-divider, rgba(56, 189, 248, 0.26));
 }
 
 [data-theme='dark'] .bezent-table.is-hoverable .bezent-table__row:hover {
