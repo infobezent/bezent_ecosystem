@@ -1,10 +1,19 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Button } from '../../../../design-system/components/Button';
-import { Avatar } from '../../../../design-system/components/Avatar';
-import { EmptyState } from '../../../../design-system/components/EmptyState';
-import { Page } from '../../../../design-system/components/Page';
-import { PageHeader } from '../../../../design-system/components/PageHeader';
-import { Toolbar } from '../../../../design-system/components/Toolbar';
+import {
+  Button,
+  Avatar,
+  EmptyState,
+  Page,
+  PageHeader,
+  Toolbar,
+  LoadingState,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableHeaderCell,
+  TableCell,
+} from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { useDevContext } from '../../../../platform/context/DevContext';
 import {
@@ -280,11 +289,9 @@ export function OnboardingPage({ title = 'Onboarding' }: OnboardingPageProps) {
       )}
 
       {/* Main Table */}
-      <div className="onboarding-page__table-container bezent-table-container">
+      <div className="onboarding-page__table-container">
         {loading ? (
-          <div className="onboarding-page__loading bezent-table-loading">
-            Loading onboarding records...
-          </div>
+          <LoadingState label="Loading onboarding records…" fill />
         ) : filteredCases.length === 0 ? (
           <EmptyState
             variant="onboarding"
@@ -304,21 +311,21 @@ export function OnboardingPage({ title = 'Onboarding' }: OnboardingPageProps) {
             }
           />
         ) : (
-          <table className="onboarding-page__table bezent-table is-hoverable">
-            <thead className="bezent-table__head">
-              <tr>
-                <th className="onboarding-page__th bezent-table__th">Name</th>
-                <th className="onboarding-page__th bezent-table__th">Department</th>
-                <th className="onboarding-page__th bezent-table__th">Designation</th>
-                <th className="onboarding-page__th bezent-table__th">Location</th>
-                <th className="onboarding-page__th bezent-table__th">Stage</th>
-                <th className="onboarding-page__th bezent-table__th">Joining Date</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table hoverable>
+            <TableHead>
+              <TableRow>
+                <TableHeaderCell>Name</TableHeaderCell>
+                <TableHeaderCell>Department</TableHeaderCell>
+                <TableHeaderCell>Designation</TableHeaderCell>
+                <TableHeaderCell>Location</TableHeaderCell>
+                <TableHeaderCell>Stage</TableHeaderCell>
+                <TableHeaderCell>Joining Date</TableHeaderCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
               {filteredCases.map((item) => (
-                <tr key={item.id} className="onboarding-page__tr bezent-table__row">
-                  <td className="onboarding-page__td bezent-table__td">
+                <TableRow key={item.id}>
+                  <TableCell>
                     <div className="onboarding-page__person-cell bezent-table-cell--avatar-meta">
                       <Avatar initials={getInitials(item.fullName)} alt={item.fullName} />
                       <div className="onboarding-page__person-info bezent-table-meta-group">
@@ -330,26 +337,22 @@ export function OnboardingPage({ title = 'Onboarding' }: OnboardingPageProps) {
                         </span>
                       </div>
                     </div>
-                  </td>
-                  <td className="onboarding-page__td bezent-table__td">{item.departmentName}</td>
-                  <td className="onboarding-page__td bezent-table__td">{item.designationName}</td>
-                  <td className="onboarding-page__td bezent-table__td">
-                    {item.locationName || '—'}
-                  </td>
-                  <td className="onboarding-page__td bezent-table__td">
+                  </TableCell>
+                  <TableCell>{item.departmentName}</TableCell>
+                  <TableCell>{item.designationName}</TableCell>
+                  <TableCell>{item.locationName || '—'}</TableCell>
+                  <TableCell>
                     <span
                       className={`onboarding-page__stage-tag bezent-stage-tag bezent-stage-tag--${item.stage}`}
                     >
                       {item.stage}
                     </span>
-                  </td>
-                  <td className="onboarding-page__td bezent-table__td">
-                    {formatDate(item.joiningDate)}
-                  </td>
-                </tr>
+                  </TableCell>
+                  <TableCell>{formatDate(item.joiningDate)}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         )}
       </div>
 

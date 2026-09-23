@@ -1,0 +1,139 @@
+/* ─── BEZENT Checkbox ─────────────────────────────────────────────────────── */
+
+/* Wrapper — acts as the real <label> */
+.bezent-checkbox-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+  cursor: pointer;
+  user-select: none;
+}
+
+.bezent-checkbox-wrapper--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Track (positions the native input and custom box on top of each other) */
+.bezent-checkbox__track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Native input — visually hidden but accessible */
+.bezent-checkbox__input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+/* Custom visual box */
+.bezent-checkbox__box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm, 4px);
+  border: 1.5px solid var(--color-border-default);
+  background: var(--color-surface-elevated);
+  transition:
+    background var(--motion-duration-fast) var(--motion-easing-default),
+    border-color var(--motion-duration-fast) var(--motion-easing-default),
+    box-shadow var(--motion-duration-fast) var(--motion-easing-default);
+}
+
+/* Sizes */
+.bezent-checkbox-wrapper--md .bezent-checkbox__box {
+  width: 16px;
+  height: 16px;
+}
+
+.bezent-checkbox-wrapper--sm .bezent-checkbox__box {
+  width: 13px;
+  height: 13px;
+}
+
+/* Checkmark SVG */
+.bezent-checkbox__checkmark {
+  width: 10px;
+  height: 10px;
+  stroke: #fff;
+  opacity: 0;
+  transform: scale(0.5);
+  transition:
+    opacity var(--motion-duration-fast) var(--motion-easing-default),
+    transform var(--motion-duration-fast) var(--motion-easing-default);
+}
+
+.bezent-checkbox-wrapper--sm .bezent-checkbox__checkmark {
+  width: 8px;
+  height: 8px;
+}
+
+/* Indeterminate dash */
+.bezent-checkbox__indeterminate {
+  position: absolute;
+  width: 8px;
+  height: 2px;
+  background: #fff;
+  border-radius: 1px;
+  opacity: 0;
+  transition: opacity var(--motion-duration-fast) var(--motion-easing-default);
+}
+
+/* Checked state */
+.bezent-checkbox__input:checked ~ .bezent-checkbox__box {
+  background: var(--color-primary-500, #3b82f6);
+  border-color: var(--color-primary-500, #3b82f6);
+}
+
+.bezent-checkbox__input:checked ~ .bezent-checkbox__box .bezent-checkbox__checkmark {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Indeterminate state */
+.bezent-checkbox__input:indeterminate ~ .bezent-checkbox__box {
+  background: var(--color-primary-500, #3b82f6);
+  border-color: var(--color-primary-500, #3b82f6);
+}
+
+.bezent-checkbox__input:indeterminate ~ .bezent-checkbox__box .bezent-checkbox__indeterminate {
+  opacity: 1;
+}
+
+/* Focus ring */
+.bezent-checkbox__input:focus-visible ~ .bezent-checkbox__box {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-500, #3b82f6) 30%, transparent);
+}
+
+/* Hover */
+.bezent-checkbox-wrapper:hover .bezent-checkbox__box {
+  border-color: var(--color-primary-400, #60a5fa);
+}
+
+/* Label text */
+.bezent-checkbox__label {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-normal);
+}
+
+/* Dark mode */
+[data-theme='dark'] .bezent-checkbox__box {
+  background: var(--color-surface-elevated);
+  border-color: var(--color-border-default);
+}
+
+[data-theme='dark'] .bezent-checkbox__label {
+  color: var(--color-text-primary);
+}

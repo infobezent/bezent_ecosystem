@@ -6,6 +6,7 @@ import { TasksPage } from '../../platform/tasks';
 import { ApprovalsPage } from '../../platform/approvals';
 import { NotesPage } from '../../platform/notes';
 import { DevPlaceholderPage } from './DevPlaceholderPage';
+import { DesignSystemShowcase } from './DesignSystemShowcase';
 import { NotFoundPage } from './NotFoundPage';
 import { ShellLayout } from './ShellLayout';
 import { StandaloneUtilityLayout } from './StandaloneUtilityLayout';
@@ -26,9 +27,13 @@ const router = createBrowserRouter([
     children: [
       { path: '/', element: <Navigate to={homePath} replace /> },
       ...APPLICATIONS.flatMap((application) => application.routes),
-      // Development-only design-system verification page. Registered only in
-      // dev builds, so it is absent from production bundles and navigation.
-      ...(import.meta.env.DEV ? [{ path: '/dev', element: <DevPlaceholderPage /> }] : []),
+      // Development-only pages. Excluded from production bundles.
+      ...(import.meta.env.DEV
+        ? [
+            { path: '/dev', element: <DevPlaceholderPage /> },
+            { path: '/dev/design-system', element: <DesignSystemShowcase /> },
+          ]
+        : []),
       { path: '*', element: <NotFoundPage homePath={homePath} /> },
     ],
   },

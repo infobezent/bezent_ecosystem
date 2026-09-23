@@ -1,0 +1,102 @@
+/*
+ * Styles for the /dev/design-system showcase page.
+ * Uses tokens from the BEZENT design system.
+ */
+
+.bds-showcase__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 8px);
+  padding-bottom: var(--space-4, 16px);
+  border-bottom: 1px solid var(--color-border-subtle, #e2e8f0);
+  margin-bottom: var(--space-6, 24px);
+}
+
+.bds-showcase__nav-btn {
+  padding: var(--space-2, 8px) var(--space-4, 16px);
+  border-radius: var(--radius-md, 6px);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-text-secondary, #64748b);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm, 14px);
+  font-weight: var(--font-weight-medium, 500);
+  cursor: pointer;
+  transition: all var(--duration-fast, 150ms) ease;
+}
+
+.bds-showcase__nav-btn:hover {
+  background: var(--color-bg-subtle, #f1f5f9);
+  color: var(--color-text-primary, #0f172a);
+}
+
+.bds-showcase__nav-btn.is-active {
+  background: var(--color-primary-subtle, #e0f2fe);
+  color: var(--color-primary, #0284c7);
+  font-weight: var(--font-weight-semibold, 600);
+}
+
+.bds-showcase__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6, 24px);
+}
+
+.bds-showcase__block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 12px);
+  padding: var(--space-4, 16px);
+  border-radius: var(--radius-lg, 8px);
+  border: 1px solid var(--color-border-subtle, #e2e8f0);
+  background: var(--color-bg-surface, #ffffff);
+}
+
+.bds-showcase__block-title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm, 14px);
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--color-text-tertiary, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.bds-showcase__block-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 12px);
+}
+
+.bds-demo-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3, 12px) var(--space-4, 16px);
+  background: var(--color-bg-subtle, #f8fafc);
+  border: 1px dashed var(--color-border-default, #cbd5e1);
+  border-radius: var(--radius-md, 6px);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm, 14px);
+  color: var(--color-text-secondary, #64748b);
+}
+
+.bds-code {
+  margin: 0;
+  padding: var(--space-3, 12px);
+  background: var(--color-bg-subtle, #f8fafc);
+  border-radius: var(--radius-md, 6px);
+  font-family: var(--font-mono, monospace);
+  font-size: var(--font-size-xs, 12px);
+  line-height: var(--line-height-relaxed, 1.6);
+  color: var(--color-text-primary, #0f172a);
+  overflow-x: auto;
+}
+
+.bds-form-col {
+  max-width: 360px;
+}
+
+.bds-card-demo {
+  max-width: 320px;
+}
