@@ -157,18 +157,6 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
     };
   }, [cases]);
 
-  if (viewMode === 'registration') {
-    return (
-      <EmployeeRegistration
-        initialDraft={selectedDraft}
-        onCancel={() => {
-          setSelectedDraft(null);
-          setViewMode('list');
-        }}
-      />
-    );
-  }
-
   return (
     <Page className="onboarding-page" maxWidth="full" gap="lg">
       {/* Header Banner */}
@@ -384,6 +372,17 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
         onContinueDraft={handleContinueDraft}
         onDeleteDraft={handleDeleteDraft}
       />
+
+      {/* Employee Registration Modal Workspace */}
+      {viewMode === 'registration' && (
+        <EmployeeRegistration
+          initialDraft={selectedDraft}
+          onCancel={() => {
+            setSelectedDraft(null);
+            setViewMode('list');
+          }}
+        />
+      )}
     </Page>
   );
 }

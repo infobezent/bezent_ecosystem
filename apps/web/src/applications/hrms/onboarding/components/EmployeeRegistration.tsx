@@ -5,8 +5,6 @@ import {
   Input,
   Select,
   Tabs,
-  Page,
-  PageHeader,
   Toolbar,
   Actions,
   Stack,
@@ -53,6 +51,7 @@ export const REGISTRATION_SECTIONS: readonly RegistrationSection[] = [
 ];
 
 interface EmployeeRegistrationProps {
+  isOpen?: boolean;
   onCancel: () => void;
   onSave?: (data: Record<string, unknown>) => void;
   initialDraft?: EmployeeRegistrationDraft | null;
@@ -62,6 +61,7 @@ import { useCustomFields } from '../../settings/context/CustomFieldsContext';
 import type { OnboardingCardConfig } from '../../settings/types/settingsCenter';
 
 export function EmployeeRegistration({
+  isOpen = true,
   onCancel,
   onSave,
   initialDraft,
@@ -586,32 +586,61 @@ export function EmployeeRegistration({
     showToast('Draft deleted.');
   };
 
+  if (!isOpen) return null;
+
   return (
-    <Page maxWidth="full" gap="lg">
-      {/* Page Header */}
-      <PageHeader
-        breadcrumbs={
-          <Inline gap="xs">
-            <span>HRMS</span>
-            <span>&gt;</span>
-            <span>Employee Registration</span>
-          </Inline>
-        }
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={() => setShowUnsavedModal(true)}
         title="Employee Registration"
-        subtitle="Add and manage new employee information"
-      />
-
-      {/* Dynamic Section Horizontal Navigation */}
-      <Tabs
-        items={allSections.map((s) => ({ id: s.id, label: s.label }))}
-        activeId={activeSection}
-        onChange={(id) => setActiveSection(id)}
-        variant="underline"
-      />
-
-      {/* Workspace Content Card */}
-      <Card padding="lg">
+        description="Add and manage new employee information"
+        size="xl"
+        footer={
+          <Toolbar
+            left={
+              <Actions gap="sm">
+                <Button
+                  variant="secondary"
+                  type="button"
+                  disabled={activeSection === 'general'}
+                  onClick={handleBack}
+                >
+                  ← Back
+                </Button>
+                <Button variant="secondary" type="button" onClick={() => handleSaveDraft(false)}>
+                  💾 Save Draft
+                </Button>
+                <Button variant="secondary" type="button" onClick={() => setShowUnsavedModal(true)}>
+                  Cancel
+                </Button>
+              </Actions>
+            }
+            right={
+              activeSection !== 'review' ? (
+                <Button variant="primary" type="button" onClick={handleNext}>
+                  Save &amp; Next →
+                </Button>
+              ) : undefined
+            }
+          />
+        }
+      >
         <Stack gap="lg">
+          {/* Toast Alert Banner */}
+          {toastMsg && (
+            <Alert variant="info" onDismiss={() => setToastMsg(null)}>
+              {toastMsg}
+            </Alert>
+          )}
+
+          {/* Dynamic Section Horizontal Navigation */}
+          <Tabs
+            items={allSections.map((s) => ({ id: s.id, label: s.label }))}
+            activeId={activeSection}
+            onChange={(id) => setActiveSection(id)}
+            variant="underline"
+          />
           {activeSection === 'general' ? (
             <Stack gap="lg">
               {/* General Section Banner */}
@@ -996,44 +1025,8 @@ export function EmployeeRegistration({
               </Stack>
             </Stack>
           )}
-
-          {/* Bottom Actions Toolbar */}
-          <Toolbar
-            left={
-              <Actions gap="sm">
-                <Button
-                  variant="secondary"
-                  type="button"
-                  disabled={activeSection === 'general'}
-                  onClick={handleBack}
-                >
-                  ← Back
-                </Button>
-                <Button variant="secondary" type="button" onClick={() => handleSaveDraft(false)}>
-                  💾 Save Draft
-                </Button>
-                <Button variant="secondary" type="button" onClick={() => setShowUnsavedModal(true)}>
-                  Cancel
-                </Button>
-              </Actions>
-            }
-            right={
-              activeSection !== 'review' ? (
-                <Button variant="primary" type="button" onClick={handleNext}>
-                  Save &amp; Next →
-                </Button>
-              ) : undefined
-            }
-          />
         </Stack>
-      </Card>
-
-      {/* Toast Alert Banner */}
-      {toastMsg && (
-        <Alert variant="info" onDismiss={() => setToastMsg(null)}>
-          {toastMsg}
-        </Alert>
-      )}
+      </Modal>
 
       {/* Drafts Modal */}
       <DraftsModal
@@ -1050,6 +1043,7 @@ export function EmployeeRegistration({
           isOpen={showUnsavedModal}
           onClose={() => setShowUnsavedModal(false)}
           title="Unsaved Changes"
+          size="sm"
           footer={
             <Actions align="end" gap="sm">
               <Button variant="secondary" type="button" onClick={() => setShowUnsavedModal(false)}>
@@ -1067,6 +1061,6 @@ export function EmployeeRegistration({
           <p>You have unsaved changes. Save as draft before leaving?</p>
         </Modal>
       )}
-    </Page>
+    </>
   );
 }
