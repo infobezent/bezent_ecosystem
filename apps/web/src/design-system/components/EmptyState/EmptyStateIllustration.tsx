@@ -39,6 +39,11 @@ export interface EmptyStateIllustrationProps {
   imageSrc?: string;
   /** Page or module contextual mascot variant */
   variant?: RaccoonVariant | string;
+  /**
+   * Optional alt text for the illustration image.
+   * Defaults to empty string (decorative illustration).
+   */
+  imageAlt?: string;
 }
 
 /** Registry of dedicated mascot illustrations mapped by page/module variant */
@@ -78,6 +83,8 @@ export const VARIANT_ACCENTS: Record<string, { icon: string; label: string; colo
  * gentle floating starlight sparkles and subtle breathing motion.
  * Renders page-specific variants (onboarding, attendance, leave, etc.)
  * with contextual theme badges for pages awaiting dedicated full-body art.
+ * Supports generic custom illustration image sources while preserving the
+ * synchronized breathing animation and starlight atmosphere.
  */
 export function EmptyStateIllustration({
   size = 'default',
@@ -85,6 +92,7 @@ export function EmptyStateIllustration({
   isDark: isDarkProp,
   imageSrc,
   variant = 'default',
+  imageAlt = '',
 }: EmptyStateIllustrationProps) {
   const activeImage = imageSrc || RACCOON_ILLUSTRATIONS[variant] || sleepingRaccoonImg;
   const accent = VARIANT_ACCENTS[variant];
@@ -101,7 +109,7 @@ export function EmptyStateIllustration({
       <div className="bezent-sleeping-raccoon-stage">
         <img
           src={activeImage}
-          alt=""
+          alt={imageAlt}
           className={`bezent-sleeping-raccoon-img bezent-sleeping-raccoon-img--${variant}`}
           draggable={false}
         />

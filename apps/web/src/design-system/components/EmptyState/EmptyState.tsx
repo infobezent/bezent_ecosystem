@@ -14,6 +14,12 @@ export interface EmptyStateAction {
 export interface EmptyStateProps {
   title: string;
   description?: string;
+  /**
+   * Optional custom illustration node (e.g. an `<EmptyStateIllustration />`
+   * with custom `imageSrc`, or a custom graphic).
+   * When omitted, renders the canonical `<EmptyStateIllustration size={size} />`.
+   */
+  illustration?: ReactNode;
   primaryAction?: EmptyStateAction;
   /** Optional decoration inside the primary action button (e.g. an icon). */
   primaryActionIcon?: ReactNode;
@@ -53,6 +59,7 @@ export interface EmptyStateProps {
 export function EmptyState({
   title,
   description,
+  illustration,
   primaryAction,
   primaryActionIcon,
   secondaryAction,
@@ -72,7 +79,9 @@ export function EmptyState({
     >
       {!hideIllustration && (
         <div className="bezent-empty-state__illustration">
-          <EmptyStateIllustration size={size} imageSrc={imageSrc} variant={variant} />
+          {illustration ?? (
+            <EmptyStateIllustration size={size} imageSrc={imageSrc} variant={variant} />
+          )}
         </div>
       )}
 
