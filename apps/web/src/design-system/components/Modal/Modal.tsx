@@ -7,8 +7,9 @@ export interface ModalProps {
   onClose: () => void;
   title?: string;
   description?: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'workspace';
   children: ReactNode;
+  headerBottom?: ReactNode;
   footer?: ReactNode;
   className?: string;
 }
@@ -24,6 +25,7 @@ export function Modal({
   description,
   size = 'md',
   children,
+  headerBottom,
   footer,
   className,
 }: ModalProps) {
@@ -55,25 +57,31 @@ export function Modal({
       }}
     >
       <div className={`bezent-modal bezent-modal--${size} ${className || ''}`.trim()}>
-        {Boolean(title || onClose) && (
-          <div className="bezent-modal__header">
-            <div className="bezent-modal__title-group">
-              {title && (
-                <h2 id="bezent-modal-title" className="bezent-modal__title">
-                  {title}
-                </h2>
-              )}
-              {description && <p className="bezent-modal__desc">{description}</p>}
+        {Boolean(title || onClose || headerBottom) && (
+          <div
+            className={`bezent-modal__header ${headerBottom ? 'bezent-modal__header--with-bottom' : ''}`.trim()}
+          >
+            <div className="bezent-modal__header-main">
+              <div className="bezent-modal__title-group">
+                {title && (
+                  <h2 id="bezent-modal-title" className="bezent-modal__title">
+                    {title}
+                  </h2>
+                )}
+                {description && <p className="bezent-modal__desc">{description}</p>}
+              </div>
+
+              <button
+                type="button"
+                className="bezent-modal__close-btn"
+                onClick={onClose}
+                aria-label="Close dialog"
+              >
+                <BezentIcon name="close" size={18} color="currentColor" />
+              </button>
             </div>
 
-            <button
-              type="button"
-              className="bezent-modal__close-btn"
-              onClick={onClose}
-              aria-label="Close dialog"
-            >
-              <BezentIcon name="close" size={18} color="currentColor" />
-            </button>
+            {headerBottom && <div className="bezent-modal__header-bottom">{headerBottom}</div>}
           </div>
         )}
 
