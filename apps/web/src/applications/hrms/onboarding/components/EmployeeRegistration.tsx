@@ -10,6 +10,8 @@ import {
   Stack,
   Inline,
   FormGrid,
+  FormField,
+  FormSection,
   Modal,
   Alert,
 } from '../../../../design-system/components';
@@ -595,7 +597,15 @@ export function EmployeeRegistration({
         onClose={() => setShowUnsavedModal(true)}
         title="Employee Registration"
         description="Add and manage new employee information"
-        size="xl"
+        size="workspace"
+        headerBottom={
+          <Tabs
+            items={allSections.map((s) => ({ id: s.id, label: s.label }))}
+            activeId={activeSection}
+            onChange={(id) => setActiveSection(id)}
+            variant="underline"
+          />
+        }
         footer={
           <Toolbar
             left={
@@ -626,7 +636,7 @@ export function EmployeeRegistration({
           />
         }
       >
-        <Stack gap="lg">
+        <Stack gap="xl">
           {/* Toast Alert Banner */}
           {toastMsg && (
             <Alert variant="info" onDismiss={() => setToastMsg(null)}>
@@ -634,299 +644,311 @@ export function EmployeeRegistration({
             </Alert>
           )}
 
-          {/* Dynamic Section Horizontal Navigation */}
-          <Tabs
-            items={allSections.map((s) => ({ id: s.id, label: s.label }))}
-            activeId={activeSection}
-            onChange={(id) => setActiveSection(id)}
-            variant="underline"
-          />
           {activeSection === 'general' ? (
-            <Stack gap="lg">
-              {/* General Section Banner */}
-              <Toolbar
-                left={
-                  <Inline gap="md" align="center">
-                    <BezentIcon name="documents" size={22} />
-                    <div>
-                      <h3 className="bezent-card__title">General Information</h3>
-                      <p className="bezent-card__desc">
-                        Basic employment details for the employee.
-                      </p>
-                    </div>
-                  </Inline>
-                }
-              />
+            <Stack gap="xl">
+              {/* Section 1: General Information */}
+              <FormSection
+                title="General Information"
+                description="Core identity and classification details"
+              >
+                <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                  {/* Dynamically rendered custom fields from Administration Customization Builder */}
+                  {customFields
+                    .filter((f) => f.sectionId === 'general')
+                    .map((f) => (
+                      <FormField
+                        key={f.id}
+                        label={f.label}
+                        htmlFor={`custom-${f.id}`}
+                        required={f.required}
+                        disabled={f.readOnly}
+                      >
+                        {f.fieldType === 'select' ? (
+                          <Select
+                            id={`custom-${f.id}`}
+                            disabled={f.readOnly}
+                            options={[
+                              { value: '', label: `Select ${f.label}` },
+                              ...(f.options?.map((opt: string) => ({ value: opt, label: opt })) ||
+                                []),
+                            ]}
+                          />
+                        ) : (
+                          <Input
+                            id={`custom-${f.id}`}
+                            type={f.fieldType === 'date' ? 'date' : 'text'}
+                            placeholder={f.defaultValue || `Enter ${f.label}`}
+                            disabled={f.readOnly}
+                          />
+                        )}
+                      </FormField>
+                    ))}
 
-              {/* 16 General Section Fields Grid */}
-              <FormGrid columns={2}>
-                {/* Dynamically rendered custom fields from Administration Customization Builder */}
-                {customFields
-                  .filter((f) => f.sectionId === 'general')
-                  .map((f) => (
-                    <div key={f.id}>
-                      {f.fieldType === 'select' ? (
-                        <Select
-                          label={`${f.label}${f.required ? ' *' : ''}`}
-                          disabled={f.readOnly}
-                          options={[
-                            { value: '', label: `Select ${f.label}` },
-                            ...(f.options?.map((opt: string) => ({ value: opt, label: opt })) ||
-                              []),
-                          ]}
-                        />
-                      ) : (
-                        <Input
-                          type={f.fieldType === 'date' ? 'date' : 'text'}
-                          label={`${f.label}${f.required ? ' *' : ''}`}
-                          placeholder={f.defaultValue || `Enter ${f.label}`}
-                          disabled={f.readOnly}
-                        />
-                      )}
-                    </div>
-                  ))}
+                  {/* 1. Employee ID */}
+                  <FormField label="Employee ID" htmlFor="reg-employee-id" required>
+                    <Input
+                      id="reg-employee-id"
+                      value={employeeId}
+                      onChange={(e) => setEmployeeId(e.target.value)}
+                      placeholder="EMP2026001"
+                      rightIcon={
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          type="button"
+                          onClick={handleAutoGenerateId}
+                        >
+                          Auto
+                        </Button>
+                      }
+                    />
+                  </FormField>
 
-                {/* 1. Employee ID */}
-                <Input
-                  label="Employee ID *"
-                  value={employeeId}
-                  onChange={(e) => setEmployeeId(e.target.value)}
-                  placeholder="EMP2026001"
-                  rightIcon={
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      type="button"
-                      onClick={handleAutoGenerateId}
-                    >
-                      Auto
-                    </Button>
-                  }
-                />
+                  {/* 2. Employment Type */}
+                  <FormField label="Employment Type" htmlFor="reg-employment-type" required>
+                    <Select
+                      id="reg-employment-type"
+                      value={employmentType}
+                      onChange={(e) => setEmploymentType(e.target.value)}
+                      options={[
+                        { value: 'full_time', label: 'Full Time' },
+                        { value: 'part_time', label: 'Part Time' },
+                        { value: 'contract', label: 'Contract' },
+                        { value: 'intern', label: 'Intern' },
+                        { value: 'other', label: 'Other' },
+                      ]}
+                    />
+                  </FormField>
 
-                {/* 2. Employment Type */}
-                <Select
-                  label="Employment Type *"
-                  value={employmentType}
-                  onChange={(e) => setEmploymentType(e.target.value)}
-                  options={[
-                    { value: 'full_time', label: 'Full Time' },
-                    { value: 'part_time', label: 'Part Time' },
-                    { value: 'contract', label: 'Contract' },
-                    { value: 'intern', label: 'Intern' },
-                    { value: 'other', label: 'Other' },
-                  ]}
-                />
+                  {/* 3. Employment Status */}
+                  <FormField label="Employment Status" htmlFor="reg-employment-status" required>
+                    <Select
+                      id="reg-employment-status"
+                      value={employmentStatus}
+                      onChange={(e) => setEmploymentStatus(e.target.value)}
+                      options={[
+                        { value: 'pending_activation', label: 'Pending Activation' },
+                        { value: 'active', label: 'Active' },
+                        { value: 'probation', label: 'Probation' },
+                        { value: 'other', label: 'Other' },
+                      ]}
+                    />
+                  </FormField>
+                </FormGrid>
+              </FormSection>
 
-                {/* 3. Employment Status */}
-                <Select
-                  label="Employment Status *"
-                  value={employmentStatus}
-                  onChange={(e) => setEmploymentStatus(e.target.value)}
-                  options={[
-                    { value: 'pending_activation', label: 'Pending Activation' },
-                    { value: 'active', label: 'Active' },
-                    { value: 'probation', label: 'Probation' },
-                    { value: 'other', label: 'Other' },
-                  ]}
-                />
+              {/* Section 2: Employment Details */}
+              <FormSection
+                title="Employment Details"
+                description="Role, structure, placement, and reporting hierarchy"
+              >
+                <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                  {/* 4. Department */}
+                  <FormField label="Department" htmlFor="reg-department" required>
+                    <Select
+                      id="reg-department"
+                      value={department}
+                      onChange={(e) => setDepartment(e.target.value)}
+                      options={[
+                        { value: 'Engineering', label: 'Engineering' },
+                        { value: 'Human Resources', label: 'Human Resources' },
+                        { value: 'Finance', label: 'Finance' },
+                        { value: 'Operations', label: 'Operations' },
+                        { value: 'other', label: 'Other' },
+                      ]}
+                    />
+                  </FormField>
 
-                {/* 4. Department */}
-                <Select
-                  label="Department *"
-                  value={department}
-                  onChange={(e) => setDepartment(e.target.value)}
-                  options={[
-                    { value: 'Engineering', label: 'Engineering' },
-                    { value: 'Human Resources', label: 'Human Resources' },
-                    { value: 'Finance', label: 'Finance' },
-                    { value: 'Operations', label: 'Operations' },
-                    { value: 'other', label: 'Other' },
-                  ]}
-                />
+                  {/* 5. Team */}
+                  <FormField label="Team" htmlFor="reg-team" required>
+                    <Select
+                      id="reg-team"
+                      value={team}
+                      onChange={(e) => setTeam(e.target.value)}
+                      options={[
+                        { value: 'Product Development', label: 'Product Development' },
+                        { value: 'Frontend', label: 'Frontend Engineering' },
+                        { value: 'Backend', label: 'Backend Engineering' },
+                        { value: 'QA', label: 'Quality Assurance' },
+                        { value: 'other', label: 'Other' },
+                      ]}
+                    />
+                  </FormField>
 
-                {/* 5. Team */}
-                <Select
-                  label="Team *"
-                  value={team}
-                  onChange={(e) => setTeam(e.target.value)}
-                  options={[
-                    { value: 'Product Development', label: 'Product Development' },
-                    { value: 'Frontend', label: 'Frontend Engineering' },
-                    { value: 'Backend', label: 'Backend Engineering' },
-                    { value: 'QA', label: 'Quality Assurance' },
-                    { value: 'other', label: 'Other' },
-                  ]}
-                />
+                  {/* 6. Designation */}
+                  <FormField label="Designation" htmlFor="reg-designation" required>
+                    <Select
+                      id="reg-designation"
+                      value={designation}
+                      onChange={(e) => setDesignation(e.target.value)}
+                      options={[
+                        { value: 'Software Engineer', label: 'Software Engineer' },
+                        { value: 'Financial Analyst', label: 'Financial Analyst' },
+                        { value: 'Senior HR Specialist', label: 'Senior HR Specialist' },
+                        { value: 'Product Manager', label: 'Product Manager' },
+                        { value: 'other', label: 'Other' },
+                      ]}
+                    />
+                  </FormField>
 
-                {/* 6. Designation */}
-                <Select
-                  label="Designation *"
-                  value={designation}
-                  onChange={(e) => setDesignation(e.target.value)}
-                  options={[
-                    { value: 'Software Engineer', label: 'Software Engineer' },
-                    { value: 'Financial Analyst', label: 'Financial Analyst' },
-                    { value: 'Senior HR Specialist', label: 'Senior HR Specialist' },
-                    { value: 'Product Manager', label: 'Product Manager' },
-                    { value: 'other', label: 'Other' },
-                  ]}
-                />
+                  {/* 7. Grade / Level */}
+                  <FormField label="Grade / Level" htmlFor="reg-grade-level" required>
+                    <Select
+                      id="reg-grade-level"
+                      value={gradeLevel}
+                      onChange={(e) => setGradeLevel(e.target.value)}
+                      options={[
+                        { value: 'L1 - Entry Level', label: 'L1 - Entry Level' },
+                        { value: 'L2 - Mid Level', label: 'L2 - Mid Level' },
+                        { value: 'L3 - Senior Level', label: 'L3 - Senior Level' },
+                        { value: 'L4 - Lead', label: 'L4 - Lead' },
+                        { value: 'L5 - Executive', label: 'L5 - Executive' },
+                        { value: 'other', label: 'Other' },
+                      ]}
+                    />
+                  </FormField>
 
-                {/* 7. Grade / Level */}
-                <Select
-                  label="Grade / Level *"
-                  value={gradeLevel}
-                  onChange={(e) => setGradeLevel(e.target.value)}
-                  options={[
-                    { value: 'L1 - Entry Level', label: 'L1 - Entry Level' },
-                    { value: 'L2 - Mid Level', label: 'L2 - Mid Level' },
-                    { value: 'L3 - Senior Level', label: 'L3 - Senior Level' },
-                    { value: 'L4 - Lead', label: 'L4 - Lead' },
-                    { value: 'L5 - Executive', label: 'L5 - Executive' },
-                    { value: 'other', label: 'Other' },
-                  ]}
-                />
+                  {/* 8. Reporting Manager */}
+                  <FormField
+                    label="Reporting Manager"
+                    htmlFor="reg-reporting-manager"
+                    required
+                    disabled
+                  >
+                    <Input
+                      id="reg-reporting-manager"
+                      value={reportingManager || ''}
+                      placeholder="Select Manager..."
+                      disabled
+                    />
+                  </FormField>
 
-                {/* 8. Reporting Manager */}
-                <Input
-                  label="Reporting Manager *"
-                  value={reportingManager || ''}
-                  placeholder="Select Manager..."
-                  disabled
-                />
+                  {/* 9. Organisation Unit */}
+                  <FormField label="Organisation Unit" htmlFor="reg-org-unit" required>
+                    <Select
+                      id="reg-org-unit"
+                      value={organisationUnit}
+                      onChange={(e) => setOrganisationUnit(e.target.value)}
+                      options={[
+                        { value: 'Technology', label: 'Technology' },
+                        { value: 'Operations', label: 'Operations' },
+                        { value: 'Corporate', label: 'Corporate' },
+                        { value: 'other', label: 'Other' },
+                      ]}
+                    />
+                  </FormField>
 
-                {/* 9. Organisation Unit */}
-                <Select
-                  label="Organisation Unit *"
-                  value={organisationUnit}
-                  onChange={(e) => setOrganisationUnit(e.target.value)}
-                  options={[
-                    { value: 'Technology', label: 'Technology' },
-                    { value: 'Operations', label: 'Operations' },
-                    { value: 'Corporate', label: 'Corporate' },
-                    { value: 'other', label: 'Other' },
-                  ]}
-                />
+                  {/* 10. Office Location */}
+                  <FormField label="Office Location" htmlFor="reg-office-location" required>
+                    <Select
+                      id="reg-office-location"
+                      value={officeLocation}
+                      onChange={(e) => setOfficeLocation(e.target.value)}
+                      options={[
+                        { value: 'Chennai - Main Office', label: 'Chennai - Main Office' },
+                        { value: 'Bengaluru', label: 'Bengaluru' },
+                        { value: 'Hyderabad', label: 'Hyderabad' },
+                        { value: 'other', label: 'Other' },
+                      ]}
+                    />
+                  </FormField>
 
-                {/* 10. Office Location */}
-                <Select
-                  label="Office Location *"
-                  value={officeLocation}
-                  onChange={(e) => setOfficeLocation(e.target.value)}
-                  options={[
-                    { value: 'Chennai - Main Office', label: 'Chennai - Main Office' },
-                    { value: 'Bengaluru', label: 'Bengaluru' },
-                    { value: 'Hyderabad', label: 'Hyderabad' },
-                    { value: 'other', label: 'Other' },
-                  ]}
-                />
+                  {/* 11. Joining Date */}
+                  <FormField label="Joining Date" htmlFor="reg-joining-date" required>
+                    <Input
+                      id="reg-joining-date"
+                      type="date"
+                      value={joiningDate}
+                      onChange={(e) => setJoiningDate(e.target.value)}
+                    />
+                  </FormField>
+                </FormGrid>
+              </FormSection>
 
-                {/* 11. Joining Date */}
-                <Input
-                  label="Joining Date *"
-                  type="date"
-                  value={joiningDate}
-                  onChange={(e) => setJoiningDate(e.target.value)}
-                />
+              {/* Section 3: Additional Information */}
+              <FormSection
+                title="Additional Information"
+                description="Timeline, recruitment source, and employment terms"
+              >
+                <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                  {/* 12. Confirmed Date of Joining */}
+                  <FormField label="Confirmed Date of Joining" htmlFor="reg-confirmed-joining-date">
+                    <Input
+                      id="reg-confirmed-joining-date"
+                      type="date"
+                      value={confirmedJoiningDate}
+                      onChange={(e) => setConfirmedJoiningDate(e.target.value)}
+                    />
+                  </FormField>
 
-                {/* 12. Confirmed Date of Joining */}
-                <Input
-                  label="Confirmed Date of Joining"
-                  type="date"
-                  value={confirmedJoiningDate}
-                  onChange={(e) => setConfirmedJoiningDate(e.target.value)}
-                />
+                  {/* 13. End Date */}
+                  <FormField label="End Date" htmlFor="reg-end-date">
+                    <Input
+                      id="reg-end-date"
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                    />
+                  </FormField>
 
-                {/* 13. End Date */}
-                <Input
-                  label="End Date"
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                />
+                  {/* 14. Source of Hire */}
+                  <FormField label="Source of Hire" htmlFor="reg-source-of-hire" required>
+                    <Select
+                      id="reg-source-of-hire"
+                      value={sourceOfHire}
+                      onChange={(e) => setSourceOfHire(e.target.value)}
+                      options={[
+                        { value: 'direct_applicant', label: 'Direct Applicant' },
+                        { value: 'referral', label: 'Referral' },
+                        { value: 'agency', label: 'Agency' },
+                        { value: 'campus', label: 'Campus' },
+                        { value: 'linkedin', label: 'LinkedIn' },
+                        { value: 'other', label: 'Other' },
+                      ]}
+                    />
+                  </FormField>
 
-                {/* 14. Source of Hire */}
-                <Select
-                  label="Source of Hire *"
-                  value={sourceOfHire}
-                  onChange={(e) => setSourceOfHire(e.target.value)}
-                  options={[
-                    { value: 'direct_applicant', label: 'Direct Applicant' },
-                    { value: 'referral', label: 'Referral' },
-                    { value: 'agency', label: 'Agency' },
-                    { value: 'campus', label: 'Campus' },
-                    { value: 'linkedin', label: 'LinkedIn' },
-                    { value: 'other', label: 'Other' },
-                  ]}
-                />
+                  {/* 15. Probation Period */}
+                  <FormField label="Probation Period" htmlFor="reg-probation-period" required>
+                    <Select
+                      id="reg-probation-period"
+                      value={probationPeriod}
+                      onChange={(e) => setProbationPeriod(e.target.value)}
+                      options={[
+                        { value: '3_months', label: '3 Months' },
+                        { value: '6_months', label: '6 Months' },
+                        { value: '12_months', label: '12 Months' },
+                        { value: 'no_probation', label: 'No Probation' },
+                        { value: 'custom', label: 'Custom' },
+                        { value: 'other', label: 'Other' },
+                      ]}
+                    />
+                  </FormField>
 
-                {/* 15. Probation Period */}
-                <Select
-                  label="Probation Period *"
-                  value={probationPeriod}
-                  onChange={(e) => setProbationPeriod(e.target.value)}
-                  options={[
-                    { value: '3_months', label: '3 Months' },
-                    { value: '6_months', label: '6 Months' },
-                    { value: '12_months', label: '12 Months' },
-                    { value: 'no_probation', label: 'No Probation' },
-                    { value: 'custom', label: 'Custom' },
-                    { value: 'other', label: 'Other' },
-                  ]}
-                />
-
-                {/* 16. Notice Period */}
-                <Select
-                  label="Notice Period *"
-                  value={noticePeriod}
-                  onChange={(e) => setNoticePeriod(e.target.value)}
-                  options={[
-                    { value: '15_days', label: '15 Days' },
-                    { value: '30_days', label: '30 Days' },
-                    { value: '60_days', label: '60 Days' },
-                    { value: '90_days', label: '90 Days' },
-                    { value: 'no_notice', label: 'No Notice Period' },
-                    { value: 'custom', label: 'Custom' },
-                    { value: 'other', label: 'Other' },
-                  ]}
-                />
-              </FormGrid>
+                  {/* 16. Notice Period */}
+                  <FormField label="Notice Period" htmlFor="reg-notice-period" required>
+                    <Select
+                      id="reg-notice-period"
+                      value={noticePeriod}
+                      onChange={(e) => setNoticePeriod(e.target.value)}
+                      options={[
+                        { value: '15_days', label: '15 Days' },
+                        { value: '30_days', label: '30 Days' },
+                        { value: '60_days', label: '60 Days' },
+                        { value: '90_days', label: '90 Days' },
+                        { value: 'no_notice', label: 'No Notice Period' },
+                        { value: 'custom', label: 'Custom' },
+                        { value: 'other', label: 'Other' },
+                      ]}
+                    />
+                  </FormField>
+                </FormGrid>
+              </FormSection>
             </Stack>
           ) : activeSection === 'personal' ? (
-            <Stack gap="lg">
-              <Toolbar
-                left={
-                  <Inline gap="md" align="center">
-                    <BezentIcon name="employees" size={22} />
-                    <div>
-                      <h3 className="bezent-card__title">Personal Information</h3>
-                      <p className="bezent-card__desc">
-                        Basic personal information about the employee.
-                      </p>
-                    </div>
-                  </Inline>
-                }
-              />
-              <PersonalInformation employeeId={employeeId} />
-            </Stack>
+            <PersonalInformation employeeId={employeeId} />
           ) : activeSection === 'onboarding' ? (
-            <Stack gap="lg">
-              <Toolbar
-                left={
-                  <Inline gap="md" align="center">
-                    <BezentIcon name="tasks" size={22} />
-                    <div>
-                      <h3 className="bezent-card__title">Administration / Onboarding</h3>
-                      <p className="bezent-card__desc">
-                        Onboarding tasks and assigned assets for the employee.
-                      </p>
-                    </div>
-                  </Inline>
-                }
-              />
-              <OnboardingSection />
-            </Stack>
+            <OnboardingSection />
           ) : activeSection === 'skills' ? (
             <SkillsSection />
           ) : activeSection === 'emergency' ? (

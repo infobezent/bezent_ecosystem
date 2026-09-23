@@ -116,7 +116,10 @@ describe('HRMS Onboarding UI Components', () => {
     );
     // Modal workspace structure & tokens
     expect(html).toContain('bezent-modal');
-    expect(html).toContain('bezent-modal--xl');
+    expect(html).toContain('bezent-modal--workspace');
+    expect(html).toContain('bezent-modal__header-bottom');
+    expect(html).toContain('bezent-form-grid--layout-horizontal');
+    expect(html).toContain('bezent-form-field--horizontal');
     expect(html).toContain('Employee Registration');
     expect(html).toContain('Add and manage new employee information');
     // Persistent header close button
