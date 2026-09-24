@@ -1,5 +1,20 @@
 import { useState, useMemo } from 'react';
-import { BezentIcon } from '../../../../design-system/icons';
+import {
+  FormSection,
+  FormGrid,
+  FormField,
+  Input,
+  Select,
+  Button,
+  Badge,
+  Card,
+  CardTitle,
+  Label,
+  Switch,
+  Stack,
+  Inline,
+  Grid,
+} from '../../../../design-system';
 
 interface BankInfo {
   bankName: string;
@@ -29,6 +44,56 @@ const IFSC_DATABASE: Record<string, BankInfo> = {
     location: 'Chennai, Tamil Nadu',
   },
 };
+
+const SALARY_STRUCTURE_OPTIONS = [
+  { value: 'Standard IT Professional Structure', label: 'Standard IT Professional Structure' },
+  { value: 'Executive Management Structure', label: 'Executive Management Structure' },
+  { value: 'Sales & Commission Structure', label: 'Sales & Commission Structure' },
+  { value: 'Other', label: 'Other / Add New' },
+];
+
+const PAY_GRADE_OPTIONS = [
+  { value: 'L1 - Entry Level', label: 'L1 - Entry Level' },
+  { value: 'L2 - Mid Level', label: 'L2 - Mid Level' },
+  { value: 'L3 - Senior Specialist', label: 'L3 - Senior Specialist' },
+  { value: 'L4 - Lead / Manager', label: 'L4 - Lead / Manager' },
+  { value: 'L5 - Executive', label: 'L5 - Executive' },
+];
+
+const PAYROLL_GROUP_OPTIONS = [
+  { value: 'Core Engineering Payroll', label: 'Core Engineering Payroll' },
+  { value: 'Executive Payroll', label: 'Executive Payroll' },
+  { value: 'Contractor Payroll', label: 'Contractor Payroll' },
+  { value: 'Other', label: 'Other / Add New' },
+];
+
+const PAYMENT_FREQUENCY_OPTIONS = [
+  { value: 'Monthly', label: 'Monthly' },
+  { value: 'Weekly', label: 'Weekly' },
+  { value: 'Bi-weekly', label: 'Bi-weekly' },
+  { value: 'Other', label: 'Other' },
+];
+
+const TAX_REGIME_OPTIONS = [
+  { value: 'New Tax Regime', label: 'New Tax Regime (Default Sec 115BAC)' },
+  { value: 'Old Tax Regime', label: 'Old Tax Regime (With Deductions)' },
+  { value: 'Not Applicable', label: 'Not Applicable' },
+];
+
+const BENEFIT_ITEMS = [
+  { id: 'medical', label: 'Medical Insurance' },
+  { id: 'life', label: 'Life Insurance' },
+  { id: 'accident', label: 'Accident Coverage' },
+  { id: 'gratuityEligible', label: 'Gratuity Eligible' },
+  { id: 'bonusEligible', label: 'Bonus Eligible' },
+  { id: 'incentiveEligible', label: 'Incentive Eligible' },
+  { id: 'travel', label: 'Travel Allowance' },
+  { id: 'mobile', label: 'Mobile Reimbursement' },
+  { id: 'internet', label: 'Internet Allowance' },
+  { id: 'meal', label: 'Meal Vouchers' },
+  { id: 'wfh', label: 'WFH Allowance' },
+  { id: 'vehicle', label: 'Company Vehicle' },
+];
 
 export function AccountsSection() {
   // A. BANK DETAILS STATE
@@ -170,547 +235,386 @@ export function AccountsSection() {
   };
 
   return (
-    <div className="accounts-section">
-      {/* Banner Header */}
-      <div className="employee-registration__section-header">
-        <div className="employee-registration__section-icon-badge">
-          <BezentIcon name="documents" size={22} />
-        </div>
-        <div className="employee-registration__section-title-group">
-          <h2 className="employee-registration__section-title">Accounts &amp; Payroll</h2>
-          <p className="employee-registration__section-subtitle">
-            Bank details, automated salary structure, statutory compliance and benefits.
-          </p>
-        </div>
-      </div>
+    <Stack gap="xl">
+      {/* A. BANK DETAILS */}
+      <FormSection
+        title="Bank Details"
+        description="Bank account information and IFSC verification."
+      >
+        <FormGrid columns={2} layout="horizontal" labelWidth="md">
+          {/* 1. IFSC Code */}
+          <FormField label="IFSC Code" required helperText={ifscStatusMsg}>
+            <Input
+              type="text"
+              placeholder="e.g. HDFC0001234"
+              maxLength={11}
+              value={ifscCode}
+              onChange={(e) => handleIfscChange(e.target.value)}
+            />
+          </FormField>
 
-      <div className="accounts-section__container">
-        {/* ================================================== */}
-        {/* A. BANK DETAILS */}
-        {/* ================================================== */}
-        <div className="accounts-section__card">
-          <div className="accounts-section__card-header">
-            <span className="accounts-section__sub-badge">SUBSECTION A</span>
-            <h3 className="accounts-section__card-title">Bank Details</h3>
-          </div>
-
-          <form className="accounts-section__grid" onSubmit={(e) => e.preventDefault()}>
-            {/* 1. IFSC Code */}
-            <div className="employee-registration__field">
-              <label className="employee-registration__label">
-                IFSC Code <span className="employee-registration__required">*</span>
-              </label>
-              <input
+          {/* 2. Bank Name */}
+          <FormField label="Bank Name" required>
+            <Inline gap="xs" align="center">
+              <Input
                 type="text"
-                className="employee-registration__input uppercase"
-                placeholder="e.g. HDFC0001234"
-                maxLength={11}
-                value={ifscCode}
-                onChange={(e) => handleIfscChange(e.target.value)}
-              />
-              <span className="accounts-section__helper-text">{ifscStatusMsg}</span>
-            </div>
-
-            {/* 2. Bank Name */}
-            <div className="employee-registration__field">
-              <div className="accounts-section__label-row">
-                <label className="employee-registration__label">
-                  Bank Name <span className="employee-registration__required">*</span>
-                </label>
-                <button
-                  type="button"
-                  className="accounts-section__inline-btn"
-                  onClick={() => setIsBankNameEditable(!isBankNameEditable)}
-                >
-                  {isBankNameEditable ? 'Lock' : 'Edit'}
-                </button>
-              </div>
-              <input
-                type="text"
-                className="employee-registration__input"
                 value={bankName}
                 onChange={(e) => setBankName(e.target.value)}
                 readOnly={!isBankNameEditable}
               />
-            </div>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setIsBankNameEditable(!isBankNameEditable)}
+              >
+                {isBankNameEditable ? 'Lock' : 'Edit'}
+              </Button>
+            </Inline>
+          </FormField>
 
-            {/* 3. Branch Name */}
-            <div className="employee-registration__field">
-              <label className="employee-registration__label">Branch Name</label>
-              <input
-                type="text"
-                className="employee-registration__input"
-                value={branchName}
-                readOnly
-              />
-              <span className="accounts-section__helper-text">{bankLocation}</span>
-            </div>
+          {/* 3. Branch Name */}
+          <FormField label="Branch Name" helperText={bankLocation}>
+            <Input type="text" value={branchName} readOnly />
+          </FormField>
 
-            {/* 4. Account Holder Name */}
-            <div className="employee-registration__field">
-              <label className="employee-registration__label">
-                Account Holder Name <span className="employee-registration__required">*</span>
-              </label>
-              <input
-                type="text"
-                className="employee-registration__input"
-                value={accountHolderName}
-                onChange={(e) => setAccountHolderName(e.target.value)}
-              />
-            </div>
+          {/* 4. Account Holder Name */}
+          <FormField label="Account Holder" required>
+            <Input
+              type="text"
+              value={accountHolderName}
+              onChange={(e) => setAccountHolderName(e.target.value)}
+            />
+          </FormField>
 
-            {/* 5. Account Number */}
-            <div className="employee-registration__field">
-              <label className="employee-registration__label">
-                Account Number <span className="employee-registration__required">*</span>
-              </label>
-              <input
-                type="text"
-                className="employee-registration__input"
-                placeholder="Enter bank account number"
-                value={accountNumber}
-                onChange={(e) => setAccountNumber(e.target.value)}
-              />
-            </div>
+          {/* 5. Account Number */}
+          <FormField label="Account Number" required>
+            <Input
+              type="text"
+              placeholder="Enter bank account number"
+              value={accountNumber}
+              onChange={(e) => setAccountNumber(e.target.value)}
+            />
+          </FormField>
 
-            {/* 6. Re-enter Account Number */}
-            <div className="employee-registration__field">
-              <label className="employee-registration__label">
-                Re-enter Account Number <span className="employee-registration__required">*</span>
-              </label>
-              <input
-                type="text"
-                className={`employee-registration__input ${
-                  accountMismatchError ? 'accounts-section__input--error' : ''
-                }`}
-                placeholder="Re-enter bank account number"
-                value={reAccountNumber}
-                onChange={(e) => setReAccountNumber(e.target.value)}
-              />
-              {accountMismatchError && (
-                <span className="accounts-section__error-msg">{accountMismatchError}</span>
-              )}
-            </div>
-          </form>
-        </div>
+          {/* 6. Re-enter Account Number */}
+          <FormField label="Re-enter Account" required error={accountMismatchError}>
+            <Input
+              type="text"
+              placeholder="Re-enter bank account number"
+              value={reAccountNumber}
+              onChange={(e) => setReAccountNumber(e.target.value)}
+            />
+          </FormField>
+        </FormGrid>
+      </FormSection>
 
-        {/* ================================================== */}
-        {/* B. SALARY STRUCTURE */}
-        {/* ================================================== */}
-        <div className="accounts-section__card">
-          <div className="accounts-section__card-header">
-            <span className="accounts-section__sub-badge">SUBSECTION B</span>
-            <h3 className="accounts-section__card-title">Salary Structure &amp; Breakdown</h3>
-          </div>
-
-          <form className="accounts-section__grid" onSubmit={(e) => e.preventDefault()}>
+      {/* B. SALARY STRUCTURE & BREAKDOWN */}
+      <FormSection
+        title="Salary Structure & Breakdown"
+        description="Annual CTC, pay grade, and automated monthly salary component breakdown."
+      >
+        <Stack gap="md">
+          <FormGrid columns={2} layout="horizontal" labelWidth="md">
             {/* 1. Salary Structure */}
-            <div className="employee-registration__field">
-              <label className="employee-registration__label">
-                Salary Structure <span className="employee-registration__required">*</span>
-              </label>
-              <div className="employee-registration__select-wrapper">
-                <select
-                  className="employee-registration__select"
+            <FormField label="Salary Structure" required>
+              <Stack gap="xs">
+                <Select
+                  options={SALARY_STRUCTURE_OPTIONS}
                   value={salaryStructure}
                   onChange={(e) => setSalaryStructure(e.target.value)}
-                >
-                  <option value="Standard IT Professional Structure">
-                    Standard IT Professional Structure
-                  </option>
-                  <option value="Executive Management Structure">
-                    Executive Management Structure
-                  </option>
-                  <option value="Sales & Commission Structure">
-                    Sales &amp; Commission Structure
-                  </option>
-                  <option value="Other">Other / Add New</option>
-                </select>
-                <span className="employee-registration__select-icon">▼</span>
-              </div>
-              {salaryStructure === 'Other' && (
-                <div className="employee-registration__other-container">
-                  <input
+                />
+                {salaryStructure === 'Other' && (
+                  <Input
                     type="text"
-                    className="employee-registration__input"
                     placeholder="Enter Custom Salary Structure"
                     value={customSalaryStructure}
                     onChange={(e) => setCustomSalaryStructure(e.target.value)}
                   />
-                </div>
-              )}
-            </div>
+                )}
+              </Stack>
+            </FormField>
 
             {/* 2. Pay Grade */}
-            <div className="employee-registration__field">
-              <label className="employee-registration__label">
-                Pay Grade <span className="employee-registration__required">*</span>
-              </label>
-              <div className="employee-registration__select-wrapper">
-                <select
-                  className="employee-registration__select"
-                  value={payGrade}
-                  onChange={(e) => setPayGrade(e.target.value)}
-                >
-                  <option value="L1 - Entry Level">L1 - Entry Level</option>
-                  <option value="L2 - Mid Level">L2 - Mid Level</option>
-                  <option value="L3 - Senior Specialist">L3 - Senior Specialist</option>
-                  <option value="L4 - Lead / Manager">L4 - Lead / Manager</option>
-                  <option value="L5 - Executive">L5 - Executive</option>
-                </select>
-                <span className="employee-registration__select-icon">▼</span>
-              </div>
-            </div>
+            <FormField label="Pay Grade" required>
+              <Select
+                options={PAY_GRADE_OPTIONS}
+                value={payGrade}
+                onChange={(e) => setPayGrade(e.target.value)}
+              />
+            </FormField>
 
             {/* 3. Annual CTC */}
-            <div className="employee-registration__field">
-              <label className="employee-registration__label">
-                Annual CTC (₹) <span className="employee-registration__required">*</span>
-              </label>
-              <input
+            <FormField
+              label="Annual CTC (₹)"
+              required
+              helperText={`Monthly CTC: ₹${salaryCalculations.monthlyCtc.toLocaleString('en-IN')}`}
+            >
+              <Input
                 type="number"
                 min="0"
-                className="employee-registration__input"
                 placeholder="e.g. 1200000"
                 value={annualCtc}
                 onChange={(e) => setAnnualCtc(e.target.value)}
               />
-              <span className="accounts-section__helper-text">
-                Monthly CTC: ₹{salaryCalculations.monthlyCtc.toLocaleString('en-IN')}
-              </span>
-            </div>
-          </form>
+            </FormField>
 
-          {/* AUTOMATED CALCULATED BREAKDOWN */}
-          <div className="accounts-section__calc-banner">
-            <span className="accounts-section__calc-icon">⚡</span>
-            <span>
-              Component values are automatically calculated from Annual CTC &amp; Salary Structure.
-            </span>
-          </div>
-
-          <div className="accounts-section__salary-grid">
-            <div className="accounts-section__calc-box">
-              <span className="accounts-section__calc-label">Basic Salary (Monthly)</span>
-              <span className="accounts-section__calc-val">
-                ₹{salaryCalculations.basicMonthly.toLocaleString('en-IN')}
-              </span>
-            </div>
-            <div className="accounts-section__calc-box">
-              <span className="accounts-section__calc-label">HRA (Monthly)</span>
-              <span className="accounts-section__calc-val">
-                ₹{salaryCalculations.hraMonthly.toLocaleString('en-IN')}
-              </span>
-            </div>
-            <div className="accounts-section__calc-box">
-              <span className="accounts-section__calc-label">Special Allowance</span>
-              <span className="accounts-section__calc-val">
-                ₹{salaryCalculations.specialAllowanceMonthly.toLocaleString('en-IN')}
-              </span>
-            </div>
-            <div className="accounts-section__calc-box">
-              <span className="accounts-section__calc-label">Other Allowances</span>
-              <span className="accounts-section__calc-val">
-                ₹{salaryCalculations.otherAllowancesMonthly.toLocaleString('en-IN')}
-              </span>
-            </div>
-            <div className="accounts-section__calc-box">
-              <span className="accounts-section__calc-label">Variable Pay / Bonus</span>
-              <div className="accounts-section__var-row">
-                <input
+            {/* 4. Variable Pay */}
+            <FormField label="Variable Pay">
+              <Inline gap="xs" align="center">
+                <Input
                   type="number"
-                  className="accounts-section__var-input"
                   value={variablePayVal}
                   onChange={(e) => setVariablePayVal(e.target.value)}
                 />
-                <select
-                  className="accounts-section__var-select"
+                <Select
+                  options={[
+                    { value: 'percentage', label: '%' },
+                    { value: 'amount', label: '₹/Yr' },
+                  ]}
                   value={variablePayType}
                   onChange={(e) => setVariablePayType(e.target.value as 'amount' | 'percentage')}
-                >
-                  <option value="percentage">%</option>
-                  <option value="amount">₹/Yr</option>
-                </select>
-              </div>
-            </div>
-            <div className="accounts-section__calc-box accounts-section__calc-box--highlight">
-              <span className="accounts-section__calc-label">Gross Salary (Monthly)</span>
-              <span className="accounts-section__calc-val accounts-section__calc-val--primary">
-                ₹{salaryCalculations.grossMonthly.toLocaleString('en-IN')}
-              </span>
-            </div>
-            <div className="accounts-section__calc-box">
-              <span className="accounts-section__calc-label">Employer PF Contribution</span>
-              <span className="accounts-section__calc-val">
-                ₹{salaryCalculations.pfMonthly.toLocaleString('en-IN')}
-              </span>
-            </div>
-            <div className="accounts-section__calc-box">
-              <span className="accounts-section__calc-label">Gratuity Provision</span>
-              <span className="accounts-section__calc-val">
-                ₹{salaryCalculations.gratuityMonthly.toLocaleString('en-IN')}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* ================================================== */}
-        {/* C. PAYROLL SETUP & D. STATUTORY */}
-        {/* ================================================== */}
-        <div className="accounts-section__row-2">
-          {/* C. PAYROLL SETUP */}
-          <div className="accounts-section__card">
-            <div className="accounts-section__card-header">
-              <span className="accounts-section__sub-badge">SUBSECTION C</span>
-              <h3 className="accounts-section__card-title">Payroll Setup</h3>
-            </div>
-            <form className="accounts-section__grid-stack" onSubmit={(e) => e.preventDefault()}>
-              {/* 1. Payroll Group */}
-              <div className="employee-registration__field">
-                <label className="employee-registration__label">Payroll Group</label>
-                <div className="employee-registration__select-wrapper">
-                  <select
-                    className="employee-registration__select"
-                    value={payrollGroup}
-                    onChange={(e) => setPayrollGroup(e.target.value)}
-                  >
-                    <option value="Core Engineering Payroll">Core Engineering Payroll</option>
-                    <option value="Executive Payroll">Executive Payroll</option>
-                    <option value="Contractor Payroll">Contractor Payroll</option>
-                    <option value="Other">Other / Add New</option>
-                  </select>
-                  <span className="employee-registration__select-icon">▼</span>
-                </div>
-                {payrollGroup === 'Other' && (
-                  <div className="employee-registration__other-container">
-                    <input
-                      type="text"
-                      className="employee-registration__input"
-                      placeholder="Enter Payroll Group"
-                      value={customPayrollGroup}
-                      onChange={(e) => setCustomPayrollGroup(e.target.value)}
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* 2. Salary Effective Date */}
-              <div className="employee-registration__field">
-                <label className="employee-registration__label">Salary Effective Date</label>
-                <input
-                  type="date"
-                  className="employee-registration__input"
-                  value={salaryEffectiveDate}
-                  onChange={(e) => setSalaryEffectiveDate(e.target.value)}
                 />
-              </div>
+              </Inline>
+            </FormField>
+          </FormGrid>
 
-              {/* 3. Payment Frequency */}
-              <div className="employee-registration__field">
-                <label className="employee-registration__label">Payment Frequency</label>
-                <div className="employee-registration__select-wrapper">
-                  <select
-                    className="employee-registration__select"
-                    value={paymentFrequency}
-                    onChange={(e) => setPaymentFrequency(e.target.value)}
-                  >
-                    <option value="Monthly">Monthly</option>
-                    <option value="Weekly">Weekly</option>
-                    <option value="Bi-weekly">Bi-weekly</option>
-                    <option value="Other">Other</option>
-                  </select>
-                  <span className="employee-registration__select-icon">▼</span>
-                </div>
-                {paymentFrequency === 'Other' && (
-                  <div className="employee-registration__other-container">
-                    <input
-                      type="text"
-                      className="employee-registration__input"
-                      placeholder="Enter Payment Frequency"
-                      value={customPaymentFrequency}
-                      onChange={(e) => setCustomPaymentFrequency(e.target.value)}
-                    />
-                  </div>
-                )}
-              </div>
-            </form>
-          </div>
+          {/* CALCULATED BREAKDOWN */}
+          <Card variant="flat">
+            <Stack gap="md">
+              <Inline justify="between" align="center">
+                <CardTitle>Monthly Salary Components Breakdown</CardTitle>
+                <Badge variant="neutral" size="sm">
+                  Auto-calculated
+                </Badge>
+              </Inline>
 
-          {/* D. STATUTORY */}
-          <div className="accounts-section__card">
-            <div className="accounts-section__card-header">
-              <span className="accounts-section__sub-badge">SUBSECTION D</span>
-              <h3 className="accounts-section__card-title">Statutory Compliance</h3>
-            </div>
-            <div className="accounts-section__toggle-grid">
-              <div className="accounts-section__toggle-item">
-                <div>
-                  <span className="accounts-section__toggle-title">PF Applicable?</span>
-                  <span className="accounts-section__toggle-desc">
-                    Provident Fund 12% contribution
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  className={`emergency-contact-section__toggle-switch ${
-                    isPfApplicable ? 'emergency-contact-section__toggle-switch--active' : ''
-                  }`}
-                  onClick={() => setIsPfApplicable(!isPfApplicable)}
-                >
-                  <span className="emergency-contact-section__toggle-handle" />
-                </button>
-              </div>
+              <Grid columns={4} gap="md">
+                <Card variant="flat" padding="sm">
+                  <Stack gap="xs">
+                    <Label size="sm">Basic Salary (Monthly)</Label>
+                    <CardTitle>
+                      ₹{salaryCalculations.basicMonthly.toLocaleString('en-IN')}
+                    </CardTitle>
+                  </Stack>
+                </Card>
+                <Card variant="flat" padding="sm">
+                  <Stack gap="xs">
+                    <Label size="sm">HRA (Monthly)</Label>
+                    <CardTitle>₹{salaryCalculations.hraMonthly.toLocaleString('en-IN')}</CardTitle>
+                  </Stack>
+                </Card>
+                <Card variant="flat" padding="sm">
+                  <Stack gap="xs">
+                    <Label size="sm">Special Allowance</Label>
+                    <CardTitle>
+                      ₹{salaryCalculations.specialAllowanceMonthly.toLocaleString('en-IN')}
+                    </CardTitle>
+                  </Stack>
+                </Card>
+                <Card variant="flat" padding="sm">
+                  <Stack gap="xs">
+                    <Label size="sm">Other Allowances</Label>
+                    <CardTitle>
+                      ₹{salaryCalculations.otherAllowancesMonthly.toLocaleString('en-IN')}
+                    </CardTitle>
+                  </Stack>
+                </Card>
+                <Card variant="flat" padding="sm">
+                  <Stack gap="xs">
+                    <Label size="sm">Gross Salary (Monthly)</Label>
+                    <CardTitle>
+                      ₹{salaryCalculations.grossMonthly.toLocaleString('en-IN')}
+                    </CardTitle>
+                  </Stack>
+                </Card>
+                <Card variant="flat" padding="sm">
+                  <Stack gap="xs">
+                    <Label size="sm">Employer PF Contribution</Label>
+                    <CardTitle>₹{salaryCalculations.pfMonthly.toLocaleString('en-IN')}</CardTitle>
+                  </Stack>
+                </Card>
+                <Card variant="flat" padding="sm">
+                  <Stack gap="xs">
+                    <Label size="sm">Gratuity Provision</Label>
+                    <CardTitle>
+                      ₹{salaryCalculations.gratuityMonthly.toLocaleString('en-IN')}
+                    </CardTitle>
+                  </Stack>
+                </Card>
+                <Card variant="flat" padding="sm">
+                  <Stack gap="xs">
+                    <Label size="sm">Variable Component</Label>
+                    <CardTitle>
+                      ₹{salaryCalculations.variableMonthly.toLocaleString('en-IN')}
+                    </CardTitle>
+                  </Stack>
+                </Card>
+              </Grid>
+            </Stack>
+          </Card>
+        </Stack>
+      </FormSection>
 
-              <div className="accounts-section__toggle-item">
-                <div>
-                  <span className="accounts-section__toggle-title">ESI Applicable?</span>
-                  <span className="accounts-section__toggle-desc">Employees State Insurance</span>
-                </div>
-                <button
-                  type="button"
-                  className={`emergency-contact-section__toggle-switch ${
-                    isEsiApplicable ? 'emergency-contact-section__toggle-switch--active' : ''
-                  }`}
-                  onClick={() => setIsEsiApplicable(!isEsiApplicable)}
-                >
-                  <span className="emergency-contact-section__toggle-handle" />
-                </button>
-              </div>
+      {/* C. PAYROLL SETUP & D. STATUTORY */}
+      <FormSection
+        title="Payroll Setup & Statutory Compliance"
+        description="Payroll disbursement frequency, tax regime, and statutory requirements."
+      >
+        <FormGrid columns={2} layout="horizontal" labelWidth="md">
+          {/* 1. Payroll Group */}
+          <FormField label="Payroll Group">
+            <Stack gap="xs">
+              <Select
+                options={PAYROLL_GROUP_OPTIONS}
+                value={payrollGroup}
+                onChange={(e) => setPayrollGroup(e.target.value)}
+              />
+              {payrollGroup === 'Other' && (
+                <Input
+                  type="text"
+                  placeholder="Enter Payroll Group"
+                  value={customPayrollGroup}
+                  onChange={(e) => setCustomPayrollGroup(e.target.value)}
+                />
+              )}
+            </Stack>
+          </FormField>
 
-              <div className="accounts-section__toggle-item">
-                <div>
-                  <span className="accounts-section__toggle-title">PT Applicable?</span>
-                  <span className="accounts-section__toggle-desc">
-                    Professional Tax state deduction
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  className={`emergency-contact-section__toggle-switch ${
-                    isPtApplicable ? 'emergency-contact-section__toggle-switch--active' : ''
-                  }`}
-                  onClick={() => setIsPtApplicable(!isPtApplicable)}
-                >
-                  <span className="emergency-contact-section__toggle-handle" />
-                </button>
-              </div>
+          {/* 2. Salary Effective Date */}
+          <FormField label="Effective Date">
+            <Input
+              type="date"
+              value={salaryEffectiveDate}
+              onChange={(e) => setSalaryEffectiveDate(e.target.value)}
+            />
+          </FormField>
 
-              <div className="employee-registration__field">
-                <label className="employee-registration__label">TDS &amp; Tax Regime</label>
-                <div className="employee-registration__select-wrapper">
-                  <select
-                    className="employee-registration__select"
-                    value={taxRegime}
-                    onChange={(e) => setTaxRegime(e.target.value)}
-                  >
-                    <option value="New Tax Regime">New Tax Regime (Default Sec 115BAC)</option>
-                    <option value="Old Tax Regime">Old Tax Regime (With Deductions)</option>
-                    <option value="Not Applicable">Not Applicable</option>
-                  </select>
-                  <span className="employee-registration__select-icon">▼</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+          {/* 3. Payment Frequency */}
+          <FormField label="Payment Frequency">
+            <Stack gap="xs">
+              <Select
+                options={PAYMENT_FREQUENCY_OPTIONS}
+                value={paymentFrequency}
+                onChange={(e) => setPaymentFrequency(e.target.value)}
+              />
+              {paymentFrequency === 'Other' && (
+                <Input
+                  type="text"
+                  placeholder="Enter Payment Frequency"
+                  value={customPaymentFrequency}
+                  onChange={(e) => setCustomPaymentFrequency(e.target.value)}
+                />
+              )}
+            </Stack>
+          </FormField>
 
-        {/* ================================================== */}
-        {/* E. BENEFITS */}
-        {/* ================================================== */}
-        <div className="accounts-section__card">
-          <div className="accounts-section__card-header">
-            <span className="accounts-section__sub-badge">SUBSECTION E</span>
-            <h3 className="accounts-section__card-title">Employee Benefits Checklist</h3>
-          </div>
+          {/* 4. TDS & Tax Regime */}
+          <FormField label="TDS Tax Regime">
+            <Select
+              options={TAX_REGIME_OPTIONS}
+              value={taxRegime}
+              onChange={(e) => setTaxRegime(e.target.value)}
+            />
+          </FormField>
 
-          <div className="accounts-section__benefits-grid">
-            {[
-              { id: 'medical', label: 'Medical Insurance' },
-              { id: 'life', label: 'Life Insurance' },
-              { id: 'accident', label: 'Accident Coverage' },
-              { id: 'gratuityEligible', label: 'Gratuity Eligible' },
-              { id: 'bonusEligible', label: 'Bonus Eligible' },
-              { id: 'incentiveEligible', label: 'Incentive Eligible' },
-              { id: 'travel', label: 'Travel Allowance' },
-              { id: 'mobile', label: 'Mobile Reimbursement' },
-              { id: 'internet', label: 'Internet Allowance' },
-              { id: 'meal', label: 'Meal Vouchers' },
-              { id: 'wfh', label: 'WFH Allowance' },
-              { id: 'vehicle', label: 'Company Vehicle' },
-            ].map((b) => {
+          {/* 5. PF Applicable */}
+          <FormField label="Provident Fund (PF)">
+            <Switch
+              checked={isPfApplicable}
+              onChange={(e) => setIsPfApplicable(e.target.checked)}
+              label="12% Contribution Applicable"
+            />
+          </FormField>
+
+          {/* 6. ESI Applicable */}
+          <FormField label="ESI Applicable">
+            <Switch
+              checked={isEsiApplicable}
+              onChange={(e) => setIsEsiApplicable(e.target.checked)}
+              label="Employees State Insurance"
+            />
+          </FormField>
+
+          {/* 7. PT Applicable */}
+          <FormField label="Professional Tax (PT)">
+            <Switch
+              checked={isPtApplicable}
+              onChange={(e) => setIsPtApplicable(e.target.checked)}
+              label="State PT Deduction"
+            />
+          </FormField>
+        </FormGrid>
+      </FormSection>
+
+      {/* E. BENEFITS */}
+      <FormSection
+        title="Employee Benefits Checklist"
+        description="Select applicable employee allowances, insurances, and corporate benefits."
+      >
+        <Stack gap="md">
+          <Grid columns={3} gap="md">
+            {BENEFIT_ITEMS.map((b) => {
               const key = b.id as keyof typeof benefits;
               return (
-                <div key={b.id} className="accounts-section__benefit-chip">
-                  <button
-                    type="button"
-                    className={`emergency-contact-section__toggle-switch ${
-                      benefits[key] ? 'emergency-contact-section__toggle-switch--active' : ''
-                    }`}
-                    onClick={() => toggleBenefit(key)}
-                  >
-                    <span className="emergency-contact-section__toggle-handle" />
-                  </button>
-                  <span className="accounts-section__benefit-name">{b.label}</span>
-                </div>
+                <Card key={b.id} variant="flat">
+                  <Switch
+                    checked={benefits[key]}
+                    onChange={() => toggleBenefit(key)}
+                    label={b.label}
+                  />
+                </Card>
               );
             })}
-          </div>
+          </Grid>
 
           {/* CONDITIONAL MEDICAL INSURANCE DETAILS */}
           {benefits.medical && (
-            <div className="accounts-section__medical-box">
-              <h4 className="accounts-section__sub-heading">Medical Insurance Policy Details</h4>
-              <div className="accounts-section__grid">
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">Insurance Provider</label>
-                  <input
-                    type="text"
-                    className="employee-registration__input"
-                    value={insuranceProvider}
-                    onChange={(e) => setInsuranceProvider(e.target.value)}
-                  />
-                </div>
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">Policy Name / Number</label>
-                  <input
-                    type="text"
-                    className="employee-registration__input"
-                    value={policyNumber}
-                    onChange={(e) => setPolicyNumber(e.target.value)}
-                  />
-                </div>
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">Coverage Amount</label>
-                  <input
-                    type="text"
-                    className="employee-registration__input"
-                    value={coverageAmount}
-                    onChange={(e) => setCoverageAmount(e.target.value)}
-                  />
-                </div>
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">Effective Date</label>
-                  <input
-                    type="date"
-                    className="employee-registration__input"
-                    value={medicalEffectiveDate}
-                    onChange={(e) => setMedicalEffectiveDate(e.target.value)}
-                  />
-                </div>
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">Expiry Date</label>
-                  <input
-                    type="date"
-                    className="employee-registration__input"
-                    value={medicalExpiryDate}
-                    onChange={(e) => setMedicalExpiryDate(e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
+            <Card variant="flat">
+              <Stack gap="md">
+                <CardTitle>Medical Insurance Policy Details</CardTitle>
+                <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                  <FormField label="Provider">
+                    <Input
+                      type="text"
+                      value={insuranceProvider}
+                      onChange={(e) => setInsuranceProvider(e.target.value)}
+                    />
+                  </FormField>
+                  <FormField label="Policy Number">
+                    <Input
+                      type="text"
+                      value={policyNumber}
+                      onChange={(e) => setPolicyNumber(e.target.value)}
+                    />
+                  </FormField>
+                  <FormField label="Coverage Amount">
+                    <Input
+                      type="text"
+                      value={coverageAmount}
+                      onChange={(e) => setCoverageAmount(e.target.value)}
+                    />
+                  </FormField>
+                  <FormField label="Effective Date">
+                    <Input
+                      type="date"
+                      value={medicalEffectiveDate}
+                      onChange={(e) => setMedicalEffectiveDate(e.target.value)}
+                    />
+                  </FormField>
+                  <FormField label="Expiry Date">
+                    <Input
+                      type="date"
+                      value={medicalExpiryDate}
+                      onChange={(e) => setMedicalExpiryDate(e.target.value)}
+                    />
+                  </FormField>
+                </FormGrid>
+              </Stack>
+            </Card>
           )}
-        </div>
-      </div>
-    </div>
+        </Stack>
+      </FormSection>
+    </Stack>
   );
 }

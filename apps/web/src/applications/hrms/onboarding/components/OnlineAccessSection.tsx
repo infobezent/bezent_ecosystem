@@ -1,5 +1,20 @@
 import { useState } from 'react';
-import { BezentIcon } from '../../../../design-system/icons';
+import {
+  FormSection,
+  FormGrid,
+  FormField,
+  Input,
+  Select,
+  Button,
+  Badge,
+  Card,
+  CardDescription,
+  Switch,
+  Checkbox,
+  Stack,
+  Inline,
+  Grid,
+} from '../../../../design-system';
 
 export interface ModulePermission {
   id: string;
@@ -55,6 +70,31 @@ const DEFAULT_MODULES: ModulePermission[] = [
   },
 ];
 
+const INVITATION_STATUS_OPTIONS = [
+  { value: 'Not Sent', label: 'Not Sent' },
+  { value: 'Pending', label: 'Pending' },
+  { value: 'Sent', label: 'Sent' },
+  { value: 'Accepted', label: 'Accepted' },
+  { value: 'Expired', label: 'Expired' },
+];
+
+const ROLE_OPTIONS = [
+  { value: 'Employee', label: 'Employee (Standard ESS)' },
+  { value: 'Team Lead', label: 'Team Lead' },
+  { value: 'Department Manager', label: 'Department Manager' },
+  { value: 'HR Admin', label: 'HR Administrator' },
+  { value: 'Finance Manager', label: 'Finance Manager' },
+  { value: 'System Admin', label: 'System Administrator' },
+];
+
+const SCOPE_OPTIONS = [
+  { value: 'Employee', label: 'Employee Scope (Self-Service)' },
+  { value: 'Team', label: 'Team Scope' },
+  { value: 'Department', label: 'Department Scope' },
+  { value: 'Organization', label: 'Organization Scope (All Entities)' },
+  { value: 'Custom', label: 'Custom Scope Configuration' },
+];
+
 export function OnlineAccessSection() {
   // A. ACCOUNT INFORMATION STATE
   const [username, setUsername] = useState('arun.kumar');
@@ -89,7 +129,7 @@ export function OnlineAccessSection() {
     });
     setInvitationStatus('Sent');
     setInvitationSentDate(currentDateStr);
-    setInvitationSuccessMsg(`✅ Welcome invitation sent to ${companyEmail} on ${currentDateStr}`);
+    setInvitationSuccessMsg(`Welcome invitation sent to ${companyEmail} on ${currentDateStr}`);
     setTimeout(() => setInvitationSuccessMsg(''), 6000);
   };
 
@@ -133,284 +173,161 @@ export function OnlineAccessSection() {
     setModules((prev) => prev.map((m) => (m.id === id ? { ...m, enabled: !m.enabled } : m)));
   };
 
+  const getBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'Accepted':
+        return 'success';
+      case 'Sent':
+        return 'info';
+      case 'Pending':
+        return 'warning';
+      case 'Expired':
+        return 'danger';
+      default:
+        return 'neutral';
+    }
+  };
+
   return (
-    <div className="online-access-section">
-      {/* Banner Header */}
-      <div className="employee-registration__section-header">
-        <div className="employee-registration__section-icon-badge">
-          <BezentIcon name="tasks" size={22} />
-        </div>
-        <div className="employee-registration__section-title-group">
-          <h2 className="employee-registration__section-title">
-            Online Access &amp; User Credentials
-          </h2>
-          <p className="employee-registration__section-subtitle">
-            Manage single sign-on credentials, security policies, portal roles and module access
-            permissions.
-          </p>
-        </div>
-      </div>
+    <Stack gap="xl">
+      {/* A. ACCOUNT INFORMATION */}
+      <FormSection
+        title="User Account & Credentials"
+        description="Single sign-on username, corporate email, and invitation onboarding."
+      >
+        <FormGrid columns={2} layout="horizontal" labelWidth="md">
+          {/* 1. Employee Username */}
+          <FormField label="Username" required>
+            <Input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
+          </FormField>
 
-      <div className="online-access-section__container">
-        {/* ================================================== */}
-        {/* A. ACCOUNT INFORMATION */}
-        {/* ================================================== */}
-        <div className="online-access-section__card">
-          <div className="online-access-section__card-header">
-            <span className="online-access-section__sub-badge">SUBSECTION A</span>
-            <h3 className="online-access-section__card-title">Account Credentials</h3>
-          </div>
+          {/* 2. Official Company Email */}
+          <FormField label="Company Email" required>
+            <Input
+              type="email"
+              value={companyEmail}
+              onChange={(e) => setCompanyEmail(e.target.value)}
+            />
+          </FormField>
 
-          <form className="online-access-section__grid" onSubmit={(e) => e.preventDefault()}>
-            {/* 1. Employee Username */}
-            <div className="employee-registration__field">
-              <label className="employee-registration__label">
-                Employee Username <span className="employee-registration__required">*</span>
-              </label>
-              <input
-                type="text"
-                className="employee-registration__input"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+          {/* 3. Invitation Status */}
+          <FormField label="Invitation Status">
+            <Inline gap="sm" align="center">
+              <Badge variant={getBadgeVariant(invitationStatus)}>● {invitationStatus}</Badge>
+              <Select
+                options={INVITATION_STATUS_OPTIONS}
+                value={invitationStatus}
+                onChange={(e) =>
+                  setInvitationStatus(
+                    e.target.value as 'Not Sent' | 'Pending' | 'Sent' | 'Accepted' | 'Expired',
+                  )
+                }
               />
-            </div>
+            </Inline>
+          </FormField>
 
-            {/* 2. Official Company Email */}
-            <div className="employee-registration__field">
-              <label className="employee-registration__label">
-                Official Company Email <span className="employee-registration__required">*</span>
-              </label>
-              <input
-                type="email"
-                className="employee-registration__input"
-                value={companyEmail}
-                onChange={(e) => setCompanyEmail(e.target.value)}
+          {/* 4. Invitation Sent Date */}
+          <FormField label="Sent Date">
+            <Input type="text" value={invitationSentDate} readOnly />
+          </FormField>
+        </FormGrid>
+      </FormSection>
+
+      {/* B. SECURITY */}
+      <FormSection
+        title="Security & Authentication"
+        description="Two-factor authentication requirements and password policies."
+      >
+        <Stack gap="md">
+          <FormGrid columns={2} layout="horizontal" labelWidth="md">
+            <FormField label="MFA Policy">
+              <Switch
+                checked={mfaRequired}
+                onChange={(e) => setMfaRequired(e.target.checked)}
+                label="Enforce Two-Factor Authentication"
               />
-            </div>
+            </FormField>
 
-            {/* 3. Invitation Status */}
-            <div className="employee-registration__field">
-              <label className="employee-registration__label">Invitation Status</label>
-              <div className="online-access-section__status-row">
-                <span
-                  className={`online-access-section__status-pill online-access-section__status-pill--${invitationStatus.toLowerCase().replace(' ', '-')}`}
-                >
-                  ● {invitationStatus}
-                </span>
-                <select
-                  className="online-access-section__status-select"
-                  value={invitationStatus}
-                  onChange={(e) =>
-                    setInvitationStatus(
-                      e.target.value as 'Not Sent' | 'Pending' | 'Sent' | 'Accepted' | 'Expired',
-                    )
-                  }
-                >
-                  <option value="Not Sent">Not Sent</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Sent">Sent</option>
-                  <option value="Accepted">Accepted</option>
-                  <option value="Expired">Expired</option>
-                </select>
-              </div>
-            </div>
-
-            {/* 4. Invitation Sent Date */}
-            <div className="employee-registration__field">
-              <label className="employee-registration__label">Invitation Sent Date</label>
-              <input
-                type="text"
-                className="employee-registration__input"
-                value={invitationSentDate}
-                readOnly
+            <FormField label="Password Setup">
+              <Switch
+                checked={forcePasswordSetup}
+                onChange={(e) => setForcePasswordSetup(e.target.checked)}
+                label="Force Password Setup on First Login"
               />
-            </div>
-          </form>
-        </div>
+            </FormField>
 
-        {/* ================================================== */}
-        {/* B. SECURITY */}
-        {/* ================================================== */}
-        <div className="online-access-section__card">
-          <div className="online-access-section__card-header">
-            <span className="online-access-section__sub-badge">SUBSECTION B</span>
-            <h3 className="online-access-section__card-title">Security &amp; Invitation Action</h3>
-          </div>
+            <FormField label="Account State">
+              <Switch
+                checked={accountActive}
+                onChange={(e) => setAccountActive(e.target.checked)}
+                label="Account Active & Enabled"
+              />
+            </FormField>
 
-          <div className="online-access-section__security-row">
-            <div className="accounts-section__toggle-item">
-              <div>
-                <span className="accounts-section__toggle-title">MFA Required</span>
-                <span className="accounts-section__toggle-desc">
-                  Enforce 2-Factor Authentication
-                </span>
-              </div>
-              <button
-                type="button"
-                className={`emergency-contact-section__toggle-switch ${
-                  mfaRequired ? 'emergency-contact-section__toggle-switch--active' : ''
-                }`}
-                onClick={() => setMfaRequired(!mfaRequired)}
-              >
-                <span className="emergency-contact-section__toggle-handle" />
-              </button>
-            </div>
+            <FormField label="Invitation">
+              <Inline gap="md" align="center">
+                <Button type="button" variant="primary" onClick={handleSendInvitation}>
+                  ✉️ Send Welcome Invitation
+                </Button>
+                {invitationSuccessMsg && <Badge variant="success">{invitationSuccessMsg}</Badge>}
+              </Inline>
+            </FormField>
+          </FormGrid>
+        </Stack>
+      </FormSection>
 
-            <div className="accounts-section__toggle-item">
-              <div>
-                <span className="accounts-section__toggle-title">
-                  Force Password Setup First Login
-                </span>
-                <span className="accounts-section__toggle-desc">
-                  Require immediate password change
-                </span>
-              </div>
-              <button
-                type="button"
-                className={`emergency-contact-section__toggle-switch ${
-                  forcePasswordSetup ? 'emergency-contact-section__toggle-switch--active' : ''
-                }`}
-                onClick={() => setForcePasswordSetup(!forcePasswordSetup)}
-              >
-                <span className="emergency-contact-section__toggle-handle" />
-              </button>
-            </div>
+      {/* C. ROLE & ACCESS */}
+      <FormSection
+        title="Role & Scope Assignment"
+        description="Portal access role and operational data scope."
+      >
+        <FormGrid columns={2} layout="horizontal" labelWidth="md">
+          {/* 1. Employee Role */}
+          <FormField label="Employee Role" required>
+            <Select
+              options={ROLE_OPTIONS}
+              value={employeeRole}
+              onChange={(e) => handleRoleChange(e.target.value)}
+            />
+          </FormField>
 
-            <div className="accounts-section__toggle-item">
-              <div>
-                <span className="accounts-section__toggle-title">Account Active &amp; Enabled</span>
-                <span className="accounts-section__toggle-desc">Enable single sign-on access</span>
-              </div>
-              <button
-                type="button"
-                className={`emergency-contact-section__toggle-switch ${
-                  accountActive ? 'emergency-contact-section__toggle-switch--active' : ''
-                }`}
-                onClick={() => setAccountActive(!accountActive)}
-              >
-                <span className="emergency-contact-section__toggle-handle" />
-              </button>
-            </div>
-          </div>
-
-          <div className="online-access-section__invite-banner">
-            <button
-              type="button"
-              className="online-access-section__invite-btn"
-              onClick={handleSendInvitation}
-            >
-              ✉️ SEND WELCOME INVITATION
-            </button>
-            {invitationSuccessMsg && (
-              <span className="online-access-section__invite-msg">{invitationSuccessMsg}</span>
-            )}
-          </div>
-        </div>
-
-        {/* ================================================== */}
-        {/* C. ROLE & ACCESS */}
-        {/* ================================================== */}
-        <div className="online-access-section__card">
-          <div className="online-access-section__card-header">
-            <span className="online-access-section__sub-badge">SUBSECTION C</span>
-            <h3 className="online-access-section__card-title">Role &amp; Scope Assignment</h3>
-          </div>
-
-          <form className="online-access-section__grid" onSubmit={(e) => e.preventDefault()}>
-            {/* 1. Employee Role */}
-            <div className="employee-registration__field">
-              <label className="employee-registration__label">
-                Employee Role <span className="employee-registration__required">*</span>
-              </label>
-              <div className="employee-registration__select-wrapper">
-                <select
-                  className="employee-registration__select"
-                  value={employeeRole}
-                  onChange={(e) => handleRoleChange(e.target.value)}
-                >
-                  <option value="Employee">Employee (Standard ESS)</option>
-                  <option value="Team Lead">Team Lead</option>
-                  <option value="Department Manager">Department Manager</option>
-                  <option value="HR Admin">HR Administrator</option>
-                  <option value="Finance Manager">Finance Manager</option>
-                  <option value="System Admin">System Administrator</option>
-                </select>
-                <span className="employee-registration__select-icon">▼</span>
-              </div>
-            </div>
-
-            {/* 2. Portal Role Scope */}
-            <div className="employee-registration__field">
-              <label className="employee-registration__label">
-                Portal Role Scope <span className="employee-registration__required">*</span>
-              </label>
-              <div className="employee-registration__select-wrapper">
-                <select
-                  className="employee-registration__select"
-                  value={portalRoleScope}
-                  onChange={(e) => setPortalRoleScope(e.target.value)}
-                >
-                  <option value="Employee">Employee Scope (Self-Service)</option>
-                  <option value="Team">Team Scope</option>
-                  <option value="Department">Department Scope</option>
-                  <option value="Organization">Organization Scope (All Entities)</option>
-                  <option value="Custom">Custom Scope Configuration</option>
-                </select>
-                <span className="employee-registration__select-icon">▼</span>
-              </div>
+          {/* 2. Portal Role Scope */}
+          <FormField label="Role Scope" required>
+            <Stack gap="xs">
+              <Select
+                options={SCOPE_OPTIONS}
+                value={portalRoleScope}
+                onChange={(e) => setPortalRoleScope(e.target.value)}
+              />
               {portalRoleScope === 'Custom' && (
-                <div className="employee-registration__other-container">
-                  <input
-                    type="text"
-                    className="employee-registration__input"
-                    placeholder="Describe custom scope boundaries..."
-                    value={customScopeText}
-                    onChange={(e) => setCustomScopeText(e.target.value)}
-                  />
-                </div>
-              )}
-            </div>
-          </form>
-        </div>
-
-        {/* ================================================== */}
-        {/* D. MODULE ACCESS */}
-        {/* ================================================== */}
-        <div className="online-access-section__card">
-          <div className="online-access-section__card-header">
-            <span className="online-access-section__sub-badge">SUBSECTION D</span>
-            <h3 className="online-access-section__card-title">Module Access Permissions</h3>
-          </div>
-
-          <p className="online-access-section__card-desc">
-            Module permissions are automatically assigned based on the selected Employee Role. HR
-            can toggle individual checkboxes below to customize access.
-          </p>
-
-          <div className="online-access-section__modules-grid">
-            {modules.map((m) => (
-              <div
-                key={m.id}
-                className={`online-access-section__module-card ${
-                  m.enabled ? 'online-access-section__module-card--active' : ''
-                }`}
-                onClick={() => toggleModule(m.id)}
-              >
-                <input
-                  type="checkbox"
-                  className="online-access-section__checkbox"
-                  checked={m.enabled}
-                  onChange={() => {}} // Handled by div click
+                <Input
+                  type="text"
+                  placeholder="Describe custom scope boundaries..."
+                  value={customScopeText}
+                  onChange={(e) => setCustomScopeText(e.target.value)}
                 />
-                <div className="online-access-section__module-info">
-                  <span className="online-access-section__module-name">{m.name}</span>
-                  <span className="online-access-section__module-desc">{m.description}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+              )}
+            </Stack>
+          </FormField>
+        </FormGrid>
+      </FormSection>
+
+      {/* D. MODULE ACCESS */}
+      <FormSection
+        title="Module Access Permissions"
+        description="Module permissions auto-configured based on selected role. Toggle individual items to customize access."
+      >
+        <Grid columns={3} gap="md">
+          {modules.map((m) => (
+            <Card key={m.id} variant="flat">
+              <Stack gap="xs">
+                <Checkbox checked={m.enabled} onChange={() => toggleModule(m.id)} label={m.name} />
+                <CardDescription>{m.description}</CardDescription>
+              </Stack>
+            </Card>
+          ))}
+        </Grid>
+      </FormSection>
+    </Stack>
   );
 }
