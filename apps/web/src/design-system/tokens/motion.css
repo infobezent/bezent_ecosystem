@@ -57,8 +57,4 @@
   --motion-duration-launcher-enter: 200ms;
   --motion-duration-launcher-drill: 135ms;
   --motion-duration-flyout-enter: 140ms;
-  --motion-duration-theme-reveal: 600ms;
-  --motion-duration-reactor-pulse: 450ms;
-  --motion-ease-arc-reactor: cubic-bezier(0.16, 1, 0.3, 1);
-  --motion-ease-eclipse: cubic-bezier(0.2, 0, 0, 1);
 }

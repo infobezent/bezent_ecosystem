@@ -155,15 +155,7 @@ export function StandaloneUtilityLayout() {
           <button
             type="button"
             className="standalone-header__action-btn"
-            onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              toggleTheme({
-                origin: {
-                  x: rect.left + rect.width / 2,
-                  y: rect.top + rect.height / 2,
-                },
-              });
-            }}
+            onClick={toggleTheme}
             title={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           >
             <BezentIcon
