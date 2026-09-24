@@ -4,6 +4,7 @@ import { ModulePlaceholder } from '../pages/ModulePlaceholder';
 import { OnboardingPage, EmployeeRegistrationPage } from '../onboarding';
 import { SettingsPage } from '../settings';
 import { destinationPath } from '../../../shared/utils/navigation';
+import type { BezentRouteHandle } from '../../../layouts/app-shell';
 
 export const HRMS_BASE_PATH = '/hrms';
 export const HRMS_DEFAULT_DESTINATION_ID = 'dashboard';
@@ -90,6 +91,10 @@ export const hrmsRoutes: RouteObject[] = [
                   sectionId={child.id}
                 />
               ),
+            handle:
+              isAdministration && child.id === 'onboarding'
+                ? ({ workspaceVariant: 'flush' } satisfies BezentRouteHandle)
+                : undefined,
           })),
         ];
       }),

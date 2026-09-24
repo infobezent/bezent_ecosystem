@@ -109,27 +109,30 @@ describe('HRMS Onboarding UI Components', () => {
     expect(html).toContain('Search employees...');
   });
 
-  it('hrmsRoutes routes administration/onboarding directly to Employee Registration dedicated workspace page', () => {
+  it('hrmsRoutes routes administration/onboarding directly to Employee Registration flush workspace', () => {
     const basePathRoute = hrmsRoutes[0];
     const onboardingFormRoute = basePathRoute?.children?.find(
       (r) => r.path === 'administration/onboarding',
     );
     expect(onboardingFormRoute).toBeDefined();
     expect(onboardingFormRoute?.element).toBeDefined();
+    expect(onboardingFormRoute?.handle).toEqual({ workspaceVariant: 'flush' });
 
     const html = renderToStaticMarkup(
       <MemoryRouter>{onboardingFormRoute!.element as React.ReactElement}</MemoryRouter>,
     );
-    // Dedicated page workspace structure & tokens
-    expect(html).toContain('bezent-page');
-    expect(html).toContain('employee-registration-page');
+    // Dedicated flush workspace structure & tokens — no padded Page wrapper
+    expect(html).not.toContain('bezent-page--max-width');
+    expect(html).not.toContain('employee-registration-page');
     expect(html).toContain('bezent-page-header');
     expect(html).toContain('bezent-breadcrumb');
+    expect(html).toContain('employee-registration-workspace-content');
+    expect(html).toContain('employee-registration-workspace-actions');
     expect(html).toContain('bezent-form-grid--layout-horizontal');
     expect(html).toContain('bezent-form-field--horizontal');
     expect(html).toContain('Employee Registration');
     expect(html).toContain('Add and manage new employee information');
-    // Modal-specific elements must NOT be present on page root
+    // Modal-specific presentation must NOT be present on page root
     expect(html).not.toContain('bezent-modal--workspace');
     expect(html).not.toContain('bezent-modal__close-btn');
     // Tabs
@@ -146,7 +149,6 @@ describe('HRMS Onboarding UI Components', () => {
     // Form body
     expect(html).toContain('General Information');
     // Persistent footer toolbar actions
-    expect(html).toContain('bezent-form-actions');
     expect(html).toContain('Save Draft');
     expect(html).toContain('Cancel');
     expect(html).toContain('Save &amp; Next →');
