@@ -58,7 +58,11 @@ describe('HRMS Onboarding UI Components', () => {
   });
 
   it('OnboardingPage renders header, add button, and filter tabs', () => {
-    const html = renderToStaticMarkup(<OnboardingPage />);
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <OnboardingPage />
+      </MemoryRouter>,
+    );
 
     expect(html).toContain('Onboarding');
     expect(html).toContain('Add New Hire');
@@ -77,7 +81,9 @@ describe('HRMS Onboarding UI Components', () => {
     expect(onboardingRoute?.element).toBeDefined();
 
     // Render the route element to verify it renders the real OnboardingPage
-    const html = renderToStaticMarkup(onboardingRoute!.element as React.ReactElement);
+    const html = renderToStaticMarkup(
+      <MemoryRouter>{onboardingRoute!.element as React.ReactElement}</MemoryRouter>,
+    );
     expect(html).toContain('Onboarding');
     expect(html).toContain('Add New Hire');
   });
@@ -103,7 +109,7 @@ describe('HRMS Onboarding UI Components', () => {
     expect(html).toContain('Search employees...');
   });
 
-  it('hrmsRoutes routes administration/onboarding directly to Employee Registration modal workspace', () => {
+  it('hrmsRoutes routes administration/onboarding directly to Employee Registration dedicated workspace page', () => {
     const basePathRoute = hrmsRoutes[0];
     const onboardingFormRoute = basePathRoute?.children?.find(
       (r) => r.path === 'administration/onboarding',
@@ -114,28 +120,33 @@ describe('HRMS Onboarding UI Components', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>{onboardingFormRoute!.element as React.ReactElement}</MemoryRouter>,
     );
-    // Modal workspace structure & tokens
-    expect(html).toContain('bezent-modal');
-    expect(html).toContain('bezent-modal--workspace');
-    expect(html).toContain('bezent-modal__header-bottom');
+    // Dedicated page workspace structure & tokens
+    expect(html).toContain('bezent-page');
+    expect(html).toContain('employee-registration-page');
+    expect(html).toContain('bezent-page-header');
+    expect(html).toContain('bezent-breadcrumb');
     expect(html).toContain('bezent-form-grid--layout-horizontal');
     expect(html).toContain('bezent-form-field--horizontal');
     expect(html).toContain('Employee Registration');
     expect(html).toContain('Add and manage new employee information');
-    // Persistent header close button
-    expect(html).toContain('bezent-modal__close-btn');
+    // Modal-specific elements must NOT be present on page root
+    expect(html).not.toContain('bezent-modal--workspace');
+    expect(html).not.toContain('bezent-modal__close-btn');
     // Tabs
     expect(html).toContain('General');
     expect(html).toContain('Personal Information');
+    expect(html).toContain('Administration');
     expect(html).toContain('Skills');
     expect(html).toContain('Emergency Contact');
     expect(html).toContain('Accounts');
     expect(html).toContain('Online Access');
     expect(html).toContain('Working Hours');
+    expect(html).toContain('Documents');
     expect(html).toContain('Review');
     // Form body
     expect(html).toContain('General Information');
     // Persistent footer toolbar actions
+    expect(html).toContain('bezent-form-actions');
     expect(html).toContain('Save Draft');
     expect(html).toContain('Cancel');
     expect(html).toContain('Save &amp; Next →');
