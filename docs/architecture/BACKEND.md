@@ -7,92 +7,133 @@
 ```
 apps/api/src/
 ├── app/
-│   ├── server/       Express app bootstrap, route mounting (createApp.ts)
-│   ├── middleware/    cross-cutting middleware (e.g. notFound)
-│   ├── config/        environment configuration (env.ts)
-│   └── errors/        AppError hierarchy + centralized error handler
-├── platform/          reusable platform capabilities (documented boundary only)
+│   ├── server/       Express app bootstrap, createApp.ts, health router
+│   ├── middleware/   cross-cutting middleware (notFound, etc.)
+│   ├── config/       environment configuration (env.ts)
+│   └── errors/       AppError hierarchy + centralized error handler
+├── platform/         reusable platform capabilities (platform/context)
 ├── applications/
-│   └── hrms/          the HRMS business application (boundary only)
-├── shared/             business-agnostic utilities
+│   └── hrms/         the HRMS business application
+│       ├── organization/       organization masters data access
+│       ├── onboarding/         new hire management, cases, stage lifecycle
+│       └── settings/           administration & onboarding configuration
+├── shared/            business-agnostic utilities
 ├── db/
-│   ├── connection.ts   MySQL pool + Drizzle instance (lazy, optional)
-│   ├── schema.ts        Drizzle schema entry point (no tables yet)
-│   └── migrations/      drizzle-kit generated migrations
-└── main.ts             process entrypoint
+│   ├── connection.ts  MySQL2 pool + Drizzle instance (strict, fail-fast)
+│   ├── schema.ts      Drizzle schema (tenants, org masters, onboarding, settings)
+│   ├── migrations/    drizzle-kit generated SQL migrations
+│   └── seed.ts        deterministic development seed script
+└── main.ts            process entrypoint
 ```
 
 `app/` and `applications/` are unrelated concepts despite the similar
 name — see
-[AGENTS.md — `app/` vs. `applications/`](../../AGENTS.md#bezent-architecture-terminology)
-if this is ever ambiguous.
+[AGENTS.md — `app/` vs. `applications/`](../../AGENTS.md#bezent-architecture-terminology).
 
-`app/` owns the HTTP server, middleware pipeline, configuration loading, and
-the centralized error-handling strategy. No business logic lives here.
+`app/` owns the HTTP server bootstrap, middleware pipeline, environment
+configuration, and the centralized error-handling strategy. No business
+domain logic lives in `app/`.
 
-`platform/` will own identity/authentication, tenants, users, access
-control, audit, notifications, approvals, workflow, and documents — as
-reusable capabilities every business application consumes. Business
-applications must never implement their own authentication or tenant
-resolution. In Phase 0 this is a single documented boundary with no
-implementation; subfolders are added only once a real capability is built.
+`platform/` owns cross-application platform capabilities. Currently,
+`platform/context/devContext.ts` provides development request context
+resolution. Future platform capabilities (identity/auth, tenancy runtime
+services, access control/RBAC, audit logging, notifications, approvals)
+will live here as reusable services that business applications consume.
 
-`applications/hrms` is the sole business application. It may depend on
-`platform` and `shared`. Future business applications (CRM, Project
-Management, etc.) must never import another application's internals — see
+`applications/hrms` is the primary business application. It currently
+contains implemented domains for `organization`, `onboarding`, and
+`settings/onboarding`. Future business applications (CRM, Project Management,
+etc.) will live as sibling folders under `applications/` and must never
+depend on HRMS internals — see
 [APPLICATION-BOUNDARIES.md](APPLICATION-BOUNDARIES.md).
 
 ## Internal structure of a business module/domain
 
-`applications/hrms` is itself composed of business modules/domains
-(Attendance, Leave, Payroll, Recruitment, ...). A layered structure is
-used for each domain's internals rather than full Clean Architecture
-(`domain/application/infrastructure/api`):
+Implemented HRMS business domains follow a consistent layered architecture:
 
 ```
 applications/hrms/<domain>/
-├── controller/
-├── service/
-├── repository/
-├── validation/
-├── types/
-└── routes/
+├── controller/     HTTP request/response parsing, status codes, DTO mapping
+├── service/        business logic, validation orchestration, domain rules
+├── repository/     data access via Drizzle ORM, strict tenant/company scoping
+├── validation/     request payload validation schemas (Zod)
+├── types/          domain-specific TypeScript interfaces and types
+└── routes/         Express route definitions and middleware binding
 ```
 
-**Why:** at this stage no domain has business logic complex enough to
-justify a domain/application/infrastructure split — introducing that
-ceremony now would be empty scaffolding. The layered structure still gives
-clear separation between HTTP concerns (controller/routes), business logic
-(service), data access (repository), and input validation, is easy to
-onboard to, and is testable. A specific domain may adopt fuller hexagonal
-layering later if its complexity genuinely warrants it — that's a local,
-per-domain decision, not a platform-wide mandate.
+### Current Implemented HRMS Domains:
 
-No domain has this structure populated yet; `applications/hrms` currently
-contains only a README documenting future modules/domains — see
-[AGENTS.md — BEZENT Architecture Terminology](../../AGENTS.md#bezent-architecture-terminology)
-for the Application vs. Module/Domain distinction this section relies on.
+- **`organization`**: Read and query access for organizational master records
+  (`companies`, `departments`, `designations`, `locations`).
+- **`onboarding`**: Complete candidate onboarding lifecycle, preboarding cases,
+  draft registration, stage transitions, and audit stage history.
+- **`settings/onboarding`**: Administrative configuration builder for onboarding
+  general settings, custom stages, configurable fields, document requirements,
+  checklist templates, and workforce conversion rules.
 
-## Error handling
+### Planned HRMS Domains (Not Yet Implemented):
 
-Centralized: `app/errors/AppError.ts` defines a base `AppError` (and
-`NotFoundError`) with a `statusCode` and `code`; `app/errors/errorHandler.ts`
-is the single Express error-handling middleware that maps any thrown error
-to a consistent JSON response (`{ error: { code, message } }`), omitting
-stack traces outside development. Controllers throw `AppError` subclasses
-instead of calling `res.status(...)` directly.
+- Recruitment, Candidates, Interviews, Employees (Core Workforce), Attendance,
+  Shifts, Leave, Timesheets, Payroll, Performance, Learning, Career, Documents,
+  Assets, Employee Requests, Reports.
 
-## Validation
+## Request Execution Flow
 
-Not yet needed — Phase 0 has no request bodies to validate beyond the
-health endpoint. When the first domain endpoint is built, validation
-happens at the API boundary (controller/route layer) using a TypeScript-
-first schema library (Zod is the default recommendation) — never trusting
-frontend-side validation alone.
+A typical request through the backend executes through these canonical layers:
 
-## API structure
+```
+HTTP Request
+     ↓
+Express Middleware (helmet, cors, devContextMiddleware)
+     ↓
+Route Layer (express.Router)
+     ↓
+Controller Layer (parses params/body, invokes validation)
+     ↓
+Validation (Zod schemas)
+     ↓
+Service Layer (business logic, transactions, domain invariants)
+     ↓
+Repository Layer (Drizzle queries with tenantId + companyId scoping)
+     ↓
+MySQL Database
+```
 
-Routes are mounted under `/api/v1`. Phase 0 exposes only
-`GET /api/v1/health`, which reports application health unconditionally and
-database connectivity only if a database is configured (it never requires
-business tables to exist).
+## Error Handling & Sanitization
+
+Centralized error handling is enforced:
+
+- Base `AppError` (`app/errors/AppError.ts`) defines an error with an HTTP
+  `statusCode` and machine-readable `code`. Subclasses include `NotFoundError`
+  and `DatabaseConnectionError`.
+- Centralized `errorHandler` (`app/errors/errorHandler.ts`) catches all thrown
+  errors and returns a standardized JSON error envelope:
+  ```json
+  {
+    "error": {
+      "code": "DATABASE_UNAVAILABLE",
+      "message": "Database is not configured"
+    }
+  }
+  ```
+- Outside development, internal driver details, connection strings, hostnames,
+  ports, raw SQL queries, and stack traces are stripped to prevent data leakage.
+- Controllers throw `AppError` subclasses rather than calling `res.status(...)`
+  directly with raw error objects.
+
+## Strict Persistence & Fail-Fast Database Behavior
+
+In accordance with ADR-016 and AGENTS.md Article 14:
+
+- All domain repositories persist exclusively to MySQL via Drizzle ORM.
+- **No silent in-memory or mock fallbacks are permitted.** If MySQL is
+  unconfigured, unreachable, or encounters a connection error, calls fail
+  fast by throwing `DatabaseConnectionError`.
+- Database availability is mandatory for domain operations.
+
+## API Structure
+
+All routes are mounted under `/api/v1` in `createApp.ts`:
+
+- Platform routes: `GET /api/v1/health`, `GET /api/v1/context`
+- HRMS domain routes: `/api/v1/hrms/<domain>/...`
