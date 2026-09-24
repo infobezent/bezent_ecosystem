@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { MemoryRouter } from 'react-router-dom';
 import { NewHireModal } from '../components/NewHireModal';
 import { OnboardingPage } from '../pages/OnboardingPage';
 import { hrmsRoutes } from '../../routes/hrmsRoutes';
@@ -79,5 +80,74 @@ describe('HRMS Onboarding UI Components', () => {
     const html = renderToStaticMarkup(onboardingRoute!.element as React.ReactElement);
     expect(html).toContain('Onboarding');
     expect(html).toContain('Add New Hire');
+  });
+
+  it('hrmsRoutes routes administration/employee-administration to candidate listing with Employee Administration', () => {
+    const basePathRoute = hrmsRoutes[0];
+    const empAdminRoute = basePathRoute?.children?.find(
+      (r) => r.path === 'administration/employee-administration',
+    );
+    expect(empAdminRoute).toBeDefined();
+    expect(empAdminRoute?.element).toBeDefined();
+
+    const html = renderToStaticMarkup(
+      <MemoryRouter>{empAdminRoute!.element as React.ReactElement}</MemoryRouter>,
+    );
+    expect(html).toContain('Employee Administration');
+    expect(html).toContain('Manage employee administration, new hires, and employment records.');
+    expect(html).toContain('View Drafts');
+    expect(html).toContain('Add New Hire');
+    expect(html).toContain('Preboarding');
+    expect(html).toContain('Documents');
+    expect(html).toContain('Completed');
+    expect(html).toContain('Search employees...');
+  });
+
+  it('hrmsRoutes routes administration/onboarding directly to Employee Registration modal workspace', () => {
+    const basePathRoute = hrmsRoutes[0];
+    const onboardingFormRoute = basePathRoute?.children?.find(
+      (r) => r.path === 'administration/onboarding',
+    );
+    expect(onboardingFormRoute).toBeDefined();
+    expect(onboardingFormRoute?.element).toBeDefined();
+
+    const html = renderToStaticMarkup(
+      <MemoryRouter>{onboardingFormRoute!.element as React.ReactElement}</MemoryRouter>,
+    );
+    // Modal workspace structure & tokens
+    expect(html).toContain('bezent-modal');
+    expect(html).toContain('bezent-modal--workspace');
+    expect(html).toContain('bezent-modal__header-bottom');
+    expect(html).toContain('bezent-form-grid--layout-horizontal');
+    expect(html).toContain('bezent-form-field--horizontal');
+    expect(html).toContain('Employee Registration');
+    expect(html).toContain('Add and manage new employee information');
+    // Persistent header close button
+    expect(html).toContain('bezent-modal__close-btn');
+    // Tabs
+    expect(html).toContain('General');
+    expect(html).toContain('Personal Information');
+    expect(html).toContain('Skills');
+    expect(html).toContain('Emergency Contact');
+    expect(html).toContain('Accounts');
+    expect(html).toContain('Online Access');
+    expect(html).toContain('Working Hours');
+    expect(html).toContain('Review');
+    // Form body
+    expect(html).toContain('General Information');
+    // Persistent footer toolbar actions
+    expect(html).toContain('Save Draft');
+    expect(html).toContain('Cancel');
+    expect(html).toContain('Save &amp; Next →');
+  });
+
+  it('hrmsRoutes routes administration/documents to Documents destination', () => {
+    const basePathRoute = hrmsRoutes[0];
+    const docsRoute = basePathRoute?.children?.find((r) => r.path === 'administration/documents');
+    expect(docsRoute).toBeDefined();
+    expect(docsRoute?.element).toBeDefined();
+
+    const html = renderToStaticMarkup(docsRoute!.element as React.ReactElement);
+    expect(html).toContain('Documents');
   });
 });

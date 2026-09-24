@@ -496,3 +496,48 @@ export function validateWithdrawCase(
     version: data.version as number,
   };
 }
+
+export function validateListNewHiresQuery(query: Record<string, unknown>): {
+  page: number;
+  pageSize: number;
+  stage?: string;
+  search?: string;
+} {
+  let page = 1;
+  if (query.page !== undefined && query.page !== null && query.page !== '') {
+    const parsedPage = Number(query.page);
+    if (!Number.isInteger(parsedPage) || parsedPage < 1) {
+      throw new ValidationError('page must be an integer greater than or equal to 1');
+    }
+    page = parsedPage;
+  }
+
+  let pageSize = 25;
+  if (query.pageSize !== undefined && query.pageSize !== null && query.pageSize !== '') {
+    const parsedSize = Number(query.pageSize);
+    if (![25, 50, 100].includes(parsedSize)) {
+      throw new ValidationError('pageSize must be one of: 25, 50, 100');
+    }
+    pageSize = parsedSize;
+  }
+
+  let stage: string | undefined;
+  if (typeof query.stage === 'string' && query.stage.trim()) {
+    const trimmed = query.stage.trim().toLowerCase();
+    if (trimmed !== 'all') {
+      const VALID_STAGES = ['preboarding', 'documents', 'induction', 'completed'];
+      if (!VALID_STAGES.includes(trimmed)) {
+        throw new ValidationError(`stage must be one of: all, ${VALID_STAGES.join(', ')}`);
+      }
+      stage = trimmed;
+    }
+  }
+
+  let search: string | undefined;
+  const rawSearch = query.search ?? query.q;
+  if (typeof rawSearch === 'string' && rawSearch.trim()) {
+    search = rawSearch.trim();
+  }
+
+  return { page, pageSize, stage, search };
+}

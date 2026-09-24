@@ -1,7 +1,7 @@
-import { Navigate, type RouteObject } from 'react-router-dom';
+import { Navigate, useNavigate, type RouteObject } from 'react-router-dom';
 import { hrmsNavigation } from '../navigation';
 import { ModulePlaceholder } from '../pages/ModulePlaceholder';
-import { OnboardingPage } from '../onboarding';
+import { OnboardingPage, EmployeeRegistrationPage } from '../onboarding';
 import { SettingsPage } from '../settings';
 import { destinationPath } from '../../../shared/utils/navigation';
 
@@ -10,14 +10,29 @@ export const HRMS_DEFAULT_DESTINATION_ID = 'dashboard';
 
 const APPLICATION = 'HRMS';
 
+function EmployeeAdministrationRoute() {
+  const navigate = useNavigate();
+
+  return (
+    <OnboardingPage
+      title="Employee Administration"
+      onAddNewHire={() => {
+        navigate('/hrms/administration/onboarding');
+      }}
+    />
+  );
+}
+
 /**
  * HRMS routes, generated from the ONE canonical navigation catalog — there
  * is no separate route map to keep in sync.
  *
- * Milestone 1 renders the real OnboardingPage for `/hrms/onboarding` and its
- * primary child `/hrms/onboarding/new-hires`.
- * HRMS Settings renders the real SettingsPage for `/hrms/settings` and `/hrms/onboarding/workflow-settings`.
- * Every other destination and sub-destination renders the development placeholder.
+ * Administration maps:
+ * - employee-administration -> Candidate/New-Hire listing with title "Employee Administration"
+ * - onboarding -> Direct Employee Registration form workspace
+ * - documents -> Documents destination placeholder
+ *
+ * Backward-compatible aliases ensure legacy `/hrms/onboarding` and `/hrms/administrative` deep links resolve.
  */
 const basePath = HRMS_BASE_PATH.replace(/^\//, '');
 const defaultDestination = hrmsNavigation.destinations.find(
@@ -33,14 +48,14 @@ export const hrmsRoutes: RouteObject[] = [
         element: <Navigate to={destinationPath(HRMS_BASE_PATH, defaultDestination)} replace />,
       },
       ...hrmsNavigation.destinations.flatMap((destination): RouteObject[] => {
-        const isOnboarding = destination.id === 'onboarding';
+        const isAdministration = destination.id === 'administration';
         const isSettings = destination.id === 'settings';
 
         return [
           {
             path: destination.segment,
-            element: isOnboarding ? (
-              <OnboardingPage title={destination.label} />
+            element: isAdministration ? (
+              <Navigate to="/hrms/administration/employee-administration" replace />
             ) : isSettings ? (
               <SettingsPage />
             ) : (
@@ -54,10 +69,18 @@ export const hrmsRoutes: RouteObject[] = [
           ...(destination.children ?? []).map((child): RouteObject => ({
             path: `${destination.segment}/${child.id}`,
             element:
-              isOnboarding && child.id === 'workflow-settings' ? (
+              isAdministration && child.id === 'employee-administration' ? (
+                <EmployeeAdministrationRoute />
+              ) : isAdministration && child.id === 'onboarding' ? (
+                <EmployeeRegistrationPage />
+              ) : isAdministration && child.id === 'documents' ? (
+                <ModulePlaceholder
+                  application={APPLICATION}
+                  destinationId="documents"
+                  title="Documents"
+                />
+              ) : isSettings ? (
                 <SettingsPage />
-              ) : isOnboarding ? (
-                <OnboardingPage title={destination.label} />
               ) : (
                 <ModulePlaceholder
                   application={APPLICATION}
@@ -70,6 +93,39 @@ export const hrmsRoutes: RouteObject[] = [
           })),
         ];
       }),
+      // Backward-compatible routes for existing Onboarding and Administrative URLs
+      {
+        path: 'onboarding',
+        element: <OnboardingPage title="Onboarding" />,
+      },
+      {
+        path: 'onboarding/new-hires',
+        element: <OnboardingPage title="Onboarding" />,
+      },
+      {
+        path: 'onboarding/workflow-settings',
+        element: <SettingsPage />,
+      },
+      {
+        path: 'onboarding/*',
+        element: <Navigate to="/hrms/administration/onboarding" replace />,
+      },
+      {
+        path: 'administrative/employee-administration',
+        element: <Navigate to="/hrms/administration/employee-administration" replace />,
+      },
+      {
+        path: 'administrative/onboarding',
+        element: <Navigate to="/hrms/administration/onboarding" replace />,
+      },
+      {
+        path: 'administrative/documents',
+        element: <Navigate to="/hrms/administration/documents" replace />,
+      },
+      {
+        path: 'administrative/*',
+        element: <Navigate to="/hrms/administration/employee-administration" replace />,
+      },
       {
         path: '*',
         element: (

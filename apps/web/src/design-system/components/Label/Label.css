@@ -3,29 +3,30 @@
 .bezent-label {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  font-family: var(--font-sans);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
+  gap: var(--space-1, 4px);
+  font-family: var(--font-family-base, 'Google Sans', sans-serif);
+  font-weight: var(--font-weight-medium, 500);
+  color: var(--text-secondary, #444746);
   cursor: default;
-  transition: color var(--motion-duration-fast) var(--motion-easing-default);
+  white-space: nowrap;
+  transition: color var(--motion-duration-fast, 120ms) var(--motion-easing-default, ease);
 }
 
 /* Sizes */
 .bezent-label--md {
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
+  font-size: var(--font-size-sm, 13px);
+  line-height: var(--line-height-normal, 1.4);
 }
 
 .bezent-label--sm {
-  font-size: var(--font-size-xs);
-  line-height: var(--line-height-normal);
+  font-size: var(--font-size-xs, 12px);
+  line-height: var(--line-height-normal, 1.4);
 }
 
 /* Required asterisk */
 .bezent-label__required {
-  color: var(--color-danger-500, #ef4444);
-  font-size: var(--font-size-sm);
+  color: var(--status-danger-fg, #ef4444);
+  font-size: var(--font-size-sm, 13px);
   line-height: 1;
   margin-left: var(--space-0-5, 2px);
   user-select: none;
@@ -33,15 +34,15 @@
 
 /* Disabled state */
 .bezent-label--disabled {
-  color: var(--color-text-disabled);
+  color: var(--text-disabled, #a8a8a8);
   cursor: not-allowed;
 }
 
 /* Dark mode */
 [data-theme='dark'] .bezent-label {
-  color: var(--color-text-secondary);
+  color: var(--text-secondary, #94a3b8);
 }
 
 [data-theme='dark'] .bezent-label--disabled {
-  color: var(--color-text-disabled);
+  color: var(--text-disabled, #5f6368);
 }

@@ -1,6 +1,16 @@
 import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { Label, FormField, Checkbox, Spinner, LoadingState } from '../index';
+import {
+  Label,
+  FormField,
+  FormGrid,
+  Checkbox,
+  Spinner,
+  LoadingState,
+  Select,
+  Toolbar,
+  Inline,
+} from '../index';
 import * as RootDesignSystem from '../../index';
 
 describe('Design System Core Primitives', () => {
@@ -11,6 +21,18 @@ describe('Design System Core Primitives', () => {
       expect(html).toContain('for="test-id"');
       expect(html).toContain('bezent-label');
       expect(html).toContain('Full Name');
+    });
+
+    it('renders as custom element with size modifier when as is provided', () => {
+      const html = renderToStaticMarkup(
+        <Label as="span" size="sm">
+          Showing 1–25 of 100
+        </Label>,
+      );
+      expect(html).toContain('<span');
+      expect(html).toContain('bezent-label');
+      expect(html).toContain('bezent-label--sm');
+      expect(html).toContain('Showing 1–25 of 100');
     });
 
     it('renders required asterisk when required is true', () => {
@@ -30,6 +52,58 @@ describe('Design System Core Primitives', () => {
         </Label>,
       );
       expect(html).toContain('bezent-label--disabled');
+    });
+  });
+
+  describe('Select', () => {
+    it('renders width-auto modifier class when width is auto', () => {
+      const html = renderToStaticMarkup(
+        <Select width="auto" size="sm" options={[{ value: '25', label: '25' }]} />,
+      );
+      expect(html).toContain('bezent-select-wrapper--width-auto');
+      expect(html).toContain('bezent-select-wrapper--sm');
+    });
+  });
+
+  describe('Pagination Toolbar Composition', () => {
+    it('composes Toolbar, Label, Inline, and Select with proper typography and alignment tokens', () => {
+      const html = renderToStaticMarkup(
+        <Toolbar
+          className="onboarding-page__pagination"
+          align="center"
+          left={
+            <Label as="span" size="sm" aria-live="polite">
+              Showing 1–25 of 457
+            </Label>
+          }
+          right={
+            <Inline gap="lg" align="center">
+              <Inline gap="xs" align="center">
+                <Label htmlFor="page-size" size="sm">
+                  Rows per page:
+                </Label>
+                <Select
+                  id="page-size"
+                  size="sm"
+                  width="auto"
+                  value="25"
+                  onChange={() => {}}
+                  options={[{ value: '25', label: '25' }]}
+                />
+              </Inline>
+            </Inline>
+          }
+        />,
+      );
+
+      expect(html).toContain('bezent-toolbar--align-center');
+      expect(html).toContain('bezent-label');
+      expect(html).toContain('bezent-label--sm');
+      expect(html).toContain('Showing 1–25 of 457');
+      expect(html).toContain('Rows per page:');
+      expect(html).toContain('for="page-size"');
+      expect(html).toContain('bezent-select-wrapper--width-auto');
+      expect(html).toContain('bezent-select-wrapper--sm');
     });
   });
 
@@ -66,6 +140,50 @@ describe('Design System Core Primitives', () => {
       expect(html).toContain('bezent-form-field__helper--error');
       expect(html).toContain('Password is required');
       expect(html).toContain('role="alert"');
+    });
+
+    it('renders horizontal layout with semantic label width and span modifiers', () => {
+      const html = renderToStaticMarkup(
+        <FormField
+          label="Employment Type"
+          htmlFor="emp-type"
+          orientation="horizontal"
+          labelWidth="lg"
+          span={2}
+          required
+        >
+          <input id="emp-type" type="text" />
+        </FormField>,
+      );
+      expect(html).toContain('bezent-form-field--horizontal');
+      expect(html).toContain('bezent-form-field--label-width-lg');
+      expect(html).toContain('bezent-form-field--span-2');
+      expect(html).toContain('Employment Type');
+      expect(html).toContain('*');
+    });
+
+    it('inherits orientation and labelWidth from enclosing FormGridContext', () => {
+      const html = renderToStaticMarkup(
+        <FormGrid columns={2} layout="horizontal" labelWidth="md">
+          <FormField label="First Name" htmlFor="fn">
+            <input id="fn" type="text" />
+          </FormField>
+          <FormField label="Reporting Manager" htmlFor="rm" labelWidth="lg">
+            <input id="rm" type="text" />
+          </FormField>
+          <FormField label="Full Width Notes" htmlFor="notes" orientation="vertical" span="full">
+            <textarea id="notes" />
+          </FormField>
+        </FormGrid>,
+      );
+      // First field inherits horizontal and md labelWidth
+      expect(html).toContain('bezent-form-field--horizontal');
+      expect(html).toContain('bezent-form-field--label-width-md');
+      // Second field explicitly overrides labelWidth to lg
+      expect(html).toContain('bezent-form-field--label-width-lg');
+      // Third field explicitly overrides orientation to vertical and spans full width
+      expect(html).toContain('bezent-form-field--vertical');
+      expect(html).toContain('bezent-form-field--span-full');
     });
   });
 

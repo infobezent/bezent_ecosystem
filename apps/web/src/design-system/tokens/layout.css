@@ -46,4 +46,14 @@
   --z-search-panel: 250;
   --z-search-trigger: 260;
   --z-search-filter-menu: 300;
+
+  /*
+   * Form layout — semantic label column width tokens for horizontal forms.
+   * sm: compact forms / short labels (Name, Code, Status).
+   * md: standard enterprise forms (Employment Type, Reporting Manager).
+   * lg: dense forms with extended enterprise labels (Confirmed Date of Joining).
+   */
+  --form-label-width-sm: 140px;
+  --form-label-width-md: 180px;
+  --form-label-width-lg: 220px;
 }
