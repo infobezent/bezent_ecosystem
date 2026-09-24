@@ -83,6 +83,9 @@
   --border-subtle: #e7ebf0;
   --border-divider: #dde3ea;
   --border-focus: #1a73e8;
+  --table-border: #dde3ea;
+  --table-head-divider: #dde3ea;
+  --table-row-divider: #e7ebf0;
   /* Chrome separator between TopNav and workspace: deliberately softer than
      --border-default so the top bar reads as part of the app canvas rather
      than a structural frame edge. */
@@ -162,6 +165,9 @@
   /* Shared Floating Surface Tokens */
   --floating-surface-bg: #ffffff;
   --floating-surface-header-bg: #ffffff;
+  --subnav-header-bg: var(--nav-selected, #c2e7ff);
+  --subnav-header-title: #041e49;
+  --subnav-header-subtitle: #444746;
   --floating-surface-border: #dde3ea;
   --floating-surface-divider: #e7ebf0;
   --floating-surface-shadow: 0 4px 16px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
@@ -331,9 +337,10 @@
   --bg-surface-secondary: #081b3a;
   --bg-card: #081b3a;
   --card-bg: #081b3a;
-  --card-border: rgba(56, 189, 248, 0.14);
+  --card-border: rgba(56, 189, 248, 0.32);
+  --table-border: rgba(56, 189, 248, 0.35);
   --card-hover-bg: #0b2347;
-  --card-hover-border: rgba(56, 189, 248, 0.28);
+  --card-hover-border: rgba(56, 189, 248, 0.45);
   --card-shadow: 0 4px 20px rgba(2, 11, 28, 0.5);
   --card-hover-shadow: 0 8px 30px rgba(2, 11, 28, 0.65), 0 0 16px rgba(22, 131, 255, 0.2);
   --card-radius: 16px;
@@ -368,17 +375,20 @@
   --text-primary: #f8fafc;
   --text-body: #94a3b8;
   --text-secondary: #94a3b8;
-  --text-tertiary: #64748b;
-  --text-muted: #64748b;
+  --text-tertiary: #94a3b8;
+  --text-muted: #94a3b8;
   --text-disabled: #475569;
   --text-inverse: #020b1c;
 
   /* Borders & Dividers */
-  --border-default: rgba(56, 189, 248, 0.14);
-  --border-subtle: rgba(56, 189, 248, 0.08);
-  --border-divider: rgba(56, 189, 248, 0.1);
+  --border-default: rgba(56, 189, 248, 0.32);
+  --border-subtle: rgba(56, 189, 248, 0.24);
+  --border-divider: rgba(56, 189, 248, 0.28);
   --border-focus: #1683ff;
-  --header-border-bottom: rgba(56, 189, 248, 0.08);
+  --header-border-bottom: rgba(56, 189, 248, 0.16);
+  --table-border: rgba(56, 189, 248, 0.35);
+  --table-head-divider: rgba(56, 189, 248, 0.32);
+  --table-row-divider: rgba(56, 189, 248, 0.26);
 
   /* Global Icon System */
   --icon-default: #94a3b8;
@@ -453,6 +463,13 @@
   /* Floating Surfaces & Shadows */
   --floating-surface-bg: #081b3a;
   --floating-surface-header-bg: #081b3a;
+  --subnav-header-bg: linear-gradient(
+    135deg,
+    rgba(22, 131, 255, 0.35) 0%,
+    rgba(11, 37, 78, 0.95) 100%
+  );
+  --subnav-header-title: #ffffff;
+  --subnav-header-subtitle: #bae6fd;
   --floating-surface-border: rgba(56, 189, 248, 0.16);
   --floating-surface-divider: rgba(56, 189, 248, 0.08);
   --floating-surface-shadow: 0 16px 40px rgba(2, 11, 28, 0.75), 0 0 1px rgba(56, 189, 248, 0.2);

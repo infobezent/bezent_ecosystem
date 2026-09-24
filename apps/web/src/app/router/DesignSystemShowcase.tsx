@@ -525,7 +525,6 @@ export function DesignSystemShowcase() {
                 </FormField>
               </FormGrid>
             </ShowcaseBlock>
-
             <ShowcaseBlock title="Card">
               <Card className="bds-card-demo">
                 <CardHeader>

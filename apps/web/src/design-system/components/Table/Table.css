@@ -5,7 +5,7 @@
 .bezent-table-container {
   width: 100%;
   overflow-x: auto;
-  border: 1px solid var(--border-default, #dde3ea);
+  border: 1px solid var(--table-border, var(--border-default, #dde3ea));
   border-radius: var(--card-radius, 16px);
   background: var(--bg-surface, #ffffff);
 }
@@ -22,7 +22,7 @@
 /* ── Head ── */
 .bezent-table__head {
   background: var(--bg-surface-secondary, #f0f4f9);
-  border-bottom: 1px solid var(--border-default, #dde3ea);
+  border-bottom: 1px solid var(--table-head-divider, var(--border-default, #dde3ea));
 }
 
 .bezent-table__th {
@@ -37,7 +37,7 @@
 
 /* ── Body Rows ── */
 .bezent-table__row {
-  border-bottom: 1px solid var(--border-subtle, #e7ebf0);
+  border-bottom: 1px solid var(--table-row-divider, var(--border-subtle, #e7ebf0));
   transition: background-color 0.12s ease;
 }
 
@@ -88,7 +88,7 @@
 
 .bezent-table-meta-subtitle {
   font-size: 12px;
-  color: var(--text-muted, #64748b);
+  color: var(--text-secondary, var(--text-muted, #64748b));
 }
 
 /* ── Table Loading & Empty State ── */
@@ -121,4 +121,39 @@
   font-size: 14px;
   color: var(--text-muted, #64748b);
   max-width: 380px;
+}
+
+/* ── Dark Mode Table ─────────────────────────────────────────────────── */
+
+[data-theme='dark'] .bezent-table-container {
+  background: var(--bg-card, #081b3a);
+  border: 1px solid var(--table-border, rgba(56, 189, 248, 0.35));
+  box-shadow:
+    0 4px 20px rgba(2, 11, 28, 0.5),
+    0 0 1px rgba(56, 189, 248, 0.35);
+}
+
+[data-theme='dark'] .bezent-table__head {
+  background: rgba(8, 27, 58, 0.75);
+  border-bottom: 1px solid var(--table-head-divider, rgba(56, 189, 248, 0.32));
+}
+
+[data-theme='dark'] .bezent-table__th {
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme='dark'] .bezent-table__row {
+  border-bottom: 1px solid var(--table-row-divider, rgba(56, 189, 248, 0.26));
+}
+
+[data-theme='dark'] .bezent-table.is-hoverable .bezent-table__row:hover {
+  background-color: rgba(22, 131, 255, 0.08);
+}
+
+[data-theme='dark'] .bezent-table-meta-title {
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme='dark'] .bezent-table-meta-subtitle {
+  color: var(--text-secondary, #94a3b8);
 }
