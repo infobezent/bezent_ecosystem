@@ -1,6 +1,11 @@
 import { useMemo } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { AppShell, type ShellRailItem } from '../../layouts/app-shell';
+import { Outlet, useLocation, useNavigate, useMatches } from 'react-router-dom';
+import {
+  AppShell,
+  type ShellRailItem,
+  type WorkspaceVariant,
+  type BezentRouteHandle,
+} from '../../layouts/app-shell';
 import { ApprovalsDrawer } from '../../platform/approvals';
 import { CalendarDrawer } from '../../platform/calendar';
 import { NotesDrawer } from '../../platform/notes';
@@ -21,6 +26,11 @@ import { toShellLauncher, toShellNavItems } from './shellNavigation';
 import { DEV_SEARCH_PROVIDER } from './devSearchFixtures';
 import { useDevUtilityData } from './devUtilityFixtures';
 import { CustomFieldsProvider } from '../../applications/hrms/settings/context/CustomFieldsContext';
+
+/** Type guard to validate whether an unknown route handle implements BezentRouteHandle. */
+function isBezentRouteHandle(handle: unknown): handle is BezentRouteHandle {
+  return typeof handle === 'object' && handle !== null && 'workspaceVariant' in handle;
+}
 
 /** Rail buttons come from the one capability registry — never listed by hand. */
 const RAIL_CAPABILITIES = UTILITY_CAPABILITIES.filter((c) => c.placement === 'rail');
@@ -43,6 +53,19 @@ export function ShellLayout() {
   const { resolvedTheme, toggleTheme } = useTheme();
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const matches = useMatches();
+
+  // Resolve the active workspace variant from the most specific matched route handle.
+  // Defaults to 'default' (floating card workspace) when no handle or override is specified.
+  const resolvedWorkspaceVariant: WorkspaceVariant = useMemo(() => {
+    for (let i = matches.length - 1; i >= 0; i--) {
+      const handle = matches[i]?.handle;
+      if (isBezentRouteHandle(handle) && handle.workspaceVariant) {
+        return handle.workspaceVariant;
+      }
+    }
+    return 'default';
+  }, [matches]);
 
   // The URL is the single source of truth for selection: the active
   // application, destination and sub-destination are all derived from it.
@@ -136,6 +159,7 @@ export function ShellLayout() {
   return (
     <CustomFieldsProvider>
       <AppShell
+        workspaceVariant={resolvedWorkspaceVariant}
         topNavSearch={
           <GlobalSearch
             provider={DEV_SEARCH_PROVIDER}
