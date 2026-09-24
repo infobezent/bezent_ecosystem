@@ -16,7 +16,6 @@ import {
   FormSection,
   Modal,
   Alert,
-  Page,
   PageHeader,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
@@ -596,8 +595,8 @@ export function EmployeeRegistration({
 
   return (
     <>
-      <Page className="employee-registration-page" maxWidth="full" gap="lg">
-        {/* Page Header */}
+      {/* Region A & B: Workspace Header & Persistent Tabs (Non-scrolling) */}
+      <div className="bezent-modal__header bezent-modal__header--with-bottom">
         <PageHeader
           title="Employee Registration"
           subtitle="Add and manage new employee information"
@@ -644,7 +643,10 @@ export function EmployeeRegistration({
           onChange={(id) => setActiveSection(id)}
           variant="underline"
         />
+      </div>
 
+      {/* Region C: Scrollable Active Tab Content (flex: 1, min-height: 0, overflow-y: auto) */}
+      <div className="bezent-modal__body employee-registration-workspace-content">
         <Stack gap="xl">
           {/* Toast Alert Banner */}
           {toastMsg && (
@@ -1055,10 +1057,11 @@ export function EmployeeRegistration({
             </Stack>
           )}
         </Stack>
+      </div>
 
-        {/* Persistent Bottom Action Bar */}
+      {/* Region D: Persistent Bottom Action Bar (Non-scrolling) */}
+      <div className="bezent-modal__footer employee-registration-workspace-actions">
         <Toolbar
-          className="bezent-form-actions"
           left={
             <Actions gap="sm">
               <Button
@@ -1085,7 +1088,7 @@ export function EmployeeRegistration({
             ) : undefined
           }
         />
-      </Page>
+      </div>
 
       {/* Drafts Modal */}
       <DraftsModal
