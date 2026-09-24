@@ -2,6 +2,8 @@ import { useState } from 'react';
 import {
   Button,
   Card,
+  CardTitle,
+  CardDescription,
   Input,
   Select,
   Tabs,
@@ -988,12 +990,12 @@ export function EmployeeRegistration({
                   <Inline gap="md" align="center">
                     <BezentIcon name="documents" size={22} />
                     <div>
-                      <h3 className="bezent-card__title">
+                      <CardTitle>
                         {allSections.find((s) => s.id === activeSection)?.label || 'Custom Section'}
-                      </h3>
-                      <p className="bezent-card__desc">
+                      </CardTitle>
+                      <CardDescription>
                         Configured custom fields and section details.
-                      </p>
+                      </CardDescription>
                     </div>
                   </Inline>
                 }
@@ -1007,13 +1009,12 @@ export function EmployeeRegistration({
                     return (
                       <Card key={c.id} padding="md">
                         <Stack gap="sm">
-                          <h4 className="bezent-card__title">{c.title}</h4>
-                          <FormGrid columns={2}>
+                          <CardTitle>{c.title}</CardTitle>
+                          <FormGrid columns={2} layout="horizontal" labelWidth="md">
                             {cardFields.map((f) => (
-                              <div key={f.id}>
+                              <FormField key={f.id} label={f.label} required={f.required}>
                                 {f.fieldType === 'select' ? (
                                   <Select
-                                    label={`${f.label}${f.required ? ' *' : ''}`}
                                     disabled={f.readOnly}
                                     options={[
                                       { value: '', label: `Select ${f.label}` },
@@ -1032,12 +1033,11 @@ export function EmployeeRegistration({
                                           ? 'number'
                                           : 'text'
                                     }
-                                    label={`${f.label}${f.required ? ' *' : ''}`}
                                     placeholder={f.defaultValue || `Enter ${f.label}`}
                                     disabled={f.readOnly}
                                   />
                                 )}
-                              </div>
+                              </FormField>
                             ))}
                           </FormGrid>
                         </Stack>

@@ -8,6 +8,7 @@ import {
   FormGrid,
   Stack,
   Actions,
+  CardTitle,
 } from '../../../../design-system/components';
 import type {
   OrganizationMasters,
@@ -132,7 +133,7 @@ export function NewHireModal({ isOpen, onClose, masters, onSubmit }: NewHireModa
 
           {/* Personal Information */}
           <Stack gap="md">
-            <h3 className="bezent-card__title">Personal Details</h3>
+            <CardTitle>Personal Details</CardTitle>
             <FormGrid columns={2}>
               <Input
                 id="nh-first-name"
@@ -176,7 +177,7 @@ export function NewHireModal({ isOpen, onClose, masters, onSubmit }: NewHireModa
 
           {/* Employment Details */}
           <Stack gap="md">
-            <h3 className="bezent-card__title">Employment Details</h3>
+            <CardTitle>Employment Details</CardTitle>
 
             <Input
               id="nh-company"

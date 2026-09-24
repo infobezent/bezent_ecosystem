@@ -1,4 +1,17 @@
 import { useState } from 'react';
+import {
+  Card,
+  CardTitle,
+  Label,
+  Button,
+  Badge,
+  Modal,
+  Alert,
+  Stack,
+  Inline,
+  Grid,
+  Divider,
+} from '../../../../design-system';
 import { BezentIcon } from '../../../../design-system/icons';
 import { RegistrationSectionId } from './EmployeeRegistration';
 import { DocumentItemState } from './DocumentsSection';
@@ -401,912 +414,875 @@ export function ReviewSection({
     }
   };
 
-  return (
-    <div className="review-section">
-      {/* Header Banner */}
-      <div className="employee-registration__section-header">
-        <div className="employee-registration__section-icon-badge">
-          <BezentIcon name="documents" size={22} />
-        </div>
-        <div className="employee-registration__section-title-group">
-          <h2 className="employee-registration__section-title">Employee Registration Review</h2>
-          <p className="employee-registration__section-subtitle">
-            Consolidated single-page view of all registration sections. Review details, fix pending
-            items, and finalize employee creation.
-          </p>
-        </div>
-      </div>
+  const hasSectionPending = (secLabel: string) => Boolean(sectionPendingMap[secLabel]?.length);
 
-      {/* Prominent REGISTRATION STATUS Banner */}
-      <div
-        className={`review-section__status-banner ${
-          isComplete
-            ? 'review-section__status-banner--complete'
-            : 'review-section__status-banner--pending'
-        }`}
-      >
-        <div className="review-section__status-info">
-          <div className="review-section__status-badge-row">
-            <span
-              className={`review-section__status-pill ${
-                isComplete
-                  ? 'review-section__status-pill--complete'
-                  : 'review-section__status-pill--pending'
-              }`}
-            >
-              {isComplete ? '✓ Registration Complete' : '⚠ Pending — Action Required'}
-            </span>
-            <span className="review-section__status-count">
+  return (
+    <Stack gap="xl">
+      {/* Prominent REGISTRATION STATUS Alert */}
+      <Alert variant={isComplete ? 'success' : 'warning'}>
+        <Inline justify="between" align="center">
+          <Stack gap="xs">
+            <strong>{isComplete ? 'Registration Complete' : 'Pending Action Required'}</strong>
+            <span>
               {isComplete
-                ? 'All 10 registration sections complete and verified.'
+                ? 'All 10 registration sections complete and verified. Ready to create employee record.'
                 : `${pendingItems.length} item${pendingItems.length > 1 ? 's' : ''} require attention across ${
                     Object.keys(sectionPendingMap).length
-                  } section${Object.keys(sectionPendingMap).length > 1 ? 's' : ''}.`}
+                  } sections.`}
             </span>
-          </div>
-          <p className="review-section__status-desc">
-            {isComplete
-              ? 'All required employee information, statutory details, bank setup, and document verifications are complete. Ready to generate employee record.'
-              : 'Review the section indicators below and click any pending item to navigate directly to the field.'}
-          </p>
-        </div>
-      </div>
+          </Stack>
+          <Badge variant={isComplete ? 'success' : 'warning'}>
+            {isComplete ? 'Verified' : 'Pending Items'}
+          </Badge>
+        </Inline>
+      </Alert>
 
       {/* SECTION & FIELD PENDING WORK SUMMARY */}
       {!isComplete && (
-        <div className="review-section__pending-summary-card">
-          <div className="review-section__pending-summary-header">
-            <BezentIcon name="clock" size={18} />
-            <h3 className="review-section__pending-summary-title">
-              Pending Work Summary ({pendingItems.length} Items)
-            </h3>
-          </div>
+        <Card variant="flat">
+          <Stack gap="md">
+            <CardTitle>Pending Work Summary ({pendingItems.length} Items)</CardTitle>
 
-          <div className="review-section__pending-list">
-            {Object.entries(sectionPendingMap).map(([sectionLabel, items]) => {
-              return (
-                <div key={sectionLabel} className="review-section__pending-group">
-                  <div className="review-section__pending-group-title">
-                    <span className="review-section__pending-warning-icon">⚠</span>
+            <Stack gap="sm">
+              {Object.entries(sectionPendingMap).map(([sectionLabel, items]) => (
+                <Stack key={sectionLabel} gap="xs">
+                  <span className="bezent-card__desc">
                     <strong>{sectionLabel}</strong> ({items.length} pending)
-                  </div>
-                  <div className="review-section__pending-items-flex">
+                  </span>
+                  <Inline gap="xs" wrap>
                     {items.map((item, idx) => (
-                      <button
+                      <Button
                         key={idx}
                         type="button"
-                        className="review-section__pending-item-chip"
+                        variant="secondary"
+                        size="sm"
                         onClick={() => onEditSection(item.sectionId)}
                       >
-                        <span className="review-section__chip-field">{item.fieldName}</span>
-                        <span className="review-section__chip-reason">— {item.reason}</span>
-                        <span className="review-section__chip-action">Fix →</span>
-                      </button>
+                        {item.fieldName} — {item.reason} →
+                      </Button>
                     ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+                  </Inline>
+                </Stack>
+              ))}
+            </Stack>
+          </Stack>
+        </Card>
       )}
 
-      {/* CONSOLIDATED 10-SECTION CARDS WITH EASY EDIT & DELETE */}
-      <div className="review-section__cards-grid">
-        {/* 1. GENERAL INFORMATION */}
-        <div className="review-section__card">
-          <div className="review-section__card-header">
-            <div className="review-section__card-title-group">
-              <span className="review-section__card-icon">📋</span>
-              <h3 className="review-section__card-title">1. General Information</h3>
-              <span className="review-section__section-status-badge review-section__section-status-badge--complete">
-                ✓ Complete
-              </span>
-            </div>
-            <button
+      {/* 1. GENERAL INFORMATION */}
+      <Card variant="flat">
+        <Stack gap="md">
+          <Inline justify="between" align="center">
+            <Inline gap="sm" align="center">
+              <CardTitle>1. General Information</CardTitle>
+              {hasSectionPending('General') ? (
+                <Badge variant="warning">Action Required</Badge>
+              ) : (
+                <Badge variant="success">Complete</Badge>
+              )}
+            </Inline>
+            <Button
               type="button"
-              className="review-section__edit-btn"
+              variant="secondary"
+              size="sm"
               onClick={() => onEditSection('general')}
             >
-              ✎ Edit
-            </button>
-          </div>
+              Edit
+            </Button>
+          </Inline>
 
-          <div className="review-section__data-grid">
-            <div className="review-section__data-item">
-              <span className="review-section__label">Employee ID</span>
-              <span className="review-section__value">{data.general.employeeId || '—'}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Employment Type</span>
-              <span className="review-section__value">{data.general.employmentType}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Employment Status</span>
-              <span className="review-section__value">{data.general.employmentStatus}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Department</span>
-              <span className="review-section__value">{data.general.department}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Team</span>
-              <span className="review-section__value">{data.general.team}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Designation</span>
-              <span className="review-section__value">{data.general.designation}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Grade / Level</span>
-              <span className="review-section__value">{data.general.gradeLevel}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Reporting Manager</span>
-              <span className="review-section__value">
-                {data.general.reportingManager || 'Unassigned'}
-              </span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Organisation Unit</span>
-              <span className="review-section__value">{data.general.organisationUnit}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Office Location</span>
-              <span className="review-section__value">{data.general.officeLocation}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Joining Date</span>
-              <span className="review-section__value">{data.general.joiningDate || '—'}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Confirmed Date of Joining</span>
-              <span className="review-section__value">
-                {data.general.confirmedJoiningDate || '—'}
-              </span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Source of Hire</span>
-              <span className="review-section__value">{data.general.sourceOfHire}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Probation Period</span>
-              <span className="review-section__value">{data.general.probationPeriod}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Notice Period</span>
-              <span className="review-section__value">{data.general.noticePeriod}</span>
-            </div>
-          </div>
-        </div>
+          <Grid columns={3} gap="md">
+            <Stack gap="xs">
+              <Label size="sm">Employee ID</Label>
+              <strong>{data.general.employeeId || '—'}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Employment Type</Label>
+              <strong>{data.general.employmentType}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Employment Status</Label>
+              <strong>{data.general.employmentStatus}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Department</Label>
+              <strong>{data.general.department}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Team</Label>
+              <strong>{data.general.team}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Designation</Label>
+              <strong>{data.general.designation}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Grade / Level</Label>
+              <strong>{data.general.gradeLevel}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Reporting Manager</Label>
+              <strong>{data.general.reportingManager || 'Unassigned'}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Organisation Unit</Label>
+              <strong>{data.general.organisationUnit}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Office Location</Label>
+              <strong>{data.general.officeLocation}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Joining Date</Label>
+              <strong>{data.general.joiningDate || '—'}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Confirmed Joining Date</Label>
+              <strong>{data.general.confirmedJoiningDate || '—'}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Source of Hire</Label>
+              <strong>{data.general.sourceOfHire}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Probation Period</Label>
+              <strong>{data.general.probationPeriod}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Notice Period</Label>
+              <strong>{data.general.noticePeriod}</strong>
+            </Stack>
+          </Grid>
+        </Stack>
+      </Card>
 
-        {/* 2. PERSONAL INFORMATION */}
-        <div className="review-section__card">
-          <div className="review-section__card-header">
-            <div className="review-section__card-title-group">
-              <span className="review-section__card-icon">👤</span>
-              <h3 className="review-section__card-title">2. Personal Information</h3>
-              <span className="review-section__section-status-badge review-section__section-status-badge--complete">
-                ✓ Complete
-              </span>
-            </div>
-            <button
+      {/* 2. PERSONAL INFORMATION */}
+      <Card variant="flat">
+        <Stack gap="md">
+          <Inline justify="between" align="center">
+            <Inline gap="sm" align="center">
+              <CardTitle>2. Personal Information</CardTitle>
+              {hasSectionPending('Personal Information') ? (
+                <Badge variant="warning">Action Required</Badge>
+              ) : (
+                <Badge variant="success">Complete</Badge>
+              )}
+            </Inline>
+            <Button
               type="button"
-              className="review-section__edit-btn"
+              variant="secondary"
+              size="sm"
               onClick={() => onEditSection('personal')}
             >
-              ✎ Edit
-            </button>
-          </div>
+              Edit
+            </Button>
+          </Inline>
 
-          {/* Photo Preview & Key Personal Info */}
-          <div className="review-section__photo-review-row">
-            <div className="review-section__photo-box">
-              {data.documents.passportPhoto.previewUrl ? (
-                <img
-                  src={data.documents.passportPhoto.previewUrl}
-                  alt="Passport Photograph"
-                  className="review-section__photo-img"
-                />
-              ) : (
-                <div className="review-section__photo-placeholder">
-                  <BezentIcon name="employees" size={32} />
-                  <span>No Photo</span>
-                </div>
-              )}
-            </div>
-            <div className="review-section__photo-meta">
-              <h4 className="review-section__person-name">
-                {data.personal.fullName || 'Arun Kumar'}
-              </h4>
-              <span className="review-section__person-sub">
+          {/* Photo & Identity Summary */}
+          <Inline gap="md" align="center">
+            {data.documents.passportPhoto.previewUrl ? (
+              <img
+                src={data.documents.passportPhoto.previewUrl}
+                alt="Passport Photo"
+                className="bezent-photo-preview"
+              />
+            ) : (
+              <div className="bezent-photo-placeholder">
+                <BezentIcon name="employees" size={32} />
+              </div>
+            )}
+            <Stack gap="xs">
+              <CardTitle>{data.personal.fullName || 'Arun Kumar'}</CardTitle>
+              <span className="bezent-card__desc">
                 {data.personal.gender} • DOB: {data.personal.dob} • Nationality:{' '}
                 {data.personal.nationality}
               </span>
-              <span className="review-section__person-sub">
+              <span className="bezent-card__desc">
                 Aadhaar: {data.personal.aadhaarNumber} | PAN: {data.personal.panNumber}
               </span>
-            </div>
-          </div>
+            </Stack>
+          </Inline>
 
-          <div className="review-section__data-grid">
-            <div className="review-section__data-item">
-              <span className="review-section__label">Personal Email</span>
-              <span className="review-section__value">{data.personal.personalEmail}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Mobile Phone</span>
-              <span className="review-section__value">{data.personal.mobilePhone}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Marital Status</span>
-              <span className="review-section__value">{data.personal.maritalStatus}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Blood Group</span>
-              <span className="review-section__value">{data.personal.bloodGroup}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Current Address</span>
-              <span className="review-section__value">
+          <Grid columns={3} gap="md">
+            <Stack gap="xs">
+              <Label size="sm">Personal Email</Label>
+              <strong>{data.personal.personalEmail}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Mobile Phone</Label>
+              <strong>{data.personal.mobilePhone}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Marital Status</Label>
+              <strong>{data.personal.maritalStatus}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Blood Group</Label>
+              <strong>{data.personal.bloodGroup}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Current Address</Label>
+              <strong>
                 {data.personal.currentStreet}, {data.personal.currentCity},{' '}
                 {data.personal.currentState} - {data.personal.currentPin}
-              </span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Permanent Address</span>
-              <span className="review-section__value">
+              </strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Permanent Address</Label>
+              <strong>
                 {data.personal.permanentStreet}, {data.personal.permanentCity},{' '}
                 {data.personal.permanentState} - {data.personal.permanentPin}
-              </span>
-            </div>
-          </div>
+              </strong>
+            </Stack>
+          </Grid>
 
-          {/* Repeatable: Family Members */}
-          <div className="review-section__sub-block">
-            <h4 className="review-section__sub-heading">
-              Family Members ({data.personal.familyMembers.length})
-            </h4>
-            <div className="review-section__repeatable-list">
-              {data.personal.familyMembers.map((fam) => (
-                <div key={fam.id} className="review-section__repeatable-item">
-                  <div className="review-section__repeatable-info">
-                    <strong>{fam.name}</strong> ({fam.relationship}) — DOB: {fam.dob}
-                    {fam.dependent && <span className="review-section__mini-tag">Dependent</span>}
-                  </div>
-                  {onDeleteFamilyMember && (
-                    <button
-                      type="button"
-                      className="review-section__delete-item-btn"
-                      onClick={() => confirmAndDelete(fam.name, () => onDeleteFamilyMember(fam.id))}
-                    >
-                      🗑 Delete
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* Family Members */}
+          {data.personal.familyMembers.length > 0 && (
+            <Stack gap="xs">
+              <Divider />
+              <Label size="md">Family Members ({data.personal.familyMembers.length})</Label>
+              <Stack gap="xs">
+                {data.personal.familyMembers.map((fam) => (
+                  <Inline key={fam.id} justify="between" align="center">
+                    <span>
+                      <strong>{fam.name}</strong> ({fam.relationship}) — DOB: {fam.dob}{' '}
+                      {fam.dependent && <Badge variant="neutral">Dependent</Badge>}
+                    </span>
+                    {onDeleteFamilyMember && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          confirmAndDelete(fam.name, () => onDeleteFamilyMember(fam.id))
+                        }
+                      >
+                        Delete
+                      </Button>
+                    )}
+                  </Inline>
+                ))}
+              </Stack>
+            </Stack>
+          )}
 
-          {/* Repeatable: Nomination Details */}
-          <div className="review-section__sub-block">
-            <h4 className="review-section__sub-heading">
-              Nomination Details ({data.personal.nominationDetails.length})
-            </h4>
-            <div className="review-section__repeatable-list">
-              {data.personal.nominationDetails.map((nom) => (
-                <div key={nom.id} className="review-section__repeatable-item">
-                  <div className="review-section__repeatable-info">
-                    <strong>{nom.nomineeName}</strong> ({nom.relationship}) — {nom.percentage}%
-                    Allocation
-                    {nom.isMinor && <span className="review-section__mini-tag">Minor</span>}
-                  </div>
-                  {onDeleteNominee && (
-                    <button
-                      type="button"
-                      className="review-section__delete-item-btn"
-                      onClick={() =>
-                        confirmAndDelete(nom.nomineeName, () => onDeleteNominee(nom.id))
-                      }
-                    >
-                      🗑 Delete
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+          {/* Nomination Details */}
+          {data.personal.nominationDetails.length > 0 && (
+            <Stack gap="xs">
+              <Divider />
+              <Label size="md">Nomination Details ({data.personal.nominationDetails.length})</Label>
+              <Stack gap="xs">
+                {data.personal.nominationDetails.map((nom) => (
+                  <Inline key={nom.id} justify="between" align="center">
+                    <span>
+                      <strong>{nom.nomineeName}</strong> ({nom.relationship}) — {nom.percentage}%
+                      Allocation {nom.isMinor && <Badge variant="warning">Minor</Badge>}
+                    </span>
+                    {onDeleteNominee && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          confirmAndDelete(nom.nomineeName, () => onDeleteNominee(nom.id))
+                        }
+                      >
+                        Delete
+                      </Button>
+                    )}
+                  </Inline>
+                ))}
+              </Stack>
+            </Stack>
+          )}
+        </Stack>
+      </Card>
 
-        {/* 3. ONBOARDING */}
-        <div className="review-section__card">
-          <div className="review-section__card-header">
-            <div className="review-section__card-title-group">
-              <span className="review-section__card-icon">🚀</span>
-              <h3 className="review-section__card-title">3. Onboarding Tasks &amp; Assets</h3>
-              <span className="review-section__section-status-badge review-section__section-status-badge--complete">
-                ✓ Complete
-              </span>
-            </div>
-            <button
+      {/* 3. ONBOARDING */}
+      <Card variant="flat">
+        <Stack gap="md">
+          <Inline justify="between" align="center">
+            <Inline gap="sm" align="center">
+              <CardTitle>3. Onboarding Tasks &amp; Assets</CardTitle>
+              <Badge variant="success">Complete</Badge>
+            </Inline>
+            <Button
               type="button"
-              className="review-section__edit-btn"
+              variant="secondary"
+              size="sm"
               onClick={() => onEditSection('onboarding')}
             >
-              ✎ Edit
-            </button>
-          </div>
+              Edit
+            </Button>
+          </Inline>
 
-          {/* Onboarding Tasks */}
-          <div className="review-section__sub-block">
-            <h4 className="review-section__sub-heading">
-              Onboarding Tasks ({data.onboarding.tasks.length})
-            </h4>
-            <div className="review-section__repeatable-list">
+          {/* Tasks */}
+          <Stack gap="xs">
+            <Label size="md">Onboarding Tasks ({data.onboarding.tasks.length})</Label>
+            <Stack gap="xs">
               {data.onboarding.tasks.map((tsk) => (
-                <div key={tsk.id} className="review-section__repeatable-item">
-                  <div className="review-section__repeatable-info">
+                <Inline key={tsk.id} justify="between" align="center">
+                  <span>
                     <strong>{tsk.taskDescription}</strong> • Assigned: {tsk.assignedTo} • Due:{' '}
-                    {tsk.dueDate}
-                    <span className="review-section__mini-tag">{tsk.status}</span>
-                  </div>
+                    {tsk.dueDate} <Badge variant="neutral">{tsk.status}</Badge>
+                  </span>
                   {onDeleteTask && (
-                    <button
+                    <Button
                       type="button"
-                      className="review-section__delete-item-btn"
+                      variant="ghost"
+                      size="sm"
                       onClick={() =>
                         confirmAndDelete(tsk.taskDescription, () => onDeleteTask(tsk.id))
                       }
                     >
-                      🗑 Delete
-                    </button>
+                      Delete
+                    </Button>
                   )}
-                </div>
+                </Inline>
               ))}
-            </div>
-          </div>
+            </Stack>
+          </Stack>
 
-          {/* Assigned Assets */}
-          <div className="review-section__sub-block">
-            <h4 className="review-section__sub-heading">
-              Assigned Assets ({data.onboarding.assets.length})
-            </h4>
-            <div className="review-section__repeatable-list">
+          {/* Assets */}
+          <Stack gap="xs">
+            <Divider />
+            <Label size="md">Assigned Assets ({data.onboarding.assets.length})</Label>
+            <Stack gap="xs">
               {data.onboarding.assets.map((ast) => (
-                <div key={ast.id} className="review-section__repeatable-item">
-                  <div className="review-section__repeatable-info">
+                <Inline key={ast.id} justify="between" align="center">
+                  <span>
                     <strong>{ast.assetName}</strong> ({ast.category}) — S/N: {ast.serialNumber} •
                     Issued: {ast.issueDate} (Qty: {ast.quantity})
-                  </div>
+                  </span>
                   {onDeleteAsset && (
-                    <button
+                    <Button
                       type="button"
-                      className="review-section__delete-item-btn"
+                      variant="ghost"
+                      size="sm"
                       onClick={() => confirmAndDelete(ast.assetName, () => onDeleteAsset(ast.id))}
                     >
-                      🗑 Delete
-                    </button>
+                      Delete
+                    </Button>
                   )}
-                </div>
+                </Inline>
               ))}
-            </div>
-          </div>
-        </div>
+            </Stack>
+          </Stack>
+        </Stack>
+      </Card>
 
-        {/* 4. SKILLS */}
-        <div className="review-section__card">
-          <div className="review-section__card-header">
-            <div className="review-section__card-title-group">
-              <span className="review-section__card-icon">⚡</span>
-              <h3 className="review-section__card-title">4. Skills &amp; Qualifications</h3>
-              <span className="review-section__section-status-badge review-section__section-status-badge--complete">
-                ✓ Complete
-              </span>
-            </div>
-            <button
+      {/* 4. SKILLS */}
+      <Card variant="flat">
+        <Stack gap="md">
+          <Inline justify="between" align="center">
+            <Inline gap="sm" align="center">
+              <CardTitle>4. Skills &amp; Qualifications</CardTitle>
+              <Badge variant="success">Complete</Badge>
+            </Inline>
+            <Button
               type="button"
-              className="review-section__edit-btn"
+              variant="secondary"
+              size="sm"
               onClick={() => onEditSection('skills')}
             >
-              ✎ Edit
-            </button>
-          </div>
+              Edit
+            </Button>
+          </Inline>
 
-          <div className="review-section__repeatable-list">
+          <Stack gap="xs">
             {data.skills.map((skl) => (
-              <div key={skl.id} className="review-section__repeatable-item">
-                <div className="review-section__repeatable-info">
-                  <strong>{skl.skill}</strong> ({skl.skillType}) — Level: {skl.level} (
-                  {skl.levelType}) • {skl.yearsExperience} yrs exp
-                  <br />
-                  <span className="review-section__small-muted">
+              <Inline key={skl.id} justify="between" align="center">
+                <Stack gap="xs">
+                  <span>
+                    <strong>{skl.skill}</strong> ({skl.skillType}) — Level: {skl.level} (
+                    {skl.levelType}) • {skl.yearsExperience} yrs exp
+                  </span>
+                  <span className="bezent-card__desc">
                     Examiner: {skl.examiner} | Verified By: {skl.verifiedBy} | Mentor: {skl.mentor}
                   </span>
-                </div>
+                </Stack>
                 {onDeleteSkill && (
-                  <button
+                  <Button
                     type="button"
-                    className="review-section__delete-item-btn"
+                    variant="ghost"
+                    size="sm"
                     onClick={() => confirmAndDelete(skl.skill, () => onDeleteSkill(skl.id))}
                   >
-                    🗑 Delete
-                  </button>
+                    Delete
+                  </Button>
                 )}
-              </div>
+              </Inline>
             ))}
-          </div>
-        </div>
+          </Stack>
+        </Stack>
+      </Card>
 
-        {/* 5. EMERGENCY CONTACT */}
-        <div className="review-section__card">
-          <div className="review-section__card-header">
-            <div className="review-section__card-title-group">
-              <span className="review-section__card-icon">📞</span>
-              <h3 className="review-section__card-title">5. Emergency Contacts</h3>
-              <span className="review-section__section-status-badge review-section__section-status-badge--complete">
-                ✓ Complete
-              </span>
-            </div>
-            <button
+      {/* 5. EMERGENCY CONTACT */}
+      <Card variant="flat">
+        <Stack gap="md">
+          <Inline justify="between" align="center">
+            <Inline gap="sm" align="center">
+              <CardTitle>5. Emergency Contacts</CardTitle>
+              {hasSectionPending('Emergency Contact') ? (
+                <Badge variant="warning">Action Required</Badge>
+              ) : (
+                <Badge variant="success">Complete</Badge>
+              )}
+            </Inline>
+            <Button
               type="button"
-              className="review-section__edit-btn"
+              variant="secondary"
+              size="sm"
               onClick={() => onEditSection('emergency')}
             >
-              ✎ Edit
-            </button>
-          </div>
+              Edit
+            </Button>
+          </Inline>
 
-          <div className="review-section__data-grid">
-            <div className="review-section__data-item">
-              <span className="review-section__label">Primary Contact Name</span>
-              <span className="review-section__value">
+          <Grid columns={3} gap="md">
+            <Stack gap="xs">
+              <Label size="sm">Primary Contact</Label>
+              <strong>
                 {data.emergency.primaryContact.name} ({data.emergency.primaryContact.relationship})
-              </span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Primary Phone</span>
-              <span className="review-section__value">{data.emergency.primaryContact.phone}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Primary Email</span>
-              <span className="review-section__value">
-                {data.emergency.primaryContact.email || '—'}
-              </span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Primary Address</span>
-              <span className="review-section__value">
-                {data.emergency.primaryContact.address || '—'}
-              </span>
-            </div>
-          </div>
+              </strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Primary Phone</Label>
+              <strong>{data.emergency.primaryContact.phone}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Primary Email</Label>
+              <strong>{data.emergency.primaryContact.email || '—'}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Primary Address</Label>
+              <strong>{data.emergency.primaryContact.address || '—'}</strong>
+            </Stack>
+          </Grid>
 
           {data.emergency.secondaryContact && (
-            <div className="review-section__sub-block">
-              <div className="review-section__sub-header-row">
-                <h4 className="review-section__sub-heading">Secondary Emergency Contact</h4>
+            <Stack gap="xs">
+              <Divider />
+              <Inline justify="between" align="center">
+                <Label size="md">Secondary Contact</Label>
                 {onDeleteSecondaryContact && (
-                  <button
+                  <Button
                     type="button"
-                    className="review-section__delete-item-btn"
+                    variant="ghost"
+                    size="sm"
                     onClick={() => confirmAndDelete('Secondary Contact', onDeleteSecondaryContact)}
                   >
-                    🗑 Delete Contact
-                  </button>
+                    Delete Contact
+                  </Button>
                 )}
-              </div>
-              <div className="review-section__data-grid">
-                <div className="review-section__data-item">
-                  <span className="review-section__label">Name</span>
-                  <span className="review-section__value">
+              </Inline>
+              <Grid columns={2} gap="md">
+                <Stack gap="xs">
+                  <Label size="sm">Name</Label>
+                  <strong>
                     {data.emergency.secondaryContact.name} (
                     {data.emergency.secondaryContact.relationship})
-                  </span>
-                </div>
-                <div className="review-section__data-item">
-                  <span className="review-section__label">Phone</span>
-                  <span className="review-section__value">
-                    {data.emergency.secondaryContact.phone}
-                  </span>
-                </div>
-              </div>
-            </div>
+                  </strong>
+                </Stack>
+                <Stack gap="xs">
+                  <Label size="sm">Phone</Label>
+                  <strong>{data.emergency.secondaryContact.phone}</strong>
+                </Stack>
+              </Grid>
+            </Stack>
           )}
-        </div>
+        </Stack>
+      </Card>
 
-        {/* 6. ACCOUNTS */}
-        <div className="review-section__card">
-          <div className="review-section__card-header">
-            <div className="review-section__card-title-group">
-              <span className="review-section__card-icon">🏦</span>
-              <h3 className="review-section__card-title">6. Accounts &amp; Salary Breakdown</h3>
-              <span className="review-section__section-status-badge review-section__section-status-badge--complete">
-                ✓ Complete
-              </span>
-            </div>
-            <button
+      {/* 6. ACCOUNTS */}
+      <Card variant="flat">
+        <Stack gap="md">
+          <Inline justify="between" align="center">
+            <Inline gap="sm" align="center">
+              <CardTitle>6. Accounts &amp; Salary Breakdown</CardTitle>
+              {hasSectionPending('Accounts') ? (
+                <Badge variant="warning">Action Required</Badge>
+              ) : (
+                <Badge variant="success">Complete</Badge>
+              )}
+            </Inline>
+            <Button
               type="button"
-              className="review-section__edit-btn"
+              variant="secondary"
+              size="sm"
               onClick={() => onEditSection('accounts')}
             >
-              ✎ Edit
-            </button>
-          </div>
+              Edit
+            </Button>
+          </Inline>
 
-          <div className="review-section__data-grid">
-            <div className="review-section__data-item">
-              <span className="review-section__label">Bank Name &amp; Branch</span>
-              <span className="review-section__value">
+          <Grid columns={3} gap="md">
+            <Stack gap="xs">
+              <Label size="sm">Bank &amp; Branch</Label>
+              <strong>
                 {data.accounts.bankName} — {data.accounts.branchName}
-              </span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">IFSC Code</span>
-              <span className="review-section__value">{data.accounts.ifscCode}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Account Holder</span>
-              <span className="review-section__value">{data.accounts.accountHolderName}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Account Number</span>
-              <span className="review-section__value">
-                •••• •••• {data.accounts.accountNumber.slice(-4)}
-              </span>
-            </div>
-
-            <div className="review-section__data-item">
-              <span className="review-section__label">Salary Structure</span>
-              <span className="review-section__value">
+              </strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">IFSC Code</Label>
+              <strong>{data.accounts.ifscCode}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Account Holder</Label>
+              <strong>{data.accounts.accountHolderName}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Account Number</Label>
+              <strong>•••• •••• {data.accounts.accountNumber.slice(-4)}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Salary Structure</Label>
+              <strong>
                 {data.accounts.salaryStructure} ({data.accounts.payGrade})
-              </span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Annual CTC</span>
-              <span className="review-section__value">
-                ₹{data.accounts.annualCtc.toLocaleString('en-IN')} / year
-              </span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Monthly Basic</span>
-              <span className="review-section__value">
-                ₹{data.accounts.monthlyBasic.toLocaleString('en-IN')} / mo
-              </span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Monthly Gross</span>
-              <span className="review-section__value">
-                ₹{data.accounts.grossSalary.toLocaleString('en-IN')} / mo
-              </span>
-            </div>
+              </strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Annual CTC</Label>
+              <strong>₹{data.accounts.annualCtc.toLocaleString('en-IN')} / yr</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Monthly Basic</Label>
+              <strong>₹{data.accounts.monthlyBasic.toLocaleString('en-IN')} / mo</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Monthly Gross</Label>
+              <strong>₹{data.accounts.grossSalary.toLocaleString('en-IN')} / mo</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Payroll Group</Label>
+              <strong>{data.accounts.payrollGroup}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Tax Regime</Label>
+              <strong>{data.accounts.taxRegime}</strong>
+            </Stack>
+          </Grid>
 
-            <div className="review-section__data-item">
-              <span className="review-section__label">Payroll Group</span>
-              <span className="review-section__value">{data.accounts.payrollGroup}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Tax Regime</span>
-              <span className="review-section__value">{data.accounts.taxRegime}</span>
-            </div>
-          </div>
-
-          {/* Conditional Medical Insurance Details */}
           {data.accounts.benefits.Medical && (
-            <div className="review-section__sub-block">
-              <h4 className="review-section__sub-heading">Medical Insurance Policy</h4>
-              <div className="review-section__data-grid">
-                <div className="review-section__data-item">
-                  <span className="review-section__label">Provider</span>
-                  <span className="review-section__value">
-                    {data.accounts.medicalDetails.provider}
-                  </span>
-                </div>
-                <div className="review-section__data-item">
-                  <span className="review-section__label">Policy Number</span>
-                  <span className="review-section__value">
-                    {data.accounts.medicalDetails.policyNumber}
-                  </span>
-                </div>
-                <div className="review-section__data-item">
-                  <span className="review-section__label">Coverage</span>
-                  <span className="review-section__value">
-                    {data.accounts.medicalDetails.coverage}
-                  </span>
-                </div>
-              </div>
-            </div>
+            <Stack gap="xs">
+              <Divider />
+              <Label size="md">Medical Insurance Policy</Label>
+              <Grid columns={3} gap="md">
+                <Stack gap="xs">
+                  <Label size="sm">Provider</Label>
+                  <strong>{data.accounts.medicalDetails.provider}</strong>
+                </Stack>
+                <Stack gap="xs">
+                  <Label size="sm">Policy Number</Label>
+                  <strong>{data.accounts.medicalDetails.policyNumber}</strong>
+                </Stack>
+                <Stack gap="xs">
+                  <Label size="sm">Coverage</Label>
+                  <strong>{data.accounts.medicalDetails.coverage}</strong>
+                </Stack>
+              </Grid>
+            </Stack>
           )}
-        </div>
+        </Stack>
+      </Card>
 
-        {/* 7. ONLINE ACCESS */}
-        <div className="review-section__card">
-          <div className="review-section__card-header">
-            <div className="review-section__card-title-group">
-              <span className="review-section__card-icon">🔑</span>
-              <h3 className="review-section__card-title">7. Online Access &amp; Permissions</h3>
-              <span className="review-section__section-status-badge review-section__section-status-badge--complete">
-                ✓ Complete
-              </span>
-            </div>
-            <button
+      {/* 7. ONLINE ACCESS */}
+      <Card variant="flat">
+        <Stack gap="md">
+          <Inline justify="between" align="center">
+            <Inline gap="sm" align="center">
+              <CardTitle>7. Online Access &amp; Permissions</CardTitle>
+              {hasSectionPending('Online Access') ? (
+                <Badge variant="warning">Action Required</Badge>
+              ) : (
+                <Badge variant="success">Complete</Badge>
+              )}
+            </Inline>
+            <Button
               type="button"
-              className="review-section__edit-btn"
+              variant="secondary"
+              size="sm"
               onClick={() => onEditSection('online_access')}
             >
-              ✎ Edit
-            </button>
-          </div>
+              Edit
+            </Button>
+          </Inline>
 
-          <div className="review-section__data-grid">
-            <div className="review-section__data-item">
-              <span className="review-section__label">Employee Username</span>
-              <span className="review-section__value">{data.onlineAccess.username}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Official Company Email</span>
-              <span className="review-section__value">{data.onlineAccess.officialEmail}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Invitation Status</span>
-              <span className="review-section__value">
+          <Grid columns={2} gap="md">
+            <Stack gap="xs">
+              <Label size="sm">Employee Username</Label>
+              <strong>{data.onlineAccess.username}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Official Company Email</Label>
+              <strong>{data.onlineAccess.officialEmail}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Invitation Status</Label>
+              <strong>
                 {data.onlineAccess.invitationStatus} (Sent: {data.onlineAccess.invitationSentDate})
-              </span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Employee Role &amp; Scope</span>
-              <span className="review-section__value">
+              </strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Role &amp; Scope</Label>
+              <strong>
                 {data.onlineAccess.employeeRole} ({data.onlineAccess.portalRoleScope})
-              </span>
-            </div>
-          </div>
+              </strong>
+            </Stack>
+          </Grid>
 
-          <div className="review-section__sub-block">
-            <h4 className="review-section__sub-heading">Granted Module Permissions</h4>
-            <div className="review-section__modules-grid">
+          <Stack gap="xs">
+            <Divider />
+            <Label size="md">Granted Module Permissions</Label>
+            <Inline gap="xs" wrap>
               {Object.entries(data.onlineAccess.moduleAccess).map(([mod, granted]) => (
-                <span
-                  key={mod}
-                  className={`review-section__module-chip ${
-                    granted
-                      ? 'review-section__module-chip--granted'
-                      : 'review-section__module-chip--denied'
-                  }`}
-                >
-                  {granted ? '✓' : '✕'} {mod}
-                </span>
+                <Badge key={mod} size="sm" variant={granted ? 'info' : 'neutral'}>
+                  {mod}
+                </Badge>
               ))}
-            </div>
-          </div>
-        </div>
+            </Inline>
+          </Stack>
+        </Stack>
+      </Card>
 
-        {/* 8. WORKING HOURS */}
-        <div className="review-section__card">
-          <div className="review-section__card-header">
-            <div className="review-section__card-title-group">
-              <span className="review-section__card-icon">⏰</span>
-              <h3 className="review-section__card-title">8. Working Hours &amp; Calendar</h3>
-              <span className="review-section__section-status-badge review-section__section-status-badge--complete">
-                ✓ Complete
-              </span>
-            </div>
-            <button
+      {/* 8. WORKING HOURS */}
+      <Card variant="flat">
+        <Stack gap="md">
+          <Inline justify="between" align="center">
+            <Inline gap="sm" align="center">
+              <CardTitle>8. Working Hours &amp; Calendar</CardTitle>
+              {hasSectionPending('Working Hours') ? (
+                <Badge variant="warning">Action Required</Badge>
+              ) : (
+                <Badge variant="success">Complete</Badge>
+              )}
+            </Inline>
+            <Button
               type="button"
-              className="review-section__edit-btn"
+              variant="secondary"
+              size="sm"
               onClick={() => onEditSection('working_hours')}
             >
-              ✎ Edit
-            </button>
-          </div>
+              Edit
+            </Button>
+          </Inline>
 
-          <div className="review-section__data-grid">
-            <div className="review-section__data-item">
-              <span className="review-section__label">Work Schedule</span>
-              <span className="review-section__value">{data.workingHours.workSchedule}</span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Shift Hours</span>
-              <span className="review-section__value">
+          <Grid columns={2} gap="md">
+            <Stack gap="xs">
+              <Label size="sm">Work Schedule</Label>
+              <strong>{data.workingHours.workSchedule}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Shift Hours</Label>
+              <strong>
                 {data.workingHours.startTime} – {data.workingHours.endTime} (
                 {data.workingHours.standardHours})
-              </span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Working Days</span>
-              <span className="review-section__value">
-                {data.workingHours.workingDays.join(', ')}
-              </span>
-            </div>
-            <div className="review-section__data-item">
-              <span className="review-section__label">Assigned Calendar &amp; Timezone</span>
-              <span className="review-section__value">
+              </strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Working Days</Label>
+              <strong>{data.workingHours.workingDays.join(', ')}</strong>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Calendar &amp; Timezone</Label>
+              <strong>
                 {data.workingHours.assignedCalendar} ({data.workingHours.timeZone})
-              </span>
-            </div>
-          </div>
-        </div>
+              </strong>
+            </Stack>
+          </Grid>
+        </Stack>
+      </Card>
 
-        {/* 9. DOCUMENTS */}
-        <div className="review-section__card">
-          <div className="review-section__card-header">
-            <div className="review-section__card-title-group">
-              <span className="review-section__card-icon">📁</span>
-              <h3 className="review-section__card-title">9. Documents Vault &amp; Verification</h3>
-              <span className="review-section__section-status-badge review-section__section-status-badge--complete">
-                ✓ Complete
-              </span>
-            </div>
-            <button
+      {/* 9. DOCUMENTS */}
+      <Card variant="flat">
+        <Stack gap="md">
+          <Inline justify="between" align="center">
+            <Inline gap="sm" align="center">
+              <CardTitle>9. Documents Vault &amp; Verification</CardTitle>
+              {hasSectionPending('Documents') ? (
+                <Badge variant="warning">Action Required</Badge>
+              ) : (
+                <Badge variant="success">Complete</Badge>
+              )}
+            </Inline>
+            <Button
               type="button"
-              className="review-section__edit-btn"
+              variant="secondary"
+              size="sm"
               onClick={() => onEditSection('documents')}
             >
-              ✎ Edit
-            </button>
-          </div>
+              Edit
+            </Button>
+          </Inline>
 
-          {/* Passport Photo Row */}
-          <div className="review-section__photo-review-row">
-            <div className="review-section__photo-box">
-              {data.documents.passportPhoto.previewUrl ? (
-                <img
-                  src={data.documents.passportPhoto.previewUrl}
-                  alt="Passport Photograph"
-                  className="review-section__photo-img"
-                />
-              ) : (
-                <div className="review-section__photo-placeholder">
-                  <BezentIcon name="employees" size={32} />
-                  <span>No Photo</span>
-                </div>
-              )}
-            </div>
-            <div className="review-section__photo-meta">
-              <h4 className="review-section__person-name">Passport-size Photograph</h4>
-              <span className="review-section__person-sub">
+          {/* Photo */}
+          <Inline gap="md" align="center">
+            {data.documents.passportPhoto.previewUrl ? (
+              <img
+                src={data.documents.passportPhoto.previewUrl}
+                alt="Passport Photo"
+                className="bezent-photo-preview"
+              />
+            ) : (
+              <div className="bezent-photo-placeholder">
+                <BezentIcon name="employees" size={32} />
+              </div>
+            )}
+            <Stack gap="xs">
+              <Label size="md">Passport-size Photograph</Label>
+              <span className="bezent-card__desc">
                 File: {data.documents.passportPhoto.fileName || 'Not Uploaded'}
               </span>
-              <span className="review-section__mini-tag">
+              <Badge size="sm" variant="neutral">
                 {data.documents.passportPhoto.status}
-              </span>
-            </div>
-          </div>
+              </Badge>
+            </Stack>
+          </Inline>
 
           {/* Document Items List */}
-          <div className="review-section__repeatable-list">
-            {data.documents.items.map((doc) => {
-              if (
-                !data.documents.isExperiencedHire &&
-                doc.category.includes('Professional History')
-              ) {
-                return null;
-              }
-              return (
-                <div key={doc.id} className="review-section__repeatable-item">
-                  <div className="review-section__repeatable-info">
-                    <strong>{doc.name}</strong> ({doc.category})
-                    <br />
-                    <span className="review-section__small-muted">
-                      Doc #: {doc.docNumber || 'N/A'} | File: {doc.fileName || 'No File'}{' '}
-                      {doc.fileSizeFormatted ? `(${doc.fileSizeFormatted})` : ''}
-                    </span>
-                  </div>
-                  <div className="review-section__doc-right">
-                    <span
-                      className={`documents-section__status-badge documents-section__status-badge--${doc.status.toLowerCase().replace(' ', '-')}`}
-                    >
-                      ● {doc.status}
-                    </span>
-                    {onDeleteDocument && doc.fileName && (
-                      <button
-                        type="button"
-                        className="review-section__delete-item-btn"
-                        onClick={() => confirmAndDelete(doc.name, () => onDeleteDocument(doc.id))}
+          <Stack gap="xs">
+            <Divider />
+            <Label size="md">Document Vault Records</Label>
+            <Stack gap="xs">
+              {data.documents.items.map((doc) => {
+                if (
+                  !data.documents.isExperiencedHire &&
+                  doc.category.includes('Professional History')
+                ) {
+                  return null;
+                }
+                return (
+                  <Inline key={doc.id} justify="between" align="center">
+                    <Stack gap="xs">
+                      <span>
+                        <strong>{doc.name}</strong> ({doc.category})
+                      </span>
+                      <span className="bezent-card__desc">
+                        Doc #: {doc.docNumber || 'N/A'} | File: {doc.fileName || 'No File'}{' '}
+                        {doc.fileSizeFormatted ? `(${doc.fileSizeFormatted})` : ''}
+                      </span>
+                    </Stack>
+                    <Inline gap="sm" align="center">
+                      <Badge
+                        size="sm"
+                        variant={
+                          doc.status === 'Verified'
+                            ? 'success'
+                            : doc.status === 'Rejected'
+                              ? 'danger'
+                              : 'neutral'
+                        }
                       >
-                        🗑 Delete
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+                        {doc.status}
+                      </Badge>
+                      {onDeleteDocument && doc.fileName && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => confirmAndDelete(doc.name, () => onDeleteDocument(doc.id))}
+                        >
+                          Delete
+                        </Button>
+                      )}
+                    </Inline>
+                  </Inline>
+                );
+              })}
+            </Stack>
+          </Stack>
+        </Stack>
+      </Card>
 
-      {/* FINAL CREATE EMPLOYEE BUTTON */}
-      <div className="review-section__final-action-bar">
-        <div className="review-section__final-info">
-          <strong>✓ Registration Complete</strong>
-          <span>Ensure all 10 sections are verified before creating the employee record.</span>
-        </div>
-        <button
-          type="button"
-          className="review-section__create-btn--large"
-          onClick={handleFinalCreateClick}
-        >
-          Create Employee
-        </button>
-      </div>
+      {/* FINAL CREATE EMPLOYEE ACTION CARD */}
+      <Card>
+        <Inline justify="between" align="center">
+          <Stack gap="xs">
+            <CardTitle>Registration Review &amp; Completion</CardTitle>
+            <span className="bezent-card__desc">
+              Ensure all sections are verified before generating the official employee record.
+            </span>
+          </Stack>
+          <Button type="button" variant="primary" size="lg" onClick={handleFinalCreateClick}>
+            Create Employee
+          </Button>
+        </Inline>
+      </Card>
 
       {/* VALIDATION WARNING MODAL */}
       {showValidationModal && (
-        <div className="review-section__modal-overlay">
-          <div className="review-section__modal-card">
-            <div className="review-section__modal-header review-section__modal-header--warning">
-              <span className="review-section__modal-icon">⚠️</span>
-              <h3>Cannot Create Employee — Pending Items ({pendingItems.length})</h3>
-            </div>
-            <div className="review-section__modal-body">
-              <p>
-                The registration cannot be completed because required information or document
-                verification is still pending:
-              </p>
-              <div className="review-section__modal-pending-list">
-                {pendingItems.map((item, idx) => (
-                  <div key={idx} className="review-section__modal-pending-row">
-                    <div>
-                      <strong>{item.sectionLabel}</strong>: {item.fieldName} ({item.reason})
-                    </div>
-                    <button
-                      type="button"
-                      className="review-section__modal-fix-btn"
-                      onClick={() => {
-                        setShowValidationModal(false);
-                        onEditSection(item.sectionId);
-                      }}
-                    >
-                      Fix Now →
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="review-section__modal-footer">
-              <button
+        <Modal
+          isOpen={showValidationModal}
+          onClose={() => setShowValidationModal(false)}
+          title={`Cannot Create Employee — Pending Items (${pendingItems.length})`}
+          size="md"
+        >
+          <Stack gap="md">
+            <Alert variant="danger">
+              The registration cannot be completed because required information or document
+              verification is still pending:
+            </Alert>
+            <Stack gap="xs">
+              {pendingItems.map((item, idx) => (
+                <Inline key={idx} justify="between" align="center">
+                  <span>
+                    <strong>{item.sectionLabel}</strong>: {item.fieldName} ({item.reason})
+                  </span>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      setShowValidationModal(false);
+                      onEditSection(item.sectionId);
+                    }}
+                  >
+                    Fix Now →
+                  </Button>
+                </Inline>
+              ))}
+            </Stack>
+            <Inline justify="end">
+              <Button
                 type="button"
-                className="review-section__modal-close-btn"
+                variant="secondary"
                 onClick={() => setShowValidationModal(false)}
               >
                 Close &amp; Review
-              </button>
-            </div>
-          </div>
-        </div>
+              </Button>
+            </Inline>
+          </Stack>
+        </Modal>
       )}
 
       {/* SUCCESS CONFIRMATION MODAL */}
       {showSuccessModal && (
-        <div className="review-section__modal-overlay">
-          <div className="review-section__modal-card">
-            <div className="review-section__modal-header review-section__modal-header--success">
-              <span className="review-section__modal-icon">🎉</span>
-              <h3>Employee Registration Complete!</h3>
-            </div>
-            <div className="review-section__modal-body">
-              <p>
-                Employee <strong>{data.personal.fullName || 'Arun Kumar'}</strong> (ID:{' '}
-                <strong>{data.general.employeeId}</strong>) has been successfully created and
-                registered in BEZENT HRMS.
-              </p>
-              <ul className="review-section__success-checklist">
-                <li>✓ General employment records created</li>
-                <li>✓ Bank account &amp; payroll breakdown configured</li>
-                <li>✓ Official email invitation dispatched</li>
-                <li>✓ Document vault &amp; verification records sealed</li>
-              </ul>
-            </div>
-            <div className="review-section__modal-footer">
-              <button
-                type="button"
-                className="review-section__create-btn--large"
-                onClick={() => setShowSuccessModal(false)}
-              >
+        <Modal
+          isOpen={showSuccessModal}
+          onClose={() => setShowSuccessModal(false)}
+          title="Employee Registration Complete!"
+          size="md"
+        >
+          <Stack gap="md">
+            <Alert variant="success">
+              Employee <strong>{data.personal.fullName || 'Arun Kumar'}</strong> (ID:{' '}
+              <strong>{data.general.employeeId}</strong>) has been successfully created and
+              registered in BEZENT HRMS.
+            </Alert>
+            <Stack gap="xs">
+              <span>General employment records created</span>
+              <span>Bank account &amp; payroll breakdown configured</span>
+              <span>Official email invitation dispatched</span>
+              <span>Document vault &amp; verification records sealed</span>
+            </Stack>
+            <Inline justify="end">
+              <Button type="button" variant="primary" onClick={() => setShowSuccessModal(false)}>
                 Done
-              </button>
-            </div>
-          </div>
-        </div>
+              </Button>
+            </Inline>
+          </Stack>
+        </Modal>
       )}
-    </div>
+    </Stack>
   );
 }

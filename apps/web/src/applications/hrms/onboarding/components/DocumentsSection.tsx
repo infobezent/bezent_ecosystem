@@ -1,4 +1,18 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import {
+  FormSection,
+  FormGrid,
+  FormField,
+  Input,
+  Button,
+  Badge,
+  Card,
+  CardTitle,
+  Modal,
+  Alert,
+  Stack,
+  Inline,
+} from '../../../../design-system';
 import { BezentIcon } from '../../../../design-system/icons';
 
 export interface DocumentItemState {
@@ -37,7 +51,7 @@ export const INITIAL_DOCUMENTS: DocumentItemState[] = [
   // A. IDENTITY & GOVERNMENT
   {
     id: 'doc-aadhaar',
-    category: 'A. Identity & Government Documents',
+    category: 'Identity & Government Documents',
     name: 'Aadhaar Card',
     isRequired: true,
     docNumber: '5482 9102 3341',
@@ -49,7 +63,7 @@ export const INITIAL_DOCUMENTS: DocumentItemState[] = [
   },
   {
     id: 'doc-pan',
-    category: 'A. Identity & Government Documents',
+    category: 'Identity & Government Documents',
     name: 'PAN Card',
     isRequired: true,
     docNumber: 'ABCDE1234F',
@@ -61,7 +75,7 @@ export const INITIAL_DOCUMENTS: DocumentItemState[] = [
   },
   {
     id: 'doc-passport',
-    category: 'A. Identity & Government Documents',
+    category: 'Identity & Government Documents',
     name: 'Passport',
     isRequired: false,
     docNumber: 'Z8920192',
@@ -73,7 +87,7 @@ export const INITIAL_DOCUMENTS: DocumentItemState[] = [
   },
   {
     id: 'doc-voter',
-    category: 'A. Identity & Government Documents',
+    category: 'Identity & Government Documents',
     name: 'Voter ID',
     isRequired: false,
     docNumber: '',
@@ -84,10 +98,10 @@ export const INITIAL_DOCUMENTS: DocumentItemState[] = [
     remarks: '',
   },
 
-  // B. ADDRESS PROOF (Utility Bill and Rent Agreement REMOVED)
+  // B. ADDRESS PROOF
   {
     id: 'doc-dl',
-    category: 'B. Address Proof',
+    category: 'Address Proof Documents',
     name: 'Driving License',
     isRequired: false,
     docNumber: 'TN-07-202100912',
@@ -101,7 +115,7 @@ export const INITIAL_DOCUMENTS: DocumentItemState[] = [
   // C. EDUCATIONAL RECORDS
   {
     id: 'doc-class10',
-    category: 'C. Educational Records',
+    category: 'Educational Records',
     name: 'Class 10 Marksheet / Certificate',
     isRequired: true,
     docNumber: 'CBSE-10-88912',
@@ -113,7 +127,7 @@ export const INITIAL_DOCUMENTS: DocumentItemState[] = [
   },
   {
     id: 'doc-class12',
-    category: 'C. Educational Records',
+    category: 'Educational Records',
     name: 'Class 12 Marksheet / Certificate',
     isRequired: true,
     docNumber: 'CBSE-12-99012',
@@ -125,7 +139,7 @@ export const INITIAL_DOCUMENTS: DocumentItemState[] = [
   },
   {
     id: 'doc-grad',
-    category: 'C. Educational Records',
+    category: 'Educational Records',
     name: 'Graduation Degree / Certificate (B.Tech)',
     isRequired: true,
     docNumber: 'AU-BTECH-2022-091',
@@ -137,7 +151,7 @@ export const INITIAL_DOCUMENTS: DocumentItemState[] = [
   },
   {
     id: 'doc-semesters',
-    category: 'C. Educational Records',
+    category: 'Educational Records',
     name: 'Semester Mark Sheets',
     isRequired: true,
     docNumber: 'S1-S8 Consolidated',
@@ -149,7 +163,7 @@ export const INITIAL_DOCUMENTS: DocumentItemState[] = [
   },
   {
     id: 'doc-postgrad',
-    category: 'C. Educational Records',
+    category: 'Educational Records',
     name: 'Post-Graduation Certificate',
     isRequired: false,
     docNumber: '',
@@ -161,7 +175,7 @@ export const INITIAL_DOCUMENTS: DocumentItemState[] = [
   },
   {
     id: 'doc-certifications',
-    category: 'C. Educational Records',
+    category: 'Educational Records',
     name: 'Professional / Technical Certifications',
     isRequired: false,
     docNumber: 'AWS-SOL-ARCH-8821',
@@ -175,7 +189,7 @@ export const INITIAL_DOCUMENTS: DocumentItemState[] = [
   // D. PROFESSIONAL HISTORY (Experienced Only)
   {
     id: 'doc-prev-appt',
-    category: 'D. Professional History',
+    category: 'Professional History',
     name: 'Previous Appointment Letter',
     isRequired: true,
     docNumber: 'PREV-EMP-1029',
@@ -187,7 +201,7 @@ export const INITIAL_DOCUMENTS: DocumentItemState[] = [
   },
   {
     id: 'doc-exp-cert',
-    category: 'D. Professional History',
+    category: 'Professional History',
     name: 'Experience Certificate',
     isRequired: true,
     docNumber: 'EXP-2026-88',
@@ -199,7 +213,7 @@ export const INITIAL_DOCUMENTS: DocumentItemState[] = [
   },
   {
     id: 'doc-relieving',
-    category: 'D. Professional History',
+    category: 'Professional History',
     name: 'Relieving Letter',
     isRequired: true,
     docNumber: 'REL-2026-091',
@@ -211,7 +225,7 @@ export const INITIAL_DOCUMENTS: DocumentItemState[] = [
   },
   {
     id: 'doc-slips',
-    category: 'D. Professional History',
+    category: 'Professional History',
     name: 'Salary Slips (Last 3 Months)',
     isRequired: true,
     docNumber: 'Dec25-Feb26',
@@ -223,7 +237,7 @@ export const INITIAL_DOCUMENTS: DocumentItemState[] = [
   },
   {
     id: 'doc-form16',
-    category: 'D. Professional History',
+    category: 'Professional History',
     name: 'Form 16 / Tax Statement',
     isRequired: true,
     docNumber: 'AY-2025-26',
@@ -235,7 +249,7 @@ export const INITIAL_DOCUMENTS: DocumentItemState[] = [
   },
   {
     id: 'doc-resignation',
-    category: 'D. Professional History',
+    category: 'Professional History',
     name: 'Resignation / Exit Acceptance',
     isRequired: true,
     docNumber: 'EXIT-ACC-99',
@@ -247,7 +261,7 @@ export const INITIAL_DOCUMENTS: DocumentItemState[] = [
   },
   {
     id: 'doc-nodues',
-    category: 'D. Professional History',
+    category: 'Professional History',
     name: 'No-Dues Certificate',
     isRequired: false,
     docNumber: 'NDC-9912',
@@ -261,7 +275,7 @@ export const INITIAL_DOCUMENTS: DocumentItemState[] = [
   // E. FINANCIAL & TAX DOCUMENTS
   {
     id: 'doc-pan-doc',
-    category: 'E. Financial & Tax Documents',
+    category: 'Financial & Tax Documents',
     name: 'PAN Document Scan',
     isRequired: true,
     docNumber: 'ABCDE1234F',
@@ -273,7 +287,7 @@ export const INITIAL_DOCUMENTS: DocumentItemState[] = [
   },
   {
     id: 'doc-bank-proof',
-    category: 'E. Financial & Tax Documents',
+    category: 'Financial & Tax Documents',
     name: 'Bank Account Proof (Cancelled Cheque / Passbook)',
     isRequired: true,
     docNumber: 'CHEQUE-000192',
@@ -285,7 +299,7 @@ export const INITIAL_DOCUMENTS: DocumentItemState[] = [
   },
   {
     id: 'doc-uan',
-    category: 'E. Financial & Tax Documents',
+    category: 'Financial & Tax Documents',
     name: 'UAN / PF Details Document',
     isRequired: false,
     docNumber: '100918273645',
@@ -325,6 +339,9 @@ export function DocumentsSection({
     status: 'Verified',
   });
 
+  const photoFileInputRef = useRef<HTMLInputElement>(null);
+  const docFileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
   const [uploadErrorMsg, setUploadErrorMsg] = useState<string | null>(null);
   const [previewingDoc, setPreviewingDoc] = useState<{
     name: string;
@@ -351,7 +368,6 @@ export function DocumentsSection({
     if (onPassportPhotoChange) onPassportPhotoChange(newPhoto);
   };
 
-  // Handle Passport Photo Upload with Size Validation
   const handlePhotoSelect = (file: File) => {
     setUploadErrorMsg(null);
     if (file.size > MAX_FILE_SIZE_BYTES) {
@@ -378,7 +394,6 @@ export function DocumentsSection({
     });
   };
 
-  // AUTOMATION: Upload Document -> Automatically sets Status = Pending with File Size Validation
   const handleFileUpload = (id: string, file: File) => {
     setUploadErrorMsg(null);
     if (file.size > MAX_FILE_SIZE_BYTES) {
@@ -403,7 +418,6 @@ export function DocumentsSection({
     updateDocuments(nextDocs);
   };
 
-  // HR Approves Document -> Sets System Status = Verified
   const handleVerifyDocument = (id: string) => {
     const nextDocs = documents.map((doc) => {
       if (doc.id === id) {
@@ -418,7 +432,6 @@ export function DocumentsSection({
     updateDocuments(nextDocs);
   };
 
-  // HR Rejects Document -> Sets System Status = Rejected
   const handleRejectDocument = (id: string) => {
     const nextDocs = documents.map((doc) => {
       if (doc.id === id) {
@@ -438,263 +451,241 @@ export function DocumentsSection({
     updateDocuments(nextDocs);
   };
 
-  // Group documents by category
   const categories = Array.from(new Set(documents.map((d) => d.category)));
 
-  return (
-    <div className="documents-section">
-      {/* Banner Header */}
-      <div className="employee-registration__section-header">
-        <div className="employee-registration__section-icon-badge">
-          <BezentIcon name="documents" size={22} />
-        </div>
-        <div className="employee-registration__section-title-group">
-          <h2 className="employee-registration__section-title">
-            Documents Vault &amp; Verification
-          </h2>
-          <p className="employee-registration__section-subtitle">
-            Predefined document checklist, upload controls, system-controlled verification
-            workflows, and 10 MB size limits.
-          </p>
-        </div>
-      </div>
+  const getDocStatusBadge = (status: DocumentItemState['status']) => {
+    switch (status) {
+      case 'Verified':
+        return (
+          <Badge variant="success" size="sm">
+            Verified
+          </Badge>
+        );
+      case 'Rejected':
+        return (
+          <Badge variant="danger" size="sm">
+            Rejected
+          </Badge>
+        );
+      case 'Pending':
+        return (
+          <Badge variant="warning" size="sm">
+            Pending
+          </Badge>
+        );
+      case 'Not Required':
+        return (
+          <Badge variant="neutral" size="sm">
+            Not Required
+          </Badge>
+        );
+    }
+  };
 
-      {/* Global Upload Error Alert Banner */}
+  return (
+    <Stack gap="xl">
+      {/* Upload Error Banner */}
       {uploadErrorMsg && (
-        <div className="documents-section__error-alert">
-          <span className="documents-section__error-icon">⚠️</span>
-          <span>{uploadErrorMsg}</span>
-          <button
-            type="button"
-            className="documents-section__error-close"
-            onClick={() => setUploadErrorMsg(null)}
-          >
-            ✕
-          </button>
-        </div>
+        <Alert variant="danger">
+          <Inline justify="between" align="center">
+            <span>{uploadErrorMsg}</span>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setUploadErrorMsg(null)}>
+              ✕
+            </Button>
+          </Inline>
+        </Alert>
       )}
 
-      {/* DEDICATED PASSPORT-SIZE PHOTOGRAPH UPLOAD PROVISION */}
-      <div className="documents-section__photo-card">
-        <div className="documents-section__photo-card-header">
-          <span className="documents-section__category-badge">Passport-size Photograph</span>
-          <span className="documents-section__tag documents-section__tag--required">REQUIRED</span>
-        </div>
-
-        <div className="documents-section__upload-limits-note">
-          Supported formats: <strong>JPG, JPEG, PNG</strong> &nbsp;|&nbsp; Maximum file size:{' '}
-          <strong>10 MB</strong>
-        </div>
-
-        <div className="documents-section__photo-content">
-          {passportPhoto.previewUrl ? (
-            <div className="documents-section__photo-preview-box">
+      {/* 1. PASSPORT-SIZE PHOTOGRAPH */}
+      <FormSection
+        title="Passport-Size Photograph"
+        description="Upload a clear front-facing photograph. Formats: JPG, PNG (Max 10 MB)."
+      >
+        <Card variant="flat">
+          <Inline gap="lg" align="center">
+            {passportPhoto.previewUrl ? (
               <img
                 src={passportPhoto.previewUrl}
-                alt="Passport-size Photograph"
-                className="documents-section__photo-preview-image"
+                alt="Passport Preview"
+                className="bezent-photo-preview"
               />
-              <div className="documents-section__photo-meta">
-                <span className="documents-section__photo-filename">{passportPhoto.fileName}</span>
-                {passportPhoto.fileSizeFormatted && (
-                  <span className="documents-section__photo-filesize">
-                    Size: {passportPhoto.fileSizeFormatted}
-                  </span>
-                )}
-                <div className="documents-section__photo-actions">
-                  <label className="documents-section__photo-btn documents-section__photo-btn--replace">
-                    📷 Replace Photo
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/jpg"
-                      className="documents-section__file-input"
-                      onChange={(e) => {
-                        if (e.target.files?.[0]) {
-                          handlePhotoSelect(e.target.files[0]);
-                        }
-                      }}
-                    />
-                  </label>
-                  <button
-                    type="button"
-                    className="documents-section__photo-btn documents-section__photo-btn--remove"
-                    onClick={handleRemovePhoto}
-                  >
-                    🗑 Remove Photo
-                  </button>
-                </div>
+            ) : (
+              <div className="bezent-photo-placeholder">
+                <BezentIcon name="employees" size={32} />
               </div>
-            </div>
-          ) : (
-            <label className="documents-section__photo-placeholder-box">
-              <BezentIcon name="employees" size={36} />
-              <span className="documents-section__photo-placeholder-text">
-                Click or drag to upload Passport-size Photograph
-              </span>
-              <span className="documents-section__photo-placeholder-hint">
-                Supported formats: JPG, JPEG, PNG | Maximum file size: 10 MB
-              </span>
+            )}
+
+            <Stack gap="sm">
               <input
+                ref={photoFileInputRef}
                 type="file"
+                hidden
                 accept="image/jpeg,image/png,image/jpg"
-                className="documents-section__file-input"
                 onChange={(e) => {
                   if (e.target.files?.[0]) {
                     handlePhotoSelect(e.target.files[0]);
                   }
                 }}
               />
-            </label>
-          )}
-        </div>
-      </div>
+              <Inline gap="sm" align="center">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => photoFileInputRef.current?.click()}
+                >
+                  {passportPhoto.previewUrl ? 'Replace Photo' : 'Upload Photo'}
+                </Button>
+                {passportPhoto.previewUrl && (
+                  <Button type="button" variant="ghost" onClick={handleRemovePhoto}>
+                    Remove Photo
+                  </Button>
+                )}
+                {passportPhoto.fileName && (
+                  <span className="bezent-card__desc">
+                    {passportPhoto.fileName} ({passportPhoto.fileSizeFormatted})
+                  </span>
+                )}
+              </Inline>
+            </Stack>
+          </Inline>
+        </Card>
+      </FormSection>
 
-      {/* Classification Automation Toggle */}
-      <div className="documents-section__classification-card">
-        <div className="documents-section__class-info">
-          <span className="documents-section__class-title">Candidate Hiring Classification:</span>
-          <span className="documents-section__class-desc">
-            {isExperiencedHire
-              ? 'Experienced Hire — showing full professional history & previous employer checklist'
-              : 'Fresher — hiding unnecessary previous employment documents automatically'}
-          </span>
-        </div>
-        <div className="documents-section__class-toggle">
-          <button
+      {/* 2. CLASSIFICATION AUTOMATION */}
+      <FormSection
+        title="Hiring Classification"
+        description="Toggle candidate hiring classification to automatically adjust required document checklist."
+      >
+        <Inline gap="md" align="center">
+          <Button
             type="button"
-            className={`documents-section__class-btn ${
-              isExperiencedHire ? 'documents-section__class-btn--active' : ''
-            }`}
+            variant={isExperiencedHire ? 'primary' : 'secondary'}
             onClick={() => updateClassification(true)}
           >
             Experienced Hire
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className={`documents-section__class-btn ${
-              !isExperiencedHire ? 'documents-section__class-btn--active' : ''
-            }`}
+            variant={!isExperiencedHire ? 'primary' : 'secondary'}
             onClick={() => updateClassification(false)}
           >
             Fresher
-          </button>
-        </div>
-      </div>
+          </Button>
+          <span className="bezent-card__desc">
+            {isExperiencedHire
+              ? 'Showing full professional history & previous employer checklist.'
+              : 'Hiding previous employment history documents.'}
+          </span>
+        </Inline>
+      </FormSection>
 
-      {/* PREDEFINED DOCUMENT CHECKLIST */}
-      <div className="documents-section__container">
-        {categories.map((cat) => {
-          // AUTOMATION: Hide Professional History if Fresher
-          if (!isExperiencedHire && cat.includes('Professional History')) {
-            return null;
-          }
+      {/* 3. DOCUMENT CHECKLIST BY CATEGORY */}
+      {categories.map((cat) => {
+        if (!isExperiencedHire && cat.includes('Professional History')) {
+          return null;
+        }
 
-          const catDocs = documents.filter((d) => d.category === cat);
+        const catDocs = documents.filter((d) => d.category === cat);
 
-          return (
-            <div key={cat} className="documents-section__card">
-              <div className="documents-section__card-header">
-                <span className="documents-section__category-badge">{cat}</span>
-              </div>
-
-              <div className="documents-section__list">
-                {catDocs.map((doc) => (
-                  <div key={doc.id} className="documents-section__item-box">
-                    {/* Item Header */}
-                    <div className="documents-section__item-header">
-                      <div className="documents-section__item-title-row">
-                        <span className="documents-section__item-name">{doc.name}</span>
+        return (
+          <FormSection
+            key={cat}
+            title={cat}
+            description={`Verify and maintain ${cat.toLowerCase()}.`}
+          >
+            <Stack gap="md">
+              {catDocs.map((doc) => (
+                <Card key={doc.id} variant="flat">
+                  <Stack gap="md">
+                    <Inline justify="between" align="center">
+                      <Inline gap="sm" align="center">
+                        <CardTitle>{doc.name}</CardTitle>
                         {doc.isRequired ? (
-                          <span className="documents-section__tag documents-section__tag--required">
-                            REQUIRED
-                          </span>
+                          <Badge variant="warning" size="sm">
+                            Required
+                          </Badge>
                         ) : (
-                          <span className="documents-section__tag documents-section__tag--optional">
-                            OPTIONAL
-                          </span>
+                          <Badge variant="neutral" size="sm">
+                            Optional
+                          </Badge>
                         )}
-                      </div>
+                      </Inline>
 
-                      {/* System-Controlled Verification Status & HR Actions */}
-                      <div className="documents-section__status-group">
-                        <span
-                          className={`documents-section__status-badge documents-section__status-badge--${doc.status.toLowerCase().replace(' ', '-')}`}
-                        >
-                          ● {doc.status}
-                        </span>
+                      <Inline gap="sm" align="center">
+                        {getDocStatusBadge(doc.status)}
                         {doc.status !== 'Verified' && (
-                          <button
+                          <Button
                             type="button"
-                            className="documents-section__verify-btn"
+                            variant="secondary"
+                            size="sm"
                             onClick={() => handleVerifyDocument(doc.id)}
                           >
-                            ✓ Approve
-                          </button>
+                            Approve
+                          </Button>
                         )}
                         {doc.status !== 'Rejected' && (
-                          <button
+                          <Button
                             type="button"
-                            className="documents-section__reject-btn"
+                            variant="ghost"
+                            size="sm"
                             onClick={() => handleRejectDocument(doc.id)}
                           >
-                            ✕ Reject
-                          </button>
+                            Reject
+                          </Button>
                         )}
-                      </div>
-                    </div>
+                      </Inline>
+                    </Inline>
 
-                    {/* Document Upload & Input Fields (Simplified: Verified By, Dates REMOVED) */}
-                    <div className="documents-section__item-fields-simplified">
-                      {/* 1. Document Number */}
-                      <div className="employee-registration__field">
-                        <label className="employee-registration__label">Document Number</label>
-                        <input
+                    <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                      {/* Document Number */}
+                      <FormField label="Document Number">
+                        <Input
                           type="text"
-                          className="employee-registration__input"
                           placeholder="e.g. ID / Reference #"
                           value={doc.docNumber}
                           onChange={(e) =>
                             handleUpdateDocField(doc.id, 'docNumber', e.target.value)
                           }
                         />
-                      </div>
+                      </FormField>
 
-                      {/* 2. File Upload Control with Specs Note & Size Display */}
-                      <div className="employee-registration__field documents-section__field--span-2">
-                        <label className="employee-registration__label">
-                          Upload Document{' '}
-                          <span className="documents-section__upload-spec">
-                            (PDF, JPG, JPEG, PNG | Max 10 MB)
+                      {/* File Upload Control */}
+                      <FormField
+                        label="Document File"
+                        helperText={
+                          doc.fileSizeFormatted ? `Size: ${doc.fileSizeFormatted}` : undefined
+                        }
+                      >
+                        <Inline gap="xs" align="center">
+                          <input
+                            ref={(el) => {
+                              docFileInputRefs.current[doc.id] = el;
+                            }}
+                            type="file"
+                            hidden
+                            accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) {
+                                handleFileUpload(doc.id, e.target.files[0]);
+                              }
+                            }}
+                          />
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => docFileInputRefs.current[doc.id]?.click()}
+                          >
+                            Choose File
+                          </Button>
+                          <span className="bezent-card__desc">
+                            {doc.fileName || 'No file selected'}
                           </span>
-                        </label>
-                        <div className="documents-section__upload-row">
-                          <label className="documents-section__upload-label">
-                            📁 Choose File
-                            <input
-                              type="file"
-                              accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
-                              className="documents-section__file-input"
-                              onChange={(e) => {
-                                if (e.target.files?.[0]) {
-                                  handleFileUpload(doc.id, e.target.files[0]);
-                                }
-                              }}
-                            />
-                          </label>
-                          <div className="documents-section__file-info-group">
-                            <span className="documents-section__file-name">
-                              {doc.fileName || 'No file selected'}
-                            </span>
-                            {doc.fileSizeFormatted && (
-                              <span className="documents-section__file-size-badge">
-                                ({doc.fileSizeFormatted})
-                              </span>
-                            )}
-                          </div>
                           {doc.fileName && (
-                            <button
+                            <Button
                               type="button"
-                              className="documents-section__preview-btn"
+                              variant="ghost"
+                              size="sm"
                               onClick={() =>
                                 setPreviewingDoc({
                                   name: doc.name,
@@ -703,79 +694,63 @@ export function DocumentsSection({
                                 })
                               }
                             >
-                              👁 View / Preview
-                            </button>
+                              View
+                            </Button>
                           )}
-                        </div>
-                      </div>
+                        </Inline>
+                      </FormField>
 
-                      {/* 3. Remarks */}
-                      <div className="employee-registration__field documents-section__field--span-full">
-                        <label className="employee-registration__label">
-                          Verification Remarks / Notes
-                        </label>
-                        <input
+                      {/* Remarks */}
+                      <FormField label="Remarks" span="full">
+                        <Input
                           type="text"
-                          className="employee-registration__input"
-                          placeholder="Optional notes or rejection remarks..."
+                          placeholder="Optional notes or verification remarks..."
                           value={doc.remarks}
                           onChange={(e) => handleUpdateDocField(doc.id, 'remarks', e.target.value)}
                         />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+                      </FormField>
+                    </FormGrid>
+                  </Stack>
+                </Card>
+              ))}
+            </Stack>
+          </FormSection>
+        );
+      })}
 
       {/* DOCUMENT PREVIEW MODAL */}
       {previewingDoc && (
-        <div className="documents-section__modal-overlay">
-          <div className="documents-section__modal-card">
-            <div className="documents-section__modal-header">
-              <h3>Preview: {previewingDoc.name}</h3>
-              <button
-                type="button"
-                className="documents-section__modal-close-icon"
-                onClick={() => setPreviewingDoc(null)}
-              >
-                ✕
-              </button>
-            </div>
-            <div className="documents-section__modal-body">
-              {previewingDoc.url ? (
-                <img
-                  src={previewingDoc.url}
-                  alt={previewingDoc.name}
-                  className="documents-section__modal-img"
-                />
-              ) : (
-                <div className="documents-section__modal-doc-preview">
+        <Modal
+          isOpen={!!previewingDoc}
+          onClose={() => setPreviewingDoc(null)}
+          title={`Preview: ${previewingDoc.name}`}
+          size="md"
+        >
+          <Stack gap="md" align="center">
+            {previewingDoc.url ? (
+              <img
+                src={previewingDoc.url}
+                alt={previewingDoc.name}
+                className="bezent-photo-preview"
+              />
+            ) : (
+              <Card variant="flat">
+                <Stack gap="sm" align="center">
                   <BezentIcon name="documents" size={48} />
-                  <p>
-                    <strong>{previewingDoc.fileName}</strong>
-                  </p>
-                  <p className="documents-section__modal-hint">
+                  <strong>{previewingDoc.fileName}</strong>
+                  <span className="bezent-card__desc">
                     Document file ready for review &amp; archiving.
-                  </p>
-                </div>
-              )}
-            </div>
-            <div className="documents-section__modal-footer">
-              <button
-                type="button"
-                className="employee-registration__cancel-btn"
-                onClick={() => setPreviewingDoc(null)}
-              >
-                Close Preview
-              </button>
-            </div>
-          </div>
-        </div>
+                  </span>
+                </Stack>
+              </Card>
+            )}
+
+            <Button type="button" variant="secondary" onClick={() => setPreviewingDoc(null)}>
+              Close Preview
+            </Button>
+          </Stack>
+        </Modal>
       )}
-    </div>
+    </Stack>
   );
 }

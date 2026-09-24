@@ -1,5 +1,37 @@
 import { useState } from 'react';
-import { BezentIcon } from '../../../../design-system/icons';
+import {
+  FormSection,
+  FormGrid,
+  FormField,
+  Input,
+  Select,
+  Textarea,
+  Switch,
+  Stack,
+  Inline,
+} from '../../../../design-system';
+
+const RELATIONSHIP_OPTIONS = [
+  { value: 'Father', label: 'Father' },
+  { value: 'Mother', label: 'Mother' },
+  { value: 'Spouse', label: 'Spouse' },
+  { value: 'Brother', label: 'Brother' },
+  { value: 'Sister', label: 'Sister' },
+  { value: 'Son', label: 'Son' },
+  { value: 'Daughter', label: 'Daughter' },
+  { value: 'Guardian', label: 'Guardian' },
+  { value: 'Relative', label: 'Relative' },
+  { value: 'Friend', label: 'Friend' },
+  { value: 'Other', label: 'Other' },
+];
+
+const COUNTRY_CODE_OPTIONS = [
+  { value: '+91', label: '+91 (IND)' },
+  { value: '+1', label: '+1 (USA)' },
+  { value: '+44', label: '+44 (UK)' },
+  { value: '+65', label: '+65 (SGP)' },
+  { value: '+971', label: '+971 (UAE)' },
+];
 
 export function EmergencyContactSection() {
   // PRIMARY CONTACT STATE
@@ -76,294 +108,157 @@ export function EmergencyContactSection() {
   };
 
   return (
-    <div className="emergency-contact-section">
-      {/* Banner Header */}
-      <div className="employee-registration__section-header">
-        <div className="employee-registration__section-icon-badge">
-          <BezentIcon name="notes" size={22} />
-        </div>
-        <div className="employee-registration__section-title-group">
-          <h2 className="employee-registration__section-title">Emergency Contact</h2>
-          <p className="employee-registration__section-subtitle">
-            Emergency and alternate contact information for the employee.
-          </p>
-        </div>
-      </div>
+    <Stack gap="xl">
+      {/* 1. PRIMARY CONTACT AREA */}
+      <FormSection
+        title="Primary Emergency Contact"
+        description="Primary emergency contact and private record preferences."
+      >
+        <FormGrid columns={2} layout="horizontal" labelWidth="md">
+          {/* 1. Contact Name */}
+          <FormField label="Contact Name" required>
+            <Input
+              type="text"
+              placeholder="Enter Primary Contact Name"
+              value={primaryName}
+              onChange={(e) => setPrimaryName(e.target.value)}
+            />
+          </FormField>
 
-      <div className="emergency-contact-section__container">
-        {/* ================================================== */}
-        {/* 1. PRIMARY CONTACT AREA */}
-        {/* ================================================== */}
-        <div className="emergency-contact-section__card">
-          <div className="emergency-contact-section__card-header">
-            <div className="emergency-contact-section__header-title-group">
-              <span className="emergency-contact-section__badge emergency-contact-section__badge--primary">
-                PRIMARY CONTACT
-              </span>
-              <h3 className="emergency-contact-section__card-title">Primary Emergency Contact</h3>
-            </div>
-          </div>
-
-          <form className="emergency-contact-section__grid" onSubmit={(e) => e.preventDefault()}>
-            {/* 1. Contact Name */}
-            <div className="employee-registration__field">
-              <label className="employee-registration__label">
-                Contact Name <span className="employee-registration__required">*</span>
-              </label>
-              <input
-                type="text"
-                className="employee-registration__input"
-                placeholder="Enter Primary Contact Name"
-                value={primaryName}
-                onChange={(e) => setPrimaryName(e.target.value)}
+          {/* 2. Relationship / Role */}
+          <FormField label="Relationship / Role" required>
+            <Stack gap="xs">
+              <Select
+                options={RELATIONSHIP_OPTIONS}
+                value={primaryRelationship}
+                onChange={(e) => setPrimaryRelationship(e.target.value)}
               />
-            </div>
-
-            {/* 2. Relationship / Role */}
-            <div className="employee-registration__field">
-              <label className="employee-registration__label">
-                Relationship / Role <span className="employee-registration__required">*</span>
-              </label>
-              <div className="employee-registration__select-wrapper">
-                <select
-                  className="employee-registration__select"
-                  value={primaryRelationship}
-                  onChange={(e) => setPrimaryRelationship(e.target.value)}
-                >
-                  <option value="Father">Father</option>
-                  <option value="Mother">Mother</option>
-                  <option value="Spouse">Spouse</option>
-                  <option value="Brother">Brother</option>
-                  <option value="Sister">Sister</option>
-                  <option value="Son">Son</option>
-                  <option value="Daughter">Daughter</option>
-                  <option value="Guardian">Guardian</option>
-                  <option value="Relative">Relative</option>
-                  <option value="Friend">Friend</option>
-                  <option value="Other">Other</option>
-                </select>
-                <span className="employee-registration__select-icon">▼</span>
-              </div>
               {primaryRelationship === 'Other' && (
-                <div className="employee-registration__other-container">
-                  <input
-                    type="text"
-                    className="employee-registration__input"
-                    placeholder="Enter Relationship / Role"
-                    value={customPrimaryRelationship}
-                    onChange={(e) => setCustomPrimaryRelationship(e.target.value)}
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* 3. Phone */}
-            <div className="employee-registration__field">
-              <label className="employee-registration__label">
-                Phone <span className="employee-registration__required">*</span>
-              </label>
-              <div className="emergency-contact-section__phone-group">
-                <select
-                  className="emergency-contact-section__country-code"
-                  value={primaryCountryCode}
-                  onChange={(e) => setPrimaryCountryCode(e.target.value)}
-                >
-                  <option value="+91">+91 (IND)</option>
-                  <option value="+1">+1 (USA)</option>
-                  <option value="+44">+44 (UK)</option>
-                  <option value="+65">+65 (SGP)</option>
-                  <option value="+971">+971 (UAE)</option>
-                </select>
-                <input
-                  type="tel"
-                  className={`employee-registration__input ${
-                    primaryPhoneError ? 'emergency-contact-section__input--error' : ''
-                  }`}
-                  placeholder="98765 43210"
-                  value={primaryPhone}
-                  onChange={(e) => handlePrimaryPhoneChange(e.target.value)}
+                <Input
+                  type="text"
+                  placeholder="Enter Relationship / Role"
+                  value={customPrimaryRelationship}
+                  onChange={(e) => setCustomPrimaryRelationship(e.target.value)}
                 />
-              </div>
-              {primaryPhoneError && (
-                <span className="emergency-contact-section__error-msg">{primaryPhoneError}</span>
               )}
-            </div>
+            </Stack>
+          </FormField>
 
-            {/* 4. Email */}
-            <div className="employee-registration__field">
-              <label className="employee-registration__label">
-                Email <span className="employee-registration__required">*</span>
-              </label>
-              <input
-                type="email"
-                className={`employee-registration__input ${
-                  primaryEmailError ? 'emergency-contact-section__input--error' : ''
-                }`}
-                placeholder="contact@example.com"
-                value={primaryEmail}
-                onChange={(e) => handlePrimaryEmailChange(e.target.value)}
+          {/* 3. Phone */}
+          <FormField label="Phone" required error={primaryPhoneError}>
+            <Inline gap="xs">
+              <Select
+                options={COUNTRY_CODE_OPTIONS}
+                value={primaryCountryCode}
+                onChange={(e) => setPrimaryCountryCode(e.target.value)}
               />
-              {primaryEmailError && (
-                <span className="emergency-contact-section__error-msg font-sm">
-                  {primaryEmailError}
-                </span>
-              )}
-            </div>
-
-            {/* 5. Address / Contact Details */}
-            <div className="employee-registration__field emergency-contact-section__field--span-2">
-              <label className="employee-registration__label">
-                Address / Contact Details <span className="employee-registration__required">*</span>
-              </label>
-              <textarea
-                className="emergency-contact-section__textarea"
-                rows={3}
-                placeholder="Enter complete address or relevant contact details..."
-                value={primaryAddress}
-                onChange={(e) => setPrimaryAddress(e.target.value)}
+              <Input
+                type="tel"
+                placeholder="98765 43210"
+                value={primaryPhone}
+                onChange={(e) => handlePrimaryPhoneChange(e.target.value)}
               />
-            </div>
+            </Inline>
+          </FormField>
 
-            {/* 6. Primary / Private Contact Indicator */}
-            <div className="employee-registration__field emergency-contact-section__field--span-full">
-              <label className="employee-registration__label">
-                Primary / Private Contact Indicator
-              </label>
-              <div className="emergency-contact-section__toggle-row">
-                <button
-                  type="button"
-                  className={`emergency-contact-section__toggle-switch ${
-                    isPrimaryPrivate ? 'emergency-contact-section__toggle-switch--active' : ''
-                  }`}
-                  onClick={() => setIsPrimaryPrivate(!isPrimaryPrivate)}
-                  role="switch"
-                  aria-checked={isPrimaryPrivate}
-                >
-                  <span className="emergency-contact-section__toggle-handle" />
-                </button>
-                <span className="emergency-contact-section__toggle-label">
-                  {isPrimaryPrivate
-                    ? 'Primary Emergency Contact (Private Record)'
-                    : 'Standard Emergency Contact (Public HR Record)'}
-                </span>
-              </div>
-            </div>
-          </form>
-        </div>
+          {/* 4. Email */}
+          <FormField label="Email" required error={primaryEmailError}>
+            <Input
+              type="email"
+              placeholder="contact@example.com"
+              value={primaryEmail}
+              onChange={(e) => handlePrimaryEmailChange(e.target.value)}
+            />
+          </FormField>
 
-        {/* ================================================== */}
-        {/* 2. SECONDARY CONTACT AREA */}
-        {/* ================================================== */}
-        <div className="emergency-contact-section__card">
-          <div className="emergency-contact-section__card-header">
-            <div className="emergency-contact-section__header-title-group">
-              <span className="emergency-contact-section__badge emergency-contact-section__badge--secondary">
-                SECONDARY CONTACT
-              </span>
-              <h3 className="emergency-contact-section__card-title">Secondary Emergency Contact</h3>
-            </div>
-          </div>
+          {/* 5. Address / Contact Details */}
+          <FormField label="Address Details" required span="full">
+            <Textarea
+              rows={3}
+              placeholder="Enter complete address or relevant contact details..."
+              value={primaryAddress}
+              onChange={(e) => setPrimaryAddress(e.target.value)}
+            />
+          </FormField>
 
-          <form className="emergency-contact-section__grid" onSubmit={(e) => e.preventDefault()}>
-            {/* 1. Secondary Contact Name */}
-            <div className="employee-registration__field">
-              <label className="employee-registration__label">Secondary Contact Name</label>
-              <input
-                type="text"
-                className="employee-registration__input"
-                placeholder="Enter Secondary Contact Name"
-                value={secondaryName}
-                onChange={(e) => setSecondaryName(e.target.value)}
+          {/* 6. Primary / Private Contact Indicator */}
+          <FormField label="Privacy Record" span="full">
+            <Switch
+              checked={isPrimaryPrivate}
+              onChange={(e) => setIsPrimaryPrivate(e.target.checked)}
+              label={
+                isPrimaryPrivate
+                  ? 'Primary Emergency Contact (Private Record)'
+                  : 'Standard Emergency Contact (Public HR Record)'
+              }
+            />
+          </FormField>
+        </FormGrid>
+      </FormSection>
+
+      {/* 2. SECONDARY CONTACT AREA */}
+      <FormSection
+        title="Secondary Emergency Contact"
+        description="Secondary alternate contact details for emergencies."
+      >
+        <FormGrid columns={2} layout="horizontal" labelWidth="md">
+          {/* 1. Secondary Contact Name */}
+          <FormField label="Secondary Contact Name">
+            <Input
+              type="text"
+              placeholder="Enter Secondary Contact Name"
+              value={secondaryName}
+              onChange={(e) => setSecondaryName(e.target.value)}
+            />
+          </FormField>
+
+          {/* 2. Secondary Relationship */}
+          <FormField label="Secondary Relationship">
+            <Stack gap="xs">
+              <Select
+                options={RELATIONSHIP_OPTIONS}
+                value={secondaryRelationship}
+                onChange={(e) => setSecondaryRelationship(e.target.value)}
               />
-            </div>
-
-            {/* 2. Secondary Relationship */}
-            <div className="employee-registration__field">
-              <label className="employee-registration__label">Secondary Relationship</label>
-              <div className="employee-registration__select-wrapper">
-                <select
-                  className="employee-registration__select"
-                  value={secondaryRelationship}
-                  onChange={(e) => setSecondaryRelationship(e.target.value)}
-                >
-                  <option value="Father">Father</option>
-                  <option value="Mother">Mother</option>
-                  <option value="Spouse">Spouse</option>
-                  <option value="Brother">Brother</option>
-                  <option value="Sister">Sister</option>
-                  <option value="Son">Son</option>
-                  <option value="Daughter">Daughter</option>
-                  <option value="Guardian">Guardian</option>
-                  <option value="Relative">Relative</option>
-                  <option value="Friend">Friend</option>
-                  <option value="Other">Other</option>
-                </select>
-                <span className="employee-registration__select-icon">▼</span>
-              </div>
               {secondaryRelationship === 'Other' && (
-                <div className="employee-registration__other-container">
-                  <input
-                    type="text"
-                    className="employee-registration__input"
-                    placeholder="Enter Secondary Relationship"
-                    value={customSecondaryRelationship}
-                    onChange={(e) => setCustomSecondaryRelationship(e.target.value)}
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* 3. Secondary Mobile */}
-            <div className="employee-registration__field">
-              <label className="employee-registration__label">Secondary Mobile</label>
-              <div className="emergency-contact-section__phone-group">
-                <select
-                  className="emergency-contact-section__country-code"
-                  value={secondaryCountryCode}
-                  onChange={(e) => setSecondaryCountryCode(e.target.value)}
-                >
-                  <option value="+91">+91 (IND)</option>
-                  <option value="+1">+1 (USA)</option>
-                  <option value="+44">+44 (UK)</option>
-                  <option value="+65">+65 (SGP)</option>
-                  <option value="+971">+971 (UAE)</option>
-                </select>
-                <input
-                  type="tel"
-                  className={`employee-registration__input ${
-                    secondaryMobileError ? 'emergency-contact-section__input--error' : ''
-                  }`}
-                  placeholder="98765 43211"
-                  value={secondaryMobile}
-                  onChange={(e) => handleSecondaryMobileChange(e.target.value)}
+                <Input
+                  type="text"
+                  placeholder="Enter Secondary Relationship"
+                  value={customSecondaryRelationship}
+                  onChange={(e) => setCustomSecondaryRelationship(e.target.value)}
                 />
-              </div>
-              {secondaryMobileError && (
-                <span className="emergency-contact-section__error-msg">{secondaryMobileError}</span>
               )}
-            </div>
+            </Stack>
+          </FormField>
 
-            {/* 4. Secondary Email */}
-            <div className="employee-registration__field">
-              <label className="employee-registration__label">Secondary Email</label>
-              <input
-                type="email"
-                className={`employee-registration__input ${
-                  secondaryEmailError ? 'emergency-contact-section__input--error' : ''
-                }`}
-                placeholder="secondary@example.com"
-                value={secondaryEmail}
-                onChange={(e) => handleSecondaryEmailChange(e.target.value)}
+          {/* 3. Secondary Mobile */}
+          <FormField label="Secondary Mobile" error={secondaryMobileError}>
+            <Inline gap="xs">
+              <Select
+                options={COUNTRY_CODE_OPTIONS}
+                value={secondaryCountryCode}
+                onChange={(e) => setSecondaryCountryCode(e.target.value)}
               />
-              {secondaryEmailError && (
-                <span className="emergency-contact-section__error-msg font-sm">
-                  {secondaryEmailError}
-                </span>
-              )}
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+              <Input
+                type="tel"
+                placeholder="98765 43211"
+                value={secondaryMobile}
+                onChange={(e) => handleSecondaryMobileChange(e.target.value)}
+              />
+            </Inline>
+          </FormField>
+
+          {/* 4. Secondary Email */}
+          <FormField label="Secondary Email" error={secondaryEmailError}>
+            <Input
+              type="email"
+              placeholder="secondary@example.com"
+              value={secondaryEmail}
+              onChange={(e) => handleSecondaryEmailChange(e.target.value)}
+            />
+          </FormField>
+        </FormGrid>
+      </FormSection>
+    </Stack>
   );
 }
