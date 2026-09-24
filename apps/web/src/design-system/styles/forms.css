@@ -1,0 +1,777 @@
+/*
+ * BEZENT Design System — Universal Forms & Data Collection Styles
+ *
+ * Provides standardized, semantic styling for form fields, grids, repeatable
+ * cards, upload targets, directory pickers, review summaries, and data cards
+ * across all business modules in both Light and Dark theme modes.
+ */
+
+/* ─── 1. Core Form Field & Control Primitives ─────────────────────────────── */
+.employee-registration__field,
+.onboarding-section__field,
+.personal-info__field,
+.working-hours-section__field,
+.documents-section__field,
+.accounts-section__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.employee-registration__label,
+.onboarding-section__label,
+.personal-info__label,
+.working-hours-section__label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #444746);
+  letter-spacing: -0.1px;
+}
+
+.employee-registration__required,
+.onboarding-section__required {
+  color: var(--status-danger-fg, #ef4444);
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+.employee-registration__input,
+.onboarding-section__input,
+.personal-info__input,
+.working-hours-section__input,
+.accounts-section__input {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-md, 8px);
+  color: var(--text-primary, #1f1f1f);
+  font: inherit;
+  font-size: 13px;
+  box-sizing: border-box;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.employee-registration__input:hover:not(:disabled):not([readonly]),
+.onboarding-section__input:hover:not(:disabled):not([readonly]),
+.personal-info__input:hover:not(:disabled):not([readonly]) {
+  border-color: var(--border-focus, #1a73e8);
+}
+
+.employee-registration__input:focus,
+.onboarding-section__input:focus,
+.personal-info__input:focus,
+.working-hours-section__input:focus,
+.accounts-section__input:focus {
+  outline: none;
+  border-color: var(--border-focus, #1a73e8);
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.18);
+}
+
+.employee-registration__input--disabled,
+.employee-registration__input:disabled,
+.onboarding-section__input:disabled {
+  background: var(--bg-surface-secondary, #f0f4f9);
+  color: var(--text-muted, #747775);
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+/* ─── 2. Select Dropdowns & Wrappers ─────────────────────────────────────── */
+.employee-registration__select-wrapper,
+.onboarding-section__select-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.employee-registration__select,
+.onboarding-section__select,
+.working-hours-section__select,
+.accounts-section__select {
+  width: 100%;
+  height: 38px;
+  padding: 0 32px 0 12px;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-md, 8px);
+  color: var(--text-primary, #1f1f1f);
+  font: inherit;
+  font-size: 13px;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.employee-registration__select:hover:not(:disabled) {
+  border-color: var(--border-focus, #1a73e8);
+}
+
+.employee-registration__select:focus {
+  outline: none;
+  border-color: var(--border-focus, #1a73e8);
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.18);
+}
+
+.employee-registration__select:disabled {
+  background: var(--bg-surface-secondary, #f0f4f9);
+  color: var(--text-muted, #747775);
+  cursor: not-allowed;
+}
+
+.employee-registration__select-icon,
+.onboarding-section__select-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 9px;
+  color: var(--text-muted, #747775);
+  pointer-events: none;
+  user-select: none;
+}
+
+.employee-registration__search-prefix {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: var(--text-muted, #747775);
+  pointer-events: none;
+  user-select: none;
+}
+
+.employee-registration__select--with-search {
+  padding-left: 32px !important;
+}
+
+.employee-registration__other-container {
+  margin-top: 6px;
+  width: 100%;
+}
+
+/* ─── 3. Textarea Controls ────────────────────────────────────────────────── */
+.employee-registration__textarea,
+.onboarding-section__textarea {
+  width: 100%;
+  min-height: 72px;
+  padding: 8px 12px;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-md, 8px);
+  color: var(--text-primary, #1f1f1f);
+  font: inherit;
+  font-size: 13px;
+  box-sizing: border-box;
+  resize: vertical;
+  line-height: 1.45;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.employee-registration__textarea:hover:not(:disabled) {
+  border-color: var(--border-focus, #1a73e8);
+}
+
+.employee-registration__textarea:focus {
+  outline: none;
+  border-color: var(--border-focus, #1a73e8);
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.18);
+}
+
+/* ─── 4. Checkboxes & Switches ───────────────────────────────────────────── */
+.employee-registration__checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary, #1f1f1f);
+  cursor: pointer;
+  user-select: none;
+}
+
+.employee-registration__checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--border-focus, #1a73e8);
+  cursor: pointer;
+}
+
+/* ─── 5. Section Headers & Banners ───────────────────────────────────────── */
+.employee-registration__section-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  background: var(--bg-card, #f0f4f9);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-lg, 12px);
+  margin-bottom: 20px;
+}
+
+.employee-registration__section-icon-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md, 10px);
+  background: var(--bg-hover, #c2e7ff);
+  color: var(--icon-active, #041e49);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.employee-registration__section-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.employee-registration__section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary, #1f1f1f);
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.employee-registration__section-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary, #444746);
+  margin: 0;
+}
+
+/* ─── 6. Action Buttons & Helpers ────────────────────────────────────────── */
+.employee-registration__add-btn,
+.onboarding-section__add-btn,
+.personal-info__add-btn,
+.personal-info__add-repeatable-btn,
+.emergency-contact__add-btn,
+.skills-section__add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--border-focus, #1a73e8);
+  background: var(--bg-surface-secondary, #f0f4f9);
+  border: 1px dashed var(--border-default, #dde3ea);
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: fit-content;
+  margin-top: 8px;
+}
+
+.employee-registration__add-btn:hover,
+.onboarding-section__add-btn:hover,
+.personal-info__add-btn:hover,
+.personal-info__add-repeatable-btn:hover,
+.emergency-contact__add-btn:hover,
+.skills-section__add-btn:hover {
+  background: var(--bg-hover, #c2e7ff);
+  border-color: var(--border-focus, #1a73e8);
+  color: var(--nav-icon-active, #041e49);
+}
+
+.onboarding-section__remove-btn,
+.personal-info__remove-item-btn,
+.emergency-contact__remove-btn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--status-danger-fg, #ef4444);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background-color 0.15s ease;
+}
+
+.onboarding-section__remove-btn:hover,
+.personal-info__remove-item-btn:hover,
+.emergency-contact__remove-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* ─── 7. Repeatable Cards & Section Groups ───────────────────────────────── */
+.onboarding-section,
+.personal-info,
+.skills-section,
+.emergency-contact,
+.accounts-section,
+.online-access-section,
+.working-hours-section,
+.documents-section,
+.review-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.onboarding-section__group,
+.personal-info__group,
+.emergency-contact__group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.onboarding-section__group-title,
+.personal-info__group-title,
+.emergency-contact__group-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary, #1f1f1f);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.onboarding-section__group-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary, #444746);
+  margin: -6px 0 6px 0;
+}
+
+.onboarding-section__cards-list,
+.personal-info__repeatable-list,
+.emergency-contact__cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.onboarding-section__card,
+.personal-info__repeatable-card,
+.emergency-contact__card,
+.skills-section__form-card,
+.skills-section__card,
+.working-hours-section__card,
+.online-access-section__card,
+.documents-section__photo-card,
+.documents-section__category-card,
+.review-section__card {
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-lg, 12px);
+  padding: 16px 18px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.onboarding-section__card-header,
+.personal-info__repeatable-header,
+.emergency-contact__card-header,
+.working-hours-section__card-header,
+.online-access-section__card-header,
+.documents-section__photo-card-header,
+.review-section__card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle, #e7ebf0);
+}
+
+.onboarding-section__card-title,
+.personal-info__repeatable-title,
+.emergency-contact__card-title,
+.skills-section__card-title,
+.working-hours-section__card-title,
+.online-access-section__card-title,
+.review-section__card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary, #1f1f1f);
+}
+
+/* ─── 8. Form Grids ──────────────────────────────────────────────────────── */
+.employee-registration__form-grid,
+.onboarding-section__form-grid-2,
+.personal-info__grid-2,
+.working-hours-section__row-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.onboarding-section__form-grid-3,
+.employee-registration__form-grid-3,
+.skills-section__grid,
+.working-hours-section__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.onboarding-section__field--full,
+.personal-info__field--full,
+.documents-section__field--span-full {
+  grid-column: 1 / -1;
+}
+
+.documents-section__field--span-2 {
+  grid-column: span 2;
+}
+
+/* ─── 9. Status Badges & Pills ───────────────────────────────────────────── */
+.onboarding-section__status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 4px;
+  width: fit-content;
+}
+
+.onboarding-section__status-badge--completed {
+  background: var(--status-success-bg, #ecfdf5);
+  color: var(--status-success-fg, #059669);
+  border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
+.onboarding-section__status-badge--overdue {
+  background: var(--status-danger-bg, #fef2f2);
+  color: var(--status-danger-fg, #dc2626);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.onboarding-section__select--overdue {
+  border-color: var(--status-danger-fg, #dc2626);
+}
+
+/* ─── 10. Photo Upload & Preview ─────────────────────────────────────────── */
+.personal-info__photo-container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 20px;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-lg, 12px);
+  margin-bottom: 16px;
+}
+
+.personal-info__photo-placeholder,
+.personal-info__photo-preview {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 700;
+  background: var(--bg-hover, #c2e7ff);
+  color: var(--icon-active, #041e49);
+  border: 2px solid var(--border-default, #dde3ea);
+  flex-shrink: 0;
+}
+
+.personal-info__photo-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.personal-info__photo-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary, #1f1f1f);
+}
+
+.personal-info__photo-hint {
+  font-size: 11px;
+  color: var(--text-secondary, #444746);
+}
+
+.personal-info__photo-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.personal-info__upload-btn,
+.documents-section__photo-btn--replace {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--bg-surface-secondary, #f0f4f9);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary, #1f1f1f);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.personal-info__upload-btn:hover,
+.documents-section__photo-btn--replace:hover {
+  background: var(--bg-hover, #c2e7ff);
+  border-color: var(--border-focus, #1a73e8);
+}
+
+.personal-info__file-input,
+.documents-section__file-input {
+  display: none;
+}
+
+.personal-info__remove-photo-btn,
+.documents-section__photo-btn--remove {
+  background: none;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--status-danger-fg, #ef4444);
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.personal-info__remove-photo-btn:hover,
+.documents-section__photo-btn--remove:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* ─── 11. Documents Vault & Dropzones ────────────────────────────────────── */
+.documents-section__photo-card {
+  margin-bottom: 20px;
+}
+
+.documents-section__upload-limits-note {
+  font-size: 11px;
+  color: var(--text-secondary, #444746);
+  margin-bottom: 12px;
+}
+
+.documents-section__photo-placeholder-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  background: var(--bg-surface-secondary, #f0f4f9);
+  border: 2px dashed var(--border-default, #dde3ea);
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.documents-section__photo-placeholder-box:hover {
+  background: var(--bg-hover, #c2e7ff);
+  border-color: var(--border-focus, #1a73e8);
+}
+
+.documents-section__photo-placeholder-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary, #1f1f1f);
+}
+
+.documents-section__photo-placeholder-hint {
+  font-size: 11px;
+  color: var(--text-muted, #747775);
+}
+
+.documents-section__category-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary, #1f1f1f);
+}
+
+.documents-section__tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.documents-section__tag--required {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--status-danger-fg, #ef4444);
+}
+
+/* ─── 12. Review Section Cards & Summary ─────────────────────────────────── */
+.review-section__cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 16px;
+}
+
+.review-section__data-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.review-section__data-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.review-section__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary, #444746);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.review-section__value {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary, #1f1f1f);
+}
+
+.review-section__edit-btn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--border-focus, #1a73e8);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.review-section__edit-btn:hover {
+  background: var(--bg-hover, #c2e7ff);
+}
+
+/* ─── 13. Directory Picker Modals & Overlays ──────────────────────────────── */
+.skills-section__modal-overlay,
+.review-section__modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 16px;
+}
+
+.skills-section__modal,
+.review-section__modal-card {
+  width: 100%;
+  max-width: 540px;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.skills-section__modal-header,
+.review-section__modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-subtle, #e7ebf0);
+}
+
+.skills-section__modal-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary, #1f1f1f);
+  margin: 0;
+}
+
+.skills-section__modal-close {
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: var(--text-muted, #747775);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.skills-section__employee-list {
+  max-height: 280px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.skills-section__employee-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-subtle, #e7ebf0);
+  transition: background-color 0.12s ease;
+}
+
+.skills-section__employee-item:hover {
+  background: var(--bg-hover, #c2e7ff);
+}
+
+.skills-section__emp-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary, #1f1f1f);
+}
+
+.skills-section__emp-sub {
+  font-size: 11px;
+  color: var(--text-secondary, #444746);
+}
+
+/* ─── 14. Helper Texts & Inline Links ────────────────────────────────────── */
+.personal-info__helper-text,
+.accounts-section__helper-text,
+.personal-info__postal-status {
+  font-size: 11px;
+  color: var(--text-muted, #747775);
+  margin-top: 2px;
+}
+
+.personal-info__error-hint {
+  font-size: 11px;
+  color: var(--status-danger-fg, #ef4444);
+  font-weight: 500;
+  margin-top: 2px;
+}
