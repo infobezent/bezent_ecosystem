@@ -307,6 +307,7 @@ export function OnboardingBuilderSection() {
                       <Inline gap="xs" align="center" onClick={(e) => e.stopPropagation()}>
                         <button
                           type="button"
+                          className="admin-builder-action-btn"
                           title={sec.hidden ? 'Show Section' : 'Hide Section'}
                           onClick={() => toggleHideSection(sec.id)}
                           aria-label={sec.hidden ? 'Show Section' : 'Hide Section'}
@@ -315,25 +316,28 @@ export function OnboardingBuilderSection() {
                         </button>
                         <button
                           type="button"
+                          className="admin-builder-action-btn"
                           title="Move Up"
                           disabled={index === 0}
                           onClick={() => reorderSection(index, 'up')}
                           aria-label="Move Up"
                         >
-                          ▲
+                          <BezentIcon name="chevronUp" size={14} />
                         </button>
                         <button
                           type="button"
+                          className="admin-builder-action-btn"
                           title="Move Down"
                           disabled={index === sections.length - 1}
                           onClick={() => reorderSection(index, 'down')}
                           aria-label="Move Down"
                         >
-                          ▼
+                          <BezentIcon name="chevronDown" size={14} />
                         </button>
                         {sec.isCustom && (
                           <button
                             type="button"
+                            className="admin-builder-action-btn admin-builder-action-btn--delete"
                             title="Delete Section"
                             onClick={() => deleteSection(sec.id)}
                             aria-label="Delete Section"
@@ -419,21 +423,23 @@ export function OnboardingBuilderSection() {
                             </Button>
                             <button
                               type="button"
+                              className="admin-builder-action-btn"
                               title="Move Card Up"
                               disabled={cIndex === 0}
                               onClick={() => reorderCard(card.sectionId, cIndex, 'up')}
                               aria-label="Move Card Up"
                             >
-                              ▲
+                              <BezentIcon name="chevronUp" size={14} />
                             </button>
                             <button
                               type="button"
+                              className="admin-builder-action-btn"
                               title="Move Card Down"
                               disabled={cIndex === currentCards.length - 1}
                               onClick={() => reorderCard(card.sectionId, cIndex, 'down')}
                               aria-label="Move Card Down"
                             >
-                              ▼
+                              <BezentIcon name="chevronDown" size={14} />
                             </button>
                             <Button
                               type="button"
@@ -768,6 +774,7 @@ export function OnboardingBuilderSection() {
                         <span>{opt}</span>
                         <button
                           type="button"
+                          className="admin-builder-option-remove-btn"
                           aria-label={`Remove ${opt}`}
                           onClick={() => handleDeleteOption(idx)}
                         >

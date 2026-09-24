@@ -2365,3 +2365,83 @@
   margin-bottom: 12px;
 }
 
+/* ==========================================================================
+   21. Administration Customization Builder
+   ========================================================================== */
+
+.admin-builder-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: var(--bezent-btn-sec-bg, #c2e7ff);
+  color: var(--bezent-btn-sec-text, #071e49);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm, 6px);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.admin-builder-action-btn:hover:not(:disabled) {
+  background: var(--bezent-btn-sec-hover, #a8dbfc);
+  color: var(--bezent-btn-sec-text, #071e49);
+}
+
+.admin-builder-action-btn:active:not(:disabled) {
+  background: #90d0fa;
+}
+
+.admin-builder-action-btn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  background: var(--bg-canvas, #f0f4f9);
+  color: var(--text-tertiary, #747775);
+  border-color: var(--border-default, #dde3ea);
+}
+
+.admin-builder-action-btn--delete {
+  color: var(--status-danger-fg, #ef4444);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.admin-builder-action-btn--delete:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--status-danger-fg, #ef4444);
+}
+
+.admin-builder-option-remove-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.75;
+  transition: opacity 0.15s ease;
+}
+
+.admin-builder-option-remove-btn:hover {
+  opacity: 1;
+}
+
+[data-theme='dark'] .admin-builder-action-btn {
+  background: var(--bezent-btn-sec-bg, #1a273b);
+  color: var(--bezent-btn-sec-text, #c2e7ff);
+}
+
+[data-theme='dark'] .admin-builder-action-btn:hover:not(:disabled) {
+  background: var(--bezent-btn-sec-hover, #233550);
+}
+
+[data-theme='dark'] .admin-builder-action-btn:disabled {
+  background: var(--bg-canvas, #0b0f17);
+  color: var(--text-tertiary, #555b68);
+  border-color: var(--border-default, #2a313d);
+}
+
+

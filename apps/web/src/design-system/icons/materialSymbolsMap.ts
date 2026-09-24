@@ -105,6 +105,8 @@ export const MATERIAL_SYMBOLS_MAP: Record<string, string> = {
   chevronLeft: 'chevron_left',
   chevronright: 'chevron_right',
   chevronRight: 'chevron_right',
+  chevronup: 'keyboard_arrow_up',
+  chevronUp: 'keyboard_arrow_up',
   chevrondown: 'keyboard_arrow_down',
   chevronDown: 'keyboard_arrow_down',
   arrowleft: 'arrow_back',
