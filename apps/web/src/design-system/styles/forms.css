@@ -1590,32 +1590,39 @@
   font-weight: 700;
 }
 
-/* Review Cards Grid */
+/* Review Cards Masonry Flow — Eliminates all empty gaps */
 .review-section__cards-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  align-items: start;
+  columns: 2 440px;
+  column-gap: 16px;
 }
 
 @media (max-width: 1024px) {
   .review-section__cards-grid {
-    grid-template-columns: 1fr;
+    columns: 1;
   }
 }
 
-.review-section__cards-grid > .review-section__card:last-child {
-  grid-column: 1 / -1;
+.review-section__card {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
 }
 
-.review-section__cards-grid > .review-section__card:last-child .review-section__repeatable-list {
+.review-section__card--full-width {
+  column-span: all;
+  margin-bottom: 16px;
+}
+
+.review-section__documents-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
 
-@media (max-width: 768px) {
-  .review-section__cards-grid > .review-section__card:last-child .review-section__repeatable-list {
+@media (max-width: 860px) {
+  .review-section__documents-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -1760,21 +1767,43 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 8px 12px;
+  padding: 10px 12px;
   background: var(--bg-surface-secondary, #f0f4f9);
   border: 1px solid var(--border-subtle, #e7ebf0);
   border-radius: 8px;
-  min-height: 48px;
+  min-height: 52px;
   box-sizing: border-box;
 }
 
 .review-section__repeatable-info {
   flex: 1;
   min-width: 0;
-  font-size: var(--form-font-size-subtitle, 12px);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.review-section__doc-header-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.review-section__doc-title {
+  font-size: var(--form-font-size-input, 13px);
+  font-weight: 700;
   color: var(--text-primary, #1f1f1f);
-  line-height: 1.4;
-  word-break: break-word;
+}
+
+.review-section__doc-category-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary, #444746);
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-default, #dde3ea);
+  padding: 1px 6px;
+  border-radius: 4px;
 }
 
 .review-section__mini-tag {
@@ -1784,7 +1813,6 @@
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   color: var(--bezent-btn-sec-text, #071e49);
   border-radius: 4px;
-  margin-left: 6px;
   display: inline-flex;
   align-items: center;
   width: fit-content;
@@ -1803,11 +1831,14 @@
   border-radius: 6px;
   font-size: var(--form-font-size-hint, 11px);
   font-weight: 600;
-  padding: 3px 8px;
+  padding: 4px 8px;
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .review-section__delete-item-btn:hover {
@@ -1861,7 +1892,7 @@
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
-  min-width: 130px;
+  min-width: 150px;
   justify-content: flex-end;
 }
 
