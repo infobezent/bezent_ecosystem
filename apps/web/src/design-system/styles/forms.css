@@ -1,19 +1,31 @@
 /*
  * BEZENT Design System — Universal Forms & Data Collection Styles
  *
- * Standardized semantic styling for form fields, multi-section cards,
- * button groups, document checklists, verification chips, directory pickers,
- * time configurations, salary breakdowns, and review summaries.
+ * Consistent typography, uniform font sizes, semantic tokens, grid alignments,
+ * and controls for all registration tabs and forms across the ecosystem.
  */
 
-/* ─── 1. Core Form Field & Control Primitives ─────────────────────────────── */
+/* ─── 1. Uniform Typography Scale for Forms ───────────────────────────────── */
+:root {
+  --form-font-size-title: 15px;
+  --form-font-size-subtitle: 12px;
+  --form-font-size-card-title: 14px;
+  --form-font-size-section-label: 11px;
+  --form-font-size-label: 12px;
+  --form-font-size-input: 13px;
+  --form-font-size-hint: 11px;
+  --form-font-size-badge: 11px;
+}
+
+/* ─── 2. Core Form Field & Control Primitives ─────────────────────────────── */
 .employee-registration__field,
 .onboarding-section__field,
 .personal-info__field,
 .working-hours-section__field,
 .documents-section__field,
 .accounts-section__field,
-.skills-section__field {
+.skills-section__field,
+.emergency-contact-section__field {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -28,14 +40,16 @@
 .working-hours-section__label,
 .documents-section__label,
 .accounts-section__label,
-.skills-section__label {
+.skills-section__label,
+.emergency-contact-section__label {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: var(--form-font-size-label, 12px);
   font-weight: 600;
   color: var(--text-secondary, #444746);
   letter-spacing: -0.1px;
+  margin: 0;
 }
 
 .employee-registration__required,
@@ -50,7 +64,8 @@
 .personal-info__input,
 .working-hours-section__input,
 .accounts-section__input,
-.skills-section__input {
+.skills-section__input,
+.emergency-contact-section__input {
   width: 100%;
   height: 38px;
   padding: 0 12px;
@@ -59,7 +74,7 @@
   border-radius: var(--radius-md, 8px);
   color: var(--text-primary, #1f1f1f);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--form-font-size-input, 13px);
   box-sizing: border-box;
   transition:
     border-color 0.15s ease,
@@ -80,7 +95,8 @@
 .personal-info__input:focus,
 .working-hours-section__input:focus,
 .accounts-section__input:focus,
-.skills-section__input:focus {
+.skills-section__input:focus,
+.emergency-contact-section__input:focus {
   outline: none;
   border-color: var(--border-focus, #1a73e8);
   box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.18);
@@ -95,10 +111,11 @@
   opacity: 0.85;
 }
 
-/* ─── 2. Select Dropdowns & Wrappers ─────────────────────────────────────── */
+/* ─── 3. Select Dropdowns & Wrappers ─────────────────────────────────────── */
 .employee-registration__select-wrapper,
 .onboarding-section__select-wrapper,
-.working-hours-section__select-wrapper {
+.working-hours-section__select-wrapper,
+.emergency-contact-section__select-wrapper {
   position: relative;
   width: 100%;
   display: flex;
@@ -109,7 +126,8 @@
 .onboarding-section__select,
 .working-hours-section__select,
 .accounts-section__select,
-.skills-section__select {
+.skills-section__select,
+.emergency-contact-section__select {
   width: 100%;
   height: 38px;
   padding: 0 32px 0 12px;
@@ -118,7 +136,7 @@
   border-radius: var(--radius-md, 8px);
   color: var(--text-primary, #1f1f1f);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--form-font-size-input, 13px);
   box-sizing: border-box;
   appearance: none;
   -webkit-appearance: none;
@@ -183,9 +201,10 @@
   width: 100%;
 }
 
-/* ─── 3. Textarea Controls ────────────────────────────────────────────────── */
+/* ─── 4. Textarea Controls ────────────────────────────────────────────────── */
 .employee-registration__textarea,
-.onboarding-section__textarea {
+.onboarding-section__textarea,
+.emergency-contact-section__textarea {
   width: 100%;
   min-height: 72px;
   padding: 8px 12px;
@@ -194,7 +213,7 @@
   border-radius: var(--radius-md, 8px);
   color: var(--text-primary, #1f1f1f);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--form-font-size-input, 13px);
   box-sizing: border-box;
   resize: vertical;
   line-height: 1.45;
@@ -204,22 +223,24 @@
     background-color 0.15s ease;
 }
 
-.employee-registration__textarea:hover:not(:disabled) {
+.employee-registration__textarea:hover:not(:disabled),
+.emergency-contact-section__textarea:hover:not(:disabled) {
   border-color: var(--border-focus, #1a73e8);
 }
 
-.employee-registration__textarea:focus {
+.employee-registration__textarea:focus,
+.emergency-contact-section__textarea:focus {
   outline: none;
   border-color: var(--border-focus, #1a73e8);
   box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.18);
 }
 
-/* ─── 4. Section Headers & Banners ───────────────────────────────────────── */
+/* ─── 5. Section Headers & Banners ───────────────────────────────────────── */
 .employee-registration__section-header {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 16px 20px;
+  padding: 14px 18px;
   background: var(--bg-card, #f0f4f9);
   border: 1px solid var(--border-default, #dde3ea);
   border-radius: var(--radius-lg, 12px);
@@ -227,8 +248,8 @@
 }
 
 .employee-registration__section-icon-badge {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-md, 10px);
   background: var(--bg-hover, #c2e7ff);
   color: var(--icon-active, #041e49);
@@ -245,20 +266,20 @@
 }
 
 .employee-registration__section-title {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: var(--form-font-size-title, 15px);
+  font-weight: 600;
   color: var(--text-primary, #1f1f1f);
   margin: 0;
   letter-spacing: -0.2px;
 }
 
 .employee-registration__section-subtitle {
-  font-size: 12px;
+  font-size: var(--form-font-size-subtitle, 12px);
   color: var(--text-secondary, #444746);
   margin: 0;
 }
 
-/* ─── 5. Action Buttons & Helpers ────────────────────────────────────────── */
+/* ─── 6. Action Buttons & Helpers ────────────────────────────────────────── */
 .employee-registration__add-btn,
 .onboarding-section__add-btn,
 .personal-info__add-btn,
@@ -270,7 +291,7 @@
   justify-content: center;
   gap: 6px;
   padding: 8px 16px;
-  font-size: 13px;
+  font-size: var(--form-font-size-input, 13px);
   font-weight: 600;
   color: var(--border-focus, #1a73e8);
   background: var(--bg-surface-secondary, #f0f4f9);
@@ -313,11 +334,12 @@
   background: rgba(239, 68, 68, 0.1);
 }
 
-/* ─── 6. Repeatable Cards & Section Groups ───────────────────────────────── */
+/* ─── 7. Repeatable Cards & Section Groups ───────────────────────────────── */
 .onboarding-section,
 .personal-info,
 .skills-section,
 .emergency-contact,
+.emergency-contact-section,
 .accounts-section,
 .online-access-section,
 .working-hours-section,
@@ -325,7 +347,7 @@
 .review-section {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
   width: 100%;
 }
 
@@ -340,23 +362,24 @@
 .onboarding-section__group-title,
 .personal-info__group-title,
 .emergency-contact__group-title {
-  font-size: 13px;
+  font-size: var(--form-font-size-section-label, 11px);
   font-weight: 700;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-secondary, #444746);
   letter-spacing: 0.5px;
   text-transform: uppercase;
   margin: 0;
 }
 
 .onboarding-section__group-subtitle {
-  font-size: 12px;
+  font-size: var(--form-font-size-subtitle, 12px);
   color: var(--text-secondary, #444746);
   margin: -6px 0 6px 0;
 }
 
 .onboarding-section__cards-list,
 .personal-info__repeatable-list,
-.emergency-contact__cards-list {
+.emergency-contact__cards-list,
+.emergency-contact-section__container {
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -365,6 +388,7 @@
 .onboarding-section__card,
 .personal-info__repeatable-card,
 .emergency-contact__card,
+.emergency-contact-section__card,
 .skills-section__form-card,
 .skills-section__card,
 .working-hours-section__card,
@@ -385,6 +409,7 @@
 .onboarding-section__card-header,
 .personal-info__repeatable-header,
 .emergency-contact__card-header,
+.emergency-contact-section__card-header,
 .working-hours-section__card-header,
 .online-access-section__card-header,
 .documents-section__photo-card-header,
@@ -401,20 +426,23 @@
 .onboarding-section__card-title,
 .personal-info__repeatable-title,
 .emergency-contact__card-title,
+.emergency-contact-section__card-title,
 .skills-section__card-title,
 .working-hours-section__card-title,
 .online-access-section__card-title,
 .review-section__card-title {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--form-font-size-card-title, 14px);
+  font-weight: 600;
   color: var(--text-primary, #1f1f1f);
+  margin: 0;
 }
 
-/* ─── 7. Form Grids ──────────────────────────────────────────────────────── */
+/* ─── 8. Form Grids ──────────────────────────────────────────────────────── */
 .employee-registration__form-grid,
 .onboarding-section__form-grid-2,
 .personal-info__grid-2,
-.accounts-section__grid {
+.accounts-section__grid,
+.emergency-contact-section__grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
@@ -442,23 +470,97 @@
 
 .onboarding-section__field--full,
 .personal-info__field--full,
-.documents-section__field--span-full {
+.documents-section__field--span-full,
+.emergency-contact-section__field--span-full {
   grid-column: 1 / -1;
 }
 
 .documents-section__field--span-2,
-.working-hours-section__field--span-2 {
+.working-hours-section__field--span-2,
+.emergency-contact-section__field--span-2 {
   grid-column: span 2;
 }
 
-/* ─── 8. Status Badges & Pills ───────────────────────────────────────────── */
+/* ─── 9. Emergency Contact Section ───────────────────────────────────────── */
+.emergency-contact-section__header-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.emergency-contact-section__badge {
+  font-size: var(--form-font-size-badge, 11px);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.emergency-contact-section__badge--primary {
+  background: var(--bg-hover, #c2e7ff);
+  color: var(--nav-icon-active, #041e49);
+}
+
+.emergency-contact-section__badge--secondary {
+  background: var(--bg-surface-secondary, #f0f4f9);
+  color: var(--text-secondary, #444746);
+  border: 1px solid var(--border-default, #dde3ea);
+}
+
+.emergency-contact-section__phone-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.emergency-contact-section__country-code {
+  width: 110px;
+  height: 38px;
+  padding: 0 8px;
+  background: var(--bg-surface-secondary, #f0f4f9);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-md, 8px);
+  color: var(--text-primary, #1f1f1f);
+  font: inherit;
+  font-size: var(--form-font-size-input, 13px);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.emergency-contact-section__toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg-surface-secondary, #f0f4f9);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-md, 8px);
+  margin-top: 4px;
+}
+
+.emergency-contact-section__toggle-label {
+  font-size: var(--form-font-size-input, 13px);
+  font-weight: 500;
+  color: var(--text-primary, #1f1f1f);
+}
+
+.emergency-contact-section__error-msg {
+  font-size: var(--form-font-size-hint, 11px);
+  color: var(--status-danger-fg, #ef4444);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+/* ─── 10. Status Badges & Pills ──────────────────────────────────────────── */
 .onboarding-section__status-badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 3px 8px;
   border-radius: 6px;
-  font-size: 11px;
+  font-size: var(--form-font-size-badge, 11px);
   font-weight: 600;
   margin-top: 4px;
   width: fit-content;
@@ -480,7 +582,7 @@
   border-color: var(--status-danger-fg, #dc2626);
 }
 
-/* ─── 9. Photo Upload & Preview ─────────────────────────────────────────── */
+/* ─── 11. Photo Upload & Preview ─────────────────────────────────────────── */
 .personal-info__photo-container {
   display: flex;
   align-items: center;
@@ -516,13 +618,13 @@
 }
 
 .personal-info__photo-title {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--form-font-size-card-title, 14px);
+  font-weight: 600;
   color: var(--text-primary, #1f1f1f);
 }
 
 .personal-info__photo-hint {
-  font-size: 11px;
+  font-size: var(--form-font-size-hint, 11px);
   color: var(--text-secondary, #444746);
 }
 
@@ -542,7 +644,7 @@
   background: var(--bg-surface-secondary, #f0f4f9);
   border: 1px solid var(--border-default, #dde3ea);
   border-radius: 6px;
-  font-size: 12px;
+  font-size: var(--form-font-size-subtitle, 12px);
   font-weight: 600;
   color: var(--text-primary, #1f1f1f);
   cursor: pointer;
@@ -564,7 +666,7 @@
 .documents-section__photo-btn--remove {
   background: none;
   border: none;
-  font-size: 12px;
+  font-size: var(--form-font-size-subtitle, 12px);
   font-weight: 600;
   color: var(--status-danger-fg, #ef4444);
   cursor: pointer;
@@ -577,7 +679,7 @@
   background: rgba(239, 68, 68, 0.1);
 }
 
-/* ─── 10. Documents Vault & Checklist ─────────────────────────────────────── */
+/* ─── 12. Documents Vault & Checklist ─────────────────────────────────────── */
 .documents-section__classification-card {
   display: flex;
   align-items: center;
@@ -597,13 +699,13 @@
 }
 
 .documents-section__class-title {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--form-font-size-card-title, 14px);
+  font-weight: 600;
   color: var(--text-primary, #1f1f1f);
 }
 
 .documents-section__class-desc {
-  font-size: 12px;
+  font-size: var(--form-font-size-subtitle, 12px);
   color: var(--text-secondary, #444746);
 }
 
@@ -618,7 +720,7 @@
 
 .documents-section__class-btn {
   padding: 6px 14px;
-  font-size: 12px;
+  font-size: var(--form-font-size-subtitle, 12px);
   font-weight: 600;
   border: none;
   background: transparent;
@@ -658,8 +760,8 @@
 }
 
 .documents-section__item-name {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--form-font-size-card-title, 14px);
+  font-weight: 600;
   color: var(--text-primary, #1f1f1f);
 }
 
@@ -687,7 +789,7 @@
 }
 
 .documents-section__status-badge {
-  font-size: 11px;
+  font-size: var(--form-font-size-badge, 11px);
   font-weight: 600;
   padding: 3px 8px;
   border-radius: 6px;
@@ -718,7 +820,7 @@
 
 .documents-section__verify-btn {
   padding: 4px 10px;
-  font-size: 11px;
+  font-size: var(--form-font-size-hint, 11px);
   font-weight: 600;
   background: var(--status-success-bg, #ecfdf5);
   color: var(--status-success-fg, #059669);
@@ -734,7 +836,7 @@
 
 .documents-section__reject-btn {
   padding: 4px 10px;
-  font-size: 11px;
+  font-size: var(--form-font-size-hint, 11px);
   font-weight: 600;
   background: var(--status-danger-bg, #fef2f2);
   color: var(--status-danger-fg, #dc2626);
@@ -755,7 +857,7 @@
 }
 
 .documents-section__upload-spec {
-  font-size: 11px;
+  font-size: var(--form-font-size-hint, 11px);
   font-weight: 400;
   color: var(--text-muted, #747775);
 }
@@ -772,7 +874,7 @@
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  font-size: 12px;
+  font-size: var(--form-font-size-subtitle, 12px);
   font-weight: 600;
   background: var(--bg-surface-secondary, #f0f4f9);
   border: 1px solid var(--border-default, #dde3ea);
@@ -793,19 +895,19 @@
 }
 
 .documents-section__file-name {
-  font-size: 12px;
+  font-size: var(--form-font-size-subtitle, 12px);
   font-weight: 600;
   color: var(--text-primary, #1f1f1f);
 }
 
 .documents-section__file-size-badge {
-  font-size: 11px;
+  font-size: var(--form-font-size-hint, 11px);
   color: var(--text-muted, #747775);
 }
 
 .documents-section__preview-btn {
   padding: 4px 10px;
-  font-size: 11px;
+  font-size: var(--form-font-size-hint, 11px);
   font-weight: 600;
   background: var(--bg-hover, #c2e7ff);
   color: var(--nav-icon-active, #041e49);
@@ -853,17 +955,17 @@
 }
 
 .documents-section__photo-placeholder-text {
-  font-size: 13px;
+  font-size: var(--form-font-size-card-title, 14px);
   font-weight: 600;
   color: var(--text-primary, #1f1f1f);
 }
 
 .documents-section__photo-placeholder-hint {
-  font-size: 11px;
+  font-size: var(--form-font-size-hint, 11px);
   color: var(--text-muted, #747775);
 }
 
-/* ─── 11. Working Hours & Days ───────────────────────────────────────────── */
+/* ─── 13. Working Hours & Days ───────────────────────────────────────────── */
 .working-hours-section__days-row {
   display: flex;
   gap: 6px;
@@ -872,7 +974,7 @@
 
 .working-hours-section__day-chip {
   padding: 6px 14px;
-  font-size: 12px;
+  font-size: var(--form-font-size-subtitle, 12px);
   font-weight: 600;
   border: 1px solid var(--border-default, #dde3ea);
   background: var(--bg-surface, #ffffff);
@@ -895,8 +997,9 @@
 .working-hours-section__sub-badge,
 .online-access-section__sub-badge,
 .accounts-section__sub-badge {
-  font-size: 10px;
+  font-size: var(--form-font-size-badge, 11px);
   font-weight: 700;
+  letter-spacing: 0.3px;
   padding: 2px 6px;
   border-radius: 4px;
   background: var(--bg-hover, #c2e7ff);
@@ -910,7 +1013,7 @@
 }
 
 .working-hours-section__sub-title {
-  font-size: 12px;
+  font-size: var(--form-font-size-label, 12px);
   font-weight: 700;
   color: var(--text-primary, #1f1f1f);
   margin: 0 0 4px 0;
@@ -923,7 +1026,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 12px;
+  font-size: var(--form-font-size-subtitle, 12px);
   color: var(--text-secondary, #444746);
 }
 
@@ -944,7 +1047,7 @@
   gap: 16px;
 }
 
-/* ─── 12. Online Access & Security ───────────────────────────────────────── */
+/* ─── 14. Online Access & Security ───────────────────────────────────────── */
 .online-access-section__status-row {
   display: flex;
   align-items: center;
@@ -952,7 +1055,7 @@
 }
 
 .online-access-section__status-pill {
-  font-size: 11px;
+  font-size: var(--form-font-size-badge, 11px);
   font-weight: 600;
   padding: 3px 8px;
   border-radius: 6px;
@@ -966,7 +1069,7 @@
   border: 1px solid var(--border-default, #dde3ea);
   border-radius: 6px;
   background: var(--bg-surface, #ffffff);
-  font-size: 12px;
+  font-size: var(--form-font-size-subtitle, 12px);
 }
 
 .online-access-section__security-row {
@@ -989,14 +1092,14 @@
 
 .accounts-section__toggle-title {
   display: block;
-  font-size: 12px;
+  font-size: var(--form-font-size-label, 12px);
   font-weight: 700;
   color: var(--text-primary, #1f1f1f);
 }
 
 .accounts-section__toggle-desc {
   display: block;
-  font-size: 11px;
+  font-size: var(--form-font-size-hint, 11px);
   color: var(--text-secondary, #444746);
 }
 
@@ -1048,7 +1151,7 @@
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  font-size: 12px;
+  font-size: var(--form-font-size-subtitle, 12px);
   font-weight: 700;
   background: var(--border-focus, #1a73e8);
   color: #ffffff;
@@ -1063,7 +1166,7 @@
 }
 
 .online-access-section__invite-msg {
-  font-size: 12px;
+  font-size: var(--form-font-size-subtitle, 12px);
   font-weight: 600;
   color: var(--status-success-fg, #059669);
 }
@@ -1098,18 +1201,18 @@
 
 .online-access-section__module-name {
   display: block;
-  font-size: 12px;
+  font-size: var(--form-font-size-label, 12px);
   font-weight: 700;
   color: var(--text-primary, #1f1f1f);
 }
 
 .online-access-section__module-desc {
   display: block;
-  font-size: 11px;
+  font-size: var(--form-font-size-hint, 11px);
   color: var(--text-secondary, #444746);
 }
 
-/* ─── 13. Accounts & Salary Breakdown ────────────────────────────────────── */
+/* ─── 15. Accounts & Salary Breakdown ────────────────────────────────────── */
 .accounts-section__label-row {
   display: flex;
   align-items: center;
@@ -1119,7 +1222,7 @@
 .accounts-section__inline-btn {
   background: none;
   border: none;
-  font-size: 11px;
+  font-size: var(--form-font-size-hint, 11px);
   font-weight: 600;
   color: var(--border-focus, #1a73e8);
   cursor: pointer;
@@ -1138,7 +1241,7 @@
   padding: 10px 14px;
   background: var(--bg-surface-secondary, #f0f4f9);
   border-radius: 8px;
-  font-size: 12px;
+  font-size: var(--form-font-size-subtitle, 12px);
   color: var(--text-secondary, #444746);
   margin: 14px 0;
 }
@@ -1160,17 +1263,17 @@
 }
 
 .accounts-section__calc-label {
-  font-size: 11px;
+  font-size: var(--form-font-size-hint, 11px);
   color: var(--text-secondary, #444746);
 }
 
 .accounts-section__calc-val {
-  font-size: 14px;
+  font-size: var(--form-font-size-card-title, 14px);
   font-weight: 700;
   color: var(--text-primary, #1f1f1f);
 }
 
-/* ─── 14. Skills Section & Directory Pickers ─────────────────────────────── */
+/* ─── 16. Skills Section & Directory Pickers ─────────────────────────────── */
 .employee-registration__pill-select {
   display: flex;
   align-items: center;
@@ -1187,7 +1290,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  font-size: var(--form-font-size-input, 13px);
   font-weight: 600;
   color: var(--text-primary, #1f1f1f);
 }
@@ -1226,7 +1329,7 @@
   border: 1px solid var(--border-default, #dde3ea);
   padding: 8px 16px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: var(--form-font-size-input, 13px);
   font-weight: 600;
   color: var(--text-secondary, #444746);
   cursor: pointer;
@@ -1238,7 +1341,7 @@
 }
 
 .skills-section__summary-title {
-  font-size: 14px;
+  font-size: var(--form-font-size-card-title, 14px);
   font-weight: 700;
   margin-bottom: 12px;
   color: var(--text-primary, #1f1f1f);
@@ -1258,14 +1361,14 @@
 }
 
 .skills-section__card-skill-name {
-  font-size: 14px;
+  font-size: var(--form-font-size-card-title, 14px);
   font-weight: 700;
   margin: 0 0 4px 0;
   color: var(--text-primary, #1f1f1f);
 }
 
 .skills-section__type-badge {
-  font-size: 11px;
+  font-size: var(--form-font-size-badge, 11px);
   font-weight: 600;
   padding: 2px 6px;
   border-radius: 4px;
@@ -1283,7 +1386,7 @@
   border: 1px solid var(--border-default, #dde3ea);
   border-radius: 6px;
   padding: 4px 8px;
-  font-size: 11px;
+  font-size: var(--form-font-size-hint, 11px);
   font-weight: 600;
   cursor: pointer;
   color: var(--text-primary, #1f1f1f);
@@ -1307,7 +1410,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  font-size: 12px;
+  font-size: var(--form-font-size-subtitle, 12px);
 }
 
 .skills-section__detail-row {
@@ -1324,7 +1427,7 @@
   color: var(--text-primary, #1f1f1f);
 }
 
-/* ─── 15. Review Section Cards & Summary ─────────────────────────────────── */
+/* ─── 17. Review Section Cards & Summary ─────────────────────────────────── */
 .review-section__cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
@@ -1344,7 +1447,7 @@
 }
 
 .review-section__label {
-  font-size: 11px;
+  font-size: var(--form-font-size-section-label, 11px);
   font-weight: 600;
   color: var(--text-secondary, #444746);
   text-transform: uppercase;
@@ -1352,7 +1455,7 @@
 }
 
 .review-section__value {
-  font-size: 13px;
+  font-size: var(--form-font-size-input, 13px);
   font-weight: 500;
   color: var(--text-primary, #1f1f1f);
 }
@@ -1360,7 +1463,7 @@
 .review-section__edit-btn {
   background: none;
   border: none;
-  font-size: 12px;
+  font-size: var(--form-font-size-subtitle, 12px);
   font-weight: 600;
   color: var(--border-focus, #1a73e8);
   cursor: pointer;
@@ -1372,7 +1475,7 @@
   background: var(--bg-hover, #c2e7ff);
 }
 
-/* ─── 16. Directory Picker Modals & Overlays ──────────────────────────────── */
+/* ─── 18. Directory Picker Modals & Overlays ──────────────────────────────── */
 .skills-section__modal-overlay,
 .review-section__modal-overlay,
 .documents-section__modal-overlay {
@@ -1413,7 +1516,7 @@
 
 .skills-section__modal-title,
 .documents-section__modal-header h3 {
-  font-size: 14px;
+  font-size: var(--form-font-size-card-title, 14px);
   font-weight: 700;
   color: var(--text-primary, #1f1f1f);
   margin: 0;
@@ -1458,28 +1561,28 @@
 }
 
 .skills-section__emp-name {
-  font-size: 13px;
+  font-size: var(--form-font-size-input, 13px);
   font-weight: 600;
   color: var(--text-primary, #1f1f1f);
 }
 
 .skills-section__emp-sub {
-  font-size: 11px;
+  font-size: var(--form-font-size-hint, 11px);
   color: var(--text-secondary, #444746);
 }
 
-/* ─── 17. Helper Texts & Inline Links ────────────────────────────────────── */
+/* ─── 19. Helper Texts & Inline Links ────────────────────────────────────── */
 .personal-info__helper-text,
 .accounts-section__helper-text,
 .personal-info__postal-status {
-  font-size: 11px;
+  font-size: var(--form-font-size-hint, 11px);
   color: var(--text-muted, #747775);
   margin-top: 2px;
 }
 
 .personal-info__error-hint,
 .accounts-section__error-msg {
-  font-size: 11px;
+  font-size: var(--form-font-size-hint, 11px);
   color: var(--status-danger-fg, #ef4444);
   font-weight: 500;
   margin-top: 2px;
