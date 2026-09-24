@@ -1593,8 +1593,31 @@
 /* Review Cards Grid */
 .review-section__cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .review-section__cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.review-section__cards-grid > .review-section__card:last-child {
+  grid-column: 1 / -1;
+}
+
+.review-section__cards-grid > .review-section__card:last-child .review-section__repeatable-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .review-section__cards-grid > .review-section__card:last-child .review-section__repeatable-list {
+    grid-template-columns: 1fr;
+  }
 }
 
 .review-section__card-title-group {
@@ -1628,7 +1651,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 10px;
+  padding: 10px 14px;
   background: var(--bg-surface-secondary, #f0f4f9);
   border-radius: 8px;
   margin-bottom: 12px;
@@ -1664,7 +1687,8 @@
 .review-section__photo-meta {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  align-items: flex-start;
+  gap: 4px;
 }
 
 .review-section__person-name {
@@ -1735,28 +1759,35 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 8px 10px;
+  gap: 12px;
+  padding: 8px 12px;
   background: var(--bg-surface-secondary, #f0f4f9);
   border: 1px solid var(--border-subtle, #e7ebf0);
-  border-radius: 6px;
+  border-radius: 8px;
+  min-height: 48px;
+  box-sizing: border-box;
 }
 
 .review-section__repeatable-info {
+  flex: 1;
+  min-width: 0;
   font-size: var(--form-font-size-subtitle, 12px);
   color: var(--text-primary, #1f1f1f);
   line-height: 1.4;
+  word-break: break-word;
 }
 
 .review-section__mini-tag {
   font-size: 10px;
   font-weight: 700;
-  padding: 1px 6px;
+  padding: 2px 8px;
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   color: var(--bezent-btn-sec-text, #071e49);
   border-radius: 4px;
   margin-left: 6px;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
 }
 
 .review-section__small-muted {
@@ -1829,6 +1860,9 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
+  min-width: 130px;
+  justify-content: flex-end;
 }
 
 /* Final action bar */
