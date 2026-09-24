@@ -1,9 +1,19 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, beforeAll } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../../../../app/server/createApp.js';
+import { pingDatabase } from '../../../../db/connection.js';
 
 describe('HRMS Onboarding Active Case Stage & Status Lifecycle (PR2)', () => {
   const app = createApp();
+
+  beforeAll(async () => {
+    const connected = await pingDatabase();
+    if (!connected) {
+      throw new Error(
+        'MySQL database is unreachable. Start MySQL to run MySQL-backed integration tests.',
+      );
+    }
+  });
 
   // Reset general settings and stage configs to active defaults before tests
   beforeEach(async () => {

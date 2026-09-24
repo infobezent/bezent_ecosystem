@@ -1,9 +1,19 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../../../../app/server/createApp.js';
+import { pingDatabase } from '../../../../db/connection.js';
 
 describe('HRMS Onboarding & Organization API', () => {
   const app = createApp();
+
+  beforeAll(async () => {
+    const connected = await pingDatabase();
+    if (!connected) {
+      throw new Error(
+        'MySQL database is unreachable. Start MySQL to run MySQL-backed integration tests.',
+      );
+    }
+  });
 
   it('GET /api/v1/context returns centralized development context', async () => {
     const res = await request(app).get('/api/v1/context');

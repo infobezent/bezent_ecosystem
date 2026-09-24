@@ -2,11 +2,18 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../../../../../app/server/createApp.js';
 import { seedDatabase } from '../../../../../db/seed.js';
+import { pingDatabase } from '../../../../../db/connection.js';
 
 describe('HRMS Onboarding Settings API', () => {
   const app = createApp();
 
   beforeAll(async () => {
+    const connected = await pingDatabase();
+    if (!connected) {
+      throw new Error(
+        'MySQL database is unreachable. Start MySQL to run MySQL-backed integration tests.',
+      );
+    }
     await seedDatabase();
   });
 
