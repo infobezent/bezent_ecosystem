@@ -45,3 +45,10 @@ export class BadRequestError extends AppError {
     this.name = 'BadRequestError';
   }
 }
+
+export class DatabaseConnectionError extends AppError {
+  constructor(message = 'Database service is unavailable', code = 'DATABASE_UNAVAILABLE') {
+    super(message, 500, code);
+    this.name = 'DatabaseConnectionError';
+  }
+}
