@@ -128,9 +128,7 @@
 [data-theme='dark'] .bezent-table-container {
   background: var(--bg-card, #081b3a);
   border: 1px solid var(--table-border, rgba(56, 189, 248, 0.35));
-  box-shadow:
-    0 4px 20px rgba(2, 11, 28, 0.5),
-    0 0 1px rgba(56, 189, 248, 0.35);
+  box-shadow: none;
 }
 
 [data-theme='dark'] .bezent-table__head {

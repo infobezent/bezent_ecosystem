@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { BezentIcon, CompanionIcon, type BezentIconName } from '../../design-system/icons';
 import type { ShellRailItem } from './types';
-import { Badge, Tooltip } from '../../design-system/components';
+import { Tooltip } from '../../design-system/components';
 import './RightRail.css';
 
 export interface RightRailProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   isDarkTheme: boolean;
-  onToggleTheme: () => void;
+  onToggleTheme?: (e?: React.MouseEvent<HTMLButtonElement>) => void;
   /** Utility capability buttons, supplied by the host. */
   items: ShellRailItem[];
   activeItemId?: string;
@@ -39,14 +39,10 @@ export function RightRail({
   onAddon,
   onAI,
   onQuickCreate,
-  notificationCount,
-  notificationsOpen,
-  onNotificationsToggle,
   onAccountSettings,
 }: RightRailProps) {
   const [aiHovered, setAiHovered] = useState(false);
   const [createHovered, setCreateHovered] = useState(false);
-  const [notifHovered, setNotifHovered] = useState(false);
   const [settingsHovered, setSettingsHovered] = useState(false);
   const [addonHovered, setAddonHovered] = useState(false);
 
@@ -111,64 +107,18 @@ export function RightRail({
             <div className="right-rail__divider" aria-hidden="true" />
 
             <div className="right-rail__items">
-              {items.map((item) => (
-                <RailButton
-                  key={item.id}
-                  id={item.id}
-                  label={item.label}
-                  icon={item.icon}
-                  badge={item.badge}
-                  active={item.id === activeItemId}
-                  onClick={() => onItemSelect?.(item.id)}
-                />
-              ))}
-
-              <div className="right-rail__divider" aria-hidden="true" />
-
-              {/* Notifications */}
-              <div className="right-rail__anchor">
-                <button
-                  type="button"
-                  className={`bezent-right-rail-btn ${notificationsOpen ? 'is-active' : ''}`.trim()}
-                  aria-label="Notifications"
-                  data-notifications-toggle=""
-                  onClick={onNotificationsToggle}
-                  onMouseEnter={() => setNotifHovered(true)}
-                  onMouseLeave={() => setNotifHovered(false)}
-                >
-                  <BezentIcon
-                    name="notifications"
-                    size={20}
-                    color="var(--right-rail-icon-default, #444746)"
-                    strokeWidth={1.8}
+              <div className="right-rail__group">
+                {items.map((item) => (
+                  <RailButton
+                    key={item.id}
+                    id={item.id}
+                    label={item.label}
+                    icon={item.icon}
+                    badge={item.badge}
+                    active={item.id === activeItemId}
+                    onClick={() => onItemSelect?.(item.id)}
                   />
-                  {notificationCount !== undefined && notificationCount > 0 && (
-                    <span className="right-rail__badge">
-                      <Badge count={notificationCount} />
-                    </span>
-                  )}
-                </button>
-                {notifHovered && <Tooltip label="Notifications" direction="left" />}
-              </div>
-
-              {/* Settings */}
-              <div className="right-rail__anchor">
-                <button
-                  type="button"
-                  className="bezent-right-rail-btn"
-                  aria-label="Settings"
-                  onClick={onAccountSettings}
-                  onMouseEnter={() => setSettingsHovered(true)}
-                  onMouseLeave={() => setSettingsHovered(false)}
-                >
-                  <BezentIcon
-                    name="settings"
-                    size={20}
-                    color="var(--right-rail-icon-default, #444746)"
-                    strokeWidth={1.8}
-                  />
-                </button>
-                {settingsHovered && <Tooltip label="Settings" direction="left" />}
+                ))}
               </div>
 
               {onAddon && (
@@ -195,6 +145,24 @@ export function RightRail({
 
             <div className="right-rail__footer">
               <ThemeButton isDark={isDarkTheme} onToggle={onToggleTheme} />
+              <div className="right-rail__anchor">
+                <button
+                  type="button"
+                  className="bezent-right-rail-btn"
+                  aria-label="Settings"
+                  onClick={onAccountSettings}
+                  onMouseEnter={() => setSettingsHovered(true)}
+                  onMouseLeave={() => setSettingsHovered(false)}
+                >
+                  <BezentIcon
+                    name="settings"
+                    size={20}
+                    color="var(--right-rail-icon-default, #444746)"
+                    strokeWidth={1.8}
+                  />
+                </button>
+                {settingsHovered && <Tooltip label="Settings" direction="left" />}
+              </div>
               <button
                 type="button"
                 className="right-rail__collapse"
@@ -255,25 +223,41 @@ function RailButton({
   );
 }
 
-function ThemeButton({ isDark, onToggle }: { isDark: boolean; onToggle: () => void }) {
+function ThemeButton({
+  isDark,
+  onToggle,
+}: {
+  isDark: boolean;
+  onToggle?: (e?: React.MouseEvent<HTMLButtonElement>) => void;
+}) {
   const [hovered, setHovered] = useState(false);
+  const [isArcPulse, setIsArcPulse] = useState(false);
   const label = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setIsArcPulse(true);
+    setTimeout(() => setIsArcPulse(false), 850);
+    onToggle?.(e);
+  };
+
   return (
     <div className="right-rail__anchor">
       <button
         type="button"
-        className="right-rail__theme"
+        className={`right-rail__theme ${isArcPulse ? 'is-arc-pulse' : ''}`.trim()}
         aria-label={label}
-        onClick={onToggle}
+        onClick={handleClick}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        <BezentIcon
-          name={isDark ? 'sun' : 'moon'}
-          size={19}
-          color="currentColor"
-          strokeWidth={1.8}
-        />
+        <span className="right-rail__theme-icon-wrap">
+          <BezentIcon
+            name={isDark ? 'sun' : 'moon'}
+            size={19}
+            color="currentColor"
+            strokeWidth={1.8}
+          />
+        </span>
       </button>
       {hovered && <Tooltip label={label} direction="left" />}
     </div>
