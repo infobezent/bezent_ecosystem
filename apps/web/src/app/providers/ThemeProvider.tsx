@@ -156,7 +156,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       const nextResolved: ResolvedTheme = currentResolved === 'dark' ? 'light' : 'dark';
       const nextMode: ThemeMode = nextResolved;
 
-      // Respect prefers-reduced-motion: instant/standard 180ms fade without radial energy wave
+      // Respect prefers-reduced-motion: instant switch without radial energy wave
       const prefersReducedMotion =
         typeof window !== 'undefined' &&
         window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
@@ -191,7 +191,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
           : null;
 
       if (doc && typeof doc.startViewTransition === 'function') {
-        // Phase 1 (t=0ms): Mount overlay so button compresses & Arc Reactor core ignites visually
+        // Synchronously suppress CSS color transitions and mount the overlay
+        // in the same frame — zero pre-delay, zero stutter at the start.
+        if (typeof document !== 'undefined') {
+          document.documentElement.classList.add('is-theme-transitioning');
+        }
+
         setTransitionState({
           originX: x,
           originY: y,
@@ -199,44 +204,35 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
           isFallbackReveal: false,
         });
 
-        // Phase 2 (t=80ms): Suppress CSS color transitions globally so the
-        // View Transitions snapshot captures a pristine, fully-resolved target
-        // frame with zero intermediate interpolation fighting the clip-path reveal.
-        setTimeout(() => {
-          if (typeof document !== 'undefined') {
-            document.documentElement.classList.add('is-theme-transitioning');
-          }
-
-          let transition: { finished: Promise<void> } | null = null;
-          try {
-            transition = doc.startViewTransition(() => {
-              flushSync(() => {
-                setModeState(nextMode);
-                document.documentElement.setAttribute('data-theme', nextResolved);
-              });
-              try {
-                localStorage.setItem(STORAGE_KEY, nextMode);
-              } catch {
-                // Ignore write failures in restricted/incognito contexts.
-              }
+        let transition: { finished: Promise<void> } | null = null;
+        try {
+          transition = doc.startViewTransition(() => {
+            flushSync(() => {
+              setModeState(nextMode);
+              document.documentElement.setAttribute('data-theme', nextResolved);
             });
-          } catch {
-            // startViewTransition threw — graceful instant fallback
-            setModeState(nextMode);
-            if (typeof document !== 'undefined') {
-              document.documentElement.classList.remove('is-theme-transitioning');
-            }
-            return;
-          }
-
-          // Phase 3 (t≈800ms): Once the 720ms radial reveal fully settles,
-          // restore CSS color transitions so hover/focus states animate normally.
-          transition.finished.finally(() => {
-            if (typeof document !== 'undefined') {
-              document.documentElement.classList.remove('is-theme-transitioning');
+            try {
+              localStorage.setItem(STORAGE_KEY, nextMode);
+            } catch {
+              // Ignore write failures in restricted/incognito contexts.
             }
           });
-        }, 80);
+        } catch {
+          // startViewTransition threw — graceful instant fallback
+          setModeState(nextMode);
+          if (typeof document !== 'undefined') {
+            document.documentElement.classList.remove('is-theme-transitioning');
+          }
+          isTransitioningRef.current = false;
+          return;
+        }
+
+        // Restore CSS color transitions once the reveal fully settles
+        transition.finished.finally(() => {
+          if (typeof document !== 'undefined') {
+            document.documentElement.classList.remove('is-theme-transitioning');
+          }
+        });
       } else {
         // Fallback for browsers without View Transitions API
         setTransitionState({
@@ -256,7 +252,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
           } catch {
             // Ignore write failures in restricted/incognito contexts.
           }
-        }, 360);
+        }, 400);
       }
     },
     [mode, systemTheme, setMode],

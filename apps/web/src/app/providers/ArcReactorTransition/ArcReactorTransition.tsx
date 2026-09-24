@@ -63,9 +63,10 @@ export function ArcReactorTransition({
   onComplete,
 }: ArcReactorTransitionProps) {
   useEffect(() => {
+    // 820ms reveal + 160ms ring-3 stagger + 80ms settle = 1060ms
     const timer = setTimeout(() => {
       onComplete();
-    }, 850);
+    }, 1060);
 
     return () => clearTimeout(timer);
   }, [onComplete]);
