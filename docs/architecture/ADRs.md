@@ -161,9 +161,30 @@ maintenance.
 
 **Approval:** explicit, approved by the user per Article 4.
 
+<a id="adr-016"></a>
+
+### ADR-016 — No Silent In-Memory Persistence Fallbacks
+
+**Context:** Persistence repositories in backend domains previously contained fallback mechanisms that caught database connection errors and silently served or mutated data in in-memory maps or static fallback fixtures (e.g. `FALLBACK_MASTERS`, `inMemoryCases`, `memGeneral`). This allowed the API to start and respond with synthetic mock data even when the database was unconfigured, misconfigured, or unreachable, obscuring connection issues and causing non-deterministic state between application runs.
+
+**Decision:**
+
+1. All persistent business data operations must strictly target the configured MySQL database via Drizzle ORM.
+2. In-memory, mock, or silent persistence fallback stores in runtime repositories are prohibited.
+3. Database unavailability or unreachability must fail fast and explicitly by throwing `DatabaseConnectionError`, surfaced by the centralized error handler as HTTP `500 DATABASE_UNAVAILABLE`.
+
+**Consequences:**
+
+- Production-like behavior is deterministic across all environments; state cannot diverge into ephemeral memory.
+- Database misconfigurations, network outages, or unreachable database instances are visible immediately rather than masked.
+- Tests requiring persistence must execute against proper MySQL infrastructure rather than silently exercising memory fallbacks.
+- Zero hidden fallback data stores remain in runtime code paths.
+
+**Approval:** explicit, approved in PR #44 per Article 4.
+
 ## Recording a new ADR
 
-Adding ADR-015 and beyond follows the process defined in
+Adding ADR-017 and beyond follows the process defined in
 [AGENTS.md, Article 4](../../AGENTS.md#article-4--changing-this-stack):
 justification → ADR entry here → explicit approval → implementation, in
 that order.

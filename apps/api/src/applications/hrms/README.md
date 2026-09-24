@@ -3,36 +3,91 @@
 BEZENT's first **business application**: Complete HRMS + Employee
 Self-Service.
 
-No routes, services, or schema exist yet — this folder is the
-application's boundary/mount point only.
-
-## HRMS is a business application, not a module
+## HRMS is a Business Application, Not a Module
 
 `applications/hrms` is a top-level BEZENT **business application** (see
 [docs/architecture/README.md](../../../../docs/architecture/README.md)).
-Internally it is composed of **business modules/domains** (Attendance,
-Leave, Payroll, Recruitment, ...) — HRMS is not "a module that contains
-modules"; it is the application, and Attendance/Leave/Payroll/etc. are its
+Internally it is composed of **business modules/domains** (Organization,
+Onboarding, Leave, Attendance, Payroll, ...). HRMS is not "a module that contains
+modules"; it is the application, and Organization, Onboarding, Leave, etc. are its
 modules/domains. See
 [docs/architecture/APPLICATION-BOUNDARIES.md](../../../../docs/architecture/APPLICATION-BOUNDARIES.md).
 
-## Employee Self-Service is not a separate system
+## Employee Self-Service (ESS)
 
 Employee Self-Service (ESS) is a **permission-scoped experience within
 HRMS**, not a separate application and not a separate domain. Each HRMS
-domain below will eventually expose **both** an administrative experience
-and an employee self-service experience over the _same_ underlying data —
-never as duplicate applications or duplicate domains. See
-[docs/architecture/APPLICATION-BOUNDARIES.md](../../../../docs/architecture/APPLICATION-BOUNDARIES.md).
+domain exposes both an administrative experience and an employee self-service
+experience over the _same_ underlying data.
 
-## Future domains/modules (documented direction only, not created yet)
+## Implemented HRMS Domains (Current)
 
-Organization, Employees, Recruitment, Onboarding, Attendance, Shifts,
-Leave, Timesheets, Payroll, Performance, Learning, Career, Documents,
-Assets, Employee Requests, Reports, Settings.
+```
+applications/hrms/
+├── organization/
+│   ├── controller/
+│   ├── service/
+│   ├── repository/
+│   └── routes/
+├── onboarding/
+│   ├── controller/
+│   ├── service/
+│   ├── repository/
+│   ├── routes/
+│   ├── validation/
+│   └── types/
+└── settings/
+    └── onboarding/
+        ├── controller/
+        ├── service/
+        ├── repository/
+        ├── routes/
+        ├── validation/
+        └── types/
+```
 
-Each domain gets its own folder (controller/service/repository/validation/
-types/routes) **when its implementation actually begins**, not before.
+### Domain Responsibilities
+
+1. **`organization/`**
+   - Manages organization hierarchy masters: companies, departments, designations, and locations.
+   - Enforces tenant and company scoping across master lookups.
+
+2. **`onboarding/`**
+   - Handles the lifecycle of new hires and onboarding cases: case drafting, submission, stage progression, and case withdrawal.
+   - Maintains stage transition history and audit records.
+
+3. **`settings/onboarding/`**
+   - Manages company-specific onboarding configuration: general settings, stage pipelines, dynamic field configs, document requirements, checklist templates, and employee conversion rules.
+
+### Canonical Layer Responsibilities
+
+- **Controller (`controller/`):** Parses HTTP requests, extracts request context (`req.devContext`), delegates to validation, coordinates with the service layer, and writes standardized responses.
+- **Validation (`validation/`):** Zod schemas validating incoming request bodies and query parameters at the boundary.
+- **Service (`service/`):** Encapsulates business logic, state machines, domain rules, and multi-table transactions.
+- **Repository (`repository/`):** Performs data access via Drizzle ORM against MySQL, strictly enforcing `tenant_id` and `company_id` scoping.
+- **Routes (`routes/`):** Express router mounting domain endpoints under `/api/v1/hrms/...`.
+- **Types (`types/`):** TypeScript domain models and DTO type definitions.
+
+## Planned HRMS Domains (Not Yet Implemented)
+
+The following business modules are planned for subsequent implementation slices and are not yet built:
+
+- Employees (workforce directory and employment records)
+- Recruitment
+- Attendance
+- Shifts
+- Leave
+- Timesheets
+- Payroll
+- Performance
+- Learning
+- Career
+- Documents
+- Assets
+- Employee Requests
+- Reports
+
+Detailed business domain specifications will be maintained under `docs/modules/hrms/`.
 
 ## Dependencies
 
