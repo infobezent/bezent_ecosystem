@@ -1590,29 +1590,36 @@
   font-weight: 700;
 }
 
-/* Review Cards Masonry Flow — Eliminates all empty gaps */
+/* Review Cards Grid — Symmetrical 2-Column Grid */
 .review-section__cards-grid {
-  columns: 2 440px;
-  column-gap: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  align-items: stretch;
 }
 
 @media (max-width: 1024px) {
   .review-section__cards-grid {
-    columns: 1;
+    grid-template-columns: 1fr;
   }
 }
 
 .review-section__card {
-  break-inside: avoid;
-  page-break-inside: avoid;
-  margin-bottom: 16px;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-lg, 12px);
+  padding: 16px 18px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
+  height: 100%;
+  box-sizing: border-box;
 }
 
-.review-section__card--full-width {
-  column-span: all;
-  margin-bottom: 16px;
+.review-section__card--full-width,
+.review-section__cards-grid > .review-section__card:last-child {
+  grid-column: 1 / -1;
 }
 
 .review-section__documents-grid {
