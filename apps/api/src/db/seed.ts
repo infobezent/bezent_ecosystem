@@ -1,5 +1,6 @@
 import { getDb, isDatabaseConfigured } from './connection.js';
 import {
+  tenants,
   companies,
   departments,
   designations,
@@ -32,6 +33,18 @@ export async function seedDatabase() {
 
   const tenantId = 'tenant_demo_01';
   const companyId = 'comp_demo_01';
+
+  // 0. Tenant
+  const existingTenant = await db.select().from(tenants).where(eq(tenants.id, tenantId));
+
+  if (existingTenant.length === 0) {
+    console.log('[Seed] Inserting tenant...');
+    await db.insert(tenants).values({
+      id: tenantId,
+      name: 'BEZENT Demo Organization',
+      status: 'active',
+    });
+  }
 
   // 1. Company
   const existingCompany = await db.select().from(companies).where(eq(companies.id, companyId));

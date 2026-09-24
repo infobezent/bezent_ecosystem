@@ -11,6 +11,20 @@ import {
 } from 'drizzle-orm/mysql-core';
 
 /**
+ * Platform: Tenants
+ * Top-level customer/account and data-isolation boundary.
+ */
+export const tenants = mysqlTable('tenants', {
+  id: varchar('id', { length: 64 }).primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  status: mysqlEnum('status', ['active', 'inactive', 'suspended', 'archived'])
+    .default('active')
+    .notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+});
+
+/**
  * Organization Masters: Companies
  */
 export const companies = mysqlTable(
@@ -295,6 +309,9 @@ export const onboardingConversionSettings = mysqlTable(
     uniqueIndex('idx_onboarding_conv_tenant_company').on(table.tenantId, table.companyId),
   ],
 );
+
+export type Tenant = typeof tenants.$inferSelect;
+export type NewTenant = typeof tenants.$inferInsert;
 
 export type Company = typeof companies.$inferSelect;
 export type NewCompany = typeof companies.$inferInsert;
