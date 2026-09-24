@@ -83,6 +83,30 @@
   box-shadow: var(--shadow-workspace);
 }
 
+/* ── Workspace Variants ────────────────────────────────────────────── */
+
+.app-shell__workspace--default {
+  /* Retains default floating-card appearance */
+}
+
+/*
+ * Flush application workspace: occupies the full center grid area between
+ * TopNav, LeftSidebar, RightRail, and BottomBar without outer gutters,
+ * rounded corners, or card shadow. Flex column layout delegates internal
+ * scrolling to the active workspace content region.
+ */
+.app-shell__workspace--flush {
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 /* ── Dark Mode Ambient Illuminations & Workspace Glass Surface ─────── */
 
 [data-theme='dark'] .app-shell {
@@ -98,6 +122,11 @@
     0 12px 36px rgba(1, 8, 20, 0.7),
     0 0 24px rgba(22, 131, 255, 0.08),
     inset 0 1px 0 rgba(56, 189, 248, 0.2);
+}
+
+[data-theme='dark'] .app-shell__workspace--flush {
+  border: none;
+  box-shadow: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
