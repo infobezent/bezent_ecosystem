@@ -5,6 +5,7 @@ import { CalendarPage } from '../../platform/calendar';
 import { TasksPage } from '../../platform/tasks';
 import { ApprovalsPage } from '../../platform/approvals';
 import { NotesPage } from '../../platform/notes';
+import { EmployeeRegistrationPage } from '../../applications/hrms/onboarding';
 import { DevPlaceholderPage } from './DevPlaceholderPage';
 import { DesignSystemShowcase } from './DesignSystemShowcase';
 import { NotFoundPage } from './NotFoundPage';
@@ -18,10 +19,10 @@ const homePath = destinationPath(DEFAULT_APPLICATION.basePath, defaultDestinatio
 
 /**
  * Root router composition. Applications mount under ShellLayout, while the
- * four standalone utilities (Calendar, Tasks, Approvals, Notes) mount in their
- * own StandaloneUtilityLayout without application navigation bars.
+ * standalone utilities and Employee Registration mount in their own
+ * StandaloneUtilityLayout without application navigation bars.
  */
-const router = createBrowserRouter([
+export const appRoutes = [
   {
     element: <ShellLayout />,
     children: [
@@ -44,10 +45,27 @@ const router = createBrowserRouter([
       { path: '/tasks', element: <TasksPage /> },
       { path: '/approvals', element: <ApprovalsPage /> },
       { path: '/notes', element: <NotesPage /> },
+      {
+        path: '/hrms/administration/onboarding/registration',
+        element: <EmployeeRegistrationPage />,
+      },
+      {
+        path: '/hrms/administration/onboarding/registration/:caseId',
+        element: <EmployeeRegistrationPage />,
+      },
     ],
   },
-]);
+];
+
+let router: ReturnType<typeof createBrowserRouter> | undefined;
+
+export function getRouter() {
+  if (!router) {
+    router = createBrowserRouter(appRoutes);
+  }
+  return router;
+}
 
 export function AppRouter() {
-  return <RouterProvider router={router} />;
+  return <RouterProvider router={getRouter()} />;
 }

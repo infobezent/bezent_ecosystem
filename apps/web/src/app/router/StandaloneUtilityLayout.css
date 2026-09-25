@@ -315,3 +315,17 @@
   border-color: var(--border-default);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14);
 }
+
+/* ── Standalone Registration Workspace ───────────────────────────────── */
+.standalone-layout--registration {
+  background: var(--bg-surface);
+}
+
+.standalone-layout__main--registration {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: var(--bg-surface);
+}

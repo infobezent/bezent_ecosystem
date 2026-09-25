@@ -112,6 +112,15 @@ describe('HRMS Onboarding & Organization API', () => {
     const getRes = await request(app).get(`/api/v1/hrms/onboarding/new-hires/${created.id}`);
     expect(getRes.status).toBe(200);
     expect(getRes.body.data.id).toBe(created.id);
+
+    // 5. Verify candidate != employee invariant: NO employee record created
+    const empListRes = await request(app).get('/api/v1/hrms/employees');
+    expect(empListRes.status).toBe(200);
+    const empMatch = (empListRes.body.data || []).find(
+      (emp: { workEmail?: string; personalEmail?: string }) =>
+        emp.workEmail === payload.email || emp.personalEmail === payload.email,
+    );
+    expect(empMatch).toBeUndefined();
   });
 
   describe('Onboarding Case & Draft Lifecycle (PR1)', () => {

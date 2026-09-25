@@ -157,14 +157,12 @@ describe('HRMS Employee Administration Server-Side Pagination API & State', () =
     expect(capturedUrl).toContain('search=Arun');
   });
 
-  it('fetchNewHiresPaginated falls back to mock pagination on network failure', async () => {
+  it('fetchNewHiresPaginated throws on network failure and does not fall back to mock data', async () => {
     globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
 
-    const res = await fetchNewHiresPaginated({ page: 1, pageSize: 25 });
-    expect(res.data).toBeDefined();
-    expect(res.pagination).toBeDefined();
-    expect(res.pagination.pageSize).toBe(25);
-    expect(res.counts.all).toBeGreaterThanOrEqual(1);
+    await expect(fetchNewHiresPaginated({ page: 1, pageSize: 25 })).rejects.toThrow(
+      'Network error',
+    );
   });
 
   it('fetchNewHires backward compatibility helper returns array of items', async () => {

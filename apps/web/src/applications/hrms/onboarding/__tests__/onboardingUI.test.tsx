@@ -1,8 +1,10 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
 import { NewHireModal } from '../components/NewHireModal';
 import { OnboardingPage } from '../pages/OnboardingPage';
+import { StandaloneUtilityLayout } from '../../../../app/router/StandaloneUtilityLayout';
+import { appRoutes } from '../../../../app/router/AppRouter';
 import { hrmsRoutes } from '../../routes/hrmsRoutes';
 import type { OrganizationMasters } from '../api/onboardingApi';
 
@@ -22,7 +24,15 @@ const mockMasters: OrganizationMasters = {
   ],
 };
 
-describe('HRMS Onboarding UI Components', () => {
+describe('HRMS Onboarding UI Components & Pages', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('NewHireModal renders nothing when isOpen is false', () => {
     const html = renderToStaticMarkup(
       <NewHireModal
@@ -57,38 +67,98 @@ describe('HRMS Onboarding UI Components', () => {
     expect(html).toContain('Create New Hire');
   });
 
-  it('OnboardingPage renders header, add button, and filter tabs', () => {
+  it('OnboardingPage renders header, description, add button, and real metrics', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <OnboardingPage />
       </MemoryRouter>,
     );
 
+    // Header
     expect(html).toContain('Onboarding');
+    expect(html).toContain('Manage new hires from pre-joining through employee creation.');
     expect(html).toContain('Add New Hire');
+
+    // Real Summary Metrics (strictly accurate, omitting unsupported joining soon/attention required)
+    expect(html).toContain('Total New Hires');
+    expect(html).toContain('In Progress');
+    expect(html).toContain('Completed');
+
+    // Stage Filter Tabs
+    expect(html).toContain('All');
     expect(html).toContain('Preboarding');
     expect(html).toContain('Documents');
     expect(html).toContain('Completed');
+
+    // Search
     expect(html).toContain('Search by name, email, department...');
+
+    // No localStorage drafts or fake progress
+    expect(html).not.toContain('View Drafts');
+    expect(html).not.toContain('35%');
+    expect(html).not.toContain('60%');
+    expect(html).not.toContain('90%');
   });
 
-  it('hrmsRoutes routes /hrms/onboarding to OnboardingPage', () => {
+  it('hrmsRoutes routes administration/onboarding to OnboardingPage', () => {
     const basePathRoute = hrmsRoutes[0];
     expect(basePathRoute).toBeDefined();
 
-    const onboardingRoute = basePathRoute?.children?.find((r) => r.path === 'onboarding');
+    const onboardingRoute = basePathRoute?.children?.find(
+      (r) => r.path === 'administration/onboarding',
+    );
     expect(onboardingRoute).toBeDefined();
     expect(onboardingRoute?.element).toBeDefined();
 
-    // Render the route element to verify it renders the real OnboardingPage
     const html = renderToStaticMarkup(
       <MemoryRouter>{onboardingRoute!.element as React.ReactElement}</MemoryRouter>,
     );
     expect(html).toContain('Onboarding');
+    expect(html).toContain('Manage new hires from pre-joining through employee creation.');
     expect(html).toContain('Add New Hire');
+    expect(html).toContain('New Hires');
   });
 
-  it('hrmsRoutes routes administration/employee-administration to Employee Administration, not the onboarding listing', () => {
+  it('routes /hrms/administration/onboarding/registration to StandaloneUtilityLayout with EmployeeRegistrationPage', () => {
+    const standaloneRoute = appRoutes.find(
+      (r) => r.element && (r.element as React.ReactElement).type === StandaloneUtilityLayout,
+    );
+    expect(standaloneRoute).toBeDefined();
+    const registrationRoute = standaloneRoute?.children?.find(
+      (r) => r.path === '/hrms/administration/onboarding/registration',
+    );
+    expect(registrationRoute).toBeDefined();
+    expect(registrationRoute?.element).toBeDefined();
+
+    const html = renderToStaticMarkup(
+      <MemoryRouter>{registrationRoute!.element as React.ReactElement}</MemoryRouter>,
+    );
+    // Dedicated flush workspace structure & tokens — no padded Page wrapper
+    expect(html).not.toContain('bezent-page--max-width');
+    expect(html).toContain('bezent-page-header');
+    expect(html).toContain('bezent-breadcrumb');
+    expect(html).toContain('Employee Registration');
+    expect(html).toContain('Add and manage new employee information');
+
+    // 10 JourneyNav Steps remain completely frozen and intact
+    expect(html).toContain('General');
+    expect(html).toContain('Personal Information');
+    expect(html).toContain('Administration');
+    expect(html).toContain('Skills');
+    expect(html).toContain('Emergency Contact');
+    expect(html).toContain('Accounts');
+    expect(html).toContain('Online Access');
+    expect(html).toContain('Working Hours');
+    expect(html).toContain('Documents');
+    expect(html).toContain('Review');
+
+    // Action buttons
+    expect(html).toContain('Save Draft');
+    expect(html).toContain('Cancel');
+    expect(html).toContain('Save &amp; Next →');
+  });
+
+  it('hrmsRoutes routes administration/employee-administration to Employee Administration', () => {
     const basePathRoute = hrmsRoutes[0];
     const empAdminRoute = basePathRoute?.children?.find(
       (r) => r.path === 'administration/employee-administration',
@@ -101,55 +171,7 @@ describe('HRMS Onboarding UI Components', () => {
     );
     expect(html).toContain('Employee Administration');
     expect(html).toContain('New Employee Action');
-    // Onboarding (new hire → employee conversion) lives on its own route.
-    expect(html).not.toContain('View Drafts');
     expect(html).not.toContain('Add New Hire');
-    expect(html).not.toContain('Preboarding');
-  });
-
-  it('hrmsRoutes routes administration/onboarding directly to Employee Registration flush workspace', () => {
-    const basePathRoute = hrmsRoutes[0];
-    const onboardingFormRoute = basePathRoute?.children?.find(
-      (r) => r.path === 'administration/onboarding',
-    );
-    expect(onboardingFormRoute).toBeDefined();
-    expect(onboardingFormRoute?.element).toBeDefined();
-    expect(onboardingFormRoute?.handle).toEqual({ workspaceVariant: 'flush' });
-
-    const html = renderToStaticMarkup(
-      <MemoryRouter>{onboardingFormRoute!.element as React.ReactElement}</MemoryRouter>,
-    );
-    // Dedicated flush workspace structure & tokens — no padded Page wrapper
-    expect(html).not.toContain('bezent-page--max-width');
-    expect(html).not.toContain('employee-registration-page');
-    expect(html).toContain('bezent-page-header');
-    expect(html).toContain('bezent-breadcrumb');
-    expect(html).toContain('employee-registration-workspace-content');
-    expect(html).toContain('employee-registration-workspace-actions');
-    expect(html).toContain('bezent-form-grid--layout-horizontal');
-    expect(html).toContain('bezent-form-field--horizontal');
-    expect(html).toContain('Employee Registration');
-    expect(html).toContain('Add and manage new employee information');
-    // Modal-specific presentation must NOT be present on page root
-    expect(html).not.toContain('bezent-modal--workspace');
-    expect(html).not.toContain('bezent-modal__close-btn');
-    // Tabs
-    expect(html).toContain('General');
-    expect(html).toContain('Personal Information');
-    expect(html).toContain('Administration');
-    expect(html).toContain('Skills');
-    expect(html).toContain('Emergency Contact');
-    expect(html).toContain('Accounts');
-    expect(html).toContain('Online Access');
-    expect(html).toContain('Working Hours');
-    expect(html).toContain('Documents');
-    expect(html).toContain('Review');
-    // Form body
-    expect(html).toContain('General Information');
-    // Persistent footer toolbar actions
-    expect(html).toContain('Save Draft');
-    expect(html).toContain('Cancel');
-    expect(html).toContain('Save &amp; Next →');
   });
 
   it('hrmsRoutes routes administration/documents to Documents destination', () => {
