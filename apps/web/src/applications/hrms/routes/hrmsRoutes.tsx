@@ -3,6 +3,7 @@ import { hrmsNavigation } from '../navigation';
 import { ModulePlaceholder } from '../pages/ModulePlaceholder';
 import { OnboardingPage } from '../onboarding';
 import { EmployeeAdministrationPage } from '../employee-administration';
+import { DocumentsPage } from '../documents';
 import { EMPLOYEES_PATH, EmployeeDirectoryPage, EmployeeProfilePage } from '../employees';
 import { SettingsPage } from '../settings';
 import { destinationPath } from '../../../shared/utils/navigation';
@@ -20,7 +21,7 @@ const APPLICATION = 'HRMS';
  * - employees -> canonical Employee Directory; employees/:employeeId -> canonical Employee Profile
  * - employee-administration -> Employee Administration action queue (employment actions on existing employees)
  * - onboarding -> Direct Employee Registration form workspace
- * - documents -> Documents destination placeholder
+ * - documents -> Documents main page (canonical employee documents)
  *
  * Backward-compatible aliases ensure legacy `/hrms/onboarding` and `/hrms/administrative` deep links resolve.
  */
@@ -67,11 +68,7 @@ export const hrmsRoutes: RouteObject[] = [
               ) : isAdministration && child.id === 'onboarding' ? (
                 <OnboardingPage title="Onboarding" />
               ) : isAdministration && child.id === 'documents' ? (
-                <ModulePlaceholder
-                  application={APPLICATION}
-                  destinationId="documents"
-                  title="Documents"
-                />
+                <DocumentsPage />
               ) : isSettings ? (
                 <SettingsPage />
               ) : (
