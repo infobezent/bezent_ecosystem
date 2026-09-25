@@ -295,7 +295,9 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
           ) : cases.length === 0 ? (
             <EmptyState
               variant="onboarding"
-              title={searchQuery || activeTab !== 'all' ? 'No matching new hires' : 'No New Hires Found'}
+              title={
+                searchQuery || activeTab !== 'all' ? 'No matching new hires' : 'No New Hires Found'
+              }
               description={
                 searchQuery || activeTab !== 'all'
                   ? 'No candidate records match your current filter criteria. Try adjusting your search or tab filter.'

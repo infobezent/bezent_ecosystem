@@ -206,7 +206,12 @@ describe('Onboarding Main Page Architecture & Components', () => {
         });
       });
 
-      const res = await fetchNewHiresPaginated({ page: 1, pageSize: 25, stage: 'preboarding', search: 'Arun' });
+      const res = await fetchNewHiresPaginated({
+        page: 1,
+        pageSize: 25,
+        stage: 'preboarding',
+        search: 'Arun',
+      });
 
       expect(requestedUrl).toContain('/hrms/onboarding/new-hires');
       expect(requestedUrl).toContain('page=1');
