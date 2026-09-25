@@ -128,7 +128,7 @@ export function EmployeeDirectoryPage() {
       <PageHeader
         eyebrow="HRMS · Administration"
         title="Employees"
-        subtitle="View and manage employee records across your organization."
+        subtitle="Find employees and view their employment information."
       />
 
       <Toolbar

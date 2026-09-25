@@ -1,3 +1,5 @@
+export type SourceOfHire =
+  'direct_applicant' | 'referral' | 'agency' | 'campus' | 'linkedin' | 'other';
 export type EmploymentType = 'full_time' | 'part_time' | 'contract' | 'intern';
 export type EmploymentStatus =
   'active' | 'probation' | 'notice' | 'terminated' | 'suspended' | 'resigned';
@@ -16,6 +18,9 @@ export interface CreateEmployeeDto {
   joiningDate: string; // YYYY-MM-DD
   confirmedJoiningDate?: string | null; // YYYY-MM-DD
   probationEndDate?: string | null; // YYYY-MM-DD
+  sourceOfHire?: SourceOfHire | null;
+  noticePeriodDays?: number | null;
+  contractEndDate?: string | null; // YYYY-MM-DD
   employmentType?: EmploymentType;
   employmentStatus?: EmploymentStatus;
 }
@@ -61,6 +66,9 @@ export interface EmployeeListItem {
   probationEndDate: string | null;
   confirmationDate: string | null;
   lastWorkingDate: string | null;
+  sourceOfHire: SourceOfHire | null;
+  noticePeriodDays: number | null;
+  contractEndDate: string | null;
   employmentType: EmploymentType;
   employmentStatus: EmploymentStatus;
   createdAt: Date;

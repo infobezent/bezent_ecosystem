@@ -5,10 +5,20 @@ import type {
   ListEmployeesParams,
   EmploymentType,
   EmploymentStatus,
+  SourceOfHire,
 } from '../types/employee.types.js';
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+export const VALID_SOURCES_OF_HIRE: SourceOfHire[] = [
+  'direct_applicant',
+  'referral',
+  'agency',
+  'campus',
+  'linkedin',
+  'other',
+];
+
+export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 export const VALID_EMPLOYMENT_TYPES: EmploymentType[] = [
   'full_time',
   'part_time',
@@ -187,6 +197,25 @@ export function validateCreateEmployee(input: unknown): CreateEmployeeDto {
   const reportingManagerError = checkOptionalId(data.reportingManagerId, 'Reporting manager ID');
   if (reportingManagerError) errors.reportingManagerId = reportingManagerError;
 
+  if (
+    data.sourceOfHire !== undefined &&
+    data.sourceOfHire !== null &&
+    data.sourceOfHire !== '' &&
+    !VALID_SOURCES_OF_HIRE.includes(data.sourceOfHire as SourceOfHire)
+  ) {
+    errors.sourceOfHire = `Source of hire must be one of: ${VALID_SOURCES_OF_HIRE.join(', ')}`;
+  }
+
+  if (data.noticePeriodDays !== undefined && data.noticePeriodDays !== null) {
+    const days = data.noticePeriodDays;
+    if (typeof days !== 'number' || !Number.isInteger(days) || days < 0 || days > 365) {
+      errors.noticePeriodDays = 'Notice period must be a whole number of days between 0 and 365';
+    }
+  }
+
+  const contractEndDateError = checkOptionalDate(data.contractEndDate, 'Contract end date');
+  if (contractEndDateError) errors.contractEndDate = contractEndDateError;
+
   if (Object.keys(errors).length > 0) {
     throw new ValidationError('Validation failed for employee creation', errors);
   }
@@ -207,6 +236,9 @@ export function validateCreateEmployee(input: unknown): CreateEmployeeDto {
       ? (data.confirmedJoiningDate as string).trim()
       : null,
     probationEndDate: normalizeOptional(data.probationEndDate),
+    sourceOfHire: (normalizeOptional(data.sourceOfHire) as SourceOfHire | null) ?? null,
+    noticePeriodDays: typeof data.noticePeriodDays === 'number' ? data.noticePeriodDays : null,
+    contractEndDate: normalizeOptional(data.contractEndDate),
     employmentType: (data.employmentType as EmploymentType) ?? 'full_time',
     employmentStatus: (data.employmentStatus as EmploymentStatus) ?? 'probation',
   };

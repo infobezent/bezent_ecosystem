@@ -409,6 +409,17 @@ export const employees = mysqlTable(
     probationEndDate: varchar('probation_end_date', { length: 10 }),
     confirmationDate: varchar('confirmation_date', { length: 10 }),
     lastWorkingDate: varchar('last_working_date', { length: 10 }),
+    // Employment terms captured at hire (Registration → General)
+    sourceOfHire: mysqlEnum('source_of_hire', [
+      'direct_applicant',
+      'referral',
+      'agency',
+      'campus',
+      'linkedin',
+      'other',
+    ]),
+    noticePeriodDays: int('notice_period_days'),
+    contractEndDate: varchar('contract_end_date', { length: 10 }),
     employmentType: mysqlEnum('employment_type', ['full_time', 'part_time', 'contract', 'intern'])
       .default('full_time')
       .notNull(),
@@ -443,6 +454,217 @@ export const employees = mysqlTable(
 
 export type Employee = typeof employees.$inferSelect;
 export type NewEmployee = typeof employees.$inferInsert;
+
+/*
+ * HRMS Domain: Employee record details (canonical, employee-owned).
+ * Every row is tenant/company scoped and belongs to exactly one employee.
+ * One-to-one details are keyed by employee_id; repeatable records have their
+ * own id. These hold the employee's CURRENT HR record — not a snapshot of the
+ * onboarding registration form.
+ */
+
+/** Personal details and personal contact/address (one per employee). */
+export const employeePersonalDetails = mysqlTable(
+  'employee_personal_details',
+  {
+    employeeId: varchar('employee_id', { length: 64 })
+      .primaryKey()
+      .references(() => employees.id),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    middleName: varchar('middle_name', { length: 100 }),
+    preferredName: varchar('preferred_name', { length: 100 }),
+    gender: varchar('gender', { length: 50 }),
+    dateOfBirth: varchar('date_of_birth', { length: 10 }),
+    maritalStatus: varchar('marital_status', { length: 50 }),
+    bloodGroup: varchar('blood_group', { length: 10 }),
+    nationality: varchar('nationality', { length: 100 }),
+    nativeLanguage: varchar('native_language', { length: 100 }),
+    fatherName: varchar('father_name', { length: 200 }),
+    guardianName: varchar('guardian_name', { length: 200 }),
+    personalEmail: varchar('personal_email', { length: 255 }),
+    homePhone: varchar('home_phone', { length: 50 }),
+    businessPhone: varchar('business_phone', { length: 50 }),
+    workPhone: varchar('work_phone', { length: 50 }),
+    addressStreet: varchar('address_street', { length: 255 }),
+    addressCity: varchar('address_city', { length: 100 }),
+    addressDistrict: varchar('address_district', { length: 100 }),
+    addressState: varchar('address_state', { length: 100 }),
+    addressPostalCode: varchar('address_postal_code', { length: 20 }),
+    addressCountry: varchar('address_country', { length: 100 }),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [index('idx_emp_personal_tenant_company').on(table.tenantId, table.companyId)],
+);
+
+/** Family members (repeatable). */
+export const employeeFamilyMembers = mysqlTable(
+  'employee_family_members',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    employeeId: varchar('employee_id', { length: 64 })
+      .notNull()
+      .references(() => employees.id),
+    name: varchar('name', { length: 200 }).notNull(),
+    relationship: varchar('relationship', { length: 50 }).notNull(),
+    dateOfBirth: varchar('date_of_birth', { length: 10 }),
+    phone: varchar('phone', { length: 50 }),
+    sortOrder: int('sort_order').default(0).notNull(),
+  },
+  (table) => [
+    index('idx_emp_family_tenant_company').on(table.tenantId, table.companyId),
+    index('idx_emp_family_employee').on(table.employeeId),
+  ],
+);
+
+/** Nominees (repeatable; shares total at most 100%). */
+export const employeeNominees = mysqlTable(
+  'employee_nominees',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    employeeId: varchar('employee_id', { length: 64 })
+      .notNull()
+      .references(() => employees.id),
+    name: varchar('name', { length: 200 }).notNull(),
+    relationship: varchar('relationship', { length: 50 }).notNull(),
+    sharePercentage: int('share_percentage').notNull(),
+    sortOrder: int('sort_order').default(0).notNull(),
+  },
+  (table) => [
+    index('idx_emp_nominee_tenant_company').on(table.tenantId, table.companyId),
+    index('idx_emp_nominee_employee').on(table.employeeId),
+  ],
+);
+
+/** Emergency contacts (primary and optional secondary). */
+export const employeeEmergencyContacts = mysqlTable(
+  'employee_emergency_contacts',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    employeeId: varchar('employee_id', { length: 64 })
+      .notNull()
+      .references(() => employees.id),
+    priority: mysqlEnum('priority', ['primary', 'secondary']).notNull(),
+    name: varchar('name', { length: 200 }).notNull(),
+    relationship: varchar('relationship', { length: 50 }).notNull(),
+    phone: varchar('phone', { length: 50 }).notNull(),
+    email: varchar('email', { length: 255 }),
+    address: varchar('address', { length: 500 }),
+    isPrivate: boolean('is_private').default(false).notNull(),
+  },
+  (table) => [
+    index('idx_emp_emergency_tenant_company').on(table.tenantId, table.companyId),
+    uniqueIndex('idx_emp_emergency_employee_priority').on(table.employeeId, table.priority),
+  ],
+);
+
+/** Salary bank account (one per employee). Account numbers are masked in API responses. */
+export const employeeBankAccounts = mysqlTable(
+  'employee_bank_accounts',
+  {
+    employeeId: varchar('employee_id', { length: 64 })
+      .primaryKey()
+      .references(() => employees.id),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    accountHolderName: varchar('account_holder_name', { length: 200 }).notNull(),
+    accountNumber: varchar('account_number', { length: 34 }).notNull(),
+    ifscCode: varchar('ifsc_code', { length: 11 }).notNull(),
+    bankName: varchar('bank_name', { length: 200 }).notNull(),
+    branchName: varchar('branch_name', { length: 200 }),
+    bankLocation: varchar('bank_location', { length: 200 }),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [index('idx_emp_bank_tenant_company').on(table.tenantId, table.companyId)],
+);
+
+/** Skills (repeatable). Examiner/verifier/mentor are employees of the same company. */
+export const employeeSkills = mysqlTable(
+  'employee_skills',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    employeeId: varchar('employee_id', { length: 64 })
+      .notNull()
+      .references(() => employees.id),
+    skillName: varchar('skill_name', { length: 200 }).notNull(),
+    skillType: varchar('skill_type', { length: 50 }).notNull(),
+    proficiency: mysqlEnum('proficiency', [
+      'Beginner',
+      'Intermediate',
+      'Advanced',
+      'Expert',
+    ]).notNull(),
+    level: varchar('level', { length: 50 }),
+    assessedOn: varchar('assessed_on', { length: 10 }),
+    yearsOfExperience: int('years_of_experience'),
+    examinerEmployeeId: varchar('examiner_employee_id', { length: 64 }).references(
+      (): AnyMySqlColumn => employees.id,
+    ),
+    verifiedByEmployeeId: varchar('verified_by_employee_id', { length: 64 }).references(
+      (): AnyMySqlColumn => employees.id,
+    ),
+    mentorEmployeeId: varchar('mentor_employee_id', { length: 64 }).references(
+      (): AnyMySqlColumn => employees.id,
+    ),
+    sortOrder: int('sort_order').default(0).notNull(),
+  },
+  (table) => [
+    index('idx_emp_skill_tenant_company').on(table.tenantId, table.companyId),
+    index('idx_emp_skill_employee').on(table.employeeId),
+  ],
+);
+
+/** Assigned working hours (one per employee; Registration → Working Hours). */
+export const employeeWorkSchedules = mysqlTable(
+  'employee_work_schedules',
+  {
+    employeeId: varchar('employee_id', { length: 64 })
+      .primaryKey()
+      .references(() => employees.id),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    workingCalendar: varchar('working_calendar', { length: 100 }),
+    workSchedule: varchar('work_schedule', { length: 100 }),
+    workingDays: json('working_days').$type<string[]>().notNull(),
+    startTime: varchar('start_time', { length: 5 }).notNull(),
+    endTime: varchar('end_time', { length: 5 }).notNull(),
+    breakMinutes: int('break_minutes').default(0).notNull(),
+    lunchMinutes: int('lunch_minutes').default(0).notNull(),
+    timeZone: varchar('time_zone', { length: 64 }),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [index('idx_emp_work_tenant_company').on(table.tenantId, table.companyId)],
+);
+
+export type EmployeePersonalDetails = typeof employeePersonalDetails.$inferSelect;
+export type EmployeeFamilyMember = typeof employeeFamilyMembers.$inferSelect;
+export type EmployeeNominee = typeof employeeNominees.$inferSelect;
+export type EmployeeEmergencyContact = typeof employeeEmergencyContacts.$inferSelect;
+export type EmployeeBankAccount = typeof employeeBankAccounts.$inferSelect;
+export type EmployeeSkill = typeof employeeSkills.$inferSelect;
+export type EmployeeWorkSchedule = typeof employeeWorkSchedules.$inferSelect;
 
 /**
  * HRMS Domain: Employee Administration — Employee Actions
