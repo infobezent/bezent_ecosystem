@@ -727,7 +727,7 @@ export function EmployeeRegistration({
   return (
     <>
       {/* Region A & B: Workspace Header & Persistent JourneyNav */}
-      <div className="bezent-modal__header bezent-modal__header--with-bottom">
+      <div className="bezent-modal__header bezent-modal__header--brand bezent-modal__header--with-bottom">
         <PageHeader
           title="Employee Registration"
           subtitle="Add and manage new employee information"
