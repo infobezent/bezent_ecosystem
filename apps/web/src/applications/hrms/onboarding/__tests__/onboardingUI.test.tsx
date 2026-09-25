@@ -88,7 +88,7 @@ describe('HRMS Onboarding UI Components', () => {
     expect(html).toContain('Add New Hire');
   });
 
-  it('hrmsRoutes routes administration/employee-administration to candidate listing with Employee Administration', () => {
+  it('hrmsRoutes routes administration/employee-administration to Employee Administration, not the onboarding listing', () => {
     const basePathRoute = hrmsRoutes[0];
     const empAdminRoute = basePathRoute?.children?.find(
       (r) => r.path === 'administration/employee-administration',
@@ -100,13 +100,11 @@ describe('HRMS Onboarding UI Components', () => {
       <MemoryRouter>{empAdminRoute!.element as React.ReactElement}</MemoryRouter>,
     );
     expect(html).toContain('Employee Administration');
-    expect(html).toContain('Manage employee administration, new hires, and employment records.');
-    expect(html).toContain('View Drafts');
-    expect(html).toContain('Add New Hire');
-    expect(html).toContain('Preboarding');
-    expect(html).toContain('Documents');
-    expect(html).toContain('Completed');
-    expect(html).toContain('Search employees...');
+    expect(html).toContain('New Employee Action');
+    // Onboarding (new hire → employee conversion) lives on its own route.
+    expect(html).not.toContain('View Drafts');
+    expect(html).not.toContain('Add New Hire');
+    expect(html).not.toContain('Preboarding');
   });
 
   it('hrmsRoutes routes administration/onboarding directly to Employee Registration flush workspace', () => {

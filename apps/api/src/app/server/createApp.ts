@@ -8,6 +8,8 @@ import { contextRouter, devContextMiddleware } from '../../platform/context/devC
 import { organizationRouter } from '../../applications/hrms/organization/routes/organization.route.js';
 import { onboardingRouter } from '../../applications/hrms/onboarding/routes/onboarding.route.js';
 import { onboardingSettingsRouter } from '../../applications/hrms/settings/onboarding/routes/settings.route.js';
+import { employeeRouter } from '../../applications/hrms/employees/routes/employee.route.js';
+import { employeeActionRouter } from '../../applications/hrms/employee-administration/routes/employeeAction.route.js';
 
 /**
  * Builds the Express application. Kept separate from `main.ts` so it can be
@@ -31,6 +33,8 @@ export function createApp(): Express {
   app.use('/api/v1', organizationRouter);
   app.use('/api/v1', onboardingRouter);
   app.use('/api/v1', onboardingSettingsRouter);
+  app.use('/api/v1', employeeRouter);
+  app.use('/api/v1', employeeActionRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
