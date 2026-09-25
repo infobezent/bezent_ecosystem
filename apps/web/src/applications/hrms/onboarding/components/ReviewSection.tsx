@@ -1126,7 +1126,7 @@ export function ReviewSection({
         </div>
 
         {/* 9. DOCUMENTS */}
-        <div className="review-section__card review-section__card--full-width">
+        <div className="review-section__card">
           <div className="review-section__card-header">
             <div className="review-section__card-title-group">
               <span className="review-section__card-icon">📁</span>
@@ -1166,13 +1166,13 @@ export function ReviewSection({
                 File: {data.documents.passportPhoto.fileName || 'Not Uploaded'}
               </span>
               <span className="review-section__mini-tag">
-                ● {data.documents.passportPhoto.status}
+                {data.documents.passportPhoto.status}
               </span>
             </div>
           </div>
 
-          {/* Document Items Grid */}
-          <div className="review-section__documents-grid">
+          {/* Document Items List */}
+          <div className="review-section__repeatable-list">
             {data.documents.items.map((doc) => {
               if (
                 !data.documents.isExperiencedHire &&
@@ -1183,14 +1183,12 @@ export function ReviewSection({
               return (
                 <div key={doc.id} className="review-section__repeatable-item">
                   <div className="review-section__repeatable-info">
-                    <div className="review-section__doc-header-line">
-                      <strong className="review-section__doc-title">{doc.name}</strong>
-                      <span className="review-section__doc-category-badge">{doc.category}</span>
-                    </div>
-                    <div className="review-section__small-muted">
-                      Doc #: {doc.docNumber || 'N/A'} • File: {doc.fileName || 'No File'}{' '}
+                    <strong>{doc.name}</strong> ({doc.category})
+                    <br />
+                    <span className="review-section__small-muted">
+                      Doc #: {doc.docNumber || 'N/A'} | File: {doc.fileName || 'No File'}{' '}
                       {doc.fileSizeFormatted ? `(${doc.fileSizeFormatted})` : ''}
-                    </div>
+                    </span>
                   </div>
                   <div className="review-section__doc-right">
                     <span

@@ -1,0 +1,125 @@
+/*
+ * BEZENT EditorialHeader Primitive — High-End Editorial Chapter Header.
+ * Strict Semantic Token Foundation (zero inline CSS).
+ */
+
+.bezent-editorial-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 16px);
+  width: 100%;
+  padding-bottom: var(--space-2, 8px);
+}
+
+.bezent-editorial-header__main {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-5, 20px);
+  width: 100%;
+}
+
+/* ─── Chapter Numeral Column ─────────────────────────────────────────── */
+.bezent-editorial-header__chapter-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 58px;
+  padding: 8px 12px;
+  background: var(--search-bg, #eaf1fb);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--card-radius, 12px);
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(4, 30, 73, 0.04);
+}
+
+.bezent-editorial-header__numeral {
+  font-family: var(--font-family-base, inherit);
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--brand-primary, #041e49);
+  letter-spacing: -0.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.bezent-editorial-header__numeral-sub {
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--text-muted, #747775);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+
+/* ─── Content Area ───────────────────────────────────────────────────── */
+.bezent-editorial-header__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1, 4px);
+  flex: 1;
+}
+
+.bezent-editorial-header__kicker {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--accent-interactive, #1a73e8);
+}
+
+.bezent-editorial-header__title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 12px);
+  flex-wrap: wrap;
+}
+
+.bezent-editorial-header__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary, #1f1f1f);
+  letter-spacing: -0.3px;
+  line-height: 1.25;
+}
+
+.bezent-editorial-header__desc {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary, #444746);
+  line-height: 1.45;
+  max-width: 680px;
+}
+
+.bezent-editorial-header__badge {
+  display: inline-flex;
+  align-items: center;
+}
+
+.bezent-editorial-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* ─── Architectural Accent Rule ──────────────────────────────────────── */
+.bezent-editorial-header__rule {
+  position: relative;
+  width: 100%;
+  height: 1px;
+  background: var(--border-subtle, #e7ebf0);
+  margin-top: var(--space-1, 4px);
+}
+
+.bezent-editorial-header__rule-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 56px;
+  height: 2px;
+  background: var(--brand-primary, #041e49);
+  border-radius: 2px;
+}

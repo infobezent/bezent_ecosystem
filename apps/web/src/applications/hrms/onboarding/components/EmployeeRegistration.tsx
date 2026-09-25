@@ -4,7 +4,8 @@ import {
   Card,
   Input,
   Select,
-  Tabs,
+  JourneyNav,
+  EditorialHeader,
   Toolbar,
   Actions,
   Stack,
@@ -38,6 +39,98 @@ export interface RegistrationSection {
   id: RegistrationSectionId;
   label: string;
 }
+
+export interface RegistrationChapterMeta {
+  id: RegistrationSectionId;
+  stepNumber: string;
+  label: string;
+  title: string;
+  description: string;
+  kicker: string;
+}
+
+export const REGISTRATION_CHAPTERS: readonly RegistrationChapterMeta[] = [
+  {
+    id: 'general',
+    stepNumber: '01',
+    label: 'General',
+    title: 'GENERAL INFORMATION',
+    description: 'Core identity, organizational placement, and employment classification details',
+    kicker: 'CHAPTER // 01',
+  },
+  {
+    id: 'personal',
+    stepNumber: '02',
+    label: 'Personal Information',
+    title: 'PERSONAL INFORMATION',
+    description: 'Legal identity, demographics, contact details, permanent residence, and family profile',
+    kicker: 'CHAPTER // 02',
+  },
+  {
+    id: 'onboarding',
+    stepNumber: '03',
+    label: 'Administration',
+    title: 'ADMINISTRATION & WORKFLOW',
+    description: 'Pre-boarding setup, compliance checklist items, and hardware/asset provisioning',
+    kicker: 'CHAPTER // 03',
+  },
+  {
+    id: 'skills',
+    stepNumber: '04',
+    label: 'Skills',
+    title: 'SKILLS & COMPETENCY PROFILE',
+    description: 'Technical proficiencies, competency evaluations, certifications, and assigned mentors',
+    kicker: 'CHAPTER // 04',
+  },
+  {
+    id: 'emergency',
+    stepNumber: '05',
+    label: 'Emergency Contact',
+    title: 'EMERGENCY CONTACT DETAILS',
+    description: 'Primary and secondary emergency contacts, relationships, and emergency protocols',
+    kicker: 'CHAPTER // 05',
+  },
+  {
+    id: 'accounts',
+    stepNumber: '06',
+    label: 'Accounts',
+    title: 'STATUTORY & BANK ACCOUNTS',
+    description: 'Disbursement bank accounts, PF/ESI numbers, tax classification, and payroll setup',
+    kicker: 'CHAPTER // 06',
+  },
+  {
+    id: 'online_access',
+    stepNumber: '07',
+    label: 'Online Access',
+    title: 'ONLINE ACCESS & CREDENTIALS',
+    description: 'Single sign-on authorization, enterprise email allocation, and portal permissions',
+    kicker: 'CHAPTER // 07',
+  },
+  {
+    id: 'working_hours',
+    stepNumber: '08',
+    label: 'Working Hours',
+    title: 'WORKING HOURS & SCHEDULE',
+    description: 'Assigned shift schedule, weekly calendar, holiday calendar, and time tracking policy',
+    kicker: 'CHAPTER // 08',
+  },
+  {
+    id: 'documents',
+    stepNumber: '09',
+    label: 'Documents',
+    title: 'DOCUMENT REPOSITORY & VERIFICATION',
+    description: 'Mandatory identification proof, experience letters, certificates, and photo upload',
+    kicker: 'CHAPTER // 09',
+  },
+  {
+    id: 'review',
+    stepNumber: '10',
+    label: 'Review',
+    title: 'REGISTRATION REVIEW & SUBMISSION',
+    description: 'Comprehensive overview of all registration chapters prior to employee profile activation',
+    kicker: 'CHAPTER // 10',
+  },
+];
 
 export const REGISTRATION_SECTIONS: readonly RegistrationSection[] = [
   { id: 'general', label: 'General' },
@@ -484,6 +577,15 @@ export function EmployeeRegistration({
     }
   });
 
+  const refreshDrafts = () => {
+    try {
+      const saved = localStorage.getItem('bezent_hrms_registration_drafts');
+      setDraftsList(saved ? JSON.parse(saved) : []);
+    } catch {
+      setDraftsList([]);
+    }
+  };
+
   const showToast = (msg: string) => {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(null), 3500);
@@ -590,6 +692,26 @@ export function EmployeeRegistration({
 
   if (!isOpen) return null;
 
+  const currentChapterIndex = allSections.findIndex((s) => s.id === activeSection);
+  const chapterMatch = REGISTRATION_CHAPTERS.find((c) => c.id === activeSection);
+  const currentChapter: RegistrationChapterMeta = chapterMatch || {
+    id: activeSection,
+    stepNumber: String(currentChapterIndex >= 0 ? currentChapterIndex + 1 : 1).padStart(2, '0'),
+    label: allSections.find((s) => s.id === activeSection)?.label || 'Custom Section',
+    title: (allSections.find((s) => s.id === activeSection)?.label || 'CUSTOM SECTION').toUpperCase(),
+    description: 'Configured custom fields and section details.',
+    kicker: `CHAPTER // ${String(currentChapterIndex >= 0 ? currentChapterIndex + 1 : 1).padStart(2, '0')}`,
+  };
+
+  const journeySteps = allSections.map((s, idx) => {
+    const meta = REGISTRATION_CHAPTERS.find((c) => c.id === s.id);
+    return {
+      id: s.id,
+      stepNumber: meta ? meta.stepNumber : String(idx + 1).padStart(2, '0'),
+      label: s.label,
+    };
+  });
+
   return (
     <>
       <Modal
@@ -598,12 +720,26 @@ export function EmployeeRegistration({
         title="Employee Registration"
         description="Add and manage new employee information"
         size="workspace"
+        headerActions={
+          <Inline gap="sm" align="center">
+            <button
+              type="button"
+              className="onboarding-page__drafts-btn bezent-btn-draft"
+              onClick={() => {
+                refreshDrafts();
+                setIsDraftsModalOpen(true);
+              }}
+            >
+              <BezentIcon name="documents" size={15} />
+              <span>Drafts ({draftsList.length})</span>
+            </button>
+          </Inline>
+        }
         headerBottom={
-          <Tabs
-            items={allSections.map((s) => ({ id: s.id, label: s.label }))}
+          <JourneyNav
+            steps={journeySteps}
             activeId={activeSection}
-            onChange={(id) => setActiveSection(id)}
-            variant="underline"
+            onStepSelect={(id) => setActiveSection(id)}
           />
         }
         footer={
@@ -643,6 +779,19 @@ export function EmployeeRegistration({
               {toastMsg}
             </Alert>
           )}
+
+          {/* LAYER 3: Editorial Chapter Introduction */}
+          <EditorialHeader
+            chapterNumber={currentChapter.stepNumber}
+            kicker={currentChapter.kicker}
+            title={currentChapter.title}
+            description={currentChapter.description}
+            actions={
+              <span className="bezent-editorial-header__numeral-sub">
+                {currentChapterIndex + 1} OF {journeySteps.length}
+              </span>
+            }
+          />
 
           {activeSection === 'general' ? (
             <Stack gap="xl">

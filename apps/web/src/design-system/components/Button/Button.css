@@ -186,6 +186,24 @@
   font-size: 14px;
 }
 
+.bezent-btn .bezent-material-icon,
+.bezent-btn .bezent-duotone-icon,
+.bezent-btn__icon,
+.bezent-btn__icon .bezent-material-icon,
+.bezent-btn__icon svg,
+.bezent-btn svg {
+  color: inherit;
+  fill: currentColor;
+}
+
+.bezent-btn:hover:not(:disabled) .bezent-material-icon,
+.bezent-btn:hover:not(:disabled) .bezent-duotone-icon,
+.bezent-btn:hover:not(:disabled) .bezent-btn__icon,
+.bezent-btn:hover:not(:disabled) .bezent-btn__icon .bezent-material-icon,
+.bezent-btn:hover:not(:disabled) svg {
+  color: inherit;
+}
+
 .bezent-btn__label {
   display: inline-flex;
   align-items: center;

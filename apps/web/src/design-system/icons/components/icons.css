@@ -217,14 +217,14 @@ span.material-symbols-outlined {
   color: var(--text-secondary);
 }
 
-/* Button contextual colors */
-button:hover .bezent-material-icon,
-[role='button']:hover .bezent-material-icon {
+/* Button contextual colors (for unstyled buttons) */
+button:not(.bezent-btn):not(.bezent-icon-btn):hover .bezent-material-icon,
+[role='button']:not(.bezent-btn):not(.bezent-icon-btn):hover .bezent-material-icon {
   color: var(--icon-hover);
 }
 
-button.is-active .bezent-material-icon,
-[role='button'].is-active .bezent-material-icon {
+button:not(.bezent-btn):not(.bezent-icon-btn).is-active .bezent-material-icon,
+[role='button']:not(.bezent-btn):not(.bezent-icon-btn).is-active .bezent-material-icon {
   color: var(--icon-active);
 }
 

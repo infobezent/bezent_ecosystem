@@ -44,6 +44,8 @@ export * from './Modal';
 
 /* ─── Navigation ──────────────────────────────────────────────────────────── */
 export * from './Tabs';
+export * from './JourneyNav';
+export * from './EditorialHeader';
 
 /* ─── Display ─────────────────────────────────────────────────────────────── */
 export * from './Avatar';

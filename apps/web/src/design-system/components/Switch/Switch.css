@@ -49,8 +49,8 @@
 
 /* ── Checked State ── */
 .bezent-switch-input:checked + .bezent-switch-track {
-  background: var(--nav-icon-active, #071e49);
-  border-color: var(--nav-icon-active, #071e49);
+  background: var(--accent-interactive, #1a73e8);
+  border-color: var(--accent-interactive, #1a73e8);
 }
 
 .bezent-switch-input:checked + .bezent-switch-track .bezent-switch-thumb {

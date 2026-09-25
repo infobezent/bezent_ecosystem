@@ -1,0 +1,223 @@
+/*
+ * BEZENT JourneyNav Primitive — Editorial Multi-Stage Progressive Navigation.
+ * Strict Semantic Token Foundation (zero inline CSS).
+ */
+
+.bezent-journey-nav {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background: var(--bg-surface-secondary, #f0f4f9);
+  border-top: 1px solid var(--border-subtle, #e7ebf0);
+  border-bottom: 1px solid var(--border-default, #dde3ea);
+  user-select: none;
+}
+
+.bezent-journey-nav__track-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Continuous Subtle Journey Track Line */
+.bezent-journey-nav__guide-track {
+  position: absolute;
+  top: 50%;
+  left: 32px;
+  right: 32px;
+  height: 2px;
+  background: var(--border-subtle, #e7ebf0);
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Horizontal Scrollable Step Sequence */
+.bezent-journey-nav__list {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+  width: 100%;
+  padding: 12px 32px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-subtle, #e7ebf0) transparent;
+}
+
+.bezent-journey-nav__list::-webkit-scrollbar {
+  height: 4px;
+}
+
+.bezent-journey-nav__list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.bezent-journey-nav__list::-webkit-scrollbar-thumb {
+  background: var(--border-subtle, #e7ebf0);
+  border-radius: 4px;
+}
+
+/* ─── Individual Journey Step ────────────────────────────────────────── */
+.bezent-journey-step {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--card-radius, 12px);
+  color: var(--text-muted, #747775);
+  font-family: var(--font-family-base, inherit);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  outline: none;
+  flex-shrink: 0;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.14s ease,
+    box-shadow 0.18s ease;
+}
+
+.bezent-journey-step:hover:not(:disabled) {
+  background: var(--bg-surface, #ffffff);
+  border-color: var(--border-default, #dde3ea);
+  color: var(--text-primary, #1f1f1f);
+  box-shadow: 0 1px 4px rgba(4, 30, 73, 0.05);
+}
+
+.bezent-journey-step:hover:not(:disabled) .bezent-journey-step__indicator {
+  border-color: var(--accent-interactive, #1a73e8);
+  color: var(--brand-primary, #041e49);
+}
+
+.bezent-journey-step:focus-visible {
+  border-color: var(--border-focus, #1a73e8);
+  box-shadow: 0 0 0 2px var(--accent-subtle, #e8f0fe);
+}
+
+/* Step Indicator & Numeral */
+.bezent-journey-step__indicator {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--bg-surface, #ffffff);
+  border: 1.5px solid var(--border-default, #dde3ea);
+  color: var(--text-muted, #747775);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.2px;
+  flex-shrink: 0;
+  transition: all 0.18s ease;
+}
+
+.bezent-journey-step__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.bezent-journey-step__label {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.25;
+  color: inherit;
+  letter-spacing: -0.1px;
+}
+
+.bezent-journey-step__caption {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--text-muted, #747775);
+  line-height: 1.2;
+}
+
+/* ─── Completed Step ─────────────────────────────────────────────────── */
+.bezent-journey-step.is-completed {
+  color: var(--text-secondary, #444746);
+}
+
+.bezent-journey-step.is-completed .bezent-journey-step__indicator {
+  background: var(--search-bg, #eaf1fb);
+  border-color: var(--accent-interactive, #1a73e8);
+  color: var(--nav-icon-active, #041e49);
+}
+
+/* ─── Active Step — Strong Blue-Family Architectural Weight ────────── */
+.bezent-journey-step.is-active {
+  background: var(--bg-surface, #ffffff);
+  border-color: var(--card-border, #dde3ea);
+  color: var(--brand-primary, #041e49);
+  font-weight: 600;
+  box-shadow: 0 2px 6px -1px rgba(4, 30, 73, 0.08), 0 1px 2px rgba(4, 30, 73, 0.04);
+}
+
+.bezent-journey-step.is-active .bezent-journey-step__indicator {
+  background: var(--brand-primary, #041e49);
+  border-color: var(--brand-primary, #041e49);
+  color: var(--text-inverse, #ffffff);
+  box-shadow: 0 0 0 3px var(--search-bg, #eaf1fb);
+}
+
+.bezent-journey-step.is-active .bezent-journey-step__label {
+  color: var(--brand-primary, #041e49);
+  font-weight: 600;
+}
+
+/* Subtle Animated Active Pulse Ring */
+.bezent-journey-step__pulse {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent-interactive, #1a73e8);
+  opacity: 0.6;
+  pointer-events: none;
+  animation: bezentStepPulse 2.4s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+}
+
+@keyframes bezentStepPulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+/* ─── Inactive / Upcoming Step ───────────────────────────────────────── */
+.bezent-journey-step.is-upcoming {
+  color: var(--text-muted, #747775);
+}
+
+.bezent-journey-step.is-upcoming .bezent-journey-step__indicator {
+  background: var(--bg-surface-secondary, #f0f4f9);
+  border-color: var(--border-subtle, #e7ebf0);
+  color: var(--text-muted, #747775);
+}
+
+.bezent-journey-step:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
