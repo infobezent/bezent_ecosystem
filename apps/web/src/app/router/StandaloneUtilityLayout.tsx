@@ -65,6 +65,20 @@ export function StandaloneUtilityLayout() {
     return RAIL_CAPABILITIES.find((c) => c.id === activeDrawerId) ?? null;
   }, [activeDrawerId]);
 
+  const isRegistration = location.pathname.includes('/onboarding/registration');
+
+  // Employee Registration occupies the complete standalone browser workspace
+  // without the utility top bar or companion rail.
+  if (isRegistration) {
+    return (
+      <div className="standalone-layout standalone-layout--registration">
+        <main className="standalone-layout__main standalone-layout__main--registration">
+          <Outlet context={data} />
+        </main>
+      </div>
+    );
+  }
+
   function handleBack() {
     if (window.history.length > 2) {
       navigate(-1);

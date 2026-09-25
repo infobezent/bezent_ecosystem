@@ -1,12 +1,11 @@
 import { Navigate, type RouteObject } from 'react-router-dom';
 import { hrmsNavigation } from '../navigation';
 import { ModulePlaceholder } from '../pages/ModulePlaceholder';
-import { OnboardingPage, EmployeeRegistrationPage } from '../onboarding';
+import { OnboardingPage } from '../onboarding';
 import { EmployeeAdministrationPage } from '../employee-administration';
 import { EMPLOYEES_PATH, EmployeeDirectoryPage, EmployeeProfilePage } from '../employees';
 import { SettingsPage } from '../settings';
 import { destinationPath } from '../../../shared/utils/navigation';
-import type { BezentRouteHandle } from '../../../layouts/app-shell';
 
 export const HRMS_BASE_PATH = '/hrms';
 export const HRMS_DEFAULT_DESTINATION_ID = 'dashboard';
@@ -66,7 +65,7 @@ export const hrmsRoutes: RouteObject[] = [
               ) : isAdministration && child.id === 'employee-administration' ? (
                 <EmployeeAdministrationPage />
               ) : isAdministration && child.id === 'onboarding' ? (
-                <EmployeeRegistrationPage />
+                <OnboardingPage title="Onboarding" />
               ) : isAdministration && child.id === 'documents' ? (
                 <ModulePlaceholder
                   application={APPLICATION}
@@ -84,10 +83,6 @@ export const hrmsRoutes: RouteObject[] = [
                   sectionId={child.id}
                 />
               ),
-            handle:
-              isAdministration && child.id === 'onboarding'
-                ? ({ workspaceVariant: 'flush' } satisfies BezentRouteHandle)
-                : undefined,
           })),
         ];
       }),
@@ -96,6 +91,7 @@ export const hrmsRoutes: RouteObject[] = [
         path: 'administration/employees/:employeeId',
         element: <EmployeeProfilePage />,
       },
+
       // Legacy top-level Employees URL (no longer a navigation destination)
       {
         path: 'employees',

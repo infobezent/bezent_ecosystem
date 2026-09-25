@@ -11,7 +11,7 @@ export function EmployeeRegistrationPage({ onCancel }: { onCancel?: () => void }
     if (onCancel) {
       onCancel();
     } else {
-      navigate('/hrms/administration/employee-administration');
+      navigate('/hrms/administration/onboarding');
     }
   };
 

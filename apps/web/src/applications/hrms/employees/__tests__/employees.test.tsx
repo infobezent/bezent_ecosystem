@@ -9,7 +9,7 @@ import { EmployeeProfilePage } from '../pages/EmployeeProfilePage';
 import { EmployeeDirectoryTable } from '../components/EmployeeDirectoryTable';
 import { EmployeeProfileView } from '../components/EmployeeProfileView';
 import { EmployeeAdministrationPage } from '../../employee-administration';
-import { EmployeeRegistrationPage } from '../../onboarding';
+import { OnboardingPage } from '../../onboarding';
 import { ModulePlaceholder } from '../../pages/ModulePlaceholder';
 import {
   EmployeesApiError,
@@ -156,8 +156,7 @@ describe('HRMS routing for Administration', () => {
       <EmployeeAdministrationPage />,
     );
     const onboarding = routeFor('/hrms/administration/onboarding').route;
-    expect(onboarding.element).toEqual(<EmployeeRegistrationPage />);
-    expect(onboarding.handle).toEqual({ workspaceVariant: 'flush' });
+    expect(onboarding.element).toEqual(<OnboardingPage title="Onboarding" />);
     expect((routeFor('/hrms/administration/documents').route.element as ReactElement).type).toBe(
       ModulePlaceholder,
     );
