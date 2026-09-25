@@ -158,24 +158,29 @@
 }
 
 /* ── Workspace Identity Zone (Layer 1) ── */
-.bezent-modal--workspace .bezent-modal__header {
+.bezent-modal--workspace .bezent-modal__header,
+.bezent-modal__header--brand {
   padding: 0;
   background: var(--nav-selected, #c2e7ff);
   border-bottom: none;
 }
 
-.bezent-modal--workspace .bezent-modal__header-main {
-  padding: 24px 32px 20px;
+.bezent-modal--workspace .bezent-modal__header-main,
+.bezent-modal__header--brand .bezent-modal__header-main,
+.bezent-modal__header--brand .bezent-page-header {
+  padding: 20px 32px 16px;
 }
 
-.bezent-modal--workspace .bezent-modal__title {
+.bezent-modal--workspace .bezent-modal__title,
+.bezent-modal__header--brand .bezent-page-header__title {
   font-size: 22px;
   font-weight: 700;
   color: var(--brand-primary, #041e49);
   letter-spacing: -0.4px;
 }
 
-.bezent-modal--workspace .bezent-modal__desc {
+.bezent-modal--workspace .bezent-modal__desc,
+.bezent-modal__header--brand .bezent-page-header__subtitle {
   font-size: 14px;
   font-weight: 500;
   color: var(--nav-icon-active, #041e49);
@@ -183,7 +188,23 @@
   max-width: 600px;
 }
 
-.bezent-modal--workspace .bezent-modal__header-bottom {
+.bezent-modal__header--brand .bezent-breadcrumb {
+  color: var(--nav-icon-active, #041e49);
+  opacity: 0.85;
+}
+
+.bezent-modal__header--brand .bezent-breadcrumb-item--active {
+  color: var(--brand-primary, #041e49);
+  font-weight: 600;
+}
+
+.bezent-modal__header--brand .bezent-breadcrumb-separator {
+  color: var(--nav-icon-active, #041e49);
+  opacity: 0.5;
+}
+
+.bezent-modal--workspace .bezent-modal__header-bottom,
+.bezent-modal__header--brand .bezent-modal__header-bottom {
   width: 100%;
   margin-top: 0;
 }
