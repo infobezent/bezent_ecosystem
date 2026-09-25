@@ -66,7 +66,8 @@ export const REGISTRATION_CHAPTERS: readonly RegistrationChapterMeta[] = [
     stepNumber: '02',
     label: 'Personal Information',
     title: 'PERSONAL INFORMATION',
-    description: 'Legal identity, demographics, contact details, permanent residence, and family profile',
+    description:
+      'Legal identity, demographics, contact details, permanent residence, and family profile',
     kicker: 'CHAPTER // 02',
   },
   {
@@ -82,7 +83,8 @@ export const REGISTRATION_CHAPTERS: readonly RegistrationChapterMeta[] = [
     stepNumber: '04',
     label: 'Skills',
     title: 'SKILLS & COMPETENCY PROFILE',
-    description: 'Technical proficiencies, competency evaluations, certifications, and assigned mentors',
+    description:
+      'Technical proficiencies, competency evaluations, certifications, and assigned mentors',
     kicker: 'CHAPTER // 04',
   },
   {
@@ -98,7 +100,8 @@ export const REGISTRATION_CHAPTERS: readonly RegistrationChapterMeta[] = [
     stepNumber: '06',
     label: 'Accounts',
     title: 'STATUTORY & BANK ACCOUNTS',
-    description: 'Disbursement bank accounts, PF/ESI numbers, tax classification, and payroll setup',
+    description:
+      'Disbursement bank accounts, PF/ESI numbers, tax classification, and payroll setup',
     kicker: 'CHAPTER // 06',
   },
   {
@@ -106,7 +109,8 @@ export const REGISTRATION_CHAPTERS: readonly RegistrationChapterMeta[] = [
     stepNumber: '07',
     label: 'Online Access',
     title: 'ONLINE ACCESS & CREDENTIALS',
-    description: 'Single sign-on authorization, enterprise email allocation, and portal permissions',
+    description:
+      'Single sign-on authorization, enterprise email allocation, and portal permissions',
     kicker: 'CHAPTER // 07',
   },
   {
@@ -114,7 +118,8 @@ export const REGISTRATION_CHAPTERS: readonly RegistrationChapterMeta[] = [
     stepNumber: '08',
     label: 'Working Hours',
     title: 'WORKING HOURS & SCHEDULE',
-    description: 'Assigned shift schedule, weekly calendar, holiday calendar, and time tracking policy',
+    description:
+      'Assigned shift schedule, weekly calendar, holiday calendar, and time tracking policy',
     kicker: 'CHAPTER // 08',
   },
   {
@@ -122,7 +127,8 @@ export const REGISTRATION_CHAPTERS: readonly RegistrationChapterMeta[] = [
     stepNumber: '09',
     label: 'Documents',
     title: 'DOCUMENT REPOSITORY & VERIFICATION',
-    description: 'Mandatory identification proof, experience letters, certificates, and photo upload',
+    description:
+      'Mandatory identification proof, experience letters, certificates, and photo upload',
     kicker: 'CHAPTER // 09',
   },
   {
@@ -130,7 +136,8 @@ export const REGISTRATION_CHAPTERS: readonly RegistrationChapterMeta[] = [
     stepNumber: '10',
     label: 'Review',
     title: 'REGISTRATION REVIEW & SUBMISSION',
-    description: 'Comprehensive overview of all registration chapters prior to employee profile activation',
+    description:
+      'Comprehensive overview of all registration chapters prior to employee profile activation',
     kicker: 'CHAPTER // 10',
   },
 ];
@@ -701,7 +708,9 @@ export function EmployeeRegistration({
     id: activeSection,
     stepNumber: String(currentChapterIndex >= 0 ? currentChapterIndex + 1 : 1).padStart(2, '0'),
     label: allSections.find((s) => s.id === activeSection)?.label || 'Custom Section',
-    title: (allSections.find((s) => s.id === activeSection)?.label || 'CUSTOM SECTION').toUpperCase(),
+    title: (
+      allSections.find((s) => s.id === activeSection)?.label || 'CUSTOM SECTION'
+    ).toUpperCase(),
     description: 'Configured custom fields and section details.',
     kicker: `CHAPTER // ${String(currentChapterIndex >= 0 ? currentChapterIndex + 1 : 1).padStart(2, '0')}`,
   };

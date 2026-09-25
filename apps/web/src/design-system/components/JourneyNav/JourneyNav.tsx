@@ -45,10 +45,7 @@ export function JourneyNav({
       const containerWidth = container.offsetWidth;
       const scrollLeft = container.scrollLeft;
 
-      if (
-        elementLeft < scrollLeft ||
-        elementLeft + elementWidth > scrollLeft + containerWidth
-      ) {
+      if (elementLeft < scrollLeft || elementLeft + elementWidth > scrollLeft + containerWidth) {
         container.scrollTo({
           left: elementLeft - containerWidth / 2 + elementWidth / 2,
           behavior: 'smooth',

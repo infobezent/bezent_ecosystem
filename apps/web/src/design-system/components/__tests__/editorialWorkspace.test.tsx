@@ -11,9 +11,7 @@ describe('Design System Editorial Workspace Primitives', () => {
     ];
 
     it('renders journey navigation with continuous track and steps', () => {
-      const html = renderToStaticMarkup(
-        <JourneyNav steps={steps} activeId="step-2" />,
-      );
+      const html = renderToStaticMarkup(<JourneyNav steps={steps} activeId="step-2" />);
 
       expect(html).toContain('bezent-journey-nav');
       expect(html).toContain('bezent-journey-nav__guide-track');
@@ -29,9 +27,7 @@ describe('Design System Editorial Workspace Primitives', () => {
     });
 
     it('correctly assigns active, completed, and upcoming classes', () => {
-      const html = renderToStaticMarkup(
-        <JourneyNav steps={steps} activeId="step-2" />,
-      );
+      const html = renderToStaticMarkup(<JourneyNav steps={steps} activeId="step-2" />);
 
       // step-1 is before activeId, so it is completed
       expect(html).toContain('is-completed');

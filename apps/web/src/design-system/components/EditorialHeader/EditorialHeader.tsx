@@ -27,9 +27,7 @@ export function EditorialHeader({
   children,
 }: EditorialHeaderProps) {
   const formattedChapter =
-    typeof chapterNumber === 'number'
-      ? String(chapterNumber).padStart(2, '0')
-      : chapterNumber;
+    typeof chapterNumber === 'number' ? String(chapterNumber).padStart(2, '0') : chapterNumber;
 
   return (
     <header className={`bezent-editorial-header ${className || ''}`.trim()}>
@@ -51,17 +49,13 @@ export function EditorialHeader({
             {badge && <div className="bezent-editorial-header__badge">{badge}</div>}
           </div>
 
-          {description && (
-            <p className="bezent-editorial-header__desc">{description}</p>
-          )}
+          {description && <p className="bezent-editorial-header__desc">{description}</p>}
 
           {children}
         </div>
 
         {/* Right Actions Block */}
-        {actions && (
-          <div className="bezent-editorial-header__actions">{actions}</div>
-        )}
+        {actions && <div className="bezent-editorial-header__actions">{actions}</div>}
       </div>
 
       {/* Architectural Accent Rule */}

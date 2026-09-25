@@ -1279,9 +1279,7 @@ export const GLOBAL_ICON_DEFINITIONS: Record<string, IconDefinition> = {
 
   // ── Search glyphs (Phase 0B.6) ──
   close: glyph('close', 'Close', (c, sw) => <path d="M18 6 6 18M6 6l12 12" {...S(c, sw)} />),
-  chevronUp: glyph('chevronUp', 'Chevron up', (c, sw) => (
-    <path d="m18 15-6-6-6 6" {...S(c, sw)} />
-  )),
+  chevronUp: glyph('chevronUp', 'Chevron up', (c, sw) => <path d="m18 15-6-6-6 6" {...S(c, sw)} />),
   chevronDown: glyph('chevronDown', 'Chevron down', (c, sw) => (
     <path d="m6 9 6 6 6-6" {...S(c, sw)} />
   )),
