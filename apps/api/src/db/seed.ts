@@ -12,6 +12,7 @@ import {
   onboardingDocumentRequirements,
   onboardingChecklistTemplates,
   onboardingConversionSettings,
+  employees,
 } from './schema.js';
 import { eq } from 'drizzle-orm';
 
@@ -498,6 +499,82 @@ export async function seedDatabase() {
       employeeIdPrefix: 'EMP-',
       defaultEmploymentStatus: 'probation',
     });
+  }
+
+  // 7. Sample Employees (canonical HRMS workforce records; user_id left null — no IAM yet)
+  const employeeData = [
+    {
+      id: 'emp_demo_001',
+      employeeNumber: 'EMP-0001',
+      firstName: 'Lakshmi',
+      lastName: 'Narayanan',
+      email: 'lakshmi.narayanan@bezent-demo.example',
+      departmentId: 'dept_hr_01',
+      designationId: 'desig_hr_01',
+      locationId: 'loc_chn_01',
+      reportingManagerId: null,
+      joiningDate: '2023-04-03',
+      probationEndDate: '2023-10-03',
+      confirmationDate: '2023-10-03',
+      employmentStatus: 'active' as const,
+    },
+    {
+      id: 'emp_demo_002',
+      employeeNumber: 'EMP-0002',
+      firstName: 'Arjun',
+      lastName: 'Mehta',
+      email: 'arjun.mehta@bezent-demo.example',
+      departmentId: 'dept_eng_01',
+      designationId: 'desig_se_01',
+      locationId: 'loc_blr_01',
+      reportingManagerId: 'emp_demo_001',
+      joiningDate: '2024-01-15',
+      probationEndDate: '2024-07-15',
+      confirmationDate: '2024-07-15',
+      employmentStatus: 'active' as const,
+    },
+    {
+      id: 'emp_demo_003',
+      employeeNumber: 'EMP-0003',
+      firstName: 'Kavya',
+      lastName: 'Iyer',
+      email: 'kavya.iyer@bezent-demo.example',
+      departmentId: 'dept_eng_01',
+      designationId: 'desig_se_01',
+      locationId: 'loc_chn_01',
+      reportingManagerId: 'emp_demo_002',
+      joiningDate: '2026-06-01',
+      probationEndDate: '2026-12-01',
+      confirmationDate: null,
+      employmentStatus: 'probation' as const,
+    },
+    {
+      id: 'emp_demo_004',
+      employeeNumber: 'EMP-0004',
+      firstName: 'Rahul',
+      lastName: 'Verma',
+      email: 'rahul.verma@bezent-demo.example',
+      departmentId: 'dept_fin_01',
+      designationId: 'desig_fa_01',
+      locationId: 'loc_rem_01',
+      reportingManagerId: 'emp_demo_001',
+      joiningDate: '2026-07-20',
+      probationEndDate: '2027-01-20',
+      confirmationDate: null,
+      employmentStatus: 'probation' as const,
+    },
+  ];
+
+  for (const e of employeeData) {
+    const exists = await db.select().from(employees).where(eq(employees.id, e.id));
+    if (exists.length === 0) {
+      await db.insert(employees).values({
+        ...e,
+        tenantId,
+        companyId,
+        employmentType: 'full_time',
+      });
+    }
   }
 
   console.log('[Seed] Database seeded successfully for BEZENT Demo Pvt Ltd.');

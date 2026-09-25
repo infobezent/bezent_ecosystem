@@ -76,7 +76,17 @@ describe('canonical HRMS navigation catalog', () => {
       'attendance',
       'timesheets',
       'performance',
+    ]);
+  });
+
+  it('has no top-level Employees destination — employees live under Administration', () => {
+    expect(destinations.map((d) => d.id)).not.toContain('employees');
+    const administration = destinations.find((d) => d.id === 'administration');
+    expect(administration?.children?.map((c) => c.id)).toEqual([
       'employees',
+      'employee-administration',
+      'onboarding',
+      'documents',
     ]);
   });
 });
