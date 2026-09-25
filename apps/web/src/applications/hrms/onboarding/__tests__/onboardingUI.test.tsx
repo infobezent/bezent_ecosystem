@@ -180,7 +180,10 @@ describe('HRMS Onboarding UI Components & Pages', () => {
     expect(docsRoute).toBeDefined();
     expect(docsRoute?.element).toBeDefined();
 
-    const html = renderToStaticMarkup(docsRoute!.element as React.ReactElement);
+    const html = renderToStaticMarkup(
+      <MemoryRouter>{docsRoute!.element as React.ReactElement}</MemoryRouter>,
+    );
     expect(html).toContain('Documents');
+    expect(html).toContain('Manage, verify and monitor employee documents.');
   });
 });

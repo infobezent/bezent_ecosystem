@@ -751,3 +751,57 @@ export const employeeActionHistory = mysqlTable(
 
 export type EmployeeActionHistory = typeof employeeActionHistory.$inferSelect;
 export type NewEmployeeActionHistory = typeof employeeActionHistory.$inferInsert;
+
+/**
+ * HRMS Domain: Documents — Employee Documents
+ * The ONE canonical store for employee documents across the employee
+ * lifecycle (Administration → Documents). Onboarding-collected documents are
+ * expected to feed into this table. Metadata only: binary file storage does
+ * not exist yet, so no file columns are modelled.
+ */
+export const employeeDocuments = mysqlTable(
+  'employee_documents',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    employeeId: varchar('employee_id', { length: 64 })
+      .notNull()
+      .references(() => employees.id),
+    category: mysqlEnum('category', [
+      'personal_identity',
+      'address_proof',
+      'education',
+      'previous_employment',
+      'bank_payroll',
+      'tax_other',
+    ]).notNull(),
+    documentName: varchar('document_name', { length: 150 }).notNull(),
+    documentNumber: varchar('document_number', { length: 100 }),
+    status: mysqlEnum('status', [
+      'pending',
+      'under_review',
+      'verified',
+      'rejected',
+      'resubmission_required',
+      'expired',
+    ])
+      .default('pending')
+      .notNull(),
+    expiryDate: varchar('expiry_date', { length: 10 }),
+    verificationRemarks: varchar('verification_remarks', { length: 1000 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_employee_documents_tenant_company').on(table.tenantId, table.companyId),
+    index('idx_employee_documents_employee').on(table.employeeId),
+    index('idx_employee_documents_status').on(table.status),
+    index('idx_employee_documents_expiry').on(table.expiryDate),
+  ],
+);
+
+export type EmployeeDocument = typeof employeeDocuments.$inferSelect;
+export type NewEmployeeDocument = typeof employeeDocuments.$inferInsert;

@@ -10,7 +10,7 @@ import { EmployeeDirectoryTable } from '../components/EmployeeDirectoryTable';
 import { EmployeeProfileView } from '../components/EmployeeProfileView';
 import { EmployeeAdministrationPage } from '../../employee-administration';
 import { OnboardingPage } from '../../onboarding';
-import { ModulePlaceholder } from '../../pages/ModulePlaceholder';
+import { DocumentsPage } from '../../documents';
 import {
   EmployeesApiError,
   fetchEmployee,
@@ -158,7 +158,7 @@ describe('HRMS routing for Administration', () => {
     const onboarding = routeFor('/hrms/administration/onboarding').route;
     expect(onboarding.element).toEqual(<OnboardingPage title="Onboarding" />);
     expect((routeFor('/hrms/administration/documents').route.element as ReactElement).type).toBe(
-      ModulePlaceholder,
+      DocumentsPage,
     );
   });
 });
