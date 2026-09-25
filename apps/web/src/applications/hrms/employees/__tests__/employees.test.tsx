@@ -14,9 +14,14 @@ import { ModulePlaceholder } from '../../pages/ModulePlaceholder';
 import {
   EmployeesApiError,
   fetchEmployee,
+  fetchEmployeeProfile,
   fetchEmployees,
+  type EmployeeProfile,
   type EmployeeRecord,
 } from '../api/employeesApi';
+import { EmploymentHistory } from '../components/EmploymentHistory';
+import { PROFILE_TABS, type ProfileTabId } from '../components/EmployeeProfileView';
+import type { EmployeeActionListItem } from '../../employee-administration/api/employeeAdministrationApi';
 import { EMPLOYEES_PATH, employeeProfilePath } from '../model/employeeModel';
 
 const noop = () => {};
@@ -41,6 +46,9 @@ const kavya: EmployeeRecord = {
   probationEndDate: '2026-12-01',
   confirmationDate: null,
   lastWorkingDate: null,
+  sourceOfHire: null,
+  noticePeriodDays: null,
+  contractEndDate: null,
   employmentType: 'full_time',
   employmentStatus: 'probation',
 };
@@ -67,7 +75,13 @@ const arjun: EmployeeRecord = {
 /** Collects elements from a (hook-free) component's rendered element tree. */
 function findElements(node: ReactNode, predicate: (el: ReactElement) => boolean): ReactElement[] {
   if (Array.isArray(node)) return node.flatMap((child) => findElements(child, predicate));
-  if (!isValidElement(node)) return [];
+  if (!isValidElement(node)) {
+    // Plain data props (e.g. `items: [{ label, value: <Button/> }]`) can hold elements too.
+    if (node && typeof node === 'object') {
+      return Object.values(node).flatMap((value) => findElements(value as ReactNode, predicate));
+    }
+    return [];
+  }
   const el = node as ReactElement<Record<string, unknown>>;
   // Walk every element-valued prop (children, and slots like PageHeader `breadcrumbs`).
   const nested = Object.values(el.props).flatMap((value) =>
@@ -154,7 +168,8 @@ describe('Employees Directory page', () => {
   it('renders header, description, search, filters and a loading state', () => {
     const html = renderDirectory();
     expect(html).toContain('Employees');
-    expect(html).toContain('View and manage employee records across your organization.');
+    expect(html).toContain('Find employees and view their employment information.');
+    expect(html).not.toContain('View and manage employee records');
     expect(html).toContain('Search employees...');
     expect(html).toContain('All departments');
     expect(html).toContain('All locations');
@@ -320,7 +335,114 @@ describe('Employees API', () => {
 });
 
 describe('Employee Profile', () => {
-  it('route page starts by loading the employee', () => {
+  const emptyProfile = (employee: EmployeeRecord): EmployeeProfile => ({
+    employee,
+    personal: null,
+    familyMembers: [],
+    nominees: [],
+    emergencyContacts: [],
+    bankAccount: null,
+    skills: [],
+    workSchedule: null,
+  });
+
+  const fullProfile: EmployeeProfile = {
+    employee: { ...arjun, sourceOfHire: 'referral', noticePeriodDays: 30 },
+    personal: {
+      middleName: null,
+      preferredName: 'AJ',
+      gender: 'Male',
+      dateOfBirth: '1994-05-18',
+      maritalStatus: 'Married',
+      bloodGroup: 'O+',
+      nationality: 'Indian',
+      nativeLanguage: 'Tamil',
+      fatherName: null,
+      guardianName: null,
+      personalEmail: 'arjun.personal@example.com',
+      homePhone: null,
+      businessPhone: null,
+      workPhone: '+91 44 4000 0002',
+      addressStreet: '12 Anna Salai',
+      addressCity: 'Chennai',
+      addressDistrict: null,
+      addressState: 'Tamil Nadu',
+      addressPostalCode: '600017',
+      addressCountry: 'India',
+    },
+    familyMembers: [
+      {
+        id: 'efm_1',
+        name: 'Meera Mehta',
+        relationship: 'Spouse',
+        dateOfBirth: '1995-01-10',
+        phone: null,
+      },
+    ],
+    nominees: [{ id: 'enm_1', name: 'Meera Mehta', relationship: 'Spouse', sharePercentage: 100 }],
+    emergencyContacts: [
+      {
+        id: 'eec_1',
+        priority: 'primary',
+        name: 'Meera Mehta',
+        relationship: 'Spouse',
+        phone: '+91 91111 11111',
+        email: null,
+        address: null,
+        isPrivate: true,
+      },
+    ],
+    bankAccount: {
+      accountHolderName: 'Arjun Mehta',
+      accountNumberMasked: '••••5678',
+      ifscCode: 'HDFC0001234',
+      bankName: 'HDFC Bank',
+      branchName: 'T. Nagar',
+      bankLocation: null,
+    },
+    skills: [
+      {
+        id: 'esk_1',
+        skillName: 'TypeScript',
+        skillType: 'Technical',
+        proficiency: 'Advanced',
+        level: 'Level 4',
+        assessedOn: '2025-11-20',
+        yearsOfExperience: 4,
+        examinerEmployeeId: null,
+        verifiedByEmployeeId: null,
+        mentorEmployeeId: 'emp_demo_001',
+        examinerName: null,
+        verifiedByName: null,
+        mentorName: 'Lakshmi Narayanan',
+      },
+    ],
+    workSchedule: {
+      workingCalendar: 'India Corporate Calendar',
+      workSchedule: 'General Shift',
+      workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      startTime: '09:00',
+      endTime: '18:00',
+      breakMinutes: 15,
+      lunchMinutes: 45,
+      timeZone: 'Asia/Kolkata',
+    },
+  };
+
+  function renderTab(profile: EmployeeProfile, activeTab: ProfileTabId, history: ReactNode = null) {
+    return renderToStaticMarkup(
+      <EmployeeProfileView
+        profile={profile}
+        activeTab={activeTab}
+        onTabChange={noop}
+        onBack={noop}
+        onOpenEmployee={noop}
+        history={history}
+      />,
+    );
+  }
+
+  it('route page starts by loading the employee profile', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter initialEntries={['/hrms/administration/employees/emp_demo_003']}>
         <EmployeeProfilePage />
@@ -329,57 +451,238 @@ describe('Employee Profile', () => {
     expect(html).toContain('Loading employee');
   });
 
-  it('shows header, overview and existing contact fields only', () => {
-    const html = renderToStaticMarkup(
-      <EmployeeProfileView employee={kavya} onBack={noop} onOpenEmployee={noop} />,
-    );
-
-    // Header
-    expect(html).toContain('Kavya Iyer');
-    expect(html).toContain('EMP-0003 · Product Manager');
-    expect(html).toContain('Probation');
-    // Overview
-    for (const label of [
-      'Department',
-      'Designation',
-      'Location',
-      'Reporting Manager',
-      'Employment Type',
-      'Joining Date',
-      'Probation End Date',
-    ]) {
-      expect(html).toContain(`>${label}<`);
+  it('loads the canonical profile from the real profile endpoint', async () => {
+    const originalFetch = globalThis.fetch;
+    const urls: string[] = [];
+    globalThis.fetch = vi.fn().mockImplementation((url: string) => {
+      urls.push(url);
+      return Promise.resolve({ ok: true, status: 200, json: async () => ({ data: fullProfile }) });
+    });
+    try {
+      const profile = await fetchEmployeeProfile('emp_demo_002');
+      expect(urls[0]).toMatch(/\/hrms\/employees\/emp_demo_002\/profile$/);
+      expect(profile.bankAccount?.accountNumberMasked).toBe('••••5678');
+    } finally {
+      globalThis.fetch = originalFetch;
     }
-    expect(html).toContain('Chennai (HQ)');
-    expect(html).toContain('Arjun Mehta');
-    expect(html).toContain('Full Time');
-    expect(html).toContain('Dec 1, 2026');
-    // Not confirmed yet → no confirmation date; no phone on record → no phone row
-    expect(html).not.toContain('Confirmation Date');
-    expect(html).not.toContain('>Phone<');
-    expect(html).toContain('kavya.iyer@bezent-demo.example');
-    // No Employee Administration action forms inside the profile
-    expect(html).not.toContain('New Employee Action');
-    expect(html).not.toContain('Action Type');
   });
 
-  it('shows confirmation date and phone when they exist', () => {
-    const html = renderToStaticMarkup(
-      <EmployeeProfileView employee={arjun} onBack={noop} onOpenEmployee={noop} />,
-    );
+  it('offers only implemented record sections — no Tasks, Review, Documents, Assets or Access', () => {
+    expect(PROFILE_TABS.map((tab) => tab.label)).toEqual([
+      'Overview',
+      'Personal',
+      'Emergency Contacts',
+      'Accounts',
+      'Skills',
+      'Work',
+      'History',
+    ]);
+    const html = renderTab(fullProfile, 'overview');
+    for (const absent of ['>Review<', '>Tasks<', '>Documents<', '>Assets<', '>Online Access<']) {
+      expect(html).not.toContain(absent);
+    }
+  });
+
+  it('overview groups contact, organization and employment, with conditional fields', () => {
+    const html = renderTab(fullProfile, 'overview');
+    expect(html).toContain('Arjun Mehta');
+    expect(html).toContain('EMP-0002 · Software Engineer');
+    for (const group of ['>Contact<', '>Organization<', '>Employment<']) {
+      expect(html).toContain(group);
+    }
+    expect(html).toContain('Work Email');
+    expect(html).toContain('+91 98450 00002');
+    expect(html).toContain('Bengaluru');
+    expect(html).toContain('Lakshmi Narayanan');
     expect(html).toContain('Confirmation Date');
     expect(html).toContain('Jul 15, 2024');
-    expect(html).toContain('+91 98450 00002');
+    expect(html).toContain('30 days');
+    expect(html).toContain('Referral');
+    // Not applicable → not shown
+    expect(html).not.toContain('Last Working Date');
+    expect(html).not.toContain('Contract End Date');
+
+    const probationer = renderTab(emptyProfile(kavya), 'overview');
+    expect(probationer).not.toContain('Confirmation Date');
+    expect(probationer).not.toContain('Notice Period');
+    expect(probationer).toContain('Dec 1, 2026');
   });
 
-  it('reporting manager and back link navigate to canonical employee routes', () => {
+  it('personal tab shows personal details, address, family and nominees from the API', () => {
+    const html = renderTab(fullProfile, 'personal');
+    expect(html).toContain('Personal Details');
+    expect(html).toContain('May 18, 1994');
+    expect(html).toContain('arjun.personal@example.com');
+    expect(html).toContain('12 Anna Salai, Chennai, Tamil Nadu, 600017, India');
+    expect(html).toContain('Family Members');
+    expect(html).toContain('Meera Mehta');
+    expect(html).toContain('Nominees');
+    expect(html).toContain('100%');
+    // Blank fields are omitted, not shown as empty rows
+    expect(html).not.toContain('Middle Name');
+    expect(html).not.toContain('Home Phone');
+  });
+
+  it('shows emergency contacts, masked bank account, skills and working hours', () => {
+    const emergency = renderTab(fullProfile, 'emergency');
+    expect(emergency).toContain('Primary Contact');
+    expect(emergency).toContain('Private');
+    expect(emergency).toContain('+91 91111 11111');
+
+    const accounts = renderTab(fullProfile, 'accounts');
+    expect(accounts).toContain('••••5678');
+    expect(accounts).toContain('HDFC0001234');
+
+    const skills = renderTab(fullProfile, 'skills');
+    expect(skills).toContain('TypeScript');
+    expect(skills).toContain('Advanced');
+    expect(skills).toContain('4 yrs');
+    expect(skills).toContain('Lakshmi Narayanan');
+
+    const work = renderTab(fullProfile, 'work');
+    expect(work).toContain('Monday, Tuesday, Wednesday, Thursday, Friday');
+    expect(work).toContain('09:00 – 18:00');
+    expect(work).toContain('Asia/Kolkata');
+  });
+
+  it('shows an empty state per section when nothing is recorded', () => {
+    const profile = emptyProfile(kavya);
+    expect(renderTab(profile, 'personal')).toContain('No personal details recorded');
+    expect(renderTab(profile, 'emergency')).toContain('No emergency contacts recorded');
+    expect(renderTab(profile, 'accounts')).toContain('No bank account recorded');
+    expect(renderTab(profile, 'skills')).toContain('No skills recorded');
+    expect(renderTab(profile, 'work')).toContain('No working hours recorded');
+  });
+
+  it('back link and reporting manager navigate to canonical employee routes', () => {
     const onOpenEmployee = vi.fn();
     const onBack = vi.fn();
-    const tree = EmployeeProfileView({ employee: kavya, onBack, onOpenEmployee });
-
-    clickableWithText(tree, 'Arjun Mehta').onClick();
-    expect(onOpenEmployee).toHaveBeenCalledWith('emp_demo_002');
-    clickableWithText(tree, 'Employees').onClick();
+    const view = EmployeeProfileView({
+      profile: fullProfile,
+      activeTab: 'overview',
+      onTabChange: noop,
+      onBack,
+      onOpenEmployee,
+      history: null,
+    });
+    clickableWithText(view, 'Employees').onClick();
     expect(onBack).toHaveBeenCalled();
+
+    // Section components are hook-free: render the Overview element's tree directly.
+    const [overview] = findElements(
+      view,
+      (el) => typeof el.type === 'function' && el.type.name === 'ProfileOverview',
+    );
+    const render = overview!.type as (props: unknown) => ReactNode;
+    clickableWithText(render(overview!.props), 'Lakshmi Narayanan').onClick();
+    expect(onOpenEmployee).toHaveBeenCalledWith('emp_demo_001');
+  });
+});
+
+describe('Employment History', () => {
+  const appliedChange: EmployeeActionListItem = {
+    id: 'ea_7',
+    employeeId: 'emp_demo_003',
+    employeeNumber: 'EMP-0003',
+    employeeName: 'Kavya Iyer',
+    actionType: 'department_change',
+    category: 'job_changes',
+    status: 'applied',
+    effectiveDate: '2026-09-20',
+    reason: 'Reorganisation',
+    changes: [
+      {
+        field: 'departmentId',
+        from: 'dept_eng_01',
+        fromLabel: 'Engineering',
+        to: 'dept_prod_01',
+        toLabel: 'Product',
+      },
+    ],
+    requestDate: null,
+    requestedBy: null,
+    cancellationReason: null,
+    appliedAt: '2026-09-25T04:36:00.000Z',
+    cancelledAt: null,
+    version: 2,
+    createdAt: '2026-09-25T04:36:00.000Z',
+    updatedAt: '2026-09-25T04:36:00.000Z',
+  };
+
+  it('lists persisted employee actions with previous → new values', () => {
+    const html = renderToStaticMarkup(
+      <EmploymentHistory
+        status="ready"
+        actions={[appliedChange]}
+        onRetry={noop}
+        onOpenAction={noop}
+      />,
+    );
+    expect(html).toContain('Department Change');
+    expect(html).toContain('Engineering → Product');
+    expect(html).toContain('Sep 20, 2026');
+    expect(html).toContain('Applied');
+  });
+
+  it('opens the existing Employee Administration action detail', () => {
+    const onOpenAction = vi.fn();
+    const tree = EmploymentHistory({
+      status: 'ready',
+      actions: [appliedChange],
+      onRetry: noop,
+      onOpenAction,
+    });
+    clickableWithText(tree, 'Department Change').onClick();
+    clickableWithText(tree, 'View').onClick();
+    expect(onOpenAction).toHaveBeenCalledTimes(2);
+    expect(onOpenAction).toHaveBeenCalledWith('ea_7');
+  });
+
+  it('shows loading, error and empty states', () => {
+    const render = (props: Partial<Parameters<typeof EmploymentHistory>[0]>) =>
+      renderToStaticMarkup(
+        <EmploymentHistory
+          status="ready"
+          actions={[]}
+          onRetry={noop}
+          onOpenAction={noop}
+          {...props}
+        />,
+      );
+    expect(render({ status: 'loading' })).toContain('Loading employment history');
+    expect(render({ status: 'error', error: 'boom' })).toContain(
+      'Employment history could not be loaded',
+    );
+    expect(render({})).toContain('No employment activity yet');
+  });
+
+  it('is rendered inside the profile History tab', () => {
+    const html = renderToStaticMarkup(
+      <EmployeeProfileView
+        profile={{
+          employee: kavya,
+          personal: null,
+          familyMembers: [],
+          nominees: [],
+          emergencyContacts: [],
+          bankAccount: null,
+          skills: [],
+          workSchedule: null,
+        }}
+        activeTab="history"
+        onTabChange={noop}
+        onBack={noop}
+        onOpenEmployee={noop}
+        history={
+          <EmploymentHistory
+            status="ready"
+            actions={[appliedChange]}
+            onRetry={noop}
+            onOpenAction={noop}
+          />
+        }
+      />,
+    );
+    expect(html).toContain('Engineering → Product');
   });
 });

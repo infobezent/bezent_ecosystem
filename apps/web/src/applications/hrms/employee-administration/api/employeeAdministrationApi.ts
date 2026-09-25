@@ -125,6 +125,7 @@ export interface CreateEmployeeActionPayload {
 export interface ListEmployeeActionsQuery {
   category?: EmployeeActionCategory;
   status?: EmployeeActionStatus;
+  employeeId?: string;
   search?: string;
   page?: number;
   pageSize?: number;

@@ -58,6 +58,9 @@ const kavya: EmployeeRecord = {
   probationEndDate: '2026-12-01',
   confirmationDate: null,
   lastWorkingDate: null,
+  sourceOfHire: null,
+  noticePeriodDays: null,
+  contractEndDate: null,
   employmentType: 'full_time',
   employmentStatus: 'probation',
 };

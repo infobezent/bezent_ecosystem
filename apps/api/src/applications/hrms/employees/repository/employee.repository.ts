@@ -69,6 +69,9 @@ const detailSelection = {
   probationEndDate: employees.probationEndDate,
   confirmationDate: employees.confirmationDate,
   lastWorkingDate: employees.lastWorkingDate,
+  sourceOfHire: employees.sourceOfHire,
+  noticePeriodDays: employees.noticePeriodDays,
+  contractEndDate: employees.contractEndDate,
   employmentType: employees.employmentType,
   employmentStatus: employees.employmentStatus,
   createdAt: employees.createdAt,
@@ -138,8 +141,13 @@ export class EmployeeRepository {
       );
   }
 
-  async create(tenantId: string, companyId: string, dto: CreateEmployeeDto): Promise<Employee> {
-    const db = getDb();
+  async create(
+    tenantId: string,
+    companyId: string,
+    dto: CreateEmployeeDto,
+    executor: DbExecutor = getDb(),
+  ): Promise<Employee> {
+    const db = executor;
     const id = randomUUID();
 
     const newRecord: NewEmployee = {
@@ -159,6 +167,9 @@ export class EmployeeRepository {
       joiningDate: dto.joiningDate,
       confirmedJoiningDate: dto.confirmedJoiningDate ?? null,
       probationEndDate: dto.probationEndDate ?? null,
+      sourceOfHire: dto.sourceOfHire ?? null,
+      noticePeriodDays: dto.noticePeriodDays ?? null,
+      contractEndDate: dto.contractEndDate ?? null,
       employmentType: dto.employmentType ?? 'full_time',
       employmentStatus: dto.employmentStatus ?? 'probation',
     };

@@ -1,4 +1,4 @@
-import type { EmploymentStatus, EmploymentType } from '../api/employeesApi';
+import type { EmploymentStatus, EmploymentType, SourceOfHire } from '../api/employeesApi';
 
 /** Canonical employee route base. The Employee Directory lives here. */
 export const EMPLOYEES_PATH = '/hrms/administration/employees';
@@ -70,4 +70,19 @@ export function formatDate(value: string | null | undefined): string {
         hour: 'numeric',
         minute: '2-digit',
       });
+}
+
+export const SOURCE_OF_HIRE_LABELS: Record<SourceOfHire, string> = {
+  direct_applicant: 'Direct Applicant',
+  referral: 'Referral',
+  agency: 'Agency',
+  campus: 'Campus',
+  linkedin: 'LinkedIn',
+  other: 'Other',
+};
+
+export function formatNoticePeriod(days: number | null): string | null {
+  if (days === null) return null;
+  if (days === 0) return 'No notice period';
+  return `${days} ${days === 1 ? 'day' : 'days'}`;
 }

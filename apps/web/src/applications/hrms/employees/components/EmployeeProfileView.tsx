@@ -1,33 +1,57 @@
-import {
-  Badge,
-  Button,
-  Grid,
-  PageHeader,
-  Section,
-  Stack,
-} from '../../../../design-system/components';
+import type { ReactNode } from 'react';
+import { Badge, Button, PageHeader, Stack, Tabs } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
-import type { EmployeeRecord } from '../api/employeesApi';
+import type { EmployeeProfile } from '../api/employeesApi';
+import { EMPLOYMENT_STATUS_LABELS, employmentStatusVariant } from '../model/employeeModel';
 import {
-  EMPLOYMENT_STATUS_LABELS,
-  employmentStatusVariant,
-  employmentTypeLabel,
-  formatDate,
-} from '../model/employeeModel';
-import { DetailItem } from './DetailItem';
+  AccountsSection,
+  EmergencyContactsSection,
+  PersonalSection,
+  ProfileOverview,
+  SkillsSection,
+  WorkSection,
+} from './ProfileSections';
 
-export interface EmployeeProfileViewProps {
-  employee: EmployeeRecord;
-  onBack: () => void;
-  onOpenEmployee: (employeeId: string) => void;
+/**
+ * Profile tabs — one per implemented employee-record domain. Onboarding tasks
+ * and the registration Review step are deliberately not profile sections.
+ */
+export const PROFILE_TABS = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'personal', label: 'Personal' },
+  { id: 'emergency', label: 'Emergency Contacts' },
+  { id: 'accounts', label: 'Accounts' },
+  { id: 'skills', label: 'Skills' },
+  { id: 'work', label: 'Work' },
+  { id: 'history', label: 'History' },
+] as const;
+
+export type ProfileTabId = (typeof PROFILE_TABS)[number]['id'];
+
+export function isProfileTab(value: string | null): value is ProfileTabId {
+  return PROFILE_TABS.some((tab) => tab.id === value);
 }
 
-/** Canonical, read-only Employee Profile. Shows only fields of the canonical Employee model. */
+export interface EmployeeProfileViewProps {
+  profile: EmployeeProfile;
+  activeTab: ProfileTabId;
+  onTabChange: (tab: ProfileTabId) => void;
+  onBack: () => void;
+  onOpenEmployee: (employeeId: string) => void;
+  /** Employment history content (loaded separately from Employee Administration). */
+  history: ReactNode;
+}
+
+/** Canonical, read-only Employee Profile: the employee's current HR record. */
 export function EmployeeProfileView({
-  employee,
+  profile,
+  activeTab,
+  onTabChange,
   onBack,
   onOpenEmployee,
+  history,
 }: EmployeeProfileViewProps) {
+  const { employee } = profile;
   const subtitle = [employee.employeeNumber, employee.designationName].filter(Boolean).join(' · ');
 
   return (
@@ -52,51 +76,25 @@ export function EmployeeProfileView({
         }
       />
 
-      <Section title="Overview">
-        <Grid columns={3} gap="md">
-          <DetailItem label="Employee ID">{employee.employeeNumber}</DetailItem>
-          <DetailItem label="Department">{employee.departmentName ?? 'Not set'}</DetailItem>
-          <DetailItem label="Designation">{employee.designationName ?? 'Not set'}</DetailItem>
-          <DetailItem label="Location">{employee.locationName ?? 'Not set'}</DetailItem>
-          <DetailItem label="Reporting Manager">
-            {employee.reportingManagerId && employee.reportingManagerName ? (
-              <Button
-                variant="text"
-                size="sm"
-                onClick={() => onOpenEmployee(employee.reportingManagerId!)}
-              >
-                {employee.reportingManagerName}
-              </Button>
-            ) : (
-              'Not assigned'
-            )}
-          </DetailItem>
-          <DetailItem label="Employment Type">
-            {employmentTypeLabel(employee.employmentType)}
-          </DetailItem>
-          <DetailItem label="Joining Date">{formatDate(employee.joiningDate)}</DetailItem>
-          <DetailItem label="Probation End Date">
-            {employee.probationEndDate ? formatDate(employee.probationEndDate) : 'Not set'}
-          </DetailItem>
-          {employee.confirmationDate && (
-            <DetailItem label="Confirmation Date">
-              {formatDate(employee.confirmationDate)}
-            </DetailItem>
-          )}
-          {employee.lastWorkingDate && (
-            <DetailItem label="Last Working Date">
-              {formatDate(employee.lastWorkingDate)}
-            </DetailItem>
-          )}
-        </Grid>
-      </Section>
+      <Tabs
+        activeId={activeTab}
+        onChange={(id) => onTabChange(id as ProfileTabId)}
+        items={PROFILE_TABS.map((tab) => ({ id: tab.id, label: tab.label }))}
+      />
 
-      <Section title="Contact">
-        <Grid columns={3} gap="md">
-          <DetailItem label="Email">{employee.email}</DetailItem>
-          {employee.phone && <DetailItem label="Phone">{employee.phone}</DetailItem>}
-        </Grid>
-      </Section>
+      {activeTab === 'overview' && (
+        <ProfileOverview employee={employee} onOpenEmployee={onOpenEmployee} />
+      )}
+      {activeTab === 'personal' && <PersonalSection profile={profile} />}
+      {activeTab === 'emergency' && (
+        <EmergencyContactsSection contacts={profile.emergencyContacts} />
+      )}
+      {activeTab === 'accounts' && <AccountsSection bankAccount={profile.bankAccount} />}
+      {activeTab === 'skills' && (
+        <SkillsSection skills={profile.skills} onOpenEmployee={onOpenEmployee} />
+      )}
+      {activeTab === 'work' && <WorkSection workSchedule={profile.workSchedule} />}
+      {activeTab === 'history' && history}
     </Stack>
   );
 }

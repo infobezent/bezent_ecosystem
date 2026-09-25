@@ -1,4 +1,5 @@
 import { EmployeeRepository } from '../repository/employee.repository.js';
+import { EmployeeProfileService } from './employeeProfile.service.js';
 import { OrganizationRepository } from '../../organization/repository/organization.repository.js';
 import {
   validateCreateEmployee,
@@ -12,6 +13,7 @@ export class EmployeeService {
   constructor(
     private readonly repo = new EmployeeRepository(),
     private readonly orgRepo = new OrganizationRepository(),
+    private readonly profileService = new EmployeeProfileService(),
   ) {}
 
   private async validateOrgAssignments(
@@ -110,10 +112,28 @@ export class EmployeeService {
     await this.validateOrgAssignments(tenantId, companyId, validatedDto);
     await this.validateReportingManager(tenantId, companyId, validatedDto.reportingManagerId);
 
-    // 4. Create record
-    const created = await this.repo.create(tenantId, companyId, validatedDto);
+    // 4. Validate optional employee record details (conversion-ready payload)
+    const details = await this.profileService.prepareDetails(
+      tenantId,
+      companyId,
+      (input as { details?: unknown }).details,
+    );
+    const hasDetails = Object.keys(details).length > 0;
 
-    // 5. Return full detailed representation
+    // 5. Create the employee and its detail records in one transaction
+    const created = hasDetails
+      ? await this.profileService.runInTransaction(async (tx) => {
+          const employee = await this.repo.create(tenantId, companyId, validatedDto, tx);
+          await this.profileService.writeDetails(
+            tx,
+            { tenantId, companyId, employeeId: employee.id },
+            details,
+          );
+          return employee;
+        })
+      : await this.repo.create(tenantId, companyId, validatedDto);
+
+    // 6. Return full detailed representation
     const fullDetails = await this.repo.getById(tenantId, companyId, created.id);
     if (!fullDetails) {
       throw new Error('Failed to load created employee details');
