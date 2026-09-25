@@ -8,7 +8,22 @@ import {
   int,
   uniqueIndex,
   json,
+  type AnyMySqlColumn,
 } from 'drizzle-orm/mysql-core';
+
+/**
+ * Platform: Tenants
+ * Top-level customer/account and data-isolation boundary.
+ */
+export const tenants = mysqlTable('tenants', {
+  id: varchar('id', { length: 64 }).primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  status: mysqlEnum('status', ['active', 'inactive', 'suspended', 'archived'])
+    .default('active')
+    .notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+});
 
 /**
  * Organization Masters: Companies
@@ -296,6 +311,9 @@ export const onboardingConversionSettings = mysqlTable(
   ],
 );
 
+export type Tenant = typeof tenants.$inferSelect;
+export type NewTenant = typeof tenants.$inferInsert;
+
 export type Company = typeof companies.$inferSelect;
 export type NewCompany = typeof companies.$inferInsert;
 
@@ -359,3 +377,155 @@ export const onboardingCaseStageHistory = mysqlTable(
 
 export type OnboardingCaseStageHistory = typeof onboardingCaseStageHistory.$inferSelect;
 export type NewOnboardingCaseStageHistory = typeof onboardingCaseStageHistory.$inferInsert;
+
+/**
+ * HRMS Domain: Employees
+ * Canonical workforce record for employees post-conversion.
+ * Invariants: Employee != User != Candidate.
+ * user_id is a nullable bridge for future IAM integration.
+ */
+export const employees = mysqlTable(
+  'employees',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    employeeNumber: varchar('employee_number', { length: 50 }).notNull(),
+    userId: varchar('user_id', { length: 64 }),
+    firstName: varchar('first_name', { length: 100 }).notNull(),
+    lastName: varchar('last_name', { length: 100 }),
+    email: varchar('email', { length: 255 }).notNull(),
+    phone: varchar('phone', { length: 50 }),
+    departmentId: varchar('department_id', { length: 64 }).references(() => departments.id),
+    designationId: varchar('designation_id', { length: 64 }).references(() => designations.id),
+    locationId: varchar('location_id', { length: 64 }).references(() => locations.id),
+    reportingManagerId: varchar('reporting_manager_id', { length: 64 }).references(
+      (): AnyMySqlColumn => employees.id,
+    ),
+    joiningDate: varchar('joining_date', { length: 10 }).notNull(),
+    confirmedJoiningDate: varchar('confirmed_joining_date', { length: 10 }),
+    probationEndDate: varchar('probation_end_date', { length: 10 }),
+    confirmationDate: varchar('confirmation_date', { length: 10 }),
+    lastWorkingDate: varchar('last_working_date', { length: 10 }),
+    employmentType: mysqlEnum('employment_type', ['full_time', 'part_time', 'contract', 'intern'])
+      .default('full_time')
+      .notNull(),
+    employmentStatus: mysqlEnum('employment_status', [
+      'active',
+      'probation',
+      'notice',
+      'terminated',
+      'suspended',
+      'resigned',
+    ])
+      .default('probation')
+      .notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_employees_tenant_company').on(table.tenantId, table.companyId),
+    uniqueIndex('idx_employees_company_emp_no').on(
+      table.tenantId,
+      table.companyId,
+      table.employeeNumber,
+    ),
+    index('idx_employees_email').on(table.tenantId, table.companyId, table.email),
+    index('idx_employees_department').on(table.departmentId),
+    index('idx_employees_designation').on(table.designationId),
+    index('idx_employees_location').on(table.locationId),
+    index('idx_employees_user_id').on(table.userId),
+    index('idx_employees_reporting_manager').on(table.reportingManagerId),
+  ],
+);
+
+export type Employee = typeof employees.$inferSelect;
+export type NewEmployee = typeof employees.$inferInsert;
+
+/**
+ * HRMS Domain: Employee Administration — Employee Actions
+ * Persistent employment actions (job changes, probation decisions, transfers,
+ * status changes, separations) performed on existing employees.
+ * Canonical employee fields change only when an action is applied; the action
+ * row is preserved as employment history.
+ */
+export const employeeActions = mysqlTable(
+  'employee_actions',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    employeeId: varchar('employee_id', { length: 64 })
+      .notNull()
+      .references(() => employees.id),
+    actionType: mysqlEnum('action_type', [
+      'department_change',
+      'designation_change',
+      'reporting_manager_change',
+      'employment_type_change',
+      'confirm_employee',
+      'extend_probation',
+      'location_transfer',
+      'employment_status_change',
+      'resignation',
+      'termination',
+    ]).notNull(),
+    status: mysqlEnum('status', ['pending', 'applied', 'cancelled']).default('pending').notNull(),
+    effectiveDate: varchar('effective_date', { length: 10 }).notNull(),
+    reason: varchar('reason', { length: 1000 }).notNull(),
+    /** Typed change set (EmployeeActionChangeSet): old/new values captured at request time. */
+    changeData: json('change_data').notNull(),
+    /** Nullable until platform authentication supplies an authenticated actor. */
+    requestedBy: varchar('requested_by', { length: 64 }),
+    cancellationReason: varchar('cancellation_reason', { length: 1000 }),
+    appliedAt: timestamp('applied_at'),
+    cancelledAt: timestamp('cancelled_at'),
+    version: int('version').default(1).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_employee_actions_tenant_company').on(table.tenantId, table.companyId),
+    index('idx_employee_actions_employee').on(table.employeeId),
+    index('idx_employee_actions_type_status').on(table.actionType, table.status),
+  ],
+);
+
+export type EmployeeAction = typeof employeeActions.$inferSelect;
+export type NewEmployeeAction = typeof employeeActions.$inferInsert;
+
+/**
+ * HRMS Domain: Employee Administration — Action History
+ * Append-only audit trail of employee action lifecycle events.
+ */
+export const employeeActionHistory = mysqlTable(
+  'employee_action_history',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    actionId: varchar('action_id', { length: 64 })
+      .notNull()
+      .references(() => employeeActions.id),
+    event: mysqlEnum('event', ['created', 'updated', 'applied', 'cancelled']).notNull(),
+    fromStatus: varchar('from_status', { length: 20 }),
+    toStatus: varchar('to_status', { length: 20 }).notNull(),
+    notes: varchar('notes', { length: 1000 }),
+    /** Nullable until platform authentication supplies an authenticated actor. */
+    actor: varchar('actor', { length: 64 }),
+    createdAt: timestamp('created_at', { fsp: 3 }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_employee_action_history_tenant_company').on(table.tenantId, table.companyId),
+    index('idx_employee_action_history_action').on(table.actionId),
+  ],
+);
+
+export type EmployeeActionHistory = typeof employeeActionHistory.$inferSelect;
+export type NewEmployeeActionHistory = typeof employeeActionHistory.$inferInsert;

@@ -1,4 +1,18 @@
 import { useState } from 'react';
+import {
+  FormSection,
+  FormGrid,
+  FormField,
+  Input,
+  Select,
+  Textarea,
+  Button,
+  Badge,
+  Card,
+  CardTitle,
+  Stack,
+  Inline,
+} from '../../../../design-system';
 
 export interface OnboardingTaskItem {
   id: string;
@@ -128,267 +142,214 @@ export function OnboardingSection() {
   };
 
   return (
-    <div className="onboarding-section">
+    <Stack gap="xl">
       {/* SECTION 1: ONBOARDING TASKS */}
-      <div className="onboarding-section__group">
-        <h3 className="onboarding-section__group-title">ONBOARDING TASKS</h3>
-        <p className="onboarding-section__group-subtitle">
-          Individual onboarding tasks that need to be completed.
-        </p>
-
-        <div className="onboarding-section__cards-list">
+      <FormSection
+        title="Onboarding Tasks"
+        description="Individual onboarding tasks that need to be completed."
+      >
+        <Stack gap="md">
           {tasks.map((task, idx) => {
             const overdue = isTaskOverdue(task.dueDate, task.status);
+            const statusOptions = [
+              { value: 'Not Started', label: 'Not Started' },
+              { value: 'In Progress', label: 'In Progress' },
+              { value: 'Completed', label: 'Completed' },
+              ...(overdue ? [{ value: 'Overdue', label: 'Overdue (Auto-Calculated)' }] : []),
+            ];
+
             return (
-              <div key={task.id} className="onboarding-section__card">
-                <div className="onboarding-section__card-header">
-                  <span className="onboarding-section__card-title">Task #{idx + 1}</span>
-                  {tasks.length > 1 && (
-                    <button
-                      type="button"
-                      className="onboarding-section__remove-btn"
-                      onClick={() => removeTask(task.id)}
+              <Card key={task.id} variant="flat">
+                <Stack gap="md">
+                  <Inline justify="between" align="center">
+                    <CardTitle>Task #{idx + 1}</CardTitle>
+                    {tasks.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeTask(task.id)}
+                      >
+                        Remove
+                      </Button>
+                    )}
+                  </Inline>
+
+                  <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                    {/* 1. Onboarding Tasks */}
+                    <FormField label="Onboarding Tasks" required>
+                      <Stack gap="xs">
+                        <Select
+                          options={PREDEFINED_TASKS}
+                          value={task.taskName}
+                          onChange={(e) => updateTask(task.id, 'taskName', e.target.value)}
+                        />
+                        {task.taskName === 'other' && (
+                          <Input
+                            type="text"
+                            placeholder="Enter Onboarding Task..."
+                            value={task.otherTaskName || ''}
+                            onChange={(e) => updateTask(task.id, 'otherTaskName', e.target.value)}
+                          />
+                        )}
+                      </Stack>
+                    </FormField>
+
+                    {/* 3. Assigned To */}
+                    <FormField label="Assigned To" required>
+                      <Stack gap="xs">
+                        <Select
+                          options={ASSIGNED_TO_OPTIONS}
+                          value={task.assignedTo}
+                          onChange={(e) => updateTask(task.id, 'assignedTo', e.target.value)}
+                        />
+                        {task.assignedTo === 'other' && (
+                          <Input
+                            type="text"
+                            placeholder="Enter Assignment..."
+                            value={task.otherAssignedTo || ''}
+                            onChange={(e) => updateTask(task.id, 'otherAssignedTo', e.target.value)}
+                          />
+                        )}
+                      </Stack>
+                    </FormField>
+
+                    {/* 2. Task Description (Full Width) */}
+                    <FormField label="Task Description" span="full">
+                      <Textarea
+                        placeholder="Enter task details or instructions..."
+                        rows={3}
+                        value={task.description}
+                        onChange={(e) => updateTask(task.id, 'description', e.target.value)}
+                      />
+                    </FormField>
+
+                    {/* 4. Due Date */}
+                    <FormField label="Due Date">
+                      <Input
+                        type="date"
+                        value={task.dueDate}
+                        onChange={(e) => updateTask(task.id, 'dueDate', e.target.value)}
+                      />
+                    </FormField>
+
+                    {/* 5. Task Status */}
+                    <FormField
+                      label="Task Status"
+                      required
+                      helperText={overdue ? '⚠️ Overdue — Due Date has passed' : undefined}
                     >
-                      ✕ Remove
-                    </button>
-                  )}
-                </div>
-
-                <div className="onboarding-section__form-grid-2">
-                  {/* 1. Onboarding Tasks */}
-                  <div className="employee-registration__field">
-                    <label className="employee-registration__label">
-                      Onboarding Tasks <span className="employee-registration__required">*</span>
-                    </label>
-                    <div className="employee-registration__select-wrapper">
-                      <select
-                        className="employee-registration__select"
-                        value={task.taskName}
-                        onChange={(e) => updateTask(task.id, 'taskName', e.target.value)}
-                      >
-                        {PREDEFINED_TASKS.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                      <span className="employee-registration__select-icon">▼</span>
-                    </div>
-                    {task.taskName === 'other' && (
-                      <div className="employee-registration__other-container">
-                        <input
-                          type="text"
-                          className="employee-registration__input"
-                          placeholder="Enter Onboarding Task..."
-                          value={task.otherTaskName || ''}
-                          onChange={(e) => updateTask(task.id, 'otherTaskName', e.target.value)}
+                      <Inline gap="sm" align="center">
+                        <Select
+                          options={statusOptions}
+                          value={overdue ? 'Overdue' : task.status}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (
+                              val === 'Completed' ||
+                              val === 'In Progress' ||
+                              val === 'Not Started'
+                            ) {
+                              updateTask(task.id, 'status', val);
+                            }
+                          }}
                         />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* 3. Assigned To */}
-                  <div className="employee-registration__field">
-                    <label className="employee-registration__label">
-                      Assigned To <span className="employee-registration__required">*</span>
-                    </label>
-                    <div className="employee-registration__select-wrapper">
-                      <select
-                        className="employee-registration__select"
-                        value={task.assignedTo}
-                        onChange={(e) => updateTask(task.id, 'assignedTo', e.target.value)}
-                      >
-                        {ASSIGNED_TO_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                      <span className="employee-registration__select-icon">▼</span>
-                    </div>
-                    {task.assignedTo === 'other' && (
-                      <div className="employee-registration__other-container">
-                        <input
-                          type="text"
-                          className="employee-registration__input"
-                          placeholder="Enter Assignment..."
-                          value={task.otherAssignedTo || ''}
-                          onChange={(e) => updateTask(task.id, 'otherAssignedTo', e.target.value)}
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* 2. Task Description (Full Width) */}
-                  <div className="employee-registration__field onboarding-section__field--full">
-                    <label className="employee-registration__label">Task Description</label>
-                    <textarea
-                      className="onboarding-section__textarea"
-                      placeholder="Enter task details or instructions..."
-                      rows={3}
-                      value={task.description}
-                      onChange={(e) => updateTask(task.id, 'description', e.target.value)}
-                    />
-                  </div>
-
-                  {/* 4. Due Date */}
-                  <div className="employee-registration__field">
-                    <label className="employee-registration__label">Due Date</label>
-                    <input
-                      type="date"
-                      className="employee-registration__input"
-                      value={task.dueDate}
-                      onChange={(e) => updateTask(task.id, 'dueDate', e.target.value)}
-                    />
-                  </div>
-
-                  {/* 5. Task Status */}
-                  <div className="employee-registration__field">
-                    <label className="employee-registration__label">
-                      Task Status <span className="employee-registration__required">*</span>
-                    </label>
-                    <div className="employee-registration__select-wrapper">
-                      <select
-                        className={`employee-registration__select ${
-                          overdue ? 'onboarding-section__select--overdue' : ''
-                        }`}
-                        value={overdue ? 'Overdue' : task.status}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          if (
-                            val === 'Completed' ||
-                            val === 'In Progress' ||
-                            val === 'Not Started'
-                          ) {
-                            updateTask(task.id, 'status', val);
-                          }
-                        }}
-                      >
-                        <option value="Not Started">Not Started</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Overdue" disabled={!overdue}>
-                          Overdue (Auto-Calculated)
-                        </option>
-                      </select>
-                      <span className="employee-registration__select-icon">▼</span>
-                    </div>
-                    {overdue && (
-                      <span className="onboarding-section__status-badge onboarding-section__status-badge--overdue">
-                        ⚠️ Overdue — Due Date has passed
-                      </span>
-                    )}
-                    {task.status === 'Completed' && (
-                      <span className="onboarding-section__status-badge onboarding-section__status-badge--completed">
-                        ✓ Completed
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
+                        {task.status === 'Completed' && (
+                          <Badge variant="success">✓ Completed</Badge>
+                        )}
+                        {overdue && <Badge variant="danger">⚠️ Overdue</Badge>}
+                      </Inline>
+                    </FormField>
+                  </FormGrid>
+                </Stack>
+              </Card>
             );
           })}
 
-          <button type="button" className="onboarding-section__add-btn" onClick={addTask}>
-            + Add Task
-          </button>
-        </div>
-      </div>
+          <Inline>
+            <Button type="button" variant="secondary" onClick={addTask}>
+              + Add Task
+            </Button>
+          </Inline>
+        </Stack>
+      </FormSection>
 
       {/* SECTION 2: ASSETS */}
-      <div className="onboarding-section__group">
-        <h3 className="onboarding-section__group-title">ASSETS</h3>
-        <p className="onboarding-section__group-subtitle">
-          Assets assigned to the employee during onboarding.
-        </p>
-
-        <div className="onboarding-section__cards-list">
+      <FormSection
+        title="Assigned Assets"
+        description="Assets assigned to the employee during onboarding."
+      >
+        <Stack gap="md">
           {assets.map((asset, idx) => (
-            <div key={asset.id} className="onboarding-section__card">
-              <div className="onboarding-section__card-header">
-                <span className="onboarding-section__card-title">Asset #{idx + 1}</span>
-                {assets.length > 1 && (
-                  <button
-                    type="button"
-                    className="onboarding-section__remove-btn"
-                    onClick={() => removeAsset(asset.id)}
-                  >
-                    ✕ Remove
-                  </button>
-                )}
-              </div>
-
-              <div className="onboarding-section__form-grid-3">
-                {/* 1. Assets */}
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">
-                    Assets <span className="employee-registration__required">*</span>
-                  </label>
-                  <div className="employee-registration__select-wrapper">
-                    <select
-                      className="employee-registration__select"
-                      value={asset.assetName}
-                      onChange={(e) => updateAsset(asset.id, 'assetName', e.target.value)}
+            <Card key={asset.id} variant="flat">
+              <Stack gap="md">
+                <Inline justify="between" align="center">
+                  <CardTitle>Asset #{idx + 1}</CardTitle>
+                  {assets.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeAsset(asset.id)}
                     >
-                      {PREDEFINED_ASSETS.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
-                    <span className="employee-registration__select-icon">▼</span>
-                  </div>
-                  {asset.assetName === 'other' && (
-                    <div className="employee-registration__other-container">
-                      <input
-                        type="text"
-                        className="employee-registration__input"
-                        placeholder="Enter Asset Name..."
-                        value={asset.otherAssetName || ''}
-                        onChange={(e) => updateAsset(asset.id, 'otherAssetName', e.target.value)}
-                      />
-                    </div>
+                      Remove
+                    </Button>
                   )}
-                </div>
+                </Inline>
 
-                {/* 2. Asset Quantity */}
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">
-                    Asset Quantity <span className="employee-registration__required">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    min={1}
-                    className="employee-registration__input"
-                    placeholder="1"
-                    value={asset.quantity}
-                    onChange={(e) =>
-                      updateAsset(asset.id, 'quantity', Number(e.target.value) || '')
-                    }
-                  />
-                </div>
+                <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                  {/* 1. Assets */}
+                  <FormField label="Assets" required>
+                    <Stack gap="xs">
+                      <Select
+                        options={PREDEFINED_ASSETS}
+                        value={asset.assetName}
+                        onChange={(e) => updateAsset(asset.id, 'assetName', e.target.value)}
+                      />
+                      {asset.assetName === 'other' && (
+                        <Input
+                          type="text"
+                          placeholder="Enter Asset Name..."
+                          value={asset.otherAssetName || ''}
+                          onChange={(e) => updateAsset(asset.id, 'otherAssetName', e.target.value)}
+                        />
+                      )}
+                    </Stack>
+                  </FormField>
 
-                {/* 3. Asset Issue Date */}
-                <div className="employee-registration__field">
-                  <label className="employee-registration__label">
-                    Asset Issue Date <span className="employee-registration__required">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    className="employee-registration__input"
-                    value={asset.issueDate}
-                    onChange={(e) => updateAsset(asset.id, 'issueDate', e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
+                  {/* 2. Asset Quantity */}
+                  <FormField label="Asset Quantity" required>
+                    <Input
+                      type="number"
+                      min={1}
+                      placeholder="1"
+                      value={asset.quantity}
+                      onChange={(e) =>
+                        updateAsset(asset.id, 'quantity', Number(e.target.value) || '')
+                      }
+                    />
+                  </FormField>
+
+                  {/* 3. Asset Issue Date */}
+                  <FormField label="Asset Issue Date" required>
+                    <Input
+                      type="date"
+                      value={asset.issueDate}
+                      onChange={(e) => updateAsset(asset.id, 'issueDate', e.target.value)}
+                    />
+                  </FormField>
+                </FormGrid>
+              </Stack>
+            </Card>
           ))}
 
-          <button type="button" className="onboarding-section__add-btn" onClick={addAsset}>
-            + Add Asset
-          </button>
-        </div>
-      </div>
-    </div>
+          <Inline>
+            <Button type="button" variant="secondary" onClick={addAsset}>
+              + Add Asset
+            </Button>
+          </Inline>
+        </Stack>
+      </FormSection>
+    </Stack>
   );
 }

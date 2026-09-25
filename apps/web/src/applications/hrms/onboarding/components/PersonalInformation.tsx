@@ -1,4 +1,17 @@
 import { useState, useEffect, useRef, type ChangeEvent } from 'react';
+import {
+  FormSection,
+  FormGrid,
+  FormField,
+  Input,
+  Select,
+  Button,
+  Stack,
+  Inline,
+  Card,
+  CardTitle,
+  Toolbar,
+} from '../../../../design-system/components';
 import { useCustomFields } from '../../settings/context/CustomFieldsContext';
 
 import type {
@@ -225,6 +238,7 @@ interface PersonalInformationProps {
 export function PersonalInformation({ employeeId }: PersonalInformationProps) {
   // 1. Profile Photo
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   // 3-6. Name fields
   const [firstName, setFirstName] = useState('');
@@ -544,758 +558,706 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
   const renderCustomFieldsForCard = (cardId: string) => {
     const fieldsInCard = customFields.filter((f) => f.cardId === cardId && f.isCustom);
     return fieldsInCard.map((f) => (
-      <div key={f.id} className="employee-registration__field">
-        <label className="employee-registration__label">
-          {f.label} {f.required && <span className="employee-registration__required">*</span>}
-        </label>
+      <FormField
+        key={f.id}
+        label={f.label}
+        htmlFor={`custom-${f.id}`}
+        required={f.required}
+        disabled={f.readOnly}
+      >
         {f.fieldType === 'select' ? (
-          <div className="employee-registration__select-wrapper">
-            <select className="employee-registration__select" disabled={f.readOnly}>
-              <option value="">Select {f.label}</option>
-              {f.options?.map((opt, idx) => (
-                <option key={idx} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
-            <span className="employee-registration__select-icon">▼</span>
-          </div>
+          <Select
+            id={`custom-${f.id}`}
+            disabled={f.readOnly}
+            options={[
+              { value: '', label: `Select ${f.label}` },
+              ...(f.options?.map((opt) => ({ value: opt, label: opt })) || []),
+            ]}
+          />
         ) : (
-          <input
+          <Input
+            id={`custom-${f.id}`}
             type={f.fieldType === 'date' ? 'date' : f.fieldType === 'number' ? 'number' : 'text'}
-            className="employee-registration__input"
             placeholder={f.defaultValue || `Enter ${f.label}`}
             disabled={f.readOnly}
           />
         )}
-      </div>
+      </FormField>
     ));
   };
 
   return (
-    <div className="personal-info">
+    <Stack gap="xl">
       {/* SECTION 1: PERSONAL DETAILS */}
-      <div className="personal-info__group">
-        <h3 className="personal-info__group-title">Personal Details</h3>
-
-        {/* 1. Profile Photo */}
-        <div className="personal-info__photo-container">
-          {photoPreview ? (
-            <img
-              src={photoPreview}
-              alt="Profile Preview"
-              className="personal-info__photo-preview"
-            />
-          ) : (
-            <div className="personal-info__photo-placeholder">
-              {firstName ? firstName[0]?.toUpperCase() : '👤'}
-            </div>
-          )}
-          <div className="personal-info__photo-meta">
-            <span className="personal-info__photo-title">Profile Photo</span>
-            <span className="personal-info__photo-hint">Supports JPG, PNG under 5MB</span>
-            <div className="personal-info__photo-actions">
-              <label className="personal-info__upload-btn">
-                Upload Photo
+      <FormSection
+        title="Personal Details"
+        description="Personal background, identity, and demographic information"
+      >
+        <Stack gap="lg">
+          {/* Profile Photo */}
+          <div className="bezent-photo-uploader">
+            {photoPreview ? (
+              <img src={photoPreview} alt="Profile Preview" className="bezent-photo-preview" />
+            ) : (
+              <div className="bezent-photo-placeholder">
+                {firstName ? firstName[0]?.toUpperCase() : '👤'}
+              </div>
+            )}
+            <Stack gap="xs">
+              <Inline gap="xs" align="center">
+                <span className="bezent-card__title">Profile Photo</span>
+                <span className="bezent-card__desc">(Supports JPG, PNG under 5MB)</span>
+              </Inline>
+              <Inline gap="sm">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  type="button"
+                  onClick={() => photoInputRef.current?.click()}
+                >
+                  Upload Photo
+                </Button>
+                {photoPreview && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    type="button"
+                    onClick={() => setPhotoPreview(null)}
+                  >
+                    Remove
+                  </Button>
+                )}
                 <input
+                  ref={photoInputRef}
                   type="file"
                   accept="image/jpeg,image/png"
+                  hidden
                   onChange={handlePhotoChange}
-                  className="personal-info__file-input"
                 />
-              </label>
-              {photoPreview && (
-                <button
-                  type="button"
-                  className="personal-info__remove-photo-btn"
-                  onClick={() => setPhotoPreview(null)}
-                >
-                  Remove
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Form Fields Grid */}
-        <div className="employee-registration__form-grid">
-          {/* 2. Employee ID (Read-only) */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">
-              Employee ID <span className="employee-registration__required">*</span>
-            </label>
-            <input
-              type="text"
-              value={employeeId}
-              readOnly
-              className="employee-registration__input employee-registration__input--disabled"
-            />
+              </Inline>
+            </Stack>
           </div>
 
-          {/* 3. First Name */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">
-              First Name <span className="employee-registration__required">*</span>
-            </label>
-            <input
-              type="text"
-              className="employee-registration__input"
-              placeholder="e.g. Arun"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-            />
-          </div>
+          {/* Form Fields Grid */}
+          <FormGrid columns={2} layout="horizontal" labelWidth="md">
+            {/* 2. Employee ID (Read-only) */}
+            <FormField label="Employee ID" htmlFor="pers-employee-id" required disabled>
+              <Input id="pers-employee-id" type="text" value={employeeId} disabled />
+            </FormField>
 
-          {/* 4. Middle Name */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">Middle Name</label>
-            <input
-              type="text"
-              className="employee-registration__input"
-              placeholder="e.g. Kumar"
-              value={middleName}
-              onChange={(e) => setMiddleName(e.target.value)}
-            />
-          </div>
+            {/* 3. First Name */}
+            <FormField label="First Name" htmlFor="pers-first-name" required>
+              <Input
+                id="pers-first-name"
+                type="text"
+                placeholder="e.g. Arun"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+            </FormField>
 
-          {/* 5. Last Name */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">
-              Last Name <span className="employee-registration__required">*</span>
-            </label>
-            <input
-              type="text"
-              className="employee-registration__input"
-              placeholder="e.g. Sharma"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-            />
-          </div>
+            {/* 4. Middle Name */}
+            <FormField label="Middle Name" htmlFor="pers-middle-name">
+              <Input
+                id="pers-middle-name"
+                type="text"
+                placeholder="e.g. Kumar"
+                value={middleName}
+                onChange={(e) => setMiddleName(e.target.value)}
+              />
+            </FormField>
 
-          {/* 6. Preferred Name */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">Preferred Name</label>
-            <input
-              type="text"
-              className="employee-registration__input"
-              placeholder="e.g. Arun"
-              value={preferredName}
-              onChange={(e) => setPreferredName(e.target.value)}
-            />
-          </div>
+            {/* 5. Last Name */}
+            <FormField label="Last Name" htmlFor="pers-last-name" required>
+              <Input
+                id="pers-last-name"
+                type="text"
+                placeholder="e.g. Sharma"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </FormField>
 
-          {/* 7. Gender */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">
-              Gender <span className="employee-registration__required">*</span>
-            </label>
-            <div className="employee-registration__select-wrapper">
-              <select
-                className="employee-registration__select"
-                value={gender}
-                onChange={(e) => setGender(e.target.value)}
-              >
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Non-binary">Non-binary</option>
-                <option value="Prefer not to say">Prefer not to say</option>
-                <option value="Other">Other</option>
-              </select>
-              <span className="employee-registration__select-icon">▼</span>
-            </div>
-            {gender === 'Other' && (
-              <div className="employee-registration__other-container">
-                <input
-                  type="text"
-                  className="employee-registration__input"
-                  placeholder="Enter Gender..."
-                  value={otherGender}
-                  onChange={(e) => setOtherGender(e.target.value)}
+            {/* 6. Preferred Name */}
+            <FormField label="Preferred Name" htmlFor="pers-preferred-name">
+              <Input
+                id="pers-preferred-name"
+                type="text"
+                placeholder="e.g. Arun"
+                value={preferredName}
+                onChange={(e) => setPreferredName(e.target.value)}
+              />
+            </FormField>
+
+            {/* 7. Gender */}
+            <FormField label="Gender" htmlFor="pers-gender" required>
+              <Stack gap="xs">
+                <Select
+                  id="pers-gender"
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                  options={[
+                    { value: 'Male', label: 'Male' },
+                    { value: 'Female', label: 'Female' },
+                    { value: 'Non-binary', label: 'Non-binary' },
+                    { value: 'Prefer not to say', label: 'Prefer not to say' },
+                    { value: 'Other', label: 'Other' },
+                  ]}
                 />
-              </div>
-            )}
-          </div>
+                {gender === 'Other' && (
+                  <Input
+                    placeholder="Enter Gender..."
+                    value={otherGender}
+                    onChange={(e) => setOtherGender(e.target.value)}
+                  />
+                )}
+              </Stack>
+            </FormField>
 
-          {/* 8. Date of Birth */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">
-              Date of Birth <span className="employee-registration__required">*</span>
-            </label>
-            <input
-              type="date"
-              className="employee-registration__input"
-              value={dob}
-              onChange={(e) => setDob(e.target.value)}
-            />
-          </div>
+            {/* 8. Date of Birth */}
+            <FormField label="Date of Birth" htmlFor="pers-dob" required>
+              <Input
+                id="pers-dob"
+                type="date"
+                value={dob}
+                onChange={(e) => setDob(e.target.value)}
+              />
+            </FormField>
 
-          {/* 9. Marital Status */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">
-              Marital Status <span className="employee-registration__required">*</span>
-            </label>
-            <div className="employee-registration__select-wrapper">
-              <select
-                className="employee-registration__select"
-                value={maritalStatus}
-                onChange={(e) => setMaritalStatus(e.target.value)}
-              >
-                <option value="Single">Single</option>
-                <option value="Married">Married</option>
-                <option value="Divorced">Divorced</option>
-                <option value="Widowed">Widowed</option>
-                <option value="Other">Other</option>
-              </select>
-              <span className="employee-registration__select-icon">▼</span>
-            </div>
-            {maritalStatus === 'Other' && (
-              <div className="employee-registration__other-container">
-                <input
-                  type="text"
-                  className="employee-registration__input"
-                  placeholder="Enter Marital Status..."
-                  value={otherMaritalStatus}
-                  onChange={(e) => setOtherMaritalStatus(e.target.value)}
+            {/* 9. Marital Status */}
+            <FormField label="Marital Status" htmlFor="pers-marital-status" required>
+              <Stack gap="xs">
+                <Select
+                  id="pers-marital-status"
+                  value={maritalStatus}
+                  onChange={(e) => setMaritalStatus(e.target.value)}
+                  options={[
+                    { value: 'Single', label: 'Single' },
+                    { value: 'Married', label: 'Married' },
+                    { value: 'Divorced', label: 'Divorced' },
+                    { value: 'Widowed', label: 'Widowed' },
+                    { value: 'Other', label: 'Other' },
+                  ]}
                 />
-              </div>
-            )}
-          </div>
+                {maritalStatus === 'Other' && (
+                  <Input
+                    placeholder="Enter Marital Status..."
+                    value={otherMaritalStatus}
+                    onChange={(e) => setOtherMaritalStatus(e.target.value)}
+                  />
+                )}
+              </Stack>
+            </FormField>
 
-          {/* 10. Blood Group */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">
-              Blood Group <span className="employee-registration__required">*</span>
-            </label>
-            <div className="employee-registration__select-wrapper">
-              <select
-                className="employee-registration__select"
+            {/* 10. Blood Group */}
+            <FormField label="Blood Group" htmlFor="pers-blood-group" required>
+              <Select
+                id="pers-blood-group"
                 value={bloodGroup}
                 onChange={(e) => setBloodGroup(e.target.value)}
-              >
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-              </select>
-              <span className="employee-registration__select-icon">▼</span>
-            </div>
-          </div>
+                options={[
+                  { value: 'A+', label: 'A+' },
+                  { value: 'A-', label: 'A-' },
+                  { value: 'B+', label: 'B+' },
+                  { value: 'B-', label: 'B-' },
+                  { value: 'AB+', label: 'AB+' },
+                  { value: 'AB-', label: 'AB-' },
+                  { value: 'O+', label: 'O+' },
+                  { value: 'O-', label: 'O-' },
+                ]}
+              />
+            </FormField>
 
-          {/* 11. Nationality */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">
-              Nationality <span className="employee-registration__required">*</span>
-            </label>
-            <div className="employee-registration__select-wrapper">
-              <select
-                className="employee-registration__select"
-                value={nationality}
-                onChange={(e) => setNationality(e.target.value)}
-              >
-                <option value="Indian">Indian</option>
-                <option value="American">American</option>
-                <option value="British">British</option>
-                <option value="Canadian">Canadian</option>
-                <option value="Australian">Australian</option>
-                <option value="Emirati">Emirati</option>
-                <option value="Singaporean">Singaporean</option>
-                <option value="Other">Other</option>
-              </select>
-              <span className="employee-registration__select-icon">▼</span>
-            </div>
-            {nationality === 'Other' && (
-              <div className="employee-registration__other-container">
-                <input
-                  type="text"
-                  className="employee-registration__input"
-                  placeholder="Enter Nationality..."
-                  value={otherNationality}
-                  onChange={(e) => setOtherNationality(e.target.value)}
+            {/* 11. Nationality */}
+            <FormField label="Nationality" htmlFor="pers-nationality" required>
+              <Stack gap="xs">
+                <Select
+                  id="pers-nationality"
+                  value={nationality}
+                  onChange={(e) => setNationality(e.target.value)}
+                  options={[
+                    { value: 'Indian', label: 'Indian' },
+                    { value: 'American', label: 'American' },
+                    { value: 'British', label: 'British' },
+                    { value: 'Canadian', label: 'Canadian' },
+                    { value: 'Australian', label: 'Australian' },
+                    { value: 'Emirati', label: 'Emirati' },
+                    { value: 'Singaporean', label: 'Singaporean' },
+                    { value: 'Other', label: 'Other' },
+                  ]}
                 />
-              </div>
-            )}
-          </div>
+                {nationality === 'Other' && (
+                  <Input
+                    placeholder="Enter Nationality..."
+                    value={otherNationality}
+                    onChange={(e) => setOtherNationality(e.target.value)}
+                  />
+                )}
+              </Stack>
+            </FormField>
 
-          {/* 12. Native Language */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">
-              Native Language <span className="employee-registration__required">*</span>
-            </label>
-            <div className="employee-registration__select-wrapper">
-              <select
-                className="employee-registration__select"
-                value={nativeLanguage}
-                onChange={(e) => setNativeLanguage(e.target.value)}
-              >
-                <option value="English">English</option>
-                <option value="Hindi">Hindi</option>
-                <option value="Tamil">Tamil</option>
-                <option value="Telugu">Telugu</option>
-                <option value="Bengali">Bengali</option>
-                <option value="Marathi">Marathi</option>
-                <option value="Kannada">Kannada</option>
-                <option value="Malayalam">Malayalam</option>
-                <option value="Gujarati">Gujarati</option>
-                <option value="Punjabi">Punjabi</option>
-                <option value="Other">Other</option>
-              </select>
-              <span className="employee-registration__select-icon">▼</span>
-            </div>
-            {nativeLanguage === 'Other' && (
-              <div className="employee-registration__other-container">
-                <input
-                  type="text"
-                  className="employee-registration__input"
-                  placeholder="Enter Native Language..."
-                  value={otherNativeLanguage}
-                  onChange={(e) => setOtherNativeLanguage(e.target.value)}
+            {/* 12. Native Language */}
+            <FormField label="Native Language" htmlFor="pers-native-language" required>
+              <Stack gap="xs">
+                <Select
+                  id="pers-native-language"
+                  value={nativeLanguage}
+                  onChange={(e) => setNativeLanguage(e.target.value)}
+                  options={[
+                    { value: 'English', label: 'English' },
+                    { value: 'Hindi', label: 'Hindi' },
+                    { value: 'Tamil', label: 'Tamil' },
+                    { value: 'Telugu', label: 'Telugu' },
+                    { value: 'Bengali', label: 'Bengali' },
+                    { value: 'Marathi', label: 'Marathi' },
+                    { value: 'Kannada', label: 'Kannada' },
+                    { value: 'Malayalam', label: 'Malayalam' },
+                    { value: 'Gujarati', label: 'Gujarati' },
+                    { value: 'Punjabi', label: 'Punjabi' },
+                    { value: 'Other', label: 'Other' },
+                  ]}
                 />
-              </div>
-            )}
-          </div>
+                {nativeLanguage === 'Other' && (
+                  <Input
+                    placeholder="Enter Native Language..."
+                    value={otherNativeLanguage}
+                    onChange={(e) => setOtherNativeLanguage(e.target.value)}
+                  />
+                )}
+              </Stack>
+            </FormField>
 
-          {/* 13. Father's Name */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">Father&apos;s Name</label>
-            <input
-              type="text"
-              className="employee-registration__input"
-              placeholder="e.g. Ramesh Kumar"
-              value={fatherName}
-              onChange={(e) => setFatherName(e.target.value)}
-            />
-          </div>
+            {/* 13. Father's Name */}
+            <FormField label="Father's Name" htmlFor="pers-father-name">
+              <Input
+                id="pers-father-name"
+                type="text"
+                placeholder="e.g. Ramesh Kumar"
+                value={fatherName}
+                onChange={(e) => setFatherName(e.target.value)}
+              />
+            </FormField>
 
-          {/* 14. Guardian Name */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">Guardian Name</label>
-            <input
-              type="text"
-              className="employee-registration__input"
-              placeholder="e.g. Guardian Name"
-              value={guardianName}
-              onChange={(e) => setGuardianName(e.target.value)}
-            />
-          </div>
-        </div>
-      </div>
+            {/* 14. Guardian Name */}
+            <FormField label="Guardian Name" htmlFor="pers-guardian-name">
+              <Input
+                id="pers-guardian-name"
+                type="text"
+                placeholder="e.g. Guardian Name"
+                value={guardianName}
+                onChange={(e) => setGuardianName(e.target.value)}
+              />
+            </FormField>
+          </FormGrid>
+        </Stack>
+      </FormSection>
 
       {/* SECTION 2: FAMILY & NOMINATION */}
-      <div className="personal-info__group">
-        <h3 className="personal-info__group-title">Family &amp; Nomination</h3>
-
-        {/* 15. Family Members (Repeatable) */}
-        <div className="personal-info__field personal-info__field--full">
-          <label className="employee-registration__label personal-info__label-margin">
-            Family Members
-          </label>
-          <div className="personal-info__repeatable-list">
+      <FormSection
+        title="Family & Nomination"
+        description="Family members and policy/statutory nominee beneficiaries"
+      >
+        <Stack gap="xl">
+          {/* 15. Family Members (Repeatable) */}
+          <Stack gap="md">
+            <Toolbar
+              left={<CardTitle>Family Members</CardTitle>}
+              right={
+                <Button variant="secondary" size="sm" type="button" onClick={addFamilyMember}>
+                  + Add Family Member
+                </Button>
+              }
+            />
             {familyMembers.map((fam, idx) => (
-              <div key={fam.id} className="personal-info__repeatable-card">
-                <div className="personal-info__repeatable-header">
-                  <span className="personal-info__repeatable-title">Member #{idx + 1}</span>
-                  {familyMembers.length > 1 && (
-                    <button
-                      type="button"
-                      className="personal-info__remove-item-btn"
-                      onClick={() => removeFamilyMember(fam.id)}
-                    >
-                      ✕ Remove
-                    </button>
-                  )}
-                </div>
-                <div className="employee-registration__form-grid">
-                  <div className="employee-registration__field">
-                    <label className="employee-registration__label">Name</label>
-                    <input
-                      type="text"
-                      className="employee-registration__input"
-                      placeholder="Full Name"
-                      value={fam.name}
-                      onChange={(e) => updateFamilyMember(fam.id, 'name', e.target.value)}
-                    />
-                  </div>
-                  <div className="employee-registration__field">
-                    <label className="employee-registration__label">Relationship</label>
-                    <div className="employee-registration__select-wrapper">
-                      <select
-                        className="employee-registration__select"
-                        value={fam.relationship}
-                        onChange={(e) => updateFamilyMember(fam.id, 'relationship', e.target.value)}
-                      >
-                        <option value="Spouse">Spouse</option>
-                        <option value="Father">Father</option>
-                        <option value="Mother">Mother</option>
-                        <option value="Son">Son</option>
-                        <option value="Daughter">Daughter</option>
-                        <option value="Brother">Brother</option>
-                        <option value="Sister">Sister</option>
-                        <option value="Other">Other</option>
-                      </select>
-                      <span className="employee-registration__select-icon">▼</span>
-                    </div>
-                    {fam.relationship === 'Other' && (
-                      <div className="employee-registration__other-container">
-                        <input
-                          type="text"
-                          className="employee-registration__input"
-                          placeholder="Enter Relationship..."
-                          value={fam.otherRelationship || ''}
-                          onChange={(e) =>
-                            updateFamilyMember(fam.id, 'otherRelationship', e.target.value)
-                          }
-                        />
-                      </div>
-                    )}
-                  </div>
-                  <div className="employee-registration__field">
-                    <label className="employee-registration__label">Date of Birth</label>
-                    <input
-                      type="date"
-                      className="employee-registration__input"
-                      value={fam.dob}
-                      onChange={(e) => updateFamilyMember(fam.id, 'dob', e.target.value)}
-                    />
-                  </div>
-                  <div className="employee-registration__field">
-                    <label className="employee-registration__label">Phone</label>
-                    <div className="personal-info__phone-row">
-                      <select
-                        className="personal-info__country-code-select"
-                        value={fam.countryCode}
-                        onChange={(e) => updateFamilyMember(fam.id, 'countryCode', e.target.value)}
-                      >
-                        <option value="+91">+91 (IN)</option>
-                        <option value="+1">+1 (US)</option>
-                        <option value="+44">+44 (UK)</option>
-                        <option value="+971">+971 (UAE)</option>
-                      </select>
-                      <input
-                        type="tel"
-                        className="employee-registration__input"
-                        placeholder="Phone Number"
-                        value={fam.phone}
-                        onChange={(e) => updateFamilyMember(fam.id, 'phone', e.target.value)}
+              <Card key={fam.id} padding="md">
+                <Stack gap="md">
+                  <Toolbar
+                    left={<CardTitle>Member #{idx + 1}</CardTitle>}
+                    right={
+                      familyMembers.length > 1 ? (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          type="button"
+                          onClick={() => removeFamilyMember(fam.id)}
+                        >
+                          Remove
+                        </Button>
+                      ) : undefined
+                    }
+                  />
+                  <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                    <FormField label="Name" htmlFor={`fam-name-${fam.id}`}>
+                      <Input
+                        id={`fam-name-${fam.id}`}
+                        type="text"
+                        placeholder="Full Name"
+                        value={fam.name}
+                        onChange={(e) => updateFamilyMember(fam.id, 'name', e.target.value)}
                       />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-            <button
-              type="button"
-              className="personal-info__add-repeatable-btn"
-              onClick={addFamilyMember}
-            >
-              + Add Family Member
-            </button>
-          </div>
-        </div>
-
-        {/* 16. Nomination Details (Repeatable) */}
-        <div className="personal-info__field personal-info__field--full personal-info__repeatable-section-gap">
-          <label className="employee-registration__label personal-info__label-margin">
-            Nomination Details
-          </label>
-          <div className="personal-info__repeatable-list">
-            {nominees.map((nom, idx) => (
-              <div key={nom.id} className="personal-info__repeatable-card">
-                <div className="personal-info__repeatable-header">
-                  <span className="personal-info__repeatable-title">Nominee #{idx + 1}</span>
-                  {nominees.length > 1 && (
-                    <button
-                      type="button"
-                      className="personal-info__remove-item-btn"
-                      onClick={() => removeNominee(nom.id)}
-                    >
-                      ✕ Remove
-                    </button>
-                  )}
-                </div>
-                <div className="employee-registration__form-grid">
-                  <div className="employee-registration__field">
-                    <label className="employee-registration__label">Nominee Name</label>
-                    <input
-                      type="text"
-                      className="employee-registration__input"
-                      placeholder="Full Name"
-                      value={nom.name}
-                      onChange={(e) => updateNominee(nom.id, 'name', e.target.value)}
-                    />
-                  </div>
-                  <div className="employee-registration__field">
-                    <label className="employee-registration__label">Relationship</label>
-                    <div className="employee-registration__select-wrapper">
-                      <select
-                        className="employee-registration__select"
-                        value={nom.relationship}
-                        onChange={(e) => updateNominee(nom.id, 'relationship', e.target.value)}
-                      >
-                        <option value="Spouse">Spouse</option>
-                        <option value="Father">Father</option>
-                        <option value="Mother">Mother</option>
-                        <option value="Son">Son</option>
-                        <option value="Daughter">Daughter</option>
-                        <option value="Sibling">Sibling</option>
-                        <option value="Other">Other</option>
-                      </select>
-                      <span className="employee-registration__select-icon">▼</span>
-                    </div>
-                    {nom.relationship === 'Other' && (
-                      <div className="employee-registration__other-container">
-                        <input
-                          type="text"
-                          className="employee-registration__input"
-                          placeholder="Enter Relationship..."
-                          value={nom.otherRelationship || ''}
+                    </FormField>
+                    <FormField label="Relationship" htmlFor={`fam-rel-${fam.id}`}>
+                      <Stack gap="xs">
+                        <Select
+                          id={`fam-rel-${fam.id}`}
+                          value={fam.relationship}
                           onChange={(e) =>
-                            updateNominee(nom.id, 'otherRelationship', e.target.value)
+                            updateFamilyMember(fam.id, 'relationship', e.target.value)
                           }
+                          options={[
+                            { value: 'Spouse', label: 'Spouse' },
+                            { value: 'Father', label: 'Father' },
+                            { value: 'Mother', label: 'Mother' },
+                            { value: 'Son', label: 'Son' },
+                            { value: 'Daughter', label: 'Daughter' },
+                            { value: 'Brother', label: 'Brother' },
+                            { value: 'Sister', label: 'Sister' },
+                            { value: 'Other', label: 'Other' },
+                          ]}
                         />
-                      </div>
-                    )}
-                  </div>
-                  <div className="employee-registration__field">
-                    <label className="employee-registration__label">Share % (1-100)</label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="100"
-                      className="employee-registration__input"
-                      placeholder="100"
-                      value={nom.sharePercentage}
-                      onChange={(e) =>
-                        updateNominee(nom.id, 'sharePercentage', Number(e.target.value) || '')
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
+                        {fam.relationship === 'Other' && (
+                          <Input
+                            placeholder="Enter Relationship..."
+                            value={fam.otherRelationship || ''}
+                            onChange={(e) =>
+                              updateFamilyMember(fam.id, 'otherRelationship', e.target.value)
+                            }
+                          />
+                        )}
+                      </Stack>
+                    </FormField>
+                    <FormField label="Date of Birth" htmlFor={`fam-dob-${fam.id}`}>
+                      <Input
+                        id={`fam-dob-${fam.id}`}
+                        type="date"
+                        value={fam.dob}
+                        onChange={(e) => updateFamilyMember(fam.id, 'dob', e.target.value)}
+                      />
+                    </FormField>
+                    <FormField label="Phone" htmlFor={`fam-phone-${fam.id}`}>
+                      <Inline gap="xs">
+                        <Select
+                          value={fam.countryCode}
+                          onChange={(e) =>
+                            updateFamilyMember(fam.id, 'countryCode', e.target.value)
+                          }
+                          options={[
+                            { value: '+91', label: '+91 (IN)' },
+                            { value: '+1', label: '+1 (US)' },
+                            { value: '+44', label: '+44 (UK)' },
+                            { value: '+971', label: '+971 (UAE)' },
+                          ]}
+                        />
+                        <Input
+                          id={`fam-phone-${fam.id}`}
+                          type="tel"
+                          placeholder="Phone Number"
+                          value={fam.phone}
+                          onChange={(e) => updateFamilyMember(fam.id, 'phone', e.target.value)}
+                        />
+                      </Inline>
+                    </FormField>
+                  </FormGrid>
+                </Stack>
+              </Card>
             ))}
-            <button
-              type="button"
-              className="personal-info__add-repeatable-btn"
-              onClick={addNominee}
-            >
-              + Add Nominee
-            </button>
-          </div>
-        </div>
-      </div>
+          </Stack>
+
+          {/* 16. Nomination Details (Repeatable) */}
+          <Stack gap="md">
+            <Toolbar
+              left={<CardTitle>Nomination Details</CardTitle>}
+              right={
+                <Button variant="secondary" size="sm" type="button" onClick={addNominee}>
+                  + Add Nominee
+                </Button>
+              }
+            />
+            {nominees.map((nom, idx) => (
+              <Card key={nom.id} padding="md">
+                <Stack gap="md">
+                  <Toolbar
+                    left={<CardTitle>Nominee #{idx + 1}</CardTitle>}
+                    right={
+                      nominees.length > 1 ? (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          type="button"
+                          onClick={() => removeNominee(nom.id)}
+                        >
+                          Remove
+                        </Button>
+                      ) : undefined
+                    }
+                  />
+                  <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                    <FormField label="Nominee Name" htmlFor={`nom-name-${nom.id}`}>
+                      <Input
+                        id={`nom-name-${nom.id}`}
+                        type="text"
+                        placeholder="Full Name"
+                        value={nom.name}
+                        onChange={(e) => updateNominee(nom.id, 'name', e.target.value)}
+                      />
+                    </FormField>
+                    <FormField label="Relationship" htmlFor={`nom-rel-${nom.id}`}>
+                      <Stack gap="xs">
+                        <Select
+                          id={`nom-rel-${nom.id}`}
+                          value={nom.relationship}
+                          onChange={(e) => updateNominee(nom.id, 'relationship', e.target.value)}
+                          options={[
+                            { value: 'Spouse', label: 'Spouse' },
+                            { value: 'Father', label: 'Father' },
+                            { value: 'Mother', label: 'Mother' },
+                            { value: 'Son', label: 'Son' },
+                            { value: 'Daughter', label: 'Daughter' },
+                            { value: 'Sibling', label: 'Sibling' },
+                            { value: 'Other', label: 'Other' },
+                          ]}
+                        />
+                        {nom.relationship === 'Other' && (
+                          <Input
+                            placeholder="Enter Relationship..."
+                            value={nom.otherRelationship || ''}
+                            onChange={(e) =>
+                              updateNominee(nom.id, 'otherRelationship', e.target.value)
+                            }
+                          />
+                        )}
+                      </Stack>
+                    </FormField>
+                    <FormField label="Share % (1-100)" htmlFor={`nom-share-${nom.id}`}>
+                      <Input
+                        id={`nom-share-${nom.id}`}
+                        type="number"
+                        min="1"
+                        max="100"
+                        placeholder="100"
+                        value={nom.sharePercentage}
+                        onChange={(e) =>
+                          updateNominee(nom.id, 'sharePercentage', Number(e.target.value) || '')
+                        }
+                      />
+                    </FormField>
+                  </FormGrid>
+                </Stack>
+              </Card>
+            ))}
+          </Stack>
+        </Stack>
+      </FormSection>
 
       {/* SECTION 3: CONTACT DETAILS */}
-      <div className="personal-info__group">
-        <h3 className="personal-info__group-title">Contact Details</h3>
-
-        <div className="employee-registration__form-grid">
+      <FormSection
+        title="Contact Details"
+        description="Communication details, phone numbers, and emergency contact channels"
+      >
+        <FormGrid columns={2} layout="horizontal" labelWidth="md">
           {/* 17. Time Zone */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">
-              Time Zone <span className="employee-registration__required">*</span>
-            </label>
-            <div className="employee-registration__select-wrapper">
-              <select
-                className="employee-registration__select"
-                value={timeZone}
-                onChange={(e) => setTimeZone(e.target.value)}
-              >
-                <option value="(GMT+05:30) Asia/Kolkata (IST)">
-                  (GMT+05:30) India Standard Time (Asia/Kolkata)
-                </option>
-                <option value="(GMT+00:00) UTC">
-                  (GMT+00:00) UTC (Coordinated Universal Time)
-                </option>
-                <option value="(GMT-05:00) America/New_York (EST)">
-                  (GMT-05:00) Eastern Time (US &amp; Canada)
-                </option>
-                <option value="(GMT+04:00) Asia/Dubai (GST)">
-                  (GMT+04:00) Gulf Standard Time (Dubai)
-                </option>
-                <option value="(GMT+08:00) Asia/Singapore (SGT)">(GMT+08:00) Singapore Time</option>
-              </select>
-              <span className="employee-registration__select-icon">▼</span>
-            </div>
-          </div>
+          <FormField label="Time Zone" htmlFor="pers-timezone" required>
+            <Select
+              id="pers-timezone"
+              value={timeZone}
+              onChange={(e) => setTimeZone(e.target.value)}
+              options={[
+                {
+                  value: '(GMT+05:30) Asia/Kolkata (IST)',
+                  label: '(GMT+05:30) India Standard Time (Asia/Kolkata)',
+                },
+                {
+                  value: '(GMT+00:00) UTC',
+                  label: '(GMT+00:00) UTC (Coordinated Universal Time)',
+                },
+                {
+                  value: '(GMT-05:00) America/New_York (EST)',
+                  label: '(GMT-05:00) Eastern Time (US & Canada)',
+                },
+                {
+                  value: '(GMT+04:00) Asia/Dubai (GST)',
+                  label: '(GMT+04:00) Gulf Standard Time (Dubai)',
+                },
+                { value: '(GMT+08:00) Asia/Singapore (SGT)', label: '(GMT+08:00) Singapore Time' },
+              ]}
+            />
+          </FormField>
 
           {/* 18. Mobile Phone */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">
-              Mobile Phone <span className="employee-registration__required">*</span>
-            </label>
-            <div className="personal-info__phone-row">
-              <select
-                className="personal-info__country-code-select"
+          <FormField label="Mobile Phone" htmlFor="pers-mobile-phone" required>
+            <Inline gap="xs">
+              <Select
                 value={mobileCountryCode}
                 onChange={(e) => setMobileCountryCode(e.target.value)}
-              >
-                <option value="+91">+91 (IN)</option>
-                <option value="+1">+1 (US)</option>
-                <option value="+44">+44 (UK)</option>
-                <option value="+971">+971 (UAE)</option>
-                <option value="+65">+65 (SG)</option>
-              </select>
-              <input
+                options={[
+                  { value: '+91', label: '+91 (IN)' },
+                  { value: '+1', label: '+1 (US)' },
+                  { value: '+44', label: '+44 (UK)' },
+                  { value: '+971', label: '+971 (UAE)' },
+                  { value: '+65', label: '+65 (SG)' },
+                ]}
+              />
+              <Input
+                id="pers-mobile-phone"
                 type="tel"
-                className="employee-registration__input"
                 placeholder="e.g. 98765 43210"
                 value={mobilePhone}
                 onChange={(e) => setMobilePhone(e.target.value)}
               />
-            </div>
-          </div>
+            </Inline>
+          </FormField>
 
           {/* 19. Home Phone */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">Home Phone</label>
-            <div className="personal-info__phone-row">
-              <select
-                className="personal-info__country-code-select"
+          <FormField label="Home Phone" htmlFor="pers-home-phone">
+            <Inline gap="xs">
+              <Select
                 value={homeCountryCode}
                 onChange={(e) => setHomeCountryCode(e.target.value)}
-              >
-                <option value="+91">+91 (IN)</option>
-                <option value="+1">+1 (US)</option>
-                <option value="+44">+44 (UK)</option>
-                <option value="+971">+971 (UAE)</option>
-              </select>
-              <input
+                options={[
+                  { value: '+91', label: '+91 (IN)' },
+                  { value: '+1', label: '+1 (US)' },
+                  { value: '+44', label: '+44 (UK)' },
+                  { value: '+971', label: '+971 (UAE)' },
+                ]}
+              />
+              <Input
+                id="pers-home-phone"
                 type="tel"
-                className="employee-registration__input"
                 placeholder="Landline number"
                 value={homePhone}
                 onChange={(e) => setHomePhone(e.target.value)}
               />
-            </div>
-          </div>
+            </Inline>
+          </FormField>
 
           {/* 20. Business Phone */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">Business Phone</label>
-            <div className="personal-info__phone-row">
-              <select
-                className="personal-info__country-code-select"
+          <FormField label="Business Phone" htmlFor="pers-business-phone">
+            <Inline gap="xs">
+              <Select
                 value={businessCountryCode}
                 onChange={(e) => setBusinessCountryCode(e.target.value)}
-              >
-                <option value="+91">+91 (IN)</option>
-                <option value="+1">+1 (US)</option>
-                <option value="+44">+44 (UK)</option>
-                <option value="+971">+971 (UAE)</option>
-              </select>
-              <input
+                options={[
+                  { value: '+91', label: '+91 (IN)' },
+                  { value: '+1', label: '+1 (US)' },
+                  { value: '+44', label: '+44 (UK)' },
+                  { value: '+971', label: '+971 (UAE)' },
+                ]}
+              />
+              <Input
+                id="pers-business-phone"
                 type="tel"
-                className="employee-registration__input"
                 placeholder="Office extension"
                 value={businessPhone}
                 onChange={(e) => setBusinessPhone(e.target.value)}
               />
-            </div>
-          </div>
+            </Inline>
+          </FormField>
 
           {/* 21. Work Phone */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">Work Phone</label>
-            <div className="personal-info__phone-row">
-              <select
-                className="personal-info__country-code-select"
+          <FormField label="Work Phone" htmlFor="pers-work-phone">
+            <Inline gap="xs">
+              <Select
                 value={workCountryCode}
                 onChange={(e) => setWorkCountryCode(e.target.value)}
-              >
-                <option value="+91">+91 (IN)</option>
-                <option value="+1">+1 (US)</option>
-                <option value="+44">+44 (UK)</option>
-                <option value="+971">+971 (UAE)</option>
-              </select>
-              <input
+                options={[
+                  { value: '+91', label: '+91 (IN)' },
+                  { value: '+1', label: '+1 (US)' },
+                  { value: '+44', label: '+44 (UK)' },
+                  { value: '+971', label: '+971 (UAE)' },
+                ]}
+              />
+              <Input
+                id="pers-work-phone"
                 type="tel"
-                className="employee-registration__input"
                 placeholder="Direct work line"
                 value={workPhone}
                 onChange={(e) => setWorkPhone(e.target.value)}
               />
-            </div>
-          </div>
+            </Inline>
+          </FormField>
 
           {/* 22. Email Address */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">
-              Email Address <span className="employee-registration__required">*</span>
-            </label>
-            <input
+          <FormField
+            label="Email Address"
+            htmlFor="pers-email"
+            required
+            error={emailError || undefined}
+          >
+            <Input
+              id="pers-email"
               type="email"
-              className="employee-registration__input"
               placeholder="e.g. employee@company.com"
               value={email}
               onChange={handleEmailChange}
+              error={emailError || undefined}
             />
-            {emailError && <span className="personal-info__error-hint">{emailError}</span>}
-          </div>
-        </div>
-      </div>
+          </FormField>
+        </FormGrid>
+      </FormSection>
 
       {/* SECTION 4: ADDRESS DETAILS */}
-      <div className="personal-info__group">
-        <h3 className="personal-info__group-title">Address Details</h3>
-
-        <div className="employee-registration__form-grid">
+      <FormSection
+        title="Address Details"
+        description="Residential and permanent address information"
+      >
+        <FormGrid columns={2} layout="horizontal" labelWidth="md">
           {/* 23. Street (Full width) */}
-          <div className="employee-registration__field personal-info__field--full">
-            <label className="employee-registration__label">
-              Street <span className="employee-registration__required">*</span>
-            </label>
-            <input
+          <FormField label="Street" htmlFor="pers-street" required span={2}>
+            <Input
+              id="pers-street"
               type="text"
-              className="employee-registration__input"
               placeholder="Building, Flat No., Street, Area"
               value={street}
               onChange={(e) => setStreet(e.target.value)}
             />
-          </div>
+          </FormField>
 
-          {/* 26. PIN Code (Placed first for auto-fill flow) */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">
-              PIN Code (India) <span className="employee-registration__required">*</span>
-            </label>
-            <input
+          {/* 26. PIN Code */}
+          <FormField
+            label="PIN Code (India)"
+            htmlFor="pers-pincode"
+            required
+            helperText={
+              postalStatus
+                ? `✓ ${postalStatus}`
+                : postalLoading
+                  ? 'Looking up PIN code...'
+                  : undefined
+            }
+          >
+            <Input
+              id="pers-pincode"
               type="text"
               maxLength={6}
-              className="employee-registration__input"
               placeholder="e.g. 600001"
               value={pinCode}
               onChange={(e) => setPinCode(e.target.value)}
             />
-            {postalLoading && (
-              <span className="personal-info__photo-hint">Looking up PIN code...</span>
-            )}
-            {postalStatus && <span className="personal-info__postal-status">✓ {postalStatus}</span>}
-          </div>
+          </FormField>
 
           {/* 24. City */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">
-              City <span className="employee-registration__required">*</span>
-            </label>
-            <input
-              type="text"
-              className="employee-registration__input"
-              placeholder="e.g. Hosur, Chennai, Tambaram"
-              value={city}
-              onChange={handleCityChange}
-            />
-            {cityLoading && (
-              <span className="personal-info__photo-hint">Searching postal PIN code...</span>
-            )}
-            {cityStatus && <span className="personal-info__postal-status">✓ {cityStatus}</span>}
-
-            {availablePincodes.length > 1 && (
-              <div className="employee-registration__other-container personal-info__dropdown-margin">
-                <select
-                  className="employee-registration__select personal-info__pincode-select"
+          <FormField
+            label="City"
+            htmlFor="pers-city"
+            required
+            helperText={
+              cityStatus
+                ? `✓ ${cityStatus}`
+                : cityLoading
+                  ? 'Searching postal PIN code...'
+                  : undefined
+            }
+          >
+            <Stack gap="xs">
+              <Input
+                id="pers-city"
+                type="text"
+                placeholder="e.g. Hosur, Chennai, Tambaram"
+                value={city}
+                onChange={handleCityChange}
+              />
+              {availablePincodes.length > 1 && (
+                <Select
                   value={pinCode}
                   onChange={(e) => {
                     setPinCode(e.target.value);
@@ -1304,120 +1266,75 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
                       setCityStatus(`Selected PIN: ${sel.pincode} (${sel.name})`);
                     }
                   }}
-                >
-                  <option value="">Select specific area PIN code...</option>
-                  {availablePincodes.map((p) => (
-                    <option key={p.pincode} value={p.pincode}>
-                      {p.pincode} - {p.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-          </div>
+                  options={[
+                    { value: '', label: 'Select specific area PIN code...' },
+                    ...availablePincodes.map((p) => ({
+                      value: p.pincode,
+                      label: `${p.pincode} - ${p.name}`,
+                    })),
+                  ]}
+                />
+              )}
+            </Stack>
+          </FormField>
 
           {/* District */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">
-              District <span className="employee-registration__required">*</span>
-            </label>
-            <input
+          <FormField label="District" htmlFor="pers-district" required>
+            <Input
+              id="pers-district"
               type="text"
-              className="employee-registration__input"
               placeholder="e.g. Krishnagiri, Chengalpattu"
               value={district}
               onChange={(e) => setDistrict(e.target.value)}
             />
-          </div>
+          </FormField>
 
           {/* 25. State */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">
-              State <span className="employee-registration__required">*</span>
-            </label>
-            <input
+          <FormField label="State" htmlFor="pers-state" required>
+            <Input
+              id="pers-state"
               type="text"
-              className="employee-registration__input"
               placeholder="e.g. Tamil Nadu"
               value={state}
               onChange={(e) => setState(e.target.value)}
             />
-          </div>
+          </FormField>
 
           {/* 27. Country */}
-          <div className="employee-registration__field">
-            <label className="employee-registration__label">
-              Country <span className="employee-registration__required">*</span>
-            </label>
-            <div className="employee-registration__select-wrapper">
-              <select
-                className="employee-registration__select"
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-              >
-                <option value="India">India</option>
-                <option value="United States">United States</option>
-                <option value="United Kingdom">United Kingdom</option>
-                <option value="United Arab Emirates">United Arab Emirates</option>
-                <option value="Singapore">Singapore</option>
-                <option value="Australia">Australia</option>
-                <option value="Canada">Canada</option>
-              </select>
-              <span className="employee-registration__select-icon">▼</span>
-            </div>
-          </div>
+          <FormField label="Country" htmlFor="pers-country" required>
+            <Select
+              id="pers-country"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              options={[
+                { value: 'India', label: 'India' },
+                { value: 'United States', label: 'United States' },
+                { value: 'United Kingdom', label: 'United Kingdom' },
+                { value: 'United Arab Emirates', label: 'United Arab Emirates' },
+                { value: 'Singapore', label: 'Singapore' },
+                { value: 'Australia', label: 'Australia' },
+                { value: 'Canada', label: 'Canada' },
+              ]}
+            />
+          </FormField>
+
           {/* Custom Fields in Address Details */}
           {renderCustomFieldsForCard('c_pers_address')}
-        </div>
-      </div>
+        </FormGrid>
+      </FormSection>
 
       {/* Render Newly Created Custom Cards */}
       {customCards
         .filter((c) => c.isCustom)
         .map((card) => {
-          const cardFields = customFields.filter((f) => f.cardId === card.id);
           return (
-            <div key={card.id} className="personal-info__group">
-              <h3 className="personal-info__group-title">{card.title}</h3>
-              <div className="employee-registration__form-grid">
-                {cardFields.map((f) => (
-                  <div key={f.id} className="employee-registration__field">
-                    <label className="employee-registration__label">
-                      {f.label}{' '}
-                      {f.required && <span className="employee-registration__required">*</span>}
-                    </label>
-                    {f.fieldType === 'select' ? (
-                      <div className="employee-registration__select-wrapper">
-                        <select className="employee-registration__select" disabled={f.readOnly}>
-                          <option value="">Select {f.label}</option>
-                          {f.options?.map((opt, idx) => (
-                            <option key={idx} value={opt}>
-                              {opt}
-                            </option>
-                          ))}
-                        </select>
-                        <span className="employee-registration__select-icon">▼</span>
-                      </div>
-                    ) : (
-                      <input
-                        type={
-                          f.fieldType === 'date'
-                            ? 'date'
-                            : f.fieldType === 'number'
-                              ? 'number'
-                              : 'text'
-                        }
-                        className="employee-registration__input"
-                        placeholder={f.defaultValue || `Enter ${f.label}`}
-                        disabled={f.readOnly}
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
+            <FormSection key={card.id} title={card.title}>
+              <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                {renderCustomFieldsForCard(card.id)}
+              </FormGrid>
+            </FormSection>
           );
         })}
-    </div>
+    </Stack>
   );
 }

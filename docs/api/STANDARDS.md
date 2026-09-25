@@ -4,92 +4,117 @@ The source of truth for how BEZENT's REST API is designed. For the error-
 handling and validation architecture these standards build on, see
 [../architecture/BACKEND.md](../architecture/BACKEND.md).
 
-## Versioning and URL structure
+## Versioning and URL Structure
 
-- All routes are mounted under `/api/v1`.
-- Resource-oriented URLs: `/api/v1/<resource>` (plural noun), e.g.
-  `/api/v1/employees` (not yet implemented).
-- A breaking change to an existing endpoint's contract requires a new
-  version prefix (`/api/v2`) rather than silently changing `/api/v1`
-  behavior — versioning strategy is finalized in detail once a real
-  breaking change is first needed.
+- All routes are mounted under the `/api/v1` namespace.
+- Platform utility routes live at `/api/v1/<utility>`:
+  - `/api/v1/health`
+  - `/api/v1/context`
+- Business application routes follow the canonical application namespace:
+  - `/api/v1/<application>/<domain>/...`
+  - Current business application: `/api/v1/hrms/...`
+- A breaking change to an existing endpoint's contract requires a new version prefix (`/api/v2`) rather than silently changing `/api/v1` behavior.
 
-## Pagination, filtering, sorting, search
+## Request Validation
 
-To be applied uniformly once the first list endpoint is built:
+- Validation happens strictly at the API controller boundary using Zod schemas before any service or repository logic executes.
+- Frontend-side validation is never trusted as the sole line of defense.
+- When validation fails, controllers throw a `ValidationError` containing structured field-level errors (`details?: Record<string, string>`), which the centralized error handler transforms into a 400 response.
 
-- **Pagination** — `?page=`/`?pageSize=` query parameters as the default
-  approach; a cursor-based scheme is adopted instead only for an endpoint
-  with a specific need (e.g. high-write, frequently-reordered data), and
-  documented per-endpoint if so.
-- **Filtering** — via query parameters named after the field they filter
-  (e.g. `?status=active`), documented per endpoint.
-- **Sorting** — `?sort=field` / `?order=asc|desc`, documented per endpoint.
-- **Search** — a dedicated `?q=` parameter for free-text search where an
-  endpoint supports it.
+## Response Conventions
 
-## Request validation
+- **Success Data Envelope:** All successful JSON responses wrap their payload in a top-level `data` property:
+  ```json
+  {
+    "data": { ... }
+  }
+  ```
+- **Paginated Collections:** List endpoints returning paginated data provide `data`, `pagination`, and optional summary `counts`:
+  ```json
+  {
+    "data": [ ... ],
+    "pagination": {
+      "total": 42,
+      "page": 1,
+      "pageSize": 20,
+      "totalPages": 3
+    },
+    "counts": {
+      "all": 42,
+      "draft": 5,
+      "in_progress": 25,
+      "completed": 12
+    }
+  }
+  ```
+- **HTTP Status Codes:**
+  - `200 OK` — Standard successful retrieval or update.
+  - `201 Created` — Successful resource creation.
+  - `400 Bad Request` — Validation failure (`VALIDATION_ERROR`) or missing context (`CONTEXT_MISSING`).
+  - `404 Not Found` — Resource not found (`NOT_FOUND`).
+  - `409 Conflict` — State conflict (`CONFLICT`).
+  - `500 Internal Error` — Unexpected server errors (`INTERNAL_ERROR`) or database failure (`DATABASE_UNAVAILABLE`).
 
-Validation happens at the API boundary — the controller/route layer —
-before any service/business logic runs. Frontend-side validation is never
-trusted as the only line of defense. See
-[../architecture/BACKEND.md](../architecture/BACKEND.md#validation) for the
-validation-library direction (Zod).
+## Error Envelope
 
-## Errors
-
-All error responses follow the centralized shape produced by
-`apps/api/src/app/errors/errorHandler.ts`:
+All error responses follow the centralized shape produced by `apps/api/src/app/errors/errorHandler.ts`:
 
 ```json
 {
   "error": {
     "code": "NOT_FOUND",
-    "message": "Resource not found"
+    "message": "Resource not found",
+    "details": {
+      "fieldName": "Explanation of validation error"
+    }
   }
 }
 ```
 
-- `code` is a stable, machine-readable string (not an HTTP status text).
-- `message` is safe to show to an API consumer.
-- A `stack` field is included only outside `production` — never in a
-  production response.
-- Controllers throw an `AppError` subclass; they never call
-  `res.status(...).json(...)` directly for error cases.
+- `code` is a stable, machine-readable string (e.g. `NOT_FOUND`, `VALIDATION_ERROR`, `DATABASE_UNAVAILABLE`).
+- `message` is a safe, human-readable error description.
+- `details` is included for validation errors providing field-by-field explanations.
+- `stack` is included outside production only — never in production.
+- Controllers throw `AppError` subclasses; they never call `res.status(...).json(...)` directly for errors.
 
-## Authentication and authorization
+## Development Context vs. Production Auth
 
-Not implemented yet. Once `platform` identity/access-control capabilities
-exist, every non-public endpoint requires authentication, and
-authorization is enforced server-side per request — never inferred from
-frontend state alone. Header/token scheme is defined when that work begins.
+- **Current Implementation:** Request context is provided by `devContextMiddleware` (`apps/api/src/platform/context/devContext.ts`). It inspects `x-tenant-id` and `x-company-id` headers, falling back to `DEFAULT_DEV_CONTEXT` (`tenant_demo_01`, `comp_demo_01`).
+- **Trust Boundary:** Headers are development-only inputs and are **not** authenticated or validated against the `tenants` table.
+- **Planned / Future:** Production identity, verified session tokens, membership resolution, and RBAC will replace `devContext` when platform authentication is built.
 
-## Tenant scoping
+## Active Route Overview (Current)
 
-Every endpoint that touches tenant-scoped data resolves and enforces
-tenant scope server-side (from the authenticated session, not from a
-client-supplied tenant identifier alone). See
-[../architecture/DATABASE.md](../architecture/DATABASE.md#multi-tenancy).
+A concise overview of active endpoints currently registered under `/api/v1`:
 
-## Endpoints (current)
+### Platform
 
-### `GET /api/v1/health`
+- `GET /api/v1/health` — Application health and MySQL database pool status.
+- `GET /api/v1/context` — Returns active development context (`tenantId`, `companyId`).
 
-Returns application health. Reports database connectivity only if a
-database is configured; never requires business tables to exist.
+### HRMS Organization Masters
 
-```json
-{
-  "status": "ok",
-  "service": "bezent-api",
-  "timestamp": "2026-01-01T00:00:00.000Z",
-  "database": { "configured": false, "connected": false }
-}
-```
+- `GET /api/v1/hrms/organization/masters` — Retrieves companies, departments, designations, and locations scoped to tenant and company.
 
-## Changing these standards
+### HRMS Onboarding
 
-A change to the conventions above (versioning scheme, pagination approach,
-error shape, auth scheme) applies to every future endpoint — treat it as an
-architectural change requiring the ADR + approval process in
-[../../AGENTS.md, Article 4](../../AGENTS.md#article-4--changing-this-stack).
+- `GET /api/v1/hrms/onboarding/new-hires` — List new hires with pagination, status filters, and category counts.
+- `GET /api/v1/hrms/onboarding/cases` — List active onboarding cases.
+- `POST /api/v1/hrms/onboarding/cases` — Create a new onboarding case.
+- `GET /api/v1/hrms/onboarding/cases/:id` — Retrieve onboarding case details and stage timeline.
+- `POST /api/v1/hrms/onboarding/cases/:id/stage` — Advance/transition onboarding stage.
+- `POST /api/v1/hrms/onboarding/cases/:id/withdraw` — Withdraw an onboarding case.
+
+### HRMS Onboarding Settings
+
+- `GET /api/v1/hrms/settings/onboarding/summary` — Full onboarding settings summary.
+- `GET` / `PUT /api/v1/hrms/settings/onboarding/general` — General onboarding policies.
+- `GET` / `PUT /api/v1/hrms/settings/onboarding/stages` — Stage configuration pipeline.
+- `GET` / `PUT /api/v1/hrms/settings/onboarding/fields` — Dynamic form field configurations.
+- `GET` / `PUT /api/v1/hrms/settings/onboarding/documents` — Document collection requirements.
+- `GET` / `PUT /api/v1/hrms/settings/onboarding/checklists` — Checklist templates.
+- `GET` / `PUT /api/v1/hrms/settings/onboarding/conversion` — Conversion settings.
+
+## Changing These Standards
+
+A change to the conventions above applies platform-wide — treat it as an architectural change requiring the ADR + approval process in [AGENTS.md, Article 4](../../AGENTS.md#article-4--changing-this-stack).

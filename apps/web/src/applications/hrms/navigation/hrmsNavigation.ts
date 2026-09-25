@@ -100,13 +100,22 @@ export const HRMS_NAV_DESTINATIONS: readonly NavDestination[] = [
     label: 'Administration',
     icon: 'onboarding',
     segment: 'administration',
-    subtitle: 'Employee Administration',
-    description: 'Employee administration, onboarding, and workforce documents',
-    keywords: ['admin', 'administration', 'onboarding', 'documents', 'employee administration'],
+    subtitle: 'Employees & Employment',
+    description: 'Employee records, employment actions, onboarding, and workforce documents',
+    keywords: [
+      'admin',
+      'administration',
+      'employee directory',
+      'employee profile',
+      'onboarding',
+      'documents',
+      'employee administration',
+    ],
     categoryId: 'people',
     sidebar: true,
     permissionKey: view('administration'),
     children: [
+      child('employees', 'Employees', 'workforce'),
       child('employee-administration', 'Employee Administration', 'employees'),
       child('onboarding', 'Onboarding', 'onboarding'),
       child('documents', 'Documents', 'documents'),
@@ -186,19 +195,8 @@ export const HRMS_NAV_DESTINATIONS: readonly NavDestination[] = [
       child('feedback', '360 Feedback', 'employees'),
     ],
   },
-  {
-    id: 'employees',
-    label: 'Employees',
-    icon: 'employees',
-    segment: 'employees',
-    subtitle: 'Employee Management',
-    description: 'Manage employee profiles, roles, and employment records',
-    keywords: ['staff', 'directory', 'people', 'headcount'],
-    categoryId: 'people',
-    sidebar: true,
-    quickAccess: true,
-    permissionKey: view('employees'),
-  },
+  // Employees is not a top-level destination: the canonical Employee Directory
+  // is Administration → Employees. Legacy `/hrms/employees` redirects there.
 
   // ── More launcher only ────────────────────────────────────────────────
   {

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import {
   Button,
   Card,
+  CardTitle,
+  CardDescription,
   Input,
   Select,
   JourneyNav,
@@ -15,6 +17,7 @@ import {
   FormSection,
   Modal,
   Alert,
+  PageHeader,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { PersonalInformation } from './PersonalInformation';
@@ -690,7 +693,7 @@ export function EmployeeRegistration({
     showToast('Draft deleted.');
   };
 
-  if (!isOpen) return null;
+  if (isOpen === false) return null;
 
   const currentChapterIndex = allSections.findIndex((s) => s.id === activeSection);
   const chapterMatch = REGISTRATION_CHAPTERS.find((c) => c.id === activeSection);
@@ -714,64 +717,60 @@ export function EmployeeRegistration({
 
   return (
     <>
-      <Modal
-        isOpen={isOpen}
-        onClose={() => setShowUnsavedModal(true)}
-        title="Employee Registration"
-        description="Add and manage new employee information"
-        size="workspace"
-        headerActions={
-          <Inline gap="sm" align="center">
-            <button
-              type="button"
-              className="onboarding-page__drafts-btn bezent-btn-draft"
-              onClick={() => {
-                refreshDrafts();
-                setIsDraftsModalOpen(true);
-              }}
-            >
-              <BezentIcon name="documents" size={15} />
-              <span>Drafts ({draftsList.length})</span>
-            </button>
-          </Inline>
-        }
-        headerBottom={
-          <JourneyNav
-            steps={journeySteps}
-            activeId={activeSection}
-            onStepSelect={(id) => setActiveSection(id)}
-          />
-        }
-        footer={
-          <Toolbar
-            left={
-              <Actions gap="sm">
-                <Button
-                  variant="secondary"
-                  type="button"
-                  disabled={activeSection === 'general'}
-                  onClick={handleBack}
-                >
-                  ← Back
-                </Button>
-                <Button variant="secondary" type="button" onClick={() => handleSaveDraft(false)}>
-                  💾 Save Draft
-                </Button>
-                <Button variant="secondary" type="button" onClick={() => setShowUnsavedModal(true)}>
-                  Cancel
-                </Button>
-              </Actions>
-            }
-            right={
-              activeSection !== 'review' ? (
-                <Button variant="primary" type="button" onClick={handleNext}>
-                  Save &amp; Next →
-                </Button>
-              ) : undefined
-            }
-          />
-        }
-      >
+      {/* Region A & B: Workspace Header & Persistent JourneyNav */}
+      <div className="bezent-modal__header bezent-modal__header--with-bottom">
+        <PageHeader
+          title="Employee Registration"
+          subtitle="Add and manage new employee information"
+          breadcrumbs={
+            <div className="bezent-breadcrumb" role="navigation" aria-label="Breadcrumb">
+              <span>Administration</span>
+              <span className="bezent-breadcrumb-separator">/</span>
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  setShowUnsavedModal(true);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setShowUnsavedModal(true);
+                  }
+                }}
+              >
+                Employee Administration
+              </span>
+              <span className="bezent-breadcrumb-separator">/</span>
+              <span className="bezent-breadcrumb-item--active">Employee Registration</span>
+            </div>
+          }
+          actions={
+            <Inline gap="md" align="center">
+              <button
+                type="button"
+                className="onboarding-page__drafts-btn bezent-btn-draft"
+                onClick={() => {
+                  refreshDrafts();
+                  setIsDraftsModalOpen(true);
+                }}
+              >
+                <BezentIcon name="documents" size={16} />
+                <span>View Drafts ({draftsList.length})</span>
+              </button>
+            </Inline>
+          }
+        />
+
+        {/* Persistent Journey Navigation */}
+        <JourneyNav
+          steps={journeySteps}
+          activeId={activeSection}
+          onStepSelect={(id) => setActiveSection(id)}
+        />
+      </div>
+
+      {/* Region C: Scrollable Active Tab Content */}
+      <div className="bezent-modal__body employee-registration-workspace-content">
         <Stack gap="xl">
           {/* Toast Alert Banner */}
           {toastMsg && (
@@ -1137,12 +1136,12 @@ export function EmployeeRegistration({
                   <Inline gap="md" align="center">
                     <BezentIcon name="documents" size={22} />
                     <div>
-                      <h3 className="bezent-card__title">
+                      <CardTitle>
                         {allSections.find((s) => s.id === activeSection)?.label || 'Custom Section'}
-                      </h3>
-                      <p className="bezent-card__desc">
+                      </CardTitle>
+                      <CardDescription>
                         Configured custom fields and section details.
-                      </p>
+                      </CardDescription>
                     </div>
                   </Inline>
                 }
@@ -1156,13 +1155,12 @@ export function EmployeeRegistration({
                     return (
                       <Card key={c.id} padding="md">
                         <Stack gap="sm">
-                          <h4 className="bezent-card__title">{c.title}</h4>
-                          <FormGrid columns={2}>
+                          <CardTitle>{c.title}</CardTitle>
+                          <FormGrid columns={2} layout="horizontal" labelWidth="md">
                             {cardFields.map((f) => (
-                              <div key={f.id}>
+                              <FormField key={f.id} label={f.label} required={f.required}>
                                 {f.fieldType === 'select' ? (
                                   <Select
-                                    label={`${f.label}${f.required ? ' *' : ''}`}
                                     disabled={f.readOnly}
                                     options={[
                                       { value: '', label: `Select ${f.label}` },
@@ -1181,12 +1179,11 @@ export function EmployeeRegistration({
                                           ? 'number'
                                           : 'text'
                                     }
-                                    label={`${f.label}${f.required ? ' *' : ''}`}
                                     placeholder={f.defaultValue || `Enter ${f.label}`}
                                     disabled={f.readOnly}
                                   />
                                 )}
-                              </div>
+                              </FormField>
                             ))}
                           </FormGrid>
                         </Stack>
@@ -1197,7 +1194,38 @@ export function EmployeeRegistration({
             </Stack>
           )}
         </Stack>
-      </Modal>
+      </div>
+
+      {/* Region D: Persistent Bottom Action Bar (Non-scrolling) */}
+      <div className="bezent-modal__footer employee-registration-workspace-actions">
+        <Toolbar
+          left={
+            <Actions gap="sm">
+              <Button
+                variant="secondary"
+                type="button"
+                disabled={activeSection === 'general'}
+                onClick={handleBack}
+              >
+                ← Back
+              </Button>
+              <Button variant="secondary" type="button" onClick={() => handleSaveDraft(false)}>
+                💾 Save Draft
+              </Button>
+              <Button variant="secondary" type="button" onClick={() => setShowUnsavedModal(true)}>
+                Cancel
+              </Button>
+            </Actions>
+          }
+          right={
+            activeSection !== 'review' ? (
+              <Button variant="primary" type="button" onClick={handleNext}>
+                Save &amp; Next →
+              </Button>
+            ) : undefined
+          }
+        />
+      </div>
 
       {/* Drafts Modal */}
       <DraftsModal

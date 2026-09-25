@@ -1,4 +1,4 @@
-import { getDb, isDatabaseConfigured } from '../../../../../db/connection.js';
+import { getDb } from '../../../../../db/connection.js';
 import {
   onboardingGeneralSettings,
   onboardingStageConfigs,
@@ -34,23 +34,8 @@ import type {
   UpdateOnboardingConversionSettingsDto,
 } from '../types/settings.types.js';
 
-// In-memory fallback state for development/testing when MySQL is unconfigured
-const memGeneral = new Map<string, OnboardingGeneralSettings>();
-const memStages = new Map<string, OnboardingStageConfig[]>();
-const memFields = new Map<string, OnboardingFieldConfig[]>();
-const memDocs = new Map<string, OnboardingDocumentRequirement[]>();
-const memChecklists = new Map<string, OnboardingChecklistTemplate[]>();
-const memConversion = new Map<string, OnboardingConversionSettings>();
-
 export class OnboardingSettingsRepository {
   private get db() {
-    if (!isDatabaseConfigured) {
-      throw new AppError(
-        'MySQL database is not configured. Settings require a database connection.',
-        500,
-        'DATABASE_UNAVAILABLE',
-      );
-    }
     return getDb();
   }
 
@@ -60,10 +45,6 @@ export class OnboardingSettingsRepository {
     tenantId: string,
     companyId: string,
   ): Promise<OnboardingGeneralSettings | null> {
-    if (!isDatabaseConfigured) {
-      return memGeneral.get(`${tenantId}:${companyId}`) ?? null;
-    }
-
     const rows = await this.db
       .select()
       .from(onboardingGeneralSettings)
@@ -81,20 +62,6 @@ export class OnboardingSettingsRepository {
     companyId: string,
     data: UpdateOnboardingGeneralSettingsDto,
   ): Promise<OnboardingGeneralSettings> {
-    if (!isDatabaseConfigured) {
-      const key = `${tenantId}:${companyId}`;
-      const existing = await this.getGeneralSettings(tenantId, companyId);
-      if (!existing) {
-        const defaults = getDefaultGeneralSettings(tenantId, companyId);
-        const merged = { ...defaults, ...data } as OnboardingGeneralSettings;
-        memGeneral.set(key, merged);
-        return merged;
-      }
-      const merged = { ...existing, ...data } as OnboardingGeneralSettings;
-      memGeneral.set(key, merged);
-      return merged;
-    }
-
     const existing = await this.getGeneralSettings(tenantId, companyId);
     if (!existing) {
       const defaults = getDefaultGeneralSettings(tenantId, companyId);
@@ -124,10 +91,6 @@ export class OnboardingSettingsRepository {
   // ==================== Stage Configurations ====================
 
   async getStageConfigs(tenantId: string, companyId: string): Promise<OnboardingStageConfig[]> {
-    if (!isDatabaseConfigured) {
-      return memStages.get(`${tenantId}:${companyId}`) ?? [];
-    }
-
     return this.db
       .select()
       .from(onboardingStageConfigs)
@@ -145,11 +108,6 @@ export class OnboardingSettingsRepository {
     companyId: string,
     stageKey: string,
   ): Promise<OnboardingStageConfig | null> {
-    if (!isDatabaseConfigured) {
-      const list = await this.getStageConfigs(tenantId, companyId);
-      return list.find((s) => s.stageKey === stageKey) ?? null;
-    }
-
     const rows = await this.db
       .select()
       .from(onboardingStageConfigs)
@@ -169,27 +127,6 @@ export class OnboardingSettingsRepository {
     stageKey: string,
     data: UpdateOnboardingStageConfigDto,
   ): Promise<OnboardingStageConfig> {
-    if (!isDatabaseConfigured) {
-      const key = `${tenantId}:${companyId}`;
-      let list = memStages.get(key) ?? [];
-      const existing = list.find((s) => s.stageKey === stageKey);
-      if (!existing) {
-        const allDefaults = getDefaultStageConfigs(tenantId, companyId);
-        const matchDefault = allDefaults.find((s) => s.stageKey === stageKey);
-        if (!matchDefault) {
-          throw new AppError(`Stage '${stageKey}' is not supported.`, 400, 'INVALID_STAGE');
-        }
-        const item = { ...matchDefault, ...data } as OnboardingStageConfig;
-        list = [...list, item];
-        memStages.set(key, list);
-        return item;
-      }
-      const updated = { ...existing, ...data } as OnboardingStageConfig;
-      list = list.map((s) => (s.stageKey === stageKey ? updated : s));
-      memStages.set(key, list);
-      return updated;
-    }
-
     const existing = await this.getStageConfigByKey(tenantId, companyId, stageKey);
     if (!existing) {
       const allDefaults = getDefaultStageConfigs(tenantId, companyId);
@@ -225,10 +162,6 @@ export class OnboardingSettingsRepository {
   // ==================== Field Configurations ====================
 
   async getFieldConfigs(tenantId: string, companyId: string): Promise<OnboardingFieldConfig[]> {
-    if (!isDatabaseConfigured) {
-      return memFields.get(`${tenantId}:${companyId}`) ?? [];
-    }
-
     return this.db
       .select()
       .from(onboardingFieldConfigs)
@@ -246,11 +179,6 @@ export class OnboardingSettingsRepository {
     companyId: string,
     fieldKey: string,
   ): Promise<OnboardingFieldConfig | null> {
-    if (!isDatabaseConfigured) {
-      const list = await this.getFieldConfigs(tenantId, companyId);
-      return list.find((f) => f.fieldKey === fieldKey) ?? null;
-    }
-
     const rows = await this.db
       .select()
       .from(onboardingFieldConfigs)
@@ -270,31 +198,6 @@ export class OnboardingSettingsRepository {
     fieldKey: string,
     data: UpdateOnboardingFieldConfigDto,
   ): Promise<OnboardingFieldConfig> {
-    if (!isDatabaseConfigured) {
-      const key = `${tenantId}:${companyId}`;
-      let list = memFields.get(key) ?? [];
-      const existing = list.find((f) => f.fieldKey === fieldKey);
-      if (!existing) {
-        const allDefaults = getDefaultFieldConfigs(tenantId, companyId);
-        const matchDefault = allDefaults.find((f) => f.fieldKey === fieldKey);
-        if (!matchDefault) {
-          throw new AppError(
-            `Field '${fieldKey}' is not configured for this company.`,
-            400,
-            'INVALID_FIELD',
-          );
-        }
-        const item = { ...matchDefault, ...data } as OnboardingFieldConfig;
-        list = [...list, item];
-        memFields.set(key, list);
-        return item;
-      }
-      const updated = { ...existing, ...data } as OnboardingFieldConfig;
-      list = list.map((f) => (f.fieldKey === fieldKey ? updated : f));
-      memFields.set(key, list);
-      return updated;
-    }
-
     const existing = await this.getFieldConfigByKey(tenantId, companyId, fieldKey);
     if (!existing) {
       const allDefaults = getDefaultFieldConfigs(tenantId, companyId);
@@ -337,10 +240,6 @@ export class OnboardingSettingsRepository {
     tenantId: string,
     companyId: string,
   ): Promise<OnboardingDocumentRequirement[]> {
-    if (!isDatabaseConfigured) {
-      return memDocs.get(`${tenantId}:${companyId}`) ?? [];
-    }
-
     return this.db
       .select()
       .from(onboardingDocumentRequirements)
@@ -358,11 +257,6 @@ export class OnboardingSettingsRepository {
     companyId: string,
     id: string,
   ): Promise<OnboardingDocumentRequirement | null> {
-    if (!isDatabaseConfigured) {
-      const list = await this.getDocumentRequirements(tenantId, companyId);
-      return list.find((d) => d.id === id) ?? null;
-    }
-
     const rows = await this.db
       .select()
       .from(onboardingDocumentRequirements)
@@ -381,11 +275,6 @@ export class OnboardingSettingsRepository {
     companyId: string,
     documentType: string,
   ): Promise<OnboardingDocumentRequirement | null> {
-    if (!isDatabaseConfigured) {
-      const list = await this.getDocumentRequirements(tenantId, companyId);
-      return list.find((d) => d.documentType === documentType) ?? null;
-    }
-
     const rows = await this.db
       .select()
       .from(onboardingDocumentRequirements)
@@ -404,36 +293,6 @@ export class OnboardingSettingsRepository {
     companyId: string,
     data: CreateOnboardingDocumentRequirementDto,
   ): Promise<OnboardingDocumentRequirement> {
-    if (!isDatabaseConfigured) {
-      const key = `${tenantId}:${companyId}`;
-      const list = memDocs.get(key) ?? [];
-      if (list.some((d) => d.documentType === data.documentType)) {
-        throw new AppError(
-          `Document requirement with type '${data.documentType}' already exists for this company.`,
-          409,
-          'DUPLICATE_KEY',
-        );
-      }
-      const id = `doc_req_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-      const created = {
-        id,
-        tenantId,
-        companyId,
-        documentType: data.documentType,
-        name: data.name,
-        description: data.description ?? null,
-        isRequired: data.isRequired ?? true,
-        verificationRequired: data.verificationRequired ?? true,
-        expiryTracking: data.expiryTracking ?? false,
-        displayOrder: data.displayOrder ?? 0,
-        isActive: data.isActive ?? true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      } as unknown as OnboardingDocumentRequirement;
-      memDocs.set(key, [...list, created]);
-      return created;
-    }
-
     const existing = await this.getDocumentRequirementByType(
       tenantId,
       companyId,
@@ -472,20 +331,6 @@ export class OnboardingSettingsRepository {
     id: string,
     data: UpdateOnboardingDocumentRequirementDto,
   ): Promise<OnboardingDocumentRequirement> {
-    if (!isDatabaseConfigured) {
-      const key = `${tenantId}:${companyId}`;
-      let list = memDocs.get(key) ?? [];
-      const idx = list.findIndex((d) => d.id === id);
-      if (idx === -1) {
-        throw new NotFoundError(`Document requirement with ID '${id}' not found.`);
-      }
-      const updated = { ...list[idx]!, ...data } as OnboardingDocumentRequirement;
-      list = [...list];
-      list[idx] = updated;
-      memDocs.set(key, list);
-      return updated;
-    }
-
     const existing = await this.getDocumentRequirementById(tenantId, companyId, id);
     if (!existing) {
       throw new NotFoundError(`Document requirement with ID '${id}' not found.`);
@@ -507,17 +352,6 @@ export class OnboardingSettingsRepository {
   }
 
   async deleteDocumentRequirement(tenantId: string, companyId: string, id: string): Promise<void> {
-    if (!isDatabaseConfigured) {
-      const key = `${tenantId}:${companyId}`;
-      let list = memDocs.get(key) ?? [];
-      if (!list.some((d) => d.id === id)) {
-        throw new NotFoundError(`Document requirement with ID '${id}' not found.`);
-      }
-      list = list.filter((d) => d.id !== id);
-      memDocs.set(key, list);
-      return;
-    }
-
     const existing = await this.getDocumentRequirementById(tenantId, companyId, id);
     if (!existing) {
       throw new NotFoundError(`Document requirement with ID '${id}' not found.`);
@@ -541,14 +375,6 @@ export class OnboardingSettingsRepository {
     companyId: string,
     stageKey?: string,
   ): Promise<OnboardingChecklistTemplate[]> {
-    if (!isDatabaseConfigured) {
-      let list = memChecklists.get(`${tenantId}:${companyId}`) ?? [];
-      if (stageKey) {
-        list = list.filter((c) => c.stageKey === stageKey);
-      }
-      return list;
-    }
-
     const conditions = [
       eq(onboardingChecklistTemplates.tenantId, tenantId),
       eq(onboardingChecklistTemplates.companyId, companyId),
@@ -570,11 +396,6 @@ export class OnboardingSettingsRepository {
     companyId: string,
     id: string,
   ): Promise<OnboardingChecklistTemplate | null> {
-    if (!isDatabaseConfigured) {
-      const list = await this.getChecklistTemplates(tenantId, companyId);
-      return list.find((c) => c.id === id) ?? null;
-    }
-
     const rows = await this.db
       .select()
       .from(onboardingChecklistTemplates)
@@ -593,29 +414,6 @@ export class OnboardingSettingsRepository {
     companyId: string,
     data: CreateOnboardingChecklistTemplateDto,
   ): Promise<OnboardingChecklistTemplate> {
-    if (!isDatabaseConfigured) {
-      const key = `${tenantId}:${companyId}`;
-      const list = memChecklists.get(key) ?? [];
-      const id = `chk_tpl_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-      const created = {
-        id,
-        tenantId,
-        companyId,
-        name: data.name,
-        description: data.description ?? null,
-        stageKey: data.stageKey,
-        assigneeType: data.assigneeType ?? 'hr',
-        dueOffsetDays: data.dueOffsetDays ?? 0,
-        isRequired: data.isRequired ?? true,
-        displayOrder: data.displayOrder ?? 0,
-        isActive: data.isActive ?? true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      } as unknown as OnboardingChecklistTemplate;
-      memChecklists.set(key, [...list, created]);
-      return created;
-    }
-
     const id = `chk_tpl_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     await this.db.insert(onboardingChecklistTemplates).values({
       id,
@@ -641,20 +439,6 @@ export class OnboardingSettingsRepository {
     id: string,
     data: UpdateOnboardingChecklistTemplateDto,
   ): Promise<OnboardingChecklistTemplate> {
-    if (!isDatabaseConfigured) {
-      const key = `${tenantId}:${companyId}`;
-      let list = memChecklists.get(key) ?? [];
-      const idx = list.findIndex((c) => c.id === id);
-      if (idx === -1) {
-        throw new NotFoundError(`Checklist template with ID '${id}' not found.`);
-      }
-      const updated = { ...list[idx]!, ...data } as OnboardingChecklistTemplate;
-      list = [...list];
-      list[idx] = updated;
-      memChecklists.set(key, list);
-      return updated;
-    }
-
     const existing = await this.getChecklistTemplateById(tenantId, companyId, id);
     if (!existing) {
       throw new NotFoundError(`Checklist template with ID '${id}' not found.`);
@@ -676,17 +460,6 @@ export class OnboardingSettingsRepository {
   }
 
   async deleteChecklistTemplate(tenantId: string, companyId: string, id: string): Promise<void> {
-    if (!isDatabaseConfigured) {
-      const key = `${tenantId}:${companyId}`;
-      let list = memChecklists.get(key) ?? [];
-      if (!list.some((c) => c.id === id)) {
-        throw new NotFoundError(`Checklist template with ID '${id}' not found.`);
-      }
-      list = list.filter((c) => c.id !== id);
-      memChecklists.set(key, list);
-      return;
-    }
-
     const existing = await this.getChecklistTemplateById(tenantId, companyId, id);
     if (!existing) {
       throw new NotFoundError(`Checklist template with ID '${id}' not found.`);
@@ -709,10 +482,6 @@ export class OnboardingSettingsRepository {
     tenantId: string,
     companyId: string,
   ): Promise<OnboardingConversionSettings | null> {
-    if (!isDatabaseConfigured) {
-      return memConversion.get(`${tenantId}:${companyId}`) ?? null;
-    }
-
     const rows = await this.db
       .select()
       .from(onboardingConversionSettings)
@@ -730,20 +499,6 @@ export class OnboardingSettingsRepository {
     companyId: string,
     data: UpdateOnboardingConversionSettingsDto,
   ): Promise<OnboardingConversionSettings> {
-    if (!isDatabaseConfigured) {
-      const key = `${tenantId}:${companyId}`;
-      const existing = await this.getConversionSettings(tenantId, companyId);
-      if (!existing) {
-        const defaults = getDefaultConversionSettings(tenantId, companyId);
-        const merged = { ...defaults, ...data } as OnboardingConversionSettings;
-        memConversion.set(key, merged);
-        return merged;
-      }
-      const merged = { ...existing, ...data } as OnboardingConversionSettings;
-      memConversion.set(key, merged);
-      return merged;
-    }
-
     const existing = await this.getConversionSettings(tenantId, companyId);
     if (!existing) {
       const defaults = getDefaultConversionSettings(tenantId, companyId);
@@ -773,41 +528,6 @@ export class OnboardingSettingsRepository {
   // ==================== Idempotent Company Initialization ====================
 
   async initializeCompanySettings(tenantId: string, companyId: string): Promise<void> {
-    if (!isDatabaseConfigured) {
-      const key = `${tenantId}:${companyId}`;
-      if (!memGeneral.has(key)) {
-        memGeneral.set(
-          key,
-          getDefaultGeneralSettings(tenantId, companyId) as OnboardingGeneralSettings,
-        );
-      }
-      if (!memStages.has(key)) {
-        memStages.set(key, getDefaultStageConfigs(tenantId, companyId) as OnboardingStageConfig[]);
-      }
-      if (!memFields.has(key)) {
-        memFields.set(key, getDefaultFieldConfigs(tenantId, companyId) as OnboardingFieldConfig[]);
-      }
-      if (!memDocs.has(key)) {
-        memDocs.set(
-          key,
-          getDefaultDocumentRequirements(tenantId, companyId) as OnboardingDocumentRequirement[],
-        );
-      }
-      if (!memChecklists.has(key)) {
-        memChecklists.set(
-          key,
-          getDefaultChecklistTemplates(tenantId, companyId) as OnboardingChecklistTemplate[],
-        );
-      }
-      if (!memConversion.has(key)) {
-        memConversion.set(
-          key,
-          getDefaultConversionSettings(tenantId, companyId) as OnboardingConversionSettings,
-        );
-      }
-      return;
-    }
-
     // 1. General
     const gen = await this.getGeneralSettings(tenantId, companyId);
     if (!gen) {

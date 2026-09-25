@@ -1,24 +1,21 @@
-import { useNavigate } from 'react-router-dom';
-import { OnboardingPage } from './OnboardingPage';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { EmployeeRegistration } from '../components/EmployeeRegistration';
+import type { EmployeeRegistrationDraft } from '../components/DraftsModal';
 
 export function EmployeeRegistrationPage({ onCancel }: { onCancel?: () => void } = {}) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const initialDraft = (location.state as { draft?: EmployeeRegistrationDraft })?.draft || null;
 
-  return (
-    <>
-      <OnboardingPage title="Employee Administration" onAddNewHire={() => {}} />
-      <EmployeeRegistration
-        onCancel={() => {
-          if (onCancel) {
-            onCancel();
-          } else {
-            navigate('/hrms/administration/employee-administration');
-          }
-        }}
-      />
-    </>
-  );
+  const handleCancel = () => {
+    if (onCancel) {
+      onCancel();
+    } else {
+      navigate('/hrms/administration/employee-administration');
+    }
+  };
+
+  return <EmployeeRegistration onCancel={handleCancel} initialDraft={initialDraft} />;
 }
 
 export default EmployeeRegistrationPage;

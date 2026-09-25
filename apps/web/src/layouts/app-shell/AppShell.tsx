@@ -4,7 +4,7 @@ import { LeftSidebar } from './LeftSidebar';
 import { RightRail } from './RightRail';
 import { BottomBar } from './BottomBar';
 import { MoreLauncher } from './MoreLauncher';
-import type { ShellLauncher, ShellNavItem, ShellRailItem } from './types';
+import type { ShellLauncher, ShellNavItem, ShellRailItem, WorkspaceVariant } from './types';
 import './AppShell.css';
 
 export interface AppShellProps {
@@ -44,6 +44,12 @@ export interface AppShellProps {
   notificationsOpen?: boolean;
   onNotificationsToggle?: () => void;
   onSettingsClick?: () => void;
+  /**
+   * Workspace presentation variant.
+   * - 'default': standard floating card workspace with outer margins, radius, and shadow.
+   * - 'flush': edge-to-edge center workspace without card margins, radius, or shadow.
+   */
+  workspaceVariant?: WorkspaceVariant;
   /** Main workspace content (the router outlet). */
   children: ReactNode;
 }
@@ -86,6 +92,7 @@ export function AppShell({
   notificationsOpen,
   onNotificationsToggle,
   onSettingsClick,
+  workspaceVariant = 'default',
   children,
 }: AppShellProps) {
   const [railOpen, setRailOpen] = useState(true);
@@ -147,7 +154,13 @@ export function AppShell({
           onClose={() => setMoreOpen(false)}
         />
       )}
-      <main className="app-shell__workspace">{children}</main>
+      <main
+        className={['app-shell__workspace', `app-shell__workspace--${workspaceVariant}`]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        {children}
+      </main>
       {utilityDrawer && <div className="app-shell__drawer">{utilityDrawer}</div>}
       <RightRail
         open={railOpen}

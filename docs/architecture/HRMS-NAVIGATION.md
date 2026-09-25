@@ -41,22 +41,24 @@ LeftSidebar; `categoryId` → also listed in More; `children` → sub-navigation
 inside the shell; addresses outside any application render a global one.
 `app/router/AppRouter.tsx` only mounts `application.routes`.
 
-## 5. Primary sidebar (7 + More)
+## 5. Primary sidebar (6 + More)
 
-Dashboard, Onboarding, Leave, Attendance, Timesheets, Performance,
-Employees, then the More button. Source: the old six fixed slots plus the
-dynamic slot's default (Employees). The old user-swappable dynamic slot
+Dashboard, Administration, Leave, Attendance, Timesheets, Performance, then
+the More button. Source: the old six fixed slots (the old Onboarding slot is
+now the **Administration** group). The old dynamic slot's default
+(Employees) is no longer a sidebar destination — employee records live under
+Administration → Employees (see §7). The old user-swappable dynamic slot
 needed persisted preferences and is not migrated.
 
-## 6. More launcher (20 destinations, 6 categories)
+## 6. More launcher (19 destinations, 6 categories)
 
-Final approved categories (`MORE_CATEGORIES`): **People** (Onboarding,
-Employees, Organization, Recruitment), **Work & Time** (Leave, Attendance,
+Final approved categories (`MORE_CATEGORIES`): **People** (Administration,
+Organization, Recruitment), **Work & Time** (Leave, Attendance,
 Timesheets, Shifts), **Growth** (Performance, Learning, Career Paths), **Pay &
 Benefits** (Payroll, Compensation, Benefits), **Workplace** (Documents, Assets,
 Employee Requests), **HR Operations** (Standard Operations, Reports, HR
-Settings). Includes Quick Access tiles (Leave, Attendance, Employees, Payroll —
-the `quickAccess` flag), category drill-in, search, and the active/“More has an
+Settings). Includes Quick Access tiles (Leave, Attendance, Payroll — the
+`quickAccess` flag), category drill-in, search, and the active/“More has an
 active item” marker. The old 4-group `MORE_GROUP_DEFINITIONS` and the
 prototype "All / People / Workforce / Development / Admin" idea are dead code
 and not used.
@@ -69,8 +71,8 @@ pinning/"Customize", "Recently Used", promoting a tool to the sidebar.
 ## 7. Sub-navigation
 
 Supplied by `children`; the generic `SubNavFlyout` renders them and reports
-the choice. Rows: Dashboard (Overview, Analytics, Activity), Onboarding (New
-Hires, Task Checklists, Document Collection, Workflows), Leave (Leave Summary,
+the choice. Rows: Dashboard (Overview, Analytics, Activity), Administration
+(Employees, Employee Administration, Onboarding, Documents), Leave (Leave Summary,
 Apply Leave, Leave Approvals, Holiday Calendar), Attendance (Daily Log,
 Monthly Summary, Regularization, Policies), Timesheets (Timer & Log, Weekly
 Timesheets, Project Hours, Approvals), Performance (Goals & OKRs, Appraisals,
@@ -83,6 +85,36 @@ Job Openings/Candidates/Interviews/Offers → Recruitment children; Goals &
 OKRs and Appraisals → Performance children; Workforce Hub and Operations
 dropped (dead catalog only); Reports added; Onboarding added to People; the
 old generic filler flyout (`DEFAULT_SUBNAV_ITEMS`) is not carried over.
+
+### Administration
+
+Administration is a navigation group (no overview page; `/hrms/administration`
+lands on its first child). Canonical structure:
+
+```
+Administration
+├── Employees
+├── Employee Administration
+├── Onboarding
+└── Documents
+```
+
+- **Employees** (`/hrms/administration/employees`) — canonical employee
+  records: the Employee Directory, and the Employee Profile at
+  `/hrms/administration/employees/:employeeId`. This is the single place an
+  employee record is viewed; other screens link here.
+- **Employee Administration** (`/hrms/administration/employee-administration`)
+  — employment actions performed on existing employees (job changes,
+  probation & confirmation, transfers, employment status, separation). It is
+  not an employee-records area.
+- **Onboarding** (`/hrms/administration/onboarding`) — the new hire →
+  employee process.
+- **Documents** (`/hrms/administration/documents`) — workforce document
+  operations.
+
+Employees is **not** a top-level HRMS destination: it is not in the sidebar
+or the More launcher. The legacy URL `/hrms/employees` is kept only as a
+compatibility redirect to `/hrms/administration/employees`.
 
 ## 8. Permission-ready metadata
 
@@ -183,6 +215,11 @@ product plan, C = introduced in 0B.8.
 
 No further destinations were invented.
 
+**Superseded since 0B.9:** the top-level Employees destination was removed
+(employee records are Administration → Employees; `/hrms/employees` redirects
+there), and the Onboarding sidebar slot became the Administration group with
+Onboarding as one of its children. See §5 and §7 (Administration).
+
 **Timesheets vs Time Tracker — final:** ONE concept, **Timesheets**. The
 planned HRMS domain list has Timesheets only; the old prototype's Time Tracker
 and Timesheets modules had overlapping sub-navigation. The sidebar keeps the
@@ -194,12 +231,13 @@ launcher search keyword — it is not a destination or an alias route.
 its first sub-view. There is no separate "Home" concept anywhere in the
 catalog.
 
-**Primary sidebar — frozen:** Dashboard, Onboarding, Leave, Attendance,
-Timesheets, Performance, Employees, More (matches the old rail order:
-six fixed slots + the dynamic slot's default; labels are one line at 10.5px;
-guarded by a test).
+**Primary sidebar — frozen:** Dashboard, Administration, Leave, Attendance,
+Timesheets, Performance, More (the old rail's six fixed slots, with the
+Onboarding slot now the Administration group; the dynamic slot's Employees
+default was removed — employees live under Administration → Employees;
+labels are one line at 10.5px; guarded by a test).
 
-**More launcher — validated:** 20 destinations / 6 categories (People 4, Work &
+**More launcher — validated:** 19 destinations / 6 categories (People 3, Work &
 Time 4, Growth 3, Pay & Benefits 3, Workplace 3, HR Operations 3), no
 duplicates or orphans (tests enforce unique ids and valid categories).
 

@@ -102,11 +102,9 @@
 
 [data-theme='dark'] .bezent-card {
   border-color: var(--card-border, rgba(56, 189, 248, 0.32));
-  box-shadow: none;
-}
-
-[data-theme='dark'] .bezent-card--interactive:hover {
-  box-shadow: none;
+  box-shadow:
+    0 4px 20px rgba(2, 11, 28, 0.5),
+    0 0 1px rgba(56, 189, 248, 0.32);
 }
 
 [data-theme='dark'] .bezent-card__title {

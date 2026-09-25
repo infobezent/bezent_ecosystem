@@ -63,3 +63,11 @@ export interface ShellLauncher {
   activeItemId?: string;
   onSelect: (id: string) => void;
 }
+
+/** Layout variant for the AppShell workspace area. */
+export type WorkspaceVariant = 'default' | 'flush';
+
+/** Route handle metadata for Bezent routes. */
+export interface BezentRouteHandle {
+  workspaceVariant?: WorkspaceVariant;
+}

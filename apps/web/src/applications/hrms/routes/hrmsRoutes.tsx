@@ -1,34 +1,25 @@
-import { Navigate, useNavigate, type RouteObject } from 'react-router-dom';
+import { Navigate, type RouteObject } from 'react-router-dom';
 import { hrmsNavigation } from '../navigation';
 import { ModulePlaceholder } from '../pages/ModulePlaceholder';
 import { OnboardingPage, EmployeeRegistrationPage } from '../onboarding';
+import { EmployeeAdministrationPage } from '../employee-administration';
+import { EMPLOYEES_PATH, EmployeeDirectoryPage, EmployeeProfilePage } from '../employees';
 import { SettingsPage } from '../settings';
 import { destinationPath } from '../../../shared/utils/navigation';
+import type { BezentRouteHandle } from '../../../layouts/app-shell';
 
 export const HRMS_BASE_PATH = '/hrms';
 export const HRMS_DEFAULT_DESTINATION_ID = 'dashboard';
 
 const APPLICATION = 'HRMS';
 
-function EmployeeAdministrationRoute() {
-  const navigate = useNavigate();
-
-  return (
-    <OnboardingPage
-      title="Employee Administration"
-      onAddNewHire={() => {
-        navigate('/hrms/administration/onboarding');
-      }}
-    />
-  );
-}
-
 /**
  * HRMS routes, generated from the ONE canonical navigation catalog — there
  * is no separate route map to keep in sync.
  *
  * Administration maps:
- * - employee-administration -> Candidate/New-Hire listing with title "Employee Administration"
+ * - employees -> canonical Employee Directory; employees/:employeeId -> canonical Employee Profile
+ * - employee-administration -> Employee Administration action queue (employment actions on existing employees)
  * - onboarding -> Direct Employee Registration form workspace
  * - documents -> Documents destination placeholder
  *
@@ -50,12 +41,13 @@ export const hrmsRoutes: RouteObject[] = [
       ...hrmsNavigation.destinations.flatMap((destination): RouteObject[] => {
         const isAdministration = destination.id === 'administration';
         const isSettings = destination.id === 'settings';
-
+        // Administration is a navigation group (no overview page); it lands on
+        // its first child, the canonical Employee Directory.
         return [
           {
             path: destination.segment,
             element: isAdministration ? (
-              <Navigate to="/hrms/administration/employee-administration" replace />
+              <Navigate to={EMPLOYEES_PATH} replace />
             ) : isSettings ? (
               <SettingsPage />
             ) : (
@@ -69,8 +61,10 @@ export const hrmsRoutes: RouteObject[] = [
           ...(destination.children ?? []).map((child): RouteObject => ({
             path: `${destination.segment}/${child.id}`,
             element:
-              isAdministration && child.id === 'employee-administration' ? (
-                <EmployeeAdministrationRoute />
+              isAdministration && child.id === 'employees' ? (
+                <EmployeeDirectoryPage />
+              ) : isAdministration && child.id === 'employee-administration' ? (
+                <EmployeeAdministrationPage />
               ) : isAdministration && child.id === 'onboarding' ? (
                 <EmployeeRegistrationPage />
               ) : isAdministration && child.id === 'documents' ? (
@@ -90,9 +84,23 @@ export const hrmsRoutes: RouteObject[] = [
                   sectionId={child.id}
                 />
               ),
+            handle:
+              isAdministration && child.id === 'onboarding'
+                ? ({ workspaceVariant: 'flush' } satisfies BezentRouteHandle)
+                : undefined,
           })),
         ];
       }),
+      // Canonical Employee Profile (Employees directory and Employee Administration both link here)
+      {
+        path: 'administration/employees/:employeeId',
+        element: <EmployeeProfilePage />,
+      },
+      // Legacy top-level Employees URL (no longer a navigation destination)
+      {
+        path: 'employees',
+        element: <Navigate to={EMPLOYEES_PATH} replace />,
+      },
       // Backward-compatible routes for existing Onboarding and Administrative URLs
       {
         path: 'onboarding',

@@ -1,16 +1,16 @@
 import mysql from 'mysql2/promise';
 import { drizzle } from 'drizzle-orm/mysql2';
 import { env, isDatabaseConfigured } from '../app/config/env.js';
+import { DatabaseConnectionError } from '../app/errors/AppError.js';
 
 export { isDatabaseConfigured };
 
 /**
  * Lazily-created MySQL connection pool + Drizzle instance.
  *
- * Phase 0 intentionally ships with no business schema, so nothing here
- * requires the database to be reachable at startup. Callers (currently just
- * the health endpoint) must treat the database as optional and handle
- * `getDb()` throwing or a ping failing gracefully.
+ * Callers requiring database persistence must treat database configuration
+ * and availability as mandatory. If unconfigured or unreachable, calls fail
+ * clearly through DatabaseConnectionError.
  */
 
 let pool: mysql.Pool | undefined;
@@ -33,7 +33,7 @@ function createPool(): mysql.Pool {
 
 export function getPool(): mysql.Pool {
   if (!isDatabaseConfigured) {
-    throw new Error('Database is not configured (see .env.example for required variables).');
+    throw new DatabaseConnectionError('Database is not configured');
   }
   pool ??= createPool();
   return pool;
@@ -57,5 +57,12 @@ export async function pingDatabase(): Promise<boolean> {
     }
   } catch {
     return false;
+  }
+}
+
+export async function closePool(): Promise<void> {
+  if (pool) {
+    await pool.end();
+    pool = undefined;
   }
 }
