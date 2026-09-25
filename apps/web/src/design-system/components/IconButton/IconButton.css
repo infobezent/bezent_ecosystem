@@ -23,6 +23,13 @@
   padding: 0;
   outline: none;
   transition: background-color 0.14s ease;
+  color: inherit;
+}
+
+.bezent-icon-btn .bezent-material-icon,
+.bezent-icon-btn .bezent-duotone-icon,
+.bezent-icon-btn svg {
+  color: inherit;
 }
 
 .bezent-icon-btn:hover:not(:disabled) {

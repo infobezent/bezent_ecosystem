@@ -5,11 +5,12 @@ import './Modal.css';
 export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title?: string;
-  description?: string;
+  title?: ReactNode;
+  description?: ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'workspace';
   children: ReactNode;
   headerBottom?: ReactNode;
+  headerActions?: ReactNode;
   footer?: ReactNode;
   className?: string;
 }
@@ -26,6 +27,7 @@ export function Modal({
   size = 'md',
   children,
   headerBottom,
+  headerActions,
   footer,
   className,
 }: ModalProps) {
@@ -71,14 +73,17 @@ export function Modal({
                 {description && <p className="bezent-modal__desc">{description}</p>}
               </div>
 
-              <button
-                type="button"
-                className="bezent-modal__close-btn"
-                onClick={onClose}
-                aria-label="Close dialog"
-              >
-                <BezentIcon name="close" size={18} color="currentColor" />
-              </button>
+              <div className="bezent-modal__header-actions">
+                {headerActions}
+                <button
+                  type="button"
+                  className="bezent-modal__close-btn"
+                  onClick={onClose}
+                  aria-label="Close dialog"
+                >
+                  <BezentIcon name="close" size={18} color="currentColor" />
+                </button>
+              </div>
             </div>
 
             {headerBottom && <div className="bezent-modal__header-bottom">{headerBottom}</div>}

@@ -229,6 +229,7 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
             </button>
             <Button
               variant="primary"
+              leftIcon={<BezentIcon name="plusSign" size={16} />}
               onClick={() => {
                 if (onAddNewHire) {
                   onAddNewHire();
@@ -237,10 +238,7 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                 }
               }}
             >
-              <span className="onboarding-page__btn-content">
-                <BezentIcon name="plusSign" size={16} />
-                Add New Hire
-              </span>
+              Add New Hire
             </Button>
           </Inline>
         }

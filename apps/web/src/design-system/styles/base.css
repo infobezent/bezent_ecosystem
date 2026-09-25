@@ -30,8 +30,15 @@ nav,
 main {
   transition:
     background-color var(--motion-duration-theme) ease,
-    color var(--motion-duration-theme) ease,
-    border-color var(--motion-duration-theme) ease;
+    color var(--motion-duration-theme) ease;
+}
+
+/* Suppress micro CSS color transitions during radial Arc Reactor power transition to ensure 60fps compositor smoothness */
+html.is-theme-transitioning,
+html.is-theme-transitioning *,
+html.is-theme-transitioning *::before,
+html.is-theme-transitioning *::after {
+  transition: none !important;
 }
 
 /* Form controls and buttons inherit the BEZENT font instead of the

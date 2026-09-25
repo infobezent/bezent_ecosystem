@@ -80,8 +80,8 @@
 /* Positions the design-system Badge on the bell's top-right corner. */
 .top-nav__bell-badge {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 2px;
+  right: 2px;
   display: flex;
   pointer-events: none;
 }

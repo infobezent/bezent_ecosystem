@@ -16,9 +16,11 @@
   padding: 16px 0 12px;
 }
 
-/* Open: let tooltips extend left over the workspace */
+/* Open: let tooltips extend left over the workspace and center rail in the gutter */
 .app-shell--rail-open .right-rail {
   overflow: visible;
+  width: calc(var(--shell-right-rail-width, 56px) + 12px);
+  margin-left: -12px;
 }
 
 .right-rail__top {
@@ -120,6 +122,54 @@
   width: 100%;
 }
 
+.right-rail__group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 46px;
+  padding: 5px 0;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 12px 28px -4px rgba(15, 23, 42, 0.09),
+    0 4px 10px -2px rgba(15, 23, 42, 0.04),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    transform 200ms ease;
+}
+
+.right-rail__group .bezent-right-rail-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  transition:
+    transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.right-rail__group .bezent-right-rail-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+  transform: translateY(-2px) scale(1.08);
+}
+
+.right-rail__group .bezent-right-rail-btn:active {
+  background: rgba(0, 0, 0, 0.07);
+  transform: translateY(0) scale(0.96);
+}
+
+.right-rail__group .bezent-right-rail-btn.is-active {
+  background: rgba(22, 131, 255, 0.12);
+  color: #1a73e8;
+}
+
 .right-rail__divider {
   width: 20px;
   height: 1px;
@@ -211,6 +261,7 @@
 
 /* Appearance (theme) control */
 .right-rail__theme {
+  position: relative;
   width: 40px;
   height: 40px;
   display: flex;
@@ -225,12 +276,74 @@
   outline: none;
   transition:
     background-color 180ms ease,
-    color 180ms ease;
+    color 180ms ease,
+    transform 160ms cubic-bezier(0.2, 0, 0, 1),
+    box-shadow 160ms ease;
 }
 
 .right-rail__theme:hover {
   background: var(--right-rail-btn-hover-bg, #c2e7ff);
   color: var(--right-rail-icon-hover, #1f1f1f);
+}
+
+.right-rail__theme.is-arc-pulse {
+  animation: arcButtonPulse 800ms cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+@keyframes arcButtonPulse {
+  0% {
+    transform: scale(1);
+  }
+  10% {
+    transform: scale(0.94);
+    box-shadow: 0 0 16px rgba(56, 189, 248, 0.6);
+  }
+  25% {
+    transform: scale(1.06);
+    box-shadow:
+      0 0 28px rgba(56, 189, 248, 0.8),
+      inset 0 0 8px rgba(255, 255, 255, 0.7);
+  }
+  60% {
+    transform: scale(1);
+    box-shadow: 0 0 16px rgba(56, 189, 248, 0.4);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: none;
+  }
+}
+
+.right-rail__theme-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform 400ms cubic-bezier(0.2, 0, 0.3, 1),
+    filter 300ms ease;
+}
+
+.right-rail__theme.is-arc-pulse .right-rail__theme-icon-wrap {
+  animation: arcIconMorph 800ms cubic-bezier(0.2, 0, 0.3, 1) forwards;
+}
+
+@keyframes arcIconMorph {
+  0% {
+    transform: rotate(0deg) scale(1);
+    filter: drop-shadow(0 0 0px transparent);
+  }
+  20% {
+    transform: rotate(35deg) scale(0.85);
+    filter: drop-shadow(0 0 8px #38bdf8);
+  }
+  50% {
+    transform: rotate(45deg) scale(1.08);
+    filter: drop-shadow(0 0 12px #38bdf8);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+    filter: drop-shadow(0 0 0px transparent);
+  }
 }
 
 .right-rail__collapse {
@@ -351,4 +464,31 @@
 
 [data-theme='dark'] .right-rail__divider {
   background-color: rgba(56, 189, 248, 0.12);
+}
+
+[data-theme='dark'] .right-rail__group {
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 14px 32px -4px rgba(0, 0, 0, 0.55),
+    0 4px 12px -2px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+[data-theme='dark'] .right-rail__group .bezent-right-rail-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px) scale(1.08);
+  color: #ffffff;
+}
+
+[data-theme='dark'] .right-rail__group .bezent-right-rail-btn:active {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(0) scale(0.96);
+}
+
+[data-theme='dark'] .right-rail__group .bezent-right-rail-btn.is-active {
+  background: rgba(56, 189, 248, 0.16);
+  color: #38bdf8;
 }

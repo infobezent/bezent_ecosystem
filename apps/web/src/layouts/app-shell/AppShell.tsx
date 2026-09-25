@@ -32,7 +32,7 @@ export interface AppShellProps {
   notificationCount?: number;
   /** Theme is owned by ThemeProvider (app/providers); the shell only renders the control. */
   isDarkTheme: boolean;
-  onToggleTheme: () => void;
+  onToggleTheme?: (e?: React.MouseEvent<HTMLButtonElement>) => void;
   /** Right-rail buttons, active one, and selection callback. */
   railItems: ShellRailItem[];
   activeRailItemId?: string;
@@ -125,6 +125,9 @@ export function AppShell({
         onSwitchAccount={onSwitchAccount}
         onHelp={onHelp}
         search={topNavSearch}
+        notificationCount={notificationCount}
+        notificationsOpen={notificationsOpen}
+        onNotificationsToggle={onNotificationsToggle}
         notificationsPanel={notificationsPanel}
       />
       <LeftSidebar
