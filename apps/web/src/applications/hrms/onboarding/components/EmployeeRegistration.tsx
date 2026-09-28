@@ -6,7 +6,8 @@ import {
   CardDescription,
   Input,
   Select,
-  ChapterFocusCarousel,
+  JourneyNav,
+  EditorialHeader,
   Toolbar,
   Actions,
   Stack,
@@ -714,21 +715,19 @@ export function EmployeeRegistration({
     kicker: `CHAPTER // ${String(currentChapterIndex >= 0 ? currentChapterIndex + 1 : 1).padStart(2, '0')}`,
   };
 
-  const chapterSteps = allSections.map((s, idx) => {
+  const journeySteps = allSections.map((s, idx) => {
     const meta = REGISTRATION_CHAPTERS.find((c) => c.id === s.id);
     return {
       id: s.id,
       stepNumber: meta ? meta.stepNumber : String(idx + 1).padStart(2, '0'),
       label: s.label,
-      title: meta ? meta.title : s.label.toUpperCase(),
-      description: meta ? meta.description : '',
     };
   });
 
   return (
     <>
-      {/* Region A: Workspace Header */}
-      <div className="bezent-modal__header">
+      {/* Region A & B: Workspace Header & Persistent JourneyNav */}
+      <div className="bezent-modal__header bezent-modal__header--brand bezent-modal__header--with-bottom">
         <PageHeader
           title="Employee Registration"
           subtitle="Add and manage new employee information"
@@ -770,15 +769,14 @@ export function EmployeeRegistration({
             </Inline>
           }
         />
-      </div>
 
-      {/* Region B: Edge-to-Edge Chapter Focus Carousel */}
-      <ChapterFocusCarousel
-        chapters={chapterSteps}
-        activeId={activeSection}
-        onSelectChapter={(id) => setActiveSection(id)}
-        kickerLabel="REGISTRATION CHAPTERS"
-      />
+        {/* Persistent Journey Navigation */}
+        <JourneyNav
+          steps={journeySteps}
+          activeId={activeSection}
+          onStepSelect={(id) => setActiveSection(id)}
+        />
+      </div>
 
       {/* Region C: Scrollable Active Tab Content */}
       <div className="bezent-modal__body employee-registration-workspace-content">
@@ -790,18 +788,18 @@ export function EmployeeRegistration({
             </Alert>
           )}
 
-          {/* Integrated Chapter Section Header (Number integrated into heading) */}
-          <div className="bezent-chapter-header">
-            <div className="bezent-chapter-header__top">
-              <span className="bezent-chapter-header__position-badge">
-                {currentChapter.stepNumber} / {String(chapterSteps.length).padStart(2, '0')}
+          {/* LAYER 3: Editorial Chapter Introduction */}
+          <EditorialHeader
+            chapterNumber={currentChapter.stepNumber}
+            kicker={currentChapter.kicker}
+            title={currentChapter.title}
+            description={currentChapter.description}
+            actions={
+              <span className="bezent-editorial-header__numeral-sub">
+                {currentChapterIndex + 1} OF {journeySteps.length}
               </span>
-            </div>
-            <h1 className="bezent-chapter-header__title">{currentChapter.title}</h1>
-            {currentChapter.description && (
-              <p className="bezent-chapter-header__desc">{currentChapter.description}</p>
-            )}
-          </div>
+            }
+          />
 
           {activeSection === 'general' ? (
             <Stack gap="xl">
