@@ -32,6 +32,53 @@ export class EmployeeController {
     }
   };
 
+  getNextEmployeeNumber = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const devContext = req.devContext;
+      if (!devContext) {
+        throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
+      }
+
+      const result = await this.service.getNextEmployeeNumber(
+        devContext.tenantId,
+        devContext.companyId,
+      );
+
+      res.json({
+        data: result,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  resolveReferral = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const devContext = req.devContext;
+      if (!devContext) {
+        throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
+      }
+
+      const rawCode = req.params.code;
+      const code = Array.isArray(rawCode) ? rawCode[0] : rawCode;
+      if (!code) {
+        throw new AppError('Referral code is required', 400, 'VALIDATION_ERROR');
+      }
+
+      const result = await this.service.resolveReferral(
+        devContext.tenantId,
+        devContext.companyId,
+        code,
+      );
+
+      res.json({
+        data: result,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
+
   getEmployeeById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const devContext = req.devContext;

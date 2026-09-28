@@ -1,11 +1,22 @@
 export type SourceOfHire =
-  'direct_applicant' | 'referral' | 'agency' | 'campus' | 'linkedin' | 'other';
+  | 'direct_applicant'
+  | 'referral'
+  | 'agency'
+  | 'campus'
+  | 'linkedin'
+  | 'other';
 export type EmploymentType = 'full_time' | 'part_time' | 'contract' | 'intern';
 export type EmploymentStatus =
-  'active' | 'probation' | 'notice' | 'terminated' | 'suspended' | 'resigned';
+  | 'pending_activation'
+  | 'active'
+  | 'probation'
+  | 'notice'
+  | 'terminated'
+  | 'suspended'
+  | 'resigned';
 
 export interface CreateEmployeeDto {
-  employeeNumber: string;
+  employeeNumber?: string | null;
   userId?: string | null;
   firstName: string;
   lastName?: string | null;
@@ -19,6 +30,8 @@ export interface CreateEmployeeDto {
   confirmedJoiningDate?: string | null; // YYYY-MM-DD
   probationEndDate?: string | null; // YYYY-MM-DD
   sourceOfHire?: SourceOfHire | null;
+  referralCode?: string | null;
+  referredByEmployeeId?: string | null;
   noticePeriodDays?: number | null;
   contractEndDate?: string | null; // YYYY-MM-DD
   employmentType?: EmploymentType;
@@ -40,6 +53,8 @@ export interface UpdateEmployeeDto {
   employmentType?: EmploymentType;
   employmentStatus?: EmploymentStatus;
   userId?: string | null;
+  referralCode?: string | null;
+  referredByEmployeeId?: string | null;
 }
 
 export interface EmployeeListItem {
@@ -61,6 +76,9 @@ export interface EmployeeListItem {
   locationName: string | null;
   reportingManagerId: string | null;
   reportingManagerName: string | null;
+  referralCode: string | null;
+  referredByEmployeeId: string | null;
+  referredByName: string | null;
   joiningDate: string;
   confirmedJoiningDate: string | null;
   probationEndDate: string | null;

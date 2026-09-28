@@ -27,7 +27,7 @@ describe('BEZENT Common Portal Settings Center UI', () => {
 
     expect(html).toContain('Administration');
     expect(html).toContain(
-      'Customize employee registration sections, fields, options, and requirements.',
+      'Configure Administration forms, such as the Employee Registration form.',
     );
     expect(html).toContain('Leave');
     expect(html).toContain('Attendance');

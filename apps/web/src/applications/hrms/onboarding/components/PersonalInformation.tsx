@@ -11,6 +11,7 @@ import {
   Card,
   CardTitle,
   Toolbar,
+  Checkbox,
 } from '../../../../design-system/components';
 import { useCustomFields } from '../../settings/context/CustomFieldsContext';
 
@@ -18,6 +19,7 @@ import type {
   OnboardingCardConfig,
   OnboardingFieldConfig,
 } from '../../settings/types/settingsCenter';
+import { RegistrationField } from '../registration/registrationConfig';
 
 // Comprehensive Head/GPO PIN Code & State map for major Indian cities
 // Comprehensive Head/GPO PIN Code & State map for major Indian cities
@@ -231,6 +233,8 @@ export interface NomineeRecord {
   sharePercentage: number | '';
 }
 
+export type ParentGuardianRelationship = 'Father' | 'Mother' | 'Legal Guardian' | 'Other';
+
 interface PersonalInformationProps {
   employeeId: string;
 }
@@ -268,9 +272,59 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
   const [nativeLanguage, setNativeLanguage] = useState('English');
   const [otherNativeLanguage, setOtherNativeLanguage] = useState('');
 
-  // 13-14. Parents / Guardian
-  const [fatherName, setFatherName] = useState('');
-  const [guardianName, setGuardianName] = useState('');
+  // Date of birth error validation
+  const [dobError, setDobError] = useState<string | null>(null);
+
+  // 13-14. Parent / Guardian Details (Structured Repeatable)
+  const [parentGuardians, setParentGuardians] = useState<
+    Array<{ id: string; relationship: ParentGuardianRelationship; name: string }>
+  >([
+    { id: 'pg_1', relationship: 'Father', name: '' },
+  ]);
+
+  const addParentGuardian = () => {
+    setParentGuardians((prev) => [
+      ...prev,
+      { id: `pg_${Date.now()}`, relationship: 'Mother', name: '' },
+    ]);
+  };
+
+  const removeParentGuardian = (id: string) => {
+    setParentGuardians((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const updateParentGuardian = (
+    id: string,
+    field: 'relationship' | 'name',
+    value: string,
+  ) => {
+    setParentGuardians((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? field === 'relationship'
+            ? { ...item, relationship: value as ParentGuardianRelationship }
+            : { ...item, name: value }
+          : item,
+      ),
+    );
+  };
+
+  const handleDobChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setDob(val);
+    if (val) {
+      const selected = new Date(val);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (selected > today) {
+        setDobError('Date of birth cannot be in the future');
+      } else {
+        setDobError(null);
+      }
+    } else {
+      setDobError(null);
+    }
+  };
 
   // 15. Family Members (Repeatable)
   const [familyMembers, setFamilyMembers] = useState<FamilyMemberRecord[]>([
@@ -297,25 +351,17 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
   // 17. Time Zone
   const [timeZone, setTimeZone] = useState('(GMT+05:30) Asia/Kolkata (IST)');
 
-  // 18-21. Phones
+  // 18. Mobile Phone
   const [mobileCountryCode, setMobileCountryCode] = useState('+91');
   const [mobilePhone, setMobilePhone] = useState('');
 
-  const [homeCountryCode, setHomeCountryCode] = useState('+91');
-  const [homePhone, setHomePhone] = useState('');
-
-  const [businessCountryCode, setBusinessCountryCode] = useState('+91');
-  const [businessPhone, setBusinessPhone] = useState('');
-
-  const [workCountryCode, setWorkCountryCode] = useState('+91');
-  const [workPhone, setWorkPhone] = useState('');
-
-  // 22. Email Address
+  // 22. Personal Email
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState<string | null>(null);
 
-  // 23-28. Address Details
+  // 23-28. Address Details (Current and Permanent)
   const [street, setStreet] = useState('');
+  const [addressLine2, setAddressLine2] = useState('');
   const [city, setCity] = useState('');
   const [district, setDistrict] = useState('');
   const [state, setState] = useState('');
@@ -323,6 +369,18 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
   const [country, setCountry] = useState('India');
   const [postalStatus, setPostalStatus] = useState<string | null>(null);
   const [postalLoading, setPostalLoading] = useState(false);
+
+  // Permanent Address
+  const [isPermanentSameAsCurrent, setIsPermanentSameAsCurrent] = useState(true);
+  const [permanentStreet, setPermanentStreet] = useState('');
+  const [permanentAddressLine2, setPermanentAddressLine2] = useState('');
+  const [permanentCity, setPermanentCity] = useState('');
+  const [permanentDistrict, setPermanentDistrict] = useState('');
+  const [permanentState, setPermanentState] = useState('');
+  const [permanentPinCode, setPermanentPinCode] = useState('');
+  const [permanentCountry, setPermanentCountry] = useState('India');
+  const [permanentPostalStatus, setPermanentPostalStatus] = useState<string | null>(null);
+  const [permanentPostalLoading, setPermanentPostalLoading] = useState(false);
 
   const [cityStatus, setCityStatus] = useState<string | null>(null);
   const [cityLoading, setCityLoading] = useState(false);
@@ -392,6 +450,51 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
       setPostalStatus(null);
     }
   }, [pinCode, city]);
+
+  // Permanent Postal API Lookup by 6-digit PIN Code
+  useEffect(() => {
+    if (isPermanentSameAsCurrent) return;
+    const cleanPin = permanentPinCode.trim();
+    if (/^[1-9][0-9]{5}$/.test(cleanPin)) {
+      setPermanentPostalLoading(true);
+      setPermanentPostalStatus('Fetching location details...');
+      fetch(`https://api.postalpincode.in/pincode/${cleanPin}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setPermanentPostalLoading(false);
+          if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice?.length > 0) {
+            const po = data[0].PostOffice[0];
+            const fetchedDistrict = po.District || '';
+            const fetchedState = po.State;
+            const fetchedCountry = po.Country || 'India';
+
+            setPermanentPostalStatus(
+              `Verified: ${po.District || po.Name}, ${fetchedState}, ${fetchedCountry}`,
+            );
+            if (fetchedDistrict) setPermanentDistrict(fetchedDistrict);
+            if (!permanentCity) {
+              const cityCandidate =
+                po.Block && po.Block !== 'NA'
+                  ? po.Block
+                  : po.Name !== po.District
+                    ? po.Name
+                    : po.District;
+              setPermanentCity(cityCandidate);
+            }
+            setPermanentState(fetchedState);
+            setPermanentCountry(fetchedCountry);
+          } else {
+            setPermanentPostalStatus('PIN code not found in official registry.');
+          }
+        })
+        .catch(() => {
+          setPermanentPostalLoading(false);
+          setPermanentPostalStatus(null);
+        });
+    } else {
+      setPermanentPostalStatus(null);
+    }
+  }, [permanentPinCode, isPermanentSameAsCurrent, permanentCity]);
 
   // 2. City Name Lookup -> Auto-generates PIN Code & State
   const handleCityChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -646,7 +749,11 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
             </FormField>
 
             {/* 3. First Name */}
-            <FormField label="First Name" htmlFor="pers-first-name" required>
+            <RegistrationField
+              fieldKey="personal.firstName"
+              value={firstName}
+              htmlFor="pers-first-name"
+            >
               <Input
                 id="pers-first-name"
                 type="text"
@@ -654,10 +761,14 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
               />
-            </FormField>
+            </RegistrationField>
 
             {/* 4. Middle Name */}
-            <FormField label="Middle Name" htmlFor="pers-middle-name">
+            <RegistrationField
+              fieldKey="personal.middleName"
+              value={middleName}
+              htmlFor="pers-middle-name"
+            >
               <Input
                 id="pers-middle-name"
                 type="text"
@@ -665,10 +776,14 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
                 value={middleName}
                 onChange={(e) => setMiddleName(e.target.value)}
               />
-            </FormField>
+            </RegistrationField>
 
             {/* 5. Last Name */}
-            <FormField label="Last Name" htmlFor="pers-last-name" required>
+            <RegistrationField
+              fieldKey="personal.lastName"
+              value={lastName}
+              htmlFor="pers-last-name"
+            >
               <Input
                 id="pers-last-name"
                 type="text"
@@ -676,10 +791,14 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
               />
-            </FormField>
+            </RegistrationField>
 
             {/* 6. Preferred Name */}
-            <FormField label="Preferred Name" htmlFor="pers-preferred-name">
+            <RegistrationField
+              fieldKey="personal.preferredName"
+              value={preferredName}
+              htmlFor="pers-preferred-name"
+            >
               <Input
                 id="pers-preferred-name"
                 type="text"
@@ -687,10 +806,10 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
                 value={preferredName}
                 onChange={(e) => setPreferredName(e.target.value)}
               />
-            </FormField>
+            </RegistrationField>
 
             {/* 7. Gender */}
-            <FormField label="Gender" htmlFor="pers-gender" required>
+            <RegistrationField fieldKey="personal.gender" value={gender} htmlFor="pers-gender">
               <Stack gap="xs">
                 <Select
                   id="pers-gender"
@@ -712,20 +831,32 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
                   />
                 )}
               </Stack>
-            </FormField>
+            </RegistrationField>
 
             {/* 8. Date of Birth */}
-            <FormField label="Date of Birth" htmlFor="pers-dob" required>
+            <RegistrationField
+              fieldKey="personal.dateOfBirth"
+              value={dob}
+              htmlFor="pers-dob"
+              helperText={dobError || undefined}
+              error={dobError || undefined}
+            >
               <Input
                 id="pers-dob"
                 type="date"
                 value={dob}
-                onChange={(e) => setDob(e.target.value)}
+                max={new Date().toISOString().slice(0, 10)}
+                onChange={handleDobChange}
+                error={dobError || undefined}
               />
-            </FormField>
+            </RegistrationField>
 
             {/* 9. Marital Status */}
-            <FormField label="Marital Status" htmlFor="pers-marital-status" required>
+            <RegistrationField
+              fieldKey="personal.maritalStatus"
+              value={maritalStatus}
+              htmlFor="pers-marital-status"
+            >
               <Stack gap="xs">
                 <Select
                   id="pers-marital-status"
@@ -747,10 +878,14 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
                   />
                 )}
               </Stack>
-            </FormField>
+            </RegistrationField>
 
             {/* 10. Blood Group */}
-            <FormField label="Blood Group" htmlFor="pers-blood-group" required>
+            <RegistrationField
+              fieldKey="personal.bloodGroup"
+              value={bloodGroup}
+              htmlFor="pers-blood-group"
+            >
               <Select
                 id="pers-blood-group"
                 value={bloodGroup}
@@ -766,10 +901,14 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
                   { value: 'O-', label: 'O-' },
                 ]}
               />
-            </FormField>
+            </RegistrationField>
 
             {/* 11. Nationality */}
-            <FormField label="Nationality" htmlFor="pers-nationality" required>
+            <RegistrationField
+              fieldKey="personal.nationality"
+              value={nationality}
+              htmlFor="pers-nationality"
+            >
               <Stack gap="xs">
                 <Select
                   id="pers-nationality"
@@ -794,10 +933,14 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
                   />
                 )}
               </Stack>
-            </FormField>
+            </RegistrationField>
 
             {/* 12. Native Language */}
-            <FormField label="Native Language" htmlFor="pers-native-language" required>
+            <RegistrationField
+              fieldKey="personal.nativeLanguage"
+              value={nativeLanguage}
+              htmlFor="pers-native-language"
+            >
               <Stack gap="xs">
                 <Select
                   id="pers-native-language"
@@ -825,28 +968,71 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
                   />
                 )}
               </Stack>
-            </FormField>
+            </RegistrationField>
 
-            {/* 13. Father's Name */}
-            <FormField label="Father's Name" htmlFor="pers-father-name">
-              <Input
-                id="pers-father-name"
-                type="text"
-                placeholder="e.g. Ramesh Kumar"
-                value={fatherName}
-                onChange={(e) => setFatherName(e.target.value)}
-              />
-            </FormField>
-
-            {/* 14. Guardian Name */}
-            <FormField label="Guardian Name" htmlFor="pers-guardian-name">
-              <Input
-                id="pers-guardian-name"
-                type="text"
-                placeholder="e.g. Guardian Name"
-                value={guardianName}
-                onChange={(e) => setGuardianName(e.target.value)}
-              />
+            {/* Structured Repeatable Parent / Guardian Details */}
+            <FormField label="Parent / Guardian Details" span="full">
+              <Stack gap="md">
+                <Toolbar
+                  left={<CardTitle>Parent / Guardian Details</CardTitle>}
+                  right={
+                    <Button variant="secondary" size="sm" type="button" onClick={addParentGuardian}>
+                      + Add Parent / Guardian
+                    </Button>
+                  }
+                />
+                {parentGuardians.map((pg, idx) => (
+                  <Card key={pg.id} padding="md">
+                    <Stack gap="md">
+                      <Toolbar
+                        left={<CardTitle>Parent / Guardian #{idx + 1}</CardTitle>}
+                        right={
+                          parentGuardians.length > 1 ? (
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              type="button"
+                              onClick={() => removeParentGuardian(pg.id)}
+                            >
+                              Remove
+                            </Button>
+                          ) : undefined
+                        }
+                      />
+                      <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                        <FormField label="Relationship" htmlFor={`pg-rel-${pg.id}`}>
+                          <Select
+                            id={`pg-rel-${pg.id}`}
+                            value={pg.relationship}
+                            onChange={(e) =>
+                              updateParentGuardian(
+                                pg.id,
+                                'relationship',
+                                e.target.value as ParentGuardianRelationship,
+                              )
+                            }
+                            options={[
+                              { value: 'Father', label: 'Father' },
+                              { value: 'Mother', label: 'Mother' },
+                              { value: 'Legal Guardian', label: 'Legal Guardian' },
+                              { value: 'Other', label: 'Other' },
+                            ]}
+                          />
+                        </FormField>
+                        <FormField label="Name" htmlFor={`pg-name-${pg.id}`}>
+                          <Input
+                            id={`pg-name-${pg.id}`}
+                            type="text"
+                            placeholder="Full Name"
+                            value={pg.name}
+                            onChange={(e) => updateParentGuardian(pg.id, 'name', e.target.value)}
+                          />
+                        </FormField>
+                      </FormGrid>
+                    </Stack>
+                  </Card>
+                ))}
+              </Stack>
             </FormField>
           </FormGrid>
         </Stack>
@@ -1056,7 +1242,7 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
       >
         <FormGrid columns={2} layout="horizontal" labelWidth="md">
           {/* 17. Time Zone */}
-          <FormField label="Time Zone" htmlFor="pers-timezone" required>
+          <RegistrationField fieldKey="personal.timeZone" value={timeZone} htmlFor="pers-timezone">
             <Select
               id="pers-timezone"
               value={timeZone}
@@ -1081,10 +1267,14 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
                 { value: '(GMT+08:00) Asia/Singapore (SGT)', label: '(GMT+08:00) Singapore Time' },
               ]}
             />
-          </FormField>
+          </RegistrationField>
 
           {/* 18. Mobile Phone */}
-          <FormField label="Mobile Phone" htmlFor="pers-mobile-phone" required>
+          <RegistrationField
+            fieldKey="personal.mobilePhone"
+            value={mobilePhone}
+            htmlFor="pers-mobile-phone"
+          >
             <Inline gap="xs">
               <Select
                 value={mobileCountryCode}
@@ -1105,82 +1295,13 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
                 onChange={(e) => setMobilePhone(e.target.value)}
               />
             </Inline>
-          </FormField>
+          </RegistrationField>
 
-          {/* 19. Home Phone */}
-          <FormField label="Home Phone" htmlFor="pers-home-phone">
-            <Inline gap="xs">
-              <Select
-                value={homeCountryCode}
-                onChange={(e) => setHomeCountryCode(e.target.value)}
-                options={[
-                  { value: '+91', label: '+91 (IN)' },
-                  { value: '+1', label: '+1 (US)' },
-                  { value: '+44', label: '+44 (UK)' },
-                  { value: '+971', label: '+971 (UAE)' },
-                ]}
-              />
-              <Input
-                id="pers-home-phone"
-                type="tel"
-                placeholder="Landline number"
-                value={homePhone}
-                onChange={(e) => setHomePhone(e.target.value)}
-              />
-            </Inline>
-          </FormField>
-
-          {/* 20. Business Phone */}
-          <FormField label="Business Phone" htmlFor="pers-business-phone">
-            <Inline gap="xs">
-              <Select
-                value={businessCountryCode}
-                onChange={(e) => setBusinessCountryCode(e.target.value)}
-                options={[
-                  { value: '+91', label: '+91 (IN)' },
-                  { value: '+1', label: '+1 (US)' },
-                  { value: '+44', label: '+44 (UK)' },
-                  { value: '+971', label: '+971 (UAE)' },
-                ]}
-              />
-              <Input
-                id="pers-business-phone"
-                type="tel"
-                placeholder="Office extension"
-                value={businessPhone}
-                onChange={(e) => setBusinessPhone(e.target.value)}
-              />
-            </Inline>
-          </FormField>
-
-          {/* 21. Work Phone */}
-          <FormField label="Work Phone" htmlFor="pers-work-phone">
-            <Inline gap="xs">
-              <Select
-                value={workCountryCode}
-                onChange={(e) => setWorkCountryCode(e.target.value)}
-                options={[
-                  { value: '+91', label: '+91 (IN)' },
-                  { value: '+1', label: '+1 (US)' },
-                  { value: '+44', label: '+44 (UK)' },
-                  { value: '+971', label: '+971 (UAE)' },
-                ]}
-              />
-              <Input
-                id="pers-work-phone"
-                type="tel"
-                placeholder="Direct work line"
-                value={workPhone}
-                onChange={(e) => setWorkPhone(e.target.value)}
-              />
-            </Inline>
-          </FormField>
-
-          {/* 22. Email Address */}
-          <FormField
-            label="Email Address"
+          {/* 22. Personal Email */}
+          <RegistrationField
+            fieldKey="personal.email"
+            value={email}
             htmlFor="pers-email"
-            required
             error={emailError || undefined}
           >
             <Input
@@ -1191,7 +1312,7 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
               onChange={handleEmailChange}
               error={emailError || undefined}
             />
-          </FormField>
+          </RegistrationField>
         </FormGrid>
       </FormSection>
 
@@ -1200,127 +1321,301 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
         title="Address Details"
         description="Residential and permanent address information"
       >
-        <FormGrid columns={2} layout="horizontal" labelWidth="md">
-          {/* 23. Street (Full width) */}
-          <FormField label="Street" htmlFor="pers-street" required span={2}>
-            <Input
-              id="pers-street"
-              type="text"
-              placeholder="Building, Flat No., Street, Area"
-              value={street}
-              onChange={(e) => setStreet(e.target.value)}
-            />
-          </FormField>
+        <Stack gap="lg">
+          <Card padding="md">
+            <Stack gap="md">
+              <CardTitle>Current Address</CardTitle>
+              <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                {/* 23. Address Line 1 */}
+                <RegistrationField
+                  fieldKey="personal.street"
+                  value={street}
+                  htmlFor="pers-street"
+                  span={2}
+                >
+                  <Input
+                    id="pers-street"
+                    type="text"
+                    placeholder="Building, Flat No., Street, Area"
+                    value={street}
+                    onChange={(e) => setStreet(e.target.value)}
+                  />
+                </RegistrationField>
 
-          {/* 26. PIN Code */}
-          <FormField
-            label="PIN Code (India)"
-            htmlFor="pers-pincode"
-            required
-            helperText={
-              postalStatus
-                ? `✓ ${postalStatus}`
-                : postalLoading
-                  ? 'Looking up PIN code...'
-                  : undefined
-            }
-          >
-            <Input
-              id="pers-pincode"
-              type="text"
-              maxLength={6}
-              placeholder="e.g. 600001"
-              value={pinCode}
-              onChange={(e) => setPinCode(e.target.value)}
-            />
-          </FormField>
+                {/* Address Line 2 */}
+                <RegistrationField
+                  fieldKey="personal.addressLine2"
+                  value={addressLine2}
+                  htmlFor="pers-address-line-2"
+                  span={2}
+                >
+                  <Input
+                    id="pers-address-line-2"
+                    type="text"
+                    placeholder="Apartment, suite, unit, etc. (optional)"
+                    value={addressLine2}
+                    onChange={(e) => setAddressLine2(e.target.value)}
+                  />
+                </RegistrationField>
 
-          {/* 24. City */}
-          <FormField
-            label="City"
-            htmlFor="pers-city"
-            required
-            helperText={
-              cityStatus
-                ? `✓ ${cityStatus}`
-                : cityLoading
-                  ? 'Searching postal PIN code...'
-                  : undefined
-            }
-          >
-            <Stack gap="xs">
-              <Input
-                id="pers-city"
-                type="text"
-                placeholder="e.g. Hosur, Chennai, Tambaram"
-                value={city}
-                onChange={handleCityChange}
-              />
-              {availablePincodes.length > 1 && (
-                <Select
+                {/* PIN Code */}
+                <RegistrationField
+                  fieldKey="personal.pinCode"
                   value={pinCode}
-                  onChange={(e) => {
-                    setPinCode(e.target.value);
-                    const sel = availablePincodes.find((p) => p.pincode === e.target.value);
-                    if (sel) {
-                      setCityStatus(`Selected PIN: ${sel.pincode} (${sel.name})`);
-                    }
-                  }}
-                  options={[
-                    { value: '', label: 'Select specific area PIN code...' },
-                    ...availablePincodes.map((p) => ({
-                      value: p.pincode,
-                      label: `${p.pincode} - ${p.name}`,
-                    })),
-                  ]}
-                />
+                  htmlFor="pers-pincode"
+                  helperText={
+                    postalStatus
+                      ? `✓ ${postalStatus}`
+                      : postalLoading
+                        ? 'Looking up PIN code...'
+                        : undefined
+                  }
+                >
+                  <Input
+                    id="pers-pincode"
+                    type="text"
+                    maxLength={6}
+                    placeholder="e.g. 600001"
+                    value={pinCode}
+                    onChange={(e) => setPinCode(e.target.value)}
+                  />
+                </RegistrationField>
+
+                {/* City */}
+                <RegistrationField
+                  fieldKey="personal.city"
+                  value={city}
+                  htmlFor="pers-city"
+                  helperText={
+                    cityStatus
+                      ? `✓ ${cityStatus}`
+                      : cityLoading
+                        ? 'Searching postal PIN code...'
+                        : undefined
+                  }
+                >
+                  <Stack gap="xs">
+                    <Input
+                      id="pers-city"
+                      type="text"
+                      placeholder="e.g. Hosur, Chennai, Tambaram"
+                      value={city}
+                      onChange={handleCityChange}
+                    />
+                    {availablePincodes.length > 1 && (
+                      <Select
+                        value={pinCode}
+                        onChange={(e) => {
+                          setPinCode(e.target.value);
+                          const sel = availablePincodes.find((p) => p.pincode === e.target.value);
+                          if (sel) {
+                            setCityStatus(`Selected PIN: ${sel.pincode} (${sel.name})`);
+                          }
+                        }}
+                        options={[
+                          { value: '', label: 'Select specific area PIN code...' },
+                          ...availablePincodes.map((p) => ({
+                            value: p.pincode,
+                            label: `${p.pincode} - ${p.name}`,
+                          })),
+                        ]}
+                      />
+                    )}
+                  </Stack>
+                </RegistrationField>
+
+                {/* District */}
+                <RegistrationField
+                  fieldKey="personal.district"
+                  value={district}
+                  htmlFor="pers-district"
+                >
+                  <Input
+                    id="pers-district"
+                    type="text"
+                    placeholder="e.g. Krishnagiri, Chengalpattu"
+                    value={district}
+                    onChange={(e) => setDistrict(e.target.value)}
+                  />
+                </RegistrationField>
+
+                {/* State */}
+                <RegistrationField fieldKey="personal.state" value={state} htmlFor="pers-state">
+                  <Input
+                    id="pers-state"
+                    type="text"
+                    placeholder="e.g. Tamil Nadu"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                  />
+                </RegistrationField>
+
+                {/* Country */}
+                <RegistrationField
+                  fieldKey="personal.country"
+                  value={country}
+                  htmlFor="pers-country"
+                >
+                  <Select
+                    id="pers-country"
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                    options={[
+                      { value: 'India', label: 'India' },
+                      { value: 'United States', label: 'United States' },
+                      { value: 'United Kingdom', label: 'United Kingdom' },
+                      { value: 'United Arab Emirates', label: 'United Arab Emirates' },
+                      { value: 'Singapore', label: 'Singapore' },
+                      { value: 'Australia', label: 'Australia' },
+                      { value: 'Canada', label: 'Canada' },
+                    ]}
+                  />
+                </RegistrationField>
+              </FormGrid>
+            </Stack>
+          </Card>
+
+          {/* Same as Current Address Checkbox & Permanent Address */}
+          <Card padding="md">
+            <Stack gap="md">
+              <Checkbox
+                id="pers-same-address"
+                label="Permanent address is same as current address"
+                checked={isPermanentSameAsCurrent}
+                onChange={(e) => setIsPermanentSameAsCurrent(e.target.checked)}
+              />
+
+              {!isPermanentSameAsCurrent && (
+                <Stack gap="md">
+                  <CardTitle>Permanent Address</CardTitle>
+                  <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                    <RegistrationField
+                      fieldKey="personal.permanentStreet"
+                      value={permanentStreet}
+                      htmlFor="pers-perm-street"
+                      span={2}
+                    >
+                      <Input
+                        id="pers-perm-street"
+                        type="text"
+                        placeholder="Building, Flat No., Street, Area"
+                        value={permanentStreet}
+                        onChange={(e) => setPermanentStreet(e.target.value)}
+                      />
+                    </RegistrationField>
+
+                    <RegistrationField
+                      fieldKey="personal.permanentAddressLine2"
+                      value={permanentAddressLine2}
+                      htmlFor="pers-perm-address-line-2"
+                      span={2}
+                    >
+                      <Input
+                        id="pers-perm-address-line-2"
+                        type="text"
+                        placeholder="Apartment, suite, unit, etc. (optional)"
+                        value={permanentAddressLine2}
+                        onChange={(e) => setPermanentAddressLine2(e.target.value)}
+                      />
+                    </RegistrationField>
+
+                    <RegistrationField
+                      fieldKey="personal.permanentPinCode"
+                      value={permanentPinCode}
+                      htmlFor="pers-perm-pincode"
+                      helperText={
+                        permanentPostalStatus
+                          ? `✓ ${permanentPostalStatus}`
+                          : permanentPostalLoading
+                            ? 'Looking up PIN code...'
+                            : undefined
+                      }
+                    >
+                      <Input
+                        id="pers-perm-pincode"
+                        type="text"
+                        maxLength={6}
+                        placeholder="e.g. 600001"
+                        value={permanentPinCode}
+                        onChange={(e) => setPermanentPinCode(e.target.value)}
+                      />
+                    </RegistrationField>
+
+                    <RegistrationField
+                      fieldKey="personal.permanentCity"
+                      value={permanentCity}
+                      htmlFor="pers-perm-city"
+                    >
+                      <Input
+                        id="pers-perm-city"
+                        type="text"
+                        placeholder="e.g. Chennai"
+                        value={permanentCity}
+                        onChange={(e) => setPermanentCity(e.target.value)}
+                      />
+                    </RegistrationField>
+
+                    <RegistrationField
+                      fieldKey="personal.permanentDistrict"
+                      value={permanentDistrict}
+                      htmlFor="pers-perm-district"
+                    >
+                      <Input
+                        id="pers-perm-district"
+                        type="text"
+                        placeholder="e.g. Chennai"
+                        value={permanentDistrict}
+                        onChange={(e) => setPermanentDistrict(e.target.value)}
+                      />
+                    </RegistrationField>
+
+                    <RegistrationField
+                      fieldKey="personal.permanentState"
+                      value={permanentState}
+                      htmlFor="pers-perm-state"
+                    >
+                      <Input
+                        id="pers-perm-state"
+                        type="text"
+                        placeholder="e.g. Tamil Nadu"
+                        value={permanentState}
+                        onChange={(e) => setPermanentState(e.target.value)}
+                      />
+                    </RegistrationField>
+
+                    <RegistrationField
+                      fieldKey="personal.permanentCountry"
+                      value={permanentCountry}
+                      htmlFor="pers-perm-country"
+                    >
+                      <Select
+                        id="pers-perm-country"
+                        value={permanentCountry}
+                        onChange={(e) => setPermanentCountry(e.target.value)}
+                        options={[
+                          { value: 'India', label: 'India' },
+                          { value: 'United States', label: 'United States' },
+                          { value: 'United Kingdom', label: 'United Kingdom' },
+                          { value: 'United Arab Emirates', label: 'United Arab Emirates' },
+                          { value: 'Singapore', label: 'Singapore' },
+                          { value: 'Australia', label: 'Australia' },
+                          { value: 'Canada', label: 'Canada' },
+                        ]}
+                      />
+                    </RegistrationField>
+                  </FormGrid>
+                </Stack>
               )}
             </Stack>
-          </FormField>
-
-          {/* District */}
-          <FormField label="District" htmlFor="pers-district" required>
-            <Input
-              id="pers-district"
-              type="text"
-              placeholder="e.g. Krishnagiri, Chengalpattu"
-              value={district}
-              onChange={(e) => setDistrict(e.target.value)}
-            />
-          </FormField>
-
-          {/* 25. State */}
-          <FormField label="State" htmlFor="pers-state" required>
-            <Input
-              id="pers-state"
-              type="text"
-              placeholder="e.g. Tamil Nadu"
-              value={state}
-              onChange={(e) => setState(e.target.value)}
-            />
-          </FormField>
-
-          {/* 27. Country */}
-          <FormField label="Country" htmlFor="pers-country" required>
-            <Select
-              id="pers-country"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-              options={[
-                { value: 'India', label: 'India' },
-                { value: 'United States', label: 'United States' },
-                { value: 'United Kingdom', label: 'United Kingdom' },
-                { value: 'United Arab Emirates', label: 'United Arab Emirates' },
-                { value: 'Singapore', label: 'Singapore' },
-                { value: 'Australia', label: 'Australia' },
-                { value: 'Canada', label: 'Canada' },
-              ]}
-            />
-          </FormField>
+          </Card>
 
           {/* Custom Fields in Address Details */}
-          {renderCustomFieldsForCard('c_pers_address')}
-        </FormGrid>
+          {customFields.filter((f) => f.cardId === 'c_pers_address' && f.isCustom).length > 0 && (
+            <FormGrid columns={2} layout="horizontal" labelWidth="md">
+              {renderCustomFieldsForCard('c_pers_address')}
+            </FormGrid>
+          )}
+        </Stack>
       </FormSection>
 
       {/* Render Newly Created Custom Cards */}

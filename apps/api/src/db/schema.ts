@@ -418,12 +418,17 @@ export const employees = mysqlTable(
       'linkedin',
       'other',
     ]),
+    referralCode: varchar('referral_code', { length: 50 }),
+    referredByEmployeeId: varchar('referred_by_employee_id', { length: 64 }).references(
+      (): AnyMySqlColumn => employees.id,
+    ),
     noticePeriodDays: int('notice_period_days'),
     contractEndDate: varchar('contract_end_date', { length: 10 }),
     employmentType: mysqlEnum('employment_type', ['full_time', 'part_time', 'contract', 'intern'])
       .default('full_time')
       .notNull(),
     employmentStatus: mysqlEnum('employment_status', [
+      'pending_activation',
       'active',
       'probation',
       'notice',
@@ -431,7 +436,7 @@ export const employees = mysqlTable(
       'suspended',
       'resigned',
     ])
-      .default('probation')
+      .default('pending_activation')
       .notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
@@ -443,12 +448,18 @@ export const employees = mysqlTable(
       table.companyId,
       table.employeeNumber,
     ),
+    uniqueIndex('idx_employees_company_ref_code').on(
+      table.tenantId,
+      table.companyId,
+      table.referralCode,
+    ),
     index('idx_employees_email').on(table.tenantId, table.companyId, table.email),
     index('idx_employees_department').on(table.departmentId),
     index('idx_employees_designation').on(table.designationId),
     index('idx_employees_location').on(table.locationId),
     index('idx_employees_user_id').on(table.userId),
     index('idx_employees_reporting_manager').on(table.reportingManagerId),
+    index('idx_employees_referred_by').on(table.referredByEmployeeId),
   ],
 );
 
@@ -488,12 +499,23 @@ export const employeePersonalDetails = mysqlTable(
     homePhone: varchar('home_phone', { length: 50 }),
     businessPhone: varchar('business_phone', { length: 50 }),
     workPhone: varchar('work_phone', { length: 50 }),
+    // Current Address
     addressStreet: varchar('address_street', { length: 255 }),
+    addressLine2: varchar('address_line_2', { length: 255 }),
     addressCity: varchar('address_city', { length: 100 }),
     addressDistrict: varchar('address_district', { length: 100 }),
     addressState: varchar('address_state', { length: 100 }),
     addressPostalCode: varchar('address_postal_code', { length: 20 }),
     addressCountry: varchar('address_country', { length: 100 }),
+    // Permanent Address
+    isPermanentSameAsCurrent: boolean('is_permanent_same_as_current').default(true).notNull(),
+    permanentAddressStreet: varchar('permanent_address_street', { length: 255 }),
+    permanentAddressLine2: varchar('permanent_address_line_2', { length: 255 }),
+    permanentAddressCity: varchar('permanent_address_city', { length: 100 }),
+    permanentAddressDistrict: varchar('permanent_address_district', { length: 100 }),
+    permanentAddressState: varchar('permanent_address_state', { length: 100 }),
+    permanentAddressPostalCode: varchar('permanent_address_postal_code', { length: 20 }),
+    permanentAddressCountry: varchar('permanent_address_country', { length: 100 }),
     updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
   },
   (table) => [index('idx_emp_personal_tenant_company').on(table.tenantId, table.companyId)],
@@ -805,3 +827,145 @@ export const employeeDocuments = mysqlTable(
 
 export type EmployeeDocument = typeof employeeDocuments.$inferSelect;
 export type NewEmployeeDocument = typeof employeeDocuments.$inferInsert;
+
+/**
+ * HR Settings Domain: Form Engine — company customisation of a system form.
+ *
+ * System form definitions (forms, sections, fields, defaults) ship in code.
+ * A company's customisation is stored in three tables, keyed by the stable
+ * form / section / field keys, and resolved on read:
+ *   resolved form = system definition + field overrides + custom fields
+ * (see docs/architecture/FORM-ENGINE.md). The system form is never copied.
+ *
+ * No created_by / updated_by yet: requests carry no authenticated user
+ * (development context only). Add them with authentication.
+ */
+
+/**
+ * One row per (company, system form) once the company first saves the form.
+ * `version` is the optimistic-concurrency token for editor saves: a save
+ * must present the version it was based on (0 = never saved) and increments it.
+ * Hard delete only (nothing references it; losing it = "never customised").
+ */
+export const formCustomizations = mysqlTable(
+  'form_customizations',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    formKey: varchar('form_key', { length: 100 }).notNull(),
+    version: int('version').default(1).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_form_customizations_key').on(table.tenantId, table.companyId, table.formKey),
+  ],
+);
+
+export type FormCustomization = typeof formCustomizations.$inferSelect;
+
+/**
+ * A company's overrides of one SYSTEM field of a system form.
+ *
+ * - A row exists only while at least one property differs from the system
+ *   definition.
+ * - Every override column is nullable: NULL = inherit the system default, so a
+ *   later BEZENT change to that default still reaches the company.
+ * - `sort_order` positions the field within its (fixed) section; it is set for
+ *   every field of a section whose layout the company changed, NULL otherwise.
+ * - Hard delete (no soft delete): removing a row returns the field to the
+ *   system default; nothing references these rows.
+ */
+export const formFieldOverrides = mysqlTable(
+  'form_field_overrides',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    formKey: varchar('form_key', { length: 100 }).notNull(),
+    fieldKey: varchar('field_key', { length: 100 }).notNull(),
+    isEnabled: boolean('is_enabled'),
+    isRequired: boolean('is_required'),
+    label: varchar('label', { length: 100 }),
+    description: varchar('description', { length: 500 }),
+    width: mysqlEnum('width', ['half', 'full']),
+    sortOrder: int('sort_order'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_form_field_overrides_key').on(
+      table.tenantId,
+      table.companyId,
+      table.formKey,
+      table.fieldKey,
+    ),
+  ],
+);
+
+export type FormFieldOverride = typeof formFieldOverrides.$inferSelect;
+export type NewFormFieldOverride = typeof formFieldOverrides.$inferInsert;
+
+/**
+ * Company-owned CUSTOM field definitions added to a system form.
+ *
+ * - `field_key` is a generated, permanent key (`custom.<32 hex>`).
+ * - Definitions only: values are NOT stored here and never as columns on
+ *   `employees` (value storage is a separate, later table — see FORM-ENGINE.md).
+ * - Hard delete while no values exist; once value storage lands, deletion of a
+ *   field with values must become an archive (status) instead.
+ */
+export const formCustomFields = mysqlTable(
+  'form_custom_fields',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    formKey: varchar('form_key', { length: 100 }).notNull(),
+    fieldKey: varchar('field_key', { length: 100 }).notNull(),
+    sectionKey: varchar('section_key', { length: 100 }).notNull(),
+    fieldType: mysqlEnum('field_type', [
+      'single_line',
+      'multi_line',
+      'email',
+      'phone',
+      'number',
+      'decimal',
+      'dropdown',
+      'radio',
+      'checkbox',
+      'multi_select',
+      'date',
+      'time',
+      'datetime',
+      'file_upload',
+    ]).notNull(),
+    label: varchar('label', { length: 100 }).notNull(),
+    description: varchar('description', { length: 500 }),
+    isEnabled: boolean('is_enabled').notNull(),
+    isRequired: boolean('is_required').notNull(),
+    width: mysqlEnum('width', ['half', 'full']).notNull(),
+    sortOrder: int('sort_order').notNull(),
+    config: json('config').$type<Record<string, unknown>>().notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_form_custom_fields_key').on(
+      table.tenantId,
+      table.companyId,
+      table.formKey,
+      table.fieldKey,
+    ),
+  ],
+);
+
+export type FormCustomField = typeof formCustomFields.$inferSelect;
+export type NewFormCustomField = typeof formCustomFields.$inferInsert;

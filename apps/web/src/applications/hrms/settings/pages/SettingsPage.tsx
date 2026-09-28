@@ -17,7 +17,7 @@ import { BezentIcon } from '../../../../design-system/icons';
 import { useDevContext } from '../../../../platform/context/DevContext';
 import { SETTINGS_MODULE_CARDS, type SettingsModuleId } from '../types/settingsCenter';
 import { DashboardSettingsSection } from '../components/DashboardSettingsSection';
-import { OnboardingBuilderSection } from '../components/OnboardingBuilderSection';
+import { AdministrationSettingsSection } from '../components/AdministrationSettingsSection';
 import { LeaveSettingsSection } from '../components/LeaveSettingsSection';
 import { AttendanceSettingsSection } from '../components/AttendanceSettingsSection';
 import { TimesheetsSettingsSection } from '../components/TimesheetsSettingsSection';
@@ -101,7 +101,7 @@ export function SettingsPage() {
 
             <div>
               {activeModule === 'dashboard' && <DashboardSettingsSection />}
-              {activeModule === 'onboarding' && <OnboardingBuilderSection />}
+              {activeModule === 'onboarding' && <AdministrationSettingsSection />}
               {activeModule === 'leave' && <LeaveSettingsSection />}
               {activeModule === 'attendance' && <AttendanceSettingsSection />}
               {activeModule === 'timesheets' && <TimesheetsSettingsSection />}

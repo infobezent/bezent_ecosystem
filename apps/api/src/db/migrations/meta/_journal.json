@@ -71,6 +71,27 @@
       "when": 1790328367812,
       "tag": "0009_employee_documents",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1790335879425,
+      "tag": "0010_form_field_overrides",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1790337132877,
+      "tag": "0011_form_editor_customization",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1790338500000,
+      "tag": "0012_registration_general_personal",
+      "breakpoints": true
     }
   ]
 }

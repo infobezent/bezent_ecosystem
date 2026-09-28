@@ -37,12 +37,28 @@ export interface PersonalDetailsInput {
   homePhone: string | null;
   businessPhone: string | null;
   workPhone: string | null;
+  // Current Address
   addressStreet: string | null;
+  addressLine2: string | null;
   addressCity: string | null;
   addressDistrict: string | null;
   addressState: string | null;
   addressPostalCode: string | null;
   addressCountry: string | null;
+  // Permanent Address
+  isPermanentSameAsCurrent: boolean;
+  permanentAddressStreet: string | null;
+  permanentAddressLine2: string | null;
+  permanentAddressCity: string | null;
+  permanentAddressDistrict: string | null;
+  permanentAddressState: string | null;
+  permanentAddressPostalCode: string | null;
+  permanentAddressCountry: string | null;
+}
+
+export interface ParentGuardianInput {
+  name: string;
+  relationship: string;
 }
 
 export interface FamilyMemberInput {
@@ -104,6 +120,7 @@ export interface WorkScheduleInput {
 export interface EmployeeRecordDetailsInput {
   personal?: PersonalDetailsInput;
   familyMembers?: FamilyMemberInput[];
+  parentGuardians?: ParentGuardianInput[];
   nominees?: NomineeInput[];
   emergencyContacts?: EmergencyContactInput[];
   bankAccount?: BankAccountInput;
@@ -116,6 +133,7 @@ export type EmployeeRecordSection = keyof EmployeeRecordDetailsInput;
 export const EMPLOYEE_RECORD_SECTIONS: EmployeeRecordSection[] = [
   'personal',
   'familyMembers',
+  'parentGuardians',
   'nominees',
   'emergencyContacts',
   'bankAccount',
@@ -164,6 +182,7 @@ export interface EmployeeProfile {
   employee: EmployeeDetails;
   personal: PersonalDetails | null;
   familyMembers: FamilyMember[];
+  parentGuardians?: ParentGuardianInput[];
   nominees: Nominee[];
   emergencyContacts: EmergencyContact[];
   bankAccount: BankAccountView | null;

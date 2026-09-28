@@ -7,6 +7,8 @@ const controller = new EmployeeController();
 
 // Canonical employee records (directory, selection, probation views).
 employeeRouter.get('/hrms/employees', controller.listEmployees);
+employeeRouter.get('/hrms/employees/next-number', controller.getNextEmployeeNumber);
+employeeRouter.get('/hrms/employees/resolve-referral/:code', controller.resolveReferral);
 // Create an employee with optional record details in one transaction
 // (the target for Onboarding conversion).
 employeeRouter.post('/hrms/employees', controller.createEmployee);

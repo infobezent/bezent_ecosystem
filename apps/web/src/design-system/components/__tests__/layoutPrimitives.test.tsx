@@ -55,6 +55,18 @@ describe('Design System Layout Primitives', () => {
     expect(html).toContain('bezent-grid--gap-lg');
   });
 
+  it('Grid sidebar-main uses the fixed sidebar template class (no min-width suffix)', () => {
+    const html = renderToStaticMarkup(<Grid columns="sidebar-main">x</Grid>);
+    expect(html).toContain('bezent-grid--cols-sidebar-main ');
+    expect(html).not.toContain('bezent-grid--cols-sidebar-main-');
+  });
+
+  it('Grid three-pane uses the fixed three-pane template class (no min-width suffix)', () => {
+    const html = renderToStaticMarkup(<Grid columns="three-pane">x</Grid>);
+    expect(html).toContain('bezent-grid--cols-three-pane ');
+    expect(html).not.toContain('bezent-grid--cols-three-pane-');
+  });
+
   it('PageHeader renders title, eyebrow, subtitle, and action slots', () => {
     const html = renderToStaticMarkup(
       <PageHeader

@@ -79,22 +79,99 @@ export class EmployeeService {
     }
   }
 
+  async getNextEmployeeNumber(
+    tenantId: string,
+    companyId: string,
+  ): Promise<{ employeeNumber: string }> {
+    const prefix = 'EMP-';
+    const existing = await this.repo.listAllNumbers(tenantId, companyId);
+    let maxSeq = 0;
+    for (const num of existing) {
+      const m = num.match(/(\d+)$/);
+      if (m && m[1]) {
+        const val = parseInt(m[1], 10);
+        if (!isNaN(val) && val > maxSeq) {
+          maxSeq = val;
+        }
+      }
+    }
+    const nextSeq = maxSeq + 1;
+    let candidate = `${prefix}${String(nextSeq).padStart(4, '0')}`;
+    const takenSet = new Set(existing);
+    let offset = 0;
+    while (takenSet.has(candidate)) {
+      offset++;
+      candidate = `${prefix}${String(nextSeq + offset).padStart(4, '0')}`;
+    }
+    return { employeeNumber: candidate };
+  }
+
+  async resolveReferral(
+    tenantId: string,
+    companyId: string,
+    referralCode: string,
+  ): Promise<{
+    id: string;
+    employeeNumber: string;
+    name: string;
+    designationName: string | null;
+    departmentName: string | null;
+  }> {
+    if (!referralCode || !referralCode.trim()) {
+      throw new BadRequestError('Referral code is required', 'MISSING_REFERRAL_CODE');
+    }
+    const employee = await this.repo.getByReferralCode(
+      tenantId,
+      companyId,
+      referralCode.trim(),
+    );
+    if (!employee) {
+      throw new NotFoundError(
+        `No eligible employee found with referral code '${referralCode}'`,
+      );
+    }
+    const name = employee.lastName
+      ? `${employee.firstName} ${employee.lastName}`
+      : employee.firstName;
+    return {
+      id: employee.id,
+      employeeNumber: employee.employeeNumber,
+      name,
+      designationName: employee.designationName,
+      departmentName: employee.departmentName,
+    };
+  }
+
   async createEmployee(
     tenantId: string,
     companyId: string,
     input: unknown,
   ): Promise<EmployeeDetails> {
-    const validatedDto = validateCreateEmployee(input);
+    const inputObj =
+      input && typeof input === 'object'
+        ? { ...(input as Record<string, unknown>) }
+        : ({} as Record<string, unknown>);
+
+    // Auto-generate employee number if not provided
+    if (!inputObj.employeeNumber) {
+      const generated = await this.getNextEmployeeNumber(tenantId, companyId);
+      inputObj.employeeNumber = generated.employeeNumber;
+    }
+
+    const validatedDto = validateCreateEmployee(inputObj);
+    const employeeNumber =
+      validatedDto.employeeNumber || (await this.getNextEmployeeNumber(tenantId, companyId)).employeeNumber;
+    validatedDto.employeeNumber = employeeNumber;
 
     // 1. Check duplicate employee number within company
     const existingByNumber = await this.repo.getByEmployeeNumber(
       tenantId,
       companyId,
-      validatedDto.employeeNumber,
+      employeeNumber,
     );
     if (existingByNumber) {
       throw new ConflictError(
-        `Employee number '${validatedDto.employeeNumber}' is already in use`,
+        `Employee number '${employeeNumber}' is already in use`,
         'EMPLOYEE_NUMBER_EXISTS',
       );
     }
@@ -111,6 +188,27 @@ export class EmployeeService {
     // 3. Verify organization masters (dept, desig, loc) and reporting manager
     await this.validateOrgAssignments(tenantId, companyId, validatedDto);
     await this.validateReportingManager(tenantId, companyId, validatedDto.reportingManagerId);
+
+    // 3b. Verify referring employee if referredByEmployeeId is passed
+    if (validatedDto.referredByEmployeeId) {
+      const referring = await this.repo.getById(
+        tenantId,
+        companyId,
+        validatedDto.referredByEmployeeId,
+      );
+      if (!referring) {
+        throw new BadRequestError(
+          `Referring employee '${validatedDto.referredByEmployeeId}' does not exist or does not belong to this company`,
+          'INVALID_REFERRING_EMPLOYEE',
+        );
+      }
+    }
+
+    // 3c. Auto-assign referral code for this new employee if none provided
+    if (!validatedDto.referralCode) {
+      const cleanNum = employeeNumber.replace(/[^A-Za-z0-9]/g, '');
+      validatedDto.referralCode = `REF-${cleanNum}`;
+    }
 
     // 4. Validate optional employee record details (conversion-ready payload)
     const details = await this.profileService.prepareDetails(

@@ -11,6 +11,7 @@ import { onboardingSettingsRouter } from '../../applications/hrms/settings/onboa
 import { employeeRouter } from '../../applications/hrms/employees/routes/employee.route.js';
 import { employeeActionRouter } from '../../applications/hrms/employee-administration/routes/employeeAction.route.js';
 import { employeeDocumentRouter } from '../../applications/hrms/documents/routes/employeeDocument.route.js';
+import { formsRouter } from '../../applications/hrms/settings/forms/routes/forms.route.js';
 
 /**
  * Builds the Express application. Kept separate from `main.ts` so it can be
@@ -37,6 +38,7 @@ export function createApp(): Express {
   app.use('/api/v1', employeeRouter);
   app.use('/api/v1', employeeActionRouter);
   app.use('/api/v1', employeeDocumentRouter);
+  app.use('/api/v1', formsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
