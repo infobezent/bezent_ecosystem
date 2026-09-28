@@ -167,11 +167,7 @@ export function ChapterFocusCarousel({
       {/* Viewport & Carousel Track */}
       <div className="bezent-focus-carousel__viewport" ref={containerRef}>
         {/* Moving Track */}
-        <div
-          role="tablist"
-          aria-label={ariaLabel}
-          className="bezent-focus-carousel__track"
-        >
+        <div role="tablist" aria-label={ariaLabel} className="bezent-focus-carousel__track">
           {chapters.map((chapter, index) => {
             const isActive = chapter.id === activeId;
             const distance = Math.abs(index - activeIndex);

@@ -36,11 +36,7 @@ describe('Design System ChapterFocusCarousel Primitive', () => {
 
   it('assigns is-focus-active to active chapter and proper depth classes to neighbors', () => {
     const html = renderToStaticMarkup(
-      <ChapterFocusCarousel
-        chapters={chapters}
-        activeId="personal"
-        onSelectChapter={vi.fn()}
-      />,
+      <ChapterFocusCarousel chapters={chapters} activeId="personal" onSelectChapter={vi.fn()} />,
     );
 
     // Active item (personal)

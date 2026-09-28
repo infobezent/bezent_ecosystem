@@ -48,7 +48,6 @@ export * from './JourneyNav';
 export * from './EditorialHeader';
 export * from './ChapterFocusCarousel';
 
-
 /* ─── Display ─────────────────────────────────────────────────────────────── */
 export * from './Avatar';
 export * from './Card';

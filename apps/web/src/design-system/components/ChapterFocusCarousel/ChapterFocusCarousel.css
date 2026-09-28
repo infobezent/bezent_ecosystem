@@ -206,7 +206,7 @@
 /* 2. Direct Neighbor (±1 distance) */
 .bezent-focus-card.is-focus-neighbor {
   transform: scale(0.94);
-  opacity: 0.90;
+  opacity: 0.9;
   background: var(--bg-surface, #ffffff);
   border-color: var(--border-subtle, #e7ebf0);
   color: var(--text-primary, #1f1f1f);
