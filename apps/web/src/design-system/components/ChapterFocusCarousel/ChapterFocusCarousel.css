@@ -1,0 +1,329 @@
+/*
+ * BEZENT ChapterFocusCarousel & Integrated Chapter Header
+ * Strict Semantic Token Foundation (zero inline CSS).
+ */
+
+.bezent-focus-carousel {
+  position: relative;
+  width: 100%;
+  background: var(--bg-surface-secondary, #f0f4f9);
+  border-top: 1px solid var(--border-subtle, #e7ebf0);
+  border-bottom: 1px solid var(--border-default, #dde3ea);
+  padding: 12px 0 14px;
+  user-select: none;
+  overflow: hidden;
+}
+
+/* ── Top Editorial Kicker & Controls ── */
+.bezent-focus-carousel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px 10px;
+  width: 100%;
+}
+
+.bezent-focus-carousel__kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted, #747775);
+}
+
+.bezent-focus-carousel__controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bezent-focus-carousel__nav-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-subtle, #e7ebf0);
+  color: var(--text-secondary, #444746);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 150ms ease;
+  user-select: none;
+}
+
+.bezent-focus-carousel__nav-btn:hover:not(:disabled) {
+  background: var(--bg-hover, #c2e7ff);
+  color: var(--brand-primary, #041e49);
+  border-color: var(--border-focus, #1a73e8);
+}
+
+.bezent-focus-carousel__nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  background: transparent;
+  border-color: transparent;
+}
+
+.bezent-focus-carousel__counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary, #444746);
+  background: var(--bg-surface, #ffffff);
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle, #e7ebf0);
+}
+
+.bezent-focus-carousel__counter-current {
+  color: var(--brand-primary, #041e49);
+}
+
+.bezent-focus-carousel__counter-divider {
+  color: var(--text-muted, #747775);
+  font-weight: 400;
+}
+
+.bezent-focus-carousel__counter-total {
+  color: var(--text-muted, #747775);
+}
+
+/* ── Viewport & Moving Track ── */
+.bezent-focus-carousel__viewport {
+  position: relative;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: flex;
+  align-items: center;
+  min-height: 54px;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 4px 0;
+}
+
+.bezent-focus-carousel__viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.bezent-focus-carousel__track {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  padding: 6px calc(50% - 90px);
+  width: max-content;
+}
+
+/* ── Chapter Focus Card ── */
+.bezent-focus-card {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-family: var(--font-family-base, inherit);
+  cursor: pointer;
+  flex-shrink: 0;
+  outline: none;
+  border: 1px solid transparent;
+  transform-origin: center center;
+  white-space: nowrap;
+  transition:
+    transform 360ms cubic-bezier(0.2, 0.8, 0.25, 1),
+    opacity 360ms ease,
+    background-color 200ms ease,
+    border-color 200ms ease,
+    box-shadow 300ms ease,
+    color 200ms ease;
+}
+
+.bezent-focus-card:focus-visible {
+  border-color: var(--border-focus, #1a73e8);
+  box-shadow: 0 0 0 2px var(--accent-subtle, #e8f0fe);
+}
+
+/* Number Marker */
+.bezent-focus-card__number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  transition: all 200ms ease;
+  border: 1px solid transparent;
+}
+
+.bezent-focus-card__label {
+  font-size: 13px;
+  line-height: 1.25;
+  letter-spacing: -0.1px;
+  transition: all 200ms ease;
+}
+
+/* ── Focus Depth States ── */
+
+/* 1. Active Focus Card */
+.bezent-focus-card.is-focus-active {
+  transform: scale(1);
+  opacity: 1;
+  background: var(--bg-surface, #ffffff);
+  border-color: var(--card-border, #dde3ea);
+  color: var(--brand-primary, #041e49);
+  font-weight: 600;
+  box-shadow:
+    0 4px 14px -2px rgba(4, 30, 73, 0.08),
+    0 1px 3px rgba(4, 30, 73, 0.04);
+  z-index: 2;
+}
+
+.bezent-focus-card.is-focus-active .bezent-focus-card__number {
+  background: var(--brand-primary, #041e49);
+  border-color: var(--brand-primary, #041e49);
+  color: var(--text-inverse, #ffffff);
+  box-shadow: 0 0 0 2.5px var(--bg-hover, #c2e7ff);
+}
+
+.bezent-focus-card.is-focus-active .bezent-focus-card__label {
+  color: var(--brand-primary, #041e49);
+  font-weight: 600;
+}
+
+/* 2. Direct Neighbor (±1 distance) */
+.bezent-focus-card.is-focus-neighbor {
+  transform: scale(0.94);
+  opacity: 0.9;
+  background: var(--bg-surface, #ffffff);
+  border-color: var(--border-subtle, #e7ebf0);
+  color: var(--text-primary, #1f1f1f);
+}
+
+.bezent-focus-card.is-focus-neighbor .bezent-focus-card__number {
+  background: var(--bg-surface-secondary, #f0f4f9);
+  border-color: var(--border-subtle, #e7ebf0);
+  color: var(--text-secondary, #444746);
+}
+
+/* 3. Secondary Neighbor (±2 distance) */
+.bezent-focus-card.is-focus-secondary {
+  transform: scale(0.88);
+  opacity: 0.78;
+  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--border-subtle, #e7ebf0);
+  color: var(--text-secondary, #444746);
+}
+
+.bezent-focus-card.is-focus-secondary .bezent-focus-card__number {
+  background: var(--bg-surface-secondary, #f0f4f9);
+  border-color: var(--border-subtle, #e7ebf0);
+  color: var(--text-secondary, #444746);
+}
+
+/* 4. Far Distance (±3+ distance) */
+.bezent-focus-card.is-focus-far {
+  transform: scale(0.84);
+  opacity: 0.65;
+  background: rgba(255, 255, 255, 0.8);
+  border-color: var(--border-subtle, #e7ebf0);
+  color: var(--text-secondary, #444746);
+}
+
+.bezent-focus-card.is-focus-far .bezent-focus-card__number {
+  background: var(--bg-surface-secondary, #f0f4f9);
+  border-color: var(--border-subtle, #e7ebf0);
+  color: var(--text-secondary, #444746);
+}
+
+/* Hover Interaction on Inactive Cards */
+.bezent-focus-card:hover:not(.is-focus-active):not(:disabled) {
+  opacity: 1;
+  transform: scale(0.96);
+  background: var(--bg-surface, #ffffff);
+  border-color: var(--border-default, #dde3ea);
+  color: var(--text-primary, #1f1f1f);
+  box-shadow: 0 2px 8px rgba(4, 30, 73, 0.06);
+}
+
+.bezent-focus-card:hover:not(.is-focus-active):not(:disabled) .bezent-focus-card__number {
+  border-color: var(--border-focus, #1a73e8);
+  color: var(--brand-primary, #041e49);
+}
+
+.bezent-focus-card:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Integrated Chapter Section Header ── */
+.bezent-chapter-header {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-subtle, #e7ebf0);
+  animation: bezentChapterFadeIn 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes bezentChapterFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bezent-chapter-header__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.bezent-chapter-header__position-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--brand-primary, #041e49);
+  background: var(--bg-surface-secondary, #f0f4f9);
+  border: 1px solid var(--border-subtle, #e7ebf0);
+  border-radius: 6px;
+  padding: 3px 10px;
+}
+
+.bezent-chapter-header__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--text-primary, #1f1f1f);
+}
+
+.bezent-chapter-header__desc {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--text-muted, #747775);
+  line-height: 1.45;
+  max-width: 780px;
+}

@@ -46,6 +46,7 @@ export * from './Modal';
 export * from './Tabs';
 export * from './JourneyNav';
 export * from './EditorialHeader';
+export * from './ChapterFocusCarousel';
 
 /* ─── Display ─────────────────────────────────────────────────────────────── */
 export * from './Avatar';
