@@ -1,8 +1,16 @@
 import { Router } from 'express';
 import { OnboardingSettingsController } from '../controller/settings.controller.js';
+import { requireReadWrite } from '../../../../../platform/access/middleware/access.middleware.js';
 
 export const onboardingSettingsRouter = Router();
 const controller = new OnboardingSettingsController();
+
+// Reads serve onboarding operators and settings administrators; every change
+// requires HR settings authority (ADR-017). Covers all routes under the prefix.
+onboardingSettingsRouter.use(
+  '/hrms/settings/onboarding',
+  requireReadWrite(['hrms.settings.manage', 'hrms.onboarding.read'], 'hrms.settings.manage'),
+);
 
 // Aggregate and Idempotent Initialization
 onboardingSettingsRouter.get('/hrms/settings/onboarding', controller.getAggregateSettings);

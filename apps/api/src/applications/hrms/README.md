@@ -37,7 +37,15 @@ applications/hrms/
 │   ├── validation/
 │   └── types/
 └── settings/
-    └── onboarding/
+    ├── onboarding/
+    │   ├── controller/
+    │   ├── service/
+    │   ├── repository/
+    │   ├── routes/
+    │   ├── validation/
+    │   └── types/
+    └── forms/
+        ├── definitions/
         ├── controller/
         ├── service/
         ├── repository/
@@ -58,6 +66,9 @@ applications/hrms/
 
 3. **`settings/onboarding/`**
    - Manages company-specific onboarding configuration: general settings, stage pipelines, dynamic field configs, document requirements, checklist templates, and employee conversion rules.
+
+4. **`settings/forms/`**
+   - Form Engine: BEZENT system form definitions (e.g. Employee Registration) resolved with company overrides. See [docs/architecture/FORM-ENGINE.md](../../../../docs/architecture/FORM-ENGINE.md).
 
 ### Canonical Layer Responsibilities
 

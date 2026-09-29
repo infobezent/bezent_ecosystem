@@ -39,6 +39,9 @@ export interface FormFieldProps {
   orientation?: FormLayout;
   /** Semantic label column width in horizontal layout — 'sm' (140px), 'md' (180px), 'lg' (220px) */
   labelWidth?: FormLabelWidth;
+  selectable?: boolean;
+  selected?: boolean;
+  onClick?: () => void;
   /** Column span within a FormGrid (e.g. span={2} for full width in 2-column grid) */
   span?: 1 | 2 | 'full';
   /** Passed to the wrapping element */
@@ -58,6 +61,9 @@ export function FormField({
   labelWidth,
   span,
   className,
+  selectable,
+  selected,
+  onClick,
   children,
 }: FormFieldProps) {
   const gridContext = useFormGridContext();
@@ -77,6 +83,8 @@ export function FormField({
       : '',
     hasError ? 'bezent-form-field--error' : '',
     disabled ? 'bezent-form-field--disabled' : '',
+    selectable ? 'bezent-form-field--selectable' : '',
+    selected ? 'bezent-form-field--selected' : '',
     className ?? '',
   ]
     .filter(Boolean)
@@ -88,7 +96,7 @@ export function FormField({
     : 'bezent-form-field__helper';
 
   return (
-    <div className={classes}>
+    <div className={classes} onClick={onClick}>
       {(label || labelNode) && (
         <Label htmlFor={htmlFor} required={required} disabled={disabled}>
           {labelNode ?? label}

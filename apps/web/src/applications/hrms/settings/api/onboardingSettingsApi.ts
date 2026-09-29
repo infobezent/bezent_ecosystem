@@ -16,6 +16,7 @@ import type {
   OnboardingConversionSettings,
   UpdateOnboardingConversionSettingsDto,
 } from '../types/settings';
+import { authorizedFetch } from '../../../../platform/auth';
 
 async function handleResponse<T>(res: Response, defaultErrorMsg: string): Promise<T> {
   if (!res.ok) {
@@ -33,12 +34,12 @@ async function handleResponse<T>(res: Response, defaultErrorMsg: string): Promis
 // ==================== Aggregate & Initialization ====================
 
 export async function fetchAggregateSettings(): Promise<OnboardingSettingsAggregate> {
-  const res = await fetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding`);
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding`);
   return handleResponse<OnboardingSettingsAggregate>(res, 'Failed to load onboarding settings');
 }
 
 export async function initializeSettings(): Promise<OnboardingSettingsAggregate> {
-  const res = await fetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding/initialize`, {
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding/initialize`, {
     method: 'POST',
   });
   return handleResponse<OnboardingSettingsAggregate>(res, 'Failed to initialize settings');
@@ -47,14 +48,14 @@ export async function initializeSettings(): Promise<OnboardingSettingsAggregate>
 // ==================== General Settings ====================
 
 export async function fetchGeneralSettings(): Promise<OnboardingGeneralSettings> {
-  const res = await fetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding/general`);
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding/general`);
   return handleResponse<OnboardingGeneralSettings>(res, 'Failed to load general settings');
 }
 
 export async function updateGeneralSettings(
   payload: UpdateOnboardingGeneralSettingsDto,
 ): Promise<OnboardingGeneralSettings> {
-  const res = await fetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding/general`, {
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding/general`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -65,7 +66,7 @@ export async function updateGeneralSettings(
 // ==================== Stage Configurations ====================
 
 export async function fetchStageConfigs(): Promise<OnboardingStageConfig[]> {
-  const res = await fetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding/stages`);
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding/stages`);
   return handleResponse<OnboardingStageConfig[]>(res, 'Failed to load stage configurations');
 }
 
@@ -73,7 +74,7 @@ export async function updateStageConfig(
   stageKey: string,
   payload: UpdateOnboardingStageConfigDto,
 ): Promise<OnboardingStageConfig> {
-  const res = await fetch(
+  const res = await authorizedFetch(
     `${appConfig.apiBaseUrl}/hrms/settings/onboarding/stages/${encodeURIComponent(stageKey)}`,
     {
       method: 'PATCH',
@@ -87,7 +88,7 @@ export async function updateStageConfig(
 // ==================== Field Configurations ====================
 
 export async function fetchFieldConfigs(): Promise<OnboardingFieldConfig[]> {
-  const res = await fetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding/fields`);
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding/fields`);
   return handleResponse<OnboardingFieldConfig[]>(res, 'Failed to load field configurations');
 }
 
@@ -95,7 +96,7 @@ export async function updateFieldConfig(
   fieldKey: string,
   payload: UpdateOnboardingFieldConfigDto,
 ): Promise<OnboardingFieldConfig> {
-  const res = await fetch(
+  const res = await authorizedFetch(
     `${appConfig.apiBaseUrl}/hrms/settings/onboarding/fields/${encodeURIComponent(fieldKey)}`,
     {
       method: 'PATCH',
@@ -109,7 +110,7 @@ export async function updateFieldConfig(
 // ==================== Document Requirements ====================
 
 export async function fetchDocumentRequirements(): Promise<OnboardingDocumentRequirement[]> {
-  const res = await fetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding/documents`);
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding/documents`);
   return handleResponse<OnboardingDocumentRequirement[]>(
     res,
     'Failed to load document requirements',
@@ -119,7 +120,7 @@ export async function fetchDocumentRequirements(): Promise<OnboardingDocumentReq
 export async function createDocumentRequirement(
   payload: CreateOnboardingDocumentRequirementDto,
 ): Promise<OnboardingDocumentRequirement> {
-  const res = await fetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding/documents`, {
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding/documents`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -134,7 +135,7 @@ export async function updateDocumentRequirement(
   id: string,
   payload: UpdateOnboardingDocumentRequirementDto,
 ): Promise<OnboardingDocumentRequirement> {
-  const res = await fetch(
+  const res = await authorizedFetch(
     `${appConfig.apiBaseUrl}/hrms/settings/onboarding/documents/${encodeURIComponent(id)}`,
     {
       method: 'PATCH',
@@ -149,7 +150,7 @@ export async function updateDocumentRequirement(
 }
 
 export async function deleteDocumentRequirement(id: string): Promise<void> {
-  const res = await fetch(
+  const res = await authorizedFetch(
     `${appConfig.apiBaseUrl}/hrms/settings/onboarding/documents/${encodeURIComponent(id)}`,
     {
       method: 'DELETE',
@@ -169,14 +170,14 @@ export async function fetchChecklistTemplates(
   const url = stageKey
     ? `${appConfig.apiBaseUrl}/hrms/settings/onboarding/checklists?stageKey=${encodeURIComponent(stageKey)}`
     : `${appConfig.apiBaseUrl}/hrms/settings/onboarding/checklists`;
-  const res = await fetch(url);
+  const res = await authorizedFetch(url);
   return handleResponse<OnboardingChecklistTemplate[]>(res, 'Failed to load checklist templates');
 }
 
 export async function createChecklistTemplate(
   payload: CreateOnboardingChecklistTemplateDto,
 ): Promise<OnboardingChecklistTemplate> {
-  const res = await fetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding/checklists`, {
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding/checklists`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -188,7 +189,7 @@ export async function updateChecklistTemplate(
   id: string,
   payload: UpdateOnboardingChecklistTemplateDto,
 ): Promise<OnboardingChecklistTemplate> {
-  const res = await fetch(
+  const res = await authorizedFetch(
     `${appConfig.apiBaseUrl}/hrms/settings/onboarding/checklists/${encodeURIComponent(id)}`,
     {
       method: 'PATCH',
@@ -200,7 +201,7 @@ export async function updateChecklistTemplate(
 }
 
 export async function deleteChecklistTemplate(id: string): Promise<void> {
-  const res = await fetch(
+  const res = await authorizedFetch(
     `${appConfig.apiBaseUrl}/hrms/settings/onboarding/checklists/${encodeURIComponent(id)}`,
     {
       method: 'DELETE',
@@ -215,14 +216,14 @@ export async function deleteChecklistTemplate(id: string): Promise<void> {
 // ==================== Conversion Settings ====================
 
 export async function fetchConversionSettings(): Promise<OnboardingConversionSettings> {
-  const res = await fetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding/conversion`);
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding/conversion`);
   return handleResponse<OnboardingConversionSettings>(res, 'Failed to load conversion settings');
 }
 
 export async function updateConversionSettings(
   payload: UpdateOnboardingConversionSettingsDto,
 ): Promise<OnboardingConversionSettings> {
-  const res = await fetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding/conversion`, {
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding/conversion`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),

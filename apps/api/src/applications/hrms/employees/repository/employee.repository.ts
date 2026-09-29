@@ -44,6 +44,7 @@ export type EmploymentFieldUpdate = Partial<
 >;
 
 const manager = alias(employees, 'reporting_manager');
+const referredBy = alias(employees, 'referred_by');
 
 const detailSelection = {
   id: employees.id,
@@ -64,6 +65,10 @@ const detailSelection = {
   reportingManagerId: employees.reportingManagerId,
   reportingManagerFirstName: manager.firstName,
   reportingManagerLastName: manager.lastName,
+  referralCode: employees.referralCode,
+  referredByEmployeeId: employees.referredByEmployeeId,
+  referredByFirstName: referredBy.firstName,
+  referredByLastName: referredBy.lastName,
   joiningDate: employees.joiningDate,
   confirmedJoiningDate: employees.confirmedJoiningDate,
   probationEndDate: employees.probationEndDate,
@@ -78,9 +83,11 @@ const detailSelection = {
   updatedAt: employees.updatedAt,
 };
 
-type DetailRow = Omit<EmployeeDetails, 'fullName' | 'reportingManagerName'> & {
+type DetailRow = Omit<EmployeeDetails, 'fullName' | 'reportingManagerName' | 'referredByName'> & {
   reportingManagerFirstName: string | null;
   reportingManagerLastName: string | null;
+  referredByFirstName: string | null;
+  referredByLastName: string | null;
 };
 
 function joinName(firstName: string | null, lastName: string | null): string | null {
@@ -90,11 +97,18 @@ function joinName(firstName: string | null, lastName: string | null): string | n
 
 export class EmployeeRepository {
   private formatEmployeeRow(row: DetailRow): EmployeeDetails {
-    const { reportingManagerFirstName, reportingManagerLastName, ...rest } = row;
+    const {
+      reportingManagerFirstName,
+      reportingManagerLastName,
+      referredByFirstName,
+      referredByLastName,
+      ...rest
+    } = row;
     return {
       ...rest,
       fullName: joinName(row.firstName, row.lastName) ?? row.firstName,
       reportingManagerName: joinName(reportingManagerFirstName, reportingManagerLastName),
+      referredByName: joinName(referredByFirstName, referredByLastName),
     };
   }
 
@@ -138,6 +152,14 @@ export class EmployeeRepository {
           eq(manager.tenantId, tenantId),
           eq(manager.companyId, companyId),
         ),
+      )
+      .leftJoin(
+        referredBy,
+        and(
+          eq(employees.referredByEmployeeId, referredBy.id),
+          eq(referredBy.tenantId, tenantId),
+          eq(referredBy.companyId, companyId),
+        ),
       );
   }
 
@@ -154,7 +176,7 @@ export class EmployeeRepository {
       id,
       tenantId,
       companyId,
-      employeeNumber: dto.employeeNumber,
+      employeeNumber: dto.employeeNumber ?? '',
       userId: dto.userId ?? null,
       firstName: dto.firstName,
       lastName: dto.lastName ?? null,
@@ -164,6 +186,8 @@ export class EmployeeRepository {
       designationId: dto.designationId ?? null,
       locationId: dto.locationId ?? null,
       reportingManagerId: dto.reportingManagerId ?? null,
+      referralCode: dto.referralCode ?? null,
+      referredByEmployeeId: dto.referredByEmployeeId ?? null,
       joiningDate: dto.joiningDate,
       confirmedJoiningDate: dto.confirmedJoiningDate ?? null,
       probationEndDate: dto.probationEndDate ?? null,
@@ -171,7 +195,7 @@ export class EmployeeRepository {
       noticePeriodDays: dto.noticePeriodDays ?? null,
       contractEndDate: dto.contractEndDate ?? null,
       employmentType: dto.employmentType ?? 'full_time',
-      employmentStatus: dto.employmentStatus ?? 'probation',
+      employmentStatus: dto.employmentStatus ?? 'pending_activation',
     };
 
     await db.insert(employees).values(newRecord);
@@ -256,6 +280,33 @@ export class EmployeeRepository {
       .limit(1);
 
     return rows[0] ?? null;
+  }
+
+  async getByReferralCode(
+    tenantId: string,
+    companyId: string,
+    referralCode: string,
+  ): Promise<EmployeeDetails | null> {
+    const rows = await this.selectDetails(getDb(), tenantId, companyId)
+      .where(
+        and(
+          eq(employees.tenantId, tenantId),
+          eq(employees.companyId, companyId),
+          eq(employees.referralCode, referralCode),
+        ),
+      )
+      .limit(1);
+
+    if (rows.length === 0) return null;
+    return this.formatEmployeeRow(rows[0]!);
+  }
+
+  async listAllNumbers(tenantId: string, companyId: string): Promise<string[]> {
+    const rows = await getDb()
+      .select({ employeeNumber: employees.employeeNumber })
+      .from(employees)
+      .where(and(eq(employees.tenantId, tenantId), eq(employees.companyId, companyId)));
+    return rows.map((r) => r.employeeNumber);
   }
 
   async listPaginated(

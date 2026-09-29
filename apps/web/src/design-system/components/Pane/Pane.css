@@ -1,0 +1,633 @@
+/*
+ * BEZENT Pane — independently scrolling and/or sticky layout region.
+ */
+
+:root {
+  --pane-max-height-sm: 240px;
+  --pane-max-height-md: 360px;
+  --pane-max-height-lg: 480px;
+  --pane-max-height-xl: 640px;
+}
+
+.bezent-pane {
+  min-width: 0;
+  min-height: 0;
+}
+
+.bezent-pane--scroll-y {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.bezent-pane--scroll-y:focus-visible {
+  outline: 2px solid var(--border-focus, #1a73e8);
+  outline-offset: 2px;
+}
+
+/* Surface variants */
+.bezent-pane--surface-white {
+  background-color: var(--bg-surface, #ffffff);
+}
+
+.bezent-pane--surface-neutral {
+  background-color: var(--bg-surface-secondary, #f8fafc);
+}
+
+.bezent-pane--surface-canvas {
+  background-color: var(--bg-canvas, #f1f5f9);
+}
+
+/* Border variants */
+.bezent-pane--border-right {
+  border-right: 1px solid var(--border-subtle, #e2e8f0);
+}
+
+.bezent-pane--border-left {
+  border-left: 1px solid var(--border-subtle, #e2e8f0);
+}
+
+.bezent-pane--border-x {
+  border-left: 1px solid var(--border-subtle, #e2e8f0);
+  border-right: 1px solid var(--border-subtle, #e2e8f0);
+}
+
+.bezent-pane--border-all {
+  border: 1px solid var(--border-subtle, #e2e8f0);
+}
+
+/* Size variants */
+.bezent-pane--size-toolbox {
+  width: 240px;
+  min-width: 230px;
+  max-width: 260px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.bezent-pane--size-inspector {
+  width: 320px;
+  min-width: 300px;
+  max-width: 360px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.bezent-pane--size-fluid {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.bezent-pane--max-sm {
+  max-height: var(--pane-max-height-sm);
+}
+
+.bezent-pane--max-md {
+  max-height: var(--pane-max-height-md);
+}
+
+.bezent-pane--max-lg {
+  max-height: var(--pane-max-height-lg);
+}
+
+.bezent-pane--max-xl {
+  max-height: var(--pane-max-height-xl);
+}
+
+/* In a grid/flex parent, a sticky pane must not stretch to the row height. */
+.bezent-pane--sticky {
+  position: sticky;
+  top: 0;
+  align-self: start;
+}
+
+/* ─── Global Full-Page Editor Layout ────────────────────────────────────────── */
+
+.bezent-editor-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-canvas, #f1f5f9);
+  color: var(--text-primary, #0f172a);
+}
+
+.bezent-editor-header {
+  flex-shrink: 0;
+  height: 52px;
+  padding: 0 16px;
+  background-color: var(--bg-surface, #ffffff);
+  border-bottom: 1px solid var(--border-subtle, #e2e8f0);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 20;
+}
+
+.bezent-editor-header__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.bezent-editor-header__divider {
+  width: 1px;
+  height: 24px;
+  background-color: var(--border-subtle, #e2e8f0);
+  flex-shrink: 0;
+}
+
+.bezent-editor-header__title-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.bezent-editor-header__title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.bezent-editor-header__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  letter-spacing: -0.01em;
+}
+
+.bezent-editor-header__tabs {
+  display: flex;
+  align-items: center;
+}
+
+.bezent-editor-header__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.bezent-editor-alerts {
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border-subtle, #e2e8f0);
+  background-color: var(--bg-surface, #ffffff);
+}
+
+.bezent-editor-workspace {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* ─── Pane Common Headers & Content ────────────────────────────────────────── */
+
+.bezent-pane-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-subtle, #e2e8f0);
+  background-color: var(--bg-surface, #ffffff);
+  flex-shrink: 0;
+}
+
+.bezent-pane-header__title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ─── Toolbox Pane ─────────────────────────────────────────────────────────── */
+
+.bezent-toolbox-content {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bezent-toolbox-sub {
+  font-size: 11px;
+  color: var(--text-secondary, #64748b);
+  line-height: 1.35;
+  padding: 0 2px;
+}
+
+.bezent-toolbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bezent-toolbox-heading {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-secondary, #64748b);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 4px;
+}
+
+.bezent-toolbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.bezent-toolbox-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  background-color: var(--bg-surface, #ffffff);
+  cursor: grab;
+  user-select: none;
+  transition: all 120ms ease;
+  font-size: 12px;
+  color: var(--text-primary, #0f172a);
+}
+
+.bezent-toolbox-item:hover:not(.is-disabled) {
+  background-color: var(--bg-hover, #f1f5f9);
+  border-color: var(--border-default, #cbd5e1);
+}
+
+.bezent-toolbox-item.is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background-color: var(--bg-surface-secondary, #f8fafc);
+}
+
+.bezent-toolbox-item__left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.bezent-toolbox-item__handle {
+  color: var(--text-muted, #94a3b8);
+  display: flex;
+  align-items: center;
+}
+
+.bezent-toolbox-item__label {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bezent-toolbox-item__add {
+  color: var(--text-muted, #94a3b8);
+  display: flex;
+  align-items: center;
+  opacity: 0.7;
+  transition:
+    opacity 120ms ease,
+    color 120ms ease;
+}
+
+.bezent-toolbox-item:hover:not(.is-disabled) .bezent-toolbox-item__add {
+  opacity: 1;
+  color: var(--accent-interactive, #1a73e8);
+}
+
+.bezent-toolbox-search {
+  padding: 8px 12px 4px;
+}
+
+/* ─── Canvas Section Bar & Clean Header ───────────────────────────────────── */
+
+.bezent-canvas-section-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 20px;
+  background-color: var(--bg-surface, #ffffff);
+  border-bottom: 1px solid var(--border-subtle, #e2e8f0);
+  flex-shrink: 0;
+  gap: 16px;
+  z-index: 10;
+}
+
+.bezent-canvas-section-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bezent-canvas-section-select-wrap {
+  width: 250px;
+}
+
+.bezent-canvas-section-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ─── Form Canvas Paper & Content ─────────────────────────────────────────── */
+
+.bezent-canvas-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px 20px 48px;
+}
+
+.bezent-canvas-paper {
+  max-width: 880px;
+  width: 100%;
+  margin: 0 auto;
+  background-color: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: var(--radius-md, 8px);
+  padding: 28px 32px 40px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.bezent-canvas-header-clean {
+  border-bottom: 1px solid var(--border-subtle, #e2e8f0);
+  padding-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bezent-canvas-title-clean {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.bezent-canvas-desc-clean {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary, #64748b);
+  line-height: 1.4;
+}
+
+.bezent-canvas-file-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: var(--bg-surface-secondary, #f8fafc);
+  border: 1px dashed var(--border-default, #cbd5e1);
+  border-radius: var(--radius-sm, 6px);
+  font-size: 12px;
+  color: var(--text-secondary, #64748b);
+}
+
+/* ─── Field Selection & Contextual Toolbar ─────────────────────────────────── */
+
+.bezent-canvas-field-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.bezent-canvas-field-toolbar {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background-color: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-default, #cbd5e1);
+  border-radius: var(--radius-sm, 6px);
+  padding: 2px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  z-index: 10;
+}
+
+.bezent-canvas-field-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted, #94a3b8);
+  cursor: grab;
+  border-radius: 4px;
+}
+
+.bezent-canvas-field-handle:hover {
+  background-color: var(--bg-hover, #f1f5f9);
+  color: var(--text-primary, #0f172a);
+}
+
+.bezent-canvas-field-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, #64748b);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 120ms ease;
+}
+
+.bezent-canvas-field-btn:hover:not(:disabled) {
+  background-color: var(--bg-hover, #f1f5f9);
+  color: var(--text-primary, #0f172a);
+}
+
+.bezent-canvas-field-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.bezent-canvas-field-btn--danger:hover {
+  background-color: var(--status-danger-bg, #fef2f2);
+  color: var(--status-danger-fg, #dc2626);
+}
+
+/* Ensure controls in preview canvas have full readable contrast and delegate clicks */
+.bezent-form-field--selectable .bezent-form-field__control {
+  pointer-events: none;
+}
+
+/* ─── Inspector Pane ───────────────────────────────────────────────────────── */
+
+.bezent-inspector-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.bezent-inspector-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle, #e2e8f0);
+}
+
+.bezent-inspector-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+}
+
+.bezent-inspector-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bezent-inspector-heading {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-secondary, #64748b);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ─── Properties Tabs (Form Properties | Field Properties) ─────────────────── */
+
+.bezent-properties-tabs {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--border-subtle, #e2e8f0);
+  background-color: var(--bg-surface, #ffffff);
+  flex-shrink: 0;
+}
+
+.bezent-properties-tab {
+  flex: 1;
+  padding: 10px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-secondary, #64748b);
+  border-bottom: 2px solid transparent;
+  transition: all 120ms ease;
+  white-space: nowrap;
+}
+
+.bezent-properties-tab:hover {
+  color: var(--text-primary, #0f172a);
+  background-color: var(--bg-hover, #f1f5f9);
+}
+
+.bezent-properties-tab.is-active {
+  color: var(--accent-interactive, #1a73e8);
+  border-bottom-color: var(--accent-interactive, #1a73e8);
+  background-color: var(--color-primary-light, #eff6ff);
+}
+
+.bezent-inspector-preview-box {
+  padding: 12px;
+  background-color: var(--bg-surface-secondary, #f8fafc);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: var(--radius-sm, 6px);
+}
+
+/* ─── Drag & Drop Interaction Styles ───────────────────────────────────────── */
+
+.bezent-toolbox-item.is-dragging {
+  opacity: 0.35;
+}
+
+.bezent-canvas-field-wrapper.is-drop-target {
+  outline: 2px dashed var(--accent-interactive, #1a73e8);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm, 6px);
+}
+
+.bezent-subgroup-dropzone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  margin-top: 10px;
+  border: 1px dashed var(--border-subtle, #e2e8f0);
+  border-radius: var(--radius-sm, 6px);
+  color: var(--text-muted, #94a3b8);
+  font-size: 11px;
+  font-weight: 500;
+  transition: all 120ms ease;
+  user-select: none;
+  min-height: 32px;
+}
+
+.bezent-subgroup-dropzone:hover,
+.bezent-subgroup-dropzone.is-over {
+  border-color: var(--accent-interactive, #1a73e8);
+  background-color: var(--color-primary-light, #eff6ff);
+  color: var(--accent-interactive, #1a73e8);
+}
+
+.bezent-subgroup-dropzone__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bezent-drag-overlay-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--bg-surface, #ffffff);
+  border: 1.5px solid var(--accent-interactive, #1a73e8);
+  border-radius: var(--radius-sm, 6px);
+  padding: 6px 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  cursor: grabbing;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary, #0f172a);
+}
+
+.bezent-canvas-subgroup {
+  padding: 8px;
+  border-radius: var(--radius-md, 8px);
+  transition: all 150ms ease;
+}
+
+.bezent-canvas-subgroup.is-selected {
+  background-color: var(--color-primary-light, #f0f7ff);
+  box-shadow: 0 0 0 1.5px var(--accent-interactive, #1a73e8);
+}
+
+.bezent-subgroup-dropzone--empty {
+  padding: 24px 16px;
+  min-height: 52px;
+  background-color: var(--bg-surface, #ffffff);
+  border-style: dashed;
+  border-width: 1.5px;
+}

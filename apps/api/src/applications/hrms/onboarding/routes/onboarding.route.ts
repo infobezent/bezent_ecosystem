@@ -1,8 +1,16 @@
 import { Router } from 'express';
 import { OnboardingController } from '../controller/onboarding.controller.js';
+import { requireReadWrite } from '../../../../platform/access/middleware/access.middleware.js';
 
 export const onboardingRouter = Router();
 const controller = new OnboardingController();
+
+// Viewing onboarding needs hrms.onboarding.read; every change to a case
+// needs hrms.onboarding.manage (ADR-017). Covers all routes under the prefix.
+onboardingRouter.use(
+  '/hrms/onboarding',
+  requireReadWrite(['hrms.onboarding.read'], 'hrms.onboarding.manage'),
+);
 
 // Existing New Hire compatibility routes
 onboardingRouter.get('/hrms/onboarding/new-hires', controller.listNewHires);

@@ -9,6 +9,16 @@ import { OnboardingSettingsRepository } from '../../../applications/hrms/setting
 
 describe('Database Failure & Persistence Fallback Removal (P0)', () => {
   const app = createApp();
+  /**
+   * HRMS routes authenticate first (ADR-017/018). A well-formed bearer token
+   * makes the session lookup the first database call, so an outage must
+   * surface as DATABASE_UNAVAILABLE — never as a fallback or a misleading 401.
+   */
+  const api = () =>
+    request
+      .agent(app)
+      .set('authorization', `Bearer ${'a'.repeat(64)}`)
+      .set('x-company-id', 'comp_demo_01');
 
   afterEach(() => {
     vi.restoreAllMocks();
@@ -90,7 +100,7 @@ describe('Database Failure & Persistence Fallback Removal (P0)', () => {
     });
 
     it('GET /api/v1/hrms/organization/masters fails with 500 DATABASE_UNAVAILABLE and no mock data', async () => {
-      const res = await request(app).get('/api/v1/hrms/organization/masters');
+      const res = await api().get('/api/v1/hrms/organization/masters');
 
       expect(res.status).toBe(500);
       expect(res.body.data).toBeUndefined();
@@ -101,7 +111,7 @@ describe('Database Failure & Persistence Fallback Removal (P0)', () => {
     });
 
     it('POST /api/v1/hrms/onboarding/new-hires fails with 500 DATABASE_UNAVAILABLE', async () => {
-      const res = await request(app).post('/api/v1/hrms/onboarding/new-hires').send({
+      const res = await api().post('/api/v1/hrms/onboarding/new-hires').send({
         firstName: 'Unsaved',
         lastName: 'Candidate',
         email: 'unsaved@example.com',
@@ -121,7 +131,7 @@ describe('Database Failure & Persistence Fallback Removal (P0)', () => {
     });
 
     it('POST /api/v1/hrms/onboarding/cases (draft) fails with 500 DATABASE_UNAVAILABLE', async () => {
-      const res = await request(app).post('/api/v1/hrms/onboarding/cases').send({
+      const res = await api().post('/api/v1/hrms/onboarding/cases').send({
         firstName: 'DraftFail',
         email: 'draftfail@example.com',
       });
@@ -134,7 +144,7 @@ describe('Database Failure & Persistence Fallback Removal (P0)', () => {
     });
 
     it('GET /api/v1/hrms/settings/onboarding/general fails with 500 DATABASE_UNAVAILABLE', async () => {
-      const res = await request(app).get('/api/v1/hrms/settings/onboarding/general');
+      const res = await api().get('/api/v1/hrms/settings/onboarding/general');
 
       expect(res.status).toBe(500);
       expect(res.body.data).toBeUndefined();
@@ -144,7 +154,7 @@ describe('Database Failure & Persistence Fallback Removal (P0)', () => {
     });
 
     it('PATCH /api/v1/hrms/settings/onboarding/general fails with 500 DATABASE_UNAVAILABLE', async () => {
-      const res = await request(app)
+      const res = await api()
         .patch('/api/v1/hrms/settings/onboarding/general')
         .send({ onboardingEnabled: false });
 
@@ -169,7 +179,7 @@ describe('Database Failure & Persistence Fallback Removal (P0)', () => {
     });
 
     it('sanitizes driver errors: returns DATABASE_UNAVAILABLE without leaking connection string, host, or stack', async () => {
-      const res = await request(app).get('/api/v1/hrms/organization/masters');
+      const res = await api().get('/api/v1/hrms/organization/masters');
 
       expect(res.status).toBe(500);
       expect(res.body.data).toBeUndefined();

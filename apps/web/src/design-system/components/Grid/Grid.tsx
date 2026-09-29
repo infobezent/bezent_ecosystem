@@ -1,7 +1,7 @@
 import type { HTMLAttributes, ReactNode, ElementType } from 'react';
 import './Grid.css';
 
-export type GridColumns = 1 | 2 | 3 | 4 | 'auto-fill' | 'auto-fit' | 'sidebar-main';
+export type GridColumns = 1 | 2 | 3 | 4 | 'auto-fill' | 'auto-fit' | 'sidebar-main' | 'three-pane';
 export type GridMinColWidth = 'sm' | 'md' | 'lg';
 export type GridGap = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
@@ -28,7 +28,8 @@ export function Grid({
   ...rest
 }: GridProps) {
   const colClass =
-    typeof columns === 'number'
+    // Fixed templates carry no min-width suffix (only auto-fill/auto-fit do).
+    typeof columns === 'number' || columns === 'sidebar-main' || columns === 'three-pane'
       ? `bezent-grid--cols-${columns}`
       : `bezent-grid--cols-${columns}-${minColWidth}`;
 

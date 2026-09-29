@@ -1,0 +1,86 @@
+/*
+ * BEZENT SelectableList — vertical single-select list (listbox).
+ * Semantic tokens only; dark theme follows the token redefinitions.
+ */
+
+.bezent-selectable-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bezent-selectable-list__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  color: var(--text-primary, #1f1f1f);
+  cursor: pointer;
+  text-align: left;
+  user-select: none;
+  outline: none;
+  transition:
+    background-color 0.14s ease,
+    border-color 0.14s ease;
+}
+
+.bezent-selectable-list__item--md {
+  padding: 10px 12px;
+}
+
+.bezent-selectable-list__item--sm {
+  padding: 6px 10px;
+}
+
+.bezent-selectable-list__item:hover:not(.is-disabled):not(.is-selected) {
+  background: var(--bg-hover, #c2e7ff);
+}
+
+.bezent-selectable-list__item.is-selected {
+  background: var(--bg-selected, #c2e7ff);
+  border-color: var(--border-focus, #1a73e8);
+}
+
+.bezent-selectable-list__item:focus-visible {
+  outline: 2px solid var(--border-focus, #1a73e8);
+  outline-offset: 1px;
+}
+
+.bezent-selectable-list__item.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* No min-width: 0 — the label may wrap between words but never mid-word. */
+.bezent-selectable-list__content {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bezent-selectable-list__label {
+  font-size: 13px;
+  font-weight: 500;
+  overflow-wrap: break-word;
+}
+
+.bezent-selectable-list__item.is-selected .bezent-selectable-list__label {
+  font-weight: 600;
+}
+
+.bezent-selectable-list__description {
+  font-size: 12px;
+  color: var(--text-secondary, #444746);
+}
+
+.bezent-selectable-list__trailing {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+}

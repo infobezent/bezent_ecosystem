@@ -26,7 +26,7 @@ export const SETTINGS_MODULE_CARDS: SettingsModuleCard[] = [
   {
     id: 'onboarding',
     name: 'Administration',
-    description: 'Customize employee registration sections, fields, options, and requirements.',
+    description: 'Configure Administration forms, such as the Employee Registration form.',
     icon: 'onboarding',
   },
   {

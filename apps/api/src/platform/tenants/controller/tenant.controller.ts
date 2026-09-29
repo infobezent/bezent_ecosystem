@@ -1,0 +1,80 @@
+import type { Request, Response, NextFunction } from 'express';
+import { tenantService, TenantService } from '../service/tenant.service.js';
+import { validateCreateTenant, validateUpdateTenant } from '../validation/tenant.schema.js';
+import type { TenantStatus } from '../types/tenant.types.js';
+
+export class TenantController {
+  constructor(private readonly service: TenantService = tenantService) {}
+
+  list = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { search, status, page, limit } = req.query;
+      const result = await this.service.listTenants({
+        search: typeof search === 'string' ? search : undefined,
+        status: typeof status === 'string' ? (status as TenantStatus) : undefined,
+        page: typeof page === 'string' ? parseInt(page, 10) : 1,
+        limit: typeof limit === 'string' ? parseInt(limit, 10) : 20,
+      });
+      res.status(200).json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  getById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = String(req.params.id);
+      const result = await this.service.getTenantById(id);
+      res.status(200).json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  create = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const dto = validateCreateTenant(req.body);
+      const actor = { id: req.user?.id, email: req.user?.email };
+      const result = await this.service.createTenant(dto, actor);
+      res.status(201).json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  update = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = String(req.params.id);
+      const dto = validateUpdateTenant(req.body);
+      const actor = { id: req.user?.id, email: req.user?.email };
+      const result = await this.service.updateTenant(id, dto, actor);
+      res.status(200).json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  activate = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = String(req.params.id);
+      const actor = { id: req.user?.id, email: req.user?.email };
+      const result = await this.service.activateTenant(id, actor);
+      res.status(200).json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  suspend = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = String(req.params.id);
+      const actor = { id: req.user?.id, email: req.user?.email };
+      const result = await this.service.suspendTenant(id, actor);
+      res.status(200).json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+}
+
+export const tenantController = new TenantController();

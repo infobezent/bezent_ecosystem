@@ -5,7 +5,12 @@ import { NewHireModal } from '../components/NewHireModal';
 import { OnboardingPage } from '../pages/OnboardingPage';
 import { StandaloneUtilityLayout } from '../../../../app/router/StandaloneUtilityLayout';
 import { appRoutes } from '../../../../app/router/AppRouter';
+import { RequireAuth } from '../../../../platform/auth';
 import { hrmsRoutes } from '../../routes/hrmsRoutes';
+import { EmployeeRegistrationPage } from '../pages/EmployeeRegistrationPage';
+import { EmployeeRegistration } from '../components/EmployeeRegistration';
+import { RegistrationConfigProvider } from '../registration/registrationConfig';
+import { defaultRegistrationConfiguration } from './registrationConfigFixture';
 import type { OrganizationMasters } from '../api/onboardingApi';
 
 const mockMasters: OrganizationMasters = {
@@ -120,9 +125,14 @@ describe('HRMS Onboarding UI Components & Pages', () => {
   });
 
   it('routes /hrms/administration/onboarding/registration to StandaloneUtilityLayout with EmployeeRegistrationPage', () => {
-    const standaloneRoute = appRoutes.find(
-      (r) => r.element && (r.element as React.ReactElement).type === StandaloneUtilityLayout,
-    );
+    // The standalone workspace requires a signed-in session (ADR-018).
+    const standaloneRoute = appRoutes.find((r) => {
+      const element = r.element as
+        React.ReactElement<{ children?: React.ReactElement }> | undefined;
+      return (
+        element?.type === RequireAuth && element.props.children?.type === StandaloneUtilityLayout
+      );
+    });
     expect(standaloneRoute).toBeDefined();
     const registrationRoute = standaloneRoute?.children?.find(
       (r) => r.path === '/hrms/administration/onboarding/registration',
@@ -130,8 +140,20 @@ describe('HRMS Onboarding UI Components & Pages', () => {
     expect(registrationRoute).toBeDefined();
     expect(registrationRoute?.element).toBeDefined();
 
+    expect((registrationRoute!.element as React.ReactElement).type).toBe(EmployeeRegistrationPage);
+    // The page first loads the company's resolved Registration configuration.
+    expect(
+      renderToStaticMarkup(
+        <MemoryRouter>{registrationRoute!.element as React.ReactElement}</MemoryRouter>,
+      ),
+    ).toContain('Loading employee registration');
+
     const html = renderToStaticMarkup(
-      <MemoryRouter>{registrationRoute!.element as React.ReactElement}</MemoryRouter>,
+      <MemoryRouter>
+        <RegistrationConfigProvider configuration={defaultRegistrationConfiguration}>
+          <EmployeeRegistration onCancel={() => {}} initialDraft={null} />
+        </RegistrationConfigProvider>
+      </MemoryRouter>,
     );
     // Dedicated flush workspace structure & tokens — no padded Page wrapper
     expect(html).not.toContain('bezent-page--max-width');

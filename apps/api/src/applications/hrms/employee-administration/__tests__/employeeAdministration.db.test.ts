@@ -1,5 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
 import request from 'supertest';
+import {
+  hrmsTestHeaders,
+  removeHrmsTestAccess,
+} from '../../../../platform/__tests__/support/testSession.js';
 import { eq, inArray } from 'drizzle-orm';
 import { createApp } from '../../../../app/server/createApp.js';
 import { getDb, pingDatabase } from '../../../../db/connection.js';
@@ -21,6 +25,8 @@ import type { CreateEmployeeDto } from '../../employees/types/employee.types.js'
  */
 describe('HRMS Employee Administration API (MySQL)', () => {
   const app = createApp();
+  /** Authenticated HR operator agent: every request passes the real auth + RBAC chain. */
+  let hrms: ReturnType<typeof request.agent>;
   const employeeRepo = new EmployeeRepository();
 
   const tenantId = 'tenant_demo_01';
@@ -63,7 +69,7 @@ describe('HRMS Employee Administration API (MySQL)', () => {
   }
 
   async function createAction(body: Record<string, unknown>, headers: Record<string, string> = {}) {
-    return request(app).post('/api/v1/hrms/employee-actions').set(headers).send(body);
+    return hrms.post('/api/v1/hrms/employee-actions').set(headers).send(body);
   }
 
   async function getEmployee(id: string) {
@@ -71,6 +77,7 @@ describe('HRMS Employee Administration API (MySQL)', () => {
   }
 
   beforeAll(async () => {
+    hrms = request.agent(app).set(await hrmsTestHeaders());
     const connected = await pingDatabase();
     if (!connected) {
       throw new Error(
@@ -78,7 +85,7 @@ describe('HRMS Employee Administration API (MySQL)', () => {
       );
     }
 
-    const mastersRes = await request(app).get('/api/v1/hrms/organization/masters');
+    const mastersRes = await hrms.get('/api/v1/hrms/organization/masters');
     masters = mastersRes.body.data;
     expect(masters.departments.length).toBeGreaterThanOrEqual(2);
     expect(masters.designations.length).toBeGreaterThanOrEqual(2);
@@ -92,6 +99,8 @@ describe('HRMS Employee Administration API (MySQL)', () => {
       code: `EA${run}`.slice(0, 50),
       status: 'active',
     });
+    // Authorized in both companies, so isolation is proven at the data layer.
+    await hrmsTestHeaders(otherCompanyId);
     await db.insert(departments).values({
       id: otherDepartmentId,
       tenantId,
@@ -127,6 +136,7 @@ describe('HRMS Employee Administration API (MySQL)', () => {
       await db.delete(employees).where(inArray(employees.id, createdEmployeeIds));
     }
     await db.delete(departments).where(eq(departments.id, otherDepartmentId));
+    await removeHrmsTestAccess([otherCompanyId]);
     await db.delete(companies).where(eq(companies.id, otherCompanyId));
   });
 
@@ -279,22 +289,22 @@ describe('HRMS Employee Administration API (MySQL)', () => {
     });
     const actionId = created.body.data.id;
 
-    const detail = await request(app)
+    const detail = await hrms
       .get(`/api/v1/hrms/employee-actions/${actionId}`)
       .set(otherCompanyHeaders);
     expect(detail.status).toBe(404);
 
-    const apply = await request(app)
+    const apply = await hrms
       .post(`/api/v1/hrms/employee-actions/${actionId}/apply`)
       .set(otherCompanyHeaders)
       .send({ version: 1 });
     expect(apply.status).toBe(404);
 
-    const list = await request(app).get('/api/v1/hrms/employee-actions').set(otherCompanyHeaders);
+    const list = await hrms.get('/api/v1/hrms/employee-actions').set(otherCompanyHeaders);
     expect(list.status).toBe(200);
     expect(list.body.data.map((a: { id: string }) => a.id)).not.toContain(actionId);
 
-    const ownList = await request(app)
+    const ownList = await hrms
       .get('/api/v1/hrms/employee-actions')
       .query({ employeeId: employee.id });
     expect(ownList.body.data.map((a: { id: string }) => a.id)).toContain(actionId);
@@ -302,12 +312,10 @@ describe('HRMS Employee Administration API (MySQL)', () => {
 
   it('does not expose employees to another company', async () => {
     const employee = await createEmployee();
-    const res = await request(app)
-      .get(`/api/v1/hrms/employees/${employee.id}`)
-      .set(otherCompanyHeaders);
+    const res = await hrms.get(`/api/v1/hrms/employees/${employee.id}`).set(otherCompanyHeaders);
     expect(res.status).toBe(404);
 
-    const own = await request(app).get(`/api/v1/hrms/employees/${employee.id}`);
+    const own = await hrms.get(`/api/v1/hrms/employees/${employee.id}`);
     expect(own.status).toBe(200);
     expect(own.body.data.employeeNumber).toBe(employee.employeeNumber);
   });
@@ -338,7 +346,7 @@ describe('HRMS Employee Administration API (MySQL)', () => {
       'reportingManagerId',
     ]);
 
-    const applied = await request(app)
+    const applied = await hrms
       .post(`/api/v1/hrms/employee-actions/${dept.body.data.id}/apply`)
       .send({ version: 1 });
     expect(applied.status).toBe(200);
@@ -357,7 +365,7 @@ describe('HRMS Employee Administration API (MySQL)', () => {
       reason: 'Promotion',
       values: { designationId: masters.designations[0]!.id },
     });
-    await request(app)
+    await hrms
       .post(`/api/v1/hrms/employee-actions/${desig.body.data.id}/apply`)
       .send({ version: 1 })
       .expect(200);
@@ -369,7 +377,7 @@ describe('HRMS Employee Administration API (MySQL)', () => {
       reason: 'Relocation',
       values: { locationId: masters.locations[1]!.id },
     });
-    await request(app)
+    await hrms
       .post(`/api/v1/hrms/employee-actions/${loc.body.data.id}/apply`)
       .send({ version: 1 })
       .expect(200);
@@ -406,7 +414,7 @@ describe('HRMS Employee Administration API (MySQL)', () => {
     });
     expect(res.status).toBe(201);
 
-    await request(app)
+    await hrms
       .post(`/api/v1/hrms/employee-actions/${res.body.data.id}/apply`)
       .send({ version: 1 })
       .expect(200);
@@ -454,7 +462,7 @@ describe('HRMS Employee Administration API (MySQL)', () => {
       to: '2025-10-06',
     });
 
-    await request(app)
+    await hrms
       .post(`/api/v1/hrms/employee-actions/${res.body.data.id}/apply`)
       .send({ version: 1 })
       .expect(200);
@@ -474,7 +482,7 @@ describe('HRMS Employee Administration API (MySQL)', () => {
       values: { employmentStatus: 'suspended' },
     });
     expect(res.status).toBe(201);
-    await request(app)
+    await hrms
       .post(`/api/v1/hrms/employee-actions/${res.body.data.id}/apply`)
       .send({ version: 1 })
       .expect(200);
@@ -506,7 +514,7 @@ describe('HRMS Employee Administration API (MySQL)', () => {
     expect(res.body.data.requestDate).toBe('2026-01-02');
     expect(res.body.data.category).toBe('separation');
 
-    await request(app)
+    await hrms
       .post(`/api/v1/hrms/employee-actions/${res.body.data.id}/apply`)
       .send({ version: 1 })
       .expect(200);
@@ -536,7 +544,7 @@ describe('HRMS Employee Administration API (MySQL)', () => {
       values: { lastWorkingDate: '2026-01-31' },
     });
     expect(res.status).toBe(201);
-    await request(app)
+    await hrms
       .post(`/api/v1/hrms/employee-actions/${res.body.data.id}/apply`)
       .send({ version: 1 })
       .expect(200);
@@ -561,7 +569,7 @@ describe('HRMS Employee Administration API (MySQL)', () => {
     });
     const actionId = created.body.data.id;
 
-    const updated = await request(app)
+    const updated = await hrms
       .patch(`/api/v1/hrms/employee-actions/${actionId}`)
       .send({ version: 1, reason: 'Revised reason', values: { employmentType: 'contract' } });
     expect(updated.status).toBe(200);
@@ -569,12 +577,12 @@ describe('HRMS Employee Administration API (MySQL)', () => {
     expect(updated.body.data.reason).toBe('Revised reason');
     expect(updated.body.data.changes[0].to).toBe('contract');
 
-    await request(app)
+    await hrms
       .post(`/api/v1/hrms/employee-actions/${actionId}/apply`)
       .send({ version: 2 })
       .expect(200);
 
-    const detail = await request(app).get(`/api/v1/hrms/employee-actions/${actionId}`);
+    const detail = await hrms.get(`/api/v1/hrms/employee-actions/${actionId}`);
     expect(detail.body.data.status).toBe('applied');
     expect(detail.body.data.changes[0]).toMatchObject({ from: 'full_time', to: 'contract' });
     expect(detail.body.data.history.map((h: { event: string }) => h.event)).toEqual([
@@ -583,7 +591,7 @@ describe('HRMS Employee Administration API (MySQL)', () => {
       'applied',
     ]);
 
-    const cancelApplied = await request(app)
+    const cancelApplied = await hrms
       .post(`/api/v1/hrms/employee-actions/${actionId}/cancel`)
       .send({ version: 3 });
     expect(cancelApplied.status).toBe(409);
@@ -600,7 +608,7 @@ describe('HRMS Employee Administration API (MySQL)', () => {
       values: { locationId: masters.locations[1]!.id },
     });
 
-    const cancelled = await request(app)
+    const cancelled = await hrms
       .post(`/api/v1/hrms/employee-actions/${created.body.data.id}/cancel`)
       .send({ version: 1, reason: 'Requested in error' });
     expect(cancelled.status).toBe(200);
@@ -624,13 +632,13 @@ describe('HRMS Employee Administration API (MySQL)', () => {
       reason: 'Future change',
       values: { employmentType: 'intern' },
     });
-    const early = await request(app)
+    const early = await hrms
       .post(`/api/v1/hrms/employee-actions/${future.body.data.id}/apply`)
       .send({ version: 1 });
     expect(early.status).toBe(409);
     expect(early.body.error.code).toBe('NOT_YET_EFFECTIVE');
 
-    const wrongVersion = await request(app)
+    const wrongVersion = await hrms
       .post(`/api/v1/hrms/employee-actions/${future.body.data.id}/apply`)
       .send({ version: 7 });
     expect(wrongVersion.status).toBe(409);
@@ -648,7 +656,7 @@ describe('HRMS Employee Administration API (MySQL)', () => {
       departmentId: masters.departments[2]?.id ?? masters.departments[1]!.id,
     });
 
-    const stale = await request(app)
+    const stale = await hrms
       .post(`/api/v1/hrms/employee-actions/${dept.body.data.id}/apply`)
       .send({ version: 1 });
     expect(stale.status).toBe(409);
@@ -676,7 +684,7 @@ describe('HRMS Employee Administration API (MySQL)', () => {
       },
     );
 
-    const res = await request(app)
+    const res = await hrms
       .post(`/api/v1/hrms/employee-actions/${actionId}/apply`)
       .send({ version: 1 });
     expect(res.status).toBe(500);
@@ -684,7 +692,7 @@ describe('HRMS Employee Administration API (MySQL)', () => {
     vi.restoreAllMocks();
 
     expect((await getEmployee(employee.id)).locationId).toBe(masters.locations[0]!.id);
-    const detail = await request(app).get(`/api/v1/hrms/employee-actions/${actionId}`);
+    const detail = await hrms.get(`/api/v1/hrms/employee-actions/${actionId}`);
     expect(detail.body.data.status).toBe('pending');
     expect(detail.body.data.version).toBe(1);
     expect(detail.body.data.history.map((h: { event: string }) => h.event)).toEqual(['created']);
@@ -710,7 +718,7 @@ describe('HRMS Employee Administration API (MySQL)', () => {
       values: { lastWorkingDate: '2026-03-31' },
     });
 
-    const res = await request(app)
+    const res = await hrms
       .get('/api/v1/hrms/employee-actions')
       .query({ category: 'separation', employeeId: employee.id });
     expect(res.status).toBe(200);
@@ -727,7 +735,7 @@ describe('HRMS Employee Administration API (MySQL)', () => {
       reportingManagerId: manager.id,
     });
 
-    const res = await request(app)
+    const res = await hrms
       .get('/api/v1/hrms/employees')
       .query({ employmentStatus: 'probation', search: employee.employeeNumber });
     expect(res.status).toBe(200);

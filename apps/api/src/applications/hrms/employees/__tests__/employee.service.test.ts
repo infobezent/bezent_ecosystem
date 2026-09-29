@@ -43,6 +43,9 @@ describe('EmployeeService', () => {
     contractEndDate: null,
     employmentType: 'full_time',
     employmentStatus: 'probation',
+    referralCode: null,
+    referredByEmployeeId: null,
+    referredByName: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -71,6 +74,8 @@ describe('EmployeeService', () => {
     contractEndDate: null,
     employmentType: 'full_time',
     employmentStatus: 'probation',
+    referralCode: null,
+    referredByEmployeeId: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };

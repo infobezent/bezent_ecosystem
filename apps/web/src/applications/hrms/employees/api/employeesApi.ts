@@ -1,4 +1,5 @@
 import { appConfig } from '../../../../app/config/env';
+import { authorizedFetch } from '../../../../platform/auth';
 
 /**
  * Employees API client — canonical HRMS employee records (Employee ≠ User ≠
@@ -73,7 +74,7 @@ export class EmployeesApiError extends Error {
 }
 
 async function request<T>(path: string): Promise<T> {
-  const res = await fetch(`${appConfig.apiBaseUrl}${path}`);
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}${path}`);
 
   let body: unknown = null;
   try {
