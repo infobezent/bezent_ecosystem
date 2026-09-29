@@ -27,8 +27,15 @@ export function validateCreateCompany(body: unknown): CreateCompanyDto {
     errors.code = 'Company Code cannot exceed 50 characters';
   }
 
-  if (data.businessEmail !== undefined && data.businessEmail !== null && data.businessEmail !== '') {
-    if (typeof data.businessEmail !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.businessEmail.trim())) {
+  if (
+    data.businessEmail !== undefined &&
+    data.businessEmail !== null &&
+    data.businessEmail !== ''
+  ) {
+    if (
+      typeof data.businessEmail !== 'string' ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.businessEmail.trim())
+    ) {
       errors.businessEmail = 'Invalid business email format';
     }
   }
@@ -65,8 +72,15 @@ export function validateUpdateCompany(body: unknown): UpdateCompanyDto {
     }
   }
 
-  if (data.businessEmail !== undefined && data.businessEmail !== null && data.businessEmail !== '') {
-    if (typeof data.businessEmail !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.businessEmail.trim())) {
+  if (
+    data.businessEmail !== undefined &&
+    data.businessEmail !== null &&
+    data.businessEmail !== ''
+  ) {
+    if (
+      typeof data.businessEmail !== 'string' ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.businessEmail.trim())
+    ) {
       errors.businessEmail = 'Invalid business email format';
     }
   }
@@ -77,10 +91,31 @@ export function validateUpdateCompany(body: unknown): UpdateCompanyDto {
 
   return {
     name: data.name ? (data.name as string).trim() : undefined,
-    legalName: data.legalName !== undefined ? (data.legalName ? String(data.legalName).trim() : null) : undefined,
-    businessEmail: data.businessEmail !== undefined ? (data.businessEmail ? String(data.businessEmail).trim() : null) : undefined,
-    contactPhone: data.contactPhone !== undefined ? (data.contactPhone ? String(data.contactPhone).trim() : null) : undefined,
-    country: data.country !== undefined ? (data.country ? String(data.country).trim() : null) : undefined,
-    timeZone: data.timeZone !== undefined ? (data.timeZone ? String(data.timeZone).trim() : null) : undefined,
+    legalName:
+      data.legalName !== undefined
+        ? data.legalName
+          ? String(data.legalName).trim()
+          : null
+        : undefined,
+    businessEmail:
+      data.businessEmail !== undefined
+        ? data.businessEmail
+          ? String(data.businessEmail).trim()
+          : null
+        : undefined,
+    contactPhone:
+      data.contactPhone !== undefined
+        ? data.contactPhone
+          ? String(data.contactPhone).trim()
+          : null
+        : undefined,
+    country:
+      data.country !== undefined ? (data.country ? String(data.country).trim() : null) : undefined,
+    timeZone:
+      data.timeZone !== undefined
+        ? data.timeZone
+          ? String(data.timeZone).trim()
+          : null
+        : undefined,
   };
 }

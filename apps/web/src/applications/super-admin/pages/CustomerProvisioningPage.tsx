@@ -63,7 +63,9 @@ export function CustomerProvisioningPage() {
   const canProceedStep4 =
     adminMode === 'existing'
       ? adminUserId.trim().length > 0
-      : adminEmail.trim().length > 4 && adminFirstName.trim().length > 0 && adminLastName.trim().length > 0;
+      : adminEmail.trim().length > 4 &&
+        adminFirstName.trim().length > 0 &&
+        adminLastName.trim().length > 0;
 
   const handleNext = (e?: FormEvent) => {
     if (e) e.preventDefault();
@@ -163,7 +165,8 @@ export function CustomerProvisioningPage() {
       {result ? (
         <Stack gap="lg">
           <Alert variant="success" title="Customer Successfully Provisioned!">
-            The customer tenant, primary company, module entitlements, and Company Admin were atomically created in MySQL.
+            The customer tenant, primary company, module entitlements, and Company Admin were
+            atomically created in MySQL.
           </Alert>
 
           <Card>
@@ -172,13 +175,16 @@ export function CustomerProvisioningPage() {
                 <Stack gap="sm">
                   <strong>Tenant:</strong> {result.tenant.name} (<code>{result.tenant.code}</code>)
                   <br />
-                  <strong>Company:</strong> {result.company.name} (<code>{result.company.code}</code>)
+                  <strong>Company:</strong> {result.company.name} (
+                  <code>{result.company.code}</code>)
                   <br />
-                  <strong>Status:</strong> <Badge status={result.tenant.status}>{result.tenant.status}</Badge>
+                  <strong>Status:</strong>{' '}
+                  <Badge status={result.tenant.status}>{result.tenant.status}</Badge>
                 </Stack>
 
                 <Stack gap="sm">
-                  <strong>Assigned Company Admin:</strong> {result.admin.firstName} {result.admin.lastName} ({result.admin.email})
+                  <strong>Assigned Company Admin:</strong> {result.admin.firstName}{' '}
+                  {result.admin.lastName} ({result.admin.email})
                   <br />
                   <strong>Sign-in:</strong> Email one-time code (no password)
                   <br />
@@ -409,10 +415,7 @@ export function CustomerProvisioningPage() {
                           Team projects, task boards, milestones and deliverable tracking.
                         </span>
                       </Stack>
-                      <Switch
-                        checked={enablePm}
-                        onChange={(e) => setEnablePm(e.target.checked)}
-                      />
+                      <Switch checked={enablePm} onChange={(e) => setEnablePm(e.target.checked)} />
                     </Inline>
                   </Card>
                 </Stack>
@@ -482,8 +485,8 @@ export function CustomerProvisioningPage() {
                       />
 
                       <span className="bezent-caption">
-                        No password is created. The administrator is emailed sign-in
-                        instructions and signs in with a one-time code sent to this email.
+                        No password is created. The administrator is emailed sign-in instructions
+                        and signs in with a one-time code sent to this email.
                       </span>
                     </Stack>
                   )}
@@ -520,7 +523,9 @@ export function CustomerProvisioningPage() {
                     <Stack gap="xs">
                       <span className="bezent-caption">Administrator</span>
                       {adminMode === 'create' ? (
-                        <span>{adminFirstName} {adminLastName} ({adminEmail})</span>
+                        <span>
+                          {adminFirstName} {adminLastName} ({adminEmail})
+                        </span>
                       ) : (
                         <span>User ID: {adminUserId}</span>
                       )}
@@ -533,7 +538,8 @@ export function CustomerProvisioningPage() {
                     <Stack gap="xs">
                       <strong>Activate Customer Immediately</strong>
                       <span className="bezent-caption">
-                        If disabled, customer tenant and company will be provisioned in suspended state.
+                        If disabled, customer tenant and company will be provisioned in suspended
+                        state.
                       </span>
                     </Stack>
                     <Switch
@@ -548,11 +554,7 @@ export function CustomerProvisioningPage() {
 
           {/* Navigation Controls */}
           <Inline justify="between">
-            <Button
-              variant="secondary"
-              onClick={handleBack}
-              disabled={step === 1 || submitting}
-            >
+            <Button variant="secondary" onClick={handleBack} disabled={step === 1 || submitting}>
               Back
             </Button>
 
@@ -561,11 +563,7 @@ export function CustomerProvisioningPage() {
                 Continue →
               </Button>
             ) : (
-              <Button
-                variant="primary"
-                onClick={handleProvision}
-                disabled={submitting}
-              >
+              <Button variant="primary" onClick={handleProvision} disabled={submitting}>
                 {submitting ? 'Provisioning Customer...' : 'Execute Provisioning'}
               </Button>
             )}

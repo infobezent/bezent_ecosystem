@@ -52,16 +52,25 @@ export function EssDocumentsPage() {
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const handleUpload = async () => {
     setUploadLoading(true);
     setUploadError(null);
     try {
-      await essApi.uploadDocument({ category, documentName, documentNumber: documentNumber || undefined, expiryDate: expiryDate || undefined });
+      await essApi.uploadDocument({
+        category,
+        documentName,
+        documentNumber: documentNumber || undefined,
+        expiryDate: expiryDate || undefined,
+      });
       setSuccessMsg(`"${documentName}" uploaded and queued for HR verification.`);
       setUploadOpen(false);
-      setDocumentName(''); setDocumentNumber(''); setExpiryDate('');
+      setDocumentName('');
+      setDocumentNumber('');
+      setExpiryDate('');
       await load();
     } catch (err: unknown) {
       setUploadError(err instanceof Error ? err.message : 'Failed to upload document');
@@ -71,7 +80,12 @@ export function EssDocumentsPage() {
   };
 
   if (loading) return <LoadingState label="Loading documents..." />;
-  if (error) return <Alert variant="error" title="Error">{error}</Alert>;
+  if (error)
+    return (
+      <Alert variant="error" title="Error">
+        {error}
+      </Alert>
+    );
 
   const statusVariant = (status: EssDocument['status']): BadgeVariant => {
     if (status === 'verified') return 'success';
@@ -82,7 +96,7 @@ export function EssDocumentsPage() {
   };
 
   const categoryLabel = (c: EssDocument['category']): string =>
-    c.replace(/_/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase());
+    c.replace(/_/g, ' ').replace(/\b\w/g, (ch) => ch.toUpperCase());
 
   return (
     <Page>
@@ -95,11 +109,17 @@ export function EssDocumentsPage() {
             variant="primary"
             leftIcon={<BezentIcon name="documents" size={16} />}
             onClick={() => setUploadOpen(true)}
-          >Upload Document</Button>
+          >
+            Upload Document
+          </Button>
         }
       />
 
-      {successMsg && <Alert variant="success" title="Uploaded">{successMsg}</Alert>}
+      {successMsg && (
+        <Alert variant="success" title="Uploaded">
+          {successMsg}
+        </Alert>
+      )}
 
       <Section title="Document Vault">
         {documents.length === 0 ? (
@@ -132,7 +152,9 @@ export function EssDocumentsPage() {
                   <TableCell>{doc.documentNumber ?? '—'}</TableCell>
                   <TableCell>{doc.expiryDate ?? '—'}</TableCell>
                   <TableCell>
-                    <Badge variant={statusVariant(doc.status)}>{doc.status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</Badge>
+                    <Badge variant={statusVariant(doc.status)}>
+                      {doc.status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
+                    </Badge>
                   </TableCell>
                 </TableRow>
               ))}
@@ -148,18 +170,34 @@ export function EssDocumentsPage() {
         onClose={() => setUploadOpen(false)}
         footer={
           <Inline gap="sm">
-            <Button id="doc-upload-cancel" variant="secondary" onClick={() => setUploadOpen(false)}>Cancel</Button>
-            <Button id="doc-upload-submit" variant="primary" onClick={handleUpload} loading={uploadLoading}>Upload</Button>
+            <Button id="doc-upload-cancel" variant="secondary" onClick={() => setUploadOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              id="doc-upload-submit"
+              variant="primary"
+              onClick={handleUpload}
+              loading={uploadLoading}
+            >
+              Upload
+            </Button>
           </Inline>
         }
       >
         <Stack gap="md">
-          {uploadError && <Alert variant="error" title="Error">{uploadError}</Alert>}
+          {uploadError && (
+            <Alert variant="error" title="Error">
+              {uploadError}
+            </Alert>
+          )}
           <FormSection title="Document Details">
             <FormGrid columns={1}>
               <label>
                 Category
-                <select value={category} onChange={e => setCategory(e.target.value as EssDocument['category'])}>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value as EssDocument['category'])}
+                >
                   <option value="personal_identity">Personal Identity</option>
                   <option value="address_proof">Address Proof</option>
                   <option value="education">Education</option>
@@ -168,9 +206,30 @@ export function EssDocumentsPage() {
                   <option value="tax_other">Tax / Other</option>
                 </select>
               </label>
-              <label>Document Name<input value={documentName} onChange={e => setDocumentName(e.target.value)} placeholder="e.g., Aadhaar Card" /></label>
-              <label>Document Number (optional)<input value={documentNumber} onChange={e => setDocumentNumber(e.target.value)} placeholder="e.g., XXXX-XXXX-1234" /></label>
-              <label>Expiry Date (optional)<input type="date" value={expiryDate} onChange={e => setExpiryDate(e.target.value)} /></label>
+              <label>
+                Document Name
+                <input
+                  value={documentName}
+                  onChange={(e) => setDocumentName(e.target.value)}
+                  placeholder="e.g., Aadhaar Card"
+                />
+              </label>
+              <label>
+                Document Number (optional)
+                <input
+                  value={documentNumber}
+                  onChange={(e) => setDocumentNumber(e.target.value)}
+                  placeholder="e.g., XXXX-XXXX-1234"
+                />
+              </label>
+              <label>
+                Expiry Date (optional)
+                <input
+                  type="date"
+                  value={expiryDate}
+                  onChange={(e) => setExpiryDate(e.target.value)}
+                />
+              </label>
             </FormGrid>
           </FormSection>
         </Stack>

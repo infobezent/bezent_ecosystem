@@ -15,10 +15,7 @@ import {
 import { BezentIcon } from '../../../design-system/icons';
 import { useCompanyAdmin } from '../context/CompanyAdminContext';
 import { CompanyContextBar } from '../components/CompanyContextBar';
-import {
-  companyAdminApi,
-  type RoleDefinition,
-} from '../api/companyAdminApi';
+import { companyAdminApi, type RoleDefinition } from '../api/companyAdminApi';
 
 export function CompanyRolesPage() {
   const { activeCompanyId, activeCompany } = useCompanyAdmin();
@@ -73,7 +70,9 @@ export function CompanyRolesPage() {
       ) : (
         <Stack gap="lg">
           <Alert variant="info" title="Role Hierarchy & Boundaries">
-            Platform roles like <strong>Super Admin</strong> operate strictly at the ecosystem infrastructure layer and cannot be assigned by Company Admins. Roles listed below are scoped strictly to <strong>{activeCompany?.name}</strong>.
+            Platform roles like <strong>Super Admin</strong> operate strictly at the ecosystem
+            infrastructure layer and cannot be assigned by Company Admins. Roles listed below are
+            scoped strictly to <strong>{activeCompany?.name}</strong>.
           </Alert>
 
           <Section
@@ -94,8 +93,8 @@ export function CompanyRolesPage() {
                           r.id === 'company_admin'
                             ? 'info'
                             : r.id === 'hr_manager'
-                            ? 'info'
-                            : 'neutral'
+                              ? 'info'
+                              : 'neutral'
                         }
                       >
                         {r.id.toUpperCase()}
@@ -105,7 +104,9 @@ export function CompanyRolesPage() {
                     <p>{r.description}</p>
 
                     <Stack gap="xs">
-                      <span className="bezent-metric-label">Granted Permissions ({r.permissions.length}):</span>
+                      <span className="bezent-metric-label">
+                        Granted Permissions ({r.permissions.length}):
+                      </span>
                       <Inline gap="xs" wrap>
                         {r.permissions.map((perm) => (
                           <Badge key={perm} variant="neutral" size="sm">

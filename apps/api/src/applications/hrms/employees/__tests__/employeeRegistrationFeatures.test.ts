@@ -7,7 +7,11 @@ import {
   validateEmployeeRecordDetails,
   validateEmployeeRecordSection,
 } from '../validation/employeeProfile.schema.js';
-import { NotFoundError, BadRequestError, ValidationError } from '../../../../app/errors/AppError.js';
+import {
+  NotFoundError,
+  BadRequestError,
+  ValidationError,
+} from '../../../../app/errors/AppError.js';
 import type { Employee } from '../../../../db/schema.js';
 import type { EmployeeDetails } from '../types/employee.types.js';
 
@@ -57,35 +61,38 @@ describe('Employee Registration Features & Invariants', () => {
       vi.mocked(mockRepo.listAllNumbers!).mockResolvedValue(['EMP-0010']);
       vi.mocked(mockRepo.getByEmployeeNumber!).mockResolvedValue(null);
       vi.mocked(mockRepo.getByEmail!).mockResolvedValue(null);
-      vi.mocked(mockRepo.create!).mockImplementation(async (_t, _c, dto) => ({
-        id: 'emp_new',
-        tenantId,
-        companyId,
-        employeeNumber: dto.employeeNumber,
-        userId: null,
-        firstName: dto.firstName,
-        lastName: dto.lastName ?? null,
-        email: dto.email,
-        phone: dto.phone ?? null,
-        departmentId: null,
-        designationId: null,
-        locationId: null,
-        reportingManagerId: null,
-        joiningDate: dto.joiningDate,
-        confirmedJoiningDate: null,
-        probationEndDate: null,
-        confirmationDate: null,
-        lastWorkingDate: null,
-        sourceOfHire: null,
-        referralCode: dto.referralCode ?? null,
-        referredByEmployeeId: dto.referredByEmployeeId ?? null,
-        noticePeriodDays: null,
-        contractEndDate: null,
-        employmentType: dto.employmentType,
-        employmentStatus: dto.employmentStatus,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as Employee));
+      vi.mocked(mockRepo.create!).mockImplementation(
+        async (_t, _c, dto) =>
+          ({
+            id: 'emp_new',
+            tenantId,
+            companyId,
+            employeeNumber: dto.employeeNumber,
+            userId: null,
+            firstName: dto.firstName,
+            lastName: dto.lastName ?? null,
+            email: dto.email,
+            phone: dto.phone ?? null,
+            departmentId: null,
+            designationId: null,
+            locationId: null,
+            reportingManagerId: null,
+            joiningDate: dto.joiningDate,
+            confirmedJoiningDate: null,
+            probationEndDate: null,
+            confirmationDate: null,
+            lastWorkingDate: null,
+            sourceOfHire: null,
+            referralCode: dto.referralCode ?? null,
+            referredByEmployeeId: dto.referredByEmployeeId ?? null,
+            noticePeriodDays: null,
+            contractEndDate: null,
+            employmentType: dto.employmentType,
+            employmentStatus: dto.employmentStatus,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }) as Employee,
+      );
       vi.mocked(mockRepo.getById!).mockResolvedValue({
         id: 'emp_new',
         tenantId,
@@ -209,9 +216,9 @@ describe('Employee Registration Features & Invariants', () => {
 
     it('throws NotFoundError for non-existent referral code', async () => {
       vi.mocked(mockRepo.getByReferralCode!).mockResolvedValue(null);
-      await expect(
-        service.resolveReferral(tenantId, companyId, 'INVALID-CODE'),
-      ).rejects.toThrow(NotFoundError);
+      await expect(service.resolveReferral(tenantId, companyId, 'INVALID-CODE')).rejects.toThrow(
+        NotFoundError,
+      );
     });
 
     it('throws BadRequestError if referral code is empty', async () => {

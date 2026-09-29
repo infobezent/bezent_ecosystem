@@ -86,13 +86,7 @@ export function FieldToolbox({
   }, [search]);
 
   return (
-    <Pane
-      size="toolbox"
-      surface="neutral"
-      border="right"
-      scroll="y"
-      aria-label="Add Field Toolbox"
-    >
+    <Pane size="toolbox" surface="neutral" border="right" scroll="y" aria-label="Add Field Toolbox">
       <div className="bezent-pane-header">
         <span className="bezent-pane-header__title">Add Field</span>
         <Badge variant="neutral" size="sm">
@@ -146,5 +140,3 @@ export function FieldToolbox({
     </Pane>
   );
 }
-
-

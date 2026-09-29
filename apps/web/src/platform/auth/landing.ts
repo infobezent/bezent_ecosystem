@@ -16,7 +16,8 @@ export function landingPath(access: AccessOverview): string {
 
 /** Accepts only same-origin, absolute in-app paths (no protocol-relative or external URLs). */
 export function safeNextPath(next: string | null): string | null {
-  if (!next || !next.startsWith('/') || next.startsWith('//') || next.startsWith('/\\')) return null;
+  if (!next || !next.startsWith('/') || next.startsWith('//') || next.startsWith('/\\'))
+    return null;
   if (next === '/login' || next.startsWith('/login?')) return null;
   return next;
 }

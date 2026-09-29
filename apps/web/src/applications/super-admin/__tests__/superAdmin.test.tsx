@@ -23,10 +23,7 @@ describe('Super Admin Navigation Catalog', () => {
   });
 
   it('resolves every icon against the design-system icon registry', () => {
-    const icons = [
-      ...categories.map((c) => c.icon),
-      ...destinations.map((d) => d.icon),
-    ];
+    const icons = [...categories.map((c) => c.icon), ...destinations.map((d) => d.icon)];
     for (const icon of icons) {
       expect(ICON_DEFINITIONS[icon], `Missing icon: ${icon}`).toBeDefined();
     }

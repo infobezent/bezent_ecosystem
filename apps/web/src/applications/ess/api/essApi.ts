@@ -99,17 +99,25 @@ export interface EssTimesheet {
 
 export interface EssDocument {
   id: string;
-  category: 'personal_identity' | 'address_proof' | 'education' | 'previous_employment' | 'bank_payroll' | 'tax_other';
+  category:
+    | 'personal_identity'
+    | 'address_proof'
+    | 'education'
+    | 'previous_employment'
+    | 'bank_payroll'
+    | 'tax_other';
   documentName: string;
   documentNumber?: string | null;
-  status: 'pending' | 'under_review' | 'verified' | 'rejected' | 'resubmission_required' | 'expired';
+  status:
+    'pending' | 'under_review' | 'verified' | 'rejected' | 'resubmission_required' | 'expired';
   expiryDate?: string | null;
   createdAt: string;
 }
 
 export interface EssRequest {
   id: string;
-  requestType: 'profile_change' | 'attendance_regularization' | 'document_request' | 'general_service';
+  requestType:
+    'profile_change' | 'attendance_regularization' | 'document_request' | 'general_service';
   subject: string;
   details: Record<string, unknown>;
   status: 'pending' | 'approved' | 'rejected' | 'cancelled';
@@ -147,8 +155,10 @@ export interface EssFullProfile {
 /* ── HTTP client ──────────────────────────────────────────────────── */
 
 function getHeaders(): Record<string, string> {
-  const token = typeof localStorage !== 'undefined' ? localStorage.getItem(PLATFORM_TOKEN_KEY) : null;
-  const companyId = typeof localStorage !== 'undefined' ? localStorage.getItem(ACTIVE_COMPANY_KEY) : null;
+  const token =
+    typeof localStorage !== 'undefined' ? localStorage.getItem(PLATFORM_TOKEN_KEY) : null;
+  const companyId =
+    typeof localStorage !== 'undefined' ? localStorage.getItem(ACTIVE_COMPANY_KEY) : null;
 
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -185,24 +195,35 @@ export const essApi = {
     section: 'personal' | 'emergency_contact' | 'bank_account' | 'address';
     changes: Record<string, unknown>;
     reason: string;
-  }) => req<EssRequest>('/profile/change-requests', { method: 'POST', body: JSON.stringify(payload) }),
+  }) =>
+    req<EssRequest>('/profile/change-requests', { method: 'POST', body: JSON.stringify(payload) }),
 
   // Attendance
   getAttendance: () =>
-    req<{ today: EssTodayAttendance & { notes?: string | null }; history: EssAttendanceRecord[] }>('/attendance'),
+    req<{ today: EssTodayAttendance & { notes?: string | null }; history: EssAttendanceRecord[] }>(
+      '/attendance',
+    ),
   checkIn: (payload: { workLocation?: string; notes?: string }) =>
-    req<EssAttendanceRecord>('/attendance/check-in', { method: 'POST', body: JSON.stringify(payload) }),
+    req<EssAttendanceRecord>('/attendance/check-in', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
   checkOut: () => req<EssAttendanceRecord>('/attendance/check-out', { method: 'POST' }),
   regularizeAttendance: (payload: {
     date: string;
     checkInTime: string;
     checkOutTime: string;
     reason: string;
-  }) => req<EssRequest>('/attendance/regularize', { method: 'POST', body: JSON.stringify(payload) }),
+  }) =>
+    req<EssRequest>('/attendance/regularize', { method: 'POST', body: JSON.stringify(payload) }),
 
   // Leave
   getLeave: () =>
-    req<{ balances: EssLeaveBalanceItem[]; requests: EssLeaveRequest[]; holidays: Array<{ name: string; date: string; dayOfWeek: string }> }>('/leave'),
+    req<{
+      balances: EssLeaveBalanceItem[];
+      requests: EssLeaveRequest[];
+      holidays: Array<{ name: string; date: string; dayOfWeek: string }>;
+    }>('/leave'),
   applyLeave: (payload: {
     leaveType: 'annual' | 'sick' | 'casual' | 'unpaid';
     startDate: string;
@@ -220,7 +241,10 @@ export const essApi = {
     hours: number;
   }) => req<EssTimesheet>('/timesheets/log', { method: 'POST', body: JSON.stringify(payload) }),
   submitTimesheets: (ids?: string[]) =>
-    req<{ submittedCount: number }>('/timesheets/submit', { method: 'POST', body: JSON.stringify({ ids }) }),
+    req<{ submittedCount: number }>('/timesheets/submit', {
+      method: 'POST',
+      body: JSON.stringify({ ids }),
+    }),
 
   // Documents
   getDocuments: () => req<{ documents: EssDocument[] }>('/documents'),
@@ -241,11 +265,12 @@ export const essApi = {
     req<EssTask>(`/tasks/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
 
   // Notifications
-  getNotifications: () => req<{ notifications: EssNotification[]; unreadCount: number }>('/notifications'),
-  markNotificationRead: (id: string) => req<EssNotification>(`/notifications/${id}/read`, { method: 'PATCH' }),
+  getNotifications: () =>
+    req<{ notifications: EssNotification[]; unreadCount: number }>('/notifications'),
+  markNotificationRead: (id: string) =>
+    req<EssNotification>(`/notifications/${id}/read`, { method: 'PATCH' }),
   markAllRead: () => req<{ markedCount: number }>('/notifications/read-all', { method: 'POST' }),
 
   // Payslips
-  getPayslips: () =>
-    req<{ enabled: boolean; message: string; payslips: unknown[] }>('/payslips'),
+  getPayslips: () => req<{ enabled: boolean; message: string; payslips: unknown[] }>('/payslips'),
 };

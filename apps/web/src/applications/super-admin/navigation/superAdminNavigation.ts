@@ -20,7 +20,8 @@ export const SUPER_ADMIN_NAV_CATEGORIES: readonly NavCategory[] = [
   {
     id: 'access-apps',
     label: 'Access & Applications',
-    description: 'Platform user directory, company admin assignments and module access entitlements.',
+    description:
+      'Platform user directory, company admin assignments and module access entitlements.',
     icon: 'employees',
   },
   {
@@ -71,7 +72,8 @@ export const SUPER_ADMIN_NAV_DESTINATIONS: readonly NavDestination[] = [
     icon: 'dashboard',
     segment: 'provisioning',
     subtitle: 'Provision New Customer',
-    description: 'Guided multi-step wizard to create tenant, company, assign admin and entitle modules.',
+    description:
+      'Guided multi-step wizard to create tenant, company, assign admin and entitle modules.',
     categoryId: 'customers',
     sidebar: true,
   },
@@ -103,7 +105,8 @@ export const SUPER_ADMIN_NAV_DESTINATIONS: readonly NavDestination[] = [
     icon: 'dashboard',
     segment: 'modules',
     subtitle: 'Application Entitlements',
-    description: 'Configure and enforce module access (HRMS, CRM, Project Management) per customer.',
+    description:
+      'Configure and enforce module access (HRMS, CRM, Project Management) per customer.',
     categoryId: 'access-apps',
     sidebar: true,
   },
@@ -125,7 +128,8 @@ export const SUPER_ADMIN_NAV_DESTINATIONS: readonly NavDestination[] = [
     icon: 'settings',
     segment: 'settings',
     subtitle: 'Platform System Configuration',
-    description: 'Multi-tenancy isolation policies, authentication rules and platform bootstrap status.',
+    description:
+      'Multi-tenancy isolation policies, authentication rules and platform bootstrap status.',
     categoryId: 'platform',
     sidebar: true,
   },

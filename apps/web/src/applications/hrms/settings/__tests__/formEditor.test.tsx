@@ -308,8 +308,11 @@ describe('Form Editor → Field Reorder (arrayMove)', () => {
 
     // Bug path (without sort): indices are from raw array
     const bugFromIdx = rawFields.findIndex((f) => f.key === 'general.c'); // 2
-    const bugToIdx = rawFields.findIndex((f) => f.key === 'general.a');   // 1
-    const bugReordered = arrayMove(rawFields, bugFromIdx, bugToIdx).map((f, i) => ({ ...f, order: i + 1 }));
+    const bugToIdx = rawFields.findIndex((f) => f.key === 'general.a'); // 1
+    const bugReordered = arrayMove(rawFields, bugFromIdx, bugToIdx).map((f, i) => ({
+      ...f,
+      order: i + 1,
+    }));
     // Bug: produces [B, C, A] (swapped B and C in raw — wrong visual result)
     expect(bugReordered.map((f) => f.key)).not.toEqual(['general.c', 'general.a', 'general.b']);
 
@@ -317,8 +320,11 @@ describe('Form Editor → Field Reorder (arrayMove)', () => {
     const sorted = [...rawFields].sort((a, b) => a.order - b.order);
     // sorted = [A(1), B(2), C(3)]
     const fixFromIdx = sorted.findIndex((f) => f.key === 'general.c'); // 2
-    const fixToIdx = sorted.findIndex((f) => f.key === 'general.a');   // 0
-    const fixReordered = arrayMove(sorted, fixFromIdx, fixToIdx).map((f, i) => ({ ...f, order: i + 1 }));
+    const fixToIdx = sorted.findIndex((f) => f.key === 'general.a'); // 0
+    const fixReordered = arrayMove(sorted, fixFromIdx, fixToIdx).map((f, i) => ({
+      ...f,
+      order: i + 1,
+    }));
     // Fixed: C moves before A → [C, A, B]
     expect(fixReordered.map((f) => f.key)).toEqual(['general.c', 'general.a', 'general.b']);
     expect(fixReordered.map((f) => f.order)).toEqual([1, 2, 3]);
@@ -334,9 +340,10 @@ describe('Form Editor → Field Reorder (arrayMove)', () => {
     const idx = fields.findIndex((f) => f.key === 'general.a');
     // active.id === over.id — handleDragEnd returns early, arrayMove never called
     // Simulate the guard: fromIdx === toIdx
-    const reordered = idx === idx
-      ? fields.map((f, i) => ({ ...f, order: i + 1 }))
-      : arrayMove(fields, idx, idx).map((f, i) => ({ ...f, order: i + 1 }));
+    const reordered =
+      idx === idx
+        ? fields.map((f, i) => ({ ...f, order: i + 1 }))
+        : arrayMove(fields, idx, idx).map((f, i) => ({ ...f, order: i + 1 }));
 
     expect(reordered.map((f) => f.key)).toEqual(['general.a', 'general.b']);
   });
@@ -361,27 +368,29 @@ describe('Form Editor → Field Reorder (arrayMove)', () => {
     // API insertion order), the canvas must render sorted by `order`.
     //
     // Arrange: two fields with reversed order values vs. array positions.
-    const sectionsOutOfOrder: ResolvedFormSection[] = [{
-      key: 'general',
-      label: 'General Information',
-      order: 1,
-      origin: 'system',
-      configurable: true,
-      fields: [
-        {
-          ...mockCustomField,
-          key: 'general.employmentType',
-          label: 'Employment Type',
-          order: 2,  // ← stored second in raw array
-        },
-        {
-          ...mockSystemField,
-          key: 'general.employeeId',
-          label: 'Employee ID',
-          order: 1,  // ← stored first but has lower order
-        },
-      ],
-    }];
+    const sectionsOutOfOrder: ResolvedFormSection[] = [
+      {
+        key: 'general',
+        label: 'General Information',
+        order: 1,
+        origin: 'system',
+        configurable: true,
+        fields: [
+          {
+            ...mockCustomField,
+            key: 'general.employmentType',
+            label: 'Employment Type',
+            order: 2, // ← stored second in raw array
+          },
+          {
+            ...mockSystemField,
+            key: 'general.employeeId',
+            label: 'Employee ID',
+            order: 1, // ← stored first but has lower order
+          },
+        ],
+      },
+    ];
 
     const html = renderToStaticMarkup(
       <FormCanvas
@@ -402,7 +411,6 @@ describe('Form Editor → Field Reorder (arrayMove)', () => {
     expect(empIdPos).toBeLessThan(empTypePos);
   });
 });
-
 
 describe('Form Editor → Properties Inspector (Form Properties vs Field Properties)', () => {
   it('renders Form Properties when no field is selected', () => {
@@ -669,7 +677,9 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
     // Group 'general_info' contains employeeId and employmentType
     const sortedFields = [...existingFields].sort((a, b) => a.order - b.order);
     const targetGroupKey = 'general_info';
-    const groupFields = sortedFields.filter((f) => getSubgroupForField('general', f) === targetGroupKey);
+    const groupFields = sortedFields.filter(
+      (f) => getSubgroupForField('general', f) === targetGroupKey,
+    );
 
     expect(groupFields.length).toBe(2);
     const lastField = groupFields[groupFields.length - 1]!;
@@ -677,7 +687,12 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
     expect(lastIdx).toBe(1); // after employmentType, before department
 
     const insertIndex = lastIdx + 1;
-    const newField = createNewCustomField('dropdown', 'Badge Color', insertIndex + 1, targetGroupKey);
+    const newField = createNewCustomField(
+      'dropdown',
+      'Badge Color',
+      insertIndex + 1,
+      targetGroupKey,
+    );
 
     sortedFields.splice(insertIndex, 0, newField);
     const reindexed = sortedFields.map((f, i) => ({ ...f, order: i + 1 }));
@@ -1018,7 +1033,9 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
       expect(html).toContain('Basic Information');
       expect(html).toContain('Updated description');
       expect(html).toContain('Section Visibility');
-      expect(html).toContain('Mandatory system section. Cannot be hidden from employee registration.');
+      expect(html).toContain(
+        'Mandatory system section. Cannot be hidden from employee registration.',
+      );
     });
 
     it('renders section order controls and position indicators', () => {
@@ -1130,4 +1147,3 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
     });
   });
 });
-

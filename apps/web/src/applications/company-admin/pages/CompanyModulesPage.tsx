@@ -16,11 +16,7 @@ import {
 import { BezentIcon } from '../../../design-system/icons';
 import { useCompanyAdmin } from '../context/CompanyAdminContext';
 import { CompanyContextBar } from '../components/CompanyContextBar';
-import {
-  companyAdminApi,
-  type CompanyModuleStatus,
-  type ModuleCode,
-} from '../api/companyAdminApi';
+import { companyAdminApi, type CompanyModuleStatus, type ModuleCode } from '../api/companyAdminApi';
 
 export function CompanyModulesPage() {
   const { activeCompanyId, activeCompany } = useCompanyAdmin();
@@ -114,7 +110,9 @@ export function CompanyModulesPage() {
       ) : (
         <Stack gap="lg">
           <Alert variant="info" title="Tenant Entitlement Governance">
-            Applications are provisioned to customer tenants by Super Admin. A Company Admin can enable or disable access for company personnel, but cannot override tenant-level entitlements.
+            Applications are provisioned to customer tenants by Super Admin. A Company Admin can
+            enable or disable access for company personnel, but cannot override tenant-level
+            entitlements.
           </Alert>
 
           <Section
@@ -164,10 +162,10 @@ export function CompanyModulesPage() {
                           {isToggling
                             ? 'Saving...'
                             : !m.tenantEntitled
-                            ? 'Disabled at Tenant Level'
-                            : m.companyEnabled
-                            ? 'Company Active'
-                            : 'Enable for Company'}
+                              ? 'Disabled at Tenant Level'
+                              : m.companyEnabled
+                                ? 'Company Active'
+                                : 'Enable for Company'}
                         </span>
                       </Inline>
                     </Stack>

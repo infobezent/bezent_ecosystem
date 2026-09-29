@@ -1,7 +1,13 @@
 import { useAuth } from '../../../platform/auth';
 
 interface SuperAdminAuthValue {
-  user: { id: string; email: string; firstName: string; lastName: string; isSuperAdmin: boolean } | null;
+  user: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    isSuperAdmin: boolean;
+  } | null;
   isAuthenticated: boolean;
   isSuperAdmin: boolean;
   isLoading: boolean;

@@ -290,12 +290,10 @@ describe('HRMS Onboarding Settings API', () => {
     });
 
     it('persists conversion settings updates', async () => {
-      const patchRes = await hrms
-        .patch('/api/v1/hrms/settings/onboarding/conversion')
-        .send({
-          autoConvertOnJoining: true,
-          employeeIdPrefix: 'EMP-BEZ-',
-        });
+      const patchRes = await hrms.patch('/api/v1/hrms/settings/onboarding/conversion').send({
+        autoConvertOnJoining: true,
+        employeeIdPrefix: 'EMP-BEZ-',
+      });
 
       expect(patchRes.status).toBe(200);
       expect(patchRes.body.data.autoConvertOnJoining).toBe(true);

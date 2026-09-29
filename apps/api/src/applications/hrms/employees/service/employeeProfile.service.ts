@@ -108,7 +108,9 @@ export class EmployeeProfileService {
         rows.familyMembers.length > 0
           ? rows.familyMembers.map((f) => ({ name: f.name, relationship: f.relationship }))
           : [
-              ...(personal?.fatherName ? [{ name: personal.fatherName, relationship: 'Father' }] : []),
+              ...(personal?.fatherName
+                ? [{ name: personal.fatherName, relationship: 'Father' }]
+                : []),
               ...(personal?.guardianName
                 ? [{ name: personal.guardianName, relationship: 'Legal Guardian' }]
                 : []),
@@ -211,9 +213,7 @@ export class EmployeeProfileService {
   ): Promise<EmployeeRecordDetailsInput> {
     const details = validateEmployeeRecordDetails(input);
     if (details.parentGuardians && details.personal) {
-      const father = details.parentGuardians.find(
-        (p) => p.relationship.toLowerCase() === 'father',
-      );
+      const father = details.parentGuardians.find((p) => p.relationship.toLowerCase() === 'father');
       if (father && !details.personal.fatherName) details.personal.fatherName = father.name;
       const guardian = details.parentGuardians.find((p) =>
         p.relationship.toLowerCase().includes('guardian'),

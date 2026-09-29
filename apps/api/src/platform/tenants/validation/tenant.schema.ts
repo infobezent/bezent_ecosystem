@@ -24,7 +24,10 @@ export function validateCreateTenant(body: unknown): CreateTenantDto {
   }
 
   if (data.contactEmail !== undefined && data.contactEmail !== null && data.contactEmail !== '') {
-    if (typeof data.contactEmail !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.contactEmail.trim())) {
+    if (
+      typeof data.contactEmail !== 'string' ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.contactEmail.trim())
+    ) {
       errors.contactEmail = 'Invalid contact email format';
     }
   }
@@ -58,7 +61,10 @@ export function validateUpdateTenant(body: unknown): UpdateTenantDto {
   }
 
   if (data.contactEmail !== undefined && data.contactEmail !== null && data.contactEmail !== '') {
-    if (typeof data.contactEmail !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.contactEmail.trim())) {
+    if (
+      typeof data.contactEmail !== 'string' ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.contactEmail.trim())
+    ) {
       errors.contactEmail = 'Invalid contact email format';
     }
   }
@@ -69,7 +75,17 @@ export function validateUpdateTenant(body: unknown): UpdateTenantDto {
 
   return {
     name: data.name ? (data.name as string).trim() : undefined,
-    contactEmail: data.contactEmail !== undefined ? (data.contactEmail ? String(data.contactEmail).trim() : null) : undefined,
-    contactPhone: data.contactPhone !== undefined ? (data.contactPhone ? String(data.contactPhone).trim() : null) : undefined,
+    contactEmail:
+      data.contactEmail !== undefined
+        ? data.contactEmail
+          ? String(data.contactEmail).trim()
+          : null
+        : undefined,
+    contactPhone:
+      data.contactPhone !== undefined
+        ? data.contactPhone
+          ? String(data.contactPhone).trim()
+          : null
+        : undefined,
   };
 }

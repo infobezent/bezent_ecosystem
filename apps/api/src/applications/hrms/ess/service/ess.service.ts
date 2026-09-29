@@ -1,10 +1,6 @@
 import { EssRepository } from '../repository/ess.repository.js';
 import type { EmployeeContext } from '../../../../platform/auth/middleware/auth.middleware.js';
-import {
-  BadRequestError,
-  NotFoundError,
-  ConflictError,
-} from '../../../../app/errors/AppError.js';
+import { BadRequestError, NotFoundError, ConflictError } from '../../../../app/errors/AppError.js';
 import type {
   EssDashboardData,
   EssFullProfile,
@@ -98,10 +94,7 @@ export class EssService {
     return profile;
   }
 
-  async createProfileChangeRequest(
-    ctx: EmployeeContext,
-    input: CreateProfileChangeRequestInput,
-  ) {
+  async createProfileChangeRequest(ctx: EmployeeContext, input: CreateProfileChangeRequestInput) {
     if (!input.subject || !input.subject.trim()) {
       throw new BadRequestError('Subject is required for change request');
     }
@@ -314,7 +307,12 @@ export class EssService {
     // Check balance for non-unpaid leaves
     if (input.leaveType !== 'unpaid') {
       const year = start.getFullYear();
-      const balances = await this.repo.ensureDefaultLeaveBalances(ctx.tenantId, ctx.companyId, ctx.id, year);
+      const balances = await this.repo.ensureDefaultLeaveBalances(
+        ctx.tenantId,
+        ctx.companyId,
+        ctx.id,
+        year,
+      );
       const balance = balances.find((b) => b.leaveType === input.leaveType);
       const available = balance ? balance.totalDays - balance.usedDays - balance.pendingDays : 0;
       if (available < totalDays) {

@@ -25,9 +25,7 @@ describe('HRMS Onboarding Active Case Stage & Status Lifecycle (PR2)', () => {
 
   // Reset general settings and stage configs to active defaults before tests
   beforeEach(async () => {
-    await hrms
-      .patch('/api/v1/hrms/settings/onboarding/general')
-      .send({ onboardingEnabled: true });
+    await hrms.patch('/api/v1/hrms/settings/onboarding/general').send({ onboardingEnabled: true });
 
     await hrms
       .patch('/api/v1/hrms/settings/onboarding/stages/preboarding')
@@ -50,19 +48,17 @@ describe('HRMS Onboarding Active Case Stage & Status Lifecycle (PR2)', () => {
     const mastersRes = await hrms.get('/api/v1/hrms/organization/masters');
     const masters = mastersRes.body.data;
 
-    const res = await hrms
-      .post('/api/v1/hrms/onboarding/new-hires')
-      .send({
-        firstName: 'Active',
-        lastName: 'Candidate',
-        email: `stage.test.${Date.now()}.${Math.random()}@example.com`,
-        companyId: masters.company.id,
-        departmentId: masters.departments[0].id,
-        designationId: masters.designations[0].id,
-        locationId: masters.locations[0].id,
-        joiningDate: '2026-11-01',
-        employmentType: 'full_time',
-      });
+    const res = await hrms.post('/api/v1/hrms/onboarding/new-hires').send({
+      firstName: 'Active',
+      lastName: 'Candidate',
+      email: `stage.test.${Date.now()}.${Math.random()}@example.com`,
+      companyId: masters.company.id,
+      departmentId: masters.departments[0].id,
+      designationId: masters.designations[0].id,
+      locationId: masters.locations[0].id,
+      joiningDate: '2026-11-01',
+      employmentType: 'full_time',
+    });
 
     return res.body.data.id;
   }
@@ -111,9 +107,7 @@ describe('HRMS Onboarding Active Case Stage & Status Lifecycle (PR2)', () => {
     const caseId = await createActiveCase();
 
     // Disable 'documents' stage in settings
-    await hrms
-      .patch('/api/v1/hrms/settings/onboarding/stages/documents')
-      .send({ isActive: false });
+    await hrms.patch('/api/v1/hrms/settings/onboarding/stages/documents').send({ isActive: false });
 
     // Attempt transition to disabled 'documents' stage
     const res = await hrms.post(`/api/v1/hrms/onboarding/cases/${caseId}/stage`).send({
@@ -224,12 +218,10 @@ describe('HRMS Onboarding Active Case Stage & Status Lifecycle (PR2)', () => {
   it('7 & 12. valid withdrawal with reason creates history entry', async () => {
     const caseId = await createActiveCase();
 
-    const withdrawRes = await hrms
-      .post(`/api/v1/hrms/onboarding/cases/${caseId}/withdraw`)
-      .send({
-        reason: 'Personal reasons - unable to relocate',
-        version: 1,
-      });
+    const withdrawRes = await hrms.post(`/api/v1/hrms/onboarding/cases/${caseId}/withdraw`).send({
+      reason: 'Personal reasons - unable to relocate',
+      version: 1,
+    });
 
     expect(withdrawRes.status).toBe(200);
     expect(withdrawRes.body.data.status).toBe('withdrawn');
@@ -371,21 +363,17 @@ describe('HRMS Onboarding Active Case Stage & Status Lifecycle (PR2)', () => {
     const masters = mastersRes.body.data;
 
     // 1. Disable onboarding in general settings
-    await hrms
-      .patch('/api/v1/hrms/settings/onboarding/general')
-      .send({ onboardingEnabled: false });
+    await hrms.patch('/api/v1/hrms/settings/onboarding/general').send({ onboardingEnabled: false });
 
     // 2. Direct new hire creation (active) is blocked
-    const resNewHire = await hrms
-      .post('/api/v1/hrms/onboarding/new-hires')
-      .send({
-        firstName: 'BlockedActive',
-        email: `blocked.${Date.now()}@example.com`,
-        companyId: masters.company.id,
-        departmentId: masters.departments[0].id,
-        designationId: masters.designations[0].id,
-        joiningDate: '2026-11-01',
-      });
+    const resNewHire = await hrms.post('/api/v1/hrms/onboarding/new-hires').send({
+      firstName: 'BlockedActive',
+      email: `blocked.${Date.now()}@example.com`,
+      companyId: masters.company.id,
+      departmentId: masters.departments[0].id,
+      designationId: masters.designations[0].id,
+      joiningDate: '2026-11-01',
+    });
     expect(resNewHire.status).toBe(400);
     expect(resNewHire.body.error.code).toBe('ONBOARDING_DISABLED');
 
@@ -406,36 +394,30 @@ describe('HRMS Onboarding Active Case Stage & Status Lifecycle (PR2)', () => {
     const draftId = resDraft.body.data.id;
 
     // 5. Activating the draft via submit is blocked while disabled
-    const resSubmit = await hrms
-      .post(`/api/v1/hrms/onboarding/cases/${draftId}/submit`)
-      .send({
-        firstName: 'SafeDraft',
-        lastName: 'Candidate',
-        email: `safedraft.${Date.now()}@example.com`,
-        departmentId: masters.departments[0].id,
-        designationId: masters.designations[0].id,
-        joiningDate: '2026-11-01',
-        version: 1,
-      });
+    const resSubmit = await hrms.post(`/api/v1/hrms/onboarding/cases/${draftId}/submit`).send({
+      firstName: 'SafeDraft',
+      lastName: 'Candidate',
+      email: `safedraft.${Date.now()}@example.com`,
+      departmentId: masters.departments[0].id,
+      designationId: masters.designations[0].id,
+      joiningDate: '2026-11-01',
+      version: 1,
+    });
     expect(resSubmit.status).toBe(400);
     expect(resSubmit.body.error.code).toBe('ONBOARDING_DISABLED');
 
     // 6. Re-enabling allows submitting the draft successfully
-    await hrms
-      .patch('/api/v1/hrms/settings/onboarding/general')
-      .send({ onboardingEnabled: true });
+    await hrms.patch('/api/v1/hrms/settings/onboarding/general').send({ onboardingEnabled: true });
 
-    const resSubmitAfter = await hrms
-      .post(`/api/v1/hrms/onboarding/cases/${draftId}/submit`)
-      .send({
-        firstName: 'SafeDraft',
-        lastName: 'Candidate',
-        email: `safedraft.${Date.now()}@example.com`,
-        departmentId: masters.departments[0].id,
-        designationId: masters.designations[0].id,
-        joiningDate: '2026-11-01',
-        version: 1,
-      });
+    const resSubmitAfter = await hrms.post(`/api/v1/hrms/onboarding/cases/${draftId}/submit`).send({
+      firstName: 'SafeDraft',
+      lastName: 'Candidate',
+      email: `safedraft.${Date.now()}@example.com`,
+      departmentId: masters.departments[0].id,
+      designationId: masters.designations[0].id,
+      joiningDate: '2026-11-01',
+      version: 1,
+    });
     expect(resSubmitAfter.status).toBe(200);
     expect(resSubmitAfter.body.data.status).toBe('active');
   });
@@ -457,13 +439,11 @@ describe('HRMS Onboarding Active Case Stage & Status Lifecycle (PR2)', () => {
       .send({ toStage: 'induction', version: 2 });
 
     // Revert to immediate previous stage (documents) -> Allowed!
-    const revertRes = await hrms
-      .post(`/api/v1/hrms/onboarding/cases/${caseId}/stage`)
-      .send({
-        toStage: 'documents',
-        notes: 'Document re-verification required',
-        version: 3,
-      });
+    const revertRes = await hrms.post(`/api/v1/hrms/onboarding/cases/${caseId}/stage`).send({
+      toStage: 'documents',
+      notes: 'Document re-verification required',
+      version: 3,
+    });
 
     expect(revertRes.status).toBe(200);
     expect(revertRes.body.data.stage).toBe('documents');

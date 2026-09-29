@@ -3,13 +3,7 @@ import request from 'supertest';
 import { eq } from 'drizzle-orm';
 import { createApp } from '../../app/server/createApp.js';
 import { isDatabaseConfigured, getDb } from '../../db/connection.js';
-import {
-  tenants,
-  companies,
-  users,
-  memberships,
-  roleAssignments,
-} from '../../db/schema.js';
+import { tenants, companies, users, memberships, roleAssignments } from '../../db/schema.js';
 import { hashPassword } from '../auth/security.js';
 import { signInForTest } from './support/testSession.js';
 import { emailOutboxRepository } from '../email/repository/emailOutbox.repository.js';
@@ -34,32 +28,62 @@ describe('Company Admin Platform Subsystem (Phase 2)', () => {
     const db = getDb();
 
     // 1. Create Tenants
-    await db.insert(tenants).values([
-      { id: tenantAId, name: 'Company Admin Tenant A', status: 'active' },
-      { id: tenantBId, name: 'Company Admin Tenant B', status: 'active' },
-    ]).onDuplicateKeyUpdate({ set: { status: 'active' } });
+    await db
+      .insert(tenants)
+      .values([
+        { id: tenantAId, name: 'Company Admin Tenant A', status: 'active' },
+        { id: tenantBId, name: 'Company Admin Tenant B', status: 'active' },
+      ])
+      .onDuplicateKeyUpdate({ set: { status: 'active' } });
 
     // 2. Create Companies
-    await db.insert(companies).values([
-      { id: companyAId, tenantId: tenantAId, name: 'Alpha Corporation', code: 'ALPHA', status: 'active' },
-      { id: companyBId, tenantId: tenantBId, name: 'Beta Enterprises', code: 'BETA', status: 'active' },
-      { id: companySuspendedId, tenantId: tenantAId, name: 'Suspended Co', code: 'SUSP', status: 'suspended' },
-    ]).onDuplicateKeyUpdate({ set: { name: 'Alpha Corporation' } });
+    await db
+      .insert(companies)
+      .values([
+        {
+          id: companyAId,
+          tenantId: tenantAId,
+          name: 'Alpha Corporation',
+          code: 'ALPHA',
+          status: 'active',
+        },
+        {
+          id: companyBId,
+          tenantId: tenantBId,
+          name: 'Beta Enterprises',
+          code: 'BETA',
+          status: 'active',
+        },
+        {
+          id: companySuspendedId,
+          tenantId: tenantAId,
+          name: 'Suspended Co',
+          code: 'SUSP',
+          status: 'suspended',
+        },
+      ])
+      .onDuplicateKeyUpdate({ set: { name: 'Alpha Corporation' } });
 
-    await db.update(companies).set({ status: 'suspended' }).where(eq(companies.id, companySuspendedId));
+    await db
+      .update(companies)
+      .set({ status: 'suspended' })
+      .where(eq(companies.id, companySuspendedId));
 
     // 3. Create Super Admin User
     const saPass = hashPassword('BezentAdmin2026!');
-    await db.insert(users).values({
-      id: 'usr_sa_ca_test',
-      email: 'sa_catest@bezent.com',
-      passwordHash: saPass.hash,
-      salt: saPass.salt,
-      firstName: 'Super',
-      lastName: 'Admin',
-      status: 'active',
-      isSuperAdmin: true,
-    }).onDuplicateKeyUpdate({ set: { status: 'active' } });
+    await db
+      .insert(users)
+      .values({
+        id: 'usr_sa_ca_test',
+        email: 'sa_catest@bezent.com',
+        passwordHash: saPass.hash,
+        salt: saPass.salt,
+        firstName: 'Super',
+        lastName: 'Admin',
+        status: 'active',
+        isSuperAdmin: true,
+      })
+      .onDuplicateKeyUpdate({ set: { status: 'active' } });
 
     const saLogin = await signInForTest('sa_catest@bezent.com');
     superAdminToken = saLogin.token;
@@ -67,33 +91,42 @@ describe('Company Admin Platform Subsystem (Phase 2)', () => {
     // 4. Create Company Admin User for Company A
     const caPass = hashPassword('CompanyAdmin2026!');
     userAId = 'usr_ca_test_user_a';
-    await db.insert(users).values({
-      id: userAId,
-      email: 'admin_a@alpha.example',
-      passwordHash: caPass.hash,
-      salt: caPass.salt,
-      firstName: 'Alice',
-      lastName: 'Admin',
-      status: 'active',
-      isSuperAdmin: false,
-    }).onDuplicateKeyUpdate({ set: { status: 'active' } });
+    await db
+      .insert(users)
+      .values({
+        id: userAId,
+        email: 'admin_a@alpha.example',
+        passwordHash: caPass.hash,
+        salt: caPass.salt,
+        firstName: 'Alice',
+        lastName: 'Admin',
+        status: 'active',
+        isSuperAdmin: false,
+      })
+      .onDuplicateKeyUpdate({ set: { status: 'active' } });
 
-    await db.insert(memberships).values({
-      id: 'mem_ca_test_a',
-      userId: userAId,
-      tenantId: tenantAId,
-      companyId: companyAId,
-      role: 'company_admin',
-      status: 'active',
-    }).onDuplicateKeyUpdate({ set: { status: 'active', role: 'company_admin' } });
-    await db.insert(roleAssignments).values({
-      id: 'ra_ca_test_a',
-      userId: userAId,
-      roleId: 'role_sys_company_admin',
-      tenantId: tenantAId,
-      companyId: companyAId,
-      status: 'active',
-    }).onDuplicateKeyUpdate({ set: { status: 'active' } });
+    await db
+      .insert(memberships)
+      .values({
+        id: 'mem_ca_test_a',
+        userId: userAId,
+        tenantId: tenantAId,
+        companyId: companyAId,
+        role: 'company_admin',
+        status: 'active',
+      })
+      .onDuplicateKeyUpdate({ set: { status: 'active', role: 'company_admin' } });
+    await db
+      .insert(roleAssignments)
+      .values({
+        id: 'ra_ca_test_a',
+        userId: userAId,
+        roleId: 'role_sys_company_admin',
+        tenantId: tenantAId,
+        companyId: companyAId,
+        status: 'active',
+      })
+      .onDuplicateKeyUpdate({ set: { status: 'active' } });
 
     const caLogin = await signInForTest('admin_a@alpha.example');
     companyAdminAToken = caLogin.token;
@@ -101,33 +134,42 @@ describe('Company Admin Platform Subsystem (Phase 2)', () => {
     // 5. Create Ordinary Employee User
     const empPass = hashPassword('Employee2026!');
     userEmpId = 'usr_ca_test_user_emp';
-    await db.insert(users).values({
-      id: userEmpId,
-      email: 'employee_a@alpha.example',
-      passwordHash: empPass.hash,
-      salt: empPass.salt,
-      firstName: 'Bob',
-      lastName: 'Staff',
-      status: 'active',
-      isSuperAdmin: false,
-    }).onDuplicateKeyUpdate({ set: { status: 'active' } });
+    await db
+      .insert(users)
+      .values({
+        id: userEmpId,
+        email: 'employee_a@alpha.example',
+        passwordHash: empPass.hash,
+        salt: empPass.salt,
+        firstName: 'Bob',
+        lastName: 'Staff',
+        status: 'active',
+        isSuperAdmin: false,
+      })
+      .onDuplicateKeyUpdate({ set: { status: 'active' } });
 
-    await db.insert(memberships).values({
-      id: 'mem_ca_test_emp',
-      userId: userEmpId,
-      tenantId: tenantAId,
-      companyId: companyAId,
-      role: 'employee',
-      status: 'active',
-    }).onDuplicateKeyUpdate({ set: { status: 'active', role: 'employee' } });
-    await db.insert(roleAssignments).values({
-      id: 'ra_ca_test_emp',
-      userId: userEmpId,
-      roleId: 'role_sys_employee',
-      tenantId: tenantAId,
-      companyId: companyAId,
-      status: 'active',
-    }).onDuplicateKeyUpdate({ set: { status: 'active' } });
+    await db
+      .insert(memberships)
+      .values({
+        id: 'mem_ca_test_emp',
+        userId: userEmpId,
+        tenantId: tenantAId,
+        companyId: companyAId,
+        role: 'employee',
+        status: 'active',
+      })
+      .onDuplicateKeyUpdate({ set: { status: 'active', role: 'employee' } });
+    await db
+      .insert(roleAssignments)
+      .values({
+        id: 'ra_ca_test_emp',
+        userId: userEmpId,
+        roleId: 'role_sys_employee',
+        tenantId: tenantAId,
+        companyId: companyAId,
+        status: 'active',
+      })
+      .onDuplicateKeyUpdate({ set: { status: 'active' } });
 
     const empLogin = await signInForTest('employee_a@alpha.example');
     ordinaryEmployeeToken = empLogin.token;
@@ -355,11 +397,15 @@ describe('Company Admin Platform Subsystem (Phase 2)', () => {
         .set('x-company-id', companyAId);
 
       expect(res.status).toBe(200);
-      const hrms = res.body.data.find((m: { code: string; tenantEntitled: boolean }) => m.code === 'hrms');
+      const hrms = res.body.data.find(
+        (m: { code: string; tenantEntitled: boolean }) => m.code === 'hrms',
+      );
       expect(hrms).toBeDefined();
       expect(hrms.tenantEntitled).toBe(true);
 
-      const crm = res.body.data.find((m: { code: string; tenantEntitled: boolean }) => m.code === 'crm');
+      const crm = res.body.data.find(
+        (m: { code: string; tenantEntitled: boolean }) => m.code === 'crm',
+      );
       expect(crm).toBeDefined();
       expect(crm.tenantEntitled).toBe(false);
     });

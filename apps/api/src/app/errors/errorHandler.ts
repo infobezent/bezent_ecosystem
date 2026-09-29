@@ -26,7 +26,11 @@ function extractErrorCode(err: unknown): string | undefined {
   if ('code' in err && typeof (err as { code: unknown }).code === 'string') {
     return (err as { code: string }).code;
   }
-  if ('cause' in err && typeof (err as { cause: unknown }).cause === 'object' && (err as { cause: unknown }).cause !== null) {
+  if (
+    'cause' in err &&
+    typeof (err as { cause: unknown }).cause === 'object' &&
+    (err as { cause: unknown }).cause !== null
+  ) {
     return extractErrorCode((err as { cause: unknown }).cause);
   }
   return undefined;

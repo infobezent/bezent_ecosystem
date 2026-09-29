@@ -22,10 +22,7 @@ import {
 import { BezentIcon } from '../../../design-system/icons';
 import { useCompanyAdmin } from '../context/CompanyAdminContext';
 import { CompanyContextBar } from '../components/CompanyContextBar';
-import {
-  companyAdminApi,
-  type OrganizationSummary,
-} from '../api/companyAdminApi';
+import { companyAdminApi, type OrganizationSummary } from '../api/companyAdminApi';
 
 export function CompanyOrganizationPage() {
   const navigate = useNavigate();
@@ -90,7 +87,8 @@ export function CompanyOrganizationPage() {
       ) : data ? (
         <Stack gap="lg">
           <Alert variant="info" title="Canonical HRMS Master Records">
-            Organization masters are unified across the BEZENT platform. All workforce records and employment histories link directly to these organizational entities.
+            Organization masters are unified across the BEZENT platform. All workforce records and
+            employment histories link directly to these organizational entities.
           </Alert>
 
           {/* Counts Overview */}

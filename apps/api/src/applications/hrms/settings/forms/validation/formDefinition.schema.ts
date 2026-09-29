@@ -61,7 +61,8 @@ export function validateFieldConfig(
   const unexpected = Object.keys(raw).filter(
     (key) => !allowed.includes(key as keyof FormFieldConfig),
   );
-  if (unexpected.length > 0) return { error: `Unsupported config for ${type}: ${unexpected.join(', ')}` };
+  if (unexpected.length > 0)
+    return { error: `Unsupported config for ${type}: ${unexpected.join(', ')}` };
 
   const config: FormFieldConfig = {};
 
@@ -80,7 +81,8 @@ export function validateFieldConfig(
       config[key] = value;
     }
     if (config.minLength !== undefined && config.maxLength !== undefined) {
-      if (config.minLength > config.maxLength) return { error: 'minLength cannot exceed maxLength' };
+      if (config.minLength > config.maxLength)
+        return { error: 'minLength cannot exceed maxLength' };
     }
   }
 
@@ -111,12 +113,17 @@ export function validateFieldConfig(
     if (!Array.isArray(options) || options.length === 0) {
       return { error: 'At least one option is required' };
     }
-    if (options.length > MAX_OPTIONS) return { error: `At most ${MAX_OPTIONS} options are allowed` };
+    if (options.length > MAX_OPTIONS)
+      return { error: `At most ${MAX_OPTIONS} options are allowed` };
     const values = new Set<string>();
     const labels = new Set<string>();
     const normalised: FormFieldOption[] = [];
     for (const option of options) {
-      if (!isObject(option) || typeof option.value !== 'string' || typeof option.label !== 'string') {
+      if (
+        !isObject(option) ||
+        typeof option.value !== 'string' ||
+        typeof option.label !== 'string'
+      ) {
         return { error: 'Each option needs a value and a label' };
       }
       const label = option.label.trim();
@@ -132,7 +139,11 @@ export function validateFieldConfig(
     }
     config.options = normalised;
 
-    if (SINGLE_CHOICE_TYPES.has(type) && raw.defaultValue !== undefined && raw.defaultValue !== null) {
+    if (
+      SINGLE_CHOICE_TYPES.has(type) &&
+      raw.defaultValue !== undefined &&
+      raw.defaultValue !== null
+    ) {
       if (typeof raw.defaultValue !== 'string' || !values.has(raw.defaultValue)) {
         return { error: 'The default must be one of the options' };
       }
@@ -182,7 +193,8 @@ export function validateSaveFormDefinition(
 
   const errors: Record<string, string> = {};
   const { version, sections, metadata } = input as Record<string, unknown>;
-  if (!isInteger(version) || (version as number) < 0) errors.version = 'Version must be a non-negative integer';
+  if (!isInteger(version) || (version as number) < 0)
+    errors.version = 'Version must be a non-negative integer';
   if (!Array.isArray(sections)) {
     errors.sections = 'Sections must be an array';
     throw new ValidationError(`Validation failed for ${form.name}`, errors);
@@ -202,7 +214,8 @@ export function validateSaveFormDefinition(
           for (const [secKey, secVal] of Object.entries(metadata.sections)) {
             if (isObject(secVal)) {
               if (secVal.visible === false && MANDATORY_SYSTEM_SECTIONS.has(secKey)) {
-                errors[`metadata.sections.${secKey}.visible`] = `Mandatory section '${secKey}' cannot be hidden`;
+                errors[`metadata.sections.${secKey}.visible`] =
+                  `Mandatory section '${secKey}' cannot be hidden`;
               }
               validatedMetadata.sections[secKey] = {
                 title: typeof secVal.title === 'string' ? secVal.title.trim() : undefined,
@@ -225,7 +238,9 @@ export function validateSaveFormDefinition(
               validatedMetadata.subgroups[groupKey] = {
                 title: typeof groupVal.title === 'string' ? groupVal.title.trim() : undefined,
                 description:
-                  typeof groupVal.description === 'string' ? groupVal.description.trim() : undefined,
+                  typeof groupVal.description === 'string'
+                    ? groupVal.description.trim()
+                    : undefined,
               };
             }
           }
@@ -262,11 +277,11 @@ export function validateSaveFormDefinition(
             }
             const title = typeof cs.title === 'string' ? cs.title.trim() : '';
             if (!title || title.length > MAX_LABEL_LENGTH) {
-              errors[`${csPath}.title`] = `Custom section title must be 1–${MAX_LABEL_LENGTH} characters`;
+              errors[`${csPath}.title`] =
+                `Custom section title must be 1–${MAX_LABEL_LENGTH} characters`;
               continue;
             }
-            const description =
-              typeof cs.description === 'string' ? cs.description.trim() : null;
+            const description = typeof cs.description === 'string' ? cs.description.trim() : null;
             validatedMetadata.customSections.push({
               key,
               title,
@@ -278,8 +293,12 @@ export function validateSaveFormDefinition(
         }
       }
       if (metadata.sectionOrder !== undefined && metadata.sectionOrder !== null) {
-        if (!Array.isArray(metadata.sectionOrder) || !metadata.sectionOrder.every((k) => typeof k === 'string')) {
-          errors['metadata.sectionOrder'] = 'Metadata sectionOrder must be an array of section keys';
+        if (
+          !Array.isArray(metadata.sectionOrder) ||
+          !metadata.sectionOrder.every((k) => typeof k === 'string')
+        ) {
+          errors['metadata.sectionOrder'] =
+            'Metadata sectionOrder must be an array of section keys';
         } else {
           validatedMetadata.sectionOrder = metadata.sectionOrder.map((k) => k.trim());
         }
@@ -349,8 +368,12 @@ export function validateSaveFormDefinition(
         return;
       }
       if (rawField.description !== null && rawField.description !== undefined) {
-        if (typeof rawField.description !== 'string' || rawField.description.length > MAX_DESCRIPTION_LENGTH) {
-          errors[`${path}.description`] = `Description must be at most ${MAX_DESCRIPTION_LENGTH} characters`;
+        if (
+          typeof rawField.description !== 'string' ||
+          rawField.description.length > MAX_DESCRIPTION_LENGTH
+        ) {
+          errors[`${path}.description`] =
+            `Description must be at most ${MAX_DESCRIPTION_LENGTH} characters`;
           return;
         }
       }
@@ -374,11 +397,13 @@ export function validateSaveFormDefinition(
           return;
         }
         if (definition.protected && (!enabled || !required)) {
-          errors[path] = `'${definition.label}' is system-required and must stay enabled and required`;
+          errors[path] =
+            `'${definition.label}' is system-required and must stay enabled and required`;
           return;
         }
         if (rawField.type !== undefined || rawField.config !== undefined) {
-          errors[path] = `The type and configuration of system field '${definition.label}' cannot change`;
+          errors[path] =
+            `The type and configuration of system field '${definition.label}' cannot change`;
           return;
         }
         fields.push({
@@ -427,7 +452,8 @@ export function validateSaveFormDefinition(
 
     const missing = [...systemFields.keys()].filter((key) => !seenFields.has(key));
     if (missing.length > 0) {
-      errors[`${sectionPath}.fields`] = `System fields cannot be removed or moved: ${missing.join(', ')}`;
+      errors[`${sectionPath}.fields`] =
+        `System fields cannot be removed or moved: ${missing.join(', ')}`;
     }
     result.push({ key: sectionKey, fields });
   });

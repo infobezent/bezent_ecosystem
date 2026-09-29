@@ -121,7 +121,9 @@ export async function fetchNewHiresPaginated(
   if (options.search) params.set('search', options.search);
 
   const queryString = params.toString() ? `?${params.toString()}` : '';
-  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/onboarding/new-hires${queryString}`);
+  const res = await authorizedFetch(
+    `${appConfig.apiBaseUrl}/hrms/onboarding/new-hires${queryString}`,
+  );
   if (!res.ok) {
     const errorJson = await res.json().catch(() => ({}));
     throw new Error(errorJson.error?.message || 'Failed to fetch onboarding cases');

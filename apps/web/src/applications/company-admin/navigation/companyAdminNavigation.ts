@@ -45,7 +45,8 @@ export const COMPANY_ADMIN_NAV_DESTINATIONS: readonly NavDestination[] = [
     icon: 'dashboard',
     segment: 'dashboard',
     subtitle: 'Company Operations & Metrics',
-    description: 'Overview of company users, assigned roles, provisioned modules and recent activities.',
+    description:
+      'Overview of company users, assigned roles, provisioned modules and recent activities.',
     categoryId: 'company-admin',
     sidebar: true,
   },
@@ -99,7 +100,8 @@ export const COMPANY_ADMIN_NAV_DESTINATIONS: readonly NavDestination[] = [
     icon: 'employees',
     segment: 'invitations',
     subtitle: 'Pending User Invites',
-    description: 'Track outstanding invitations, resend invitation tokens and cancel expired invites.',
+    description:
+      'Track outstanding invitations, resend invitation tokens and cancel expired invites.',
     categoryId: 'people-access',
     sidebar: true,
   },
@@ -109,7 +111,8 @@ export const COMPANY_ADMIN_NAV_DESTINATIONS: readonly NavDestination[] = [
     icon: 'settings',
     segment: 'roles',
     subtitle: 'Access Control Catalog',
-    description: 'Inspect available company roles, view granular permissions and privilege boundaries.',
+    description:
+      'Inspect available company roles, view granular permissions and privilege boundaries.',
     categoryId: 'people-access',
     sidebar: true,
   },
@@ -143,7 +146,8 @@ export const COMPANY_ADMIN_NAV_DESTINATIONS: readonly NavDestination[] = [
     icon: 'settings',
     segment: 'settings',
     subtitle: 'Administrative Settings',
-    description: 'Company-specific administrative controls, security settings and operational defaults.',
+    description:
+      'Company-specific administrative controls, security settings and operational defaults.',
     categoryId: 'governance',
     sidebar: true,
   },

@@ -9,8 +9,14 @@ import {
   tenantModules,
 } from '../../../db/schema.js';
 import { tenantRepository, TenantRepository } from '../../tenants/repository/tenant.repository.js';
-import { companyRepository, CompanyRepository } from '../../companies/repository/company.repository.js';
-import { platformUserRepository, PlatformUserRepository } from '../../users/repository/user.repository.js';
+import {
+  companyRepository,
+  CompanyRepository,
+} from '../../companies/repository/company.repository.js';
+import {
+  platformUserRepository,
+  PlatformUserRepository,
+} from '../../users/repository/user.repository.js';
 import { auditService, AuditService } from '../../audit/service/audit.service.js';
 import { roleManagementService } from '../../access/service/roleManagement.service.js';
 import { emailService, EmailService } from '../../email/service/email.service.js';
@@ -52,7 +58,9 @@ export class CustomerProvisioningService {
         };
   }
 
-  async validatePreflight(dto: CustomerProvisioningDto): Promise<{ valid: boolean; summary: string }> {
+  async validatePreflight(
+    dto: CustomerProvisioningDto,
+  ): Promise<{ valid: boolean; summary: string }> {
     const existingTenant = await this.tenantRepo.findByCode(dto.tenant.code);
     if (existingTenant) {
       throw new ConflictError(`A tenant with code '${dto.tenant.code}' already exists`);

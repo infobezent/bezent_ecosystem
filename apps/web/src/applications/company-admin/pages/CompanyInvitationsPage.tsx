@@ -20,10 +20,7 @@ import {
 import { BezentIcon } from '../../../design-system/icons';
 import { useCompanyAdmin } from '../context/CompanyAdminContext';
 import { CompanyContextBar } from '../components/CompanyContextBar';
-import {
-  companyAdminApi,
-  type InvitationItem,
-} from '../api/companyAdminApi';
+import { companyAdminApi, type InvitationItem } from '../api/companyAdminApi';
 
 export function CompanyInvitationsPage() {
   const { activeCompanyId, activeCompany } = useCompanyAdmin();
@@ -153,9 +150,7 @@ export function CompanyInvitationsPage() {
                       <strong>{inv.email}</strong>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="neutral">
-                        {inv.role.replace('_', ' ').toUpperCase()}
-                      </Badge>
+                      <Badge variant="neutral">{inv.role.replace('_', ' ').toUpperCase()}</Badge>
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -163,19 +158,15 @@ export function CompanyInvitationsPage() {
                           inv.status === 'pending'
                             ? 'warning'
                             : inv.status === 'accepted'
-                            ? 'success'
-                            : 'neutral'
+                              ? 'success'
+                              : 'neutral'
                         }
                       >
                         {inv.status.toUpperCase()}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      {new Date(inv.expiresAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(inv.createdAt).toLocaleDateString()}
-                    </TableCell>
+                    <TableCell>{new Date(inv.expiresAt).toLocaleDateString()}</TableCell>
+                    <TableCell>{new Date(inv.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <code>{inv.token.substring(0, 12)}...</code>
                     </TableCell>

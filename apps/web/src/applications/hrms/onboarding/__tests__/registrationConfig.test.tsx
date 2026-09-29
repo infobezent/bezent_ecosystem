@@ -240,4 +240,3 @@ describe('RegistrationConfigProvider contract — regression guards', () => {
     expect(html).not.toContain('bezent-page-header');
   });
 });
-

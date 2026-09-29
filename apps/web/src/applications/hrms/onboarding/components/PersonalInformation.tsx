@@ -278,9 +278,7 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
   // 13-14. Parent / Guardian Details (Structured Repeatable)
   const [parentGuardians, setParentGuardians] = useState<
     Array<{ id: string; relationship: ParentGuardianRelationship; name: string }>
-  >([
-    { id: 'pg_1', relationship: 'Father', name: '' },
-  ]);
+  >([{ id: 'pg_1', relationship: 'Father', name: '' }]);
 
   const addParentGuardian = () => {
     setParentGuardians((prev) => [
@@ -293,11 +291,7 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
     setParentGuardians((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const updateParentGuardian = (
-    id: string,
-    field: 'relationship' | 'name',
-    value: string,
-  ) => {
+  const updateParentGuardian = (id: string, field: 'relationship' | 'name', value: string) => {
     setParentGuardians((prev) =>
       prev.map((item) =>
         item.id === id

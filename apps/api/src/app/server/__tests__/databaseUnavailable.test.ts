@@ -15,7 +15,10 @@ describe('Database Failure & Persistence Fallback Removal (P0)', () => {
    * surface as DATABASE_UNAVAILABLE — never as a fallback or a misleading 401.
    */
   const api = () =>
-    request.agent(app).set('authorization', `Bearer ${'a'.repeat(64)}`).set('x-company-id', 'comp_demo_01');
+    request
+      .agent(app)
+      .set('authorization', `Bearer ${'a'.repeat(64)}`)
+      .set('x-company-id', 'comp_demo_01');
 
   afterEach(() => {
     vi.restoreAllMocks();

@@ -17,7 +17,9 @@ const SENSITIVE_KEYS = new Set([
   'api_key',
 ]);
 
-function sanitizeMetadata(data: Record<string, unknown> | null | undefined): Record<string, unknown> | null {
+function sanitizeMetadata(
+  data: Record<string, unknown> | null | undefined,
+): Record<string, unknown> | null {
   if (!data) return null;
   const clean: Record<string, unknown> = {};
   for (const [key, val] of Object.entries(data)) {

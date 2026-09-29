@@ -21,11 +21,7 @@ import {
   Toolbar,
 } from '../../../design-system/components';
 import { BezentIcon } from '../../../design-system/icons';
-import {
-  superAdminApi,
-  type AuditLogEntry,
-  type TenantRecord,
-} from '../api/superAdminApi';
+import { superAdminApi, type AuditLogEntry, type TenantRecord } from '../api/superAdminApi';
 
 export function AuditLogsPage() {
   const [logs, setLogs] = useState<AuditLogEntry[]>([]);
@@ -206,9 +202,7 @@ export function AuditLogsPage() {
         }
       >
         {activeMetadata && (
-          <pre className="bezent-code-block">
-            {JSON.stringify(activeMetadata, null, 2)}
-          </pre>
+          <pre className="bezent-code-block">{JSON.stringify(activeMetadata, null, 2)}</pre>
         )}
       </Modal>
     </Page>

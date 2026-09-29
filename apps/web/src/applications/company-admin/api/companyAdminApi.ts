@@ -15,8 +15,11 @@ export const ACTIVE_COMPANY_KEY = 'bezent_active_company_id';
 export const PLATFORM_TOKEN_KEY = 'bezent_platform_token';
 
 function getHeaders(companyId?: string): Record<string, string> {
-  const token = typeof localStorage !== 'undefined' ? localStorage.getItem(PLATFORM_TOKEN_KEY) : null;
-  const activeCompId = companyId || (typeof localStorage !== 'undefined' ? localStorage.getItem(ACTIVE_COMPANY_KEY) : null);
+  const token =
+    typeof localStorage !== 'undefined' ? localStorage.getItem(PLATFORM_TOKEN_KEY) : null;
+  const activeCompId =
+    companyId ||
+    (typeof localStorage !== 'undefined' ? localStorage.getItem(ACTIVE_COMPANY_KEY) : null);
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -227,7 +230,10 @@ export const companyAdminApi = {
     return request<CompanyProfile>('/profile', {}, companyId);
   },
 
-  async updateProfile(input: UpdateCompanyProfileInput, companyId?: string): Promise<CompanyProfile> {
+  async updateProfile(
+    input: UpdateCompanyProfileInput,
+    companyId?: string,
+  ): Promise<CompanyProfile> {
     return request<CompanyProfile>(
       '/profile',
       {

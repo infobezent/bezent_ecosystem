@@ -49,7 +49,9 @@ export function validateAssignCompanyAdmin(body: unknown): AssignCompanyAdminDto
     userId: hasUserId ? (data.userId as string).trim() : undefined,
     newUser: hasNewUser
       ? {
-          email: String((data.newUser as Record<string, unknown>).email).trim().toLowerCase(),
+          email: String((data.newUser as Record<string, unknown>).email)
+            .trim()
+            .toLowerCase(),
           firstName: String((data.newUser as Record<string, unknown>).firstName).trim(),
           lastName: String((data.newUser as Record<string, unknown>).lastName).trim(),
           phone: (data.newUser as Record<string, unknown>).phone

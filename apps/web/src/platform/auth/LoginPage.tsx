@@ -162,12 +162,15 @@ export function LoginPage() {
               </p>
             </Stack>
 
-            {status === 'loading' && (
-              <Alert variant="info">Checking your existing session…</Alert>
-            )}
+            {status === 'loading' && <Alert variant="info">Checking your existing session…</Alert>}
 
             {alert && (
-              <Alert variant="error" title="Sign-in problem" dismissible onDismiss={() => setAlert(null)}>
+              <Alert
+                variant="error"
+                title="Sign-in problem"
+                dismissible
+                onDismiss={() => setAlert(null)}
+              >
                 {alert}
               </Alert>
             )}

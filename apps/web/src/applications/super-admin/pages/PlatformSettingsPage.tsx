@@ -29,7 +29,8 @@ export function PlatformSettingsPage() {
                 <strong>Tenant & Company Model</strong>
                 <span>
                   Every customer record is strictly tenant-scoped. Repositories enforce server-side
-                  scoping on all queries. Frontend-only filtering is never treated as tenant isolation.
+                  scoping on all queries. Frontend-only filtering is never treated as tenant
+                  isolation.
                 </span>
                 <Inline gap="xs">
                   <Badge variant="success">Tenant Scoped</Badge>
@@ -42,7 +43,8 @@ export function PlatformSettingsPage() {
                 <strong>Identity & Access Control (ADR-009)</strong>
                 <span>
                   Platform Identity is strictly separated from HRMS Employment records:
-                  <code>User ≠ Employee</code>. Creating a platform administrator never creates an HRMS employee record.
+                  <code>User ≠ Employee</code>. Creating a platform administrator never creates an
+                  HRMS employee record.
                 </span>
                 <Inline gap="xs">
                   <Badge variant="success">User ≠ Employee</Badge>
@@ -70,9 +72,7 @@ export function PlatformSettingsPage() {
               <Stack gap="xs">
                 <span className="bezent-caption">Super Admin Role Scope</span>
                 <Badge variant="warning">Platform Level Only</Badge>
-                <span className="bezent-caption">
-                  Independent of company-level memberships
-                </span>
+                <span className="bezent-caption">Independent of company-level memberships</span>
               </Stack>
 
               <Stack gap="xs">
@@ -94,9 +94,9 @@ export function PlatformSettingsPage() {
           >
             <Stack gap="sm">
               <p>
-                BEZENT strictly uses <strong>MySQL + Drizzle ORM</strong>. Per ADR-016, in-memory repositories,
-                mock fallbacks, and SQLite are strictly prohibited in runtime code. If MySQL is unreachable,
-                the backend fails clearly with appropriate diagnostics.
+                BEZENT strictly uses <strong>MySQL + Drizzle ORM</strong>. Per ADR-016, in-memory
+                repositories, mock fallbacks, and SQLite are strictly prohibited in runtime code. If
+                MySQL is unreachable, the backend fails clearly with appropriate diagnostics.
               </p>
               <Inline gap="xs">
                 <Badge variant="neutral">Drizzle Schema</Badge>

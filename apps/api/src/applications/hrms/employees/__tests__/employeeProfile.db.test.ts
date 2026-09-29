@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
 import request from 'supertest';
-import { hrmsTestHeaders, removeHrmsTestAccess } from '../../../../platform/__tests__/support/testSession.js';
+import {
+  hrmsTestHeaders,
+  removeHrmsTestAccess,
+} from '../../../../platform/__tests__/support/testSession.js';
 import { eq, inArray, or } from 'drizzle-orm';
 import { createApp } from '../../../../app/server/createApp.js';
 import { getDb, pingDatabase } from '../../../../db/connection.js';
@@ -368,21 +371,17 @@ describe('HRMS Employee Profile & record details (MySQL)', () => {
   it('enforces nominee share and emergency contact rules', async () => {
     const id = (await createEmployee()).body.data.id;
 
-    const overShare = await hrms
-      .put(`/api/v1/hrms/employees/${id}/nominees`)
-      .send([
-        { name: 'A', relationship: 'Spouse', sharePercentage: 70 },
-        { name: 'B', relationship: 'Child', sharePercentage: 40 },
-      ]);
+    const overShare = await hrms.put(`/api/v1/hrms/employees/${id}/nominees`).send([
+      { name: 'A', relationship: 'Spouse', sharePercentage: 70 },
+      { name: 'B', relationship: 'Child', sharePercentage: 40 },
+    ]);
     expect(overShare.status).toBe(400);
     expect(overShare.body.error.details.nominees).toContain('100%');
 
-    const twoPrimaries = await hrms
-      .put(`/api/v1/hrms/employees/${id}/emergency-contacts`)
-      .send([
-        { priority: 'primary', name: 'A', relationship: 'Spouse', phone: '1' },
-        { priority: 'primary', name: 'B', relationship: 'Parent', phone: '2' },
-      ]);
+    const twoPrimaries = await hrms.put(`/api/v1/hrms/employees/${id}/emergency-contacts`).send([
+      { priority: 'primary', name: 'A', relationship: 'Spouse', phone: '1' },
+      { priority: 'primary', name: 'B', relationship: 'Parent', phone: '2' },
+    ]);
     expect(twoPrimaries.status).toBe(400);
 
     const secondaryOnly = await hrms
@@ -445,15 +444,13 @@ describe('HRMS Employee Profile & record details (MySQL)', () => {
     const id = (await createEmployee()).body.data.id;
     const target = masters.departments[1]!;
 
-    const action = await hrms
-      .post('/api/v1/hrms/employee-actions')
-      .send({
-        employeeId: id,
-        actionType: 'department_change',
-        effectiveDate: '2025-06-01',
-        reason: 'Reorganisation',
-        values: { departmentId: target.id },
-      });
+    const action = await hrms.post('/api/v1/hrms/employee-actions').send({
+      employeeId: id,
+      actionType: 'department_change',
+      effectiveDate: '2025-06-01',
+      reason: 'Reorganisation',
+      values: { departmentId: target.id },
+    });
     expect(action.status).toBe(201);
     await hrms
       .post(`/api/v1/hrms/employee-actions/${action.body.data.id}/apply`)
@@ -465,9 +462,7 @@ describe('HRMS Employee Profile & record details (MySQL)', () => {
     expect(profile.employee.departmentName).toBe(target.name);
 
     // History comes from the persisted Employee Administration actions
-    const history = await hrms
-      .get('/api/v1/hrms/employee-actions')
-      .query({ employeeId: id });
+    const history = await hrms.get('/api/v1/hrms/employee-actions').query({ employeeId: id });
     expect(history.body.data[0]).toMatchObject({
       actionType: 'department_change',
       status: 'applied',
@@ -480,11 +475,7 @@ describe('HRMS Employee Profile & record details (MySQL)', () => {
   it('returns 404 for unknown employees and unknown sections', async () => {
     expect((await getProfile('emp_does_not_exist')).status).toBe(404);
     const id = (await createEmployee()).body.data.id;
-    expect((await hrms.put(`/api/v1/hrms/employees/${id}/tasks`).send([])).status).toBe(
-      404,
-    );
-    expect((await hrms.put(`/api/v1/hrms/employees/${id}/review`).send({})).status).toBe(
-      404,
-    );
+    expect((await hrms.put(`/api/v1/hrms/employees/${id}/tasks`).send([])).status).toBe(404);
+    expect((await hrms.put(`/api/v1/hrms/employees/${id}/review`).send({})).status).toBe(404);
   });
 });

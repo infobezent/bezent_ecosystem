@@ -152,7 +152,12 @@ export function CompanyAdminsPage() {
       )}
 
       {notice && (
-        <Alert variant="success" title="Company Admin assigned" dismissible onDismiss={() => setNotice(null)}>
+        <Alert
+          variant="success"
+          title="Company Admin assigned"
+          dismissible
+          onDismiss={() => setNotice(null)}
+        >
           {notice}
         </Alert>
       )}
@@ -230,16 +235,10 @@ export function CompanyAdminsPage() {
                         {item.status.toUpperCase()}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      {new Date(item.assignedAt).toLocaleDateString()}
-                    </TableCell>
+                    <TableCell>{new Date(item.assignedAt).toLocaleDateString()}</TableCell>
                     <TableCell>
                       {item.status === 'active' && (
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => handleRevoke(item)}
-                        >
+                        <Button variant="danger" size="sm" onClick={() => handleRevoke(item)}>
                           Revoke
                         </Button>
                       )}
@@ -342,8 +341,8 @@ export function CompanyAdminsPage() {
                   />
                 </Inline>
                 <span className="bezent-caption">
-                  No password is needed. The administrator is emailed instructions and signs in
-                  with a one-time code sent to this email.
+                  No password is needed. The administrator is emailed instructions and signs in with
+                  a one-time code sent to this email.
                 </span>
               </Stack>
             )}

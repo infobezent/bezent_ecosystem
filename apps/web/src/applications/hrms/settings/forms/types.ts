@@ -1,4 +1,9 @@
-import type { CustomFieldType, FormCustomizationMetadata, FormFieldConfig, ResolvedFormField } from '../api/formsApi';
+import type {
+  CustomFieldType,
+  FormCustomizationMetadata,
+  FormFieldConfig,
+  ResolvedFormField,
+} from '../api/formsApi';
 
 export interface ToolboxItem {
   type: CustomFieldType;
@@ -63,7 +68,9 @@ export function createNewCustomField(
         ],
         ...(groupKey ? { groupKey } : {}),
       }
-    : (groupKey ? { groupKey } : {});
+    : groupKey
+      ? { groupKey }
+      : {};
 
   return {
     key: generateCustomFieldKey(),
@@ -107,7 +114,8 @@ export const CHAPTER_METADATA: readonly ChapterDefinition[] = [
     stepNumber: '02',
     label: 'Personal Information',
     title: 'PERSONAL INFORMATION',
-    description: 'Legal identity, demographics, contact details, permanent residence, and family profile',
+    description:
+      'Legal identity, demographics, contact details, permanent residence, and family profile',
     kicker: 'CHAPTER // 02',
   },
   {
@@ -123,7 +131,8 @@ export const CHAPTER_METADATA: readonly ChapterDefinition[] = [
     stepNumber: '04',
     label: 'Skills',
     title: 'SKILLS & COMPETENCY PROFILE',
-    description: 'Technical proficiencies, competency evaluations, certifications, and assigned mentors',
+    description:
+      'Technical proficiencies, competency evaluations, certifications, and assigned mentors',
     kicker: 'CHAPTER // 04',
   },
   {
@@ -139,7 +148,8 @@ export const CHAPTER_METADATA: readonly ChapterDefinition[] = [
     stepNumber: '06',
     label: 'Accounts',
     title: 'STATUTORY & BANK ACCOUNTS',
-    description: 'Disbursement bank accounts, PF/ESI numbers, tax classification, and payroll setup',
+    description:
+      'Disbursement bank accounts, PF/ESI numbers, tax classification, and payroll setup',
     kicker: 'CHAPTER // 06',
   },
   {
@@ -147,7 +157,8 @@ export const CHAPTER_METADATA: readonly ChapterDefinition[] = [
     stepNumber: '07',
     label: 'Online Access',
     title: 'ONLINE ACCESS & CREDENTIALS',
-    description: 'Single sign-on authorization, enterprise email allocation, and portal permissions',
+    description:
+      'Single sign-on authorization, enterprise email allocation, and portal permissions',
     kicker: 'CHAPTER // 07',
   },
   {
@@ -155,7 +166,8 @@ export const CHAPTER_METADATA: readonly ChapterDefinition[] = [
     stepNumber: '08',
     label: 'Working Hours',
     title: 'WORKING HOURS & SCHEDULE',
-    description: 'Assigned shift schedule, weekly calendar, holiday calendar, and time tracking policy',
+    description:
+      'Assigned shift schedule, weekly calendar, holiday calendar, and time tracking policy',
     kicker: 'CHAPTER // 08',
   },
   {
@@ -163,7 +175,8 @@ export const CHAPTER_METADATA: readonly ChapterDefinition[] = [
     stepNumber: '09',
     label: 'Documents',
     title: 'DOCUMENT REPOSITORY & VERIFICATION',
-    description: 'Mandatory identification proof, experience letters, certificates, and photo upload',
+    description:
+      'Mandatory identification proof, experience letters, certificates, and photo upload',
     kicker: 'CHAPTER // 09',
   },
   {
@@ -171,7 +184,8 @@ export const CHAPTER_METADATA: readonly ChapterDefinition[] = [
     stepNumber: '10',
     label: 'Review',
     title: 'REGISTRATION REVIEW & SUBMISSION',
-    description: 'Comprehensive overview of all registration chapters prior to employee profile activation',
+    description:
+      'Comprehensive overview of all registration chapters prior to employee profile activation',
     kicker: 'CHAPTER // 10',
   },
 ] as const;
@@ -243,11 +257,7 @@ export const KNOWN_SECTION_GROUPS: Record<string, readonly SectionGroupDefinitio
       key: 'contact_info',
       title: 'CONTACT & COMMUNICATION',
       description: 'Primary mobile, personal email, and time zone',
-      fieldKeys: [
-        'personal.mobilePhone',
-        'personal.email',
-        'personal.timeZone',
-      ],
+      fieldKeys: ['personal.mobilePhone', 'personal.email', 'personal.timeZone'],
     },
     {
       key: 'current_address',
@@ -283,7 +293,8 @@ export const KNOWN_SECTION_GROUPS: Record<string, readonly SectionGroupDefinitio
     {
       key: 'credentials',
       title: 'ONLINE ACCESS & CREDENTIALS',
-      description: 'Single sign-on authorization, enterprise email allocation, and portal permissions',
+      description:
+        'Single sign-on authorization, enterprise email allocation, and portal permissions',
       fieldKeys: ['online_access.companyEmail'],
     },
   ],
@@ -374,7 +385,8 @@ export function getGroupsForSection(
     result.push({
       key: groupDef.key,
       title: groupMeta?.title || groupDef.title,
-      description: groupMeta?.description !== undefined ? groupMeta.description : groupDef.description,
+      description:
+        groupMeta?.description !== undefined ? groupMeta.description : groupDef.description,
       fields: groupFields,
     });
   }
@@ -401,4 +413,3 @@ export function getGroupsForSection(
 
   return result;
 }
-

@@ -1,8 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import {
-  companyAdminService,
-  CompanyAdminService,
-} from '../service/companyAdmin.service.js';
+import { companyAdminService, CompanyAdminService } from '../service/companyAdmin.service.js';
 import { UnauthorizedError } from '../../../app/errors/AppError.js';
 import { roleManagementService } from '../../access/service/roleManagement.service.js';
 import type { ModuleCode } from '../../modules/types/module.types.js';
@@ -45,12 +42,7 @@ export class CompanyAdminController {
     try {
       const { tenantId, companyId } = req.companyContext!;
       const actor = { id: req.user!.id, email: req.user!.email };
-      const updated = await this.service.updateProfile(
-        tenantId,
-        companyId,
-        req.body,
-        actor,
-      );
+      const updated = await this.service.updateProfile(tenantId, companyId, req.body, actor);
       res.json({ data: updated });
     } catch (err) {
       next(err);
@@ -86,12 +78,7 @@ export class CompanyAdminController {
       const { tenantId, companyId } = req.companyContext!;
       const actor = { id: req.user!.id, email: req.user!.email };
       assertCanGrantRequestedRole(req, req.body?.role);
-      const result = await this.service.inviteUser(
-        tenantId,
-        companyId,
-        req.body,
-        actor,
-      );
+      const result = await this.service.inviteUser(tenantId, companyId, req.body, actor);
       res.status(201).json({ data: result });
     } catch (err) {
       next(err);
@@ -105,13 +92,7 @@ export class CompanyAdminController {
       const { role } = req.body;
       const actor = { id: req.user!.id, email: req.user!.email };
       assertCanGrantRequestedRole(req, role);
-      const result = await this.service.updateUserRole(
-        tenantId,
-        companyId,
-        userId,
-        role,
-        actor,
-      );
+      const result = await this.service.updateUserRole(tenantId, companyId, userId, role, actor);
       res.json({ data: result });
     } catch (err) {
       next(err);
@@ -142,12 +123,7 @@ export class CompanyAdminController {
       const { tenantId, companyId } = req.companyContext!;
       const userId = String(req.params.userId);
       const actor = { id: req.user!.id, email: req.user!.email };
-      const result = await this.service.revokeMembership(
-        tenantId,
-        companyId,
-        userId,
-        actor,
-      );
+      const result = await this.service.revokeMembership(tenantId, companyId, userId, actor);
       res.json({ data: result });
     } catch (err) {
       next(err);
@@ -169,12 +145,7 @@ export class CompanyAdminController {
       const { tenantId, companyId } = req.companyContext!;
       const id = String(req.params.id);
       const actor = { id: req.user!.id, email: req.user!.email };
-      const result = await this.service.resendInvitation(
-        tenantId,
-        companyId,
-        id,
-        actor,
-      );
+      const result = await this.service.resendInvitation(tenantId, companyId, id, actor);
       res.json({ data: result });
     } catch (err) {
       next(err);
@@ -186,12 +157,7 @@ export class CompanyAdminController {
       const { tenantId, companyId } = req.companyContext!;
       const id = String(req.params.id);
       const actor = { id: req.user!.id, email: req.user!.email };
-      const result = await this.service.cancelInvitation(
-        tenantId,
-        companyId,
-        id,
-        actor,
-      );
+      const result = await this.service.cancelInvitation(tenantId, companyId, id, actor);
       res.json({ data: result });
     } catch (err) {
       next(err);

@@ -132,9 +132,10 @@ export class FormOverridesRepository {
         );
       }
 
-      const nextMetadata = (dto.metadata ?? existing?.metadata ?? null) as
-        | Record<string, unknown>
-        | null;
+      const nextMetadata = (dto.metadata ?? existing?.metadata ?? null) as Record<
+        string,
+        unknown
+      > | null;
 
       if (existing) {
         await tx
@@ -196,12 +197,15 @@ export class FormOverridesRepository {
             const sysField = sysIndex >= 0 ? sysSection.fields[sysIndex] : undefined;
             if (!sysField) return;
 
-            const enabled = fieldInput.enabled === sysField.defaultEnabled ? null : fieldInput.enabled;
+            const enabled =
+              fieldInput.enabled === sysField.defaultEnabled ? null : fieldInput.enabled;
             const required =
               fieldInput.required === sysField.defaultRequired ? null : fieldInput.required;
             const label = fieldInput.label === sysField.label ? null : fieldInput.label;
             const description =
-              fieldInput.description === (sysField.description ?? null) ? null : fieldInput.description;
+              fieldInput.description === (sysField.description ?? null)
+                ? null
+                : fieldInput.description;
             const width = fieldInput.width === sysField.width ? null : fieldInput.width;
             const isPositionOverridden = idx !== sysIndex;
             const sortOrder = isPositionOverridden ? position : null;

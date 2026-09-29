@@ -58,7 +58,9 @@ export function EssAttendancePage() {
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const handleCheckIn = async () => {
     setPunchLoading(true);
@@ -94,7 +96,12 @@ export function EssAttendancePage() {
     setRegLoading(true);
     setRegError(null);
     try {
-      await essApi.regularizeAttendance({ date: regDate, checkInTime: regCheckIn, checkOutTime: regCheckOut, reason: regReason });
+      await essApi.regularizeAttendance({
+        date: regDate,
+        checkInTime: regCheckIn,
+        checkOutTime: regCheckOut,
+        reason: regReason,
+      });
       setRegSuccess(true);
       setRegularizeOpen(false);
     } catch (err: unknown) {
@@ -105,7 +112,12 @@ export function EssAttendancePage() {
   };
 
   if (loading) return <LoadingState label="Loading attendance..." />;
-  if (error) return <Alert variant="error" title="Error">{error}</Alert>;
+  if (error)
+    return (
+      <Alert variant="error" title="Error">
+        {error}
+      </Alert>
+    );
   if (!workspace) return null;
 
   const today = workspace.today;
@@ -123,13 +135,27 @@ export function EssAttendancePage() {
             variant="secondary"
             leftIcon={<BezentIcon name="edit" size={16} />}
             onClick={() => setRegularizeOpen(true)}
-          >Regularize Attendance</Button>
+          >
+            Regularize Attendance
+          </Button>
         }
       />
 
-      {punchError && <Alert variant="error" title="Error">{punchError}</Alert>}
-      {punchSuccess && <Alert variant="success" title="Success">{punchSuccess}</Alert>}
-      {regSuccess && <Alert variant="success" title="Request Submitted">Your attendance regularization request has been submitted.</Alert>}
+      {punchError && (
+        <Alert variant="error" title="Error">
+          {punchError}
+        </Alert>
+      )}
+      {punchSuccess && (
+        <Alert variant="success" title="Success">
+          {punchSuccess}
+        </Alert>
+      )}
+      {regSuccess && (
+        <Alert variant="success" title="Request Submitted">
+          Your attendance regularization request has been submitted.
+        </Alert>
+      )}
 
       {/* Today's Status */}
       <Section title="Today's Status" subtitle={today.date}>
@@ -140,29 +166,53 @@ export function EssAttendancePage() {
                 <BezentIcon name="attendance" size={20} />
                 <Stack gap="xs">
                   {hasPunchedIn ? (
-                    <span>Checked in at <strong>{today.checkInTime}</strong></span>
+                    <span>
+                      Checked in at <strong>{today.checkInTime}</strong>
+                    </span>
                   ) : (
                     <span>Not checked in today</span>
                   )}
                   {hasPunchedOut && (
-                    <span>Checked out at <strong>{today.checkOutTime}</strong></span>
+                    <span>
+                      Checked out at <strong>{today.checkOutTime}</strong>
+                    </span>
                   )}
                 </Stack>
               </Inline>
               <Badge
-                variant={today.status === 'present' ? 'success' : today.status === 'not_checked_in' ? 'neutral' : 'warning'}
-              >{today.status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</Badge>
+                variant={
+                  today.status === 'present'
+                    ? 'success'
+                    : today.status === 'not_checked_in'
+                      ? 'neutral'
+                      : 'warning'
+                }
+              >
+                {today.status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
+              </Badge>
             </Stack>
             <Inline gap="sm">
               {!hasPunchedIn && (
-                <Button id="att-check-in" variant="primary" onClick={handleCheckIn} loading={punchLoading}>Check In</Button>
+                <Button
+                  id="att-check-in"
+                  variant="primary"
+                  onClick={handleCheckIn}
+                  loading={punchLoading}
+                >
+                  Check In
+                </Button>
               )}
               {hasPunchedIn && !hasPunchedOut && (
-                <Button id="att-check-out" variant="secondary" onClick={handleCheckOut} loading={punchLoading}>Check Out</Button>
+                <Button
+                  id="att-check-out"
+                  variant="secondary"
+                  onClick={handleCheckOut}
+                  loading={punchLoading}
+                >
+                  Check Out
+                </Button>
               )}
-              {hasPunchedIn && hasPunchedOut && (
-                <Badge variant="success">Complete</Badge>
-              )}
+              {hasPunchedIn && hasPunchedOut && <Badge variant="success">Complete</Badge>}
             </Inline>
           </Inline>
         </Card>
@@ -170,11 +220,11 @@ export function EssAttendancePage() {
 
       {/* Attendance History */}
       <Section title="Attendance History">
-        <Toolbar
-          left={<span>Last 60 days</span>}
-        />
+        <Toolbar left={<span>Last 60 days</span>} />
         {workspace.history.length === 0 ? (
-          <Alert variant="info" title="No Records">No attendance records found for the past 60 days.</Alert>
+          <Alert variant="info" title="No Records">
+            No attendance records found for the past 60 days.
+          </Alert>
         ) : (
           <Table>
             <TableHead>
@@ -195,8 +245,16 @@ export function EssAttendancePage() {
                   <TableCell>{rec.workLocation}</TableCell>
                   <TableCell>
                     <Badge
-                      variant={rec.status === 'present' ? 'success' : rec.status === 'absent' ? 'danger' : 'warning'}
-                    >{rec.status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</Badge>
+                      variant={
+                        rec.status === 'present'
+                          ? 'success'
+                          : rec.status === 'absent'
+                            ? 'danger'
+                            : 'warning'
+                      }
+                    >
+                      {rec.status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
+                    </Badge>
                   </TableCell>
                 </TableRow>
               ))}
@@ -212,19 +270,57 @@ export function EssAttendancePage() {
         onClose={() => setRegularizeOpen(false)}
         footer={
           <Inline gap="sm">
-            <Button id="reg-cancel" variant="secondary" onClick={() => setRegularizeOpen(false)}>Cancel</Button>
-            <Button id="reg-submit" variant="primary" onClick={handleRegularize} loading={regLoading}>Submit Request</Button>
+            <Button id="reg-cancel" variant="secondary" onClick={() => setRegularizeOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              id="reg-submit"
+              variant="primary"
+              onClick={handleRegularize}
+              loading={regLoading}
+            >
+              Submit Request
+            </Button>
           </Inline>
         }
       >
         <Stack gap="md">
-          {regError && <Alert variant="error" title="Error">{regError}</Alert>}
+          {regError && (
+            <Alert variant="error" title="Error">
+              {regError}
+            </Alert>
+          )}
           <FormSection title="Regularization Details">
             <FormGrid columns={1}>
-              <label>Date<input type="date" value={regDate} onChange={e => setRegDate(e.target.value)} /></label>
-              <label>Check-In Time<input type="time" value={regCheckIn} onChange={e => setRegCheckIn(e.target.value)} /></label>
-              <label>Check-Out Time<input type="time" value={regCheckOut} onChange={e => setRegCheckOut(e.target.value)} /></label>
-              <label>Reason<textarea value={regReason} onChange={e => setRegReason(e.target.value)} rows={3} placeholder="Reason for regularization" /></label>
+              <label>
+                Date
+                <input type="date" value={regDate} onChange={(e) => setRegDate(e.target.value)} />
+              </label>
+              <label>
+                Check-In Time
+                <input
+                  type="time"
+                  value={regCheckIn}
+                  onChange={(e) => setRegCheckIn(e.target.value)}
+                />
+              </label>
+              <label>
+                Check-Out Time
+                <input
+                  type="time"
+                  value={regCheckOut}
+                  onChange={(e) => setRegCheckOut(e.target.value)}
+                />
+              </label>
+              <label>
+                Reason
+                <textarea
+                  value={regReason}
+                  onChange={(e) => setRegReason(e.target.value)}
+                  rows={3}
+                  placeholder="Reason for regularization"
+                />
+              </label>
             </FormGrid>
           </FormSection>
         </Stack>

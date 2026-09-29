@@ -1,7 +1,12 @@
 import { tenantRepository, TenantRepository } from '../repository/tenant.repository.js';
 import { auditService, AuditService } from '../../audit/service/audit.service.js';
 import { NotFoundError, ConflictError } from '../../../app/errors/AppError.js';
-import type { CreateTenantDto, TenantFilter, TenantRecord, UpdateTenantDto } from '../types/tenant.types.js';
+import type {
+  CreateTenantDto,
+  TenantFilter,
+  TenantRecord,
+  UpdateTenantDto,
+} from '../types/tenant.types.js';
 
 export class TenantService {
   constructor(

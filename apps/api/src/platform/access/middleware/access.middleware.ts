@@ -95,12 +95,18 @@ export function requireApplicationAccess(moduleCode: ModuleCode, workspace: Work
       const access = req.access!;
       if (!access.enabledModules.includes(moduleCode)) {
         return next(
-          new ForbiddenError(`Application '${moduleCode}' is not enabled for this company`, 'MODULE_DISABLED'),
+          new ForbiddenError(
+            `Application '${moduleCode}' is not enabled for this company`,
+            'MODULE_DISABLED',
+          ),
         );
       }
       if (!access.workspaces.includes(workspace)) {
         return next(
-          new ForbiddenError(`You do not have access to '${moduleCode}' in this company`, 'FORBIDDEN_WORKSPACE'),
+          new ForbiddenError(
+            `You do not have access to '${moduleCode}' in this company`,
+            'FORBIDDEN_WORKSPACE',
+          ),
         );
       }
       next();
@@ -115,7 +121,9 @@ function checkPermissions(permissions: string[], mode: 'all' | 'any') {
     }
     const held = req.access.permissions;
     const ok =
-      mode === 'all' ? permissions.every((p) => held.includes(p)) : permissions.some((p) => held.includes(p));
+      mode === 'all'
+        ? permissions.every((p) => held.includes(p))
+        : permissions.some((p) => held.includes(p));
     if (!ok) {
       const label = permissions.map((p) => `'${p}'`).join(mode === 'all' ? ' and ' : ' or ');
       return next(new ForbiddenError(`Permission ${label} is required`, 'FORBIDDEN_PERMISSION'));

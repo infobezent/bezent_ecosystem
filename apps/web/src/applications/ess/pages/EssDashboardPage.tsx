@@ -70,8 +70,19 @@ export function EssDashboardPage() {
   };
 
   if (loading) return <LoadingState label="Loading your workspace..." />;
-  if (error) return <Alert variant="error" title="Failed to Load Dashboard">{error}</Alert>;
-  if (!data) return <EmptyState title="Workspace Unavailable" description="Unable to load employee data. Please try again." />;
+  if (error)
+    return (
+      <Alert variant="error" title="Failed to Load Dashboard">
+        {error}
+      </Alert>
+    );
+  if (!data)
+    return (
+      <EmptyState
+        title="Workspace Unavailable"
+        description="Unable to load employee data. Please try again."
+      />
+    );
 
   const today = data.todayAttendance;
   const hasPunchedIn = !!today.checkInTime;
@@ -93,7 +104,9 @@ export function EssDashboardPage() {
       />
 
       {punchError && (
-        <Alert variant="error" title="Punch Error">{punchError}</Alert>
+        <Alert variant="error" title="Punch Error">
+          {punchError}
+        </Alert>
       )}
 
       {/* Attendance Widget */}
@@ -108,16 +121,20 @@ export function EssDashboardPage() {
                     {hasPunchedIn ? `Checked in at ${today.checkInTime}` : 'Not checked in yet'}
                   </strong>
                 </Inline>
-                {hasPunchedOut && (
-                  <span>Checked out at {today.checkOutTime}</span>
-                )}
+                {hasPunchedOut && <span>Checked out at {today.checkOutTime}</span>}
                 <Badge
                   variant={
-                    today.status === 'present' ? 'success' :
-                    today.status === 'not_checked_in' ? 'neutral' :
-                    today.status === 'on_leave' ? 'info' : 'warning'
+                    today.status === 'present'
+                      ? 'success'
+                      : today.status === 'not_checked_in'
+                        ? 'neutral'
+                        : today.status === 'on_leave'
+                          ? 'info'
+                          : 'warning'
                   }
-                >{formatStatus(today.status)}</Badge>
+                >
+                  {formatStatus(today.status)}
+                </Badge>
               </Stack>
               <Inline gap="sm">
                 {!hasPunchedIn && (
@@ -127,7 +144,9 @@ export function EssDashboardPage() {
                     onClick={handlePunchIn}
                     loading={punchLoading}
                     leftIcon={<BezentIcon name="attendance" size={16} />}
-                  >Check In</Button>
+                  >
+                    Check In
+                  </Button>
                 )}
                 {hasPunchedIn && !hasPunchedOut && (
                   <Button
@@ -135,7 +154,9 @@ export function EssDashboardPage() {
                     variant="secondary"
                     onClick={handlePunchOut}
                     loading={punchLoading}
-                  >Check Out</Button>
+                  >
+                    Check Out
+                  </Button>
                 )}
                 {hasPunchedIn && hasPunchedOut && (
                   <Badge variant="success">Attendance Recorded</Badge>
@@ -152,7 +173,9 @@ export function EssDashboardPage() {
           {data.leaveBalances.map((bal) => (
             <Card key={bal.leaveType}>
               <Stack gap="xs">
-                <Badge variant={leaveColors[bal.leaveType] ?? 'neutral'}>{capitalise(bal.leaveType)}</Badge>
+                <Badge variant={leaveColors[bal.leaveType] ?? 'neutral'}>
+                  {capitalise(bal.leaveType)}
+                </Badge>
                 <strong>{bal.availableDays}</strong>
                 <span>Available of {bal.totalDays} days</span>
                 {bal.pendingDays > 0 && <span>{bal.pendingDays} pending</span>}
@@ -172,7 +195,14 @@ export function EssDashboardPage() {
                 <strong>Pending Requests</strong>
               </Inline>
               <strong>{data.pendingRequestsCount}</strong>
-              <Button id="ess-view-requests" variant="ghost" size="sm" onClick={() => navigate('/ess/requests')}>View All</Button>
+              <Button
+                id="ess-view-requests"
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/ess/requests')}
+              >
+                View All
+              </Button>
             </Stack>
           </Card>
           <Card>
@@ -182,7 +212,14 @@ export function EssDashboardPage() {
                 <strong>Active Tasks</strong>
               </Inline>
               <strong>{data.assignedTasksCount}</strong>
-              <Button id="ess-view-tasks" variant="ghost" size="sm" onClick={() => navigate('/ess/tasks')}>View All</Button>
+              <Button
+                id="ess-view-tasks"
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/ess/tasks')}
+              >
+                View All
+              </Button>
             </Stack>
           </Card>
           <Card>
@@ -192,7 +229,14 @@ export function EssDashboardPage() {
                 <strong>Unread Notifications</strong>
               </Inline>
               <strong>{data.unreadNotificationsCount}</strong>
-              <Button id="ess-view-notifs" variant="ghost" size="sm" onClick={() => navigate('/ess/notifications')}>View All</Button>
+              <Button
+                id="ess-view-notifs"
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/ess/notifications')}
+              >
+                View All
+              </Button>
             </Stack>
           </Card>
         </Grid>
@@ -229,7 +273,9 @@ export function EssDashboardPage() {
               <Card key={h.date}>
                 <Stack gap="xs">
                   <strong>{h.name}</strong>
-                  <span>{formatDate(h.date)} · {h.dayOfWeek}</span>
+                  <span>
+                    {formatDate(h.date)} · {h.dayOfWeek}
+                  </span>
                 </Stack>
               </Card>
             ))}
@@ -250,7 +296,10 @@ function getGreeting(): string {
 function formatDate(dateStr: string): string {
   try {
     return new Date(dateStr).toLocaleDateString('en-IN', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
   } catch {
     return dateStr;

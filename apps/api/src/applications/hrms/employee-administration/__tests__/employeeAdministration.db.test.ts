@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
 import request from 'supertest';
-import { hrmsTestHeaders, removeHrmsTestAccess } from '../../../../platform/__tests__/support/testSession.js';
+import {
+  hrmsTestHeaders,
+  removeHrmsTestAccess,
+} from '../../../../platform/__tests__/support/testSession.js';
 import { eq, inArray } from 'drizzle-orm';
 import { createApp } from '../../../../app/server/createApp.js';
 import { getDb, pingDatabase } from '../../../../db/connection.js';
@@ -309,9 +312,7 @@ describe('HRMS Employee Administration API (MySQL)', () => {
 
   it('does not expose employees to another company', async () => {
     const employee = await createEmployee();
-    const res = await hrms
-      .get(`/api/v1/hrms/employees/${employee.id}`)
-      .set(otherCompanyHeaders);
+    const res = await hrms.get(`/api/v1/hrms/employees/${employee.id}`).set(otherCompanyHeaders);
     expect(res.status).toBe(404);
 
     const own = await hrms.get(`/api/v1/hrms/employees/${employee.id}`);

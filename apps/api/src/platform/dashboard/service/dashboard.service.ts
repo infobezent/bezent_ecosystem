@@ -1,6 +1,12 @@
 import { tenantRepository, TenantRepository } from '../../tenants/repository/tenant.repository.js';
-import { companyRepository, CompanyRepository } from '../../companies/repository/company.repository.js';
-import { platformUserRepository, PlatformUserRepository } from '../../users/repository/user.repository.js';
+import {
+  companyRepository,
+  CompanyRepository,
+} from '../../companies/repository/company.repository.js';
+import {
+  platformUserRepository,
+  PlatformUserRepository,
+} from '../../users/repository/user.repository.js';
 import { auditRepository, AuditRepository } from '../../audit/repository/audit.repository.js';
 import type { TenantRecord } from '../../tenants/types/tenant.types.js';
 import type { AuditLogRecord } from '../../audit/types/audit.types.js';

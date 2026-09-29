@@ -17,10 +17,15 @@ describe('Module Catalog & Entitlement Service', () => {
       setStatus: vi.fn(),
     };
     mockTenantRepo = {
-      findById: vi.fn().mockResolvedValue({ id: 'tenant_01', name: 'Test Tenant' } as unknown as import('../tenants/types/tenant.types.js').TenantRecord),
+      findById: vi.fn().mockResolvedValue({
+        id: 'tenant_01',
+        name: 'Test Tenant',
+      } as unknown as import('../tenants/types/tenant.types.js').TenantRecord),
     };
     mockAudit = {
-      logEvent: vi.fn().mockResolvedValue({ id: 'aud_1' } as unknown as import('../audit/types/audit.types.js').AuditLogRecord),
+      logEvent: vi.fn().mockResolvedValue({
+        id: 'aud_1',
+      } as unknown as import('../audit/types/audit.types.js').AuditLogRecord),
     };
     moduleService = new ModuleService(
       mockRepo as ModuleRepository,
@@ -83,8 +88,8 @@ describe('Module Catalog & Entitlement Service', () => {
   it('rejects module enabling when tenant does not exist', async () => {
     vi.mocked(mockTenantRepo.findById!).mockResolvedValue(null);
 
-    await expect(
-      moduleService.enableModule('unknown_tenant', 'hrms')
-    ).rejects.toThrow(NotFoundError);
+    await expect(moduleService.enableModule('unknown_tenant', 'hrms')).rejects.toThrow(
+      NotFoundError,
+    );
   });
 });

@@ -67,12 +67,26 @@ describe.skipIf(!isDatabaseConfigured)('HRMS API security (authenticated RBAC)',
         .onDuplicateKeyUpdate({ set: { status: 'active' } });
       await db
         .insert(memberships)
-        .values({ id: `mem_hsec_${name}`, userId, tenantId, companyId, role: 'user', status: 'active' })
+        .values({
+          id: `mem_hsec_${name}`,
+          userId,
+          tenantId,
+          companyId,
+          role: 'user',
+          status: 'active',
+        })
         .onDuplicateKeyUpdate({ set: { status: 'active' } });
       for (const roleId of roleIds) {
         await db
           .insert(roleAssignments)
-          .values({ id: `ra_hsec_${name}_${roleId}`, userId, roleId, tenantId, companyId, status: 'active' })
+          .values({
+            id: `ra_hsec_${name}_${roleId}`,
+            userId,
+            roleId,
+            tenantId,
+            companyId,
+            status: 'active',
+          })
           .onDuplicateKeyUpdate({ set: { status: 'active', revokedAt: null } });
       }
       tokens[name] = (await signInForTest(email(name))).token;
@@ -86,7 +100,12 @@ describe.skipIf(!isDatabaseConfigured)('HRMS API security (authenticated RBAC)',
   });
 
   it('rejects requests without a session (401)', async () => {
-    for (const path of ['/employees', '/onboarding/cases', '/organization/masters', '/settings/onboarding']) {
+    for (const path of [
+      '/employees',
+      '/onboarding/cases',
+      '/organization/masters',
+      '/settings/onboarding',
+    ]) {
       const res = await request(app).get(`/api/v1/hrms${path}`).set('x-company-id', companyId);
       expect(res.status).toBe(401);
     }
@@ -153,7 +172,9 @@ describe.skipIf(!isDatabaseConfigured)('HRMS API security (authenticated RBAC)',
       expect(res.status).toBe(403);
       expect(res.body.error.code).toBe('MODULE_DISABLED');
     } finally {
-      await getDb().delete(tenantModules).where(inArray(tenantModules.id, ['mod_hsec_hrms_off']));
+      await getDb()
+        .delete(tenantModules)
+        .where(inArray(tenantModules.id, ['mod_hsec_hrms_off']));
     }
   });
 

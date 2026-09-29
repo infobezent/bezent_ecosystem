@@ -7,7 +7,13 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { authApi, AuthApiError, type AccessOverview, type CompanyAccess, type SignInResult } from './authApi';
+import {
+  authApi,
+  AuthApiError,
+  type AccessOverview,
+  type CompanyAccess,
+  type SignInResult,
+} from './authApi';
 import {
   SESSION_ENDED_EVENT,
   getActiveCompanyId,
@@ -54,7 +60,9 @@ function chooseCompany(access: AccessOverview, preferred: string | null): string
  * token and which authorized company is selected.
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [status, setStatus] = useState<AuthStatus>(() => (getSessionToken() ? 'loading' : 'anonymous'));
+  const [status, setStatus] = useState<AuthStatus>(() =>
+    getSessionToken() ? 'loading' : 'anonymous',
+  );
   const [error, setError] = useState<string | null>(null);
   const [access, setAccess] = useState<AccessOverview | null>(null);
   const [activeCompanyId, setActiveCompanyIdState] = useState<string | null>(null);

@@ -60,10 +60,7 @@ export class AuditRepository {
 
     const rows = await query;
 
-    const allMatching = await db
-      .select({ id: auditLogs.id })
-      .from(auditLogs)
-      .where(whereClause);
+    const allMatching = await db.select({ id: auditLogs.id }).from(auditLogs).where(whereClause);
 
     return {
       items: rows.map((r) => ({

@@ -1,6 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { authApi, AuthApiError } from '../authApi';
-import { authorizedFetch, SESSION_ENDED_EVENT, SESSION_TOKEN_KEY, ACTIVE_COMPANY_KEY } from '../session';
+import {
+  authorizedFetch,
+  SESSION_ENDED_EVENT,
+  SESSION_TOKEN_KEY,
+  ACTIVE_COMPANY_KEY,
+} from '../session';
 import { landingPath, safeNextPath } from '../landing';
 import { appConfig } from '../../../app/config/env';
 
@@ -139,9 +144,9 @@ describe('platform auth — navigation helpers', () => {
     ({ workspaces }) as unknown as Parameters<typeof landingPath>[0]['companies'][number];
 
   it('lands each user on a workspace they are authorized for', () => {
-    expect(
-      landingPath(access({ user: { ...access({}).user, isSuperAdmin: true } })),
-    ).toBe('/super-admin');
+    expect(landingPath(access({ user: { ...access({}).user, isSuperAdmin: true } }))).toBe(
+      '/super-admin',
+    );
     expect(landingPath(access({ companies: [company(['hrms', 'ess'])] }))).toBe('/hrms/dashboard');
     expect(landingPath(access({ companies: [company(['ess'])] }))).toBe('/ess');
     expect(landingPath(access({ companies: [company(['company_admin', 'hrms'])] }))).toBe(
@@ -151,7 +156,14 @@ describe('platform auth — navigation helpers', () => {
 
   it('only follows safe in-app return paths', () => {
     expect(safeNextPath('/hrms/employees?x=1')).toBe('/hrms/employees?x=1');
-    for (const unsafe of ['https://evil.example', '//evil.example', '/\\evil', 'relative', '/login', null]) {
+    for (const unsafe of [
+      'https://evil.example',
+      '//evil.example',
+      '/\\evil',
+      'relative',
+      '/login',
+      null,
+    ]) {
       expect(safeNextPath(unsafe)).toBeNull();
     }
   });

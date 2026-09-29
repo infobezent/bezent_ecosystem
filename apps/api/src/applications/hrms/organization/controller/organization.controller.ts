@@ -12,7 +12,10 @@ export class OrganizationController {
         throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
       }
 
-      const masters = await this.service.getMasters(companyContext.tenantId, companyContext.companyId);
+      const masters = await this.service.getMasters(
+        companyContext.tenantId,
+        companyContext.companyId,
+      );
 
       res.json({
         data: masters,

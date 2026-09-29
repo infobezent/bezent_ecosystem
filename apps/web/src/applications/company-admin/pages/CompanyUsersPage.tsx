@@ -57,7 +57,9 @@ export function CompanyUsersPage() {
 
   // Edit Role Modal
   const [editingUser, setEditingUser] = useState<CompanyUserItem | null>(null);
-  const [selectedRole, setSelectedRole] = useState<'company_admin' | 'hr_manager' | 'employee' | 'user'>('employee');
+  const [selectedRole, setSelectedRole] = useState<
+    'company_admin' | 'hr_manager' | 'employee' | 'user'
+  >('employee');
   const [updatingRole, setUpdatingRole] = useState<boolean>(false);
 
   const fetchUsers = useCallback(async () => {
@@ -118,7 +120,11 @@ export function CompanyUsersPage() {
     setSuccess(null);
 
     try {
-      const res = await companyAdminApi.updateUserRole(editingUser.userId, selectedRole, activeCompanyId);
+      const res = await companyAdminApi.updateUserRole(
+        editingUser.userId,
+        selectedRole,
+        activeCompanyId,
+      );
       setSuccess(res.message);
       setEditingUser(null);
       fetchUsers();
@@ -146,7 +152,11 @@ export function CompanyUsersPage() {
 
   const handleRevokeMembership = async (user: CompanyUserItem) => {
     if (!activeCompanyId) return;
-    if (!window.confirm(`Revoke company membership for ${user.firstName} ${user.lastName} (${user.email})?`)) {
+    if (
+      !window.confirm(
+        `Revoke company membership for ${user.firstName} ${user.lastName} (${user.email})?`,
+      )
+    ) {
       return;
     }
 
@@ -243,11 +253,7 @@ export function CompanyUsersPage() {
                 />
               </Inline>
             }
-            right={
-              <Badge variant="neutral">
-                Total Users: {total}
-              </Badge>
-            }
+            right={<Badge variant="neutral">Total Users: {total}</Badge>}
           />
         </Card>
 
@@ -279,7 +285,9 @@ export function CompanyUsersPage() {
                   <TableRow key={u.id}>
                     <TableCell>
                       <Stack gap="none">
-                        <strong>{u.firstName} {u.lastName}</strong>
+                        <strong>
+                          {u.firstName} {u.lastName}
+                        </strong>
                         {u.phone && <span className="bezent-metric-label">{u.phone}</span>}
                       </Stack>
                     </TableCell>
@@ -290,8 +298,8 @@ export function CompanyUsersPage() {
                           u.role === 'company_admin'
                             ? 'info'
                             : u.role === 'hr_manager'
-                            ? 'info'
-                            : 'neutral'
+                              ? 'info'
+                              : 'neutral'
                         }
                       >
                         {u.role.replace('_', ' ').toUpperCase()}
@@ -303,8 +311,8 @@ export function CompanyUsersPage() {
                           u.membershipStatus === 'active'
                             ? 'success'
                             : u.membershipStatus === 'inactive'
-                            ? 'warning'
-                            : 'danger'
+                              ? 'warning'
+                              : 'danger'
                         }
                       >
                         {u.membershipStatus.toUpperCase()}
@@ -316,16 +324,14 @@ export function CompanyUsersPage() {
                           u.userStatus === 'active'
                             ? 'success'
                             : u.userStatus === 'inactive'
-                            ? 'neutral'
-                            : 'danger'
+                              ? 'neutral'
+                              : 'danger'
                         }
                       >
                         {u.userStatus.toUpperCase()}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      {new Date(u.joinedAt).toLocaleDateString()}
-                    </TableCell>
+                    <TableCell>{new Date(u.joinedAt).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <Inline gap="xs">
                         <Button
@@ -338,18 +344,10 @@ export function CompanyUsersPage() {
                         >
                           Role
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleToggleStatus(u)}
-                        >
+                        <Button variant="ghost" size="sm" onClick={() => handleToggleStatus(u)}>
                           {u.membershipStatus === 'active' ? 'Deactivate' : 'Activate'}
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRevokeMembership(u)}
-                        >
+                        <Button variant="ghost" size="sm" onClick={() => handleRevokeMembership(u)}>
                           Revoke
                         </Button>
                       </Inline>
@@ -388,9 +386,7 @@ export function CompanyUsersPage() {
                   id="invite-lastName"
                   required
                   value={inviteData.lastName}
-                  onChange={(e) =>
-                    setInviteData((prev) => ({ ...prev, lastName: e.target.value }))
-                  }
+                  onChange={(e) => setInviteData((prev) => ({ ...prev, lastName: e.target.value }))}
                   placeholder="e.g. Doe"
                 />
               </FormField>
@@ -401,9 +397,7 @@ export function CompanyUsersPage() {
                   type="email"
                   required
                   value={inviteData.email}
-                  onChange={(e) =>
-                    setInviteData((prev) => ({ ...prev, email: e.target.value }))
-                  }
+                  onChange={(e) => setInviteData((prev) => ({ ...prev, email: e.target.value }))}
                   placeholder="jane.doe@company.com"
                 />
               </FormField>
@@ -428,11 +422,7 @@ export function CompanyUsersPage() {
               </FormField>
 
               <Inline align="end" gap="sm">
-                <Button
-                  variant="secondary"
-                  type="button"
-                  onClick={() => setShowInviteModal(false)}
-                >
+                <Button variant="secondary" type="button" onClick={() => setShowInviteModal(false)}>
                   Cancel
                 </Button>
                 <Button variant="primary" type="submit" disabled={inviting}>
@@ -453,7 +443,8 @@ export function CompanyUsersPage() {
         >
           <Stack gap="md">
             <p>
-              Update authorized role for <strong>{editingUser.email}</strong> within {activeCompany?.name}.
+              Update authorized role for <strong>{editingUser.email}</strong> within{' '}
+              {activeCompany?.name}.
             </p>
 
             <FormField label="Select Role" htmlFor="edit-role">
@@ -461,7 +452,9 @@ export function CompanyUsersPage() {
                 id="edit-role"
                 value={selectedRole}
                 onChange={(e) =>
-                  setSelectedRole(e.target.value as 'company_admin' | 'hr_manager' | 'employee' | 'user')
+                  setSelectedRole(
+                    e.target.value as 'company_admin' | 'hr_manager' | 'employee' | 'user',
+                  )
                 }
                 options={[
                   { value: 'employee', label: 'Employee (Workforce & ESS)' },
@@ -473,17 +466,10 @@ export function CompanyUsersPage() {
             </FormField>
 
             <Inline align="end" gap="sm">
-              <Button
-                variant="secondary"
-                onClick={() => setEditingUser(null)}
-              >
+              <Button variant="secondary" onClick={() => setEditingUser(null)}>
                 Cancel
               </Button>
-              <Button
-                variant="primary"
-                onClick={handleUpdateRole}
-                disabled={updatingRole}
-              >
+              <Button variant="primary" onClick={handleUpdateRole} disabled={updatingRole}>
                 {updatingRole ? 'Updating...' : 'Save Role Assignment'}
               </Button>
             </Inline>

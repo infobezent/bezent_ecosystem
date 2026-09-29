@@ -181,23 +181,24 @@ export function EmployeeRegistration({
   const customFields = customCtx?.fields ?? [];
   const customCards = customCtx?.cards ?? [];
 
-  const allSections: Array<{ id: string; label: string; description?: string | null }> = useMemo(() => {
-    if (registrationConfig?.sections && registrationConfig.sections.length > 0) {
-      return registrationConfig.sections
-        .filter((s: { visible?: boolean }) => s.visible !== false)
-        .map((s: { id: string; label: string; description?: string | null }) => ({
-          id: s.id,
-          label: s.label,
-          description: s.description,
-        }));
-    }
-    if (customCtx && customCtx.sections && customCtx.sections.length > 0) {
-      return customCtx.sections
-        .filter((s) => !s.hidden)
-        .map((s) => ({ id: s.id, label: s.title, description: null }));
-    }
-    return [...REGISTRATION_SECTIONS];
-  }, [registrationConfig, customCtx]);
+  const allSections: Array<{ id: string; label: string; description?: string | null }> =
+    useMemo(() => {
+      if (registrationConfig?.sections && registrationConfig.sections.length > 0) {
+        return registrationConfig.sections
+          .filter((s: { visible?: boolean }) => s.visible !== false)
+          .map((s: { id: string; label: string; description?: string | null }) => ({
+            id: s.id,
+            label: s.label,
+            description: s.description,
+          }));
+      }
+      if (customCtx && customCtx.sections && customCtx.sections.length > 0) {
+        return customCtx.sections
+          .filter((s) => !s.hidden)
+          .map((s) => ({ id: s.id, label: s.title, description: null }));
+      }
+      return [...REGISTRATION_SECTIONS];
+    }, [registrationConfig, customCtx]);
 
   const [activeSection, setActiveSection] = useState<RegistrationSectionId>(
     initialDraft ? initialDraft.activeSection : 'general',
@@ -979,12 +980,12 @@ export function EmployeeRegistration({
                           options={[
                             { value: '', label: `Select ${f.label}` },
                             ...(Array.isArray(f.config?.options)
-                              ? (
-                                  f.config.options as Array<{ value: string; label: string }>
-                                ).map((opt) => ({
-                                  value: opt.value,
-                                  label: opt.label,
-                                }))
+                              ? (f.config.options as Array<{ value: string; label: string }>).map(
+                                  (opt) => ({
+                                    value: opt.value,
+                                    label: opt.label,
+                                  }),
+                                )
                               : []),
                           ]}
                         />
@@ -1272,7 +1273,7 @@ export function EmployeeRegistration({
                           ? 'Resolving referral code...'
                           : resolvedReferrer
                             ? `✓ Referred by: ${resolvedReferrer.name}${resolvedReferrer.designation ? ` (${resolvedReferrer.designation})` : ''}`
-                            : referralError || 'Enter the referring employee\'s unique Referral ID'
+                            : referralError || "Enter the referring employee's unique Referral ID"
                       }
                       error={referralError || undefined}
                     >
@@ -1445,7 +1446,8 @@ export function EmployeeRegistration({
                     <Card padding="md">
                       <Stack gap="sm">
                         <CardTitle>
-                          {allSections.find((s) => s.id === activeSection)?.label || 'Custom Fields'}
+                          {allSections.find((s) => s.id === activeSection)?.label ||
+                            'Custom Fields'}
                         </CardTitle>
                         <FormGrid columns={2} layout="horizontal" labelWidth="md">
                           {engineFields.map((f) => (
@@ -1466,10 +1468,15 @@ export function EmployeeRegistration({
                                   }
                                   options={[
                                     { value: '', label: `Select ${f.label}` },
-                                    ...(((f.config?.options as Array<{ value: string; label: string }>) ?? []).map((opt) => ({
+                                    ...(
+                                      (f.config?.options as Array<{
+                                        value: string;
+                                        label: string;
+                                      }>) ?? []
+                                    ).map((opt) => ({
                                       value: opt.value,
                                       label: opt.label,
-                                    }))),
+                                    })),
                                   ]}
                                 />
                               ) : (
@@ -1481,7 +1488,13 @@ export function EmployeeRegistration({
                                       [f.key]: e.target.value,
                                     }))
                                   }
-                                  type={f.type === 'date' ? 'date' : f.type === 'number' ? 'number' : 'text'}
+                                  type={
+                                    f.type === 'date'
+                                      ? 'date'
+                                      : f.type === 'number'
+                                        ? 'number'
+                                        : 'text'
+                                  }
                                   placeholder={f.description || `Enter ${f.label}`}
                                 />
                               )}

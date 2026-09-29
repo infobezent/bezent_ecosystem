@@ -95,25 +95,16 @@ export class CompanyAdminRepository {
 
     if (options.role) {
       conditions.push(
-        eq(
-          memberships.role,
-          options.role as 'company_admin' | 'hr_manager' | 'employee' | 'user',
-        ),
+        eq(memberships.role, options.role as 'company_admin' | 'hr_manager' | 'employee' | 'user'),
       );
     }
     if (options.status) {
-      conditions.push(
-        eq(memberships.status, options.status as 'active' | 'inactive' | 'revoked'),
-      );
+      conditions.push(eq(memberships.status, options.status as 'active' | 'inactive' | 'revoked'));
     }
     if (options.search) {
       const term = `%${options.search.trim().toLowerCase()}%`;
       conditions.push(
-        or(
-          like(users.email, term),
-          like(users.firstName, term),
-          like(users.lastName, term),
-        )!,
+        or(like(users.email, term), like(users.firstName, term), like(users.lastName, term))!,
       );
     }
 
@@ -393,20 +384,14 @@ export class CompanyAdminRepository {
   async getOrganizationSummary(companyId: string) {
     const db = getDb();
 
-    const depts = await db
-      .select()
-      .from(departments)
-      .where(eq(departments.companyId, companyId));
+    const depts = await db.select().from(departments).where(eq(departments.companyId, companyId));
 
     const desigs = await db
       .select()
       .from(designations)
       .where(eq(designations.companyId, companyId));
 
-    const locs = await db
-      .select()
-      .from(locations)
-      .where(eq(locations.companyId, companyId));
+    const locs = await db.select().from(locations).where(eq(locations.companyId, companyId));
 
     return {
       departments: depts,

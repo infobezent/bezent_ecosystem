@@ -25,25 +25,30 @@ export async function hrmsTestHeaders(
   // The seeded demo company is never created here (the seed owns it); only a
   // suite's synthetic companies are created on demand.
   if (companyId !== 'comp_demo_01') {
-    await db.insert(tenants).ignore().values({ id: tenantId, name: `Test tenant ${tenantId}` });
+    await db
+      .insert(tenants)
+      .ignore()
+      .values({ id: tenantId, name: `Test tenant ${tenantId}` });
     await db
       .insert(companies)
       .ignore()
-      .values({ id: companyId, tenantId, name: `Test company ${companyId}`, code: companyId.slice(0, 50) });
+      .values({
+        id: companyId,
+        tenantId,
+        name: `Test company ${companyId}`,
+        code: companyId.slice(0, 50),
+      });
   }
 
   const unused = hashPassword('not-used-by-otp');
-  await db
-    .insert(users)
-    .ignore()
-    .values({
-      id: HRMS_TEST_USER_ID,
-      email: HRMS_TEST_EMAIL,
-      passwordHash: unused.hash,
-      salt: unused.salt,
-      firstName: 'HRMS',
-      lastName: 'Test Operator',
-    });
+  await db.insert(users).ignore().values({
+    id: HRMS_TEST_USER_ID,
+    email: HRMS_TEST_EMAIL,
+    passwordHash: unused.hash,
+    salt: unused.salt,
+    firstName: 'HRMS',
+    lastName: 'Test Operator',
+  });
   await db
     .insert(memberships)
     .values({
@@ -81,11 +86,16 @@ export async function removeHrmsTestAccess(companyIds: string[]): Promise<void> 
   await db
     .delete(roleAssignments)
     .where(
-      and(eq(roleAssignments.userId, HRMS_TEST_USER_ID), inArray(roleAssignments.companyId, companyIds)),
+      and(
+        eq(roleAssignments.userId, HRMS_TEST_USER_ID),
+        inArray(roleAssignments.companyId, companyIds),
+      ),
     );
   await db
     .delete(memberships)
-    .where(and(eq(memberships.userId, HRMS_TEST_USER_ID), inArray(memberships.companyId, companyIds)));
+    .where(
+      and(eq(memberships.userId, HRMS_TEST_USER_ID), inArray(memberships.companyId, companyIds)),
+    );
 }
 
 /**

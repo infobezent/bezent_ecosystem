@@ -130,7 +130,15 @@ export function RegistrationConfigProvider({
       validateSection,
       hasError: (key) => errorKeys.has(key),
     }),
-    [configuration.sections, byKey, customFieldsBySection, reportValue, removeValue, validateSection, errorKeys],
+    [
+      configuration.sections,
+      byKey,
+      customFieldsBySection,
+      reportValue,
+      removeValue,
+      validateSection,
+      errorKeys,
+    ],
   );
 
   return (

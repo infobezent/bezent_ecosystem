@@ -31,79 +31,100 @@ describe('Employee Self Service (ESS) Backend API (Phase 3)', () => {
     const db = getDb();
 
     // 1. Tenant & Company
-    await db.insert(tenants).values({
-      id: tenantId,
-      name: 'ESS Test Tenant',
-      status: 'active',
-    }).onDuplicateKeyUpdate({ set: { status: 'active' } });
+    await db
+      .insert(tenants)
+      .values({
+        id: tenantId,
+        name: 'ESS Test Tenant',
+        status: 'active',
+      })
+      .onDuplicateKeyUpdate({ set: { status: 'active' } });
 
-    await db.insert(companies).values({
-      id: companyId,
-      tenantId,
-      name: 'ESS Test Company',
-      code: 'ESSTEST',
-      status: 'active',
-    }).onDuplicateKeyUpdate({ set: { status: 'active' } });
+    await db
+      .insert(companies)
+      .values({
+        id: companyId,
+        tenantId,
+        name: 'ESS Test Company',
+        code: 'ESSTEST',
+        status: 'active',
+      })
+      .onDuplicateKeyUpdate({ set: { status: 'active' } });
 
     // 2. Employee User
     const empPass = hashPassword('BezentEmployee2026!');
-    await db.insert(users).values({
-      id: 'usr_ess_emp_01',
-      email: 'ess_emp@test.example',
-      passwordHash: empPass.hash,
-      salt: empPass.salt,
-      firstName: 'Rahul',
-      lastName: 'Dravid',
-      status: 'active',
-      isSuperAdmin: false,
-    }).onDuplicateKeyUpdate({ set: { status: 'active' } });
+    await db
+      .insert(users)
+      .values({
+        id: 'usr_ess_emp_01',
+        email: 'ess_emp@test.example',
+        passwordHash: empPass.hash,
+        salt: empPass.salt,
+        firstName: 'Rahul',
+        lastName: 'Dravid',
+        status: 'active',
+        isSuperAdmin: false,
+      })
+      .onDuplicateKeyUpdate({ set: { status: 'active' } });
 
     // 3. Employee Record
-    await db.insert(employees).values({
-      id: employeeId,
-      tenantId,
-      companyId,
-      userId: 'usr_ess_emp_01',
-      employeeNumber: 'EMP-ESS-01',
-      firstName: 'Rahul',
-      lastName: 'Dravid',
-      email: 'ess_emp@test.example',
-      joiningDate: '2024-01-01',
-      employmentStatus: 'active',
-      employmentType: 'full_time',
-    }).onDuplicateKeyUpdate({ set: { employmentStatus: 'active' } });
+    await db
+      .insert(employees)
+      .values({
+        id: employeeId,
+        tenantId,
+        companyId,
+        userId: 'usr_ess_emp_01',
+        employeeNumber: 'EMP-ESS-01',
+        firstName: 'Rahul',
+        lastName: 'Dravid',
+        email: 'ess_emp@test.example',
+        joiningDate: '2024-01-01',
+        employmentStatus: 'active',
+        employmentType: 'full_time',
+      })
+      .onDuplicateKeyUpdate({ set: { employmentStatus: 'active' } });
 
     // 4. Employee Membership
-    await db.insert(memberships).values({
-      id: 'mem_ess_emp_01',
-      tenantId,
-      companyId,
-      userId: 'usr_ess_emp_01',
-      role: 'employee',
-      status: 'active',
-    }).onDuplicateKeyUpdate({ set: { status: 'active' } });
+    await db
+      .insert(memberships)
+      .values({
+        id: 'mem_ess_emp_01',
+        tenantId,
+        companyId,
+        userId: 'usr_ess_emp_01',
+        role: 'employee',
+        status: 'active',
+      })
+      .onDuplicateKeyUpdate({ set: { status: 'active' } });
 
     // 5. Non-Employee User (pure user without employee record)
     const nonEmpPass = hashPassword('BezentAdmin2026!');
-    await db.insert(users).values({
-      id: 'usr_ess_non_emp',
-      email: 'non_emp@test.example',
-      passwordHash: nonEmpPass.hash,
-      salt: nonEmpPass.salt,
-      firstName: 'External',
-      lastName: 'Contractor',
-      status: 'active',
-      isSuperAdmin: false,
-    }).onDuplicateKeyUpdate({ set: { status: 'active' } });
+    await db
+      .insert(users)
+      .values({
+        id: 'usr_ess_non_emp',
+        email: 'non_emp@test.example',
+        passwordHash: nonEmpPass.hash,
+        salt: nonEmpPass.salt,
+        firstName: 'External',
+        lastName: 'Contractor',
+        status: 'active',
+        isSuperAdmin: false,
+      })
+      .onDuplicateKeyUpdate({ set: { status: 'active' } });
 
-    await db.insert(memberships).values({
-      id: 'mem_ess_non_emp',
-      tenantId,
-      companyId,
-      userId: 'usr_ess_non_emp',
-      role: 'user',
-      status: 'active',
-    }).onDuplicateKeyUpdate({ set: { status: 'active' } });
+    await db
+      .insert(memberships)
+      .values({
+        id: 'mem_ess_non_emp',
+        tenantId,
+        companyId,
+        userId: 'usr_ess_non_emp',
+        role: 'user',
+        status: 'active',
+      })
+      .onDuplicateKeyUpdate({ set: { status: 'active' } });
 
     // Clean any prior test attendance/leaves
     await db.delete(employeeAttendance).where(eq(employeeAttendance.employeeId, employeeId));

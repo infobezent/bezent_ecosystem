@@ -1,7 +1,12 @@
 import { platformUserRepository, PlatformUserRepository } from '../repository/user.repository.js';
 import { auditService, AuditService } from '../../audit/service/audit.service.js';
 import { NotFoundError, ConflictError, BadRequestError } from '../../../app/errors/AppError.js';
-import type { CreateUserDto, PlatformUserRecord, UserAccountStatus, UserFilter } from '../types/user.types.js';
+import type {
+  CreateUserDto,
+  PlatformUserRecord,
+  UserAccountStatus,
+  UserFilter,
+} from '../types/user.types.js';
 
 export class PlatformUserService {
   constructor(
@@ -50,7 +55,9 @@ export class PlatformUserService {
     actor?: { id?: string; email?: string },
   ): Promise<PlatformUserRecord> {
     if (actor?.id === id && status !== 'active') {
-      throw new BadRequestError('Cannot deactivate or suspend your own active administrator account');
+      throw new BadRequestError(
+        'Cannot deactivate or suspend your own active administrator account',
+      );
     }
 
     const existing = await this.getUserById(id);

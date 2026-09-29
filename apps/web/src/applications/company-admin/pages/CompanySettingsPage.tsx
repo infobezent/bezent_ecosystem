@@ -28,7 +28,9 @@ export function CompanySettingsPage() {
 
       <Stack gap="lg">
         <Alert variant="info" title="Security & Multi-Tenant Boundary Enforcement">
-          This company is managed under tenant <strong>{activeCompany?.tenantName}</strong> (ID: {activeCompany?.tenantId}). All personnel, workforce data, roles, and administrative records are isolated on the server side using cryptographically enforced company scoping.
+          This company is managed under tenant <strong>{activeCompany?.tenantName}</strong> (ID:{' '}
+          {activeCompany?.tenantId}). All personnel, workforce data, roles, and administrative
+          records are isolated on the server side using cryptographically enforced company scoping.
         </Alert>
 
         <Section
@@ -69,7 +71,8 @@ export function CompanySettingsPage() {
               <Stack gap="sm">
                 <strong>Sole Admin Protection</strong>
                 <p>
-                  The platform prevents accidental removal or demotion of the last active Company Administrator. At least one administrator must remain assigned to the company.
+                  The platform prevents accidental removal or demotion of the last active Company
+                  Administrator. At least one administrator must remain assigned to the company.
                 </p>
                 <Badge variant="success">Active Policy</Badge>
               </Stack>
@@ -79,7 +82,8 @@ export function CompanySettingsPage() {
               <Stack gap="sm">
                 <strong>Invitation Security (7-Day TTL)</strong>
                 <p>
-                  User invitation tokens are generated cryptographically and expire automatically after 7 days. Tokens can be revoked or refreshed at any time.
+                  User invitation tokens are generated cryptographically and expire automatically
+                  after 7 days. Tokens can be revoked or refreshed at any time.
                 </p>
                 <Badge variant="info">Enforced</Badge>
               </Stack>
@@ -89,7 +93,8 @@ export function CompanySettingsPage() {
               <Stack gap="sm">
                 <strong>Privilege Escalation Prevention</strong>
                 <p>
-                  Company Administrators cannot assign platform-level Super Admin credentials or override tenant-level software entitlement locks.
+                  Company Administrators cannot assign platform-level Super Admin credentials or
+                  override tenant-level software entitlement locks.
                 </p>
                 <Badge variant="neutral">Platform Invariant</Badge>
               </Stack>

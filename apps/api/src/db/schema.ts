@@ -1050,11 +1050,7 @@ export const memberships = mysqlTable(
   (table) => [
     index('idx_memberships_user').on(table.userId),
     index('idx_memberships_tenant_company').on(table.tenantId, table.companyId),
-    uniqueIndex('idx_memberships_user_company_role').on(
-      table.userId,
-      table.companyId,
-      table.role,
-    ),
+    uniqueIndex('idx_memberships_user_company_role').on(table.userId, table.companyId, table.role),
   ],
 );
 
@@ -1185,8 +1181,9 @@ export const invitations = mysqlTable(
     email: varchar('email', { length: 255 }).notNull(),
     role: mysqlEnum('role', ['company_admin', 'hr_manager', 'employee', 'user']).notNull(),
     token: varchar('token', { length: 255 }).notNull(),
-    invitedByUserId: varchar('invited_by_user_id', { length: 64 })
-      .references(() => users.id, { onDelete: 'set null' }),
+    invitedByUserId: varchar('invited_by_user_id', { length: 64 }).references(() => users.id, {
+      onDelete: 'set null',
+    }),
     status: mysqlEnum('status', ['pending', 'accepted', 'expired', 'cancelled'])
       .default('pending')
       .notNull(),

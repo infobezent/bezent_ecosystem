@@ -52,7 +52,9 @@ export function EssTimesheetsPage() {
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const handleLogHours = async () => {
     setLogLoading(true);
@@ -61,7 +63,10 @@ export function EssTimesheetsPage() {
       await essApi.logTimesheet({ date, projectName, taskDescription, hours: Number(hours) });
       setSuccessMsg('Timesheet entry logged successfully.');
       setLogOpen(false);
-      setDate(''); setProjectName(''); setTaskDescription(''); setHours('');
+      setDate('');
+      setProjectName('');
+      setTaskDescription('');
+      setHours('');
       await load();
     } catch (err: unknown) {
       setLogError(err instanceof Error ? err.message : 'Failed to log timesheet');
@@ -84,10 +89,15 @@ export function EssTimesheetsPage() {
     }
   };
 
-  const draftCount = timesheets.filter(t => t.status === 'draft').length;
+  const draftCount = timesheets.filter((t) => t.status === 'draft').length;
 
   if (loading) return <LoadingState label="Loading timesheets..." />;
-  if (error) return <Alert variant="error" title="Error">{error}</Alert>;
+  if (error)
+    return (
+      <Alert variant="error" title="Error">
+        {error}
+      </Alert>
+    );
 
   return (
     <Page>
@@ -109,12 +119,18 @@ export function EssTimesheetsPage() {
               variant="primary"
               leftIcon={<BezentIcon name="timesheets" size={16} />}
               onClick={() => setLogOpen(true)}
-            >Log Hours</Button>
+            >
+              Log Hours
+            </Button>
           </Inline>
         }
       />
 
-      {successMsg && <Alert variant="success" title="Success">{successMsg}</Alert>}
+      {successMsg && (
+        <Alert variant="success" title="Success">
+          {successMsg}
+        </Alert>
+      )}
 
       <Section title="Time Log">
         {timesheets.length === 0 ? (
@@ -143,8 +159,18 @@ export function EssTimesheetsPage() {
                   <TableCell>{ts.hours}h</TableCell>
                   <TableCell>
                     <Badge
-                      variant={ts.status === 'approved' ? 'success' : ts.status === 'submitted' ? 'info' : ts.status === 'rejected' ? 'danger' : 'neutral'}
-                    >{ts.status.charAt(0).toUpperCase() + ts.status.slice(1)}</Badge>
+                      variant={
+                        ts.status === 'approved'
+                          ? 'success'
+                          : ts.status === 'submitted'
+                            ? 'info'
+                            : ts.status === 'rejected'
+                              ? 'danger'
+                              : 'neutral'
+                      }
+                    >
+                      {ts.status.charAt(0).toUpperCase() + ts.status.slice(1)}
+                    </Badge>
                   </TableCell>
                 </TableRow>
               ))}
@@ -160,19 +186,55 @@ export function EssTimesheetsPage() {
         onClose={() => setLogOpen(false)}
         footer={
           <Inline gap="sm">
-            <Button id="log-cancel" variant="secondary" onClick={() => setLogOpen(false)}>Cancel</Button>
-            <Button id="log-submit" variant="primary" onClick={handleLogHours} loading={logLoading}>Log Hours</Button>
+            <Button id="log-cancel" variant="secondary" onClick={() => setLogOpen(false)}>
+              Cancel
+            </Button>
+            <Button id="log-submit" variant="primary" onClick={handleLogHours} loading={logLoading}>
+              Log Hours
+            </Button>
           </Inline>
         }
       >
         <Stack gap="md">
-          {logError && <Alert variant="error" title="Error">{logError}</Alert>}
+          {logError && (
+            <Alert variant="error" title="Error">
+              {logError}
+            </Alert>
+          )}
           <FormSection title="Entry Details">
             <FormGrid columns={1}>
-              <label>Date<input type="date" value={date} onChange={e => setDate(e.target.value)} /></label>
-              <label>Project Name<input value={projectName} onChange={e => setProjectName(e.target.value)} placeholder="e.g., BEZENT Core Platform" /></label>
-              <label>Task Description<textarea value={taskDescription} onChange={e => setTaskDescription(e.target.value)} rows={2} placeholder="What did you work on?" /></label>
-              <label>Hours (1–24)<input type="number" min={1} max={24} value={hours} onChange={e => setHours(e.target.value)} placeholder="e.g., 8" /></label>
+              <label>
+                Date
+                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+              </label>
+              <label>
+                Project Name
+                <input
+                  value={projectName}
+                  onChange={(e) => setProjectName(e.target.value)}
+                  placeholder="e.g., BEZENT Core Platform"
+                />
+              </label>
+              <label>
+                Task Description
+                <textarea
+                  value={taskDescription}
+                  onChange={(e) => setTaskDescription(e.target.value)}
+                  rows={2}
+                  placeholder="What did you work on?"
+                />
+              </label>
+              <label>
+                Hours (1–24)
+                <input
+                  type="number"
+                  min={1}
+                  max={24}
+                  value={hours}
+                  onChange={(e) => setHours(e.target.value)}
+                  placeholder="e.g., 8"
+                />
+              </label>
             </FormGrid>
           </FormSection>
         </Stack>

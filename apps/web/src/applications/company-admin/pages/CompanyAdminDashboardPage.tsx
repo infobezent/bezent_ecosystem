@@ -24,10 +24,7 @@ import {
 import { BezentIcon } from '../../../design-system/icons';
 import { useCompanyAdmin } from '../context/CompanyAdminContext';
 import { CompanyContextBar } from '../components/CompanyContextBar';
-import {
-  companyAdminApi,
-  type CompanyAdminDashboard,
-} from '../api/companyAdminApi';
+import { companyAdminApi, type CompanyAdminDashboard } from '../api/companyAdminApi';
 
 export function CompanyAdminDashboardPage() {
   const navigate = useNavigate();
@@ -116,9 +113,7 @@ export function CompanyAdminDashboardPage() {
         </Alert>
       )}
 
-      {loading && !data && (
-        <LoadingState label="Loading company administration metrics..." />
-      )}
+      {loading && !data && <LoadingState label="Loading company administration metrics..." />}
 
       {data && (
         <Stack gap="lg">

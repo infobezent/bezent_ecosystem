@@ -83,7 +83,12 @@ export class ModuleRepository {
         .update(tenantModules)
         .set({
           status,
-          enabledAt: status === 'enabled' ? new Date() : (existing.enabledAt ? new Date(existing.enabledAt) : new Date()),
+          enabledAt:
+            status === 'enabled'
+              ? new Date()
+              : existing.enabledAt
+                ? new Date(existing.enabledAt)
+                : new Date(),
           disabledAt: status === 'disabled' ? new Date() : null,
         })
         .where(eq(tenantModules.id, existing.id));

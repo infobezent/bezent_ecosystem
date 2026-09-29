@@ -127,8 +127,11 @@ describe('HRMS Onboarding UI Components & Pages', () => {
   it('routes /hrms/administration/onboarding/registration to StandaloneUtilityLayout with EmployeeRegistrationPage', () => {
     // The standalone workspace requires a signed-in session (ADR-018).
     const standaloneRoute = appRoutes.find((r) => {
-      const element = r.element as React.ReactElement<{ children?: React.ReactElement }> | undefined;
-      return element?.type === RequireAuth && element.props.children?.type === StandaloneUtilityLayout;
+      const element = r.element as
+        React.ReactElement<{ children?: React.ReactElement }> | undefined;
+      return (
+        element?.type === RequireAuth && element.props.children?.type === StandaloneUtilityLayout
+      );
     });
     expect(standaloneRoute).toBeDefined();
     const registrationRoute = standaloneRoute?.children?.find(

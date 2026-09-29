@@ -36,7 +36,9 @@ export function EssTasksPage() {
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const updateStatus = async (id: string, status: EssTask['status']) => {
     setUpdatingId(id);
@@ -52,7 +54,12 @@ export function EssTasksPage() {
   };
 
   if (loading) return <LoadingState label="Loading tasks..." />;
-  if (error) return <Alert variant="error" title="Error">{error}</Alert>;
+  if (error)
+    return (
+      <Alert variant="error" title="Error">
+        {error}
+      </Alert>
+    );
 
   const priorityVariant = (p: EssTask['priority']): BadgeVariant =>
     p === 'high' ? 'danger' : p === 'medium' ? 'warning' : 'neutral';
@@ -60,7 +67,7 @@ export function EssTasksPage() {
   const statusVariant = (s: EssTask['status']): BadgeVariant =>
     s === 'completed' ? 'success' : s === 'in_progress' ? 'info' : 'neutral';
 
-  const activeCount = tasks.filter(t => t.status !== 'completed').length;
+  const activeCount = tasks.filter((t) => t.status !== 'completed').length;
 
   return (
     <Page>
@@ -69,7 +76,11 @@ export function EssTasksPage() {
         subtitle={`${activeCount} active task${activeCount !== 1 ? 's' : ''} assigned to you`}
       />
 
-      {successMsg && <Alert variant="success" title="Updated">{successMsg}</Alert>}
+      {successMsg && (
+        <Alert variant="success" title="Updated">
+          {successMsg}
+        </Alert>
+      )}
 
       <Section title="Task List">
         {tasks.length === 0 ? (
@@ -86,7 +97,9 @@ export function EssTasksPage() {
                     <Inline gap="sm" align="center">
                       <BezentIcon name="tasks" size={16} />
                       <strong>{task.title}</strong>
-                      <Badge variant={priorityVariant(task.priority)}>{task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}</Badge>
+                      <Badge variant={priorityVariant(task.priority)}>
+                        {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                      </Badge>
                     </Inline>
                     {task.description && <span>{task.description}</span>}
                     <Inline gap="sm">
@@ -96,7 +109,9 @@ export function EssTasksPage() {
                           <span>Due {task.dueDate}</span>
                         </Inline>
                       )}
-                      <Badge variant={statusVariant(task.status)}>{task.status.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}</Badge>
+                      <Badge variant={statusVariant(task.status)}>
+                        {task.status.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
+                      </Badge>
                     </Inline>
                   </Stack>
                   <Inline gap="xs">
@@ -107,7 +122,9 @@ export function EssTasksPage() {
                         size="sm"
                         onClick={() => updateStatus(task.id, 'in_progress')}
                         loading={updatingId === task.id}
-                      >Start</Button>
+                      >
+                        Start
+                      </Button>
                     )}
                     {task.status === 'in_progress' && (
                       <Button
@@ -116,11 +133,11 @@ export function EssTasksPage() {
                         size="sm"
                         onClick={() => updateStatus(task.id, 'completed')}
                         loading={updatingId === task.id}
-                      >Mark Complete</Button>
+                      >
+                        Mark Complete
+                      </Button>
                     )}
-                    {task.status === 'completed' && (
-                      <Badge variant="success">Done</Badge>
-                    )}
+                    {task.status === 'completed' && <Badge variant="success">Done</Badge>}
                   </Inline>
                 </Inline>
               </Card>

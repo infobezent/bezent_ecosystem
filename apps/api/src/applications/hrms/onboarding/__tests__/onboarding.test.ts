@@ -305,21 +305,17 @@ describe('HRMS Onboarding & Organization API', () => {
       // 2. Active case cannot be deleted
       const mastersRes = await hrms.get('/api/v1/hrms/organization/masters');
       const masters = mastersRes.body.data;
-      const resCreateActive = await hrms
-        .post('/api/v1/hrms/onboarding/new-hires')
-        .send({
-          firstName: 'ActiveEmp',
-          email: `active.${Date.now()}@example.com`,
-          companyId: masters.company.id,
-          departmentId: masters.departments[0].id,
-          designationId: masters.designations[0].id,
-          joiningDate: '2026-11-01',
-        });
+      const resCreateActive = await hrms.post('/api/v1/hrms/onboarding/new-hires').send({
+        firstName: 'ActiveEmp',
+        email: `active.${Date.now()}@example.com`,
+        companyId: masters.company.id,
+        departmentId: masters.departments[0].id,
+        designationId: masters.designations[0].id,
+        joiningDate: '2026-11-01',
+      });
       const activeId = resCreateActive.body.data.id;
 
-      const resDeleteActive = await hrms.delete(
-        `/api/v1/hrms/onboarding/cases/${activeId}`,
-      );
+      const resDeleteActive = await hrms.delete(`/api/v1/hrms/onboarding/cases/${activeId}`);
       expect(resDeleteActive.status).toBe(409);
       expect(resDeleteActive.body.error.code).toBe('CONFLICT');
     });
@@ -358,15 +354,11 @@ describe('HRMS Onboarding & Organization API', () => {
       expect(invalidPage.status).toBe(400);
       expect(invalidPage.body.error.code).toBe('VALIDATION_ERROR');
 
-      const invalidPageSize = await hrms.get(
-        '/api/v1/hrms/onboarding/new-hires?pageSize=10',
-      );
+      const invalidPageSize = await hrms.get('/api/v1/hrms/onboarding/new-hires?pageSize=10');
       expect(invalidPageSize.status).toBe(400);
       expect(invalidPageSize.body.error.code).toBe('VALIDATION_ERROR');
 
-      const invalidStage = await hrms.get(
-        '/api/v1/hrms/onboarding/new-hires?stage=unknown_stage',
-      );
+      const invalidStage = await hrms.get('/api/v1/hrms/onboarding/new-hires?stage=unknown_stage');
       expect(invalidStage.status).toBe(400);
       expect(invalidStage.body.error.code).toBe('VALIDATION_ERROR');
     });
@@ -397,9 +389,7 @@ describe('HRMS Onboarding & Organization API', () => {
     });
 
     it('returns empty result cleanly for non-matching search', async () => {
-      const res = await hrms.get(
-        '/api/v1/hrms/onboarding/new-hires?search=nonexistent_xyz_query',
-      );
+      const res = await hrms.get('/api/v1/hrms/onboarding/new-hires?search=nonexistent_xyz_query');
 
       expect(res.status).toBe(200);
       expect(res.body.data).toEqual([]);

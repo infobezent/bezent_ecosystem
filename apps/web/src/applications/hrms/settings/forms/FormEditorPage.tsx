@@ -146,9 +146,7 @@ export function FormEditorPage() {
   const currentSectionDescription = useMemo(() => {
     if (!activeSection) return undefined;
     return (
-      metadata.sections?.[activeSection.key]?.description ??
-      activeSection.description ??
-      undefined
+      metadata.sections?.[activeSection.key]?.description ?? activeSection.description ?? undefined
     );
   }, [activeSection, metadata]);
 
@@ -172,178 +170,149 @@ export function FormEditorPage() {
   }, [selectedSubgroupKey, activeSection, metadata]);
 
   // Section & subgroup editing handlers
-  const handleUpdateSectionTitle = useCallback(
-    (secKey: string, title: string) => {
-      setMetadata((prev) => ({
-        ...prev,
-        customSections: prev.customSections?.map((cs) =>
-          cs.key === secKey ? { ...cs, title } : cs,
-        ),
-        sections: {
-          ...prev.sections,
-          [secKey]: {
-            ...prev.sections?.[secKey],
+  const handleUpdateSectionTitle = useCallback((secKey: string, title: string) => {
+    setMetadata((prev) => ({
+      ...prev,
+      customSections: prev.customSections?.map((cs) => (cs.key === secKey ? { ...cs, title } : cs)),
+      sections: {
+        ...prev.sections,
+        [secKey]: {
+          ...prev.sections?.[secKey],
+          title,
+        },
+      },
+    }));
+    setDraftSections((prev) => prev.map((s) => (s.key === secKey ? { ...s, label: title } : s)));
+  }, []);
+
+  const handleUpdateSectionDescription = useCallback((secKey: string, description: string) => {
+    setMetadata((prev) => ({
+      ...prev,
+      customSections: prev.customSections?.map((cs) =>
+        cs.key === secKey ? { ...cs, description } : cs,
+      ),
+      sections: {
+        ...prev.sections,
+        [secKey]: {
+          ...prev.sections?.[secKey],
+          description,
+        },
+      },
+    }));
+    setDraftSections((prev) => prev.map((s) => (s.key === secKey ? { ...s, description } : s)));
+  }, []);
+
+  const handleUpdateSectionVisibility = useCallback((secKey: string, visible: boolean) => {
+    if (!visible && MANDATORY_SECTION_KEYS.includes(secKey)) {
+      return;
+    }
+    setMetadata((prev) => ({
+      ...prev,
+      sections: {
+        ...prev.sections,
+        [secKey]: {
+          ...prev.sections?.[secKey],
+          visible,
+        },
+      },
+    }));
+    setDraftSections((prev) => prev.map((s) => (s.key === secKey ? { ...s, visible } : s)));
+  }, []);
+
+  const handleMoveSectionUp = useCallback((secKey: string) => {
+    setDraftSections((prev) => {
+      const idx = prev.findIndex((s) => s.key === secKey);
+      if (idx <= 0) return prev;
+      const reordered = arrayMove(prev, idx, idx - 1);
+      setMetadata((metaPrev) => ({
+        ...metaPrev,
+        sectionOrder: reordered.map((s) => s.key),
+      }));
+      return reordered;
+    });
+  }, []);
+
+  const handleMoveSectionDown = useCallback((secKey: string) => {
+    setDraftSections((prev) => {
+      const idx = prev.findIndex((s) => s.key === secKey);
+      if (idx === -1 || idx >= prev.length - 1) return prev;
+      const reordered = arrayMove(prev, idx, idx + 1);
+      setMetadata((metaPrev) => ({
+        ...metaPrev,
+        sectionOrder: reordered.map((s) => s.key),
+      }));
+      return reordered;
+    });
+  }, []);
+
+  const handleAddSection = useCallback((title: string, description?: string) => {
+    const newKey = `custom_sec_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+    setDraftSections((prev) => {
+      const newSection: ResolvedFormSection = {
+        key: newKey,
+        label: title,
+        description: description ?? null,
+        configurable: true,
+        origin: 'custom',
+        protected: false,
+        visible: true,
+        order: prev.length + 1,
+        fields: [],
+      };
+      const next = [...prev, newSection];
+      setMetadata((metaPrev) => ({
+        ...metaPrev,
+        customSections: [
+          ...(metaPrev.customSections ?? []),
+          {
+            key: newKey,
             title,
+            description: description || undefined,
+            order: next.length,
           },
-        },
-      }));
-      setDraftSections((prev) =>
-        prev.map((s) => (s.key === secKey ? { ...s, label: title } : s)),
-      );
-    },
-    [],
-  );
-
-  const handleUpdateSectionDescription = useCallback(
-    (secKey: string, description: string) => {
-      setMetadata((prev) => ({
-        ...prev,
-        customSections: prev.customSections?.map((cs) =>
-          cs.key === secKey ? { ...cs, description } : cs,
-        ),
+        ],
         sections: {
-          ...prev.sections,
-          [secKey]: {
-            ...prev.sections?.[secKey],
-            description,
+          ...metaPrev.sections,
+          [newKey]: {
+            title,
+            description: description || undefined,
+            visible: true,
           },
         },
+        sectionOrder: next.map((s) => s.key),
       }));
-      setDraftSections((prev) =>
-        prev.map((s) => (s.key === secKey ? { ...s, description } : s)),
-      );
-    },
-    [],
-  );
+      return next;
+    });
 
-  const handleUpdateSectionVisibility = useCallback(
-    (secKey: string, visible: boolean) => {
-      if (!visible && MANDATORY_SECTION_KEYS.includes(secKey)) {
-        return;
+    setActiveSectionKey(newKey);
+    setSelectedFieldKey(null);
+    setSelectedSubgroupKey(null);
+  }, []);
+
+  const handleDeleteSection = useCallback((secKey: string) => {
+    setDraftSections((prev) => {
+      const target = prev.find((s) => s.key === secKey);
+      if (!target || target.origin !== 'custom' || target.protected) {
+        return prev;
       }
-      setMetadata((prev) => ({
-        ...prev,
-        sections: {
-          ...prev.sections,
-          [secKey]: {
-            ...prev.sections?.[secKey],
-            visible,
-          },
-        },
-      }));
-      setDraftSections((prev) =>
-        prev.map((s) => (s.key === secKey ? { ...s, visible } : s)),
-      );
-    },
-    [],
-  );
-
-  const handleMoveSectionUp = useCallback(
-    (secKey: string) => {
-      setDraftSections((prev) => {
-        const idx = prev.findIndex((s) => s.key === secKey);
-        if (idx <= 0) return prev;
-        const reordered = arrayMove(prev, idx, idx - 1);
-        setMetadata((metaPrev) => ({
+      const filtered = prev.filter((s) => s.key !== secKey);
+      setMetadata((metaPrev) => {
+        const nextSections = { ...metaPrev.sections };
+        delete nextSections[secKey];
+        return {
           ...metaPrev,
-          sectionOrder: reordered.map((s) => s.key),
-        }));
-        return reordered;
-      });
-    },
-    [],
-  );
-
-  const handleMoveSectionDown = useCallback(
-    (secKey: string) => {
-      setDraftSections((prev) => {
-        const idx = prev.findIndex((s) => s.key === secKey);
-        if (idx === -1 || idx >= prev.length - 1) return prev;
-        const reordered = arrayMove(prev, idx, idx + 1);
-        setMetadata((metaPrev) => ({
-          ...metaPrev,
-          sectionOrder: reordered.map((s) => s.key),
-        }));
-        return reordered;
-      });
-    },
-    [],
-  );
-
-  const handleAddSection = useCallback(
-    (title: string, description?: string) => {
-      const newKey = `custom_sec_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-      setDraftSections((prev) => {
-        const newSection: ResolvedFormSection = {
-          key: newKey,
-          label: title,
-          description: description ?? null,
-          configurable: true,
-          origin: 'custom',
-          protected: false,
-          visible: true,
-          order: prev.length + 1,
-          fields: [],
+          customSections: (metaPrev.customSections ?? []).filter((cs) => cs.key !== secKey),
+          sections: nextSections,
+          sectionOrder: filtered.map((s) => s.key),
         };
-        const next = [...prev, newSection];
-        setMetadata((metaPrev) => ({
-          ...metaPrev,
-          customSections: [
-            ...(metaPrev.customSections ?? []),
-            {
-              key: newKey,
-              title,
-              description: description || undefined,
-              order: next.length,
-            },
-          ],
-          sections: {
-            ...metaPrev.sections,
-            [newKey]: {
-              title,
-              description: description || undefined,
-              visible: true,
-            },
-          },
-          sectionOrder: next.map((s) => s.key),
-        }));
-        return next;
       });
+      return filtered;
+    });
 
-      setActiveSectionKey(newKey);
-      setSelectedFieldKey(null);
-      setSelectedSubgroupKey(null);
-    },
-    [],
-  );
-
-  const handleDeleteSection = useCallback(
-    (secKey: string) => {
-      setDraftSections((prev) => {
-        const target = prev.find((s) => s.key === secKey);
-        if (!target || target.origin !== 'custom' || target.protected) {
-          return prev;
-        }
-        const filtered = prev.filter((s) => s.key !== secKey);
-        setMetadata((metaPrev) => {
-          const nextSections = { ...metaPrev.sections };
-          delete nextSections[secKey];
-          return {
-            ...metaPrev,
-            customSections: (metaPrev.customSections ?? []).filter((cs) => cs.key !== secKey),
-            sections: nextSections,
-            sectionOrder: filtered.map((s) => s.key),
-          };
-        });
-        return filtered;
-      });
-
-      setActiveSectionKey('general');
-      setSelectedFieldKey(null);
-      setSelectedSubgroupKey(null);
-    },
-    [],
-  );
+    setActiveSectionKey('general');
+    setSelectedFieldKey(null);
+    setSelectedSubgroupKey(null);
+  }, []);
 
   const handleUpdateSubgroupTitle = useCallback((groupKey: string, title: string) => {
     setMetadata((prev) => ({
@@ -378,14 +347,11 @@ export function FormEditorPage() {
 
   // Select section handler: selects active section and clears field/subgroup selection
   // so Form Properties tab is displayed immediately.
-  const handleSelectSection = useCallback(
-    (secKey: string) => {
-      setActiveSectionKey(secKey);
-      setSelectedSubgroupKey(null);
-      setSelectedFieldKey(null);
-    },
-    [],
-  );
+  const handleSelectSection = useCallback((secKey: string) => {
+    setActiveSectionKey(secKey);
+    setSelectedSubgroupKey(null);
+    setSelectedFieldKey(null);
+  }, []);
 
   // Select field handler
   const handleSelectField = useCallback(
@@ -735,9 +701,8 @@ export function FormEditorPage() {
             ? String(over.id).split(':')[1]
             : String(over.id).startsWith('section-')
               ? String(over.id).replace('section-', '')
-              : draftSections.find((sec) =>
-                  sec.fields.some((f) => f.key === String(over.id)),
-                )?.key);
+              : draftSections.find((sec) => sec.fields.some((f) => f.key === String(over.id)))
+                  ?.key);
 
         if (!targetSectionKey) {
           targetSectionKey = activeSectionKey || 'general';
@@ -750,8 +715,7 @@ export function FormEditorPage() {
           overData?.isSubgroupEmpty ||
           String(over.id).startsWith('subgroup-empty:')
         ) {
-          const groupKey =
-            overData?.groupKey || String(over.id).split(':')[2];
+          const groupKey = overData?.groupKey || String(over.id).split(':')[2];
           handleAddFieldAtPosition({
             type: activeData.type,
             label: activeData.label,
@@ -766,8 +730,8 @@ export function FormEditorPage() {
         const targetFieldKey =
           overData?.fieldKey ||
           (!String(over.id).startsWith('section-') &&
-            !String(over.id).startsWith('subgroup-end:') &&
-            !String(over.id).startsWith('subgroup-empty:')
+          !String(over.id).startsWith('subgroup-end:') &&
+          !String(over.id).startsWith('subgroup-empty:')
             ? String(over.id)
             : undefined);
 
@@ -956,7 +920,7 @@ export function FormEditorPage() {
 
   const isMandatorySection = Boolean(
     activeSection &&
-      (activeSection.protected || MANDATORY_SECTION_KEYS.includes(activeSection.key)),
+    (activeSection.protected || MANDATORY_SECTION_KEYS.includes(activeSection.key)),
   );
 
   const sectionOrderIndex = activeSection
@@ -1044,12 +1008,7 @@ export function FormEditorPage() {
           >
             Discard Changes
           </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            disabled={!isDirty || isSaving}
-            onClick={handleSave}
-          >
+          <Button variant="primary" size="sm" disabled={!isDirty || isSaving} onClick={handleSave}>
             {isSaving ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>
@@ -1158,18 +1117,19 @@ export function FormEditorPage() {
          * while a field or toolbox item is being dragged.
          */}
         <DragOverlay>
-          {activeDragFieldKey !== null && (() => {
-            const field = draftSections
-              .flatMap((s) => s.fields)
-              .find((f) => f.key === activeDragFieldKey);
-            if (!field) return null;
-            return (
-              <div className="bezent-drag-overlay-chip">
-                <BezentIcon name="more" size={14} />
-                <span>{field.label}</span>
-              </div>
-            );
-          })()}
+          {activeDragFieldKey !== null &&
+            (() => {
+              const field = draftSections
+                .flatMap((s) => s.fields)
+                .find((f) => f.key === activeDragFieldKey);
+              if (!field) return null;
+              return (
+                <div className="bezent-drag-overlay-chip">
+                  <BezentIcon name="more" size={14} />
+                  <span>{field.label}</span>
+                </div>
+              );
+            })()}
           {activeDragToolboxItem !== null && (
             <div className="bezent-drag-overlay-chip">
               <BezentIcon name="add" size={14} />

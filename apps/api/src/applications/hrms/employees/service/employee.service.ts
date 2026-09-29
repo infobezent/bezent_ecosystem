@@ -120,15 +120,9 @@ export class EmployeeService {
     if (!referralCode || !referralCode.trim()) {
       throw new BadRequestError('Referral code is required', 'MISSING_REFERRAL_CODE');
     }
-    const employee = await this.repo.getByReferralCode(
-      tenantId,
-      companyId,
-      referralCode.trim(),
-    );
+    const employee = await this.repo.getByReferralCode(tenantId, companyId, referralCode.trim());
     if (!employee) {
-      throw new NotFoundError(
-        `No eligible employee found with referral code '${referralCode}'`,
-      );
+      throw new NotFoundError(`No eligible employee found with referral code '${referralCode}'`);
     }
     const name = employee.lastName
       ? `${employee.firstName} ${employee.lastName}`
@@ -160,7 +154,8 @@ export class EmployeeService {
 
     const validatedDto = validateCreateEmployee(inputObj);
     const employeeNumber =
-      validatedDto.employeeNumber || (await this.getNextEmployeeNumber(tenantId, companyId)).employeeNumber;
+      validatedDto.employeeNumber ||
+      (await this.getNextEmployeeNumber(tenantId, companyId)).employeeNumber;
     validatedDto.employeeNumber = employeeNumber;
 
     // 1. Check duplicate employee number within company

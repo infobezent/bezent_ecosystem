@@ -106,7 +106,13 @@ export interface LogTimesheetInput {
 }
 
 export interface SubmitDocumentInput {
-  category: 'personal_identity' | 'address_proof' | 'education' | 'previous_employment' | 'bank_payroll' | 'tax_other';
+  category:
+    | 'personal_identity'
+    | 'address_proof'
+    | 'education'
+    | 'previous_employment'
+    | 'bank_payroll'
+    | 'tax_other';
   documentName: string;
   documentNumber?: string;
   expiryDate?: string;

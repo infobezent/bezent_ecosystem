@@ -90,8 +90,7 @@ export async function requireEssAuth(req: Request, _res: Response, next: NextFun
       throw new UnauthorizedError('Authentication required');
     }
 
-    const rawCompanyId =
-      req.headers['x-company-id'] || req.params.companyId || req.query.companyId;
+    const rawCompanyId = req.headers['x-company-id'] || req.params.companyId || req.query.companyId;
 
     let companyId: string | undefined;
 
@@ -178,10 +177,7 @@ export async function requireEssAuth(req: Request, _res: Response, next: NextFun
     }
 
     if (emp.employmentStatus === 'terminated' || emp.employmentStatus === 'suspended') {
-      throw new ForbiddenError(
-        'Employee account is inactive or suspended',
-        'EMPLOYEE_INACTIVE',
-      );
+      throw new ForbiddenError('Employee account is inactive or suspended', 'EMPLOYEE_INACTIVE');
     }
 
     // ESS is an HRMS experience: it follows the HRMS entitlement.

@@ -16,10 +16,7 @@ import {
 import { BezentIcon } from '../../../design-system/icons';
 import { useCompanyAdmin } from '../context/CompanyAdminContext';
 import { CompanyContextBar } from '../components/CompanyContextBar';
-import {
-  companyAdminApi,
-  type PoliciesSummary,
-} from '../api/companyAdminApi';
+import { companyAdminApi, type PoliciesSummary } from '../api/companyAdminApi';
 
 export function CompanyPoliciesPage() {
   const navigate = useNavigate();
@@ -84,7 +81,8 @@ export function CompanyPoliciesPage() {
       ) : data ? (
         <Stack gap="lg">
           <Alert variant="info" title="Centralized Policy Administration">
-            Policy definitions configure the operational behavior of HRMS workflows such as onboarding, attendance, leave accrual, and registration form schemas.
+            Policy definitions configure the operational behavior of HRMS workflows such as
+            onboarding, attendance, leave accrual, and registration form schemas.
           </Alert>
 
           {/* Form Engine & Onboarding Schema Section */}

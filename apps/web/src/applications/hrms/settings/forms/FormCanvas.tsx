@@ -18,12 +18,12 @@ import {
   Stack,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
-import type { FormCustomizationMetadata, ResolvedFormField, ResolvedFormSection } from '../api/formsApi';
-import {
-  CHAPTER_METADATA,
-  getGroupsForSection,
-  type ChapterDefinition,
-} from './types';
+import type {
+  FormCustomizationMetadata,
+  ResolvedFormField,
+  ResolvedFormSection,
+} from '../api/formsApi';
+import { CHAPTER_METADATA, getGroupsForSection, type ChapterDefinition } from './types';
 
 // ─── Public prop surface ────────────────────────────────────────────────────
 
@@ -233,7 +233,7 @@ export function CanvasFieldControl({ field }: { field: ResolvedFormField }) {
               ? 'name@company.com'
               : field.type === 'phone'
                 ? '+91 98765 43210'
-                : field.description ?? `Enter ${field.label}...`
+                : (field.description ?? `Enter ${field.label}...`)
           }
           tabIndex={-1}
         />
@@ -268,23 +268,16 @@ function SortableCanvasField({
   onSelect,
   onDelete,
 }: SortableCanvasFieldProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-    isOver,
-  } = useSortable({
-    id: field.key,
-    data: {
-      isField: true,
-      fieldKey: field.key,
-      groupKey,
-      sectionKey,
-    },
-  });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } =
+    useSortable({
+      id: field.key,
+      data: {
+        isField: true,
+        fieldKey: field.key,
+        groupKey,
+        sectionKey,
+      },
+    });
 
   // UI-RULES Rule 1 exception: live drag transform — cannot be expressed as a
   // static CSS class. `transition` animates other fields smoothly into their
@@ -475,15 +468,16 @@ export function FormCanvas({
     sections.find((s) => s.configurable) ??
     sections[0];
 
-  const chapterMeta: ChapterDefinition =
-    CHAPTER_METADATA.find((c) => c.key === effectiveSectionKey) || {
-      key: effectiveSectionKey,
-      stepNumber: '01',
-      label: currentSection?.label || 'General',
-      title: (currentSection?.label || 'GENERAL INFORMATION').toUpperCase(),
-      description: 'Registration form attributes and layout configuration',
-      kicker: 'CHAPTER // 01',
-    };
+  const chapterMeta: ChapterDefinition = CHAPTER_METADATA.find(
+    (c) => c.key === effectiveSectionKey,
+  ) || {
+    key: effectiveSectionKey,
+    stepNumber: '01',
+    label: currentSection?.label || 'General',
+    title: (currentSection?.label || 'GENERAL INFORMATION').toUpperCase(),
+    description: 'Registration form attributes and layout configuration',
+    kicker: 'CHAPTER // 01',
+  };
 
   // Droppable zone for the active section — used by toolbox items dragged from
   // the Field Toolbox panel on the left. Field-to-field reordering uses
@@ -564,19 +558,18 @@ export function FormCanvas({
       <div className="bezent-canvas-body" ref={setNodeRef}>
         <div className="bezent-canvas-paper">
           {/* Section Hidden Alert */}
-          {((metadata?.sections?.[effectiveSectionKey]?.visible === false) ||
+          {(metadata?.sections?.[effectiveSectionKey]?.visible === false ||
             (currentSection?.visible === false &&
               metadata?.sections?.[effectiveSectionKey]?.visible !== true)) && (
             <Alert variant="warning" title="Hidden Section">
-              This section is currently hidden from employee registration. Its configuration and custom fields remain preserved.
+              This section is currently hidden from employee registration. Its configuration and
+              custom fields remain preserved.
             </Alert>
           )}
 
           {/* Section Header */}
           <div className="bezent-canvas-header-clean">
-            <h2 className="bezent-canvas-title-clean">
-              {sectionTitle || chapterMeta.title}
-            </h2>
+            <h2 className="bezent-canvas-title-clean">{sectionTitle || chapterMeta.title}</h2>
             <p className="bezent-canvas-desc-clean">
               {sectionDescription ?? chapterMeta.description}
             </p>
@@ -608,7 +601,8 @@ export function FormCanvas({
                         key={group.key}
                         className={`bezent-canvas-subgroup ${isSubgroupSelected ? 'is-selected' : ''}`}
                         onClick={(e) => {
-                          if ((e.target as HTMLElement).closest('.bezent-canvas-field-wrapper')) return;
+                          if ((e.target as HTMLElement).closest('.bezent-canvas-field-wrapper'))
+                            return;
                           onSelectSubgroup?.(group.key);
                         }}
                       >
@@ -683,14 +677,14 @@ export function FormCanvas({
                       {[...sectionFields]
                         .sort((a, b) => a.order - b.order)
                         .map((field) => (
-                        <SortableCanvasField
-                          key={field.key}
-                          field={field}
-                          isSelected={selectedFieldKey === field.key}
-                          onSelect={() => onSelectField(field.key)}
-                          onDelete={() => onDeleteField(field.key)}
-                        />
-                      ))}
+                          <SortableCanvasField
+                            key={field.key}
+                            field={field}
+                            isSelected={selectedFieldKey === field.key}
+                            onSelect={() => onSelectField(field.key)}
+                            onDelete={() => onDeleteField(field.key)}
+                          />
+                        ))}
                     </FormGrid>
                   </SortableContext>
                 </FormSection>

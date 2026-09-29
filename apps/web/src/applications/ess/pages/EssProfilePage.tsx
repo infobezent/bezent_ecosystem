@@ -29,7 +29,9 @@ export function EssProfilePage() {
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
   // Change request form state
-  const [section, setSection] = useState<'personal' | 'emergency_contact' | 'bank_account' | 'address'>('personal');
+  const [section, setSection] = useState<
+    'personal' | 'emergency_contact' | 'bank_account' | 'address'
+  >('personal');
   const [subject, setSubject] = useState('');
   const [reason, setReason] = useState('');
   const [changes, setChanges] = useState('');
@@ -47,7 +49,9 @@ export function EssProfilePage() {
     }
   }, []);
 
-  useEffect(() => { loadProfile(); }, [loadProfile]);
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
 
   const handleSubmitChangeRequest = async () => {
     setSubmitLoading(true);
@@ -79,8 +83,19 @@ export function EssProfilePage() {
   };
 
   if (loading) return <LoadingState label="Loading your profile..." />;
-  if (error) return <Alert variant="error" title="Failed to Load Profile">{error}</Alert>;
-  if (!profile) return <EmptyState title="Profile Unavailable" description="Your employee profile data could not be retrieved." />;
+  if (error)
+    return (
+      <Alert variant="error" title="Failed to Load Profile">
+        {error}
+      </Alert>
+    );
+  if (!profile)
+    return (
+      <EmptyState
+        title="Profile Unavailable"
+        description="Your employee profile data could not be retrieved."
+      />
+    );
 
   const { employee: emp, personal, bankAccount, skills, emergencyContacts } = profile;
   const pd = personal as Record<string, string> | null;
@@ -96,12 +111,16 @@ export function EssProfilePage() {
             variant="primary"
             leftIcon={<BezentIcon name="edit" size={16} />}
             onClick={() => setChangeModalOpen(true)}
-          >Request Profile Change</Button>
+          >
+            Request Profile Change
+          </Button>
         }
       />
 
       {submitSuccess && (
-        <Alert variant="success" title="Request Submitted">Your profile change request has been submitted for HR review.</Alert>
+        <Alert variant="success" title="Request Submitted">
+          Your profile change request has been submitted for HR review.
+        </Alert>
       )}
 
       {/* Employment Details */}
@@ -114,7 +133,9 @@ export function EssProfilePage() {
             </Stack>
             <Stack gap="xs">
               <span>Full Name</span>
-              <strong>{emp.firstName} {emp.lastName ?? ''}</strong>
+              <strong>
+                {emp.firstName} {emp.lastName ?? ''}
+              </strong>
             </Stack>
             <Stack gap="xs">
               <span>Email</span>
@@ -138,7 +159,9 @@ export function EssProfilePage() {
             </Stack>
             <Stack gap="xs">
               <span>Status</span>
-              <Badge variant={emp.employmentStatus === 'active' ? 'success' : 'warning'}>{formatLabel(emp.employmentStatus)}</Badge>
+              <Badge variant={emp.employmentStatus === 'active' ? 'success' : 'warning'}>
+                {formatLabel(emp.employmentStatus)}
+              </Badge>
             </Stack>
             <Stack gap="xs">
               <span>Joining Date</span>
@@ -153,14 +176,22 @@ export function EssProfilePage() {
         <Section title="Personal Details">
           <Card>
             <Grid columns={3} gap="md">
-              {['dateOfBirth', 'gender', 'maritalStatus', 'bloodGroup', 'nationality', 'personalEmail', 'homePhone'].map((key) => (
+              {[
+                'dateOfBirth',
+                'gender',
+                'maritalStatus',
+                'bloodGroup',
+                'nationality',
+                'personalEmail',
+                'homePhone',
+              ].map((key) =>
                 pd[key] ? (
                   <Stack key={key} gap="xs">
                     <span>{camelToLabel(key)}</span>
                     <strong>{String(pd[key])}</strong>
                   </Stack>
-                ) : null
-              ))}
+                ) : null,
+              )}
             </Grid>
           </Card>
         </Section>
@@ -180,7 +211,9 @@ export function EssProfilePage() {
                       <strong>{contact['name'] ?? 'Contact'}</strong>
                       <Badge variant="neutral">{formatLabel(contact['priority'] ?? '')}</Badge>
                     </Inline>
-                    <span>{contact['relationship']} · {contact['phone']}</span>
+                    <span>
+                      {contact['relationship']} · {contact['phone']}
+                    </span>
                     {contact['email'] && <span>{contact['email']}</span>}
                   </Stack>
                 </Card>
@@ -254,18 +287,30 @@ export function EssProfilePage() {
         onClose={() => setChangeModalOpen(false)}
         footer={
           <Inline gap="sm">
-            <Button id="ess-profile-change-cancel" variant="secondary" onClick={() => setChangeModalOpen(false)}>Cancel</Button>
+            <Button
+              id="ess-profile-change-cancel"
+              variant="secondary"
+              onClick={() => setChangeModalOpen(false)}
+            >
+              Cancel
+            </Button>
             <Button
               id="ess-profile-change-submit"
               variant="primary"
               onClick={handleSubmitChangeRequest}
               loading={submitLoading}
-            >Submit Request</Button>
+            >
+              Submit Request
+            </Button>
           </Inline>
         }
       >
         <Stack gap="md">
-          {submitError && <Alert variant="error" title="Error">{submitError}</Alert>}
+          {submitError && (
+            <Alert variant="error" title="Error">
+              {submitError}
+            </Alert>
+          )}
           <FormSection title="Change Details">
             <FormGrid columns={1}>
               <label>

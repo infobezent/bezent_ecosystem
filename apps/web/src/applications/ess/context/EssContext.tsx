@@ -1,12 +1,10 @@
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  type ReactNode,
-} from 'react';
-import { essApi, type EssDashboardData, type EssEmployeeSummary, ACTIVE_COMPANY_KEY } from '../api/essApi';
+  essApi,
+  type EssDashboardData,
+  type EssEmployeeSummary,
+  ACTIVE_COMPANY_KEY,
+} from '../api/essApi';
 import { useSuperAdminAuth } from '../../super-admin/context/SuperAdminAuthContext';
 
 interface EssContextValue {

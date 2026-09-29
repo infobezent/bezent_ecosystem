@@ -7,17 +7,9 @@ import {
   platformUserRepository,
   PlatformUserRepository,
 } from '../../users/repository/user.repository.js';
-import {
-  moduleService,
-  ModuleService,
-} from '../../modules/service/module.service.js';
-import {
-  auditService,
-  AuditService,
-} from '../../audit/service/audit.service.js';
-import {
-  generateSurrogateId,
-} from '../../auth/security.js';
+import { moduleService, ModuleService } from '../../modules/service/module.service.js';
+import { auditService, AuditService } from '../../audit/service/audit.service.js';
+import { generateSurrogateId } from '../../auth/security.js';
 import {
   NotFoundError,
   ForbiddenError,
@@ -43,14 +35,16 @@ import type {
   CompanyModuleStatus,
 } from '../types/companyAdmin.types.js';
 import type { ModuleCode } from '../../modules/types/module.types.js';
-import {
-  systemRoleIdForCode,
-  type SystemRoleCode,
-} from '../../access/catalog/accessCatalog.js';
+import { systemRoleIdForCode, type SystemRoleCode } from '../../access/catalog/accessCatalog.js';
 import type { AuthenticatedUser } from '../../auth/types/auth.types.js';
 
 const INVITATION_TTL_DAYS = 7;
-const MEMBERSHIP_ROLES: readonly SystemRoleCode[] = ['company_admin', 'hr_manager', 'employee', 'user'];
+const MEMBERSHIP_ROLES: readonly SystemRoleCode[] = [
+  'company_admin',
+  'hr_manager',
+  'employee',
+  'user',
+];
 const ROLE_LABELS: Record<SystemRoleCode, string> = {
   company_admin: 'Company Administrator',
   hr_manager: 'HR',
@@ -169,8 +163,10 @@ export class CompanyAdminService {
 
     const updated = await this.repo.updateCompanyProfile(companyId, {
       legalName: input.legalName !== undefined ? input.legalName : comp.legalName,
-      businessEmail: input.businessEmail !== undefined ? input.businessEmail?.trim() : comp.businessEmail,
-      contactPhone: input.contactPhone !== undefined ? input.contactPhone?.trim() : comp.contactPhone,
+      businessEmail:
+        input.businessEmail !== undefined ? input.businessEmail?.trim() : comp.businessEmail,
+      contactPhone:
+        input.contactPhone !== undefined ? input.contactPhone?.trim() : comp.contactPhone,
       country: input.country !== undefined ? input.country?.trim() : comp.country,
       timeZone: input.timeZone !== undefined ? input.timeZone?.trim() : comp.timeZone,
     });
@@ -201,7 +197,16 @@ export class CompanyAdminService {
     };
   }
 
-  async listUsers(companyId: string, options: { search?: string; role?: string; status?: string; page?: number; limit?: number } = {}) {
+  async listUsers(
+    companyId: string,
+    options: {
+      search?: string;
+      role?: string;
+      status?: string;
+      page?: number;
+      limit?: number;
+    } = {},
+  ) {
     return this.repo.listCompanyUsers(companyId, options);
   }
 

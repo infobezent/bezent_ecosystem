@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  type ReactNode,
-} from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import {
   companyAdminApi,
   ACTIVE_COMPANY_KEY,
@@ -53,7 +46,8 @@ export function CompanyAdminProvider({ children }: { children: ReactNode }) {
       setAuthorizedCompanies(companies);
 
       if (companies.length > 0) {
-        const stored = typeof localStorage !== 'undefined' ? localStorage.getItem(ACTIVE_COMPANY_KEY) : null;
+        const stored =
+          typeof localStorage !== 'undefined' ? localStorage.getItem(ACTIVE_COMPANY_KEY) : null;
         const exists = companies.some((c) => c.id === stored);
 
         if (stored && exists) {
@@ -94,7 +88,9 @@ export function CompanyAdminProvider({ children }: { children: ReactNode }) {
 
   const activeCompany = authorizedCompanies.find((c) => c.id === activeCompanyId) || null;
   const isCompanyAdmin = Boolean(
-    isSuperAdmin || (activeCompany && (activeCompany.role === 'company_admin' || activeCompany.role === 'super_admin')),
+    isSuperAdmin ||
+    (activeCompany &&
+      (activeCompany.role === 'company_admin' || activeCompany.role === 'super_admin')),
   );
 
   const value: CompanyAdminContextValue = {

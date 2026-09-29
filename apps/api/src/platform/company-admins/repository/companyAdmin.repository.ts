@@ -8,10 +8,7 @@ import type { DbExecutor } from '../../access/repository/access.repository.js';
 export class CompanyAdminRepository {
   async list(tenantId?: string, companyId?: string): Promise<CompanyAdminAssignment[]> {
     const db = getDb();
-    const conditions = [
-      eq(memberships.role, 'company_admin'),
-      eq(memberships.status, 'active'),
-    ];
+    const conditions = [eq(memberships.role, 'company_admin'), eq(memberships.status, 'active')];
     if (tenantId) conditions.push(eq(memberships.tenantId, tenantId));
     if (companyId) conditions.push(eq(memberships.companyId, companyId));
 
@@ -77,10 +74,7 @@ export class CompanyAdminRepository {
 
   async findMembershipById(membershipId: string) {
     const db = getDb();
-    const [row] = await db
-      .select()
-      .from(memberships)
-      .where(eq(memberships.id, membershipId));
+    const [row] = await db.select().from(memberships).where(eq(memberships.id, membershipId));
     return row ?? null;
   }
 
@@ -114,10 +108,7 @@ export class CompanyAdminRepository {
   }
 
   async revokeMembership(membershipId: string, db: DbExecutor = getDb()): Promise<void> {
-    await db
-      .update(memberships)
-      .set({ status: 'revoked' })
-      .where(eq(memberships.id, membershipId));
+    await db.update(memberships).set({ status: 'revoked' }).where(eq(memberships.id, membershipId));
   }
 }
 

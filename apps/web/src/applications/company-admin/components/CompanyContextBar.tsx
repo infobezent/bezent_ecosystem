@@ -6,13 +6,8 @@ interface CompanyContextBarProps {
 }
 
 export function CompanyContextBar({ onCompanyChange }: CompanyContextBarProps) {
-  const {
-    activeCompanyId,
-    activeCompany,
-    authorizedCompanies,
-    switchCompany,
-    isLoadingCompanies,
-  } = useCompanyAdmin();
+  const { activeCompanyId, activeCompany, authorizedCompanies, switchCompany, isLoadingCompanies } =
+    useCompanyAdmin();
 
   if (isLoadingCompanies || authorizedCompanies.length === 0) {
     return null;
@@ -44,10 +39,7 @@ export function CompanyContextBar({ onCompanyChange }: CompanyContextBarProps) {
 
         {activeCompany && (
           <Inline gap="sm" align="center">
-            <Badge
-              variant={activeCompany.status === 'active' ? 'success' : 'danger'}
-              size="sm"
-            >
+            <Badge variant={activeCompany.status === 'active' ? 'success' : 'danger'} size="sm">
               {activeCompany.status.toUpperCase()}
             </Badge>
             <Badge variant="neutral" size="sm">

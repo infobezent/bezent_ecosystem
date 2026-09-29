@@ -1,6 +1,15 @@
-import { companyAdminRepository, CompanyAdminRepository } from '../repository/companyAdmin.repository.js';
-import { platformUserRepository, PlatformUserRepository } from '../../users/repository/user.repository.js';
-import { companyRepository, CompanyRepository } from '../../companies/repository/company.repository.js';
+import {
+  companyAdminRepository,
+  CompanyAdminRepository,
+} from '../repository/companyAdmin.repository.js';
+import {
+  platformUserRepository,
+  PlatformUserRepository,
+} from '../../users/repository/user.repository.js';
+import {
+  companyRepository,
+  CompanyRepository,
+} from '../../companies/repository/company.repository.js';
 import { tenantRepository, TenantRepository } from '../../tenants/repository/tenant.repository.js';
 import { auditService, AuditService } from '../../audit/service/audit.service.js';
 import { roleManagementService } from '../../access/service/roleManagement.service.js';
@@ -23,7 +32,10 @@ export class CompanyAdminService {
     private readonly email: EmailService = emailService,
   ) {}
 
-  async listCompanyAdmins(tenantId?: string, companyId?: string): Promise<CompanyAdminAssignment[]> {
+  async listCompanyAdmins(
+    tenantId?: string,
+    companyId?: string,
+  ): Promise<CompanyAdminAssignment[]> {
     return this.repo.list(tenantId, companyId);
   }
 
@@ -155,7 +167,10 @@ export class CompanyAdminService {
     };
   }
 
-  async revokeCompanyAdmin(membershipId: string, actor?: { id?: string; email?: string }): Promise<void> {
+  async revokeCompanyAdmin(
+    membershipId: string,
+    actor?: { id?: string; email?: string },
+  ): Promise<void> {
     const membership = await this.repo.findMembershipById(membershipId);
     if (!membership) {
       throw new NotFoundError(`Membership '${membershipId}' not found`);

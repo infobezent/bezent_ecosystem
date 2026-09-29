@@ -138,9 +138,7 @@ export function CompanyProfilePage() {
         </Alert>
       )}
 
-      {loading && !profile && (
-        <LoadingState label="Loading company profile..." />
-      )}
+      {loading && !profile && <LoadingState label="Loading company profile..." />}
 
       {profile && (
         <Stack gap="lg">
@@ -247,10 +245,7 @@ export function CompanyProfilePage() {
                         onChange={(e) =>
                           setFormData((prev) => ({ ...prev, country: e.target.value }))
                         }
-                        options={[
-                          { value: '', label: 'Select Country...' },
-                          ...COUNTRY_OPTIONS,
-                        ]}
+                        options={[{ value: '', label: 'Select Country...' }, ...COUNTRY_OPTIONS]}
                       />
                     </FormField>
 
@@ -265,10 +260,7 @@ export function CompanyProfilePage() {
                         onChange={(e) =>
                           setFormData((prev) => ({ ...prev, timeZone: e.target.value }))
                         }
-                        options={[
-                          { value: '', label: 'Select Time Zone...' },
-                          ...TIMEZONE_OPTIONS,
-                        ]}
+                        options={[{ value: '', label: 'Select Time Zone...' }, ...TIMEZONE_OPTIONS]}
                       />
                     </FormField>
                   </Grid>

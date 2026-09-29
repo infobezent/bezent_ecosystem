@@ -20,7 +20,10 @@ export class ModuleService {
     return MODULE_CATALOG;
   }
 
-  async getTenantModules(tenantId: string, companyId?: string | null): Promise<TenantModuleRecord[]> {
+  async getTenantModules(
+    tenantId: string,
+    companyId?: string | null,
+  ): Promise<TenantModuleRecord[]> {
     return this.repo.listByTenant(tenantId, companyId);
   }
 

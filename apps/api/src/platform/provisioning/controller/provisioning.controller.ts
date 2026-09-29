@@ -6,7 +6,9 @@ import {
 import { validateCustomerProvisioning } from '../validation/provisioning.schema.js';
 
 export class CustomerProvisioningController {
-  constructor(private readonly service: CustomerProvisioningService = customerProvisioningService) {}
+  constructor(
+    private readonly service: CustomerProvisioningService = customerProvisioningService,
+  ) {}
 
   validate = async (req: Request, res: Response, next: NextFunction) => {
     try {

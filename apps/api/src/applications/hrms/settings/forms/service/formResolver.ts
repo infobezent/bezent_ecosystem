@@ -49,7 +49,7 @@ export function resolveForm(
   const systemResolved: ResolvedFormSection[] = definition.sections.map((section, sectionIndex) => {
     const sectionMeta = state.metadata?.sections?.[section.key];
     const isProtected = MANDATORY_SYSTEM_SECTIONS.has(section.key);
-    const visible = isProtected ? true : (sectionMeta?.visible !== false);
+    const visible = isProtected ? true : sectionMeta?.visible !== false;
     return {
       key: section.key,
       label: sectionMeta?.title || section.label,
@@ -62,12 +62,9 @@ export function resolveForm(
       configurable: section.configurable,
       visible,
       protected: isProtected,
-      fields: resolveSectionFields(
-        section,
-        overridesByKey,
-        state.customFields,
-        state.metadata,
-      ).map((field, index) => ({ ...field, order: index + 1 })),
+      fields: resolveSectionFields(section, overridesByKey, state.customFields, state.metadata).map(
+        (field, index) => ({ ...field, order: index + 1 }),
+      ),
     };
   });
 
@@ -75,8 +72,7 @@ export function resolveForm(
   const customSectionsMeta = state.metadata?.customSections ?? [];
   const customResolved: ResolvedFormSection[] = customSectionsMeta.map((cs, csIndex) => {
     const sectionMeta = state.metadata?.sections?.[cs.key];
-    const visible =
-      sectionMeta?.visible !== undefined ? sectionMeta.visible : (cs.visible !== false);
+    const visible = sectionMeta?.visible !== undefined ? sectionMeta.visible : cs.visible !== false;
     const customFieldsForSection = state.customFields
       .filter((custom) => custom.sectionKey === cs.key)
       .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -87,9 +83,7 @@ export function resolveForm(
       key: cs.key,
       label: sectionMeta?.title || cs.title,
       description:
-        sectionMeta?.description !== undefined
-          ? sectionMeta.description
-          : (cs.description ?? null),
+        sectionMeta?.description !== undefined ? sectionMeta.description : (cs.description ?? null),
       order: systemResolved.length + csIndex + 1,
       origin: 'custom' as const,
       configurable: true,

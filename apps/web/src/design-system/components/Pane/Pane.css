@@ -299,7 +299,9 @@
   display: flex;
   align-items: center;
   opacity: 0.7;
-  transition: opacity 120ms ease, color 120ms ease;
+  transition:
+    opacity 120ms ease,
+    color 120ms ease;
 }
 
 .bezent-toolbox-item:hover:not(.is-disabled) .bezent-toolbox-item__add {
@@ -629,5 +631,3 @@
   border-style: dashed;
   border-width: 1.5px;
 }
-
-

@@ -76,7 +76,11 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
       headers: { 'Content-Type': 'application/json', ...(init.headers as Record<string, string>) },
     });
   } catch {
-    throw new AuthApiError('BEZENT could not be reached. Check your connection and try again.', 0, 'NETWORK_ERROR');
+    throw new AuthApiError(
+      'BEZENT could not be reached. Check your connection and try again.',
+      0,
+      'NETWORK_ERROR',
+    );
   }
   const body = (await response.json().catch(() => ({}))) as {
     data?: T;
@@ -102,7 +106,10 @@ export const authApi = {
 
   /** Exchanges a code for a session plus the user's resolved access. */
   verifyOtp(challengeId: string, code: string): Promise<SignInResult> {
-    return call('/auth/otp/verify', { method: 'POST', body: JSON.stringify({ challengeId, code }) });
+    return call('/auth/otp/verify', {
+      method: 'POST',
+      body: JSON.stringify({ challengeId, code }),
+    });
   },
 
   /** The signed-in user's companies and workspaces, re-resolved by the server. */

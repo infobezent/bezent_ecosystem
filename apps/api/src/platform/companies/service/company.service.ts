@@ -2,7 +2,12 @@ import { companyRepository, CompanyRepository } from '../repository/company.repo
 import { tenantRepository, TenantRepository } from '../../tenants/repository/tenant.repository.js';
 import { auditService, AuditService } from '../../audit/service/audit.service.js';
 import { NotFoundError, ConflictError, BadRequestError } from '../../../app/errors/AppError.js';
-import type { CompanyFilter, CompanyRecord, CreateCompanyDto, UpdateCompanyDto } from '../types/company.types.js';
+import type {
+  CompanyFilter,
+  CompanyRecord,
+  CreateCompanyDto,
+  UpdateCompanyDto,
+} from '../types/company.types.js';
 
 export class CompanyService {
   constructor(
@@ -78,7 +83,10 @@ export class CompanyService {
     return updated;
   }
 
-  async activateCompany(id: string, actor?: { id?: string; email?: string }): Promise<CompanyRecord> {
+  async activateCompany(
+    id: string,
+    actor?: { id?: string; email?: string },
+  ): Promise<CompanyRecord> {
     const existing = await this.getCompanyById(id);
     const updated = await this.repo.updateStatus(id, 'active');
 
@@ -95,7 +103,10 @@ export class CompanyService {
     return updated;
   }
 
-  async suspendCompany(id: string, actor?: { id?: string; email?: string }): Promise<CompanyRecord> {
+  async suspendCompany(
+    id: string,
+    actor?: { id?: string; email?: string },
+  ): Promise<CompanyRecord> {
     const existing = await this.getCompanyById(id);
     const updated = await this.repo.updateStatus(id, 'suspended');
 

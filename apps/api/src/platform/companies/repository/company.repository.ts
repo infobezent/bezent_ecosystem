@@ -104,11 +104,15 @@ export class CompanyRepository {
     const updateValues: Record<string, unknown> = {};
 
     if (dto.name !== undefined) updateValues.name = dto.name.trim();
-    if (dto.legalName !== undefined) updateValues.legalName = dto.legalName ? dto.legalName.trim() : null;
-    if (dto.businessEmail !== undefined) updateValues.businessEmail = dto.businessEmail ? dto.businessEmail.trim() : null;
-    if (dto.contactPhone !== undefined) updateValues.contactPhone = dto.contactPhone ? dto.contactPhone.trim() : null;
+    if (dto.legalName !== undefined)
+      updateValues.legalName = dto.legalName ? dto.legalName.trim() : null;
+    if (dto.businessEmail !== undefined)
+      updateValues.businessEmail = dto.businessEmail ? dto.businessEmail.trim() : null;
+    if (dto.contactPhone !== undefined)
+      updateValues.contactPhone = dto.contactPhone ? dto.contactPhone.trim() : null;
     if (dto.country !== undefined) updateValues.country = dto.country ? dto.country.trim() : null;
-    if (dto.timeZone !== undefined) updateValues.timeZone = dto.timeZone ? dto.timeZone.trim() : null;
+    if (dto.timeZone !== undefined)
+      updateValues.timeZone = dto.timeZone ? dto.timeZone.trim() : null;
 
     if (Object.keys(updateValues).length > 0) {
       await db.update(companies).set(updateValues).where(eq(companies.id, id));
@@ -177,10 +181,7 @@ export class CompanyRepository {
       .limit(limit)
       .offset(offset);
 
-    const countRows = await db
-      .select({ id: companies.id })
-      .from(companies)
-      .where(whereClause);
+    const countRows = await db.select({ id: companies.id }).from(companies).where(whereClause);
 
     return {
       items: rows.map((r) => ({

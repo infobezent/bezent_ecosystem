@@ -95,7 +95,11 @@ export function TenantsPage() {
   const handleToggleStatus = async (tenant: TenantRecord) => {
     try {
       if (tenant.status === 'active') {
-        if (!confirm(`Are you sure you want to suspend tenant '${tenant.name}'? Users will be restricted from accessing the application.`)) {
+        if (
+          !confirm(
+            `Are you sure you want to suspend tenant '${tenant.name}'? Users will be restricted from accessing the application.`,
+          )
+        ) {
           return;
         }
         await superAdminApi.suspendTenant(tenant.id);
@@ -210,9 +214,7 @@ export function TenantsPage() {
                     <TableCell>
                       <Badge status={tenant.status}>{tenant.status}</Badge>
                     </TableCell>
-                    <TableCell>
-                      {new Date(tenant.createdAt).toLocaleDateString()}
-                    </TableCell>
+                    <TableCell>{new Date(tenant.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <Inline gap="sm">
                         <Button

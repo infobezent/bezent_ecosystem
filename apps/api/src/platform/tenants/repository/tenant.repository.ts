@@ -156,10 +156,7 @@ export class TenantRepository {
 
     await db.transaction(async (tx) => {
       if (dto.name !== undefined) {
-        await tx
-          .update(tenants)
-          .set({ name: dto.name.trim() })
-          .where(eq(tenants.id, id));
+        await tx.update(tenants).set({ name: dto.name.trim() }).where(eq(tenants.id, id));
       }
 
       const existingDetail = await tx
@@ -173,10 +170,7 @@ export class TenantRepository {
         if (dto.contactPhone !== undefined) updateValues.contactPhone = dto.contactPhone;
 
         if (Object.keys(updateValues).length > 0) {
-          await tx
-            .update(tenantDetails)
-            .set(updateValues)
-            .where(eq(tenantDetails.tenantId, id));
+          await tx.update(tenantDetails).set(updateValues).where(eq(tenantDetails.tenantId, id));
         }
       } else {
         await tx.insert(tenantDetails).values({

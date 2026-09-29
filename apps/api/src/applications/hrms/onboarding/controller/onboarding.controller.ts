@@ -48,9 +48,13 @@ export class OnboardingController {
 
       const statusQuery = typeof req.query.status === 'string' ? req.query.status : undefined;
 
-      const items = await this.service.listCases(companyContext.tenantId, companyContext.companyId, {
-        status: statusQuery,
-      });
+      const items = await this.service.listCases(
+        companyContext.tenantId,
+        companyContext.companyId,
+        {
+          status: statusQuery,
+        },
+      );
 
       res.json({
         data: items,
@@ -119,7 +123,11 @@ export class OnboardingController {
         throw new AppError('Onboarding case ID is required', 400, 'VALIDATION_ERROR');
       }
 
-      const item = await this.service.getCaseById(companyContext.tenantId, companyContext.companyId, id);
+      const item = await this.service.getCaseById(
+        companyContext.tenantId,
+        companyContext.companyId,
+        id,
+      );
 
       res.json({
         data: item,

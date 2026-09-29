@@ -21,11 +21,7 @@ import {
   Toolbar,
 } from '../../../design-system/components';
 import { BezentIcon } from '../../../design-system/icons';
-import {
-  superAdminApi,
-  type PlatformUserSummary,
-  type TenantRecord,
-} from '../api/superAdminApi';
+import { superAdminApi, type PlatformUserSummary, type TenantRecord } from '../api/superAdminApi';
 
 export function PlatformUsersPage() {
   const [users, setUsers] = useState<PlatformUserSummary[]>([]);
@@ -188,9 +184,7 @@ export function PlatformUsersPage() {
                     <TableCell>
                       <Badge status={user.status}>{user.status}</Badge>
                     </TableCell>
-                    <TableCell>
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </TableCell>
+                    <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell>
                       {!user.isSuperAdmin && (
                         <Button

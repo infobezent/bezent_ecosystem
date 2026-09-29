@@ -1,15 +1,20 @@
 import { eq, and, gt, isNull, or } from 'drizzle-orm';
 import { getDb } from '../../../db/connection.js';
-import { users, sessions, memberships, companies, tenants, type User, type Session } from '../../../db/schema.js';
+import {
+  users,
+  sessions,
+  memberships,
+  companies,
+  tenants,
+  type User,
+  type Session,
+} from '../../../db/schema.js';
 import { generateSurrogateId, hashSessionToken } from '../security.js';
 
 export class AuthRepository {
   async findUserByEmail(email: string): Promise<User | null> {
     const db = getDb();
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email.toLowerCase().trim()));
+    const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase().trim()));
     return user ?? null;
   }
 
@@ -66,10 +71,7 @@ export class AuthRepository {
 
   async revokeSession(token: string): Promise<void> {
     const db = getDb();
-    await db
-      .update(sessions)
-      .set({ revokedAt: new Date() })
-      .where(this.matchesToken(token));
+    await db.update(sessions).set({ revokedAt: new Date() }).where(this.matchesToken(token));
   }
 
   private matchesToken(token: string) {
@@ -78,10 +80,7 @@ export class AuthRepository {
 
   async updateLastLogin(userId: string): Promise<void> {
     const db = getDb();
-    await db
-      .update(users)
-      .set({ lastLoginAt: new Date() })
-      .where(eq(users.id, userId));
+    await db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, userId));
   }
 
   async getUserMemberships(userId: string) {

@@ -77,14 +77,15 @@ export function SuperAdminDashboardPage() {
         </Alert>
       )}
 
-      {loading && !data && (
-        <LoadingState label="Loading platform dashboard metrics..." />
-      )}
+      {loading && !data && <LoadingState label="Loading platform dashboard metrics..." />}
 
       {data && (
         <Stack gap="lg">
           {/* Key Metric Tiles */}
-          <Section title="Platform Overview" subtitle="System-wide capacity and tenant distribution">
+          <Section
+            title="Platform Overview"
+            subtitle="System-wide capacity and tenant distribution"
+          >
             <Grid columns={3} gap="md">
               <Card>
                 <Stack gap="xs">
@@ -130,11 +131,7 @@ export function SuperAdminDashboardPage() {
                     <h2>{data.metrics.totalUsers}</h2>
                     <Badge variant="info">{data.metrics.activeUsers} Active</Badge>
                   </Inline>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate('/super-admin/users')}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => navigate('/super-admin/users')}>
                     Manage Users →
                   </Button>
                 </Stack>
@@ -249,7 +246,9 @@ export function SuperAdminDashboardPage() {
                           <TableCell>
                             <Badge variant="neutral">{log.action}</Badge>
                           </TableCell>
-                          <TableCell>{log.targetType}: {log.targetId}</TableCell>
+                          <TableCell>
+                            {log.targetType}: {log.targetId}
+                          </TableCell>
                           <TableCell>{log.actorEmail || 'System'}</TableCell>
                           <TableCell>
                             {new Date(log.createdAt).toLocaleTimeString([], {

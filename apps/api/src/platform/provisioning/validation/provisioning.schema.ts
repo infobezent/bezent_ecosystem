@@ -22,9 +22,14 @@ export function validateCustomerProvisioning(body: unknown): CustomerProvisionin
     if (typeof t.code !== 'string' || !t.code.trim()) {
       errors['tenant.code'] = 'Tenant code is required';
     } else if (!/^[A-Za-z0-9_-]+$/.test(t.code.trim())) {
-      errors['tenant.code'] = 'Tenant code can only contain letters, numbers, hyphens and underscores';
+      errors['tenant.code'] =
+        'Tenant code can only contain letters, numbers, hyphens and underscores';
     }
-    if (t.contactEmail && typeof t.contactEmail === 'string' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t.contactEmail.trim())) {
+    if (
+      t.contactEmail &&
+      typeof t.contactEmail === 'string' &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t.contactEmail.trim())
+    ) {
       errors['tenant.contactEmail'] = 'Invalid contact email format';
     }
   }
@@ -39,9 +44,14 @@ export function validateCustomerProvisioning(body: unknown): CustomerProvisionin
     if (typeof c.code !== 'string' || !c.code.trim()) {
       errors['company.code'] = 'Company code is required';
     } else if (!/^[A-Za-z0-9_-]+$/.test(c.code.trim())) {
-      errors['company.code'] = 'Company code can only contain letters, numbers, hyphens and underscores';
+      errors['company.code'] =
+        'Company code can only contain letters, numbers, hyphens and underscores';
     }
-    if (c.businessEmail && typeof c.businessEmail === 'string' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.businessEmail.trim())) {
+    if (
+      c.businessEmail &&
+      typeof c.businessEmail === 'string' &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.businessEmail.trim())
+    ) {
       errors['company.businessEmail'] = 'Invalid business email format';
     }
   }
@@ -65,7 +75,8 @@ export function validateCustomerProvisioning(body: unknown): CustomerProvisionin
     const hasNewUser = typeof a.newUser === 'object' && a.newUser !== null;
 
     if (!hasUserId && !hasNewUser) {
-      errors.admin = 'Either an existing userId or newUser details must be provided for Company Admin';
+      errors.admin =
+        'Either an existing userId or newUser details must be provided for Company Admin';
     }
 
     if (hasNewUser) {
@@ -115,7 +126,9 @@ export function validateCustomerProvisioning(body: unknown): CustomerProvisionin
       userId: typeof a.userId === 'string' && a.userId.trim() ? a.userId.trim() : undefined,
       newUser: a.newUser
         ? {
-            email: String((a.newUser as Record<string, unknown>).email).trim().toLowerCase(),
+            email: String((a.newUser as Record<string, unknown>).email)
+              .trim()
+              .toLowerCase(),
             firstName: String((a.newUser as Record<string, unknown>).firstName).trim(),
             lastName: String((a.newUser as Record<string, unknown>).lastName).trim(),
             phone: (a.newUser as Record<string, unknown>).phone

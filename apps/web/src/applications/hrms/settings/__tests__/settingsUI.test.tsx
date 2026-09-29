@@ -54,7 +54,9 @@ describe('BEZENT Common Portal Settings Center UI', () => {
     expect(settingsRoute).toBeDefined();
     expect(settingsRoute?.element).toBeDefined();
 
-    const html = renderToStaticMarkup(<AuthProvider>{settingsRoute!.element as ReactElement}</AuthProvider>);
+    const html = renderToStaticMarkup(
+      <AuthProvider>{settingsRoute!.element as ReactElement}</AuthProvider>,
+    );
     expect(html).toContain('Settings');
     expect(html).toContain('Configure and manage settings across the BEZENT portal.');
   });

@@ -66,7 +66,11 @@ export function validateCreateEmployee(input: unknown): CreateEmployeeDto {
   const errors: Record<string, string> = {};
 
   // Employee Number
-  if (!data.employeeNumber || typeof data.employeeNumber !== 'string' || !data.employeeNumber.trim()) {
+  if (
+    !data.employeeNumber ||
+    typeof data.employeeNumber !== 'string' ||
+    !data.employeeNumber.trim()
+  ) {
     errors.employeeNumber = 'Employee number is required';
   } else if (data.employeeNumber.trim().length > 50) {
     errors.employeeNumber = 'Employee number must not exceed 50 characters';

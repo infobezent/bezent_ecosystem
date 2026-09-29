@@ -183,13 +183,7 @@ export function FieldProperties({
   };
 
   return (
-    <Pane
-      size="inspector"
-      surface="white"
-      border="left"
-      scroll="y"
-      aria-label="Properties Panel"
-    >
+    <Pane size="inspector" surface="white" border="left" scroll="y" aria-label="Properties Panel">
       {/* Top Tabs: Form Properties | Subgroup Properties | Field Properties */}
       <div className="bezent-properties-tabs">
         <button
@@ -246,12 +240,7 @@ export function FieldProperties({
               readOnly
               value={form?.name ?? 'Employee Registration'}
             />
-            <Input
-              label="Label Name"
-              size="sm"
-              readOnly
-              value="Employee Registration Form"
-            />
+            <Input label="Label Name" size="sm" readOnly value="Employee Registration Form" />
             <Input
               label="Description"
               size="sm"
@@ -269,49 +258,23 @@ export function FieldProperties({
               readOnly
               value="Employee ID (general.employeeId)"
             />
-            <Switch
-              label="Enable custom validations"
-              checked={false}
-              disabled
-            />
+            <Switch label="Enable custom validations" checked={false} disabled />
           </div>
 
           {/* Preferences */}
           <div className="bezent-inspector-section">
             <div className="bezent-inspector-heading">PREFERENCES</div>
-            <Switch
-              label="Allow saving as draft"
-              checked={true}
-              disabled
-            />
-            <Switch
-              label="Capture reason for modifications"
-              checked={false}
-              disabled
-            />
+            <Switch label="Allow saving as draft" checked={true} disabled />
+            <Switch label="Capture reason for modifications" checked={false} disabled />
           </div>
 
           {/* Auto-Numbering */}
           <div className="bezent-inspector-section">
             <div className="bezent-inspector-heading">AUTO-NUMBERING</div>
-            <Switch
-              label="Enable Auto-number"
-              checked={true}
-              disabled
-            />
+            <Switch label="Enable Auto-number" checked={true} disabled />
             <Inline gap="sm">
-              <Input
-                label="Prefix"
-                size="sm"
-                readOnly
-                value="EMP"
-              />
-              <Input
-                label="Starts From"
-                size="sm"
-                readOnly
-                value="2026001"
-              />
+              <Input label="Prefix" size="sm" readOnly value="EMP" />
+              <Input label="Starts From" size="sm" readOnly value="2026001" />
             </Inline>
           </div>
 
@@ -319,12 +282,7 @@ export function FieldProperties({
           {activeSection && (
             <div className="bezent-inspector-section">
               <div className="bezent-inspector-heading">ACTIVE CHAPTER / SECTION</div>
-              <Input
-                label="Section Identifier"
-                size="sm"
-                readOnly
-                value={activeSection.key}
-              />
+              <Input label="Section Identifier" size="sm" readOnly value={activeSection.key} />
               <Input
                 label="Section Title"
                 size="sm"
@@ -344,9 +302,7 @@ export function FieldProperties({
                 label="Section Visibility"
                 checked={sectionVisible ?? activeSection.visible !== false}
                 disabled={isMandatorySection}
-                onChange={(e) =>
-                  onUpdateSectionVisibility?.(activeSection.key, e.target.checked)
-                }
+                onChange={(e) => onUpdateSectionVisibility?.(activeSection.key, e.target.checked)}
               />
               {isMandatorySection && (
                 <Label as="span" size="sm">
@@ -476,12 +432,7 @@ export function FieldProperties({
             {/* Subgroup Basic */}
             <div className="bezent-inspector-section">
               <div className="bezent-inspector-heading">SUBGROUP PROPERTIES</div>
-              <Input
-                label="Subgroup Identifier"
-                size="sm"
-                readOnly
-                value={selectedSubgroup.key}
-              />
+              <Input label="Subgroup Identifier" size="sm" readOnly value={selectedSubgroup.key} />
               <Input
                 label="Subgroup Title"
                 size="sm"
@@ -515,8 +466,8 @@ export function FieldProperties({
         ))}
 
       {/* ─── TAB 3: FIELD PROPERTIES ────────────────────────────────────────── */}
-      {panelTab === 'field' && (
-        !field ? (
+      {panelTab === 'field' &&
+        (!field ? (
           <div className="bezent-inspector-content">
             <EmptyState
               size="compact"
@@ -565,13 +516,7 @@ export function FieldProperties({
                 required
                 disabled={isProtected}
               />
-              <Input
-                label="Label Name"
-                size="sm"
-                value={field.label}
-                readOnly
-                disabled
-              />
+              <Input label="Label Name" size="sm" value={field.label} readOnly disabled />
               <Input
                 label="Description / Help Text"
                 size="sm"
@@ -808,8 +753,7 @@ export function FieldProperties({
               </div>
             )}
           </div>
-        )
-      )}
+        ))}
 
       {/* Modal: Add Custom Section */}
       <Modal
@@ -893,12 +837,12 @@ export function FieldProperties({
       >
         <Stack gap="md">
           <Alert variant="warning" title="Confirm Section Deletion">
-            This will permanently remove the custom section <strong>{activeSection?.label}</strong> ({activeSection?.key}) and all custom fields within it from the employee registration form.
+            This will permanently remove the custom section <strong>{activeSection?.label}</strong>{' '}
+            ({activeSection?.key}) and all custom fields within it from the employee registration
+            form.
           </Alert>
         </Stack>
       </Modal>
     </Pane>
   );
 }
-
-

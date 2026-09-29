@@ -10,9 +10,7 @@ const API_BASE = `${appConfig.apiBaseUrl}/platform`;
 
 function getAuthHeader(): Record<string, string> {
   const token =
-    typeof localStorage !== 'undefined'
-      ? localStorage.getItem('bezent_platform_token')
-      : null;
+    typeof localStorage !== 'undefined' ? localStorage.getItem('bezent_platform_token') : null;
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -215,7 +213,9 @@ export const superAdminApi = {
   getDashboard: () => request<DashboardOverview>('/dashboard/overview'),
 
   // Tenants
-  listTenants: (params: { search?: string; status?: string; limit?: number; offset?: number } = {}) => {
+  listTenants: (
+    params: { search?: string; status?: string; limit?: number; offset?: number } = {},
+  ) => {
     const query = new URLSearchParams();
     if (params.search) query.set('search', params.search);
     if (params.status) query.set('status', params.status);
@@ -227,13 +227,21 @@ export const superAdminApi = {
 
   getTenant: (id: string) => request<TenantRecord>(`/tenants/${id}`),
 
-  createTenant: (data: { name: string; code: string; contactEmail?: string; contactPhone?: string }) =>
+  createTenant: (data: {
+    name: string;
+    code: string;
+    contactEmail?: string;
+    contactPhone?: string;
+  }) =>
     request<TenantRecord>('/tenants', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
-  updateTenant: (id: string, data: { name?: string; contactEmail?: string; contactPhone?: string }) =>
+  updateTenant: (
+    id: string,
+    data: { name?: string; contactEmail?: string; contactPhone?: string },
+  ) =>
     request<TenantRecord>(`/tenants/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
@@ -381,13 +389,15 @@ export const superAdminApi = {
     }),
 
   // Audit Logs
-  listAuditLogs: (params: {
-    tenantId?: string;
-    action?: string;
-    targetType?: string;
-    limit?: number;
-    offset?: number;
-  } = {}) => {
+  listAuditLogs: (
+    params: {
+      tenantId?: string;
+      action?: string;
+      targetType?: string;
+      limit?: number;
+      offset?: number;
+    } = {},
+  ) => {
     const query = new URLSearchParams();
     if (params.tenantId) query.set('tenantId', params.tenantId);
     if (params.action) query.set('action', params.action);

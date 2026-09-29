@@ -1,10 +1,5 @@
 export type SourceOfHire =
-  | 'direct_applicant'
-  | 'referral'
-  | 'agency'
-  | 'campus'
-  | 'linkedin'
-  | 'other';
+  'direct_applicant' | 'referral' | 'agency' | 'campus' | 'linkedin' | 'other';
 export type EmploymentType = 'full_time' | 'part_time' | 'contract' | 'intern';
 export type EmploymentStatus =
   | 'pending_activation'

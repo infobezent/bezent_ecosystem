@@ -58,7 +58,9 @@ export function EssLeavePage() {
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const handleApplyLeave = async () => {
     setApplyLoading(true);
@@ -67,7 +69,9 @@ export function EssLeavePage() {
       await essApi.applyLeave({ leaveType, startDate, endDate, reason });
       setSuccessMsg('Leave application submitted successfully.');
       setApplyOpen(false);
-      setStartDate(''); setEndDate(''); setReason('');
+      setStartDate('');
+      setEndDate('');
+      setReason('');
       await load();
     } catch (err: unknown) {
       setApplyError(err instanceof Error ? err.message : 'Failed to apply for leave');
@@ -90,11 +94,19 @@ export function EssLeavePage() {
   };
 
   if (loading) return <LoadingState label="Loading leave workspace..." />;
-  if (error) return <Alert variant="error" title="Error">{error}</Alert>;
+  if (error)
+    return (
+      <Alert variant="error" title="Error">
+        {error}
+      </Alert>
+    );
   if (!workspace) return null;
 
   const balanceColors: Record<string, 'success' | 'warning' | 'info' | 'neutral'> = {
-    annual: 'success', sick: 'warning', casual: 'info', unpaid: 'neutral',
+    annual: 'success',
+    sick: 'warning',
+    casual: 'info',
+    unpaid: 'neutral',
   };
 
   return (
@@ -108,11 +120,17 @@ export function EssLeavePage() {
             variant="primary"
             leftIcon={<BezentIcon name="leave" size={16} />}
             onClick={() => setApplyOpen(true)}
-          >Apply for Leave</Button>
+          >
+            Apply for Leave
+          </Button>
         }
       />
 
-      {successMsg && <Alert variant="success" title="Success">{successMsg}</Alert>}
+      {successMsg && (
+        <Alert variant="success" title="Success">
+          {successMsg}
+        </Alert>
+      )}
 
       {/* Leave Balances */}
       <Section title="Leave Balances" subtitle={`Year ${new Date().getFullYear()}`}>
@@ -120,7 +138,9 @@ export function EssLeavePage() {
           {workspace.balances.map((bal) => (
             <Card key={bal.leaveType}>
               <Stack gap="sm">
-                <Badge variant={balanceColors[bal.leaveType] ?? 'neutral'}>{capitalise(bal.leaveType)}</Badge>
+                <Badge variant={balanceColors[bal.leaveType] ?? 'neutral'}>
+                  {capitalise(bal.leaveType)}
+                </Badge>
                 <Inline gap="sm" align="baseline">
                   <strong>{bal.availableDays}</strong>
                   <span>/ {bal.totalDays} days</span>
@@ -159,15 +179,29 @@ export function EssLeavePage() {
             <TableBody>
               {workspace.requests.map((req) => (
                 <TableRow key={req.id}>
-                  <TableCell><Badge variant={balanceColors[req.leaveType] ?? 'neutral'}>{capitalise(req.leaveType)}</Badge></TableCell>
+                  <TableCell>
+                    <Badge variant={balanceColors[req.leaveType] ?? 'neutral'}>
+                      {capitalise(req.leaveType)}
+                    </Badge>
+                  </TableCell>
                   <TableCell>{req.startDate}</TableCell>
                   <TableCell>{req.endDate}</TableCell>
                   <TableCell>{req.totalDays}</TableCell>
                   <TableCell>{req.reason}</TableCell>
                   <TableCell>
                     <Badge
-                      variant={req.status === 'approved' ? 'success' : req.status === 'rejected' ? 'danger' : req.status === 'cancelled' ? 'neutral' : 'warning'}
-                    >{capitalise(req.status)}</Badge>
+                      variant={
+                        req.status === 'approved'
+                          ? 'success'
+                          : req.status === 'rejected'
+                            ? 'danger'
+                            : req.status === 'cancelled'
+                              ? 'neutral'
+                              : 'warning'
+                      }
+                    >
+                      {capitalise(req.status)}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     {req.status === 'pending' && (
@@ -177,7 +211,9 @@ export function EssLeavePage() {
                         size="sm"
                         onClick={() => handleCancelLeave(req.id)}
                         loading={cancellingId === req.id}
-                      >Cancel</Button>
+                      >
+                        Cancel
+                      </Button>
                     )}
                   </TableCell>
                 </TableRow>
@@ -196,7 +232,9 @@ export function EssLeavePage() {
                 <BezentIcon name="calendar" size={18} />
                 <Stack gap="xs">
                   <strong>{h.name}</strong>
-                  <span>{h.date} · {h.dayOfWeek}</span>
+                  <span>
+                    {h.date} · {h.dayOfWeek}
+                  </span>
                 </Stack>
               </Inline>
             </Card>
@@ -211,18 +249,34 @@ export function EssLeavePage() {
         onClose={() => setApplyOpen(false)}
         footer={
           <Inline gap="sm">
-            <Button id="leave-cancel" variant="secondary" onClick={() => setApplyOpen(false)}>Cancel</Button>
-            <Button id="leave-submit" variant="primary" onClick={handleApplyLeave} loading={applyLoading}>Submit Application</Button>
+            <Button id="leave-cancel" variant="secondary" onClick={() => setApplyOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              id="leave-submit"
+              variant="primary"
+              onClick={handleApplyLeave}
+              loading={applyLoading}
+            >
+              Submit Application
+            </Button>
           </Inline>
         }
       >
         <Stack gap="md">
-          {applyError && <Alert variant="error" title="Error">{applyError}</Alert>}
+          {applyError && (
+            <Alert variant="error" title="Error">
+              {applyError}
+            </Alert>
+          )}
           <FormSection title="Leave Details">
             <FormGrid columns={1}>
               <label>
                 Leave Type
-                <select value={leaveType} onChange={e => setLeaveType(e.target.value as typeof leaveType)}>
+                <select
+                  value={leaveType}
+                  onChange={(e) => setLeaveType(e.target.value as typeof leaveType)}
+                >
                   <option value="annual">Annual Leave</option>
                   <option value="sick">Sick Leave</option>
                   <option value="casual">Casual Leave</option>
@@ -230,12 +284,27 @@ export function EssLeavePage() {
                 </select>
               </label>
               <Grid columns={2} gap="sm">
-                <label>Start Date<input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} /></label>
-                <label>End Date<input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} /></label>
+                <label>
+                  Start Date
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                  />
+                </label>
+                <label>
+                  End Date
+                  <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                </label>
               </Grid>
               <label>
                 Reason
-                <textarea value={reason} onChange={e => setReason(e.target.value)} rows={3} placeholder="Provide reason for leave..." />
+                <textarea
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  rows={3}
+                  placeholder="Provide reason for leave..."
+                />
               </label>
             </FormGrid>
           </FormSection>

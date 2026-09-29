@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { hrmsTestHeaders, removeHrmsTestAccess } from '../../../../platform/__tests__/support/testSession.js';
+import {
+  hrmsTestHeaders,
+  removeHrmsTestAccess,
+} from '../../../../platform/__tests__/support/testSession.js';
 import { and, eq, inArray } from 'drizzle-orm';
 import { createApp } from '../../../../app/server/createApp.js';
 import { getDb, pingDatabase } from '../../../../db/connection.js';

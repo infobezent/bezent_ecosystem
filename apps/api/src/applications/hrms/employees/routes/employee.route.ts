@@ -10,7 +10,11 @@ const controller = new EmployeeController();
 // each operation then requires its own permission (ADR-017).
 
 // Canonical employee records (directory, selection, probation views).
-employeeRouter.get('/hrms/employees', requirePermission('hrms.employees.read'), controller.listEmployees);
+employeeRouter.get(
+  '/hrms/employees',
+  requirePermission('hrms.employees.read'),
+  controller.listEmployees,
+);
 employeeRouter.get(
   '/hrms/employees/next-number',
   requirePermission('hrms.employees.create'),
@@ -23,7 +27,11 @@ employeeRouter.get(
 );
 // Create an employee with optional record details in one transaction
 // (the target for Onboarding conversion).
-employeeRouter.post('/hrms/employees', requirePermission('hrms.employees.create'), controller.createEmployee);
+employeeRouter.post(
+  '/hrms/employees',
+  requirePermission('hrms.employees.create'),
+  controller.createEmployee,
+);
 employeeRouter.get(
   '/hrms/employees/:employeeId',
   requirePermission('hrms.employees.read'),

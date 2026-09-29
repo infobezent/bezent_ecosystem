@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { hrmsTestHeaders, removeHrmsTestAccess } from '../../../../../platform/__tests__/support/testSession.js';
+import {
+  hrmsTestHeaders,
+  removeHrmsTestAccess,
+} from '../../../../../platform/__tests__/support/testSession.js';
 import { eq, inArray } from 'drizzle-orm';
 import { createApp } from '../../../../../app/server/createApp.js';
 import { getDb, pingDatabase } from '../../../../../db/connection.js';
@@ -317,8 +320,12 @@ describe('HRMS Forms API — Employee Registration (MySQL)', () => {
   it('persists and resolves metadata for section titles, descriptions, and subgroup mappings', async () => {
     const current = await getForm(headersB);
     const version = current.body.data.form.version as number;
-    const generalSection = current.body.data.sections.find((s: { key: string }) => s.key === 'general');
-    const personalSection = current.body.data.sections.find((s: { key: string }) => s.key === 'personal');
+    const generalSection = current.body.data.sections.find(
+      (s: { key: string }) => s.key === 'general',
+    );
+    const personalSection = current.body.data.sections.find(
+      (s: { key: string }) => s.key === 'personal',
+    );
 
     const metadata = {
       sections: {
@@ -382,7 +389,9 @@ describe('HRMS Forms API — Employee Registration (MySQL)', () => {
     expect(reloaded.status).toBe(200);
     expect(reloaded.body.data.form.metadata).toEqual(metadata);
 
-    const reloadedGeneral = reloaded.body.data.sections.find((s: { key: string }) => s.key === 'general');
+    const reloadedGeneral = reloaded.body.data.sections.find(
+      (s: { key: string }) => s.key === 'general',
+    );
     expect(reloadedGeneral.label).toBe('Modified General Details');
     expect(reloadedGeneral.description).toBe('Custom explanation for general details');
 
@@ -395,8 +404,12 @@ describe('HRMS Forms API — Employee Registration (MySQL)', () => {
   it('persists and resolves custom sections, section visibility, and section order across reload', async () => {
     const current = await getForm(headersB);
     const version = current.body.data.form.version as number;
-    const generalSection = current.body.data.sections.find((s: { key: string }) => s.key === 'general');
-    const personalSection = current.body.data.sections.find((s: { key: string }) => s.key === 'personal');
+    const generalSection = current.body.data.sections.find(
+      (s: { key: string }) => s.key === 'general',
+    );
+    const personalSection = current.body.data.sections.find(
+      (s: { key: string }) => s.key === 'personal',
+    );
 
     const customSecKey = 'custom_sec_compliance';
     const customFieldKey = 'custom.0123456789abcdef0123456789abcdee';
@@ -501,5 +514,3 @@ describe('HRMS Forms API — Employee Registration (MySQL)', () => {
     expect(reloadedSkills.visible).toBe(false);
   });
 });
-
-

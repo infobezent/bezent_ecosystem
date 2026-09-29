@@ -587,7 +587,10 @@ export async function seedDatabase() {
   }
 
   // 8. Tenant Details for canonical demo tenant
-  const existingDetail = await db.select().from(tenantDetails).where(eq(tenantDetails.tenantId, tenantId));
+  const existingDetail = await db
+    .select()
+    .from(tenantDetails)
+    .where(eq(tenantDetails.tenantId, tenantId));
   if (existingDetail.length === 0) {
     await db.insert(tenantDetails).values({
       tenantId,
@@ -598,7 +601,9 @@ export async function seedDatabase() {
   }
 
   // 9. Initial Super Admin Identity
-  const superAdminEmail = (process.env.SUPER_ADMIN_EMAIL || 'superadmin@bezent.com').toLowerCase().trim();
+  const superAdminEmail = (process.env.SUPER_ADMIN_EMAIL || 'superadmin@bezent.com')
+    .toLowerCase()
+    .trim();
   const existingSa = await db.select().from(users).where(eq(users.email, superAdminEmail));
   if (existingSa.length === 0) {
     const { hash, salt } = createUnusableCredential(); // passwordless: signs in with Email OTP
@@ -698,10 +703,7 @@ export async function seedDatabase() {
   }
 
   // Link employee record to this user ID
-  await db
-    .update(employees)
-    .set({ userId: empUserId })
-    .where(eq(employees.id, 'emp_demo_002'));
+  await db.update(employees).set({ userId: empUserId }).where(eq(employees.id, 'emp_demo_002'));
 
   // Employee Membership
   const existingEmpMem = await db
@@ -804,7 +806,8 @@ export async function seedDatabase() {
       companyId,
       employeeId: 'emp_demo_002',
       title: 'Welcome to BEZENT Employee Self Service',
-      message: 'Access your profile, attendance, leave balance, documents and personal requests directly.',
+      message:
+        'Access your profile, attendance, leave balance, documents and personal requests directly.',
       type: 'info',
       isRead: false,
     });

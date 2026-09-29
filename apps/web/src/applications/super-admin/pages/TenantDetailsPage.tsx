@@ -231,7 +231,8 @@ export function TenantDetailsPage() {
                     <TableCell>
                       {m.moduleCode === 'hrms' && 'HRMS & Employee Self-Service'}
                       {m.moduleCode === 'crm' && 'CRM (Customer Relationship Management)'}
-                      {m.moduleCode === 'project_management' && 'Project Management & Collaboration'}
+                      {m.moduleCode === 'project_management' &&
+                        'Project Management & Collaboration'}
                     </TableCell>
                     <TableCell>
                       <Badge variant={m.status === 'enabled' ? 'success' : 'neutral'}>

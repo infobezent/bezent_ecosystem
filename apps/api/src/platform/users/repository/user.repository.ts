@@ -56,10 +56,7 @@ export class PlatformUserRepository {
 
   async findByEmail(email: string): Promise<PlatformUserRecord | null> {
     const db = getDb();
-    const [u] = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email.toLowerCase().trim()));
+    const [u] = await db.select().from(users).where(eq(users.email, email.toLowerCase().trim()));
     if (!u) return null;
     return this.findById(u.id);
   }
@@ -166,10 +163,7 @@ export class PlatformUserRepository {
       .limit(limit)
       .offset(offset);
 
-    const countRows = await db
-      .select({ id: users.id })
-      .from(users)
-      .where(whereClause);
+    const countRows = await db.select({ id: users.id }).from(users).where(whereClause);
 
     // Fetch memberships for this page's users
     const userIds = rows.map((u) => u.id);

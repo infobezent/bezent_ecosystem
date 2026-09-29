@@ -25,7 +25,7 @@ describe('Tenant Validation Schemas', () => {
         name: 'Acme Corporation',
         code: 'ACME',
         contactEmail: 'not-an-email',
-      })
+      }),
     ).toThrow(ValidationError);
   });
 
@@ -33,7 +33,7 @@ describe('Tenant Validation Schemas', () => {
     expect(() =>
       validateCreateTenant({
         name: 'A',
-      })
+      }),
     ).toThrow(ValidationError);
   });
 });
@@ -64,7 +64,9 @@ describe('TenantService', () => {
       updateStatus: vi.fn(),
     };
     mockAudit = {
-      logEvent: vi.fn().mockResolvedValue({ id: 'aud_1' } as unknown as import('../audit/types/audit.types.js').AuditLogRecord),
+      logEvent: vi.fn().mockResolvedValue({
+        id: 'aud_1',
+      } as unknown as import('../audit/types/audit.types.js').AuditLogRecord),
     };
     tenantService = new TenantService(
       mockRepo as TenantRepository,
@@ -94,7 +96,7 @@ describe('TenantService', () => {
       tenantService.createTenant({
         name: 'New Acme Corp',
         code: 'ACME',
-      })
+      }),
     ).rejects.toThrow(ConflictError);
   });
 

@@ -78,14 +78,35 @@ export class EssRepository {
 
     const db = getDb();
 
-    const [personalRows, familyRows, emergencyRows, bankRows, skillRows, scheduleRows] = await Promise.all([
-      db.select().from(employeePersonalDetails).where(eq(employeePersonalDetails.employeeId, employeeId)),
-      db.select().from(employeeFamilyMembers).where(eq(employeeFamilyMembers.employeeId, employeeId)).orderBy(employeeFamilyMembers.sortOrder),
-      db.select().from(employeeEmergencyContacts).where(eq(employeeEmergencyContacts.employeeId, employeeId)),
-      db.select().from(employeeBankAccounts).where(eq(employeeBankAccounts.employeeId, employeeId)),
-      db.select().from(employeeSkills).where(eq(employeeSkills.employeeId, employeeId)).orderBy(employeeSkills.sortOrder),
-      db.select().from(employeeWorkSchedules).where(eq(employeeWorkSchedules.employeeId, employeeId)),
-    ]);
+    const [personalRows, familyRows, emergencyRows, bankRows, skillRows, scheduleRows] =
+      await Promise.all([
+        db
+          .select()
+          .from(employeePersonalDetails)
+          .where(eq(employeePersonalDetails.employeeId, employeeId)),
+        db
+          .select()
+          .from(employeeFamilyMembers)
+          .where(eq(employeeFamilyMembers.employeeId, employeeId))
+          .orderBy(employeeFamilyMembers.sortOrder),
+        db
+          .select()
+          .from(employeeEmergencyContacts)
+          .where(eq(employeeEmergencyContacts.employeeId, employeeId)),
+        db
+          .select()
+          .from(employeeBankAccounts)
+          .where(eq(employeeBankAccounts.employeeId, employeeId)),
+        db
+          .select()
+          .from(employeeSkills)
+          .where(eq(employeeSkills.employeeId, employeeId))
+          .orderBy(employeeSkills.sortOrder),
+        db
+          .select()
+          .from(employeeWorkSchedules)
+          .where(eq(employeeWorkSchedules.employeeId, employeeId)),
+      ]);
 
     const bank = bankRows[0];
     let maskedBank: EssFullProfile['bankAccount'] = null;
@@ -157,7 +178,10 @@ export class EssRepository {
           notes: notes ?? existing.notes,
         })
         .where(eq(employeeAttendance.id, existing.id));
-      const [updated] = await db.select().from(employeeAttendance).where(eq(employeeAttendance.id, existing.id));
+      const [updated] = await db
+        .select()
+        .from(employeeAttendance)
+        .where(eq(employeeAttendance.id, existing.id));
       return updated!;
     }
 
@@ -174,17 +198,20 @@ export class EssRepository {
       status: 'present',
     });
 
-    const [created] = await db.select().from(employeeAttendance).where(eq(employeeAttendance.id, id));
+    const [created] = await db
+      .select()
+      .from(employeeAttendance)
+      .where(eq(employeeAttendance.id, id));
     return created!;
   }
 
   async checkOut(id: string, checkOutTime: string): Promise<EmployeeAttendance> {
     const db = getDb();
-    await db
-      .update(employeeAttendance)
-      .set({ checkOutTime })
+    await db.update(employeeAttendance).set({ checkOutTime }).where(eq(employeeAttendance.id, id));
+    const [updated] = await db
+      .select()
+      .from(employeeAttendance)
       .where(eq(employeeAttendance.id, id));
-    const [updated] = await db.select().from(employeeAttendance).where(eq(employeeAttendance.id, id));
     return updated!;
   }
 
@@ -240,7 +267,10 @@ export class EssRepository {
     if (existing.length > 0) return existing;
 
     const db = getDb();
-    const defaults: Array<{ leaveType: 'annual' | 'sick' | 'casual' | 'unpaid'; totalDays: number }> = [
+    const defaults: Array<{
+      leaveType: 'annual' | 'sick' | 'casual' | 'unpaid';
+      totalDays: number;
+    }> = [
       { leaveType: 'annual', totalDays: 18 },
       { leaveType: 'sick', totalDays: 12 },
       { leaveType: 'casual', totalDays: 6 },
@@ -350,19 +380,21 @@ export class EssRepository {
         ),
       );
 
-    const [created] = await db.select().from(employeeLeaveRequests).where(eq(employeeLeaveRequests.id, id));
+    const [created] = await db
+      .select()
+      .from(employeeLeaveRequests)
+      .where(eq(employeeLeaveRequests.id, id));
     return created!;
   }
 
-  async cancelLeaveRequest(
-    id: string,
-    employeeId: string,
-  ): Promise<EmployeeLeaveRequest> {
+  async cancelLeaveRequest(id: string, employeeId: string): Promise<EmployeeLeaveRequest> {
     const db = getDb();
     const [existing] = await db
       .select()
       .from(employeeLeaveRequests)
-      .where(and(eq(employeeLeaveRequests.id, id), eq(employeeLeaveRequests.employeeId, employeeId)));
+      .where(
+        and(eq(employeeLeaveRequests.id, id), eq(employeeLeaveRequests.employeeId, employeeId)),
+      );
 
     if (!existing) {
       throw new Error('Leave request not found');
@@ -392,7 +424,10 @@ export class EssRepository {
         ),
       );
 
-    const [updated] = await db.select().from(employeeLeaveRequests).where(eq(employeeLeaveRequests.id, id));
+    const [updated] = await db
+      .select()
+      .from(employeeLeaveRequests)
+      .where(eq(employeeLeaveRequests.id, id));
     return updated!;
   }
 
@@ -439,7 +474,10 @@ export class EssRepository {
       status: 'draft',
     });
 
-    const [created] = await db.select().from(employeeTimesheets).where(eq(employeeTimesheets.id, id));
+    const [created] = await db
+      .select()
+      .from(employeeTimesheets)
+      .where(eq(employeeTimesheets.id, id));
     return created!;
   }
 
@@ -554,7 +592,8 @@ export class EssRepository {
     tenantId: string;
     companyId: string;
     employeeId: string;
-    requestType: 'profile_change' | 'attendance_regularization' | 'document_request' | 'general_service';
+    requestType:
+      'profile_change' | 'attendance_regularization' | 'document_request' | 'general_service';
     subject: string;
     details: Record<string, unknown>;
   }): Promise<EmployeeRequest> {
@@ -599,11 +638,7 @@ export class EssRepository {
   }
 
   // Tasks
-  async getTasks(
-    tenantId: string,
-    companyId: string,
-    employeeId: string,
-  ): Promise<EmployeeTask[]> {
+  async getTasks(tenantId: string, companyId: string, employeeId: string): Promise<EmployeeTask[]> {
     const db = getDb();
     return db
       .select()
@@ -633,10 +668,7 @@ export class EssRepository {
       throw new Error('Task not found');
     }
 
-    await db
-      .update(employeeTasks)
-      .set({ status })
-      .where(eq(employeeTasks.id, id));
+    await db.update(employeeTasks).set({ status }).where(eq(employeeTasks.id, id));
 
     const [updated] = await db.select().from(employeeTasks).where(eq(employeeTasks.id, id));
     return updated!;
@@ -695,7 +727,9 @@ export class EssRepository {
     const [existing] = await db
       .select()
       .from(employeeNotifications)
-      .where(and(eq(employeeNotifications.id, id), eq(employeeNotifications.employeeId, employeeId)));
+      .where(
+        and(eq(employeeNotifications.id, id), eq(employeeNotifications.employeeId, employeeId)),
+      );
 
     if (!existing) {
       throw new Error('Notification not found');
@@ -706,7 +740,10 @@ export class EssRepository {
       .set({ isRead: true })
       .where(eq(employeeNotifications.id, id));
 
-    const [updated] = await db.select().from(employeeNotifications).where(eq(employeeNotifications.id, id));
+    const [updated] = await db
+      .select()
+      .from(employeeNotifications)
+      .where(eq(employeeNotifications.id, id));
     return updated!;
   }
 
@@ -768,7 +805,10 @@ export class EssRepository {
       isRead: false,
     });
 
-    const [created] = await db.select().from(employeeNotifications).where(eq(employeeNotifications.id, id));
+    const [created] = await db
+      .select()
+      .from(employeeNotifications)
+      .where(eq(employeeNotifications.id, id));
     return created!;
   }
 }

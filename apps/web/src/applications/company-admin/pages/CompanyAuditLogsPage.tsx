@@ -22,10 +22,7 @@ import {
 import { BezentIcon } from '../../../design-system/icons';
 import { useCompanyAdmin } from '../context/CompanyAdminContext';
 import { CompanyContextBar } from '../components/CompanyContextBar';
-import {
-  companyAdminApi,
-  type CompanyAuditLogItem,
-} from '../api/companyAdminApi';
+import { companyAdminApi, type CompanyAuditLogItem } from '../api/companyAdminApi';
 
 export function CompanyAuditLogsPage() {
   const { activeCompanyId, activeCompany } = useCompanyAdmin();
@@ -123,11 +120,7 @@ export function CompanyAuditLogsPage() {
                 />
               </Inline>
             }
-            right={
-              <Badge variant="neutral">
-                Records Displayed: {logs.length}
-              </Badge>
-            }
+            right={<Badge variant="neutral">Records Displayed: {logs.length}</Badge>}
           />
         </Card>
 
@@ -177,15 +170,9 @@ export function CompanyAuditLogsPage() {
                       <code>{log.ipAddress || '—'}</code>
                     </TableCell>
                     <TableCell>
-                      {log.metadata ? (
-                        <code>{JSON.stringify(log.metadata)}</code>
-                      ) : (
-                        '—'
-                      )}
+                      {log.metadata ? <code>{JSON.stringify(log.metadata)}</code> : '—'}
                     </TableCell>
-                    <TableCell>
-                      {new Date(log.createdAt).toLocaleString()}
-                    </TableCell>
+                    <TableCell>{new Date(log.createdAt).toLocaleString()}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
