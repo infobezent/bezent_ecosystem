@@ -1,6 +1,10 @@
 import { authRepository, AuthRepository } from '../repository/auth.repository.js';
 import { auditService, AuditService } from '../../audit/service/audit.service.js';
 import {
+  accessResolverService,
+  AccessResolverService,
+} from '../../access/service/accessResolver.service.js';
+import {
   generateSessionToken,
   generateSurrogateId,
   hashPassword,
@@ -17,6 +21,7 @@ export class AuthService {
   constructor(
     private readonly repo: AuthRepository = authRepository,
     private readonly audit: AuditService = auditService,
+    private readonly access: AccessResolverService = accessResolverService,
   ) {}
 
   async login(email: string, password: string): Promise<LoginResult> {
@@ -74,12 +79,19 @@ export class AuthService {
       targetId: user.id,
     });
 
-    const isCompanyAdmin = memberships.some((m) => m.role === 'company_admin');
+    // Landing destination follows the workspaces the user's effective
+    // permissions actually grant, never a role name.
+    const overview = await this.access.resolveOverview(authenticatedUser);
+    const workspaces = new Set(overview.companies.flatMap((c) => c.workspaces));
     const defaultDestination = user.isSuperAdmin
       ? '/super-admin'
-      : isCompanyAdmin
+      : workspaces.has('company_admin')
         ? '/company-admin'
-        : '/hrms/dashboard';
+        : workspaces.has('hrms')
+          ? '/hrms/dashboard'
+          : workspaces.has('ess')
+            ? '/ess'
+            : '/hrms/dashboard';
 
     return {
       token,
@@ -96,8 +108,9 @@ export class AuthService {
         actorUserId: userId,
         actorEmail: email,
         action: 'user_logged_out',
-        targetType: 'session',
-        targetId: token.substring(0, 8),
+        // Never record any part of the session token.
+        targetType: 'user',
+        targetId: userId,
       });
     }
   }

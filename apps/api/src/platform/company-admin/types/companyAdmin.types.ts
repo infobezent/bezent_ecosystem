@@ -99,13 +99,6 @@ export interface InvitationItem {
   invitedByUserId: string | null;
 }
 
-export interface RoleDefinition {
-  id: string;
-  name: string;
-  description: string;
-  permissions: string[];
-}
-
 export interface CompanyModuleStatus {
   code: ModuleCode;
   name: string;

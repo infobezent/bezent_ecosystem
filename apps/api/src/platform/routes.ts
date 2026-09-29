@@ -8,10 +8,14 @@ import { companyAdminRouter } from './company-admins/routes/companyAdmin.routes.
 import { moduleRouter } from './modules/routes/module.routes.js';
 import { userRouter } from './users/routes/user.routes.js';
 import { auditRouter } from './audit/routes/audit.routes.js';
+import { accessRouter } from './access/routes/access.routes.js';
 
 export const platformRouter = Router();
 
 platformRouter.use(authRouter);
+// Mounted before the Super Admin routers: several of them apply
+// requireSuperAdmin to every request that reaches them.
+platformRouter.use(accessRouter);
 platformRouter.use(dashboardRouter);
 platformRouter.use(tenantRouter);
 platformRouter.use(companyRouter);

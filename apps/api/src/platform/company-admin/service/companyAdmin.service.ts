@@ -24,72 +24,32 @@ import {
   BadRequestError,
   ConflictError,
 } from '../../../app/errors/AppError.js';
+import {
+  accessResolverService,
+  AccessResolverService,
+} from '../../access/service/accessResolver.service.js';
+import {
+  roleManagementService,
+  RoleManagementService,
+} from '../../access/service/roleManagement.service.js';
+import { getDb } from '../../../db/connection.js';
 import type {
   AuthorizedCompanySummary,
   CompanyAdminDashboard,
   CompanyProfile,
   UpdateCompanyProfileInput,
   InviteCompanyUserInput,
-  RoleDefinition,
   CompanyModuleStatus,
 } from '../types/companyAdmin.types.js';
 import type { ModuleCode } from '../../modules/types/module.types.js';
+import {
+  systemRoleIdForCode,
+  type SystemRoleCode,
+} from '../../access/catalog/accessCatalog.js';
+import type { AuthenticatedUser } from '../../auth/types/auth.types.js';
 
 const INVITATION_TTL_DAYS = 7;
-
-export const COMPANY_ROLES_CATALOG: RoleDefinition[] = [
-  {
-    id: 'company_admin',
-    name: 'Company Administrator',
-    description:
-      'Full administrative authority over the company, including user management, role assignments, company settings, and audit logs.',
-    permissions: [
-      'company:read',
-      'company:write',
-      'company.users:read',
-      'company.users:write',
-      'company.roles:read',
-      'company.roles:write',
-      'company.modules:read',
-      'company.modules:write',
-      'company.audit:read',
-      'company.organization:read',
-      'company.policies:read',
-    ],
-  },
-  {
-    id: 'hr_manager',
-    name: 'HR Manager',
-    description:
-      'Workforce management authority: manages employee records, onboarding workflows, document verification, and operational HR administration.',
-    permissions: [
-      'hrms.workforce:read',
-      'hrms.workforce:write',
-      'hrms.onboarding:read',
-      'hrms.onboarding:write',
-      'hrms.documents:read',
-      'hrms.documents:write',
-    ],
-  },
-  {
-    id: 'employee',
-    name: 'Employee',
-    description:
-      'Standard employee access to Employee Self-Service (ESS): personal profile view, timesheet entry, leave requests, and document viewing.',
-    permissions: [
-      'ess.profile:read',
-      'ess.documents:read',
-      'ess.requests:read',
-      'ess.requests:write',
-    ],
-  },
-  {
-    id: 'user',
-    name: 'Platform User',
-    description: 'Basic platform identity with self-service view privileges.',
-    permissions: ['platform.user:read'],
-  },
-];
+const MEMBERSHIP_ROLES: readonly SystemRoleCode[] = ['company_admin', 'hr_manager', 'employee', 'user'];
 
 export class CompanyAdminService {
   constructor(
@@ -97,13 +57,31 @@ export class CompanyAdminService {
     private readonly userRepo: PlatformUserRepository = platformUserRepository,
     private readonly moduleSvc: ModuleService = moduleService,
     private readonly audit: AuditService = auditService,
+    private readonly resolver: AccessResolverService = accessResolverService,
+    private readonly roleMgmt: RoleManagementService = roleManagementService,
   ) {}
 
-  async getAuthorizedCompanies(
-    userId: string,
-    isSuperAdmin: boolean,
-  ): Promise<AuthorizedCompanySummary[]> {
-    return this.repo.getAuthorizedCompanies(userId, isSuperAdmin);
+  /**
+   * Companies whose Company Admin workspace the user may open. Super Admin
+   * keeps platform oversight of every active company; everyone else gets the
+   * companies where their effective permissions grant the workspace.
+   */
+  async getAuthorizedCompanies(user: AuthenticatedUser): Promise<AuthorizedCompanySummary[]> {
+    if (user.isSuperAdmin) {
+      return this.repo.listActiveCompaniesForOversight();
+    }
+    const overview = await this.resolver.resolveOverview(user);
+    return overview.companies
+      .filter((c) => c.workspaces.includes('company_admin'))
+      .map((c) => ({
+        id: c.companyId,
+        name: c.companyName,
+        code: c.companyCode,
+        status: 'active' as const,
+        tenantId: c.tenantId,
+        tenantName: c.tenantName ?? '',
+        role: 'company_admin',
+      }));
   }
 
   async getDashboard(tenantId: string, companyId: string): Promise<CompanyAdminDashboard> {
@@ -231,7 +209,7 @@ export class CompanyAdminService {
     if (!input.firstName?.trim() || !input.lastName?.trim()) {
       throw new BadRequestError('First name and last name are required');
     }
-    if (!['company_admin', 'hr_manager', 'employee', 'user'].includes(input.role)) {
+    if (!MEMBERSHIP_ROLES.includes(input.role)) {
       throw new BadRequestError(`Invalid role '${input.role}'`);
     }
 
@@ -250,7 +228,7 @@ export class CompanyAdminService {
       if (existingMem) {
         // Reactivate membership with the requested role
         await this.repo.updateMembershipRole(existingMem.id, input.role);
-        await this.repo.updateMembershipStatus(existingMem.id, 'active');
+        await this.repo.updateMembershipStatusForUser(companyId, userId, 'active');
       } else {
         // Create new membership in this company
         await this.repo.createMembership({
@@ -288,6 +266,15 @@ export class CompanyAdminService {
         status: 'active',
       });
     }
+
+    // The invited role becomes a role assignment in this company (additive).
+    await this.roleMgmt.syncMembershipRole(getDb(), {
+      userId,
+      tenantId,
+      companyId,
+      role: input.role,
+      actorId: actor.id,
+    });
 
     // Generate secure invitation token
     const token = crypto.randomBytes(32).toString('hex');
@@ -332,7 +319,7 @@ export class CompanyAdminService {
     newRole: 'company_admin' | 'hr_manager' | 'employee' | 'user',
     actor: { id: string; email: string },
   ) {
-    if (!['company_admin', 'hr_manager', 'employee', 'user'].includes(newRole)) {
+    if (!MEMBERSHIP_ROLES.includes(newRole)) {
       throw new BadRequestError(`Invalid role '${newRole}'`);
     }
 
@@ -343,14 +330,24 @@ export class CompanyAdminService {
 
     // Safety rule: Cannot demote last active company admin
     if (mem.role === 'company_admin' && newRole !== 'company_admin') {
-      const activeAdminCount = await this.repo.countActiveCompanyAdmins(companyId);
-      if (activeAdminCount <= 1) {
-        throw new BadRequestError(
-          'Cannot demote the sole active Company Administrator. Assign another Company Administrator first.',
-        );
-      }
+      await this.roleMgmt.assertNotLastCompanyAdmin(
+        { tenantId, companyId },
+        systemRoleIdForCode('company_admin'),
+      );
     }
 
+    // Legacy "change role" semantics: the previous primary role is replaced.
+    // Other role assignments the user holds in this company are untouched.
+    await getDb().transaction((tx) =>
+      this.roleMgmt.syncMembershipRole(tx, {
+        userId: targetUserId,
+        tenantId,
+        companyId,
+        role: newRole,
+        previousRole: mem.role,
+        actorId: actor.id,
+      }),
+    );
     const updated = await this.repo.updateMembershipRole(mem.id, newRole);
 
     await this.audit.logEvent({
@@ -380,16 +377,17 @@ export class CompanyAdminService {
     }
 
     // Safety rule: Cannot deactivate or revoke last active company admin
-    if (mem.role === 'company_admin' && newStatus !== 'active') {
-      const activeAdminCount = await this.repo.countActiveCompanyAdmins(companyId);
-      if (activeAdminCount <= 1) {
-        throw new BadRequestError(
-          'Cannot deactivate or revoke the sole active Company Administrator.',
-        );
-      }
+    if (newStatus !== 'active') {
+      await this.roleMgmt.assertCanRemoveCompanyAccess({ tenantId, companyId }, targetUserId);
     }
 
-    const updated = await this.repo.updateMembershipStatus(mem.id, newStatus);
+    // Company access is one decision: every membership row of the user in this
+    // company changes together (legacy data may hold one row per role).
+    const updated = await this.repo.updateMembershipStatusForUser(
+      companyId,
+      targetUserId,
+      newStatus,
+    );
 
     await this.audit.logEvent({
       actorUserId: actor.id,
@@ -475,10 +473,6 @@ export class CompanyAdminService {
     });
 
     return updated;
-  }
-
-  getRoles(): RoleDefinition[] {
-    return COMPANY_ROLES_CATALOG;
   }
 
   async getModules(tenantId: string, companyId: string): Promise<CompanyModuleStatus[]> {

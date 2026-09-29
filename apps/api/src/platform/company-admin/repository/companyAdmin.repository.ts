@@ -26,32 +26,9 @@ import type {
 } from '../types/companyAdmin.types.js';
 
 export class CompanyAdminRepository {
-  async getAuthorizedCompanies(
-    userId: string,
-    isSuperAdmin: boolean,
-  ): Promise<AuthorizedCompanySummary[]> {
+  /** Every active company — platform Super Admin oversight only. */
+  async listActiveCompaniesForOversight(): Promise<AuthorizedCompanySummary[]> {
     const db = getDb();
-
-    if (isSuperAdmin) {
-      const rows = await db
-        .select({
-          id: companies.id,
-          name: companies.name,
-          code: companies.code,
-          status: companies.status,
-          tenantId: companies.tenantId,
-          tenantName: tenants.name,
-        })
-        .from(companies)
-        .innerJoin(tenants, eq(companies.tenantId, tenants.id))
-        .where(eq(companies.status, 'active'));
-
-      return rows.map((r) => ({
-        ...r,
-        role: 'super_admin',
-      }));
-    }
-
     const rows = await db
       .select({
         id: companies.id,
@@ -60,21 +37,15 @@ export class CompanyAdminRepository {
         status: companies.status,
         tenantId: companies.tenantId,
         tenantName: tenants.name,
-        role: memberships.role,
       })
-      .from(memberships)
-      .innerJoin(companies, eq(memberships.companyId, companies.id))
-      .innerJoin(tenants, eq(memberships.tenantId, tenants.id))
-      .where(
-        and(
-          eq(memberships.userId, userId),
-          eq(memberships.status, 'active'),
-          eq(memberships.role, 'company_admin'),
-          eq(companies.status, 'active'),
-        ),
-      );
+      .from(companies)
+      .innerJoin(tenants, eq(companies.tenantId, tenants.id))
+      .where(eq(companies.status, 'active'));
 
-    return rows;
+    return rows.map((r) => ({
+      ...r,
+      role: 'super_admin',
+    }));
   }
 
   async getCompanyProfile(companyId: string): Promise<Company | null> {
@@ -179,12 +150,14 @@ export class CompanyAdminRepository {
     return { items: rows, total };
   }
 
+  /** The user's membership in the company, preferring an active row when several exist. */
   async findMembership(companyId: string, userId: string) {
     const db = getDb();
     const [mem] = await db
       .select()
       .from(memberships)
-      .where(and(eq(memberships.companyId, companyId), eq(memberships.userId, userId)));
+      .where(and(eq(memberships.companyId, companyId), eq(memberships.userId, userId)))
+      .orderBy(sql`${memberships.status} = 'active' DESC`, desc(memberships.updatedAt));
     return mem ?? null;
   }
 
@@ -207,25 +180,18 @@ export class CompanyAdminRepository {
     return this.findMembershipById(membershipId);
   }
 
-  async updateMembershipStatus(membershipId: string, status: 'active' | 'inactive' | 'revoked') {
+  /** Sets the status of every membership row the user has in the company; returns one of them. */
+  async updateMembershipStatusForUser(
+    companyId: string,
+    userId: string,
+    status: 'active' | 'inactive' | 'revoked',
+  ) {
     const db = getDb();
-    await db.update(memberships).set({ status }).where(eq(memberships.id, membershipId));
-    return this.findMembershipById(membershipId);
-  }
-
-  async countActiveCompanyAdmins(companyId: string): Promise<number> {
-    const db = getDb();
-    const [res] = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(memberships)
-      .where(
-        and(
-          eq(memberships.companyId, companyId),
-          eq(memberships.role, 'company_admin'),
-          eq(memberships.status, 'active'),
-        ),
-      );
-    return Number(res?.count || 0);
+    await db
+      .update(memberships)
+      .set({ status })
+      .where(and(eq(memberships.companyId, companyId), eq(memberships.userId, userId)));
+    return this.findMembership(companyId, userId);
   }
 
   // Invitations

@@ -4,7 +4,9 @@ import {
   CompanyAdminService,
 } from '../service/companyAdmin.service.js';
 import { UnauthorizedError } from '../../../app/errors/AppError.js';
+import { roleManagementService } from '../../access/service/roleManagement.service.js';
 import type { ModuleCode } from '../../modules/types/module.types.js';
+import type { SystemRoleCode } from '../../access/catalog/accessCatalog.js';
 
 export class CompanyAdminController {
   constructor(private readonly service: CompanyAdminService = companyAdminService) {}
@@ -12,10 +14,7 @@ export class CompanyAdminController {
   getAuthorizedCompanies = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user) throw new UnauthorizedError('Authentication required');
-      const companies = await this.service.getAuthorizedCompanies(
-        req.user.id,
-        req.user.isSuperAdmin,
-      );
+      const companies = await this.service.getAuthorizedCompanies(req.user);
       res.json({ data: companies });
     } catch (err) {
       next(err);
@@ -86,6 +85,7 @@ export class CompanyAdminController {
     try {
       const { tenantId, companyId } = req.companyContext!;
       const actor = { id: req.user!.id, email: req.user!.email };
+      assertCanGrantRequestedRole(req, req.body?.role);
       const result = await this.service.inviteUser(
         tenantId,
         companyId,
@@ -104,6 +104,7 @@ export class CompanyAdminController {
       const userId = String(req.params.userId);
       const { role } = req.body;
       const actor = { id: req.user!.id, email: req.user!.email };
+      assertCanGrantRequestedRole(req, role);
       const result = await this.service.updateUserRole(
         tenantId,
         companyId,
@@ -197,11 +198,6 @@ export class CompanyAdminController {
     }
   };
 
-  getRoles = async (_req: Request, res: Response) => {
-    const roles = this.service.getRoles();
-    res.json({ data: roles });
-  };
-
   getModules = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { tenantId, companyId } = req.companyContext!;
@@ -272,6 +268,16 @@ export class CompanyAdminController {
       next(err);
     }
   };
+}
+
+/**
+ * A role granted through invitation or the legacy role change must not carry
+ * administration permissions the actor lacks, nor belong to a disabled
+ * application. Malformed roles are left to the service's own validation.
+ */
+function assertCanGrantRequestedRole(req: Request, role: unknown): void {
+  if (typeof role !== 'string' || !req.access) return;
+  roleManagementService.assertCanGrantSystemRole(req.access, role as SystemRoleCode);
 }
 
 export const companyAdminController = new CompanyAdminController();

@@ -4,6 +4,8 @@ import { platformUserRepository, PlatformUserRepository } from '../../users/repo
 import { companyRepository, CompanyRepository } from '../../companies/repository/company.repository.js';
 import { tenantRepository, TenantRepository } from '../../tenants/repository/tenant.repository.js';
 import { auditService, AuditService } from '../../audit/service/audit.service.js';
+import { roleManagementService } from '../../access/service/roleManagement.service.js';
+import { getDb } from '../../../db/connection.js';
 import { NotFoundError, BadRequestError } from '../../../app/errors/AppError.js';
 import type {
   AssignCompanyAdminDto,
@@ -96,6 +98,13 @@ export class CompanyAdminService {
     }
 
     const membershipId = await this.repo.createMembership(dto.tenantId, dto.companyId, targetUserId);
+    await roleManagementService.syncMembershipRole(getDb(), {
+      userId: targetUserId,
+      tenantId: dto.tenantId,
+      companyId: dto.companyId,
+      role: 'company_admin',
+      actorId: actor?.id ?? null,
+    });
     const assignedUser = await this.userRepo.findById(targetUserId);
 
     await this.audit.logEvent({
@@ -144,6 +153,13 @@ export class CompanyAdminService {
     }
 
     await this.repo.revokeMembership(membershipId);
+    await roleManagementService.revokeSystemRole(getDb(), {
+      userId: membership.userId,
+      tenantId: membership.tenantId,
+      companyId: membership.companyId,
+      role: 'company_admin',
+      actorId: actor?.id ?? null,
+    });
 
     await this.audit.logEvent({
       actorUserId: actor?.id,

@@ -16,6 +16,7 @@ import {
   tenantDetails,
   users,
   memberships,
+  roleAssignments,
   tenantModules,
   employeeLeaveBalances,
   employeeTasks,
@@ -650,6 +651,18 @@ export async function seedDatabase() {
       status: 'active',
     });
   }
+  // Company Admin role assignment (ADR-017; authorization reads role_assignments)
+  await db
+    .insert(roleAssignments)
+    .values({
+      id: 'ra_ca_demo_01',
+      userId: companyAdminUserId,
+      roleId: 'role_sys_company_admin',
+      tenantId,
+      companyId,
+      status: 'active',
+    })
+    .onDuplicateKeyUpdate({ set: { status: 'active' } });
 
   // 12. Default HRMS Module Entitlement
   const existingModule = await db
@@ -708,6 +721,17 @@ export async function seedDatabase() {
       status: 'active',
     });
   }
+  await db
+    .insert(roleAssignments)
+    .values({
+      id: 'ra_emp_arjun_01',
+      userId: empUserId,
+      roleId: 'role_sys_employee',
+      tenantId,
+      companyId,
+      status: 'active',
+    })
+    .onDuplicateKeyUpdate({ set: { status: 'active' } });
 
   // Initial Leave Balances for 2026
   const existingLeaveBal = await db

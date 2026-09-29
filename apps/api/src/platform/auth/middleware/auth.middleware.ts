@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { eq, and, or, sql } from 'drizzle-orm';
+import { eq, and, or, sql, isNull } from 'drizzle-orm';
 import { authService } from '../service/auth.service.js';
 import {
   UnauthorizedError,
@@ -10,6 +10,7 @@ import {
 import { getDb } from '../../../db/connection.js';
 import { companies, tenants, employees } from '../../../db/schema.js';
 import type { AuthenticatedUser } from '../types/auth.types.js';
+import { moduleService } from '../../modules/service/module.service.js';
 
 export interface EmployeeContext {
   id: string;
@@ -37,7 +38,6 @@ declare global {
       companyContext?: {
         tenantId: string;
         companyId: string;
-        role: string;
       };
       employeeContext?: EmployeeContext;
     }
@@ -75,72 +75,6 @@ export function requireSuperAdmin(req: Request, _res: Response, next: NextFuncti
   }
 
   next();
-}
-
-export async function requireCompanyAdmin(req: Request, _res: Response, next: NextFunction) {
-  try {
-    if (!req.user) {
-      throw new UnauthorizedError('Authentication required');
-    }
-
-    const rawCompanyId =
-      req.headers['x-company-id'] || req.params.companyId || req.query.companyId;
-
-    if (!rawCompanyId) {
-      throw new BadRequestError('Active company context (X-Company-Id header) is required');
-    }
-
-    const companyId: string =
-      typeof rawCompanyId === 'string'
-        ? rawCompanyId
-        : Array.isArray(rawCompanyId)
-          ? String(rawCompanyId[0])
-          : String(rawCompanyId);
-
-    const membership = req.user.memberships.find(
-      (m) => m.companyId === companyId && m.status === 'active',
-    );
-
-    if (!req.user.isSuperAdmin && (!membership || membership.role !== 'company_admin')) {
-      throw new ForbiddenError(
-        'Company Admin authorization required for this company',
-        'FORBIDDEN_COMPANY_ADMIN',
-      );
-    }
-
-    const db = getDb();
-    const [comp] = await db.select().from(companies).where(eq(companies.id, companyId));
-    if (!comp) {
-      throw new NotFoundError(`Company '${companyId}' not found`);
-    }
-    if (comp.status === 'suspended') {
-      throw new ForbiddenError(
-        'Company account is suspended. Please contact platform administration.',
-        'COMPANY_SUSPENDED',
-      );
-    }
-
-    const [tent] = await db.select().from(tenants).where(eq(tenants.id, comp.tenantId));
-    if (!tent) {
-      throw new NotFoundError(`Tenant '${comp.tenantId}' not found`);
-    }
-    if (tent.status === 'suspended') {
-      throw new ForbiddenError(
-        'Tenant organization is suspended. Please contact platform administration.',
-        'TENANT_SUSPENDED',
-      );
-    }
-
-    req.companyContext = {
-      tenantId: comp.tenantId,
-      companyId: comp.id,
-      role: req.user.isSuperAdmin ? 'super_admin' : membership!.role,
-    };
-
-    next();
-  } catch (err) {
-    next(err);
-  }
 }
 
 /**
@@ -182,10 +116,23 @@ export async function requireEssAuth(req: Request, _res: Response, next: NextFun
       }
     }
 
+    // A client-supplied company is only honoured when the user holds an active
+    // membership in it (req.user.memberships contains active rows only).
+    const membership = req.user.memberships.find((m) => m.companyId === companyId);
+    if (!membership) {
+      throw new ForbiddenError(
+        'No active membership in the selected company',
+        'FORBIDDEN_COMPANY_ACCESS',
+      );
+    }
+
     const db = getDb();
     const [comp] = await db.select().from(companies).where(eq(companies.id, companyId));
-    if (!comp) {
-      throw new NotFoundError(`Company '${companyId}' not found`);
+    if (!comp || comp.tenantId !== membership.tenantId) {
+      throw new ForbiddenError(
+        'No active membership in the selected company',
+        'FORBIDDEN_COMPANY_ACCESS',
+      );
     }
     if (comp.status === 'suspended') {
       throw new ForbiddenError(
@@ -205,16 +152,22 @@ export async function requireEssAuth(req: Request, _res: Response, next: NextFun
       );
     }
 
-    // Resolve Employee record in this company
+    // Resolve the Employee record in this company. An email match is only a
+    // candidate for an UNLINKED record; a record already linked to another
+    // User is never claimable by email.
     const [emp] = await db
       .select()
       .from(employees)
       .where(
         and(
+          eq(employees.tenantId, comp.tenantId),
           eq(employees.companyId, companyId),
           or(
             eq(employees.userId, req.user.id),
-            eq(sql`LOWER(${employees.email})`, req.user.email.toLowerCase()),
+            and(
+              isNull(employees.userId),
+              eq(sql`LOWER(${employees.email})`, req.user.email.toLowerCase()),
+            ),
           ),
         ),
       );
@@ -233,18 +186,23 @@ export async function requireEssAuth(req: Request, _res: Response, next: NextFun
       );
     }
 
-    // If userId was not linked yet, establish IAM bridge
+    // ESS is an HRMS experience: it follows the HRMS entitlement.
+    if (!(await moduleService.isModuleEnabled(comp.tenantId, 'hrms', comp.id))) {
+      throw new ForbiddenError('HRMS is not enabled for this company', 'MODULE_DISABLED');
+    }
+
+    // If userId was not linked yet, establish IAM bridge. The IS NULL guard
+    // keeps a concurrent link by another User from being overwritten.
     if (!emp.userId) {
       await db
         .update(employees)
         .set({ userId: req.user.id })
-        .where(eq(employees.id, emp.id));
+        .where(and(eq(employees.id, emp.id), isNull(employees.userId)));
     }
 
     req.companyContext = {
       tenantId: comp.tenantId,
       companyId: comp.id,
-      role: 'employee',
     };
 
     req.employeeContext = {

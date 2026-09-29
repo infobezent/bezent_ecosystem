@@ -1062,6 +1062,113 @@ export type Membership = typeof memberships.$inferSelect;
 export type NewMembership = typeof memberships.$inferInsert;
 
 /**
+ * Platform: Roles (ADR-017)
+ * A role is a named collection of permissions. System roles ship with BEZENT
+ * (tenant_id / company_id NULL, is_system = true, permissions defined in code);
+ * custom roles belong to one company and keep their permissions in
+ * `role_permissions`. `code` is the stable internal identifier.
+ * No hard delete while assigned: roles are deactivated through `status`.
+ */
+export const roles = mysqlTable(
+  'roles',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }),
+    companyId: varchar('company_id', { length: 64 }).references(() => companies.id),
+    code: varchar('code', { length: 64 }).notNull(),
+    name: varchar('name', { length: 100 }).notNull(),
+    description: varchar('description', { length: 500 }),
+    /** Business application the role belongs to; NULL = company administration. */
+    moduleCode: mysqlEnum('module_code', ['hrms', 'crm', 'project_management']),
+    isSystem: boolean('is_system').default(false).notNull(),
+    status: mysqlEnum('status', ['active', 'inactive']).default('active').notNull(),
+    createdBy: varchar('created_by', { length: 64 }),
+    updatedBy: varchar('updated_by', { length: 64 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_roles_tenant_company').on(table.tenantId, table.companyId),
+    uniqueIndex('idx_roles_company_code').on(table.tenantId, table.companyId, table.code),
+  ],
+);
+
+export type Role = typeof roles.$inferSelect;
+export type NewRole = typeof roles.$inferInsert;
+
+/**
+ * Platform: Custom Role Permissions (ADR-017)
+ * Maps a company custom role to permission identifiers from the code-defined
+ * catalog. Hard delete: rows are replaced as a set when a role is edited;
+ * the change itself is recorded in audit_logs.
+ */
+export const rolePermissions = mysqlTable(
+  'role_permissions',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    roleId: varchar('role_id', { length: 64 })
+      .notNull()
+      .references(() => roles.id),
+    permissionId: varchar('permission_id', { length: 100 }).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_role_permissions_tenant_company').on(table.tenantId, table.companyId),
+    uniqueIndex('idx_role_permissions_role_perm').on(table.roleId, table.permissionId),
+  ],
+);
+
+export type RolePermission = typeof rolePermissions.$inferSelect;
+export type NewRolePermission = typeof rolePermissions.$inferInsert;
+
+/**
+ * Platform: Role Assignments (ADR-017)
+ * Grants a role to a User within exactly one company. A User may hold many
+ * roles per company; a role held in one company never applies to another.
+ * Revocation is a status change (kept as access history).
+ */
+export const roleAssignments = mysqlTable(
+  'role_assignments',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    userId: varchar('user_id', { length: 64 })
+      .notNull()
+      .references(() => users.id),
+    roleId: varchar('role_id', { length: 64 })
+      .notNull()
+      .references(() => roles.id),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    status: mysqlEnum('status', ['active', 'revoked']).default('active').notNull(),
+    assignedBy: varchar('assigned_by', { length: 64 }),
+    revokedBy: varchar('revoked_by', { length: 64 }),
+    revokedAt: timestamp('revoked_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_role_assignments_tenant_company').on(table.tenantId, table.companyId),
+    index('idx_role_assignments_user').on(table.userId),
+    index('idx_role_assignments_role').on(table.roleId),
+    uniqueIndex('idx_role_assignments_user_company_role').on(
+      table.userId,
+      table.companyId,
+      table.roleId,
+    ),
+  ],
+);
+
+export type RoleAssignment = typeof roleAssignments.$inferSelect;
+export type NewRoleAssignment = typeof roleAssignments.$inferInsert;
+
+/**
  * Platform: Company User Invitations
  * Manages secure, expiring tokens for inviting users to specific companies.
  */

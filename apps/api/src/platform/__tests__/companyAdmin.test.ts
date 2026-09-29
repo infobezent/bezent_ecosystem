@@ -8,6 +8,7 @@ import {
   companies,
   users,
   memberships,
+  roleAssignments,
 } from '../../db/schema.js';
 import { hashPassword } from '../auth/security.js';
 import { authService } from '../auth/service/auth.service.js';
@@ -84,6 +85,14 @@ describe('Company Admin Platform Subsystem (Phase 2)', () => {
       role: 'company_admin',
       status: 'active',
     }).onDuplicateKeyUpdate({ set: { status: 'active', role: 'company_admin' } });
+    await db.insert(roleAssignments).values({
+      id: 'ra_ca_test_a',
+      userId: userAId,
+      roleId: 'role_sys_company_admin',
+      tenantId: tenantAId,
+      companyId: companyAId,
+      status: 'active',
+    }).onDuplicateKeyUpdate({ set: { status: 'active' } });
 
     const caLogin = await authService.login('admin_a@alpha.example', 'CompanyAdmin2026!');
     companyAdminAToken = caLogin.token;
@@ -110,6 +119,14 @@ describe('Company Admin Platform Subsystem (Phase 2)', () => {
       role: 'employee',
       status: 'active',
     }).onDuplicateKeyUpdate({ set: { status: 'active', role: 'employee' } });
+    await db.insert(roleAssignments).values({
+      id: 'ra_ca_test_emp',
+      userId: userEmpId,
+      roleId: 'role_sys_employee',
+      tenantId: tenantAId,
+      companyId: companyAId,
+      status: 'active',
+    }).onDuplicateKeyUpdate({ set: { status: 'active' } });
 
     const empLogin = await authService.login('employee_a@alpha.example', 'Employee2026!');
     ordinaryEmployeeToken = empLogin.token;

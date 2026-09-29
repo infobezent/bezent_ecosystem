@@ -13,6 +13,7 @@ import { tenantRepository, TenantRepository } from '../../tenants/repository/ten
 import { companyRepository, CompanyRepository } from '../../companies/repository/company.repository.js';
 import { platformUserRepository, PlatformUserRepository } from '../../users/repository/user.repository.js';
 import { auditService, AuditService } from '../../audit/service/audit.service.js';
+import { roleManagementService } from '../../access/service/roleManagement.service.js';
 import { ConflictError, BadRequestError } from '../../../app/errors/AppError.js';
 import { generateSurrogateId, hashPassword } from '../../auth/security.js';
 import type { CustomerProvisioningDto, ProvisioningResult } from '../types/provisioning.types.js';
@@ -146,6 +147,13 @@ export class CustomerProvisioningService {
         userId: targetUserId!,
         role: 'company_admin',
         status: 'active',
+      });
+      await roleManagementService.syncMembershipRole(tx, {
+        userId: targetUserId!,
+        tenantId,
+        companyId,
+        role: 'company_admin',
+        actorId: actor?.id ?? null,
       });
     });
 

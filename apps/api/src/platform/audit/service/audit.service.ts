@@ -1,14 +1,16 @@
 import { auditRepository, AuditRepository } from '../repository/audit.repository.js';
 import type { AuditEventInput, AuditLogFilter, AuditLogRecord } from '../types/audit.types.js';
 
+// Compared against the lower-cased key, so every entry must be lower case.
 const SENSITIVE_KEYS = new Set([
   'password',
-  'passwordHash',
+  'passwordhash',
   'password_hash',
   'salt',
   'token',
-  'accessToken',
-  'refreshToken',
+  'accesstoken',
+  'refreshtoken',
+  'sessiontoken',
   'secret',
   'authorization',
   'apikey',

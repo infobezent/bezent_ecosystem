@@ -120,6 +120,13 @@
       "when": 1790750000000,
       "tag": "0016_employee_self_service",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "5",
+      "when": 1790800000000,
+      "tag": "0017_enterprise_rbac",
+      "breakpoints": true
     }
   ]
 }

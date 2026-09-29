@@ -39,7 +39,8 @@ export const ESS_NAV_DESTINATIONS: readonly NavDestination[] = [
     icon: 'dashboard',
     segment: 'dashboard',
     subtitle: 'My Personal Overview',
-    description: 'Punch in/out, today's attendance, leave balances, notifications and pending tasks.',
+    description:
+      "Punch in/out, today's attendance, leave balances, notifications and pending tasks.",
     categoryId: 'my-workspace',
     sidebar: true,
   },
@@ -49,7 +50,8 @@ export const ESS_NAV_DESTINATIONS: readonly NavDestination[] = [
     icon: 'employees',
     segment: 'profile',
     subtitle: 'Personal & Employment Details',
-    description: 'View and update personal information, emergency contacts, bank account and skills.',
+    description:
+      'View and update personal information, emergency contacts, bank account and skills.',
     categoryId: 'my-workspace',
     sidebar: true,
   },
@@ -61,7 +63,8 @@ export const ESS_NAV_DESTINATIONS: readonly NavDestination[] = [
     icon: 'attendance',
     segment: 'attendance',
     subtitle: 'Daily Attendance Log',
-    description: 'View today's punch status, attendance history and submit regularization requests.',
+    description:
+      "View today's punch status, attendance history and submit regularization requests.",
     categoryId: 'time-attendance',
     sidebar: true,
   },
@@ -71,7 +74,8 @@ export const ESS_NAV_DESTINATIONS: readonly NavDestination[] = [
     icon: 'leave',
     segment: 'leave',
     subtitle: 'Leave Balances & Requests',
-    description: 'Apply for leave, view remaining balance, manage requests and view holiday calendar.',
+    description:
+      'Apply for leave, view remaining balance, manage requests and view holiday calendar.',
     categoryId: 'time-attendance',
     sidebar: true,
   },
@@ -81,7 +85,8 @@ export const ESS_NAV_DESTINATIONS: readonly NavDestination[] = [
     icon: 'timesheets',
     segment: 'timesheets',
     subtitle: 'Work Hours Log',
-    description: 'Log daily work hours against projects, review submitted timesheets and submit drafts.',
+    description:
+      'Log daily work hours against projects, review submitted timesheets and submit drafts.',
     categoryId: 'time-attendance',
     sidebar: true,
   },
@@ -93,7 +98,8 @@ export const ESS_NAV_DESTINATIONS: readonly NavDestination[] = [
     icon: 'documents',
     segment: 'documents',
     subtitle: 'Personal Document Vault',
-    description: 'Upload and track personal identity, address proof, education and employment documents.',
+    description:
+      'Upload and track personal identity, address proof, education and employment documents.',
     categoryId: 'my-services',
     sidebar: true,
   },
@@ -103,7 +109,8 @@ export const ESS_NAV_DESTINATIONS: readonly NavDestination[] = [
     icon: 'requests',
     segment: 'requests',
     subtitle: 'Service Request Ledger',
-    description: 'Track all personal HR requests including profile changes and general service requests.',
+    description:
+      'Track all personal HR requests including profile changes and general service requests.',
     categoryId: 'my-services',
     sidebar: true,
   },
@@ -125,7 +132,8 @@ export const ESS_NAV_DESTINATIONS: readonly NavDestination[] = [
     icon: 'tasks',
     segment: 'tasks',
     subtitle: 'Assigned Action Items',
-    description: 'View tasks assigned to you, update statuses from pending to in progress to completed.',
+    description:
+      'View tasks assigned to you, update statuses from pending to in progress to completed.',
     categoryId: 'productivity',
     sidebar: true,
   },
@@ -135,7 +143,8 @@ export const ESS_NAV_DESTINATIONS: readonly NavDestination[] = [
     icon: 'notifications',
     segment: 'notifications',
     subtitle: 'Personal Alerts',
-    description: 'Stay up to date with attendance confirmations, leave updates and HR announcements.',
+    description:
+      'Stay up to date with attendance confirmations, leave updates and HR announcements.',
     categoryId: 'productivity',
     sidebar: true,
   },

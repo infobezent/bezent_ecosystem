@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import { EssService } from '../service/ess.service.js';
+import { AppError } from '../../../../app/errors/AppError.js';
 
 export class EssController {
   constructor(private readonly service: EssService = new EssService()) {}
@@ -87,7 +88,7 @@ export class EssController {
 
   cancelLeave = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await this.service.cancelLeave(req.employeeContext!, req.params.id);
+      const result = await this.service.cancelLeave(req.employeeContext!, requireRecordId(req));
       res.status(200).json({ data: result });
     } catch (err) {
       next(err);
@@ -150,7 +151,7 @@ export class EssController {
 
   cancelRequest = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await this.service.cancelRequest(req.employeeContext!, req.params.id);
+      const result = await this.service.cancelRequest(req.employeeContext!, requireRecordId(req));
       res.status(200).json({ data: result });
     } catch (err) {
       next(err);
@@ -170,7 +171,7 @@ export class EssController {
     try {
       const result = await this.service.updateTaskStatus(
         req.employeeContext!,
-        req.params.id,
+        requireRecordId(req),
         req.body?.status,
       );
       res.status(200).json({ data: result });
@@ -190,7 +191,10 @@ export class EssController {
 
   markNotificationRead = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await this.service.markNotificationRead(req.employeeContext!, req.params.id);
+      const result = await this.service.markNotificationRead(
+        req.employeeContext!,
+        requireRecordId(req),
+      );
       res.status(200).json({ data: result });
     } catch (err) {
       next(err);
@@ -214,6 +218,15 @@ export class EssController {
       next(err);
     }
   };
+}
+
+function requireRecordId(req: Request): string {
+  const rawId = req.params.id;
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
+  if (!id) {
+    throw new AppError('Record ID is required', 400, 'VALIDATION_ERROR');
+  }
+  return id;
 }
 
 export const essController = new EssController();

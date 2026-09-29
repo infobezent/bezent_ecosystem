@@ -92,27 +92,54 @@ export class ModuleService {
       return moduleCode === 'hrms';
     }
 
-    // Check company-specific entitlement if companyId provided
-    if (companyId) {
-      const companyEntitlement = await this.repo.findEntitlement(tenantId, moduleCode, companyId);
-      if (companyEntitlement) {
-        return companyEntitlement.status === 'enabled';
+    const tenantEntitlement = await this.repo.findEntitlement(tenantId, moduleCode, null);
+    const companyEntitlement = companyId
+      ? await this.repo.findEntitlement(tenantId, moduleCode, companyId)
+      : null;
+    return evaluateEntitlement(moduleCode, tenantEntitlement, companyEntitlement);
+  }
+
+  /** Every module enabled for a company, from one query. Suspended tenants get none. */
+  async getEnabledModules(tenantId: string, companyId: string): Promise<Set<ModuleCode>> {
+    const enabled = new Set<ModuleCode>();
+    const tenant = await this.tenantRepo.findById(tenantId);
+    if (!tenant || tenant.status === 'suspended') {
+      return enabled;
+    }
+
+    const records = await this.repo.listByTenant(tenantId);
+    for (const item of MODULE_CATALOG) {
+      const tenantRecord =
+        records.find((r) => r.moduleCode === item.code && r.companyId === null) ?? null;
+      const companyRecord =
+        records.find((r) => r.moduleCode === item.code && r.companyId === companyId) ?? null;
+      if (evaluateEntitlement(item.code, tenantRecord, companyRecord)) {
+        enabled.add(item.code);
       }
     }
+    return enabled;
+  }
+}
 
-    // Fall back to tenant-wide entitlement
-    const tenantEntitlement = await this.repo.findEntitlement(tenantId, moduleCode, null);
-    if (tenantEntitlement) {
-      return tenantEntitlement.status === 'enabled';
-    }
-
-    // For backwards-compatibility with un-entitled tenants: HRMS defaults to enabled if no explicit record
-    if (moduleCode === 'hrms') {
-      return true;
-    }
-
+/**
+ * The tenant-wide (platform-controlled) entitlement is the ceiling. HRMS
+ * defaults to entitled when no tenant record exists (backwards compatibility);
+ * every other module requires an explicit enabled record. A company-level
+ * record may only narrow the tenant entitlement, never widen it.
+ */
+function evaluateEntitlement(
+  moduleCode: ModuleCode,
+  tenantRecord: TenantModuleRecord | null,
+  companyRecord: TenantModuleRecord | null,
+): boolean {
+  const tenantEntitled =
+    moduleCode === 'hrms'
+      ? tenantRecord?.status !== 'disabled'
+      : tenantRecord?.status === 'enabled';
+  if (!tenantEntitled) {
     return false;
   }
+  return companyRecord ? companyRecord.status === 'enabled' : true;
 }
 
 export const moduleService = new ModuleService();
