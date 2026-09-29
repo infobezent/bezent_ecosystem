@@ -29,7 +29,7 @@ function DraggableToolboxItem({
   disabled?: boolean;
   onAdd: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, isDragging, transform } = useDraggable({
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `toolbox-${item.type}`,
     disabled,
     data: {
@@ -39,23 +39,12 @@ function DraggableToolboxItem({
     },
   });
 
-  // UI-RULES Rule 1 exception: live runtime transform during drag
-  const dragStyle = transform
-    ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-        opacity: isDragging ? 0.6 : 1,
-        zIndex: 999,
-      }
-    : undefined;
-
   return (
     <div
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      // eslint-disable-next-line no-restricted-syntax
-      style={dragStyle}
-      className={`bezent-toolbox-item ${disabled ? 'is-disabled' : ''}`.trim()}
+      className={`bezent-toolbox-item ${disabled ? 'is-disabled' : ''} ${isDragging ? 'is-dragging' : ''}`.trim()}
       onClick={disabled ? undefined : onAdd}
       title={
         disabled

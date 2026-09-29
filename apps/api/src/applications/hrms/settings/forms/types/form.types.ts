@@ -73,6 +73,7 @@ export interface FormFieldConfig {
   maxSizeMb?: number;
   /** reference (system fields only) */
   entity?: 'employee';
+  groupKey?: string;
 }
 
 // ── System definitions (code) ──────────────────────────────────────────────
@@ -97,6 +98,7 @@ export interface SystemFieldDefinition {
 export interface SystemSectionDefinition {
   key: string;
   label: string;
+  description?: string | null;
   /**
    * Companies may customise this section in the current release: override its
    * system fields, reorder them, and add custom fields. Section order itself
@@ -144,9 +146,33 @@ export interface CustomFieldDefinition {
   config: FormFieldConfig;
 }
 
+export interface FormCustomizationSectionMeta {
+  title?: string;
+  description?: string;
+  visible?: boolean;
+  order?: number;
+}
+
+export interface CustomSectionDefinition {
+  key: string;
+  title: string;
+  description?: string | null;
+  visible?: boolean;
+  order?: number;
+}
+
+export interface FormCustomizationMetadata {
+  sections?: Record<string, FormCustomizationSectionMeta>;
+  subgroups?: Record<string, { title?: string; description?: string }>;
+  fieldSubgroups?: Record<string, string>;
+  customSections?: CustomSectionDefinition[];
+  sectionOrder?: string[];
+}
+
 export interface FormCustomizationState {
   /** 0 when the company has never saved this form. */
   version: number;
+  metadata?: FormCustomizationMetadata;
   overrides: FormFieldOverrideValues[];
   customFields: CustomFieldDefinition[];
 }
@@ -154,6 +180,7 @@ export interface FormCustomizationState {
 export interface FormOverridesDto {
   formKey: string;
   version: number;
+  metadata?: FormCustomizationMetadata;
   fields: (FormFieldOverrideValues & { updatedAt: string })[];
   customFields: (CustomFieldDefinition & { updatedAt: string })[];
 }
@@ -188,6 +215,10 @@ export interface FormFieldInput {
 
 export interface FormSectionInput {
   key: string;
+  label?: string;
+  description?: string | null;
+  visible?: boolean;
+  order?: number;
   fields: FormFieldInput[];
 }
 
@@ -199,6 +230,7 @@ export interface FormSectionInput {
 export interface SaveFormDefinitionDto {
   /** The version the editor loaded (optimistic concurrency). */
   version: number;
+  metadata?: FormCustomizationMetadata;
   sections: FormSectionInput[];
 }
 
@@ -229,10 +261,13 @@ export interface ResolvedFormField {
 export interface ResolvedFormSection {
   key: string;
   label: string;
+  description?: string | null;
   /** 1-based position within the form. */
   order: number;
   origin: FormElementOrigin;
   configurable: boolean;
+  visible?: boolean;
+  protected?: boolean;
   fields: ResolvedFormField[];
 }
 
@@ -245,6 +280,7 @@ export interface ResolvedForm {
     status: FormStatus;
     /** The company's customisation version (0 = never saved); send it back when saving. */
     version: number;
+    metadata?: FormCustomizationMetadata;
   };
   sections: ResolvedFormSection[];
 }

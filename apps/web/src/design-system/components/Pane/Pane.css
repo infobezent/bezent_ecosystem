@@ -555,3 +555,79 @@
   border-radius: var(--radius-sm, 6px);
 }
 
+/* ─── Drag & Drop Interaction Styles ───────────────────────────────────────── */
+
+.bezent-toolbox-item.is-dragging {
+  opacity: 0.35;
+}
+
+.bezent-canvas-field-wrapper.is-drop-target {
+  outline: 2px dashed var(--accent-interactive, #1a73e8);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm, 6px);
+}
+
+.bezent-subgroup-dropzone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  margin-top: 10px;
+  border: 1px dashed var(--border-subtle, #e2e8f0);
+  border-radius: var(--radius-sm, 6px);
+  color: var(--text-muted, #94a3b8);
+  font-size: 11px;
+  font-weight: 500;
+  transition: all 120ms ease;
+  user-select: none;
+  min-height: 32px;
+}
+
+.bezent-subgroup-dropzone:hover,
+.bezent-subgroup-dropzone.is-over {
+  border-color: var(--accent-interactive, #1a73e8);
+  background-color: var(--color-primary-light, #eff6ff);
+  color: var(--accent-interactive, #1a73e8);
+}
+
+.bezent-subgroup-dropzone__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bezent-drag-overlay-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--bg-surface, #ffffff);
+  border: 1.5px solid var(--accent-interactive, #1a73e8);
+  border-radius: var(--radius-sm, 6px);
+  padding: 6px 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  cursor: grabbing;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary, #0f172a);
+}
+
+.bezent-canvas-subgroup {
+  padding: 8px;
+  border-radius: var(--radius-md, 8px);
+  transition: all 150ms ease;
+}
+
+.bezent-canvas-subgroup.is-selected {
+  background-color: var(--color-primary-light, #f0f7ff);
+  box-shadow: 0 0 0 1.5px var(--accent-interactive, #1a73e8);
+}
+
+.bezent-subgroup-dropzone--empty {
+  padding: 24px 16px;
+  min-height: 52px;
+  background-color: var(--bg-surface, #ffffff);
+  border-style: dashed;
+  border-width: 1.5px;
+}
+
+

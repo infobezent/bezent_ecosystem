@@ -19,6 +19,7 @@ import {
   fetchRegistrationConfiguration,
   type RegistrationConfiguration,
   type RegistrationFieldConfig,
+  type RegistrationSectionConfig,
 } from '../../settings/api/registrationSettingsApi';
 
 /**
@@ -53,7 +54,8 @@ export function findMissingRequiredFields(
     .map((field) => field.key);
 }
 
-interface RegistrationConfigContextValue {
+export interface RegistrationConfigContextValue {
+  sections: RegistrationSectionConfig[];
   field: (key: string) => RegistrationFieldConfig | undefined;
   customFields: (sectionId: string) => RegistrationFieldConfig[];
   /** Records a rendered field's current value (for validation). */
@@ -120,6 +122,7 @@ export function RegistrationConfigProvider({
 
   const context = useMemo<RegistrationConfigContextValue>(
     () => ({
+      sections: configuration.sections,
       field: (key) => byKey.get(key),
       customFields: (sectionId) => customFieldsBySection.get(sectionId) ?? [],
       reportValue,
@@ -127,7 +130,7 @@ export function RegistrationConfigProvider({
       validateSection,
       hasError: (key) => errorKeys.has(key),
     }),
-    [byKey, customFieldsBySection, reportValue, removeValue, validateSection, errorKeys],
+    [configuration.sections, byKey, customFieldsBySection, reportValue, removeValue, validateSection, errorKeys],
   );
 
   return (

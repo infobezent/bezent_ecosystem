@@ -50,6 +50,7 @@ export interface FormFieldConfig {
   disallowFuture?: boolean;
   maxSizeMb?: number;
   entity?: 'employee';
+  groupKey?: string;
 }
 
 export interface ResolvedFormField {
@@ -70,12 +71,38 @@ export interface ResolvedFormField {
   overridden: boolean;
 }
 
+export interface FormCustomizationSectionMeta {
+  title?: string;
+  description?: string;
+  visible?: boolean;
+  order?: number;
+}
+
+export interface CustomSectionDefinition {
+  key: string;
+  title: string;
+  description?: string | null;
+  visible?: boolean;
+  order?: number;
+}
+
+export interface FormCustomizationMetadata {
+  sections?: Record<string, FormCustomizationSectionMeta>;
+  subgroups?: Record<string, { title?: string; description?: string }>;
+  fieldSubgroups?: Record<string, string>;
+  customSections?: CustomSectionDefinition[];
+  sectionOrder?: string[];
+}
+
 export interface ResolvedFormSection {
   key: string;
   label: string;
+  description?: string | null;
   order: number;
   origin: FormElementOrigin;
   configurable: boolean;
+  visible?: boolean;
+  protected?: boolean;
   fields: ResolvedFormField[];
 }
 
@@ -87,6 +114,7 @@ export interface ResolvedForm {
     kind: FormKind;
     status: FormStatus;
     version: number;
+    metadata?: FormCustomizationMetadata;
   };
   sections: ResolvedFormSection[];
 }
@@ -112,11 +140,16 @@ export interface FormFieldInput {
 
 export interface FormSectionInput {
   key: string;
+  label?: string;
+  description?: string | null;
+  visible?: boolean;
+  order?: number;
   fields: FormFieldInput[];
 }
 
 export interface SaveFormDefinitionDto {
   version: number;
+  metadata?: FormCustomizationMetadata;
   sections: FormSectionInput[];
 }
 

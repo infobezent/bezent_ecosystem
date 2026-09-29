@@ -10,6 +10,7 @@ import {
 import { ConflictError } from '../../../../../app/errors/AppError.js';
 import type {
   CustomFieldDefinition,
+  FormCustomizationMetadata,
   FormCustomizationState,
   FormFieldConfig,
   FormFieldOverrideValues,
@@ -77,6 +78,7 @@ export class FormOverridesRepository {
 
     return {
       version: customization?.version ?? 0,
+      metadata: (customization?.metadata as FormCustomizationMetadata) ?? undefined,
       overrides: overridesRows.map((r) => ({
         fieldKey: r.fieldKey,
         enabled: r.isEnabled,
@@ -130,10 +132,17 @@ export class FormOverridesRepository {
         );
       }
 
+      const nextMetadata = (dto.metadata ?? existing?.metadata ?? null) as
+        | Record<string, unknown>
+        | null;
+
       if (existing) {
         await tx
           .update(formCustomizations)
-          .set({ version: currentVersion + 1 })
+          .set({
+            version: currentVersion + 1,
+            metadata: nextMetadata,
+          })
           .where(eq(formCustomizations.id, existing.id));
       } else {
         await tx.insert(formCustomizations).values({
@@ -142,6 +151,7 @@ export class FormOverridesRepository {
           companyId,
           formKey: form.key,
           version: 1,
+          metadata: nextMetadata,
         });
       }
 
@@ -178,11 +188,10 @@ export class FormOverridesRepository {
 
       for (const sectionInput of dto.sections) {
         const sysSection = form.sections.find((s) => s.key === sectionInput.key);
-        if (!sysSection) continue;
 
         sectionInput.fields.forEach((fieldInput, idx) => {
           const position = idx + 1;
-          if (fieldInput.origin === 'system') {
+          if (sysSection && fieldInput.origin === 'system') {
             const sysIndex = sysSection.fields.findIndex((f) => f.key === fieldInput.key);
             const sysField = sysIndex >= 0 ? sysSection.fields[sysIndex] : undefined;
             if (!sysField) return;

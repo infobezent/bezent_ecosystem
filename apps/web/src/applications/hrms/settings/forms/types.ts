@@ -1,4 +1,4 @@
-import type { CustomFieldType, FormFieldConfig, ResolvedFormField } from '../api/formsApi';
+import type { CustomFieldType, FormCustomizationMetadata, FormFieldConfig, ResolvedFormField } from '../api/formsApi';
 
 export interface ToolboxItem {
   type: CustomFieldType;
@@ -50,6 +50,7 @@ export function createNewCustomField(
   type: CustomFieldType,
   label: string,
   order: number,
+  groupKey?: string,
 ): ResolvedFormField {
   const isChoiceType =
     type === 'dropdown' || type === 'radio' || type === 'checkbox' || type === 'multi_select';
@@ -60,8 +61,9 @@ export function createNewCustomField(
           { value: 'option_1', label: 'Option 1' },
           { value: 'option_2', label: 'Option 2' },
         ],
+        ...(groupKey ? { groupKey } : {}),
       }
-    : {};
+    : (groupKey ? { groupKey } : {});
 
   return {
     key: generateCustomFieldKey(),
@@ -299,54 +301,102 @@ export interface ResolvedSectionGroup {
  * canonical Employee Registration structure (e.g. General Information,
  * Employment Details, Additional Information).
  */
+/**
+ * Determines which subgroup a field belongs to.
+ * Explicit `config.groupKey` takes precedence over static `KNOWN_SECTION_GROUPS` definitions.
+ * Custom fields without an explicit groupKey default to 'additional_info'.
+ */
+export function getSubgroupForField(
+  sectionKey: string,
+  field: ResolvedFormField,
+  metadata?: FormCustomizationMetadata,
+): string {
+  const customSubgroup = metadata?.fieldSubgroups?.[field.key];
+  if (customSubgroup) {
+    return customSubgroup;
+  }
+  if (field.config?.groupKey) {
+    return field.config.groupKey;
+  }
+  const definedGroups = KNOWN_SECTION_GROUPS[sectionKey];
+  if (definedGroups) {
+    for (const group of definedGroups) {
+      if (group.fieldKeys.includes(field.key)) {
+        return group.key;
+      }
+    }
+  }
+  return 'additional_info';
+}
+
+/**
+ * Partitions fields of a form section into logical groups matching the
+ * canonical Employee Registration structure (e.g. General Information,
+ * Employment Details, Additional Information).
+ */
 export function getGroupsForSection(
   sectionKey: string,
   sectionFields: readonly ResolvedFormField[],
+  metadata?: FormCustomizationMetadata,
 ): ResolvedSectionGroup[] {
   const definedGroups = KNOWN_SECTION_GROUPS[sectionKey];
   if (!definedGroups) {
     if (sectionFields.length === 0) return [];
+    const customTitle = metadata?.subgroups?.['all_fields']?.title;
+    const customDesc = metadata?.subgroups?.['all_fields']?.description;
     return [
       {
         key: 'all_fields',
-        title: 'SECTION FIELDS',
+        title: customTitle || 'SECTION FIELDS',
+        description: customDesc,
         fields: [...sectionFields],
       },
     ];
   }
 
-  const fieldMap = new Map(sectionFields.map((f) => [f.key, f]));
   const assignedKeys = new Set<string>();
   const result: ResolvedSectionGroup[] = [];
 
   for (const groupDef of definedGroups) {
     const groupFields: ResolvedFormField[] = [];
-    for (const key of groupDef.fieldKeys) {
-      const field = fieldMap.get(key);
-      if (field) {
+
+    for (const field of sectionFields) {
+      if (assignedKeys.has(field.key)) continue;
+
+      const fieldGroup = getSubgroupForField(sectionKey, field, metadata);
+      if (fieldGroup === groupDef.key) {
         groupFields.push(field);
-        assignedKeys.add(key);
+        assignedKeys.add(field.key);
       }
     }
-    if (groupFields.length > 0) {
-      result.push({
-        key: groupDef.key,
-        title: groupDef.title,
-        description: groupDef.description,
-        fields: groupFields,
-      });
-    }
+
+    const groupMeta = metadata?.subgroups?.[groupDef.key];
+    result.push({
+      key: groupDef.key,
+      title: groupMeta?.title || groupDef.title,
+      description: groupMeta?.description !== undefined ? groupMeta.description : groupDef.description,
+      fields: groupFields,
+    });
   }
 
-  // Any remaining fields (e.g. custom fields added by the admin) belong to "Additional Information"
+  // Any remaining fields not assigned to any group belong to "additional_info"
   const remainingFields = sectionFields.filter((f) => !assignedKeys.has(f.key));
   if (remainingFields.length > 0) {
-    result.push({
-      key: 'additional_info',
-      title: 'ADDITIONAL INFORMATION',
-      description: 'Custom fields and company-specific attributes',
-      fields: remainingFields,
-    });
+    const existingAdditional = result.find((g) => g.key === 'additional_info');
+    if (existingAdditional) {
+      existingAdditional.fields.push(...remainingFields);
+    } else {
+      const additionalMeta = metadata?.subgroups?.['additional_info'];
+      result.push({
+        key: 'additional_info',
+        title: additionalMeta?.title || 'ADDITIONAL INFORMATION',
+        description:
+          additionalMeta?.description !== undefined
+            ? additionalMeta.description
+            : 'Custom fields and company-specific attributes',
+        fields: remainingFields,
+      });
+    }
   }
 
   return result;

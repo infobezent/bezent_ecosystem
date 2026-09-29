@@ -13,8 +13,16 @@ import {
   onboardingChecklistTemplates,
   onboardingConversionSettings,
   employees,
+  tenantDetails,
+  users,
+  memberships,
+  tenantModules,
+  employeeLeaveBalances,
+  employeeTasks,
+  employeeNotifications,
 } from './schema.js';
 import { eq } from 'drizzle-orm';
+import { hashPassword } from '../platform/auth/security.js';
 
 /**
  * Deterministic Development Seed Script
@@ -575,6 +583,210 @@ export async function seedDatabase() {
         employmentType: 'full_time',
       });
     }
+  }
+
+  // 8. Tenant Details for canonical demo tenant
+  const existingDetail = await db.select().from(tenantDetails).where(eq(tenantDetails.tenantId, tenantId));
+  if (existingDetail.length === 0) {
+    await db.insert(tenantDetails).values({
+      tenantId,
+      code: 'BEZENT_DEMO',
+      contactEmail: 'contact@bezent-demo.example',
+      contactPhone: '+1-555-0199',
+    });
+  }
+
+  // 9. Initial Super Admin Identity
+  const superAdminEmail = (process.env.SUPER_ADMIN_EMAIL || 'superadmin@bezent.com').toLowerCase().trim();
+  const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD || 'BezentSuperAdmin2026!';
+  const existingSa = await db.select().from(users).where(eq(users.email, superAdminEmail));
+  if (existingSa.length === 0) {
+    const { hash, salt } = hashPassword(superAdminPassword);
+    await db.insert(users).values({
+      id: 'usr_sa_demo_01',
+      email: superAdminEmail,
+      passwordHash: hash,
+      salt,
+      firstName: 'Platform',
+      lastName: 'Superadmin',
+      status: 'active',
+      isSuperAdmin: true,
+    });
+  }
+
+  // 10. Initial Company Admin Identity
+  const companyAdminEmail = 'admin@bezent-demo.example';
+  const companyAdminPassword = 'BezentCompanyAdmin2026!';
+  const existingCa = await db.select().from(users).where(eq(users.email, companyAdminEmail));
+  let companyAdminUserId = 'usr_ca_demo_01';
+  if (existingCa.length === 0) {
+    const { hash, salt } = hashPassword(companyAdminPassword);
+    await db.insert(users).values({
+      id: companyAdminUserId,
+      email: companyAdminEmail,
+      passwordHash: hash,
+      salt,
+      firstName: 'Company',
+      lastName: 'Administrator',
+      status: 'active',
+      isSuperAdmin: false,
+    });
+  } else {
+    companyAdminUserId = existingCa[0]!.id;
+  }
+
+  // 11. Company Admin Membership
+  const existingMem = await db
+    .select()
+    .from(memberships)
+    .where(eq(memberships.id, 'mem_ca_demo_01'));
+  if (existingMem.length === 0) {
+    await db.insert(memberships).values({
+      id: 'mem_ca_demo_01',
+      tenantId,
+      companyId,
+      userId: companyAdminUserId,
+      role: 'company_admin',
+      status: 'active',
+    });
+  }
+
+  // 12. Default HRMS Module Entitlement
+  const existingModule = await db
+    .select()
+    .from(tenantModules)
+    .where(eq(tenantModules.id, 'mod_hrms_demo_01'));
+  if (existingModule.length === 0) {
+    await db.insert(tenantModules).values({
+      id: 'mod_hrms_demo_01',
+      tenantId,
+      companyId,
+      moduleCode: 'hrms',
+      status: 'enabled',
+    });
+  }
+
+  // 13. Initial Sample Employee User (Arjun Mehta - emp_demo_002)
+  const employeeEmail = 'arjun.mehta@bezent-demo.example';
+  const employeePassword = 'BezentEmployee2026!';
+  const existingEmpUser = await db.select().from(users).where(eq(users.email, employeeEmail));
+  let empUserId = 'usr_emp_arjun_01';
+  if (existingEmpUser.length === 0) {
+    const { hash, salt } = hashPassword(employeePassword);
+    await db.insert(users).values({
+      id: empUserId,
+      email: employeeEmail,
+      passwordHash: hash,
+      salt,
+      firstName: 'Arjun',
+      lastName: 'Mehta',
+      status: 'active',
+      isSuperAdmin: false,
+    });
+  } else {
+    empUserId = existingEmpUser[0]!.id;
+  }
+
+  // Link employee record to this user ID
+  await db
+    .update(employees)
+    .set({ userId: empUserId })
+    .where(eq(employees.id, 'emp_demo_002'));
+
+  // Employee Membership
+  const existingEmpMem = await db
+    .select()
+    .from(memberships)
+    .where(eq(memberships.id, 'mem_emp_arjun_01'));
+  if (existingEmpMem.length === 0) {
+    await db.insert(memberships).values({
+      id: 'mem_emp_arjun_01',
+      tenantId,
+      companyId,
+      userId: empUserId,
+      role: 'employee',
+      status: 'active',
+    });
+  }
+
+  // Initial Leave Balances for 2026
+  const existingLeaveBal = await db
+    .select()
+    .from(employeeLeaveBalances)
+    .where(eq(employeeLeaveBalances.employeeId, 'emp_demo_002'));
+  if (existingLeaveBal.length === 0) {
+    await db.insert(employeeLeaveBalances).values([
+      {
+        id: 'lvb_demo_01',
+        tenantId,
+        companyId,
+        employeeId: 'emp_demo_002',
+        leaveType: 'annual',
+        totalDays: 18,
+        usedDays: 3,
+        pendingDays: 0,
+        year: 2026,
+      },
+      {
+        id: 'lvb_demo_02',
+        tenantId,
+        companyId,
+        employeeId: 'emp_demo_002',
+        leaveType: 'sick',
+        totalDays: 12,
+        usedDays: 1,
+        pendingDays: 0,
+        year: 2026,
+      },
+      {
+        id: 'lvb_demo_03',
+        tenantId,
+        companyId,
+        employeeId: 'emp_demo_002',
+        leaveType: 'casual',
+        totalDays: 6,
+        usedDays: 0,
+        pendingDays: 0,
+        year: 2026,
+      },
+    ]);
+  }
+
+  // Initial Task for Arjun
+  const existingEmpTask = await db
+    .select()
+    .from(employeeTasks)
+    .where(eq(employeeTasks.employeeId, 'emp_demo_002'));
+  if (existingEmpTask.length === 0) {
+    await db.insert(employeeTasks).values({
+      id: 'tsk_demo_01',
+      tenantId,
+      companyId,
+      employeeId: 'emp_demo_002',
+      title: 'Complete annual IT security compliance refresher',
+      description: 'Review updated data handling policies and acknowledge compliance.',
+      dueDate: '2026-10-15',
+      priority: 'medium',
+      status: 'pending',
+    });
+  }
+
+  // Initial Welcome Notification
+  const existingEmpNotif = await db
+    .select()
+    .from(employeeNotifications)
+    .where(eq(employeeNotifications.employeeId, 'emp_demo_002'));
+  if (existingEmpNotif.length === 0) {
+    await db.insert(employeeNotifications).values({
+      id: 'notif_demo_01',
+      tenantId,
+      companyId,
+      employeeId: 'emp_demo_002',
+      title: 'Welcome to BEZENT Employee Self Service',
+      message: 'Access your profile, attendance, leave balance, documents and personal requests directly.',
+      type: 'info',
+      isRead: false,
+    });
   }
 
   console.log('[Seed] Database seeded successfully for BEZENT Demo Pvt Ltd.');

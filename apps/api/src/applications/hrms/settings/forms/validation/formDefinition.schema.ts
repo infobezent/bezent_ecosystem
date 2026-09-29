@@ -3,6 +3,7 @@ import {
   CUSTOM_FIELD_TYPES,
   FORM_FIELD_WIDTHS,
   type CustomFieldType,
+  type FormCustomizationMetadata,
   type FormFieldConfig,
   type FormFieldInput,
   type FormFieldOption,
@@ -28,20 +29,20 @@ const SINGLE_CHOICE_TYPES = new Set<CustomFieldType>(['dropdown', 'radio']);
 
 /** Config keys each custom field type accepts. */
 const ALLOWED_CONFIG_KEYS: Record<CustomFieldType, readonly (keyof FormFieldConfig)[]> = {
-  single_line: ['minLength', 'maxLength'],
-  multi_line: ['minLength', 'maxLength'],
-  email: [],
-  phone: [],
-  number: ['min', 'max'],
-  decimal: ['min', 'max', 'decimalPlaces'],
-  dropdown: ['options', 'defaultValue'],
-  radio: ['options', 'defaultValue'],
-  checkbox: ['options'],
-  multi_select: ['options'],
-  date: ['disallowPast', 'disallowFuture'],
-  time: [],
-  datetime: ['disallowPast', 'disallowFuture'],
-  file_upload: ['maxSizeMb'],
+  single_line: ['minLength', 'maxLength', 'groupKey'],
+  multi_line: ['minLength', 'maxLength', 'groupKey'],
+  email: ['groupKey'],
+  phone: ['groupKey'],
+  number: ['min', 'max', 'groupKey'],
+  decimal: ['min', 'max', 'decimalPlaces', 'groupKey'],
+  dropdown: ['options', 'defaultValue', 'groupKey'],
+  radio: ['options', 'defaultValue', 'groupKey'],
+  checkbox: ['options', 'groupKey'],
+  multi_select: ['options', 'groupKey'],
+  date: ['disallowPast', 'disallowFuture', 'groupKey'],
+  time: ['groupKey'],
+  datetime: ['disallowPast', 'disallowFuture', 'groupKey'],
+  file_upload: ['maxSizeMb', 'groupKey'],
 };
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
@@ -63,6 +64,10 @@ export function validateFieldConfig(
   if (unexpected.length > 0) return { error: `Unsupported config for ${type}: ${unexpected.join(', ')}` };
 
   const config: FormFieldConfig = {};
+
+  if (typeof raw.groupKey === 'string' && raw.groupKey.trim()) {
+    config.groupKey = raw.groupKey.trim();
+  }
 
   const textLimit = TEXT_LIMITS[type];
   if (textLimit !== undefined) {
@@ -166,6 +171,9 @@ export function validateFieldConfig(
  * - touch a non-configurable section or use an unknown key/type/config.
  * Any invalid entry rejects the whole request.
  */
+const CUSTOM_SECTION_KEY_PATTERN = /^custom(_sec)?[._a-zA-Z0-9-]{1,64}$/;
+const MANDATORY_SYSTEM_SECTIONS = new Set(['general', 'personal', 'online_access', 'review']);
+
 export function validateSaveFormDefinition(
   form: SystemFormDefinition,
   input: unknown,
@@ -173,15 +181,117 @@ export function validateSaveFormDefinition(
   if (!isObject(input)) throw new ValidationError('Request body must be a JSON object');
 
   const errors: Record<string, string> = {};
-  const { version, sections } = input;
-  if (!isInteger(version) || version < 0) errors.version = 'Version must be a non-negative integer';
+  const { version, sections, metadata } = input as Record<string, unknown>;
+  if (!isInteger(version) || (version as number) < 0) errors.version = 'Version must be a non-negative integer';
   if (!Array.isArray(sections)) {
     errors.sections = 'Sections must be an array';
     throw new ValidationError(`Validation failed for ${form.name}`, errors);
   }
 
+  let validatedMetadata: FormCustomizationMetadata | undefined;
+  if (metadata !== undefined && metadata !== null) {
+    if (!isObject(metadata)) {
+      errors.metadata = 'Metadata must be an object';
+    } else {
+      validatedMetadata = {};
+      if (metadata.sections !== undefined && metadata.sections !== null) {
+        if (!isObject(metadata.sections)) {
+          errors['metadata.sections'] = 'Metadata sections must be an object';
+        } else {
+          validatedMetadata.sections = {};
+          for (const [secKey, secVal] of Object.entries(metadata.sections)) {
+            if (isObject(secVal)) {
+              if (secVal.visible === false && MANDATORY_SYSTEM_SECTIONS.has(secKey)) {
+                errors[`metadata.sections.${secKey}.visible`] = `Mandatory section '${secKey}' cannot be hidden`;
+              }
+              validatedMetadata.sections[secKey] = {
+                title: typeof secVal.title === 'string' ? secVal.title.trim() : undefined,
+                description:
+                  typeof secVal.description === 'string' ? secVal.description.trim() : undefined,
+                visible: typeof secVal.visible === 'boolean' ? secVal.visible : undefined,
+                order: typeof secVal.order === 'number' ? secVal.order : undefined,
+              };
+            }
+          }
+        }
+      }
+      if (metadata.subgroups !== undefined && metadata.subgroups !== null) {
+        if (!isObject(metadata.subgroups)) {
+          errors['metadata.subgroups'] = 'Metadata subgroups must be an object';
+        } else {
+          validatedMetadata.subgroups = {};
+          for (const [groupKey, groupVal] of Object.entries(metadata.subgroups)) {
+            if (isObject(groupVal)) {
+              validatedMetadata.subgroups[groupKey] = {
+                title: typeof groupVal.title === 'string' ? groupVal.title.trim() : undefined,
+                description:
+                  typeof groupVal.description === 'string' ? groupVal.description.trim() : undefined,
+              };
+            }
+          }
+        }
+      }
+      if (metadata.fieldSubgroups !== undefined && metadata.fieldSubgroups !== null) {
+        if (!isObject(metadata.fieldSubgroups)) {
+          errors['metadata.fieldSubgroups'] = 'Metadata fieldSubgroups must be an object';
+        } else {
+          validatedMetadata.fieldSubgroups = {};
+          for (const [fieldKey, groupKey] of Object.entries(metadata.fieldSubgroups)) {
+            if (typeof groupKey === 'string' && groupKey.trim()) {
+              validatedMetadata.fieldSubgroups[fieldKey] = groupKey.trim();
+            }
+          }
+        }
+      }
+      if (metadata.customSections !== undefined && metadata.customSections !== null) {
+        if (!Array.isArray(metadata.customSections)) {
+          errors['metadata.customSections'] = 'Metadata customSections must be an array';
+        } else {
+          validatedMetadata.customSections = [];
+          for (let i = 0; i < metadata.customSections.length; i++) {
+            const cs = metadata.customSections[i];
+            const csPath = `metadata.customSections[${i}]`;
+            if (!isObject(cs) || typeof cs.key !== 'string' || !cs.key.trim()) {
+              errors[`${csPath}.key`] = 'Custom section needs a key';
+              continue;
+            }
+            const key = cs.key.trim();
+            if (!CUSTOM_SECTION_KEY_PATTERN.test(key)) {
+              errors[`${csPath}.key`] = `Invalid custom section key '${key}'`;
+              continue;
+            }
+            const title = typeof cs.title === 'string' ? cs.title.trim() : '';
+            if (!title || title.length > MAX_LABEL_LENGTH) {
+              errors[`${csPath}.title`] = `Custom section title must be 1–${MAX_LABEL_LENGTH} characters`;
+              continue;
+            }
+            const description =
+              typeof cs.description === 'string' ? cs.description.trim() : null;
+            validatedMetadata.customSections.push({
+              key,
+              title,
+              description: description || null,
+              visible: typeof cs.visible === 'boolean' ? cs.visible : true,
+              order: typeof cs.order === 'number' ? cs.order : i + 1,
+            });
+          }
+        }
+      }
+      if (metadata.sectionOrder !== undefined && metadata.sectionOrder !== null) {
+        if (!Array.isArray(metadata.sectionOrder) || !metadata.sectionOrder.every((k) => typeof k === 'string')) {
+          errors['metadata.sectionOrder'] = 'Metadata sectionOrder must be an array of section keys';
+        } else {
+          validatedMetadata.sectionOrder = metadata.sectionOrder.map((k) => k.trim());
+        }
+      }
+    }
+  }
+
   const configurable = new Map(
     form.sections.filter((section) => section.configurable).map((s) => [s.key, s]),
+  );
+  const customSectionMap = new Map(
+    (validatedMetadata?.customSections ?? []).map((cs) => [cs.key, cs]),
   );
   const seenSections = new Set<string>();
   const seenFields = new Set<string>();
@@ -194,22 +304,26 @@ export function validateSaveFormDefinition(
       errors[sectionPath] = 'Each section needs a key';
       return;
     }
-    const section = configurable.get(rawSection.key);
-    if (!section) {
+    const systemSection = configurable.get(rawSection.key);
+    const customSection = customSectionMap.get(rawSection.key);
+    if (!systemSection && !customSection) {
       errors[`${sectionPath}.key`] = `Section '${rawSection.key}' is not configurable`;
       return;
     }
-    if (seenSections.has(section.key)) {
-      errors[`${sectionPath}.key`] = `Duplicate section '${section.key}'`;
+    const sectionKey = systemSection ? systemSection.key : customSection!.key;
+    if (seenSections.has(sectionKey)) {
+      errors[`${sectionPath}.key`] = `Duplicate section '${sectionKey}'`;
       return;
     }
-    seenSections.add(section.key);
+    seenSections.add(sectionKey);
     if (!Array.isArray(rawSection.fields)) {
       errors[`${sectionPath}.fields`] = 'Fields must be an array';
       return;
     }
 
-    const systemFields = new Map(section.fields.map((f) => [f.key, f]));
+    const systemFields = systemSection
+      ? new Map(systemSection.fields.map((f) => [f.key, f]))
+      : new Map();
     const fields: FormFieldInput[] = [];
 
     rawSection.fields.forEach((rawField, fieldIndex) => {
@@ -256,7 +370,7 @@ export function validateSaveFormDefinition(
       if (origin === 'system') {
         const definition = systemFields.get(key);
         if (!definition) {
-          errors[`${path}.key`] = `'${key}' is not a system field of section '${section.key}'`;
+          errors[`${path}.key`] = `'${key}' is not a system field of section '${sectionKey}'`;
           return;
         }
         if (definition.protected && (!enabled || !required)) {
@@ -315,7 +429,7 @@ export function validateSaveFormDefinition(
     if (missing.length > 0) {
       errors[`${sectionPath}.fields`] = `System fields cannot be removed or moved: ${missing.join(', ')}`;
     }
-    result.push({ key: section.key, fields });
+    result.push({ key: sectionKey, fields });
   });
 
   const missingSections = [...configurable.keys()].filter((key) => !seenSections.has(key));
@@ -329,5 +443,5 @@ export function validateSaveFormDefinition(
   if (Object.keys(errors).length > 0) {
     throw new ValidationError(`Validation failed for ${form.name}`, errors);
   }
-  return { version: version as number, sections: result };
+  return { version: version as number, metadata: validatedMetadata, sections: result };
 }

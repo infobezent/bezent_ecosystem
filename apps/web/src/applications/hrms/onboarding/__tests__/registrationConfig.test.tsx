@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
+import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
 import { EmployeeRegistration } from '../components/EmployeeRegistration';
+import { EmployeeRegistrationPage } from '../pages/EmployeeRegistrationPage';
 import { PersonalInformation } from '../components/PersonalInformation';
 import {
   RegistrationConfigProvider,
@@ -205,3 +207,37 @@ describe('Registration configuration ← Form Engine API client', () => {
     expect((error as FormsApiError).details?.['fields[0]']).toContain('system-required');
   });
 });
+
+describe('RegistrationConfigProvider contract — regression guards', () => {
+  it('EmployeeRegistration throws the context error when rendered outside RegistrationConfigProvider', () => {
+    // Regression: if RegistrationConfigLoader/RegistrationConfigProvider is ever
+    // removed from the route tree, this test catches the regression immediately
+    // rather than causing a silent runtime crash.
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    expect(() =>
+      renderToStaticMarkup(
+        <MemoryRouter>
+          <EmployeeRegistration onCancel={() => {}} initialDraft={null} />
+        </MemoryRouter>,
+      ),
+    ).toThrow('useRegistrationConfig must be used within a RegistrationConfigProvider');
+    vi.restoreAllMocks();
+  });
+
+  it('EmployeeRegistrationPage renders the loading gate (RegistrationConfigLoader) before the form', () => {
+    // RegistrationConfigLoader always renders <LoadingState> on the first synchronous
+    // pass (the fetch is async); EmployeeRegistration is never mounted without the
+    // provider. This asserts the route element is EmployeeRegistrationPage, not
+    // a bare EmployeeRegistration.
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <EmployeeRegistrationPage />
+      </MemoryRouter>,
+    );
+    expect(html).toContain('Loading employee registration');
+    // The form body must NOT be present on the first synchronous render
+    // because the provider is not yet mounted.
+    expect(html).not.toContain('bezent-page-header');
+  });
+});
+

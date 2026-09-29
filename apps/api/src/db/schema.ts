@@ -35,7 +35,12 @@ export const companies = mysqlTable(
     tenantId: varchar('tenant_id', { length: 64 }).notNull(),
     name: varchar('name', { length: 255 }).notNull(),
     code: varchar('code', { length: 50 }).notNull(),
-    status: mysqlEnum('status', ['active', 'inactive']).default('active').notNull(),
+    legalName: varchar('legal_name', { length: 255 }),
+    businessEmail: varchar('business_email', { length: 255 }),
+    contactPhone: varchar('contact_phone', { length: 50 }),
+    country: varchar('country', { length: 100 }),
+    timeZone: varchar('time_zone', { length: 100 }),
+    status: mysqlEnum('status', ['active', 'inactive', 'suspended']).default('active').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
   },
@@ -857,6 +862,7 @@ export const formCustomizations = mysqlTable(
       .references(() => companies.id),
     formKey: varchar('form_key', { length: 100 }).notNull(),
     version: int('version').default(1).notNull(),
+    metadata: json('metadata').$type<Record<string, unknown>>(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
   },
@@ -969,3 +975,474 @@ export const formCustomFields = mysqlTable(
 
 export type FormCustomField = typeof formCustomFields.$inferSelect;
 export type NewFormCustomField = typeof formCustomFields.$inferInsert;
+
+/**
+ * Platform: Tenant Details (Extension of canonical Tenants table)
+ * Stores extended profile information: code, contact email, contact phone.
+ */
+export const tenantDetails = mysqlTable(
+  'tenant_details',
+  {
+    tenantId: varchar('tenant_id', { length: 64 })
+      .primaryKey()
+      .references(() => tenants.id),
+    code: varchar('code', { length: 50 }).notNull(),
+    contactEmail: varchar('contact_email', { length: 255 }),
+    contactPhone: varchar('contact_phone', { length: 50 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [uniqueIndex('idx_tenant_details_code').on(table.code)],
+);
+
+export type TenantDetail = typeof tenantDetails.$inferSelect;
+export type NewTenantDetail = typeof tenantDetails.$inferInsert;
+
+/**
+ * Platform: Users (ADR-009 User != Employee)
+ * Authentication identity and platform access credentials.
+ */
+export const users = mysqlTable(
+  'users',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    email: varchar('email', { length: 255 }).notNull(),
+    passwordHash: varchar('password_hash', { length: 255 }).notNull(),
+    salt: varchar('salt', { length: 64 }).notNull(),
+    firstName: varchar('first_name', { length: 100 }).notNull(),
+    lastName: varchar('last_name', { length: 100 }).notNull(),
+    phone: varchar('phone', { length: 50 }),
+    status: mysqlEnum('status', ['active', 'inactive', 'suspended']).default('active').notNull(),
+    isSuperAdmin: boolean('is_super_admin').default(false).notNull(),
+    lastLoginAt: timestamp('last_login_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_users_email').on(table.email),
+    index('idx_users_status').on(table.status),
+  ],
+);
+
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
+
+/**
+ * Platform: Company Memberships & Role Assignments
+ * Associates users with tenants and legal company entities with explicit roles.
+ */
+export const memberships = mysqlTable(
+  'memberships',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    userId: varchar('user_id', { length: 64 })
+      .notNull()
+      .references(() => users.id),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    role: mysqlEnum('role', ['company_admin', 'hr_manager', 'employee', 'user']).notNull(),
+    status: mysqlEnum('status', ['active', 'inactive', 'revoked']).default('active').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_memberships_user').on(table.userId),
+    index('idx_memberships_tenant_company').on(table.tenantId, table.companyId),
+    uniqueIndex('idx_memberships_user_company_role').on(
+      table.userId,
+      table.companyId,
+      table.role,
+    ),
+  ],
+);
+
+export type Membership = typeof memberships.$inferSelect;
+export type NewMembership = typeof memberships.$inferInsert;
+
+/**
+ * Platform: Company User Invitations
+ * Manages secure, expiring tokens for inviting users to specific companies.
+ */
+export const invitations = mysqlTable(
+  'invitations',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 })
+      .notNull()
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id, { onDelete: 'cascade' }),
+    email: varchar('email', { length: 255 }).notNull(),
+    role: mysqlEnum('role', ['company_admin', 'hr_manager', 'employee', 'user']).notNull(),
+    token: varchar('token', { length: 255 }).notNull(),
+    invitedByUserId: varchar('invited_by_user_id', { length: 64 })
+      .references(() => users.id, { onDelete: 'set null' }),
+    status: mysqlEnum('status', ['pending', 'accepted', 'expired', 'cancelled'])
+      .default('pending')
+      .notNull(),
+    expiresAt: timestamp('expires_at').notNull(),
+    acceptedAt: timestamp('accepted_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_invitations_token').on(table.token),
+    index('idx_invitations_tenant_company').on(table.tenantId, table.companyId),
+    index('idx_invitations_email').on(table.email),
+    index('idx_invitations_status').on(table.status),
+  ],
+);
+
+export type Invitation = typeof invitations.$inferSelect;
+export type NewInvitation = typeof invitations.$inferInsert;
+
+/**
+ * Platform: Sessions & Auth Tokens
+ * Persisted session tokens with explicit expiration and revocation.
+ */
+export const sessions = mysqlTable(
+  'sessions',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    token: varchar('token', { length: 255 }).notNull(),
+    userId: varchar('user_id', { length: 64 })
+      .notNull()
+      .references(() => users.id),
+    expiresAt: timestamp('expires_at').notNull(),
+    revokedAt: timestamp('revoked_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_sessions_token').on(table.token),
+    index('idx_sessions_user').on(table.userId),
+    index('idx_sessions_expires_at').on(table.expiresAt),
+  ],
+);
+
+export type Session = typeof sessions.$inferSelect;
+export type NewSession = typeof sessions.$inferInsert;
+
+/**
+ * Platform: Tenant Module Entitlements
+ * Configures application module access (HRMS, CRM, Project Management) per customer.
+ */
+export const tenantModules = mysqlTable(
+  'tenant_modules',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 }),
+    moduleCode: mysqlEnum('module_code', ['hrms', 'crm', 'project_management']).notNull(),
+    status: mysqlEnum('status', ['enabled', 'disabled']).default('enabled').notNull(),
+    enabledAt: timestamp('enabled_at').defaultNow().notNull(),
+    disabledAt: timestamp('disabled_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_tenant_modules_tenant').on(table.tenantId),
+    uniqueIndex('idx_tenant_modules_tenant_company_module').on(
+      table.tenantId,
+      table.companyId,
+      table.moduleCode,
+    ),
+  ],
+);
+
+export type TenantModule = typeof tenantModules.$inferSelect;
+export type NewTenantModule = typeof tenantModules.$inferInsert;
+
+/**
+ * Platform: Administrative Audit Logs
+ * Comprehensive administrative audit trail with actor, action, target, and change metadata.
+ */
+export const auditLogs = mysqlTable(
+  'audit_logs',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    actorUserId: varchar('actor_user_id', { length: 64 }),
+    actorEmail: varchar('actor_email', { length: 255 }),
+    action: varchar('action', { length: 100 }).notNull(),
+    targetType: varchar('target_type', { length: 50 }).notNull(),
+    targetId: varchar('target_id', { length: 64 }).notNull(),
+    tenantId: varchar('tenant_id', { length: 64 }),
+    companyId: varchar('company_id', { length: 64 }),
+    metadata: json('metadata').$type<Record<string, unknown>>(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_audit_logs_actor').on(table.actorUserId),
+    index('idx_audit_logs_target').on(table.targetType, table.targetId),
+    index('idx_audit_logs_tenant_company').on(table.tenantId, table.companyId),
+    index('idx_audit_logs_action').on(table.action),
+    index('idx_audit_logs_created_at').on(table.createdAt),
+  ],
+);
+
+export type AuditLog = typeof auditLogs.$inferSelect;
+export type NewAuditLog = typeof auditLogs.$inferInsert;
+
+/**
+ * HRMS Domain: Employee Self-Service (ESS) — Attendance
+ */
+export const employeeAttendance = mysqlTable(
+  'employee_attendance',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    employeeId: varchar('employee_id', { length: 64 })
+      .notNull()
+      .references(() => employees.id),
+    date: varchar('date', { length: 10 }).notNull(),
+    checkInTime: varchar('check_in_time', { length: 10 }),
+    checkOutTime: varchar('check_out_time', { length: 10 }),
+    status: mysqlEnum('status', ['present', 'absent', 'half_day', 'on_leave', 'holiday'])
+      .default('present')
+      .notNull(),
+    workLocation: varchar('work_location', { length: 100 }).default('office').notNull(),
+    notes: varchar('notes', { length: 500 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_emp_att_tenant_company').on(table.tenantId, table.companyId),
+    index('idx_emp_att_employee').on(table.employeeId),
+    index('idx_emp_att_date').on(table.date),
+    uniqueIndex('idx_emp_att_emp_date').on(
+      table.tenantId,
+      table.companyId,
+      table.employeeId,
+      table.date,
+    ),
+  ],
+);
+
+export type EmployeeAttendance = typeof employeeAttendance.$inferSelect;
+export type NewEmployeeAttendance = typeof employeeAttendance.$inferInsert;
+
+/**
+ * HRMS Domain: Employee Self-Service (ESS) — Leave Balances
+ */
+export const employeeLeaveBalances = mysqlTable(
+  'employee_leave_balances',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    employeeId: varchar('employee_id', { length: 64 })
+      .notNull()
+      .references(() => employees.id),
+    leaveType: mysqlEnum('leave_type', ['annual', 'sick', 'casual', 'unpaid']).notNull(),
+    totalDays: int('total_days').default(0).notNull(),
+    usedDays: int('used_days').default(0).notNull(),
+    pendingDays: int('pending_days').default(0).notNull(),
+    year: int('year').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_emp_leave_bal_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_emp_leave_bal_employee').on(table.employeeId),
+    uniqueIndex('idx_emp_leave_bal_type_year').on(
+      table.tenantId,
+      table.companyId,
+      table.employeeId,
+      table.leaveType,
+      table.year,
+    ),
+  ],
+);
+
+export type EmployeeLeaveBalance = typeof employeeLeaveBalances.$inferSelect;
+export type NewEmployeeLeaveBalance = typeof employeeLeaveBalances.$inferInsert;
+
+/**
+ * HRMS Domain: Employee Self-Service (ESS) — Leave Requests
+ */
+export const employeeLeaveRequests = mysqlTable(
+  'employee_leave_requests',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    employeeId: varchar('employee_id', { length: 64 })
+      .notNull()
+      .references(() => employees.id),
+    leaveType: mysqlEnum('leave_type', ['annual', 'sick', 'casual', 'unpaid']).notNull(),
+    startDate: varchar('start_date', { length: 10 }).notNull(),
+    endDate: varchar('end_date', { length: 10 }).notNull(),
+    totalDays: int('total_days').notNull(),
+    reason: varchar('reason', { length: 500 }).notNull(),
+    status: mysqlEnum('status', ['pending', 'approved', 'rejected', 'cancelled'])
+      .default('pending')
+      .notNull(),
+    reviewedByUserId: varchar('reviewed_by_user_id', { length: 64 }),
+    rejectionReason: varchar('rejection_reason', { length: 500 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_emp_leave_req_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_emp_leave_req_employee').on(table.employeeId),
+    index('idx_emp_leave_req_status').on(table.status),
+    index('idx_emp_leave_req_dates').on(table.startDate, table.endDate),
+  ],
+);
+
+export type EmployeeLeaveRequest = typeof employeeLeaveRequests.$inferSelect;
+export type NewEmployeeLeaveRequest = typeof employeeLeaveRequests.$inferInsert;
+
+/**
+ * HRMS Domain: Employee Self-Service (ESS) — Timesheets
+ */
+export const employeeTimesheets = mysqlTable(
+  'employee_timesheets',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    employeeId: varchar('employee_id', { length: 64 })
+      .notNull()
+      .references(() => employees.id),
+    date: varchar('date', { length: 10 }).notNull(),
+    projectName: varchar('project_name', { length: 150 }).notNull(),
+    taskDescription: varchar('task_description', { length: 500 }).notNull(),
+    hours: int('hours').notNull(),
+    status: mysqlEnum('status', ['draft', 'submitted', 'approved', 'rejected'])
+      .default('draft')
+      .notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_emp_timesheet_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_emp_timesheet_employee').on(table.employeeId),
+    index('idx_emp_timesheet_date').on(table.date),
+    index('idx_emp_timesheet_status').on(table.status),
+  ],
+);
+
+export type EmployeeTimesheet = typeof employeeTimesheets.$inferSelect;
+export type NewEmployeeTimesheet = typeof employeeTimesheets.$inferInsert;
+
+/**
+ * HRMS Domain: Employee Self-Service (ESS) — Employee Requests
+ * Handles Profile Changes, Attendance Regularizations, Document Requests, and General Requests.
+ */
+export const employeeRequests = mysqlTable(
+  'employee_requests',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    employeeId: varchar('employee_id', { length: 64 })
+      .notNull()
+      .references(() => employees.id),
+    requestType: mysqlEnum('request_type', [
+      'profile_change',
+      'attendance_regularization',
+      'document_request',
+      'general_service',
+    ]).notNull(),
+    subject: varchar('subject', { length: 200 }).notNull(),
+    details: json('details').$type<Record<string, unknown>>().notNull(),
+    status: mysqlEnum('status', ['pending', 'approved', 'rejected', 'cancelled'])
+      .default('pending')
+      .notNull(),
+    reviewerNotes: varchar('reviewer_notes', { length: 500 }),
+    reviewedByUserId: varchar('reviewed_by_user_id', { length: 64 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_emp_requests_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_emp_requests_employee').on(table.employeeId),
+    index('idx_emp_requests_type_status').on(table.requestType, table.status),
+  ],
+);
+
+export type EmployeeRequest = typeof employeeRequests.$inferSelect;
+export type NewEmployeeRequest = typeof employeeRequests.$inferInsert;
+
+/**
+ * HRMS Domain: Employee Self-Service (ESS) — Tasks
+ */
+export const employeeTasks = mysqlTable(
+  'employee_tasks',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    employeeId: varchar('employee_id', { length: 64 })
+      .notNull()
+      .references(() => employees.id),
+    title: varchar('title', { length: 200 }).notNull(),
+    description: varchar('description', { length: 500 }),
+    dueDate: varchar('due_date', { length: 10 }),
+    priority: mysqlEnum('priority', ['low', 'medium', 'high']).default('medium').notNull(),
+    status: mysqlEnum('status', ['pending', 'in_progress', 'completed'])
+      .default('pending')
+      .notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_emp_tasks_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_emp_tasks_employee').on(table.employeeId),
+    index('idx_emp_tasks_status').on(table.status),
+  ],
+);
+
+export type EmployeeTask = typeof employeeTasks.$inferSelect;
+export type NewEmployeeTask = typeof employeeTasks.$inferInsert;
+
+/**
+ * HRMS Domain: Employee Self-Service (ESS) — Notifications
+ */
+export const employeeNotifications = mysqlTable(
+  'employee_notifications',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    employeeId: varchar('employee_id', { length: 64 })
+      .notNull()
+      .references(() => employees.id),
+    title: varchar('title', { length: 200 }).notNull(),
+    message: varchar('message', { length: 500 }).notNull(),
+    type: mysqlEnum('type', ['info', 'success', 'warning', 'action_required'])
+      .default('info')
+      .notNull(),
+    isRead: boolean('is_read').default(false).notNull(),
+    link: varchar('link', { length: 200 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_emp_notif_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_emp_notif_employee').on(table.employeeId),
+    index('idx_emp_notif_read').on(table.isRead),
+    index('idx_emp_notif_created').on(table.createdAt),
+  ],
+);
+
+export type EmployeeNotification = typeof employeeNotifications.$inferSelect;
+export type NewEmployeeNotification = typeof employeeNotifications.$inferInsert;

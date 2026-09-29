@@ -246,6 +246,115 @@ describe('Form resolver', () => {
     expect(fieldOf(resolved, 'personal.middleName')).toMatchObject({ enabled: false });
     expect(fieldOf(resolved, 'personal.lastName')).toMatchObject({ required: true });
   });
+
+  it('resolves section titles, descriptions, and fieldSubgroups from metadata', () => {
+    const metadata = {
+      sections: {
+        general: {
+          title: 'Custom General Info',
+          description: 'Custom general description',
+        },
+      },
+      subgroups: {
+        employment_details: {
+          title: 'Role & Employment Details',
+          description: 'Details about the position',
+        },
+      },
+      fieldSubgroups: {
+        'general.designation': 'employment_details',
+      },
+    };
+
+    const resolved = resolveForm(FORM, {
+      version: 1,
+      overrides: [],
+      customFields: [],
+      metadata,
+    });
+    const generalSection = resolved.sections.find((s) => s.key === 'general');
+    expect(generalSection).toBeDefined();
+    expect(generalSection?.label).toBe('Custom General Info');
+    expect(generalSection?.description).toBe('Custom general description');
+    expect(resolved.form.metadata).toEqual(metadata);
+
+    const designationField = generalSection?.fields.find((f) => f.key === 'general.designation');
+    expect(designationField?.config.groupKey).toBe('employment_details');
+  });
+
+  it('resolves custom sections, section visibility, and section ordering from metadata', () => {
+    const metadata = {
+      sections: {
+        general: {
+          title: 'Workforce Details',
+          visible: false, // Attempt to hide mandatory section
+        },
+        skills: {
+          visible: false, // Optional section hidden
+        },
+      },
+      customSections: [
+        {
+          key: 'custom_sec_equipment',
+          title: 'Equipment & Hardware',
+          description: 'Company-issued laptops and peripherals',
+          visible: true,
+          order: 1,
+        },
+      ],
+      sectionOrder: ['custom_sec_equipment', 'general', 'personal'],
+    };
+
+    const resolved = resolveForm(FORM, {
+      version: 1,
+      overrides: [],
+      customFields: [
+        {
+          key: 'custom.0123456789abcdef0123456789abcdef',
+          sectionKey: 'custom_sec_equipment',
+          type: 'single_line',
+          label: 'Laptop Serial Number',
+          description: 'Asset tag or serial',
+          enabled: true,
+          required: true,
+          width: 'full',
+          sortOrder: 1,
+          config: {},
+        },
+      ],
+      metadata,
+    });
+
+    // 1. Mandatory section protection: general cannot be hidden and is protected
+    const generalSection = resolved.sections.find((s) => s.key === 'general');
+    expect(generalSection?.protected).toBe(true);
+    expect(generalSection?.visible).toBe(true);
+    expect(generalSection?.label).toBe('Workforce Details');
+
+    // 2. Optional section visibility: skills is hidden and not protected
+    const skillsSection = resolved.sections.find((s) => s.key === 'skills');
+    expect(skillsSection?.protected).toBe(false);
+    expect(skillsSection?.visible).toBe(false);
+
+    // 3. Custom section resolution
+    const customSection = resolved.sections.find((s) => s.key === 'custom_sec_equipment');
+    expect(customSection).toBeDefined();
+    expect(customSection?.origin).toBe('custom');
+    expect(customSection?.configurable).toBe(true);
+    expect(customSection?.visible).toBe(true);
+    expect(customSection?.protected).toBe(false);
+    expect(customSection?.label).toBe('Equipment & Hardware');
+    expect(customSection?.fields).toHaveLength(1);
+    expect(customSection?.fields[0]?.label).toBe('Laptop Serial Number');
+
+    // 4. Section ordering: custom_sec_equipment is order 1, general is order 2, personal is order 3
+    expect(resolved.sections[0]?.key).toBe('custom_sec_equipment');
+    expect(resolved.sections[0]?.order).toBe(1);
+    expect(resolved.sections[1]?.key).toBe('general');
+    expect(resolved.sections[1]?.order).toBe(2);
+    expect(resolved.sections[2]?.key).toBe('personal');
+    expect(resolved.sections[2]?.order).toBe(3);
+  });
 });
 
 describe('Override validation', () => {

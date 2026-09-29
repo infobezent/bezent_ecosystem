@@ -18,6 +18,9 @@ export interface RegistrationSectionConfig {
   id: string;
   label: string;
   configurable: boolean;
+  visible?: boolean;
+  order?: number;
+  description?: string | null;
 }
 
 export interface RegistrationFieldConfig {
@@ -49,11 +52,21 @@ export type RegistrationFieldSettingInput = FormFieldSettingInput;
 
 /** Projects a resolved form onto the Registration configuration (form order kept). */
 export function toRegistrationConfiguration(form: ResolvedForm): RegistrationConfiguration {
+  const meta = form.form?.metadata;
   return {
     sections: form.sections.map((section) => ({
       id: section.key,
-      label: section.label,
+      label: meta?.sections?.[section.key]?.title || section.label,
       configurable: section.configurable,
+      visible:
+        meta?.sections?.[section.key]?.visible !== undefined
+          ? meta.sections[section.key]!.visible !== false
+          : section.visible !== false,
+      order: section.order,
+      description:
+        meta?.sections?.[section.key]?.description !== undefined
+          ? meta.sections[section.key]!.description
+          : section.description,
     })),
     fields: form.sections.flatMap((section) =>
       section.fields.map((field) => ({

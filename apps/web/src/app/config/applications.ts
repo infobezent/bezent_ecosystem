@@ -1,4 +1,7 @@
 import { hrmsApplication } from '../../applications/hrms';
+import { superAdminApplication } from '../../applications/super-admin';
+import { companyAdminApplication } from '../../applications/company-admin';
+import { essApplication } from '../../applications/ess';
 import type { BezentApplication } from '../../shared/types/application';
 
 /**
@@ -6,7 +9,12 @@ import type { BezentApplication } from '../../shared/types/application';
  * Projects later means registering its `BezentApplication` here — the shell,
  * sidebar, sub-navigation and More launcher need no change.
  */
-export const APPLICATIONS: readonly BezentApplication[] = [hrmsApplication];
+export const APPLICATIONS: readonly BezentApplication[] = [
+  hrmsApplication,
+  superAdminApplication,
+  companyAdminApplication,
+  essApplication,
+];
 
 /** Application opened at `/`. */
 export const DEFAULT_APPLICATION: BezentApplication = hrmsApplication;

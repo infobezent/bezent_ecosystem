@@ -13,7 +13,7 @@ import {
   Toolbar,
   Checkbox,
 } from '../../../../design-system/components';
-import { useCustomFields } from '../../settings/context/CustomFieldsContext';
+import { useCustomFieldsOptional } from '../../settings/context/CustomFieldsContext';
 
 import type {
   OnboardingCardConfig,
@@ -648,15 +648,15 @@ export function PersonalInformation({ employeeId }: PersonalInformationProps) {
     setNominees(nominees.map((n) => (n.id === id ? { ...n, [field]: value } : n)));
   };
 
-  let customCards: OnboardingCardConfig[] = [];
-  let customFields: OnboardingFieldConfig[] = [];
-  try {
-    const ctx = useCustomFields();
-    customCards = ctx.cards.filter((c) => c.sectionId === 'personal');
-    customFields = ctx.fields.filter((f) => f.sectionId === 'personal');
-  } catch {
-    // fallback if context is not present
-  }
+  // Optional custom-fields context (only present inside the settings builder).
+  // Called unconditionally at render scope to satisfy React's Rules of Hooks.
+  const customCtxOptional = useCustomFieldsOptional();
+  const customCards: OnboardingCardConfig[] = customCtxOptional
+    ? customCtxOptional.cards.filter((c) => c.sectionId === 'personal')
+    : [];
+  const customFields: OnboardingFieldConfig[] = customCtxOptional
+    ? customCtxOptional.fields.filter((f) => f.sectionId === 'personal')
+    : [];
 
   const renderCustomFieldsForCard = (cardId: string) => {
     const fieldsInCard = customFields.filter((f) => f.cardId === cardId && f.isCustom);

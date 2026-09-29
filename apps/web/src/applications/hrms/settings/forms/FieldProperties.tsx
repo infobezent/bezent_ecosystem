@@ -8,6 +8,7 @@ import {
   Inline,
   Input,
   Label,
+  Modal,
   Pane,
   Select,
   Stack,
@@ -16,6 +17,13 @@ import {
 import { BezentIcon } from '../../../../design-system/icons';
 import type { FormFieldWidth, ResolvedFormField, ResolvedFormSection } from '../api/formsApi';
 import { CanvasFieldControl } from './FormCanvas';
+
+export interface SubgroupPropertiesData {
+  key: string;
+  title: string;
+  description?: string;
+  sectionKey: string;
+}
 
 export interface FieldPropertiesProps {
   field: ResolvedFormField | null;
@@ -26,6 +34,22 @@ export interface FieldPropertiesProps {
     kind: string;
   };
   activeSection?: ResolvedFormSection | null;
+  sectionTitle?: string;
+  sectionDescription?: string;
+  sectionVisible?: boolean;
+  sectionOrderIndex?: number;
+  totalSections?: number;
+  isMandatorySection?: boolean;
+  selectedSubgroup?: SubgroupPropertiesData | null;
+  onUpdateSectionTitle?: (sectionKey: string, title: string) => void;
+  onUpdateSectionDescription?: (sectionKey: string, description: string) => void;
+  onUpdateSectionVisibility?: (sectionKey: string, visible: boolean) => void;
+  onMoveSectionUp?: (sectionKey: string) => void;
+  onMoveSectionDown?: (sectionKey: string) => void;
+  onAddSection?: (title: string, description?: string) => void;
+  onDeleteSection?: (sectionKey: string) => void;
+  onUpdateSubgroupTitle?: (groupKey: string, title: string) => void;
+  onUpdateSubgroupDescription?: (groupKey: string, description: string) => void;
   onUpdateField: (updated: ResolvedFormField) => void;
   onDeleteField: (fieldKey: string) => void;
   onDeselectField?: () => void;
@@ -35,11 +59,43 @@ export function FieldProperties({
   field,
   form,
   activeSection,
+  sectionTitle,
+  sectionDescription,
+  sectionVisible,
+  sectionOrderIndex,
+  totalSections,
+  isMandatorySection,
+  selectedSubgroup,
+  onUpdateSectionTitle,
+  onUpdateSectionDescription,
+  onUpdateSectionVisibility,
+  onMoveSectionUp,
+  onMoveSectionDown,
+  onAddSection,
+  onDeleteSection,
+  onUpdateSubgroupTitle,
+  onUpdateSubgroupDescription,
   onUpdateField,
   onDeleteField,
 }: FieldPropertiesProps) {
-  // Tabs: 'form' | 'field'
-  const [panelTab, setPanelTab] = useState<'form' | 'field'>(field ? 'field' : 'form');
+  // Tabs: 'form' | 'subgroup' | 'field'
+  const [panelTab, setPanelTab] = useState<'form' | 'subgroup' | 'field'>(
+    selectedSubgroup ? 'subgroup' : field ? 'field' : 'form',
+  );
+
+  // Section management modal state
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newSectionTitle, setNewSectionTitle] = useState('');
+  const [newSectionDescription, setNewSectionDescription] = useState('');
+  const [addSectionError, setAddSectionError] = useState<string | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  // When active section changes with no field or subgroup selected, display Form Properties
+  useEffect(() => {
+    if (!field && !selectedSubgroup) {
+      setPanelTab('form');
+    }
+  }, [activeSection?.key, field, selectedSubgroup]);
 
   // Auto switch to 'field' when a field is selected
   useEffect(() => {
@@ -47,6 +103,13 @@ export function FieldProperties({
       setPanelTab('field');
     }
   }, [field?.key]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto switch to 'subgroup' when a subgroup is selected
+  useEffect(() => {
+    if (selectedSubgroup) {
+      setPanelTab('subgroup');
+    }
+  }, [selectedSubgroup?.key]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const isCustom = field?.origin === 'custom';
   const isProtected = field?.protected ?? false;
@@ -127,7 +190,7 @@ export function FieldProperties({
       scroll="y"
       aria-label="Properties Panel"
     >
-      {/* Top Tabs: Form Properties | Field Properties */}
+      {/* Top Tabs: Form Properties | Subgroup Properties | Field Properties */}
       <div className="bezent-properties-tabs">
         <button
           type="button"
@@ -135,6 +198,13 @@ export function FieldProperties({
           onClick={() => setPanelTab('form')}
         >
           Form Properties
+        </button>
+        <button
+          type="button"
+          className={`bezent-properties-tab ${panelTab === 'subgroup' ? 'is-active' : ''}`.trim()}
+          onClick={() => setPanelTab('subgroup')}
+        >
+          Subgroup Properties
         </button>
         <button
           type="button"
@@ -245,31 +315,206 @@ export function FieldProperties({
             </Inline>
           </div>
 
-          {/* Active Section Info */}
+          {/* Active Section Info & Editing */}
           {activeSection && (
             <div className="bezent-inspector-section">
-              <div className="bezent-inspector-heading">ACTIVE CHAPTER</div>
+              <div className="bezent-inspector-heading">ACTIVE CHAPTER / SECTION</div>
+              <Input
+                label="Section Identifier"
+                size="sm"
+                readOnly
+                value={activeSection.key}
+              />
+              <Input
+                label="Section Title"
+                size="sm"
+                value={sectionTitle ?? activeSection.label}
+                onChange={(e) => onUpdateSectionTitle?.(activeSection.key, e.target.value)}
+                placeholder="Section Title"
+                required
+              />
+              <Input
+                label="Section Description"
+                size="sm"
+                value={sectionDescription ?? activeSection.description ?? ''}
+                onChange={(e) => onUpdateSectionDescription?.(activeSection.key, e.target.value)}
+                placeholder="Section Description"
+              />
+              <Switch
+                label="Section Visibility"
+                checked={sectionVisible ?? activeSection.visible !== false}
+                disabled={isMandatorySection}
+                onChange={(e) =>
+                  onUpdateSectionVisibility?.(activeSection.key, e.target.checked)
+                }
+              />
+              {isMandatorySection && (
+                <Label as="span" size="sm">
+                  Mandatory system section. Cannot be hidden from employee registration.
+                </Label>
+              )}
+              <div className="bezent-inspector-subheading">
+                <Label as="span" size="sm">
+                  <strong>Section Order</strong>
+                </Label>
+              </div>
               <Inline justify="between" align="center">
                 <Label as="span" size="sm">
-                  <strong>{activeSection.label}</strong>
+                  Position {(sectionOrderIndex ?? 0) + 1} of {totalSections ?? 1}
                 </Label>
+                <Inline gap="xs">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    disabled={sectionOrderIndex === undefined || sectionOrderIndex <= 0}
+                    onClick={() => onMoveSectionUp?.(activeSection.key)}
+                    leftIcon={<BezentIcon name="chevronUp" size={14} />}
+                  >
+                    Move Up
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    disabled={
+                      sectionOrderIndex === undefined ||
+                      totalSections === undefined ||
+                      sectionOrderIndex >= totalSections - 1
+                    }
+                    onClick={() => onMoveSectionDown?.(activeSection.key)}
+                    leftIcon={<BezentIcon name="chevronDown" size={14} />}
+                  >
+                    Move Down
+                  </Button>
+                </Inline>
+              </Inline>
+              <Inline justify="between" align="center">
                 <Badge
-                  variant={activeSection.configurable ? 'success' : 'neutral'}
+                  variant={
+                    activeSection.origin === 'custom'
+                      ? 'info'
+                      : activeSection.configurable
+                        ? 'success'
+                        : 'neutral'
+                  }
                   size="sm"
                 >
-                  {activeSection.configurable ? 'Configurable' : 'Standard'}
+                  {activeSection.origin === 'custom'
+                    ? 'Custom Section'
+                    : activeSection.configurable
+                      ? 'Configurable System Section'
+                      : 'Standard System Section'}
                 </Badge>
+                <Label as="span" size="sm">
+                  {activeSection.fields.length}{' '}
+                  {activeSection.fields.length === 1 ? 'field' : 'fields'} configured
+                </Label>
               </Inline>
-              <Label as="span" size="sm">
-                {activeSection.fields.length}{' '}
-                {activeSection.fields.length === 1 ? 'field' : 'fields'} configured
-              </Label>
             </div>
           )}
+
+          {/* Section Management */}
+          <div className="bezent-inspector-section">
+            <div className="bezent-inspector-heading">SECTION MANAGEMENT</div>
+            <Stack gap="sm">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  setNewSectionTitle('');
+                  setNewSectionDescription('');
+                  setAddSectionError(null);
+                  setIsAddModalOpen(true);
+                }}
+                leftIcon={<BezentIcon name="add" size={14} />}
+              >
+                Add Section
+              </Button>
+              {activeSection?.origin === 'custom' ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsDeleteModalOpen(true)}
+                  leftIcon={<BezentIcon name="delete" size={14} />}
+                >
+                  Delete Section
+                </Button>
+              ) : (
+                <Label as="span" size="sm">
+                  System sections are protected and cannot be deleted.
+                </Label>
+              )}
+            </Stack>
+          </div>
         </div>
       )}
 
-      {/* ─── TAB 2: FIELD PROPERTIES ────────────────────────────────────────── */}
+      {/* ─── TAB 2: SUBGROUP PROPERTIES ─────────────────────────────────────── */}
+      {panelTab === 'subgroup' &&
+        (!selectedSubgroup ? (
+          <div className="bezent-inspector-content">
+            <EmptyState
+              size="compact"
+              hideIllustration
+              title="No subgroup selected"
+              description="Click on any subgroup heading in the form canvas to inspect and edit its title and description."
+            />
+          </div>
+        ) : (
+          <div className="bezent-inspector-content">
+            <div className="bezent-inspector-header">
+              <Inline justify="between" align="center">
+                <h3 className="bezent-inspector-title">{selectedSubgroup.title}</h3>
+                <Badge variant="info" size="sm">
+                  Subgroup
+                </Badge>
+              </Inline>
+              <Label as="span" size="sm">
+                Identifier: <code>{selectedSubgroup.key}</code>
+              </Label>
+            </div>
+
+            {/* Subgroup Basic */}
+            <div className="bezent-inspector-section">
+              <div className="bezent-inspector-heading">SUBGROUP PROPERTIES</div>
+              <Input
+                label="Subgroup Identifier"
+                size="sm"
+                readOnly
+                value={selectedSubgroup.key}
+              />
+              <Input
+                label="Subgroup Title"
+                size="sm"
+                value={selectedSubgroup.title}
+                onChange={(e) => onUpdateSubgroupTitle?.(selectedSubgroup.key, e.target.value)}
+                placeholder="Subgroup Title"
+                required
+              />
+              <Input
+                label="Subgroup Description"
+                size="sm"
+                value={selectedSubgroup.description ?? ''}
+                onChange={(e) =>
+                  onUpdateSubgroupDescription?.(selectedSubgroup.key, e.target.value)
+                }
+                placeholder="Optional description or guidance text for this subgroup"
+              />
+            </div>
+
+            {/* Parent section context */}
+            <div className="bezent-inspector-section">
+              <div className="bezent-inspector-heading">SECTION CONTEXT</div>
+              <Input
+                label="Parent Section"
+                size="sm"
+                readOnly
+                value={activeSection?.label ?? selectedSubgroup.sectionKey}
+              />
+            </div>
+          </div>
+        ))}
+
+      {/* ─── TAB 3: FIELD PROPERTIES ────────────────────────────────────────── */}
       {panelTab === 'field' && (
         !field ? (
           <div className="bezent-inspector-content">
@@ -565,6 +810,93 @@ export function FieldProperties({
           </div>
         )
       )}
+
+      {/* Modal: Add Custom Section */}
+      <Modal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        title="Add Custom Section"
+        description="Create a new custom chapter in the Employee Registration form with its own fields and configuration."
+        footer={
+          <Inline justify="end" gap="sm">
+            <Button variant="outline" size="sm" onClick={() => setIsAddModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                if (!newSectionTitle.trim()) {
+                  setAddSectionError('Section title is required.');
+                  return;
+                }
+                onAddSection?.(newSectionTitle.trim(), newSectionDescription.trim() || undefined);
+                setIsAddModalOpen(false);
+              }}
+            >
+              Add Section
+            </Button>
+          </Inline>
+        }
+      >
+        <Stack gap="md">
+          {addSectionError && (
+            <Alert variant="danger" title="Validation Error">
+              {addSectionError}
+            </Alert>
+          )}
+          <Input
+            label="Section Title"
+            size="sm"
+            required
+            placeholder="e.g. Additional Certifications"
+            value={newSectionTitle}
+            onChange={(e) => {
+              setNewSectionTitle(e.target.value);
+              if (addSectionError) setAddSectionError(null);
+            }}
+          />
+          <Input
+            label="Section Description"
+            size="sm"
+            placeholder="Optional section description"
+            value={newSectionDescription}
+            onChange={(e) => setNewSectionDescription(e.target.value)}
+          />
+        </Stack>
+      </Modal>
+
+      {/* Modal: Delete Custom Section Confirmation */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        title="Delete Custom Section"
+        description={`Are you sure you want to delete "${activeSection?.label}"?`}
+        footer={
+          <Inline justify="end" gap="sm">
+            <Button variant="outline" size="sm" onClick={() => setIsDeleteModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => {
+                if (!activeSection) return;
+                onDeleteSection?.(activeSection.key);
+                setIsDeleteModalOpen(false);
+              }}
+            >
+              Delete Section
+            </Button>
+          </Inline>
+        }
+      >
+        <Stack gap="md">
+          <Alert variant="warning" title="Confirm Section Deletion">
+            This will permanently remove the custom section <strong>{activeSection?.label}</strong> ({activeSection?.key}) and all custom fields within it from the employee registration form.
+          </Alert>
+        </Stack>
+      </Modal>
     </Pane>
   );
 }

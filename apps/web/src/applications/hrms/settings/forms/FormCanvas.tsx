@@ -1,5 +1,8 @@
-import { useDraggable, useDroppable } from '@dnd-kit/core';
+import { useDroppable } from '@dnd-kit/core';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import {
+  Alert,
   Badge,
   Button,
   Checkbox,
@@ -15,24 +18,32 @@ import {
   Stack,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
-import type { ResolvedFormField, ResolvedFormSection } from '../api/formsApi';
+import type { FormCustomizationMetadata, ResolvedFormField, ResolvedFormSection } from '../api/formsApi';
 import {
   CHAPTER_METADATA,
   getGroupsForSection,
   type ChapterDefinition,
 } from './types';
 
+// ─── Public prop surface ────────────────────────────────────────────────────
+
 export interface FormCanvasProps {
   sections: ResolvedFormSection[];
   activeSectionKey?: string;
   selectedFieldKey: string | null;
+  selectedSubgroupKey?: string | null;
+  sectionTitle?: string;
+  sectionDescription?: string;
+  metadata?: FormCustomizationMetadata;
   onSelectSection?: (sectionKey: string) => void;
   onSelectField: (fieldKey: string) => void;
-  onMoveField: (fieldKey: string, direction: 'up' | 'down') => void;
-  onMoveToSection?: (fieldKey: string, targetSectionKey: string) => void;
+  onSelectSubgroup?: (groupKey: string) => void;
+  /** Fired when a custom field should be deleted. */
   onDeleteField: (fieldKey: string) => void;
   onQuickAddField?: (sectionKey: string) => void;
 }
+
+// ─── Sample data helpers ─────────────────────────────────────────────────────
 
 function getSampleOptionsForField(fieldKey: string): Array<{ value: string; label: string }> {
   switch (fieldKey) {
@@ -126,6 +137,8 @@ function getSampleOptionsForField(fieldKey: string): Array<{ value: string; labe
       ];
   }
 }
+
+// ─── Field input preview ──────────────────────────────────────────────────────
 
 export function CanvasFieldControl({ field }: { field: ResolvedFormField }) {
   if (field.key === 'general.employeeId') {
@@ -228,51 +241,60 @@ export function CanvasFieldControl({ field }: { field: ResolvedFormField }) {
   }
 }
 
-interface DraggableCanvasFieldProps {
+// ─── Sortable field card ──────────────────────────────────────────────────────
+
+interface SortableCanvasFieldProps {
   field: ResolvedFormField;
   isSelected: boolean;
-  canMoveUp: boolean;
-  canMoveDown: boolean;
+  groupKey?: string;
+  sectionKey?: string;
   onSelect: () => void;
-  onMoveUp: () => void;
-  onMoveDown: () => void;
   onDelete: () => void;
 }
 
-function DraggableCanvasField({
+/**
+ * A single field card in the Form Canvas.
+ *
+ * The drag handle (⠿) is **always** rendered so users can drag without first
+ * selecting a field. Up/Down arrow buttons have been removed; reordering is
+ * done exclusively via drag-and-drop. The Delete button remains visible only
+ * for selected custom (company-owned) fields, preserving system-field protection.
+ */
+function SortableCanvasField({
   field,
   isSelected,
-  canMoveUp,
-  canMoveDown,
+  groupKey,
+  sectionKey,
   onSelect,
-  onMoveUp,
-  onMoveDown,
   onDelete,
-}: DraggableCanvasFieldProps) {
-  const { attributes, listeners, setNodeRef, isDragging, transform } = useDraggable({
-    id: `field-${field.key}`,
+}: SortableCanvasFieldProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+    isOver,
+  } = useSortable({
+    id: field.key,
     data: {
       isField: true,
       fieldKey: field.key,
+      groupKey,
+      sectionKey,
     },
   });
 
-  const { setNodeRef: setDropRef } = useDroppable({
-    id: `drop-field-${field.key}`,
-    data: {
-      isField: true,
-      fieldKey: field.key,
-    },
-  });
-
-  // UI-RULES Rule 1 exception: live runtime transform during drag
-  const dragStyle = transform
-    ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-        opacity: isDragging ? 0.4 : 1,
-        zIndex: 50,
-      }
-    : undefined;
+  // UI-RULES Rule 1 exception: live drag transform — cannot be expressed as a
+  // static CSS class. `transition` animates other fields smoothly into their
+  // new positions while dragging and after a drop.
+  const dragStyle = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.35 : 1,
+    zIndex: isDragging ? 50 : undefined,
+  };
 
   const labelNode = (
     <Inline gap="xs" align="center">
@@ -292,13 +314,17 @@ function DraggableCanvasField({
 
   return (
     <div
-      ref={(el) => {
-        setNodeRef(el);
-        setDropRef(el);
-      }}
+      ref={setNodeRef}
       // eslint-disable-next-line no-restricted-syntax
       style={dragStyle}
-      className={`bezent-canvas-field-wrapper ${isSelected ? 'is-selected' : ''}`.trim()}
+      className={[
+        'bezent-canvas-field-wrapper',
+        isSelected ? 'is-selected' : '',
+        isDragging ? 'is-dragging' : '',
+        isOver ? 'is-drop-target' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
     >
       <FormField
         labelNode={labelNode}
@@ -311,63 +337,129 @@ function DraggableCanvasField({
         <CanvasFieldControl field={field} />
       </FormField>
 
-      {isSelected && (
+      {/*
+       * Drag handle — always visible so users do not need to select a field
+       * before grabbing it. The `.bezent-canvas-field-handle` class positions
+       * this absolutely inside the wrapper.
+       */}
+      <button
+        type="button"
+        className="bezent-canvas-field-handle"
+        {...listeners}
+        {...attributes}
+        title="Drag to reorder"
+        aria-label="Drag handle"
+        tabIndex={0}
+      >
+        <BezentIcon name="more" size={14} />
+      </button>
+
+      {/*
+       * Contextual action toolbar — only shown when the field is selected.
+       * No Up/Down buttons; ordering is done via the drag handle above.
+       * Delete is restricted to custom (company-owned) fields; system and
+       * protected fields are never deletable.
+       */}
+      {isSelected && field.origin === 'custom' && (
         <div className="bezent-canvas-field-toolbar" onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
-            className="bezent-canvas-field-handle"
-            {...listeners}
-            {...attributes}
-            title="Drag to reorder"
-            aria-label="Drag handle"
-            tabIndex={0}
+            className="bezent-canvas-field-btn bezent-canvas-field-btn--danger"
+            onClick={onDelete}
+            title="Delete custom field"
+            aria-label="Delete field"
           >
-            <BezentIcon name="more" size={14} />
+            <BezentIcon name="delete" size={12} />
           </button>
-          <button
-            type="button"
-            className="bezent-canvas-field-btn"
-            disabled={!canMoveUp}
-            onClick={onMoveUp}
-            title="Move up"
-            aria-label="Move up"
-          >
-            <BezentIcon name="chevronUp" size={12} />
-          </button>
-          <button
-            type="button"
-            className="bezent-canvas-field-btn"
-            disabled={!canMoveDown}
-            onClick={onMoveDown}
-            title="Move down"
-            aria-label="Move down"
-          >
-            <BezentIcon name="chevronDown" size={12} />
-          </button>
-          {field.origin === 'custom' && (
-            <button
-              type="button"
-              className="bezent-canvas-field-btn bezent-canvas-field-btn--danger"
-              onClick={onDelete}
-              title="Delete custom field"
-              aria-label="Delete field"
-            >
-              <BezentIcon name="delete" size={12} />
-            </button>
-          )}
         </div>
       )}
     </div>
   );
 }
 
+/**
+ * Drop target positioned at the end of a subgroup. Allows dropping toolbox items
+ * or dragging fields directly to the end of this subgroup.
+ */
+export function SubgroupDropZone({
+  sectionKey,
+  groupKey,
+  groupTitle,
+}: {
+  sectionKey: string;
+  groupKey: string;
+  groupTitle: string;
+}) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `subgroup-end:${sectionKey}:${groupKey}`,
+    data: {
+      isSubgroupEnd: true,
+      sectionKey,
+      groupKey,
+    },
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`bezent-subgroup-dropzone ${isOver ? 'is-over' : ''}`.trim()}
+      data-testid={`dropzone-${groupKey}`}
+      title={`Drop field here to place at end of ${groupTitle}`}
+    >
+      <span className="bezent-subgroup-dropzone__label">
+        <BezentIcon name="add" size={12} />
+        {isOver ? `Drop at end of ${groupTitle}` : `Add to ${groupTitle}`}
+      </span>
+    </div>
+  );
+}
+
+export function SubgroupEmptyDropZone({
+  sectionKey,
+  groupKey,
+  groupTitle,
+}: {
+  sectionKey: string;
+  groupKey: string;
+  groupTitle: string;
+}) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `subgroup-empty:${sectionKey}:${groupKey}`,
+    data: {
+      isSubgroupEmpty: true,
+      sectionKey,
+      groupKey,
+    },
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`bezent-subgroup-dropzone bezent-subgroup-dropzone--empty ${isOver ? 'is-over' : ''}`.trim()}
+      data-testid={`dropzone-empty-${groupKey}`}
+      title={`Drop field here into empty subgroup ${groupTitle}`}
+    >
+      <span className="bezent-subgroup-dropzone__label">
+        <BezentIcon name="add" size={12} />
+        {isOver ? `Drop into ${groupTitle}` : `Empty Subgroup: Drop fields here`}
+      </span>
+    </div>
+  );
+}
+
+// ─── Canvas ───────────────────────────────────────────────────────────────────
+
 export function FormCanvas({
   sections,
   activeSectionKey,
   selectedFieldKey,
+  selectedSubgroupKey,
+  sectionTitle,
+  sectionDescription,
+  metadata,
   onSelectSection,
   onSelectField,
-  onMoveField,
+  onSelectSubgroup,
   onDeleteField,
 }: FormCanvasProps) {
   // Determine effective active section key
@@ -393,7 +485,9 @@ export function FormCanvas({
       kicker: 'CHAPTER // 01',
     };
 
-  // Droppable container for active section
+  // Droppable zone for the active section — used by toolbox items dragged from
+  // the Field Toolbox panel on the left. Field-to-field reordering uses
+  // SortableContext (below) instead.
   const { setNodeRef } = useDroppable({
     id: `section-${effectiveSectionKey}`,
     data: {
@@ -402,7 +496,30 @@ export function FormCanvas({
   });
 
   const sectionFields = currentSection?.fields ?? [];
-  const groups = currentSection ? getGroupsForSection(currentSection.key, sectionFields) : [];
+
+  // ROOT-CAUSE FIX: getGroupsForSection assigns fields to groups using the
+  // *static* KNOWN_SECTION_GROUPS.fieldKeys order, ignoring the `order`
+  // property entirely. After each drag, arrayMove updates `order` values in
+  // React state — but without re-sorting here, getGroupsForSection would
+  // re-render fields in the original static sequence every time, making the
+  // reorder appear invisible to the user.
+  //
+  // Fix: after grouping (which determines GROUP MEMBERSHIP), sort each
+  // group's fields by their `order` property (which determines POSITION
+  // within the group). This is the only place where `order` is consumed
+  // for rendering; the rest of the pipeline already writes it correctly.
+  const groups = currentSection
+    ? getGroupsForSection(currentSection.key, sectionFields, metadata).map((group) => ({
+        ...group,
+        fields: [...group.fields].sort((a, b) => a.order - b.order),
+      }))
+    : [];
+
+  // Flat list of field IDs in their exact rendered sequence — groups are
+  // concatenated in definition order, fields within each group are sorted by
+  // `order`. SortableContext items MUST match this rendered order for
+  // verticalListSortingStrategy to compute correct drop positions.
+  const sortableIds = groups.flatMap((g) => g.fields.map((f) => f.key));
 
   return (
     <Pane size="fluid" surface="canvas" aria-label="Form Canvas">
@@ -419,9 +536,14 @@ export function FormCanvas({
               onChange={(e) => onSelectSection?.(e.target.value)}
               options={sections.map((s) => {
                 const meta = CHAPTER_METADATA.find((c) => c.key === s.key);
+                const customSecTitle = metadata?.sections?.[s.key]?.title;
+                const isHidden =
+                  metadata?.sections?.[s.key]?.visible === false ||
+                  (s.visible === false && metadata?.sections?.[s.key]?.visible !== true);
+                const baseTitle = customSecTitle || meta?.label || s.label;
                 return {
                   value: s.key,
-                  label: meta?.label ?? s.label,
+                  label: isHidden ? `${baseTitle} (Hidden)` : baseTitle,
                 };
               })}
             />
@@ -441,10 +563,23 @@ export function FormCanvas({
       {/* 2. Scrollable Canvas Body */}
       <div className="bezent-canvas-body" ref={setNodeRef}>
         <div className="bezent-canvas-paper">
+          {/* Section Hidden Alert */}
+          {((metadata?.sections?.[effectiveSectionKey]?.visible === false) ||
+            (currentSection?.visible === false &&
+              metadata?.sections?.[effectiveSectionKey]?.visible !== true)) && (
+            <Alert variant="warning" title="Hidden Section">
+              This section is currently hidden from employee registration. Its configuration and custom fields remain preserved.
+            </Alert>
+          )}
+
           {/* Section Header */}
           <div className="bezent-canvas-header-clean">
-            <h2 className="bezent-canvas-title-clean">{chapterMeta.title}</h2>
-            <p className="bezent-canvas-desc-clean">{chapterMeta.description}</p>
+            <h2 className="bezent-canvas-title-clean">
+              {sectionTitle || chapterMeta.title}
+            </h2>
+            <p className="bezent-canvas-desc-clean">
+              {sectionDescription ?? chapterMeta.description}
+            </p>
           </div>
 
           {/* Form Content: Actual Registration Appearance */}
@@ -457,34 +592,84 @@ export function FormCanvas({
                 description="Click or drag fields from the Field Toolbox on the left to add them to this section."
               />
             ) : (
-              <Stack gap="xl">
-                {groups.map((group) => (
-                  <FormSection
-                    key={group.key}
-                    title={group.title}
-                    description={group.description}
-                  >
-                    <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                      {group.fields.map((field) => {
-                        const globalIdx = sectionFields.findIndex((f) => f.key === field.key);
-                        return (
-                          <DraggableCanvasField
-                            key={field.key}
-                            field={field}
-                            isSelected={selectedFieldKey === field.key}
-                            canMoveUp={globalIdx > 0}
-                            canMoveDown={globalIdx < sectionFields.length - 1}
-                            onSelect={() => onSelectField(field.key)}
-                            onMoveUp={() => onMoveField(field.key, 'up')}
-                            onMoveDown={() => onMoveField(field.key, 'down')}
-                            onDelete={() => onDeleteField(field.key)}
+              /*
+               * SortableContext owns the flat ordered list of all fields in this
+               * section. Each SortableCanvasField registers itself via useSortable
+               * with the same ID. When the user releases a drag, FormEditorPage
+               * calls arrayMove and re-indexes the `order` property so the new
+               * sequence is persisted on Save.
+               */
+              <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
+                <Stack gap="xl">
+                  {groups.map((group) => {
+                    const isSubgroupSelected = selectedSubgroupKey === group.key;
+                    return (
+                      <div
+                        key={group.key}
+                        className={`bezent-canvas-subgroup ${isSubgroupSelected ? 'is-selected' : ''}`}
+                        onClick={(e) => {
+                          if ((e.target as HTMLElement).closest('.bezent-canvas-field-wrapper')) return;
+                          onSelectSubgroup?.(group.key);
+                        }}
+                      >
+                        <FormSection
+                          title={group.title}
+                          description={group.description}
+                          actions={
+                            <Inline gap="xs" align="center">
+                              {isSubgroupSelected && (
+                                <Badge variant="info" size="sm">
+                                  Selected Subgroup
+                                </Badge>
+                              )}
+                              <Button
+                                variant={isSubgroupSelected ? 'secondary' : 'text'}
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onSelectSubgroup?.(group.key);
+                                }}
+                                title="Edit subgroup properties"
+                                aria-label={`Edit ${group.title}`}
+                              >
+                                <BezentIcon name="edit" size={12} />
+                                {isSubgroupSelected ? 'Editing' : 'Edit Subgroup'}
+                              </Button>
+                            </Inline>
+                          }
+                        >
+                          {group.fields.length > 0 ? (
+                            <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                              {group.fields.map((field) => (
+                                <SortableCanvasField
+                                  key={field.key}
+                                  field={field}
+                                  groupKey={group.key}
+                                  sectionKey={effectiveSectionKey}
+                                  isSelected={selectedFieldKey === field.key}
+                                  onSelect={() => onSelectField(field.key)}
+                                  onDelete={() => onDeleteField(field.key)}
+                                />
+                              ))}
+                            </FormGrid>
+                          ) : (
+                            <SubgroupEmptyDropZone
+                              sectionKey={effectiveSectionKey}
+                              groupKey={group.key}
+                              groupTitle={group.title}
+                            />
+                          )}
+                          <SubgroupDropZone
+                            sectionKey={effectiveSectionKey}
+                            groupKey={group.key}
+                            groupTitle={group.title}
                           />
-                        );
-                      })}
-                    </FormGrid>
-                  </FormSection>
-                ))}
-              </Stack>
+                        </FormSection>
+                      </div>
+                    );
+                  })}
+                </Stack>
+              </SortableContext>
             )
           ) : (
             <Stack gap="md">
@@ -493,21 +678,21 @@ export function FormCanvas({
                   title={`${chapterMeta.label.toUpperCase()} FIELDS`}
                   description="Standard platform attributes defined for this chapter"
                 >
-                  <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                    {sectionFields.map((field, idx) => (
-                      <DraggableCanvasField
-                        key={field.key}
-                        field={field}
-                        isSelected={selectedFieldKey === field.key}
-                        canMoveUp={idx > 0}
-                        canMoveDown={idx < sectionFields.length - 1}
-                        onSelect={() => onSelectField(field.key)}
-                        onMoveUp={() => onMoveField(field.key, 'up')}
-                        onMoveDown={() => onMoveField(field.key, 'down')}
-                        onDelete={() => onDeleteField(field.key)}
-                      />
-                    ))}
-                  </FormGrid>
+                  <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
+                    <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                      {[...sectionFields]
+                        .sort((a, b) => a.order - b.order)
+                        .map((field) => (
+                        <SortableCanvasField
+                          key={field.key}
+                          field={field}
+                          isSelected={selectedFieldKey === field.key}
+                          onSelect={() => onSelectField(field.key)}
+                          onDelete={() => onDeleteField(field.key)}
+                        />
+                      ))}
+                    </FormGrid>
+                  </SortableContext>
                 </FormSection>
               )}
 
@@ -524,4 +709,3 @@ export function FormCanvas({
     </Pane>
   );
 }
-

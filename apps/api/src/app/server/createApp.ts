@@ -12,6 +12,10 @@ import { employeeRouter } from '../../applications/hrms/employees/routes/employe
 import { employeeActionRouter } from '../../applications/hrms/employee-administration/routes/employeeAction.route.js';
 import { employeeDocumentRouter } from '../../applications/hrms/documents/routes/employeeDocument.route.js';
 import { formsRouter } from '../../applications/hrms/settings/forms/routes/forms.route.js';
+import { platformRouter } from '../../platform/routes.js';
+import { companyAdminRouter } from '../../platform/company-admin/routes/companyAdmin.routes.js';
+import { essRouter } from '../../applications/hrms/ess/routes/ess.routes.js';
+import { requireModuleAccess } from '../../platform/modules/middleware/moduleAccess.middleware.js';
 
 /**
  * Builds the Express application. Kept separate from `main.ts` so it can be
@@ -32,6 +36,13 @@ export function createApp(): Express {
   // Platform & Domain routers under /api/v1
   app.use('/api/v1', healthRouter);
   app.use('/api/v1', contextRouter);
+  app.use('/api/v1/platform', platformRouter);
+  app.use('/api/v1/company-admin', companyAdminRouter);
+  app.use('/api/v1/ess', essRouter);
+
+  // Enforce module entitlement on HRMS domain routes
+  app.use('/api/v1/hrms', requireModuleAccess('hrms'));
+
   app.use('/api/v1', organizationRouter);
   app.use('/api/v1', onboardingRouter);
   app.use('/api/v1', onboardingSettingsRouter);

@@ -1,6 +1,9 @@
 import type { ReactNode } from 'react';
 import { ThemeProvider } from './ThemeProvider';
 import { DevContextProvider } from '../../platform/context/DevContext';
+import { SuperAdminAuthProvider } from '../../applications/super-admin/context/SuperAdminAuthContext';
+import { CompanyAdminProvider } from '../../applications/company-admin/context/CompanyAdminContext';
+import { EssProvider } from '../../applications/ess/context/EssContext';
 
 interface AppProvidersProps {
   children: ReactNode;
@@ -14,7 +17,13 @@ interface AppProvidersProps {
 export function AppProviders({ children }: AppProvidersProps) {
   return (
     <ThemeProvider>
-      <DevContextProvider>{children}</DevContextProvider>
+      <DevContextProvider>
+        <SuperAdminAuthProvider>
+          <CompanyAdminProvider>
+            <EssProvider>{children}</EssProvider>
+          </CompanyAdminProvider>
+        </SuperAdminAuthProvider>
+      </DevContextProvider>
     </ThemeProvider>
   );
 }

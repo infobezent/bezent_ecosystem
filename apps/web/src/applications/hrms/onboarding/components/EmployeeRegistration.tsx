@@ -162,8 +162,7 @@ interface EmployeeRegistrationProps {
   initialDraft?: EmployeeRegistrationDraft | null;
 }
 
-import { useCustomFields } from '../../settings/context/CustomFieldsContext';
-import type { OnboardingCardConfig } from '../../settings/types/settingsCenter';
+import { useCustomFieldsOptional } from '../../settings/context/CustomFieldsContext';
 
 export function EmployeeRegistration({
   isOpen = true,
@@ -171,37 +170,39 @@ export function EmployeeRegistration({
   onSave,
   initialDraft,
 }: EmployeeRegistrationProps) {
-  let allSections: Array<{ id: string; label: string }> = [...REGISTRATION_SECTIONS];
-  let customFields: Array<{
-    id: string;
-    sectionId: string;
-    cardId: string;
-    label: string;
-    fieldType: string;
-    required?: boolean;
-    readOnly?: boolean;
-    defaultValue?: string;
-    options?: string[];
-  }> = [];
-  let customCards: OnboardingCardConfig[] = [];
-  try {
-    const customCtx = useCustomFields();
-    customFields = customCtx.fields;
-    customCards = customCtx.cards;
-    if (customCtx.sections && customCtx.sections.length > 0) {
-      allSections = customCtx.sections
-        .filter((s) => !s.hidden)
-        .map((s) => ({ id: s.id, label: s.title }));
+  // Optional: custom-fields context is only present inside the settings builder;
+  // the registration form renders without it in production. Call the hook
+  // unconditionally (Rules of Hooks) and branch on the returned value.
+  const customCtx = useCustomFieldsOptional();
+  // Resolved company Registration configuration (field visibility / required).
+  const registrationConfig = useRegistrationConfig();
+
+  const customFields = customCtx?.fields ?? [];
+  const customCards = customCtx?.cards ?? [];
+
+  const allSections: Array<{ id: string; label: string; description?: string | null }> = useMemo(() => {
+    if (registrationConfig?.sections && registrationConfig.sections.length > 0) {
+      return registrationConfig.sections
+        .filter((s: { visible?: boolean }) => s.visible !== false)
+        .map((s: { id: string; label: string; description?: string | null }) => ({
+          id: s.id,
+          label: s.label,
+          description: s.description,
+        }));
     }
-  } catch {
-    // fallback if outside context
-  }
+    if (customCtx && customCtx.sections && customCtx.sections.length > 0) {
+      return customCtx.sections
+        .filter((s) => !s.hidden)
+        .map((s) => ({ id: s.id, label: s.title, description: null }));
+    }
+    return [...REGISTRATION_SECTIONS];
+  }, [registrationConfig, customCtx]);
+
   const [activeSection, setActiveSection] = useState<RegistrationSectionId>(
     initialDraft ? initialDraft.activeSection : 'general',
   );
 
-  // Resolved company Registration configuration (field visibility / required).
-  const registrationConfig = useRegistrationConfig();
+  const [customFieldValues, setCustomFieldValues] = useState<Record<string, unknown>>({});
 
   // General Form State
   const [employeeId, setEmployeeId] = useState(initialDraft?.employeeId || '');
@@ -819,14 +820,16 @@ export function EmployeeRegistration({
 
   const currentChapterIndex = allSections.findIndex((s) => s.id === activeSection);
   const chapterMatch = REGISTRATION_CHAPTERS.find((c) => c.id === activeSection);
-  const currentChapter: RegistrationChapterMeta = chapterMatch || {
+  const activeSectionMeta = allSections.find((s) => s.id === activeSection);
+  const currentChapter: RegistrationChapterMeta = {
     id: activeSection,
     stepNumber: String(currentChapterIndex >= 0 ? currentChapterIndex + 1 : 1).padStart(2, '0'),
-    label: allSections.find((s) => s.id === activeSection)?.label || 'Custom Section',
-    title: (
-      allSections.find((s) => s.id === activeSection)?.label || 'CUSTOM SECTION'
-    ).toUpperCase(),
-    description: 'Configured custom fields and section details.',
+    label: activeSectionMeta?.label || chapterMatch?.label || 'Custom Section',
+    title: (activeSectionMeta?.label || chapterMatch?.title || 'CUSTOM SECTION').toUpperCase(),
+    description:
+      activeSectionMeta?.description ??
+      chapterMatch?.description ??
+      'Configured custom fields and section details.',
     kicker: `CHAPTER // ${String(currentChapterIndex >= 0 ? currentChapterIndex + 1 : 1).padStart(2, '0')}`,
   };
 
@@ -834,10 +837,10 @@ export function EmployeeRegistration({
     const meta = REGISTRATION_CHAPTERS.find((c) => c.id === s.id);
     return {
       id: s.id,
-      stepNumber: meta ? meta.stepNumber : String(idx + 1).padStart(2, '0'),
+      stepNumber: String(idx + 1).padStart(2, '0'),
       label: s.label,
-      title: meta ? meta.title : s.label.toUpperCase(),
-      description: meta ? meta.description : '',
+      title: s.label.toUpperCase(),
+      description: s.description ?? meta?.description ?? '',
     };
   });
 
@@ -1432,6 +1435,62 @@ export function EmployeeRegistration({
                       </Card>
                     );
                   })}
+
+                {/* Form Engine Custom Fields for this section */}
+                {(() => {
+                  const engineFields = registrationConfig.customFields(activeSection);
+                  if (engineFields.length === 0) return null;
+                  return (
+                    <Card padding="md">
+                      <Stack gap="sm">
+                        <CardTitle>
+                          {allSections.find((s) => s.id === activeSection)?.label || 'Custom Fields'}
+                        </CardTitle>
+                        <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                          {engineFields.map((f) => (
+                            <RegistrationField
+                              key={f.key}
+                              fieldKey={f.key}
+                              value={customFieldValues[f.key] ?? ''}
+                              span={f.width === 'full' ? 'full' : undefined}
+                            >
+                              {f.type === 'dropdown' || f.type === 'select' ? (
+                                <Select
+                                  value={(customFieldValues[f.key] as string) || ''}
+                                  onChange={(e) =>
+                                    setCustomFieldValues((prev) => ({
+                                      ...prev,
+                                      [f.key]: e.target.value,
+                                    }))
+                                  }
+                                  options={[
+                                    { value: '', label: `Select ${f.label}` },
+                                    ...(((f.config?.options as Array<{ value: string; label: string }>) ?? []).map((opt) => ({
+                                      value: opt.value,
+                                      label: opt.label,
+                                    }))),
+                                  ]}
+                                />
+                              ) : (
+                                <Input
+                                  value={(customFieldValues[f.key] as string) || ''}
+                                  onChange={(e) =>
+                                    setCustomFieldValues((prev) => ({
+                                      ...prev,
+                                      [f.key]: e.target.value,
+                                    }))
+                                  }
+                                  type={f.type === 'date' ? 'date' : f.type === 'number' ? 'number' : 'text'}
+                                  placeholder={f.description || `Enter ${f.label}`}
+                                />
+                              )}
+                            </RegistrationField>
+                          ))}
+                        </FormGrid>
+                      </Stack>
+                    </Card>
+                  );
+                })()}
               </Stack>
             </Stack>
           )}

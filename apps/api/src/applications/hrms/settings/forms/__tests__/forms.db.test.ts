@@ -305,4 +305,193 @@ describe('HRMS Forms API — Employee Registration (MySQL)', () => {
     const conflict = await saveForm(headersA, { ...payload, version });
     expect(conflict.status).toBe(409);
   });
+
+  it('persists and resolves metadata for section titles, descriptions, and subgroup mappings', async () => {
+    const current = await getForm(headersB);
+    const version = current.body.data.form.version as number;
+    const generalSection = current.body.data.sections.find((s: { key: string }) => s.key === 'general');
+    const personalSection = current.body.data.sections.find((s: { key: string }) => s.key === 'personal');
+
+    const metadata = {
+      sections: {
+        general: {
+          title: 'Modified General Details',
+          description: 'Custom explanation for general details',
+        },
+      },
+      subgroups: {
+        employment_details: {
+          title: 'Work Information',
+          description: 'Official employment records',
+        },
+      },
+      fieldSubgroups: {
+        'general.designation': 'employment_details',
+      },
+    };
+
+    const mapField = (f: {
+      key: string;
+      origin: string;
+      label: string;
+      description: string | null;
+      enabled: boolean;
+      required: boolean;
+      width: string;
+      type?: string;
+      config?: Record<string, unknown>;
+    }) => ({
+      key: f.key,
+      origin: f.origin,
+      label: f.label,
+      description: f.description,
+      enabled: f.enabled,
+      required: f.required,
+      width: f.width,
+      ...(f.origin === 'custom' && f.type ? { type: f.type } : {}),
+      ...(f.origin === 'custom' && f.config ? { config: f.config } : {}),
+    });
+
+    const payload = {
+      version,
+      metadata,
+      sections: [
+        {
+          key: 'general',
+          fields: generalSection.fields.map(mapField),
+        },
+        {
+          key: 'personal',
+          fields: personalSection.fields.map(mapField),
+        },
+      ],
+    };
+
+    const saveRes = await saveForm(headersB, payload);
+    expect(saveRes.status).toBe(200);
+
+    const reloaded = await getForm(headersB);
+    expect(reloaded.status).toBe(200);
+    expect(reloaded.body.data.form.metadata).toEqual(metadata);
+
+    const reloadedGeneral = reloaded.body.data.sections.find((s: { key: string }) => s.key === 'general');
+    expect(reloadedGeneral.label).toBe('Modified General Details');
+    expect(reloadedGeneral.description).toBe('Custom explanation for general details');
+
+    const designationField = reloadedGeneral.fields.find(
+      (f: { key: string }) => f.key === 'general.designation',
+    );
+    expect(designationField.config.groupKey).toBe('employment_details');
+  });
+
+  it('persists and resolves custom sections, section visibility, and section order across reload', async () => {
+    const current = await getForm(headersB);
+    const version = current.body.data.form.version as number;
+    const generalSection = current.body.data.sections.find((s: { key: string }) => s.key === 'general');
+    const personalSection = current.body.data.sections.find((s: { key: string }) => s.key === 'personal');
+
+    const customSecKey = 'custom_sec_compliance';
+    const customFieldKey = 'custom.0123456789abcdef0123456789abcdee';
+
+    const metadata = {
+      sections: {
+        skills: {
+          visible: false, // Hide optional system section
+        },
+      },
+      customSections: [
+        {
+          key: customSecKey,
+          title: 'Legal & Compliance',
+          description: 'Non-disclosure and statutory declarations',
+          visible: true,
+          order: 1,
+        },
+      ],
+      sectionOrder: [customSecKey, 'general', 'personal', 'skills'],
+    };
+
+    const mapField = (f: {
+      key: string;
+      origin: string;
+      label: string;
+      description: string | null;
+      enabled: boolean;
+      required: boolean;
+      width: string;
+      type?: string;
+      config?: Record<string, unknown>;
+    }) => ({
+      key: f.key,
+      origin: f.origin,
+      label: f.label,
+      description: f.description,
+      enabled: f.enabled,
+      required: f.required,
+      width: f.width,
+      ...(f.origin === 'custom' && f.type ? { type: f.type } : {}),
+      ...(f.origin === 'custom' && f.config ? { config: f.config } : {}),
+    });
+
+    const payload = {
+      version,
+      metadata,
+      sections: [
+        {
+          key: 'general',
+          fields: generalSection.fields.map(mapField),
+        },
+        {
+          key: 'personal',
+          fields: personalSection.fields.map(mapField),
+        },
+        {
+          key: customSecKey,
+          fields: [
+            {
+              key: customFieldKey,
+              origin: 'custom',
+              label: 'Background Check ID',
+              description: 'Verification agency case ID',
+              enabled: true,
+              required: true,
+              width: 'half',
+              type: 'single_line',
+              config: {},
+            },
+          ],
+        },
+      ],
+    };
+
+    const saveRes = await saveForm(headersB, payload);
+    expect(saveRes.status).toBe(200);
+
+    const reloaded = await getForm(headersB);
+    expect(reloaded.status).toBe(200);
+
+    // 1. Verify custom section resolved
+    const reloadedCustomSec = reloaded.body.data.sections.find(
+      (s: { key: string }) => s.key === customSecKey,
+    );
+    expect(reloadedCustomSec).toBeDefined();
+    expect(reloadedCustomSec.origin).toBe('custom');
+    expect(reloadedCustomSec.label).toBe('Legal & Compliance');
+    expect(reloadedCustomSec.fields).toHaveLength(1);
+    expect(reloadedCustomSec.fields[0].key).toBe(customFieldKey);
+
+    // 2. Verify section ordering
+    expect(reloaded.body.data.sections[0].key).toBe(customSecKey);
+    expect(reloaded.body.data.sections[0].order).toBe(1);
+    expect(reloaded.body.data.sections[1].key).toBe('general');
+    expect(reloaded.body.data.sections[1].order).toBe(2);
+
+    // 3. Verify section visibility
+    const reloadedSkills = reloaded.body.data.sections.find(
+      (s: { key: string }) => s.key === 'skills',
+    );
+    expect(reloadedSkills.visible).toBe(false);
+  });
 });
+
+
