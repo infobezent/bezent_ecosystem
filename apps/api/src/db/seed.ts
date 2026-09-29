@@ -23,7 +23,7 @@ import {
   employeeNotifications,
 } from './schema.js';
 import { eq } from 'drizzle-orm';
-import { hashPassword } from '../platform/auth/security.js';
+import { createUnusableCredential } from '../platform/auth/security.js';
 
 /**
  * Deterministic Development Seed Script
@@ -599,10 +599,9 @@ export async function seedDatabase() {
 
   // 9. Initial Super Admin Identity
   const superAdminEmail = (process.env.SUPER_ADMIN_EMAIL || 'superadmin@bezent.com').toLowerCase().trim();
-  const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD || 'BezentSuperAdmin2026!';
   const existingSa = await db.select().from(users).where(eq(users.email, superAdminEmail));
   if (existingSa.length === 0) {
-    const { hash, salt } = hashPassword(superAdminPassword);
+    const { hash, salt } = createUnusableCredential(); // passwordless: signs in with Email OTP
     await db.insert(users).values({
       id: 'usr_sa_demo_01',
       email: superAdminEmail,
@@ -617,11 +616,10 @@ export async function seedDatabase() {
 
   // 10. Initial Company Admin Identity
   const companyAdminEmail = 'admin@bezent-demo.example';
-  const companyAdminPassword = 'BezentCompanyAdmin2026!';
   const existingCa = await db.select().from(users).where(eq(users.email, companyAdminEmail));
   let companyAdminUserId = 'usr_ca_demo_01';
   if (existingCa.length === 0) {
-    const { hash, salt } = hashPassword(companyAdminPassword);
+    const { hash, salt } = createUnusableCredential(); // passwordless: signs in with Email OTP
     await db.insert(users).values({
       id: companyAdminUserId,
       email: companyAdminEmail,
@@ -681,11 +679,10 @@ export async function seedDatabase() {
 
   // 13. Initial Sample Employee User (Arjun Mehta - emp_demo_002)
   const employeeEmail = 'arjun.mehta@bezent-demo.example';
-  const employeePassword = 'BezentEmployee2026!';
   const existingEmpUser = await db.select().from(users).where(eq(users.email, employeeEmail));
   let empUserId = 'usr_emp_arjun_01';
   if (existingEmpUser.length === 0) {
-    const { hash, salt } = hashPassword(employeePassword);
+    const { hash, salt } = createUnusableCredential(); // passwordless: signs in with Email OTP
     await db.insert(users).values({
       id: empUserId,
       email: employeeEmail,

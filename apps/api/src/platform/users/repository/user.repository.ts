@@ -8,7 +8,7 @@ import type {
   UserFilter,
   UserMembershipRecord,
 } from '../types/user.types.js';
-import { generateSurrogateId, hashPassword } from '../../auth/security.js';
+import { createUnusableCredential, generateSurrogateId } from '../../auth/security.js';
 
 export class PlatformUserRepository {
   async findById(id: string): Promise<PlatformUserRecord | null> {
@@ -64,11 +64,11 @@ export class PlatformUserRepository {
     return this.findById(u.id);
   }
 
-  async create(dto: CreateUserDto, password?: string): Promise<PlatformUserRecord> {
+  /** Creates a passwordless identity (ADR-018): the user signs in with Email OTP. */
+  async create(dto: CreateUserDto): Promise<PlatformUserRecord> {
     const db = getDb();
     const id = generateSurrogateId('usr');
-    const pwd = password || dto.password || 'BezentTemp2026!';
-    const { hash, salt } = hashPassword(pwd);
+    const { hash, salt } = createUnusableCredential();
 
     await db.insert(users).values({
       id,

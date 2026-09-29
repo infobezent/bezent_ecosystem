@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
+import { hrmsTestHeaders, removeHrmsTestAccess } from '../../../../../platform/__tests__/support/testSession.js';
 import { eq, inArray } from 'drizzle-orm';
 import { createApp } from '../../../../../app/server/createApp.js';
 import { getDb, pingDatabase } from '../../../../../db/connection.js';
@@ -17,6 +18,8 @@ import {
  */
 describe('HRMS Forms API — Employee Registration (MySQL)', () => {
   const app = createApp();
+  /** Authenticated HR operator agent: every request passes the real auth + RBAC chain. */
+  let hrms: ReturnType<typeof request.agent>;
   const tenantId = 'tenant_demo_01';
   const run = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
   const companyA = `comp_ff_a_${run}`;
@@ -34,19 +37,20 @@ describe('HRMS Forms API — Employee Registration (MySQL)', () => {
       }[];
     };
   };
-  const getForm = (headers: Record<string, string>) => request(app).get(base).set(headers);
+  const getForm = (headers: Record<string, string>) => hrms.get(base).set(headers);
   const getOverrides = (headers: Record<string, string>) =>
-    request(app).get(`${base}/overrides`).set(headers);
+    hrms.get(`${base}/overrides`).set(headers);
   const put = (headers: Record<string, string>, fields: unknown[]) =>
-    request(app).put(`${base}/overrides`).set(headers).send({ fields });
+    hrms.put(`${base}/overrides`).set(headers).send({ fields });
   const saveForm = (headers: Record<string, string>, payload: string | object) =>
-    request(app).put(base).set(headers).send(payload);
+    hrms.put(base).set(headers).send(payload);
   const fieldOf = (body: Body, key: string) =>
     body.data.sections.flatMap((s) => s.fields).find((f) => f.key === key);
   const rowsOf = (companyId: string) =>
     getDb().select().from(formFieldOverrides).where(eq(formFieldOverrides.companyId, companyId));
 
   beforeAll(async () => {
+    hrms = request.agent(app).set(await hrmsTestHeaders());
     const connected = await pingDatabase();
     if (!connected) {
       throw new Error(
@@ -71,6 +75,9 @@ describe('HRMS Forms API — Employee Registration (MySQL)', () => {
           status: 'active',
         },
       ]);
+    // Authorized in both companies, so isolation is proven at the data layer.
+    await hrmsTestHeaders(companyA);
+    await hrmsTestHeaders(companyB);
   });
 
   afterAll(async () => {
@@ -84,6 +91,7 @@ describe('HRMS Forms API — Employee Registration (MySQL)', () => {
     await db
       .delete(formCustomizations)
       .where(inArray(formCustomizations.companyId, [companyA, companyB]));
+    await removeHrmsTestAccess([companyA, companyB]);
     await db.delete(companies).where(inArray(companies.id, [companyA, companyB]));
   });
 
@@ -120,7 +128,7 @@ describe('HRMS Forms API — Employee Registration (MySQL)', () => {
   });
 
   it('returns 404 for an unknown form', async () => {
-    const res = await request(app).get('/api/v1/hrms/settings/forms/no-such-form').set(headersA);
+    const res = await hrms.get('/api/v1/hrms/settings/forms/no-such-form').set(headersA);
     expect(res.status).toBe(404);
   });
 

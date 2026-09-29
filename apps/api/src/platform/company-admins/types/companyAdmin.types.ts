@@ -23,15 +23,19 @@ export interface AssignCompanyAdminDto {
     firstName: string;
     lastName: string;
     phone?: string;
-    tempPassword?: string;
   };
+}
+
+/**
+ * Outcome of telling a user how to sign in (ADR-018: Email OTP, no password
+ * is ever generated or shown). The access grant itself is already committed.
+ */
+export interface SignInInvitationDelivery {
+  status: 'INVITATION_EMAILED' | 'INVITATION_EMAIL_FAILED';
+  message: string;
 }
 
 export interface AssignmentResult {
   assignment: CompanyAdminAssignment;
-  invitationDelivery: {
-    status: 'MANUAL_DELIVERY_REQUIRED' | 'ALREADY_ASSIGNED';
-    message: string;
-    temporaryPassword?: string;
-  };
+  invitationDelivery: SignInInvitationDelivery;
 }

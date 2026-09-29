@@ -1,10 +1,10 @@
-import crypto from 'node:crypto';
 import { companyAdminRepository, CompanyAdminRepository } from '../repository/companyAdmin.repository.js';
 import { platformUserRepository, PlatformUserRepository } from '../../users/repository/user.repository.js';
 import { companyRepository, CompanyRepository } from '../../companies/repository/company.repository.js';
 import { tenantRepository, TenantRepository } from '../../tenants/repository/tenant.repository.js';
 import { auditService, AuditService } from '../../audit/service/audit.service.js';
 import { roleManagementService } from '../../access/service/roleManagement.service.js';
+import { emailService, EmailService } from '../../email/service/email.service.js';
 import { getDb } from '../../../db/connection.js';
 import { NotFoundError, BadRequestError } from '../../../app/errors/AppError.js';
 import type {
@@ -20,6 +20,7 @@ export class CompanyAdminService {
     private readonly companyRepo: CompanyRepository = companyRepository,
     private readonly tenantRepo: TenantRepository = tenantRepository,
     private readonly audit: AuditService = auditService,
+    private readonly email: EmailService = emailService,
   ) {}
 
   async listCompanyAdmins(tenantId?: string, companyId?: string): Promise<CompanyAdminAssignment[]> {
@@ -48,8 +49,6 @@ export class CompanyAdminService {
     }
 
     let targetUserId: string;
-    let temporaryPassword: string | undefined;
-    let isNewUser = false;
 
     if (dto.userId) {
       const user = await this.userRepo.findById(dto.userId);
@@ -79,31 +78,31 @@ export class CompanyAdminService {
         }
         targetUserId = existingUser.id;
       } else {
-        temporaryPassword = dto.newUser.tempPassword || `Admin!${crypto.randomBytes(4).toString('hex')}`;
-        const createdUser = await this.userRepo.create(
-          {
-            email: dto.newUser.email,
-            firstName: dto.newUser.firstName,
-            lastName: dto.newUser.lastName,
-            phone: dto.newUser.phone,
-            isSuperAdmin: false,
-          },
-          temporaryPassword,
-        );
+        // Passwordless identity (ADR-018): the administrator signs in with Email OTP.
+        const createdUser = await this.userRepo.create({
+          email: dto.newUser.email,
+          firstName: dto.newUser.firstName,
+          lastName: dto.newUser.lastName,
+          phone: dto.newUser.phone,
+          isSuperAdmin: false,
+        });
         targetUserId = createdUser.id;
-        isNewUser = true;
       }
     } else {
       throw new BadRequestError('Either userId or newUser details must be provided');
     }
 
-    const membershipId = await this.repo.createMembership(dto.tenantId, dto.companyId, targetUserId);
-    await roleManagementService.syncMembershipRole(getDb(), {
-      userId: targetUserId,
-      tenantId: dto.tenantId,
-      companyId: dto.companyId,
-      role: 'company_admin',
-      actorId: actor?.id ?? null,
+    // Membership and role assignment are one decision: written atomically.
+    const membershipId = await getDb().transaction(async (tx) => {
+      const id = await this.repo.createMembership(dto.tenantId, dto.companyId, targetUserId, tx);
+      await roleManagementService.syncMembershipRole(tx, {
+        userId: targetUserId,
+        tenantId: dto.tenantId,
+        companyId: dto.companyId,
+        role: 'company_admin',
+        actorId: actor?.id ?? null,
+      });
+      return id;
     });
     const assignedUser = await this.userRepo.findById(targetUserId);
 
@@ -134,15 +133,25 @@ export class CompanyAdminService {
       assignedAt: new Date().toISOString(),
     };
 
+    const delivery = await this.email.sendSignInInvitation({
+      to: assignment.email,
+      firstName: assignment.firstName,
+      companyName: company.name,
+      roleLabel: 'Company Administrator',
+    });
+
     return {
       assignment,
-      invitationDelivery: {
-        status: isNewUser ? 'MANUAL_DELIVERY_REQUIRED' : 'ALREADY_ASSIGNED',
-        message: isNewUser
-          ? 'Email delivery integration is not configured. Provide these initial credentials securely to the company administrator.'
-          : 'User has been assigned as Company Administrator.',
-        temporaryPassword,
-      },
+      invitationDelivery:
+        delivery === 'sent'
+          ? {
+              status: 'INVITATION_EMAILED',
+              message: `${assignment.email} was assigned as Company Administrator and emailed sign-in instructions (Email OTP).`,
+            }
+          : {
+              status: 'INVITATION_EMAIL_FAILED',
+              message: `${assignment.email} was assigned as Company Administrator, but the sign-in email could not be sent. They can still sign in with Email OTP at the BEZENT login page.`,
+            },
     };
   }
 
@@ -152,13 +161,15 @@ export class CompanyAdminService {
       throw new NotFoundError(`Membership '${membershipId}' not found`);
     }
 
-    await this.repo.revokeMembership(membershipId);
-    await roleManagementService.revokeSystemRole(getDb(), {
-      userId: membership.userId,
-      tenantId: membership.tenantId,
-      companyId: membership.companyId,
-      role: 'company_admin',
-      actorId: actor?.id ?? null,
+    await getDb().transaction(async (tx) => {
+      await this.repo.revokeMembership(membershipId, tx);
+      await roleManagementService.revokeSystemRole(tx, {
+        userId: membership.userId,
+        tenantId: membership.tenantId,
+        companyId: membership.companyId,
+        role: 'company_admin',
+        actorId: actor?.id ?? null,
+      });
     });
 
     await this.audit.logEvent({

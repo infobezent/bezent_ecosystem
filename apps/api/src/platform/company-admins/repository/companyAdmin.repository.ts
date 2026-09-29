@@ -3,6 +3,7 @@ import { getDb } from '../../../db/connection.js';
 import { memberships, users, companies, tenants } from '../../../db/schema.js';
 import type { CompanyAdminAssignment } from '../types/companyAdmin.types.js';
 import { generateSurrogateId } from '../../auth/security.js';
+import type { DbExecutor } from '../../access/repository/access.repository.js';
 
 export class CompanyAdminRepository {
   async list(tenantId?: string, companyId?: string): Promise<CompanyAdminAssignment[]> {
@@ -54,8 +55,12 @@ export class CompanyAdminRepository {
     }));
   }
 
-  async findMembership(tenantId: string, companyId: string, userId: string) {
-    const db = getDb();
+  async findMembership(
+    tenantId: string,
+    companyId: string,
+    userId: string,
+    db: DbExecutor = getDb(),
+  ) {
     const [row] = await db
       .select()
       .from(memberships)
@@ -79,9 +84,13 @@ export class CompanyAdminRepository {
     return row ?? null;
   }
 
-  async createMembership(tenantId: string, companyId: string, userId: string): Promise<string> {
-    const db = getDb();
-    const existing = await this.findMembership(tenantId, companyId, userId);
+  async createMembership(
+    tenantId: string,
+    companyId: string,
+    userId: string,
+    db: DbExecutor = getDb(),
+  ): Promise<string> {
+    const existing = await this.findMembership(tenantId, companyId, userId, db);
     if (existing) {
       if (existing.status !== 'active') {
         await db
@@ -104,8 +113,7 @@ export class CompanyAdminRepository {
     return id;
   }
 
-  async revokeMembership(membershipId: string): Promise<void> {
-    const db = getDb();
+  async revokeMembership(membershipId: string, db: DbExecutor = getDb()): Promise<void> {
     await db
       .update(memberships)
       .set({ status: 'revoked' })

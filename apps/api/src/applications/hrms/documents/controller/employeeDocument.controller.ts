@@ -1,13 +1,13 @@
 import type { Request, Response, NextFunction } from 'express';
 import { EmployeeDocumentService } from '../service/employeeDocument.service.js';
 import { AppError } from '../../../../app/errors/AppError.js';
-import type { DevContext } from '../../../../platform/context/devContext.js';
+import type { CompanyContext } from '../../../../platform/access/types/access.types.js';
 
-function requireContext(req: Request): DevContext {
-  if (!req.devContext) {
+function requireContext(req: Request): CompanyContext {
+  if (!req.companyContext) {
     throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
   }
-  return req.devContext;
+  return req.companyContext;
 }
 
 export class EmployeeDocumentController {

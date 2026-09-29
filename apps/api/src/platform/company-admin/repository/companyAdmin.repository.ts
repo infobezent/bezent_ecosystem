@@ -1,5 +1,6 @@
 import { eq, and, sql, desc, or, like } from 'drizzle-orm';
 import { getDb } from '../../../db/connection.js';
+import type { DbExecutor } from '../../access/repository/access.repository.js';
 import {
   companies,
   tenants,
@@ -151,8 +152,7 @@ export class CompanyAdminRepository {
   }
 
   /** The user's membership in the company, preferring an active row when several exist. */
-  async findMembership(companyId: string, userId: string) {
-    const db = getDb();
+  async findMembership(companyId: string, userId: string, db: DbExecutor = getDb()) {
     const [mem] = await db
       .select()
       .from(memberships)
@@ -161,23 +161,24 @@ export class CompanyAdminRepository {
     return mem ?? null;
   }
 
-  async findMembershipById(membershipId: string) {
-    const db = getDb();
+  async findMembershipById(membershipId: string, db: DbExecutor = getDb()) {
     const [mem] = await db.select().from(memberships).where(eq(memberships.id, membershipId));
     return mem ?? null;
   }
 
-  async createMembership(data: NewMembership) {
-    const db = getDb();
+  async createMembership(data: NewMembership, db: DbExecutor = getDb()) {
     await db.insert(memberships).values(data);
     const [mem] = await db.select().from(memberships).where(eq(memberships.id, data.id));
     return mem!;
   }
 
-  async updateMembershipRole(membershipId: string, role: 'company_admin' | 'hr_manager' | 'employee' | 'user') {
-    const db = getDb();
+  async updateMembershipRole(
+    membershipId: string,
+    role: 'company_admin' | 'hr_manager' | 'employee' | 'user',
+    db: DbExecutor = getDb(),
+  ) {
     await db.update(memberships).set({ role }).where(eq(memberships.id, membershipId));
-    return this.findMembershipById(membershipId);
+    return this.findMembershipById(membershipId, db);
   }
 
   /** Sets the status of every membership row the user has in the company; returns one of them. */
@@ -185,13 +186,13 @@ export class CompanyAdminRepository {
     companyId: string,
     userId: string,
     status: 'active' | 'inactive' | 'revoked',
+    db: DbExecutor = getDb(),
   ) {
-    const db = getDb();
     await db
       .update(memberships)
       .set({ status })
       .where(and(eq(memberships.companyId, companyId), eq(memberships.userId, userId)));
-    return this.findMembership(companyId, userId);
+    return this.findMembership(companyId, userId, db);
   }
 
   // Invitations

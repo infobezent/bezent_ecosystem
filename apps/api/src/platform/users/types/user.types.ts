@@ -24,9 +24,9 @@ export interface PlatformUserRecord {
   memberships?: UserMembershipRecord[];
 }
 
+/** New identities are passwordless (ADR-018); there is no password input. */
 export interface CreateUserDto {
   email: string;
-  password?: string;
   firstName: string;
   lastName: string;
   phone?: string | null;

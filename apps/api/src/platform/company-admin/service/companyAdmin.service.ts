@@ -32,6 +32,7 @@ import {
   roleManagementService,
   RoleManagementService,
 } from '../../access/service/roleManagement.service.js';
+import { emailService, EmailService } from '../../email/service/email.service.js';
 import { getDb } from '../../../db/connection.js';
 import type {
   AuthorizedCompanySummary,
@@ -50,6 +51,13 @@ import type { AuthenticatedUser } from '../../auth/types/auth.types.js';
 
 const INVITATION_TTL_DAYS = 7;
 const MEMBERSHIP_ROLES: readonly SystemRoleCode[] = ['company_admin', 'hr_manager', 'employee', 'user'];
+const ROLE_LABELS: Record<SystemRoleCode, string> = {
+  company_admin: 'Company Administrator',
+  hr_manager: 'HR',
+  manager: 'Manager',
+  employee: 'Employee',
+  user: 'Member',
+};
 
 export class CompanyAdminService {
   constructor(
@@ -59,6 +67,7 @@ export class CompanyAdminService {
     private readonly audit: AuditService = auditService,
     private readonly resolver: AccessResolverService = accessResolverService,
     private readonly roleMgmt: RoleManagementService = roleManagementService,
+    private readonly email: EmailService = emailService,
   ) {}
 
   /**
@@ -213,67 +222,52 @@ export class CompanyAdminService {
       throw new BadRequestError(`Invalid role '${input.role}'`);
     }
 
-    // Check if user already exists
-    let user = await this.userRepo.findByEmail(email);
-    let userId: string;
+    // The identity is shared across companies; a new one is passwordless and
+    // signs in with Email OTP (ADR-018).
+    const existingUser = await this.userRepo.findByEmail(email);
+    const existingMem = existingUser
+      ? await this.repo.findMembership(companyId, existingUser.id)
+      : null;
+    if (existingMem && existingMem.status === 'active') {
+      throw new ConflictError(`User '${email}' is already an active member of this company`);
+    }
+    const user =
+      existingUser ??
+      (await this.userRepo.create({
+        email,
+        firstName: input.firstName.trim(),
+        lastName: input.lastName.trim(),
+        status: 'active',
+        isSuperAdmin: false,
+      }));
+    const userId = user.id;
 
-    if (user) {
-      userId = user.id;
-      // Check existing membership in this company
-      const existingMem = await this.repo.findMembership(companyId, userId);
-      if (existingMem && existingMem.status === 'active') {
-        throw new ConflictError(`User '${email}' is already an active member of this company`);
-      }
-
+    // Company access and the invited role are one decision: written atomically.
+    // The role is additive to any other roles the user holds in this company.
+    await getDb().transaction(async (tx) => {
       if (existingMem) {
-        // Reactivate membership with the requested role
-        await this.repo.updateMembershipRole(existingMem.id, input.role);
-        await this.repo.updateMembershipStatusForUser(companyId, userId, 'active');
+        await this.repo.updateMembershipRole(existingMem.id, input.role, tx);
+        await this.repo.updateMembershipStatusForUser(companyId, userId, 'active', tx);
       } else {
-        // Create new membership in this company
-        await this.repo.createMembership({
-          id: generateSurrogateId('mem'),
-          userId,
-          tenantId,
-          companyId,
-          role: input.role,
-          status: 'active',
-        });
+        await this.repo.createMembership(
+          {
+            id: generateSurrogateId('mem'),
+            userId,
+            tenantId,
+            companyId,
+            role: input.role,
+            status: 'active',
+          },
+          tx,
+        );
       }
-    } else {
-      // Create user identity
-      const tempPassword = crypto.randomBytes(16).toString('hex') + '!Aa1';
-
-      user = await this.userRepo.create(
-        {
-          email,
-          firstName: input.firstName.trim(),
-          lastName: input.lastName.trim(),
-          status: 'active',
-          isSuperAdmin: false,
-        },
-        tempPassword,
-      );
-      userId = user.id;
-
-      // Create membership
-      await this.repo.createMembership({
-        id: generateSurrogateId('mem'),
+      await this.roleMgmt.syncMembershipRole(tx, {
         userId,
         tenantId,
         companyId,
         role: input.role,
-        status: 'active',
+        actorId: actor.id,
       });
-    }
-
-    // The invited role becomes a role assignment in this company (additive).
-    await this.roleMgmt.syncMembershipRole(getDb(), {
-      userId,
-      tenantId,
-      companyId,
-      role: input.role,
-      actorId: actor.id,
     });
 
     // Generate secure invitation token
@@ -303,13 +297,33 @@ export class CompanyAdminService {
       metadata: { email, role: input.role, invitationId: inv?.id },
     });
 
+    const delivery = await this.sendInvitationEmail(companyId, email, user.firstName, input.role);
+
     return {
       invitation: inv,
       userId,
-      emailDeliveryStatus: 'not_configured' as const,
+      emailDeliveryStatus: delivery,
       message:
-        'User membership created and invitation generated. (External email delivery is not configured in this environment; invitation token is recorded in system).',
+        delivery === 'sent'
+          ? `${email} now has access and was emailed sign-in instructions (Email OTP).`
+          : `${email} now has access, but the sign-in email could not be sent. They can still sign in with Email OTP at the BEZENT login page.`,
     };
+  }
+
+  /** Emails an invited user how to sign in (Email OTP; no password is ever issued). */
+  private async sendInvitationEmail(
+    companyId: string,
+    email: string,
+    firstName: string,
+    role: SystemRoleCode,
+  ): Promise<'sent' | 'failed'> {
+    const company = await this.repo.getCompanyProfile(companyId);
+    return this.email.sendSignInInvitation({
+      to: email,
+      firstName,
+      companyName: company?.name ?? 'your company',
+      roleLabel: ROLE_LABELS[role],
+    });
   }
 
   async updateUserRole(
@@ -338,17 +352,17 @@ export class CompanyAdminService {
 
     // Legacy "change role" semantics: the previous primary role is replaced.
     // Other role assignments the user holds in this company are untouched.
-    await getDb().transaction((tx) =>
-      this.roleMgmt.syncMembershipRole(tx, {
+    const updated = await getDb().transaction(async (tx) => {
+      await this.roleMgmt.syncMembershipRole(tx, {
         userId: targetUserId,
         tenantId,
         companyId,
         role: newRole,
         previousRole: mem.role,
         actorId: actor.id,
-      }),
-    );
-    const updated = await this.repo.updateMembershipRole(mem.id, newRole);
+      });
+      return this.repo.updateMembershipRole(mem.id, newRole, tx);
+    });
 
     await this.audit.logEvent({
       actorUserId: actor.id,
@@ -441,10 +455,21 @@ export class CompanyAdminService {
       metadata: { email: inv.email },
     });
 
+    const invitee = await this.userRepo.findByEmail(inv.email);
+    const delivery = await this.sendInvitationEmail(
+      companyId,
+      inv.email,
+      invitee?.firstName ?? '',
+      inv.role,
+    );
+
     return {
       invitation: updated,
-      emailDeliveryStatus: 'not_configured' as const,
-      message: 'Invitation expiration extended by 7 days.',
+      emailDeliveryStatus: delivery,
+      message:
+        delivery === 'sent'
+          ? 'Invitation extended by 7 days and sign-in instructions emailed again.'
+          : 'Invitation extended by 7 days, but the sign-in email could not be sent.',
     };
   }
 

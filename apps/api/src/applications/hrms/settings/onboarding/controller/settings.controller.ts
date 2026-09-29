@@ -16,11 +16,11 @@ export class OnboardingSettingsController {
   constructor(private readonly service = new OnboardingSettingsService()) {}
 
   private getContext(req: Request) {
-    const devContext = req.devContext;
-    if (!devContext) {
+    const companyContext = req.companyContext;
+    if (!companyContext) {
       throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
     }
-    return devContext;
+    return companyContext;
   }
 
   // ==================== Aggregate ====================

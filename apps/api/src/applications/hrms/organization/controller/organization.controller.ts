@@ -7,12 +7,12 @@ export class OrganizationController {
 
   getMasters = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const devContext = req.devContext;
-      if (!devContext) {
+      const companyContext = req.companyContext;
+      if (!companyContext) {
         throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
       }
 
-      const masters = await this.service.getMasters(devContext.tenantId, devContext.companyId);
+      const masters = await this.service.getMasters(companyContext.tenantId, companyContext.companyId);
 
       res.json({
         data: masters,

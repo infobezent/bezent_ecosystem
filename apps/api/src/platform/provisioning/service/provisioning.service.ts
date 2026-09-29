@@ -1,4 +1,3 @@
-import crypto from 'node:crypto';
 import { eq, and } from 'drizzle-orm';
 import { getDb } from '../../../db/connection.js';
 import {
@@ -14,9 +13,11 @@ import { companyRepository, CompanyRepository } from '../../companies/repository
 import { platformUserRepository, PlatformUserRepository } from '../../users/repository/user.repository.js';
 import { auditService, AuditService } from '../../audit/service/audit.service.js';
 import { roleManagementService } from '../../access/service/roleManagement.service.js';
+import { emailService, EmailService } from '../../email/service/email.service.js';
 import { ConflictError, BadRequestError } from '../../../app/errors/AppError.js';
-import { generateSurrogateId, hashPassword } from '../../auth/security.js';
+import { createUnusableCredential, generateSurrogateId } from '../../auth/security.js';
 import type { CustomerProvisioningDto, ProvisioningResult } from '../types/provisioning.types.js';
+import type { SignInInvitationDelivery } from '../../company-admins/types/companyAdmin.types.js';
 import type { ModuleCode } from '../../modules/types/module.types.js';
 
 export class CustomerProvisioningService {
@@ -25,7 +26,31 @@ export class CustomerProvisioningService {
     private readonly companyRepo: CompanyRepository = companyRepository,
     private readonly userRepo: PlatformUserRepository = platformUserRepository,
     private readonly audit: AuditService = auditService,
+    private readonly email: EmailService = emailService,
   ) {}
+
+  /** Emails the new Company Administrator how to sign in (Email OTP; ADR-018). */
+  private async inviteAdministrator(
+    to: string,
+    firstName: string,
+    companyName: string,
+  ): Promise<SignInInvitationDelivery> {
+    const result = await this.email.sendSignInInvitation({
+      to,
+      firstName,
+      companyName,
+      roleLabel: 'Company Administrator',
+    });
+    return result === 'sent'
+      ? {
+          status: 'INVITATION_EMAILED',
+          message: `Customer provisioning complete. ${to} was emailed sign-in instructions (Email OTP).`,
+        }
+      : {
+          status: 'INVITATION_EMAIL_FAILED',
+          message: `Customer provisioning complete, but the sign-in email to ${to} could not be sent. The administrator can still sign in with Email OTP at the BEZENT login page.`,
+        };
+  }
 
   async validatePreflight(dto: CustomerProvisioningDto): Promise<{ valid: boolean; summary: string }> {
     const existingTenant = await this.tenantRepo.findByCode(dto.tenant.code);
@@ -58,7 +83,6 @@ export class CustomerProvisioningService {
     const tenantId = dto.tenant.id?.trim() || generateSurrogateId('tnt');
     const companyId = dto.company.id?.trim() || generateSurrogateId('comp');
     let targetUserId = dto.admin.userId?.trim();
-    let temporaryPassword: string | undefined;
     let isNewUser = false;
 
     // Determine or prepare company admin user
@@ -68,8 +92,6 @@ export class CustomerProvisioningService {
         targetUserId = existingUser.id;
       } else {
         targetUserId = generateSurrogateId('usr');
-        temporaryPassword =
-          dto.admin.newUser.tempPassword || `Admin!${crypto.randomBytes(4).toString('hex')}`;
         isNewUser = true;
       }
     }
@@ -122,9 +144,9 @@ export class CustomerProvisioningService {
         });
       }
 
-      // 5. Admin User (if new)
-      if (isNewUser && dto.admin.newUser && temporaryPassword) {
-        const { hash, salt } = hashPassword(temporaryPassword);
+      // 5. Admin User (if new) — passwordless identity; signs in with Email OTP.
+      if (isNewUser && dto.admin.newUser) {
+        const { hash, salt } = createUnusableCredential();
         await tx.insert(users).values({
           id: targetUserId!,
           email: dto.admin.newUser.email.toLowerCase().trim(),
@@ -201,13 +223,11 @@ export class CustomerProvisioningService {
         status: 'active',
         assignedAt: new Date().toISOString(),
       },
-      invitationDelivery: {
-        status: isNewUser ? 'MANUAL_DELIVERY_REQUIRED' : 'ALREADY_ASSIGNED',
-        message: isNewUser
-          ? 'Customer provisioning complete. Email service is not configured; supply the generated administrator password to the customer admin.'
-          : 'Customer provisioning complete. Existing user has been assigned as Company Administrator.',
-        temporaryPassword,
-      },
+      invitationDelivery: await this.inviteAdministrator(
+        assignedUser?.email ?? '',
+        assignedUser?.firstName ?? '',
+        createdCompany?.name ?? dto.company.name,
+      ),
       status: 'COMPLETED',
     };
 

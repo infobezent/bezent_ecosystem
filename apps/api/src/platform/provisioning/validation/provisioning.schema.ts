@@ -121,9 +121,6 @@ export function validateCustomerProvisioning(body: unknown): CustomerProvisionin
             phone: (a.newUser as Record<string, unknown>).phone
               ? String((a.newUser as Record<string, unknown>).phone).trim()
               : null,
-            tempPassword: (a.newUser as Record<string, unknown>).tempPassword
-              ? String((a.newUser as Record<string, unknown>).tempPassword)
-              : undefined,
           }
         : undefined,
     },

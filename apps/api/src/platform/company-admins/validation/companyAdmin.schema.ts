@@ -55,9 +55,6 @@ export function validateAssignCompanyAdmin(body: unknown): AssignCompanyAdminDto
           phone: (data.newUser as Record<string, unknown>).phone
             ? String((data.newUser as Record<string, unknown>).phone).trim()
             : undefined,
-          tempPassword: (data.newUser as Record<string, unknown>).tempPassword
-            ? String((data.newUser as Record<string, unknown>).tempPassword)
-            : undefined,
         }
       : undefined,
   };

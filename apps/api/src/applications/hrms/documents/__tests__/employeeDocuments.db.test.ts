@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
+import { hrmsTestHeaders, removeHrmsTestAccess } from '../../../../platform/__tests__/support/testSession.js';
 import { and, eq, inArray } from 'drizzle-orm';
 import { createApp } from '../../../../app/server/createApp.js';
 import { getDb, pingDatabase } from '../../../../db/connection.js';
@@ -14,6 +15,8 @@ import { expiryWindow, todayIsoDate } from '../service/employeeDocument.service.
  */
 describe('HRMS Employee Documents API (MySQL)', () => {
   const app = createApp();
+  /** Authenticated HR operator agent: every request passes the real auth + RBAC chain. */
+  let hrms: ReturnType<typeof request.agent>;
   const employeeRepo = new EmployeeRepository();
   const tenantId = 'tenant_demo_01';
   const companyId = 'comp_demo_01';
@@ -58,24 +61,25 @@ describe('HRMS Employee Documents API (MySQL)', () => {
     );
 
   function createDocument(body: Record<string, unknown>, headers = {}) {
-    return request(app).post('/api/v1/hrms/employee-documents').set(headers).send(body);
+    return hrms.post('/api/v1/hrms/employee-documents').set(headers).send(body);
   }
 
   function list(query: Record<string, string> = {}, headers = {}) {
-    return request(app)
+    return hrms
       .get('/api/v1/hrms/employee-documents')
       .set(headers)
       .query({ search: token, pageSize: '100', ...query });
   }
 
   beforeAll(async () => {
+    hrms = request.agent(app).set(await hrmsTestHeaders());
     const connected = await pingDatabase();
     if (!connected) {
       throw new Error(
         'MySQL database is unreachable. Start MySQL to run MySQL-backed integration tests.',
       );
     }
-    masters = (await request(app).get('/api/v1/hrms/organization/masters')).body.data;
+    masters = (await hrms.get('/api/v1/hrms/organization/masters')).body.data;
     await getDb()
       .insert(companies)
       .values({
@@ -85,6 +89,8 @@ describe('HRMS Employee Documents API (MySQL)', () => {
         code: `DOC${run}`.slice(0, 50),
         status: 'active',
       });
+    // Authorized in both companies, so isolation is proven at the data layer.
+    await hrmsTestHeaders(otherCompanyId);
 
     alice = await createEmployee('Alice', 0);
     bob = await createEmployee('Bob', 1);
@@ -129,6 +135,7 @@ describe('HRMS Employee Documents API (MySQL)', () => {
     const db = getDb();
     await db.delete(employeeDocuments).where(inArray(employeeDocuments.employeeId, employeeIds));
     await db.delete(employees).where(inArray(employees.id, employeeIds));
+    await removeHrmsTestAccess([otherCompanyId]);
     await db.delete(companies).where(eq(companies.id, otherCompanyId));
   });
 
@@ -150,7 +157,7 @@ describe('HRMS Employee Documents API (MySQL)', () => {
       fileAvailable: false,
     });
 
-    const detail = await request(app).get(`/api/v1/hrms/employee-documents/${res.body.data.id}`);
+    const detail = await hrms.get(`/api/v1/hrms/employee-documents/${res.body.data.id}`);
     expect(detail.status).toBe(200);
     expect(detail.body.data.documentName).toBe('Form 16');
     await getDb().delete(employeeDocuments).where(eq(employeeDocuments.id, res.body.data.id));
@@ -191,14 +198,14 @@ describe('HRMS Employee Documents API (MySQL)', () => {
   });
 
   it('searches by document name, document number and employee', async () => {
-    const byDoc = await request(app)
+    const byDoc = await hrms
       .get('/api/v1/hrms/employee-documents')
       .query({ search: 'Driving Licence', employeeId: alice.id });
     expect(byDoc.body.data.map((d: { documentName: string }) => d.documentName)).toEqual([
       'Driving Licence',
     ]);
 
-    const byNumber = await request(app)
+    const byNumber = await hrms
       .get('/api/v1/hrms/employee-documents')
       .query({ search: 'P1234567', employeeId: alice.id });
     expect(byNumber.body.data).toHaveLength(1);
@@ -271,7 +278,7 @@ describe('HRMS Employee Documents API (MySQL)', () => {
     expect(res.body.data).toEqual([]);
 
     const own = await list();
-    const detail = await request(app)
+    const detail = await hrms
       .get(`/api/v1/hrms/employee-documents/${own.body.data[0].id}`)
       .set(otherHeaders);
     expect(detail.status).toBe(404);

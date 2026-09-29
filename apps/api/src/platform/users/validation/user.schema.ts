@@ -29,7 +29,6 @@ export function validateCreateUser(body: unknown): CreateUserDto {
 
   return {
     email: (data.email as string).trim().toLowerCase(),
-    password: typeof data.password === 'string' && data.password ? data.password : undefined,
     firstName: (data.firstName as string).trim(),
     lastName: (data.lastName as string).trim(),
     phone: data.phone ? String(data.phone).trim() : null,

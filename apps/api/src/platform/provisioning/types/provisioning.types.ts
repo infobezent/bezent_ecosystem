@@ -1,7 +1,10 @@
 import type { ModuleCode, TenantModuleRecord } from '../../modules/types/module.types.js';
 import type { TenantRecord } from '../../tenants/types/tenant.types.js';
 import type { CompanyRecord } from '../../companies/types/company.types.js';
-import type { CompanyAdminAssignment } from '../../company-admins/types/companyAdmin.types.js';
+import type {
+  CompanyAdminAssignment,
+  SignInInvitationDelivery,
+} from '../../company-admins/types/companyAdmin.types.js';
 
 export interface CustomerProvisioningDto {
   tenant: {
@@ -29,7 +32,6 @@ export interface CustomerProvisioningDto {
       firstName: string;
       lastName: string;
       phone?: string | null;
-      tempPassword?: string;
     };
   };
   activateImmediately?: boolean;
@@ -40,10 +42,6 @@ export interface ProvisioningResult {
   company: CompanyRecord;
   modules: TenantModuleRecord[];
   admin: CompanyAdminAssignment;
-  invitationDelivery: {
-    status: 'MANUAL_DELIVERY_REQUIRED' | 'ALREADY_ASSIGNED';
-    message: string;
-    temporaryPassword?: string;
-  };
+  invitationDelivery: SignInInvitationDelivery;
   status: 'COMPLETED';
 }

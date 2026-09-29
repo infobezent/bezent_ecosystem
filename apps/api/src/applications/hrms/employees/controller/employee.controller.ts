@@ -12,14 +12,14 @@ export class EmployeeController {
 
   listEmployees = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const devContext = req.devContext;
-      if (!devContext) {
+      const companyContext = req.companyContext;
+      if (!companyContext) {
         throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
       }
 
       const result = await this.service.listEmployees(
-        devContext.tenantId,
-        devContext.companyId,
+        companyContext.tenantId,
+        companyContext.companyId,
         req.query as Record<string, unknown>,
       );
 
@@ -34,14 +34,14 @@ export class EmployeeController {
 
   getNextEmployeeNumber = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const devContext = req.devContext;
-      if (!devContext) {
+      const companyContext = req.companyContext;
+      if (!companyContext) {
         throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
       }
 
       const result = await this.service.getNextEmployeeNumber(
-        devContext.tenantId,
-        devContext.companyId,
+        companyContext.tenantId,
+        companyContext.companyId,
       );
 
       res.json({
@@ -54,8 +54,8 @@ export class EmployeeController {
 
   resolveReferral = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const devContext = req.devContext;
-      if (!devContext) {
+      const companyContext = req.companyContext;
+      if (!companyContext) {
         throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
       }
 
@@ -66,8 +66,8 @@ export class EmployeeController {
       }
 
       const result = await this.service.resolveReferral(
-        devContext.tenantId,
-        devContext.companyId,
+        companyContext.tenantId,
+        companyContext.companyId,
         code,
       );
 
@@ -81,8 +81,8 @@ export class EmployeeController {
 
   getEmployeeById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const devContext = req.devContext;
-      if (!devContext) {
+      const companyContext = req.companyContext;
+      if (!companyContext) {
         throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
       }
 
@@ -93,8 +93,8 @@ export class EmployeeController {
       }
 
       const employee = await this.service.getEmployeeById(
-        devContext.tenantId,
-        devContext.companyId,
+        companyContext.tenantId,
+        companyContext.companyId,
         employeeId,
       );
 
@@ -108,14 +108,14 @@ export class EmployeeController {
 
   createEmployee = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const devContext = req.devContext;
-      if (!devContext) {
+      const companyContext = req.companyContext;
+      if (!companyContext) {
         throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
       }
 
       const created = await this.service.createEmployee(
-        devContext.tenantId,
-        devContext.companyId,
+        companyContext.tenantId,
+        companyContext.companyId,
         req.body,
       );
 
@@ -129,14 +129,14 @@ export class EmployeeController {
 
   getEmployeeProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const devContext = req.devContext;
-      if (!devContext) {
+      const companyContext = req.companyContext;
+      if (!companyContext) {
         throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
       }
 
       const profile = await this.profileService.getProfile(
-        devContext.tenantId,
-        devContext.companyId,
+        companyContext.tenantId,
+        companyContext.companyId,
         requireEmployeeId(req),
       );
 
@@ -152,14 +152,14 @@ export class EmployeeController {
   updateRecordSection =
     (section: EmployeeRecordSection) => async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const devContext = req.devContext;
-        if (!devContext) {
+        const companyContext = req.companyContext;
+        if (!companyContext) {
           throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
         }
 
         const profile = await this.profileService.updateSection(
-          devContext.tenantId,
-          devContext.companyId,
+          companyContext.tenantId,
+          companyContext.companyId,
           requireEmployeeId(req),
           section,
           req.body,

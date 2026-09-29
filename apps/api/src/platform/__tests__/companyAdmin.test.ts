@@ -12,6 +12,7 @@ import {
 } from '../../db/schema.js';
 import { hashPassword } from '../auth/security.js';
 import { signInForTest } from './support/testSession.js';
+import { emailOutboxRepository } from '../email/repository/emailOutbox.repository.js';
 
 describe('Company Admin Platform Subsystem (Phase 2)', () => {
   const app = createApp();
@@ -243,7 +244,7 @@ describe('Company Admin Platform Subsystem (Phase 2)', () => {
   describe('User Management & Invitations', () => {
     const inviteEmail = `newhire_${Date.now()}@alpha.example`;
 
-    it('invites a new user, creates membership and secure expiring invitation token', async () => {
+    it('invites a new user, creates membership, invitation record and emails OTP sign-in instructions', async () => {
       const res = await request(app)
         .post('/api/v1/company-admin/users/invite')
         .set('Authorization', `Bearer ${companyAdminAToken}`)
@@ -259,7 +260,14 @@ describe('Company Admin Platform Subsystem (Phase 2)', () => {
       expect(res.body.data.invitation).toBeDefined();
       expect(res.body.data.invitation.email).toBe(inviteEmail);
       expect(res.body.data.invitation.token).toBeDefined();
-      expect(res.body.data.emailDeliveryStatus).toBe('not_configured');
+      expect(res.body.data.emailDeliveryStatus).toBe('sent');
+
+      // Passwordless (ADR-018): the email explains Email OTP sign-in and carries no password.
+      const mail = await emailOutboxRepository.latestFor(inviteEmail);
+      expect(mail?.subject).toContain('Alpha Corporation');
+      expect(mail?.bodyText).toContain('one-time code');
+      expect(mail?.bodyText.toLowerCase()).not.toMatch(/password:|temporary password/);
+      expect(JSON.stringify(res.body)).not.toMatch(/tempPassword|temporaryPassword/);
     });
 
     it('rejects duplicate active invite for the same user in this company (409)', async () => {

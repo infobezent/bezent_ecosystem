@@ -1,6 +1,16 @@
 import type { ModuleCode } from '../../modules/types/module.types.js';
 import type { PermissionGroup, PermissionScope, WorkspaceId } from '../catalog/accessCatalog.js';
 
+/**
+ * The server-verified tenant/company of a request (req.companyContext). Set
+ * only by access middleware after membership, status and entitlement checks;
+ * never taken from client headers.
+ */
+export interface CompanyContext {
+  tenantId: string;
+  companyId: string;
+}
+
 export interface AccessRoleSummary {
   id: string;
   code: string;
