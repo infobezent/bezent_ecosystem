@@ -1,0 +1,52 @@
+/*
+ * BEZENT universal sign-in page (platform/auth). Layout only: all controls are
+ * Design System components; colours and type come from theme tokens.
+ */
+
+.bezent-login {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background: var(--bg-app);
+  color: var(--text-primary);
+  font-family: var(--font-family-base);
+}
+
+.bezent-login__panel {
+  width: 100%;
+  max-width: 420px;
+}
+
+.bezent-login__mark {
+  display: inline-flex;
+  width: 52px;
+  height: 52px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--brand-logo-bg);
+  color: var(--brand-logo-text);
+}
+
+.bezent-login__title {
+  margin: 8px 0 0;
+  font-size: 22px;
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+}
+
+.bezent-login__subtitle,
+.bezent-login__footnote {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.bezent-login__footnote {
+  font-size: 12px;
+}

@@ -26,6 +26,7 @@ export const VALID_EMPLOYMENT_TYPES: EmploymentType[] = [
   'intern',
 ];
 export const VALID_EMPLOYMENT_STATUSES: EmploymentStatus[] = [
+  'pending_activation',
   'active',
   'probation',
   'notice',
@@ -213,15 +214,40 @@ export function validateCreateEmployee(input: unknown): CreateEmployeeDto {
     }
   }
 
-  const contractEndDateError = checkOptionalDate(data.contractEndDate, 'Contract end date');
-  if (contractEndDateError) errors.contractEndDate = contractEndDateError;
+  const empType = (data.employmentType as EmploymentType) ?? 'full_time';
+  const isFixedTerm = empType === 'contract' || empType === 'intern';
+  let resolvedContractEndDate = normalizeOptional(data.contractEndDate);
+
+  if (resolvedContractEndDate) {
+    const contractEndDateError = checkOptionalDate(resolvedContractEndDate, 'Contract end date');
+    if (contractEndDateError) {
+      errors.contractEndDate = contractEndDateError;
+    } else if (!isFixedTerm) {
+      // End Date is only applicable to fixed-term employment types
+      resolvedContractEndDate = null;
+    } else if (
+      data.joiningDate &&
+      typeof data.joiningDate === 'string' &&
+      resolvedContractEndDate < data.joiningDate.trim()
+    ) {
+      errors.contractEndDate = 'Contract end date must be on or after joining date';
+    }
+  }
+
+  const referralCodeError = checkOptionalId(data.referralCode, 'Referral ID');
+  if (referralCodeError) errors.referralCode = referralCodeError;
+
+  const referredByError = checkOptionalId(data.referredByEmployeeId, 'Referring employee ID');
+  if (referredByError) errors.referredByEmployeeId = referredByError;
 
   if (Object.keys(errors).length > 0) {
     throw new ValidationError('Validation failed for employee creation', errors);
   }
 
+  const rawNumber = typeof data.employeeNumber === 'string' ? data.employeeNumber.trim() : null;
+
   return {
-    employeeNumber: (data.employeeNumber as string).trim(),
+    employeeNumber: rawNumber || null,
     userId: data.userId ? (data.userId as string).trim() : null,
     firstName: (data.firstName as string).trim(),
     lastName: data.lastName ? (data.lastName as string).trim() : null,
@@ -237,9 +263,11 @@ export function validateCreateEmployee(input: unknown): CreateEmployeeDto {
       : null,
     probationEndDate: normalizeOptional(data.probationEndDate),
     sourceOfHire: (normalizeOptional(data.sourceOfHire) as SourceOfHire | null) ?? null,
+    referralCode: normalizeOptional(data.referralCode),
+    referredByEmployeeId: normalizeOptional(data.referredByEmployeeId),
     noticePeriodDays: typeof data.noticePeriodDays === 'number' ? data.noticePeriodDays : null,
-    contractEndDate: normalizeOptional(data.contractEndDate),
-    employmentType: (data.employmentType as EmploymentType) ?? 'full_time',
+    contractEndDate: resolvedContractEndDate,
+    employmentType: empType,
     employmentStatus: (data.employmentStatus as EmploymentStatus) ?? 'probation',
   };
 }

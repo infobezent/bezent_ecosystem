@@ -1,11 +1,14 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
+import { hrmsTestHeaders } from '../../../../../platform/__tests__/support/testSession.js';
 import { createApp } from '../../../../../app/server/createApp.js';
 import { seedDatabase } from '../../../../../db/seed.js';
 import { pingDatabase } from '../../../../../db/connection.js';
 
 describe('HRMS Onboarding Settings API', () => {
   const app = createApp();
+  /** Authenticated HR operator agent: every request passes the real auth + RBAC chain. */
+  let hrms: ReturnType<typeof request.agent>;
 
   beforeAll(async () => {
     const connected = await pingDatabase();
@@ -15,6 +18,13 @@ describe('HRMS Onboarding Settings API', () => {
       );
     }
     await seedDatabase();
+    hrms = request.agent(app).set(await hrmsTestHeaders());
+    // Synthetic companies the operator may access: settings defaults for
+    // never-configured companies, and cross-company isolation.
+    for (const n of ['01', '02', '03']) {
+      await hrmsTestHeaders(`comp_unprovisioned_${n}`, `tenant_unprovisioned_${n}`);
+    }
+    await hrmsTestHeaders('comp_other_isolated', 'tenant_other_isolated');
   });
 
   // ==========================================
@@ -22,7 +32,7 @@ describe('HRMS Onboarding Settings API', () => {
   // ==========================================
   describe('Default configuration behavior without write side-effects', () => {
     it('returns deterministic defaults on GET /general for a new company without DB writes', async () => {
-      const res = await request(app)
+      const res = await hrms
         .get('/api/v1/hrms/settings/onboarding/general')
         .set('x-company-id', 'comp_unprovisioned_01')
         .set('x-tenant-id', 'tenant_unprovisioned_01');
@@ -36,7 +46,7 @@ describe('HRMS Onboarding Settings API', () => {
     });
 
     it('returns 4 system stages by default for unprovisioned company', async () => {
-      const res = await request(app)
+      const res = await hrms
         .get('/api/v1/hrms/settings/onboarding/stages')
         .set('x-company-id', 'comp_unprovisioned_02')
         .set('x-tenant-id', 'tenant_unprovisioned_02');
@@ -49,7 +59,7 @@ describe('HRMS Onboarding Settings API', () => {
     });
 
     it('returns core field configs by default', async () => {
-      const res = await request(app)
+      const res = await hrms
         .get('/api/v1/hrms/settings/onboarding/fields')
         .set('x-company-id', 'comp_unprovisioned_03')
         .set('x-tenant-id', 'tenant_unprovisioned_03');
@@ -64,7 +74,7 @@ describe('HRMS Onboarding Settings API', () => {
     });
 
     it('returns aggregate settings in single call', async () => {
-      const res = await request(app).get('/api/v1/hrms/settings/onboarding');
+      const res = await hrms.get('/api/v1/hrms/settings/onboarding');
 
       expect(res.status).toBe(200);
       const data = res.body.data;
@@ -83,7 +93,7 @@ describe('HRMS Onboarding Settings API', () => {
   describe('Tenant & Company Scoping Isolation', () => {
     it('ensures Company A cannot see custom document requirements of Company B', async () => {
       // 1. Create a document requirement in Company A
-      const createRes = await request(app)
+      const createRes = await hrms
         .post('/api/v1/hrms/settings/onboarding/documents')
         .set('x-company-id', 'comp_demo_01')
         .set('x-tenant-id', 'tenant_demo_01')
@@ -100,7 +110,7 @@ describe('HRMS Onboarding Settings API', () => {
       expect(createdDoc.id).toBeDefined();
 
       // 2. Query documents under Company B
-      const companyBRes = await request(app)
+      const companyBRes = await hrms
         .get('/api/v1/hrms/settings/onboarding/documents')
         .set('x-company-id', 'comp_other_isolated')
         .set('x-tenant-id', 'tenant_other_isolated');
@@ -110,7 +120,7 @@ describe('HRMS Onboarding Settings API', () => {
       expect(bDocIds).not.toContain(createdDoc.id);
 
       // 3. Company B attempting to update or delete Company A document receives 404
-      const updateAttempt = await request(app)
+      const updateAttempt = await hrms
         .patch(`/api/v1/hrms/settings/onboarding/documents/${createdDoc.id}`)
         .set('x-company-id', 'comp_other_isolated')
         .set('x-tenant-id', 'tenant_other_isolated')
@@ -121,7 +131,7 @@ describe('HRMS Onboarding Settings API', () => {
 
     it('ensures checklist template updates are isolated by company', async () => {
       // 1. Create checklist template in Company A
-      const createRes = await request(app)
+      const createRes = await hrms
         .post('/api/v1/hrms/settings/onboarding/checklists')
         .set('x-company-id', 'comp_demo_01')
         .set('x-tenant-id', 'tenant_demo_01')
@@ -136,7 +146,7 @@ describe('HRMS Onboarding Settings API', () => {
       const chk = createRes.body.data;
 
       // 2. Company B trying to delete it receives 404
-      const deleteAttempt = await request(app)
+      const deleteAttempt = await hrms
         .delete(`/api/v1/hrms/settings/onboarding/checklists/${chk.id}`)
         .set('x-company-id', 'comp_other_isolated')
         .set('x-tenant-id', 'tenant_other_isolated');
@@ -144,7 +154,7 @@ describe('HRMS Onboarding Settings API', () => {
       expect(deleteAttempt.status).toBe(404);
 
       // 3. Clean up in Company A
-      const deleteSuccess = await request(app)
+      const deleteSuccess = await hrms
         .delete(`/api/v1/hrms/settings/onboarding/checklists/${chk.id}`)
         .set('x-company-id', 'comp_demo_01')
         .set('x-tenant-id', 'tenant_demo_01');
@@ -160,13 +170,13 @@ describe('HRMS Onboarding Settings API', () => {
     it('rejects duplicate documentType in document requirements with 409', async () => {
       const docType = `cert_${Date.now()}`;
 
-      const res1 = await request(app).post('/api/v1/hrms/settings/onboarding/documents').send({
+      const res1 = await hrms.post('/api/v1/hrms/settings/onboarding/documents').send({
         documentType: docType,
         name: 'Certificate 1',
       });
       expect(res1.status).toBe(201);
 
-      const res2 = await request(app).post('/api/v1/hrms/settings/onboarding/documents').send({
+      const res2 = await hrms.post('/api/v1/hrms/settings/onboarding/documents').send({
         documentType: docType,
         name: 'Certificate 2 Duplicate',
       });
@@ -181,14 +191,14 @@ describe('HRMS Onboarding Settings API', () => {
   // ==========================================
   describe('Protected system fields and stages protection', () => {
     it('prevents disabling or making optional protected system fields (e.g. firstName)', async () => {
-      const resDisable = await request(app)
+      const resDisable = await hrms
         .patch('/api/v1/hrms/settings/onboarding/fields/firstName')
         .send({ isEnabled: false });
 
       expect(resDisable.status).toBe(400);
       expect(resDisable.body.error.details.isEnabled).toBeDefined();
 
-      const resOptional = await request(app)
+      const resOptional = await hrms
         .patch('/api/v1/hrms/settings/onboarding/fields/firstName')
         .send({ isRequired: false });
 
@@ -197,7 +207,7 @@ describe('HRMS Onboarding Settings API', () => {
     });
 
     it('allows updating non-protected field configs', async () => {
-      const res = await request(app)
+      const res = await hrms
         .patch('/api/v1/hrms/settings/onboarding/fields/phone')
         .send({ label: 'Mobile Number', isRequired: true });
 
@@ -207,7 +217,7 @@ describe('HRMS Onboarding Settings API', () => {
     });
 
     it('prevents deactivating terminal system stage "completed"', async () => {
-      const res = await request(app)
+      const res = await hrms
         .patch('/api/v1/hrms/settings/onboarding/stages/completed')
         .send({ isActive: false });
 
@@ -221,7 +231,7 @@ describe('HRMS Onboarding Settings API', () => {
   // ==========================================
   describe('Invalid stage references', () => {
     it('rejects update on an unsupported stageKey', async () => {
-      const res = await request(app)
+      const res = await hrms
         .patch('/api/v1/hrms/settings/onboarding/stages/arbitrary_custom_stage')
         .send({ name: 'Arbitrary' });
 
@@ -230,7 +240,7 @@ describe('HRMS Onboarding Settings API', () => {
     });
 
     it('rejects creating checklist template referencing invalid stage', async () => {
-      const res = await request(app).post('/api/v1/hrms/settings/onboarding/checklists').send({
+      const res = await hrms.post('/api/v1/hrms/settings/onboarding/checklists').send({
         name: 'Do something',
         stageKey: 'unknown_stage',
         assigneeType: 'hr',
@@ -246,7 +256,7 @@ describe('HRMS Onboarding Settings API', () => {
   // ==========================================
   describe('Extensible Checklist Assignee Type', () => {
     it('accepts both standard and custom responsibility actor keys', async () => {
-      const res = await request(app).post('/api/v1/hrms/settings/onboarding/checklists').send({
+      const res = await hrms.post('/api/v1/hrms/settings/onboarding/checklists').send({
         name: 'Buddy Lunch & Walkthrough',
         stageKey: 'induction',
         assigneeType: 'assigned_buddy',
@@ -264,7 +274,7 @@ describe('HRMS Onboarding Settings API', () => {
   // ==========================================
   describe('General & Conversion Settings Persistence', () => {
     it('persists general settings updates', async () => {
-      const patchRes = await request(app).patch('/api/v1/hrms/settings/onboarding/general').send({
+      const patchRes = await hrms.patch('/api/v1/hrms/settings/onboarding/general').send({
         defaultDurationDays: 45,
         idPrefix: 'BEZ-',
       });
@@ -273,25 +283,23 @@ describe('HRMS Onboarding Settings API', () => {
       expect(patchRes.body.data.defaultDurationDays).toBe(45);
       expect(patchRes.body.data.idPrefix).toBe('BEZ-');
 
-      const getRes = await request(app).get('/api/v1/hrms/settings/onboarding/general');
+      const getRes = await hrms.get('/api/v1/hrms/settings/onboarding/general');
       expect(getRes.status).toBe(200);
       expect(getRes.body.data.defaultDurationDays).toBe(45);
       expect(getRes.body.data.idPrefix).toBe('BEZ-');
     });
 
     it('persists conversion settings updates', async () => {
-      const patchRes = await request(app)
-        .patch('/api/v1/hrms/settings/onboarding/conversion')
-        .send({
-          autoConvertOnJoining: true,
-          employeeIdPrefix: 'EMP-BEZ-',
-        });
+      const patchRes = await hrms.patch('/api/v1/hrms/settings/onboarding/conversion').send({
+        autoConvertOnJoining: true,
+        employeeIdPrefix: 'EMP-BEZ-',
+      });
 
       expect(patchRes.status).toBe(200);
       expect(patchRes.body.data.autoConvertOnJoining).toBe(true);
       expect(patchRes.body.data.employeeIdPrefix).toBe('EMP-BEZ-');
 
-      const getRes = await request(app).get('/api/v1/hrms/settings/onboarding/conversion');
+      const getRes = await hrms.get('/api/v1/hrms/settings/onboarding/conversion');
       expect(getRes.status).toBe(200);
       expect(getRes.body.data.autoConvertOnJoining).toBe(true);
     });
@@ -301,15 +309,12 @@ describe('HRMS Onboarding Settings API', () => {
   // 8. Existing Onboarding API Regression
   // ==========================================
   describe('Existing Onboarding API regression verification', () => {
-    it('verifies GET /context, /masters, and /new-hires remain fully functional', async () => {
-      const ctxRes = await request(app).get('/api/v1/context');
-      expect(ctxRes.status).toBe(200);
-
-      const mastersRes = await request(app).get('/api/v1/hrms/organization/masters');
+    it('verifies /masters and /new-hires remain fully functional for an authorized HR user', async () => {
+      const mastersRes = await hrms.get('/api/v1/hrms/organization/masters');
       expect(mastersRes.status).toBe(200);
       expect(mastersRes.body.data.company.name).toBe('BEZENT Demo Pvt Ltd');
 
-      const newHiresRes = await request(app).get('/api/v1/hrms/onboarding/new-hires');
+      const newHiresRes = await hrms.get('/api/v1/hrms/onboarding/new-hires');
       expect(newHiresRes.status).toBe(200);
       expect(Array.isArray(newHiresRes.body.data)).toBe(true);
       expect(newHiresRes.body.data.length).toBeGreaterThanOrEqual(1);

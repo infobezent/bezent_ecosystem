@@ -21,6 +21,21 @@ const DB_CONNECTION_ERROR_CODES = new Set([
   'ER_BAD_DB_ERROR',
 ]);
 
+function extractErrorCode(err: unknown): string | undefined {
+  if (typeof err !== 'object' || err === null) return undefined;
+  if ('code' in err && typeof (err as { code: unknown }).code === 'string') {
+    return (err as { code: string }).code;
+  }
+  if (
+    'cause' in err &&
+    typeof (err as { cause: unknown }).cause === 'object' &&
+    (err as { cause: unknown }).cause !== null
+  ) {
+    return extractErrorCode((err as { cause: unknown }).cause);
+  }
+  return undefined;
+}
+
 /**
  * Centralized error handler. Every route/middleware error should end up
  * here instead of ad-hoc `res.status(...)` calls scattered across
@@ -33,12 +48,8 @@ export function errorHandler(
   _next: NextFunction,
 ): void {
   // If the error is a DatabaseConnectionError or an underlying DB connection failure
-  const isDriverDbError =
-    typeof err === 'object' &&
-    err !== null &&
-    'code' in err &&
-    typeof (err as { code: unknown }).code === 'string' &&
-    DB_CONNECTION_ERROR_CODES.has((err as { code: string }).code);
+  const errorCode = extractErrorCode(err);
+  const isDriverDbError = errorCode !== undefined && DB_CONNECTION_ERROR_CODES.has(errorCode);
 
   if (err instanceof DatabaseConnectionError || isDriverDbError) {
     const message =

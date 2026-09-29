@@ -6,10 +6,12 @@ import { TasksPage } from '../../platform/tasks';
 import { ApprovalsPage } from '../../platform/approvals';
 import { NotesPage } from '../../platform/notes';
 import { EmployeeRegistrationPage } from '../../applications/hrms/onboarding';
+import { FormEditorPage } from '../../applications/hrms/settings/forms';
 import { DevPlaceholderPage } from './DevPlaceholderPage';
 import { DesignSystemShowcase } from './DesignSystemShowcase';
 import { NotFoundPage } from './NotFoundPage';
 import { ShellLayout } from './ShellLayout';
+import { LoginPage, RequireAuth } from '../../platform/auth';
 import { StandaloneUtilityLayout } from './StandaloneUtilityLayout';
 
 const defaultDestination = DEFAULT_APPLICATION.navigation.destinations.find(
@@ -20,11 +22,18 @@ const homePath = destinationPath(DEFAULT_APPLICATION.basePath, defaultDestinatio
 /**
  * Root router composition. Applications mount under ShellLayout, while the
  * standalone utilities and Employee Registration mount in their own
- * StandaloneUtilityLayout without application navigation bars.
+ * StandaloneUtilityLayout without application navigation bars. Both require a
+ * signed-in session; `/login` is the shared Email OTP sign-in page.
  */
 export const appRoutes = [
+  // The ONE sign-in page for every BEZENT user (ADR-018), outside every shell.
+  { path: '/login', element: <LoginPage /> },
   {
-    element: <ShellLayout />,
+    element: (
+      <RequireAuth>
+        <ShellLayout />
+      </RequireAuth>
+    ),
     children: [
       { path: '/', element: <Navigate to={homePath} replace /> },
       ...APPLICATIONS.flatMap((application) => application.routes),
@@ -39,7 +48,11 @@ export const appRoutes = [
     ],
   },
   {
-    element: <StandaloneUtilityLayout />,
+    element: (
+      <RequireAuth>
+        <StandaloneUtilityLayout />
+      </RequireAuth>
+    ),
     children: [
       { path: '/calendar', element: <CalendarPage /> },
       { path: '/tasks', element: <TasksPage /> },
@@ -52,6 +65,14 @@ export const appRoutes = [
       {
         path: '/hrms/administration/onboarding/registration/:caseId',
         element: <EmployeeRegistrationPage />,
+      },
+      {
+        path: '/hrms/settings/forms/:formKey',
+        element: <FormEditorPage />,
+      },
+      {
+        path: '/hrms/settings/forms',
+        element: <FormEditorPage />,
       },
     ],
   },

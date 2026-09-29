@@ -71,6 +71,7 @@ describe('HRMS Employee Database & Repository Foundation', () => {
       ]);
       expect(employees.employmentStatus).toBeDefined();
       expect(employees.employmentStatus.enumValues).toEqual([
+        'pending_activation',
         'active',
         'probation',
         'notice',

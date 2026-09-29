@@ -52,3 +52,17 @@ export class DatabaseConnectionError extends AppError {
     this.name = 'DatabaseConnectionError';
   }
 }
+
+export class UnauthorizedError extends AppError {
+  constructor(message = 'Authentication required', code = 'UNAUTHORIZED') {
+    super(message, 401, code);
+    this.name = 'UnauthorizedError';
+  }
+}
+
+export class ForbiddenError extends AppError {
+  constructor(message = 'Access forbidden', code = 'FORBIDDEN') {
+    super(message, 403, code);
+    this.name = 'ForbiddenError';
+  }
+}

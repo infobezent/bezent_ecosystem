@@ -1,6 +1,7 @@
 import { createApp } from './app/server/createApp.js';
-import { env } from './app/config/env.js';
+import { assertProductionAuthConfig, env } from './app/config/env.js';
 
+assertProductionAuthConfig();
 const app = createApp();
 
 app.listen(env.port, () => {

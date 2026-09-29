@@ -1217,3 +1217,15 @@ export function useCustomFields() {
   }
   return context;
 }
+
+/**
+ * Safe optional variant — returns `null` when called outside a
+ * `CustomFieldsProvider`. Use this when the context is optional for a
+ * component (e.g. the Employee Registration form renders both inside and
+ * outside the settings builder). Calling hooks unconditionally at the top
+ * level satisfies React's Rules of Hooks; do NOT use `useCustomFields`
+ * inside a try/catch block.
+ */
+export function useCustomFieldsOptional() {
+  return useContext(CustomFieldsContext);
+}

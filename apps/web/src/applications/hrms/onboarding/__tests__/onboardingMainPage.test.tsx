@@ -11,6 +11,8 @@ import {
   type OnboardingCaseItem,
 } from '../api/onboardingApi';
 import { EmployeeRegistration } from '../components/EmployeeRegistration';
+import { RegistrationConfigProvider } from '../registration/registrationConfig';
+import { defaultRegistrationConfiguration } from './registrationConfigFixture';
 
 const mockMasters: OrganizationMasters = {
   company: { id: 'comp_01', name: 'BEZENT Demo Pvt Ltd', code: 'BEZENT_DEMO' },
@@ -174,7 +176,9 @@ describe('Onboarding Main Page Architecture & Components', () => {
   it('Employee Registration wizard remains completely frozen and intact', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
-        <EmployeeRegistration onCancel={() => {}} initialDraft={null} />
+        <RegistrationConfigProvider configuration={defaultRegistrationConfiguration}>
+          <EmployeeRegistration onCancel={() => {}} initialDraft={null} />
+        </RegistrationConfigProvider>
       </MemoryRouter>,
     );
 

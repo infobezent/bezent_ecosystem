@@ -10,6 +10,7 @@ import {
   type EmployeeRecordSection,
   type FamilyMemberInput,
   type NomineeInput,
+  type ParentGuardianInput,
   type PersonalDetailsInput,
   type Proficiency,
   type SkillInput,
@@ -138,6 +139,17 @@ function personal(value: unknown, errors: Errors): PersonalDetailsInput | undefi
   const raw = asObject(value, 'personal', errors);
   if (!raw) return undefined;
   const p = 'personal';
+
+  const isPermanentSameAsCurrent = raw.isPermanentSameAsCurrent !== false;
+
+  const addressStreet = text(raw, 'addressStreet', p, errors);
+  const addressLine2 = text(raw, 'addressLine2', p, errors);
+  const addressCity = text(raw, 'addressCity', p, errors, { max: 100 });
+  const addressDistrict = text(raw, 'addressDistrict', p, errors, { max: 100 });
+  const addressState = text(raw, 'addressState', p, errors, { max: 100 });
+  const addressPostalCode = text(raw, 'addressPostalCode', p, errors, { max: 20 });
+  const addressCountry = text(raw, 'addressCountry', p, errors, { max: 100 });
+
   return {
     middleName: text(raw, 'middleName', p, errors, { max: 100 }),
     preferredName: text(raw, 'preferredName', p, errors, { max: 100 }),
@@ -153,12 +165,35 @@ function personal(value: unknown, errors: Errors): PersonalDetailsInput | undefi
     homePhone: text(raw, 'homePhone', p, errors, { max: 50 }),
     businessPhone: text(raw, 'businessPhone', p, errors, { max: 50 }),
     workPhone: text(raw, 'workPhone', p, errors, { max: 50 }),
-    addressStreet: text(raw, 'addressStreet', p, errors),
-    addressCity: text(raw, 'addressCity', p, errors, { max: 100 }),
-    addressDistrict: text(raw, 'addressDistrict', p, errors, { max: 100 }),
-    addressState: text(raw, 'addressState', p, errors, { max: 100 }),
-    addressPostalCode: text(raw, 'addressPostalCode', p, errors, { max: 20 }),
-    addressCountry: text(raw, 'addressCountry', p, errors, { max: 100 }),
+    addressStreet,
+    addressLine2,
+    addressCity,
+    addressDistrict,
+    addressState,
+    addressPostalCode,
+    addressCountry,
+    isPermanentSameAsCurrent,
+    permanentAddressStreet: isPermanentSameAsCurrent
+      ? addressStreet
+      : text(raw, 'permanentAddressStreet', p, errors),
+    permanentAddressLine2: isPermanentSameAsCurrent
+      ? addressLine2
+      : text(raw, 'permanentAddressLine2', p, errors),
+    permanentAddressCity: isPermanentSameAsCurrent
+      ? addressCity
+      : text(raw, 'permanentAddressCity', p, errors, { max: 100 }),
+    permanentAddressDistrict: isPermanentSameAsCurrent
+      ? addressDistrict
+      : text(raw, 'permanentAddressDistrict', p, errors, { max: 100 }),
+    permanentAddressState: isPermanentSameAsCurrent
+      ? addressState
+      : text(raw, 'permanentAddressState', p, errors, { max: 100 }),
+    permanentAddressPostalCode: isPermanentSameAsCurrent
+      ? addressPostalCode
+      : text(raw, 'permanentAddressPostalCode', p, errors, { max: 20 }),
+    permanentAddressCountry: isPermanentSameAsCurrent
+      ? addressCountry
+      : text(raw, 'permanentAddressCountry', p, errors, { max: 100 }),
   };
 }
 
@@ -170,6 +205,16 @@ function familyMembers(value: unknown, errors: Errors): FamilyMemberInput[] {
       relationship: text(raw, 'relationship', p, errors, { required: true, max: 50 })!,
       dateOfBirth: date(raw, 'dateOfBirth', p, errors, { notInFuture: true }),
       phone: text(raw, 'phone', p, errors, { max: 50 }),
+    };
+  });
+}
+
+function parentGuardians(value: unknown, errors: Errors): ParentGuardianInput[] {
+  return list(value, 'parentGuardians', errors).map((raw, i) => {
+    const p = `parentGuardians[${i}]`;
+    return {
+      name: text(raw, 'name', p, errors, { required: true, max: 200 })!,
+      relationship: text(raw, 'relationship', p, errors, { required: true, max: 50 })!,
     };
   });
 }
@@ -309,6 +354,7 @@ const SECTION_VALIDATORS: {
 } = {
   personal,
   familyMembers,
+  parentGuardians,
   nominees,
   emergencyContacts,
   bankAccount,

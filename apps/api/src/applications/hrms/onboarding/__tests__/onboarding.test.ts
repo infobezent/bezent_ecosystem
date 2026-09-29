@@ -1,31 +1,47 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
+import { hrmsTestHeaders } from '../../../../platform/__tests__/support/testSession.js';
 import { createApp } from '../../../../app/server/createApp.js';
 import { pingDatabase } from '../../../../db/connection.js';
 
 describe('HRMS Onboarding & Organization API', () => {
   const app = createApp();
+  /** Authenticated HR operator agent: every request passes the real auth + RBAC chain. */
+  let hrms: ReturnType<typeof request.agent>;
 
   beforeAll(async () => {
+    hrms = request.agent(app).set(await hrmsTestHeaders());
     const connected = await pingDatabase();
     if (!connected) {
       throw new Error(
         'MySQL database is unreachable. Start MySQL to run MySQL-backed integration tests.',
       );
     }
+    // An empty company the operator may access, for data-layer isolation checks.
+    await hrmsTestHeaders('comp_isolated_other', 'tenant_isolated_other');
   });
 
-  it('GET /api/v1/context returns centralized development context', async () => {
-    const res = await request(app).get('/api/v1/context');
+  it('resolves the company from the verified session, never a default development context', async () => {
+    // The retired development context endpoint no longer exists.
+    expect((await request(app).get('/api/v1/context')).status).toBe(404);
 
-    expect(res.status).toBe(200);
-    expect(res.body.data).toBeDefined();
-    expect(res.body.data.companyId).toBe('comp_demo_01');
-    expect(res.body.data.companyName).toBe('BEZENT Demo Pvt Ltd');
+    // No company selected: rejected rather than defaulted.
+    const missing = await request(app)
+      .get('/api/v1/hrms/organization/masters')
+      .set('authorization', (await hrmsTestHeaders()).authorization!);
+    expect(missing.status).toBe(400);
+
+    // A company the caller is not a member of: refused, whatever the headers claim.
+    const spoofed = await hrms
+      .get('/api/v1/hrms/organization/masters')
+      .set('x-company-id', 'comp_not_a_member_of')
+      .set('x-tenant-id', 'tenant_demo_01');
+    expect(spoofed.status).toBe(403);
+    expect(spoofed.body.error.code).toBe('FORBIDDEN_COMPANY_ACCESS');
   });
 
   it('GET /api/v1/hrms/organization/masters returns company and master lists', async () => {
-    const res = await request(app).get('/api/v1/hrms/organization/masters');
+    const res = await hrms.get('/api/v1/hrms/organization/masters');
 
     expect(res.status).toBe(200);
     const data = res.body.data;
@@ -37,7 +53,7 @@ describe('HRMS Onboarding & Organization API', () => {
   });
 
   it('GET /api/v1/hrms/onboarding/new-hires lists initial onboarding records', async () => {
-    const res = await request(app).get('/api/v1/hrms/onboarding/new-hires');
+    const res = await hrms.get('/api/v1/hrms/onboarding/new-hires');
 
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body.data)).toBe(true);
@@ -53,7 +69,7 @@ describe('HRMS Onboarding & Organization API', () => {
   });
 
   it('POST /api/v1/hrms/onboarding/new-hires fails on invalid input', async () => {
-    const res = await request(app).post('/api/v1/hrms/onboarding/new-hires').send({
+    const res = await hrms.post('/api/v1/hrms/onboarding/new-hires').send({
       firstName: '',
       email: 'invalid-email',
     });
@@ -69,7 +85,7 @@ describe('HRMS Onboarding & Organization API', () => {
 
   it('POST /api/v1/hrms/onboarding/new-hires successfully creates and persists a record', async () => {
     // 1. Fetch masters to get valid IDs
-    const mastersRes = await request(app).get('/api/v1/hrms/organization/masters');
+    const mastersRes = await hrms.get('/api/v1/hrms/organization/masters');
     const masters = mastersRes.body.data;
     const deptId = masters.departments[0].id;
     const desigId = masters.designations[0].id;
@@ -89,7 +105,7 @@ describe('HRMS Onboarding & Organization API', () => {
       employmentType: 'full_time',
     };
 
-    const createRes = await request(app).post('/api/v1/hrms/onboarding/new-hires').send(payload);
+    const createRes = await hrms.post('/api/v1/hrms/onboarding/new-hires').send(payload);
 
     expect(createRes.status).toBe(201);
     const created = createRes.body.data;
@@ -102,19 +118,19 @@ describe('HRMS Onboarding & Organization API', () => {
     expect(created.status).toBe('active');
 
     // 3. Verify record is returned in list
-    const listRes = await request(app).get('/api/v1/hrms/onboarding/new-hires');
+    const listRes = await hrms.get('/api/v1/hrms/onboarding/new-hires');
     expect(listRes.status).toBe(200);
     const match = listRes.body.data.find((item: { id: string }) => item.id === created.id);
     expect(match).toBeDefined();
     expect(match.fullName).toBe('Test Candidate');
 
     // 4. Verify getById
-    const getRes = await request(app).get(`/api/v1/hrms/onboarding/new-hires/${created.id}`);
+    const getRes = await hrms.get(`/api/v1/hrms/onboarding/new-hires/${created.id}`);
     expect(getRes.status).toBe(200);
     expect(getRes.body.data.id).toBe(created.id);
 
     // 5. Verify candidate != employee invariant: NO employee record created
-    const empListRes = await request(app).get('/api/v1/hrms/employees');
+    const empListRes = await hrms.get('/api/v1/hrms/employees');
     expect(empListRes.status).toBe(200);
     const empMatch = (empListRes.body.data || []).find(
       (emp: { workEmail?: string; personalEmail?: string }) =>
@@ -135,7 +151,7 @@ describe('HRMS Onboarding & Organization API', () => {
         },
       };
 
-      const res = await request(app).post('/api/v1/hrms/onboarding/cases').send(draftPayload);
+      const res = await hrms.post('/api/v1/hrms/onboarding/cases').send(draftPayload);
 
       expect(res.status).toBe(201);
       const data = res.body.data;
@@ -150,12 +166,12 @@ describe('HRMS Onboarding & Organization API', () => {
 
     it('GET /api/v1/hrms/onboarding/cases?status=draft filters only draft records', async () => {
       // Create a draft
-      const resCreate = await request(app)
+      const resCreate = await hrms
         .post('/api/v1/hrms/onboarding/cases')
         .send({ firstName: 'FilterDraft', status: 'draft' });
       expect(resCreate.status).toBe(201);
 
-      const res = await request(app).get('/api/v1/hrms/onboarding/cases?status=draft');
+      const res = await hrms.get('/api/v1/hrms/onboarding/cases?status=draft');
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body.data)).toBe(true);
       expect(res.body.data.length).toBeGreaterThanOrEqual(1);
@@ -165,23 +181,23 @@ describe('HRMS Onboarding & Organization API', () => {
     });
 
     it('GET /api/v1/hrms/onboarding/cases/:caseId returns single case by ID and 404s for non-existent', async () => {
-      const resCreate = await request(app)
+      const resCreate = await hrms
         .post('/api/v1/hrms/onboarding/cases')
         .send({ firstName: 'GetMe', status: 'draft' });
       const id = resCreate.body.data.id;
 
-      const resGet = await request(app).get(`/api/v1/hrms/onboarding/cases/${id}`);
+      const resGet = await hrms.get(`/api/v1/hrms/onboarding/cases/${id}`);
       expect(resGet.status).toBe(200);
       expect(resGet.body.data.id).toBe(id);
       expect(resGet.body.data.firstName).toBe('GetMe');
 
-      const resNotFound = await request(app).get('/api/v1/hrms/onboarding/cases/case_non_existent');
+      const resNotFound = await hrms.get('/api/v1/hrms/onboarding/cases/case_non_existent');
       expect(resNotFound.status).toBe(404);
       expect(resNotFound.body.error.code).toBe('NOT_FOUND');
     });
 
     it('PATCH /api/v1/hrms/onboarding/cases/:caseId/draft updates partial data and increments version', async () => {
-      const resCreate = await request(app)
+      const resCreate = await hrms
         .post('/api/v1/hrms/onboarding/cases')
         .send({ firstName: 'InitialName', status: 'draft' });
       const id = resCreate.body.data.id;
@@ -194,7 +210,7 @@ describe('HRMS Onboarding & Organization API', () => {
         version: 1,
       };
 
-      const resPatch = await request(app)
+      const resPatch = await hrms
         .patch(`/api/v1/hrms/onboarding/cases/${id}/draft`)
         .send(patchPayload);
 
@@ -208,18 +224,18 @@ describe('HRMS Onboarding & Organization API', () => {
     });
 
     it('PATCH /api/v1/hrms/onboarding/cases/:caseId/draft returns 409 on version mismatch (optimistic locking)', async () => {
-      const resCreate = await request(app)
+      const resCreate = await hrms
         .post('/api/v1/hrms/onboarding/cases')
         .send({ firstName: 'ConflictTest', status: 'draft' });
       const id = resCreate.body.data.id;
 
       // First update moves version to 2
-      await request(app)
+      await hrms
         .patch(`/api/v1/hrms/onboarding/cases/${id}/draft`)
         .send({ firstName: 'FirstUpdate', version: 1 });
 
       // Second update with stale version 1 must conflict
-      const resConflict = await request(app)
+      const resConflict = await hrms
         .patch(`/api/v1/hrms/onboarding/cases/${id}/draft`)
         .send({ firstName: 'StaleUpdate', version: 1 });
 
@@ -228,16 +244,16 @@ describe('HRMS Onboarding & Organization API', () => {
     });
 
     it('POST /api/v1/hrms/onboarding/cases/:caseId/submit transitions draft to active when valid', async () => {
-      const mastersRes = await request(app).get('/api/v1/hrms/organization/masters');
+      const mastersRes = await hrms.get('/api/v1/hrms/organization/masters');
       const masters = mastersRes.body.data;
 
-      const resCreate = await request(app)
+      const resCreate = await hrms
         .post('/api/v1/hrms/onboarding/cases')
         .send({ firstName: 'Submittable', status: 'draft' });
       const id = resCreate.body.data.id;
 
       // Attempt submit without mandatory fields -> 400
-      const resIncomplete = await request(app)
+      const resIncomplete = await hrms
         .post(`/api/v1/hrms/onboarding/cases/${id}/submit`)
         .send({ firstName: 'Submittable' });
       expect(resIncomplete.status).toBe(400);
@@ -256,7 +272,7 @@ describe('HRMS Onboarding & Organization API', () => {
         version: 1,
       };
 
-      const resSubmit = await request(app)
+      const resSubmit = await hrms
         .post(`/api/v1/hrms/onboarding/cases/${id}/submit`)
         .send(submitPayload);
 
@@ -266,7 +282,7 @@ describe('HRMS Onboarding & Organization API', () => {
       expect(resSubmit.body.data.version).toBe(2);
 
       // Subsequent submit on already active case returns 409
-      const resResubmit = await request(app)
+      const resResubmit = await hrms
         .post(`/api/v1/hrms/onboarding/cases/${id}/submit`)
         .send(submitPayload);
       expect(resResubmit.status).toBe(409);
@@ -274,36 +290,32 @@ describe('HRMS Onboarding & Organization API', () => {
 
     it('DELETE /api/v1/hrms/onboarding/cases/:caseId discards draft and rejects deleting active cases', async () => {
       // 1. Create and delete draft -> 204
-      const resCreateDraft = await request(app)
+      const resCreateDraft = await hrms
         .post('/api/v1/hrms/onboarding/cases')
         .send({ firstName: 'ToDelete', status: 'draft' });
       const draftId = resCreateDraft.body.data.id;
 
-      const resDelete = await request(app).delete(`/api/v1/hrms/onboarding/cases/${draftId}`);
+      const resDelete = await hrms.delete(`/api/v1/hrms/onboarding/cases/${draftId}`);
       expect(resDelete.status).toBe(204);
 
       // Verify draft is gone
-      const resVerify = await request(app).get(`/api/v1/hrms/onboarding/cases/${draftId}`);
+      const resVerify = await hrms.get(`/api/v1/hrms/onboarding/cases/${draftId}`);
       expect(resVerify.status).toBe(404);
 
       // 2. Active case cannot be deleted
-      const mastersRes = await request(app).get('/api/v1/hrms/organization/masters');
+      const mastersRes = await hrms.get('/api/v1/hrms/organization/masters');
       const masters = mastersRes.body.data;
-      const resCreateActive = await request(app)
-        .post('/api/v1/hrms/onboarding/new-hires')
-        .send({
-          firstName: 'ActiveEmp',
-          email: `active.${Date.now()}@example.com`,
-          companyId: masters.company.id,
-          departmentId: masters.departments[0].id,
-          designationId: masters.designations[0].id,
-          joiningDate: '2026-11-01',
-        });
+      const resCreateActive = await hrms.post('/api/v1/hrms/onboarding/new-hires').send({
+        firstName: 'ActiveEmp',
+        email: `active.${Date.now()}@example.com`,
+        companyId: masters.company.id,
+        departmentId: masters.departments[0].id,
+        designationId: masters.designations[0].id,
+        joiningDate: '2026-11-01',
+      });
       const activeId = resCreateActive.body.data.id;
 
-      const resDeleteActive = await request(app).delete(
-        `/api/v1/hrms/onboarding/cases/${activeId}`,
-      );
+      const resDeleteActive = await hrms.delete(`/api/v1/hrms/onboarding/cases/${activeId}`);
       expect(resDeleteActive.status).toBe(409);
       expect(resDeleteActive.body.error.code).toBe('CONFLICT');
     });
@@ -311,7 +323,7 @@ describe('HRMS Onboarding & Organization API', () => {
 
   describe('Server-Side Pagination & Filtering (GET /api/v1/hrms/onboarding/new-hires)', () => {
     it('returns default pagination metadata (page=1, pageSize=25) and stage counts', async () => {
-      const res = await request(app).get('/api/v1/hrms/onboarding/new-hires');
+      const res = await hrms.get('/api/v1/hrms/onboarding/new-hires');
 
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body.data)).toBe(true);
@@ -330,7 +342,7 @@ describe('HRMS Onboarding & Organization API', () => {
 
     it('supports allowed page sizes (25, 50, 100)', async () => {
       for (const size of [25, 50, 100]) {
-        const res = await request(app).get(`/api/v1/hrms/onboarding/new-hires?pageSize=${size}`);
+        const res = await hrms.get(`/api/v1/hrms/onboarding/new-hires?pageSize=${size}`);
         expect(res.status).toBe(200);
         expect(res.body.pagination.pageSize).toBe(size);
         expect(res.body.data.length).toBeLessThanOrEqual(size);
@@ -338,25 +350,21 @@ describe('HRMS Onboarding & Organization API', () => {
     });
 
     it('rejects invalid page or pageSize with 400 VALIDATION_ERROR', async () => {
-      const invalidPage = await request(app).get('/api/v1/hrms/onboarding/new-hires?page=0');
+      const invalidPage = await hrms.get('/api/v1/hrms/onboarding/new-hires?page=0');
       expect(invalidPage.status).toBe(400);
       expect(invalidPage.body.error.code).toBe('VALIDATION_ERROR');
 
-      const invalidPageSize = await request(app).get(
-        '/api/v1/hrms/onboarding/new-hires?pageSize=10',
-      );
+      const invalidPageSize = await hrms.get('/api/v1/hrms/onboarding/new-hires?pageSize=10');
       expect(invalidPageSize.status).toBe(400);
       expect(invalidPageSize.body.error.code).toBe('VALIDATION_ERROR');
 
-      const invalidStage = await request(app).get(
-        '/api/v1/hrms/onboarding/new-hires?stage=unknown_stage',
-      );
+      const invalidStage = await hrms.get('/api/v1/hrms/onboarding/new-hires?stage=unknown_stage');
       expect(invalidStage.status).toBe(400);
       expect(invalidStage.body.error.code).toBe('VALIDATION_ERROR');
     });
 
     it('filters by stage correctly while keeping total company stage counts', async () => {
-      const res = await request(app).get('/api/v1/hrms/onboarding/new-hires?stage=preboarding');
+      const res = await hrms.get('/api/v1/hrms/onboarding/new-hires?stage=preboarding');
 
       expect(res.status).toBe(200);
       expect(res.body.data.every((item: { stage: string }) => item.stage === 'preboarding')).toBe(
@@ -368,7 +376,7 @@ describe('HRMS Onboarding & Organization API', () => {
     });
 
     it('searches by keyword and paginates matching results', async () => {
-      const res = await request(app).get('/api/v1/hrms/onboarding/new-hires?search=Arun');
+      const res = await hrms.get('/api/v1/hrms/onboarding/new-hires?search=Arun');
 
       expect(res.status).toBe(200);
       expect(res.body.pagination.page).toBe(1);
@@ -381,9 +389,7 @@ describe('HRMS Onboarding & Organization API', () => {
     });
 
     it('returns empty result cleanly for non-matching search', async () => {
-      const res = await request(app).get(
-        '/api/v1/hrms/onboarding/new-hires?search=nonexistent_xyz_query',
-      );
+      const res = await hrms.get('/api/v1/hrms/onboarding/new-hires?search=nonexistent_xyz_query');
 
       expect(res.status).toBe(200);
       expect(res.body.data).toEqual([]);
@@ -394,7 +400,7 @@ describe('HRMS Onboarding & Organization API', () => {
     });
 
     it('handles out of range page gracefully', async () => {
-      const res = await request(app).get('/api/v1/hrms/onboarding/new-hires?page=999&pageSize=25');
+      const res = await hrms.get('/api/v1/hrms/onboarding/new-hires?page=999&pageSize=25');
 
       expect(res.status).toBe(200);
       expect(res.body.data).toEqual([]);
@@ -403,7 +409,7 @@ describe('HRMS Onboarding & Organization API', () => {
     });
 
     it('enforces tenant/company isolation in pagination and count queries', async () => {
-      const res = await request(app)
+      const res = await hrms
         .get('/api/v1/hrms/onboarding/new-hires')
         .set('x-company-id', 'comp_isolated_other')
         .set('x-tenant-id', 'tenant_isolated_other');

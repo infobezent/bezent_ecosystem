@@ -24,6 +24,7 @@ export * from './Grid';
 export * from './FormGrid';
 export * from './FormSection';
 export * from './Section';
+export * from './Pane';
 export * from './Divider';
 export * from './Page';
 export * from './PageHeader';
@@ -31,6 +32,7 @@ export * from './PageHeader';
 /* ─── Data ────────────────────────────────────────────────────────────────── */
 export * from './Table';
 export * from './EmptyState';
+export * from './SelectableList';
 
 /* ─── Feedback ────────────────────────────────────────────────────────────── */
 export * from './Alert';
@@ -46,6 +48,7 @@ export * from './Modal';
 export * from './Tabs';
 export * from './JourneyNav';
 export * from './EditorialHeader';
+export * from './ChapterFocusCarousel';
 
 /* ─── Display ─────────────────────────────────────────────────────────────── */
 export * from './Avatar';

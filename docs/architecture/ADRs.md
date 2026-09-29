@@ -182,6 +182,102 @@ maintenance.
 
 **Approval:** explicit, approved in PR #44 per Article 4.
 
+<a id="adr-017"></a>
+
+### ADR-017 — Centralized RBAC: roles, role assignments and a code-defined permission catalog
+
+**Context:** Phases 1–3 introduced platform authentication (`users`,
+`sessions`), company access (`memberships`) and a Super Admin flag
+(`users.is_super_admin`). Authorization, however, is expressed as a single
+role enum on `memberships` (`company_admin | hr_manager | employee | user`)
+and a hard-coded role list in the Company Admin service. There is no
+permission model, no effective-permission resolution, no custom roles, no
+Manager role, and Company Admin role changes overwrite the previous role.
+Business authorization therefore cannot follow the canonical chain
+`User → Company Membership → Roles → Permissions → Capability` (Article 17).
+
+**Decision:**
+
+1. **Membership = company access.** `memberships` continues to record that a
+   User may access a company. Its `role` column is retained for backward
+   compatibility and is no longer the authorization source.
+2. **Roles** live in a new `roles` table. System roles (`tenant_id` /
+   `company_id` NULL, `is_system = true`) keep the existing identifiers
+   (`company_admin`, `hr_manager`, `employee`, `user`) and add `manager`.
+   Companies may create custom roles scoped to `(tenant_id, company_id)`.
+   Roles are deactivated (status), never hard-deleted while assigned.
+3. **Permissions** are a **code-defined catalog** with stable dotted
+   identifiers (e.g. `company.users.invite`, `hrms.employees.update`,
+   `ess.leave.apply`), grouped by area (Platform, Company Administration,
+   HRMS, ESS, CRM, Project Management) — the same "system definitions ship in
+   code" pattern as the Form Engine. System-role permission sets also ship in
+   code (they cannot be edited at runtime); `role_permissions` maps a company
+   **custom** role to catalog identifiers. Platform-scope permissions can never
+   be attached to a company role; Super Admin remains `users.is_super_admin`
+   only. Self-service (`ess.*`) permissions are granted by a linked, active
+   Employee record — never by a role.
+4. **Role assignments** live in a new `role_assignments` table
+   `(user_id, role_id, tenant_id, company_id, status)`; a user may hold many
+   roles per company. Existing `memberships.role` values are backfilled into
+   `role_assignments` by migration.
+5. **One effective-permission resolver** evaluates, per request and per
+   selected company only: active session → active account → active
+   membership → company/tenant not suspended → active role assignments →
+   active roles → role permissions → module entitlements. Deny by default;
+   permissions from different companies are never combined. Client-supplied
+   company context is always re-validated server-side.
+
+**Consequences:** Adds three tables (`roles`, `role_permissions`,
+`role_assignments`) via an additive migration; no existing column is
+dropped. Middleware `requireCompanyContext` / `requirePermission` replace
+role-name checks. Securing the HRMS API with this model (removing
+dev-context header trust) is delivered separately.
+
+**Approval:** explicit, given by the user on 2026-09-29 per Article 4.
+
+<a id="adr-018"></a>
+
+### ADR-018 — Passwordless Email OTP authentication for every BEZENT user
+
+**Context:** Platform authentication (Phase 1) used email + password for all
+users, a dormant bootstrap path carried a hard-coded default Super Admin
+password, and session tokens were stored in plain text. BEZENT has no email
+delivery capability.
+
+**Decision:**
+
+1. **One passwordless flow for every user** — Super Admin, Company Admin, HR,
+   Manager, Employee and any custom role. `POST /platform/auth/otp/request`
+   issues a one-time code to the account email; `POST /platform/auth/otp/verify`
+   exchanges it for a session. There is no role-specific login path or bypass.
+   Password login (`POST /platform/auth/login`) is disabled; the password
+   columns are retained (additive schema) but no longer grant access.
+2. **Challenges** (`auth_otp_challenges`): 6-digit code stored only as an
+   HMAC-SHA256 digest keyed by `OTP_SECRET`; 10-minute expiry; single use;
+   at most 5 verification attempts, then locked; 60-second resend cooldown;
+   request rate limits per email and per client IP. Requests for unknown or
+   inactive accounts return the same response shape (no account enumeration)
+   and send nothing.
+3. **After verification** the existing session store issues the session and
+   the ADR-017 resolver returns platform workspaces, companies, roles,
+   permissions and workspaces. Authorization is still re-evaluated on every
+   protected request; OTP changes only how a session is created.
+4. **Session tokens are stored hashed** (SHA-256) in `sessions.token`.
+   Sessions issued before this change remain valid until they expire.
+5. **Email delivery** is a new platform capability (`platform/email`) using
+   **nodemailer over SMTP**. Development and tests may use a local
+   `email_outbox` table transport instead; production refuses to start
+   without SMTP configuration and `OTP_SECRET`. Codes are never written to
+   logs or audit metadata.
+
+**Consequences:** Adds the `nodemailer` dependency (Tech Stack: email
+delivery) and migration 0018 (`auth_otp_challenges`, `email_outbox`). The
+existing web login page (password form) must move to the OTP flow — that is
+the Multi-Login frontend work. Temporary passwords generated by provisioning
+and invitations no longer grant access.
+
+**Approval:** explicit, given by the user on 2026-09-29 per Article 4.
+
 ## Recording a new ADR
 
 Adding ADR-017 and beyond follows the process defined in

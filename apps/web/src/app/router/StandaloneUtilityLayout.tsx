@@ -66,10 +66,11 @@ export function StandaloneUtilityLayout() {
   }, [activeDrawerId]);
 
   const isRegistration = location.pathname.includes('/onboarding/registration');
+  const isFormEditor = location.pathname.includes('/settings/forms');
 
-  // Employee Registration occupies the complete standalone browser workspace
+  // Employee Registration and Form Editor occupy the complete standalone browser workspace
   // without the utility top bar or companion rail.
-  if (isRegistration) {
+  if (isRegistration || isFormEditor) {
     return (
       <div className="standalone-layout standalone-layout--registration">
         <main className="standalone-layout__main standalone-layout__main--registration">

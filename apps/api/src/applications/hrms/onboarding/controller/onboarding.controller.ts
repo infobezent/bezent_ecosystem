@@ -16,16 +16,16 @@ export class OnboardingController {
 
   listNewHires = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const devContext = req.devContext;
-      if (!devContext) {
+      const companyContext = req.companyContext;
+      if (!companyContext) {
         throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
       }
 
       const queryParams = validateListNewHiresQuery(req.query as Record<string, unknown>);
 
       const result = await this.service.listNewHires(
-        devContext.tenantId,
-        devContext.companyId,
+        companyContext.tenantId,
+        companyContext.companyId,
         queryParams,
       );
 
@@ -41,16 +41,20 @@ export class OnboardingController {
 
   listCases = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const devContext = req.devContext;
-      if (!devContext) {
+      const companyContext = req.companyContext;
+      if (!companyContext) {
         throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
       }
 
       const statusQuery = typeof req.query.status === 'string' ? req.query.status : undefined;
 
-      const items = await this.service.listCases(devContext.tenantId, devContext.companyId, {
-        status: statusQuery,
-      });
+      const items = await this.service.listCases(
+        companyContext.tenantId,
+        companyContext.companyId,
+        {
+          status: statusQuery,
+        },
+      );
 
       res.json({
         data: items,
@@ -62,16 +66,16 @@ export class OnboardingController {
 
   createNewHire = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const devContext = req.devContext;
-      if (!devContext) {
+      const companyContext = req.companyContext;
+      if (!companyContext) {
         throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
       }
 
       const validatedDto = validateCreateNewHire(req.body);
 
       const created = await this.service.createNewHire(
-        devContext.tenantId,
-        devContext.companyId,
+        companyContext.tenantId,
+        companyContext.companyId,
         validatedDto,
       );
 
@@ -85,16 +89,16 @@ export class OnboardingController {
 
   createCase = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const devContext = req.devContext;
-      if (!devContext) {
+      const companyContext = req.companyContext;
+      if (!companyContext) {
         throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
       }
 
       const validatedDto = validateCreateCase(req.body);
 
       const created = await this.service.createCase(
-        devContext.tenantId,
-        devContext.companyId,
+        companyContext.tenantId,
+        companyContext.companyId,
         validatedDto,
       );
 
@@ -108,8 +112,8 @@ export class OnboardingController {
 
   getCaseById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const devContext = req.devContext;
-      if (!devContext) {
+      const companyContext = req.companyContext;
+      if (!companyContext) {
         throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
       }
 
@@ -119,7 +123,11 @@ export class OnboardingController {
         throw new AppError('Onboarding case ID is required', 400, 'VALIDATION_ERROR');
       }
 
-      const item = await this.service.getCaseById(devContext.tenantId, devContext.companyId, id);
+      const item = await this.service.getCaseById(
+        companyContext.tenantId,
+        companyContext.companyId,
+        id,
+      );
 
       res.json({
         data: item,
@@ -135,8 +143,8 @@ export class OnboardingController {
 
   updateDraft = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const devContext = req.devContext;
-      if (!devContext) {
+      const companyContext = req.companyContext;
+      if (!companyContext) {
         throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
       }
 
@@ -149,8 +157,8 @@ export class OnboardingController {
       const validatedDto = validateUpdateDraft(req.body);
 
       const updated = await this.service.updateDraft(
-        devContext.tenantId,
-        devContext.companyId,
+        companyContext.tenantId,
+        companyContext.companyId,
         caseId,
         validatedDto,
       );
@@ -165,8 +173,8 @@ export class OnboardingController {
 
   submitCase = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const devContext = req.devContext;
-      if (!devContext) {
+      const companyContext = req.companyContext;
+      if (!companyContext) {
         throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
       }
 
@@ -179,8 +187,8 @@ export class OnboardingController {
       const validatedDto = validateSubmitCase(req.body);
 
       const submitted = await this.service.submitCase(
-        devContext.tenantId,
-        devContext.companyId,
+        companyContext.tenantId,
+        companyContext.companyId,
         caseId,
         validatedDto,
       );
@@ -195,8 +203,8 @@ export class OnboardingController {
 
   deleteDraft = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const devContext = req.devContext;
-      if (!devContext) {
+      const companyContext = req.companyContext;
+      if (!companyContext) {
         throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
       }
 
@@ -206,7 +214,7 @@ export class OnboardingController {
         throw new AppError('Onboarding case ID is required', 400, 'VALIDATION_ERROR');
       }
 
-      await this.service.deleteDraft(devContext.tenantId, devContext.companyId, caseId);
+      await this.service.deleteDraft(companyContext.tenantId, companyContext.companyId, caseId);
 
       res.status(204).send();
     } catch (err) {
@@ -216,8 +224,8 @@ export class OnboardingController {
 
   transitionStage = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const devContext = req.devContext;
-      if (!devContext) {
+      const companyContext = req.companyContext;
+      if (!companyContext) {
         throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
       }
 
@@ -230,8 +238,8 @@ export class OnboardingController {
       const validatedDto = validateTransitionStage(req.body);
 
       const updated = await this.service.transitionStage(
-        devContext.tenantId,
-        devContext.companyId,
+        companyContext.tenantId,
+        companyContext.companyId,
         caseId,
         validatedDto,
       );
@@ -246,8 +254,8 @@ export class OnboardingController {
 
   withdrawCase = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const devContext = req.devContext;
-      if (!devContext) {
+      const companyContext = req.companyContext;
+      if (!companyContext) {
         throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
       }
 
@@ -260,8 +268,8 @@ export class OnboardingController {
       const validatedDto = validateWithdrawCase(req.body);
 
       const withdrawn = await this.service.withdrawCase(
-        devContext.tenantId,
-        devContext.companyId,
+        companyContext.tenantId,
+        companyContext.companyId,
         caseId,
         validatedDto,
       );
@@ -276,8 +284,8 @@ export class OnboardingController {
 
   getCaseHistory = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const devContext = req.devContext;
-      if (!devContext) {
+      const companyContext = req.companyContext;
+      if (!companyContext) {
         throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
       }
 
@@ -288,8 +296,8 @@ export class OnboardingController {
       }
 
       const history = await this.service.getCaseHistory(
-        devContext.tenantId,
-        devContext.companyId,
+        companyContext.tenantId,
+        companyContext.companyId,
         caseId,
       );
 

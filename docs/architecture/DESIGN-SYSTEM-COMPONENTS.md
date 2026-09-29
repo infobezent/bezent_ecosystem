@@ -23,6 +23,8 @@ never imports from `app/`, `platform/`, `layouts/` or `applications/`.
 | `Badge`                                   | Notification unread-count badge (`App.tsx`)                                                                                                    | `count` (+ `max`), or `dot`; decorative (`aria-hidden`)                                                    |
 | `Avatar`                                  | Profile avatar (`App.tsx`)                                                                                                                     | `initials`, or `src` + `alt`; fixed 34px (only size evidenced)                                             |
 | `EmptyState` (+ `EmptyStateIllustration`) | `BezentEmptyState` / `BezentEmptyStateIllustration`                                                                                            | `title`, `description`, `primaryAction`, `secondaryAction`, `size: default \| compact`, `hideIllustration` |
+| `SelectableList` (+ `SelectableListItem`) | Approved requirement: list/detail editors (HR Settings → Forms editor); added under explicit authorization while Dev3 was unavailable          | `aria-label`, `selectedId`, `onSelect`, `size: sm \| md`; item `id`, `description`, `trailing`, `disabled` |
+| `Pane`                                    | Approved requirement: independently scrolling / sticky regions in list/detail editors                                                          | `scroll: none \| y`, `maxHeight: none \| sm \| md \| lg \| xl` (tokenised), `sticky`, `as`                 |
 
 ## 3. Candidate classification
 
@@ -82,7 +84,12 @@ replacement for an accessible name. Badge: `aria-hidden` — the consumer's
 control label should state the count (e.g. "Notifications, 5 unread").
 Avatar: `role="img"` + label for initials, `alt` for images. EmptyState:
 `role="region"` labelled by `title`; illustration `aria-hidden`, animations
-disabled under `prefers-reduced-motion`.
+disabled under `prefers-reduced-motion`. SelectableList: WAI-ARIA single-select
+`listbox` / `option` with `aria-selected`; roving tab stop (selected or first
+enabled option); ArrowUp/ArrowDown/Home/End move focus and selection and skip
+disabled options; Enter/Space select; disabled options are `aria-disabled`.
+Pane: a scrolling pane (`scroll="y"`) is keyboard-focusable and should be
+named with `aria-label`.
 
 ## 7. CSS ownership
 
@@ -114,7 +121,15 @@ application. Not a component: `EmployeeCard`, `LeaveBalanceCard`,
 - **`lucide-react`**: not added; missing shell glyphs went into the BEZENT
   icon registry instead (see ICON-SYSTEM.md).
 
-## 11. Deferred
+## 11. Forms editor update
+
+- `SelectableList` and `Pane` added (see §2 and §6) for list/detail editors.
+- **Bug fixed:** `Grid columns="sidebar-main"` emitted
+  `bezent-grid--cols-sidebar-main-{minColWidth}`, which no rule matched, so the
+  280px + 1fr template never applied. It now emits
+  `bezent-grid--cols-sidebar-main`.
+
+## 12. Deferred
 
 Input/search shell, Drawer primitives, MenuItem, Divider, additional Button
 variants, Avatar sizes.

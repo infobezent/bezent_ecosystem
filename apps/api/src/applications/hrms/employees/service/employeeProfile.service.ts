@@ -81,11 +81,20 @@ export class EmployeeProfileService {
             businessPhone: personal.businessPhone,
             workPhone: personal.workPhone,
             addressStreet: personal.addressStreet,
+            addressLine2: personal.addressLine2,
             addressCity: personal.addressCity,
             addressDistrict: personal.addressDistrict,
             addressState: personal.addressState,
             addressPostalCode: personal.addressPostalCode,
             addressCountry: personal.addressCountry,
+            isPermanentSameAsCurrent: personal.isPermanentSameAsCurrent,
+            permanentAddressStreet: personal.permanentAddressStreet,
+            permanentAddressLine2: personal.permanentAddressLine2,
+            permanentAddressCity: personal.permanentAddressCity,
+            permanentAddressDistrict: personal.permanentAddressDistrict,
+            permanentAddressState: personal.permanentAddressState,
+            permanentAddressPostalCode: personal.permanentAddressPostalCode,
+            permanentAddressCountry: personal.permanentAddressCountry,
           }
         : null,
       familyMembers: rows.familyMembers.map((row) => ({
@@ -95,6 +104,17 @@ export class EmployeeProfileService {
         dateOfBirth: row.dateOfBirth,
         phone: row.phone,
       })),
+      parentGuardians:
+        rows.familyMembers.length > 0
+          ? rows.familyMembers.map((f) => ({ name: f.name, relationship: f.relationship }))
+          : [
+              ...(personal?.fatherName
+                ? [{ name: personal.fatherName, relationship: 'Father' }]
+                : []),
+              ...(personal?.guardianName
+                ? [{ name: personal.guardianName, relationship: 'Legal Guardian' }]
+                : []),
+            ],
       nominees: rows.nominees.map((row) => ({
         id: row.id,
         name: row.name,
@@ -192,6 +212,14 @@ export class EmployeeProfileService {
     input: unknown,
   ): Promise<EmployeeRecordDetailsInput> {
     const details = validateEmployeeRecordDetails(input);
+    if (details.parentGuardians && details.personal) {
+      const father = details.parentGuardians.find((p) => p.relationship.toLowerCase() === 'father');
+      if (father && !details.personal.fatherName) details.personal.fatherName = father.name;
+      const guardian = details.parentGuardians.find((p) =>
+        p.relationship.toLowerCase().includes('guardian'),
+      );
+      if (guardian && !details.personal.guardianName) details.personal.guardianName = guardian.name;
+    }
     await this.assertReferences(tenantId, companyId, null, details);
     return details;
   }
@@ -203,8 +231,20 @@ export class EmployeeProfileService {
     details: EmployeeRecordDetailsInput,
   ): Promise<void> {
     if (details.personal) await this.repo.upsertPersonal(tx, owner, details.personal);
-    if (details.familyMembers)
+    if (details.parentGuardians && details.parentGuardians.length > 0) {
+      const pgFamilyMembers = details.parentGuardians.map((pg) => ({
+        name: pg.name,
+        relationship: pg.relationship,
+        dateOfBirth: null,
+        phone: null,
+      }));
+      const allFamily = details.familyMembers
+        ? [...details.familyMembers, ...pgFamilyMembers]
+        : pgFamilyMembers;
+      await this.repo.replaceFamilyMembers(tx, owner, allFamily);
+    } else if (details.familyMembers) {
       await this.repo.replaceFamilyMembers(tx, owner, details.familyMembers);
+    }
     if (details.nominees) await this.repo.replaceNominees(tx, owner, details.nominees);
     if (details.emergencyContacts) {
       await this.repo.replaceEmergencyContacts(tx, owner, details.emergencyContacts);

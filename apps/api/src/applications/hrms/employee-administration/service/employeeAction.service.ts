@@ -41,6 +41,7 @@ const EMPLOYMENT_TYPE_LABELS: Record<EmploymentType, string> = {
 };
 
 const EMPLOYMENT_STATUS_LABELS: Record<EmploymentStatus, string> = {
+  pending_activation: 'Pending Activation',
   active: 'Active',
   probation: 'Probation',
   notice: 'Notice Period',

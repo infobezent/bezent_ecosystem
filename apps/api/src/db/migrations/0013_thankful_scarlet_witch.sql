@@ -1,0 +1,1 @@
+ALTER TABLE `form_customizations` ADD `metadata` json;

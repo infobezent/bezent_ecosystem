@@ -1,4 +1,5 @@
 import { appConfig } from '../../../../app/config/env';
+import { authorizedFetch } from '../../../../platform/auth';
 
 /** Organization masters (departments, designations, locations) from the real API — no fallback. */
 
@@ -16,7 +17,7 @@ export interface OrganizationMasters {
 }
 
 export async function fetchOrganizationMasters(): Promise<OrganizationMasters> {
-  const res = await fetch(`${appConfig.apiBaseUrl}/hrms/organization/masters`);
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/organization/masters`);
   let body: { data?: OrganizationMasters; error?: { message?: string } } | null = null;
   try {
     body = await res.json();
