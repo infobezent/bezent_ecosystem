@@ -50,15 +50,16 @@
   font-size: 24px;
   font-weight: 700;
   color: var(--text-primary, #1f1f1f);
-  letter-spacing: -0.02em;
-  line-height: 1.25;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
 }
 
 .bezent-page-header__subtitle {
   margin: 0;
-  font-size: 14px;
+  font-size: 13.5px;
   color: var(--text-secondary, #444746);
-  line-height: 1.4;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
 }
 
 .bezent-page-header__actions {
@@ -67,3 +68,58 @@
   gap: 12px;
   flex-wrap: wrap;
 }
+
+/* Center Alignment Modifier */
+.bezent-page-header--align-center {
+  align-items: center;
+  text-align: center;
+}
+
+.bezent-page-header--align-center .bezent-page-header__breadcrumbs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.bezent-page-header--align-center .bezent-page-header__breadcrumbs .bezent-breadcrumb {
+  justify-content: center;
+}
+
+.bezent-page-header--align-center .bezent-page-header__main {
+  justify-content: center;
+  position: relative;
+  width: 100%;
+}
+
+.bezent-page-header--align-center .bezent-page-header__title-group {
+  align-items: center;
+  text-align: center;
+  margin: 0 auto;
+}
+
+.bezent-page-header--align-center .bezent-page-header__title-row {
+  justify-content: center;
+}
+
+.bezent-page-header--align-center .bezent-page-header__subtitle {
+  text-align: center;
+}
+
+.bezent-page-header--align-center .bezent-page-header__actions {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+@media (max-width: 768px) {
+  .bezent-page-header--align-center .bezent-page-header__actions {
+    position: static;
+    transform: none;
+    justify-content: center;
+    width: 100%;
+    margin-top: 8px;
+  }
+}
+

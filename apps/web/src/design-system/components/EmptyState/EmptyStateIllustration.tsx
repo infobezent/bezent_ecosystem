@@ -56,6 +56,8 @@ export const RACCOON_ILLUSTRATIONS: Record<string, string> = {
   performance: performanceRaccoonImg,
   employees: employeesRaccoonImg,
   employee: employeesRaccoonImg,
+  documents: employeesRaccoonImg,
+  document: employeesRaccoonImg,
 };
 
 /** Contextual badge accents for pages awaiting dedicated AI generation */

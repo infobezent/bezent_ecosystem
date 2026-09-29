@@ -31,14 +31,14 @@
 /* Label */
 .bezent-loading-state__label {
   margin: 0;
-  font-family: var(--font-sans);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-normal);
-  color: var(--color-text-tertiary);
-  line-height: var(--line-height-normal);
+  font-family: var(--font-family-base, 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  font-size: var(--font-size-sm, 13.5px);
+  font-weight: var(--font-weight-normal, 400);
+  color: var(--text-muted, #747775);
+  line-height: var(--line-height-normal, 1.4);
 }
 
 /* Dark mode */
 [data-theme='dark'] .bezent-loading-state__label {
-  color: var(--color-text-tertiary);
+  color: var(--text-muted, #8e918f);
 }

@@ -62,8 +62,8 @@ export function ProbationQueue({
   if (employees.length === 0) {
     return (
       <EmptyState
+        variant="employees"
         size="compact"
-        hideIllustration
         title="No confirmations due"
         description="Employees on probation will appear here with their confirmation due dates."
       />

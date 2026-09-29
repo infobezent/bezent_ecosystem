@@ -63,7 +63,7 @@ export function EmploymentHistory({
     return (
       <EmptyState
         size="compact"
-        hideIllustration
+        variant="employees"
         title="No employment activity yet"
         description="Job changes, confirmations, transfers, status changes and separations recorded in Employee Administration will appear here."
       />

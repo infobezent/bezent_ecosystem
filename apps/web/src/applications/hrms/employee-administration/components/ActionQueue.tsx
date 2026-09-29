@@ -68,6 +68,7 @@ export function ActionQueue({
   if (items.length === 0) {
     return (
       <EmptyState
+        variant="employees"
         size="compact"
         title={filtered ? 'No matching employee actions' : 'No employee actions yet.'}
         description={

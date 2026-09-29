@@ -7,14 +7,14 @@
 
 /* ─── 1. Uniform Typography & Color Palette ──────────────────────────────── */
 :root {
-  --form-font-size-title: 15px;
-  --form-font-size-subtitle: 12px;
-  --form-font-size-card-title: 14px;
-  --form-font-size-section-label: 11px;
-  --form-font-size-label: 12px;
-  --form-font-size-input: 13px;
-  --form-font-size-hint: 11px;
-  --form-font-size-badge: 11px;
+  --form-font-size-title: 18px;
+  --form-font-size-subtitle: 13.5px;
+  --form-font-size-card-title: 15.5px;
+  --form-font-size-section-label: 12px;
+  --form-font-size-label: 13px;
+  --form-font-size-input: 13.5px;
+  --form-font-size-hint: 12px;
+  --form-font-size-badge: 11.5px;
 
   /* Theme Button & Toggle Palette */
   --bezent-btn-sec-bg: #c2e7ff;
@@ -52,10 +52,10 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: var(--form-font-size-label, 12px);
+  font-size: var(--form-font-size-label, 13px);
   font-weight: 600;
   color: var(--text-secondary, #444746);
-  letter-spacing: -0.1px;
+  letter-spacing: -0.005em;
   margin: 0;
 }
 
@@ -81,7 +81,7 @@
   border-radius: var(--radius-md, 8px);
   color: var(--text-primary, #1f1f1f);
   font: inherit;
-  font-size: var(--form-font-size-input, 13px);
+  font-size: var(--form-font-size-input, 13.5px);
   box-sizing: border-box;
   transition:
     border-color 0.15s ease,
@@ -298,17 +298,19 @@
 }
 
 .employee-registration__section-title {
-  font-size: var(--form-font-size-title, 15px);
-  font-weight: 600;
+  font-size: var(--form-font-size-title, 18px);
+  font-weight: 700;
   color: var(--text-primary, #1f1f1f);
   margin: 0;
-  letter-spacing: -0.2px;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
 }
 
 .employee-registration__section-subtitle {
-  font-size: var(--form-font-size-subtitle, 12px);
+  font-size: var(--form-font-size-subtitle, 13.5px);
   color: var(--text-secondary, #444746);
-  margin: 0;
+  margin: 2px 0 0 0;
+  line-height: 1.45;
 }
 
 /* ─── 6. Action Buttons in Brand Blue (#c2e7ff / #071e49) ─────────────────── */
@@ -462,10 +464,11 @@
 .working-hours-section__card-title,
 .online-access-section__card-title,
 .review-section__card-title {
-  font-size: var(--form-font-size-card-title, 14px);
-  font-weight: 600;
+  font-size: var(--form-font-size-card-title, 15.5px);
+  font-weight: 700;
   color: var(--text-primary, #1f1f1f);
   margin: 0;
+  letter-spacing: -0.015em;
 }
 
 /* ─── 8. Form Grids ──────────────────────────────────────────────────────── */

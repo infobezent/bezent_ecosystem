@@ -60,6 +60,26 @@ textarea {
   color-scheme: dark;
 }
 
+/* Custom sleek scrollbars */
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 999px;
+  transition: background 0.15s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.45);
+}
+
 /*
  * Global reduced-motion safety net: every transition/animation collapses to
  * (effectively) instant. Components with meaningful motion also carry their

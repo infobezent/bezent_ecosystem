@@ -131,6 +131,7 @@ export function ChecklistsSection({
 
         {filteredTasks.length === 0 ? (
           <EmptyState
+            variant="onboarding"
             title="No checklist tasks found for this stage."
             description="Add task templates to assign responsibilities automatically across onboarding stages."
             primaryAction={{ label: 'Add First Task', onClick: openCreateModal }}
