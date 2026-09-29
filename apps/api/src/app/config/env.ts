@@ -34,6 +34,8 @@ export const env = {
   },
   /** Key for OTP code digests (ADR-018). Must be a long random secret in production. */
   otpSecret: optional('OTP_SECRET'),
+  /** Public URL of the web app, used in sign-in invitation emails. */
+  webAppUrl: required('WEB_APP_URL', 'http://localhost:3000'),
 };
 
 /**

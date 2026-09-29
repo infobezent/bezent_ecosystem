@@ -12,7 +12,8 @@
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:seed": "tsx src/db/seed.ts"
+    "db:seed": "tsx src/db/seed.ts",
+    "dev:mail": "tsx src/platform/email/devOutbox.cli.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",

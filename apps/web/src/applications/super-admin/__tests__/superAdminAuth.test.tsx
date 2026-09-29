@@ -2,6 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { superAdminApi } from '../api/superAdminApi';
 import { appConfig } from '../../../app/config/env';
 
+/**
+ * The Super Admin client uses the ONE platform session (ADR-018). Signing in
+ * is covered by the shared Email OTP client (platform/auth); there is no
+ * Super Admin password login.
+ */
 describe('Super Admin API Authentication Client', () => {
   const store: Record<string, string> = {};
   const mockLocalStorage = {
@@ -25,64 +30,8 @@ describe('Super Admin API Authentication Client', () => {
     vi.stubGlobal('localStorage', mockLocalStorage);
   });
 
-  it('constructs login URL using appConfig.apiBaseUrl', async () => {
-    const mockResponse = {
-      data: {
-        token: 'test_token_123',
-        user: {
-          id: 'usr_sa_01',
-          email: 'superadmin@bezent.com',
-          firstName: 'Platform',
-          lastName: 'Superadmin',
-          status: 'active',
-          isSuperAdmin: true,
-        },
-        expiresAt: '2026-09-30T10:00:00.000Z',
-        defaultDestination: '/super-admin',
-      },
-    };
-
-    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockResponse,
-    } as Response);
-
-    const result = await superAdminApi.login({
-      email: 'superadmin@bezent.com',
-      password: 'testPassword',
-    });
-
-    expect(fetchSpy).toHaveBeenCalledWith(
-      `${appConfig.apiBaseUrl}/platform/auth/login`,
-      expect.objectContaining({
-        method: 'POST',
-        headers: expect.objectContaining({
-          'Content-Type': 'application/json',
-        }),
-      }),
-    );
-    expect(result.token).toBe('test_token_123');
-    expect(result.user.isSuperAdmin).toBe(true);
-  });
-
-  it('parses error response messages cleanly when login fails', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
-      ok: false,
-      status: 401,
-      json: async () => ({
-        error: {
-          code: 'UNAUTHORIZED',
-          message: 'Invalid email or password',
-        },
-      }),
-    } as Response);
-
-    await expect(
-      superAdminApi.login({
-        email: 'superadmin@bezent.com',
-        password: 'wrong',
-      }),
-    ).rejects.toThrow('Invalid email or password');
+  it('offers no password login', () => {
+    expect('login' in superAdminApi).toBe(false);
   });
 
   it('includes Authorization header with Bearer token for authenticated requests', async () => {
@@ -90,6 +39,7 @@ describe('Super Admin API Authentication Client', () => {
 
     const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
       ok: true,
+      status: 200,
       json: async () => ({ data: { items: [], total: 0 } }),
     } as Response);
 

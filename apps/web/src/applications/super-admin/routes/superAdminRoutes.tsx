@@ -1,4 +1,4 @@
-import { Navigate, type RouteObject } from 'react-router-dom';
+import { Navigate, useLocation, type RouteObject } from 'react-router-dom';
 import { SuperAdminDashboardPage } from '../pages/SuperAdminDashboardPage';
 import { TenantsPage } from '../pages/TenantsPage';
 import { TenantDetailsPage } from '../pages/TenantDetailsPage';
@@ -10,22 +10,35 @@ import { CompanyAdminsPage } from '../pages/CompanyAdminsPage';
 import { ModuleAccessPage } from '../pages/ModuleAccessPage';
 import { AuditLogsPage } from '../pages/AuditLogsPage';
 import { PlatformSettingsPage } from '../pages/PlatformSettingsPage';
-import { SuperAdminLoginPage } from '../pages/SuperAdminLoginPage';
 import { useSuperAdminAuth } from '../context/SuperAdminAuthContext';
-import { LoadingState } from '../../../design-system/components';
+import { Alert, LoadingState } from '../../../design-system/components';
 
 export const SUPER_ADMIN_BASE_PATH = '/super-admin';
 export const SUPER_ADMIN_DEFAULT_DESTINATION_ID = 'dashboard';
 
+/**
+ * Navigation guard for the platform workspace. Signing in happens on the shared
+ * Email OTP page; the platform API independently enforces Super Admin access.
+ */
 function RequireSuperAdmin({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isSuperAdmin, isLoading } = useSuperAdminAuth();
+  const location = useLocation();
 
   if (isLoading) {
-    return <LoadingState label="Verifying platform administrator credentials..." />;
+    return <LoadingState label="Verifying platform administrator access..." />;
   }
 
-  if (!isAuthenticated || !isSuperAdmin) {
-    return <Navigate to="/super-admin/login" replace />;
+  if (!isAuthenticated) {
+    const next = encodeURIComponent(`${location.pathname}${location.search}`);
+    return <Navigate to={`/login?next=${next}`} replace />;
+  }
+
+  if (!isSuperAdmin) {
+    return (
+      <Alert variant="error" title="Access denied">
+        Platform administration is available to BEZENT Super Admins only.
+      </Alert>
+    );
   }
 
   return <>{children}</>;
@@ -42,8 +55,9 @@ export const superAdminRoutes: RouteObject[] = [
         element: <Navigate to={`${SUPER_ADMIN_BASE_PATH}/dashboard`} replace />,
       },
       {
+        // Retired: every user signs in on the shared Email OTP page (ADR-018).
         path: 'login',
-        element: <SuperAdminLoginPage />,
+        element: <Navigate to="/login" replace />,
       },
       {
         path: 'dashboard',

@@ -10,6 +10,7 @@ import {
 import { getDb } from '../../../db/connection.js';
 import { companies, tenants, employees } from '../../../db/schema.js';
 import type { AuthenticatedUser } from '../types/auth.types.js';
+import type { CompanyContext } from '../../access/types/access.types.js';
 import { moduleService } from '../../modules/service/module.service.js';
 
 export interface EmployeeContext {
@@ -35,10 +36,7 @@ declare global {
     interface Request {
       user?: AuthenticatedUser;
       sessionToken?: string;
-      companyContext?: {
-        tenantId: string;
-        companyId: string;
-      };
+      companyContext?: CompanyContext;
       employeeContext?: EmployeeContext;
     }
   }

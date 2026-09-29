@@ -30,6 +30,16 @@ export function verifyPassword(password: string, hash: string, salt: string): bo
   }
 }
 
+/**
+ * Credential material for new users under passwordless sign-in (ADR-018).
+ * The password columns remain NOT NULL (additive schema) but grant nothing:
+ * this is a random secret that is hashed and immediately discarded, so no one
+ * — including the platform — ever knows a password for the account.
+ */
+export function createUnusableCredential(): { hash: string; salt: string } {
+  return hashPassword(crypto.randomBytes(32).toString('hex'));
+}
+
 export function generateSessionToken(): string {
   return crypto.randomBytes(32).toString('hex');
 }

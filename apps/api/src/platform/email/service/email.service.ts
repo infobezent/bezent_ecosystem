@@ -56,6 +56,34 @@ export class EmailService {
       env.email.transport === 'smtp' ? new SmtpTransport() : new OutboxTransport(this.outbox);
     await this.transport.send(message);
   }
+
+  /**
+   * Tells a user they were given access and how to sign in (Email OTP; no
+   * password is ever issued). Used after the access itself is committed, so a
+   * delivery failure is reported to the caller rather than undoing the grant.
+   */
+  async sendSignInInvitation(input: {
+    to: string;
+    firstName: string;
+    companyName: string;
+    roleLabel: string;
+  }): Promise<'sent' | 'failed'> {
+    const loginUrl = `${env.webAppUrl.replace(/\/+$/, '')}/login`;
+    try {
+      await this.send({
+        to: input.to,
+        subject: `You have been given access to ${input.companyName} on BEZENT`,
+        text:
+          `Hello ${input.firstName},\n\n` +
+          `You have been given ${input.roleLabel} access to ${input.companyName} on BEZENT.\n\n` +
+          `Sign in at ${loginUrl} with this email address (${input.to}). ` +
+          'BEZENT will email you a one-time code; no password is needed.',
+      });
+      return 'sent';
+    } catch {
+      return 'failed';
+    }
+  }
 }
 
 export const emailService = new EmailService();
