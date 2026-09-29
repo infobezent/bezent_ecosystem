@@ -34,6 +34,32 @@ export function generateSessionToken(): string {
   return crypto.randomBytes(32).toString('hex');
 }
 
+/** Stored form of a session token (ADR-018): only the digest ever reaches the database. */
+export function hashSessionToken(token: string): string {
+  return `sha256:${crypto.createHash('sha256').update(token).digest('hex')}`;
+}
+
+/** Bearer tokens are exactly what generateSessionToken produces; anything else is rejected. */
+export function isWellFormedSessionToken(token: string): boolean {
+  return /^[0-9a-f]{64}$/.test(token);
+}
+
+/** Uniformly random 6-digit one-time code. */
+export function generateOtpCode(): string {
+  return crypto.randomInt(0, 1_000_000).toString().padStart(6, '0');
+}
+
+/** Keyed digest of a one-time code, bound to its challenge so digests cannot be reused. */
+export function digestOtpCode(secret: string, challengeId: string, code: string): string {
+  return crypto.createHmac('sha256', secret).update(`${challengeId}:${code}`).digest('hex');
+}
+
+export function timingSafeEqualHex(a: string, b: string): boolean {
+  const left = Buffer.from(a, 'hex');
+  const right = Buffer.from(b, 'hex');
+  return left.length === right.length && left.length > 0 && crypto.timingSafeEqual(left, right);
+}
+
 export function generateSurrogateId(prefix: string): string {
   return `${prefix}_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
 }

@@ -1,3 +1,5 @@
+import type { AccessOverview } from '../../access/types/access.types.js';
+
 export interface AuthenticatedUser {
   id: string;
   email: string;
@@ -24,4 +26,13 @@ export interface LoginResult {
   user: AuthenticatedUser;
   expiresAt: string;
   defaultDestination: string;
+  /** Authorized platform workspaces, companies, roles, permissions and workspaces. */
+  access: AccessOverview;
+}
+
+/** Response to an OTP request. Identical whether or not the email belongs to an account. */
+export interface OtpChallengeResult {
+  challengeId: string;
+  expiresAt: string;
+  resendAvailableAt: string;
 }

@@ -4,19 +4,18 @@ import {
   accessResolverService,
   AccessResolverService,
 } from '../../access/service/accessResolver.service.js';
-import {
-  generateSessionToken,
-  generateSurrogateId,
-  hashPassword,
-  verifyPassword,
-} from '../security.js';
+import { generateSessionToken, isWellFormedSessionToken } from '../security.js';
 import { UnauthorizedError, ForbiddenError } from '../../../app/errors/AppError.js';
 import type { AuthenticatedUser, LoginResult } from '../types/auth.types.js';
-import { getDb } from '../../../db/connection.js';
-import { users } from '../../../db/schema.js';
+import type { User } from '../../../db/schema.js';
 
 const SESSION_TTL_HOURS = 24;
 
+/**
+ * Platform sessions (ADR-018). There is ONE way to obtain a session for every
+ * user: a verified Email OTP (see OtpAuthService), which calls issueSession.
+ * Authorization is never decided here; it is resolved per request (ADR-017).
+ */
 export class AuthService {
   constructor(
     private readonly repo: AuthRepository = authRepository,
@@ -24,22 +23,16 @@ export class AuthService {
     private readonly access: AccessResolverService = accessResolverService,
   ) {}
 
-  async login(email: string, password: string): Promise<LoginResult> {
-    const user = await this.repo.findUserByEmail(email);
-    if (!user) {
-      throw new UnauthorizedError('Invalid email or password');
-    }
-
+  /**
+   * Opens a session for an already-verified identity and resolves what it may
+   * reach: platform workspaces, companies, roles, permissions and workspaces.
+   */
+  async issueSession(user: User): Promise<LoginResult> {
     if (user.status === 'suspended') {
       throw new ForbiddenError('Account is suspended. Please contact administrator.');
     }
-    if (user.status === 'inactive') {
+    if (user.status !== 'active') {
       throw new UnauthorizedError('Account is inactive.');
-    }
-
-    const isValidPassword = verifyPassword(password, user.passwordHash, user.salt);
-    if (!isValidPassword) {
-      throw new UnauthorizedError('Invalid email or password');
     }
 
     const token = generateSessionToken();
@@ -48,28 +41,7 @@ export class AuthService {
     await this.repo.createSession(user.id, token, expiresAt);
     await this.repo.updateLastLogin(user.id);
 
-    const memberships = await this.repo.getUserMemberships(user.id);
-
-    const authenticatedUser: AuthenticatedUser = {
-      id: user.id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      phone: user.phone,
-      status: user.status,
-      isSuperAdmin: user.isSuperAdmin,
-      memberships: memberships.map((m) => ({
-        tenantId: m.tenantId,
-        companyId: m.companyId,
-        role: m.role,
-        status: m.status,
-        companyName: m.companyName,
-        companyCode: m.companyCode,
-        companyStatus: m.companyStatus,
-        tenantName: m.tenantName,
-        tenantStatus: m.tenantStatus,
-      })),
-    };
+    const authenticatedUser = await this.toAuthenticatedUser(user);
 
     await this.audit.logEvent({
       actorUserId: user.id,
@@ -77,12 +49,14 @@ export class AuthService {
       action: 'user_logged_in',
       targetType: 'user',
       targetId: user.id,
+      metadata: { method: 'email_otp' },
     });
+
+    const access = await this.access.resolveOverview(authenticatedUser);
 
     // Landing destination follows the workspaces the user's effective
     // permissions actually grant, never a role name.
-    const overview = await this.access.resolveOverview(authenticatedUser);
-    const workspaces = new Set(overview.companies.flatMap((c) => c.workspaces));
+    const workspaces = new Set(access.companies.flatMap((c) => c.workspaces));
     const defaultDestination = user.isSuperAdmin
       ? '/super-admin'
       : workspaces.has('company_admin')
@@ -98,6 +72,7 @@ export class AuthService {
       user: authenticatedUser,
       expiresAt: expiresAt.toISOString(),
       defaultDestination,
+      access,
     };
   }
 
@@ -116,6 +91,10 @@ export class AuthService {
   }
 
   async validateToken(token: string): Promise<AuthenticatedUser> {
+    // Only raw tokens as issued are accepted; a stored digest is never a credential.
+    if (!isWellFormedSessionToken(token)) {
+      throw new UnauthorizedError('Session expired or invalid');
+    }
     const session = await this.repo.findActiveSession(token);
     if (!session) {
       throw new UnauthorizedError('Session expired or invalid');
@@ -126,8 +105,11 @@ export class AuthService {
       throw new ForbiddenError('Account is not active');
     }
 
-    const memberships = await this.repo.getUserMemberships(user.id);
+    return this.toAuthenticatedUser(user);
+  }
 
+  private async toAuthenticatedUser(user: User): Promise<AuthenticatedUser> {
+    const memberships = await this.repo.getUserMemberships(user.id);
     return {
       id: user.id,
       email: user.email,
@@ -148,29 +130,6 @@ export class AuthService {
         tenantStatus: m.tenantStatus,
       })),
     };
-  }
-
-  async bootstrapSuperAdmin(): Promise<void> {
-    const defaultEmail = process.env.SUPER_ADMIN_EMAIL || 'superadmin@bezent.com';
-    const defaultPassword = process.env.SUPER_ADMIN_PASSWORD || 'BezentSuperAdmin2026!';
-
-    const existing = await this.repo.findUserByEmail(defaultEmail);
-    if (existing) return;
-
-    const { hash, salt } = hashPassword(defaultPassword);
-    const db = getDb();
-    const id = generateSurrogateId('usr_sa');
-
-    await db.insert(users).values({
-      id,
-      email: defaultEmail.toLowerCase().trim(),
-      passwordHash: hash,
-      salt,
-      firstName: 'Super',
-      lastName: 'Admin',
-      status: 'active',
-      isSuperAdmin: true,
-    });
   }
 }
 

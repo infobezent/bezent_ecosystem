@@ -17,7 +17,7 @@ import {
   users,
 } from '../../db/schema.js';
 import { hashPassword, generateSessionToken } from '../auth/security.js';
-import { authService } from '../auth/service/auth.service.js';
+import { signInForTest } from './support/testSession.js';
 
 /**
  * Phase 4 acceptance: one identity, many roles, many companies (ADR-017).
@@ -230,10 +230,10 @@ describe.skipIf(!isDatabaseConfigured)('Enterprise RBAC & multi-company access (
     );
     await upsertAssignment(limited, limitedRoleId, tenant1, companyA);
 
-    tokenA = (await authService.login(emailOf(userA), PASSWORD)).token;
-    tokenAdmin2 = (await authService.login(emailOf(admin2), PASSWORD)).token;
-    tokenLimited = (await authService.login(emailOf(limited), PASSWORD)).token;
-    tokenSuperAdmin = (await authService.login(emailOf(superAdmin), PASSWORD)).token;
+    tokenA = (await signInForTest(emailOf(userA))).token;
+    tokenAdmin2 = (await signInForTest(emailOf(admin2))).token;
+    tokenLimited = (await signInForTest(emailOf(limited))).token;
+    tokenSuperAdmin = (await signInForTest(emailOf(superAdmin))).token;
   });
 
   afterAll(async () => {
@@ -242,7 +242,7 @@ describe.skipIf(!isDatabaseConfigured)('Enterprise RBAC & multi-company access (
 
   describe('Identity: one login, many roles, many companies', () => {
     it('lands a multi-workspace user on an authorized workspace at login', async () => {
-      const result = await authService.login(emailOf(userA), PASSWORD);
+      const result = await signInForTest(emailOf(userA));
       expect(result.defaultDestination).toBe('/company-admin');
     });
 
@@ -669,19 +669,19 @@ describe.skipIf(!isDatabaseConfigured)('Enterprise RBAC & multi-company access (
     });
 
     it('rejects a suspended account on its existing session', async () => {
-      const { token } = await authService.login(emailOf(other), PASSWORD);
+      const { token } = await signInForTest(emailOf(other));
       await getDb().update(users).set({ status: 'suspended' }).where(eq(users.id, other));
       try {
         const res = await request(app).get('/api/v1/platform/access').set(auth(token));
         expect(res.status).toBe(403);
-        await expect(authService.login(emailOf(other), PASSWORD)).rejects.toThrow();
+        await expect(signInForTest(emailOf(other))).rejects.toThrow();
       } finally {
         await getDb().update(users).set({ status: 'active' }).where(eq(users.id, other));
       }
     });
 
     it('rejects a session after logout', async () => {
-      const { token } = await authService.login(emailOf(admin2), PASSWORD);
+      const { token } = await signInForTest(emailOf(admin2));
       const out = await request(app).post('/api/v1/platform/auth/logout').set(auth(token));
       expect(out.status).toBeLessThan(300);
       const res = await request(app).get('/api/v1/platform/access').set(auth(token));

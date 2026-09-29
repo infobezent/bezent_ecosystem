@@ -14,7 +14,7 @@ import {
   employeeLeaveRequests,
 } from '../../../../db/schema.js';
 import { hashPassword } from '../../../../platform/auth/security.js';
-import { authService } from '../../../../platform/auth/service/auth.service.js';
+import { signInForTest } from '../../../../platform/__tests__/support/testSession.js';
 
 describe('Employee Self Service (ESS) Backend API (Phase 3)', () => {
   const app = createApp();
@@ -110,10 +110,10 @@ describe('Employee Self Service (ESS) Backend API (Phase 3)', () => {
     await db.delete(employeeLeaveRequests).where(eq(employeeLeaveRequests.employeeId, employeeId));
 
     // Obtain tokens
-    const empLogin = await authService.login('ess_emp@test.example', 'BezentEmployee2026!');
+    const empLogin = await signInForTest('ess_emp@test.example');
     employeeToken = empLogin.token;
 
-    const nonEmpLogin = await authService.login('non_emp@test.example', 'BezentAdmin2026!');
+    const nonEmpLogin = await signInForTest('non_emp@test.example');
     nonEmployeeToken = nonEmpLogin.token;
   });
 

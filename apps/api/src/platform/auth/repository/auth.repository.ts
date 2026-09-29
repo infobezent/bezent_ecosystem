@@ -1,7 +1,7 @@
-import { eq, and, gt, isNull } from 'drizzle-orm';
+import { eq, and, gt, isNull, or } from 'drizzle-orm';
 import { getDb } from '../../../db/connection.js';
 import { users, sessions, memberships, companies, tenants, type User, type Session } from '../../../db/schema.js';
-import { generateSurrogateId } from '../security.js';
+import { generateSurrogateId, hashSessionToken } from '../security.js';
 
 export class AuthRepository {
   async findUserByEmail(email: string): Promise<User | null> {
@@ -19,6 +19,12 @@ export class AuthRepository {
     return user ?? null;
   }
 
+  /**
+   * Resolves a bearer token. New sessions are stored as `sha256:<hex>`; rows
+   * created before ADR-018 hold the raw token and still match until they
+   * expire. Callers must pass only well-formed tokens (64 hex chars), so a
+   * stored digest can never be replayed as a bearer token.
+   */
   async findActiveSession(token: string): Promise<(Session & { user: User }) | null> {
     const db = getDb();
     const rows = await db
@@ -30,7 +36,7 @@ export class AuthRepository {
       .innerJoin(users, eq(sessions.userId, users.id))
       .where(
         and(
-          eq(sessions.token, token),
+          this.matchesToken(token),
           isNull(sessions.revokedAt),
           gt(sessions.expiresAt, new Date()),
         ),
@@ -49,7 +55,7 @@ export class AuthRepository {
     const id = generateSurrogateId('sess');
     await db.insert(sessions).values({
       id,
-      token,
+      token: hashSessionToken(token),
       userId,
       expiresAt,
     });
@@ -63,7 +69,11 @@ export class AuthRepository {
     await db
       .update(sessions)
       .set({ revokedAt: new Date() })
-      .where(eq(sessions.token, token));
+      .where(this.matchesToken(token));
+  }
+
+  private matchesToken(token: string) {
+    return or(eq(sessions.token, hashSessionToken(token)), eq(sessions.token, token));
   }
 
   async updateLastLogin(userId: string): Promise<void> {

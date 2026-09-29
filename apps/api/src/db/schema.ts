@@ -1208,7 +1208,10 @@ export type NewInvitation = typeof invitations.$inferInsert;
 
 /**
  * Platform: Sessions & Auth Tokens
- * Persisted session tokens with explicit expiration and revocation.
+ * Persisted sessions with explicit expiration and revocation.
+ * `token` holds the SHA-256 hex digest of the bearer token (ADR-018); the raw
+ * token is only ever held by the client. Sessions created before ADR-018 hold
+ * the raw token and remain valid until they expire.
  */
 export const sessions = mysqlTable(
   'sessions',
@@ -1232,6 +1235,61 @@ export const sessions = mysqlTable(
 
 export type Session = typeof sessions.$inferSelect;
 export type NewSession = typeof sessions.$inferInsert;
+
+/**
+ * Platform: Email OTP login challenges (ADR-018)
+ * One row per code request. The code itself is never stored, only an HMAC
+ * digest. `user_id` and `code_digest` are NULL when the email matched no
+ * active account: the row still exists, counts attempts and locks exactly like
+ * a real challenge, so responses never reveal whether an account exists.
+ * Rows are kept (status) as security history; no hard delete.
+ */
+export const authOtpChallenges = mysqlTable(
+  'auth_otp_challenges',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    userId: varchar('user_id', { length: 64 }).references(() => users.id),
+    email: varchar('email', { length: 255 }).notNull(),
+    codeDigest: varchar('code_digest', { length: 64 }),
+    status: mysqlEnum('status', ['pending', 'consumed', 'locked', 'expired'])
+      .default('pending')
+      .notNull(),
+    attempts: int('attempts').default(0).notNull(),
+    expiresAt: timestamp('expires_at').notNull(),
+    consumedAt: timestamp('consumed_at'),
+    requestIp: varchar('request_ip', { length: 64 }),
+    createdAt: timestamp('created_at', { fsp: 3 }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_otp_email_created').on(table.email, table.createdAt),
+    index('idx_otp_ip_created').on(table.requestIp, table.createdAt),
+    index('idx_otp_user').on(table.userId),
+  ],
+);
+
+export type AuthOtpChallenge = typeof authOtpChallenges.$inferSelect;
+
+/**
+ * Platform: Development email outbox (ADR-018)
+ * Written only by the `outbox` email transport (development and tests); the
+ * API refuses to start in production unless SMTP is configured. Hard delete is
+ * acceptable: nothing references these rows.
+ */
+export const emailOutbox = mysqlTable(
+  'email_outbox',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    recipient: varchar('recipient', { length: 255 }).notNull(),
+    subject: varchar('subject', { length: 255 }).notNull(),
+    bodyText: varchar('body_text', { length: 4000 }).notNull(),
+    createdAt: timestamp('created_at', { fsp: 3 }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [index('idx_email_outbox_recipient').on(table.recipient, table.createdAt)],
+);
+
+export type EmailOutboxMessage = typeof emailOutbox.$inferSelect;
 
 /**
  * Platform: Tenant Module Entitlements

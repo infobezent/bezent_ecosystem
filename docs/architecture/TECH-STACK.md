@@ -15,6 +15,7 @@ any entry here requires an ADR and explicit approval — see
 | Backend framework     | Express.js + TypeScript     | [ADR-006](ADRs.md#adr-006) |
 | Database              | MySQL 8+                    | [ADR-007](ADRs.md#adr-007) |
 | Database access layer | Drizzle ORM + `drizzle-kit` | [ADR-007](ADRs.md#adr-007) |
+| Email delivery        | nodemailer (SMTP)           | [ADR-018](ADRs.md#adr-018) |
 | Package manager       | npm (workspaces)            | see below                  |
 | Architecture style    | Modular monolith            | [ADR-004](ADRs.md#adr-004) |
 | Linting               | ESLint (flat config)        | —                          |

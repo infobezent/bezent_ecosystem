@@ -11,7 +11,7 @@ import {
   roleAssignments,
 } from '../../db/schema.js';
 import { hashPassword } from '../auth/security.js';
-import { authService } from '../auth/service/auth.service.js';
+import { signInForTest } from './support/testSession.js';
 
 describe('Company Admin Platform Subsystem (Phase 2)', () => {
   const app = createApp();
@@ -60,7 +60,7 @@ describe('Company Admin Platform Subsystem (Phase 2)', () => {
       isSuperAdmin: true,
     }).onDuplicateKeyUpdate({ set: { status: 'active' } });
 
-    const saLogin = await authService.login('sa_catest@bezent.com', 'BezentAdmin2026!');
+    const saLogin = await signInForTest('sa_catest@bezent.com');
     superAdminToken = saLogin.token;
 
     // 4. Create Company Admin User for Company A
@@ -94,7 +94,7 @@ describe('Company Admin Platform Subsystem (Phase 2)', () => {
       status: 'active',
     }).onDuplicateKeyUpdate({ set: { status: 'active' } });
 
-    const caLogin = await authService.login('admin_a@alpha.example', 'CompanyAdmin2026!');
+    const caLogin = await signInForTest('admin_a@alpha.example');
     companyAdminAToken = caLogin.token;
 
     // 5. Create Ordinary Employee User
@@ -128,7 +128,7 @@ describe('Company Admin Platform Subsystem (Phase 2)', () => {
       status: 'active',
     }).onDuplicateKeyUpdate({ set: { status: 'active' } });
 
-    const empLogin = await authService.login('employee_a@alpha.example', 'Employee2026!');
+    const empLogin = await signInForTest('employee_a@alpha.example');
     ordinaryEmployeeToken = empLogin.token;
   });
 
