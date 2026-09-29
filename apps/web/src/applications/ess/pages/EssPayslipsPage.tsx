@@ -31,7 +31,7 @@ export function EssPayslipsPage() {
   }, []);
 
   if (loading) return <LoadingState label="Loading payslips..." />;
-  if (error) return <Alert variant="error" title="Error" description={error} />;
+  if (error) return <Alert variant="error" title="Error">{error}</Alert>;
 
   return (
     <Page>
@@ -43,22 +43,25 @@ export function EssPayslipsPage() {
         {!status?.enabled ? (
           <Card>
             <Stack gap="md">
-              <Inline gap="sm" alignItems="center">
+              <Inline gap="sm" align="center">
                 <BezentIcon name="payroll" size={32} />
                 <Stack gap="xs">
-                  <span style={{ fontWeight: 600, fontSize: '1.1rem' }}>Payroll Not Configured</span>
+                  <strong>Payroll Not Configured</strong>
                   <span>{status?.message ?? 'Payroll integration is not configured for your organization.'}</span>
                 </Stack>
               </Inline>
               <Alert
                 variant="info"
                 title="Module Not Available"
-                description="Your organization's payroll integration is not set up yet. Once configured, your monthly payslips will appear here for download."
-              />
+              >
+                {
+                  "Your organization's payroll integration is not set up yet. Once configured, your monthly payslips will appear here for download."
+                }
+              </Alert>
             </Stack>
           </Card>
         ) : (
-          <Alert variant="info" title="No Payslips" description="No payslips are available for download yet." />
+          <Alert variant="info" title="No Payslips">No payslips are available for download yet.</Alert>
         )}
       </Section>
     </Page>

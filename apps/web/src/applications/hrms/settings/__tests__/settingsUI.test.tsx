@@ -12,10 +12,16 @@ import { EmployeesSettingsSection } from '../components/EmployeesSettingsSection
 import { HRSettingsSection } from '../components/HRSettingsSection';
 import { CustomFieldsProvider } from '../context/CustomFieldsContext';
 import { hrmsRoutes } from '../../routes/hrmsRoutes';
+// SettingsPage shows the signed-in session's active company.
+import { AuthProvider } from '../../../../platform/auth';
 
 describe('BEZENT Common Portal Settings Center UI', () => {
   it('SettingsPage renders common portal header and clean content without duplicate top sub-nav', () => {
-    const html = renderToStaticMarkup(<SettingsPage />);
+    const html = renderToStaticMarkup(
+      <AuthProvider>
+        <SettingsPage />
+      </AuthProvider>,
+    );
 
     expect(html).toContain('Settings');
     expect(html).toContain('Configure and manage settings across the BEZENT portal.');
@@ -23,7 +29,11 @@ describe('BEZENT Common Portal Settings Center UI', () => {
   });
 
   it('SettingsPage Overview view displays Administration module card', () => {
-    const html = renderToStaticMarkup(<SettingsPage />);
+    const html = renderToStaticMarkup(
+      <AuthProvider>
+        <SettingsPage />
+      </AuthProvider>,
+    );
 
     expect(html).toContain('Administration');
     expect(html).toContain(
@@ -44,7 +54,7 @@ describe('BEZENT Common Portal Settings Center UI', () => {
     expect(settingsRoute).toBeDefined();
     expect(settingsRoute?.element).toBeDefined();
 
-    const html = renderToStaticMarkup(settingsRoute!.element as ReactElement);
+    const html = renderToStaticMarkup(<AuthProvider>{settingsRoute!.element as ReactElement}</AuthProvider>);
     expect(html).toContain('Settings');
     expect(html).toContain('Configure and manage settings across the BEZENT portal.');
   });

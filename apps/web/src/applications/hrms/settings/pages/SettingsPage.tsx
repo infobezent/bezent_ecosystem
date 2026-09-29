@@ -14,7 +14,7 @@ import {
   Stack,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
-import { useDevContext } from '../../../../platform/context/DevContext';
+import { useAuth } from '../../../../platform/auth';
 import { SETTINGS_MODULE_CARDS, type SettingsModuleId } from '../types/settingsCenter';
 import { DashboardSettingsSection } from '../components/DashboardSettingsSection';
 import { AdministrationSettingsSection } from '../components/AdministrationSettingsSection';
@@ -26,7 +26,7 @@ import { EmployeesSettingsSection } from '../components/EmployeesSettingsSection
 import { HRSettingsSection } from '../components/HRSettingsSection';
 
 export function SettingsPage() {
-  const devContext = useDevContext();
+  const { activeCompany } = useAuth();
   const [activeModule, setActiveModule] = useState<SettingsModuleId>('overview');
 
   const selectedModuleInfo = SETTINGS_MODULE_CARDS.find((m) => m.id === activeModule);
@@ -42,7 +42,7 @@ export function SettingsPage() {
             <Badge variant="info">
               <Inline gap="xs" align="center">
                 <BezentIcon name="hrSettings" size={14} />
-                <span>{devContext.companyName}</span>
+                <span>{activeCompany?.companyName ?? 'No company selected'}</span>
               </Inline>
             </Badge>
           }

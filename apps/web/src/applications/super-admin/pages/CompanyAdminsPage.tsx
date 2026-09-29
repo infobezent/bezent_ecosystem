@@ -49,7 +49,7 @@ export function CompanyAdminsPage() {
   const [newEmail, setNewEmail] = useState<string>('');
   const [newFirstName, setNewFirstName] = useState<string>('');
   const [newLastName, setNewLastName] = useState<string>('');
-  const [newPassword, setNewPassword] = useState<string>('');
+  const [notice, setNotice] = useState<string | null>(null);
 
   const fetchAdmins = useCallback(async () => {
     setLoading(true);
@@ -89,7 +89,7 @@ export function CompanyAdminsPage() {
     setSubmitting(true);
     setFormError(null);
     try {
-      await superAdminApi.assignCompanyAdmin({
+      const result = await superAdminApi.assignCompanyAdmin({
         tenantId: modalTenantId,
         companyId: modalCompanyId || undefined,
         userId: assignMode === 'existing' ? existingUserId.trim() : undefined,
@@ -99,7 +99,6 @@ export function CompanyAdminsPage() {
                 email: newEmail.trim().toLowerCase(),
                 firstName: newFirstName.trim(),
                 lastName: newLastName.trim(),
-                password: newPassword || undefined,
               }
             : undefined,
       });
@@ -109,7 +108,7 @@ export function CompanyAdminsPage() {
       setNewEmail('');
       setNewFirstName('');
       setNewLastName('');
-      setNewPassword('');
+      setNotice(result.invitationDelivery.message);
       await fetchAdmins();
     } catch (err: unknown) {
       setFormError(err instanceof Error ? err.message : 'Failed to assign administrator');
@@ -119,11 +118,11 @@ export function CompanyAdminsPage() {
   };
 
   const handleRevoke = async (admin: CompanyAdminAssignment) => {
-    if (!confirm(`Are you sure you want to revoke Company Admin access for ${admin.user.email}?`)) {
+    if (!confirm(`Are you sure you want to revoke Company Admin access for ${admin.email}?`)) {
       return;
     }
     try {
-      await superAdminApi.revokeCompanyAdmin(admin.id);
+      await superAdminApi.revokeCompanyAdmin(admin.membershipId);
       await fetchAdmins();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to revoke administrator');
@@ -149,6 +148,12 @@ export function CompanyAdminsPage() {
       {error && (
         <Alert variant="error" title="Error" onDismiss={() => setError(null)}>
           {error}
+        </Alert>
+      )}
+
+      {notice && (
+        <Alert variant="success" title="Company Admin assigned" dismissible onDismiss={() => setNotice(null)}>
+          {notice}
         </Alert>
       )}
 
@@ -207,13 +212,13 @@ export function CompanyAdminsPage() {
               </TableHead>
               <TableBody>
                 {admins.map((item) => (
-                  <TableRow key={item.id}>
+                  <TableRow key={item.membershipId}>
                     <TableCell>
                       <Stack gap="xs">
                         <strong>
-                          {item.user.firstName} {item.user.lastName}
+                          {item.firstName} {item.lastName}
                         </strong>
-                        <span className="bezent-caption">{item.user.email}</span>
+                        <span className="bezent-caption">{item.email}</span>
                       </Stack>
                     </TableCell>
                     <TableCell>
@@ -336,12 +341,10 @@ export function CompanyAdminsPage() {
                     required
                   />
                 </Inline>
-                <Input
-                  label="Initial Password"
-                  placeholder="Optional temporary password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                />
+                <span className="bezent-caption">
+                  No password is needed. The administrator is emailed instructions and signs in
+                  with a one-time code sent to this email.
+                </span>
               </Stack>
             )}
           </Stack>

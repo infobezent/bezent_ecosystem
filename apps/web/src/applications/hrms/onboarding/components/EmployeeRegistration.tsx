@@ -163,6 +163,7 @@ interface EmployeeRegistrationProps {
 }
 
 import { useCustomFieldsOptional } from '../../settings/context/CustomFieldsContext';
+import { authorizedFetch } from '../../../../platform/auth';
 
 export function EmployeeRegistration({
   isOpen = true,
@@ -285,7 +286,7 @@ export function EmployeeRegistration({
   // Auto-fetch next unique Employee ID from backend on mount
   useEffect(() => {
     if (!initialDraft?.employeeId) {
-      fetch('/api/v1/hrms/employees/next-number')
+      authorizedFetch('/api/v1/hrms/employees/next-number')
         .then((res) => {
           if (!res.ok) throw new Error('Failed to fetch next number');
           return res.json();
@@ -309,7 +310,7 @@ export function EmployeeRegistration({
       setReferralLoading(true);
       setReferralError(null);
       const timer = setTimeout(() => {
-        fetch(`/api/v1/hrms/employees/resolve-referral/${encodeURIComponent(code)}`)
+        authorizedFetch(`/api/v1/hrms/employees/resolve-referral/${encodeURIComponent(code)}`)
           .then((res) => {
             if (!res.ok) throw new Error('Not found');
             return res.json();

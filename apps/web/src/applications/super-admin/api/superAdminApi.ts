@@ -1,4 +1,5 @@
 import { appConfig } from '../../../app/config/env';
+import { authorizedFetch } from '../../../platform/auth';
 
 /**
  * Super Admin Platform API Client
@@ -22,7 +23,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     ...(options.headers || {}),
   };
 
-  const response = await fetch(`${API_BASE}${path}`, {
+  const response = await authorizedFetch(`${API_BASE}${path}`, {
     ...options,
     headers,
   });
@@ -59,13 +60,6 @@ export interface PlatformUserSummary {
     role: string;
     status: string;
   }>;
-}
-
-export interface AuthLoginResponse {
-  token: string;
-  user: PlatformUserSummary;
-  expiresAt: string;
-  defaultDestination: string;
 }
 
 export interface TenantRecord {
@@ -116,23 +110,21 @@ export interface TenantModuleStatus {
   disabledAt: string | null;
 }
 
+/** Mirrors the API's CompanyAdminAssignment (platform/company-admins/types). */
 export interface CompanyAdminAssignment {
-  id: string;
+  membershipId: string;
   userId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone: string | null;
   tenantId: string;
   tenantName?: string;
-  companyId: string | null;
-  companyName?: string | null;
-  role: 'company_admin';
-  status: 'active' | 'revoked';
+  companyId: string;
+  companyName?: string;
+  role: string;
+  status: string;
   assignedAt: string;
-  user: {
-    email: string;
-    firstName: string;
-    lastName: string;
-    phone: string | null;
-    status: string;
-  };
 }
 
 export interface AuditLogEntry {
@@ -186,10 +178,18 @@ export interface CustomerProvisioningPayload {
       firstName: string;
       lastName: string;
       phone?: string;
-      tempPassword?: string;
     };
   };
   activateImmediately?: boolean;
+}
+
+/**
+ * How the new administrator was told to sign in. BEZENT is passwordless
+ * (ADR-018): no password is generated or shown; they sign in with Email OTP.
+ */
+export interface SignInInvitationDelivery {
+  status: 'INVITATION_EMAILED' | 'INVITATION_EMAIL_FAILED';
+  message: string;
 }
 
 export interface ProvisioningResponse {
@@ -197,23 +197,13 @@ export interface ProvisioningResponse {
   company: CompanyRecord;
   modules: TenantModuleStatus[];
   admin: CompanyAdminAssignment;
-  invitationDelivery: {
-    status: string;
-    message: string;
-    temporaryPassword?: string;
-  };
+  invitationDelivery: SignInInvitationDelivery;
 }
 
 /* ── API Client ─────────────────────────────────────────────────────── */
 
 export const superAdminApi = {
-  // Auth
-  login: (credentials: { email: string; password: string }) =>
-    request<AuthLoginResponse>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    }),
-
+  // Sign-in is the shared Email OTP flow (platform/auth); there is no password login.
   logout: () =>
     request<{ success: boolean }>('/auth/logout', {
       method: 'POST',
@@ -375,16 +365,18 @@ export const superAdminApi = {
       firstName: string;
       lastName: string;
       phone?: string;
-      password?: string;
     };
   }) =>
-    request<CompanyAdminAssignment>('/company-admins/assign', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
+    request<{ assignment: CompanyAdminAssignment; invitationDelivery: SignInInvitationDelivery }>(
+      '/company-admins/assign',
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      },
+    ),
 
-  revokeCompanyAdmin: (assignmentId: string) =>
-    request<{ success: boolean }>(`/company-admins/${assignmentId}/revoke`, {
+  revokeCompanyAdmin: (membershipId: string) =>
+    request<{ success: boolean }>(`/company-admins/${membershipId}/revoke`, {
       method: 'POST',
     }),
 

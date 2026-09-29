@@ -11,6 +11,7 @@ import {
   Alert,
   LoadingState,
   EmptyState,
+  type BadgeVariant,
 } from '../../../design-system/components';
 import { BezentIcon } from '../../../design-system/icons';
 import { essApi, type EssTask } from '../api/essApi';
@@ -51,13 +52,13 @@ export function EssTasksPage() {
   };
 
   if (loading) return <LoadingState label="Loading tasks..." />;
-  if (error) return <Alert variant="error" title="Error" description={error} />;
+  if (error) return <Alert variant="error" title="Error">{error}</Alert>;
 
-  const priorityVariant = (p: EssTask['priority']): string =>
-    p === 'high' ? 'red' : p === 'medium' ? 'yellow' : 'grey';
+  const priorityVariant = (p: EssTask['priority']): BadgeVariant =>
+    p === 'high' ? 'danger' : p === 'medium' ? 'warning' : 'neutral';
 
-  const statusVariant = (s: EssTask['status']): string =>
-    s === 'completed' ? 'green' : s === 'in_progress' ? 'blue' : 'grey';
+  const statusVariant = (s: EssTask['status']): BadgeVariant =>
+    s === 'completed' ? 'success' : s === 'in_progress' ? 'info' : 'neutral';
 
   const activeCount = tasks.filter(t => t.status !== 'completed').length;
 
@@ -68,7 +69,7 @@ export function EssTasksPage() {
         subtitle={`${activeCount} active task${activeCount !== 1 ? 's' : ''} assigned to you`}
       />
 
-      {successMsg && <Alert variant="success" title="Updated" description={successMsg} />}
+      {successMsg && <Alert variant="success" title="Updated">{successMsg}</Alert>}
 
       <Section title="Task List">
         {tasks.length === 0 ? (
@@ -80,22 +81,22 @@ export function EssTasksPage() {
           <Stack gap="sm">
             {tasks.map((task) => (
               <Card key={task.id}>
-                <Inline gap="md" alignItems="flex-start" justifyContent="space-between">
+                <Inline gap="md" align="start" justify="between">
                   <Stack gap="xs">
-                    <Inline gap="sm" alignItems="center">
+                    <Inline gap="sm" align="center">
                       <BezentIcon name="tasks" size={16} />
-                      <span style={{ fontWeight: 600 }}>{task.title}</span>
-                      <Badge variant={priorityVariant(task.priority)} label={task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} />
+                      <strong>{task.title}</strong>
+                      <Badge variant={priorityVariant(task.priority)}>{task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}</Badge>
                     </Inline>
                     {task.description && <span>{task.description}</span>}
                     <Inline gap="sm">
                       {task.dueDate && (
-                        <Inline gap="xs" alignItems="center">
+                        <Inline gap="xs" align="center">
                           <BezentIcon name="calendar" size={12} />
                           <span>Due {task.dueDate}</span>
                         </Inline>
                       )}
-                      <Badge variant={statusVariant(task.status)} label={task.status.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())} />
+                      <Badge variant={statusVariant(task.status)}>{task.status.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}</Badge>
                     </Inline>
                   </Stack>
                   <Inline gap="xs">
@@ -104,23 +105,21 @@ export function EssTasksPage() {
                         id={`task-start-${task.id}`}
                         variant="secondary"
                         size="sm"
-                        label="Start"
                         onClick={() => updateStatus(task.id, 'in_progress')}
                         loading={updatingId === task.id}
-                      />
+                      >Start</Button>
                     )}
                     {task.status === 'in_progress' && (
                       <Button
                         id={`task-complete-${task.id}`}
                         variant="primary"
                         size="sm"
-                        label="Mark Complete"
                         onClick={() => updateStatus(task.id, 'completed')}
                         loading={updatingId === task.id}
-                      />
+                      >Mark Complete</Button>
                     )}
                     {task.status === 'completed' && (
-                      <Badge variant="green" label="Done" />
+                      <Badge variant="success">Done</Badge>
                     )}
                   </Inline>
                 </Inline>

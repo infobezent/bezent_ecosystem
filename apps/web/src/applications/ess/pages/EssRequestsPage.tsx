@@ -3,8 +3,6 @@ import {
   Page,
   PageHeader,
   Section,
-  Stack,
-  Inline,
   Badge,
   Button,
   Alert,
@@ -55,7 +53,7 @@ export function EssRequestsPage() {
   };
 
   if (loading) return <LoadingState label="Loading requests..." />;
-  if (error) return <Alert variant="error" title="Error" description={error} />;
+  if (error) return <Alert variant="error" title="Error">{error}</Alert>;
 
   const typeLabel = (t: EssRequest['requestType']): string =>
     t.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
@@ -67,7 +65,7 @@ export function EssRequestsPage() {
         subtitle="All HR service requests including profile changes, attendance regularizations and general requests"
       />
 
-      {successMsg && <Alert variant="success" title="Done" description={successMsg} />}
+      {successMsg && <Alert variant="success" title="Done">{successMsg}</Alert>}
 
       <Section title="Request Ledger">
         {requests.length === 0 ? (
@@ -90,18 +88,17 @@ export function EssRequestsPage() {
               {requests.map((req) => (
                 <TableRow key={req.id}>
                   <TableCell>
-                    <Badge variant="grey" label={typeLabel(req.requestType)} />
+                    <Badge variant="neutral">{typeLabel(req.requestType)}</Badge>
                   </TableCell>
                   <TableCell>{req.subject}</TableCell>
                   <TableCell>
                     <Badge
                       variant={
-                        req.status === 'approved' ? 'green' :
-                        req.status === 'rejected' ? 'red' :
-                        req.status === 'cancelled' ? 'grey' : 'yellow'
+                        req.status === 'approved' ? 'success' :
+                        req.status === 'rejected' ? 'danger' :
+                        req.status === 'cancelled' ? 'neutral' : 'warning'
                       }
-                      label={req.status.charAt(0).toUpperCase() + req.status.slice(1)}
-                    />
+                    >{req.status.charAt(0).toUpperCase() + req.status.slice(1)}</Badge>
                   </TableCell>
                   <TableCell>{new Date(req.createdAt).toLocaleDateString('en-IN')}</TableCell>
                   <TableCell>
@@ -109,11 +106,10 @@ export function EssRequestsPage() {
                       <Button
                         id={`cancel-req-${req.id}`}
                         variant="ghost"
-                        label="Cancel"
                         size="sm"
                         onClick={() => handleCancel(req.id)}
                         loading={cancellingId === req.id}
-                      />
+                      >Cancel</Button>
                     )}
                   </TableCell>
                 </TableRow>

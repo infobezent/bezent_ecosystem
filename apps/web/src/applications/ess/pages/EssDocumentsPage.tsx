@@ -19,6 +19,7 @@ import {
   FormSection,
   FormGrid,
   EmptyState,
+  type BadgeVariant,
 } from '../../../design-system/components';
 import { BezentIcon } from '../../../design-system/icons';
 import { essApi, type EssDocument } from '../api/essApi';
@@ -70,14 +71,14 @@ export function EssDocumentsPage() {
   };
 
   if (loading) return <LoadingState label="Loading documents..." />;
-  if (error) return <Alert variant="error" title="Error" description={error} />;
+  if (error) return <Alert variant="error" title="Error">{error}</Alert>;
 
-  const statusVariant = (status: EssDocument['status']): string => {
-    if (status === 'verified') return 'green';
-    if (status === 'rejected' || status === 'expired') return 'red';
-    if (status === 'under_review') return 'blue';
-    if (status === 'resubmission_required') return 'yellow';
-    return 'grey';
+  const statusVariant = (status: EssDocument['status']): BadgeVariant => {
+    if (status === 'verified') return 'success';
+    if (status === 'rejected' || status === 'expired') return 'danger';
+    if (status === 'under_review') return 'info';
+    if (status === 'resubmission_required') return 'warning';
+    return 'neutral';
   };
 
   const categoryLabel = (c: EssDocument['category']): string =>
@@ -92,14 +93,13 @@ export function EssDocumentsPage() {
           <Button
             id="ess-upload-doc-btn"
             variant="primary"
-            label="Upload Document"
-            leadingIcon={<BezentIcon name="documents" size={16} />}
+            leftIcon={<BezentIcon name="documents" size={16} />}
             onClick={() => setUploadOpen(true)}
-          />
+          >Upload Document</Button>
         }
       />
 
-      {successMsg && <Alert variant="success" title="Uploaded" description={successMsg} />}
+      {successMsg && <Alert variant="success" title="Uploaded">{successMsg}</Alert>}
 
       <Section title="Document Vault">
         {documents.length === 0 ? (
@@ -123,7 +123,7 @@ export function EssDocumentsPage() {
               {documents.map((doc) => (
                 <TableRow key={doc.id}>
                   <TableCell>
-                    <Inline gap="sm" alignItems="center">
+                    <Inline gap="sm" align="center">
                       <BezentIcon name="documents" size={14} />
                       <span>{doc.documentName}</span>
                     </Inline>
@@ -132,7 +132,7 @@ export function EssDocumentsPage() {
                   <TableCell>{doc.documentNumber ?? '—'}</TableCell>
                   <TableCell>{doc.expiryDate ?? '—'}</TableCell>
                   <TableCell>
-                    <Badge variant={statusVariant(doc.status)} label={doc.status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())} />
+                    <Badge variant={statusVariant(doc.status)}>{doc.status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</Badge>
                   </TableCell>
                 </TableRow>
               ))}
@@ -148,13 +148,13 @@ export function EssDocumentsPage() {
         onClose={() => setUploadOpen(false)}
         footer={
           <Inline gap="sm">
-            <Button id="doc-upload-cancel" variant="secondary" label="Cancel" onClick={() => setUploadOpen(false)} />
-            <Button id="doc-upload-submit" variant="primary" label="Upload" onClick={handleUpload} loading={uploadLoading} />
+            <Button id="doc-upload-cancel" variant="secondary" onClick={() => setUploadOpen(false)}>Cancel</Button>
+            <Button id="doc-upload-submit" variant="primary" onClick={handleUpload} loading={uploadLoading}>Upload</Button>
           </Inline>
         }
       >
         <Stack gap="md">
-          {uploadError && <Alert variant="error" title="Error" description={uploadError} />}
+          {uploadError && <Alert variant="error" title="Error">{uploadError}</Alert>}
           <FormSection title="Document Details">
             <FormGrid columns={1}>
               <label>

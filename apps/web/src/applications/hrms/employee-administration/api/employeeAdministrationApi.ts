@@ -1,5 +1,6 @@
 import { appConfig } from '../../../../app/config/env';
 import type { EmployeeRecord, PaginationMetadata } from '../../employees/api/employeesApi';
+import { authorizedFetch } from '../../../../platform/auth';
 
 /**
  * Employee Administration API client. Every call hits the real backend and
@@ -161,7 +162,7 @@ function toQueryString(params: object): string {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${appConfig.apiBaseUrl}${path}`, {
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}${path}`, {
     ...init,
     headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
   });

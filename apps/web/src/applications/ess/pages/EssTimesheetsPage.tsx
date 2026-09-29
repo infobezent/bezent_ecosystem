@@ -87,7 +87,7 @@ export function EssTimesheetsPage() {
   const draftCount = timesheets.filter(t => t.status === 'draft').length;
 
   if (loading) return <LoadingState label="Loading timesheets..." />;
-  if (error) return <Alert variant="error" title="Error" description={error} />;
+  if (error) return <Alert variant="error" title="Error">{error}</Alert>;
 
   return (
     <Page>
@@ -100,23 +100,21 @@ export function EssTimesheetsPage() {
               <Button
                 id="ess-submit-timesheets-btn"
                 variant="secondary"
-                label={`Submit All Drafts (${draftCount})`}
                 onClick={handleSubmitAll}
                 loading={submitLoading}
-              />
+              >{`Submit All Drafts (${draftCount})`}</Button>
             )}
             <Button
               id="ess-log-hours-btn"
               variant="primary"
-              label="Log Hours"
-              leadingIcon={<BezentIcon name="timesheets" size={16} />}
+              leftIcon={<BezentIcon name="timesheets" size={16} />}
               onClick={() => setLogOpen(true)}
-            />
+            >Log Hours</Button>
           </Inline>
         }
       />
 
-      {successMsg && <Alert variant="success" title="Success" description={successMsg} />}
+      {successMsg && <Alert variant="success" title="Success">{successMsg}</Alert>}
 
       <Section title="Time Log">
         {timesheets.length === 0 ? (
@@ -145,9 +143,8 @@ export function EssTimesheetsPage() {
                   <TableCell>{ts.hours}h</TableCell>
                   <TableCell>
                     <Badge
-                      variant={ts.status === 'approved' ? 'green' : ts.status === 'submitted' ? 'blue' : ts.status === 'rejected' ? 'red' : 'grey'}
-                      label={ts.status.charAt(0).toUpperCase() + ts.status.slice(1)}
-                    />
+                      variant={ts.status === 'approved' ? 'success' : ts.status === 'submitted' ? 'info' : ts.status === 'rejected' ? 'danger' : 'neutral'}
+                    >{ts.status.charAt(0).toUpperCase() + ts.status.slice(1)}</Badge>
                   </TableCell>
                 </TableRow>
               ))}
@@ -163,13 +160,13 @@ export function EssTimesheetsPage() {
         onClose={() => setLogOpen(false)}
         footer={
           <Inline gap="sm">
-            <Button id="log-cancel" variant="secondary" label="Cancel" onClick={() => setLogOpen(false)} />
-            <Button id="log-submit" variant="primary" label="Log Hours" onClick={handleLogHours} loading={logLoading} />
+            <Button id="log-cancel" variant="secondary" onClick={() => setLogOpen(false)}>Cancel</Button>
+            <Button id="log-submit" variant="primary" onClick={handleLogHours} loading={logLoading}>Log Hours</Button>
           </Inline>
         }
       >
         <Stack gap="md">
-          {logError && <Alert variant="error" title="Error" description={logError} />}
+          {logError && <Alert variant="error" title="Error">{logError}</Alert>}
           <FormSection title="Entry Details">
             <FormGrid columns={1}>
               <label>Date<input type="date" value={date} onChange={e => setDate(e.target.value)} /></label>

@@ -105,7 +105,7 @@ export function EssAttendancePage() {
   };
 
   if (loading) return <LoadingState label="Loading attendance..." />;
-  if (error) return <Alert variant="error" title="Error" description={error} />;
+  if (error) return <Alert variant="error" title="Error">{error}</Alert>;
   if (!workspace) return null;
 
   const today = workspace.today;
@@ -121,23 +121,22 @@ export function EssAttendancePage() {
           <Button
             id="ess-attendance-regularize-btn"
             variant="secondary"
-            label="Regularize Attendance"
-            leadingIcon={<BezentIcon name="edit" size={16} />}
+            leftIcon={<BezentIcon name="edit" size={16} />}
             onClick={() => setRegularizeOpen(true)}
-          />
+          >Regularize Attendance</Button>
         }
       />
 
-      {punchError && <Alert variant="error" title="Error" description={punchError} />}
-      {punchSuccess && <Alert variant="success" title="Success" description={punchSuccess} />}
-      {regSuccess && <Alert variant="success" title="Request Submitted" description="Your attendance regularization request has been submitted." />}
+      {punchError && <Alert variant="error" title="Error">{punchError}</Alert>}
+      {punchSuccess && <Alert variant="success" title="Success">{punchSuccess}</Alert>}
+      {regSuccess && <Alert variant="success" title="Request Submitted">Your attendance regularization request has been submitted.</Alert>}
 
       {/* Today's Status */}
       <Section title="Today's Status" subtitle={today.date}>
         <Card>
-          <Inline gap="lg" alignItems="center" justifyContent="space-between">
+          <Inline gap="lg" align="center" justify="between">
             <Stack gap="sm">
-              <Inline gap="sm" alignItems="center">
+              <Inline gap="sm" align="center">
                 <BezentIcon name="attendance" size={20} />
                 <Stack gap="xs">
                   {hasPunchedIn ? (
@@ -151,19 +150,18 @@ export function EssAttendancePage() {
                 </Stack>
               </Inline>
               <Badge
-                variant={today.status === 'present' ? 'green' : today.status === 'not_checked_in' ? 'grey' : 'yellow'}
-                label={today.status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
-              />
+                variant={today.status === 'present' ? 'success' : today.status === 'not_checked_in' ? 'neutral' : 'warning'}
+              >{today.status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</Badge>
             </Stack>
             <Inline gap="sm">
               {!hasPunchedIn && (
-                <Button id="att-check-in" variant="primary" label="Check In" onClick={handleCheckIn} loading={punchLoading} />
+                <Button id="att-check-in" variant="primary" onClick={handleCheckIn} loading={punchLoading}>Check In</Button>
               )}
               {hasPunchedIn && !hasPunchedOut && (
-                <Button id="att-check-out" variant="secondary" label="Check Out" onClick={handleCheckOut} loading={punchLoading} />
+                <Button id="att-check-out" variant="secondary" onClick={handleCheckOut} loading={punchLoading}>Check Out</Button>
               )}
               {hasPunchedIn && hasPunchedOut && (
-                <Badge variant="green" label="Complete" />
+                <Badge variant="success">Complete</Badge>
               )}
             </Inline>
           </Inline>
@@ -176,7 +174,7 @@ export function EssAttendancePage() {
           left={<span>Last 60 days</span>}
         />
         {workspace.history.length === 0 ? (
-          <Alert variant="info" title="No Records" description="No attendance records found for the past 60 days." />
+          <Alert variant="info" title="No Records">No attendance records found for the past 60 days.</Alert>
         ) : (
           <Table>
             <TableHead>
@@ -197,9 +195,8 @@ export function EssAttendancePage() {
                   <TableCell>{rec.workLocation}</TableCell>
                   <TableCell>
                     <Badge
-                      variant={rec.status === 'present' ? 'green' : rec.status === 'absent' ? 'red' : 'yellow'}
-                      label={rec.status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
-                    />
+                      variant={rec.status === 'present' ? 'success' : rec.status === 'absent' ? 'danger' : 'warning'}
+                    >{rec.status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</Badge>
                   </TableCell>
                 </TableRow>
               ))}
@@ -215,13 +212,13 @@ export function EssAttendancePage() {
         onClose={() => setRegularizeOpen(false)}
         footer={
           <Inline gap="sm">
-            <Button id="reg-cancel" variant="secondary" label="Cancel" onClick={() => setRegularizeOpen(false)} />
-            <Button id="reg-submit" variant="primary" label="Submit Request" onClick={handleRegularize} loading={regLoading} />
+            <Button id="reg-cancel" variant="secondary" onClick={() => setRegularizeOpen(false)}>Cancel</Button>
+            <Button id="reg-submit" variant="primary" onClick={handleRegularize} loading={regLoading}>Submit Request</Button>
           </Inline>
         }
       >
         <Stack gap="md">
-          {regError && <Alert variant="error" title="Error" description={regError} />}
+          {regError && <Alert variant="error" title="Error">{regError}</Alert>}
           <FormSection title="Regularization Details">
             <FormGrid columns={1}>
               <label>Date<input type="date" value={regDate} onChange={e => setRegDate(e.target.value)} /></label>

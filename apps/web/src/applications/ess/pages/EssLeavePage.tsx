@@ -90,11 +90,11 @@ export function EssLeavePage() {
   };
 
   if (loading) return <LoadingState label="Loading leave workspace..." />;
-  if (error) return <Alert variant="error" title="Error" description={error} />;
+  if (error) return <Alert variant="error" title="Error">{error}</Alert>;
   if (!workspace) return null;
 
-  const balanceColors: Record<string, 'green' | 'yellow' | 'blue' | 'grey'> = {
-    annual: 'green', sick: 'yellow', casual: 'blue', unpaid: 'grey',
+  const balanceColors: Record<string, 'success' | 'warning' | 'info' | 'neutral'> = {
+    annual: 'success', sick: 'warning', casual: 'info', unpaid: 'neutral',
   };
 
   return (
@@ -106,14 +106,13 @@ export function EssLeavePage() {
           <Button
             id="ess-apply-leave-btn"
             variant="primary"
-            label="Apply for Leave"
-            leadingIcon={<BezentIcon name="leave" size={16} />}
+            leftIcon={<BezentIcon name="leave" size={16} />}
             onClick={() => setApplyOpen(true)}
-          />
+          >Apply for Leave</Button>
         }
       />
 
-      {successMsg && <Alert variant="success" title="Success" description={successMsg} />}
+      {successMsg && <Alert variant="success" title="Success">{successMsg}</Alert>}
 
       {/* Leave Balances */}
       <Section title="Leave Balances" subtitle={`Year ${new Date().getFullYear()}`}>
@@ -121,9 +120,9 @@ export function EssLeavePage() {
           {workspace.balances.map((bal) => (
             <Card key={bal.leaveType}>
               <Stack gap="sm">
-                <Badge variant={balanceColors[bal.leaveType] ?? 'grey'} label={capitalise(bal.leaveType)} />
-                <Inline gap="sm" alignItems="baseline">
-                  <span style={{ fontSize: '2rem', fontWeight: 700 }}>{bal.availableDays}</span>
+                <Badge variant={balanceColors[bal.leaveType] ?? 'neutral'}>{capitalise(bal.leaveType)}</Badge>
+                <Inline gap="sm" align="baseline">
+                  <strong>{bal.availableDays}</strong>
                   <span>/ {bal.totalDays} days</span>
                 </Inline>
                 <Grid columns={2} gap="xs">
@@ -160,27 +159,25 @@ export function EssLeavePage() {
             <TableBody>
               {workspace.requests.map((req) => (
                 <TableRow key={req.id}>
-                  <TableCell><Badge variant={balanceColors[req.leaveType] ?? 'grey'} label={capitalise(req.leaveType)} /></TableCell>
+                  <TableCell><Badge variant={balanceColors[req.leaveType] ?? 'neutral'}>{capitalise(req.leaveType)}</Badge></TableCell>
                   <TableCell>{req.startDate}</TableCell>
                   <TableCell>{req.endDate}</TableCell>
                   <TableCell>{req.totalDays}</TableCell>
                   <TableCell>{req.reason}</TableCell>
                   <TableCell>
                     <Badge
-                      variant={req.status === 'approved' ? 'green' : req.status === 'rejected' ? 'red' : req.status === 'cancelled' ? 'grey' : 'yellow'}
-                      label={capitalise(req.status)}
-                    />
+                      variant={req.status === 'approved' ? 'success' : req.status === 'rejected' ? 'danger' : req.status === 'cancelled' ? 'neutral' : 'warning'}
+                    >{capitalise(req.status)}</Badge>
                   </TableCell>
                   <TableCell>
                     {req.status === 'pending' && (
                       <Button
                         id={`cancel-leave-${req.id}`}
                         variant="ghost"
-                        label="Cancel"
                         size="sm"
                         onClick={() => handleCancelLeave(req.id)}
                         loading={cancellingId === req.id}
-                      />
+                      >Cancel</Button>
                     )}
                   </TableCell>
                 </TableRow>
@@ -195,10 +192,10 @@ export function EssLeavePage() {
         <Grid columns={3} gap="sm">
           {workspace.holidays.map((h) => (
             <Card key={h.date}>
-              <Inline gap="md" alignItems="center">
+              <Inline gap="md" align="center">
                 <BezentIcon name="calendar" size={18} />
                 <Stack gap="xs">
-                  <span style={{ fontWeight: 600 }}>{h.name}</span>
+                  <strong>{h.name}</strong>
                   <span>{h.date} · {h.dayOfWeek}</span>
                 </Stack>
               </Inline>
@@ -214,13 +211,13 @@ export function EssLeavePage() {
         onClose={() => setApplyOpen(false)}
         footer={
           <Inline gap="sm">
-            <Button id="leave-cancel" variant="secondary" label="Cancel" onClick={() => setApplyOpen(false)} />
-            <Button id="leave-submit" variant="primary" label="Submit Application" onClick={handleApplyLeave} loading={applyLoading} />
+            <Button id="leave-cancel" variant="secondary" onClick={() => setApplyOpen(false)}>Cancel</Button>
+            <Button id="leave-submit" variant="primary" onClick={handleApplyLeave} loading={applyLoading}>Submit Application</Button>
           </Inline>
         }
       >
         <Stack gap="md">
-          {applyError && <Alert variant="error" title="Error" description={applyError} />}
+          {applyError && <Alert variant="error" title="Error">{applyError}</Alert>}
           <FormSection title="Leave Details">
             <FormGrid columns={1}>
               <label>

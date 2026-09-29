@@ -29,7 +29,7 @@ function RequireEssAuth({ children }: { children: React.ReactNode }) {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/super-admin/login" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;

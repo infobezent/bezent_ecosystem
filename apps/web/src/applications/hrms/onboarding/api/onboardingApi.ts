@@ -1,4 +1,5 @@
 import { appConfig } from '../../../../app/config/env';
+import { authorizedFetch } from '../../../../platform/auth';
 
 export interface CompanyMaster {
   id: string;
@@ -101,7 +102,7 @@ export interface PaginatedNewHiresResponse {
 }
 
 export async function fetchOrganizationMasters(): Promise<OrganizationMasters> {
-  const res = await fetch(`${appConfig.apiBaseUrl}/hrms/organization/masters`);
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/organization/masters`);
   if (!res.ok) {
     const errorJson = await res.json().catch(() => ({}));
     throw new Error(errorJson.error?.message || 'Failed to fetch organization masters');
@@ -120,7 +121,7 @@ export async function fetchNewHiresPaginated(
   if (options.search) params.set('search', options.search);
 
   const queryString = params.toString() ? `?${params.toString()}` : '';
-  const res = await fetch(`${appConfig.apiBaseUrl}/hrms/onboarding/new-hires${queryString}`);
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/onboarding/new-hires${queryString}`);
   if (!res.ok) {
     const errorJson = await res.json().catch(() => ({}));
     throw new Error(errorJson.error?.message || 'Failed to fetch onboarding cases');
@@ -149,7 +150,7 @@ export async function fetchNewHires(): Promise<OnboardingCaseItem[]> {
 }
 
 export async function createNewHire(payload: CreateNewHirePayload): Promise<OnboardingCaseItem> {
-  const res = await fetch(`${appConfig.apiBaseUrl}/hrms/onboarding/new-hires`, {
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/onboarding/new-hires`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

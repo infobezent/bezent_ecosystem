@@ -8,6 +8,9 @@ import type { ResolvedForm } from '../../settings/api/formsApi';
  * Test fixture mirroring the API's default resolved Registration configuration
  * (no company overrides). Tests only — the app always loads it from the API.
  */
+// Section order and visibility are part of the projected configuration (Form
+// Engine section ordering/visibility): system sections keep their definition
+// order (1-based) and are visible unless a company hides them.
 const SECTIONS: RegistrationConfiguration['sections'] = [
   { id: 'general', label: 'General', configurable: true },
   { id: 'personal', label: 'Personal Information', configurable: true },
@@ -19,7 +22,7 @@ const SECTIONS: RegistrationConfiguration['sections'] = [
   { id: 'working_hours', label: 'Working Hours', configurable: false },
   { id: 'documents', label: 'Documents', configurable: false },
   { id: 'review', label: 'Review', configurable: false },
-];
+].map((section, index) => ({ ...section, order: index + 1, visible: true }));
 
 const FIELDS: [key: string, label: string, isProtected?: boolean, configurable?: boolean][] = [
   ['general.employeeId', 'Employee ID', true],

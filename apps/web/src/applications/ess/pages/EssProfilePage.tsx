@@ -79,7 +79,7 @@ export function EssProfilePage() {
   };
 
   if (loading) return <LoadingState label="Loading your profile..." />;
-  if (error) return <Alert variant="error" title="Failed to Load Profile" description={error} />;
+  if (error) return <Alert variant="error" title="Failed to Load Profile">{error}</Alert>;
   if (!profile) return <EmptyState title="Profile Unavailable" description="Your employee profile data could not be retrieved." />;
 
   const { employee: emp, personal, bankAccount, skills, emergencyContacts } = profile;
@@ -94,15 +94,14 @@ export function EssProfilePage() {
           <Button
             id="ess-profile-change-request-btn"
             variant="primary"
-            label="Request Profile Change"
-            leadingIcon={<BezentIcon name="edit" size={16} />}
+            leftIcon={<BezentIcon name="edit" size={16} />}
             onClick={() => setChangeModalOpen(true)}
-          />
+          >Request Profile Change</Button>
         }
       />
 
       {submitSuccess && (
-        <Alert variant="success" title="Request Submitted" description="Your profile change request has been submitted for HR review." />
+        <Alert variant="success" title="Request Submitted">Your profile change request has been submitted for HR review.</Alert>
       )}
 
       {/* Employment Details */}
@@ -111,39 +110,39 @@ export function EssProfilePage() {
           <Grid columns={3} gap="md">
             <Stack gap="xs">
               <span>Employee ID</span>
-              <span style={{ fontWeight: 600 }}>{emp.employeeNumber}</span>
+              <strong>{emp.employeeNumber}</strong>
             </Stack>
             <Stack gap="xs">
               <span>Full Name</span>
-              <span style={{ fontWeight: 600 }}>{emp.firstName} {emp.lastName ?? ''}</span>
+              <strong>{emp.firstName} {emp.lastName ?? ''}</strong>
             </Stack>
             <Stack gap="xs">
               <span>Email</span>
-              <span style={{ fontWeight: 600 }}>{emp.email}</span>
+              <strong>{emp.email}</strong>
             </Stack>
             <Stack gap="xs">
               <span>Department</span>
-              <span style={{ fontWeight: 600 }}>{emp.departmentName ?? '—'}</span>
+              <strong>{emp.departmentName ?? '—'}</strong>
             </Stack>
             <Stack gap="xs">
               <span>Designation</span>
-              <span style={{ fontWeight: 600 }}>{emp.designationTitle ?? '—'}</span>
+              <strong>{emp.designationTitle ?? '—'}</strong>
             </Stack>
             <Stack gap="xs">
               <span>Location</span>
-              <span style={{ fontWeight: 600 }}>{emp.locationName ?? '—'}</span>
+              <strong>{emp.locationName ?? '—'}</strong>
             </Stack>
             <Stack gap="xs">
               <span>Employment Type</span>
-              <span style={{ fontWeight: 600 }}>{formatLabel(emp.employmentType)}</span>
+              <strong>{formatLabel(emp.employmentType)}</strong>
             </Stack>
             <Stack gap="xs">
               <span>Status</span>
-              <Badge variant={emp.employmentStatus === 'active' ? 'green' : 'yellow'} label={formatLabel(emp.employmentStatus)} />
+              <Badge variant={emp.employmentStatus === 'active' ? 'success' : 'warning'}>{formatLabel(emp.employmentStatus)}</Badge>
             </Stack>
             <Stack gap="xs">
               <span>Joining Date</span>
-              <span style={{ fontWeight: 600 }}>{emp.joiningDate}</span>
+              <strong>{emp.joiningDate}</strong>
             </Stack>
           </Grid>
         </Card>
@@ -158,7 +157,7 @@ export function EssProfilePage() {
                 pd[key] ? (
                   <Stack key={key} gap="xs">
                     <span>{camelToLabel(key)}</span>
-                    <span style={{ fontWeight: 600 }}>{String(pd[key])}</span>
+                    <strong>{String(pd[key])}</strong>
                   </Stack>
                 ) : null
               ))}
@@ -176,10 +175,10 @@ export function EssProfilePage() {
               return (
                 <Card key={idx}>
                   <Stack gap="xs">
-                    <Inline gap="sm" alignItems="center">
+                    <Inline gap="sm" align="center">
                       <BezentIcon name="employees" size={16} />
-                      <span style={{ fontWeight: 600 }}>{contact['name'] ?? 'Contact'}</span>
-                      <Badge variant="grey" label={formatLabel(contact['priority'] ?? '')} />
+                      <strong>{contact['name'] ?? 'Contact'}</strong>
+                      <Badge variant="neutral">{formatLabel(contact['priority'] ?? '')}</Badge>
                     </Inline>
                     <span>{contact['relationship']} · {contact['phone']}</span>
                     {contact['email'] && <span>{contact['email']}</span>}
@@ -198,24 +197,24 @@ export function EssProfilePage() {
             <Grid columns={3} gap="md">
               <Stack gap="xs">
                 <span>Bank Name</span>
-                <span style={{ fontWeight: 600 }}>{bankAccount.bankName}</span>
+                <strong>{bankAccount.bankName}</strong>
               </Stack>
               <Stack gap="xs">
                 <span>Account Holder</span>
-                <span style={{ fontWeight: 600 }}>{bankAccount.accountHolderName}</span>
+                <strong>{bankAccount.accountHolderName}</strong>
               </Stack>
               <Stack gap="xs">
                 <span>Account Number</span>
-                <span style={{ fontWeight: 600, letterSpacing: '0.1em' }}>{bankAccount.maskedAccountNumber}</span>
+                <strong>{bankAccount.maskedAccountNumber}</strong>
               </Stack>
               <Stack gap="xs">
                 <span>IFSC Code</span>
-                <span style={{ fontWeight: 600 }}>{bankAccount.ifscCode}</span>
+                <strong>{bankAccount.ifscCode}</strong>
               </Stack>
               {bankAccount.branchName && (
                 <Stack gap="xs">
                   <span>Branch</span>
-                  <span style={{ fontWeight: 600 }}>{bankAccount.branchName}</span>
+                  <strong>{bankAccount.branchName}</strong>
                 </Stack>
               )}
             </Grid>
@@ -231,13 +230,13 @@ export function EssProfilePage() {
               {skills.map((sk, idx) => {
                 const skill = sk as Record<string, string>;
                 return (
-                  <Inline key={idx} gap="sm" alignItems="center">
+                  <Inline key={idx} gap="sm" align="center">
                     <BezentIcon name="sparkles" size={14} />
                     <Stack gap="xs">
-                      <span style={{ fontWeight: 600 }}>{skill['skillName']}</span>
+                      <strong>{skill['skillName']}</strong>
                       <Inline gap="xs">
-                        <Badge variant="grey" label={skill['proficiency'] ?? ''} />
-                        <Badge variant="grey" label={skill['skillType'] ?? ''} />
+                        <Badge variant="neutral">{skill['proficiency'] ?? ''}</Badge>
+                        <Badge variant="neutral">{skill['skillType'] ?? ''}</Badge>
                       </Inline>
                     </Stack>
                   </Inline>
@@ -255,19 +254,18 @@ export function EssProfilePage() {
         onClose={() => setChangeModalOpen(false)}
         footer={
           <Inline gap="sm">
-            <Button id="ess-profile-change-cancel" variant="secondary" label="Cancel" onClick={() => setChangeModalOpen(false)} />
+            <Button id="ess-profile-change-cancel" variant="secondary" onClick={() => setChangeModalOpen(false)}>Cancel</Button>
             <Button
               id="ess-profile-change-submit"
               variant="primary"
-              label="Submit Request"
               onClick={handleSubmitChangeRequest}
               loading={submitLoading}
-            />
+            >Submit Request</Button>
           </Inline>
         }
       >
         <Stack gap="md">
-          {submitError && <Alert variant="error" title="Error" description={submitError} />}
+          {submitError && <Alert variant="error" title="Error">{submitError}</Alert>}
           <FormSection title="Change Details">
             <FormGrid columns={1}>
               <label>

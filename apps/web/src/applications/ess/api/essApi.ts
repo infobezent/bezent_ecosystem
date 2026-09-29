@@ -1,4 +1,5 @@
 import { appConfig } from '../../../app/config/env';
+import { authorizedFetch } from '../../../platform/auth';
 
 const API_BASE = `${appConfig.apiBaseUrl}/ess`;
 
@@ -156,7 +157,7 @@ function getHeaders(): Record<string, string> {
 }
 
 async function req<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const resp = await fetch(`${API_BASE}${path}`, {
+  const resp = await authorizedFetch(`${API_BASE}${path}`, {
     ...options,
     headers: { ...getHeaders(), ...(options.headers as Record<string, string> | undefined) },
   });

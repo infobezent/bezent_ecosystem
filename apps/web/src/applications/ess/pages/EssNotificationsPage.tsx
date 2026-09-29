@@ -12,6 +12,7 @@ import {
   LoadingState,
   EmptyState,
   Toolbar,
+  type BadgeVariant,
 } from '../../../design-system/components';
 import { BezentIcon } from '../../../design-system/icons';
 import { essApi, type EssNotification } from '../api/essApi';
@@ -65,13 +66,13 @@ export function EssNotificationsPage() {
   };
 
   if (loading) return <LoadingState label="Loading notifications..." />;
-  if (error) return <Alert variant="error" title="Error" description={error} />;
+  if (error) return <Alert variant="error" title="Error">{error}</Alert>;
 
-  const typeVariant = (t: EssNotification['type']): string => {
-    if (t === 'success') return 'green';
-    if (t === 'warning') return 'yellow';
-    if (t === 'action_required') return 'red';
-    return 'blue';
+  const typeVariant = (t: EssNotification['type']): BadgeVariant => {
+    if (t === 'success') return 'success';
+    if (t === 'warning') return 'warning';
+    if (t === 'action_required') return 'danger';
+    return 'info';
   };
 
   return (
@@ -84,10 +85,9 @@ export function EssNotificationsPage() {
             <Button
               id="ess-mark-all-read-btn"
               variant="secondary"
-              label="Mark All as Read"
               onClick={handleMarkAllRead}
               loading={markingAll}
-            />
+            >Mark All as Read</Button>
           ) : undefined
         }
       />
@@ -105,28 +105,27 @@ export function EssNotificationsPage() {
           <Stack gap="sm">
             {notifications.map((notif) => (
               <Card key={notif.id}>
-                <Inline gap="md" alignItems="flex-start" justifyContent="space-between">
+                <Inline gap="md" align="start" justify="between">
                   <Stack gap="xs">
-                    <Inline gap="sm" alignItems="center">
+                    <Inline gap="sm" align="center">
                       <BezentIcon name="notifications" size={16} />
-                      <span style={{ fontWeight: notif.isRead ? 400 : 700 }}>{notif.title}</span>
-                      {!notif.isRead && <Badge variant="blue" label="New" />}
-                      <Badge variant={typeVariant(notif.type)} label={notif.type.replace('_', ' ')} />
+                      {notif.isRead ? <span>{notif.title}</span> : <strong>{notif.title}</strong>}
+                      {!notif.isRead && <Badge variant="info">New</Badge>}
+                      <Badge variant={typeVariant(notif.type)}>{notif.type.replace('_', ' ')}</Badge>
                     </Inline>
                     <span>{notif.message}</span>
-                    <span style={{ fontSize: '0.8em' }}>
+                    <small>
                       {new Date(notif.createdAt).toLocaleString('en-IN')}
-                    </span>
+                    </small>
                   </Stack>
                   {!notif.isRead && (
                     <Button
                       id={`mark-read-${notif.id}`}
                       variant="ghost"
                       size="sm"
-                      label="Mark Read"
                       onClick={() => handleMarkRead(notif.id)}
                       loading={markingId === notif.id}
-                    />
+                    >Mark Read</Button>
                   )}
                 </Inline>
               </Card>

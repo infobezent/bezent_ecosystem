@@ -5,6 +5,7 @@ import { NewHireModal } from '../components/NewHireModal';
 import { OnboardingPage } from '../pages/OnboardingPage';
 import { StandaloneUtilityLayout } from '../../../../app/router/StandaloneUtilityLayout';
 import { appRoutes } from '../../../../app/router/AppRouter';
+import { RequireAuth } from '../../../../platform/auth';
 import { hrmsRoutes } from '../../routes/hrmsRoutes';
 import { EmployeeRegistrationPage } from '../pages/EmployeeRegistrationPage';
 import { EmployeeRegistration } from '../components/EmployeeRegistration';
@@ -124,9 +125,11 @@ describe('HRMS Onboarding UI Components & Pages', () => {
   });
 
   it('routes /hrms/administration/onboarding/registration to StandaloneUtilityLayout with EmployeeRegistrationPage', () => {
-    const standaloneRoute = appRoutes.find(
-      (r) => r.element && (r.element as React.ReactElement).type === StandaloneUtilityLayout,
-    );
+    // The standalone workspace requires a signed-in session (ADR-018).
+    const standaloneRoute = appRoutes.find((r) => {
+      const element = r.element as React.ReactElement<{ children?: React.ReactElement }> | undefined;
+      return element?.type === RequireAuth && element.props.children?.type === StandaloneUtilityLayout;
+    });
     expect(standaloneRoute).toBeDefined();
     const registrationRoute = standaloneRoute?.children?.find(
       (r) => r.path === '/hrms/administration/onboarding/registration',

@@ -12,6 +12,7 @@ import {
   type AuthorizedCompanySummary,
 } from '../api/companyAdminApi';
 import { useSuperAdminAuth } from '../../super-admin/context/SuperAdminAuthContext';
+import { useAuth } from '../../../platform/auth';
 
 interface CompanyAdminContextValue {
   activeCompanyId: string | null;
@@ -28,6 +29,7 @@ const CompanyAdminContext = createContext<CompanyAdminContextValue | null>(null)
 
 export function CompanyAdminProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated, isSuperAdmin } = useSuperAdminAuth();
+  const { selectCompany } = useAuth();
   const [authorizedCompanies, setAuthorizedCompanies] = useState<AuthorizedCompanySummary[]>([]);
   const [activeCompanyId, setActiveCompanyId] = useState<string | null>(() => {
     return typeof localStorage !== 'undefined' ? localStorage.getItem(ACTIVE_COMPANY_KEY) : null;
@@ -79,10 +81,16 @@ export function CompanyAdminProvider({ children }: { children: ReactNode }) {
     refreshCompanies();
   }, [refreshCompanies]);
 
-  const switchCompany = useCallback((companyId: string) => {
-    localStorage.setItem(ACTIVE_COMPANY_KEY, companyId);
-    setActiveCompanyId(companyId);
-  }, []);
+  const switchCompany = useCallback(
+    (companyId: string) => {
+      localStorage.setItem(ACTIVE_COMPANY_KEY, companyId);
+      setActiveCompanyId(companyId);
+      // Keep the shared platform session on the same company (other workspaces
+      // read it); Super Admin oversight companies are not memberships.
+      selectCompany(companyId);
+    },
+    [selectCompany],
+  );
 
   const activeCompany = authorizedCompanies.find((c) => c.id === activeCompanyId) || null;
   const isCompanyAdmin = Boolean(

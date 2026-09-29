@@ -1,4 +1,5 @@
 import { appConfig } from '../../../app/config/env';
+import { authorizedFetch } from '../../../platform/auth';
 
 export type ModuleCode = 'hrms' | 'crm' | 'pm';
 
@@ -38,7 +39,7 @@ async function request<T>(path: string, options: RequestInit = {}, companyId?: s
     ...(options.headers || {}),
   };
 
-  const response = await fetch(`${API_BASE}${path}`, {
+  const response = await authorizedFetch(`${API_BASE}${path}`, {
     ...options,
     headers,
   });

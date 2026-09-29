@@ -1,4 +1,5 @@
 import { appConfig } from '../../../../app/config/env';
+import { authorizedFetch } from '../../../../platform/auth';
 
 /**
  * Form Engine API — a company's resolved form (BEZENT system definition +
@@ -166,7 +167,7 @@ export class FormsApiError extends Error {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${appConfig.apiBaseUrl}/hrms/settings/forms/${path}`, {
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/settings/forms/${path}`, {
     ...init,
     headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
   });

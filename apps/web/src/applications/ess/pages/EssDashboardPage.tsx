@@ -13,6 +13,7 @@ import {
   Alert,
   LoadingState,
   EmptyState,
+  type BadgeVariant,
 } from '../../../design-system/components';
 import { BezentIcon } from '../../../design-system/icons';
 import { essApi, type EssDashboardData } from '../api/essApi';
@@ -69,7 +70,7 @@ export function EssDashboardPage() {
   };
 
   if (loading) return <LoadingState label="Loading your workspace..." />;
-  if (error) return <Alert variant="error" title="Failed to Load Dashboard" description={error} />;
+  if (error) return <Alert variant="error" title="Failed to Load Dashboard">{error}</Alert>;
   if (!data) return <EmptyState title="Workspace Unavailable" description="Unable to load employee data. Please try again." />;
 
   const today = data.todayAttendance;
@@ -77,11 +78,11 @@ export function EssDashboardPage() {
   const hasPunchedOut = !!today.checkOutTime;
   const currentYear = new Date().getFullYear();
 
-  const leaveColors: Record<string, string> = {
-    annual: 'green',
-    sick: 'yellow',
-    casual: 'blue',
-    unpaid: 'grey',
+  const leaveColors: Record<string, BadgeVariant> = {
+    annual: 'success',
+    sick: 'warning',
+    casual: 'info',
+    unpaid: 'neutral',
   };
 
   return (
@@ -92,55 +93,52 @@ export function EssDashboardPage() {
       />
 
       {punchError && (
-        <Alert variant="error" title="Punch Error" description={punchError} />
+        <Alert variant="error" title="Punch Error">{punchError}</Alert>
       )}
 
       {/* Attendance Widget */}
       <Section title="Today's Attendance" subtitle={formatDate(today.date)}>
         <Card>
           <Stack gap="md">
-            <Inline gap="lg" alignItems="center" justifyContent="space-between">
+            <Inline gap="lg" align="center" justify="between">
               <Stack gap="xs">
-                <Inline gap="sm" alignItems="center">
+                <Inline gap="sm" align="center">
                   <BezentIcon name="attendance" size={20} />
-                  <span style={{ fontWeight: 600 }}>
+                  <strong>
                     {hasPunchedIn ? `Checked in at ${today.checkInTime}` : 'Not checked in yet'}
-                  </span>
+                  </strong>
                 </Inline>
                 {hasPunchedOut && (
                   <span>Checked out at {today.checkOutTime}</span>
                 )}
                 <Badge
                   variant={
-                    today.status === 'present' ? 'green' :
-                    today.status === 'not_checked_in' ? 'grey' :
-                    today.status === 'on_leave' ? 'blue' : 'yellow'
+                    today.status === 'present' ? 'success' :
+                    today.status === 'not_checked_in' ? 'neutral' :
+                    today.status === 'on_leave' ? 'info' : 'warning'
                   }
-                  label={formatStatus(today.status)}
-                />
+                >{formatStatus(today.status)}</Badge>
               </Stack>
               <Inline gap="sm">
                 {!hasPunchedIn && (
                   <Button
                     id="ess-check-in-btn"
                     variant="primary"
-                    label="Check In"
                     onClick={handlePunchIn}
                     loading={punchLoading}
-                    leadingIcon={<BezentIcon name="attendance" size={16} />}
-                  />
+                    leftIcon={<BezentIcon name="attendance" size={16} />}
+                  >Check In</Button>
                 )}
                 {hasPunchedIn && !hasPunchedOut && (
                   <Button
                     id="ess-check-out-btn"
                     variant="secondary"
-                    label="Check Out"
                     onClick={handlePunchOut}
                     loading={punchLoading}
-                  />
+                  >Check Out</Button>
                 )}
                 {hasPunchedIn && hasPunchedOut && (
-                  <Badge variant="green" label="Attendance Recorded" />
+                  <Badge variant="success">Attendance Recorded</Badge>
                 )}
               </Inline>
             </Inline>
@@ -154,8 +152,8 @@ export function EssDashboardPage() {
           {data.leaveBalances.map((bal) => (
             <Card key={bal.leaveType}>
               <Stack gap="xs">
-                <Badge variant={leaveColors[bal.leaveType] ?? 'grey'} label={capitalise(bal.leaveType)} />
-                <span style={{ fontSize: '2rem', fontWeight: 700 }}>{bal.availableDays}</span>
+                <Badge variant={leaveColors[bal.leaveType] ?? 'neutral'}>{capitalise(bal.leaveType)}</Badge>
+                <strong>{bal.availableDays}</strong>
                 <span>Available of {bal.totalDays} days</span>
                 {bal.pendingDays > 0 && <span>{bal.pendingDays} pending</span>}
               </Stack>
@@ -169,32 +167,32 @@ export function EssDashboardPage() {
         <Grid columns={3} gap="md">
           <Card>
             <Stack gap="xs">
-              <Inline gap="sm" alignItems="center">
+              <Inline gap="sm" align="center">
                 <BezentIcon name="requests" size={18} />
-                <span style={{ fontWeight: 600 }}>Pending Requests</span>
+                <strong>Pending Requests</strong>
               </Inline>
-              <span style={{ fontSize: '1.75rem', fontWeight: 700 }}>{data.pendingRequestsCount}</span>
-              <Button id="ess-view-requests" variant="ghost" label="View All" size="sm" onClick={() => navigate('/ess/requests')} />
+              <strong>{data.pendingRequestsCount}</strong>
+              <Button id="ess-view-requests" variant="ghost" size="sm" onClick={() => navigate('/ess/requests')}>View All</Button>
             </Stack>
           </Card>
           <Card>
             <Stack gap="xs">
-              <Inline gap="sm" alignItems="center">
+              <Inline gap="sm" align="center">
                 <BezentIcon name="tasks" size={18} />
-                <span style={{ fontWeight: 600 }}>Active Tasks</span>
+                <strong>Active Tasks</strong>
               </Inline>
-              <span style={{ fontSize: '1.75rem', fontWeight: 700 }}>{data.assignedTasksCount}</span>
-              <Button id="ess-view-tasks" variant="ghost" label="View All" size="sm" onClick={() => navigate('/ess/tasks')} />
+              <strong>{data.assignedTasksCount}</strong>
+              <Button id="ess-view-tasks" variant="ghost" size="sm" onClick={() => navigate('/ess/tasks')}>View All</Button>
             </Stack>
           </Card>
           <Card>
             <Stack gap="xs">
-              <Inline gap="sm" alignItems="center">
+              <Inline gap="sm" align="center">
                 <BezentIcon name="notifications" size={18} />
-                <span style={{ fontWeight: 600 }}>Unread Notifications</span>
+                <strong>Unread Notifications</strong>
               </Inline>
-              <span style={{ fontSize: '1.75rem', fontWeight: 700 }}>{data.unreadNotificationsCount}</span>
-              <Button id="ess-view-notifs" variant="ghost" label="View All" size="sm" onClick={() => navigate('/ess/notifications')} />
+              <strong>{data.unreadNotificationsCount}</strong>
+              <Button id="ess-view-notifs" variant="ghost" size="sm" onClick={() => navigate('/ess/notifications')}>View All</Button>
             </Stack>
           </Card>
         </Grid>
@@ -206,12 +204,12 @@ export function EssDashboardPage() {
           <Stack gap="sm">
             {data.recentNotifications.map((notif) => (
               <Card key={notif.id}>
-                <Inline gap="md" alignItems="center" justifyContent="space-between">
+                <Inline gap="md" align="center" justify="between">
                   <Stack gap="xs">
-                    <Inline gap="sm" alignItems="center">
+                    <Inline gap="sm" align="center">
                       <BezentIcon name="notifications" size={14} />
-                      <span style={{ fontWeight: 600 }}>{notif.title}</span>
-                      {!notif.isRead && <Badge variant="blue" label="New" />}
+                      <strong>{notif.title}</strong>
+                      {!notif.isRead && <Badge variant="info">New</Badge>}
                     </Inline>
                     <span>{notif.message}</span>
                   </Stack>
@@ -230,7 +228,7 @@ export function EssDashboardPage() {
             {data.upcomingHolidays.slice(0, 3).map((h) => (
               <Card key={h.date}>
                 <Stack gap="xs">
-                  <span style={{ fontWeight: 600 }}>{h.name}</span>
+                  <strong>{h.name}</strong>
                   <span>{formatDate(h.date)} · {h.dayOfWeek}</span>
                 </Stack>
               </Card>

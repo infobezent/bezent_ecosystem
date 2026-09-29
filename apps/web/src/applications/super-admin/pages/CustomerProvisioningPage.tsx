@@ -53,7 +53,6 @@ export function CustomerProvisioningPage() {
   const [adminFirstName, setAdminFirstName] = useState('');
   const [adminLastName, setAdminLastName] = useState('');
   const [adminPhone, setAdminPhone] = useState('');
-  const [adminTempPassword, setAdminTempPassword] = useState('TempAdminPass2026!');
 
   const [activateImmediately, setActivateImmediately] = useState(true);
 
@@ -127,7 +126,6 @@ export function CustomerProvisioningPage() {
                 firstName: adminFirstName.trim(),
                 lastName: adminLastName.trim(),
                 phone: adminPhone.trim() || undefined,
-                tempPassword: adminTempPassword || undefined,
               },
             },
       activateImmediately,
@@ -169,7 +167,7 @@ export function CustomerProvisioningPage() {
           </Alert>
 
           <Card>
-            <Section title="Provisioning Summary" subtitle="Created resources and credentials">
+            <Section title="Provisioning Summary" subtitle="Created resources and sign-in">
               <Grid columns={2} gap="lg">
                 <Stack gap="sm">
                   <strong>Tenant:</strong> {result.tenant.name} (<code>{result.tenant.code}</code>)
@@ -180,13 +178,11 @@ export function CustomerProvisioningPage() {
                 </Stack>
 
                 <Stack gap="sm">
-                  <strong>Assigned Company Admin:</strong> {result.admin.user.firstName} {result.admin.user.lastName} ({result.admin.user.email})
+                  <strong>Assigned Company Admin:</strong> {result.admin.firstName} {result.admin.lastName} ({result.admin.email})
                   <br />
-                  <strong>Temporary Password:</strong> <code>{result.invitationDelivery.temporaryPassword || 'Configured'}</code>
+                  <strong>Sign-in:</strong> Email one-time code (no password)
                   <br />
-                  <span className="bezent-caption">
-                    Note: Email delivery integration requirement: {result.invitationDelivery.message}
-                  </span>
+                  <span className="bezent-caption">{result.invitationDelivery.message}</span>
                 </Stack>
               </Grid>
             </Section>
@@ -485,12 +481,10 @@ export function CustomerProvisioningPage() {
                         onChange={(e) => setAdminPhone(e.target.value)}
                       />
 
-                      <Input
-                        label="Initial Temporary Password"
-                        value={adminTempPassword}
-                        onChange={(e) => setAdminTempPassword(e.target.value)}
-                        helperText="Provide this to the customer admin for initial login"
-                      />
+                      <span className="bezent-caption">
+                        No password is created. The administrator is emailed sign-in
+                        instructions and signs in with a one-time code sent to this email.
+                      </span>
                     </Stack>
                   )}
                 </Stack>
