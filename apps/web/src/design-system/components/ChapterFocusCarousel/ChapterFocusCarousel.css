@@ -9,7 +9,7 @@
   width: 100%;
   background: var(--bg-header-shelf, #c2e7ff);
   border-top: 1px solid var(--border-subtle, #e7ebf0);
-  border-bottom: 1px solid var(--border-default, #dde3ea);
+  border-bottom: none;
   padding: 12px 0 0;
   user-select: none;
   overflow: visible;
@@ -141,8 +141,7 @@
   cursor: pointer;
   flex-shrink: 0;
   outline: none;
-  border: 1px solid transparent;
-  border-bottom: none;
+  border: none;
   background: transparent;
   color: var(--text-secondary, #334155);
   transform-origin: bottom center;
@@ -150,13 +149,11 @@
   margin-bottom: 0;
   transition:
     background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
     color 160ms cubic-bezier(0.16, 1, 0.3, 1),
     box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .bezent-focus-card:focus-visible {
-  border-color: var(--border-focus, #1a73e8);
   box-shadow: 0 0 0 2px var(--accent-subtle, #e8f0fe);
 }
 
@@ -206,25 +203,21 @@
 /* ── 1. ACTIVE BROWSER TAB (Physically Attached to Page Content) ── */
 .bezent-focus-card.is-focus-active {
   background: var(--bg-surface, #ffffff);
-  border-top: 1px solid var(--border-default, #dde3ea);
-  border-left: 1px solid var(--border-default, #dde3ea);
-  border-right: 1px solid var(--border-default, #dde3ea);
-  border-bottom: 1px solid var(--bg-surface, #ffffff);
+  border: none;
   border-radius: 12px 12px 0 0;
   padding: 10px 18px 9px;
-  margin-bottom: -1px;
+  margin-bottom: 0;
   color: var(--brand-primary, #041e49);
   font-weight: 600;
   z-index: 20;
   opacity: 1;
-  box-shadow: 0 -3px 10px -2px rgba(4, 30, 73, 0.08);
 }
 
 /* Left Concave Curve (Inverted Fillet) */
 .bezent-focus-card.is-focus-active::before {
   content: '';
   position: absolute;
-  bottom: -1px;
+  bottom: 0;
   left: -12px;
   width: 12px;
   height: 12px;
@@ -237,7 +230,7 @@
 .bezent-focus-card.is-focus-active::after {
   content: '';
   position: absolute;
-  bottom: -1px;
+  bottom: 0;
   right: -12px;
   width: 12px;
   height: 12px;
