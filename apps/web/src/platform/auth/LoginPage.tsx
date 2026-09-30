@@ -50,7 +50,7 @@ export function LoginPage() {
 
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
+  const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
   const [challenge, setChallenge] = useState<OtpChallenge | null>(null);
   const [emailError, setEmailError] = useState<string | undefined>();
   const [codeError, setCodeError] = useState<string | undefined>();
@@ -59,8 +59,9 @@ export function LoginPage() {
   const [busy, setBusy] = useState(false);
   const [resendAt, setResendAt] = useState<number | null>(null);
   const [, setTick] = useState(0);
-  const codeInput = useRef<HTMLInputElement>(null);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  const code = otp.join('');
   const resendIn = secondsUntil(resendAt);
 
   // Drives the resend countdown.
@@ -71,7 +72,9 @@ export function LoginPage() {
   }, [resendIn]);
 
   useEffect(() => {
-    if (step === 'code') codeInput.current?.focus();
+    if (step === 'code') {
+      inputRefs.current[0]?.focus();
+    }
   }, [step, challenge]);
 
   if (status === 'authenticated' && access) {
@@ -85,7 +88,7 @@ export function LoginPage() {
       const issued = await authApi.requestOtp(address);
       setChallenge(issued);
       setResendAt(new Date(issued.resendAvailableAt).getTime());
-      setCode('');
+      setOtp(['', '', '', '', '', '']);
       setCodeError(undefined);
       setCodeLocked(false);
       setStep('code');
@@ -128,19 +131,81 @@ export function LoginPage() {
       navigate(next ?? result.defaultDestination, { replace: true });
     } catch (err) {
       const described = describe(err);
-      setCode('');
+      setOtp(['', '', '', '', '', '']);
       setCodeLocked(Boolean(described.codeLocked));
       if (described.codeLocked) setResendAt(null);
       setAlert(described.message);
+      inputRefs.current[0]?.focus();
     } finally {
       setBusy(false);
     }
   }
 
+  function handleDigitChange(index: number, value: string) {
+    if (busy || codeLocked) return;
+    const digitsOnly = value.replace(/\D/g, '');
+
+    if (digitsOnly.length > 1) {
+      const newOtp = [...otp];
+      for (let i = 0; i < 6; i++) {
+        if (index + i < 6 && i < digitsOnly.length) {
+          newOtp[index + i] = digitsOnly[i] ?? '';
+        }
+      }
+      setOtp(newOtp);
+      const nextIdx = Math.min(index + digitsOnly.length, 5);
+      inputRefs.current[nextIdx]?.focus();
+      return;
+    }
+
+    const char = digitsOnly.slice(-1);
+    const newOtp = [...otp];
+    newOtp[index] = char;
+    setOtp(newOtp);
+
+    if (char && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  }
+
+  function handleDigitKeyDown(index: number, e: React.KeyboardEvent<HTMLInputElement>) {
+    if (busy || codeLocked) return;
+    if (e.key === 'Backspace') {
+      if (!otp[index] && index > 0) {
+        const newOtp = [...otp];
+        newOtp[index - 1] = '';
+        setOtp(newOtp);
+        inputRefs.current[index - 1]?.focus();
+      } else {
+        const newOtp = [...otp];
+        newOtp[index] = '';
+        setOtp(newOtp);
+      }
+    } else if (e.key === 'ArrowLeft' && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    } else if (e.key === 'ArrowRight' && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  }
+
+  function handleDigitPaste(e: React.ClipboardEvent<HTMLDivElement>) {
+    e.preventDefault();
+    if (busy || codeLocked) return;
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (!pasted) return;
+    const newOtp = ['', '', '', '', '', ''];
+    for (let i = 0; i < pasted.length; i++) {
+      newOtp[i] = pasted[i] ?? '';
+    }
+    setOtp(newOtp);
+    const targetIndex = Math.min(pasted.length, 5);
+    inputRefs.current[targetIndex]?.focus();
+  }
+
   function changeEmail() {
     setStep('email');
     setChallenge(null);
-    setCode('');
+    setOtp(['', '', '', '', '', '']);
     setAlert(null);
     setCodeError(undefined);
     setCodeLocked(false);
@@ -212,22 +277,47 @@ export function LoginPage() {
             ) : (
               <form onSubmit={onSubmitCode} noValidate>
                 <Stack gap="md">
-                  <Input
-                    ref={codeInput}
-                    label="Sign-in code"
-                    name="code"
-                    inputMode="numeric"
-                    autoComplete="one-time-code"
-                    pattern="[0-9]*"
-                    maxLength={6}
-                    placeholder="123456"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    error={codeError}
-                    helperText="The code expires 10 minutes after it is sent and works once."
-                    disabled={busy || codeLocked}
-                    required
-                  />
+                  <div className="bezent-login__otp-field">
+                    <label className="bezent-login__otp-label" id="otp-label">
+                      Sign-in code
+                    </label>
+                    <div
+                      className="bezent-login__otp-group"
+                      role="group"
+                      aria-labelledby="otp-label"
+                      onPaste={handleDigitPaste}
+                    >
+                      {otp.map((digit, index) => (
+                        <input
+                          key={index}
+                          ref={(el) => {
+                            inputRefs.current[index] = el;
+                          }}
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          maxLength={1}
+                          autoComplete={index === 0 ? 'one-time-code' : 'off'}
+                          aria-label={`Digit ${index + 1} of 6`}
+                          className={`bezent-login__otp-digit ${digit ? 'bezent-login__otp-digit--filled' : ''} ${codeError ? 'bezent-login__otp-digit--error' : ''}`}
+                          value={digit}
+                          onChange={(e) => handleDigitChange(index, e.target.value)}
+                          onKeyDown={(e) => handleDigitKeyDown(index, e)}
+                          disabled={busy || codeLocked}
+                        />
+                      ))}
+                    </div>
+                    {codeError ? (
+                      <p className="bezent-login__otp-error" role="alert">
+                        {codeError}
+                      </p>
+                    ) : (
+                      <p className="bezent-login__otp-helper">
+                        The code expires 10 minutes after it is sent and works once.
+                      </p>
+                    )}
+                  </div>
+
                   <Button
                     type="submit"
                     variant="primary"

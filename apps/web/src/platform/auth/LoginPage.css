@@ -334,6 +334,92 @@
   overflow-wrap: anywhere;
 }
 
+/* ── 6-Digit Individual OTP Input Boxes ── */
+
+.bezent-login__otp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.bezent-login__otp-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.bezent-login__otp-group {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.bezent-login__otp-digit {
+  flex: 1;
+  min-width: 0;
+  height: 60px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  color: #0a192f;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.bezent-login__otp-digit:hover:not(:disabled) {
+  background: #ffffff;
+  border-color: #94a3b8;
+}
+
+.bezent-login__otp-digit:focus {
+  background: #ffffff;
+  border-color: #0284c7;
+  box-shadow:
+    0 0 0 3.5px rgba(2, 132, 199, 0.22),
+    0 4px 12px rgba(2, 132, 199, 0.12);
+  transform: translateY(-2px);
+}
+
+.bezent-login__otp-digit--filled {
+  border-color: rgba(2, 132, 199, 0.5);
+  background: #ffffff;
+}
+
+.bezent-login__otp-digit--error {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18);
+}
+
+.bezent-login__otp-digit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.bezent-login__otp-helper {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.4;
+}
+
+.bezent-login__otp-error {
+  margin: 4px 0 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #dc2626;
+  line-height: 1.4;
+}
+
 /* ── Dark Mode Adaptability ── */
 
 [data-theme='dark'] .bezent-login {
@@ -369,6 +455,38 @@
 
 [data-theme='dark'] .bezent-login__glass-card .bezent-input__label {
   color: #cbd5e1;
+}
+
+[data-theme='dark'] .bezent-login__otp-label {
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .bezent-login__otp-digit {
+  background: rgba(15, 23, 42, 0.85);
+  border-color: rgba(51, 65, 85, 0.9);
+  color: #f8fafc;
+}
+
+[data-theme='dark'] .bezent-login__otp-digit:hover:not(:disabled) {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: #64748b;
+}
+
+[data-theme='dark'] .bezent-login__otp-digit:focus {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: #38bdf8;
+  box-shadow:
+    0 0 0 3.5px rgba(56, 189, 248, 0.25),
+    0 4px 12px rgba(56, 189, 248, 0.15);
+}
+
+[data-theme='dark'] .bezent-login__otp-digit--filled {
+  border-color: rgba(56, 189, 248, 0.6);
+  background: rgba(30, 41, 59, 0.95);
+}
+
+[data-theme='dark'] .bezent-login__otp-helper {
+  color: #94a3b8;
 }
 
 [data-theme='dark'] .bezent-login__glass-card .bezent-btn--variant-primary {
