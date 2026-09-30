@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
-import { Alert, Button, Card, Inline, Input, Stack } from '../../design-system/components';
+import { Alert, Button, Inline, Input, Stack } from '../../design-system/components';
 import { BezentIcon } from '../../design-system/icons';
 import { authApi, AuthApiError, type OtpChallenge } from './authApi';
 import { useAuth } from './AuthProvider';
 import { landingPath, safeNextPath } from './landing';
+import { LoginBackground } from './LoginBackground';
 import './LoginPage.css';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -147,13 +148,17 @@ export function LoginPage() {
 
   return (
     <main className="bezent-login">
+      <LoginBackground />
+
       <div className="bezent-login__panel">
-        <Card padding="lg">
+        <div className="bezent-login__glass-card">
           <Stack gap="lg">
             <Stack gap="xs" align="center">
-              <span className="bezent-login__mark" aria-hidden="true">
-                <BezentIcon name="security" size={28} color="currentColor" />
-              </span>
+              <div className="bezent-login__mark-container">
+                <span className="bezent-login__mark" aria-hidden="true">
+                  <BezentIcon name="security" size={26} color="currentColor" />
+                </span>
+              </div>
               <h1 className="bezent-login__title">Sign in to BEZENT</h1>
               <p className="bezent-login__subtitle">
                 {step === 'email'
@@ -262,7 +267,7 @@ export function LoginPage() {
               One sign-in for every BEZENT workspace. No password is needed.
             </p>
           </Stack>
-        </Card>
+        </div>
       </div>
     </main>
   );
