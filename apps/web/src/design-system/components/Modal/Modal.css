@@ -173,7 +173,7 @@
 .bezent-modal--workspace .bezent-modal__header-main,
 .bezent-modal__header--brand .bezent-modal__header-main,
 .bezent-modal__header--brand .bezent-page-header {
-  padding: 16px 32px 14px;
+  padding: 10px 32px;
 }
 
 .bezent-modal--workspace .bezent-modal__title,
