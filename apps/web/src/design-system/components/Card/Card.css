@@ -4,7 +4,7 @@
 
 .bezent-card {
   position: relative;
-  background: var(--bg-card, #f0f4f9);
+  background: var(--bg-card, #ffffff);
   border: 1px solid var(--card-border, #dde3ea);
   border-radius: var(--card-radius, 14px);
   box-shadow: var(--card-shadow, 0 1px 3px rgba(0, 0, 0, 0.04));

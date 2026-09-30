@@ -33,10 +33,10 @@
   --bg-app: var(--app-canvas);
   --bg-surface: var(--workspace);
   --bg-surface-secondary: #f0f4f9;
-  --bg-card: #f0f4f9;
-  --card-bg: #f0f4f9;
+  --bg-card: #ffffff;
+  --card-bg: #ffffff;
   --card-border: #dde3ea;
-  --card-hover-bg: #e9eff8;
+  --card-hover-bg: #f8fafc;
   --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
   --card-hover-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.06), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
   --card-radius: 14px;

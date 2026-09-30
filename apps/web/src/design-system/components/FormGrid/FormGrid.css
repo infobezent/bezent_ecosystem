@@ -229,10 +229,10 @@
   display: flex;
   align-items: center;
   gap: var(--space-4, 16px);
-  background-color: var(--bg-surface-secondary, #f8fafc);
+  background-color: var(--bg-surface, #ffffff);
   padding: var(--space-4, 16px);
   border-radius: var(--radius-lg, 12px);
-  border: 1px dashed var(--border-default, #cbd5e1);
+  border: 1px dashed var(--border-default, #dde3ea);
 }
 
 .bezent-photo-preview {
