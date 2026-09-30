@@ -84,6 +84,7 @@
   flex-direction: column;
   flex-shrink: 0;
   padding: 20px 24px 16px;
+  background: #c2e7ff;
   border-bottom: 1px solid var(--border-subtle, #e7ebf0);
 }
 
@@ -165,7 +166,7 @@
 .bezent-modal--workspace .bezent-modal__header,
 .bezent-modal__header--brand {
   padding: 0;
-  background: var(--bg-surface, #ffffff);
+  background: #c2e7ff;
   border-bottom: 1px solid var(--border-subtle, #e7ebf0);
 }
 

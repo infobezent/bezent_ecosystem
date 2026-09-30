@@ -849,7 +849,7 @@ export function EmployeeRegistration({
   return (
     <>
       {/* Region A: Workspace Header */}
-      <div className="bezent-modal__header">
+      <div className="bezent-modal__header bezent-modal__header--brand">
         <PageHeader
           align="center"
           title="Employee Registration"
