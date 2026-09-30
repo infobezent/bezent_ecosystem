@@ -943,7 +943,6 @@ export function EmployeeRegistration({
         chapters={chapterSteps}
         activeId={activeSection}
         onSelectChapter={handleSelectChapter}
-        kickerLabel="REGISTRATION CHAPTERS"
       />
 
       {/* Region C: Scrollable Active Tab Content */}

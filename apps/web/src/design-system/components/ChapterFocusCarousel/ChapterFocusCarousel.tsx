@@ -30,7 +30,7 @@ export function ChapterFocusCarousel({
   chapters,
   activeId,
   onSelectChapter,
-  kickerLabel = 'REGISTRATION CHAPTERS',
+  kickerLabel,
   className = '',
   ariaLabel = 'Registration Chapters',
 }: ChapterFocusCarouselProps) {
@@ -148,7 +148,11 @@ export function ChapterFocusCarousel({
     >
       {/* Top Editorial Kicker & Indicator */}
       <div className="bezent-focus-carousel__header">
-        <div className="bezent-focus-carousel__kicker">{kickerLabel}</div>
+        {kickerLabel ? (
+          <div className="bezent-focus-carousel__kicker">{kickerLabel}</div>
+        ) : (
+          <div />
+        )}
         <div className="bezent-focus-carousel__controls">
           <button
             type="button"
