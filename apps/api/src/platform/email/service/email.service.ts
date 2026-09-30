@@ -33,6 +33,12 @@ class OutboxTransport implements EmailTransport {
 
   async send(message: EmailMessage): Promise<void> {
     await this.outbox.record(message);
+    if (env.nodeEnv !== 'production') {
+      console.log(`\n📬 [DEV EMAIL OUTBOX]`);
+      console.log(`To:      ${message.to}`);
+      console.log(`Subject: ${message.subject}`);
+      console.log(`Message: ${message.text}\n`);
+    }
   }
 }
 
