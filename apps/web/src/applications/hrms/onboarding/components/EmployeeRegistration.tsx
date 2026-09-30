@@ -897,28 +897,6 @@ export function EmployeeRegistration({
         <PageHeader
           align="center"
           title="Employee Registration"
-          breadcrumbs={
-            <div className="bezent-breadcrumb" role="navigation" aria-label="Breadcrumb">
-              <span>Administration</span>
-              <span className="bezent-breadcrumb-separator">/</span>
-              <span
-                role="button"
-                tabIndex={0}
-                onClick={() => {
-                  setShowUnsavedModal(true);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setShowUnsavedModal(true);
-                  }
-                }}
-              >
-                Employee Administration
-              </span>
-              <span className="bezent-breadcrumb-separator">/</span>
-              <span className="bezent-breadcrumb-item--active">Employee Registration</span>
-            </div>
-          }
           actions={
             <Inline gap="md" align="center">
               <button
