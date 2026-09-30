@@ -78,7 +78,15 @@
 /* Helper / error text */
 .bezent-form-field__helper {
   margin: 4px 0 0 0;
-  font-family: var(--font-family-base, 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  font-family: var(
+    --font-family-base,
+    'Google Sans',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif
+  );
   font-size: var(--form-font-size-hint, 12px);
   line-height: var(--line-height-normal, 1.4);
   color: var(--text-muted, #747775);

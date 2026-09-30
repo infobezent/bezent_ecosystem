@@ -31,7 +31,15 @@
 /* Label */
 .bezent-loading-state__label {
   margin: 0;
-  font-family: var(--font-family-base, 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  font-family: var(
+    --font-family-base,
+    'Google Sans',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif
+  );
   font-size: var(--font-size-sm, 13.5px);
   font-weight: var(--font-weight-normal, 400);
   color: var(--text-muted, #747775);

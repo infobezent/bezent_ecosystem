@@ -28,6 +28,7 @@ function createPool(): mysql.Pool {
     database: env.db.name,
     waitForConnections: true,
     connectionLimit: 10,
+    timezone: 'Z',
   });
 }
 

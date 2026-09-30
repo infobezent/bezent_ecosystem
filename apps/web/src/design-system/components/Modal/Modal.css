@@ -34,7 +34,9 @@
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
   border-radius: var(--card-radius, 16px);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.02);
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(0, 0, 0, 0.02);
   overflow: hidden;
   animation: bezentModalZoomIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
