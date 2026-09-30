@@ -227,7 +227,7 @@ export function EmployeeRegistration({
         { replace: true },
       );
       if (contentContainerRef.current) {
-        contentContainerRef.current.scrollTop = 0;
+        contentContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
       }
     },
     [setSearchParams],
@@ -243,7 +243,7 @@ export function EmployeeRegistration({
     ) {
       setActiveSection(currentParam as RegistrationSectionId);
       if (contentContainerRef.current) {
-        contentContainerRef.current.scrollTop = 0;
+        contentContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
   }, [searchParams, allSections, activeSection]);
@@ -959,7 +959,9 @@ export function EmployeeRegistration({
             </Alert>
           )}
 
-          {/* Integrated Chapter Section Header (Number integrated into heading) */}
+          {/* Animated Chapter Page Container */}
+          <div key={activeSection} className="bezent-chapter-page-transition">
+            {/* Integrated Chapter Section Header (Number integrated into heading) */}
           <div className="bezent-chapter-header">
             <div className="bezent-chapter-header__top">
               <span className="bezent-chapter-header__position-badge">
@@ -1556,6 +1558,7 @@ export function EmployeeRegistration({
               </Stack>
             </Stack>
           )}
+          </div>
         </Stack>
       </div>
 
