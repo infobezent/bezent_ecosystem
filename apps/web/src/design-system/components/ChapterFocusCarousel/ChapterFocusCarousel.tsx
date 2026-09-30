@@ -72,13 +72,9 @@ export function ChapterFocusCarousel({
   }, [activeId]);
 
   useEffect(() => {
-    centerActiveCard();
     const rafId = requestAnimationFrame(() => {
       centerActiveCard();
     });
-    const timerId = setTimeout(() => {
-      centerActiveCard();
-    }, 120);
 
     const handleResize = () => {
       centerActiveCard();
@@ -87,7 +83,6 @@ export function ChapterFocusCarousel({
     window.addEventListener('resize', handleResize);
     return () => {
       cancelAnimationFrame(rafId);
-      clearTimeout(timerId);
       window.removeEventListener('resize', handleResize);
     };
   }, [centerActiveCard]);
