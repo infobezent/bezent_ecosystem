@@ -78,7 +78,7 @@ export function CompanyModulesPage() {
   return (
     <Page>
       <PageHeader
-        title="Application Module Access"
+        title="Application Access"
         subtitle={`Provisioned applications and company-level enablement for ${activeCompany?.name || 'Company'}`}
         actions={
           <Button

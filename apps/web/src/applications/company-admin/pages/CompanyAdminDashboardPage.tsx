@@ -188,7 +188,7 @@ export function CompanyAdminDashboardPage() {
                     size="sm"
                     onClick={() => navigate('/company-admin/modules')}
                   >
-                    Module Access →
+                    Application Access →
                   </Button>
                 </Stack>
               </Card>

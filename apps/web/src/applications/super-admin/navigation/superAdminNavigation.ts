@@ -21,7 +21,7 @@ export const SUPER_ADMIN_NAV_CATEGORIES: readonly NavCategory[] = [
     id: 'access-apps',
     label: 'Access & Applications',
     description:
-      'Platform user directory, company admin assignments and module access entitlements.',
+      'Platform user directory, company admin assignments and application access entitlements.',
     icon: 'employees',
   },
   {
@@ -101,12 +101,12 @@ export const SUPER_ADMIN_NAV_DESTINATIONS: readonly NavDestination[] = [
   },
   {
     id: 'modules',
-    label: 'Module Access',
+    label: 'Application Access',
     icon: 'dashboard',
     segment: 'modules',
     subtitle: 'Application Entitlements',
     description:
-      'Configure and enforce module access (HRMS, CRM, Project Management) per customer.',
+      'Configure and enforce application access (HRMS, CRM, Project Management) per customer.',
     categoryId: 'access-apps',
     sidebar: true,
   },

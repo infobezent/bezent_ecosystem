@@ -22,7 +22,7 @@ import {
   employeeTasks,
   employeeNotifications,
 } from './schema.js';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { createUnusableCredential } from '../platform/auth/security.js';
 
 /**
@@ -600,7 +600,7 @@ export async function seedDatabase() {
     });
   }
 
-  // 9. Initial Super Admin Identity
+  // 9. Development Identity 1: superadmin@bezent.com (Platform Super Admin)
   const superAdminEmail = (process.env.SUPER_ADMIN_EMAIL || 'superadmin@bezent.com')
     .toLowerCase()
     .trim();
@@ -613,16 +613,21 @@ export async function seedDatabase() {
       passwordHash: hash,
       salt,
       firstName: 'Platform',
-      lastName: 'Superadmin',
+      lastName: 'Super Admin',
       status: 'active',
       isSuperAdmin: true,
     });
+  } else {
+    await db
+      .update(users)
+      .set({ isSuperAdmin: true, status: 'active' })
+      .where(eq(users.email, superAdminEmail));
   }
 
-  // 10. Initial Company Admin Identity
-  const companyAdminEmail = 'admin@bezent-demo.example';
+  // 10. Development Identity 2: companyadmin@bezent.com (Development Company Administrator)
+  const companyAdminEmail = 'companyadmin@bezent.com';
   const existingCa = await db.select().from(users).where(eq(users.email, companyAdminEmail));
-  let companyAdminUserId = 'usr_ca_demo_01';
+  let companyAdminUserId = 'usr_ca_bezent_01';
   if (existingCa.length === 0) {
     const { hash, salt } = createUnusableCredential(); // passwordless: signs in with Email OTP
     await db.insert(users).values({
@@ -631,22 +636,32 @@ export async function seedDatabase() {
       passwordHash: hash,
       salt,
       firstName: 'Company',
-      lastName: 'Administrator',
+      lastName: 'Admin',
       status: 'active',
       isSuperAdmin: false,
     });
   } else {
     companyAdminUserId = existingCa[0]!.id;
+    await db
+      .update(users)
+      .set({ status: 'active', isSuperAdmin: false })
+      .where(eq(users.id, companyAdminUserId));
   }
 
-  // 11. Company Admin Membership
-  const existingMem = await db
+  // Company Admin Membership & System Role Assignment
+  const existingCaMem = await db
     .select()
     .from(memberships)
-    .where(eq(memberships.id, 'mem_ca_demo_01'));
-  if (existingMem.length === 0) {
+    .where(
+      and(
+        eq(memberships.tenantId, tenantId),
+        eq(memberships.companyId, companyId),
+        eq(memberships.userId, companyAdminUserId),
+      ),
+    );
+  if (existingCaMem.length === 0) {
     await db.insert(memberships).values({
-      id: 'mem_ca_demo_01',
+      id: 'mem_ca_bezent_01',
       tenantId,
       companyId,
       userId: companyAdminUserId,
@@ -654,11 +669,10 @@ export async function seedDatabase() {
       status: 'active',
     });
   }
-  // Company Admin role assignment (ADR-017; authorization reads role_assignments)
   await db
     .insert(roleAssignments)
     .values({
-      id: 'ra_ca_demo_01',
+      id: 'ra_ca_bezent_01',
       userId: companyAdminUserId,
       roleId: 'role_sys_company_admin',
       tenantId,
@@ -667,11 +681,110 @@ export async function seedDatabase() {
     })
     .onDuplicateKeyUpdate({ set: { status: 'active' } });
 
-  // 12. Default HRMS Module Entitlement
+  // Also support legacy test company admin alias if present
+  const legacyCaEmail = 'admin@bezent-demo.example';
+  const existingLegacyCa = await db.select().from(users).where(eq(users.email, legacyCaEmail));
+  if (existingLegacyCa.length === 0) {
+    const { hash, salt } = createUnusableCredential();
+    await db.insert(users).values({
+      id: 'usr_ca_legacy_01',
+      email: legacyCaEmail,
+      passwordHash: hash,
+      salt,
+      firstName: 'Company',
+      lastName: 'Administrator',
+      status: 'active',
+      isSuperAdmin: false,
+    });
+    await db.insert(memberships).values({
+      id: 'mem_ca_legacy_01',
+      tenantId,
+      companyId,
+      userId: 'usr_ca_legacy_01',
+      role: 'company_admin',
+      status: 'active',
+    });
+    await db.insert(roleAssignments).values({
+      id: 'ra_ca_legacy_01',
+      userId: 'usr_ca_legacy_01',
+      roleId: 'role_sys_company_admin',
+      tenantId,
+      companyId,
+      status: 'active',
+    });
+  }
+
+  // 11. Development Identity 3: hr@bezent.com (Daily HRMS Application Development)
+  const hrEmail = 'hr@bezent.com';
+  const existingHr = await db.select().from(users).where(eq(users.email, hrEmail));
+  let hrUserId = 'usr_hr_bezent_01';
+  if (existingHr.length === 0) {
+    const { hash, salt } = createUnusableCredential();
+    await db.insert(users).values({
+      id: hrUserId,
+      email: hrEmail,
+      passwordHash: hash,
+      salt,
+      firstName: 'HR',
+      lastName: 'Manager',
+      status: 'active',
+      isSuperAdmin: false,
+    });
+  } else {
+    hrUserId = existingHr[0]!.id;
+    await db
+      .update(users)
+      .set({ status: 'active', isSuperAdmin: false })
+      .where(eq(users.id, hrUserId));
+  }
+
+  // HR Membership & Role Assignment
+  const existingHrMem = await db
+    .select()
+    .from(memberships)
+    .where(
+      and(
+        eq(memberships.tenantId, tenantId),
+        eq(memberships.companyId, companyId),
+        eq(memberships.userId, hrUserId),
+      ),
+    );
+  if (existingHrMem.length === 0) {
+    await db.insert(memberships).values({
+      id: 'mem_hr_bezent_01',
+      tenantId,
+      companyId,
+      userId: hrUserId,
+      role: 'hr_manager',
+      status: 'active',
+    });
+  }
+  await db
+    .insert(roleAssignments)
+    .values({
+      id: 'ra_hr_bezent_01',
+      userId: hrUserId,
+      roleId: 'role_sys_hr_manager',
+      tenantId,
+      companyId,
+      status: 'active',
+    })
+    .onDuplicateKeyUpdate({ set: { status: 'active' } });
+
+  // Link HR employee record (emp_demo_001 Lakshmi Narayanan)
+  await db.update(employees).set({ userId: hrUserId }).where(eq(employees.id, 'emp_demo_001'));
+
+  // 12. Ensure HRMS Application Entitlement in Development Company
   const existingModule = await db
     .select()
     .from(tenantModules)
-    .where(eq(tenantModules.id, 'mod_hrms_demo_01'));
+    .where(
+      and(
+        eq(tenantModules.tenantId, tenantId),
+        eq(tenantModules.companyId, companyId),
+        eq(tenantModules.moduleCode, 'hrms'),
+      ),
+    );
   if (existingModule.length === 0) {
     await db.insert(tenantModules).values({
       id: 'mod_hrms_demo_01',
@@ -680,39 +793,51 @@ export async function seedDatabase() {
       moduleCode: 'hrms',
       status: 'enabled',
     });
+  } else if (existingModule[0]!.status !== 'enabled') {
+    await db
+      .update(tenantModules)
+      .set({ status: 'enabled' })
+      .where(eq(tenantModules.id, existingModule[0]!.id));
   }
 
-  // 13. Initial Sample Employee User (Arjun Mehta - emp_demo_002)
-  const employeeEmail = 'arjun.mehta@bezent-demo.example';
+  // 13. Development Identity 4: employee@bezent.com (Employee Self Service testing)
+  const employeeEmail = 'employee@bezent.com';
   const existingEmpUser = await db.select().from(users).where(eq(users.email, employeeEmail));
-  let empUserId = 'usr_emp_arjun_01';
+  let empUserId = 'usr_emp_bezent_01';
   if (existingEmpUser.length === 0) {
-    const { hash, salt } = createUnusableCredential(); // passwordless: signs in with Email OTP
+    const { hash, salt } = createUnusableCredential();
     await db.insert(users).values({
       id: empUserId,
       email: employeeEmail,
       passwordHash: hash,
       salt,
-      firstName: 'Arjun',
-      lastName: 'Mehta',
+      firstName: 'Demo',
+      lastName: 'Employee',
       status: 'active',
       isSuperAdmin: false,
     });
   } else {
     empUserId = existingEmpUser[0]!.id;
+    await db
+      .update(users)
+      .set({ status: 'active', isSuperAdmin: false })
+      .where(eq(users.id, empUserId));
   }
-
-  // Link employee record to this user ID
-  await db.update(employees).set({ userId: empUserId }).where(eq(employees.id, 'emp_demo_002'));
 
   // Employee Membership
   const existingEmpMem = await db
     .select()
     .from(memberships)
-    .where(eq(memberships.id, 'mem_emp_arjun_01'));
+    .where(
+      and(
+        eq(memberships.tenantId, tenantId),
+        eq(memberships.companyId, companyId),
+        eq(memberships.userId, empUserId),
+      ),
+    );
   if (existingEmpMem.length === 0) {
     await db.insert(memberships).values({
-      id: 'mem_emp_arjun_01',
+      id: 'mem_emp_bezent_01',
       tenantId,
       companyId,
       userId: empUserId,
@@ -723,7 +848,7 @@ export async function seedDatabase() {
   await db
     .insert(roleAssignments)
     .values({
-      id: 'ra_emp_arjun_01',
+      id: 'ra_emp_bezent_01',
       userId: empUserId,
       roleId: 'role_sys_employee',
       tenantId,
@@ -731,6 +856,12 @@ export async function seedDatabase() {
       status: 'active',
     })
     .onDuplicateKeyUpdate({ set: { status: 'active' } });
+
+  // Link employee record (emp_demo_002) to this user
+  await db
+    .update(employees)
+    .set({ userId: empUserId, email: employeeEmail })
+    .where(eq(employees.id, 'emp_demo_002'));
 
   // Initial Leave Balances for 2026
   const existingLeaveBal = await db

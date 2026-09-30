@@ -2,7 +2,17 @@
  * Platform authentication & access (ADR-017 / ADR-018): the one session,
  * sign-in page and access model shared by every BEZENT workspace.
  */
-export { AuthProvider, useAuth, type AuthContextValue, type AuthStatus } from './AuthProvider';
+export {
+  AuthContext,
+  AuthProvider,
+  useAuth,
+  useOptionalAuth,
+  useAuthorization,
+  type AuthContextValue,
+  type AuthStatus,
+} from './AuthProvider';
+export { Can, type CanProps } from './Can';
+export { RequirePermission, type RequirePermissionProps } from './RequirePermission';
 export { LoginPage } from './LoginPage';
 export { RequireAuth } from './RequireAuth';
 export { landingPath, safeNextPath } from './landing';
@@ -17,6 +27,7 @@ export {
   type SignInResult,
   type WorkspaceId,
 } from './authApi';
+export { resolveProfileIdentity, type ResolvedProfileIdentity } from './profileIdentity';
 export {
   ACTIVE_COMPANY_KEY,
   SESSION_ENDED_EVENT,

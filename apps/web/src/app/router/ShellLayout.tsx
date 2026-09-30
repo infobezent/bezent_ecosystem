@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { Outlet, useLocation, useNavigate, useMatches } from 'react-router-dom';
+import { useCallback, useMemo } from 'react';
+import { Outlet, useLocation, useNavigate, useMatches, Navigate } from 'react-router-dom';
 import {
   AppShell,
   type ShellRailItem,
@@ -26,6 +26,8 @@ import { toShellLauncher, toShellNavItems } from './shellNavigation';
 import { DEV_SEARCH_PROVIDER } from './devSearchFixtures';
 import { useDevUtilityData } from './devUtilityFixtures';
 import { CustomFieldsProvider } from '../../applications/hrms/settings/context/CustomFieldsContext';
+import { useOptionalAuth, resolveProfileIdentity } from '../../platform/auth';
+import { landingPath } from '../../platform/auth/landing';
 
 /** Type guard to validate whether an unknown route handle implements BezentRouteHandle. */
 function isBezentRouteHandle(handle: unknown): handle is BezentRouteHandle {
@@ -77,9 +79,47 @@ export function ShellLayout() {
     (d) => d.id === active?.destinationId,
   );
   const activeId = active?.destinationId;
+
+  const auth = useOptionalAuth();
+  const access = auth?.access ?? null;
+  const activeCompany = auth?.activeCompany ?? null;
+  const can = auth?.can;
+  const signOut = auth?.signOut;
+
+  const isAuthorizedForActiveApp = useMemo(() => {
+    if (!application || !auth || auth.status !== 'authenticated' || !access) {
+      return true;
+    }
+    const isSuperAdmin = Boolean(
+      access.user.isSuperAdmin || access.platformWorkspaces?.includes('super_admin'),
+    );
+    const isCompanyAdmin = Boolean(
+      isSuperAdmin ||
+      activeCompany?.workspaces.includes('company_admin') ||
+      activeCompany?.roles.some((r) => r.code === 'company_admin') ||
+      activeCompany?.isPlatformOversight ||
+      access.companies.some((c) => c.workspaces.includes('company_admin')),
+    );
+    const hasHrms = Boolean(activeCompany?.workspaces.includes('hrms'));
+    const hasEss = Boolean(activeCompany?.workspaces.includes('ess'));
+
+    switch (application.id) {
+      case 'super-admin':
+        return isSuperAdmin;
+      case 'company-admin':
+        return isCompanyAdmin;
+      case 'hrms':
+        return hasHrms;
+      case 'ess':
+        return hasEss;
+      default:
+        return true;
+    }
+  }, [application, auth, access, activeCompany]);
+
   const navItems = useMemo(
-    () => (application ? toShellNavItems(application, activeId) : []),
-    [application, activeId],
+    () => (application ? toShellNavItems(application, activeId, can) : []),
+    [application, activeId, can],
   );
   const utility = useActiveUtility();
   const data = useDevUtilityData();
@@ -156,6 +196,61 @@ export function ShellLayout() {
     }
   }
 
+  const { userName, userEmail, userInitials, userRole } = useMemo(
+    () => resolveProfileIdentity(access, activeCompany),
+    [access, activeCompany],
+  );
+
+  const handleSignOut = useCallback(async () => {
+    if (signOut) await signOut();
+    navigate('/login', { replace: true });
+  }, [signOut, navigate]);
+
+  const handleSwitchAccount = useCallback(async () => {
+    if (signOut) await signOut();
+    navigate('/login', { replace: true });
+  }, [signOut, navigate]);
+
+  const handleMyProfile = useCallback(() => {
+    if (access?.user.isSuperAdmin && !activeCompany?.essEligible) {
+      navigate('/super-admin/settings');
+      return;
+    }
+    if (activeCompany?.essEligible) {
+      navigate('/ess/profile');
+      return;
+    }
+    if (activeCompany?.roles.some((r) => r.code === 'company_admin')) {
+      navigate('/company-admin/profile');
+      return;
+    }
+    if (application) {
+      navigate(`${application.basePath}/employees`);
+      return;
+    }
+    navigate('/ess/profile');
+  }, [access, activeCompany, application, navigate]);
+
+  const handleAccountSettings = useCallback(() => {
+    if (access?.user.isSuperAdmin && !activeCompany) {
+      navigate('/super-admin/settings');
+      return;
+    }
+    if (activeCompany?.roles.some((r) => r.code === 'company_admin')) {
+      navigate('/company-admin/settings');
+      return;
+    }
+    if (application) {
+      navigate(`${application.basePath}/settings`);
+      return;
+    }
+    navigate('/hrms/settings');
+  }, [access, activeCompany, application, navigate]);
+
+  if (!isAuthorizedForActiveApp && access) {
+    return <Navigate to={landingPath(access)} replace />;
+  }
+
   return (
     <CustomFieldsProvider>
       <AppShell
@@ -182,21 +277,15 @@ export function ShellLayout() {
             navigate(destinationPath(application.basePath, destination, subId));
           }
         }}
-        launcher={application ? toShellLauncher(application, active, navigate) : undefined}
-        userInitials="SD"
-        userName="Sabin Davis"
-        userEmail="sabin.d@bezent.com"
-        userRole="Administrator • HRMS"
-        onMyProfile={() => {
-          if (application) {
-            navigate(`${application.basePath}/employees`);
-          }
-        }}
-        onAccountSettings={() => {
-          if (application) {
-            navigate(`${application.basePath}/settings`);
-          }
-        }}
+        launcher={application ? toShellLauncher(application, active, navigate, can) : undefined}
+        userInitials={userInitials}
+        userName={userName}
+        userEmail={userEmail}
+        userRole={userRole}
+        onMyProfile={handleMyProfile}
+        onAccountSettings={handleAccountSettings}
+        onSignOut={handleSignOut}
+        onSwitchAccount={handleSwitchAccount}
         onSettingsClick={() => navigate('/hrms/settings')}
         notificationCount={data.notifications.filter((n) => !n.read).length}
         notificationsOpen={utility.activeId === 'notifications'}

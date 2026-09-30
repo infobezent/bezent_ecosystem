@@ -1,11 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-import {
-  companyAdminApi,
-  ACTIVE_COMPANY_KEY,
-  type AuthorizedCompanySummary,
-} from '../api/companyAdminApi';
-import { useSuperAdminAuth } from '../../super-admin/context/SuperAdminAuthContext';
-import { useAuth } from '../../../platform/auth';
+import { companyAdminApi, type AuthorizedCompanySummary } from '../api/companyAdminApi';
+import { getActiveCompanyId, useAuth } from '../../../platform/auth';
 
 interface CompanyAdminContextValue {
   activeCompanyId: string | null;
@@ -18,22 +13,22 @@ interface CompanyAdminContextValue {
   isCompanyAdmin: boolean;
 }
 
-const CompanyAdminContext = createContext<CompanyAdminContextValue | null>(null);
+export const CompanyAdminContext = createContext<CompanyAdminContextValue | null>(null);
 
 export function CompanyAdminProvider({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isSuperAdmin } = useSuperAdminAuth();
-  const { selectCompany } = useAuth();
+  const { status, access, activeCompany: authActiveCompany, selectCompany } = useAuth();
+  const isSuperAdmin = Boolean(access?.user.isSuperAdmin);
+  const isAuthenticated = status === 'authenticated';
+  const hasCompanyAdminAccess =
+    isSuperAdmin || Boolean(access?.companies.some((c) => c.workspaces.includes('company_admin')));
+
   const [authorizedCompanies, setAuthorizedCompanies] = useState<AuthorizedCompanySummary[]>([]);
-  const [activeCompanyId, setActiveCompanyId] = useState<string | null>(() => {
-    return typeof localStorage !== 'undefined' ? localStorage.getItem(ACTIVE_COMPANY_KEY) : null;
-  });
-  const [isLoadingCompanies, setIsLoadingCompanies] = useState<boolean>(true);
+  const [isLoadingCompanies, setIsLoadingCompanies] = useState<boolean>(false);
   const [companyError, setCompanyError] = useState<string | null>(null);
 
   const refreshCompanies = useCallback(async () => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !hasCompanyAdminAccess) {
       setAuthorizedCompanies([]);
-      setActiveCompanyId(null);
       setIsLoadingCompanies(false);
       return;
     }
@@ -46,46 +41,39 @@ export function CompanyAdminProvider({ children }: { children: ReactNode }) {
       setAuthorizedCompanies(companies);
 
       if (companies.length > 0) {
-        const stored =
-          typeof localStorage !== 'undefined' ? localStorage.getItem(ACTIVE_COMPANY_KEY) : null;
-        const exists = companies.some((c) => c.id === stored);
-
-        if (stored && exists) {
-          setActiveCompanyId(stored);
-        } else {
-          const first = companies[0]!.id;
-          setActiveCompanyId(first);
-          localStorage.setItem(ACTIVE_COMPANY_KEY, first);
+        const currentActive = getActiveCompanyId();
+        const exists = companies.some((c) => c.id === currentActive);
+        if (!currentActive || (!exists && isSuperAdmin)) {
+          const firstId = companies[0]!.id;
+          selectCompany(firstId);
         }
-      } else {
-        setActiveCompanyId(null);
-        localStorage.removeItem(ACTIVE_COMPANY_KEY);
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to load authorized companies';
       setCompanyError(msg);
       setAuthorizedCompanies([]);
-      setActiveCompanyId(null);
     } finally {
       setIsLoadingCompanies(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, hasCompanyAdminAccess, isSuperAdmin, selectCompany]);
 
   useEffect(() => {
-    refreshCompanies();
-  }, [refreshCompanies]);
+    if (isAuthenticated && hasCompanyAdminAccess) {
+      void refreshCompanies();
+    } else {
+      setAuthorizedCompanies([]);
+      setIsLoadingCompanies(false);
+    }
+  }, [isAuthenticated, hasCompanyAdminAccess, refreshCompanies]);
 
   const switchCompany = useCallback(
     (companyId: string) => {
-      localStorage.setItem(ACTIVE_COMPANY_KEY, companyId);
-      setActiveCompanyId(companyId);
-      // Keep the shared platform session on the same company (other workspaces
-      // read it); Super Admin oversight companies are not memberships.
       selectCompany(companyId);
     },
     [selectCompany],
   );
 
+  const activeCompanyId = authActiveCompany?.companyId ?? getActiveCompanyId();
   const activeCompany = authorizedCompanies.find((c) => c.id === activeCompanyId) || null;
   const isCompanyAdmin = Boolean(
     isSuperAdmin ||

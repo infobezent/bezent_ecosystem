@@ -1,11 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-import {
-  essApi,
-  type EssDashboardData,
-  type EssEmployeeSummary,
-  ACTIVE_COMPANY_KEY,
-} from '../api/essApi';
-import { useSuperAdminAuth } from '../../super-admin/context/SuperAdminAuthContext';
+import { essApi, type EssDashboardData, type EssEmployeeSummary } from '../api/essApi';
+import { getActiveCompanyId, useAuth } from '../../../platform/auth';
 
 interface EssContextValue {
   employee: EssEmployeeSummary | null;
@@ -20,16 +15,17 @@ interface EssContextValue {
 const EssContext = createContext<EssContextValue | null>(null);
 
 export function EssProvider({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useSuperAdminAuth();
+  const { status, activeCompany } = useAuth();
+  const isAuthenticated = status === 'authenticated';
+  const isEssEligible = Boolean(activeCompany?.essEligible);
+  const activeCompanyId = activeCompany?.companyId ?? getActiveCompanyId();
+
   const [dashboard, setDashboard] = useState<EssDashboardData | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeCompanyId] = useState<string | null>(() =>
-    typeof localStorage !== 'undefined' ? localStorage.getItem(ACTIVE_COMPANY_KEY) : null,
-  );
 
   const refreshDashboard = useCallback(async () => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !isEssEligible) {
       setDashboard(null);
       setIsLoading(false);
       return;
@@ -46,11 +42,16 @@ export function EssProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isEssEligible]);
 
   useEffect(() => {
-    refreshDashboard();
-  }, [refreshDashboard]);
+    if (isAuthenticated && isEssEligible) {
+      void refreshDashboard();
+    } else {
+      setDashboard(null);
+      setIsLoading(false);
+    }
+  }, [isAuthenticated, isEssEligible, refreshDashboard]);
 
   return (
     <EssContext.Provider

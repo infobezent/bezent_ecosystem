@@ -11,7 +11,9 @@ export function landingPath(access: AccessOverview): string {
   if (workspaces.has('company_admin')) return '/company-admin';
   if (workspaces.has('hrms')) return '/hrms/dashboard';
   if (workspaces.has('ess')) return '/ess';
-  return '/hrms/dashboard';
+  // No authorized workspace resolved yet — send to the universal sign-in page.
+  // The backend controls what the user may open; the frontend must not guess.
+  return '/login';
 }
 
 /** Accepts only same-origin, absolute in-app paths (no protocol-relative or external URLs). */

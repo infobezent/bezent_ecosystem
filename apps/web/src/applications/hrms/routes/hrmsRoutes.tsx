@@ -1,4 +1,4 @@
-import { Navigate, type RouteObject } from 'react-router-dom';
+import { Navigate, Outlet, type RouteObject } from 'react-router-dom';
 import { hrmsNavigation } from '../navigation';
 import { ModulePlaceholder } from '../pages/ModulePlaceholder';
 import { OnboardingPage } from '../onboarding';
@@ -7,11 +7,47 @@ import { DocumentsPage } from '../documents';
 import { EMPLOYEES_PATH, EmployeeDirectoryPage, EmployeeProfilePage } from '../employees';
 import { SettingsPage } from '../settings';
 import { destinationPath } from '../../../shared/utils/navigation';
+import { useAuth } from '../../../platform/auth';
+import { landingPath } from '../../../platform/auth/landing';
+import { LoadingState } from '../../../design-system/components';
 
 export const HRMS_BASE_PATH = '/hrms';
 export const HRMS_DEFAULT_DESTINATION_ID = 'dashboard';
 
 const APPLICATION = 'HRMS';
+
+/**
+ * HRMS workspace guard (layout route). Requires the user to hold the `hrms`
+ * workspace (i.e. at least one HRMS admin permission resolved by the server).
+ *
+ * An Employee whose only workspace is `ess` is redirected to their authorized
+ * landing path. This is UX-layer gating; the backend enforces the same boundary
+ * via requireApplicationAccess('hrms', 'hrms') on every /api/v1/hrms route.
+ */
+export function RequireHrmsWorkspace() {
+  const { status, access, activeCompany } = useAuth();
+
+  if (status === 'loading') {
+    return <LoadingState label="Verifying access…" fill />;
+  }
+
+  // Not authenticated at all — RequireAuth (parent) will handle this,
+  // but guard defensively here too.
+  if (status !== 'authenticated' || !access) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Check the server-resolved HRMS workspace in the active company.
+  const hasHrmsWorkspace = activeCompany?.workspaces.includes('hrms') ?? false;
+
+  if (!hasHrmsWorkspace) {
+    // Redirect to the correct workspace for this user (e.g. /ess for an Employee).
+    return <Navigate to={landingPath(access)} replace />;
+  }
+
+  // Render children via React Router's Outlet (layout route pattern).
+  return <Outlet />;
+}
 
 /**
  * HRMS routes, generated from the ONE canonical navigation catalog — there
@@ -33,6 +69,7 @@ const defaultDestination = hrmsNavigation.destinations.find(
 export const hrmsRoutes: RouteObject[] = [
   {
     path: basePath,
+    element: <RequireHrmsWorkspace />,
     children: [
       {
         index: true,
