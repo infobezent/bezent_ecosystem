@@ -65,11 +65,12 @@ export class OtpAuthService {
 
     const latest = await this.otp.latestForEmail(email);
     if (latest) {
-      const readyAt = latest.createdAt.getTime() + OTP_RESEND_COOLDOWN_SECONDS * 1000;
+      const createdTime = Math.min(latest.createdAt.getTime(), now);
+      const readyAt = createdTime + OTP_RESEND_COOLDOWN_SECONDS * 1000;
       if (readyAt > now) {
         throw new OtpRateLimitedError(
           'Please wait before requesting another code',
-          Math.ceil((readyAt - now) / 1000),
+          Math.min(OTP_RESEND_COOLDOWN_SECONDS, Math.max(1, Math.ceil((readyAt - now) / 1000))),
         );
       }
     }

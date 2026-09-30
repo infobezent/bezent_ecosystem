@@ -191,8 +191,16 @@ export function LoginPage() {
                     autoFocus
                     required
                   />
-                  <Button type="submit" variant="primary" size="lg" loading={busy} disabled={busy}>
-                    Send sign-in code
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="lg"
+                    loading={busy}
+                    disabled={busy || resendIn > 0}
+                  >
+                    {resendIn > 0
+                      ? `Wait ${resendIn}s before requesting code`
+                      : 'Send sign-in code'}
                   </Button>
                 </Stack>
               </form>
