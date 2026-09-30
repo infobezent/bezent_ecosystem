@@ -16,20 +16,29 @@ export { isDatabaseConfigured };
 let pool: mysql.Pool | undefined;
 
 function createPool(): mysql.Pool {
-  if (env.db.url) {
-    return mysql.createPool(env.db.url);
-  }
+  const options: mysql.PoolOptions = env.db.url
+    ? { uri: env.db.url }
+    : {
+        host: env.db.host,
+        port: env.db.port,
+        user: env.db.user,
+        password: env.db.password,
+        database: env.db.name,
+        waitForConnections: true,
+        connectionLimit: 10,
+      };
 
-  return mysql.createPool({
-    host: env.db.host,
-    port: env.db.port,
-    user: env.db.user,
-    password: env.db.password,
-    database: env.db.name,
-    waitForConnections: true,
-    connectionLimit: 10,
+  const poolInstance = mysql.createPool({
+    ...options,
     timezone: 'Z',
+    dateStrings: true,
   });
+
+  poolInstance.on('connection', (connection: mysql.PoolConnection) => {
+    connection.query("SET time_zone = '+00:00'");
+  });
+
+  return poolInstance;
 }
 
 export function getPool(): mysql.Pool {

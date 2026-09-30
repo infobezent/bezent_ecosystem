@@ -329,7 +329,7 @@ describe('Company Admin Platform Subsystem (Phase 2)', () => {
 
     it('lists company users with roles and statuses', async () => {
       const res = await request(app)
-        .get('/api/v1/company-admin/users')
+        .get('/api/v1/company-admin/users?limit=50')
         .set('Authorization', `Bearer ${companyAdminAToken}`)
         .set('x-company-id', companyAId);
 
