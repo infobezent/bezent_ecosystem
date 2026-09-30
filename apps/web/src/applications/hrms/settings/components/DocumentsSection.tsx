@@ -100,6 +100,7 @@ export function DocumentsSection({
 
         {sortedDocs.length === 0 ? (
           <EmptyState
+            variant="documents"
             title="No document requirements defined yet."
             description="Add requirements to request mandatory or optional documents during candidate onboarding."
             primaryAction={{ label: 'Add First Document', onClick: openCreateModal }}

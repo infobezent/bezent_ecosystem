@@ -376,6 +376,7 @@ export function OnboardingBuilderSection() {
 
           {currentCards.length === 0 ? (
             <EmptyState
+              variant="onboarding"
               title={`No cards configured for ${selectedSection?.title}.`}
               description="Create a card group to organize fields within this section."
               primaryAction={{ label: '+ Create First Card', onClick: handleOpenAddCard }}

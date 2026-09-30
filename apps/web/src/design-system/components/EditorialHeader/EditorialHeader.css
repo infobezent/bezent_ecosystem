@@ -77,10 +77,10 @@
 
 .bezent-editorial-header__title {
   margin: 0;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--text-primary, #1f1f1f);
-  letter-spacing: -0.3px;
+  letter-spacing: -0.02em;
   line-height: 1.25;
 }
 
@@ -88,8 +88,8 @@
   margin: 0;
   font-size: 14px;
   color: var(--text-secondary, #444746);
-  line-height: 1.45;
-  max-width: 680px;
+  line-height: 1.5;
+  max-width: 720px;
 }
 
 .bezent-editorial-header__badge {

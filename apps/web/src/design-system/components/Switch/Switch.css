@@ -30,9 +30,9 @@
   border: 1px solid var(--border-default, #dde3ea);
   border-radius: 999px;
   transition:
-    background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ── Thumb ── */
@@ -43,8 +43,10 @@
   height: 16px;
   background: #ffffff;
   border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.2),
+    0 0 1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* ── Checked State ── */
@@ -61,6 +63,7 @@
 .bezent-switch-input:focus-visible + .bezent-switch-track {
   outline: 2px solid var(--border-focus, #1a73e8);
   outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.16);
 }
 
 /* ── Compact Size ── */
@@ -85,8 +88,9 @@
 }
 
 .bezent-switch-label {
-  font-size: 13px;
+  font-size: var(--form-font-size-input, 13.5px);
   color: var(--text-primary, #1f1f1f);
   font-weight: 500;
-  letter-spacing: -0.1px;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
 }

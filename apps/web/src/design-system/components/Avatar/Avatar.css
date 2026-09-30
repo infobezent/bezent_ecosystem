@@ -24,10 +24,13 @@
   flex-shrink: 0;
   user-select: none;
   overflow: hidden;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
   transition:
-    opacity 0.14s ease,
-    transform 0.14s ease;
+    opacity 0.16s ease,
+    transform 0.14s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.16s ease;
 }
 
 .bezent-avatar--sm {

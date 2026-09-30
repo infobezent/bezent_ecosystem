@@ -8,6 +8,7 @@ export interface PageHeaderProps {
   badge?: ReactNode;
   actions?: ReactNode;
   breadcrumbs?: ReactNode;
+  align?: 'left' | 'center';
   className?: string;
   children?: ReactNode;
 }
@@ -23,11 +24,14 @@ export function PageHeader({
   badge,
   actions,
   breadcrumbs,
+  align = 'left',
   className,
   children,
 }: PageHeaderProps) {
   return (
-    <header className={`bezent-page-header ${className || ''}`.trim()}>
+    <header
+      className={`bezent-page-header bezent-page-header--align-${align} ${className || ''}`.trim()}
+    >
       {breadcrumbs && <div className="bezent-page-header__breadcrumbs">{breadcrumbs}</div>}
 
       <div className="bezent-page-header__main">

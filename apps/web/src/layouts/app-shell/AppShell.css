@@ -1,13 +1,5 @@
 /*
- * BEZENT AppShell — global page composition.
- *
- * Source: old approved UI `App.tsx` — fixed-position TopNav (60px),
- * LeftNav (90px), RightNav (48px, animated width 0.2s), BottomBar (36px),
- * workspace `fixed` between them. Rebuilt as a CSS grid so regions cannot
- * overlap by construction; dimensions come from tokens/layout.css.
- *
- * Scroll ownership: the viewport never scrolls (`overflow: hidden`); the
- * ONLY scroller in the shell is `.app-shell__workspace`.
+ * BEZENT AppShell — global page composition (Linear/Stripe Grade).
  */
 
 .app-shell {
@@ -26,15 +18,15 @@
     'top top top'
     'left main right'
     'bottom bottom bottom';
-  background: var(--bg-app);
-  transition: grid-template-columns 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--bg-app, #f8fafc);
+  transition: grid-template-columns 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .app-shell--rail-open {
   --app-shell-rail-width: var(--shell-right-rail-width);
 }
 
-/* Overlay utility drawer: floats on top of workspace on the right side with matching radius */
+/* Overlay utility drawer */
 .app-shell__drawer {
   position: absolute;
   top: calc(var(--shell-topbar-height) + 8px);
@@ -50,8 +42,8 @@
   border-radius: 16px;
   overflow: hidden;
   box-shadow: var(--shadow-utility-drawer);
-  animation: appShellDrawerSlideIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  transition: right 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: appShellDrawerSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: right 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes appShellDrawerSlideIn {
@@ -70,31 +62,18 @@
   min-width: 0;
   min-height: 0;
   overflow: auto;
-  background: var(--bg-surface);
-  /*
-   * Workspace inset — a 6px gutter on every side lets the blue-grey app
-   * canvas (#F6F8FC) show around the white surface, creating the
-   * "application canvas containing a white working surface" hierarchy.
-   * Radius 18px on all corners: the workspace is visually a card floating
-   * inside the canvas rather than a flush rectangular region.
-   */
+  background: var(--bg-surface, #ffffff);
   margin: 8px 12px 12px 8px;
-  border-radius: 16px;
-  box-shadow: var(--shadow-workspace);
+  border-radius: 14px;
+  border: 1px solid var(--border-default, #e2e8f0);
+  box-shadow: var(
+    --shadow-workspace,
+    0 1px 3px rgba(15, 23, 42, 0.05),
+    0 4px 12px rgba(15, 23, 42, 0.03)
+  );
 }
 
-/* ── Workspace Variants ────────────────────────────────────────────── */
-
-.app-shell__workspace--default {
-  /* Retains default floating-card appearance */
-}
-
-/*
- * Flush application workspace: occupies the full center grid area between
- * TopNav, LeftSidebar, RightRail, and BottomBar without outer gutters,
- * rounded corners, or card shadow. Flex column layout delegates internal
- * scrolling to the active workspace content region.
- */
+/* Flush workspace variant */
 .app-shell__workspace--flush {
   margin: 0;
   border-radius: 0;
@@ -107,21 +86,15 @@
   overflow: hidden;
 }
 
-/* ── Dark Mode Ambient Illuminations & Workspace Glass Surface ─────── */
-
+/* ── Dark Mode Ambient Glass Surface ── */
 [data-theme='dark'] .app-shell {
-  background:
-    radial-gradient(ellipse 90% 50% at 50% -10%, rgba(22, 131, 255, 0.08) 0%, transparent 60%),
-    radial-gradient(circle at 10% 20%, rgba(11, 37, 78, 0.4) 0%, transparent 50%), var(--bg-app);
+  background: #09090b;
 }
 
 [data-theme='dark'] .app-shell__workspace {
-  background: linear-gradient(180deg, #071a3d 0%, #05142f 100%);
-  border: 1px solid rgba(56, 189, 248, 0.16);
-  box-shadow:
-    0 12px 36px rgba(1, 8, 20, 0.7),
-    0 0 24px rgba(22, 131, 255, 0.08),
-    inset 0 1px 0 rgba(56, 189, 248, 0.2);
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
 }
 
 [data-theme='dark'] .app-shell__workspace--flush {
