@@ -897,7 +897,6 @@ export function EmployeeRegistration({
         <PageHeader
           align="center"
           title="Employee Registration"
-          subtitle="Add and manage new employee information"
           breadcrumbs={
             <div className="bezent-breadcrumb" role="navigation" aria-label="Breadcrumb">
               <span>Administration</span>

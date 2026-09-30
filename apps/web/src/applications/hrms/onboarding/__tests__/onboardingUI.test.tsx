@@ -160,7 +160,6 @@ describe('HRMS Onboarding UI Components & Pages', () => {
     expect(html).toContain('bezent-page-header');
     expect(html).toContain('bezent-breadcrumb');
     expect(html).toContain('Employee Registration');
-    expect(html).toContain('Add and manage new employee information');
 
     // 10 JourneyNav Steps remain completely frozen and intact
     expect(html).toContain('General');
