@@ -51,35 +51,34 @@ export function ChapterFocusCarousel({
       const containerRect = container.getBoundingClientRect();
       const cardRect = activeCard.getBoundingClientRect();
 
-      // If content fits comfortably within container, do not scroll
+      // If content fits comfortably within container, keep natural center alignment
       if (container.scrollWidth <= container.clientWidth + 4) {
+        container.scrollTo({ left: 0, behavior: 'smooth' });
         return;
       }
 
       if (containerRect.width > 0 && cardRect.width > 0) {
-        const isFullyVisible =
-          cardRect.left >= containerRect.left + 16 &&
-          cardRect.right <= containerRect.right - 16;
+        const currentScrollLeft = container.scrollLeft;
+        const cardCenter = cardRect.left + cardRect.width / 2;
+        const containerCenter = containerRect.left + containerRect.width / 2;
+        const targetScrollLeft = currentScrollLeft + (cardCenter - containerCenter);
 
-        if (!isFullyVisible) {
-          const currentScrollLeft = container.scrollLeft;
-          const cardCenter = cardRect.left + cardRect.width / 2;
-          const containerCenter = containerRect.left + containerRect.width / 2;
-          const targetScrollLeft = currentScrollLeft + (cardCenter - containerCenter);
-
-          container.scrollTo({
-            left: Math.max(0, targetScrollLeft),
-            behavior: 'smooth',
-          });
-        }
+        container.scrollTo({
+          left: Math.max(0, targetScrollLeft),
+          behavior: 'smooth',
+        });
       }
     }
   }, [activeId]);
 
   useEffect(() => {
+    centerActiveCard();
     const rafId = requestAnimationFrame(() => {
       centerActiveCard();
     });
+    const timerId = setTimeout(() => {
+      centerActiveCard();
+    }, 120);
 
     const handleResize = () => {
       centerActiveCard();
@@ -88,6 +87,7 @@ export function ChapterFocusCarousel({
     window.addEventListener('resize', handleResize);
     return () => {
       cancelAnimationFrame(rafId);
+      clearTimeout(timerId);
       window.removeEventListener('resize', handleResize);
     };
   }, [centerActiveCard]);
