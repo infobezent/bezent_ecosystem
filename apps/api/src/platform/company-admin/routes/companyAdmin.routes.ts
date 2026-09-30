@@ -129,6 +129,11 @@ companyAdminRouter.get(
   requirePermission('company.roles.read'),
   accessController.listAssignablePermissions,
 );
+companyAdminRouter.get(
+  '/permissions/tree',
+  requirePermission('company.roles.read'),
+  accessController.getPermissionTree,
+);
 
 // Module Management
 companyAdminRouter.get(

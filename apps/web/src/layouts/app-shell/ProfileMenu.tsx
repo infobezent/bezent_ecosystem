@@ -30,9 +30,9 @@ export function ProfileMenu({
   isOpen,
   onClose,
   userInitials,
-  userName = 'Sabin Davis',
-  userEmail = 'sabin.d@bezent.com',
-  userRole = 'Administrator • HRMS',
+  userName = 'User',
+  userEmail = '',
+  userRole = 'Member',
   onMyProfile,
   onAccountSettings,
   onSignOut,
@@ -151,7 +151,7 @@ export function ProfileMenu({
           </span>
           <div className="profile-menu__item-content">
             <span className="profile-menu__item-label">Switch Account</span>
-            <span className="profile-menu__item-desc">Change organization or active role</span>
+            <span className="profile-menu__item-desc">Sign in with a different email identity</span>
           </div>
         </button>
 

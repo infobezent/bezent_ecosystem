@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { BezentIcon, CompanionIcon } from '../../design-system/icons';
 import { Avatar } from '../../design-system/components';
@@ -14,13 +14,10 @@ import {
 import { useTheme } from '../providers/ThemeProvider';
 import { useDevUtilityData } from './devUtilityFixtures';
 import { ProfileMenu } from '../../layouts/app-shell/ProfileMenu';
+import { useOptionalAuth, resolveProfileIdentity } from '../../platform/auth';
 import './StandaloneUtilityLayout.css';
 
 const RAIL_CAPABILITIES = UTILITY_CAPABILITIES.filter((c) => c.placement === 'rail');
-const DEFAULT_INITIALS = 'SD';
-const DEFAULT_NAME = 'Sabin Dani';
-const DEFAULT_EMAIL = 'sabin.dani@bezent.com';
-const DEFAULT_ROLE = 'Platform Lead';
 
 export function StandaloneUtilityLayout() {
   const { resolvedTheme, toggleTheme } = useTheme();
@@ -32,6 +29,57 @@ export function StandaloneUtilityLayout() {
   const [panelOpen, setPanelOpen] = useState(true);
   const [activeDrawerId, setActiveDrawerId] = useState<UtilityCapabilityId | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
+  const auth = useOptionalAuth();
+  const access = auth?.access ?? null;
+  const activeCompany = auth?.activeCompany ?? null;
+  const signOut = auth?.signOut;
+
+  const { userName, userEmail, userInitials, userRole } = useMemo(
+    () => resolveProfileIdentity(access, activeCompany),
+    [access, activeCompany],
+  );
+
+  const handleSignOut = useCallback(async () => {
+    setProfileOpen(false);
+    if (signOut) await signOut();
+    navigate('/login', { replace: true });
+  }, [signOut, navigate]);
+
+  const handleSwitchAccount = useCallback(async () => {
+    setProfileOpen(false);
+    if (signOut) await signOut();
+    navigate('/login', { replace: true });
+  }, [signOut, navigate]);
+
+  const handleMyProfile = useCallback(() => {
+    setProfileOpen(false);
+    if (access?.user.isSuperAdmin && !activeCompany?.essEligible) {
+      navigate('/super-admin/settings');
+      return;
+    }
+    if (activeCompany?.essEligible) {
+      navigate('/ess/profile');
+      return;
+    }
+    if (activeCompany?.roles.some((r) => r.code === 'company_admin')) {
+      navigate('/company-admin/profile');
+      return;
+    }
+    navigate('/hrms/employees');
+  }, [access, activeCompany, navigate]);
+
+  const handleAccountSettings = useCallback(() => {
+    setProfileOpen(false);
+    if (access?.user.isSuperAdmin && !activeCompany) {
+      navigate('/super-admin/settings');
+      return;
+    }
+    if (activeCompany?.roles.some((r) => r.code === 'company_admin')) {
+      navigate('/company-admin/settings');
+      return;
+    }
+    navigate('/hrms/settings');
+  }, [access, activeCompany, navigate]);
 
   // Identify current page capability
   const currentCapabilityId: UtilityCapabilityId = useMemo(() => {
@@ -189,26 +237,20 @@ export function StandaloneUtilityLayout() {
               aria-haspopup="menu"
               onClick={() => setProfileOpen((prev) => !prev)}
             >
-              <Avatar initials={DEFAULT_INITIALS} />
+              <Avatar initials={userInitials} />
             </button>
 
             <ProfileMenu
               isOpen={profileOpen}
               onClose={() => setProfileOpen(false)}
-              userInitials={DEFAULT_INITIALS}
-              userName={DEFAULT_NAME}
-              userEmail={DEFAULT_EMAIL}
-              userRole={DEFAULT_ROLE}
-              onMyProfile={() => {
-                setProfileOpen(false);
-                navigate('/hrms/employees');
-              }}
-              onAccountSettings={() => {
-                setProfileOpen(false);
-                navigate('/hrms/settings');
-              }}
-              onSignOut={() => setProfileOpen(false)}
-              onSwitchAccount={() => setProfileOpen(false)}
+              userInitials={userInitials}
+              userName={userName}
+              userEmail={userEmail}
+              userRole={userRole}
+              onMyProfile={handleMyProfile}
+              onAccountSettings={handleAccountSettings}
+              onSignOut={handleSignOut}
+              onSwitchAccount={handleSwitchAccount}
               onHelp={() => setProfileOpen(false)}
             />
           </div>

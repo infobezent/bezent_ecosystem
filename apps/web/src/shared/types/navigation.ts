@@ -48,8 +48,10 @@ export interface NavDestination {
   /** Show as a Quick Access tile in the launcher. */
   quickAccess?: boolean;
   /**
-   * Stable permission key for future filtering (e.g. `hrms.leave.view`).
-   * Metadata only — nothing evaluates it yet.
+   * Permission key for UI-layer navigation filtering (e.g. `hrms.leave.view`).
+   * `toShellNavItems` / `toShellLauncher` use the caller's `can()` function to
+   * hide destinations the user lacks permission to reach. Backend route guards
+   * remain the authoritative boundary; this is UX convenience only.
    */
   permissionKey?: string;
   children?: readonly NavChild[];

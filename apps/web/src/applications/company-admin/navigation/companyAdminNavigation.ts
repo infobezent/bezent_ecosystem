@@ -120,7 +120,7 @@ export const COMPANY_ADMIN_NAV_DESTINATIONS: readonly NavDestination[] = [
   // Applications
   {
     id: 'modules',
-    label: 'Module Access',
+    label: 'Application Access',
     icon: 'dashboard',
     segment: 'modules',
     subtitle: 'Provisioned Applications',

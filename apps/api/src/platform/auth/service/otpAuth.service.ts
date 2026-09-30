@@ -115,6 +115,12 @@ export class OtpAuthService {
           `It expires in ${OTP_TTL_MINUTES} minutes and can be used once. ` +
           'If you did not try to sign in, you can ignore this email.',
       });
+
+      if (env.nodeEnv !== 'production' && env.email.transport === 'outbox') {
+        console.log(
+          `[auth:dev] Sign-in OTP\nEmail: ${user.email}\nOTP: ${code}\nExpires in: ${OTP_TTL_MINUTES} minutes`,
+        );
+      }
     }
 
     await this.audit.logEvent({

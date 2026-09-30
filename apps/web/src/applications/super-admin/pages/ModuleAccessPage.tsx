@@ -101,7 +101,7 @@ export function ModuleAccessPage() {
   return (
     <Page>
       <PageHeader
-        title="Module Access Management"
+        title="Application Access Management"
         subtitle="Control which business applications (HRMS, CRM, PM) are licensed and active per customer"
       />
 

@@ -2,6 +2,7 @@ import { accessRepository, AccessRepository } from '../repository/access.reposit
 import { moduleService, ModuleService } from '../../modules/service/module.service.js';
 import { AppError, ForbiddenError, NotFoundError } from '../../../app/errors/AppError.js';
 import {
+  expandPermissionKeys,
   findPermission,
   findSystemRole,
   isRoleAssignablePermission,
@@ -117,8 +118,11 @@ export class AccessResolverService {
       }
     }
 
+    // Expand granted permissions to include both canonical keys and aliases for seamless backward-compatibility
+    const allGranted = expandPermissionKeys([...granted]);
+
     // A permission whose business application is not entitled grants nothing.
-    const permissions = [...granted]
+    const permissions = allGranted
       .filter((id) => {
         const definition = findPermission(id);
         if (!definition) return false;

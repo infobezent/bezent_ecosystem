@@ -15,10 +15,12 @@ import {
 import {
   findPermission,
   findSystemRole,
+  getPermissionTree,
   isRoleAssignablePermission,
   PERMISSION_CATALOG,
   PERMISSION_GROUP_LABELS,
   systemRoleIdForCode,
+  type PermissionTreeApplication,
   type SystemRoleCode,
 } from '../catalog/accessCatalog.js';
 import type { Role } from '../../../db/schema.js';
@@ -70,6 +72,14 @@ export class RoleManagementService {
       description: p.description,
       moduleCode: p.moduleCode,
     }));
+  }
+
+  /** Hierarchical permission matrix for dynamic UI rendering (Section 4 RBAC catalog). */
+  getPermissionTree(access: CompanyAccess): PermissionTreeApplication[] {
+    return getPermissionTree({
+      assignableOnly: true,
+      enabledModules: access.enabledModules,
+    });
   }
 
   async listRoles(access: CompanyAccess): Promise<RoleDirectoryEntry[]> {

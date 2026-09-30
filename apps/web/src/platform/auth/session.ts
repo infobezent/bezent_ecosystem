@@ -15,15 +15,22 @@ export const ACTIVE_COMPANY_KEY = 'bezent_active_company_id';
 /** Fired when the API rejects the stored session (expired, revoked, account suspended). */
 export const SESSION_ENDED_EVENT = 'bezent:session-ended';
 
+let inMemoryToken: string | null = null;
+let inMemoryCompanyId: string | null = null;
+
 function read(key: string): string | null {
   try {
-    return typeof localStorage === 'undefined' ? null : localStorage.getItem(key);
+    const val = typeof localStorage === 'undefined' ? null : localStorage.getItem(key);
+    if (val !== null) return val;
+    return key === SESSION_TOKEN_KEY ? inMemoryToken : inMemoryCompanyId;
   } catch {
-    return null;
+    return key === SESSION_TOKEN_KEY ? inMemoryToken : inMemoryCompanyId;
   }
 }
 
 function write(key: string, value: string | null): void {
+  if (key === SESSION_TOKEN_KEY) inMemoryToken = value;
+  if (key === ACTIVE_COMPANY_KEY) inMemoryCompanyId = value;
   try {
     if (typeof localStorage === 'undefined') return;
     if (value === null) localStorage.removeItem(key);

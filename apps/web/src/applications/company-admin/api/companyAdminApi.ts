@@ -167,6 +167,64 @@ export interface RoleDefinition {
   name: string;
   description: string;
   permissions: string[];
+  code?: string;
+  moduleCode?: ModuleCode | null;
+  isSystem?: boolean;
+  status?: 'active' | 'inactive';
+  activeAssignmentCount?: number;
+}
+
+export interface PermissionTreeAction {
+  id: string;
+  action: string;
+  label: string;
+  description: string;
+  scope: string;
+  isSystem: boolean;
+  aliases: string[];
+}
+
+export interface PermissionTreeModule {
+  module: string;
+  label: string;
+  permissions: PermissionTreeAction[];
+}
+
+export interface PermissionTreeApplication {
+  application: string;
+  label: string;
+  moduleCode: ModuleCode | null;
+  modules: PermissionTreeModule[];
+}
+
+export interface CreateCustomRoleInput {
+  name: string;
+  description?: string;
+  moduleCode?: ModuleCode | null;
+  permissions: string[];
+}
+
+export interface UpdateCustomRoleInput {
+  name?: string;
+  description?: string;
+  permissions?: string[];
+}
+
+export interface UserCompanyAccess {
+  userId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  membershipStatus: 'active' | 'inactive' | 'revoked';
+  roles: Array<{
+    id: string;
+    code: string;
+    name: string;
+    isSystem: boolean;
+    moduleCode: ModuleCode | null;
+  }>;
+  effectivePermissions: string[];
+  essEligible: boolean;
 }
 
 export interface CompanyModuleStatus {
@@ -345,6 +403,85 @@ export const companyAdminApi = {
   // 6. Roles & Permissions Catalog
   async getRoles(companyId?: string): Promise<RoleDefinition[]> {
     return request<RoleDefinition[]>('/roles', {}, companyId);
+  },
+
+  async getPermissionTree(companyId?: string): Promise<PermissionTreeApplication[]> {
+    return request<PermissionTreeApplication[]>('/permissions/tree', {}, companyId);
+  },
+
+  async listAssignablePermissions(
+    companyId?: string,
+  ): Promise<Array<{ id: string; label: string; description: string; moduleCode: string | null }>> {
+    return request('/permissions', {}, companyId);
+  },
+
+  async createCustomRole(
+    input: CreateCustomRoleInput,
+    companyId?: string,
+  ): Promise<RoleDefinition> {
+    return request<RoleDefinition>(
+      '/roles',
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+      companyId,
+    );
+  },
+
+  async updateCustomRole(
+    roleId: string,
+    input: UpdateCustomRoleInput,
+    companyId?: string,
+  ): Promise<RoleDefinition> {
+    return request<RoleDefinition>(
+      `/roles/${roleId}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(input),
+      },
+      companyId,
+    );
+  },
+
+  async setCustomRoleStatus(
+    roleId: string,
+    status: 'active' | 'inactive',
+    companyId?: string,
+  ): Promise<RoleDefinition> {
+    return request<RoleDefinition>(
+      `/roles/${roleId}/status`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      },
+      companyId,
+    );
+  },
+
+  async getUserAccess(userId: string, companyId?: string): Promise<UserCompanyAccess> {
+    return request<UserCompanyAccess>(`/users/${userId}/access`, {}, companyId);
+  },
+
+  async assignRole(userId: string, roleId: string, companyId?: string): Promise<UserCompanyAccess> {
+    return request<UserCompanyAccess>(
+      `/users/${userId}/roles`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ roleId }),
+      },
+      companyId,
+    );
+  },
+
+  async revokeRole(userId: string, roleId: string, companyId?: string): Promise<UserCompanyAccess> {
+    return request<UserCompanyAccess>(
+      `/users/${userId}/roles/${roleId}`,
+      {
+        method: 'DELETE',
+      },
+      companyId,
+    );
   },
 
   // 7. Modules

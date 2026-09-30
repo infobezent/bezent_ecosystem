@@ -1,4 +1,4 @@
-import { Navigate, type RouteObject } from 'react-router-dom';
+import { Navigate, Outlet, useLocation, type RouteObject } from 'react-router-dom';
 import { CompanyAdminDashboardPage } from '../pages/CompanyAdminDashboardPage';
 import { CompanyProfilePage } from '../pages/CompanyProfilePage';
 import { CompanyOrganizationPage } from '../pages/CompanyOrganizationPage';
@@ -9,27 +9,70 @@ import { CompanyRolesPage } from '../pages/CompanyRolesPage';
 import { CompanyModulesPage } from '../pages/CompanyModulesPage';
 import { CompanyAuditLogsPage } from '../pages/CompanyAuditLogsPage';
 import { CompanySettingsPage } from '../pages/CompanySettingsPage';
-import { useSuperAdminAuth } from '../../super-admin/context/SuperAdminAuthContext';
-import { useCompanyAdmin } from '../context/CompanyAdminContext';
+import { useAuth } from '../../../platform/auth';
+import { landingPath } from '../../../platform/auth/landing';
 import { LoadingState } from '../../../design-system/components';
 
 export const COMPANY_ADMIN_BASE_PATH = '/company-admin';
 export const COMPANY_ADMIN_DEFAULT_DESTINATION_ID = 'dashboard';
 
-function RequireCompanyAdmin({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading: authLoading } = useSuperAdminAuth();
-  const { isCompanyAdmin, isLoadingCompanies } = useCompanyAdmin();
+/**
+ * Company Admin workspace guard (layout route).
+ * Requires the user to hold Company Admin authorization in the active company (or platform oversight).
+ * Unauthorized users are redirected to their authorized workspace immediately,
+ * BEFORE the Company Admin shell or navigation can render.
+ */
+export function RequireCompanyAdminWorkspace() {
+  const { status, access, activeCompany } = useAuth();
+  const location = useLocation();
 
-  if (authLoading || isLoadingCompanies) {
-    return <LoadingState label="Verifying company administrator authorization..." />;
+  if (status === 'loading') {
+    return <LoadingState label="Verifying company administrator authorization..." fill />;
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  if (status !== 'authenticated' || !access) {
+    const next = encodeURIComponent(`${location.pathname}${location.search}`);
+    return <Navigate to={`/login?next=${next}`} replace />;
   }
+
+  const isCompanyAdmin = Boolean(
+    access.user.isSuperAdmin ||
+    activeCompany?.workspaces.includes('company_admin') ||
+    activeCompany?.roles.some((r) => r.code === 'company_admin') ||
+    activeCompany?.isPlatformOversight ||
+    access.companies.some((c) => c.workspaces.includes('company_admin')),
+  );
 
   if (!isCompanyAdmin) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={landingPath(access)} replace />;
+  }
+
+  return <Outlet />;
+}
+
+function RequireCompanyAdmin({ children }: { children: React.ReactNode }) {
+  const { status, access, activeCompany } = useAuth();
+  const location = useLocation();
+
+  if (status === 'loading') {
+    return <LoadingState label="Verifying company administrator authorization..." fill />;
+  }
+
+  if (status !== 'authenticated' || !access) {
+    const next = encodeURIComponent(`${location.pathname}${location.search}`);
+    return <Navigate to={`/login?next=${next}`} replace />;
+  }
+
+  const isCompanyAdmin = Boolean(
+    access.user.isSuperAdmin ||
+    activeCompany?.workspaces.includes('company_admin') ||
+    activeCompany?.roles.some((r) => r.code === 'company_admin') ||
+    activeCompany?.isPlatformOversight ||
+    access.companies.some((c) => c.workspaces.includes('company_admin')),
+  );
+
+  if (!isCompanyAdmin) {
+    return <Navigate to={landingPath(access)} replace />;
   }
 
   return <>{children}</>;
@@ -40,6 +83,7 @@ const basePath = COMPANY_ADMIN_BASE_PATH.replace(/^\//, '');
 export const companyAdminRoutes: RouteObject[] = [
   {
     path: basePath,
+    element: <RequireCompanyAdminWorkspace />,
     children: [
       {
         index: true,
