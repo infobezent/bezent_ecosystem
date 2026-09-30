@@ -121,12 +121,14 @@
 .bezent-focus-carousel__track {
   display: flex;
   align-items: flex-end;
-  justify-content: center;
-  gap: 16px;
+  justify-content: space-between;
+  gap: 24px;
   position: relative;
   margin: 0 auto;
   padding: 0 16px;
-  width: max-content;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* ── Chapter Focus Card (Browser Tab Primitive) ── */
