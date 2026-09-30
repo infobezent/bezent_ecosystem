@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Button,
   Card,
@@ -200,9 +201,52 @@ export function EmployeeRegistration({
       return [...REGISTRATION_SECTIONS];
     }, [registrationConfig, customCtx]);
 
-  const [activeSection, setActiveSection] = useState<RegistrationSectionId>(
-    initialDraft ? initialDraft.activeSection : 'general',
+  const [searchParams, setSearchParams] = useSearchParams();
+  const contentContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const urlChapter = searchParams.get('chapter') || searchParams.get('section');
+  const initialSection = (
+    urlChapter && allSections.some((s) => s.id === urlChapter)
+      ? urlChapter
+      : initialDraft
+        ? initialDraft.activeSection
+        : 'general'
+  ) as RegistrationSectionId;
+
+  const [activeSection, setActiveSection] = useState<RegistrationSectionId>(initialSection);
+
+  const handleSelectChapter = useCallback(
+    (id: string) => {
+      setActiveSection(id as RegistrationSectionId);
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.set('chapter', id);
+          return next;
+        },
+        { replace: true },
+      );
+      if (contentContainerRef.current) {
+        contentContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    },
+    [setSearchParams],
   );
+
+  // Sync when searchParams change externally or via browser back/forward
+  useEffect(() => {
+    const currentParam = searchParams.get('chapter') || searchParams.get('section');
+    if (
+      currentParam &&
+      allSections.some((s) => s.id === currentParam) &&
+      currentParam !== activeSection
+    ) {
+      setActiveSection(currentParam as RegistrationSectionId);
+      if (contentContainerRef.current) {
+        contentContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+  }, [searchParams, allSections, activeSection]);
 
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, unknown>>({});
 
@@ -721,7 +765,7 @@ export function EmployeeRegistration({
   const handleBack = () => {
     const currentIndex = allSections.findIndex((s) => s.id === activeSection);
     if (currentIndex > 0) {
-      setActiveSection(allSections[currentIndex - 1]!.id);
+      handleSelectChapter(allSections[currentIndex - 1]!.id);
     }
   };
 
@@ -734,7 +778,7 @@ export function EmployeeRegistration({
     }
     const currentIndex = allSections.findIndex((s) => s.id === activeSection);
     if (currentIndex < allSections.length - 1) {
-      setActiveSection(allSections[currentIndex + 1]!.id);
+      handleSelectChapter(allSections[currentIndex + 1]!.id);
     }
   };
 
@@ -898,12 +942,15 @@ export function EmployeeRegistration({
       <ChapterFocusCarousel
         chapters={chapterSteps}
         activeId={activeSection}
-        onSelectChapter={(id) => setActiveSection(id)}
+        onSelectChapter={handleSelectChapter}
         kickerLabel="REGISTRATION CHAPTERS"
       />
 
       {/* Region C: Scrollable Active Tab Content */}
-      <div className="bezent-modal__body employee-registration-workspace-content">
+      <div
+        ref={contentContainerRef}
+        className="bezent-modal__body employee-registration-workspace-content"
+      >
         <Stack gap="xl">
           {/* Toast Alert Banner */}
           {toastMsg && (
@@ -1367,7 +1414,7 @@ export function EmployeeRegistration({
           ) : activeSection === 'review' ? (
             <ReviewSection
               data={reviewData}
-              onEditSection={(sectionId) => setActiveSection(sectionId)}
+              onEditSection={handleSelectChapter}
               onDeleteFamilyMember={handleDeleteFamilyMember}
               onDeleteNominee={handleDeleteNominee}
               onDeleteTask={handleDeleteTask}
