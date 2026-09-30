@@ -7,7 +7,7 @@
 .bezent-focus-carousel {
   position: relative;
   width: 100%;
-  background: var(--bg-header-shelf, #c2e7ff);
+  background: var(--bg-surface-secondary, #f0f4f9);
   border-top: 1px solid var(--border-subtle, #e7ebf0);
   border-bottom: none;
   padding: 12px 0 0;
