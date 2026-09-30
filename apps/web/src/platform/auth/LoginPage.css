@@ -1,7 +1,8 @@
 /*
- * BEZENT universal sign-in page (platform/auth).
- * Immersive ambient blue background + complete, recognizable outlined BEZENT wordmark
- * + translucent glassmorphism login card.
+ * BEZENT Universal Sign-In Page (platform/auth).
+ * Ultra-Sleek Obsidian & Electric Cyan Glass Aesthetic.
+ * Features volumetric ambient lighting, architectural wordmark backdrop,
+ * precision frosted sapphire/obsidian glassmorphic card, and glowing controls.
  */
 
 .bezent-login {
@@ -13,13 +14,13 @@
   justify-content: center;
   padding: 32px 20px;
   overflow: hidden;
-  background-color: #061328;
+  background-color: #030814;
   color: var(--text-primary);
   font-family: var(--font-family-base);
   box-sizing: border-box;
 }
 
-/* ── Full-Screen Immersive Ambient Blue Background ── */
+/* ── Full-Screen Volumetric Ambient Atmosphere ── */
 
 .bezent-login-bg {
   position: absolute;
@@ -30,10 +31,10 @@
   pointer-events: none;
   z-index: 0;
   background:
-    radial-gradient(circle at 20% 25%, rgba(2, 132, 199, 0.38) 0%, transparent 45%),
-    radial-gradient(circle at 80% 75%, rgba(37, 99, 235, 0.32) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.12) 0%, transparent 65%),
-    linear-gradient(135deg, #040e1e 0%, #061733 40%, #092247 70%, #051226 100%);
+    radial-gradient(circle at 20% 25%, rgba(2, 132, 199, 0.4) 0%, transparent 45%),
+    radial-gradient(circle at 80% 75%, rgba(37, 99, 235, 0.35) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.14) 0%, transparent 65%),
+    linear-gradient(135deg, #020611 0%, #051329 40%, #081e3d 70%, #030a17 100%);
 }
 
 .bezent-login-bg__ambient-glow {
@@ -41,7 +42,7 @@
   border-radius: 50%;
   filter: blur(90px);
   pointer-events: none;
-  opacity: 0.6;
+  opacity: 0.65;
   will-change: transform, opacity;
   animation: bezentAmbientPulse 18s ease-in-out infinite alternate;
 }
@@ -55,8 +56,8 @@
   max-height: 650px;
   background: radial-gradient(
     circle,
-    rgba(56, 189, 248, 0.4) 0%,
-    rgba(2, 132, 199, 0.12) 60%,
+    rgba(56, 189, 248, 0.42) 0%,
+    rgba(2, 132, 199, 0.14) 60%,
     transparent 75%
   );
 }
@@ -70,8 +71,8 @@
   max-height: 700px;
   background: radial-gradient(
     circle,
-    rgba(37, 99, 235, 0.35) 0%,
-    rgba(29, 78, 216, 0.12) 60%,
+    rgba(37, 99, 235, 0.38) 0%,
+    rgba(29, 78, 216, 0.14) 60%,
     transparent 75%
   );
   animation-duration: 22s;
@@ -85,12 +86,12 @@
   height: 45vw;
   max-width: 550px;
   max-height: 550px;
-  background: radial-gradient(circle, rgba(14, 165, 233, 0.2) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.22) 0%, transparent 70%);
   animation-duration: 16s;
   animation-delay: -8s;
 }
 
-/* ── Faded Architectural Outlined BEZENT Background Wordmark ── */
+/* ── Architectural Outlined BEZENT Background Wordmark ── */
 
 .bezent-login-bg__wordmark-wrap {
   position: absolute;
@@ -108,7 +109,7 @@
   width: min(98vw, 1680px);
   height: auto;
   transform: translateY(-210px);
-  opacity: 0.9;
+  opacity: 0.92;
   will-change: transform, opacity;
   animation: bezentWordmarkSubtleDrift 28s ease-in-out infinite alternate;
 }
@@ -128,15 +129,15 @@
 @keyframes bezentWordmarkSubtleDrift {
   0% {
     transform: translateY(-210px) scale(1);
-    opacity: 0.85;
+    opacity: 0.88;
   }
   50% {
     transform: translateY(-218px) scale(1.008);
-    opacity: 0.95;
+    opacity: 0.98;
   }
   100% {
     transform: translateY(-204px) scale(0.995);
-    opacity: 0.88;
+    opacity: 0.9;
   }
 }
 
@@ -144,40 +145,39 @@
   position: absolute;
   inset: 0;
   z-index: 3;
-  background: radial-gradient(circle at center, transparent 38%, rgba(4, 14, 30, 0.42) 100%);
+  background: radial-gradient(circle at center, transparent 35%, rgba(2, 6, 18, 0.5) 100%);
   pointer-events: none;
 }
 
-/* Keyframes */
 @keyframes bezentAmbientPulse {
   0% {
     transform: scale(0.96) translate(0, 0);
-    opacity: 0.5;
+    opacity: 0.55;
   }
   50% {
     transform: scale(1.06) translate(2%, 2%);
-    opacity: 0.7;
+    opacity: 0.75;
   }
   100% {
     transform: scale(1) translate(-2%, -2%);
-    opacity: 0.55;
+    opacity: 0.6;
   }
 }
 
-/* ── Centered Glassmorphism Login Card (Reference 2 Treatment) ── */
+/* ── Centered Glassmorphism Card (Ultra-Sleek Obsidian & Electric Cyan Glass) ── */
 
 .bezent-login__panel {
   position: relative;
   z-index: 10;
   width: 100%;
-  max-width: 620px;
+  max-width: 540px;
   animation: bezentCardEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes bezentCardEntrance {
   0% {
     opacity: 0;
-    transform: translateY(18px) scale(0.98);
+    transform: translateY(20px) scale(0.97);
   }
   100% {
     opacity: 1;
@@ -187,17 +187,17 @@
 
 .bezent-login__glass-card {
   position: relative;
-  padding: 58px 52px;
-  border-radius: 34px;
-  background: rgba(210, 230, 255, 0.48);
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(40px) saturate(200%) brightness(105%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(105%);
+  padding: 50px 44px;
+  border-radius: 28px;
+  background: linear-gradient(155deg, rgba(16, 36, 68, 0.72) 0%, rgba(8, 20, 42, 0.88) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(48px) saturate(200%);
+  -webkit-backdrop-filter: blur(48px) saturate(200%);
   box-shadow:
-    0 35px 80px -15px rgba(2, 20, 60, 0.42),
-    0 0 0 1px rgba(255, 255, 255, 0.5) inset,
-    0 2px 6px rgba(255, 255, 255, 0.85) inset,
-    0 -2px 6px rgba(186, 214, 245, 0.25) inset;
+    0 40px 100px -20px rgba(0, 0, 0, 0.75),
+    0 0 45px -10px rgba(14, 165, 233, 0.28),
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.35),
+    inset 0 -1px 2px rgba(14, 165, 233, 0.15);
   transition:
     box-shadow 0.3s ease,
     border-color 0.3s ease;
@@ -207,7 +207,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .bezent-login__mark {
@@ -217,121 +217,99 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(224, 242, 254, 0.9) 0%, rgba(186, 230, 253, 0.8) 100%);
-  color: #0284c7;
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(12px);
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.28) 0%, rgba(2, 132, 199, 0.12) 100%);
+  color: #38bdf8;
+  border: 1.5px solid rgba(56, 189, 248, 0.55);
+  backdrop-filter: blur(14px);
   box-shadow:
-    0 8px 24px -4px rgba(14, 165, 233, 0.35),
-    0 0 0 4px rgba(255, 255, 255, 0.6);
-  transition: transform 0.25s ease;
+    0 0 28px rgba(14, 165, 233, 0.45),
+    0 0 0 4px rgba(56, 189, 248, 0.12),
+    inset 0 1px 2px rgba(255, 255, 255, 0.5);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .bezent-login__mark:hover {
-  transform: scale(1.05);
+  transform: scale(1.06);
+  box-shadow:
+    0 0 36px rgba(14, 165, 233, 0.65),
+    0 0 0 6px rgba(56, 189, 248, 0.18),
+    inset 0 1px 2px rgba(255, 255, 255, 0.7);
 }
 
 .bezent-login__title {
   margin: 6px 0 0;
-  font-size: 30px;
-  font-weight: 700;
+  font-size: 29px;
+  font-weight: 800;
   letter-spacing: -0.025em;
   text-align: center;
-  color: #0a192f;
+  color: #ffffff;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
 }
 
 .bezent-login__subtitle {
   margin: 4px 0 0;
-  color: #334155;
-  font-size: 16px;
+  color: #94a3b8;
+  font-size: 15px;
   line-height: 1.55;
   text-align: center;
+  font-weight: 400;
   overflow-wrap: anywhere;
 }
 
-/* ── Refined Input Surface inside Glass Card ── */
+/* ── Work Email Frosted Input Box ── */
 
-.bezent-login__glass-card .bezent-input {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  border-radius: 14px;
+.bezent-login__glass-card .bezent-input-wrapper {
+  gap: 8px;
+}
+
+.bezent-login__glass-card .bezent-input-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin-bottom: 2px;
+}
+
+.bezent-login__glass-card .bezent-input-box {
   height: 54px;
-  padding: 0 18px;
-  font-size: 16.5px;
-  color: #0f172a;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-  transition: all 0.2s ease;
+  border-radius: 14px;
+  background: rgba(13, 27, 50, 0.7);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.bezent-login__glass-card .bezent-input:hover:not(:disabled) {
-  background: #ffffff;
-  border-color: #94a3b8;
+.bezent-login__glass-card .bezent-input-box:hover:not(.is-disabled) {
+  background: rgba(18, 36, 68, 0.85);
+  border-color: rgba(56, 189, 248, 0.45);
 }
 
-.bezent-login__glass-card .bezent-input:focus {
-  background: #ffffff;
-  border-color: #0284c7;
+.bezent-login__glass-card .bezent-input-box:focus-within {
+  background: rgba(18, 36, 68, 0.95);
+  border-color: #38bdf8;
   box-shadow:
-    0 0 0 3.5px rgba(2, 132, 199, 0.22),
-    0 2px 6px rgba(0, 0, 0, 0.04);
-  outline: none;
+    0 0 0 4px rgba(56, 189, 248, 0.25),
+    0 4px 20px rgba(14, 165, 233, 0.25),
+    inset 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-.bezent-login__glass-card .bezent-input__label {
-  font-size: 15px;
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 8px;
-}
-
-/* ── Elegant Deep Blue Action Button ── */
-
-.bezent-login__glass-card .bezent-btn--variant-primary {
-  background: linear-gradient(180deg, #0a2144 0%, #051329 100%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 14px;
-  height: 54px;
-  font-size: 16.5px;
-  font-weight: 600;
+.bezent-login__glass-card .bezent-input-field {
+  font-size: 16px;
   color: #ffffff;
-  box-shadow:
-    0 10px 24px -6px rgba(10, 33, 68, 0.45),
-    0 1px 2px rgba(255, 255, 255, 0.25) inset;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  background: transparent;
+  padding: 0 18px;
 }
 
-.bezent-login__glass-card .bezent-btn--variant-primary:hover:not(:disabled) {
-  background: linear-gradient(180deg, #0e2e5e 0%, #081d3d 100%);
-  transform: translateY(-1.5px);
-  box-shadow:
-    0 14px 28px -6px rgba(10, 33, 68, 0.55),
-    0 1px 2px rgba(255, 255, 255, 0.35) inset;
+.bezent-login__glass-card .bezent-input-field::placeholder {
+  color: rgba(148, 163, 184, 0.55);
 }
 
-.bezent-login__glass-card .bezent-btn--variant-primary:active:not(:disabled) {
-  transform: translateY(0.5px);
-  box-shadow: 0 6px 16px -4px rgba(10, 33, 68, 0.4);
-}
-
-.bezent-login__glass-card .bezent-btn--variant-text {
-  color: #0369a1;
+.bezent-login__glass-card .bezent-input-feedback.is-error {
+  color: #f87171;
+  font-size: 13px;
   font-weight: 500;
-}
-
-.bezent-login__glass-card .bezent-btn--variant-text:hover:not(:disabled) {
-  color: #0284c7;
-  background: rgba(2, 132, 199, 0.08);
-}
-
-.bezent-login__footnote {
-  margin: 4px 0 0;
-  color: #475569;
-  font-size: 13.5px;
-  line-height: 1.5;
-  text-align: center;
-  overflow-wrap: anywhere;
+  margin-top: 4px;
 }
 
 /* ── 6-Digit Individual OTP Input Boxes ── */
@@ -344,14 +322,14 @@
 }
 
 .bezent-login__otp-label {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
-  color: #1e293b;
+  color: #e2e8f0;
 }
 
 .bezent-login__otp-group {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   justify-content: space-between;
   align-items: center;
   width: 100%;
@@ -360,55 +338,55 @@
 .bezent-login__otp-digit {
   flex: 1;
   min-width: 0;
-  height: 60px;
+  height: 62px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1.5px solid rgba(255, 255, 255, 0.95);
-  font-size: 24px;
+  background: rgba(13, 27, 50, 0.7);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  font-size: 26px;
   font-weight: 700;
   text-align: center;
-  color: #0a192f;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  color: #ffffff;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   outline: none;
   box-sizing: border-box;
 }
 
 .bezent-login__otp-digit:hover:not(:disabled) {
-  background: #ffffff;
-  border-color: #94a3b8;
+  background: rgba(18, 36, 68, 0.85);
+  border-color: rgba(56, 189, 248, 0.45);
 }
 
 .bezent-login__otp-digit:focus {
-  background: #ffffff;
-  border-color: #0284c7;
+  background: rgba(18, 36, 68, 0.95);
+  border-color: #38bdf8;
   box-shadow:
-    0 0 0 3.5px rgba(2, 132, 199, 0.22),
-    0 4px 12px rgba(2, 132, 199, 0.12);
+    0 0 0 4px rgba(56, 189, 248, 0.28),
+    0 4px 18px rgba(14, 165, 233, 0.25);
   transform: translateY(-2px);
 }
 
 .bezent-login__otp-digit--filled {
-  border-color: rgba(2, 132, 199, 0.5);
-  background: #ffffff;
+  border-color: rgba(56, 189, 248, 0.65);
+  background: rgba(14, 165, 233, 0.16);
 }
 
 .bezent-login__otp-digit--error {
   border-color: #ef4444;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
 }
 
 .bezent-login__otp-digit:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
 .bezent-login__otp-helper {
   margin: 4px 0 0;
   font-size: 13px;
-  color: #475569;
+  color: #94a3b8;
   line-height: 1.4;
 }
 
@@ -416,84 +394,75 @@
   margin: 4px 0 0;
   font-size: 13px;
   font-weight: 500;
-  color: #dc2626;
+  color: #f87171;
   line-height: 1.4;
 }
 
-/* ── Dark Mode Adaptability ── */
+/* ── Glowing Radiant Action Button ── */
 
-[data-theme='dark'] .bezent-login {
-  background-color: #030a16;
-}
-
-[data-theme='dark'] .bezent-login__glass-card {
-  background: linear-gradient(145deg, rgba(15, 23, 42, 0.78) 0%, rgba(30, 41, 59, 0.52) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+.bezent-login__glass-card .bezent-btn--primary {
+  height: 54px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #0284c7 0%, #2563eb 55%, #1d4ed8 100%);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  font-size: 16.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   box-shadow:
-    0 30px 80px -15px rgba(0, 0, 0, 0.7),
-    0 0 0 1px rgba(56, 189, 248, 0.25) inset,
-    0 1px 2px rgba(255, 255, 255, 0.1) inset;
+    0 10px 28px -4px rgba(37, 99, 235, 0.65),
+    0 0 24px rgba(14, 165, 233, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.45);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-[data-theme='dark'] .bezent-login__title {
-  color: #f8fafc;
+.bezent-login__glass-card .bezent-btn--primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 55%, #2563eb 100%);
+  box-shadow:
+    0 14px 34px -4px rgba(37, 99, 235, 0.8),
+    0 0 32px rgba(14, 165, 233, 0.55),
+    inset 0 1px 2px rgba(255, 255, 255, 0.6);
 }
 
-[data-theme='dark'] .bezent-login__subtitle {
-  color: #94a3b8;
+.bezent-login__glass-card .bezent-btn--primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.5);
 }
 
-[data-theme='dark'] .bezent-login__footnote {
+.bezent-login__glass-card .bezent-btn--primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ── Refined Secondary Action Links ── */
+
+.bezent-login__glass-card .bezent-btn--text {
+  color: #7dd3fc;
+  background: rgba(56, 189, 248, 0.08);
+  border-radius: 10px;
+  padding: 7px 14px;
+  font-size: 13.5px;
+  font-weight: 500;
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  transition: all 0.2s ease;
+}
+
+.bezent-login__glass-card .bezent-btn--text:hover:not(:disabled) {
+  color: #ffffff;
+  background: rgba(56, 189, 248, 0.2);
+  border-color: rgba(56, 189, 248, 0.45);
+}
+
+.bezent-login__footnote {
+  margin: 4px 0 0;
   color: #64748b;
-}
-
-[data-theme='dark'] .bezent-login__glass-card .bezent-input {
-  background: rgba(15, 23, 42, 0.85);
-  border-color: rgba(51, 65, 85, 0.9);
-  color: #f8fafc;
-}
-
-[data-theme='dark'] .bezent-login__glass-card .bezent-input__label {
-  color: #cbd5e1;
-}
-
-[data-theme='dark'] .bezent-login__otp-label {
-  color: #cbd5e1;
-}
-
-[data-theme='dark'] .bezent-login__otp-digit {
-  background: rgba(15, 23, 42, 0.85);
-  border-color: rgba(51, 65, 85, 0.9);
-  color: #f8fafc;
-}
-
-[data-theme='dark'] .bezent-login__otp-digit:hover:not(:disabled) {
-  background: rgba(30, 41, 59, 0.95);
-  border-color: #64748b;
-}
-
-[data-theme='dark'] .bezent-login__otp-digit:focus {
-  background: rgba(30, 41, 59, 0.95);
-  border-color: #38bdf8;
-  box-shadow:
-    0 0 0 3.5px rgba(56, 189, 248, 0.25),
-    0 4px 12px rgba(56, 189, 248, 0.15);
-}
-
-[data-theme='dark'] .bezent-login__otp-digit--filled {
-  border-color: rgba(56, 189, 248, 0.6);
-  background: rgba(30, 41, 59, 0.95);
-}
-
-[data-theme='dark'] .bezent-login__otp-helper {
-  color: #94a3b8;
-}
-
-[data-theme='dark'] .bezent-login__glass-card .bezent-btn--variant-primary {
-  background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
-  box-shadow:
-    0 10px 24px -6px rgba(2, 132, 199, 0.5),
-    0 1px 2px rgba(255, 255, 255, 0.3) inset;
+  font-size: 13.5px;
+  line-height: 1.5;
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 
 /* ── Mobile & Small Screen Responsive Breakpoints ── */
@@ -511,16 +480,26 @@
   }
 
   .bezent-login__glass-card {
-    padding: 32px 22px;
+    padding: 34px 22px;
     border-radius: 22px;
   }
 
   .bezent-login__title {
-    font-size: 22px;
+    font-size: 23px;
   }
 
   .bezent-login__subtitle {
     font-size: 13.5px;
+  }
+
+  .bezent-login__otp-group {
+    gap: 8px;
+  }
+
+  .bezent-login__otp-digit {
+    height: 52px;
+    font-size: 22px;
+    border-radius: 10px;
   }
 
   .bezent-login-bg__wordmark-svg {
