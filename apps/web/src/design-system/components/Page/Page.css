@@ -241,9 +241,9 @@
 .bezent-btn-draft {
   height: 36px;
   padding: 0 16px;
-  background-color: var(--bg-surface, #ffffff);
-  color: var(--brand-primary, #041e49);
-  border: 1px solid var(--border-default, #dde3ea);
+  background-color: var(--bezent-btn-sec-bg, #c2e7ff);
+  color: var(--bezent-btn-sec-text, #071e49);
+  border: 1px solid transparent;
   border-radius: var(--radius-md, 8px);
   font-size: 13px;
   font-weight: 600;
@@ -256,9 +256,9 @@
 }
 
 .bezent-btn-draft:hover {
-  background-color: var(--bg-surface-secondary, #f0f4f9);
-  border-color: var(--border-focus, #1a73e8);
-  color: var(--brand-primary, #041e49);
+  background-color: var(--bezent-btn-sec-hover, #a8dbfc);
+  border-color: transparent;
+  color: var(--bezent-btn-sec-text, #071e49);
 }
 
 .bezent-btn-cancel {
