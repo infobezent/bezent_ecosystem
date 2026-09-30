@@ -895,7 +895,6 @@ export function EmployeeRegistration({
       {/* Region A: Workspace Header */}
       <div className="bezent-modal__header bezent-modal__header--brand">
         <PageHeader
-          align="center"
           title="Employee Registration"
           actions={
             <Inline gap="md" align="center">
