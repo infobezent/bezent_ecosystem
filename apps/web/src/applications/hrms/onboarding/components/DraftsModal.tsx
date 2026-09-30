@@ -66,6 +66,8 @@ export function DraftsModal({
       <Stack gap="md">
         {drafts.length === 0 ? (
           <EmptyState
+            size="compact"
+            variant="onboarding"
             title="No Saved Drafts"
             description="When HR saves an incomplete employee registration using Save Draft, it will appear here for seamless continuation."
           />

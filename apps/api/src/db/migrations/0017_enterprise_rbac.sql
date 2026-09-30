@@ -66,7 +66,7 @@ INSERT IGNORE INTO `roles` (`id`, `tenant_id`, `company_id`, `code`, `name`, `de
 -- Backfill: every existing membership role becomes a role assignment in the same company.
 INSERT IGNORE INTO `role_assignments` (`id`, `user_id`, `role_id`, `tenant_id`, `company_id`, `status`)
 SELECT
-  CONCAT('ra_', MD5(`m`.`id`)),
+  CONCAT('ra_', `m`.`id`),
   `m`.`user_id`,
   CONCAT('role_sys_', `m`.`role`),
   `m`.`tenant_id`,

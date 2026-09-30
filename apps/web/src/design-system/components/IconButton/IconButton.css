@@ -22,7 +22,9 @@
   cursor: pointer;
   padding: 0;
   outline: none;
-  transition: background-color 0.14s ease;
+  transition:
+    background-color 0.16s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.12s cubic-bezier(0.16, 1, 0.3, 1);
   color: inherit;
 }
 
@@ -34,6 +36,11 @@
 
 .bezent-icon-btn:hover:not(:disabled) {
   background: var(--top-utility-hover, var(--nav-hover));
+  transform: scale(1.06);
+}
+
+.bezent-icon-btn:active:not(:disabled) {
+  transform: scale(0.94);
 }
 
 .bezent-icon-btn.is-active {
@@ -52,18 +59,24 @@
   border-radius: 50%;
   background: var(--primary, #d3e3fd);
   color: var(--nav-label-active, #041e49);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
   transition:
-    background-color 0.14s ease,
-    transform 0.08s ease;
+    background-color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.12s ease;
 }
 
 .bezent-icon-btn--solid:hover:not(:disabled) {
   background: #c2e7ff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px) scale(1.04);
 }
 
 .bezent-icon-btn--solid:active:not(:disabled) {
   background: #b3defa;
+  transform: scale(0.96);
 }
 
 .bezent-icon-btn:focus-visible {

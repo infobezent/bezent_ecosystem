@@ -5,10 +5,11 @@
   align-items: center;
   gap: var(--space-1, 4px);
   font-family: var(--font-family-base, 'Google Sans', sans-serif);
-  font-weight: var(--font-weight-medium, 500);
+  font-weight: 600;
   color: var(--text-secondary, #444746);
   cursor: default;
   white-space: nowrap;
+  letter-spacing: -0.005em;
   transition: color var(--motion-duration-fast, 120ms) var(--motion-easing-default, ease);
 }
 

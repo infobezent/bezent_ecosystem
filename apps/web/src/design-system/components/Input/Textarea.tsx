@@ -1,4 +1,5 @@
 import { forwardRef, type TextareaHTMLAttributes } from 'react';
+import type { InputSize } from './Input';
 import './Input.css';
 
 export interface TextareaProps extends Omit<
@@ -8,6 +9,7 @@ export interface TextareaProps extends Omit<
   label?: string;
   helperText?: string;
   error?: string;
+  size?: InputSize;
   className?: string;
 }
 
@@ -15,7 +17,7 @@ export interface TextareaProps extends Omit<
  * Standard BEZENT multi-line textarea with label and validation states.
  */
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textarea(
-  { label, helperText, error, id, disabled, className, ...rest },
+  { label, helperText, error, size = 'md', id, disabled, className, ...rest },
   ref,
 ) {
   const inputId =
@@ -23,7 +25,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
 
   return (
     <div
-      className={`bezent-input-wrapper ${error ? 'has-error' : ''} ${disabled ? 'is-disabled' : ''} ${className || ''}`.trim()}
+      className={`bezent-input-wrapper bezent-input-wrapper--${size} ${error ? 'has-error' : ''} ${disabled ? 'is-disabled' : ''} ${className || ''}`.trim()}
     >
       {label && (
         <label htmlFor={inputId} className="bezent-input-label">

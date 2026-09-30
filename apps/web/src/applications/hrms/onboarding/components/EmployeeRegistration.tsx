@@ -851,6 +851,7 @@ export function EmployeeRegistration({
       {/* Region A: Workspace Header */}
       <div className="bezent-modal__header">
         <PageHeader
+          align="center"
           title="Employee Registration"
           subtitle="Add and manage new employee information"
           breadcrumbs={

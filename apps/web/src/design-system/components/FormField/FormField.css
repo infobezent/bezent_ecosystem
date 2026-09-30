@@ -77,11 +77,19 @@
 
 /* Helper / error text */
 .bezent-form-field__helper {
-  margin: 0;
-  font-family: var(--font-sans);
-  font-size: var(--font-size-xs);
-  line-height: var(--line-height-normal);
-  color: var(--color-text-tertiary);
+  margin: 4px 0 0 0;
+  font-family: var(
+    --font-family-base,
+    'Google Sans',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif
+  );
+  font-size: var(--form-font-size-hint, 12px);
+  line-height: var(--line-height-normal, 1.4);
+  color: var(--text-muted, #747775);
 }
 
 .bezent-form-field--horizontal > .bezent-form-field__helper {
@@ -111,7 +119,7 @@
 
 /* Dark mode */
 [data-theme='dark'] .bezent-form-field__helper {
-  color: var(--color-text-tertiary);
+  color: var(--text-muted, #8e918f);
 }
 
 [data-theme='dark'] .bezent-form-field__helper--error {

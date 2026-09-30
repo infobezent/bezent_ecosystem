@@ -6,12 +6,15 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 14px 18px;
   border-radius: 12px;
   border: 1px solid transparent;
   font-size: 13px;
-  line-height: 1.4;
+  line-height: 1.45;
   letter-spacing: -0.1px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .bezent-alert__icon {
