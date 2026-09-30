@@ -12,6 +12,7 @@ import {
   AuthApiError,
   type AccessOverview,
   type CompanyAccess,
+  type ModuleCode,
   type SignInResult,
 } from './authApi';
 import {
@@ -32,6 +33,16 @@ export interface AuthContextValue {
   access: AccessOverview | null;
   /** The selected company's access, or null (e.g. a Super Admin without companies). */
   activeCompany: CompanyAccess | null;
+  /** Checks if the user holds a specific permission in the active company. */
+  can: (permission: string) => boolean;
+  /** Checks if the user holds at least one of the specified permissions. */
+  canAny: (permissions: readonly string[]) => boolean;
+  /** Checks if the user holds all of the specified permissions. */
+  canAll: (permissions: readonly string[]) => boolean;
+  /** Checks if the active company has access to a business application ('hrms' | 'crm' | 'pm'). */
+  hasApplicationAccess: (moduleCode: ModuleCode | string) => boolean;
+  isSuperAdmin: boolean;
+  isCompanyAdmin: boolean;
   /** Stores a verified sign-in and selects an authorized company. */
   completeSignIn: (result: SignInResult) => void;
   /** Selects another authorized company without signing in again. Returns false if not authorized. */
@@ -41,7 +52,7 @@ export interface AuthContextValue {
   signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextValue | null>(null);
+export const AuthContext = createContext<AuthContextValue | null>(null);
 
 /**
  * Keeps the stored company only while the server still authorizes it. A Super
@@ -65,7 +76,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
   const [error, setError] = useState<string | null>(null);
   const [access, setAccess] = useState<AccessOverview | null>(null);
-  const [activeCompanyId, setActiveCompanyIdState] = useState<string | null>(null);
+  const [activeCompanyId, setActiveCompanyIdState] = useState<string | null>(() =>
+    getActiveCompanyId(),
+  );
 
   const endSession = useCallback(() => {
     setSessionToken(null);
@@ -122,7 +135,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const selectCompany = useCallback(
     (companyId: string) => {
-      if (!access?.companies.some((c) => c.companyId === companyId)) return false;
+      const isMember = access?.companies.some((c) => c.companyId === companyId);
+      if (!isMember && !access?.user.isSuperAdmin) return false;
       setActiveCompanyId(companyId);
       setActiveCompanyIdState(companyId);
       return true;
@@ -140,18 +154,90 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [endSession]);
 
+  const activeCompany = useMemo(
+    () => access?.companies.find((c) => c.companyId === activeCompanyId) ?? null,
+    [access, activeCompanyId],
+  );
+
+  const heldPermissions = useMemo(() => new Set(activeCompany?.permissions ?? []), [activeCompany]);
+
+  const enabledModules = useMemo(
+    () => new Set(activeCompany?.enabledModules ?? []),
+    [activeCompany],
+  );
+
+  const can = useCallback(
+    (permission: string): boolean => {
+      if (heldPermissions.has(permission)) return true;
+      // Also check standard aliases: read/view, update/edit
+      const alt = permission.endsWith('.view')
+        ? permission.replace(/\.view$/, '.read')
+        : permission.endsWith('.read')
+          ? permission.replace(/\.read$/, '.view')
+          : permission.endsWith('.edit')
+            ? permission.replace(/\.edit$/, '.update')
+            : permission.endsWith('.update')
+              ? permission.replace(/\.update$/, '.edit')
+              : null;
+      return alt ? heldPermissions.has(alt) : false;
+    },
+    [heldPermissions],
+  );
+
+  const canAny = useCallback(
+    (permissions: readonly string[]): boolean => permissions.some((p) => can(p)),
+    [can],
+  );
+
+  const canAll = useCallback(
+    (permissions: readonly string[]): boolean => permissions.every((p) => can(p)),
+    [can],
+  );
+
+  const hasApplicationAccess = useCallback(
+    (moduleCode: ModuleCode | string): boolean => enabledModules.has(moduleCode as ModuleCode),
+    [enabledModules],
+  );
+
+  const isSuperAdmin = Boolean(access?.user.isSuperAdmin);
+  const isCompanyAdmin = Boolean(
+    activeCompany?.roles.some((r) => r.code === 'company_admin') ||
+    activeCompany?.isPlatformOversight,
+  );
+
   const value = useMemo<AuthContextValue>(
     () => ({
       status,
       error,
       access,
-      activeCompany: access?.companies.find((c) => c.companyId === activeCompanyId) ?? null,
+      activeCompany,
+      can,
+      canAny,
+      canAll,
+      hasApplicationAccess,
+      isSuperAdmin,
+      isCompanyAdmin,
       completeSignIn,
       selectCompany,
       refreshAccess,
       signOut,
     }),
-    [status, error, access, activeCompanyId, completeSignIn, selectCompany, refreshAccess, signOut],
+    [
+      status,
+      error,
+      access,
+      activeCompany,
+      can,
+      canAny,
+      canAll,
+      hasApplicationAccess,
+      isSuperAdmin,
+      isCompanyAdmin,
+      completeSignIn,
+      selectCompany,
+      refreshAccess,
+      signOut,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -161,4 +247,29 @@ export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within an AuthProvider');
   return ctx;
+}
+
+export function useOptionalAuth(): AuthContextValue | null {
+  return useContext(AuthContext);
+}
+
+/**
+ * High-level authorization hook (Section 14 RBAC Foundation).
+ * Exposes canonical authorization helpers: can, canAny, canAll, hasApplicationAccess.
+ */
+export function useAuthorization() {
+  const { can, canAny, canAll, hasApplicationAccess, activeCompany, isSuperAdmin, isCompanyAdmin } =
+    useAuth();
+
+  return {
+    can,
+    canAny,
+    canAll,
+    hasApplicationAccess,
+    activeCompany,
+    roles: activeCompany?.roles ?? [],
+    permissions: activeCompany?.permissions ?? [],
+    isSuperAdmin,
+    isCompanyAdmin,
+  };
 }

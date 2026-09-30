@@ -90,6 +90,14 @@ export class AccessController {
     }
   };
 
+  getPermissionTree = (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.json({ data: this.roles.getPermissionTree(requireAccess(req)) });
+    } catch (err) {
+      next(err);
+    }
+  };
+
   listRoles = async (req: Request, res: Response, next: NextFunction) => {
     try {
       res.json({ data: await this.roles.listRoles(requireAccess(req)) });

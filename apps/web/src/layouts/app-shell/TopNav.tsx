@@ -30,9 +30,9 @@ export interface TopNavProps {
  */
 export function TopNav({
   userInitials,
-  userName = 'Sabin Davis',
-  userEmail = 'sabin.d@bezent.com',
-  userRole = 'Administrator • HRMS',
+  userName = 'User',
+  userEmail = '',
+  userRole = 'Member',
   notificationCount,
   search,
   notificationsPanel,

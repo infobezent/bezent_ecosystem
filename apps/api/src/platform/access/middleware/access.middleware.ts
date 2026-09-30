@@ -9,7 +9,7 @@ import {
   accessResolverService,
   FORBIDDEN_COMPANY_ACCESS,
 } from '../service/accessResolver.service.js';
-import type { WorkspaceId } from '../catalog/accessCatalog.js';
+import { findPermission, type WorkspaceId } from '../catalog/accessCatalog.js';
 import type { ModuleCode } from '../../modules/types/module.types.js';
 import type { CompanyAccess } from '../types/access.types.js';
 
@@ -114,6 +114,14 @@ export function requireApplicationAccess(moduleCode: ModuleCode, workspace: Work
   };
 }
 
+function matchesPermission(held: string[], required: string): boolean {
+  if (held.includes(required)) return true;
+  const def = findPermission(required);
+  if (!def) return false;
+  if (held.includes(def.id)) return true;
+  return Boolean(def.aliases?.some((a) => held.includes(a)));
+}
+
 function checkPermissions(permissions: string[], mode: 'all' | 'any') {
   return (req: Request, _res: Response, next: NextFunction) => {
     if (!req.access) {
@@ -122,8 +130,8 @@ function checkPermissions(permissions: string[], mode: 'all' | 'any') {
     const held = req.access.permissions;
     const ok =
       mode === 'all'
-        ? permissions.every((p) => held.includes(p))
-        : permissions.some((p) => held.includes(p));
+        ? permissions.every((p) => matchesPermission(held, p))
+        : permissions.some((p) => matchesPermission(held, p));
     if (!ok) {
       const label = permissions.map((p) => `'${p}'`).join(mode === 'all' ? ' and ' : ' or ');
       return next(new ForbiddenError(`Permission ${label} is required`, 'FORBIDDEN_PERMISSION'));

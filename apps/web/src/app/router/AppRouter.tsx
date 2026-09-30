@@ -1,6 +1,5 @@
-import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, Navigate, RouterProvider, type RouteObject } from 'react-router-dom';
 import { destinationPath } from '../../shared/utils/navigation';
-import { APPLICATIONS, DEFAULT_APPLICATION } from '../config/applications';
 import { CalendarPage } from '../../platform/calendar';
 import { TasksPage } from '../../platform/tasks';
 import { ApprovalsPage } from '../../platform/approvals';
@@ -11,40 +10,124 @@ import { DevPlaceholderPage } from './DevPlaceholderPage';
 import { DesignSystemShowcase } from './DesignSystemShowcase';
 import { NotFoundPage } from './NotFoundPage';
 import { ShellLayout } from './ShellLayout';
-import { LoginPage, RequireAuth } from '../../platform/auth';
+import { LoginPage, RequireAuth, useAuth } from '../../platform/auth';
+import { landingPath } from '../../platform/auth/landing';
 import { StandaloneUtilityLayout } from './StandaloneUtilityLayout';
-
-const defaultDestination = DEFAULT_APPLICATION.navigation.destinations.find(
-  (d) => d.id === DEFAULT_APPLICATION.defaultDestinationId,
-)!;
-const homePath = destinationPath(DEFAULT_APPLICATION.basePath, defaultDestination);
+import { hrmsApplication } from '../../applications/hrms';
+import {
+  superAdminRoutes,
+  RequireSuperAdminWorkspace,
+} from '../../applications/super-admin/routes/superAdminRoutes';
+import {
+  companyAdminRoutes,
+  RequireCompanyAdminWorkspace,
+} from '../../applications/company-admin/routes/companyAdminRoutes';
+import { hrmsRoutes, RequireHrmsWorkspace } from '../../applications/hrms/routes/hrmsRoutes';
+import { essRoutes, RequireEssWorkspace } from '../../applications/ess/routes/essRoutes';
 
 /**
- * Root router composition. Applications mount under ShellLayout, while the
- * standalone utilities and Employee Registration mount in their own
- * StandaloneUtilityLayout without application navigation bars. Both require a
- * signed-in session; `/login` is the shared Email OTP sign-in page.
+ * Workspace-aware root redirect. Reads the live auth state so that an Employee
+ * landing on `/` is directed to `/ess` — not `/hrms` — without the backend
+ * needing to repeat the destination on every restore.
+ * RequireAuth is the parent, so by the time this renders status is 'authenticated'.
  */
-export const appRoutes = [
+function WorkspaceRedirect() {
+  const { access } = useAuth();
+  if (!access) return null;
+  return <Navigate to={landingPath(access)} replace />;
+}
+
+// Fallback homePath for the 404 page. Uses the HRMS dashboard path as the
+// universal "go home" when the active application cannot be determined.
+const hrmsFallbackPath = destinationPath(
+  hrmsApplication.basePath,
+  hrmsApplication.navigation.destinations.find(
+    (d) => d.id === hrmsApplication.defaultDestinationId,
+  )!,
+);
+
+/**
+ * Root router composition.
+ *
+ * CRITICAL ARCHITECTURAL BOUNDARY:
+ * Workspace authorization guards (RequireSuperAdminWorkspace, RequireCompanyAdminWorkspace,
+ * RequireHrmsWorkspace, RequireEssWorkspace) are mounted STRICTLY ABOVE ShellLayout.
+ *
+ * An unauthorized user attempting to access another workspace route (e.g., HR user visiting
+ * /super-admin/provisioning or Employee visiting /hrms/leave) is intercepted and redirected
+ * BEFORE the unauthorized workspace shell or navigation items can ever render.
+ */
+export const appRoutes: RouteObject[] = [
   // The ONE sign-in page for every BEZENT user (ADR-018), outside every shell.
   { path: '/login', element: <LoginPage /> },
+
+  // Root redirect: workspace-aware, routes signed-in users to their authorized workspace.
+  {
+    path: '/',
+    element: (
+      <RequireAuth>
+        <WorkspaceRedirect />
+      </RequireAuth>
+    ),
+  },
+
+  // 1. Super Admin Workspace — Workspace Guard is strictly ABOVE the shell layout
   {
     element: (
       <RequireAuth>
-        <ShellLayout />
+        <RequireSuperAdminWorkspace />
       </RequireAuth>
     ),
     children: [
-      { path: '/', element: <Navigate to={homePath} replace /> },
-      ...APPLICATIONS.flatMap((application) => application.routes),
-      // Development-only pages. Excluded from production bundles.
-      ...(import.meta.env.DEV
-        ? [
-            { path: '/dev', element: <DevPlaceholderPage /> },
-            { path: '/dev/design-system', element: <DesignSystemShowcase /> },
-          ]
-        : []),
-      { path: '*', element: <NotFoundPage homePath={homePath} /> },
+      {
+        element: <ShellLayout />,
+        children: superAdminRoutes,
+      },
+    ],
+  },
+
+  // 2. Company Admin Workspace — Workspace Guard is strictly ABOVE the shell layout
+  {
+    element: (
+      <RequireAuth>
+        <RequireCompanyAdminWorkspace />
+      </RequireAuth>
+    ),
+    children: [
+      {
+        element: <ShellLayout />,
+        children: companyAdminRoutes,
+      },
+    ],
+  },
+
+  // 3. HRMS Administration Workspace — Workspace Guard is strictly ABOVE the shell layout
+  {
+    element: (
+      <RequireAuth>
+        <RequireHrmsWorkspace />
+      </RequireAuth>
+    ),
+    children: [
+      {
+        element: <ShellLayout />,
+        children: hrmsRoutes,
+      },
+    ],
+  },
+
+  // 4. Employee Self Service Workspace — Workspace Guard is strictly ABOVE the shell layout
+  {
+    element: (
+      <RequireAuth>
+        <RequireEssWorkspace />
+      </RequireAuth>
+    ),
+    children: [
+      {
+        element: <ShellLayout />,
+        children: essRoutes,
+      },
     ],
   },
   {
@@ -75,6 +158,33 @@ export const appRoutes = [
         element: <FormEditorPage />,
       },
     ],
+  },
+
+  // Development-only pages. Excluded from production bundles.
+  ...(import.meta.env.DEV
+    ? [
+        {
+          element: (
+            <RequireAuth>
+              <ShellLayout />
+            </RequireAuth>
+          ),
+          children: [
+            { path: '/dev', element: <DevPlaceholderPage /> },
+            { path: '/dev/design-system', element: <DesignSystemShowcase /> },
+          ],
+        },
+      ]
+    : []),
+
+  // 404 Fallback: neutral page with safe home navigation
+  {
+    path: '*',
+    element: (
+      <RequireAuth>
+        <NotFoundPage homePath={hrmsFallbackPath} />
+      </RequireAuth>
+    ),
   },
 ];
 
