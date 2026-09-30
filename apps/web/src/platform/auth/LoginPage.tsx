@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { Alert, Button, Inline, Input, Stack } from '../../design-system/components';
 import { BezentIcon } from '../../design-system/icons';
+import { useTheme } from '../../app/providers/ThemeProvider';
 import { authApi, AuthApiError, type OtpChallenge } from './authApi';
 import { useAuth } from './AuthProvider';
 import { landingPath, safeNextPath } from './landing';
@@ -12,6 +13,19 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const CODE_PATTERN = /^\d{6}$/;
 
 type Step = 'email' | 'code';
+
+function useLoginTheme() {
+  try {
+    return useTheme();
+  } catch {
+    return {
+      mode: 'dark' as const,
+      resolvedTheme: 'dark' as const,
+      setMode: () => {},
+      toggleTheme: () => {},
+    };
+  }
+}
 
 /** Seconds remaining until `target` (never negative). */
 function secondsUntil(target: number | null): number {
@@ -46,6 +60,8 @@ export function LoginPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const { status, access, completeSignIn } = useAuth();
+  const { resolvedTheme, toggleTheme } = useLoginTheme();
+  const isDark = resolvedTheme === 'dark';
   const next = safeNextPath(params.get('next'));
 
   const [step, setStep] = useState<Step>('email');
@@ -359,6 +375,21 @@ export function LoginPage() {
           </Stack>
         </div>
       </div>
+
+      {/* Floating Bottom-Right Day/Night Mode Toggle */}
+      <button
+        type="button"
+        className="bezent-login__theme-toggle"
+        onClick={(e) => toggleTheme(e)}
+        aria-label={isDark ? 'Switch to Day mode' : 'Switch to Night mode'}
+      >
+        <span className="bezent-login__theme-toggle-icon" aria-hidden="true">
+          <BezentIcon name={isDark ? 'sun' : 'moon'} size={16} color="currentColor" />
+        </span>
+        <span className="bezent-login__theme-toggle-label">
+          {isDark ? 'Day Mode' : 'Night Mode'}
+        </span>
+      </button>
     </main>
   );
 }
