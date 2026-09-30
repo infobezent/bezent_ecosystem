@@ -103,11 +103,13 @@
   overflow-y: hidden;
   display: flex;
   align-items: center;
-  min-height: 54px;
+  justify-content: safe center;
+  min-height: 52px;
   scroll-behavior: smooth;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 4px 0;
+  padding: 0 24px 4px;
+  box-sizing: border-box;
 }
 
 .bezent-focus-carousel__viewport::-webkit-scrollbar {
@@ -117,9 +119,11 @@
 .bezent-focus-carousel__track {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: 10px;
   position: relative;
-  padding: 6px calc(50% - 90px);
+  margin: 0 auto;
+  padding: 4px 0;
   width: max-content;
 }
 
@@ -135,15 +139,17 @@
   cursor: pointer;
   flex-shrink: 0;
   outline: none;
-  border: 1px solid transparent;
+  border: 1px solid var(--border-subtle, #e7ebf0);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary, #444746);
   transform-origin: center center;
   white-space: nowrap;
   transition:
-    transform 360ms cubic-bezier(0.2, 0.8, 0.25, 1),
-    opacity 360ms ease,
+    transform 200ms cubic-bezier(0.2, 0.8, 0.25, 1),
+    opacity 200ms ease,
     background-color 200ms ease,
     border-color 200ms ease,
-    box-shadow 300ms ease,
+    box-shadow 200ms ease,
     color 200ms ease;
 }
 
@@ -164,8 +170,10 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
+  background: var(--bg-surface-secondary, #f0f4f9);
+  border: 1px solid var(--border-subtle, #e7ebf0);
+  color: var(--text-secondary, #444746);
   transition: all 200ms ease;
-  border: 1px solid transparent;
 }
 
 .bezent-focus-card__label {
@@ -182,12 +190,12 @@
   transform: scale(1);
   opacity: 1;
   background: var(--bg-surface, #ffffff);
-  border-color: var(--card-border, #dde3ea);
+  border-color: var(--brand-primary, #041e49);
   color: var(--brand-primary, #041e49);
   font-weight: 600;
   box-shadow:
-    0 4px 14px -2px rgba(4, 30, 73, 0.08),
-    0 1px 3px rgba(4, 30, 73, 0.04);
+    0 4px 14px -2px rgba(4, 30, 73, 0.1),
+    0 1px 3px rgba(4, 30, 73, 0.05);
   z-index: 2;
 }
 
@@ -195,7 +203,7 @@
   background: var(--brand-primary, #041e49);
   border-color: var(--brand-primary, #041e49);
   color: var(--text-inverse, #ffffff);
-  box-shadow: 0 0 0 2.5px var(--bg-hover, #c2e7ff);
+  box-shadow: 0 0 0 2px var(--bg-hover, #c2e7ff);
 }
 
 .bezent-focus-card.is-focus-active .bezent-focus-card__label {
@@ -205,45 +213,24 @@
 
 /* 2. Direct Neighbor (±1 distance) */
 .bezent-focus-card.is-focus-neighbor {
-  transform: scale(0.94);
-  opacity: 0.9;
-  background: var(--bg-surface, #ffffff);
+  opacity: 0.95;
+  background: rgba(255, 255, 255, 0.85);
   border-color: var(--border-subtle, #e7ebf0);
   color: var(--text-primary, #1f1f1f);
 }
 
-.bezent-focus-card.is-focus-neighbor .bezent-focus-card__number {
-  background: var(--bg-surface-secondary, #f0f4f9);
-  border-color: var(--border-subtle, #e7ebf0);
-  color: var(--text-secondary, #444746);
-}
-
 /* 3. Secondary Neighbor (±2 distance) */
 .bezent-focus-card.is-focus-secondary {
-  transform: scale(0.88);
-  opacity: 0.78;
-  background: rgba(255, 255, 255, 0.9);
-  border-color: var(--border-subtle, #e7ebf0);
-  color: var(--text-secondary, #444746);
-}
-
-.bezent-focus-card.is-focus-secondary .bezent-focus-card__number {
-  background: var(--bg-surface-secondary, #f0f4f9);
+  opacity: 0.88;
+  background: rgba(255, 255, 255, 0.75);
   border-color: var(--border-subtle, #e7ebf0);
   color: var(--text-secondary, #444746);
 }
 
 /* 4. Far Distance (±3+ distance) */
 .bezent-focus-card.is-focus-far {
-  transform: scale(0.84);
-  opacity: 0.65;
-  background: rgba(255, 255, 255, 0.8);
-  border-color: var(--border-subtle, #e7ebf0);
-  color: var(--text-secondary, #444746);
-}
-
-.bezent-focus-card.is-focus-far .bezent-focus-card__number {
-  background: var(--bg-surface-secondary, #f0f4f9);
+  opacity: 0.8;
+  background: rgba(255, 255, 255, 0.65);
   border-color: var(--border-subtle, #e7ebf0);
   color: var(--text-secondary, #444746);
 }
@@ -251,7 +238,6 @@
 /* Hover Interaction on Inactive Cards */
 .bezent-focus-card:hover:not(.is-focus-active):not(:disabled) {
   opacity: 1;
-  transform: scale(0.96);
   background: var(--bg-surface, #ffffff);
   border-color: var(--border-default, #dde3ea);
   color: var(--text-primary, #1f1f1f);
