@@ -51,22 +51,27 @@ export function ChapterFocusCarousel({
       const containerRect = container.getBoundingClientRect();
       const cardRect = activeCard.getBoundingClientRect();
 
-      // If content fits comfortably within container, keep natural center alignment
+      // If content fits comfortably within container, do not scroll
       if (container.scrollWidth <= container.clientWidth + 4) {
-        container.scrollTo({ left: 0, behavior: 'smooth' });
         return;
       }
 
       if (containerRect.width > 0 && cardRect.width > 0) {
-        const currentScrollLeft = container.scrollLeft;
-        const cardCenter = cardRect.left + cardRect.width / 2;
-        const containerCenter = containerRect.left + containerRect.width / 2;
-        const targetScrollLeft = currentScrollLeft + (cardCenter - containerCenter);
+        const isFullyVisible =
+          cardRect.left >= containerRect.left + 16 &&
+          cardRect.right <= containerRect.right - 16;
 
-        container.scrollTo({
-          left: Math.max(0, targetScrollLeft),
-          behavior: 'smooth',
-        });
+        if (!isFullyVisible) {
+          const currentScrollLeft = container.scrollLeft;
+          const cardCenter = cardRect.left + cardRect.width / 2;
+          const containerCenter = containerRect.left + containerRect.width / 2;
+          const targetScrollLeft = currentScrollLeft + (cardCenter - containerCenter);
+
+          container.scrollTo({
+            left: Math.max(0, targetScrollLeft),
+            behavior: 'smooth',
+          });
+        }
       }
     }
   }, [activeId]);
