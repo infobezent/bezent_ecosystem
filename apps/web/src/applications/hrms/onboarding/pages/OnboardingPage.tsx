@@ -335,29 +335,15 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                         <TableCell>
                           <Inline gap="sm" align="center">
                             <Avatar initials={getInitials(item.fullName)} alt={item.fullName} />
-                            <Stack gap="xs">
-                              <Label as="span" size="sm" weight="semibold">
-                                {item.fullName}
-                              </Label>
-                              {item.email && (
-                                <Label as="span" size="sm" weight="regular">
-                                  {item.email}
-                                </Label>
-                              )}
-                            </Stack>
+                            <Label as="span" size="sm" weight="semibold">
+                              {item.fullName}
+                            </Label>
                           </Inline>
                         </TableCell>
                         <TableCell>
-                          <Stack gap="xs">
-                            <Label as="span" size="sm" weight="semibold">
-                              {item.designationName || '—'}
-                            </Label>
-                            {item.departmentName && (
-                              <Label as="span" size="sm" weight="regular">
-                                {item.departmentName}
-                              </Label>
-                            )}
-                          </Stack>
+                          <Label as="span" size="sm" weight="semibold">
+                            {item.designationName || '—'}
+                          </Label>
                         </TableCell>
                         <TableCell>
                           <Label as="span" size="sm" weight="regular">

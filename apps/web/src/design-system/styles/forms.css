@@ -13,7 +13,7 @@
   --form-font-size-section-label: 17px;
   --form-font-size-label: 17px;
   --form-font-size-input: 17px;
-  --form-font-size-hint: 17px;
+  --form-font-size-hint: 12px;
   --form-font-size-badge: 13px;
 
   /* Theme Button & Toggle Palette */
@@ -275,14 +275,14 @@
   padding: 14px 18px;
   background: var(--bg-card, #f0f4f9);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-lg, 12px);
+  border-radius: var(--radius-md, 8px);
   margin-bottom: 20px;
 }
 
 .employee-registration__section-icon-badge {
   width: 40px;
   height: 40px;
-  border-radius: var(--radius-md, 10px);
+  border-radius: var(--radius-sm, 6px);
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   color: var(--bezent-btn-sec-text, #071e49);
   display: flex;
@@ -384,6 +384,37 @@
   width: 100%;
 }
 
+.review-section .bezent-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary, #5f6368);
+  letter-spacing: normal;
+}
+
+.review-section .bezent-label--sm {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-secondary, #5f6368);
+}
+
+.review-section .bezent-label--md {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #041e49);
+}
+
+.review-section span {
+  font-weight: 400;
+}
+
+[data-theme='dark'] .review-section .bezent-label {
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme='dark'] .review-section .bezent-label--md {
+  color: var(--text-primary, #f8fafc);
+}
+
 .onboarding-section__group,
 .personal-info__group,
 .emergency-contact__group {
@@ -431,7 +462,7 @@
 .review-section__card {
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-lg, 12px);
+  border-radius: var(--radius-md, 8px);
   padding: 16px 18px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   transition:
@@ -624,7 +655,7 @@
   padding: 16px 20px;
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-lg, 12px);
+  border-radius: var(--radius-md, 8px);
   margin-bottom: 16px;
 }
 
@@ -721,7 +752,7 @@
   padding: 14px 18px;
   background: var(--bg-card, #f0f4f9);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-lg, 12px);
+  border-radius: var(--radius-md, 8px);
   margin-bottom: 20px;
 }
 
@@ -771,7 +802,7 @@
 
 .documents-section__item-box {
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 14px 16px;
   background: var(--bg-surface, #ffffff);
   display: flex;
@@ -2203,12 +2234,12 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 14px;
+  padding: 6px 12px;
   background: var(--bg-surface, #ffffff);
   color: var(--brand-primary, #041e49);
   border: 1px solid var(--border-default, #dde3ea);
   border-radius: var(--radius-md, 8px);
-  font-size: var(--form-font-size-subtitle, 13px);
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 1px 2px rgba(4, 30, 73, 0.06);

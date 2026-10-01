@@ -23,7 +23,7 @@
   width: 100%;
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: 10px;
+  border-radius: 6px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
   transition:
     border-color 0.16s cubic-bezier(0.16, 1, 0.3, 1),
@@ -43,7 +43,7 @@
 /* ── Sizes ── */
 .bezent-input-wrapper--sm .bezent-input-box {
   height: 32px;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .bezent-input-wrapper--sm .bezent-input-field {
@@ -53,7 +53,7 @@
 
 .bezent-input-wrapper--md .bezent-input-box {
   height: 42px;
-  border-radius: 10px;
+  border-radius: 6px;
 }
 
 .bezent-input-wrapper--md .bezent-input-field {
@@ -63,7 +63,7 @@
 
 .bezent-input-wrapper--lg .bezent-input-box {
   height: 46px;
-  border-radius: 12px;
+  border-radius: 8px;
 }
 
 .bezent-input-wrapper--lg .bezent-input-field {
@@ -379,7 +379,7 @@
   padding: 0 14px;
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-md, 10px);
+  border-radius: var(--radius-sm, 6px);
   color: var(--text-primary, #000000);
   font: inherit;
   font-size: var(--form-font-size-input, 17px);
@@ -411,7 +411,7 @@
   padding: 10px 14px;
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-md, 10px);
+  border-radius: var(--radius-sm, 6px);
   color: var(--text-primary, #000000);
   font: inherit;
   font-size: var(--form-font-size-input, 17px);

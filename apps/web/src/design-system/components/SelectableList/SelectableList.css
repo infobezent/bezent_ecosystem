@@ -17,7 +17,7 @@
   gap: 12px;
   width: 100%;
   box-sizing: border-box;
-  border-radius: 10px;
+  border-radius: 6px;
   border: 1px solid transparent;
   color: var(--text-primary, #1f1f1f);
   cursor: pointer;

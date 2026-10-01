@@ -239,13 +239,13 @@
 }
 
 .bezent-btn-draft {
-  height: 36px;
-  padding: 0 16px;
+  height: 32px;
+  padding: 0 14px;
   background-color: var(--bg-surface, #ffffff);
   color: var(--brand-primary, #041e49);
   border: 1px solid var(--border-default, #dde3ea);
   border-radius: var(--radius-md, 8px);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
