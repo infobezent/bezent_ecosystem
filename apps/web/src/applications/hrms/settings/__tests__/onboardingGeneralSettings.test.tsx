@@ -1,12 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { AdministrationSettingsSection } from '../components/AdministrationSettingsSection';
+import { AdministrationSettingsSection } from '../administration/AdministrationSettingsSection';
 import {
   GeneralSettingsSection,
   validateGeneralSettingsValues,
   isGeneralSettingsDirty,
   type GeneralSettingsFormValues,
-} from '../components/GeneralSettingsSection';
+} from '../administration/onboarding/GeneralSettingsSection';
 import type { OnboardingGeneralSettings } from '../types/settings';
 
 const mockSettings: OnboardingGeneralSettings = {

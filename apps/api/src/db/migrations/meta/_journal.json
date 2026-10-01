@@ -141,6 +141,20 @@
       "when": 1790900000000,
       "tag": "0019_dynamic_onboarding_stages",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1790950000000,
+      "tag": "0020_organization_profile",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "5",
+      "when": 1791000000000,
+      "tag": "0021_organization_structure",
+      "breakpoints": true
     }
   ]
 }

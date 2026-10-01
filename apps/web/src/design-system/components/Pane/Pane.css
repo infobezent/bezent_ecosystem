@@ -412,7 +412,7 @@
 .bezent-canvas-field-toolbar {
   position: absolute;
   top: 4px;
-  right: 6px;
+  right: 32px;
   display: flex;
   align-items: center;
   gap: 2px;
@@ -425,6 +425,9 @@
 }
 
 .bezent-canvas-field-handle {
+  position: absolute;
+  top: 6px;
+  right: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -435,6 +438,15 @@
   color: var(--text-muted, #94a3b8);
   cursor: grab;
   border-radius: var(--radius-xs);
+  opacity: 0;
+  transition: opacity 120ms ease, background-color 120ms ease, color 120ms ease;
+  z-index: 5;
+}
+
+.bezent-canvas-field-wrapper:hover .bezent-canvas-field-handle,
+.bezent-canvas-field-handle:focus,
+.bezent-canvas-field-handle:focus-visible {
+  opacity: 1;
 }
 
 .bezent-canvas-field-handle:hover {

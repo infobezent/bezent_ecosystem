@@ -5,7 +5,7 @@ import { OnboardingPage } from '../onboarding';
 import { EmployeeAdministrationPage } from '../employee-administration';
 import { DocumentsPage } from '../documents';
 import { EMPLOYEES_PATH, EmployeeDirectoryPage, EmployeeProfilePage } from '../employees';
-import { SettingsPage } from '../settings';
+import { SettingsPage, OrganizationProfilePage, OrganizationStructurePage } from '../settings';
 import { destinationPath } from '../../../shared/utils/navigation';
 import { useAuth } from '../../../platform/auth';
 import { landingPath } from '../../../platform/auth/landing';
@@ -163,6 +163,31 @@ export const hrmsRoutes: RouteObject[] = [
       {
         path: 'administrative/*',
         element: <Navigate to="/hrms/administration/employee-administration" replace />,
+      },
+      // Organization Profile and Organization Structure direct paths and aliases
+      {
+        path: 'settings/organization/profile',
+        element: <OrganizationProfilePage />,
+      },
+      {
+        path: 'settings/organization/structure',
+        element: <OrganizationStructurePage />,
+      },
+      {
+        path: 'settings/organization',
+        element: <Navigate to="/hrms/settings/organization/profile" replace />,
+      },
+      {
+        path: 'organization/structure',
+        element: <Navigate to="/hrms/settings/organization/structure" replace />,
+      },
+      {
+        path: 'organization/profile',
+        element: <Navigate to="/hrms/settings/organization/profile" replace />,
+      },
+      {
+        path: 'organization',
+        element: <Navigate to="/hrms/settings/organization/profile" replace />,
       },
       {
         path: '*',

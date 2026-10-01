@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { AdministrationSettingsSection } from '../components/AdministrationSettingsSection';
-import { StagesSection } from '../components/StagesSection';
+import { AdministrationSettingsSection } from '../administration/AdministrationSettingsSection';
+import { StagesSection } from '../administration/onboarding/StagesSection';
 import type { OnboardingStageConfig } from '../types/settings';
 
 const mockCompanyStages: OnboardingStageConfig[] = [

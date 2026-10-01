@@ -5,7 +5,7 @@ import { TasksPage } from '../../platform/tasks';
 import { ApprovalsPage } from '../../platform/approvals';
 import { NotesPage } from '../../platform/notes';
 import { EmployeeRegistrationPage } from '../../applications/hrms/onboarding';
-import { FormEditorPage } from '../../applications/hrms/settings/forms';
+import { FormEditorPage } from '../../applications/hrms/settings/administration/forms';
 import { DevPlaceholderPage } from './DevPlaceholderPage';
 import { DesignSystemShowcase } from './DesignSystemShowcase';
 import { NotFoundPage } from './NotFoundPage';

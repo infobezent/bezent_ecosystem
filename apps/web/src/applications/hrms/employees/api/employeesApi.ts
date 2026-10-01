@@ -218,3 +218,66 @@ export async function fetchEmployeeProfile(id: string): Promise<EmployeeProfile>
   );
   return body.data;
 }
+
+export interface CreateEmployeeRequest {
+  employeeNumber?: string | null;
+  firstName: string;
+  lastName?: string | null;
+  email: string;
+  phone?: string | null;
+  joiningDate: string;
+  confirmedJoiningDate?: string | null;
+  departmentId?: string | null;
+  designationId?: string | null;
+  locationId?: string | null;
+  employmentType?: EmploymentType;
+  employmentStatus?: EmploymentStatus;
+  reportingManagerId?: string | null;
+  sourceOfHire?: SourceOfHire | null;
+  referralCode?: string | null;
+  referredByEmployeeId?: string | null;
+  noticePeriodDays?: number | null;
+  contractEndDate?: string | null;
+  details?: {
+    personal?: Record<string, unknown>;
+    familyMembers?: Array<Record<string, unknown>>;
+    parentGuardians?: Array<Record<string, unknown>>;
+    nominees?: Array<Record<string, unknown>>;
+    emergencyContacts?: Array<Record<string, unknown>>;
+    bankAccount?: Record<string, unknown>;
+    skills?: Array<Record<string, unknown>>;
+    workSchedule?: Record<string, unknown>;
+  };
+}
+
+export async function createEmployee(
+  payload: CreateEmployeeRequest,
+): Promise<EmployeeRecord> {
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/employees`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  let body: unknown = null;
+  try {
+    body = await res.json();
+  } catch {
+    body = null;
+  }
+
+  if (!res.ok) {
+    const error = (body as { error?: { message?: string; code?: string; details?: unknown } } | null)
+      ?.error;
+    throw new EmployeesApiError(
+      error?.message ?? `Request failed with status ${res.status}`,
+      res.status,
+      error?.code ?? 'REQUEST_FAILED',
+    );
+  }
+
+  return (body as { data: EmployeeRecord }).data;
+}
+

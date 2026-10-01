@@ -13,12 +13,12 @@ import {
   Inline,
   FormGrid,
   FormField,
-  FormSection,
   Modal,
   Alert,
   PageHeader,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
+import { GeneralInformation } from './GeneralInformation';
 import { PersonalInformation } from './PersonalInformation';
 import { RegistrationField, useRegistrationConfig } from '../registration/registrationConfig';
 import { OnboardingSection } from './OnboardingSection';
@@ -35,6 +35,20 @@ import {
 } from './DocumentsSection';
 import { ReviewSection, ReviewSectionData } from './ReviewSection';
 import { DraftsModal, EmployeeRegistrationDraft } from './DraftsModal';
+import {
+  type RegistrationFormData,
+  INITIAL_REGISTRATION_DATA,
+  toReviewSectionData,
+  type Chapter01GeneralState,
+  type Chapter02PersonalState,
+  type Chapter03OnboardingState,
+  type Chapter04SkillsState,
+  type Chapter05EmergencyState,
+  type Chapter06AccountsState,
+  type Chapter07OnlineAccessState,
+  type Chapter08WorkingHoursState,
+  type Chapter09DocumentsState,
+} from '../types/registration.types';
 
 export type RegistrationSectionId = string;
 
@@ -155,10 +169,14 @@ export const REGISTRATION_SECTIONS: readonly RegistrationSection[] = [
   { id: 'review', label: 'Review' },
 ];
 
-interface EmployeeRegistrationProps {
+export interface EmployeeRegistrationProps {
   isOpen?: boolean;
   onCancel: () => void;
   onSave?: (data: Record<string, unknown>) => void;
+  onSubmit?: (formData: RegistrationFormData) => Promise<void>;
+  isSubmitting?: boolean;
+  submitError?: string | null;
+  createdEmployee?: { id: string; employeeNumber?: string | null; name?: string } | null;
   initialDraft?: EmployeeRegistrationDraft | null;
 }
 
@@ -169,6 +187,10 @@ export function EmployeeRegistration({
   isOpen = true,
   onCancel,
   onSave,
+  onSubmit,
+  isSubmitting = false,
+  submitError = null,
+  createdEmployee = null,
   initialDraft,
 }: EmployeeRegistrationProps) {
   // Optional: custom-fields context is only present inside the settings builder;
@@ -206,83 +228,71 @@ export function EmployeeRegistration({
 
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, unknown>>({});
 
+  // Authoritative centralized registration form state
+  const [formData, setFormData] = useState<RegistrationFormData>(() => {
+    if (initialDraft?.formData) {
+      return initialDraft.formData;
+    }
+    const base: RegistrationFormData = JSON.parse(JSON.stringify(INITIAL_REGISTRATION_DATA));
+    if (initialDraft?.employeeId) {
+      base.general.employeeId = initialDraft.employeeId;
+    }
+    if (initialDraft?.reviewData?.general) {
+      base.general.employeeId = initialDraft.reviewData.general.employeeId || base.general.employeeId;
+      base.general.department = initialDraft.reviewData.general.department || base.general.department;
+      base.general.designation = initialDraft.reviewData.general.designation || base.general.designation;
+      base.general.joiningDate = initialDraft.reviewData.general.joiningDate || base.general.joiningDate;
+    }
+    return base;
+  });
+
+  const updateGeneral = (fields: Partial<Chapter01GeneralState>) => {
+    if (fields.employeeId) {
+      setEmployeeId(fields.employeeId);
+    }
+    setFormData((prev) => ({
+      ...prev,
+      general: { ...prev.general, ...fields },
+    }));
+  };
+
+  const updatePersonal = (fields: Partial<Chapter02PersonalState>) => {
+    setFormData((prev) => ({
+      ...prev,
+      personal: { ...prev.personal, ...fields },
+    }));
+  };
+
+  const updateOnboarding = (val: Chapter03OnboardingState) => {
+    setFormData((prev) => ({ ...prev, onboarding: val }));
+  };
+
+  const updateSkills = (val: Chapter04SkillsState) => {
+    setFormData((prev) => ({ ...prev, skills: val }));
+  };
+
+  const updateEmergency = (val: Chapter05EmergencyState) => {
+    setFormData((prev) => ({ ...prev, emergency: val }));
+  };
+
+  const updateAccounts = (val: Chapter06AccountsState) => {
+    setFormData((prev) => ({ ...prev, accounts: val }));
+  };
+
+  const updateOnlineAccess = (val: Chapter07OnlineAccessState) => {
+    setFormData((prev) => ({ ...prev, onlineAccess: val }));
+  };
+
+  const updateWorkingHours = (val: Chapter08WorkingHoursState) => {
+    setFormData((prev) => ({ ...prev, workingHours: val }));
+  };
+
+  const updateDocuments = (val: Chapter09DocumentsState) => {
+    setFormData((prev) => ({ ...prev, documents: val }));
+  };
+
   // General Form State
   const [employeeId, setEmployeeId] = useState(initialDraft?.employeeId || '');
-
-  // Employment Type
-  const [employmentType, setEmploymentType] = useState('full_time');
-
-  // Employment Status (System-controlled, default pending_activation)
-  const [employmentStatus] = useState('pending_activation');
-
-  // Department & Team (Filtered hierarchy)
-  const [department, setDepartment] = useState('Engineering');
-  const [team, setTeam] = useState('Product Development');
-
-  // Designation
-  const [designation, setDesignation] = useState('Software Engineer');
-
-  // Grade / Level
-  const [gradeLevel, setGradeLevel] = useState('L2 - Mid Level');
-
-  // Reporting Manager
-  const [reportingManager] = useState<string | null>('Rakesh Kumar');
-
-  // Organisation Unit
-  const [organisationUnit, setOrganisationUnit] = useState('Technology');
-
-  // Office Location
-  const [officeLocation, setOfficeLocation] = useState('Chennai - Main Office');
-
-  // Dates
-  const [joiningDate, setJoiningDate] = useState('2026-04-01');
-  const [confirmedJoiningDate, setConfirmedJoiningDate] = useState('2026-07-01');
-  const [endDate, setEndDate] = useState('');
-
-  // Source of Hire & Referral
-  const [sourceOfHire, setSourceOfHire] = useState('direct_applicant');
-  const [referralId, setReferralId] = useState('');
-  const [resolvedReferrer, setResolvedReferrer] = useState<{
-    id: string;
-    name: string;
-    designation?: string | null;
-    department?: string | null;
-  } | null>(null);
-  const [referralError, setReferralError] = useState<string | null>(null);
-  const [referralLoading, setReferralLoading] = useState(false);
-  const [, setReferredByEmployeeId] = useState<string | null>(null);
-
-  // Probation Period
-  const [probationPeriod, setProbationPeriod] = useState('6_months');
-
-  // Notice Period
-  const [noticePeriod, setNoticePeriod] = useState('30_days');
-
-  // Department-to-Team hierarchy
-  const DEPARTMENT_TEAMS: Record<string, string[]> = {
-    Engineering: ['Product Development', 'Frontend', 'Backend', 'QA'],
-    'Human Resources': ['Talent Acquisition', 'HR Operations', 'Employee Relations'],
-    Finance: ['Accounting', 'Payroll & Compliance', 'Financial Planning'],
-    Operations: ['Facilities', 'IT Systems', 'Procurement'],
-  };
-
-  // Fixed-term type check
-  const isFixedTerm = employmentType === 'contract' || employmentType === 'intern';
-
-  const handleEmploymentTypeChange = (newType: string) => {
-    setEmploymentType(newType);
-    if (newType !== 'contract' && newType !== 'intern') {
-      setEndDate('');
-    }
-  };
-
-  const handleDepartmentChange = (newDept: string) => {
-    setDepartment(newDept);
-    const availableTeams = DEPARTMENT_TEAMS[newDept] || ['General'];
-    if (!availableTeams.includes(team)) {
-      setTeam(availableTeams[0] || 'General');
-    }
-  };
 
   // Auto-fetch next unique Employee ID from backend on mount
   useEffect(() => {
@@ -295,75 +305,28 @@ export function EmployeeRegistration({
         .then((body) => {
           if (body?.data?.employeeNumber) {
             setEmployeeId(body.data.employeeNumber);
+            setFormData((prev) => ({
+              ...prev,
+              general: { ...prev.general, employeeId: body.data.employeeNumber },
+            }));
           }
         })
         .catch(() => {
           // Fallback if backend dev server is temporarily uncontactable
           setEmployeeId('EMP2026001');
+          setFormData((prev) => ({
+            ...prev,
+            general: { ...prev.general, employeeId: 'EMP2026001' },
+          }));
         });
     }
   }, [initialDraft?.employeeId]);
 
-  // Referral ID resolution
-  useEffect(() => {
-    const code = referralId.trim();
-    if (sourceOfHire === 'referral' && code.length >= 3) {
-      setReferralLoading(true);
-      setReferralError(null);
-      const timer = setTimeout(() => {
-        authorizedFetch(`/api/v1/hrms/employees/resolve-referral/${encodeURIComponent(code)}`)
-          .then((res) => {
-            if (!res.ok) throw new Error('Not found');
-            return res.json();
-          })
-          .then((body) => {
-            if (body?.data?.name) {
-              setResolvedReferrer({
-                id: body.data.id,
-                name: body.data.name,
-                designation: body.data.designationName,
-                department: body.data.departmentName,
-              });
-              setReferredByEmployeeId(body.data.id);
-              setReferralError(null);
-            } else {
-              setResolvedReferrer(null);
-              setReferredByEmployeeId(null);
-              setReferralError('Referral ID not found');
-            }
-          })
-          .catch(() => {
-            setResolvedReferrer(null);
-            setReferredByEmployeeId(null);
-            setReferralError('Invalid or unrecognised Referral ID');
-          })
-          .finally(() => {
-            setReferralLoading(false);
-          });
-      }, 400);
-      return () => clearTimeout(timer);
-    } else {
-      setResolvedReferrer(null);
-      setReferredByEmployeeId(null);
-      setReferralError(null);
-      setReferralLoading(false);
-    }
-  }, [referralId, sourceOfHire]);
-
-  // System-calculated probation end date based on joiningDate & probationPeriod
-  const calculatedProbationEndDate = useMemo(() => {
-    if (!joiningDate || probationPeriod === 'no_probation') return null;
-    const d = new Date(joiningDate);
-    if (isNaN(d.getTime())) return null;
-    if (probationPeriod === '3_months') d.setMonth(d.getMonth() + 3);
-    else if (probationPeriod === '6_months') d.setMonth(d.getMonth() + 6);
-    else if (probationPeriod === '12_months') d.setFullYear(d.getFullYear() + 1);
-    return d.toISOString().slice(0, 10);
-  }, [joiningDate, probationPeriod]);
-
   // Document Section State
   const [documentsList, setDocumentsList] = useState<DocumentItemState[]>(
-    initialDraft?.reviewData?.documents?.items || INITIAL_DOCUMENTS,
+    initialDraft?.reviewData?.documents?.items
+      ? (initialDraft.reviewData.documents.items as unknown as DocumentItemState[])
+      : INITIAL_DOCUMENTS,
   );
   const [isExperiencedHire, setIsExperiencedHire] = useState(
     initialDraft?.reviewData?.documents?.isExperiencedHire !== undefined
@@ -372,7 +335,7 @@ export function EmployeeRegistration({
   );
   const [passportPhoto, setPassportPhoto] = useState<PassportPhotoState>(
     initialDraft?.reviewData?.documents?.passportPhoto
-      ? { file: null, ...initialDraft.reviewData.documents.passportPhoto }
+      ? ({ file: null, previewUrl: '', ...initialDraft.reviewData.documents.passportPhoto } as PassportPhotoState)
       : {
           file: null,
           fileName: 'Passport_Photo.png',
@@ -533,159 +496,9 @@ export function EmployeeRegistration({
   };
 
   // Consolidated Data Object for Review Section
-  const reviewData: ReviewSectionData = {
-    general: {
-      employeeId,
-      employmentType: employmentType.replace('_', ' ').toUpperCase(),
-      employmentStatus: employmentStatus.replace('_', ' ').toUpperCase(),
-      department,
-      team,
-      designation,
-      gradeLevel,
-      reportingManager,
-      organisationUnit,
-      officeLocation,
-      joiningDate,
-      confirmedJoiningDate,
-      endDate,
-      sourceOfHire: sourceOfHire.replace('_', ' ').toUpperCase(),
-      probationPeriod: probationPeriod.replace('_', ' '),
-      noticePeriod: noticePeriod.replace('_', ' '),
-    },
-    personal: {
-      fullName: 'Arun Kumar',
-      gender: 'Male',
-      dob: '1995-05-18',
-      maritalStatus: 'Married',
-      nationality: 'Indian',
-      bloodGroup: 'O+ Positive',
-      differentlyAbled: 'No',
-      aadhaarNumber: '5482 9102 3341',
-      panNumber: 'ABCDE1234F',
-      personalEmail: 'arun.kumar@gmail.com',
-      mobilePhone: '+91 98765 43210',
-      emergencyPhone: '+91 98765 43211',
-      currentStreet: '123 Anna Salai, T. Nagar',
-      currentCity: 'Chennai',
-      currentState: 'Tamil Nadu',
-      currentPin: '600017',
-      currentCountry: 'India',
-      permanentStreet: '123 Anna Salai, T. Nagar',
-      permanentCity: 'Chennai',
-      permanentState: 'Tamil Nadu',
-      permanentPin: '600017',
-      permanentCountry: 'India',
-      familyMembers,
-      nominationDetails,
-    },
-    onboarding: {
-      tasks: onboardingTasks,
-      assets: assignedAssets,
-    },
-    skills: skillsList,
-    emergency: {
-      primaryContact: {
-        name: 'Sunita Kumar',
-        relationship: 'Spouse',
-        phone: '+91 98765 43210',
-        altPhone: '+91 98765 43212',
-        email: 'sunita.k@gmail.com',
-        address: '123 Anna Salai, T. Nagar, Chennai',
-      },
-      secondaryContact,
-    },
-    accounts: {
-      ifscCode: 'HDFC0001234',
-      bankName: 'HDFC Bank Ltd',
-      branchName: 'T. Nagar Branch',
-      accountHolderName: 'Arun Kumar',
-      accountNumber: '50100012345678',
-      reEnterAccountNumber: '50100012345678',
-      salaryStructure: 'Executive Tech Band (Grade L2)',
-      payGrade: 'L2 - Senior Software Engineer',
-      annualCtc: 1800000,
-      monthlyBasic: 75000,
-      hra: 30000,
-      specialAllowance: 45000,
-      grossSalary: 150000,
-      employerPf: 9000,
-      gratuity: 3608,
-      payrollGroup: 'Executive India Payroll',
-      salaryEffectiveDate: '2026-04-01',
-      paymentFrequency: 'Monthly',
-      pfApplicable: true,
-      esiApplicable: false,
-      ptApplicable: true,
-      taxRegime: 'New Tax Regime',
-      benefits: {
-        Medical: true,
-        Life: true,
-        Accident: true,
-        Gratuity: true,
-        Bonus: true,
-        Incentive: true,
-        Travel: false,
-        Mobile: true,
-        Internet: true,
-        Meal: true,
-        WFH: true,
-        CompanyVehicle: false,
-      },
-      medicalDetails: {
-        provider: 'Star Health & Allied Insurance',
-        policyNumber: 'SH-POL-2026-88912',
-        coverage: '₹500,000 Family Floater',
-        effectiveDate: '2026-04-01',
-        expiryDate: '2027-03-31',
-      },
-    },
-    onlineAccess: {
-      username: 'arun.kumar',
-      officialEmail: 'arun.kumar@bezent.com',
-      invitationStatus: 'Sent',
-      invitationSentDate: '2026-03-22',
-      mfaRequired: true,
-      forcePasswordSetup: true,
-      accountActive: true,
-      employeeRole: 'Software Engineer',
-      portalRoleScope: 'Employee',
-      moduleAccess: {
-        Dashboard: true,
-        Attendance: true,
-        Leave: true,
-        Calendar: true,
-        Tasks: true,
-        Meetings: true,
-        Projects: true,
-        Performance: true,
-        Documents: true,
-      },
-    },
-    workingHours: {
-      workSchedule: 'Standard General Shift (9:00 AM – 6:00 PM)',
-      workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-      startTime: '09:00',
-      endTime: '18:00',
-      standardHours: '8 hours / day (40 hours / week)',
-      breakMinutes: 15,
-      lunchMinutes: 45,
-      assignedCalendar: 'India Corporate Calendar 2026',
-      timeZone: 'Asia/Kolkata (IST, UTC+5:30)',
-      assignedSchedule: 'Standard General Shift',
-      holidays: [
-        { name: "New Year's Day", date: '2026-01-01', type: 'Public' },
-        { name: 'Republic Day', date: '2026-01-26', type: 'National' },
-        { name: 'Independence Day', date: '2026-08-15', type: 'National' },
-        { name: 'Gandhi Jayanti', date: '2026-10-02', type: 'National' },
-        { name: 'Diwali', date: '2026-11-08', type: 'Festival' },
-      ],
-    },
-    documents: {
-      isExperiencedHire,
-      passportPhoto,
-      items: documentsList,
-    },
-  };
+  const reviewData: ReviewSectionData = useMemo(() => {
+    return toReviewSectionData(formData);
+  }, [formData]);
 
   // Drafts & Unsaved Changes State
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(
@@ -744,7 +557,11 @@ export function EmployeeRegistration({
       setCurrentDraftId(draftId);
     }
 
-    const empName = reviewData.personal.fullName || 'Arun Kumar';
+    const empName =
+      [formData.personal.firstName, formData.personal.lastName].filter(Boolean).join(' ') ||
+      formData.personal.preferredName ||
+      reviewData.personal.fullName ||
+      'Draft Employee';
     const now = new Date();
     const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     const lastUpdated = `Today at ${timeStr}`;
@@ -758,6 +575,7 @@ export function EmployeeRegistration({
       pendingSectionLabels: ['Personal Information', 'Documents'],
       lastUpdated,
       reviewData,
+      formData,
     };
 
     setDraftsList((prev) => {
@@ -785,14 +603,19 @@ export function EmployeeRegistration({
     setCurrentDraftId(draft.id);
     setActiveSection(draft.activeSection);
 
-    if (draft.reviewData?.general?.employeeId) {
+    if (draft.formData) {
+      setFormData(draft.formData);
+      if (draft.formData.general.employeeId) {
+        setEmployeeId(draft.formData.general.employeeId);
+      }
+    } else if (draft.reviewData?.general?.employeeId) {
       setEmployeeId(draft.reviewData.general.employeeId);
     }
     if (draft.reviewData?.documents?.items) {
-      setDocumentsList(draft.reviewData.documents.items);
+      setDocumentsList(draft.reviewData.documents.items as unknown as DocumentItemState[]);
     }
     if (draft.reviewData?.documents?.passportPhoto) {
-      setPassportPhoto({ file: null, ...draft.reviewData.documents.passportPhoto });
+      setPassportPhoto({ file: null, previewUrl: '', ...draft.reviewData.documents.passportPhoto } as PassportPhotoState);
     }
     if (draft.reviewData?.documents?.isExperiencedHire !== undefined) {
       setIsExperiencedHire(draft.reviewData.documents.isExperiencedHire);
@@ -926,435 +749,29 @@ export function EmployeeRegistration({
           </div>
 
           {activeSection === 'general' ? (
-            <Stack gap="xl">
-              {/* Section 1: General Information */}
-              <FormSection
-                title="General Information"
-                description="Core identity and classification details"
-              >
-                <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                  {/* Dynamically rendered custom fields from Administration Customization Builder */}
-                  {customFields
-                    .filter((f) => f.sectionId === 'general')
-                    .map((f) => (
-                      <FormField
-                        key={f.id}
-                        label={f.label}
-                        htmlFor={`custom-${f.id}`}
-                        required={f.required}
-                        disabled={f.readOnly}
-                      >
-                        {f.fieldType === 'select' ? (
-                          <Select
-                            id={`custom-${f.id}`}
-                            disabled={f.readOnly}
-                            options={[
-                              { value: '', label: `Select ${f.label}` },
-                              ...(f.options?.map((opt: string) => ({ value: opt, label: opt })) ||
-                                []),
-                            ]}
-                          />
-                        ) : (
-                          <Input
-                            id={`custom-${f.id}`}
-                            type={f.fieldType === 'date' ? 'date' : 'text'}
-                            placeholder={f.defaultValue || `Enter ${f.label}`}
-                            disabled={f.readOnly}
-                          />
-                        )}
-                      </FormField>
-                    ))}
-
-                  {/* Form Engine company custom fields */}
-                  {registrationConfig.customFields('general').map((f) => (
-                    <FormField
-                      key={f.key}
-                      label={f.label}
-                      htmlFor={`form-engine-${f.key}`}
-                      required={f.required}
-                      span={f.width === 'full' ? 'full' : undefined}
-                      helperText={f.description ?? undefined}
-                    >
-                      {f.type === 'dropdown' || f.type === 'select' || f.type === 'radio' ? (
-                        <Select
-                          id={`form-engine-${f.key}`}
-                          options={[
-                            { value: '', label: `Select ${f.label}` },
-                            ...(Array.isArray(f.config?.options)
-                              ? (f.config.options as Array<{ value: string; label: string }>).map(
-                                  (opt) => ({
-                                    value: opt.value,
-                                    label: opt.label,
-                                  }),
-                                )
-                              : []),
-                          ]}
-                        />
-                      ) : (
-                        <Input
-                          id={`form-engine-${f.key}`}
-                          type={
-                            f.type === 'date' ? 'date' : f.type === 'number' ? 'number' : 'text'
-                          }
-                          placeholder={`Enter ${f.label}`}
-                        />
-                      )}
-                    </FormField>
-                  ))}
-
-                  {/* 1. Employee ID */}
-                  <RegistrationField
-                    fieldKey="general.employeeId"
-                    value={employeeId}
-                    htmlFor="reg-employee-id"
-                    helperText="System-assigned unique ID (auto-generated by backend)"
-                  >
-                    <Input
-                      id="reg-employee-id"
-                      value={employeeId}
-                      readOnly
-                      disabled
-                      placeholder="Generating..."
-                    />
-                  </RegistrationField>
-
-                  {/* 2. Employment Type */}
-                  <RegistrationField
-                    fieldKey="general.employmentType"
-                    value={employmentType}
-                    htmlFor="reg-employment-type"
-                  >
-                    <Select
-                      id="reg-employment-type"
-                      value={employmentType}
-                      onChange={(e) => handleEmploymentTypeChange(e.target.value)}
-                      options={[
-                        { value: 'full_time', label: 'Full Time' },
-                        { value: 'part_time', label: 'Part Time' },
-                        { value: 'contract', label: 'Contract (Fixed Term)' },
-                        { value: 'intern', label: 'Intern (Fixed Term)' },
-                        { value: 'other', label: 'Other' },
-                      ]}
-                    />
-                  </RegistrationField>
-
-                  {/* 3. Employment Status */}
-                  <RegistrationField
-                    fieldKey="general.employmentStatus"
-                    value={employmentStatus}
-                    htmlFor="reg-employment-status"
-                    helperText="System-controlled: Pending Activation"
-                  >
-                    <Input
-                      id="reg-employment-status"
-                      value="Pending Activation"
-                      readOnly
-                      disabled
-                    />
-                  </RegistrationField>
-                </FormGrid>
-              </FormSection>
-
-              {/* Section 2: Employment Details */}
-              <FormSection
-                title="Employment Details"
-                description="Role, structure, placement, and reporting hierarchy"
-              >
-                <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                  {/* 4. Department */}
-                  <RegistrationField
-                    fieldKey="general.department"
-                    value={department}
-                    htmlFor="reg-department"
-                  >
-                    <Select
-                      id="reg-department"
-                      value={department}
-                      onChange={(e) => handleDepartmentChange(e.target.value)}
-                      options={[
-                        { value: 'Engineering', label: 'Engineering' },
-                        { value: 'Human Resources', label: 'Human Resources' },
-                        { value: 'Finance', label: 'Finance' },
-                        { value: 'Operations', label: 'Operations' },
-                        { value: 'other', label: 'Other' },
-                      ]}
-                    />
-                  </RegistrationField>
-
-                  {/* 5. Team (Filtered based on selected Department) */}
-                  <RegistrationField fieldKey="general.team" value={team} htmlFor="reg-team">
-                    <Select
-                      id="reg-team"
-                      value={team}
-                      onChange={(e) => setTeam(e.target.value)}
-                      options={(DEPARTMENT_TEAMS[department] || ['General', 'other']).map((t) => ({
-                        value: t,
-                        label: t,
-                      }))}
-                    />
-                  </RegistrationField>
-
-                  {/* 6. Designation */}
-                  <RegistrationField
-                    fieldKey="general.designation"
-                    value={designation}
-                    htmlFor="reg-designation"
-                  >
-                    <Select
-                      id="reg-designation"
-                      value={designation}
-                      onChange={(e) => setDesignation(e.target.value)}
-                      options={[
-                        { value: 'Software Engineer', label: 'Software Engineer' },
-                        { value: 'Financial Analyst', label: 'Financial Analyst' },
-                        { value: 'Senior HR Specialist', label: 'Senior HR Specialist' },
-                        { value: 'Product Manager', label: 'Product Manager' },
-                        { value: 'other', label: 'Other' },
-                      ]}
-                    />
-                  </RegistrationField>
-
-                  {/* 7. Grade / Level */}
-                  <RegistrationField
-                    fieldKey="general.gradeLevel"
-                    value={gradeLevel}
-                    htmlFor="reg-grade-level"
-                  >
-                    <Select
-                      id="reg-grade-level"
-                      value={gradeLevel}
-                      onChange={(e) => setGradeLevel(e.target.value)}
-                      options={[
-                        { value: 'L1 - Entry Level', label: 'L1 - Entry Level' },
-                        { value: 'L2 - Mid Level', label: 'L2 - Mid Level' },
-                        { value: 'L3 - Senior Level', label: 'L3 - Senior Level' },
-                        { value: 'L4 - Lead', label: 'L4 - Lead' },
-                        { value: 'L5 - Executive', label: 'L5 - Executive' },
-                        { value: 'other', label: 'Other' },
-                      ]}
-                    />
-                  </RegistrationField>
-
-                  {/* 8. Reporting Manager */}
-                  <RegistrationField
-                    fieldKey="general.reportingManager"
-                    value={reportingManager}
-                    htmlFor="reg-reporting-manager"
-                    disabled
-                  >
-                    <Input
-                      id="reg-reporting-manager"
-                      value={reportingManager || ''}
-                      placeholder="Select Manager..."
-                      disabled
-                    />
-                  </RegistrationField>
-
-                  {/* 9. Organisation Unit */}
-                  <RegistrationField
-                    fieldKey="general.organisationUnit"
-                    value={organisationUnit}
-                    htmlFor="reg-org-unit"
-                  >
-                    <Select
-                      id="reg-org-unit"
-                      value={organisationUnit}
-                      onChange={(e) => setOrganisationUnit(e.target.value)}
-                      options={[
-                        { value: 'Technology', label: 'Technology' },
-                        { value: 'Operations', label: 'Operations' },
-                        { value: 'Corporate', label: 'Corporate' },
-                        { value: 'other', label: 'Other' },
-                      ]}
-                    />
-                  </RegistrationField>
-
-                  {/* 10. Office Location */}
-                  <RegistrationField
-                    fieldKey="general.officeLocation"
-                    value={officeLocation}
-                    htmlFor="reg-office-location"
-                  >
-                    <Select
-                      id="reg-office-location"
-                      value={officeLocation}
-                      onChange={(e) => setOfficeLocation(e.target.value)}
-                      options={[
-                        { value: 'Chennai - Main Office', label: 'Chennai - Main Office' },
-                        { value: 'Bengaluru', label: 'Bengaluru' },
-                        { value: 'Hyderabad', label: 'Hyderabad' },
-                        { value: 'other', label: 'Other' },
-                      ]}
-                    />
-                  </RegistrationField>
-
-                  {/* 11. Joining Date */}
-                  <RegistrationField
-                    fieldKey="general.joiningDate"
-                    value={joiningDate}
-                    htmlFor="reg-joining-date"
-                  >
-                    <Input
-                      id="reg-joining-date"
-                      type="date"
-                      value={joiningDate}
-                      onChange={(e) => setJoiningDate(e.target.value)}
-                    />
-                  </RegistrationField>
-                </FormGrid>
-              </FormSection>
-
-              {/* Section 3: Additional Information */}
-              <FormSection
-                title="Additional Information"
-                description="Timeline, recruitment source, and employment terms"
-              >
-                <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                  {/* 12. Confirmed Date of Joining */}
-                  <RegistrationField
-                    fieldKey="general.confirmedJoiningDate"
-                    value={confirmedJoiningDate}
-                    htmlFor="reg-confirmed-joining-date"
-                    helperText="Agreed candidate joining date (distinct from probation confirmation)"
-                  >
-                    <Input
-                      id="reg-confirmed-joining-date"
-                      type="date"
-                      value={confirmedJoiningDate}
-                      onChange={(e) => setConfirmedJoiningDate(e.target.value)}
-                    />
-                  </RegistrationField>
-
-                  {/* 13. End Date (Conditional for fixed-term) */}
-                  {isFixedTerm && (
-                    <RegistrationField
-                      fieldKey="general.endDate"
-                      value={endDate}
-                      htmlFor="reg-end-date"
-                      helperText="Contract or internship termination date"
-                    >
-                      <Input
-                        id="reg-end-date"
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                      />
-                    </RegistrationField>
-                  )}
-
-                  {/* 14. Source of Hire */}
-                  <RegistrationField
-                    fieldKey="general.sourceOfHire"
-                    value={sourceOfHire}
-                    htmlFor="reg-source-of-hire"
-                  >
-                    <Select
-                      id="reg-source-of-hire"
-                      value={sourceOfHire}
-                      onChange={(e) => setSourceOfHire(e.target.value)}
-                      options={[
-                        { value: 'direct_applicant', label: 'Direct Applicant' },
-                        { value: 'referral', label: 'Employee Referral' },
-                        { value: 'agency', label: 'Agency' },
-                        { value: 'campus', label: 'Campus' },
-                        { value: 'linkedin', label: 'LinkedIn' },
-                        { value: 'other', label: 'Other' },
-                      ]}
-                    />
-                  </RegistrationField>
-
-                  {/* 14b. Referral ID Input (Shown only when Source of Hire = Employee Referral) */}
-                  {sourceOfHire === 'referral' && (
-                    <RegistrationField
-                      fieldKey="general.referralId"
-                      value={referralId}
-                      htmlFor="reg-referral-id"
-                      helperText={
-                        referralLoading
-                          ? 'Resolving referral code...'
-                          : resolvedReferrer
-                            ? `✓ Referred by: ${resolvedReferrer.name}${resolvedReferrer.designation ? ` (${resolvedReferrer.designation})` : ''}`
-                            : referralError || "Enter the referring employee's unique Referral ID"
-                      }
-                      error={referralError || undefined}
-                    >
-                      <Input
-                        id="reg-referral-id"
-                        type="text"
-                        placeholder="e.g. REF-EMP0001"
-                        value={referralId}
-                        onChange={(e) => setReferralId(e.target.value)}
-                        error={referralError || undefined}
-                      />
-                    </RegistrationField>
-                  )}
-
-                  {/* 15. Probation Period */}
-                  <RegistrationField
-                    fieldKey="general.probationPeriod"
-                    value={probationPeriod}
-                    htmlFor="reg-probation-period"
-                    helperText={
-                      calculatedProbationEndDate
-                        ? `Probation ends on: ${calculatedProbationEndDate}`
-                        : probationPeriod === 'no_probation'
-                          ? 'No probation period applicable'
-                          : undefined
-                    }
-                  >
-                    <Select
-                      id="reg-probation-period"
-                      value={probationPeriod}
-                      onChange={(e) => setProbationPeriod(e.target.value)}
-                      options={[
-                        { value: '3_months', label: '3 Months' },
-                        { value: '6_months', label: '6 Months' },
-                        { value: '12_months', label: '12 Months' },
-                        { value: 'no_probation', label: 'No Probation' },
-                        { value: 'custom', label: 'Custom' },
-                        { value: 'other', label: 'Other' },
-                      ]}
-                    />
-                  </RegistrationField>
-
-                  {/* 16. Notice Period */}
-                  <RegistrationField
-                    fieldKey="general.noticePeriod"
-                    value={noticePeriod}
-                    htmlFor="reg-notice-period"
-                  >
-                    <Select
-                      id="reg-notice-period"
-                      value={noticePeriod}
-                      onChange={(e) => setNoticePeriod(e.target.value)}
-                      options={[
-                        { value: '15_days', label: '15 Days' },
-                        { value: '30_days', label: '30 Days' },
-                        { value: '60_days', label: '60 Days' },
-                        { value: '90_days', label: '90 Days' },
-                        { value: 'no_notice', label: 'No Notice Period' },
-                        { value: 'custom', label: 'Custom' },
-                        { value: 'other', label: 'Other' },
-                      ]}
-                    />
-                  </RegistrationField>
-                </FormGrid>
-              </FormSection>
-            </Stack>
+            <GeneralInformation
+              employeeId={employeeId}
+              data={formData.general}
+              onChange={updateGeneral}
+            />
           ) : activeSection === 'personal' ? (
-            <PersonalInformation employeeId={employeeId} />
+            <PersonalInformation
+              employeeId={employeeId}
+              data={formData.personal}
+              onChange={updatePersonal}
+            />
           ) : activeSection === 'onboarding' ? (
-            <OnboardingSection />
+            <OnboardingSection value={formData.onboarding} onChange={updateOnboarding} />
           ) : activeSection === 'skills' ? (
-            <SkillsSection />
+            <SkillsSection value={formData.skills} onChange={updateSkills} />
           ) : activeSection === 'emergency' ? (
-            <EmergencyContactSection />
+            <EmergencyContactSection value={formData.emergency} onChange={updateEmergency} />
           ) : activeSection === 'accounts' ? (
-            <AccountsSection />
+            <AccountsSection value={formData.accounts} onChange={updateAccounts} />
           ) : activeSection === 'online_access' ? (
-            <OnlineAccessSection />
+            <OnlineAccessSection value={formData.onlineAccess} onChange={updateOnlineAccess} />
           ) : activeSection === 'working_hours' ? (
-            <WorkingHoursSection />
+            <WorkingHoursSection value={formData.workingHours} onChange={updateWorkingHours} />
           ) : activeSection === 'documents' ? (
             <DocumentsSection
               documents={documentsList}
@@ -1375,7 +792,17 @@ export function EmployeeRegistration({
               onDeleteSkill={handleDeleteSkill}
               onDeleteSecondaryContact={handleDeleteSecondaryContact}
               onDeleteDocument={handleDeleteDocument}
-              onCreateEmployee={() => onSave?.(reviewData as unknown as Record<string, unknown>)}
+              onCreateEmployee={() => {
+                if (onSubmit) {
+                  void onSubmit(formData);
+                } else if (onSave) {
+                  onSave(reviewData as unknown as Record<string, unknown>);
+                }
+              }}
+              isSubmitting={isSubmitting}
+              submitError={submitError}
+              createdEmployee={createdEmployee}
+              onDone={onCancel}
             />
           ) : (
             <Stack gap="lg">

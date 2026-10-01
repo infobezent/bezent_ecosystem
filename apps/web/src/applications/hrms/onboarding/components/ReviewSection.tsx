@@ -114,88 +114,100 @@ export interface ReviewSectionData {
       name: string;
       relationship: string;
       phone: string;
-      altPhone: string;
-      email: string;
-      address: string;
-    };
-    secondaryContact: {
+      altPhone?: string;
+      email?: string;
+      address?: string;
+      isPrivate?: boolean;
+    } | null;
+    secondaryContact?: {
       name: string;
       relationship: string;
       phone: string;
-      altPhone: string;
-      email: string;
-      address: string;
+      altPhone?: string;
+      email?: string;
+      address?: string;
     } | null;
   };
   accounts: {
     ifscCode: string;
     bankName: string;
-    branchName: string;
+    branchName?: string;
     accountHolderName: string;
     accountNumber: string;
-    reEnterAccountNumber: string;
-    salaryStructure: string;
-    payGrade: string;
-    annualCtc: number;
-    monthlyBasic: number;
-    hra: number;
-    specialAllowance: number;
-    grossSalary: number;
-    employerPf: number;
-    gratuity: number;
-    payrollGroup: string;
-    salaryEffectiveDate: string;
-    paymentFrequency: string;
-    pfApplicable: boolean;
-    esiApplicable: boolean;
-    ptApplicable: boolean;
-    taxRegime: string;
-    benefits: Record<string, boolean>;
-    medicalDetails: {
-      provider: string;
-      policyNumber: string;
-      coverage: string;
-      effectiveDate: string;
-      expiryDate: string;
+    reEnterAccountNumber?: string;
+    salaryStructure?: string;
+    payGrade?: string;
+    annualCtc?: number;
+    monthlyBasic?: number;
+    hra?: number;
+    specialAllowance?: number;
+    grossSalary?: number;
+    employerPf?: number;
+    gratuity?: number;
+    payrollGroup?: string;
+    salaryEffectiveDate?: string;
+    paymentFrequency?: string;
+    pfApplicable?: boolean;
+    esiApplicable?: boolean;
+    ptApplicable?: boolean;
+    taxRegime?: string;
+    benefits?: Record<string, boolean>;
+    medicalDetails?: {
+      provider?: string;
+      policyNumber?: string;
+      coverage?: string;
+      effectiveDate?: string;
+      expiryDate?: string;
     };
-  };
+  } | null;
   onlineAccess: {
     username: string;
     officialEmail: string;
-    invitationStatus: string;
-    invitationSentDate: string;
-    mfaRequired: boolean;
-    forcePasswordSetup: boolean;
-    accountActive: boolean;
-    employeeRole: string;
-    portalRoleScope: string;
-    moduleAccess: Record<string, boolean>;
+    invitationStatus?: string;
+    invitationSentDate?: string;
+    mfaRequired?: boolean;
+    forcePasswordSetup?: boolean;
+    accountActive?: boolean;
+    employeeRole?: string;
+    portalRoleScope?: string;
+    moduleAccess?: Record<string, boolean>;
   };
   workingHours: {
     workSchedule: string;
     workingDays: string[];
     startTime: string;
     endTime: string;
-    standardHours: string;
-    breakMinutes: number;
-    lunchMinutes: number;
-    assignedCalendar: string;
+    standardHours?: string;
+    breakMinutes?: number;
+    lunchMinutes?: number;
+    assignedCalendar?: string;
     timeZone: string;
-    assignedSchedule: string;
-    holidays: Array<{ name: string; date: string; type: string }>;
+    assignedSchedule?: string;
+    holidays?: Array<{ name: string; date: string; type: string }>;
   };
   documents: {
     isExperiencedHire: boolean;
-    passportPhoto: {
+    passportPhoto?: {
       fileName: string;
-      previewUrl: string;
+      previewUrl?: string;
       status: 'Pending' | 'Verified' | 'Rejected' | 'Not Required';
-    };
-    items: DocumentItemState[];
+    } | null;
+    items: Array<
+      Partial<DocumentItemState> & {
+        id: string;
+        name: string;
+        isRequired?: boolean;
+        category?: string;
+        status?: string;
+        docNumber?: string;
+        fileName?: string;
+        fileSizeFormatted?: string;
+      }
+    >;
   };
 }
 
-interface ReviewSectionProps {
+export interface ReviewSectionProps {
   data: ReviewSectionData;
   onEditSection: (sectionId: RegistrationSectionId) => void;
   onDeleteFamilyMember?: (id: string) => void;
@@ -206,6 +218,10 @@ interface ReviewSectionProps {
   onDeleteSecondaryContact?: () => void;
   onDeleteDocument?: (id: string) => void;
   onCreateEmployee?: () => void;
+  isSubmitting?: boolean;
+  submitError?: string | null;
+  createdEmployee?: { id: string; employeeNumber?: string | null; name?: string } | null;
+  onDone?: () => void;
 }
 
 export function ReviewSection({
@@ -219,16 +235,19 @@ export function ReviewSection({
   onDeleteSecondaryContact,
   onDeleteDocument,
   onCreateEmployee,
+  isSubmitting = false,
+  submitError = null,
+  createdEmployee = null,
+  onDone,
 }: ReviewSectionProps) {
   const [showValidationModal, setShowValidationModal] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Dynamic calculation of pending work across all sections
   const calculatePendingFields = (): PendingFieldItem[] => {
     const pending: PendingFieldItem[] = [];
 
-    // 1. General
-    if (!data.general.employeeId) {
+    // 1. General (Core Required)
+    if (!data.general.employeeId?.trim()) {
       pending.push({
         sectionId: 'general',
         sectionLabel: 'General',
@@ -236,7 +255,7 @@ export function ReviewSection({
         reason: 'Required',
       });
     }
-    if (!data.general.joiningDate) {
+    if (!data.general.joiningDate?.trim()) {
       pending.push({
         sectionId: 'general',
         sectionLabel: 'General',
@@ -244,7 +263,7 @@ export function ReviewSection({
         reason: 'Required',
       });
     }
-    if (!data.general.department) {
+    if (!data.general.department?.trim()) {
       pending.push({
         sectionId: 'general',
         sectionLabel: 'General',
@@ -253,8 +272,8 @@ export function ReviewSection({
       });
     }
 
-    // 2. Personal Information
-    if (!data.personal.fullName) {
+    // 2. Personal Information (Core Required)
+    if (!data.personal.fullName?.trim()) {
       pending.push({
         sectionId: 'personal',
         sectionLabel: 'Personal Information',
@@ -262,7 +281,7 @@ export function ReviewSection({
         reason: 'Required',
       });
     }
-    if (!data.personal.personalEmail) {
+    if (!data.personal.personalEmail?.trim()) {
       pending.push({
         sectionId: 'personal',
         sectionLabel: 'Personal Information',
@@ -270,7 +289,7 @@ export function ReviewSection({
         reason: 'Required',
       });
     }
-    if (!data.personal.mobilePhone) {
+    if (!data.personal.mobilePhone?.trim()) {
       pending.push({
         sectionId: 'personal',
         sectionLabel: 'Personal Information',
@@ -279,105 +298,65 @@ export function ReviewSection({
       });
     }
 
-    // 5. Emergency Contact
-    if (!data.emergency.primaryContact.name || !data.emergency.primaryContact.phone) {
+    // 5. Emergency Contact (If partially provided, validate consistency)
+    if (data.emergency.primaryContact?.name && !data.emergency.primaryContact?.phone?.trim()) {
       pending.push({
         sectionId: 'emergency',
         sectionLabel: 'Emergency Contact',
-        fieldName: 'Primary Contact Details',
-        reason: 'Required',
+        fieldName: 'Primary Contact Phone',
+        reason: 'Phone required when name is entered',
       });
     }
 
-    // 6. Accounts
-    if (!data.accounts.accountNumber || !data.accounts.ifscCode) {
-      pending.push({
-        sectionId: 'accounts',
-        sectionLabel: 'Accounts',
-        fieldName: 'Bank Account / IFSC',
-        reason: 'Required',
-      });
-    }
-    if (data.accounts.accountNumber !== data.accounts.reEnterAccountNumber) {
-      pending.push({
-        sectionId: 'accounts',
-        sectionLabel: 'Accounts',
-        fieldName: 'Account Number Verification',
-        reason: 'Numbers do not match',
-      });
-    }
-    if (
-      data.accounts.benefits.Medical &&
-      (!data.accounts.medicalDetails.provider || !data.accounts.medicalDetails.policyNumber)
-    ) {
-      pending.push({
-        sectionId: 'accounts',
-        sectionLabel: 'Accounts',
-        fieldName: 'Medical Insurance Details',
-        reason: 'Medical benefit enabled — policy required',
-      });
-    }
-
-    // 7. Online Access
-    if (!data.onlineAccess.username || !data.onlineAccess.officialEmail) {
-      pending.push({
-        sectionId: 'online_access',
-        sectionLabel: 'Online Access',
-        fieldName: 'Username / Official Email',
-        reason: 'Required',
-      });
-    }
-
-    // 8. Working Hours
-    if (!data.workingHours.workSchedule || !data.workingHours.timeZone) {
-      pending.push({
-        sectionId: 'working_hours',
-        sectionLabel: 'Working Hours',
-        fieldName: 'Work Schedule & Timezone',
-        reason: 'Required',
-      });
-    }
-
-    // 9. Documents
-    if (!data.documents.passportPhoto.previewUrl && !data.documents.passportPhoto.fileName) {
-      pending.push({
-        sectionId: 'documents',
-        sectionLabel: 'Documents',
-        fieldName: 'Passport-size Photograph',
-        reason: 'Missing Upload',
-      });
-    }
-
-    data.documents.items.forEach((doc) => {
-      // Ignore professional history docs if fresher
-      if (!data.documents.isExperiencedHire && doc.category.includes('Professional History')) {
-        return;
+    // 6. Accounts (If entered, validate consistency)
+    if (data.accounts) {
+      if (data.accounts.accountNumber && !data.accounts.ifscCode) {
+        pending.push({
+          sectionId: 'accounts',
+          sectionLabel: 'Accounts',
+          fieldName: 'IFSC Code',
+          reason: 'Required when bank account is provided',
+        });
       }
-      if (doc.isRequired) {
-        if (!doc.fileName && !doc.file && !doc.filePreviewUrl && !doc.docNumber) {
-          pending.push({
-            sectionId: 'documents',
-            sectionLabel: 'Documents',
-            fieldName: `${doc.name}`,
-            reason: 'Missing Upload',
-          });
-        } else if (doc.status === 'Pending') {
-          pending.push({
-            sectionId: 'documents',
-            sectionLabel: 'Documents',
-            fieldName: `${doc.name}`,
-            reason: 'Pending Verification',
-          });
-        } else if (doc.status === 'Rejected') {
-          pending.push({
-            sectionId: 'documents',
-            sectionLabel: 'Documents',
-            fieldName: `${doc.name}`,
-            reason: 'Verification Rejected',
-          });
+      if (
+        data.accounts.accountNumber &&
+        data.accounts.reEnterAccountNumber &&
+        data.accounts.accountNumber !== data.accounts.reEnterAccountNumber
+      ) {
+        pending.push({
+          sectionId: 'accounts',
+          sectionLabel: 'Accounts',
+          fieldName: 'Account Number Verification',
+          reason: 'Account numbers do not match',
+        });
+      }
+    }
+
+    // 9. Documents (If documents exist and are rejected)
+    if (data.documents.items.length > 0) {
+      data.documents.items.forEach((doc) => {
+        if (!data.documents.isExperiencedHire && doc.category?.includes('Professional History')) {
+          return;
         }
-      }
-    });
+        if (doc.isRequired) {
+          if (!doc.fileName && !doc.file && !doc.filePreviewUrl && !doc.docNumber) {
+            pending.push({
+              sectionId: 'documents',
+              sectionLabel: 'Documents',
+              fieldName: `${doc.name}`,
+              reason: 'Missing Upload',
+            });
+          } else if (doc.status === 'Rejected') {
+            pending.push({
+              sectionId: 'documents',
+              sectionLabel: 'Documents',
+              fieldName: `${doc.name}`,
+              reason: 'Verification Rejected',
+            });
+          }
+        }
+      });
+    }
 
     return pending;
   };
@@ -395,13 +374,11 @@ export function ReviewSection({
   });
 
   const handleFinalCreateClick = () => {
+    if (isSubmitting) return;
     if (!isComplete) {
       setShowValidationModal(true);
     } else {
-      setShowSuccessModal(true);
-      if (onCreateEmployee) {
-        onCreateEmployee();
-      }
+      onCreateEmployee?.();
     }
   };
 
@@ -418,14 +395,24 @@ export function ReviewSection({
 
   return (
     <Stack gap="xl">
+      {/* Actionable Error Alert if backend submission failed */}
+      {submitError && (
+        <Alert variant="danger">
+          <Stack gap="xs">
+            <strong>Creation Failed</strong>
+            <span>{submitError}</span>
+          </Stack>
+        </Alert>
+      )}
+
       {/* Prominent REGISTRATION STATUS Alert */}
       <Alert variant={isComplete ? 'success' : 'warning'}>
         <Inline justify="between" align="center">
           <Stack gap="xs">
-            <strong>{isComplete ? 'Registration Complete' : 'Pending Action Required'}</strong>
+            <strong>{isComplete ? 'Registration Ready' : 'Pending Action Required'}</strong>
             <span>
               {isComplete
-                ? 'All 10 registration sections complete and verified. Ready to create employee record.'
+                ? 'Core registration details verified. Ready to create employee record.'
                 : `${pendingItems.length} item${pendingItems.length > 1 ? 's' : ''} require attention across ${
                     Object.keys(sectionPendingMap).length
                   } sections.`}
@@ -506,19 +493,19 @@ export function ReviewSection({
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Department</Label>
-              <strong>{data.general.department}</strong>
+              <strong>{data.general.department || '—'}</strong>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Team</Label>
-              <strong>{data.general.team}</strong>
+              <strong>{data.general.team || '—'}</strong>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Designation</Label>
-              <strong>{data.general.designation}</strong>
+              <strong>{data.general.designation || '—'}</strong>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Grade / Level</Label>
-              <strong>{data.general.gradeLevel}</strong>
+              <strong>{data.general.gradeLevel || '—'}</strong>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Reporting Manager</Label>
@@ -526,11 +513,11 @@ export function ReviewSection({
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Organisation Unit</Label>
-              <strong>{data.general.organisationUnit}</strong>
+              <strong>{data.general.organisationUnit || '—'}</strong>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Office Location</Label>
-              <strong>{data.general.officeLocation}</strong>
+              <strong>{data.general.officeLocation || '—'}</strong>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Joining Date</Label>
@@ -580,7 +567,7 @@ export function ReviewSection({
 
           {/* Photo & Identity Summary */}
           <Inline gap="md" align="center">
-            {data.documents.passportPhoto.previewUrl ? (
+            {data.documents.passportPhoto?.previewUrl ? (
               <img
                 src={data.documents.passportPhoto.previewUrl}
                 alt="Passport Photo"
@@ -592,46 +579,62 @@ export function ReviewSection({
               </div>
             )}
             <Stack gap="xs">
-              <CardTitle>{data.personal.fullName || 'Arun Kumar'}</CardTitle>
+              <CardTitle>{data.personal.fullName || '—'}</CardTitle>
               <span className="bezent-card__desc">
-                {data.personal.gender} • DOB: {data.personal.dob} • Nationality:{' '}
-                {data.personal.nationality}
+                {data.personal.gender || '—'} • DOB: {data.personal.dob || '—'} • Nationality:{' '}
+                {data.personal.nationality || '—'}
               </span>
-              <span className="bezent-card__desc">
-                Aadhaar: {data.personal.aadhaarNumber} | PAN: {data.personal.panNumber}
-              </span>
+              {(data.personal.aadhaarNumber || data.personal.panNumber) && (
+                <span className="bezent-card__desc">
+                  {data.personal.aadhaarNumber ? `Aadhaar: ${data.personal.aadhaarNumber}` : ''}
+                  {data.personal.aadhaarNumber && data.personal.panNumber ? ' | ' : ''}
+                  {data.personal.panNumber ? `PAN: ${data.personal.panNumber}` : ''}
+                </span>
+              )}
             </Stack>
           </Inline>
 
           <Grid columns={3} gap="md">
             <Stack gap="xs">
               <Label size="sm">Personal Email</Label>
-              <strong>{data.personal.personalEmail}</strong>
+              <strong>{data.personal.personalEmail || '—'}</strong>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Mobile Phone</Label>
-              <strong>{data.personal.mobilePhone}</strong>
+              <strong>{data.personal.mobilePhone || '—'}</strong>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Marital Status</Label>
-              <strong>{data.personal.maritalStatus}</strong>
+              <strong>{data.personal.maritalStatus || '—'}</strong>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Blood Group</Label>
-              <strong>{data.personal.bloodGroup}</strong>
+              <strong>{data.personal.bloodGroup || '—'}</strong>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Current Address</Label>
               <strong>
-                {data.personal.currentStreet}, {data.personal.currentCity},{' '}
-                {data.personal.currentState} - {data.personal.currentPin}
+                {[
+                  data.personal.currentStreet,
+                  data.personal.currentCity,
+                  data.personal.currentState,
+                  data.personal.currentPin,
+                ]
+                  .filter(Boolean)
+                  .join(', ') || '—'}
               </strong>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Permanent Address</Label>
               <strong>
-                {data.personal.permanentStreet}, {data.personal.permanentCity},{' '}
-                {data.personal.permanentState} - {data.personal.permanentPin}
+                {[
+                  data.personal.permanentStreet,
+                  data.personal.permanentCity,
+                  data.personal.permanentState,
+                  data.personal.permanentPin,
+                ]
+                  .filter(Boolean)
+                  .join(', ') || '—'}
               </strong>
             </Stack>
           </Grid>
@@ -645,7 +648,8 @@ export function ReviewSection({
                 {data.personal.familyMembers.map((fam) => (
                   <Inline key={fam.id} justify="between" align="center">
                     <span>
-                      <strong>{fam.name}</strong> ({fam.relationship}) — DOB: {fam.dob}{' '}
+                      <strong>{fam.name}</strong> ({fam.relationship})
+                      {fam.dob ? ` — DOB: ${fam.dob}` : ''}{' '}
                       {fam.dependent && <Badge variant="neutral">Dependent</Badge>}
                     </span>
                     {onDeleteFamilyMember && (
@@ -704,7 +708,11 @@ export function ReviewSection({
           <Inline justify="between" align="center">
             <Inline gap="sm" align="center">
               <CardTitle>3. Onboarding Tasks &amp; Assets</CardTitle>
-              <Badge variant="success">Complete</Badge>
+              {data.onboarding.tasks.length > 0 || data.onboarding.assets.length > 0 ? (
+                <Badge variant="success">Configured</Badge>
+              ) : (
+                <Badge variant="neutral">Not Configured</Badge>
+              )}
             </Inline>
             <Button
               type="button"
@@ -716,58 +724,74 @@ export function ReviewSection({
             </Button>
           </Inline>
 
-          {/* Tasks */}
-          <Stack gap="xs">
-            <Label size="md">Onboarding Tasks ({data.onboarding.tasks.length})</Label>
-            <Stack gap="xs">
-              {data.onboarding.tasks.map((tsk) => (
-                <Inline key={tsk.id} justify="between" align="center">
-                  <span>
-                    <strong>{tsk.taskDescription}</strong> • Assigned: {tsk.assignedTo} • Due:{' '}
-                    {tsk.dueDate} <Badge variant="neutral">{tsk.status}</Badge>
-                  </span>
-                  {onDeleteTask && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() =>
-                        confirmAndDelete(tsk.taskDescription, () => onDeleteTask(tsk.id))
-                      }
-                    >
-                      Delete
-                    </Button>
-                  )}
-                </Inline>
-              ))}
-            </Stack>
-          </Stack>
+          {data.onboarding.tasks.length === 0 && data.onboarding.assets.length === 0 ? (
+            <span className="bezent-card__desc">
+              No onboarding tasks or assets configured for this registration.
+            </span>
+          ) : (
+            <>
+              {/* Tasks */}
+              {data.onboarding.tasks.length > 0 && (
+                <Stack gap="xs">
+                  <Label size="md">Onboarding Tasks ({data.onboarding.tasks.length})</Label>
+                  <Stack gap="xs">
+                    {data.onboarding.tasks.map((tsk) => (
+                      <Inline key={tsk.id} justify="between" align="center">
+                        <span>
+                          <strong>{tsk.taskDescription}</strong> • Assigned: {tsk.assignedTo} • Due:{' '}
+                          {tsk.dueDate} <Badge variant="neutral">{tsk.status}</Badge>
+                        </span>
+                        {onDeleteTask && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              confirmAndDelete(tsk.taskDescription, () => onDeleteTask(tsk.id))
+                            }
+                          >
+                            Delete
+                          </Button>
+                        )}
+                      </Inline>
+                    ))}
+                  </Stack>
+                </Stack>
+              )}
 
-          {/* Assets */}
-          <Stack gap="xs">
-            <Divider />
-            <Label size="md">Assigned Assets ({data.onboarding.assets.length})</Label>
-            <Stack gap="xs">
-              {data.onboarding.assets.map((ast) => (
-                <Inline key={ast.id} justify="between" align="center">
-                  <span>
-                    <strong>{ast.assetName}</strong> ({ast.category}) — S/N: {ast.serialNumber} •
-                    Issued: {ast.issueDate} (Qty: {ast.quantity})
-                  </span>
-                  {onDeleteAsset && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => confirmAndDelete(ast.assetName, () => onDeleteAsset(ast.id))}
-                    >
-                      Delete
-                    </Button>
-                  )}
-                </Inline>
-              ))}
-            </Stack>
-          </Stack>
+              {/* Assets */}
+              {data.onboarding.assets.length > 0 && (
+                <Stack gap="xs">
+                  <Divider />
+                  <Label size="md">Assigned Assets ({data.onboarding.assets.length})</Label>
+                  <Stack gap="xs">
+                    {data.onboarding.assets.map((ast) => (
+                      <Inline key={ast.id} justify="between" align="center">
+                        <span>
+                          <strong>{ast.assetName}</strong>
+                          {ast.category ? ` (${ast.category})` : ''}
+                          {ast.serialNumber ? ` — S/N: ${ast.serialNumber}` : ''} • Issued:{' '}
+                          {ast.issueDate} (Qty: {ast.quantity})
+                        </span>
+                        {onDeleteAsset && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              confirmAndDelete(ast.assetName, () => onDeleteAsset(ast.id))
+                            }
+                          >
+                            Delete
+                          </Button>
+                        )}
+                      </Inline>
+                    ))}
+                  </Stack>
+                </Stack>
+              )}
+            </>
+          )}
         </Stack>
       </Card>
 
@@ -777,7 +801,11 @@ export function ReviewSection({
           <Inline justify="between" align="center">
             <Inline gap="sm" align="center">
               <CardTitle>4. Skills &amp; Qualifications</CardTitle>
-              <Badge variant="success">Complete</Badge>
+              {data.skills.length > 0 ? (
+                <Badge variant="success">Configured</Badge>
+              ) : (
+                <Badge variant="neutral">Not Configured</Badge>
+              )}
             </Inline>
             <Button
               type="button"
@@ -789,31 +817,45 @@ export function ReviewSection({
             </Button>
           </Inline>
 
-          <Stack gap="xs">
-            {data.skills.map((skl) => (
-              <Inline key={skl.id} justify="between" align="center">
-                <Stack gap="xs">
-                  <span>
-                    <strong>{skl.skill}</strong> ({skl.skillType}) — Level: {skl.level} (
-                    {skl.levelType}) • {skl.yearsExperience} yrs exp
-                  </span>
-                  <span className="bezent-card__desc">
-                    Examiner: {skl.examiner} | Verified By: {skl.verifiedBy} | Mentor: {skl.mentor}
-                  </span>
-                </Stack>
-                {onDeleteSkill && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => confirmAndDelete(skl.skill, () => onDeleteSkill(skl.id))}
-                  >
-                    Delete
-                  </Button>
-                )}
-              </Inline>
-            ))}
-          </Stack>
+          {data.skills.length === 0 ? (
+            <span className="bezent-card__desc">
+              No skills or qualifications recorded for this registration.
+            </span>
+          ) : (
+            <Stack gap="xs">
+              {data.skills.map((skl) => (
+                <Inline key={skl.id} justify="between" align="center">
+                  <Stack gap="xs">
+                    <span>
+                      <strong>{skl.skill}</strong> {skl.skillType ? `(${skl.skillType})` : ''}
+                      {skl.level ? ` — Level: ${skl.level}` : ''}
+                      {skl.levelType ? ` (${skl.levelType})` : ''}
+                      {skl.yearsExperience ? ` • ${skl.yearsExperience} yrs exp` : ''}
+                    </span>
+                    {(skl.examiner || skl.verifiedBy || skl.mentor) && (
+                      <span className="bezent-card__desc">
+                        {skl.examiner ? `Examiner: ${skl.examiner}` : ''}
+                        {skl.examiner && skl.verifiedBy ? ' | ' : ''}
+                        {skl.verifiedBy ? `Verified By: ${skl.verifiedBy}` : ''}
+                        {(skl.examiner || skl.verifiedBy) && skl.mentor ? ' | ' : ''}
+                        {skl.mentor ? `Mentor: ${skl.mentor}` : ''}
+                      </span>
+                    )}
+                  </Stack>
+                  {onDeleteSkill && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => confirmAndDelete(skl.skill, () => onDeleteSkill(skl.id))}
+                    >
+                      Delete
+                    </Button>
+                  )}
+                </Inline>
+              ))}
+            </Stack>
+          )}
         </Stack>
       </Card>
 
@@ -823,10 +865,14 @@ export function ReviewSection({
           <Inline justify="between" align="center">
             <Inline gap="sm" align="center">
               <CardTitle>5. Emergency Contacts</CardTitle>
-              {hasSectionPending('Emergency Contact') ? (
-                <Badge variant="warning">Action Required</Badge>
+              {data.emergency.primaryContact ? (
+                hasSectionPending('Emergency Contact') ? (
+                  <Badge variant="warning">Action Required</Badge>
+                ) : (
+                  <Badge variant="success">Complete</Badge>
+                )
               ) : (
-                <Badge variant="success">Complete</Badge>
+                <Badge variant="neutral">Not Configured</Badge>
               )}
             </Inline>
             <Button
@@ -839,57 +885,68 @@ export function ReviewSection({
             </Button>
           </Inline>
 
-          <Grid columns={3} gap="md">
-            <Stack gap="xs">
-              <Label size="sm">Primary Contact</Label>
-              <strong>
-                {data.emergency.primaryContact.name} ({data.emergency.primaryContact.relationship})
-              </strong>
-            </Stack>
-            <Stack gap="xs">
-              <Label size="sm">Primary Phone</Label>
-              <strong>{data.emergency.primaryContact.phone}</strong>
-            </Stack>
-            <Stack gap="xs">
-              <Label size="sm">Primary Email</Label>
-              <strong>{data.emergency.primaryContact.email || '—'}</strong>
-            </Stack>
-            <Stack gap="xs">
-              <Label size="sm">Primary Address</Label>
-              <strong>{data.emergency.primaryContact.address || '—'}</strong>
-            </Stack>
-          </Grid>
-
-          {data.emergency.secondaryContact && (
-            <Stack gap="xs">
-              <Divider />
-              <Inline justify="between" align="center">
-                <Label size="md">Secondary Contact</Label>
-                {onDeleteSecondaryContact && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => confirmAndDelete('Secondary Contact', onDeleteSecondaryContact)}
-                  >
-                    Delete Contact
-                  </Button>
-                )}
-              </Inline>
-              <Grid columns={2} gap="md">
+          {data.emergency.primaryContact ? (
+            <>
+              <Grid columns={3} gap="md">
                 <Stack gap="xs">
-                  <Label size="sm">Name</Label>
+                  <Label size="sm">Primary Contact</Label>
                   <strong>
-                    {data.emergency.secondaryContact.name} (
-                    {data.emergency.secondaryContact.relationship})
+                    {data.emergency.primaryContact.name} (
+                    {data.emergency.primaryContact.relationship})
                   </strong>
                 </Stack>
                 <Stack gap="xs">
-                  <Label size="sm">Phone</Label>
-                  <strong>{data.emergency.secondaryContact.phone}</strong>
+                  <Label size="sm">Primary Phone</Label>
+                  <strong>{data.emergency.primaryContact.phone}</strong>
+                </Stack>
+                <Stack gap="xs">
+                  <Label size="sm">Primary Email</Label>
+                  <strong>{data.emergency.primaryContact.email || '—'}</strong>
+                </Stack>
+                <Stack gap="xs">
+                  <Label size="sm">Primary Address</Label>
+                  <strong>{data.emergency.primaryContact.address || '—'}</strong>
                 </Stack>
               </Grid>
-            </Stack>
+
+              {data.emergency.secondaryContact && (
+                <Stack gap="xs">
+                  <Divider />
+                  <Inline justify="between" align="center">
+                    <Label size="md">Secondary Contact</Label>
+                    {onDeleteSecondaryContact && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          confirmAndDelete('Secondary Contact', onDeleteSecondaryContact)
+                        }
+                      >
+                        Delete Contact
+                      </Button>
+                    )}
+                  </Inline>
+                  <Grid columns={2} gap="md">
+                    <Stack gap="xs">
+                      <Label size="sm">Name</Label>
+                      <strong>
+                        {data.emergency.secondaryContact.name} (
+                        {data.emergency.secondaryContact.relationship})
+                      </strong>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Label size="sm">Phone</Label>
+                      <strong>{data.emergency.secondaryContact.phone}</strong>
+                    </Stack>
+                  </Grid>
+                </Stack>
+              )}
+            </>
+          ) : (
+            <span className="bezent-card__desc">
+              No emergency contacts registered for this employee.
+            </span>
           )}
         </Stack>
       </Card>
@@ -900,10 +957,14 @@ export function ReviewSection({
           <Inline justify="between" align="center">
             <Inline gap="sm" align="center">
               <CardTitle>6. Accounts &amp; Salary Breakdown</CardTitle>
-              {hasSectionPending('Accounts') ? (
-                <Badge variant="warning">Action Required</Badge>
+              {data.accounts ? (
+                hasSectionPending('Accounts') ? (
+                  <Badge variant="warning">Action Required</Badge>
+                ) : (
+                  <Badge variant="success">Complete</Badge>
+                )
               ) : (
-                <Badge variant="success">Complete</Badge>
+                <Badge variant="neutral">Not Configured</Badge>
               )}
             </Inline>
             <Button
@@ -916,72 +977,98 @@ export function ReviewSection({
             </Button>
           </Inline>
 
-          <Grid columns={3} gap="md">
-            <Stack gap="xs">
-              <Label size="sm">Bank &amp; Branch</Label>
-              <strong>
-                {data.accounts.bankName} — {data.accounts.branchName}
-              </strong>
-            </Stack>
-            <Stack gap="xs">
-              <Label size="sm">IFSC Code</Label>
-              <strong>{data.accounts.ifscCode}</strong>
-            </Stack>
-            <Stack gap="xs">
-              <Label size="sm">Account Holder</Label>
-              <strong>{data.accounts.accountHolderName}</strong>
-            </Stack>
-            <Stack gap="xs">
-              <Label size="sm">Account Number</Label>
-              <strong>•••• •••• {data.accounts.accountNumber.slice(-4)}</strong>
-            </Stack>
-            <Stack gap="xs">
-              <Label size="sm">Salary Structure</Label>
-              <strong>
-                {data.accounts.salaryStructure} ({data.accounts.payGrade})
-              </strong>
-            </Stack>
-            <Stack gap="xs">
-              <Label size="sm">Annual CTC</Label>
-              <strong>₹{data.accounts.annualCtc.toLocaleString('en-IN')} / yr</strong>
-            </Stack>
-            <Stack gap="xs">
-              <Label size="sm">Monthly Basic</Label>
-              <strong>₹{data.accounts.monthlyBasic.toLocaleString('en-IN')} / mo</strong>
-            </Stack>
-            <Stack gap="xs">
-              <Label size="sm">Monthly Gross</Label>
-              <strong>₹{data.accounts.grossSalary.toLocaleString('en-IN')} / mo</strong>
-            </Stack>
-            <Stack gap="xs">
-              <Label size="sm">Payroll Group</Label>
-              <strong>{data.accounts.payrollGroup}</strong>
-            </Stack>
-            <Stack gap="xs">
-              <Label size="sm">Tax Regime</Label>
-              <strong>{data.accounts.taxRegime}</strong>
-            </Stack>
-          </Grid>
-
-          {data.accounts.benefits.Medical && (
-            <Stack gap="xs">
-              <Divider />
-              <Label size="md">Medical Insurance Policy</Label>
+          {data.accounts ? (
+            <>
               <Grid columns={3} gap="md">
                 <Stack gap="xs">
-                  <Label size="sm">Provider</Label>
-                  <strong>{data.accounts.medicalDetails.provider}</strong>
+                  <Label size="sm">Bank &amp; Branch</Label>
+                  <strong>
+                    {data.accounts.bankName}
+                    {data.accounts.branchName ? ` — ${data.accounts.branchName}` : ''}
+                  </strong>
                 </Stack>
                 <Stack gap="xs">
-                  <Label size="sm">Policy Number</Label>
-                  <strong>{data.accounts.medicalDetails.policyNumber}</strong>
+                  <Label size="sm">IFSC Code</Label>
+                  <strong>{data.accounts.ifscCode}</strong>
                 </Stack>
                 <Stack gap="xs">
-                  <Label size="sm">Coverage</Label>
-                  <strong>{data.accounts.medicalDetails.coverage}</strong>
+                  <Label size="sm">Account Holder</Label>
+                  <strong>{data.accounts.accountHolderName}</strong>
                 </Stack>
+                <Stack gap="xs">
+                  <Label size="sm">Account Number</Label>
+                  <strong>
+                    {data.accounts.accountNumber
+                      ? `•••• •••• ${data.accounts.accountNumber.slice(-4)}`
+                      : '—'}
+                  </strong>
+                </Stack>
+                {data.accounts.salaryStructure && (
+                  <Stack gap="xs">
+                    <Label size="sm">Salary Structure</Label>
+                    <strong>
+                      {data.accounts.salaryStructure}
+                      {data.accounts.payGrade ? ` (${data.accounts.payGrade})` : ''}
+                    </strong>
+                  </Stack>
+                )}
+                {typeof data.accounts.annualCtc === 'number' && data.accounts.annualCtc > 0 && (
+                  <Stack gap="xs">
+                    <Label size="sm">Annual CTC</Label>
+                    <strong>₹{data.accounts.annualCtc.toLocaleString('en-IN')} / yr</strong>
+                  </Stack>
+                )}
+                {typeof data.accounts.monthlyBasic === 'number' && data.accounts.monthlyBasic > 0 && (
+                  <Stack gap="xs">
+                    <Label size="sm">Monthly Basic</Label>
+                    <strong>₹{data.accounts.monthlyBasic.toLocaleString('en-IN')} / mo</strong>
+                  </Stack>
+                )}
+                {typeof data.accounts.grossSalary === 'number' && data.accounts.grossSalary > 0 && (
+                  <Stack gap="xs">
+                    <Label size="sm">Monthly Gross</Label>
+                    <strong>₹{data.accounts.grossSalary.toLocaleString('en-IN')} / mo</strong>
+                  </Stack>
+                )}
+                {data.accounts.payrollGroup && (
+                  <Stack gap="xs">
+                    <Label size="sm">Payroll Group</Label>
+                    <strong>{data.accounts.payrollGroup}</strong>
+                  </Stack>
+                )}
+                {data.accounts.taxRegime && (
+                  <Stack gap="xs">
+                    <Label size="sm">Tax Regime</Label>
+                    <strong>{data.accounts.taxRegime}</strong>
+                  </Stack>
+                )}
               </Grid>
-            </Stack>
+
+              {data.accounts.benefits?.Medical && data.accounts.medicalDetails && (
+                <Stack gap="xs">
+                  <Divider />
+                  <Label size="md">Medical Insurance Policy</Label>
+                  <Grid columns={3} gap="md">
+                    <Stack gap="xs">
+                      <Label size="sm">Provider</Label>
+                      <strong>{data.accounts.medicalDetails.provider || '—'}</strong>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Label size="sm">Policy Number</Label>
+                      <strong>{data.accounts.medicalDetails.policyNumber || '—'}</strong>
+                    </Stack>
+                    <Stack gap="xs">
+                      <Label size="sm">Coverage</Label>
+                      <strong>{data.accounts.medicalDetails.coverage || '—'}</strong>
+                    </Stack>
+                  </Grid>
+                </Stack>
+              )}
+            </>
+          ) : (
+            <span className="bezent-card__desc">
+              Bank account and statutory details not configured.
+            </span>
           )}
         </Stack>
       </Card>
@@ -992,10 +1079,10 @@ export function ReviewSection({
           <Inline justify="between" align="center">
             <Inline gap="sm" align="center">
               <CardTitle>7. Online Access &amp; Permissions</CardTitle>
-              {hasSectionPending('Online Access') ? (
-                <Badge variant="warning">Action Required</Badge>
+              {data.onlineAccess.username || data.onlineAccess.officialEmail ? (
+                <Badge variant="success">Configured</Badge>
               ) : (
-                <Badge variant="success">Complete</Badge>
+                <Badge variant="neutral">Not Configured</Badge>
               )}
             </Inline>
             <Button
@@ -1008,40 +1095,60 @@ export function ReviewSection({
             </Button>
           </Inline>
 
-          <Grid columns={2} gap="md">
-            <Stack gap="xs">
-              <Label size="sm">Employee Username</Label>
-              <strong>{data.onlineAccess.username}</strong>
-            </Stack>
-            <Stack gap="xs">
-              <Label size="sm">Official Company Email</Label>
-              <strong>{data.onlineAccess.officialEmail}</strong>
-            </Stack>
-            <Stack gap="xs">
-              <Label size="sm">Invitation Status</Label>
-              <strong>
-                {data.onlineAccess.invitationStatus} (Sent: {data.onlineAccess.invitationSentDate})
-              </strong>
-            </Stack>
-            <Stack gap="xs">
-              <Label size="sm">Role &amp; Scope</Label>
-              <strong>
-                {data.onlineAccess.employeeRole} ({data.onlineAccess.portalRoleScope})
-              </strong>
-            </Stack>
-          </Grid>
+          {data.onlineAccess.username || data.onlineAccess.officialEmail ? (
+            <>
+              <Grid columns={2} gap="md">
+                <Stack gap="xs">
+                  <Label size="sm">Employee Username</Label>
+                  <strong>{data.onlineAccess.username || '—'}</strong>
+                </Stack>
+                <Stack gap="xs">
+                  <Label size="sm">Official Company Email</Label>
+                  <strong>{data.onlineAccess.officialEmail || '—'}</strong>
+                </Stack>
+                {data.onlineAccess.invitationStatus && (
+                  <Stack gap="xs">
+                    <Label size="sm">Invitation Status</Label>
+                    <strong>
+                      {data.onlineAccess.invitationStatus}
+                      {data.onlineAccess.invitationSentDate
+                        ? ` (Sent: ${data.onlineAccess.invitationSentDate})`
+                        : ''}
+                    </strong>
+                  </Stack>
+                )}
+                {data.onlineAccess.employeeRole && (
+                  <Stack gap="xs">
+                    <Label size="sm">Role &amp; Scope</Label>
+                    <strong>
+                      {data.onlineAccess.employeeRole}
+                      {data.onlineAccess.portalRoleScope
+                        ? ` (${data.onlineAccess.portalRoleScope})`
+                        : ''}
+                    </strong>
+                  </Stack>
+                )}
+              </Grid>
 
-          <Stack gap="xs">
-            <Divider />
-            <Label size="md">Granted Module Permissions</Label>
-            <Inline gap="xs" wrap>
-              {Object.entries(data.onlineAccess.moduleAccess).map(([mod, granted]) => (
-                <Badge key={mod} size="sm" variant={granted ? 'info' : 'neutral'}>
-                  {mod}
-                </Badge>
-              ))}
-            </Inline>
-          </Stack>
+              {data.onlineAccess.moduleAccess && (
+                <Stack gap="xs">
+                  <Divider />
+                  <Label size="md">Granted Module Permissions</Label>
+                  <Inline gap="xs" wrap>
+                    {Object.entries(data.onlineAccess.moduleAccess).map(([mod, granted]) => (
+                      <Badge key={mod} size="sm" variant={granted ? 'info' : 'neutral'}>
+                        {mod}
+                      </Badge>
+                    ))}
+                  </Inline>
+                </Stack>
+              )}
+            </>
+          ) : (
+            <span className="bezent-card__desc">
+              Online access and credentials not yet configured.
+            </span>
+          )}
         </Stack>
       </Card>
 
@@ -1051,10 +1158,10 @@ export function ReviewSection({
           <Inline justify="between" align="center">
             <Inline gap="sm" align="center">
               <CardTitle>8. Working Hours &amp; Calendar</CardTitle>
-              {hasSectionPending('Working Hours') ? (
-                <Badge variant="warning">Action Required</Badge>
+              {data.workingHours.workSchedule || data.workingHours.startTime ? (
+                <Badge variant="success">Configured</Badge>
               ) : (
-                <Badge variant="success">Complete</Badge>
+                <Badge variant="neutral">Not Configured</Badge>
               )}
             </Inline>
             <Button
@@ -1067,29 +1174,36 @@ export function ReviewSection({
             </Button>
           </Inline>
 
-          <Grid columns={2} gap="md">
-            <Stack gap="xs">
-              <Label size="sm">Work Schedule</Label>
-              <strong>{data.workingHours.workSchedule}</strong>
-            </Stack>
-            <Stack gap="xs">
-              <Label size="sm">Shift Hours</Label>
-              <strong>
-                {data.workingHours.startTime} – {data.workingHours.endTime} (
-                {data.workingHours.standardHours})
-              </strong>
-            </Stack>
-            <Stack gap="xs">
-              <Label size="sm">Working Days</Label>
-              <strong>{data.workingHours.workingDays.join(', ')}</strong>
-            </Stack>
-            <Stack gap="xs">
-              <Label size="sm">Calendar &amp; Timezone</Label>
-              <strong>
-                {data.workingHours.assignedCalendar} ({data.workingHours.timeZone})
-              </strong>
-            </Stack>
-          </Grid>
+          {data.workingHours.workSchedule || data.workingHours.startTime ? (
+            <Grid columns={2} gap="md">
+              <Stack gap="xs">
+                <Label size="sm">Work Schedule</Label>
+                <strong>{data.workingHours.workSchedule || '—'}</strong>
+              </Stack>
+              <Stack gap="xs">
+                <Label size="sm">Shift Hours</Label>
+                <strong>
+                  {data.workingHours.startTime} – {data.workingHours.endTime}
+                  {data.workingHours.standardHours ? ` (${data.workingHours.standardHours})` : ''}
+                </strong>
+              </Stack>
+              <Stack gap="xs">
+                <Label size="sm">Working Days</Label>
+                <strong>{data.workingHours.workingDays?.join(', ') || '—'}</strong>
+              </Stack>
+              <Stack gap="xs">
+                <Label size="sm">Calendar &amp; Timezone</Label>
+                <strong>
+                  {data.workingHours.assignedCalendar || 'Default Calendar'}{' '}
+                  {data.workingHours.timeZone ? `(${data.workingHours.timeZone})` : ''}
+                </strong>
+              </Stack>
+            </Grid>
+          ) : (
+            <span className="bezent-card__desc">
+              Working hours and shift schedule not configured yet.
+            </span>
+          )}
         </Stack>
       </Card>
 
@@ -1099,10 +1213,10 @@ export function ReviewSection({
           <Inline justify="between" align="center">
             <Inline gap="sm" align="center">
               <CardTitle>9. Documents Vault &amp; Verification</CardTitle>
-              {hasSectionPending('Documents') ? (
-                <Badge variant="warning">Action Required</Badge>
+              {data.documents.items.length > 0 || data.documents.passportPhoto?.fileName ? (
+                <Badge variant="success">Configured</Badge>
               ) : (
-                <Badge variant="success">Complete</Badge>
+                <Badge variant="neutral">Not Configured</Badge>
               )}
             </Inline>
             <Button
@@ -1115,82 +1229,84 @@ export function ReviewSection({
             </Button>
           </Inline>
 
-          {/* Photo */}
-          <Inline gap="md" align="center">
-            {data.documents.passportPhoto.previewUrl ? (
+          {data.documents.passportPhoto?.previewUrl ? (
+            <Inline gap="md" align="center">
               <img
                 src={data.documents.passportPhoto.previewUrl}
                 alt="Passport Photo"
                 className="bezent-photo-preview"
               />
-            ) : (
-              <div className="bezent-photo-placeholder">
-                <BezentIcon name="employees" size={32} />
-              </div>
-            )}
-            <Stack gap="xs">
-              <Label size="md">Passport-size Photograph</Label>
-              <span className="bezent-card__desc">
-                File: {data.documents.passportPhoto.fileName || 'Not Uploaded'}
-              </span>
-              <Badge size="sm" variant="neutral">
-                {data.documents.passportPhoto.status}
-              </Badge>
-            </Stack>
-          </Inline>
+              <Stack gap="xs">
+                <Label size="md">Passport-size Photograph</Label>
+                <span className="bezent-card__desc">
+                  File: {data.documents.passportPhoto.fileName || 'Uploaded'}
+                </span>
+                <Badge size="sm" variant="neutral">
+                  {data.documents.passportPhoto.status}
+                </Badge>
+              </Stack>
+            </Inline>
+          ) : null}
 
-          {/* Document Items List */}
-          <Stack gap="xs">
-            <Divider />
-            <Label size="md">Document Vault Records</Label>
+          {data.documents.items.length > 0 ? (
             <Stack gap="xs">
-              {data.documents.items.map((doc) => {
-                if (
-                  !data.documents.isExperiencedHire &&
-                  doc.category.includes('Professional History')
-                ) {
-                  return null;
-                }
-                return (
-                  <Inline key={doc.id} justify="between" align="center">
-                    <Stack gap="xs">
-                      <span>
-                        <strong>{doc.name}</strong> ({doc.category})
-                      </span>
-                      <span className="bezent-card__desc">
-                        Doc #: {doc.docNumber || 'N/A'} | File: {doc.fileName || 'No File'}{' '}
-                        {doc.fileSizeFormatted ? `(${doc.fileSizeFormatted})` : ''}
-                      </span>
-                    </Stack>
-                    <Inline gap="sm" align="center">
-                      <Badge
-                        size="sm"
-                        variant={
-                          doc.status === 'Verified'
-                            ? 'success'
-                            : doc.status === 'Rejected'
-                              ? 'danger'
-                              : 'neutral'
-                        }
-                      >
-                        {doc.status}
-                      </Badge>
-                      {onDeleteDocument && doc.fileName && (
-                        <Button
-                          type="button"
-                          variant="ghost"
+              <Divider />
+              <Label size="md">Document Vault Records</Label>
+              <Stack gap="xs">
+                {data.documents.items.map((doc) => {
+                  if (
+                    !data.documents.isExperiencedHire &&
+                    doc.category?.includes('Professional History')
+                  ) {
+                    return null;
+                  }
+                  return (
+                    <Inline key={doc.id} justify="between" align="center">
+                      <Stack gap="xs">
+                        <span>
+                          <strong>{doc.name}</strong> {doc.category ? `(${doc.category})` : ''}
+                        </span>
+                        <span className="bezent-card__desc">
+                          Doc #: {doc.docNumber || 'N/A'} | File: {doc.fileName || 'No File'}{' '}
+                          {doc.fileSizeFormatted ? `(${doc.fileSizeFormatted})` : ''}
+                        </span>
+                      </Stack>
+                      <Inline gap="sm" align="center">
+                        <Badge
                           size="sm"
-                          onClick={() => confirmAndDelete(doc.name, () => onDeleteDocument(doc.id))}
+                          variant={
+                            doc.status === 'Verified'
+                              ? 'success'
+                              : doc.status === 'Rejected'
+                                ? 'danger'
+                                : 'neutral'
+                          }
                         >
-                          Delete
-                        </Button>
-                      )}
+                          {doc.status || 'Pending'}
+                        </Badge>
+                        {onDeleteDocument && doc.fileName && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              confirmAndDelete(doc.name, () => onDeleteDocument(doc.id))
+                            }
+                          >
+                            Delete
+                          </Button>
+                        )}
+                      </Inline>
                     </Inline>
-                  </Inline>
-                );
-              })}
+                  );
+                })}
+              </Stack>
             </Stack>
-          </Stack>
+          ) : !data.documents.passportPhoto?.previewUrl ? (
+            <span className="bezent-card__desc">
+              No documents uploaded yet for this employee.
+            </span>
+          ) : null}
         </Stack>
       </Card>
 
@@ -1203,8 +1319,14 @@ export function ReviewSection({
               Ensure all sections are verified before generating the official employee record.
             </span>
           </Stack>
-          <Button type="button" variant="primary" size="lg" onClick={handleFinalCreateClick}>
-            Create Employee
+          <Button
+            type="button"
+            variant="primary"
+            size="lg"
+            disabled={isSubmitting}
+            onClick={handleFinalCreateClick}
+          >
+            {isSubmitting ? 'Creating Employee...' : 'Create Employee'}
           </Button>
         </Inline>
       </Card>
@@ -1219,8 +1341,7 @@ export function ReviewSection({
         >
           <Stack gap="md">
             <Alert variant="danger">
-              The registration cannot be completed because required information or document
-              verification is still pending:
+              The registration cannot be completed because required information is still pending:
             </Alert>
             <Stack gap="xs">
               {pendingItems.map((item, idx) => (
@@ -1255,28 +1376,32 @@ export function ReviewSection({
         </Modal>
       )}
 
-      {/* SUCCESS CONFIRMATION MODAL */}
-      {showSuccessModal && (
+      {/* SUCCESS CONFIRMATION MODAL - Only shown after backend confirmation */}
+      {Boolean(createdEmployee) && (
         <Modal
-          isOpen={showSuccessModal}
-          onClose={() => setShowSuccessModal(false)}
+          isOpen={Boolean(createdEmployee)}
+          onClose={onDone || (() => {})}
           title="Employee Registration Complete!"
           size="md"
         >
           <Stack gap="md">
             <Alert variant="success">
-              Employee <strong>{data.personal.fullName || 'Arun Kumar'}</strong> (ID:{' '}
-              <strong>{data.general.employeeId}</strong>) has been successfully created and
-              registered in BEZENT HRMS.
+              Employee{' '}
+              <strong>
+                {createdEmployee?.name || data.personal.fullName || 'New Employee'}
+              </strong>{' '}
+              (ID:{' '}
+              <strong>{createdEmployee?.employeeNumber || data.general.employeeId}</strong>) has
+              been successfully created and registered in BEZENT HRMS.
             </Alert>
             <Stack gap="xs">
-              <span>General employment records created</span>
-              <span>Bank account &amp; payroll breakdown configured</span>
-              <span>Official email invitation dispatched</span>
-              <span>Document vault &amp; verification records sealed</span>
+              <span>General employment record created in database</span>
+              {data.accounts?.accountNumber && <span>Bank account configured</span>}
+              {data.onlineAccess.officialEmail && <span>Official email registered</span>}
+              <span>Employee profile activated</span>
             </Stack>
             <Inline justify="end">
-              <Button type="button" variant="primary" onClick={() => setShowSuccessModal(false)}>
+              <Button type="button" variant="primary" onClick={onDone}>
                 Done
               </Button>
             </Inline>

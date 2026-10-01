@@ -10,13 +10,13 @@ import {
   hasUnsavedChanges,
   settingsOf,
   type RegistrationFormEditorProps,
-} from '../components/RegistrationSettingsSection';
-import { AdministrationSettingsSection } from '../components/AdministrationSettingsSection';
+} from '../administration/forms/RegistrationSettingsSection';
+import { AdministrationSettingsSection } from '../administration/AdministrationSettingsSection';
 import {
   EmployeeRegistrationFormConfiguration,
   FORM_CONFIGURATION_TABS,
   FormsLanding,
-} from '../components/FormsSettings';
+} from '../administration/forms/FormsSettings';
 import { saveRegistrationConfiguration } from '../api/registrationSettingsApi';
 import {
   configurationWith,

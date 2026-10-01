@@ -7,8 +7,10 @@ export interface AvatarProps {
   src?: string;
   /** Required alongside `src` — describes the person, not "avatar". */
   alt?: string;
-  /** Size scale: sm (28px), md (34px, default), lg (56px) */
-  size?: 'sm' | 'md' | 'lg';
+  /** Size scale: sm (28px), md (34px, default), lg (56px), xl (104px) */
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  /** Geometry: circle (default) or square (rounded corners) */
+  shape?: 'circle' | 'square';
   /** Additional CSS class name */
   className?: string;
 }
@@ -16,9 +18,17 @@ export interface AvatarProps {
 /**
  * The canonical BEZENT avatar with light sky blue surface and deep navy initials.
  */
-export function Avatar({ initials, src, alt, size = 'md', className = '' }: AvatarProps) {
+export function Avatar({
+  initials,
+  src,
+  alt,
+  size = 'md',
+  shape = 'circle',
+  className = '',
+}: AvatarProps) {
   const sizeClass = size !== 'md' ? `bezent-avatar--${size}` : '';
-  const classes = `bezent-avatar ${sizeClass} ${className}`.trim();
+  const shapeClass = shape !== 'circle' ? `bezent-avatar--${shape}` : '';
+  const classes = `bezent-avatar ${sizeClass} ${shapeClass} ${className}`.trim();
 
   if (src) {
     return (

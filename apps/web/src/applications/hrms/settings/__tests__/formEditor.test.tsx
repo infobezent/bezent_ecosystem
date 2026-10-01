@@ -6,10 +6,10 @@ import {
   getGroupsForSection,
   getSubgroupForField,
   TOOLBOX_ITEMS,
-} from '../forms/types';
-import { FieldToolbox } from '../forms/FieldToolbox';
-import { FormCanvas } from '../forms/FormCanvas';
-import { FieldProperties } from '../forms/FieldProperties';
+} from '../administration/forms/types';
+import { FieldToolbox } from '../administration/forms/FieldToolbox';
+import { FormCanvas } from '../administration/forms/FormCanvas';
+import { FieldProperties } from '../administration/forms/FieldProperties';
 import {
   saveFormDefinition,
   type ResolvedFormField,
@@ -191,8 +191,8 @@ describe('Form Editor → Section Grouping & Canvas', () => {
     // Real Form Representation
     expect(html).toContain('GENERAL INFORMATION');
     expect(html).toContain('Employee ID');
-    expect(html).toContain('EMP2026001');
-    expect(html).toContain('Auto'); // Real auto button preview!
+    expect(html).toContain('System Assigned');
+    expect(html).toContain('Generated automatically');
 
     // Selection highlight & contextual controls on selected field
     expect(html).toContain('bezent-form-field--selected');
@@ -1029,7 +1029,7 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
       );
 
       expect(html).toContain('Chapter Settings');
-      expect(html).toContain('Chapter Key');
+      expect(html).toContain('Key');
       expect(html).toContain('general');
       expect(html).toContain('Basic Information');
       expect(html).toContain('Updated description');
@@ -1054,9 +1054,10 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
         />,
       );
 
-      expect(html).toContain('Position 2 of 4');
-      expect(html).toContain('Move Up');
-      expect(html).toContain('Move Down');
+      expect(html).toContain('Position 02 of 04');
+      expect(html).not.toContain('Move Up');
+      expect(html).not.toContain('Move Down');
+      expect(html).toContain('Reorder chapters from Form Structure');
     });
 
     it('renders Delete Section for custom sections and protects system sections', () => {
@@ -1254,8 +1255,9 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
       );
 
       expect(html).toContain('System Field');
-      expect(html).toContain('This is a system field provided by BEZENT.');
+      expect(html).toContain('Protected System Field');
       expect(html).toContain('FIELD INFORMATION');
+      expect(html).toContain('System Assigned');
       expect(html).toContain('Protected');
       expect(html).toContain('This is a protected system field and cannot be deleted.');
     });
@@ -1295,7 +1297,7 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
       // No permanent mode tab strip
       expect(html).not.toContain('bezent-properties-tabs');
       expect(html).toContain('Chapter Settings');
-      expect(html).toContain('Position 1 of 10');
+      expect(html).toContain('Position 01 of 10');
     });
 
     it('renders Form Settings when form root entity is selected', () => {
@@ -1539,6 +1541,272 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
       expect(html).toContain('Default Value');
       expect(html).toContain('Division A');
       expect(html).toContain('Division B');
+    });
+
+    describe('Field Capability Matrix & Clutter Removal', () => {
+      it('Short Text (custom): shows label, placeholder, validation (min/max length), width, danger zone, and no clutter', () => {
+        const customText: ResolvedFormField = {
+          key: 'custom.nickname',
+          type: 'single_line',
+          label: 'Nickname',
+          description: 'Preferred employee nickname',
+          origin: 'custom',
+          protected: false,
+          protectedReason: null,
+          configurable: true,
+          enabled: true,
+          required: false,
+          order: 3,
+          width: 'half',
+          config: { minLength: 2, maxLength: 50 },
+          defaults: null,
+          overridden: false,
+        };
+
+        const html = renderToStaticMarkup(
+          <FieldProperties
+            field={customText}
+            selectedEntity="field"
+            onUpdateField={vi.fn()}
+            onDeleteField={vi.fn()}
+          />,
+        );
+
+        // General & Behavior
+        expect(html).toContain('Field Label');
+        expect(html).toContain('Placeholder');
+        expect(html).toContain('Help Text');
+        expect(html).toContain('Visible');
+        expect(html).toContain('Required');
+
+        // Actionable Validation
+        expect(html).toContain('VALIDATION');
+        expect(html).toContain('Min Length');
+        expect(html).toContain('Max Length');
+
+        // Display
+        expect(html).toContain('DISPLAY');
+        expect(html).toContain('Field Width');
+
+        // Clutter removed: No PREVIEW section, no Database Field, no Options, no Data Source
+        expect(html).not.toContain('PREVIEW');
+        expect(html).not.toContain('Database Field');
+        expect(html).not.toContain('+ Add Option');
+        expect(html).not.toContain('DATA SOURCE');
+
+        // Danger zone present for custom field
+        expect(html).toContain('DANGER ZONE');
+        expect(html).toContain('Delete Custom Field');
+      });
+
+      it('Email / Phone: exposes relevant placeholder without numeric or options validation', () => {
+        const emailField: ResolvedFormField = {
+          key: 'personal.personalEmail',
+          type: 'email',
+          label: 'Personal Email',
+          description: 'Secondary contact email',
+          origin: 'system',
+          protected: false,
+          protectedReason: null,
+          configurable: true,
+          enabled: true,
+          required: false,
+          order: 5,
+          width: 'half',
+          config: {},
+          defaults: null,
+          overridden: false,
+        };
+
+        const html = renderToStaticMarkup(
+          <FieldProperties
+            field={emailField}
+            selectedEntity="field"
+            onUpdateField={vi.fn()}
+            onDeleteField={vi.fn()}
+          />,
+        );
+
+        expect(html).toContain('Personal Email');
+        expect(html).toContain('Placeholder');
+        // No non-actionable validation group rendered
+        expect(html).not.toContain('VALIDATION');
+        expect(html).not.toContain('Min Value');
+        expect(html).not.toContain('Disallow Past Dates');
+        expect(html).not.toContain('OPTIONS');
+      });
+
+      it('Number & Decimal: exposes min, max, and decimal places where supported', () => {
+        const decimalField: ResolvedFormField = {
+          key: 'custom.hourlyRate',
+          type: 'decimal',
+          label: 'Hourly Rate',
+          description: null,
+          origin: 'custom',
+          protected: false,
+          protectedReason: null,
+          configurable: true,
+          enabled: true,
+          required: true,
+          order: 6,
+          width: 'half',
+          config: { min: 0, max: 1000, decimalPlaces: 2 },
+          defaults: null,
+          overridden: false,
+        };
+
+        const html = renderToStaticMarkup(
+          <FieldProperties
+            field={decimalField}
+            selectedEntity="field"
+            onUpdateField={vi.fn()}
+            onDeleteField={vi.fn()}
+          />,
+        );
+
+        expect(html).toContain('VALIDATION');
+        expect(html).toContain('Min Value');
+        expect(html).toContain('Max Value');
+        expect(html).toContain('Decimal Places (1-6)');
+        expect(html).not.toContain('Disallow Past Dates');
+        expect(html).not.toContain('+ Add Option');
+      });
+
+      it('Date & DateTime: exposes past/future restrictions without options', () => {
+        const dateField: ResolvedFormField = {
+          key: 'custom.certificationDate',
+          type: 'date',
+          label: 'Certification Date',
+          description: null,
+          origin: 'custom',
+          protected: false,
+          protectedReason: null,
+          configurable: true,
+          enabled: true,
+          required: false,
+          order: 7,
+          width: 'half',
+          config: { disallowFuture: true },
+          defaults: null,
+          overridden: false,
+        };
+
+        const html = renderToStaticMarkup(
+          <FieldProperties
+            field={dateField}
+            selectedEntity="field"
+            onUpdateField={vi.fn()}
+            onDeleteField={vi.fn()}
+          />,
+        );
+
+        expect(html).toContain('VALIDATION');
+        expect(html).toContain('Disallow Past Dates');
+        expect(html).toContain('Disallow Future Dates');
+        expect(html).not.toContain('OPTIONS');
+        expect(html).not.toContain('Min Length');
+      });
+
+      it('Gender field audit: correctly mapped to Chapter Personal Information and Section Personal Details with authoritative Demographic Options', () => {
+        const genderField: ResolvedFormField = {
+          key: 'personal.gender',
+          type: 'dropdown',
+          label: 'Gender',
+          description: 'Employee legal gender',
+          origin: 'system',
+          protected: false,
+          protectedReason: null,
+          configurable: true,
+          enabled: true,
+          required: true,
+          order: 8,
+          width: 'half',
+          config: {},
+          defaults: null,
+          overridden: false,
+        };
+
+        const html = renderToStaticMarkup(
+          <FieldProperties
+            field={genderField}
+            activeSection={{
+              key: 'personal',
+              label: 'Personal Information',
+              order: 2,
+              origin: 'system',
+              configurable: true,
+              fields: [genderField],
+            }}
+            selectedEntity="field"
+            onUpdateField={vi.fn()}
+            onDeleteField={vi.fn()}
+          />,
+        );
+
+        // DATA SOURCE section present with correct master data authority
+        expect(html).toContain('DATA SOURCE');
+        expect(html).toContain('System Master Data → Demographic Options');
+        expect(html).toContain('Options are managed from authoritative company master data');
+
+        // MUST NOT allow manual option editing for Gender
+        expect(html).not.toContain('+ Add Option');
+
+        // Field Information: Chapter is Personal Information, Section is Personal Details
+        expect(html).toContain('Personal Information');
+        expect(html).toContain('Personal Details');
+        expect(html).toContain('System Field');
+        expect(html).toContain('Partially Configurable');
+        expect(html).toContain('personal.gender');
+
+        // No misleading edit icons or previews
+        expect(html).not.toContain('PREVIEW');
+        expect(html).not.toContain('Database Field');
+      });
+
+      it('Custom Radio & Multi-Select: renders options list with reorder and remove actions', () => {
+        const radioField: ResolvedFormField = {
+          key: 'custom.workPreference',
+          type: 'radio',
+          label: 'Work Preference',
+          description: null,
+          origin: 'custom',
+          protected: false,
+          protectedReason: null,
+          configurable: true,
+          enabled: true,
+          required: true,
+          order: 9,
+          width: 'half',
+          config: {
+            options: [
+              { value: 'remote', label: 'Remote' },
+              { value: 'hybrid', label: 'Hybrid' },
+              { value: 'onsite', label: 'On-site' },
+            ],
+          },
+          defaults: null,
+          overridden: false,
+        };
+
+        const html = renderToStaticMarkup(
+          <FieldProperties
+            field={radioField}
+            selectedEntity="field"
+            onUpdateField={vi.fn()}
+            onDeleteField={vi.fn()}
+          />,
+        );
+
+        expect(html).toContain('OPTIONS');
+        expect(html).toContain('Options (3)');
+        expect(html).toContain('Remote');
+        expect(html).toContain('Hybrid');
+        expect(html).toContain('On-site');
+        expect(html).toContain('+ Add Option');
+        expect(html).toContain('Move up');
+        expect(html).toContain('Move down');
+        expect(html).toContain('Remove option');
+      });
     });
   });
 });

@@ -40,6 +40,18 @@ export const companies = mysqlTable(
     contactPhone: varchar('contact_phone', { length: 50 }),
     country: varchar('country', { length: 100 }),
     timeZone: varchar('time_zone', { length: 100 }),
+    displayName: varchar('display_name', { length: 255 }),
+    organizationType: varchar('organization_type', { length: 100 }),
+    industry: varchar('industry', { length: 100 }),
+    website: varchar('website', { length: 255 }),
+    logoUrl: varchar('logo_url', { length: 500 }),
+    alternateEmail: varchar('alternate_email', { length: 255 }),
+    alternatePhone: varchar('alternate_phone', { length: 50 }),
+    addressLine1: varchar('address_line_1', { length: 255 }),
+    addressLine2: varchar('address_line_2', { length: 255 }),
+    state: varchar('state', { length: 100 }),
+    city: varchar('city', { length: 100 }),
+    postalCode: varchar('postal_code', { length: 20 }),
     status: mysqlEnum('status', ['active', 'inactive', 'suspended']).default('active').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
@@ -111,6 +123,71 @@ export const locations = mysqlTable(
   },
   (table) => [index('idx_locations_tenant_company').on(table.tenantId, table.companyId)],
 );
+
+/**
+ * Organization Structure: Business Units
+ * Optional layer under Company in the organizational hierarchy.
+ */
+export const businessUnits = mysqlTable(
+  'business_units',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    name: varchar('name', { length: 255 }).notNull(),
+    code: varchar('code', { length: 50 }),
+    description: varchar('description', { length: 1000 }),
+    headEmployeeId: varchar('head_employee_id', { length: 64 }).references(
+      (): AnyMySqlColumn => employees.id,
+    ),
+    status: mysqlEnum('status', ['active', 'inactive']).default('active').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_business_units_tenant_company').on(table.tenantId, table.companyId),
+    index('idx_business_units_company_code').on(table.companyId, table.code),
+  ],
+);
+
+/**
+ * Organization Structure: Divisions
+ * Optional layer under Business Unit in the organizational hierarchy.
+ */
+export const divisions = mysqlTable(
+  'divisions',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    businessUnitId: varchar('business_unit_id', { length: 64 })
+      .notNull()
+      .references(() => businessUnits.id),
+    name: varchar('name', { length: 255 }).notNull(),
+    code: varchar('code', { length: 50 }),
+    description: varchar('description', { length: 1000 }),
+    headEmployeeId: varchar('head_employee_id', { length: 64 }).references(
+      (): AnyMySqlColumn => employees.id,
+    ),
+    status: mysqlEnum('status', ['active', 'inactive']).default('active').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_divisions_tenant_company').on(table.tenantId, table.companyId),
+    index('idx_divisions_business_unit').on(table.businessUnitId),
+    index('idx_divisions_company_code').on(table.companyId, table.code),
+  ],
+);
+
+export type BusinessUnit = typeof businessUnits.$inferSelect;
+export type NewBusinessUnit = typeof businessUnits.$inferInsert;
+export type Division = typeof divisions.$inferSelect;
+export type NewDivision = typeof divisions.$inferInsert;
 
 /**
  * HRMS Domain: Onboarding Cases (New Hires)

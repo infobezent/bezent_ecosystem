@@ -33,7 +33,14 @@ const COUNTRY_CODE_OPTIONS = [
   { value: '+971', label: '+971 (UAE)' },
 ];
 
-export function EmergencyContactSection() {
+import type { Chapter05EmergencyState } from '../types/registration.types';
+
+export interface EmergencyContactSectionProps {
+  value?: Chapter05EmergencyState;
+  onChange?: (updated: Chapter05EmergencyState) => void;
+}
+
+export function EmergencyContactSection({ value: _value, onChange: _onChange }: EmergencyContactSectionProps = {}) {
   // PRIMARY CONTACT STATE
   const [primaryName, setPrimaryName] = useState('Ramesh Kumar');
   const [primaryRelationship, setPrimaryRelationship] = useState('Father');

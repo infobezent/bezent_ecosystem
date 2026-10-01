@@ -17,24 +17,45 @@ import {
 import { BezentIcon } from '../../../../design-system/icons';
 import { useAuth } from '../../../../platform/auth';
 import { SETTINGS_MODULE_CARDS, type SettingsModuleId } from '../types/settingsCenter';
-import { DashboardSettingsSection } from '../components/DashboardSettingsSection';
-import { AdministrationSettingsSection } from '../components/AdministrationSettingsSection';
-import { LeaveSettingsSection } from '../components/LeaveSettingsSection';
-import { AttendanceSettingsSection } from '../components/AttendanceSettingsSection';
-import { TimesheetsSettingsSection } from '../components/TimesheetsSettingsSection';
-import { PerformanceSettingsSection } from '../components/PerformanceSettingsSection';
-import { EmployeesSettingsSection } from '../components/EmployeesSettingsSection';
-import { HRSettingsSection } from '../components/HRSettingsSection';
+import { DashboardSettingsSection, EmployeesSettingsSection, HRSettingsSection } from '../general';
+import { AdministrationSettingsSection } from '../administration';
+import { LeaveSettingsSection } from '../leave';
+import { AttendanceSettingsSection } from '../attendance';
+import { TimesheetsSettingsSection } from '../timesheets';
+import { PerformanceSettingsSection } from '../performance';
+import { OrganizationSettingsWorkspace, type OrganizationTabId } from '../organization/OrganizationSettingsWorkspace';
+
+import type { OrganizationProfile } from '../../organization/api/organizationApi';
+import type { OrganizationHierarchy } from '../../organization/types/structure';
 
 export interface SettingsPageInnerProps {
   initialModule?: SettingsModuleId;
+  initialOrganizationTab?: OrganizationTabId;
+  initialOrganizationProfile?: OrganizationProfile;
+  initialOrganizationHierarchy?: OrganizationHierarchy;
 }
 
-export function SettingsPageInner({ initialModule = 'overview' }: SettingsPageInnerProps) {
+export function SettingsPageInner({
+  initialModule = 'overview',
+  initialOrganizationTab = 'profile',
+  initialOrganizationProfile,
+  initialOrganizationHierarchy,
+}: SettingsPageInnerProps) {
   const { activeCompany } = useAuth();
   const [activeModule, setActiveModule] = useState<SettingsModuleId>(initialModule);
 
   const selectedModuleInfo = SETTINGS_MODULE_CARDS.find((m) => m.id === activeModule);
+
+  if (activeModule === 'organization') {
+    return (
+      <OrganizationSettingsWorkspace
+        initialTab={initialOrganizationTab}
+        initialProfile={initialOrganizationProfile}
+        initialHierarchy={initialOrganizationHierarchy}
+        onBack={() => setActiveModule('overview')}
+      />
+    );
+  }
 
   return (
     <Page maxWidth="default">
@@ -127,13 +148,30 @@ function RoutedSettingsPage() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const isWorkflowSettings = location.pathname.includes('onboarding/workflow-settings');
+  const isStructure =
+    location.pathname.includes('organization/structure') ||
+    searchParams.get('tab') === 'structure' ||
+    searchParams.get('sub') === 'structure';
+  const isOrganization =
+    location.pathname.includes('organization') ||
+    searchParams.get('module') === 'organization' ||
+    searchParams.get('tab') === 'organization' ||
+    isStructure;
   const hasOnboardingParam =
     searchParams.get('module') === 'onboarding' ||
     searchParams.get('tab') === 'onboarding' ||
     searchParams.has('sub');
-  const initialModule: SettingsModuleId =
-    isWorkflowSettings || hasOnboardingParam ? 'onboarding' : 'overview';
-  return <SettingsPageInner initialModule={initialModule} />;
+  const initialModule: SettingsModuleId = isOrganization
+    ? 'organization'
+    : isWorkflowSettings || hasOnboardingParam
+      ? 'onboarding'
+      : 'overview';
+  return (
+    <SettingsPageInner
+      initialModule={initialModule}
+      initialOrganizationTab={isStructure ? 'structure' : 'profile'}
+    />
+  );
 }
 
 export function SettingsPage() {

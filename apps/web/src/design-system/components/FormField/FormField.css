@@ -97,13 +97,18 @@
 }
 
 /* Error state — propagates a CSS property child controls can react to */
+.bezent-form-field--error .bezent-input-box,
+.bezent-form-field--error .bezent-select-box,
 .bezent-form-field--error .bezent-input,
 .bezent-form-field--error .bezent-select {
   border-color: var(--color-danger-500, #ef4444);
 }
 
+.bezent-form-field--error .bezent-input-box:focus-within,
+.bezent-form-field--error .bezent-select-box:focus-within,
 .bezent-form-field--error .bezent-input:focus,
 .bezent-form-field--error .bezent-select:focus {
+  border-color: var(--color-danger-500, #ef4444);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-danger-500, #ef4444) 25%, transparent);
 }
 
@@ -168,7 +173,8 @@
 }
 
 .bezent-form-field--selected {
-  background-color: var(--accent-subtle, rgba(26, 115, 232, 0.05));
-  border: 1.5px solid var(--accent-primary, #1a73e8);
-  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.14);
+  background-color: var(--accent-subtle, rgba(26, 115, 232, 0.04));
+  border-color: var(--accent-primary, #1a73e8);
+  box-shadow: none;
 }
+

@@ -65,6 +65,13 @@ export const CANONICAL_CONCEPT_MAP: Record<string, string> = {
   delete: 'delete',
   security: 'security',
   sop: 'sop',
+  mail: 'mail',
+  email: 'mail',
+  phone: 'phone',
+  call: 'phone',
+  upload: 'upload',
+  location: 'pin',
+  location_on: 'pin',
 
   // Shell Utilities
   "what's new": 'whatsNew',
