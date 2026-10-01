@@ -49,7 +49,7 @@
   width: 100%;
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: 10px;
+  border-radius: 6px;
   cursor: pointer;
   user-select: none;
   box-sizing: border-box;
@@ -75,7 +75,7 @@
 /* ── Sizes ── */
 .bezent-select-wrapper--sm .bezent-select-box {
   height: 32px;
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 0 28px 0 10px;
 }
 
@@ -85,7 +85,7 @@
 
 .bezent-select-wrapper--md .bezent-select-box {
   height: 42px;
-  border-radius: 10px;
+  border-radius: 6px;
   padding: 0 34px 0 14px;
 }
 
@@ -95,7 +95,7 @@
 
 .bezent-select-wrapper--lg .bezent-select-box {
   height: 46px;
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 0 38px 0 16px;
 }
 

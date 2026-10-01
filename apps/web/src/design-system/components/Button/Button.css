@@ -27,21 +27,21 @@
 .bezent-btn--sm {
   height: 28px;
   padding: 0 12px;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 11px;
 }
 
 .bezent-btn--md {
   height: 34px;
   padding: 0 16px;
-  border-radius: 10px;
+  border-radius: 6px;
   font-size: 12px;
 }
 
 .bezent-btn--lg {
   height: 40px;
   padding: 0 20px;
-  border-radius: 12px;
+  border-radius: 8px;
   font-size: 13px;
 }
 

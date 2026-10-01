@@ -6,7 +6,7 @@
   width: 100%;
   overflow-x: auto;
   border: 1px solid var(--table-border, var(--border-default, #dde3ea));
-  border-radius: var(--card-radius, 14px);
+  border-radius: var(--card-radius, 8px);
   background: var(--bg-surface, #ffffff);
   box-shadow: var(--shadow-card, 0 1px 3px rgba(0, 0, 0, 0.04));
 }
@@ -66,7 +66,7 @@
   background-color: #fafbfc;
 }
 
-/* ── Google Gmail-style Floating Elevated Row Hover (No vertical column lines) ── */
+/* ── Google Gmail-style Floating Elevated Row Hover ── */
 .bezent-table.is-hoverable .bezent-table__row {
   cursor: pointer;
 }
@@ -75,29 +75,13 @@
   position: relative;
   z-index: 5;
   box-shadow:
-    0 1px 3px 0 rgba(60, 64, 67, 0.2),
-    0 4px 8px 3px rgba(60, 64, 67, 0.1);
+    0 1px 2px 0 rgba(60, 64, 67, 0.3),
+    0 1px 3px 1px rgba(60, 64, 67, 0.15);
 }
 
 .bezent-table.is-hoverable .bezent-table__row:hover .bezent-table__td {
   background-color: var(--bg-surface, #ffffff);
-  box-shadow:
-    inset 0 1px 0 var(--border-default, #dadce0),
-    inset 0 -1px 0 var(--border-default, #dadce0);
-}
-
-.bezent-table.is-hoverable .bezent-table__row:hover .bezent-table__td:first-child {
-  box-shadow:
-    inset 1px 0 0 var(--border-default, #dadce0),
-    inset 0 1px 0 var(--border-default, #dadce0),
-    inset 0 -1px 0 var(--border-default, #dadce0);
-}
-
-.bezent-table.is-hoverable .bezent-table__row:hover .bezent-table__td:last-child {
-  box-shadow:
-    inset -1px 0 0 var(--border-default, #dadce0),
-    inset 0 1px 0 var(--border-default, #dadce0),
-    inset 0 -1px 0 var(--border-default, #dadce0);
+  border-bottom-color: transparent;
 }
 
 /* ── Compact modifier ── */
@@ -190,34 +174,14 @@
 }
 
 [data-theme='dark'] .bezent-table.is-hoverable .bezent-table__row:hover {
-  box-shadow: 0 4px 20px rgba(2, 11, 28, 0.6);
+  box-shadow:
+    0 4px 20px rgba(2, 11, 28, 0.6),
+    0 0 0 1px rgba(56, 189, 248, 0.25);
 }
 
 [data-theme='dark'] .bezent-table.is-hoverable .bezent-table__row:hover .bezent-table__td {
   background-color: #0b254e;
-  box-shadow:
-    inset 0 1px 0 rgba(56, 189, 248, 0.4),
-    inset 0 -1px 0 rgba(56, 189, 248, 0.4);
-}
-
-[data-theme='dark']
-  .bezent-table.is-hoverable
-  .bezent-table__row:hover
-  .bezent-table__td:first-child {
-  box-shadow:
-    inset 1px 0 0 rgba(56, 189, 248, 0.4),
-    inset 0 1px 0 rgba(56, 189, 248, 0.4),
-    inset 0 -1px 0 rgba(56, 189, 248, 0.4);
-}
-
-[data-theme='dark']
-  .bezent-table.is-hoverable
-  .bezent-table__row:hover
-  .bezent-table__td:last-child {
-  box-shadow:
-    inset -1px 0 0 rgba(56, 189, 248, 0.4),
-    inset 0 1px 0 rgba(56, 189, 248, 0.4),
-    inset 0 -1px 0 rgba(56, 189, 248, 0.4);
+  border-bottom-color: transparent;
 }
 
 [data-theme='dark'] .bezent-table-meta-title {

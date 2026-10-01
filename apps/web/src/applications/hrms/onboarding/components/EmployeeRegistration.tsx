@@ -885,7 +885,7 @@ export function EmployeeRegistration({
       id: s.id,
       stepNumber: String(idx + 1).padStart(2, '0'),
       label: s.label,
-      title: s.label.toUpperCase(),
+      title: s.label,
       description: s.description ?? meta?.description ?? '',
     };
   });
@@ -938,11 +938,6 @@ export function EmployeeRegistration({
           <div key={activeSection} className="bezent-chapter-page-transition">
             {/* Integrated Chapter Section Header (Number integrated into heading) */}
             <div className="bezent-chapter-header">
-              <div className="bezent-chapter-header__top">
-                <span className="bezent-chapter-header__position-badge">
-                  {currentChapter.stepNumber} / {String(chapterSteps.length).padStart(2, '0')}
-                </span>
-              </div>
               <h1 className="bezent-chapter-header__title">{currentChapter.title}</h1>
               {currentChapter.description && (
                 <p className="bezent-chapter-header__desc">{currentChapter.description}</p>

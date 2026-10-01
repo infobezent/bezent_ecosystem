@@ -6,7 +6,7 @@
   position: relative;
   background: var(--bg-card, #ffffff);
   border: 1px solid var(--card-border, #dde3ea);
-  border-radius: var(--card-radius, 14px);
+  border-radius: var(--card-radius, 8px);
   box-shadow: var(--card-shadow, 0 1px 3px rgba(0, 0, 0, 0.04));
   overflow: hidden;
   transition:
@@ -46,8 +46,12 @@
 .bezent-card--interactive:hover {
   background: var(--card-hover-bg, #e9eff8);
   border-color: var(--card-hover-border, #c4c7c5);
-  box-shadow: var(--card-hover-shadow, 0 10px 25px -5px rgba(0, 0, 0, 0.06));
-  transform: translateY(-1.5px);
+  box-shadow: var(
+    --card-hover-shadow,
+    0 1px 2px 0 rgba(60, 64, 67, 0.3),
+    0 1px 3px 1px rgba(60, 64, 67, 0.15)
+  );
+  transform: translateY(-1px);
 }
 
 /* ── Sub-sections ── */
@@ -80,7 +84,7 @@
   justify-content: center;
   width: 44px;
   height: 44px;
-  border-radius: var(--radius-md, 10px);
+  border-radius: var(--radius-sm, 6px);
   background-color: var(--accent-subtle, #e8f0fe);
   color: var(--accent-primary, #1a73e8);
   flex-shrink: 0;

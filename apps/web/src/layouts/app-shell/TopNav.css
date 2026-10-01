@@ -144,16 +144,28 @@
   margin-left: 6px;
   transition:
     box-shadow 0.14s ease,
-    transform 0.12s ease;
+    transform 0.14s cubic-bezier(0.16, 1, 0.3, 1);
   outline: none;
 }
 
 .top-nav__profile:hover {
-  box-shadow: 0 0 0 4px var(--bg-hover, #c2e7ff);
+  transform: translateY(-1px) scale(1.06);
+  box-shadow:
+    0 0 0 4px var(--bg-hover, #c2e7ff),
+    0 1px 2px 0 rgba(60, 64, 67, 0.3),
+    0 1px 3px 1px rgba(60, 64, 67, 0.15);
+}
+
+.top-nav__profile:active {
+  transform: scale(0.95);
 }
 
 .top-nav__profile.is-active {
-  box-shadow: 0 0 0 3px var(--border-focus, #1a73e8);
+  transform: translateY(-1px) scale(1.06);
+  box-shadow:
+    0 0 0 3px var(--border-focus, #1a73e8),
+    0 1px 2px 0 rgba(60, 64, 67, 0.3),
+    0 1px 3px 1px rgba(60, 64, 67, 0.15);
 }
 
 .top-nav__profile:focus-visible,
