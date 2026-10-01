@@ -83,8 +83,8 @@
   grid-template-columns:
     var(--field-group-label-width, var(--form-grid-label-width, var(--form-label-width-md, 180px)))
     minmax(0, 1fr);
-  column-gap: var(--space-3);
-  row-gap: var(--space-1);
+  column-gap: var(--space-3, 12px);
+  row-gap: var(--space-1, 4px);
   align-items: start;
 }
 
@@ -102,7 +102,7 @@
 
 .bezent-field-group--horizontal > .bezent-field-group__label {
   grid-column: 1;
-  padding-top: var(--space-2);
+  padding-top: var(--space-2, 8px);
   white-space: normal;
   word-break: normal;
   overflow-wrap: break-word;
@@ -124,9 +124,9 @@
 }
 
 .bezent-field-group__label {
-  font-size: var(--font-form-label-size, var(--font-size-md, 13px));
-  font-weight: var(--font-form-label-weight, 500);
-  color: var(--text-primary, #1f1f1f);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #000000);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -137,13 +137,13 @@
 }
 
 .bezent-field-group__helper {
-  font-size: var(--font-form-helper-size, var(--font-size-sm, 12px));
-  color: var(--text-muted, #747775);
+  font-size: 13px;
+  color: var(--text-muted, #000000);
   margin-top: 2px;
 }
 
 .bezent-field-group__error {
-  font-size: var(--font-form-error-size, var(--font-size-sm, 12px));
+  font-size: 12px;
   color: var(--status-danger, #ef4444);
   margin-top: 2px;
 }
@@ -163,7 +163,7 @@
 
   .bezent-field-group--horizontal {
     grid-template-columns: 1fr;
-    row-gap: var(--space-1-5);
+    row-gap: var(--space-1-5, 6px);
   }
 
   .bezent-field-group--horizontal > .bezent-field-group__label {
@@ -188,10 +188,10 @@
 .bezent-checkbox-label {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  font-size: var(--font-form-label-size, var(--font-size-md, 13px));
+  gap: var(--space-2, 8px);
+  font-size: 14px;
   font-weight: 500;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
   cursor: pointer;
   user-select: none;
 }
@@ -207,15 +207,15 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: var(--space-3);
+  gap: var(--space-3, 12px);
 }
 
 .bezent-radio-label {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  font-size: var(--font-form-label-size, var(--font-size-md, 13px));
-  color: var(--text-primary, #1f1f1f);
+  gap: var(--space-2, 8px);
+  font-size: 14px;
+  color: var(--text-primary, #000000);
   cursor: pointer;
 }
 
@@ -228,17 +228,17 @@
 .bezent-photo-uploader {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
-  background-color: var(--bg-surface-secondary, #f8fafc);
-  padding: var(--space-4);
-  border-radius: var(--radius-lg);
-  border: 1px dashed var(--border-default, #cbd5e1);
+  gap: var(--space-4, 16px);
+  background-color: var(--bg-surface, #ffffff);
+  padding: var(--space-4, 16px);
+  border-radius: var(--radius-lg, 12px);
+  border: 1px dashed var(--border-default, #dde3ea);
 }
 
 .bezent-photo-preview {
   width: 72px;
   height: 72px;
-  border-radius: var(--radius-full);
+  border-radius: 9999px;
   object-fit: cover;
   border: 2px solid var(--bg-surface, #ffffff);
   box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.1));
@@ -247,19 +247,39 @@
 .bezent-photo-placeholder {
   width: 72px;
   height: 72px;
-  border-radius: var(--radius-full);
-  background-color: var(--bg-surface-secondary, #e2e8f0);
-  color: var(--text-secondary, #64748b);
+  border-radius: 9999px;
+  background: linear-gradient(150deg, #ffffff 0%, #e2f1fd 35%, #bce0fd 100%);
+  color: #032147;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--font-size-2xl, 22px);
+  font-size: 24px;
   font-weight: 700;
   flex-shrink: 0;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 3px 8px -1px rgba(10, 45, 90, 0.22),
+    0 1px 4px rgba(10, 45, 90, 0.16),
+    0 0 0 1px rgba(10, 45, 90, 0.08),
+    inset 0 2px 1.5px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -2px 3px 0 rgba(10, 45, 90, 0.12);
+  transition:
+    transform 0.16s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bezent-photo-placeholder:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow:
+    0 6px 16px -2px rgba(10, 45, 90, 0.3),
+    0 2px 6px rgba(10, 45, 90, 0.2),
+    0 0 0 1px rgba(10, 45, 90, 0.12),
+    inset 0 2px 1.5px 0 #ffffff,
+    inset 0 -2px 3px 0 rgba(10, 45, 90, 0.15);
 }
 
 .bezent-photo-meta {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-1, 4px);
 }

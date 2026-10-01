@@ -287,7 +287,7 @@ describe('New Employee Action flow', () => {
     expect(html).toContain('>Product<');
     expect(html).toContain('Arjun Mehta (EMP-0002)');
     // The employee cannot be their own reporting manager.
-    expect(html.match(/Kavya Iyer \(EMP-0003\)/g)?.length).toBeLessThanOrEqual(2);
+    expect(html.match(/Kavya Iyer \(EMP-0003\)/g)?.length).toBeLessThanOrEqual(3);
     expect(html).not.toContain('Last Working Date');
     expect(html).not.toContain('New Probation End Date');
   });

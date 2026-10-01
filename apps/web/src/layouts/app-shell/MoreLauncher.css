@@ -20,7 +20,7 @@
   user-select: none;
   background: var(--more-panel-bg);
   border: 1px solid var(--more-panel-border);
-  border-radius: 16px;
+  border-radius: 8px;
   box-shadow:
     0 25px 60px -15px rgba(15, 23, 42, 0.22),
     0 0 1px 1px rgba(15, 23, 42, 0.08);

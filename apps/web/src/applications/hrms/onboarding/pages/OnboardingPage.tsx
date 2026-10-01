@@ -419,37 +419,23 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                         <TableCell>
                           <Inline gap="sm" align="center">
                             <Avatar initials={getInitials(item.fullName)} alt={item.fullName} />
-                            <Stack gap="xs">
-                              <Label as="span" size="sm">
-                                {item.fullName}
-                              </Label>
-                              {item.email && (
-                                <Label as="span" size="sm">
-                                  {item.email}
-                                </Label>
-                              )}
-                            </Stack>
+                            <Label as="span" size="sm" weight="semibold">
+                              {item.fullName}
+                            </Label>
                           </Inline>
                         </TableCell>
                         <TableCell>
-                          <Stack gap="xs">
-                            <Label as="span" size="sm">
-                              {item.designationName || '—'}
-                            </Label>
-                            {item.departmentName && (
-                              <Label as="span" size="sm">
-                                {item.departmentName}
-                              </Label>
-                            )}
-                          </Stack>
+                          <Label as="span" size="sm" weight="semibold">
+                            {item.designationName || '—'}
+                          </Label>
                         </TableCell>
                         <TableCell>
-                          <Label as="span" size="sm">
+                          <Label as="span" size="sm" weight="regular">
                             {item.locationName || '—'}
                           </Label>
                         </TableCell>
                         <TableCell>
-                          <Label as="span" size="sm">
+                          <Label as="span" size="sm" weight="regular">
                             {formatDate(item.joiningDate)}
                           </Label>
                         </TableCell>

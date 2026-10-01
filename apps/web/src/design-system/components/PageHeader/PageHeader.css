@@ -12,8 +12,8 @@
 }
 
 .bezent-page-header__breadcrumbs {
-  font-size: var(--font-body-sm-size, var(--font-size-md, 13px));
-  color: var(--text-muted, #747775);
+  font-size: 13.5px;
+  color: var(--text-muted, #000000);
 }
 
 .bezent-page-header__main {
@@ -31,12 +31,11 @@
 }
 
 .bezent-page-header__eyebrow {
-  font-size: var(--font-overline-size, var(--font-size-xs, 11px));
-  font-weight: var(--font-overline-weight, 600);
-  line-height: var(--font-overline-line-height, 1.25);
+  font-size: 12px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: var(--font-overline-spacing, 0.05em);
-  color: var(--text-tertiary, #5f6368);
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary, #000000);
 }
 
 .bezent-page-header__title-row {
@@ -48,19 +47,19 @@
 
 .bezent-page-header__title {
   margin: 0;
-  font-size: var(--font-page-title-size, var(--font-size-2xl, 22px));
-  font-weight: var(--font-page-title-weight, 600);
-  line-height: var(--font-page-title-line-height, 1.25);
-  letter-spacing: var(--font-page-title-spacing, -0.01em);
-  color: var(--text-primary, #1f1f1f);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary, #000000);
+  letter-spacing: -0.03em;
+  line-height: 1.2;
 }
 
 .bezent-page-header__subtitle {
   margin: 0;
-  font-size: var(--font-body-sm-size, var(--font-size-md, 13px));
-  line-height: var(--font-body-sm-line-height, 1.5);
-  letter-spacing: var(--letter-spacing-normal, 0em);
-  color: var(--text-secondary, #444746);
+  font-size: 14px;
+  color: var(--text-secondary, #000000);
+  line-height: 1.45;
+  letter-spacing: -0.01em;
 }
 
 .bezent-page-header__actions {

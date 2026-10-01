@@ -7,11 +7,11 @@
   align-items: flex-start;
   gap: 12px;
   padding: 14px 18px;
-  border-radius: var(--radius-lg);
+  border-radius: 8px;
   border: 1px solid transparent;
-  font-size: var(--font-body-sm-size, var(--font-size-md, 13px));
-  line-height: var(--font-body-sm-line-height, var(--line-height-normal, 1.5));
-  letter-spacing: var(--letter-spacing-normal, 0em);
+  font-size: 13px;
+  line-height: 1.45;
+  letter-spacing: -0.1px;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
@@ -33,7 +33,7 @@
 }
 
 .bezent-alert__title {
-  font-weight: var(--font-weight-semibold, 600);
+  font-weight: 600;
 }
 
 .bezent-alert__message {
@@ -48,7 +48,7 @@
   margin: -2px -4px 0 0;
   background: transparent;
   border: none;
-  border-radius: var(--radius-xs);
+  border-radius: 4px;
   color: inherit;
   opacity: 0.7;
   cursor: pointer;

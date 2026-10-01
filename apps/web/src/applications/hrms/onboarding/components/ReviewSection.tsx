@@ -394,6 +394,7 @@ export function ReviewSection({
   const hasSectionPending = (secLabel: string) => Boolean(sectionPendingMap[secLabel]?.length);
 
   return (
+
     <Stack gap="xl">
       {/* Actionable Error Alert if backend submission failed */}
       {submitError && (
@@ -404,13 +405,14 @@ export function ReviewSection({
           </Stack>
         </Alert>
       )}
-
-      {/* Prominent REGISTRATION STATUS Alert */}
+      {/* Prominent REGISTRATION STATUS Alert */}
       <Alert variant={isComplete ? 'success' : 'warning'}>
         <Inline justify="between" align="center">
           <Stack gap="xs">
-            <strong>{isComplete ? 'Registration Ready' : 'Pending Action Required'}</strong>
-            <span>
+
+            <span className="review-section__status-title">
+              {isComplete ? 'Registration Complete' : 'Pending Action Required'}
+            </span>            <span>
               {isComplete
                 ? 'Core registration details verified. Ready to create employee record.'
                 : `${pendingItems.length} item${pendingItems.length > 1 ? 's' : ''} require attention across ${
@@ -434,7 +436,7 @@ export function ReviewSection({
               {Object.entries(sectionPendingMap).map(([sectionLabel, items]) => (
                 <Stack key={sectionLabel} gap="xs">
                   <span className="bezent-card__desc">
-                    <strong>{sectionLabel}</strong> ({items.length} pending)
+                    <span>{sectionLabel}</span> ({items.length} pending)
                   </span>
                   <Inline gap="xs" wrap>
                     {items.map((item, idx) => (
@@ -481,63 +483,63 @@ export function ReviewSection({
           <Grid columns={3} gap="md">
             <Stack gap="xs">
               <Label size="sm">Employee ID</Label>
-              <strong>{data.general.employeeId || '—'}</strong>
+              <span>{data.general.employeeId || '—'}</span>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Employment Type</Label>
-              <strong>{data.general.employmentType}</strong>
+              <span>{data.general.employmentType}</span>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Employment Status</Label>
-              <strong>{data.general.employmentStatus}</strong>
+              <span>{data.general.employmentStatus}</span>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Department</Label>
-              <strong>{data.general.department || '—'}</strong>
+
+              <span>{data.general.department}</span>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Team</Label>
-              <strong>{data.general.team || '—'}</strong>
+              <span>{data.general.team}</span>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Designation</Label>
-              <strong>{data.general.designation || '—'}</strong>
+              <span>{data.general.designation}</span>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Grade / Level</Label>
-              <strong>{data.general.gradeLevel || '—'}</strong>
-            </Stack>
+              <span>{data.general.gradeLevel}</span>            </Stack>
             <Stack gap="xs">
               <Label size="sm">Reporting Manager</Label>
-              <strong>{data.general.reportingManager || 'Unassigned'}</strong>
+              <span>{data.general.reportingManager || 'Unassigned'}</span>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Organisation Unit</Label>
-              <strong>{data.general.organisationUnit || '—'}</strong>
+
+              <span>{data.general.organisationUnit}</span>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Office Location</Label>
-              <strong>{data.general.officeLocation || '—'}</strong>
-            </Stack>
+              <span>{data.general.officeLocation}</span>            </Stack>
             <Stack gap="xs">
               <Label size="sm">Joining Date</Label>
-              <strong>{data.general.joiningDate || '—'}</strong>
+              <span>{data.general.joiningDate || '—'}</span>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Confirmed Joining Date</Label>
-              <strong>{data.general.confirmedJoiningDate || '—'}</strong>
+              <span>{data.general.confirmedJoiningDate || '—'}</span>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Source of Hire</Label>
-              <strong>{data.general.sourceOfHire}</strong>
+              <span>{data.general.sourceOfHire}</span>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Probation Period</Label>
-              <strong>{data.general.probationPeriod}</strong>
+              <span>{data.general.probationPeriod}</span>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Notice Period</Label>
-              <strong>{data.general.noticePeriod}</strong>
+              <span>{data.general.noticePeriod}</span>
             </Stack>
           </Grid>
         </Stack>
@@ -597,46 +599,34 @@ export function ReviewSection({
           <Grid columns={3} gap="md">
             <Stack gap="xs">
               <Label size="sm">Personal Email</Label>
-              <strong>{data.personal.personalEmail || '—'}</strong>
+
+              <span>{data.personal.personalEmail}</span>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Mobile Phone</Label>
-              <strong>{data.personal.mobilePhone || '—'}</strong>
+              <span>{data.personal.mobilePhone}</span>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Marital Status</Label>
-              <strong>{data.personal.maritalStatus || '—'}</strong>
+              <span>{data.personal.maritalStatus}</span>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Blood Group</Label>
-              <strong>{data.personal.bloodGroup || '—'}</strong>
+              <span>{data.personal.bloodGroup}</span>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Current Address</Label>
-              <strong>
-                {[
-                  data.personal.currentStreet,
-                  data.personal.currentCity,
-                  data.personal.currentState,
-                  data.personal.currentPin,
-                ]
-                  .filter(Boolean)
-                  .join(', ') || '—'}
-              </strong>
+              <span>
+                {data.personal.currentStreet}, {data.personal.currentCity},{' '}
+                {data.personal.currentState} - {data.personal.currentPin}
+              </span>
             </Stack>
             <Stack gap="xs">
               <Label size="sm">Permanent Address</Label>
-              <strong>
-                {[
-                  data.personal.permanentStreet,
-                  data.personal.permanentCity,
-                  data.personal.permanentState,
-                  data.personal.permanentPin,
-                ]
-                  .filter(Boolean)
-                  .join(', ') || '—'}
-              </strong>
-            </Stack>
+              <span>
+                {data.personal.permanentStreet}, {data.personal.permanentCity},{' '}
+                {data.personal.permanentState} - {data.personal.permanentPin}
+              </span>            </Stack>
           </Grid>
 
           {/* Family Members */}
@@ -648,9 +638,8 @@ export function ReviewSection({
                 {data.personal.familyMembers.map((fam) => (
                   <Inline key={fam.id} justify="between" align="center">
                     <span>
-                      <strong>{fam.name}</strong> ({fam.relationship})
-                      {fam.dob ? ` — DOB: ${fam.dob}` : ''}{' '}
-                      {fam.dependent && <Badge variant="neutral">Dependent</Badge>}
+
+                      <span>{fam.name}</span> ({fam.relationship}) — DOB: {fam.dob}{' '}                      {fam.dependent && <Badge variant="neutral">Dependent</Badge>}
                     </span>
                     {onDeleteFamilyMember && (
                       <Button
@@ -679,7 +668,7 @@ export function ReviewSection({
                 {data.personal.nominationDetails.map((nom) => (
                   <Inline key={nom.id} justify="between" align="center">
                     <span>
-                      <strong>{nom.nomineeName}</strong> ({nom.relationship}) — {nom.percentage}%
+                      <span>{nom.nomineeName}</span> ({nom.relationship}) — {nom.percentage}%
                       Allocation {nom.isMinor && <Badge variant="warning">Minor</Badge>}
                     </span>
                     {onDeleteNominee && (
@@ -724,75 +713,59 @@ export function ReviewSection({
             </Button>
           </Inline>
 
-          {data.onboarding.tasks.length === 0 && data.onboarding.assets.length === 0 ? (
-            <span className="bezent-card__desc">
-              No onboarding tasks or assets configured for this registration.
-            </span>
-          ) : (
-            <>
-              {/* Tasks */}
-              {data.onboarding.tasks.length > 0 && (
-                <Stack gap="xs">
-                  <Label size="md">Onboarding Tasks ({data.onboarding.tasks.length})</Label>
-                  <Stack gap="xs">
-                    {data.onboarding.tasks.map((tsk) => (
-                      <Inline key={tsk.id} justify="between" align="center">
-                        <span>
-                          <strong>{tsk.taskDescription}</strong> • Assigned: {tsk.assignedTo} • Due:{' '}
-                          {tsk.dueDate} <Badge variant="neutral">{tsk.status}</Badge>
-                        </span>
-                        {onDeleteTask && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              confirmAndDelete(tsk.taskDescription, () => onDeleteTask(tsk.id))
-                            }
-                          >
-                            Delete
-                          </Button>
-                        )}
-                      </Inline>
-                    ))}
-                  </Stack>
-                </Stack>
-              )}
 
-              {/* Assets */}
-              {data.onboarding.assets.length > 0 && (
-                <Stack gap="xs">
-                  <Divider />
-                  <Label size="md">Assigned Assets ({data.onboarding.assets.length})</Label>
-                  <Stack gap="xs">
-                    {data.onboarding.assets.map((ast) => (
-                      <Inline key={ast.id} justify="between" align="center">
-                        <span>
-                          <strong>{ast.assetName}</strong>
-                          {ast.category ? ` (${ast.category})` : ''}
-                          {ast.serialNumber ? ` — S/N: ${ast.serialNumber}` : ''} • Issued:{' '}
-                          {ast.issueDate} (Qty: {ast.quantity})
-                        </span>
-                        {onDeleteAsset && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              confirmAndDelete(ast.assetName, () => onDeleteAsset(ast.id))
-                            }
-                          >
-                            Delete
-                          </Button>
-                        )}
-                      </Inline>
-                    ))}
-                  </Stack>
-                </Stack>
-              )}
-            </>
-          )}
-        </Stack>
+          {/* Tasks */}
+          <Stack gap="xs">
+            <Label size="md">Onboarding Tasks ({data.onboarding.tasks.length})</Label>
+            <Stack gap="xs">
+              {data.onboarding.tasks.map((tsk) => (
+                <Inline key={tsk.id} justify="between" align="center">
+                  <span>
+                    <span>{tsk.taskDescription}</span> • Assigned: {tsk.assignedTo} • Due:{' '}
+                    {tsk.dueDate} <Badge variant="neutral">{tsk.status}</Badge>
+                  </span>
+                  {onDeleteTask && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        confirmAndDelete(tsk.taskDescription, () => onDeleteTask(tsk.id))
+                      }
+                    >
+                      Delete
+                    </Button>
+                  )}
+                </Inline>
+              ))}
+            </Stack>
+          </Stack>
+
+          {/* Assets */}
+          <Stack gap="xs">
+            <Divider />
+            <Label size="md">Assigned Assets ({data.onboarding.assets.length})</Label>
+            <Stack gap="xs">
+              {data.onboarding.assets.map((ast) => (
+                <Inline key={ast.id} justify="between" align="center">
+                  <span>
+                    <span>{ast.assetName}</span> ({ast.category}) — S/N: {ast.serialNumber} •
+                    Issued: {ast.issueDate} (Qty: {ast.quantity})
+                  </span>
+                  {onDeleteAsset && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => confirmAndDelete(ast.assetName, () => onDeleteAsset(ast.id))}
+                    >
+                      Delete
+                    </Button>
+                  )}
+                </Inline>
+              ))}
+            </Stack>
+          </Stack>        </Stack>
       </Card>
 
       {/* 4. SKILLS */}
@@ -817,46 +790,32 @@ export function ReviewSection({
             </Button>
           </Inline>
 
-          {data.skills.length === 0 ? (
-            <span className="bezent-card__desc">
-              No skills or qualifications recorded for this registration.
-            </span>
-          ) : (
-            <Stack gap="xs">
-              {data.skills.map((skl) => (
-                <Inline key={skl.id} justify="between" align="center">
-                  <Stack gap="xs">
-                    <span>
-                      <strong>{skl.skill}</strong> {skl.skillType ? `(${skl.skillType})` : ''}
-                      {skl.level ? ` — Level: ${skl.level}` : ''}
-                      {skl.levelType ? ` (${skl.levelType})` : ''}
-                      {skl.yearsExperience ? ` • ${skl.yearsExperience} yrs exp` : ''}
-                    </span>
-                    {(skl.examiner || skl.verifiedBy || skl.mentor) && (
-                      <span className="bezent-card__desc">
-                        {skl.examiner ? `Examiner: ${skl.examiner}` : ''}
-                        {skl.examiner && skl.verifiedBy ? ' | ' : ''}
-                        {skl.verifiedBy ? `Verified By: ${skl.verifiedBy}` : ''}
-                        {(skl.examiner || skl.verifiedBy) && skl.mentor ? ' | ' : ''}
-                        {skl.mentor ? `Mentor: ${skl.mentor}` : ''}
-                      </span>
-                    )}
-                  </Stack>
-                  {onDeleteSkill && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => confirmAndDelete(skl.skill, () => onDeleteSkill(skl.id))}
-                    >
-                      Delete
-                    </Button>
-                  )}
-                </Inline>
-              ))}
-            </Stack>
-          )}
-        </Stack>
+
+          <Stack gap="xs">
+            {data.skills.map((skl) => (
+              <Inline key={skl.id} justify="between" align="center">
+                <Stack gap="xs">
+                  <span>
+                    <span>{skl.skill}</span> ({skl.skillType}) — Level: {skl.level} ({skl.levelType}
+                    ) • {skl.yearsExperience} yrs exp
+                  </span>
+                  <span className="bezent-card__desc">
+                    Examiner: {skl.examiner} | Verified By: {skl.verifiedBy} | Mentor: {skl.mentor}
+                  </span>
+                </Stack>
+                {onDeleteSkill && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => confirmAndDelete(skl.skill, () => onDeleteSkill(skl.id))}
+                  >
+                    Delete
+                  </Button>
+                )}
+              </Inline>
+            ))}
+          </Stack>        </Stack>
       </Card>
 
       {/* 5. EMERGENCY CONTACT */}
@@ -885,28 +844,55 @@ export function ReviewSection({
             </Button>
           </Inline>
 
-          {data.emergency.primaryContact ? (
-            <>
-              <Grid columns={3} gap="md">
+
+          <Grid columns={3} gap="md">
+            <Stack gap="xs">
+              <Label size="sm">Primary Contact</Label>
+              <span>
+                {data.emergency.primaryContact.name} ({data.emergency.primaryContact.relationship})
+              </span>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Primary Phone</Label>
+              <span>{data.emergency.primaryContact.phone}</span>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Primary Email</Label>
+              <span>{data.emergency.primaryContact.email || '—'}</span>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Primary Address</Label>
+              <span>{data.emergency.primaryContact.address || '—'}</span>
+            </Stack>
+          </Grid>
+
+          {data.emergency.secondaryContact && (
+            <Stack gap="xs">
+              <Divider />
+              <Inline justify="between" align="center">
+                <Label size="md">Secondary Contact</Label>
+                {onDeleteSecondaryContact && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => confirmAndDelete('Secondary Contact', onDeleteSecondaryContact)}
+                  >
+                    Delete Contact
+                  </Button>
+                )}
+              </Inline>
+              <Grid columns={2} gap="md">
                 <Stack gap="xs">
-                  <Label size="sm">Primary Contact</Label>
-                  <strong>
-                    {data.emergency.primaryContact.name} (
-                    {data.emergency.primaryContact.relationship})
-                  </strong>
+                  <Label size="sm">Name</Label>
+                  <span>
+                    {data.emergency.secondaryContact.name} (
+                    {data.emergency.secondaryContact.relationship})
+                  </span>
                 </Stack>
                 <Stack gap="xs">
-                  <Label size="sm">Primary Phone</Label>
-                  <strong>{data.emergency.primaryContact.phone}</strong>
-                </Stack>
-                <Stack gap="xs">
-                  <Label size="sm">Primary Email</Label>
-                  <strong>{data.emergency.primaryContact.email || '—'}</strong>
-                </Stack>
-                <Stack gap="xs">
-                  <Label size="sm">Primary Address</Label>
-                  <strong>{data.emergency.primaryContact.address || '—'}</strong>
-                </Stack>
+                  <Label size="sm">Phone</Label>
+                  <span>{data.emergency.secondaryContact.phone}</span>                </Stack>
               </Grid>
 
               {data.emergency.secondaryContact && (
@@ -977,24 +963,70 @@ export function ReviewSection({
             </Button>
           </Inline>
 
-          {data.accounts ? (
-            <>
+
+          <Grid columns={3} gap="md">
+            <Stack gap="xs">
+              <Label size="sm">Bank &amp; Branch</Label>
+              <span>
+                {data.accounts.bankName} — {data.accounts.branchName}
+              </span>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">IFSC Code</Label>
+              <span>{data.accounts.ifscCode}</span>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Account Holder</Label>
+              <span>{data.accounts.accountHolderName}</span>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Account Number</Label>
+              <span>•••• •••• {data.accounts.accountNumber.slice(-4)}</span>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Salary Structure</Label>
+              <span>
+                {data.accounts.salaryStructure} ({data.accounts.payGrade})
+              </span>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Annual CTC</Label>
+              <span>₹{data.accounts.annualCtc.toLocaleString('en-IN')} / yr</span>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Monthly Basic</Label>
+              <span>₹{data.accounts.monthlyBasic.toLocaleString('en-IN')} / mo</span>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Monthly Gross</Label>
+              <span>₹{data.accounts.grossSalary.toLocaleString('en-IN')} / mo</span>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Payroll Group</Label>
+              <span>{data.accounts.payrollGroup}</span>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Tax Regime</Label>
+              <span>{data.accounts.taxRegime}</span>
+            </Stack>
+          </Grid>
+
+          {data.accounts.benefits.Medical && (
+            <Stack gap="xs">
+              <Divider />
+              <Label size="md">Medical Insurance Policy</Label>
               <Grid columns={3} gap="md">
                 <Stack gap="xs">
-                  <Label size="sm">Bank &amp; Branch</Label>
-                  <strong>
-                    {data.accounts.bankName}
-                    {data.accounts.branchName ? ` — ${data.accounts.branchName}` : ''}
-                  </strong>
+                  <Label size="sm">Provider</Label>
+                  <span>{data.accounts.medicalDetails.provider}</span>
                 </Stack>
                 <Stack gap="xs">
-                  <Label size="sm">IFSC Code</Label>
-                  <strong>{data.accounts.ifscCode}</strong>
+                  <Label size="sm">Policy Number</Label>
+                  <span>{data.accounts.medicalDetails.policyNumber}</span>
                 </Stack>
                 <Stack gap="xs">
-                  <Label size="sm">Account Holder</Label>
-                  <strong>{data.accounts.accountHolderName}</strong>
-                </Stack>
+                  <Label size="sm">Coverage</Label>
+                  <span>{data.accounts.medicalDetails.coverage}</span>                </Stack>
                 <Stack gap="xs">
                   <Label size="sm">Account Number</Label>
                   <strong>
@@ -1095,41 +1127,29 @@ export function ReviewSection({
             </Button>
           </Inline>
 
-          {data.onlineAccess.username || data.onlineAccess.officialEmail ? (
-            <>
-              <Grid columns={2} gap="md">
-                <Stack gap="xs">
-                  <Label size="sm">Employee Username</Label>
-                  <strong>{data.onlineAccess.username || '—'}</strong>
-                </Stack>
-                <Stack gap="xs">
-                  <Label size="sm">Official Company Email</Label>
-                  <strong>{data.onlineAccess.officialEmail || '—'}</strong>
-                </Stack>
-                {data.onlineAccess.invitationStatus && (
-                  <Stack gap="xs">
-                    <Label size="sm">Invitation Status</Label>
-                    <strong>
-                      {data.onlineAccess.invitationStatus}
-                      {data.onlineAccess.invitationSentDate
-                        ? ` (Sent: ${data.onlineAccess.invitationSentDate})`
-                        : ''}
-                    </strong>
-                  </Stack>
-                )}
-                {data.onlineAccess.employeeRole && (
-                  <Stack gap="xs">
-                    <Label size="sm">Role &amp; Scope</Label>
-                    <strong>
-                      {data.onlineAccess.employeeRole}
-                      {data.onlineAccess.portalRoleScope
-                        ? ` (${data.onlineAccess.portalRoleScope})`
-                        : ''}
-                    </strong>
-                  </Stack>
-                )}
-              </Grid>
 
+          <Grid columns={2} gap="md">
+            <Stack gap="xs">
+              <Label size="sm">Employee Username</Label>
+              <span>{data.onlineAccess.username}</span>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Official Company Email</Label>
+              <span>{data.onlineAccess.officialEmail}</span>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Invitation Status</Label>
+              <span>
+                {data.onlineAccess.invitationStatus} (Sent: {data.onlineAccess.invitationSentDate})
+              </span>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Role &amp; Scope</Label>
+              <span>
+                {data.onlineAccess.employeeRole} ({data.onlineAccess.portalRoleScope})
+              </span>
+            </Stack>
+          </Grid>
               {data.onlineAccess.moduleAccess && (
                 <Stack gap="xs">
                   <Divider />
@@ -1174,37 +1194,30 @@ export function ReviewSection({
             </Button>
           </Inline>
 
-          {data.workingHours.workSchedule || data.workingHours.startTime ? (
-            <Grid columns={2} gap="md">
-              <Stack gap="xs">
-                <Label size="sm">Work Schedule</Label>
-                <strong>{data.workingHours.workSchedule || '—'}</strong>
-              </Stack>
-              <Stack gap="xs">
-                <Label size="sm">Shift Hours</Label>
-                <strong>
-                  {data.workingHours.startTime} – {data.workingHours.endTime}
-                  {data.workingHours.standardHours ? ` (${data.workingHours.standardHours})` : ''}
-                </strong>
-              </Stack>
-              <Stack gap="xs">
-                <Label size="sm">Working Days</Label>
-                <strong>{data.workingHours.workingDays?.join(', ') || '—'}</strong>
-              </Stack>
-              <Stack gap="xs">
-                <Label size="sm">Calendar &amp; Timezone</Label>
-                <strong>
-                  {data.workingHours.assignedCalendar || 'Default Calendar'}{' '}
-                  {data.workingHours.timeZone ? `(${data.workingHours.timeZone})` : ''}
-                </strong>
-              </Stack>
-            </Grid>
-          ) : (
-            <span className="bezent-card__desc">
-              Working hours and shift schedule not configured yet.
-            </span>
-          )}
-        </Stack>
+
+          <Grid columns={2} gap="md">
+            <Stack gap="xs">
+              <Label size="sm">Work Schedule</Label>
+              <span>{data.workingHours.workSchedule}</span>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Shift Hours</Label>
+              <span>
+                {data.workingHours.startTime} – {data.workingHours.endTime} (
+                {data.workingHours.standardHours})
+              </span>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Working Days</Label>
+              <span>{data.workingHours.workingDays.join(', ')}</span>
+            </Stack>
+            <Stack gap="xs">
+              <Label size="sm">Calendar &amp; Timezone</Label>
+              <span>
+                {data.workingHours.assignedCalendar} ({data.workingHours.timeZone})
+              </span>
+            </Stack>
+          </Grid>        </Stack>
       </Card>
 
       {/* 9. DOCUMENTS */}
@@ -1250,6 +1263,7 @@ export function ReviewSection({
 
           {data.documents.items.length > 0 ? (
             <Stack gap="xs">
+
               <Divider />
               <Label size="md">Document Vault Records</Label>
               <Stack gap="xs">
@@ -1272,8 +1286,7 @@ export function ReviewSection({
                         </span>
                       </Stack>
                       <Inline gap="sm" align="center">
-                        <Badge
-                          size="sm"
+                        <Badge                          size="sm"
                           variant={
                             doc.status === 'Verified'
                               ? 'success'
@@ -1347,7 +1360,7 @@ export function ReviewSection({
               {pendingItems.map((item, idx) => (
                 <Inline key={idx} justify="between" align="center">
                   <span>
-                    <strong>{item.sectionLabel}</strong>: {item.fieldName} ({item.reason})
+                    <span>{item.sectionLabel}</span>: {item.fieldName} ({item.reason})
                   </span>
                   <Button
                     type="button"

@@ -1,6 +1,7 @@
 /*
  * BEZENT ChapterFocusCarousel & Integrated Chapter Header
- * Strict Semantic Token Foundation (zero inline CSS).
+ * Real Browser Tab Visual Concept & Connected Page Architecture
+ * Strict Semantic Token Foundation (zero application CSS).
  */
 
 .bezent-focus-carousel {
@@ -8,10 +9,11 @@
   width: 100%;
   background: var(--bg-surface-secondary, #f0f4f9);
   border-top: 1px solid var(--border-subtle, #e7ebf0);
-  border-bottom: 1px solid var(--border-default, #dde3ea);
-  padding: 12px 0 14px;
+  border-bottom: none;
+  padding: 2px 0 0;
   user-select: none;
-  overflow: hidden;
+  overflow: visible;
+  z-index: 10;
 }
 
 /* ── Top Editorial Kicker & Controls ── */
@@ -19,17 +21,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px 10px;
+  padding: 0 32px 8px;
   width: 100%;
 }
 
 .bezent-focus-carousel__kicker {
-  font-size: var(--font-overline-size, var(--font-size-xs, 11px));
-  font-weight: var(--font-overline-weight, 600);
-  line-height: var(--font-overline-line-height, 1.25);
-  letter-spacing: var(--font-overline-spacing, 0.05em);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--text-muted, #747775);
+  color: var(--text-primary, #000000);
 }
 
 .bezent-focus-carousel__controls {
@@ -39,16 +40,16 @@
 }
 
 .bezent-focus-carousel__nav-btn {
-  width: 26px;
-  height: 26px;
-  border-radius: var(--radius-sm);
+  width: 25px;
+  height: 25px;
+  border-radius: 6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-subtle, #e7ebf0);
-  color: var(--text-secondary, #444746);
-  font-size: 15px;
+  color: var(--text-primary, #000000);
+  font-size: 14px;
   font-weight: 600;
   line-height: 1;
   cursor: pointer;
@@ -73,13 +74,13 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: var(--font-size-sm, 12px);
-  font-weight: var(--font-weight-semibold, 600);
+  font-size: 12px;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: var(--text-secondary, #444746);
+  color: var(--text-primary, #000000);
   background: var(--bg-surface, #ffffff);
-  padding: 3px 8px;
-  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+  border-radius: 6px;
   border: 1px solid var(--border-subtle, #e7ebf0);
 }
 
@@ -88,27 +89,27 @@
 }
 
 .bezent-focus-carousel__counter-divider {
-  color: var(--text-muted, #747775);
+  color: var(--text-muted, #000000);
   font-weight: 400;
 }
 
 .bezent-focus-carousel__counter-total {
-  color: var(--text-muted, #747775);
+  color: var(--text-muted, #000000);
 }
 
-/* ── Viewport & Moving Track ── */
+/* ── Viewport & Browser Tab Strip ── */
 .bezent-focus-carousel__viewport {
   position: relative;
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
   display: flex;
-  align-items: center;
-  min-height: 54px;
-  scroll-behavior: smooth;
+  align-items: flex-end;
+  min-height: 42px;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 4px 0;
+  padding: 0 16px;
+  box-sizing: border-box;
 }
 
 .bezent-focus-carousel__viewport::-webkit-scrollbar {
@@ -117,151 +118,171 @@
 
 .bezent-focus-carousel__track {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  align-items: flex-end;
+  width: 100%;
+  gap: 4px;
   position: relative;
-  padding: 6px calc(50% - 90px);
-  width: max-content;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* ── Chapter Focus Card ── */
+/* ── Chapter Focus Card (Browser Tab Primitive) ── */
 .bezent-focus-card {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  border-radius: var(--radius-md);
+  justify-content: center;
+  gap: 6px;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 8px 8px 7px;
+  height: 38px;
+  border-radius: 10px 10px 0 0;
   font-family: var(--font-family-base, inherit);
   cursor: pointer;
-  flex-shrink: 0;
   outline: none;
-  border: 1px solid transparent;
-  transform-origin: center center;
+  border: none;
+  background: transparent;
+  color: var(--text-primary, #000000);
+  box-sizing: border-box;
   white-space: nowrap;
+  margin: 0;
   transition:
-    transform 360ms cubic-bezier(0.2, 0.8, 0.25, 1),
-    opacity 360ms ease,
-    background-color 200ms ease,
-    border-color 200ms ease,
-    box-shadow 300ms ease,
-    color 200ms ease;
+    background-color 140ms ease,
+    color 140ms ease;
 }
 
 .bezent-focus-card:focus-visible {
-  border-color: var(--border-focus, #1a73e8);
   box-shadow: 0 0 0 2px var(--accent-subtle, #e8f0fe);
 }
 
 /* Number Marker */
 .bezent-focus-card__number {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
-  transition: all 200ms ease;
-  border: 1px solid transparent;
+  background: #f0f4f9;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #000000;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition:
+    background-color 140ms ease,
+    color 140ms ease,
+    box-shadow 140ms ease;
 }
 
 .bezent-focus-card__label {
-  font-size: 13px;
+  position: relative;
+  z-index: 1;
+  font-size: 13.5px;
+  font-weight: 600;
   line-height: 1.25;
   letter-spacing: -0.1px;
-  transition: all 200ms ease;
+  color: #000000;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* ── Focus Depth States ── */
-
-/* 1. Active Focus Card */
-.bezent-focus-card.is-focus-active {
-  transform: scale(1);
-  opacity: 1;
-  background: var(--bg-surface, #ffffff);
-  border-color: var(--card-border, #dde3ea);
-  color: var(--brand-primary, #041e49);
-  font-weight: 600;
-  box-shadow:
-    0 4px 14px -2px rgba(4, 30, 73, 0.08),
-    0 1px 3px rgba(4, 30, 73, 0.04);
-  z-index: 2;
+/* ── Inactive Tabs (Floating above the bottom) ── */
+.bezent-focus-card:not(.is-focus-active):not(:disabled)::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  bottom: 5px;
+  left: 2px;
+  right: 2px;
+  border-radius: 7px;
+  background: transparent;
+  pointer-events: none;
+  transition: background-color 140ms ease;
+  z-index: 0;
 }
 
-.bezent-focus-card.is-focus-active .bezent-focus-card__number {
-  background: var(--brand-primary, #041e49);
-  border-color: var(--brand-primary, #041e49);
-  color: var(--text-inverse, #ffffff);
-  box-shadow: 0 0 0 2.5px var(--bg-hover, #c2e7ff);
+.bezent-focus-card:hover:not(.is-focus-active):not(:disabled)::before {
+  background: rgba(255, 255, 255, 0.6);
 }
 
-.bezent-focus-card.is-focus-active .bezent-focus-card__label {
-  color: var(--brand-primary, #041e49);
-  font-weight: 600;
-}
-
-/* 2. Direct Neighbor (±1 distance) */
-.bezent-focus-card.is-focus-neighbor {
-  transform: scale(0.94);
-  opacity: 0.9;
-  background: var(--bg-surface, #ffffff);
-  border-color: var(--border-subtle, #e7ebf0);
-  color: var(--text-primary, #1f1f1f);
-}
-
-.bezent-focus-card.is-focus-neighbor .bezent-focus-card__number {
-  background: var(--bg-surface-secondary, #f0f4f9);
-  border-color: var(--border-subtle, #e7ebf0);
-  color: var(--text-secondary, #444746);
-}
-
-/* 3. Secondary Neighbor (±2 distance) */
-.bezent-focus-card.is-focus-secondary {
-  transform: scale(0.88);
-  opacity: 0.78;
-  background: rgba(255, 255, 255, 0.9);
-  border-color: var(--border-subtle, #e7ebf0);
-  color: var(--text-secondary, #444746);
-}
-
-.bezent-focus-card.is-focus-secondary .bezent-focus-card__number {
-  background: var(--bg-surface-secondary, #f0f4f9);
-  border-color: var(--border-subtle, #e7ebf0);
-  color: var(--text-secondary, #444746);
-}
-
-/* 4. Far Distance (±3+ distance) */
-.bezent-focus-card.is-focus-far {
-  transform: scale(0.84);
-  opacity: 0.65;
-  background: rgba(255, 255, 255, 0.8);
-  border-color: var(--border-subtle, #e7ebf0);
-  color: var(--text-secondary, #444746);
-}
-
-.bezent-focus-card.is-focus-far .bezent-focus-card__number {
-  background: var(--bg-surface-secondary, #f0f4f9);
-  border-color: var(--border-subtle, #e7ebf0);
-  color: var(--text-secondary, #444746);
-}
-
-/* Hover Interaction on Inactive Cards */
 .bezent-focus-card:hover:not(.is-focus-active):not(:disabled) {
-  opacity: 1;
-  transform: scale(0.96);
-  background: var(--bg-surface, #ffffff);
-  border-color: var(--border-default, #dde3ea);
-  color: var(--text-primary, #1f1f1f);
-  box-shadow: 0 2px 8px rgba(4, 30, 73, 0.06);
+  color: #000000;
 }
 
 .bezent-focus-card:hover:not(.is-focus-active):not(:disabled) .bezent-focus-card__number {
-  border-color: var(--border-focus, #1a73e8);
-  color: var(--brand-primary, #041e49);
+  background: #e2e8f0;
+  color: #000000;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.bezent-focus-card.is-focus-neighbor,
+.bezent-focus-card.is-focus-secondary,
+.bezent-focus-card.is-focus-far {
+  opacity: 1;
+}
+
+/* ── 1. ACTIVE BROWSER TAB (Physically Attached to Page Content) ── */
+.bezent-focus-card.is-focus-active {
+  background: var(--bg-surface, #ffffff);
+  border: none;
+  border-radius: 10px 10px 0 0;
+  padding: 8px 8px 7px;
+  margin: 0;
+  color: #000000;
+  z-index: 20;
+  opacity: 1;
+}
+
+/* Left Concave Curve (Inverted Fillet) */
+.bezent-focus-card.is-focus-active::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -10px;
+  width: 10px;
+  height: 10px;
+  background: radial-gradient(circle at 0 0, transparent 10px, var(--bg-surface, #ffffff) 10.5px);
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* Right Concave Curve (Inverted Fillet) */
+.bezent-focus-card.is-focus-active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: -10px;
+  width: 10px;
+  height: 10px;
+  background: radial-gradient(
+    circle at 100% 0,
+    transparent 10px,
+    var(--bg-surface, #ffffff) 10.5px
+  );
+  pointer-events: none;
+  z-index: 20;
+}
+
+.bezent-focus-card.is-focus-active .bezent-focus-card__number {
+  background: var(--bg-hover, #c2e7ff);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #000000;
+  font-weight: 700;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.16),
+    0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.bezent-focus-card.is-focus-active .bezent-focus-card__label {
+  color: #000000;
 }
 
 .bezent-focus-card:disabled {
@@ -278,18 +299,6 @@
   gap: 6px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--border-subtle, #e7ebf0);
-  animation: bezentChapterFadeIn 320ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes bezentChapterFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .bezent-chapter-header__top {
@@ -303,29 +312,49 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: var(--font-size-sm, 12px);
-  font-weight: var(--font-weight-semibold, 600);
-  letter-spacing: var(--letter-spacing-wide, 0.05em);
-  color: var(--brand-primary, #041e49);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #000000;
   background: var(--bg-surface-secondary, #f0f4f9);
-  border: 1px solid var(--border-subtle, #e7ebf0);
-  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle, #dde3ea);
+  border-radius: 6px;
   padding: 3px 10px;
 }
 
 .bezent-chapter-header__title {
   margin: 0;
-  font-size: var(--font-page-title-size, var(--font-size-2xl, 22px));
-  font-weight: var(--font-page-title-weight, 600);
-  letter-spacing: var(--font-page-title-spacing, -0.01em);
-  line-height: var(--font-page-title-line-height, 1.25);
-  color: var(--text-primary, #1f1f1f);
+  font-size: 23px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.35px;
+  color: #041e49;
 }
 
 .bezent-chapter-header__desc {
   margin: 0;
-  font-size: var(--font-body-sm-size, var(--font-size-md, 13px));
-  color: var(--text-muted, #747775);
-  line-height: var(--font-body-sm-line-height, 1.5);
+  font-size: 14px;
+  font-weight: 400;
+  color: #000000;
+  line-height: 1.5;
   max-width: 780px;
+}
+
+/* ── Chapter Page-to-Page Smooth Motion ── */
+.bezent-chapter-page-transition {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl, 24px);
+  width: 100%;
+  animation: bezentChapterFadeIn 140ms ease-out forwards;
+}
+
+@keyframes bezentChapterFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

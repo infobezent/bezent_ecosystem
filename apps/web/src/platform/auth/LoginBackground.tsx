@@ -32,6 +32,16 @@ export const LoginBackground: React.FC = () => {
               <stop offset="100%" stopColor="#082f49" stopOpacity="0" />
             </linearGradient>
 
+            {/* Light Mode Outline Gradient: crisp azure / brand blue upper half fading to 0% */}
+            <linearGradient id="bezentOutlineGradLight" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#0284c7" stopOpacity="0.85" />
+              <stop offset="22%" stopColor="#0369a1" stopOpacity="0.65" />
+              <stop offset="45%" stopColor="#0284c7" stopOpacity="0.4" />
+              <stop offset="68%" stopColor="#38bdf8" stopOpacity="0.15" />
+              <stop offset="85%" stopColor="#bae6fd" stopOpacity="0.05" />
+              <stop offset="100%" stopColor="#e0f2fe" stopOpacity="0" />
+            </linearGradient>
+
             {/* Top-half specular gleam: luminous white/cyan rim reflections on upper edges */}
             <linearGradient id="bezentTopSpecularGleam" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.25" />
@@ -41,6 +51,17 @@ export const LoginBackground: React.FC = () => {
               <stop offset="65%" stopColor="#38bdf8" stopOpacity="0.25" />
               <stop offset="82%" stopColor="#ffffff" stopOpacity="0.95" />
               <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.25" />
+            </linearGradient>
+
+            {/* Light Mode Top Specular Gleam */}
+            <linearGradient id="bezentTopSpecularGleamLight" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#0284c7" stopOpacity="0.3" />
+              <stop offset="14%" stopColor="#0369a1" stopOpacity="0.9" />
+              <stop offset="28%" stopColor="#0284c7" stopOpacity="0.35" />
+              <stop offset="48%" stopColor="#003566" stopOpacity="0.95" />
+              <stop offset="65%" stopColor="#0284c7" stopOpacity="0.3" />
+              <stop offset="82%" stopColor="#0369a1" stopOpacity="0.9" />
+              <stop offset="100%" stopColor="#0284c7" stopOpacity="0.3" />
             </linearGradient>
 
             {/* Vertical mask strictly restricting specular glow to the upper half */}

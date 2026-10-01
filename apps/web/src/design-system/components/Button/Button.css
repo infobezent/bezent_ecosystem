@@ -10,8 +10,8 @@
   border: 1px solid transparent;
   cursor: pointer;
   font: inherit;
-  font-weight: var(--font-weight-semibold, 600);
-  letter-spacing: var(--letter-spacing-normal, 0em);
+  font-weight: 600;
+  letter-spacing: -0.1px;
   user-select: none;
   white-space: nowrap;
   transition:
@@ -27,25 +27,22 @@
 .bezent-btn--sm {
   height: 28px;
   padding: 0 12px;
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-xs, 11px);
-  line-height: var(--font-button-line-height, var(--line-height-snug, 1.375));
+  border-radius: 6px;
+  font-size: 11px;
 }
 
 .bezent-btn--md {
   height: 34px;
   padding: 0 16px;
-  border-radius: var(--radius-md);
-  font-size: var(--font-button-size, var(--font-size-md, 13px));
-  line-height: var(--font-button-line-height, var(--line-height-snug, 1.375));
+  border-radius: 6px;
+  font-size: 12px;
 }
 
 .bezent-btn--lg {
   height: 40px;
   padding: 0 20px;
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-base, 14px);
-  line-height: var(--font-button-line-height, var(--line-height-snug, 1.375));
+  border-radius: 8px;
+  font-size: 13px;
 }
 
 /* ── Variants ── */

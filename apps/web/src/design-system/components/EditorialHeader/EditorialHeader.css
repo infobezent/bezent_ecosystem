@@ -6,15 +6,15 @@
 .bezent-editorial-header {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-4, 16px);
   width: 100%;
-  padding-bottom: var(--space-2);
+  padding-bottom: var(--space-2, 8px);
 }
 
 .bezent-editorial-header__main {
   display: flex;
   align-items: flex-start;
-  gap: var(--space-5);
+  gap: var(--space-5, 20px);
   width: 100%;
 }
 
@@ -28,7 +28,7 @@
   padding: 8px 12px;
   background: var(--search-bg, #eaf1fb);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-md);
+  border-radius: var(--card-radius, 8px);
   flex-shrink: 0;
   box-shadow: 0 1px 2px rgba(4, 30, 73, 0.04);
 }
@@ -46,7 +46,7 @@
 .bezent-editorial-header__numeral-sub {
   font-size: 8px;
   font-weight: 700;
-  color: var(--text-muted, #747775);
+  color: var(--text-muted, #000000);
   letter-spacing: 1px;
   text-transform: uppercase;
   margin-top: 3px;
@@ -56,40 +56,40 @@
 .bezent-editorial-header__content {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-1, 4px);
   flex: 1;
 }
 
 .bezent-editorial-header__kicker {
-  font-size: var(--font-overline-size, var(--font-size-xs, 11px));
-  font-weight: var(--font-overline-weight, 600);
-  line-height: var(--font-overline-line-height, 1.25);
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: var(--font-overline-spacing, 0.05em);
+  letter-spacing: 0.8px;
   color: var(--accent-interactive, #1a73e8);
 }
 
 .bezent-editorial-header__title-row {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-3, 12px);
   flex-wrap: wrap;
 }
 
 .bezent-editorial-header__title {
   margin: 0;
-  font-size: var(--font-page-title-size, var(--font-size-2xl, 22px));
-  font-weight: var(--font-page-title-weight, 600);
-  color: var(--text-primary, #1f1f1f);
-  letter-spacing: var(--font-page-title-spacing, -0.01em);
-  line-height: var(--font-page-title-line-height, 1.25);
+  font-size: 23px;
+  font-weight: 700;
+  color: var(--brand-primary, #041e49);
+  letter-spacing: -0.35px;
+  line-height: 1.2;
 }
 
 .bezent-editorial-header__desc {
   margin: 0;
-  font-size: var(--font-body-size, var(--font-size-base, 14px));
-  color: var(--text-secondary, #444746);
-  line-height: var(--font-body-line-height, 1.5);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-secondary, #000000);
+  line-height: 1.5;
   max-width: 720px;
 }
 
@@ -101,7 +101,7 @@
 .bezent-editorial-header__actions {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-2, 8px);
   flex-shrink: 0;
   margin-left: auto;
 }
@@ -112,7 +112,7 @@
   width: 100%;
   height: 1px;
   background: var(--border-subtle, #e7ebf0);
-  margin-top: var(--space-1);
+  margin-top: var(--space-1, 4px);
 }
 
 .bezent-editorial-header__rule-accent {

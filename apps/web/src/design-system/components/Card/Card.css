@@ -4,9 +4,9 @@
 
 .bezent-card {
   position: relative;
-  background: var(--bg-card, #f0f4f9);
+  background: var(--bg-card, #ffffff);
   border: 1px solid var(--card-border, #dde3ea);
-  border-radius: var(--radius-lg);
+  border-radius: var(--card-radius, 8px);
   box-shadow: var(--card-shadow, 0 1px 3px rgba(0, 0, 0, 0.04));
   overflow: hidden;
   transition:
@@ -46,8 +46,12 @@
 .bezent-card--interactive:hover {
   background: var(--card-hover-bg, #e9eff8);
   border-color: var(--card-hover-border, #c4c7c5);
-  box-shadow: var(--card-hover-shadow, 0 10px 25px -5px rgba(0, 0, 0, 0.06));
-  transform: translateY(-1.5px);
+  box-shadow: var(
+    --card-hover-shadow,
+    0 1px 2px 0 rgba(60, 64, 67, 0.3),
+    0 1px 3px 1px rgba(60, 64, 67, 0.15)
+  );
+  transform: translateY(-1px);
 }
 
 /* ── Sub-sections ── */
@@ -60,19 +64,18 @@
 }
 
 .bezent-card__title {
-  font-size: var(--font-card-title-size, var(--font-size-base, 14px));
-  font-weight: var(--font-card-title-weight, 600);
-  color: var(--text-primary, #1f1f1f);
-  letter-spacing: var(--letter-spacing-normal, 0em);
-  line-height: var(--font-card-title-line-height, var(--line-height-snug, 1.375));
+  font-size: var(--form-font-size-card-title, 16px);
+  font-weight: 700;
+  color: var(--text-primary, #000000);
+  letter-spacing: -0.015em;
   margin: 0;
 }
 
 .bezent-card__desc {
-  font-size: var(--font-body-sm-size, var(--font-size-md, 13px));
-  color: var(--text-secondary, #444746);
+  font-size: 13.5px;
+  color: var(--text-secondary, #000000);
   margin: 4px 0 0 0;
-  line-height: var(--font-body-sm-line-height, var(--line-height-normal, 1.5));
+  line-height: 1.45;
 }
 
 .bezent-card__icon {
@@ -81,7 +84,7 @@
   justify-content: center;
   width: 44px;
   height: 44px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm, 6px);
   background-color: var(--accent-subtle, #e8f0fe);
   color: var(--accent-primary, #1a73e8);
   flex-shrink: 0;

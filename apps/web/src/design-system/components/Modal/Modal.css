@@ -33,7 +33,7 @@
   max-height: calc(100vh - 40px);
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-xl);
+  border-radius: var(--card-radius, 8px);
   box-shadow:
     0 25px 50px -12px rgba(0, 0, 0, 0.25),
     0 0 0 1px rgba(0, 0, 0, 0.02);
@@ -74,7 +74,7 @@
   max-width: calc(100vw - 40px);
   height: 94vh;
   max-height: calc(100vh - 40px);
-  border-radius: var(--radius-xl);
+  border-radius: var(--card-radius, 8px);
   box-shadow: 0 25px 60px -15px rgba(4, 30, 73, 0.28);
 }
 
@@ -84,6 +84,7 @@
   flex-direction: column;
   flex-shrink: 0;
   padding: 20px 24px 16px;
+  background: #c2e7ff;
   border-bottom: 1px solid var(--border-subtle, #e7ebf0);
 }
 
@@ -102,7 +103,7 @@
 .bezent-modal__header-actions {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-3, 12px);
   flex-shrink: 0;
 }
 
@@ -119,18 +120,16 @@
 
 .bezent-modal__title {
   margin: 0;
-  font-size: var(--font-section-title-size, var(--font-size-lg, 16px));
-  font-weight: var(--font-section-title-weight, 600);
-  line-height: var(--font-section-title-line-height, var(--line-height-snug, 1.375));
-  color: var(--text-primary, #1f1f1f);
-  letter-spacing: var(--letter-spacing-normal, 0em);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary, #000000);
+  letter-spacing: -0.2px;
 }
 
 .bezent-modal__desc {
   margin: 0;
-  font-size: var(--font-body-sm-size, var(--font-size-md, 13px));
-  line-height: var(--font-body-sm-line-height, var(--line-height-normal, 1.5));
-  color: var(--text-muted, #747775);
+  font-size: 13.5px;
+  color: var(--text-muted, #000000);
 }
 
 .bezent-modal__close-btn {
@@ -142,8 +141,8 @@
   padding: 0;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: var(--radius-md);
-  color: var(--icon-muted, #5f6368);
+  border-radius: 8px;
+  color: var(--icon-muted, #000000);
   cursor: pointer;
   transition:
     background-color 0.16s cubic-bezier(0.16, 1, 0.3, 1),
@@ -167,52 +166,66 @@
 .bezent-modal--workspace .bezent-modal__header,
 .bezent-modal__header--brand {
   padding: 0;
-  background: var(--bg-surface, #ffffff);
+  background: #c2e7ff;
   border-bottom: 1px solid var(--border-subtle, #e7ebf0);
 }
 
 .bezent-modal--workspace .bezent-modal__header-main,
 .bezent-modal__header--brand .bezent-modal__header-main,
 .bezent-modal__header--brand .bezent-page-header {
-  padding: 16px 32px 14px;
+  padding: 10px 32px;
 }
 
 .bezent-modal--workspace .bezent-modal__title,
 .bezent-modal__header--brand .bezent-page-header__title {
-  font-size: var(--font-page-title-size, var(--font-size-2xl, 22px));
-  font-weight: var(--font-page-title-weight, 600);
-  line-height: var(--font-page-title-line-height, 1.25);
-  letter-spacing: var(--font-page-title-spacing, -0.01em);
-  color: var(--text-primary, #1f1f1f);
+  font-size: 23px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #041e49;
+  letter-spacing: -0.35px;
 }
 
 .bezent-modal--workspace .bezent-modal__desc,
 .bezent-modal__header--brand .bezent-page-header__subtitle {
-  font-size: var(--font-body-sm-size, var(--font-size-md, 13px));
-  font-weight: var(--font-weight-regular, 400);
-  line-height: var(--font-body-sm-line-height, 1.5);
-  color: var(--text-muted, #747775);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #000000;
   max-width: 600px;
 }
 
 .bezent-modal__header--brand .bezent-breadcrumb {
-  color: var(--text-muted, #747775);
-  font-size: var(--font-size-sm, 12px);
+  color: #000000;
+  font-size: 13px;
 }
 
 .bezent-modal__header--brand .bezent-breadcrumb-item--active {
-  color: var(--text-primary, #1f1f1f);
-  font-weight: var(--font-weight-semibold, 600);
+  color: #041e49;
+  font-weight: 700;
 }
 
 .bezent-modal__header--brand .bezent-breadcrumb-separator {
-  color: var(--border-default, #dde3ea);
+  color: #000000;
 }
 
 .bezent-modal--workspace .bezent-modal__header-bottom,
 .bezent-modal__header--brand .bezent-modal__header-bottom {
   width: 100%;
   margin-top: 0;
+}
+
+.bezent-modal__header--brand .bezent-btn-draft,
+.bezent-modal__header--brand .onboarding-page__drafts-btn {
+  background: #ffffff;
+  color: #041e49;
+  border: 1px solid #dde3ea;
+  box-shadow: 0 1px 2px rgba(4, 30, 73, 0.08);
+}
+
+.bezent-modal__header--brand .bezent-btn-draft:hover,
+.bezent-modal__header--brand .onboarding-page__drafts-btn:hover {
+  background: #f0f4f9;
+  color: #041e49;
+  border-color: #1a73e8;
 }
 
 .bezent-modal--workspace .bezent-modal__close-btn {
@@ -225,6 +238,62 @@
   background: var(--bg-hover, #c2e7ff);
   border-color: var(--border-focus, #1a73e8);
   color: var(--icon-active, #041e49);
+}
+
+/* ── Dark Mode Workspace Identity Zone ── */
+[data-theme='dark'] .bezent-modal--workspace .bezent-modal__header,
+[data-theme='dark'] .bezent-modal__header--brand {
+  background: #081b3a;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.24);
+}
+
+[data-theme='dark'] .bezent-modal--workspace .bezent-modal__title,
+[data-theme='dark'] .bezent-modal__header--brand .bezent-page-header__title {
+  color: #f8fafc;
+}
+
+[data-theme='dark'] .bezent-modal--workspace .bezent-modal__desc,
+[data-theme='dark'] .bezent-modal__header--brand .bezent-page-header__subtitle {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-modal__header--brand .bezent-breadcrumb {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-modal__header--brand .bezent-breadcrumb-item--active {
+  color: #38bdf8;
+}
+
+[data-theme='dark'] .bezent-modal__header--brand .bezent-breadcrumb-separator {
+  color: rgba(56, 189, 248, 0.32);
+}
+
+[data-theme='dark'] .bezent-modal__header--brand .bezent-btn-draft,
+[data-theme='dark'] .bezent-modal__header--brand .onboarding-page__drafts-btn {
+  background: rgba(56, 189, 248, 0.08);
+  color: #f8fafc;
+  border: 1px solid rgba(56, 189, 248, 0.32);
+  box-shadow: 0 1px 3px rgba(2, 11, 28, 0.5);
+}
+
+[data-theme='dark'] .bezent-modal__header--brand .bezent-btn-draft:hover,
+[data-theme='dark'] .bezent-modal__header--brand .onboarding-page__drafts-btn:hover {
+  background: rgba(22, 131, 255, 0.22);
+  color: #ffffff;
+  border-color: #1683ff;
+}
+
+[data-theme='dark'] .bezent-modal--workspace .bezent-modal__close-btn {
+  background: #081b3a;
+  border: 1px solid rgba(56, 189, 248, 0.32);
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-modal--workspace .bezent-modal__close-btn:hover {
+  background: rgba(22, 131, 255, 0.22);
+  border-color: #1683ff;
+  color: #38bdf8;
 }
 
 /* ── Body ── */

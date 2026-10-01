@@ -10,11 +10,10 @@
 }
 
 .bezent-input-label {
-  font-size: var(--font-form-label-size, var(--font-size-md, 13px));
-  font-weight: var(--font-form-label-weight, 500);
-  line-height: var(--font-form-label-line-height, var(--line-height-snug, 1.375));
-  color: var(--text-secondary, #444746);
-  letter-spacing: var(--letter-spacing-normal, 0em);
+  font-size: var(--form-font-size-label, 14px);
+  font-weight: 600;
+  color: var(--text-primary, #000000);
+  letter-spacing: -0.005em;
 }
 
 .bezent-input-box {
@@ -24,7 +23,7 @@
   width: 100%;
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-md);
+  border-radius: 6px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
   transition:
     border-color 0.16s cubic-bezier(0.16, 1, 0.3, 1),
@@ -43,32 +42,32 @@
 
 /* ── Sizes ── */
 .bezent-input-wrapper--sm .bezent-input-box {
-  height: 30px;
-  border-radius: var(--radius-md);
+  height: 32px;
+  border-radius: 6px;
 }
 
 .bezent-input-wrapper--sm .bezent-input-field {
-  font-size: var(--font-size-sm, 12px);
+  font-size: 13px;
   padding: 0 10px;
 }
 
 .bezent-input-wrapper--md .bezent-input-box {
-  height: 36px;
-  border-radius: var(--radius-md);
+  height: 42px;
+  border-radius: 6px;
 }
 
 .bezent-input-wrapper--md .bezent-input-field {
-  font-size: var(--font-form-input-size, var(--font-size-base, 14px));
+  font-size: var(--form-font-size-input, 17px);
   padding: 0 14px;
 }
 
 .bezent-input-wrapper--lg .bezent-input-box {
-  height: 42px;
-  border-radius: var(--radius-md);
+  height: 46px;
+  border-radius: 8px;
 }
 
 .bezent-input-wrapper--lg .bezent-input-field {
-  font-size: var(--font-size-base, 14px);
+  font-size: 18px;
   padding: 0 16px;
 }
 
@@ -119,7 +118,7 @@
   padding: 0 14px;
   background-color: var(--color-primary-light, #eff6ff);
   border: 1px solid var(--color-primary-border, #bfdbfe);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-sm, 6px);
   color: var(--accent-interactive, #1a73e8);
   font-size: 13px;
   font-weight: 600;
@@ -142,7 +141,7 @@
   width: 100%;
   height: 40px;
   border: 1px solid var(--border-default, #cbd5e1);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm, 6px);
   background-color: var(--bg-surface, #ffffff);
   display: flex;
   align-items: center;
@@ -157,7 +156,7 @@
   gap: 6px;
   background-color: var(--bg-surface-secondary, #f1f5f9);
   border: 1px solid var(--border-subtle, #e2e8f0);
-  border-radius: var(--radius-full);
+  border-radius: 20px;
   padding: 3px 10px 3px 4px;
   font-size: 13px;
   font-weight: 500;
@@ -225,12 +224,12 @@
 .bezent-search-bar {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-2, 8px);
   padding: 0 12px;
   height: 36px;
   background-color: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #cbd5e1);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm, 6px);
   min-width: 240px;
 }
 
@@ -253,15 +252,15 @@
   background: transparent;
   border: none;
   outline: none;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
   font: inherit;
-  font-size: var(--font-form-input-size, var(--font-size-base, 14px));
-  line-height: var(--font-form-input-line-height, var(--line-height-normal, 1.5));
-  letter-spacing: var(--letter-spacing-normal, 0em);
+  font-size: var(--form-font-size-input, 14px);
+  letter-spacing: -0.01em;
 }
 
 .bezent-input-field::placeholder {
-  color: var(--text-muted, #747775);
+  color: #000000;
+  opacity: 0.5;
 }
 
 /* ── Icon Slots ── */
@@ -338,21 +337,20 @@
   resize: vertical;
   min-height: 76px;
   padding: 10px 14px;
-  font-size: var(--font-form-input-size, var(--font-size-base, 14px)) !important;
-  line-height: var(--line-height-normal, 1.5);
+  font-size: var(--form-font-size-input, 13.5px) !important;
+  line-height: 1.5;
   box-sizing: border-box;
 }
 
 /* ── Feedback & Validation ── */
 .bezent-input-feedback {
-  font-size: var(--font-caption-size, var(--font-size-xs, 11px));
-  line-height: var(--line-height-normal, 1.5);
+  font-size: 11px;
   color: var(--text-muted, #747775);
 }
 
 .bezent-input-feedback.is-error {
   color: var(--status-danger-fg, #b91c1c);
-  font-weight: var(--font-form-error-weight, 500);
+  font-weight: 500;
 }
 
 .bezent-input-wrapper.has-error .bezent-input-box {
@@ -377,14 +375,15 @@
 .bezent-input,
 .bezent-select {
   width: 100%;
-  height: 38px;
+  height: 42px;
   padding: 0 14px;
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-md);
-  color: var(--text-primary, #1f1f1f);
+  border-radius: var(--radius-sm, 6px);
+  color: var(--text-primary, #000000);
   font: inherit;
-  font-size: var(--font-form-input-size, var(--font-size-base, 14px));
+  font-size: var(--form-font-size-input, 17px);
+  font-weight: 400;
   box-sizing: border-box;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
   transition:
@@ -402,7 +401,7 @@
 .bezent-input:disabled,
 .bezent-select:disabled {
   background: var(--bg-surface-secondary, #f0f4f9);
-  color: var(--text-muted, #747775);
+  color: var(--text-muted, #000000);
   cursor: not-allowed;
 }
 
@@ -412,10 +411,11 @@
   padding: 10px 14px;
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-md);
-  color: var(--text-primary, #1f1f1f);
+  border-radius: var(--radius-sm, 6px);
+  color: var(--text-primary, #000000);
   font: inherit;
-  font-size: var(--font-form-input-size, var(--font-size-base, 14px));
+  font-size: var(--form-font-size-input, 17px);
+  font-weight: 400;
   box-sizing: border-box;
   resize: vertical;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);

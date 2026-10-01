@@ -1,8 +1,9 @@
 /*
- * BEZENT Select — Semantic Token System.
+ * BEZENT Select — Custom Themed Dropdown System.
  */
 
 .bezent-select-wrapper {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -15,109 +16,239 @@
 
 .bezent-select-wrapper--width-auto {
   width: auto;
-  min-width: 68px;
+  min-width: 80px;
 }
 
 .bezent-select-label {
-  font-size: var(--font-form-label-size, var(--font-size-md, 13px));
-  font-weight: var(--font-form-label-weight, 500);
-  line-height: var(--font-form-label-line-height, var(--line-height-snug, 1.375));
-  color: var(--text-secondary, #444746);
-  letter-spacing: var(--letter-spacing-normal, 0em);
+  font-size: var(--form-font-size-label, 17px);
+  font-weight: 600;
+  color: var(--text-primary, #000000);
+  letter-spacing: -0.1px;
 }
 
+/* ── Hidden Native Select (keeps forms and test queries synced) ── */
+.bezent-select-native {
+  position: absolute !important;
+  opacity: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  pointer-events: none !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  clip: rect(0, 0, 0, 0) !important;
+  overflow: hidden !important;
+}
+
+/* ── Custom Trigger Box ── */
 .bezent-select-box {
   position: relative;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-md);
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  box-sizing: border-box;
+  padding: 0 34px 0 14px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
   transition:
     border-color 0.14s ease,
-    box-shadow 0.14s ease;
+    box-shadow 0.14s ease,
+    background-color 0.14s ease;
 }
 
 .bezent-select-box:hover:not(.is-disabled) {
   border-color: var(--border-focus, #1a73e8);
 }
 
-.bezent-select-box:focus-within {
+.bezent-select-box:focus-visible,
+.bezent-select-box.is-active {
+  outline: none;
   border-color: var(--border-focus, #1a73e8);
-  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.18);
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.14);
 }
 
 /* ── Sizes ── */
 .bezent-select-wrapper--sm .bezent-select-box {
-  height: 30px;
-  border-radius: var(--radius-md);
-}
-
-.bezent-select-wrapper--sm .bezent-select-field {
-  font-size: var(--font-size-sm, 12px);
+  height: 32px;
+  border-radius: 6px;
   padding: 0 28px 0 10px;
 }
 
-.bezent-select-wrapper--md .bezent-select-box {
-  height: 36px;
-  border-radius: var(--radius-md);
+.bezent-select-wrapper--sm .bezent-select-display {
+  font-size: 13px;
 }
 
-.bezent-select-wrapper--md .bezent-select-field {
-  font-size: var(--font-form-input-size, var(--font-size-base, 14px));
+.bezent-select-wrapper--md .bezent-select-box {
+  height: 42px;
+  border-radius: 6px;
   padding: 0 34px 0 14px;
 }
 
-.bezent-select-wrapper--lg .bezent-select-box {
-  height: 42px;
-  border-radius: var(--radius-md);
+.bezent-select-wrapper--md .bezent-select-display {
+  font-size: var(--form-font-size-input, 17px);
 }
 
-.bezent-select-wrapper--lg .bezent-select-field {
-  font-size: var(--font-size-base, 14px);
+.bezent-select-wrapper--lg .bezent-select-box {
+  height: 46px;
+  border-radius: 8px;
   padding: 0 38px 0 16px;
 }
 
-/* ── Native Select Field ── */
-.bezent-select-field {
+.bezent-select-wrapper--lg .bezent-select-display {
+  font-size: 18px;
+}
+
+/* ── Display Label ── */
+.bezent-select-display {
   width: 100%;
-  height: 100%;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
   font: inherit;
-  letter-spacing: var(--letter-spacing-normal, 0em);
-  appearance: none;
-  cursor: pointer;
+  font-size: var(--form-font-size-input, 17px);
+  font-weight: 400;
+  letter-spacing: -0.1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.bezent-select-field option {
-  background: var(--bg-surface, #ffffff);
-  color: var(--text-primary, #1f1f1f);
+.bezent-select-display.is-placeholder {
+  color: #000000;
+  opacity: 0.5;
 }
 
+/* ── Chevron Arrow Indicator ── */
 .bezent-select-arrow {
   position: absolute;
   right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--icon-default, #444746);
+  color: var(--icon-default, #000000);
   pointer-events: none;
+  transition: transform 0.18s ease;
+}
+
+.bezent-select-arrow.is-open {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* ── Custom Themed Floating Dropdown Popover ── */
+.bezent-select-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  min-width: 100%;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: 8px;
+  box-shadow:
+    0 10px 25px -4px rgba(15, 23, 42, 0.12),
+    0 4px 10px -2px rgba(15, 23, 42, 0.06);
+  z-index: 1000;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 4px;
+  box-sizing: border-box;
+  animation: bezentSelectFadeIn 0.14s ease-out;
+}
+
+@keyframes bezentSelectFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bezent-select-dropdown-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bezent-select-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: var(--form-font-size-input, 17px);
+  font-weight: 400;
+  color: var(--text-primary, #000000);
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
+}
+
+.bezent-select-option:hover,
+.bezent-select-option.is-highlighted {
+  background: var(--bg-surface-secondary, #f0f4f9);
+  color: #000000;
+}
+
+.bezent-select-option.is-selected {
+  background: var(--bg-hover, #c2e7ff);
+  color: #041e49;
+  font-weight: 600;
+}
+
+.bezent-select-option.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.bezent-select-option.is-empty {
+  color: var(--text-muted, #747775);
+  font-size: 14px;
+  padding: 10px;
+  cursor: default;
+}
+
+.bezent-select-option-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #041e49;
+  flex-shrink: 0;
+}
+
+.bezent-select-option-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ── Feedback & Validation ── */
 .bezent-select-feedback {
-  font-size: var(--font-caption-size, var(--font-size-xs, 11px));
-  line-height: var(--line-height-normal, 1.5);
-  color: var(--text-muted, #747775);
+  font-size: 13px;
+  color: var(--text-muted, #000000);
 }
 
 .bezent-select-feedback.is-error {
   color: var(--status-danger-fg, #b91c1c);
-  font-weight: var(--font-form-error-weight, 500);
+  font-weight: 500;
 }
 
 .bezent-select-wrapper.has-error .bezent-select-box {
@@ -132,4 +263,25 @@
 .bezent-select-wrapper.is-disabled .bezent-select-box {
   background: var(--bg-surface-secondary, #f0f4f9);
   pointer-events: none;
+}
+
+/* ── Dark Mode ── */
+[data-theme='dark'] .bezent-select-dropdown {
+  background: #081b3a;
+  border-color: rgba(56, 189, 248, 0.25);
+  box-shadow: 0 16px 40px rgba(2, 11, 28, 0.75);
+}
+
+[data-theme='dark'] .bezent-select-option {
+  color: #f8fafc;
+}
+
+[data-theme='dark'] .bezent-select-option:hover,
+[data-theme='dark'] .bezent-select-option.is-highlighted {
+  background: rgba(22, 131, 255, 0.15);
+}
+
+[data-theme='dark'] .bezent-select-option.is-selected {
+  background: rgba(22, 131, 255, 0.3);
+  color: #ffffff;
 }

@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
+State, useEffect, useMemo, useCallb
+              uter-dom';
 import {
   Button,
   Card,
@@ -222,9 +223,52 @@ export function EmployeeRegistration({
       return [...REGISTRATION_SECTIONS];
     }, [registrationConfig, customCtx]);
 
-  const [activeSection, setActiveSection] = useState<RegistrationSectionId>(
-    initialDraft ? initialDraft.activeSection : 'general',
+  const [searchParams, setSearchParams] = useSearchParams();
+  const contentContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const urlChapter = searchParams.get('chapter') || searchParams.get('section');
+  const initialSection = (
+    urlChapter && allSections.some((s) => s.id === urlChapter)
+      ? urlChapter
+      : initialDraft
+        ? initialDraft.activeSection
+        : 'general'
+  ) as RegistrationSectionId;
+
+  const [activeSection, setActiveSection] = useState<RegistrationSectionId>(initialSection);
+
+  const handleSelectChapter = useCallback(
+    (id: string) => {
+      setActiveSection(id as RegistrationSectionId);
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.set('chapter', id);
+          return next;
+        },
+        { replace: true },
+      );
+      if (contentContainerRef.current) {
+        contentContainerRef.current.scrollTop = 0;
+      }
+    },
+    [setSearchParams],
   );
+
+  // Sync when searchParams change externally or via browser back/forward
+  useEffect(() => {
+    const currentParam = searchParams.get('chapter') || searchParams.get('section');
+    if (
+      currentParam &&
+      allSections.some((s) => s.id === currentParam) &&
+      currentParam !== activeSection
+    ) {
+      setActiveSection(currentParam as RegistrationSectionId);
+      if (contentContainerRef.current) {
+        contentContainerRef.current.scrollTop = 0;
+      }
+    }
+  }, [searchParams, allSections, activeSection]);
 
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, unknown>>({});
 
@@ -534,7 +578,7 @@ export function EmployeeRegistration({
   const handleBack = () => {
     const currentIndex = allSections.findIndex((s) => s.id === activeSection);
     if (currentIndex > 0) {
-      setActiveSection(allSections[currentIndex - 1]!.id);
+      handleSelectChapter(allSections[currentIndex - 1]!.id);
     }
   };
 
@@ -547,7 +591,7 @@ export function EmployeeRegistration({
     }
     const currentIndex = allSections.findIndex((s) => s.id === activeSection);
     if (currentIndex < allSections.length - 1) {
-      setActiveSection(allSections[currentIndex + 1]!.id);
+      handleSelectChapter(allSections[currentIndex + 1]!.id);
     }
   };
 
@@ -664,7 +708,7 @@ export function EmployeeRegistration({
       id: s.id,
       stepNumber: String(idx + 1).padStart(2, '0'),
       label: s.label,
-      title: s.label.toUpperCase(),
+      title: s.label,
       description: s.description ?? meta?.description ?? '',
     };
   });
@@ -672,33 +716,9 @@ export function EmployeeRegistration({
   return (
     <>
       {/* Region A: Workspace Header */}
-      <div className="bezent-modal__header">
+      <div className="bezent-modal__header bezent-modal__header--brand">
         <PageHeader
-          align="center"
           title="Employee Registration"
-          subtitle="Add and manage new employee information"
-          breadcrumbs={
-            <div className="bezent-breadcrumb" role="navigation" aria-label="Breadcrumb">
-              <span>Administration</span>
-              <span className="bezent-breadcrumb-separator">/</span>
-              <span
-                role="button"
-                tabIndex={0}
-                onClick={() => {
-                  setShowUnsavedModal(true);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setShowUnsavedModal(true);
-                  }
-                }}
-              >
-                Employee Administration
-              </span>
-              <span className="bezent-breadcrumb-separator">/</span>
-              <span className="bezent-breadcrumb-item--active">Employee Registration</span>
-            </div>
-          }
           actions={
             <Inline gap="md" align="center">
               <button
@@ -721,12 +741,14 @@ export function EmployeeRegistration({
       <ChapterFocusCarousel
         chapters={chapterSteps}
         activeId={activeSection}
-        onSelectChapter={(id) => setActiveSection(id)}
-        kickerLabel="REGISTRATION CHAPTERS"
+        onSelectChapter={handleSelectChapter}
       />
 
       {/* Region C: Scrollable Active Tab Content */}
-      <div className="bezent-modal__body employee-registration-workspace-content">
+      <div
+        ref={contentContainerRef}
+        className="bezent-modal__body employee-registration-workspace-content"
+      >
         <Stack gap="xl">
           {/* Toast Alert Banner */}
           {toastMsg && (
@@ -735,18 +757,15 @@ export function EmployeeRegistration({
             </Alert>
           )}
 
-          {/* Integrated Chapter Section Header (Number integrated into heading) */}
-          <div className="bezent-chapter-header">
-            <div className="bezent-chapter-header__top">
-              <span className="bezent-chapter-header__position-badge">
-                {currentChapter.stepNumber} / {String(chapterSteps.length).padStart(2, '0')}
-              </span>
+          {/* Animated Chapter Page Container */}
+          <div key={activeSection} className="bezent-chapter-page-transition">
+            {/* Integrated Chapter Section Header (Number integrated into heading) */}
+            <div className="bezent-chapter-header">
+              <h1 className="bezent-chapter-header__title">{currentChapter.title}</h1>
+              {currentChapter.description && (
+                <p className="bezent-chapter-header__desc">{currentChapter.description}</p>
+              )}
             </div>
-            <h1 className="bezent-chapter-header__title">{currentChapter.title}</h1>
-            {currentChapter.description && (
-              <p className="bezent-chapter-header__desc">{currentChapter.description}</p>
-            )}
-          </div>
 
           {activeSection === 'general' ? (
             <GeneralInformation
@@ -805,137 +824,139 @@ export function EmployeeRegistration({
               onDone={onCancel}
             />
           ) : (
-            <Stack gap="lg">
-              <Toolbar
-                left={
-                  <Inline gap="md" align="center">
-                    <BezentIcon name="documents" size={22} />
-                    <div>
-                      <CardTitle>
-                        {allSections.find((s) => s.id === activeSection)?.label || 'Custom Section'}
-                      </CardTitle>
-                      <CardDescription>
-                        Configured custom fields and section details.
-                      </CardDescription>
-                    </div>
-                  </Inline>
-                }
-              />
+              <Stack gap="lg">
+                <Toolbar
+                  left={
+                    <Inline gap="md" align="center">
+                      <BezentIcon name="documents" size={22} />
+                      <div>
+                        <CardTitle>
+                          {allSections.find((s) => s.id === activeSection)?.label ||
+                            'Custom Section'}
+                        </CardTitle>
+                        <CardDescription>
+                          Configured custom fields and section details.
+                        </CardDescription>
+                      </div>
+                    </Inline>
+                  }
+                />
 
-              <Stack gap="md">
-                {customCards
-                  .filter((c) => c.sectionId === activeSection)
-                  .map((c) => {
-                    const cardFields = customFields.filter((f) => f.cardId === c.id);
+                <Stack gap="md">
+                  {customCards
+                    .filter((c) => c.sectionId === activeSection)
+                    .map((c) => {
+                      const cardFields = customFields.filter((f) => f.cardId === c.id);
+                      return (
+                        <Card key={c.id} padding="md">
+                          <Stack gap="sm">
+                            <CardTitle>{c.title}</CardTitle>
+                            <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                              {cardFields.map((f) => (
+                                <FormField key={f.id} label={f.label} required={f.required}>
+                                  {f.fieldType === 'select' ? (
+                                    <Select
+                                      disabled={f.readOnly}
+                                      options={[
+                                        { value: '', label: `Select ${f.label}` },
+                                        ...(f.options?.map((opt: string) => ({
+                                          value: opt,
+                                          label: opt,
+                                        })) || []),
+                                      ]}
+                                    />
+                                  ) : (
+                                    <Input
+                                      type={
+                                        f.fieldType === 'date'
+                                          ? 'date'
+                                          : f.fieldType === 'number'
+                                            ? 'number'
+                                            : 'text'
+                                      }
+                                      placeholder={f.defaultValue || `Enter ${f.label}`}
+                                      disabled={f.readOnly}
+                                    />
+                                  )}
+                                </FormField>
+                              ))}
+                            </FormGrid>
+                          </Stack>
+                        </Card>
+                      );
+                    })}
+
+                  {/* Form Engine Custom Fields for this section */}
+                  {(() => {
+                    const engineFields = registrationConfig.customFields(activeSection);
+                    if (engineFields.length === 0) return null;
                     return (
-                      <Card key={c.id} padding="md">
+                      <Card padding="md">
                         <Stack gap="sm">
-                          <CardTitle>{c.title}</CardTitle>
+                          <CardTitle>
+                            {allSections.find((s) => s.id === activeSection)?.label ||
+                              'Custom Fields'}
+                          </CardTitle>
                           <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                            {cardFields.map((f) => (
-                              <FormField key={f.id} label={f.label} required={f.required}>
-                                {f.fieldType === 'select' ? (
+                            {engineFields.map((f) => (
+                              <RegistrationField
+                                key={f.key}
+                                fieldKey={f.key}
+                                value={customFieldValues[f.key] ?? ''}
+                                span={f.width === 'full' ? 'full' : undefined}
+                              >
+                                {f.type === 'dropdown' || f.type === 'select' ? (
                                   <Select
-                                    disabled={f.readOnly}
+                                    value={(customFieldValues[f.key] as string) || ''}
+                                    onChange={(e) =>
+                                      setCustomFieldValues((prev) => ({
+                                        ...prev,
+                                        [f.key]: e.target.value,
+                                      }))
+                                    }
                                     options={[
                                       { value: '', label: `Select ${f.label}` },
-                                      ...(f.options?.map((opt: string) => ({
-                                        value: opt,
-                                        label: opt,
-                                      })) || []),
+                                      ...(
+                                        (f.config?.options as Array<{
+                                          value: string;
+                                          label: string;
+                                        }>) ?? []
+                                      ).map((opt) => ({
+                                        value: opt.value,
+                                        label: opt.label,
+                                      })),
                                     ]}
                                   />
                                 ) : (
                                   <Input
+                                    value={(customFieldValues[f.key] as string) || ''}
+                                    onChange={(e) =>
+                                      setCustomFieldValues((prev) => ({
+                                        ...prev,
+                                        [f.key]: e.target.value,
+                                      }))
+                                    }
                                     type={
-                                      f.fieldType === 'date'
+                                      f.type === 'date'
                                         ? 'date'
-                                        : f.fieldType === 'number'
+                                        : f.type === 'number'
                                           ? 'number'
                                           : 'text'
                                     }
-                                    placeholder={f.defaultValue || `Enter ${f.label}`}
-                                    disabled={f.readOnly}
+                                    placeholder={f.description || `Enter ${f.label}`}
                                   />
                                 )}
-                              </FormField>
+                              </RegistrationField>
                             ))}
                           </FormGrid>
                         </Stack>
                       </Card>
                     );
-                  })}
-
-                {/* Form Engine Custom Fields for this section */}
-                {(() => {
-                  const engineFields = registrationConfig.customFields(activeSection);
-                  if (engineFields.length === 0) return null;
-                  return (
-                    <Card padding="md">
-                      <Stack gap="sm">
-                        <CardTitle>
-                          {allSections.find((s) => s.id === activeSection)?.label ||
-                            'Custom Fields'}
-                        </CardTitle>
-                        <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                          {engineFields.map((f) => (
-                            <RegistrationField
-                              key={f.key}
-                              fieldKey={f.key}
-                              value={customFieldValues[f.key] ?? ''}
-                              span={f.width === 'full' ? 'full' : undefined}
-                            >
-                              {f.type === 'dropdown' || f.type === 'select' ? (
-                                <Select
-                                  value={(customFieldValues[f.key] as string) || ''}
-                                  onChange={(e) =>
-                                    setCustomFieldValues((prev) => ({
-                                      ...prev,
-                                      [f.key]: e.target.value,
-                                    }))
-                                  }
-                                  options={[
-                                    { value: '', label: `Select ${f.label}` },
-                                    ...(
-                                      (f.config?.options as Array<{
-                                        value: string;
-                                        label: string;
-                                      }>) ?? []
-                                    ).map((opt) => ({
-                                      value: opt.value,
-                                      label: opt.label,
-                                    })),
-                                  ]}
-                                />
-                              ) : (
-                                <Input
-                                  value={(customFieldValues[f.key] as string) || ''}
-                                  onChange={(e) =>
-                                    setCustomFieldValues((prev) => ({
-                                      ...prev,
-                                      [f.key]: e.target.value,
-                                    }))
-                                  }
-                                  type={
-                                    f.type === 'date'
-                                      ? 'date'
-                                      : f.type === 'number'
-                                        ? 'number'
-                                        : 'text'
-                                  }
-                                  placeholder={f.description || `Enter ${f.label}`}
-                                />
-                              )}
-                            </RegistrationField>
-                          ))}
-                        </FormGrid>
-                      </Stack>
-                    </Card>
-                  );
-                })()}
+                  })()}
+                </Stack>
               </Stack>
-            </Stack>
-          )}
+            )}
+          </div>
         </Stack>
       </div>
 

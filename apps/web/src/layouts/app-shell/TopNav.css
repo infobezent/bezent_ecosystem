@@ -21,13 +21,14 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  flex-shrink: 0;
+  flex: 0 0 auto;
+  min-width: 220px;
 }
 
 .top-nav__logo {
   width: 32px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--brand-logo-bg, var(--bezent-logo-surface, #c2e7ff));
   color: var(--brand-logo-text, var(--bezent-logo-text, #001d35));
   display: flex;
@@ -62,7 +63,9 @@
   flex: 0 1 720px;
   width: 100%;
   max-width: 720px;
-  margin: 0 auto 0 140px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
 }
 
 /* ── Utility controls ────────────────────────────────────────────────── */
@@ -70,9 +73,10 @@
 .top-nav__actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 6px;
-  flex-shrink: 0;
-  margin-left: auto;
+  flex: 0 0 auto;
+  min-width: 220px;
 }
 
 /* Positions the design-system Badge on the bell's top-right corner. */
@@ -137,16 +141,28 @@
   margin-left: 6px;
   transition:
     box-shadow 0.14s ease,
-    transform 0.12s ease;
+    transform 0.14s cubic-bezier(0.16, 1, 0.3, 1);
   outline: none;
 }
 
 .top-nav__profile:hover {
-  box-shadow: 0 0 0 4px var(--bg-hover, #c2e7ff);
+  transform: translateY(-1px) scale(1.06);
+  box-shadow:
+    0 0 0 4px var(--bg-hover, #c2e7ff),
+    0 1px 2px 0 rgba(60, 64, 67, 0.3),
+    0 1px 3px 1px rgba(60, 64, 67, 0.15);
+}
+
+.top-nav__profile:active {
+  transform: scale(0.95);
 }
 
 .top-nav__profile.is-active {
-  box-shadow: 0 0 0 3px var(--border-focus, #1a73e8);
+  transform: translateY(-1px) scale(1.06);
+  box-shadow:
+    0 0 0 3px var(--border-focus, #1a73e8),
+    0 1px 2px 0 rgba(60, 64, 67, 0.3),
+    0 1px 3px 1px rgba(60, 64, 67, 0.15);
 }
 
 .top-nav__profile:focus-visible,
