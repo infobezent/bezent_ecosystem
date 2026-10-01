@@ -59,7 +59,11 @@ function extractOptions(children: ReactNode): SelectOption[] {
   Children.forEach(children, (child) => {
     if (isValidElement(child)) {
       if (child.type === 'option') {
-        const childProps = child.props as { value?: string | number; children?: ReactNode; disabled?: boolean };
+        const childProps = child.props as {
+          value?: string | number;
+          children?: ReactNode;
+          disabled?: boolean;
+        };
         const labelText = getTextFromReactNode(childProps.children);
         extracted.push({
           value: childProps.value !== undefined ? childProps.value : labelText,
@@ -105,7 +109,11 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
 ) {
   const [isOpen, setIsOpen] = useState(false);
   const [internalValue, setInternalValue] = useState<string | number>(
-    value !== undefined ? (value as string | number) : defaultValue !== undefined ? (defaultValue as string | number) : '',
+    value !== undefined
+      ? (value as string | number)
+      : defaultValue !== undefined
+        ? (defaultValue as string | number)
+        : '',
   );
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
 
@@ -131,9 +139,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
   const currentValue = value !== undefined ? (value as string | number) : internalValue;
 
   // Selected option label
-  const selectedOption = parsedOptions.find(
-    (opt) => String(opt.value) === String(currentValue),
-  );
+  const selectedOption = parsedOptions.find((opt) => String(opt.value) === String(currentValue));
 
   const selectId =
     id || (label ? `bezent-select-${label.toLowerCase().replace(/\s+/g, '-')}` : undefined);
@@ -226,9 +232,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
         setIsOpen(true);
         setHighlightedIndex(0);
       } else {
-        setHighlightedIndex((prev) =>
-          prev < parsedOptions.length - 1 ? prev + 1 : prev,
-        );
+        setHighlightedIndex((prev) => (prev < parsedOptions.length - 1 ? prev + 1 : prev));
       }
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();

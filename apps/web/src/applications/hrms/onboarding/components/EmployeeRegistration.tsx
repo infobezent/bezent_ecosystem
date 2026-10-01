@@ -937,602 +937,605 @@ export function EmployeeRegistration({
           {/* Animated Chapter Page Container */}
           <div key={activeSection} className="bezent-chapter-page-transition">
             {/* Integrated Chapter Section Header (Number integrated into heading) */}
-          <div className="bezent-chapter-header">
-            <div className="bezent-chapter-header__top">
-              <span className="bezent-chapter-header__position-badge">
-                {currentChapter.stepNumber} / {String(chapterSteps.length).padStart(2, '0')}
-              </span>
+            <div className="bezent-chapter-header">
+              <div className="bezent-chapter-header__top">
+                <span className="bezent-chapter-header__position-badge">
+                  {currentChapter.stepNumber} / {String(chapterSteps.length).padStart(2, '0')}
+                </span>
+              </div>
+              <h1 className="bezent-chapter-header__title">{currentChapter.title}</h1>
+              {currentChapter.description && (
+                <p className="bezent-chapter-header__desc">{currentChapter.description}</p>
+              )}
             </div>
-            <h1 className="bezent-chapter-header__title">{currentChapter.title}</h1>
-            {currentChapter.description && (
-              <p className="bezent-chapter-header__desc">{currentChapter.description}</p>
-            )}
-          </div>
 
-          {activeSection === 'general' ? (
-            <Stack gap="xl">
-              {/* Section 1: General Information */}
-              <FormSection
-                title="General Information"
-                description="Core identity and classification details"
-              >
-                <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                  {/* Dynamically rendered custom fields from Administration Customization Builder */}
-                  {customFields
-                    .filter((f) => f.sectionId === 'general')
-                    .map((f) => (
+            {activeSection === 'general' ? (
+              <Stack gap="xl">
+                {/* Section 1: General Information */}
+                <FormSection
+                  title="General Information"
+                  description="Core identity and classification details"
+                >
+                  <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                    {/* Dynamically rendered custom fields from Administration Customization Builder */}
+                    {customFields
+                      .filter((f) => f.sectionId === 'general')
+                      .map((f) => (
+                        <FormField
+                          key={f.id}
+                          label={f.label}
+                          htmlFor={`custom-${f.id}`}
+                          required={f.required}
+                          disabled={f.readOnly}
+                        >
+                          {f.fieldType === 'select' ? (
+                            <Select
+                              id={`custom-${f.id}`}
+                              disabled={f.readOnly}
+                              options={[
+                                { value: '', label: `Select ${f.label}` },
+                                ...(f.options?.map((opt: string) => ({ value: opt, label: opt })) ||
+                                  []),
+                              ]}
+                            />
+                          ) : (
+                            <Input
+                              id={`custom-${f.id}`}
+                              type={f.fieldType === 'date' ? 'date' : 'text'}
+                              placeholder={f.defaultValue || `Enter ${f.label}`}
+                              disabled={f.readOnly}
+                            />
+                          )}
+                        </FormField>
+                      ))}
+
+                    {/* Form Engine company custom fields */}
+                    {registrationConfig.customFields('general').map((f) => (
                       <FormField
-                        key={f.id}
+                        key={f.key}
                         label={f.label}
-                        htmlFor={`custom-${f.id}`}
+                        htmlFor={`form-engine-${f.key}`}
                         required={f.required}
-                        disabled={f.readOnly}
+                        span={f.width === 'full' ? 'full' : undefined}
+                        helperText={f.description ?? undefined}
                       >
-                        {f.fieldType === 'select' ? (
+                        {f.type === 'dropdown' || f.type === 'select' || f.type === 'radio' ? (
                           <Select
-                            id={`custom-${f.id}`}
-                            disabled={f.readOnly}
+                            id={`form-engine-${f.key}`}
                             options={[
                               { value: '', label: `Select ${f.label}` },
-                              ...(f.options?.map((opt: string) => ({ value: opt, label: opt })) ||
-                                []),
+                              ...(Array.isArray(f.config?.options)
+                                ? (f.config.options as Array<{ value: string; label: string }>).map(
+                                    (opt) => ({
+                                      value: opt.value,
+                                      label: opt.label,
+                                    }),
+                                  )
+                                : []),
                             ]}
                           />
                         ) : (
                           <Input
-                            id={`custom-${f.id}`}
-                            type={f.fieldType === 'date' ? 'date' : 'text'}
-                            placeholder={f.defaultValue || `Enter ${f.label}`}
-                            disabled={f.readOnly}
+                            id={`form-engine-${f.key}`}
+                            type={
+                              f.type === 'date' ? 'date' : f.type === 'number' ? 'number' : 'text'
+                            }
+                            placeholder={`Enter ${f.label}`}
                           />
                         )}
                       </FormField>
                     ))}
 
-                  {/* Form Engine company custom fields */}
-                  {registrationConfig.customFields('general').map((f) => (
-                    <FormField
-                      key={f.key}
-                      label={f.label}
-                      htmlFor={`form-engine-${f.key}`}
-                      required={f.required}
-                      span={f.width === 'full' ? 'full' : undefined}
-                      helperText={f.description ?? undefined}
-                    >
-                      {f.type === 'dropdown' || f.type === 'select' || f.type === 'radio' ? (
-                        <Select
-                          id={`form-engine-${f.key}`}
-                          options={[
-                            { value: '', label: `Select ${f.label}` },
-                            ...(Array.isArray(f.config?.options)
-                              ? (f.config.options as Array<{ value: string; label: string }>).map(
-                                  (opt) => ({
-                                    value: opt.value,
-                                    label: opt.label,
-                                  }),
-                                )
-                              : []),
-                          ]}
-                        />
-                      ) : (
-                        <Input
-                          id={`form-engine-${f.key}`}
-                          type={
-                            f.type === 'date' ? 'date' : f.type === 'number' ? 'number' : 'text'
-                          }
-                          placeholder={`Enter ${f.label}`}
-                        />
-                      )}
-                    </FormField>
-                  ))}
-
-                  {/* 1. Employee ID */}
-                  <RegistrationField
-                    fieldKey="general.employeeId"
-                    value={employeeId}
-                    htmlFor="reg-employee-id"
-                    helperText="System-assigned unique ID (auto-generated by backend)"
-                  >
-                    <Input
-                      id="reg-employee-id"
+                    {/* 1. Employee ID */}
+                    <RegistrationField
+                      fieldKey="general.employeeId"
                       value={employeeId}
-                      readOnly
-                      disabled
-                      placeholder="Generating..."
-                    />
-                  </RegistrationField>
+                      htmlFor="reg-employee-id"
+                      helperText="System-assigned unique ID (auto-generated by backend)"
+                    >
+                      <Input
+                        id="reg-employee-id"
+                        value={employeeId}
+                        readOnly
+                        disabled
+                        placeholder="Generating..."
+                      />
+                    </RegistrationField>
 
-                  {/* 2. Employment Type */}
-                  <RegistrationField
-                    fieldKey="general.employmentType"
-                    value={employmentType}
-                    htmlFor="reg-employment-type"
-                  >
-                    <Select
-                      id="reg-employment-type"
+                    {/* 2. Employment Type */}
+                    <RegistrationField
+                      fieldKey="general.employmentType"
                       value={employmentType}
-                      onChange={(e) => handleEmploymentTypeChange(e.target.value)}
-                      options={[
-                        { value: 'full_time', label: 'Full Time' },
-                        { value: 'part_time', label: 'Part Time' },
-                        { value: 'contract', label: 'Contract (Fixed Term)' },
-                        { value: 'intern', label: 'Intern (Fixed Term)' },
-                        { value: 'other', label: 'Other' },
-                      ]}
-                    />
-                  </RegistrationField>
+                      htmlFor="reg-employment-type"
+                    >
+                      <Select
+                        id="reg-employment-type"
+                        value={employmentType}
+                        onChange={(e) => handleEmploymentTypeChange(e.target.value)}
+                        options={[
+                          { value: 'full_time', label: 'Full Time' },
+                          { value: 'part_time', label: 'Part Time' },
+                          { value: 'contract', label: 'Contract (Fixed Term)' },
+                          { value: 'intern', label: 'Intern (Fixed Term)' },
+                          { value: 'other', label: 'Other' },
+                        ]}
+                      />
+                    </RegistrationField>
 
-                  {/* 3. Employment Status */}
-                  <RegistrationField
-                    fieldKey="general.employmentStatus"
-                    value={employmentStatus}
-                    htmlFor="reg-employment-status"
-                    helperText="System-controlled: Pending Activation"
-                  >
-                    <Input
-                      id="reg-employment-status"
-                      value="Pending Activation"
-                      readOnly
-                      disabled
-                    />
-                  </RegistrationField>
-                </FormGrid>
-              </FormSection>
+                    {/* 3. Employment Status */}
+                    <RegistrationField
+                      fieldKey="general.employmentStatus"
+                      value={employmentStatus}
+                      htmlFor="reg-employment-status"
+                      helperText="System-controlled: Pending Activation"
+                    >
+                      <Input
+                        id="reg-employment-status"
+                        value="Pending Activation"
+                        readOnly
+                        disabled
+                      />
+                    </RegistrationField>
+                  </FormGrid>
+                </FormSection>
 
-              {/* Section 2: Employment Details */}
-              <FormSection
-                title="Employment Details"
-                description="Role, structure, placement, and reporting hierarchy"
-              >
-                <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                  {/* 4. Department */}
-                  <RegistrationField
-                    fieldKey="general.department"
-                    value={department}
-                    htmlFor="reg-department"
-                  >
-                    <Select
-                      id="reg-department"
+                {/* Section 2: Employment Details */}
+                <FormSection
+                  title="Employment Details"
+                  description="Role, structure, placement, and reporting hierarchy"
+                >
+                  <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                    {/* 4. Department */}
+                    <RegistrationField
+                      fieldKey="general.department"
                       value={department}
-                      onChange={(e) => handleDepartmentChange(e.target.value)}
-                      options={[
-                        { value: 'Engineering', label: 'Engineering' },
-                        { value: 'Human Resources', label: 'Human Resources' },
-                        { value: 'Finance', label: 'Finance' },
-                        { value: 'Operations', label: 'Operations' },
-                        { value: 'other', label: 'Other' },
-                      ]}
-                    />
-                  </RegistrationField>
+                      htmlFor="reg-department"
+                    >
+                      <Select
+                        id="reg-department"
+                        value={department}
+                        onChange={(e) => handleDepartmentChange(e.target.value)}
+                        options={[
+                          { value: 'Engineering', label: 'Engineering' },
+                          { value: 'Human Resources', label: 'Human Resources' },
+                          { value: 'Finance', label: 'Finance' },
+                          { value: 'Operations', label: 'Operations' },
+                          { value: 'other', label: 'Other' },
+                        ]}
+                      />
+                    </RegistrationField>
 
-                  {/* 5. Team (Filtered based on selected Department) */}
-                  <RegistrationField fieldKey="general.team" value={team} htmlFor="reg-team">
-                    <Select
-                      id="reg-team"
-                      value={team}
-                      onChange={(e) => setTeam(e.target.value)}
-                      options={(DEPARTMENT_TEAMS[department] || ['General', 'other']).map((t) => ({
-                        value: t,
-                        label: t,
-                      }))}
-                    />
-                  </RegistrationField>
+                    {/* 5. Team (Filtered based on selected Department) */}
+                    <RegistrationField fieldKey="general.team" value={team} htmlFor="reg-team">
+                      <Select
+                        id="reg-team"
+                        value={team}
+                        onChange={(e) => setTeam(e.target.value)}
+                        options={(DEPARTMENT_TEAMS[department] || ['General', 'other']).map(
+                          (t) => ({
+                            value: t,
+                            label: t,
+                          }),
+                        )}
+                      />
+                    </RegistrationField>
 
-                  {/* 6. Designation */}
-                  <RegistrationField
-                    fieldKey="general.designation"
-                    value={designation}
-                    htmlFor="reg-designation"
-                  >
-                    <Select
-                      id="reg-designation"
+                    {/* 6. Designation */}
+                    <RegistrationField
+                      fieldKey="general.designation"
                       value={designation}
-                      onChange={(e) => setDesignation(e.target.value)}
-                      options={[
-                        { value: 'Software Engineer', label: 'Software Engineer' },
-                        { value: 'Financial Analyst', label: 'Financial Analyst' },
-                        { value: 'Senior HR Specialist', label: 'Senior HR Specialist' },
-                        { value: 'Product Manager', label: 'Product Manager' },
-                        { value: 'other', label: 'Other' },
-                      ]}
-                    />
-                  </RegistrationField>
+                      htmlFor="reg-designation"
+                    >
+                      <Select
+                        id="reg-designation"
+                        value={designation}
+                        onChange={(e) => setDesignation(e.target.value)}
+                        options={[
+                          { value: 'Software Engineer', label: 'Software Engineer' },
+                          { value: 'Financial Analyst', label: 'Financial Analyst' },
+                          { value: 'Senior HR Specialist', label: 'Senior HR Specialist' },
+                          { value: 'Product Manager', label: 'Product Manager' },
+                          { value: 'other', label: 'Other' },
+                        ]}
+                      />
+                    </RegistrationField>
 
-                  {/* 7. Grade / Level */}
-                  <RegistrationField
-                    fieldKey="general.gradeLevel"
-                    value={gradeLevel}
-                    htmlFor="reg-grade-level"
-                  >
-                    <Select
-                      id="reg-grade-level"
+                    {/* 7. Grade / Level */}
+                    <RegistrationField
+                      fieldKey="general.gradeLevel"
                       value={gradeLevel}
-                      onChange={(e) => setGradeLevel(e.target.value)}
-                      options={[
-                        { value: 'L1 - Entry Level', label: 'L1 - Entry Level' },
-                        { value: 'L2 - Mid Level', label: 'L2 - Mid Level' },
-                        { value: 'L3 - Senior Level', label: 'L3 - Senior Level' },
-                        { value: 'L4 - Lead', label: 'L4 - Lead' },
-                        { value: 'L5 - Executive', label: 'L5 - Executive' },
-                        { value: 'other', label: 'Other' },
-                      ]}
-                    />
-                  </RegistrationField>
+                      htmlFor="reg-grade-level"
+                    >
+                      <Select
+                        id="reg-grade-level"
+                        value={gradeLevel}
+                        onChange={(e) => setGradeLevel(e.target.value)}
+                        options={[
+                          { value: 'L1 - Entry Level', label: 'L1 - Entry Level' },
+                          { value: 'L2 - Mid Level', label: 'L2 - Mid Level' },
+                          { value: 'L3 - Senior Level', label: 'L3 - Senior Level' },
+                          { value: 'L4 - Lead', label: 'L4 - Lead' },
+                          { value: 'L5 - Executive', label: 'L5 - Executive' },
+                          { value: 'other', label: 'Other' },
+                        ]}
+                      />
+                    </RegistrationField>
 
-                  {/* 8. Reporting Manager */}
-                  <RegistrationField
-                    fieldKey="general.reportingManager"
-                    value={reportingManager}
-                    htmlFor="reg-reporting-manager"
-                    disabled
-                  >
-                    <Input
-                      id="reg-reporting-manager"
-                      value={reportingManager || ''}
-                      placeholder="Select Manager..."
+                    {/* 8. Reporting Manager */}
+                    <RegistrationField
+                      fieldKey="general.reportingManager"
+                      value={reportingManager}
+                      htmlFor="reg-reporting-manager"
                       disabled
-                    />
-                  </RegistrationField>
+                    >
+                      <Input
+                        id="reg-reporting-manager"
+                        value={reportingManager || ''}
+                        placeholder="Select Manager..."
+                        disabled
+                      />
+                    </RegistrationField>
 
-                  {/* 9. Organisation Unit */}
-                  <RegistrationField
-                    fieldKey="general.organisationUnit"
-                    value={organisationUnit}
-                    htmlFor="reg-org-unit"
-                  >
-                    <Select
-                      id="reg-org-unit"
+                    {/* 9. Organisation Unit */}
+                    <RegistrationField
+                      fieldKey="general.organisationUnit"
                       value={organisationUnit}
-                      onChange={(e) => setOrganisationUnit(e.target.value)}
-                      options={[
-                        { value: 'Technology', label: 'Technology' },
-                        { value: 'Operations', label: 'Operations' },
-                        { value: 'Corporate', label: 'Corporate' },
-                        { value: 'other', label: 'Other' },
-                      ]}
-                    />
-                  </RegistrationField>
+                      htmlFor="reg-org-unit"
+                    >
+                      <Select
+                        id="reg-org-unit"
+                        value={organisationUnit}
+                        onChange={(e) => setOrganisationUnit(e.target.value)}
+                        options={[
+                          { value: 'Technology', label: 'Technology' },
+                          { value: 'Operations', label: 'Operations' },
+                          { value: 'Corporate', label: 'Corporate' },
+                          { value: 'other', label: 'Other' },
+                        ]}
+                      />
+                    </RegistrationField>
 
-                  {/* 10. Office Location */}
-                  <RegistrationField
-                    fieldKey="general.officeLocation"
-                    value={officeLocation}
-                    htmlFor="reg-office-location"
-                  >
-                    <Select
-                      id="reg-office-location"
+                    {/* 10. Office Location */}
+                    <RegistrationField
+                      fieldKey="general.officeLocation"
                       value={officeLocation}
-                      onChange={(e) => setOfficeLocation(e.target.value)}
-                      options={[
-                        { value: 'Chennai - Main Office', label: 'Chennai - Main Office' },
-                        { value: 'Bengaluru', label: 'Bengaluru' },
-                        { value: 'Hyderabad', label: 'Hyderabad' },
-                        { value: 'other', label: 'Other' },
-                      ]}
-                    />
-                  </RegistrationField>
+                      htmlFor="reg-office-location"
+                    >
+                      <Select
+                        id="reg-office-location"
+                        value={officeLocation}
+                        onChange={(e) => setOfficeLocation(e.target.value)}
+                        options={[
+                          { value: 'Chennai - Main Office', label: 'Chennai - Main Office' },
+                          { value: 'Bengaluru', label: 'Bengaluru' },
+                          { value: 'Hyderabad', label: 'Hyderabad' },
+                          { value: 'other', label: 'Other' },
+                        ]}
+                      />
+                    </RegistrationField>
 
-                  {/* 11. Joining Date */}
-                  <RegistrationField
-                    fieldKey="general.joiningDate"
-                    value={joiningDate}
-                    htmlFor="reg-joining-date"
-                  >
-                    <Input
-                      id="reg-joining-date"
-                      type="date"
+                    {/* 11. Joining Date */}
+                    <RegistrationField
+                      fieldKey="general.joiningDate"
                       value={joiningDate}
-                      onChange={(e) => setJoiningDate(e.target.value)}
-                    />
-                  </RegistrationField>
-                </FormGrid>
-              </FormSection>
-
-              {/* Section 3: Additional Information */}
-              <FormSection
-                title="Additional Information"
-                description="Timeline, recruitment source, and employment terms"
-              >
-                <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                  {/* 12. Confirmed Date of Joining */}
-                  <RegistrationField
-                    fieldKey="general.confirmedJoiningDate"
-                    value={confirmedJoiningDate}
-                    htmlFor="reg-confirmed-joining-date"
-                    helperText="Agreed candidate joining date (distinct from probation confirmation)"
-                  >
-                    <Input
-                      id="reg-confirmed-joining-date"
-                      type="date"
-                      value={confirmedJoiningDate}
-                      onChange={(e) => setConfirmedJoiningDate(e.target.value)}
-                    />
-                  </RegistrationField>
-
-                  {/* 13. End Date (Conditional for fixed-term) */}
-                  {isFixedTerm && (
-                    <RegistrationField
-                      fieldKey="general.endDate"
-                      value={endDate}
-                      htmlFor="reg-end-date"
-                      helperText="Contract or internship termination date"
+                      htmlFor="reg-joining-date"
                     >
                       <Input
-                        id="reg-end-date"
+                        id="reg-joining-date"
                         type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
+                        value={joiningDate}
+                        onChange={(e) => setJoiningDate(e.target.value)}
                       />
                     </RegistrationField>
-                  )}
+                  </FormGrid>
+                </FormSection>
 
-                  {/* 14. Source of Hire */}
-                  <RegistrationField
-                    fieldKey="general.sourceOfHire"
-                    value={sourceOfHire}
-                    htmlFor="reg-source-of-hire"
-                  >
-                    <Select
-                      id="reg-source-of-hire"
-                      value={sourceOfHire}
-                      onChange={(e) => setSourceOfHire(e.target.value)}
-                      options={[
-                        { value: 'direct_applicant', label: 'Direct Applicant' },
-                        { value: 'referral', label: 'Employee Referral' },
-                        { value: 'agency', label: 'Agency' },
-                        { value: 'campus', label: 'Campus' },
-                        { value: 'linkedin', label: 'LinkedIn' },
-                        { value: 'other', label: 'Other' },
-                      ]}
-                    />
-                  </RegistrationField>
-
-                  {/* 14b. Referral ID Input (Shown only when Source of Hire = Employee Referral) */}
-                  {sourceOfHire === 'referral' && (
+                {/* Section 3: Additional Information */}
+                <FormSection
+                  title="Additional Information"
+                  description="Timeline, recruitment source, and employment terms"
+                >
+                  <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                    {/* 12. Confirmed Date of Joining */}
                     <RegistrationField
-                      fieldKey="general.referralId"
-                      value={referralId}
-                      htmlFor="reg-referral-id"
-                      helperText={
-                        referralLoading
-                          ? 'Resolving referral code...'
-                          : resolvedReferrer
-                            ? `✓ Referred by: ${resolvedReferrer.name}${resolvedReferrer.designation ? ` (${resolvedReferrer.designation})` : ''}`
-                            : referralError || "Enter the referring employee's unique Referral ID"
-                      }
-                      error={referralError || undefined}
+                      fieldKey="general.confirmedJoiningDate"
+                      value={confirmedJoiningDate}
+                      htmlFor="reg-confirmed-joining-date"
+                      helperText="Agreed candidate joining date (distinct from probation confirmation)"
                     >
                       <Input
-                        id="reg-referral-id"
-                        type="text"
-                        placeholder="e.g. REF-EMP0001"
-                        value={referralId}
-                        onChange={(e) => setReferralId(e.target.value)}
-                        error={referralError || undefined}
+                        id="reg-confirmed-joining-date"
+                        type="date"
+                        value={confirmedJoiningDate}
+                        onChange={(e) => setConfirmedJoiningDate(e.target.value)}
                       />
                     </RegistrationField>
-                  )}
 
-                  {/* 15. Probation Period */}
-                  <RegistrationField
-                    fieldKey="general.probationPeriod"
-                    value={probationPeriod}
-                    htmlFor="reg-probation-period"
-                    helperText={
-                      calculatedProbationEndDate
-                        ? `Probation ends on: ${calculatedProbationEndDate}`
-                        : probationPeriod === 'no_probation'
-                          ? 'No probation period applicable'
-                          : undefined
-                    }
-                  >
-                    <Select
-                      id="reg-probation-period"
+                    {/* 13. End Date (Conditional for fixed-term) */}
+                    {isFixedTerm && (
+                      <RegistrationField
+                        fieldKey="general.endDate"
+                        value={endDate}
+                        htmlFor="reg-end-date"
+                        helperText="Contract or internship termination date"
+                      >
+                        <Input
+                          id="reg-end-date"
+                          type="date"
+                          value={endDate}
+                          onChange={(e) => setEndDate(e.target.value)}
+                        />
+                      </RegistrationField>
+                    )}
+
+                    {/* 14. Source of Hire */}
+                    <RegistrationField
+                      fieldKey="general.sourceOfHire"
+                      value={sourceOfHire}
+                      htmlFor="reg-source-of-hire"
+                    >
+                      <Select
+                        id="reg-source-of-hire"
+                        value={sourceOfHire}
+                        onChange={(e) => setSourceOfHire(e.target.value)}
+                        options={[
+                          { value: 'direct_applicant', label: 'Direct Applicant' },
+                          { value: 'referral', label: 'Employee Referral' },
+                          { value: 'agency', label: 'Agency' },
+                          { value: 'campus', label: 'Campus' },
+                          { value: 'linkedin', label: 'LinkedIn' },
+                          { value: 'other', label: 'Other' },
+                        ]}
+                      />
+                    </RegistrationField>
+
+                    {/* 14b. Referral ID Input (Shown only when Source of Hire = Employee Referral) */}
+                    {sourceOfHire === 'referral' && (
+                      <RegistrationField
+                        fieldKey="general.referralId"
+                        value={referralId}
+                        htmlFor="reg-referral-id"
+                        helperText={
+                          referralLoading
+                            ? 'Resolving referral code...'
+                            : resolvedReferrer
+                              ? `✓ Referred by: ${resolvedReferrer.name}${resolvedReferrer.designation ? ` (${resolvedReferrer.designation})` : ''}`
+                              : referralError || "Enter the referring employee's unique Referral ID"
+                        }
+                        error={referralError || undefined}
+                      >
+                        <Input
+                          id="reg-referral-id"
+                          type="text"
+                          placeholder="e.g. REF-EMP0001"
+                          value={referralId}
+                          onChange={(e) => setReferralId(e.target.value)}
+                          error={referralError || undefined}
+                        />
+                      </RegistrationField>
+                    )}
+
+                    {/* 15. Probation Period */}
+                    <RegistrationField
+                      fieldKey="general.probationPeriod"
                       value={probationPeriod}
-                      onChange={(e) => setProbationPeriod(e.target.value)}
-                      options={[
-                        { value: '3_months', label: '3 Months' },
-                        { value: '6_months', label: '6 Months' },
-                        { value: '12_months', label: '12 Months' },
-                        { value: 'no_probation', label: 'No Probation' },
-                        { value: 'custom', label: 'Custom' },
-                        { value: 'other', label: 'Other' },
-                      ]}
-                    />
-                  </RegistrationField>
+                      htmlFor="reg-probation-period"
+                      helperText={
+                        calculatedProbationEndDate
+                          ? `Probation ends on: ${calculatedProbationEndDate}`
+                          : probationPeriod === 'no_probation'
+                            ? 'No probation period applicable'
+                            : undefined
+                      }
+                    >
+                      <Select
+                        id="reg-probation-period"
+                        value={probationPeriod}
+                        onChange={(e) => setProbationPeriod(e.target.value)}
+                        options={[
+                          { value: '3_months', label: '3 Months' },
+                          { value: '6_months', label: '6 Months' },
+                          { value: '12_months', label: '12 Months' },
+                          { value: 'no_probation', label: 'No Probation' },
+                          { value: 'custom', label: 'Custom' },
+                          { value: 'other', label: 'Other' },
+                        ]}
+                      />
+                    </RegistrationField>
 
-                  {/* 16. Notice Period */}
-                  <RegistrationField
-                    fieldKey="general.noticePeriod"
-                    value={noticePeriod}
-                    htmlFor="reg-notice-period"
-                  >
-                    <Select
-                      id="reg-notice-period"
+                    {/* 16. Notice Period */}
+                    <RegistrationField
+                      fieldKey="general.noticePeriod"
                       value={noticePeriod}
-                      onChange={(e) => setNoticePeriod(e.target.value)}
-                      options={[
-                        { value: '15_days', label: '15 Days' },
-                        { value: '30_days', label: '30 Days' },
-                        { value: '60_days', label: '60 Days' },
-                        { value: '90_days', label: '90 Days' },
-                        { value: 'no_notice', label: 'No Notice Period' },
-                        { value: 'custom', label: 'Custom' },
-                        { value: 'other', label: 'Other' },
-                      ]}
-                    />
-                  </RegistrationField>
-                </FormGrid>
-              </FormSection>
-            </Stack>
-          ) : activeSection === 'personal' ? (
-            <PersonalInformation employeeId={employeeId} />
-          ) : activeSection === 'onboarding' ? (
-            <OnboardingSection />
-          ) : activeSection === 'skills' ? (
-            <SkillsSection />
-          ) : activeSection === 'emergency' ? (
-            <EmergencyContactSection />
-          ) : activeSection === 'accounts' ? (
-            <AccountsSection />
-          ) : activeSection === 'online_access' ? (
-            <OnlineAccessSection />
-          ) : activeSection === 'working_hours' ? (
-            <WorkingHoursSection />
-          ) : activeSection === 'documents' ? (
-            <DocumentsSection
-              documents={documentsList}
-              isExperiencedHire={isExperiencedHire}
-              passportPhoto={passportPhoto}
-              onDocumentsChange={setDocumentsList}
-              onClassificationChange={setIsExperiencedHire}
-              onPassportPhotoChange={setPassportPhoto}
-            />
-          ) : activeSection === 'review' ? (
-            <ReviewSection
-              data={reviewData}
-              onEditSection={handleSelectChapter}
-              onDeleteFamilyMember={handleDeleteFamilyMember}
-              onDeleteNominee={handleDeleteNominee}
-              onDeleteTask={handleDeleteTask}
-              onDeleteAsset={handleDeleteAsset}
-              onDeleteSkill={handleDeleteSkill}
-              onDeleteSecondaryContact={handleDeleteSecondaryContact}
-              onDeleteDocument={handleDeleteDocument}
-              onCreateEmployee={() => onSave?.(reviewData as unknown as Record<string, unknown>)}
-            />
-          ) : (
-            <Stack gap="lg">
-              <Toolbar
-                left={
-                  <Inline gap="md" align="center">
-                    <BezentIcon name="documents" size={22} />
-                    <div>
-                      <CardTitle>
-                        {allSections.find((s) => s.id === activeSection)?.label || 'Custom Section'}
-                      </CardTitle>
-                      <CardDescription>
-                        Configured custom fields and section details.
-                      </CardDescription>
-                    </div>
-                  </Inline>
-                }
+                      htmlFor="reg-notice-period"
+                    >
+                      <Select
+                        id="reg-notice-period"
+                        value={noticePeriod}
+                        onChange={(e) => setNoticePeriod(e.target.value)}
+                        options={[
+                          { value: '15_days', label: '15 Days' },
+                          { value: '30_days', label: '30 Days' },
+                          { value: '60_days', label: '60 Days' },
+                          { value: '90_days', label: '90 Days' },
+                          { value: 'no_notice', label: 'No Notice Period' },
+                          { value: 'custom', label: 'Custom' },
+                          { value: 'other', label: 'Other' },
+                        ]}
+                      />
+                    </RegistrationField>
+                  </FormGrid>
+                </FormSection>
+              </Stack>
+            ) : activeSection === 'personal' ? (
+              <PersonalInformation employeeId={employeeId} />
+            ) : activeSection === 'onboarding' ? (
+              <OnboardingSection />
+            ) : activeSection === 'skills' ? (
+              <SkillsSection />
+            ) : activeSection === 'emergency' ? (
+              <EmergencyContactSection />
+            ) : activeSection === 'accounts' ? (
+              <AccountsSection />
+            ) : activeSection === 'online_access' ? (
+              <OnlineAccessSection />
+            ) : activeSection === 'working_hours' ? (
+              <WorkingHoursSection />
+            ) : activeSection === 'documents' ? (
+              <DocumentsSection
+                documents={documentsList}
+                isExperiencedHire={isExperiencedHire}
+                passportPhoto={passportPhoto}
+                onDocumentsChange={setDocumentsList}
+                onClassificationChange={setIsExperiencedHire}
+                onPassportPhotoChange={setPassportPhoto}
               />
+            ) : activeSection === 'review' ? (
+              <ReviewSection
+                data={reviewData}
+                onEditSection={handleSelectChapter}
+                onDeleteFamilyMember={handleDeleteFamilyMember}
+                onDeleteNominee={handleDeleteNominee}
+                onDeleteTask={handleDeleteTask}
+                onDeleteAsset={handleDeleteAsset}
+                onDeleteSkill={handleDeleteSkill}
+                onDeleteSecondaryContact={handleDeleteSecondaryContact}
+                onDeleteDocument={handleDeleteDocument}
+                onCreateEmployee={() => onSave?.(reviewData as unknown as Record<string, unknown>)}
+              />
+            ) : (
+              <Stack gap="lg">
+                <Toolbar
+                  left={
+                    <Inline gap="md" align="center">
+                      <BezentIcon name="documents" size={22} />
+                      <div>
+                        <CardTitle>
+                          {allSections.find((s) => s.id === activeSection)?.label ||
+                            'Custom Section'}
+                        </CardTitle>
+                        <CardDescription>
+                          Configured custom fields and section details.
+                        </CardDescription>
+                      </div>
+                    </Inline>
+                  }
+                />
 
-              <Stack gap="md">
-                {customCards
-                  .filter((c) => c.sectionId === activeSection)
-                  .map((c) => {
-                    const cardFields = customFields.filter((f) => f.cardId === c.id);
+                <Stack gap="md">
+                  {customCards
+                    .filter((c) => c.sectionId === activeSection)
+                    .map((c) => {
+                      const cardFields = customFields.filter((f) => f.cardId === c.id);
+                      return (
+                        <Card key={c.id} padding="md">
+                          <Stack gap="sm">
+                            <CardTitle>{c.title}</CardTitle>
+                            <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                              {cardFields.map((f) => (
+                                <FormField key={f.id} label={f.label} required={f.required}>
+                                  {f.fieldType === 'select' ? (
+                                    <Select
+                                      disabled={f.readOnly}
+                                      options={[
+                                        { value: '', label: `Select ${f.label}` },
+                                        ...(f.options?.map((opt: string) => ({
+                                          value: opt,
+                                          label: opt,
+                                        })) || []),
+                                      ]}
+                                    />
+                                  ) : (
+                                    <Input
+                                      type={
+                                        f.fieldType === 'date'
+                                          ? 'date'
+                                          : f.fieldType === 'number'
+                                            ? 'number'
+                                            : 'text'
+                                      }
+                                      placeholder={f.defaultValue || `Enter ${f.label}`}
+                                      disabled={f.readOnly}
+                                    />
+                                  )}
+                                </FormField>
+                              ))}
+                            </FormGrid>
+                          </Stack>
+                        </Card>
+                      );
+                    })}
+
+                  {/* Form Engine Custom Fields for this section */}
+                  {(() => {
+                    const engineFields = registrationConfig.customFields(activeSection);
+                    if (engineFields.length === 0) return null;
                     return (
-                      <Card key={c.id} padding="md">
+                      <Card padding="md">
                         <Stack gap="sm">
-                          <CardTitle>{c.title}</CardTitle>
+                          <CardTitle>
+                            {allSections.find((s) => s.id === activeSection)?.label ||
+                              'Custom Fields'}
+                          </CardTitle>
                           <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                            {cardFields.map((f) => (
-                              <FormField key={f.id} label={f.label} required={f.required}>
-                                {f.fieldType === 'select' ? (
+                            {engineFields.map((f) => (
+                              <RegistrationField
+                                key={f.key}
+                                fieldKey={f.key}
+                                value={customFieldValues[f.key] ?? ''}
+                                span={f.width === 'full' ? 'full' : undefined}
+                              >
+                                {f.type === 'dropdown' || f.type === 'select' ? (
                                   <Select
-                                    disabled={f.readOnly}
+                                    value={(customFieldValues[f.key] as string) || ''}
+                                    onChange={(e) =>
+                                      setCustomFieldValues((prev) => ({
+                                        ...prev,
+                                        [f.key]: e.target.value,
+                                      }))
+                                    }
                                     options={[
                                       { value: '', label: `Select ${f.label}` },
-                                      ...(f.options?.map((opt: string) => ({
-                                        value: opt,
-                                        label: opt,
-                                      })) || []),
+                                      ...(
+                                        (f.config?.options as Array<{
+                                          value: string;
+                                          label: string;
+                                        }>) ?? []
+                                      ).map((opt) => ({
+                                        value: opt.value,
+                                        label: opt.label,
+                                      })),
                                     ]}
                                   />
                                 ) : (
                                   <Input
+                                    value={(customFieldValues[f.key] as string) || ''}
+                                    onChange={(e) =>
+                                      setCustomFieldValues((prev) => ({
+                                        ...prev,
+                                        [f.key]: e.target.value,
+                                      }))
+                                    }
                                     type={
-                                      f.fieldType === 'date'
+                                      f.type === 'date'
                                         ? 'date'
-                                        : f.fieldType === 'number'
+                                        : f.type === 'number'
                                           ? 'number'
                                           : 'text'
                                     }
-                                    placeholder={f.defaultValue || `Enter ${f.label}`}
-                                    disabled={f.readOnly}
+                                    placeholder={f.description || `Enter ${f.label}`}
                                   />
                                 )}
-                              </FormField>
+                              </RegistrationField>
                             ))}
                           </FormGrid>
                         </Stack>
                       </Card>
                     );
-                  })}
-
-                {/* Form Engine Custom Fields for this section */}
-                {(() => {
-                  const engineFields = registrationConfig.customFields(activeSection);
-                  if (engineFields.length === 0) return null;
-                  return (
-                    <Card padding="md">
-                      <Stack gap="sm">
-                        <CardTitle>
-                          {allSections.find((s) => s.id === activeSection)?.label ||
-                            'Custom Fields'}
-                        </CardTitle>
-                        <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                          {engineFields.map((f) => (
-                            <RegistrationField
-                              key={f.key}
-                              fieldKey={f.key}
-                              value={customFieldValues[f.key] ?? ''}
-                              span={f.width === 'full' ? 'full' : undefined}
-                            >
-                              {f.type === 'dropdown' || f.type === 'select' ? (
-                                <Select
-                                  value={(customFieldValues[f.key] as string) || ''}
-                                  onChange={(e) =>
-                                    setCustomFieldValues((prev) => ({
-                                      ...prev,
-                                      [f.key]: e.target.value,
-                                    }))
-                                  }
-                                  options={[
-                                    { value: '', label: `Select ${f.label}` },
-                                    ...(
-                                      (f.config?.options as Array<{
-                                        value: string;
-                                        label: string;
-                                      }>) ?? []
-                                    ).map((opt) => ({
-                                      value: opt.value,
-                                      label: opt.label,
-                                    })),
-                                  ]}
-                                />
-                              ) : (
-                                <Input
-                                  value={(customFieldValues[f.key] as string) || ''}
-                                  onChange={(e) =>
-                                    setCustomFieldValues((prev) => ({
-                                      ...prev,
-                                      [f.key]: e.target.value,
-                                    }))
-                                  }
-                                  type={
-                                    f.type === 'date'
-                                      ? 'date'
-                                      : f.type === 'number'
-                                        ? 'number'
-                                        : 'text'
-                                  }
-                                  placeholder={f.description || `Enter ${f.label}`}
-                                />
-                              )}
-                            </RegistrationField>
-                          ))}
-                        </FormGrid>
-                      </Stack>
-                    </Card>
-                  );
-                })()}
+                  })()}
+                </Stack>
               </Stack>
-            </Stack>
-          )}
+            )}
           </div>
         </Stack>
       </div>
