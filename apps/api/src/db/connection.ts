@@ -1,5 +1,3 @@
-import { spawn } from 'node:child_process';
-import { existsSync } from 'node:fs';
 import mysql from 'mysql2/promise';
 import { drizzle } from 'drizzle-orm/mysql2';
 import { env, isDatabaseConfigured } from '../app/config/env.js';
@@ -28,6 +26,8 @@ function createPool(): mysql.Pool {
         database: env.db.name,
         waitForConnections: true,
         connectionLimit: 10,
+        enableKeepAlive: true,
+        keepAliveInitialDelay: 10000,
       };
 
   const poolInstance = mysql.createPool({
@@ -36,9 +36,37 @@ function createPool(): mysql.Pool {
     dateStrings: true,
   });
 
-  poolInstance.on('connection', (connection: mysql.PoolConnection) => {
-    connection.query("SET time_zone = '+00:00'");
+  poolInstance.on('connection', (connection: unknown) => {
+    if (
+      connection &&
+      typeof connection === 'object' &&
+      'query' in connection &&
+      typeof (connection as { query: unknown }).query === 'function'
+    ) {
+      (
+        connection as {
+          query: (sql: string, cb: (err: unknown) => void) => void;
+        }
+      ).query("SET time_zone = '+00:00'", (err: unknown) => {
+        if (err) {
+          console.warn(
+            '[db] Failed to set connection time zone:',
+            err instanceof Error ? err.message : String(err),
+          );
+        }
+      });
+    }
   });
+
+  (poolInstance as unknown as { on(event: string, listener: (err: unknown) => void): void }).on(
+    'error',
+    (err: unknown) => {
+      console.error(
+        '[db] MySQL connection pool error:',
+        err instanceof Error ? err.message : String(err),
+      );
+    },
+  );
 
   return poolInstance;
 }
@@ -55,12 +83,12 @@ export function getDb() {
   return drizzle(getPool());
 }
 
-export async function pingDatabase(): Promise<boolean> {
+export async function pingDatabase(poolGetter: () => mysql.Pool = getPool): Promise<boolean> {
   if (!isDatabaseConfigured) {
     return false;
   }
   try {
-    const connection = await getPool().getConnection();
+    const connection = await poolGetter().getConnection();
     try {
       await connection.ping();
       return true;
@@ -101,39 +129,36 @@ export async function checkDatabaseConnection(): Promise<DbCheckResult> {
   }
 }
 
-function tryStartLocalMysqld(): boolean {
-  if (process.platform !== 'win32') return false;
-  const mysqldPath = 'C:\\Program Files\\MySQL\\MySQL Server 8.4\\bin\\mysqld.exe';
-  const dataDir = 'C:\\ProgramData\\MySQL\\bezent_dev_data';
-  if (!existsSync(mysqldPath) || !existsSync(dataDir)) return false;
-  try {
-    const child = spawn(mysqldPath, [`--datadir=${dataDir}`, '--port=3306'], {
-      detached: true,
-      stdio: 'ignore',
-    });
-    child.unref();
-    return true;
-  } catch {
-    return false;
-  }
+export interface EnsureDatabaseConnectedOptions {
+  maxRetries?: number;
+  initialDelayMs?: number;
+  maxDelayMs?: number;
+  checker?: () => Promise<DbCheckResult>;
 }
 
-export async function ensureDatabaseConnected(): Promise<{ ok: boolean; diagnostic?: string }> {
-  let result = await checkDatabaseConnection();
-  if (result.ok) {
-    return { ok: true };
-  }
+export async function ensureDatabaseConnected(
+  options: EnsureDatabaseConnectedOptions = {},
+): Promise<{ ok: boolean; diagnostic?: string }> {
+  const maxRetries = options.maxRetries ?? (env.nodeEnv === 'development' ? 5 : 3);
+  const initialDelayMs = options.initialDelayMs ?? 500;
+  const maxDelayMs = options.maxDelayMs ?? 2000;
+  const check = options.checker ?? checkDatabaseConnection;
 
-  if (env.nodeEnv === 'development' && result.code === 'ECONNREFUSED') {
-    const started = tryStartLocalMysqld();
-    if (started) {
-      for (let i = 0; i < 10; i++) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        result = await checkDatabaseConnection();
-        if (result.ok) {
-          return { ok: true };
-        }
-      }
+  let result: DbCheckResult = { ok: false, error: 'Uninitialized' };
+  let delay = initialDelayMs;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    result = await check();
+    if (result.ok) {
+      return { ok: true };
+    }
+
+    if (attempt < maxRetries) {
+      console.warn(
+        `[db] Connection attempt ${attempt}/${maxRetries} failed: ${result.error ?? 'Unknown error'} (${result.code ?? 'UNKNOWN'}). Retrying in ${delay}ms...`,
+      );
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      delay = Math.min(delay * 1.5, maxDelayMs);
     }
   }
 
@@ -141,7 +166,7 @@ export async function ensureDatabaseConnected(): Promise<{ ok: boolean; diagnost
   const port = env.db.port ?? 3306;
   const dbName = env.db.name ?? 'unknown';
   const diagnostic =
-    `Could not connect to MySQL at ${host}:${port} (database: ${dbName}).\n` +
+    `Could not connect to MySQL at ${host}:${port} (database: ${dbName}) after ${maxRetries} attempts.\n` +
     `  Reason: ${result.error || 'Connection failed'} (${result.code || 'UNKNOWN'}).\n` +
     `  Please ensure MySQL Server 8.4 is running on port ${port}.`;
 
@@ -150,7 +175,15 @@ export async function ensureDatabaseConnected(): Promise<{ ok: boolean; diagnost
 
 export async function closePool(): Promise<void> {
   if (pool) {
-    await pool.end();
+    const p = pool;
     pool = undefined;
+    try {
+      await p.end();
+    } catch (err) {
+      console.warn(
+        '[db] Error closing MySQL pool:',
+        err instanceof Error ? err.message : String(err),
+      );
+    }
   }
 }

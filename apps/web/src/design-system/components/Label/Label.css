@@ -3,33 +3,33 @@
 .bezent-label {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1, 4px);
-  font-family: var(--font-family-base, 'Google Sans', sans-serif);
-  font-weight: 600;
+  gap: var(--space-1);
+  font-family: var(--font-family-base);
+  font-weight: var(--font-form-label-weight, 500);
   color: var(--text-secondary, #444746);
   cursor: default;
   white-space: nowrap;
-  letter-spacing: -0.005em;
+  letter-spacing: var(--letter-spacing-normal, 0em);
   transition: color var(--motion-duration-fast, 120ms) var(--motion-easing-default, ease);
 }
 
 /* Sizes */
 .bezent-label--md {
-  font-size: var(--font-size-sm, 13px);
-  line-height: var(--line-height-normal, 1.4);
+  font-size: var(--font-form-label-size, var(--font-size-md, 13px));
+  line-height: var(--font-form-label-line-height, var(--line-height-snug, 1.375));
 }
 
 .bezent-label--sm {
-  font-size: var(--font-size-xs, 12px);
-  line-height: var(--line-height-normal, 1.4);
+  font-size: var(--font-size-sm, 12px);
+  line-height: var(--font-form-label-line-height, var(--line-height-snug, 1.375));
 }
 
 /* Required asterisk */
 .bezent-label__required {
   color: var(--status-danger-fg, #ef4444);
-  font-size: var(--font-size-sm, 13px);
+  font-size: var(--font-form-label-size, var(--font-size-md, 13px));
   line-height: 1;
-  margin-left: var(--space-0-5, 2px);
+  margin-left: var(--space-0-5);
   user-select: none;
 }
 

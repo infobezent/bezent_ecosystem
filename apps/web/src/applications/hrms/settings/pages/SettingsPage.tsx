@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation, useInRouterContext } from 'react-router-dom';
 import {
   Button,
   Card,
@@ -25,31 +26,35 @@ import { PerformanceSettingsSection } from '../components/PerformanceSettingsSec
 import { EmployeesSettingsSection } from '../components/EmployeesSettingsSection';
 import { HRSettingsSection } from '../components/HRSettingsSection';
 
-export function SettingsPage() {
+export interface SettingsPageInnerProps {
+  initialModule?: SettingsModuleId;
+}
+
+export function SettingsPageInner({ initialModule = 'overview' }: SettingsPageInnerProps) {
   const { activeCompany } = useAuth();
-  const [activeModule, setActiveModule] = useState<SettingsModuleId>('overview');
+  const [activeModule, setActiveModule] = useState<SettingsModuleId>(initialModule);
 
   const selectedModuleInfo = SETTINGS_MODULE_CARDS.find((m) => m.id === activeModule);
 
   return (
     <Page maxWidth="default">
-      <Stack gap="lg">
-        {/* Settings Center Top Header */}
-        <PageHeader
-          title="Settings"
-          subtitle="Configure and manage settings across the BEZENT portal."
-          actions={
-            <Badge variant="info">
-              <Inline gap="xs" align="center">
-                <BezentIcon name="hrSettings" size={14} />
-                <span>{activeCompany?.companyName ?? 'No company selected'}</span>
-              </Inline>
-            </Badge>
-          }
-        />
+      {activeModule === 'overview' ? (
+        <Stack gap="lg">
+          {/* Settings Center Top Header for Overview */}
+          <PageHeader
+            title="Settings"
+            subtitle="Configure and manage settings across the BEZENT portal."
+            actions={
+              <Badge variant="info">
+                <Inline gap="xs" align="center">
+                  <BezentIcon name="hrSettings" size={14} />
+                  <span>{activeCompany?.companyName ?? 'No company selected'}</span>
+                </Inline>
+              </Badge>
+            }
+          />
 
-        {/* View 1: Overview Grid of 8 Enterprise Cards (Clean main content without duplicate top sub-nav) */}
-        {activeModule === 'overview' ? (
+          {/* View 1: Overview Grid of 8 Enterprise Cards */}
           <Grid columns={3} gap="lg">
             {SETTINGS_MODULE_CARDS.map((mod) => (
               <Card
@@ -76,44 +81,67 @@ export function SettingsPage() {
               </Card>
             ))}
           </Grid>
-        ) : (
-          /* View 2: Active Module Configuration Workspace */
-          <Stack gap="lg">
-            <Toolbar
-              left={
-                <Button
-                  variant="secondary"
-                  type="button"
-                  onClick={() => setActiveModule('overview')}
-                >
-                  <BezentIcon name="chevronLeft" size={16} />
-                  Back to Settings
-                </Button>
-              }
-              right={
-                <Inline gap="xs" align="center">
-                  <span>Settings</span>
-                  <span>/</span>
-                  <strong>{selectedModuleInfo?.name}</strong>
-                </Inline>
-              }
-            />
+        </Stack>
+      ) : activeModule === 'onboarding' ? (
+        /* View 2: Administration Workspace (Image 2 Approved Hierarchy) */
+        <AdministrationSettingsSection onBack={() => setActiveModule('overview')} />
+      ) : (
+        /* View 3: Other Module Configuration Workspaces */
+        <Stack gap="lg">
+          <Toolbar
+            left={
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={() => setActiveModule('overview')}
+              >
+                <BezentIcon name="chevronLeft" size={16} />
+                Back to Settings
+              </Button>
+            }
+            right={
+              <Inline gap="xs" align="center">
+                <span>Settings</span>
+                <span>/</span>
+                <strong>{selectedModuleInfo?.name}</strong>
+              </Inline>
+            }
+          />
 
-            <div>
-              {activeModule === 'dashboard' && <DashboardSettingsSection />}
-              {activeModule === 'onboarding' && <AdministrationSettingsSection />}
-              {activeModule === 'leave' && <LeaveSettingsSection />}
-              {activeModule === 'attendance' && <AttendanceSettingsSection />}
-              {activeModule === 'timesheets' && <TimesheetsSettingsSection />}
-              {activeModule === 'performance' && <PerformanceSettingsSection />}
-              {activeModule === 'employees' && <EmployeesSettingsSection />}
-              {activeModule === 'hr-settings' && <HRSettingsSection />}
-            </div>
-          </Stack>
-        )}
-      </Stack>
+          <div>
+            {activeModule === 'dashboard' && <DashboardSettingsSection />}
+            {activeModule === 'leave' && <LeaveSettingsSection />}
+            {activeModule === 'attendance' && <AttendanceSettingsSection />}
+            {activeModule === 'timesheets' && <TimesheetsSettingsSection />}
+            {activeModule === 'performance' && <PerformanceSettingsSection />}
+            {activeModule === 'employees' && <EmployeesSettingsSection />}
+            {activeModule === 'hr-settings' && <HRSettingsSection />}
+          </div>
+        </Stack>
+      )}
     </Page>
   );
+}
+
+function RoutedSettingsPage() {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const isWorkflowSettings = location.pathname.includes('onboarding/workflow-settings');
+  const hasOnboardingParam =
+    searchParams.get('module') === 'onboarding' ||
+    searchParams.get('tab') === 'onboarding' ||
+    searchParams.has('sub');
+  const initialModule: SettingsModuleId =
+    isWorkflowSettings || hasOnboardingParam ? 'onboarding' : 'overview';
+  return <SettingsPageInner initialModule={initialModule} />;
+}
+
+export function SettingsPage() {
+  const inRouter = useInRouterContext();
+  if (inRouter) {
+    return <RoutedSettingsPage />;
+  }
+  return <SettingsPageInner initialModule="overview" />;
 }
 
 export default SettingsPage;

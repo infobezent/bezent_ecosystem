@@ -1,5 +1,5 @@
 export type EmploymentType = 'full_time' | 'part_time' | 'contract' | 'intern';
-export type OnboardingStage = 'preboarding' | 'documents' | 'induction' | 'completed';
+export type OnboardingStage = 'preboarding' | 'documents' | 'induction' | 'completed' | (string & {});
 export type OnboardingStatus = 'draft' | 'active' | 'withdrawn' | 'completed';
 
 export interface CreateNewHireDto {
@@ -119,6 +119,7 @@ export interface StageCounts {
   preboarding: number;
   documents: number;
   completed: number;
+  [stageKey: string]: number;
 }
 
 export interface PaginatedNewHiresResult {

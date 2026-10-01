@@ -17,7 +17,7 @@
   gap: 12px;
   width: 100%;
   box-sizing: border-box;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   border: 1px solid transparent;
   color: var(--text-primary, #1f1f1f);
   cursor: pointer;
@@ -65,17 +65,19 @@
 }
 
 .bezent-selectable-list__label {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--font-tab-size, var(--font-size-md, 13px));
+  font-weight: var(--font-tab-weight, 500);
+  line-height: var(--line-height-snug, 1.375);
   overflow-wrap: break-word;
 }
 
 .bezent-selectable-list__item.is-selected .bezent-selectable-list__label {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold, 600);
 }
 
 .bezent-selectable-list__description {
-  font-size: 12px;
+  font-size: var(--font-body-secondary-size, var(--font-size-sm, 12px));
+  line-height: var(--line-height-normal, 1.5);
   color: var(--text-secondary, #444746);
 }
 

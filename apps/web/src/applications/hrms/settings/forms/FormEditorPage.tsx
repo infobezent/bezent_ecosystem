@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   DndContext,
@@ -19,13 +19,18 @@ import {
   Alert,
   Badge,
   Button,
+  EmptyState,
+  FormField,
+  FormGrid,
+  FormSection,
   Inline,
   LoadingState,
+  Modal,
   Page,
   Stack,
-  Tabs,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
+import { AuthContext } from '../../../../platform/auth/AuthProvider';
 import {
   fetchResolvedForm,
   saveFormDefinition,
@@ -36,9 +41,14 @@ import {
   type ResolvedFormSection,
   type SaveFormDefinitionDto,
 } from '../api/formsApi';
-import { createNewCustomField, getSubgroupForField, KNOWN_SECTION_GROUPS } from './types';
+import {
+  createNewCustomField,
+  getGroupsForSection,
+  getSubgroupForField,
+  KNOWN_SECTION_GROUPS,
+} from './types';
 import { FieldToolbox } from './FieldToolbox';
-import { FormCanvas } from './FormCanvas';
+import { FormCanvas, CanvasFieldControl } from './FormCanvas';
 import { FieldProperties } from './FieldProperties';
 
 export const FORM_EDITOR_TABS = [
@@ -67,9 +77,6 @@ export function FormEditorPage() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [concurrencyConflict, setConcurrencyConflict] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [activeTab, setActiveTab] = useState<'customize' | 'access-control' | 'preview'>(
-    'customize',
-  );
   // Tracks the field key being dragged — used to render the DragOverlay ghost.
   const [activeDragFieldKey, setActiveDragFieldKey] = useState<string | null>(null);
   // Tracks the toolbox item being dragged — used to render the DragOverlay ghost.
@@ -77,6 +84,22 @@ export function FormEditorPage() {
     type: CustomFieldType;
     label: string;
   } | null>(null);
+  const [toolboxGuidance, setToolboxGuidance] = useState<string | null>(null);
+
+  // V2 Shell State
+  const auth = useContext(AuthContext);
+  const canManage = auth
+    ? auth.isCompanyAdmin ||
+      auth.can('hrms:settings:manage') ||
+      auth.can('hrms:administration:manage')
+    : true;
+  const [leftPanelMode, setLeftPanelMode] = useState<'structure' | 'fields'>('structure');
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewSectionKey, setPreviewSectionKey] = useState<string>('general');
+  // Tracks which entity level is selected: form root / chapter / section (canvas only) / field / null
+  const [selectedEntity, setSelectedEntity] = useState<
+    'form' | 'chapter' | 'section' | 'field' | null
+  >('chapter');
 
   // Load Form Definition
   const loadForm = useCallback(async () => {
@@ -220,6 +243,7 @@ export function FormEditorPage() {
   }, []);
 
   const handleMoveSectionUp = useCallback((secKey: string) => {
+    if (secKey === 'review') return;
     setDraftSections((prev) => {
       const idx = prev.findIndex((s) => s.key === secKey);
       if (idx <= 0) return prev;
@@ -233,15 +257,37 @@ export function FormEditorPage() {
   }, []);
 
   const handleMoveSectionDown = useCallback((secKey: string) => {
+    if (secKey === 'review') return;
     setDraftSections((prev) => {
       const idx = prev.findIndex((s) => s.key === secKey);
       if (idx === -1 || idx >= prev.length - 1) return prev;
+      if (prev[idx + 1]?.key === 'review') return prev;
       const reordered = arrayMove(prev, idx, idx + 1);
       setMetadata((metaPrev) => ({
         ...metaPrev,
         sectionOrder: reordered.map((s) => s.key),
       }));
       return reordered;
+    });
+  }, []);
+
+  const handleToggleSectionVisibility = useCallback((secKey: string) => {
+    if (MANDATORY_SECTION_KEYS.includes(secKey)) return;
+    setDraftSections((prev) => {
+      const target = prev.find((s) => s.key === secKey);
+      if (!target) return prev;
+      const nextVisible = !target.visible;
+      setMetadata((metaPrev) => ({
+        ...metaPrev,
+        sections: {
+          ...metaPrev.sections,
+          [secKey]: {
+            ...metaPrev.sections?.[secKey],
+            visible: nextVisible,
+          },
+        },
+      }));
+      return prev.map((s) => (s.key === secKey ? { ...s, visible: nextVisible } : s));
     });
   }, []);
 
@@ -343,20 +389,23 @@ export function FormEditorPage() {
   const handleSelectSubgroup = useCallback((groupKey: string) => {
     setSelectedSubgroupKey(groupKey);
     setSelectedFieldKey(null);
+    setSelectedEntity('section');
+    setToolboxGuidance(null);
   }, []);
 
   // Select section handler: selects active section and clears field/subgroup selection
-  // so Form Properties tab is displayed immediately.
   const handleSelectSection = useCallback((secKey: string) => {
     setActiveSectionKey(secKey);
     setSelectedSubgroupKey(null);
     setSelectedFieldKey(null);
+    setSelectedEntity('chapter');
   }, []);
 
   // Select field handler
   const handleSelectField = useCallback(
     (fieldKey: string) => {
       setSelectedFieldKey(fieldKey);
+      setSelectedEntity('field');
       for (const sec of draftSections) {
         const found = sec.fields.find((f) => f.key === fieldKey);
         if (found) {
@@ -369,6 +418,13 @@ export function FormEditorPage() {
     },
     [draftSections, metadata],
   );
+
+  // Select the form root entity (shows Form Settings in inspector)
+  const handleSelectForm = useCallback(() => {
+    setSelectedEntity('form');
+    setSelectedFieldKey(null);
+    setSelectedSubgroupKey(null);
+  }, []);
 
   // Drag sensors with distance activation to distinguish clicks from drags
   const sensors = useSensors(
@@ -514,6 +570,34 @@ export function FormEditorPage() {
       }
     },
     [activeSectionKey, metadata],
+  );
+
+  const handleQuickAddCustomField = useCallback(
+    (targetSectionKey?: string) => {
+      handleAddFieldAtPosition({
+        type: 'single_line',
+        label: 'New Custom Field',
+        sectionKey: targetSectionKey || activeSectionKey,
+      });
+    },
+    [handleAddFieldAtPosition, activeSectionKey],
+  );
+
+  const handleToolboxAddField = useCallback(
+    (type: CustomFieldType, label: string) => {
+      if (!selectedSubgroupKey) {
+        setToolboxGuidance('Select a section before adding a field');
+        return;
+      }
+      setToolboxGuidance(null);
+      handleAddFieldAtPosition({
+        type,
+        label,
+        sectionKey: activeSectionKey,
+        targetGroupKey: selectedSubgroupKey,
+      });
+    },
+    [selectedSubgroupKey, activeSectionKey, handleAddFieldAtPosition],
   );
 
   /**
@@ -886,7 +970,22 @@ export function FormEditorPage() {
               required: f.required,
               width: f.width,
               type: f.origin === 'custom' ? (f.type as CustomFieldType) : undefined,
-              config: f.origin === 'custom' ? f.config : undefined,
+              config:
+                f.origin === 'custom' && f.config
+                  ? {
+                      ...(f.config.minLength !== undefined ? { minLength: f.config.minLength } : {}),
+                      ...(f.config.maxLength !== undefined ? { maxLength: f.config.maxLength } : {}),
+                      ...(f.config.min !== undefined ? { min: f.config.min } : {}),
+                      ...(f.config.max !== undefined ? { max: f.config.max } : {}),
+                      ...(f.config.decimalPlaces !== undefined ? { decimalPlaces: f.config.decimalPlaces } : {}),
+                      ...(f.config.options !== undefined ? { options: f.config.options } : {}),
+                      ...(f.config.defaultValue !== undefined ? { defaultValue: f.config.defaultValue } : {}),
+                      ...(f.config.disallowPast !== undefined ? { disallowPast: f.config.disallowPast } : {}),
+                      ...(f.config.disallowFuture !== undefined ? { disallowFuture: f.config.disallowFuture } : {}),
+                      ...(f.config.maxSizeMb !== undefined ? { maxSizeMb: f.config.maxSizeMb } : {}),
+                      ...(f.config.groupKey !== undefined ? { groupKey: f.config.groupKey } : {}),
+                    }
+                  : undefined,
             })),
           })),
       };
@@ -933,6 +1032,14 @@ export function FormEditorPage() {
     ? (metadata.sections?.[activeSection.key]?.visible ?? activeSection.visible !== false)
     : true;
 
+  const previewSection = useMemo(() => {
+    return draftSections.find((s) => s.key === previewSectionKey) ?? draftSections[0] ?? null;
+  }, [draftSections, previewSectionKey]);
+
+  const previewIndex = useMemo(() => {
+    return draftSections.findIndex((s) => s.key === previewSection?.key);
+  }, [draftSections, previewSection]);
+
   if (loading) {
     return (
       <Page title="Loading Form Editor">
@@ -958,7 +1065,7 @@ export function FormEditorPage() {
 
   return (
     <div className="bezent-editor-shell">
-      {/* 1. Compact Editor Header */}
+      {/* 1. V2 Header with Breadcrumbs & Actions */}
       <header className="bezent-editor-header">
         <div className="bezent-editor-header__left">
           <Button
@@ -967,12 +1074,20 @@ export function FormEditorPage() {
             leftIcon={<BezentIcon name="arrowLeft" size={14} />}
             onClick={handleBack}
           >
-            Forms
+            Back to Forms
           </Button>
 
           <div className="bezent-editor-header__divider" aria-hidden="true" />
 
           <div className="bezent-editor-header__title-group">
+            <div className="bezent-editor-breadcrumbs" aria-label="Breadcrumbs">
+              <span>Administration</span>
+              <span className="bezent-editor-breadcrumbs__sep">/</span>
+              <span>Forms</span>
+              <span className="bezent-editor-breadcrumbs__sep">/</span>
+              <span>Employee Registration</span>
+            </div>
+
             <div className="bezent-editor-header__title-row">
               <h1 className="bezent-editor-header__title">{persistedForm.form.name}</h1>
               <Badge variant="neutral" size="sm">
@@ -985,17 +1100,9 @@ export function FormEditorPage() {
               )}
             </div>
 
-            <div className="bezent-editor-header__tabs">
-              <Tabs
-                activeId={activeTab}
-                onChange={(id) => setActiveTab(id as typeof activeTab)}
-                items={FORM_EDITOR_TABS.map((item) => ({
-                  id: item.id,
-                  label: item.label,
-                  disabled: item.disabled,
-                }))}
-              />
-            </div>
+            <p className="bezent-editor-header__desc">
+              Configure the employee registration form for your organization. Manage tab order, field settings, visibility and add custom fields.
+            </p>
           </div>
         </div>
 
@@ -1003,12 +1110,33 @@ export function FormEditorPage() {
           <Button
             variant="outline"
             size="sm"
-            disabled={!isDirty || isSaving}
-            onClick={handleDiscard}
+            leftIcon={<BezentIcon name="view" size={14} />}
+            onClick={() => {
+              setPreviewSectionKey(activeSectionKey || 'general');
+              setIsPreviewOpen(true);
+            }}
           >
-            Discard Changes
+            Preview Form
           </Button>
-          <Button variant="primary" size="sm" disabled={!isDirty || isSaving} onClick={handleSave}>
+
+          {isDirty && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isSaving}
+              onClick={handleDiscard}
+            >
+              Discard Changes
+            </Button>
+          )}
+
+          <Button
+            variant="primary"
+            size="sm"
+            disabled={!isDirty || isSaving || !canManage}
+            onClick={handleSave}
+            leftIcon={<BezentIcon name="check" size={14} />}
+          >
             {isSaving ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>
@@ -1061,13 +1189,24 @@ export function FormEditorPage() {
         onDragCancel={handleDragCancel}
       >
         <div className="bezent-editor-workspace">
-          {/* Left Toolbox */}
+          {/* Left Toolbox & Structure */}
           <FieldToolbox
-            onAddField={(type, label) =>
-              handleAddFieldAtPosition({ type, label, sectionKey: activeSectionKey })
-            }
+            mode={leftPanelMode}
+            onModeChange={setLeftPanelMode}
+            sections={draftSections}
+            activeSectionKey={activeSectionKey}
+            onSelectSection={handleSelectSection}
+            onMoveSectionUp={handleMoveSectionUp}
+            onMoveSectionDown={handleMoveSectionDown}
+            onToggleSectionVisibility={handleToggleSectionVisibility}
+            onQuickAddCustomField={handleQuickAddCustomField}
+            onAddField={handleToolboxAddField}
+            guidanceNotice={toolboxGuidance}
+            onClearGuidanceNotice={() => setToolboxGuidance(null)}
             activeSectionLabel={activeSection?.label}
             isConfigurable={activeSection?.configurable ?? true}
+            onSelectForm={handleSelectForm}
+            selectedEntity={selectedEntity}
           />
 
           {/* Center Canvas */}
@@ -1079,10 +1218,15 @@ export function FormEditorPage() {
             sectionTitle={currentSectionTitle}
             sectionDescription={currentSectionDescription}
             metadata={metadata}
+            isDragging={activeDragFieldKey !== null || activeDragToolboxItem !== null}
             onSelectSection={handleSelectSection}
             onSelectField={handleSelectField}
             onSelectSubgroup={handleSelectSubgroup}
             onDeleteField={handleDeleteField}
+            onQuickAddField={handleQuickAddCustomField}
+            onUpdateSubgroupTitle={handleUpdateSubgroupTitle}
+            onUpdateSubgroupDescription={handleUpdateSubgroupDescription}
+            onUpdateField={handleUpdateField}
           />
 
           {/* Right Inspector */}
@@ -1096,6 +1240,7 @@ export function FormEditorPage() {
             sectionOrderIndex={sectionOrderIndex}
             totalSections={totalSections}
             isMandatorySection={isMandatorySection}
+            selectedEntity={selectedEntity}
             selectedSubgroup={selectedSubgroupData}
             onUpdateSectionTitle={handleUpdateSectionTitle}
             onUpdateSectionDescription={handleUpdateSectionDescription}
@@ -1112,10 +1257,7 @@ export function FormEditorPage() {
           />
         </div>
 
-        {/*
-         * DragOverlay renders a floating ghost card that follows the cursor
-         * while a field or toolbox item is being dragged.
-         */}
+        {/* DragOverlay renders a floating ghost card that follows the cursor */}
         <DragOverlay>
           {activeDragFieldKey !== null &&
             (() => {
@@ -1138,6 +1280,140 @@ export function FormEditorPage() {
           )}
         </DragOverlay>
       </DndContext>
+
+      {/* 3. Preview Modal */}
+      {isPreviewOpen && (
+        <Modal
+          isOpen={isPreviewOpen}
+          onClose={() => setIsPreviewOpen(false)}
+          title="Employee Registration Preview"
+          size="lg"
+          footer={
+            <div className="bezent-preview-modal-footer">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={previewIndex <= 0}
+                onClick={() => {
+                  if (previewIndex > 0) {
+                    const prevSec = draftSections[previewIndex - 1];
+                    if (prevSec) setPreviewSectionKey(prevSec.key);
+                  }
+                }}
+              >
+                ← Back
+              </Button>
+              <Inline gap="sm">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  disabled={previewIndex >= draftSections.length - 1}
+                  onClick={() => {
+                    if (previewIndex < draftSections.length - 1) {
+                      const nextSec = draftSections[previewIndex + 1];
+                      if (nextSec) setPreviewSectionKey(nextSec.key);
+                    }
+                  }}
+                >
+                  {previewIndex < draftSections.length - 1 ? 'Continue →' : 'Final Step'}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setIsPreviewOpen(false)}>
+                  Close Preview
+                </Button>
+              </Inline>
+            </div>
+          }
+        >
+          <Stack gap="lg">
+            <div className="bezent-preview-header">
+              <Badge variant="neutral" size="sm">
+                Step {previewIndex + 1} of {draftSections.length}
+              </Badge>
+              <h2 className="bezent-preview-title">
+                {previewSection?.label || 'Registration Form'}
+              </h2>
+              {previewSection?.description && (
+                <p className="bezent-preview-description">{previewSection.description}</p>
+              )}
+            </div>
+
+            <div className="bezent-preview-tabs">
+              <Inline gap="xs" wrap>
+                {draftSections.map((sec, idx) => (
+                  <Button
+                    key={sec.key}
+                    variant={sec.key === previewSection?.key ? 'primary' : 'outline'}
+                    size="sm"
+                    onClick={() => setPreviewSectionKey(sec.key)}
+                  >
+                    {String(idx + 1).padStart(2, '0')} {sec.label}
+                  </Button>
+                ))}
+              </Inline>
+            </div>
+
+            {previewSection && (
+              <div className="bezent-preview-body">
+                {(() => {
+                  const groups = getGroupsForSection(previewSection.key, previewSection.fields, metadata);
+                  const sortedFields = [...previewSection.fields].sort((a, b) => a.order - b.order);
+
+                  if (groups.length === 0 || sortedFields.length === 0) {
+                    return (
+                      <EmptyState
+                        title="No fields configured"
+                        description="This section has no visible fields configured in the current draft."
+                      />
+                    );
+                  }
+
+                  return (
+                    <Stack gap="lg">
+                      {groups.map((group) => {
+                        const groupFields = sortedFields.filter(
+                          (f) => getSubgroupForField(previewSection.key, f, metadata) === group.key,
+                        );
+                        if (groupFields.length === 0) return null;
+
+                        return (
+                          <FormSection
+                            key={group.key}
+                            title={metadata.subgroups?.[group.key]?.title || group.title}
+                            description={
+                              metadata.subgroups?.[group.key]?.description !== undefined
+                                ? metadata.subgroups[group.key]?.description
+                                : group.description
+                            }
+                          >
+                            <FormGrid columns={2}>
+                              {groupFields
+                                .filter((f) => f.enabled !== false)
+                                .map((field) => (
+                                  <div
+                                    key={field.key}
+                                    className={field.width === 'full' ? 'bezent-field-full-width' : undefined}
+                                  >
+                                    <FormField
+                                      label={field.label}
+                                      required={field.required}
+                                      helperText={field.description || undefined}
+                                    >
+                                      <CanvasFieldControl field={field} />
+                                    </FormField>
+                                  </div>
+                                ))}
+                            </FormGrid>
+                          </FormSection>
+                        );
+                      })}
+                    </Stack>
+                  );
+                })()}
+              </div>
+            )}
+          </Stack>
+        </Modal>
+      )}
     </div>
   );
 }

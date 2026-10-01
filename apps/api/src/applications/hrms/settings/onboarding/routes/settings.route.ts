@@ -9,7 +9,10 @@ const controller = new OnboardingSettingsController();
 // requires HR settings authority (ADR-017). Covers all routes under the prefix.
 onboardingSettingsRouter.use(
   '/hrms/settings/onboarding',
-  requireReadWrite(['hrms.settings.manage', 'hrms.onboarding.read'], 'hrms.settings.manage'),
+  requireReadWrite(
+    ['hrms.settings.view', 'hrms.settings.manage', 'hrms.onboarding.read'],
+    'hrms.settings.manage',
+  ),
 );
 
 // Aggregate and Idempotent Initialization
@@ -28,9 +31,18 @@ onboardingSettingsRouter.patch(
 
 // Stage Configurations
 onboardingSettingsRouter.get('/hrms/settings/onboarding/stages', controller.getStageConfigs);
+onboardingSettingsRouter.post('/hrms/settings/onboarding/stages', controller.createStageConfig);
+onboardingSettingsRouter.put(
+  '/hrms/settings/onboarding/stages/reorder',
+  controller.reorderStageConfigs,
+);
 onboardingSettingsRouter.patch(
   '/hrms/settings/onboarding/stages/:stageKey',
   controller.updateStageConfig,
+);
+onboardingSettingsRouter.delete(
+  '/hrms/settings/onboarding/stages/:stageKey',
+  controller.deleteStageConfig,
 );
 
 // Field Configurations

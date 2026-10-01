@@ -1,37 +1,106 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import {
+  Actions,
+  Alert,
   Button,
   Card,
+  Divider,
+  Inline,
   Input,
-  Switch,
-  Alert,
+  Label,
+  LoadingState,
   Stack,
-  Actions,
+  Switch,
 } from '../../../../design-system/components';
+import { BezentIcon } from '../../../../design-system/icons';
+import {
+  fetchGeneralSettings,
+  updateGeneralSettings,
+} from '../api/onboardingSettingsApi';
 import type {
   OnboardingGeneralSettings,
   UpdateOnboardingGeneralSettingsDto,
 } from '../types/settings';
 
-interface GeneralSettingsSectionProps {
-  initialData: OnboardingGeneralSettings | null;
-  onSave: (payload: UpdateOnboardingGeneralSettingsDto) => Promise<void>;
-  saving: boolean;
+export interface GeneralSettingsFormValues {
+  onboardingEnabled: boolean;
+  defaultDurationDays: number | string;
+  idPrefix: string;
+}
+
+export function validateGeneralSettingsValues(values: {
+  defaultDurationDays: number | string;
+  idPrefix: string;
+}): { valid: boolean; durationError?: string; prefixError?: string } {
+  let valid = true;
+  let durationError: string | undefined;
+  let prefixError: string | undefined;
+
+  const durationNum = Number(values.defaultDurationDays);
+  if (
+    values.defaultDurationDays === '' ||
+    isNaN(durationNum) ||
+    !Number.isInteger(durationNum) ||
+    durationNum < 1 ||
+    durationNum > 365
+  ) {
+    durationError = 'Default duration must be an integer between 1 and 365 days';
+    valid = false;
+  }
+
+  const trimmedPrefix = values.idPrefix.trim();
+  if (!trimmedPrefix) {
+    prefixError = 'New Hire ID Prefix is required';
+    valid = false;
+  } else if (trimmedPrefix.length > 20) {
+    prefixError = 'New Hire ID Prefix must not exceed 20 characters';
+    valid = false;
+  }
+
+  return { valid, durationError, prefixError };
+}
+
+export function isGeneralSettingsDirty(
+  current: GeneralSettingsFormValues,
+  baseline: GeneralSettingsFormValues,
+): boolean {
+  if (current.onboardingEnabled !== baseline.onboardingEnabled) return true;
+  if (String(current.defaultDurationDays) !== String(baseline.defaultDurationDays)) return true;
+  if (current.idPrefix !== baseline.idPrefix) return true;
+  return false;
+}
+
+export interface GeneralSettingsSectionProps {
+  initialData?: OnboardingGeneralSettings | null;
+  onSave?: (payload: UpdateOnboardingGeneralSettingsDto) => Promise<void>;
+  saving?: boolean;
 }
 
 export function GeneralSettingsSection({
   initialData,
   onSave,
-  saving,
+  saving: propSaving,
 }: GeneralSettingsSectionProps) {
-  const [onboardingEnabled, setOnboardingEnabled] = useState(
+  const [loading, setLoading] = useState<boolean>(!initialData);
+  const [internalSaving, setInternalSaving] = useState<boolean>(false);
+  const isSaving = propSaving ?? internalSaving;
+
+  const [onboardingEnabled, setOnboardingEnabled] = useState<boolean>(
     initialData ? initialData.onboardingEnabled : true,
   );
-  const [defaultDurationDays, setDefaultDurationDays] = useState(
-    initialData ? initialData.defaultDurationDays : 30,
+  const [defaultDurationDays, setDefaultDurationDays] = useState<string>(
+    initialData ? String(initialData.defaultDurationDays) : '30',
   );
-  const [idPrefix, setIdPrefix] = useState(initialData?.idPrefix || 'NH-');
-  const [defaultLocationId, setDefaultLocationId] = useState(initialData?.defaultLocationId || '');
+  const [idPrefix, setIdPrefix] = useState<string>(initialData?.idPrefix ?? 'NH-');
+
+  const [baseline, setBaseline] = useState<GeneralSettingsFormValues>({
+    onboardingEnabled: initialData ? initialData.onboardingEnabled : true,
+    defaultDurationDays: initialData ? initialData.defaultDurationDays : 30,
+    idPrefix: initialData?.idPrefix ?? 'NH-',
+  });
+
+  const [durationError, setDurationError] = useState<string | null>(null);
+  const [prefixError, setPrefixError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(
     null,
   );
@@ -39,39 +108,86 @@ export function GeneralSettingsSection({
   useEffect(() => {
     if (initialData) {
       setOnboardingEnabled(initialData.onboardingEnabled);
-      setDefaultDurationDays(initialData.defaultDurationDays);
+      setDefaultDurationDays(String(initialData.defaultDurationDays));
       setIdPrefix(initialData.idPrefix);
-      setDefaultLocationId(initialData.defaultLocationId || '');
+      setBaseline({
+        onboardingEnabled: initialData.onboardingEnabled,
+        defaultDurationDays: initialData.defaultDurationDays,
+        idPrefix: initialData.idPrefix,
+      });
+      setLoading(false);
+      return;
     }
+
+    let isMounted = true;
+    setLoading(true);
+    fetchGeneralSettings()
+      .then((data) => {
+        if (!isMounted) return;
+        setOnboardingEnabled(data.onboardingEnabled);
+        setDefaultDurationDays(String(data.defaultDurationDays));
+        setIdPrefix(data.idPrefix);
+        setBaseline({
+          onboardingEnabled: data.onboardingEnabled,
+          defaultDurationDays: data.defaultDurationDays,
+          idPrefix: data.idPrefix,
+        });
+      })
+      .catch((err) => {
+        if (!isMounted) return;
+        setFeedback({
+          type: 'error',
+          message: err instanceof Error ? err.message : 'Failed to load general settings',
+        });
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, [initialData]);
+
+  const isDirty = isGeneralSettingsDirty(
+    { onboardingEnabled, defaultDurationDays, idPrefix },
+    baseline,
+  );
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setFeedback(null);
 
-    if (defaultDurationDays < 1 || defaultDurationDays > 365) {
-      setFeedback({
-        type: 'error',
-        message: 'Default duration must be between 1 and 365 days',
-      });
+    const validation = validateGeneralSettingsValues({
+      defaultDurationDays,
+      idPrefix,
+    });
+
+    if (!validation.valid) {
+      if (validation.durationError) setDurationError(validation.durationError);
+      if (validation.prefixError) setPrefixError(validation.prefixError);
       return;
     }
 
-    if (!idPrefix.trim() || idPrefix.trim().length > 20) {
-      setFeedback({
-        type: 'error',
-        message: 'ID prefix is required and must not exceed 20 characters',
-      });
-      return;
-    }
+    const payload: UpdateOnboardingGeneralSettingsDto = {
+      onboardingEnabled,
+      defaultDurationDays: Number(defaultDurationDays),
+      idPrefix: idPrefix.trim(),
+    };
 
+    setInternalSaving(true);
     try {
-      await onSave({
+      if (onSave) {
+        await onSave(payload);
+      } else {
+        await updateGeneralSettings(payload);
+      }
+      setBaseline({
         onboardingEnabled,
-        defaultDurationDays,
+        defaultDurationDays: Number(defaultDurationDays),
         idPrefix: idPrefix.trim(),
-        defaultLocationId: defaultLocationId.trim() || null,
       });
+      setIdPrefix(idPrefix.trim());
       setFeedback({
         type: 'success',
         message: 'General settings saved successfully.',
@@ -81,18 +197,34 @@ export function GeneralSettingsSection({
         type: 'error',
         message: err instanceof Error ? err.message : 'Failed to save general settings',
       });
+    } finally {
+      setInternalSaving(false);
     }
   };
 
+  if (loading) {
+    return (
+      <Card variant="flat" padding="md">
+        <LoadingState label="Loading onboarding settings..." />
+      </Card>
+    );
+  }
+
   return (
-    <Card padding="lg">
+    <form onSubmit={handleSubmit}>
       <Stack gap="lg">
-        <div>
-          <h2 className="bezent-card__title">General Onboarding Settings</h2>
-          <p className="bezent-card__desc">
-            Configure overarching pipeline defaults, case identifiers, and workflow activation.
-          </p>
-        </div>
+        {/* Onboarding Header Area */}
+        <Inline gap="md" align="center">
+          <div className="bezent-card__icon">
+            <BezentIcon name="onboarding" size={24} />
+          </div>
+          <Stack gap="xs">
+            <h2 className="bezent-card__title">General</h2>
+            <p className="bezent-card__desc">
+              Control the basic settings used across employee onboarding.
+            </p>
+          </Stack>
+        </Inline>
 
         {feedback && (
           <Alert variant={feedback.type === 'success' ? 'success' : 'danger'}>
@@ -100,54 +232,121 @@ export function GeneralSettingsSection({
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <Stack gap="lg">
-            <Switch
-              label="Enable Onboarding Module (Controls whether new hire onboarding flows are active for your company)"
-              checked={onboardingEnabled}
-              onChange={(e) => setOnboardingEnabled(e.target.checked)}
-            />
+        {/* Single clean settings surface */}
+        <Card variant="flat" padding="md">
+          <Stack gap="md">
+            {/* ONBOARDING AVAILABILITY */}
+            <Stack gap="sm">
+              <span className="bezent-page-header__eyebrow">ONBOARDING AVAILABILITY</span>
+              <Inline justify="between" align="center" wrap gap="md">
+                <Stack gap="xs">
+                  <Label htmlFor="enable-employee-onboarding">Enable Employee Onboarding</Label>
+                  <span className="bezent-card__desc">
+                    Allow your company to create and manage employee onboarding cases.
+                  </span>
+                </Stack>
+                <Switch
+                  id="enable-employee-onboarding"
+                  aria-label="Enable Employee Onboarding"
+                  checked={onboardingEnabled}
+                  onChange={(e) => setOnboardingEnabled(e.target.checked)}
+                  disabled={isSaving}
+                />
+              </Inline>
+            </Stack>
 
-            <Input
-              id="gen-id-prefix"
-              label="New Hire ID Prefix"
-              helperText="Prefix assigned to new onboarding cases (e.g., NH-)"
-              value={idPrefix}
-              maxLength={20}
-              required
-              onChange={(e) => setIdPrefix(e.target.value)}
-            />
+            <Divider spacing="sm" />
 
-            <Input
-              id="gen-duration"
-              label="Default Onboarding Duration (Days)"
-              helperText="Expected total timeline for a candidate to complete all onboarding stages (1-365 days)"
-              type="number"
-              min={1}
-              max={365}
-              value={defaultDurationDays}
-              required
-              onChange={(e) => setDefaultDurationDays(parseInt(e.target.value, 10) || 0)}
-            />
+            {/* TIMELINE */}
+            <Stack gap="sm">
+              <span className="bezent-page-header__eyebrow">TIMELINE</span>
+              <Inline justify="between" align="center" wrap gap="md">
+                <Stack gap="xs">
+                  <Label htmlFor="default-onboarding-duration">Default Onboarding Duration</Label>
+                  <span className="bezent-card__desc">
+                    Default duration used for a new onboarding process.
+                  </span>
+                  {durationError && (
+                    <span className="bezent-input-feedback is-error" role="alert">
+                      {durationError}
+                    </span>
+                  )}
+                </Stack>
+                <Inline gap="xs" align="center">
+                  <Input
+                    id="default-onboarding-duration"
+                    className="bezent-input--narrow"
+                    type="number"
+                    min={1}
+                    max={365}
+                    step={1}
+                    value={defaultDurationDays}
+                    onChange={(e) => {
+                      setDefaultDurationDays(e.target.value);
+                      if (durationError) setDurationError(null);
+                    }}
+                    disabled={isSaving}
+                    aria-label="Default Onboarding Duration"
+                  />
+                  <span className="bezent-label">Days</span>
+                </Inline>
+              </Inline>
+            </Stack>
 
-            <Input
-              id="gen-location"
-              label="Default Location ID (Optional)"
-              helperText="Fallback location assigned to new candidates when unassigned"
-              placeholder="e.g., loc_chn_01"
-              value={defaultLocationId}
-              onChange={(e) => setDefaultLocationId(e.target.value)}
-            />
+            <Divider spacing="sm" />
 
-            <Actions align="start">
-              <Button variant="primary" type="submit" disabled={saving}>
-                {saving ? 'Saving...' : 'Save General Settings'}
-              </Button>
-            </Actions>
+            {/* NEW HIRE IDENTIFICATION */}
+            <Stack gap="sm">
+              <span className="bezent-page-header__eyebrow">NEW HIRE IDENTIFICATION</span>
+              <Inline justify="between" align="start" wrap gap="md">
+                <Stack gap="xs">
+                  <Label htmlFor="new-hire-id-prefix">New Hire ID Prefix</Label>
+                  <span className="bezent-card__desc">
+                    Prefix assigned to new onboarding cases.
+                  </span>
+                  {prefixError && (
+                    <span className="bezent-input-feedback is-error" role="alert">
+                      {prefixError}
+                    </span>
+                  )}
+                </Stack>
+                <Stack gap="xs" align="end">
+                  <Input
+                    id="new-hire-id-prefix"
+                    className="bezent-input--narrow"
+                    maxLength={20}
+                    value={idPrefix}
+                    onChange={(e) => {
+                      setIdPrefix(e.target.value);
+                      if (prefixError) setPrefixError(null);
+                    }}
+                    disabled={isSaving}
+                    aria-label="New Hire ID Prefix"
+                  />
+                  <Inline gap="xs" align="center">
+                    <span className="bezent-input-label">Example:</span>
+                    <span className="bezent-card__desc">
+                      {`${idPrefix.trim() || 'NH-'}0001`}
+                    </span>
+                  </Inline>
+                </Stack>
+              </Inline>
+            </Stack>
           </Stack>
-        </form>
+        </Card>
+
+        {/* Save Changes Action */}
+        <Actions align="end">
+          <Button
+            variant="primary"
+            type="submit"
+            disabled={!isDirty || isSaving}
+          >
+            {isSaving ? 'Saving...' : 'Save Changes'}
+          </Button>
+        </Actions>
       </Stack>
-    </Card>
+    </form>
   );
 }
 

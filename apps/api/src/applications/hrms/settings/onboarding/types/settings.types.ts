@@ -32,12 +32,22 @@ export interface UpdateOnboardingGeneralSettingsDto {
 
 // Stage Configurations
 export type OnboardingStageConfigDto = OnboardingStageConfig;
+export interface CreateOnboardingStageConfigDto {
+  name: string;
+  description?: string | null;
+  isRequired?: boolean;
+  position?: number;
+  afterStageKey?: string;
+}
 export interface UpdateOnboardingStageConfigDto {
   name?: string;
   description?: string | null;
   displayOrder?: number;
   isRequired?: boolean;
   isActive?: boolean;
+}
+export interface ReorderOnboardingStagesDto {
+  stageKeys: string[];
 }
 
 // Field Configurations

@@ -333,3 +333,65 @@ describe('Employee Registration → Save Changes', () => {
     expect(hasUnsavedChanges(draft, settingsOf(result))).toBe(false);
   });
 });
+
+describe('HRMS Administration Settings UI — Approved Hierarchy & Image 2 Specifications', () => {
+  it('renders Administration heading and approved description without generic Settings header', () => {
+    const html = renderToStaticMarkup(<AdministrationSettingsSection />);
+    // 1. Administration heading renders
+    expect(html).toContain('Administration');
+    // 2. Correct description renders
+    expect(html).toContain('Configure employee administration and onboarding settings.');
+    // 3. Generic Settings title/description no longer render in this Administration view
+    expect(html).not.toContain('Configure and manage settings across the BEZENT portal.');
+    expect(html).not.toContain('Settings / Administration');
+  });
+
+  it('renders top utility row with Back to Settings and current company indicator', () => {
+    const onBack = vi.fn();
+    const html = renderToStaticMarkup(<AdministrationSettingsSection onBack={onBack} />);
+    expect(html).toContain('Back to Settings');
+    expect(html).toContain('No company selected');
+  });
+
+  it('renders primary administration tabs with Forms active by default and Onboarding/Employee Configuration visible', () => {
+    const html = renderToStaticMarkup(<AdministrationSettingsSection />);
+    // 4. Forms is the default active tab
+    expect(html).toContain('id="tab-forms"');
+    expect(html).toContain('aria-selected="true"');
+    // 5. Onboarding tab is visible
+    expect(html).toContain('id="tab-onboarding"');
+    expect(html).toContain('>Onboarding<');
+    // 6. Employee Configuration tab is visible
+    expect(html).toContain('id="tab-employee-configuration"');
+    expect(html).toContain('>Employee Configuration<');
+  });
+
+  it('renders Forms workspace with System Forms, Employee Registration, Active status, and System Form badge', () => {
+    const html = renderToStaticMarkup(<AdministrationSettingsSection />);
+    // 7. Employee Registration renders
+    expect(html).toContain('Employee Registration');
+    expect(html).toContain('Configure fields and layout used during employee registration.');
+    // 8. Active status renders
+    expect(html).toContain('Active');
+    // 9. System Form indicator renders
+    expect(html).toContain('System Form');
+    // 10. Configure button renders
+    expect(html).toContain('Configure');
+    // 11. Custom Forms empty state renders
+    expect(html).toContain('Custom Forms');
+    expect(html).toContain('No custom forms yet');
+    expect(html).toContain('Creating custom forms will be available in a future release.');
+    // 12. Create Form is disabled and cannot trigger unsupported creation
+    expect(buttonTag(html, 'Create Form')).toContain('disabled=""');
+  });
+
+  it('Configure preserves existing navigation routing', () => {
+    const onConfigure = vi.fn();
+    const tree = FormsLanding({ onConfigure });
+    const configure = findElements(tree, byAriaLabel('Configure Employee Registration'))[0];
+    expect(configure).toBeDefined();
+    (configure!.props as { onClick: () => void }).onClick();
+    expect(onConfigure).toHaveBeenCalledWith('employee-registration');
+  });
+});
+

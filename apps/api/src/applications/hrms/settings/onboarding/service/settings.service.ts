@@ -11,7 +11,9 @@ import type {
   OnboardingGeneralSettingsDto,
   UpdateOnboardingGeneralSettingsDto,
   OnboardingStageConfigDto,
+  CreateOnboardingStageConfigDto,
   UpdateOnboardingStageConfigDto,
+  ReorderOnboardingStagesDto,
   OnboardingFieldConfigDto,
   UpdateOnboardingFieldConfigDto,
   OnboardingDocumentRequirementDto,
@@ -61,6 +63,14 @@ export class OnboardingSettingsService {
     return getDefaultStageConfigs(tenantId, companyId);
   }
 
+  async createStageConfig(
+    tenantId: string,
+    companyId: string,
+    data: CreateOnboardingStageConfigDto,
+  ): Promise<OnboardingStageConfigDto> {
+    return this.repository.createStageConfig(tenantId, companyId, data);
+  }
+
   async updateStageConfig(
     tenantId: string,
     companyId: string,
@@ -68,6 +78,22 @@ export class OnboardingSettingsService {
     data: UpdateOnboardingStageConfigDto,
   ): Promise<OnboardingStageConfigDto> {
     return this.repository.upsertStageConfig(tenantId, companyId, stageKey, data);
+  }
+
+  async reorderStageConfigs(
+    tenantId: string,
+    companyId: string,
+    data: ReorderOnboardingStagesDto,
+  ): Promise<OnboardingStageConfigDto[]> {
+    return this.repository.reorderStages(tenantId, companyId, data.stageKeys);
+  }
+
+  async deleteStageConfig(
+    tenantId: string,
+    companyId: string,
+    stageKey: string,
+  ): Promise<void> {
+    return this.repository.deleteStageConfig(tenantId, companyId, stageKey);
   }
 
   // ==================== Field Configurations ====================

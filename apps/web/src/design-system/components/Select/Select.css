@@ -19,10 +19,11 @@
 }
 
 .bezent-select-label {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--font-form-label-size, var(--font-size-md, 13px));
+  font-weight: var(--font-form-label-weight, 500);
+  line-height: var(--font-form-label-line-height, var(--line-height-snug, 1.375));
   color: var(--text-secondary, #444746);
-  letter-spacing: -0.1px;
+  letter-spacing: var(--letter-spacing-normal, 0em);
 }
 
 .bezent-select-box {
@@ -32,7 +33,7 @@
   width: 100%;
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   transition:
     border-color 0.14s ease,
     box-shadow 0.14s ease;
@@ -50,31 +51,31 @@
 /* ── Sizes ── */
 .bezent-select-wrapper--sm .bezent-select-box {
   height: 30px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
 }
 
 .bezent-select-wrapper--sm .bezent-select-field {
-  font-size: 12px;
+  font-size: var(--font-size-sm, 12px);
   padding: 0 28px 0 10px;
 }
 
 .bezent-select-wrapper--md .bezent-select-box {
   height: 36px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
 }
 
 .bezent-select-wrapper--md .bezent-select-field {
-  font-size: 13px;
+  font-size: var(--font-form-input-size, var(--font-size-base, 14px));
   padding: 0 34px 0 14px;
 }
 
 .bezent-select-wrapper--lg .bezent-select-box {
   height: 42px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
 }
 
 .bezent-select-wrapper--lg .bezent-select-field {
-  font-size: 14px;
+  font-size: var(--font-size-base, 14px);
   padding: 0 38px 0 16px;
 }
 
@@ -87,7 +88,7 @@
   outline: none;
   color: var(--text-primary, #1f1f1f);
   font: inherit;
-  letter-spacing: -0.1px;
+  letter-spacing: var(--letter-spacing-normal, 0em);
   appearance: none;
   cursor: pointer;
 }
@@ -109,13 +110,14 @@
 
 /* ── Feedback & Validation ── */
 .bezent-select-feedback {
-  font-size: 11px;
+  font-size: var(--font-caption-size, var(--font-size-xs, 11px));
+  line-height: var(--line-height-normal, 1.5);
   color: var(--text-muted, #747775);
 }
 
 .bezent-select-feedback.is-error {
   color: var(--status-danger-fg, #b91c1c);
-  font-weight: 500;
+  font-weight: var(--font-form-error-weight, 500);
 }
 
 .bezent-select-wrapper.has-error .bezent-select-box {

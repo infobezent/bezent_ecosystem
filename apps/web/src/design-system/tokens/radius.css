@@ -1,0 +1,28 @@
+/*
+ * BEZENT Design System — Canonical Border Radius Scale Tokens
+ *
+ * Professional, restrained enterprise UI corner-radius scale.
+ *
+ * Scale Hierarchy:
+ * - none: 0px (no rounding)
+ * - xs: 4px (micro elements, subtle indicators)
+ * - sm: 6px (compact controls, tags, tooltips)
+ * - md: 8px (DEFAULT interactive/control radius: Button, Input, Select, Textarea)
+ * - lg: 10px (normal containers/surfaces: Card, Section, Panels)
+ * - xl: 12px (large/elevated surfaces: Modal, Dialog, Drawers)
+ * - full: 9999px (pill/status semantics only: Badge, Status, Chip)
+ */
+
+:root {
+  /* Canonical Primitive Radius Scale */
+  --radius-none: 0px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  /* Semantic Container Radius Alias */
+  --card-radius: var(--radius-lg);
+}

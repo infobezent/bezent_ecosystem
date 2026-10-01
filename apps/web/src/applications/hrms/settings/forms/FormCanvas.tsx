@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -35,12 +36,16 @@ export interface FormCanvasProps {
   sectionTitle?: string;
   sectionDescription?: string;
   metadata?: FormCustomizationMetadata;
+  isDragging?: boolean;
   onSelectSection?: (sectionKey: string) => void;
   onSelectField: (fieldKey: string) => void;
   onSelectSubgroup?: (groupKey: string) => void;
   /** Fired when a custom field should be deleted. */
   onDeleteField: (fieldKey: string) => void;
-  onQuickAddField?: (sectionKey: string) => void;
+  onQuickAddField?: (sectionKey: string, groupKey?: string) => void;
+  onUpdateSubgroupTitle?: (groupKey: string, title: string) => void;
+  onUpdateSubgroupDescription?: (groupKey: string, description: string) => void;
+  onUpdateField?: (updated: ResolvedFormField) => void;
 }
 
 // ─── Sample data helpers ─────────────────────────────────────────────────────
@@ -289,21 +294,6 @@ function SortableCanvasField({
     zIndex: isDragging ? 50 : undefined,
   };
 
-  const labelNode = (
-    <Inline gap="xs" align="center">
-      <span>{field.label}</span>
-      {field.required && (
-        <span className="bezent-label__required" aria-hidden="true">
-          *
-        </span>
-      )}
-      {!field.enabled && (
-        <Badge variant="neutral" size="sm">
-          Disabled
-        </Badge>
-      )}
-    </Inline>
-  );
 
   return (
     <div
@@ -318,14 +308,35 @@ function SortableCanvasField({
       ]
         .filter(Boolean)
         .join(' ')}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect();
+      }}
     >
       <FormField
-        labelNode={labelNode}
+        labelNode={
+          <Inline gap="xs" align="center">
+            <span>{field.label}</span>
+            {field.required && (
+              <span className="bezent-label__required" aria-hidden="true">
+                *
+              </span>
+            )}
+            {!field.enabled && (
+              <Badge variant="neutral" size="sm">
+                Disabled
+              </Badge>
+            )}
+          </Inline>
+        }
         selectable
         selected={isSelected}
         span={field.width === 'full' ? 'full' : 1}
         helperText={field.description ?? undefined}
-        onClick={onSelect}
+        onClick={(e?: React.MouseEvent) => {
+          e?.stopPropagation();
+          onSelect();
+        }}
       >
         <CanvasFieldControl field={field} />
       </FormField>
@@ -371,6 +382,206 @@ function SortableCanvasField({
 }
 
 /**
+ * Inline editable section title with pencil icon and double-click triggers.
+ */
+function InlineSectionTitle({
+  title,
+  onSave,
+}: {
+  title: string;
+  onSave?: (newTitle: string) => void;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState(title);
+
+  useEffect(() => {
+    setDraft(title);
+  }, [title]);
+
+  const handleConfirm = () => {
+    const trimmed = draft.trim();
+    if (trimmed && trimmed !== title && onSave) {
+      onSave(trimmed);
+    } else {
+      setDraft(title);
+    }
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setDraft(title);
+    setIsEditing(false);
+  };
+
+  if (isEditing) {
+    return (
+      <span className="bezent-inline-edit-wrapper" onClick={(e) => e.stopPropagation()}>
+        <input
+          type="text"
+          className="bezent-inline-edit-input"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleConfirm();
+            } else if (e.key === 'Escape') {
+              e.preventDefault();
+              handleCancel();
+            }
+          }}
+          autoFocus
+          aria-label="Edit section title"
+        />
+        <button
+          type="button"
+          className="bezent-inline-edit-btn bezent-inline-edit-btn--confirm"
+          onClick={handleConfirm}
+          title="Save section title (Enter)"
+          aria-label="Save section title"
+        >
+          <BezentIcon name="check" size={14} />
+        </button>
+        <button
+          type="button"
+          className="bezent-inline-edit-btn bezent-inline-edit-btn--cancel"
+          onClick={handleCancel}
+          title="Cancel editing (Esc)"
+          aria-label="Cancel editing"
+        >
+          <BezentIcon name="close" size={14} />
+        </button>
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className="bezent-inline-edit-display"
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        setIsEditing(true);
+      }}
+      title="Double click or click pencil to edit title"
+    >
+      <span>{title}</span>
+      <button
+        type="button"
+        className="bezent-inline-edit-trigger"
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsEditing(true);
+        }}
+        title="Edit section title"
+        aria-label="Edit section title"
+      >
+        <BezentIcon name="edit" size={12} />
+      </button>
+    </span>
+  );
+}
+
+/**
+ * Inline editable section description with pencil icon and double-click triggers.
+ */
+function InlineSectionDescription({
+  description,
+  onSave,
+}: {
+  description: string;
+  onSave?: (newDescription: string) => void;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState(description);
+
+  useEffect(() => {
+    setDraft(description);
+  }, [description]);
+
+  const handleConfirm = () => {
+    const trimmed = draft.trim();
+    if (trimmed !== description && onSave) {
+      onSave(trimmed);
+    } else {
+      setDraft(description);
+    }
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setDraft(description);
+    setIsEditing(false);
+  };
+
+  if (isEditing) {
+    return (
+      <span className="bezent-inline-edit-wrapper" onClick={(e) => e.stopPropagation()}>
+        <input
+          type="text"
+          className="bezent-inline-edit-input"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleConfirm();
+            } else if (e.key === 'Escape') {
+              e.preventDefault();
+              handleCancel();
+            }
+          }}
+          autoFocus
+          aria-label="Edit section description"
+        />
+        <button
+          type="button"
+          className="bezent-inline-edit-btn bezent-inline-edit-btn--confirm"
+          onClick={handleConfirm}
+          title="Save section description (Enter)"
+          aria-label="Save section description"
+        >
+          <BezentIcon name="check" size={14} />
+        </button>
+        <button
+          type="button"
+          className="bezent-inline-edit-btn bezent-inline-edit-btn--cancel"
+          onClick={handleCancel}
+          title="Cancel editing (Esc)"
+          aria-label="Cancel editing"
+        >
+          <BezentIcon name="close" size={14} />
+        </button>
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className="bezent-inline-edit-display"
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        setIsEditing(true);
+      }}
+      title="Double click or click pencil to edit description"
+    >
+      <span>{description}</span>
+      <button
+        type="button"
+        className="bezent-inline-edit-trigger"
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsEditing(true);
+        }}
+        title="Edit section description"
+        aria-label="Edit section description"
+      >
+        <BezentIcon name="edit" size={12} />
+      </button>
+    </span>
+  );
+}
+
+/**
  * Drop target positioned at the end of a subgroup. Allows dropping toolbox items
  * or dragging fields directly to the end of this subgroup.
  */
@@ -378,10 +589,12 @@ export function SubgroupDropZone({
   sectionKey,
   groupKey,
   groupTitle,
+  isDragging,
 }: {
   sectionKey: string;
   groupKey: string;
   groupTitle: string;
+  isDragging?: boolean;
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: `subgroup-end:${sectionKey}:${groupKey}`,
@@ -392,16 +605,18 @@ export function SubgroupDropZone({
     },
   });
 
+  const active = isDragging || isOver;
+
   return (
     <div
       ref={setNodeRef}
-      className={`bezent-subgroup-dropzone ${isOver ? 'is-over' : ''}`.trim()}
+      className={`bezent-subgroup-dropzone ${active ? 'is-active-drag' : 'is-idle'} ${isOver ? 'is-over' : ''}`.trim()}
       data-testid={`dropzone-${groupKey}`}
       title={`Drop field here to place at end of ${groupTitle}`}
     >
       <span className="bezent-subgroup-dropzone__label">
         <BezentIcon name="add" size={12} />
-        {isOver ? `Drop at end of ${groupTitle}` : `Add to ${groupTitle}`}
+        {isOver ? `Drop at end of ${groupTitle}` : `Drop field here`}
       </span>
     </div>
   );
@@ -411,10 +626,12 @@ export function SubgroupEmptyDropZone({
   sectionKey,
   groupKey,
   groupTitle,
+  isDragging,
 }: {
   sectionKey: string;
   groupKey: string;
   groupTitle: string;
+  isDragging?: boolean;
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: `subgroup-empty:${sectionKey}:${groupKey}`,
@@ -425,10 +642,12 @@ export function SubgroupEmptyDropZone({
     },
   });
 
+  const active = isDragging || isOver;
+
   return (
     <div
       ref={setNodeRef}
-      className={`bezent-subgroup-dropzone bezent-subgroup-dropzone--empty ${isOver ? 'is-over' : ''}`.trim()}
+      className={`bezent-subgroup-dropzone bezent-subgroup-dropzone--empty ${active ? 'is-active-drag' : ''} ${isOver ? 'is-over' : ''}`.trim()}
       data-testid={`dropzone-empty-${groupKey}`}
       title={`Drop field here into empty subgroup ${groupTitle}`}
     >
@@ -450,10 +669,15 @@ export function FormCanvas({
   sectionTitle,
   sectionDescription,
   metadata,
-  onSelectSection,
+  isDragging,
+  onSelectSection: _onSelectSection,
   onSelectField,
   onSelectSubgroup,
   onDeleteField,
+  onQuickAddField: _onQuickAddField,
+  onUpdateSubgroupTitle,
+  onUpdateSubgroupDescription,
+  onUpdateField: _onUpdateField,
 }: FormCanvasProps) {
   // Determine effective active section key
   const effectiveSectionKey =
@@ -517,44 +741,7 @@ export function FormCanvas({
 
   return (
     <Pane size="fluid" surface="canvas" aria-label="Form Canvas">
-      {/* 1. Section Selector Bar */}
-      <div className="bezent-canvas-section-bar">
-        <div className="bezent-canvas-section-selector">
-          <Label as="span" size="sm">
-            <strong>Section</strong>
-          </Label>
-          <div className="bezent-canvas-section-select-wrap">
-            <Select
-              size="sm"
-              value={effectiveSectionKey}
-              onChange={(e) => onSelectSection?.(e.target.value)}
-              options={sections.map((s) => {
-                const meta = CHAPTER_METADATA.find((c) => c.key === s.key);
-                const customSecTitle = metadata?.sections?.[s.key]?.title;
-                const isHidden =
-                  metadata?.sections?.[s.key]?.visible === false ||
-                  (s.visible === false && metadata?.sections?.[s.key]?.visible !== true);
-                const baseTitle = customSecTitle || meta?.label || s.label;
-                return {
-                  value: s.key,
-                  label: isHidden ? `${baseTitle} (Hidden)` : baseTitle,
-                };
-              })}
-            />
-          </div>
-        </div>
-
-        <div className="bezent-canvas-section-meta">
-          <Badge variant={currentSection?.configurable ? 'success' : 'neutral'} size="sm">
-            {currentSection?.configurable ? 'Configurable Form' : 'Standard Workflow'}
-          </Badge>
-          <Badge variant="neutral" size="sm">
-            {sectionFields.length} {sectionFields.length === 1 ? 'field' : 'fields'}
-          </Badge>
-        </div>
-      </div>
-
-      {/* 2. Scrollable Canvas Body */}
+      {/* 1. Scrollable Canvas Body */}
       <div className="bezent-canvas-body" ref={setNodeRef}>
         <div className="bezent-canvas-paper">
           {/* Section Hidden Alert */}
@@ -607,29 +794,21 @@ export function FormCanvas({
                         }}
                       >
                         <FormSection
-                          title={group.title}
-                          description={group.description}
-                          actions={
-                            <Inline gap="xs" align="center">
-                              {isSubgroupSelected && (
-                                <Badge variant="info" size="sm">
-                                  Selected Subgroup
-                                </Badge>
-                              )}
-                              <Button
-                                variant={isSubgroupSelected ? 'secondary' : 'text'}
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onSelectSubgroup?.(group.key);
-                                }}
-                                title="Edit subgroup properties"
-                                aria-label={`Edit ${group.title}`}
-                              >
-                                <BezentIcon name="edit" size={12} />
-                                {isSubgroupSelected ? 'Editing' : 'Edit Subgroup'}
-                              </Button>
-                            </Inline>
+                          title={
+                            <InlineSectionTitle
+                              title={group.title}
+                              onSave={(newTitle) =>
+                                onUpdateSubgroupTitle?.(group.key, newTitle)
+                              }
+                            />
+                          }
+                          description={
+                            <InlineSectionDescription
+                              description={group.description || ''}
+                              onSave={(newDesc) =>
+                                onUpdateSubgroupDescription?.(group.key, newDesc)
+                              }
+                            />
                           }
                         >
                           {group.fields.length > 0 ? (
@@ -651,12 +830,14 @@ export function FormCanvas({
                               sectionKey={effectiveSectionKey}
                               groupKey={group.key}
                               groupTitle={group.title}
+                              isDragging={isDragging}
                             />
                           )}
                           <SubgroupDropZone
                             sectionKey={effectiveSectionKey}
                             groupKey={group.key}
                             groupTitle={group.title}
+                            isDragging={isDragging}
                           />
                         </FormSection>
                       </div>

@@ -47,6 +47,7 @@ export interface FormFieldConfig {
   decimalPlaces?: number;
   options?: FormFieldOption[];
   defaultValue?: string;
+  placeholder?: string;
   disallowPast?: boolean;
   disallowFuture?: boolean;
   maxSizeMb?: number;

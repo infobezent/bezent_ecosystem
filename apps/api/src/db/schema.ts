@@ -136,7 +136,7 @@ export const onboardingCases = mysqlTable(
     employmentType: mysqlEnum('employment_type', ['full_time', 'part_time', 'contract', 'intern'])
       .default('full_time')
       .notNull(),
-    stage: mysqlEnum('stage', ['preboarding', 'documents', 'induction', 'completed'])
+    stage: varchar('stage', { length: 50 })
       .default('preboarding')
       .notNull(),
     status: mysqlEnum('status', ['draft', 'active', 'withdrawn', 'completed'])
@@ -199,6 +199,7 @@ export const onboardingStageConfigs = mysqlTable(
     isRequired: boolean('is_required').default(true).notNull(),
     isActive: boolean('is_active').default(true).notNull(),
     isSystem: boolean('is_system').default(true).notNull(),
+    isTerminal: boolean('is_terminal').default(false).notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
   },

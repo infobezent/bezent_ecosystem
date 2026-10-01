@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { ReactElement } from 'react';
-import { SettingsPage } from '../pages/SettingsPage';
+import { SettingsPage, SettingsPageInner } from '../pages/SettingsPage';
 import { DashboardSettingsSection } from '../components/DashboardSettingsSection';
 import { OnboardingBuilderSection } from '../components/OnboardingBuilderSection';
 import { LeaveSettingsSection } from '../components/LeaveSettingsSection';
@@ -26,6 +26,18 @@ describe('BEZENT Common Portal Settings Center UI', () => {
     expect(html).toContain('Settings');
     expect(html).toContain('Configure and manage settings across the BEZENT portal.');
     expect(html).not.toContain('settings-page__domain-nav');
+  });
+
+  it('SettingsPage renders Administration hierarchy without generic Settings header when activeModule is onboarding', () => {
+    const html = renderToStaticMarkup(
+      <AuthProvider>
+        <SettingsPageInner initialModule="onboarding" />
+      </AuthProvider>,
+    );
+
+    expect(html).toContain('Administration');
+    expect(html).toContain('Configure employee administration and onboarding settings.');
+    expect(html).not.toContain('Configure and manage settings across the BEZENT portal.');
   });
 
   it('SettingsPage Overview view displays Administration module card', () => {

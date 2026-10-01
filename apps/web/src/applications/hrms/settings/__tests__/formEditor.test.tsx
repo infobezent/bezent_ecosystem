@@ -149,7 +149,7 @@ describe('Form Editor → Toolbox & Custom Field Factory', () => {
       <FieldToolbox onAddField={vi.fn()} activeSectionLabel="General" isConfigurable={true} />,
     );
     expect(html).toContain('Add Field');
-    expect(html).toContain('Search fields...');
+    expect(html).toContain('Search field type...');
     expect(html).toContain('Single Line');
     expect(html).toContain('Dropdown');
     expect(html).toContain('File Upload');
@@ -172,7 +172,7 @@ describe('Form Editor → Section Grouping & Canvas', () => {
     expect(additionalGroup?.fields.some((f) => f.key === mockCustomField.key)).toBe(true);
   });
 
-  it('renders realistic form canvas with chapter switcher and editorial header', () => {
+  it('renders realistic form canvas with clean editorial header and no duplicate selector', () => {
     const html = renderToStaticMarkup(
       <FormCanvas
         sections={mockSections}
@@ -184,10 +184,7 @@ describe('Form Editor → Section Grouping & Canvas', () => {
       />,
     );
 
-    // Section selector & Clean Chapter Header
-    expect(html).toContain('Section');
-    expect(html).toContain('General Information');
-    expect(html).toContain('Personal Information');
+    // Clean Chapter Header without duplicate navigation
     expect(html).toContain('GENERAL INFORMATION');
     expect(html).toContain('Core identity');
 
@@ -412,8 +409,8 @@ describe('Form Editor → Field Reorder (arrayMove)', () => {
   });
 });
 
-describe('Form Editor → Properties Inspector (Form Properties vs Field Properties)', () => {
-  it('renders Form Properties when no field is selected', () => {
+describe('Form Editor → Properties Inspector (Form Settings vs Field Settings)', () => {
+  it('renders Form Settings when form root entity is selected', () => {
     const html = renderToStaticMarkup(
       <FieldProperties
         field={null}
@@ -423,50 +420,51 @@ describe('Form Editor → Properties Inspector (Form Properties vs Field Propert
           version: 2,
           kind: 'system',
         }}
-        activeSection={mockSections[0]}
+        selectedEntity="form"
         onUpdateField={vi.fn()}
         onDeleteField={vi.fn()}
       />,
     );
-    expect(html).toContain('Form Properties');
+    expect(html).toContain('Form Settings');
     expect(html).toContain('Employee Registration');
     expect(html).toContain('employee-registration');
     expect(html).toContain('v2');
-    expect(html).toContain('General');
     expect(html).toContain('Form Name');
-    expect(html).toContain('VALIDATION &amp; IDENTIFIERS');
+    expect(html).toContain('FORM INFORMATION');
   });
 
   it('locks protected system fields from being disabled or made optional', () => {
     const html = renderToStaticMarkup(
       <FieldProperties
         field={mockSystemField}
+        selectedEntity="field"
         onUpdateField={vi.fn()}
         onDeleteField={vi.fn()}
         onDeselectField={vi.fn()}
       />,
     );
-    expect(html).toContain('Field Properties');
+    expect(html).toContain('Field Settings');
     expect(html).toContain('Protected System Field');
-    expect(html).toContain('Required by the employee record.');
+    expect(html).toContain('required by the employee record');
     // Delete button must NOT be present for system fields
-    expect(html).not.toContain('Delete Field');
+    expect(html).not.toContain('Delete Custom Field');
     // Key displayed
     expect(html).toContain('general.employeeId');
   });
 
-  it('allows editing properties and shows Delete Field for custom fields', () => {
+  it('allows editing properties and shows Delete Custom Field for custom fields', () => {
     const html = renderToStaticMarkup(
       <FieldProperties
         field={mockCustomField}
+        selectedEntity="field"
         onUpdateField={vi.fn()}
         onDeleteField={vi.fn()}
         onDeselectField={vi.fn()}
       />,
     );
-    expect(html).toContain('Field Properties');
+    expect(html).toContain('Field Settings');
     expect(html).toContain('Custom Division');
-    expect(html).toContain('Delete Field');
+    expect(html).toContain('Delete Custom Field');
     expect(html).toContain('Division A');
     expect(html).toContain('Division B');
   });
@@ -595,8 +593,9 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
     expect(html).toContain('data-testid="dropzone-general_info"');
     expect(html).toContain('data-testid="dropzone-employment_details"');
     expect(html).toContain('data-testid="dropzone-additional_info"');
-    expect(html).toContain('Add to GENERAL INFORMATION');
-    expect(html).toContain('Add to EMPLOYMENT DETAILS');
+    // UX update: idle dropzones show 'Drop field here' (not 'Add to X')
+    // The label changes to 'Drop at end of X' only when dragging/over
+    expect(html).toContain('Drop field here');
   });
 
   it('drops toolbox field at top of a subgroup (before first field)', () => {
@@ -771,7 +770,7 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
     expect(savedCustom.config.groupKey).toBe('general_info');
   });
 
-  it('renders and allows editing Section Title & Description in FieldProperties Form Properties tab', () => {
+  it('renders and allows editing Chapter Name & Description in FieldProperties Chapter Settings', () => {
     const onUpdateTitle = vi.fn();
     const onUpdateDesc = vi.fn();
 
@@ -787,6 +786,7 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
         activeSection={mockSections[0]}
         sectionTitle="General Info Custom"
         sectionDescription="Detailed description of general section"
+        selectedEntity="chapter"
         onUpdateSectionTitle={onUpdateTitle}
         onUpdateSectionDescription={onUpdateDesc}
         onUpdateField={vi.fn()}
@@ -794,15 +794,15 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
       />,
     );
 
-    expect(html).toContain('Form Properties');
-    expect(html).toContain('Section Title');
-    expect(html).toContain('Section Description');
+    expect(html).toContain('Chapter Settings');
+    expect(html).toContain('Chapter Name');
+    expect(html).toContain('Description');
     expect(html).toContain('General Info Custom');
     expect(html).toContain('Detailed description of general section');
     expect(html).toContain('general'); // stable section key shown read-only
   });
 
-  it('renders and allows editing Subgroup Title & Description in FieldProperties Subgroup tab', () => {
+  it('does NOT render Section Settings in FieldProperties when section is selected, showing neutral empty state', () => {
     const onUpdateTitle = vi.fn();
     const onUpdateDesc = vi.fn();
 
@@ -816,6 +816,7 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
           kind: 'system',
         }}
         activeSection={mockSections[0]}
+        selectedEntity="section"
         selectedSubgroup={{
           key: 'employment_details',
           title: 'Employment Details',
@@ -829,12 +830,11 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
       />,
     );
 
-    expect(html).toContain('Subgroup Properties');
-    expect(html).toContain('Subgroup Title');
-    expect(html).toContain('Subgroup Description');
-    expect(html).toContain('Employment Details');
-    expect(html).toContain('Official employment data');
-    expect(html).toContain('employment_details'); // stable internal subgroup ID
+    expect(html).not.toContain('Section Settings');
+    expect(html).not.toContain('Section Name');
+    expect(html).not.toContain('Section Description');
+    expect(html).not.toContain('System Section');
+    expect(html).toContain('Select a field to configure its properties.');
   });
 
   it('renders empty subgroup drop target when subgroup has no fields', () => {
@@ -1011,7 +1011,7 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
       fields: [],
     };
 
-    it('renders section identifier, title, description, and visibility under Form Properties', () => {
+    it('renders chapter identifier, title, description, and visibility under Chapter Settings', () => {
       const html = renderToStaticMarkup(
         <FieldProperties
           field={null}
@@ -1022,19 +1022,20 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
           sectionOrderIndex={0}
           totalSections={3}
           isMandatorySection={true}
+          selectedEntity="chapter"
           onUpdateField={vi.fn()}
           onDeleteField={vi.fn()}
         />,
       );
 
-      expect(html).toContain('ACTIVE CHAPTER / SECTION');
-      expect(html).toContain('Section Identifier');
+      expect(html).toContain('Chapter Settings');
+      expect(html).toContain('Chapter Key');
       expect(html).toContain('general');
       expect(html).toContain('Basic Information');
       expect(html).toContain('Updated description');
-      expect(html).toContain('Section Visibility');
+      expect(html).toContain('Visible');
       expect(html).toContain(
-        'Mandatory system section. Cannot be hidden from employee registration.',
+        'Mandatory system chapter',
       );
     });
 
@@ -1047,6 +1048,7 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
           sectionOrderIndex={1}
           totalSections={4}
           isMandatorySection={true}
+          selectedEntity="chapter"
           onUpdateField={vi.fn()}
           onDeleteField={vi.fn()}
         />,
@@ -1063,23 +1065,25 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
           field={null}
           activeSection={mockGeneralSection}
           sectionTitle="General Information"
+          selectedEntity="chapter"
           onUpdateField={vi.fn()}
           onDeleteField={vi.fn()}
         />,
       );
-      expect(systemHtml).toContain('System sections are protected and cannot be deleted.');
+      expect(systemHtml).toContain('System chapters are protected and cannot be deleted.');
 
       const customHtml = renderToStaticMarkup(
         <FieldProperties
           field={null}
           activeSection={mockCustomSection}
           sectionTitle="Certifications &amp; Compliance"
+          selectedEntity="chapter"
           onUpdateField={vi.fn()}
           onDeleteField={vi.fn()}
         />,
       );
       expect(customHtml).toContain('Delete Section');
-      expect(customHtml).toContain('Custom Section');
+      expect(customHtml).toContain('Custom Chapter');
     });
 
     it('renders Add Section button and action modal markup', () => {
@@ -1087,11 +1091,12 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
         <FieldProperties
           field={null}
           activeSection={mockGeneralSection}
+          selectedEntity="chapter"
           onUpdateField={vi.fn()}
           onDeleteField={vi.fn()}
         />,
       );
-      expect(html).toContain('SECTION MANAGEMENT');
+      expect(html).toContain('CHAPTER MANAGEMENT');
       expect(html).toContain('Add Section');
     });
 
@@ -1144,6 +1149,396 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
       // Skills section marked hidden
       const skills = config.sections.find((s) => s.id === 'skills');
       expect(skills?.visible).toBe(false);
+    });
+  });
+
+  describe('V2 Form Editor Shell & UX Interactions', () => {
+    const tenRegistrationSections: ResolvedFormSection[] = [
+      { key: 'personal', label: 'Personal Information', order: 1, origin: 'system', configurable: true, fields: [mockSystemField] },
+      { key: 'general', label: 'General', order: 2, origin: 'system', configurable: true, fields: [] },
+      { key: 'administration', label: 'Administration / Onboarding', order: 3, origin: 'system', configurable: true, fields: [] },
+      { key: 'skills', label: 'Skills & Competencies', order: 4, origin: 'system', configurable: true, fields: [] },
+      { key: 'emergency', label: 'Emergency Contact', order: 5, origin: 'system', configurable: true, fields: [] },
+      { key: 'accounts', label: 'Accounts & Statutory', order: 6, origin: 'system', configurable: true, fields: [] },
+      { key: 'online_access', label: 'Online Access & Security', order: 7, origin: 'system', configurable: true, fields: [] },
+      { key: 'working_hours', label: 'Working Hours & Shifts', order: 8, origin: 'system', configurable: true, fields: [] },
+      { key: 'documents', label: 'Documents & Compliance', order: 9, origin: 'system', configurable: true, fields: [] },
+      { key: 'review', label: 'Review & Finalize', order: 10, origin: 'system', configurable: false, protected: true, fields: [] },
+    ];
+
+    it('renders Left Panel in Structure mode with all 10 registration tabs and 2-digit indexing', () => {
+      const html = renderToStaticMarkup(
+        <FieldToolbox
+          mode="structure"
+          sections={tenRegistrationSections}
+          activeSectionKey="personal"
+          onAddField={vi.fn()}
+        />,
+      );
+
+      expect(html).toContain('Form Structure');
+      expect(html).toContain('01');
+      expect(html).toContain('Personal Information');
+      expect(html).toContain('02');
+      expect(html).toContain('General');
+      expect(html).toContain('10');
+      expect(html).toContain('Review &amp; Finalize');
+      expect(html).toContain('Add Custom Field');
+    });
+
+    it('marks Review & Finalize tab as protected with lock indicator in Structure mode', () => {
+      const html = renderToStaticMarkup(
+        <FieldToolbox
+          mode="structure"
+          sections={tenRegistrationSections}
+          activeSectionKey="personal"
+          onAddField={vi.fn()}
+        />,
+      );
+
+      // Tab 10 must have protected lock indicator and title
+      expect(html).toContain('title="Review &amp; Finalize (Protected final step)"');
+    });
+
+    it('renders Left Panel in Fields mode with search and categorized toolbox items', () => {
+      const html = renderToStaticMarkup(
+        <FieldToolbox
+          mode="fields"
+          sections={tenRegistrationSections}
+          activeSectionKey="personal"
+          onAddField={vi.fn()}
+        />,
+      );
+
+      expect(html).toContain('Add Field');
+      expect(html).toContain('Search field type...');
+      expect(html).toContain('TEXT &amp; INPUT');
+      expect(html).toContain('Short Text');
+      expect(html).toContain('Paragraph');
+      expect(html).toContain('Numeric Input');
+      expect(html).toContain('SELECTION &amp; CHOICES');
+      expect(html).toContain('Dropdown Menu');
+    });
+
+    it('renders Center Canvas with active chapter content and without duplicate horizontal chapter navigation', () => {
+      const html = renderToStaticMarkup(
+        <FormCanvas
+          sections={tenRegistrationSections}
+          activeSectionKey="personal"
+          selectedFieldKey={null}
+          onSelectField={vi.fn()}
+          onDeleteField={vi.fn()}
+        />,
+      );
+
+      // Duplicate horizontal chapter navigation must not be present
+      expect(html).not.toContain('aria-label="Registration form chapters"');
+      expect(html).toContain('PERSONAL INFORMATION');
+      // UX update: persistent 'Add Custom Field' button was removed from canvas
+      // It now exists only in the FieldToolbox Structure panel (accessible click fallback)
+      expect(html).not.toContain('bezent-add-custom-field-btn');
+      // Inline section title/desc editing is present
+      expect(html).toContain('bezent-inline-edit-trigger');
+    });
+
+    it('renders System Field notice and field information table in Right Inspector', () => {
+      const html = renderToStaticMarkup(
+        <FieldProperties
+          field={mockSystemField}
+          form={{ name: 'Employee Registration', key: 'employee-registration', version: 1, kind: 'system' }}
+          activeSection={tenRegistrationSections[0]}
+          selectedEntity="field"
+          onUpdateField={vi.fn()}
+          onDeleteField={vi.fn()}
+        />,
+      );
+
+      expect(html).toContain('System Field');
+      expect(html).toContain('This is a system field provided by BEZENT.');
+      expect(html).toContain('FIELD INFORMATION');
+      expect(html).toContain('Protected');
+      expect(html).toContain('This is a protected system field and cannot be deleted.');
+    });
+
+    it('renders options editor and active delete button for custom dropdown fields', () => {
+      const html = renderToStaticMarkup(
+        <FieldProperties
+          field={mockCustomField}
+          form={{ name: 'Employee Registration', key: 'employee-registration', version: 1, kind: 'system' }}
+          activeSection={tenRegistrationSections[0]}
+          selectedEntity="field"
+          onUpdateField={vi.fn()}
+          onDeleteField={vi.fn()}
+        />,
+      );
+
+      expect(html).toContain('OPTIONS');
+      expect(html).toContain('+ Add Option');
+      expect(html).toContain('Delete Custom Field');
+    });
+
+    it('renders context-sensitive inspector without permanent mode tabs', () => {
+      const html = renderToStaticMarkup(
+        <FieldProperties
+          field={null}
+          form={{ name: 'Employee Registration', key: 'employee-registration', version: 1, kind: 'system' }}
+          activeSection={tenRegistrationSections[0]}
+          sectionTitle="Personal Information"
+          sectionOrderIndex={0}
+          totalSections={10}
+          selectedEntity="chapter"
+          onUpdateField={vi.fn()}
+          onDeleteField={vi.fn()}
+        />,
+      );
+
+      // No permanent mode tab strip
+      expect(html).not.toContain('bezent-properties-tabs');
+      expect(html).toContain('Chapter Settings');
+      expect(html).toContain('Position 1 of 10');
+    });
+
+    it('renders Form Settings when form root entity is selected', () => {
+      const html = renderToStaticMarkup(
+        <FieldProperties
+          field={null}
+          form={{ name: 'Employee Registration', key: 'employee-registration', version: 1, kind: 'system' }}
+          selectedEntity="form"
+          onUpdateField={vi.fn()}
+          onDeleteField={vi.fn()}
+        />,
+      );
+
+      expect(html).toContain('Form Settings');
+      expect(html).toContain('Employee Registration');
+      expect(html).toContain('employee-registration');
+      expect(html).toContain('System Form');
+    });
+
+    it('renders neutral inspector state without Section Settings when a section is selected', () => {
+      const html = renderToStaticMarkup(
+        <FieldProperties
+          field={null}
+          form={{ name: 'Employee Registration', key: 'employee-registration', version: 1, kind: 'system' }}
+          selectedEntity="section"
+          onUpdateField={vi.fn()}
+          onDeleteField={vi.fn()}
+        />,
+      );
+
+      // SECTION SETTINGS must NOT exist in the right inspector
+      expect(html).not.toContain('Section Settings');
+      expect(html).not.toContain('SECTION SETTINGS');
+      expect(html).not.toContain('System Section');
+      expect(html).not.toContain('SECTION INFORMATION');
+      expect(html).toContain('Select a field');
+      expect(html).toContain('Select a field to configure its properties.');
+    });
+
+    it('renders clean canvas without field pencil triggers but keeps section pencil triggers', () => {
+      const html = renderToStaticMarkup(
+        <FormCanvas
+          sections={tenRegistrationSections}
+          activeSectionKey="personal"
+          selectedFieldKey={null}
+          onSelectField={vi.fn()}
+          onDeleteField={vi.fn()}
+        />,
+      );
+
+      // Section inline edit pencil triggers must exist
+      expect(html).toContain('bezent-inline-edit-trigger');
+      expect(html).toContain('aria-label="Edit section title"');
+      // Field level edit pencil must NOT exist
+      expect(html).not.toContain('aria-label="Edit first_name label"');
+      expect(html).not.toContain('title="Edit field label"');
+    });
+
+    it('renders expanded Field Settings with GENERAL, BEHAVIOR, DISPLAY, FIELD INFORMATION', () => {
+      const html = renderToStaticMarkup(
+        <FieldProperties
+          field={mockSystemField}
+          form={{ name: 'Employee Registration', key: 'employee-registration', version: 1, kind: 'system' }}
+          activeSection={tenRegistrationSections[0]}
+          selectedEntity="field"
+          onUpdateField={vi.fn()}
+          onDeleteField={vi.fn()}
+        />,
+      );
+
+      expect(html).toContain('Field Settings');
+      expect(html).toContain('GENERAL');
+      expect(html).toContain('BEHAVIOR');
+      expect(html).toContain('DISPLAY');
+      expect(html).toContain('FIELD INFORMATION');
+      expect(html).not.toContain('Section Settings');
+    });
+
+    it('renders GENERAL with Field Label, Placeholder, and Help Text with char counter', () => {
+      const html = renderToStaticMarkup(
+        <FieldProperties
+          field={{ ...mockCustomField, description: 'Enter division guidance' }}
+          form={{ name: 'Employee Registration', key: 'employee-registration', version: 1, kind: 'system' }}
+          activeSection={tenRegistrationSections[0]}
+          selectedEntity="field"
+          onUpdateField={vi.fn()}
+          onDeleteField={vi.fn()}
+        />,
+      );
+
+      expect(html).toContain('Field Label');
+      expect(html).toContain('Placeholder');
+      expect(html).toContain('Help Text');
+      expect(html).toContain('Enter division guidance');
+      expect(html).toContain('/500');
+    });
+
+    it('omits unsupported Read Only control from BEHAVIOR', () => {
+      const html = renderToStaticMarkup(
+        <FieldProperties
+          field={mockCustomField}
+          selectedEntity="field"
+          onUpdateField={vi.fn()}
+          onDeleteField={vi.fn()}
+        />,
+      );
+
+      expect(html).toContain('Visible');
+      expect(html).toContain('Required');
+      expect(html).not.toContain('Read Only');
+    });
+
+    it('renders type-specific validation for text and does not show date or numeric validation', () => {
+      const customTextField: ResolvedFormField = {
+        ...mockCustomField,
+        type: 'single_line',
+        config: { minLength: 2, maxLength: 50 },
+      };
+      const html = renderToStaticMarkup(
+        <FieldProperties
+          field={customTextField}
+          selectedEntity="field"
+          onUpdateField={vi.fn()}
+          onDeleteField={vi.fn()}
+        />,
+      );
+
+      expect(html).toContain('Min Length');
+      expect(html).toContain('Max Length');
+      expect(html).not.toContain('Min Value');
+      expect(html).not.toContain('Max Value');
+      expect(html).not.toContain('Disallow Past Dates');
+    });
+
+    it('renders type-specific validation for number and decimal fields', () => {
+      const customNumberField: ResolvedFormField = {
+        ...mockCustomField,
+        type: 'decimal',
+        config: { min: 0, max: 1000, decimalPlaces: 2 },
+      };
+      const html = renderToStaticMarkup(
+        <FieldProperties
+          field={customNumberField}
+          selectedEntity="field"
+          onUpdateField={vi.fn()}
+          onDeleteField={vi.fn()}
+        />,
+      );
+
+      expect(html).toContain('Min Value');
+      expect(html).toContain('Max Value');
+      expect(html).toContain('Decimal Places (1-6)');
+      expect(html).not.toContain('Min Length');
+      expect(html).not.toContain('Disallow Past Dates');
+    });
+
+    it('renders type-specific validation for date fields', () => {
+      const customDateField: ResolvedFormField = {
+        ...mockCustomField,
+        type: 'date',
+        config: { disallowPast: true },
+      };
+      const html = renderToStaticMarkup(
+        <FieldProperties
+          field={customDateField}
+          selectedEntity="field"
+          onUpdateField={vi.fn()}
+          onDeleteField={vi.fn()}
+        />,
+      );
+
+      expect(html).toContain('Disallow Past Dates');
+      expect(html).toContain('Disallow Future Dates');
+      expect(html).not.toContain('Min Length');
+      expect(html).not.toContain('Min Value');
+    });
+
+    it('does NOT render OPTIONS for non-choice fields like single_line', () => {
+      const customTextField: ResolvedFormField = {
+        ...mockCustomField,
+        type: 'single_line',
+        config: {},
+      };
+      const html = renderToStaticMarkup(
+        <FieldProperties
+          field={customTextField}
+          selectedEntity="field"
+          onUpdateField={vi.fn()}
+          onDeleteField={vi.fn()}
+        />,
+      );
+
+      expect(html).not.toContain('+ Add Option');
+    });
+
+    it('renders DATA SOURCE instead of manual OPTIONS editor for master-data fields', () => {
+      const deptField: ResolvedFormField = {
+        key: 'general.department',
+        type: 'dropdown',
+        label: 'Department',
+        description: 'Employee assigned department',
+        origin: 'system',
+        protected: false,
+        protectedReason: null,
+        configurable: true,
+        enabled: true,
+        required: true,
+        order: 4,
+        width: 'half',
+        config: {},
+        defaults: null,
+        overridden: false,
+      };
+
+      const html = renderToStaticMarkup(
+        <FieldProperties
+          field={deptField}
+          selectedEntity="field"
+          onUpdateField={vi.fn()}
+          onDeleteField={vi.fn()}
+        />,
+      );
+
+      expect(html).toContain('DATA SOURCE');
+      expect(html).toContain('Organization → Departments');
+      expect(html).toContain('authoritative company master data');
+      // Must NOT allow adding manual options for authoritative master data
+      expect(html).not.toContain('+ Add Option');
+    });
+
+    it('renders Default Value selector for custom dropdown choice fields', () => {
+      const html = renderToStaticMarkup(
+        <FieldProperties
+          field={mockCustomField}
+          selectedEntity="field"
+          onUpdateField={vi.fn()}
+          onDeleteField={vi.fn()}
+        />,
+      );
+
+      expect(html).toContain('Default Value');
+      expect(html).toContain('Division A');
+      expect(html).toContain('Division B');
     });
   });
 });

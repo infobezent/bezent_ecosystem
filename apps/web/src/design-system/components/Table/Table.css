@@ -6,7 +6,7 @@
   width: 100%;
   overflow-x: auto;
   border: 1px solid var(--table-border, var(--border-default, #dde3ea));
-  border-radius: var(--card-radius, 14px);
+  border-radius: var(--radius-md);
   background: var(--bg-surface, #ffffff);
   box-shadow: var(--shadow-card, 0 1px 3px rgba(0, 0, 0, 0.04));
 }
@@ -15,9 +15,11 @@
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  font-size: 13px;
+  font-size: var(--font-table-cell-size, var(--font-size-md, 13px));
+  font-weight: var(--font-table-cell-weight, 400);
+  line-height: var(--font-table-cell-line-height, var(--line-height-normal, 1.5));
   color: var(--text-primary, #1f1f1f);
-  letter-spacing: -0.1px;
+  letter-spacing: var(--letter-spacing-normal, 0em);
 }
 
 /* ── Head ── */
@@ -28,10 +30,11 @@
 
 .bezent-table__th {
   padding: 12px 16px;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--font-table-header-size, var(--font-size-sm, 12px));
+  font-weight: var(--font-table-header-weight, 600);
+  line-height: var(--font-table-header-line-height, var(--line-height-snug, 1.375));
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--letter-spacing-wide, 0.05em);
   color: var(--text-muted, #747775);
   white-space: nowrap;
 }
@@ -73,7 +76,7 @@
 .bezent-table-cell--avatar-meta {
   display: flex;
   align-items: center;
-  gap: var(--space-3, 12px);
+  gap: var(--space-3);
 }
 
 .bezent-table-meta-group {
@@ -83,12 +86,16 @@
 }
 
 .bezent-table-meta-title {
-  font-weight: 600;
+  font-size: var(--font-table-cell-size, var(--font-size-md, 13px));
+  font-weight: var(--font-weight-semibold, 600);
+  line-height: var(--line-height-snug, 1.375);
   color: var(--text-primary, #0f172a);
 }
 
 .bezent-table-meta-subtitle {
-  font-size: 12px;
+  font-size: var(--font-body-secondary-size, var(--font-size-sm, 12px));
+  font-weight: var(--font-body-secondary-weight, 400);
+  line-height: var(--line-height-normal, 1.5);
   color: var(--text-secondary, var(--text-muted, #64748b));
 }
 
@@ -97,7 +104,7 @@
   padding: 48px;
   text-align: center;
   color: var(--text-muted, #64748b);
-  font-size: 14px;
+  font-size: var(--font-body-size, var(--font-size-base, 14px));
 }
 
 .bezent-table-empty {
@@ -112,14 +119,16 @@
 
 .bezent-table-empty-title {
   margin: 0;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--font-section-title-size, var(--font-size-lg, 16px));
+  font-weight: var(--font-section-title-weight, 600);
+  line-height: var(--font-section-title-line-height, var(--line-height-snug, 1.375));
   color: var(--text-primary, #1e293b);
 }
 
 .bezent-table-empty-desc {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--font-body-size, var(--font-size-base, 14px));
+  line-height: var(--font-body-line-height, var(--line-height-normal, 1.5));
   color: var(--text-muted, #64748b);
   max-width: 380px;
 }

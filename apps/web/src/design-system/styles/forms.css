@@ -7,14 +7,15 @@
 
 /* ─── 1. Uniform Typography & Color Palette ──────────────────────────────── */
 :root {
-  --form-font-size-title: 18px;
-  --form-font-size-subtitle: 13.5px;
-  --form-font-size-card-title: 15.5px;
-  --form-font-size-section-label: 12px;
-  --form-font-size-label: 13px;
-  --form-font-size-input: 13.5px;
-  --form-font-size-hint: 12px;
-  --form-font-size-badge: 11.5px;
+  /* Canonical mappings for legacy form typography variables */
+  --form-font-size-title: var(--font-section-title-size, var(--font-size-lg, 16px));
+  --form-font-size-subtitle: var(--font-body-sm-size, var(--font-size-md, 13px));
+  --form-font-size-card-title: var(--font-card-title-size, var(--font-size-base, 14px));
+  --form-font-size-section-label: var(--font-table-header-size, var(--font-size-sm, 12px));
+  --form-font-size-label: var(--font-form-label-size, var(--font-size-md, 13px));
+  --form-font-size-input: var(--font-form-input-size, var(--font-size-base, 14px));
+  --form-font-size-hint: var(--font-form-helper-size, var(--font-size-sm, 12px));
+  --form-font-size-badge: var(--font-caption-size, var(--font-size-xs, 11px));
 
   /* Theme Button & Toggle Palette */
   --bezent-btn-sec-bg: #c2e7ff;
@@ -78,7 +79,7 @@
   padding: 0 12px;
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--radius-md);
   color: var(--text-primary, #1f1f1f);
   font: inherit;
   font-size: var(--form-font-size-input, 13.5px);
@@ -140,7 +141,7 @@
   padding: 0 32px 0 12px;
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--radius-md);
   color: var(--text-primary, #1f1f1f);
   font: inherit;
   font-size: var(--form-font-size-input, 13px);
@@ -242,7 +243,7 @@
   padding: 8px 12px;
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--radius-md);
   color: var(--text-primary, #1f1f1f);
   font: inherit;
   font-size: var(--form-font-size-input, 13px);
@@ -275,14 +276,14 @@
   padding: 14px 18px;
   background: var(--bg-card, #f0f4f9);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-lg, 12px);
+  border-radius: var(--radius-lg);
   margin-bottom: 20px;
 }
 
 .employee-registration__section-icon-badge {
   width: 40px;
   height: 40px;
-  border-radius: var(--radius-md, 10px);
+  border-radius: var(--radius-md);
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   color: var(--bezent-btn-sec-text, #071e49);
   display: flex;
@@ -330,7 +331,7 @@
   color: var(--bezent-btn-sec-text, #071e49);
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   border: 1px solid transparent;
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.15s ease;
   width: fit-content;
@@ -357,7 +358,7 @@
   color: var(--status-danger-fg, #ef4444);
   cursor: pointer;
   padding: 4px 8px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   transition: background-color 0.15s ease;
 }
 
@@ -431,7 +432,7 @@
 .review-section__card {
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-lg, 12px);
+  border-radius: var(--radius-lg);
   padding: 16px 18px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   transition:
@@ -528,7 +529,7 @@
   letter-spacing: 0.5px;
   text-transform: uppercase;
   padding: 3px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
 }
 
 .emergency-contact-section__badge--primary {
@@ -555,7 +556,7 @@
   padding: 0 8px;
   background: var(--bg-surface-secondary, #f0f4f9);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--radius-md);
   color: var(--text-primary, #1f1f1f);
   font: inherit;
   font-size: var(--form-font-size-input, 13px);
@@ -570,7 +571,7 @@
   padding: 10px 14px;
   background: var(--bg-surface-secondary, #f0f4f9);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--radius-md);
   margin-top: 4px;
 }
 
@@ -593,7 +594,7 @@
   align-items: center;
   gap: 4px;
   padding: 3px 8px;
-  border-radius: 6px;
+  border-radius: var(--radius-full);
   font-size: var(--form-font-size-badge, 11px);
   font-weight: 600;
   margin-top: 4px;
@@ -624,7 +625,7 @@
   padding: 16px 20px;
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-lg, 12px);
+  border-radius: var(--radius-lg);
   margin-bottom: 16px;
 }
 
@@ -677,7 +678,7 @@
   padding: 6px 14px;
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: var(--form-font-size-subtitle, 12px);
   font-weight: 600;
   color: var(--bezent-btn-sec-text, #071e49);
@@ -704,7 +705,7 @@
   color: var(--status-danger-fg, #ef4444);
   cursor: pointer;
   padding: 6px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
 }
 
 .personal-info__remove-photo-btn:hover,
@@ -721,7 +722,7 @@
   padding: 14px 18px;
   background: var(--bg-card, #f0f4f9);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-lg, 12px);
+  border-radius: var(--radius-lg);
   margin-bottom: 20px;
 }
 
@@ -748,7 +749,7 @@
   background: var(--bg-surface, #ffffff);
   padding: 4px;
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
 }
 
 .documents-section__class-btn {
@@ -757,7 +758,7 @@
   font-weight: 600;
   border: none;
   background: transparent;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   color: var(--text-secondary, #444746);
   transition: all 0.15s ease;
@@ -771,7 +772,7 @@
 
 .documents-section__item-box {
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   padding: 14px 16px;
   background: var(--bg-surface, #ffffff);
   display: flex;
@@ -802,7 +803,7 @@
   font-size: 10px;
   font-weight: 700;
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
 }
 
 .documents-section__tag--required {
@@ -825,7 +826,7 @@
   font-size: var(--form-font-size-badge, 11px);
   font-weight: 600;
   padding: 3px 8px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
 }
 
 .documents-section__status-badge--verified {
@@ -858,7 +859,7 @@
   background: var(--status-success-bg, #ecfdf5);
   color: var(--status-success-fg, #059669);
   border: 1px solid rgba(5, 150, 105, 0.3);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -874,7 +875,7 @@
   background: var(--status-danger-bg, #fef2f2);
   color: var(--status-danger-fg, #dc2626);
   border: 1px solid rgba(220, 38, 38, 0.3);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -911,7 +912,7 @@
   font-weight: 600;
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   color: var(--bezent-btn-sec-text, #071e49);
   cursor: pointer;
   transition: all 0.15s ease;
@@ -945,7 +946,7 @@
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   color: var(--bezent-btn-sec-text, #071e49);
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -963,7 +964,7 @@
 .documents-section__photo-preview-image {
   width: 72px;
   height: 72px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   object-fit: cover;
   border: 1px solid var(--border-default, #dde3ea);
 }
@@ -977,7 +978,7 @@
   padding: 24px;
   background: var(--bg-surface-secondary, #f0f4f9);
   border: 2px dashed var(--border-default, #dde3ea);
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--radius-md);
   cursor: pointer;
   text-align: center;
   transition: all 0.15s ease;
@@ -1012,7 +1013,7 @@
   font-weight: 600;
   border: 1px solid var(--border-default, #dde3ea);
   background: var(--bg-surface, #ffffff);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   color: var(--text-secondary, #444746);
   transition: all 0.15s ease;
@@ -1035,7 +1036,7 @@
   font-weight: 700;
   letter-spacing: 0.3px;
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   color: var(--bezent-btn-sec-text, #071e49);
 }
@@ -1092,7 +1093,7 @@
   font-size: var(--form-font-size-badge, 11px);
   font-weight: 600;
   padding: 3px 8px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: var(--bg-surface-secondary, #f0f4f9);
   color: var(--text-muted, #747775);
 }
@@ -1101,7 +1102,7 @@
   height: 34px;
   padding: 0 8px;
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: var(--bg-surface, #ffffff);
   font-size: var(--form-font-size-subtitle, 12px);
 }
@@ -1120,7 +1121,7 @@
   gap: 10px;
   padding: 12px 14px;
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--bg-surface-secondary, #f0f4f9);
 }
 
@@ -1141,7 +1142,7 @@
 .emergency-contact-section__toggle-switch {
   width: 38px;
   height: 22px;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   background: var(--border-default, #cbd5e1);
   border: none;
   cursor: pointer;
@@ -1177,7 +1178,7 @@
   margin-top: 14px;
   padding: 12px 16px;
   background: var(--bg-surface-secondary, #f0f4f9);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   border: 1px dashed var(--border-default, #dde3ea);
 }
 
@@ -1191,7 +1192,7 @@
   background: var(--bezent-toggle-active-bg, #071e49);
   color: #ffffff;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: opacity 0.15s ease;
 }
@@ -1219,7 +1220,7 @@
   gap: 10px;
   padding: 10px 12px;
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--bg-surface, #ffffff);
   cursor: pointer;
   transition: all 0.15s ease;
@@ -1262,7 +1263,7 @@
   color: var(--bezent-btn-sec-text, #071e49);
   cursor: pointer;
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   transition: all 0.15s ease;
 }
 
@@ -1276,7 +1277,7 @@
   gap: 8px;
   padding: 10px 14px;
   background: var(--bg-surface-secondary, #f0f4f9);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: var(--form-font-size-subtitle, 12px);
   color: var(--text-secondary, #444746);
   margin: 14px 0;
@@ -1295,7 +1296,7 @@
   padding: 10px 12px;
   background: var(--bg-surface-secondary, #f0f4f9);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
 }
 
 .accounts-section__calc-label {
@@ -1317,7 +1318,7 @@
   height: 38px;
   padding: 0 8px 0 10px;
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--bg-surface, #ffffff);
   box-sizing: border-box;
 }
@@ -1364,7 +1365,7 @@
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   border: 1px solid transparent;
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: var(--form-font-size-input, 13px);
   font-weight: 600;
   color: var(--bezent-btn-sec-text, #071e49);
@@ -1412,7 +1413,7 @@
   font-size: var(--form-font-size-badge, 11px);
   font-weight: 600;
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   color: var(--bezent-btn-sec-text, #071e49);
 }
@@ -1425,7 +1426,7 @@
 .skills-section__action-btn {
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   padding: 4px 8px;
   font-size: var(--form-font-size-hint, 11px);
   font-weight: 600;
@@ -1472,7 +1473,7 @@
 /* ─── 17. Review Section Cards & Summary ─────────────────────────────────── */
 .review-section__status-banner {
   padding: 14px 18px;
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--radius-md);
   margin-bottom: 16px;
   display: flex;
   align-items: center;
@@ -1504,7 +1505,7 @@
 
 .review-section__status-pill {
   padding: 3px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   font-size: var(--form-font-size-subtitle, 12px);
   font-weight: 700;
   display: inline-flex;
@@ -1537,7 +1538,7 @@
 .review-section__pending-summary-card {
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--radius-md);
   padding: 16px;
   margin-bottom: 16px;
 }
@@ -1594,7 +1595,7 @@
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   color: var(--bezent-btn-sec-text, #071e49);
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: var(--form-font-size-hint, 11px);
   font-weight: 600;
   cursor: pointer;
@@ -1635,7 +1636,7 @@
 .review-section__card {
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-lg, 12px);
+  border-radius: var(--radius-lg);
   padding: 16px 18px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   display: flex;
@@ -1676,7 +1677,7 @@
   font-size: var(--form-font-size-badge, 11px);
   font-weight: 700;
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
 }
 
 .review-section__section-status-badge--complete {
@@ -1695,14 +1696,14 @@
   gap: 14px;
   padding: 10px 14px;
   background: var(--bg-surface-secondary, #f0f4f9);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   margin-bottom: 12px;
 }
 
 .review-section__photo-box {
   width: 56px;
   height: 56px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   background: #ffffff;
   border: 1px solid var(--border-default, #dde3ea);
@@ -1805,7 +1806,7 @@
   padding: 10px 12px;
   background: var(--bg-surface-secondary, #f0f4f9);
   border: 1px solid var(--border-subtle, #e7ebf0);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   min-height: 52px;
   box-sizing: border-box;
 }
@@ -1838,7 +1839,7 @@
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
   padding: 1px 6px;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
 }
 
 .review-section__mini-tag {
@@ -1847,7 +1848,7 @@
   padding: 2px 8px;
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   color: var(--bezent-btn-sec-text, #071e49);
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   display: inline-flex;
   align-items: center;
   width: fit-content;
@@ -1863,7 +1864,7 @@
   background: rgba(239, 68, 68, 0.08);
   border: 1px solid rgba(239, 68, 68, 0.2);
   color: var(--status-danger-fg, #ef4444);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: var(--form-font-size-hint, 11px);
   font-weight: 600;
   padding: 4px 8px;
@@ -1889,7 +1890,7 @@
   color: var(--bezent-btn-sec-text, #071e49);
   cursor: pointer;
   padding: 4px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   transition: all 0.15s ease;
 }
 
@@ -1907,7 +1908,7 @@
   font-size: var(--form-font-size-hint, 11px);
   font-weight: 600;
   padding: 3px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   display: inline-flex;
   align-items: center;
 }
@@ -1939,7 +1940,7 @@
   padding: 14px 18px;
   background: var(--bg-surface-secondary, #f0f4f9);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--radius-md);
   margin-top: 20px;
 }
 
@@ -1957,7 +1958,7 @@
   padding: 10px 24px;
   font-size: 14px;
   font-weight: 600;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
   transition: background-color 0.15s ease;
@@ -2001,14 +2002,14 @@
   gap: 10px;
   padding: 8px 12px;
   background: var(--bg-surface-secondary, #f0f4f9);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
 }
 
 .review-section__modal-fix-btn {
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   color: var(--bezent-btn-sec-text, #071e49);
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: var(--form-font-size-hint, 11px);
   font-weight: 600;
   padding: 4px 10px;
@@ -2031,7 +2032,7 @@
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   color: var(--bezent-btn-sec-text, #071e49);
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: var(--form-font-size-subtitle, 12px);
   font-weight: 600;
   padding: 6px 14px;
@@ -2077,7 +2078,7 @@
   max-width: 540px;
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-lg, 12px);
+  border-radius: var(--radius-xl);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   overflow: hidden;
   display: flex;
@@ -2133,7 +2134,7 @@
   cursor: pointer;
   border-bottom: 1px solid var(--border-subtle, #e7ebf0);
   transition: background-color 0.12s ease;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
 }
 
 .skills-section__employee-item:hover {
@@ -2185,7 +2186,7 @@
   padding: 3px 10px;
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   color: var(--bezent-btn-sec-text, #071e49);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   font-size: var(--form-font-size-hint, 11px);
   font-weight: 600;
   border: 1px solid transparent;
@@ -2206,7 +2207,7 @@
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   color: var(--bezent-btn-sec-text, #071e49);
   border: 1px solid transparent;
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--radius-md);
   font-size: var(--form-font-size-subtitle, 12px);
   font-weight: 600;
   cursor: pointer;
@@ -2236,7 +2237,7 @@
   gap: 4px;
   background: var(--bg-surface-secondary, #f0f4f9);
   padding: 3px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--border-default, #dde3ea);
 }
 
@@ -2248,7 +2249,7 @@
   padding: 6px 14px;
   border: none;
   background: transparent;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: var(--form-font-size-subtitle, 12px);
   font-weight: 600;
   color: var(--text-secondary, #444746);
@@ -2273,7 +2274,7 @@
 .onboarding-page__tab-count,
 .bezent-filter-tab-count {
   padding: 1px 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   font-size: 10px;
   font-weight: 700;
   background: rgba(0, 0, 0, 0.08);
@@ -2321,7 +2322,7 @@
   display: inline-flex;
   align-items: center;
   padding: 3px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: var(--form-font-size-hint, 11px);
   font-weight: 600;
   text-transform: capitalize;
@@ -2354,7 +2355,7 @@
   padding: 12px 16px;
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-md, 8px);
+  border-radius: var(--radius-md);
 }
 
 .new-hire-modal__error-alert {
@@ -2362,7 +2363,7 @@
   background: #fee2e2;
   border: 1px solid #fca5a5;
   color: #b91c1c;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: 12px;
   font-weight: 600;
   margin-bottom: 12px;
@@ -2382,7 +2383,7 @@
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   color: var(--bezent-btn-sec-text, #071e49);
   border: 1px solid transparent;
-  border-radius: var(--radius-sm, 6px);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.15s ease;
   flex-shrink: 0;

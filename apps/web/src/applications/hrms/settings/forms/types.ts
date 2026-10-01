@@ -121,7 +121,7 @@ export const CHAPTER_METADATA: readonly ChapterDefinition[] = [
   {
     key: 'onboarding',
     stepNumber: '03',
-    label: 'Administration',
+    label: 'Administration / Onboarding',
     title: 'ADMINISTRATION & WORKFLOW',
     description: 'Pre-boarding setup, compliance checklist items, and hardware/asset provisioning',
     kicker: 'CHAPTER // 03',
@@ -129,7 +129,7 @@ export const CHAPTER_METADATA: readonly ChapterDefinition[] = [
   {
     key: 'skills',
     stepNumber: '04',
-    label: 'Skills',
+    label: 'Skills & Competencies',
     title: 'SKILLS & COMPETENCY PROFILE',
     description:
       'Technical proficiencies, competency evaluations, certifications, and assigned mentors',
@@ -146,7 +146,7 @@ export const CHAPTER_METADATA: readonly ChapterDefinition[] = [
   {
     key: 'accounts',
     stepNumber: '06',
-    label: 'Accounts',
+    label: 'Accounts & Statutory',
     title: 'STATUTORY & BANK ACCOUNTS',
     description:
       'Disbursement bank accounts, PF/ESI numbers, tax classification, and payroll setup',
@@ -155,7 +155,7 @@ export const CHAPTER_METADATA: readonly ChapterDefinition[] = [
   {
     key: 'online_access',
     stepNumber: '07',
-    label: 'Online Access',
+    label: 'Online Access & Security',
     title: 'ONLINE ACCESS & CREDENTIALS',
     description:
       'Single sign-on authorization, enterprise email allocation, and portal permissions',
@@ -164,7 +164,7 @@ export const CHAPTER_METADATA: readonly ChapterDefinition[] = [
   {
     key: 'working_hours',
     stepNumber: '08',
-    label: 'Working Hours',
+    label: 'Working Hours & Shifts',
     title: 'WORKING HOURS & SCHEDULE',
     description:
       'Assigned shift schedule, weekly calendar, holiday calendar, and time tracking policy',
@@ -173,7 +173,7 @@ export const CHAPTER_METADATA: readonly ChapterDefinition[] = [
   {
     key: 'documents',
     stepNumber: '09',
-    label: 'Documents',
+    label: 'Documents & Compliance',
     title: 'DOCUMENT REPOSITORY & VERIFICATION',
     description:
       'Mandatory identification proof, experience letters, certificates, and photo upload',
@@ -182,7 +182,7 @@ export const CHAPTER_METADATA: readonly ChapterDefinition[] = [
   {
     key: 'review',
     stepNumber: '10',
-    label: 'Review',
+    label: 'Review & Finalize',
     title: 'REGISTRATION REVIEW & SUBMISSION',
     description:
       'Comprehensive overview of all registration chapters prior to employee profile activation',

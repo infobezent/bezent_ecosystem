@@ -83,8 +83,8 @@
   grid-template-columns:
     var(--field-group-label-width, var(--form-grid-label-width, var(--form-label-width-md, 180px)))
     minmax(0, 1fr);
-  column-gap: var(--space-3, 12px);
-  row-gap: var(--space-1, 4px);
+  column-gap: var(--space-3);
+  row-gap: var(--space-1);
   align-items: start;
 }
 
@@ -102,7 +102,7 @@
 
 .bezent-field-group--horizontal > .bezent-field-group__label {
   grid-column: 1;
-  padding-top: var(--space-2, 8px);
+  padding-top: var(--space-2);
   white-space: normal;
   word-break: normal;
   overflow-wrap: break-word;
@@ -124,8 +124,8 @@
 }
 
 .bezent-field-group__label {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--font-form-label-size, var(--font-size-md, 13px));
+  font-weight: var(--font-form-label-weight, 500);
   color: var(--text-primary, #1f1f1f);
   display: flex;
   align-items: center;
@@ -137,13 +137,13 @@
 }
 
 .bezent-field-group__helper {
-  font-size: 12px;
+  font-size: var(--font-form-helper-size, var(--font-size-sm, 12px));
   color: var(--text-muted, #747775);
   margin-top: 2px;
 }
 
 .bezent-field-group__error {
-  font-size: 12px;
+  font-size: var(--font-form-error-size, var(--font-size-sm, 12px));
   color: var(--status-danger, #ef4444);
   margin-top: 2px;
 }
@@ -163,7 +163,7 @@
 
   .bezent-field-group--horizontal {
     grid-template-columns: 1fr;
-    row-gap: var(--space-1-5, 6px);
+    row-gap: var(--space-1-5);
   }
 
   .bezent-field-group--horizontal > .bezent-field-group__label {
@@ -188,8 +188,8 @@
 .bezent-checkbox-label {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2, 8px);
-  font-size: var(--font-size-sm, 13px);
+  gap: var(--space-2);
+  font-size: var(--font-form-label-size, var(--font-size-md, 13px));
   font-weight: 500;
   color: var(--text-primary, #1f1f1f);
   cursor: pointer;
@@ -207,14 +207,14 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: var(--space-3, 12px);
+  gap: var(--space-3);
 }
 
 .bezent-radio-label {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2, 8px);
-  font-size: var(--font-size-sm, 13px);
+  gap: var(--space-2);
+  font-size: var(--font-form-label-size, var(--font-size-md, 13px));
   color: var(--text-primary, #1f1f1f);
   cursor: pointer;
 }
@@ -228,17 +228,17 @@
 .bezent-photo-uploader {
   display: flex;
   align-items: center;
-  gap: var(--space-4, 16px);
+  gap: var(--space-4);
   background-color: var(--bg-surface-secondary, #f8fafc);
-  padding: var(--space-4, 16px);
-  border-radius: var(--radius-lg, 12px);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
   border: 1px dashed var(--border-default, #cbd5e1);
 }
 
 .bezent-photo-preview {
   width: 72px;
   height: 72px;
-  border-radius: 9999px;
+  border-radius: var(--radius-full);
   object-fit: cover;
   border: 2px solid var(--bg-surface, #ffffff);
   box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.1));
@@ -247,13 +247,13 @@
 .bezent-photo-placeholder {
   width: 72px;
   height: 72px;
-  border-radius: 9999px;
+  border-radius: var(--radius-full);
   background-color: var(--bg-surface-secondary, #e2e8f0);
   color: var(--text-secondary, #64748b);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: var(--font-size-2xl, 22px);
   font-weight: 700;
   flex-shrink: 0;
 }
@@ -261,5 +261,5 @@
 .bezent-photo-meta {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1, 4px);
+  gap: var(--space-1);
 }

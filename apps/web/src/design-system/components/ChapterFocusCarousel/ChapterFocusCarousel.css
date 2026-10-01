@@ -24,9 +24,10 @@
 }
 
 .bezent-focus-carousel__kicker {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: var(--font-overline-size, var(--font-size-xs, 11px));
+  font-weight: var(--font-overline-weight, 600);
+  line-height: var(--font-overline-line-height, 1.25);
+  letter-spacing: var(--font-overline-spacing, 0.05em);
   text-transform: uppercase;
   color: var(--text-muted, #747775);
 }
@@ -40,7 +41,7 @@
 .bezent-focus-carousel__nav-btn {
   width: 26px;
   height: 26px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -72,13 +73,13 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--font-size-sm, 12px);
+  font-weight: var(--font-weight-semibold, 600);
   font-variant-numeric: tabular-nums;
   color: var(--text-secondary, #444746);
   background: var(--bg-surface, #ffffff);
   padding: 3px 8px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border-subtle, #e7ebf0);
 }
 
@@ -130,7 +131,7 @@
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   font-family: var(--font-family-base, inherit);
   cursor: pointer;
   flex-shrink: 0;
@@ -302,28 +303,29 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-size: var(--font-size-sm, 12px);
+  font-weight: var(--font-weight-semibold, 600);
+  letter-spacing: var(--letter-spacing-wide, 0.05em);
   color: var(--brand-primary, #041e49);
   background: var(--bg-surface-secondary, #f0f4f9);
   border: 1px solid var(--border-subtle, #e7ebf0);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   padding: 3px 10px;
 }
 
 .bezent-chapter-header__title {
   margin: 0;
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.3px;
+  font-size: var(--font-page-title-size, var(--font-size-2xl, 22px));
+  font-weight: var(--font-page-title-weight, 600);
+  letter-spacing: var(--font-page-title-spacing, -0.01em);
+  line-height: var(--font-page-title-line-height, 1.25);
   color: var(--text-primary, #1f1f1f);
 }
 
 .bezent-chapter-header__desc {
   margin: 0;
-  font-size: 13.5px;
+  font-size: var(--font-body-sm-size, var(--font-size-md, 13px));
   color: var(--text-muted, #747775);
-  line-height: 1.45;
+  line-height: var(--font-body-sm-line-height, 1.5);
   max-width: 780px;
 }

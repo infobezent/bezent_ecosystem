@@ -58,41 +58,41 @@
   padding: 24px 36px;
   display: flex;
   flex-direction: column;
-  gap: var(--space-4, 20px);
+  gap: var(--space-5);
   box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
   .bezent-fullscreen-workspace {
-    padding: 16px;
-    gap: 16px;
+    padding: var(--space-4);
+    gap: var(--space-4);
   }
 }
 
 /* Notification Toast */
 .bezent-toast {
   position: fixed;
-  top: 20px;
-  right: 20px;
+  top: var(--space-5);
+  right: var(--space-5);
   z-index: calc(var(--z-modal, 500) + 10);
   background-color: var(--status-success-bg, #ecfdf5);
   color: var(--status-success-fg, #065f46);
   border: 1px solid var(--status-success-border, #a7f3d0);
-  padding: 12px 20px;
-  border-radius: var(--radius-md, 8px);
-  font-size: 13px;
-  font-weight: 600;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  font-size: var(--font-body-sm-size, var(--font-size-md, 13px));
+  font-weight: var(--font-weight-semibold, 600);
   box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
   display: flex;
   align-items: center;
-  gap: var(--space-2, 8px);
+  gap: var(--space-2);
 }
 
 /* Multi-Step Wizard Tabs */
 .bezent-step-tabs {
   display: flex;
   align-items: center;
-  gap: var(--space-2, 8px);
+  gap: var(--space-2);
   overflow-x: auto;
   padding-bottom: 2px;
   border-bottom: 1px solid var(--border-default, #e2e8f0);
@@ -101,12 +101,12 @@
 .bezent-step-tab {
   display: flex;
   align-items: center;
-  gap: var(--space-2, 8px);
+  gap: var(--space-2);
   background: none;
   border: none;
   padding: 10px 16px;
-  font-size: var(--font-size-sm, 13px);
-  font-weight: 500;
+  font-size: var(--font-tab-size, var(--font-size-md, 13px));
+  font-weight: var(--font-tab-weight, 500);
   color: var(--text-secondary, #64748b);
   border-bottom: 2px solid transparent;
   cursor: pointer;
@@ -122,22 +122,22 @@
 .bezent-step-tab--active {
   color: var(--accent-interactive, #1a73e8);
   border-bottom-color: var(--accent-interactive, #1a73e8);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold, 600);
 }
 
 /* Breadcrumbs */
 .bezent-breadcrumb {
   display: flex;
   align-items: center;
-  gap: var(--space-2, 8px);
-  font-size: 13px;
+  gap: var(--space-2);
+  font-size: var(--font-body-sm-size, var(--font-size-md, 13px));
   color: var(--text-muted, #64748b);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium, 500);
 }
 
 .bezent-breadcrumb-item--active {
   color: var(--text-primary, #0f172a);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold, 600);
 }
 
 .bezent-breadcrumb-separator {
@@ -152,9 +152,9 @@
   padding: 4px 10px;
   background-color: var(--bg-hover, #c2e7ff);
   color: var(--text-primary, #001d35);
-  border-radius: 9999px;
-  font-size: 12px;
-  font-weight: 600;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm, 12px);
+  font-weight: var(--font-weight-semibold, 600);
 }
 
 /* Confirmation Dialog Overlay & Card */
@@ -172,7 +172,7 @@
 
 .bezent-confirm-card {
   background-color: var(--bg-surface, #ffffff);
-  border-radius: var(--radius-lg, 12px);
+  border-radius: var(--radius-lg);
   width: 100%;
   max-width: 440px;
   padding: 24px;
@@ -186,16 +186,16 @@
 
 .bezent-confirm-title {
   margin: 0;
-  font-size: 18px;
-  font-weight: 700;
+  font-size: var(--font-section-title-size, var(--font-size-lg, 16px));
+  font-weight: var(--font-section-title-weight, 600);
   color: var(--text-primary, #0f172a);
 }
 
 .bezent-confirm-desc {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--font-body-size, var(--font-size-base, 14px));
   color: var(--text-secondary, #475569);
-  line-height: 1.5;
+  line-height: var(--font-body-line-height, 1.5);
 }
 
 .bezent-confirm-actions {
@@ -211,8 +211,8 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: var(--space-3, 12px);
-  padding-top: var(--space-4, 20px);
+  gap: var(--space-3);
+  padding-top: var(--space-5);
   border-top: 1px solid var(--border-default, #e2e8f0);
 }
 
@@ -222,9 +222,9 @@
   background-color: var(--bg-surface, #ffffff);
   color: var(--text-primary, #334155);
   border: 1px solid var(--border-default, #cbd5e1);
-  border-radius: var(--radius-md, 8px);
-  font-size: 14px;
-  font-weight: 600;
+  border-radius: var(--radius-md);
+  font-size: var(--font-button-size, var(--font-size-md, 13px));
+  font-weight: var(--font-button-weight, 500);
   cursor: pointer;
   transition: all 150ms ease;
 }
@@ -244,9 +244,9 @@
   background-color: var(--bg-surface, #ffffff);
   color: var(--brand-primary, #041e49);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-md, 8px);
-  font-size: 13px;
-  font-weight: 600;
+  border-radius: var(--radius-md);
+  font-size: var(--font-button-size, var(--font-size-md, 13px));
+  font-weight: var(--font-button-weight, 500);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -267,9 +267,9 @@
   background-color: var(--bg-surface, #ffffff);
   color: var(--text-primary, #334155);
   border: 1px solid var(--border-default, #cbd5e1);
-  border-radius: var(--radius-md, 8px);
-  font-size: 14px;
-  font-weight: 600;
+  border-radius: var(--radius-md);
+  font-size: var(--font-button-size, var(--font-size-md, 13px));
+  font-weight: var(--font-button-weight, 500);
   cursor: pointer;
   transition: background-color 150ms ease;
 }
@@ -284,9 +284,9 @@
   background-color: var(--bg-surface, #ffffff);
   color: var(--status-danger-fg, #dc2626);
   border: 1px solid #fca5a5;
-  border-radius: var(--radius-md, 8px);
-  font-size: 14px;
-  font-weight: 600;
+  border-radius: var(--radius-md);
+  font-size: var(--font-button-size, var(--font-size-md, 13px));
+  font-weight: var(--font-button-weight, 500);
   cursor: pointer;
   transition: background-color 150ms ease;
 }
@@ -301,9 +301,9 @@
   align-items: center;
   gap: 6px;
   padding: 3px 10px;
-  border-radius: 9999px;
-  font-size: 12px;
-  font-weight: 600;
+  border-radius: var(--radius-full);
+  font-size: var(--font-caption-size, var(--font-size-xs, 11px));
+  font-weight: var(--font-weight-semibold, 600);
   text-transform: capitalize;
 }
 

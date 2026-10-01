@@ -134,6 +134,13 @@
       "when": 1790850000000,
       "tag": "0018_email_otp_auth",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1790900000000,
+      "tag": "0019_dynamic_onboarding_stages",
+      "breakpoints": true
     }
   ]
 }

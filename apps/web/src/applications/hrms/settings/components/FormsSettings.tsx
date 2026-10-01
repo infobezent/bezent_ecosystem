@@ -2,17 +2,13 @@ import { useState } from 'react';
 import {
   Badge,
   Button,
+  Card,
   EmptyState,
+  Inline,
   Label,
-  Section,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeaderCell,
-  TableRow,
   Tabs,
+  Toolbar,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { RegistrationSettingsSection } from './RegistrationSettingsSection';
@@ -22,7 +18,7 @@ export const SYSTEM_FORMS = [
   {
     id: 'employee-registration',
     name: 'Employee Registration',
-    description: 'Information collected when registering a new employee.',
+    description: 'Configure fields and layout used during employee registration.',
     status: 'Active',
   },
 ] as const;
@@ -36,71 +32,103 @@ export interface FormsLandingProps {
 /** HR Settings → Administration → Forms. */
 export function FormsLanding({ onConfigure }: FormsLandingProps) {
   return (
-    <Stack gap="lg">
-      <Section title="System Forms" subtitle="Forms provided by BEZENT HRMS.">
-        <Table aria-label="System forms">
-          <TableHead>
-            <TableRow>
-              <TableHeaderCell>Form</TableHeaderCell>
-              <TableHeaderCell>Status</TableHeaderCell>
-              <TableHeaderCell>Actions</TableHeaderCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {SYSTEM_FORMS.map((form) => (
-              <TableRow key={form.id}>
-                <TableCell>
+    <Card variant="flat" padding="lg">
+      <Stack gap="xl">
+        {/* Forms Workspace Title Area */}
+        <Inline gap="md" align="center">
+          <div className="bezent-card__icon">
+            <BezentIcon name="document" size={24} />
+          </div>
+          <Stack gap="xs">
+            <h2 className="bezent-card__title">Forms</h2>
+            <p className="bezent-card__desc">
+              Configure the forms used to collect employee information.
+            </p>
+          </Stack>
+        </Inline>
+
+        {/* Surface 1: System Forms */}
+        <Stack gap="sm">
+          <Stack gap="xs">
+            <h3 className="bezent-section__title">System Forms</h3>
+            <p className="bezent-section__subtitle">
+              These forms are provided by BEZENT HRMS and can be configured based on your company requirements.
+            </p>
+          </Stack>
+
+          {SYSTEM_FORMS.map((form) => (
+            <Card key={form.id} variant="flat" padding="md">
+              <Inline justify="between" align="center" wrap>
+                <Inline gap="md" align="center">
+                  <div className="bezent-card__icon">
+                    <BezentIcon name="document" size={22} />
+                  </div>
                   <Stack gap="xs">
-                    <span>{form.name}</span>
-                    <Label as="span" size="sm">
-                      {form.description}
-                    </Label>
+                    <Inline gap="sm" align="center">
+                      <span className="bezent-card__title">{form.name}</span>
+                      <Badge variant="success" size="sm" showDot>
+                        {form.status}
+                      </Badge>
+                    </Inline>
+                    <span className="bezent-card__desc">{form.description}</span>
                   </Stack>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="success" size="sm">
-                    {form.status}
+                </Inline>
+
+                <Stack gap="xs" align="end">
+                  <Badge variant="neutral" size="sm">
+                    System Form
                   </Badge>
-                </TableCell>
-                <TableCell>
                   <Button
-                    variant="outline"
-                    size="sm"
+                    variant="primary"
+                    size="md"
+                    rightIcon={<BezentIcon name="arrowRight" size={16} />}
                     onClick={() => onConfigure(form.id)}
                     aria-label={`Configure ${form.name}`}
                   >
                     Configure
                   </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Section>
+                </Stack>
+              </Inline>
+            </Card>
+          ))}
+        </Stack>
 
-      <Section
-        title="Custom Forms"
-        subtitle="Forms your company creates."
-        actions={
-          <Button
-            variant="primary"
-            size="sm"
-            disabled
-            leftIcon={<BezentIcon name="plusSign" size={16} />}
-            aria-label="Create Form (available in a future release)"
-          >
-            Create Form
-          </Button>
-        }
-      >
-        <EmptyState
-          size="compact"
-          hideIllustration
-          title="No custom forms yet"
-          description="Creating custom forms will be available in a future release."
-        />
-      </Section>
-    </Stack>
+        {/* Surface 2: Custom Forms */}
+        <Stack gap="sm">
+          <Toolbar
+            left={
+              <Stack gap="xs">
+                <h3 className="bezent-section__title">Custom Forms</h3>
+                <p className="bezent-section__subtitle">
+                  Create and manage custom forms for additional employee information.
+                </p>
+              </Stack>
+            }
+            right={
+              <Button
+                variant="outline"
+                size="sm"
+                disabled
+                leftIcon={<BezentIcon name="plusSign" size={14} />}
+                aria-label="Create Form (available in a future release)"
+              >
+                Create Form
+              </Button>
+            }
+          />
+
+          <Card variant="flat" padding="md">
+            <EmptyState
+              size="compact"
+              hideIllustration={false}
+              illustration={<BezentIcon name="document" size={32} color="var(--text-tertiary)" />}
+              title="No custom forms yet"
+              description="Creating custom forms will be available in a future release."
+            />
+          </Card>
+        </Stack>
+      </Stack>
+    </Card>
   );
 }
 

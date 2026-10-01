@@ -9,11 +9,11 @@
   background: var(--bg-popup);
   color: var(--text-primary);
   border: 1px solid var(--border-default);
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1;
+  font-size: var(--font-caption-size, var(--font-size-xs, 11px));
+  font-weight: var(--font-caption-weight, 500);
+  line-height: var(--line-height-tight, 1.25);
   padding: 5px 8px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   white-space: nowrap;
   pointer-events: none;
   z-index: var(--z-tooltip);

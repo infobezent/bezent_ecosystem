@@ -1,9 +1,17 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
-import { hrmsTestHeaders } from '../../../../../platform/__tests__/support/testSession.js';
+import { hrmsTestHeaders, signInForTest } from '../../../../../platform/__tests__/support/testSession.js';
 import { createApp } from '../../../../../app/server/createApp.js';
 import { seedDatabase } from '../../../../../db/seed.js';
-import { pingDatabase } from '../../../../../db/connection.js';
+import { pingDatabase, getDb } from '../../../../../db/connection.js';
+import {
+  users,
+  memberships,
+  roles,
+  rolePermissions,
+  roleAssignments,
+} from '../../../../../db/schema.js';
+import { hashPassword } from '../../../../../platform/auth/security.js';
 
 describe('HRMS Onboarding Settings API', () => {
   const app = createApp();
@@ -320,4 +328,183 @@ describe('HRMS Onboarding Settings API', () => {
       expect(newHiresRes.body.data.length).toBeGreaterThanOrEqual(1);
     });
   });
+
+  // ==========================================
+  // 9. General Settings Scoping, RBAC & Runtime Protection
+  // ==========================================
+  describe('General Settings Scoping, RBAC & Runtime Protection', () => {
+    it('ensures GET and PATCH general settings are strictly company-scoped', async () => {
+      // Configure Company A (comp_demo_01)
+      const patchA = await hrms
+        .patch('/api/v1/hrms/settings/onboarding/general')
+        .set('x-company-id', 'comp_demo_01')
+        .set('x-tenant-id', 'tenant_demo_01')
+        .send({
+          defaultDurationDays: 60,
+          idPrefix: 'CMPA-',
+        });
+      expect(patchA.status).toBe(200);
+
+      // Configure Company B (comp_other_isolated)
+      const patchB = await hrms
+        .patch('/api/v1/hrms/settings/onboarding/general')
+        .set('x-company-id', 'comp_other_isolated')
+        .set('x-tenant-id', 'tenant_other_isolated')
+        .send({
+          defaultDurationDays: 14,
+          idPrefix: 'CMPB-',
+        });
+      expect(patchB.status).toBe(200);
+
+      // Verify Company A settings
+      const getA = await hrms
+        .get('/api/v1/hrms/settings/onboarding/general')
+        .set('x-company-id', 'comp_demo_01')
+        .set('x-tenant-id', 'tenant_demo_01');
+      expect(getA.status).toBe(200);
+      expect(getA.body.data.defaultDurationDays).toBe(60);
+      expect(getA.body.data.idPrefix).toBe('CMPA-');
+
+      // Verify Company B settings did not affect Company A
+      const getB = await hrms
+        .get('/api/v1/hrms/settings/onboarding/general')
+        .set('x-company-id', 'comp_other_isolated')
+        .set('x-tenant-id', 'tenant_other_isolated');
+      expect(getB.status).toBe(200);
+      expect(getB.body.data.defaultDurationDays).toBe(14);
+      expect(getB.body.data.idPrefix).toBe('CMPB-');
+    });
+
+    it('allows users with hrms.settings.view to read general settings, but requires hrms.settings.manage to mutate', async () => {
+      const db = getDb();
+      const viewerUserId = 'usr_test_settings_viewer';
+      const viewerEmail = 'settings.viewer@bezent-test.example';
+      const viewerRoleId = 'role_test_settings_viewer';
+      const tenantId = 'tenant_demo_01';
+      const companyId = 'comp_demo_01';
+
+      const unused = hashPassword('not-used-by-otp');
+      await db
+        .insert(users)
+        .values({
+          id: viewerUserId,
+          email: viewerEmail,
+          passwordHash: unused.hash,
+          salt: unused.salt,
+          firstName: 'Settings',
+          lastName: 'Viewer',
+        })
+        .onDuplicateKeyUpdate({ set: { email: viewerEmail } });
+
+      await db
+        .insert(memberships)
+        .values({
+          id: `mem_test_viewer_${companyId}`,
+          userId: viewerUserId,
+          tenantId,
+          companyId,
+          role: 'user',
+          status: 'active',
+        })
+        .onDuplicateKeyUpdate({ set: { status: 'active' } });
+
+      await db
+        .insert(roles)
+        .values({
+          id: viewerRoleId,
+          tenantId,
+          companyId,
+          code: 'settings_viewer',
+          name: 'Settings Viewer',
+          isSystem: false,
+          status: 'active',
+        })
+        .onDuplicateKeyUpdate({ set: { status: 'active' } });
+
+      await db
+        .insert(rolePermissions)
+        .values([
+          {
+            id: 'rp_test_viewer_view',
+            tenantId,
+            companyId,
+            roleId: viewerRoleId,
+            permissionId: 'hrms.settings.view',
+          },
+        ])
+        .onDuplicateKeyUpdate({ set: { permissionId: 'hrms.settings.view' } });
+
+      await db
+        .insert(roleAssignments)
+        .values({
+          id: `ra_test_viewer_${companyId}`,
+          userId: viewerUserId,
+          roleId: viewerRoleId,
+          tenantId,
+          companyId,
+          status: 'active',
+        })
+        .onDuplicateKeyUpdate({ set: { status: 'active' } });
+
+      const viewerToken = (await signInForTest(viewerEmail)).token;
+      const viewerAgent = request.agent(app).set({
+        authorization: `Bearer ${viewerToken}`,
+        'x-company-id': companyId,
+        'x-tenant-id': tenantId,
+      });
+
+      // 1. Read succeeds with hrms.settings.view
+      const readRes = await viewerAgent.get('/api/v1/hrms/settings/onboarding/general');
+      expect(readRes.status).toBe(200);
+      expect(readRes.body.data).toBeDefined();
+
+      // 2. Mutation fails with 403 Forbidden because hrms.settings.manage is required
+      const mutateRes = await viewerAgent
+        .patch('/api/v1/hrms/settings/onboarding/general')
+        .send({ defaultDurationDays: 40 });
+      expect(mutateRes.status).toBe(403);
+      expect(mutateRes.body.error.code).toBe('FORBIDDEN_PERMISSION');
+    });
+
+    it('disabling onboarding blocks new case creation while preserving existing cases', async () => {
+      // 1. Verify existing new-hires
+      const initialListRes = await hrms.get('/api/v1/hrms/onboarding/new-hires');
+      expect(initialListRes.status).toBe(200);
+      const initialCount = initialListRes.body.data.length;
+      expect(initialCount).toBeGreaterThan(0);
+
+      // 2. Disable onboarding via General Settings
+      const disableRes = await hrms
+        .patch('/api/v1/hrms/settings/onboarding/general')
+        .send({ onboardingEnabled: false });
+      expect(disableRes.status).toBe(200);
+      expect(disableRes.body.data.onboardingEnabled).toBe(false);
+
+      // 3. Attempting to create a new hire must be blocked by OnboardingService
+      const createAttempt = await hrms.post('/api/v1/hrms/onboarding/new-hires').send({
+        companyId: 'comp_demo_01',
+        firstName: 'Blocked',
+        lastName: 'Candidate',
+        email: `blocked.${Date.now()}@example.com`,
+        departmentId: 'dept_eng_01',
+        designationId: 'desig_se_01',
+        joiningDate: '2026-10-01',
+      });
+      expect(createAttempt.status).toBe(400);
+      expect(createAttempt.body.error.code).toBe('ONBOARDING_DISABLED');
+
+      // 4. Verify existing cases were NOT deleted or altered
+      const postCheckListRes = await hrms.get('/api/v1/hrms/onboarding/new-hires');
+      expect(postCheckListRes.status).toBe(200);
+      expect(postCheckListRes.body.data.length).toBe(initialCount);
+
+      // 5. Restore onboarding enabled state for subsequent tests
+      const restoreRes = await hrms
+        .patch('/api/v1/hrms/settings/onboarding/general')
+        .send({ onboardingEnabled: true });
+      expect(restoreRes.status).toBe(200);
+      expect(restoreRes.body.data.onboardingEnabled).toBe(true);
+    });
+  });
 });
+

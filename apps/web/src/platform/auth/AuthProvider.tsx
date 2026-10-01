@@ -65,6 +65,17 @@ function chooseCompany(access: AccessOverview, preferred: string | null): string
   return access.companies[0]?.companyId ?? null;
 }
 
+export function isTransientAuthError(err: unknown): boolean {
+  if (err instanceof AuthApiError) {
+    if (err.status === 401 || err.status === 403) return false;
+    if (err.code === 'NETWORK_ERROR' || err.code === 'DATABASE_UNAVAILABLE') return true;
+    if (err.status === 503 || err.status === 502 || err.status === 504 || err.status === 500) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /**
  * The ONE authenticated session for every BEZENT user and workspace (ADR-018).
  * Access is always re-resolved by the server; the client only remembers the
@@ -98,22 +109,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus('authenticated');
   }, []);
 
-  const refreshAccess = useCallback(async () => {
-    if (!getSessionToken()) {
-      endSession();
-      return;
-    }
-    try {
-      applyAccess(await authApi.getAccess());
-    } catch (err) {
-      if (err instanceof AuthApiError && (err.status === 401 || err.status === 403)) {
+  const refreshAccess = useCallback(
+    async (retryCount = 0): Promise<void> => {
+      if (!getSessionToken()) {
         endSession();
         return;
       }
-      setError(err instanceof Error ? err.message : 'Your session could not be restored.');
-      setStatus('error');
-    }
-  }, [applyAccess, endSession]);
+      const MAX_RETRIES = 3;
+      const RETRY_DELAYS = [800, 1500, 2500];
+
+      if (retryCount === 0) {
+        setStatus('loading');
+        setError(null);
+      }
+
+      try {
+        applyAccess(await authApi.getAccess());
+      } catch (err) {
+        if (err instanceof AuthApiError && (err.status === 401 || err.status === 403)) {
+          endSession();
+          return;
+        }
+
+        if (isTransientAuthError(err) && retryCount < MAX_RETRIES) {
+          const delay = RETRY_DELAYS[retryCount] ?? 2000;
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          return refreshAccess(retryCount + 1);
+        }
+
+        setError(err instanceof Error ? err.message : 'Your session could not be restored.');
+        setStatus('error');
+      }
+    },
+    [applyAccess, endSession],
+  );
 
   useEffect(() => {
     if (getSessionToken()) void refreshAccess();

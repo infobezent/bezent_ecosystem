@@ -18,9 +18,9 @@
   background: var(--avatar-bg, #c2e7ff);
   color: var(--avatar-text, #041e49);
   font-family: var(--font-family-base);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.2px;
+  font-size: var(--font-size-sm, 12px);
+  font-weight: var(--font-weight-semibold, 600);
+  letter-spacing: var(--letter-spacing-normal, 0em);
   flex-shrink: 0;
   user-select: none;
   overflow: hidden;
@@ -36,20 +36,20 @@
 .bezent-avatar--sm {
   width: 26px;
   height: 26px;
-  font-size: 11px;
+  font-size: var(--font-caption-size, var(--font-size-xs, 11px));
 }
 
 .bezent-avatar--md {
   width: 32px;
   height: 32px;
-  font-size: 12px;
+  font-size: var(--font-size-sm, 12px);
 }
 
 .bezent-avatar--lg {
   width: 54px;
   height: 54px;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: var(--font-size-xl, 18px);
+  font-weight: var(--font-weight-semibold, 600);
 }
 
 .bezent-avatar:hover {

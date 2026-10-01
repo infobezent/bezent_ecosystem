@@ -14,7 +14,7 @@
 .bezent-section--card {
   background-color: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--card-radius, 16px);
+  border-radius: var(--radius-lg);
   padding: 24px;
   box-shadow: var(--card-shadow, 0 1px 2px rgba(60, 64, 67, 0.08));
 }
@@ -50,18 +50,18 @@
 
 .bezent-section__title {
   margin: 0;
-  font-size: var(--form-font-size-title, 18px);
-  font-weight: 700;
+  font-size: var(--font-section-title-size, var(--font-size-lg, 16px));
+  font-weight: var(--font-section-title-weight, 600);
   color: var(--text-primary, #1f1f1f);
-  letter-spacing: -0.02em;
-  line-height: 1.3;
+  letter-spacing: var(--letter-spacing-normal, 0em);
+  line-height: var(--font-section-title-line-height, var(--line-height-snug, 1.375));
 }
 
 .bezent-section__subtitle {
   margin: 2px 0 0 0;
-  font-size: var(--form-font-size-subtitle, 13.5px);
+  font-size: var(--font-body-sm-size, var(--font-size-md, 13px));
   color: var(--text-secondary, #444746);
-  line-height: 1.45;
+  line-height: var(--font-body-sm-line-height, var(--line-height-normal, 1.5));
 }
 
 .bezent-section__actions {
@@ -81,7 +81,7 @@
 .bezent-section-icon-badge {
   width: 44px;
   height: 44px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background-color: var(--color-primary-light, #eff6ff);
   color: var(--color-primary, #2563eb);
   display: flex;
