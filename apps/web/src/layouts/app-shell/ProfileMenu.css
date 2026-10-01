@@ -9,7 +9,7 @@
   width: 330px;
   background: var(--bg-popup, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: 20px;
+  border-radius: 8px;
   box-shadow:
     0 10px 30px rgba(60, 64, 67, 0.15),
     0 4px 12px rgba(60, 64, 67, 0.08);

@@ -69,12 +69,12 @@
 
   /* Typography — Strict Semantic Tokens */
   --text-brand: #000000;
-  --text-primary: #1f1f1f;
-  --text-body: #444746;
-  --text-secondary: #444746;
-  --text-tertiary: #5f6368;
-  --text-muted: #747775;
-  --text-disabled: #a8a8a8;
+  --text-primary: #000000;
+  --text-body: #000000;
+  --text-secondary: #000000;
+  --text-tertiary: #000000;
+  --text-muted: #000000;
+  --text-disabled: #000000;
   --text-inverse: #ffffff;
 
   /* Borders */

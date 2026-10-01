@@ -336,11 +336,11 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                           <Inline gap="sm" align="center">
                             <Avatar initials={getInitials(item.fullName)} alt={item.fullName} />
                             <Stack gap="xs">
-                              <Label as="span" size="sm">
+                              <Label as="span" size="sm" weight="semibold">
                                 {item.fullName}
                               </Label>
                               {item.email && (
-                                <Label as="span" size="sm">
+                                <Label as="span" size="sm" weight="regular">
                                   {item.email}
                                 </Label>
                               )}
@@ -349,23 +349,23 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                         </TableCell>
                         <TableCell>
                           <Stack gap="xs">
-                            <Label as="span" size="sm">
+                            <Label as="span" size="sm" weight="semibold">
                               {item.designationName || '—'}
                             </Label>
                             {item.departmentName && (
-                              <Label as="span" size="sm">
+                              <Label as="span" size="sm" weight="regular">
                                 {item.departmentName}
                               </Label>
                             )}
                           </Stack>
                         </TableCell>
                         <TableCell>
-                          <Label as="span" size="sm">
+                          <Label as="span" size="sm" weight="regular">
                             {item.locationName || '—'}
                           </Label>
                         </TableCell>
                         <TableCell>
-                          <Label as="span" size="sm">
+                          <Label as="span" size="sm" weight="regular">
                             {formatDate(item.joiningDate)}
                           </Label>
                         </TableCell>

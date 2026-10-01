@@ -227,7 +227,7 @@ export function EmployeeRegistration({
         { replace: true },
       );
       if (contentContainerRef.current) {
-        contentContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        contentContainerRef.current.scrollTop = 0;
       }
     },
     [setSearchParams],
@@ -243,7 +243,7 @@ export function EmployeeRegistration({
     ) {
       setActiveSection(currentParam as RegistrationSectionId);
       if (contentContainerRef.current) {
-        contentContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        contentContainerRef.current.scrollTop = 0;
       }
     }
   }, [searchParams, allSections, activeSection]);

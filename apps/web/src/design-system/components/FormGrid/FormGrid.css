@@ -124,9 +124,9 @@
 }
 
 .bezent-field-group__label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-primary, #1f1f1f);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #000000);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -137,8 +137,8 @@
 }
 
 .bezent-field-group__helper {
-  font-size: 12px;
-  color: var(--text-muted, #747775);
+  font-size: 13px;
+  color: var(--text-muted, #000000);
   margin-top: 2px;
 }
 
@@ -189,9 +189,9 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2, 8px);
-  font-size: var(--font-size-sm, 13px);
+  font-size: 14px;
   font-weight: 500;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
   cursor: pointer;
   user-select: none;
 }
@@ -214,8 +214,8 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2, 8px);
-  font-size: var(--font-size-sm, 13px);
-  color: var(--text-primary, #1f1f1f);
+  font-size: 14px;
+  color: var(--text-primary, #000000);
   cursor: pointer;
 }
 
@@ -249,7 +249,7 @@
   height: 72px;
   border-radius: 9999px;
   background-color: var(--bg-surface-secondary, #e2e8f0);
-  color: var(--text-secondary, #64748b);
+  color: var(--text-secondary, #000000);
   display: flex;
   align-items: center;
   justify-content: center;

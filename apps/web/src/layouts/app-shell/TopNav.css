@@ -24,13 +24,14 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  flex-shrink: 0;
+  flex: 0 0 auto;
+  min-width: 220px;
 }
 
 .top-nav__logo {
   width: 32px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--brand-logo-bg, var(--bezent-logo-surface, #c2e7ff));
   color: var(--brand-logo-text, var(--bezent-logo-text, #001d35));
   display: flex;
@@ -65,7 +66,9 @@
   flex: 0 1 720px;
   width: 100%;
   max-width: 720px;
-  margin: 0 auto 0 140px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
 }
 
 /* ── Utility controls ────────────────────────────────────────────────── */
@@ -73,9 +76,10 @@
 .top-nav__actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 6px;
-  flex-shrink: 0;
-  margin-left: auto;
+  flex: 0 0 auto;
+  min-width: 220px;
 }
 
 /* Positions the design-system Badge on the bell's top-right corner. */

@@ -46,7 +46,7 @@
 .bezent-editorial-header__numeral-sub {
   font-size: 8px;
   font-weight: 700;
-  color: var(--text-muted, #747775);
+  color: var(--text-muted, #000000);
   letter-spacing: 1px;
   text-transform: uppercase;
   margin-top: 3px;
@@ -79,7 +79,7 @@
   margin: 0;
   font-size: 22px;
   font-weight: 700;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
   letter-spacing: -0.02em;
   line-height: 1.25;
 }
@@ -87,7 +87,8 @@
 .bezent-editorial-header__desc {
   margin: 0;
   font-size: 14px;
-  color: var(--text-secondary, #444746);
+  font-weight: 400;
+  color: var(--text-secondary, #000000);
   line-height: 1.5;
   max-width: 720px;
 }

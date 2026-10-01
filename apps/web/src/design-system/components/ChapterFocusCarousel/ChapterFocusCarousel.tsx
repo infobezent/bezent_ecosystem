@@ -50,23 +50,27 @@ export function ChapterFocusCarousel({
     const activeCard = cardRefs.current[activeId];
 
     if (activeCard) {
-      const containerRect = container.getBoundingClientRect();
-      const cardRect = activeCard.getBoundingClientRect();
-
-      // If content fits comfortably within container, keep natural center alignment
-      if (container.scrollWidth <= container.clientWidth + 4) {
-        container.scrollTo({ left: 0, behavior: 'smooth' });
+      // If content fits comfortably within container, do not scroll
+      if (container.scrollWidth <= container.clientWidth) {
+        if (container.scrollLeft !== 0) {
+          container.scrollLeft = 0;
+        }
         return;
       }
 
-      if (containerRect.width > 0 && cardRect.width > 0) {
-        const currentScrollLeft = container.scrollLeft;
-        const cardCenter = cardRect.left + cardRect.width / 2;
-        const containerCenter = containerRect.left + containerRect.width / 2;
-        const targetScrollLeft = currentScrollLeft + (cardCenter - containerCenter);
+      // Only scroll if active card is outside visible viewport
+      const cardLeft = activeCard.offsetLeft;
+      const cardRight = cardLeft + activeCard.offsetWidth;
+      const viewLeft = container.scrollLeft;
+      const viewRight = viewLeft + container.clientWidth;
 
+      if (cardLeft < viewLeft || cardRight > viewRight) {
+        const targetScrollLeft = Math.max(
+          0,
+          cardLeft + activeCard.offsetWidth / 2 - container.clientWidth / 2,
+        );
         container.scrollTo({
-          left: Math.max(0, targetScrollLeft),
+          left: targetScrollLeft,
           behavior: 'smooth',
         });
       }
@@ -75,12 +79,6 @@ export function ChapterFocusCarousel({
 
   useEffect(() => {
     centerActiveCard();
-    const rafId = requestAnimationFrame(() => {
-      centerActiveCard();
-    });
-    const timerId = setTimeout(() => {
-      centerActiveCard();
-    }, 120);
 
     const handleResize = () => {
       centerActiveCard();
@@ -88,8 +86,6 @@ export function ChapterFocusCarousel({
 
     window.addEventListener('resize', handleResize);
     return () => {
-      cancelAnimationFrame(rafId);
-      clearTimeout(timerId);
       window.removeEventListener('resize', handleResize);
     };
   }, [centerActiveCard]);

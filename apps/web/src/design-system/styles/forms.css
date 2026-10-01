@@ -7,14 +7,14 @@
 
 /* ─── 1. Uniform Typography & Color Palette ──────────────────────────────── */
 :root {
-  --form-font-size-title: 18px;
-  --form-font-size-subtitle: 13.5px;
-  --form-font-size-card-title: 15.5px;
-  --form-font-size-section-label: 12px;
-  --form-font-size-label: 13px;
-  --form-font-size-input: 13.5px;
-  --form-font-size-hint: 12px;
-  --form-font-size-badge: 11.5px;
+  --form-font-size-title: 17px;
+  --form-font-size-subtitle: 17px;
+  --form-font-size-card-title: 17px;
+  --form-font-size-section-label: 17px;
+  --form-font-size-label: 17px;
+  --form-font-size-input: 17px;
+  --form-font-size-hint: 17px;
+  --form-font-size-badge: 13px;
 
   /* Theme Button & Toggle Palette */
   --bezent-btn-sec-bg: #c2e7ff;
@@ -52,9 +52,9 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: var(--form-font-size-label, 13px);
+  font-size: var(--form-font-size-label, 14px);
   font-weight: 600;
-  color: var(--text-secondary, #444746);
+  color: var(--text-primary, #000000);
   letter-spacing: -0.005em;
   margin: 0;
 }
@@ -79,9 +79,9 @@
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
   border-radius: var(--radius-md, 8px);
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
   font: inherit;
-  font-size: var(--form-font-size-input, 13.5px);
+  font-size: var(--form-font-size-input, 14px);
   box-sizing: border-box;
   transition:
     border-color 0.15s ease,
@@ -113,7 +113,7 @@
 .employee-registration__input:disabled,
 .onboarding-section__input:disabled {
   background: var(--bg-surface-secondary, #f0f4f9);
-  color: var(--text-muted, #747775);
+  color: var(--text-muted, #000000);
   cursor: not-allowed;
   opacity: 0.85;
 }
@@ -141,9 +141,9 @@
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
   border-radius: var(--radius-md, 8px);
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
   font: inherit;
-  font-size: var(--form-font-size-input, 13px);
+  font-size: var(--form-font-size-input, 14px);
   box-sizing: border-box;
   appearance: none;
   -webkit-appearance: none;
@@ -171,7 +171,7 @@
 
 .employee-registration__select:disabled {
   background: var(--bg-surface-secondary, #f0f4f9);
-  color: var(--text-muted, #747775);
+  color: var(--text-muted, #000000);
   cursor: not-allowed;
 }
 
@@ -188,7 +188,7 @@
   transform: translateY(-50%);
   width: 16px;
   height: 16px;
-  color: var(--text-muted, #747775);
+  color: var(--text-muted, #000000);
   pointer-events: none;
   user-select: none;
   display: flex;
@@ -218,8 +218,8 @@
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 12px;
-  color: var(--text-muted, #747775);
+  font-size: 13px;
+  color: var(--text-muted, #000000);
   pointer-events: none;
   user-select: none;
 }
@@ -243,9 +243,9 @@
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
   border-radius: var(--radius-md, 8px);
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
   font: inherit;
-  font-size: var(--form-font-size-input, 13px);
+  font-size: var(--form-font-size-input, 14px);
   box-sizing: border-box;
   resize: vertical;
   line-height: 1.45;
@@ -298,17 +298,17 @@
 }
 
 .employee-registration__section-title {
-  font-size: var(--form-font-size-title, 18px);
+  font-size: var(--form-font-size-title, 20px);
   font-weight: 700;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
   margin: 0;
   letter-spacing: -0.02em;
   line-height: 1.3;
 }
 
 .employee-registration__section-subtitle {
-  font-size: var(--form-font-size-subtitle, 13.5px);
-  color: var(--text-secondary, #444746);
+  font-size: var(--form-font-size-subtitle, 14px);
+  color: var(--text-secondary, #000000);
   margin: 2px 0 0 0;
   line-height: 1.45;
 }
@@ -325,7 +325,7 @@
   justify-content: center;
   gap: 6px;
   padding: 8px 16px;
-  font-size: var(--form-font-size-input, 13px);
+  font-size: var(--form-font-size-input, 14px);
   font-weight: 600;
   color: var(--bezent-btn-sec-text, #071e49);
   background: var(--bezent-btn-sec-bg, #c2e7ff);
@@ -352,7 +352,7 @@
 .emergency-contact__remove-btn {
   background: none;
   border: none;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--status-danger-fg, #ef4444);
   cursor: pointer;
@@ -395,17 +395,17 @@
 .onboarding-section__group-title,
 .personal-info__group-title,
 .emergency-contact__group-title {
-  font-size: var(--form-font-size-section-label, 11px);
+  font-size: var(--form-font-size-section-label, 13px);
   font-weight: 700;
-  color: var(--text-secondary, #444746);
+  color: var(--text-secondary, #000000);
   letter-spacing: 0.5px;
   text-transform: uppercase;
   margin: 0;
 }
 
 .onboarding-section__group-subtitle {
-  font-size: var(--form-font-size-subtitle, 12px);
-  color: var(--text-secondary, #444746);
+  font-size: var(--form-font-size-subtitle, 13.5px);
+  color: var(--text-secondary, #000000);
   margin: -6px 0 6px 0;
 }
 
@@ -464,9 +464,9 @@
 .working-hours-section__card-title,
 .online-access-section__card-title,
 .review-section__card-title {
-  font-size: var(--form-font-size-card-title, 15.5px);
+  font-size: var(--form-font-size-card-title, 16px);
   font-weight: 700;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
   margin: 0;
   letter-spacing: -0.015em;
 }
@@ -523,7 +523,7 @@
 }
 
 .emergency-contact-section__badge {
-  font-size: var(--form-font-size-badge, 11px);
+  font-size: var(--form-font-size-badge, 12px);
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -538,7 +538,7 @@
 
 .emergency-contact-section__badge--secondary {
   background: var(--bg-surface-secondary, #f0f4f9);
-  color: var(--text-secondary, #444746);
+  color: var(--text-secondary, #000000);
   border: 1px solid var(--border-default, #dde3ea);
 }
 
@@ -556,9 +556,9 @@
   background: var(--bg-surface-secondary, #f0f4f9);
   border: 1px solid var(--border-default, #dde3ea);
   border-radius: var(--radius-md, 8px);
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
   font: inherit;
-  font-size: var(--form-font-size-input, 13px);
+  font-size: var(--form-font-size-input, 14px);
   flex-shrink: 0;
   cursor: pointer;
 }
@@ -575,13 +575,13 @@
 }
 
 .emergency-contact-section__toggle-label {
-  font-size: var(--form-font-size-input, 13px);
+  font-size: var(--form-font-size-input, 14px);
   font-weight: 500;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
 }
 
 .emergency-contact-section__error-msg {
-  font-size: var(--form-font-size-hint, 11px);
+  font-size: var(--form-font-size-hint, 12px);
   color: var(--status-danger-fg, #ef4444);
   font-weight: 500;
   margin-top: 2px;
@@ -594,7 +594,7 @@
   gap: 4px;
   padding: 3px 8px;
   border-radius: 6px;
-  font-size: var(--form-font-size-badge, 11px);
+  font-size: var(--form-font-size-badge, 12px);
   font-weight: 600;
   margin-top: 4px;
   width: fit-content;
@@ -652,14 +652,14 @@
 }
 
 .personal-info__photo-title {
-  font-size: var(--form-font-size-card-title, 14px);
+  font-size: var(--form-font-size-card-title, 15px);
   font-weight: 600;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
 }
 
 .personal-info__photo-hint {
-  font-size: var(--form-font-size-hint, 11px);
-  color: var(--text-secondary, #444746);
+  font-size: var(--form-font-size-hint, 13px);
+  color: var(--text-secondary, #000000);
 }
 
 .personal-info__photo-actions {
@@ -678,7 +678,7 @@
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   border: 1px solid transparent;
   border-radius: 6px;
-  font-size: var(--form-font-size-subtitle, 12px);
+  font-size: var(--form-font-size-subtitle, 13px);
   font-weight: 600;
   color: var(--bezent-btn-sec-text, #071e49);
   cursor: pointer;
@@ -699,7 +699,7 @@
 .documents-section__photo-btn--remove {
   background: none;
   border: none;
-  font-size: var(--form-font-size-subtitle, 12px);
+  font-size: var(--form-font-size-subtitle, 13px);
   font-weight: 600;
   color: var(--status-danger-fg, #ef4444);
   cursor: pointer;
@@ -732,14 +732,14 @@
 }
 
 .documents-section__class-title {
-  font-size: var(--form-font-size-card-title, 14px);
+  font-size: var(--form-font-size-card-title, 15px);
   font-weight: 600;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
 }
 
 .documents-section__class-desc {
-  font-size: var(--form-font-size-subtitle, 12px);
-  color: var(--text-secondary, #444746);
+  font-size: var(--form-font-size-subtitle, 13.5px);
+  color: var(--text-secondary, #000000);
 }
 
 .documents-section__class-toggle {
@@ -753,13 +753,13 @@
 
 .documents-section__class-btn {
   padding: 6px 14px;
-  font-size: var(--form-font-size-subtitle, 12px);
+  font-size: var(--form-font-size-subtitle, 13px);
   font-weight: 600;
   border: none;
   background: transparent;
   border-radius: 6px;
   cursor: pointer;
-  color: var(--text-secondary, #444746);
+  color: var(--text-secondary, #000000);
   transition: all 0.15s ease;
 }
 
@@ -793,13 +793,13 @@
 }
 
 .documents-section__item-name {
-  font-size: var(--form-font-size-card-title, 14px);
+  font-size: var(--form-font-size-card-title, 15px);
   font-weight: 600;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
 }
 
 .documents-section__tag {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   padding: 2px 6px;
   border-radius: 4px;
@@ -812,7 +812,7 @@
 
 .documents-section__tag--optional {
   background: rgba(148, 163, 184, 0.15);
-  color: var(--text-muted, #64748b);
+  color: var(--text-muted, #000000);
 }
 
 .documents-section__status-group {
@@ -822,7 +822,7 @@
 }
 
 .documents-section__status-badge {
-  font-size: var(--form-font-size-badge, 11px);
+  font-size: var(--form-font-size-badge, 12px);
   font-weight: 600;
   padding: 3px 8px;
   border-radius: 6px;
@@ -848,12 +848,12 @@
 
 .documents-section__status-badge--not-required {
   background: var(--bg-surface-secondary, #f0f4f9);
-  color: var(--text-muted, #747775);
+  color: var(--text-muted, #000000);
 }
 
 .documents-section__verify-btn {
   padding: 4px 10px;
-  font-size: var(--form-font-size-hint, 11px);
+  font-size: var(--form-font-size-hint, 12px);
   font-weight: 600;
   background: var(--status-success-bg, #ecfdf5);
   color: var(--status-success-fg, #059669);
@@ -869,7 +869,7 @@
 
 .documents-section__reject-btn {
   padding: 4px 10px;
-  font-size: var(--form-font-size-hint, 11px);
+  font-size: var(--form-font-size-hint, 12px);
   font-weight: 600;
   background: var(--status-danger-bg, #fef2f2);
   color: var(--status-danger-fg, #dc2626);
@@ -890,9 +890,9 @@
 }
 
 .documents-section__upload-spec {
-  font-size: var(--form-font-size-hint, 11px);
+  font-size: var(--form-font-size-hint, 13px);
   font-weight: 400;
-  color: var(--text-muted, #747775);
+  color: var(--text-muted, #000000);
 }
 
 .documents-section__upload-row {
@@ -907,7 +907,7 @@
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  font-size: var(--form-font-size-subtitle, 12px);
+  font-size: var(--form-font-size-subtitle, 13px);
   font-weight: 600;
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   border: 1px solid transparent;
@@ -928,19 +928,19 @@
 }
 
 .documents-section__file-name {
-  font-size: var(--form-font-size-subtitle, 12px);
+  font-size: var(--form-font-size-subtitle, 13.5px);
   font-weight: 600;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
 }
 
 .documents-section__file-size-badge {
-  font-size: var(--form-font-size-hint, 11px);
-  color: var(--text-muted, #747775);
+  font-size: var(--form-font-size-hint, 12px);
+  color: var(--text-muted, #000000);
 }
 
 .documents-section__preview-btn {
   padding: 4px 10px;
-  font-size: var(--form-font-size-hint, 11px);
+  font-size: var(--form-font-size-hint, 12px);
   font-weight: 600;
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   color: var(--bezent-btn-sec-text, #071e49);
@@ -989,14 +989,14 @@
 }
 
 .documents-section__photo-placeholder-text {
-  font-size: var(--form-font-size-card-title, 14px);
+  font-size: var(--form-font-size-card-title, 15px);
   font-weight: 600;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
 }
 
 .documents-section__photo-placeholder-hint {
-  font-size: var(--form-font-size-hint, 11px);
-  color: var(--text-muted, #747775);
+  font-size: var(--form-font-size-hint, 13px);
+  color: var(--text-muted, #000000);
 }
 
 /* ─── 13. Working Hours & Days ───────────────────────────────────────────── */
@@ -1008,13 +1008,13 @@
 
 .working-hours-section__day-chip {
   padding: 6px 14px;
-  font-size: var(--form-font-size-subtitle, 12px);
+  font-size: var(--form-font-size-subtitle, 13px);
   font-weight: 600;
   border: 1px solid var(--border-default, #dde3ea);
   background: var(--bg-surface, #ffffff);
   border-radius: 8px;
   cursor: pointer;
-  color: var(--text-secondary, #444746);
+  color: var(--text-secondary, #000000);
   transition: all 0.15s ease;
 }
 
@@ -1031,7 +1031,7 @@
 .working-hours-section__sub-badge,
 .online-access-section__sub-badge,
 .accounts-section__sub-badge {
-  font-size: var(--form-font-size-badge, 11px);
+  font-size: var(--form-font-size-badge, 12px);
   font-weight: 700;
   letter-spacing: 0.3px;
   padding: 2px 6px;
@@ -1047,9 +1047,9 @@
 }
 
 .working-hours-section__sub-title {
-  font-size: var(--form-font-size-label, 12px);
+  font-size: var(--form-font-size-label, 14px);
   font-weight: 700;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
   margin: 0 0 4px 0;
 }
 
@@ -1060,8 +1060,8 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: var(--form-font-size-subtitle, 12px);
-  color: var(--text-secondary, #444746);
+  font-size: var(--form-font-size-subtitle, 13.5px);
+  color: var(--text-secondary, #000000);
 }
 
 .working-hours-section__list li {
@@ -1072,7 +1072,7 @@
 
 .working-hours-section__list li span {
   font-weight: 600;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
 }
 
 .working-hours-section__row-2 {
@@ -1089,12 +1089,12 @@
 }
 
 .online-access-section__status-pill {
-  font-size: var(--form-font-size-badge, 11px);
+  font-size: var(--form-font-size-badge, 12px);
   font-weight: 600;
   padding: 3px 8px;
   border-radius: 6px;
   background: var(--bg-surface-secondary, #f0f4f9);
-  color: var(--text-muted, #747775);
+  color: var(--text-muted, #000000);
 }
 
 .online-access-section__status-select {
@@ -1103,7 +1103,8 @@
   border: 1px solid var(--border-default, #dde3ea);
   border-radius: 6px;
   background: var(--bg-surface, #ffffff);
-  font-size: var(--form-font-size-subtitle, 12px);
+  font-size: var(--form-font-size-subtitle, 13.5px);
+  color: var(--text-primary, #000000);
 }
 
 .online-access-section__security-row {
@@ -1126,15 +1127,15 @@
 
 .accounts-section__toggle-title {
   display: block;
-  font-size: var(--form-font-size-label, 12px);
+  font-size: var(--form-font-size-label, 14px);
   font-weight: 700;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
 }
 
 .accounts-section__toggle-desc {
   display: block;
-  font-size: var(--form-font-size-hint, 11px);
-  color: var(--text-secondary, #444746);
+  font-size: var(--form-font-size-hint, 13px);
+  color: var(--text-secondary, #000000);
 }
 
 /* Switches / Toggles (#071e49 active) */
@@ -1186,7 +1187,7 @@
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  font-size: var(--form-font-size-subtitle, 12px);
+  font-size: var(--form-font-size-subtitle, 13px);
   font-weight: 700;
   background: var(--bezent-toggle-active-bg, #071e49);
   color: #ffffff;
@@ -1201,7 +1202,7 @@
 }
 
 .online-access-section__invite-msg {
-  font-size: var(--form-font-size-subtitle, 12px);
+  font-size: var(--form-font-size-subtitle, 13px);
   font-weight: 600;
   color: var(--status-success-fg, #059669);
 }
@@ -1236,15 +1237,15 @@
 
 .online-access-section__module-name {
   display: block;
-  font-size: var(--form-font-size-label, 12px);
+  font-size: var(--form-font-size-label, 14px);
   font-weight: 700;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
 }
 
 .online-access-section__module-desc {
   display: block;
-  font-size: var(--form-font-size-hint, 11px);
-  color: var(--text-secondary, #444746);
+  font-size: var(--form-font-size-hint, 12px);
+  color: var(--text-secondary, #000000);
 }
 
 /* ─── 15. Accounts & Salary Breakdown ────────────────────────────────────── */
@@ -1257,7 +1258,7 @@
 .accounts-section__inline-btn {
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   border: none;
-  font-size: var(--form-font-size-hint, 11px);
+  font-size: var(--form-font-size-hint, 12px);
   font-weight: 600;
   color: var(--bezent-btn-sec-text, #071e49);
   cursor: pointer;
@@ -1277,8 +1278,8 @@
   padding: 10px 14px;
   background: var(--bg-surface-secondary, #f0f4f9);
   border-radius: 8px;
-  font-size: var(--form-font-size-subtitle, 12px);
-  color: var(--text-secondary, #444746);
+  font-size: var(--form-font-size-subtitle, 13.5px);
+  color: var(--text-secondary, #000000);
   margin: 14px 0;
 }
 
@@ -1299,14 +1300,14 @@
 }
 
 .accounts-section__calc-label {
-  font-size: var(--form-font-size-hint, 11px);
-  color: var(--text-secondary, #444746);
+  font-size: var(--form-font-size-hint, 13px);
+  color: var(--text-secondary, #000000);
 }
 
 .accounts-section__calc-val {
-  font-size: var(--form-font-size-card-title, 14px);
+  font-size: var(--form-font-size-card-title, 15px);
   font-weight: 700;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
 }
 
 /* ─── 16. Skills Section & Directory Pickers ─────────────────────────────── */
@@ -1326,9 +1327,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: var(--form-font-size-input, 13px);
+  font-size: var(--form-font-size-input, 14px);
   font-weight: 600;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
 }
 
 .employee-registration__pill-avatar {
@@ -1337,7 +1338,7 @@
   border-radius: 50%;
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   color: var(--bezent-btn-sec-text, #071e49);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -1365,7 +1366,7 @@
   border: 1px solid transparent;
   padding: 8px 16px;
   border-radius: 8px;
-  font-size: var(--form-font-size-input, 13px);
+  font-size: var(--form-font-size-input, 14px);
   font-weight: 600;
   color: var(--bezent-btn-sec-text, #071e49);
   cursor: pointer;
@@ -1382,10 +1383,10 @@
 }
 
 .skills-section__summary-title {
-  font-size: var(--form-font-size-card-title, 14px);
+  font-size: var(--form-font-size-card-title, 16px);
   font-weight: 700;
   margin-bottom: 12px;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
 }
 
 .skills-section__summary-grid {
@@ -1402,14 +1403,14 @@
 }
 
 .skills-section__card-skill-name {
-  font-size: var(--form-font-size-card-title, 14px);
+  font-size: var(--form-font-size-card-title, 15px);
   font-weight: 700;
   margin: 0 0 4px 0;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
 }
 
 .skills-section__type-badge {
-  font-size: var(--form-font-size-badge, 11px);
+  font-size: var(--form-font-size-badge, 12px);
   font-weight: 600;
   padding: 2px 6px;
   border-radius: 4px;
@@ -1427,7 +1428,7 @@
   border: 1px solid transparent;
   border-radius: 6px;
   padding: 4px 8px;
-  font-size: var(--form-font-size-hint, 11px);
+  font-size: var(--form-font-size-hint, 12px);
   font-weight: 600;
   cursor: pointer;
   color: var(--bezent-btn-sec-text, #071e49);
@@ -1452,7 +1453,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  font-size: var(--form-font-size-subtitle, 12px);
+  font-size: var(--form-font-size-subtitle, 13px);
 }
 
 .skills-section__detail-row {
@@ -1462,11 +1463,11 @@
 
 .skills-section__detail-label {
   font-weight: 600;
-  color: var(--text-secondary, #444746);
+  color: var(--text-secondary, #000000);
 }
 
 .skills-section__detail-val {
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
 }
 
 /* ─── 17. Review Section Cards & Summary ─────────────────────────────────── */
@@ -1522,14 +1523,14 @@
 }
 
 .review-section__status-count {
-  font-size: var(--form-font-size-subtitle, 12px);
+  font-size: var(--form-font-size-subtitle, 13.5px);
   font-weight: 600;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
 }
 
 .review-section__status-desc {
-  font-size: var(--form-font-size-subtitle, 12px);
-  color: var(--text-secondary, #444746);
+  font-size: var(--form-font-size-subtitle, 13.5px);
+  color: var(--text-secondary, #000000);
   margin: 0;
 }
 
@@ -1551,7 +1552,7 @@
 }
 
 .review-section__pending-summary-title {
-  font-size: var(--form-font-size-card-title, 14px);
+  font-size: var(--form-font-size-card-title, 16px);
   font-weight: 700;
   margin: 0;
 }
@@ -1569,8 +1570,8 @@
 }
 
 .review-section__pending-group-title {
-  font-size: var(--form-font-size-subtitle, 12px);
-  color: var(--text-primary, #1f1f1f);
+  font-size: var(--form-font-size-subtitle, 13.5px);
+  color: var(--text-primary, #000000);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1595,7 +1596,7 @@
   color: var(--bezent-btn-sec-text, #071e49);
   border: 1px solid transparent;
   border-radius: 6px;
-  font-size: var(--form-font-size-hint, 11px);
+  font-size: var(--form-font-size-hint, 12px);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -1610,7 +1611,7 @@
 }
 
 .review-section__chip-reason {
-  color: var(--text-secondary, #444746);
+  color: var(--text-secondary, #000000);
 }
 
 .review-section__chip-action {
@@ -1673,7 +1674,7 @@
 }
 
 .review-section__section-status-badge {
-  font-size: var(--form-font-size-badge, 11px);
+  font-size: var(--form-font-size-badge, 12px);
   font-weight: 700;
   padding: 2px 6px;
   border-radius: 4px;
@@ -1722,8 +1723,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-size: 9px;
-  color: var(--text-muted, #747775);
+  font-size: 10px;
+  color: var(--text-muted, #000000);
 }
 
 .review-section__photo-meta {
@@ -1734,15 +1735,15 @@
 }
 
 .review-section__person-name {
-  font-size: var(--form-font-size-card-title, 14px);
+  font-size: var(--form-font-size-card-title, 15px);
   font-weight: 700;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
   margin: 0;
 }
 
 .review-section__person-sub {
-  font-size: var(--form-font-size-hint, 11px);
-  color: var(--text-secondary, #444746);
+  font-size: var(--form-font-size-hint, 13px);
+  color: var(--text-secondary, #000000);
 }
 
 .review-section__data-grid {
@@ -1758,17 +1759,17 @@
 }
 
 .review-section__label {
-  font-size: var(--form-font-size-section-label, 11px);
+  font-size: var(--form-font-size-section-label, 12px);
   font-weight: 600;
-  color: var(--text-secondary, #444746);
+  color: var(--text-secondary, #000000);
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
 
 .review-section__value {
-  font-size: var(--form-font-size-input, 13px);
+  font-size: var(--form-font-size-input, 14px);
   font-weight: 500;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
 }
 
 .review-section__sub-block {
@@ -1785,9 +1786,9 @@
 }
 
 .review-section__sub-heading {
-  font-size: var(--form-font-size-subtitle, 12px);
+  font-size: var(--form-font-size-subtitle, 14px);
   font-weight: 700;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
   margin: 0 0 8px 0;
 }
 
@@ -1826,15 +1827,15 @@
 }
 
 .review-section__doc-title {
-  font-size: var(--form-font-size-input, 13px);
+  font-size: var(--form-font-size-input, 14px);
   font-weight: 700;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
 }
 
 .review-section__doc-category-badge {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
-  color: var(--text-secondary, #444746);
+  color: var(--text-secondary, #000000);
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
   padding: 1px 6px;
@@ -1842,7 +1843,7 @@
 }
 
 .review-section__mini-tag {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   padding: 2px 8px;
   background: var(--bezent-btn-sec-bg, #c2e7ff);
@@ -1854,8 +1855,8 @@
 }
 
 .review-section__small-muted {
-  font-size: var(--form-font-size-hint, 11px);
-  color: var(--text-secondary, #444746);
+  font-size: var(--form-font-size-hint, 13px);
+  color: var(--text-secondary, #000000);
 }
 
 /* Delete / Action buttons inside review */
@@ -1864,7 +1865,7 @@
   border: 1px solid rgba(239, 68, 68, 0.2);
   color: var(--status-danger-fg, #ef4444);
   border-radius: 6px;
-  font-size: var(--form-font-size-hint, 11px);
+  font-size: var(--form-font-size-hint, 12px);
   font-weight: 600;
   padding: 4px 8px;
   cursor: pointer;
@@ -1884,7 +1885,7 @@
 .review-section__edit-btn {
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   border: 1px solid transparent;
-  font-size: var(--form-font-size-subtitle, 12px);
+  font-size: var(--form-font-size-subtitle, 13px);
   font-weight: 600;
   color: var(--bezent-btn-sec-text, #071e49);
   cursor: pointer;
@@ -1904,7 +1905,7 @@
 }
 
 .review-section__module-chip {
-  font-size: var(--form-font-size-hint, 11px);
+  font-size: var(--form-font-size-hint, 12px);
   font-weight: 600;
   padding: 3px 8px;
   border-radius: 4px;
@@ -1947,15 +1948,15 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  font-size: var(--form-font-size-subtitle, 12px);
-  color: var(--text-secondary, #444746);
+  font-size: var(--form-font-size-subtitle, 13.5px);
+  color: var(--text-secondary, #000000);
 }
 
 .review-section__create-btn--large {
   background: var(--bezent-toggle-active-bg, #071e49);
   color: #ffffff;
   padding: 10px 24px;
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 600;
   border-radius: 8px;
   border: none;
@@ -1983,8 +1984,8 @@
 
 .review-section__modal-body {
   padding: 16px 18px;
-  font-size: var(--form-font-size-input, 13px);
-  color: var(--text-primary, #1f1f1f);
+  font-size: var(--form-font-size-input, 14px);
+  color: var(--text-primary, #000000);
 }
 
 .review-section__modal-pending-list {
@@ -2009,7 +2010,7 @@
   color: var(--bezent-btn-sec-text, #071e49);
   border: 1px solid transparent;
   border-radius: 6px;
-  font-size: var(--form-font-size-hint, 11px);
+  font-size: var(--form-font-size-hint, 12px);
   font-weight: 600;
   padding: 4px 10px;
   cursor: pointer;
@@ -2032,7 +2033,7 @@
   color: var(--bezent-btn-sec-text, #071e49);
   border: 1px solid transparent;
   border-radius: 6px;
-  font-size: var(--form-font-size-subtitle, 12px);
+  font-size: var(--form-font-size-subtitle, 13px);
   font-weight: 600;
   padding: 6px 14px;
   cursor: pointer;
@@ -2052,7 +2053,7 @@
   gap: 6px;
   color: #15803d;
   font-weight: 600;
-  font-size: var(--form-font-size-subtitle, 12px);
+  font-size: var(--form-font-size-subtitle, 13px);
 }
 
 /* ─── 18. Directory Picker Modals & Overlays ──────────────────────────────── */
@@ -2096,9 +2097,9 @@
 
 .skills-section__modal-title,
 .documents-section__modal-header h3 {
-  font-size: var(--form-font-size-card-title, 14px);
+  font-size: var(--form-font-size-card-title, 16px);
   font-weight: 700;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
   margin: 0;
 }
 
@@ -2107,7 +2108,7 @@
   background: none;
   border: none;
   font-size: 14px;
-  color: var(--text-muted, #747775);
+  color: var(--text-muted, #000000);
   cursor: pointer;
   padding: 4px;
 }
@@ -2141,28 +2142,28 @@
 }
 
 .skills-section__emp-name {
-  font-size: var(--form-font-size-input, 13px);
+  font-size: var(--form-font-size-input, 14px);
   font-weight: 600;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
 }
 
 .skills-section__emp-sub {
-  font-size: var(--form-font-size-hint, 11px);
-  color: var(--text-secondary, #444746);
+  font-size: var(--form-font-size-hint, 13px);
+  color: var(--text-secondary, #000000);
 }
 
 /* ─── 19. Helper Texts & Inline Links ────────────────────────────────────── */
 .personal-info__helper-text,
 .accounts-section__helper-text,
 .personal-info__postal-status {
-  font-size: var(--form-font-size-hint, 11px);
-  color: var(--text-muted, #747775);
+  font-size: var(--form-font-size-hint, 13px);
+  color: var(--text-muted, #000000);
   margin-top: 2px;
 }
 
 .personal-info__error-hint,
 .accounts-section__error-msg {
-  font-size: var(--form-font-size-hint, 11px);
+  font-size: var(--form-font-size-hint, 12px);
   color: var(--status-danger-fg, #ef4444);
   font-weight: 500;
   margin-top: 2px;
@@ -2186,7 +2187,7 @@
   background: var(--bezent-btn-sec-bg, #c2e7ff);
   color: var(--bezent-btn-sec-text, #071e49);
   border-radius: 999px;
-  font-size: var(--form-font-size-hint, 11px);
+  font-size: var(--form-font-size-hint, 12px);
   font-weight: 600;
   border: 1px solid transparent;
 }
@@ -2207,7 +2208,7 @@
   color: var(--brand-primary, #041e49);
   border: 1px solid var(--border-default, #dde3ea);
   border-radius: var(--radius-md, 8px);
-  font-size: var(--form-font-size-subtitle, 12px);
+  font-size: var(--form-font-size-subtitle, 13px);
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 1px 2px rgba(4, 30, 73, 0.06);
@@ -2252,16 +2253,16 @@
   border: none;
   background: transparent;
   border-radius: 6px;
-  font-size: var(--form-font-size-subtitle, 12px);
+  font-size: var(--form-font-size-subtitle, 13px);
   font-weight: 600;
-  color: var(--text-secondary, #444746);
+  color: var(--text-secondary, #000000);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .onboarding-page__tab:hover,
 .bezent-filter-tab:hover {
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
   background: rgba(0, 0, 0, 0.04);
 }
 
@@ -2277,7 +2278,7 @@
 .bezent-filter-tab-count {
   padding: 1px 6px;
   border-radius: 999px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   background: rgba(0, 0, 0, 0.08);
   color: inherit;
@@ -2307,15 +2308,16 @@
 
 .onboarding-page__person-name,
 .bezent-table-meta-title {
-  font-size: var(--form-font-size-input, 13px);
+  font-size: var(--form-font-size-input, 14px);
   font-weight: 600;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
 }
 
 .onboarding-page__person-email,
 .bezent-table-meta-subtitle {
-  font-size: var(--form-font-size-hint, 11px);
-  color: var(--text-secondary, #444746);
+  font-size: var(--form-font-size-hint, 13.5px);
+  font-weight: 400;
+  color: var(--text-secondary, #000000);
 }
 
 /* Pipeline Stage Tags */
@@ -2404,7 +2406,7 @@
   opacity: 0.38;
   cursor: not-allowed;
   background: var(--bg-canvas, #f0f4f9);
-  color: var(--text-tertiary, #747775);
+  color: var(--text-tertiary, #000000);
   border-color: var(--border-default, #dde3ea);
 }
 

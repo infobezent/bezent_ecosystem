@@ -12,8 +12,8 @@
 }
 
 .bezent-page-header__breadcrumbs {
-  font-size: 13px;
-  color: var(--text-muted, #747775);
+  font-size: 13.5px;
+  color: var(--text-muted, #000000);
 }
 
 .bezent-page-header__main {
@@ -32,10 +32,10 @@
 
 .bezent-page-header__eyebrow {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--text-tertiary, #5f6368);
+  color: var(--text-tertiary, #000000);
 }
 
 .bezent-page-header__title-row {
@@ -49,15 +49,15 @@
   margin: 0;
   font-size: 24px;
   font-weight: 700;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
   letter-spacing: -0.03em;
   line-height: 1.2;
 }
 
 .bezent-page-header__subtitle {
   margin: 0;
-  font-size: 13.5px;
-  color: var(--text-secondary, #444746);
+  font-size: 14px;
+  color: var(--text-secondary, #000000);
   line-height: 1.45;
   letter-spacing: -0.01em;
 }
