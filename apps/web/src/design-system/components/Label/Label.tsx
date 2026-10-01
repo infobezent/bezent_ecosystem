@@ -9,6 +9,7 @@ import type { LabelHTMLAttributes, ElementType } from 'react';
 import './Label.css';
 
 export type LabelSize = 'sm' | 'md';
+export type LabelWeight = 'regular' | 'medium' | 'semibold' | 'bold';
 
 export interface LabelProps extends Omit<LabelHTMLAttributes<HTMLElement>, 'className'> {
   /** Renders a required asterisk after the label text */
@@ -16,6 +17,7 @@ export interface LabelProps extends Omit<LabelHTMLAttributes<HTMLElement>, 'clas
   /** Dims the label for disabled contexts */
   disabled?: boolean;
   size?: LabelSize;
+  weight?: LabelWeight;
   as?: ElementType;
   className?: string;
 }
@@ -24,6 +26,7 @@ export function Label({
   required,
   disabled,
   size = 'md',
+  weight = 'semibold',
   as: Component = 'label',
   className,
   children,
@@ -32,6 +35,7 @@ export function Label({
   const classes = [
     'bezent-label',
     `bezent-label--${size}`,
+    `bezent-label--${weight}`,
     disabled ? 'bezent-label--disabled' : '',
     className ?? '',
   ]

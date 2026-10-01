@@ -1,5 +1,5 @@
 /*
- * BEZENT Table — Semantic Token System.
+ * BEZENT Table — Semantic Token System & Google-style Floating Row Elevation.
  */
 
 .bezent-table-container {
@@ -13,51 +13,91 @@
 
 .bezent-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   text-align: left;
-  font-size: 13px;
-  color: var(--text-primary, #1f1f1f);
+  font-size: 14px;
+  color: var(--text-primary, #000000);
   letter-spacing: -0.1px;
 }
 
 /* ── Head ── */
 .bezent-table__head {
   background: var(--bg-surface-secondary, #f0f4f9);
-  border-bottom: 1px solid var(--table-head-divider, var(--border-default, #dde3ea));
 }
 
-.bezent-table__th {
+.bezent-table__head .bezent-table__th {
   padding: 12px 16px;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--text-muted, #747775);
+  color: var(--text-primary, #000000);
   white-space: nowrap;
+  border-bottom: 1px solid var(--table-head-divider, var(--border-default, #dde3ea));
 }
 
 /* ── Body Rows ── */
 .bezent-table__row {
-  border-bottom: 1px solid var(--table-row-divider, var(--border-subtle, #e7ebf0));
-  transition: background-color 0.14s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.bezent-table__row:last-child {
-  border-bottom: none;
-}
-
-.bezent-table.is-hoverable .bezent-table__row:hover {
-  background-color: var(--bg-surface-secondary, #f0f4f9);
-}
-
-.bezent-table.is-striped .bezent-table__row:nth-child(even) {
-  background-color: #fafbfc;
+  position: relative;
+  transition:
+    background-color 0.14s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.14s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ── Cells ── */
 .bezent-table__td {
   padding: 14px 16px;
   vertical-align: middle;
+  color: var(--text-primary, #000000);
+  border-bottom: 1px solid var(--table-row-divider, var(--border-subtle, #e7ebf0));
+  background-color: transparent;
+  transition:
+    background-color 0.14s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.14s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bezent-table__row:last-child .bezent-table__td {
+  border-bottom: none;
+}
+
+/* ── Striped modifier ── */
+.bezent-table.is-striped .bezent-table__row:nth-child(even) .bezent-table__td {
+  background-color: #fafbfc;
+}
+
+/* ── Google Gmail-style Floating Elevated Row Hover (No vertical column lines) ── */
+.bezent-table.is-hoverable .bezent-table__row {
+  cursor: pointer;
+}
+
+.bezent-table.is-hoverable .bezent-table__row:hover {
+  position: relative;
+  z-index: 5;
+  box-shadow:
+    0 1px 3px 0 rgba(60, 64, 67, 0.2),
+    0 4px 8px 3px rgba(60, 64, 67, 0.1);
+}
+
+.bezent-table.is-hoverable .bezent-table__row:hover .bezent-table__td {
+  background-color: var(--bg-surface, #ffffff);
+  box-shadow:
+    inset 0 1px 0 var(--border-default, #dadce0),
+    inset 0 -1px 0 var(--border-default, #dadce0);
+}
+
+.bezent-table.is-hoverable .bezent-table__row:hover .bezent-table__td:first-child {
+  box-shadow:
+    inset 1px 0 0 var(--border-default, #dadce0),
+    inset 0 1px 0 var(--border-default, #dadce0),
+    inset 0 -1px 0 var(--border-default, #dadce0);
+}
+
+.bezent-table.is-hoverable .bezent-table__row:hover .bezent-table__td:last-child {
+  box-shadow:
+    inset -1px 0 0 var(--border-default, #dadce0),
+    inset 0 1px 0 var(--border-default, #dadce0),
+    inset 0 -1px 0 var(--border-default, #dadce0);
 }
 
 /* ── Compact modifier ── */
@@ -84,19 +124,21 @@
 
 .bezent-table-meta-title {
   font-weight: 600;
-  color: var(--text-primary, #0f172a);
+  font-size: 14px;
+  color: var(--text-primary, #000000);
 }
 
 .bezent-table-meta-subtitle {
-  font-size: 12px;
-  color: var(--text-secondary, var(--text-muted, #64748b));
+  font-size: 13.5px;
+  font-weight: 400;
+  color: var(--text-secondary, #000000);
 }
 
 /* ── Table Loading & Empty State ── */
 .bezent-table-loading {
   padding: 48px;
   text-align: center;
-  color: var(--text-muted, #64748b);
+  color: var(--text-primary, #000000);
   font-size: 14px;
 }
 
@@ -114,13 +156,13 @@
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary, #1e293b);
+  color: var(--text-primary, #000000);
 }
 
 .bezent-table-empty-desc {
   margin: 0;
   font-size: 14px;
-  color: var(--text-muted, #64748b);
+  color: var(--text-secondary, #000000);
   max-width: 380px;
 }
 
@@ -136,19 +178,46 @@
 
 [data-theme='dark'] .bezent-table__head {
   background: rgba(8, 27, 58, 0.75);
-  border-bottom: 1px solid var(--table-head-divider, rgba(56, 189, 248, 0.32));
 }
 
-[data-theme='dark'] .bezent-table__th {
+[data-theme='dark'] .bezent-table__head .bezent-table__th {
+  border-bottom: 1px solid var(--table-head-divider, rgba(56, 189, 248, 0.32));
   color: var(--text-secondary, #94a3b8);
 }
 
-[data-theme='dark'] .bezent-table__row {
+[data-theme='dark'] .bezent-table__td {
   border-bottom: 1px solid var(--table-row-divider, rgba(56, 189, 248, 0.26));
 }
 
 [data-theme='dark'] .bezent-table.is-hoverable .bezent-table__row:hover {
-  background-color: rgba(22, 131, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(2, 11, 28, 0.6);
+}
+
+[data-theme='dark'] .bezent-table.is-hoverable .bezent-table__row:hover .bezent-table__td {
+  background-color: #0b254e;
+  box-shadow:
+    inset 0 1px 0 rgba(56, 189, 248, 0.4),
+    inset 0 -1px 0 rgba(56, 189, 248, 0.4);
+}
+
+[data-theme='dark']
+  .bezent-table.is-hoverable
+  .bezent-table__row:hover
+  .bezent-table__td:first-child {
+  box-shadow:
+    inset 1px 0 0 rgba(56, 189, 248, 0.4),
+    inset 0 1px 0 rgba(56, 189, 248, 0.4),
+    inset 0 -1px 0 rgba(56, 189, 248, 0.4);
+}
+
+[data-theme='dark']
+  .bezent-table.is-hoverable
+  .bezent-table__row:hover
+  .bezent-table__td:last-child {
+  box-shadow:
+    inset -1px 0 0 rgba(56, 189, 248, 0.4),
+    inset 0 1px 0 rgba(56, 189, 248, 0.4),
+    inset 0 -1px 0 rgba(56, 189, 248, 0.4);
 }
 
 [data-theme='dark'] .bezent-table-meta-title {

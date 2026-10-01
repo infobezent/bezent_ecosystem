@@ -4,7 +4,7 @@
 
 .bezent-card {
   position: relative;
-  background: var(--bg-card, #f0f4f9);
+  background: var(--bg-card, #ffffff);
   border: 1px solid var(--card-border, #dde3ea);
   border-radius: var(--card-radius, 14px);
   box-shadow: var(--card-shadow, 0 1px 3px rgba(0, 0, 0, 0.04));
@@ -60,16 +60,16 @@
 }
 
 .bezent-card__title {
-  font-size: var(--form-font-size-card-title, 15.5px);
+  font-size: var(--form-font-size-card-title, 16px);
   font-weight: 700;
-  color: var(--text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
   letter-spacing: -0.015em;
   margin: 0;
 }
 
 .bezent-card__desc {
-  font-size: 13px;
-  color: var(--text-secondary, #444746);
+  font-size: 13.5px;
+  color: var(--text-secondary, #000000);
   margin: 4px 0 0 0;
   line-height: 1.45;
 }

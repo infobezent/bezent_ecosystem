@@ -87,9 +87,10 @@
     Roboto,
     sans-serif
   );
-  font-size: var(--form-font-size-hint, 12px);
+  font-size: var(--form-font-size-hint, 14px);
+  font-weight: 400;
   line-height: var(--line-height-normal, 1.4);
-  color: var(--text-muted, #747775);
+  color: var(--text-muted, #000000);
 }
 
 .bezent-form-field--horizontal > .bezent-form-field__helper {

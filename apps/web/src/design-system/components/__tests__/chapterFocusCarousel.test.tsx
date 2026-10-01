@@ -18,6 +18,7 @@ describe('Design System ChapterFocusCarousel Primitive', () => {
         activeId="general"
         onSelectChapter={vi.fn()}
         kickerLabel="REGISTRATION CHAPTERS"
+        showControls={true}
       />,
     );
 

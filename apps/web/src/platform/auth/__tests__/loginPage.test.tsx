@@ -45,4 +45,10 @@ describe('Universal sign-in page (ADR-018)', () => {
     }
     expect(html).toContain('one sign-in for every bezent workspace');
   });
+
+  it('renders the floating day/night mode toggle button', () => {
+    const html = render();
+    expect(html).toContain('bezent-login__theme-toggle');
+    expect(html).toContain('Mode');
+  });
 });

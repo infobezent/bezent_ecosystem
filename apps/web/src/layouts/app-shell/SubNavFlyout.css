@@ -17,7 +17,7 @@
   flex-direction: column;
   background: var(--floating-surface-bg);
   border: 1px solid var(--floating-surface-border);
-  border-radius: 14px;
+  border-radius: 6px;
   box-shadow: var(--floating-surface-shadow);
   z-index: var(--z-flyout);
   /* Mounted only while it owns the sidebar flyout; open/close is LeftSidebar state. */
@@ -82,8 +82,8 @@
   padding: 12px 16px 10px;
   background: var(--subnav-header-bg, var(--nav-selected, #c2e7ff));
   border-bottom: 1px solid var(--floating-surface-divider);
-  border-top-left-radius: 13px;
-  border-top-right-radius: 13px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
 }
 
 .subnav-flyout__title {
@@ -110,8 +110,8 @@
   box-sizing: border-box;
   overflow-y: auto;
   background: var(--floating-surface-bg);
-  border-bottom-left-radius: 13px;
-  border-bottom-right-radius: 13px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
 }
 
 .subnav-flyout__row {
@@ -124,7 +124,7 @@
   padding: 6px 9px;
   background: transparent;
   border: none;
-  border-radius: 8px;
+  border-radius: 4px;
   cursor: pointer;
   font-family: inherit;
   text-align: left;

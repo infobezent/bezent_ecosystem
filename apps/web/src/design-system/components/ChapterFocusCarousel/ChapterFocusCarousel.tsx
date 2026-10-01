@@ -15,6 +15,7 @@ export interface ChapterFocusCarouselProps {
   activeId: string;
   onSelectChapter: (id: string) => void;
   kickerLabel?: string;
+  showControls?: boolean;
   className?: string;
   ariaLabel?: string;
 }
@@ -30,7 +31,8 @@ export function ChapterFocusCarousel({
   chapters,
   activeId,
   onSelectChapter,
-  kickerLabel = 'REGISTRATION CHAPTERS',
+  kickerLabel,
+  showControls = false,
   className = '',
   ariaLabel = 'Registration Chapters',
 }: ChapterFocusCarouselProps) {
@@ -48,22 +50,35 @@ export function ChapterFocusCarousel({
     const activeCard = cardRefs.current[activeId];
 
     if (activeCard) {
-      const containerWidth = container.offsetWidth;
-      const cardLeft = activeCard.offsetLeft;
-      const cardWidth = activeCard.offsetWidth;
+      // If content fits comfortably within container, do not scroll
+      if (container.scrollWidth <= container.clientWidth) {
+        if (container.scrollLeft !== 0) {
+          container.scrollLeft = 0;
+        }
+        return;
+      }
 
-      container.scrollTo({
-        left: cardLeft - containerWidth / 2 + cardWidth / 2,
-        behavior: 'smooth',
-      });
+      // Only scroll if active card is outside visible viewport
+      const cardLeft = activeCard.offsetLeft;
+      const cardRight = cardLeft + activeCard.offsetWidth;
+      const viewLeft = container.scrollLeft;
+      const viewRight = viewLeft + container.clientWidth;
+
+      if (cardLeft < viewLeft || cardRight > viewRight) {
+        const targetScrollLeft = Math.max(
+          0,
+          cardLeft + activeCard.offsetWidth / 2 - container.clientWidth / 2,
+        );
+        container.scrollTo({
+          left: targetScrollLeft,
+          behavior: 'smooth',
+        });
+      }
     }
   }, [activeId]);
 
   useEffect(() => {
     centerActiveCard();
-    const rafId = requestAnimationFrame(() => {
-      centerActiveCard();
-    });
 
     const handleResize = () => {
       centerActiveCard();
@@ -71,7 +86,6 @@ export function ChapterFocusCarousel({
 
     window.addEventListener('resize', handleResize);
     return () => {
-      cancelAnimationFrame(rafId);
       window.removeEventListener('resize', handleResize);
     };
   }, [centerActiveCard]);
@@ -130,39 +144,47 @@ export function ChapterFocusCarousel({
       aria-label={ariaLabel}
       role="region"
     >
-      {/* Top Editorial Kicker & Indicator */}
-      <div className="bezent-focus-carousel__header">
-        <div className="bezent-focus-carousel__kicker">{kickerLabel}</div>
-        <div className="bezent-focus-carousel__controls">
-          <button
-            type="button"
-            className="bezent-focus-carousel__nav-btn"
-            onClick={handlePrev}
-            disabled={activeIndex === 0}
-            aria-label="Previous chapter"
-          >
-            ‹
-          </button>
-          <div className="bezent-focus-carousel__counter">
-            <span className="bezent-focus-carousel__counter-current">
-              {String(activeIndex + 1).padStart(2, '0')}
-            </span>
-            <span className="bezent-focus-carousel__counter-divider">/</span>
-            <span className="bezent-focus-carousel__counter-total">
-              {String(chapters.length).padStart(2, '0')}
-            </span>
-          </div>
-          <button
-            type="button"
-            className="bezent-focus-carousel__nav-btn"
-            onClick={handleNext}
-            disabled={activeIndex === chapters.length - 1}
-            aria-label="Next chapter"
-          >
-            ›
-          </button>
+      {/* Optional Top Editorial Kicker & Indicator */}
+      {(kickerLabel || showControls) && (
+        <div className="bezent-focus-carousel__header">
+          {kickerLabel ? (
+            <div className="bezent-focus-carousel__kicker">{kickerLabel}</div>
+          ) : (
+            <div />
+          )}
+          {showControls && (
+            <div className="bezent-focus-carousel__controls">
+              <button
+                type="button"
+                className="bezent-focus-carousel__nav-btn"
+                onClick={handlePrev}
+                disabled={activeIndex === 0}
+                aria-label="Previous chapter"
+              >
+                ‹
+              </button>
+              <div className="bezent-focus-carousel__counter">
+                <span className="bezent-focus-carousel__counter-current">
+                  {String(activeIndex + 1).padStart(2, '0')}
+                </span>
+                <span className="bezent-focus-carousel__counter-divider">/</span>
+                <span className="bezent-focus-carousel__counter-total">
+                  {String(chapters.length).padStart(2, '0')}
+                </span>
+              </div>
+              <button
+                type="button"
+                className="bezent-focus-carousel__nav-btn"
+                onClick={handleNext}
+                disabled={activeIndex === chapters.length - 1}
+                aria-label="Next chapter"
+              >
+                ›
+              </button>
+            </div>
+          )}
         </div>
-      </div>
+      )}
 
       {/* Viewport & Carousel Track */}
       <div className="bezent-focus-carousel__viewport" ref={containerRef}>

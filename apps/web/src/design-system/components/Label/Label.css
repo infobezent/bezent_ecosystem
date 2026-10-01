@@ -6,7 +6,7 @@
   gap: var(--space-1, 4px);
   font-family: var(--font-family-base, 'Google Sans', sans-serif);
   font-weight: 600;
-  color: var(--text-secondary, #444746);
+  color: var(--text-primary, #000000);
   cursor: default;
   white-space: nowrap;
   letter-spacing: -0.005em;
@@ -15,13 +15,30 @@
 
 /* Sizes */
 .bezent-label--md {
-  font-size: var(--font-size-sm, 13px);
+  font-size: var(--form-font-size-label, 17px);
   line-height: var(--line-height-normal, 1.4);
 }
 
 .bezent-label--sm {
-  font-size: var(--font-size-xs, 12px);
+  font-size: var(--form-font-size-label, 15px);
   line-height: var(--line-height-normal, 1.4);
+}
+
+/* Weights */
+.bezent-label--regular {
+  font-weight: 400;
+}
+
+.bezent-label--medium {
+  font-weight: 500;
+}
+
+.bezent-label--semibold {
+  font-weight: 600;
+}
+
+.bezent-label--bold {
+  font-weight: 700;
 }
 
 /* Required asterisk */
