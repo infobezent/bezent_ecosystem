@@ -42,8 +42,17 @@ export interface OnboardingStageConfig {
   isRequired: boolean;
   isActive: boolean;
   isSystem: boolean;
+  isTerminal?: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CreateOnboardingStageConfigDto {
+  name: string;
+  description?: string | null;
+  isRequired?: boolean;
+  position?: number;
+  afterStageKey?: string;
 }
 
 export interface UpdateOnboardingStageConfigDto {
@@ -52,6 +61,10 @@ export interface UpdateOnboardingStageConfigDto {
   displayOrder?: number;
   isRequired?: boolean;
   isActive?: boolean;
+}
+
+export interface ReorderOnboardingStagesDto {
+  stageKeys: string[];
 }
 
 export interface OnboardingFieldConfig {

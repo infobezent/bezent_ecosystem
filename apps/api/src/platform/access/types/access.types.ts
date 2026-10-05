@@ -33,6 +33,8 @@ export interface CompanyAccess {
   isMember: boolean;
   /** True when access comes only from platform Super Admin oversight. */
   isPlatformOversight: boolean;
+  /** True when access comes from tenant-level administrative authority. */
+  isTenantAdmin?: boolean;
   roles: AccessRoleSummary[];
   permissions: string[];
   enabledModules: ModuleCode[];

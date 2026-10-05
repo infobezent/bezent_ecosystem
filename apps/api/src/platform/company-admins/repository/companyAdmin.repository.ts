@@ -27,6 +27,7 @@ export class CompanyAdminRepository {
         role: memberships.role,
         status: memberships.status,
         assignedAt: memberships.createdAt,
+        lastLoginAt: users.lastLoginAt,
       })
       .from(memberships)
       .innerJoin(users, eq(memberships.userId, users.id))
@@ -49,6 +50,7 @@ export class CompanyAdminRepository {
       role: r.role,
       status: r.status,
       assignedAt: r.assignedAt.toISOString(),
+      lastLoginAt: r.lastLoginAt ? r.lastLoginAt.toISOString() : null,
     }));
   }
 

@@ -95,7 +95,14 @@ const BENEFIT_ITEMS = [
   { id: 'vehicle', label: 'Company Vehicle' },
 ];
 
-export function AccountsSection() {
+import type { Chapter06AccountsState } from '../types/registration.types';
+
+export interface AccountsSectionProps {
+  value?: Chapter06AccountsState;
+  onChange?: (updated: Chapter06AccountsState) => void;
+}
+
+export function AccountsSection({ value: _value, onChange: _onChange }: AccountsSectionProps = {}) {
   // A. BANK DETAILS STATE
   const [ifscCode, setIfscCode] = useState('HDFC0001234');
   const [bankName, setBankName] = useState('HDFC Bank Ltd');

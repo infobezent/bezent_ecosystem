@@ -40,6 +40,7 @@ export function CustomerProvisioningPage() {
   const [companyCode, setCompanyCode] = useState('');
   const [legalName, setLegalName] = useState('');
   const [businessEmail, setBusinessEmail] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
   const [country, setCountry] = useState('US');
   const [timeZone, setTimeZone] = useState('America/New_York');
 
@@ -71,19 +72,19 @@ export function CustomerProvisioningPage() {
     if (e) e.preventDefault();
     setError(null);
     if (step === 1 && !canProceedStep1) {
-      setError('Please provide valid Tenant Name and Code');
+      setError('Please provide valid Customer Name and Code.');
       return;
     }
     if (step === 2 && !canProceedStep2) {
-      setError('Please provide valid Company Name and Code');
+      setError('Please provide valid Primary Company Name and Code.');
       return;
     }
     if (step === 3 && !canProceedStep3) {
-      setError('At least one application module must be selected');
+      setError('At least one application must be selected.');
       return;
     }
     if (step === 4 && !canProceedStep4) {
-      setError('Please complete the Administrator configuration');
+      setError('Please complete the Administrator configuration.');
       return;
     }
     setStep((prev) => Math.min(prev + 1, 5));
@@ -92,6 +93,31 @@ export function CustomerProvisioningPage() {
   const handleBack = () => {
     setError(null);
     setStep((prev) => Math.max(prev - 1, 1));
+  };
+
+  const resetForm = () => {
+    setResult(null);
+    setStep(1);
+    setTenantName('');
+    setTenantCode('');
+    setTenantEmail('');
+    setTenantPhone('');
+    setCompanyName('');
+    setCompanyCode('');
+    setLegalName('');
+    setBusinessEmail('');
+    setContactPhone('');
+    setEnableHrms(true);
+    setEnableCrm(false);
+    setEnablePm(false);
+    setAdminMode('create');
+    setAdminUserId('');
+    setAdminEmail('');
+    setAdminFirstName('');
+    setAdminLastName('');
+    setAdminPhone('');
+    setActivateImmediately(true);
+    setError(null);
   };
 
   const handleProvision = async () => {
@@ -115,6 +141,7 @@ export function CustomerProvisioningPage() {
         code: companyCode.trim().toUpperCase(),
         legalName: legalName.trim() || undefined,
         businessEmail: businessEmail.trim() || undefined,
+        contactPhone: contactPhone.trim() || undefined,
         country: country.trim() || undefined,
         timeZone: timeZone.trim() || undefined,
       },
@@ -137,7 +164,9 @@ export function CustomerProvisioningPage() {
       const response = await superAdminApi.provisionCustomer(payload);
       setResult(response);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Provisioning failed');
+      setError(
+        err instanceof Error ? err.message : 'Provisioning failed. Please verify input data.',
+      );
     } finally {
       setSubmitting(false);
     }
@@ -147,7 +176,7 @@ export function CustomerProvisioningPage() {
     <Page>
       <PageHeader
         title="Customer Provisioning"
-        subtitle="Guided, atomic multi-tenant customer onboarding workflow"
+        subtitle="Onboard a new BEZENT customer: customer tenant, primary company, application entitlements, and initial administrator."
         actions={
           <Button variant="secondary" onClick={() => navigate('/super-admin/tenants')}>
             Cancel
@@ -156,39 +185,94 @@ export function CustomerProvisioningPage() {
       />
 
       {error && (
-        <Alert variant="error" title="Provisioning Validation / Execution Error">
+        <Alert
+          variant="error"
+          title="Provisioning Validation / Execution Error"
+          onDismiss={() => setError(null)}
+        >
           {error}
         </Alert>
       )}
 
-      {/* Result view */}
+      {/* ── SUCCESS STATE ─────────────────────────────────────────── */}
       {result ? (
         <Stack gap="lg">
-          <Alert variant="success" title="Customer Successfully Provisioned!">
-            The customer tenant, primary company, module entitlements, and Company Admin were
-            atomically created in MySQL.
+          <Alert variant="success" title="Customer provisioned successfully">
+            {result.tenant.name} is ready on BEZENT. Customer tenant boundary, primary company,
+            application entitlements, and company administrator were atomically created.
           </Alert>
 
           <Card>
-            <Section title="Provisioning Summary" subtitle="Created resources and sign-in">
+            <Section
+              title="Provisioning Summary"
+              subtitle="Created resources and initial access state"
+            >
               <Grid columns={2} gap="lg">
                 <Stack gap="sm">
-                  <strong>Tenant:</strong> {result.tenant.name} (<code>{result.tenant.code}</code>)
-                  <br />
-                  <strong>Company:</strong> {result.company.name} (
-                  <code>{result.company.code}</code>)
-                  <br />
-                  <strong>Status:</strong>{' '}
-                  <Badge status={result.tenant.status}>{result.tenant.status}</Badge>
+                  <div>
+                    <span className="bezent-caption">Customer</span>
+                    <div>
+                      <strong>{result.tenant.name}</strong> (<code>{result.tenant.code}</code>)
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="bezent-caption">Primary Company</span>
+                    <div>
+                      <strong>{result.company.name}</strong> (<code>{result.company.code}</code>)
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="bezent-caption">Applications</span>
+                    <div>
+                      <Inline gap="xs">
+                        {result.tenant.activeModules && result.tenant.activeModules.length > 0 ? (
+                          result.tenant.activeModules.map((m) => (
+                            <Badge key={m} variant="success">
+                              {m === 'hrms' ? 'HRMS' : m === 'crm' ? 'CRM' : 'Project Management'}
+                            </Badge>
+                          ))
+                        ) : (
+                          <Badge variant="neutral">None</Badge>
+                        )}
+                      </Inline>
+                    </div>
+                  </div>
                 </Stack>
 
                 <Stack gap="sm">
-                  <strong>Assigned Company Admin:</strong> {result.admin.firstName}{' '}
-                  {result.admin.lastName} ({result.admin.email})
-                  <br />
-                  <strong>Sign-in:</strong> Email one-time code (no password)
-                  <br />
-                  <span className="bezent-caption">{result.invitationDelivery.message}</span>
+                  <div>
+                    <span className="bezent-caption">Initial Administrator</span>
+                    <div>
+                      <strong>
+                        {result.admin.firstName} {result.admin.lastName}
+                      </strong>{' '}
+                      ({result.admin.email})
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="bezent-caption">Admin Access</span>
+                    <div>
+                      <Inline gap="xs" align="center">
+                        <Badge
+                          variant={
+                            result.invitationDelivery.status === 'INVITATION_EMAILED'
+                              ? 'info'
+                              : 'warning'
+                          }
+                        >
+                          {result.invitationDelivery.status === 'INVITATION_EMAILED'
+                            ? 'Invitation sent / Pending first sign-in'
+                            : 'Invitation email pending'}
+                        </Badge>
+                      </Inline>
+                    </div>
+                    <div>
+                      <span className="bezent-caption">{result.invitationDelivery.message}</span>
+                    </div>
+                  </div>
                 </Stack>
               </Grid>
             </Section>
@@ -199,33 +283,28 @@ export function CustomerProvisioningPage() {
               variant="primary"
               onClick={() => navigate(`/super-admin/tenants/${result.tenant.id}`)}
             >
-              Open Tenant Profile
+              View Customer
             </Button>
             <Button
               variant="secondary"
-              onClick={() => {
-                setResult(null);
-                setStep(1);
-                setTenantName('');
-                setTenantCode('');
-                setCompanyName('');
-                setCompanyCode('');
-                setAdminEmail('');
-              }}
+              onClick={() => navigate(`/super-admin/companies/${result.company.id}`)}
             >
+              View Company
+            </Button>
+            <Button variant="secondary" onClick={resetForm}>
               Provision Another Customer
             </Button>
           </Inline>
         </Stack>
       ) : (
-        /* Multi-step Wizard */
+        /* ── 5-STEP WIZARD ─────────────────────────────────────────── */
         <Stack gap="lg">
-          {/* Progress Indicators */}
+          {/* Step Progress Header */}
           <Card>
             <Inline gap="md" justify="between" align="center">
               <Inline gap="sm">
                 <Badge variant={step === 1 ? 'info' : step > 1 ? 'success' : 'neutral'}>
-                  1. Tenant Details
+                  1. Customer
                 </Badge>
                 <span>→</span>
                 <Badge variant={step === 2 ? 'info' : step > 2 ? 'success' : 'neutral'}>
@@ -233,29 +312,29 @@ export function CustomerProvisioningPage() {
                 </Badge>
                 <span>→</span>
                 <Badge variant={step === 3 ? 'info' : step > 3 ? 'success' : 'neutral'}>
-                  3. Modules
+                  3. Applications
                 </Badge>
                 <span>→</span>
                 <Badge variant={step === 4 ? 'info' : step > 4 ? 'success' : 'neutral'}>
-                  4. Administrator
+                  4. Initial Administrator
                 </Badge>
                 <span>→</span>
-                <Badge variant={step === 5 ? 'info' : 'neutral'}>5. Review & Execute</Badge>
+                <Badge variant={step === 5 ? 'info' : 'neutral'}>5. Review & Provision</Badge>
               </Inline>
               <span className="bezent-caption">Step {step} of 5</span>
             </Inline>
           </Card>
 
-          {/* Step 1: Tenant */}
+          {/* Step 1: Customer */}
           {step === 1 && (
             <Card>
               <Section
                 title="Step 1: Customer Tenant Identity"
-                subtitle="Establish customer isolation root and unique identifier"
+                subtitle="Establish customer isolation boundary and unique tenant identifier"
               >
                 <Stack gap="md">
                   <Input
-                    label="Customer / Organization Name *"
+                    label="Customer Name *"
                     placeholder="e.g. Apex Global Industries"
                     value={tenantName}
                     onChange={(e) => {
@@ -276,11 +355,11 @@ export function CustomerProvisioningPage() {
                   />
 
                   <Input
-                    label="Tenant Code *"
+                    label="Customer Code *"
                     placeholder="e.g. APEX-GLOBAL"
                     value={tenantCode}
                     onChange={(e) => setTenantCode(e.target.value.toUpperCase())}
-                    helperText="Unique uppercase tenant domain identifier"
+                    helperText="Unique uppercase customer tenant identifier"
                     required
                   />
 
@@ -303,12 +382,12 @@ export function CustomerProvisioningPage() {
             </Card>
           )}
 
-          {/* Step 2: Company */}
+          {/* Step 2: Primary Company */}
           {step === 2 && (
             <Card>
               <Section
-                title="Step 2: Primary Company Entity"
-                subtitle="Configure the initial legal business entity for this customer"
+                title="Step 2: Primary Company"
+                subtitle="Configure the initial legal operating entity belonging to this customer"
               >
                 <Stack gap="md">
                   <Input
@@ -334,6 +413,7 @@ export function CustomerProvisioningPage() {
                     placeholder="e.g. APEX-US"
                     value={companyCode}
                     onChange={(e) => setCompanyCode(e.target.value.toUpperCase())}
+                    helperText="Unique company identifier within this customer"
                     required
                   />
 
@@ -350,6 +430,13 @@ export function CustomerProvisioningPage() {
                     placeholder="billing@apex.com"
                     value={businessEmail}
                     onChange={(e) => setBusinessEmail(e.target.value)}
+                  />
+
+                  <Input
+                    label="Contact Phone"
+                    placeholder="+1-555-0177"
+                    value={contactPhone}
+                    onChange={(e) => setContactPhone(e.target.value)}
                   />
 
                   <Inline gap="md">
@@ -369,12 +456,12 @@ export function CustomerProvisioningPage() {
             </Card>
           )}
 
-          {/* Step 3: Modules */}
+          {/* Step 3: Applications */}
           {step === 3 && (
             <Card>
               <Section
-                title="Step 3: Application Module Entitlements"
-                subtitle="Select which BEZENT applications to enable for this customer"
+                title="Step 3: Application Entitlements"
+                subtitle="Select top-level BEZENT applications. This establishes the customer tenant entitlement ceiling and initial primary company access."
               >
                 <Stack gap="md">
                   <Card>
@@ -382,7 +469,7 @@ export function CustomerProvisioningPage() {
                       <Stack gap="xs">
                         <strong>HRMS (Human Resource Management System)</strong>
                         <span className="bezent-caption">
-                          Employee directory, onboarding, organization, attendance, leave and ESS.
+                          Workforce records, onboarding, organization, attendance, leave, and ESS.
                         </span>
                       </Stack>
                       <Switch
@@ -397,7 +484,7 @@ export function CustomerProvisioningPage() {
                       <Stack gap="xs">
                         <strong>CRM (Customer Relationship Management)</strong>
                         <span className="bezent-caption">
-                          Sales pipeline, accounts, contacts and business opportunity tracking.
+                          Sales pipeline, accounts, contacts, and business opportunity tracking.
                         </span>
                       </Stack>
                       <Switch
@@ -412,7 +499,7 @@ export function CustomerProvisioningPage() {
                       <Stack gap="xs">
                         <strong>Project Management</strong>
                         <span className="bezent-caption">
-                          Team projects, task boards, milestones and deliverable tracking.
+                          Team projects, task boards, milestones, and deliverable tracking.
                         </span>
                       </Stack>
                       <Switch checked={enablePm} onChange={(e) => setEnablePm(e.target.checked)} />
@@ -423,12 +510,12 @@ export function CustomerProvisioningPage() {
             </Card>
           )}
 
-          {/* Step 4: Administrator */}
+          {/* Step 4: Initial Administrator */}
           {step === 4 && (
             <Card>
               <Section
-                title="Step 4: Company Administrator Assignment"
-                subtitle="Designate or create the primary administrator account for this tenant"
+                title="Step 4: Initial Company Administrator"
+                subtitle="Designate or create the authorized initial administrator for the primary company"
               >
                 <Stack gap="md">
                   <Select
@@ -437,7 +524,7 @@ export function CustomerProvisioningPage() {
                     onChange={(e) => setAdminMode(e.target.value as 'create' | 'existing')}
                     options={[
                       { value: 'create', label: 'Create New Company Administrator' },
-                      { value: 'existing', label: 'Assign Existing User by User ID' },
+                      { value: 'existing', label: 'Assign Existing Platform User ID' },
                     ]}
                   />
 
@@ -484,10 +571,11 @@ export function CustomerProvisioningPage() {
                         onChange={(e) => setAdminPhone(e.target.value)}
                       />
 
-                      <span className="bezent-caption">
-                        No password is created. The administrator is emailed sign-in instructions
-                        and signs in with a one-time code sent to this email.
-                      </span>
+                      <Alert variant="info" title="Universal Email + OTP Authentication">
+                        No password is created. The administrator will be emailed sign-in
+                        instructions and authenticates passwordlessly via Email OTP at the BEZENT
+                        login page.
+                      </Alert>
                     </Stack>
                   )}
                 </Stack>
@@ -495,25 +583,29 @@ export function CustomerProvisioningPage() {
             </Card>
           )}
 
-          {/* Step 5: Review & Execute */}
+          {/* Step 5: Review & Provision */}
           {step === 5 && (
             <Card>
               <Section
-                title="Step 5: Review & Execute Provisioning"
-                subtitle="Verify configuration before executing atomic database transaction"
+                title="Step 5: Review & Provision Customer"
+                subtitle="Verify all configurations before executing atomic customer provisioning"
               >
                 <Stack gap="md">
                   <Grid columns={2} gap="md">
                     <Stack gap="xs">
-                      <span className="bezent-caption">Customer Tenant</span>
+                      <span className="bezent-caption">Customer</span>
                       <strong>{tenantName}</strong> (<code>{tenantCode}</code>)
+                      {tenantEmail && (
+                        <span className="bezent-caption">Contact: {tenantEmail}</span>
+                      )}
                     </Stack>
                     <Stack gap="xs">
                       <span className="bezent-caption">Primary Company</span>
                       <strong>{companyName}</strong> (<code>{companyCode}</code>)
+                      {legalName && <span className="bezent-caption">Legal: {legalName}</span>}
                     </Stack>
                     <Stack gap="xs">
-                      <span className="bezent-caption">Enabled Modules</span>
+                      <span className="bezent-caption">Enabled Applications</span>
                       <Inline gap="xs">
                         {enableHrms && <Badge variant="success">HRMS</Badge>}
                         {enableCrm && <Badge variant="success">CRM</Badge>}
@@ -521,7 +613,7 @@ export function CustomerProvisioningPage() {
                       </Inline>
                     </Stack>
                     <Stack gap="xs">
-                      <span className="bezent-caption">Administrator</span>
+                      <span className="bezent-caption">Initial Administrator</span>
                       {adminMode === 'create' ? (
                         <span>
                           {adminFirstName} {adminLastName} ({adminEmail})
@@ -552,7 +644,7 @@ export function CustomerProvisioningPage() {
             </Card>
           )}
 
-          {/* Navigation Controls */}
+          {/* Wizard Navigation Controls */}
           <Inline justify="between">
             <Button variant="secondary" onClick={handleBack} disabled={step === 1 || submitting}>
               Back
@@ -564,7 +656,7 @@ export function CustomerProvisioningPage() {
               </Button>
             ) : (
               <Button variant="primary" onClick={handleProvision} disabled={submitting}>
-                {submitting ? 'Provisioning Customer...' : 'Execute Provisioning'}
+                {submitting ? 'Provisioning Customer...' : 'Provision Customer'}
               </Button>
             )}
           </Inline>

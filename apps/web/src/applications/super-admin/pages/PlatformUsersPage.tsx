@@ -21,14 +21,34 @@ import {
   Toolbar,
 } from '../../../design-system/components';
 import { BezentIcon } from '../../../design-system/icons';
+import { useAuth } from '../../../platform/auth';
 import { superAdminApi, type PlatformUserSummary, type TenantRecord } from '../api/superAdminApi';
 
+const formatRoleLabel = (role: string): string => {
+  switch (role) {
+    case 'company_admin':
+      return 'Company Admin';
+    case 'hr_manager':
+      return 'HR Manager';
+    case 'employee':
+      return 'Employee';
+    case 'user':
+      return 'User';
+    default:
+      return role.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+};
+
 export function PlatformUsersPage() {
+  const { access } = useAuth();
+  const currentUserId = access?.user?.id;
+
   const [users, setUsers] = useState<PlatformUserSummary[]>([]);
   const [tenants, setTenants] = useState<TenantRecord[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const [selectedTenantId, setSelectedTenantId] = useState<string>('all');
   const [search, setSearch] = useState<string>('');
@@ -62,16 +82,44 @@ export function PlatformUsersPage() {
 
   const handleToggleStatus = async (user: PlatformUserSummary) => {
     if (user.isSuperAdmin) {
-      alert('Super Admin accounts cannot be suspended from user directory.');
+      setError('Super Admin accounts cannot be suspended from user directory.');
+      return;
+    }
+    if (user.id === currentUserId) {
+      setError('Cannot suspend your own active administrator account.');
       return;
     }
     const newStatus = user.status === 'active' ? 'suspended' : 'active';
     try {
       await superAdminApi.updateUserStatus(user.id, newStatus);
+      setNotice(
+        `User ${user.email} status changed to ${newStatus === 'active' ? 'Active' : 'Suspended'}.`,
+      );
       await fetchUsers();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to update user status');
     }
+  };
+
+  const renderMemberships = (memberships?: PlatformUserSummary['memberships']) => {
+    if (!memberships || memberships.length === 0) {
+      return <span className="bezent-caption">No company memberships</span>;
+    }
+
+    return (
+      <Stack gap="xs">
+        {memberships.map((m, idx) => {
+          const roleLabel = formatRoleLabel(m.role);
+          const company = m.companyName || 'Company';
+          const tenant = m.tenantName || m.tenantId;
+          return (
+            <span key={idx} className="bezent-caption">
+              <strong>{roleLabel}</strong> at {company} ({tenant})
+            </span>
+          );
+        })}
+      </Stack>
+    );
   };
 
   return (
@@ -82,8 +130,19 @@ export function PlatformUsersPage() {
       />
 
       {error && (
-        <Alert variant="error" title="Error" onDismiss={() => setError(null)}>
+        <Alert variant="error" title="Action Error" onDismiss={() => setError(null)}>
           {error}
+        </Alert>
+      )}
+
+      {notice && (
+        <Alert
+          variant="success"
+          title="Status Updated"
+          dismissible
+          onDismiss={() => setNotice(null)}
+        >
+          {notice}
         </Alert>
       )}
 
@@ -143,9 +202,10 @@ export function PlatformUsersPage() {
               <TableHead>
                 <TableRow>
                   <TableHeaderCell>User</TableHeaderCell>
-                  <TableHeaderCell>Role & Level</TableHeaderCell>
-                  <TableHeaderCell>Memberships</TableHeaderCell>
+                  <TableHeaderCell>Account Type</TableHeaderCell>
+                  <TableHeaderCell>Access / Memberships</TableHeaderCell>
                   <TableHeaderCell>Status</TableHeaderCell>
+                  <TableHeaderCell>Last Sign-In</TableHeaderCell>
                   <TableHeaderCell>Created</TableHeaderCell>
                   <TableHeaderCell>Actions</TableHeaderCell>
                 </TableRow>
@@ -165,35 +225,45 @@ export function PlatformUsersPage() {
                       {user.isSuperAdmin ? (
                         <Badge variant="warning">SUPER ADMIN</Badge>
                       ) : (
-                        <Badge variant="neutral">Platform User</Badge>
+                        <Badge variant="neutral">User</Badge>
                       )}
                     </TableCell>
+                    <TableCell>{renderMemberships(user.memberships)}</TableCell>
                     <TableCell>
-                      {user.memberships && user.memberships.length > 0 ? (
-                        <Stack gap="xs">
-                          {user.memberships.map((m, idx) => (
-                            <span key={idx} className="bezent-caption">
-                              {m.role} @ {m.tenantId}
-                            </span>
-                          ))}
-                        </Stack>
+                      <Badge status={user.status}>{user.status.toUpperCase()}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      {user.lastLoginAt ? (
+                        <span>
+                          {new Date(user.lastLoginAt).toLocaleDateString(undefined, {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </span>
                       ) : (
-                        <span className="bezent-caption">None</span>
+                        <span className="bezent-caption">Never signed in</span>
                       )}
                     </TableCell>
                     <TableCell>
-                      <Badge status={user.status}>{user.status}</Badge>
+                      {new Date(user.createdAt).toLocaleDateString(undefined, {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
                     </TableCell>
-                    <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell>
-                      {!user.isSuperAdmin && (
+                      {!user.isSuperAdmin && currentUserId !== user.id && (
                         <Button
                           variant={user.status === 'active' ? 'danger' : 'secondary'}
                           size="sm"
                           onClick={() => handleToggleStatus(user)}
                         >
-                          {user.status === 'active' ? 'Suspend' : 'Activate'}
+                          {user.status === 'active' ? 'Suspend' : 'Reactivate'}
                         </Button>
+                      )}
+                      {currentUserId === user.id && (
+                        <span className="bezent-caption">Current User</span>
                       )}
                     </TableCell>
                   </TableRow>

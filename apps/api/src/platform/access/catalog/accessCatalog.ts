@@ -229,9 +229,20 @@ const BASE_PERMISSION_DEFINITIONS: PermissionDefinition[] = [
     'company.modules.read',
   ]),
   company('modules', 'manage', 'Manage applications', 'Enable or disable entitled applications.'),
-  company('organization', 'view', 'View organization', 'View organization structure summary.', [
-    'company.organization.read',
-  ]),
+  company(
+    'organization',
+    'view',
+    'View organization masters',
+    'View organization structure, departments, and work locations.',
+    ['company.organization.read'],
+  ),
+  company(
+    'organization',
+    'manage',
+    'Manage organization masters',
+    'Create and edit company departments, work locations, and organization structure.',
+    ['company.organization.edit'],
+  ),
   company('policies', 'view', 'View policies', 'View company policy and settings summary.', [
     'company.policies.read',
   ]),
@@ -270,18 +281,42 @@ const BASE_PERMISSION_DEFINITIONS: PermissionDefinition[] = [
   ]),
   hrms('documents', 'manage', 'Manage employee documents', 'Record and verify employee documents.'),
   hrms(
-    'organization',
+    'workforce',
     'view',
-    'View organization masters',
-    'View departments, designations and locations.',
-    ['hrms.organization.read'],
+    'View workforce configuration',
+    'View designations, job levels and grades.',
+    [
+      'hrms.workforce.view',
+      'hrms.workforce.read',
+      'hrms.organization.view',
+      'hrms.organization.read',
+      'organization.designations.view',
+      'organization.jobLevels.view',
+      'organization.grades.view',
+    ],
   ),
   hrms(
-    'organization',
+    'workforce',
     'manage',
-    'Manage organization masters',
-    'Edit departments, designations and locations.',
+    'Manage workforce configuration',
+    'Edit designations, job levels and grades.',
+    [
+      'hrms.workforce.manage',
+      'hrms.organization.manage',
+      'organization.designations.manage',
+      'organization.jobLevels.manage',
+      'organization.grades.manage',
+    ],
   ),
+  hrms(
+    'jobLevels',
+    'view',
+    'View job levels',
+    'View organizational job levels and seniority ranks.',
+  ),
+  hrms('jobLevels', 'manage', 'Manage job levels', 'Create, edit, and deactivate job levels.'),
+  hrms('grades', 'view', 'View grades', 'View employee grades and classification ranks.'),
+  hrms('grades', 'manage', 'Manage grades', 'Create, edit, and deactivate grades.'),
   hrms(
     'settings',
     'view',
@@ -418,7 +453,7 @@ export function isRoleAssignablePermission(id: string): boolean {
   return findPermission(id)?.scope === 'company';
 }
 
-const COMPANY_ADMINISTRATION_PERMISSIONS = expandPermissionKeys(
+export const COMPANY_ADMINISTRATION_PERMISSIONS: readonly string[] = expandPermissionKeys(
   PERMISSION_CATALOG.filter((p) => p.group === 'company_administration').map((p) => p.id),
 );
 

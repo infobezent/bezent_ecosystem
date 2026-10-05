@@ -16,6 +16,8 @@ export interface ShellNavItem {
   id: string;
   label: string;
   icon: BezentIconName;
+  /** Optional heading override in the sub-nav flyout (e.g. "Access & Applications" when rail is "Access"). */
+  flyoutTitle?: string;
   /** Optional line under the flyout title. */
   subtitle?: string;
   /** When present and non-empty, hovering the item opens the flyout. */

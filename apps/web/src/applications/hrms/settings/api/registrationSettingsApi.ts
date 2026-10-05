@@ -1,6 +1,7 @@
 import {
   fetchResolvedForm,
   saveFormOverrides,
+  type FormCustomizationMetadata,
   type FormFieldSettingInput,
   type ResolvedForm,
 } from './formsApi';
@@ -46,6 +47,7 @@ export interface RegistrationFieldConfig {
 export interface RegistrationConfiguration {
   sections: RegistrationSectionConfig[];
   fields: RegistrationFieldConfig[];
+  metadata?: FormCustomizationMetadata;
 }
 
 export type RegistrationFieldSettingInput = FormFieldSettingInput;
@@ -54,6 +56,7 @@ export type RegistrationFieldSettingInput = FormFieldSettingInput;
 export function toRegistrationConfiguration(form: ResolvedForm): RegistrationConfiguration {
   const meta = form.form?.metadata;
   return {
+    metadata: meta,
     sections: form.sections.map((section) => ({
       id: section.key,
       label: meta?.sections?.[section.key]?.title || section.label,

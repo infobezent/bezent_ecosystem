@@ -51,7 +51,7 @@ export function SubNavFlyout({
       <span className="subnav-flyout__pointer" aria-hidden="true" />
 
       <div className="subnav-flyout__header">
-        <div className="subnav-flyout__title">{item.label}</div>
+        <div className="subnav-flyout__title">{item.flyoutTitle || item.label}</div>
         {item.subtitle && <div className="subnav-flyout__subtitle">{item.subtitle}</div>}
       </div>
 

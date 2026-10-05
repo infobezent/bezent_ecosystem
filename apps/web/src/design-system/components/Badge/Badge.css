@@ -10,7 +10,7 @@
   min-width: 14px;
   height: 14px;
   padding: 0 3.5px;
-  border-radius: 99px;
+  border-radius: var(--radius-full);
   background: var(--badge-bg, #b3261e);
   color: var(--icon-on-solid, #ffffff);
   font-size: 9px;
@@ -32,7 +32,7 @@
 .bezent-badge--sm {
   min-width: 18px;
   height: 18px;
-  font-size: 11px;
+  font-size: var(--font-caption-size, var(--font-size-xs, 11px));
   padding: 0 5px;
   line-height: 18px;
 }
@@ -56,10 +56,10 @@
   gap: 6px;
   height: 22px;
   padding: 0 8px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: -0.1px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-caption-size, var(--font-size-xs, 11px));
+  font-weight: var(--font-weight-semibold, 600);
+  letter-spacing: var(--letter-spacing-normal, 0em);
   line-height: 1;
   white-space: nowrap;
   user-select: none;

@@ -206,6 +206,7 @@ export async function seedDatabase() {
       isRequired: true,
       isActive: true,
       isSystem: true,
+      isTerminal: false,
     },
     {
       id: 'stg_cfg_documents',
@@ -216,6 +217,7 @@ export async function seedDatabase() {
       isRequired: true,
       isActive: true,
       isSystem: true,
+      isTerminal: false,
     },
     {
       id: 'stg_cfg_induction',
@@ -226,6 +228,7 @@ export async function seedDatabase() {
       isRequired: true,
       isActive: true,
       isSystem: true,
+      isTerminal: false,
     },
     {
       id: 'stg_cfg_completed',
@@ -236,6 +239,7 @@ export async function seedDatabase() {
       isRequired: true,
       isActive: true,
       isSystem: true,
+      isTerminal: true,
     },
   ];
 

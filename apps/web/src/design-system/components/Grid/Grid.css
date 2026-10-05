@@ -77,27 +77,27 @@
 }
 
 .bezent-grid--gap-none {
-  gap: 0;
+  gap: var(--space-0);
 }
 
 .bezent-grid--gap-xs {
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .bezent-grid--gap-sm {
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .bezent-grid--gap-md {
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .bezent-grid--gap-lg {
-  gap: 20px;
+  gap: var(--space-5);
 }
 
 .bezent-grid--gap-xl {
-  gap: 24px;
+  gap: var(--space-6);
 }
 
 @media (max-width: 1024px) {

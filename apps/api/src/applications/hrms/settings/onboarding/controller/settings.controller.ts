@@ -2,7 +2,10 @@ import type { Request, Response, NextFunction } from 'express';
 import { OnboardingSettingsService } from '../service/settings.service.js';
 import {
   validateUpdateGeneralSettings,
+  validateCreateStageConfig,
   validateUpdateStageConfig,
+  validateReorderStages,
+  validateStageKey,
   validateUpdateFieldConfig,
   validateCreateDocumentRequirement,
   validateUpdateDocumentRequirement,
@@ -84,6 +87,17 @@ export class OnboardingSettingsController {
     }
   };
 
+  createStageConfig = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { tenantId, companyId } = this.getContext(req);
+      const dto = validateCreateStageConfig(req.body);
+      const created = await this.service.createStageConfig(tenantId, companyId, dto);
+      res.status(201).json({ data: created });
+    } catch (err) {
+      next(err);
+    }
+  };
+
   updateStageConfig = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { tenantId, companyId } = this.getContext(req);
@@ -91,6 +105,28 @@ export class OnboardingSettingsController {
       const dto = validateUpdateStageConfig(stageKey, req.body);
       const updated = await this.service.updateStageConfig(tenantId, companyId, stageKey, dto);
       res.json({ data: updated });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  reorderStageConfigs = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { tenantId, companyId } = this.getContext(req);
+      const dto = validateReorderStages(req.body);
+      const updated = await this.service.reorderStageConfigs(tenantId, companyId, dto);
+      res.json({ data: updated });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  deleteStageConfig = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { tenantId, companyId } = this.getContext(req);
+      const stageKey = validateStageKey(req.params.stageKey as string);
+      await this.service.deleteStageConfig(tenantId, companyId, stageKey);
+      res.status(204).end();
     } catch (err) {
       next(err);
     }

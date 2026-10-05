@@ -95,7 +95,17 @@ const SCOPE_OPTIONS = [
   { value: 'Custom', label: 'Custom Scope Configuration' },
 ];
 
-export function OnlineAccessSection() {
+import type { Chapter07OnlineAccessState } from '../types/registration.types';
+
+export interface OnlineAccessSectionProps {
+  value?: Chapter07OnlineAccessState;
+  onChange?: (updated: Chapter07OnlineAccessState) => void;
+}
+
+export function OnlineAccessSection({
+  value: _value,
+  onChange: _onChange,
+}: OnlineAccessSectionProps = {}) {
   // A. ACCOUNT INFORMATION STATE
   const [username, setUsername] = useState('arun.kumar');
   const [companyEmail, setCompanyEmail] = useState('arun.kumar@bezent.com');

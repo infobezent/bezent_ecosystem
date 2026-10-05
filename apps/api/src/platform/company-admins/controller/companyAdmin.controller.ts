@@ -39,6 +39,17 @@ export class CompanyAdminController {
       next(err);
     }
   };
+
+  resendInvitation = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const membershipId = String(req.params.membershipId);
+      const actor = { id: req.user?.id, email: req.user?.email };
+      const result = await this.service.resendInvitation(membershipId, actor);
+      res.status(200).json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
 }
 
 export const companyAdminController = new CompanyAdminController();

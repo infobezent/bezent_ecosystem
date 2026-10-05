@@ -4,8 +4,8 @@ import { ModulePlaceholder } from '../pages/ModulePlaceholder';
 import { OnboardingPage } from '../onboarding';
 import { EmployeeAdministrationPage } from '../employee-administration';
 import { DocumentsPage } from '../documents';
-import { EMPLOYEES_PATH, EmployeeDirectoryPage, EmployeeProfilePage } from '../employees';
 import { SettingsPage } from '../settings';
+import { EmployeeDirectoryPage, EmployeeProfilePage, EMPLOYEES_PATH } from '../employees';
 import { destinationPath } from '../../../shared/utils/navigation';
 import { useAuth } from '../../../platform/auth';
 import { landingPath } from '../../../platform/auth/landing';
@@ -163,6 +163,85 @@ export const hrmsRoutes: RouteObject[] = [
       {
         path: 'administrative/*',
         element: <Navigate to="/hrms/administration/employee-administration" replace />,
+      },
+      // Organization masters are now owned by Company Administration.
+      // These backward-compatible redirects preserve any existing deep links into
+      // the old /hrms/settings/organization/* and /hrms/organization/* paths.
+      {
+        path: 'settings/organization/profile',
+        element: <Navigate to="/company-admin/profile" replace />,
+      },
+      {
+        path: 'settings/organization/structure',
+        element: <Navigate to="/company-admin/organization/structure" replace />,
+      },
+      {
+        path: 'settings/organization/departments',
+        element: <Navigate to="/company-admin/organization/departments" replace />,
+      },
+      {
+        path: 'settings/organization/designations',
+        element: (
+          <Navigate
+            to="/hrms/settings/administration?tab=employee-configuration&sub=designations"
+            replace
+          />
+        ),
+      },
+      {
+        path: 'settings/organization/locations',
+        element: <Navigate to="/company-admin/organization/work-locations" replace />,
+      },
+      {
+        path: 'settings/organization/job-levels',
+        element: (
+          <Navigate
+            to="/hrms/settings/administration?tab=employee-configuration&sub=job-levels"
+            replace
+          />
+        ),
+      },
+      {
+        path: 'settings/organization',
+        element: <Navigate to="/company-admin/organization" replace />,
+      },
+      {
+        path: 'organization/job-levels',
+        element: (
+          <Navigate
+            to="/hrms/settings/administration?tab=employee-configuration&sub=job-levels"
+            replace
+          />
+        ),
+      },
+      {
+        path: 'organization/locations',
+        element: <Navigate to="/company-admin/organization/work-locations" replace />,
+      },
+      {
+        path: 'organization/designations',
+        element: (
+          <Navigate
+            to="/hrms/settings/administration?tab=employee-configuration&sub=designations"
+            replace
+          />
+        ),
+      },
+      {
+        path: 'organization/departments',
+        element: <Navigate to="/company-admin/organization/departments" replace />,
+      },
+      {
+        path: 'organization/structure',
+        element: <Navigate to="/company-admin/organization/structure" replace />,
+      },
+      {
+        path: 'organization/profile',
+        element: <Navigate to="/company-admin/profile" replace />,
+      },
+      {
+        path: 'organization',
+        element: <Navigate to="/company-admin/organization" replace />,
       },
       {
         path: '*',

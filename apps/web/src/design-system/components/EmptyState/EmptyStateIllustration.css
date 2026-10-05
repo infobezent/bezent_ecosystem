@@ -290,7 +290,7 @@
   align-items: center;
   gap: 5px;
   padding: 3px 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--bg-surface-elevated, #ffffff);
   border: 1px solid var(--border-default, #e2e8f0);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);

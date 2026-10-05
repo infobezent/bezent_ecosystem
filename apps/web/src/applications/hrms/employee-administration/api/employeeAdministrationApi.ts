@@ -19,8 +19,8 @@ export type {
   PaginationMetadata,
 } from '../../employees/api/employeesApi';
 export { fetchEmployees } from '../../employees/api/employeesApi';
-export type { MasterOption, OrganizationMasters } from '../../organization/api/organizationApi';
-export { fetchOrganizationMasters } from '../../organization/api/organizationApi';
+export type { MasterOption, OrganizationMasters } from '../../api/organizationMastersApi';
+export { fetchOrganizationMasters } from '../../api/organizationMastersApi';
 
 export type EmployeeActionType =
   | 'department_change'

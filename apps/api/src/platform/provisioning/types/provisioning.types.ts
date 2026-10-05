@@ -11,6 +11,7 @@ export interface CustomerProvisioningDto {
     id?: string;
     name: string;
     code: string;
+    maxCompanies?: number;
     contactEmail?: string | null;
     contactPhone?: string | null;
   };

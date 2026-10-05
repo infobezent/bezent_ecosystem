@@ -221,8 +221,11 @@ export class PlatformUserRepository {
 
   async getCounts() {
     const db = getDb();
-    const rows = await db.select({ id: users.id }).from(users);
-    return { total: rows.length };
+    const rows = await db.select({ status: users.status }).from(users);
+    const total = rows.length;
+    const active = rows.filter((u) => u.status === 'active').length;
+    const suspended = rows.filter((u) => u.status === 'suspended').length;
+    return { total, active, suspended };
   }
 }
 

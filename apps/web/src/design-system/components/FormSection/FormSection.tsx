@@ -1,9 +1,9 @@
 import type { HTMLAttributes, ReactNode } from 'react';
 import './FormSection.css';
 
-export interface FormSectionProps extends HTMLAttributes<HTMLDivElement> {
-  title?: string;
-  description?: string;
+export interface FormSectionProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
+  title?: ReactNode;
+  description?: ReactNode;
   actions?: ReactNode;
   children: ReactNode;
 }

@@ -1,6 +1,6 @@
 import { eq, desc, and } from 'drizzle-orm';
 import { getDb } from '../../../db/connection.js';
-import { auditLogs } from '../../../db/schema.js';
+import { auditLogs, tenants, companies } from '../../../db/schema.js';
 import type { AuditEventInput, AuditLogFilter, AuditLogRecord } from '../types/audit.types.js';
 import { generateSurrogateId } from '../../auth/security.js';
 
@@ -47,12 +47,28 @@ export class AuditRepository {
     if (filter.targetType) conditions.push(eq(auditLogs.targetType, filter.targetType));
     if (filter.targetId) conditions.push(eq(auditLogs.targetId, filter.targetId));
     if (filter.tenantId) conditions.push(eq(auditLogs.tenantId, filter.tenantId));
+    if (filter.companyId) conditions.push(eq(auditLogs.companyId, filter.companyId));
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
     const query = db
-      .select()
+      .select({
+        id: auditLogs.id,
+        actorUserId: auditLogs.actorUserId,
+        actorEmail: auditLogs.actorEmail,
+        action: auditLogs.action,
+        targetType: auditLogs.targetType,
+        targetId: auditLogs.targetId,
+        tenantId: auditLogs.tenantId,
+        companyId: auditLogs.companyId,
+        metadata: auditLogs.metadata,
+        createdAt: auditLogs.createdAt,
+        tenantName: tenants.name,
+        companyName: companies.name,
+      })
       .from(auditLogs)
+      .leftJoin(tenants, eq(auditLogs.tenantId, tenants.id))
+      .leftJoin(companies, eq(auditLogs.companyId, companies.id))
       .where(whereClause)
       .orderBy(desc(auditLogs.createdAt))
       .limit(limit)
@@ -71,7 +87,9 @@ export class AuditRepository {
         targetType: r.targetType,
         targetId: r.targetId,
         tenantId: r.tenantId,
+        tenantName: r.tenantName ?? null,
         companyId: r.companyId,
+        companyName: r.companyName ?? null,
         metadata: r.metadata,
         createdAt: r.createdAt.toISOString(),
       })),

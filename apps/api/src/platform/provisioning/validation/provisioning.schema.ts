@@ -32,6 +32,15 @@ export function validateCustomerProvisioning(body: unknown): CustomerProvisionin
     ) {
       errors['tenant.contactEmail'] = 'Invalid contact email format';
     }
+    if (t.maxCompanies !== undefined && t.maxCompanies !== null) {
+      if (
+        typeof t.maxCompanies !== 'number' ||
+        !Number.isInteger(t.maxCompanies) ||
+        t.maxCompanies < 1
+      ) {
+        errors['tenant.maxCompanies'] = 'maxCompanies must be a positive integer (at least 1)';
+      }
+    }
   }
 
   if (typeof data.company !== 'object' || data.company === null) {
@@ -108,6 +117,7 @@ export function validateCustomerProvisioning(body: unknown): CustomerProvisionin
       id: typeof t.id === 'string' && t.id.trim() ? t.id.trim() : undefined,
       name: String(t.name).trim(),
       code: String(t.code).trim().toUpperCase(),
+      maxCompanies: typeof t.maxCompanies === 'number' ? t.maxCompanies : undefined,
       contactEmail: t.contactEmail ? String(t.contactEmail).trim() : null,
       contactPhone: t.contactPhone ? String(t.contactPhone).trim() : null,
     },
@@ -137,6 +147,6 @@ export function validateCustomerProvisioning(body: unknown): CustomerProvisionin
           }
         : undefined,
     },
-    activateImmediately: Boolean(data.activateImmediately),
+    activateImmediately: data.activateImmediately === false ? false : true,
   };
 }

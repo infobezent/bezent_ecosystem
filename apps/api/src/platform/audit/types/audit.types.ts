@@ -17,7 +17,9 @@ export interface AuditLogRecord {
   targetType: string;
   targetId: string;
   tenantId: string | null;
+  tenantName?: string | null;
   companyId: string | null;
+  companyName?: string | null;
   metadata: Record<string, unknown> | null;
   createdAt: string;
 }
@@ -27,6 +29,7 @@ export interface AuditLogFilter {
   targetType?: string;
   targetId?: string;
   tenantId?: string;
+  companyId?: string;
   page?: number;
   limit?: number;
 }

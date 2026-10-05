@@ -287,46 +287,59 @@ export class OnboardingService {
     if (!targetConfig) {
       throw new BadRequestError(
         `Target stage '${dto.toStage}' is not configured for this organization.`,
+        'STAGE_NOT_FOUND',
       );
     }
     if (!targetConfig.isActive) {
       throw new BadRequestError(
         `Target stage '${dto.toStage}' is disabled in organization stage configuration.`,
+        'STAGE_INACTIVE',
       );
     }
 
-    const activeStages = stageConfigs
-      .filter((s) => s.isActive)
-      .sort((a, b) => a.displayOrder - b.displayOrder);
-
-    const currentIndex = activeStages.findIndex((s) => s.stageKey === existing.stage);
-    const targetIndex = activeStages.findIndex((s) => s.stageKey === dto.toStage);
+    const currentConfig = stageConfigs.find((s) => s.stageKey === existing.stage);
+    const sortedStages = [...stageConfigs].sort((a, b) => a.displayOrder - b.displayOrder);
+    const activeStages = sortedStages.filter((s) => s.isActive);
 
     let action: 'transition' | 'revert' | 'complete' = 'transition';
 
-    if (targetIndex > currentIndex) {
-      for (let i = currentIndex + 1; i < targetIndex; i++) {
-        const intermediate = activeStages[i]!;
-        if (intermediate.isRequired) {
+    if (currentConfig) {
+      const currentOrder = currentConfig.displayOrder;
+      const targetOrder = targetConfig.displayOrder;
+
+      if (targetOrder > currentOrder) {
+        // Forward transition: verify intermediate active required stages are not skipped
+        const intermediateRequired = activeStages.filter(
+          (s) => s.displayOrder > currentOrder && s.displayOrder < targetOrder && s.isRequired,
+        );
+        if (intermediateRequired.length > 0) {
+          const firstSkipped = intermediateRequired[0]!;
           throw new BadRequestError(
-            `Cannot skip required stage '${intermediate.name}' (${intermediate.stageKey}).`,
+            `Cannot skip required stage '${firstSkipped.name}' (${firstSkipped.stageKey}).`,
+            'STAGE_SKIPPED_REQUIRED',
           );
         }
-      }
-      if (dto.toStage === 'completed') {
-        action = 'complete';
+        action = targetConfig.isTerminal || dto.toStage === 'completed' ? 'complete' : 'transition';
+      } else if (targetOrder < currentOrder) {
+        // Revert: can only revert to immediate previous active stage
+        const activeBeforeCurrent = activeStages
+          .filter((s) => s.displayOrder < currentOrder)
+          .sort((a, b) => b.displayOrder - a.displayOrder);
+        const immediatePrev = activeBeforeCurrent[0];
+
+        if (!immediatePrev || immediatePrev.stageKey !== targetConfig.stageKey) {
+          const prevName = immediatePrev ? immediatePrev.name : 'previous active stage';
+          throw new BadRequestError(
+            `Cannot revert across multiple stages. You may only revert to the immediate previous active stage '${prevName}'.`,
+            'STAGE_INVALID_REVERT',
+          );
+        }
+        action = 'revert';
       } else {
-        action = 'transition';
+        throw new BadRequestError(`Case ${id} is already in '${dto.toStage}' stage.`);
       }
-    } else if (targetIndex < currentIndex) {
-      if (targetIndex !== currentIndex - 1) {
-        const immediatePrev = activeStages[currentIndex - 1];
-        const prevName = immediatePrev ? immediatePrev.name : 'previous active stage';
-        throw new BadRequestError(
-          `Cannot revert across multiple stages. You may only revert to the immediate previous active stage '${prevName}'.`,
-        );
-      }
-      action = 'revert';
+    } else {
+      action = targetConfig.isTerminal || dto.toStage === 'completed' ? 'complete' : 'transition';
     }
 
     const success = await this.repo.transitionStageWithHistory(

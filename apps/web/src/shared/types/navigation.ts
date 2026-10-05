@@ -20,12 +20,14 @@ export interface NavCategory {
   icon: BezentIconName;
 }
 
-/** A sub-navigation destination. Its route is `<destination.segment>/<id>`. */
+/** A sub-navigation destination. Its route is `<destination.segment>/<id>`, or custom `path` if specified. */
 export interface NavChild {
   id: string;
   label: string;
   icon: BezentIconName;
   permissionKey?: string;
+  /** Optional custom path or route segment when child route differs from `<destination.segment>/<id>`. */
+  path?: string;
 }
 
 export interface NavDestination {
@@ -35,6 +37,8 @@ export interface NavDestination {
   icon: BezentIconName;
   /** Path segment below the application's base path (`/hrms` + `/` + segment). */
   segment: string;
+  /** Optional heading override in the sub-nav flyout (e.g. "Access & Applications" when rail label is "Access"). */
+  flyoutTitle?: string;
   /** Short line under the flyout title. */
   subtitle?: string;
   /** Launcher description. */

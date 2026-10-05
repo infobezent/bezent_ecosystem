@@ -134,7 +134,14 @@ const LEVEL_OPTIONS_BY_TYPE: Record<'Beginner' | 'Intermediate' | 'Advanced' | '
     ],
   };
 
-export function SkillsSection() {
+import type { Chapter04SkillsState } from '../types/registration.types';
+
+export interface SkillsSectionProps {
+  value?: Chapter04SkillsState;
+  onChange?: (updated: Chapter04SkillsState) => void;
+}
+
+export function SkillsSection({ value: _value, onChange: _onChange }: SkillsSectionProps = {}) {
   const [skillsList, setSkillsList] = useState<SkillEntry[]>([
     {
       id: 'skill-01',

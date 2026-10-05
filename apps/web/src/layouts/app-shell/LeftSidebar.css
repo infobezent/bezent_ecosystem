@@ -13,10 +13,7 @@
   min-height: 0;
   padding: 8px 0 6px;
   background: var(--bg-sidebar, var(--bg-header));
-  font-family: 'Google Sans', sans-serif;
-  font-optical-sizing: auto;
-  font-style: normal;
-  font-variation-settings: 'GRAD' 0;
+  font-family: var(--font-family-base);
   /* No border-right: surface contrast between --bg-sidebar (#F6F8FC) and
      --bg-surface (#FFF) provides the visual separation naturally. */
 }
@@ -142,12 +139,9 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-family: 'Google Sans', sans-serif;
-  font-optical-sizing: auto;
-  font-style: normal;
-  font-variation-settings: 'GRAD' 0;
-  font-size: 12px;
-  font-weight: 550;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm, 12px);
+  font-weight: var(--font-weight-medium, 500);
   line-height: 14px;
   text-align: center;
   color: var(--nav-label-default);

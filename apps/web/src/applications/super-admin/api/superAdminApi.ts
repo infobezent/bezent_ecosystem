@@ -53,11 +53,59 @@ export interface PlatformUserSummary {
   lastLoginAt?: string | null;
   createdAt: string;
   memberships?: Array<{
+    id?: string;
     tenantId: string;
+    tenantName?: string;
     companyId: string | null;
+    companyName?: string;
     role: string;
     status: string;
   }>;
+}
+
+export type CustomerHealthStatus = 'healthy' | 'needs_attention' | 'critical';
+
+export interface NextBestAction {
+  action?: string;
+  actionType?: string;
+  label: string;
+  targetTab?: 'overview' | 'companies' | 'applications' | 'administrators' | 'activity';
+  href?: string;
+  targetPath?: string;
+  description?: string;
+}
+
+export interface CustomerHealth {
+  status: CustomerHealthStatus;
+  reason?: string;
+  reasons: string[];
+  nextBestAction?: NextBestAction | null;
+}
+
+export interface SetupMilestone {
+  key: string;
+  title: string;
+  label?: string;
+  description: string;
+  completed: boolean;
+  completedAt?: string | null;
+}
+
+export interface SetupProgress {
+  totalMilestones: number;
+  completedMilestones: number;
+  percentage: number;
+  milestones: SetupMilestone[];
+  isComplete: boolean;
+}
+
+export interface TenantCompanySummary {
+  id: string;
+  name: string;
+  code: string;
+  status: 'active' | 'suspended';
+  enabledModules: string[];
+  createdAt: string;
 }
 
 export interface TenantRecord {
@@ -71,6 +119,10 @@ export interface TenantRecord {
   updatedAt: string;
   activeModules?: string[];
   companiesCount?: number;
+  companyCount?: number;
+  companies?: TenantCompanySummary[];
+  health?: CustomerHealth;
+  setupProgress?: SetupProgress;
 }
 
 export interface CompanyRecord {
@@ -87,6 +139,11 @@ export interface CompanyRecord {
   status: 'active' | 'suspended';
   createdAt: string;
   updatedAt: string;
+  enabledModules?: string[];
+  adminsCount?: number;
+  activeAdminsCount?: number;
+  pendingAdminsCount?: number;
+  adminAccessStatus?: 'active' | 'pending' | 'none';
 }
 
 export interface ModuleCatalogItem {
@@ -123,6 +180,7 @@ export interface CompanyAdminAssignment {
   role: string;
   status: string;
   assignedAt: string;
+  lastLoginAt?: string | null;
 }
 
 export interface AuditLogEntry {
@@ -133,23 +191,117 @@ export interface AuditLogEntry {
   targetType: string;
   targetId: string;
   tenantId: string | null;
+  tenantName?: string | null;
   companyId: string | null;
+  companyName?: string | null;
   metadata: Record<string, unknown> | null;
   createdAt: string;
 }
 
+export interface GovernanceSummary {
+  authentication: {
+    method: string;
+    enabled: boolean;
+    otpExpiryMinutes: number;
+    maxVerificationAttempts: number;
+    resendCooldownSeconds: number;
+  };
+  session: {
+    ttlHours: number;
+    platformAuthorization: boolean;
+  };
+  isolation: {
+    tenantIsolation: boolean;
+    companyScoping: boolean;
+    identitySeparatedFromEmployee: boolean;
+  };
+  audit: {
+    enabled: boolean;
+    sensitiveMetadataProtection: boolean;
+    scope: string;
+  };
+  applications: {
+    total: number;
+    available: number;
+    comingSoon: number;
+  };
+}
+
+export interface NeedsAttentionItem {
+  tenantId: string;
+  tenantName: string;
+  status: 'critical' | 'needs_attention';
+  reason: string;
+  reasons: string[];
+  nextBestAction: NextBestAction | null;
+}
+
+export interface ApplicationOverviewItem {
+  code: 'hrms' | 'crm' | 'project_management';
+  name: string;
+  availability: 'GA' | 'Beta' | 'Planned';
+  entitledTenantsCount: number;
+}
+
 export interface DashboardOverview {
   metrics: {
+    customers: {
+      total: number;
+      active: number;
+      suspended: number;
+    };
+    companies: {
+      total: number;
+      active: number;
+      suspended: number;
+      withoutAdmin: number;
+    };
+    platformUsers: {
+      total: number;
+      active: number;
+      suspended: number;
+    };
+    companyAdmins: {
+      uniqueAdmins: number;
+      totalAssignments: number;
+      companiesWithoutAdmin: number;
+    };
+    healthSummary: {
+      healthy: number;
+      needsAttention: number;
+      critical: number;
+    };
     totalTenants: number;
     activeTenants: number;
     suspendedTenants: number;
     totalCompanies: number;
     activeCompanies: number;
+    suspendedCompanies: number;
     totalUsers: number;
     activeUsers: number;
+    suspendedUsers: number;
+    uniqueAdmins?: number;
+    adminAssignments?: number;
+    companiesWithoutAdmin?: number;
   };
+  customerHealth: {
+    health: {
+      healthy: number;
+      needsAttention: number;
+      critical: number;
+    };
+    lifecycle: {
+      active: number;
+      suspended: number;
+    };
+  };
+  applications: ApplicationOverviewItem[];
+  needsAttention: NeedsAttentionItem[];
+  totalNeedsAttention: number;
   recentTenants: TenantRecord[];
+  recentCustomers?: TenantRecord[];
   recentAuditLogs: AuditLogEntry[];
+  recentActivities?: AuditLogEntry[];
 }
 
 export interface CustomerProvisioningPayload {
@@ -214,11 +366,20 @@ export const superAdminApi = {
 
   // Tenants
   listTenants: (
-    params: { search?: string; status?: string; limit?: number; offset?: number } = {},
+    params: {
+      search?: string;
+      status?: string;
+      moduleCode?: string;
+      attention?: string;
+      limit?: number;
+      offset?: number;
+    } = {},
   ) => {
     const query = new URLSearchParams();
     if (params.search) query.set('search', params.search);
     if (params.status) query.set('status', params.status);
+    if (params.moduleCode) query.set('moduleCode', params.moduleCode);
+    if (params.attention) query.set('attention', params.attention);
     if (params.limit) query.set('limit', String(params.limit));
     if (params.offset) query.set('offset', String(params.offset));
     const qs = query.toString() ? `?${query.toString()}` : '';
@@ -258,11 +419,14 @@ export const superAdminApi = {
     }),
 
   // Companies
-  listCompanies: (params: { tenantId?: string; search?: string; status?: string } = {}) => {
+  listCompanies: (
+    params: { tenantId?: string; search?: string; status?: string; moduleCode?: string } = {},
+  ) => {
     const query = new URLSearchParams();
     if (params.tenantId) query.set('tenantId', params.tenantId);
     if (params.search) query.set('search', params.search);
     if (params.status) query.set('status', params.status);
+    if (params.moduleCode) query.set('moduleCode', params.moduleCode);
     const qs = query.toString() ? `?${query.toString()}` : '';
     return request<{ items: CompanyRecord[]; total: number }>(`/companies${qs}`);
   },
@@ -278,6 +442,16 @@ export const superAdminApi = {
     contactPhone?: string;
     country?: string;
     timeZone?: string;
+    modules?: Array<'hrms' | 'crm' | 'project_management'>;
+    admin?: {
+      userId?: string;
+      newUser?: {
+        email: string;
+        firstName: string;
+        lastName: string;
+        phone?: string;
+      };
+    };
   }) =>
     request<CompanyRecord>('/companies', {
       method: 'POST',
@@ -388,23 +562,38 @@ export const superAdminApi = {
       method: 'POST',
     }),
 
+  resendCompanyAdminInvitation: (membershipId: string) =>
+    request<{ success: boolean; invitationDelivery: SignInInvitationDelivery }>(
+      `/company-admins/${membershipId}/resend-invitation`,
+      {
+        method: 'POST',
+      },
+    ),
+
   // Audit Logs
   listAuditLogs: (
     params: {
       tenantId?: string;
+      companyId?: string;
       action?: string;
       targetType?: string;
+      page?: number;
       limit?: number;
       offset?: number;
     } = {},
   ) => {
     const query = new URLSearchParams();
     if (params.tenantId) query.set('tenantId', params.tenantId);
+    if (params.companyId) query.set('companyId', params.companyId);
     if (params.action) query.set('action', params.action);
     if (params.targetType) query.set('targetType', params.targetType);
+    if (params.page) query.set('page', String(params.page));
     if (params.limit) query.set('limit', String(params.limit));
     if (params.offset) query.set('offset', String(params.offset));
     const qs = query.toString() ? `?${query.toString()}` : '';
     return request<{ items: AuditLogEntry[]; total: number }>(`/audit${qs}`);
   },
+
+  // Governance & Platform Settings
+  getGovernanceSummary: () => request<GovernanceSummary>('/governance/summary'),
 };

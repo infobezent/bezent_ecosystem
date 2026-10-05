@@ -13,6 +13,8 @@ import { BezentIcon } from '../../../../design-system/icons';
 import { type RegistrationSectionId, REGISTRATION_SECTIONS } from './EmployeeRegistration';
 import type { ReviewSectionData } from './ReviewSection';
 
+import type { RegistrationFormData } from '../types/registration.types';
+
 export interface EmployeeRegistrationDraft {
   id: string;
   employeeId: string;
@@ -22,6 +24,7 @@ export interface EmployeeRegistrationDraft {
   pendingSectionLabels: string[];
   lastUpdated: string;
   reviewData: ReviewSectionData;
+  formData?: RegistrationFormData;
 }
 
 interface DraftsModalProps {

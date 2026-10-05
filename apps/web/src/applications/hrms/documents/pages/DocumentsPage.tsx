@@ -23,7 +23,7 @@ import {
 import {
   fetchOrganizationMasters,
   type OrganizationMasters,
-} from '../../organization/api/organizationApi';
+} from '../../api/organizationMastersApi';
 import { employeeProfilePath } from '../../employees/model/employeeModel';
 import { CATEGORY_LABELS, DOCUMENT_TABS, STATUS_LABELS } from '../model/documentModel';
 import { DocumentsTable } from '../components/DocumentsTable';

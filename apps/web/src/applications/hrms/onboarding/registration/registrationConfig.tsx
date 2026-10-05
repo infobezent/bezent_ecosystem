@@ -21,6 +21,7 @@ import {
   type RegistrationFieldConfig,
   type RegistrationSectionConfig,
 } from '../../settings/api/registrationSettingsApi';
+import type { FormCustomizationMetadata } from '../../settings/api/formsApi';
 
 /**
  * Employee Registration ← resolved company configuration.
@@ -56,6 +57,9 @@ export function findMissingRequiredFields(
 
 export interface RegistrationConfigContextValue {
   sections: RegistrationSectionConfig[];
+  fields: RegistrationFieldConfig[];
+  metadata?: FormCustomizationMetadata;
+  configuration: RegistrationConfiguration;
   field: (key: string) => RegistrationFieldConfig | undefined;
   customFields: (sectionId: string) => RegistrationFieldConfig[];
   /** Records a rendered field's current value (for validation). */
@@ -123,6 +127,9 @@ export function RegistrationConfigProvider({
   const context = useMemo<RegistrationConfigContextValue>(
     () => ({
       sections: configuration.sections,
+      fields: configuration.fields,
+      metadata: configuration.metadata,
+      configuration,
       field: (key) => byKey.get(key),
       customFields: (sectionId) => customFieldsBySection.get(sectionId) ?? [],
       reportValue,
@@ -131,7 +138,7 @@ export function RegistrationConfigProvider({
       hasError: (key) => errorKeys.has(key),
     }),
     [
-      configuration.sections,
+      configuration,
       byKey,
       customFieldsBySection,
       reportValue,
