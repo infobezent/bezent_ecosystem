@@ -597,7 +597,7 @@ export function CompanyProfilePage() {
                         </Button>
                       </Stack>
                     </Inline>
-                    <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                    <span className="bezent-form-field__helper">
                       Supported formats: PNG, JPG, or SVG (max 2 MB).
                     </span>
                   </Stack>

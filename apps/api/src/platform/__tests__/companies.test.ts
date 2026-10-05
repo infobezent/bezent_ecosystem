@@ -1,8 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { CompanyService } from '../companies/service/company.service.js';
-import { ModuleService } from '../modules/service/module.service.js';
-import { CompanyAdminService } from '../company-admins/service/companyAdmin.service.js';
-import { AuditService } from '../audit/service/audit.service.js';
 import { NotFoundError, ConflictError, BadRequestError } from '../../app/errors/AppError.js';
 import type { CompanyRecord } from '../companies/types/company.types.js';
 
