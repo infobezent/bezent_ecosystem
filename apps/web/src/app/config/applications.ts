@@ -1,5 +1,6 @@
 import { hrmsApplication } from '../../applications/hrms';
 import { superAdminApplication } from '../../applications/super-admin';
+import { tenantAdminApplication } from '../../applications/tenant-admin';
 import { companyAdminApplication } from '../../applications/company-admin';
 import { essApplication } from '../../applications/ess';
 import type { BezentApplication } from '../../shared/types/application';
@@ -12,6 +13,7 @@ import type { BezentApplication } from '../../shared/types/application';
 export const APPLICATIONS: readonly BezentApplication[] = [
   hrmsApplication,
   superAdminApplication,
+  tenantAdminApplication,
   companyAdminApplication,
   essApplication,
 ];

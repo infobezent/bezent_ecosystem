@@ -7,6 +7,13 @@ import type { AccessOverview } from './authApi';
  */
 export function landingPath(access: AccessOverview): string {
   if (access.user.isSuperAdmin) return '/super-admin';
+  if (
+    access.isTenantAdmin ||
+    access.platformWorkspaces?.includes('tenant_admin') ||
+    access.companies.some((c) => c.isTenantAdmin || c.workspaces.includes('tenant_admin'))
+  ) {
+    return '/tenant-admin';
+  }
   const workspaces = new Set(access.companies.flatMap((c) => c.workspaces));
   if (workspaces.has('company_admin')) return '/company-admin';
   if (workspaces.has('hrms')) return '/hrms/dashboard';

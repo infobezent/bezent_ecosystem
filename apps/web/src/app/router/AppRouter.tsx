@@ -19,6 +19,10 @@ import {
   RequireSuperAdminWorkspace,
 } from '../../applications/super-admin/routes/superAdminRoutes';
 import {
+  tenantAdminRoutes,
+  RequireTenantAdminWorkspace,
+} from '../../applications/tenant-admin/routes/tenantAdminRoutes';
+import {
   companyAdminRoutes,
   RequireCompanyAdminWorkspace,
 } from '../../applications/company-admin/routes/companyAdminRoutes';
@@ -90,7 +94,24 @@ export const appRoutes: RouteObject[] = [
     ],
   },
 
-  // 2. Company Admin Workspace — Workspace Guard is strictly ABOVE the shell layout
+  // 2. Tenant Admin Workspace — Workspace Guard is strictly ABOVE the shell layout
+  {
+    element: (
+      <RequireAuth>
+        <RequireTenantAdminWorkspace />
+      </RequireAuth>
+    ),
+    errorElement: <RouteErrorBoundary />,
+    children: [
+      {
+        element: <ShellLayout />,
+        errorElement: <RouteErrorBoundary />,
+        children: tenantAdminRoutes,
+      },
+    ],
+  },
+
+  // 3. Company Admin Workspace — Workspace Guard is strictly ABOVE the shell layout
   {
     element: (
       <RequireAuth>
