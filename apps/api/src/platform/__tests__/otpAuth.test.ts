@@ -1,8 +1,9 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach, afterEach } from 'vitest';
 import request from 'supertest';
 import { eq, inArray } from 'drizzle-orm';
 import { createApp } from '../../app/server/createApp.js';
 import { isDatabaseConfigured, getDb } from '../../db/connection.js';
+import { env } from '../../app/config/env.js';
 import {
   auditLogs,
   authOtpChallenges,
@@ -44,6 +45,7 @@ describe.skipIf(!isDatabaseConfigured)('Email OTP authentication (ADR-018)', () 
     cooldown: 'cooldown',
     suspended: 'suspended',
     suspendedLater: 'suspendedlater',
+    uat: 'uat',
   } as const;
   const UNKNOWN = email('nobody');
   const allEmails = [...Object.values(USERS).map(email), UNKNOWN];
@@ -107,6 +109,7 @@ describe.skipIf(!isDatabaseConfigured)('Email OTP authentication (ADR-018)', () 
       [USERS.manager, 'role_sys_manager'],
       [USERS.employee, 'role_sys_employee'],
       [USERS.custom, 'role_otp_custom'],
+      [USERS.uat, 'role_sys_manager'],
     ];
     await db
       .insert(roles)
@@ -307,6 +310,177 @@ describe.skipIf(!isDatabaseConfigured)('Email OTP authentication (ADR-018)', () 
     it('validates request payloads', async () => {
       expect((await requestCode('not-an-email')).status).toBe(400);
       expect((await verify('otp_x', '12ab56')).status).toBe(400);
+    });
+  });
+
+  describe('UAT Fixed OTP support (temporary non-production mechanism)', () => {
+    const originalNodeEnv = process.env.NODE_ENV;
+    const originalUatOtp = process.env.UAT_FIXED_OTP;
+
+    beforeEach(async () => {
+      await getDb()
+        .delete(authOtpChallenges)
+        .where(
+          inArray(authOtpChallenges.email, [email(USERS.uat), email(USERS.suspended), UNKNOWN]),
+        );
+      await getDb()
+        .delete(emailOutbox)
+        .where(inArray(emailOutbox.recipient, [email(USERS.uat), email(USERS.suspended), UNKNOWN]));
+    });
+
+    afterEach(async () => {
+      if (originalNodeEnv !== undefined) {
+        process.env.NODE_ENV = originalNodeEnv;
+      } else {
+        delete process.env.NODE_ENV;
+      }
+      if (originalUatOtp !== undefined) {
+        process.env.UAT_FIXED_OTP = originalUatOtp;
+      } else {
+        delete process.env.UAT_FIXED_OTP;
+      }
+      await getDb()
+        .delete(authOtpChallenges)
+        .where(
+          inArray(authOtpChallenges.email, [email(USERS.uat), email(USERS.suspended), UNKNOWN]),
+        );
+      await getDb()
+        .delete(emailOutbox)
+        .where(inArray(emailOutbox.recipient, [email(USERS.uat), email(USERS.suspended), UNKNOWN]));
+    });
+
+    it('staging + configured fixed OTP -> success', async () => {
+      process.env.NODE_ENV = 'staging';
+      process.env.UAT_FIXED_OTP = '123456';
+
+      const requested = await requestCode(email(USERS.uat));
+      expect(requested.status).toBe(202);
+      const { challengeId } = requested.body.data;
+
+      const res = await verify(challengeId, '123456');
+      expect(res.status).toBe(200);
+      expect(res.body.data.token).toBeDefined();
+      expect(res.body.data.user.email).toBe(email(USERS.uat));
+
+      const [row] = await getDb()
+        .select()
+        .from(authOtpChallenges)
+        .where(eq(authOtpChallenges.id, challengeId));
+      expect(row?.status).toBe('consumed');
+    });
+
+    it('wrong fixed OTP -> failure', async () => {
+      process.env.NODE_ENV = 'staging';
+      process.env.UAT_FIXED_OTP = '123456';
+
+      const requested = await requestCode(email(USERS.uat));
+      expect(requested.status).toBe(202);
+      const { challengeId } = requested.body.data;
+
+      const res = await verify(challengeId, '999999');
+      expect(res.status).toBe(401);
+      expect(res.body.error.code).toBe('OTP_INVALID');
+    });
+
+    it('expired challenge -> failure', async () => {
+      process.env.NODE_ENV = 'staging';
+      process.env.UAT_FIXED_OTP = '123456';
+
+      const requested = await requestCode(email(USERS.uat));
+      expect(requested.status).toBe(202);
+      const { challengeId } = requested.body.data;
+
+      await getDb()
+        .update(authOtpChallenges)
+        .set({ expiresAt: new Date(Date.now() - 1000) })
+        .where(eq(authOtpChallenges.id, challengeId));
+
+      const res = await verify(challengeId, '123456');
+      expect(res.status).toBe(401);
+      expect(res.body.error.code).toBe('OTP_EXPIRED');
+    });
+
+    it('unknown user -> failure even with fixed OTP', async () => {
+      process.env.NODE_ENV = 'staging';
+      process.env.UAT_FIXED_OTP = '123456';
+
+      const requested = await requestCode(UNKNOWN);
+      expect(requested.status).toBe(202);
+      const { challengeId } = requested.body.data;
+
+      const res = await verify(challengeId, '123456');
+      expect(res.status).toBe(401);
+      expect(res.body.error.code).toBe('OTP_INVALID');
+    });
+
+    it('inactive/suspended user -> failure even with fixed OTP', async () => {
+      process.env.NODE_ENV = 'staging';
+      process.env.UAT_FIXED_OTP = '123456';
+
+      const requested = await requestCode(email(USERS.suspended));
+      expect(requested.status).toBe(202);
+      const { challengeId } = requested.body.data;
+
+      const res = await verify(challengeId, '123456');
+      expect(res.status).toBe(401);
+      expect(res.body.error.code).toBe('OTP_INVALID');
+    });
+
+    it('consumed challenge cannot be reused', async () => {
+      process.env.NODE_ENV = 'staging';
+      process.env.UAT_FIXED_OTP = '123456';
+
+      const requested = await requestCode(email(USERS.uat));
+      expect(requested.status).toBe(202);
+      const { challengeId } = requested.body.data;
+
+      const first = await verify(challengeId, '123456');
+      expect(first.status).toBe(200);
+
+      const replay = await verify(challengeId, '123456');
+      expect(replay.status).toBe(401);
+      expect(replay.body.error.code).toBe('OTP_INVALID');
+    });
+
+    it('production + UAT_FIXED_OTP -> fixed OTP must NOT work', async () => {
+      process.env.NODE_ENV = 'production';
+      process.env.UAT_FIXED_OTP = '123456';
+
+      expect(env.uatFixedOtp).toBeUndefined();
+
+      const requested = await requestCode(email(USERS.uat));
+      expect(requested.status).toBe(202);
+      const { challengeId } = requested.body.data;
+
+      const res = await verify(challengeId, '123456');
+      expect(res.status).toBe(401);
+      expect(res.body.error.code).toBe('OTP_INVALID');
+    });
+
+    it('normal generated OTP still works', async () => {
+      process.env.NODE_ENV = 'staging';
+      process.env.UAT_FIXED_OTP = '123456';
+
+      const requested = await requestCode(email(USERS.uat));
+      expect(requested.status).toBe(202);
+      const { challengeId } = requested.body.data;
+
+      const realCode = await codeSentTo(email(USERS.uat));
+      expect(realCode).toMatch(/^\d{6}$/);
+
+      const res = await verify(challengeId, realCode);
+      expect(res.status).toBe(200);
+      expect(res.body.data.token).toBeDefined();
+      expect(res.body.data.user.email).toBe(email(USERS.uat));
+    });
+
+    it('cannot login using fixed OTP without first requesting a challenge', async () => {
+      process.env.NODE_ENV = 'staging';
+      process.env.UAT_FIXED_OTP = '123456';
+
+      const res = await verify('fake-challenge-id', '123456');
+      expect(res.status).toBe(401);
+      expect(res.body.error.code).toBe('OTP_INVALID');
     });
   });
 
