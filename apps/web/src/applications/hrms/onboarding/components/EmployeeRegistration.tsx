@@ -300,10 +300,14 @@ export function EmployeeRegistration({
       base.general.employeeId = initialDraft.employeeId;
     }
     if (initialDraft?.reviewData?.general) {
-      base.general.employeeId = initialDraft.reviewData.general.employeeId || base.general.employeeId;
-      base.general.department = initialDraft.reviewData.general.department || base.general.department;
-      base.general.designation = initialDraft.reviewData.general.designation || base.general.designation;
-      base.general.joiningDate = initialDraft.reviewData.general.joiningDate || base.general.joiningDate;
+      base.general.employeeId =
+        initialDraft.reviewData.general.employeeId || base.general.employeeId;
+      base.general.department =
+        initialDraft.reviewData.general.department || base.general.department;
+      base.general.designation =
+        initialDraft.reviewData.general.designation || base.general.designation;
+      base.general.joiningDate =
+        initialDraft.reviewData.general.joiningDate || base.general.joiningDate;
     }
     return base;
   });
@@ -385,7 +389,8 @@ export function EmployeeRegistration({
             general: { ...prev.general, employeeId: 'EMP2026001' },
           }));
           if (savedStepDataRef.current['general']) {
-            (savedStepDataRef.current['general'] as Record<string, unknown>).employeeId = 'EMP2026001';
+            (savedStepDataRef.current['general'] as Record<string, unknown>).employeeId =
+              'EMP2026001';
           }
         });
     }
@@ -404,7 +409,11 @@ export function EmployeeRegistration({
   );
   const [passportPhoto, setPassportPhoto] = useState<PassportPhotoState>(
     initialDraft?.reviewData?.documents?.passportPhoto
-      ? ({ file: null, previewUrl: '', ...initialDraft.reviewData.documents.passportPhoto } as PassportPhotoState)
+      ? ({
+          file: null,
+          previewUrl: '',
+          ...initialDraft.reviewData.documents.passportPhoto,
+        } as PassportPhotoState)
       : {
           file: null,
           fileName: 'Passport_Photo.png',
@@ -675,64 +684,61 @@ export function EmployeeRegistration({
     [getSectionSnapshot],
   );
 
-  const revertSectionToSnapshot = useCallback(
-    (sectionId: string) => {
-      const snapshot = savedStepDataRef.current[sectionId];
-      if (!snapshot) return;
-      switch (sectionId) {
-        case 'personal':
-          setFormData((prev) => ({ ...prev, personal: JSON.parse(JSON.stringify(snapshot)) }));
-          break;
-        case 'general':
-          setFormData((prev) => ({ ...prev, general: JSON.parse(JSON.stringify(snapshot)) }));
-          break;
-        case 'onboarding':
-          setFormData((prev) => ({ ...prev, onboarding: JSON.parse(JSON.stringify(snapshot)) }));
-          break;
-        case 'skills':
-          setFormData((prev) => ({ ...prev, skills: JSON.parse(JSON.stringify(snapshot)) }));
-          break;
-        case 'emergency':
-          setFormData((prev) => ({ ...prev, emergency: JSON.parse(JSON.stringify(snapshot)) }));
-          break;
-        case 'accounts':
-          setFormData((prev) => ({ ...prev, accounts: JSON.parse(JSON.stringify(snapshot)) }));
-          break;
-        case 'online_access':
-          setFormData((prev) => ({ ...prev, onlineAccess: JSON.parse(JSON.stringify(snapshot)) }));
-          break;
-        case 'working_hours':
-          setFormData((prev) => ({ ...prev, workingHours: JSON.parse(JSON.stringify(snapshot)) }));
-          break;
-        case 'documents': {
-          const docSnap = snapshot as {
-            documents: Chapter09DocumentsState;
-            documentsList: DocumentItemState[];
-            isExperiencedHire: boolean;
-          };
-          if (docSnap.documents) {
-            setFormData((prev) => ({
-              ...prev,
-              documents: JSON.parse(JSON.stringify(docSnap.documents)),
-            }));
-          }
-          if (docSnap.documentsList) {
-            setDocumentsList(JSON.parse(JSON.stringify(docSnap.documentsList)));
-          }
-          if (docSnap.isExperiencedHire !== undefined) {
-            setIsExperiencedHire(docSnap.isExperiencedHire);
-          }
-          break;
+  const revertSectionToSnapshot = useCallback((sectionId: string) => {
+    const snapshot = savedStepDataRef.current[sectionId];
+    if (!snapshot) return;
+    switch (sectionId) {
+      case 'personal':
+        setFormData((prev) => ({ ...prev, personal: JSON.parse(JSON.stringify(snapshot)) }));
+        break;
+      case 'general':
+        setFormData((prev) => ({ ...prev, general: JSON.parse(JSON.stringify(snapshot)) }));
+        break;
+      case 'onboarding':
+        setFormData((prev) => ({ ...prev, onboarding: JSON.parse(JSON.stringify(snapshot)) }));
+        break;
+      case 'skills':
+        setFormData((prev) => ({ ...prev, skills: JSON.parse(JSON.stringify(snapshot)) }));
+        break;
+      case 'emergency':
+        setFormData((prev) => ({ ...prev, emergency: JSON.parse(JSON.stringify(snapshot)) }));
+        break;
+      case 'accounts':
+        setFormData((prev) => ({ ...prev, accounts: JSON.parse(JSON.stringify(snapshot)) }));
+        break;
+      case 'online_access':
+        setFormData((prev) => ({ ...prev, onlineAccess: JSON.parse(JSON.stringify(snapshot)) }));
+        break;
+      case 'working_hours':
+        setFormData((prev) => ({ ...prev, workingHours: JSON.parse(JSON.stringify(snapshot)) }));
+        break;
+      case 'documents': {
+        const docSnap = snapshot as {
+          documents: Chapter09DocumentsState;
+          documentsList: DocumentItemState[];
+          isExperiencedHire: boolean;
+        };
+        if (docSnap.documents) {
+          setFormData((prev) => ({
+            ...prev,
+            documents: JSON.parse(JSON.stringify(docSnap.documents)),
+          }));
         }
-        case 'review':
-          break;
-        default:
-          setCustomFieldValues(JSON.parse(JSON.stringify(snapshot)));
-          break;
+        if (docSnap.documentsList) {
+          setDocumentsList(JSON.parse(JSON.stringify(docSnap.documentsList)));
+        }
+        if (docSnap.isExperiencedHire !== undefined) {
+          setIsExperiencedHire(docSnap.isExperiencedHire);
+        }
+        break;
       }
-    },
-    [],
-  );
+      case 'review':
+        break;
+      default:
+        setCustomFieldValues(JSON.parse(JSON.stringify(snapshot)));
+        break;
+    }
+  }, []);
 
   // Single reliable navigation method that updates both state & searchParams
   const navigateToSection = useCallback(
@@ -956,7 +962,11 @@ export function EmployeeRegistration({
       setDocumentsList(draft.reviewData.documents.items as unknown as DocumentItemState[]);
     }
     if (draft.reviewData?.documents?.passportPhoto) {
-      setPassportPhoto({ file: null, previewUrl: '', ...draft.reviewData.documents.passportPhoto } as PassportPhotoState);
+      setPassportPhoto({
+        file: null,
+        previewUrl: '',
+        ...draft.reviewData.documents.passportPhoto,
+      } as PassportPhotoState);
     }
     if (draft.reviewData?.documents?.isExperiencedHire !== undefined) {
       setIsExperiencedHire(draft.reviewData.documents.isExperiencedHire);
@@ -971,8 +981,12 @@ export function EmployeeRegistration({
       savedStepDataRef.current.skills = JSON.parse(JSON.stringify(draft.formData.skills));
       savedStepDataRef.current.emergency = JSON.parse(JSON.stringify(draft.formData.emergency));
       savedStepDataRef.current.accounts = JSON.parse(JSON.stringify(draft.formData.accounts));
-      savedStepDataRef.current.online_access = JSON.parse(JSON.stringify(draft.formData.onlineAccess));
-      savedStepDataRef.current.working_hours = JSON.parse(JSON.stringify(draft.formData.workingHours));
+      savedStepDataRef.current.online_access = JSON.parse(
+        JSON.stringify(draft.formData.onlineAccess),
+      );
+      savedStepDataRef.current.working_hours = JSON.parse(
+        JSON.stringify(draft.formData.workingHours),
+      );
     }
     savedStepDataRef.current[draft.activeSection] = getSectionSnapshot(draft.activeSection);
 
@@ -1079,63 +1093,63 @@ export function EmployeeRegistration({
               )}
             </div>
 
-          {activeSection === 'general' ? (
-            <GeneralInformation
-              employeeId={employeeId}
-              data={formData.general}
-              onChange={updateGeneral}
-            />
-          ) : activeSection === 'personal' ? (
-            <PersonalInformation
-              employeeId={employeeId}
-              data={formData.personal}
-              onChange={updatePersonal}
-            />
-          ) : activeSection === 'onboarding' ? (
-            <OnboardingSection value={formData.onboarding} onChange={updateOnboarding} />
-          ) : activeSection === 'skills' ? (
-            <SkillsSection value={formData.skills} onChange={updateSkills} />
-          ) : activeSection === 'emergency' ? (
-            <EmergencyContactSection value={formData.emergency} onChange={updateEmergency} />
-          ) : activeSection === 'accounts' ? (
-            <AccountsSection value={formData.accounts} onChange={updateAccounts} />
-          ) : activeSection === 'online_access' ? (
-            <OnlineAccessSection value={formData.onlineAccess} onChange={updateOnlineAccess} />
-          ) : activeSection === 'working_hours' ? (
-            <WorkingHoursSection value={formData.workingHours} onChange={updateWorkingHours} />
-          ) : activeSection === 'documents' ? (
-            <DocumentsSection
-              documents={documentsList}
-              isExperiencedHire={isExperiencedHire}
-              passportPhoto={passportPhoto}
-              onDocumentsChange={setDocumentsList}
-              onClassificationChange={setIsExperiencedHire}
-              onPassportPhotoChange={setPassportPhoto}
-            />
-          ) : activeSection === 'review' ? (
-            <ReviewSection
-              data={reviewData}
-              onEditSection={(sectionId) => requestNavigation(sectionId)}
-              onDeleteFamilyMember={handleDeleteFamilyMember}
-              onDeleteNominee={handleDeleteNominee}
-              onDeleteTask={handleDeleteTask}
-              onDeleteAsset={handleDeleteAsset}
-              onDeleteSkill={handleDeleteSkill}
-              onDeleteSecondaryContact={handleDeleteSecondaryContact}
-              onDeleteDocument={handleDeleteDocument}
-              onCreateEmployee={() => {
-                if (onSubmit) {
-                  void onSubmit(formData);
-                } else if (onSave) {
-                  onSave(reviewData as unknown as Record<string, unknown>);
-                }
-              }}
-              isSubmitting={isSubmitting}
-              submitError={submitError}
-              createdEmployee={createdEmployee}
-              onDone={onCancel}
-            />
-          ) : (
+            {activeSection === 'general' ? (
+              <GeneralInformation
+                employeeId={employeeId}
+                data={formData.general}
+                onChange={updateGeneral}
+              />
+            ) : activeSection === 'personal' ? (
+              <PersonalInformation
+                employeeId={employeeId}
+                data={formData.personal}
+                onChange={updatePersonal}
+              />
+            ) : activeSection === 'onboarding' ? (
+              <OnboardingSection value={formData.onboarding} onChange={updateOnboarding} />
+            ) : activeSection === 'skills' ? (
+              <SkillsSection value={formData.skills} onChange={updateSkills} />
+            ) : activeSection === 'emergency' ? (
+              <EmergencyContactSection value={formData.emergency} onChange={updateEmergency} />
+            ) : activeSection === 'accounts' ? (
+              <AccountsSection value={formData.accounts} onChange={updateAccounts} />
+            ) : activeSection === 'online_access' ? (
+              <OnlineAccessSection value={formData.onlineAccess} onChange={updateOnlineAccess} />
+            ) : activeSection === 'working_hours' ? (
+              <WorkingHoursSection value={formData.workingHours} onChange={updateWorkingHours} />
+            ) : activeSection === 'documents' ? (
+              <DocumentsSection
+                documents={documentsList}
+                isExperiencedHire={isExperiencedHire}
+                passportPhoto={passportPhoto}
+                onDocumentsChange={setDocumentsList}
+                onClassificationChange={setIsExperiencedHire}
+                onPassportPhotoChange={setPassportPhoto}
+              />
+            ) : activeSection === 'review' ? (
+              <ReviewSection
+                data={reviewData}
+                onEditSection={(sectionId) => requestNavigation(sectionId)}
+                onDeleteFamilyMember={handleDeleteFamilyMember}
+                onDeleteNominee={handleDeleteNominee}
+                onDeleteTask={handleDeleteTask}
+                onDeleteAsset={handleDeleteAsset}
+                onDeleteSkill={handleDeleteSkill}
+                onDeleteSecondaryContact={handleDeleteSecondaryContact}
+                onDeleteDocument={handleDeleteDocument}
+                onCreateEmployee={() => {
+                  if (onSubmit) {
+                    void onSubmit(formData);
+                  } else if (onSave) {
+                    onSave(reviewData as unknown as Record<string, unknown>);
+                  }
+                }}
+                isSubmitting={isSubmitting}
+                submitError={submitError}
+                createdEmployee={createdEmployee}
+                onDone={onCancel}
+              />
+            ) : (
               <Stack gap="lg">
                 <Toolbar
                   left={
@@ -1328,11 +1342,7 @@ export function EmployeeRegistration({
               <Button variant="secondary" type="button" onClick={handleModalCancel}>
                 Cancel
               </Button>
-              <Button
-                variant="secondary"
-                type="button"
-                onClick={handleModalLeaveWithoutSaving}
-              >
+              <Button variant="secondary" type="button" onClick={handleModalLeaveWithoutSaving}>
                 Leave Without Saving
               </Button>
               <Button variant="primary" type="button" onClick={handleModalSaveDraft}>

@@ -24,7 +24,6 @@ function parseModuleCode(code: string): ModuleCode {
 export class TenantAdminController {
   constructor(private readonly service: TenantAdminService = tenantAdminService) {}
 
-
   getContext = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       if (!req.user || !req.tenantAdminContext) {
@@ -71,11 +70,7 @@ export class TenantAdminController {
       }
       const dto = validateCreateTenantAdminCompany(req.body);
       const actor = { id: req.user.id, email: req.user.email };
-      const company = await this.service.createCompany(
-        req.tenantAdminContext.tenantId,
-        dto,
-        actor,
-      );
+      const company = await this.service.createCompany(req.tenantAdminContext.tenantId, dto, actor);
       res.status(201).json({ data: company });
     } catch (err) {
       next(err);
@@ -146,11 +141,7 @@ export class TenantAdminController {
       }
       const actor = { id: req.user.id, email: req.user.email };
 
-      await this.service.revokeTenantAdmin(
-        req.tenantAdminContext.tenantId,
-        targetUserId,
-        actor,
-      );
+      await this.service.revokeTenantAdmin(req.tenantAdminContext.tenantId, targetUserId, actor);
 
       res.json({ message: 'Tenant Administrator revoked successfully' });
     } catch (err) {
@@ -251,11 +242,7 @@ export class TenantAdminController {
       const dto = validateInviteTenantMember(req.body);
       const actor = { id: req.user.id, email: req.user.email };
 
-      const result = await this.service.inviteMember(
-        req.tenantAdminContext.tenantId,
-        dto,
-        actor,
-      );
+      const result = await this.service.inviteMember(req.tenantAdminContext.tenantId, dto, actor);
 
       res.status(201).json({ data: result });
     } catch (err) {
@@ -446,7 +433,11 @@ export class TenantAdminController {
     }
   };
 
-  demoteMemberFromAdmin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  demoteMemberFromAdmin = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       if (!req.tenantAdminContext || !req.user) {
         throw new UnauthorizedError('Tenant Admin authority required');
@@ -463,11 +454,7 @@ export class TenantAdminController {
       }
       const actor = { id: req.user.id, email: req.user.email };
 
-      await this.service.revokeTenantAdmin(
-        req.tenantAdminContext.tenantId,
-        userId,
-        actor,
-      );
+      await this.service.revokeTenantAdmin(req.tenantAdminContext.tenantId, userId, actor);
 
       res.json({ message: 'Tenant Administrator revoked successfully' });
     } catch (err) {
@@ -491,7 +478,11 @@ export class TenantAdminController {
     }
   };
 
-  getCompanyApplications = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  getCompanyApplications = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       if (!req.tenantAdminContext) {
         throw new UnauthorizedError('Tenant Admin authority required');
@@ -517,7 +508,11 @@ export class TenantAdminController {
     }
   };
 
-  enableCompanyApplication = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  enableCompanyApplication = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       if (!req.tenantAdminContext || !req.user) {
         throw new UnauthorizedError('Tenant Admin authority required');
@@ -555,7 +550,11 @@ export class TenantAdminController {
     }
   };
 
-  disableCompanyApplication = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  disableCompanyApplication = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       if (!req.tenantAdminContext || !req.user) {
         throw new UnauthorizedError('Tenant Admin authority required');
@@ -595,4 +594,3 @@ export class TenantAdminController {
 }
 
 export const tenantAdminController = new TenantAdminController();
-

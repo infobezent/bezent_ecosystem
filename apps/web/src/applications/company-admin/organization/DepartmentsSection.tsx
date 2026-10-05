@@ -35,22 +35,14 @@ import {
   deactivateDepartment,
   reactivateDepartment,
 } from './api/departmentApi';
-import {
-  fetchBusinessUnits,
-  fetchDivisions,
-  fetchEligibleHeads,
-} from './api/structureApi';
+import { fetchBusinessUnits, fetchDivisions, fetchEligibleHeads } from './api/structureApi';
 import type {
   DepartmentRecord,
   DepartmentStatus,
   CreateDepartmentPayload,
   UpdateDepartmentPayload,
 } from './types/department';
-import type {
-  BusinessUnitRecord,
-  DivisionRecord,
-  EligibleHead,
-} from './types/structure';
+import type { BusinessUnitRecord, DivisionRecord, EligibleHead } from './types/structure';
 
 export interface DepartmentsSectionProps {
   onBack?: () => void;
@@ -145,7 +137,9 @@ export function DepartmentsSection({
     return [
       { value: '', label: 'None (Top-level Department)' },
       ...departments
-        .filter((d) => d.status === 'active' && (!editingDepartment || d.id !== editingDepartment.id))
+        .filter(
+          (d) => d.status === 'active' && (!editingDepartment || d.id !== editingDepartment.id),
+        )
         .map((d) => ({ value: d.id, label: d.code ? `${d.name} (${d.code})` : d.name })),
     ];
   }, [departments, editingDepartment]);
@@ -314,7 +308,9 @@ export function DepartmentsSection({
         const q = searchQuery.toLowerCase();
         const matchesName = d.name.toLowerCase().includes(q);
         const matchesCode = d.code ? d.code.toLowerCase().includes(q) : false;
-        const matchesHead = d.headEmployeeName ? d.headEmployeeName.toLowerCase().includes(q) : false;
+        const matchesHead = d.headEmployeeName
+          ? d.headEmployeeName.toLowerCase().includes(q)
+          : false;
         if (!matchesName && !matchesCode && !matchesHead) return false;
       }
       return true;
@@ -397,9 +393,7 @@ export function DepartmentsSection({
                 <Select
                   aria-label="Filter by Status"
                   value={statusFilter}
-                  onChange={(e) =>
-                    setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')
-                  }
+                  onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
                   options={[
                     { value: 'all', label: 'All Statuses' },
                     { value: 'active', label: 'Active Only' },
@@ -487,9 +481,7 @@ export function DepartmentsSection({
                   <TableCell>
                     <Stack gap="xs">
                       <strong>{dept.name}</strong>
-                      {dept.description && (
-                        <small>{dept.description}</small>
-                      )}
+                      {dept.description && <small>{dept.description}</small>}
                       {dept.childDepartmentCount > 0 && (
                         <small>↳ {dept.childDepartmentCount} sub-department(s)</small>
                       )}
@@ -587,11 +579,7 @@ export function DepartmentsSection({
                   />
                 </FormField>
 
-                <FormField
-                  label="Department Code"
-                  error={formErrors.code}
-                  htmlFor="dept-form-code"
-                >
+                <FormField label="Department Code" error={formErrors.code} htmlFor="dept-form-code">
                   <Input
                     id="dept-form-code"
                     value={formCode}
@@ -692,10 +680,7 @@ export function DepartmentsSection({
                   />
                 </FormField>
 
-                <FormField
-                  label="Status"
-                  htmlFor="dept-form-status"
-                >
+                <FormField label="Status" htmlFor="dept-form-status">
                   <Select
                     id="dept-form-status"
                     value={formStatus}
@@ -711,7 +696,12 @@ export function DepartmentsSection({
 
             {/* Action buttons */}
             <Inline gap="sm" justify="end">
-              <Button variant="secondary" type="button" onClick={closeModal} disabled={actionLoading}>
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={closeModal}
+                disabled={actionLoading}
+              >
                 Cancel
               </Button>
               <Button variant="primary" type="submit" disabled={actionLoading}>

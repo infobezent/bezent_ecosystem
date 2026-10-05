@@ -102,7 +102,10 @@ export interface OnlineAccessSectionProps {
   onChange?: (updated: Chapter07OnlineAccessState) => void;
 }
 
-export function OnlineAccessSection({ value: _value, onChange: _onChange }: OnlineAccessSectionProps = {}) {
+export function OnlineAccessSection({
+  value: _value,
+  onChange: _onChange,
+}: OnlineAccessSectionProps = {}) {
   // A. ACCOUNT INFORMATION STATE
   const [username, setUsername] = useState('arun.kumar');
   const [companyEmail, setCompanyEmail] = useState('arun.kumar@bezent.com');

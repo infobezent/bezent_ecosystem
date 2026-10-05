@@ -326,7 +326,9 @@ describe('Organization Profile API (Multi-Company & RBAC)', () => {
   afterAll(async () => {
     if (!dbAvailable) return;
     const db = getDb();
-    await db.delete(roleAssignments).where(inArray(roleAssignments.companyId, [companyAId, companyBId]));
+    await db
+      .delete(roleAssignments)
+      .where(inArray(roleAssignments.companyId, [companyAId, companyBId]));
     await db.delete(memberships).where(inArray(memberships.companyId, [companyAId, companyBId]));
     await db.delete(companies).where(inArray(companies.id, [companyAId, companyBId]));
     await db.delete(tenantModules).where(eq(tenantModules.tenantId, tenantId));

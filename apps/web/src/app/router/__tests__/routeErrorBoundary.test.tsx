@@ -7,7 +7,12 @@ vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
     ...actual,
-    useRouteError: vi.fn(() => new Error('Simulated runtime exception at TenantsPage.tsx:153:22 TypeError: Cannot read properties of undefined (reading length)')),
+    useRouteError: vi.fn(
+      () =>
+        new Error(
+          'Simulated runtime exception at TenantsPage.tsx:153:22 TypeError: Cannot read properties of undefined (reading length)',
+        ),
+    ),
     useNavigate: vi.fn(() => vi.fn()),
   };
 });

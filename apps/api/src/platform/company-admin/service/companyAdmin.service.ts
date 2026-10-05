@@ -20,7 +20,10 @@ import {
   accessResolverService,
   AccessResolverService,
 } from '../../access/service/accessResolver.service.js';
-import { roleManagementService, RoleManagementService } from '../../access/service/roleManagement.service.js';
+import {
+  roleManagementService,
+  RoleManagementService,
+} from '../../access/service/roleManagement.service.js';
 import { emailService, EmailService } from '../../email/service/email.service.js';
 import { companyService, CompanyService } from '../../companies/service/company.service.js';
 import { getDb } from '../../../db/connection.js';

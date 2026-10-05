@@ -25,7 +25,11 @@ export function validateCreateGrade(input: unknown): CreateGradeDto {
   }
 
   // Code: required, trimmed, uppercase, max 50
-  if (data.code === undefined || data.code === null || (typeof data.code === 'string' && !data.code.trim())) {
+  if (
+    data.code === undefined ||
+    data.code === null ||
+    (typeof data.code === 'string' && !data.code.trim())
+  ) {
     errors.code = 'Grade code is required';
   } else if (typeof data.code !== 'string') {
     errors.code = 'Grade code must be a string';

@@ -78,9 +78,7 @@ const mockGeneralSettings = {
 describe('HRMS Administration Settings — Onboarding Secondary Navigation + Stages Workspace', () => {
   describe('Secondary Navigation Invariants', () => {
     it('renders secondary navigation with all 5 required tabs when Onboarding is active', () => {
-      const html = renderToStaticMarkup(
-        <AdministrationSettingsSection initialTab="onboarding" />,
-      );
+      const html = renderToStaticMarkup(<AdministrationSettingsSection initialTab="onboarding" />);
 
       // Primary tabs
       expect(html).toContain('Forms');
@@ -130,18 +128,14 @@ describe('HRMS Administration Settings — Onboarding Secondary Navigation + Sta
 
   describe('Stages Workspace Surface & Layout', () => {
     it('renders standard header and description', () => {
-      const html = renderToStaticMarkup(
-        <StagesSection initialStages={mockCompanyStages} />,
-      );
+      const html = renderToStaticMarkup(<StagesSection initialStages={mockCompanyStages} />);
 
       expect(html).toContain('Stages');
       expect(html).toContain('Configure the stages employees move through during onboarding.');
     });
 
     it('renders single parent surface with ordered rows and divider lines', () => {
-      const html = renderToStaticMarkup(
-        <StagesSection initialStages={mockCompanyStages} />,
-      );
+      const html = renderToStaticMarkup(<StagesSection initialStages={mockCompanyStages} />);
 
       expect(html).toContain('ONBOARDING WORKFLOW');
       expect(html).toContain('bezent-divider');
@@ -149,9 +143,7 @@ describe('HRMS Administration Settings — Onboarding Secondary Navigation + Sta
     });
 
     it('formats stage numbers with leading zeros (01, 02, 03, 04) derived from displayOrder', () => {
-      const html = renderToStaticMarkup(
-        <StagesSection initialStages={mockCompanyStages} />,
-      );
+      const html = renderToStaticMarkup(<StagesSection initialStages={mockCompanyStages} />);
 
       expect(html).toContain('01');
       expect(html).toContain('02');
@@ -160,9 +152,7 @@ describe('HRMS Administration Settings — Onboarding Secondary Navigation + Sta
     });
 
     it('displays stage name, key, description, and status badges', () => {
-      const html = renderToStaticMarkup(
-        <StagesSection initialStages={mockCompanyStages} />,
-      );
+      const html = renderToStaticMarkup(<StagesSection initialStages={mockCompanyStages} />);
 
       // Stage names
       expect(html).toContain('Pre-boarding');
@@ -188,17 +178,13 @@ describe('HRMS Administration Settings — Onboarding Secondary Navigation + Sta
     });
 
     it('renders Add Stage button when manage permission is available', () => {
-      const html = renderToStaticMarkup(
-        <StagesSection initialStages={mockCompanyStages} />,
-      );
+      const html = renderToStaticMarkup(<StagesSection initialStages={mockCompanyStages} />);
 
       expect(html).toContain('Add Stage');
     });
 
     it('renders reorder controls (Move Up / Move Down) for configurable stages', () => {
-      const html = renderToStaticMarkup(
-        <StagesSection initialStages={mockCompanyStages} />,
-      );
+      const html = renderToStaticMarkup(<StagesSection initialStages={mockCompanyStages} />);
 
       expect(html).toContain('Move Pre-boarding down');
       expect(html).toContain('Move Document Collection up');
@@ -224,9 +210,7 @@ describe('HRMS Administration Settings — Onboarding Secondary Navigation + Sta
         },
       ];
 
-      const html = renderToStaticMarkup(
-        <StagesSection initialStages={stagesWithCustom} />,
-      );
+      const html = renderToStaticMarkup(<StagesSection initialStages={stagesWithCustom} />);
 
       expect(html).toContain('System');
       expect(html).toContain('Custom');
@@ -246,9 +230,7 @@ describe('HRMS Administration Settings — Onboarding Secondary Navigation + Sta
 
   describe('RBAC & Mutation Capabilities', () => {
     it('exposes Edit button for stages to users with manage permissions', () => {
-      const html = renderToStaticMarkup(
-        <StagesSection initialStages={mockCompanyStages} />,
-      );
+      const html = renderToStaticMarkup(<StagesSection initialStages={mockCompanyStages} />);
 
       expect(html).toContain('Edit');
       expect(html).toContain('aria-label="Edit stage Pre-boarding"');

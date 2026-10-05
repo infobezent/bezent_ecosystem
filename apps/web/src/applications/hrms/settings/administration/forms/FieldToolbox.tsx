@@ -49,27 +49,90 @@ interface ExtendedToolboxItem {
 
 const V2_TOOLBOX_ITEMS: readonly ExtendedToolboxItem[] = [
   // Text & Input
-  { type: 'single_line', label: 'Single Line', subLabel: 'Short Text', category: 'text', icon: 'edit' },
-  { type: 'multi_line', label: 'Multi Line', subLabel: 'Paragraph', category: 'text', icon: 'edit' },
+  {
+    type: 'single_line',
+    label: 'Single Line',
+    subLabel: 'Short Text',
+    category: 'text',
+    icon: 'edit',
+  },
+  {
+    type: 'multi_line',
+    label: 'Multi Line',
+    subLabel: 'Paragraph',
+    category: 'text',
+    icon: 'edit',
+  },
   { type: 'email', label: 'Email', category: 'text', icon: 'email' },
   { type: 'phone', label: 'Phone', category: 'text', icon: 'phone' },
-  { type: 'number', label: 'Number', subLabel: 'Numeric Input', category: 'advanced', icon: 'sparkles' },
+  {
+    type: 'number',
+    label: 'Number',
+    subLabel: 'Numeric Input',
+    category: 'advanced',
+    icon: 'sparkles',
+  },
   { type: 'decimal', label: 'Decimal', category: 'advanced', icon: 'sparkles' },
   { type: 'date', label: 'Date', subLabel: 'Date Picker', category: 'date', icon: 'calendar' },
   { type: 'time', label: 'Time', category: 'date', icon: 'calendar' },
   { type: 'datetime', label: 'Date-Time', category: 'date', icon: 'calendar' },
-  { type: 'file_upload', label: 'File Upload', subLabel: 'Image / Attachment', category: 'advanced', icon: 'documents' },
+  {
+    type: 'file_upload',
+    label: 'File Upload',
+    subLabel: 'Image / Attachment',
+    category: 'advanced',
+    icon: 'documents',
+  },
 
   // Selection & Choices
-  { type: 'dropdown', label: 'Dropdown', subLabel: 'Dropdown Menu', category: 'choice', icon: 'filter' },
+  {
+    type: 'dropdown',
+    label: 'Dropdown',
+    subLabel: 'Dropdown Menu',
+    category: 'choice',
+    icon: 'filter',
+  },
   { type: 'radio', label: 'Radio', category: 'choice', icon: 'filter' },
-  { type: 'checkbox', label: 'Checkbox', subLabel: 'Toggle / Checkbox', category: 'choice', icon: 'check' },
-  { type: 'multi_select', label: 'Multi Select', subLabel: 'Checklist Group', category: 'choice', icon: 'filter' },
+  {
+    type: 'checkbox',
+    label: 'Checkbox',
+    subLabel: 'Toggle / Checkbox',
+    category: 'choice',
+    icon: 'check',
+  },
+  {
+    type: 'multi_select',
+    label: 'Multi Select',
+    subLabel: 'Checklist Group',
+    category: 'choice',
+    icon: 'filter',
+  },
 
   // Coming Soon Placeholders (Disabled to communicate roadmap honestly)
-  { type: 'number', label: 'Range Slider', category: 'choice', icon: 'settings', disabled: true, badge: 'Coming Soon' },
-  { type: 'single_line', label: 'Section Break', category: 'layout', icon: 'more', disabled: true, badge: 'Coming Soon' },
-  { type: 'single_line', label: 'Data Table', category: 'layout', icon: 'table', disabled: true, badge: 'Coming Soon' },
+  {
+    type: 'number',
+    label: 'Range Slider',
+    category: 'choice',
+    icon: 'settings',
+    disabled: true,
+    badge: 'Coming Soon',
+  },
+  {
+    type: 'single_line',
+    label: 'Section Break',
+    category: 'layout',
+    icon: 'more',
+    disabled: true,
+    badge: 'Coming Soon',
+  },
+  {
+    type: 'single_line',
+    label: 'Data Table',
+    category: 'layout',
+    icon: 'table',
+    disabled: true,
+    badge: 'Coming Soon',
+  },
 ];
 
 function DraggableToolboxItem({
@@ -227,12 +290,16 @@ export function FieldToolbox({
             role="button"
             tabIndex={0}
             onClick={() => onSelectForm?.()}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSelectForm?.(); }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') onSelectForm?.();
+            }}
             title="Employee Registration (System Form) — click to view Form Settings"
             aria-label="Employee Registration System Form — click to select"
           >
             <span className="bezent-structure-form-root__label">Employee Registration</span>
-            <Badge variant="neutral" size="sm">System Form</Badge>
+            <Badge variant="neutral" size="sm">
+              System Form
+            </Badge>
           </div>
 
           <div className="bezent-structure-header">
@@ -250,8 +317,7 @@ export function FieldToolbox({
               const isSelected = activeSectionKey === secKey;
               const isLocked = secKey === 'review';
               const isMandatory = MANDATORY_KEYS.includes(secKey);
-              const isVisible =
-                'visible' in sec ? sec.visible !== false : true;
+              const isVisible = 'visible' in sec ? sec.visible !== false : true;
               const displayNum = String(idx + 1).padStart(2, '0');
 
               return (
@@ -293,15 +359,15 @@ export function FieldToolbox({
                       }
                       aria-label={`${label} visibility: ${isVisible ? 'Visible' : 'Hidden'}`}
                     >
-                      <BezentIcon
-                        name={isVisible ? 'visibility' : 'visibilityOff'}
-                        size={14}
-                      />
+                      <BezentIcon name={isVisible ? 'visibility' : 'visibilityOff'} size={14} />
                     </button>
 
                     {/* Navigation arrow or lock */}
                     {isLocked ? (
-                      <span title="Review & Finalize (Protected final step)" aria-label="Review & Finalize (Protected final step)">
+                      <span
+                        title="Review & Finalize (Protected final step)"
+                        aria-label="Review & Finalize (Protected final step)"
+                      >
                         <BezentIcon name="lock" size={12} />
                       </span>
                     ) : (

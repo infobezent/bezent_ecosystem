@@ -317,7 +317,8 @@ export const INITIAL_REGISTRATION_DATA: RegistrationFormData = {
 export function toReviewSectionData(formData: RegistrationFormData): ReviewSectionData {
   const g = formData.general;
   const p = formData.personal;
-  const fullName = [p.firstName, p.middleName, p.lastName].filter(Boolean).join(' ') || p.preferredName || '';
+  const fullName =
+    [p.firstName, p.middleName, p.lastName].filter(Boolean).join(' ') || p.preferredName || '';
 
   return {
     general: {
@@ -488,7 +489,11 @@ export function buildCreateEmployeePayload(
   const noticeMatch = g.noticePeriod.match(/(\d+)/);
   const noticePeriodDays = noticeMatch ? parseInt(noticeMatch[1] ?? '30', 10) : undefined;
 
-  const email = (formData.onlineAccess.officialEmail || p.personalEmail || `${(p.firstName || 'emp').toLowerCase()}@company.local`).trim();
+  const email = (
+    formData.onlineAccess.officialEmail ||
+    p.personalEmail ||
+    `${(p.firstName || 'emp').toLowerCase()}@company.local`
+  ).trim();
 
   const details: NonNullable<CreateEmployeeRequest['details']> = {};
 

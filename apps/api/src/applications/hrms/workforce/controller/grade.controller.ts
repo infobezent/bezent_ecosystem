@@ -53,12 +53,7 @@ export class GradeController {
       const { tenantId, companyId } = this.getContext(req);
       const actor = this.getActor(req);
       const validated = validateCreateGrade(req.body);
-      const created = await this.service.createGrade(
-        tenantId,
-        companyId,
-        validated,
-        actor,
-      );
+      const created = await this.service.createGrade(tenantId, companyId, validated, actor);
       res.status(201).json({ data: created });
     } catch (err) {
       next(err);
@@ -71,13 +66,7 @@ export class GradeController {
       const actor = this.getActor(req);
       const id = String(req.params.id);
       const validated = validateUpdateGrade(req.body);
-      const updated = await this.service.updateGrade(
-        tenantId,
-        companyId,
-        id,
-        validated,
-        actor,
-      );
+      const updated = await this.service.updateGrade(tenantId, companyId, id, validated, actor);
       res.json({ data: updated });
     } catch (err) {
       next(err);
@@ -112,12 +101,7 @@ export class GradeController {
       const { tenantId, companyId } = this.getContext(req);
       const actor = this.getActor(req);
       const id = String(req.params.id);
-      const result = await this.service.deactivateGrade(
-        tenantId,
-        companyId,
-        id,
-        actor,
-      );
+      const result = await this.service.deactivateGrade(tenantId, companyId, id, actor);
       res.json({
         data: result.data,
         affectedEmployeeCount: result.affectedEmployeeCount,
@@ -134,12 +118,7 @@ export class GradeController {
       const { tenantId, companyId } = this.getContext(req);
       const actor = this.getActor(req);
       const id = String(req.params.id);
-      const result = await this.service.reactivateGrade(
-        tenantId,
-        companyId,
-        id,
-        actor,
-      );
+      const result = await this.service.reactivateGrade(tenantId, companyId, id, actor);
       res.json({
         data: result.data,
         affectedEmployeeCount: result.affectedEmployeeCount,

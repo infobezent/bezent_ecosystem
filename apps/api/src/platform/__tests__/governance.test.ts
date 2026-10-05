@@ -2,7 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { governanceService } from '../governance/service/governance.service.js';
 import { auditService } from '../audit/service/audit.service.js';
 import type { AuditRepository } from '../audit/repository/audit.repository.js';
-import { OTP_TTL_MINUTES, OTP_MAX_ATTEMPTS, OTP_RESEND_COOLDOWN_SECONDS } from '../auth/service/otpAuth.service.js';
+import {
+  OTP_TTL_MINUTES,
+  OTP_MAX_ATTEMPTS,
+  OTP_RESEND_COOLDOWN_SECONDS,
+} from '../auth/service/otpAuth.service.js';
 import { SESSION_TTL_HOURS } from '../auth/service/auth.service.js';
 
 describe('Governance Subsystem', () => {
@@ -67,9 +71,9 @@ describe('Governance Subsystem', () => {
       },
     };
 
-    const service = new (auditService.constructor as new (repo: AuditRepository) => typeof auditService)(
-      mockRepo as AuditRepository,
-    );
+    const service = new (
+      auditService.constructor as new (repo: AuditRepository) => typeof auditService
+    )(mockRepo as AuditRepository);
 
     await service.logEvent({
       action: 'test_action',

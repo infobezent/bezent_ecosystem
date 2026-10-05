@@ -38,7 +38,13 @@ const mockCompanyAccess = {
   workspaces: ['company_admin' as const],
 };
 
-function TestWrapper({ children, initialEntry = '/company-admin/organization' }: { children: ReactNode; initialEntry?: string }) {
+function TestWrapper({
+  children,
+  initialEntry = '/company-admin/organization',
+}: {
+  children: ReactNode;
+  initialEntry?: string;
+}) {
   const authValue: AuthContextValue = {
     status: 'authenticated',
     error: null,
@@ -70,9 +76,7 @@ function TestWrapper({ children, initialEntry = '/company-admin/organization' }:
   return (
     <AuthContext.Provider value={authValue}>
       <MemoryRouter initialEntries={[initialEntry]}>
-        <CompanyAdminProvider>
-          {children}
-        </CompanyAdminProvider>
+        <CompanyAdminProvider>{children}</CompanyAdminProvider>
       </MemoryRouter>
     </AuthContext.Provider>
   );

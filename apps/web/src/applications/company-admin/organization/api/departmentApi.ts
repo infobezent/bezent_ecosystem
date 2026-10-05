@@ -145,7 +145,8 @@ export async function deactivateDepartment(
     },
   );
 
-  let body: { data?: DepartmentRecord; message?: string; error?: { message?: string } } | null = null;
+  let body: { data?: DepartmentRecord; message?: string; error?: { message?: string } } | null =
+    null;
   try {
     body = await res.json();
   } catch {
@@ -169,7 +170,8 @@ export async function reactivateDepartment(
     },
   );
 
-  let body: { data?: DepartmentRecord; message?: string; error?: { message?: string } } | null = null;
+  let body: { data?: DepartmentRecord; message?: string; error?: { message?: string } } | null =
+    null;
   try {
     body = await res.json();
   } catch {

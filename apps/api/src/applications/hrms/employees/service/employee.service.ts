@@ -42,7 +42,9 @@ export class EmployeeService {
     }
 
     if (dto.designationId) {
-      const validDesig = masters.designations.some((d: { id: string }) => d.id === dto.designationId);
+      const validDesig = masters.designations.some(
+        (d: { id: string }) => d.id === dto.designationId,
+      );
       if (!validDesig) {
         throw new BadRequestError(
           `Designation '${dto.designationId}' does not exist or does not belong to this company`,

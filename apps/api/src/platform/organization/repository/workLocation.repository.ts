@@ -41,11 +41,7 @@ export class WorkLocationRepository {
     if (filter.search && filter.search.trim().length > 0) {
       const term = `%${filter.search.trim()}%`;
       conditions.push(
-        or(
-          like(locations.name, term),
-          like(locations.code, term),
-          like(locations.city, term),
-        )!,
+        or(like(locations.name, term), like(locations.code, term), like(locations.city, term))!,
       );
     }
 

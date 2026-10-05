@@ -123,8 +123,7 @@ export async function requireTenantAdminCompanyContext(
       throw new UnauthorizedError('Tenant Admin context must be resolved first');
     }
 
-    const rawCompanyId =
-      req.params.companyId || req.headers['x-company-id'] || req.query.companyId;
+    const rawCompanyId = req.params.companyId || req.headers['x-company-id'] || req.query.companyId;
     const companyId =
       typeof rawCompanyId === 'string'
         ? rawCompanyId.trim()

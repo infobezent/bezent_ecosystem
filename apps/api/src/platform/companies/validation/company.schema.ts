@@ -55,7 +55,9 @@ export function validateCreateCompany(body: unknown): CreateCompanyDto {
       if (invalid.length > 0) {
         errors.modules = `Invalid module codes: ${invalid.join(', ')}`;
       } else {
-        validatedModules = Array.from(new Set(data.modules)) as Array<'hrms' | 'crm' | 'project_management'>;
+        validatedModules = Array.from(new Set(data.modules)) as Array<
+          'hrms' | 'crm' | 'project_management'
+        >;
       }
     }
   }
@@ -93,7 +95,8 @@ export function validateCreateCompany(body: unknown): CreateCompanyDto {
                 email: (nu.email as string).trim().toLowerCase(),
                 firstName: (nu.firstName as string).trim(),
                 lastName: (nu.lastName as string).trim(),
-                phone: typeof nu.phone === 'string' && nu.phone.trim() ? nu.phone.trim() : undefined,
+                phone:
+                  typeof nu.phone === 'string' && nu.phone.trim() ? nu.phone.trim() : undefined,
               },
             };
           }
@@ -233,4 +236,3 @@ export function validateCreateTenantAdminCompany(body: unknown): CreateTenantAdm
     timeZone: data.timeZone ? String(data.timeZone).trim() : null,
   };
 }
-

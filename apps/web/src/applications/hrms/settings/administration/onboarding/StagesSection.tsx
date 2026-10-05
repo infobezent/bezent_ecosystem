@@ -417,11 +417,7 @@ export function StagesSection({
       />
 
       {feedback && (
-        <Alert
-          variant={feedback.type}
-          dismissible
-          onDismiss={() => setFeedback(null)}
-        >
+        <Alert variant={feedback.type} dismissible onDismiss={() => setFeedback(null)}>
           {feedback.message}
         </Alert>
       )}
@@ -458,10 +454,7 @@ export function StagesSection({
                 const isTerminal = stage.isTerminal || stage.stageKey === 'completed';
                 const canMoveUp = canManage && index > 0 && !isTerminal && !reordering;
                 const canMoveDown =
-                  canManage &&
-                  index < sortedStages.length - 2 &&
-                  !isTerminal &&
-                  !reordering;
+                  canManage && index < sortedStages.length - 2 && !isTerminal && !reordering;
                 const canDelete = canManage && !stage.isSystem && !isTerminal;
 
                 return (
@@ -576,12 +569,7 @@ export function StagesSection({
               <Button variant="secondary" onClick={closeAddModal} disabled={adding} type="button">
                 Cancel
               </Button>
-              <Button
-                variant="primary"
-                onClick={handleCreateStage}
-                disabled={adding}
-                type="button"
-              >
+              <Button variant="primary" onClick={handleCreateStage} disabled={adding} type="button">
                 {adding ? 'Creating...' : 'Create Stage'}
               </Button>
             </Actions>
@@ -709,7 +697,12 @@ export function StagesSection({
           size="sm"
           footer={
             <Actions align="end" gap="sm">
-              <Button variant="secondary" onClick={closeDeleteModal} disabled={deleting} type="button">
+              <Button
+                variant="secondary"
+                onClick={closeDeleteModal}
+                disabled={deleting}
+                type="button"
+              >
                 Cancel
               </Button>
               <Button
@@ -726,8 +719,8 @@ export function StagesSection({
           <Stack gap="md">
             {deleteError && <Alert variant="danger">{deleteError}</Alert>}
             <p className="bezent-card__desc">
-              Only unreferenced custom stages can be permanently removed. If this stage has any active
-              cases or past history, deactivate it instead to preserve audit logs.
+              Only unreferenced custom stages can be permanently removed. If this stage has any
+              active cases or past history, deactivate it instead to preserve audit logs.
             </p>
           </Stack>
         </Modal>
@@ -737,4 +730,3 @@ export function StagesSection({
 }
 
 export default StagesSection;
-

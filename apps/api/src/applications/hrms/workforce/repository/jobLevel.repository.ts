@@ -49,21 +49,12 @@ export class JobLevelRepository {
 
     if (filter.search && filter.search.trim().length > 0) {
       const term = `%${filter.search.trim()}%`;
-      conditions.push(
-        or(
-          like(jobLevels.name, term),
-          like(jobLevels.code, term),
-        )!,
-      );
+      conditions.push(or(like(jobLevels.name, term), like(jobLevels.code, term))!);
     }
 
     const whereClause = and(...conditions);
 
-    const rows = await db
-      .select()
-      .from(jobLevels)
-      .where(whereClause)
-      .orderBy(asc(jobLevels.rank));
+    const rows = await db.select().from(jobLevels).where(whereClause).orderBy(asc(jobLevels.rank));
 
     const items = rows.map((r) => this.mapRecord(r));
 

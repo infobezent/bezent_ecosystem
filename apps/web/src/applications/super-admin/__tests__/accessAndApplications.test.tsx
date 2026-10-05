@@ -290,7 +290,9 @@ describe('Super Admin Access & Applications UI Suite', () => {
       vi.mocked(superAdminApi.listCompanyAdmins).mockReturnValue(new Promise(() => {}));
       const html = renderToStaticMarkup(<CompanyAdminsPage />);
       expect(html).toContain('Company Administrators');
-      expect(html).toContain('Manage designated company administrators assigned to customer companies');
+      expect(html).toContain(
+        'Manage designated company administrators assigned to customer companies',
+      );
     });
 
     it('does not contain "Tenant-wide" option in assign modal', () => {

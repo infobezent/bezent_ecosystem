@@ -77,7 +77,13 @@ export class DepartmentController {
       const actor = this.getActor(req);
       const id = String(req.params.id);
       const validated = validateUpdateDepartment(req.body);
-      const updated = await this.service.updateDepartment(tenantId, companyId, id, validated, actor);
+      const updated = await this.service.updateDepartment(
+        tenantId,
+        companyId,
+        id,
+        validated,
+        actor,
+      );
       res.json({ data: updated });
     } catch (err) {
       next(err);
@@ -90,7 +96,13 @@ export class DepartmentController {
       const actor = this.getActor(req);
       const id = String(req.params.id);
       const { status } = validateSetDepartmentStatus(req.body);
-      const updated = await this.service.setDepartmentStatus(tenantId, companyId, id, status, actor);
+      const updated = await this.service.setDepartmentStatus(
+        tenantId,
+        companyId,
+        id,
+        status,
+        actor,
+      );
       res.json({ data: updated });
     } catch (err) {
       next(err);

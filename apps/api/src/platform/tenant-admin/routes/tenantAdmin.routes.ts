@@ -69,15 +69,30 @@ tenantAdminRouter.get('/members/:userId', tenantAdminController.getMember);
 
 // 8. Company Access Management
 tenantAdminRouter.post('/members/:userId/companies', tenantAdminController.grantCompanyAccess);
-tenantAdminRouter.delete('/members/:userId/companies/:companyId', tenantAdminController.revokeCompanyAccess);
+tenantAdminRouter.delete(
+  '/members/:userId/companies/:companyId',
+  tenantAdminController.revokeCompanyAccess,
+);
 
 // 9. Company Role Management
-tenantAdminRouter.post('/members/:userId/companies/:companyId/roles', tenantAdminController.assignCompanyRoles);
-tenantAdminRouter.delete('/members/:userId/companies/:companyId/roles/:roleId', tenantAdminController.revokeCompanyRole);
+tenantAdminRouter.post(
+  '/members/:userId/companies/:companyId/roles',
+  tenantAdminController.assignCompanyRoles,
+);
+tenantAdminRouter.delete(
+  '/members/:userId/companies/:companyId/roles/:roleId',
+  tenantAdminController.revokeCompanyRole,
+);
 
 // 10. Tenant Admin Promotion / Demotion from Member Directory
-tenantAdminRouter.post('/members/:userId/promote-admin', tenantAdminController.promoteMemberToAdmin);
-tenantAdminRouter.post('/members/:userId/demote-admin', tenantAdminController.demoteMemberFromAdmin);
+tenantAdminRouter.post(
+  '/members/:userId/promote-admin',
+  tenantAdminController.promoteMemberToAdmin,
+);
+tenantAdminRouter.post(
+  '/members/:userId/demote-admin',
+  tenantAdminController.demoteMemberFromAdmin,
+);
 
 // =========================================================================
 // Phase 2E: Application Distribution
@@ -102,4 +117,3 @@ tenantAdminRouter.post(
   requireTenantAdminCompanyContext,
   tenantAdminController.disableCompanyApplication,
 );
-

@@ -25,8 +25,14 @@ import type {
   CompanyUserItem,
   UpdateCompanyProfileInput,
 } from '../types/companyAdmin.types.js';
-import { companyRepository, CompanyRepository } from '../../companies/repository/company.repository.js';
-import { organizationRepository, OrganizationRepository } from '../../organization/repository/organization.repository.js';
+import {
+  companyRepository,
+  CompanyRepository,
+} from '../../companies/repository/company.repository.js';
+import {
+  organizationRepository,
+  OrganizationRepository,
+} from '../../organization/repository/organization.repository.js';
 
 export class CompanyAdminRepository {
   /** Every active company — platform Super Admin oversight only. */
@@ -215,10 +221,7 @@ export class CompanyAdminRepository {
       .select()
       .from(invitations)
       .where(
-        and(
-          eq(invitations.email, email.toLowerCase().trim()),
-          eq(invitations.status, 'pending'),
-        ),
+        and(eq(invitations.email, email.toLowerCase().trim()), eq(invitations.status, 'pending')),
       );
   }
 

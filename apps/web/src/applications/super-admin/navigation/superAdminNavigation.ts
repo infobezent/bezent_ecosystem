@@ -30,7 +30,8 @@ export const SUPER_ADMIN_NAV_CATEGORIES: readonly NavCategory[] = [
   {
     id: 'access',
     label: 'Access & Applications',
-    description: 'Platform user directory, company admin assignments, and application entitlements.',
+    description:
+      'Platform user directory, company admin assignments, and application entitlements.',
     icon: 'employees',
   },
   {
@@ -102,7 +103,8 @@ export const SUPER_ADMIN_NAV_DESTINATIONS: readonly NavDestination[] = [
     icon: 'employees',
     segment: 'users',
     subtitle: 'Access & Applications',
-    description: 'Platform user directory, company admin assignments, and application entitlements.',
+    description:
+      'Platform user directory, company admin assignments, and application entitlements.',
     categoryId: 'access',
     sidebar: true,
     children: [

@@ -1,12 +1,6 @@
 import { eq, and, isNull } from 'drizzle-orm';
 import { getDb } from '../../../db/connection.js';
-import {
-  tenants,
-  companies,
-  users,
-  memberships,
-  tenantModules,
-} from '../../../db/schema.js';
+import { tenants, companies, users, memberships, tenantModules } from '../../../db/schema.js';
 import { tenantRepository, TenantRepository } from '../../tenants/repository/tenant.repository.js';
 import {
   companyRepository,
@@ -17,7 +11,11 @@ import {
   PlatformUserRepository,
 } from '../../users/repository/user.repository.js';
 import { auditRepository, AuditRepository } from '../../audit/repository/audit.repository.js';
-import type { TenantRecord, NextBestAction, TenantStatus } from '../../tenants/types/tenant.types.js';
+import type {
+  TenantRecord,
+  NextBestAction,
+  TenantStatus,
+} from '../../tenants/types/tenant.types.js';
 import type { AuditLogRecord } from '../../audit/types/audit.types.js';
 import {
   evaluateCustomerHealth,
@@ -127,12 +125,7 @@ export class DashboardService {
         companyId: memberships.companyId,
       })
       .from(memberships)
-      .where(
-        and(
-          eq(memberships.role, 'company_admin'),
-          eq(memberships.status, 'active'),
-        ),
-      );
+      .where(and(eq(memberships.role, 'company_admin'), eq(memberships.status, 'active')));
 
     const uniqueAdminUsers = new Set(adminRows.map((r) => r.userId)).size;
     const totalAssignments = adminRows.length;
@@ -174,12 +167,7 @@ export class DashboardService {
         status: tenantModules.status,
       })
       .from(tenantModules)
-      .where(
-        and(
-          isNull(tenantModules.companyId),
-          eq(tenantModules.status, 'enabled'),
-        ),
-      );
+      .where(and(isNull(tenantModules.companyId), eq(tenantModules.status, 'enabled')));
 
     const allAdminMembers = await db
       .select({
@@ -191,12 +179,7 @@ export class DashboardService {
       })
       .from(memberships)
       .leftJoin(users, eq(memberships.userId, users.id))
-      .where(
-        and(
-          eq(memberships.role, 'company_admin'),
-          eq(memberships.status, 'active'),
-        ),
-      );
+      .where(and(eq(memberships.role, 'company_admin'), eq(memberships.status, 'active')));
 
     const companyMap = new Map<string, EvaluationCompanyInput[]>();
     for (const c of allCompanies) {

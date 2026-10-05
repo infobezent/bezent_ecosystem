@@ -241,7 +241,8 @@ export function OrganizationStructureSection({
     const defaultParentId =
       parentBuId ??
       (selectedNode?.type === 'business_unit' ? selectedNode.id : '') ??
-      (hierarchy?.businessUnits[0]?.id ?? '');
+      hierarchy?.businessUnits[0]?.id ??
+      '';
 
     setEditingDivision(null);
     setPresetBuIdForDivision(defaultParentId);
@@ -599,9 +600,7 @@ export function OrganizationStructureSection({
                                       </Badge>
                                     </Inline>
                                     <CardDescription>
-                                      {bu.headEmployeeName
-                                        ? `Head: ${bu.headEmployeeName} • `
-                                        : ''}
+                                      {bu.headEmployeeName ? `Head: ${bu.headEmployeeName} • ` : ''}
                                       {bu.divisionCount}{' '}
                                       {bu.divisionCount === 1 ? 'division' : 'divisions'}
                                     </CardDescription>
@@ -617,9 +616,7 @@ export function OrganizationStructureSection({
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      onClick={() =>
-                                        setActiveMenuKey(isMenuOpen ? null : menuKey)
-                                      }
+                                      onClick={() => setActiveMenuKey(isMenuOpen ? null : menuKey)}
                                       aria-label={`Options for ${bu.name}`}
                                     >
                                       <BezentIcon name="moreVertical" size={16} />
@@ -723,9 +720,7 @@ export function OrganizationStructureSection({
                                                     <Badge variant="neutral">{div.code}</Badge>
                                                   )}
                                                   <Badge
-                                                    variant={
-                                                      isDivInactive ? 'neutral' : 'success'
-                                                    }
+                                                    variant={isDivInactive ? 'neutral' : 'success'}
                                                   >
                                                     {isDivInactive ? 'Inactive' : 'Active'}
                                                   </Badge>
@@ -892,79 +887,82 @@ export function OrganizationStructureSection({
               </CardHeader>
 
               <CardBody>
-                {selectedNode?.type === 'company' && (() => {
-                  const companyData = selectedNode.data as CompanySummary;
-                  return (
-                    <Stack gap="md">
-                      <div>
-                        <Label>Organization Name</Label>
-                        <p className="bezent-detail-value">{companyData.name || '—'}</p>
-                      </div>
+                {selectedNode?.type === 'company' &&
+                  (() => {
+                    const companyData = selectedNode.data as CompanySummary;
+                    return (
+                      <Stack gap="md">
+                        <div>
+                          <Label>Organization Name</Label>
+                          <p className="bezent-detail-value">{companyData.name || '—'}</p>
+                        </div>
 
-                      <div>
-                        <Label>Display Name</Label>
-                        <p className="bezent-detail-value">{companyData.displayName || '—'}</p>
-                      </div>
+                        <div>
+                          <Label>Display Name</Label>
+                          <p className="bezent-detail-value">{companyData.displayName || '—'}</p>
+                        </div>
 
-                      <div>
-                        <Label>Organization Type</Label>
-                        <p className="bezent-detail-value">{companyData.organizationType || '—'}</p>
-                      </div>
+                        <div>
+                          <Label>Organization Type</Label>
+                          <p className="bezent-detail-value">
+                            {companyData.organizationType || '—'}
+                          </p>
+                        </div>
 
-                      <div>
-                        <Label>Industry</Label>
-                        <p className="bezent-detail-value">{companyData.industry || '—'}</p>
-                      </div>
+                        <div>
+                          <Label>Industry</Label>
+                          <p className="bezent-detail-value">{companyData.industry || '—'}</p>
+                        </div>
 
-                      <div>
-                        <Label>Website</Label>
-                        <p className="bezent-detail-value">
-                          {companyData.website ? (
-                            <a
-                              href={
-                                companyData.website.startsWith('http')
-                                  ? companyData.website
-                                  : `https://${companyData.website}`
-                              }
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              {companyData.website}
-                            </a>
-                          ) : (
-                            '—'
-                          )}
-                        </p>
-                      </div>
+                        <div>
+                          <Label>Website</Label>
+                          <p className="bezent-detail-value">
+                            {companyData.website ? (
+                              <a
+                                href={
+                                  companyData.website.startsWith('http')
+                                    ? companyData.website
+                                    : `https://${companyData.website}`
+                                }
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {companyData.website}
+                              </a>
+                            ) : (
+                              '—'
+                            )}
+                          </p>
+                        </div>
 
-                      <div>
-                        <Label>Registered Address</Label>
-                        <p className="bezent-detail-value">
-                          {[
-                            companyData.addressLine1,
-                            companyData.addressLine2,
-                            companyData.city,
-                            companyData.state,
-                            companyData.country,
-                            companyData.postalCode,
-                          ]
-                            .filter(Boolean)
-                            .join(', ') || '—'}
-                        </p>
-                      </div>
+                        <div>
+                          <Label>Registered Address</Label>
+                          <p className="bezent-detail-value">
+                            {[
+                              companyData.addressLine1,
+                              companyData.addressLine2,
+                              companyData.city,
+                              companyData.state,
+                              companyData.country,
+                              companyData.postalCode,
+                            ]
+                              .filter(Boolean)
+                              .join(', ') || '—'}
+                          </p>
+                        </div>
 
-                      {onNavigateToProfile && (
-                        <Button
-                          variant="secondary"
-                          onClick={onNavigateToProfile}
-                          leftIcon={<BezentIcon name="edit" size={16} />}
-                        >
-                          Edit Company Profile
-                        </Button>
-                      )}
-                    </Stack>
-                  );
-                })()}
+                        {onNavigateToProfile && (
+                          <Button
+                            variant="secondary"
+                            onClick={onNavigateToProfile}
+                            leftIcon={<BezentIcon name="edit" size={16} />}
+                          >
+                            Edit Company Profile
+                          </Button>
+                        )}
+                      </Stack>
+                    );
+                  })()}
 
                 {selectedNode?.type === 'business_unit' && (
                   <Stack gap="md">
@@ -1023,9 +1021,7 @@ export function OrganizationStructureSection({
                       <Stack gap="sm">
                         <Button
                           variant="secondary"
-                          onClick={() =>
-                            handleOpenEditBu(selectedNode.data as BusinessUnitRecord)
-                          }
+                          onClick={() => handleOpenEditBu(selectedNode.data as BusinessUnitRecord)}
                           leftIcon={<BezentIcon name="edit" size={16} />}
                         >
                           Edit Business Unit
@@ -1071,8 +1067,7 @@ export function OrganizationStructureSection({
                     <div>
                       <Label>Head of Division</Label>
                       <p className="bezent-detail-value">
-                        {(selectedNode.data as DivisionRecord).headEmployeeName ||
-                          'Not assigned'}
+                        {(selectedNode.data as DivisionRecord).headEmployeeName || 'Not assigned'}
                       </p>
                     </div>
 
@@ -1101,9 +1096,7 @@ export function OrganizationStructureSection({
                     {canManage && (
                       <Button
                         variant="secondary"
-                        onClick={() =>
-                          handleOpenEditDivision(selectedNode.data as DivisionRecord)
-                        }
+                        onClick={() => handleOpenEditDivision(selectedNode.data as DivisionRecord)}
                         leftIcon={<BezentIcon name="edit" size={16} />}
                       >
                         Edit Division
@@ -1133,11 +1126,7 @@ export function OrganizationStructureSection({
             >
               Cancel
             </Button>
-            <Button
-              variant="primary"
-              onClick={handleSubmitBu}
-              loading={actionLoading}
-            >
+            <Button variant="primary" onClick={handleSubmitBu} loading={actionLoading}>
               {editingBu ? 'Save Changes' : 'Create Business Unit'}
             </Button>
           </Inline>
@@ -1212,11 +1201,7 @@ export function OrganizationStructureSection({
             >
               Cancel
             </Button>
-            <Button
-              variant="primary"
-              onClick={handleSubmitDivision}
-              loading={actionLoading}
-            >
+            <Button variant="primary" onClick={handleSubmitDivision} loading={actionLoading}>
               {editingDivision ? 'Save Changes' : 'Create Division'}
             </Button>
           </Inline>
@@ -1288,11 +1273,7 @@ export function OrganizationStructureSection({
       <Modal
         isOpen={!!deactivatingItem}
         onClose={() => setDeactivatingItem(null)}
-        title={
-          deactivatingItem?.type === 'bu'
-            ? 'Deactivate Business Unit'
-            : 'Deactivate Division'
-        }
+        title={deactivatingItem?.type === 'bu' ? 'Deactivate Business Unit' : 'Deactivate Division'}
         size="sm"
         footer={
           <Inline gap="sm" justify="end">
@@ -1303,11 +1284,7 @@ export function OrganizationStructureSection({
             >
               Cancel
             </Button>
-            <Button
-              variant="danger"
-              onClick={handleConfirmDeactivate}
-              loading={actionLoading}
-            >
+            <Button variant="danger" onClick={handleConfirmDeactivate} loading={actionLoading}>
               Deactivate
             </Button>
           </Inline>

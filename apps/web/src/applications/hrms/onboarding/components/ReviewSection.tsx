@@ -1018,12 +1018,13 @@ export function ReviewSection({
                     <strong>₹{data.accounts.annualCtc.toLocaleString('en-IN')} / yr</strong>
                   </Stack>
                 )}
-                {typeof data.accounts.monthlyBasic === 'number' && data.accounts.monthlyBasic > 0 && (
-                  <Stack gap="xs">
-                    <Label size="sm">Monthly Basic</Label>
-                    <strong>₹{data.accounts.monthlyBasic.toLocaleString('en-IN')} / mo</strong>
-                  </Stack>
-                )}
+                {typeof data.accounts.monthlyBasic === 'number' &&
+                  data.accounts.monthlyBasic > 0 && (
+                    <Stack gap="xs">
+                      <Label size="sm">Monthly Basic</Label>
+                      <strong>₹{data.accounts.monthlyBasic.toLocaleString('en-IN')} / mo</strong>
+                    </Stack>
+                  )}
                 {typeof data.accounts.grossSalary === 'number' && data.accounts.grossSalary > 0 && (
                   <Stack gap="xs">
                     <Label size="sm">Monthly Gross</Label>
@@ -1303,9 +1304,7 @@ export function ReviewSection({
               </Stack>
             </Stack>
           ) : !data.documents.passportPhoto?.previewUrl ? (
-            <span className="bezent-card__desc">
-              No documents uploaded yet for this employee.
-            </span>
+            <span className="bezent-card__desc">No documents uploaded yet for this employee.</span>
           ) : null}
         </Stack>
       </Card>
@@ -1387,12 +1386,9 @@ export function ReviewSection({
           <Stack gap="md">
             <Alert variant="success">
               Employee{' '}
-              <strong>
-                {createdEmployee?.name || data.personal.fullName || 'New Employee'}
-              </strong>{' '}
-              (ID:{' '}
-              <strong>{createdEmployee?.employeeNumber || data.general.employeeId}</strong>) has
-              been successfully created and registered in BEZENT HRMS.
+              <strong>{createdEmployee?.name || data.personal.fullName || 'New Employee'}</strong>{' '}
+              (ID: <strong>{createdEmployee?.employeeNumber || data.general.employeeId}</strong>)
+              has been successfully created and registered in BEZENT HRMS.
             </Alert>
             <Stack gap="xs">
               <span>General employment record created in database</span>

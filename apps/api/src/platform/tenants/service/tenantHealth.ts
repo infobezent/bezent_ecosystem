@@ -65,7 +65,8 @@ export function evaluateCustomerHealth(
         actionType: 'create_company',
         targetTab: 'companies',
         targetPath: '/super-admin/companies',
-        description: 'Set up the primary legal entity so administrators and users can be onboarded.',
+        description:
+          'Set up the primary legal entity so administrators and users can be onboarded.',
       },
     };
   }
@@ -149,7 +150,8 @@ export function evaluateCustomerHealth(
     };
   }
 
-  const healthyReason = 'Account is fully configured with active administrators and application entitlements.';
+  const healthyReason =
+    'Account is fully configured with active administrators and application entitlements.';
   return {
     status: 'healthy',
     reason: healthyReason,
@@ -174,7 +176,8 @@ export function evaluateSetupProgress(
       title: 'Customer Tenant Created',
       completed: true,
       description: 'Tenant account and root isolation boundary registered',
-      completedAt: typeof tenant.createdAt === 'string' ? tenant.createdAt : tenant.createdAt.toISOString(),
+      completedAt:
+        typeof tenant.createdAt === 'string' ? tenant.createdAt : tenant.createdAt.toISOString(),
     },
     {
       key: 'company_created',

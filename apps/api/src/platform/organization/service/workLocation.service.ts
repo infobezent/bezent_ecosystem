@@ -6,15 +6,8 @@ import {
   type ListWorkLocationsFilter,
   type WorkLocationLifecycleResult,
 } from '../types/workLocation.types.js';
-import {
-  NotFoundError,
-  ConflictError,
-  ValidationError,
-} from '../../../app/errors/AppError.js';
-import {
-  auditRepository,
-  AuditRepository,
-} from '../../audit/repository/audit.repository.js';
+import { NotFoundError, ConflictError, ValidationError } from '../../../app/errors/AppError.js';
+import { auditRepository, AuditRepository } from '../../audit/repository/audit.repository.js';
 
 export class WorkLocationService {
   constructor(
@@ -94,9 +87,7 @@ export class WorkLocationService {
         dto.code,
       );
       if (existingWithCode) {
-        throw new ConflictError(
-          `Location code "${dto.code}" is already in use in this company`,
-        );
+        throw new ConflictError(`Location code "${dto.code}" is already in use in this company`);
       }
     }
 
@@ -148,9 +139,7 @@ export class WorkLocationService {
         dto.code,
       );
       if (existingWithCode && existingWithCode.id !== id) {
-        throw new ConflictError(
-          `Location code "${dto.code}" is already in use in this company`,
-        );
+        throw new ConflictError(`Location code "${dto.code}" is already in use in this company`);
       }
     }
 

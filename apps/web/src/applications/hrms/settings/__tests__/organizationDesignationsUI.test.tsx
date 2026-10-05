@@ -15,7 +15,15 @@ const mockCompanyAccess = {
   tenantName: 'Demo Tenant',
   isMember: true,
   isPlatformOversight: false,
-  roles: [{ id: 'role_admin', name: 'Company Admin', code: 'company_admin', isSystem: true, moduleCode: null }],
+  roles: [
+    {
+      id: 'role_admin',
+      name: 'Company Admin',
+      code: 'company_admin',
+      isSystem: true,
+      moduleCode: null,
+    },
+  ],
   permissions: [
     'organization.designations.view',
     'organization.designations.manage',
@@ -29,11 +37,7 @@ const mockCompanyAccess = {
 
 const mockReadOnlyCompanyAccess = {
   ...mockCompanyAccess,
-  permissions: [
-    'organization.designations.view',
-    'hrms.organization.view',
-    'hrms.settings.view',
-  ],
+  permissions: ['organization.designations.view', 'hrms.organization.view', 'hrms.settings.view'],
 };
 
 function createMockAuthContext(permissions: string[]): AuthContextValue {
@@ -57,7 +61,15 @@ function createMockAuthContext(permissions: string[]): AuthContextValue {
     },
     tenants: [],
     companies: [],
-    activeTenant: { id: 'tenant_demo_01', name: 'Demo Tenant', code: 'demo', status: 'active', isDefault: true, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+    activeTenant: {
+      id: 'tenant_demo_01',
+      name: 'Demo Tenant',
+      code: 'demo',
+      status: 'active',
+      isDefault: true,
+      createdAt: '2026-01-01T00:00:00Z',
+      updatedAt: '2026-01-01T00:00:00Z',
+    },
     activeCompany: companyAccess,
     access: {
       userId: 'usr_admin_01',
@@ -82,9 +94,7 @@ function createMockAuthContext(permissions: string[]): AuthContextValue {
 function renderWithAuth(ui: ReactNode, permissions = mockCompanyAccess.permissions) {
   const contextValue = createMockAuthContext(permissions);
   return renderToStaticMarkup(
-    <AuthContext.Provider value={contextValue}>
-      {ui}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{ui}</AuthContext.Provider>,
   );
 }
 
@@ -120,7 +130,7 @@ describe('Organization Designations UI', () => {
 
   it('verifies route registration in hrmsRoutes', () => {
     // Check that hrmsRoutes includes settings and designations route
-    const settingsRoute = hrmsRoutes[0]?.children?.find(r => r.path?.includes('settings'));
+    const settingsRoute = hrmsRoutes[0]?.children?.find((r) => r.path?.includes('settings'));
     expect(settingsRoute).toBeDefined();
 
     // Flatten route hierarchy to check leaf paths
@@ -133,7 +143,7 @@ describe('Organization Designations UI', () => {
     };
     collectPaths(hrmsRoutes);
 
-    expect(paths.some(p => p.includes('settings/organization/designations'))).toBe(true);
-    expect(paths.some(p => p.includes('organization/designations'))).toBe(true);
+    expect(paths.some((p) => p.includes('settings/organization/designations'))).toBe(true);
+    expect(paths.some((p) => p.includes('organization/designations'))).toBe(true);
   });
 });

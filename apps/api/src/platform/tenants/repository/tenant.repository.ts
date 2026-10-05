@@ -25,8 +25,7 @@ import {
 } from '../service/tenantHealth.js';
 
 type DbClient =
-  | ReturnType<typeof getDb>
-  | Parameters<Parameters<ReturnType<typeof getDb>['transaction']>[0]>[0];
+  ReturnType<typeof getDb> | Parameters<Parameters<ReturnType<typeof getDb>['transaction']>[0]>[0];
 
 export class TenantRepository {
   async findById(id: string): Promise<TenantRecord | null> {
@@ -297,7 +296,10 @@ export class TenantRepository {
         .from(tenantModules)
         .where(
           and(
-            eq(tenantModules.moduleCode, filter.moduleCode as 'hrms' | 'crm' | 'project_management'),
+            eq(
+              tenantModules.moduleCode,
+              filter.moduleCode as 'hrms' | 'crm' | 'project_management',
+            ),
             eq(tenantModules.status, 'enabled'),
           ),
         );
@@ -370,10 +372,7 @@ export class TenantRepository {
         })
         .from(tenantModules)
         .where(
-          and(
-            inArray(tenantModules.tenantId, tenantIds),
-            eq(tenantModules.status, 'enabled'),
-          ),
+          and(inArray(tenantModules.tenantId, tenantIds), eq(tenantModules.status, 'enabled')),
         );
       for (const m of allModules) {
         const list = moduleMap.get(m.tenantId) ?? [];
@@ -499,10 +498,7 @@ export class TenantRepository {
     tx?: DbClient,
   ): Promise<TenantRecord> {
     const client = (tx ?? getDb()) as ReturnType<typeof getDb>;
-    await client
-      .update(tenants)
-      .set({ maxCompanies })
-      .where(eq(tenants.id, tenantId));
+    await client.update(tenants).set({ maxCompanies }).where(eq(tenants.id, tenantId));
     const updated = await this.findById(tenantId);
     if (!updated) throw new Error('Tenant not found after capacity update');
     return updated;

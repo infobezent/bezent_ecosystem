@@ -52,7 +52,8 @@ export function FormsLanding({ onConfigure }: FormsLandingProps) {
           <Stack gap="xs">
             <h3 className="bezent-section__title">System Forms</h3>
             <p className="bezent-section__subtitle">
-              These forms are provided by BEZENT HRMS and can be configured based on your company requirements.
+              These forms are provided by BEZENT HRMS and can be configured based on your company
+              requirements.
             </p>
           </Stack>
 

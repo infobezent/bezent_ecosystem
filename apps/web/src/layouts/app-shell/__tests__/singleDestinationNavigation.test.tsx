@@ -30,11 +30,7 @@ describe('Single-Destination Navigation Behavior (Super Admin & Shared AppShell)
 
     // Render LeftSidebar with Overview
     const html = renderToStaticMarkup(
-      <LeftSidebar
-        items={shellItems}
-        activeId="overview"
-        testAvailableHeight={600}
-      />,
+      <LeftSidebar items={shellItems} activeId="overview" testAvailableHeight={600} />,
     );
 
     // Overview button does NOT declare popup/expanded
@@ -128,7 +124,9 @@ describe('Single-Destination Navigation Behavior (Super Admin & Shared AppShell)
         testAvailableHeight={600}
       />,
     );
-    expect(htmlOverview).toMatch(/class="[^"]*left-sidebar__item[^"]*is-active[^"]*"[^>]*aria-current="page"[^>]*>[\s\S]*?Overview/);
+    expect(htmlOverview).toMatch(
+      /class="[^"]*left-sidebar__item[^"]*is-active[^"]*"[^>]*aria-current="page"[^>]*>[\s\S]*?Overview/,
+    );
 
     // Customers / Tenants active state
     const resolvedCustomers = resolveActiveNavigation(

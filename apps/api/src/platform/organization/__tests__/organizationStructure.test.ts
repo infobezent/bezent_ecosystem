@@ -46,14 +46,26 @@ describe('Organization Structure Unit & Integration Tests', () => {
 
     // Clean up
     await db.delete(divisions).where(inArray(divisions.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(businessUnits).where(inArray(businessUnits.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(businessUnits)
+      .where(inArray(businessUnits.companyId, [testCompanyA, testCompanyB]));
     await db.delete(employees).where(inArray(employees.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(designations).where(inArray(designations.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(departments).where(inArray(departments.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(roleAssignments).where(inArray(roleAssignments.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(memberships).where(inArray(memberships.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(designations)
+      .where(inArray(designations.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(departments)
+      .where(inArray(departments.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(roleAssignments)
+      .where(inArray(roleAssignments.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(memberships)
+      .where(inArray(memberships.companyId, [testCompanyA, testCompanyB]));
     await db.delete(companies).where(inArray(companies.id, [testCompanyA, testCompanyB]));
-    await db.delete(tenantModules).where(inArray(tenantModules.tenantId, [testTenantA, testTenantB]));
+    await db
+      .delete(tenantModules)
+      .where(inArray(tenantModules.tenantId, [testTenantA, testTenantB]));
     await db.delete(users).where(inArray(users.id, [testUserA, testUserB]));
     await db.delete(tenants).where(inArray(tenants.id, [testTenantA, testTenantB]));
 
@@ -65,8 +77,18 @@ describe('Organization Structure Unit & Integration Tests', () => {
 
     // Enable HRMS module for tenants
     await db.insert(tenantModules).values([
-      { id: `tmod_${testTenantA}_hrms`, tenantId: testTenantA, moduleCode: 'hrms', status: 'enabled' },
-      { id: `tmod_${testTenantB}_hrms`, tenantId: testTenantB, moduleCode: 'hrms', status: 'enabled' },
+      {
+        id: `tmod_${testTenantA}_hrms`,
+        tenantId: testTenantA,
+        moduleCode: 'hrms',
+        status: 'enabled',
+      },
+      {
+        id: `tmod_${testTenantB}_hrms`,
+        tenantId: testTenantB,
+        moduleCode: 'hrms',
+        status: 'enabled',
+      },
     ]);
 
     // Seed companies
@@ -208,14 +230,26 @@ describe('Organization Structure Unit & Integration Tests', () => {
   afterAll(async () => {
     const db = getDb();
     await db.delete(divisions).where(inArray(divisions.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(businessUnits).where(inArray(businessUnits.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(businessUnits)
+      .where(inArray(businessUnits.companyId, [testCompanyA, testCompanyB]));
     await db.delete(employees).where(inArray(employees.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(designations).where(inArray(designations.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(departments).where(inArray(departments.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(roleAssignments).where(inArray(roleAssignments.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(memberships).where(inArray(memberships.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(designations)
+      .where(inArray(designations.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(departments)
+      .where(inArray(departments.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(roleAssignments)
+      .where(inArray(roleAssignments.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(memberships)
+      .where(inArray(memberships.companyId, [testCompanyA, testCompanyB]));
     await db.delete(companies).where(inArray(companies.id, [testCompanyA, testCompanyB]));
-    await db.delete(tenantModules).where(inArray(tenantModules.tenantId, [testTenantA, testTenantB]));
+    await db
+      .delete(tenantModules)
+      .where(inArray(tenantModules.tenantId, [testTenantA, testTenantB]));
     await db.delete(users).where(inArray(users.id, [testUserA, testUserB]));
     await db.delete(tenants).where(inArray(tenants.id, [testTenantA, testTenantB]));
   });
@@ -238,7 +272,9 @@ describe('Organization Structure Unit & Integration Tests', () => {
     });
 
     it('validates Division creation requires parent businessUnitId and name', () => {
-      expect(() => validateCreateDivision({ name: 'Product Development' })).toThrow(ValidationError);
+      expect(() => validateCreateDivision({ name: 'Product Development' })).toThrow(
+        ValidationError,
+      );
       const valid = validateCreateDivision({
         businessUnitId: 'bu_123',
         name: 'Product Development',

@@ -133,7 +133,11 @@ export function CompanyAdminsPage() {
 
   const handleRevoke = async (admin: CompanyAdminAssignment) => {
     const targetLabel = admin.companyName ? `${admin.companyName}` : 'this company';
-    if (!confirm(`Are you sure you want to revoke Company Admin access for ${admin.email} at ${targetLabel}?`)) {
+    if (
+      !confirm(
+        `Are you sure you want to revoke Company Admin access for ${admin.email} at ${targetLabel}?`,
+      )
+    ) {
       return;
     }
     try {
@@ -181,12 +185,7 @@ export function CompanyAdminsPage() {
       )}
 
       {notice && (
-        <Alert
-          variant="success"
-          title="Success"
-          dismissible
-          onDismiss={() => setNotice(null)}
-        >
+        <Alert variant="success" title="Success" dismissible onDismiss={() => setNotice(null)}>
           {notice}
         </Alert>
       )}
@@ -259,9 +258,7 @@ export function CompanyAdminsPage() {
                         <span className="bezent-caption">{item.email}</span>
                       </Stack>
                     </TableCell>
-                    <TableCell>
-                      {item.tenantName || item.tenantId}
-                    </TableCell>
+                    <TableCell>{item.tenantName || item.tenantId}</TableCell>
                     <TableCell>
                       <strong>{item.companyName || '—'}</strong>
                     </TableCell>

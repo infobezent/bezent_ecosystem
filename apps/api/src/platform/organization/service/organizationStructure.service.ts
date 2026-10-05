@@ -1,9 +1,5 @@
 import { OrganizationStructureRepository } from '../repository/organizationStructure.repository.js';
-import {
-  NotFoundError,
-  ConflictError,
-  BadRequestError,
-} from '../../../app/errors/AppError.js';
+import { NotFoundError, ConflictError, BadRequestError } from '../../../app/errors/AppError.js';
 import type {
   OrganizationHierarchy,
   BusinessUnitRecord,
@@ -151,11 +147,7 @@ export class OrganizationStructureService {
     return this.repo.listDivisions(tenantId, companyId, businessUnitId);
   }
 
-  async getDivisionById(
-    tenantId: string,
-    companyId: string,
-    id: string,
-  ): Promise<DivisionRecord> {
+  async getDivisionById(tenantId: string, companyId: string, id: string): Promise<DivisionRecord> {
     const div = await this.repo.findDivisionById(tenantId, companyId, id);
     if (!div) {
       throw new NotFoundError(`Division not found for ID: ${id}`);

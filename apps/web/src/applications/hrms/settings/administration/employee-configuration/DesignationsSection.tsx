@@ -35,10 +35,7 @@ import {
   reactivateDesignation,
 } from './api/designationApi';
 import { fetchDepartments } from '../../../../company-admin/organization/api/departmentApi';
-import type {
-  DesignationRecord,
-  DesignationStatus,
-} from './types/designation';
+import type { DesignationRecord, DesignationStatus } from './types/designation';
 import type { DepartmentRecord } from '../../../../company-admin/organization/types/department';
 
 export interface DesignationsSectionProps {
@@ -197,7 +194,12 @@ export function DesignationsSection({
       return;
     }
 
-    if (isStructuralMove && editingDesignation && editingDesignation.activeEmployeeCount > 0 && !confirmStructuralMove) {
+    if (
+      isStructuralMove &&
+      editingDesignation &&
+      editingDesignation.activeEmployeeCount > 0 &&
+      !confirmStructuralMove
+    ) {
       setFormError(
         `${editingDesignation.activeEmployeeCount} active employee(s) use this designation. You must confirm this structural move before saving.`,
       );
@@ -350,9 +352,7 @@ export function DesignationsSection({
                 <Select
                   aria-label="Filter by Status"
                   value={statusFilter}
-                  onChange={(e) =>
-                    setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')
-                  }
+                  onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
                   options={[
                     { value: 'all', label: 'All Statuses' },
                     { value: 'active', label: 'Active Only' },
@@ -378,7 +378,9 @@ export function DesignationsSection({
               <Inline gap="xs" align="center" wrap>
                 <Badge variant="neutral">Total: {counts.total}</Badge>
                 <Badge variant="success">Active: {counts.active}</Badge>
-                {counts.inactive > 0 && <Badge variant="warning">Inactive: {counts.inactive}</Badge>}
+                {counts.inactive > 0 && (
+                  <Badge variant="warning">Inactive: {counts.inactive}</Badge>
+                )}
                 <Badge variant="neutral">Company-wide: {counts.companyWide}</Badge>
                 <Badge variant="neutral">Department-specific: {counts.deptSpecific}</Badge>
               </Inline>
@@ -439,7 +441,8 @@ export function DesignationsSection({
                   </TableCell>
                   <TableCell>
                     <Badge variant={desig.activeEmployeeCount > 0 ? 'success' : 'neutral'}>
-                      {desig.activeEmployeeCount} employee{desig.activeEmployeeCount === 1 ? '' : 's'}
+                      {desig.activeEmployeeCount} employee
+                      {desig.activeEmployeeCount === 1 ? '' : 's'}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -450,11 +453,7 @@ export function DesignationsSection({
                   <TableCell align="right">
                     {canManage && (
                       <Inline gap="xs" justify="end">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => openEditModal(desig)}
-                        >
+                        <Button variant="secondary" size="sm" onClick={() => openEditModal(desig)}>
                           <BezentIcon name="edit" size={14} />
                           Edit
                         </Button>
@@ -595,29 +594,32 @@ export function DesignationsSection({
               </FormGrid>
 
               {/* Structural Move Warning Alert */}
-              {isStructuralMove && editingDesignation && editingDesignation.activeEmployeeCount > 0 && (
-                <Alert variant="warning">
-                  <Stack gap="xs">
-                    <strong>Structural Move Impact</strong>
-                    <span>
-                      {editingDesignation.activeEmployeeCount} active employee(s) currently use
-                      this designation. Changing the department mapping will not move or modify
-                      those employees.
-                    </span>
-                    <Inline gap="xs" align="center">
-                      <input
-                        type="checkbox"
-                        id="desig-confirm-move"
-                        checked={confirmStructuralMove}
-                        onChange={(e) => setConfirmStructuralMove(e.target.checked)}
-                      />
-                      <label htmlFor="desig-confirm-move">
-                        I confirm this structural mapping change without altering employee assignments.
-                      </label>
-                    </Inline>
-                  </Stack>
-                </Alert>
-              )}
+              {isStructuralMove &&
+                editingDesignation &&
+                editingDesignation.activeEmployeeCount > 0 && (
+                  <Alert variant="warning">
+                    <Stack gap="xs">
+                      <strong>Structural Move Impact</strong>
+                      <span>
+                        {editingDesignation.activeEmployeeCount} active employee(s) currently use
+                        this designation. Changing the department mapping will not move or modify
+                        those employees.
+                      </span>
+                      <Inline gap="xs" align="center">
+                        <input
+                          type="checkbox"
+                          id="desig-confirm-move"
+                          checked={confirmStructuralMove}
+                          onChange={(e) => setConfirmStructuralMove(e.target.checked)}
+                        />
+                        <label htmlFor="desig-confirm-move">
+                          I confirm this structural mapping change without altering employee
+                          assignments.
+                        </label>
+                      </Inline>
+                    </Stack>
+                  </Alert>
+                )}
             </Stack>
 
             {/* Section 3: STATUS */}
@@ -695,11 +697,7 @@ export function DesignationsSection({
               >
                 Cancel
               </Button>
-              <Button
-                variant="primary"
-                onClick={handleConfirmDeactivate}
-                disabled={actionLoading}
-              >
+              <Button variant="primary" onClick={handleConfirmDeactivate} disabled={actionLoading}>
                 {actionLoading ? 'Deactivating...' : 'Confirm Deactivation'}
               </Button>
             </Inline>

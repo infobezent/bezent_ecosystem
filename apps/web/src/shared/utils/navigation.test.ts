@@ -22,9 +22,7 @@ const navigation: ApplicationNavigation = {
       label: 'Gamma',
       icon: 'home',
       segment: 'default-seg',
-      children: [
-        { id: 'custom', label: 'Custom Path', icon: 'home', path: 'direct-path' },
-      ],
+      children: [{ id: 'custom', label: 'Custom Path', icon: 'home', path: 'direct-path' }],
     },
   ],
 };

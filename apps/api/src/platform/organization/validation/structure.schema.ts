@@ -48,7 +48,11 @@ export function validateCreateBusinessUnit(input: unknown): CreateBusinessUnitDt
   }
 
   let headEmployeeId: string | null = null;
-  if (data.headEmployeeId !== undefined && data.headEmployeeId !== null && data.headEmployeeId !== '') {
+  if (
+    data.headEmployeeId !== undefined &&
+    data.headEmployeeId !== null &&
+    data.headEmployeeId !== ''
+  ) {
     if (typeof data.headEmployeeId !== 'string') {
       errors.headEmployeeId = 'Head employee ID must be a valid identifier';
     } else {
@@ -86,7 +90,11 @@ export function validateCreateDivision(input: unknown): CreateDivisionDto {
   const data = asObject(input);
   const errors: Record<string, string> = {};
 
-  if (!data.businessUnitId || typeof data.businessUnitId !== 'string' || !data.businessUnitId.trim()) {
+  if (
+    !data.businessUnitId ||
+    typeof data.businessUnitId !== 'string' ||
+    !data.businessUnitId.trim()
+  ) {
     errors.businessUnitId = 'Parent business unit is required';
   }
 
@@ -119,7 +127,11 @@ export function validateCreateDivision(input: unknown): CreateDivisionDto {
   }
 
   let headEmployeeId: string | null = null;
-  if (data.headEmployeeId !== undefined && data.headEmployeeId !== null && data.headEmployeeId !== '') {
+  if (
+    data.headEmployeeId !== undefined &&
+    data.headEmployeeId !== null &&
+    data.headEmployeeId !== ''
+  ) {
     if (typeof data.headEmployeeId !== 'string') {
       errors.headEmployeeId = 'Head employee ID must be a valid identifier';
     } else {
@@ -183,7 +195,11 @@ export function validateUpdateDivision(input: unknown): UpdateDivisionDto {
   }
 
   let headEmployeeId: string | null = null;
-  if (data.headEmployeeId !== undefined && data.headEmployeeId !== null && data.headEmployeeId !== '') {
+  if (
+    data.headEmployeeId !== undefined &&
+    data.headEmployeeId !== null &&
+    data.headEmployeeId !== ''
+  ) {
     if (typeof data.headEmployeeId !== 'string') {
       errors.headEmployeeId = 'Head employee ID must be a valid identifier';
     } else {

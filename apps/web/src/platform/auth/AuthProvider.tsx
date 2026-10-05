@@ -24,7 +24,8 @@ import {
 } from './session';
 
 export type AuthStatus = 'loading' | 'anonymous' | 'authenticated' | 'error';
-export type AuthErrorKind = 'network' | 'database_unavailable' | 'server_error' | 'forbidden' | null;
+export type AuthErrorKind =
+  'network' | 'database_unavailable' | 'server_error' | 'forbidden' | null;
 
 export interface AuthContextValue {
   status: AuthStatus;

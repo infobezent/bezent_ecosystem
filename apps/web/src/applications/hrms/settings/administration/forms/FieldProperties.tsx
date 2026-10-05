@@ -443,15 +443,9 @@ export function FieldProperties({
   const hasActionableValidation =
     isCustom &&
     field !== null &&
-    [
-      'single_line',
-      'multi_line',
-      'number',
-      'decimal',
-      'date',
-      'datetime',
-      'file_upload',
-    ].includes(field.type);
+    ['single_line', 'multi_line', 'number', 'decimal', 'date', 'datetime', 'file_upload'].includes(
+      field.type,
+    );
 
   const chapterName = field ? getFieldChapterName(field, activeSection) : '';
   const sectionName = field ? getFieldSectionName(field, activeSection, metadata) : '';
@@ -462,7 +456,13 @@ export function FieldProperties({
       : 'Configurable';
 
   return (
-    <Pane size="inspector" surface="neutral" border="left" scroll="y" aria-label="Properties Inspector">
+    <Pane
+      size="inspector"
+      surface="neutral"
+      border="left"
+      scroll="y"
+      aria-label="Properties Inspector"
+    >
       {/* Context-sensitive header */}
       <div className="bezent-inspector-context-header">
         <h3 className="bezent-inspector-title">
@@ -493,7 +493,11 @@ export function FieldProperties({
             {activeSection?.origin === 'custom' ? 'Custom Chapter' : 'System Chapter'}
           </Badge>
         )}
-        {panelMode === 'form' && <Badge variant="neutral" size="sm">System Form</Badge>}
+        {panelMode === 'form' && (
+          <Badge variant="neutral" size="sm">
+            System Form
+          </Badge>
+        )}
       </div>
 
       {/* ─── FORM SETTINGS ─────────────────────────────────────────────────── */}
@@ -501,14 +505,26 @@ export function FieldProperties({
         <div className="bezent-inspector-content" aria-label="Form Settings">
           <div className="bezent-inspector-section">
             <div className="bezent-inspector-heading">BASIC</div>
-            <Input label="Form Name" size="sm" readOnly value={form?.name ?? 'Employee Registration'} />
-            <Input label="Description" size="sm" readOnly value="Standard employee onboarding and workforce registration form" />
+            <Input
+              label="Form Name"
+              size="sm"
+              readOnly
+              value={form?.name ?? 'Employee Registration'}
+            />
+            <Input
+              label="Description"
+              size="sm"
+              readOnly
+              value="Standard employee onboarding and workforce registration form"
+            />
           </div>
           <div className="bezent-info-card">
             <div className="bezent-inspector-heading">FORM INFORMATION</div>
             <div className="bezent-info-row">
               <span className="bezent-info-label">Form Key</span>
-              <span className="bezent-info-val"><code>{form?.key ?? 'employee-registration'}</code></span>
+              <span className="bezent-info-val">
+                <code>{form?.key ?? 'employee-registration'}</code>
+              </span>
             </div>
             <div className="bezent-info-row">
               <span className="bezent-info-label">Form Type</span>
@@ -522,7 +538,9 @@ export function FieldProperties({
             )}
             <div className="bezent-info-row">
               <span className="bezent-info-label">Identifier</span>
-              <span className="bezent-info-val"><code>employee-registration</code></span>
+              <span className="bezent-info-val">
+                <code>employee-registration</code>
+              </span>
             </div>
           </div>
         </div>
@@ -532,19 +550,27 @@ export function FieldProperties({
       {panelMode === 'chapter' && (
         <div className="bezent-inspector-content" aria-label="Chapter Settings">
           {!activeSection ? (
-            <EmptyState size="compact" hideIllustration title="No Chapter Selected" description="Click on a chapter in the left panel to inspect and configure its settings." />
+            <EmptyState
+              size="compact"
+              hideIllustration
+              title="No Chapter Selected"
+              description="Click on a chapter in the left panel to inspect and configure its settings."
+            />
           ) : (
             <>
               <div className="bezent-inspector-section">
                 <div className="bezent-inspector-heading">BASIC</div>
                 <Input
-                  label="Chapter Name" size="sm"
+                  label="Chapter Name"
+                  size="sm"
                   value={sectionTitle ?? activeSection.label}
                   onChange={(e) => onUpdateSectionTitle?.(activeSection.key, e.target.value)}
-                  placeholder="Chapter Name" required
+                  placeholder="Chapter Name"
+                  required
                 />
                 <Input
-                  label="Description" size="sm"
+                  label="Description"
+                  size="sm"
                   value={sectionDescription ?? activeSection.description ?? ''}
                   onChange={(e) => onUpdateSectionDescription?.(activeSection.key, e.target.value)}
                   placeholder="Chapter description"
@@ -556,7 +582,9 @@ export function FieldProperties({
                   onChange={(e) => onUpdateSectionVisibility?.(activeSection.key, e.target.checked)}
                 />
                 {isMandatorySection && (
-                  <Label as="span" size="sm">Mandatory system chapter — cannot be hidden from employee registration.</Label>
+                  <Label as="span" size="sm">
+                    Mandatory system chapter — cannot be hidden from employee registration.
+                  </Label>
                 )}
               </div>
 
@@ -565,7 +593,8 @@ export function FieldProperties({
                 <div className="bezent-info-row">
                   <span className="bezent-info-label">Order</span>
                   <span className="bezent-info-val">
-                    Position {String((sectionOrderIndex ?? 0) + 1).padStart(2, '0')} of {String(totalSections ?? 1).padStart(2, '0')}
+                    Position {String((sectionOrderIndex ?? 0) + 1).padStart(2, '0')} of{' '}
+                    {String(totalSections ?? 1).padStart(2, '0')}
                   </span>
                 </div>
                 <span className="bezent-card__desc">Reorder chapters from Form Structure</span>
@@ -573,21 +602,54 @@ export function FieldProperties({
 
               <div className="bezent-info-card">
                 <div className="bezent-inspector-heading">CHAPTER INFORMATION</div>
-                <div className="bezent-info-row"><span className="bezent-info-label">Key</span><span className="bezent-info-val"><code>{activeSection.key}</code></span></div>
-                <div className="bezent-info-row"><span className="bezent-info-label">Protection</span><span className="bezent-info-val">{activeSection.key === 'review' ? 'Protected Final Chapter' : isMandatorySection ? 'Protected' : 'Standard'}</span></div>
+                <div className="bezent-info-row">
+                  <span className="bezent-info-label">Key</span>
+                  <span className="bezent-info-val">
+                    <code>{activeSection.key}</code>
+                  </span>
+                </div>
+                <div className="bezent-info-row">
+                  <span className="bezent-info-label">Protection</span>
+                  <span className="bezent-info-val">
+                    {activeSection.key === 'review'
+                      ? 'Protected Final Chapter'
+                      : isMandatorySection
+                        ? 'Protected'
+                        : 'Standard'}
+                  </span>
+                </div>
               </div>
 
               {activeSection.key === 'review' && (
-                <Alert variant="info" title="Protected Final Chapter">Review &amp; Finalize is the final protected step of registration and cannot be moved or hidden.</Alert>
+                <Alert variant="info" title="Protected Final Chapter">
+                  Review &amp; Finalize is the final protected step of registration and cannot be
+                  moved or hidden.
+                </Alert>
               )}
 
               <div className="bezent-inspector-section">
                 <div className="bezent-inspector-heading">CHAPTER MANAGEMENT</div>
-                <Button variant="outline" size="sm" onClick={() => setIsAddModalOpen(true)} leftIcon={<BezentIcon name="add" size={14} />}>Add Section</Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsAddModalOpen(true)}
+                  leftIcon={<BezentIcon name="add" size={14} />}
+                >
+                  Add Section
+                </Button>
                 {activeSection.origin === 'system' ? (
-                  <Label as="span" size="sm">System chapters are protected and cannot be deleted.</Label>
+                  <Label as="span" size="sm">
+                    System chapters are protected and cannot be deleted.
+                  </Label>
                 ) : (
-                  <Button variant="outline" size="sm" onClick={() => setIsDeleteModalOpen(true)} leftIcon={<BezentIcon name="delete" size={14} />}>Delete Section</Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsDeleteModalOpen(true)}
+                    leftIcon={<BezentIcon name="delete" size={14} />}
+                  >
+                    Delete Section
+                  </Button>
                 )}
               </div>
             </>
@@ -611,10 +673,14 @@ export function FieldProperties({
       {panelMode === 'field' && (
         <div className="bezent-inspector-content" aria-label="Field Settings">
           {!field ? (
-            <EmptyState size="compact" hideIllustration title="No Field Selected" description="Click on any field in the center canvas to inspect and configure its settings." />
+            <EmptyState
+              size="compact"
+              hideIllustration
+              title="No Field Selected"
+              description="Click on any field in the center canvas to inspect and configure its settings."
+            />
           ) : (
             <div className="bezent-inspector-section">
-
               {/* 1. GENERAL */}
               <div className="bezent-inspector-section">
                 <div className="bezent-inspector-heading">GENERAL</div>
@@ -625,26 +691,30 @@ export function FieldProperties({
                   onChange={(e) => handleLabelChange(e.target.value)}
                   placeholder="Field Label"
                   required
-                  readOnly={field.key === 'personal.profilePhoto' || field.key === 'general.employeeId'}
+                  readOnly={
+                    field.key === 'personal.profilePhoto' || field.key === 'general.employeeId'
+                  }
                 />
-                {supportsPlaceholder(field.type) && field.key !== 'general.employeeId' && field.key !== 'personal.profilePhoto' && (
-                  <Input
-                    label="Placeholder"
-                    size="sm"
-                    value={field.config?.placeholder ?? ''}
-                    placeholder={
-                      field.type === 'dropdown' || field.type === 'select'
-                        ? `Select ${field.label}...`
-                        : `Enter ${field.label}...`
-                    }
-                    onChange={(e) =>
-                      onUpdateField({
-                        ...field,
-                        config: { ...field.config, placeholder: e.target.value },
-                      })
-                    }
-                  />
-                )}
+                {supportsPlaceholder(field.type) &&
+                  field.key !== 'general.employeeId' &&
+                  field.key !== 'personal.profilePhoto' && (
+                    <Input
+                      label="Placeholder"
+                      size="sm"
+                      value={field.config?.placeholder ?? ''}
+                      placeholder={
+                        field.type === 'dropdown' || field.type === 'select'
+                          ? `Select ${field.label}...`
+                          : `Enter ${field.label}...`
+                      }
+                      onChange={(e) =>
+                        onUpdateField({
+                          ...field,
+                          config: { ...field.config, placeholder: e.target.value },
+                        })
+                      }
+                    />
+                  )}
                 <div>
                   <Input
                     label="Help Text"
@@ -676,26 +746,35 @@ export function FieldProperties({
                 />
                 {isProtected && (
                   <Label as="span" size="sm">
-                    {field.key === 'personal.profilePhoto' ? 'Protected System Control' : 'Protected System Field'}: {field.protectedReason ? (field.protectedReason.charAt(0).toLowerCase() + field.protectedReason.slice(1)) : 'required by the employee record.'}
+                    {field.key === 'personal.profilePhoto'
+                      ? 'Protected System Control'
+                      : 'Protected System Field'}
+                    :{' '}
+                    {field.protectedReason
+                      ? field.protectedReason.charAt(0).toLowerCase() +
+                        field.protectedReason.slice(1)
+                      : 'required by the employee record.'}
                   </Label>
                 )}
-                {isCustom && (field.type === 'dropdown' || field.type === 'radio') && options.length > 0 && (
-                  <Select
-                    label="Default Value"
-                    size="sm"
-                    value={field.config?.defaultValue ?? ''}
-                    onChange={(e) =>
-                      onUpdateField({
-                        ...field,
-                        config: { ...field.config, defaultValue: e.target.value || undefined },
-                      })
-                    }
-                    options={[
-                      { value: '', label: '(None)' },
-                      ...options.map((opt) => ({ value: opt.value, label: opt.label })),
-                    ]}
-                  />
-                )}
+                {isCustom &&
+                  (field.type === 'dropdown' || field.type === 'radio') &&
+                  options.length > 0 && (
+                    <Select
+                      label="Default Value"
+                      size="sm"
+                      value={field.config?.defaultValue ?? ''}
+                      onChange={(e) =>
+                        onUpdateField({
+                          ...field,
+                          config: { ...field.config, defaultValue: e.target.value || undefined },
+                        })
+                      }
+                      options={[
+                        { value: '', label: '(None)' },
+                        ...options.map((opt) => ({ value: opt.value, label: opt.label })),
+                      ]}
+                    />
+                  )}
               </div>
 
               {/* 3. VALIDATION (Rendered ONLY when actionable validation is supported) */}
@@ -708,7 +787,11 @@ export function FieldProperties({
                         label="Min Length"
                         size="sm"
                         type="number"
-                        value={field.config?.minLength !== undefined ? String(field.config.minLength) : ''}
+                        value={
+                          field.config?.minLength !== undefined
+                            ? String(field.config.minLength)
+                            : ''
+                        }
                         placeholder="0"
                         onChange={(e) => {
                           const val = e.target.value ? parseInt(e.target.value, 10) : undefined;
@@ -722,7 +805,11 @@ export function FieldProperties({
                         label="Max Length"
                         size="sm"
                         type="number"
-                        value={field.config?.maxLength !== undefined ? String(field.config.maxLength) : ''}
+                        value={
+                          field.config?.maxLength !== undefined
+                            ? String(field.config.maxLength)
+                            : ''
+                        }
                         placeholder={field.type === 'multi_line' ? '5000' : '255'}
                         onChange={(e) => {
                           const val = e.target.value ? parseInt(e.target.value, 10) : undefined;
@@ -771,7 +858,11 @@ export function FieldProperties({
                           label="Decimal Places (1-6)"
                           size="sm"
                           type="number"
-                          value={field.config?.decimalPlaces !== undefined ? String(field.config.decimalPlaces) : '2'}
+                          value={
+                            field.config?.decimalPlaces !== undefined
+                              ? String(field.config.decimalPlaces)
+                              : '2'
+                          }
                           placeholder="2"
                           onChange={(e) => {
                             const val = e.target.value ? parseInt(e.target.value, 10) : undefined;
@@ -796,7 +887,9 @@ export function FieldProperties({
                             config: {
                               ...field.config,
                               disallowPast: e.target.checked,
-                              disallowFuture: e.target.checked ? false : field.config?.disallowFuture,
+                              disallowFuture: e.target.checked
+                                ? false
+                                : field.config?.disallowFuture,
                             },
                           })
                         }
@@ -823,7 +916,11 @@ export function FieldProperties({
                       label="Max File Size (MB, 1–25)"
                       size="sm"
                       type="number"
-                      value={field.config?.maxSizeMb !== undefined ? String(field.config.maxSizeMb) : '10'}
+                      value={
+                        field.config?.maxSizeMb !== undefined
+                          ? String(field.config.maxSizeMb)
+                          : '10'
+                      }
                       placeholder="10"
                       onChange={(e) => {
                         const val = e.target.value ? parseInt(e.target.value, 10) : 10;
@@ -859,10 +956,13 @@ export function FieldProperties({
                   <div className="bezent-info-card">
                     <div className="bezent-info-row">
                       <span className="bezent-info-label">Options Source</span>
-                      <span className="bezent-info-val"><strong>{getFieldDataSource(field)} 🔒</strong></span>
+                      <span className="bezent-info-val">
+                        <strong>{getFieldDataSource(field)} 🔒</strong>
+                      </span>
                     </div>
                     <p className="bezent-inspector-delete-note">
-                      Options are managed from authoritative company master data and cannot be manually modified in the Form Editor.
+                      Options are managed from authoritative company master data and cannot be
+                      manually modified in the Form Editor.
                     </p>
                   </div>
                 </div>
@@ -873,16 +973,24 @@ export function FieldProperties({
                 <div className="bezent-inspector-section">
                   <div className="bezent-inspector-heading">OPTIONS</div>
                   <Inline justify="between" align="center">
-                    <Label as="span" size="sm">Options ({options.length})</Label>
-                    <Button variant="outline" size="sm" onClick={handleAddOption}>+ Add Option</Button>
+                    <Label as="span" size="sm">
+                      Options ({options.length})
+                    </Label>
+                    <Button variant="outline" size="sm" onClick={handleAddOption}>
+                      + Add Option
+                    </Button>
                   </Inline>
                   {options.length === 0 ? (
-                    <Label as="span" size="sm">No options defined. Click &ldquo;+ Add Option&rdquo; above.</Label>
+                    <Label as="span" size="sm">
+                      No options defined. Click &ldquo;+ Add Option&rdquo; above.
+                    </Label>
                   ) : (
                     <Stack gap="xs">
                       {options.map((opt, idx) => (
                         <Inline key={idx} gap="xs" align="center">
-                          <Label as="span" size="sm">≡</Label>
+                          <Label as="span" size="sm">
+                            ≡
+                          </Label>
                           <Input
                             size="sm"
                             value={opt.label}
@@ -932,7 +1040,9 @@ export function FieldProperties({
                 <div className="bezent-info-row">
                   <span className="bezent-info-label">Type</span>
                   <span className="bezent-info-val">
-                    {field.key === 'general.employeeId' ? 'System Assigned' : formatFieldType(field.type)}
+                    {field.key === 'general.employeeId'
+                      ? 'System Assigned'
+                      : formatFieldType(field.type)}
                   </span>
                 </div>
                 <div className="bezent-info-row">
@@ -963,7 +1073,10 @@ export function FieldProperties({
                 <div className="bezent-info-row">
                   <span className="bezent-info-label">Protection</span>
                   <span className="bezent-info-val">
-                    <Badge variant={isProtected ? 'danger' : isCustom ? 'success' : 'neutral'} size="sm">
+                    <Badge
+                      variant={isProtected ? 'danger' : isCustom ? 'success' : 'neutral'}
+                      size="sm"
+                    >
                       {protectionStatus}
                     </Badge>
                   </span>
@@ -1005,19 +1118,50 @@ export function FieldProperties({
         description="Create a new custom chapter in the Employee Registration form with its own fields and configuration."
         footer={
           <Inline justify="end" gap="sm">
-            <Button variant="outline" size="sm" onClick={() => setIsAddModalOpen(false)}>Cancel</Button>
-            <Button variant="primary" size="sm" onClick={() => {
-              if (!newSectionTitle.trim()) { setAddSectionError('Section title is required.'); return; }
-              onAddSection?.(newSectionTitle.trim(), newSectionDescription.trim() || undefined);
-              setIsAddModalOpen(false);
-            }}>Add Section</Button>
+            <Button variant="outline" size="sm" onClick={() => setIsAddModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                if (!newSectionTitle.trim()) {
+                  setAddSectionError('Section title is required.');
+                  return;
+                }
+                onAddSection?.(newSectionTitle.trim(), newSectionDescription.trim() || undefined);
+                setIsAddModalOpen(false);
+              }}
+            >
+              Add Section
+            </Button>
           </Inline>
         }
       >
         <Stack gap="md">
-          {addSectionError && <Alert variant="danger" title="Validation Error">{addSectionError}</Alert>}
-          <Input label="Section Title" size="sm" required placeholder="e.g. Additional Certifications" value={newSectionTitle} onChange={(e) => { setNewSectionTitle(e.target.value); if (addSectionError) setAddSectionError(null); }} />
-          <Input label="Section Description" size="sm" placeholder="e.g. Employee technical certifications and licenses" value={newSectionDescription} onChange={(e) => setNewSectionDescription(e.target.value)} />
+          {addSectionError && (
+            <Alert variant="danger" title="Validation Error">
+              {addSectionError}
+            </Alert>
+          )}
+          <Input
+            label="Section Title"
+            size="sm"
+            required
+            placeholder="e.g. Additional Certifications"
+            value={newSectionTitle}
+            onChange={(e) => {
+              setNewSectionTitle(e.target.value);
+              if (addSectionError) setAddSectionError(null);
+            }}
+          />
+          <Input
+            label="Section Description"
+            size="sm"
+            placeholder="e.g. Employee technical certifications and licenses"
+            value={newSectionDescription}
+            onChange={(e) => setNewSectionDescription(e.target.value)}
+          />
         </Stack>
       </Modal>
 
@@ -1028,12 +1172,25 @@ export function FieldProperties({
         description={`Are you sure you want to delete the custom section "${sectionTitle ?? activeSection?.label}"? All custom fields within this section will also be deleted.`}
         footer={
           <Inline justify="end" gap="sm">
-            <Button variant="outline" size="sm" onClick={() => setIsDeleteModalOpen(false)}>Cancel</Button>
-            <Button variant="primary" size="sm" onClick={() => { if (activeSection) onDeleteSection?.(activeSection.key); setIsDeleteModalOpen(false); }}>Delete Section</Button>
+            <Button variant="outline" size="sm" onClick={() => setIsDeleteModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                if (activeSection) onDeleteSection?.(activeSection.key);
+                setIsDeleteModalOpen(false);
+              }}
+            >
+              Delete Section
+            </Button>
           </Inline>
         }
       >
-        <Alert variant="warning" title="Irreversible Action">This will permanently remove the custom chapter and its associated field definitions.</Alert>
+        <Alert variant="warning" title="Irreversible Action">
+          This will permanently remove the custom chapter and its associated field definitions.
+        </Alert>
       </Modal>
     </Pane>
   );

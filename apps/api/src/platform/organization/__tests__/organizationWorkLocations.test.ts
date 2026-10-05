@@ -44,10 +44,16 @@ describe('BEZENT HRMS — Organization Work Locations Integration & Domain Tests
     // Clean up any stale test records
     await db.delete(employees).where(inArray(employees.companyId, [testCompanyA, testCompanyB]));
     await db.delete(locations).where(inArray(locations.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(roleAssignments).where(inArray(roleAssignments.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(memberships).where(inArray(memberships.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(roleAssignments)
+      .where(inArray(roleAssignments.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(memberships)
+      .where(inArray(memberships.companyId, [testCompanyA, testCompanyB]));
     await db.delete(companies).where(inArray(companies.id, [testCompanyA, testCompanyB]));
-    await db.delete(tenantModules).where(inArray(tenantModules.tenantId, [testTenantA, testTenantB]));
+    await db
+      .delete(tenantModules)
+      .where(inArray(tenantModules.tenantId, [testTenantA, testTenantB]));
     await db.delete(users).where(inArray(users.id, [testUserA, testUserB, testUserNoPerm]));
     await db.delete(tenants).where(inArray(tenants.id, [testTenantA, testTenantB]));
 
@@ -59,8 +65,18 @@ describe('BEZENT HRMS — Organization Work Locations Integration & Domain Tests
 
     // Enable HRMS module
     await db.insert(tenantModules).values([
-      { id: `tmod_${testTenantA}_hrms`, tenantId: testTenantA, moduleCode: 'hrms', status: 'enabled' },
-      { id: `tmod_${testTenantB}_hrms`, tenantId: testTenantB, moduleCode: 'hrms', status: 'enabled' },
+      {
+        id: `tmod_${testTenantA}_hrms`,
+        tenantId: testTenantA,
+        moduleCode: 'hrms',
+        status: 'enabled',
+      },
+      {
+        id: `tmod_${testTenantB}_hrms`,
+        tenantId: testTenantB,
+        moduleCode: 'hrms',
+        status: 'enabled',
+      },
     ]);
 
     // Seed companies
@@ -177,10 +193,16 @@ describe('BEZENT HRMS — Organization Work Locations Integration & Domain Tests
     const db = getDb();
     await db.delete(employees).where(inArray(employees.companyId, [testCompanyA, testCompanyB]));
     await db.delete(locations).where(inArray(locations.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(roleAssignments).where(inArray(roleAssignments.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(memberships).where(inArray(memberships.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(roleAssignments)
+      .where(inArray(roleAssignments.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(memberships)
+      .where(inArray(memberships.companyId, [testCompanyA, testCompanyB]));
     await db.delete(companies).where(inArray(companies.id, [testCompanyA, testCompanyB]));
-    await db.delete(tenantModules).where(inArray(tenantModules.tenantId, [testTenantA, testTenantB]));
+    await db
+      .delete(tenantModules)
+      .where(inArray(tenantModules.tenantId, [testTenantA, testTenantB]));
     await db.delete(users).where(inArray(users.id, [testUserA, testUserB, testUserNoPerm]));
     await db.delete(tenants).where(inArray(tenants.id, [testTenantA, testTenantB]));
   });
@@ -720,10 +742,7 @@ describe('BEZENT HRMS — Organization Work Locations Integration & Domain Tests
     // 27. Persistence after reload
     it('27. persists work location attributes across fresh database queries', async () => {
       const db = getDb();
-      const [persisted] = await db
-        .select()
-        .from(locations)
-        .where(eq(locations.id, officeLocId));
+      const [persisted] = await db.select().from(locations).where(eq(locations.id, officeLocId));
 
       expect(persisted).toBeDefined();
       expect(persisted!.name).toBe('Hosur Headquarters & Plant');

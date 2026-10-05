@@ -225,11 +225,7 @@ describe('LeftSidebar Generic Overflow & Responsive Launcher Engine', () => {
 
   it('8. Main Nav active item preserves single active rail item invariant', () => {
     const html = renderToStaticMarkup(
-      <LeftSidebar
-        items={superAdminFourItems}
-        activeId="customers"
-        testAvailableHeight={600}
-      />,
+      <LeftSidebar items={superAdminFourItems} activeId="customers" testAvailableHeight={600} />,
     );
 
     expect(html).toContain('is-active');

@@ -1369,4 +1369,3 @@ export const GLOBAL_ICON_DEFINITIONS: Record<string, IconDefinition> = {
     </g>
   )),
 };
-

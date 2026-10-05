@@ -46,7 +46,12 @@ export function validateCreateDesignation(input: unknown): CreateDesignationDto 
   }
 
   let departmentId: string | null = null;
-  if (data.departmentId !== undefined && data.departmentId !== null && data.departmentId !== '' && data.departmentId !== 'none') {
+  if (
+    data.departmentId !== undefined &&
+    data.departmentId !== null &&
+    data.departmentId !== '' &&
+    data.departmentId !== 'none'
+  ) {
     if (typeof data.departmentId !== 'string') {
       errors.departmentId = 'Department ID must be a valid identifier';
     } else {
@@ -161,7 +166,9 @@ export function validateSetDesignationStatus(input: unknown): { status: Designat
   return { status: data.status };
 }
 
-export function validateListDesignationsQuery(query: Record<string, unknown>): ListDesignationsQuery {
+export function validateListDesignationsQuery(
+  query: Record<string, unknown>,
+): ListDesignationsQuery {
   const res: ListDesignationsQuery = {};
 
   if (query.status && typeof query.status === 'string') {

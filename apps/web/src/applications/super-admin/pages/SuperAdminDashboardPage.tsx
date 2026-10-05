@@ -134,7 +134,8 @@ export function SuperAdminDashboardPage({ initialData }: SuperAdminDashboardPage
                     </Badge>
                     {(data.metrics.customers?.suspended ?? data.metrics.suspendedTenants) > 0 && (
                       <Badge variant="danger">
-                        {data.metrics.customers?.suspended ?? data.metrics.suspendedTenants} Suspended
+                        {data.metrics.customers?.suspended ?? data.metrics.suspendedTenants}{' '}
+                        Suspended
                       </Badge>
                     )}
                   </Inline>
@@ -159,7 +160,8 @@ export function SuperAdminDashboardPage({ initialData }: SuperAdminDashboardPage
                     </Badge>
                     {(data.metrics.companies?.suspended ?? data.metrics.suspendedCompanies) > 0 && (
                       <Badge variant="danger">
-                        {data.metrics.companies?.suspended ?? data.metrics.suspendedCompanies} Suspended
+                        {data.metrics.companies?.suspended ?? data.metrics.suspendedCompanies}{' '}
+                        Suspended
                       </Badge>
                     )}
                   </Inline>
@@ -189,9 +191,11 @@ export function SuperAdminDashboardPage({ initialData }: SuperAdminDashboardPage
                     <Badge variant="info">
                       {data.metrics.platformUsers?.active ?? data.metrics.activeUsers ?? 0} Active
                     </Badge>
-                    {(data.metrics.platformUsers?.suspended ?? data.metrics.suspendedUsers ?? 0) > 0 && (
+                    {(data.metrics.platformUsers?.suspended ?? data.metrics.suspendedUsers ?? 0) >
+                      0 && (
                       <Badge variant="danger">
-                        {data.metrics.platformUsers?.suspended ?? data.metrics.suspendedUsers} Suspended
+                        {data.metrics.platformUsers?.suspended ?? data.metrics.suspendedUsers}{' '}
+                        Suspended
                       </Badge>
                     )}
                   </Inline>
@@ -206,15 +210,24 @@ export function SuperAdminDashboardPage({ initialData }: SuperAdminDashboardPage
                 <Stack gap="xs">
                   <span className="bezent-metric-label">Company Administrators</span>
                   <Inline gap="md" align="baseline">
-                    <h2>{data.metrics.companyAdmins?.uniqueAdmins ?? data.metrics.uniqueAdmins ?? 0}</h2>
+                    <h2>
+                      {data.metrics.companyAdmins?.uniqueAdmins ?? data.metrics.uniqueAdmins ?? 0}
+                    </h2>
                     <Badge variant="info">
-                      {data.metrics.companyAdmins?.totalAssignments ?? data.metrics.adminAssignments ?? 0} Assignments
+                      {data.metrics.companyAdmins?.totalAssignments ??
+                        data.metrics.adminAssignments ??
+                        0}{' '}
+                      Assignments
                     </Badge>
                   </Inline>
-                  {(data.metrics.companyAdmins?.companiesWithoutAdmin ?? data.metrics.companiesWithoutAdmin ?? 0) > 0 && (
+                  {(data.metrics.companyAdmins?.companiesWithoutAdmin ??
+                    data.metrics.companiesWithoutAdmin ??
+                    0) > 0 && (
                     <Inline gap="xs">
                       <Badge variant="warning">
-                        {data.metrics.companyAdmins?.companiesWithoutAdmin ?? data.metrics.companiesWithoutAdmin} Unmanaged
+                        {data.metrics.companyAdmins?.companiesWithoutAdmin ??
+                          data.metrics.companiesWithoutAdmin}{' '}
+                        Unmanaged
                       </Badge>
                     </Inline>
                   )}
@@ -235,11 +248,7 @@ export function SuperAdminDashboardPage({ initialData }: SuperAdminDashboardPage
             <Section
               title="Needs Attention"
               actions={
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate('/super-admin/tenants')}
-                >
+                <Button variant="ghost" size="sm" onClick={() => navigate('/super-admin/tenants')}>
                   View Customers →
                 </Button>
               }
@@ -309,13 +318,22 @@ export function SuperAdminDashboardPage({ initialData }: SuperAdminDashboardPage
                     <span className="bezent-caption">OPERATIONAL HEALTH</span>
                     <Inline gap="sm">
                       <Badge variant="success">
-                        {data.customerHealth?.health.healthy ?? data.metrics.healthSummary?.healthy ?? 0} Healthy
+                        {data.customerHealth?.health.healthy ??
+                          data.metrics.healthSummary?.healthy ??
+                          0}{' '}
+                        Healthy
                       </Badge>
                       <Badge variant="warning">
-                        {data.customerHealth?.health.needsAttention ?? data.metrics.healthSummary?.needsAttention ?? 0} Needs Attention
+                        {data.customerHealth?.health.needsAttention ??
+                          data.metrics.healthSummary?.needsAttention ??
+                          0}{' '}
+                        Needs Attention
                       </Badge>
                       <Badge variant="danger">
-                        {data.customerHealth?.health.critical ?? data.metrics.healthSummary?.critical ?? 0} Critical
+                        {data.customerHealth?.health.critical ??
+                          data.metrics.healthSummary?.critical ??
+                          0}{' '}
+                        Critical
                       </Badge>
                     </Inline>
                   </Stack>
@@ -324,10 +342,24 @@ export function SuperAdminDashboardPage({ initialData }: SuperAdminDashboardPage
                     <span className="bezent-caption">ACCOUNT LIFECYCLE</span>
                     <Inline gap="sm">
                       <Badge variant="success">
-                        {data.customerHealth?.lifecycle.active ?? data.metrics.customers?.active ?? data.metrics.activeTenants} Active
+                        {data.customerHealth?.lifecycle.active ??
+                          data.metrics.customers?.active ??
+                          data.metrics.activeTenants}{' '}
+                        Active
                       </Badge>
-                      <Badge variant={(data.customerHealth?.lifecycle.suspended ?? data.metrics.customers?.suspended ?? data.metrics.suspendedTenants) > 0 ? 'danger' : 'neutral'}>
-                        {data.customerHealth?.lifecycle.suspended ?? data.metrics.customers?.suspended ?? data.metrics.suspendedTenants} Suspended
+                      <Badge
+                        variant={
+                          (data.customerHealth?.lifecycle.suspended ??
+                            data.metrics.customers?.suspended ??
+                            data.metrics.suspendedTenants) > 0
+                            ? 'danger'
+                            : 'neutral'
+                        }
+                      >
+                        {data.customerHealth?.lifecycle.suspended ??
+                          data.metrics.customers?.suspended ??
+                          data.metrics.suspendedTenants}{' '}
+                        Suspended
                       </Badge>
                     </Inline>
                   </Stack>
@@ -390,11 +422,7 @@ export function SuperAdminDashboardPage({ initialData }: SuperAdminDashboardPage
             <Section
               title="Recent Customers"
               actions={
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate('/super-admin/tenants')}
-                >
+                <Button variant="ghost" size="sm" onClick={() => navigate('/super-admin/tenants')}>
                   View All Customers →
                 </Button>
               }
@@ -430,7 +458,8 @@ export function SuperAdminDashboardPage({ initialData }: SuperAdminDashboardPage
                             </Stack>
                           </TableCell>
                           <TableCell>
-                            {tenant.companyCount ?? 0} {(tenant.companyCount ?? 0) === 1 ? 'Company' : 'Companies'}
+                            {tenant.companyCount ?? 0}{' '}
+                            {(tenant.companyCount ?? 0) === 1 ? 'Company' : 'Companies'}
                           </TableCell>
                           <TableCell>
                             {activeMods.length > 0 ? (

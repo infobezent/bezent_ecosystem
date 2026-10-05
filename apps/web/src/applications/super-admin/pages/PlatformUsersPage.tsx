@@ -136,7 +136,12 @@ export function PlatformUsersPage() {
       )}
 
       {notice && (
-        <Alert variant="success" title="Status Updated" dismissible onDismiss={() => setNotice(null)}>
+        <Alert
+          variant="success"
+          title="Status Updated"
+          dismissible
+          onDismiss={() => setNotice(null)}
+        >
           {notice}
         </Alert>
       )}

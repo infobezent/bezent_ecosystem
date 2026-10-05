@@ -486,9 +486,7 @@ export function JobLevelsGradesSection({
                         <TableHeaderCell>Name</TableHeaderCell>
                         <TableHeaderCell>Description</TableHeaderCell>
                         <TableHeaderCell>Status</TableHeaderCell>
-                        <TableHeaderCell align="right">
-                          Actions
-                        </TableHeaderCell>
+                        <TableHeaderCell align="right">Actions</TableHeaderCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -504,11 +502,7 @@ export function JobLevelsGradesSection({
                             <strong>{jl.name}</strong>
                           </TableCell>
                           <TableCell>
-                            {jl.description ? (
-                              <span>{jl.description}</span>
-                            ) : (
-                              <span>—</span>
-                            )}
+                            {jl.description ? <span>{jl.description}</span> : <span>—</span>}
                           </TableCell>
                           <TableCell>
                             <Badge variant={jl.status === 'active' ? 'success' : 'neutral'}>
@@ -646,9 +640,7 @@ export function JobLevelsGradesSection({
                         <TableHeaderCell>Name</TableHeaderCell>
                         <TableHeaderCell>Description</TableHeaderCell>
                         <TableHeaderCell>Status</TableHeaderCell>
-                        <TableHeaderCell align="right">
-                          Actions
-                        </TableHeaderCell>
+                        <TableHeaderCell align="right">Actions</TableHeaderCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -664,11 +656,7 @@ export function JobLevelsGradesSection({
                             <strong>{g.name}</strong>
                           </TableCell>
                           <TableCell>
-                            {g.description ? (
-                              <span>{g.description}</span>
-                            ) : (
-                              <span>—</span>
-                            )}
+                            {g.description ? <span>{g.description}</span> : <span>—</span>}
                           </TableCell>
                           <TableCell>
                             <Badge variant={g.status === 'active' ? 'success' : 'neutral'}>
@@ -823,7 +811,11 @@ export function JobLevelsGradesSection({
                   Cancel
                 </Button>
                 <Button variant="primary" type="submit" disabled={jlModalSubmitting}>
-                  {jlModalSubmitting ? 'Saving...' : editingJl ? 'Save Changes' : 'Create Job Level'}
+                  {jlModalSubmitting
+                    ? 'Saving...'
+                    : editingJl
+                      ? 'Save Changes'
+                      : 'Create Job Level'}
                 </Button>
               </Inline>
             </Stack>
@@ -944,9 +936,7 @@ export function JobLevelsGradesSection({
           isOpen={deactivatingTarget !== null}
           onClose={() => !deactivatingSubmitting && setDeactivatingTarget(null)}
           title={
-            deactivatingTarget?.type === 'job-level'
-              ? 'Deactivate Job Level'
-              : 'Deactivate Grade'
+            deactivatingTarget?.type === 'job-level' ? 'Deactivate Job Level' : 'Deactivate Grade'
           }
         >
           <Stack gap="md">
@@ -964,8 +954,8 @@ export function JobLevelsGradesSection({
             </Alert>
 
             <p>
-              Are you sure you want to deactivate{' '}
-              <strong>{deactivatingTarget?.item.name}</strong> ({deactivatingTarget?.item.code})?
+              Are you sure you want to deactivate <strong>{deactivatingTarget?.item.name}</strong> (
+              {deactivatingTarget?.item.code})?
             </p>
 
             <Inline gap="sm" justify="end">

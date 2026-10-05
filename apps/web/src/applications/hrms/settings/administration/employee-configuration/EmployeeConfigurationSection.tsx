@@ -1,17 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, useInRouterContext, useSearchParams } from 'react-router-dom';
-import {
-  Stack,
-  Tabs,
-} from '../../../../../design-system/components';
+import { Stack, Tabs } from '../../../../../design-system/components';
 import { EmployeeNumberingSection } from './EmployeeNumberingSection';
 import { DesignationsSection } from './DesignationsSection';
 import { JobLevelsGradesSection } from './JobLevelsGradesSection';
 
-export type EmployeeConfigurationSubSection =
-  | 'numbering'
-  | 'designations'
-  | 'job-levels';
+export type EmployeeConfigurationSubSection = 'numbering' | 'designations' | 'job-levels';
 
 export interface EmployeeConfigurationSectionProps {
   initialSubSection?: EmployeeConfigurationSubSection;
@@ -105,11 +99,7 @@ function UnroutedEmployeeConfigurationSection({
 
       {activeSub === 'numbering' && <EmployeeNumberingSection />}
 
-      {activeSub === 'designations' && (
-        <DesignationsSection
-          onBack={onBack}
-        />
-      )}
+      {activeSub === 'designations' && <DesignationsSection onBack={onBack} />}
 
       {activeSub === 'job-levels' && (
         <JobLevelsGradesSection

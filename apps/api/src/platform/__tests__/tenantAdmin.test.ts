@@ -234,12 +234,7 @@ describe('Tenant Admin Authority Foundation (Phase 1)', () => {
       const directMemberships = await db
         .select()
         .from(memberships)
-        .where(
-          and(
-            eq(memberships.userId, tenantAdminAId),
-            eq(memberships.tenantId, tenantAId),
-          ),
-        );
+        .where(and(eq(memberships.userId, tenantAdminAId), eq(memberships.tenantId, tenantAId)));
       expect(directMemberships.length).toBe(0);
 
       // 1. Can administer Company A1
@@ -341,9 +336,9 @@ describe('Tenant Admin Authority Foundation (Phase 1)', () => {
 
   describe('5. Last Active Tenant Admin Protection', () => {
     it('prevents revoking the sole active Tenant Administrator for a tenant', async () => {
-      await expect(
-        tenantAdminService.revokeTenantAdmin(tenantAId, tenantAdminAId),
-      ).rejects.toThrow(BadRequestError);
+      await expect(tenantAdminService.revokeTenantAdmin(tenantAId, tenantAdminAId)).rejects.toThrow(
+        BadRequestError,
+      );
     });
 
     it('allows revocation when another active Tenant Admin exists, and protects the remainder', async () => {
@@ -372,17 +367,15 @@ describe('Tenant Admin Authority Foundation (Phase 1)', () => {
       });
 
       // Now 2 active admins exist; revoking the second admin must succeed
-      await expect(
-        tenantAdminService.revokeTenantAdmin(tenantAId, ta2Id),
-      ).resolves.not.toThrow();
+      await expect(tenantAdminService.revokeTenantAdmin(tenantAId, ta2Id)).resolves.not.toThrow();
 
       const isTA2 = await tenantAdminService.isTenantAdmin(ta2Id, tenantAId);
       expect(isTA2).toBe(false);
 
       // Now back to 1 active admin; revoking the primary admin must be rejected
-      await expect(
-        tenantAdminService.revokeTenantAdmin(tenantAId, tenantAdminAId),
-      ).rejects.toThrow(BadRequestError);
+      await expect(tenantAdminService.revokeTenantAdmin(tenantAId, tenantAdminAId)).rejects.toThrow(
+        BadRequestError,
+      );
     });
   });
 

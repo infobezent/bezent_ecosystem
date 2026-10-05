@@ -1,6 +1,13 @@
 import { eq, and, or, like, desc, inArray, isNotNull } from 'drizzle-orm';
 import { getDb } from '../../../db/connection.js';
-import { companies, tenants, tenantModules, memberships, users, type Company } from '../../../db/schema.js';
+import {
+  companies,
+  tenants,
+  tenantModules,
+  memberships,
+  users,
+  type Company,
+} from '../../../db/schema.js';
 import type {
   CompanyFilter,
   CompanyRecord,
@@ -74,10 +81,16 @@ export class CompanyRepository {
 
     return companiesList.map((c) => {
       // Determine enabled modules respecting Tenant Entitlement Ceiling
-      const tenantMods = moduleRows.filter((m) => m.tenantId === c.tenantId && m.companyId === null);
+      const tenantMods = moduleRows.filter(
+        (m) => m.tenantId === c.tenantId && m.companyId === null,
+      );
       const compMods = moduleRows.filter((m) => m.tenantId === c.tenantId && m.companyId === c.id);
 
-      const allCodes: Array<'hrms' | 'crm' | 'project_management'> = ['hrms', 'crm', 'project_management'];
+      const allCodes: Array<'hrms' | 'crm' | 'project_management'> = [
+        'hrms',
+        'crm',
+        'project_management',
+      ];
       const enabledModules: string[] = [];
 
       for (const code of allCodes) {
@@ -269,7 +282,10 @@ export class CompanyRepository {
         .from(tenantModules)
         .where(
           and(
-            eq(tenantModules.moduleCode, filter.moduleCode as 'hrms' | 'crm' | 'project_management'),
+            eq(
+              tenantModules.moduleCode,
+              filter.moduleCode as 'hrms' | 'crm' | 'project_management',
+            ),
             eq(tenantModules.status, 'enabled'),
             isNotNull(tenantModules.companyId),
           ),
@@ -353,10 +369,7 @@ export class CompanyRepository {
     if (input.timeZone !== undefined) updateSet.timeZone = input.timeZone;
 
     if (Object.keys(updateSet).length > 0) {
-      await db
-        .update(companies)
-        .set(updateSet)
-        .where(eq(companies.id, companyId));
+      await db.update(companies).set(updateSet).where(eq(companies.id, companyId));
     }
 
     const [updated] = await db.select().from(companies).where(eq(companies.id, companyId));

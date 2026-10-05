@@ -98,7 +98,10 @@ export const INDIAN_STATE_OPTIONS = [
   { value: 'West Bengal', label: 'West Bengal' },
   { value: 'Andaman and Nicobar Islands', label: 'Andaman and Nicobar Islands' },
   { value: 'Chandigarh', label: 'Chandigarh' },
-  { value: 'Dadra and Nagar Haveli and Daman and Diu', label: 'Dadra and Nagar Haveli and Daman and Diu' },
+  {
+    value: 'Dadra and Nagar Haveli and Daman and Diu',
+    label: 'Dadra and Nagar Haveli and Daman and Diu',
+  },
   { value: 'Delhi', label: 'Delhi' },
   { value: 'Jammu & Kashmir', label: 'Jammu & Kashmir' },
   { value: 'Ladakh', label: 'Ladakh' },
@@ -209,7 +212,10 @@ export function CompanyProfilePage() {
       return {
         ...prev,
         country,
-        state: isInd && !INDIAN_STATE_OPTIONS.some((s) => s.value === prev.state) ? 'Tamil Nadu' : prev.state,
+        state:
+          isInd && !INDIAN_STATE_OPTIONS.some((s) => s.value === prev.state)
+            ? 'Tamil Nadu'
+            : prev.state,
       };
     });
     setSuccess(null);
@@ -225,7 +231,8 @@ export function CompanyProfilePage() {
     const errors: Record<string, string> = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRegex = /^[\d+\-()\s.]{7,25}$/;
-    const websiteRegex = /^(https?:\/\/)?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/;
+    const websiteRegex =
+      /^(https?:\/\/)?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/;
 
     if (formData.businessEmail && !emailRegex.test(formData.businessEmail.trim())) {
       errors.businessEmail = 'Please enter a valid business email address';
@@ -243,7 +250,11 @@ export function CompanyProfilePage() {
       errors.alternatePhone = 'Please enter a valid alternate phone number';
     }
 
-    if (formData.website && formData.website.trim() && !websiteRegex.test(formData.website.trim())) {
+    if (
+      formData.website &&
+      formData.website.trim() &&
+      !websiteRegex.test(formData.website.trim())
+    ) {
       errors.website = 'Please enter a valid website URL (e.g. www.example.com)';
     }
 
@@ -359,7 +370,12 @@ export function CompanyProfilePage() {
       )}
 
       {logoNotice && (
-        <Alert variant="warning" title="Upload Storage Policy" dismissible onDismiss={() => setLogoNotice(null)}>
+        <Alert
+          variant="warning"
+          title="Upload Storage Policy"
+          dismissible
+          onDismiss={() => setLogoNotice(null)}
+        >
           {logoNotice}
         </Alert>
       )}
@@ -431,7 +447,10 @@ export function CompanyProfilePage() {
                         id="organizationType"
                         value={formData.organizationType || ''}
                         onChange={(e) => updateField('organizationType', e.target.value)}
-                        options={[{ value: '', label: 'Select Organization Type...' }, ...ORGANIZATION_TYPE_OPTIONS]}
+                        options={[
+                          { value: '', label: 'Select Organization Type...' },
+                          ...ORGANIZATION_TYPE_OPTIONS,
+                        ]}
                       />
                     </FormField>
 
@@ -771,12 +790,7 @@ export function CompanyProfilePage() {
 
             {/* Action Bar */}
             <Inline align="end" gap="sm">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={fetchProfile}
-                disabled={saving}
-              >
+              <Button type="button" variant="secondary" onClick={fetchProfile} disabled={saving}>
                 Reset
               </Button>
               <Button

@@ -12,7 +12,15 @@ const mockCompanyAccess = {
   tenantName: 'Demo Tenant',
   isMember: true,
   isPlatformOversight: false,
-  roles: [{ id: 'role_admin', name: 'Company Admin', code: 'company_admin', isSystem: true, moduleCode: null }],
+  roles: [
+    {
+      id: 'role_admin',
+      name: 'Company Admin',
+      code: 'company_admin',
+      isSystem: true,
+      moduleCode: null,
+    },
+  ],
   permissions: [
     'organization.workLocations.view',
     'organization.workLocations.manage',
@@ -54,7 +62,15 @@ function createMockAuthContext(permissions: string[]): AuthContextValue {
     },
     tenants: [],
     companies: [],
-    activeTenant: { id: 'tenant_demo_01', name: 'Demo Tenant', code: 'demo', status: 'active', isDefault: true, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+    activeTenant: {
+      id: 'tenant_demo_01',
+      name: 'Demo Tenant',
+      code: 'demo',
+      status: 'active',
+      isDefault: true,
+      createdAt: '2026-01-01T00:00:00Z',
+      updatedAt: '2026-01-01T00:00:00Z',
+    },
     activeCompany: companyAccess,
     access: {
       userId: 'usr_admin_01',
@@ -79,9 +95,7 @@ function createMockAuthContext(permissions: string[]): AuthContextValue {
 function renderWithAuth(ui: ReactNode, permissions = mockCompanyAccess.permissions) {
   const contextValue = createMockAuthContext(permissions);
   return renderToStaticMarkup(
-    <AuthContext.Provider value={contextValue}>
-      {ui}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{ui}</AuthContext.Provider>,
   );
 }
 

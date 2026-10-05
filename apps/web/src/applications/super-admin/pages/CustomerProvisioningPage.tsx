@@ -164,7 +164,9 @@ export function CustomerProvisioningPage() {
       const response = await superAdminApi.provisionCustomer(payload);
       setResult(response);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Provisioning failed. Please verify input data.');
+      setError(
+        err instanceof Error ? err.message : 'Provisioning failed. Please verify input data.',
+      );
     } finally {
       setSubmitting(false);
     }
@@ -183,7 +185,11 @@ export function CustomerProvisioningPage() {
       />
 
       {error && (
-        <Alert variant="error" title="Provisioning Validation / Execution Error" onDismiss={() => setError(null)}>
+        <Alert
+          variant="error"
+          title="Provisioning Validation / Execution Error"
+          onDismiss={() => setError(null)}
+        >
           {error}
         </Alert>
       )}
@@ -192,11 +198,15 @@ export function CustomerProvisioningPage() {
       {result ? (
         <Stack gap="lg">
           <Alert variant="success" title="Customer provisioned successfully">
-            {result.tenant.name} is ready on BEZENT. Customer tenant boundary, primary company, application entitlements, and company administrator were atomically created.
+            {result.tenant.name} is ready on BEZENT. Customer tenant boundary, primary company,
+            application entitlements, and company administrator were atomically created.
           </Alert>
 
           <Card>
-            <Section title="Provisioning Summary" subtitle="Created resources and initial access state">
+            <Section
+              title="Provisioning Summary"
+              subtitle="Created resources and initial access state"
+            >
               <Grid columns={2} gap="lg">
                 <Stack gap="sm">
                   <div>
@@ -235,7 +245,10 @@ export function CustomerProvisioningPage() {
                   <div>
                     <span className="bezent-caption">Initial Administrator</span>
                     <div>
-                      <strong>{result.admin.firstName} {result.admin.lastName}</strong> ({result.admin.email})
+                      <strong>
+                        {result.admin.firstName} {result.admin.lastName}
+                      </strong>{' '}
+                      ({result.admin.email})
                     </div>
                   </div>
 
@@ -244,7 +257,11 @@ export function CustomerProvisioningPage() {
                     <div>
                       <Inline gap="xs" align="center">
                         <Badge
-                          variant={result.invitationDelivery.status === 'INVITATION_EMAILED' ? 'info' : 'warning'}
+                          variant={
+                            result.invitationDelivery.status === 'INVITATION_EMAILED'
+                              ? 'info'
+                              : 'warning'
+                          }
                         >
                           {result.invitationDelivery.status === 'INVITATION_EMAILED'
                             ? 'Invitation sent / Pending first sign-in'
@@ -302,9 +319,7 @@ export function CustomerProvisioningPage() {
                   4. Initial Administrator
                 </Badge>
                 <span>→</span>
-                <Badge variant={step === 5 ? 'info' : 'neutral'}>
-                  5. Review & Provision
-                </Badge>
+                <Badge variant={step === 5 ? 'info' : 'neutral'}>5. Review & Provision</Badge>
               </Inline>
               <span className="bezent-caption">Step {step} of 5</span>
             </Inline>
@@ -557,7 +572,9 @@ export function CustomerProvisioningPage() {
                       />
 
                       <Alert variant="info" title="Universal Email + OTP Authentication">
-                        No password is created. The administrator will be emailed sign-in instructions and authenticates passwordlessly via Email OTP at the BEZENT login page.
+                        No password is created. The administrator will be emailed sign-in
+                        instructions and authenticates passwordlessly via Email OTP at the BEZENT
+                        login page.
                       </Alert>
                     </Stack>
                   )}
@@ -578,7 +595,9 @@ export function CustomerProvisioningPage() {
                     <Stack gap="xs">
                       <span className="bezent-caption">Customer</span>
                       <strong>{tenantName}</strong> (<code>{tenantCode}</code>)
-                      {tenantEmail && <span className="bezent-caption">Contact: {tenantEmail}</span>}
+                      {tenantEmail && (
+                        <span className="bezent-caption">Contact: {tenantEmail}</span>
+                      )}
                     </Stack>
                     <Stack gap="xs">
                       <span className="bezent-caption">Primary Company</span>
@@ -611,7 +630,8 @@ export function CustomerProvisioningPage() {
                     <Stack gap="xs">
                       <strong>Activate Customer Immediately</strong>
                       <span className="bezent-caption">
-                        If disabled, customer tenant and company will be provisioned in suspended state.
+                        If disabled, customer tenant and company will be provisioned in suspended
+                        state.
                       </span>
                     </Stack>
                     <Switch
@@ -645,4 +665,3 @@ export function CustomerProvisioningPage() {
     </Page>
   );
 }
-

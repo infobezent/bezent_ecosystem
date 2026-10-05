@@ -133,7 +133,11 @@ export function TenantsPage({
 
   const renderHealthBadge = (tenant: TenantRecord) => {
     const health = tenant.health;
-    if (!health || !health.status || !['healthy', 'needs_attention', 'critical'].includes(health.status)) {
+    if (
+      !health ||
+      !health.status ||
+      !['healthy', 'needs_attention', 'critical'].includes(health.status)
+    ) {
       return <Badge variant="neutral">Health unavailable</Badge>;
     }
 
@@ -280,7 +284,9 @@ export function TenantsPage({
                           <Inline gap="xs" align="center">
                             <code>{tenant.code}</code>
                             <span className="bezent-caption">•</span>
-                            <span className="bezent-caption">{tenant.contactEmail || 'No email'}</span>
+                            <span className="bezent-caption">
+                              {tenant.contactEmail || 'No email'}
+                            </span>
                           </Inline>
                         </Stack>
                       </TableCell>
@@ -403,7 +409,11 @@ export function TenantsPage({
       <Modal
         isOpen={statusTarget !== null}
         onClose={() => setStatusTarget(null)}
-        title={statusTarget?.status === 'active' ? 'Suspend Customer Tenant' : 'Reactivate Customer Tenant'}
+        title={
+          statusTarget?.status === 'active'
+            ? 'Suspend Customer Tenant'
+            : 'Reactivate Customer Tenant'
+        }
         description={
           statusTarget?.status === 'active'
             ? `Suspending customer '${statusTarget?.name}' will immediately revoke access to all business applications for every company and user under this account. Active sessions will be terminated.`
@@ -431,7 +441,9 @@ export function TenantsPage({
         <Stack gap="sm">
           <Alert
             variant={statusTarget?.status === 'active' ? 'warning' : 'info'}
-            title={statusTarget?.status === 'active' ? 'Tenant Isolation Impact' : 'Access Restoration'}
+            title={
+              statusTarget?.status === 'active' ? 'Tenant Isolation Impact' : 'Access Restoration'
+            }
           >
             {statusTarget?.status === 'active'
               ? 'This is a customer-wide action. All companies associated with this tenant will be inaccessible by company administrators and employees until reactivated.'

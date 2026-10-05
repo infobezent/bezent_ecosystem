@@ -49,33 +49,25 @@ describe('Tenant Admin Phase 2C: Company Capacity & Tenant Admin Company Creatio
     const db = getDb();
 
     // 0. Clean up previous test artifacts
-    await db.delete(auditLogs).where(
-      sql`${auditLogs.tenantId} IN (${tenantCId}, ${tenantDId})`,
-    );
-    await db.delete(tenantAdmins).where(
-      sql`${tenantAdmins.tenantId} IN (${tenantCId}, ${tenantDId})`,
-    );
-    await db.delete(departments).where(
-      sql`${departments.tenantId} IN (${tenantCId}, ${tenantDId})`,
-    );
-    await db.delete(locations).where(
-      sql`${locations.tenantId} IN (${tenantCId}, ${tenantDId})`,
-    );
-    await db.delete(roleAssignments).where(
-      sql`${roleAssignments.tenantId} IN (${tenantCId}, ${tenantDId})`,
-    );
-    await db.delete(memberships).where(
-      sql`${memberships.tenantId} IN (${tenantCId}, ${tenantDId})`,
-    );
-    await db.delete(tenantModules).where(
-      sql`${tenantModules.tenantId} IN (${tenantCId}, ${tenantDId})`,
-    );
-    await db.delete(companies).where(
-      sql`${companies.tenantId} IN (${tenantCId}, ${tenantDId})`,
-    );
-    await db.delete(tenants).where(
-      sql`${tenants.id} IN (${tenantCId}, ${tenantDId})`,
-    );
+    await db.delete(auditLogs).where(sql`${auditLogs.tenantId} IN (${tenantCId}, ${tenantDId})`);
+    await db
+      .delete(tenantAdmins)
+      .where(sql`${tenantAdmins.tenantId} IN (${tenantCId}, ${tenantDId})`);
+    await db
+      .delete(departments)
+      .where(sql`${departments.tenantId} IN (${tenantCId}, ${tenantDId})`);
+    await db.delete(locations).where(sql`${locations.tenantId} IN (${tenantCId}, ${tenantDId})`);
+    await db
+      .delete(roleAssignments)
+      .where(sql`${roleAssignments.tenantId} IN (${tenantCId}, ${tenantDId})`);
+    await db
+      .delete(memberships)
+      .where(sql`${memberships.tenantId} IN (${tenantCId}, ${tenantDId})`);
+    await db
+      .delete(tenantModules)
+      .where(sql`${tenantModules.tenantId} IN (${tenantCId}, ${tenantDId})`);
+    await db.delete(companies).where(sql`${companies.tenantId} IN (${tenantCId}, ${tenantDId})`);
+    await db.delete(tenants).where(sql`${tenants.id} IN (${tenantCId}, ${tenantDId})`);
 
     // 1. Insert Tenants with explicit capacity
     // Tenant C starts with maxCompanies = 3, existing companies = 2
@@ -125,35 +117,38 @@ describe('Tenant Admin Phase 2C: Company Capacity & Tenant Admin Company Creatio
 
     // 4. Create Users
     const { hash, salt } = hashPassword('TestP2CPass!1');
-    await db.insert(users).values([
-      {
-        id: userTaId,
-        email: userTaEmail,
-        passwordHash: hash,
-        salt,
-        firstName: 'Tenant',
-        lastName: 'Admin C',
-        status: 'active',
-      },
-      {
-        id: userCaId,
-        email: userCaEmail,
-        passwordHash: hash,
-        salt,
-        firstName: 'Company',
-        lastName: 'Admin C1',
-        status: 'active',
-      },
-      {
-        id: userEmpId,
-        email: userEmpEmail,
-        passwordHash: hash,
-        salt,
-        firstName: 'Regular',
-        lastName: 'Employee',
-        status: 'active',
-      },
-    ]).onDuplicateKeyUpdate({ set: { status: 'active' } });
+    await db
+      .insert(users)
+      .values([
+        {
+          id: userTaId,
+          email: userTaEmail,
+          passwordHash: hash,
+          salt,
+          firstName: 'Tenant',
+          lastName: 'Admin C',
+          status: 'active',
+        },
+        {
+          id: userCaId,
+          email: userCaEmail,
+          passwordHash: hash,
+          salt,
+          firstName: 'Company',
+          lastName: 'Admin C1',
+          status: 'active',
+        },
+        {
+          id: userEmpId,
+          email: userEmpEmail,
+          passwordHash: hash,
+          salt,
+          firstName: 'Regular',
+          lastName: 'Employee',
+          status: 'active',
+        },
+      ])
+      .onDuplicateKeyUpdate({ set: { status: 'active' } });
 
     // 5. Assign Tenant Admin for Tenant C
     await db.insert(tenantAdmins).values({
@@ -344,7 +339,8 @@ describe('Tenant Admin Phase 2C: Company Capacity & Tenant Admin Company Creatio
       expect(latest.targetType).toBe('tenant');
       expect(latest.targetId).toBe(tenantCId);
       expect(latest.companyId).toBeNull();
-      const meta = typeof latest.metadata === 'string' ? JSON.parse(latest.metadata) : latest.metadata;
+      const meta =
+        typeof latest.metadata === 'string' ? JSON.parse(latest.metadata) : latest.metadata;
       expect(meta.newMaxCompanies).toBe(2);
     });
   });
@@ -434,10 +430,7 @@ describe('Tenant Admin Phase 2C: Company Capacity & Tenant Admin Company Creatio
 
     it('14. Created company belongs to callers server-resolved tenant', async () => {
       const db = getDb();
-      const [comp] = await db
-        .select()
-        .from(companies)
-        .where(eq(companies.id, createdCompanyId));
+      const [comp] = await db.select().from(companies).where(eq(companies.id, createdCompanyId));
 
       expect(comp).toBeDefined();
       expect(comp?.tenantId).toBe(tenantCId);
@@ -460,10 +453,7 @@ describe('Tenant Admin Phase 2C: Company Capacity & Tenant Admin Company Creatio
 
       // Verify in database
       const db = getDb();
-      const [comp] = await db
-        .select()
-        .from(companies)
-        .where(eq(companies.id, res.body.data.id));
+      const [comp] = await db.select().from(companies).where(eq(companies.id, res.body.data.id));
       expect(comp?.tenantId).toBe(tenantCId);
     });
 
@@ -636,16 +626,10 @@ describe('Tenant Admin Phase 2C: Company Capacity & Tenant Admin Company Creatio
         .from(companies)
         .where(sql`${companies.tenantId} = ${tenantCId} AND ${companies.code} = 'C3_GAMMA'`);
 
-      const depts = await db
-        .select()
-        .from(departments)
-        .where(eq(departments.companyId, comp!.id));
+      const depts = await db.select().from(departments).where(eq(departments.companyId, comp!.id));
       expect(depts.length).toBe(0);
 
-      const locs = await db
-        .select()
-        .from(locations)
-        .where(eq(locations.companyId, comp!.id));
+      const locs = await db.select().from(locations).where(eq(locations.companyId, comp!.id));
       expect(locs.length).toBe(0);
     });
 
@@ -681,10 +665,7 @@ describe('Tenant Admin Phase 2C: Company Capacity & Tenant Admin Company Creatio
     it('26. Inactive or suspended company STILL consumes capacity', async () => {
       const db = getDb();
       // Set Company C2 to inactive
-      await db
-        .update(companies)
-        .set({ status: 'inactive' })
-        .where(eq(companies.id, companyC2Id));
+      await db.update(companies).set({ status: 'inactive' }).where(eq(companies.id, companyC2Id));
 
       // Check capacity for Tenant C
       const res = await request(app)

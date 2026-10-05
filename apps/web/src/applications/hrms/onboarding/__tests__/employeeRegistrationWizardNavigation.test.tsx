@@ -18,7 +18,9 @@ function renderWizard(props?: {
   onCancel?: () => void;
 }) {
   return renderToStaticMarkup(
-    <MemoryRouter initialEntries={props?.initialEntries ?? ['/hrms/administration/onboarding/registration']}>
+    <MemoryRouter
+      initialEntries={props?.initialEntries ?? ['/hrms/administration/onboarding/registration']}
+    >
       <RegistrationConfigProvider configuration={defaultRegistrationConfiguration}>
         <EmployeeRegistration
           onCancel={props?.onCancel ?? (() => {})}
@@ -288,4 +290,3 @@ describe('Employee Registration Wizard — Navigation & Identity Context', () =>
     });
   });
 });
-

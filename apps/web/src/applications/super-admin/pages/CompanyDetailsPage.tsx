@@ -63,7 +63,9 @@ export function CompanyDetailsPage({
   const [company, setCompany] = useState<CompanyRecord | null>(initialCompany ?? null);
   const [tenant, setTenant] = useState<TenantRecord | null>(initialTenant ?? null);
   const [companyModules, setCompanyModules] = useState<TenantModuleStatus[]>(initialModules ?? []);
-  const [tenantModules, setTenantModules] = useState<TenantModuleStatus[]>(initialTenantModules ?? []);
+  const [tenantModules, setTenantModules] = useState<TenantModuleStatus[]>(
+    initialTenantModules ?? [],
+  );
   const [admins, setAdmins] = useState<CompanyAdminAssignment[]>(initialAdmins ?? []);
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(initialAuditLogs ?? []);
   const [tenantUsers, setTenantUsers] = useState<PlatformUserSummary[]>([]);
@@ -201,7 +203,10 @@ export function CompanyDetailsPage({
   };
 
   // Module Enable / Disable
-  const handleToggleModule = async (moduleCode: string, currentStatus: 'enabled' | 'disabled' | null) => {
+  const handleToggleModule = async (
+    moduleCode: string,
+    currentStatus: 'enabled' | 'disabled' | null,
+  ) => {
     if (!company) return;
     try {
       if (currentStatus === 'enabled') {
@@ -227,7 +232,12 @@ export function CompanyDetailsPage({
     if (!company) return;
     setAssigningAdmin(true);
     try {
-      let payload: { tenantId: string; companyId: string; userId?: string; newUser?: { email: string; firstName: string; lastName: string; phone?: string } };
+      let payload: {
+        tenantId: string;
+        companyId: string;
+        userId?: string;
+        newUser?: { email: string; firstName: string; lastName: string; phone?: string };
+      };
 
       if (adminMode === 'existing') {
         if (!selectedUserId) {
@@ -241,8 +251,14 @@ export function CompanyDetailsPage({
           userId: selectedUserId,
         };
       } else {
-        if (!newAdminData.email.trim() || !newAdminData.firstName.trim() || !newAdminData.lastName.trim()) {
-          setError('Email, First Name, and Last Name are required for new administrator invitation.');
+        if (
+          !newAdminData.email.trim() ||
+          !newAdminData.firstName.trim() ||
+          !newAdminData.lastName.trim()
+        ) {
+          setError(
+            'Email, First Name, and Last Name are required for new administrator invitation.',
+          );
           setAssigningAdmin(false);
           return;
         }
@@ -260,7 +276,9 @@ export function CompanyDetailsPage({
 
       const res = await superAdminApi.assignCompanyAdmin(payload);
       setIsAssignAdminOpen(false);
-      setActionSuccess(res.invitationDelivery.message || 'Company Administrator assigned successfully.');
+      setActionSuccess(
+        res.invitationDelivery.message || 'Company Administrator assigned successfully.',
+      );
       const refreshedAdmins = await superAdminApi.listCompanyAdmins({ companyId: company.id });
       setAdmins(refreshedAdmins);
       const refreshedComp = await superAdminApi.getCompany(company.id);
@@ -330,7 +348,8 @@ export function CompanyDetailsPage({
 
   // Lightweight Deterministic Company Setup Status
   const enabledApps = companyModules.filter((m) => m.status === 'enabled');
-  const hasAppEnabled = enabledApps.length > 0 || (company.enabledModules && company.enabledModules.length > 0);
+  const hasAppEnabled =
+    enabledApps.length > 0 || (company.enabledModules && company.enabledModules.length > 0);
   const hasAdminAssigned = admins.length > 0;
   const hasAdminSignedIn = admins.some((a) => Boolean(a.lastLoginAt));
 
@@ -359,7 +378,8 @@ export function CompanyDetailsPage({
       label: 'Administrator completed first sign-in',
       completed: Boolean(hasAdminSignedIn),
       actionLabel: admins.length > 0 ? 'Resend Invitation' : undefined,
-      onAction: admins.length > 0 ? () => handleResendInvitation(admins[0]!.membershipId) : undefined,
+      onAction:
+        admins.length > 0 ? () => handleResendInvitation(admins[0]!.membershipId) : undefined,
     },
   ];
 
@@ -481,7 +501,10 @@ export function CompanyDetailsPage({
                 isSetupComplete ? (
                   <Badge variant="success">Setup Complete</Badge>
                 ) : (
-                  <Badge variant="warning">{incompleteMilestones.length} step{incompleteMilestones.length === 1 ? '' : 's'} remaining</Badge>
+                  <Badge variant="warning">
+                    {incompleteMilestones.length} step{incompleteMilestones.length === 1 ? '' : 's'}{' '}
+                    remaining
+                  </Badge>
                 )
               }
             >
@@ -507,11 +530,7 @@ export function CompanyDetailsPage({
                     <span className="bezent-caption">
                       Next Best Action: Resolve <strong>{nextActionMilestone.label}</strong>
                     </span>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={nextActionMilestone.onAction}
-                    >
+                    <Button variant="primary" size="sm" onClick={nextActionMilestone.onAction}>
                       {nextActionMilestone.actionLabel}
                     </Button>
                   </Inline>
@@ -522,7 +541,10 @@ export function CompanyDetailsPage({
 
           {/* COMPANY INFORMATION */}
           <Card>
-            <Section title="Company Information" subtitle="Corporate registration and operational metadata">
+            <Section
+              title="Company Information"
+              subtitle="Corporate registration and operational metadata"
+            >
               <Grid columns={3} gap="md">
                 <Stack gap="xs">
                   <span className="bezent-caption">Company Name</span>
@@ -576,7 +598,8 @@ export function CompanyDetailsPage({
       {activeTab === 'applications' && (
         <Stack gap="md">
           <Alert variant="info" title="Tenant Entitlement Ceiling">
-            Company applications are strictly bounded by customer tenant entitlements. A company can only be granted applications that are enabled for its parent customer tenant.
+            Company applications are strictly bounded by customer tenant entitlements. A company can
+            only be granted applications that are enabled for its parent customer tenant.
           </Alert>
 
           <Stack gap="sm">
@@ -584,7 +607,8 @@ export function CompanyDetailsPage({
               {
                 code: 'hrms' as const,
                 title: 'Human Resource Management System (HRMS)',
-                description: 'Workforce records, organization structure, attendance, and leave management.',
+                description:
+                  'Workforce records, organization structure, attendance, and leave management.',
               },
               {
                 code: 'crm' as const,
@@ -621,7 +645,9 @@ export function CompanyDetailsPage({
                               {isCompEnabled ? '● Enabled' : '○ Disabled'}
                             </Badge>
                           ) : (
-                            <span className="bezent-caption">— Not included in customer entitlement</span>
+                            <span className="bezent-caption">
+                              — Not included in customer entitlement
+                            </span>
                           )}
                         </Inline>
                       </Inline>
@@ -632,7 +658,9 @@ export function CompanyDetailsPage({
                         <Button
                           variant={isCompEnabled ? 'danger' : 'primary'}
                           size="sm"
-                          onClick={() => handleToggleModule(app.code, compMod ? compMod.status : null)}
+                          onClick={() =>
+                            handleToggleModule(app.code, compMod ? compMod.status : null)
+                          }
                         >
                           {isCompEnabled ? 'Disable Access' : 'Enable Access'}
                         </Button>
@@ -655,7 +683,8 @@ export function CompanyDetailsPage({
         <Stack gap="md">
           <Inline justify="between" align="center">
             <span className="bezent-caption">
-              Administrators assigned to <strong>{company.name}</strong>. BEZENT uses passwordless universal identity; administrators sign in via Email OTP.
+              Administrators assigned to <strong>{company.name}</strong>. BEZENT uses passwordless
+              universal identity; administrators sign in via Email OTP.
             </span>
             <Button
               variant="primary"
@@ -695,7 +724,9 @@ export function CompanyDetailsPage({
                   {admins.map((a) => (
                     <TableRow key={a.membershipId}>
                       <TableCell>
-                        <strong>{a.firstName} {a.lastName}</strong>
+                        <strong>
+                          {a.firstName} {a.lastName}
+                        </strong>
                       </TableCell>
                       <TableCell>
                         <span>{a.email}</span>
@@ -708,7 +739,9 @@ export function CompanyDetailsPage({
                         )}
                       </TableCell>
                       <TableCell>
-                        <span>{a.lastLoginAt ? new Date(a.lastLoginAt).toLocaleString() : 'Never'}</span>
+                        <span>
+                          {a.lastLoginAt ? new Date(a.lastLoginAt).toLocaleString() : 'Never'}
+                        </span>
                       </TableCell>
                       <TableCell>
                         <span>{new Date(a.assignedAt).toLocaleDateString()}</span>
@@ -772,7 +805,9 @@ export function CompanyDetailsPage({
                   {auditLogs.map((log) => (
                     <TableRow key={log.id}>
                       <TableCell>
-                        <span className="bezent-caption">{new Date(log.createdAt).toLocaleString()}</span>
+                        <span className="bezent-caption">
+                          {new Date(log.createdAt).toLocaleString()}
+                        </span>
                       </TableCell>
                       <TableCell>
                         <span>{log.actorEmail || log.actorUserId || 'System'}</span>
@@ -781,7 +816,9 @@ export function CompanyDetailsPage({
                         <Badge variant="neutral">{log.action}</Badge>
                       </TableCell>
                       <TableCell>
-                        <code>{log.targetType}:{log.targetId}</code>
+                        <code>
+                          {log.targetType}:{log.targetId}
+                        </code>
                       </TableCell>
                       <TableCell>
                         <span className="bezent-caption">
@@ -893,7 +930,8 @@ export function CompanyDetailsPage({
               <Stack gap="sm">
                 {tenantUsers.length === 0 ? (
                   <Alert variant="warning" title="No Users Found">
-                    No users exist under this customer tenant. You can invite a new administrator instead.
+                    No users exist under this customer tenant. You can invite a new administrator
+                    instead.
                   </Alert>
                 ) : (
                   <Select
@@ -924,7 +962,9 @@ export function CompanyDetailsPage({
                     label="First Name *"
                     placeholder="Jane"
                     value={newAdminData.firstName}
-                    onChange={(e) => setNewAdminData({ ...newAdminData, firstName: e.target.value })}
+                    onChange={(e) =>
+                      setNewAdminData({ ...newAdminData, firstName: e.target.value })
+                    }
                     required
                   />
                   <Input
@@ -942,7 +982,8 @@ export function CompanyDetailsPage({
                   onChange={(e) => setNewAdminData({ ...newAdminData, phone: e.target.value })}
                 />
                 <span className="bezent-caption">
-                  The administrator will receive a sign-in invitation and sign in via Email OTP. No passwords are created.
+                  The administrator will receive a sign-in invitation and sign in via Email OTP. No
+                  passwords are created.
                 </span>
               </Stack>
             )}
@@ -968,7 +1009,9 @@ export function CompanyDetailsPage({
         }
       >
         <Alert variant="warning" title="Restricted Access">
-          Are you sure you want to suspend &apos;{company.name}&apos;? Suspending this company will block all users and company administrators from accessing applications and services for this company entity until reactivated.
+          Are you sure you want to suspend &apos;{company.name}&apos;? Suspending this company will
+          block all users and company administrators from accessing applications and services for
+          this company entity until reactivated.
         </Alert>
       </Modal>
     </Page>

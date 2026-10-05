@@ -250,7 +250,9 @@ describe('Employee Registration Shared Foundation & Review Wiring', () => {
       expect(payload.details?.workSchedule?.startTime).toBe('09:00');
 
       // Unsupported domains intentionally excluded from payload
-      expect((payload.details as Record<string, unknown> | undefined)?.salaryDetails).toBeUndefined();
+      expect(
+        (payload.details as Record<string, unknown> | undefined)?.salaryDetails,
+      ).toBeUndefined();
       expect((payload as unknown as Record<string, unknown>).annualCtc).toBeUndefined();
       expect((payload as unknown as Record<string, unknown>).assets).toBeUndefined();
       expect((payload as unknown as Record<string, unknown>).portalPermissions).toBeUndefined();
@@ -341,11 +343,7 @@ describe('Employee Registration Shared Foundation & Review Wiring', () => {
     it('displays submitting state and disables submit button when isSubmitting is true', () => {
       const html = renderToStaticMarkup(
         <MemoryRouter>
-          <ReviewSection
-            data={validReviewData}
-            onEditSection={() => {}}
-            isSubmitting={true}
-          />
+          <ReviewSection data={validReviewData} onEditSection={() => {}} isSubmitting={true} />
         </MemoryRouter>,
       );
 

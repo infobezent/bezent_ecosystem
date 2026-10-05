@@ -133,9 +133,7 @@ export function LeftSidebar({
   const effectiveHeight =
     testAvailableHeight ??
     containerHeight ??
-    (typeof window !== 'undefined'
-      ? Math.max(0, window.innerHeight - 64 - 36 - 8 - 6 - 8)
-      : 800);
+    (typeof window !== 'undefined' ? Math.max(0, window.innerHeight - 64 - 36 - 8 - 6 - 8) : 800);
 
   const availableHeight = Math.max(0, effectiveHeight - NAV_LIST_PADDING_BOTTOM);
 
@@ -155,7 +153,13 @@ export function LeftSidebar({
         shouldRenderMore = true;
       } else {
         const availableForItems = availableHeight - (NAV_ITEM_HEIGHT + NAV_ITEM_GAP);
-        const fitCount = Math.max(1, Math.min(items.length - 1, Math.floor((availableForItems + NAV_ITEM_GAP) / (NAV_ITEM_HEIGHT + NAV_ITEM_GAP))));
+        const fitCount = Math.max(
+          1,
+          Math.min(
+            items.length - 1,
+            Math.floor((availableForItems + NAV_ITEM_GAP) / (NAV_ITEM_HEIGHT + NAV_ITEM_GAP)),
+          ),
+        );
         visibleItems = items.slice(0, fitCount);
         shouldRenderMore = true;
       }
@@ -167,7 +171,13 @@ export function LeftSidebar({
   } else {
     // Items genuinely overflow available rail space
     const availableForItems = availableHeight - (NAV_ITEM_HEIGHT + NAV_ITEM_GAP);
-    const fitCount = Math.max(1, Math.min(items.length - 1, Math.floor((availableForItems + NAV_ITEM_GAP) / (NAV_ITEM_HEIGHT + NAV_ITEM_GAP))));
+    const fitCount = Math.max(
+      1,
+      Math.min(
+        items.length - 1,
+        Math.floor((availableForItems + NAV_ITEM_GAP) / (NAV_ITEM_HEIGHT + NAV_ITEM_GAP)),
+      ),
+    );
     visibleItems = items.slice(0, fitCount);
     shouldRenderMore = Boolean(more);
   }
@@ -183,10 +193,11 @@ export function LeftSidebar({
   const activeRailItem = isMoreOpen ? 'more' : activeId;
 
   // If the active item is in overflow, More indicates active selection
-  const isActiveItemInOverflow = Boolean(activeId && !visibleItems.some((item) => item.id === activeId));
+  const isActiveItemInOverflow = Boolean(
+    activeId && !visibleItems.some((item) => item.id === activeId),
+  );
   const isMoreButtonActive =
-    activeRailItem === 'more' ||
-    (!isMoreOpen && (Boolean(more?.active) || isActiveItemInOverflow));
+    activeRailItem === 'more' || (!isMoreOpen && (Boolean(more?.active) || isActiveItemInOverflow));
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape' && flyoutParentId) closeNow();
@@ -226,11 +237,7 @@ export function LeftSidebar({
           );
         })}
         {more && shouldRenderMore && (
-          <MoreButton
-            {...more}
-            active={isMoreButtonActive}
-            onEnter={closeNow}
-          />
+          <MoreButton {...more} active={isMoreButtonActive} onEnter={closeNow} />
         )}
       </nav>
     </aside>

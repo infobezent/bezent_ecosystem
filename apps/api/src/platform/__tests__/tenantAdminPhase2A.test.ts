@@ -72,21 +72,31 @@ describe('Tenant Admin Phase 2A: Backfill & Canonical APIs', () => {
     const db = getDb();
 
     // Clean up potential prior test artifacts
-    await db.delete(tenantAdmins).where(
-      sql`${tenantAdmins.tenantId} IN (${tenantAId}, ${tenantBId}, ${tenantCId}, ${tenantDId}, ${tenantEId})`,
-    );
-    await db.delete(memberships).where(
-      sql`${memberships.tenantId} IN (${tenantAId}, ${tenantBId}, ${tenantCId}, ${tenantDId}, ${tenantEId})`,
-    );
-    await db.delete(tenantModules).where(
-      sql`${tenantModules.tenantId} IN (${tenantAId}, ${tenantBId}, ${tenantCId}, ${tenantDId}, ${tenantEId})`,
-    );
-    await db.delete(companies).where(
-      sql`${companies.tenantId} IN (${tenantAId}, ${tenantBId}, ${tenantCId}, ${tenantDId}, ${tenantEId})`,
-    );
-    await db.delete(tenants).where(
-      sql`${tenants.id} IN (${tenantAId}, ${tenantBId}, ${tenantCId}, ${tenantDId}, ${tenantEId})`,
-    );
+    await db
+      .delete(tenantAdmins)
+      .where(
+        sql`${tenantAdmins.tenantId} IN (${tenantAId}, ${tenantBId}, ${tenantCId}, ${tenantDId}, ${tenantEId})`,
+      );
+    await db
+      .delete(memberships)
+      .where(
+        sql`${memberships.tenantId} IN (${tenantAId}, ${tenantBId}, ${tenantCId}, ${tenantDId}, ${tenantEId})`,
+      );
+    await db
+      .delete(tenantModules)
+      .where(
+        sql`${tenantModules.tenantId} IN (${tenantAId}, ${tenantBId}, ${tenantCId}, ${tenantDId}, ${tenantEId})`,
+      );
+    await db
+      .delete(companies)
+      .where(
+        sql`${companies.tenantId} IN (${tenantAId}, ${tenantBId}, ${tenantCId}, ${tenantDId}, ${tenantEId})`,
+      );
+    await db
+      .delete(tenants)
+      .where(
+        sql`${tenants.id} IN (${tenantAId}, ${tenantBId}, ${tenantCId}, ${tenantDId}, ${tenantEId})`,
+      );
 
     // 1. Insert Tenants
     await db.insert(tenants).values([
@@ -99,33 +109,141 @@ describe('Tenant Admin Phase 2A: Backfill & Canonical APIs', () => {
 
     // 2. Insert Companies
     await db.insert(companies).values([
-      { id: companyA1Id, tenantId: tenantAId, name: 'Company A1', code: 'COMPA1', status: 'active' },
-      { id: companyA2Id, tenantId: tenantAId, name: 'Company A2', code: 'COMPA2', status: 'active' },
-      { id: companyB1Id, tenantId: tenantBId, name: 'Company B1', code: 'COMPB1', status: 'active' },
-      { id: companyC1Id, tenantId: tenantCId, name: 'Company C1', code: 'COMPC1', status: 'active' },
-      { id: companyD1Id, tenantId: tenantDId, name: 'Company D1', code: 'COMPD1', status: 'active' },
-      { id: companyD2Id, tenantId: tenantDId, name: 'Company D2', code: 'COMPD2', status: 'active' },
-      { id: companyE1Id, tenantId: tenantEId, name: 'Company E1', code: 'COMPE1', status: 'active' },
+      {
+        id: companyA1Id,
+        tenantId: tenantAId,
+        name: 'Company A1',
+        code: 'COMPA1',
+        status: 'active',
+      },
+      {
+        id: companyA2Id,
+        tenantId: tenantAId,
+        name: 'Company A2',
+        code: 'COMPA2',
+        status: 'active',
+      },
+      {
+        id: companyB1Id,
+        tenantId: tenantBId,
+        name: 'Company B1',
+        code: 'COMPB1',
+        status: 'active',
+      },
+      {
+        id: companyC1Id,
+        tenantId: tenantCId,
+        name: 'Company C1',
+        code: 'COMPC1',
+        status: 'active',
+      },
+      {
+        id: companyD1Id,
+        tenantId: tenantDId,
+        name: 'Company D1',
+        code: 'COMPD1',
+        status: 'active',
+      },
+      {
+        id: companyD2Id,
+        tenantId: tenantDId,
+        name: 'Company D2',
+        code: 'COMPD2',
+        status: 'active',
+      },
+      {
+        id: companyE1Id,
+        tenantId: tenantEId,
+        name: 'Company E1',
+        code: 'COMPE1',
+        status: 'active',
+      },
     ]);
 
     // 3. Insert Application Entitlements for Tenant A
     await db.insert(tenantModules).values([
-      { id: 'tm_p2a_hrms_a', tenantId: tenantAId, companyId: null, moduleCode: 'hrms', status: 'enabled' },
-      { id: 'tm_p2a_crm_a', tenantId: tenantAId, companyId: null, moduleCode: 'crm', status: 'enabled' },
+      {
+        id: 'tm_p2a_hrms_a',
+        tenantId: tenantAId,
+        companyId: null,
+        moduleCode: 'hrms',
+        status: 'enabled',
+      },
+      {
+        id: 'tm_p2a_crm_a',
+        tenantId: tenantAId,
+        companyId: null,
+        moduleCode: 'crm',
+        status: 'enabled',
+      },
     ]);
 
     // 4. Create Users
     const { hash, salt } = hashPassword('TestP2A!Pass123');
     const userRows = [
-      { id: userTaAId, email: userTaAEmail, firstName: 'Admin', lastName: 'TA-A', isSuperAdmin: false },
-      { id: userCaA1Id, email: userCaA1Email, firstName: 'Admin', lastName: 'CA-A1', isSuperAdmin: false },
-      { id: userNormAId, email: userNormAEmail, firstName: 'Employee', lastName: 'Norm-A', isSuperAdmin: false },
-      { id: userSuperId, email: userSuperEmail, firstName: 'Super', lastName: 'Admin', isSuperAdmin: true },
-      { id: userTaBId, email: userTaBEmail, firstName: 'Admin', lastName: 'TA-B', isSuperAdmin: false },
-      { id: userC1Id, email: userC1Email, firstName: 'Founder', lastName: 'Legacy-C', isSuperAdmin: false },
-      { id: userD1Id, email: userD1Email, firstName: 'Admin1', lastName: 'Legacy-D', isSuperAdmin: false },
-      { id: userD2Id, email: userD2Email, firstName: 'Admin2', lastName: 'Legacy-D', isSuperAdmin: false },
-      { id: userE1Id, email: userE1Email, firstName: 'Cross', lastName: 'Legacy-E', isSuperAdmin: false },
+      {
+        id: userTaAId,
+        email: userTaAEmail,
+        firstName: 'Admin',
+        lastName: 'TA-A',
+        isSuperAdmin: false,
+      },
+      {
+        id: userCaA1Id,
+        email: userCaA1Email,
+        firstName: 'Admin',
+        lastName: 'CA-A1',
+        isSuperAdmin: false,
+      },
+      {
+        id: userNormAId,
+        email: userNormAEmail,
+        firstName: 'Employee',
+        lastName: 'Norm-A',
+        isSuperAdmin: false,
+      },
+      {
+        id: userSuperId,
+        email: userSuperEmail,
+        firstName: 'Super',
+        lastName: 'Admin',
+        isSuperAdmin: true,
+      },
+      {
+        id: userTaBId,
+        email: userTaBEmail,
+        firstName: 'Admin',
+        lastName: 'TA-B',
+        isSuperAdmin: false,
+      },
+      {
+        id: userC1Id,
+        email: userC1Email,
+        firstName: 'Founder',
+        lastName: 'Legacy-C',
+        isSuperAdmin: false,
+      },
+      {
+        id: userD1Id,
+        email: userD1Email,
+        firstName: 'Admin1',
+        lastName: 'Legacy-D',
+        isSuperAdmin: false,
+      },
+      {
+        id: userD2Id,
+        email: userD2Email,
+        firstName: 'Admin2',
+        lastName: 'Legacy-D',
+        isSuperAdmin: false,
+      },
+      {
+        id: userE1Id,
+        email: userE1Email,
+        firstName: 'Cross',
+        lastName: 'Legacy-E',
+        isSuperAdmin: false,
+      },
     ];
 
     for (const u of userRows) {
@@ -147,18 +265,74 @@ describe('Tenant Admin Phase 2A: Backfill & Canonical APIs', () => {
     // 5. Memberships
     await db.insert(memberships).values([
       // Tenant A
-      { id: 'mem_p2a_ca_a1', tenantId: tenantAId, companyId: companyA1Id, userId: userCaA1Id, role: 'company_admin', status: 'active' },
-      { id: 'mem_p2a_norm_a', tenantId: tenantAId, companyId: companyA1Id, userId: userNormAId, role: 'employee', status: 'active' },
+      {
+        id: 'mem_p2a_ca_a1',
+        tenantId: tenantAId,
+        companyId: companyA1Id,
+        userId: userCaA1Id,
+        role: 'company_admin',
+        status: 'active',
+      },
+      {
+        id: 'mem_p2a_norm_a',
+        tenantId: tenantAId,
+        companyId: companyA1Id,
+        userId: userNormAId,
+        role: 'employee',
+        status: 'active',
+      },
       // Tenant B
-      { id: 'mem_p2a_ta_b', tenantId: tenantBId, companyId: companyB1Id, userId: userTaBId, role: 'company_admin', status: 'active' },
+      {
+        id: 'mem_p2a_ta_b',
+        tenantId: tenantBId,
+        companyId: companyB1Id,
+        userId: userTaBId,
+        role: 'company_admin',
+        status: 'active',
+      },
       // Tenant C: sole company_admin
-      { id: 'mem_p2a_c1', tenantId: tenantCId, companyId: companyC1Id, userId: userC1Id, role: 'company_admin', status: 'active' },
+      {
+        id: 'mem_p2a_c1',
+        tenantId: tenantCId,
+        companyId: companyC1Id,
+        userId: userC1Id,
+        role: 'company_admin',
+        status: 'active',
+      },
       // Tenant D: two company admins in different companies
-      { id: 'mem_p2a_d1', tenantId: tenantDId, companyId: companyD1Id, userId: userD1Id, role: 'company_admin', status: 'active' },
-      { id: 'mem_p2a_d2', tenantId: tenantDId, companyId: companyD2Id, userId: userD2Id, role: 'company_admin', status: 'active' },
+      {
+        id: 'mem_p2a_d1',
+        tenantId: tenantDId,
+        companyId: companyD1Id,
+        userId: userD1Id,
+        role: 'company_admin',
+        status: 'active',
+      },
+      {
+        id: 'mem_p2a_d2',
+        tenantId: tenantDId,
+        companyId: companyD2Id,
+        userId: userD2Id,
+        role: 'company_admin',
+        status: 'active',
+      },
       // Tenant E: userE1 has membership in Tenant E AND in Tenant B (cross-tenant)
-      { id: 'mem_p2a_e1', tenantId: tenantEId, companyId: companyE1Id, userId: userE1Id, role: 'company_admin', status: 'active' },
-      { id: 'mem_p2a_e1_b', tenantId: tenantBId, companyId: companyB1Id, userId: userE1Id, role: 'employee', status: 'active' },
+      {
+        id: 'mem_p2a_e1',
+        tenantId: tenantEId,
+        companyId: companyE1Id,
+        userId: userE1Id,
+        role: 'company_admin',
+        status: 'active',
+      },
+      {
+        id: 'mem_p2a_e1_b',
+        tenantId: tenantBId,
+        companyId: companyB1Id,
+        userId: userE1Id,
+        role: 'employee',
+        status: 'active',
+      },
     ]);
 
     // 6. Explicit Tenant Admins (Tenant A and B)
@@ -190,7 +364,9 @@ describe('Tenant Admin Phase 2A: Backfill & Canonical APIs', () => {
   describe('Part A — Existing Tenant Backfill', () => {
     it('1 & 2. Idempotent backfill identifies unambiguous sole admin and creates exactly one tenant_admins record', async () => {
       // First run: Tenant C should be backfilled
-      const firstRun = await tenantAdminBackfillService.runBackfill({ email: 'super@bezent.example' });
+      const firstRun = await tenantAdminBackfillService.runBackfill({
+        email: 'super@bezent.example',
+      });
       const backfilledC = firstRun.backfilled.find((b) => b.tenantId === tenantCId);
 
       expect(backfilledC).toBeDefined();

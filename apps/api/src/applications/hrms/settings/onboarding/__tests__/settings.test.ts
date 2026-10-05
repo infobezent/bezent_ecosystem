@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
-import { hrmsTestHeaders, signInForTest } from '../../../../../platform/__tests__/support/testSession.js';
+import {
+  hrmsTestHeaders,
+  signInForTest,
+} from '../../../../../platform/__tests__/support/testSession.js';
 import { createApp } from '../../../../../app/server/createApp.js';
 import { seedDatabase } from '../../../../../db/seed.js';
 import { pingDatabase, getDb } from '../../../../../db/connection.js';
@@ -507,4 +510,3 @@ describe('HRMS Onboarding Settings API', () => {
     });
   });
 });
-

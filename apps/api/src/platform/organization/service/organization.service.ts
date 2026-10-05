@@ -21,11 +21,7 @@ export class OrganizationService {
     return profile;
   }
 
-  async updateProfile(
-    tenantId: string,
-    companyId: string,
-    data: UpdateOrganizationProfileDto,
-  ) {
+  async updateProfile(tenantId: string, companyId: string, data: UpdateOrganizationProfileDto) {
     const updated = await this.repo.updateProfile(tenantId, companyId, data);
     if (!updated) {
       throw new NotFoundError(`Company not found for ID: ${companyId}`);

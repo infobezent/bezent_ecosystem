@@ -68,7 +68,9 @@ export function AuditLogsPage() {
           page,
           limit: PAGE_SIZE,
         }),
-        tenants.length === 0 ? superAdminApi.listTenants({ limit: 100 }) : Promise.resolve({ items: tenants, total: tenants.length }),
+        tenants.length === 0
+          ? superAdminApi.listTenants({ limit: 100 })
+          : Promise.resolve({ items: tenants, total: tenants.length }),
       ]);
       setLogs(logsRes.items);
       setTotal(logsRes.total);
@@ -223,11 +225,7 @@ export function AuditLogsPage() {
 
                       {/* DETAILS */}
                       <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setActiveLog(log)}
-                        >
+                        <Button variant="ghost" size="sm" onClick={() => setActiveLog(log)}>
                           View Details
                         </Button>
                       </TableCell>
@@ -243,7 +241,8 @@ export function AuditLogsPage() {
             <Toolbar
               left={
                 <span className="bezent-caption">
-                  Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} of {total} records
+                  Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} of{' '}
+                  {total} records
                 </span>
               }
               right={
@@ -307,7 +306,10 @@ export function AuditLogsPage() {
 
               <Inline gap="sm" justify="between">
                 <span className="bezent-caption">Actor:</span>
-                <span>{activeLog.actorEmail || 'System Process'} {activeLog.actorUserId ? `(${activeLog.actorUserId})` : ''}</span>
+                <span>
+                  {activeLog.actorEmail || 'System Process'}{' '}
+                  {activeLog.actorUserId ? `(${activeLog.actorUserId})` : ''}
+                </span>
               </Inline>
 
               <Inline gap="sm" justify="between">
@@ -326,7 +328,9 @@ export function AuditLogsPage() {
                 <span className="bezent-caption">Target:</span>
                 <span>
                   <strong>{resolveAuditTarget(activeLog, tenantMap).label}</strong>{' '}
-                  <span className="bezent-caption">({resolveAuditTarget(activeLog, tenantMap).type}: {activeLog.targetId})</span>
+                  <span className="bezent-caption">
+                    ({resolveAuditTarget(activeLog, tenantMap).type}: {activeLog.targetId})
+                  </span>
                 </span>
               </Inline>
 

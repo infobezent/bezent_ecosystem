@@ -41,9 +41,11 @@ describe('Database Lifecycle & Startup Readiness', () => {
     });
 
     it('stops after bounded retries and reports diagnostic failure without hanging', async () => {
-      const checker = vi
-        .fn()
-        .mockResolvedValue({ ok: false, error: 'connect ECONNREFUSED 127.0.0.1:3306', code: 'ECONNREFUSED' });
+      const checker = vi.fn().mockResolvedValue({
+        ok: false,
+        error: 'connect ECONNREFUSED 127.0.0.1:3306',
+        code: 'ECONNREFUSED',
+      });
 
       const result = await connection.ensureDatabaseConnected({
         maxRetries: 3,

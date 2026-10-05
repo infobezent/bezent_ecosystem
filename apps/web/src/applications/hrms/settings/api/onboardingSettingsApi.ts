@@ -97,9 +97,7 @@ export async function updateStageConfig(
   return handleResponse<OnboardingStageConfig>(res, 'Failed to update stage configuration');
 }
 
-export async function reorderStageConfigs(
-  stageKeys: string[],
-): Promise<OnboardingStageConfig[]> {
+export async function reorderStageConfigs(stageKeys: string[]): Promise<OnboardingStageConfig[]> {
   const res = await authorizedFetch(
     `${appConfig.apiBaseUrl}/hrms/settings/onboarding/stages/reorder`,
     {

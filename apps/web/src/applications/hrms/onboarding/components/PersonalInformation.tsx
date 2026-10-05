@@ -1480,12 +1480,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
 
       case 'personal.isPermanentSameAsCurrent':
         return (
-          <RegistrationField
-            key={key}
-            fieldKey={key}
-            value={isPermanentSameAsCurrent}
-            span="full"
-          >
+          <RegistrationField key={key} fieldKey={key} value={isPermanentSameAsCurrent} span="full">
             <Checkbox
               id="pers-same-address"
               label={label}
@@ -1689,7 +1684,11 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
               {group.key === 'personal_details' && isPhotoEnabled && (
                 <div className="bezent-photo-uploader">
                   {photoPreview ? (
-                    <img src={photoPreview} alt="Profile Preview" className="bezent-photo-preview" />
+                    <img
+                      src={photoPreview}
+                      alt="Profile Preview"
+                      className="bezent-photo-preview"
+                    />
                   ) : (
                     <div className="bezent-photo-placeholder">
                       {firstName ? firstName[0]?.toUpperCase() : '👤'}
@@ -1731,7 +1730,9 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
                 </div>
               )}
               <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                {group.fields.map((field) => renderField(field as unknown as RegistrationFieldConfig))}
+                {group.fields.map((field) =>
+                  renderField(field as unknown as RegistrationFieldConfig),
+                )}
               </FormGrid>
             </Stack>
           </FormSection>

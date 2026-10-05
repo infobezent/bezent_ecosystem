@@ -134,4 +134,3 @@ export function validateUpdateCompanyCapacity(body: unknown): UpdateCompanyCapac
     maxCompanies: data.maxCompanies as number,
   };
 }
-

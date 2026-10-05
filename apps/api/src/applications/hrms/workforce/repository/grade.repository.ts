@@ -36,10 +36,7 @@ export class GradeRepository {
     filter: ListGradesFilter = {},
   ): Promise<{ items: GradeRecord[]; total: number }> {
     const db = getDb();
-    const conditions: SQL[] = [
-      eq(grades.tenantId, tenantId),
-      eq(grades.companyId, companyId),
-    ];
+    const conditions: SQL[] = [eq(grades.tenantId, tenantId), eq(grades.companyId, companyId)];
 
     if (filter.lookupOnly) {
       conditions.push(eq(grades.status, 'active'));
@@ -49,21 +46,12 @@ export class GradeRepository {
 
     if (filter.search && filter.search.trim().length > 0) {
       const term = `%${filter.search.trim()}%`;
-      conditions.push(
-        or(
-          like(grades.name, term),
-          like(grades.code, term),
-        )!,
-      );
+      conditions.push(or(like(grades.name, term), like(grades.code, term))!);
     }
 
     const whereClause = and(...conditions);
 
-    const rows = await db
-      .select()
-      .from(grades)
-      .where(whereClause)
-      .orderBy(asc(grades.rank));
+    const rows = await db.select().from(grades).where(whereClause).orderBy(asc(grades.rank));
 
     const items = rows.map((r) => this.mapRecord(r));
 
@@ -83,11 +71,7 @@ export class GradeRepository {
       .select()
       .from(grades)
       .where(
-        and(
-          eq(grades.tenantId, tenantId),
-          eq(grades.companyId, companyId),
-          eq(grades.id, id),
-        ),
+        and(eq(grades.tenantId, tenantId), eq(grades.companyId, companyId), eq(grades.id, id)),
       );
 
     if (rows.length === 0 || !rows[0]) return null;
@@ -125,11 +109,7 @@ export class GradeRepository {
       .select()
       .from(grades)
       .where(
-        and(
-          eq(grades.tenantId, tenantId),
-          eq(grades.companyId, companyId),
-          eq(grades.rank, rank),
-        ),
+        and(eq(grades.tenantId, tenantId), eq(grades.companyId, companyId), eq(grades.rank, rank)),
       );
 
     if (rows.length === 0 || !rows[0]) return null;
@@ -183,11 +163,7 @@ export class GradeRepository {
       .update(grades)
       .set(updates)
       .where(
-        and(
-          eq(grades.tenantId, tenantId),
-          eq(grades.companyId, companyId),
-          eq(grades.id, id),
-        ),
+        and(eq(grades.tenantId, tenantId), eq(grades.companyId, companyId), eq(grades.id, id)),
       );
 
     const updated = await this.findGradeById(tenantId, companyId, id);
@@ -208,11 +184,7 @@ export class GradeRepository {
       .update(grades)
       .set({ status, updatedAt: new Date() })
       .where(
-        and(
-          eq(grades.tenantId, tenantId),
-          eq(grades.companyId, companyId),
-          eq(grades.id, id),
-        ),
+        and(eq(grades.tenantId, tenantId), eq(grades.companyId, companyId), eq(grades.id, id)),
       );
 
     const updated = await this.findGradeById(tenantId, companyId, id);
@@ -227,11 +199,7 @@ export class GradeRepository {
     await db
       .delete(grades)
       .where(
-        and(
-          eq(grades.tenantId, tenantId),
-          eq(grades.companyId, companyId),
-          eq(grades.id, id),
-        ),
+        and(eq(grades.tenantId, tenantId), eq(grades.companyId, companyId), eq(grades.id, id)),
       );
   }
 }

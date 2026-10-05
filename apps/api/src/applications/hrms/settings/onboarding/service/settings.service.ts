@@ -88,11 +88,7 @@ export class OnboardingSettingsService {
     return this.repository.reorderStages(tenantId, companyId, data.stageKeys);
   }
 
-  async deleteStageConfig(
-    tenantId: string,
-    companyId: string,
-    stageKey: string,
-  ): Promise<void> {
+  async deleteStageConfig(tenantId: string, companyId: string, stageKey: string): Promise<void> {
     return this.repository.deleteStageConfig(tenantId, companyId, stageKey);
   }
 

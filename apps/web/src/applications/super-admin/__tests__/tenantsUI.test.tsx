@@ -38,7 +38,9 @@ describe('Super Admin - TenantsPage UI', () => {
       companiesCount: 1,
       health: {
         status: 'healthy',
-        reasons: ['Account is fully configured with active administrators and application entitlements.'],
+        reasons: [
+          'Account is fully configured with active administrators and application entitlements.',
+        ],
         nextBestAction: null,
       },
       setupProgress: {
@@ -229,14 +231,22 @@ describe('Super Admin - TenantsPage UI', () => {
         name: 'No Company Tenant',
         companiesCount: 0,
         companies: [],
-        health: { status: 'critical', reasons: ['No legal company entity created.'], nextBestAction: null },
+        health: {
+          status: 'critical',
+          reasons: ['No legal company entity created.'],
+          nextBestAction: null,
+        },
       },
       {
         ...mockTenants[0]!,
         id: 't_no_apps',
         name: 'No Apps Tenant',
         activeModules: [],
-        health: { status: 'needs_attention', reasons: ['No active application entitlements.'], nextBestAction: null },
+        health: {
+          status: 'needs_attention',
+          reasons: ['No active application entitlements.'],
+          nextBestAction: null,
+        },
       },
       {
         ...mockTenants[0]!,
@@ -304,7 +314,9 @@ describe('Super Admin - TenantDetailsPage UI', () => {
     companiesCount: 1,
     health: {
       status: 'healthy',
-      reasons: ['Account is fully configured with active administrators and application entitlements.'],
+      reasons: [
+        'Account is fully configured with active administrators and application entitlements.',
+      ],
       nextBestAction: null,
     },
     setupProgress: {
@@ -434,7 +446,10 @@ describe('Super Admin - TenantDetailsPage UI', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter initialEntries={['/super-admin/tenants/tenant_acme_01']}>
         <Routes>
-          <Route path="/super-admin/tenants/:tenantId" element={<TenantDetailsPage initialTenant={tenantWithoutHealth} />} />
+          <Route
+            path="/super-admin/tenants/:tenantId"
+            element={<TenantDetailsPage initialTenant={tenantWithoutHealth} />}
+          />
         </Routes>
       </MemoryRouter>,
     );

@@ -28,9 +28,7 @@ export interface SettingsPageInnerProps {
   initialModule?: SettingsModuleId;
 }
 
-export function SettingsPageInner({
-  initialModule = 'overview',
-}: SettingsPageInnerProps) {
+export function SettingsPageInner({ initialModule = 'overview' }: SettingsPageInnerProps) {
   const { activeCompany } = useAuth();
   const [activeModule, setActiveModule] = useState<SettingsModuleId>(initialModule);
 
@@ -90,11 +88,7 @@ export function SettingsPageInner({
         <Stack gap="lg">
           <Toolbar
             left={
-              <Button
-                variant="secondary"
-                type="button"
-                onClick={() => setActiveModule('overview')}
-              >
+              <Button variant="secondary" type="button" onClick={() => setActiveModule('overview')}>
                 <BezentIcon name="chevronLeft" size={16} />
                 Back to Settings
               </Button>
@@ -131,14 +125,9 @@ function RoutedSettingsPage() {
     searchParams.get('module') === 'onboarding' ||
     searchParams.get('tab') === 'onboarding' ||
     searchParams.has('sub');
-  const initialModule: SettingsModuleId = isWorkflowSettings || hasOnboardingParam
-    ? 'onboarding'
-    : 'overview';
-  return (
-    <SettingsPageInner
-      initialModule={initialModule}
-    />
-  );
+  const initialModule: SettingsModuleId =
+    isWorkflowSettings || hasOnboardingParam ? 'onboarding' : 'overview';
+  return <SettingsPageInner initialModule={initialModule} />;
 }
 
 export function SettingsPage() {

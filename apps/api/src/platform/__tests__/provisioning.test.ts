@@ -1,7 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { validateCustomerProvisioning } from '../provisioning/validation/provisioning.schema.js';
 import { CustomerProvisioningService } from '../provisioning/service/provisioning.service.js';
-import { ValidationError, ConflictError, BadRequestError, NotFoundError } from '../../app/errors/AppError.js';
+import {
+  ValidationError,
+  ConflictError,
+  BadRequestError,
+  NotFoundError,
+} from '../../app/errors/AppError.js';
 import type { CustomerProvisioningDto } from '../provisioning/types/provisioning.types.js';
 import type { TenantRepository } from '../tenants/repository/tenant.repository.js';
 import type { CompanyRepository } from '../companies/repository/company.repository.js';
@@ -176,7 +181,10 @@ describe('Customer Provisioning Validation Schema', () => {
 
 describe('Customer Provisioning Service — Preflight & Security Boundaries', () => {
   let mockTenantRepo: { findByCode: ReturnType<typeof vi.fn>; findById: ReturnType<typeof vi.fn> };
-  let mockCompanyRepo: { findById: ReturnType<typeof vi.fn>; findByTenantAndCode: ReturnType<typeof vi.fn> };
+  let mockCompanyRepo: {
+    findById: ReturnType<typeof vi.fn>;
+    findByTenantAndCode: ReturnType<typeof vi.fn>;
+  };
   let mockUserRepo: { findByEmail: ReturnType<typeof vi.fn>; findById: ReturnType<typeof vi.fn> };
   let mockModuleRepo: { listByTenant: ReturnType<typeof vi.fn> };
   let mockAudit: { logEvent: ReturnType<typeof vi.fn> };
@@ -241,10 +249,34 @@ describe('Customer Provisioning Service — Preflight & Security Boundaries', ()
 
     mockModuleRepo = {
       listByTenant: vi.fn().mockResolvedValue([
-        { id: 'mod_01', tenantId: 'tnt_acme_01', companyId: null, moduleCode: 'hrms', status: 'enabled' },
-        { id: 'mod_02', tenantId: 'tnt_acme_01', companyId: 'comp_acme_01', moduleCode: 'hrms', status: 'enabled' },
-        { id: 'mod_03', tenantId: 'tnt_acme_01', companyId: null, moduleCode: 'project_management', status: 'enabled' },
-        { id: 'mod_04', tenantId: 'tnt_acme_01', companyId: 'comp_acme_01', moduleCode: 'project_management', status: 'enabled' },
+        {
+          id: 'mod_01',
+          tenantId: 'tnt_acme_01',
+          companyId: null,
+          moduleCode: 'hrms',
+          status: 'enabled',
+        },
+        {
+          id: 'mod_02',
+          tenantId: 'tnt_acme_01',
+          companyId: 'comp_acme_01',
+          moduleCode: 'hrms',
+          status: 'enabled',
+        },
+        {
+          id: 'mod_03',
+          tenantId: 'tnt_acme_01',
+          companyId: null,
+          moduleCode: 'project_management',
+          status: 'enabled',
+        },
+        {
+          id: 'mod_04',
+          tenantId: 'tnt_acme_01',
+          companyId: 'comp_acme_01',
+          moduleCode: 'project_management',
+          status: 'enabled',
+        },
       ]),
     };
 
@@ -317,7 +349,10 @@ describe('Customer Provisioning Service — Preflight & Security Boundaries', ()
 
 describe('Customer Provisioning Service — Transactional Execution & Invariants', () => {
   let mockTenantRepo: { findByCode: ReturnType<typeof vi.fn>; findById: ReturnType<typeof vi.fn> };
-  let mockCompanyRepo: { findById: ReturnType<typeof vi.fn>; findByTenantAndCode: ReturnType<typeof vi.fn> };
+  let mockCompanyRepo: {
+    findById: ReturnType<typeof vi.fn>;
+    findByTenantAndCode: ReturnType<typeof vi.fn>;
+  };
   let mockUserRepo: { findByEmail: ReturnType<typeof vi.fn>; findById: ReturnType<typeof vi.fn> };
   let mockModuleRepo: { listByTenant: ReturnType<typeof vi.fn> };
   let mockAudit: { logEvent: ReturnType<typeof vi.fn> };
@@ -386,10 +421,34 @@ describe('Customer Provisioning Service — Transactional Execution & Invariants
 
     mockModuleRepo = {
       listByTenant: vi.fn().mockResolvedValue([
-        { id: 'mod_01', tenantId: 'tnt_omni_01', companyId: null, moduleCode: 'hrms', status: 'enabled' },
-        { id: 'mod_02', tenantId: 'tnt_omni_01', companyId: 'comp_omni_01', moduleCode: 'hrms', status: 'enabled' },
-        { id: 'mod_03', tenantId: 'tnt_omni_01', companyId: null, moduleCode: 'crm', status: 'enabled' },
-        { id: 'mod_04', tenantId: 'tnt_omni_01', companyId: 'comp_omni_01', moduleCode: 'crm', status: 'enabled' },
+        {
+          id: 'mod_01',
+          tenantId: 'tnt_omni_01',
+          companyId: null,
+          moduleCode: 'hrms',
+          status: 'enabled',
+        },
+        {
+          id: 'mod_02',
+          tenantId: 'tnt_omni_01',
+          companyId: 'comp_omni_01',
+          moduleCode: 'hrms',
+          status: 'enabled',
+        },
+        {
+          id: 'mod_03',
+          tenantId: 'tnt_omni_01',
+          companyId: null,
+          moduleCode: 'crm',
+          status: 'enabled',
+        },
+        {
+          id: 'mod_04',
+          tenantId: 'tnt_omni_01',
+          companyId: 'comp_omni_01',
+          moduleCode: 'crm',
+          status: 'enabled',
+        },
       ]),
     };
 
@@ -412,7 +471,10 @@ describe('Customer Provisioning Service — Transactional Execution & Invariants
   });
 
   it('12. executes atomic provisioning in a single database transaction', async () => {
-    const result = await service.provisionCustomer(validDto, { id: 'usr_super', email: 'super@bezent.com' });
+    const result = await service.provisionCustomer(validDto, {
+      id: 'usr_super',
+      email: 'super@bezent.com',
+    });
 
     expect(mockDb.transaction).toHaveBeenCalledTimes(1);
     expect(result.status).toBe('COMPLETED');
@@ -490,7 +552,9 @@ describe('Customer Provisioning Service — Transactional Execution & Invariants
   it('17. emits canonical audit logs for lifecycle history', async () => {
     await service.provisionCustomer(validDto, { id: 'usr_super', email: 'super@bezent.com' });
 
-    const auditActions = mockAudit.logEvent.mock.calls.map((c: unknown[]) => (c[0] as { action: string }).action);
+    const auditActions = mockAudit.logEvent.mock.calls.map(
+      (c: unknown[]) => (c[0] as { action: string }).action,
+    );
     expect(auditActions).toContain('tenant_created');
     expect(auditActions).toContain('company_created');
     expect(auditActions).toContain('module_enabled');

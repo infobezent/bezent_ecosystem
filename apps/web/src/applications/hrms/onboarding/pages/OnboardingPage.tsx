@@ -227,7 +227,7 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
       return { label: 'Withdrawn', variant: 'danger' };
     }
     const cfg = stageConfigs.find((s) => s.stageKey === stage);
-    const label = cfg?.name ?? (stage.charAt(0).toUpperCase() + stage.slice(1));
+    const label = cfg?.name ?? stage.charAt(0).toUpperCase() + stage.slice(1);
     if (cfg?.isTerminal || stage === 'completed') {
       return { label, variant: 'success' };
     }
@@ -355,13 +355,7 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
         <Stack gap="md">
           {/* Toolbar: Filters and Search */}
           <Toolbar
-            left={
-              <Tabs
-                activeId={activeTab}
-                onChange={handleTabChange}
-                items={tabItems}
-              />
-            }
+            left={<Tabs activeId={activeTab} onChange={handleTabChange} items={tabItems} />}
             right={
               <SearchInput
                 placeholder="Search by name, email, department..."

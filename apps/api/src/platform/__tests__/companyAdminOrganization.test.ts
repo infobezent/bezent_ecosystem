@@ -3,7 +3,15 @@ import request from 'supertest';
 import { createApp } from '../../app/server/createApp.js';
 import { isDatabaseConfigured, getDb } from '../../db/connection.js';
 import { eq } from 'drizzle-orm';
-import { tenants, companies, users, memberships, roleAssignments, tenantModules, tenantAdmins } from '../../db/schema.js';
+import {
+  tenants,
+  companies,
+  users,
+  memberships,
+  roleAssignments,
+  tenantModules,
+  tenantAdmins,
+} from '../../db/schema.js';
 import { hashPassword } from '../auth/security.js';
 import { signInForTest } from './support/testSession.js';
 
@@ -28,9 +36,7 @@ describe('Company Admin Organization Masters Subsystem (HRMS-Decoupled)', () => 
     // 1. Create Tenant with NO HRMS entitlement (only cm / no hrms)
     await db
       .insert(tenants)
-      .values([
-        { id: tenantId, name: 'Decoupled Org Tenant', status: 'active' },
-      ])
+      .values([{ id: tenantId, name: 'Decoupled Org Tenant', status: 'active' }])
       .onDuplicateKeyUpdate({ set: { status: 'active' } });
 
     // Explicitly configure tenant modules WITHOUT hrms (e.g. crm only)

@@ -9,9 +9,7 @@ import type {
   JobLevelLifecycleResult,
 } from '../types/jobLevel';
 
-export async function fetchJobLevels(
-  filters: ListJobLevelsFilters = {},
-): Promise<JobLevel[]> {
+export async function fetchJobLevels(filters: ListJobLevelsFilters = {}): Promise<JobLevel[]> {
   const query = new URLSearchParams();
   if (filters.status) query.set('status', filters.status);
   if (filters.search) query.set('search', filters.search);
@@ -50,18 +48,14 @@ export async function fetchJobLevelById(id: string): Promise<JobLevel> {
   return body.data;
 }
 
-export async function createJobLevel(
-  payload: CreateJobLevelPayload,
-): Promise<JobLevel> {
-  const res = await authorizedFetch(
-    `${appConfig.apiBaseUrl}/hrms/organization/job-levels`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    },
-  );
-  let body: { data?: JobLevel; error?: { message?: string; details?: { code?: string } } } | null = null;
+export async function createJobLevel(payload: CreateJobLevelPayload): Promise<JobLevel> {
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/organization/job-levels`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  let body: { data?: JobLevel; error?: { message?: string; details?: { code?: string } } } | null =
+    null;
   try {
     body = await res.json();
   } catch {
@@ -89,7 +83,8 @@ export async function updateJobLevel(
       body: JSON.stringify(payload),
     },
   );
-  let body: { data?: JobLevel; error?: { message?: string; details?: { code?: string } } } | null = null;
+  let body: { data?: JobLevel; error?: { message?: string; details?: { code?: string } } } | null =
+    null;
   try {
     body = await res.json();
   } catch {
@@ -134,9 +129,7 @@ export async function setJobLevelStatus(
   };
 }
 
-export async function deactivateJobLevel(
-  id: string,
-): Promise<JobLevelLifecycleResult> {
+export async function deactivateJobLevel(id: string): Promise<JobLevelLifecycleResult> {
   const res = await authorizedFetch(
     `${appConfig.apiBaseUrl}/hrms/organization/job-levels/${encodeURIComponent(id)}/deactivate`,
     {
@@ -166,9 +159,7 @@ export async function deactivateJobLevel(
   };
 }
 
-export async function reactivateJobLevel(
-  id: string,
-): Promise<JobLevelLifecycleResult> {
+export async function reactivateJobLevel(id: string): Promise<JobLevelLifecycleResult> {
   const res = await authorizedFetch(
     `${appConfig.apiBaseUrl}/hrms/organization/job-levels/${encodeURIComponent(id)}/reactivate`,
     {

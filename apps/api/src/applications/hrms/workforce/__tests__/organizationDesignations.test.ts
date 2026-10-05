@@ -48,12 +48,22 @@ describe('BEZENT HRMS — Organization Designations Integration & Domain Tests',
 
     // Clean up
     await db.delete(employees).where(inArray(employees.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(designations).where(inArray(designations.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(departments).where(inArray(departments.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(roleAssignments).where(inArray(roleAssignments.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(memberships).where(inArray(memberships.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(designations)
+      .where(inArray(designations.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(departments)
+      .where(inArray(departments.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(roleAssignments)
+      .where(inArray(roleAssignments.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(memberships)
+      .where(inArray(memberships.companyId, [testCompanyA, testCompanyB]));
     await db.delete(companies).where(inArray(companies.id, [testCompanyA, testCompanyB]));
-    await db.delete(tenantModules).where(inArray(tenantModules.tenantId, [testTenantA, testTenantB]));
+    await db
+      .delete(tenantModules)
+      .where(inArray(tenantModules.tenantId, [testTenantA, testTenantB]));
     await db.delete(users).where(inArray(users.id, [testUserA, testUserB, testUserNoPerm]));
     await db.delete(tenants).where(inArray(tenants.id, [testTenantA, testTenantB]));
 
@@ -65,8 +75,18 @@ describe('BEZENT HRMS — Organization Designations Integration & Domain Tests',
 
     // Enable HRMS module
     await db.insert(tenantModules).values([
-      { id: `tmod_${testTenantA}_hrms`, tenantId: testTenantA, moduleCode: 'hrms', status: 'enabled' },
-      { id: `tmod_${testTenantB}_hrms`, tenantId: testTenantB, moduleCode: 'hrms', status: 'enabled' },
+      {
+        id: `tmod_${testTenantA}_hrms`,
+        tenantId: testTenantA,
+        moduleCode: 'hrms',
+        status: 'enabled',
+      },
+      {
+        id: `tmod_${testTenantB}_hrms`,
+        tenantId: testTenantB,
+        moduleCode: 'hrms',
+        status: 'enabled',
+      },
     ]);
 
     // Seed companies
@@ -212,12 +232,22 @@ describe('BEZENT HRMS — Organization Designations Integration & Domain Tests',
   afterAll(async () => {
     const db = getDb();
     await db.delete(employees).where(inArray(employees.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(designations).where(inArray(designations.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(departments).where(inArray(departments.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(roleAssignments).where(inArray(roleAssignments.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(memberships).where(inArray(memberships.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(designations)
+      .where(inArray(designations.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(departments)
+      .where(inArray(departments.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(roleAssignments)
+      .where(inArray(roleAssignments.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(memberships)
+      .where(inArray(memberships.companyId, [testCompanyA, testCompanyB]));
     await db.delete(companies).where(inArray(companies.id, [testCompanyA, testCompanyB]));
-    await db.delete(tenantModules).where(inArray(tenantModules.tenantId, [testTenantA, testTenantB]));
+    await db
+      .delete(tenantModules)
+      .where(inArray(tenantModules.tenantId, [testTenantA, testTenantB]));
     await db.delete(users).where(inArray(users.id, [testUserA, testUserB, testUserNoPerm]));
     await db.delete(tenants).where(inArray(tenants.id, [testTenantA, testTenantB]));
   });

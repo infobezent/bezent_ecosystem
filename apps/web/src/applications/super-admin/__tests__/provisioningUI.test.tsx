@@ -7,7 +7,8 @@ import { SUPER_ADMIN_BASE_PATH } from '../routes/superAdminRoutes';
 import { resolveActiveNavigation } from '../../../shared/utils/navigation';
 
 vi.mock('../api/superAdminApi', async () => {
-  const actual = await vi.importActual<typeof import('../api/superAdminApi')>('../api/superAdminApi');
+  const actual =
+    await vi.importActual<typeof import('../api/superAdminApi')>('../api/superAdminApi');
   return {
     ...actual,
     superAdminApi: {

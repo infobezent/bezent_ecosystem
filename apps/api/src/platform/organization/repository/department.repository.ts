@@ -125,9 +125,7 @@ export class DepartmentRepository {
     }
 
     return rows.map((r) => {
-      const headName = r.headFirstName
-        ? `${r.headFirstName} ${r.headLastName ?? ''}`.trim()
-        : null;
+      const headName = r.headFirstName ? `${r.headFirstName} ${r.headLastName ?? ''}`.trim() : null;
 
       return {
         id: r.id,
@@ -336,11 +334,7 @@ export class DepartmentRepository {
     return rows[0] ?? null;
   }
 
-  async findDivision(
-    tenantId: string,
-    companyId: string,
-    divId: string,
-  ): Promise<Division | null> {
+  async findDivision(tenantId: string, companyId: string, divId: string): Promise<Division | null> {
     const db = getDb();
     const rows = await db
       .select()
@@ -357,11 +351,7 @@ export class DepartmentRepository {
     return rows[0] ?? null;
   }
 
-  async findEmployee(
-    tenantId: string,
-    companyId: string,
-    empId: string,
-  ): Promise<Employee | null> {
+  async findEmployee(tenantId: string, companyId: string, empId: string): Promise<Employee | null> {
     const db = getDb();
     const rows = await db
       .select()

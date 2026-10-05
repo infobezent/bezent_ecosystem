@@ -91,9 +91,7 @@ export class OrganizationStructureRepository {
     }
 
     return rows.map((r) => {
-      const headName = r.headFirstName
-        ? `${r.headFirstName} ${r.headLastName ?? ''}`.trim()
-        : null;
+      const headName = r.headFirstName ? `${r.headFirstName} ${r.headLastName ?? ''}`.trim() : null;
 
       return {
         id: r.id,
@@ -160,9 +158,7 @@ export class OrganizationStructureRepository {
         ),
       );
 
-    const headName = r.headFirstName
-      ? `${r.headFirstName} ${r.headLastName ?? ''}`.trim()
-      : null;
+    const headName = r.headFirstName ? `${r.headFirstName} ${r.headLastName ?? ''}`.trim() : null;
 
     return {
       id: r.id,
@@ -325,9 +321,7 @@ export class OrganizationStructureRepository {
       .orderBy(asc(divisions.name));
 
     return rows.map((r) => {
-      const headName = r.headFirstName
-        ? `${r.headFirstName} ${r.headLastName ?? ''}`.trim()
-        : null;
+      const headName = r.headFirstName ? `${r.headFirstName} ${r.headLastName ?? ''}`.trim() : null;
 
       return {
         id: r.id,
@@ -387,9 +381,7 @@ export class OrganizationStructureRepository {
     if (!rows[0]) return null;
     const r = rows[0];
 
-    const headName = r.headFirstName
-      ? `${r.headFirstName} ${r.headLastName ?? ''}`.trim()
-      : null;
+    const headName = r.headFirstName ? `${r.headFirstName} ${r.headLastName ?? ''}`.trim() : null;
 
     return {
       id: r.id,

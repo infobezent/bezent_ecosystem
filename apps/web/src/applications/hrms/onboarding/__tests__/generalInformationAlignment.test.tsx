@@ -2,9 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { GeneralInformation } from '../components/GeneralInformation';
-import {
-  RegistrationConfigProvider,
-} from '../registration/registrationConfig';
+import { RegistrationConfigProvider } from '../registration/registrationConfig';
 import type { RegistrationConfiguration } from '../../settings/api/registrationSettingsApi';
 import {
   KNOWN_SECTION_GROUPS,
@@ -24,10 +22,7 @@ import {
 
 import type { GeneralInformationProps } from '../components/GeneralInformation';
 
-function renderGeneralWith(
-  config: RegistrationConfiguration,
-  props?: GeneralInformationProps,
-) {
+function renderGeneralWith(config: RegistrationConfiguration, props?: GeneralInformationProps) {
   return renderToStaticMarkup(
     <RegistrationConfigProvider configuration={config}>
       <GeneralInformation
@@ -45,11 +40,7 @@ describe('Chapter 02 (General) Form Editor ↔ Runtime Alignment', () => {
     const editorGroups = KNOWN_SECTION_GROUPS['general']!;
     expect(editorGroups).toBeDefined();
     const groupKeys = editorGroups.map((g) => g.key);
-    expect(groupKeys).toEqual([
-      'general_info',
-      'employment_details',
-      'additional_info',
-    ]);
+    expect(groupKeys).toEqual(['general_info', 'employment_details', 'additional_info']);
 
     // 2. Runtime partitioning using getGroupsForSection on default configuration
     const generalFields = defaultRegistrationConfiguration.fields.filter(
@@ -180,13 +171,9 @@ describe('Chapter 02 (General) Form Editor ↔ Runtime Alignment', () => {
 
     const html = renderGeneralWith(config);
     // Required asterisk on Notice Period
-    expect(html).toMatch(
-      /Notice Period\s*<span class="bezent-label__required"[^>]*>\*<\/span>/,
-    );
+    expect(html).toMatch(/Notice Period\s*<span class="bezent-label__required"[^>]*>\*<\/span>/);
     // Protected joiningDate is always required
-    expect(html).toMatch(
-      /Joining Date\s*<span class="bezent-label__required"[^>]*>\*<\/span>/,
-    );
+    expect(html).toMatch(/Joining Date\s*<span class="bezent-label__required"[^>]*>\*<\/span>/);
   });
 
   it('propagates field width (full vs half) to runtime layout', () => {

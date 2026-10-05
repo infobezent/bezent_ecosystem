@@ -1,9 +1,5 @@
 import { DepartmentRepository, departmentRepository } from '../repository/department.repository.js';
-import {
-  NotFoundError,
-  ConflictError,
-  BadRequestError,
-} from '../../../app/errors/AppError.js';
+import { NotFoundError, ConflictError, BadRequestError } from '../../../app/errors/AppError.js';
 import { auditRepository } from '../../audit/repository/audit.repository.js';
 import type {
   DepartmentRecord,
@@ -135,9 +131,7 @@ export class DepartmentService {
         emp.employmentStatus === 'suspended' ||
         emp.employmentStatus === 'resigned'
       ) {
-        throw new BadRequestError(
-          'Department head must be an active employee in this company',
-        );
+        throw new BadRequestError('Department head must be an active employee in this company');
       }
     }
 
@@ -189,7 +183,9 @@ export class DepartmentService {
     const trimmedName = dto.name.trim();
     const trimmedCode = dto.code?.trim() || null;
     let businessUnitId =
-      dto.businessUnitId !== undefined ? dto.businessUnitId?.trim() || null : existing.businessUnitId;
+      dto.businessUnitId !== undefined
+        ? dto.businessUnitId?.trim() || null
+        : existing.businessUnitId;
     const divisionId =
       dto.divisionId !== undefined ? dto.divisionId?.trim() || null : existing.divisionId;
     const parentDepartmentId =
@@ -197,7 +193,9 @@ export class DepartmentService {
         ? dto.parentDepartmentId?.trim() || null
         : existing.parentDepartmentId;
     const headEmployeeId =
-      dto.headEmployeeId !== undefined ? dto.headEmployeeId?.trim() || null : existing.headEmployeeId;
+      dto.headEmployeeId !== undefined
+        ? dto.headEmployeeId?.trim() || null
+        : existing.headEmployeeId;
 
     // 1. Code uniqueness check
     if (trimmedCode) {
@@ -300,9 +298,7 @@ export class DepartmentService {
         emp.employmentStatus === 'suspended' ||
         emp.employmentStatus === 'resigned'
       ) {
-        throw new BadRequestError(
-          'Department head must be an active employee in this company',
-        );
+        throw new BadRequestError('Department head must be an active employee in this company');
       }
     }
 

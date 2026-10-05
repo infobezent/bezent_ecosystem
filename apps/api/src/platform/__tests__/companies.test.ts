@@ -72,7 +72,10 @@ describe('Super Admin Companies — Backend Domain & Security Suite', () => {
     mockCompanyAdminSvc = {
       assignCompanyAdmin: vi.fn().mockResolvedValue({
         assignment: { membershipId: 'mem_01', email: 'admin@abc.com' },
-        invitationDelivery: { status: 'INVITATION_EMAILED', message: 'Invitation sent via Email OTP.' },
+        invitationDelivery: {
+          status: 'INVITATION_EMAILED',
+          message: 'Invitation sent via Email OTP.',
+        },
       }),
       listCompanyAdmins: vi.fn().mockResolvedValue([]),
     };

@@ -30,14 +30,8 @@ const baseAdmin: EvaluationAdminInput = {
 };
 
 describe('Customer Attention & Health Engine', () => {
-
   it('evaluates healthy state when all operational signals are verified', () => {
-    const health = evaluateCustomerHealth(
-      baseTenant,
-      [baseCompany],
-      ['hrms'],
-      [baseAdmin],
-    );
+    const health = evaluateCustomerHealth(baseTenant, [baseCompany], ['hrms'], [baseAdmin]);
 
     expect(health.status).toBe('healthy');
     expect(health.nextBestAction).toBeNull();
@@ -56,24 +50,14 @@ describe('Customer Attention & Health Engine', () => {
   });
 
   it('marks critical when customer has zero companies', () => {
-    const health = evaluateCustomerHealth(
-      baseTenant,
-      [],
-      ['hrms'],
-      [baseAdmin],
-    );
+    const health = evaluateCustomerHealth(baseTenant, [], ['hrms'], [baseAdmin]);
 
     expect(health.status).toBe('critical');
     expect(health.nextBestAction?.actionType).toBe('create_company');
   });
 
   it('marks critical when customer has no active administrators', () => {
-    const health = evaluateCustomerHealth(
-      baseTenant,
-      [baseCompany],
-      ['hrms'],
-      [],
-    );
+    const health = evaluateCustomerHealth(baseTenant, [baseCompany], ['hrms'], []);
 
     expect(health.status).toBe('critical');
     expect(health.nextBestAction?.actionType).toBe('assign_admin');
@@ -92,12 +76,7 @@ describe('Customer Attention & Health Engine', () => {
   });
 
   it('marks needs_attention when no applications are entitled', () => {
-    const health = evaluateCustomerHealth(
-      baseTenant,
-      [baseCompany],
-      [],
-      [baseAdmin],
-    );
+    const health = evaluateCustomerHealth(baseTenant, [baseCompany], [], [baseAdmin]);
 
     expect(health.status).toBe('needs_attention');
     expect(health.nextBestAction?.actionType).toBe('configure_applications');
@@ -175,9 +154,7 @@ describe('Customer Setup Progress Engine', () => {
     expect(progress.completedMilestones).toBe(4);
     expect(progress.percentage).toBe(80);
     expect(progress.isComplete).toBe(false);
-    const adminActivatedMilestone = progress.milestones.find(
-      (m) => m.key === 'admin_activated',
-    );
+    const adminActivatedMilestone = progress.milestones.find((m) => m.key === 'admin_activated');
     expect(adminActivatedMilestone?.completed).toBe(false);
   });
 
@@ -195,7 +172,12 @@ describe('Customer Setup Progress Engine', () => {
     expect(healthy.reasons.length).toBeGreaterThan(0);
     expect(healthy.reason).toBe(healthy.reasons[0]);
 
-    const critical = evaluateCustomerHealth({ ...baseTenant, status: 'suspended' }, [baseCompany], ['hrms'], [baseAdmin]);
+    const critical = evaluateCustomerHealth(
+      { ...baseTenant, status: 'suspended' },
+      [baseCompany],
+      ['hrms'],
+      [baseAdmin],
+    );
     expect(Array.isArray(critical.reasons)).toBe(true);
     expect(critical.reasons.length).toBeGreaterThan(0);
     expect(critical.reason).toBe(critical.reasons[0]);

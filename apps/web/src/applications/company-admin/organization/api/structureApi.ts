@@ -13,9 +13,7 @@ import type {
 } from '../types/structure';
 
 export async function fetchOrganizationHierarchy(): Promise<OrganizationHierarchy> {
-  const res = await authorizedFetch(
-    `${appConfig.apiBaseUrl}/company-admin/organization/structure`,
-  );
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/company-admin/organization/structure`);
   let body: { data?: OrganizationHierarchy; error?: { message?: string } } | null = null;
   try {
     body = await res.json();
@@ -150,9 +148,7 @@ export async function fetchDivisions(businessUnitId?: string): Promise<DivisionR
   return body.data;
 }
 
-export async function createDivision(
-  payload: CreateDivisionPayload,
-): Promise<DivisionRecord> {
+export async function createDivision(payload: CreateDivisionPayload): Promise<DivisionRecord> {
   const res = await authorizedFetch(
     `${appConfig.apiBaseUrl}/company-admin/organization/structure/divisions`,
     {

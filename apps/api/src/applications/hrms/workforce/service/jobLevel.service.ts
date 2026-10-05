@@ -1,9 +1,6 @@
 import { JobLevelRepository } from '../repository/jobLevel.repository.js';
 import { auditRepository } from '../../../../platform/audit/repository/audit.repository.js';
-import {
-  NotFoundError,
-  ConflictError,
-} from '../../../../app/errors/AppError.js';
+import { NotFoundError, ConflictError } from '../../../../app/errors/AppError.js';
 import type {
   JobLevelRecord,
   CreateJobLevelDto,
@@ -50,11 +47,7 @@ export class JobLevelService {
     return this.repo.listJobLevels(tenantId, companyId, filter);
   }
 
-  async getJobLevelById(
-    tenantId: string,
-    companyId: string,
-    id: string,
-  ): Promise<JobLevelRecord> {
+  async getJobLevelById(tenantId: string, companyId: string, id: string): Promise<JobLevelRecord> {
     const record = await this.repo.findJobLevelById(tenantId, companyId, id);
     if (!record) {
       throw new NotFoundError(`Job level not found (ID: ${id})`);
@@ -83,15 +76,9 @@ export class JobLevelService {
     }
 
     // 2. Check rank uniqueness within company
-    const existingWithRank = await this.repo.findJobLevelByRank(
-      tenantId,
-      companyId,
-      dto.rank,
-    );
+    const existingWithRank = await this.repo.findJobLevelByRank(tenantId, companyId, dto.rank);
     if (existingWithRank) {
-      throw new ConflictError(
-        `Job level rank ${dto.rank} is already in use in this company`,
-      );
+      throw new ConflictError(`Job level rank ${dto.rank} is already in use in this company`);
     }
 
     try {
@@ -126,9 +113,7 @@ export class JobLevelService {
           );
         }
         if (error.message?.includes('idx_job_levels_company_rank')) {
-          throw new ConflictError(
-            `Job level rank ${dto.rank} is already in use in this company`,
-          );
+          throw new ConflictError(`Job level rank ${dto.rank} is already in use in this company`);
         }
       }
       throw err;
@@ -165,15 +150,9 @@ export class JobLevelService {
 
     // Check rank uniqueness if changed
     if (dto.rank !== undefined && dto.rank !== existing.rank) {
-      const existingWithRank = await this.repo.findJobLevelByRank(
-        tenantId,
-        companyId,
-        dto.rank,
-      );
+      const existingWithRank = await this.repo.findJobLevelByRank(tenantId, companyId, dto.rank);
       if (existingWithRank && existingWithRank.id !== id) {
-        throw new ConflictError(
-          `Job level rank ${dto.rank} is already in use in this company`,
-        );
+        throw new ConflictError(`Job level rank ${dto.rank} is already in use in this company`);
       }
     }
 
@@ -219,9 +198,7 @@ export class JobLevelService {
           );
         }
         if (error.message?.includes('idx_job_levels_company_rank') && dto.rank !== undefined) {
-          throw new ConflictError(
-            `Job level rank ${dto.rank} is already in use in this company`,
-          );
+          throw new ConflictError(`Job level rank ${dto.rank} is already in use in this company`);
         }
       }
       throw err;

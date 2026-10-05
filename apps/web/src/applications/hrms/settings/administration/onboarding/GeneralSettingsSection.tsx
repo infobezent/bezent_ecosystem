@@ -13,10 +13,7 @@ import {
   Switch,
 } from '../../../../../design-system/components';
 import { BezentIcon } from '../../../../../design-system/icons';
-import {
-  fetchGeneralSettings,
-  updateGeneralSettings,
-} from '../../api/onboardingSettingsApi';
+import { fetchGeneralSettings, updateGeneralSettings } from '../../api/onboardingSettingsApi';
 import type {
   OnboardingGeneralSettings,
   UpdateOnboardingGeneralSettingsDto,
@@ -325,9 +322,7 @@ export function GeneralSettingsSection({
                   />
                   <Inline gap="xs" align="center">
                     <span className="bezent-input-label">Example:</span>
-                    <span className="bezent-card__desc">
-                      {`${idPrefix.trim() || 'NH-'}0001`}
-                    </span>
+                    <span className="bezent-card__desc">{`${idPrefix.trim() || 'NH-'}0001`}</span>
                   </Inline>
                 </Stack>
               </Inline>
@@ -337,11 +332,7 @@ export function GeneralSettingsSection({
 
         {/* Save Changes Action */}
         <Actions align="end">
-          <Button
-            variant="primary"
-            type="submit"
-            disabled={!isDirty || isSaving}
-          >
+          <Button variant="primary" type="submit" disabled={!isDirty || isSaving}>
             {isSaving ? 'Saving...' : 'Save Changes'}
           </Button>
         </Actions>

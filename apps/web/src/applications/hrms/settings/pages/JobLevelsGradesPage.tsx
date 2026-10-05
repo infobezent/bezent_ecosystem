@@ -6,7 +6,9 @@ function RoutedJobLevelsGrades() {
   return (
     <JobLevelsGradesSection
       onBack={() => navigate('/hrms/settings')}
-      onNavigateToDesignations={() => navigate('/hrms/settings?tab=employee-configuration&sub=designations')}
+      onNavigateToDesignations={() =>
+        navigate('/hrms/settings?tab=employee-configuration&sub=designations')
+      }
       onNavigateToStructure={() => navigate('/company-admin/organization/structure')}
     />
   );

@@ -138,21 +138,13 @@ const manageGradePermissions = requireAnyPermission(
   'hrms.settings.manage',
 );
 
-workforceRouter.get(
-  '/hrms/workforce/grades',
-  viewGradePermissions,
-  gradeController.listGrades,
-);
+workforceRouter.get('/hrms/workforce/grades', viewGradePermissions, gradeController.listGrades);
 workforceRouter.get(
   '/hrms/workforce/grades/:id',
   viewGradePermissions,
   gradeController.getGradeById,
 );
-workforceRouter.post(
-  '/hrms/workforce/grades',
-  manageGradePermissions,
-  gradeController.createGrade,
-);
+workforceRouter.post('/hrms/workforce/grades', manageGradePermissions, gradeController.createGrade);
 workforceRouter.patch(
   '/hrms/workforce/grades/:id',
   manageGradePermissions,

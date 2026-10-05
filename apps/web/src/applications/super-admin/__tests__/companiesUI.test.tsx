@@ -7,7 +7,8 @@ import { superAdminApi, type CompanyRecord, type TenantRecord } from '../api/sup
 import { superAdminNavigation } from '../navigation/superAdminNavigation';
 
 vi.mock('../api/superAdminApi', async () => {
-  const actual = await vi.importActual<typeof import('../api/superAdminApi')>('../api/superAdminApi');
+  const actual =
+    await vi.importActual<typeof import('../api/superAdminApi')>('../api/superAdminApi');
   return {
     ...actual,
     superAdminApi: {
@@ -114,10 +115,7 @@ describe('Super Admin Companies — Frontend UI & Regression Suite', () => {
     it('1 & 2. renders company name, code, and parent customer', () => {
       const html = renderToStaticMarkup(
         <MemoryRouter>
-          <CompaniesPage
-            initialCompanies={[sampleCompany]}
-            initialTenants={[sampleTenant]}
-          />
+          <CompaniesPage initialCompanies={[sampleCompany]} initialTenants={[sampleTenant]} />
         </MemoryRouter>,
       );
 
@@ -144,10 +142,7 @@ describe('Super Admin Companies — Frontend UI & Regression Suite', () => {
     it('4. renders active admin state with count', () => {
       const html = renderToStaticMarkup(
         <MemoryRouter>
-          <CompaniesPage
-            initialCompanies={[sampleCompany]}
-            initialTenants={[sampleTenant]}
-          />
+          <CompaniesPage initialCompanies={[sampleCompany]} initialTenants={[sampleTenant]} />
         </MemoryRouter>,
       );
 
@@ -197,10 +192,7 @@ describe('Super Admin Companies — Frontend UI & Regression Suite', () => {
     it('8, 9, 10, 11. renders search and filter controls (search, tenant, status, application)', () => {
       const html = renderToStaticMarkup(
         <MemoryRouter>
-          <CompaniesPage
-            initialCompanies={[sampleCompany]}
-            initialTenants={[sampleTenant]}
-          />
+          <CompaniesPage initialCompanies={[sampleCompany]} initialTenants={[sampleTenant]} />
         </MemoryRouter>,
       );
 
@@ -228,10 +220,7 @@ describe('Super Admin Companies — Frontend UI & Regression Suite', () => {
 
       const html = renderToStaticMarkup(
         <MemoryRouter>
-          <CompaniesPage
-            initialCompanies={[legacyCompany]}
-            initialTenants={[sampleTenant]}
-          />
+          <CompaniesPage initialCompanies={[legacyCompany]} initialTenants={[sampleTenant]} />
         </MemoryRouter>,
       );
 
@@ -250,12 +239,44 @@ describe('Super Admin Companies — Frontend UI & Regression Suite', () => {
             initialCompany={sampleCompany}
             initialTenant={sampleTenant}
             initialModules={[
-              { id: 'mod_1', tenantId: 'tnt_abc_01', companyId: 'comp_abc_01', moduleCode: 'hrms', status: 'enabled', enabledAt: new Date().toISOString(), disabledAt: null },
-              { id: 'mod_2', tenantId: 'tnt_abc_01', companyId: 'comp_abc_01', moduleCode: 'project_management', status: 'enabled', enabledAt: new Date().toISOString(), disabledAt: null },
+              {
+                id: 'mod_1',
+                tenantId: 'tnt_abc_01',
+                companyId: 'comp_abc_01',
+                moduleCode: 'hrms',
+                status: 'enabled',
+                enabledAt: new Date().toISOString(),
+                disabledAt: null,
+              },
+              {
+                id: 'mod_2',
+                tenantId: 'tnt_abc_01',
+                companyId: 'comp_abc_01',
+                moduleCode: 'project_management',
+                status: 'enabled',
+                enabledAt: new Date().toISOString(),
+                disabledAt: null,
+              },
             ]}
             initialTenantModules={[
-              { id: 'tmod_1', tenantId: 'tnt_abc_01', companyId: null, moduleCode: 'hrms', status: 'enabled', enabledAt: new Date().toISOString(), disabledAt: null },
-              { id: 'tmod_2', tenantId: 'tnt_abc_01', companyId: null, moduleCode: 'project_management', status: 'enabled', enabledAt: new Date().toISOString(), disabledAt: null },
+              {
+                id: 'tmod_1',
+                tenantId: 'tnt_abc_01',
+                companyId: null,
+                moduleCode: 'hrms',
+                status: 'enabled',
+                enabledAt: new Date().toISOString(),
+                disabledAt: null,
+              },
+              {
+                id: 'tmod_2',
+                tenantId: 'tnt_abc_01',
+                companyId: null,
+                moduleCode: 'project_management',
+                status: 'enabled',
+                enabledAt: new Date().toISOString(),
+                disabledAt: null,
+              },
             ]}
             initialAdmins={[
               {
@@ -292,10 +313,26 @@ describe('Super Admin Companies — Frontend UI & Regression Suite', () => {
             initialCompany={sampleCompany}
             initialTenant={sampleTenant}
             initialModules={[
-              { id: 'mod_1', tenantId: 'tnt_abc_01', companyId: 'comp_abc_01', moduleCode: 'hrms', status: 'enabled', enabledAt: new Date().toISOString(), disabledAt: null },
+              {
+                id: 'mod_1',
+                tenantId: 'tnt_abc_01',
+                companyId: 'comp_abc_01',
+                moduleCode: 'hrms',
+                status: 'enabled',
+                enabledAt: new Date().toISOString(),
+                disabledAt: null,
+              },
             ]}
             initialTenantModules={[
-              { id: 'tmod_1', tenantId: 'tnt_abc_01', companyId: null, moduleCode: 'hrms', status: 'enabled', enabledAt: new Date().toISOString(), disabledAt: null },
+              {
+                id: 'tmod_1',
+                tenantId: 'tnt_abc_01',
+                companyId: null,
+                moduleCode: 'hrms',
+                status: 'enabled',
+                enabledAt: new Date().toISOString(),
+                disabledAt: null,
+              },
             ]}
             initialAdmins={[
               {
@@ -343,7 +380,15 @@ describe('Super Admin Companies — Frontend UI & Regression Suite', () => {
             initialCompany={sampleCompany}
             initialTenant={sampleTenant}
             initialModules={[
-              { id: 'mod_1', tenantId: 'tnt_abc_01', companyId: 'comp_abc_01', moduleCode: 'hrms', status: 'enabled', enabledAt: new Date().toISOString(), disabledAt: null },
+              {
+                id: 'mod_1',
+                tenantId: 'tnt_abc_01',
+                companyId: 'comp_abc_01',
+                moduleCode: 'hrms',
+                status: 'enabled',
+                enabledAt: new Date().toISOString(),
+                disabledAt: null,
+              },
             ]}
             initialTenantModules={[]}
             initialAdmins={[]}
@@ -361,7 +406,15 @@ describe('Super Admin Companies — Frontend UI & Regression Suite', () => {
             initialCompany={sampleCompany}
             initialTenant={sampleTenant}
             initialModules={[
-              { id: 'mod_1', tenantId: 'tnt_abc_01', companyId: 'comp_abc_01', moduleCode: 'hrms', status: 'enabled', enabledAt: new Date().toISOString(), disabledAt: null },
+              {
+                id: 'mod_1',
+                tenantId: 'tnt_abc_01',
+                companyId: 'comp_abc_01',
+                moduleCode: 'hrms',
+                status: 'enabled',
+                enabledAt: new Date().toISOString(),
+                disabledAt: null,
+              },
             ]}
             initialTenantModules={[]}
             initialAdmins={[
@@ -390,10 +443,7 @@ describe('Super Admin Companies — Frontend UI & Regression Suite', () => {
     it('31. renders suspended company safely with reactivation option', () => {
       const html = renderToStaticMarkup(
         <MemoryRouter>
-          <CompanyDetailsPage
-            initialCompany={sampleNoAdminCompany}
-            initialTenant={sampleTenant}
-          />
+          <CompanyDetailsPage initialCompany={sampleNoAdminCompany} initialTenant={sampleTenant} />
         </MemoryRouter>,
       );
 

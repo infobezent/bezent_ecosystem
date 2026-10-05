@@ -53,12 +53,7 @@ export class DesignationController {
       const { tenantId, companyId } = this.getContext(req);
       const actor = this.getActor(req);
       const validated = validateCreateDesignation(req.body);
-      const created = await this.service.createDesignation(
-        tenantId,
-        companyId,
-        validated,
-        actor,
-      );
+      const created = await this.service.createDesignation(tenantId, companyId, validated, actor);
       res.status(201).json({ data: created });
     } catch (err) {
       next(err);
@@ -90,13 +85,7 @@ export class DesignationController {
       const actor = this.getActor(req);
       const id = String(req.params.id);
       const { status } = validateSetDesignationStatus(req.body);
-      const updated = await this.service.setStatus(
-        tenantId,
-        companyId,
-        id,
-        status,
-        actor,
-      );
+      const updated = await this.service.setStatus(tenantId, companyId, id, status, actor);
       res.json({ data: updated });
     } catch (err) {
       next(err);
@@ -108,12 +97,7 @@ export class DesignationController {
       const { tenantId, companyId } = this.getContext(req);
       const actor = this.getActor(req);
       const id = String(req.params.id);
-      const result = await this.service.deactivateDesignation(
-        tenantId,
-        companyId,
-        id,
-        actor,
-      );
+      const result = await this.service.deactivateDesignation(tenantId, companyId, id, actor);
       res.json({
         data: result.designation,
         affectedEmployeeCount: result.affectedEmployeeCount,
@@ -132,12 +116,7 @@ export class DesignationController {
       const { tenantId, companyId } = this.getContext(req);
       const actor = this.getActor(req);
       const id = String(req.params.id);
-      const updated = await this.service.reactivateDesignation(
-        tenantId,
-        companyId,
-        id,
-        actor,
-      );
+      const updated = await this.service.reactivateDesignation(tenantId, companyId, id, actor);
       res.json({
         data: updated,
         message: 'Designation reactivated successfully.',

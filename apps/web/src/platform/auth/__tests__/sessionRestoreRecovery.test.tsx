@@ -43,7 +43,9 @@ describe('Session Restore Transient Recovery Logic', () => {
 
     it('classifies HTTP 502 and 504 as transient gateway errors', () => {
       expect(isTransientAuthError(new AuthApiError('Bad Gateway', 502, 'BAD_GATEWAY'))).toBe(true);
-      expect(isTransientAuthError(new AuthApiError('Gateway Timeout', 504, 'GATEWAY_TIMEOUT'))).toBe(true);
+      expect(
+        isTransientAuthError(new AuthApiError('Gateway Timeout', 504, 'GATEWAY_TIMEOUT')),
+      ).toBe(true);
     });
 
     it('NEVER classifies 401 Unauthorized as transient (authentic auth rejection)', () => {
@@ -72,7 +74,11 @@ describe('Session Restore Transient Recovery Logic', () => {
     });
 
     it('classifies database unavailability as kind "database_unavailable"', () => {
-      const err = new AuthApiError('Database service is temporarily unavailable', 503, 'DATABASE_UNAVAILABLE');
+      const err = new AuthApiError(
+        'Database service is temporarily unavailable',
+        503,
+        'DATABASE_UNAVAILABLE',
+      );
       const result = classifyAuthError(err);
       expect(result.kind).toBe('database_unavailable');
       expect(result.message).toContain('Database service is temporarily unavailable');
@@ -108,7 +114,11 @@ describe('Session Restore Transient Recovery Logic', () => {
       expect(localStorageMock.getItem(SESSION_TOKEN_KEY)).toBe(token);
 
       // Simulating a transient DB outage error: token MUST NOT be deleted
-      const transientErr = new AuthApiError('Database service is unavailable', 500, 'DATABASE_UNAVAILABLE');
+      const transientErr = new AuthApiError(
+        'Database service is unavailable',
+        500,
+        'DATABASE_UNAVAILABLE',
+      );
       expect(isTransientAuthError(transientErr)).toBe(true);
 
       // Verify token remains intact

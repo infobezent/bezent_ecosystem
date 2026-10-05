@@ -278,7 +278,9 @@ export function WorkLocationsSection({
       setDeactivateTarget(null);
       await loadData();
     } catch (err) {
-      setDeactivateError(err instanceof Error ? err.message : 'Failed to deactivate work location.');
+      setDeactivateError(
+        err instanceof Error ? err.message : 'Failed to deactivate work location.',
+      );
     } finally {
       setDeactivateSubmitting(false);
     }
@@ -363,9 +365,7 @@ export function WorkLocationsSection({
                 <Select
                   aria-label="Filter by Status"
                   value={statusFilter}
-                  onChange={(e) =>
-                    setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')
-                  }
+                  onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
                   options={[
                     { value: 'all', label: 'All Statuses' },
                     { value: 'active', label: 'Active Only' },
@@ -377,17 +377,16 @@ export function WorkLocationsSection({
                   aria-label="Filter by Location Type"
                   value={typeFilter}
                   onChange={(e) => setTypeFilter(e.target.value as LocationType | 'all')}
-                  options={[
-                    { value: 'all', label: 'All Types' },
-                    ...LOCATION_TYPE_OPTIONS,
-                  ]}
+                  options={[{ value: 'all', label: 'All Types' }, ...LOCATION_TYPE_OPTIONS]}
                 />
               </Inline>
 
               <Inline gap="xs" align="center" wrap>
                 <Badge variant="neutral">Total: {counts.total}</Badge>
                 <Badge variant="success">Active: {counts.active}</Badge>
-                {counts.inactive > 0 && <Badge variant="warning">Inactive: {counts.inactive}</Badge>}
+                {counts.inactive > 0 && (
+                  <Badge variant="warning">Inactive: {counts.inactive}</Badge>
+                )}
                 <Badge variant="neutral">Physical: {counts.physical}</Badge>
                 <Badge variant="neutral">Remote: {counts.remote}</Badge>
               </Inline>
@@ -452,10 +451,12 @@ export function WorkLocationsSection({
                       </Inline>
                     ) : (
                       <Stack gap="xs">
-                        <span>
-                          {[loc.city, loc.state].filter(Boolean).join(', ')}
-                        </span>
-                        {loc.country && <small>{loc.country} {loc.postalCode ? `(${loc.postalCode})` : ''}</small>}
+                        <span>{[loc.city, loc.state].filter(Boolean).join(', ')}</span>
+                        {loc.country && (
+                          <small>
+                            {loc.country} {loc.postalCode ? `(${loc.postalCode})` : ''}
+                          </small>
+                        )}
                       </Stack>
                     )}
                   </TableCell>
@@ -539,7 +540,10 @@ export function WorkLocationsSection({
                   />
                 </FormField>
 
-                <FormField label="Location Code" helperText="Company-scoped unique identifier (optional)">
+                <FormField
+                  label="Location Code"
+                  helperText="Company-scoped unique identifier (optional)"
+                >
                   <Input
                     name="code"
                     value={formCode}
@@ -578,7 +582,10 @@ export function WorkLocationsSection({
                   : 'Physical address is required for on-site / facility work locations.'}
               </Alert>
 
-              <FormField label={`Address Line 1 ${!isFormRemote ? '*' : ''}`} required={!isFormRemote}>
+              <FormField
+                label={`Address Line 1 ${!isFormRemote ? '*' : ''}`}
+                required={!isFormRemote}
+              >
                 <Input
                   name="addressLine1"
                   value={formAddressLine1}
@@ -609,7 +616,10 @@ export function WorkLocationsSection({
                   />
                 </FormField>
 
-                <FormField label={`State / Province ${!isFormRemote ? '*' : ''}`} required={!isFormRemote}>
+                <FormField
+                  label={`State / Province ${!isFormRemote ? '*' : ''}`}
+                  required={!isFormRemote}
+                >
                   <Input
                     name="state"
                     value={formState}
@@ -631,7 +641,11 @@ export function WorkLocationsSection({
 
                 <FormField
                   label={`Postal Code ${!isFormRemote ? '*' : ''}`}
-                  helperText={formCountry.trim().toLowerCase() === 'india' ? '6-digit PIN code' : 'Postal / Zip code'}
+                  helperText={
+                    formCountry.trim().toLowerCase() === 'india'
+                      ? '6-digit PIN code'
+                      : 'Postal / Zip code'
+                  }
                   required={!isFormRemote}
                 >
                   <Input
@@ -648,7 +662,10 @@ export function WorkLocationsSection({
             {/* Form Group 3: REGIONAL */}
             <Stack gap="sm">
               <strong>REGIONAL</strong>
-              <FormField label="Time Zone" helperText="Canonical IANA timezone identifier (e.g. Asia/Kolkata)">
+              <FormField
+                label="Time Zone"
+                helperText="Canonical IANA timezone identifier (e.g. Asia/Kolkata)"
+              >
                 <Select
                   name="timezone"
                   value={formTimezone}
@@ -698,7 +715,11 @@ export function WorkLocationsSection({
                 Cancel
               </Button>
               <Button variant="primary" type="submit" disabled={modalSubmitting}>
-                {modalSubmitting ? 'Saving...' : editingLocation ? 'Update Location' : 'Create Location'}
+                {modalSubmitting
+                  ? 'Saving...'
+                  : editingLocation
+                    ? 'Update Location'
+                    : 'Create Location'}
               </Button>
             </Inline>
           </Stack>
@@ -722,12 +743,15 @@ export function WorkLocationsSection({
             {deactivateTarget.activeEmployeeCount > 0 ? (
               <Alert variant="warning">
                 <strong>Employee Impact Notice:</strong> {deactivateTarget.activeEmployeeCount}{' '}
-                active employee(s) are currently assigned to this work location. Deactivating will not
-                modify or reassign them, but will prevent this location from being chosen for new
-                employee assignments.
+                active employee(s) are currently assigned to this work location. Deactivating will
+                not modify or reassign them, but will prevent this location from being chosen for
+                new employee assignments.
               </Alert>
             ) : (
-              <p>This work location will be marked inactive and excluded from new employee assignments.</p>
+              <p>
+                This work location will be marked inactive and excluded from new employee
+                assignments.
+              </p>
             )}
 
             {deactivateError && <Alert variant="error">{deactivateError}</Alert>}

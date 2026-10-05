@@ -124,7 +124,10 @@ export interface WorkingHoursSectionProps {
   onChange?: (updated: Chapter08WorkingHoursState) => void;
 }
 
-export function WorkingHoursSection({ value: _value, onChange: _onChange }: WorkingHoursSectionProps = {}) {
+export function WorkingHoursSection({
+  value: _value,
+  onChange: _onChange,
+}: WorkingHoursSectionProps = {}) {
   // A. WORK SCHEDULE STATE
   const [workingCalendar, setWorkingCalendar] = useState('Standard India General Calendar 2026');
   const [customWorkingCalendar, setCustomWorkingCalendar] = useState('');

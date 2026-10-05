@@ -282,7 +282,6 @@ function SortableCanvasField({
     zIndex: isDragging ? 50 : undefined,
   };
 
-
   return (
     <div
       ref={setNodeRef}
@@ -324,7 +323,11 @@ function SortableCanvasField({
         selectable
         selected={isSelected}
         span={field.width === 'full' ? 'full' : 1}
-        helperText={field.key === 'general.employeeId' ? 'Generated automatically' : (field.description ?? undefined)}
+        helperText={
+          field.key === 'general.employeeId'
+            ? 'Generated automatically'
+            : (field.description ?? undefined)
+        }
         onClick={(e?: React.MouseEvent) => {
           e?.stopPropagation();
           onSelect();
@@ -790,9 +793,7 @@ export function FormCanvas({
                           title={
                             <InlineSectionTitle
                               title={group.title}
-                              onSave={(newTitle) =>
-                                onUpdateSubgroupTitle?.(group.key, newTitle)
-                              }
+                              onSave={(newTitle) => onUpdateSubgroupTitle?.(group.key, newTitle)}
                             />
                           }
                           description={
@@ -805,36 +806,42 @@ export function FormCanvas({
                           }
                         >
                           <Stack gap="md">
-                            {effectiveSectionKey === 'personal' && group.key === 'personal_details' && (
-                              <div
-                                className={`bezent-canvas-field-wrapper bezent-canvas-specialized-control ${selectedFieldKey === 'personal.profilePhoto' ? 'is-selected' : ''}`}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onSelectField('personal.profilePhoto');
-                                }}
-                              >
-                                <FormField
-                                  labelNode={
-                                    <Inline gap="xs" align="center">
-                                      <span>Profile Photo</span>
-                                      <Badge variant="neutral" size="sm">
-                                        System Control
-                                      </Badge>
-                                    </Inline>
-                                  }
-                                  selectable
-                                  selected={selectedFieldKey === 'personal.profilePhoto'}
-                                  span="full"
-                                  helperText="JPG / PNG • Max 5 MB"
+                            {effectiveSectionKey === 'personal' &&
+                              group.key === 'personal_details' && (
+                                <div
+                                  className={`bezent-canvas-field-wrapper bezent-canvas-specialized-control ${selectedFieldKey === 'personal.profilePhoto' ? 'is-selected' : ''}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onSelectField('personal.profilePhoto');
+                                  }}
                                 >
-                                  <div className="bezent-photo-uploader-preview">
-                                    <Button variant="secondary" size="sm" type="button" tabIndex={-1}>
-                                      Upload Photo
-                                    </Button>
-                                  </div>
-                                </FormField>
-                              </div>
-                            )}
+                                  <FormField
+                                    labelNode={
+                                      <Inline gap="xs" align="center">
+                                        <span>Profile Photo</span>
+                                        <Badge variant="neutral" size="sm">
+                                          System Control
+                                        </Badge>
+                                      </Inline>
+                                    }
+                                    selectable
+                                    selected={selectedFieldKey === 'personal.profilePhoto'}
+                                    span="full"
+                                    helperText="JPG / PNG • Max 5 MB"
+                                  >
+                                    <div className="bezent-photo-uploader-preview">
+                                      <Button
+                                        variant="secondary"
+                                        size="sm"
+                                        type="button"
+                                        tabIndex={-1}
+                                      >
+                                        Upload Photo
+                                      </Button>
+                                    </div>
+                                  </FormField>
+                                </div>
+                              )}
                             {group.fields.length > 0 ? (
                               <FormGrid columns={2} layout="horizontal" labelWidth="md">
                                 {group.fields.map((field) => (

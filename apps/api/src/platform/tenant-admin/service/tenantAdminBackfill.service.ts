@@ -1,12 +1,6 @@
 import { eq, and, sql, desc } from 'drizzle-orm';
 import { getDb } from '../../../db/connection.js';
-import {
-  tenants,
-  memberships,
-  tenantAdmins,
-  auditLogs,
-  users,
-} from '../../../db/schema.js';
+import { tenants, memberships, tenantAdmins, auditLogs, users } from '../../../db/schema.js';
 import {
   tenantAdminRepository,
   TenantAdminRepository,

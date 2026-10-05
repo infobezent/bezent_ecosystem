@@ -161,7 +161,9 @@ export function PlatformSettingsPage() {
                 <Stack gap="xs">
                   <span className="bezent-caption">Identity Model</span>
                   <strong>Platform User ≠ HRMS Employee</strong>
-                  <span className="bezent-caption">Workforce records separated from authentication</span>
+                  <span className="bezent-caption">
+                    Workforce records separated from authentication
+                  </span>
                 </Stack>
               </Grid>
             </Section>
@@ -187,7 +189,9 @@ export function PlatformSettingsPage() {
                   <Inline gap="xs">
                     <Badge variant="success">Enabled</Badge>
                   </Inline>
-                  <span className="bezent-caption">Zero logged passwords, tokens, or OTP codes</span>
+                  <span className="bezent-caption">
+                    Zero logged passwords, tokens, or OTP codes
+                  </span>
                 </Stack>
 
                 <Stack gap="xs">

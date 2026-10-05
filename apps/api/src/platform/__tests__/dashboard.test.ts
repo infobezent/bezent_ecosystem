@@ -49,9 +49,27 @@ describe('Super Admin Dashboard Service', () => {
       const companyIds = [compA1, compA2, compD1];
 
       await db.insert(companies).values([
-        { id: compA1, tenantId: tA, name: 'Alpha Retail', code: `AR_${testSuffix}`, status: 'active' },
-        { id: compA2, tenantId: tA, name: 'Alpha Logistics', code: `AL_${testSuffix}`, status: 'active' },
-        { id: compD1, tenantId: tD, name: 'Delta Main', code: `DM_${testSuffix}`, status: 'active' },
+        {
+          id: compA1,
+          tenantId: tA,
+          name: 'Alpha Retail',
+          code: `AR_${testSuffix}`,
+          status: 'active',
+        },
+        {
+          id: compA2,
+          tenantId: tA,
+          name: 'Alpha Logistics',
+          code: `AL_${testSuffix}`,
+          status: 'active',
+        },
+        {
+          id: compD1,
+          tenantId: tD,
+          name: 'Delta Main',
+          code: `DM_${testSuffix}`,
+          status: 'active',
+        },
       ]);
 
       // 3. Create Users
@@ -191,9 +209,7 @@ describe('Super Admin Dashboard Service', () => {
       const firstNeedsAttentionIdx = overview.needsAttention.findIndex(
         (i) => i.status === 'needs_attention',
       );
-      const lastCriticalIdx = overview.needsAttention
-        .map((i) => i.status)
-        .lastIndexOf('critical');
+      const lastCriticalIdx = overview.needsAttention.map((i) => i.status).lastIndexOf('critical');
 
       if (firstNeedsAttentionIdx !== -1 && lastCriticalIdx !== -1) {
         expect(lastCriticalIdx).toBeLessThan(firstNeedsAttentionIdx);
@@ -241,11 +257,26 @@ describe('Super Admin Dashboard Service', () => {
       await db.delete(tenants).where(inArray(tenants.id, tenantIds));
     } catch (err) {
       // Cleanup on error
-      await db.delete(tenantModules).where(inArray(tenantModules.tenantId, tenantIds)).catch(() => {});
-      await db.delete(memberships).where(inArray(memberships.tenantId, tenantIds)).catch(() => {});
-      await db.delete(companies).where(inArray(companies.tenantId, tenantIds)).catch(() => {});
-      await db.delete(tenantDetails).where(inArray(tenantDetails.tenantId, tenantIds)).catch(() => {});
-      await db.delete(tenants).where(inArray(tenants.id, tenantIds)).catch(() => {});
+      await db
+        .delete(tenantModules)
+        .where(inArray(tenantModules.tenantId, tenantIds))
+        .catch(() => {});
+      await db
+        .delete(memberships)
+        .where(inArray(memberships.tenantId, tenantIds))
+        .catch(() => {});
+      await db
+        .delete(companies)
+        .where(inArray(companies.tenantId, tenantIds))
+        .catch(() => {});
+      await db
+        .delete(tenantDetails)
+        .where(inArray(tenantDetails.tenantId, tenantIds))
+        .catch(() => {});
+      await db
+        .delete(tenants)
+        .where(inArray(tenants.id, tenantIds))
+        .catch(() => {});
       throw err;
     }
   });

@@ -1,11 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  Page,
-  PageHeader,
-  Stack,
-  Tabs,
-} from '../../../design-system/components';
+import { Page, PageHeader, Stack, Tabs } from '../../../design-system/components';
 import { useCompanyAdmin } from '../context/CompanyAdminContext';
 import { CompanyContextBar } from '../components/CompanyContextBar';
 
@@ -26,10 +21,7 @@ import { OrganizationStructureSection } from '../organization/OrganizationStruct
 import { DepartmentsSection } from '../organization/DepartmentsSection';
 import { WorkLocationsSection } from '../organization/WorkLocationsSection';
 
-export type OrganizationSection =
-  | 'structure'
-  | 'departments'
-  | 'work-locations';
+export type OrganizationSection = 'structure' | 'departments' | 'work-locations';
 
 export const ORGANIZATION_TABS: { id: OrganizationSection; label: string }[] = [
   { id: 'structure', label: 'Organization Structure' },

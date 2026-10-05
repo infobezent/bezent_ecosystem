@@ -45,30 +45,24 @@ describe('Tenant Admin Phase 2B: Backend Structural Consolidation', () => {
     const db = getDb();
 
     // Clean up test data
-    await db.delete(tenantAdmins).where(
-      sql`${tenantAdmins.tenantId} IN (${tenantAId}, ${tenantBId})`,
-    );
-    await db.delete(departments).where(
-      sql`${departments.tenantId} IN (${tenantAId}, ${tenantBId})`,
-    );
-    await db.delete(locations).where(
-      sql`${locations.tenantId} IN (${tenantAId}, ${tenantBId})`,
-    );
-    await db.delete(roleAssignments).where(
-      sql`${roleAssignments.tenantId} IN (${tenantAId}, ${tenantBId})`,
-    );
-    await db.delete(memberships).where(
-      sql`${memberships.tenantId} IN (${tenantAId}, ${tenantBId})`,
-    );
-    await db.delete(tenantModules).where(
-      sql`${tenantModules.tenantId} IN (${tenantAId}, ${tenantBId})`,
-    );
-    await db.delete(companies).where(
-      sql`${companies.tenantId} IN (${tenantAId}, ${tenantBId})`,
-    );
-    await db.delete(tenants).where(
-      sql`${tenants.id} IN (${tenantAId}, ${tenantBId})`,
-    );
+    await db
+      .delete(tenantAdmins)
+      .where(sql`${tenantAdmins.tenantId} IN (${tenantAId}, ${tenantBId})`);
+    await db
+      .delete(departments)
+      .where(sql`${departments.tenantId} IN (${tenantAId}, ${tenantBId})`);
+    await db.delete(locations).where(sql`${locations.tenantId} IN (${tenantAId}, ${tenantBId})`);
+    await db
+      .delete(roleAssignments)
+      .where(sql`${roleAssignments.tenantId} IN (${tenantAId}, ${tenantBId})`);
+    await db
+      .delete(memberships)
+      .where(sql`${memberships.tenantId} IN (${tenantAId}, ${tenantBId})`);
+    await db
+      .delete(tenantModules)
+      .where(sql`${tenantModules.tenantId} IN (${tenantAId}, ${tenantBId})`);
+    await db.delete(companies).where(sql`${companies.tenantId} IN (${tenantAId}, ${tenantBId})`);
+    await db.delete(tenants).where(sql`${tenants.id} IN (${tenantAId}, ${tenantBId})`);
 
     // 1. Insert Tenants
     await db.insert(tenants).values([
@@ -147,33 +141,54 @@ describe('Tenant Admin Phase 2B: Backend Structural Consolidation', () => {
 
     // 3b. Insert Application Entitlements for Tenant A & B
     await db.insert(tenantModules).values([
-      { id: 'tm_p2b_hrms_a', tenantId: tenantAId, companyId: null, moduleCode: 'hrms', status: 'enabled' },
-      { id: 'tm_p2b_crm_a', tenantId: tenantAId, companyId: null, moduleCode: 'crm', status: 'enabled' },
-      { id: 'tm_p2b_hrms_b', tenantId: tenantBId, companyId: null, moduleCode: 'hrms', status: 'enabled' },
+      {
+        id: 'tm_p2b_hrms_a',
+        tenantId: tenantAId,
+        companyId: null,
+        moduleCode: 'hrms',
+        status: 'enabled',
+      },
+      {
+        id: 'tm_p2b_crm_a',
+        tenantId: tenantAId,
+        companyId: null,
+        moduleCode: 'crm',
+        status: 'enabled',
+      },
+      {
+        id: 'tm_p2b_hrms_b',
+        tenantId: tenantBId,
+        companyId: null,
+        moduleCode: 'hrms',
+        status: 'enabled',
+      },
     ]);
 
     // 4. Insert Users
     const { hash, salt } = await hashPassword('TenantPass123!');
-    await db.insert(users).values([
-      {
-        id: userTaAId,
-        email: userTaAEmail,
-        passwordHash: hash,
-        salt,
-        firstName: 'Tenant',
-        lastName: 'Admin A',
-        status: 'active',
-      },
-      {
-        id: userCaA1Id,
-        email: userCaA1Email,
-        passwordHash: hash,
-        salt,
-        firstName: 'Company',
-        lastName: 'Admin A1',
-        status: 'active',
-      },
-    ]).onDuplicateKeyUpdate({ set: { status: 'active' } });
+    await db
+      .insert(users)
+      .values([
+        {
+          id: userTaAId,
+          email: userTaAEmail,
+          passwordHash: hash,
+          salt,
+          firstName: 'Tenant',
+          lastName: 'Admin A',
+          status: 'active',
+        },
+        {
+          id: userCaA1Id,
+          email: userCaA1Email,
+          passwordHash: hash,
+          salt,
+          firstName: 'Company',
+          lastName: 'Admin A1',
+          status: 'active',
+        },
+      ])
+      .onDuplicateKeyUpdate({ set: { status: 'active' } });
 
     // 5. Assign Tenant Admin for Tenant A (WITHOUT company membership in A1 or A2)
     await db.insert(tenantAdmins).values({
@@ -375,7 +390,9 @@ describe('Tenant Admin Phase 2B: Backend Structural Consolidation', () => {
             } else if (file.endsWith('.ts') && !file.endsWith('.d.ts')) {
               const content = fs.readFileSync(fullPath, 'utf8');
               // Check for import of company-admin (singular)
-              const hasCompanyAdminImport = /from\s+['"][^'"]*\/company-admin(\/|['"])/.test(content);
+              const hasCompanyAdminImport = /from\s+['"][^'"]*\/company-admin(\/|['"])/.test(
+                content,
+              );
               expect(
                 hasCompanyAdminImport,
                 `Forbidden dependency: ${fullPath} imports company-admin workspace`,
@@ -383,7 +400,9 @@ describe('Tenant Admin Phase 2B: Backend Structural Consolidation', () => {
 
               // Check for import of tenant-admin (except accessResolverService infrastructure authority check)
               if (domain !== 'access') {
-                const hasTenantAdminImport = /from\s+['"][^'"]*\/tenant-admin(\/|['"])/.test(content);
+                const hasTenantAdminImport = /from\s+['"][^'"]*\/tenant-admin(\/|['"])/.test(
+                  content,
+                );
                 expect(
                   hasTenantAdminImport,
                   `Forbidden dependency: ${fullPath} imports tenant-admin workspace`,

@@ -177,7 +177,9 @@ describe('Super Admin Governance UI Suite', () => {
       const html = renderToStaticMarkup(<PlatformSettingsPage />);
 
       expect(html).toContain('Platform Settings');
-      expect(html).toContain('Read-only operational configuration and governance status for the BEZENT platform.');
+      expect(html).toContain(
+        'Read-only operational configuration and governance status for the BEZENT platform.',
+      );
       expect(html).toContain('Loading platform configuration...');
       // Does not contain old developer documentation
       expect(html).not.toContain('AGENTS.md');
@@ -206,7 +208,9 @@ describe('Super Admin Governance UI Suite', () => {
       expect(formatAuditAction('company_created')).toBe('Company Created');
       expect(formatAuditAction('company_admin_assigned')).toBe('Company Administrator Assigned');
       expect(formatAuditAction('company_admin_revoked')).toBe('Company Administrator Revoked');
-      expect(formatAuditAction('company_admin_invitation_resent')).toBe('Administrator Invitation Resent');
+      expect(formatAuditAction('company_admin_invitation_resent')).toBe(
+        'Administrator Invitation Resent',
+      );
       expect(formatAuditAction('module_enabled')).toBe('Application Enabled');
       expect(formatAuditAction('module_disabled')).toBe('Application Disabled');
       expect(formatAuditAction('user_created')).toBe('Platform User Created');

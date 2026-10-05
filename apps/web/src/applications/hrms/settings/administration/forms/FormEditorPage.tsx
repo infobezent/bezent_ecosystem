@@ -160,8 +160,7 @@ export function FormEditorPage() {
         type: 'file_upload',
         origin: 'system',
         protected: true,
-        protectedReason:
-          'Profile photo is a protected system control for employee identification.',
+        protectedReason: 'Profile photo is a protected system control for employee identification.',
         configurable: false,
         enabled: true,
         required: false,
@@ -992,16 +991,30 @@ export function FormEditorPage() {
               config:
                 f.origin === 'custom' && f.config
                   ? {
-                      ...(f.config.minLength !== undefined ? { minLength: f.config.minLength } : {}),
-                      ...(f.config.maxLength !== undefined ? { maxLength: f.config.maxLength } : {}),
+                      ...(f.config.minLength !== undefined
+                        ? { minLength: f.config.minLength }
+                        : {}),
+                      ...(f.config.maxLength !== undefined
+                        ? { maxLength: f.config.maxLength }
+                        : {}),
                       ...(f.config.min !== undefined ? { min: f.config.min } : {}),
                       ...(f.config.max !== undefined ? { max: f.config.max } : {}),
-                      ...(f.config.decimalPlaces !== undefined ? { decimalPlaces: f.config.decimalPlaces } : {}),
+                      ...(f.config.decimalPlaces !== undefined
+                        ? { decimalPlaces: f.config.decimalPlaces }
+                        : {}),
                       ...(f.config.options !== undefined ? { options: f.config.options } : {}),
-                      ...(f.config.defaultValue !== undefined ? { defaultValue: f.config.defaultValue } : {}),
-                      ...(f.config.disallowPast !== undefined ? { disallowPast: f.config.disallowPast } : {}),
-                      ...(f.config.disallowFuture !== undefined ? { disallowFuture: f.config.disallowFuture } : {}),
-                      ...(f.config.maxSizeMb !== undefined ? { maxSizeMb: f.config.maxSizeMb } : {}),
+                      ...(f.config.defaultValue !== undefined
+                        ? { defaultValue: f.config.defaultValue }
+                        : {}),
+                      ...(f.config.disallowPast !== undefined
+                        ? { disallowPast: f.config.disallowPast }
+                        : {}),
+                      ...(f.config.disallowFuture !== undefined
+                        ? { disallowFuture: f.config.disallowFuture }
+                        : {}),
+                      ...(f.config.maxSizeMb !== undefined
+                        ? { maxSizeMb: f.config.maxSizeMb }
+                        : {}),
                       ...(f.config.groupKey !== undefined ? { groupKey: f.config.groupKey } : {}),
                     }
                   : undefined,
@@ -1120,7 +1133,8 @@ export function FormEditorPage() {
             </div>
 
             <p className="bezent-editor-header__desc">
-              Configure the employee registration form for your organization. Manage tab order, field settings, visibility and add custom fields.
+              Configure the employee registration form for your organization. Manage tab order,
+              field settings, visibility and add custom fields.
             </p>
           </div>
         </div>
@@ -1139,12 +1153,7 @@ export function FormEditorPage() {
           </Button>
 
           {isDirty && (
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={isSaving}
-              onClick={handleDiscard}
-            >
+            <Button variant="outline" size="sm" disabled={isSaving} onClick={handleDiscard}>
               Discard Changes
             </Button>
           )}
@@ -1374,7 +1383,11 @@ export function FormEditorPage() {
             {previewSection && (
               <div className="bezent-preview-body">
                 {(() => {
-                  const groups = getGroupsForSection(previewSection.key, previewSection.fields, metadata);
+                  const groups = getGroupsForSection(
+                    previewSection.key,
+                    previewSection.fields,
+                    metadata,
+                  );
                   const sortedFields = [...previewSection.fields].sort((a, b) => a.order - b.order);
 
                   if (groups.length === 0 || sortedFields.length === 0) {
@@ -1410,7 +1423,9 @@ export function FormEditorPage() {
                                 .map((field) => (
                                   <div
                                     key={field.key}
-                                    className={field.width === 'full' ? 'bezent-field-full-width' : undefined}
+                                    className={
+                                      field.width === 'full' ? 'bezent-field-full-width' : undefined
+                                    }
                                   >
                                     <FormField
                                       label={field.label}

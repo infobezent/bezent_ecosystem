@@ -37,10 +37,16 @@ describe('BEZENT HRMS — Organization Job Levels & Grades Integration & Domain 
     // Clean up any stale test records
     await db.delete(jobLevels).where(inArray(jobLevels.companyId, [testCompanyA, testCompanyB]));
     await db.delete(grades).where(inArray(grades.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(roleAssignments).where(inArray(roleAssignments.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(memberships).where(inArray(memberships.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(roleAssignments)
+      .where(inArray(roleAssignments.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(memberships)
+      .where(inArray(memberships.companyId, [testCompanyA, testCompanyB]));
     await db.delete(companies).where(inArray(companies.id, [testCompanyA, testCompanyB]));
-    await db.delete(tenantModules).where(inArray(tenantModules.tenantId, [testTenantA, testTenantB]));
+    await db
+      .delete(tenantModules)
+      .where(inArray(tenantModules.tenantId, [testTenantA, testTenantB]));
     await db.delete(users).where(inArray(users.id, [testUserA, testUserB, testUserNoPerm]));
     await db.delete(tenants).where(inArray(tenants.id, [testTenantA, testTenantB]));
 
@@ -52,8 +58,18 @@ describe('BEZENT HRMS — Organization Job Levels & Grades Integration & Domain 
 
     // Enable HRMS module
     await db.insert(tenantModules).values([
-      { id: `tmod_${testTenantA}_hrms`, tenantId: testTenantA, moduleCode: 'hrms', status: 'enabled' },
-      { id: `tmod_${testTenantB}_hrms`, tenantId: testTenantB, moduleCode: 'hrms', status: 'enabled' },
+      {
+        id: `tmod_${testTenantA}_hrms`,
+        tenantId: testTenantA,
+        moduleCode: 'hrms',
+        status: 'enabled',
+      },
+      {
+        id: `tmod_${testTenantB}_hrms`,
+        tenantId: testTenantB,
+        moduleCode: 'hrms',
+        status: 'enabled',
+      },
     ]);
 
     // Seed companies
@@ -176,10 +192,16 @@ describe('BEZENT HRMS — Organization Job Levels & Grades Integration & Domain 
     const db = getDb();
     await db.delete(jobLevels).where(inArray(jobLevels.companyId, [testCompanyA, testCompanyB]));
     await db.delete(grades).where(inArray(grades.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(roleAssignments).where(inArray(roleAssignments.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(memberships).where(inArray(memberships.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(roleAssignments)
+      .where(inArray(roleAssignments.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(memberships)
+      .where(inArray(memberships.companyId, [testCompanyA, testCompanyB]));
     await db.delete(companies).where(inArray(companies.id, [testCompanyA, testCompanyB]));
-    await db.delete(tenantModules).where(inArray(tenantModules.tenantId, [testTenantA, testTenantB]));
+    await db
+      .delete(tenantModules)
+      .where(inArray(tenantModules.tenantId, [testTenantA, testTenantB]));
     await db.delete(users).where(inArray(users.id, [testUserA, testUserB, testUserNoPerm]));
     await db.delete(tenants).where(inArray(tenants.id, [testTenantA, testTenantB]));
   });
@@ -335,7 +357,9 @@ describe('BEZENT HRMS — Organization Job Levels & Grades Integration & Domain 
       });
 
     expect(res.status).toBe(409);
-    expect(res.body.error?.message).toContain('Job level rank 10 is already in use in this company');
+    expect(res.body.error?.message).toContain(
+      'Job level rank 10 is already in use in this company',
+    );
   });
 
   it('9. allows the same rank in a different company', async () => {
@@ -407,7 +431,9 @@ describe('BEZENT HRMS — Organization Job Levels & Grades Integration & Domain 
       .set('Authorization', `Bearer ${tokenA}`)
       .set('x-company-id', testCompanyA);
     expect(resActive.status).toBe(200);
-    expect((resActive.body.data as Array<{ status: string }>).every((jl) => jl.status === 'active')).toBe(true);
+    expect(
+      (resActive.body.data as Array<{ status: string }>).every((jl) => jl.status === 'active'),
+    ).toBe(true);
 
     const resInactive = await request(app)
       .get('/api/v1/hrms/organization/job-levels?status=inactive')
@@ -441,7 +467,9 @@ describe('BEZENT HRMS — Organization Job Levels & Grades Integration & Domain 
     expect(lookupRes.status).toBe(200);
     const lookupIds = (lookupRes.body.data as Array<{ id: string }>).map((jl) => jl.id);
     expect(lookupIds).not.toContain(legacyId);
-    expect((lookupRes.body.data as Array<{ status: string }>).every((jl) => jl.status === 'active')).toBe(true);
+    expect(
+      (lookupRes.body.data as Array<{ status: string }>).every((jl) => jl.status === 'active'),
+    ).toBe(true);
   });
 
   it('14. edits job level name', async () => {
@@ -533,7 +561,9 @@ describe('BEZENT HRMS — Organization Job Levels & Grades Integration & Domain 
       });
 
     expect(editRes.status).toBe(409);
-    expect(editRes.body.error?.message).toContain('Job level code "L1" is already in use in this company');
+    expect(editRes.body.error?.message).toContain(
+      'Job level code "L1" is already in use in this company',
+    );
   });
 
   it('18. rejects rank conflict on edit with 409 Conflict', async () => {
@@ -553,7 +583,9 @@ describe('BEZENT HRMS — Organization Job Levels & Grades Integration & Domain 
       });
 
     expect(editRes.status).toBe(409);
-    expect(editRes.body.error?.message).toContain('Job level rank 10 is already in use in this company');
+    expect(editRes.body.error?.message).toContain(
+      'Job level rank 10 is already in use in this company',
+    );
   });
 
   it('19. deactivates job level, preserves records and returns impact message', async () => {
@@ -663,10 +695,7 @@ describe('BEZENT HRMS — Organization Job Levels & Grades Integration & Domain 
 
   it('26. persistence after DB reload', async () => {
     const db = getDb();
-    const rows = await db
-      .select()
-      .from(jobLevels)
-      .where(eq(jobLevels.companyId, testCompanyA));
+    const rows = await db.select().from(jobLevels).where(eq(jobLevels.companyId, testCompanyA));
 
     expect(rows.length).toBeGreaterThanOrEqual(3);
     const codes = rows.map((r) => r.code);

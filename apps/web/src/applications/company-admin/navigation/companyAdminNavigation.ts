@@ -155,8 +155,7 @@ export const COMPANY_ADMIN_NAV_DESTINATIONS: readonly NavDestination[] = [
     icon: 'apps',
     segment: 'modules',
     subtitle: 'Application Access',
-    description:
-      'View applications provisioned by Super Admin and configure company-level access.',
+    description: 'View applications provisioned by Super Admin and configure company-level access.',
     categoryId: 'applications',
     sidebar: true,
     permissionKey: 'company.modules.view',

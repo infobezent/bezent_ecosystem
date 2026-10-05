@@ -194,4 +194,3 @@ export interface CompanyApplicationStatus {
   companyStatus: 'enabled' | 'disabled';
   canEnable: boolean;
 }
-

@@ -394,4 +394,3 @@ describe('HRMS Administration Settings UI — Approved Hierarchy & Image 2 Speci
     expect(onConfigure).toHaveBeenCalledWith('employee-registration');
   });
 });
-

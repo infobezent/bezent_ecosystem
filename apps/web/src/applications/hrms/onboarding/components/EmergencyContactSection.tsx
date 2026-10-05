@@ -40,7 +40,10 @@ export interface EmergencyContactSectionProps {
   onChange?: (updated: Chapter05EmergencyState) => void;
 }
 
-export function EmergencyContactSection({ value: _value, onChange: _onChange }: EmergencyContactSectionProps = {}) {
+export function EmergencyContactSection({
+  value: _value,
+  onChange: _onChange,
+}: EmergencyContactSectionProps = {}) {
   // PRIMARY CONTACT STATE
   const [primaryName, setPrimaryName] = useState('Ramesh Kumar');
   const [primaryRelationship, setPrimaryRelationship] = useState('Father');

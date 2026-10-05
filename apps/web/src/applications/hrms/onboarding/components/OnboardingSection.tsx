@@ -70,7 +70,10 @@ export interface OnboardingSectionProps {
   onChange?: (updated: Chapter03OnboardingState) => void;
 }
 
-export function OnboardingSection({ value: _value, onChange: _onChange }: OnboardingSectionProps = {}) {
+export function OnboardingSection({
+  value: _value,
+  onChange: _onChange,
+}: OnboardingSectionProps = {}) {
   const [tasks, setTasks] = useState<OnboardingTaskItem[]>([
     {
       id: 'task_1',

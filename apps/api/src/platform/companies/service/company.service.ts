@@ -5,9 +5,17 @@ import { generateSurrogateId } from '../../auth/security.js';
 import { companyRepository, CompanyRepository } from '../repository/company.repository.js';
 import { tenantRepository, TenantRepository } from '../../tenants/repository/tenant.repository.js';
 import { moduleService, ModuleService } from '../../modules/service/module.service.js';
-import { companyAdminService, CompanyAdminService } from '../../company-admins/service/companyAdmin.service.js';
+import {
+  companyAdminService,
+  CompanyAdminService,
+} from '../../company-admins/service/companyAdmin.service.js';
 import { auditService, AuditService } from '../../audit/service/audit.service.js';
-import { NotFoundError, ConflictError, BadRequestError, ForbiddenError } from '../../../app/errors/AppError.js';
+import {
+  NotFoundError,
+  ConflictError,
+  BadRequestError,
+  ForbiddenError,
+} from '../../../app/errors/AppError.js';
 import type {
   CompanyFilter,
   CompanyRecord,
@@ -219,7 +227,8 @@ export class CompanyService {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRegex = /^[\d+\-()\s.]{7,25}$/;
-    const websiteRegex = /^(https?:\/\/)?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/;
+    const websiteRegex =
+      /^(https?:\/\/)?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/;
     const indiaPinRegex = /^\d{6}$/;
     const genericPostalRegex = /^[a-zA-Z0-9\s-]{2,20}$/;
 
@@ -244,7 +253,9 @@ export class CompanyService {
       if (input.organizationType !== null && typeof input.organizationType !== 'string') {
         throw new BadRequestError('Organization type must be a string');
       }
-      sanitizedInput.organizationType = input.organizationType ? input.organizationType.trim() : null;
+      sanitizedInput.organizationType = input.organizationType
+        ? input.organizationType.trim()
+        : null;
     }
 
     if (input.industry !== undefined) {

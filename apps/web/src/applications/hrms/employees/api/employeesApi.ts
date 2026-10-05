@@ -250,9 +250,7 @@ export interface CreateEmployeeRequest {
   };
 }
 
-export async function createEmployee(
-  payload: CreateEmployeeRequest,
-): Promise<EmployeeRecord> {
+export async function createEmployee(payload: CreateEmployeeRequest): Promise<EmployeeRecord> {
   const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/employees`, {
     method: 'POST',
     headers: {
@@ -269,8 +267,9 @@ export async function createEmployee(
   }
 
   if (!res.ok) {
-    const error = (body as { error?: { message?: string; code?: string; details?: unknown } } | null)
-      ?.error;
+    const error = (
+      body as { error?: { message?: string; code?: string; details?: unknown } } | null
+    )?.error;
     throw new EmployeesApiError(
       error?.message ?? `Request failed with status ${res.status}`,
       res.status,
@@ -280,4 +279,3 @@ export async function createEmployee(
 
   return (body as { data: EmployeeRecord }).data;
 }
-

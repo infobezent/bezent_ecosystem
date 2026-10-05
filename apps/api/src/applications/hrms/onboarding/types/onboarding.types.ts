@@ -1,5 +1,6 @@
 export type EmploymentType = 'full_time' | 'part_time' | 'contract' | 'intern';
-export type OnboardingStage = 'preboarding' | 'documents' | 'induction' | 'completed' | (string & {});
+export type OnboardingStage =
+  'preboarding' | 'documents' | 'induction' | 'completed' | (string & {});
 export type OnboardingStatus = 'draft' | 'active' | 'withdrawn' | 'completed';
 
 export interface CreateNewHireDto {

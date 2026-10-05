@@ -1,12 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { eq, and, or, sql, asc, isNull, like, type SQL } from 'drizzle-orm';
 import { getDb } from '../../../../db/connection.js';
-import {
-  designations,
-  departments,
-  employees,
-  type Designation,
-} from '../../../../db/schema.js';
+import { designations, departments, employees, type Designation } from '../../../../db/schema.js';
 import type {
   DesignationRecord,
   CreateDesignationDto,
@@ -57,9 +52,7 @@ export class DesignationRepository {
     // Search filter
     if (query.search && query.search.trim().length > 0) {
       const term = `%${query.search.trim()}%`;
-      conditions.push(
-        or(like(designations.name, term), like(designations.code, term))!,
-      );
+      conditions.push(or(like(designations.name, term), like(designations.code, term))!);
     }
 
     const whereClause = and(...conditions);

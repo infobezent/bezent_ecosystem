@@ -52,7 +52,9 @@ export function TenantDetailsPage({
   const [companies, setCompanies] = useState<CompanyRecord[]>([]);
   const [tenantModules, setTenantModules] = useState<TenantModuleStatus[]>([]);
   const [catalog, setCatalog] = useState<ModuleCatalogItem[]>([]);
-  const [companyModulesMap, setCompanyModulesMap] = useState<Record<string, TenantModuleStatus[]>>({});
+  const [companyModulesMap, setCompanyModulesMap] = useState<Record<string, TenantModuleStatus[]>>(
+    {},
+  );
   const [admins, setAdmins] = useState<CompanyAdminAssignment[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
 
@@ -165,7 +167,9 @@ export function TenantDetailsPage({
       let updated: TenantRecord;
       if (tenant.status === 'active') {
         updated = await superAdminApi.suspendTenant(tenantId);
-        setSuccessMessage(`Tenant '${tenant.name}' has been suspended. All associated company and user access is restricted.`);
+        setSuccessMessage(
+          `Tenant '${tenant.name}' has been suspended. All associated company and user access is restricted.`,
+        );
       } else {
         updated = await superAdminApi.activateTenant(tenantId);
         setSuccessMessage(`Tenant '${tenant.name}' has been reactivated successfully.`);
@@ -180,7 +184,10 @@ export function TenantDetailsPage({
     }
   };
 
-  const handleToggleTenantModule = async (moduleCode: string, currentStatus: 'enabled' | 'disabled') => {
+  const handleToggleTenantModule = async (
+    moduleCode: string,
+    currentStatus: 'enabled' | 'disabled',
+  ) => {
     if (!tenantId) return;
     setError(null);
     try {
@@ -224,7 +231,9 @@ export function TenantDetailsPage({
       });
       setIsAssignAdminOpen(false);
       setAssignData({ companyId: '', email: '', firstName: '', lastName: '', phone: '' });
-      setSuccessMessage('Administrator assigned successfully. Sign-in invitation email dispatched.');
+      setSuccessMessage(
+        'Administrator assigned successfully. Sign-in invitation email dispatched.',
+      );
       await fetchAllData();
     } catch (err: unknown) {
       setAdminError(err instanceof Error ? err.message : 'Failed to assign administrator');
@@ -238,7 +247,9 @@ export function TenantDetailsPage({
     setError(null);
     try {
       const res = await superAdminApi.resendCompanyAdminInvitation(admin.membershipId);
-      setSuccessMessage(`Invitation resent to ${admin.email}. ${res.invitationDelivery?.message || ''}`);
+      setSuccessMessage(
+        `Invitation resent to ${admin.email}. ${res.invitationDelivery?.message || ''}`,
+      );
       await fetchAllData();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to resend invitation');
@@ -279,7 +290,10 @@ export function TenantDetailsPage({
       setActiveTab('administrators');
     } else if (actionKey === 'create_company') {
       navigate('/super-admin/companies');
-    } else if (targetTab && ['overview', 'companies', 'applications', 'administrators', 'activity'].includes(targetTab)) {
+    } else if (
+      targetTab &&
+      ['overview', 'companies', 'applications', 'administrators', 'activity'].includes(targetTab)
+    ) {
       setActiveTab(targetTab as TabKey);
     }
   };
@@ -385,7 +399,9 @@ export function TenantDetailsPage({
             <Card>
               <Stack gap="xs">
                 <span className="bezent-caption">Applications Entitled</span>
-                <strong>{activeModulesCount} of {catalog.length}</strong>
+                <strong>
+                  {activeModulesCount} of {catalog.length}
+                </strong>
                 <span className="bezent-caption">Tenant ceiling configuration</span>
               </Stack>
             </Card>
@@ -401,10 +417,13 @@ export function TenantDetailsPage({
           </Grid>
 
           {/* Customer Health & Attention Card */}
-          {tenant.health && ['healthy', 'needs_attention', 'critical'].includes(tenant.health.status) ? (
+          {tenant.health &&
+          ['healthy', 'needs_attention', 'critical'].includes(tenant.health.status) ? (
             (() => {
               const healthReasons: string[] = Array.isArray(tenant.health.reasons)
-                ? tenant.health.reasons.filter((r): r is string => typeof r === 'string' && r.trim().length > 0)
+                ? tenant.health.reasons.filter(
+                    (r): r is string => typeof r === 'string' && r.trim().length > 0,
+                  )
                 : typeof tenant.health.reason === 'string' && tenant.health.reason.trim()
                   ? [tenant.health.reason.trim()]
                   : [];
@@ -439,14 +458,18 @@ export function TenantDetailsPage({
                         <Stack gap="xs">
                           <span className="bezent-caption">Evaluation Findings:</span>
                           {healthReasons.length === 0 ? (
-                            <span className="bezent-caption">No health issues or findings reported.</span>
+                            <span className="bezent-caption">
+                              No health issues or findings reported.
+                            </span>
                           ) : (
                             healthReasons.map((reason, idx) => (
                               <Inline key={idx} gap="xs" align="center">
                                 <BezentIcon
                                   name={tenant.health?.status === 'healthy' ? 'check' : 'alert'}
                                   size={14}
-                                  color={tenant.health?.status === 'healthy' ? '#10b981' : '#f59e0b'}
+                                  color={
+                                    tenant.health?.status === 'healthy' ? '#10b981' : '#f59e0b'
+                                  }
                                 />
                                 <span>{reason}</span>
                               </Inline>
@@ -470,7 +493,9 @@ export function TenantDetailsPage({
                                   size="sm"
                                   onClick={() =>
                                     handleExecuteNextBestAction(
-                                      tenant.health?.nextBestAction?.action || tenant.health?.nextBestAction?.actionType || '',
+                                      tenant.health?.nextBestAction?.action ||
+                                        tenant.health?.nextBestAction?.actionType ||
+                                        '',
                                       tenant.health?.nextBestAction?.targetTab,
                                     )
                                   }
@@ -504,7 +529,8 @@ export function TenantDetailsPage({
                     <Badge variant="neutral">Health unavailable</Badge>
                   </Inline>
                   <span className="bezent-caption">
-                    Health evaluation metrics are currently unavailable or not configured for this customer.
+                    Health evaluation metrics are currently unavailable or not configured for this
+                    customer.
                   </span>
                 </Stack>
               </Section>
@@ -517,9 +543,13 @@ export function TenantDetailsPage({
               const milestones = Array.isArray(tenant.setupProgress.milestones)
                 ? tenant.setupProgress.milestones
                 : [];
-              const completedCount = tenant.setupProgress.completedMilestones ?? milestones.filter((m) => m.completed).length;
+              const completedCount =
+                tenant.setupProgress.completedMilestones ??
+                milestones.filter((m) => m.completed).length;
               const totalCount = tenant.setupProgress.totalMilestones ?? milestones.length;
-              const pct = tenant.setupProgress.percentage ?? (totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0);
+              const pct =
+                tenant.setupProgress.percentage ??
+                (totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0);
 
               return (
                 <Card>
@@ -569,7 +599,9 @@ export function TenantDetailsPage({
                 title="Customer Setup Progress"
                 subtitle="Milestone verification based on verified platform records"
               >
-                <span className="bezent-caption">Setup progress tracking is not available for this customer.</span>
+                <span className="bezent-caption">
+                  Setup progress tracking is not available for this customer.
+                </span>
               </Section>
             </Card>
           )}
@@ -729,7 +761,9 @@ export function TenantDetailsPage({
                     // Check which companies have this enabled
                     const companiesWithApp = companies.filter((c) => {
                       const cMods = companyModulesMap[c.id] || [];
-                      return cMods.some((m) => m.moduleCode === item.code && m.status === 'enabled');
+                      return cMods.some(
+                        (m) => m.moduleCode === item.code && m.status === 'enabled',
+                      );
                     });
 
                     return (
@@ -744,7 +778,9 @@ export function TenantDetailsPage({
                         <TableCell>
                           <Stack gap="xs">
                             <span>{item.category}</span>
-                            <span className="bezent-caption">v{item.version} • {item.availability}</span>
+                            <span className="bezent-caption">
+                              v{item.version} • {item.availability}
+                            </span>
                           </Stack>
                         </TableCell>
                         <TableCell>
@@ -899,7 +935,10 @@ export function TenantDetailsPage({
           </Card>
 
           <Card>
-            <Section title="Authentication & Credential Policy" subtitle="BEZENT Universal Auth Standards">
+            <Section
+              title="Authentication & Credential Policy"
+              subtitle="BEZENT Universal Auth Standards"
+            >
               <span className="bezent-caption">
                 BEZENT exclusively uses passwordless Email + OTP authentication. Passwords are never
                 created, stored, or reset. Administrators receive a one-time sign-in code sent to
@@ -921,7 +960,9 @@ export function TenantDetailsPage({
             >
               <Stack gap="md">
                 {auditLogs.length === 0 ? (
-                  <span className="bezent-caption">No audit events recorded for this customer yet.</span>
+                  <span className="bezent-caption">
+                    No audit events recorded for this customer yet.
+                  </span>
                 ) : (
                   <Table compact>
                     <TableHead>
@@ -949,11 +990,15 @@ export function TenantDetailsPage({
                         .slice(0, 10)
                         .map((entry) => {
                           let title = entry.action.replace(/_/g, ' ').toUpperCase();
-                          if (entry.action === 'customer_provisioned') title = 'Customer Provisioned';
-                          if (entry.action === 'tenant_created') title = 'Customer Tenant Established';
+                          if (entry.action === 'customer_provisioned')
+                            title = 'Customer Provisioned';
+                          if (entry.action === 'tenant_created')
+                            title = 'Customer Tenant Established';
                           if (entry.action === 'company_created') title = 'Company Created';
-                          if (entry.action === 'module_enabled') title = 'Application Entitlement Granted';
-                          if (entry.action === 'company_admin_assigned') title = 'Company Admin Assigned';
+                          if (entry.action === 'module_enabled')
+                            title = 'Application Entitlement Granted';
+                          if (entry.action === 'company_admin_assigned')
+                            title = 'Company Admin Assigned';
                           if (entry.action === 'company_admin_invitation_resent')
                             title = 'Sign-in Invitation Resent';
                           if (entry.action === 'tenant_suspended') title = 'Tenant Suspended';
@@ -1090,7 +1135,9 @@ export function TenantDetailsPage({
       <Modal
         isOpen={isStatusModalOpen}
         onClose={() => setIsStatusModalOpen(false)}
-        title={tenant.status === 'active' ? 'Suspend Customer Tenant' : 'Reactivate Customer Tenant'}
+        title={
+          tenant.status === 'active' ? 'Suspend Customer Tenant' : 'Reactivate Customer Tenant'
+        }
         description={
           tenant.status === 'active'
             ? `Suspending customer '${tenant.name}' will immediately revoke access to all business applications for every company and user under this account. Active sessions will be terminated.`

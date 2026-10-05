@@ -52,6 +52,7 @@ Administration
 ```
 
 ### 1. Forms (`administration/forms/`)
+
 - **`FormEditorPage.tsx`**: Visual Form Builder supporting Chapters, Sections, Fields, drag-and-drop ordering, and context-sensitive right inspector (Form Settings, Chapter Settings, Field Settings).
 - **`FormCanvas.tsx`**: Form editor canvas with inline section editing and sortable field positioning.
 - **`FieldProperties.tsx`**: Capability-driven field inspector for system and custom field metadata.
@@ -60,6 +61,7 @@ Administration
 - **`RegistrationSettingsSection.tsx`**: Quick toggle configuration view for Employee Registration.
 
 ### 2. Onboarding (`administration/onboarding/`)
+
 - **`GeneralSettingsSection.tsx`**: Master toggle, default timeline, and new hire ID prefix configuration.
 - **`StagesSection.tsx`**: Onboarding pipeline stage management, reordering, and customization.
 - **`ChecklistsSection.tsx` & `ChecklistModal.tsx`**: Checklist template authoring mapped to onboarding stages.
@@ -68,6 +70,7 @@ Administration
 - **`FieldsSection.tsx` & `OnboardingBuilderSection.tsx`**: Custom field management and legacy builder utilities.
 
 ### 3. Employee Configuration (`administration/employee-configuration/`)
+
 - **`EmployeeConfigurationSection.tsx`**: Workspace for employee categorization and profile configuration.
 - **`EmployeeNumberingSection.tsx`**: Automated employee ID numbering series and sequences.
 

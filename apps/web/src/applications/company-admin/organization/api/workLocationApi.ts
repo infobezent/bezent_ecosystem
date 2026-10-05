@@ -134,9 +134,7 @@ export async function setWorkLocationStatus(
   return body.data;
 }
 
-export async function deactivateWorkLocation(
-  id: string,
-): Promise<WorkLocationLifecycleResult> {
+export async function deactivateWorkLocation(id: string): Promise<WorkLocationLifecycleResult> {
   const encodedId = encodeURIComponent(id);
   const res = await authorizedFetch(
     `${appConfig.apiBaseUrl}/company-admin/organization/work-locations/${encodedId}/deactivate`,
@@ -169,9 +167,7 @@ export async function deactivateWorkLocation(
   };
 }
 
-export async function reactivateWorkLocation(
-  id: string,
-): Promise<WorkLocationLifecycleResult> {
+export async function reactivateWorkLocation(id: string): Promise<WorkLocationLifecycleResult> {
   const encodedId = encodeURIComponent(id);
   const res = await authorizedFetch(
     `${appConfig.apiBaseUrl}/company-admin/organization/work-locations/${encodedId}/reactivate`,

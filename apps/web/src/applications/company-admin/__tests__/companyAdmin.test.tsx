@@ -125,7 +125,12 @@ describe('Company Admin Navigation — Single-Destination Rule (Sections 12, 14-
     expect(canItemOpenFlyout(overviewItem)).toBe(false);
 
     const html = renderToStaticMarkup(
-      <LeftSidebar items={shellItems} activeId="overview" testAvailableHeight={600} testFlyoutParentId="overview" />,
+      <LeftSidebar
+        items={shellItems}
+        activeId="overview"
+        testAvailableHeight={600}
+        testFlyoutParentId="overview"
+      />,
     );
     expect(html).not.toContain('left-sidebar__flyout');
   });
@@ -135,7 +140,12 @@ describe('Company Admin Navigation — Single-Destination Rule (Sections 12, 14-
     expect(canItemOpenFlyout(companyItem)).toBe(true);
 
     const html = renderToStaticMarkup(
-      <LeftSidebar items={shellItems} activeId="company" testAvailableHeight={600} testFlyoutParentId="company" />,
+      <LeftSidebar
+        items={shellItems}
+        activeId="company"
+        testAvailableHeight={600}
+        testFlyoutParentId="company"
+      />,
     );
     expect(html).toContain('aria-haspopup="menu"');
     expect(html).toContain('subnav-flyout');
@@ -158,7 +168,12 @@ describe('Company Admin Navigation — Single-Destination Rule (Sections 12, 14-
     expect(canItemOpenFlyout(accessItem)).toBe(true);
 
     const html = renderToStaticMarkup(
-      <LeftSidebar items={shellItems} activeId="access" testAvailableHeight={600} testFlyoutParentId="access" />,
+      <LeftSidebar
+        items={shellItems}
+        activeId="access"
+        testAvailableHeight={600}
+        testFlyoutParentId="access"
+      />,
     );
     expect(html).toContain('aria-haspopup="menu"');
     expect(html).toContain('subnav-flyout');
@@ -310,13 +325,13 @@ describe('Company Admin Application Registration', () => {
     expect(childPaths).toContain('dashboard');
     expect(childPaths).toContain('profile');
     expect(childPaths).toContain('organization');
-    expect(childPaths).toContain('policies');   // nav-removed, route preserved
+    expect(childPaths).toContain('policies'); // nav-removed, route preserved
     expect(childPaths).toContain('users');
     expect(childPaths).toContain('invitations'); // nav-removed from main, kept in access flyout
     expect(childPaths).toContain('roles');
     expect(childPaths).toContain('modules');
     expect(childPaths).toContain('audit-logs');
-    expect(childPaths).toContain('settings');   // nav-removed, route preserved
+    expect(childPaths).toContain('settings'); // nav-removed, route preserved
   });
 });
 
@@ -410,10 +425,8 @@ describe('Company Admin — Overview Restoration & Invariants (Section 8 Require
       'company.modules.view',
       'company.audit.view',
     ]);
-    const items = toShellNavItems(
-      companyAdminApplication,
-      undefined,
-      (p) => companyAdminPerms.has(p),
+    const items = toShellNavItems(companyAdminApplication, undefined, (p) =>
+      companyAdminPerms.has(p),
     );
     const itemIds = items.map((i) => i.id);
     expect(itemIds).toEqual(['overview', 'company', 'access', 'applications', 'governance']);
@@ -481,20 +494,12 @@ describe('Company Admin — Overview Restoration & Invariants (Section 8 Require
         ],
       },
     };
-    const items = toShellNavItems(
-      mockApp,
-      undefined,
-      (p) => p === 'allowed.permission',
-    );
+    const items = toShellNavItems(mockApp, undefined, (p) => p === 'allowed.permission');
     expect(items).toHaveLength(1);
     expect(items[0]?.id).toBe('single-child-parent');
     expect(canItemOpenFlyout(items[0]!)).toBe(false);
     expect(
-      destinationPath(
-        '/app',
-        mockApp.navigation.destinations[0]!,
-        items[0]?.subItems?.[0]?.id,
-      ),
+      destinationPath('/app', mockApp.navigation.destinations[0]!, items[0]?.subItems?.[0]?.id),
     ).toBe('/app/single-allowed');
   });
 });

@@ -3,7 +3,8 @@ import type { UpdateOrganizationProfileDto } from '../types/organization.types.j
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^[\d+\-()\s.]{7,25}$/;
-const WEBSITE_REGEX = /^(https?:\/\/)?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/;
+const WEBSITE_REGEX =
+  /^(https?:\/\/)?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/;
 const INDIA_PIN_REGEX = /^\d{6}$/;
 const GENERIC_POSTAL_REGEX = /^[a-zA-Z0-9\s-]{2,20}$/;
 
@@ -181,7 +182,8 @@ export function validateUpdateOrganizationProfile(input: unknown): UpdateOrganiz
     errors.postalCode = 'Postal code is required';
   } else {
     const trimmedPostal = data.postalCode.trim();
-    const isIndia = (typeof data.country === 'string' && data.country.trim().toLowerCase() === 'india');
+    const isIndia =
+      typeof data.country === 'string' && data.country.trim().toLowerCase() === 'india';
     if (isIndia && !INDIA_PIN_REGEX.test(trimmedPostal)) {
       errors.postalCode = 'PIN code must be a 6-digit number';
     } else if (!GENERIC_POSTAL_REGEX.test(trimmedPostal)) {
@@ -204,7 +206,9 @@ export function validateUpdateOrganizationProfile(input: unknown): UpdateOrganiz
     logoUrl: data.logoUrl ? (data.logoUrl as string).trim() : null,
     primaryEmail: (data.primaryEmail as string).trim().toLowerCase(),
     phoneNumber: data.phoneNumber ? (data.phoneNumber as string).trim() : null,
-    alternateEmail: data.alternateEmail ? (data.alternateEmail as string).trim().toLowerCase() : null,
+    alternateEmail: data.alternateEmail
+      ? (data.alternateEmail as string).trim().toLowerCase()
+      : null,
     alternatePhone: data.alternatePhone ? (data.alternatePhone as string).trim() : null,
     addressLine1: (data.addressLine1 as string).trim(),
     addressLine2: data.addressLine2 ? (data.addressLine2 as string).trim() : null,

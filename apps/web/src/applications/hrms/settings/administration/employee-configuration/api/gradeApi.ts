@@ -9,9 +9,7 @@ import type {
   GradeLifecycleResult,
 } from '../types/grade';
 
-export async function fetchGrades(
-  filters: ListGradesFilters = {},
-): Promise<Grade[]> {
+export async function fetchGrades(filters: ListGradesFilters = {}): Promise<Grade[]> {
   const query = new URLSearchParams();
   if (filters.status) query.set('status', filters.status);
   if (filters.search) query.set('search', filters.search);
@@ -50,18 +48,14 @@ export async function fetchGradeById(id: string): Promise<Grade> {
   return body.data;
 }
 
-export async function createGrade(
-  payload: CreateGradePayload,
-): Promise<Grade> {
-  const res = await authorizedFetch(
-    `${appConfig.apiBaseUrl}/hrms/organization/grades`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    },
-  );
-  let body: { data?: Grade; error?: { message?: string; details?: { code?: string } } } | null = null;
+export async function createGrade(payload: CreateGradePayload): Promise<Grade> {
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/organization/grades`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  let body: { data?: Grade; error?: { message?: string; details?: { code?: string } } } | null =
+    null;
   try {
     body = await res.json();
   } catch {
@@ -77,10 +71,7 @@ export async function createGrade(
   return body.data;
 }
 
-export async function updateGrade(
-  id: string,
-  payload: UpdateGradePayload,
-): Promise<Grade> {
+export async function updateGrade(id: string, payload: UpdateGradePayload): Promise<Grade> {
   const res = await authorizedFetch(
     `${appConfig.apiBaseUrl}/hrms/organization/grades/${encodeURIComponent(id)}`,
     {
@@ -89,7 +80,8 @@ export async function updateGrade(
       body: JSON.stringify(payload),
     },
   );
-  let body: { data?: Grade; error?: { message?: string; details?: { code?: string } } } | null = null;
+  let body: { data?: Grade; error?: { message?: string; details?: { code?: string } } } | null =
+    null;
   try {
     body = await res.json();
   } catch {
@@ -134,9 +126,7 @@ export async function setGradeStatus(
   };
 }
 
-export async function deactivateGrade(
-  id: string,
-): Promise<GradeLifecycleResult> {
+export async function deactivateGrade(id: string): Promise<GradeLifecycleResult> {
   const res = await authorizedFetch(
     `${appConfig.apiBaseUrl}/hrms/organization/grades/${encodeURIComponent(id)}/deactivate`,
     {
@@ -166,9 +156,7 @@ export async function deactivateGrade(
   };
 }
 
-export async function reactivateGrade(
-  id: string,
-): Promise<GradeLifecycleResult> {
+export async function reactivateGrade(id: string): Promise<GradeLifecycleResult> {
   const res = await authorizedFetch(
     `${appConfig.apiBaseUrl}/hrms/organization/grades/${encodeURIComponent(id)}/reactivate`,
     {

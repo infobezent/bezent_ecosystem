@@ -51,8 +51,7 @@ export function validateInviteTenantMember(body: unknown): InviteTenantMemberDto
   }
 
   let companyAccess:
-    | Array<{ companyId: string; roleCodes?: string[]; roles?: string[] }>
-    | undefined;
+    Array<{ companyId: string; roleCodes?: string[]; roles?: string[] }> | undefined;
 
   if (authority === 'standard') {
     if (
@@ -143,7 +142,9 @@ export function validateAssignCompanyRoles(body: unknown): AssignCompanyRolesDto
   }
 
   const data = body as Record<string, unknown>;
-  const roleIds = Array.isArray(data.roleIds) ? data.roleIds.map((r) => String(r).trim()) : undefined;
+  const roleIds = Array.isArray(data.roleIds)
+    ? data.roleIds.map((r) => String(r).trim())
+    : undefined;
   const roleCodes = Array.isArray(data.roleCodes)
     ? data.roleCodes.map((r) => String(r).trim())
     : Array.isArray(data.roles)

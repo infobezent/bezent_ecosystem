@@ -317,9 +317,7 @@ export const onboardingCases = mysqlTable(
     employmentType: mysqlEnum('employment_type', ['full_time', 'part_time', 'contract', 'intern'])
       .default('full_time')
       .notNull(),
-    stage: varchar('stage', { length: 50 })
-      .default('preboarding')
-      .notNull(),
+    stage: varchar('stage', { length: 50 }).default('preboarding').notNull(),
     status: mysqlEnum('status', ['draft', 'active', 'withdrawn', 'completed'])
       .default('active')
       .notNull(),

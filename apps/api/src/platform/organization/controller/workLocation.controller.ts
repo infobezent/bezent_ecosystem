@@ -60,12 +60,7 @@ export class WorkLocationController {
       const { tenantId, companyId } = this.getContext(req);
       const actor = this.getActor(req);
       const validated = validateCreateWorkLocation(req.body);
-      const created = await this.service.createWorkLocation(
-        tenantId,
-        companyId,
-        validated,
-        actor,
-      );
+      const created = await this.service.createWorkLocation(tenantId, companyId, validated, actor);
       res.status(201).json({ data: created });
     } catch (err) {
       next(err);
@@ -127,12 +122,7 @@ export class WorkLocationController {
       const { tenantId, companyId } = this.getContext(req);
       const actor = this.getActor(req);
       const id = String(req.params.id);
-      const result = await this.service.deactivateWorkLocation(
-        tenantId,
-        companyId,
-        id,
-        actor,
-      );
+      const result = await this.service.deactivateWorkLocation(tenantId, companyId, id, actor);
       res.json({
         data: result.data,
         affectedEmployeeCount: result.affectedEmployeeCount,
@@ -148,12 +138,7 @@ export class WorkLocationController {
       const { tenantId, companyId } = this.getContext(req);
       const actor = this.getActor(req);
       const id = String(req.params.id);
-      const result = await this.service.reactivateWorkLocation(
-        tenantId,
-        companyId,
-        id,
-        actor,
-      );
+      const result = await this.service.reactivateWorkLocation(tenantId, companyId, id, actor);
       res.json({
         data: result.data,
         affectedEmployeeCount: result.affectedEmployeeCount,

@@ -126,7 +126,10 @@ export class TenantService {
     const tenant = await this.getTenantById(id);
 
     if (!Number.isInteger(maxCompanies) || maxCompanies < 1) {
-      throw new BadRequestError('maxCompanies must be a positive integer', 'INVALID_COMPANY_CAPACITY');
+      throw new BadRequestError(
+        'maxCompanies must be a positive integer',
+        'INVALID_COMPANY_CAPACITY',
+      );
     }
 
     const currentUsage = await this.repo.countCapacityConsumingCompanies(id);

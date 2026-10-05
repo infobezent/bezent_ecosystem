@@ -71,7 +71,9 @@ export function CompaniesPage({ initialCompanies, initialTenants }: CompaniesPag
   // Step 2 Modules Data
   const [tenantModules, setTenantModules] = useState<TenantModuleStatus[]>([]);
   const [loadingModules, setLoadingModules] = useState<boolean>(false);
-  const [selectedModules, setSelectedModules] = useState<Array<'hrms' | 'crm' | 'project_management'>>(['hrms']);
+  const [selectedModules, setSelectedModules] = useState<
+    Array<'hrms' | 'crm' | 'project_management'>
+  >(['hrms']);
 
   // Step 3 Admin Data
   const [adminMode, setAdminMode] = useState<'existing' | 'new' | 'skip'>('skip');
@@ -125,7 +127,14 @@ export function CompaniesPage({ initialCompanies, initialTenants }: CompaniesPag
     } finally {
       setLoading(false);
     }
-  }, [selectedTenantId, search, statusFilter, applicationFilter, formData.tenantId, initialCompanies]);
+  }, [
+    selectedTenantId,
+    search,
+    statusFilter,
+    applicationFilter,
+    formData.tenantId,
+    initialCompanies,
+  ]);
 
   useEffect(() => {
     fetchData();
@@ -209,7 +218,9 @@ export function CompaniesPage({ initialCompanies, initialTenants }: CompaniesPag
   const handleStep3Next = () => {
     if (adminMode === 'new') {
       if (!newAdmin.email.trim() || !newAdmin.firstName.trim() || !newAdmin.lastName.trim()) {
-        setFormError('Admin Email, First Name, and Last Name are required when inviting a new administrator.');
+        setFormError(
+          'Admin Email, First Name, and Last Name are required when inviting a new administrator.',
+        );
         return;
       }
     }
@@ -221,7 +232,12 @@ export function CompaniesPage({ initialCompanies, initialTenants }: CompaniesPag
     setSubmitting(true);
     setFormError(null);
     try {
-      let adminPayload: { userId?: string; newUser?: { email: string; firstName: string; lastName: string; phone?: string } } | undefined = undefined;
+      let adminPayload:
+        | {
+            userId?: string;
+            newUser?: { email: string; firstName: string; lastName: string; phone?: string };
+          }
+        | undefined = undefined;
 
       if (adminMode === 'existing' && selectedUserId) {
         adminPayload = { userId: selectedUserId };
@@ -478,9 +494,7 @@ export function CompaniesPage({ initialCompanies, initialTenants }: CompaniesPag
                         {adminStatus === 'pending' && (
                           <Badge variant="warning">○ Pending Sign-in</Badge>
                         )}
-                        {adminStatus === 'none' && (
-                          <Badge variant="danger">⚠ No Admin</Badge>
-                        )}
+                        {adminStatus === 'none' && <Badge variant="danger">⚠ No Admin</Badge>}
                       </TableCell>
 
                       {/* STATUS COLUMN */}
@@ -684,8 +698,12 @@ export function CompaniesPage({ initialCompanies, initialTenants }: CompaniesPag
                     { code: 'crm', label: 'CRM (Customer Relationship Management)' },
                     { code: 'project_management', label: 'Project Management' },
                   ].map((mod) => {
-                    const entitled = isTenantEntitledTo(mod.code as 'hrms' | 'crm' | 'project_management');
-                    const isChecked = selectedModules.includes(mod.code as 'hrms' | 'crm' | 'project_management');
+                    const entitled = isTenantEntitledTo(
+                      mod.code as 'hrms' | 'crm' | 'project_management',
+                    );
+                    const isChecked = selectedModules.includes(
+                      mod.code as 'hrms' | 'crm' | 'project_management',
+                    );
 
                     return (
                       <Card key={mod.code}>
@@ -706,7 +724,10 @@ export function CompaniesPage({ initialCompanies, initialTenants }: CompaniesPag
                                 if (isChecked) {
                                   setSelectedModules(selectedModules.filter((m) => m !== mod.code));
                                 } else {
-                                  setSelectedModules([...selectedModules, mod.code as 'hrms' | 'crm' | 'project_management']);
+                                  setSelectedModules([
+                                    ...selectedModules,
+                                    mod.code as 'hrms' | 'crm' | 'project_management',
+                                  ]);
                                 }
                               }}
                             >
@@ -728,7 +749,8 @@ export function CompaniesPage({ initialCompanies, initialTenants }: CompaniesPag
           {createStep === 3 && (
             <Stack gap="md">
               <span className="bezent-caption">
-                Assign or invite a Company Administrator. BEZENT uses passwordless universal identity; the administrator signs in via Email OTP.
+                Assign or invite a Company Administrator. BEZENT uses passwordless universal
+                identity; the administrator signs in via Email OTP.
               </span>
 
               <Inline gap="sm">
@@ -757,7 +779,8 @@ export function CompaniesPage({ initialCompanies, initialTenants }: CompaniesPag
 
               {adminMode === 'skip' && (
                 <Alert variant="info" title="No Administrator Assigned">
-                  Company creation will complete without an administrator. You can assign an administrator at any time in Company Details.
+                  Company creation will complete without an administrator. You can assign an
+                  administrator at any time in Company Details.
                 </Alert>
               )}
 
@@ -766,7 +789,8 @@ export function CompaniesPage({ initialCompanies, initialTenants }: CompaniesPag
                   {loadingUsers && <LoadingState label="Loading tenant users..." />}
                   {!loadingUsers && tenantUsers.length === 0 && (
                     <Alert variant="warning" title="No Users Found">
-                      No existing users found for this customer tenant. You can invite a new administrator or skip for now.
+                      No existing users found for this customer tenant. You can invite a new
+                      administrator or skip for now.
                     </Alert>
                   )}
                   {!loadingUsers && tenantUsers.length > 0 && (
@@ -827,14 +851,17 @@ export function CompaniesPage({ initialCompanies, initialTenants }: CompaniesPag
           {createStep === 4 && (
             <Stack gap="md">
               <Alert variant="info" title="Review Company Configuration">
-                Please verify the entity details before creating. The company will be created under the selected customer tenant.
+                Please verify the entity details before creating. The company will be created under
+                the selected customer tenant.
               </Alert>
 
               <Card>
                 <Stack gap="sm">
                   <Inline justify="between">
                     <span className="bezent-caption">Customer Tenant:</span>
-                    <strong>{selectedTenantObj?.name} ({selectedTenantObj?.code})</strong>
+                    <strong>
+                      {selectedTenantObj?.name} ({selectedTenantObj?.code})
+                    </strong>
                   </Inline>
                   <Inline justify="between">
                     <span className="bezent-caption">Company Name:</span>
@@ -854,7 +881,9 @@ export function CompaniesPage({ initialCompanies, initialTenants }: CompaniesPag
                     <span className="bezent-caption">Enabled Applications:</span>
                     <span>
                       {selectedModules.length > 0
-                        ? selectedModules.map((m) => (m === 'project_management' ? 'PM' : m.toUpperCase())).join(', ')
+                        ? selectedModules
+                            .map((m) => (m === 'project_management' ? 'PM' : m.toUpperCase()))
+                            .join(', ')
                         : 'None'}
                     </span>
                   </Inline>
@@ -864,7 +893,8 @@ export function CompaniesPage({ initialCompanies, initialTenants }: CompaniesPag
                       {adminMode === 'skip' && 'None (will assign later)'}
                       {adminMode === 'existing' &&
                         `Existing User (${tenantUsers.find((u) => u.id === selectedUserId)?.email || selectedUserId})`}
-                      {adminMode === 'new' && `${newAdmin.firstName} ${newAdmin.lastName} (${newAdmin.email})`}
+                      {adminMode === 'new' &&
+                        `${newAdmin.firstName} ${newAdmin.lastName} (${newAdmin.email})`}
                     </span>
                   </Inline>
                 </Stack>
@@ -949,7 +979,9 @@ export function CompaniesPage({ initialCompanies, initialTenants }: CompaniesPag
         }
       >
         <Alert variant="warning" title="Restricted Access">
-          Are you sure you want to suspend &apos;{suspendingCompany?.name}&apos;? Suspending this company will block all users and company administrators from accessing applications and services for this company entity until reactivated.
+          Are you sure you want to suspend &apos;{suspendingCompany?.name}&apos;? Suspending this
+          company will block all users and company administrators from accessing applications and
+          services for this company entity until reactivated.
         </Alert>
       </Modal>
     </Page>

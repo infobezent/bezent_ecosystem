@@ -204,7 +204,9 @@ export function resolveAuditTarget(
         (meta.userEmail as string) ||
         (log.actorUserId === log.targetId ? log.actorEmail : null);
       const name =
-        meta.firstName && meta.lastName ? `${meta.firstName} ${meta.lastName}` : meta.name as string;
+        meta.firstName && meta.lastName
+          ? `${meta.firstName} ${meta.lastName}`
+          : (meta.name as string);
       return {
         label: name || email || 'User',
         type: 'User',
@@ -239,10 +241,7 @@ export function resolveAuditTarget(
     }
     default: {
       const title =
-        (meta.name as string) ||
-        (meta.title as string) ||
-        (meta.code as string) ||
-        typeLabel;
+        (meta.name as string) || (meta.title as string) || (meta.code as string) || typeLabel;
       return {
         label: title || 'Historical Target',
         type: typeLabel,
@@ -274,7 +273,11 @@ export function resolveAuditContext(
   return { customer, company };
 }
 
-export function formatAuditTimestamp(dateStr: string): { date: string; time: string; full: string } {
+export function formatAuditTimestamp(dateStr: string): {
+  date: string;
+  time: string;
+  full: string;
+} {
   try {
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return { date: '—', time: '—', full: '—' };

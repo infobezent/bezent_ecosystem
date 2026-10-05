@@ -1,10 +1,5 @@
 export type LocationType =
-  | 'office'
-  | 'branch'
-  | 'plant_factory'
-  | 'client_site'
-  | 'remote'
-  | 'other';
+  'office' | 'branch' | 'plant_factory' | 'client_site' | 'remote' | 'other';
 
 export const LOCATION_TYPE_OPTIONS: { value: LocationType; label: string }[] = [
   { value: 'office', label: 'Office' },

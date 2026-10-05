@@ -25,7 +25,10 @@ describe('HRMS Administration → Onboarding General Settings Frontend', () => {
   // Test 1: Onboarding tab opens General Settings
   it('1. Onboarding tab opens General Settings in AdministrationSettingsSection', () => {
     const html = renderToStaticMarkup(
-      <AdministrationSettingsSection initialTab="onboarding" initialOnboardingSettings={mockSettings} />,
+      <AdministrationSettingsSection
+        initialTab="onboarding"
+        initialOnboardingSettings={mockSettings}
+      />,
     );
     expect(html).toContain('General');
     expect(html).toContain('Control the basic settings used across employee onboarding.');
@@ -36,9 +39,7 @@ describe('HRMS Administration → Onboarding General Settings Frontend', () => {
 
   // Test 2: General heading and description render
   it('2. General heading and description render correctly', () => {
-    const html = renderToStaticMarkup(
-      <GeneralSettingsSection initialData={mockSettings} />,
-    );
+    const html = renderToStaticMarkup(<GeneralSettingsSection initialData={mockSettings} />);
     expect(html).toContain('General');
     expect(html).toContain('Control the basic settings used across employee onboarding.');
   });
@@ -49,7 +50,9 @@ describe('HRMS Administration → Onboarding General Settings Frontend', () => {
       <GeneralSettingsSection initialData={{ ...mockSettings, onboardingEnabled: true }} />,
     );
     expect(enabledHtml).toContain('Enable Employee Onboarding');
-    expect(enabledHtml).toContain('Allow your company to create and manage employee onboarding cases.');
+    expect(enabledHtml).toContain(
+      'Allow your company to create and manage employee onboarding cases.',
+    );
     // Check that switch input is checked
     expect(enabledHtml).toContain('checked=""');
     expect(enabledHtml).toContain('aria-checked="true"');
@@ -108,28 +111,13 @@ describe('HRMS Administration → Onboarding General Settings Frontend', () => {
     expect(isGeneralSettingsDirty(baseline, baseline)).toBe(false);
 
     // Toggle changed
-    expect(
-      isGeneralSettingsDirty(
-        { ...baseline, onboardingEnabled: false },
-        baseline,
-      ),
-    ).toBe(true);
+    expect(isGeneralSettingsDirty({ ...baseline, onboardingEnabled: false }, baseline)).toBe(true);
 
     // Duration changed
-    expect(
-      isGeneralSettingsDirty(
-        { ...baseline, defaultDurationDays: 60 },
-        baseline,
-      ),
-    ).toBe(true);
+    expect(isGeneralSettingsDirty({ ...baseline, defaultDurationDays: 60 }, baseline)).toBe(true);
 
     // Prefix changed
-    expect(
-      isGeneralSettingsDirty(
-        { ...baseline, idPrefix: 'NEW-' },
-        baseline,
-      ),
-    ).toBe(true);
+    expect(isGeneralSettingsDirty({ ...baseline, idPrefix: 'NEW-' }, baseline)).toBe(true);
 
     // Form button is disabled when pristine
     const pristineHtml = renderToStaticMarkup(
@@ -177,23 +165,43 @@ describe('HRMS Administration → Onboarding General Settings Frontend', () => {
       idPrefix: '',
     });
     expect(invalidValidation.valid).toBe(false);
-    expect(invalidValidation.durationError).toContain('Default duration must be an integer between 1 and 365');
+    expect(invalidValidation.durationError).toContain(
+      'Default duration must be an integer between 1 and 365',
+    );
     expect(invalidValidation.prefixError).toContain('New Hire ID Prefix is required');
   });
 
   // Test 10: Invalid duration is rejected
   it('10. Invalid duration (zero, negative, decimal, above 365, non-numeric) is strictly rejected', () => {
-    expect(validateGeneralSettingsValues({ defaultDurationDays: 0, idPrefix: 'NH-' }).valid).toBe(false);
-    expect(validateGeneralSettingsValues({ defaultDurationDays: -5, idPrefix: 'NH-' }).valid).toBe(false);
-    expect(validateGeneralSettingsValues({ defaultDurationDays: 14.5, idPrefix: 'NH-' }).valid).toBe(false);
-    expect(validateGeneralSettingsValues({ defaultDurationDays: 366, idPrefix: 'NH-' }).valid).toBe(false);
-    expect(validateGeneralSettingsValues({ defaultDurationDays: 'invalid', idPrefix: 'NH-' }).valid).toBe(false);
-    expect(validateGeneralSettingsValues({ defaultDurationDays: '', idPrefix: 'NH-' }).valid).toBe(false);
+    expect(validateGeneralSettingsValues({ defaultDurationDays: 0, idPrefix: 'NH-' }).valid).toBe(
+      false,
+    );
+    expect(validateGeneralSettingsValues({ defaultDurationDays: -5, idPrefix: 'NH-' }).valid).toBe(
+      false,
+    );
+    expect(
+      validateGeneralSettingsValues({ defaultDurationDays: 14.5, idPrefix: 'NH-' }).valid,
+    ).toBe(false);
+    expect(validateGeneralSettingsValues({ defaultDurationDays: 366, idPrefix: 'NH-' }).valid).toBe(
+      false,
+    );
+    expect(
+      validateGeneralSettingsValues({ defaultDurationDays: 'invalid', idPrefix: 'NH-' }).valid,
+    ).toBe(false);
+    expect(validateGeneralSettingsValues({ defaultDurationDays: '', idPrefix: 'NH-' }).valid).toBe(
+      false,
+    );
 
     // Valid values:
-    expect(validateGeneralSettingsValues({ defaultDurationDays: 1, idPrefix: 'NH-' }).valid).toBe(true);
-    expect(validateGeneralSettingsValues({ defaultDurationDays: 30, idPrefix: 'NH-' }).valid).toBe(true);
-    expect(validateGeneralSettingsValues({ defaultDurationDays: 365, idPrefix: 'NH-' }).valid).toBe(true);
+    expect(validateGeneralSettingsValues({ defaultDurationDays: 1, idPrefix: 'NH-' }).valid).toBe(
+      true,
+    );
+    expect(validateGeneralSettingsValues({ defaultDurationDays: 30, idPrefix: 'NH-' }).valid).toBe(
+      true,
+    );
+    expect(validateGeneralSettingsValues({ defaultDurationDays: 365, idPrefix: 'NH-' }).valid).toBe(
+      true,
+    );
   });
 
   // Test 11: Reload displays persisted values
@@ -205,9 +213,7 @@ describe('HRMS Administration → Onboarding General Settings Frontend', () => {
       idPrefix: 'CORP-',
     };
 
-    const html = renderToStaticMarkup(
-      <GeneralSettingsSection initialData={updatedSettings} />,
-    );
+    const html = renderToStaticMarkup(<GeneralSettingsSection initialData={updatedSettings} />);
     expect(html).toContain('aria-checked="false"');
     expect(html).toContain('value="90"');
     expect(html).toContain('value="CORP-"');
@@ -217,7 +223,10 @@ describe('HRMS Administration → Onboarding General Settings Frontend', () => {
   // Test 12: Onboarding renders secondary navigation with General active by default
   it('12. Onboarding renders secondary navigation with General active by default', () => {
     const html = renderToStaticMarkup(
-      <AdministrationSettingsSection initialTab="onboarding" initialOnboardingSettings={mockSettings} />,
+      <AdministrationSettingsSection
+        initialTab="onboarding"
+        initialOnboardingSettings={mockSettings}
+      />,
     );
     expect(html).toContain('General');
     expect(html).toContain('Stages');

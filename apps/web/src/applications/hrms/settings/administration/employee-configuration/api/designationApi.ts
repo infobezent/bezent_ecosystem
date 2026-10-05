@@ -14,7 +14,8 @@ export async function fetchDesignations(
   const query = new URLSearchParams();
   if (filters.status) query.set('status', filters.status);
   if (filters.departmentId) query.set('departmentId', filters.departmentId);
-  if (filters.eligibleForDepartmentId) query.set('eligibleForDepartmentId', filters.eligibleForDepartmentId);
+  if (filters.eligibleForDepartmentId)
+    query.set('eligibleForDepartmentId', filters.eligibleForDepartmentId);
   if (filters.search) query.set('search', filters.search);
   if (filters.limit) query.set('limit', String(filters.limit));
   if (filters.offset) query.set('offset', String(filters.offset));
@@ -55,14 +56,11 @@ export async function fetchDesignationById(id: string): Promise<DesignationRecor
 export async function createDesignation(
   payload: CreateDesignationPayload,
 ): Promise<DesignationRecord> {
-  const res = await authorizedFetch(
-    `${appConfig.apiBaseUrl}/hrms/organization/designations`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    },
-  );
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/organization/designations`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
   let body: { data?: DesignationRecord; error?: { message?: string } } | null = null;
   try {
     body = await res.json();

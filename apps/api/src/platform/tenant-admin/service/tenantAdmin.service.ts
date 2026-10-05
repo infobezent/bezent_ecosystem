@@ -11,18 +11,9 @@ import {
   companyRepository,
   CompanyRepository,
 } from '../../companies/repository/company.repository.js';
-import {
-  moduleRepository,
-  ModuleRepository,
-} from '../../modules/repository/module.repository.js';
-import {
-  moduleService,
-  ModuleService,
-} from '../../modules/service/module.service.js';
-import {
-  companyService,
-  CompanyService,
-} from '../../companies/service/company.service.js';
+import { moduleRepository, ModuleRepository } from '../../modules/repository/module.repository.js';
+import { moduleService, ModuleService } from '../../modules/service/module.service.js';
+import { companyService, CompanyService } from '../../companies/service/company.service.js';
 import type { CreateTenantAdminCompanyDto } from '../../companies/types/company.types.js';
 import { auditService, AuditService } from '../../audit/service/audit.service.js';
 import { generateSurrogateId } from '../../auth/security.js';
@@ -120,9 +111,7 @@ export class TenantAdminService {
 
     // Fetch tenant-level entitlements ceiling
     const modules = await this.moduleRepo.listByTenant(tenantId, null);
-    const enabledModules = modules
-      .filter((m) => m.status === 'enabled')
-      .map((m) => m.moduleCode);
+    const enabledModules = modules.filter((m) => m.status === 'enabled').map((m) => m.moduleCode);
 
     // HRMS default ceiling rule
     const hrmsDisabled = modules.some((m) => m.moduleCode === 'hrms' && m.status === 'disabled');
@@ -500,10 +489,7 @@ export class TenantAdminService {
           .select()
           .from(memberships)
           .where(
-            and(
-              eq(memberships.userId, user.id),
-              eq(memberships.companyId, compAccess.companyId),
-            ),
+            and(eq(memberships.userId, user.id), eq(memberships.companyId, compAccess.companyId)),
           );
 
         if (existingMem) {
@@ -1139,4 +1125,3 @@ export class TenantAdminService {
 }
 
 export const tenantAdminService = new TenantAdminService();
-

@@ -356,25 +356,25 @@ All components and business applications consume typography strictly through sem
 
 ### 20.1 Primitive Font Scale
 
-| Token | Size (px) | Size (rem) | Purpose |
-| :--- | :--- | :--- | :--- |
-| `--font-size-xs` | `11px` | `0.6875rem` | Captions, metadata, overline, badge tags |
-| `--font-size-sm` | `12px` | `0.75rem` | Field labels, helpers, errors, table headers, compact secondary text |
-| `--font-size-md` | `13px` | `0.8125rem` | Table cells, tabs, buttons, standard dense UI inputs |
-| `--font-size-base` | `14px` | `0.875rem` | Primary body text, card titles, default inputs |
-| `--font-size-lg` | `16px` | `1rem` | Section headers, panel titles, lead copy |
-| `--font-size-xl` | `18px` | `1.125rem` | Modal headers, featured metrics |
-| `--font-size-2xl` | `22px` | `1.375rem` | Primary page headers, major display headings |
-| `--font-size-3xl` | `26px` | `1.625rem` | Hero banners, prominent metric displays |
+| Token              | Size (px) | Size (rem)  | Purpose                                                              |
+| :----------------- | :-------- | :---------- | :------------------------------------------------------------------- |
+| `--font-size-xs`   | `11px`    | `0.6875rem` | Captions, metadata, overline, badge tags                             |
+| `--font-size-sm`   | `12px`    | `0.75rem`   | Field labels, helpers, errors, table headers, compact secondary text |
+| `--font-size-md`   | `13px`    | `0.8125rem` | Table cells, tabs, buttons, standard dense UI inputs                 |
+| `--font-size-base` | `14px`    | `0.875rem`  | Primary body text, card titles, default inputs                       |
+| `--font-size-lg`   | `16px`    | `1rem`      | Section headers, panel titles, lead copy                             |
+| `--font-size-xl`   | `18px`    | `1.125rem`  | Modal headers, featured metrics                                      |
+| `--font-size-2xl`  | `22px`    | `1.375rem`  | Primary page headers, major display headings                         |
+| `--font-size-3xl`  | `26px`    | `1.625rem`  | Hero banners, prominent metric displays                              |
 
 ### 20.2 Font Weights
 
-| Token | Weight | Usage |
-| :--- | :--- | :--- |
-| `--font-weight-regular` | `400` | Standard body copy, inputs, table cell contents |
-| `--font-weight-medium` | `500` | Field labels, interactive tabs, buttons, highlighted status items |
-| `--font-weight-semibold` | `600` | Page titles, section headers, card titles, table column headers |
-| `--font-weight-bold` | `700` | Exceptional emphasis only (not default heading weight) |
+| Token                    | Weight | Usage                                                             |
+| :----------------------- | :----- | :---------------------------------------------------------------- |
+| `--font-weight-regular`  | `400`  | Standard body copy, inputs, table cell contents                   |
+| `--font-weight-medium`   | `500`  | Field labels, interactive tabs, buttons, highlighted status items |
+| `--font-weight-semibold` | `600`  | Page titles, section headers, card titles, table column headers   |
+| `--font-weight-bold`     | `700`  | Exceptional emphasis only (not default heading weight)            |
 
 ### 20.3 Line Heights & Letter Spacing
 
@@ -390,24 +390,24 @@ All components and business applications consume typography strictly through sem
 
 ### 20.4 Semantic Role Hierarchy
 
-| Semantic Role | Size Token | Weight Token | Line Height Token | Tracking Token | Application |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Page Title** | `--font-page-title-size` (`22px`) | `--font-page-title-weight` (`600`) | `--font-page-title-line-height` (`1.25`) | `--font-page-title-letter-spacing` (`-0.01em`) | Primary screen title in `PageHeader` |
-| **Section Title** | `--font-section-title-size` (`16px`) | `--font-section-title-weight` (`600`) | `--font-section-title-line-height` (`1.375`) | `--font-section-title-letter-spacing` (`-0.01em`) | Module/panel section headers |
-| **Card Title** | `--font-card-title-size` (`14px`) | `--font-card-title-weight` (`600`) | `--font-card-title-line-height` (`1.375`) | `--font-card-title-letter-spacing` (`0em`) | Card and widget headers |
-| **Body** | `--font-body-size` (`14px`) | `--font-body-weight` (`400`) | `--font-body-line-height` (`1.5`) | `--font-body-letter-spacing` (`0em`) | Standard paragraphs and readouts |
-| **Body Small** | `--font-body-sm-size` (`13px`) | `--font-body-sm-weight` (`400`) | `--font-body-sm-line-height` (`1.5`) | `--font-body-sm-letter-spacing` (`0em`) | Secondary paragraphs, card copy |
-| **Secondary / Helper** | `--font-secondary-size` (`12px`) | `--font-secondary-weight` (`400`) | `--font-secondary-line-height` (`1.375`) | `--font-secondary-letter-spacing` (`0em`) | Subtitle, secondary metadata |
-| **Field Label** | `--font-form-label-size` (`12px`) | `--font-form-label-weight` (`500`) | `--font-form-label-line-height` (`1.375`) | `--font-form-label-letter-spacing` (`0em`) | Form field labels |
-| **Field Value / Input** | `--font-form-input-size` (`13px`) | `--font-form-input-weight` (`400`) | `--font-form-input-line-height` (`1.375`) | `--font-form-input-letter-spacing` (`0em`) | Input, select, and textarea values |
-| **Form Helper** | `--font-form-helper-size` (`12px`) | `--font-form-helper-weight` (`400`) | `--font-form-helper-line-height` (`1.375`) | `--font-form-helper-letter-spacing` (`0em`) | Form hint and guidance text |
-| **Form Error** | `--font-form-error-size` (`12px`) | `--font-form-error-weight` (`500`) | `--font-form-error-line-height` (`1.375`) | `--font-form-error-letter-spacing` (`0em`) | Inline validation error text |
-| **Table Header** | `--font-table-header-size` (`12px`) | `--font-table-header-weight` (`600`) | `--font-table-header-line-height` (`1.375`) | `--font-table-header-letter-spacing` (`0em`) | Table column titles |
-| **Table Cell** | `--font-table-cell-size` (`13px`) | `--font-table-cell-weight` (`400`) | `--font-table-cell-line-height` (`1.375`) | `--font-table-cell-letter-spacing` (`0em`) | Table cell data entries |
-| **Tab** | `--font-tab-size` (`13px`) | `--font-tab-weight` (`500`) | `--font-tab-line-height` (`1.25`) | `--font-tab-letter-spacing` (`0em`) | Horizontal and vertical tab labels |
-| **Button** | `--font-button-size` (`13px`) | `--font-button-weight` (`500`) | `--font-button-line-height` (`1.25`) | `--font-button-letter-spacing` (`0em`) | Interactive button triggers |
-| **Caption** | `--font-caption-size` (`11px`) | `--font-caption-weight` (`400`) | `--font-caption-line-height` (`1.375`) | `--font-caption-letter-spacing` (`0em`) | Fine print, timestamp, metadata |
-| **Overline** | `--font-overline-size` (`11px`) | `--font-overline-weight` (`600`) | `--font-overline-line-height` (`1.25`) | `--font-overline-letter-spacing` (`0.05em`) | Uppercase kicker/category badges |
+| Semantic Role           | Size Token                           | Weight Token                          | Line Height Token                            | Tracking Token                                    | Application                          |
+| :---------------------- | :----------------------------------- | :------------------------------------ | :------------------------------------------- | :------------------------------------------------ | :----------------------------------- |
+| **Page Title**          | `--font-page-title-size` (`22px`)    | `--font-page-title-weight` (`600`)    | `--font-page-title-line-height` (`1.25`)     | `--font-page-title-letter-spacing` (`-0.01em`)    | Primary screen title in `PageHeader` |
+| **Section Title**       | `--font-section-title-size` (`16px`) | `--font-section-title-weight` (`600`) | `--font-section-title-line-height` (`1.375`) | `--font-section-title-letter-spacing` (`-0.01em`) | Module/panel section headers         |
+| **Card Title**          | `--font-card-title-size` (`14px`)    | `--font-card-title-weight` (`600`)    | `--font-card-title-line-height` (`1.375`)    | `--font-card-title-letter-spacing` (`0em`)        | Card and widget headers              |
+| **Body**                | `--font-body-size` (`14px`)          | `--font-body-weight` (`400`)          | `--font-body-line-height` (`1.5`)            | `--font-body-letter-spacing` (`0em`)              | Standard paragraphs and readouts     |
+| **Body Small**          | `--font-body-sm-size` (`13px`)       | `--font-body-sm-weight` (`400`)       | `--font-body-sm-line-height` (`1.5`)         | `--font-body-sm-letter-spacing` (`0em`)           | Secondary paragraphs, card copy      |
+| **Secondary / Helper**  | `--font-secondary-size` (`12px`)     | `--font-secondary-weight` (`400`)     | `--font-secondary-line-height` (`1.375`)     | `--font-secondary-letter-spacing` (`0em`)         | Subtitle, secondary metadata         |
+| **Field Label**         | `--font-form-label-size` (`12px`)    | `--font-form-label-weight` (`500`)    | `--font-form-label-line-height` (`1.375`)    | `--font-form-label-letter-spacing` (`0em`)        | Form field labels                    |
+| **Field Value / Input** | `--font-form-input-size` (`13px`)    | `--font-form-input-weight` (`400`)    | `--font-form-input-line-height` (`1.375`)    | `--font-form-input-letter-spacing` (`0em`)        | Input, select, and textarea values   |
+| **Form Helper**         | `--font-form-helper-size` (`12px`)   | `--font-form-helper-weight` (`400`)   | `--font-form-helper-line-height` (`1.375`)   | `--font-form-helper-letter-spacing` (`0em`)       | Form hint and guidance text          |
+| **Form Error**          | `--font-form-error-size` (`12px`)    | `--font-form-error-weight` (`500`)    | `--font-form-error-line-height` (`1.375`)    | `--font-form-error-letter-spacing` (`0em`)        | Inline validation error text         |
+| **Table Header**        | `--font-table-header-size` (`12px`)  | `--font-table-header-weight` (`600`)  | `--font-table-header-line-height` (`1.375`)  | `--font-table-header-letter-spacing` (`0em`)      | Table column titles                  |
+| **Table Cell**          | `--font-table-cell-size` (`13px`)    | `--font-table-cell-weight` (`400`)    | `--font-table-cell-line-height` (`1.375`)    | `--font-table-cell-letter-spacing` (`0em`)        | Table cell data entries              |
+| **Tab**                 | `--font-tab-size` (`13px`)           | `--font-tab-weight` (`500`)           | `--font-tab-line-height` (`1.25`)            | `--font-tab-letter-spacing` (`0em`)               | Horizontal and vertical tab labels   |
+| **Button**              | `--font-button-size` (`13px`)        | `--font-button-weight` (`500`)        | `--font-button-line-height` (`1.25`)         | `--font-button-letter-spacing` (`0em`)            | Interactive button triggers          |
+| **Caption**             | `--font-caption-size` (`11px`)       | `--font-caption-weight` (`400`)       | `--font-caption-line-height` (`1.375`)       | `--font-caption-letter-spacing` (`0em`)           | Fine print, timestamp, metadata      |
+| **Overline**            | `--font-overline-size` (`11px`)      | `--font-overline-weight` (`600`)      | `--font-overline-line-height` (`1.25`)       | `--font-overline-letter-spacing` (`0.05em`)       | Uppercase kicker/category badges     |
 
 ### 20.5 Usage Rules & Constraints
 
@@ -425,20 +425,20 @@ BEZENT uses a restrained, predictable, 4px-based enterprise spacing scale. Spaci
 
 ### 21.1 Canonical Spacing Scale
 
-| Token | Pixel Value | Rem Value | Purpose & Typical Usage |
-| :--- | :--- | :--- | :--- |
-| `--space-0` | `0px` | `0rem` | Explicit reset / zero-gap layouts |
-| `--space-0-5` | `2px` | `0.125rem` | Micro-offsets: required asterisk margins, hairline separators |
-| `--space-1` | `4px` | `0.25rem` | Tight layout gaps: tag/badge icons, button action groups (`xs`) |
-| `--space-1-5` | `6px` | `0.375rem` | Compact form field row gaps, responsive collapsed grid rows |
-| `--space-2` | `8px` | `0.5rem` | Compact gaps: checkbox labels, list items, small toolbars (`sm`) |
-| `--space-3` | `12px` | `0.75rem` | Medium-compact: form field column gaps, card sub-group separation |
-| `--space-4` | `16px` | `1rem` | Standard enterprise layout gap: card padding, toolbar spacing (`md`) |
-| `--space-5` | `20px` | `1.25rem` | Editorial gap: page container gutters, major header spacing (`lg` grid) |
-| `--space-6` | `24px` | `1.5rem` | Wide layout gap: section separation, container layout blocks (`lg`) |
-| `--space-8` | `32px` | `2rem` | Extra-wide gap: major section vertical rhythm, empty states (`xl`) |
-| `--space-10` | `40px` | `2.5rem` | Extended block rhythm: full-page break points |
-| `--space-12` | `48px` | `3rem` | Maximum layout spacing: hero divisions, multi-stage journeys (`2xl`) |
+| Token         | Pixel Value | Rem Value  | Purpose & Typical Usage                                                 |
+| :------------ | :---------- | :--------- | :---------------------------------------------------------------------- |
+| `--space-0`   | `0px`       | `0rem`     | Explicit reset / zero-gap layouts                                       |
+| `--space-0-5` | `2px`       | `0.125rem` | Micro-offsets: required asterisk margins, hairline separators           |
+| `--space-1`   | `4px`       | `0.25rem`  | Tight layout gaps: tag/badge icons, button action groups (`xs`)         |
+| `--space-1-5` | `6px`       | `0.375rem` | Compact form field row gaps, responsive collapsed grid rows             |
+| `--space-2`   | `8px`       | `0.5rem`   | Compact gaps: checkbox labels, list items, small toolbars (`sm`)        |
+| `--space-3`   | `12px`      | `0.75rem`  | Medium-compact: form field column gaps, card sub-group separation       |
+| `--space-4`   | `16px`      | `1rem`     | Standard enterprise layout gap: card padding, toolbar spacing (`md`)    |
+| `--space-5`   | `20px`      | `1.25rem`  | Editorial gap: page container gutters, major header spacing (`lg` grid) |
+| `--space-6`   | `24px`      | `1.5rem`   | Wide layout gap: section separation, container layout blocks (`lg`)     |
+| `--space-8`   | `32px`      | `2rem`     | Extra-wide gap: major section vertical rhythm, empty states (`xl`)      |
+| `--space-10`  | `40px`      | `2.5rem`   | Extended block rhythm: full-page break points                           |
+| `--space-12`  | `48px`      | `3rem`     | Maximum layout spacing: hero divisions, multi-stage journeys (`2xl`)    |
 
 ### 21.2 Invariants & Rules
 
@@ -446,8 +446,8 @@ BEZENT uses a restrained, predictable, 4px-based enterprise spacing scale. Spaci
 2. **Zero Redefinition / No Local Overrides:** Components must **CONSUME** canonical tokens directly (e.g. `gap: var(--space-4);`). Components and applications are strictly prohibited from redefining `--space-*` tokens locally or within component scope.
 3. **Zero Fallback Inconsistencies:** Design System components must not use contradictory or divergent fallbacks (e.g. `var(--space-4, 20px)` vs `var(--space-4, 16px)`). With canonical tokens loaded globally, references must directly use `var(--space-*)` without fallbacks.
 4. **Spacing vs. Dimensions Distinction:**
-   - **Spacing Tokens (`--space-*`)** are strictly for *relationships* between elements: `gap`, `padding`, `margin`, `row-gap`, `column-gap`.
-   - **Dimensions** are *independent structural bounds*: control heights (e.g. 36px inputs), avatar sizes, icon sizes (e.g. 16px/20px/24px), border widths (1px/1.5px), modal maximum widths, or top-nav heights (56px). Do not replace dimension tokens with spacing tokens.
+   - **Spacing Tokens (`--space-*`)** are strictly for _relationships_ between elements: `gap`, `padding`, `margin`, `row-gap`, `column-gap`.
+   - **Dimensions** are _independent structural bounds_: control heights (e.g. 36px inputs), avatar sizes, icon sizes (e.g. 16px/20px/24px), border widths (1px/1.5px), modal maximum widths, or top-nav heights (56px). Do not replace dimension tokens with spacing tokens.
 5. **Layout Primitive Mapping:** Primitives such as `Stack`, `Inline`, and `Grid` map their size variants directly to the canonical spacing tokens:
    - `none` → `var(--space-0)`
    - `xs` → `var(--space-1)`
@@ -467,15 +467,15 @@ BEZENT uses a restrained, structured, professional enterprise corner-radius hier
 
 ### 22.1 Canonical Radius Scale
 
-| Token | Pixel Value | Rem Value | Semantic Purpose & Usage | Examples |
-| :--- | :--- | :--- | :--- | :--- |
-| `--radius-none` | `0px` | `0rem` | Explicit square corners | Flush structural sections, tables without outer border, dividers |
-| `--radius-xs` | `4px` | `0.25rem` | Micro surfaces & compact indicators | Checkbox boxes, scrollbar thumbs, tiny indicator badges, close icons |
-| `--radius-sm` | `6px` | `0.375rem` | Compact controls & micro surfaces | Compact buttons (`sm`), tooltips, filter tabs, secondary compact badges |
-| `--radius-md` | `8px` | `0.5rem` | **DEFAULT** interactive & control radius | Standard Button, Input, Select, Textarea, Search, Dropdowns, Table container |
-| `--radius-lg` | `10px` | `0.625rem` | Normal container & surface radius | Card, settings containers, Section cards, content panels, alert banners |
-| `--radius-xl` | `12px` | `0.75rem` | Large & elevated surfaces | Modal, Dialog, workspace drawers |
-| `--radius-full` | `9999px` | — | Pill & status semantics only | Badge, StatusPill, Chip, pill filter, Switch track |
+| Token           | Pixel Value | Rem Value  | Semantic Purpose & Usage                 | Examples                                                                     |
+| :-------------- | :---------- | :--------- | :--------------------------------------- | :--------------------------------------------------------------------------- |
+| `--radius-none` | `0px`       | `0rem`     | Explicit square corners                  | Flush structural sections, tables without outer border, dividers             |
+| `--radius-xs`   | `4px`       | `0.25rem`  | Micro surfaces & compact indicators      | Checkbox boxes, scrollbar thumbs, tiny indicator badges, close icons         |
+| `--radius-sm`   | `6px`       | `0.375rem` | Compact controls & micro surfaces        | Compact buttons (`sm`), tooltips, filter tabs, secondary compact badges      |
+| `--radius-md`   | `8px`       | `0.5rem`   | **DEFAULT** interactive & control radius | Standard Button, Input, Select, Textarea, Search, Dropdowns, Table container |
+| `--radius-lg`   | `10px`      | `0.625rem` | Normal container & surface radius        | Card, settings containers, Section cards, content panels, alert banners      |
+| `--radius-xl`   | `12px`      | `0.75rem`  | Large & elevated surfaces                | Modal, Dialog, workspace drawers                                             |
+| `--radius-full` | `9999px`    | —          | Pill & status semantics only             | Badge, StatusPill, Chip, pill filter, Switch track                           |
 
 ### 22.2 Invariants & Rules
 

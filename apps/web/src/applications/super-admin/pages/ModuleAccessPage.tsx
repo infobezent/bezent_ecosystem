@@ -192,7 +192,8 @@ export function ModuleAccessPage() {
                         </Inline>
                         <span>{item.description}</span>
                         <span className="bezent-caption">
-                          Version {item.version} • Availability: {isPlanned ? 'Coming Soon' : 'Generally Available'}
+                          Version {item.version} • Availability:{' '}
+                          {isPlanned ? 'Coming Soon' : 'Generally Available'}
                         </span>
                         {isPlanned && !isEnabled && (
                           <span className="bezent-caption">
@@ -201,7 +202,8 @@ export function ModuleAccessPage() {
                         )}
                         {isPlanned && isEnabled && (
                           <span className="bezent-caption">
-                            Enabled via legacy configuration. Can be disabled to enforce customer ceiling.
+                            Enabled via legacy configuration. Can be disabled to enforce customer
+                            ceiling.
                           </span>
                         )}
                       </Stack>

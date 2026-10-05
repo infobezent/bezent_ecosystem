@@ -1,11 +1,7 @@
 import { DesignationRepository } from '../repository/designation.repository.js';
 import { DepartmentRepository } from '../../../../platform/organization/repository/department.repository.js';
 import { auditRepository } from '../../../../platform/audit/repository/audit.repository.js';
-import {
-  NotFoundError,
-  ConflictError,
-  ValidationError,
-} from '../../../../app/errors/AppError.js';
+import { NotFoundError, ConflictError, ValidationError } from '../../../../app/errors/AppError.js';
 import type {
   DesignationRecord,
   CreateDesignationDto,
@@ -80,11 +76,7 @@ export class DesignationService {
 
     // 2. Department validation (if department-specific)
     if (departmentId) {
-      const dept = await this.deptRepo.findDepartmentById(
-        tenantId,
-        companyId,
-        departmentId,
-      );
+      const dept = await this.deptRepo.findDepartmentById(tenantId, companyId, departmentId);
       if (!dept) {
         throw new ValidationError(
           `Department not found or does not belong to this company (ID: ${departmentId})`,
@@ -146,16 +138,11 @@ export class DesignationService {
       throw new ValidationError('Designation name cannot be empty');
     }
 
-    const trimmedCode =
-      dto.code !== undefined ? dto.code?.trim() || null : existing.code;
+    const trimmedCode = dto.code !== undefined ? dto.code?.trim() || null : existing.code;
     const trimmedDesc =
-      dto.description !== undefined
-        ? dto.description?.trim() || null
-        : existing.description;
+      dto.description !== undefined ? dto.description?.trim() || null : existing.description;
     const targetDepartmentId =
-      dto.departmentId !== undefined
-        ? dto.departmentId?.trim() || null
-        : existing.departmentId;
+      dto.departmentId !== undefined ? dto.departmentId?.trim() || null : existing.departmentId;
 
     // 1. Code uniqueness check
     if (trimmedCode && trimmedCode !== existing.code) {
@@ -174,31 +161,21 @@ export class DesignationService {
     // 2. Department validation & Structural Move
     const isDepartmentMove = targetDepartmentId !== existing.departmentId;
     if (isDepartmentMove && targetDepartmentId !== null) {
-      const dept = await this.deptRepo.findDepartmentById(
-        tenantId,
-        companyId,
-        targetDepartmentId,
-      );
+      const dept = await this.deptRepo.findDepartmentById(tenantId, companyId, targetDepartmentId);
       if (!dept) {
         throw new ValidationError(
           `Target department not found or does not belong to this company (ID: ${targetDepartmentId})`,
         );
       }
       if (dept.status !== 'active') {
-        throw new ValidationError(
-          `Cannot move designation to inactive department "${dept.name}"`,
-        );
+        throw new ValidationError(`Cannot move designation to inactive department "${dept.name}"`);
       }
     }
 
     // 3. Structural Move Impact Check (NO SILENT EMPLOYEE MUTATION)
     let affectedEmployeeCount = 0;
     if (isDepartmentMove) {
-      affectedEmployeeCount = await this.repo.countActiveEmployees(
-        tenantId,
-        companyId,
-        id,
-      );
+      affectedEmployeeCount = await this.repo.countActiveEmployees(tenantId, companyId, id);
 
       // If active employees use this designation and caller has not explicitly confirmed:
       if (affectedEmployeeCount > 0 && !dto.confirmStructuralMove) {
@@ -223,9 +200,7 @@ export class DesignationService {
     }
 
     // 5. Audit log
-    const auditAction = isDepartmentMove
-      ? 'designation.structural_move'
-      : 'designation.update';
+    const auditAction = isDepartmentMove ? 'designation.structural_move' : 'designation.update';
 
     await this.safeRecordAudit({
       actorUserId: actor?.userId,
@@ -262,11 +237,7 @@ export class DesignationService {
       throw new NotFoundError(`Designation not found for ID: ${id}`);
     }
 
-    const affectedEmployeeCount = await this.repo.countActiveEmployees(
-      tenantId,
-      companyId,
-      id,
-    );
+    const affectedEmployeeCount = await this.repo.countActiveEmployees(tenantId, companyId, id);
 
     const updated = await this.repo.setStatus(tenantId, companyId, id, 'inactive');
     if (!updated) {

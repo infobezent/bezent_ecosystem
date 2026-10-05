@@ -151,7 +151,11 @@ export function validateCreateStageConfig(input: unknown): CreateOnboardingStage
   }
 
   let afterStageKey: string | undefined;
-  if (data.afterStageKey !== undefined && data.afterStageKey !== null && data.afterStageKey !== '') {
+  if (
+    data.afterStageKey !== undefined &&
+    data.afterStageKey !== null &&
+    data.afterStageKey !== ''
+  ) {
     if (typeof data.afterStageKey !== 'string') {
       errors.afterStageKey = 'afterStageKey must be a string';
     } else {

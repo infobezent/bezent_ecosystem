@@ -4,14 +4,8 @@ import { ModulePlaceholder } from '../pages/ModulePlaceholder';
 import { OnboardingPage } from '../onboarding';
 import { EmployeeAdministrationPage } from '../employee-administration';
 import { DocumentsPage } from '../documents';
-import {
-  SettingsPage,
-} from '../settings';
-import {
-  EmployeeDirectoryPage,
-  EmployeeProfilePage,
-  EMPLOYEES_PATH,
-} from '../employees';
+import { SettingsPage } from '../settings';
+import { EmployeeDirectoryPage, EmployeeProfilePage, EMPLOYEES_PATH } from '../employees';
 import { destinationPath } from '../../../shared/utils/navigation';
 import { useAuth } from '../../../platform/auth';
 import { landingPath } from '../../../platform/auth/landing';
@@ -187,7 +181,12 @@ export const hrmsRoutes: RouteObject[] = [
       },
       {
         path: 'settings/organization/designations',
-        element: <Navigate to="/hrms/settings/administration?tab=employee-configuration&sub=designations" replace />,
+        element: (
+          <Navigate
+            to="/hrms/settings/administration?tab=employee-configuration&sub=designations"
+            replace
+          />
+        ),
       },
       {
         path: 'settings/organization/locations',
@@ -195,7 +194,12 @@ export const hrmsRoutes: RouteObject[] = [
       },
       {
         path: 'settings/organization/job-levels',
-        element: <Navigate to="/hrms/settings/administration?tab=employee-configuration&sub=job-levels" replace />,
+        element: (
+          <Navigate
+            to="/hrms/settings/administration?tab=employee-configuration&sub=job-levels"
+            replace
+          />
+        ),
       },
       {
         path: 'settings/organization',
@@ -203,7 +207,12 @@ export const hrmsRoutes: RouteObject[] = [
       },
       {
         path: 'organization/job-levels',
-        element: <Navigate to="/hrms/settings/administration?tab=employee-configuration&sub=job-levels" replace />,
+        element: (
+          <Navigate
+            to="/hrms/settings/administration?tab=employee-configuration&sub=job-levels"
+            replace
+          />
+        ),
       },
       {
         path: 'organization/locations',
@@ -211,7 +220,12 @@ export const hrmsRoutes: RouteObject[] = [
       },
       {
         path: 'organization/designations',
-        element: <Navigate to="/hrms/settings/administration?tab=employee-configuration&sub=designations" replace />,
+        element: (
+          <Navigate
+            to="/hrms/settings/administration?tab=employee-configuration&sub=designations"
+            replace
+          />
+        ),
       },
       {
         path: 'organization/departments',

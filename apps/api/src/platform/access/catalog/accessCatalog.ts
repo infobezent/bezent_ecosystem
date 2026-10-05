@@ -308,7 +308,12 @@ const BASE_PERMISSION_DEFINITIONS: PermissionDefinition[] = [
       'organization.grades.manage',
     ],
   ),
-  hrms('jobLevels', 'view', 'View job levels', 'View organizational job levels and seniority ranks.'),
+  hrms(
+    'jobLevels',
+    'view',
+    'View job levels',
+    'View organizational job levels and seniority ranks.',
+  ),
   hrms('jobLevels', 'manage', 'Manage job levels', 'Create, edit, and deactivate job levels.'),
   hrms('grades', 'view', 'View grades', 'View employee grades and classification ranks.'),
   hrms('grades', 'manage', 'Manage grades', 'Create, edit, and deactivate grades.'),

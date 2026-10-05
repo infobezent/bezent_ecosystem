@@ -131,7 +131,9 @@ describe('Company Admin Platform Subsystem (Phase 2)', () => {
         role: 'company_admin',
         status: 'active',
       })
-      .onDuplicateKeyUpdate({ set: { status: 'active', role: 'company_admin', companyId: companyAId } });
+      .onDuplicateKeyUpdate({
+        set: { status: 'active', role: 'company_admin', companyId: companyAId },
+      });
     await db
       .insert(roleAssignments)
       .values({
@@ -201,7 +203,9 @@ describe('Company Admin Platform Subsystem (Phase 2)', () => {
         role: 'company_admin',
         status: 'active',
       })
-      .onDuplicateKeyUpdate({ set: { status: 'active', role: 'company_admin', companyId: companyA2Id } });
+      .onDuplicateKeyUpdate({
+        set: { status: 'active', role: 'company_admin', companyId: companyA2Id },
+      });
     await db
       .insert(roleAssignments)
       .values({

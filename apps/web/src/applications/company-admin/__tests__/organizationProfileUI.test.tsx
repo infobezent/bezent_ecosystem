@@ -46,7 +46,15 @@ const mockCompanyAccess = {
   tenantName: 'Demo Tenant',
   isMember: true,
   isPlatformOversight: false,
-  roles: [{ id: 'role_admin', name: 'Company Admin', code: 'company_admin', isSystem: true, moduleCode: null }],
+  roles: [
+    {
+      id: 'role_admin',
+      name: 'Company Admin',
+      code: 'company_admin',
+      isSystem: true,
+      moduleCode: null,
+    },
+  ],
   permissions: [
     'company.organization.view',
     'company.organization.manage',
@@ -232,7 +240,10 @@ describe('Company Admin — Organization Profile UI & Logic', () => {
 
       const html = renderToStaticMarkup(
         <TestAuthProvider>
-          <OrganizationStructureSection initialHierarchy={hierarchyWithUpdatedProfile} onNavigateToProfile={() => {}} />
+          <OrganizationStructureSection
+            initialHierarchy={hierarchyWithUpdatedProfile}
+            onNavigateToProfile={() => {}}
+          />
         </TestAuthProvider>,
       );
 

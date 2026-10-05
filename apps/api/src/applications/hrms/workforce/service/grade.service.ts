@@ -1,9 +1,6 @@
 import { GradeRepository } from '../repository/grade.repository.js';
 import { auditRepository } from '../../../../platform/audit/repository/audit.repository.js';
-import {
-  NotFoundError,
-  ConflictError,
-} from '../../../../app/errors/AppError.js';
+import { NotFoundError, ConflictError } from '../../../../app/errors/AppError.js';
 import type {
   GradeRecord,
   CreateGradeDto,
@@ -50,11 +47,7 @@ export class GradeService {
     return this.repo.listGrades(tenantId, companyId, filter);
   }
 
-  async getGradeById(
-    tenantId: string,
-    companyId: string,
-    id: string,
-  ): Promise<GradeRecord> {
+  async getGradeById(tenantId: string, companyId: string, id: string): Promise<GradeRecord> {
     const record = await this.repo.findGradeById(tenantId, companyId, id);
     if (!record) {
       throw new NotFoundError(`Grade not found (ID: ${id})`);
@@ -71,27 +64,15 @@ export class GradeService {
     const normalizedCode = dto.code.trim().toUpperCase();
 
     // 1. Check code uniqueness within company
-    const existingWithCode = await this.repo.findGradeByCode(
-      tenantId,
-      companyId,
-      normalizedCode,
-    );
+    const existingWithCode = await this.repo.findGradeByCode(tenantId, companyId, normalizedCode);
     if (existingWithCode) {
-      throw new ConflictError(
-        `Grade code "${normalizedCode}" is already in use in this company`,
-      );
+      throw new ConflictError(`Grade code "${normalizedCode}" is already in use in this company`);
     }
 
     // 2. Check rank uniqueness within company
-    const existingWithRank = await this.repo.findGradeByRank(
-      tenantId,
-      companyId,
-      dto.rank,
-    );
+    const existingWithRank = await this.repo.findGradeByRank(tenantId, companyId, dto.rank);
     if (existingWithRank) {
-      throw new ConflictError(
-        `Grade rank ${dto.rank} is already in use in this company`,
-      );
+      throw new ConflictError(`Grade rank ${dto.rank} is already in use in this company`);
     }
 
     try {
@@ -126,9 +107,7 @@ export class GradeService {
           );
         }
         if (error.message?.includes('idx_grades_company_rank')) {
-          throw new ConflictError(
-            `Grade rank ${dto.rank} is already in use in this company`,
-          );
+          throw new ConflictError(`Grade rank ${dto.rank} is already in use in this company`);
         }
       }
       throw err;
@@ -151,29 +130,17 @@ export class GradeService {
 
     // Check code uniqueness if changed
     if (normalizedCode !== undefined && normalizedCode !== existing.code) {
-      const existingWithCode = await this.repo.findGradeByCode(
-        tenantId,
-        companyId,
-        normalizedCode,
-      );
+      const existingWithCode = await this.repo.findGradeByCode(tenantId, companyId, normalizedCode);
       if (existingWithCode && existingWithCode.id !== id) {
-        throw new ConflictError(
-          `Grade code "${normalizedCode}" is already in use in this company`,
-        );
+        throw new ConflictError(`Grade code "${normalizedCode}" is already in use in this company`);
       }
     }
 
     // Check rank uniqueness if changed
     if (dto.rank !== undefined && dto.rank !== existing.rank) {
-      const existingWithRank = await this.repo.findGradeByRank(
-        tenantId,
-        companyId,
-        dto.rank,
-      );
+      const existingWithRank = await this.repo.findGradeByRank(tenantId, companyId, dto.rank);
       if (existingWithRank && existingWithRank.id !== id) {
-        throw new ConflictError(
-          `Grade rank ${dto.rank} is already in use in this company`,
-        );
+        throw new ConflictError(`Grade rank ${dto.rank} is already in use in this company`);
       }
     }
 
@@ -219,9 +186,7 @@ export class GradeService {
           );
         }
         if (errAny.message?.includes('idx_grades_company_rank') && dto.rank !== undefined) {
-          throw new ConflictError(
-            `Grade rank ${dto.rank} is already in use in this company`,
-          );
+          throw new ConflictError(`Grade rank ${dto.rank} is already in use in this company`);
         }
       }
       throw err;

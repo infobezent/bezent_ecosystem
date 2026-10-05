@@ -277,9 +277,7 @@ export class OnboardingSettingsRepository {
         targetOrder = Math.max(1, data.position);
       } else {
         // Default: before the terminal stage
-        const terminalStage = currentStages.find(
-          (s) => s.isTerminal || s.stageKey === 'completed',
-        );
+        const terminalStage = currentStages.find((s) => s.isTerminal || s.stageKey === 'completed');
         if (terminalStage) {
           targetOrder = terminalStage.displayOrder;
         } else {
@@ -431,11 +429,7 @@ export class OnboardingSettingsRepository {
     });
   }
 
-  async deleteStageConfig(
-    tenantId: string,
-    companyId: string,
-    stageKey: string,
-  ): Promise<void> {
+  async deleteStageConfig(tenantId: string, companyId: string, stageKey: string): Promise<void> {
     const stage = await this.getStageConfigByKey(tenantId, companyId, stageKey);
     if (!stage) {
       throw new NotFoundError(`Stage '${stageKey}' not found`);

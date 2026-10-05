@@ -1034,9 +1034,7 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
       expect(html).toContain('Basic Information');
       expect(html).toContain('Updated description');
       expect(html).toContain('Visible');
-      expect(html).toContain(
-        'Mandatory system chapter',
-      );
+      expect(html).toContain('Mandatory system chapter');
     });
 
     it('renders section order controls and position indicators', () => {
@@ -1155,16 +1153,87 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
 
   describe('V2 Form Editor Shell & UX Interactions', () => {
     const tenRegistrationSections: ResolvedFormSection[] = [
-      { key: 'personal', label: 'Personal Information', order: 1, origin: 'system', configurable: true, fields: [mockSystemField] },
-      { key: 'general', label: 'General', order: 2, origin: 'system', configurable: true, fields: [] },
-      { key: 'administration', label: 'Administration / Onboarding', order: 3, origin: 'system', configurable: true, fields: [] },
-      { key: 'skills', label: 'Skills & Competencies', order: 4, origin: 'system', configurable: true, fields: [] },
-      { key: 'emergency', label: 'Emergency Contact', order: 5, origin: 'system', configurable: true, fields: [] },
-      { key: 'accounts', label: 'Accounts & Statutory', order: 6, origin: 'system', configurable: true, fields: [] },
-      { key: 'online_access', label: 'Online Access & Security', order: 7, origin: 'system', configurable: true, fields: [] },
-      { key: 'working_hours', label: 'Working Hours & Shifts', order: 8, origin: 'system', configurable: true, fields: [] },
-      { key: 'documents', label: 'Documents & Compliance', order: 9, origin: 'system', configurable: true, fields: [] },
-      { key: 'review', label: 'Review & Finalize', order: 10, origin: 'system', configurable: false, protected: true, fields: [] },
+      {
+        key: 'personal',
+        label: 'Personal Information',
+        order: 1,
+        origin: 'system',
+        configurable: true,
+        fields: [mockSystemField],
+      },
+      {
+        key: 'general',
+        label: 'General',
+        order: 2,
+        origin: 'system',
+        configurable: true,
+        fields: [],
+      },
+      {
+        key: 'administration',
+        label: 'Administration / Onboarding',
+        order: 3,
+        origin: 'system',
+        configurable: true,
+        fields: [],
+      },
+      {
+        key: 'skills',
+        label: 'Skills & Competencies',
+        order: 4,
+        origin: 'system',
+        configurable: true,
+        fields: [],
+      },
+      {
+        key: 'emergency',
+        label: 'Emergency Contact',
+        order: 5,
+        origin: 'system',
+        configurable: true,
+        fields: [],
+      },
+      {
+        key: 'accounts',
+        label: 'Accounts & Statutory',
+        order: 6,
+        origin: 'system',
+        configurable: true,
+        fields: [],
+      },
+      {
+        key: 'online_access',
+        label: 'Online Access & Security',
+        order: 7,
+        origin: 'system',
+        configurable: true,
+        fields: [],
+      },
+      {
+        key: 'working_hours',
+        label: 'Working Hours & Shifts',
+        order: 8,
+        origin: 'system',
+        configurable: true,
+        fields: [],
+      },
+      {
+        key: 'documents',
+        label: 'Documents & Compliance',
+        order: 9,
+        origin: 'system',
+        configurable: true,
+        fields: [],
+      },
+      {
+        key: 'review',
+        label: 'Review & Finalize',
+        order: 10,
+        origin: 'system',
+        configurable: false,
+        protected: true,
+        fields: [],
+      },
     ];
 
     it('renders Left Panel in Structure mode with all 10 registration tabs and 2-digit indexing', () => {
@@ -1246,7 +1315,12 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
       const html = renderToStaticMarkup(
         <FieldProperties
           field={mockSystemField}
-          form={{ name: 'Employee Registration', key: 'employee-registration', version: 1, kind: 'system' }}
+          form={{
+            name: 'Employee Registration',
+            key: 'employee-registration',
+            version: 1,
+            kind: 'system',
+          }}
           activeSection={tenRegistrationSections[0]}
           selectedEntity="field"
           onUpdateField={vi.fn()}
@@ -1266,7 +1340,12 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
       const html = renderToStaticMarkup(
         <FieldProperties
           field={mockCustomField}
-          form={{ name: 'Employee Registration', key: 'employee-registration', version: 1, kind: 'system' }}
+          form={{
+            name: 'Employee Registration',
+            key: 'employee-registration',
+            version: 1,
+            kind: 'system',
+          }}
           activeSection={tenRegistrationSections[0]}
           selectedEntity="field"
           onUpdateField={vi.fn()}
@@ -1283,7 +1362,12 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
       const html = renderToStaticMarkup(
         <FieldProperties
           field={null}
-          form={{ name: 'Employee Registration', key: 'employee-registration', version: 1, kind: 'system' }}
+          form={{
+            name: 'Employee Registration',
+            key: 'employee-registration',
+            version: 1,
+            kind: 'system',
+          }}
           activeSection={tenRegistrationSections[0]}
           sectionTitle="Personal Information"
           sectionOrderIndex={0}
@@ -1304,7 +1388,12 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
       const html = renderToStaticMarkup(
         <FieldProperties
           field={null}
-          form={{ name: 'Employee Registration', key: 'employee-registration', version: 1, kind: 'system' }}
+          form={{
+            name: 'Employee Registration',
+            key: 'employee-registration',
+            version: 1,
+            kind: 'system',
+          }}
           selectedEntity="form"
           onUpdateField={vi.fn()}
           onDeleteField={vi.fn()}
@@ -1321,7 +1410,12 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
       const html = renderToStaticMarkup(
         <FieldProperties
           field={null}
-          form={{ name: 'Employee Registration', key: 'employee-registration', version: 1, kind: 'system' }}
+          form={{
+            name: 'Employee Registration',
+            key: 'employee-registration',
+            version: 1,
+            kind: 'system',
+          }}
           selectedEntity="section"
           onUpdateField={vi.fn()}
           onDeleteField={vi.fn()}
@@ -1360,7 +1454,12 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
       const html = renderToStaticMarkup(
         <FieldProperties
           field={mockSystemField}
-          form={{ name: 'Employee Registration', key: 'employee-registration', version: 1, kind: 'system' }}
+          form={{
+            name: 'Employee Registration',
+            key: 'employee-registration',
+            version: 1,
+            kind: 'system',
+          }}
           activeSection={tenRegistrationSections[0]}
           selectedEntity="field"
           onUpdateField={vi.fn()}
@@ -1380,7 +1479,12 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
       const html = renderToStaticMarkup(
         <FieldProperties
           field={{ ...mockCustomField, description: 'Enter division guidance' }}
-          form={{ name: 'Employee Registration', key: 'employee-registration', version: 1, kind: 'system' }}
+          form={{
+            name: 'Employee Registration',
+            key: 'employee-registration',
+            version: 1,
+            kind: 'system',
+          }}
           activeSection={tenRegistrationSections[0]}
           selectedEntity="field"
           onUpdateField={vi.fn()}

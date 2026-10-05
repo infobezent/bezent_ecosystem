@@ -25,7 +25,11 @@ export function validateCreateJobLevel(input: unknown): CreateJobLevelDto {
   }
 
   // Code: required, trimmed, uppercase, max 50
-  if (data.code === undefined || data.code === null || (typeof data.code === 'string' && !data.code.trim())) {
+  if (
+    data.code === undefined ||
+    data.code === null ||
+    (typeof data.code === 'string' && !data.code.trim())
+  ) {
     errors.code = 'Job level code is required';
   } else if (typeof data.code !== 'string') {
     errors.code = 'Job level code must be a string';

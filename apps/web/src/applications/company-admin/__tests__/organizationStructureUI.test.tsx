@@ -120,11 +120,16 @@ const mockCompanyAccess = {
   tenantName: 'Demo Tenant',
   isMember: true,
   isPlatformOversight: false,
-  roles: [{ id: 'role_admin', name: 'Company Admin', code: 'company_admin', isSystem: true, moduleCode: null }],
-  permissions: [
-    'company.organization.view',
-    'company.organization.manage',
+  roles: [
+    {
+      id: 'role_admin',
+      name: 'Company Admin',
+      code: 'company_admin',
+      isSystem: true,
+      moduleCode: null,
+    },
   ],
+  permissions: ['company.organization.view', 'company.organization.manage'],
   enabledModules: ['hrms' as const],
   essEligible: false,
   employeeId: null,

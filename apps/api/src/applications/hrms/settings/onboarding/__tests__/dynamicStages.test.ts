@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { hrmsTestHeaders, signInForTest } from '../../../../../platform/__tests__/support/testSession.js';
+import {
+  hrmsTestHeaders,
+  signInForTest,
+} from '../../../../../platform/__tests__/support/testSession.js';
 import { createApp } from '../../../../../app/server/createApp.js';
 import { seedDatabase } from '../../../../../db/seed.js';
 import { pingDatabase, getDb } from '../../../../../db/connection.js';
@@ -50,19 +53,39 @@ describe('HRMS Dynamic Onboarding Stages V1 Integration Tests', () => {
     await db
       .update(onboardingStageConfigs)
       .set({ displayOrder: 1, isActive: true, isRequired: true })
-      .where(and(eq(onboardingStageConfigs.companyId, companyA), eq(onboardingStageConfigs.stageKey, 'preboarding')));
+      .where(
+        and(
+          eq(onboardingStageConfigs.companyId, companyA),
+          eq(onboardingStageConfigs.stageKey, 'preboarding'),
+        ),
+      );
     await db
       .update(onboardingStageConfigs)
       .set({ displayOrder: 2, isActive: true, isRequired: true })
-      .where(and(eq(onboardingStageConfigs.companyId, companyA), eq(onboardingStageConfigs.stageKey, 'documents')));
+      .where(
+        and(
+          eq(onboardingStageConfigs.companyId, companyA),
+          eq(onboardingStageConfigs.stageKey, 'documents'),
+        ),
+      );
     await db
       .update(onboardingStageConfigs)
       .set({ displayOrder: 3, isActive: true, isRequired: true })
-      .where(and(eq(onboardingStageConfigs.companyId, companyA), eq(onboardingStageConfigs.stageKey, 'induction')));
+      .where(
+        and(
+          eq(onboardingStageConfigs.companyId, companyA),
+          eq(onboardingStageConfigs.stageKey, 'induction'),
+        ),
+      );
     await db
       .update(onboardingStageConfigs)
       .set({ displayOrder: 4, isActive: true, isRequired: true })
-      .where(and(eq(onboardingStageConfigs.companyId, companyA), eq(onboardingStageConfigs.stageKey, 'completed')));
+      .where(
+        and(
+          eq(onboardingStageConfigs.companyId, companyA),
+          eq(onboardingStageConfigs.stageKey, 'completed'),
+        ),
+      );
     await seedDatabase();
   });
 
@@ -260,7 +283,9 @@ describe('HRMS Dynamic Onboarding Stages V1 Integration Tests', () => {
           .set('x-company-id', companyA)
           .set('x-tenant-id', tenantA)
       ).body.data;
-      const itStage = aStages.find((s: { name: string }) => s.name === 'Hardware & Asset Distribution');
+      const itStage = aStages.find(
+        (s: { name: string }) => s.name === 'Hardware & Asset Distribution',
+      );
 
       const patchRes = await hrms
         .patch(`/api/v1/hrms/settings/onboarding/stages/${itStage.stageKey}`)
@@ -413,7 +438,9 @@ describe('HRMS Dynamic Onboarding Stages V1 Integration Tests', () => {
         .get('/api/v1/hrms/settings/onboarding/stages')
         .set('x-company-id', companyA)
         .set('x-tenant-id', tenantA);
-      expect(stagesRes.body.data.some((s: { stageKey: string }) => s.stageKey === tempKey)).toBe(false);
+      expect(stagesRes.body.data.some((s: { stageKey: string }) => s.stageKey === tempKey)).toBe(
+        false,
+      );
     });
 
     it('rejects deleting a custom stage if referenced by an onboarding case or history', async () => {
@@ -445,12 +472,10 @@ describe('HRMS Dynamic Onboarding Stages V1 Integration Tests', () => {
       const caseId = newHireRes.body.data.id;
 
       // Transition case to this custom stage
-      const transRes = await hrms
-        .post(`/api/v1/hrms/onboarding/cases/${caseId}/stage`)
-        .send({
-          toStage: refKey,
-          version: 1,
-        });
+      const transRes = await hrms.post(`/api/v1/hrms/onboarding/cases/${caseId}/stage`).send({
+        toStage: refKey,
+        version: 1,
+      });
       expect(transRes.status).toBe(200);
 
       // 3. Attempt to delete this custom stage -> must be rejected with 400 and advice to deactivate
@@ -517,24 +542,20 @@ describe('HRMS Dynamic Onboarding Stages V1 Integration Tests', () => {
       let version = newHireRes.body.data.version || 1;
 
       // Move from preboarding to documents
-      const toDocsRes = await hrms
-        .post(`/api/v1/hrms/onboarding/cases/${caseId}/stage`)
-        .send({
-          toStage: 'documents',
-          version,
-        });
+      const toDocsRes = await hrms.post(`/api/v1/hrms/onboarding/cases/${caseId}/stage`).send({
+        toStage: 'documents',
+        version,
+      });
       expect(toDocsRes.status).toBe(200);
       expect(toDocsRes.body.data.stage).toBe('documents');
       version = toDocsRes.body.data.version;
 
       // Step C: ATTEMPT Documents -> Induction
       // EXPECTED: REJECTED because Background Verification is required!
-      const skipAttempt = await hrms
-        .post(`/api/v1/hrms/onboarding/cases/${caseId}/stage`)
-        .send({
-          toStage: 'induction',
-          version,
-        });
+      const skipAttempt = await hrms.post(`/api/v1/hrms/onboarding/cases/${caseId}/stage`).send({
+        toStage: 'induction',
+        version,
+      });
 
       expect(skipAttempt.status).toBe(400);
       expect(skipAttempt.body.error.code).toBe('STAGE_SKIPPED_REQUIRED');
@@ -542,12 +563,10 @@ describe('HRMS Dynamic Onboarding Stages V1 Integration Tests', () => {
 
       // Step D: Transition Documents -> Background Verification
       // EXPECTED: SUCCESSFUL
-      const toBgRes = await hrms
-        .post(`/api/v1/hrms/onboarding/cases/${caseId}/stage`)
-        .send({
-          toStage: bgKey,
-          version,
-        });
+      const toBgRes = await hrms.post(`/api/v1/hrms/onboarding/cases/${caseId}/stage`).send({
+        toStage: bgKey,
+        version,
+      });
 
       expect(toBgRes.status).toBe(200);
       expect(toBgRes.body.data.stage).toBe(bgKey);
@@ -555,12 +574,10 @@ describe('HRMS Dynamic Onboarding Stages V1 Integration Tests', () => {
 
       // Step E: Transition Background Verification -> Induction
       // EXPECTED: SUCCESSFUL
-      const toIndRes = await hrms
-        .post(`/api/v1/hrms/onboarding/cases/${caseId}/stage`)
-        .send({
-          toStage: 'induction',
-          version,
-        });
+      const toIndRes = await hrms.post(`/api/v1/hrms/onboarding/cases/${caseId}/stage`).send({
+        toStage: 'induction',
+        version,
+      });
 
       expect(toIndRes.status).toBe(200);
       expect(toIndRes.body.data.stage).toBe('induction');
@@ -885,7 +902,9 @@ describe('HRMS Dynamic Onboarding Stages V1 Integration Tests', () => {
       expect(reorderRes.body.error.code).toBe('FORBIDDEN_PERMISSION');
 
       // 4. Delete fails with 403
-      const delRes = await viewerAgent.delete('/api/v1/hrms/settings/onboarding/stages/stage_anything');
+      const delRes = await viewerAgent.delete(
+        '/api/v1/hrms/settings/onboarding/stages/stage_anything',
+      );
       expect(delRes.status).toBe(403);
       expect(delRes.body.error.code).toBe('FORBIDDEN_PERMISSION');
     });

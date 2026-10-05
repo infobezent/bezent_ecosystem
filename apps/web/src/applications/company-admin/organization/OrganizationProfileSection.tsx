@@ -119,7 +119,10 @@ export const INDIAN_STATE_OPTIONS = [
   { value: 'West Bengal', label: 'West Bengal' },
   { value: 'Andaman and Nicobar Islands', label: 'Andaman and Nicobar Islands' },
   { value: 'Chandigarh', label: 'Chandigarh' },
-  { value: 'Dadra and Nagar Haveli and Daman and Diu', label: 'Dadra and Nagar Haveli and Daman and Diu' },
+  {
+    value: 'Dadra and Nagar Haveli and Daman and Diu',
+    label: 'Dadra and Nagar Haveli and Daman and Diu',
+  },
   { value: 'Delhi', label: 'Delhi' },
   { value: 'Jammu & Kashmir', label: 'Jammu & Kashmir' },
   { value: 'Ladakh', label: 'Ladakh' },
@@ -127,7 +130,9 @@ export const INDIAN_STATE_OPTIONS = [
   { value: 'Puducherry', label: 'Puducherry' },
 ];
 
-export function validateOrganizationProfile(form: OrganizationProfileFormValues): Record<string, string> {
+export function validateOrganizationProfile(
+  form: OrganizationProfileFormValues,
+): Record<string, string> {
   const errors: Record<string, string> = {};
 
   if (!form.name.trim()) {
@@ -145,7 +150,8 @@ export function validateOrganizationProfile(form: OrganizationProfileFormValues)
   }
 
   if (form.website && form.website.trim()) {
-    const websiteRegex = /^(https?:\/\/)?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/;
+    const websiteRegex =
+      /^(https?:\/\/)?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/;
     if (!websiteRegex.test(form.website.trim())) {
       errors.website = 'Please enter a valid website URL (e.g. www.apj3d.com)';
     }
@@ -380,7 +386,10 @@ export function OrganizationProfileSection({
       return {
         ...prev,
         country,
-        state: isInd && !INDIAN_STATE_OPTIONS.some((s) => s.value === prev.state) ? 'Tamil Nadu' : prev.state,
+        state:
+          isInd && !INDIAN_STATE_OPTIONS.some((s) => s.value === prev.state)
+            ? 'Tamil Nadu'
+            : prev.state,
       };
     });
     setIsDirty(true);
@@ -552,11 +561,7 @@ export function OrganizationProfileSection({
           }
           actions={
             <Inline gap="sm">
-              <Button
-                variant="secondary"
-                onClick={handleCancel}
-                disabled={!isDirty || saving}
-              >
+              <Button variant="secondary" onClick={handleCancel} disabled={!isDirty || saving}>
                 Cancel
               </Button>
               <Button
@@ -574,12 +579,18 @@ export function OrganizationProfileSection({
         {/* Status Notices */}
         {!canEdit && (
           <Alert variant="info" title="Read-Only Mode">
-            You have view-only access to organization profile settings. Contact your Company Administrator to modify organization details.
+            You have view-only access to organization profile settings. Contact your Company
+            Administrator to modify organization details.
           </Alert>
         )}
 
         {successNotice && (
-          <Alert variant="success" title="Success" dismissible onDismiss={() => setSuccessNotice(null)}>
+          <Alert
+            variant="success"
+            title="Success"
+            dismissible
+            onDismiss={() => setSuccessNotice(null)}
+          >
             {successNotice}
           </Alert>
         )}
@@ -591,7 +602,12 @@ export function OrganizationProfileSection({
         )}
 
         {logoBlockedNotice && (
-          <Alert variant="warning" title="Upload Storage Policy" dismissible onDismiss={() => setLogoBlockedNotice(null)}>
+          <Alert
+            variant="warning"
+            title="Upload Storage Policy"
+            dismissible
+            onDismiss={() => setLogoBlockedNotice(null)}
+          >
             {logoBlockedNotice}
           </Alert>
         )}
@@ -696,11 +712,7 @@ export function OrganizationProfileSection({
                     />
                   </FormField>
 
-                  <FormField
-                    label="Industry"
-                    error={fieldErrors.industry}
-                    htmlFor="org-industry"
-                  >
+                  <FormField label="Industry" error={fieldErrors.industry} htmlFor="org-industry">
                     <Select
                       id="org-industry"
                       value={form.industry}
@@ -710,11 +722,7 @@ export function OrganizationProfileSection({
                     />
                   </FormField>
 
-                  <FormField
-                    label="Website"
-                    error={fieldErrors.website}
-                    htmlFor="org-website"
-                  >
+                  <FormField label="Website" error={fieldErrors.website} htmlFor="org-website">
                     <Input
                       id="org-website"
                       value={form.website}
@@ -839,12 +847,7 @@ export function OrganizationProfileSection({
                 />
               </FormField>
 
-              <FormField
-                label="Country"
-                required
-                error={fieldErrors.country}
-                htmlFor="org-country"
-              >
+              <FormField label="Country" required error={fieldErrors.country} htmlFor="org-country">
                 <Select
                   id="org-country"
                   value={form.country}
@@ -879,12 +882,7 @@ export function OrganizationProfileSection({
                 )}
               </FormField>
 
-              <FormField
-                label="City"
-                required
-                error={fieldErrors.city}
-                htmlFor="org-city"
-              >
+              <FormField label="City" required error={fieldErrors.city} htmlFor="org-city">
                 <Input
                   id="org-city"
                   value={form.city}

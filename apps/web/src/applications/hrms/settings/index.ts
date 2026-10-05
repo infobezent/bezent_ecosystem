@@ -12,7 +12,10 @@ export { OrganizationProfileSection } from '../../company-admin/organization/Org
 export { OrganizationStructureSection } from '../../company-admin/organization/OrganizationStructureSection';
 export { DepartmentsSection } from '../../company-admin/organization/DepartmentsSection';
 export { WorkLocationsSection } from '../../company-admin/organization/WorkLocationsSection';
-export { DesignationsSection, JobLevelsGradesSection } from './administration/employee-configuration';
+export {
+  DesignationsSection,
+  JobLevelsGradesSection,
+} from './administration/employee-configuration';
 export { OrganizationProfilePage } from './pages/OrganizationProfilePage';
 export { OrganizationStructurePage } from './pages/OrganizationStructurePage';
 export { DepartmentsPage } from './pages/DepartmentsPage';
@@ -20,4 +23,3 @@ export { DesignationsPage } from './pages/DesignationsPage';
 export { WorkLocationsPage } from './pages/WorkLocationsPage';
 export { JobLevelsGradesPage } from './pages/JobLevelsGradesPage';
 export { DashboardSettingsSection, EmployeesSettingsSection, HRSettingsSection } from './general';
-

@@ -74,11 +74,7 @@ export const ADMINISTRATION_SETTINGS_TABS: {
 ];
 
 export type OnboardingSecondarySection =
-  | 'general'
-  | 'stages'
-  | 'checklists'
-  | 'documents'
-  | 'conversion';
+  'general' | 'stages' | 'checklists' | 'documents' | 'conversion';
 
 /** Onboarding secondary navigation sections per architectural requirements. */
 export const ONBOARDING_SECONDARY_SECTIONS: {
@@ -272,13 +268,7 @@ function ConversionWorkspace() {
     );
   }
 
-  return (
-    <ConversionSection
-      initialData={conversionSettings}
-      onSave={handleSave}
-      saving={saving}
-    />
-  );
+  return <ConversionSection initialData={conversionSettings} onSave={handleSave} saving={saving} />;
 }
 
 export interface AdministrationSettingsSectionProps {
@@ -437,7 +427,8 @@ function RoutedAdministrationSettingsSection({
   const validEmployeeConfigSubs = ['numbering', 'designations', 'job-levels'];
 
   const isEmpConfigSub = rawSubParam && validEmployeeConfigSubs.includes(rawSubParam);
-  const isOnboardingSub = rawSubParam && validSubs.includes(rawSubParam as OnboardingSecondarySection);
+  const isOnboardingSub =
+    rawSubParam && validSubs.includes(rawSubParam as OnboardingSecondarySection);
 
   const resolvedInitialTab: AdministrationSettingsTab =
     initialTab ??

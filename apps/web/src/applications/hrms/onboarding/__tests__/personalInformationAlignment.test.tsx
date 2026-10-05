@@ -2,9 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { PersonalInformation } from '../components/PersonalInformation';
-import {
-  RegistrationConfigProvider,
-} from '../registration/registrationConfig';
+import { RegistrationConfigProvider } from '../registration/registrationConfig';
 import type { RegistrationConfiguration } from '../../settings/api/registrationSettingsApi';
 import {
   KNOWN_SECTION_GROUPS,
@@ -25,10 +23,7 @@ import {
 
 import type { PersonalInformationProps } from '../components/PersonalInformation';
 
-function renderPersonalWith(
-  config: RegistrationConfiguration,
-  props?: PersonalInformationProps,
-) {
+function renderPersonalWith(config: RegistrationConfiguration, props?: PersonalInformationProps) {
   return renderToStaticMarkup(
     <RegistrationConfigProvider configuration={config}>
       <PersonalInformation employeeId={props?.employeeId ?? 'EMP2026001'} data={props?.data} />
@@ -159,13 +154,9 @@ describe('Chapter 01 (Personal Information) Form Editor ↔ Runtime Alignment', 
 
     const html = renderPersonalWith(config);
     // Required asterisk check
-    expect(html).toMatch(
-      /Marital Status\s*<span class="bezent-label__required"[^>]*>\*<\/span>/,
-    );
+    expect(html).toMatch(/Marital Status\s*<span class="bezent-label__required"[^>]*>\*<\/span>/);
     // Protected first name is always required
-    expect(html).toMatch(
-      /First Name\s*<span class="bezent-label__required"[^>]*>\*<\/span>/,
-    );
+    expect(html).toMatch(/First Name\s*<span class="bezent-label__required"[^>]*>\*<\/span>/);
   });
 
   it('propagates field width (full vs half) to runtime layout', () => {
@@ -265,7 +256,9 @@ describe('Chapter 01 (Personal Information) Form Editor ↔ Runtime Alignment', 
 
   it('dynamically resolves Employee ID ownership from configuration section order without hardcoding', () => {
     // Case 1: Default configuration (General is Chapter 01)
-    const defaultHtml = renderPersonalWith(defaultRegistrationConfiguration, { employeeId: 'EMP-001' });
+    const defaultHtml = renderPersonalWith(defaultRegistrationConfiguration, {
+      employeeId: 'EMP-001',
+    });
     expect(defaultHtml).toContain('(System Assigned • Chapter 01)');
 
     // Case 2: Reordered configuration (Personal is Chapter 01, General is Chapter 02)
