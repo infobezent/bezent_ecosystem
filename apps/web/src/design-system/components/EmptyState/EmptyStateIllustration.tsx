@@ -1,10 +1,17 @@
-import sleepingRaccoonImg from '../../../assets/sleeping_blue_raccoon.png';
-import onboardingRaccoonImg from '../../../assets/raccoon_onboarding.png';
-import leaveRaccoonImg from '../../../assets/raccoon_leave.png';
-import attendanceRaccoonImg from '../../../assets/raccoon_attendance.png';
-import timesheetsRaccoonImg from '../../../assets/raccoon_timesheets.png';
-import performanceRaccoonImg from '../../../assets/raccoon_performance.png';
-import employeesRaccoonImg from '../../../assets/raccoon_employees.png';
+import sleepingRaccoonLight from '../../../assets/sleeping_blue_raccoon.png';
+import sleepingRaccoonDark from '../../../assets/sleeping_blue_raccoon_dark.png';
+import onboardingRaccoonLight from '../../../assets/raccoon_onboarding.png';
+import onboardingRaccoonDark from '../../../assets/raccoon_onboarding_dark.png';
+import leaveRaccoonLight from '../../../assets/raccoon_leave.png';
+import leaveRaccoonDark from '../../../assets/raccoon_leave_dark.png';
+import attendanceRaccoonLight from '../../../assets/raccoon_attendance.png';
+import attendanceRaccoonDark from '../../../assets/raccoon_attendance_dark.png';
+import timesheetsRaccoonLight from '../../../assets/raccoon_timesheets.png';
+import timesheetsRaccoonDark from '../../../assets/raccoon_timesheets_dark.png';
+import performanceRaccoonLight from '../../../assets/raccoon_performance.png';
+import performanceRaccoonDark from '../../../assets/raccoon_performance_dark.png';
+import employeesRaccoonLight from '../../../assets/raccoon_employees.png';
+import employeesRaccoonDark from '../../../assets/raccoon_employees_dark.png';
 import { BezentIcon } from '../../icons';
 import './EmptyStateIllustration.css';
 
@@ -46,19 +53,36 @@ export interface EmptyStateIllustrationProps {
   imageAlt?: string;
 }
 
-/** Registry of dedicated mascot illustrations mapped by page/module variant */
-export const RACCOON_ILLUSTRATIONS: Record<string, string> = {
-  default: sleepingRaccoonImg,
-  onboarding: onboardingRaccoonImg,
-  leave: leaveRaccoonImg,
-  attendance: attendanceRaccoonImg,
-  timesheets: timesheetsRaccoonImg,
-  performance: performanceRaccoonImg,
-  employees: employeesRaccoonImg,
-  employee: employeesRaccoonImg,
-  documents: employeesRaccoonImg,
-  document: employeesRaccoonImg,
+/** Registry of dedicated mascot illustrations mapped by page/module variant for Light theme */
+export const RACCOON_ILLUSTRATIONS_LIGHT: Record<string, string> = {
+  default: sleepingRaccoonLight,
+  onboarding: onboardingRaccoonLight,
+  leave: leaveRaccoonLight,
+  attendance: attendanceRaccoonLight,
+  timesheets: timesheetsRaccoonLight,
+  performance: performanceRaccoonLight,
+  employees: employeesRaccoonLight,
+  employee: employeesRaccoonLight,
+  documents: employeesRaccoonLight,
+  document: employeesRaccoonLight,
 };
+
+/** Registry of dedicated mascot illustrations mapped by page/module variant for Dark theme */
+export const RACCOON_ILLUSTRATIONS_DARK: Record<string, string> = {
+  default: sleepingRaccoonDark,
+  onboarding: onboardingRaccoonDark,
+  leave: leaveRaccoonDark,
+  attendance: attendanceRaccoonDark,
+  timesheets: timesheetsRaccoonDark,
+  performance: performanceRaccoonDark,
+  employees: employeesRaccoonDark,
+  employee: employeesRaccoonDark,
+  documents: employeesRaccoonDark,
+  document: employeesRaccoonDark,
+};
+
+/** Default export mapping for backwards compatibility */
+export const RACCOON_ILLUSTRATIONS: Record<string, string> = RACCOON_ILLUSTRATIONS_LIGHT;
 
 /** Contextual badge accents for pages awaiting dedicated AI generation */
 export const VARIANT_ACCENTS: Record<string, { icon: string; label: string; color: string }> = {
@@ -85,8 +109,7 @@ export const VARIANT_ACCENTS: Record<string, { icon: string; label: string; colo
  * gentle floating starlight sparkles and subtle breathing motion.
  * Renders page-specific variants (onboarding, attendance, leave, etc.)
  * with contextual theme badges for pages awaiting dedicated full-body art.
- * Supports generic custom illustration image sources while preserving the
- * synchronized breathing animation and starlight atmosphere.
+ * Automatically adapts between Light (airy pastel) and Dark (rich pastel) palettes.
  */
 export function EmptyStateIllustration({
   size = 'default',
@@ -96,7 +119,9 @@ export function EmptyStateIllustration({
   variant = 'default',
   imageAlt = '',
 }: EmptyStateIllustrationProps) {
-  const activeImage = imageSrc || RACCOON_ILLUSTRATIONS[variant] || sleepingRaccoonImg;
+  const lightImage = imageSrc || RACCOON_ILLUSTRATIONS_LIGHT[variant] || sleepingRaccoonLight;
+  const darkImage = imageSrc || RACCOON_ILLUSTRATIONS_DARK[variant] || sleepingRaccoonDark;
+  const isDefaultVariant = variant === 'default' || !RACCOON_ILLUSTRATIONS_LIGHT[variant];
   const accent = VARIANT_ACCENTS[variant];
   const isDark =
     isDarkProp ??
@@ -109,15 +134,24 @@ export function EmptyStateIllustration({
       aria-hidden="true"
     >
       <div className="bezent-sleeping-raccoon-stage">
+        {/* Light theme mascot image */}
         <img
-          src={activeImage}
+          src={lightImage}
           alt={imageAlt}
-          className={`bezent-sleeping-raccoon-img bezent-sleeping-raccoon-img--${variant}`}
+          className={`bezent-sleeping-raccoon-img bezent-sleeping-raccoon-img--light bezent-sleeping-raccoon-img--${variant}`}
+          draggable={false}
+        />
+
+        {/* Dark theme mascot image */}
+        <img
+          src={darkImage}
+          alt={imageAlt}
+          className={`bezent-sleeping-raccoon-img bezent-sleeping-raccoon-img--dark bezent-sleeping-raccoon-img--${variant}`}
           draggable={false}
         />
 
         {/* Floating Contextual Theme Badge for pages without dedicated full-body art */}
-        {accent && activeImage === sleepingRaccoonImg && (
+        {accent && isDefaultVariant && (
           <div
             className={`bezent-stage-accent-badge bezent-stage-accent-badge--${variant}`}
             title={accent.label}

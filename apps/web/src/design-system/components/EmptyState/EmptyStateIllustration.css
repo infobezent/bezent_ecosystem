@@ -47,6 +47,24 @@
   filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.06));
 }
 
+.bezent-sleeping-raccoon-img--dark {
+  display: none !important;
+}
+
+.bezent-sleeping-raccoon-img--light {
+  display: block;
+}
+
+[data-theme='dark'] .bezent-sleeping-raccoon-img--dark,
+.bezent-empty-illustration-container.is-dark .bezent-sleeping-raccoon-img--dark {
+  display: block !important;
+}
+
+[data-theme='dark'] .bezent-sleeping-raccoon-img--light,
+.bezent-empty-illustration-container.is-dark .bezent-sleeping-raccoon-img--light {
+  display: none !important;
+}
+
 .bezent-empty-illustration-container--compact .bezent-sleeping-raccoon-img {
   max-width: 110px;
   max-height: 110px;
