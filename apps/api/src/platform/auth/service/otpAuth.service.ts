@@ -162,9 +162,22 @@ export class OtpAuthService {
     }
 
     // Unknown-account challenges have no digest: they fail exactly like a wrong code.
-    const matches =
+    const isNormalMatch =
       challenge.codeDigest !== null &&
       timingSafeEqualHex(digestOtpCode(OTP_SECRET, challenge.id, code), challenge.codeDigest);
+
+    // Temporary non-production UAT-only fixed OTP mechanism:
+    // Only active if NODE_ENV is NOT production, UAT_FIXED_OTP is configured,
+    // challenge belongs to an eligible user (userId != null), and code matches.
+    const isUatFixedMatch =
+      env.nodeEnv !== 'production' &&
+      typeof env.uatFixedOtp === 'string' &&
+      env.uatFixedOtp.length > 0 &&
+      challenge.userId !== null &&
+      code.length === env.uatFixedOtp.length &&
+      crypto.timingSafeEqual(Buffer.from(code), Buffer.from(env.uatFixedOtp));
+
+    const matches = isNormalMatch || isUatFixedMatch;
 
     if (!matches || attempts > OTP_MAX_ATTEMPTS) {
       const locked = attempts >= OTP_MAX_ATTEMPTS;
