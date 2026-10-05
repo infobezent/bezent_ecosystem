@@ -8,13 +8,18 @@ import {
   companies,
   users,
   memberships,
-  roles,
   roleAssignments,
   tenantAdmins,
   tenantModules,
   invitations,
   auditLogs,
 } from '../../db/schema.js';
+import type {
+  TenantMemberRecord,
+  TenantMemberCompanyAccess,
+  TenantApplicationDistribution,
+  CompanyApplicationStatus,
+} from '../tenant-admin/types/tenantAdmin.types.js';
 import { hashPassword } from '../auth/security.js';
 import { signInForTest } from './support/testSession.js';
 import { accessResolverService } from '../access/service/accessResolver.service.js';
@@ -30,8 +35,6 @@ describe('Tenant Admin Phase 2D + 2E: Members, Access, RBAC & Application Distri
   const companyOtherId = 'comp_p2de_other1';
 
   // Users
-  const superAdminEmail = 'superadmin@bezent.com';
-
   const ta1Email = 'ta1@tenant-main.example';
   const ta1Id = 'usr_p2de_ta1';
 
@@ -47,47 +50,43 @@ describe('Tenant Admin Phase 2D + 2E: Members, Access, RBAC & Application Distri
   const otherUserEmail = 'user@tenant-other.example';
   const otherUserId = 'usr_p2de_other';
 
-  let superAdminToken: string;
   let ta1Token: string;
-  let ta2Token: string;
   let dcaToken: string;
-  let multiUserToken: string;
-  let otherUserToken: string;
 
   beforeAll(async () => {
     if (!isDatabaseConfigured) return;
     const db = getDb();
 
     // 0. Clean up previous test artifacts
-    await db.delete(auditLogs).where(
-      sql`${auditLogs.tenantId} IN (${tenantMainId}, ${tenantOtherId})`,
-    );
-    await db.delete(invitations).where(
-      sql`${invitations.tenantId} IN (${tenantMainId}, ${tenantOtherId})`,
-    );
-    await db.delete(tenantAdmins).where(
-      sql`${tenantAdmins.tenantId} IN (${tenantMainId}, ${tenantOtherId})`,
-    );
-    await db.delete(roleAssignments).where(
-      sql`${roleAssignments.tenantId} IN (${tenantMainId}, ${tenantOtherId})`,
-    );
-    await db.delete(memberships).where(
-      sql`${memberships.tenantId} IN (${tenantMainId}, ${tenantOtherId})`,
-    );
-    await db.delete(tenantModules).where(
-      sql`${tenantModules.tenantId} IN (${tenantMainId}, ${tenantOtherId})`,
-    );
-    await db.delete(companies).where(
-      sql`${companies.tenantId} IN (${tenantMainId}, ${tenantOtherId})`,
-    );
-    await db.delete(tenants).where(
-      sql`${tenants.id} IN (${tenantMainId}, ${tenantOtherId})`,
-    );
+    await db
+      .delete(auditLogs)
+      .where(sql`${auditLogs.tenantId} IN (${tenantMainId}, ${tenantOtherId})`);
+    await db
+      .delete(invitations)
+      .where(sql`${invitations.tenantId} IN (${tenantMainId}, ${tenantOtherId})`);
+    await db
+      .delete(tenantAdmins)
+      .where(sql`${tenantAdmins.tenantId} IN (${tenantMainId}, ${tenantOtherId})`);
+    await db
+      .delete(roleAssignments)
+      .where(sql`${roleAssignments.tenantId} IN (${tenantMainId}, ${tenantOtherId})`);
+    await db
+      .delete(memberships)
+      .where(sql`${memberships.tenantId} IN (${tenantMainId}, ${tenantOtherId})`);
+    await db
+      .delete(tenantModules)
+      .where(sql`${tenantModules.tenantId} IN (${tenantMainId}, ${tenantOtherId})`);
+    await db
+      .delete(companies)
+      .where(sql`${companies.tenantId} IN (${tenantMainId}, ${tenantOtherId})`);
+    await db.delete(tenants).where(sql`${tenants.id} IN (${tenantMainId}, ${tenantOtherId})`);
 
     // Clean up users
-    await db.delete(users).where(
-      sql`${users.id} IN (${ta1Id}, ${ta2Id}, ${dcaId}, ${multiUserId}, ${otherUserId}) OR ${users.email} LIKE '%@tenant-main.example' OR ${users.email} LIKE '%@tenant-other.example' OR ${users.email} LIKE '%@example.com'`,
-    );
+    await db
+      .delete(users)
+      .where(
+        sql`${users.id} IN (${ta1Id}, ${ta2Id}, ${dcaId}, ${multiUserId}, ${otherUserId}) OR ${users.email} LIKE '%@tenant-main.example' OR ${users.email} LIKE '%@tenant-other.example' OR ${users.email} LIKE '%@example.com'`,
+      );
 
     // 1. Insert Tenants
     await db.insert(tenants).values([
@@ -297,12 +296,8 @@ describe('Tenant Admin Phase 2D + 2E: Members, Access, RBAC & Application Distri
     ]);
 
     // 8. Sign in users for testing
-    superAdminToken = (await signInForTest(superAdminEmail)).token;
     ta1Token = (await signInForTest(ta1Email)).token;
-    ta2Token = (await signInForTest(ta2Email)).token;
     dcaToken = (await signInForTest(dcaEmail)).token;
-    multiUserToken = (await signInForTest(multiUserEmail)).token;
-    otherUserToken = (await signInForTest(otherUserEmail)).token;
   });
 
   // =========================================================================
@@ -318,7 +313,7 @@ describe('Tenant Admin Phase 2D + 2E: Members, Access, RBAC & Application Distri
         .expect(200);
 
       expect(res.body.data).toBeInstanceOf(Array);
-      const emails = res.body.data.map((m: any) => m.email);
+      const emails = res.body.data.map((m: TenantMemberRecord) => m.email);
 
       // Should include TA1, TA2, DCA, and MultiUser
       expect(emails).toContain(ta1Email);
@@ -350,15 +345,19 @@ describe('Tenant Admin Phase 2D + 2E: Members, Access, RBAC & Application Distri
         .set('Authorization', `Bearer ${ta1Token}`)
         .expect(200);
 
-      expect(taRes.body.data.every((m: any) => m.tenantAuthority === 'tenant_admin')).toBe(true);
+      expect(
+        taRes.body.data.every((m: TenantMemberRecord) => m.tenantAuthority === 'tenant_admin'),
+      ).toBe(true);
 
       const stdRes = await request(app)
         .get('/api/v1/tenant-admin/members?authority=standard')
         .set('Authorization', `Bearer ${ta1Token}`)
         .expect(200);
 
-      expect(stdRes.body.data.every((m: any) => m.tenantAuthority === 'standard')).toBe(true);
-      expect(stdRes.body.data.some((m: any) => m.email === dcaEmail)).toBe(true);
+      expect(
+        stdRes.body.data.every((m: TenantMemberRecord) => m.tenantAuthority === 'standard'),
+      ).toBe(true);
+      expect(stdRes.body.data.some((m: TenantMemberRecord) => m.email === dcaEmail)).toBe(true);
     });
 
     it('filters tenant members by company access', async () => {
@@ -369,7 +368,7 @@ describe('Tenant Admin Phase 2D + 2E: Members, Access, RBAC & Application Distri
         .set('Authorization', `Bearer ${ta1Token}`)
         .expect(200);
 
-      const emails = res.body.data.map((m: any) => m.email);
+      const emails = res.body.data.map((m: TenantMemberRecord) => m.email);
       expect(emails).toContain(multiUserEmail);
       // DCA does not have access to C2
       expect(emails).not.toContain(dcaEmail);
@@ -383,19 +382,31 @@ describe('Tenant Admin Phase 2D + 2E: Members, Access, RBAC & Application Distri
         .set('Authorization', `Bearer ${ta1Token}`)
         .expect(200);
 
-      const member = res.body.data;
+      const member = res.body.data as TenantMemberRecord;
       expect(member.id).toBe(multiUserId);
       expect(member.tenantAuthority).toBe('standard');
       expect(member.companies.length).toBe(2);
 
-      const c1Access = member.companies.find((c: any) => c.companyId === companyC1Id);
-      const c2Access = member.companies.find((c: any) => c.companyId === companyC2Id);
+      const c1Access = member.companies.find(
+        (c: TenantMemberCompanyAccess) => c.companyId === companyC1Id,
+      );
+      const c2Access = member.companies.find(
+        (c: TenantMemberCompanyAccess) => c.companyId === companyC2Id,
+      );
 
       expect(c1Access).toBeDefined();
-      expect(c1Access.roles.some((r: any) => r.roleId === 'role_sys_employee')).toBe(true);
+      expect(
+        c1Access?.roles.some(
+          (r: TenantMemberCompanyAccess['roles'][number]) => r.roleId === 'role_sys_employee',
+        ),
+      ).toBe(true);
 
       expect(c2Access).toBeDefined();
-      expect(c2Access.roles.some((r: any) => r.roleId === 'role_sys_hr_manager')).toBe(true);
+      expect(
+        c2Access?.roles.some(
+          (r: TenantMemberCompanyAccess['roles'][number]) => r.roleId === 'role_sys_hr_manager',
+        ),
+      ).toBe(true);
     });
 
     it('Tenant Admin cannot view details of a member in another tenant (isolation)', async () => {
@@ -545,7 +556,11 @@ describe('Tenant Admin Phase 2D + 2E: Members, Access, RBAC & Application Distri
         })
         .expect(201);
 
-      expect(res.body.data.member.companies.some((c: any) => c.companyId === companyC2Id)).toBe(true);
+      expect(
+        res.body.data.member.companies.some(
+          (c: TenantMemberCompanyAccess) => c.companyId === companyC2Id,
+        ),
+      ).toBe(true);
     });
 
     it('assigns additional role within an accessible company', async () => {
@@ -559,15 +574,23 @@ describe('Tenant Admin Phase 2D + 2E: Members, Access, RBAC & Application Distri
         })
         .expect(200);
 
-      const c2 = res.body.data.member.companies.find((c: any) => c.companyId === companyC2Id);
-      expect(c2.roles.some((r: any) => r.roleId === 'role_sys_hr_manager')).toBe(true);
+      const c2 = res.body.data.member.companies.find(
+        (c: TenantMemberCompanyAccess) => c.companyId === companyC2Id,
+      );
+      expect(
+        c2?.roles.some(
+          (r: TenantMemberCompanyAccess['roles'][number]) => r.roleId === 'role_sys_hr_manager',
+        ),
+      ).toBe(true);
     });
 
     it('revokes a specific role from an accessible company', async () => {
       if (!isDatabaseConfigured) return;
 
       await request(app)
-        .delete(`/api/v1/tenant-admin/members/${dcaId}/companies/${companyC2Id}/roles/role_sys_hr_manager`)
+        .delete(
+          `/api/v1/tenant-admin/members/${dcaId}/companies/${companyC2Id}/roles/role_sys_hr_manager`,
+        )
         .set('Authorization', `Bearer ${ta1Token}`)
         .expect(200);
 
@@ -577,8 +600,14 @@ describe('Tenant Admin Phase 2D + 2E: Members, Access, RBAC & Application Distri
         .set('Authorization', `Bearer ${ta1Token}`)
         .expect(200);
 
-      const c2 = details.body.data.companies.find((c: any) => c.companyId === companyC2Id);
-      expect(c2.roles.some((r: any) => r.roleId === 'role_sys_hr_manager')).toBe(false);
+      const c2 = details.body.data.companies.find(
+        (c: TenantMemberCompanyAccess) => c.companyId === companyC2Id,
+      );
+      expect(
+        c2?.roles.some(
+          (r: TenantMemberCompanyAccess['roles'][number]) => r.roleId === 'role_sys_hr_manager',
+        ),
+      ).toBe(false);
     });
 
     it('revokes company access cleanly', async () => {
@@ -594,7 +623,11 @@ describe('Tenant Admin Phase 2D + 2E: Members, Access, RBAC & Application Distri
         .set('Authorization', `Bearer ${ta1Token}`)
         .expect(200);
 
-      expect(details.body.data.companies.some((c: any) => c.companyId === companyC2Id)).toBe(false);
+      expect(
+        details.body.data.companies.some(
+          (c: TenantMemberCompanyAccess) => c.companyId === companyC2Id,
+        ),
+      ).toBe(false);
     });
 
     it('protects last Company Admin from having company access revoked (anti-lockout)', async () => {
@@ -613,7 +646,9 @@ describe('Tenant Admin Phase 2D + 2E: Members, Access, RBAC & Application Distri
       if (!isDatabaseConfigured) return;
 
       const res = await request(app)
-        .delete(`/api/v1/tenant-admin/members/${dcaId}/companies/${companyC1Id}/roles/role_sys_company_admin`)
+        .delete(
+          `/api/v1/tenant-admin/members/${dcaId}/companies/${companyC1Id}/roles/role_sys_company_admin`,
+        )
         .set('Authorization', `Bearer ${ta1Token}`)
         .expect(400);
 
@@ -668,10 +703,7 @@ describe('Tenant Admin Phase 2D + 2E: Members, Access, RBAC & Application Distri
         .update(tenantAdmins)
         .set({ status: 'revoked' })
         .where(
-          and(
-            eq(tenantAdmins.tenantId, tenantMainId),
-            sql`${tenantAdmins.userId} != ${ta1Id}`,
-          ),
+          and(eq(tenantAdmins.tenantId, tenantMainId), sql`${tenantAdmins.userId} != ${ta1Id}`),
         );
 
       // Now TA1 is strictly the ONLY active Tenant Admin. Attempting to demote TA1 must fail!
@@ -686,12 +718,7 @@ describe('Tenant Admin Phase 2D + 2E: Members, Access, RBAC & Application Distri
       await db
         .update(tenantAdmins)
         .set({ status: 'active' })
-        .where(
-          and(
-            eq(tenantAdmins.tenantId, tenantMainId),
-            eq(tenantAdmins.userId, ta2Id),
-          ),
-        );
+        .where(and(eq(tenantAdmins.tenantId, tenantMainId), eq(tenantAdmins.userId, ta2Id)));
     });
 
     it('rejects assigning Tenant Admin across tenants', async () => {
@@ -768,9 +795,11 @@ describe('Tenant Admin Phase 2D + 2E: Members, Access, RBAC & Application Distri
         .expect(200);
 
       const items = res.body.data;
-      const hrms = items.find((a: any) => a.moduleCode === 'hrms');
-      const crm = items.find((a: any) => a.moduleCode === 'crm');
-      const pm = items.find((a: any) => a.moduleCode === 'project_management');
+      const hrms = items.find((a: TenantApplicationDistribution) => a.moduleCode === 'hrms');
+      const crm = items.find((a: TenantApplicationDistribution) => a.moduleCode === 'crm');
+      const pm = items.find(
+        (a: TenantApplicationDistribution) => a.moduleCode === 'project_management',
+      );
 
       expect(hrms.tenantEntitled).toBe(true);
       expect(crm.tenantEntitled).toBe(true);
@@ -791,9 +820,9 @@ describe('Tenant Admin Phase 2D + 2E: Members, Access, RBAC & Application Distri
         .expect(200);
 
       const apps = res.body.data;
-      const hrms = apps.find((a: any) => a.moduleCode === 'hrms');
-      const crm = apps.find((a: any) => a.moduleCode === 'crm');
-      const pm = apps.find((a: any) => a.moduleCode === 'project_management');
+      const hrms = apps.find((a: CompanyApplicationStatus) => a.moduleCode === 'hrms');
+      const crm = apps.find((a: CompanyApplicationStatus) => a.moduleCode === 'crm');
+      const pm = apps.find((a: CompanyApplicationStatus) => a.moduleCode === 'project_management');
 
       expect(hrms.companyStatus).toBe('enabled');
       expect(crm.companyStatus).toBe('disabled');
@@ -820,7 +849,7 @@ describe('Tenant Admin Phase 2D + 2E: Members, Access, RBAC & Application Distri
         .set('Authorization', `Bearer ${ta1Token}`)
         .expect(200);
 
-      const crm = statusRes.body.data.find((a: any) => a.moduleCode === 'crm');
+      const crm = statusRes.body.data.find((a: CompanyApplicationStatus) => a.moduleCode === 'crm');
       expect(crm.companyStatus).toBe('enabled');
     });
 
@@ -828,7 +857,9 @@ describe('Tenant Admin Phase 2D + 2E: Members, Access, RBAC & Application Distri
       if (!isDatabaseConfigured) return;
 
       const res = await request(app)
-        .post(`/api/v1/tenant-admin/companies/${companyC1Id}/applications/project_management/enable`)
+        .post(
+          `/api/v1/tenant-admin/companies/${companyC1Id}/applications/project_management/enable`,
+        )
         .set('Authorization', `Bearer ${ta1Token}`)
         .expect(400);
 
@@ -990,10 +1021,7 @@ describe('Tenant Admin Phase 2D + 2E: Members, Access, RBAC & Application Distri
       if (!isDatabaseConfigured) return;
 
       const db = getDb();
-      const logs = await db
-        .select()
-        .from(auditLogs)
-        .where(eq(auditLogs.tenantId, tenantMainId));
+      const logs = await db.select().from(auditLogs).where(eq(auditLogs.tenantId, tenantMainId));
 
       const actions = logs.map((l) => l.action);
 

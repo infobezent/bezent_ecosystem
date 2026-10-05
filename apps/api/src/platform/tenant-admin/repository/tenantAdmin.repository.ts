@@ -10,6 +10,7 @@ import {
   roleAssignments,
   invitations,
   type NewTenantAdmin,
+  type User,
 } from '../../../db/schema.js';
 import type { DbExecutor } from '../../access/repository/access.repository.js';
 import type {
@@ -142,7 +143,10 @@ export class TenantAdminRepository {
     return rows as TenantAdminRecord[];
   }
 
-  async listActiveByTenant(tenantId: string, db: DbExecutor = getDb()): Promise<TenantAdminRecord[]> {
+  async listActiveByTenant(
+    tenantId: string,
+    db: DbExecutor = getDb(),
+  ): Promise<TenantAdminRecord[]> {
     const rows = await db
       .select({
         id: tenantAdmins.id,
@@ -320,17 +324,11 @@ export class TenantAdminRepository {
 
     const conditions = [inArray(users.id, userIdsArray)];
     if (filter.status) {
-      conditions.push(eq(users.status, filter.status as any));
+      conditions.push(eq(users.status, filter.status as User['status']));
     }
     if (filter.search) {
       const s = `%${filter.search.trim()}%`;
-      conditions.push(
-        or(
-          like(users.email, s),
-          like(users.firstName, s),
-          like(users.lastName, s),
-        )!,
-      );
+      conditions.push(or(like(users.email, s), like(users.firstName, s), like(users.lastName, s))!);
     }
 
     const whereClause = and(...conditions);
@@ -343,10 +341,7 @@ export class TenantAdminRepository {
       .limit(limit)
       .offset(offset);
 
-    const totalCountRows = await db
-      .select({ id: users.id })
-      .from(users)
-      .where(whereClause);
+    const totalCountRows = await db.select({ id: users.id }).from(users).where(whereClause);
     const total = totalCountRows.length;
 
     const pageUserIds = userRows.map((u) => u.id);
@@ -437,7 +432,7 @@ export class TenantAdminRepository {
           companyId: m.companyId,
           companyName: m.companyName,
           companyCode: m.companyCode,
-          status: m.status as any,
+          status: m.status,
           roles: userCompanyRoles.map((r) => ({
             roleId: r.roleId,
             roleCode: r.roleCode,
