@@ -19,6 +19,8 @@ import { essRouter } from '../../applications/hrms/ess/routes/ess.routes.js';
 import { requirePlatformAuth } from '../../platform/auth/middleware/auth.middleware.js';
 import { requireApplicationAccess } from '../../platform/access/middleware/access.middleware.js';
 
+import { env } from '../config/env.js';
+
 /**
  * Builds the Express application. Kept separate from `main.ts` so it can be
  * imported directly in tests without binding a port.
@@ -28,8 +30,35 @@ import { requireApplicationAccess } from '../../platform/access/middleware/acces
 export function createApp(): Express {
   const app = express();
 
+  const allowedOrigins = new Set<string>(
+    [
+      env.webAppUrl ? env.webAppUrl.replace(/\/+$/, '') : '',
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'http://127.0.0.1:5173',
+      'http://127.0.0.1:3000',
+    ].filter(Boolean),
+  );
+
   app.use(helmet());
-  app.use(cors());
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        if (!origin || allowedOrigins.has(origin)) {
+          return callback(null, true);
+        }
+        if (
+          env.nodeEnv !== 'production' &&
+          /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
+        ) {
+          return callback(null, true);
+        }
+        callback(null, false);
+      },
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Company-Id', 'Accept'],
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    }),
+  );
   app.use(express.json());
 
   // Platform & Domain routers under /api/v1

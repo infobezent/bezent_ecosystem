@@ -194,6 +194,7 @@
   white-space: nowrap;
 }
 
+
 /* ── Inactive Tabs (Floating above the bottom) ── */
 .bezent-focus-card:not(.is-focus-active):not(:disabled)::before {
   content: '';

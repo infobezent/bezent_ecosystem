@@ -14,6 +14,7 @@ import type { ResolvedFormField } from '../../settings/api/formsApi';
 import { getGroupsForSection } from '../../settings/administration/forms/types';
 import type { Chapter01GeneralState } from '../types/registration.types';
 import { authorizedFetch } from '../../../../platform/auth';
+import { appConfig } from '../../../../app/config/env';
 
 export interface GeneralInformationProps {
   employeeId?: string;
@@ -34,7 +35,9 @@ export function GeneralInformation({
   const [team, setTeam] = useState(data?.team ?? 'Product Development');
   const [designation, setDesignation] = useState(data?.designation ?? 'Software Engineer');
   const [gradeLevel, setGradeLevel] = useState(data?.gradeLevel ?? 'L2 - Mid Level');
-  const [reportingManager] = useState<string | null>(data?.reportingManager ?? 'Rakesh Kumar');
+  const [reportingManager] = useState<string | null>(
+    data?.reportingManager !== undefined ? data.reportingManager : null,
+  );
   const [organisationUnit, setOrganisationUnit] = useState(data?.organisationUnit ?? 'Technology');
   const [officeLocation, setOfficeLocation] = useState(data?.officeLocation ?? 'Chennai - Main Office');
   const [joiningDate, setJoiningDate] = useState(data?.joiningDate ?? '2026-04-01');
@@ -101,7 +104,9 @@ export function GeneralInformation({
       setReferralLoading(true);
       setReferralError(null);
       const timer = setTimeout(() => {
-        authorizedFetch(`/api/v1/hrms/employees/resolve-referral/${encodeURIComponent(code)}`)
+        authorizedFetch(
+          `${appConfig.apiBaseUrl}/hrms/employees/resolve-referral/${encodeURIComponent(code)}`,
+        )
           .then((res) => {
             if (!res.ok) throw new Error('Not found');
             return res.json();
@@ -157,7 +162,7 @@ export function GeneralInformation({
       isFirstRender.current = false;
       return;
     }
-    onChange?.({
+    const updated: Partial<Chapter01GeneralState> = {
       employeeId: employeeIdProp || employeeId,
       employmentType,
       employmentStatus,
@@ -176,7 +181,13 @@ export function GeneralInformation({
       referredByEmployeeId,
       probationPeriod,
       noticePeriod,
-    });
+    };
+
+    if (data && JSON.stringify(updated) === JSON.stringify(data)) {
+      return;
+    }
+
+    onChange?.(updated);
   }, [
     employeeIdProp,
     employeeId,
@@ -197,6 +208,7 @@ export function GeneralInformation({
     referredByEmployeeId,
     probationPeriod,
     noticePeriod,
+    data,
     onChange,
   ]);
 

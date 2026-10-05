@@ -48,7 +48,7 @@ export class ModuleService {
     }
 
     const catalogItem = MODULE_CATALOG.find((m) => m.code === moduleCode);
-    if (catalogItem?.availability === 'Planned') {
+    if (!companyId && catalogItem?.availability === 'Planned') {
       throw new BadRequestError(
         'This application is planned and is not yet available for customer entitlement',
       );

@@ -368,7 +368,7 @@ describe('Workspace & Shell Isolation Boundaries', () => {
       const html = renderAt('/super-admin/provisioning', superAdminAuth);
 
       // Super Admin navigation labels are present
-      expect(html).toContain('Tenants');
+      expect(html).toContain('Customers');
       expect(html).toContain('Customer Provisioning');
     });
 

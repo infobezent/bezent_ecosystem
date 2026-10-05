@@ -93,3 +93,105 @@ export interface BackfillSummary {
   skippedNoAdminFound: SkippedTenantItem[];
 }
 
+export type TenantMemberAuthority = 'tenant_admin' | 'standard';
+
+export interface TenantMemberCompanyAccess {
+  companyId: string;
+  companyName?: string;
+  companyCode?: string;
+  status: 'active' | 'inactive' | 'revoked';
+  roles: Array<{
+    roleId: string;
+    roleCode: string;
+    roleName: string;
+    moduleCode: string | null;
+    isSystem: boolean;
+  }>;
+}
+
+export interface TenantMemberRecord {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone: string | null;
+  status: string;
+  isSuperAdmin: boolean;
+  tenantAuthority: TenantMemberAuthority;
+  tenantAdminId?: string | null;
+  companies: TenantMemberCompanyAccess[];
+  pendingInvitations?: Array<{
+    id: string;
+    companyId: string;
+    companyName?: string;
+    role: string;
+    status: string;
+    expiresAt: string;
+    createdAt: string;
+  }>;
+  createdAt: string;
+  lastLoginAt: string | null;
+}
+
+export interface TenantMemberListFilter {
+  search?: string;
+  status?: string;
+  authority?: TenantMemberAuthority;
+  companyId?: string;
+  page?: number;
+  limit?: number;
+  offset?: number;
+}
+
+export interface InviteTenantMemberDto {
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  authority?: TenantMemberAuthority;
+  companyAccess?: Array<{
+    companyId: string;
+    roleCodes?: string[];
+    roles?: string[];
+  }>;
+}
+
+export interface GrantCompanyAccessDto {
+  companyId: string;
+  roleCodes?: string[];
+  roles?: string[];
+}
+
+export interface AssignCompanyRolesDto {
+  roleIds?: string[];
+  roleCodes?: string[];
+}
+
+export interface TenantApplicationDistribution {
+  moduleCode: string;
+  name: string;
+  description: string;
+  category: string;
+  availability: string;
+  tenantEntitled: boolean;
+  companyCount: number;
+  enabledCompanyCount: number;
+  companies: Array<{
+    companyId: string;
+    companyName: string;
+    companyCode: string;
+    status: 'enabled' | 'disabled';
+  }>;
+}
+
+export interface CompanyApplicationStatus {
+  moduleCode: string;
+  name: string;
+  description: string;
+  category: string;
+  availability: string;
+  tenantEntitled: boolean;
+  companyStatus: 'enabled' | 'disabled';
+  canEnable: boolean;
+}
+

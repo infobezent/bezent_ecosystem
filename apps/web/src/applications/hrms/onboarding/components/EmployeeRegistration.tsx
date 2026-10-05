@@ -69,20 +69,20 @@ export interface RegistrationChapterMeta {
 
 export const REGISTRATION_CHAPTERS: readonly RegistrationChapterMeta[] = [
   {
-    id: 'general',
-    stepNumber: '01',
-    label: 'General',
-    title: 'GENERAL INFORMATION',
-    description: 'Core identity, organizational placement, and employment classification details',
-    kicker: 'CHAPTER // 01',
-  },
-  {
     id: 'personal',
-    stepNumber: '02',
+    stepNumber: '01',
     label: 'Personal Information',
     title: 'PERSONAL INFORMATION',
     description:
       'Legal identity, demographics, contact details, permanent residence, and family profile',
+    kicker: 'CHAPTER // 01',
+  },
+  {
+    id: 'general',
+    stepNumber: '02',
+    label: 'General',
+    title: 'GENERAL INFORMATION',
+    description: 'Core identity, organizational placement, and employment classification details',
     kicker: 'CHAPTER // 02',
   },
   {
@@ -158,8 +158,8 @@ export const REGISTRATION_CHAPTERS: readonly RegistrationChapterMeta[] = [
 ];
 
 export const REGISTRATION_SECTIONS: readonly RegistrationSection[] = [
-  { id: 'general', label: 'General' },
   { id: 'personal', label: 'Personal Information' },
+  { id: 'general', label: 'General' },
   { id: 'onboarding', label: 'Administration' },
   { id: 'skills', label: 'Skills' },
   { id: 'emergency', label: 'Emergency Contact' },
@@ -183,6 +183,7 @@ export interface EmployeeRegistrationProps {
 
 import { useCustomFieldsOptional } from '../../settings/context/CustomFieldsContext';
 import { authorizedFetch } from '../../../../platform/auth';
+import { appConfig } from '../../../../app/config/env';
 
 export function EmployeeRegistration({
   isOpen = true,
@@ -206,21 +207,56 @@ export function EmployeeRegistration({
 
   const allSections: Array<{ id: string; label: string; description?: string | null }> =
     useMemo(() => {
+      const configMap = new Map<
+        string,
+        { label: string; description?: string | null; visible?: boolean }
+      >();
       if (registrationConfig?.sections && registrationConfig.sections.length > 0) {
-        return registrationConfig.sections
-          .filter((s: { visible?: boolean }) => s.visible !== false)
-          .map((s: { id: string; label: string; description?: string | null }) => ({
-            id: s.id,
-            label: s.label,
-            description: s.description,
-          }));
+        for (const s of registrationConfig.sections) {
+          configMap.set(s.id, { label: s.label, description: s.description, visible: s.visible });
+        }
+      } else if (customCtx?.sections && customCtx.sections.length > 0) {
+        for (const s of customCtx.sections) {
+          configMap.set(s.id, { label: s.title, description: null, visible: !s.hidden });
+        }
       }
-      if (customCtx && customCtx.sections && customCtx.sections.length > 0) {
-        return customCtx.sections
-          .filter((s) => !s.hidden)
-          .map((s) => ({ id: s.id, label: s.title, description: null }));
+
+      const ordered: Array<{ id: string; label: string; description?: string | null }> = [];
+      for (const cs of REGISTRATION_SECTIONS) {
+        const conf = configMap.get(cs.id);
+        if (conf?.visible !== false) {
+          ordered.push({
+            id: cs.id,
+            label: conf?.label || cs.label,
+            description: conf?.description,
+          });
+        }
       }
-      return [...REGISTRATION_SECTIONS];
+
+      // Append any custom sections not in canonical list
+      if (registrationConfig?.sections) {
+        for (const s of registrationConfig.sections) {
+          if (!REGISTRATION_SECTIONS.some((cs) => cs.id === s.id) && s.visible !== false) {
+            ordered.push({
+              id: s.id,
+              label: s.label,
+              description: s.description,
+            });
+          }
+        }
+      } else if (customCtx?.sections) {
+        for (const s of customCtx.sections) {
+          if (!REGISTRATION_SECTIONS.some((cs) => cs.id === s.id) && !s.hidden) {
+            ordered.push({
+              id: s.id,
+              label: s.title,
+              description: null,
+            });
+          }
+        }
+      }
+
+      return ordered.length > 0 ? ordered : [...REGISTRATION_SECTIONS];
     }, [registrationConfig, customCtx]);
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -230,30 +266,12 @@ export function EmployeeRegistration({
   const initialSection = (
     urlChapter && allSections.some((s) => s.id === urlChapter)
       ? urlChapter
-      : initialDraft
+      : initialDraft?.activeSection && allSections.some((s) => s.id === initialDraft.activeSection)
         ? initialDraft.activeSection
-        : 'general'
+        : allSections[0]?.id || 'personal'
   ) as RegistrationSectionId;
 
   const [activeSection, setActiveSection] = useState<RegistrationSectionId>(initialSection);
-
-  const handleSelectChapter = useCallback(
-    (id: string) => {
-      setActiveSection(id as RegistrationSectionId);
-      setSearchParams(
-        (prev) => {
-          const next = new URLSearchParams(prev);
-          next.set('chapter', id);
-          return next;
-        },
-        { replace: true },
-      );
-      if (contentContainerRef.current) {
-        contentContainerRef.current.scrollTop = 0;
-      }
-    },
-    [setSearchParams],
-  );
 
   // Sync when searchParams change externally or via browser back/forward
   useEffect(() => {
@@ -341,18 +359,22 @@ export function EmployeeRegistration({
   // Auto-fetch next unique Employee ID from backend on mount
   useEffect(() => {
     if (!initialDraft?.employeeId) {
-      authorizedFetch('/api/v1/hrms/employees/next-number')
+      authorizedFetch(`${appConfig.apiBaseUrl}/hrms/employees/next-number`)
         .then((res) => {
           if (!res.ok) throw new Error('Failed to fetch next number');
           return res.json();
         })
         .then((body) => {
           if (body?.data?.employeeNumber) {
-            setEmployeeId(body.data.employeeNumber);
+            const nextNum = body.data.employeeNumber;
+            setEmployeeId(nextNum);
             setFormData((prev) => ({
               ...prev,
-              general: { ...prev.general, employeeId: body.data.employeeNumber },
+              general: { ...prev.general, employeeId: nextNum },
             }));
+            if (savedStepDataRef.current['general']) {
+              (savedStepDataRef.current['general'] as Record<string, unknown>).employeeId = nextNum;
+            }
           }
         })
         .catch(() => {
@@ -362,6 +384,9 @@ export function EmployeeRegistration({
             ...prev,
             general: { ...prev.general, employeeId: 'EMP2026001' },
           }));
+          if (savedStepDataRef.current['general']) {
+            (savedStepDataRef.current['general'] as Record<string, unknown>).employeeId = 'EMP2026001';
+          }
         });
     }
   }, [initialDraft?.employeeId]);
@@ -544,12 +569,201 @@ export function EmployeeRegistration({
     return toReviewSectionData(formData);
   }, [formData]);
 
+  // Employee Identity Context
+  const employeeFullName = useMemo(() => {
+    const parts = [
+      formData.personal.firstName,
+      formData.personal.middleName,
+      formData.personal.lastName,
+    ]
+      .map((s) => s?.trim())
+      .filter(Boolean);
+    if (parts.length > 0) return parts.join(' ');
+    if (formData.personal.preferredName?.trim()) return formData.personal.preferredName.trim();
+    if (initialDraft?.employeeName && initialDraft.employeeName !== 'Draft Employee') {
+      return initialDraft.employeeName;
+    }
+    return null;
+  }, [
+    formData.personal.firstName,
+    formData.personal.middleName,
+    formData.personal.lastName,
+    formData.personal.preferredName,
+    initialDraft?.employeeName,
+  ]);
+
+  const currentEmployeeNumber =
+    formData.general.employeeId || employeeId || initialDraft?.employeeId || null;
+
+  const employeeIdentityContext = useMemo(() => {
+    if (employeeFullName && currentEmployeeNumber) {
+      return `${employeeFullName} • ${currentEmployeeNumber}`;
+    }
+    if (employeeFullName) return employeeFullName;
+    if (currentEmployeeNumber) return currentEmployeeNumber;
+    return null;
+  }, [employeeFullName, currentEmployeeNumber]);
+
+  // Checkpoint snapshots for each section to track unsaved edits cleanly
+  const savedStepDataRef = useRef<Record<string, unknown>>(
+    initialDraft?.formData
+      ? {
+          personal: JSON.parse(JSON.stringify(initialDraft.formData.personal)),
+          general: JSON.parse(JSON.stringify(initialDraft.formData.general)),
+          onboarding: JSON.parse(JSON.stringify(initialDraft.formData.onboarding)),
+          skills: JSON.parse(JSON.stringify(initialDraft.formData.skills)),
+          emergency: JSON.parse(JSON.stringify(initialDraft.formData.emergency)),
+          accounts: JSON.parse(JSON.stringify(initialDraft.formData.accounts)),
+          online_access: JSON.parse(JSON.stringify(initialDraft.formData.onlineAccess)),
+          working_hours: JSON.parse(JSON.stringify(initialDraft.formData.workingHours)),
+        }
+      : {},
+  );
+
+  const getSectionSnapshot = useCallback(
+    (sectionId: string) => {
+      switch (sectionId) {
+        case 'personal':
+          return JSON.parse(JSON.stringify(formData.personal));
+        case 'general':
+          return JSON.parse(JSON.stringify(formData.general));
+        case 'onboarding':
+          return JSON.parse(JSON.stringify(formData.onboarding));
+        case 'skills':
+          return JSON.parse(JSON.stringify(formData.skills));
+        case 'emergency':
+          return JSON.parse(JSON.stringify(formData.emergency));
+        case 'accounts':
+          return JSON.parse(JSON.stringify(formData.accounts));
+        case 'online_access':
+          return JSON.parse(JSON.stringify(formData.onlineAccess));
+        case 'working_hours':
+          return JSON.parse(JSON.stringify(formData.workingHours));
+        case 'documents':
+          return JSON.parse(
+            JSON.stringify({
+              documents: formData.documents,
+              documentsList,
+              isExperiencedHire,
+              photo: passportPhoto.fileName,
+            }),
+          );
+        case 'review':
+          return {};
+        default:
+          return JSON.parse(JSON.stringify(customFieldValues));
+      }
+    },
+    [formData, documentsList, isExperiencedHire, passportPhoto, customFieldValues],
+  );
+
+  // Initialize checkpoint on mount for the initial activeSection
+  useEffect(() => {
+    if (!savedStepDataRef.current[activeSection]) {
+      savedStepDataRef.current[activeSection] = getSectionSnapshot(activeSection);
+    }
+  }, [activeSection, getSectionSnapshot]);
+
+  const isSectionDirty = useCallback(
+    (sectionId: string) => {
+      if (sectionId === 'review') return false;
+      const snapshot = savedStepDataRef.current[sectionId];
+      if (!snapshot) return false;
+      const current = getSectionSnapshot(sectionId);
+      return JSON.stringify(current) !== JSON.stringify(snapshot);
+    },
+    [getSectionSnapshot],
+  );
+
+  const revertSectionToSnapshot = useCallback(
+    (sectionId: string) => {
+      const snapshot = savedStepDataRef.current[sectionId];
+      if (!snapshot) return;
+      switch (sectionId) {
+        case 'personal':
+          setFormData((prev) => ({ ...prev, personal: JSON.parse(JSON.stringify(snapshot)) }));
+          break;
+        case 'general':
+          setFormData((prev) => ({ ...prev, general: JSON.parse(JSON.stringify(snapshot)) }));
+          break;
+        case 'onboarding':
+          setFormData((prev) => ({ ...prev, onboarding: JSON.parse(JSON.stringify(snapshot)) }));
+          break;
+        case 'skills':
+          setFormData((prev) => ({ ...prev, skills: JSON.parse(JSON.stringify(snapshot)) }));
+          break;
+        case 'emergency':
+          setFormData((prev) => ({ ...prev, emergency: JSON.parse(JSON.stringify(snapshot)) }));
+          break;
+        case 'accounts':
+          setFormData((prev) => ({ ...prev, accounts: JSON.parse(JSON.stringify(snapshot)) }));
+          break;
+        case 'online_access':
+          setFormData((prev) => ({ ...prev, onlineAccess: JSON.parse(JSON.stringify(snapshot)) }));
+          break;
+        case 'working_hours':
+          setFormData((prev) => ({ ...prev, workingHours: JSON.parse(JSON.stringify(snapshot)) }));
+          break;
+        case 'documents': {
+          const docSnap = snapshot as {
+            documents: Chapter09DocumentsState;
+            documentsList: DocumentItemState[];
+            isExperiencedHire: boolean;
+          };
+          if (docSnap.documents) {
+            setFormData((prev) => ({
+              ...prev,
+              documents: JSON.parse(JSON.stringify(docSnap.documents)),
+            }));
+          }
+          if (docSnap.documentsList) {
+            setDocumentsList(JSON.parse(JSON.stringify(docSnap.documentsList)));
+          }
+          if (docSnap.isExperiencedHire !== undefined) {
+            setIsExperiencedHire(docSnap.isExperiencedHire);
+          }
+          break;
+        }
+        case 'review':
+          break;
+        default:
+          setCustomFieldValues(JSON.parse(JSON.stringify(snapshot)));
+          break;
+      }
+    },
+    [],
+  );
+
+  // Single reliable navigation method that updates both state & searchParams
+  const navigateToSection = useCallback(
+    (id: string) => {
+      setActiveSection(id as RegistrationSectionId);
+      if (!savedStepDataRef.current[id]) {
+        savedStepDataRef.current[id] = getSectionSnapshot(id);
+      }
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.delete('section');
+          next.set('chapter', id);
+          return next;
+        },
+        { replace: true },
+      );
+      if (contentContainerRef.current) {
+        contentContainerRef.current.scrollTop = 0;
+      }
+    },
+    [setSearchParams, getSectionSnapshot],
+  );
+
   // Drafts & Unsaved Changes State
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(
     initialDraft ? initialDraft.id : null,
   );
   const [isDraftsModalOpen, setIsDraftsModalOpen] = useState(false);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [pendingDestination, setPendingDestination] = useState<string | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
   const [draftsList, setDraftsList] = useState<EmployeeRegistrationDraft[]>(() => {
@@ -575,73 +789,156 @@ export function EmployeeRegistration({
     setTimeout(() => setToastMsg(null), 3500);
   };
 
-  const handleBack = () => {
+  const handleSaveDraft = useCallback(
+    (overrideExit = false) => {
+      const draftId = currentDraftId || `draft-${Date.now()}`;
+      if (!currentDraftId) {
+        setCurrentDraftId(draftId);
+      }
+
+      const empName =
+        employeeFullName ||
+        [formData.personal.firstName, formData.personal.lastName].filter(Boolean).join(' ') ||
+        formData.personal.preferredName ||
+        reviewData.personal.fullName ||
+        'Draft Employee';
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      const lastUpdated = `Today at ${timeStr}`;
+
+      const newDraft: EmployeeRegistrationDraft = {
+        id: draftId,
+        employeeId: currentEmployeeNumber || employeeId,
+        employeeName: empName,
+        activeSection,
+        completedSectionsCount: 8,
+        pendingSectionLabels: ['Personal Information', 'Documents'],
+        lastUpdated,
+        reviewData,
+        formData,
+      };
+
+      setDraftsList((prev) => {
+        const exists = prev.some((d) => d.id === draftId);
+        const nextList = exists
+          ? prev.map((d) => (d.id === draftId ? newDraft : d))
+          : [newDraft, ...prev];
+        try {
+          localStorage.setItem('bezent_hrms_registration_drafts', JSON.stringify(nextList));
+        } catch {
+          // fallback
+        }
+        return nextList;
+      });
+
+      // Update checkpoint for the active section so it is considered saved
+      savedStepDataRef.current[activeSection] = getSectionSnapshot(activeSection);
+
+      showToast('Draft saved successfully.');
+
+      if (overrideExit) {
+        setShowUnsavedModal(false);
+        setPendingDestination(null);
+        onCancel();
+      }
+    },
+    [
+      currentDraftId,
+      employeeFullName,
+      formData,
+      reviewData,
+      currentEmployeeNumber,
+      employeeId,
+      activeSection,
+      getSectionSnapshot,
+      onCancel,
+    ],
+  );
+
+  // Protected navigation handler that verifies unsaved changes before moving
+  const requestNavigation = useCallback(
+    (destination: string | '__EXIT__') => {
+      if (destination === activeSection) return;
+
+      if (isSectionDirty(activeSection)) {
+        setPendingDestination(destination);
+        setShowUnsavedModal(true);
+      } else {
+        if (destination === '__EXIT__') {
+          onCancel();
+        } else {
+          navigateToSection(destination);
+        }
+      }
+    },
+    [activeSection, isSectionDirty, onCancel, navigateToSection],
+  );
+
+  const handleModalCancel = useCallback(() => {
+    setShowUnsavedModal(false);
+    setPendingDestination(null);
+  }, []);
+
+  const handleModalLeaveWithoutSaving = useCallback(() => {
+    const dest = pendingDestination;
+    revertSectionToSnapshot(activeSection);
+    setShowUnsavedModal(false);
+    setPendingDestination(null);
+    if (dest === '__EXIT__') {
+      onCancel();
+    } else if (dest) {
+      navigateToSection(dest);
+    }
+  }, [activeSection, pendingDestination, revertSectionToSnapshot, onCancel, navigateToSection]);
+
+  const handleModalSaveDraft = useCallback(() => {
+    const dest = pendingDestination;
+    handleSaveDraft(false);
+    setShowUnsavedModal(false);
+    setPendingDestination(null);
+    if (dest === '__EXIT__') {
+      onCancel();
+    } else if (dest) {
+      navigateToSection(dest);
+    }
+  }, [pendingDestination, handleSaveDraft, onCancel, navigateToSection]);
+
+  const handleBack = useCallback(() => {
     const currentIndex = allSections.findIndex((s) => s.id === activeSection);
     if (currentIndex > 0) {
-      handleSelectChapter(allSections[currentIndex - 1]!.id);
+      requestNavigation(allSections[currentIndex - 1]!.id);
     }
-  };
+  }, [allSections, activeSection, requestNavigation]);
 
-  const handleNext = () => {
+  const isNavigatingRef = useRef(false);
+
+  const handleNext = useCallback(() => {
+    if (isNavigatingRef.current) return;
+
     // Company-configured required fields of this section must be filled first.
     const missing = registrationConfig.validateSection(activeSection);
     if (missing.length > 0) {
       showToast('Complete the required fields before continuing.');
       return;
     }
+
+    isNavigatingRef.current = true;
+    setTimeout(() => {
+      isNavigatingRef.current = false;
+    }, 300);
+
+    // Checkpoint current section data so it is saved/clean
+    savedStepDataRef.current[activeSection] = getSectionSnapshot(activeSection);
+
     const currentIndex = allSections.findIndex((s) => s.id === activeSection);
     if (currentIndex < allSections.length - 1) {
-      handleSelectChapter(allSections[currentIndex + 1]!.id);
-    }
-  };
-
-  const handleSaveDraft = (overrideExit = false) => {
-    const draftId = currentDraftId || `draft-${Date.now()}`;
-    if (!currentDraftId) {
-      setCurrentDraftId(draftId);
-    }
-
-    const empName =
-      [formData.personal.firstName, formData.personal.lastName].filter(Boolean).join(' ') ||
-      formData.personal.preferredName ||
-      reviewData.personal.fullName ||
-      'Draft Employee';
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-    const lastUpdated = `Today at ${timeStr}`;
-
-    const newDraft: EmployeeRegistrationDraft = {
-      id: draftId,
-      employeeId,
-      employeeName: empName,
-      activeSection,
-      completedSectionsCount: 8,
-      pendingSectionLabels: ['Personal Information', 'Documents'],
-      lastUpdated,
-      reviewData,
-      formData,
-    };
-
-    setDraftsList((prev) => {
-      const exists = prev.some((d) => d.id === draftId);
-      const nextList = exists
-        ? prev.map((d) => (d.id === draftId ? newDraft : d))
-        : [newDraft, ...prev];
-      try {
-        localStorage.setItem('bezent_hrms_registration_drafts', JSON.stringify(nextList));
-      } catch {
-        // fallback
+      const nextSectionId = allSections[currentIndex + 1]!.id;
+      if (!savedStepDataRef.current[nextSectionId]) {
+        savedStepDataRef.current[nextSectionId] = getSectionSnapshot(nextSectionId);
       }
-      return nextList;
-    });
-
-    showToast('Draft saved successfully.');
-
-    if (overrideExit) {
-      setShowUnsavedModal(false);
-      onCancel();
+      navigateToSection(nextSectionId);
     }
-  };
+  }, [activeSection, allSections, registrationConfig, getSectionSnapshot, navigateToSection]);
 
   const handleContinueDraft = (draft: EmployeeRegistrationDraft) => {
     setCurrentDraftId(draft.id);
@@ -664,6 +961,20 @@ export function EmployeeRegistration({
     if (draft.reviewData?.documents?.isExperiencedHire !== undefined) {
       setIsExperiencedHire(draft.reviewData.documents.isExperiencedHire);
     }
+
+    // Reset saved checkpoints to the restored draft values so the loaded draft is established as clean baseline
+    savedStepDataRef.current = {};
+    if (draft.formData) {
+      savedStepDataRef.current.personal = JSON.parse(JSON.stringify(draft.formData.personal));
+      savedStepDataRef.current.general = JSON.parse(JSON.stringify(draft.formData.general));
+      savedStepDataRef.current.onboarding = JSON.parse(JSON.stringify(draft.formData.onboarding));
+      savedStepDataRef.current.skills = JSON.parse(JSON.stringify(draft.formData.skills));
+      savedStepDataRef.current.emergency = JSON.parse(JSON.stringify(draft.formData.emergency));
+      savedStepDataRef.current.accounts = JSON.parse(JSON.stringify(draft.formData.accounts));
+      savedStepDataRef.current.online_access = JSON.parse(JSON.stringify(draft.formData.onlineAccess));
+      savedStepDataRef.current.working_hours = JSON.parse(JSON.stringify(draft.formData.workingHours));
+    }
+    savedStepDataRef.current[draft.activeSection] = getSectionSnapshot(draft.activeSection);
 
     setIsDraftsModalOpen(false);
     showToast(`Draft restored for ${draft.employeeName || draft.employeeId}.`);
@@ -719,6 +1030,7 @@ export function EmployeeRegistration({
       <div className="bezent-modal__header bezent-modal__header--brand">
         <PageHeader
           title="Employee Registration"
+          subtitle={employeeIdentityContext ?? undefined}
           actions={
             <Inline gap="md" align="center">
               <button
@@ -741,7 +1053,7 @@ export function EmployeeRegistration({
       <ChapterFocusCarousel
         chapters={chapterSteps}
         activeId={activeSection}
-        onSelectChapter={handleSelectChapter}
+        onSelectChapter={(id) => requestNavigation(id)}
       />
 
       {/* Region C: Scrollable Active Tab Content */}
@@ -803,7 +1115,7 @@ export function EmployeeRegistration({
           ) : activeSection === 'review' ? (
             <ReviewSection
               data={reviewData}
-              onEditSection={(sectionId) => setActiveSection(sectionId)}
+              onEditSection={(sectionId) => requestNavigation(sectionId)}
               onDeleteFamilyMember={handleDeleteFamilyMember}
               onDeleteNominee={handleDeleteNominee}
               onDeleteTask={handleDeleteTask}
@@ -968,7 +1280,7 @@ export function EmployeeRegistration({
               <Button
                 variant="secondary"
                 type="button"
-                disabled={activeSection === 'general'}
+                disabled={activeSection === allSections[0]?.id}
                 onClick={handleBack}
               >
                 ← Back
@@ -976,7 +1288,11 @@ export function EmployeeRegistration({
               <Button variant="secondary" type="button" onClick={() => handleSaveDraft(false)}>
                 💾 Save Draft
               </Button>
-              <Button variant="secondary" type="button" onClick={() => setShowUnsavedModal(true)}>
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={() => requestNavigation('__EXIT__')}
+              >
                 Cancel
               </Button>
             </Actions>
@@ -1004,18 +1320,22 @@ export function EmployeeRegistration({
       {showUnsavedModal && (
         <Modal
           isOpen={showUnsavedModal}
-          onClose={() => setShowUnsavedModal(false)}
+          onClose={handleModalCancel}
           title="Unsaved Changes"
           size="sm"
           footer={
             <Actions align="end" gap="sm">
-              <Button variant="secondary" type="button" onClick={() => setShowUnsavedModal(false)}>
+              <Button variant="secondary" type="button" onClick={handleModalCancel}>
                 Cancel
               </Button>
-              <Button variant="secondary" type="button" onClick={onCancel}>
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={handleModalLeaveWithoutSaving}
+              >
                 Leave Without Saving
               </Button>
-              <Button variant="primary" type="button" onClick={() => handleSaveDraft(true)}>
+              <Button variant="primary" type="button" onClick={handleModalSaveDraft}>
                 Save Draft
               </Button>
             </Actions>

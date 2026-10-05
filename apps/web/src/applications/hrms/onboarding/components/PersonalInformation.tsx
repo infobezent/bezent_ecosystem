@@ -280,7 +280,16 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
   // 13-14. Parent / Guardian Details (Structured Repeatable)
   const [parentGuardians, setParentGuardians] = useState<
     Array<{ id: string; relationship: ParentGuardianRelationship; name: string }>
-  >([{ id: 'pg_1', relationship: 'Father', name: '' }]);
+  >(() => {
+    if (data?.parentGuardians && data.parentGuardians.length > 0) {
+      return data.parentGuardians.map((pg, idx) => ({
+        id: pg.id || `pg_${idx + 1}`,
+        relationship: (pg.relationship as ParentGuardianRelationship) || 'Father',
+        name: pg.name || '',
+      }));
+    }
+    return [];
+  });
 
   const addParentGuardian = () => {
     setParentGuardians((prev) => [
@@ -323,26 +332,40 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
   };
 
   // 15. Family Members (Repeatable)
-  const [familyMembers, setFamilyMembers] = useState<FamilyMemberRecord[]>([
-    {
-      id: 'fam_1',
-      name: '',
-      relationship: 'Spouse',
-      dob: '',
-      countryCode: '+91',
-      phone: '',
-    },
-  ]);
+  const [familyMembers, setFamilyMembers] = useState<FamilyMemberRecord[]>(() => {
+    if (data?.familyMembers && data.familyMembers.length > 0) {
+      return data.familyMembers.map((f, idx) => ({
+        id: f.id || `fam_${idx + 1}`,
+        name: f.name || '',
+        relationship: f.relationship || 'Spouse',
+        otherRelationship:
+          f.relationship !== 'Spouse' && f.relationship !== 'Child' && f.relationship !== 'Parent'
+            ? f.relationship
+            : '',
+        dob: f.dob || '',
+        countryCode: '+91',
+        phone: f.phone || '',
+      }));
+    }
+    return [];
+  });
 
   // 16. Nomination Details (Repeatable)
-  const [nominees, setNominees] = useState<NomineeRecord[]>([
-    {
-      id: 'nom_1',
-      name: '',
-      relationship: 'Spouse',
-      sharePercentage: 100,
-    },
-  ]);
+  const [nominees, setNominees] = useState<NomineeRecord[]>(() => {
+    if (data?.nominationDetails && data.nominationDetails.length > 0) {
+      return data.nominationDetails.map((n, idx) => ({
+        id: n.id || `nom_${idx + 1}`,
+        name: n.nomineeName || '',
+        relationship: n.relationship || 'Spouse',
+        otherRelationship:
+          n.relationship !== 'Spouse' && n.relationship !== 'Child' && n.relationship !== 'Parent'
+            ? n.relationship
+            : '',
+        sharePercentage: n.percentage ?? 100,
+      }));
+    }
+    return [];
+  });
 
   // 17. Time Zone
   const [timeZone, setTimeZone] = useState('(GMT+05:30) Asia/Kolkata (IST)');
@@ -389,7 +412,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
       isFirstRender.current = false;
       return;
     }
-    onChange?.({
+    const updated: Partial<Chapter02PersonalState> = {
       firstName,
       middleName,
       lastName,
@@ -435,7 +458,13 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
         relationship: n.relationship === 'other' ? n.otherRelationship || 'Other' : n.relationship,
         percentage: Number(n.sharePercentage) || 0,
       })),
-    });
+    };
+
+    if (data && JSON.stringify(updated) === JSON.stringify(data)) {
+      return;
+    }
+
+    onChange?.(updated);
   }, [
     firstName,
     middleName,
@@ -471,6 +500,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
     familyMembers,
     parentGuardians,
     nominees,
+    data,
     onChange,
   ]);
 
