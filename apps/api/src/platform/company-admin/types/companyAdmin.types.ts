@@ -45,27 +45,10 @@ export interface CompanyAdminDashboard {
   }>;
 }
 
-export interface CompanyProfile {
-  id: string;
-  tenantId: string;
-  name: string;
-  legalName: string | null;
-  code: string;
-  businessEmail: string | null;
-  contactPhone: string | null;
-  country: string | null;
-  timeZone: string | null;
-  status: 'active' | 'inactive' | 'suspended';
-  createdAt: Date | string;
-}
-
-export interface UpdateCompanyProfileInput {
-  legalName?: string | null;
-  businessEmail?: string | null;
-  contactPhone?: string | null;
-  country?: string | null;
-  timeZone?: string | null;
-}
+export type {
+  CompanyProfile,
+  UpdateCompanyProfileInput,
+} from '../../companies/types/company.types.js';
 
 export interface CompanyUserItem {
   id: string;

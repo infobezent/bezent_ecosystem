@@ -20,11 +20,9 @@ import {
   accessResolverService,
   AccessResolverService,
 } from '../../access/service/accessResolver.service.js';
-import {
-  roleManagementService,
-  RoleManagementService,
-} from '../../access/service/roleManagement.service.js';
+import { roleManagementService, RoleManagementService } from '../../access/service/roleManagement.service.js';
 import { emailService, EmailService } from '../../email/service/email.service.js';
+import { companyService, CompanyService } from '../../companies/service/company.service.js';
 import { getDb } from '../../../db/connection.js';
 import type {
   AuthorizedCompanySummary,
@@ -62,6 +60,7 @@ export class CompanyAdminService {
     private readonly resolver: AccessResolverService = accessResolverService,
     private readonly roleMgmt: RoleManagementService = roleManagementService,
     private readonly email: EmailService = emailService,
+    private readonly companySvc: CompanyService = companyService,
   ) {}
 
   /**
@@ -123,24 +122,7 @@ export class CompanyAdminService {
   }
 
   async getProfile(companyId: string): Promise<CompanyProfile> {
-    const comp = await this.repo.getCompanyProfile(companyId);
-    if (!comp) {
-      throw new NotFoundError(`Company '${companyId}' not found`);
-    }
-
-    return {
-      id: comp.id,
-      tenantId: comp.tenantId,
-      name: comp.name,
-      legalName: comp.legalName,
-      code: comp.code,
-      businessEmail: comp.businessEmail,
-      contactPhone: comp.contactPhone,
-      country: comp.country,
-      timeZone: comp.timeZone,
-      status: comp.status,
-      createdAt: comp.createdAt,
-    };
+    return this.companySvc.getCompanyProfile(companyId);
   }
 
   async updateProfile(
@@ -149,52 +131,7 @@ export class CompanyAdminService {
     input: UpdateCompanyProfileInput,
     actor: { id: string; email: string },
   ): Promise<CompanyProfile> {
-    const comp = await this.repo.getCompanyProfile(companyId);
-    if (!comp) {
-      throw new NotFoundError(`Company '${companyId}' not found`);
-    }
-
-    if (input.businessEmail) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(input.businessEmail.trim())) {
-        throw new BadRequestError('Invalid business email address');
-      }
-    }
-
-    const updated = await this.repo.updateCompanyProfile(companyId, {
-      legalName: input.legalName !== undefined ? input.legalName : comp.legalName,
-      businessEmail:
-        input.businessEmail !== undefined ? input.businessEmail?.trim() : comp.businessEmail,
-      contactPhone:
-        input.contactPhone !== undefined ? input.contactPhone?.trim() : comp.contactPhone,
-      country: input.country !== undefined ? input.country?.trim() : comp.country,
-      timeZone: input.timeZone !== undefined ? input.timeZone?.trim() : comp.timeZone,
-    });
-
-    await this.audit.logEvent({
-      actorUserId: actor.id,
-      actorEmail: actor.email,
-      action: 'company_profile_updated',
-      targetType: 'company',
-      targetId: companyId,
-      tenantId,
-      companyId,
-      metadata: { fieldsUpdated: Object.keys(input) },
-    });
-
-    return {
-      id: updated.id,
-      tenantId: updated.tenantId,
-      name: updated.name,
-      legalName: updated.legalName,
-      code: updated.code,
-      businessEmail: updated.businessEmail,
-      contactPhone: updated.contactPhone,
-      country: updated.country,
-      timeZone: updated.timeZone,
-      status: updated.status,
-      createdAt: updated.createdAt,
-    };
+    return this.companySvc.updateCompanyProfile(tenantId, companyId, input, actor);
   }
 
   async listUsers(
@@ -227,9 +164,33 @@ export class CompanyAdminService {
       throw new BadRequestError(`Invalid role '${input.role}'`);
     }
 
-    // The identity is shared across companies; a new one is passwordless and
-    // signs in with Email OTP (ADR-018).
+    // The identity is shared across companies within the same tenant; a new one
+    // is passwordless and signs in with Email OTP (ADR-018).
     const existingUser = await this.userRepo.findByEmail(email);
+
+    // Cross-tenant invariant check (Phase 0):
+    // A normal customer user must not be silently associated with multiple customer tenants.
+    // 1. If an existing user identity has memberships in another tenant, reject.
+    if (existingUser?.memberships && existingUser.memberships.length > 0) {
+      const otherTenant = existingUser.memberships.find((m) => m.tenantId !== tenantId);
+      if (otherTenant) {
+        throw new BadRequestError(
+          `User with email '${email}' is already associated with another tenant. Cross-tenant user invitation is prohibited.`,
+          'CROSS_TENANT_INVITATION_PROHIBITED',
+        );
+      }
+    }
+
+    // 2. If a pending invitation for this email exists in another tenant, reject.
+    const pendingInvites = await this.repo.findActiveInvitationsByEmail(email);
+    const otherTenantInvite = pendingInvites.find((inv) => inv.tenantId !== tenantId);
+    if (otherTenantInvite) {
+      throw new BadRequestError(
+        `User with email '${email}' is already associated with another tenant. Cross-tenant user invitation is prohibited.`,
+        'CROSS_TENANT_INVITATION_PROHIBITED',
+      );
+    }
+
     const existingMem = existingUser
       ? await this.repo.findMembership(companyId, existingUser.id)
       : null;

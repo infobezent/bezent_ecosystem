@@ -46,6 +46,17 @@ export class AccessRepository {
     return row ?? null;
   }
 
+  /** Active companies belonging to any of the specified tenants. */
+  async listActiveCompanyIdsForTenants(tenantIds: string[]): Promise<string[]> {
+    if (tenantIds.length === 0) return [];
+    const db = getDb();
+    const rows = await db
+      .select({ id: companies.id })
+      .from(companies)
+      .where(and(inArray(companies.tenantId, tenantIds), eq(companies.status, 'active')));
+    return rows.map((r) => r.id);
+  }
+
   /** Active roles held by the user in one company (inactive roles grant nothing). */
   async listActiveRolesForUser(
     userId: string,

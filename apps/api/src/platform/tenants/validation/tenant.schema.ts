@@ -1,5 +1,9 @@
 import { ValidationError } from '../../../app/errors/AppError.js';
-import type { CreateTenantDto, UpdateTenantDto } from '../types/tenant.types.js';
+import type {
+  CreateTenantDto,
+  UpdateTenantDto,
+  UpdateCompanyCapacityDto,
+} from '../types/tenant.types.js';
 
 export function validateCreateTenant(body: unknown): CreateTenantDto {
   if (typeof body !== 'object' || body === null) {
@@ -32,6 +36,19 @@ export function validateCreateTenant(body: unknown): CreateTenantDto {
     }
   }
 
+  let validatedMaxCompanies: number | undefined = undefined;
+  if (data.maxCompanies !== undefined && data.maxCompanies !== null) {
+    if (
+      typeof data.maxCompanies !== 'number' ||
+      !Number.isInteger(data.maxCompanies) ||
+      data.maxCompanies < 1
+    ) {
+      errors.maxCompanies = 'maxCompanies must be a positive integer';
+    } else {
+      validatedMaxCompanies = data.maxCompanies;
+    }
+  }
+
   if (Object.keys(errors).length > 0) {
     throw new ValidationError('Validation failed', errors);
   }
@@ -40,6 +57,7 @@ export function validateCreateTenant(body: unknown): CreateTenantDto {
     id: typeof data.id === 'string' && data.id.trim() ? data.id.trim() : undefined,
     name: (data.name as string).trim(),
     code: (data.code as string).trim().toUpperCase(),
+    maxCompanies: validatedMaxCompanies,
     contactEmail: data.contactEmail ? (data.contactEmail as string).trim() : null,
     contactPhone: data.contactPhone ? String(data.contactPhone).trim() : null,
     status: (data.status as CreateTenantDto['status']) ?? 'active',
@@ -89,3 +107,31 @@ export function validateUpdateTenant(body: unknown): UpdateTenantDto {
         : undefined,
   };
 }
+
+export function validateUpdateCompanyCapacity(body: unknown): UpdateCompanyCapacityDto {
+  if (typeof body !== 'object' || body === null) {
+    throw new ValidationError('Invalid request body');
+  }
+
+  const data = body as Record<string, unknown>;
+  const errors: Record<string, string> = {};
+
+  if (data.maxCompanies === undefined || data.maxCompanies === null) {
+    errors.maxCompanies = 'maxCompanies is required';
+  } else if (
+    typeof data.maxCompanies !== 'number' ||
+    !Number.isInteger(data.maxCompanies) ||
+    data.maxCompanies < 1
+  ) {
+    errors.maxCompanies = 'maxCompanies must be a positive integer';
+  }
+
+  if (Object.keys(errors).length > 0) {
+    throw new ValidationError('Validation failed', errors);
+  }
+
+  return {
+    maxCompanies: data.maxCompanies as number,
+  };
+}
+

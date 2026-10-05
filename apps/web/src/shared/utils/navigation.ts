@@ -1,13 +1,21 @@
 import type { ApplicationNavigation, NavDestination } from '../types/navigation';
 
-/** Full path of a destination, or of one of its children. */
 export function destinationPath(
   basePath: string,
   destination: NavDestination,
   childId?: string,
 ): string {
-  const base = `${basePath}/${destination.segment}`;
-  return childId ? `${base}/${childId}` : base;
+  const targetChildId =
+    childId ?? (destination.children?.length === 1 ? destination.children[0]?.id : undefined);
+  if (targetChildId) {
+    const child = destination.children?.find((c) => c.id === targetChildId);
+    if (child?.path) {
+      const cleanPath = child.path.replace(/^\//, '');
+      return `${basePath}/${cleanPath}`;
+    }
+    return `${basePath}/${destination.segment}/${targetChildId}`;
+  }
+  return `${basePath}/${destination.segment}`;
 }
 
 export interface ActiveNavigation {
@@ -25,15 +33,26 @@ export function resolveActiveNavigation(
   pathname: string,
 ): ActiveNavigation | undefined {
   const normalized = pathname.replace(/\/+$/, '');
+
+  // 1. Check all children across all destinations first (more specific matches, including detail routes)
   for (const destination of navigation.destinations) {
-    const root = destinationPath(basePath, destination);
-    if (normalized === root) return { destinationId: destination.id };
-    if (normalized.startsWith(`${root}/`)) {
-      const childId = destination.children?.find(
-        (child) => normalized === destinationPath(basePath, destination, child.id),
-      )?.id;
-      return { destinationId: destination.id, childId };
+    if (destination.children) {
+      for (const child of destination.children) {
+        const cPath = destinationPath(basePath, destination, child.id);
+        if (normalized === cPath || normalized.startsWith(`${cPath}/`)) {
+          return { destinationId: destination.id, childId: child.id };
+        }
+      }
     }
   }
+
+  // 2. Check root destination paths
+  for (const destination of navigation.destinations) {
+    const root = destinationPath(basePath, destination);
+    if (normalized === root || normalized.startsWith(`${root}/`)) {
+      return { destinationId: destination.id };
+    }
+  }
+
   return undefined;
 }

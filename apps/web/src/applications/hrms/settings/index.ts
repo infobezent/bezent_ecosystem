@@ -8,10 +8,16 @@ export { AttendanceSettingsSection } from './attendance/AttendanceSettingsSectio
 export { LeaveSettingsSection } from './leave/LeaveSettingsSection';
 export { TimesheetsSettingsSection } from './timesheets/TimesheetsSettingsSection';
 export { PerformanceSettingsSection } from './performance/PerformanceSettingsSection';
-export { OrganizationProfileSection } from './organization/OrganizationProfileSection';
-export { OrganizationStructureSection } from './organization/OrganizationStructureSection';
-export { OrganizationSettingsWorkspace } from './organization/OrganizationSettingsWorkspace';
+export { OrganizationProfileSection } from '../../company-admin/organization/OrganizationProfileSection';
+export { OrganizationStructureSection } from '../../company-admin/organization/OrganizationStructureSection';
+export { DepartmentsSection } from '../../company-admin/organization/DepartmentsSection';
+export { WorkLocationsSection } from '../../company-admin/organization/WorkLocationsSection';
+export { DesignationsSection, JobLevelsGradesSection } from './administration/employee-configuration';
 export { OrganizationProfilePage } from './pages/OrganizationProfilePage';
 export { OrganizationStructurePage } from './pages/OrganizationStructurePage';
+export { DepartmentsPage } from './pages/DepartmentsPage';
+export { DesignationsPage } from './pages/DesignationsPage';
+export { WorkLocationsPage } from './pages/WorkLocationsPage';
+export { JobLevelsGradesPage } from './pages/JobLevelsGradesPage';
 export { DashboardSettingsSection, EmployeesSettingsSection, HRSettingsSection } from './general';
 

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { EmployeeActionRepository } from '../repository/employeeAction.repository.js';
 import { EmployeeRepository } from '../../employees/repository/employee.repository.js';
-import { OrganizationRepository } from '../../organization/repository/organization.repository.js';
+import { OrganizationRepository } from '../../../../platform/organization/repository/organization.repository.js';
 import type {
   EmployeeDetails,
   EmploymentStatus,

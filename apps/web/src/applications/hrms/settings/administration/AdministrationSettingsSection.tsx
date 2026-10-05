@@ -423,7 +423,7 @@ function RoutedAdministrationSettingsSection({
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const subParam = searchParams.get('sub') as OnboardingSecondarySection | null;
+  const rawSubParam = searchParams.get('sub');
   const tabParam = searchParams.get('tab') as AdministrationSettingsTab | null;
 
   const validTabs: AdministrationSettingsTab[] = ['forms', 'onboarding', 'employee-configuration'];
@@ -434,14 +434,24 @@ function RoutedAdministrationSettingsSection({
     'documents',
     'conversion',
   ];
+  const validEmployeeConfigSubs = ['numbering', 'designations', 'job-levels'];
+
+  const isEmpConfigSub = rawSubParam && validEmployeeConfigSubs.includes(rawSubParam);
+  const isOnboardingSub = rawSubParam && validSubs.includes(rawSubParam as OnboardingSecondarySection);
 
   const resolvedInitialTab: AdministrationSettingsTab =
     initialTab ??
-    (subParam ? 'onboarding' : tabParam && validTabs.includes(tabParam) ? tabParam : 'forms');
+    (isEmpConfigSub
+      ? 'employee-configuration'
+      : isOnboardingSub
+        ? 'onboarding'
+        : tabParam && validTabs.includes(tabParam)
+          ? tabParam
+          : 'forms');
 
   const resolvedInitialSecondary: OnboardingSecondarySection =
     initialSecondarySection ??
-    (subParam && validSubs.includes(subParam) ? subParam : 'general');
+    (isOnboardingSub ? (rawSubParam as OnboardingSecondarySection) : 'general');
 
   const handleBack = onBack ?? (() => navigate('/hrms/settings'));
   const handleNavigate = explicitNavigate ?? ((path: string) => navigate(path));
@@ -451,7 +461,7 @@ function RoutedAdministrationSettingsSection({
       (prev) => {
         const next = new URLSearchParams(prev);
         next.set('tab', newTab);
-        if (newTab !== 'onboarding') {
+        if (newTab !== 'onboarding' && newTab !== 'employee-configuration') {
           next.delete('sub');
         }
         return next;

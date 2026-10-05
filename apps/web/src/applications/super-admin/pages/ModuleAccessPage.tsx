@@ -46,7 +46,7 @@ export function ModuleAccessPage() {
         setSelectedTenantId(tenantsRes.items[0]!.id);
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to load module catalog');
+      setError(err instanceof Error ? err.message : 'Failed to load application catalog');
     } finally {
       setLoading(false);
     }
@@ -62,7 +62,7 @@ export function ModuleAccessPage() {
       const statuses = await superAdminApi.getTenantModules(tenantId);
       setModuleStatuses(statuses);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to load module statuses');
+      setError(err instanceof Error ? err.message : 'Failed to load application statuses');
     }
   }, []);
 
@@ -72,37 +72,53 @@ export function ModuleAccessPage() {
     }
   }, [selectedTenantId, fetchTenantModules]);
 
-  const handleToggleModule = async (moduleCode: string, isEnabled: boolean) => {
+  const handleToggleModule = async (item: ModuleCatalogItem, isEnabled: boolean) => {
     if (!selectedTenantId) return;
-    setUpdatingCode(moduleCode);
+
+    if (!isEnabled && item.availability === 'Planned') {
+      setError('This application is planned and is not yet available for customer entitlement.');
+      return;
+    }
+
+    if (isEnabled) {
+      const confirmDisable = confirm(
+        `Disabling this application for the customer will immediately restrict access for all companies under this customer.\n\nExisting company configuration will be preserved if the application is enabled again.\n\nDo you want to proceed?`,
+      );
+      if (!confirmDisable) {
+        return;
+      }
+    }
+
+    setUpdatingCode(item.code);
     setError(null);
     setSuccess(null);
     try {
       if (isEnabled) {
-        await superAdminApi.disableModule(selectedTenantId, moduleCode);
-        setSuccess(`Application module '${moduleCode.toUpperCase()}' has been disabled.`);
+        await superAdminApi.disableModule(selectedTenantId, item.code);
+        setSuccess(`Application '${item.name}' has been disabled for this customer.`);
       } else {
-        await superAdminApi.enableModule(selectedTenantId, moduleCode);
-        setSuccess(`Application module '${moduleCode.toUpperCase()}' has been enabled.`);
+        await superAdminApi.enableModule(selectedTenantId, item.code);
+        setSuccess(`Application '${item.name}' has been enabled for this customer.`);
       }
       await fetchTenantModules(selectedTenantId);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to toggle module entitlement');
+      setError(err instanceof Error ? err.message : 'Failed to toggle application entitlement');
     } finally {
       setUpdatingCode(null);
     }
   };
 
   const getStatusForModule = (code: string): 'enabled' | 'disabled' => {
-    const found = moduleStatuses.find((m) => m.moduleCode === code);
-    return found ? found.status : 'disabled';
+    const found = moduleStatuses.find((m) => m.moduleCode === code && m.companyId === null);
+    if (found) return found.status;
+    return code === 'hrms' ? 'enabled' : 'disabled';
   };
 
   return (
     <Page>
       <PageHeader
         title="Application Access Management"
-        subtitle="Control which business applications (HRMS, CRM, PM) are licensed and active per customer"
+        subtitle="Manage customer-level application entitlement ceilings across the BEZENT ecosystem."
       />
 
       {error && (
@@ -123,7 +139,7 @@ export function ModuleAccessPage() {
             left={
               <Inline gap="md" align="center">
                 <Select
-                  label="Select Customer Tenant"
+                  label="Select Customer"
                   value={selectedTenantId}
                   onChange={(e) => setSelectedTenantId(e.target.value)}
                   options={tenants.map((t) => ({ value: t.id, label: `${t.name} (${t.code})` }))}
@@ -150,6 +166,8 @@ export function ModuleAccessPage() {
                 const status = getStatusForModule(item.code);
                 const isEnabled = status === 'enabled';
                 const isUpdating = updatingCode === item.code;
+                const isPlanned = item.availability === 'Planned';
+                const switchDisabled = isUpdating || !selectedTenantId || (isPlanned && !isEnabled);
 
                 return (
                   <Card key={item.code}>
@@ -162,21 +180,46 @@ export function ModuleAccessPage() {
                             {status.toUpperCase()}
                           </Badge>
                           <Badge variant="info">{item.category}</Badge>
+                          {isPlanned ? (
+                            isEnabled ? (
+                              <Badge variant="warning">Legacy Enabled</Badge>
+                            ) : (
+                              <Badge variant="neutral">Coming Soon</Badge>
+                            )
+                          ) : (
+                            <Badge variant="success">Generally Available</Badge>
+                          )}
                         </Inline>
                         <span>{item.description}</span>
                         <span className="bezent-caption">
-                          Version {item.version} • Availability: {item.availability}
+                          Version {item.version} • Availability: {isPlanned ? 'Coming Soon' : 'Generally Available'}
                         </span>
+                        {isPlanned && !isEnabled && (
+                          <span className="bezent-caption">
+                            Coming Soon — Not available for new enablement
+                          </span>
+                        )}
+                        {isPlanned && isEnabled && (
+                          <span className="bezent-caption">
+                            Enabled via legacy configuration. Can be disabled to enforce customer ceiling.
+                          </span>
+                        )}
                       </Stack>
 
                       <Inline gap="md" align="center">
                         <Switch
                           checked={isEnabled}
-                          disabled={isUpdating || !selectedTenantId}
-                          onChange={() => handleToggleModule(item.code, isEnabled)}
+                          disabled={switchDisabled}
+                          onChange={() => handleToggleModule(item, isEnabled)}
                         />
                         <span className="bezent-caption">
-                          {isUpdating ? 'Updating...' : isEnabled ? 'Active' : 'Disabled'}
+                          {isUpdating
+                            ? 'Updating...'
+                            : isPlanned && !isEnabled
+                              ? 'Unavailable'
+                              : isEnabled
+                                ? 'Enabled'
+                                : 'Disabled'}
                         </span>
                       </Inline>
                     </Inline>

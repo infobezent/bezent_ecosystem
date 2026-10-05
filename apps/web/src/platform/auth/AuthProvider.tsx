@@ -24,11 +24,14 @@ import {
 } from './session';
 
 export type AuthStatus = 'loading' | 'anonymous' | 'authenticated' | 'error';
+export type AuthErrorKind = 'network' | 'database_unavailable' | 'server_error' | 'forbidden' | null;
 
 export interface AuthContextValue {
   status: AuthStatus;
   /** Why the session could not be restored (status 'error'); never fake data. */
   error: string | null;
+  /** Structured classification of why the session could not be restored. */
+  errorKind: AuthErrorKind;
   /** Resolved access of the signed-in user; null unless authenticated. */
   access: AccessOverview | null;
   /** The selected company's access, or null (e.g. a Super Admin without companies). */
@@ -65,6 +68,45 @@ function chooseCompany(access: AccessOverview, preferred: string | null): string
   return access.companies[0]?.companyId ?? null;
 }
 
+export function classifyAuthError(err: unknown): { kind: AuthErrorKind; message: string } {
+  if (err instanceof AuthApiError) {
+    if (err.status === 403) {
+      return {
+        kind: 'forbidden',
+        message: err.message || 'You do not have permission to access this resource or company.',
+      };
+    }
+    if (err.code === 'NETWORK_ERROR' || err.status === 0) {
+      return {
+        kind: 'network',
+        message: 'BEZENT API could not be reached. Check that the backend server is running.',
+      };
+    }
+    if (err.code === 'DATABASE_UNAVAILABLE' || err.status === 503) {
+      return {
+        kind: 'database_unavailable',
+        message:
+          err.message ||
+          'Database service is temporarily unavailable. Check that MySQL Server 8.4 is running.',
+      };
+    }
+    if (err.status >= 500) {
+      return {
+        kind: 'server_error',
+        message: err.message || 'A server error occurred while restoring your session.',
+      };
+    }
+    return {
+      kind: 'server_error',
+      message: err.message || 'An error occurred while restoring your session.',
+    };
+  }
+  return {
+    kind: 'server_error',
+    message: err instanceof Error ? err.message : 'Your session could not be restored.',
+  };
+}
+
 export function isTransientAuthError(err: unknown): boolean {
   if (err instanceof AuthApiError) {
     if (err.status === 401 || err.status === 403) return false;
@@ -86,6 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     getSessionToken() ? 'loading' : 'anonymous',
   );
   const [error, setError] = useState<string | null>(null);
+  const [errorKind, setErrorKind] = useState<AuthErrorKind>(null);
   const [access, setAccess] = useState<AccessOverview | null>(null);
   const [activeCompanyId, setActiveCompanyIdState] = useState<string | null>(() =>
     getActiveCompanyId(),
@@ -97,6 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAccess(null);
     setActiveCompanyIdState(null);
     setError(null);
+    setErrorKind(null);
     setStatus('anonymous');
   }, []);
 
@@ -106,6 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setActiveCompanyIdState(companyId);
     setAccess(next);
     setError(null);
+    setErrorKind(null);
     setStatus('authenticated');
   }, []);
 
@@ -121,12 +166,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (retryCount === 0) {
         setStatus('loading');
         setError(null);
+        setErrorKind(null);
       }
 
       try {
         applyAccess(await authApi.getAccess());
       } catch (err) {
-        if (err instanceof AuthApiError && (err.status === 401 || err.status === 403)) {
+        if (err instanceof AuthApiError && err.status === 401) {
           endSession();
           return;
         }
@@ -137,7 +183,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return refreshAccess(retryCount + 1);
         }
 
-        setError(err instanceof Error ? err.message : 'Your session could not be restored.');
+        const classified = classifyAuthError(err);
+        setError(classified.message);
+        setErrorKind(classified.kind);
         setStatus('error');
       }
     },
@@ -238,6 +286,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       status,
       error,
+      errorKind,
       access,
       activeCompany,
       can,
@@ -254,6 +303,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [
       status,
       error,
+      errorKind,
       access,
       activeCompany,
       can,

@@ -1,6 +1,6 @@
 import { EmployeeRepository } from '../repository/employee.repository.js';
 import { EmployeeProfileService } from './employeeProfile.service.js';
-import { OrganizationRepository } from '../../organization/repository/organization.repository.js';
+import { OrganizationRepository } from '../../../../platform/organization/repository/organization.repository.js';
 import {
   validateCreateEmployee,
   validateUpdateEmployee,
@@ -32,7 +32,7 @@ export class EmployeeService {
     const masters = await this.orgRepo.getMasters(tenantId, companyId);
 
     if (dto.departmentId) {
-      const validDept = masters.departments.some((d) => d.id === dto.departmentId);
+      const validDept = masters.departments.some((d: { id: string }) => d.id === dto.departmentId);
       if (!validDept) {
         throw new BadRequestError(
           `Department '${dto.departmentId}' does not exist or does not belong to this company`,
@@ -42,7 +42,7 @@ export class EmployeeService {
     }
 
     if (dto.designationId) {
-      const validDesig = masters.designations.some((d) => d.id === dto.designationId);
+      const validDesig = masters.designations.some((d: { id: string }) => d.id === dto.designationId);
       if (!validDesig) {
         throw new BadRequestError(
           `Designation '${dto.designationId}' does not exist or does not belong to this company`,
@@ -52,7 +52,7 @@ export class EmployeeService {
     }
 
     if (dto.locationId) {
-      const validLoc = masters.locations.some((l) => l.id === dto.locationId);
+      const validLoc = masters.locations.some((l: { id: string }) => l.id === dto.locationId);
       if (!validLoc) {
         throw new BadRequestError(
           `Location '${dto.locationId}' does not exist or does not belong to this company`,

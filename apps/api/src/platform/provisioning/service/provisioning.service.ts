@@ -6,6 +6,7 @@ import {
   companies,
   users,
   memberships,
+  tenantAdmins,
   tenantModules,
 } from '../../../db/schema.js';
 import { tenantRepository, TenantRepository } from '../../tenants/repository/tenant.repository.js';
@@ -17,20 +18,21 @@ import {
   platformUserRepository,
   PlatformUserRepository,
 } from '../../users/repository/user.repository.js';
+import { moduleRepository, ModuleRepository } from '../../modules/repository/module.repository.js';
 import { auditService, AuditService } from '../../audit/service/audit.service.js';
 import { roleManagementService } from '../../access/service/roleManagement.service.js';
 import { emailService, EmailService } from '../../email/service/email.service.js';
-import { ConflictError, BadRequestError } from '../../../app/errors/AppError.js';
+import { ConflictError, BadRequestError, NotFoundError } from '../../../app/errors/AppError.js';
 import { createUnusableCredential, generateSurrogateId } from '../../auth/security.js';
 import type { CustomerProvisioningDto, ProvisioningResult } from '../types/provisioning.types.js';
 import type { SignInInvitationDelivery } from '../../company-admins/types/companyAdmin.types.js';
-import type { ModuleCode } from '../../modules/types/module.types.js';
 
 export class CustomerProvisioningService {
   constructor(
     private readonly tenantRepo: TenantRepository = tenantRepository,
     private readonly companyRepo: CompanyRepository = companyRepository,
     private readonly userRepo: PlatformUserRepository = platformUserRepository,
+    private readonly moduleRepo: ModuleRepository = moduleRepository,
     private readonly audit: AuditService = auditService,
     private readonly email: EmailService = emailService,
   ) {}
@@ -75,9 +77,21 @@ export class CustomerProvisioningService {
       }
     }
 
+    if (dto.admin.userId) {
+      const existingUser = await this.userRepo.findById(dto.admin.userId);
+      if (!existingUser) {
+        throw new NotFoundError(`Admin user with ID '${dto.admin.userId}' not found`);
+      }
+      if (existingUser.memberships && existingUser.memberships.length > 0) {
+        throw new BadRequestError(
+          `User '${existingUser.email}' already belongs to another tenant. Cross-tenant administrator assignment is prohibited.`,
+        );
+      }
+    }
+
     return {
       valid: true,
-      summary: `Tenant '${dto.tenant.name}' (${dto.tenant.code}) with company '${dto.company.name}' and ${dto.modules.length} modules is ready to provision.`,
+      summary: `Tenant '${dto.tenant.name}' (${dto.tenant.code}) with company '${dto.company.name}' and ${dto.modules.length} applications is ready to provision.`,
     };
   }
 
@@ -108,13 +122,16 @@ export class CustomerProvisioningService {
       throw new BadRequestError('Admin user identifier could not be resolved');
     }
 
+    const initialStatus = dto.activateImmediately === false ? 'suspended' : 'active';
+
     // Execute atomic transactional provisioning
     await db.transaction(async (tx) => {
-      // 1. Tenant
+      // 1. Tenant Isolation Boundary
       await tx.insert(tenants).values({
         id: tenantId,
         name: dto.tenant.name.trim(),
-        status: 'active',
+        maxCompanies: dto.tenant.maxCompanies ?? 5,
+        status: initialStatus,
       });
 
       // 2. Tenant Details
@@ -125,7 +142,7 @@ export class CustomerProvisioningService {
         contactPhone: dto.tenant.contactPhone?.trim() || null,
       });
 
-      // 3. Company
+      // 3. Primary Company
       await tx.insert(companies).values({
         id: companyId,
         tenantId,
@@ -136,19 +153,44 @@ export class CustomerProvisioningService {
         contactPhone: dto.company.contactPhone?.trim() || null,
         country: dto.company.country?.trim() || null,
         timeZone: dto.company.timeZone?.trim() || null,
-        status: 'active',
+        status: initialStatus,
       });
 
-      // 4. Module Access Entitlements
+      // 4. Application Entitlements:
+      // Establish Tenant Entitlement Ceiling (companyId: null) AND
+      // grant initial Primary Company Access (companyId: companyId)
       for (const moduleCode of dto.modules) {
-        const modId = generateSurrogateId('mod');
+        // Tenant Entitlement Ceiling
         await tx.insert(tenantModules).values({
-          id: modId,
+          id: generateSurrogateId('mod'),
+          tenantId,
+          companyId: null,
+          moduleCode,
+          status: 'enabled',
+          enabledAt: new Date(),
+        });
+
+        // Primary Company Application Access
+        await tx.insert(tenantModules).values({
+          id: generateSurrogateId('mod'),
           tenantId,
           companyId,
           moduleCode,
           status: 'enabled',
           enabledAt: new Date(),
+        });
+      }
+
+      // If HRMS is explicitly not selected, record disabled ceiling so implicit default doesn't kick in
+      if (!dto.modules.includes('hrms')) {
+        await tx.insert(tenantModules).values({
+          id: generateSurrogateId('mod'),
+          tenantId,
+          companyId: null,
+          moduleCode: 'hrms',
+          status: 'disabled',
+          enabledAt: new Date(),
+          disabledAt: new Date(),
         });
       }
 
@@ -168,7 +210,7 @@ export class CustomerProvisioningService {
         });
       }
 
-      // 6. Company Admin Membership
+      // 6. Company Admin Membership & Role Sync
       const membershipId = generateSurrogateId('mem');
       await tx.insert(memberships).values({
         id: membershipId,
@@ -185,12 +227,21 @@ export class CustomerProvisioningService {
         role: 'company_admin',
         actorId: actor?.id ?? null,
       });
+
+      // 7. Initial Tenant Admin Authority (Phase 1)
+      await tx.insert(tenantAdmins).values({
+        id: generateSurrogateId('ta'),
+        tenantId,
+        userId: targetUserId!,
+        status: 'active',
+      });
     });
 
     // Load full created records
     const createdTenant = await this.tenantRepo.findById(tenantId);
     const createdCompany = await this.companyRepo.findById(companyId);
     const assignedUser = await this.userRepo.findById(targetUserId);
+    const createdModules = await this.moduleRepo.listByTenant(tenantId);
     const [adminMembership] = await db
       .select()
       .from(memberships)
@@ -202,42 +253,76 @@ export class CustomerProvisioningService {
         ),
       );
 
-    const result: ProvisioningResult = {
-      tenant: createdTenant!,
-      company: createdCompany!,
-      modules: (createdTenant?.activeModules || []).map((code) => ({
-        id: generateSurrogateId('mod'),
+    // Deliver passwordless sign-in invitation via Email OTP post-commit
+    const invitationDelivery = await this.inviteAdministrator(
+      assignedUser?.email ?? '',
+      assignedUser?.firstName ?? '',
+      createdCompany?.name ?? dto.company.name,
+    );
+
+    // Canonical Audit Logs for Customer Lifecycle Journey and Company Activity
+    await this.audit.logEvent({
+      actorUserId: actor?.id,
+      actorEmail: actor?.email,
+      action: 'tenant_created',
+      targetType: 'tenant',
+      targetId: tenantId,
+      tenantId,
+      metadata: { name: createdTenant?.name, code: createdTenant?.code },
+    });
+
+    await this.audit.logEvent({
+      actorUserId: actor?.id,
+      actorEmail: actor?.email,
+      action: 'company_created',
+      targetType: 'company',
+      targetId: companyId,
+      tenantId,
+      companyId,
+      metadata: { name: createdCompany?.name, code: createdCompany?.code, isPrimary: true },
+    });
+
+    for (const moduleCode of dto.modules) {
+      await this.audit.logEvent({
+        actorUserId: actor?.id,
+        actorEmail: actor?.email,
+        action: 'module_enabled',
+        targetType: 'module',
+        targetId: moduleCode,
         tenantId,
         companyId,
-        moduleCode: code as ModuleCode,
-        status: 'enabled',
-        enabledAt: new Date().toISOString(),
-        disabledAt: null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      })),
-      admin: {
-        membershipId: adminMembership?.id || generateSurrogateId('mem'),
-        userId: targetUserId,
-        email: assignedUser?.email || '',
-        firstName: assignedUser?.firstName || '',
-        lastName: assignedUser?.lastName || '',
-        phone: assignedUser?.phone || null,
-        tenantId,
-        tenantName: createdTenant?.name,
-        companyId,
-        companyName: createdCompany?.name,
-        role: 'company_admin',
-        status: 'active',
-        assignedAt: new Date().toISOString(),
+        metadata: { moduleCode, status: 'enabled' },
+      });
+    }
+
+    await this.audit.logEvent({
+      actorUserId: actor?.id,
+      actorEmail: actor?.email,
+      action: 'company_admin_assigned',
+      targetType: 'company_admin',
+      targetId: targetUserId,
+      tenantId,
+      companyId,
+      metadata: {
+        adminUserId: targetUserId,
+        adminEmail: assignedUser?.email,
+        membershipId: adminMembership?.id,
       },
-      invitationDelivery: await this.inviteAdministrator(
-        assignedUser?.email ?? '',
-        assignedUser?.firstName ?? '',
-        createdCompany?.name ?? dto.company.name,
-      ),
-      status: 'COMPLETED',
-    };
+    });
+
+    await this.audit.logEvent({
+      actorUserId: actor?.id,
+      actorEmail: actor?.email,
+      action: 'tenant_admin_assigned',
+      targetType: 'tenant_admin',
+      targetId: targetUserId,
+      tenantId,
+      companyId: null,
+      metadata: {
+        adminUserId: targetUserId,
+        adminEmail: assignedUser?.email,
+      },
+    });
 
     await this.audit.logEvent({
       actorUserId: actor?.id,
@@ -255,7 +340,28 @@ export class CustomerProvisioningService {
       },
     });
 
-    return result;
+    return {
+      tenant: createdTenant!,
+      company: createdCompany!,
+      modules: createdModules,
+      admin: {
+        membershipId: adminMembership?.id || generateSurrogateId('mem'),
+        userId: targetUserId,
+        email: assignedUser?.email || '',
+        firstName: assignedUser?.firstName || '',
+        lastName: assignedUser?.lastName || '',
+        phone: assignedUser?.phone || null,
+        tenantId,
+        tenantName: createdTenant?.name,
+        companyId,
+        companyName: createdCompany?.name,
+        role: 'company_admin',
+        status: 'active',
+        assignedAt: new Date().toISOString(),
+      },
+      invitationDelivery,
+      status: 'COMPLETED',
+    };
   }
 }
 

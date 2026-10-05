@@ -139,8 +139,8 @@ export interface EnsureDatabaseConnectedOptions {
 export async function ensureDatabaseConnected(
   options: EnsureDatabaseConnectedOptions = {},
 ): Promise<{ ok: boolean; diagnostic?: string }> {
-  const maxRetries = options.maxRetries ?? (env.nodeEnv === 'development' ? 5 : 3);
-  const initialDelayMs = options.initialDelayMs ?? 500;
+  const maxRetries = options.maxRetries ?? (env.nodeEnv === 'development' ? 15 : 3);
+  const initialDelayMs = options.initialDelayMs ?? (env.nodeEnv === 'development' ? 1000 : 500);
   const maxDelayMs = options.maxDelayMs ?? 2000;
   const check = options.checker ?? checkDatabaseConnection;
 
@@ -168,7 +168,7 @@ export async function ensureDatabaseConnected(
   const diagnostic =
     `Could not connect to MySQL at ${host}:${port} (database: ${dbName}) after ${maxRetries} attempts.\n` +
     `  Reason: ${result.error || 'Connection failed'} (${result.code || 'UNKNOWN'}).\n` +
-    `  Please ensure MySQL Server 8.4 is running on port ${port}.`;
+    `  Please ensure MySQL Server 8.4 is running on port ${port}. Run 'npm run db:start' to start it.`;
 
   return { ok: false, diagnostic };
 }

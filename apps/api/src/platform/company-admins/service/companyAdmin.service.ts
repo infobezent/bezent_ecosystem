@@ -198,6 +198,54 @@ export class CompanyAdminService {
       metadata: { userId: membership.userId },
     });
   }
+
+  async resendInvitation(
+    membershipId: string,
+    actor?: { id?: string; email?: string },
+  ): Promise<import('../types/companyAdmin.types.js').SignInInvitationDelivery> {
+    const membership = await this.repo.findMembershipById(membershipId);
+    if (!membership) {
+      throw new NotFoundError(`Membership '${membershipId}' not found`);
+    }
+
+    const user = await this.userRepo.findById(membership.userId);
+    if (!user) {
+      throw new NotFoundError(`User '${membership.userId}' not found`);
+    }
+
+    const company = await this.companyRepo.findById(membership.companyId);
+    if (!company) {
+      throw new NotFoundError(`Company '${membership.companyId}' not found`);
+    }
+
+    const delivery = await this.email.sendSignInInvitation({
+      to: user.email,
+      firstName: user.firstName,
+      companyName: company.name,
+      roleLabel: 'Company Administrator',
+    });
+
+    await this.audit.logEvent({
+      actorUserId: actor?.id,
+      actorEmail: actor?.email,
+      action: 'company_admin_invitation_resent',
+      targetType: 'company_admin',
+      targetId: membershipId,
+      tenantId: membership.tenantId,
+      companyId: membership.companyId,
+      metadata: { userId: user.id, email: user.email, deliveryStatus: delivery },
+    });
+
+    return delivery === 'sent'
+      ? {
+          status: 'INVITATION_EMAILED',
+          message: `Sign-in invitation was resent to ${user.email} (Email OTP).`,
+        }
+      : {
+          status: 'INVITATION_EMAIL_FAILED',
+          message: `Failed to resend sign-in email to ${user.email}.`,
+        };
+  }
 }
 
 export const companyAdminService = new CompanyAdminService();

@@ -9,3 +9,7 @@ companyAdminRouter.use(requirePlatformAuth, requireSuperAdmin);
 companyAdminRouter.get('/company-admins', companyAdminController.list);
 companyAdminRouter.post('/company-admins/assign', companyAdminController.assign);
 companyAdminRouter.post('/company-admins/:membershipId/revoke', companyAdminController.revoke);
+companyAdminRouter.post(
+  '/company-admins/:membershipId/resend-invitation',
+  companyAdminController.resendInvitation,
+);

@@ -1,6 +1,5 @@
 export type SettingsModuleId =
   | 'overview'
-  | 'organization'
   | 'dashboard'
   | 'onboarding'
   | 'leave'
@@ -18,13 +17,6 @@ export interface SettingsModuleCard {
 }
 
 export const SETTINGS_MODULE_CARDS: SettingsModuleCard[] = [
-  {
-    id: 'organization',
-    name: 'Organization',
-    description:
-      'Manage organization profile, structure, departments, designations, locations, and related master data.',
-    icon: 'organization',
-  },
   {
     id: 'dashboard',
     name: 'Dashboard',

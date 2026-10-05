@@ -9,7 +9,7 @@ import { UnauthorizedError, ForbiddenError } from '../../../app/errors/AppError.
 import type { AuthenticatedUser, LoginResult } from '../types/auth.types.js';
 import type { User } from '../../../db/schema.js';
 
-const SESSION_TTL_HOURS = 24;
+export const SESSION_TTL_HOURS = 24;
 
 /**
  * Platform sessions (ADR-018). There is ONE way to obtain a session for every

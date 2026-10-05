@@ -23,39 +23,18 @@ import { LeaveSettingsSection } from '../leave';
 import { AttendanceSettingsSection } from '../attendance';
 import { TimesheetsSettingsSection } from '../timesheets';
 import { PerformanceSettingsSection } from '../performance';
-import { OrganizationSettingsWorkspace, type OrganizationTabId } from '../organization/OrganizationSettingsWorkspace';
-
-import type { OrganizationProfile } from '../../organization/api/organizationApi';
-import type { OrganizationHierarchy } from '../../organization/types/structure';
 
 export interface SettingsPageInnerProps {
   initialModule?: SettingsModuleId;
-  initialOrganizationTab?: OrganizationTabId;
-  initialOrganizationProfile?: OrganizationProfile;
-  initialOrganizationHierarchy?: OrganizationHierarchy;
 }
 
 export function SettingsPageInner({
   initialModule = 'overview',
-  initialOrganizationTab = 'profile',
-  initialOrganizationProfile,
-  initialOrganizationHierarchy,
 }: SettingsPageInnerProps) {
   const { activeCompany } = useAuth();
   const [activeModule, setActiveModule] = useState<SettingsModuleId>(initialModule);
 
   const selectedModuleInfo = SETTINGS_MODULE_CARDS.find((m) => m.id === activeModule);
-
-  if (activeModule === 'organization') {
-    return (
-      <OrganizationSettingsWorkspace
-        initialTab={initialOrganizationTab}
-        initialProfile={initialOrganizationProfile}
-        initialHierarchy={initialOrganizationHierarchy}
-        onBack={() => setActiveModule('overview')}
-      />
-    );
-  }
 
   return (
     <Page maxWidth="default">
@@ -148,28 +127,16 @@ function RoutedSettingsPage() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const isWorkflowSettings = location.pathname.includes('onboarding/workflow-settings');
-  const isStructure =
-    location.pathname.includes('organization/structure') ||
-    searchParams.get('tab') === 'structure' ||
-    searchParams.get('sub') === 'structure';
-  const isOrganization =
-    location.pathname.includes('organization') ||
-    searchParams.get('module') === 'organization' ||
-    searchParams.get('tab') === 'organization' ||
-    isStructure;
   const hasOnboardingParam =
     searchParams.get('module') === 'onboarding' ||
     searchParams.get('tab') === 'onboarding' ||
     searchParams.has('sub');
-  const initialModule: SettingsModuleId = isOrganization
-    ? 'organization'
-    : isWorkflowSettings || hasOnboardingParam
-      ? 'onboarding'
-      : 'overview';
+  const initialModule: SettingsModuleId = isWorkflowSettings || hasOnboardingParam
+    ? 'onboarding'
+    : 'overview';
   return (
     <SettingsPageInner
       initialModule={initialModule}
-      initialOrganizationTab={isStructure ? 'structure' : 'profile'}
     />
   );
 }

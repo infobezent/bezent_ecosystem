@@ -1,7 +1,6 @@
 import { useNavigate, useInRouterContext } from 'react-router-dom';
-import { OrganizationProfileSection } from '../organization/OrganizationProfileSection';
-
-import type { OrganizationProfile } from '../../organization/api/organizationApi';
+import { OrganizationProfileSection } from '../../../company-admin/organization/OrganizationProfileSection';
+import type { OrganizationProfile } from '../../../company-admin/organization/types/organization';
 
 export interface OrganizationProfilePageProps {
   initialProfile?: OrganizationProfile;

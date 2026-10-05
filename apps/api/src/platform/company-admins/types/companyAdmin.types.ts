@@ -12,6 +12,7 @@ export interface CompanyAdminAssignment {
   role: string;
   status: string;
   assignedAt: string;
+  lastLoginAt?: string | null;
 }
 
 export interface AssignCompanyAdminDto {

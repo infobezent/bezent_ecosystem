@@ -648,10 +648,16 @@ export function buildCreateEmployeePayload(
     departmentId: deptMatch?.id || null,
     designationId: desigMatch?.id || null,
     locationId: locMatch?.id || null,
-    employmentType: (g.employmentType as any) || 'full_time',
-    employmentStatus: (g.employmentStatus as any) || 'pending_activation',
+    employmentType:
+      (g.employmentType as unknown as NonNullable<CreateEmployeeRequest['employmentType']>) ||
+      'full_time',
+    employmentStatus:
+      (g.employmentStatus as unknown as NonNullable<CreateEmployeeRequest['employmentStatus']>) ||
+      'pending_activation',
     reportingManagerId: g.reportingManager || null,
-    sourceOfHire: (g.sourceOfHire as any) || 'direct_applicant',
+    sourceOfHire:
+      (g.sourceOfHire as unknown as NonNullable<CreateEmployeeRequest['sourceOfHire']>) ||
+      'direct_applicant',
     referralCode: g.referralId.trim() || null,
     referredByEmployeeId: g.referredByEmployeeId || null,
     noticePeriodDays: noticePeriodDays ?? null,

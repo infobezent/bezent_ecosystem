@@ -4,7 +4,7 @@ import { EmployeeRegistration } from '../components/EmployeeRegistration';
 import type { EmployeeRegistrationDraft } from '../components/DraftsModal';
 import { RegistrationConfigLoader } from '../registration/registrationConfig';
 import { createEmployee } from '../../employees/api/employeesApi';
-import { fetchOrganizationMasters, type OrganizationMasters } from '../../organization/api/organizationApi';
+import { fetchOrganizationMasters, type OrganizationMasters } from '../../api/organizationMastersApi';
 import { buildCreateEmployeePayload, type RegistrationFormData } from '../types/registration.types';
 
 export function EmployeeRegistrationPage({ onCancel }: { onCancel?: () => void } = {}) {

@@ -76,6 +76,7 @@ function makeMockAuth(
   return {
     status: 'authenticated',
     error: null,
+    errorKind: null,
     access,
     activeCompany: company,
     can: (p) => permissions.includes(p),

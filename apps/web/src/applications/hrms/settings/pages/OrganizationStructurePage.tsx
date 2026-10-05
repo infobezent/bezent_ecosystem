@@ -1,6 +1,6 @@
 import { useNavigate, useInRouterContext } from 'react-router-dom';
-import { OrganizationStructureSection } from '../organization/OrganizationStructureSection';
-import type { OrganizationHierarchy } from '../../organization/types/structure';
+import { OrganizationStructureSection } from '../../../company-admin/organization/OrganizationStructureSection';
+import type { OrganizationHierarchy } from '../../../company-admin/organization/types/structure';
 
 export interface OrganizationStructurePageProps {
   initialHierarchy?: OrganizationHierarchy;
@@ -12,7 +12,7 @@ function RoutedOrganizationStructure({ initialHierarchy }: OrganizationStructure
     <OrganizationStructureSection
       initialHierarchy={initialHierarchy}
       onBack={() => navigate('/hrms/settings')}
-      onNavigateToProfile={() => navigate('/hrms/settings/organization/profile')}
+      onNavigateToProfile={() => navigate('/company-admin/organization/profile')}
     />
   );
 }

@@ -3,7 +3,7 @@ import request from 'supertest';
 import { createApp } from '../createApp.js';
 import * as connection from '../../../db/connection.js';
 import { DatabaseConnectionError } from '../../errors/AppError.js';
-import { OrganizationRepository } from '../../../applications/hrms/organization/repository/organization.repository.js';
+import { OrganizationRepository } from '../../../platform/organization/repository/organization.repository.js';
 import { OnboardingRepository } from '../../../applications/hrms/onboarding/repository/onboarding.repository.js';
 import { OnboardingSettingsRepository } from '../../../applications/hrms/settings/onboarding/repository/settings.repository.js';
 

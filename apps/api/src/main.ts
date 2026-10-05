@@ -32,6 +32,13 @@ async function startServer(): Promise<void> {
 
   process.on('SIGINT', () => void shutdown('SIGINT'));
   process.on('SIGTERM', () => void shutdown('SIGTERM'));
+
+  process.on('unhandledRejection', (reason) => {
+    console.error('[bezent-api] Unhandled Rejection:', reason);
+  });
+  process.on('uncaughtException', (err) => {
+    console.error('[bezent-api] Uncaught Exception:', err);
+  });
 }
 
 void startServer();

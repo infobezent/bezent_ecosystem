@@ -18,6 +18,7 @@ import {
 export const tenants = mysqlTable('tenants', {
   id: varchar('id', { length: 64 }).primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
+  maxCompanies: int('max_companies').notNull().default(5),
   status: mysqlEnum('status', ['active', 'inactive', 'suspended', 'archived'])
     .default('active')
     .notNull(),
@@ -74,12 +75,31 @@ export const departments = mysqlTable(
       .notNull()
       .references(() => companies.id),
     name: varchar('name', { length: 255 }).notNull(),
-    code: varchar('code', { length: 50 }).notNull(),
+    code: varchar('code', { length: 50 }),
+    description: varchar('description', { length: 1000 }),
+    businessUnitId: varchar('business_unit_id', { length: 64 }).references(
+      (): AnyMySqlColumn => businessUnits.id,
+    ),
+    divisionId: varchar('division_id', { length: 64 }).references(
+      (): AnyMySqlColumn => divisions.id,
+    ),
+    parentDepartmentId: varchar('parent_department_id', { length: 64 }).references(
+      (): AnyMySqlColumn => departments.id,
+    ),
+    headEmployeeId: varchar('head_employee_id', { length: 64 }).references(
+      (): AnyMySqlColumn => employees.id,
+    ),
     status: mysqlEnum('status', ['active', 'inactive']).default('active').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
   },
-  (table) => [index('idx_departments_tenant_company').on(table.tenantId, table.companyId)],
+  (table) => [
+    index('idx_departments_tenant_company').on(table.tenantId, table.companyId),
+    index('idx_departments_business_unit').on(table.businessUnitId),
+    index('idx_departments_division').on(table.divisionId),
+    index('idx_departments_parent').on(table.parentDepartmentId),
+    index('idx_departments_company_code').on(table.companyId, table.code),
+  ],
 );
 
 /**
@@ -94,17 +114,34 @@ export const designations = mysqlTable(
       .notNull()
       .references(() => companies.id),
     name: varchar('name', { length: 255 }).notNull(),
-    code: varchar('code', { length: 50 }).notNull(),
+    code: varchar('code', { length: 50 }),
+    description: varchar('description', { length: 1000 }),
+    departmentId: varchar('department_id', { length: 64 }).references(
+      (): AnyMySqlColumn => departments.id,
+    ),
     status: mysqlEnum('status', ['active', 'inactive']).default('active').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
   },
-  (table) => [index('idx_designations_tenant_company').on(table.tenantId, table.companyId)],
+  (table) => [
+    index('idx_designations_tenant_company').on(table.tenantId, table.companyId),
+    uniqueIndex('idx_designations_company_code').on(table.companyId, table.code),
+    index('idx_designations_department').on(table.departmentId),
+  ],
 );
 
 /**
- * Organization Masters: Locations
+ * Organization Masters: Work Locations
  */
+export const locationTypeEnum = mysqlEnum('type', [
+  'office',
+  'branch',
+  'plant_factory',
+  'client_site',
+  'remote',
+  'other',
+]);
+
 export const locations = mysqlTable(
   'locations',
   {
@@ -114,14 +151,81 @@ export const locations = mysqlTable(
       .notNull()
       .references(() => companies.id),
     name: varchar('name', { length: 255 }).notNull(),
-    code: varchar('code', { length: 50 }).notNull(),
+    code: varchar('code', { length: 50 }),
+    type: locationTypeEnum.default('office').notNull(),
+    addressLine1: varchar('address_line_1', { length: 255 }),
+    addressLine2: varchar('address_line_2', { length: 255 }),
     city: varchar('city', { length: 100 }),
+    state: varchar('state', { length: 100 }),
     country: varchar('country', { length: 100 }),
+    postalCode: varchar('postal_code', { length: 20 }),
+    timezone: varchar('timezone', { length: 100 }),
+    description: varchar('description', { length: 1000 }),
     status: mysqlEnum('status', ['active', 'inactive']).default('active').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
   },
-  (table) => [index('idx_locations_tenant_company').on(table.tenantId, table.companyId)],
+  (table) => [
+    index('idx_locations_tenant_company').on(table.tenantId, table.companyId),
+    index('idx_locations_company').on(table.companyId),
+    uniqueIndex('idx_locations_company_code').on(table.companyId, table.code),
+  ],
+);
+
+/**
+ * Organization Masters: Job Levels
+ * Seniority / classification tier master within Company.
+ */
+export const jobLevels = mysqlTable(
+  'job_levels',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    name: varchar('name', { length: 255 }).notNull(),
+    code: varchar('code', { length: 50 }).notNull(),
+    rank: int('rank').notNull(),
+    description: varchar('description', { length: 1000 }),
+    status: mysqlEnum('status', ['active', 'inactive']).default('active').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_job_levels_tenant_company').on(table.tenantId, table.companyId),
+    uniqueIndex('idx_job_levels_company_code').on(table.companyId, table.code),
+    uniqueIndex('idx_job_levels_company_rank').on(table.companyId, table.rank),
+    index('idx_job_levels_company_status').on(table.companyId, table.status),
+  ],
+);
+
+/**
+ * Organization Masters: Grades
+ * Employment / classification grade master within Company.
+ */
+export const grades = mysqlTable(
+  'grades',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    name: varchar('name', { length: 255 }).notNull(),
+    code: varchar('code', { length: 50 }).notNull(),
+    rank: int('rank').notNull(),
+    description: varchar('description', { length: 1000 }),
+    status: mysqlEnum('status', ['active', 'inactive']).default('active').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_grades_tenant_company').on(table.tenantId, table.companyId),
+    uniqueIndex('idx_grades_company_code').on(table.companyId, table.code),
+    uniqueIndex('idx_grades_company_rank').on(table.companyId, table.rank),
+    index('idx_grades_company_status').on(table.companyId, table.status),
+  ],
 );
 
 /**
@@ -408,6 +512,12 @@ export type NewDesignation = typeof designations.$inferInsert;
 
 export type Location = typeof locations.$inferSelect;
 export type NewLocation = typeof locations.$inferInsert;
+
+export type JobLevel = typeof jobLevels.$inferSelect;
+export type NewJobLevel = typeof jobLevels.$inferInsert;
+
+export type Grade = typeof grades.$inferSelect;
+export type NewGrade = typeof grades.$inferInsert;
 
 export type OnboardingCase = typeof onboardingCases.$inferSelect;
 export type NewOnboardingCase = typeof onboardingCases.$inferInsert;
@@ -1134,6 +1244,37 @@ export const memberships = mysqlTable(
 
 export type Membership = typeof memberships.$inferSelect;
 export type NewMembership = typeof memberships.$inferInsert;
+
+/**
+ * Platform: Tenant Administrators
+ * Represents explicit, tenant-level administrative authority.
+ * A Tenant Admin has authority over the tenant and all companies within it
+ * without requiring individual company_admin memberships.
+ */
+export const tenantAdmins = mysqlTable(
+  'tenant_admins',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 })
+      .notNull()
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    userId: varchar('user_id', { length: 64 })
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    status: mysqlEnum('status', ['active', 'inactive', 'revoked']).default('active').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_tenant_admins_tenant').on(table.tenantId),
+    index('idx_tenant_admins_user').on(table.userId),
+    index('idx_tenant_admins_status').on(table.status),
+    uniqueIndex('idx_tenant_admins_tenant_user').on(table.tenantId, table.userId),
+  ],
+);
+
+export type TenantAdmin = typeof tenantAdmins.$inferSelect;
+export type NewTenantAdmin = typeof tenantAdmins.$inferInsert;
 
 /**
  * Platform: Roles (ADR-017)

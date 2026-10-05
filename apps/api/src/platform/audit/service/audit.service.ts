@@ -15,6 +15,10 @@ const SENSITIVE_KEYS = new Set([
   'authorization',
   'apikey',
   'api_key',
+  'otp',
+  'code',
+  'otpcode',
+  'cookie',
 ]);
 
 function sanitizeMetadata(

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { isTransientAuthError } from '../AuthProvider';
+import { isTransientAuthError, classifyAuthError } from '../AuthProvider';
 import { AuthApiError } from '../authApi';
 import { setSessionToken, getSessionToken, SESSION_TOKEN_KEY } from '../session';
 
@@ -63,6 +63,42 @@ describe('Session Restore Transient Recovery Logic', () => {
     });
   });
 
+  describe('classifyAuthError structured categorization', () => {
+    it('classifies network connection failure as kind "network"', () => {
+      const err = new AuthApiError('BEZENT could not be reached', 0, 'NETWORK_ERROR');
+      const result = classifyAuthError(err);
+      expect(result.kind).toBe('network');
+      expect(result.message).toContain('BEZENT API could not be reached');
+    });
+
+    it('classifies database unavailability as kind "database_unavailable"', () => {
+      const err = new AuthApiError('Database service is temporarily unavailable', 503, 'DATABASE_UNAVAILABLE');
+      const result = classifyAuthError(err);
+      expect(result.kind).toBe('database_unavailable');
+      expect(result.message).toContain('Database service is temporarily unavailable');
+    });
+
+    it('classifies 403 access denial as kind "forbidden"', () => {
+      const err = new AuthApiError('Workspace access forbidden', 403, 'FORBIDDEN');
+      const result = classifyAuthError(err);
+      expect(result.kind).toBe('forbidden');
+      expect(result.message).toContain('Workspace access forbidden');
+    });
+
+    it('classifies 500 internal server error as kind "server_error"', () => {
+      const err = new AuthApiError('Internal Server Error', 500, 'INTERNAL_ERROR');
+      const result = classifyAuthError(err);
+      expect(result.kind).toBe('server_error');
+      expect(result.message).toContain('Internal Server Error');
+    });
+
+    it('classifies arbitrary non-AuthApiError as kind "server_error"', () => {
+      const result = classifyAuthError(new Error('Syntax or runtime crash'));
+      expect(result.kind).toBe('server_error');
+      expect(result.message).toBe('Syntax or runtime crash');
+    });
+  });
+
   describe('Session Token Preservation across Failures', () => {
     it('retains the session token in localStorage across temporary failures', () => {
       const token = 'persisted_session_token_xyz';
@@ -79,7 +115,7 @@ describe('Session Restore Transient Recovery Logic', () => {
       expect(getSessionToken()).toBe(token);
     });
 
-    it('clears the session token only on explicit 401/403 or sign-out', () => {
+    it('clears the session token only on explicit 401 sign-out or session end', () => {
       const token = 'token_to_clear';
       setSessionToken(token);
       expect(getSessionToken()).toBe(token);

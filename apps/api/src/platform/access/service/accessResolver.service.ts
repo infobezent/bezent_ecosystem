@@ -1,4 +1,8 @@
 import { accessRepository, AccessRepository } from '../repository/access.repository.js';
+import {
+  tenantAdminRepository,
+  TenantAdminRepository,
+} from '../../tenant-admin/repository/tenantAdmin.repository.js';
 import { moduleService, ModuleService } from '../../modules/service/module.service.js';
 import { AppError, ForbiddenError, NotFoundError } from '../../../app/errors/AppError.js';
 import {
@@ -8,6 +12,7 @@ import {
   isRoleAssignablePermission,
   SELF_SERVICE_PERMISSIONS,
   SUPER_ADMIN_COMPANY_OVERSIGHT,
+  COMPANY_ADMINISTRATION_PERMISSIONS,
   WORKSPACE_ENTRY_PERMISSIONS,
   type WorkspaceId,
 } from '../catalog/accessCatalog.js';
@@ -21,30 +26,21 @@ export const FORBIDDEN_COMPANY_ACCESS = 'FORBIDDEN_COMPANY_ACCESS';
  *
  * Resolution is always for a single, explicitly selected company and is
  * deny-by-default. In order it requires: an authenticated, active user (the
- * session layer), an active membership in the company (or platform Super
- * Admin oversight), a company and tenant that are not suspended, active role
- * assignments on active roles, and the business application entitlement each
- * permission depends on. Self-service permissions additionally require a
- * linked, active Employee record. Permissions from different companies are
- * never combined.
+ * session layer), an active membership in the company, tenant-level administrative
+ * authority (or platform Super Admin oversight), a company and tenant that are
+ * not suspended, active role assignments on active roles, and the business
+ * application entitlement each permission depends on. Self-service permissions
+ * additionally require a linked, active Employee record. Permissions from
+ * different companies are never combined.
  */
 export class AccessResolverService {
   constructor(
     private readonly repo: AccessRepository = accessRepository,
     private readonly modules: ModuleService = moduleService,
+    private readonly tenantAdminRepo: TenantAdminRepository = tenantAdminRepository,
   ) {}
 
   async resolveCompanyAccess(user: AuthenticatedUser, companyId: string): Promise<CompanyAccess> {
-    const membership = user.memberships.find(
-      (m) => m.companyId === companyId && m.status === 'active',
-    );
-    if (!membership && !user.isSuperAdmin) {
-      throw new ForbiddenError(
-        'No active membership in the selected company',
-        FORBIDDEN_COMPANY_ACCESS,
-      );
-    }
-
     const found = await this.repo.findCompanyWithTenant(companyId);
     if (!found) {
       if (user.isSuperAdmin) throw new NotFoundError(`Company '${companyId}' not found`);
@@ -54,12 +50,30 @@ export class AccessResolverService {
       );
     }
     const { company, tenant } = found;
+
+    const membership = user.memberships.find(
+      (m) => m.companyId === companyId && m.status === 'active',
+    );
     if (membership && membership.tenantId !== company.tenantId) {
       throw new ForbiddenError(
         'No active membership in the selected company',
         FORBIDDEN_COMPANY_ACCESS,
       );
     }
+
+    // Check tenant-level administrative authority (Phase 1)
+    const isTenantAdmin = await this.tenantAdminRepo.hasActiveTenantAdmin(
+      company.tenantId,
+      user.id,
+    );
+
+    if (!membership && !user.isSuperAdmin && !isTenantAdmin) {
+      throw new ForbiddenError(
+        'No active membership in the selected company',
+        FORBIDDEN_COMPANY_ACCESS,
+      );
+    }
+
     if (company.status === 'suspended') {
       throw new ForbiddenError(
         'Company account is suspended. Please contact platform administration.',
@@ -102,6 +116,10 @@ export class AccessResolverService {
 
     if (user.isSuperAdmin) {
       SUPER_ADMIN_COMPANY_OVERSIGHT.forEach((p) => granted.add(p));
+    }
+
+    if (isTenantAdmin) {
+      COMPANY_ADMINISTRATION_PERMISSIONS.forEach((p) => granted.add(p));
     }
 
     let employeeId: string | null = null;
@@ -151,6 +169,7 @@ export class AccessResolverService {
       companyCode: company.code,
       isMember: Boolean(membership),
       isPlatformOversight: !membership && user.isSuperAdmin,
+      isTenantAdmin: Boolean(isTenantAdmin),
       roles: heldRoles.map((r) => ({
         id: r.id,
         code: r.code,
@@ -172,9 +191,16 @@ export class AccessResolverService {
    * any other failure propagates.
    */
   async resolveOverview(user: AuthenticatedUser): Promise<AccessOverview> {
-    const companyIds = [
-      ...new Set(user.memberships.filter((m) => m.status === 'active').map((m) => m.companyId)),
-    ];
+    const memberCompanyIds = user.memberships
+      .filter((m) => m.status === 'active')
+      .map((m) => m.companyId);
+
+    // Active companies belonging to tenants where the user holds Tenant Admin authority
+    const tenantAdminRows = await this.tenantAdminRepo.listActiveByUser(user.id);
+    const tenantIds = tenantAdminRows.map((r) => r.tenantId);
+    const tenantCompanyIds = await this.repo.listActiveCompanyIdsForTenants(tenantIds);
+
+    const companyIds = [...new Set([...memberCompanyIds, ...tenantCompanyIds])];
 
     const companies: CompanyAccess[] = [];
     for (const companyId of companyIds) {

@@ -9,6 +9,8 @@ import { moduleRouter } from './modules/routes/module.routes.js';
 import { userRouter } from './users/routes/user.routes.js';
 import { auditRouter } from './audit/routes/audit.routes.js';
 import { accessRouter } from './access/routes/access.routes.js';
+import { governanceRouter } from './governance/routes/governance.routes.js';
+import { platformTenantAdminRouter } from './tenant-admin/routes/platformTenantAdmin.routes.js';
 
 export const platformRouter = Router();
 
@@ -21,6 +23,8 @@ platformRouter.use(tenantRouter);
 platformRouter.use(companyRouter);
 platformRouter.use(provisioningRouter);
 platformRouter.use(companyAdminRouter);
+platformRouter.use(platformTenantAdminRouter);
 platformRouter.use(moduleRouter);
 platformRouter.use(userRouter);
 platformRouter.use(auditRouter);
+platformRouter.use(governanceRouter);

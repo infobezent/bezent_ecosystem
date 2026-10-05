@@ -85,6 +85,7 @@ Administration
 
 ## Shared Boundaries & Dependencies
 
+- **Organization Masters**: Company identity and organizational master records (Organization Profile, Structure, Departments, Designations, Work Locations, Job Levels/Grades) are owned by **Company Administration** (`/company-admin/organization`), not HRMS Settings. They represent company-wide master data shared across all BEZENT business applications. Deep links from `/hrms/settings/organization/*` automatically redirect to `/company-admin/organization/*`.
 - **`api/`**: Shared HTTP clients for settings and forms (`formsApi.ts`, `onboardingSettingsApi.ts`, `registrationSettingsApi.ts`).
 - **`types/`**: Domain contracts (`settings.ts`, `settingsCenter.ts`).
 - **`context/`**: Shared state (`CustomFieldsContext.tsx`) consumed across settings and onboarding.

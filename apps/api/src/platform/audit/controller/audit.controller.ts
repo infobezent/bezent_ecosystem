@@ -6,12 +6,13 @@ export class AuditController {
 
   list = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { action, targetType, targetId, tenantId, page, limit } = req.query;
+      const { action, targetType, targetId, tenantId, companyId, page, limit } = req.query;
       const result = await this.service.getLogs({
         action: typeof action === 'string' ? action : undefined,
         targetType: typeof targetType === 'string' ? targetType : undefined,
         targetId: typeof targetId === 'string' ? targetId : undefined,
         tenantId: typeof tenantId === 'string' ? tenantId : undefined,
+        companyId: typeof companyId === 'string' ? companyId : undefined,
         page: typeof page === 'string' ? parseInt(page, 10) : 1,
         limit: typeof limit === 'string' ? parseInt(limit, 10) : 20,
       });

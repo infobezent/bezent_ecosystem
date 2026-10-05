@@ -1,7 +1,7 @@
 import { moduleRepository, ModuleRepository } from '../repository/module.repository.js';
 import { tenantRepository, TenantRepository } from '../../tenants/repository/tenant.repository.js';
 import { auditService, AuditService } from '../../audit/service/audit.service.js';
-import { NotFoundError } from '../../../app/errors/AppError.js';
+import { NotFoundError, BadRequestError } from '../../../app/errors/AppError.js';
 import {
   MODULE_CATALOG,
   type ModuleCatalogItem,
@@ -20,6 +20,15 @@ export class ModuleService {
     return MODULE_CATALOG;
   }
 
+  async isTenantEntitled(tenantId: string, moduleCode: ModuleCode): Promise<boolean> {
+    const tenant = await this.tenantRepo.findById(tenantId);
+    if (!tenant || tenant.status === 'suspended') return false;
+    const tenantEntitlement = await this.repo.findEntitlement(tenantId, moduleCode, null);
+    return moduleCode === 'hrms'
+      ? tenantEntitlement?.status !== 'disabled'
+      : tenantEntitlement?.status === 'enabled';
+  }
+
   async getTenantModules(
     tenantId: string,
     companyId?: string | null,
@@ -36,6 +45,22 @@ export class ModuleService {
     const tenant = await this.tenantRepo.findById(tenantId);
     if (!tenant) {
       throw new NotFoundError(`Tenant '${tenantId}' not found`);
+    }
+
+    const catalogItem = MODULE_CATALOG.find((m) => m.code === moduleCode);
+    if (catalogItem?.availability === 'Planned') {
+      throw new BadRequestError(
+        'This application is planned and is not yet available for customer entitlement',
+      );
+    }
+
+    if (companyId) {
+      const isEntitled = await this.isTenantEntitled(tenantId, moduleCode);
+      if (!isEntitled) {
+        throw new BadRequestError(
+          `Cannot enable application '${moduleCode}' for company: parent tenant '${tenant.name}' is not entitled to it`,
+        );
+      }
     }
 
     const record = await this.repo.setStatus(tenantId, moduleCode, 'enabled', companyId);

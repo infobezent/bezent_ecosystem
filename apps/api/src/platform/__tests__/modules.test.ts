@@ -43,12 +43,12 @@ describe('Module Catalog & Entitlement Service', () => {
     expect(codes).toContain('project_management');
   });
 
-  it('enables an application module for a tenant', async () => {
+  it('enables an application module (GA) for a tenant', async () => {
     const updatedRecord: TenantModuleRecord = {
-      id: 'mod_2',
+      id: 'mod_1',
       tenantId: 'tenant_01',
       companyId: null,
-      moduleCode: 'crm',
+      moduleCode: 'hrms',
       status: 'enabled',
       enabledAt: new Date().toISOString(),
       disabledAt: null,
@@ -58,10 +58,17 @@ describe('Module Catalog & Entitlement Service', () => {
 
     vi.mocked(mockRepo.setStatus!).mockResolvedValue(updatedRecord);
 
-    const result = await moduleService.enableModule('tenant_01', 'crm');
+    const result = await moduleService.enableModule('tenant_01', 'hrms');
     expect(result.status).toBe('enabled');
-    expect(mockRepo.setStatus).toHaveBeenCalledWith('tenant_01', 'crm', 'enabled', undefined);
+    expect(mockRepo.setStatus).toHaveBeenCalledWith('tenant_01', 'hrms', 'enabled', undefined);
     expect(mockAudit.logEvent).toHaveBeenCalled();
+  });
+
+  it('rejects enabling an application module with Planned availability', async () => {
+    await expect(moduleService.enableModule('tenant_01', 'crm')).rejects.toThrow(
+      'This application is planned and is not yet available for customer entitlement',
+    );
+    expect(mockRepo.setStatus).not.toHaveBeenCalled();
   });
 
   it('disables an application module for a tenant without deleting data', async () => {
@@ -83,6 +90,26 @@ describe('Module Catalog & Entitlement Service', () => {
     expect(result.status).toBe('disabled');
     expect(mockRepo.setStatus).toHaveBeenCalledWith('tenant_01', 'hrms', 'disabled', undefined);
     expect(mockAudit.logEvent).toHaveBeenCalled();
+  });
+
+  it('allows disabling a Planned application module for legacy compatibility', async () => {
+    const updatedRecord: TenantModuleRecord = {
+      id: 'mod_legacy_crm',
+      tenantId: 'tenant_01',
+      companyId: null,
+      moduleCode: 'crm',
+      status: 'disabled',
+      enabledAt: new Date().toISOString(),
+      disabledAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    vi.mocked(mockRepo.setStatus!).mockResolvedValue(updatedRecord);
+
+    const result = await moduleService.disableModule('tenant_01', 'crm');
+    expect(result.status).toBe('disabled');
+    expect(mockRepo.setStatus).toHaveBeenCalledWith('tenant_01', 'crm', 'disabled', undefined);
   });
 
   it('rejects module enabling when tenant does not exist', async () => {

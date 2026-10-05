@@ -8,7 +8,7 @@ import {
   buildCreateEmployeePayload,
   type RegistrationFormData,
 } from '../types/registration.types';
-import type { OrganizationMasters } from '../../organization/api/organizationApi';
+import type { OrganizationMasters } from '../../api/organizationMastersApi';
 import { createEmployee } from '../../employees/api/employeesApi';
 import * as authPlatform from '../../../../platform/auth';
 
@@ -250,11 +250,11 @@ describe('Employee Registration Shared Foundation & Review Wiring', () => {
       expect(payload.details?.workSchedule?.startTime).toBe('09:00');
 
       // Unsupported domains intentionally excluded from payload
-      expect((payload.details as any)?.salaryDetails).toBeUndefined();
-      expect((payload as any)?.annualCtc).toBeUndefined();
-      expect((payload as any)?.assets).toBeUndefined();
-      expect((payload as any)?.portalPermissions).toBeUndefined();
-      expect((payload as any)?.documents).toBeUndefined();
+      expect((payload.details as Record<string, unknown> | undefined)?.salaryDetails).toBeUndefined();
+      expect((payload as unknown as Record<string, unknown>).annualCtc).toBeUndefined();
+      expect((payload as unknown as Record<string, unknown>).assets).toBeUndefined();
+      expect((payload as unknown as Record<string, unknown>).portalPermissions).toBeUndefined();
+      expect((payload as unknown as Record<string, unknown>).documents).toBeUndefined();
     });
   });
 
