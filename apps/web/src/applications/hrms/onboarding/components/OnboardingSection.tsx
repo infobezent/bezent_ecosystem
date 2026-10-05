@@ -63,7 +63,17 @@ const PREDEFINED_ASSETS = [
   { value: 'other', label: '+ Other / Add New' },
 ];
 
-export function OnboardingSection() {
+import type { Chapter03OnboardingState } from '../types/registration.types';
+
+export interface OnboardingSectionProps {
+  value?: Chapter03OnboardingState;
+  onChange?: (updated: Chapter03OnboardingState) => void;
+}
+
+export function OnboardingSection({
+  value: _value,
+  onChange: _onChange,
+}: OnboardingSectionProps = {}) {
   const [tasks, setTasks] = useState<OnboardingTaskItem[]>([
     {
       id: 'task_1',

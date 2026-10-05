@@ -3,6 +3,7 @@ import { companyAdminController } from '../controller/companyAdmin.controller.js
 import { accessController } from '../../access/controller/access.controller.js';
 import { requirePlatformAuth } from '../../auth/middleware/auth.middleware.js';
 import { requirePermission, requireWorkspace } from '../../access/middleware/access.middleware.js';
+import { companyOrganizationRouter } from './companyOrganization.routes.js';
 
 export const companyAdminRouter = Router();
 
@@ -147,12 +148,8 @@ companyAdminRouter.patch(
   companyAdminController.setModuleStatus,
 );
 
-// Organization Management (HRMS Masters Integration)
-companyAdminRouter.get(
-  '/organization/summary',
-  requirePermission('company.organization.read'),
-  companyAdminController.getOrganizationSummary,
-);
+// Organization Management (Shared Organization Masters)
+companyAdminRouter.use('/organization', companyOrganizationRouter);
 
 // Policies & HRMS Settings
 companyAdminRouter.get(

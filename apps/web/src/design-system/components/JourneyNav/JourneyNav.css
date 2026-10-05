@@ -41,7 +41,7 @@
   z-index: 1;
   display: flex;
   align-items: center;
-  gap: var(--space-2, 8px);
+  gap: var(--space-2);
   width: 100%;
   padding: 12px 32px;
   overflow-x: auto;
@@ -59,7 +59,7 @@
 
 .bezent-journey-nav__list::-webkit-scrollbar-thumb {
   background: var(--border-subtle, #e7ebf0);
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
 }
 
 /* ─── Individual Journey Step ────────────────────────────────────────── */
@@ -67,15 +67,16 @@
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2, 8px);
+  gap: var(--space-2);
   padding: 8px 14px;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: var(--card-radius, 12px);
+  border-radius: var(--radius-md);
   color: var(--text-muted, #747775);
-  font-family: var(--font-family-base, inherit);
-  font-size: 13px;
-  font-weight: 500;
+  font-family: var(--font-family-base);
+  font-size: var(--font-tab-size, var(--font-size-md, 13px));
+  font-weight: var(--font-tab-weight, 500);
+  line-height: var(--font-tab-line-height, var(--line-height-snug, 1.375));
   white-space: nowrap;
   cursor: pointer;
   outline: none;
@@ -117,10 +118,10 @@
   background: var(--bg-surface, #ffffff);
   border: 1.5px solid var(--border-default, #dde3ea);
   color: var(--text-muted, #747775);
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--font-caption-size, var(--font-size-xs, 11px));
+  font-weight: var(--font-weight-semibold, 600);
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.2px;
+  letter-spacing: var(--letter-spacing-normal, 0em);
   flex-shrink: 0;
   transition: all 0.18s ease;
 }
@@ -133,15 +134,15 @@
 }
 
 .bezent-journey-step__label {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--font-tab-size, var(--font-size-md, 13px));
+  font-weight: var(--font-tab-weight, 500);
   line-height: 1.25;
   color: inherit;
-  letter-spacing: -0.1px;
+  letter-spacing: var(--letter-spacing-normal, 0em);
 }
 
 .bezent-journey-step__caption {
-  font-size: 10px;
+  font-size: var(--font-caption-size, var(--font-size-xs, 11px));
   font-weight: 400;
   color: var(--text-muted, #747775);
   line-height: 1.2;

@@ -25,6 +25,14 @@ import type {
   CompanyUserItem,
   UpdateCompanyProfileInput,
 } from '../types/companyAdmin.types.js';
+import {
+  companyRepository,
+  CompanyRepository,
+} from '../../companies/repository/company.repository.js';
+import {
+  organizationRepository,
+  OrganizationRepository,
+} from '../../organization/repository/organization.repository.js';
 
 export class CompanyAdminRepository {
   /** Every active company — platform Super Admin oversight only. */
@@ -49,31 +57,20 @@ export class CompanyAdminRepository {
     }));
   }
 
+  constructor(
+    private readonly companyRepo: CompanyRepository = companyRepository,
+    private readonly orgRepo: OrganizationRepository = organizationRepository,
+  ) {}
+
   async getCompanyProfile(companyId: string): Promise<Company | null> {
-    const db = getDb();
-    const [comp] = await db.select().from(companies).where(eq(companies.id, companyId));
-    return comp ?? null;
+    return this.companyRepo.getCompanyProfile(companyId);
   }
 
   async updateCompanyProfile(
     companyId: string,
     input: UpdateCompanyProfileInput,
   ): Promise<Company> {
-    const db = getDb();
-    await db
-      .update(companies)
-      .set({
-        legalName: input.legalName ?? null,
-        businessEmail: input.businessEmail ?? null,
-        contactPhone: input.contactPhone ?? null,
-        country: input.country ?? null,
-        timeZone: input.timeZone ?? null,
-      })
-      .where(eq(companies.id, companyId));
-
-    const [updated] = await db.select().from(companies).where(eq(companies.id, companyId));
-    if (!updated) throw new Error('Company not found after update');
-    return updated;
+    return this.companyRepo.updateCompanyProfile(companyId, input);
   }
 
   async listCompanyUsers(
@@ -215,6 +212,17 @@ export class CompanyAdminRepository {
         ),
       );
     return inv ?? null;
+  }
+
+  /** Finds all pending invitations for an email across all tenants. */
+  async findActiveInvitationsByEmail(email: string) {
+    const db = getDb();
+    return db
+      .select()
+      .from(invitations)
+      .where(
+        and(eq(invitations.email, email.toLowerCase().trim()), eq(invitations.status, 'pending')),
+      );
   }
 
   async createInvitation(data: NewInvitation) {
@@ -382,22 +390,7 @@ export class CompanyAdminRepository {
 
   // Organization Masters Summary
   async getOrganizationSummary(companyId: string) {
-    const db = getDb();
-
-    const depts = await db.select().from(departments).where(eq(departments.companyId, companyId));
-
-    const desigs = await db
-      .select()
-      .from(designations)
-      .where(eq(designations.companyId, companyId));
-
-    const locs = await db.select().from(locations).where(eq(locations.companyId, companyId));
-
-    return {
-      departments: depts,
-      designations: desigs,
-      locations: locs,
-    };
+    return this.orgRepo.getSummary(companyId);
   }
 
   // Policies Summary

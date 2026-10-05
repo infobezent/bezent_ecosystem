@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { EmployeeService } from '../service/employee.service.js';
 import type { EmployeeRepository } from '../repository/employee.repository.js';
-import type { OrganizationRepository } from '../../organization/repository/organization.repository.js';
+import type { OrganizationRepository } from '../../../../platform/organization/repository/organization.repository.js';
 import { validateCreateEmployee } from '../validation/employee.schema.js';
 import {
   validateEmployeeRecordDetails,

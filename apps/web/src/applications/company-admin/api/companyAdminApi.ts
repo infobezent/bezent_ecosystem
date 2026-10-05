@@ -112,21 +112,45 @@ export interface CompanyProfile {
   id: string;
   tenantId: string;
   name: string;
-  legalName: string | null;
   code: string;
+  displayName: string | null;
+  legalName: string | null;
+  organizationType: string | null;
+  industry: string | null;
+  website: string | null;
+  logoUrl: string | null;
   businessEmail: string | null;
   contactPhone: string | null;
+  alternateEmail: string | null;
+  alternatePhone: string | null;
+  addressLine1: string | null;
+  addressLine2: string | null;
+  city: string | null;
+  state: string | null;
   country: string | null;
+  postalCode: string | null;
   timeZone: string | null;
   status: 'active' | 'inactive' | 'suspended';
   createdAt: string;
 }
 
 export interface UpdateCompanyProfileInput {
+  displayName?: string | null;
   legalName?: string | null;
+  organizationType?: string | null;
+  industry?: string | null;
+  website?: string | null;
+  logoUrl?: string | null;
   businessEmail?: string | null;
   contactPhone?: string | null;
+  alternateEmail?: string | null;
+  alternatePhone?: string | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  city?: string | null;
+  state?: string | null;
   country?: string | null;
+  postalCode?: string | null;
   timeZone?: string | null;
 }
 

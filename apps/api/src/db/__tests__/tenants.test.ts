@@ -35,6 +35,11 @@ describe('Tenant Persistence Foundation (Step 03A)', () => {
       expect(tenants.name).toBeDefined();
       expect(tenants.name.notNull).toBe(true);
 
+      // maxCompanies: int, not null, default 5 (Phase 2C company capacity ceiling)
+      expect(tenants.maxCompanies).toBeDefined();
+      expect(tenants.maxCompanies.notNull).toBe(true);
+      expect(tenants.maxCompanies.default).toBe(5);
+
       // status: enum('active', 'inactive', 'suspended', 'archived'), not null, default 'active'
       expect(tenants.status).toBeDefined();
       expect(tenants.status.notNull).toBe(true);

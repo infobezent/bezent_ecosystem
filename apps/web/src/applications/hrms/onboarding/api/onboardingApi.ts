@@ -35,7 +35,8 @@ export interface OrganizationMasters {
 }
 
 export type EmploymentType = 'full_time' | 'part_time' | 'contract' | 'intern';
-export type OnboardingStage = 'preboarding' | 'documents' | 'induction' | 'completed';
+export type OnboardingStage =
+  'preboarding' | 'documents' | 'induction' | 'completed' | (string & {});
 export type OnboardingStatus = 'draft' | 'active' | 'withdrawn' | 'completed';
 
 export interface OnboardingCaseItem {
@@ -51,6 +52,7 @@ export interface OnboardingCaseItem {
   employmentType: EmploymentType;
   stage: OnboardingStage;
   status: OnboardingStatus;
+  version?: number;
   departmentId: string;
   departmentName?: string | null;
   designationId: string;
@@ -86,6 +88,7 @@ export interface StageCounts {
   preboarding: number;
   documents: number;
   completed: number;
+  [stageKey: string]: number;
 }
 
 export interface FetchNewHiresOptions {
@@ -163,6 +166,38 @@ export async function createNewHire(payload: CreateNewHirePayload): Promise<Onbo
   if (!res.ok) {
     const errorJson = await res.json().catch(() => ({}));
     const message = errorJson.error?.message || 'Failed to create new hire';
+    const details = errorJson.error?.details
+      ? Object.values(errorJson.error.details).join(', ')
+      : '';
+    throw new Error(details ? `${message}: ${details}` : message);
+  }
+
+  const json = await res.json();
+  return json.data;
+}
+
+export async function transitionCaseStage(
+  caseId: string,
+  payload: {
+    toStage: string;
+    notes?: string;
+    version: number;
+  },
+): Promise<OnboardingCaseItem> {
+  const res = await authorizedFetch(
+    `${appConfig.apiBaseUrl}/hrms/onboarding/cases/${encodeURIComponent(caseId)}/stage`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    },
+  );
+
+  if (!res.ok) {
+    const errorJson = await res.json().catch(() => ({}));
+    const message = errorJson.error?.message || 'Failed to transition stage';
     const details = errorJson.error?.details
       ? Object.values(errorJson.error.details).join(', ')
       : '';

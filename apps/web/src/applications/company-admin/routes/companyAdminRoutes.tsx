@@ -114,6 +114,20 @@ export const companyAdminRoutes: RouteObject[] = [
         ),
       },
       {
+        path: 'organization/profile',
+        element: <Navigate to="/company-admin/profile" replace />,
+      },
+      {
+        // Deep-link support: /company-admin/organization/:section
+        // e.g. /company-admin/organization/departments, /company-admin/organization/structure
+        path: 'organization/:section',
+        element: (
+          <RequireCompanyAdmin>
+            <CompanyOrganizationPage />
+          </RequireCompanyAdmin>
+        ),
+      },
+      {
         path: 'policies',
         element: (
           <RequireCompanyAdmin>

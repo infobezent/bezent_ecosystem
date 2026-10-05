@@ -15,7 +15,7 @@ import { landingPath } from '../../../platform/auth/landing';
 import { LoadingState } from '../../../design-system/components';
 
 export const SUPER_ADMIN_BASE_PATH = '/super-admin';
-export const SUPER_ADMIN_DEFAULT_DESTINATION_ID = 'dashboard';
+export const SUPER_ADMIN_DEFAULT_DESTINATION_ID = 'overview';
 
 /**
  * Super Admin workspace guard (layout route).

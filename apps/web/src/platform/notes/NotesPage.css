@@ -8,7 +8,7 @@
   height: 100%;
   background: var(--bg-surface, #ffffff);
   color: var(--text-primary, #1f1f1f);
-  font-family: var(--font-family-base, 'Google Sans', sans-serif);
+  font-family: var(--font-family-base);
   user-select: none;
   overflow: hidden;
 }

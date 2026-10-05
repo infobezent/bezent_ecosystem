@@ -12,7 +12,39 @@ export interface LeftSidebarProps {
   activeSubId?: string;
   onSubSelect?: (itemId: string, subId: string) => void;
   /** When present, renders the More button that toggles the launcher. */
-  more?: { active: boolean; open: boolean; onToggle: () => void };
+  more?: {
+    active: boolean;
+    open: boolean;
+    onToggle: () => void;
+    hasLauncherOnlyItems?: boolean;
+  };
+  /** Optional container height override for deterministic testing */
+  testAvailableHeight?: number;
+  /** Optional flyout parent ID override for deterministic testing */
+  testFlyoutParentId?: string | null;
+}
+
+/**
+ * Determines whether a navigation item should open a flyout drawer.
+ * - Items with 0 or 1 child navigate directly without opening a flyout drawer.
+ * - Items with 2 or more children open a sub-navigation flyout drawer.
+ */
+export function canItemOpenFlyout(item: ShellNavItem): boolean {
+  return Boolean(item.subItems && item.subItems.length > 1);
+}
+
+/**
+ * Canonical layout tokens from design-system/tokens/layout.css:
+ * --shell-nav-item-height: 68px
+ * --shell-nav-item-gap: 2px
+ */
+const NAV_ITEM_HEIGHT = 68;
+const NAV_ITEM_GAP = 2;
+const NAV_LIST_PADDING_BOTTOM = 8;
+
+function getRequiredHeight(count: number): number {
+  if (count <= 0) return 0;
+  return count * NAV_ITEM_HEIGHT + (count - 1) * NAV_ITEM_GAP;
 }
 
 /**
@@ -37,9 +69,13 @@ export function LeftSidebar({
   activeSubId,
   onSubSelect,
   more,
+  testAvailableHeight,
+  testFlyoutParentId,
 }: LeftSidebarProps) {
-  const [flyoutParentId, setFlyoutParentId] = useState<string | null>(null);
+  const [flyoutParentId, setFlyoutParentId] = useState<string | null>(testFlyoutParentId ?? null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const navRef = useRef<HTMLElement | null>(null);
+  const [containerHeight, setContainerHeight] = useState<number | null>(null);
 
   const cancelClose = () => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -57,21 +93,111 @@ export function LeftSidebar({
   };
   const openFlyout = (item: ShellNavItem) => {
     cancelClose();
-    // Items without sub-navigation never open an (empty) flyout and close
-    // whichever one was open.
-    setFlyoutParentId(item.subItems && item.subItems.length > 0 ? item.id : null);
+    // Items without sub-navigation or with exactly one sub-item never open a flyout.
+    // Single-child destinations navigate directly to that destination on select.
+    setFlyoutParentId(canItemOpenFlyout(item) ? item.id : null);
   };
+
+  useEffect(() => {
+    const el = navRef.current;
+    if (!el) return;
+
+    const updateHeight = () => {
+      if (el.clientHeight > 0) {
+        setContainerHeight(el.clientHeight);
+      }
+    };
+
+    updateHeight();
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const height = entry.contentRect?.height ?? (el ? el.clientHeight : 0);
+          if (height > 0) {
+            setContainerHeight(height);
+          }
+        }
+      });
+      ro.observe(el);
+      return () => ro.disconnect();
+    }
+
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
+  }, []);
 
   useEffect(() => cancelClose, []);
 
+  // Determine available vertical height inside navigation list
+  const effectiveHeight =
+    testAvailableHeight ??
+    containerHeight ??
+    (typeof window !== 'undefined' ? Math.max(0, window.innerHeight - 64 - 36 - 8 - 6 - 8) : 800);
+
+  const availableHeight = Math.max(0, effectiveHeight - NAV_LIST_PADDING_BOTTOM);
+
+  // Generic capacity and overflow calculation
+  const totalItemsHeight = getRequiredHeight(items.length);
+  const allItemsFit = totalItemsHeight <= availableHeight;
+
+  let visibleItems: ShellNavItem[];
+  let shouldRenderMore: boolean;
+
+  if (allItemsFit) {
+    if (more?.hasLauncherOnlyItems) {
+      // All items fit, but launcher contains additional destinations
+      const heightWithMore = totalItemsHeight + NAV_ITEM_GAP + NAV_ITEM_HEIGHT;
+      if (heightWithMore <= availableHeight) {
+        visibleItems = items;
+        shouldRenderMore = true;
+      } else {
+        const availableForItems = availableHeight - (NAV_ITEM_HEIGHT + NAV_ITEM_GAP);
+        const fitCount = Math.max(
+          1,
+          Math.min(
+            items.length - 1,
+            Math.floor((availableForItems + NAV_ITEM_GAP) / (NAV_ITEM_HEIGHT + NAV_ITEM_GAP)),
+          ),
+        );
+        visibleItems = items.slice(0, fitCount);
+        shouldRenderMore = true;
+      }
+    } else {
+      // All items fit and no launcher-only items exist: DO NOT render More
+      visibleItems = items;
+      shouldRenderMore = false;
+    }
+  } else {
+    // Items genuinely overflow available rail space
+    const availableForItems = availableHeight - (NAV_ITEM_HEIGHT + NAV_ITEM_GAP);
+    const fitCount = Math.max(
+      1,
+      Math.min(
+        items.length - 1,
+        Math.floor((availableForItems + NAV_ITEM_GAP) / (NAV_ITEM_HEIGHT + NAV_ITEM_GAP)),
+      ),
+    );
+    visibleItems = items.slice(0, fitCount);
+    shouldRenderMore = Boolean(more);
+  }
+
   // The More launcher takes precedence: no flyout while it is open.
-  const visibleFlyoutId = more?.open ? null : flyoutParentId;
+  const activeFlyoutParent = testFlyoutParentId !== undefined ? testFlyoutParentId : flyoutParentId;
+  const visibleFlyoutId = more?.open ? null : activeFlyoutParent;
 
   // Single active rail item invariant (BZ-03):
   // At any given time, only ONE rail item has active styling.
   // When More launcher is open, More is the active item; the current page item receives a secondary dimmed current style.
   const isMoreOpen = !!more?.open;
   const activeRailItem = isMoreOpen ? 'more' : activeId;
+
+  // If the active item is in overflow, More indicates active selection
+  const isActiveItemInOverflow = Boolean(
+    activeId && !visibleItems.some((item) => item.id === activeId),
+  );
+  const isMoreButtonActive =
+    activeRailItem === 'more' || (!isMoreOpen && (Boolean(more?.active) || isActiveItemInOverflow));
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape' && flyoutParentId) closeNow();
@@ -84,8 +210,8 @@ export function LeftSidebar({
       aria-label="Primary navigation"
       onKeyDown={onKeyDown}
     >
-      <nav className="left-sidebar__list">
-        {items.map((item) => {
+      <nav ref={navRef} className="left-sidebar__list">
+        {visibleItems.map((item) => {
           const isActive = item.id === activeRailItem;
           const isCurrentPage = isMoreOpen && item.id === activeId;
 
@@ -110,12 +236,8 @@ export function LeftSidebar({
             />
           );
         })}
-        {more && (
-          <MoreButton
-            {...more}
-            active={activeRailItem === 'more' || (!isMoreOpen && !!more.active)}
-            onEnter={closeNow}
-          />
+        {more && shouldRenderMore && (
+          <MoreButton {...more} active={isMoreButtonActive} onEnter={closeNow} />
         )}
       </nav>
     </aside>
@@ -151,10 +273,11 @@ function NavItem({
   onSubSelect: (subId: string) => void;
 }) {
   const [hovered, setHovered] = useState(false);
+  const hasFlyout = canItemOpenFlyout(item);
 
   return (
     <div
-      className="left-sidebar__item-wrap"
+      className={`left-sidebar__item-wrap ${flyoutOpen && hasFlyout ? 'is-flyout-open' : ''}`.trim()}
       onMouseEnter={() => {
         setHovered(true);
         onEnter();
@@ -172,8 +295,8 @@ function NavItem({
         type="button"
         className={`left-sidebar__item ${active ? 'is-active' : ''} ${isCurrentPage ? 'is-current-page' : ''}`.trim()}
         aria-current={active || isCurrentPage ? 'page' : undefined}
-        aria-haspopup={item.subItems && item.subItems.length > 0 ? 'menu' : undefined}
-        aria-expanded={item.subItems && item.subItems.length > 0 ? flyoutOpen : undefined}
+        aria-haspopup={hasFlyout ? 'menu' : undefined}
+        aria-expanded={hasFlyout ? flyoutOpen : undefined}
         onClick={onSelect}
       >
         <BezentNavIcon name={item.icon} active={active} hovered={hovered} size={20}>
@@ -185,7 +308,9 @@ function NavItem({
           <span className="left-sidebar__label">{item.label}</span>
         </span>
       </button>
-      {flyoutOpen && <SubNavFlyout item={item} activeSubId={activeSubId} onSelect={onSubSelect} />}
+      {flyoutOpen && hasFlyout && (
+        <SubNavFlyout item={item} activeSubId={activeSubId} onSelect={onSubSelect} />
+      )}
     </div>
   );
 }

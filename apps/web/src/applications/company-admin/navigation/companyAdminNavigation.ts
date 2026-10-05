@@ -4,152 +4,192 @@ import type {
   NavDestination,
 } from '../../../shared/types/navigation';
 
+/**
+ * Company Administration Navigation Catalog
+ *
+ * Exactly 5 canonical top-level navigation groups (Main Nav → SubNavFlyout pattern):
+ *
+ * 01. Overview     (1 child  → direct navigate to /company-admin/dashboard, no flyout)
+ * 02. Company      (2 children → flyout: Company Profile, Organization)
+ * 03. Access       (2 children → flyout: Users, Roles & Permissions)
+ * 04. Applications (1 child  → direct navigate to /company-admin/modules, no flyout)
+ * 05. Governance   (1 child  → direct navigate to /company-admin/audit-logs, no flyout)
+ *
+ * Single-destination rule (canItemOpenFlyout in LeftSidebar):
+ *   children.length <= 1  → direct navigation, no flyout opened.
+ *   children.length  >= 2 → SubNavFlyout opens on hover/click.
+ *
+ * Removed from nav (routes preserved for compatibility):
+ *   - Company Policies (policies): HRMS-owned config, not canonical Company Admin.
+ *   - Invitations: conceptually Access → Users child; route kept for compat.
+ *   - Company Settings (settings): not in final IA; route kept for compat.
+ */
+
 export const COMPANY_ADMIN_NAV_CATEGORIES: readonly NavCategory[] = [
   {
-    id: 'company-admin',
-    label: 'Company Admin',
-    description: 'Company overview, operational metrics and administrative actions.',
+    id: 'overview',
+    label: 'Overview',
+    description: 'Company overview and operational health.',
     icon: 'dashboard',
   },
   {
     id: 'company',
     label: 'Company',
-    description: 'Company profile, organizational units and corporate policies.',
+    description: 'Company profile, organizational units and corporate structure.',
     icon: 'organization',
   },
   {
-    id: 'people-access',
-    label: 'People & Access',
-    description: 'User directory, pending invitations and role permission management.',
+    id: 'access',
+    label: 'Access',
+    description: 'User directory and role-based access management.',
     icon: 'employees',
   },
   {
     id: 'applications',
     label: 'Applications',
-    description: 'Application catalog, module enablement and access controls.',
-    icon: 'dashboard',
+    description: 'Application catalog and company-level access entitlements.',
+    icon: 'apps',
   },
   {
     id: 'governance',
     label: 'Governance',
-    description: 'Company-scoped audit logs and administrative configuration.',
+    description: 'Company-scoped audit logs and administrative governance.',
     icon: 'settings',
   },
 ];
 
 export const COMPANY_ADMIN_NAV_DESTINATIONS: readonly NavDestination[] = [
-  // Company Admin
+  // 01. Overview — single child → direct navigate (no flyout)
   {
-    id: 'dashboard',
-    label: 'Dashboard',
+    id: 'overview',
+    label: 'Overview',
     icon: 'dashboard',
     segment: 'dashboard',
-    subtitle: 'Company Operations & Metrics',
+    subtitle: 'Company Operations Overview',
     description:
-      'Overview of company users, assigned roles, provisioned modules and recent activities.',
-    categoryId: 'company-admin',
+      'Overview of company users, assigned roles, provisioned applications and recent activities.',
+    categoryId: 'overview',
     sidebar: true,
+    children: [
+      {
+        id: 'dashboard',
+        label: 'Dashboard',
+        icon: 'dashboard',
+        path: 'dashboard',
+        permissionKey: 'company.profile.read',
+      },
+    ],
   },
 
-  // Company
+  // 02. Company — two children → SubNavFlyout
   {
-    id: 'profile',
-    label: 'Company Profile',
+    id: 'company',
+    label: 'Company',
+    flyoutTitle: 'COMPANY',
     icon: 'organization',
     segment: 'profile',
-    subtitle: 'Legal Entity & Details',
-    description: 'View and update company metadata, business contacts, country and time zone.',
+    subtitle: 'Company Details',
+    description: 'Company identity, organizational structure and corporate details.',
     categoryId: 'company',
     sidebar: true,
-  },
-  {
-    id: 'organization',
-    label: 'Organization',
-    icon: 'organization',
-    segment: 'organization',
-    subtitle: 'Structure & Departments',
-    description: 'Overview and administration of departments, designations, levels and locations.',
-    categoryId: 'company',
-    sidebar: true,
-  },
-  {
-    id: 'policies',
-    label: 'Company Policies',
-    icon: 'documents',
-    segment: 'policies',
-    subtitle: 'HRMS Configuration & Policies',
-    description: 'Configure employment types, probation, leave, shifts and onboarding form fields.',
-    categoryId: 'company',
-    sidebar: true,
+    children: [
+      {
+        id: 'profile',
+        label: 'Company Profile',
+        icon: 'organization',
+        path: 'profile',
+        permissionKey: 'company.profile.read',
+      },
+      {
+        id: 'organization',
+        label: 'Organization',
+        icon: 'organization',
+        path: 'organization',
+        permissionKey: 'company.organization.view',
+      },
+    ],
   },
 
-  // People & Access
+  // 03. Access — two+ children → SubNavFlyout
   {
-    id: 'users',
-    label: 'Users',
+    id: 'access',
+    label: 'Access',
+    flyoutTitle: 'ACCESS',
     icon: 'employees',
     segment: 'users',
-    subtitle: 'Company User Directory',
-    description: 'Manage company users, view statuses, assign roles and handle access memberships.',
-    categoryId: 'people-access',
+    subtitle: 'Access Management',
+    description: 'User directory, role assignments and permission boundaries.',
+    categoryId: 'access',
     sidebar: true,
-  },
-  {
-    id: 'invitations',
-    label: 'Invitations',
-    icon: 'employees',
-    segment: 'invitations',
-    subtitle: 'Pending User Invites',
-    description:
-      'Track outstanding invitations, resend invitation tokens and cancel expired invites.',
-    categoryId: 'people-access',
-    sidebar: true,
-  },
-  {
-    id: 'roles',
-    label: 'Roles & Permissions',
-    icon: 'settings',
-    segment: 'roles',
-    subtitle: 'Access Control Catalog',
-    description:
-      'Inspect available company roles, view granular permissions and privilege boundaries.',
-    categoryId: 'people-access',
-    sidebar: true,
+    children: [
+      {
+        id: 'users',
+        label: 'Users',
+        icon: 'employees',
+        path: 'users',
+        permissionKey: 'company.users.view',
+      },
+      {
+        id: 'roles',
+        label: 'Roles & Permissions',
+        icon: 'settings',
+        path: 'roles',
+        permissionKey: 'company.roles.view',
+      },
+      // Invitations: legacy compat child — route preserved, active state resolves to Access.
+      // Shown in flyout temporarily; final Access/Users page UX review will merge or hide it.
+      {
+        id: 'invitations',
+        label: 'Invitations',
+        icon: 'employees',
+        path: 'invitations',
+        permissionKey: 'company.users.view',
+      },
+    ],
   },
 
-  // Applications
+  // 04. Applications — single child → direct navigate (no flyout)
   {
-    id: 'modules',
-    label: 'Application Access',
-    icon: 'dashboard',
+    id: 'applications',
+    label: 'Applications',
+    icon: 'apps',
     segment: 'modules',
-    subtitle: 'Provisioned Applications',
+    subtitle: 'Application Access',
     description: 'View applications provisioned by Super Admin and configure company-level access.',
     categoryId: 'applications',
     sidebar: true,
+    permissionKey: 'company.modules.view',
+    children: [
+      {
+        id: 'application-access',
+        label: 'Application Access',
+        icon: 'apps',
+        path: 'modules',
+        permissionKey: 'company.modules.view',
+      },
+    ],
   },
 
-  // Governance
+  // 05. Governance — single child → direct navigate (no flyout)
   {
-    id: 'audit-logs',
-    label: 'Audit Logs',
-    icon: 'documents',
+    id: 'governance',
+    label: 'Governance',
+    icon: 'settings',
     segment: 'audit-logs',
-    subtitle: 'Company Activity Ledger',
+    subtitle: 'Company Governance',
     description: 'Audit trail of administrative actions strictly scoped to this company.',
     categoryId: 'governance',
     sidebar: true,
-  },
-  {
-    id: 'settings',
-    label: 'Company Settings',
-    icon: 'settings',
-    segment: 'settings',
-    subtitle: 'Administrative Settings',
-    description:
-      'Company-specific administrative controls, security settings and operational defaults.',
-    categoryId: 'governance',
-    sidebar: true,
+    permissionKey: 'company.audit.view',
+    children: [
+      {
+        id: 'audit-logs',
+        label: 'Audit Logs',
+        icon: 'documents',
+        path: 'audit-logs',
+        permissionKey: 'company.audit.view',
+      },
+    ],
   },
 ];
 

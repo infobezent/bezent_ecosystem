@@ -104,6 +104,10 @@ export function AppShell({
     launcher.items.some((i) => i.id === launcher.activeItemId) &&
     !navItems.some((n) => n.id === launcher.activeItemId);
 
+  const hasLauncherOnlyItems = Boolean(
+    launcher?.items.some((launcherItem) => !navItems.some((nav) => nav.id === launcherItem.id)),
+  );
+
   return (
     <div
       className={[
@@ -141,7 +145,12 @@ export function AppShell({
         onSubSelect={onSubSelect}
         more={
           launcher
-            ? { active: moreActive, open: moreOpen, onToggle: () => setMoreOpen((v) => !v) }
+            ? {
+                active: moreActive,
+                open: moreOpen,
+                onToggle: () => setMoreOpen((v) => !v),
+                hasLauncherOnlyItems,
+              }
             : undefined
         }
       />

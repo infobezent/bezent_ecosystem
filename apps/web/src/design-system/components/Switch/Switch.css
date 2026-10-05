@@ -28,7 +28,7 @@
   height: 22px;
   background: var(--bg-surface-secondary, #e9eff8);
   border: 1px solid var(--border-default, #dde3ea);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   transition:
     background-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
     border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
@@ -88,9 +88,9 @@
 }
 
 .bezent-switch-label {
-  font-size: var(--form-font-size-input, 13.5px);
+  font-size: var(--font-form-input-size, var(--font-size-base, 14px));
   color: var(--text-primary, #1f1f1f);
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  line-height: 1.4;
+  font-weight: var(--font-weight-medium, 500);
+  letter-spacing: var(--letter-spacing-normal, 0em);
+  line-height: var(--line-height-normal, 1.5);
 }

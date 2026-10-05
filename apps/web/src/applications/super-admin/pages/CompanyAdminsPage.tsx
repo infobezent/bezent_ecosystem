@@ -79,10 +79,23 @@ export function CompanyAdminsPage() {
     fetchAdmins();
   }, [fetchAdmins]);
 
+  const handleTenantChange = (newTenantId: string) => {
+    setModalTenantId(newTenantId);
+    // Clear company selection if current selection doesn't belong to the newly selected tenant
+    const belongs = companies.some((c) => c.tenantId === newTenantId && c.id === modalCompanyId);
+    if (!belongs) {
+      setModalCompanyId('');
+    }
+  };
+
   const handleAssignSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!modalTenantId) {
       setFormError('Tenant selection is required');
+      return;
+    }
+    if (!modalCompanyId) {
+      setFormError('Target company selection is required');
       return;
     }
 
@@ -91,7 +104,7 @@ export function CompanyAdminsPage() {
     try {
       const result = await superAdminApi.assignCompanyAdmin({
         tenantId: modalTenantId,
-        companyId: modalCompanyId || undefined,
+        companyId: modalCompanyId,
         userId: assignMode === 'existing' ? existingUserId.trim() : undefined,
         newUser:
           assignMode === 'create'
@@ -108,6 +121,7 @@ export function CompanyAdminsPage() {
       setNewEmail('');
       setNewFirstName('');
       setNewLastName('');
+      setModalCompanyId('');
       setNotice(result.invitationDelivery.message);
       await fetchAdmins();
     } catch (err: unknown) {
@@ -118,14 +132,29 @@ export function CompanyAdminsPage() {
   };
 
   const handleRevoke = async (admin: CompanyAdminAssignment) => {
-    if (!confirm(`Are you sure you want to revoke Company Admin access for ${admin.email}?`)) {
+    const targetLabel = admin.companyName ? `${admin.companyName}` : 'this company';
+    if (
+      !confirm(
+        `Are you sure you want to revoke Company Admin access for ${admin.email} at ${targetLabel}?`,
+      )
+    ) {
       return;
     }
     try {
       await superAdminApi.revokeCompanyAdmin(admin.membershipId);
+      setNotice(`Company Admin access revoked for ${admin.email}.`);
       await fetchAdmins();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to revoke administrator');
+    }
+  };
+
+  const handleResendInvitation = async (admin: CompanyAdminAssignment) => {
+    try {
+      const res = await superAdminApi.resendCompanyAdminInvitation(admin.membershipId);
+      setNotice(res.invitationDelivery.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to resend invitation email');
     }
   };
 
@@ -133,11 +162,15 @@ export function CompanyAdminsPage() {
     <Page>
       <PageHeader
         title="Company Administrators"
-        subtitle="Manage designated company administrators assigned to customer tenants"
+        subtitle="Manage designated company administrators assigned to customer companies"
         actions={
           <Button
             variant="primary"
-            onClick={() => setIsAssignOpen(true)}
+            onClick={() => {
+              setFormError(null);
+              setModalCompanyId('');
+              setIsAssignOpen(true);
+            }}
             leftIcon={<BezentIcon name="plus" size={16} color="currentColor" />}
           >
             Assign Company Admin
@@ -146,18 +179,13 @@ export function CompanyAdminsPage() {
       />
 
       {error && (
-        <Alert variant="error" title="Error" onDismiss={() => setError(null)}>
+        <Alert variant="error" title="Action Error" onDismiss={() => setError(null)}>
           {error}
         </Alert>
       )}
 
       {notice && (
-        <Alert
-          variant="success"
-          title="Company Admin assigned"
-          dismissible
-          onDismiss={() => setNotice(null)}
-        >
+        <Alert variant="success" title="Success" dismissible onDismiss={() => setNotice(null)}>
           {notice}
         </Alert>
       )}
@@ -198,7 +226,11 @@ export function CompanyAdminsPage() {
               description="No company administrator assignments found for the selected tenant."
               primaryAction={{
                 label: 'Assign Company Admin',
-                onClick: () => setIsAssignOpen(true),
+                onClick: () => {
+                  setFormError(null);
+                  setModalCompanyId('');
+                  setIsAssignOpen(true);
+                },
               }}
             />
           )}
@@ -210,7 +242,7 @@ export function CompanyAdminsPage() {
                   <TableHeaderCell>Administrator</TableHeaderCell>
                   <TableHeaderCell>Customer Tenant</TableHeaderCell>
                   <TableHeaderCell>Company</TableHeaderCell>
-                  <TableHeaderCell>Status</TableHeaderCell>
+                  <TableHeaderCell>Status / Access State</TableHeaderCell>
                   <TableHeaderCell>Assigned Date</TableHeaderCell>
                   <TableHeaderCell>Actions</TableHeaderCell>
                 </TableRow>
@@ -226,22 +258,39 @@ export function CompanyAdminsPage() {
                         <span className="bezent-caption">{item.email}</span>
                       </Stack>
                     </TableCell>
+                    <TableCell>{item.tenantName || item.tenantId}</TableCell>
                     <TableCell>
-                      <code>{item.tenantName || item.tenantId}</code>
+                      <strong>{item.companyName || '—'}</strong>
                     </TableCell>
-                    <TableCell>{item.companyName || 'Tenant-wide'}</TableCell>
                     <TableCell>
-                      <Badge variant={item.status === 'active' ? 'success' : 'neutral'}>
-                        {item.status.toUpperCase()}
-                      </Badge>
+                      {item.status === 'active' ? (
+                        item.lastLoginAt ? (
+                          <Badge variant="success">Active</Badge>
+                        ) : (
+                          <Badge variant="warning">Pending first sign-in</Badge>
+                        )
+                      ) : (
+                        <Badge variant="neutral">{item.status.toUpperCase()}</Badge>
+                      )}
                     </TableCell>
                     <TableCell>{new Date(item.assignedAt).toLocaleDateString()}</TableCell>
                     <TableCell>
-                      {item.status === 'active' && (
-                        <Button variant="danger" size="sm" onClick={() => handleRevoke(item)}>
-                          Revoke
-                        </Button>
-                      )}
+                      <Inline gap="xs">
+                        {item.status === 'active' && !item.lastLoginAt && (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => handleResendInvitation(item)}
+                          >
+                            Resend Invitation
+                          </Button>
+                        )}
+                        {item.status === 'active' && (
+                          <Button variant="danger" size="sm" onClick={() => handleRevoke(item)}>
+                            Revoke
+                          </Button>
+                        )}
+                      </Inline>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -256,7 +305,7 @@ export function CompanyAdminsPage() {
         isOpen={isAssignOpen}
         onClose={() => setIsAssignOpen(false)}
         title="Assign Company Administrator"
-        description="Grant Company Admin permissions to a user for a specific customer tenant."
+        description="Grant Company Admin permissions to a user for a specific customer company."
         footer={
           <Inline gap="sm" justify="end">
             <Button variant="secondary" onClick={() => setIsAssignOpen(false)}>
@@ -279,21 +328,22 @@ export function CompanyAdminsPage() {
             <Select
               label="Target Customer Tenant *"
               value={modalTenantId}
-              onChange={(e) => setModalTenantId(e.target.value)}
+              onChange={(e) => handleTenantChange(e.target.value)}
               options={tenants.map((t) => ({ value: t.id, label: `${t.name} (${t.code})` }))}
               required
             />
 
             <Select
-              label="Target Company (Optional)"
+              label="Target Company *"
               value={modalCompanyId}
               onChange={(e) => setModalCompanyId(e.target.value)}
               options={[
-                { value: '', label: 'All Companies under Tenant (Tenant-wide)' },
+                { value: '', label: 'Select Target Company...' },
                 ...companies
-                  .filter((c) => !modalTenantId || c.tenantId === modalTenantId)
+                  .filter((c) => c.tenantId === modalTenantId)
                   .map((c) => ({ value: c.id, label: `${c.name} (${c.code})` })),
               ]}
+              required
             />
 
             <Select

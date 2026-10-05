@@ -47,6 +47,7 @@ describe('TenantService', () => {
     id: 'tenant_acme_01',
     name: 'Acme Corp',
     code: 'ACME',
+    maxCompanies: 5,
     contactEmail: 'contact@acme.com',
     contactPhone: '+1234567890',
     status: 'active',

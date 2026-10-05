@@ -267,7 +267,10 @@ export function ShellLayout() {
         onNavSelect={(id) => {
           const destination = application?.navigation.destinations.find((d) => d.id === id);
           if (application && destination) {
-            navigate(destinationPath(application.basePath, destination));
+            const navItem = navItems.find((n) => n.id === id);
+            const singleChildId =
+              navItem?.subItems?.length === 1 ? navItem.subItems[0]?.id : undefined;
+            navigate(destinationPath(application.basePath, destination, singleChildId));
           }
         }}
         activeSubId={active?.childId}

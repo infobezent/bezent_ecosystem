@@ -5,7 +5,7 @@ import { TasksPage } from '../../platform/tasks';
 import { ApprovalsPage } from '../../platform/approvals';
 import { NotesPage } from '../../platform/notes';
 import { EmployeeRegistrationPage } from '../../applications/hrms/onboarding';
-import { FormEditorPage } from '../../applications/hrms/settings/forms';
+import { FormEditorPage } from '../../applications/hrms/settings/administration/forms';
 import { DevPlaceholderPage } from './DevPlaceholderPage';
 import { DesignSystemShowcase } from './DesignSystemShowcase';
 import { NotFoundPage } from './NotFoundPage';
@@ -24,6 +24,7 @@ import {
 } from '../../applications/company-admin/routes/companyAdminRoutes';
 import { hrmsRoutes, RequireHrmsWorkspace } from '../../applications/hrms/routes/hrmsRoutes';
 import { essRoutes, RequireEssWorkspace } from '../../applications/ess/routes/essRoutes';
+import { RouteErrorBoundary } from './RouteErrorBoundary';
 
 /**
  * Workspace-aware root redirect. Reads the live auth state so that an Employee
@@ -59,7 +60,7 @@ const hrmsFallbackPath = destinationPath(
  */
 export const appRoutes: RouteObject[] = [
   // The ONE sign-in page for every BEZENT user (ADR-018), outside every shell.
-  { path: '/login', element: <LoginPage /> },
+  { path: '/login', element: <LoginPage />, errorElement: <RouteErrorBoundary /> },
 
   // Root redirect: workspace-aware, routes signed-in users to their authorized workspace.
   {
@@ -69,6 +70,7 @@ export const appRoutes: RouteObject[] = [
         <WorkspaceRedirect />
       </RequireAuth>
     ),
+    errorElement: <RouteErrorBoundary />,
   },
 
   // 1. Super Admin Workspace — Workspace Guard is strictly ABOVE the shell layout
@@ -78,9 +80,11 @@ export const appRoutes: RouteObject[] = [
         <RequireSuperAdminWorkspace />
       </RequireAuth>
     ),
+    errorElement: <RouteErrorBoundary />,
     children: [
       {
         element: <ShellLayout />,
+        errorElement: <RouteErrorBoundary />,
         children: superAdminRoutes,
       },
     ],
@@ -93,9 +97,11 @@ export const appRoutes: RouteObject[] = [
         <RequireCompanyAdminWorkspace />
       </RequireAuth>
     ),
+    errorElement: <RouteErrorBoundary />,
     children: [
       {
         element: <ShellLayout />,
+        errorElement: <RouteErrorBoundary />,
         children: companyAdminRoutes,
       },
     ],
@@ -108,9 +114,11 @@ export const appRoutes: RouteObject[] = [
         <RequireHrmsWorkspace />
       </RequireAuth>
     ),
+    errorElement: <RouteErrorBoundary />,
     children: [
       {
         element: <ShellLayout />,
+        errorElement: <RouteErrorBoundary />,
         children: hrmsRoutes,
       },
     ],
@@ -123,9 +131,11 @@ export const appRoutes: RouteObject[] = [
         <RequireEssWorkspace />
       </RequireAuth>
     ),
+    errorElement: <RouteErrorBoundary />,
     children: [
       {
         element: <ShellLayout />,
+        errorElement: <RouteErrorBoundary />,
         children: essRoutes,
       },
     ],

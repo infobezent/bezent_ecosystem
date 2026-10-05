@@ -208,6 +208,8 @@ export function ChapterFocusCarousel({
                     ? 'is-focus-secondary'
                     : 'is-focus-far';
 
+            const fullTitle = chapter.title || chapter.label;
+
             return (
               <button
                 key={chapter.id}
@@ -223,6 +225,7 @@ export function ChapterFocusCarousel({
                 tabIndex={isActive ? 0 : -1}
                 className={`bezent-focus-card ${depthClass}`}
                 data-distance={distance}
+                title={fullTitle}
                 onClick={() => {
                   if (!chapter.disabled) {
                     onSelectChapter(chapter.id);

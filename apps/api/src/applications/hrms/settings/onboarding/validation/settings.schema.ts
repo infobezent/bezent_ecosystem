@@ -2,9 +2,10 @@ import { ValidationError } from '../../../../../app/errors/AppError.js';
 import {
   SUPPORTED_STAGE_KEYS,
   PROTECTED_SYSTEM_FIELD_KEYS,
-  type SupportedStageKey,
   type UpdateOnboardingGeneralSettingsDto,
+  type CreateOnboardingStageConfigDto,
   type UpdateOnboardingStageConfigDto,
+  type ReorderOnboardingStagesDto,
   type UpdateOnboardingFieldConfigDto,
   type CreateOnboardingDocumentRequirementDto,
   type UpdateOnboardingDocumentRequirementDto,
@@ -70,20 +71,146 @@ export function validateUpdateGeneralSettings(input: unknown): UpdateOnboardingG
   return result;
 }
 
-export function validateStageKey(stageKey: string): SupportedStageKey {
+export function validateStageKey(stageKey: string): string {
   if (!stageKey || typeof stageKey !== 'string') {
     throw new ValidationError('Stage key is required');
   }
 
   const normalized = stageKey.trim().toLowerCase();
-  if (!SUPPORTED_STAGE_KEYS.includes(normalized as SupportedStageKey)) {
+  const isSystemStage = (SUPPORTED_STAGE_KEYS as readonly string[]).includes(normalized);
+  const isCustomStage = /^stage_[a-z0-9_]{2,60}$/.test(normalized);
+
+  if (!isSystemStage && !isCustomStage) {
     throw new ValidationError(
-      `Invalid stage reference '${stageKey}'. Supported stages are: ${SUPPORTED_STAGE_KEYS.join(', ')}`,
-      { stageKey: `Stage must be one of: ${SUPPORTED_STAGE_KEYS.join(', ')}` },
+      `Invalid stage reference '${stageKey}'. Supported stages are: ${SUPPORTED_STAGE_KEYS.join(', ')} or a valid custom stage identifier (stage_*)`,
+      {
+        stageKey: `Stage must be one of: ${SUPPORTED_STAGE_KEYS.join(', ')} or a valid custom stage identifier (stage_*)`,
+      },
     );
   }
 
-  return normalized as SupportedStageKey;
+  return normalized;
+}
+
+export function validateCreateStageConfig(input: unknown): CreateOnboardingStageConfigDto {
+  if (!input || typeof input !== 'object') {
+    throw new ValidationError('Request body must be a JSON object');
+  }
+
+  const data = input as Record<string, unknown>;
+  const errors: Record<string, string> = {};
+
+  // Forbid client-supplied privileged/system fields
+  const forbiddenFields = ['id', 'tenantId', 'companyId', 'isSystem', 'isTerminal', 'stageKey'];
+  for (const field of forbiddenFields) {
+    if (data[field] !== undefined) {
+      errors[field] = `Field '${field}' cannot be specified when creating a custom stage`;
+    }
+  }
+
+  let name = '';
+  if (!data.name || typeof data.name !== 'string' || !data.name.trim()) {
+    errors.name = 'Stage name must be a non-empty string';
+  } else if (data.name.trim().length > 100) {
+    errors.name = 'Stage name must not exceed 100 characters';
+  } else {
+    name = data.name.trim();
+  }
+
+  let description: string | null = null;
+  if (data.description !== undefined && data.description !== null && data.description !== '') {
+    if (typeof data.description !== 'string') {
+      errors.description = 'Description must be a string';
+    } else if (data.description.trim().length > 255) {
+      errors.description = 'Description must not exceed 255 characters';
+    } else {
+      description = data.description.trim();
+    }
+  }
+
+  let isRequired = true;
+  if (data.isRequired !== undefined) {
+    if (typeof data.isRequired !== 'boolean') {
+      errors.isRequired = 'isRequired must be a boolean';
+    } else {
+      isRequired = data.isRequired;
+    }
+  }
+
+  let position: number | undefined;
+  if (data.position !== undefined) {
+    if (
+      typeof data.position !== 'number' ||
+      !Number.isInteger(data.position) ||
+      data.position < 1
+    ) {
+      errors.position = 'position must be a positive integer';
+    } else {
+      position = data.position;
+    }
+  }
+
+  let afterStageKey: string | undefined;
+  if (
+    data.afterStageKey !== undefined &&
+    data.afterStageKey !== null &&
+    data.afterStageKey !== ''
+  ) {
+    if (typeof data.afterStageKey !== 'string') {
+      errors.afterStageKey = 'afterStageKey must be a string';
+    } else {
+      afterStageKey = data.afterStageKey.trim().toLowerCase();
+    }
+  }
+
+  if (Object.keys(errors).length > 0) {
+    throw new ValidationError('Validation failed for stage creation', errors);
+  }
+
+  return {
+    name,
+    description,
+    isRequired,
+    position,
+    afterStageKey,
+  };
+}
+
+export function validateReorderStages(input: unknown): ReorderOnboardingStagesDto {
+  if (!input || typeof input !== 'object') {
+    throw new ValidationError('Request body must be a JSON object');
+  }
+
+  const data = input as Record<string, unknown>;
+  const errors: Record<string, string> = {};
+
+  if (!data.stageKeys || !Array.isArray(data.stageKeys) || data.stageKeys.length === 0) {
+    errors.stageKeys = 'stageKeys must be a non-empty array of stage keys';
+  } else {
+    const keys = data.stageKeys as unknown[];
+    const seen = new Set<string>();
+    for (let i = 0; i < keys.length; i++) {
+      const k = keys[i];
+      if (typeof k !== 'string' || !k.trim()) {
+        errors.stageKeys = `stageKeys contains an invalid or empty key at index ${i}`;
+        break;
+      }
+      const trimmed = k.trim().toLowerCase();
+      if (seen.has(trimmed)) {
+        errors.stageKeys = `Duplicate stage key '${trimmed}' in stageKeys`;
+        break;
+      }
+      seen.add(trimmed);
+    }
+  }
+
+  if (Object.keys(errors).length > 0) {
+    throw new ValidationError('Validation failed for stage reordering', errors);
+  }
+
+  return {
+    stageKeys: (data.stageKeys as string[]).map((k) => k.trim().toLowerCase()),
+  };
 }
 
 export function validateUpdateStageConfig(
@@ -99,6 +226,14 @@ export function validateUpdateStageConfig(
   const data = input as Record<string, unknown>;
   const errors: Record<string, string> = {};
   const result: UpdateOnboardingStageConfigDto = {};
+
+  // Forbid mutating identity/privileged properties
+  const forbiddenFields = ['id', 'tenantId', 'companyId', 'isSystem', 'isTerminal', 'stageKey'];
+  for (const field of forbiddenFields) {
+    if (data[field] !== undefined) {
+      errors[field] = `Field '${field}' cannot be modified`;
+    }
+  }
 
   if (data.name !== undefined) {
     if (typeof data.name !== 'string' || !data.name.trim()) {

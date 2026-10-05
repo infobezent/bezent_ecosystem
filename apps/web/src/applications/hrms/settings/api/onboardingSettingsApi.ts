@@ -4,6 +4,7 @@ import type {
   OnboardingGeneralSettings,
   UpdateOnboardingGeneralSettingsDto,
   OnboardingStageConfig,
+  CreateOnboardingStageConfigDto,
   UpdateOnboardingStageConfigDto,
   OnboardingFieldConfig,
   UpdateOnboardingFieldConfigDto,
@@ -70,6 +71,17 @@ export async function fetchStageConfigs(): Promise<OnboardingStageConfig[]> {
   return handleResponse<OnboardingStageConfig[]>(res, 'Failed to load stage configurations');
 }
 
+export async function createStageConfig(
+  payload: CreateOnboardingStageConfigDto,
+): Promise<OnboardingStageConfig> {
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/settings/onboarding/stages`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return handleResponse<OnboardingStageConfig>(res, 'Failed to create stage configuration');
+}
+
 export async function updateStageConfig(
   stageKey: string,
   payload: UpdateOnboardingStageConfigDto,
@@ -83,6 +95,32 @@ export async function updateStageConfig(
     },
   );
   return handleResponse<OnboardingStageConfig>(res, 'Failed to update stage configuration');
+}
+
+export async function reorderStageConfigs(stageKeys: string[]): Promise<OnboardingStageConfig[]> {
+  const res = await authorizedFetch(
+    `${appConfig.apiBaseUrl}/hrms/settings/onboarding/stages/reorder`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stageKeys }),
+    },
+  );
+  return handleResponse<OnboardingStageConfig[]>(res, 'Failed to reorder stage configurations');
+}
+
+export async function deleteStageConfig(stageKey: string): Promise<void> {
+  const res = await authorizedFetch(
+    `${appConfig.apiBaseUrl}/hrms/settings/onboarding/stages/${encodeURIComponent(stageKey)}`,
+    {
+      method: 'DELETE',
+    },
+  );
+  if (!res.ok) {
+    const errorJson = await res.json().catch(() => ({}));
+    const message = errorJson.error?.message || 'Failed to delete stage';
+    throw new Error(message);
+  }
 }
 
 // ==================== Field Configurations ====================

@@ -117,7 +117,17 @@ const TIMEZONE_OPTIONS = [
   },
 ];
 
-export function WorkingHoursSection() {
+import type { Chapter08WorkingHoursState } from '../types/registration.types';
+
+export interface WorkingHoursSectionProps {
+  value?: Chapter08WorkingHoursState;
+  onChange?: (updated: Chapter08WorkingHoursState) => void;
+}
+
+export function WorkingHoursSection({
+  value: _value,
+  onChange: _onChange,
+}: WorkingHoursSectionProps = {}) {
   // A. WORK SCHEDULE STATE
   const [workingCalendar, setWorkingCalendar] = useState('Standard India General Calendar 2026');
   const [customWorkingCalendar, setCustomWorkingCalendar] = useState('');

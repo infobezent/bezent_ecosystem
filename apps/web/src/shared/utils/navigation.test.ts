@@ -17,6 +17,13 @@ const navigation: ApplicationNavigation = {
         { id: 'two', label: 'Two', icon: 'home' },
       ],
     },
+    {
+      id: 'gamma',
+      label: 'Gamma',
+      icon: 'home',
+      segment: 'default-seg',
+      children: [{ id: 'custom', label: 'Custom Path', icon: 'home', path: 'direct-path' }],
+    },
   ],
 };
 
@@ -25,6 +32,23 @@ describe('destinationPath', () => {
     const beta = navigation.destinations[1]!;
     expect(destinationPath('/app', beta)).toBe('/app/beta');
     expect(destinationPath('/app', beta, 'two')).toBe('/app/beta/two');
+  });
+
+  it('honors custom child path override when specified', () => {
+    const gamma = navigation.destinations[2]!;
+    expect(destinationPath('/app', gamma, 'custom')).toBe('/app/direct-path');
+  });
+
+  it('navigates directly to single child path when destination has exactly one child', () => {
+    const gamma = navigation.destinations[2]!;
+    expect(destinationPath('/app', gamma)).toBe('/app/direct-path');
+  });
+
+  it('keeps base segment when destination has multiple children or no children', () => {
+    const alpha = navigation.destinations[0]!;
+    const beta = navigation.destinations[1]!;
+    expect(destinationPath('/app', alpha)).toBe('/app/alpha');
+    expect(destinationPath('/app', beta)).toBe('/app/beta');
   });
 });
 
@@ -48,7 +72,21 @@ describe('resolveActiveNavigation', () => {
     });
   });
 
-  it('keeps the parent selected for an unknown child path', () => {
+  it('selects parent and child for custom child path override', () => {
+    expect(resolveActiveNavigation(navigation, '/app', '/app/direct-path')).toEqual({
+      destinationId: 'gamma',
+      childId: 'custom',
+    });
+  });
+
+  it('preserves parent and child for nested detail route under child', () => {
+    expect(resolveActiveNavigation(navigation, '/app', '/app/direct-path/detail_123')).toEqual({
+      destinationId: 'gamma',
+      childId: 'custom',
+    });
+  });
+
+  it('keeps the parent selected for an unknown child path under root', () => {
     expect(resolveActiveNavigation(navigation, '/app', '/app/beta/missing')).toEqual({
       destinationId: 'beta',
       childId: undefined,
@@ -57,7 +95,7 @@ describe('resolveActiveNavigation', () => {
 
   it('returns undefined outside the application or for unknown destinations', () => {
     expect(resolveActiveNavigation(navigation, '/app', '/other/alpha')).toBeUndefined();
-    expect(resolveActiveNavigation(navigation, '/app', '/app/gamma')).toBeUndefined();
+    expect(resolveActiveNavigation(navigation, '/app', '/app/unknown')).toBeUndefined();
     expect(resolveActiveNavigation(navigation, '/app', '/app')).toBeUndefined();
   });
 

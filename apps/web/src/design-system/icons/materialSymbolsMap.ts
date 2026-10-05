@@ -84,6 +84,13 @@ export const MATERIAL_SYMBOLS_MAP: Record<string, string> = {
   openInFull: 'open_in_full',
   expand: 'fullscreen',
   maximize: 'fullscreen',
+  email: 'mail',
+  mail: 'mail',
+  phone: 'call',
+  call: 'call',
+  upload: 'upload',
+  location: 'location_on',
+  location_on: 'location_on',
 
   // Shell Utilities & Micro-actions
   whatsnew: 'new_releases',

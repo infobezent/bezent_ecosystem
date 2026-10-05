@@ -27,15 +27,32 @@ export function toShellNavItems(
     .filter((d) => {
       if (!d.sidebar && !(d.id === activeId && d.categoryId)) return false;
       if (d.permissionKey && canFn && !canFn(d.permissionKey)) return false;
+      if (d.children !== undefined) {
+        const accessibleChildren = d.children.filter((c) => {
+          if (c.permissionKey && canFn && !canFn(c.permissionKey)) return false;
+          return true;
+        });
+        if (accessibleChildren.length === 0) return false;
+      }
       return true;
     })
-    .map((d) => ({
-      id: d.id,
-      label: d.label,
-      icon: d.icon,
-      subtitle: d.subtitle,
-      subItems: d.children?.map((c) => ({ id: c.id, label: c.label, icon: c.icon })),
-    }));
+    .map((d) => {
+      const accessibleChildren = d.children
+        ? d.children.filter((c) => {
+            if (c.permissionKey && canFn && !canFn(c.permissionKey)) return false;
+            return true;
+          })
+        : undefined;
+
+      return {
+        id: d.id,
+        label: d.label,
+        flyoutTitle: d.flyoutTitle,
+        icon: d.icon,
+        subtitle: d.subtitle,
+        subItems: accessibleChildren?.map((c) => ({ id: c.id, label: c.label, icon: c.icon })),
+      };
+    });
 }
 
 /** Every destination that has a launcher category, for the More launcher. */
@@ -48,6 +65,13 @@ export function toShellLauncher(
   const items: ShellLauncherItem[] = app.navigation.destinations.flatMap((d) => {
     if (!d.categoryId) return [];
     if (d.permissionKey && canFn && !canFn(d.permissionKey)) return [];
+    if (d.children !== undefined) {
+      const accessibleChildren = d.children.filter((c) => {
+        if (c.permissionKey && canFn && !canFn(c.permissionKey)) return false;
+        return true;
+      });
+      if (accessibleChildren.length === 0) return [];
+    }
     return [
       {
         id: d.id,
@@ -67,7 +91,15 @@ export function toShellLauncher(
     activeItemId: active?.destinationId,
     onSelect: (id) => {
       const destination = app.navigation.destinations.find((d) => d.id === id);
-      if (destination) navigateTo(destinationPath(app.basePath, destination));
+      if (destination) {
+        const accessibleChildren = destination.children?.filter((c) => {
+          if (c.permissionKey && canFn && !canFn(c.permissionKey)) return false;
+          return true;
+        });
+        const singleChildId =
+          accessibleChildren?.length === 1 ? accessibleChildren[0]?.id : undefined;
+        navigateTo(destinationPath(app.basePath, destination, singleChildId));
+      }
     },
   };
 }

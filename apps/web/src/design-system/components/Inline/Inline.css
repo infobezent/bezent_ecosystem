@@ -18,27 +18,27 @@
 }
 
 .bezent-inline--gap-none {
-  gap: 0;
+  gap: var(--space-0);
 }
 
 .bezent-inline--gap-xs {
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .bezent-inline--gap-sm {
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .bezent-inline--gap-md {
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .bezent-inline--gap-lg {
-  gap: 24px;
+  gap: var(--space-6);
 }
 
 .bezent-inline--gap-xl {
-  gap: 32px;
+  gap: var(--space-8);
 }
 
 .bezent-inline--align-start {

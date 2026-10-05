@@ -1,15 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { ReactElement } from 'react';
-import { SettingsPage } from '../pages/SettingsPage';
-import { DashboardSettingsSection } from '../components/DashboardSettingsSection';
-import { OnboardingBuilderSection } from '../components/OnboardingBuilderSection';
-import { LeaveSettingsSection } from '../components/LeaveSettingsSection';
-import { AttendanceSettingsSection } from '../components/AttendanceSettingsSection';
-import { TimesheetsSettingsSection } from '../components/TimesheetsSettingsSection';
-import { PerformanceSettingsSection } from '../components/PerformanceSettingsSection';
-import { EmployeesSettingsSection } from '../components/EmployeesSettingsSection';
-import { HRSettingsSection } from '../components/HRSettingsSection';
+import { SettingsPage, SettingsPageInner } from '../pages/SettingsPage';
+import { DashboardSettingsSection } from '../general/DashboardSettingsSection';
+import { OnboardingBuilderSection } from '../administration/onboarding/OnboardingBuilderSection';
+import { LeaveSettingsSection } from '../leave/LeaveSettingsSection';
+import { AttendanceSettingsSection } from '../attendance/AttendanceSettingsSection';
+import { TimesheetsSettingsSection } from '../timesheets/TimesheetsSettingsSection';
+import { PerformanceSettingsSection } from '../performance/PerformanceSettingsSection';
+import { EmployeesSettingsSection } from '../general/EmployeesSettingsSection';
+import { HRSettingsSection } from '../general/HRSettingsSection';
 import { CustomFieldsProvider } from '../context/CustomFieldsContext';
 import { hrmsRoutes } from '../../routes/hrmsRoutes';
 // SettingsPage shows the signed-in session's active company.
@@ -26,6 +26,18 @@ describe('BEZENT Common Portal Settings Center UI', () => {
     expect(html).toContain('Settings');
     expect(html).toContain('Configure and manage settings across the BEZENT portal.');
     expect(html).not.toContain('settings-page__domain-nav');
+  });
+
+  it('SettingsPage renders Administration hierarchy without generic Settings header when activeModule is onboarding', () => {
+    const html = renderToStaticMarkup(
+      <AuthProvider>
+        <SettingsPageInner initialModule="onboarding" />
+      </AuthProvider>,
+    );
+
+    expect(html).toContain('Administration');
+    expect(html).toContain('Configure employee administration and onboarding settings.');
+    expect(html).not.toContain('Configure and manage settings across the BEZENT portal.');
   });
 
   it('SettingsPage Overview view displays Administration module card', () => {

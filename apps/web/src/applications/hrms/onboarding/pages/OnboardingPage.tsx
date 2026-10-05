@@ -1,43 +1,49 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Button,
+  Actions,
+  Alert,
   Avatar,
+  Badge,
+  Button,
+  Card,
+  CardDescription,
+  CardTitle,
   EmptyState,
+  Grid,
+  Inline,
+  Input,
+  Label,
+  LoadingState,
+  Modal,
   Page,
   PageHeader,
-  Section,
-  Toolbar,
-  Tabs,
-  LoadingState,
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableHeaderCell,
-  TableCell,
-  Inline,
-  Stack,
-  Grid,
-  Card,
-  CardTitle,
-  CardDescription,
   SearchInput,
+  Section,
   Select,
-  Label,
-  Alert,
-  Badge,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeaderCell,
+  TableRow,
+  Tabs,
+  Toolbar,
   type BadgeVariant,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import {
   fetchOrganizationMasters,
   fetchNewHiresPaginated,
+  transitionCaseStage,
   type OrganizationMasters,
   type OnboardingCaseItem,
   type StageCounts,
   type OnboardingStage,
 } from '../api/onboardingApi';
+import { fetchStageConfigs } from '../../settings/api/onboardingSettingsApi';
+import type { OnboardingStageConfig } from '../../settings/types/settings';
 
 interface OnboardingPageProps {
   title?: string;
@@ -47,15 +53,21 @@ interface OnboardingPageProps {
 export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: OnboardingPageProps) {
   const navigate = useNavigate();
   const [, setMasters] = useState<OrganizationMasters | null>(null);
+  const [stageConfigs, setStageConfigs] = useState<OnboardingStageConfig[]>([]);
   const [cases, setCases] = useState<OnboardingCaseItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // Transition Modal State
+  const [transitioningCase, setTransitioningCase] = useState<OnboardingCaseItem | null>(null);
+  const [targetStageKey, setTargetStageKey] = useState<string>('');
+  const [transitionNotes, setTransitionNotes] = useState<string>('');
+  const [transitioning, setTransitioning] = useState<boolean>(false);
+  const [transitionError, setTransitionError] = useState<string | null>(null);
+
   // Filters & Search
-  const [activeTab, setActiveTab] = useState<'all' | 'preboarding' | 'documents' | 'completed'>(
-    'all',
-  );
+  const [activeTab, setActiveTab] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Pagination State
@@ -74,7 +86,7 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
     setLoading(true);
     setError(null);
     try {
-      const [mastersData, res] = await Promise.all([
+      const [mastersData, res, configs] = await Promise.all([
         fetchOrganizationMasters().catch(() => null),
         fetchNewHiresPaginated({
           page,
@@ -82,9 +94,13 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
           stage: activeTab,
           search: searchQuery,
         }),
+        fetchStageConfigs().catch(() => []),
       ]);
       if (mastersData) {
         setMasters(mastersData);
+      }
+      if (configs && configs.length > 0) {
+        setStageConfigs(configs);
       }
       setCases(res.data);
       setTotalItems(res.pagination.totalItems);
@@ -106,7 +122,7 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
   }, [loadData]);
 
   const handleTabChange = (newTabId: string) => {
-    setActiveTab(newTabId as 'all' | 'preboarding' | 'documents' | 'completed');
+    setActiveTab(newTabId);
     setPage(1);
   };
 
@@ -134,6 +150,50 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
       state: { caseId: item.id, newHire: item },
     });
   };
+
+  const openTransitionModal = (item: OnboardingCaseItem) => {
+    setTransitioningCase(item);
+    setTransitionNotes('');
+    setTransitionError(null);
+    const available = stageConfigs.filter((s) => s.isActive && s.stageKey !== item.stage);
+    setTargetStageKey(available[0]?.stageKey || '');
+  };
+
+  const closeTransitionModal = () => {
+    setTransitioningCase(null);
+    setTransitionError(null);
+  };
+
+  const handleConfirmTransition = async () => {
+    if (!transitioningCase || !targetStageKey) return;
+    setTransitioning(true);
+    setTransitionError(null);
+    try {
+      await transitionCaseStage(transitioningCase.id, {
+        toStage: targetStageKey,
+        notes: transitionNotes.trim() || undefined,
+        version: transitioningCase.version ?? 1,
+      });
+      setSuccessMessage(`Stage transition succeeded for ${transitioningCase.fullName}.`);
+      closeTransitionModal();
+      await loadData();
+    } catch (err) {
+      setTransitionError(err instanceof Error ? err.message : 'Failed to transition stage');
+    } finally {
+      setTransitioning(false);
+    }
+  };
+
+  const targetStageOptions = useMemo(() => {
+    if (!transitioningCase) return [];
+    return stageConfigs
+      .filter((s) => s.isActive && s.stageKey !== transitioningCase.stage)
+      .sort((a, b) => a.displayOrder - b.displayOrder)
+      .map((s) => ({
+        value: s.stageKey,
+        label: `${s.name}${s.isRequired ? ' (Required)' : ' (Optional)'}`,
+      }));
+  }, [stageConfigs, transitioningCase]);
 
   const getInitials = (name: string): string => {
     const parts = name.trim().split(/\s+/);
@@ -166,19 +226,41 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
     if (status === 'withdrawn') {
       return { label: 'Withdrawn', variant: 'danger' };
     }
-    switch (stage) {
-      case 'preboarding':
-        return { label: 'Preboarding', variant: 'info' };
-      case 'documents':
-        return { label: 'Documents', variant: 'warning' };
-      case 'induction':
-        return { label: 'Induction', variant: 'neutral' };
-      case 'completed':
-        return { label: 'Completed', variant: 'success' };
-      default:
-        return { label: stage, variant: 'neutral' };
+    const cfg = stageConfigs.find((s) => s.stageKey === stage);
+    const label = cfg?.name ?? stage.charAt(0).toUpperCase() + stage.slice(1);
+    if (cfg?.isTerminal || stage === 'completed') {
+      return { label, variant: 'success' };
     }
+    if (stage === 'preboarding') {
+      return { label, variant: 'info' };
+    }
+    if (stage === 'documents') {
+      return { label, variant: 'warning' };
+    }
+    return { label, variant: 'neutral' };
   };
+
+  const tabItems = useMemo(() => {
+    if (stageConfigs.length > 0) {
+      const activeConfigs = stageConfigs
+        .filter((s) => s.isActive)
+        .sort((a, b) => a.displayOrder - b.displayOrder);
+      return [
+        { id: 'all', label: 'All', count: counts.all },
+        ...activeConfigs.map((s) => ({
+          id: s.stageKey,
+          label: s.name,
+          count: counts[s.stageKey] ?? 0,
+        })),
+      ];
+    }
+    return [
+      { id: 'all', label: 'All', count: counts.all },
+      { id: 'preboarding', label: 'Preboarding', count: counts.preboarding },
+      { id: 'documents', label: 'Documents', count: counts.documents },
+      { id: 'completed', label: 'Completed', count: counts.completed },
+    ];
+  }, [stageConfigs, counts]);
 
   const pageNumbers = useMemo(() => {
     if (totalPages <= 1) return [1];
@@ -201,7 +283,14 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
     return `Showing ${start}–${end} of ${totalItems}`;
   }, [page, pageSize, totalItems]);
 
-  const inProgressCount = (counts.preboarding ?? 0) + (counts.documents ?? 0);
+  const inProgressCount = useMemo(() => {
+    if (stageConfigs.length > 0) {
+      return stageConfigs
+        .filter((s) => s.isActive && !s.isTerminal && s.stageKey !== 'completed')
+        .reduce((sum, s) => sum + (counts[s.stageKey] ?? 0), 0);
+    }
+    return (counts.preboarding ?? 0) + (counts.documents ?? 0);
+  }, [stageConfigs, counts]);
 
   return (
     <Page maxWidth="full" gap="lg">
@@ -266,18 +355,7 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
         <Stack gap="md">
           {/* Toolbar: Filters and Search */}
           <Toolbar
-            left={
-              <Tabs
-                activeId={activeTab}
-                onChange={handleTabChange}
-                items={[
-                  { id: 'all', label: 'All', count: counts.all },
-                  { id: 'preboarding', label: 'Preboarding', count: counts.preboarding },
-                  { id: 'documents', label: 'Documents', count: counts.documents },
-                  { id: 'completed', label: 'Completed', count: counts.completed },
-                ]}
-              />
-            }
+            left={<Tabs activeId={activeTab} onChange={handleTabChange} items={tabItems} />}
             right={
               <SearchInput
                 placeholder="Search by name, email, department..."
@@ -359,17 +437,29 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                           <Badge variant={badgeInfo.variant}>{badgeInfo.label}</Badge>
                         </TableCell>
                         <TableCell align="right">
-                          <Button
-                            variant={isCompleted ? 'ghost' : 'outline'}
-                            size="sm"
-                            onClick={() => handleRowAction(item)}
-                          >
-                            {isCompleted
-                              ? 'View'
-                              : item.stage === 'preboarding'
-                                ? 'Start Registration'
-                                : 'Continue Registration'}
-                          </Button>
+                          <Inline gap="xs" justify="end" align="center">
+                            {!isCompleted && item.status === 'active' && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openTransitionModal(item)}
+                                aria-label={`Transition ${item.fullName}`}
+                              >
+                                Transition
+                              </Button>
+                            )}
+                            <Button
+                              variant={isCompleted ? 'ghost' : 'outline'}
+                              size="sm"
+                              onClick={() => handleRowAction(item)}
+                            >
+                              {isCompleted
+                                ? 'View'
+                                : item.stage === 'preboarding'
+                                  ? 'Start Registration'
+                                  : 'Continue Registration'}
+                            </Button>
+                          </Inline>
                         </TableCell>
                       </TableRow>
                     );
@@ -449,6 +539,59 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
           )}
         </Stack>
       </Section>
+
+      {/* Transition Modal */}
+      {transitioningCase && (
+        <Modal
+          isOpen={Boolean(transitioningCase)}
+          onClose={closeTransitionModal}
+          title={`Transition Stage: ${transitioningCase.fullName}`}
+          description="Move candidate through the dynamic company onboarding workflow."
+          size="md"
+          footer={
+            <Actions align="end" gap="sm">
+              <Button
+                variant="secondary"
+                onClick={closeTransitionModal}
+                disabled={transitioning}
+                type="button"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleConfirmTransition}
+                disabled={transitioning || !targetStageKey}
+                type="button"
+              >
+                {transitioning ? 'Transitioning...' : 'Confirm Transition'}
+              </Button>
+            </Actions>
+          }
+        >
+          <Stack gap="md">
+            {transitionError && <Alert variant="danger">{transitionError}</Alert>}
+
+            <Select
+              id="transition-target-stage"
+              label="Target Stage *"
+              value={targetStageKey}
+              onChange={(e) => setTargetStageKey(e.target.value)}
+              options={targetStageOptions}
+              helperText="Select the stage to transition the candidate to. Required intermediate stages cannot be skipped."
+            />
+
+            <Input
+              id="transition-notes"
+              label="Transition Notes"
+              value={transitionNotes}
+              maxLength={500}
+              onChange={(e) => setTransitionNotes(e.target.value)}
+              placeholder="Optional notes or audit comments"
+            />
+          </Stack>
+        </Modal>
+      )}
     </Page>
   );
 }

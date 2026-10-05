@@ -106,13 +106,39 @@ export const defaultRegistrationConfiguration: RegistrationConfiguration = {
 
 /** Default configuration with some fields overridden. */
 export function configurationWith(
-  overrides: Record<string, Partial<Pick<RegistrationFieldConfig, 'enabled' | 'required'>>>,
+  overrides: Record<string, Partial<RegistrationFieldConfig>>,
 ): RegistrationConfiguration {
+  const existingKeys = new Set(defaultRegistrationConfiguration.fields.map((f) => f.key));
+  const updated = defaultRegistrationConfiguration.fields.map((field) =>
+    overrides[field.key] ? { ...field, ...overrides[field.key], overridden: true } : field,
+  );
+  for (const [key, val] of Object.entries(overrides)) {
+    if (!existingKeys.has(key)) {
+      const section = key.split('.')[0] || 'general';
+      updated.push({
+        key,
+        section,
+        label: val.label || key,
+        protected: false,
+        protectedReason: null,
+        configurable: true,
+        enabled: val.enabled ?? true,
+        required: val.required ?? false,
+        defaultEnabled: true,
+        defaultRequired: false,
+        overridden: true,
+        width: val.width ?? 'half',
+        description: val.description ?? null,
+        order: val.order ?? 999,
+        type: val.type ?? 'single_line',
+        origin: val.origin ?? 'system',
+        config: val.config ?? {},
+      });
+    }
+  }
   return {
     ...defaultRegistrationConfiguration,
-    fields: defaultRegistrationConfiguration.fields.map((field) =>
-      overrides[field.key] ? { ...field, ...overrides[field.key], overridden: true } : field,
-    ),
+    fields: updated,
   };
 }
 

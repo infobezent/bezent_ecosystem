@@ -34,7 +34,7 @@ function renderPersonal(configuration: RegistrationConfiguration) {
 
 function renderGeneral(configuration: RegistrationConfiguration) {
   return renderToStaticMarkup(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={['/hrms/administration/onboarding/registration?chapter=general']}>
       <RegistrationConfigProvider configuration={configuration}>
         <EmployeeRegistration onCancel={() => {}} initialDraft={null} />
       </RegistrationConfigProvider>

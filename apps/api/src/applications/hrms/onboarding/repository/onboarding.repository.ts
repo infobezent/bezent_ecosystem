@@ -9,7 +9,7 @@ import {
   type NewOnboardingCase,
   type OnboardingCase,
 } from '../../../../db/schema.js';
-import { eq, and, desc, asc, like, or, count, sql } from 'drizzle-orm';
+import { eq, and, desc, asc, like, or, count } from 'drizzle-orm';
 import type {
   OnboardingCaseListItem,
   OnboardingCaseHistoryItem,
@@ -94,22 +94,31 @@ export class OnboardingRepository {
     const db = getDb();
 
     // 1. Stage counts across entire company dataset (tenant and company isolated)
-    const [countsRow] = await db
+    const stageCountRows = await db
       .select({
-        all: count(onboardingCases.id),
-        preboarding: sql<number>`COALESCE(SUM(CASE WHEN ${onboardingCases.stage} = 'preboarding' THEN 1 ELSE 0 END), 0)`,
-        documents: sql<number>`COALESCE(SUM(CASE WHEN ${onboardingCases.stage} = 'documents' THEN 1 ELSE 0 END), 0)`,
-        completed: sql<number>`COALESCE(SUM(CASE WHEN ${onboardingCases.stage} = 'completed' THEN 1 ELSE 0 END), 0)`,
+        stage: onboardingCases.stage,
+        count: count(onboardingCases.id),
       })
       .from(onboardingCases)
-      .where(and(eq(onboardingCases.tenantId, tenantId), eq(onboardingCases.companyId, companyId)));
+      .where(and(eq(onboardingCases.tenantId, tenantId), eq(onboardingCases.companyId, companyId)))
+      .groupBy(onboardingCases.stage);
 
     const counts: StageCounts = {
-      all: Number(countsRow?.all ?? 0),
-      preboarding: Number(countsRow?.preboarding ?? 0),
-      documents: Number(countsRow?.documents ?? 0),
-      completed: Number(countsRow?.completed ?? 0),
+      all: 0,
+      preboarding: 0,
+      documents: 0,
+      completed: 0,
     };
+
+    let totalCases = 0;
+    for (const row of stageCountRows) {
+      const c = Number(row.count ?? 0);
+      totalCases += c;
+      if (row.stage) {
+        counts[row.stage] = c;
+      }
+    }
+    counts.all = totalCases;
 
     // 2. Build filtered conditions for items and total count
     const conditions = [
@@ -341,7 +350,7 @@ export class OnboardingRepository {
   ): Promise<boolean> {
     const db = getDb();
     return db.transaction(async (tx) => {
-      const isComplete = toStage === 'completed';
+      const isComplete = action === 'complete' || toStage === 'completed';
       const now = new Date();
 
       const updateValues: Record<string, unknown> = {

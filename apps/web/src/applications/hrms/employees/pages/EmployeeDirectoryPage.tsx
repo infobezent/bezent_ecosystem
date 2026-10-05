@@ -20,7 +20,7 @@ import {
 import {
   fetchOrganizationMasters,
   type OrganizationMasters,
-} from '../../organization/api/organizationApi';
+} from '../../api/organizationMastersApi';
 import { EMPLOYMENT_STATUS_LABELS, employeeProfilePath } from '../model/employeeModel';
 import { EmployeeDirectoryTable } from '../components/EmployeeDirectoryTable';
 

@@ -8,11 +8,12 @@ export class CompanyController {
 
   list = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { tenantId, search, status, page, limit } = req.query;
+      const { tenantId, search, status, moduleCode, page, limit } = req.query;
       const result = await this.service.listCompanies({
         tenantId: typeof tenantId === 'string' ? tenantId : undefined,
         search: typeof search === 'string' ? search : undefined,
         status: typeof status === 'string' ? (status as CompanyStatus) : undefined,
+        moduleCode: typeof moduleCode === 'string' ? moduleCode : undefined,
         page: typeof page === 'string' ? parseInt(page, 10) : 1,
         limit: typeof limit === 'string' ? parseInt(limit, 10) : 20,
       });

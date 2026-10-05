@@ -9,20 +9,50 @@ import { useAuth } from './AuthProvider';
  * API still authorizes every request on the server.
  */
 export function RequireAuth({ children }: { children: ReactNode }) {
-  const { status, error, refreshAccess } = useAuth();
+  const { status, error, errorKind, refreshAccess, signOut } = useAuth();
   const location = useLocation();
 
   if (status === 'loading') {
     return <LoadingState label="Restoring your session…" fill />;
   }
   if (status === 'error') {
+    const alertConfig = (() => {
+      switch (errorKind) {
+        case 'network':
+          return {
+            title: 'BEZENT Service Unreachable',
+            buttonLabel: 'Retry Connection',
+            action: () => void refreshAccess(),
+          };
+        case 'database_unavailable':
+          return {
+            title: 'Database Service Unavailable',
+            buttonLabel: 'Retry',
+            action: () => void refreshAccess(),
+          };
+        case 'forbidden':
+          return {
+            title: 'Access Denied',
+            buttonLabel: 'Sign In with Different Account',
+            action: () => void signOut(),
+          };
+        case 'server_error':
+        default:
+          return {
+            title: 'Session Could Not Be Restored',
+            buttonLabel: 'Try Again',
+            action: () => void refreshAccess(),
+          };
+      }
+    })();
+
     return (
       <Stack gap="md" align="center">
-        <Alert variant="error" title="Session could not be restored">
-          {error ?? 'BEZENT could not be reached.'}
+        <Alert variant="error" title={alertConfig.title}>
+          {error ?? 'An unexpected error occurred.'}
         </Alert>
-        <Button variant="primary" onClick={() => void refreshAccess()}>
-          Try again
+        <Button variant="primary" onClick={alertConfig.action}>
+          {alertConfig.buttonLabel}
         </Button>
       </Stack>
     );

@@ -5,8 +5,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-3, 12px);
-  padding: var(--space-8, 32px) var(--space-4, 16px);
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-4);
   text-align: center;
 }
 
@@ -31,19 +31,11 @@
 /* Label */
 .bezent-loading-state__label {
   margin: 0;
-  font-family: var(
-    --font-family-base,
-    'Google Sans',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    sans-serif
-  );
-  font-size: var(--font-size-sm, 13.5px);
-  font-weight: var(--font-weight-normal, 400);
+  font-family: var(--font-family-base);
+  font-size: var(--font-body-sm-size, var(--font-size-md, 13px));
+  font-weight: var(--font-weight-regular, 400);
   color: var(--text-muted, #747775);
-  line-height: var(--line-height-normal, 1.4);
+  line-height: var(--line-height-normal, 1.5);
 }
 
 /* Dark mode */
