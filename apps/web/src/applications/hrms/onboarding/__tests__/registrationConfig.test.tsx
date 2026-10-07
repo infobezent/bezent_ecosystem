@@ -50,13 +50,7 @@ const requiredMarker = (label: string) =>
 describe('Registration applies the resolved company configuration', () => {
   it('without overrides: every configurable field is shown and only system fields are required', () => {
     const personal = renderPersonal(defaultRegistrationConfiguration);
-    for (const label of [
-      'Blood Group',
-      'Middle Name',
-      'Last Name',
-      'Date of Birth',
-      'Address Line 1',
-    ]) {
+    for (const label of ['Blood Group', 'Middle Name', 'Last Name', 'Date of Birth', 'Street']) {
       expect(personal).toContain(label);
     }
     expect(personal).toMatch(requiredMarker('First Name'));
