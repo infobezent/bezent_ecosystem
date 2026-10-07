@@ -36,7 +36,18 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   const hasValue = isControlled ? Boolean(rest.value) : internalHasValue;
   const isEmpty = !hasValue && !hasTyped;
 
+  const isDateType = rest.type === 'date';
+  const computedMax = isDateType ? (rest.max ?? '9999-12-31') : rest.max;
+  const computedMin = isDateType ? (rest.min ?? '1900-01-01') : rest.min;
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isDateType && e.target.value) {
+      const parts = e.target.value.split('-');
+      if (parts[0] && parts[0].length > 4) {
+        parts[0] = parts[0].slice(0, 4);
+        e.target.value = parts.join('-');
+      }
+    }
     if (!isControlled) {
       setInternalHasValue(Boolean(e.target.value));
     }
@@ -64,7 +75,15 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   };
 
   const handleInput = (e: React.FormEvent<HTMLInputElement>) => {
-    const val = (e.target as HTMLInputElement).value;
+    const target = e.target as HTMLInputElement;
+    if (isDateType && target.value) {
+      const parts = target.value.split('-');
+      if (parts[0] && parts[0].length > 4) {
+        parts[0] = parts[0].slice(0, 4);
+        target.value = parts.join('-');
+      }
+    }
+    const val = target.value;
     if (!isControlled) {
       setInternalHasValue(Boolean(val));
     }
@@ -110,6 +129,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           }
           className={`bezent-input-field ${isEmpty ? 'bezent-input-field--empty' : ''}`.trim()}
           {...rest}
+          max={computedMax}
+          min={computedMin}
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
