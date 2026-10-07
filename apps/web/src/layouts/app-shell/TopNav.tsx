@@ -78,7 +78,6 @@ export function TopNav({
               <Badge count={notificationCount} />
             </span>
           )}
-          {notificationsOpen && <span className="top-nav__bell-connector" aria-hidden="true" />}
         </div>
 
         <IconButton label="App Launcher">
