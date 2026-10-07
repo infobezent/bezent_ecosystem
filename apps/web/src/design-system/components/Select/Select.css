@@ -10,6 +10,11 @@
   width: 100%;
 }
 
+.bezent-select-wrapper:focus-within,
+.bezent-select-wrapper:has(.bezent-select-dropdown) {
+  z-index: 50;
+}
+
 .bezent-select-wrapper--width-full {
   width: 100%;
 }
