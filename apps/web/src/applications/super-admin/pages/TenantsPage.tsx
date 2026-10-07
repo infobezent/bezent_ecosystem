@@ -326,10 +326,7 @@ export function TenantsPage({
                       </TableCell>
                       <TableCell>{renderHealthBadge(tenant)}</TableCell>
                       <TableCell>
-                        <Badge
-                          variant={tenant.status === 'active' ? 'success' : 'danger'}
-                          showDot
-                        >
+                        <Badge variant={tenant.status === 'active' ? 'success' : 'danger'} showDot>
                           {tenant.status === 'active' ? 'Active' : 'Suspended'}
                         </Badge>
                       </TableCell>

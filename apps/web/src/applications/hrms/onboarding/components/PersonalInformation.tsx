@@ -508,7 +508,6 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
 
   const cityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-
   // 1. Real Postal API Lookup by 6-digit PIN Code
   useEffect(() => {
     const cleanPin = pinCode.trim();
@@ -770,8 +769,6 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
       config.metadata,
     );
   }, [personalFields, config.metadata]);
-
-
 
   const renderDynamicFieldInput = (field: RegistrationFieldConfig) => {
     const fType = field.type;
@@ -1647,201 +1644,199 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
 
       {/* SECTION: FAMILY & NOMINATION (Dedicated repeatable collections) */}
       <Card padding="lg">
-        <FormSection
-          title="Family & Nomination Details"
-        >
-        <Stack gap="xl">
-          {/* Family Members (Repeatable) */}
-          <Stack gap="md">
-            <Toolbar
-              left={<CardTitle>Family Members</CardTitle>}
-              right={
-                <Button variant="secondary" size="sm" type="button" onClick={addFamilyMember}>
-                  + Add Family Member
-                </Button>
-              }
-            />
-            {familyMembers.map((fam, idx) => (
-              <Card key={fam.id} padding="md">
-                <Stack gap="md">
-                  <Toolbar
-                    left={<CardTitle>Member #{idx + 1}</CardTitle>}
-                    right={
-                      familyMembers.length > 1 ? (
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          type="button"
-                          onClick={() => removeFamilyMember(fam.id)}
-                        >
-                          Remove
-                        </Button>
-                      ) : undefined
-                    }
-                  />
-                  <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                    <FormField label="Name" htmlFor={`fam-name-${fam.id}`}>
-                      <Input
-                        id={`fam-name-${fam.id}`}
-                        type="text"
-                        placeholder="Full Name"
-                        value={fam.name}
-                        onChange={(e) => updateFamilyMember(fam.id, 'name', e.target.value)}
-                      />
-                    </FormField>
-                    <FormField label="Relationship" htmlFor={`fam-rel-${fam.id}`}>
-                      <Stack gap="xs">
-                        <Select
-                          id={`fam-rel-${fam.id}`}
-                          value={fam.relationship}
-                          onChange={(e) =>
-                            updateFamilyMember(fam.id, 'relationship', e.target.value)
-                          }
-                          options={[
-                            { value: 'Spouse', label: 'Spouse' },
-                            { value: 'Father', label: 'Father' },
-                            { value: 'Mother', label: 'Mother' },
-                            { value: 'Son', label: 'Son' },
-                            { value: 'Daughter', label: 'Daughter' },
-                            { value: 'Brother', label: 'Brother' },
-                            { value: 'Sister', label: 'Sister' },
-                            { value: 'Other', label: 'Other' },
-                          ]}
-                        />
-                        {fam.relationship === 'Other' && (
-                          <Input
-                            placeholder="Enter Relationship..."
-                            value={fam.otherRelationship || ''}
-                            onChange={(e) =>
-                              updateFamilyMember(fam.id, 'otherRelationship', e.target.value)
-                            }
-                          />
-                        )}
-                      </Stack>
-                    </FormField>
-                    <FormField label="Date of Birth" htmlFor={`fam-dob-${fam.id}`}>
-                      <Input
-                        id={`fam-dob-${fam.id}`}
-                        type="date"
-                        value={fam.dob}
-                        onChange={(e) => updateFamilyMember(fam.id, 'dob', e.target.value)}
-                      />
-                    </FormField>
-                    <FormField label="Phone" htmlFor={`fam-phone-${fam.id}`}>
-                      <Inline gap="xs">
-                        <Select
-                          value={fam.countryCode}
-                          onChange={(e) =>
-                            updateFamilyMember(fam.id, 'countryCode', e.target.value)
-                          }
-                          options={[
-                            { value: '+91', label: '+91 (IN)' },
-                            { value: '+1', label: '+1 (US)' },
-                            { value: '+44', label: '+44 (UK)' },
-                            { value: '+971', label: '+971 (UAE)' },
-                          ]}
-                        />
+        <FormSection title="Family & Nomination Details">
+          <Stack gap="xl">
+            {/* Family Members (Repeatable) */}
+            <Stack gap="md">
+              <Toolbar
+                left={<CardTitle>Family Members</CardTitle>}
+                right={
+                  <Button variant="secondary" size="sm" type="button" onClick={addFamilyMember}>
+                    + Add Family Member
+                  </Button>
+                }
+              />
+              {familyMembers.map((fam, idx) => (
+                <Card key={fam.id} padding="md">
+                  <Stack gap="md">
+                    <Toolbar
+                      left={<CardTitle>Member #{idx + 1}</CardTitle>}
+                      right={
+                        familyMembers.length > 1 ? (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            type="button"
+                            onClick={() => removeFamilyMember(fam.id)}
+                          >
+                            Remove
+                          </Button>
+                        ) : undefined
+                      }
+                    />
+                    <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                      <FormField label="Name" htmlFor={`fam-name-${fam.id}`}>
                         <Input
-                          id={`fam-phone-${fam.id}`}
-                          type="tel"
-                          placeholder="Phone Number"
-                          value={fam.phone}
-                          onChange={(e) => updateFamilyMember(fam.id, 'phone', e.target.value)}
+                          id={`fam-name-${fam.id}`}
+                          type="text"
+                          placeholder="Full Name"
+                          value={fam.name}
+                          onChange={(e) => updateFamilyMember(fam.id, 'name', e.target.value)}
                         />
-                      </Inline>
-                    </FormField>
-                  </FormGrid>
-                </Stack>
-              </Card>
-            ))}
-          </Stack>
-
-          {/* Nomination Details (Repeatable) */}
-          <Stack gap="md">
-            <Toolbar
-              left={<CardTitle>Nomination Details</CardTitle>}
-              right={
-                <Button variant="secondary" size="sm" type="button" onClick={addNominee}>
-                  + Add Nominee
-                </Button>
-              }
-            />
-            {nominees.map((nom, idx) => (
-              <Card key={nom.id} padding="md">
-                <Stack gap="md">
-                  <Toolbar
-                    left={<CardTitle>Nominee #{idx + 1}</CardTitle>}
-                    right={
-                      nominees.length > 1 ? (
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          type="button"
-                          onClick={() => removeNominee(nom.id)}
-                        >
-                          Remove
-                        </Button>
-                      ) : undefined
-                    }
-                  />
-                  <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                    <FormField label="Nominee Name" htmlFor={`nom-name-${nom.id}`}>
-                      <Input
-                        id={`nom-name-${nom.id}`}
-                        type="text"
-                        placeholder="Full Name"
-                        value={nom.name}
-                        onChange={(e) => updateNominee(nom.id, 'name', e.target.value)}
-                      />
-                    </FormField>
-                    <FormField label="Relationship" htmlFor={`nom-rel-${nom.id}`}>
-                      <Stack gap="xs">
-                        <Select
-                          id={`nom-rel-${nom.id}`}
-                          value={nom.relationship}
-                          onChange={(e) => updateNominee(nom.id, 'relationship', e.target.value)}
-                          options={[
-                            { value: 'Spouse', label: 'Spouse' },
-                            { value: 'Father', label: 'Father' },
-                            { value: 'Mother', label: 'Mother' },
-                            { value: 'Son', label: 'Son' },
-                            { value: 'Daughter', label: 'Daughter' },
-                            { value: 'Sibling', label: 'Sibling' },
-                            { value: 'Other', label: 'Other' },
-                          ]}
-                        />
-                        {nom.relationship === 'Other' && (
-                          <Input
-                            placeholder="Enter Relationship..."
-                            value={nom.otherRelationship || ''}
+                      </FormField>
+                      <FormField label="Relationship" htmlFor={`fam-rel-${fam.id}`}>
+                        <Stack gap="xs">
+                          <Select
+                            id={`fam-rel-${fam.id}`}
+                            value={fam.relationship}
                             onChange={(e) =>
-                              updateNominee(nom.id, 'otherRelationship', e.target.value)
+                              updateFamilyMember(fam.id, 'relationship', e.target.value)
                             }
+                            options={[
+                              { value: 'Spouse', label: 'Spouse' },
+                              { value: 'Father', label: 'Father' },
+                              { value: 'Mother', label: 'Mother' },
+                              { value: 'Son', label: 'Son' },
+                              { value: 'Daughter', label: 'Daughter' },
+                              { value: 'Brother', label: 'Brother' },
+                              { value: 'Sister', label: 'Sister' },
+                              { value: 'Other', label: 'Other' },
+                            ]}
                           />
-                        )}
-                      </Stack>
-                    </FormField>
-                    <FormField label="Share % (1-100)" htmlFor={`nom-share-${nom.id}`}>
-                      <Input
-                        id={`nom-share-${nom.id}`}
-                        type="number"
-                        min="1"
-                        max="100"
-                        placeholder="100"
-                        value={nom.sharePercentage}
-                        onChange={(e) =>
-                          updateNominee(nom.id, 'sharePercentage', Number(e.target.value) || '')
-                        }
-                      />
-                    </FormField>
-                  </FormGrid>
-                </Stack>
-              </Card>
-            ))}
+                          {fam.relationship === 'Other' && (
+                            <Input
+                              placeholder="Enter Relationship..."
+                              value={fam.otherRelationship || ''}
+                              onChange={(e) =>
+                                updateFamilyMember(fam.id, 'otherRelationship', e.target.value)
+                              }
+                            />
+                          )}
+                        </Stack>
+                      </FormField>
+                      <FormField label="Date of Birth" htmlFor={`fam-dob-${fam.id}`}>
+                        <Input
+                          id={`fam-dob-${fam.id}`}
+                          type="date"
+                          value={fam.dob}
+                          onChange={(e) => updateFamilyMember(fam.id, 'dob', e.target.value)}
+                        />
+                      </FormField>
+                      <FormField label="Phone" htmlFor={`fam-phone-${fam.id}`}>
+                        <Inline gap="xs">
+                          <Select
+                            value={fam.countryCode}
+                            onChange={(e) =>
+                              updateFamilyMember(fam.id, 'countryCode', e.target.value)
+                            }
+                            options={[
+                              { value: '+91', label: '+91 (IN)' },
+                              { value: '+1', label: '+1 (US)' },
+                              { value: '+44', label: '+44 (UK)' },
+                              { value: '+971', label: '+971 (UAE)' },
+                            ]}
+                          />
+                          <Input
+                            id={`fam-phone-${fam.id}`}
+                            type="tel"
+                            placeholder="Phone Number"
+                            value={fam.phone}
+                            onChange={(e) => updateFamilyMember(fam.id, 'phone', e.target.value)}
+                          />
+                        </Inline>
+                      </FormField>
+                    </FormGrid>
+                  </Stack>
+                </Card>
+              ))}
+            </Stack>
+
+            {/* Nomination Details (Repeatable) */}
+            <Stack gap="md">
+              <Toolbar
+                left={<CardTitle>Nomination Details</CardTitle>}
+                right={
+                  <Button variant="secondary" size="sm" type="button" onClick={addNominee}>
+                    + Add Nominee
+                  </Button>
+                }
+              />
+              {nominees.map((nom, idx) => (
+                <Card key={nom.id} padding="md">
+                  <Stack gap="md">
+                    <Toolbar
+                      left={<CardTitle>Nominee #{idx + 1}</CardTitle>}
+                      right={
+                        nominees.length > 1 ? (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            type="button"
+                            onClick={() => removeNominee(nom.id)}
+                          >
+                            Remove
+                          </Button>
+                        ) : undefined
+                      }
+                    />
+                    <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                      <FormField label="Nominee Name" htmlFor={`nom-name-${nom.id}`}>
+                        <Input
+                          id={`nom-name-${nom.id}`}
+                          type="text"
+                          placeholder="Full Name"
+                          value={nom.name}
+                          onChange={(e) => updateNominee(nom.id, 'name', e.target.value)}
+                        />
+                      </FormField>
+                      <FormField label="Relationship" htmlFor={`nom-rel-${nom.id}`}>
+                        <Stack gap="xs">
+                          <Select
+                            id={`nom-rel-${nom.id}`}
+                            value={nom.relationship}
+                            onChange={(e) => updateNominee(nom.id, 'relationship', e.target.value)}
+                            options={[
+                              { value: 'Spouse', label: 'Spouse' },
+                              { value: 'Father', label: 'Father' },
+                              { value: 'Mother', label: 'Mother' },
+                              { value: 'Son', label: 'Son' },
+                              { value: 'Daughter', label: 'Daughter' },
+                              { value: 'Sibling', label: 'Sibling' },
+                              { value: 'Other', label: 'Other' },
+                            ]}
+                          />
+                          {nom.relationship === 'Other' && (
+                            <Input
+                              placeholder="Enter Relationship..."
+                              value={nom.otherRelationship || ''}
+                              onChange={(e) =>
+                                updateNominee(nom.id, 'otherRelationship', e.target.value)
+                              }
+                            />
+                          )}
+                        </Stack>
+                      </FormField>
+                      <FormField label="Share % (1-100)" htmlFor={`nom-share-${nom.id}`}>
+                        <Input
+                          id={`nom-share-${nom.id}`}
+                          type="number"
+                          min="1"
+                          max="100"
+                          placeholder="100"
+                          value={nom.sharePercentage}
+                          onChange={(e) =>
+                            updateNominee(nom.id, 'sharePercentage', Number(e.target.value) || '')
+                          }
+                        />
+                      </FormField>
+                    </FormGrid>
+                  </Stack>
+                </Card>
+              ))}
+            </Stack>
           </Stack>
-        </Stack>
-      </FormSection>
-    </Card>
-  </Stack>
+        </FormSection>
+      </Card>
+    </Stack>
   );
 }

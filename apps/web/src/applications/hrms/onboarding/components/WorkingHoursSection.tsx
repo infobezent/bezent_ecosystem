@@ -208,9 +208,7 @@ export function WorkingHoursSection({
   return (
     <Stack gap="xl">
       {/* A. WORK SCHEDULE */}
-      <FormSection
-        title="Work Schedule & Calendar"
-      >
+      <FormSection title="Work Schedule & Calendar">
         <FormGrid columns={2} layout="horizontal" labelWidth="md">
           {/* 1. Working Time Calendar */}
           <FormField label="Working Calendar" required>
@@ -276,9 +274,7 @@ export function WorkingHoursSection({
       </FormSection>
 
       {/* B. TIME CONFIGURATION */}
-      <FormSection
-        title="Time Configuration & Breaks"
-      >
+      <FormSection title="Time Configuration & Breaks">
         <FormGrid columns={2} layout="horizontal" labelWidth="md">
           {/* 1. Start Time */}
           <FormField label="Start Time">
@@ -320,9 +316,7 @@ export function WorkingHoursSection({
       </FormSection>
 
       {/* C. CALENDAR & HOLIDAYS + D. EMPLOYEE ASSIGNMENT */}
-      <FormSection
-        title="Holidays & Employee Shift Linking"
-      >
+      <FormSection title="Holidays & Employee Shift Linking">
         <Grid columns={2} gap="lg">
           {/* C. CALENDAR & HOLIDAYS */}
           <Card variant="flat">

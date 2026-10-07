@@ -325,9 +325,7 @@ export function SkillsSection({ value: _value, onChange: _onChange }: SkillsSect
   return (
     <Stack gap="xl">
       {/* 1. Skill Entry Form */}
-      <FormSection
-        title="Skill Proficiency & Assessment"
-      >
+      <FormSection title="Skill Proficiency & Assessment">
         <Card variant="flat">
           <Stack gap="md">
             <CardTitle>{editingId ? 'Edit Skill Entry' : 'Add New Skill Entry'}</CardTitle>
@@ -478,9 +476,7 @@ export function SkillsSection({ value: _value, onChange: _onChange }: SkillsSect
       </FormSection>
 
       {/* 2. Added Skills Summary */}
-      <FormSection
-        title={`Added Skills (${skillsList.length})`}
-      >
+      <FormSection title={`Added Skills (${skillsList.length})`}>
         {skillsList.length === 0 ? (
           <EmptyState title="No skills added" description="Fill the form above to add a skill." />
         ) : (

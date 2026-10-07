@@ -497,9 +497,7 @@ export function DocumentsSection({
       )}
 
       {/* 1. PASSPORT-SIZE PHOTOGRAPH */}
-      <FormSection
-        title="Passport-Size Photograph"
-      >
+      <FormSection title="Passport-Size Photograph">
         <Card variant="flat">
           <Inline gap="lg" align="center">
             {passportPhoto.previewUrl ? (
@@ -551,9 +549,7 @@ export function DocumentsSection({
       </FormSection>
 
       {/* 2. CLASSIFICATION AUTOMATION */}
-      <FormSection
-        title="Hiring Classification"
-      >
+      <FormSection title="Hiring Classification">
         <Inline gap="md" align="center">
           <Button
             type="button"
@@ -586,10 +582,7 @@ export function DocumentsSection({
         const catDocs = documents.filter((d) => d.category === cat);
 
         return (
-          <FormSection
-            key={cat}
-            title={cat}
-          >
+          <FormSection key={cat} title={cat}>
             <Stack gap="md">
               {catDocs.map((doc) => (
                 <Card key={doc.id} variant="flat">

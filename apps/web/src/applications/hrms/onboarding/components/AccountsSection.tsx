@@ -244,9 +244,7 @@ export function AccountsSection({ value: _value, onChange: _onChange }: Accounts
   return (
     <Stack gap="xl">
       {/* A. BANK DETAILS */}
-      <FormSection
-        title="Bank Details"
-      >
+      <FormSection title="Bank Details">
         <FormGrid columns={2} layout="horizontal" labelWidth="md">
           {/* 1. IFSC Code */}
           <FormField label="IFSC Code" required helperText={ifscStatusMsg}>
@@ -316,9 +314,7 @@ export function AccountsSection({ value: _value, onChange: _onChange }: Accounts
       </FormSection>
 
       {/* B. SALARY STRUCTURE & BREAKDOWN */}
-      <FormSection
-        title="Salary Structure & Breakdown"
-      >
+      <FormSection title="Salary Structure & Breakdown">
         <Stack gap="md">
           <FormGrid columns={2} layout="horizontal" labelWidth="md">
             {/* 1. Salary Structure */}
@@ -462,9 +458,7 @@ export function AccountsSection({ value: _value, onChange: _onChange }: Accounts
       </FormSection>
 
       {/* C. PAYROLL SETUP & D. STATUTORY */}
-      <FormSection
-        title="Payroll Setup & Statutory Compliance"
-      >
+      <FormSection title="Payroll Setup & Statutory Compliance">
         <FormGrid columns={2} layout="horizontal" labelWidth="md">
           {/* 1. Payroll Group */}
           <FormField label="Payroll Group">
@@ -552,9 +546,7 @@ export function AccountsSection({ value: _value, onChange: _onChange }: Accounts
       </FormSection>
 
       {/* E. BENEFITS */}
-      <FormSection
-        title="Employee Benefits Checklist"
-      >
+      <FormSection title="Employee Benefits Checklist">
         <Stack gap="md">
           <Grid columns={3} gap="md">
             {BENEFIT_ITEMS.map((b) => {

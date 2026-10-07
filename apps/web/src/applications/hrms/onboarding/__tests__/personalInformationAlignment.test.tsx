@@ -243,7 +243,6 @@ describe('Chapter 01 (Personal Information) Form Editor ↔ Runtime Alignment', 
     expect(payload.details?.personal?.addressCity).toBe('Coimbatore');
   });
 
-
   it('honestly represents Profile Photo as a protected system control on FormCanvas', () => {
     const resolved = resolvedFormOf(defaultRegistrationConfiguration);
     const html = renderToStaticMarkup(

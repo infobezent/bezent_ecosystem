@@ -154,9 +154,7 @@ export function OnboardingSection({
   return (
     <Stack gap="xl">
       {/* SECTION 1: ONBOARDING TASKS */}
-      <FormSection
-        title="Onboarding Tasks"
-      >
+      <FormSection title="Onboarding Tasks">
         <Stack gap="md">
           {tasks.map((task, idx) => {
             const overdue = isTaskOverdue(task.dueDate, task.status);
@@ -284,9 +282,7 @@ export function OnboardingSection({
       </FormSection>
 
       {/* SECTION 2: ASSETS */}
-      <FormSection
-        title="Assigned Assets"
-      >
+      <FormSection title="Assigned Assets">
         <Stack gap="md">
           {assets.map((asset, idx) => (
             <Card key={asset.id} variant="flat">

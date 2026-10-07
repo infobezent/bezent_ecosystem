@@ -39,12 +39,17 @@ async function main() {
       try {
         execSync('mysql.server start', { stdio: 'inherit' });
       } catch (err) {
-        console.warn('[db] Note: Could not auto-start MySQL with brew or mysql.server:', err.message);
+        console.warn(
+          '[db] Note: Could not auto-start MySQL with brew or mysql.server:',
+          err.message,
+        );
       }
     }
   } else if (process.platform === 'win32') {
     try {
-      execSync('powershell -ExecutionPolicy Bypass -File ./scripts/start-mysql.ps1', { stdio: 'inherit' });
+      execSync('powershell -ExecutionPolicy Bypass -File ./scripts/start-mysql.ps1', {
+        stdio: 'inherit',
+      });
     } catch (err) {
       console.warn('[db] Note: Could not auto-start MySQL via powershell:', err.message);
     }

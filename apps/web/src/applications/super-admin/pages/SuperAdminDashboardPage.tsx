@@ -378,11 +378,7 @@ export function SuperAdminDashboardPage({ initialData }: SuperAdminDashboardPage
               title="Customer Health"
               subtitle="Real-time tenant operational health and lifecycle status"
               actions={
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate('/super-admin/tenants')}
-                >
+                <Button variant="ghost" size="sm" onClick={() => navigate('/super-admin/tenants')}>
                   View Directory →
                 </Button>
               }
@@ -449,11 +445,7 @@ export function SuperAdminDashboardPage({ initialData }: SuperAdminDashboardPage
               title="Applications"
               subtitle="Modular application suite availability and customer adoption"
               actions={
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate('/super-admin/modules')}
-                >
+                <Button variant="ghost" size="sm" onClick={() => navigate('/super-admin/modules')}>
                   Manage Application Access →
                 </Button>
               }
@@ -495,9 +487,7 @@ export function SuperAdminDashboardPage({ initialData }: SuperAdminDashboardPage
                       </TableCell>
                       <TableCell>
                         {app.availability === 'GA' ? (
-                          <span className="tabular-nums">
-                            {app.entitledTenantsCount} Customers
-                          </span>
+                          <span className="tabular-nums">{app.entitledTenantsCount} Customers</span>
                         ) : (
                           <span className="bezent-caption">—</span>
                         )}
@@ -612,11 +602,7 @@ export function SuperAdminDashboardPage({ initialData }: SuperAdminDashboardPage
             title="Recent Activity"
             subtitle="Platform-wide audit trail and governance events"
             actions={
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/super-admin/audit-logs')}
-              >
+              <Button variant="ghost" size="sm" onClick={() => navigate('/super-admin/audit-logs')}>
                 View Audit Logs →
               </Button>
             }
@@ -689,4 +675,3 @@ export function SuperAdminDashboardPage({ initialData }: SuperAdminDashboardPage
     </Page>
   );
 }
-
