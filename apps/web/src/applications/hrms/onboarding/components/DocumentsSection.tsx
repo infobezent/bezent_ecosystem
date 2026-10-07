@@ -499,54 +499,53 @@ export function DocumentsSection({
       {/* 1. PASSPORT-SIZE PHOTOGRAPH */}
       <Card padding="lg">
         <FormSection title="Passport-Size Photograph">
-          <Card variant="flat">
-            <Inline gap="lg" align="center">
-              {passportPhoto.previewUrl ? (
-                <img
-                  src={passportPhoto.previewUrl}
-                  alt="Passport Preview"
-                  className="bezent-photo-preview"
-                />
-              ) : (
-                <div className="bezent-photo-placeholder">
-                  <BezentIcon name="employees" size={32} />
-                </div>
-              )}
+          <Inline gap="lg" align="center">
+            {passportPhoto.previewUrl ? (
+              <img
+                src={passportPhoto.previewUrl}
+                alt="Passport Preview"
+                className="bezent-photo-preview"
+              />
+            ) : (
+              <div className="bezent-photo-placeholder">
+                <BezentIcon name="employees" size={32} />
+              </div>
+            )}
 
-              <Stack gap="sm">
-                <input
-                  ref={photoFileInputRef}
-                  type="file"
-                  hidden
-                  accept="image/jpeg,image/png,image/jpg"
-                  onChange={(e) => {
-                    if (e.target.files?.[0]) {
-                      handlePhotoSelect(e.target.files[0]);
-                    }
-                  }}
-                />
-                <Inline gap="sm" align="center">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => photoFileInputRef.current?.click()}
-                  >
-                    {passportPhoto.previewUrl ? 'Replace Photo' : 'Upload Photo'}
+            <Stack gap="sm">
+              <input
+                ref={photoFileInputRef}
+                type="file"
+                hidden
+                accept="image/jpeg,image/png,image/jpg"
+                onChange={(e) => {
+                  if (e.target.files?.[0]) {
+                    handlePhotoSelect(e.target.files[0]);
+                  }
+                }}
+              />
+              <Inline gap="sm" align="center">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => photoFileInputRef.current?.click()}
+                >
+                  {passportPhoto.previewUrl ? 'Replace Photo' : 'Upload Photo'}
+                </Button>
+                {passportPhoto.previewUrl && (
+                  <Button type="button" variant="ghost" onClick={handleRemovePhoto}>
+                    Remove Photo
                   </Button>
-                  {passportPhoto.previewUrl && (
-                    <Button type="button" variant="ghost" onClick={handleRemovePhoto}>
-                      Remove Photo
-                    </Button>
-                  )}
-                  {passportPhoto.fileName && (
-                    <span className="bezent-card__desc">
-                      {passportPhoto.fileName} ({passportPhoto.fileSizeFormatted})
-                    </span>
-                  )}
-                </Inline>
-              </Stack>
-            </Inline>
-          </Card>
+                )}
+                {passportPhoto.fileName && (
+                  <span className="bezent-card__desc">
+                    {passportPhoto.fileName}
+                    {passportPhoto.fileSizeFormatted ? ` (${passportPhoto.fileSizeFormatted})` : ''}
+                  </span>
+                )}
+              </Inline>
+            </Stack>
+          </Inline>
         </FormSection>
       </Card>
 
