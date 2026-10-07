@@ -7,6 +7,7 @@ import {
   Select,
   Textarea,
   Switch,
+  Card,
   Stack,
   Inline,
 } from '../../../../design-system';
@@ -120,149 +121,153 @@ export function EmergencyContactSection({
   return (
     <Stack gap="xl">
       {/* 1. PRIMARY CONTACT AREA */}
-      <FormSection title="Primary Emergency Contact">
-        <FormGrid columns={2} layout="horizontal" labelWidth="md">
-          {/* 1. Contact Name */}
-          <FormField label="Contact Name" required>
-            <Input
-              type="text"
-              placeholder="Enter Primary Contact Name"
-              value={primaryName}
-              onChange={(e) => setPrimaryName(e.target.value)}
-            />
-          </FormField>
-
-          {/* 2. Relationship / Role */}
-          <FormField label="Relationship / Role" required>
-            <Stack gap="xs">
-              <Select
-                options={RELATIONSHIP_OPTIONS}
-                value={primaryRelationship}
-                onChange={(e) => setPrimaryRelationship(e.target.value)}
-              />
-              {primaryRelationship === 'Other' && (
-                <Input
-                  type="text"
-                  placeholder="Enter Relationship / Role"
-                  value={customPrimaryRelationship}
-                  onChange={(e) => setCustomPrimaryRelationship(e.target.value)}
-                />
-              )}
-            </Stack>
-          </FormField>
-
-          {/* 3. Phone */}
-          <FormField label="Phone" required error={primaryPhoneError}>
-            <Inline gap="xs">
-              <Select
-                options={COUNTRY_CODE_OPTIONS}
-                value={primaryCountryCode}
-                onChange={(e) => setPrimaryCountryCode(e.target.value)}
-              />
+      <Card padding="lg">
+        <FormSection title="Primary Emergency Contact">
+          <FormGrid columns={2} layout="horizontal" labelWidth="md">
+            {/* 1. Contact Name */}
+            <FormField label="Contact Name" required>
               <Input
-                type="tel"
-                placeholder="98765 43210"
-                value={primaryPhone}
-                onChange={(e) => handlePrimaryPhoneChange(e.target.value)}
+                type="text"
+                placeholder="Enter Primary Contact Name"
+                value={primaryName}
+                onChange={(e) => setPrimaryName(e.target.value)}
               />
-            </Inline>
-          </FormField>
+            </FormField>
 
-          {/* 4. Email */}
-          <FormField label="Email" required error={primaryEmailError}>
-            <Input
-              type="email"
-              placeholder="contact@example.com"
-              value={primaryEmail}
-              onChange={(e) => handlePrimaryEmailChange(e.target.value)}
-            />
-          </FormField>
+            {/* 2. Relationship / Role */}
+            <FormField label="Relationship / Role" required>
+              <Stack gap="xs">
+                <Select
+                  options={RELATIONSHIP_OPTIONS}
+                  value={primaryRelationship}
+                  onChange={(e) => setPrimaryRelationship(e.target.value)}
+                />
+                {primaryRelationship === 'Other' && (
+                  <Input
+                    type="text"
+                    placeholder="Enter Relationship / Role"
+                    value={customPrimaryRelationship}
+                    onChange={(e) => setCustomPrimaryRelationship(e.target.value)}
+                  />
+                )}
+              </Stack>
+            </FormField>
 
-          {/* 5. Address / Contact Details */}
-          <FormField label="Address Details" required span="full">
-            <Textarea
-              rows={3}
-              placeholder="Enter complete address or relevant contact details..."
-              value={primaryAddress}
-              onChange={(e) => setPrimaryAddress(e.target.value)}
-            />
-          </FormField>
+            {/* 3. Phone */}
+            <FormField label="Phone" required error={primaryPhoneError}>
+              <Inline gap="xs">
+                <Select
+                  options={COUNTRY_CODE_OPTIONS}
+                  value={primaryCountryCode}
+                  onChange={(e) => setPrimaryCountryCode(e.target.value)}
+                />
+                <Input
+                  type="tel"
+                  placeholder="98765 43210"
+                  value={primaryPhone}
+                  onChange={(e) => handlePrimaryPhoneChange(e.target.value)}
+                />
+              </Inline>
+            </FormField>
 
-          {/* 6. Primary / Private Contact Indicator */}
-          <FormField label="Privacy Record" span="full">
-            <Switch
-              checked={isPrimaryPrivate}
-              onChange={(e) => setIsPrimaryPrivate(e.target.checked)}
-              label={
-                isPrimaryPrivate
-                  ? 'Primary Emergency Contact (Private Record)'
-                  : 'Standard Emergency Contact (Public HR Record)'
-              }
-            />
-          </FormField>
-        </FormGrid>
-      </FormSection>
+            {/* 4. Email */}
+            <FormField label="Email" required error={primaryEmailError}>
+              <Input
+                type="email"
+                placeholder="contact@example.com"
+                value={primaryEmail}
+                onChange={(e) => handlePrimaryEmailChange(e.target.value)}
+              />
+            </FormField>
+
+            {/* 5. Address / Contact Details */}
+            <FormField label="Address Details" required span="full">
+              <Textarea
+                rows={3}
+                placeholder="Enter complete address or relevant contact details..."
+                value={primaryAddress}
+                onChange={(e) => setPrimaryAddress(e.target.value)}
+              />
+            </FormField>
+
+            {/* 6. Primary / Private Contact Indicator */}
+            <FormField label="Privacy Record" span="full">
+              <Switch
+                checked={isPrimaryPrivate}
+                onChange={(e) => setIsPrimaryPrivate(e.target.checked)}
+                label={
+                  isPrimaryPrivate
+                    ? 'Primary Emergency Contact (Private Record)'
+                    : 'Standard Emergency Contact (Public HR Record)'
+                }
+              />
+            </FormField>
+          </FormGrid>
+        </FormSection>
+      </Card>
 
       {/* 2. SECONDARY CONTACT AREA */}
-      <FormSection title="Secondary Emergency Contact">
-        <FormGrid columns={2} layout="horizontal" labelWidth="md">
-          {/* 1. Secondary Contact Name */}
-          <FormField label="Secondary Contact Name">
-            <Input
-              type="text"
-              placeholder="Enter Secondary Contact Name"
-              value={secondaryName}
-              onChange={(e) => setSecondaryName(e.target.value)}
-            />
-          </FormField>
-
-          {/* 2. Secondary Relationship */}
-          <FormField label="Secondary Relationship">
-            <Stack gap="xs">
-              <Select
-                options={RELATIONSHIP_OPTIONS}
-                value={secondaryRelationship}
-                onChange={(e) => setSecondaryRelationship(e.target.value)}
-              />
-              {secondaryRelationship === 'Other' && (
-                <Input
-                  type="text"
-                  placeholder="Enter Secondary Relationship"
-                  value={customSecondaryRelationship}
-                  onChange={(e) => setCustomSecondaryRelationship(e.target.value)}
-                />
-              )}
-            </Stack>
-          </FormField>
-
-          {/* 3. Secondary Mobile */}
-          <FormField label="Secondary Mobile" error={secondaryMobileError}>
-            <Inline gap="xs">
-              <Select
-                options={COUNTRY_CODE_OPTIONS}
-                value={secondaryCountryCode}
-                onChange={(e) => setSecondaryCountryCode(e.target.value)}
-              />
+      <Card padding="lg">
+        <FormSection title="Secondary Emergency Contact">
+          <FormGrid columns={2} layout="horizontal" labelWidth="md">
+            {/* 1. Secondary Contact Name */}
+            <FormField label="Secondary Contact Name">
               <Input
-                type="tel"
-                placeholder="98765 43211"
-                value={secondaryMobile}
-                onChange={(e) => handleSecondaryMobileChange(e.target.value)}
+                type="text"
+                placeholder="Enter Secondary Contact Name"
+                value={secondaryName}
+                onChange={(e) => setSecondaryName(e.target.value)}
               />
-            </Inline>
-          </FormField>
+            </FormField>
 
-          {/* 4. Secondary Email */}
-          <FormField label="Secondary Email" error={secondaryEmailError}>
-            <Input
-              type="email"
-              placeholder="secondary@example.com"
-              value={secondaryEmail}
-              onChange={(e) => handleSecondaryEmailChange(e.target.value)}
-            />
-          </FormField>
-        </FormGrid>
-      </FormSection>
+            {/* 2. Secondary Relationship */}
+            <FormField label="Secondary Relationship">
+              <Stack gap="xs">
+                <Select
+                  options={RELATIONSHIP_OPTIONS}
+                  value={secondaryRelationship}
+                  onChange={(e) => setSecondaryRelationship(e.target.value)}
+                />
+                {secondaryRelationship === 'Other' && (
+                  <Input
+                    type="text"
+                    placeholder="Enter Secondary Relationship"
+                    value={customSecondaryRelationship}
+                    onChange={(e) => setCustomSecondaryRelationship(e.target.value)}
+                  />
+                )}
+              </Stack>
+            </FormField>
+
+            {/* 3. Secondary Mobile */}
+            <FormField label="Secondary Mobile" error={secondaryMobileError}>
+              <Inline gap="xs">
+                <Select
+                  options={COUNTRY_CODE_OPTIONS}
+                  value={secondaryCountryCode}
+                  onChange={(e) => setSecondaryCountryCode(e.target.value)}
+                />
+                <Input
+                  type="tel"
+                  placeholder="98765 43211"
+                  value={secondaryMobile}
+                  onChange={(e) => handleSecondaryMobileChange(e.target.value)}
+                />
+              </Inline>
+            </FormField>
+
+            {/* 4. Secondary Email */}
+            <FormField label="Secondary Email" error={secondaryEmailError}>
+              <Input
+                type="email"
+                placeholder="secondary@example.com"
+                value={secondaryEmail}
+                onChange={(e) => handleSecondaryEmailChange(e.target.value)}
+              />
+            </FormField>
+          </FormGrid>
+        </FormSection>
+      </Card>
     </Stack>
   );
 }
