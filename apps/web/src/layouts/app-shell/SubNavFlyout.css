@@ -8,7 +8,7 @@
 .subnav-flyout {
   position: fixed;
   left: calc(var(--shell-sidebar-width) + 4px);
-  margin-top: 4px;
+  margin-top: 0;
   width: var(--shell-subnav-flyout-width);
   min-height: 220px;
   max-height: 360px;
@@ -43,12 +43,12 @@
  * fighting the enter animation's `transform`.
  */
 .subnav-flyout--up {
-  translate: 0 calc(-100% + var(--shell-nav-item-height) - 4px);
+  translate: 0 calc(-100% + var(--shell-nav-item-height));
 }
 
 .subnav-flyout--up .subnav-flyout__pointer {
   top: auto;
-  bottom: 34px;
+  bottom: 27px;
   transform: translateY(50%) rotate(45deg);
   background: var(--floating-surface-bg);
 }
@@ -65,8 +65,8 @@
 /* Left-edge notch aligned with the hovered item's centre. */
 .subnav-flyout__pointer {
   position: absolute;
-  left: -6px;
-  top: 30px;
+  left: -5px;
+  top: 27px;
   width: 10px;
   height: 10px;
   background: var(--subnav-header-bg, var(--nav-selected, #c2e7ff));
@@ -78,8 +78,9 @@
 }
 
 .subnav-flyout__header {
+  position: relative;
   flex-shrink: 0;
-  padding: 12px 16px 10px;
+  padding: 12px 16px;
   background: var(--subnav-header-bg, var(--nav-selected, #c2e7ff));
   border-bottom: 1px solid var(--floating-surface-divider);
   border-top-left-radius: 5px;
@@ -91,14 +92,14 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  line-height: 1.2;
+  line-height: 1.25;
   color: var(--subnav-header-title, #041e49);
 }
 
 .subnav-flyout__subtitle {
-  margin-top: 2px;
+  margin-top: 3px;
   font-size: 11.5px;
-  line-height: 1.2;
+  line-height: 1.25;
   color: var(--subnav-header-subtitle, #444746);
 }
 

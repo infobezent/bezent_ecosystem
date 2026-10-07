@@ -5,7 +5,6 @@ import './BottomBar.css';
 
 /** Source: old approved UI `BOTTOM_ITEMS` (`App.tsx` 2044-2050). */
 const FOOTER_ITEMS: { icon: BezentIconName; label: string }[] = [
-  { icon: 'calendar', label: 'Calendar' },
   { icon: 'whatsNew', label: "What's New" },
   { icon: 'explore', label: 'Explore' },
   { icon: 'announcements', label: 'Announcements' },

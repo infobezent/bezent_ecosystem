@@ -497,8 +497,8 @@ export function DocumentsSection({
       )}
 
       {/* 1. PASSPORT-SIZE PHOTOGRAPH */}
-      <FormSection title="Passport-Size Photograph">
-        <Card variant="flat">
+      <Card padding="lg">
+        <FormSection title="Passport-Size Photograph">
           <Inline gap="lg" align="center">
             {passportPhoto.previewUrl ? (
               <img
@@ -539,39 +539,42 @@ export function DocumentsSection({
                 )}
                 {passportPhoto.fileName && (
                   <span className="bezent-card__desc">
-                    {passportPhoto.fileName} ({passportPhoto.fileSizeFormatted})
+                    {passportPhoto.fileName}
+                    {passportPhoto.fileSizeFormatted ? ` (${passportPhoto.fileSizeFormatted})` : ''}
                   </span>
                 )}
               </Inline>
             </Stack>
           </Inline>
-        </Card>
-      </FormSection>
+        </FormSection>
+      </Card>
 
       {/* 2. CLASSIFICATION AUTOMATION */}
-      <FormSection title="Hiring Classification">
-        <Inline gap="md" align="center">
-          <Button
-            type="button"
-            variant={isExperiencedHire ? 'primary' : 'secondary'}
-            onClick={() => updateClassification(true)}
-          >
-            Experienced Hire
-          </Button>
-          <Button
-            type="button"
-            variant={!isExperiencedHire ? 'primary' : 'secondary'}
-            onClick={() => updateClassification(false)}
-          >
-            Fresher
-          </Button>
-          <span className="bezent-card__desc">
-            {isExperiencedHire
-              ? 'Showing full professional history & previous employer checklist.'
-              : 'Hiding previous employment history documents.'}
-          </span>
-        </Inline>
-      </FormSection>
+      <Card padding="lg">
+        <FormSection title="Hiring Classification">
+          <Inline gap="md" align="center">
+            <Button
+              type="button"
+              variant={isExperiencedHire ? 'primary' : 'secondary'}
+              onClick={() => updateClassification(true)}
+            >
+              Experienced Hire
+            </Button>
+            <Button
+              type="button"
+              variant={!isExperiencedHire ? 'primary' : 'secondary'}
+              onClick={() => updateClassification(false)}
+            >
+              Fresher
+            </Button>
+            <span className="bezent-card__desc">
+              {isExperiencedHire
+                ? 'Showing full professional history & previous employer checklist.'
+                : 'Hiding previous employment history documents.'}
+            </span>
+          </Inline>
+        </FormSection>
+      </Card>
 
       {/* 3. DOCUMENT CHECKLIST BY CATEGORY */}
       {categories.map((cat) => {
@@ -582,129 +585,132 @@ export function DocumentsSection({
         const catDocs = documents.filter((d) => d.category === cat);
 
         return (
-          <FormSection key={cat} title={cat}>
-            <Stack gap="md">
-              {catDocs.map((doc) => (
-                <Card key={doc.id} variant="flat">
-                  <Stack gap="md">
-                    <Inline justify="between" align="center">
-                      <Inline gap="sm" align="center">
-                        <CardTitle>{doc.name}</CardTitle>
-                        {doc.isRequired ? (
-                          <Badge variant="warning" size="sm">
-                            Required
-                          </Badge>
-                        ) : (
-                          <Badge variant="neutral" size="sm">
-                            Optional
-                          </Badge>
-                        )}
-                      </Inline>
+          <Card key={cat} padding="lg">
+            <FormSection title={cat}>
+              <Stack gap="md">
+                {catDocs.map((doc) => (
+                  <Card key={doc.id} variant="flat">
+                    <Stack gap="md">
+                      <Inline justify="between" align="center">
+                        <Inline gap="sm" align="center">
+                          <CardTitle>{doc.name}</CardTitle>
+                          {doc.isRequired ? (
+                            <Badge variant="warning" size="sm">
+                              Required
+                            </Badge>
+                          ) : (
+                            <Badge variant="neutral" size="sm">
+                              Optional
+                            </Badge>
+                          )}
+                        </Inline>
 
-                      <Inline gap="sm" align="center">
-                        {getDocStatusBadge(doc.status)}
-                        {doc.status !== 'Verified' && (
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => handleVerifyDocument(doc.id)}
-                          >
-                            Approve
-                          </Button>
-                        )}
-                        {doc.status !== 'Rejected' && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRejectDocument(doc.id)}
-                          >
-                            Reject
-                          </Button>
-                        )}
-                      </Inline>
-                    </Inline>
-
-                    <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                      {/* Document Number */}
-                      <FormField label="Document Number">
-                        <Input
-                          type="text"
-                          placeholder="e.g. ID / Reference #"
-                          value={doc.docNumber}
-                          onChange={(e) =>
-                            handleUpdateDocField(doc.id, 'docNumber', e.target.value)
-                          }
-                        />
-                      </FormField>
-
-                      {/* File Upload Control */}
-                      <FormField
-                        label="Document File"
-                        helperText={
-                          doc.fileSizeFormatted ? `Size: ${doc.fileSizeFormatted}` : undefined
-                        }
-                      >
-                        <Inline gap="xs" align="center">
-                          <input
-                            ref={(el) => {
-                              docFileInputRefs.current[doc.id] = el;
-                            }}
-                            type="file"
-                            hidden
-                            accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
-                            onChange={(e) => {
-                              if (e.target.files?.[0]) {
-                                handleFileUpload(doc.id, e.target.files[0]);
-                              }
-                            }}
-                          />
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => docFileInputRefs.current[doc.id]?.click()}
-                          >
-                            Choose File
-                          </Button>
-                          <span className="bezent-card__desc">
-                            {doc.fileName || 'No file selected'}
-                          </span>
-                          {doc.fileName && (
+                        <Inline gap="sm" align="center">
+                          {getDocStatusBadge(doc.status)}
+                          {doc.status !== 'Verified' && (
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => handleVerifyDocument(doc.id)}
+                            >
+                              Approve
+                            </Button>
+                          )}
+                          {doc.status !== 'Rejected' && (
                             <Button
                               type="button"
                               variant="ghost"
                               size="sm"
-                              onClick={() =>
-                                setPreviewingDoc({
-                                  name: doc.name,
-                                  url: doc.filePreviewUrl,
-                                  fileName: doc.fileName,
-                                })
-                              }
+                              onClick={() => handleRejectDocument(doc.id)}
                             >
-                              View
+                              Reject
                             </Button>
                           )}
                         </Inline>
-                      </FormField>
+                      </Inline>
 
-                      {/* Remarks */}
-                      <FormField label="Remarks" span="full">
-                        <Input
-                          type="text"
-                          placeholder="Optional notes or verification remarks..."
-                          value={doc.remarks}
-                          onChange={(e) => handleUpdateDocField(doc.id, 'remarks', e.target.value)}
-                        />
-                      </FormField>
-                    </FormGrid>
-                  </Stack>
-                </Card>
-              ))}
-            </Stack>
-          </FormSection>
+                      <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                        {/* Document Number */}
+                        <FormField label="Document Number">
+                          <Input
+                            type="text"
+                            value={doc.docNumber}
+                            onChange={(e) =>
+                              handleUpdateDocField(doc.id, 'docNumber', e.target.value)
+                            }
+                          />
+                        </FormField>
+
+                        {/* File Upload Control */}
+                        <FormField
+                          label="Document File"
+                          helperText={
+                            doc.fileSizeFormatted ? `Size: ${doc.fileSizeFormatted}` : undefined
+                          }
+                        >
+                          <Inline gap="xs" align="center">
+                            <input
+                              ref={(el) => {
+                                docFileInputRefs.current[doc.id] = el;
+                              }}
+                              type="file"
+                              hidden
+                              accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                              onChange={(e) => {
+                                if (e.target.files?.[0]) {
+                                  handleFileUpload(doc.id, e.target.files[0]);
+                                }
+                              }}
+                            />
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => docFileInputRefs.current[doc.id]?.click()}
+                            >
+                              Choose File
+                            </Button>
+                            <span className="bezent-card__desc">
+                              {doc.fileName || 'No file selected'}
+                            </span>
+                            {doc.fileName && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  setPreviewingDoc({
+                                    name: doc.name,
+                                    url: doc.filePreviewUrl,
+                                    fileName: doc.fileName,
+                                  })
+                                }
+                              >
+                                View
+                              </Button>
+                            )}
+                          </Inline>
+                        </FormField>
+
+                        {/* Remarks */}
+                        <FormField label="Remarks" span="full">
+                          <Input
+                            type="text"
+                            placeholder="Optional notes or verification remarks..."
+                            value={doc.remarks}
+                            onChange={(e) =>
+                              handleUpdateDocField(doc.id, 'remarks', e.target.value)
+                            }
+                          />
+                        </FormField>
+                      </FormGrid>
+                    </Stack>
+                  </Card>
+                ))}
+              </Stack>
+            </FormSection>
+          </Card>
         );
       })}
 

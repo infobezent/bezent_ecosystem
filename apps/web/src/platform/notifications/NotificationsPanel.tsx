@@ -85,8 +85,6 @@ export function NotificationsPanel({
         if (closing && e.target === e.currentTarget) onClose();
       }}
     >
-      <span className="notif-panel__glow" aria-hidden="true" />
-
       <div className="notif-panel__header">
         <div className="notif-panel__title-group">
           <h2 className="notif-panel__title">Notifications</h2>

@@ -154,28 +154,152 @@ export function OnboardingSection({
   return (
     <Stack gap="xl">
       {/* SECTION 1: ONBOARDING TASKS */}
-      <FormSection title="Onboarding Tasks">
-        <Stack gap="md">
-          {tasks.map((task, idx) => {
-            const overdue = isTaskOverdue(task.dueDate, task.status);
-            const statusOptions = [
-              { value: 'Not Started', label: 'Not Started' },
-              { value: 'In Progress', label: 'In Progress' },
-              { value: 'Completed', label: 'Completed' },
-              ...(overdue ? [{ value: 'Overdue', label: 'Overdue (Auto-Calculated)' }] : []),
-            ];
+      <Card padding="lg">
+        <FormSection title="Onboarding Tasks">
+          <Stack gap="md">
+            {tasks.map((task, idx) => {
+              const overdue = isTaskOverdue(task.dueDate, task.status);
+              const statusOptions = [
+                { value: 'Not Started', label: 'Not Started' },
+                { value: 'In Progress', label: 'In Progress' },
+                { value: 'Completed', label: 'Completed' },
+                ...(overdue ? [{ value: 'Overdue', label: 'Overdue (Auto-Calculated)' }] : []),
+              ];
 
-            return (
-              <Card key={task.id} variant="flat">
+              return (
+                <Card key={task.id} variant="flat">
+                  <Stack gap="md">
+                    <Inline justify="between" align="center">
+                      <CardTitle>Task #{idx + 1}</CardTitle>
+                      {tasks.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeTask(task.id)}
+                        >
+                          Remove
+                        </Button>
+                      )}
+                    </Inline>
+
+                    <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                      {/* 1. Onboarding Tasks */}
+                      <FormField label="Onboarding Tasks" required>
+                        <Stack gap="xs">
+                          <Select
+                            options={PREDEFINED_TASKS}
+                            value={task.taskName}
+                            onChange={(e) => updateTask(task.id, 'taskName', e.target.value)}
+                          />
+                          {task.taskName === 'other' && (
+                            <Input
+                              type="text"
+                              placeholder="Enter Onboarding Task..."
+                              value={task.otherTaskName || ''}
+                              onChange={(e) => updateTask(task.id, 'otherTaskName', e.target.value)}
+                            />
+                          )}
+                        </Stack>
+                      </FormField>
+
+                      {/* 3. Assigned To */}
+                      <FormField label="Assigned To" required>
+                        <Stack gap="xs">
+                          <Select
+                            options={ASSIGNED_TO_OPTIONS}
+                            value={task.assignedTo}
+                            onChange={(e) => updateTask(task.id, 'assignedTo', e.target.value)}
+                          />
+                          {task.assignedTo === 'other' && (
+                            <Input
+                              type="text"
+                              placeholder="Enter Assignment..."
+                              value={task.otherAssignedTo || ''}
+                              onChange={(e) =>
+                                updateTask(task.id, 'otherAssignedTo', e.target.value)
+                              }
+                            />
+                          )}
+                        </Stack>
+                      </FormField>
+
+                      {/* 2. Task Description (Full Width) */}
+                      <FormField label="Task Description" span="full">
+                        <Textarea
+                          placeholder="Enter task details or instructions..."
+                          rows={3}
+                          value={task.description}
+                          onChange={(e) => updateTask(task.id, 'description', e.target.value)}
+                        />
+                      </FormField>
+
+                      {/* 4. Due Date */}
+                      <FormField label="Due Date">
+                        <Input
+                          type="date"
+                          value={task.dueDate}
+                          onChange={(e) => updateTask(task.id, 'dueDate', e.target.value)}
+                        />
+                      </FormField>
+
+                      {/* 5. Task Status */}
+                      <FormField
+                        label="Task Status"
+                        required
+                        helperText={overdue ? '⚠️ Overdue — Due Date has passed' : undefined}
+                      >
+                        <Inline gap="sm" align="center">
+                          <Select
+                            options={statusOptions}
+                            value={overdue ? 'Overdue' : task.status}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (
+                                val === 'Completed' ||
+                                val === 'In Progress' ||
+                                val === 'Not Started'
+                              ) {
+                                updateTask(task.id, 'status', val);
+                              }
+                            }}
+                          />
+                          {task.status === 'Completed' && (
+                            <Badge variant="success">✓ Completed</Badge>
+                          )}
+                          {overdue && <Badge variant="danger">⚠️ Overdue</Badge>}
+                        </Inline>
+                      </FormField>
+                    </FormGrid>
+                  </Stack>
+                </Card>
+              );
+            })}
+
+            <Inline>
+              <Button type="button" variant="secondary" onClick={addTask}>
+                + Add Task
+              </Button>
+            </Inline>
+          </Stack>
+        </FormSection>
+      </Card>
+
+      {/* SECTION 2: ASSETS */}
+      <Card padding="lg">
+        <FormSection title="Assigned Assets">
+          <Stack gap="md">
+            {assets.map((asset, idx) => (
+              <Card key={asset.id} variant="flat">
                 <Stack gap="md">
                   <Inline justify="between" align="center">
-                    <CardTitle>Task #{idx + 1}</CardTitle>
-                    {tasks.length > 1 && (
+                    <CardTitle>Asset #{idx + 1}</CardTitle>
+                    {assets.length > 1 && (
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={() => removeTask(task.id)}
+                        onClick={() => removeAsset(asset.id)}
                       >
                         Remove
                       </Button>
@@ -183,177 +307,61 @@ export function OnboardingSection({
                   </Inline>
 
                   <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                    {/* 1. Onboarding Tasks */}
-                    <FormField label="Onboarding Tasks" required>
+                    {/* 1. Assets */}
+                    <FormField label="Assets" required>
                       <Stack gap="xs">
                         <Select
-                          options={PREDEFINED_TASKS}
-                          value={task.taskName}
-                          onChange={(e) => updateTask(task.id, 'taskName', e.target.value)}
+                          options={PREDEFINED_ASSETS}
+                          value={asset.assetName}
+                          onChange={(e) => updateAsset(asset.id, 'assetName', e.target.value)}
                         />
-                        {task.taskName === 'other' && (
+                        {asset.assetName === 'other' && (
                           <Input
                             type="text"
-                            placeholder="Enter Onboarding Task..."
-                            value={task.otherTaskName || ''}
-                            onChange={(e) => updateTask(task.id, 'otherTaskName', e.target.value)}
+                            placeholder="Enter Asset Name..."
+                            value={asset.otherAssetName || ''}
+                            onChange={(e) =>
+                              updateAsset(asset.id, 'otherAssetName', e.target.value)
+                            }
                           />
                         )}
                       </Stack>
                     </FormField>
 
-                    {/* 3. Assigned To */}
-                    <FormField label="Assigned To" required>
-                      <Stack gap="xs">
-                        <Select
-                          options={ASSIGNED_TO_OPTIONS}
-                          value={task.assignedTo}
-                          onChange={(e) => updateTask(task.id, 'assignedTo', e.target.value)}
-                        />
-                        {task.assignedTo === 'other' && (
-                          <Input
-                            type="text"
-                            placeholder="Enter Assignment..."
-                            value={task.otherAssignedTo || ''}
-                            onChange={(e) => updateTask(task.id, 'otherAssignedTo', e.target.value)}
-                          />
-                        )}
-                      </Stack>
-                    </FormField>
-
-                    {/* 2. Task Description (Full Width) */}
-                    <FormField label="Task Description" span="full">
-                      <Textarea
-                        placeholder="Enter task details or instructions..."
-                        rows={3}
-                        value={task.description}
-                        onChange={(e) => updateTask(task.id, 'description', e.target.value)}
+                    {/* 2. Asset Quantity */}
+                    <FormField label="Asset Quantity" required>
+                      <Input
+                        type="number"
+                        min={1}
+                        placeholder="1"
+                        value={asset.quantity}
+                        onChange={(e) =>
+                          updateAsset(asset.id, 'quantity', Number(e.target.value) || '')
+                        }
                       />
                     </FormField>
 
-                    {/* 4. Due Date */}
-                    <FormField label="Due Date">
+                    {/* 3. Asset Issue Date */}
+                    <FormField label="Asset Issue Date" required>
                       <Input
                         type="date"
-                        value={task.dueDate}
-                        onChange={(e) => updateTask(task.id, 'dueDate', e.target.value)}
+                        value={asset.issueDate}
+                        onChange={(e) => updateAsset(asset.id, 'issueDate', e.target.value)}
                       />
-                    </FormField>
-
-                    {/* 5. Task Status */}
-                    <FormField
-                      label="Task Status"
-                      required
-                      helperText={overdue ? '⚠️ Overdue — Due Date has passed' : undefined}
-                    >
-                      <Inline gap="sm" align="center">
-                        <Select
-                          options={statusOptions}
-                          value={overdue ? 'Overdue' : task.status}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            if (
-                              val === 'Completed' ||
-                              val === 'In Progress' ||
-                              val === 'Not Started'
-                            ) {
-                              updateTask(task.id, 'status', val);
-                            }
-                          }}
-                        />
-                        {task.status === 'Completed' && (
-                          <Badge variant="success">✓ Completed</Badge>
-                        )}
-                        {overdue && <Badge variant="danger">⚠️ Overdue</Badge>}
-                      </Inline>
                     </FormField>
                   </FormGrid>
                 </Stack>
               </Card>
-            );
-          })}
+            ))}
 
-          <Inline>
-            <Button type="button" variant="secondary" onClick={addTask}>
-              + Add Task
-            </Button>
-          </Inline>
-        </Stack>
-      </FormSection>
-
-      {/* SECTION 2: ASSETS */}
-      <FormSection title="Assigned Assets">
-        <Stack gap="md">
-          {assets.map((asset, idx) => (
-            <Card key={asset.id} variant="flat">
-              <Stack gap="md">
-                <Inline justify="between" align="center">
-                  <CardTitle>Asset #{idx + 1}</CardTitle>
-                  {assets.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeAsset(asset.id)}
-                    >
-                      Remove
-                    </Button>
-                  )}
-                </Inline>
-
-                <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                  {/* 1. Assets */}
-                  <FormField label="Assets" required>
-                    <Stack gap="xs">
-                      <Select
-                        options={PREDEFINED_ASSETS}
-                        value={asset.assetName}
-                        onChange={(e) => updateAsset(asset.id, 'assetName', e.target.value)}
-                      />
-                      {asset.assetName === 'other' && (
-                        <Input
-                          type="text"
-                          placeholder="Enter Asset Name..."
-                          value={asset.otherAssetName || ''}
-                          onChange={(e) => updateAsset(asset.id, 'otherAssetName', e.target.value)}
-                        />
-                      )}
-                    </Stack>
-                  </FormField>
-
-                  {/* 2. Asset Quantity */}
-                  <FormField label="Asset Quantity" required>
-                    <Input
-                      type="number"
-                      min={1}
-                      placeholder="1"
-                      value={asset.quantity}
-                      onChange={(e) =>
-                        updateAsset(asset.id, 'quantity', Number(e.target.value) || '')
-                      }
-                    />
-                  </FormField>
-
-                  {/* 3. Asset Issue Date */}
-                  <FormField label="Asset Issue Date" required>
-                    <Input
-                      type="date"
-                      value={asset.issueDate}
-                      onChange={(e) => updateAsset(asset.id, 'issueDate', e.target.value)}
-                    />
-                  </FormField>
-                </FormGrid>
-              </Stack>
-            </Card>
-          ))}
-
-          <Inline>
-            <Button type="button" variant="secondary" onClick={addAsset}>
-              + Add Asset
-            </Button>
-          </Inline>
-        </Stack>
-      </FormSection>
+            <Inline>
+              <Button type="button" variant="secondary" onClick={addAsset}>
+                + Add Asset
+              </Button>
+            </Inline>
+          </Stack>
+        </FormSection>
+      </Card>
     </Stack>
   );
 }

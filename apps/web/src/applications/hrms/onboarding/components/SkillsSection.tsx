@@ -325,221 +325,224 @@ export function SkillsSection({ value: _value, onChange: _onChange }: SkillsSect
   return (
     <Stack gap="xl">
       {/* 1. Skill Entry Form */}
-      <FormSection title="Skill Proficiency & Assessment">
-        <Card variant="flat">
-          <Stack gap="md">
-            <CardTitle>{editingId ? 'Edit Skill Entry' : 'Add New Skill Entry'}</CardTitle>
+      <Card padding="lg">
+        <FormSection title="Skill Proficiency & Assessment">
+          <Card variant="flat">
+            <Stack gap="md">
+              <CardTitle>{editingId ? 'Edit Skill Entry' : 'Add New Skill Entry'}</CardTitle>
 
-            <FormGrid columns={2} layout="horizontal" labelWidth="md">
-              {/* 1. Skill */}
-              <FormField label="Skill" required>
-                <Stack gap="xs">
-                  <Select
-                    options={skillOptions}
-                    value={selectedSkill}
-                    onChange={(e) => handleSkillChange(e.target.value)}
-                  />
-                  {selectedSkill === 'Other' && (
-                    <Input
-                      type="text"
-                      placeholder="Enter Skill"
-                      value={customSkillName}
-                      onChange={(e) => setCustomSkillName(e.target.value)}
+              <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                {/* 1. Skill */}
+                <FormField label="Skill" required>
+                  <Stack gap="xs">
+                    <Select
+                      options={skillOptions}
+                      value={selectedSkill}
+                      onChange={(e) => handleSkillChange(e.target.value)}
                     />
-                  )}
-                </Stack>
-              </FormField>
+                    {selectedSkill === 'Other' && (
+                      <Input
+                        type="text"
+                        placeholder="Enter Skill"
+                        value={customSkillName}
+                        onChange={(e) => setCustomSkillName(e.target.value)}
+                      />
+                    )}
+                  </Stack>
+                </FormField>
 
-              {/* 2. Skill Type */}
-              <FormField label="Skill Type" required>
-                <Stack gap="xs">
-                  <Select
-                    options={skillTypeOptions}
-                    value={skillType}
-                    onChange={(e) => setSkillType(e.target.value as SkillEntry['skillType'])}
-                  />
-                  {skillType === 'Other' && (
-                    <Input
-                      type="text"
-                      placeholder="Enter Skill Type"
-                      value={customSkillType}
-                      onChange={(e) => setCustomSkillType(e.target.value)}
+                {/* 2. Skill Type */}
+                <FormField label="Skill Type" required>
+                  <Stack gap="xs">
+                    <Select
+                      options={skillTypeOptions}
+                      value={skillType}
+                      onChange={(e) => setSkillType(e.target.value as SkillEntry['skillType'])}
                     />
-                  )}
-                </Stack>
-              </FormField>
+                    {skillType === 'Other' && (
+                      <Input
+                        type="text"
+                        placeholder="Enter Skill Type"
+                        value={customSkillType}
+                        onChange={(e) => setCustomSkillType(e.target.value)}
+                      />
+                    )}
+                  </Stack>
+                </FormField>
 
-              {/* 3. Level Type */}
-              <FormField label="Level Type" required>
-                <Select
-                  options={levelTypeOptions}
-                  value={levelType}
-                  onChange={(e) =>
-                    handleLevelTypeChange(
-                      e.target.value as 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert',
-                    )
-                  }
-                />
-              </FormField>
+                {/* 3. Level Type */}
+                <FormField label="Level Type" required>
+                  <Select
+                    options={levelTypeOptions}
+                    value={levelType}
+                    onChange={(e) =>
+                      handleLevelTypeChange(
+                        e.target.value as 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert',
+                      )
+                    }
+                  />
+                </FormField>
 
-              {/* 4. Level */}
-              <FormField label="Level" required>
-                <Select
-                  options={currentLevelOptions}
-                  value={level}
-                  onChange={(e) => setLevel(e.target.value)}
-                />
-              </FormField>
+                {/* 4. Level */}
+                <FormField label="Level" required>
+                  <Select
+                    options={currentLevelOptions}
+                    value={level}
+                    onChange={(e) => setLevel(e.target.value)}
+                  />
+                </FormField>
 
-              {/* 5. Level Date */}
-              <FormField label="Level Date" required>
-                <Input
-                  type="date"
-                  value={levelDate}
-                  onChange={(e) => setLevelDate(e.target.value)}
-                />
-              </FormField>
+                {/* 5. Level Date */}
+                <FormField label="Level Date" required>
+                  <Input
+                    type="date"
+                    value={levelDate}
+                    onChange={(e) => setLevelDate(e.target.value)}
+                  />
+                </FormField>
 
-              {/* 6. Years of Experience */}
-              <FormField label="Experience" required>
-                <Input
-                  type="number"
-                  step="0.5"
-                  min="0"
-                  placeholder="e.g. 1.5 Years"
-                  value={yearsOfExperience}
-                  onChange={(e) => setYearsOfExperience(e.target.value)}
-                />
-              </FormField>
+                {/* 6. Years of Experience */}
+                <FormField label="Experience" required>
+                  <Input
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    value={yearsOfExperience}
+                    onChange={(e) => setYearsOfExperience(e.target.value)}
+                  />
+                </FormField>
 
-              {/* 7. Examiner */}
-              <FormField label="Examiner" required>
-                <Inline gap="xs" align="center">
-                  <Avatar initials={getSelectedEmployee(examinerId).initials} size="sm" />
-                  <span>{getSelectedEmployee(examinerId).name}</span>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setActivePickerField('examiner')}
-                  >
-                    Select
-                  </Button>
-                </Inline>
-              </FormField>
+                {/* 7. Examiner */}
+                <FormField label="Examiner" required>
+                  <Inline gap="xs" align="center">
+                    <Avatar initials={getSelectedEmployee(examinerId).initials} size="sm" />
+                    <span>{getSelectedEmployee(examinerId).name}</span>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setActivePickerField('examiner')}
+                    >
+                      Select
+                    </Button>
+                  </Inline>
+                </FormField>
 
-              {/* 8. Verified By */}
-              <FormField label="Verified By" required>
-                <Inline gap="xs" align="center">
-                  <Avatar initials={getSelectedEmployee(verifiedById).initials} size="sm" />
-                  <span>{getSelectedEmployee(verifiedById).name}</span>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setActivePickerField('verifiedBy')}
-                  >
-                    Select
-                  </Button>
-                </Inline>
-              </FormField>
+                {/* 8. Verified By */}
+                <FormField label="Verified By" required>
+                  <Inline gap="xs" align="center">
+                    <Avatar initials={getSelectedEmployee(verifiedById).initials} size="sm" />
+                    <span>{getSelectedEmployee(verifiedById).name}</span>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setActivePickerField('verifiedBy')}
+                    >
+                      Select
+                    </Button>
+                  </Inline>
+                </FormField>
 
-              {/* 9. Mentor */}
-              <FormField label="Mentor" required>
-                <Inline gap="xs" align="center">
-                  <Avatar initials={getSelectedEmployee(mentorId).initials} size="sm" />
-                  <span>{getSelectedEmployee(mentorId).name}</span>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setActivePickerField('mentor')}
-                  >
-                    Select
-                  </Button>
-                </Inline>
-              </FormField>
-            </FormGrid>
+                {/* 9. Mentor */}
+                <FormField label="Mentor" required>
+                  <Inline gap="xs" align="center">
+                    <Avatar initials={getSelectedEmployee(mentorId).initials} size="sm" />
+                    <span>{getSelectedEmployee(mentorId).name}</span>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setActivePickerField('mentor')}
+                    >
+                      Select
+                    </Button>
+                  </Inline>
+                </FormField>
+              </FormGrid>
 
-            <Inline gap="sm">
-              <Button type="button" variant="primary" onClick={handleAddOrUpdateSkill}>
-                {editingId ? 'Update Skill' : '+ Add Skill'}
-              </Button>
-              {editingId && (
-                <Button type="button" variant="ghost" onClick={() => setEditingId(null)}>
-                  Cancel Edit
+              <Inline gap="sm">
+                <Button type="button" variant="primary" onClick={handleAddOrUpdateSkill}>
+                  {editingId ? 'Update Skill' : '+ Add Skill'}
                 </Button>
-              )}
-            </Inline>
-          </Stack>
-        </Card>
-      </FormSection>
+                {editingId && (
+                  <Button type="button" variant="ghost" onClick={() => setEditingId(null)}>
+                    Cancel Edit
+                  </Button>
+                )}
+              </Inline>
+            </Stack>
+          </Card>
+        </FormSection>
+      </Card>
 
       {/* 2. Added Skills Summary */}
-      <FormSection title={`Added Skills (${skillsList.length})`}>
-        {skillsList.length === 0 ? (
-          <EmptyState title="No skills added" description="Fill the form above to add a skill." />
-        ) : (
-          <Grid columns={2} gap="md">
-            {skillsList.map((item) => (
-              <Card key={item.id} variant="flat">
-                <Stack gap="sm">
-                  <Inline justify="between" align="start">
-                    <Stack gap="xs">
-                      <CardTitle>
-                        {item.skillName === 'Other' ? item.customSkillName : item.skillName}
-                      </CardTitle>
-                      <Badge variant="neutral" size="sm">
-                        {item.skillType === 'Other' ? item.customSkillType : item.skillType}
-                      </Badge>
-                    </Stack>
-                    <Inline gap="xs">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditSkill(item)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoveSkill(item.id)}
-                      >
-                        Remove
-                      </Button>
+      <Card padding="lg">
+        <FormSection title={`Added Skills (${skillsList.length})`}>
+          {skillsList.length === 0 ? (
+            <EmptyState title="No skills added" description="Fill the form above to add a skill." />
+          ) : (
+            <Grid columns={2} gap="md">
+              {skillsList.map((item) => (
+                <Card key={item.id} variant="flat">
+                  <Stack gap="sm">
+                    <Inline justify="between" align="start">
+                      <Stack gap="xs">
+                        <CardTitle>
+                          {item.skillName === 'Other' ? item.customSkillName : item.skillName}
+                        </CardTitle>
+                        <Badge variant="neutral" size="sm">
+                          {item.skillType === 'Other' ? item.customSkillType : item.skillType}
+                        </Badge>
+                      </Stack>
+                      <Inline gap="xs">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditSkill(item)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveSkill(item.id)}
+                        >
+                          Remove
+                        </Button>
+                      </Inline>
                     </Inline>
-                  </Inline>
 
-                  <Stack gap="xs">
-                    <Inline gap="xs" align="center">
-                      <Label size="sm">Proficiency:</Label>
-                      <span className="bezent-card__desc">
-                        {item.levelType} ({item.level})
-                      </span>
-                    </Inline>
-                    <Inline gap="xs" align="center">
-                      <Label size="sm">Experience:</Label>
-                      <span className="bezent-card__desc">
-                        {item.yearsOfExperience} Yrs • Assessed {item.levelDate}
-                      </span>
-                    </Inline>
-                    <Inline gap="xs" align="center">
-                      <Label size="sm">Reviewers:</Label>
-                      <span className="bezent-card__desc">
-                        {item.examinerName} (Assessed) • {item.verifiedByName} (Verified) •{' '}
-                        {item.mentorName} (Mentor)
-                      </span>
-                    </Inline>
+                    <Stack gap="xs">
+                      <Inline gap="xs" align="center">
+                        <Label size="sm">Proficiency:</Label>
+                        <span className="bezent-card__desc">
+                          {item.levelType} ({item.level})
+                        </span>
+                      </Inline>
+                      <Inline gap="xs" align="center">
+                        <Label size="sm">Experience:</Label>
+                        <span className="bezent-card__desc">
+                          {item.yearsOfExperience} Yrs • Assessed {item.levelDate}
+                        </span>
+                      </Inline>
+                      <Inline gap="xs" align="center">
+                        <Label size="sm">Reviewers:</Label>
+                        <span className="bezent-card__desc">
+                          {item.examinerName} (Assessed) • {item.verifiedByName} (Verified) •{' '}
+                          {item.mentorName} (Mentor)
+                        </span>
+                      </Inline>
+                    </Stack>
                   </Stack>
-                </Stack>
-              </Card>
-            ))}
-          </Grid>
-        )}
-      </FormSection>
+                </Card>
+              ))}
+            </Grid>
+          )}
+        </FormSection>
+      </Card>
 
       {/* 3. Employee Search Modal */}
       {activePickerField && (
