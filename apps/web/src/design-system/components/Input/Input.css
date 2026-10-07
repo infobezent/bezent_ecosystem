@@ -299,29 +299,20 @@
   opacity: 1;
 }
 
-/* When empty and not focused, show faded placeholder color */
-.bezent-input-field--empty[type='date']:not(:focus),
-.bezent-input-field--empty[type='time']:not(:focus),
-.bezent-input-field--empty[type='date']:not(:focus)::-webkit-datetime-edit,
-.bezent-input-field--empty[type='time']:not(:focus)::-webkit-datetime-edit,
-.bezent-input-field--empty[type='date']:not(:focus)::-webkit-datetime-edit-text,
-.bezent-input-field--empty[type='time']:not(:focus)::-webkit-datetime-edit-text,
-.bezent-input-field--empty[type='date']:not(:focus)::-webkit-datetime-edit-month-field,
-.bezent-input-field--empty[type='date']:not(:focus)::-webkit-datetime-edit-day-field,
-.bezent-input-field--empty[type='date']:not(:focus)::-webkit-datetime-edit-year-field {
+/* When empty (placeholder dd/mm/yyyy), show faded color even when focused */
+.bezent-input-field--empty[type='date'],
+.bezent-input-field--empty[type='time'],
+.bezent-input-field--empty[type='date']::-webkit-datetime-edit,
+.bezent-input-field--empty[type='time']::-webkit-datetime-edit,
+.bezent-input-field--empty[type='date']::-webkit-datetime-edit-text,
+.bezent-input-field--empty[type='time']::-webkit-datetime-edit-text,
+.bezent-input-field--empty[type='date']::-webkit-datetime-edit-month-field,
+.bezent-input-field--empty[type='date']::-webkit-datetime-edit-day-field,
+.bezent-input-field--empty[type='date']::-webkit-datetime-edit-year-field {
   color: var(--text-muted, #94a3b8) !important;
 }
 
-/* When focused, active, or containing entered values, crisp solid text */
-.bezent-input-field[type='date']:focus,
-.bezent-input-field[type='time']:focus,
-.bezent-input-field[type='date']:focus::-webkit-datetime-edit,
-.bezent-input-field[type='time']:focus::-webkit-datetime-edit,
-.bezent-input-field[type='date']:focus::-webkit-datetime-edit-text,
-.bezent-input-field[type='time']:focus::-webkit-datetime-edit-text,
-.bezent-input-field[type='date']:focus::-webkit-datetime-edit-month-field,
-.bezent-input-field[type='date']:focus::-webkit-datetime-edit-day-field,
-.bezent-input-field[type='date']:focus::-webkit-datetime-edit-year-field,
+/* When typing or containing entered value, show normal solid black */
 .bezent-input-field:not(.bezent-input-field--empty)[type='date'],
 .bezent-input-field:not(.bezent-input-field--empty)[type='time'],
 .bezent-input-field:not(.bezent-input-field--empty)[type='date']::-webkit-datetime-edit,
@@ -331,8 +322,6 @@
 .bezent-input-field:not(.bezent-input-field--empty)[type='date']::-webkit-datetime-edit-month-field,
 .bezent-input-field:not(.bezent-input-field--empty)[type='date']::-webkit-datetime-edit-day-field,
 .bezent-input-field:not(.bezent-input-field--empty)[type='date']::-webkit-datetime-edit-year-field,
-.bezent-input[type='date']:focus,
-.bezent-input[type='time']:focus,
 .bezent-input[type='date']:not(:placeholder-shown),
 .bezent-input[type='time']:not(:placeholder-shown) {
   color: var(--text-primary, #000000) !important;

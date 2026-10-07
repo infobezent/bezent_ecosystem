@@ -30,37 +30,57 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   const [internalHasValue, setInternalHasValue] = useState<boolean>(() => {
     return Boolean(rest.value || rest.defaultValue);
   });
-  const [isFocused, setIsFocused] = useState<boolean>(false);
+  const [hasTyped, setHasTyped] = useState<boolean>(false);
 
   const isControlled = rest.value !== undefined;
   const hasValue = isControlled ? Boolean(rest.value) : internalHasValue;
-  const isEmpty = !hasValue && !isFocused;
+  const isEmpty = !hasValue && !hasTyped;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!isControlled) {
       setInternalHasValue(Boolean(e.target.value));
     }
+    if (e.target.value) {
+      setHasTyped(true);
+    } else {
+      setHasTyped(false);
+    }
     rest.onChange?.(e);
   };
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    setIsFocused(true);
     rest.onFocus?.(e);
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    setIsFocused(false);
+    const val = e.target.value;
     if (!isControlled) {
-      setInternalHasValue(Boolean(e.target.value));
+      setInternalHasValue(Boolean(val));
+    }
+    if (!val) {
+      setHasTyped(false);
     }
     rest.onBlur?.(e);
   };
 
   const handleInput = (e: React.FormEvent<HTMLInputElement>) => {
+    const val = (e.target as HTMLInputElement).value;
     if (!isControlled) {
-      setInternalHasValue(Boolean((e.target as HTMLInputElement).value));
+      setInternalHasValue(Boolean(val));
+    }
+    if (val) {
+      setHasTyped(true);
     }
     rest.onInput?.(e);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (rest.type === 'date' || rest.type === 'time') {
+      if (/^[0-9]$/.test(e.key)) {
+        setHasTyped(true);
+      }
+    }
+    rest.onKeyDown?.(e);
   };
 
   return (
@@ -94,6 +114,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           onFocus={handleFocus}
           onBlur={handleBlur}
           onInput={handleInput}
+          onKeyDown={handleKeyDown}
         />
 
         {rightIcon && (
