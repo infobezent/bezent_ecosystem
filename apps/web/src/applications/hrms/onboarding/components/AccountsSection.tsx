@@ -250,7 +250,6 @@ export function AccountsSection({ value: _value, onChange: _onChange }: Accounts
           <FormField label="IFSC Code" required helperText={ifscStatusMsg}>
             <Input
               type="text"
-              placeholder="e.g. HDFC0001234"
               maxLength={11}
               value={ifscCode}
               onChange={(e) => handleIfscChange(e.target.value)}
@@ -354,7 +353,6 @@ export function AccountsSection({ value: _value, onChange: _onChange }: Accounts
               <Input
                 type="number"
                 min="0"
-                placeholder="e.g. 1200000"
                 value={annualCtc}
                 onChange={(e) => setAnnualCtc(e.target.value)}
               />

@@ -631,7 +631,6 @@ export function DocumentsSection({
                       <FormField label="Document Number">
                         <Input
                           type="text"
-                          placeholder="e.g. ID / Reference #"
                           value={doc.docNumber}
                           onChange={(e) =>
                             handleUpdateDocField(doc.id, 'docNumber', e.target.value)

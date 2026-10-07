@@ -140,7 +140,6 @@ export function NewHireModal({ isOpen, onClose, masters, onSubmit }: NewHireModa
                 label="First Name *"
                 type="text"
                 required
-                placeholder="e.g. Arun"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
               />
@@ -148,7 +147,6 @@ export function NewHireModal({ isOpen, onClose, masters, onSubmit }: NewHireModa
                 id="nh-last-name"
                 label="Last Name"
                 type="text"
-                placeholder="e.g. Kumar"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
               />
@@ -160,7 +158,6 @@ export function NewHireModal({ isOpen, onClose, masters, onSubmit }: NewHireModa
                 label="Email Address *"
                 type="email"
                 required
-                placeholder="e.g. arun.kumar@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -168,7 +165,6 @@ export function NewHireModal({ isOpen, onClose, masters, onSubmit }: NewHireModa
                 id="nh-phone"
                 label="Phone Number"
                 type="tel"
-                placeholder="e.g. +91 98765 43210"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
               />

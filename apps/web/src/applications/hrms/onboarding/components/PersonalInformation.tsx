@@ -852,7 +852,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-first-name"
               type="text"
-              placeholder={configuredPlaceholder || 'e.g. Arun'}
+              placeholder={configuredPlaceholder}
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
             />
@@ -871,7 +871,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-middle-name"
               type="text"
-              placeholder={configuredPlaceholder || 'e.g. Kumar'}
+              placeholder={configuredPlaceholder}
               value={middleName}
               onChange={(e) => setMiddleName(e.target.value)}
             />
@@ -890,7 +890,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-last-name"
               type="text"
-              placeholder={configuredPlaceholder || 'e.g. Sharma'}
+              placeholder={configuredPlaceholder}
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
             />
@@ -909,7 +909,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-preferred-name"
               type="text"
-              placeholder={configuredPlaceholder || 'e.g. Arun'}
+              placeholder={configuredPlaceholder}
               value={preferredName}
               onChange={(e) => setPreferredName(e.target.value)}
             />
@@ -1197,7 +1197,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
               <Input
                 id="pers-mobile-phone"
                 type="tel"
-                placeholder={configuredPlaceholder || 'e.g. 98765 43210'}
+                placeholder={configuredPlaceholder}
                 value={mobilePhone}
                 onChange={(e) => setMobilePhone(e.target.value)}
               />
@@ -1218,7 +1218,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-email"
               type="email"
-              placeholder={configuredPlaceholder || 'e.g. employee@company.com'}
+              placeholder={configuredPlaceholder}
               value={email}
               onChange={handleEmailChange}
               error={emailError || undefined}
@@ -1320,7 +1320,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
               id="pers-pincode"
               type="text"
               maxLength={6}
-              placeholder={configuredPlaceholder || 'e.g. 600001'}
+              placeholder={configuredPlaceholder}
               value={pinCode}
               onChange={(e) => setPinCode(e.target.value)}
             />
@@ -1347,7 +1347,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
               <Input
                 id="pers-city"
                 type="text"
-                placeholder={configuredPlaceholder || 'e.g. Hosur, Chennai, Tambaram'}
+                placeholder={configuredPlaceholder}
                 value={city}
                 onChange={handleCityChange}
               />
@@ -1386,7 +1386,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-district"
               type="text"
-              placeholder={configuredPlaceholder || 'e.g. Krishnagiri, Chengalpattu'}
+              placeholder={configuredPlaceholder}
               value={district}
               onChange={(e) => setDistrict(e.target.value)}
             />
@@ -1405,7 +1405,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-state"
               type="text"
-              placeholder={configuredPlaceholder || 'e.g. Tamil Nadu'}
+              placeholder={configuredPlaceholder}
               value={state}
               onChange={(e) => setState(e.target.value)}
             />
@@ -1511,7 +1511,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
               id="pers-perm-pincode"
               type="text"
               maxLength={6}
-              placeholder={configuredPlaceholder || 'e.g. 600001'}
+              placeholder={configuredPlaceholder}
               value={permanentPinCode}
               onChange={(e) => setPermanentPinCode(e.target.value)}
             />
@@ -1531,7 +1531,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-perm-city"
               type="text"
-              placeholder={configuredPlaceholder || 'e.g. Chennai'}
+              placeholder={configuredPlaceholder}
               value={permanentCity}
               onChange={(e) => setPermanentCity(e.target.value)}
             />
@@ -1551,7 +1551,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-perm-district"
               type="text"
-              placeholder={configuredPlaceholder || 'e.g. Chennai'}
+              placeholder={configuredPlaceholder}
               value={permanentDistrict}
               onChange={(e) => setPermanentDistrict(e.target.value)}
             />
@@ -1571,7 +1571,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-perm-state"
               type="text"
-              placeholder={configuredPlaceholder || 'e.g. Tamil Nadu'}
+              placeholder={configuredPlaceholder}
               value={permanentState}
               onChange={(e) => setPermanentState(e.target.value)}
             />

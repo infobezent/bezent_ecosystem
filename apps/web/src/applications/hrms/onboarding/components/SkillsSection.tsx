@@ -406,7 +406,6 @@ export function SkillsSection({ value: _value, onChange: _onChange }: SkillsSect
                   type="number"
                   step="0.5"
                   min="0"
-                  placeholder="e.g. 1.5 Years"
                   value={yearsOfExperience}
                   onChange={(e) => setYearsOfExperience(e.target.value)}
                 />

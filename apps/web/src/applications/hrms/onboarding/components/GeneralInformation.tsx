@@ -640,7 +640,7 @@ export function GeneralInformation({
             <Input
               id="reg-referral-id"
               type="text"
-              placeholder={configuredPlaceholder || 'e.g. REF-EMP0001'}
+              placeholder={configuredPlaceholder}
               value={referralId}
               onChange={(e) => setReferralId(e.target.value)}
               error={referralError || undefined}
