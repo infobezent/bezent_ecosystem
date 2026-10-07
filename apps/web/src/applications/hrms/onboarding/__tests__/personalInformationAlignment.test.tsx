@@ -201,27 +201,16 @@ describe('Chapter 01 (Personal Information) Form Editor ↔ Runtime Alignment', 
     expect(html).toContain('Special dietary requirements');
   });
 
-  it('renders Profile Photo canonically and reflects disabled state', () => {
-    // 1. By default, Profile Photo is present
+  it('does not render Profile Photo uploader in Personal Details chapter', () => {
     const defaultHtml = renderPersonalWith(defaultRegistrationConfiguration);
-    expect(defaultHtml).toContain('bezent-photo-uploader');
-    expect(defaultHtml).toContain('Profile Photo');
-    expect(defaultHtml).toContain('Upload Photo');
-
-    // 2. When disabled by company configuration, Profile Photo disappears
-    const configNoPhoto = configurationWith({
-      'personal.profilePhoto': { enabled: false, required: false },
-    });
-    const noPhotoHtml = renderPersonalWith(configNoPhoto);
-    expect(noPhotoHtml).not.toContain('bezent-photo-uploader');
-    expect(noPhotoHtml).not.toContain('Upload Photo');
+    expect(defaultHtml).not.toContain('bezent-photo-uploader');
+    expect(defaultHtml).not.toContain('Upload Photo');
   });
 
-  it('displays Employee ID honestly in informational context without breaking canonical field count', () => {
+  it('does not render redundant Employee ID banner in Personal Details chapter', () => {
     const html = renderPersonalWith(defaultRegistrationConfiguration, { employeeId: 'EMP-9988' });
-    expect(html).toContain('EMP-9988');
-    expect(html).toContain('Employee ID:');
-    expect(html).toContain('System Assigned');
+    expect(html).not.toContain('Employee ID:');
+    expect(html).not.toContain('System Assigned');
   });
 
   it('existing registration state flows to Review and CreateEmployee payload accurately', () => {
@@ -254,26 +243,6 @@ describe('Chapter 01 (Personal Information) Form Editor ↔ Runtime Alignment', 
     expect(payload.details?.personal?.addressCity).toBe('Coimbatore');
   });
 
-  it('dynamically resolves Employee ID ownership from configuration section order without hardcoding', () => {
-    // Case 1: Default configuration (General is Chapter 01)
-    const defaultHtml = renderPersonalWith(defaultRegistrationConfiguration, {
-      employeeId: 'EMP-001',
-    });
-    expect(defaultHtml).toContain('(System Assigned • Chapter 01)');
-
-    // Case 2: Reordered configuration (Personal is Chapter 01, General is Chapter 02)
-    const reorderedSections = defaultRegistrationConfiguration.sections.map((sec) => {
-      if (sec.id === 'personal') return { ...sec, order: 1 };
-      if (sec.id === 'general') return { ...sec, order: 2 };
-      return sec;
-    });
-    const reorderedConfig: RegistrationConfiguration = {
-      ...defaultRegistrationConfiguration,
-      sections: reorderedSections,
-    };
-    const reorderedHtml = renderPersonalWith(reorderedConfig, { employeeId: 'EMP-001' });
-    expect(reorderedHtml).toContain('(System Assigned • Chapter 02)');
-  });
 
   it('honestly represents Profile Photo as a protected system control on FormCanvas', () => {
     const resolved = resolvedFormOf(defaultRegistrationConfiguration);

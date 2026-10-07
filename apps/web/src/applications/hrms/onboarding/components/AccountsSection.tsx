@@ -246,7 +246,6 @@ export function AccountsSection({ value: _value, onChange: _onChange }: Accounts
       {/* A. BANK DETAILS */}
       <FormSection
         title="Bank Details"
-        description="Bank account information and IFSC verification."
       >
         <FormGrid columns={2} layout="horizontal" labelWidth="md">
           {/* 1. IFSC Code */}
@@ -319,7 +318,6 @@ export function AccountsSection({ value: _value, onChange: _onChange }: Accounts
       {/* B. SALARY STRUCTURE & BREAKDOWN */}
       <FormSection
         title="Salary Structure & Breakdown"
-        description="Annual CTC, pay grade, and automated monthly salary component breakdown."
       >
         <Stack gap="md">
           <FormGrid columns={2} layout="horizontal" labelWidth="md">
@@ -466,7 +464,6 @@ export function AccountsSection({ value: _value, onChange: _onChange }: Accounts
       {/* C. PAYROLL SETUP & D. STATUTORY */}
       <FormSection
         title="Payroll Setup & Statutory Compliance"
-        description="Payroll disbursement frequency, tax regime, and statutory requirements."
       >
         <FormGrid columns={2} layout="horizontal" labelWidth="md">
           {/* 1. Payroll Group */}
@@ -557,7 +554,6 @@ export function AccountsSection({ value: _value, onChange: _onChange }: Accounts
       {/* E. BENEFITS */}
       <FormSection
         title="Employee Benefits Checklist"
-        description="Select applicable employee allowances, insurances, and corporate benefits."
       >
         <Stack gap="md">
           <Grid columns={3} gap="md">

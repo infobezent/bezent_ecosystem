@@ -242,10 +242,6 @@ export interface PersonalInformationProps {
 }
 
 export function PersonalInformation({ employeeId, data, onChange }: PersonalInformationProps) {
-  // 1. Profile Photo
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const photoInputRef = useRef<HTMLInputElement>(null);
-
   // 3-6. Name fields
   const [firstName, setFirstName] = useState(data?.firstName ?? '');
   const [middleName, setMiddleName] = useState(data?.middleName ?? '');
@@ -512,21 +508,6 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
 
   const cityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Photo Upload Handler
-  const handlePhotoChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Image size exceeds 5MB limit.');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = () => {
-        setPhotoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   // 1. Real Postal API Lookup by 6-digit PIN Code
   useEffect(() => {
@@ -790,25 +771,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
     );
   }, [personalFields, config.metadata]);
 
-  const isPhotoEnabled = useMemo(() => {
-    const photoField = config.field('personal.profilePhoto');
-    return photoField ? photoField.enabled !== false : true;
-  }, [config]);
 
-  const employeeIdOwnership = useMemo(() => {
-    const employeeIdField = config.field('general.employeeId');
-    const sectionId = employeeIdField?.section ?? 'general';
-    const sortedSections = [...config.sections]
-      .filter((s) => s.visible !== false)
-      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-    const sectionIndex = sortedSections.findIndex((s) => s.id === sectionId);
-    const chapterNumber = sectionIndex >= 0 ? String(sectionIndex + 1).padStart(2, '0') : null;
-
-    if (chapterNumber) {
-      return `System Assigned • Chapter ${chapterNumber}`;
-    }
-    return 'System Assigned';
-  }, [config]);
 
   const renderDynamicFieldInput = (field: RegistrationFieldConfig) => {
     const fType = field.type;
@@ -1663,87 +1626,30 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
 
   return (
     <Stack gap="xl">
-      {/* Informational Employee ID context header if passed */}
-      {employeeId && (
-        <Card padding="sm">
-          <Inline gap="sm" align="center">
-            <span className="bezent-card__title">Employee ID:</span>
-            <Badge variant="neutral">{employeeId}</Badge>
-            <span className="bezent-card__desc">({employeeIdOwnership})</span>
-          </Inline>
-        </Card>
-      )}
-
       {/* Dynamic Canonical Form Groups */}
       {groups.map((group) => {
         if (group.fields.length === 0) return null;
 
         return (
-          <FormSection key={group.key} title={group.title} description={group.description}>
-            <Stack gap="lg">
-              {group.key === 'personal_details' && isPhotoEnabled && (
-                <div className="bezent-photo-uploader">
-                  {photoPreview ? (
-                    <img
-                      src={photoPreview}
-                      alt="Profile Preview"
-                      className="bezent-photo-preview"
-                    />
-                  ) : (
-                    <div className="bezent-photo-placeholder">
-                      {firstName ? firstName[0]?.toUpperCase() : '👤'}
-                    </div>
+          <Card key={group.key} padding="lg">
+            <FormSection title={group.title}>
+              <Stack gap="lg">
+                <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                  {group.fields.map((field) =>
+                    renderField(field as unknown as RegistrationFieldConfig),
                   )}
-                  <Stack gap="xs">
-                    <Inline gap="xs" align="center">
-                      <span className="bezent-card__title">Profile Photo</span>
-                      <span className="bezent-card__desc">(Supports JPG, PNG under 5MB)</span>
-                    </Inline>
-                    <Inline gap="sm">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        type="button"
-                        onClick={() => photoInputRef.current?.click()}
-                      >
-                        Upload Photo
-                      </Button>
-                      {photoPreview && (
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          type="button"
-                          onClick={() => setPhotoPreview(null)}
-                        >
-                          Remove
-                        </Button>
-                      )}
-                      <input
-                        ref={photoInputRef}
-                        type="file"
-                        accept="image/jpeg,image/png"
-                        hidden
-                        onChange={handlePhotoChange}
-                      />
-                    </Inline>
-                  </Stack>
-                </div>
-              )}
-              <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                {group.fields.map((field) =>
-                  renderField(field as unknown as RegistrationFieldConfig),
-                )}
-              </FormGrid>
-            </Stack>
-          </FormSection>
+                </FormGrid>
+              </Stack>
+            </FormSection>
+          </Card>
         );
       })}
 
       {/* SECTION: FAMILY & NOMINATION (Dedicated repeatable collections) */}
-      <FormSection
-        title="Family & Nomination Details"
-        description="Family dependents and statutory nominee beneficiaries"
-      >
+      <Card padding="lg">
+        <FormSection
+          title="Family & Nomination Details"
+        >
         <Stack gap="xl">
           {/* Family Members (Repeatable) */}
           <Stack gap="md">
@@ -1935,6 +1841,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
           </Stack>
         </Stack>
       </FormSection>
-    </Stack>
+    </Card>
+  </Stack>
   );
 }

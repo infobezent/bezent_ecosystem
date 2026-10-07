@@ -64,7 +64,7 @@
 }
 
 .bezent-card__title {
-  font-size: var(--form-font-size-card-title, 16px);
+  font-size: var(--form-font-size-card-title, 13.5px);
   font-weight: 700;
   color: var(--text-primary, #000000);
   letter-spacing: -0.015em;
@@ -72,8 +72,8 @@
 }
 
 .bezent-card__desc {
-  font-size: 13.5px;
-  color: var(--text-secondary, #000000);
+  font-size: 12.5px;
+  color: var(--text-secondary, #5f6368);
   margin: 4px 0 0 0;
   line-height: 1.45;
 }

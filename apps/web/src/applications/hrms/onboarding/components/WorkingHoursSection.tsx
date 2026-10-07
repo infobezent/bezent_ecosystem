@@ -210,7 +210,6 @@ export function WorkingHoursSection({
       {/* A. WORK SCHEDULE */}
       <FormSection
         title="Work Schedule & Calendar"
-        description="Working calendar, shift presets, and scheduled work days."
       >
         <FormGrid columns={2} layout="horizontal" labelWidth="md">
           {/* 1. Working Time Calendar */}
@@ -279,7 +278,6 @@ export function WorkingHoursSection({
       {/* B. TIME CONFIGURATION */}
       <FormSection
         title="Time Configuration & Breaks"
-        description="Shift timing, break deductions, and automated net work hour calculation."
       >
         <FormGrid columns={2} layout="horizontal" labelWidth="md">
           {/* 1. Start Time */}
@@ -324,7 +322,6 @@ export function WorkingHoursSection({
       {/* C. CALENDAR & HOLIDAYS + D. EMPLOYEE ASSIGNMENT */}
       <FormSection
         title="Holidays & Employee Shift Linking"
-        description="Standard holidays, company closures, and employee timezone assignment."
       >
         <Grid columns={2} gap="lg">
           {/* C. CALENDAR & HOLIDAYS */}

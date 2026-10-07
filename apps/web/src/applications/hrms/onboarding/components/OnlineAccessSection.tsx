@@ -203,7 +203,6 @@ export function OnlineAccessSection({
       {/* A. ACCOUNT INFORMATION */}
       <FormSection
         title="User Account & Credentials"
-        description="Single sign-on username, corporate email, and invitation onboarding."
       >
         <FormGrid columns={2} layout="horizontal" labelWidth="md">
           {/* 1. Employee Username */}
@@ -246,7 +245,6 @@ export function OnlineAccessSection({
       {/* B. SECURITY */}
       <FormSection
         title="Security & Authentication"
-        description="Two-factor authentication requirements and password policies."
       >
         <Stack gap="md">
           <FormGrid columns={2} layout="horizontal" labelWidth="md">
@@ -289,7 +287,6 @@ export function OnlineAccessSection({
       {/* C. ROLE & ACCESS */}
       <FormSection
         title="Role & Scope Assignment"
-        description="Portal access role and operational data scope."
       >
         <FormGrid columns={2} layout="horizontal" labelWidth="md">
           {/* 1. Employee Role */}
@@ -325,7 +322,6 @@ export function OnlineAccessSection({
       {/* D. MODULE ACCESS */}
       <FormSection
         title="Module Access Permissions"
-        description="Module permissions auto-configured based on selected role. Toggle individual items to customize access."
       >
         <Grid columns={3} gap="md">
           {modules.map((m) => (

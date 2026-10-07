@@ -122,7 +122,6 @@ export function EmergencyContactSection({
       {/* 1. PRIMARY CONTACT AREA */}
       <FormSection
         title="Primary Emergency Contact"
-        description="Primary emergency contact and private record preferences."
       >
         <FormGrid columns={2} layout="horizontal" labelWidth="md">
           {/* 1. Contact Name */}
@@ -209,7 +208,6 @@ export function EmergencyContactSection({
       {/* 2. SECONDARY CONTACT AREA */}
       <FormSection
         title="Secondary Emergency Contact"
-        description="Secondary alternate contact details for emergencies."
       >
         <FormGrid columns={2} layout="horizontal" labelWidth="md">
           {/* 1. Secondary Contact Name */}

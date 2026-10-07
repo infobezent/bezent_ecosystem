@@ -26,18 +26,19 @@
 
 .bezent-form-section__title {
   margin: 0;
-  font-size: var(--form-font-size-title, 14px);
+  font-size: var(--form-font-size-title, 13px);
   font-weight: 700;
   color: var(--text-primary, #000000);
-  letter-spacing: -0.01em;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   line-height: 1.35;
 }
 
 .bezent-form-section__desc {
   margin: 2px 0 0 0;
-  font-size: var(--form-font-size-subtitle, 14px);
+  font-size: var(--form-font-size-subtitle, 13px);
   font-weight: 400;
-  color: var(--text-secondary, #000000);
+  color: var(--text-secondary, #5f6368);
   line-height: 1.45;
 }
 

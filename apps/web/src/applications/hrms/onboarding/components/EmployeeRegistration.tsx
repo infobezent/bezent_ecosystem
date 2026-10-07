@@ -1012,21 +1012,6 @@ export function EmployeeRegistration({
 
   if (isOpen === false) return null;
 
-  const currentChapterIndex = allSections.findIndex((s) => s.id === activeSection);
-  const chapterMatch = REGISTRATION_CHAPTERS.find((c) => c.id === activeSection);
-  const activeSectionMeta = allSections.find((s) => s.id === activeSection);
-  const currentChapter: RegistrationChapterMeta = {
-    id: activeSection,
-    stepNumber: String(currentChapterIndex >= 0 ? currentChapterIndex + 1 : 1).padStart(2, '0'),
-    label: activeSectionMeta?.label || chapterMatch?.label || 'Custom Section',
-    title: (activeSectionMeta?.label || chapterMatch?.title || 'CUSTOM SECTION').toUpperCase(),
-    description:
-      activeSectionMeta?.description ??
-      chapterMatch?.description ??
-      'Configured custom fields and section details.',
-    kicker: `CHAPTER // ${String(currentChapterIndex >= 0 ? currentChapterIndex + 1 : 1).padStart(2, '0')}`,
-  };
-
   const chapterSteps = allSections.map((s, idx) => {
     const meta = REGISTRATION_CHAPTERS.find((c) => c.id === s.id);
     return {
@@ -1085,14 +1070,6 @@ export function EmployeeRegistration({
 
           {/* Animated Chapter Page Container */}
           <div key={activeSection} className="bezent-chapter-page-transition">
-            {/* Integrated Chapter Section Header (Number integrated into heading) */}
-            <div className="bezent-chapter-header">
-              <h1 className="bezent-chapter-header__title">{currentChapter.title}</h1>
-              {currentChapter.description && (
-                <p className="bezent-chapter-header__desc">{currentChapter.description}</p>
-              )}
-            </div>
-
             {activeSection === 'general' ? (
               <GeneralInformation
                 employeeId={employeeId}

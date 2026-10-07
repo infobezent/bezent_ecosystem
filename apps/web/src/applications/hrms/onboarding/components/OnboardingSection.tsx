@@ -156,7 +156,6 @@ export function OnboardingSection({
       {/* SECTION 1: ONBOARDING TASKS */}
       <FormSection
         title="Onboarding Tasks"
-        description="Individual onboarding tasks that need to be completed."
       >
         <Stack gap="md">
           {tasks.map((task, idx) => {
@@ -287,7 +286,6 @@ export function OnboardingSection({
       {/* SECTION 2: ASSETS */}
       <FormSection
         title="Assigned Assets"
-        description="Assets assigned to the employee during onboarding."
       >
         <Stack gap="md">
           {assets.map((asset, idx) => (

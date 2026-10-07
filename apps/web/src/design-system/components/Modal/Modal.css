@@ -167,7 +167,7 @@
 .bezent-modal__header--brand {
   padding: 0;
   background: #c2e7ff;
-  border-bottom: 1px solid var(--border-subtle, #e7ebf0);
+  border-bottom: none;
 }
 
 .bezent-modal--workspace .bezent-modal__header-main,
@@ -302,6 +302,11 @@
   overflow-y: auto;
   flex: 1;
   background: var(--bg-surface, #ffffff);
+}
+
+.bezent-modal--workspace .bezent-modal__body,
+.employee-registration-workspace-content {
+  background: var(--app-canvas, #f6f8fc);
 }
 
 /* ── Footer ── */
