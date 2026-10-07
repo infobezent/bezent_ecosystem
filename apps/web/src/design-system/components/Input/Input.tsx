@@ -1,4 +1,4 @@
-import { forwardRef, type InputHTMLAttributes, type ReactNode } from 'react';
+import { forwardRef, useState, type InputHTMLAttributes, type ReactNode } from 'react';
 import './Input.css';
 
 export type InputSize = 'sm' | 'md' | 'lg';
@@ -27,7 +27,20 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   const inputId =
     id || (label ? `bezent-input-${label.toLowerCase().replace(/\s+/g, '-')}` : undefined);
 
-  const isEmpty = rest.value === '' || (rest.value === undefined && !rest.defaultValue);
+  const [internalHasValue, setInternalHasValue] = useState<boolean>(() => {
+    return Boolean(rest.value || rest.defaultValue);
+  });
+
+  const isControlled = rest.value !== undefined;
+  const hasValue = isControlled ? Boolean(rest.value) : internalHasValue;
+  const isEmpty = !hasValue;
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isControlled) {
+      setInternalHasValue(Boolean(e.target.value));
+    }
+    rest.onChange?.(e);
+  };
 
   return (
     <div
@@ -56,6 +69,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           }
           className={`bezent-input-field ${isEmpty ? 'bezent-input-field--empty' : ''}`.trim()}
           {...rest}
+          onChange={handleChange}
         />
 
         {rightIcon && (
