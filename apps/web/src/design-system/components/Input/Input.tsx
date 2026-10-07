@@ -30,16 +30,37 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   const [internalHasValue, setInternalHasValue] = useState<boolean>(() => {
     return Boolean(rest.value || rest.defaultValue);
   });
+  const [isFocused, setIsFocused] = useState<boolean>(false);
 
   const isControlled = rest.value !== undefined;
   const hasValue = isControlled ? Boolean(rest.value) : internalHasValue;
-  const isEmpty = !hasValue;
+  const isEmpty = !hasValue && !isFocused;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!isControlled) {
       setInternalHasValue(Boolean(e.target.value));
     }
     rest.onChange?.(e);
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    setIsFocused(true);
+    rest.onFocus?.(e);
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    setIsFocused(false);
+    if (!isControlled) {
+      setInternalHasValue(Boolean(e.target.value));
+    }
+    rest.onBlur?.(e);
+  };
+
+  const handleInput = (e: React.FormEvent<HTMLInputElement>) => {
+    if (!isControlled) {
+      setInternalHasValue(Boolean((e.target as HTMLInputElement).value));
+    }
+    rest.onInput?.(e);
   };
 
   return (
@@ -70,6 +91,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           className={`bezent-input-field ${isEmpty ? 'bezent-input-field--empty' : ''}`.trim()}
           {...rest}
           onChange={handleChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          onInput={handleInput}
         />
 
         {rightIcon && (
