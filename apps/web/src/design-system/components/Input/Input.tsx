@@ -27,6 +27,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   const inputId =
     id || (label ? `bezent-input-${label.toLowerCase().replace(/\s+/g, '-')}` : undefined);
 
+  const isEmpty = rest.value === '' || (rest.value === undefined && !rest.defaultValue);
+
   return (
     <div
       className={`bezent-input-wrapper bezent-input-wrapper--${size} ${error ? 'has-error' : ''} ${disabled ? 'is-disabled' : ''} ${className || ''}`.trim()}
@@ -52,7 +54,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           aria-describedby={
             error ? `${inputId}-error` : helperText ? `${inputId}-helper` : undefined
           }
-          className="bezent-input-field"
+          className={`bezent-input-field ${isEmpty ? 'bezent-input-field--empty' : ''}`.trim()}
           {...rest}
         />
 
