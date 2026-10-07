@@ -21,9 +21,20 @@ import {
   EmptyState,
   Modal,
   Toolbar,
+  Avatar,
 } from '../../../design-system/components';
 import { BezentIcon } from '../../../design-system/icons';
 import { superAdminApi, type TenantRecord } from '../api/superAdminApi';
+
+function getInitials(name: string): string {
+  if (!name) return 'BZ';
+  const clean = name.trim();
+  const words = clean.split(/\s+/);
+  if (words.length >= 2 && words[0] && words[1]) {
+    return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+  }
+  return clean.slice(0, 2).toUpperCase();
+}
 
 export function TenantsPage({
   initialTenants,
@@ -160,7 +171,9 @@ export function TenantsPage({
     return (
       <Stack gap="xs">
         <Inline gap="xs" align="center">
-          <Badge variant={variant}>{label}</Badge>
+          <Badge variant={variant} showDot>
+            {label}
+          </Badge>
         </Inline>
         {reasons.length > 0 && health.status !== 'healthy' && (
           <span className="bezent-caption" title={reasons.join(', ')}>
@@ -193,7 +206,7 @@ export function TenantsPage({
         </Alert>
       )}
 
-      <Card>
+      <Card padding="md">
         <Stack gap="md">
           {/* Filter Toolbar */}
           <Toolbar
@@ -261,7 +274,7 @@ export function TenantsPage({
           )}
 
           {!loading && tenants.length > 0 && (
-            <Table>
+            <Table compact hoverable>
               <TableHead>
                 <TableRow>
                   <TableHeaderCell>Customer / Tenant</TableHeaderCell>
@@ -279,23 +292,24 @@ export function TenantsPage({
                   return (
                     <TableRow key={tenant.id}>
                       <TableCell>
-                        <Stack gap="xs">
-                          <strong>{tenant.name}</strong>
-                          <Inline gap="xs" align="center">
-                            <code>{tenant.code}</code>
-                            <span className="bezent-caption">•</span>
-                            <span className="bezent-caption">
-                              {tenant.contactEmail || 'No email'}
-                            </span>
-                          </Inline>
-                        </Stack>
+                        <Inline gap="sm" align="center">
+                          <Avatar initials={getInitials(tenant.name)} size="sm" shape="square" />
+                          <Stack gap="none">
+                            <strong>{tenant.name}</strong>
+                            <Inline gap="xs" align="center">
+                              <code>{tenant.code}</code>
+                              <span className="bezent-caption">•</span>
+                              <span className="bezent-caption">
+                                {tenant.contactEmail || 'No email'}
+                              </span>
+                            </Inline>
+                          </Stack>
+                        </Inline>
                       </TableCell>
                       <TableCell>
-                        <Stack gap="xs">
-                          <span>
-                            {companiesCount} {companiesCount === 1 ? 'company' : 'companies'}
-                          </span>
-                        </Stack>
+                        <span className="tabular-nums">
+                          {companiesCount} {companiesCount === 1 ? 'company' : 'companies'}
+                        </span>
                       </TableCell>
                       <TableCell>
                         {apps.length === 0 ? (
@@ -312,10 +326,12 @@ export function TenantsPage({
                       </TableCell>
                       <TableCell>{renderHealthBadge(tenant)}</TableCell>
                       <TableCell>
-                        <Badge status={tenant.status}>{tenant.status}</Badge>
+                        <Badge variant={tenant.status === 'active' ? 'success' : 'danger'} showDot>
+                          {tenant.status === 'active' ? 'Active' : 'Suspended'}
+                        </Badge>
                       </TableCell>
                       <TableCell>
-                        <Inline gap="sm">
+                        <Inline gap="xs" align="center">
                           <Button
                             variant="ghost"
                             size="sm"

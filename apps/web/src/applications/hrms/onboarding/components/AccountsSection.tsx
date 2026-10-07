@@ -244,10 +244,7 @@ export function AccountsSection({ value: _value, onChange: _onChange }: Accounts
   return (
     <Stack gap="xl">
       {/* A. BANK DETAILS */}
-      <FormSection
-        title="Bank Details"
-        description="Bank account information and IFSC verification."
-      >
+      <FormSection title="Bank Details">
         <FormGrid columns={2} layout="horizontal" labelWidth="md">
           {/* 1. IFSC Code */}
           <FormField label="IFSC Code" required helperText={ifscStatusMsg}>
@@ -317,10 +314,7 @@ export function AccountsSection({ value: _value, onChange: _onChange }: Accounts
       </FormSection>
 
       {/* B. SALARY STRUCTURE & BREAKDOWN */}
-      <FormSection
-        title="Salary Structure & Breakdown"
-        description="Annual CTC, pay grade, and automated monthly salary component breakdown."
-      >
+      <FormSection title="Salary Structure & Breakdown">
         <Stack gap="md">
           <FormGrid columns={2} layout="horizontal" labelWidth="md">
             {/* 1. Salary Structure */}
@@ -464,10 +458,7 @@ export function AccountsSection({ value: _value, onChange: _onChange }: Accounts
       </FormSection>
 
       {/* C. PAYROLL SETUP & D. STATUTORY */}
-      <FormSection
-        title="Payroll Setup & Statutory Compliance"
-        description="Payroll disbursement frequency, tax regime, and statutory requirements."
-      >
+      <FormSection title="Payroll Setup & Statutory Compliance">
         <FormGrid columns={2} layout="horizontal" labelWidth="md">
           {/* 1. Payroll Group */}
           <FormField label="Payroll Group">
@@ -555,10 +546,7 @@ export function AccountsSection({ value: _value, onChange: _onChange }: Accounts
       </FormSection>
 
       {/* E. BENEFITS */}
-      <FormSection
-        title="Employee Benefits Checklist"
-        description="Select applicable employee allowances, insurances, and corporate benefits."
-      >
+      <FormSection title="Employee Benefits Checklist">
         <Stack gap="md">
           <Grid columns={3} gap="md">
             {BENEFIT_ITEMS.map((b) => {

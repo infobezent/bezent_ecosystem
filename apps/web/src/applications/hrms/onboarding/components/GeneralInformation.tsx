@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import {
+  Card,
   FormSection,
   FormGrid,
   Input,
@@ -146,16 +147,6 @@ export function GeneralInformation({
       setReferralLoading(false);
     }
   }, [referralId, sourceOfHire]);
-
-  const calculatedProbationEndDate = useMemo(() => {
-    if (!joiningDate || probationPeriod === 'no_probation') return null;
-    const d = new Date(joiningDate);
-    if (isNaN(d.getTime())) return null;
-    if (probationPeriod === '3_months') d.setMonth(d.getMonth() + 3);
-    else if (probationPeriod === '6_months') d.setMonth(d.getMonth() + 6);
-    else if (probationPeriod === '12_months') d.setFullYear(d.getFullYear() + 1);
-    return d.toISOString().slice(0, 10);
-  }, [joiningDate, probationPeriod]);
 
   // Sync state back to centralized store
   const isFirstRender = useRef(true);
@@ -360,7 +351,6 @@ export function GeneralInformation({
             value={employmentStatus}
             htmlFor="reg-employment-status"
             span={span}
-            helperText={field.description ?? 'System-controlled: Pending Activation'}
           >
             <Input
               id="reg-employment-status"
@@ -565,10 +555,6 @@ export function GeneralInformation({
             value={confirmedJoiningDate}
             htmlFor="reg-confirmed-joining-date"
             span={span}
-            helperText={
-              field.description ??
-              'Agreed candidate joining date (distinct from probation confirmation)'
-            }
           >
             <Input
               id="reg-confirmed-joining-date"
@@ -591,7 +577,6 @@ export function GeneralInformation({
             value={endDate}
             htmlFor="reg-end-date"
             span={span}
-            helperText={field.description ?? 'Contract or internship termination date'}
           >
             <Input
               id="reg-end-date"
@@ -671,13 +656,6 @@ export function GeneralInformation({
             value={probationPeriod}
             htmlFor="reg-probation-period"
             span={span}
-            helperText={
-              calculatedProbationEndDate
-                ? `Probation ends on: ${calculatedProbationEndDate}`
-                : probationPeriod === 'no_probation'
-                  ? 'No probation period applicable'
-                  : (field.description ?? undefined)
-            }
           >
             <Select
               id="reg-probation-period"
@@ -747,13 +725,15 @@ export function GeneralInformation({
         if (group.fields.length === 0) return null;
 
         return (
-          <FormSection key={group.key} title={group.title} description={group.description}>
-            <FormGrid columns={2} layout="horizontal" labelWidth="md">
-              {group.fields.map((field) =>
-                renderField(field as unknown as RegistrationFieldConfig),
-              )}
-            </FormGrid>
-          </FormSection>
+          <Card key={group.key} padding="lg">
+            <FormSection title={group.title}>
+              <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                {group.fields.map((field) =>
+                  renderField(field as unknown as RegistrationFieldConfig),
+                )}
+              </FormGrid>
+            </FormSection>
+          </Card>
         );
       })}
     </Stack>

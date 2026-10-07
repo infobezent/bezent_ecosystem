@@ -7,8 +7,8 @@
 .bezent-focus-carousel {
   position: relative;
   width: 100%;
-  background: var(--bg-surface-secondary, #f0f4f9);
-  border-top: 1px solid var(--border-subtle, #e7ebf0);
+  background: #d0d8e2;
+  border-top: none;
   border-bottom: none;
   padding: 2px 0 0;
   user-select: none;
@@ -171,8 +171,8 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
-  background: #f0f4f9;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   color: #000000;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
   transition:
@@ -231,7 +231,7 @@
 
 /* ── 1. ACTIVE BROWSER TAB (Physically Attached to Page Content) ── */
 .bezent-focus-card.is-focus-active {
-  background: var(--bg-surface, #ffffff);
+  background: var(--app-canvas, #f6f8fc);
   border: none;
   border-radius: 10px 10px 0 0;
   padding: 8px 8px 7px;
@@ -249,7 +249,7 @@
   left: -10px;
   width: 10px;
   height: 10px;
-  background: radial-gradient(circle at 0 0, transparent 10px, var(--bg-surface, #ffffff) 10.5px);
+  background: radial-gradient(circle at 0 0, transparent 10px, var(--app-canvas, #f6f8fc) 10.5px);
   pointer-events: none;
   z-index: 20;
 }
@@ -265,7 +265,7 @@
   background: radial-gradient(
     circle at 100% 0,
     transparent 10px,
-    var(--bg-surface, #ffffff) 10.5px
+    var(--app-canvas, #f6f8fc) 10.5px
   );
   pointer-events: none;
   z-index: 20;

@@ -70,18 +70,19 @@
   /* Typography — Strict Semantic Tokens */
   --text-brand: #000000;
   --text-primary: #000000;
-  --text-body: #000000;
-  --text-secondary: #000000;
-  --text-tertiary: #000000;
-  --text-muted: #000000;
-  --text-disabled: #000000;
+  --text-body: #1f1f1f;
+  --text-secondary: #5f6368;
+  --text-tertiary: #5f6368;
+  --text-muted: #747775;
+  --text-disabled: #8e918f;
   --text-inverse: #ffffff;
 
   /* Borders */
   --border-default: #dde3ea;
   --border-subtle: #e7ebf0;
   --border-divider: #dde3ea;
-  --border-focus: #1a73e8;
+  --border-focus: #7cc4fa;
+  --focus-ring: #7cc4fa;
   --table-border: #dde3ea;
   --table-head-divider: #dde3ea;
   --table-row-divider: #e7ebf0;

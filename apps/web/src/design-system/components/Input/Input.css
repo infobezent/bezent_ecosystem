@@ -32,12 +32,12 @@
 }
 
 .bezent-input-box:hover:not(.is-disabled) {
-  border-color: var(--border-focus, #1a73e8);
+  border-color: var(--border-focus, #7cc4fa);
 }
 
 .bezent-input-box:focus-within {
-  border-color: var(--border-focus, #1a73e8);
-  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.14);
+  border-color: var(--border-focus, #7cc4fa);
+  box-shadow: none;
 }
 
 /* ── Sizes ── */
@@ -57,7 +57,7 @@
 }
 
 .bezent-input-wrapper--md .bezent-input-field {
-  font-size: var(--form-font-size-input, 17px);
+  font-size: var(--form-font-size-input, 13.5px);
   padding: 0 14px;
 }
 
@@ -382,7 +382,7 @@
   border-radius: var(--radius-sm, 6px);
   color: var(--text-primary, #000000);
   font: inherit;
-  font-size: var(--form-font-size-input, 17px);
+  font-size: var(--form-font-size-input, 13.5px);
   font-weight: 400;
   box-sizing: border-box;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
@@ -394,8 +394,8 @@
 .bezent-input:focus,
 .bezent-select:focus {
   outline: none;
-  border-color: var(--border-focus, #1a73e8);
-  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.14);
+  border-color: var(--border-focus, #7cc4fa);
+  box-shadow: none;
 }
 
 .bezent-input:disabled,
@@ -414,7 +414,7 @@
   border-radius: var(--radius-sm, 6px);
   color: var(--text-primary, #000000);
   font: inherit;
-  font-size: var(--form-font-size-input, 17px);
+  font-size: var(--form-font-size-input, 13.5px);
   font-weight: 400;
   box-sizing: border-box;
   resize: vertical;
@@ -426,6 +426,6 @@
 
 .bezent-textarea:focus {
   outline: none;
-  border-color: var(--border-focus, #1a73e8);
-  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.14);
+  border-color: var(--border-focus, #7cc4fa);
+  box-shadow: none;
 }

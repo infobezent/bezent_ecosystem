@@ -201,10 +201,7 @@ export function OnlineAccessSection({
   return (
     <Stack gap="xl">
       {/* A. ACCOUNT INFORMATION */}
-      <FormSection
-        title="User Account & Credentials"
-        description="Single sign-on username, corporate email, and invitation onboarding."
-      >
+      <FormSection title="User Account & Credentials">
         <FormGrid columns={2} layout="horizontal" labelWidth="md">
           {/* 1. Employee Username */}
           <FormField label="Username" required>
@@ -244,10 +241,7 @@ export function OnlineAccessSection({
       </FormSection>
 
       {/* B. SECURITY */}
-      <FormSection
-        title="Security & Authentication"
-        description="Two-factor authentication requirements and password policies."
-      >
+      <FormSection title="Security & Authentication">
         <Stack gap="md">
           <FormGrid columns={2} layout="horizontal" labelWidth="md">
             <FormField label="MFA Policy">
@@ -287,10 +281,7 @@ export function OnlineAccessSection({
       </FormSection>
 
       {/* C. ROLE & ACCESS */}
-      <FormSection
-        title="Role & Scope Assignment"
-        description="Portal access role and operational data scope."
-      >
+      <FormSection title="Role & Scope Assignment">
         <FormGrid columns={2} layout="horizontal" labelWidth="md">
           {/* 1. Employee Role */}
           <FormField label="Employee Role" required>
@@ -323,10 +314,7 @@ export function OnlineAccessSection({
       </FormSection>
 
       {/* D. MODULE ACCESS */}
-      <FormSection
-        title="Module Access Permissions"
-        description="Module permissions auto-configured based on selected role. Toggle individual items to customize access."
-      >
+      <FormSection title="Module Access Permissions">
         <Grid columns={3} gap="md">
           {modules.map((m) => (
             <Card key={m.id} variant="flat">

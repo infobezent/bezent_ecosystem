@@ -120,10 +120,7 @@ export function EmergencyContactSection({
   return (
     <Stack gap="xl">
       {/* 1. PRIMARY CONTACT AREA */}
-      <FormSection
-        title="Primary Emergency Contact"
-        description="Primary emergency contact and private record preferences."
-      >
+      <FormSection title="Primary Emergency Contact">
         <FormGrid columns={2} layout="horizontal" labelWidth="md">
           {/* 1. Contact Name */}
           <FormField label="Contact Name" required>
@@ -207,10 +204,7 @@ export function EmergencyContactSection({
       </FormSection>
 
       {/* 2. SECONDARY CONTACT AREA */}
-      <FormSection
-        title="Secondary Emergency Contact"
-        description="Secondary alternate contact details for emergencies."
-      >
+      <FormSection title="Secondary Emergency Contact">
         <FormGrid columns={2} layout="horizontal" labelWidth="md">
           {/* 1. Secondary Contact Name */}
           <FormField label="Secondary Contact Name">
