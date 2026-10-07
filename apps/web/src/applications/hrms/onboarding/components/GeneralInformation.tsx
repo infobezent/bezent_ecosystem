@@ -267,7 +267,7 @@ export function GeneralInformation({
           <Input
             id={`field-${fKey}`}
             type="number"
-            placeholder={(field.config?.placeholder as string) || `Enter ${field.label}`}
+            placeholder={(field.config?.placeholder as string) || undefined}
             value={val}
             onChange={(e) => setVal(e.target.value)}
           />
@@ -277,7 +277,7 @@ export function GeneralInformation({
           <Input
             id={`field-${fKey}`}
             type={fType === 'email' ? 'email' : fType === 'phone' ? 'tel' : 'text'}
-            placeholder={(field.config?.placeholder as string) || `Enter ${field.label}`}
+            placeholder={(field.config?.placeholder as string) || undefined}
             value={val}
             onChange={(e) => setVal(e.target.value)}
           />

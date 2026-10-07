@@ -815,7 +815,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
           <Input
             id={`field-${fKey}`}
             type="number"
-            placeholder={(field.config?.placeholder as string) || `Enter ${field.label}`}
+            placeholder={(field.config?.placeholder as string) || undefined}
             value={val}
             onChange={(e) => setVal(e.target.value)}
           />
@@ -825,7 +825,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
           <Input
             id={`field-${fKey}`}
             type={fType === 'email' ? 'email' : fType === 'phone' ? 'tel' : 'text'}
-            placeholder={(field.config?.placeholder as string) || `Enter ${field.label}`}
+            placeholder={(field.config?.placeholder as string) || undefined}
             value={val}
             onChange={(e) => setVal(e.target.value)}
           />
@@ -1274,7 +1274,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-street"
               type="text"
-              placeholder={configuredPlaceholder || 'Building, Flat No., Street, Area'}
+              placeholder={configuredPlaceholder}
               value={street}
               onChange={(e) => setStreet(e.target.value)}
             />
@@ -1293,7 +1293,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-address-line-2"
               type="text"
-              placeholder={configuredPlaceholder || 'Apartment, suite, unit, etc. (optional)'}
+              placeholder={configuredPlaceholder}
               value={addressLine2}
               onChange={(e) => setAddressLine2(e.target.value)}
             />
@@ -1463,7 +1463,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-perm-street"
               type="text"
-              placeholder={configuredPlaceholder || 'Building, Flat No., Street, Area'}
+              placeholder={configuredPlaceholder}
               value={permanentStreet}
               onChange={(e) => setPermanentStreet(e.target.value)}
             />
@@ -1483,7 +1483,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-perm-address-line-2"
               type="text"
-              placeholder={configuredPlaceholder || 'Apartment, suite, unit, etc. (optional)'}
+              placeholder={configuredPlaceholder}
               value={permanentAddressLine2}
               onChange={(e) => setPermanentAddressLine2(e.target.value)}
             />
