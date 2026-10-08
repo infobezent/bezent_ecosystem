@@ -10,7 +10,6 @@ import {
   Switch,
   Card,
   Stack,
-  Inline,
 } from '../../../../design-system';
 
 const RELATIONSHIP_OPTIONS = [

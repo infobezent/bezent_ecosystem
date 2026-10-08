@@ -9,7 +9,7 @@
 :root {
   --form-font-size-title: 13px;
   --form-font-size-subtitle: 13px;
-  --form-font-size-card-title: 13.5px;
+  --form-font-size-card-title: 16px;
   --form-font-size-section-label: 13px;
   --form-font-size-label: 13.5px;
   --form-font-size-input: 13.5px;
@@ -384,34 +384,65 @@
   width: 100%;
 }
 
-.review-section .bezent-label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-secondary, #5f6368);
+.review-section .bezent-card__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary, #000000);
+  letter-spacing: -0.015em;
+}
+
+.review-section .bezent-label,
+.review-section .bezent-label--sm {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary, #000000);
   letter-spacing: normal;
 }
 
-.review-section .bezent-label--sm {
-  font-size: 12.5px;
-  font-weight: 500;
-  color: var(--text-secondary, #5f6368);
+.review-section .bezent-label--md {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-primary, #000000);
 }
 
-.review-section .bezent-label--md {
+.review-section strong {
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--text-secondary, #5f6368);
+  line-height: 1.4;
+}
+
+.review-section .bezent-alert strong {
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-primary, #041e49);
+  color: inherit;
+}
+
+.review-section .bezent-card__desc strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary, #000000);
 }
 
 .review-section span {
   font-weight: 400;
 }
 
-[data-theme='dark'] .review-section .bezent-label {
+[data-theme='dark'] .review-section .bezent-card__title {
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme='dark'] .review-section .bezent-label,
+[data-theme='dark'] .review-section .bezent-label--sm,
+[data-theme='dark'] .review-section .bezent-label--md {
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme='dark'] .review-section strong {
   color: var(--text-secondary, #94a3b8);
 }
 
-[data-theme='dark'] .review-section .bezent-label--md {
+[data-theme='dark'] .review-section .bezent-card__desc strong {
   color: var(--text-primary, #f8fafc);
 }
 

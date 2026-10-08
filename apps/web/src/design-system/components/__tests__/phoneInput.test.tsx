@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { PhoneInput, DEFAULT_COUNTRY_CODE_OPTIONS } from '../PhoneInput';
+import { PhoneInput } from '../PhoneInput';
 import * as RootDesignSystem from '../../index';
 
 describe('Design System PhoneInput Component', () => {
