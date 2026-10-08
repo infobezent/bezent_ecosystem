@@ -12,6 +12,7 @@ import {
   Alert,
   Button,
   FormField,
+  type FormFieldProps,
   LoadingState,
   Stack,
 } from '../../../../design-system/components';
@@ -170,10 +171,13 @@ export interface RegistrationFieldProps {
   value: unknown;
   htmlFor?: string;
   span?: 1 | 2 | 'full';
+  orientation?: FormFieldProps['orientation'];
   disabled?: boolean;
   helperText?: string;
   /** Field-specific error (e.g. format); the required error takes precedence. */
   error?: string;
+  /** When true, omits the outer FormField label (e.g. for full-width Checkbox controls with their own inline label). */
+  hideLabel?: boolean;
   children: ReactNode;
 }
 
@@ -186,9 +190,11 @@ export function RegistrationField({
   value,
   htmlFor,
   span,
+  orientation,
   disabled,
   helperText,
   error,
+  hideLabel,
   children,
 }: RegistrationFieldProps) {
   const config = useRegistrationConfig();
@@ -215,10 +221,11 @@ export function RegistrationField({
 
   return (
     <FormField
-      label={field.label}
+      label={hideLabel ? undefined : field.label}
       htmlFor={htmlFor}
       required={field.required}
       disabled={disabled}
+      orientation={orientation ?? (hideLabel ? 'vertical' : undefined)}
       span={span ?? (field.width === 'full' ? 'full' : undefined)}
       helperText={helperText ?? field.description ?? undefined}
       error={config.hasError(fieldKey) ? `${field.label} is required` : error}

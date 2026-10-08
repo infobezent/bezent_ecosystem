@@ -262,8 +262,9 @@ export function EmployeeRegistration({
   const [searchParams, setSearchParams] = useSearchParams();
   const contentContainerRef = useRef<HTMLDivElement | null>(null);
 
+  // Single authoritative source of truth for active chapter is the URL searchParam ?chapter= (or legacy ?section=)
   const urlChapter = searchParams.get('chapter') || searchParams.get('section');
-  const initialSection = (
+  const activeSection = (
     urlChapter && allSections.some((s) => s.id === urlChapter)
       ? urlChapter
       : initialDraft?.activeSection && allSections.some((s) => s.id === initialDraft.activeSection)
@@ -271,22 +272,12 @@ export function EmployeeRegistration({
         : allSections[0]?.id || 'personal'
   ) as RegistrationSectionId;
 
-  const [activeSection, setActiveSection] = useState<RegistrationSectionId>(initialSection);
-
-  // Sync when searchParams change externally or via browser back/forward
+  // Scroll content to top whenever activeSection changes
   useEffect(() => {
-    const currentParam = searchParams.get('chapter') || searchParams.get('section');
-    if (
-      currentParam &&
-      allSections.some((s) => s.id === currentParam) &&
-      currentParam !== activeSection
-    ) {
-      setActiveSection(currentParam as RegistrationSectionId);
-      if (contentContainerRef.current) {
-        contentContainerRef.current.scrollTop = 0;
-      }
+    if (contentContainerRef.current) {
+      contentContainerRef.current.scrollTop = 0;
     }
-  }, [searchParams, allSections, activeSection]);
+  }, [activeSection]);
 
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, unknown>>({});
 
@@ -740,10 +731,9 @@ export function EmployeeRegistration({
     }
   }, []);
 
-  // Single reliable navigation method that updates both state & searchParams
+  // Single reliable navigation method that updates searchParams atomically
   const navigateToSection = useCallback(
     (id: string) => {
-      setActiveSection(id as RegistrationSectionId);
       if (!savedStepDataRef.current[id]) {
         savedStepDataRef.current[id] = getSectionSnapshot(id);
       }
@@ -948,7 +938,7 @@ export function EmployeeRegistration({
 
   const handleContinueDraft = (draft: EmployeeRegistrationDraft) => {
     setCurrentDraftId(draft.id);
-    setActiveSection(draft.activeSection);
+    navigateToSection(draft.activeSection);
 
     if (draft.formData) {
       setFormData(draft.formData);

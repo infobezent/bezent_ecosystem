@@ -13,6 +13,7 @@ export * from './Toolbar';
 export * from './Label';
 export * from './FormField';
 export * from './Input';
+export * from './PhoneInput';
 export * from './Select';
 export * from './Switch';
 export * from './Checkbox';

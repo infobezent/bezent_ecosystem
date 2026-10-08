@@ -1,0 +1,270 @@
+/*
+ * BEZENT PhoneInput — Unified Country Code & Phone Number Field.
+ * Features a single unified container box: compact country code picker on the left
+ * with a clean vertical divider, flag emoji, and full-width phone input field on the right.
+ */
+
+.bezent-phone-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.bezent-phone-input-label {
+  font-size: var(--form-font-size-label, 14px);
+  font-weight: 600;
+  color: var(--text-primary, #000000);
+  letter-spacing: -0.005em;
+}
+
+/* ── Single Unified Box ── */
+.bezent-phone-input-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition:
+    border-color 0.16s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.16s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.bezent-phone-input-box:hover:not(.is-disabled) {
+  border-color: var(--border-focus, #7cc4fa);
+}
+
+.bezent-phone-input-box:focus-within,
+.bezent-phone-input-box.is-focused,
+.bezent-phone-input-box.has-open-dropdown {
+  border-color: var(--border-focus, #7cc4fa);
+  box-shadow: none;
+}
+
+/* ── Sizes ── */
+.bezent-phone-input-wrapper--sm .bezent-phone-input-box {
+  height: 32px;
+  border-radius: 6px;
+}
+
+.bezent-phone-input-wrapper--sm .bezent-phone-input-field {
+  font-size: 13px;
+  padding: 0 10px;
+}
+
+.bezent-phone-input-wrapper--sm .bezent-phone-input-country-trigger {
+  padding: 0 8px 0 10px;
+  font-size: 12.5px;
+}
+
+.bezent-phone-input-wrapper--md .bezent-phone-input-box {
+  height: 42px;
+  border-radius: 6px;
+}
+
+.bezent-phone-input-wrapper--md .bezent-phone-input-field {
+  font-size: var(--form-font-size-input, 13.5px);
+  padding: 0 14px;
+}
+
+.bezent-phone-input-wrapper--md .bezent-phone-input-country-trigger {
+  padding: 0 10px 0 12px;
+  font-size: var(--form-font-size-input, 13.5px);
+}
+
+.bezent-phone-input-wrapper--lg .bezent-phone-input-box {
+  height: 46px;
+  border-radius: 8px;
+}
+
+.bezent-phone-input-wrapper--lg .bezent-phone-input-field {
+  font-size: 16px;
+  padding: 0 16px;
+}
+
+.bezent-phone-input-wrapper--lg .bezent-phone-input-country-trigger {
+  padding: 0 12px 0 14px;
+  font-size: 15px;
+}
+
+/* ── Country Code Small Area (Left) ── */
+.bezent-phone-input-country {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border-default, #dde3ea);
+  background: var(--bg-surface-secondary, #f8fafc);
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  user-select: none;
+}
+
+.bezent-phone-input-country-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 100%;
+  border: none;
+  background: transparent;
+  color: var(--text-primary, #000000);
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.14s ease;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+}
+
+.bezent-phone-input-country-trigger:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.bezent-phone-input-country-trigger:focus-visible {
+  outline: none;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.bezent-phone-input-flag {
+  font-size: 16px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bezent-phone-input-code {
+  font-size: inherit;
+  font-weight: 500;
+  color: var(--text-primary, #000000);
+}
+
+.bezent-phone-input-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted, #94a3b8);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+  margin-left: 2px;
+}
+
+.bezent-phone-input-country.is-open .bezent-phone-input-chevron {
+  transform: rotate(180deg);
+}
+
+/* ── Hidden Native Select (keeps forms & testing queries synced) ── */
+.bezent-phone-input-native-select {
+  position: absolute !important;
+  opacity: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  pointer-events: none !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  clip: rect(0, 0, 0, 0) !important;
+  overflow: hidden !important;
+}
+
+/* ── Country Dropdown Popover ── */
+.bezent-phone-input-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 180px;
+  max-height: 240px;
+  overflow-y: auto;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+}
+
+.bezent-phone-input-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  font-size: var(--form-font-size-input, 13.5px);
+  color: var(--text-primary, #000000);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.bezent-phone-input-option-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bezent-phone-input-option:hover,
+.bezent-phone-input-option.is-highlighted {
+  background: var(--bg-surface-secondary, #f0f4f9);
+}
+
+.bezent-phone-input-option.is-selected {
+  background: var(--color-primary-light, #e8f0fe);
+  color: var(--accent-interactive, #1a73e8);
+  font-weight: 500;
+}
+
+/* ── Remaining Big Area (Phone Number Input) ── */
+.bezent-phone-input-field {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: var(--form-font-size-input, 13.5px);
+  color: var(--text-primary, #000000);
+  box-sizing: border-box;
+}
+
+.bezent-phone-input-field::placeholder {
+  color: var(--text-muted, #94a3b8);
+  opacity: 0.8;
+}
+
+/* ── Error & Disabled States ── */
+.bezent-phone-input-wrapper.has-error .bezent-phone-input-box {
+  border-color: var(--status-danger-fg, #ef4444);
+}
+
+.bezent-phone-input-wrapper.is-disabled .bezent-phone-input-box {
+  background: var(--bg-surface-secondary, #f0f4f9);
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.bezent-phone-input-wrapper.is-disabled .bezent-phone-input-country-trigger,
+.bezent-phone-input-wrapper.is-disabled .bezent-phone-input-field {
+  cursor: not-allowed;
+}
+
+.bezent-phone-input-feedback {
+  font-size: var(--form-font-size-hint, 12px);
+  color: var(--text-secondary, #5f6368);
+  margin-top: 2px;
+}
+
+.bezent-phone-input-feedback.is-error {
+  color: var(--status-danger-fg, #ef4444);
+  font-weight: 500;
+}

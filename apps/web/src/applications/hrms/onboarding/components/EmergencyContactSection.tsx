@@ -4,6 +4,7 @@ import {
   FormGrid,
   FormField,
   Input,
+  PhoneInput,
   Select,
   Textarea,
   Switch,
@@ -155,19 +156,15 @@ export function EmergencyContactSection({
 
             {/* 3. Phone */}
             <FormField label="Phone" required error={primaryPhoneError}>
-              <Inline gap="xs">
-                <Select
-                  options={COUNTRY_CODE_OPTIONS}
-                  value={primaryCountryCode}
-                  onChange={(e) => setPrimaryCountryCode(e.target.value)}
-                />
-                <Input
-                  type="tel"
-                  placeholder="98765 43210"
-                  value={primaryPhone}
-                  onChange={(e) => handlePrimaryPhoneChange(e.target.value)}
-                />
-              </Inline>
+              <PhoneInput
+                id="emergency-primary-phone"
+                countryCode={primaryCountryCode}
+                onCountryCodeChange={setPrimaryCountryCode}
+                countryCodeOptions={COUNTRY_CODE_OPTIONS}
+                placeholder="98765 43210"
+                value={primaryPhone}
+                onChange={(e) => handlePrimaryPhoneChange(e.target.value)}
+              />
             </FormField>
 
             {/* 4. Email */}
@@ -189,7 +186,6 @@ export function EmergencyContactSection({
                 onChange={(e) => setPrimaryAddress(e.target.value)}
               />
             </FormField>
-
             {/* 6. Primary / Private Contact Indicator */}
             <FormField label="Privacy Record" span="full">
               <Switch
@@ -241,21 +237,16 @@ export function EmergencyContactSection({
 
             {/* 3. Secondary Mobile */}
             <FormField label="Secondary Mobile" error={secondaryMobileError}>
-              <Inline gap="xs">
-                <Select
-                  options={COUNTRY_CODE_OPTIONS}
-                  value={secondaryCountryCode}
-                  onChange={(e) => setSecondaryCountryCode(e.target.value)}
-                />
-                <Input
-                  type="tel"
-                  placeholder="98765 43211"
-                  value={secondaryMobile}
-                  onChange={(e) => handleSecondaryMobileChange(e.target.value)}
-                />
-              </Inline>
+              <PhoneInput
+                id="emergency-secondary-phone"
+                countryCode={secondaryCountryCode}
+                onCountryCodeChange={setSecondaryCountryCode}
+                countryCodeOptions={COUNTRY_CODE_OPTIONS}
+                placeholder="98765 43211"
+                value={secondaryMobile}
+                onChange={(e) => handleSecondaryMobileChange(e.target.value)}
+              />
             </FormField>
-
             {/* 4. Secondary Email */}
             <FormField label="Secondary Email" error={secondaryEmailError}>
               <Input
