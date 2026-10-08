@@ -186,7 +186,6 @@ export function EmergencyContactSection({
                 onChange={(e) => setPrimaryAddress(e.target.value)}
               />
             </FormField>
-
             {/* 6. Primary / Private Contact Indicator */}
             <FormField label="Privacy Record" span="full">
               <Switch
@@ -248,7 +247,6 @@ export function EmergencyContactSection({
                 onChange={(e) => handleSecondaryMobileChange(e.target.value)}
               />
             </FormField>
-
             {/* 4. Secondary Email */}
             <FormField label="Secondary Email" error={secondaryEmailError}>
               <Input
