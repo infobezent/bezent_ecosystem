@@ -344,7 +344,7 @@ export function EmployeeRegistration({
     setFormData((prev) => ({ ...prev, workingHours: val }));
   };
 
-  const updateDocuments = (val: Chapter09DocumentsState) => {
+  const _updateDocuments = (val: Chapter09DocumentsState) => {
     setFormData((prev) => ({ ...prev, documents: val }));
   };
 

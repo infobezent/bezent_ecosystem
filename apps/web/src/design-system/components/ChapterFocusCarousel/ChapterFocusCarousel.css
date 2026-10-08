@@ -195,6 +195,30 @@
   opacity: 1;
 }
 
+/* ── Chrome-style Tab Hover Pill (Inactive Tabs) ── */
+.bezent-focus-card:not(.is-focus-active)::before {
+  content: '';
+  position: absolute;
+  inset: 3px 2px 4px 2px;
+  border-radius: 8px;
+  background: transparent;
+  z-index: 0;
+  transition: background-color 140ms ease;
+  pointer-events: none;
+}
+
+.bezent-focus-card:not(.is-focus-active):hover:not(:disabled)::before {
+  background: var(--bg-hover, #c2e7ff);
+}
+
+.bezent-focus-card:not(.is-focus-active):active:not(:disabled)::before {
+  background: #b3dbf8;
+}
+
+[data-theme='dark'] .bezent-focus-card:not(.is-focus-active):hover:not(:disabled)::before {
+  background: rgba(255, 255, 255, 0.12);
+}
+
 /* ── 1. ACTIVE BROWSER TAB (Physically Attached to Page Content) ── */
 .bezent-focus-card.is-focus-active {
   background: var(--app-canvas, #f6f8fc);

@@ -8,12 +8,10 @@ import {
   Select,
   Button,
   Stack,
-  Inline,
   Card,
   CardTitle,
   Toolbar,
   Checkbox,
-  Badge,
 } from '../../../../design-system/components';
 
 import { RegistrationField, useRegistrationConfig } from '../registration/registrationConfig';
@@ -242,7 +240,11 @@ export interface PersonalInformationProps {
   onChange?: (updated: Partial<Chapter02PersonalState>) => void;
 }
 
-export function PersonalInformation({ employeeId, data, onChange }: PersonalInformationProps) {
+export function PersonalInformation({
+  employeeId: _employeeId,
+  data,
+  onChange,
+}: PersonalInformationProps) {
   // 3-6. Name fields
   const [firstName, setFirstName] = useState(data?.firstName ?? '');
   const [middleName, setMiddleName] = useState(data?.middleName ?? '');
