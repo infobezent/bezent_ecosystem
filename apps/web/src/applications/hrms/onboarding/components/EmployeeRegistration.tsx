@@ -401,17 +401,17 @@ export function EmployeeRegistration({
   const [passportPhoto, setPassportPhoto] = useState<PassportPhotoState>(
     initialDraft?.reviewData?.documents?.passportPhoto
       ? ({
-        file: null,
-        previewUrl: '',
-        ...initialDraft.reviewData.documents.passportPhoto,
-      } as PassportPhotoState)
+          file: null,
+          previewUrl: '',
+          ...initialDraft.reviewData.documents.passportPhoto,
+        } as PassportPhotoState)
       : {
-        file: null,
-        fileName: 'Passport_Photo.png',
-        previewUrl:
-          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-        status: 'Verified',
-      },
+          file: null,
+          fileName: 'Passport_Photo.png',
+          previewUrl:
+            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+          status: 'Verified',
+        },
   );
 
   // Repeatable lists state for Personal, Onboarding, Skills, Emergency
@@ -552,13 +552,13 @@ export function EmployeeRegistration({
       prev.map((doc) =>
         doc.id === id
           ? {
-            ...doc,
-            file: null,
-            fileName: '',
-            filePreviewUrl: '',
-            docNumber: '',
-            status: 'Pending' as const,
-          }
+              ...doc,
+              file: null,
+              fileName: '',
+              filePreviewUrl: '',
+              docNumber: '',
+              status: 'Pending' as const,
+            }
           : doc,
       ),
     );
@@ -608,15 +608,15 @@ export function EmployeeRegistration({
   const savedStepDataRef = useRef<Record<string, unknown>>(
     initialDraft?.formData
       ? {
-        personal: JSON.parse(JSON.stringify(initialDraft.formData.personal)),
-        general: JSON.parse(JSON.stringify(initialDraft.formData.general)),
-        onboarding: JSON.parse(JSON.stringify(initialDraft.formData.onboarding)),
-        skills: JSON.parse(JSON.stringify(initialDraft.formData.skills)),
-        emergency: JSON.parse(JSON.stringify(initialDraft.formData.emergency)),
-        accounts: JSON.parse(JSON.stringify(initialDraft.formData.accounts)),
-        online_access: JSON.parse(JSON.stringify(initialDraft.formData.onlineAccess)),
-        working_hours: JSON.parse(JSON.stringify(initialDraft.formData.workingHours)),
-      }
+          personal: JSON.parse(JSON.stringify(initialDraft.formData.personal)),
+          general: JSON.parse(JSON.stringify(initialDraft.formData.general)),
+          onboarding: JSON.parse(JSON.stringify(initialDraft.formData.onboarding)),
+          skills: JSON.parse(JSON.stringify(initialDraft.formData.skills)),
+          emergency: JSON.parse(JSON.stringify(initialDraft.formData.emergency)),
+          accounts: JSON.parse(JSON.stringify(initialDraft.formData.accounts)),
+          online_access: JSON.parse(JSON.stringify(initialDraft.formData.onlineAccess)),
+          working_hours: JSON.parse(JSON.stringify(initialDraft.formData.workingHours)),
+        }
       : {},
   );
 

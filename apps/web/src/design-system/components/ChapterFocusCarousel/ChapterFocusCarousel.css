@@ -228,9 +228,11 @@
   right: -10px;
   width: 10px;
   height: 10px;
-  background: radial-gradient(circle at 100% 0,
-      transparent 10px,
-      var(--app-canvas, #f6f8fc) 10.5px);
+  background: radial-gradient(
+    circle at 100% 0,
+    transparent 10px,
+    var(--app-canvas, #f6f8fc) 10.5px
+  );
   pointer-events: none;
   z-index: 20;
 }
