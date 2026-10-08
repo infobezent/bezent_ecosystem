@@ -394,7 +394,7 @@ export function ReviewSection({
   const hasSectionPending = (secLabel: string) => Boolean(sectionPendingMap[secLabel]?.length);
 
   return (
-    <Stack gap="xl">
+    <Stack gap="xl" className="review-section">
       {/* Actionable Error Alert if backend submission failed */}
       {submitError && (
         <Alert variant="danger">
