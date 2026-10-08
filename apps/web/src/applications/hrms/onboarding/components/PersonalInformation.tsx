@@ -4,6 +4,7 @@ import {
   FormGrid,
   FormField,
   Input,
+  PhoneInput,
   Select,
   Button,
   Stack,
@@ -1182,26 +1183,21 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             htmlFor="pers-mobile-phone"
             span={span}
           >
-            <Inline gap="xs">
-              <Select
-                value={mobileCountryCode}
-                onChange={(e) => setMobileCountryCode(e.target.value)}
-                options={[
-                  { value: '+91', label: '+91 (IN)' },
-                  { value: '+1', label: '+1 (US)' },
-                  { value: '+44', label: '+44 (UK)' },
-                  { value: '+971', label: '+971 (UAE)' },
-                  { value: '+65', label: '+65 (SG)' },
-                ]}
-              />
-              <Input
-                id="pers-mobile-phone"
-                type="tel"
-                placeholder={configuredPlaceholder || undefined}
-                value={mobilePhone}
-                onChange={(e) => setMobilePhone(e.target.value)}
-              />
-            </Inline>
+            <PhoneInput
+              id="pers-mobile-phone"
+              countryCode={mobileCountryCode}
+              onCountryCodeChange={setMobileCountryCode}
+              countryCodeOptions={[
+                { value: '+91', label: '+91 (IN)' },
+                { value: '+1', label: '+1 (US)' },
+                { value: '+44', label: '+44 (UK)' },
+                { value: '+971', label: '+971 (UAE)' },
+                { value: '+65', label: '+65 (SG)' },
+              ]}
+              placeholder={configuredPlaceholder || undefined}
+              value={mobilePhone}
+              onChange={(e) => setMobilePhone(e.target.value)}
+            />
           </RegistrationField>
         );
 
@@ -1440,7 +1436,14 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
 
       case 'personal.isPermanentSameAsCurrent':
         return (
-          <RegistrationField key={key} fieldKey={key} value={isPermanentSameAsCurrent} span="full">
+          <RegistrationField
+            key={key}
+            fieldKey={key}
+            value={isPermanentSameAsCurrent}
+            hideLabel
+            orientation="vertical"
+            span="full"
+          >
             <Checkbox
               id="pers-same-address"
               label={label}
@@ -1613,6 +1616,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             fieldKey={key}
             value={customValues[key] ?? ''}
             htmlFor={`field-${key}`}
+            hideLabel={field.type === 'checkbox'}
             span={span}
           >
             {renderDynamicFieldInput(field)}
@@ -1723,27 +1727,22 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
                         />
                       </FormField>
                       <FormField label="Phone" htmlFor={`fam-phone-${fam.id}`}>
-                        <Inline gap="xs">
-                          <Select
-                            value={fam.countryCode}
-                            onChange={(e) =>
-                              updateFamilyMember(fam.id, 'countryCode', e.target.value)
-                            }
-                            options={[
-                              { value: '+91', label: '+91 (IN)' },
-                              { value: '+1', label: '+1 (US)' },
-                              { value: '+44', label: '+44 (UK)' },
-                              { value: '+971', label: '+971 (UAE)' },
-                            ]}
-                          />
-                          <Input
-                            id={`fam-phone-${fam.id}`}
-                            type="tel"
-                            placeholder="Phone Number"
-                            value={fam.phone}
-                            onChange={(e) => updateFamilyMember(fam.id, 'phone', e.target.value)}
-                          />
-                        </Inline>
+                        <PhoneInput
+                          id={`fam-phone-${fam.id}`}
+                          countryCode={fam.countryCode}
+                          onCountryCodeChange={(code) =>
+                            updateFamilyMember(fam.id, 'countryCode', code)
+                          }
+                          countryCodeOptions={[
+                            { value: '+91', label: '+91 (IN)' },
+                            { value: '+1', label: '+1 (US)' },
+                            { value: '+44', label: '+44 (UK)' },
+                            { value: '+971', label: '+971 (UAE)' },
+                          ]}
+                          placeholder="Phone Number"
+                          value={fam.phone}
+                          onChange={(e) => updateFamilyMember(fam.id, 'phone', e.target.value)}
+                        />
                       </FormField>
                     </FormGrid>
                   </Stack>

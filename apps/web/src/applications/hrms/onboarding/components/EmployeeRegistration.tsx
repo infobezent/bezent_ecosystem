@@ -262,8 +262,9 @@ export function EmployeeRegistration({
   const [searchParams, setSearchParams] = useSearchParams();
   const contentContainerRef = useRef<HTMLDivElement | null>(null);
 
+  // Single authoritative source of truth for active chapter is the URL searchParam ?chapter= (or legacy ?section=)
   const urlChapter = searchParams.get('chapter') || searchParams.get('section');
-  const initialSection = (
+  const activeSection = (
     urlChapter && allSections.some((s) => s.id === urlChapter)
       ? urlChapter
       : initialDraft?.activeSection && allSections.some((s) => s.id === initialDraft.activeSection)
@@ -271,22 +272,12 @@ export function EmployeeRegistration({
         : allSections[0]?.id || 'personal'
   ) as RegistrationSectionId;
 
-  const [activeSection, setActiveSection] = useState<RegistrationSectionId>(initialSection);
-
-  // Sync when searchParams change externally or via browser back/forward
+  // Scroll content to top whenever activeSection changes
   useEffect(() => {
-    const currentParam = searchParams.get('chapter') || searchParams.get('section');
-    if (
-      currentParam &&
-      allSections.some((s) => s.id === currentParam) &&
-      currentParam !== activeSection
-    ) {
-      setActiveSection(currentParam as RegistrationSectionId);
-      if (contentContainerRef.current) {
-        contentContainerRef.current.scrollTop = 0;
-      }
+    if (contentContainerRef.current) {
+      contentContainerRef.current.scrollTop = 0;
     }
-  }, [searchParams, allSections, activeSection]);
+  }, [activeSection]);
 
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, unknown>>({});
 
@@ -410,17 +401,17 @@ export function EmployeeRegistration({
   const [passportPhoto, setPassportPhoto] = useState<PassportPhotoState>(
     initialDraft?.reviewData?.documents?.passportPhoto
       ? ({
-          file: null,
-          previewUrl: '',
-          ...initialDraft.reviewData.documents.passportPhoto,
-        } as PassportPhotoState)
+        file: null,
+        previewUrl: '',
+        ...initialDraft.reviewData.documents.passportPhoto,
+      } as PassportPhotoState)
       : {
-          file: null,
-          fileName: 'Passport_Photo.png',
-          previewUrl:
-            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-          status: 'Verified',
-        },
+        file: null,
+        fileName: 'Passport_Photo.png',
+        previewUrl:
+          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+        status: 'Verified',
+      },
   );
 
   // Repeatable lists state for Personal, Onboarding, Skills, Emergency
@@ -561,13 +552,13 @@ export function EmployeeRegistration({
       prev.map((doc) =>
         doc.id === id
           ? {
-              ...doc,
-              file: null,
-              fileName: '',
-              filePreviewUrl: '',
-              docNumber: '',
-              status: 'Pending' as const,
-            }
+            ...doc,
+            file: null,
+            fileName: '',
+            filePreviewUrl: '',
+            docNumber: '',
+            status: 'Pending' as const,
+          }
           : doc,
       ),
     );
@@ -617,15 +608,15 @@ export function EmployeeRegistration({
   const savedStepDataRef = useRef<Record<string, unknown>>(
     initialDraft?.formData
       ? {
-          personal: JSON.parse(JSON.stringify(initialDraft.formData.personal)),
-          general: JSON.parse(JSON.stringify(initialDraft.formData.general)),
-          onboarding: JSON.parse(JSON.stringify(initialDraft.formData.onboarding)),
-          skills: JSON.parse(JSON.stringify(initialDraft.formData.skills)),
-          emergency: JSON.parse(JSON.stringify(initialDraft.formData.emergency)),
-          accounts: JSON.parse(JSON.stringify(initialDraft.formData.accounts)),
-          online_access: JSON.parse(JSON.stringify(initialDraft.formData.onlineAccess)),
-          working_hours: JSON.parse(JSON.stringify(initialDraft.formData.workingHours)),
-        }
+        personal: JSON.parse(JSON.stringify(initialDraft.formData.personal)),
+        general: JSON.parse(JSON.stringify(initialDraft.formData.general)),
+        onboarding: JSON.parse(JSON.stringify(initialDraft.formData.onboarding)),
+        skills: JSON.parse(JSON.stringify(initialDraft.formData.skills)),
+        emergency: JSON.parse(JSON.stringify(initialDraft.formData.emergency)),
+        accounts: JSON.parse(JSON.stringify(initialDraft.formData.accounts)),
+        online_access: JSON.parse(JSON.stringify(initialDraft.formData.onlineAccess)),
+        working_hours: JSON.parse(JSON.stringify(initialDraft.formData.workingHours)),
+      }
       : {},
   );
 
@@ -740,10 +731,9 @@ export function EmployeeRegistration({
     }
   }, []);
 
-  // Single reliable navigation method that updates both state & searchParams
+  // Single reliable navigation method that updates searchParams atomically
   const navigateToSection = useCallback(
     (id: string) => {
-      setActiveSection(id as RegistrationSectionId);
       if (!savedStepDataRef.current[id]) {
         savedStepDataRef.current[id] = getSectionSnapshot(id);
       }
@@ -948,7 +938,7 @@ export function EmployeeRegistration({
 
   const handleContinueDraft = (draft: EmployeeRegistrationDraft) => {
     setCurrentDraftId(draft.id);
-    setActiveSection(draft.activeSection);
+    navigateToSection(draft.activeSection);
 
     if (draft.formData) {
       setFormData(draft.formData);

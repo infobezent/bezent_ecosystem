@@ -711,6 +711,7 @@ export function GeneralInformation({
             fieldKey={key}
             value={customValues[key] ?? ''}
             htmlFor={`field-${key}`}
+            hideLabel={field.type === 'checkbox'}
             span={span}
           >
             {renderDynamicFieldInput(field)}
