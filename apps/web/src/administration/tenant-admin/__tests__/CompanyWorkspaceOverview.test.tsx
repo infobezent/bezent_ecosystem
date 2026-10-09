@@ -346,8 +346,8 @@ describe('Company Workspace & Company Overview Verification', () => {
     expect(html).toContain('Access');
     expect(html).toContain('Applications');
 
-    // Restrained empty state placeholder
-    expect(html).toContain('Company access management will be configured here.');
+    // Company Access page header/content
+    expect(html).toContain('Manage company users, pending invitations, and delegated administrative permissions.');
   });
 
   it('9. Company Applications renders inside company workspace without redirecting to global applications', () => {

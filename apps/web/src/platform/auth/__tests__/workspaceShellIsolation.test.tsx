@@ -383,7 +383,7 @@ describe('Workspace & Shell Isolation Boundaries', () => {
 
       // Super Admin navigation labels are present
       expect(html).toContain('Tenants');
-      expect(html).toContain('Customer Provisioning');
+      expect(html).toContain('Subscriptions');
     });
 
     it('DENIES /tenant-admin/dashboard for Super Admin without Tenant Admin authority', () => {

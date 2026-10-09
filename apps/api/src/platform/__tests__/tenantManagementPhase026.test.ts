@@ -27,6 +27,7 @@ import { hashPassword, generateSurrogateId } from '../auth/security.js';
 import { backgroundWorkerRunner } from '../workers/backgroundWorker.runner.js';
 import { moduleService } from '../modules/service/module.service.js';
 import { tenantService } from '../tenants/service/tenant.service.js';
+import { transactionalOutboxService } from '../outbox/service/transactionalOutbox.service.js';
 
 describe('BEZENT Phase 02.6 — Backend Remediation, Tenant Orchestration & Runtime Integration', () => {
   const app = createApp();
@@ -450,10 +451,24 @@ describe('BEZENT Phase 02.6 — Backend Remediation, Tenant Orchestration & Runt
 
   describe('Slice D — Background Workers & Lifecycle Sweeper (P1-1, P2-3)', () => {
     it('dispatches pending invitation email outbox batch asynchronously', async () => {
+      const db = getDb();
+      const [existingMsg] = await db
+        .select()
+        .from(transactionalOutbox)
+        .where(and(eq(transactionalOutbox.aggregateId, testTenantId), eq(transactionalOutbox.status, 'pending')));
+
+      if (!existingMsg) {
+        await transactionalOutboxService.publishEvent({
+          aggregateType: 'tenant',
+          aggregateId: testTenantId,
+          eventType: 'tenant.invitation.issued',
+          payload: { email: 'jane.doe@acmeapex.com', name: 'Jane Doe' },
+        });
+      }
+
       const dispatched = await backgroundWorkerRunner.processOutboxBatch();
       expect(dispatched).toBeGreaterThanOrEqual(1);
 
-      const db = getDb();
       const [msg] = await db
         .select()
         .from(transactionalOutbox)

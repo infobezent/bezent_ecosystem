@@ -69,7 +69,9 @@ describe('Tenant Admin Phase 2D + 2E: Members, Access, RBAC & Application Distri
       .where(sql`${tenantAdmins.tenantId} IN (${tenantMainId}, ${tenantOtherId})`);
     await db
       .delete(roleAssignments)
-      .where(sql`${roleAssignments.tenantId} IN (${tenantMainId}, ${tenantOtherId})`);
+      .where(
+        sql`${roleAssignments.tenantId} IN (${tenantMainId}, ${tenantOtherId}) OR ${roleAssignments.userId} IN (${ta1Id}, ${ta2Id}, ${dcaId}, ${multiUserId}, ${otherUserId}) OR ${roleAssignments.userId} IN (SELECT id FROM users WHERE email LIKE '%@tenant-main.example' OR email LIKE '%@tenant-other.example')`,
+      );
     await db
       .delete(memberships)
       .where(sql`${memberships.tenantId} IN (${tenantMainId}, ${tenantOtherId})`);
@@ -85,7 +87,7 @@ describe('Tenant Admin Phase 2D + 2E: Members, Access, RBAC & Application Distri
     await db
       .delete(users)
       .where(
-        sql`${users.id} IN (${ta1Id}, ${ta2Id}, ${dcaId}, ${multiUserId}, ${otherUserId}) OR ${users.email} LIKE '%@tenant-main.example' OR ${users.email} LIKE '%@tenant-other.example' OR ${users.email} LIKE '%@example.com'`,
+        sql`${users.id} IN (${ta1Id}, ${ta2Id}, ${dcaId}, ${multiUserId}, ${otherUserId}) OR ${users.email} LIKE '%@tenant-main.example' OR ${users.email} LIKE '%@tenant-other.example'`,
       );
 
     // 1. Insert Tenants

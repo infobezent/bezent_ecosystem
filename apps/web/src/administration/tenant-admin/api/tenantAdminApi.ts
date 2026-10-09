@@ -20,7 +20,6 @@ import type {
   TenantMemberSummary,
   WorkLocationRecord,
   WorkLocationStatus,
-  CompanyAccessRole,
   CompanyAccessUserItem,
   AvailableTenantUserItem,
   AssignCompanyUserPayload,
@@ -643,7 +642,7 @@ export const tenantAdminApi = {
         body: JSON.stringify(payload),
       },
     );
-    return (res as { data?: { message: string; user: CompanyAccessUserItem } }).data || (res as any);
+    return (res as { data?: { message: string; user: CompanyAccessUserItem } }).data || (res as unknown as { message: string; user: CompanyAccessUserItem });
   },
 
   /** Invite a new user to the company */
@@ -658,7 +657,7 @@ export const tenantAdminApi = {
         body: JSON.stringify(payload),
       },
     );
-    return (res as { data?: { message: string; invitation: CompanyAccessUserItem } }).data || (res as any);
+    return (res as { data?: { message: string; invitation: CompanyAccessUserItem } }).data || (res as unknown as { message: string; invitation: CompanyAccessUserItem });
   },
 
   /** Update a company user's role (member <-> company_admin) */
@@ -674,7 +673,7 @@ export const tenantAdminApi = {
         body: JSON.stringify(payload),
       },
     );
-    return (res as { data?: { message: string } }).data || (res as any);
+    return (res as { data?: { message: string } }).data || (res as unknown as { message: string });
   },
 
   /** Revoke a user's company access */
@@ -688,7 +687,7 @@ export const tenantAdminApi = {
         method: 'DELETE',
       },
     );
-    return (res as { data?: { message: string } }).data || (res as any);
+    return (res as { data?: { message: string } }).data || (res as unknown as { message: string });
   },
 
   /** Resend pending invitation */
@@ -702,7 +701,7 @@ export const tenantAdminApi = {
         method: 'POST',
       },
     );
-    return (res as { data?: { message: string } }).data || (res as any);
+    return (res as { data?: { message: string } }).data || (res as unknown as { message: string });
   },
 
   /** Cancel pending invitation */
@@ -716,7 +715,7 @@ export const tenantAdminApi = {
         method: 'DELETE',
       },
     );
-    return (res as { data?: { message: string } }).data || (res as any);
+    return (res as { data?: { message: string } }).data || (res as unknown as { message: string });
   },
 
   /** Get company roles and permissions overview */
