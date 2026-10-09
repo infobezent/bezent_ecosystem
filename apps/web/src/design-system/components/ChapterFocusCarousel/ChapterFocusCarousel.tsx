@@ -238,11 +238,6 @@ export function ChapterFocusCarousel({
 
                 {/* Chapter Title / Label */}
                 <span className="bezent-focus-card__label">{chapter.label}</span>
-
-                {/* Active Focus Glow & Border Indicator */}
-                {isActive && (
-                  <span className="bezent-focus-card__active-indicator" aria-hidden="true" />
-                )}
               </button>
             );
           })}

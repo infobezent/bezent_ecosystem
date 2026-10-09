@@ -50,7 +50,7 @@
 
 .bezent-section__title {
   margin: 0;
-  font-size: var(--form-font-size-title, 20px);
+  font-size: var(--form-font-size-title, 13px);
   font-weight: 700;
   color: var(--text-primary, #000000);
   letter-spacing: -0.02em;
@@ -59,7 +59,7 @@
 
 .bezent-section__subtitle {
   margin: 2px 0 0 0;
-  font-size: var(--form-font-size-subtitle, 14px);
+  font-size: var(--form-font-size-subtitle, 13px);
   color: var(--text-secondary, #000000);
   line-height: 1.45;
 }

@@ -15,12 +15,12 @@
 
 /* Sizes */
 .bezent-label--md {
-  font-size: var(--form-font-size-label, 17px);
+  font-size: var(--form-font-size-label, 13.5px);
   line-height: var(--line-height-normal, 1.4);
 }
 
 .bezent-label--sm {
-  font-size: var(--form-font-size-label, 15px);
+  font-size: var(--form-font-size-label, 12.5px);
   line-height: var(--line-height-normal, 1.4);
 }
 

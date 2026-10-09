@@ -171,25 +171,9 @@
   outline-offset: 2px;
 }
 
-/* Bell open state: joined to the notifications panel below. */
 .top-nav__bell {
   position: relative;
   display: inline-flex;
-}
-
-.top-nav__bell.is-open .bezent-icon-btn {
-  border-radius: 10px 10px 0 0;
-}
-
-.top-nav__bell-connector {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -13px;
-  height: 14px;
-  background: var(--nav-selected);
-  z-index: var(--z-notification-panel);
-  pointer-events: none;
 }
 
 /* ── Dark Mode Header Accents ────────────────────────────────────────── */

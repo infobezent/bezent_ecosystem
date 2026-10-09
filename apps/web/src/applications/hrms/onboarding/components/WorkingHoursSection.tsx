@@ -208,209 +208,206 @@ export function WorkingHoursSection({
   return (
     <Stack gap="xl">
       {/* A. WORK SCHEDULE */}
-      <FormSection
-        title="Work Schedule & Calendar"
-        description="Working calendar, shift presets, and scheduled work days."
-      >
-        <FormGrid columns={2} layout="horizontal" labelWidth="md">
-          {/* 1. Working Time Calendar */}
-          <FormField label="Working Calendar" required>
-            <Stack gap="xs">
-              <Select
-                options={CALENDAR_OPTIONS}
-                value={workingCalendar}
-                onChange={(e) => {
-                  setWorkingCalendar(e.target.value);
-                  setAssignedCalendar(e.target.value);
-                }}
-              />
-              {workingCalendar === 'Other' && (
-                <Input
-                  type="text"
-                  placeholder="Enter Custom Working Time Calendar"
-                  value={customWorkingCalendar}
-                  onChange={(e) => setCustomWorkingCalendar(e.target.value)}
+      <Card padding="lg">
+        <FormSection title="Work Schedule & Calendar">
+          <FormGrid columns={2} layout="horizontal" labelWidth="md">
+            {/* 1. Working Time Calendar */}
+            <FormField label="Working Calendar" required>
+              <Stack gap="xs">
+                <Select
+                  options={CALENDAR_OPTIONS}
+                  value={workingCalendar}
+                  onChange={(e) => {
+                    setWorkingCalendar(e.target.value);
+                    setAssignedCalendar(e.target.value);
+                  }}
                 />
-              )}
-            </Stack>
-          </FormField>
+                {workingCalendar === 'Other' && (
+                  <Input
+                    type="text"
+                    placeholder="Enter Custom Working Time Calendar"
+                    value={customWorkingCalendar}
+                    onChange={(e) => setCustomWorkingCalendar(e.target.value)}
+                  />
+                )}
+              </Stack>
+            </FormField>
 
-          {/* 2. Work Schedule Shift */}
-          <FormField label="Work Schedule" required>
-            <Stack gap="xs">
-              <Select
-                options={SHIFT_OPTIONS}
-                value={workSchedule}
-                onChange={(e) => handleShiftChange(e.target.value)}
-              />
-              {workSchedule === 'Other' && (
-                <Input
-                  type="text"
-                  placeholder="Enter Custom Work Schedule"
-                  value={customWorkSchedule}
-                  onChange={(e) => setCustomWorkSchedule(e.target.value)}
+            {/* 2. Work Schedule Shift */}
+            <FormField label="Work Schedule" required>
+              <Stack gap="xs">
+                <Select
+                  options={SHIFT_OPTIONS}
+                  value={workSchedule}
+                  onChange={(e) => handleShiftChange(e.target.value)}
                 />
-              )}
-            </Stack>
-          </FormField>
+                {workSchedule === 'Other' && (
+                  <Input
+                    type="text"
+                    placeholder="Enter Custom Work Schedule"
+                    value={customWorkSchedule}
+                    onChange={(e) => setCustomWorkSchedule(e.target.value)}
+                  />
+                )}
+              </Stack>
+            </FormField>
 
-          {/* 3. Working Days */}
-          <FormField label="Working Days" required span="full">
-            <Inline gap="xs" wrap>
-              {ALL_DAYS.map((day) => {
-                const isSelected = workingDays.includes(day);
-                return (
-                  <Button
-                    key={day}
-                    type="button"
-                    variant={isSelected ? 'primary' : 'secondary'}
-                    size="sm"
-                    onClick={() => toggleDay(day)}
-                  >
-                    {day}
-                  </Button>
-                );
-              })}
-            </Inline>
-          </FormField>
-        </FormGrid>
-      </FormSection>
+            {/* 3. Working Days */}
+            <FormField label="Working Days" required span="full">
+              <Inline gap="xs" wrap>
+                {ALL_DAYS.map((day) => {
+                  const isSelected = workingDays.includes(day);
+                  return (
+                    <Button
+                      key={day}
+                      type="button"
+                      variant={isSelected ? 'primary' : 'secondary'}
+                      size="sm"
+                      onClick={() => toggleDay(day)}
+                    >
+                      {day}
+                    </Button>
+                  );
+                })}
+              </Inline>
+            </FormField>
+          </FormGrid>
+        </FormSection>
+      </Card>
 
       {/* B. TIME CONFIGURATION */}
-      <FormSection
-        title="Time Configuration & Breaks"
-        description="Shift timing, break deductions, and automated net work hour calculation."
-      >
-        <FormGrid columns={2} layout="horizontal" labelWidth="md">
-          {/* 1. Start Time */}
-          <FormField label="Start Time">
-            <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
-          </FormField>
+      <Card padding="lg">
+        <FormSection title="Time Configuration & Breaks">
+          <FormGrid columns={2} layout="horizontal" labelWidth="md">
+            {/* 1. Start Time */}
+            <FormField label="Start Time">
+              <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+            </FormField>
 
-          {/* 2. End Time */}
-          <FormField label="End Time">
-            <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
-          </FormField>
+            {/* 2. End Time */}
+            <FormField label="End Time">
+              <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+            </FormField>
 
-          {/* 3. Break */}
-          <FormField label="Break Duration">
-            <Select
-              options={BREAK_OPTIONS}
-              value={String(breakMins)}
-              onChange={(e) => setBreakMins(Number(e.target.value))}
-            />
-          </FormField>
+            {/* 3. Break */}
+            <FormField label="Break Duration">
+              <Select
+                options={BREAK_OPTIONS}
+                value={String(breakMins)}
+                onChange={(e) => setBreakMins(Number(e.target.value))}
+              />
+            </FormField>
 
-          {/* 4. Lunch */}
-          <FormField label="Lunch Duration">
-            <Select
-              options={LUNCH_OPTIONS}
-              value={String(lunchMins)}
-              onChange={(e) => setLunchMins(Number(e.target.value))}
-            />
-          </FormField>
+            {/* 4. Lunch */}
+            <FormField label="Lunch Duration">
+              <Select
+                options={LUNCH_OPTIONS}
+                value={String(lunchMins)}
+                onChange={(e) => setLunchMins(Number(e.target.value))}
+              />
+            </FormField>
 
-          {/* 5. Standard Working Hours (Net) */}
-          <FormField
-            label="Daily Net Hours"
-            span="full"
-            helperText={`Gross: ${calculatedHours.totalGross} hrs • Non-work: ${calculatedHours.nonWork} hrs`}
-          >
-            <Input type="text" value={`${calculatedHours.totalNet} Hours / Day`} readOnly />
-          </FormField>
-        </FormGrid>
-      </FormSection>
+            {/* 5. Standard Working Hours (Net) */}
+            <FormField
+              label="Daily Net Hours"
+              span="full"
+              helperText={`Gross: ${calculatedHours.totalGross} hrs • Non-work: ${calculatedHours.nonWork} hrs`}
+            >
+              <Input type="text" value={`${calculatedHours.totalNet} Hours / Day`} readOnly />
+            </FormField>
+          </FormGrid>
+        </FormSection>
+      </Card>
 
       {/* C. CALENDAR & HOLIDAYS + D. EMPLOYEE ASSIGNMENT */}
-      <FormSection
-        title="Holidays & Employee Shift Linking"
-        description="Standard holidays, company closures, and employee timezone assignment."
-      >
-        <Grid columns={2} gap="lg">
-          {/* C. CALENDAR & HOLIDAYS */}
-          <Card variant="flat">
-            <Stack gap="md">
-              <CardTitle>Assigned Standard Holidays (2026)</CardTitle>
-              <Stack gap="xs">
-                <Inline gap="xs" align="center">
-                  <span className="bezent-label--md">Jan 26, 2026</span>
-                  <span className="bezent-card__desc">— Republic Day (National Holiday)</span>
-                </Inline>
-                <Inline gap="xs" align="center">
-                  <span className="bezent-label--md">May 01, 2026</span>
-                  <span className="bezent-card__desc">— May Day (Public Holiday)</span>
-                </Inline>
-                <Inline gap="xs" align="center">
-                  <span className="bezent-label--md">Aug 15, 2026</span>
-                  <span className="bezent-card__desc">— Independence Day (National Holiday)</span>
-                </Inline>
-                <Inline gap="xs" align="center">
-                  <span className="bezent-label--md">Oct 02, 2026</span>
-                  <span className="bezent-card__desc">— Gandhi Jayanti (National Holiday)</span>
-                </Inline>
-                <Inline gap="xs" align="center">
-                  <span className="bezent-label--md">Nov 08, 2026</span>
-                  <span className="bezent-card__desc">— Diwali / Deepavali (Festival)</span>
-                </Inline>
-                <Inline gap="xs" align="center">
-                  <span className="bezent-label--md">Dec 25, 2026</span>
-                  <span className="bezent-card__desc">— Christmas (Festival)</span>
-                </Inline>
+      <Card padding="lg">
+        <FormSection title="Holidays & Employee Shift Linking">
+          <Grid columns={2} gap="lg">
+            {/* C. CALENDAR & HOLIDAYS */}
+            <Card variant="flat">
+              <Stack gap="md">
+                <CardTitle>Assigned Standard Holidays (2026)</CardTitle>
+                <Stack gap="xs">
+                  <Inline gap="xs" align="center">
+                    <span className="bezent-label--md">Jan 26, 2026</span>
+                    <span className="bezent-card__desc">— Republic Day (National Holiday)</span>
+                  </Inline>
+                  <Inline gap="xs" align="center">
+                    <span className="bezent-label--md">May 01, 2026</span>
+                    <span className="bezent-card__desc">— May Day (Public Holiday)</span>
+                  </Inline>
+                  <Inline gap="xs" align="center">
+                    <span className="bezent-label--md">Aug 15, 2026</span>
+                    <span className="bezent-card__desc">— Independence Day (National Holiday)</span>
+                  </Inline>
+                  <Inline gap="xs" align="center">
+                    <span className="bezent-label--md">Oct 02, 2026</span>
+                    <span className="bezent-card__desc">— Gandhi Jayanti (National Holiday)</span>
+                  </Inline>
+                  <Inline gap="xs" align="center">
+                    <span className="bezent-label--md">Nov 08, 2026</span>
+                    <span className="bezent-card__desc">— Diwali / Deepavali (Festival)</span>
+                  </Inline>
+                  <Inline gap="xs" align="center">
+                    <span className="bezent-label--md">Dec 25, 2026</span>
+                    <span className="bezent-card__desc">— Christmas (Festival)</span>
+                  </Inline>
+                </Stack>
+
+                <Divider />
+
+                <CardTitle>Company Closures</CardTitle>
+                <Stack gap="xs">
+                  <Inline gap="xs" align="center">
+                    <span className="bezent-label--md">Dec 31, 2026</span>
+                    <span className="bezent-card__desc">— Annual Corporate Strategy Closure</span>
+                  </Inline>
+                </Stack>
               </Stack>
+            </Card>
 
-              <Divider />
+            {/* D. EMPLOYEE ASSIGNMENT */}
+            <Card variant="flat">
+              <Stack gap="md">
+                <CardTitle>Employee Shift & Timezone Linking</CardTitle>
+                <FormGrid columns={1} layout="horizontal" labelWidth="md">
+                  {/* 1. Employee / Worker */}
+                  <FormField label="Employee Link">
+                    <Input type="text" value={assignedEmployee} readOnly />
+                  </FormField>
 
-              <CardTitle>Company Closures</CardTitle>
-              <Stack gap="xs">
-                <Inline gap="xs" align="center">
-                  <span className="bezent-label--md">Dec 31, 2026</span>
-                  <span className="bezent-card__desc">— Annual Corporate Strategy Closure</span>
-                </Inline>
+                  {/* 2. Assigned Work Calendar */}
+                  <FormField label="Assigned Calendar">
+                    <Select
+                      options={CALENDAR_OPTIONS.filter((c) => c.value !== 'Other')}
+                      value={assignedCalendar}
+                      onChange={(e) => setAssignedCalendar(e.target.value)}
+                    />
+                  </FormField>
+
+                  {/* 3. Assigned Work Schedule */}
+                  <FormField label="Assigned Schedule">
+                    <Select
+                      options={SHIFT_OPTIONS.filter((s) => s.value !== 'Other')}
+                      value={assignedSchedule}
+                      onChange={(e) => setAssignedSchedule(e.target.value)}
+                    />
+                  </FormField>
+
+                  {/* 4. Time Zone */}
+                  <FormField label="Time Zone">
+                    <Select
+                      options={TIMEZONE_OPTIONS}
+                      value={timeZone}
+                      onChange={(e) => setTimeZone(e.target.value)}
+                    />
+                  </FormField>
+                </FormGrid>
               </Stack>
-            </Stack>
-          </Card>
-
-          {/* D. EMPLOYEE ASSIGNMENT */}
-          <Card variant="flat">
-            <Stack gap="md">
-              <CardTitle>Employee Shift & Timezone Linking</CardTitle>
-              <FormGrid columns={1} layout="horizontal" labelWidth="md">
-                {/* 1. Employee / Worker */}
-                <FormField label="Employee Link">
-                  <Input type="text" value={assignedEmployee} readOnly />
-                </FormField>
-
-                {/* 2. Assigned Work Calendar */}
-                <FormField label="Assigned Calendar">
-                  <Select
-                    options={CALENDAR_OPTIONS.filter((c) => c.value !== 'Other')}
-                    value={assignedCalendar}
-                    onChange={(e) => setAssignedCalendar(e.target.value)}
-                  />
-                </FormField>
-
-                {/* 3. Assigned Work Schedule */}
-                <FormField label="Assigned Schedule">
-                  <Select
-                    options={SHIFT_OPTIONS.filter((s) => s.value !== 'Other')}
-                    value={assignedSchedule}
-                    onChange={(e) => setAssignedSchedule(e.target.value)}
-                  />
-                </FormField>
-
-                {/* 4. Time Zone */}
-                <FormField label="Time Zone">
-                  <Select
-                    options={TIMEZONE_OPTIONS}
-                    value={timeZone}
-                    onChange={(e) => setTimeZone(e.target.value)}
-                  />
-                </FormField>
-              </FormGrid>
-            </Stack>
-          </Card>
-        </Grid>
-      </FormSection>
+            </Card>
+          </Grid>
+        </FormSection>
+      </Card>
     </Stack>
   );
 }

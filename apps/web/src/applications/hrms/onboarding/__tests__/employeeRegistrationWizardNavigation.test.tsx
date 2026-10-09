@@ -77,10 +77,6 @@ describe('Employee Registration Wizard — Navigation & Identity Context', () =>
     it('defaults to Personal Information (Step 01) on new registration with Back button disabled', () => {
       const html = renderWizard();
 
-      // Heading shows Chapter 01 Personal Information
-      expect(html).toContain('PERSONAL INFORMATION');
-      expect(html).toContain('Legal identity, demographics, contact details');
-
       // First step is selected in carousel
       expect(html).toContain('id="focus-chapter-personal"');
       expect(html).toMatch(/id="focus-chapter-personal"[^>]*aria-selected="true"/);
@@ -94,37 +90,37 @@ describe('Employee Registration Wizard — Navigation & Identity Context', () =>
       const generalHtml = renderWizard({
         initialEntries: ['/hrms/administration/onboarding/registration?chapter=general'],
       });
-      expect(generalHtml).toContain('GENERAL');
+      expect(generalHtml).toMatch(/id="focus-chapter-general"[^>]*aria-selected="true"/);
       expect(generalHtml).not.toMatch(/<button[^>]*disabled=""[^>]*>\s*← Back/);
 
       // Administration step (Step 03)
       const adminHtml = renderWizard({
         initialEntries: ['/hrms/administration/onboarding/registration?chapter=onboarding'],
       });
-      expect(adminHtml).toContain('ADMINISTRATION');
+      expect(adminHtml).toMatch(/id="focus-chapter-onboarding"[^>]*aria-selected="true"/);
       expect(adminHtml).not.toMatch(/<button[^>]*disabled=""[^>]*>\s*← Back/);
 
       // Review step (Step 10)
       const reviewHtml = renderWizard({
         initialEntries: ['/hrms/administration/onboarding/registration?chapter=review'],
       });
-      expect(reviewHtml).toContain('REVIEW');
+      expect(reviewHtml).toMatch(/id="focus-chapter-review"[^>]*aria-selected="true"/);
       expect(reviewHtml).not.toMatch(/<button[^>]*disabled=""[^>]*>\s*← Back/);
     });
   });
 
   describe('3. Direct Navigation to Every Step', () => {
     const steps = [
-      { id: 'personal', title: 'PERSONAL INFORMATION' },
-      { id: 'general', title: 'GENERAL' },
-      { id: 'onboarding', title: 'ADMINISTRATION' },
-      { id: 'skills', title: 'SKILLS' },
-      { id: 'emergency', title: 'EMERGENCY CONTACT' },
-      { id: 'accounts', title: 'ACCOUNTS' },
-      { id: 'online_access', title: 'ONLINE ACCESS' },
-      { id: 'working_hours', title: 'WORKING HOURS' },
-      { id: 'documents', title: 'DOCUMENTS' },
-      { id: 'review', title: 'REVIEW' },
+      { id: 'personal', label: 'Personal Information' },
+      { id: 'general', label: 'General' },
+      { id: 'onboarding', label: 'Administration' },
+      { id: 'skills', label: 'Skills' },
+      { id: 'emergency', label: 'Emergency Contact' },
+      { id: 'accounts', label: 'Accounts' },
+      { id: 'online_access', label: 'Online Access' },
+      { id: 'working_hours', label: 'Working Hours' },
+      { id: 'documents', label: 'Documents' },
+      { id: 'review', label: 'Review' },
     ];
 
     for (const step of steps) {
@@ -132,7 +128,7 @@ describe('Employee Registration Wizard — Navigation & Identity Context', () =>
         const html = renderWizard({
           initialEntries: [`/hrms/administration/onboarding/registration?chapter=${step.id}`],
         });
-        expect(html).toContain(step.title);
+        expect(html).toContain(step.label);
         expect(html).toMatch(new RegExp(`id="focus-chapter-${step.id}"[^>]*aria-selected="true"`));
       });
     }

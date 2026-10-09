@@ -4,15 +4,14 @@ import {
   FormGrid,
   FormField,
   Input,
+  PhoneInput,
   Select,
   Button,
   Stack,
-  Inline,
   Card,
   CardTitle,
   Toolbar,
   Checkbox,
-  Badge,
 } from '../../../../design-system/components';
 
 import { RegistrationField, useRegistrationConfig } from '../registration/registrationConfig';
@@ -241,11 +240,11 @@ export interface PersonalInformationProps {
   onChange?: (updated: Partial<Chapter02PersonalState>) => void;
 }
 
-export function PersonalInformation({ employeeId, data, onChange }: PersonalInformationProps) {
-  // 1. Profile Photo
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const photoInputRef = useRef<HTMLInputElement>(null);
-
+export function PersonalInformation({
+  employeeId: _employeeId,
+  data,
+  onChange,
+}: PersonalInformationProps) {
   // 3-6. Name fields
   const [firstName, setFirstName] = useState(data?.firstName ?? '');
   const [middleName, setMiddleName] = useState(data?.middleName ?? '');
@@ -512,22 +511,6 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
 
   const cityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Photo Upload Handler
-  const handlePhotoChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Image size exceeds 5MB limit.');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = () => {
-        setPhotoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   // 1. Real Postal API Lookup by 6-digit PIN Code
   useEffect(() => {
     const cleanPin = pinCode.trim();
@@ -790,26 +773,6 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
     );
   }, [personalFields, config.metadata]);
 
-  const isPhotoEnabled = useMemo(() => {
-    const photoField = config.field('personal.profilePhoto');
-    return photoField ? photoField.enabled !== false : true;
-  }, [config]);
-
-  const employeeIdOwnership = useMemo(() => {
-    const employeeIdField = config.field('general.employeeId');
-    const sectionId = employeeIdField?.section ?? 'general';
-    const sortedSections = [...config.sections]
-      .filter((s) => s.visible !== false)
-      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-    const sectionIndex = sortedSections.findIndex((s) => s.id === sectionId);
-    const chapterNumber = sectionIndex >= 0 ? String(sectionIndex + 1).padStart(2, '0') : null;
-
-    if (chapterNumber) {
-      return `System Assigned • Chapter ${chapterNumber}`;
-    }
-    return 'System Assigned';
-  }, [config]);
-
   const renderDynamicFieldInput = (field: RegistrationFieldConfig) => {
     const fType = field.type;
     const fKey = field.key;
@@ -855,7 +818,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
           <Input
             id={`field-${fKey}`}
             type="number"
-            placeholder={(field.config?.placeholder as string) || `Enter ${field.label}`}
+            placeholder={(field.config?.placeholder as string) || undefined}
             value={val}
             onChange={(e) => setVal(e.target.value)}
           />
@@ -865,7 +828,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
           <Input
             id={`field-${fKey}`}
             type={fType === 'email' ? 'email' : fType === 'phone' ? 'tel' : 'text'}
-            placeholder={(field.config?.placeholder as string) || `Enter ${field.label}`}
+            placeholder={(field.config?.placeholder as string) || undefined}
             value={val}
             onChange={(e) => setVal(e.target.value)}
           />
@@ -892,7 +855,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-first-name"
               type="text"
-              placeholder={configuredPlaceholder || 'e.g. Arun'}
+              placeholder={configuredPlaceholder || undefined}
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
             />
@@ -911,7 +874,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-middle-name"
               type="text"
-              placeholder={configuredPlaceholder || 'e.g. Kumar'}
+              placeholder={configuredPlaceholder || undefined}
               value={middleName}
               onChange={(e) => setMiddleName(e.target.value)}
             />
@@ -930,7 +893,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-last-name"
               type="text"
-              placeholder={configuredPlaceholder || 'e.g. Sharma'}
+              placeholder={configuredPlaceholder || undefined}
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
             />
@@ -949,7 +912,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-preferred-name"
               type="text"
-              placeholder={configuredPlaceholder || 'e.g. Arun'}
+              placeholder={configuredPlaceholder || undefined}
               value={preferredName}
               onChange={(e) => setPreferredName(e.target.value)}
             />
@@ -1222,26 +1185,21 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             htmlFor="pers-mobile-phone"
             span={span}
           >
-            <Inline gap="xs">
-              <Select
-                value={mobileCountryCode}
-                onChange={(e) => setMobileCountryCode(e.target.value)}
-                options={[
-                  { value: '+91', label: '+91 (IN)' },
-                  { value: '+1', label: '+1 (US)' },
-                  { value: '+44', label: '+44 (UK)' },
-                  { value: '+971', label: '+971 (UAE)' },
-                  { value: '+65', label: '+65 (SG)' },
-                ]}
-              />
-              <Input
-                id="pers-mobile-phone"
-                type="tel"
-                placeholder={configuredPlaceholder || 'e.g. 98765 43210'}
-                value={mobilePhone}
-                onChange={(e) => setMobilePhone(e.target.value)}
-              />
-            </Inline>
+            <PhoneInput
+              id="pers-mobile-phone"
+              countryCode={mobileCountryCode}
+              onCountryCodeChange={setMobileCountryCode}
+              countryCodeOptions={[
+                { value: '+91', label: '+91 (IN)' },
+                { value: '+1', label: '+1 (US)' },
+                { value: '+44', label: '+44 (UK)' },
+                { value: '+971', label: '+971 (UAE)' },
+                { value: '+65', label: '+65 (SG)' },
+              ]}
+              placeholder={configuredPlaceholder || undefined}
+              value={mobilePhone}
+              onChange={(e) => setMobilePhone(e.target.value)}
+            />
           </RegistrationField>
         );
 
@@ -1258,7 +1216,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-email"
               type="email"
-              placeholder={configuredPlaceholder || 'e.g. employee@company.com'}
+              placeholder={configuredPlaceholder || undefined}
               value={email}
               onChange={handleEmailChange}
               error={emailError || undefined}
@@ -1314,7 +1272,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-street"
               type="text"
-              placeholder={configuredPlaceholder || 'Building, Flat No., Street, Area'}
+              placeholder={configuredPlaceholder || undefined}
               value={street}
               onChange={(e) => setStreet(e.target.value)}
             />
@@ -1333,7 +1291,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-address-line-2"
               type="text"
-              placeholder={configuredPlaceholder || 'Apartment, suite, unit, etc. (optional)'}
+              placeholder={configuredPlaceholder || undefined}
               value={addressLine2}
               onChange={(e) => setAddressLine2(e.target.value)}
             />
@@ -1360,7 +1318,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
               id="pers-pincode"
               type="text"
               maxLength={6}
-              placeholder={configuredPlaceholder || 'e.g. 600001'}
+              placeholder={configuredPlaceholder || undefined}
               value={pinCode}
               onChange={(e) => setPinCode(e.target.value)}
             />
@@ -1387,7 +1345,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
               <Input
                 id="pers-city"
                 type="text"
-                placeholder={configuredPlaceholder || 'e.g. Hosur, Chennai, Tambaram'}
+                placeholder={configuredPlaceholder || undefined}
                 value={city}
                 onChange={handleCityChange}
               />
@@ -1426,7 +1384,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-district"
               type="text"
-              placeholder={configuredPlaceholder || 'e.g. Krishnagiri, Chengalpattu'}
+              placeholder={configuredPlaceholder || undefined}
               value={district}
               onChange={(e) => setDistrict(e.target.value)}
             />
@@ -1445,7 +1403,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-state"
               type="text"
-              placeholder={configuredPlaceholder || 'e.g. Tamil Nadu'}
+              placeholder={configuredPlaceholder || undefined}
               value={state}
               onChange={(e) => setState(e.target.value)}
             />
@@ -1480,7 +1438,14 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
 
       case 'personal.isPermanentSameAsCurrent':
         return (
-          <RegistrationField key={key} fieldKey={key} value={isPermanentSameAsCurrent} span="full">
+          <RegistrationField
+            key={key}
+            fieldKey={key}
+            value={isPermanentSameAsCurrent}
+            hideLabel
+            orientation="vertical"
+            span="full"
+          >
             <Checkbox
               id="pers-same-address"
               label={label}
@@ -1503,7 +1468,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-perm-street"
               type="text"
-              placeholder={configuredPlaceholder || 'Building, Flat No., Street, Area'}
+              placeholder={configuredPlaceholder || undefined}
               value={permanentStreet}
               onChange={(e) => setPermanentStreet(e.target.value)}
             />
@@ -1523,7 +1488,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-perm-address-line-2"
               type="text"
-              placeholder={configuredPlaceholder || 'Apartment, suite, unit, etc. (optional)'}
+              placeholder={configuredPlaceholder || undefined}
               value={permanentAddressLine2}
               onChange={(e) => setPermanentAddressLine2(e.target.value)}
             />
@@ -1551,7 +1516,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
               id="pers-perm-pincode"
               type="text"
               maxLength={6}
-              placeholder={configuredPlaceholder || 'e.g. 600001'}
+              placeholder={configuredPlaceholder || undefined}
               value={permanentPinCode}
               onChange={(e) => setPermanentPinCode(e.target.value)}
             />
@@ -1571,7 +1536,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-perm-city"
               type="text"
-              placeholder={configuredPlaceholder || 'e.g. Chennai'}
+              placeholder={configuredPlaceholder || undefined}
               value={permanentCity}
               onChange={(e) => setPermanentCity(e.target.value)}
             />
@@ -1591,7 +1556,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-perm-district"
               type="text"
-              placeholder={configuredPlaceholder || 'e.g. Chennai'}
+              placeholder={configuredPlaceholder || undefined}
               value={permanentDistrict}
               onChange={(e) => setPermanentDistrict(e.target.value)}
             />
@@ -1611,7 +1576,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             <Input
               id="pers-perm-state"
               type="text"
-              placeholder={configuredPlaceholder || 'e.g. Tamil Nadu'}
+              placeholder={configuredPlaceholder || undefined}
               value={permanentState}
               onChange={(e) => setPermanentState(e.target.value)}
             />
@@ -1653,6 +1618,7 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
             fieldKey={key}
             value={customValues[key] ?? ''}
             htmlFor={`field-${key}`}
+            hideLabel={field.type === 'checkbox'}
             span={span}
           >
             {renderDynamicFieldInput(field)}
@@ -1663,278 +1629,215 @@ export function PersonalInformation({ employeeId, data, onChange }: PersonalInfo
 
   return (
     <Stack gap="xl">
-      {/* Informational Employee ID context header if passed */}
-      {employeeId && (
-        <Card padding="sm">
-          <Inline gap="sm" align="center">
-            <span className="bezent-card__title">Employee ID:</span>
-            <Badge variant="neutral">{employeeId}</Badge>
-            <span className="bezent-card__desc">({employeeIdOwnership})</span>
-          </Inline>
-        </Card>
-      )}
-
       {/* Dynamic Canonical Form Groups */}
       {groups.map((group) => {
         if (group.fields.length === 0) return null;
 
         return (
-          <FormSection key={group.key} title={group.title} description={group.description}>
-            <Stack gap="lg">
-              {group.key === 'personal_details' && isPhotoEnabled && (
-                <div className="bezent-photo-uploader">
-                  {photoPreview ? (
-                    <img
-                      src={photoPreview}
-                      alt="Profile Preview"
-                      className="bezent-photo-preview"
-                    />
-                  ) : (
-                    <div className="bezent-photo-placeholder">
-                      {firstName ? firstName[0]?.toUpperCase() : '👤'}
-                    </div>
+          <Card key={group.key} padding="lg">
+            <FormSection title={group.title}>
+              <Stack gap="lg">
+                <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                  {group.fields.map((field) =>
+                    renderField(field as unknown as RegistrationFieldConfig),
                   )}
-                  <Stack gap="xs">
-                    <Inline gap="xs" align="center">
-                      <span className="bezent-card__title">Profile Photo</span>
-                      <span className="bezent-card__desc">(Supports JPG, PNG under 5MB)</span>
-                    </Inline>
-                    <Inline gap="sm">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        type="button"
-                        onClick={() => photoInputRef.current?.click()}
-                      >
-                        Upload Photo
-                      </Button>
-                      {photoPreview && (
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          type="button"
-                          onClick={() => setPhotoPreview(null)}
-                        >
-                          Remove
-                        </Button>
-                      )}
-                      <input
-                        ref={photoInputRef}
-                        type="file"
-                        accept="image/jpeg,image/png"
-                        hidden
-                        onChange={handlePhotoChange}
-                      />
-                    </Inline>
-                  </Stack>
-                </div>
-              )}
-              <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                {group.fields.map((field) =>
-                  renderField(field as unknown as RegistrationFieldConfig),
-                )}
-              </FormGrid>
-            </Stack>
-          </FormSection>
+                </FormGrid>
+              </Stack>
+            </FormSection>
+          </Card>
         );
       })}
 
       {/* SECTION: FAMILY & NOMINATION (Dedicated repeatable collections) */}
-      <FormSection
-        title="Family & Nomination Details"
-        description="Family dependents and statutory nominee beneficiaries"
-      >
-        <Stack gap="xl">
-          {/* Family Members (Repeatable) */}
-          <Stack gap="md">
-            <Toolbar
-              left={<CardTitle>Family Members</CardTitle>}
-              right={
-                <Button variant="secondary" size="sm" type="button" onClick={addFamilyMember}>
-                  + Add Family Member
-                </Button>
-              }
-            />
-            {familyMembers.map((fam, idx) => (
-              <Card key={fam.id} padding="md">
-                <Stack gap="md">
-                  <Toolbar
-                    left={<CardTitle>Member #{idx + 1}</CardTitle>}
-                    right={
-                      familyMembers.length > 1 ? (
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          type="button"
-                          onClick={() => removeFamilyMember(fam.id)}
-                        >
-                          Remove
-                        </Button>
-                      ) : undefined
-                    }
-                  />
-                  <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                    <FormField label="Name" htmlFor={`fam-name-${fam.id}`}>
-                      <Input
-                        id={`fam-name-${fam.id}`}
-                        type="text"
-                        placeholder="Full Name"
-                        value={fam.name}
-                        onChange={(e) => updateFamilyMember(fam.id, 'name', e.target.value)}
-                      />
-                    </FormField>
-                    <FormField label="Relationship" htmlFor={`fam-rel-${fam.id}`}>
-                      <Stack gap="xs">
-                        <Select
-                          id={`fam-rel-${fam.id}`}
-                          value={fam.relationship}
-                          onChange={(e) =>
-                            updateFamilyMember(fam.id, 'relationship', e.target.value)
-                          }
-                          options={[
-                            { value: 'Spouse', label: 'Spouse' },
-                            { value: 'Father', label: 'Father' },
-                            { value: 'Mother', label: 'Mother' },
-                            { value: 'Son', label: 'Son' },
-                            { value: 'Daughter', label: 'Daughter' },
-                            { value: 'Brother', label: 'Brother' },
-                            { value: 'Sister', label: 'Sister' },
-                            { value: 'Other', label: 'Other' },
-                          ]}
+      <Card padding="lg">
+        <FormSection title="Family & Nomination Details">
+          <Stack gap="xl">
+            {/* Family Members (Repeatable) */}
+            <Stack gap="md">
+              <Toolbar
+                left={<CardTitle>Family Members</CardTitle>}
+                right={
+                  <Button variant="secondary" size="sm" type="button" onClick={addFamilyMember}>
+                    + Add Family Member
+                  </Button>
+                }
+              />
+              {familyMembers.map((fam, idx) => (
+                <Card key={fam.id} padding="md">
+                  <Stack gap="md">
+                    <Toolbar
+                      left={<CardTitle>Member #{idx + 1}</CardTitle>}
+                      right={
+                        familyMembers.length > 1 ? (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            type="button"
+                            onClick={() => removeFamilyMember(fam.id)}
+                          >
+                            Remove
+                          </Button>
+                        ) : undefined
+                      }
+                    />
+                    <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                      <FormField label="Name" htmlFor={`fam-name-${fam.id}`}>
+                        <Input
+                          id={`fam-name-${fam.id}`}
+                          type="text"
+                          placeholder="Full Name"
+                          value={fam.name}
+                          onChange={(e) => updateFamilyMember(fam.id, 'name', e.target.value)}
                         />
-                        {fam.relationship === 'Other' && (
-                          <Input
-                            placeholder="Enter Relationship..."
-                            value={fam.otherRelationship || ''}
+                      </FormField>
+                      <FormField label="Relationship" htmlFor={`fam-rel-${fam.id}`}>
+                        <Stack gap="xs">
+                          <Select
+                            id={`fam-rel-${fam.id}`}
+                            value={fam.relationship}
                             onChange={(e) =>
-                              updateFamilyMember(fam.id, 'otherRelationship', e.target.value)
+                              updateFamilyMember(fam.id, 'relationship', e.target.value)
                             }
+                            options={[
+                              { value: 'Spouse', label: 'Spouse' },
+                              { value: 'Father', label: 'Father' },
+                              { value: 'Mother', label: 'Mother' },
+                              { value: 'Son', label: 'Son' },
+                              { value: 'Daughter', label: 'Daughter' },
+                              { value: 'Brother', label: 'Brother' },
+                              { value: 'Sister', label: 'Sister' },
+                              { value: 'Other', label: 'Other' },
+                            ]}
                           />
-                        )}
-                      </Stack>
-                    </FormField>
-                    <FormField label="Date of Birth" htmlFor={`fam-dob-${fam.id}`}>
-                      <Input
-                        id={`fam-dob-${fam.id}`}
-                        type="date"
-                        value={fam.dob}
-                        onChange={(e) => updateFamilyMember(fam.id, 'dob', e.target.value)}
-                      />
-                    </FormField>
-                    <FormField label="Phone" htmlFor={`fam-phone-${fam.id}`}>
-                      <Inline gap="xs">
-                        <Select
-                          value={fam.countryCode}
-                          onChange={(e) =>
-                            updateFamilyMember(fam.id, 'countryCode', e.target.value)
+                          {fam.relationship === 'Other' && (
+                            <Input
+                              placeholder="Enter Relationship..."
+                              value={fam.otherRelationship || ''}
+                              onChange={(e) =>
+                                updateFamilyMember(fam.id, 'otherRelationship', e.target.value)
+                              }
+                            />
+                          )}
+                        </Stack>
+                      </FormField>
+                      <FormField label="Date of Birth" htmlFor={`fam-dob-${fam.id}`}>
+                        <Input
+                          id={`fam-dob-${fam.id}`}
+                          type="date"
+                          value={fam.dob}
+                          onChange={(e) => updateFamilyMember(fam.id, 'dob', e.target.value)}
+                        />
+                      </FormField>
+                      <FormField label="Phone" htmlFor={`fam-phone-${fam.id}`}>
+                        <PhoneInput
+                          id={`fam-phone-${fam.id}`}
+                          countryCode={fam.countryCode}
+                          onCountryCodeChange={(code) =>
+                            updateFamilyMember(fam.id, 'countryCode', code)
                           }
-                          options={[
+                          countryCodeOptions={[
                             { value: '+91', label: '+91 (IN)' },
                             { value: '+1', label: '+1 (US)' },
                             { value: '+44', label: '+44 (UK)' },
                             { value: '+971', label: '+971 (UAE)' },
                           ]}
-                        />
-                        <Input
-                          id={`fam-phone-${fam.id}`}
-                          type="tel"
                           placeholder="Phone Number"
                           value={fam.phone}
                           onChange={(e) => updateFamilyMember(fam.id, 'phone', e.target.value)}
                         />
-                      </Inline>
-                    </FormField>
-                  </FormGrid>
-                </Stack>
-              </Card>
-            ))}
-          </Stack>
+                      </FormField>
+                    </FormGrid>
+                  </Stack>
+                </Card>
+              ))}
+            </Stack>
 
-          {/* Nomination Details (Repeatable) */}
-          <Stack gap="md">
-            <Toolbar
-              left={<CardTitle>Nomination Details</CardTitle>}
-              right={
-                <Button variant="secondary" size="sm" type="button" onClick={addNominee}>
-                  + Add Nominee
-                </Button>
-              }
-            />
-            {nominees.map((nom, idx) => (
-              <Card key={nom.id} padding="md">
-                <Stack gap="md">
-                  <Toolbar
-                    left={<CardTitle>Nominee #{idx + 1}</CardTitle>}
-                    right={
-                      nominees.length > 1 ? (
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          type="button"
-                          onClick={() => removeNominee(nom.id)}
-                        >
-                          Remove
-                        </Button>
-                      ) : undefined
-                    }
-                  />
-                  <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                    <FormField label="Nominee Name" htmlFor={`nom-name-${nom.id}`}>
-                      <Input
-                        id={`nom-name-${nom.id}`}
-                        type="text"
-                        placeholder="Full Name"
-                        value={nom.name}
-                        onChange={(e) => updateNominee(nom.id, 'name', e.target.value)}
-                      />
-                    </FormField>
-                    <FormField label="Relationship" htmlFor={`nom-rel-${nom.id}`}>
-                      <Stack gap="xs">
-                        <Select
-                          id={`nom-rel-${nom.id}`}
-                          value={nom.relationship}
-                          onChange={(e) => updateNominee(nom.id, 'relationship', e.target.value)}
-                          options={[
-                            { value: 'Spouse', label: 'Spouse' },
-                            { value: 'Father', label: 'Father' },
-                            { value: 'Mother', label: 'Mother' },
-                            { value: 'Son', label: 'Son' },
-                            { value: 'Daughter', label: 'Daughter' },
-                            { value: 'Sibling', label: 'Sibling' },
-                            { value: 'Other', label: 'Other' },
-                          ]}
+            {/* Nomination Details (Repeatable) */}
+            <Stack gap="md">
+              <Toolbar
+                left={<CardTitle>Nomination Details</CardTitle>}
+                right={
+                  <Button variant="secondary" size="sm" type="button" onClick={addNominee}>
+                    + Add Nominee
+                  </Button>
+                }
+              />
+              {nominees.map((nom, idx) => (
+                <Card key={nom.id} padding="md">
+                  <Stack gap="md">
+                    <Toolbar
+                      left={<CardTitle>Nominee #{idx + 1}</CardTitle>}
+                      right={
+                        nominees.length > 1 ? (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            type="button"
+                            onClick={() => removeNominee(nom.id)}
+                          >
+                            Remove
+                          </Button>
+                        ) : undefined
+                      }
+                    />
+                    <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                      <FormField label="Nominee Name" htmlFor={`nom-name-${nom.id}`}>
+                        <Input
+                          id={`nom-name-${nom.id}`}
+                          type="text"
+                          placeholder="Full Name"
+                          value={nom.name}
+                          onChange={(e) => updateNominee(nom.id, 'name', e.target.value)}
                         />
-                        {nom.relationship === 'Other' && (
-                          <Input
-                            placeholder="Enter Relationship..."
-                            value={nom.otherRelationship || ''}
-                            onChange={(e) =>
-                              updateNominee(nom.id, 'otherRelationship', e.target.value)
-                            }
+                      </FormField>
+                      <FormField label="Relationship" htmlFor={`nom-rel-${nom.id}`}>
+                        <Stack gap="xs">
+                          <Select
+                            id={`nom-rel-${nom.id}`}
+                            value={nom.relationship}
+                            onChange={(e) => updateNominee(nom.id, 'relationship', e.target.value)}
+                            options={[
+                              { value: 'Spouse', label: 'Spouse' },
+                              { value: 'Father', label: 'Father' },
+                              { value: 'Mother', label: 'Mother' },
+                              { value: 'Son', label: 'Son' },
+                              { value: 'Daughter', label: 'Daughter' },
+                              { value: 'Sibling', label: 'Sibling' },
+                              { value: 'Other', label: 'Other' },
+                            ]}
                           />
-                        )}
-                      </Stack>
-                    </FormField>
-                    <FormField label="Share % (1-100)" htmlFor={`nom-share-${nom.id}`}>
-                      <Input
-                        id={`nom-share-${nom.id}`}
-                        type="number"
-                        min="1"
-                        max="100"
-                        placeholder="100"
-                        value={nom.sharePercentage}
-                        onChange={(e) =>
-                          updateNominee(nom.id, 'sharePercentage', Number(e.target.value) || '')
-                        }
-                      />
-                    </FormField>
-                  </FormGrid>
-                </Stack>
-              </Card>
-            ))}
+                          {nom.relationship === 'Other' && (
+                            <Input
+                              placeholder="Enter Relationship..."
+                              value={nom.otherRelationship || ''}
+                              onChange={(e) =>
+                                updateNominee(nom.id, 'otherRelationship', e.target.value)
+                              }
+                            />
+                          )}
+                        </Stack>
+                      </FormField>
+                      <FormField label="Share % (1-100)" htmlFor={`nom-share-${nom.id}`}>
+                        <Input
+                          id={`nom-share-${nom.id}`}
+                          type="number"
+                          min="1"
+                          max="100"
+                          placeholder="100"
+                          value={nom.sharePercentage}
+                          onChange={(e) =>
+                            updateNominee(nom.id, 'sharePercentage', Number(e.target.value) || '')
+                          }
+                        />
+                      </FormField>
+                    </FormGrid>
+                  </Stack>
+                </Card>
+              ))}
+            </Stack>
           </Stack>
-        </Stack>
-      </FormSection>
+        </FormSection>
+      </Card>
     </Stack>
   );
 }

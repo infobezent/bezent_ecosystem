@@ -7,14 +7,14 @@
 
 /* ─── 1. Uniform Typography & Color Palette ──────────────────────────────── */
 :root {
-  --form-font-size-title: 17px;
-  --form-font-size-subtitle: 17px;
-  --form-font-size-card-title: 17px;
-  --form-font-size-section-label: 17px;
-  --form-font-size-label: 17px;
-  --form-font-size-input: 17px;
+  --form-font-size-title: 13px;
+  --form-font-size-subtitle: 13px;
+  --form-font-size-card-title: 16px;
+  --form-font-size-section-label: 13px;
+  --form-font-size-label: 13.5px;
+  --form-font-size-input: 13.5px;
   --form-font-size-hint: 12px;
-  --form-font-size-badge: 13px;
+  --form-font-size-badge: 12px;
 
   /* Theme Button & Toggle Palette */
   --bezent-btn-sec-bg: #c2e7ff;
@@ -94,7 +94,7 @@
 .personal-info__input:hover:not(:disabled):not([readonly]),
 .working-hours-section__input:hover:not(:disabled):not([readonly]),
 .accounts-section__input:hover:not(:disabled):not([readonly]) {
-  border-color: var(--border-focus, #1a73e8);
+  border-color: var(--border-focus, #7cc4fa);
 }
 
 .employee-registration__input:focus,
@@ -105,8 +105,8 @@
 .skills-section__input:focus,
 .emergency-contact-section__input:focus {
   outline: none;
-  border-color: var(--border-focus, #1a73e8);
-  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.18);
+  border-color: var(--border-focus, #7cc4fa);
+  box-shadow: none;
 }
 
 .employee-registration__input--disabled,
@@ -307,8 +307,8 @@
 }
 
 .employee-registration__section-subtitle {
-  font-size: var(--form-font-size-subtitle, 14px);
-  color: var(--text-secondary, #000000);
+  font-size: var(--form-font-size-subtitle, 13px);
+  color: var(--text-secondary, #5f6368);
   margin: 2px 0 0 0;
   line-height: 1.45;
 }
@@ -384,34 +384,65 @@
   width: 100%;
 }
 
-.review-section .bezent-label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-secondary, #5f6368);
+.review-section .bezent-card__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary, #000000);
+  letter-spacing: -0.015em;
+}
+
+.review-section .bezent-label,
+.review-section .bezent-label--sm {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary, #000000);
   letter-spacing: normal;
 }
 
-.review-section .bezent-label--sm {
-  font-size: 12.5px;
-  font-weight: 500;
-  color: var(--text-secondary, #5f6368);
+.review-section .bezent-label--md {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-primary, #000000);
 }
 
-.review-section .bezent-label--md {
+.review-section strong {
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--text-secondary, #5f6368);
+  line-height: 1.4;
+}
+
+.review-section .bezent-alert strong {
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-primary, #041e49);
+  color: inherit;
+}
+
+.review-section .bezent-card__desc strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary, #000000);
 }
 
 .review-section span {
   font-weight: 400;
 }
 
-[data-theme='dark'] .review-section .bezent-label {
+[data-theme='dark'] .review-section .bezent-card__title {
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme='dark'] .review-section .bezent-label,
+[data-theme='dark'] .review-section .bezent-label--sm,
+[data-theme='dark'] .review-section .bezent-label--md {
+  color: var(--text-primary, #f8fafc);
+}
+
+[data-theme='dark'] .review-section strong {
   color: var(--text-secondary, #94a3b8);
 }
 
-[data-theme='dark'] .review-section .bezent-label--md {
+[data-theme='dark'] .review-section .bezent-card__desc strong {
   color: var(--text-primary, #f8fafc);
 }
 
@@ -435,8 +466,8 @@
 }
 
 .onboarding-section__group-subtitle {
-  font-size: var(--form-font-size-subtitle, 13.5px);
-  color: var(--text-secondary, #000000);
+  font-size: var(--form-font-size-subtitle, 13px);
+  color: var(--text-secondary, #5f6368);
   margin: -6px 0 6px 0;
 }
 

@@ -569,7 +569,7 @@ export function TenantsPage({
           )}
 
           {!loading && tenants.length > 0 && (
-            <Table>
+            <Table compact hoverable>
               <TableHead>
                 <TableRow>
                   <TableHeaderCell onClick={() => handleSort('name')}>

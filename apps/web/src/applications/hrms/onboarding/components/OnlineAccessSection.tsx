@@ -201,143 +201,143 @@ export function OnlineAccessSection({
   return (
     <Stack gap="xl">
       {/* A. ACCOUNT INFORMATION */}
-      <FormSection
-        title="User Account & Credentials"
-        description="Single sign-on username, corporate email, and invitation onboarding."
-      >
-        <FormGrid columns={2} layout="horizontal" labelWidth="md">
-          {/* 1. Employee Username */}
-          <FormField label="Username" required>
-            <Input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
-          </FormField>
-
-          {/* 2. Official Company Email */}
-          <FormField label="Company Email" required>
-            <Input
-              type="email"
-              value={companyEmail}
-              onChange={(e) => setCompanyEmail(e.target.value)}
-            />
-          </FormField>
-
-          {/* 3. Invitation Status */}
-          <FormField label="Invitation Status">
-            <Inline gap="sm" align="center">
-              <Badge variant={getBadgeVariant(invitationStatus)}>● {invitationStatus}</Badge>
-              <Select
-                options={INVITATION_STATUS_OPTIONS}
-                value={invitationStatus}
-                onChange={(e) =>
-                  setInvitationStatus(
-                    e.target.value as 'Not Sent' | 'Pending' | 'Sent' | 'Accepted' | 'Expired',
-                  )
-                }
-              />
-            </Inline>
-          </FormField>
-
-          {/* 4. Invitation Sent Date */}
-          <FormField label="Sent Date">
-            <Input type="text" value={invitationSentDate} readOnly />
-          </FormField>
-        </FormGrid>
-      </FormSection>
-
-      {/* B. SECURITY */}
-      <FormSection
-        title="Security & Authentication"
-        description="Two-factor authentication requirements and password policies."
-      >
-        <Stack gap="md">
+      <Card padding="lg">
+        <FormSection title="User Account & Credentials">
           <FormGrid columns={2} layout="horizontal" labelWidth="md">
-            <FormField label="MFA Policy">
-              <Switch
-                checked={mfaRequired}
-                onChange={(e) => setMfaRequired(e.target.checked)}
-                label="Enforce Two-Factor Authentication"
+            {/* 1. Employee Username */}
+            <FormField label="Username" required>
+              <Input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
+            </FormField>
+
+            {/* 2. Official Company Email */}
+            <FormField label="Company Email" required>
+              <Input
+                type="email"
+                value={companyEmail}
+                onChange={(e) => setCompanyEmail(e.target.value)}
               />
             </FormField>
 
-            <FormField label="Password Setup">
-              <Switch
-                checked={forcePasswordSetup}
-                onChange={(e) => setForcePasswordSetup(e.target.checked)}
-                label="Force Password Setup on First Login"
-              />
-            </FormField>
-
-            <FormField label="Account State">
-              <Switch
-                checked={accountActive}
-                onChange={(e) => setAccountActive(e.target.checked)}
-                label="Account Active & Enabled"
-              />
-            </FormField>
-
-            <FormField label="Invitation">
-              <Inline gap="md" align="center">
-                <Button type="button" variant="primary" onClick={handleSendInvitation}>
-                  ✉️ Send Welcome Invitation
-                </Button>
-                {invitationSuccessMsg && <Badge variant="success">{invitationSuccessMsg}</Badge>}
+            {/* 3. Invitation Status */}
+            <FormField label="Invitation Status">
+              <Inline gap="sm" align="center">
+                <Badge variant={getBadgeVariant(invitationStatus)}>● {invitationStatus}</Badge>
+                <Select
+                  options={INVITATION_STATUS_OPTIONS}
+                  value={invitationStatus}
+                  onChange={(e) =>
+                    setInvitationStatus(
+                      e.target.value as 'Not Sent' | 'Pending' | 'Sent' | 'Accepted' | 'Expired',
+                    )
+                  }
+                />
               </Inline>
             </FormField>
+
+            {/* 4. Invitation Sent Date */}
+            <FormField label="Sent Date">
+              <Input type="text" value={invitationSentDate} readOnly />
+            </FormField>
           </FormGrid>
-        </Stack>
-      </FormSection>
+        </FormSection>
+      </Card>
+
+      {/* B. SECURITY */}
+      <Card padding="lg">
+        <FormSection title="Security & Authentication">
+          <Stack gap="md">
+            <FormGrid columns={2} layout="horizontal" labelWidth="md">
+              <FormField label="MFA Policy">
+                <Switch
+                  checked={mfaRequired}
+                  onChange={(e) => setMfaRequired(e.target.checked)}
+                  label="Enforce Two-Factor Authentication"
+                />
+              </FormField>
+
+              <FormField label="Password Setup">
+                <Switch
+                  checked={forcePasswordSetup}
+                  onChange={(e) => setForcePasswordSetup(e.target.checked)}
+                  label="Force Password Setup on First Login"
+                />
+              </FormField>
+
+              <FormField label="Account State">
+                <Switch
+                  checked={accountActive}
+                  onChange={(e) => setAccountActive(e.target.checked)}
+                  label="Account Active & Enabled"
+                />
+              </FormField>
+
+              <FormField label="Invitation">
+                <Inline gap="md" align="center">
+                  <Button type="button" variant="primary" onClick={handleSendInvitation}>
+                    ✉️ Send Welcome Invitation
+                  </Button>
+                  {invitationSuccessMsg && <Badge variant="success">{invitationSuccessMsg}</Badge>}
+                </Inline>
+              </FormField>
+            </FormGrid>
+          </Stack>
+        </FormSection>
+      </Card>
 
       {/* C. ROLE & ACCESS */}
-      <FormSection
-        title="Role & Scope Assignment"
-        description="Portal access role and operational data scope."
-      >
-        <FormGrid columns={2} layout="horizontal" labelWidth="md">
-          {/* 1. Employee Role */}
-          <FormField label="Employee Role" required>
-            <Select
-              options={ROLE_OPTIONS}
-              value={employeeRole}
-              onChange={(e) => handleRoleChange(e.target.value)}
-            />
-          </FormField>
-
-          {/* 2. Portal Role Scope */}
-          <FormField label="Role Scope" required>
-            <Stack gap="xs">
+      <Card padding="lg">
+        <FormSection title="Role & Scope Assignment">
+          <FormGrid columns={2} layout="horizontal" labelWidth="md">
+            {/* 1. Employee Role */}
+            <FormField label="Employee Role" required>
               <Select
-                options={SCOPE_OPTIONS}
-                value={portalRoleScope}
-                onChange={(e) => setPortalRoleScope(e.target.value)}
+                options={ROLE_OPTIONS}
+                value={employeeRole}
+                onChange={(e) => handleRoleChange(e.target.value)}
               />
-              {portalRoleScope === 'Custom' && (
-                <Input
-                  type="text"
-                  placeholder="Describe custom scope boundaries..."
-                  value={customScopeText}
-                  onChange={(e) => setCustomScopeText(e.target.value)}
+            </FormField>
+
+            {/* 2. Portal Role Scope */}
+            <FormField label="Role Scope" required>
+              <Stack gap="xs">
+                <Select
+                  options={SCOPE_OPTIONS}
+                  value={portalRoleScope}
+                  onChange={(e) => setPortalRoleScope(e.target.value)}
                 />
-              )}
-            </Stack>
-          </FormField>
-        </FormGrid>
-      </FormSection>
+                {portalRoleScope === 'Custom' && (
+                  <Input
+                    type="text"
+                    placeholder="Describe custom scope boundaries..."
+                    value={customScopeText}
+                    onChange={(e) => setCustomScopeText(e.target.value)}
+                  />
+                )}
+              </Stack>
+            </FormField>
+          </FormGrid>
+        </FormSection>
+      </Card>
 
       {/* D. MODULE ACCESS */}
-      <FormSection
-        title="Module Access Permissions"
-        description="Module permissions auto-configured based on selected role. Toggle individual items to customize access."
-      >
-        <Grid columns={3} gap="md">
-          {modules.map((m) => (
-            <Card key={m.id} variant="flat">
-              <Stack gap="xs">
-                <Checkbox checked={m.enabled} onChange={() => toggleModule(m.id)} label={m.name} />
-                <CardDescription>{m.description}</CardDescription>
-              </Stack>
-            </Card>
-          ))}
-        </Grid>
-      </FormSection>
+      <Card padding="lg">
+        <FormSection title="Module Access Permissions">
+          <Grid columns={3} gap="md">
+            {modules.map((m) => (
+              <Card key={m.id} variant="flat">
+                <Stack gap="xs">
+                  <Checkbox
+                    checked={m.enabled}
+                    onChange={() => toggleModule(m.id)}
+                    label={m.name}
+                  />
+                  <CardDescription>{m.description}</CardDescription>
+                </Stack>
+              </Card>
+            ))}
+          </Grid>
+        </FormSection>
+      </Card>
     </Stack>
   );
 }

@@ -244,384 +244,380 @@ export function AccountsSection({ value: _value, onChange: _onChange }: Accounts
   return (
     <Stack gap="xl">
       {/* A. BANK DETAILS */}
-      <FormSection
-        title="Bank Details"
-        description="Bank account information and IFSC verification."
-      >
-        <FormGrid columns={2} layout="horizontal" labelWidth="md">
-          {/* 1. IFSC Code */}
-          <FormField label="IFSC Code" required helperText={ifscStatusMsg}>
-            <Input
-              type="text"
-              placeholder="e.g. HDFC0001234"
-              maxLength={11}
-              value={ifscCode}
-              onChange={(e) => handleIfscChange(e.target.value)}
-            />
-          </FormField>
-
-          {/* 2. Bank Name */}
-          <FormField label="Bank Name" required>
-            <Inline gap="xs" align="center">
+      <Card padding="lg">
+        <FormSection title="Bank Details">
+          <FormGrid columns={2} layout="horizontal" labelWidth="md">
+            {/* 1. IFSC Code */}
+            <FormField label="IFSC Code" required helperText={ifscStatusMsg}>
               <Input
                 type="text"
-                value={bankName}
-                onChange={(e) => setBankName(e.target.value)}
-                readOnly={!isBankNameEditable}
+                maxLength={11}
+                value={ifscCode}
+                onChange={(e) => handleIfscChange(e.target.value)}
               />
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => setIsBankNameEditable(!isBankNameEditable)}
-              >
-                {isBankNameEditable ? 'Lock' : 'Edit'}
-              </Button>
-            </Inline>
-          </FormField>
+            </FormField>
 
-          {/* 3. Branch Name */}
-          <FormField label="Branch Name" helperText={bankLocation}>
-            <Input type="text" value={branchName} readOnly />
-          </FormField>
+            {/* 2. Bank Name */}
+            <FormField label="Bank Name" required>
+              <Inline gap="xs" align="center">
+                <Input
+                  type="text"
+                  value={bankName}
+                  onChange={(e) => setBankName(e.target.value)}
+                  readOnly={!isBankNameEditable}
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setIsBankNameEditable(!isBankNameEditable)}
+                >
+                  {isBankNameEditable ? 'Lock' : 'Edit'}
+                </Button>
+              </Inline>
+            </FormField>
 
-          {/* 4. Account Holder Name */}
-          <FormField label="Account Holder" required>
-            <Input
-              type="text"
-              value={accountHolderName}
-              onChange={(e) => setAccountHolderName(e.target.value)}
-            />
-          </FormField>
+            {/* 3. Branch Name */}
+            <FormField label="Branch Name" helperText={bankLocation}>
+              <Input type="text" value={branchName} readOnly />
+            </FormField>
 
-          {/* 5. Account Number */}
-          <FormField label="Account Number" required>
-            <Input
-              type="text"
-              placeholder="Enter bank account number"
-              value={accountNumber}
-              onChange={(e) => setAccountNumber(e.target.value)}
-            />
-          </FormField>
+            {/* 4. Account Holder Name */}
+            <FormField label="Account Holder" required>
+              <Input
+                type="text"
+                value={accountHolderName}
+                onChange={(e) => setAccountHolderName(e.target.value)}
+              />
+            </FormField>
 
-          {/* 6. Re-enter Account Number */}
-          <FormField label="Re-enter Account" required error={accountMismatchError}>
-            <Input
-              type="text"
-              placeholder="Re-enter bank account number"
-              value={reAccountNumber}
-              onChange={(e) => setReAccountNumber(e.target.value)}
-            />
-          </FormField>
-        </FormGrid>
-      </FormSection>
+            {/* 5. Account Number */}
+            <FormField label="Account Number" required>
+              <Input
+                type="text"
+                placeholder="Enter bank account number"
+                value={accountNumber}
+                onChange={(e) => setAccountNumber(e.target.value)}
+              />
+            </FormField>
+
+            {/* 6. Re-enter Account Number */}
+            <FormField label="Re-enter Account" required error={accountMismatchError}>
+              <Input
+                type="text"
+                placeholder="Re-enter bank account number"
+                value={reAccountNumber}
+                onChange={(e) => setReAccountNumber(e.target.value)}
+              />
+            </FormField>
+          </FormGrid>
+        </FormSection>
+      </Card>
 
       {/* B. SALARY STRUCTURE & BREAKDOWN */}
-      <FormSection
-        title="Salary Structure & Breakdown"
-        description="Annual CTC, pay grade, and automated monthly salary component breakdown."
-      >
-        <Stack gap="md">
+      <Card padding="lg">
+        <FormSection title="Salary Structure & Breakdown">
+          <Stack gap="md">
+            <FormGrid columns={2} layout="horizontal" labelWidth="md">
+              {/* 1. Salary Structure */}
+              <FormField label="Salary Structure" required>
+                <Stack gap="xs">
+                  <Select
+                    options={SALARY_STRUCTURE_OPTIONS}
+                    value={salaryStructure}
+                    onChange={(e) => setSalaryStructure(e.target.value)}
+                  />
+                  {salaryStructure === 'Other' && (
+                    <Input
+                      type="text"
+                      placeholder="Enter Custom Salary Structure"
+                      value={customSalaryStructure}
+                      onChange={(e) => setCustomSalaryStructure(e.target.value)}
+                    />
+                  )}
+                </Stack>
+              </FormField>
+
+              {/* 2. Pay Grade */}
+              <FormField label="Pay Grade" required>
+                <Select
+                  options={PAY_GRADE_OPTIONS}
+                  value={payGrade}
+                  onChange={(e) => setPayGrade(e.target.value)}
+                />
+              </FormField>
+
+              {/* 3. Annual CTC */}
+              <FormField
+                label="Annual CTC (₹)"
+                required
+                helperText={`Monthly CTC: ₹${salaryCalculations.monthlyCtc.toLocaleString('en-IN')}`}
+              >
+                <Input
+                  type="number"
+                  min="0"
+                  value={annualCtc}
+                  onChange={(e) => setAnnualCtc(e.target.value)}
+                />
+              </FormField>
+
+              {/* 4. Variable Pay */}
+              <FormField label="Variable Pay">
+                <Inline gap="xs" align="center">
+                  <Input
+                    type="number"
+                    value={variablePayVal}
+                    onChange={(e) => setVariablePayVal(e.target.value)}
+                  />
+                  <Select
+                    options={[
+                      { value: 'percentage', label: '%' },
+                      { value: 'amount', label: '₹/Yr' },
+                    ]}
+                    value={variablePayType}
+                    onChange={(e) => setVariablePayType(e.target.value as 'amount' | 'percentage')}
+                  />
+                </Inline>
+              </FormField>
+            </FormGrid>
+
+            {/* CALCULATED BREAKDOWN */}
+            <Card variant="flat">
+              <Stack gap="md">
+                <Inline justify="between" align="center">
+                  <CardTitle>Monthly Salary Components Breakdown</CardTitle>
+                  <Badge variant="neutral" size="sm">
+                    Auto-calculated
+                  </Badge>
+                </Inline>
+
+                <Grid columns={4} gap="md">
+                  <Card variant="flat" padding="sm">
+                    <Stack gap="xs">
+                      <Label size="sm">Basic Salary (Monthly)</Label>
+                      <CardTitle>
+                        ₹{salaryCalculations.basicMonthly.toLocaleString('en-IN')}
+                      </CardTitle>
+                    </Stack>
+                  </Card>
+                  <Card variant="flat" padding="sm">
+                    <Stack gap="xs">
+                      <Label size="sm">HRA (Monthly)</Label>
+                      <CardTitle>
+                        ₹{salaryCalculations.hraMonthly.toLocaleString('en-IN')}
+                      </CardTitle>
+                    </Stack>
+                  </Card>
+                  <Card variant="flat" padding="sm">
+                    <Stack gap="xs">
+                      <Label size="sm">Special Allowance</Label>
+                      <CardTitle>
+                        ₹{salaryCalculations.specialAllowanceMonthly.toLocaleString('en-IN')}
+                      </CardTitle>
+                    </Stack>
+                  </Card>
+                  <Card variant="flat" padding="sm">
+                    <Stack gap="xs">
+                      <Label size="sm">Other Allowances</Label>
+                      <CardTitle>
+                        ₹{salaryCalculations.otherAllowancesMonthly.toLocaleString('en-IN')}
+                      </CardTitle>
+                    </Stack>
+                  </Card>
+                  <Card variant="flat" padding="sm">
+                    <Stack gap="xs">
+                      <Label size="sm">Gross Salary (Monthly)</Label>
+                      <CardTitle>
+                        ₹{salaryCalculations.grossMonthly.toLocaleString('en-IN')}
+                      </CardTitle>
+                    </Stack>
+                  </Card>
+                  <Card variant="flat" padding="sm">
+                    <Stack gap="xs">
+                      <Label size="sm">Employer PF Contribution</Label>
+                      <CardTitle>₹{salaryCalculations.pfMonthly.toLocaleString('en-IN')}</CardTitle>
+                    </Stack>
+                  </Card>
+                  <Card variant="flat" padding="sm">
+                    <Stack gap="xs">
+                      <Label size="sm">Gratuity Provision</Label>
+                      <CardTitle>
+                        ₹{salaryCalculations.gratuityMonthly.toLocaleString('en-IN')}
+                      </CardTitle>
+                    </Stack>
+                  </Card>
+                  <Card variant="flat" padding="sm">
+                    <Stack gap="xs">
+                      <Label size="sm">Variable Component</Label>
+                      <CardTitle>
+                        ₹{salaryCalculations.variableMonthly.toLocaleString('en-IN')}
+                      </CardTitle>
+                    </Stack>
+                  </Card>
+                </Grid>
+              </Stack>
+            </Card>
+          </Stack>
+        </FormSection>
+      </Card>
+
+      {/* C. PAYROLL SETUP & D. STATUTORY */}
+      <Card padding="lg">
+        <FormSection title="Payroll Setup & Statutory Compliance">
           <FormGrid columns={2} layout="horizontal" labelWidth="md">
-            {/* 1. Salary Structure */}
-            <FormField label="Salary Structure" required>
+            {/* 1. Payroll Group */}
+            <FormField label="Payroll Group">
               <Stack gap="xs">
                 <Select
-                  options={SALARY_STRUCTURE_OPTIONS}
-                  value={salaryStructure}
-                  onChange={(e) => setSalaryStructure(e.target.value)}
+                  options={PAYROLL_GROUP_OPTIONS}
+                  value={payrollGroup}
+                  onChange={(e) => setPayrollGroup(e.target.value)}
                 />
-                {salaryStructure === 'Other' && (
+                {payrollGroup === 'Other' && (
                   <Input
                     type="text"
-                    placeholder="Enter Custom Salary Structure"
-                    value={customSalaryStructure}
-                    onChange={(e) => setCustomSalaryStructure(e.target.value)}
+                    placeholder="Enter Payroll Group"
+                    value={customPayrollGroup}
+                    onChange={(e) => setCustomPayrollGroup(e.target.value)}
                   />
                 )}
               </Stack>
             </FormField>
 
-            {/* 2. Pay Grade */}
-            <FormField label="Pay Grade" required>
-              <Select
-                options={PAY_GRADE_OPTIONS}
-                value={payGrade}
-                onChange={(e) => setPayGrade(e.target.value)}
-              />
-            </FormField>
-
-            {/* 3. Annual CTC */}
-            <FormField
-              label="Annual CTC (₹)"
-              required
-              helperText={`Monthly CTC: ₹${salaryCalculations.monthlyCtc.toLocaleString('en-IN')}`}
-            >
+            {/* 2. Salary Effective Date */}
+            <FormField label="Effective Date">
               <Input
-                type="number"
-                min="0"
-                placeholder="e.g. 1200000"
-                value={annualCtc}
-                onChange={(e) => setAnnualCtc(e.target.value)}
+                type="date"
+                value={salaryEffectiveDate}
+                onChange={(e) => setSalaryEffectiveDate(e.target.value)}
               />
             </FormField>
 
-            {/* 4. Variable Pay */}
-            <FormField label="Variable Pay">
-              <Inline gap="xs" align="center">
-                <Input
-                  type="number"
-                  value={variablePayVal}
-                  onChange={(e) => setVariablePayVal(e.target.value)}
-                />
+            {/* 3. Payment Frequency */}
+            <FormField label="Payment Frequency">
+              <Stack gap="xs">
                 <Select
-                  options={[
-                    { value: 'percentage', label: '%' },
-                    { value: 'amount', label: '₹/Yr' },
-                  ]}
-                  value={variablePayType}
-                  onChange={(e) => setVariablePayType(e.target.value as 'amount' | 'percentage')}
+                  options={PAYMENT_FREQUENCY_OPTIONS}
+                  value={paymentFrequency}
+                  onChange={(e) => setPaymentFrequency(e.target.value)}
                 />
-              </Inline>
+                {paymentFrequency === 'Other' && (
+                  <Input
+                    type="text"
+                    placeholder="Enter Payment Frequency"
+                    value={customPaymentFrequency}
+                    onChange={(e) => setCustomPaymentFrequency(e.target.value)}
+                  />
+                )}
+              </Stack>
+            </FormField>
+
+            {/* 4. TDS & Tax Regime */}
+            <FormField label="TDS Tax Regime">
+              <Select
+                options={TAX_REGIME_OPTIONS}
+                value={taxRegime}
+                onChange={(e) => setTaxRegime(e.target.value)}
+              />
+            </FormField>
+
+            {/* 5. PF Applicable */}
+            <FormField label="Provident Fund (PF)">
+              <Switch
+                checked={isPfApplicable}
+                onChange={(e) => setIsPfApplicable(e.target.checked)}
+                label="12% Contribution Applicable"
+              />
+            </FormField>
+
+            {/* 6. ESI Applicable */}
+            <FormField label="ESI Applicable">
+              <Switch
+                checked={isEsiApplicable}
+                onChange={(e) => setIsEsiApplicable(e.target.checked)}
+                label="Employees State Insurance"
+              />
+            </FormField>
+
+            {/* 7. PT Applicable */}
+            <FormField label="Professional Tax (PT)">
+              <Switch
+                checked={isPtApplicable}
+                onChange={(e) => setIsPtApplicable(e.target.checked)}
+                label="State PT Deduction"
+              />
             </FormField>
           </FormGrid>
-
-          {/* CALCULATED BREAKDOWN */}
-          <Card variant="flat">
-            <Stack gap="md">
-              <Inline justify="between" align="center">
-                <CardTitle>Monthly Salary Components Breakdown</CardTitle>
-                <Badge variant="neutral" size="sm">
-                  Auto-calculated
-                </Badge>
-              </Inline>
-
-              <Grid columns={4} gap="md">
-                <Card variant="flat" padding="sm">
-                  <Stack gap="xs">
-                    <Label size="sm">Basic Salary (Monthly)</Label>
-                    <CardTitle>
-                      ₹{salaryCalculations.basicMonthly.toLocaleString('en-IN')}
-                    </CardTitle>
-                  </Stack>
-                </Card>
-                <Card variant="flat" padding="sm">
-                  <Stack gap="xs">
-                    <Label size="sm">HRA (Monthly)</Label>
-                    <CardTitle>₹{salaryCalculations.hraMonthly.toLocaleString('en-IN')}</CardTitle>
-                  </Stack>
-                </Card>
-                <Card variant="flat" padding="sm">
-                  <Stack gap="xs">
-                    <Label size="sm">Special Allowance</Label>
-                    <CardTitle>
-                      ₹{salaryCalculations.specialAllowanceMonthly.toLocaleString('en-IN')}
-                    </CardTitle>
-                  </Stack>
-                </Card>
-                <Card variant="flat" padding="sm">
-                  <Stack gap="xs">
-                    <Label size="sm">Other Allowances</Label>
-                    <CardTitle>
-                      ₹{salaryCalculations.otherAllowancesMonthly.toLocaleString('en-IN')}
-                    </CardTitle>
-                  </Stack>
-                </Card>
-                <Card variant="flat" padding="sm">
-                  <Stack gap="xs">
-                    <Label size="sm">Gross Salary (Monthly)</Label>
-                    <CardTitle>
-                      ₹{salaryCalculations.grossMonthly.toLocaleString('en-IN')}
-                    </CardTitle>
-                  </Stack>
-                </Card>
-                <Card variant="flat" padding="sm">
-                  <Stack gap="xs">
-                    <Label size="sm">Employer PF Contribution</Label>
-                    <CardTitle>₹{salaryCalculations.pfMonthly.toLocaleString('en-IN')}</CardTitle>
-                  </Stack>
-                </Card>
-                <Card variant="flat" padding="sm">
-                  <Stack gap="xs">
-                    <Label size="sm">Gratuity Provision</Label>
-                    <CardTitle>
-                      ₹{salaryCalculations.gratuityMonthly.toLocaleString('en-IN')}
-                    </CardTitle>
-                  </Stack>
-                </Card>
-                <Card variant="flat" padding="sm">
-                  <Stack gap="xs">
-                    <Label size="sm">Variable Component</Label>
-                    <CardTitle>
-                      ₹{salaryCalculations.variableMonthly.toLocaleString('en-IN')}
-                    </CardTitle>
-                  </Stack>
-                </Card>
-              </Grid>
-            </Stack>
-          </Card>
-        </Stack>
-      </FormSection>
-
-      {/* C. PAYROLL SETUP & D. STATUTORY */}
-      <FormSection
-        title="Payroll Setup & Statutory Compliance"
-        description="Payroll disbursement frequency, tax regime, and statutory requirements."
-      >
-        <FormGrid columns={2} layout="horizontal" labelWidth="md">
-          {/* 1. Payroll Group */}
-          <FormField label="Payroll Group">
-            <Stack gap="xs">
-              <Select
-                options={PAYROLL_GROUP_OPTIONS}
-                value={payrollGroup}
-                onChange={(e) => setPayrollGroup(e.target.value)}
-              />
-              {payrollGroup === 'Other' && (
-                <Input
-                  type="text"
-                  placeholder="Enter Payroll Group"
-                  value={customPayrollGroup}
-                  onChange={(e) => setCustomPayrollGroup(e.target.value)}
-                />
-              )}
-            </Stack>
-          </FormField>
-
-          {/* 2. Salary Effective Date */}
-          <FormField label="Effective Date">
-            <Input
-              type="date"
-              value={salaryEffectiveDate}
-              onChange={(e) => setSalaryEffectiveDate(e.target.value)}
-            />
-          </FormField>
-
-          {/* 3. Payment Frequency */}
-          <FormField label="Payment Frequency">
-            <Stack gap="xs">
-              <Select
-                options={PAYMENT_FREQUENCY_OPTIONS}
-                value={paymentFrequency}
-                onChange={(e) => setPaymentFrequency(e.target.value)}
-              />
-              {paymentFrequency === 'Other' && (
-                <Input
-                  type="text"
-                  placeholder="Enter Payment Frequency"
-                  value={customPaymentFrequency}
-                  onChange={(e) => setCustomPaymentFrequency(e.target.value)}
-                />
-              )}
-            </Stack>
-          </FormField>
-
-          {/* 4. TDS & Tax Regime */}
-          <FormField label="TDS Tax Regime">
-            <Select
-              options={TAX_REGIME_OPTIONS}
-              value={taxRegime}
-              onChange={(e) => setTaxRegime(e.target.value)}
-            />
-          </FormField>
-
-          {/* 5. PF Applicable */}
-          <FormField label="Provident Fund (PF)">
-            <Switch
-              checked={isPfApplicable}
-              onChange={(e) => setIsPfApplicable(e.target.checked)}
-              label="12% Contribution Applicable"
-            />
-          </FormField>
-
-          {/* 6. ESI Applicable */}
-          <FormField label="ESI Applicable">
-            <Switch
-              checked={isEsiApplicable}
-              onChange={(e) => setIsEsiApplicable(e.target.checked)}
-              label="Employees State Insurance"
-            />
-          </FormField>
-
-          {/* 7. PT Applicable */}
-          <FormField label="Professional Tax (PT)">
-            <Switch
-              checked={isPtApplicable}
-              onChange={(e) => setIsPtApplicable(e.target.checked)}
-              label="State PT Deduction"
-            />
-          </FormField>
-        </FormGrid>
-      </FormSection>
+        </FormSection>
+      </Card>
 
       {/* E. BENEFITS */}
-      <FormSection
-        title="Employee Benefits Checklist"
-        description="Select applicable employee allowances, insurances, and corporate benefits."
-      >
-        <Stack gap="md">
-          <Grid columns={3} gap="md">
-            {BENEFIT_ITEMS.map((b) => {
-              const key = b.id as keyof typeof benefits;
-              return (
-                <Card key={b.id} variant="flat">
-                  <Switch
-                    checked={benefits[key]}
-                    onChange={() => toggleBenefit(key)}
-                    label={b.label}
-                  />
-                </Card>
-              );
-            })}
-          </Grid>
+      <Card padding="lg">
+        <FormSection title="Employee Benefits Checklist">
+          <Stack gap="md">
+            <Grid columns={3} gap="md">
+              {BENEFIT_ITEMS.map((b) => {
+                const key = b.id as keyof typeof benefits;
+                return (
+                  <Card key={b.id} variant="flat">
+                    <Switch
+                      checked={benefits[key]}
+                      onChange={() => toggleBenefit(key)}
+                      label={b.label}
+                    />
+                  </Card>
+                );
+              })}
+            </Grid>
 
-          {/* CONDITIONAL MEDICAL INSURANCE DETAILS */}
-          {benefits.medical && (
-            <Card variant="flat">
-              <Stack gap="md">
-                <CardTitle>Medical Insurance Policy Details</CardTitle>
-                <FormGrid columns={2} layout="horizontal" labelWidth="md">
-                  <FormField label="Provider">
-                    <Input
-                      type="text"
-                      value={insuranceProvider}
-                      onChange={(e) => setInsuranceProvider(e.target.value)}
-                    />
-                  </FormField>
-                  <FormField label="Policy Number">
-                    <Input
-                      type="text"
-                      value={policyNumber}
-                      onChange={(e) => setPolicyNumber(e.target.value)}
-                    />
-                  </FormField>
-                  <FormField label="Coverage Amount">
-                    <Input
-                      type="text"
-                      value={coverageAmount}
-                      onChange={(e) => setCoverageAmount(e.target.value)}
-                    />
-                  </FormField>
-                  <FormField label="Effective Date">
-                    <Input
-                      type="date"
-                      value={medicalEffectiveDate}
-                      onChange={(e) => setMedicalEffectiveDate(e.target.value)}
-                    />
-                  </FormField>
-                  <FormField label="Expiry Date">
-                    <Input
-                      type="date"
-                      value={medicalExpiryDate}
-                      onChange={(e) => setMedicalExpiryDate(e.target.value)}
-                    />
-                  </FormField>
-                </FormGrid>
-              </Stack>
-            </Card>
-          )}
-        </Stack>
-      </FormSection>
+            {/* CONDITIONAL MEDICAL INSURANCE DETAILS */}
+            {benefits.medical && (
+              <Card variant="flat">
+                <Stack gap="md">
+                  <CardTitle>Medical Insurance Policy Details</CardTitle>
+                  <FormGrid columns={2} layout="horizontal" labelWidth="md">
+                    <FormField label="Provider">
+                      <Input
+                        type="text"
+                        value={insuranceProvider}
+                        onChange={(e) => setInsuranceProvider(e.target.value)}
+                      />
+                    </FormField>
+                    <FormField label="Policy Number">
+                      <Input
+                        type="text"
+                        value={policyNumber}
+                        onChange={(e) => setPolicyNumber(e.target.value)}
+                      />
+                    </FormField>
+                    <FormField label="Coverage Amount">
+                      <Input
+                        type="text"
+                        value={coverageAmount}
+                        onChange={(e) => setCoverageAmount(e.target.value)}
+                      />
+                    </FormField>
+                    <FormField label="Effective Date">
+                      <Input
+                        type="date"
+                        value={medicalEffectiveDate}
+                        onChange={(e) => setMedicalEffectiveDate(e.target.value)}
+                      />
+                    </FormField>
+                    <FormField label="Expiry Date">
+                      <Input
+                        type="date"
+                        value={medicalExpiryDate}
+                        onChange={(e) => setMedicalExpiryDate(e.target.value)}
+                      />
+                    </FormField>
+                  </FormGrid>
+                </Stack>
+              </Card>
+            )}
+          </Stack>
+        </FormSection>
+      </Card>
     </Stack>
   );
 }

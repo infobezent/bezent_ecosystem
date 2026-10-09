@@ -1,10 +1,5 @@
 /*
- * BEZENT Avatar — source: old approved UI's profile avatar (`App.tsx`
- * lines 471-497). `--icon-on-solid` is used for the initials color
- * rather than a literal `#FFFFFF` — it's the token for exactly this
- * case (light text on a solid colored surface, unconditionally white in
- * both themes), and it's what the old code's hardcoded `#FFFFFF` really
- * meant.
+ * BEZENT Avatar — canonical flat enterprise styling using tokens.
  */
 
 .bezent-avatar {
@@ -15,38 +10,21 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(150deg, #ffffff 0%, #e2f1fd 35%, #bce0fd 100%);
-  color: var(--avatar-text, #032147);
+  background: var(--avatar-bg, #c2e7ff);
+  color: var(--avatar-text, #041e49);
   font-family: var(--font-family-base);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.2px;
   flex-shrink: 0;
   user-select: none;
   overflow: hidden;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
-  box-shadow:
-    0 2px 5px -1px rgba(10, 45, 90, 0.22),
-    0 1px 3px rgba(10, 45, 90, 0.16),
-    0 0 0 1px rgba(10, 45, 90, 0.08),
-    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1.5px 2px 0 rgba(10, 45, 90, 0.12);
-  transition:
-    opacity 0.16s ease,
-    transform 0.16s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.16s ease;
 }
 
 [data-theme='dark'] .bezent-avatar {
-  background: linear-gradient(150deg, #2a5282 0%, #173860 45%, #0d233f 100%);
-  color: #d8edff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
-  box-shadow:
-    0 3px 8px rgba(0, 0, 0, 0.5),
-    0 1px 3px rgba(0, 0, 0, 0.35),
-    0 0 0 1px rgba(255, 255, 255, 0.1),
-    inset 0 1.5px 1px rgba(255, 255, 255, 0.3),
-    inset 0 -1.5px 2px rgba(0, 0, 0, 0.6);
+  background: var(--avatar-bg, #0b254e);
+  color: var(--avatar-text, #ffffff);
 }
 
 .bezent-avatar--sm {
@@ -65,7 +43,7 @@
   width: 54px;
   height: 54px;
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .bezent-avatar--xl {
@@ -77,32 +55,6 @@
 
 .bezent-avatar--square {
   border-radius: var(--radius-lg, 12px);
-}
-
-.bezent-avatar:hover {
-  transform: translateY(-2px) scale(1.08);
-  box-shadow:
-    0 5px 12px -1px rgba(10, 45, 90, 0.3),
-    0 2px 5px rgba(10, 45, 90, 0.2),
-    0 0 0 1px rgba(10, 45, 90, 0.12),
-    inset 0 2px 1.5px 0 #ffffff,
-    inset 0 -1.5px 2px 0 rgba(10, 45, 90, 0.15);
-}
-
-[data-theme='dark'] .bezent-avatar:hover {
-  box-shadow:
-    0 6px 16px rgba(0, 0, 0, 0.7),
-    0 2px 6px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(255, 255, 255, 0.18),
-    inset 0 2px 1.5px rgba(255, 255, 255, 0.45),
-    inset 0 -1.5px 2px rgba(0, 0, 0, 0.7);
-}
-
-.bezent-avatar:active {
-  transform: translateY(1px) scale(0.95);
-  box-shadow:
-    0 1px 2px rgba(10, 45, 90, 0.2),
-    inset 0 2px 4px rgba(10, 45, 90, 0.22);
 }
 
 .bezent-avatar__image {

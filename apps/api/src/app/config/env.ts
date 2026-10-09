@@ -10,7 +10,14 @@ function required(name: string, fallback: string): string {
 }
 
 export const env = {
-  nodeEnv: required('NODE_ENV', 'development'),
+  get nodeEnv(): string {
+    return process.env.NODE_ENV && process.env.NODE_ENV.length > 0
+      ? process.env.NODE_ENV
+      : 'development';
+  },
+  set nodeEnv(value: string) {
+    process.env.NODE_ENV = value;
+  },
   port: Number(optional('PORT') ?? optional('API_PORT') ?? '4000'),
   db: {
     url: optional('DATABASE_URL'),
@@ -34,6 +41,18 @@ export const env = {
   },
   /** Key for OTP code digests (ADR-018). Must be a long random secret in production. */
   otpSecret: optional('OTP_SECRET'),
+  /** Fixed OTP for non-production UAT environments only. Never active in production. */
+  get uatFixedOtp(): string | undefined {
+    if (this.nodeEnv === 'production') return undefined;
+    return optional('UAT_FIXED_OTP');
+  },
+  set uatFixedOtp(value: string | undefined) {
+    if (value === undefined) {
+      delete process.env.UAT_FIXED_OTP;
+    } else {
+      process.env.UAT_FIXED_OTP = value;
+    }
+  },
   /** Public URL of the web app, used in sign-in invitation emails. */
   webAppUrl: required('WEB_APP_URL', 'http://localhost:3000'),
 };

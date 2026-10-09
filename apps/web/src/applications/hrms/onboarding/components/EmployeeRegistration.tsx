@@ -262,8 +262,9 @@ export function EmployeeRegistration({
   const [searchParams, setSearchParams] = useSearchParams();
   const contentContainerRef = useRef<HTMLDivElement | null>(null);
 
+  // Single authoritative source of truth for active chapter is the URL searchParam ?chapter= (or legacy ?section=)
   const urlChapter = searchParams.get('chapter') || searchParams.get('section');
-  const initialSection = (
+  const activeSection = (
     urlChapter && allSections.some((s) => s.id === urlChapter)
       ? urlChapter
       : initialDraft?.activeSection && allSections.some((s) => s.id === initialDraft.activeSection)
@@ -271,22 +272,12 @@ export function EmployeeRegistration({
         : allSections[0]?.id || 'personal'
   ) as RegistrationSectionId;
 
-  const [activeSection, setActiveSection] = useState<RegistrationSectionId>(initialSection);
-
-  // Sync when searchParams change externally or via browser back/forward
+  // Scroll content to top whenever activeSection changes
   useEffect(() => {
-    const currentParam = searchParams.get('chapter') || searchParams.get('section');
-    if (
-      currentParam &&
-      allSections.some((s) => s.id === currentParam) &&
-      currentParam !== activeSection
-    ) {
-      setActiveSection(currentParam as RegistrationSectionId);
-      if (contentContainerRef.current) {
-        contentContainerRef.current.scrollTop = 0;
-      }
+    if (contentContainerRef.current) {
+      contentContainerRef.current.scrollTop = 0;
     }
-  }, [searchParams, allSections, activeSection]);
+  }, [activeSection]);
 
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, unknown>>({});
 
@@ -353,7 +344,7 @@ export function EmployeeRegistration({
     setFormData((prev) => ({ ...prev, workingHours: val }));
   };
 
-  const updateDocuments = (val: Chapter09DocumentsState) => {
+  const _updateDocuments = (val: Chapter09DocumentsState) => {
     setFormData((prev) => ({ ...prev, documents: val }));
   };
 
@@ -740,10 +731,9 @@ export function EmployeeRegistration({
     }
   }, []);
 
-  // Single reliable navigation method that updates both state & searchParams
+  // Single reliable navigation method that updates searchParams atomically
   const navigateToSection = useCallback(
     (id: string) => {
-      setActiveSection(id as RegistrationSectionId);
       if (!savedStepDataRef.current[id]) {
         savedStepDataRef.current[id] = getSectionSnapshot(id);
       }
@@ -948,7 +938,7 @@ export function EmployeeRegistration({
 
   const handleContinueDraft = (draft: EmployeeRegistrationDraft) => {
     setCurrentDraftId(draft.id);
-    setActiveSection(draft.activeSection);
+    navigateToSection(draft.activeSection);
 
     if (draft.formData) {
       setFormData(draft.formData);
@@ -1012,21 +1002,6 @@ export function EmployeeRegistration({
 
   if (isOpen === false) return null;
 
-  const currentChapterIndex = allSections.findIndex((s) => s.id === activeSection);
-  const chapterMatch = REGISTRATION_CHAPTERS.find((c) => c.id === activeSection);
-  const activeSectionMeta = allSections.find((s) => s.id === activeSection);
-  const currentChapter: RegistrationChapterMeta = {
-    id: activeSection,
-    stepNumber: String(currentChapterIndex >= 0 ? currentChapterIndex + 1 : 1).padStart(2, '0'),
-    label: activeSectionMeta?.label || chapterMatch?.label || 'Custom Section',
-    title: (activeSectionMeta?.label || chapterMatch?.title || 'CUSTOM SECTION').toUpperCase(),
-    description:
-      activeSectionMeta?.description ??
-      chapterMatch?.description ??
-      'Configured custom fields and section details.',
-    kicker: `CHAPTER // ${String(currentChapterIndex >= 0 ? currentChapterIndex + 1 : 1).padStart(2, '0')}`,
-  };
-
   const chapterSteps = allSections.map((s, idx) => {
     const meta = REGISTRATION_CHAPTERS.find((c) => c.id === s.id);
     return {
@@ -1085,14 +1060,6 @@ export function EmployeeRegistration({
 
           {/* Animated Chapter Page Container */}
           <div key={activeSection} className="bezent-chapter-page-transition">
-            {/* Integrated Chapter Section Header (Number integrated into heading) */}
-            <div className="bezent-chapter-header">
-              <h1 className="bezent-chapter-header__title">{currentChapter.title}</h1>
-              {currentChapter.description && (
-                <p className="bezent-chapter-header__desc">{currentChapter.description}</p>
-              )}
-            </div>
-
             {activeSection === 'general' ? (
               <GeneralInformation
                 employeeId={employeeId}
