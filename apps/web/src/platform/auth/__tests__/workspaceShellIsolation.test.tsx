@@ -14,38 +14,43 @@ import { appRoutes } from '../../../app/router/AppRouter';
 import { AuthContext, type AuthContextValue } from '../AuthProvider';
 import { ThemeProvider } from '../../../app/providers/ThemeProvider';
 import { CompanyAdminContext } from '../../../applications/company-admin/context/CompanyAdminContext';
-import { RequireSuperAdminWorkspace } from '../../../applications/super-admin/routes/superAdminRoutes';
+import { RequireSuperAdminWorkspace } from '../../../administration/super-admin/routes/superAdminRoutes';
+import { RequireTenantAdminWorkspace } from '../../../administration/tenant-admin/routes/tenantAdminRoutes';
 import { RequireCompanyAdminWorkspace } from '../../../applications/company-admin/routes/companyAdminRoutes';
 import { RequireHrmsWorkspace } from '../../../applications/hrms/routes/hrmsRoutes';
-import { RequireEssWorkspace } from '../../../applications/ess/routes/essRoutes';
+import { RequireEssWorkspace } from '../../../applications/hrms/ess/routes/essRoutes';
 import type { AccessOverview, CompanyAccess, ModuleCode, WorkspaceId } from '../authApi';
 
 function makeMockAuth(
   email: string,
   opts: {
     isSuperAdmin?: boolean;
+    isTenantAdmin?: boolean;
     workspaces?: WorkspaceId[];
     roles?: string[];
     permissions?: string[];
     essEligible?: boolean;
+    companies?: CompanyAccess[];
   } = {},
 ): AuthContextValue {
   const isSuperAdmin = Boolean(opts.isSuperAdmin);
+  const isTenantAdmin = Boolean(opts.isTenantAdmin);
   const workspaces: WorkspaceId[] = opts.workspaces ?? [];
   const roles = opts.roles ?? [];
   const permissions = opts.permissions ?? [];
   const essEligible = Boolean(opts.essEligible);
 
-  const company: CompanyAccess | null =
-    workspaces.length > 0 || roles.length > 0
+  const defaultCompany: CompanyAccess | null =
+    workspaces.length > 0 || roles.length > 0 || isTenantAdmin
       ? {
           tenantId: 't1',
           tenantName: 'Demo Tenant',
           companyId: 'comp_demo_01',
           companyName: 'BEZENT Demo Pvt Ltd',
           companyCode: 'DEMO',
-          isMember: true,
+          isMember: !isTenantAdmin || roles.length > 0,
           isPlatformOversight: false,
+          isTenantAdmin,
           roles: roles.map((code) => ({
             id: `role_${code}`,
             code,
@@ -57,9 +62,13 @@ function makeMockAuth(
           enabledModules: ['hrms' as ModuleCode],
           essEligible,
           employeeId: essEligible ? 'emp_01' : null,
-          workspaces,
+          workspaces: isTenantAdmin && !workspaces.includes('company_admin')
+            ? ['company_admin', ...workspaces]
+            : workspaces,
         }
       : null;
+
+  const companies = opts.companies ?? (defaultCompany ? [defaultCompany] : []);
 
   const access: AccessOverview = {
     user: {
@@ -69,8 +78,12 @@ function makeMockAuth(
       lastName: 'User',
       isSuperAdmin,
     },
-    platformWorkspaces: isSuperAdmin ? ['super_admin'] : [],
-    companies: company ? [company] : [],
+    platformWorkspaces: [
+      ...(isSuperAdmin ? ['super_admin' as WorkspaceId] : []),
+      ...(isTenantAdmin ? ['tenant_admin' as WorkspaceId] : []),
+    ],
+    isTenantAdmin,
+    companies,
   };
 
   return {
@@ -78,7 +91,7 @@ function makeMockAuth(
     error: null,
     errorKind: null,
     access,
-    activeCompany: company,
+    activeCompany: companies[0] ?? null,
     can: (p) => permissions.includes(p),
     canAny: (perms) => perms.some((p) => permissions.includes(p)),
     canAll: (perms) => perms.every((p) => permissions.includes(p)),
@@ -163,7 +176,8 @@ describe('Workspace & Shell Isolation Boundaries', () => {
     );
     if (!captured) return null;
     const props = (captured as React.ReactElement<{ to?: string; replace?: boolean }>).props;
-    return { to: props?.to, replace: props?.replace };
+    if (!props?.to) return null;
+    return { to: props.to, replace: props.replace };
   }
 
   describe('HR Identity (hr@bezent.com) attempting unauthorized access and full HRMS access', () => {
@@ -368,8 +382,18 @@ describe('Workspace & Shell Isolation Boundaries', () => {
       const html = renderAt('/super-admin/provisioning', superAdminAuth);
 
       // Super Admin navigation labels are present
-      expect(html).toContain('Customers');
+      expect(html).toContain('Tenants');
       expect(html).toContain('Customer Provisioning');
+    });
+
+    it('DENIES /tenant-admin/dashboard for Super Admin without Tenant Admin authority', () => {
+      const res = testGuardRedirect(RequireTenantAdminWorkspace, superAdminAuth);
+      expect(res).toEqual({ to: '/super-admin', replace: true });
+    });
+
+    it('DENIES /company-admin/dashboard for Super Admin without company authority', () => {
+      const res = testGuardRedirect(RequireCompanyAdminWorkspace, superAdminAuth);
+      expect(res).toEqual({ to: '/super-admin', replace: true });
     });
 
     it('DENIES /ess for Super Admin without linked employee record', () => {
@@ -381,6 +405,56 @@ describe('Workspace & Shell Isolation Boundaries', () => {
     it('redirects Super Admin without linked employee from RequireEssWorkspace to /super-admin', () => {
       const res = testGuardRedirect(RequireEssWorkspace, superAdminAuth);
       expect(res).toEqual({ to: '/super-admin', replace: true });
+    });
+  });
+
+  describe('Tenant Admin Identity (tenantadmin@bezent.com)', () => {
+    const tenantAdminAuth = makeMockAuth('tenantadmin@bezent.com', {
+      isTenantAdmin: true,
+    });
+
+    it('ALLOWS /tenant-admin/dashboard for Tenant Admin', () => {
+      const res = testGuardRedirect(RequireTenantAdminWorkspace, tenantAdminAuth);
+      expect(res).toBeNull();
+    });
+
+    it('DENIES /super-admin/dashboard for Tenant Admin without Super Admin authority', () => {
+      const res = testGuardRedirect(RequireSuperAdminWorkspace, tenantAdminAuth);
+      expect(res).toEqual({ to: '/tenant-admin', replace: true });
+    });
+
+    it('ALLOWS company administration for own-tenant company', () => {
+      const res = testGuardRedirect(RequireCompanyAdminWorkspace, tenantAdminAuth);
+      expect(res).toBeNull();
+    });
+  });
+
+  describe('Explicit Dual Authority (dual@bezent.com)', () => {
+    const dualAuth = makeMockAuth('dual@bezent.com', {
+      isSuperAdmin: true,
+      isTenantAdmin: true,
+    });
+
+    it('ALLOWS Super Admin workspace for dual authority user', () => {
+      const res = testGuardRedirect(RequireSuperAdminWorkspace, dualAuth);
+      expect(res).toBeNull();
+    });
+
+    it('ALLOWS Tenant Admin workspace for dual authority user', () => {
+      const res = testGuardRedirect(RequireTenantAdminWorkspace, dualAuth);
+      expect(res).toBeNull();
+    });
+  });
+
+  describe('Cross-Workspace Navigation Isolation: Company Admin to Tenant Admin', () => {
+    const companyAdminAuth = makeMockAuth('companyadmin@bezent.com', {
+      workspaces: ['company_admin'],
+      roles: ['company_admin'],
+    });
+
+    it('DENIES /tenant-admin/dashboard for Company Admin', () => {
+      const res = testGuardRedirect(RequireTenantAdminWorkspace, companyAdminAuth);
+      expect(res).toEqual({ to: '/company-admin', replace: true });
     });
   });
 });

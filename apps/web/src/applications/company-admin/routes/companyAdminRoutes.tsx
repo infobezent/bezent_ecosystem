@@ -36,10 +36,8 @@ export function RequireCompanyAdminWorkspace() {
   }
 
   const isCompanyAdmin = Boolean(
-    access.user.isSuperAdmin ||
     activeCompany?.workspaces.includes('company_admin') ||
     activeCompany?.roles.some((r) => r.code === 'company_admin') ||
-    activeCompany?.isPlatformOversight ||
     access.companies.some((c) => c.workspaces.includes('company_admin')),
   );
 
@@ -64,10 +62,8 @@ function RequireCompanyAdmin({ children }: { children: React.ReactNode }) {
   }
 
   const isCompanyAdmin = Boolean(
-    access.user.isSuperAdmin ||
     activeCompany?.workspaces.includes('company_admin') ||
     activeCompany?.roles.some((r) => r.code === 'company_admin') ||
-    activeCompany?.isPlatformOversight ||
     access.companies.some((c) => c.workspaces.includes('company_admin')),
   );
 

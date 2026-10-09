@@ -14,7 +14,7 @@ import { employeeDocumentRouter } from '../../applications/hrms/documents/routes
 import { formsRouter } from '../../applications/hrms/settings/forms/routes/forms.route.js';
 import { platformRouter } from '../../platform/routes.js';
 import { companyAdminRouter } from '../../platform/company-admin/routes/companyAdmin.routes.js';
-import { tenantAdminRouter } from '../../platform/tenant-admin/routes/tenantAdmin.routes.js';
+import { tenantAdminRouter } from '../../administration/tenant-admin/routes/tenantAdmin.routes.js';
 import { essRouter } from '../../applications/hrms/ess/routes/ess.routes.js';
 import { requirePlatformAuth } from '../../platform/auth/middleware/auth.middleware.js';
 import { requireApplicationAccess } from '../../platform/access/middleware/access.middleware.js';
@@ -55,11 +55,12 @@ export function createApp(): Express {
         }
         callback(null, false);
       },
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Company-Id', 'Accept'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Company-Id', 'Accept', 'Idempotency-Key'],
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     }),
   );
-  app.use(express.json());
+  app.use(express.json({ limit: '10mb' }));
+  app.use(express.raw({ type: ['image/*', 'application/octet-stream'], limit: '10mb' }));
 
   // Platform & Domain routers under /api/v1
   app.use('/api/v1', healthRouter);

@@ -164,6 +164,20 @@ export class CompanyAdminController {
     }
   };
 
+  acceptInvitation = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const invitationIdOrToken = req.params.id || req.body?.token || req.body?.invitationId;
+      if (!invitationIdOrToken) {
+        throw new UnauthorizedError('Invitation ID or token is required');
+      }
+      const actor = req.user ? { id: req.user.id, email: req.user.email } : undefined;
+      const result = await this.service.acceptInvitation(invitationIdOrToken, actor);
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
   getModules = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { tenantId, companyId } = req.companyContext!;

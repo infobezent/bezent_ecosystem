@@ -50,3 +50,4 @@ export const MODULE_CATALOG: readonly ModuleCatalogItem[] = [
     availability: 'Planned',
   },
 ];
+export * from '../catalog/applicationModuleCatalog.js';

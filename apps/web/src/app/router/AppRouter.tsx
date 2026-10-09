@@ -17,17 +17,17 @@ import { hrmsApplication } from '../../applications/hrms';
 import {
   superAdminRoutes,
   RequireSuperAdminWorkspace,
-} from '../../applications/super-admin/routes/superAdminRoutes';
+} from '../../administration/super-admin/routes/superAdminRoutes';
 import {
   tenantAdminRoutes,
   RequireTenantAdminWorkspace,
-} from '../../applications/tenant-admin/routes/tenantAdminRoutes';
+} from '../../administration/tenant-admin/routes/tenantAdminRoutes';
 import {
   companyAdminRoutes,
   RequireCompanyAdminWorkspace,
 } from '../../applications/company-admin/routes/companyAdminRoutes';
 import { hrmsRoutes, RequireHrmsWorkspace } from '../../applications/hrms/routes/hrmsRoutes';
-import { essRoutes, RequireEssWorkspace } from '../../applications/ess/routes/essRoutes';
+import { essRoutes, RequireEssWorkspace } from '../../applications/hrms/ess/routes/essRoutes';
 import { RouteErrorBoundary } from './RouteErrorBoundary';
 
 /**

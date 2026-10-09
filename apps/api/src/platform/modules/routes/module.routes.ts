@@ -7,6 +7,8 @@ export const moduleRouter = Router();
 moduleRouter.use(requirePlatformAuth, requireSuperAdmin);
 
 moduleRouter.get('/modules/catalog', moduleController.getCatalog);
+moduleRouter.get('/modules/plans/:planId', moduleController.getPlanModules);
+moduleRouter.get('/plans/:planId/modules', moduleController.getPlanModules);
 moduleRouter.get('/modules', moduleController.listTenantModules);
 moduleRouter.get('/modules/tenants/:tenantId', (req, res, next) => {
   req.query.tenantId = req.params.tenantId;

@@ -31,6 +31,22 @@ export class CompanyRepository {
       contactPhone: string | null;
       country: string | null;
       timeZone: string | null;
+      displayName?: string | null;
+      organizationType?: string | null;
+      industry?: string | null;
+      logoUrl?: string | null;
+      addressLine1?: string | null;
+      addressLine2?: string | null;
+      city?: string | null;
+      state?: string | null;
+      postalCode?: string | null;
+      registrationNumber?: string | null;
+      currency?: string | null;
+      locale?: string | null;
+      dateFormat?: string | null;
+      weekStartsOn?: string | null;
+      financialYearStart?: string | null;
+      brandingMode?: string | null;
       status: string;
       createdAt: Date;
       updatedAt: Date;
@@ -129,7 +145,23 @@ export class CompanyRepository {
         businessEmail: c.businessEmail ?? null,
         contactPhone: c.contactPhone ?? null,
         country: c.country ?? null,
+        addressLine1: c.addressLine1 ?? null,
+        addressLine2: c.addressLine2 ?? null,
+        city: c.city ?? null,
+        state: c.state ?? null,
+        postalCode: c.postalCode ?? null,
+        displayName: c.displayName ?? null,
+        organizationType: c.organizationType ?? null,
+        industry: c.industry ?? null,
+        logoUrl: c.logoUrl ?? null,
         timeZone: c.timeZone ?? null,
+        registrationNumber: c.registrationNumber ?? null,
+        currency: c.currency ?? null,
+        locale: c.locale ?? null,
+        dateFormat: c.dateFormat ?? null,
+        weekStartsOn: c.weekStartsOn ?? null,
+        financialYearStart: c.financialYearStart ?? null,
+        brandingMode: (c.brandingMode as 'own_logo' | 'tenant_logo' | 'initials' | null) ?? 'initials',
         status: c.status as CompanyStatus,
         createdAt: c.createdAt.toISOString(),
         updatedAt: c.updatedAt.toISOString(),
@@ -155,7 +187,23 @@ export class CompanyRepository {
         businessEmail: companies.businessEmail,
         contactPhone: companies.contactPhone,
         country: companies.country,
+        addressLine1: companies.addressLine1,
+        addressLine2: companies.addressLine2,
+        city: companies.city,
+        state: companies.state,
+        postalCode: companies.postalCode,
+        displayName: companies.displayName,
+        organizationType: companies.organizationType,
+        industry: companies.industry,
+        logoUrl: companies.logoUrl,
         timeZone: companies.timeZone,
+        registrationNumber: companies.registrationNumber,
+        currency: companies.currency,
+        locale: companies.locale,
+        dateFormat: companies.dateFormat,
+        weekStartsOn: companies.weekStartsOn,
+        financialYearStart: companies.financialYearStart,
+        brandingMode: companies.brandingMode,
         status: companies.status,
         createdAt: companies.createdAt,
         updatedAt: companies.updatedAt,
@@ -183,7 +231,23 @@ export class CompanyRepository {
         businessEmail: companies.businessEmail,
         contactPhone: companies.contactPhone,
         country: companies.country,
+        addressLine1: companies.addressLine1,
+        addressLine2: companies.addressLine2,
+        city: companies.city,
+        state: companies.state,
+        postalCode: companies.postalCode,
+        displayName: companies.displayName,
+        organizationType: companies.organizationType,
+        industry: companies.industry,
+        logoUrl: companies.logoUrl,
         timeZone: companies.timeZone,
+        registrationNumber: companies.registrationNumber,
+        currency: companies.currency,
+        locale: companies.locale,
+        dateFormat: companies.dateFormat,
+        weekStartsOn: companies.weekStartsOn,
+        financialYearStart: companies.financialYearStart,
+        brandingMode: companies.brandingMode,
         status: companies.status,
         createdAt: companies.createdAt,
         updatedAt: companies.updatedAt,
@@ -306,7 +370,23 @@ export class CompanyRepository {
         businessEmail: companies.businessEmail,
         contactPhone: companies.contactPhone,
         country: companies.country,
+        addressLine1: companies.addressLine1,
+        addressLine2: companies.addressLine2,
+        city: companies.city,
+        state: companies.state,
+        postalCode: companies.postalCode,
+        displayName: companies.displayName,
+        organizationType: companies.organizationType,
+        industry: companies.industry,
+        logoUrl: companies.logoUrl,
         timeZone: companies.timeZone,
+        registrationNumber: companies.registrationNumber,
+        currency: companies.currency,
+        locale: companies.locale,
+        dateFormat: companies.dateFormat,
+        weekStartsOn: companies.weekStartsOn,
+        financialYearStart: companies.financialYearStart,
+        brandingMode: companies.brandingMode,
         status: companies.status,
         createdAt: companies.createdAt,
         updatedAt: companies.updatedAt,
@@ -367,6 +447,10 @@ export class CompanyRepository {
     if (input.country !== undefined) updateSet.country = input.country;
     if (input.postalCode !== undefined) updateSet.postalCode = input.postalCode;
     if (input.timeZone !== undefined) updateSet.timeZone = input.timeZone;
+    if (input.registrationNumber !== undefined) updateSet.registrationNumber = input.registrationNumber;
+    if (input.currency !== undefined) updateSet.currency = input.currency;
+    if (input.locale !== undefined) updateSet.locale = input.locale;
+    if (input.dateFormat !== undefined) updateSet.dateFormat = input.dateFormat;
 
     if (Object.keys(updateSet).length > 0) {
       await db.update(companies).set(updateSet).where(eq(companies.id, companyId));

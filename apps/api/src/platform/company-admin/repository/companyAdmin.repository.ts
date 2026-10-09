@@ -54,6 +54,11 @@ export class CompanyAdminRepository {
     return rows.map((r) => ({
       ...r,
       role: 'super_admin',
+      assignedRoles: [],
+      authoritySource: 'platform_oversight' as const,
+      authorityLabel: 'Super Admin',
+      isTenantAdmin: false,
+      isMember: false,
     }));
   }
 
@@ -136,7 +141,40 @@ export class CompanyAdminRepository {
       .limit(limit)
       .offset(offset);
 
-    return { items: rows, total };
+    const userEmails = rows.map((r) => r.email.toLowerCase().trim());
+    const invMap = new Map<string, 'pending' | 'accepted' | 'expired' | 'cancelled'>();
+    if (userEmails.length > 0) {
+      const invList = await db
+        .select({
+          email: sql<string>`LOWER(${invitations.email})`,
+          status: invitations.status,
+          createdAt: invitations.createdAt,
+        })
+        .from(invitations)
+        .where(
+          and(
+            eq(invitations.companyId, companyId),
+            sql`LOWER(${invitations.email}) IN (${sql.join(
+              userEmails.map((e) => sql`${e}`),
+              sql`, `,
+            )})`,
+          ),
+        )
+        .orderBy(desc(invitations.createdAt));
+
+      for (const inv of invList) {
+        if (!invMap.has(inv.email)) {
+          invMap.set(inv.email, inv.status as 'pending' | 'accepted' | 'expired' | 'cancelled');
+        }
+      }
+    }
+
+    const itemsWithInv: CompanyUserItem[] = rows.map((r) => ({
+      ...r,
+      invitationStatus: invMap.get(r.email.toLowerCase().trim()) ?? null,
+    }));
+
+    return { items: itemsWithInv, total };
   }
 
   /** The user's membership in the company, preferring an active row when several exist. */
@@ -196,6 +234,12 @@ export class CompanyAdminRepository {
   async findInvitationById(id: string) {
     const db = getDb();
     const [inv] = await db.select().from(invitations).where(eq(invitations.id, id));
+    return inv ?? null;
+  }
+
+  async findInvitationByToken(token: string) {
+    const db = getDb();
+    const [inv] = await db.select().from(invitations).where(eq(invitations.token, token));
     return inv ?? null;
   }
 

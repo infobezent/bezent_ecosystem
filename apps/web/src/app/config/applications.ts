@@ -1,14 +1,22 @@
 import { hrmsApplication } from '../../applications/hrms';
-import { superAdminApplication } from '../../applications/super-admin';
-import { tenantAdminApplication } from '../../applications/tenant-admin';
+import { superAdminApplication } from '../../administration/super-admin';
+import { tenantAdminApplication } from '../../administration/tenant-admin';
 import { companyAdminApplication } from '../../applications/company-admin';
-import { essApplication } from '../../applications/ess';
+import { essApplication } from '../../applications/hrms/ess';
 import type { BezentApplication } from '../../shared/types/application';
 
 /**
- * The business applications mounted inside the global shell. Adding CRM or
- * Projects later means registering its `BezentApplication` here — the shell,
- * sidebar, sub-navigation and More launcher need no change.
+ * Commercial business applications: top-level business products (ADR-014).
+ * CRM and Project Management join here when implemented.
+ */
+export const COMMERCIAL_APPLICATIONS: readonly BezentApplication[] = [
+  hrmsApplication,
+];
+
+/**
+ * All workspaces mounted inside the global AppShell.
+ * Separates commercial business products from administrative workspaces (Super Admin,
+ * Tenant Admin, delegated Company Admin) and employee experience (ESS).
  */
 export const APPLICATIONS: readonly BezentApplication[] = [
   hrmsApplication,

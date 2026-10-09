@@ -7,7 +7,8 @@ export interface ModalProps {
   onClose: () => void;
   title?: ReactNode;
   description?: ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'workspace';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'workspace' | 'drawer';
+  variant?: 'modal' | 'drawer';
   children: ReactNode;
   headerBottom?: ReactNode;
   headerActions?: ReactNode;
@@ -17,7 +18,7 @@ export interface ModalProps {
 
 /**
  * Standard BEZENT Modal Dialog primitive. Traps focus, handles Esc key,
- * renders accessible dialog semantics with backdrop overlay.
+ * renders accessible dialog semantics with backdrop overlay. Supports drawer variant.
  */
 export function Modal({
   isOpen,
@@ -25,6 +26,7 @@ export function Modal({
   title,
   description,
   size = 'md',
+  variant = 'modal',
   children,
   headerBottom,
   headerActions,
@@ -46,9 +48,11 @@ export function Modal({
 
   if (!isOpen) return null;
 
+  const isDrawer = variant === 'drawer' || size === 'drawer';
+
   return (
     <div
-      className="bezent-modal-backdrop"
+      className={`bezent-modal-backdrop ${isDrawer ? 'bezent-modal-backdrop--drawer' : ''}`.trim()}
       role="dialog"
       aria-modal="true"
       aria-labelledby={title ? 'bezent-modal-title' : undefined}
@@ -58,7 +62,9 @@ export function Modal({
         }
       }}
     >
-      <div className={`bezent-modal bezent-modal--${size} ${className || ''}`.trim()}>
+      <div
+        className={`bezent-modal bezent-modal--${size} ${isDrawer ? 'bezent-modal--drawer' : ''} ${className || ''}`.trim()}
+      >
         {Boolean(title || onClose || headerBottom) && (
           <div
             className={`bezent-modal__header ${headerBottom ? 'bezent-modal__header--with-bottom' : ''}`.trim()}

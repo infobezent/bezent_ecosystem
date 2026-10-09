@@ -78,7 +78,12 @@ export function CompanyAdminProvider({ children }: { children: ReactNode }) {
   const isCompanyAdmin = Boolean(
     isSuperAdmin ||
     (activeCompany &&
-      (activeCompany.role === 'company_admin' || activeCompany.role === 'super_admin')),
+      (activeCompany.role === 'company_admin' ||
+        activeCompany.role === 'tenant_admin' ||
+        activeCompany.role === 'super_admin' ||
+        activeCompany.isTenantAdmin ||
+        activeCompany.authoritySource === 'tenant_admin' ||
+        activeCompany.authoritySource === 'dual')),
   );
 
   const value: CompanyAdminContextValue = {

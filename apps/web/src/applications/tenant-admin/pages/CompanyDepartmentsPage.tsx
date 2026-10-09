@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { Page, PageHeader, Stack, Button } from '../../../design-system/components';
+import { Page, PageHeader, Stack, Button, Tabs } from '../../../design-system/components';
 import { useTenantAdmin } from '../context/TenantAdminContext';
 import { TenantCompanyContextBar } from '../components/TenantCompanyContextBar';
 import { DepartmentsSection } from '../../company-admin/organization/DepartmentsSection';
@@ -38,6 +38,24 @@ export function CompanyDepartmentsPage() {
           currentCompanyId={companyId}
           baseNavigatePath="/tenant-admin/tenant/companies"
         />
+
+        {company && (
+          <Tabs
+            activeId="organization"
+            onChange={(id) => {
+              if (id === 'overview') {
+                navigate(`/tenant-admin/tenant/companies/${encodeURIComponent(company.id)}/overview`);
+              } else if (id === 'details') {
+                navigate(`/tenant-admin/tenant/companies/${encodeURIComponent(company.id)}/details`);
+              }
+            }}
+            items={[
+              { id: 'overview', label: 'Overview' },
+              { id: 'details', label: 'Company Details' },
+              { id: 'organization', label: 'Organization' },
+            ]}
+          />
+        )}
 
         <DepartmentsSection
           onBack={() =>

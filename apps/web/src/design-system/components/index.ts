@@ -40,6 +40,7 @@ export * from './Badge';
 export * from './Tooltip';
 export * from './Spinner';
 export * from './LoadingState';
+export * from './ProgressBar';
 
 /* ─── Overlay ─────────────────────────────────────────────────────────────── */
 export * from './Modal';

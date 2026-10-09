@@ -2,7 +2,7 @@ import type { HTMLAttributes, ReactNode } from 'react';
 import './Card.css';
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'flat' | 'interactive';
+  variant?: 'default' | 'flat' | 'interactive' | 'tint-blue' | 'tint-green' | 'tint-amber' | 'hero';
   hoverable?: boolean;
   padding?: 'none' | 'sm' | 'md' | 'lg';
   children: ReactNode;

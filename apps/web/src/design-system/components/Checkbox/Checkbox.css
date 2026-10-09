@@ -4,13 +4,14 @@
 .bezent-checkbox-wrapper {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-2, 8px);
   cursor: pointer;
   user-select: none;
+  vertical-align: middle;
 }
 
 .bezent-checkbox-wrapper--disabled {
-  opacity: 0.5;
+  opacity: 0.65;
   cursor: not-allowed;
   pointer-events: none;
 }
@@ -24,7 +25,7 @@
   flex-shrink: 0;
 }
 
-/* Native input — visually hidden but accessible */
+/* Native input — visually hidden but accessible and keyboard-focusable */
 .bezent-checkbox__input {
   position: absolute;
   inset: 0;
@@ -35,63 +36,77 @@
   cursor: pointer;
 }
 
+.bezent-checkbox__input:disabled {
+  cursor: not-allowed;
+}
+
 /* Custom visual box */
 .bezent-checkbox__box {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-xs);
-  border: 1.5px solid var(--color-border-default);
-  background: var(--color-surface-elevated);
+  box-sizing: border-box;
+  border-radius: var(--radius-xs, 4px);
+  border: 1.5px solid var(--checkbox-border, #94a3b8);
+  background: var(--checkbox-bg, #ffffff);
   transition:
-    background var(--motion-duration-fast) var(--motion-easing-default),
-    border-color var(--motion-duration-fast) var(--motion-easing-default),
-    box-shadow var(--motion-duration-fast) var(--motion-easing-default);
+    background var(--motion-duration-fast, 150ms) var(--motion-easing-default, ease),
+    border-color var(--motion-duration-fast, 150ms) var(--motion-easing-default, ease),
+    box-shadow var(--motion-duration-fast, 150ms) var(--motion-easing-default, ease);
 }
 
-/* Sizes */
+/* Sizes: sm = 16px, md = 18px */
 .bezent-checkbox-wrapper--md .bezent-checkbox__box {
+  width: 18px;
+  height: 18px;
+}
+
+.bezent-checkbox-wrapper--sm .bezent-checkbox__box {
   width: 16px;
   height: 16px;
 }
 
-.bezent-checkbox-wrapper--sm .bezent-checkbox__box {
-  width: 13px;
-  height: 13px;
-}
-
 /* Checkmark SVG */
 .bezent-checkbox__checkmark {
-  width: 10px;
-  height: 10px;
-  stroke: #fff;
+  width: 11px;
+  height: 11px;
+  stroke: var(--checkbox-checked-color, #ffffff);
   opacity: 0;
   transform: scale(0.5);
   transition:
-    opacity var(--motion-duration-fast) var(--motion-easing-default),
-    transform var(--motion-duration-fast) var(--motion-easing-default);
+    opacity var(--motion-duration-fast, 150ms) var(--motion-easing-default, ease),
+    transform var(--motion-duration-fast, 150ms) var(--motion-easing-default, ease);
 }
 
 .bezent-checkbox-wrapper--sm .bezent-checkbox__checkmark {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 /* Indeterminate dash */
 .bezent-checkbox__indeterminate {
   position: absolute;
-  width: 8px;
+  width: 10px;
   height: 2px;
-  background: #fff;
+  background: var(--checkbox-checked-color, #ffffff);
   border-radius: 1px;
   opacity: 0;
-  transition: opacity var(--motion-duration-fast) var(--motion-easing-default);
+  transition: opacity var(--motion-duration-fast, 150ms) var(--motion-easing-default, ease);
+}
+
+.bezent-checkbox-wrapper--sm .bezent-checkbox__indeterminate {
+  width: 8px;
+}
+
+/* Hover state (when not disabled) */
+.bezent-checkbox-wrapper:hover:not(.bezent-checkbox-wrapper--disabled) .bezent-checkbox__box {
+  border-color: var(--checkbox-border-hover, #475569);
 }
 
 /* Checked state */
 .bezent-checkbox__input:checked ~ .bezent-checkbox__box {
-  background: var(--color-primary-500, #3b82f6);
-  border-color: var(--color-primary-500, #3b82f6);
+  background: var(--checkbox-checked-bg, #1a73e8);
+  border-color: var(--checkbox-checked-border, #1a73e8);
 }
 
 .bezent-checkbox__input:checked ~ .bezent-checkbox__box .bezent-checkbox__checkmark {
@@ -101,39 +116,49 @@
 
 /* Indeterminate state */
 .bezent-checkbox__input:indeterminate ~ .bezent-checkbox__box {
-  background: var(--color-primary-500, #3b82f6);
-  border-color: var(--color-primary-500, #3b82f6);
+  background: var(--checkbox-checked-bg, #1a73e8);
+  border-color: var(--checkbox-checked-border, #1a73e8);
 }
 
 .bezent-checkbox__input:indeterminate ~ .bezent-checkbox__box .bezent-checkbox__indeterminate {
   opacity: 1;
 }
 
-/* Focus ring */
+/* Focus ring (accessible keyboard navigation) */
 .bezent-checkbox__input:focus-visible ~ .bezent-checkbox__box {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary-500, #3b82f6) 30%, transparent);
+  box-shadow: 0 0 0 3px var(--checkbox-focus-ring, rgba(26, 115, 232, 0.28));
+  border-color: var(--checkbox-checked-border, #1a73e8);
 }
 
-/* Hover */
-.bezent-checkbox-wrapper:hover .bezent-checkbox__box {
-  border-color: var(--color-primary-400, #60a5fa);
+/* Disabled states */
+.bezent-checkbox-wrapper--disabled .bezent-checkbox__box {
+  background: var(--checkbox-disabled-bg, #f1f5f9);
+  border-color: var(--checkbox-disabled-border, #cbd5e1);
+  cursor: not-allowed;
+}
+
+.bezent-checkbox-wrapper--disabled .bezent-checkbox__input:checked ~ .bezent-checkbox__box,
+.bezent-checkbox-wrapper--disabled .bezent-checkbox__input:indeterminate ~ .bezent-checkbox__box {
+  background: var(--checkbox-disabled-border, #cbd5e1);
+  border-color: var(--checkbox-disabled-border, #cbd5e1);
 }
 
 /* Label text */
 .bezent-checkbox__label {
-  font-family: var(--font-family-base);
+  font-family: var(--font-family-base, inherit);
   font-size: var(--font-form-input-size, var(--font-size-base, 14px));
   font-weight: var(--font-weight-regular, 400);
-  color: var(--color-text-primary, #1f1f1f);
+  color: var(--text-primary, #000000);
   line-height: var(--line-height-normal, 1.5);
 }
 
-/* Dark mode */
+/* Dark mode explicit overrides for robustness */
 [data-theme='dark'] .bezent-checkbox__box {
-  background: var(--color-surface-elevated);
-  border-color: var(--color-border-default);
+  background: var(--checkbox-bg, #1e293b);
+  border-color: var(--checkbox-border, #64748b);
 }
 
 [data-theme='dark'] .bezent-checkbox__label {
-  color: var(--color-text-primary);
+  color: var(--text-primary, #f8fafc);
 }
+

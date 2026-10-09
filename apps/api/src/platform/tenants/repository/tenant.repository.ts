@@ -1,4 +1,4 @@
-import { eq, like, or, and, desc, inArray, count } from 'drizzle-orm';
+import { eq, like, or, and, desc, asc, inArray, count, gte, lte, ne } from 'drizzle-orm';
 import { getDb } from '../../../db/connection.js';
 import {
   tenants,
@@ -7,6 +7,13 @@ import {
   memberships,
   tenantModules,
   users,
+  tenantLifecycleEvents,
+  auditLogs,
+  tenantSubscriptions,
+  tenantAdmins,
+  invitations,
+  type NewTenantLifecycleEvent,
+  type TenantLifecycleEvent,
 } from '../../../db/schema.js';
 import type {
   CompanyCapacitySummary,
@@ -15,6 +22,7 @@ import type {
   TenantRecord,
   TenantStatus,
   UpdateTenantDto,
+  TenantActivityFilter,
 } from '../types/tenant.types.js';
 import { generateSurrogateId } from '../../auth/security.js';
 import {
@@ -35,6 +43,8 @@ export class TenantRepository {
         id: tenants.id,
         name: tenants.name,
         maxCompanies: tenants.maxCompanies,
+        logoUrl: tenants.logoUrl,
+        bannerUrl: tenants.bannerUrl,
         status: tenants.status,
         createdAt: tenants.createdAt,
         updatedAt: tenants.updatedAt,
@@ -109,6 +119,8 @@ export class TenantRepository {
       maxCompanies: max,
       contactEmail: row.contactEmail ?? null,
       contactPhone: row.contactPhone ?? null,
+      logoUrl: row.logoUrl ?? null,
+      bannerUrl: row.bannerUrl ?? null,
       status: row.status as TenantStatus,
       createdAt: row.createdAt.toISOString(),
       updatedAt: row.updatedAt.toISOString(),
@@ -261,12 +273,12 @@ export class TenantRepository {
     return updated;
   }
 
-  async updateStatus(id: string, status: TenantStatus): Promise<TenantRecord> {
-    const db = getDb();
-    await db.update(tenants).set({ status }).where(eq(tenants.id, id));
-    const updated = await this.findById(id);
-    if (!updated) throw new Error('Tenant not found');
-    return updated;
+  async updateStatus(
+    id: string,
+    status: TenantStatus,
+    details?: { suspendedReason?: string | null; suspendedAt?: Date | null; reactivatedAt?: Date | null },
+  ): Promise<TenantRecord> {
+    return this.updateTenantStatus(id, status, details);
   }
 
   async list(filter: TenantFilter): Promise<{ items: TenantRecord[]; total: number }> {
@@ -281,12 +293,19 @@ export class TenantRepository {
     }
     if (filter.search) {
       const s = `%${filter.search.trim()}%`;
+      const tenantIdsWithAdminEmail = db
+        .select({ tenantId: tenantAdmins.tenantId })
+        .from(tenantAdmins)
+        .innerJoin(users, eq(tenantAdmins.userId, users.id))
+        .where(like(users.email, s));
+
       conditions.push(
         or(
           like(tenants.name, s),
           like(tenants.id, s),
           like(tenantDetails.code, s),
           like(tenantDetails.contactEmail, s),
+          inArray(tenants.id, tenantIdsWithAdminEmail),
         ),
       );
     }
@@ -305,8 +324,66 @@ export class TenantRepository {
         );
       conditions.push(inArray(tenants.id, tenantIdsWithModule));
     }
+    if (filter.application) {
+      const tenantIdsWithApp = db
+        .select({ tenantId: tenantSubscriptions.tenantId })
+        .from(tenantSubscriptions)
+        .where(
+          and(
+            eq(
+              tenantSubscriptions.applicationCode,
+              filter.application as 'hrms' | 'crm' | 'project_management',
+            ),
+            or(eq(tenantSubscriptions.status, 'active'), eq(tenantSubscriptions.status, 'trial')),
+          ),
+        );
+      conditions.push(inArray(tenants.id, tenantIdsWithApp));
+    }
+    if (filter.planId) {
+      const tenantIdsWithPlan = db
+        .select({ tenantId: tenantSubscriptions.tenantId })
+        .from(tenantSubscriptions)
+        .where(
+          and(
+            eq(tenantSubscriptions.planId, filter.planId),
+            or(eq(tenantSubscriptions.status, 'active'), eq(tenantSubscriptions.status, 'trial')),
+          ),
+        );
+      conditions.push(inArray(tenants.id, tenantIdsWithPlan));
+    }
+    if (filter.trial !== undefined) {
+      const isTrialBool = filter.trial === true || filter.trial === 'true';
+      const tenantIdsWithTrial = db
+        .select({ tenantId: tenantSubscriptions.tenantId })
+        .from(tenantSubscriptions)
+        .where(
+          and(
+            isTrialBool
+              ? or(eq(tenantSubscriptions.accessMode, 'trial'), eq(tenantSubscriptions.status, 'trial'))
+              : and(ne(tenantSubscriptions.accessMode, 'trial'), eq(tenantSubscriptions.status, 'active')),
+            or(eq(tenantSubscriptions.status, 'active'), eq(tenantSubscriptions.status, 'trial')),
+          ),
+        );
+      conditions.push(inArray(tenants.id, tenantIdsWithTrial));
+    }
+    if (filter.createdFrom) {
+      conditions.push(gte(tenants.createdAt, new Date(filter.createdFrom)));
+    }
+    if (filter.createdTo) {
+      conditions.push(lte(tenants.createdAt, new Date(filter.createdTo)));
+    }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    const sortCol =
+      filter.sortBy === 'name'
+        ? tenants.name
+        : filter.sortBy === 'status'
+        ? tenants.status
+        : filter.sortBy === 'id'
+        ? tenants.id
+        : tenants.createdAt;
+    const orderExpr = filter.sortOrder === 'asc' ? asc(sortCol) : desc(sortCol);
 
     const rows = await db
       .select({
@@ -323,14 +400,14 @@ export class TenantRepository {
       .from(tenants)
       .leftJoin(tenantDetails, eq(tenants.id, tenantDetails.tenantId))
       .where(whereClause)
-      .orderBy(desc(tenants.createdAt))
+      .orderBy(orderExpr)
       .limit(limit)
       .offset(offset);
 
     const countRows = await db
       .select({ id: tenants.id })
       .from(tenants)
-      .leftJoin(tenantDetails, eq(tenants.id, tenantDetails.tenantId))
+      .leftJoin(tenantDetails, eq(tenantDetails.tenantId, tenants.id))
       .where(whereClause);
 
     const tenantIds = rows.map((r) => r.id);
@@ -338,6 +415,8 @@ export class TenantRepository {
     const userCountMap = new Map<string, number>();
     const moduleMap = new Map<string, string[]>();
     const adminMap = new Map<string, EvaluationAdminInput[]>();
+    const primaryAdminMap = new Map<string, any>();
+    const subscriptionMap = new Map<string, any[]>();
 
     if (tenantIds.length > 0) {
       const allCompanies = await db
@@ -411,12 +490,92 @@ export class TenantRepository {
         });
         adminMap.set(a.tenantId, list);
       }
+
+      // Batch load primary admins
+      const activePrimaryAdmins = await db
+        .select({
+          tenantId: tenantAdmins.tenantId,
+          userId: tenantAdmins.userId,
+          status: tenantAdmins.status,
+          createdAt: tenantAdmins.createdAt,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+        })
+        .from(tenantAdmins)
+        .leftJoin(users, eq(tenantAdmins.userId, users.id))
+        .where(and(inArray(tenantAdmins.tenantId, tenantIds), eq(tenantAdmins.isPrimary, true)));
+
+      for (const pa of activePrimaryAdmins) {
+        const fullName = [pa.firstName, pa.lastName].filter(Boolean).join(' ');
+        primaryAdminMap.set(pa.tenantId, {
+          id: pa.userId,
+          name: fullName || pa.email?.split('@')[0] || 'Administrator',
+          email: pa.email || '',
+          status: pa.status,
+          invitedAt: null,
+          acceptedAt: pa.createdAt?.toISOString() ?? null,
+        });
+      }
+
+      // Check pending invitations for tenants without an active primary admin
+      const pendingInvites = await db
+        .select({
+          tenantId: invitations.tenantId,
+          email: invitations.email,
+          status: invitations.status,
+          createdAt: invitations.createdAt,
+        })
+        .from(invitations)
+        .where(
+          and(
+            inArray(invitations.tenantId, tenantIds),
+            or(
+              eq(invitations.authorityType, 'tenant_admin'),
+              eq(invitations.isPrimaryAdmin, true),
+            ),
+            eq(invitations.status, 'pending'),
+          ),
+        );
+
+      for (const pi of pendingInvites) {
+        if (!primaryAdminMap.has(pi.tenantId)) {
+          primaryAdminMap.set(pi.tenantId, {
+            id: '',
+            name: pi.email.split('@')[0] || 'Administrator',
+            email: pi.email,
+            status: 'pending',
+            invitedAt: pi.createdAt.toISOString(),
+            acceptedAt: null,
+          });
+        }
+      }
+
+      // Batch load subscriptions
+      const allSubscriptions = await db
+        .select({
+          tenantId: tenantSubscriptions.tenantId,
+          applicationCode: tenantSubscriptions.applicationCode,
+          planId: tenantSubscriptions.planId,
+          status: tenantSubscriptions.status,
+          accessMode: tenantSubscriptions.accessMode,
+          licensedSeats: tenantSubscriptions.licensedSeats,
+        })
+        .from(tenantSubscriptions)
+        .where(inArray(tenantSubscriptions.tenantId, tenantIds));
+
+      for (const sub of allSubscriptions) {
+        const list = subscriptionMap.get(sub.tenantId) ?? [];
+        list.push(sub);
+        subscriptionMap.set(sub.tenantId, list);
+      }
     }
 
     let items = rows.map((r) => {
       const comps = companyMap.get(r.id) ?? [];
       const mods = moduleMap.get(r.id) ?? [];
       const adms = adminMap.get(r.id) ?? [];
+      const subs = subscriptionMap.get(r.id) ?? [];
       const tenantInput = {
         id: r.id,
         name: r.name,
@@ -430,6 +589,25 @@ export class TenantRepository {
       const max = r.maxCompanies ?? 5;
       const used = comps.length;
       const remaining = Math.max(0, max - used);
+
+      const activeSubs = subs.filter((s) => s.status === 'active' || s.status === 'trial');
+      const activePlans = Array.from(new Set(activeSubs.map((s) => s.planId)));
+      const totalSeats = activeSubs.reduce((acc, s) => acc + (s.licensedSeats ?? 0), 0);
+      const hasTrial = activeSubs.some((s) => s.accessMode === 'trial' || s.status === 'trial');
+      const hasPaid = activeSubs.some((s) => s.accessMode !== 'trial' && s.status === 'active');
+
+      let derivedClassification: 'active' | 'trial' | 'suspended' | 'pending_setup' | 'archived' = 'active';
+      if (r.status === 'suspended') {
+        derivedClassification = 'suspended';
+      } else if (r.status === 'archived') {
+        derivedClassification = 'archived';
+      } else if (hasPaid) {
+        derivedClassification = 'active';
+      } else if (hasTrial) {
+        derivedClassification = 'trial';
+      } else if (subs.length === 0) {
+        derivedClassification = r.status === 'active' ? 'active' : 'pending_setup';
+      }
 
       return {
         id: r.id,
@@ -447,6 +625,13 @@ export class TenantRepository {
         userCount: userCountMap.get(r.id) ?? 0,
         activeModules: mods,
         adminsCount: adms.length,
+        primaryAdmin: primaryAdminMap.get(r.id) ?? null,
+        subscriptionSummary: {
+          activePlans,
+          totalSeats,
+          hasTrial,
+        },
+        derivedCommercialClassification: derivedClassification,
         health,
         setupProgress,
       };
@@ -464,11 +649,44 @@ export class TenantRepository {
 
   async getCounts() {
     const db = getDb();
-    const all = await db.select({ status: tenants.status }).from(tenants);
+    const all = await db.select({ id: tenants.id, status: tenants.status }).from(tenants);
     const total = all.length;
-    const active = all.filter((t) => t.status === 'active').length;
     const suspended = all.filter((t) => t.status === 'suspended').length;
-    return { total, active, suspended };
+
+    const activeSubs = await db
+      .select({
+        tenantId: tenantSubscriptions.tenantId,
+        accessMode: tenantSubscriptions.accessMode,
+        status: tenantSubscriptions.status,
+      })
+      .from(tenantSubscriptions)
+      .where(or(eq(tenantSubscriptions.status, 'active'), eq(tenantSubscriptions.status, 'trial')));
+
+    const subMap = new Map<string, { hasPaid: boolean; hasTrial: boolean }>();
+    for (const s of activeSubs) {
+      const entry = subMap.get(s.tenantId) ?? { hasPaid: false, hasTrial: false };
+      if (s.accessMode === 'trial' || s.status === 'trial') {
+        entry.hasTrial = true;
+      } else {
+        entry.hasPaid = true;
+      }
+      subMap.set(s.tenantId, entry);
+    }
+
+    let trial = 0;
+    let active = 0;
+
+    for (const t of all) {
+      if (t.status === 'suspended' || t.status === 'archived') continue;
+      const s = subMap.get(t.id);
+      if (s && s.hasTrial && !s.hasPaid) {
+        trial++;
+      } else if (t.status === 'active') {
+        active++;
+      }
+    }
+
+    return { total, active, trial, suspended };
   }
 
   async countCapacityConsumingCompanies(tenantId: string, tx?: DbClient): Promise<number> {
@@ -501,6 +719,100 @@ export class TenantRepository {
     await client.update(tenants).set({ maxCompanies }).where(eq(tenants.id, tenantId));
     const updated = await this.findById(tenantId);
     if (!updated) throw new Error('Tenant not found after capacity update');
+    return updated;
+  }
+
+  async recordLifecycleEvent(event: NewTenantLifecycleEvent): Promise<TenantLifecycleEvent> {
+    const db = getDb();
+    await db.insert(tenantLifecycleEvents).values(event);
+    const [row] = await db
+      .select()
+      .from(tenantLifecycleEvents)
+      .where(eq(tenantLifecycleEvents.id, event.id));
+    return row!;
+  }
+
+  async listLifecycleEvents(tenantId: string): Promise<TenantLifecycleEvent[]> {
+    const db = getDb();
+    return db
+      .select()
+      .from(tenantLifecycleEvents)
+      .where(eq(tenantLifecycleEvents.tenantId, tenantId))
+      .orderBy(desc(tenantLifecycleEvents.createdAt));
+  }
+
+  async listAuditLogsByTenant(
+    tenantId: string,
+    filterOrLimit?: TenantActivityFilter | number,
+  ): Promise<any> {
+    const db = getDb();
+    if (typeof filterOrLimit === 'number') {
+      return db
+        .select()
+        .from(auditLogs)
+        .where(eq(auditLogs.tenantId, tenantId))
+        .orderBy(desc(auditLogs.createdAt))
+        .limit(filterOrLimit);
+    }
+
+    const filter = filterOrLimit;
+    const limit = filter?.limit ?? 50;
+    const page = Math.max(1, filter?.page ?? 1);
+    const offset = (page - 1) * limit;
+
+    const conditions = [eq(auditLogs.tenantId, tenantId)];
+    if (filter?.action) {
+      conditions.push(eq(auditLogs.action, filter.action));
+    }
+    if (filter?.actorUserId) {
+      conditions.push(eq(auditLogs.actorUserId, filter.actorUserId));
+    }
+    if (filter?.actorEmail) {
+      conditions.push(like(auditLogs.actorEmail, `%${filter.actorEmail.trim()}%`));
+    }
+    if (filter?.startDate) {
+      conditions.push(gte(auditLogs.createdAt, new Date(filter.startDate)));
+    }
+    if (filter?.endDate) {
+      conditions.push(lte(auditLogs.createdAt, new Date(filter.endDate)));
+    }
+
+    const whereClause = and(...conditions);
+    const items = await db
+      .select()
+      .from(auditLogs)
+      .where(whereClause)
+      .orderBy(desc(auditLogs.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    const [totalRow] = await db
+      .select({ total: count() })
+      .from(auditLogs)
+      .where(whereClause);
+
+    return {
+      items,
+      total: Number(totalRow?.total ?? items.length),
+      page,
+      limit,
+    };
+  }
+
+  async updateTenantStatus(
+    id: string,
+    status: TenantStatus,
+    details?: { suspendedReason?: string | null; suspendedAt?: Date | null; reactivatedAt?: Date | null },
+  ): Promise<TenantRecord> {
+    const db = getDb();
+    const updateData: Record<string, any> = { status };
+    if (details?.suspendedReason !== undefined) updateData.suspendedReason = details.suspendedReason;
+    if (details?.suspendedAt !== undefined) updateData.suspendedAt = details.suspendedAt;
+    if (details?.reactivatedAt !== undefined) updateData.reactivatedAt = details.reactivatedAt;
+
+    await db.update(tenants).set(updateData).where(eq(tenants.id, id));
+    const updated = await this.findById(id);
+    if (!updated) throw new Error(`Tenant '${id}' not found after status update`);
     return updated;
   }
 }

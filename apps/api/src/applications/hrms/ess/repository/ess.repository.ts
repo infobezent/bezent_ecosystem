@@ -1,4 +1,4 @@
-import { eq, and, desc, sql, gte, lte, or, inArray } from 'drizzle-orm';
+import { eq, and, desc, inArray } from 'drizzle-orm';
 import { getDb } from '../../../../db/connection.js';
 import {
   employees,
@@ -7,20 +7,15 @@ import {
   locations,
   employeePersonalDetails,
   employeeFamilyMembers,
-  employeeNominees,
   employeeEmergencyContacts,
   employeeBankAccounts,
   employeeSkills,
   employeeWorkSchedules,
   employeeDocuments,
-  employeeAttendance,
-  employeeLeaveBalances,
-  employeeLeaveRequests,
   employeeTimesheets,
   employeeRequests,
   employeeTasks,
   employeeNotifications,
-  type Employee,
   type EmployeeAttendance,
   type EmployeeLeaveBalance,
   type EmployeeLeaveRequest,
@@ -32,8 +27,17 @@ import {
 } from '../../../../db/schema.js';
 import { generateSurrogateId } from '../../../../platform/auth/security.js';
 import type { EssEmployeeSummary, EssFullProfile } from '../types/ess.types.js';
+import {
+  attendanceRepository,
+  AttendanceRepository,
+} from '../../attendance/repository/attendance.repository.js';
+import { leaveRepository, LeaveRepository } from '../../leave/repository/leave.repository.js';
 
 export class EssRepository {
+  constructor(
+    private readonly attendanceRepo: AttendanceRepository = attendanceRepository,
+    private readonly leaveRepo: LeaveRepository = leaveRepository,
+  ) {}
   async getEmployeeSummary(employeeId: string): Promise<EssEmployeeSummary | null> {
     const db = getDb();
     const rows = await db
@@ -133,26 +137,14 @@ export class EssRepository {
     };
   }
 
-  // Attendance
+  // ── Attendance Domain (Delegated to applications/hrms/attendance) ──────────
   async getTodayAttendance(
     tenantId: string,
     companyId: string,
     employeeId: string,
     date: string,
   ): Promise<EmployeeAttendance | null> {
-    const db = getDb();
-    const rows = await db
-      .select()
-      .from(employeeAttendance)
-      .where(
-        and(
-          eq(employeeAttendance.tenantId, tenantId),
-          eq(employeeAttendance.companyId, companyId),
-          eq(employeeAttendance.employeeId, employeeId),
-          eq(employeeAttendance.date, date),
-        ),
-      );
-    return rows[0] ?? null;
+    return this.attendanceRepo.getTodayAttendance(tenantId, companyId, employeeId, date);
   }
 
   async checkIn(
@@ -164,55 +156,19 @@ export class EssRepository {
     workLocation: string = 'office',
     notes?: string,
   ): Promise<EmployeeAttendance> {
-    const db = getDb();
-    const existing = await this.getTodayAttendance(tenantId, companyId, employeeId, date);
-    if (existing) {
-      if (existing.checkInTime) {
-        throw new Error('Attendance check-in already recorded for today');
-      }
-      await db
-        .update(employeeAttendance)
-        .set({
-          checkInTime,
-          workLocation,
-          notes: notes ?? existing.notes,
-        })
-        .where(eq(employeeAttendance.id, existing.id));
-      const [updated] = await db
-        .select()
-        .from(employeeAttendance)
-        .where(eq(employeeAttendance.id, existing.id));
-      return updated!;
-    }
-
-    const id = generateSurrogateId('att');
-    await db.insert(employeeAttendance).values({
-      id,
+    return this.attendanceRepo.checkIn(
       tenantId,
       companyId,
       employeeId,
       date,
       checkInTime,
       workLocation,
-      notes: notes ?? null,
-      status: 'present',
-    });
-
-    const [created] = await db
-      .select()
-      .from(employeeAttendance)
-      .where(eq(employeeAttendance.id, id));
-    return created!;
+      notes,
+    );
   }
 
   async checkOut(id: string, checkOutTime: string): Promise<EmployeeAttendance> {
-    const db = getDb();
-    await db.update(employeeAttendance).set({ checkOutTime }).where(eq(employeeAttendance.id, id));
-    const [updated] = await db
-      .select()
-      .from(employeeAttendance)
-      .where(eq(employeeAttendance.id, id));
-    return updated!;
+    return this.attendanceRepo.checkOut(id, checkOutTime);
   }
 
   async getAttendanceHistory(
@@ -221,40 +177,17 @@ export class EssRepository {
     employeeId: string,
     limit: number = 30,
   ): Promise<EmployeeAttendance[]> {
-    const db = getDb();
-    return db
-      .select()
-      .from(employeeAttendance)
-      .where(
-        and(
-          eq(employeeAttendance.tenantId, tenantId),
-          eq(employeeAttendance.companyId, companyId),
-          eq(employeeAttendance.employeeId, employeeId),
-        ),
-      )
-      .orderBy(desc(employeeAttendance.date))
-      .limit(limit);
+    return this.attendanceRepo.getAttendanceHistory(tenantId, companyId, employeeId, limit);
   }
 
-  // Leave
+  // ── Leave Domain (Delegated to applications/hrms/leave) ───────────────────
   async getLeaveBalances(
     tenantId: string,
     companyId: string,
     employeeId: string,
     year: number,
   ): Promise<EmployeeLeaveBalance[]> {
-    const db = getDb();
-    return db
-      .select()
-      .from(employeeLeaveBalances)
-      .where(
-        and(
-          eq(employeeLeaveBalances.tenantId, tenantId),
-          eq(employeeLeaveBalances.companyId, companyId),
-          eq(employeeLeaveBalances.employeeId, employeeId),
-          eq(employeeLeaveBalances.year, year),
-        ),
-      );
+    return this.leaveRepo.getLeaveBalances(tenantId, companyId, employeeId, year);
   }
 
   async ensureDefaultLeaveBalances(
@@ -263,35 +196,7 @@ export class EssRepository {
     employeeId: string,
     year: number,
   ): Promise<EmployeeLeaveBalance[]> {
-    const existing = await this.getLeaveBalances(tenantId, companyId, employeeId, year);
-    if (existing.length > 0) return existing;
-
-    const db = getDb();
-    const defaults: Array<{
-      leaveType: 'annual' | 'sick' | 'casual' | 'unpaid';
-      totalDays: number;
-    }> = [
-      { leaveType: 'annual', totalDays: 18 },
-      { leaveType: 'sick', totalDays: 12 },
-      { leaveType: 'casual', totalDays: 6 },
-      { leaveType: 'unpaid', totalDays: 0 },
-    ];
-
-    for (const def of defaults) {
-      await db.insert(employeeLeaveBalances).values({
-        id: generateSurrogateId('lvb'),
-        tenantId,
-        companyId,
-        employeeId,
-        leaveType: def.leaveType,
-        totalDays: def.totalDays,
-        usedDays: 0,
-        pendingDays: 0,
-        year,
-      });
-    }
-
-    return this.getLeaveBalances(tenantId, companyId, employeeId, year);
+    return this.leaveRepo.ensureDefaultLeaveBalances(tenantId, companyId, employeeId, year);
   }
 
   async getLeaveRequests(
@@ -299,18 +204,7 @@ export class EssRepository {
     companyId: string,
     employeeId: string,
   ): Promise<EmployeeLeaveRequest[]> {
-    const db = getDb();
-    return db
-      .select()
-      .from(employeeLeaveRequests)
-      .where(
-        and(
-          eq(employeeLeaveRequests.tenantId, tenantId),
-          eq(employeeLeaveRequests.companyId, companyId),
-          eq(employeeLeaveRequests.employeeId, employeeId),
-        ),
-      )
-      .orderBy(desc(employeeLeaveRequests.createdAt));
+    return this.leaveRepo.getLeaveRequests(tenantId, companyId, employeeId);
   }
 
   async findOverlappingLeave(
@@ -320,22 +214,7 @@ export class EssRepository {
     startDate: string,
     endDate: string,
   ): Promise<EmployeeLeaveRequest | null> {
-    const db = getDb();
-    // Overlap: existing.startDate <= newEndDate AND existing.endDate >= newStartDate
-    const rows = await db
-      .select()
-      .from(employeeLeaveRequests)
-      .where(
-        and(
-          eq(employeeLeaveRequests.tenantId, tenantId),
-          eq(employeeLeaveRequests.companyId, companyId),
-          eq(employeeLeaveRequests.employeeId, employeeId),
-          inArray(employeeLeaveRequests.status, ['pending', 'approved']),
-          lte(employeeLeaveRequests.startDate, endDate),
-          gte(employeeLeaveRequests.endDate, startDate),
-        ),
-      );
-    return rows[0] ?? null;
+    return this.leaveRepo.findOverlappingLeave(tenantId, companyId, employeeId, startDate, endDate);
   }
 
   async createLeaveRequest(data: {
@@ -348,87 +227,11 @@ export class EssRepository {
     totalDays: number;
     reason: string;
   }): Promise<EmployeeLeaveRequest> {
-    const db = getDb();
-    const id = generateSurrogateId('lvrq');
-    await db.insert(employeeLeaveRequests).values({
-      id,
-      tenantId: data.tenantId,
-      companyId: data.companyId,
-      employeeId: data.employeeId,
-      leaveType: data.leaveType,
-      startDate: data.startDate,
-      endDate: data.endDate,
-      totalDays: data.totalDays,
-      reason: data.reason,
-      status: 'pending',
-    });
-
-    // Update pending days on leave balance if applicable
-    const year = new Date(data.startDate).getFullYear();
-    await db
-      .update(employeeLeaveBalances)
-      .set({
-        pendingDays: sql`${employeeLeaveBalances.pendingDays} + ${data.totalDays}`,
-      })
-      .where(
-        and(
-          eq(employeeLeaveBalances.tenantId, data.tenantId),
-          eq(employeeLeaveBalances.companyId, data.companyId),
-          eq(employeeLeaveBalances.employeeId, data.employeeId),
-          eq(employeeLeaveBalances.leaveType, data.leaveType),
-          eq(employeeLeaveBalances.year, year),
-        ),
-      );
-
-    const [created] = await db
-      .select()
-      .from(employeeLeaveRequests)
-      .where(eq(employeeLeaveRequests.id, id));
-    return created!;
+    return this.leaveRepo.createLeaveRequest(data);
   }
 
   async cancelLeaveRequest(id: string, employeeId: string): Promise<EmployeeLeaveRequest> {
-    const db = getDb();
-    const [existing] = await db
-      .select()
-      .from(employeeLeaveRequests)
-      .where(
-        and(eq(employeeLeaveRequests.id, id), eq(employeeLeaveRequests.employeeId, employeeId)),
-      );
-
-    if (!existing) {
-      throw new Error('Leave request not found');
-    }
-    if (existing.status !== 'pending') {
-      throw new Error(`Cannot cancel leave request with status '${existing.status}'`);
-    }
-
-    await db
-      .update(employeeLeaveRequests)
-      .set({ status: 'cancelled' })
-      .where(eq(employeeLeaveRequests.id, id));
-
-    const year = new Date(existing.startDate).getFullYear();
-    await db
-      .update(employeeLeaveBalances)
-      .set({
-        pendingDays: sql`GREATEST(0, ${employeeLeaveBalances.pendingDays} - ${existing.totalDays})`,
-      })
-      .where(
-        and(
-          eq(employeeLeaveBalances.tenantId, existing.tenantId),
-          eq(employeeLeaveBalances.companyId, existing.companyId),
-          eq(employeeLeaveBalances.employeeId, existing.employeeId),
-          eq(employeeLeaveBalances.leaveType, existing.leaveType),
-          eq(employeeLeaveBalances.year, year),
-        ),
-      );
-
-    const [updated] = await db
-      .select()
-      .from(employeeLeaveRequests)
-      .where(eq(employeeLeaveRequests.id, id));
-    return updated!;
+    return this.leaveRepo.cancelLeaveRequest(id, employeeId);
   }
 
   // Timesheets

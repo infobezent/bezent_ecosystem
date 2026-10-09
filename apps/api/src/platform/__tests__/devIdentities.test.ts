@@ -2,7 +2,14 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../../app/server/createApp.js';
 import { getDb } from '../../db/connection.js';
-import { authOtpChallenges } from '../../db/schema.js';
+import {
+  authOtpChallenges,
+  users,
+  tenantAdmins,
+  memberships,
+  roleAssignments,
+  employees,
+} from '../../db/schema.js';
 import { eq } from 'drizzle-orm';
 import { seedDatabase } from '../../db/seed.js';
 import type { CompanyAccess, AccessRoleSummary } from '../access/types/access.types.js';
@@ -61,6 +68,13 @@ describe('Development Identities End-to-End Auth & Access Verification', () => {
       .get('/api/v1/platform/tenants')
       .set('Authorization', `Bearer ${session.token}`);
     expect(tenantsRes.status).toBe(200);
+
+    // DENIED tenant admin endpoint: Super Admin alone does not grant Tenant Admin authority
+    const tenantAdminRes = await request(app)
+      .get('/api/v1/tenant-admin/context')
+      .set('Authorization', `Bearer ${session.token}`);
+    expect(tenantAdminRes.status).toBe(403);
+    expect(tenantAdminRes.body.error.code).toBe('TENANT_ADMIN_AUTHORITY_REQUIRED');
   });
 
   it('verifies Identity 2: companyadmin@bezent.com has Company Admin workspace and cannot access Super Admin', async () => {
@@ -82,6 +96,20 @@ describe('Development Identities End-to-End Auth & Access Verification', () => {
       .set('Authorization', `Bearer ${session.token}`)
       .set('x-company-id', 'comp_demo_01');
     expect(rolesRes.status).toBe(200);
+
+    // Verify authorized company returns accurate Company Admin authority label
+    const caCompaniesRes = await request(app)
+      .get('/api/v1/company-admin/companies')
+      .set('Authorization', `Bearer ${session.token}`);
+    expect(caCompaniesRes.status).toBe(200);
+    const caComp = caCompaniesRes.body.data.find((c: any) => c.id === 'comp_demo_01');
+    expect(caComp).toBeDefined();
+    expect(caComp.role).toBe('company_admin');
+    expect(caComp.authoritySource).toBe('company_admin');
+    expect(caComp.authorityLabel).toBe('Company Admin');
+    expect(caComp.isTenantAdmin).toBe(false);
+    expect(caComp.isMember).toBe(true);
+    expect(caComp.assignedRoles).toContain('company_admin');
 
     // DENIED platform super admin endpoint
     const superAdminRes = await request(app)
@@ -275,5 +303,260 @@ describe('Development Identities End-to-End Auth & Access Verification', () => {
       .set('Authorization', `Bearer ${session.token}`)
       .set('x-company-id', 'comp_demo_01');
     expect(onbRes.status).toBe(200);
+  });
+
+  it('verifies Identity 5: tenantadmin@bezent.com has Tenant Admin authority, default destination /tenant-admin, and accesses tenant-admin APIs', async () => {
+    const session = await loginWithOtp('tenantadmin@bezent.com', '10.1.0.7');
+    expect(session.user.email).toBe('tenantadmin@bezent.com');
+    expect(session.user.isSuperAdmin).toBe(false);
+    expect(session.defaultDestination).toBe('/tenant-admin');
+
+    // Access overview indicates tenant admin authority
+    expect(session.access.isTenantAdmin).toBe(true);
+
+    const company = session.access.companies.find(
+      (c: CompanyAccess) => c.companyId === 'comp_demo_01',
+    );
+    expect(company).toBeDefined();
+    expect(company.isTenantAdmin).toBe(true);
+    expect(company.isMember).toBe(false);
+    expect(company.roles).toEqual([]);
+    expect(company.employeeId).toBeNull();
+    expect(company.essEligible).toBe(false);
+
+    // Tenant Admin CAN access tenant-admin endpoints
+    const contextRes = await request(app)
+      .get('/api/v1/tenant-admin/context')
+      .set('Authorization', `Bearer ${session.token}`);
+    expect(contextRes.status).toBe(200);
+    expect(contextRes.body.data.tenant.id).toBe('tenant_demo_01');
+    expect(contextRes.body.data.tenantAdmin.status).toBe('active');
+
+    // Tenant Admin CAN access company administration for own-tenant company
+    const caProfileRes = await request(app)
+      .get('/api/v1/company-admin/profile')
+      .set('Authorization', `Bearer ${session.token}`)
+      .set('x-company-id', 'comp_demo_01');
+    expect(caProfileRes.status).toBe(200);
+
+    // Verify authorized company returns accurate Tenant Admin authority label (no false company_admin role)
+    const taCompaniesRes = await request(app)
+      .get('/api/v1/company-admin/companies')
+      .set('Authorization', `Bearer ${session.token}`);
+    expect(taCompaniesRes.status).toBe(200);
+    const taComp = taCompaniesRes.body.data.find((c: any) => c.id === 'comp_demo_01');
+    expect(taComp).toBeDefined();
+    expect(taComp.role).toBe('tenant_admin');
+    expect(taComp.authoritySource).toBe('tenant_admin');
+    expect(taComp.authorityLabel).toBe('Tenant Admin');
+    expect(taComp.isTenantAdmin).toBe(true);
+    expect(taComp.isMember).toBe(false);
+    expect(taComp.assignedRoles).toEqual([]);
+
+    // Tenant Admin is DENIED platform super admin endpoint
+    const superAdminRes = await request(app)
+      .get('/api/v1/platform/tenants')
+      .set('Authorization', `Bearer ${session.token}`);
+    expect(superAdminRes.status).toBe(403);
+
+    // Tenant Admin does NOT automatically have HRMS employee business permissions
+    expect(company.permissions).not.toContain('hrms.employees.read');
+    expect(company.permissions).not.toContain('hrms.employees.manage');
+    expect(company.permissions).not.toContain('hrms.payroll.process');
+  });
+
+  it('verifies tenantadmin@bezent.com DB integrity (canonical authority, no membership, no company admin role, no employee)', async () => {
+    const db = getDb();
+
+    // 1. User exists and is active
+    const [user] = await db.select().from(users).where(eq(users.email, 'tenantadmin@bezent.com'));
+    expect(user).toBeDefined();
+    expect(user!.status).toBe('active');
+    expect(user!.isSuperAdmin).toBe(false);
+
+    // 2. Canonical tenant_admins record exists for BEZENT Demo tenant
+    const taRecords = await db
+      .select()
+      .from(tenantAdmins)
+      .where(eq(tenantAdmins.userId, user!.id));
+    expect(taRecords).toHaveLength(1);
+    expect(taRecords[0]!.tenantId).toBe('tenant_demo_01');
+    expect(taRecords[0]!.status).toBe('active');
+
+    // 3. NO memberships row created for tenantadmin
+    const userMemberships = await db
+      .select()
+      .from(memberships)
+      .where(eq(memberships.userId, user!.id));
+    expect(userMemberships).toHaveLength(0);
+
+    // 4. NO role_assignments created for tenantadmin
+    const userRoles = await db
+      .select()
+      .from(roleAssignments)
+      .where(eq(roleAssignments.userId, user!.id));
+    expect(userRoles).toHaveLength(0);
+
+    // 5. NO employee records linked
+    const linkedEmployees = await db
+      .select()
+      .from(employees)
+      .where(eq(employees.userId, user!.id));
+    expect(linkedEmployees).toHaveLength(0);
+  });
+
+  it('verifies seed idempotency by re-running seedDatabase without duplicate records', async () => {
+    const db = getDb();
+
+    // Re-run seed
+    await seedDatabase();
+
+    // Verify exactly 1 tenantadmin user
+    const taUsers = await db.select().from(users).where(eq(users.email, 'tenantadmin@bezent.com'));
+    expect(taUsers).toHaveLength(1);
+
+    // Verify exactly 1 tenant_admins authority record
+    const taRecords = await db
+      .select()
+      .from(tenantAdmins)
+      .where(eq(tenantAdmins.userId, taUsers[0]!.id));
+    expect(taRecords).toHaveLength(1);
+    expect(taRecords[0]!.tenantId).toBe('tenant_demo_01');
+    expect(taRecords[0]!.status).toBe('active');
+  });
+
+  it('verifies Identity: Explicit Dual Authority user has both Super Admin and Tenant Admin access', async () => {
+    const db = getDb();
+    const dualEmail = 'dualadmin@bezent.com';
+    const dualUserId = 'usr_dual_admin_01';
+
+    // Upsert dual authority user: isSuperAdmin=true AND active tenant_admins record
+    await db
+      .insert(users)
+      .values({
+        id: dualUserId,
+        email: dualEmail,
+        passwordHash: 'dummy',
+        salt: 'dummy',
+        firstName: 'Dual',
+        lastName: 'Admin',
+        status: 'active',
+        isSuperAdmin: true,
+      })
+      .onDuplicateKeyUpdate({ set: { status: 'active', isSuperAdmin: true } });
+
+    await db
+      .insert(tenantAdmins)
+      .values({
+        id: 'ta_dual_demo_01',
+        tenantId: 'tenant_demo_01',
+        userId: dualUserId,
+        status: 'active',
+      })
+      .onDuplicateKeyUpdate({ set: { status: 'active' } });
+
+    const session = await loginWithOtp(dualEmail, '10.1.0.8');
+    expect(session.user.isSuperAdmin).toBe(true);
+    expect(session.access.isTenantAdmin).toBe(true);
+    expect(session.access.platformWorkspaces).toContain('super_admin');
+
+    // 1. Can access platform Super Admin endpoint
+    const superAdminRes = await request(app)
+      .get('/api/v1/platform/tenants')
+      .set('Authorization', `Bearer ${session.token}`);
+    expect(superAdminRes.status).toBe(200);
+
+    // 2. Can access Tenant Admin endpoint for assigned tenant
+    const tenantAdminRes = await request(app)
+      .get('/api/v1/tenant-admin/context')
+      .set('Authorization', `Bearer ${session.token}`);
+    expect(tenantAdminRes.status).toBe(200);
+    expect(tenantAdminRes.body.data.tenant.id).toBe('tenant_demo_01');
+  });
+
+  it('verifies explicit dual authority: Tenant Admin authority + explicit Company Admin role displays accurate dual label', async () => {
+    const db = getDb();
+    const dualTaCaEmail = 'dual_taca@bezent.com';
+    const dualTaCaUserId = 'usr_dual_taca_01';
+
+    await db
+      .insert(users)
+      .values({
+        id: dualTaCaUserId,
+        email: dualTaCaEmail,
+        passwordHash: 'dummy',
+        salt: 'dummy',
+        firstName: 'Dual',
+        lastName: 'TACA',
+        status: 'active',
+        isSuperAdmin: false,
+      })
+      .onDuplicateKeyUpdate({ set: { status: 'active', isSuperAdmin: false } });
+
+    await db
+      .insert(tenantAdmins)
+      .values({
+        id: 'ta_dual_taca_01',
+        tenantId: 'tenant_demo_01',
+        userId: dualTaCaUserId,
+        status: 'active',
+      })
+      .onDuplicateKeyUpdate({ set: { status: 'active' } });
+
+    await db
+      .insert(memberships)
+      .values({
+        id: 'mem_dual_taca_01',
+        tenantId: 'tenant_demo_01',
+        companyId: 'comp_demo_01',
+        userId: dualTaCaUserId,
+        role: 'company_admin',
+        status: 'active',
+      })
+      .onDuplicateKeyUpdate({ set: { status: 'active', role: 'company_admin' } });
+
+    await db
+      .insert(roleAssignments)
+      .values({
+        id: 'ra_dual_taca_01',
+        tenantId: 'tenant_demo_01',
+        companyId: 'comp_demo_01',
+        userId: dualTaCaUserId,
+        roleId: 'role_sys_company_admin',
+        status: 'active',
+      })
+      .onDuplicateKeyUpdate({ set: { status: 'active' } });
+
+    const session = await loginWithOtp(dualTaCaEmail, '10.1.0.9');
+    expect(session.user.isSuperAdmin).toBe(false);
+    expect(session.access.isTenantAdmin).toBe(true);
+
+    const dualCompaniesRes = await request(app)
+      .get('/api/v1/company-admin/companies')
+      .set('Authorization', `Bearer ${session.token}`);
+    expect(dualCompaniesRes.status).toBe(200);
+    const dualComp = dualCompaniesRes.body.data.find((c: any) => c.id === 'comp_demo_01');
+    expect(dualComp).toBeDefined();
+    expect(dualComp.authoritySource).toBe('dual');
+    expect(dualComp.authorityLabel).toBe('Tenant Admin • Company Admin');
+    expect(dualComp.isTenantAdmin).toBe(true);
+    expect(dualComp.isMember).toBe(true);
+    expect(dualComp.assignedRoles).toContain('company_admin');
+  });
+
+  it('verifies Unauthenticated requests are rejected with 401 across all administrative endpoints', async () => {
+    // 1. Super Admin route without auth -> 401
+    const saRes = await request(app).get('/api/v1/platform/tenants');
+    expect(saRes.status).toBe(401);
+
+    // 2. Tenant Admin route without auth -> 401
+    const taRes = await request(app).get('/api/v1/tenant-admin/context');
+    expect(taRes.status).toBe(401);
+
+    // 3. Company Admin route without auth -> 401
+    const caRes = await request(app)
+      .get('/api/v1/company-admin/profile')
+      .set('x-company-id', 'comp_demo_01');
+    expect(caRes.status).toBe(401);
   });
 });

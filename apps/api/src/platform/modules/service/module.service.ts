@@ -4,29 +4,93 @@ import { auditService, AuditService } from '../../audit/service/audit.service.js
 import { NotFoundError, BadRequestError } from '../../../app/errors/AppError.js';
 import {
   MODULE_CATALOG,
+  getApplicationModules,
   type ModuleCatalogItem,
   type ModuleCode,
   type TenantModuleRecord,
+  type ApplicationModuleDefinition,
+  type PlanModuleEligibility,
 } from '../types/module.types.js';
+import { effectiveEntitlementService } from '../../entitlements/service/effectiveEntitlement.service.js';
+import { planRepository, PlanRepository } from '../../plans/repository/plan.repository.js';
+import type { ApplicationCode } from '../../plans/types/plan.types.js';
 
 export class ModuleService {
   constructor(
     private readonly repo: ModuleRepository = moduleRepository,
     private readonly tenantRepo: TenantRepository = tenantRepository,
     private readonly audit: AuditService = auditService,
+    private readonly planRepo: PlanRepository = planRepository,
   ) {}
 
-  getCatalog(): readonly ModuleCatalogItem[] {
+  getCatalog(): readonly ModuleCatalogItem[];
+  getCatalog(applicationCode: string): ApplicationModuleDefinition[];
+  getCatalog(applicationCode?: string): readonly ModuleCatalogItem[] | ApplicationModuleDefinition[] {
+    if (applicationCode) {
+      return getApplicationModules(applicationCode as ApplicationCode);
+    }
     return MODULE_CATALOG;
+  }
+
+  getApplicationModules(applicationCode: ApplicationCode): ApplicationModuleDefinition[] {
+    return getApplicationModules(applicationCode);
+  }
+
+  async getPlanModuleEligibility(planId: string): Promise<PlanModuleEligibility[]> {
+    const plan = await this.planRepo.findById(planId);
+    if (!plan) {
+      throw new NotFoundError(`Plan '${planId}' not found`);
+    }
+
+    const appModules = getApplicationModules(plan.applicationCode);
+    const hasAllModulesEntitlement = plan.entitlements.some(
+      (e) => e.moduleCode === 'all_modules' && e.isEnabled,
+    );
+    const isEnterprise = plan.tier.toLowerCase() === 'enterprise';
+
+    return appModules.map((m) => {
+      const explicitEntitlement = plan.entitlements.find(
+        (e) => e.moduleCode === m.key,
+      );
+
+      let isIncludedInPlan = false;
+      if (hasAllModulesEntitlement || isEnterprise) {
+        isIncludedInPlan = true;
+      } else if (explicitEntitlement) {
+        isIncludedInPlan = explicitEntitlement.isEnabled;
+      } else if (
+        m.includedInPlans.includes(plan.tier.toLowerCase()) ||
+        m.includedInPlans.includes(plan.code.toLowerCase())
+      ) {
+        isIncludedInPlan = true;
+      }
+
+      const defaultEnabled = isIncludedInPlan;
+      const requiresOverride = !isIncludedInPlan;
+      const limits = explicitEntitlement?.limits || m.defaultLimits || null;
+
+      return {
+        moduleKey: m.key,
+        name: m.name,
+        description: m.description,
+        category: m.category,
+        applicationCode: plan.applicationCode,
+        availability: m.availability,
+        isMandatory: m.isMandatory,
+        isIncludedInPlan,
+        defaultEnabled,
+        dependencies: m.dependencies,
+        requiresOverride,
+        limits,
+      };
+    });
   }
 
   async isTenantEntitled(tenantId: string, moduleCode: ModuleCode): Promise<boolean> {
     const tenant = await this.tenantRepo.findById(tenantId);
     if (!tenant || tenant.status === 'suspended') return false;
-    const tenantEntitlement = await this.repo.findEntitlement(tenantId, moduleCode, null);
-    return moduleCode === 'hrms'
-      ? tenantEntitlement?.status !== 'disabled'
-      : tenantEntitlement?.status === 'enabled';
+    const eff = await effectiveEntitlementService.resolveEffectiveEntitlements(tenantId, moduleCode as any, null);
+    return eff.isEntitled;
   }
 
   async getTenantModules(
@@ -120,14 +184,26 @@ export class ModuleService {
       return moduleCode === 'hrms';
     }
 
-    const tenantEntitlement = await this.repo.findEntitlement(tenantId, moduleCode, null);
-    const companyEntitlement = companyId
-      ? await this.repo.findEntitlement(tenantId, moduleCode, companyId)
-      : null;
-    return evaluateEntitlement(moduleCode, tenantEntitlement, companyEntitlement);
+    const eff = await effectiveEntitlementService.resolveEffectiveEntitlements(
+      tenantId,
+      moduleCode as any,
+      companyId,
+    );
+    if (!eff.isEntitled) {
+      return false;
+    }
+
+    if (companyId) {
+      const companyRecord = await this.repo.findEntitlement(tenantId, moduleCode, companyId);
+      if (companyRecord && companyRecord.status !== 'enabled') {
+        return false;
+      }
+    }
+
+    return true;
   }
 
-  /** Every module enabled for a company, from one query. Suspended tenants get none. */
+  /** Every module enabled for a company, from effective entitlements and company ceilings. Suspended tenants get none. */
   async getEnabledModules(tenantId: string, companyId: string): Promise<Set<ModuleCode>> {
     const enabled = new Set<ModuleCode>();
     const tenant = await this.tenantRepo.findById(tenantId);
@@ -137,12 +213,17 @@ export class ModuleService {
 
     const records = await this.repo.listByTenant(tenantId);
     for (const item of MODULE_CATALOG) {
-      const tenantRecord =
-        records.find((r) => r.moduleCode === item.code && r.companyId === null) ?? null;
-      const companyRecord =
-        records.find((r) => r.moduleCode === item.code && r.companyId === companyId) ?? null;
-      if (evaluateEntitlement(item.code, tenantRecord, companyRecord)) {
-        enabled.add(item.code);
+      const eff = await effectiveEntitlementService.resolveEffectiveEntitlements(
+        tenantId,
+        item.code as any,
+        companyId,
+      );
+      if (eff.isEntitled) {
+        const companyRecord =
+          records.find((r) => r.moduleCode === item.code && r.companyId === companyId) ?? null;
+        if (!companyRecord || companyRecord.status === 'enabled') {
+          enabled.add(item.code);
+        }
       }
     }
     return enabled;

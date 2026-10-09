@@ -26,6 +26,8 @@ import {
 } from '../../access/service/roleManagement.service.js';
 import { emailService, EmailService } from '../../email/service/email.service.js';
 import { companyService, CompanyService } from '../../companies/service/company.service.js';
+import { and, eq } from 'drizzle-orm';
+import { roleAssignments } from '../../../db/schema.js';
 import { getDb } from '../../../db/connection.js';
 import type {
   AuthorizedCompanySummary,
@@ -78,15 +80,48 @@ export class CompanyAdminService {
     const overview = await this.resolver.resolveOverview(user);
     return overview.companies
       .filter((c) => c.workspaces.includes('company_admin'))
-      .map((c) => ({
-        id: c.companyId,
-        name: c.companyName,
-        code: c.companyCode,
-        status: 'active' as const,
-        tenantId: c.tenantId,
-        tenantName: c.tenantName ?? '',
-        role: 'company_admin',
-      }));
+      .map((c) => {
+        const hasCompanyAdminRole = c.roles.some((r) => r.code === 'company_admin');
+        const isTenantAdmin = Boolean(c.isTenantAdmin);
+
+        let authoritySource: 'tenant_admin' | 'company_admin' | 'dual' | 'platform_oversight';
+        let authorityLabel: string;
+        let role: string;
+
+        if (isTenantAdmin && hasCompanyAdminRole) {
+          authoritySource = 'dual';
+          authorityLabel = 'Tenant Admin • Company Admin';
+          role = 'company_admin';
+        } else if (isTenantAdmin) {
+          authoritySource = 'tenant_admin';
+          authorityLabel = 'Tenant Admin';
+          role = 'tenant_admin';
+        } else if (hasCompanyAdminRole) {
+          authoritySource = 'company_admin';
+          authorityLabel = 'Company Admin';
+          role = 'company_admin';
+        } else {
+          const primaryRole = c.roles[0]?.name || c.roles[0]?.code || 'Company Admin';
+          authoritySource = 'company_admin';
+          authorityLabel = primaryRole;
+          role = c.roles[0]?.code || 'company_admin';
+        }
+
+        return {
+          id: c.companyId,
+          name: c.companyName,
+          code: c.companyCode,
+          status: 'active' as const,
+          tenantId: c.tenantId,
+          tenantName: c.tenantName ?? '',
+          role,
+          assignedRoles: c.roles.map((r) => r.code),
+          authoritySource,
+          authorityLabel,
+          isTenantAdmin,
+          isMember: c.isMember,
+        };
+      });
   }
 
   async getDashboard(tenantId: string, companyId: string): Promise<CompanyAdminDashboard> {
@@ -191,6 +226,15 @@ export class CompanyAdminService {
       throw new BadRequestError(
         `User with email '${email}' is already associated with another tenant. Cross-tenant user invitation is prohibited.`,
         'CROSS_TENANT_INVITATION_PROHIBITED',
+      );
+    }
+
+    // 3. If a pending invitation already exists in this company, reject duplicate (409)
+    const sameCompanyPendingInvite = pendingInvites.find((inv) => inv.companyId === companyId);
+    if (sameCompanyPendingInvite) {
+      throw new ConflictError(
+        `User with email '${email}' already has a pending invitation in this company`,
+        'DUPLICATE_INVITATION',
       );
     }
 
@@ -372,6 +416,32 @@ export class CompanyAdminService {
       newStatus,
     );
 
+    // If membership is revoked, also revoke active role assignments in this company
+    // and cancel any pending invitations in this company. Global user and memberships in
+    // other companies are strictly preserved.
+    if (newStatus === 'revoked') {
+      await getDb()
+        .update(roleAssignments)
+        .set({ status: 'revoked', revokedBy: actor.id, revokedAt: new Date() })
+        .where(
+          and(
+            eq(roleAssignments.userId, targetUserId),
+            eq(roleAssignments.companyId, companyId),
+            eq(roleAssignments.status, 'active'),
+          ),
+        );
+
+      const userRecord = await this.userRepo.findById(targetUserId);
+      if (userRecord) {
+        const pendingInvites = await this.repo.findActiveInvitationsByEmail(userRecord.email);
+        for (const inv of pendingInvites) {
+          if (inv.companyId === companyId) {
+            await this.repo.updateInvitationStatus(inv.id, 'cancelled');
+          }
+        }
+      }
+    }
+
     await this.audit.logEvent({
       actorUserId: actor.id,
       actorEmail: actor.email,
@@ -467,6 +537,95 @@ export class CompanyAdminService {
     });
 
     return updated;
+  }
+
+  async acceptInvitation(
+    tokenOrId: string,
+    actor?: { id?: string; email?: string },
+  ) {
+    let inv = await this.repo.findInvitationById(tokenOrId);
+    if (!inv) {
+      inv = await this.repo.findInvitationByToken(tokenOrId);
+    }
+    if (!inv) {
+      throw new NotFoundError('Invitation not found');
+    }
+    if (inv.status !== 'pending') {
+      throw new BadRequestError(`Invitation is already ${inv.status}`, 'INVITATION_NOT_PENDING');
+    }
+    if (inv.expiresAt.getTime() <= Date.now()) {
+      await this.repo.updateInvitationStatus(inv.id, 'expired');
+      throw new BadRequestError('Invitation has expired', 'INVITATION_EXPIRED');
+    }
+
+    const user = await this.userRepo.findByEmail(inv.email);
+    if (!user) {
+      throw new NotFoundError(`User identity for '${inv.email}' not found`);
+    }
+
+    await getDb().transaction(async (tx) => {
+      await this.repo.updateInvitationStatus(inv.id, 'accepted', new Date());
+
+      const existingMem = await this.repo.findMembership(inv.companyId, user.id, tx);
+      if (existingMem) {
+        await this.repo.updateMembershipStatusForUser(inv.companyId, user.id, 'active', tx);
+      } else {
+        await this.repo.createMembership(
+          {
+            id: generateSurrogateId('mem'),
+            userId: user.id,
+            tenantId: inv.tenantId,
+            companyId: inv.companyId,
+            role: inv.role,
+            status: 'active',
+          },
+          tx,
+        );
+      }
+
+      await this.roleMgmt.syncMembershipRole(tx, {
+        userId: user.id,
+        tenantId: inv.tenantId,
+        companyId: inv.companyId,
+        role: inv.role,
+        actorId: actor?.id ?? user.id,
+      });
+    });
+
+    await this.audit.logEvent({
+      actorUserId: actor?.id ?? user.id,
+      actorEmail: actor?.email ?? user.email,
+      action: 'company_invitation_accepted',
+      targetType: 'invitation',
+      targetId: inv.id,
+      tenantId: inv.tenantId,
+      companyId: inv.companyId,
+      metadata: { email: inv.email, role: inv.role },
+    });
+
+    return {
+      message: 'Invitation accepted successfully',
+      invitationId: inv.id,
+      companyId: inv.companyId,
+      status: 'accepted',
+    };
+  }
+
+  async acceptPendingInvitationsForEmail(
+    email: string,
+    actor?: { id?: string; email?: string },
+  ) {
+    const pending = await this.repo.findActiveInvitationsByEmail(email);
+    const results = [];
+    for (const inv of pending) {
+      try {
+        const res = await this.acceptInvitation(inv.id, actor);
+        results.push(res);
+      } catch {
+        // Continue processing other pending invitations
+      }
+    }
+    return results;
   }
 
   async getModules(tenantId: string, companyId: string): Promise<CompanyModuleStatus[]> {

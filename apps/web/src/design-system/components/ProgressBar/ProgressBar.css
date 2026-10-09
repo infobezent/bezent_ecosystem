@@ -1,0 +1,85 @@
+/*
+ * BEZENT Design System — ProgressBar Primitive
+ * Token-driven progress indicator without inline styles.
+ */
+
+.bezent-progress-bar-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.bezent-progress-bar__labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary, #475569);
+}
+
+.bezent-progress-bar__track {
+  width: 100%;
+  height: 6px;
+  background-color: var(--bg-surface-secondary, #e2e8f0);
+  border-radius: 9999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.bezent-progress-bar--sm .bezent-progress-bar__track {
+  height: 4px;
+}
+
+.bezent-progress-bar--lg .bezent-progress-bar__track {
+  height: 8px;
+}
+
+.bezent-progress-bar__fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+  background-color: var(--accent-primary, #1a73e8);
+}
+
+.bezent-progress-bar__fill--success {
+  background-color: #16a34a;
+}
+
+.bezent-progress-bar__fill--warning {
+  background-color: #d97706;
+}
+
+.bezent-progress-bar__fill--danger {
+  background-color: #dc2626;
+}
+
+.bezent-progress-bar__fill--info {
+  background-color: #0284c7;
+}
+
+/* Width steps */
+.bezent-progress-pct-0 { width: 0%; }
+.bezent-progress-pct-5 { width: 5%; }
+.bezent-progress-pct-10 { width: 10%; }
+.bezent-progress-pct-15 { width: 15%; }
+.bezent-progress-pct-20 { width: 20%; }
+.bezent-progress-pct-25 { width: 25%; }
+.bezent-progress-pct-30 { width: 30%; }
+.bezent-progress-pct-33 { width: 33.33%; }
+.bezent-progress-pct-35 { width: 35%; }
+.bezent-progress-pct-40 { width: 40%; }
+.bezent-progress-pct-45 { width: 45%; }
+.bezent-progress-pct-50 { width: 50%; }
+.bezent-progress-pct-55 { width: 55%; }
+.bezent-progress-pct-60 { width: 60%; }
+.bezent-progress-pct-65 { width: 65%; }
+.bezent-progress-pct-67 { width: 66.67%; }
+.bezent-progress-pct-70 { width: 70%; }
+.bezent-progress-pct-75 { width: 75%; }
+.bezent-progress-pct-80 { width: 80%; }
+.bezent-progress-pct-85 { width: 85%; }
+.bezent-progress-pct-90 { width: 90%; }
+.bezent-progress-pct-95 { width: 95%; }
+.bezent-progress-pct-100 { width: 100%; }

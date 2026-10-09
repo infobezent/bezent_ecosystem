@@ -2,8 +2,9 @@ import { accessRepository, AccessRepository } from '../repository/access.reposit
 import {
   tenantAdminRepository,
   TenantAdminRepository,
-} from '../../tenant-admin/repository/tenantAdmin.repository.js';
+} from '../../../administration/tenant-admin/repository/tenantAdmin.repository.js';
 import { moduleService, ModuleService } from '../../modules/service/module.service.js';
+import { effectiveEntitlementService } from '../../entitlements/service/effectiveEntitlement.service.js';
 import { AppError, ForbiddenError, NotFoundError } from '../../../app/errors/AppError.js';
 import {
   expandPermissionKeys,
@@ -139,12 +140,40 @@ export class AccessResolverService {
     // Expand granted permissions to include both canonical keys and aliases for seamless backward-compatibility
     const allGranted = expandPermissionKeys([...granted]);
 
-    // A permission whose business application is not entitled grants nothing.
+    // Check effective module-level entitlements across applications
+    const disabledApplicationModules = new Set<string>();
+    for (const appCode of enabledModules) {
+      try {
+        const eff = await effectiveEntitlementService.resolveEffectiveEntitlements(
+          tenantId,
+          appCode as any,
+          companyId,
+        );
+        for (const m of eff.modules) {
+          if (!m.isEnabled) {
+            disabledApplicationModules.add(`${appCode}:${m.moduleCode}`);
+          }
+        }
+      } catch {
+        // Safe fallback if tenant is not commercial
+      }
+    }
+
+    // A permission whose business application or module is not entitled grants nothing.
     const permissions = allGranted
       .filter((id) => {
         const definition = findPermission(id);
         if (!definition) return false;
-        return definition.moduleCode === null || enabledModules.has(definition.moduleCode);
+        if (definition.moduleCode !== null && !enabledModules.has(definition.moduleCode)) {
+          return false;
+        }
+        if (definition.moduleCode !== null) {
+          const modKey = definition.module === 'profile' ? 'employees' : definition.module;
+          if (disabledApplicationModules.has(`${definition.moduleCode}:${modKey}`)) {
+            return false;
+          }
+        }
+        return true;
       })
       .sort();
 
@@ -221,6 +250,7 @@ export class AccessResolverService {
         isSuperAdmin: user.isSuperAdmin,
       },
       platformWorkspaces: user.isSuperAdmin ? ['super_admin'] : [],
+      isTenantAdmin: tenantAdminRows.length > 0,
       companies,
     };
   }

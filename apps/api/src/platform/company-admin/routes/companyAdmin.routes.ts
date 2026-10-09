@@ -103,6 +103,14 @@ companyAdminRouter.delete(
   requirePermission('company.users.invite'),
   companyAdminController.cancelInvitation,
 );
+companyAdminRouter.post(
+  '/invitations/:id/accept',
+  companyAdminController.acceptInvitation,
+);
+companyAdminRouter.post(
+  '/invitations/accept',
+  companyAdminController.acceptInvitation,
+);
 
 // Roles & Permissions
 companyAdminRouter.get(
