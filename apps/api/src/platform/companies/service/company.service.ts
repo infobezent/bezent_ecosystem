@@ -16,6 +16,15 @@ import {
   BadRequestError,
   ForbiddenError,
 } from '../../../app/errors/AppError.js';
+import {
+  normalizeText,
+  normalizeEmail,
+  normalizePhone,
+  normalizeCountryCode,
+  normalizePostalCode,
+  normalizeIdentifier,
+  referenceDataService,
+} from '../../data/index.js';
 import type {
   CompanyFilter,
   CompanyRecord,
@@ -202,6 +211,10 @@ export class CompanyService {
       country: comp.country ?? null,
       postalCode: comp.postalCode ?? null,
       timeZone: comp.timeZone ?? null,
+      registrationNumber: comp.registrationNumber ?? null,
+      currency: comp.currency ?? null,
+      locale: comp.locale ?? null,
+      dateFormat: comp.dateFormat ?? null,
       status: comp.status,
       createdAt: comp.createdAt,
     };
@@ -386,6 +399,42 @@ export class CompanyService {
       sanitizedInput.timeZone = input.timeZone ? input.timeZone.trim() : null;
     }
 
+    if (input.registrationNumber !== undefined) {
+      if (input.registrationNumber !== null && typeof input.registrationNumber !== 'string') {
+        throw new BadRequestError('Registration number must be a string');
+      }
+      const trimmed = input.registrationNumber ? input.registrationNumber.trim() : null;
+      if (trimmed && trimmed.length > 100) {
+        throw new BadRequestError('Registration number cannot exceed 100 characters');
+      }
+      sanitizedInput.registrationNumber = trimmed;
+    }
+
+    if (input.currency !== undefined) {
+      if (input.currency !== null && typeof input.currency !== 'string') {
+        throw new BadRequestError('Currency must be a string');
+      }
+      const trimmed = input.currency ? input.currency.trim().toUpperCase() : null;
+      if (trimmed && (trimmed.length < 3 || trimmed.length > 10)) {
+        throw new BadRequestError('Currency must be a valid currency code');
+      }
+      sanitizedInput.currency = trimmed;
+    }
+
+    if (input.locale !== undefined) {
+      if (input.locale !== null && typeof input.locale !== 'string') {
+        throw new BadRequestError('Locale must be a string');
+      }
+      sanitizedInput.locale = input.locale ? input.locale.trim() : null;
+    }
+
+    if (input.dateFormat !== undefined) {
+      if (input.dateFormat !== null && typeof input.dateFormat !== 'string') {
+        throw new BadRequestError('Date format must be a string');
+      }
+      sanitizedInput.dateFormat = input.dateFormat ? input.dateFormat.trim() : null;
+    }
+
     const updated = await this.repo.updateCompanyProfile(companyId, sanitizedInput);
 
     await this.audit.logEvent({
@@ -421,6 +470,10 @@ export class CompanyService {
       country: updated.country,
       postalCode: updated.postalCode,
       timeZone: updated.timeZone,
+      registrationNumber: updated.registrationNumber ?? null,
+      currency: updated.currency ?? null,
+      locale: updated.locale ?? null,
+      dateFormat: updated.dateFormat ?? null,
       status: updated.status,
       createdAt: updated.createdAt,
     };
@@ -439,9 +492,23 @@ export class CompanyService {
     dto: CreateTenantAdminCompanyDto,
     actor?: { id?: string; email?: string },
   ): Promise<CompanyRecord> {
-    const db = getDb();
-    const normalizedCode = dto.code.trim().toUpperCase();
+    const normalizedCode =
+      normalizeIdentifier(dto.code, { uppercase: true }) || dto.code.trim().toUpperCase();
+    const normalizedCountry =
+      normalizeCountryCode(dto.country) || (dto.country ? dto.country.trim() : null);
+    const normalizedEmail = normalizeEmail(dto.businessEmail);
+    const normalizedPhone =
+      normalizePhone(dto.contactPhone) || (dto.contactPhone ? dto.contactPhone.trim() : null);
+    const normalizedPostal =
+      normalizePostalCode(dto.postalCode, normalizedCountry ?? undefined) ||
+      (dto.postalCode ? dto.postalCode.trim() : null);
+    const normalizedName =
+      normalizeText(dto.name, { collapseWhitespace: true }) || dto.name.trim();
+    const normalizedDisplayName =
+      normalizeText(dto.displayName, { collapseWhitespace: true }) ||
+      (dto.displayName ? dto.displayName.trim() : normalizedName);
 
+    const db = getDb();
     const createdId = await db.transaction(async (tx) => {
       // 1. Lock tenant row for transactional capacity check (FOR UPDATE)
       const [rawTenantRows] = await tx.execute(
@@ -492,13 +559,29 @@ export class CompanyService {
       await tx.insert(companies).values({
         id,
         tenantId,
-        name: dto.name.trim(),
+        name: normalizedName,
         code: normalizedCode,
+        displayName: normalizedDisplayName,
         legalName: dto.legalName?.trim() || null,
-        businessEmail: dto.businessEmail?.trim() || null,
-        contactPhone: dto.contactPhone?.trim() || null,
-        country: dto.country?.trim() || null,
+        organizationType: dto.organizationType?.trim() || null,
+        industry: dto.industry?.trim() || null,
+        businessEmail: normalizedEmail,
+        contactPhone: normalizedPhone,
+        country: normalizedCountry,
+        addressLine1: dto.addressLine1?.trim() || null,
+        addressLine2: dto.addressLine2?.trim() || null,
+        city: dto.city?.trim() || null,
+        state: dto.state?.trim() || null,
+        postalCode: normalizedPostal,
         timeZone: dto.timeZone?.trim() || null,
+        registrationNumber: dto.registrationNumber ? dto.registrationNumber.trim() : null,
+        currency: dto.currency ? dto.currency.trim().toUpperCase() : null,
+        locale: dto.locale ? (referenceDataService.getLocale(dto.locale)?.code ?? dto.locale.trim()) : null,
+        dateFormat: dto.dateFormat ? dto.dateFormat.trim() : null,
+        weekStartsOn: dto.weekStartsOn ? dto.weekStartsOn.trim().toLowerCase() : null,
+        financialYearStart: dto.financialYearStart ? dto.financialYearStart.trim() : null,
+        logoUrl: dto.logoUrl?.trim() || null,
+        brandingMode: dto.brandingMode || (dto.logoUrl ? 'own_logo' : 'initials'),
         status: 'active',
       });
 

@@ -60,20 +60,17 @@
 }
 
 /* ── Selection/hover pill ──────────────────────────────────────────────
-   The visual selection surface lives on the item, not the icon-box.
-   74px wide (nearly full 78px item width) × 44px tall: this is clearly
-   an item-level selection region, not an isolated icon square. The icon
-   box background is suppressed below so only the item pill provides the
-   selected background colour. */
+   Gmail-inspired navigation rail capsule pill: 56px wide x 32px tall,
+   fully rounded (border-radius: 16px) centered around the icon. */
 .left-sidebar__item::before {
   content: '';
   position: absolute;
-  top: 2px;
+  top: 4px;
   left: 50%;
   transform: translateX(-50%);
-  width: 36px;
-  height: 36px;
-  border-radius: 6px;
+  width: 56px;
+  height: 32px;
+  border-radius: 16px;
   background: transparent;
   transition: background-color var(--motion-duration-nav-icon) ease;
   pointer-events: none;
@@ -85,6 +82,10 @@
 }
 
 .left-sidebar__item.is-active::before {
+  background: var(--nav-selected);
+}
+
+.left-sidebar__item.is-active:hover::before {
   background: var(--nav-selected);
 }
 
@@ -222,18 +223,19 @@
 }
 
 [data-theme='dark'] .left-sidebar__item.is-active::before {
-  background: linear-gradient(135deg, rgba(22, 131, 255, 0.22) 0%, rgba(11, 37, 78, 0.95) 100%);
-  border: 1px solid rgba(56, 189, 248, 0.55);
-  box-shadow:
-    0 2px 8px rgba(2, 11, 28, 0.5),
-    0 0 14px rgba(22, 131, 255, 0.28),
-    inset 0 1px 0 rgba(56, 189, 248, 0.3);
-  transform: translateX(-50%) translateY(-1px);
+  background: var(--nav-selected, #0b254e);
+  border: none;
+  box-shadow: none;
+  transform: translateX(-50%);
+}
+
+[data-theme='dark'] .left-sidebar__item.is-active:hover::before {
+  background: var(--nav-selected, #0b254e);
 }
 
 [data-theme='dark'] .left-sidebar__item.is-active .bezent-material-icon {
   color: #38bdf8;
-  filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.45));
+  filter: none;
 }
 
 [data-theme='dark'] .left-sidebar__label {

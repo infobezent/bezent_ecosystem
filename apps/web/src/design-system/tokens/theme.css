@@ -52,10 +52,10 @@
   /* Interactive Surfaces */
   --bg-hover: #c2e7ff;
   --bg-selected: #c2e7ff;
-  --nav-hover: #c2e7ff;
+  --nav-hover: rgba(4, 30, 73, 0.08);
   --nav-selected: #c2e7ff;
   --nav-icon-bg-selected: #c2e7ff;
-  --nav-icon-bg-hover: #c2e7ff;
+  --nav-icon-bg-hover: rgba(4, 30, 73, 0.08);
   --nav-icon-default: #444746;
   --nav-icon-hover: #1f1f1f;
   --nav-icon-active: #041e49;
@@ -293,6 +293,17 @@
   --drawer-checkbox-hover: #041e49;
   --drawer-checkbox-checked-bg: #041e49;
   --drawer-checkbox-checked-border: #041e49;
+
+  /* Global Checkbox Tokens */
+  --checkbox-bg: #ffffff;
+  --checkbox-border: #94a3b8;
+  --checkbox-border-hover: #475569;
+  --checkbox-checked-bg: #1a73e8;
+  --checkbox-checked-border: #1a73e8;
+  --checkbox-checked-color: #ffffff;
+  --checkbox-focus-ring: rgba(26, 115, 232, 0.28);
+  --checkbox-disabled-bg: #f1f5f9;
+  --checkbox-disabled-border: #cbd5e1;
   --drawer-badge-high-bg: #fee2e2;
   --drawer-badge-high-color: #b91c1c;
   --drawer-badge-med-bg: #fef3c7;
@@ -593,6 +604,17 @@
   --drawer-checkbox-hover: #38bdf8;
   --drawer-checkbox-checked-bg: #1683ff;
   --drawer-checkbox-checked-border: #1683ff;
+
+  /* Global Checkbox Tokens */
+  --checkbox-bg: #1e293b;
+  --checkbox-border: #64748b;
+  --checkbox-border-hover: #94a3b8;
+  --checkbox-checked-bg: #1683ff;
+  --checkbox-checked-border: #1683ff;
+  --checkbox-checked-color: #ffffff;
+  --checkbox-focus-ring: rgba(22, 131, 255, 0.35);
+  --checkbox-disabled-bg: #0f172a;
+  --checkbox-disabled-border: #334155;
   --drawer-badge-high-bg: rgba(239, 68, 68, 0.18);
   --drawer-badge-high-color: #fca5a5;
   --drawer-badge-med-bg: rgba(245, 158, 11, 0.18);

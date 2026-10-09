@@ -1,6 +1,7 @@
 import { createApp } from './app/server/createApp.js';
 import { assertProductionAuthConfig, env } from './app/config/env.js';
 import { closePool, ensureDatabaseConnected, isDatabaseConfigured } from './db/connection.js';
+import { backgroundWorkerRunner } from './platform/workers/backgroundWorker.runner.js';
 
 assertProductionAuthConfig();
 
@@ -13,6 +14,8 @@ async function startServer(): Promise<void> {
       process.exit(1);
     }
     console.log('[db] MySQL connected');
+    backgroundWorkerRunner.start();
+    console.log('[workers] Background worker runner started');
   }
 
   const app = createApp();
@@ -23,6 +26,7 @@ async function startServer(): Promise<void> {
 
   const shutdown = async (signal: string) => {
     console.log(`[bezent-api] received ${signal}, shutting down gracefully...`);
+    backgroundWorkerRunner.stop();
     server.close(async () => {
       await closePool();
       console.log('[bezent-api] shutdown complete');

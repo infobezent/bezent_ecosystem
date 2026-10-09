@@ -7,10 +7,15 @@
 ```
 apps/web/src/
 ├── app/            application bootstrap/composition: router, providers, config
+├── administration/ administrative workspaces:
+│   ├── super-admin/  Platform operator administration workspace
+│   └── tenant-admin/ Tenant administration workspace (includes Delegated Company Mode)
 ├── platform/       reusable platform capabilities (auth, tenant/user context,
-│                   access control, notifications, approvals, global search, ...)
+│                   access control, notifications, approvals, global search, data, media, ...)
 ├── applications/
-│   └── hrms/       the HRMS business application
+│   └── hrms/       commercial HRMS business application
+│       ├── administration/ workforce, onboarding, employee-admin, documents
+│       └── ess/            Employee Self-Service (experience of HRMS)
 ├── layouts/        global app shell / navigation layout primitives
 ├── design-system/  the single global BEZENT design system
 │   ├── components/

@@ -21,6 +21,9 @@ import {
   Toolbar,
   Modal,
   FormField,
+  Grid,
+  Divider,
+  Section,
 } from '../../../design-system/components';
 import { BezentIcon } from '../../../design-system/icons';
 import { useCompanyAdmin } from '../context/CompanyAdminContext';
@@ -29,6 +32,8 @@ import {
   companyAdminApi,
   type CompanyUserItem,
   type InviteCompanyUserInput,
+  type UserCompanyAccess,
+  type RoleDefinition,
 } from '../api/companyAdminApi';
 
 export function CompanyUsersPage() {
@@ -61,6 +66,15 @@ export function CompanyUsersPage() {
     'company_admin' | 'hr_manager' | 'employee' | 'user'
   >('employee');
   const [updatingRole, setUpdatingRole] = useState<boolean>(false);
+
+  // User Details Modal
+  const [viewingUser, setViewingUser] = useState<CompanyUserItem | null>(null);
+  const [userAccess, setUserAccess] = useState<UserCompanyAccess | null>(null);
+  const [loadingDetails, setLoadingDetails] = useState<boolean>(false);
+  const [detailsError, setDetailsError] = useState<string | null>(null);
+  const [rolesCatalog, setRolesCatalog] = useState<RoleDefinition[]>([]);
+  const [assigningRoleId, setAssigningRoleId] = useState<string>('');
+  const [isAssigningRole, setIsAssigningRole] = useState<boolean>(false);
 
   const fetchUsers = useCallback(async () => {
     if (!activeCompanyId) return;
@@ -171,6 +185,63 @@ export function CompanyUsersPage() {
     }
   };
 
+  const openUserDetails = async (user: CompanyUserItem) => {
+    setViewingUser(user);
+    setUserAccess(null);
+    setDetailsError(null);
+    setLoadingDetails(true);
+    setAssigningRoleId('');
+    try {
+      const [accessRes, rolesRes] = await Promise.all([
+        companyAdminApi.getUserAccess(user.userId, activeCompanyId || undefined),
+        companyAdminApi.getRoles(activeCompanyId || undefined),
+      ]);
+      setUserAccess(accessRes);
+      setRolesCatalog(rolesRes);
+    } catch (err: unknown) {
+      setDetailsError(err instanceof Error ? err.message : 'Failed to load user access details');
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
+  const handleAssignRoleFromDetails = async () => {
+    if (!activeCompanyId || !viewingUser || !assigningRoleId) return;
+    setIsAssigningRole(true);
+    setDetailsError(null);
+    try {
+      const updatedAccess = await companyAdminApi.assignRole(
+        viewingUser.userId,
+        assigningRoleId,
+        activeCompanyId,
+      );
+      setUserAccess(updatedAccess);
+      setAssigningRoleId('');
+      fetchUsers();
+    } catch (err: unknown) {
+      setDetailsError(err instanceof Error ? err.message : 'Failed to assign role');
+    } finally {
+      setIsAssigningRole(false);
+    }
+  };
+
+  const handleRevokeRoleFromDetails = async (roleId: string, roleName: string) => {
+    if (!activeCompanyId || !viewingUser) return;
+    if (!window.confirm(`Revoke role "${roleName}" from ${viewingUser.email}?`)) return;
+    setDetailsError(null);
+    try {
+      const updatedAccess = await companyAdminApi.revokeRole(
+        viewingUser.userId,
+        roleId,
+        activeCompanyId,
+      );
+      setUserAccess(updatedAccess);
+      fetchUsers();
+    } catch (err: unknown) {
+      setDetailsError(err instanceof Error ? err.message : 'Failed to revoke role');
+    }
+  };
+
   return (
     <Page>
       <PageHeader
@@ -275,6 +346,7 @@ export function CompanyUsersPage() {
                   <TableHeaderCell>Email</TableHeaderCell>
                   <TableHeaderCell>Company Role</TableHeaderCell>
                   <TableHeaderCell>Membership</TableHeaderCell>
+                  <TableHeaderCell>Invitation</TableHeaderCell>
                   <TableHeaderCell>User Account</TableHeaderCell>
                   <TableHeaderCell>Joined</TableHeaderCell>
                   <TableHeaderCell>Actions</TableHeaderCell>
@@ -319,6 +391,23 @@ export function CompanyUsersPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
+                      {u.invitationStatus ? (
+                        <Badge
+                          variant={
+                            u.invitationStatus === 'pending'
+                              ? 'warning'
+                              : u.invitationStatus === 'accepted'
+                                ? 'success'
+                                : 'neutral'
+                          }
+                        >
+                          {u.invitationStatus.toUpperCase()}
+                        </Badge>
+                      ) : (
+                        <Badge variant="neutral">DIRECT</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
                       <Badge
                         variant={
                           u.userStatus === 'active'
@@ -334,6 +423,13 @@ export function CompanyUsersPage() {
                     <TableCell>{new Date(u.joinedAt).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <Inline gap="xs">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openUserDetails(u)}
+                        >
+                          Details
+                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -471,6 +567,220 @@ export function CompanyUsersPage() {
               </Button>
               <Button variant="primary" onClick={handleUpdateRole} disabled={updatingRole}>
                 {updatingRole ? 'Updating...' : 'Save Role Assignment'}
+              </Button>
+            </Inline>
+          </Stack>
+        </Modal>
+      )}
+
+      {/* User Details Modal */}
+      {viewingUser && (
+        <Modal
+          title={`User Access Details — ${viewingUser.firstName} ${viewingUser.lastName}`}
+          isOpen={Boolean(viewingUser)}
+          onClose={() => setViewingUser(null)}
+        >
+          <Stack gap="lg">
+            {loadingDetails ? (
+              <LoadingState label="Loading access authorization details..." />
+            ) : detailsError ? (
+              <Alert variant="error" title="Access Resolution Error">
+                {detailsError}
+              </Alert>
+            ) : userAccess ? (
+              <>
+                {/* 1. Global Identity vs Company Scope */}
+                <Card>
+                  <Stack gap="md">
+                    <strong>Identity & Scope Distinction</strong>
+                    <Grid columns={2} gap="md">
+                      <Stack gap="xs">
+                        <span className="bezent-metric-label">GLOBAL IDENTITY</span>
+                        <div><strong>Email:</strong> {userAccess.email}</div>
+                        <div><strong>Global User ID:</strong> <span className="bezent-metric-label">{userAccess.userId}</span></div>
+                        <Inline gap="xs" align="center">
+                          <span>Account Status:</span>
+                          <Badge variant={viewingUser.userStatus === 'active' ? 'success' : 'danger'}>
+                            {viewingUser.userStatus.toUpperCase()}
+                          </Badge>
+                        </Inline>
+                        <div>
+                          <strong>Last Sign-In:</strong>{' '}
+                          {viewingUser.lastLoginAt
+                            ? new Date(viewingUser.lastLoginAt).toLocaleString()
+                            : 'Never'}
+                        </div>
+                      </Stack>
+                      <Stack gap="xs">
+                        <span className="bezent-metric-label">COMPANY MEMBERSHIP</span>
+                        <div><strong>Company:</strong> {activeCompany?.name} ({activeCompany?.code})</div>
+                        <Inline gap="xs" align="center">
+                          <span>Membership Status:</span>
+                          <Badge
+                            variant={
+                              userAccess.membershipStatus === 'active'
+                                ? 'success'
+                                : userAccess.membershipStatus === 'inactive'
+                                  ? 'warning'
+                                  : 'danger'
+                            }
+                          >
+                            {userAccess.membershipStatus.toUpperCase()}
+                          </Badge>
+                        </Inline>
+                        <Inline gap="xs" align="center">
+                          <span>Invitation Lifecycle:</span>
+                          <Badge
+                            variant={
+                              viewingUser.invitationStatus === 'pending'
+                                ? 'warning'
+                                : viewingUser.invitationStatus === 'accepted'
+                                  ? 'success'
+                                  : 'neutral'
+                            }
+                          >
+                            {(viewingUser.invitationStatus || 'direct').toUpperCase()}
+                          </Badge>
+                        </Inline>
+                        <div><strong>Member Since:</strong> {new Date(viewingUser.joinedAt).toLocaleDateString()}</div>
+                      </Stack>
+                    </Grid>
+                  </Stack>
+                </Card>
+
+                {/* 2. Assigned Roles (RBAC) */}
+                <Card>
+                  <Stack gap="md">
+                    <Inline justify="between" align="center">
+                      <strong>Assigned Company Roles ({userAccess.roles.length})</strong>
+                      <span className="bezent-metric-label">Scoped strictly to {activeCompany?.name}</span>
+                    </Inline>
+
+                    {userAccess.roles.length === 0 ? (
+                      <p className="bezent-metric-label">No explicit roles assigned in this company.</p>
+                    ) : (
+                      <Stack gap="sm">
+                        {userAccess.roles.map((r) => (
+                          <Card key={r.id}>
+                            <Inline justify="between" align="center">
+                              <Stack gap="none">
+                                <strong>{r.name}</strong>
+                                <span className="bezent-metric-label">Code: {r.code} {r.moduleCode ? `• Application: ${r.moduleCode.toUpperCase()}` : '• Company Admin'}</span>
+                              </Stack>
+                              <Inline gap="xs" align="center">
+                                <Badge variant={r.isSystem ? 'info' : 'neutral'}>
+                                  {r.isSystem ? 'SYSTEM' : 'CUSTOM'}
+                                </Badge>
+                                {userAccess.roles.length > 1 && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleRevokeRoleFromDetails(r.id, r.name)}
+                                  >
+                                    Revoke
+                                  </Button>
+                                )}
+                              </Inline>
+                            </Inline>
+                          </Card>
+                        ))}
+                      </Stack>
+                    )}
+
+                    <Divider />
+
+                    {/* Assign Additional Role */}
+                    <Stack gap="xs">
+                      <strong>Assign Additional Role</strong>
+                      <Inline gap="sm" align="center">
+                        <Select
+                          id="assign-new-role"
+                          value={assigningRoleId}
+                          onChange={(e) => setAssigningRoleId(e.target.value)}
+                          options={[
+                            { value: '', label: 'Select role to assign...' },
+                            ...rolesCatalog
+                              .filter((rc) => !userAccess.roles.some((held) => held.id === rc.id || held.code === rc.code))
+                              .map((rc) => ({
+                                value: rc.id,
+                                label: `${rc.name} (${rc.isSystem ? 'System' : 'Custom'}${rc.moduleCode ? ` • ${rc.moduleCode.toUpperCase()}` : ''})`,
+                              })),
+                          ]}
+                        />
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          disabled={!assigningRoleId || isAssigningRole}
+                          onClick={handleAssignRoleFromDetails}
+                        >
+                          {isAssigningRole ? 'Assigning...' : 'Assign Role'}
+                        </Button>
+                      </Inline>
+                    </Stack>
+                  </Stack>
+                </Card>
+
+                {/* 3. Application Access & ESS Entitlements */}
+                <Card>
+                  <Stack gap="sm">
+                    <strong>Application Access & Self-Service</strong>
+                    <Grid columns={3} gap="sm">
+                      <Card>
+                        <Stack gap="none">
+                          <span className="bezent-metric-label">HRMS WORKFORCE</span>
+                          <strong>
+                            {userAccess.roles.some((r) => r.moduleCode === 'hrms' || r.code === 'company_admin')
+                              ? 'Authorized'
+                              : 'Standard'}
+                          </strong>
+                        </Stack>
+                      </Card>
+                      <Card>
+                        <Stack gap="none">
+                          <span className="bezent-metric-label">EMPLOYEE SELF-SERVICE</span>
+                          <Inline gap="xs" align="center">
+                            <Badge variant={userAccess.essEligible ? 'success' : 'neutral'}>
+                              {userAccess.essEligible ? 'ELIGIBLE' : 'NOT LINKED'}
+                            </Badge>
+                          </Inline>
+                        </Stack>
+                      </Card>
+                      <Card>
+                        <Stack gap="none">
+                          <span className="bezent-metric-label">ADMIN OVERSIGHT</span>
+                          <strong>
+                            {userAccess.roles.some((r) => r.code === 'company_admin')
+                              ? 'Company Administrator'
+                              : 'Member'}
+                          </strong>
+                        </Stack>
+                      </Card>
+                    </Grid>
+                  </Stack>
+                </Card>
+
+                {/* 4. Effective Permissions */}
+                <Card>
+                  <Stack gap="sm">
+                    <Inline justify="between" align="center">
+                      <strong>Effective Permissions ({userAccess.effectivePermissions.length})</strong>
+                      <span className="bezent-metric-label">Consolidated authority matrix</span>
+                    </Inline>
+                    <Inline gap="xs" wrap>
+                      {userAccess.effectivePermissions.map((perm) => (
+                        <Badge key={perm} variant="neutral" size="sm">
+                          {perm}
+                        </Badge>
+                      ))}
+                    </Inline>
+                  </Stack>
+                </Card>
+              </>
+            ) : null}
+
+            <Inline justify="end">
+              <Button variant="secondary" onClick={() => setViewingUser(null)}>
+                Close
               </Button>
             </Inline>
           </Stack>

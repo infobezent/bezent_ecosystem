@@ -12,6 +12,7 @@ import {
   generateSurrogateId,
   timingSafeEqualHex,
 } from '../security.js';
+import { companyAdminService } from '../../company-admin/service/companyAdmin.service.js';
 import type { LoginResult, OtpChallengeResult } from '../types/auth.types.js';
 
 export const OTP_TTL_MINUTES = 10;
@@ -217,6 +218,16 @@ export class OtpAuthService {
       targetId: challenge.id,
       metadata: { attempts },
     });
+
+    // Complete verification lifecycle: accept any pending company invitations for this user identity
+    try {
+      await companyAdminService.acceptPendingInvitationsForEmail(user.email, {
+        id: user.id,
+        email: user.email,
+      });
+    } catch {
+      // Non-blocking for session issuance
+    }
 
     // Account status is re-checked here: a suspension after the request still blocks.
     return this.sessions.issueSession(user);

@@ -54,6 +54,7 @@ export interface AccessOverview {
   };
   /** Platform-level workspaces (currently Super Admin only). */
   platformWorkspaces: WorkspaceId[];
+  isTenantAdmin?: boolean;
   /** Companies where the user holds an active membership, each resolved independently. */
   companies: CompanyAccess[];
 }

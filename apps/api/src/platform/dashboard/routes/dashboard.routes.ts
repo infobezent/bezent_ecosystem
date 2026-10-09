@@ -4,6 +4,9 @@ import { requirePlatformAuth, requireSuperAdmin } from '../../auth/middleware/au
 
 export const dashboardRouter = Router();
 
-dashboardRouter.use(requirePlatformAuth, requireSuperAdmin);
-
-dashboardRouter.get('/dashboard/overview', dashboardController.getOverview);
+dashboardRouter.get(
+  '/dashboard/overview',
+  requirePlatformAuth,
+  requireSuperAdmin,
+  dashboardController.getOverview,
+);

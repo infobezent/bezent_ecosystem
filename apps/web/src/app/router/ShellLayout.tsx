@@ -93,11 +93,14 @@ export function ShellLayout() {
     const isSuperAdmin = Boolean(
       access.user.isSuperAdmin || access.platformWorkspaces?.includes('super_admin'),
     );
+    const isTenantAdmin = Boolean(
+      access.isTenantAdmin ||
+      access.platformWorkspaces?.includes('tenant_admin') ||
+      access.companies.some((c) => c.isTenantAdmin || c.workspaces.includes('tenant_admin')),
+    );
     const isCompanyAdmin = Boolean(
-      isSuperAdmin ||
       activeCompany?.workspaces.includes('company_admin') ||
       activeCompany?.roles.some((r) => r.code === 'company_admin') ||
-      activeCompany?.isPlatformOversight ||
       access.companies.some((c) => c.workspaces.includes('company_admin')),
     );
     const hasHrms = Boolean(activeCompany?.workspaces.includes('hrms'));
@@ -106,6 +109,8 @@ export function ShellLayout() {
     switch (application.id) {
       case 'super-admin':
         return isSuperAdmin;
+      case 'tenant-admin':
+        return isTenantAdmin;
       case 'company-admin':
         return isCompanyAdmin;
       case 'hrms':

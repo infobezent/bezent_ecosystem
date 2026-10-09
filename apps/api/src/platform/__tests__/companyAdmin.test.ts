@@ -258,10 +258,13 @@ describe('Company Admin Platform Subsystem (Phase 2)', () => {
       })
       .onDuplicateKeyUpdate({ set: { status: 'active' } });
 
-    // Clean up any residual membership in Company A2 for userEmpId for test idempotency
+    // Clean up any residual membership and invitation in Company A2 for userEmpId for test idempotency
     await db
       .delete(memberships)
       .where(and(eq(memberships.userId, userEmpId), eq(memberships.companyId, companyA2Id)));
+    await db
+      .delete(invitations)
+      .where(eq(invitations.companyId, companyA2Id));
   });
 
   describe('Authorization & Multi-Company Boundary Enforcements', () => {
@@ -615,6 +618,77 @@ describe('Company Admin Platform Subsystem (Phase 2)', () => {
         .set('x-company-id', companyAId);
       expect(cancelRes.status).toBe(200);
       expect(cancelRes.body.data.status).toBe('cancelled');
+    });
+
+    it('accepts invitation and transitions status to accepted', async () => {
+      const acceptEmail = `accept_${Date.now()}@alpha.example`;
+      const invRes = await request(app)
+        .post('/api/v1/company-admin/users/invite')
+        .set('Authorization', `Bearer ${companyAdminAToken}`)
+        .set('x-company-id', companyAId)
+        .send({
+          email: acceptEmail,
+          firstName: 'Accept',
+          lastName: 'Tester',
+          role: 'employee',
+        });
+      expect(invRes.status).toBe(201);
+      const invId = invRes.body.data.invitation.id;
+
+      const acceptRes = await request(app)
+        .post(`/api/v1/company-admin/invitations/${invId}/accept`)
+        .set('Authorization', `Bearer ${companyAdminAToken}`)
+        .set('x-company-id', companyAId);
+
+      expect(acceptRes.status).toBe(200);
+      expect(acceptRes.body.data.status).toBe('accepted');
+
+      // Verify listUsers reflects the user with invitationStatus
+      const listUsersRes = await request(app)
+        .get(`/api/v1/company-admin/users?search=${encodeURIComponent(acceptEmail)}`)
+        .set('Authorization', `Bearer ${companyAdminAToken}`)
+        .set('x-company-id', companyAId);
+
+      expect(listUsersRes.status).toBe(200);
+      expect(listUsersRes.body.data.length).toBeGreaterThan(0);
+      expect(listUsersRes.body.data[0].invitationStatus).toBe('accepted');
+    });
+
+    it('revokes company membership, cleans up role assignments, and preserves global identity', async () => {
+      const revokeUserEmail = `revokeme_${Date.now()}@alpha.example`;
+      const invRes = await request(app)
+        .post('/api/v1/company-admin/users/invite')
+        .set('Authorization', `Bearer ${companyAdminAToken}`)
+        .set('x-company-id', companyAId)
+        .send({
+          email: revokeUserEmail,
+          firstName: 'Revoke',
+          lastName: 'Candidate',
+          role: 'employee',
+        });
+      expect(invRes.status).toBe(201);
+      const targetUserId = invRes.body.data.userId;
+
+      // Revoke membership
+      const delRes = await request(app)
+        .delete(`/api/v1/company-admin/users/${targetUserId}/membership`)
+        .set('Authorization', `Bearer ${companyAdminAToken}`)
+        .set('x-company-id', companyAId);
+
+      expect(delRes.status).toBe(200);
+
+      // Verify global identity in users table is strictly preserved
+      const db = getDb();
+      const [userInDb] = await db.select().from(users).where(eq(users.id, targetUserId));
+      expect(userInDb).toBeDefined();
+      expect(userInDb?.email).toBe(revokeUserEmail);
+
+      // Verify membership in companyA is revoked
+      const [memInDb] = await db
+        .select()
+        .from(memberships)
+        .where(and(eq(memberships.userId, targetUserId), eq(memberships.companyId, companyAId)));
+      expect(memInDb?.status).toBe('revoked');
     });
   });
 

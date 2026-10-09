@@ -5,9 +5,20 @@ import { validateModuleTogglePayload } from '../validation/module.schema.js';
 export class ModuleController {
   constructor(private readonly service: ModuleService = moduleService) {}
 
-  getCatalog = (_req: Request, res: Response) => {
-    const catalog = this.service.getCatalog();
+  getCatalog = (req: Request, res: Response) => {
+    const appCode = req.query.applicationCode || req.query.application;
+    const catalog = appCode ? this.service.getCatalog(String(appCode)) : this.service.getCatalog();
     res.status(200).json({ data: catalog });
+  };
+
+  getPlanModules = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const planId = String(req.params.planId || req.params.id);
+      const modules = await this.service.getPlanModuleEligibility(planId);
+      res.status(200).json({ data: modules });
+    } catch (err) {
+      next(err);
+    }
   };
 
   listTenantModules = async (req: Request, res: Response, next: NextFunction) => {

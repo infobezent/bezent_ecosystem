@@ -7,10 +7,11 @@
   gap: var(--space-2, 8px);
   cursor: pointer;
   user-select: none;
+  vertical-align: middle;
 }
 
 .bezent-checkbox-wrapper--disabled {
-  opacity: 0.5;
+  opacity: 0.65;
   cursor: not-allowed;
   pointer-events: none;
 }
@@ -24,7 +25,7 @@
   flex-shrink: 0;
 }
 
-/* Native input — visually hidden but accessible */
+/* Native input — visually hidden but accessible and keyboard-focusable */
 .bezent-checkbox__input {
   position: absolute;
   inset: 0;
@@ -33,6 +34,10 @@
   height: 100%;
   margin: 0;
   cursor: pointer;
+}
+
+.bezent-checkbox__input:disabled {
+  cursor: not-allowed;
 }
 
 /* Custom visual box */
@@ -50,10 +55,10 @@
     box-shadow var(--motion-duration-fast, 0.15s) var(--motion-easing-default, ease);
 }
 
-/* Sizes */
+/* Sizes: sm = 14px, md = 18px */
 .bezent-checkbox-wrapper--md .bezent-checkbox__box {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 }
 
 .bezent-checkbox-wrapper--sm .bezent-checkbox__box {
@@ -74,19 +79,28 @@
 }
 
 .bezent-checkbox-wrapper--sm .bezent-checkbox__checkmark {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
 }
 
 /* Indeterminate dash */
 .bezent-checkbox__indeterminate {
   position: absolute;
-  width: 8px;
+  width: 10px;
   height: 2px;
   background: #ffffff;
   border-radius: 1px;
   opacity: 0;
   transition: opacity var(--motion-duration-fast, 0.15s) var(--motion-easing-default, ease);
+}
+
+.bezent-checkbox-wrapper--sm .bezent-checkbox__indeterminate {
+  width: 8px;
+}
+
+/* Hover state (when not disabled) */
+.bezent-checkbox-wrapper:hover:not(.bezent-checkbox-wrapper--disabled) .bezent-checkbox__box {
+  border-color: var(--accent-interactive, #1a73e8);
 }
 
 /* Checked state */
@@ -110,14 +124,23 @@
   opacity: 1;
 }
 
-/* Focus ring */
+/* Focus ring (accessible keyboard navigation) */
 .bezent-checkbox__input:focus-visible ~ .bezent-checkbox__box {
   box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.25);
+  border-color: var(--accent-interactive, #1a73e8);
 }
 
-/* Hover */
-.bezent-checkbox-wrapper:hover .bezent-checkbox__box {
-  border-color: var(--accent-interactive, #1a73e8);
+/* Disabled states */
+.bezent-checkbox-wrapper--disabled .bezent-checkbox__box {
+  background: var(--checkbox-disabled-bg, #f1f5f9);
+  border-color: var(--checkbox-disabled-border, #cbd5e1);
+  cursor: not-allowed;
+}
+
+.bezent-checkbox-wrapper--disabled .bezent-checkbox__input:checked ~ .bezent-checkbox__box,
+.bezent-checkbox-wrapper--disabled .bezent-checkbox__input:indeterminate ~ .bezent-checkbox__box {
+  background: var(--checkbox-disabled-border, #cbd5e1);
+  border-color: var(--checkbox-disabled-border, #cbd5e1);
 }
 
 /* Label text */
@@ -129,7 +152,7 @@
   line-height: 1.4;
 }
 
-/* Dark mode */
+/* Dark mode explicit overrides for robustness */
 [data-theme='dark'] .bezent-checkbox__box {
   background: var(--bg-surface-secondary, #1e293b);
   border-color: var(--border-checkbox, #94a3b8);

@@ -1,14 +1,20 @@
 import type { Request, Response, NextFunction } from 'express';
 import { tenantAdminService, TenantAdminService } from '../service/tenantAdmin.service.js';
-import { companyService } from '../../companies/service/company.service.js';
-import { validateCreateTenantAdminCompany } from '../../companies/validation/company.schema.js';
+import { companyService } from '../../../platform/companies/service/company.service.js';
+import { validateCreateTenantAdminCompany } from '../../../platform/companies/validation/company.schema.js';
 import {
   validateInviteTenantMember,
   validateGrantCompanyAccess,
   validateAssignCompanyRoles,
+  validateUpdateTenantProfile,
+  validateAssignCompanyUser,
+  validateInviteCompanyUser,
+  validateUpdateCompanyUserRole,
 } from '../validation/tenantAdmin.schema.js';
-import type { ModuleCode } from '../../modules/types/module.types.js';
+import type { ModuleCode } from '../../../platform/modules/types/module.types.js';
 import { UnauthorizedError, BadRequestError } from '../../../app/errors/AppError.js';
+import { mediaService } from '../../../platform/data/index.js';
+import { parseUploadFromRequest } from './tenantAdminMedia.helper.js';
 
 const VALID_MODULE_CODES: readonly string[] = ['hrms', 'crm', 'project_management'];
 
@@ -46,6 +52,22 @@ export class TenantAdminController {
       }
       const details = await this.service.getTenantDetails(req.tenantAdminContext.tenantId);
       res.json({ data: details });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  updateTenantProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.tenantAdminContext || !req.user) {
+        throw new UnauthorizedError('Tenant Admin authority required');
+      }
+      const dto = validateUpdateTenantProfile(req.body);
+      const actor = { id: req.user.id, email: req.user.email };
+      // Resolve tenantId strictly from authenticated tenantAdminContext
+      const tenantId = req.tenantAdminContext.tenantId;
+      const updated = await this.service.updateTenantProfile(tenantId, dto, actor);
+      res.json({ data: updated });
     } catch (err) {
       next(err);
     }
@@ -587,6 +609,292 @@ export class TenantAdminController {
       );
 
       res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  // =========================================================================
+  // Media & Branding Operations
+  // =========================================================================
+
+  uploadTenantLogo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.tenantAdminContext || !req.user) {
+        throw new UnauthorizedError('Tenant Admin authority required');
+      }
+      const upload = parseUploadFromRequest(req);
+      const result = await mediaService.uploadTenantLogo(
+        req.tenantAdminContext.tenantId,
+        upload,
+        req.user.id,
+      );
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  removeTenantLogo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.tenantAdminContext) {
+        throw new UnauthorizedError('Tenant Admin authority required');
+      }
+      await mediaService.removeTenantLogo(req.tenantAdminContext.tenantId);
+      res.json({ data: { success: true } });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  uploadTenantBanner = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.tenantAdminContext || !req.user) {
+        throw new UnauthorizedError('Tenant Admin authority required');
+      }
+      const upload = parseUploadFromRequest(req);
+      const result = await mediaService.uploadTenantBanner(
+        req.tenantAdminContext.tenantId,
+        upload,
+        req.user.id,
+      );
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  removeTenantBanner = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.tenantAdminContext) {
+        throw new UnauthorizedError('Tenant Admin authority required');
+      }
+      await mediaService.removeTenantBanner(req.tenantAdminContext.tenantId);
+      res.json({ data: { success: true } });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  uploadCompanyLogo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.tenantAdminContext || !req.tenantAdminCompanyContext || !req.user) {
+        throw new UnauthorizedError('Tenant Admin company authority required');
+      }
+      const upload = parseUploadFromRequest(req);
+      const result = await mediaService.uploadCompanyLogo(
+        req.tenantAdminContext.tenantId,
+        req.tenantAdminCompanyContext.id,
+        upload,
+        req.user.id,
+      );
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  removeCompanyLogo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.tenantAdminContext || !req.tenantAdminCompanyContext) {
+        throw new UnauthorizedError('Tenant Admin company authority required');
+      }
+      await mediaService.removeCompanyLogo(
+        req.tenantAdminContext.tenantId,
+        req.tenantAdminCompanyContext.id,
+      );
+      res.json({ data: { success: true } });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  updateCompanyBranding = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.tenantAdminContext || !req.tenantAdminCompanyContext) {
+        throw new UnauthorizedError('Tenant Admin company authority required');
+      }
+      const rawMode = req.body?.brandingMode;
+      if (rawMode !== 'own_logo' && rawMode !== 'tenant_logo' && rawMode !== 'initials') {
+        throw new BadRequestError('Valid brandingMode is required (own_logo, tenant_logo, initials)');
+      }
+      const result = await mediaService.updateCompanyBranding(
+        req.tenantAdminContext.tenantId,
+        req.tenantAdminCompanyContext.id,
+        rawMode,
+      );
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  listCompanyAccessUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.tenantAdminContext || !req.tenantAdminCompanyContext) {
+        throw new UnauthorizedError('Tenant Admin company authority required');
+      }
+      const users = await this.service.listCompanyAccessUsers(
+        req.tenantAdminContext.tenantId,
+        req.tenantAdminCompanyContext.id,
+      );
+      res.json({ data: users });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  listAvailableTenantUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.tenantAdminContext || !req.tenantAdminCompanyContext) {
+        throw new UnauthorizedError('Tenant Admin company authority required');
+      }
+      const users = await this.service.listAvailableTenantUsers(
+        req.tenantAdminContext.tenantId,
+        req.tenantAdminCompanyContext.id,
+      );
+      res.json({ data: users });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  assignCompanyUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.tenantAdminContext || !req.tenantAdminCompanyContext || !req.user) {
+        throw new UnauthorizedError('Tenant Admin company authority required');
+      }
+      const dto = validateAssignCompanyUser(req.body);
+      const result = await this.service.assignExistingTenantUser(
+        req.tenantAdminContext.tenantId,
+        req.tenantAdminCompanyContext.id,
+        dto,
+        req.user,
+      );
+      res.status(201).json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  inviteCompanyUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.tenantAdminContext || !req.tenantAdminCompanyContext || !req.user) {
+        throw new UnauthorizedError('Tenant Admin company authority required');
+      }
+      const dto = validateInviteCompanyUser(req.body);
+      const result = await this.service.inviteUserToCompany(
+        req.tenantAdminContext.tenantId,
+        req.tenantAdminCompanyContext.id,
+        dto,
+        req.user,
+      );
+      res.status(201).json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  updateCompanyUserRole = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.tenantAdminContext || !req.tenantAdminCompanyContext || !req.user) {
+        throw new UnauthorizedError('Tenant Admin company authority required');
+      }
+      const rawUserId = req.params.userId;
+      const userId = typeof rawUserId === 'string' ? rawUserId.trim() : Array.isArray(rawUserId) ? String(rawUserId[0]).trim() : undefined;
+      if (!userId) {
+        throw new BadRequestError('User ID is required');
+      }
+      const dto = validateUpdateCompanyUserRole(req.body);
+      const result = await this.service.updateCompanyUserRole(
+        req.tenantAdminContext.tenantId,
+        req.tenantAdminCompanyContext.id,
+        userId,
+        dto.role,
+        req.user,
+      );
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  revokeCompanyUserAccess = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.tenantAdminContext || !req.tenantAdminCompanyContext || !req.user) {
+        throw new UnauthorizedError('Tenant Admin company authority required');
+      }
+      const rawUserId = req.params.userId;
+      const userId = typeof rawUserId === 'string' ? rawUserId.trim() : Array.isArray(rawUserId) ? String(rawUserId[0]).trim() : undefined;
+      if (!userId) {
+        throw new BadRequestError('User ID is required');
+      }
+      const result = await this.service.revokeCompanyAccess(
+        req.tenantAdminContext.tenantId,
+        userId,
+        req.tenantAdminCompanyContext.id,
+        req.user,
+      );
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  resendCompanyInvitation = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.tenantAdminContext || !req.tenantAdminCompanyContext || !req.user) {
+        throw new UnauthorizedError('Tenant Admin company authority required');
+      }
+      const rawInvId = req.params.invitationId;
+      const invitationId = typeof rawInvId === 'string' ? rawInvId.trim() : Array.isArray(rawInvId) ? String(rawInvId[0]).trim() : undefined;
+      if (!invitationId) {
+        throw new BadRequestError('Invitation ID is required');
+      }
+      const result = await this.service.resendCompanyInvitation(
+        req.tenantAdminContext.tenantId,
+        req.tenantAdminCompanyContext.id,
+        invitationId,
+        req.user,
+      );
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  cancelCompanyInvitation = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.tenantAdminContext || !req.tenantAdminCompanyContext || !req.user) {
+        throw new UnauthorizedError('Tenant Admin company authority required');
+      }
+      const rawInvId = req.params.invitationId;
+      const invitationId = typeof rawInvId === 'string' ? rawInvId.trim() : Array.isArray(rawInvId) ? String(rawInvId[0]).trim() : undefined;
+      if (!invitationId) {
+        throw new BadRequestError('Invitation ID is required');
+      }
+      const result = await this.service.cancelCompanyInvitation(
+        req.tenantAdminContext.tenantId,
+        req.tenantAdminCompanyContext.id,
+        invitationId,
+        req.user,
+      );
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  getCompanyRolesOverview = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.tenantAdminContext || !req.tenantAdminCompanyContext) {
+        throw new UnauthorizedError('Tenant Admin company authority required');
+      }
+      const roles = await this.service.getCompanyRolesOverview(
+        req.tenantAdminContext.tenantId,
+        req.tenantAdminCompanyContext.id,
+      );
+      res.json({ data: roles });
     } catch (err) {
       next(err);
     }

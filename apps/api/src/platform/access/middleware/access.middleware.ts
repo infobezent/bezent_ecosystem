@@ -114,6 +114,50 @@ export function requireApplicationAccess(moduleCode: ModuleCode, workspace: Work
   };
 }
 
+/**
+ * Enforces effective module entitlement for a specific business module within an entitled application
+ * (e.g. `requireModuleEntitlement('hrms', 'leave')`).
+ * Reuses existing effectiveEntitlementService without introducing a second engine.
+ */
+export function requireModuleEntitlement(applicationCode: 'hrms' | 'crm' | 'project_management', moduleKey: string) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    requireCompanyContext(req, res, async (err?: unknown) => {
+      if (err) return next(err);
+      const access = req.access!;
+      if (!access.enabledModules.includes(applicationCode)) {
+        return next(
+          new ForbiddenError(
+            `Application '${applicationCode}' is not enabled for this company`,
+            'MODULE_DISABLED',
+          ),
+        );
+      }
+      try {
+        const { effectiveEntitlementService } = await import(
+          '../../entitlements/service/effectiveEntitlement.service.js'
+        );
+        const eff = await effectiveEntitlementService.resolveEffectiveEntitlements(
+          access.tenantId,
+          applicationCode,
+          access.companyId,
+        );
+        const targetModule = eff.modules.find((m) => m.moduleCode === moduleKey);
+        if (targetModule && !targetModule.isEnabled) {
+          return next(
+            new ForbiddenError(
+              `Module '${moduleKey}' in application '${applicationCode}' is not entitled for this tenant`,
+              'MODULE_ENTITLEMENT_DENIED',
+            ),
+          );
+        }
+        next();
+      } catch (e) {
+        next(e);
+      }
+    });
+  };
+}
+
 function matchesPermission(held: string[], required: string): boolean {
   if (held.includes(required)) return true;
   const def = findPermission(required);

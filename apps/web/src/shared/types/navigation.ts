@@ -28,6 +28,8 @@ export interface NavChild {
   permissionKey?: string;
   /** Optional custom path or route segment when child route differs from `<destination.segment>/<id>`. */
   path?: string;
+  /** Optional secondary route paths or legacy aliases that should resolve to this sub-nav destination. */
+  aliases?: readonly string[];
 }
 
 export interface NavDestination {

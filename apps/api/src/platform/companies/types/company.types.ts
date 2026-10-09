@@ -8,11 +8,27 @@ export interface CompanyRecord {
   tenantName?: string;
   name: string;
   code: string;
+  displayName?: string | null;
   legalName: string | null;
+  organizationType?: string | null;
+  industry?: string | null;
   businessEmail: string | null;
   contactPhone: string | null;
   country: string | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postalCode?: string | null;
   timeZone: string | null;
+  registrationNumber?: string | null;
+  currency?: string | null;
+  locale?: string | null;
+  dateFormat?: string | null;
+  weekStartsOn?: string | null;
+  financialYearStart?: string | null;
+  logoUrl?: string | null;
+  brandingMode?: 'own_logo' | 'tenant_logo' | 'initials';
   status: CompanyStatus;
   createdAt: string;
   updatedAt: string;
@@ -51,11 +67,27 @@ export interface CreateCompanyDto {
 export interface CreateTenantAdminCompanyDto {
   name: string;
   code: string;
+  displayName?: string | null;
   legalName?: string | null;
+  organizationType?: string | null;
+  industry?: string | null;
   businessEmail?: string | null;
   contactPhone?: string | null;
   country?: string | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postalCode?: string | null;
   timeZone?: string | null;
+  registrationNumber?: string | null;
+  currency?: string | null;
+  locale?: string | null;
+  dateFormat?: string | null;
+  weekStartsOn?: string | null;
+  financialYearStart?: string | null;
+  logoUrl?: string | null;
+  brandingMode?: 'own_logo' | 'tenant_logo' | 'initials';
 }
 
 export interface UpdateCompanyDto {
@@ -98,6 +130,10 @@ export interface CompanyProfile {
   country: string | null;
   postalCode: string | null;
   timeZone: string | null;
+  registrationNumber?: string | null;
+  currency?: string | null;
+  locale?: string | null;
+  dateFormat?: string | null;
   status: 'active' | 'inactive' | 'suspended';
   createdAt: Date | string;
 }
@@ -120,4 +156,8 @@ export interface UpdateCompanyProfileInput {
   country?: string | null;
   postalCode?: string | null;
   timeZone?: string | null;
+  registrationNumber?: string | null;
+  currency?: string | null;
+  locale?: string | null;
+  dateFormat?: string | null;
 }

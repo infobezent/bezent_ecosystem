@@ -11,16 +11,21 @@ apps/api/src/
 │   ├── middleware/   cross-cutting middleware (notFound, etc.)
 │   ├── config/       environment configuration (env.ts)
 │   └── errors/       AppError hierarchy + centralized error handler
-├── platform/         reusable platform capabilities (platform/context)
+├── administration/
+│   └── tenant-admin/ tenant administration domain, routes, services & repository
+├── platform/         reusable platform capabilities (auth, access, tenants, companies, organization, data, media, rules, ...)
 ├── applications/
-│   └── hrms/         the HRMS business application
+│   └── hrms/         commercial HRMS business application
 │       ├── organization/       organization masters data access
 │       ├── onboarding/         new hire management, cases, stage lifecycle
-│       └── settings/           administration & onboarding configuration
+│       ├── settings/           administration & onboarding configuration
+│       ├── attendance/         workforce attendance domain
+│       ├── leave/              workforce leave domain
+│       └── ess/                employee self-service API orchestration (delegates to attendance & leave)
 ├── shared/            business-agnostic utilities
 ├── db/
 │   ├── connection.ts  MySQL2 pool + Drizzle instance (strict, fail-fast)
-│   ├── schema.ts      Drizzle schema (tenants, org masters, onboarding, settings)
+│   ├── schema.ts      Drizzle schema (tenants, org masters, onboarding, settings, common data, media)
 │   ├── migrations/    drizzle-kit generated SQL migrations
 │   └── seed.ts        deterministic development seed script
 └── main.ts            process entrypoint
@@ -34,11 +39,12 @@ name — see
 configuration, and the centralized error-handling strategy. No business
 domain logic lives in `app/`.
 
-`platform/` owns cross-application platform capabilities. Currently,
-`platform/context/devContext.ts` provides development request context
-resolution. Future platform capabilities (identity/auth, tenancy runtime
-services, access control/RBAC, audit logging, notifications, approvals)
-will live here as reusable services that business applications consume.
+`platform/` owns cross-application platform capabilities: identity, authentication,
+access control / RBAC, tenant and company management, organization master structure,
+common data engine, media storage, email delivery, audit logging, and the
+**BEZENT Rules Engine** (`platform/rules` — see [RULES-ENGINE.md](RULES-ENGINE.md)).
+Platform capabilities are reusable services and engines that business applications
+consume, strictly following inward dependency direction.
 
 `applications/hrms` is the primary business application. It currently
 contains implemented domains for `organization`, `onboarding`, and

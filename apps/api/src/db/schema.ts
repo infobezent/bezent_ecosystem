@@ -10,6 +10,7 @@ import {
   json,
   type AnyMySqlColumn,
 } from 'drizzle-orm/mysql-core';
+import { sql } from 'drizzle-orm';
 
 /**
  * Platform: Tenants
@@ -19,9 +20,14 @@ export const tenants = mysqlTable('tenants', {
   id: varchar('id', { length: 64 }).primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
   maxCompanies: int('max_companies').notNull().default(5),
+  logoUrl: varchar('logo_url', { length: 500 }),
+  bannerUrl: varchar('banner_url', { length: 500 }),
   status: mysqlEnum('status', ['active', 'inactive', 'suspended', 'archived'])
     .default('active')
     .notNull(),
+  suspendedReason: varchar('suspended_reason', { length: 1000 }),
+  suspendedAt: timestamp('suspended_at'),
+  reactivatedAt: timestamp('reactivated_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
 });
@@ -53,6 +59,13 @@ export const companies = mysqlTable(
     state: varchar('state', { length: 100 }),
     city: varchar('city', { length: 100 }),
     postalCode: varchar('postal_code', { length: 20 }),
+    registrationNumber: varchar('registration_number', { length: 100 }),
+    currency: varchar('currency', { length: 10 }),
+    locale: varchar('locale', { length: 20 }),
+    dateFormat: varchar('date_format', { length: 30 }),
+    weekStartsOn: varchar('week_starts_on', { length: 20 }),
+    financialYearStart: varchar('financial_year_start', { length: 20 }),
+    brandingMode: varchar('branding_mode', { length: 30 }).default('initials').notNull(),
     status: mysqlEnum('status', ['active', 'inactive', 'suspended']).default('active').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
@@ -62,6 +75,40 @@ export const companies = mysqlTable(
     index('idx_companies_code').on(table.code),
   ],
 );
+
+/**
+ * Platform: Media Assets
+ * Metadata index for all persistent media and documents in the platform.
+ */
+export const mediaAssets = mysqlTable(
+  'media_assets',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    ownerType: mysqlEnum('owner_type', ['tenant', 'company']).notNull(),
+    ownerId: varchar('owner_id', { length: 64 }).notNull(),
+    assetType: mysqlEnum('asset_type', ['tenant_logo', 'tenant_banner', 'company_logo']).notNull(),
+    storageProvider: varchar('storage_provider', { length: 50 }).notNull(),
+    storageKey: varchar('storage_key', { length: 500 }).notNull(),
+    originalFilename: varchar('original_filename', { length: 255 }).notNull(),
+    mimeType: varchar('mime_type', { length: 100 }).notNull(),
+    sizeBytes: int('size_bytes').notNull(),
+    width: int('width'),
+    height: int('height'),
+    status: mysqlEnum('status', ['active', 'archived', 'deleted']).default('active').notNull(),
+    createdBy: varchar('created_by', { length: 64 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_media_assets_tenant_id').on(table.tenantId),
+    index('idx_media_assets_owner').on(table.ownerType, table.ownerId),
+    index('idx_media_assets_status').on(table.status),
+  ],
+);
+
+export type MediaAsset = typeof mediaAssets.$inferSelect;
+export type NewMediaAsset = typeof mediaAssets.$inferInsert;
 
 /**
  * Organization Masters: Departments
@@ -1260,6 +1307,12 @@ export const tenantAdmins = mysqlTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     status: mysqlEnum('status', ['active', 'inactive', 'revoked']).default('active').notNull(),
+    isPrimary: boolean('is_primary').default(false).notNull(),
+    jobTitle: varchar('job_title', { length: 100 }),
+    primaryTenantScope: varchar('primary_tenant_scope', { length: 64 }).generatedAlwaysAs(
+      sql`(CASE WHEN \`is_primary\` = 1 AND \`status\` = 'active' THEN \`tenant_id\` ELSE NULL END)`,
+      { mode: 'virtual' },
+    ),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
   },
@@ -1268,6 +1321,7 @@ export const tenantAdmins = mysqlTable(
     index('idx_tenant_admins_user').on(table.userId),
     index('idx_tenant_admins_status').on(table.status),
     uniqueIndex('idx_tenant_admins_tenant_user').on(table.tenantId, table.userId),
+    uniqueIndex('idx_tenant_admins_single_primary').on(table.primaryTenantScope),
   ],
 );
 
@@ -1397,6 +1451,10 @@ export const invitations = mysqlTable(
       .references(() => companies.id, { onDelete: 'cascade' }),
     email: varchar('email', { length: 255 }).notNull(),
     role: mysqlEnum('role', ['company_admin', 'hr_manager', 'employee', 'user']).notNull(),
+    authorityType: mysqlEnum('authority_type', ['tenant_admin', 'company_role'])
+      .default('company_role')
+      .notNull(),
+    isPrimaryAdmin: boolean('is_primary_admin').default(false).notNull(),
     token: varchar('token', { length: 255 }).notNull(),
     invitedByUserId: varchar('invited_by_user_id', { length: 64 }).references(() => users.id, {
       onDelete: 'set null',
@@ -1534,6 +1592,333 @@ export const tenantModules = mysqlTable(
 
 export type TenantModule = typeof tenantModules.$inferSelect;
 export type NewTenantModule = typeof tenantModules.$inferInsert;
+
+/**
+ * Platform: Commercial Subscription Plans
+ * Application-specific subscription plans (HRMS, CRM, PM) with seat constraints and tier metadata.
+ */
+export const plans = mysqlTable(
+  'plans',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    applicationCode: mysqlEnum('application_code', ['hrms', 'crm', 'project_management']).notNull(),
+    code: varchar('code', { length: 50 }).notNull(),
+    name: varchar('name', { length: 100 }).notNull(),
+    description: varchar('description', { length: 500 }),
+    tier: varchar('tier', { length: 50 }).notNull(),
+    status: mysqlEnum('status', ['active', 'deprecated', 'draft']).default('active').notNull(),
+    version: int('version').default(1).notNull(),
+    defaultSeats: int('default_seats').default(10).notNull(),
+    minSeats: int('min_seats').default(1).notNull(),
+    maxSeats: int('max_seats'),
+    trialEligible: boolean('trial_eligible').default(true).notNull(),
+    trialDurationDays: int('trial_duration_days').default(14).notNull(),
+    isCustom: boolean('is_custom').default(false).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_plans_app_code').on(table.applicationCode, table.code),
+    index('idx_plans_app_status').on(table.applicationCode, table.status),
+  ],
+);
+
+export type Plan = typeof plans.$inferSelect;
+export type NewPlan = typeof plans.$inferInsert;
+
+/**
+ * Platform: Plan Commercial Prices
+ * Price per seat/interval kept separate from entitlement definitions.
+ */
+export const planPrices = mysqlTable(
+  'plan_prices',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    planId: varchar('plan_id', { length: 64 })
+      .notNull()
+      .references(() => plans.id),
+    currency: varchar('currency', { length: 10 }).notNull(),
+    billingInterval: mysqlEnum('billing_interval', [
+      'monthly',
+      'annual',
+      'quarterly',
+      'custom',
+    ])
+      .default('monthly')
+      .notNull(),
+    amountMinorUnits: int('amount_minor_units').notNull(),
+    effectiveFrom: timestamp('effective_from').defaultNow().notNull(),
+    effectiveTo: timestamp('effective_to'),
+    status: mysqlEnum('status', ['active', 'deprecated']).default('active').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_plan_prices_plan_curr_interval').on(
+      table.planId,
+      table.currency,
+      table.billingInterval,
+      table.status,
+    ),
+  ],
+);
+
+export type PlanPrice = typeof planPrices.$inferSelect;
+export type NewPlanPrice = typeof planPrices.$inferInsert;
+
+/**
+ * Platform: Plan-Derived Entitlements
+ * Defines which functional modules or capability limits are included in a plan.
+ */
+export const planEntitlements = mysqlTable(
+  'plan_entitlements',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    planId: varchar('plan_id', { length: 64 })
+      .notNull()
+      .references(() => plans.id),
+    applicationCode: mysqlEnum('application_code', ['hrms', 'crm', 'project_management']).notNull(),
+    moduleCode: varchar('module_code', { length: 100 }).notNull(),
+    isEnabled: boolean('is_enabled').default(true).notNull(),
+    limits: json('limits').$type<Record<string, unknown>>(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_plan_entitlements_plan_mod').on(table.planId, table.moduleCode),
+    index('idx_plan_entitlements_app').on(table.applicationCode),
+  ],
+);
+
+export type PlanEntitlement = typeof planEntitlements.$inferSelect;
+export type NewPlanEntitlement = typeof planEntitlements.$inferInsert;
+
+/**
+ * Platform: Tenant Subscriptions
+ * Tracks active and historical commercial subscriptions per tenant and application.
+ * Prevents conflicting simultaneously active subscriptions while preserving historical records.
+ */
+export const tenantSubscriptions = mysqlTable(
+  'tenant_subscriptions',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 })
+      .notNull()
+      .references(() => tenants.id),
+    companyId: varchar('company_id', { length: 64 }).references(() => companies.id),
+    applicationCode: mysqlEnum('application_code', ['hrms', 'crm', 'project_management']).notNull(),
+    planId: varchar('plan_id', { length: 64 })
+      .notNull()
+      .references(() => plans.id),
+    status: mysqlEnum('status', [
+      'pending_activation',
+      'active',
+      'trial',
+      'past_due',
+      'suspended',
+      'cancelled',
+      'expired',
+    ])
+      .default('active')
+      .notNull(),
+    accessMode: mysqlEnum('access_mode', ['trial', 'paid']).default('paid').notNull(),
+    billingCycle: mysqlEnum('billing_cycle', [
+      'monthly',
+      'annual',
+      'quarterly',
+      'custom',
+    ])
+      .default('monthly')
+      .notNull(),
+    licensedSeats: int('licensed_seats').default(10).notNull(),
+    scheduledActivationAt: timestamp('scheduled_activation_at'),
+    activatedAt: timestamp('activated_at'),
+    trialStartsAt: timestamp('trial_starts_at'),
+    trialEndsAt: timestamp('trial_ends_at'),
+    currentPeriodStartsAt: timestamp('current_period_starts_at'),
+    currentPeriodEndsAt: timestamp('current_period_ends_at'),
+    cancelledAt: timestamp('cancelled_at'),
+    cancellationReason: varchar('cancellation_reason', { length: 500 }),
+    renewsAt: timestamp('renews_at'),
+    autoRenew: boolean('auto_renew').default(true).notNull(),
+    version: int('version').default(1).notNull(),
+    activeSubscriptionScope: varchar('active_subscription_scope', { length: 128 }).generatedAlwaysAs(
+      sql`(CASE WHEN \`status\` IN ('active', 'trial') THEN CONCAT(\`tenant_id\`, ':', \`application_code\`) ELSE NULL END)`,
+      { mode: 'stored' },
+    ),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_tenant_subscriptions_active_scope').on(table.activeSubscriptionScope),
+    index('idx_tenant_subscriptions_tenant_app').on(table.tenantId, table.applicationCode),
+    index('idx_tenant_subscriptions_plan').on(table.planId),
+    index('idx_tenant_subscriptions_status').on(table.status),
+  ],
+);
+
+export type TenantSubscription = typeof tenantSubscriptions.$inferSelect;
+export type NewTenantSubscription = typeof tenantSubscriptions.$inferInsert;
+
+/**
+ * Platform: Tenant Entitlement Overrides
+ * Auditable, time-bounded Super Admin overrides for specific capabilities.
+ */
+export const tenantEntitlementOverrides = mysqlTable(
+  'tenant_entitlement_overrides',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 })
+      .notNull()
+      .references(() => tenants.id),
+    companyId: varchar('company_id', { length: 64 }).references(() => companies.id),
+    applicationCode: mysqlEnum('application_code', ['hrms', 'crm', 'project_management']).notNull(),
+    moduleCode: varchar('module_code', { length: 100 }).notNull(),
+    overrideType: mysqlEnum('override_type', ['enable', 'disable', 'limit'])
+      .default('enable')
+      .notNull(),
+    overrideValue: json('override_value').$type<Record<string, unknown>>(),
+    reason: varchar('reason', { length: 500 }).notNull(),
+    authorizedByUserId: varchar('authorized_by_user_id', { length: 64 })
+      .notNull()
+      .references(() => users.id),
+    validFrom: timestamp('valid_from').defaultNow().notNull(),
+    validUntil: timestamp('valid_until'),
+    revokedAt: timestamp('revoked_at'),
+    revokedByUserId: varchar('revoked_by_user_id', { length: 64 }).references(() => users.id),
+    revocationReason: varchar('revocation_reason', { length: 500 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_entitlement_overrides_tenant_mod').on(
+      table.tenantId,
+      table.applicationCode,
+      table.moduleCode,
+    ),
+    index('idx_entitlement_overrides_valid').on(table.tenantId, table.validUntil),
+  ],
+);
+
+export type TenantEntitlementOverride = typeof tenantEntitlementOverrides.$inferSelect;
+export type NewTenantEntitlementOverride = typeof tenantEntitlementOverrides.$inferInsert;
+
+/**
+ * Platform: Tenant Lifecycle Events
+ * Audit trail of tenant lifecycle state transitions with reasons and actors.
+ */
+export const tenantLifecycleEvents = mysqlTable(
+  'tenant_lifecycle_events',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 })
+      .notNull()
+      .references(() => tenants.id),
+    eventType: mysqlEnum('event_type', [
+      'created',
+      'activated',
+      'suspended',
+      'reactivated',
+      'terminated',
+      'status_changed',
+    ]).notNull(),
+    previousStatus: varchar('previous_status', { length: 50 }),
+    newStatus: varchar('new_status', { length: 50 }).notNull(),
+    reason: varchar('reason', { length: 1000 }),
+    actorUserId: varchar('actor_user_id', { length: 64 }).references(() => users.id),
+    actorEmail: varchar('actor_email', { length: 255 }),
+    metadata: json('metadata').$type<Record<string, unknown>>(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_lifecycle_tenant_created').on(table.tenantId, table.createdAt),
+    index('idx_lifecycle_event_type').on(table.eventType),
+  ],
+);
+
+export type TenantLifecycleEvent = typeof tenantLifecycleEvents.$inferSelect;
+export type NewTenantLifecycleEvent = typeof tenantLifecycleEvents.$inferInsert;
+
+/**
+ * Platform: Provisioning Jobs
+ * Persistent step-by-step state tracking for customer onboarding and asynchronous retries.
+ */
+export const provisioningJobs = mysqlTable(
+  'provisioning_jobs',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 })
+      .notNull()
+      .references(() => tenants.id),
+    companyId: varchar('company_id', { length: 64 }).references(() => companies.id),
+    jobType: mysqlEnum('job_type', [
+      'tenant_creation',
+      'subscription_activation',
+      'module_provisioning',
+      'admin_handoff',
+    ])
+      .default('tenant_creation')
+      .notNull(),
+    status: mysqlEnum('status', ['pending', 'in_progress', 'completed', 'failed'])
+      .default('pending')
+      .notNull(),
+    idempotencyKey: varchar('idempotency_key', { length: 128 }),
+    attemptCount: int('attempt_count').default(1).notNull(),
+    maxAttempts: int('max_attempts').default(3).notNull(),
+    retryEligible: boolean('retry_eligible').default(true).notNull(),
+    nextAttemptAt: timestamp('next_attempt_at'),
+    stepState: json('step_state').$type<Record<string, unknown>>().notNull(),
+    errorCode: varchar('error_code', { length: 100 }),
+    lastError: varchar('last_error', { length: 2000 }),
+    workerId: varchar('worker_id', { length: 100 }),
+    startedAt: timestamp('started_at'),
+    completedAt: timestamp('completed_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_prov_jobs_idempotency').on(table.idempotencyKey),
+    index('idx_prov_jobs_tenant').on(table.tenantId),
+    index('idx_prov_jobs_status').on(table.status),
+  ],
+);
+
+export type ProvisioningJob = typeof provisioningJobs.$inferSelect;
+export type NewProvisioningJob = typeof provisioningJobs.$inferInsert;
+
+/**
+ * Platform: Transactional Outbox
+ * Guarantees reliable publishing of business events post-commit.
+ */
+export const transactionalOutbox = mysqlTable(
+  'transactional_outbox',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    aggregateType: varchar('aggregate_type', { length: 50 }).notNull(),
+    aggregateId: varchar('aggregate_id', { length: 64 }).notNull(),
+    eventType: varchar('event_type', { length: 100 }).notNull(),
+    payload: json('payload').$type<Record<string, unknown>>().notNull(),
+    idempotencyKey: varchar('idempotency_key', { length: 128 }),
+    status: mysqlEnum('status', ['pending', 'published', 'failed', 'dead_letter'])
+      .default('pending')
+      .notNull(),
+    attemptCount: int('attempt_count').default(0).notNull(),
+    maxAttempts: int('max_attempts').default(5).notNull(),
+    nextAttemptAt: timestamp('next_attempt_at'),
+    lastError: varchar('last_error', { length: 2000 }),
+    publishedAt: timestamp('published_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_outbox_idempotency').on(table.idempotencyKey),
+    index('idx_outbox_status_next').on(table.status, table.nextAttemptAt),
+    index('idx_outbox_aggregate').on(table.aggregateType, table.aggregateId),
+  ],
+);
+
+export type TransactionalOutboxMessage = typeof transactionalOutbox.$inferSelect;
+export type NewTransactionalOutboxMessage = typeof transactionalOutbox.$inferInsert;
 
 /**
  * Platform: Administrative Audit Logs

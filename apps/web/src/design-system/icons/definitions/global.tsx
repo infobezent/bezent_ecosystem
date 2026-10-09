@@ -1368,4 +1368,19 @@ export const GLOBAL_ICON_DEFINITIONS: Record<string, IconDefinition> = {
       <line x1="12" y1="3" x2="12" y2="15" />
     </g>
   )),
+  lock: glyph('lock', 'Lock', (c, sw) => (
+    <g {...S(c, sw)}>
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" fill="none" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" fill="none" />
+    </g>
+  )),
+  camera: glyph('camera', 'Camera', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path
+        d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+        fill="none"
+      />
+      <circle cx="12" cy="13" r="4" fill="none" />
+    </g>
+  )),
 };

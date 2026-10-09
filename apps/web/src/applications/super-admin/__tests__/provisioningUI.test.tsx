@@ -66,24 +66,33 @@ describe('Super Admin Customer Provisioning — Frontend UI & Regression Suite',
     expect(html).not.toContain('<style');
   });
 
-  it('5. resolves navigation correctly for /super-admin/provisioning', () => {
+  it('5. resolves navigation correctly for /super-admin/tenants/create', () => {
     const resolved = resolveActiveNavigation(
-      superAdminNavigation,
-      SUPER_ADMIN_BASE_PATH,
-      '/super-admin/provisioning',
+       superAdminNavigation,
+       SUPER_ADMIN_BASE_PATH,
+       '/super-admin/tenants/create',
     );
     expect(resolved).toEqual({
-      destinationId: 'customers',
-      childId: 'provisioning',
+      destinationId: 'tenants',
     });
   });
 
-  it('6. validates that Super Admin Main Nav contains exactly 4 entries and Customers contains Customer Provisioning', () => {
+  it('6. validates that Super Admin Main Nav contains 8 canonical entries and Tenants is direct item', () => {
     const mainNavIds = superAdminNavigation.destinations.filter((d) => d.sidebar).map((d) => d.id);
-    expect(mainNavIds).toEqual(['overview', 'customers', 'access', 'governance']);
+    expect(mainNavIds).toEqual([
+      'overview',
+      'tenants',
+      'subscriptions',
+      'applications',
+      'governance',
+      'operations',
+      'support',
+      'settings',
+    ]);
 
-    const customersDest = superAdminNavigation.destinations.find((d) => d.id === 'customers');
-    const childIds = customersDest?.children?.map((c) => c.id);
-    expect(childIds).toEqual(['tenants', 'companies', 'provisioning']);
+    const tenantsDest = superAdminNavigation.destinations.find((d) => d.id === 'tenants');
+    expect(tenantsDest).toBeDefined();
+    expect(tenantsDest?.children).toBeUndefined();
+    expect(tenantsDest?.segment).toBe('tenants');
   });
 });

@@ -12,9 +12,10 @@ describe('Single-Destination Navigation Behavior (Super Admin & Shared AppShell)
   const shellItems = toShellNavItems(superAdminApplication);
 
   const overviewItem = shellItems.find((item) => item.id === 'overview')!;
-  const customersItem = shellItems.find((item) => item.id === 'customers')!;
-  const accessItem = shellItems.find((item) => item.id === 'access')!;
+  const tenantsItem = shellItems.find((item) => item.id === 'tenants')!;
+  const subscriptionsItem = shellItems.find((item) => item.id === 'subscriptions')!;
   const governanceItem = shellItems.find((item) => item.id === 'governance')!;
+  const settingsItem = shellItems.find((item) => item.id === 'settings')!;
 
   it('1. Overview with one child navigates directly to /super-admin/dashboard', () => {
     const overviewDest = superAdminNavigation.destinations.find((d) => d.id === 'overview')!;
@@ -49,42 +50,57 @@ describe('Single-Destination Navigation Behavior (Super Admin & Shared AppShell)
     expect(htmlWithOverviewFlyout).not.toContain('left-sidebar__flyout');
   });
 
-  it('3. Customers still opens flyout (has 3 children, aria-haspopup="menu", renders flyout when open)', () => {
-    expect(canItemOpenFlyout(customersItem)).toBe(true);
+  it('2b. Settings with one child (Platform Configuration) navigates directly without opening flyout', () => {
+    expect(canItemOpenFlyout(settingsItem)).toBe(false);
 
-    const html = renderToStaticMarkup(
-      <LeftSidebar
-        items={shellItems}
-        activeId="customers"
-        testAvailableHeight={600}
-        testFlyoutParentId="customers"
-      />,
-    );
+    const settingsDest = superAdminNavigation.destinations.find((d) => d.id === 'settings')!;
+    expect(settingsDest.children).toHaveLength(1);
+    expect(settingsDest.children?.[0]?.id).toBe('platform-config');
 
-    expect(html).toContain('aria-haspopup="menu"');
-    expect(html).toContain('subnav-flyout');
-    expect(html).toContain('Tenants');
-    expect(html).toContain('Companies');
-    expect(html).toContain('Customer Provisioning');
+    const resolvedPath = destinationPath(SUPER_ADMIN_BASE_PATH, settingsDest);
+    expect(resolvedPath).toBe('/super-admin/settings');
   });
 
-  it('4. Access still opens flyout (has 3 children, aria-haspopup="menu", renders flyout when open)', () => {
-    expect(canItemOpenFlyout(accessItem)).toBe(true);
+  it('3. Tenants navigates directly without opening flyout (canItemOpenFlyout is false, direct to /super-admin/tenants)', () => {
+    expect(canItemOpenFlyout(tenantsItem)).toBe(false);
+
+    const tenantsDest = superAdminNavigation.destinations.find((d) => d.id === 'tenants')!;
+    expect(tenantsDest.children).toBeUndefined();
+
+    const resolvedPath = destinationPath(SUPER_ADMIN_BASE_PATH, tenantsDest);
+    expect(resolvedPath).toBe('/super-admin/tenants');
 
     const html = renderToStaticMarkup(
       <LeftSidebar
         items={shellItems}
-        activeId="access"
+        activeId="tenants"
         testAvailableHeight={600}
-        testFlyoutParentId="access"
+        testFlyoutParentId="tenants"
+      />,
+    );
+
+    expect(html).toContain('Tenants');
+    expect(html).not.toMatch(/aria-haspopup="menu"[^>]*>[\s\S]*?Tenants/);
+    expect(html).not.toContain('subnav-flyout');
+  });
+
+  it('4. Subscriptions opens flyout (has 3 children, aria-haspopup="menu", renders flyout when open)', () => {
+    expect(canItemOpenFlyout(subscriptionsItem)).toBe(true);
+
+    const html = renderToStaticMarkup(
+      <LeftSidebar
+        items={shellItems}
+        activeId="subscriptions"
+        testAvailableHeight={600}
+        testFlyoutParentId="subscriptions"
       />,
     );
 
     expect(html).toContain('aria-haspopup="menu"');
     expect(html).toContain('subnav-flyout');
-    expect(html).toContain('Platform Users');
-    expect(html).toContain('Company Admins');
-    expect(html).toContain('Application Access');
+    expect(html).toContain('Plans');
+    expect(html).toContain('Tenant Subscriptions');
+    expect(html).toContain('Entitlements');
   });
 
   it('5. Governance still opens flyout (has 2 children, aria-haspopup="menu", renders flyout when open)', () => {
@@ -102,7 +118,7 @@ describe('Single-Destination Navigation Behavior (Super Admin & Shared AppShell)
     expect(html).toContain('aria-haspopup="menu"');
     expect(html).toContain('subnav-flyout');
     expect(html).toContain('Audit Logs');
-    expect(html).toContain('Platform Settings');
+    expect(html).toContain('Platform Administrators');
   });
 
   it('6. Active state remains correct across all destinations', () => {
@@ -128,26 +144,25 @@ describe('Single-Destination Navigation Behavior (Super Admin & Shared AppShell)
       /class="[^"]*left-sidebar__item[^"]*is-active[^"]*"[^>]*aria-current="page"[^>]*>[\s\S]*?Overview/,
     );
 
-    // Customers / Tenants active state
-    const resolvedCustomers = resolveActiveNavigation(
+    // Tenants active state
+    const resolvedTenants = resolveActiveNavigation(
       superAdminNavigation,
       SUPER_ADMIN_BASE_PATH,
       '/super-admin/tenants',
     );
-    expect(resolvedCustomers).toEqual({
-      destinationId: 'customers',
-      childId: 'tenants',
+    expect(resolvedTenants).toEqual({
+      destinationId: 'tenants',
     });
 
-    // Access / Users active state
-    const resolvedAccess = resolveActiveNavigation(
+    // Subscriptions / Plans active state
+    const resolvedSubs = resolveActiveNavigation(
       superAdminNavigation,
       SUPER_ADMIN_BASE_PATH,
-      '/super-admin/users',
+      '/super-admin/subscriptions/plans',
     );
-    expect(resolvedAccess).toEqual({
-      destinationId: 'access',
-      childId: 'users',
+    expect(resolvedSubs).toEqual({
+      destinationId: 'subscriptions',
+      childId: 'plans',
     });
 
     // Governance / Audit Logs active state
