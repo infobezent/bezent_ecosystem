@@ -2,6 +2,9 @@ import { useState, type ReactNode } from 'react';
 import { BezentIcon } from '../../design-system/icons';
 import { Avatar, IconButton, Badge } from '../../design-system/components';
 import { ProfileMenu } from './ProfileMenu';
+import bezentMark from '../../assets/bezent-mark.png';
+import bezentWordmarkLight from '../../assets/bezent-wordmark-light.png';
+import bezentWordmarkDark from '../../assets/bezent-wordmark-dark.png';
 import './TopNav.css';
 
 export interface TopNavProps {
@@ -50,9 +53,20 @@ export function TopNav({
     <header className="top-nav">
       <div className="top-nav__brand">
         <div className="top-nav__logo" aria-hidden="true">
-          BZ
+          <img src={bezentMark} alt="" className="top-nav__logo-img" />
         </div>
-        <span className="top-nav__wordmark">BEZENT</span>
+        <span className="top-nav__wordmark" aria-label="BEZENT">
+          <img
+            src={bezentWordmarkLight}
+            alt="BEZENT"
+            className="top-nav__wordmark-img top-nav__wordmark-img--light"
+          />
+          <img
+            src={bezentWordmarkDark}
+            alt="BEZENT"
+            className="top-nav__wordmark-img top-nav__wordmark-img--dark"
+          />
+        </span>
       </div>
 
       {/* Search is composed in by the host (platform/search); TopNav only owns its place. */}

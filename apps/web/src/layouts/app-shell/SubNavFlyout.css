@@ -138,12 +138,12 @@
 
 .subnav-flyout__row:hover {
   background: var(--popup-row-hover, var(--floating-row-hover));
-  color: var(--popup-hover-icon, var(--accent-primary));
+  color: var(--popup-hover-icon, var(--nav-icon-active));
 }
 
 .subnav-flyout__row.is-selected {
   background: var(--popup-row-selected, var(--floating-row-selected));
-  color: var(--popup-selected-icon, var(--accent-primary));
+  color: var(--popup-selected-icon, var(--nav-icon-active));
 }
 
 .subnav-flyout__row:focus-visible {
@@ -181,7 +181,7 @@
   height: 4px;
   border-radius: 50%;
   flex-shrink: 0;
-  background: var(--popup-selected-icon, var(--accent-primary));
+  background: var(--popup-selected-icon, var(--nav-icon-active));
 }
 
 @media (prefers-reduced-motion: reduce) {
