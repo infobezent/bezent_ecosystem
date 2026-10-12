@@ -219,19 +219,23 @@ export function OnlineAccessSection({
             </FormField>
 
             {/* 3. Invitation Status */}
-            <FormField label="Invitation Status">
-              <Inline gap="sm" align="center">
-                <Badge variant={getBadgeVariant(invitationStatus)}>● {invitationStatus}</Badge>
-                <Select
-                  options={INVITATION_STATUS_OPTIONS}
-                  value={invitationStatus}
-                  onChange={(e) =>
-                    setInvitationStatus(
-                      e.target.value as 'Not Sent' | 'Pending' | 'Sent' | 'Accepted' | 'Expired',
-                    )
-                  }
-                />
-              </Inline>
+            <FormField
+              labelNode={
+                <Stack gap="xs" align="start">
+                  <span>Invitation Status</span>
+                  <Badge variant={getBadgeVariant(invitationStatus)}>● {invitationStatus}</Badge>
+                </Stack>
+              }
+            >
+              <Select
+                options={INVITATION_STATUS_OPTIONS}
+                value={invitationStatus}
+                onChange={(e) =>
+                  setInvitationStatus(
+                    e.target.value as 'Not Sent' | 'Pending' | 'Sent' | 'Accepted' | 'Expired',
+                  )
+                }
+              />
             </FormField>
 
             {/* 4. Invitation Sent Date */}

@@ -7,7 +7,7 @@
 
 .subnav-flyout {
   position: fixed;
-  left: calc(var(--shell-sidebar-width) + 4px);
+  left: calc(var(--shell-sidebar-width) + 8px);
   margin-top: 0;
   width: var(--shell-subnav-flyout-width);
   min-height: 220px;
@@ -48,7 +48,7 @@
 
 .subnav-flyout--up .subnav-flyout__pointer {
   top: auto;
-  bottom: 27px;
+  bottom: 48px;
   transform: translateY(50%) rotate(45deg);
   background: var(--floating-surface-bg);
 }
@@ -56,19 +56,19 @@
 /* Invisible hover bridge between the rail and the flyout. */
 .subnav-flyout__bridge {
   position: absolute;
-  left: -18px;
+  left: -20px;
   top: 0;
-  width: 18px;
+  width: 20px;
   height: 100%;
 }
 
-/* Left-edge notch aligned with the hovered item's centre. */
+/* Left-edge notch aligned with the hovered item's icon centre (top: 2px + 36px/2 = 20px). */
 .subnav-flyout__pointer {
   position: absolute;
-  left: -5px;
-  top: 27px;
-  width: 10px;
-  height: 10px;
+  left: -6px;
+  top: 20px;
+  width: 12px;
+  height: 12px;
   background: var(--subnav-header-bg, var(--nav-selected, #c2e7ff));
   border-left: 1px solid var(--floating-surface-border);
   border-bottom: 1px solid var(--floating-surface-border);

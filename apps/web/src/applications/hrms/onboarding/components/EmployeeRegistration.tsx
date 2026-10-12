@@ -1280,7 +1280,7 @@ export function EmployeeRegistration({
           }
           right={
             activeSection !== 'review' ? (
-              <Button variant="primary" type="button" onClick={handleNext}>
+              <Button variant="secondary" type="button" onClick={handleNext}>
                 Save &amp; Next →
               </Button>
             ) : undefined
@@ -1312,7 +1312,7 @@ export function EmployeeRegistration({
               <Button variant="secondary" type="button" onClick={handleModalLeaveWithoutSaving}>
                 Leave Without Saving
               </Button>
-              <Button variant="primary" type="button" onClick={handleModalSaveDraft}>
+              <Button variant="secondary" type="button" onClick={handleModalSaveDraft}>
                 Save Draft
               </Button>
             </Actions>

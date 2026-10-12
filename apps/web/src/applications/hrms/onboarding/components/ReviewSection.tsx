@@ -1397,7 +1397,7 @@ export function ReviewSection({
               <span>Employee profile activated</span>
             </Stack>
             <Inline justify="end">
-              <Button type="button" variant="primary" onClick={onDone}>
+              <Button type="button" variant="secondary" onClick={onDone}>
                 Done
               </Button>
             </Inline>
