@@ -1098,7 +1098,7 @@ export class AttendanceRegularizationService {
             succeeded.push(reqId);
             break;
 
-          case 'bulk_approve':
+          case 'bulk_approve': {
             // High-risk and complex cases require individual review!
             if (reg.isHighRisk || reg.requestType === 'both_missing') {
               skipped.push({
@@ -1132,6 +1132,7 @@ export class AttendanceRegularizationService {
             );
             succeeded.push(reqId);
             break;
+          }
 
           case 'bulk_reject':
             if (['approved', 'rejected', 'cancelled'].includes(reg.approvalStatus)) {

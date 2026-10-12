@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
 import { AttendanceRegularizationPage } from '../pages/AttendanceRegularizationPage';
 import * as attendanceApi from '../api/attendanceApi';
+import type { RegularizationItemV1 } from '../types/attendance.types';
 
 describe('BEZENT HRMS — Attendance Regularization V1.0 Frontend Workspace', () => {
   beforeEach(() => {
@@ -45,7 +46,7 @@ describe('BEZENT HRMS — Attendance Regularization V1.0 Frontend Workspace', ()
           relatedExceptionId: 'EXC-2026-00118',
           isHighRisk: false,
         },
-      ] as any,
+      ] as RegularizationItemV1[],
       counters: {
         pendingReview: 24,
         underReview: 8,

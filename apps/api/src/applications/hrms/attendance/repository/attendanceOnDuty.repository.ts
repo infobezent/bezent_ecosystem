@@ -287,7 +287,7 @@ export class AttendanceOnDutyRepository {
     }
 
     if (filter.approvalStatus && filter.approvalStatus !== 'all') {
-      conditions.push(eq(attendanceOnDutyRequests.status, filter.approvalStatus as any));
+      conditions.push(eq(attendanceOnDutyRequests.status, filter.approvalStatus as 'draft' | 'submitted' | 'under_review' | 'approved' | 'rejected' | 'withdrawn' | 'awaiting_info' | 'cancelled'));
     }
 
     if (filter.odTypeId && filter.odTypeId !== 'all') {
@@ -295,11 +295,23 @@ export class AttendanceOnDutyRepository {
     }
 
     if (filter.processingStatus && filter.processingStatus !== 'all') {
-      conditions.push(eq(attendanceOnDutyRequests.processingStatus, filter.processingStatus as any));
+      conditions.push(
+        eq(
+          attendanceOnDutyRequests.processingStatus,
+          filter.processingStatus as
+            | 'not_applicable'
+            | 'pending'
+            | 'applied'
+            | 'partially_applied'
+            | 'processing_issues'
+            | 'blocked'
+            | 'failed',
+        ),
+      );
     }
 
     if (filter.durationType && filter.durationType !== 'all') {
-      conditions.push(eq(attendanceOnDutyRequests.durationType, filter.durationType as any));
+      conditions.push(eq(attendanceOnDutyRequests.durationType, filter.durationType as 'full_day' | 'half_day' | 'hourly' | 'multi_day'));
     }
 
     if (filter.assignedTo && filter.assignedTo !== 'all') {

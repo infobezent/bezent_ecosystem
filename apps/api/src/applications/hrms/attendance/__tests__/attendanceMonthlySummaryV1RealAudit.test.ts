@@ -183,8 +183,10 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Monthly Summa
 
   it('Check 1: Database Migration 0038 tables exist in bezent_dev', async () => {
     const db = getDb();
-    const [rows] = await db.execute("SHOW TABLES LIKE 'attendance_monthly_%'") as any;
-    const tableNames = rows.map((r: any) => Object.values(r)[0]);
+    const [rows] = (await db.execute(
+      "SHOW TABLES LIKE 'attendance_monthly_%'",
+    )) as unknown as [Array<Record<string, unknown>>, unknown];
+    const tableNames = rows.map((r: Record<string, unknown>) => Object.values(r)[0]);
 
     expect(tableNames).toContain('attendance_monthly_summaries');
     expect(tableNames).toContain('attendance_monthly_reviews');
@@ -251,7 +253,7 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Monthly Summa
     expect(res.body.data.counters.totalEmployees).toBeGreaterThanOrEqual(2);
 
     // Locate Priya's summary
-    const priyaSummary = res.body.data.items.find((s: any) => s.employeeId === empId1);
+    const priyaSummary = res.body.data.items.find((s: { employeeId: string; month: string; scheduledDays: number; weeklyOffDays: number; presentDays: string | number; leaveDays: string | number; actualWorkedHours: number }) => s.employeeId === empId1);
     expect(priyaSummary).toBeDefined();
     expect(priyaSummary.month).toBe(testMonth);
     // Scheduled days: September 2026 has 22 weekdays
@@ -270,7 +272,7 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Monthly Summa
     const listRes = await request(app)
       .get(`/api/v1/hrms/attendance/monthly-summary?month=${testMonth}`)
       .set(headers);
-    const summary = listRes.body.data.items.find((s: any) => s.employeeId === empId1);
+    const summary = listRes.body.data.items.find((s: { id: string; employeeId: string; version: number }) => s.employeeId === empId1);
     expect(summary).toBeDefined();
 
     // 2. Assign reviewer
@@ -325,7 +327,7 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Monthly Summa
     const listRes = await request(app)
       .get(`/api/v1/hrms/attendance/monthly-summary?month=${testMonth}`)
       .set(headers);
-    const summary = listRes.body.data.items.find((s: any) => s.employeeId === empId1);
+    const summary = listRes.body.data.items.find((s: { id: string; employeeId: string; version: number }) => s.employeeId === empId1);
 
     // 1. Check readiness report
     const readinessRes = await request(app)
@@ -377,7 +379,7 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Monthly Summa
     const listRes = await request(app)
       .get(`/api/v1/hrms/attendance/monthly-summary?month=${testMonth}`)
       .set(headers);
-    const summary = listRes.body.data.items.find((s: any) => s.employeeId === empId1);
+    const summary = listRes.body.data.items.find((s: { id: string; employeeId: string; version: number }) => s.employeeId === empId1);
 
     // Requesting summary with foreign company headers must return 404
     const foreignRes = await request(app)
@@ -396,7 +398,7 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Monthly Summa
     const listRes = await request(app)
       .get(`/api/v1/hrms/attendance/monthly-summary?month=${testMonth}`)
       .set(headers);
-    const summaryIds = listRes.body.data.items.map((s: any) => s.id);
+    const summaryIds = listRes.body.data.items.map((s: { id: string }) => s.id);
 
     // Bulk preview
     const previewRes = await request(app)

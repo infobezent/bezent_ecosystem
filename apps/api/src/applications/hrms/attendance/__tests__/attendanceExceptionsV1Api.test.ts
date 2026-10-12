@@ -124,7 +124,7 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Exceptions V1
       expect(counters).toHaveProperty('resolvedToday');
 
       expect(Array.isArray(items)).toBe(true);
-      const found = items.find((i: any) => i.id === testCaseId1);
+      const found = items.find((i: { id: string; exceptionType: string }) => i.id === testCaseId1);
       expect(found).toBeDefined();
       expect(found.exceptionType).toBe('missing_out');
     });
@@ -136,7 +136,7 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Exceptions V1
 
       expect(res.status).toBe(200);
       const items = res.body.data.items;
-      items.forEach((item: any) => {
+      items.forEach((item: { severity: string; status: string }) => {
         expect(item.severity).toBe('critical');
         expect(['open', 'assigned', 'in_review', 'pending_action']).toContain(item.status);
       });
@@ -232,7 +232,7 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Exceptions V1
         .set(headers);
 
       expect(detailRes.body.data.severity).toBe('critical');
-      const audit = detailRes.body.data.audits.find((a: any) => a.action === 'severity_overridden');
+      const audit = detailRes.body.data.audits.find((a: { action: string; notes: string }) => a.action === 'severity_overridden');
       expect(audit).toBeDefined();
       expect(audit.notes).toContain('Payroll processing');
     });

@@ -51,6 +51,7 @@ import type {
   OnDutyApprovalStatus,
   OnDutyProcessingStatus,
   BulkOnDutyEligibilityPreview,
+  BulkOnDutyActionInput,
   CreateOnDutyRequestPayload,
 } from '../types/attendance.types';
 
@@ -197,7 +198,9 @@ export function AttendanceOnDutyPage() {
   const [formError, setFormError] = useState<string | null>(null);
 
   // 8. Bulk Operations State
-  const [bulkModalAction, setBulkModalAction] = useState<string | null>(null);
+  const [bulkModalAction, setBulkModalAction] = useState<
+    BulkOnDutyActionInput['action'] | null
+  >(null);
   const [bulkAssignee, setBulkAssignee] = useState('');
   const [bulkReason, setBulkReason] = useState('');
   const [bulkSubmitting, setBulkSubmitting] = useState(false);
@@ -464,7 +467,9 @@ export function AttendanceOnDutyPage() {
   }, [durationType, submittedFrom, submittedTo, assignedTo, departmentId, locationId, conflictStatus]);
 
   // Bulk operation executor
-  const handleOpenBulkModal = async (action: string) => {
+  const handleOpenBulkModal = async (
+    action: BulkOnDutyActionInput['action'],
+  ) => {
     setBulkModalAction(action);
     setBulkReason('');
     setBulkResultReport(null);
@@ -485,7 +490,7 @@ export function AttendanceOnDutyPage() {
     setBulkSubmitting(true);
     try {
       const result = await executeBulkOnDutyAction({
-        action: bulkModalAction as any,
+        action: bulkModalAction,
         requestIds: Array.from(selectedIds),
         assignedTo: bulkAssignee || undefined,
         reason: bulkReason || undefined,
@@ -1079,14 +1084,14 @@ export function AttendanceOnDutyPage() {
                   />
                 </TableHeaderCell>
                 <TableHeaderCell className="bezent-table-col--employee">Employee</TableHeaderCell>
-                <TableHeaderCell style={{ minWidth: 160 }}>Duty Period</TableHeaderCell>
-                <TableHeaderCell style={{ minWidth: 140 }}>OD Type</TableHeaderCell>
-                <TableHeaderCell style={{ minWidth: 130 }}>Duration</TableHeaderCell>
-                <TableHeaderCell style={{ minWidth: 200 }}>Location / Purpose</TableHeaderCell>
-                <TableHeaderCell style={{ minWidth: 130 }}>Submitted At</TableHeaderCell>
-                <TableHeaderCell style={{ minWidth: 140 }}>Assigned To</TableHeaderCell>
-                <TableHeaderCell style={{ minWidth: 130 }}>Approval Status</TableHeaderCell>
-                <TableHeaderCell style={{ minWidth: 130 }}>Processing Status</TableHeaderCell>
+                <TableHeaderCell>Duty Period</TableHeaderCell>
+                <TableHeaderCell>OD Type</TableHeaderCell>
+                <TableHeaderCell>Duration</TableHeaderCell>
+                <TableHeaderCell>Location / Purpose</TableHeaderCell>
+                <TableHeaderCell>Submitted At</TableHeaderCell>
+                <TableHeaderCell>Assigned To</TableHeaderCell>
+                <TableHeaderCell>Approval Status</TableHeaderCell>
+                <TableHeaderCell>Processing Status</TableHeaderCell>
                 <TableHeaderCell className="bezent-table-col--actions bezent-table-col--sticky-right">
                   Actions
                 </TableHeaderCell>
@@ -1386,7 +1391,11 @@ export function AttendanceOnDutyPage() {
                                 <TableCell>{formatDate(w.workday)}</TableCell>
                                 <TableCell>{w.creditedStatus}</TableCell>
                                 <TableCell>{w.creditedWorkedMinutes} min</TableCell>
-                                <TableCell>{renderProcessingBadge(w.processingStatus as any)}</TableCell>
+                                <TableCell>
+                                  {renderProcessingBadge(
+                                    w.processingStatus as OnDutyProcessingStatus,
+                                  )}
+                                </TableCell>
                               </TableRow>
                             ))}
                           </TableBody>
@@ -1845,7 +1854,13 @@ export function AttendanceOnDutyPage() {
             {/* Modal Navigation Buttons */}
             <Inline justify="between" align="center">
               {newStep > 1 ? (
-                <Button variant="secondary" size="sm" onClick={() => setNewStep((newStep - 1) as any)}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() =>
+                    setNewStep((prev) => Math.max(1, prev - 1) as 1 | 2 | 3 | 4 | 5)
+                  }
+                >
                   Back
                 </Button>
               ) : (
@@ -1855,7 +1870,13 @@ export function AttendanceOnDutyPage() {
               )}
 
               {newStep < 5 ? (
-                <Button variant="primary" size="sm" onClick={() => setNewStep((newStep + 1) as any)}>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() =>
+                    setNewStep((prev) => Math.min(5, prev + 1) as 1 | 2 | 3 | 4 | 5)
+                  }
+                >
                   Next
                 </Button>
               ) : (
@@ -1978,7 +1999,9 @@ export function AttendanceOnDutyPage() {
               <label className="bezent-card__desc">Export Scope</label>
               <Select
                 value={exportScope}
-                onChange={(e) => setExportScope(e.target.value as any)}
+                onChange={(e) =>
+                  setExportScope(e.target.value as 'selected' | 'filtered')
+                }
               >
                 <option value="filtered">Current Filtered View ({totalCount} items)</option>
                 <option value="selected" disabled={selectedIds.size === 0}>
@@ -1991,7 +2014,9 @@ export function AttendanceOnDutyPage() {
               <label className="bezent-card__desc">File Format</label>
               <Select
                 value={exportFormat}
-                onChange={(e) => setExportFormat(e.target.value as any)}
+                onChange={(e) =>
+                  setExportFormat(e.target.value as 'csv' | 'excel' | 'pdf')
+                }
               >
                 <option value="csv">CSV (Comma Separated Values)</option>
                 <option value="excel">Excel (.xlsx)</option>
@@ -2003,7 +2028,11 @@ export function AttendanceOnDutyPage() {
               <label className="bezent-card__desc">Data Level</label>
               <Select
                 value={exportLevel}
-                onChange={(e) => setExportLevel(e.target.value as any)}
+                onChange={(e) =>
+                  setExportLevel(
+                    e.target.value as 'standard' | 'detailed' | 'audit',
+                  )
+                }
               >
                 <option value="standard">Standard Summary</option>
                 <option value="detailed">Detailed Breakdown (with workdays)</option>

@@ -38,9 +38,9 @@ import type {
   OnDutyRulesConfig,
   OnDutyDurationType,
   OnDutyApprovalStatus,
+  OnDutyProcessingStatus,
   NewAttendanceOnDutyRequestRecord,
   NewAttendanceOnDutyWorkdayRecord,
-  NewAttendanceOnDutyAuditRecord,
 } from '../types/attendance.types.js';
 
 export const CANONICAL_OD_TYPES: OnDutyTypeConfig[] = [
@@ -81,6 +81,70 @@ export const CANONICAL_OD_TYPES: OnDutyTypeConfig[] = [
   },
 ];
 
+interface MockOnDutyRecord {
+  id: string;
+  requestNumber?: string;
+  employeeId: string;
+  employeeName?: string;
+  employeeCode?: string;
+  departmentName?: string;
+  odTypeId: string;
+  odTypeName?: string;
+  startDate: string;
+  endDate: string;
+  startTime?: string | null;
+  endTime?: string | null;
+  durationType: string;
+  durationHours?: number;
+  halfDaySession?: string | null;
+  locationOrSite?: string | null;
+  reason?: string;
+  projectReference?: string | null;
+  submittedAt?: Date | string;
+  createdAt?: Date | string;
+  assignedTo?: string | null;
+  status: string;
+  currentStage: string;
+  processingStatus?: string;
+  evidenceAttachments?: unknown;
+  decisionReason?: string | null;
+  reviewedByUserId?: string | null;
+  reviewedAt?: string | Date | null;
+}
+
+interface OnDutyMockRepository {
+  checkDateInLockedPeriod?: (
+    tenantId: string,
+    companyId: string,
+    startDate: string,
+    endDate: string,
+  ) => Promise<boolean>;
+  checkOverlappingLeave?: (
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+    startDate: string,
+    endDate: string,
+  ) => Promise<boolean>;
+  createOnDutyRequest: (
+    tenantId: string,
+    companyId: string,
+    payload: Record<string, unknown>,
+  ) => Promise<MockOnDutyRecord>;
+  updateOnDutyRequest: (
+    tenantId: string,
+    companyId: string,
+    id: string,
+    payload: Record<string, unknown>,
+  ) => Promise<MockOnDutyRecord>;
+  getOnDutyRequestById: (
+    tenantId: string,
+    companyId: string,
+    id: string,
+  ) => Promise<MockOnDutyRecord | null>;
+  upsertDailyAttendance?: (payload: Record<string, unknown>) => Promise<unknown>;
+}
+
 export class AttendanceOnDutyService {
   private readonly odRepo: AttendanceOnDutyRepository;
   private readonly attRepo: AttendanceRepository;
@@ -88,7 +152,7 @@ export class AttendanceOnDutyService {
   private readonly calculator: AttendanceCalculationService;
   private readonly scheduleProvider: DefaultShiftScheduleProvider;
   private readonly isMockRepo: boolean = false;
-  private readonly mockRepo?: any;
+  private readonly mockRepo?: OnDutyMockRepository;
 
   constructor(
     odRepoOrAttRepo: AttendanceOnDutyRepository | AttendanceRepository = attendanceOnDutyRepository,
@@ -103,7 +167,7 @@ export class AttendanceOnDutyService {
       !('generateNextRequestNumber' in odRepoOrAttRepo)
     ) {
       this.isMockRepo = true;
-      this.mockRepo = odRepoOrAttRepo;
+      this.mockRepo = odRepoOrAttRepo as unknown as OnDutyMockRepository;
       this.attRepo = odRepoOrAttRepo as AttendanceRepository;
       this.policyService =
         (policyServiceOrAttRepo as AttendancePolicyService) || attendancePolicyService;
@@ -117,7 +181,7 @@ export class AttendanceOnDutyService {
     this.scheduleProvider = scheduleProvider;
   }
 
-  private mapMockToDetail(item: any): OnDutyDetailV1 {
+  private mapMockToDetail(item: MockOnDutyRecord): OnDutyDetailV1 {
     return {
       id: item.id,
       requestNumber: item.requestNumber || `OD-${item.id.slice(-5).toUpperCase()}`,
@@ -134,21 +198,33 @@ export class AttendanceOnDutyService {
       dutyPeriodDisplay: `${item.startDate} to ${item.endDate}`,
       durationType: item.durationType as OnDutyDurationType,
       durationHours: Number(item.durationHours || 8),
-      halfDaySession: item.halfDaySession ?? null,
+      halfDaySession:
+        (item.halfDaySession as 'first_half' | 'second_half' | null) ?? null,
       locationOrSite: item.locationOrSite ?? null,
-      purpose: item.reason,
+      purpose: item.reason || '',
       projectReference: item.projectReference ?? null,
-      submittedAt: (item.submittedAt || item.createdAt || new Date()).toISOString(),
+      submittedAt: (() => {
+        const d = item.submittedAt || item.createdAt;
+        if (d instanceof Date) return d.toISOString();
+        if (typeof d === 'string') return new Date(d).toISOString();
+        return new Date().toISOString();
+      })(),
       assignedTo: item.assignedTo ?? null,
       assignedToName: null,
       assignedRole: null,
       approvalStatus: item.status as OnDutyApprovalStatus,
       status: item.status as OnDutyApprovalStatus,
       currentStage: item.currentStage,
-      processingStatus: item.processingStatus || 'not_applicable',
+      processingStatus:
+        (item.processingStatus as OnDutyProcessingStatus) || 'not_applicable',
       isHighRisk: false,
       riskFactors: [],
-      evidenceAttachments: item.evidenceAttachments ?? null,
+      evidenceAttachments:
+        (item.evidenceAttachments as Array<{
+          name: string;
+          size: string;
+          url?: string;
+        }> | null) ?? null,
       decisionReason: item.decisionReason ?? null,
       reviewedByUserId: item.reviewedByUserId ?? null,
       reviewedAt: item.reviewedAt ? new Date(item.reviewedAt).toISOString() : null,
@@ -251,7 +327,7 @@ export class AttendanceOnDutyService {
       }
     }
 
-    if (this.isMockRepo) {
+    if (this.isMockRepo && this.mockRepo) {
       if (this.mockRepo.checkDateInLockedPeriod) {
         const locked = await this.mockRepo.checkDateInLockedPeriod(tenantId, companyId, input.startDate, input.endDate);
         if (locked) {
@@ -437,7 +513,7 @@ export class AttendanceOnDutyService {
     tenantId: string,
     companyId: string,
     filter: OnDutyFilterV1,
-  ): Promise<any[]> {
+  ): Promise<OnDutyItemV1[]> {
     const res = await this.listWorkspace(tenantId, companyId, filter);
     return res.items;
   }
@@ -448,7 +524,7 @@ export class AttendanceOnDutyService {
     id: string,
     actorUserId: string,
   ): Promise<OnDutyDetailV1> {
-    if (this.isMockRepo) {
+    if (this.isMockRepo && this.mockRepo) {
       const updated = await this.mockRepo.updateOnDutyRequest(tenantId, companyId, id, {
         status: 'submitted',
         currentStage: 'pending_approval',
@@ -487,7 +563,7 @@ export class AttendanceOnDutyService {
     actorUserId: string,
     reason?: string,
   ): Promise<OnDutyDetailV1> {
-    if (this.isMockRepo) {
+    if (this.isMockRepo && this.mockRepo) {
       const updated = await this.mockRepo.updateOnDutyRequest(tenantId, companyId, id, {
         status: 'withdrawn',
         currentStage: 'withdrawn',
@@ -550,7 +626,7 @@ export class AttendanceOnDutyService {
   }
 
   async getRequestById(tenantId: string, companyId: string, id: string): Promise<OnDutyDetailV1> {
-    if (this.isMockRepo) {
+    if (this.isMockRepo && this.mockRepo) {
       const item = await this.mockRepo.getOnDutyRequestById(tenantId, companyId, id);
       if (!item) throw new NotFoundError(`On-Duty request ${id} not found`);
       return this.mapMockToDetail(item);
@@ -736,7 +812,7 @@ export class AttendanceOnDutyService {
       throw new ForbiddenError('Self-approval of On-Duty requests is prohibited');
     }
 
-    if (this.isMockRepo) {
+    if (this.isMockRepo && this.mockRepo) {
       if (input.action === 'rejected') {
         if (!input.reason || input.reason.trim().length < 3) {
           throw new BadRequestError('A rejection reason (minimum 3 characters) is mandatory');
@@ -937,11 +1013,14 @@ export class AttendanceOnDutyService {
           baseOdMinutes = Math.round(Number(existing.durationHours || 1) * 60);
         }
 
-        // Idempotency check: has this attendance record already received credit for this OD request?
+        const calcMeta = existingAtt?.calculationMetadata as
+          | { isOdCredit?: boolean; odRequestId?: string }
+          | null
+          | undefined;
         const alreadyCredited =
           existingAtt &&
-          Boolean((existingAtt.calculationMetadata as any)?.isOdCredit) &&
-          (existingAtt.calculationMetadata as any)?.odRequestId === existing.id;
+          Boolean(calcMeta?.isOdCredit) &&
+          calcMeta?.odRequestId === existing.id;
 
         let creditedMinutes = baseOdMinutes;
         let finalStatus: 'present' | 'half_day' =
@@ -1054,7 +1133,7 @@ export class AttendanceOnDutyService {
       throw new BadRequestError(`Request is already in terminal status '${existing.approvalStatus}'`);
     }
 
-    if (this.isMockRepo) {
+    if (this.isMockRepo && this.mockRepo) {
       const updated = await this.mockRepo.updateOnDutyRequest(tenantId, companyId, id, {
         status: 'cancelled',
         currentStage: 'cancelled',

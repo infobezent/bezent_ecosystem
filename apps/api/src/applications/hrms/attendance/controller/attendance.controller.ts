@@ -325,8 +325,15 @@ export class AttendanceController {
           search: typeof req.query.search === 'string' ? req.query.search : undefined,
           page: req.query.page ? parseInt(String(req.query.page), 10) : 1,
           limit: req.query.limit ? parseInt(String(req.query.limit), 10) : 20,
-          sortBy: (req.query.sortBy as any) || undefined,
-          sortOrder: (req.query.sortOrder as any) || 'asc',
+          sortBy:
+            (req.query.sortBy as
+              | 'workday'
+              | 'severity'
+              | 'detectedAt'
+              | 'status'
+              | 'employeeName'
+              | 'exceptionType') || undefined,
+          sortOrder: (req.query.sortOrder as 'asc' | 'desc') || 'asc',
         });
         return res.json({ data: result });
       }

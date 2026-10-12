@@ -198,7 +198,7 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Regularizatio
       expect(counters).toHaveProperty('rejectedToday');
 
       expect(Array.isArray(items)).toBe(true);
-      const found = items.find((i: any) => i.id === regId1);
+      const found = items.find((i: { id: string; requestType: string; requestedChange: string }) => i.id === regId1);
       expect(found).toBeDefined();
       expect(found.requestType).toBe('missing_out');
       expect(found.requestedChange).toContain('06:05 PM');
@@ -211,7 +211,7 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Regularizatio
 
       expect(res.status).toBe(200);
       const items = res.body.data;
-      items.forEach((item: any) => {
+      items.forEach((item: { approvalStatus: string; requestType: string }) => {
         expect(item.approvalStatus).toBe('under_review');
         expect(item.requestType).toBe('incorrect_time');
       });
@@ -299,7 +299,7 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Regularizatio
         .set(headers);
 
       expect(detail.body.data.assignedTo).toBe(reviewerUserId);
-      expect(detail.body.data.audits.some((a: any) => a.action === 'assigned')).toBe(true);
+      expect(detail.body.data.audits.some((a: { action: string }) => a.action === 'assigned')).toBe(true);
     });
 
     it('requests more information (awaiting_info)', async () => {
@@ -416,7 +416,7 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Regularizatio
       expect(res.status).toBe(200);
       expect(res.body.data).toHaveProperty('skipped');
       // regIdBoth is high-risk both_missing, requiring individual review
-      expect(res.body.data.skipped.some((s: any) => s.id === regIdBoth)).toBe(true);
+      expect(res.body.data.skipped.some((s: { id: string; reason?: string }) => s.id === regIdBoth)).toBe(true);
     });
   });
 

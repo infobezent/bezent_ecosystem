@@ -1,4 +1,4 @@
-import { eq, and, desc, asc, sql, gte, lte, or, ne, isNull, inArray } from 'drizzle-orm';
+import { eq, and, desc, asc, sql, gte, lte, or, ne, isNull, inArray, type SQL } from 'drizzle-orm';
 import { getDb } from '../../../../db/connection.js';
 import {
   employeeAttendance,
@@ -18,9 +18,6 @@ import {
   attendanceExceptionAudits,
   type EmployeeAttendance,
   type AttendancePunch,
-  type AttendancePunchAudit,
-  type AttendanceException,
-  type AttendanceExceptionAudit,
   type AttendanceOnDutyRequest,
   type NewAttendanceOnDutyRequest,
 } from '../../../../db/schema.js';
@@ -38,7 +35,6 @@ import type {
   PunchLogSummaryCounters,
   PunchEventDetail,
   UpdatePunchInvestigationInput,
-  RetryPunchProcessingInput,
   BulkPunchActionInput,
   RegularizationFilter,
   RegularizationItem,
@@ -47,7 +43,6 @@ import type {
   ExceptionType,
   ExceptionSeverity,
   ExceptionStatus,
-  ExceptionSource,
   ExceptionSummaryCounters,
   ExceptionFilter,
   AttendanceExceptionCaseItem,
@@ -278,7 +273,14 @@ export class AttendanceRepository {
       filterConditions.push(
         eq(
           attendancePunches.source,
-          filter.source as any,
+          filter.source as
+            | 'web'
+            | 'mobile'
+            | 'biometric'
+            | 'manual'
+            | 'api'
+            | 'kiosk'
+            | 'import',
         ),
       );
     }
@@ -286,18 +288,41 @@ export class AttendanceRepository {
       filterConditions.push(
         eq(
           attendancePunches.punchType,
-          filter.punchType as any,
+          filter.punchType as
+            | 'in'
+            | 'out'
+            | 'break_in'
+            | 'break_out'
+            | 'auto'
+            | 'unknown',
         ),
       );
     }
     if (filter.validationStatus && filter.validationStatus !== 'all') {
       filterConditions.push(
-        eq(attendancePunches.validationStatus, filter.validationStatus as any),
+        eq(
+          attendancePunches.validationStatus,
+          filter.validationStatus as
+            | 'pending'
+            | 'valid'
+            | 'duplicate'
+            | 'invalid'
+            | 'needs_review'
+            | 'unmatched',
+        ),
       );
     }
     if (filter.processingState && filter.processingState !== 'all') {
       filterConditions.push(
-        eq(attendancePunches.processingState, filter.processingState as any),
+        eq(
+          attendancePunches.processingState,
+          filter.processingState as
+            | 'received'
+            | 'processing'
+            | 'processed'
+            | 'failed'
+            | 'retry_pending',
+        ),
       );
     }
     if (filter.departmentId && filter.departmentId !== 'all') {
@@ -1670,7 +1695,13 @@ export class AttendanceRepository {
           workday: p.workday,
           exceptionType: pExType,
           severity: pSeverity,
-          source: (p.source as any) || 'biometric',
+          source:
+            p.source === 'mobile' ||
+            p.source === 'biometric' ||
+            p.source === 'kiosk' ||
+            p.source === 'web'
+              ? p.source
+              : 'system',
           sourceRecordType: 'punch_log',
           sourceRecordId: p.id,
           title: pTitle,
@@ -1714,7 +1745,7 @@ export class AttendanceRepository {
       // Continue even if scan encounters non-blocking error
     }
 
-    const filterConditions: any[] = [
+    const filterConditions: SQL[] = [
       eq(attendanceExceptions.tenantId, tenantId),
       eq(attendanceExceptions.companyId, companyId),
     ];
@@ -1725,29 +1756,48 @@ export class AttendanceRepository {
         inArray(attendanceExceptions.status, ['open', 'assigned', 'in_review', 'pending_action']),
       );
     } else if (filter.status !== 'all') {
-      filterConditions.push(eq(attendanceExceptions.status, filter.status as any));
+      filterConditions.push(eq(attendanceExceptions.status, filter.status as 'open' | 'assigned' | 'in_review' | 'pending_action' | 'resolved' | 'closed'));
     }
 
     // Severity filter
     if (filter.severity && filter.severity !== 'all') {
-      filterConditions.push(eq(attendanceExceptions.severity, filter.severity as any));
+      filterConditions.push(eq(attendanceExceptions.severity, filter.severity as 'low' | 'medium' | 'high' | 'critical'));
     }
 
     // Exception type filter
     if (filter.exceptionType && filter.exceptionType !== 'all') {
-      filterConditions.push(eq(attendanceExceptions.exceptionType, filter.exceptionType as any));
+      filterConditions.push(eq(attendanceExceptions.exceptionType, filter.exceptionType as ExceptionType));
     }
 
     // Source filter
     if (filter.source && filter.source !== 'all') {
-      filterConditions.push(eq(attendanceExceptions.source, filter.source as any));
+      filterConditions.push(
+        eq(
+          attendanceExceptions.source,
+          filter.source as
+            | 'biometric'
+            | 'web'
+            | 'mobile'
+            | 'kiosk'
+            | 'import'
+            | 'engine'
+            | 'leave_system'
+            | 'od_system'
+            | 'regularization_system'
+            | 'system',
+        ),
+      );
     }
 
     // Assignment filter
     if (filter.assignment === 'unassigned') {
-      filterConditions.push(
-        or(isNull(attendanceExceptions.assignedTo), eq(attendanceExceptions.assignedTo, '')),
+      const unassignedCond = or(
+        isNull(attendanceExceptions.assignedTo),
+        eq(attendanceExceptions.assignedTo, ''),
       );
+      if (unassignedCond) {
+        filterConditions.push(unassignedCond);
+      }
     } else if (filter.assignedTo && filter.assignedTo !== 'all') {
       filterConditions.push(eq(attendanceExceptions.assignedTo, filter.assignedTo));
     }
@@ -1784,15 +1834,16 @@ export class AttendanceRepository {
     // Search filter
     if (filter.search && filter.search.trim()) {
       const term = `%${filter.search.trim()}%`;
-      filterConditions.push(
-        or(
-          sql`${employees.firstName} LIKE ${term}`,
-          sql`${employees.lastName} LIKE ${term}`,
-          sql`${employees.employeeNumber} LIKE ${term}`,
-          sql`${attendanceExceptions.title} LIKE ${term}`,
-          sql`${attendanceExceptions.id} LIKE ${term}`,
-        ),
+      const searchCond = or(
+        sql`${employees.firstName} LIKE ${term}`,
+        sql`${employees.lastName} LIKE ${term}`,
+        sql`${employees.employeeNumber} LIKE ${term}`,
+        sql`${attendanceExceptions.title} LIKE ${term}`,
+        sql`${attendanceExceptions.id} LIKE ${term}`,
       );
+      if (searchCond) {
+        filterConditions.push(searchCond);
+      }
     }
 
     // Compute the 6 Real Summary Counters from database
@@ -2005,7 +2056,7 @@ export class AttendanceRepository {
       source: string;
       validationStatus?: string;
     }> = [];
-    let evidenceDailyLog: any = null;
+    let evidenceDailyLog: ExceptionCaseDetail['evidence']['dailyLog'] = null;
 
     if (row.employeeId && row.workday) {
       const punches = await db
@@ -2039,7 +2090,21 @@ export class AttendanceRepository {
             eq(employeeAttendance.date, row.workday),
           ),
         );
-      if (daily) evidenceDailyLog = daily;
+      if (daily) {
+        evidenceDailyLog = {
+          id: daily.id,
+          status: daily.status,
+          processingState: daily.processingState,
+          checkInTime: daily.checkInTime,
+          checkOutTime: daily.checkOutTime,
+          workedMinutes: daily.workedMinutes,
+          isLate: daily.isLate,
+          lateMinutes: daily.lateMinutes,
+          isEarlyExit: daily.isEarlyExit,
+          earlyMinutes: daily.earlyMinutes,
+          isMissingPunch: daily.isMissingPunch,
+        };
+      }
     }
 
     // Fetch Case Audit Trail
@@ -2185,7 +2250,7 @@ export class AttendanceRepository {
       updates.resolutionType = input.resolutionType;
     }
 
-    let auditAction: any = 'status_transitioned';
+    let auditAction: 'status_transitioned' | 'resolved' | 'closed' | 'pending_action_marked' | 'reopened' = 'status_transitioned';
     if (input.status === 'resolved') {
       updates.resolvedAt = new Date();
       updates.resolvedByUserId = actorUserId;
@@ -2450,20 +2515,28 @@ export class AttendanceRepository {
       limit: 100,
     });
 
-    return res.items.map((i) => ({
-      id: i.id,
-      employeeId: i.employeeId ?? '',
-      employeeCode: i.employeeCode,
-      employeeName: i.employeeName,
-      departmentName: i.departmentName ?? null,
-      date: i.workday ?? new Date(i.detectedAt).toISOString().slice(0, 10),
-      checkInTime: null,
-      checkOutTime: null,
-      exceptionType: (i.exceptionType as any) || 'missing_punch',
-      details: i.description || i.title,
-      status: i.status,
-      isRegularized: i.status === 'resolved',
-    }));
+    return res.items.map((i) => {
+      let exType: 'missing_punch' | 'late_arrival' | 'early_exit' | 'short_hours' =
+        'missing_punch';
+      if (i.exceptionType === 'late_arrival') exType = 'late_arrival';
+      else if (i.exceptionType === 'early_exit') exType = 'early_exit';
+      else if (i.exceptionType === 'insufficient_hours') exType = 'short_hours';
+
+      return {
+        id: i.id,
+        employeeId: i.employeeId ?? '',
+        employeeCode: i.employeeCode,
+        employeeName: i.employeeName,
+        departmentName: i.departmentName ?? null,
+        date: i.workday ?? new Date(i.detectedAt).toISOString().slice(0, 10),
+        checkInTime: null,
+        checkOutTime: null,
+        exceptionType: exType,
+        details: i.description || i.title,
+        status: i.status,
+        isRegularized: i.status === 'resolved',
+      };
+    });
   }
 
   async getRegularizationRequests(

@@ -456,7 +456,9 @@ export class AttendanceService {
         punchTimeStr,
         item.punchType.toUpperCase(),
         item.source,
-        item.workLocation || (item.deviceMetadata as any)?.deviceId || '-',
+        item.workLocation ||
+        (item.deviceMetadata as { deviceId?: string } | null)?.deviceId ||
+        '-',
         item.workday || '-',
         item.validationStatus,
         item.processingState,

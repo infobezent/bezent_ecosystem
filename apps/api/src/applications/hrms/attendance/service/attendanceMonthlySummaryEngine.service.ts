@@ -80,7 +80,7 @@ export class AttendanceMonthlySummaryEngineService {
     let leaveDays = 0;
     let onDutyDays = 0;
     let weeklyOffDays = 0;
-    let holidayDays = 0;
+    const holidayDays = 0;
     let actualWorkedMinutes = 0;
     let policyCreditedMinutes = 0;
     let lateOccurrences = 0;

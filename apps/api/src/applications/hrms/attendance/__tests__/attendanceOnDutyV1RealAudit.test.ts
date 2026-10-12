@@ -175,8 +175,8 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance On-Duty V1.0 
       // Invariant: raw punch timestamps are not fabricated
       expect(att!.checkInTime).toBeNull();
       expect(att!.checkOutTime).toBeNull();
-      expect((att!.calculationMetadata as any)?.isOdCredit).toBe(true);
-      expect((att!.calculationMetadata as any)?.odRequestId).toBe(odId);
+      expect((att!.calculationMetadata as { isOdCredit?: boolean; odRequestId?: string })?.isOdCredit).toBe(true);
+      expect((att!.calculationMetadata as { isOdCredit?: boolean; odRequestId?: string })?.odRequestId).toBe(odId);
     });
 
     it('correctly credits hourly OD duration (does not inflate to 8 hours)', async () => {
@@ -606,8 +606,8 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance On-Duty V1.0 
       const preview = previewRes.body.data;
       expect(preview.totalSelected).toBe(2);
 
-      const itemA = preview.items.find((i: any) => i.id === idA);
-      const itemB = preview.items.find((i: any) => i.id === idB);
+      const itemA = preview.items.find((i: { id: string; isEligible: boolean; reason?: string }) => i.id === idA);
+      const itemB = preview.items.find((i: { id: string; isEligible: boolean; reason?: string }) => i.id === idB);
 
       expect(itemA.isEligible).toBe(true);
       expect(itemB.isEligible).toBe(false);
@@ -628,7 +628,7 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance On-Duty V1.0 
 
       // Item A succeeds, Item B is skipped because it requires individual review
       expect(result.succeeded).toContain(idA);
-      expect(result.skipped.some((s: any) => s.id === idB)).toBe(true);
+      expect(result.skipped.some((s: { id: string; reason?: string }) => s.id === idB)).toBe(true);
     });
   });
 

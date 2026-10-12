@@ -146,10 +146,20 @@ export function PunchLogsPage() {
     Promise.allSettled([fetchDepartments(), fetchWorkLocations()]).then(([deptRes, locRes]) => {
       if (!mounted) return;
       if (deptRes.status === 'fulfilled' && Array.isArray(deptRes.value)) {
-        setDepartments(deptRes.value.map((d: any) => ({ id: d.id, name: d.name })));
+        setDepartments(
+          deptRes.value.map((d: { id: string; name: string }) => ({
+            id: d.id,
+            name: d.name,
+          })),
+        );
       }
       if (locRes.status === 'fulfilled' && Array.isArray(locRes.value)) {
-        setWorkLocations(locRes.value.map((l: any) => ({ id: l.id, name: l.name })));
+        setWorkLocations(
+          locRes.value.map((l: { id: string; name: string }) => ({
+            id: l.id,
+            name: l.name,
+          })),
+        );
       }
     });
     return () => {
@@ -463,7 +473,16 @@ export function PunchLogsPage() {
             {/* Date Preset Selector */}
             <Select
               value={datePreset}
-              onChange={(e) => applyDatePreset(e.target.value as any)}
+              onChange={(e) =>
+                applyDatePreset(
+                  e.target.value as
+                    | 'today'
+                    | 'yesterday'
+                    | 'last_7_days'
+                    | 'this_month'
+                    | 'custom',
+                )
+              }
               aria-label="Date Range Preset"
             >
               <option value="today">Today</option>
@@ -674,7 +693,9 @@ export function PunchLogsPage() {
                     label="Date Interpretation"
                     value={dateInterpretation}
                     onChange={(e) => {
-                      setDateInterpretation(e.target.value as any);
+                      setDateInterpretation(
+                        e.target.value as 'event_timestamp' | 'workday',
+                      );
                       setPage(1);
                     }}
                   >
@@ -818,7 +839,7 @@ export function PunchLogsPage() {
               <TableHead>
                 <TableRow>
                   {/* Row Selection Checkbox */}
-                  <TableHeaderCell style={{ width: '40px' } as any}>
+                  <TableHeaderCell className="bezent-table-col--select">
                     <Checkbox
                       checked={selectedIds.size === items.length && items.length > 0}
                       onChange={handleToggleSelectAll}
@@ -844,7 +865,7 @@ export function PunchLogsPage() {
                   {/* 9. Linked Attendance */}
                   <TableHeaderCell>Linked Attendance</TableHeaderCell>
                   {/* 10. Actions */}
-                  <TableHeaderCell style={{ width: '50px', textAlign: 'center' } as any}>
+                  <TableHeaderCell className="bezent-table-col--actions bezent-table-col--sticky-right">
                     Actions
                   </TableHeaderCell>
                 </TableRow>
@@ -926,7 +947,10 @@ export function PunchLogsPage() {
                       {/* 5. Device / Location */}
                       <TableCell>
                         <span className="bezent-table-meta-title">
-                          {punch.workLocation || (punch.deviceMetadata as any)?.deviceId || '-'}
+                          {punch.workLocation ||
+                            (punch.deviceMetadata as { deviceId?: string } | null)
+                              ?.deviceId ||
+                            '-'}
                         </span>
                       </TableCell>
 
@@ -1077,7 +1101,7 @@ export function PunchLogsPage() {
               >
                 Previous
               </Button>
-              <span className="bezent-table-meta-title" style={{ padding: '0 8px' } as any}>
+              <span className="bezent-table-meta-title">
                 Page {page} of {totalPages}
               </span>
               <Button
@@ -1124,7 +1148,11 @@ export function PunchLogsPage() {
             <Tabs
               items={drawerTabs}
               activeId={drawerTab}
-              onChange={(id) => setDrawerTab(id as any)}
+              onChange={(id) =>
+                setDrawerTab(
+                  id as 'overview' | 'timeline' | 'linked' | 'history',
+                )
+              }
             />
           }
         >
@@ -1197,9 +1225,9 @@ export function PunchLogsPage() {
                       {drawerDetail.processingError && (
                         <Inline justify="between">
                           <span className="bezent-card__desc">Processing Error:</span>
-                          <span className="bezent-card__desc" style={{ color: 'var(--status-danger-text)' } as any}>
+                          <Badge variant="danger">
                             {drawerDetail.processingError}
-                          </span>
+                          </Badge>
                         </Inline>
                       )}
                       <Inline justify="between">
@@ -1348,7 +1376,16 @@ export function PunchLogsPage() {
               <Select
                 label="Investigation Status"
                 value={investigationStatus}
-                onChange={(e) => setInvestigationStatus(e.target.value as any)}
+                onChange={(e) =>
+                  setInvestigationStatus(
+                    e.target.value as
+                      | 'open'
+                      | 'assigned'
+                      | 'in_review'
+                      | 'resolved'
+                      | 'closed',
+                  )
+                }
               >
                 <option value="open">Open</option>
                 <option value="assigned">Assigned</option>
@@ -1419,7 +1456,9 @@ export function PunchLogsPage() {
               <Select
                 label="Export Scope"
                 value={exportScope}
-                onChange={(e) => setExportScope(e.target.value as any)}
+                onChange={(e) =>
+                  setExportScope(e.target.value as 'all' | 'selected')
+                }
               >
                 <option value="all">All Filtered Events ({totalCount} events)</option>
                 {selectedIds.size > 0 && (

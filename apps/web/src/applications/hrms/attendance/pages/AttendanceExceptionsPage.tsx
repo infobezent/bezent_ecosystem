@@ -133,7 +133,7 @@ export function AttendanceExceptionsPage() {
   // Pagination & Sorting
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const [sortBy, setSortBy] = useState<string>('severity');
+  const [sortBy, setSortBy] = useState<ExceptionFilter['sortBy']>('severity');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   // Data State
@@ -247,7 +247,7 @@ export function AttendanceExceptionsPage() {
         search: debouncedSearch || undefined,
         page,
         limit: pageSize,
-        sortBy: sortBy as any,
+        sortBy,
         sortOrder,
       };
 
@@ -583,7 +583,16 @@ export function AttendanceExceptionsPage() {
           <Inline gap="sm" align="center">
             <Select
               value={datePreset}
-              onChange={(e) => handleDatePresetChange(e.target.value as any)}
+              onChange={(e) =>
+                handleDatePresetChange(
+                  e.target.value as
+                    | 'today'
+                    | 'yesterday'
+                    | 'last7'
+                    | 'this_month'
+                    | 'custom',
+                )
+              }
               aria-label="Date preset selector"
             >
               <option value="today">Today</option>
@@ -795,7 +804,9 @@ export function AttendanceExceptionsPage() {
                     label="Date Interpretation"
                     value={dateInterpretation}
                     onChange={(e) => {
-                      setDateInterpretation(e.target.value as any);
+                      setDateInterpretation(
+                        e.target.value as 'workday' | 'detected_at',
+                      );
                       setPage(1);
                     }}
                   >
@@ -1090,7 +1101,11 @@ export function AttendanceExceptionsPage() {
             <Tabs
               items={drawerTabs}
               activeId={drawerTab}
-              onChange={(id) => setDrawerTab(id as any)}
+              onChange={(id) =>
+                setDrawerTab(
+                  id as 'overview' | 'evidence' | 'actions' | 'history',
+                )
+              }
             />
           }
         >
@@ -1451,7 +1466,7 @@ export function AttendanceExceptionsPage() {
             <Select
               label="New Severity Level"
               value={newSeverity}
-              onChange={(e) => setNewSeverity(e.target.value as any)}
+              onChange={(e) => setNewSeverity(e.target.value as ExceptionSeverity)}
             >
               <option value="critical">Critical</option>
               <option value="high">High</option>
@@ -1517,7 +1532,9 @@ export function AttendanceExceptionsPage() {
             <Select
               label="Export Universe"
               value={exportScope}
-              onChange={(e) => setExportScope(e.target.value as any)}
+              onChange={(e) =>
+                setExportScope(e.target.value as 'filtered' | 'selected')
+              }
             >
               <option value="filtered">All Filtered Cases ({totalCount} cases)</option>
               {selectedIds.size > 0 && (

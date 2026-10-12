@@ -9,7 +9,18 @@ import {
   AttendanceMonthlySummaryService,
 } from '../service/attendanceMonthlySummary.service.js';
 import type { AttendanceMonthlySummaryRepository } from '../repository/attendanceMonthlySummary.repository.js';
-import type { AttendanceMonthlySummary, NewAttendanceMonthlySummary } from '../../../../db/schema.js';
+import type {
+  AttendanceMonthlySummary,
+  NewAttendanceMonthlySummary,
+  AttendanceMonthlyReview,
+  NewAttendanceMonthlyReview,
+  AttendanceMonthlyAudit,
+  NewAttendanceMonthlyAudit,
+  EmployeeAttendance,
+  EmployeeLeaveRequest,
+  AttendanceOnDutyWorkdayRecord,
+} from '../../../../db/schema.js';
+import type { MonthlySummaryRow } from '../types/attendanceMonthlySummary.types.js';
 
 describe('BEZENT HRMS — Attendance → Monthly Summary V1.0 Test Suite', () => {
   const tenantId = 'tenant_test_01';
@@ -25,8 +36,8 @@ describe('BEZENT HRMS — Attendance → Monthly Summary V1.0 Test Suite', () =>
   beforeEach(() => {
     // In-memory mock repository for fast, deterministic unit & domain tests
     const summariesMap = new Map<string, AttendanceMonthlySummary>();
-    const reviewsList: any[] = [];
-    const auditsList: any[] = [];
+    const reviewsList: AttendanceMonthlyReview[] = [];
+    const auditsList: AttendanceMonthlyAudit[] = [];
 
     mockRepo = {
       getActiveEmployeesForMonth: async () => [
@@ -82,7 +93,7 @@ describe('BEZENT HRMS — Attendance → Monthly Summary V1.0 Test Suite', () =>
           lastCalculatedAt: found.lastCalculatedAt.toISOString(),
           createdAt: found.createdAt.toISOString(),
           updatedAt: found.updatedAt.toISOString(),
-        } as any;
+        } as unknown as MonthlySummaryRow;
       },
       upsertSummary: async (data: NewAttendanceMonthlySummary) => {
         const full: AttendanceMonthlySummary = {
@@ -110,15 +121,15 @@ describe('BEZENT HRMS — Attendance → Monthly Summary V1.0 Test Suite', () =>
           }
         }
       },
-      createReview: async (review: any) => {
-        reviewsList.push(review);
+      createReview: async (review: NewAttendanceMonthlyReview) => {
+        reviewsList.push(review as unknown as AttendanceMonthlyReview);
       },
       getReviewHistory: async (summaryId: string) => {
         return reviewsList.filter((r) => r.monthlySummaryId === summaryId);
       },
       createReadinessEvaluation: async () => {},
-      createAudit: async (audit: any) => {
-        auditsList.push(audit);
+      createAudit: async (audit: NewAttendanceMonthlyAudit) => {
+        auditsList.push(audit as unknown as AttendanceMonthlyAudit);
       },
       getAuditHistory: async () => auditsList,
       sendNotification: async () => {},
@@ -185,7 +196,7 @@ describe('BEZENT HRMS — Attendance → Monthly Summary V1.0 Test Suite', () =>
             isLocked: false,
             createdAt: new Date(),
             updatedAt: new Date(),
-          } as any,
+          } as unknown as EmployeeAttendance,
         ],
         odWorkdays: [],
         leaveRequests: [
@@ -202,7 +213,7 @@ describe('BEZENT HRMS — Attendance → Monthly Summary V1.0 Test Suite', () =>
             status: 'approved',
             createdAt: new Date(),
             updatedAt: new Date(),
-          } as any,
+          } as unknown as EmployeeLeaveRequest,
         ],
         regularizations: [],
         exceptions: [],
@@ -252,7 +263,7 @@ describe('BEZENT HRMS — Attendance → Monthly Summary V1.0 Test Suite', () =>
             isLocked: false,
             createdAt: new Date(),
             updatedAt: new Date(),
-          } as any,
+          } as unknown as EmployeeAttendance,
         ],
         odWorkdays: [
           {
@@ -268,7 +279,7 @@ describe('BEZENT HRMS — Attendance → Monthly Summary V1.0 Test Suite', () =>
             processingStatus: 'applied',
             createdAt: new Date(),
             updatedAt: new Date(),
-          } as any,
+          } as unknown as AttendanceOnDutyWorkdayRecord,
         ],
         leaveRequests: [],
         regularizations: [],
@@ -344,7 +355,7 @@ describe('BEZENT HRMS — Attendance → Monthly Summary V1.0 Test Suite', () =>
             isLocked: false,
             createdAt: new Date(),
             updatedAt: new Date(),
-          } as any,
+          } as unknown as EmployeeAttendance,
         ],
         odWorkdays: [],
         leaveRequests: [],

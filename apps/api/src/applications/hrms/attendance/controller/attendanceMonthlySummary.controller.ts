@@ -112,7 +112,7 @@ export class AttendanceMonthlySummaryController {
       const { tenantId, companyId } = req.companyContext!;
       const id = req.params.id as string;
       const { reviewerId } = req.body;
-      const actorUserId = (req.user as any)?.id;
+      const actorUserId = (req.user as unknown as { id?: string })?.id;
 
       if (!reviewerId) {
         throw new BadRequestError('reviewerId is required');
@@ -135,7 +135,7 @@ export class AttendanceMonthlySummaryController {
     try {
       const { tenantId, companyId } = req.companyContext!;
       const id = req.params.id as string;
-      const actorUserId = (req.user as any)?.id || 'system';
+      const actorUserId = (req.user as unknown as { id?: string })?.id || 'system';
 
       const data = await this.service.startReview(tenantId, companyId, id, actorUserId);
       res.json({ data });
@@ -149,7 +149,7 @@ export class AttendanceMonthlySummaryController {
       const { tenantId, companyId } = req.companyContext!;
       const id = req.params.id as string;
       const { notes } = req.body;
-      const actorUserId = (req.user as any)?.id || 'system';
+      const actorUserId = (req.user as unknown as { id?: string })?.id || 'system';
 
       const data = await this.service.requestCorrection(
         tenantId,
@@ -169,7 +169,7 @@ export class AttendanceMonthlySummaryController {
       const { tenantId, companyId } = req.companyContext!;
       const id = req.params.id as string;
       const { notes } = req.body;
-      const actorUserId = (req.user as any)?.id || 'system';
+      const actorUserId = (req.user as unknown as { id?: string })?.id || 'system';
 
       const data = await this.service.markReviewed(tenantId, companyId, id, notes, actorUserId);
       res.json({ data });
@@ -183,7 +183,7 @@ export class AttendanceMonthlySummaryController {
       const { tenantId, companyId } = req.companyContext!;
       const id = req.params.id as string;
       const { reason } = req.body;
-      const actorUserId = (req.user as any)?.id || 'system';
+      const actorUserId = (req.user as unknown as { id?: string })?.id || 'system';
 
       const data = await this.service.reopenReview(tenantId, companyId, id, reason, actorUserId);
       res.json({ data });
@@ -196,7 +196,7 @@ export class AttendanceMonthlySummaryController {
     try {
       const { tenantId, companyId } = req.companyContext!;
       const id = req.params.id as string;
-      const actorUserId = (req.user as any)?.id;
+      const actorUserId = (req.user as unknown as { id?: string })?.id;
 
       const data = await this.service.recalculateSummary(
         tenantId,
@@ -229,7 +229,7 @@ export class AttendanceMonthlySummaryController {
   bulkExecute = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { tenantId, companyId } = req.companyContext!;
-      const actorUserId = (req.user as any)?.id || 'system';
+      const actorUserId = (req.user as unknown as { id?: string })?.id || 'system';
       const data = await this.service.bulkExecute(tenantId, companyId, req.body, actorUserId);
       res.json({ data });
     } catch (err) {
@@ -240,7 +240,7 @@ export class AttendanceMonthlySummaryController {
   exportSummaries = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { tenantId, companyId } = req.companyContext!;
-      const actorUserId = (req.user as any)?.id || 'system';
+      const actorUserId = (req.user as unknown as { id?: string })?.id || 'system';
       const payload = req.method === 'POST' ? req.body : req.query;
 
       const month =
