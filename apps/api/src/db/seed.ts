@@ -1308,7 +1308,7 @@ export async function seedDatabase() {
         allowHalfDay: true,
         allowHourly: true,
         allowBackdated: true,
-        maxBackdatedDays: 3,
+        maxBackdatedDays: 30,
         requiresApproval: true,
         countAsPresent: true,
       },

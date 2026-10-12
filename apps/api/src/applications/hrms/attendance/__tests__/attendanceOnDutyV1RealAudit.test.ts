@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { and, eq, inArray, like } from 'drizzle-orm';
 import { createApp } from '../../../../app/server/createApp.js';
@@ -11,6 +11,7 @@ import {
   attendanceExceptions,
   employeeNotifications,
   attendancePeriods,
+  attendancePolicies,
   employees,
   users,
 } from '../../../../db/schema.js';
@@ -53,6 +54,40 @@ describe.skipIf(!isDatabaseConfigured)(
       await db
         .delete(employeeNotifications)
         .where(inArray(employeeNotifications.employeeId, [empId1, empId2]));
+
+      // Ensure company attendance policy odRules permits 30 days backdated submission for acceptance audit
+      await db
+        .update(attendancePolicies)
+        .set({
+          odRules: {
+            enabled: true,
+            odTypes: [
+              'Client Visit',
+              'Business Trip',
+              'Training / Conference',
+              'Field Assignment',
+              'client_visit',
+              'site_visit',
+              'training',
+              'travel',
+              'branch_visit',
+            ],
+            allowHalfDay: true,
+            allowHourly: true,
+            allowBackdated: true,
+            maxBackdatedDays: 30,
+            backdatedAllowedDays: 30,
+            requiresApproval: true,
+            countAsPresent: true,
+          },
+        })
+        .where(
+          and(
+            eq(attendancePolicies.tenantId, tenantId),
+            eq(attendancePolicies.companyId, companyId),
+            eq(attendancePolicies.scope, 'company'),
+          ),
+        );
 
       // Resolve real policy thresholds from development DB
       const effectivePolicy = await attendancePolicyService.getEffectivePolicy(tenantId, companyId);
@@ -825,6 +860,31 @@ describe.skipIf(!isDatabaseConfigured)(
         expect(exportRes.text).toContain('Request Number,Employee Code');
         expect(exportRes.text).toContain(reqNum);
       });
+    });
+
+    afterAll(async () => {
+      const db = getDb();
+      await db
+        .delete(attendanceOnDutyRequests)
+        .where(inArray(attendanceOnDutyRequests.employeeId, [empId1, empId2]));
+      await db
+        .delete(employeeAttendance)
+        .where(inArray(employeeAttendance.employeeId, [empId1, empId2]));
+      await db
+        .delete(attendanceExceptions)
+        .where(inArray(attendanceExceptions.employeeId, [empId1, empId2]));
+      await db
+        .delete(employeeNotifications)
+        .where(inArray(employeeNotifications.employeeId, [empId1, empId2]));
+      await db
+        .delete(attendancePeriods)
+        .where(
+          and(
+            eq(attendancePeriods.tenantId, tenantId),
+            eq(attendancePeriods.companyId, companyId),
+            like(attendancePeriods.id, 'prd_lock_%'),
+          ),
+        );
     });
   },
 );
