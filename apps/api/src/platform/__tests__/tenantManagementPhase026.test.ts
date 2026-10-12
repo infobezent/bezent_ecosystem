@@ -26,7 +26,7 @@ import { signInForTest } from './support/testSession.js';
 import { hashPassword, generateSurrogateId } from '../auth/security.js';
 import { backgroundWorkerRunner } from '../workers/backgroundWorker.runner.js';
 import { moduleService } from '../modules/service/module.service.js';
-import { tenantService } from '../tenants/service/tenant.service.js';
+import type { TenantRecord } from '../tenants/types/tenant.types.js';
 import { transactionalOutboxService } from '../outbox/service/transactionalOutbox.service.js';
 
 describe('BEZENT Phase 02.6 — Backend Remediation, Tenant Orchestration & Runtime Integration', () => {
@@ -50,24 +50,56 @@ describe('BEZENT Phase 02.6 — Backend Remediation, Tenant Orchestration & Runt
     const { hash, salt } = hashPassword('Phase026!Secure123');
 
     // Clean up entities from potential previous runs
-    await db.delete(roleAssignments).where(inArray(roleAssignments.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
-    await db.delete(memberships).where(inArray(memberships.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
-    await db.delete(tenantAdmins).where(inArray(tenantAdmins.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
-    await db.delete(invitations).where(inArray(invitations.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
-    await db.delete(tenantSubscriptions).where(inArray(tenantSubscriptions.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
-    await db.delete(tenantModules).where(inArray(tenantModules.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
-    await db.delete(provisioningJobs).where(inArray(provisioningJobs.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
-    await db.delete(transactionalOutbox).where(inArray(transactionalOutbox.aggregateId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
-    await db.delete(auditLogs).where(inArray(auditLogs.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
-    await db.delete(companies).where(inArray(companies.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
-    await db.delete(tenantDetails).where(inArray(tenantDetails.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
-    await db.delete(tenants).where(inArray(tenants.id, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
+    await db
+      .delete(roleAssignments)
+      .where(inArray(roleAssignments.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
+    await db
+      .delete(memberships)
+      .where(inArray(memberships.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
+    await db
+      .delete(tenantAdmins)
+      .where(inArray(tenantAdmins.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
+    await db
+      .delete(invitations)
+      .where(inArray(invitations.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
+    await db
+      .delete(tenantSubscriptions)
+      .where(
+        inArray(tenantSubscriptions.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']),
+      );
+    await db
+      .delete(tenantModules)
+      .where(inArray(tenantModules.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
+    await db
+      .delete(provisioningJobs)
+      .where(inArray(provisioningJobs.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
+    await db
+      .delete(transactionalOutbox)
+      .where(
+        inArray(transactionalOutbox.aggregateId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']),
+      );
+    await db
+      .delete(auditLogs)
+      .where(inArray(auditLogs.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
+    await db
+      .delete(companies)
+      .where(inArray(companies.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
+    await db
+      .delete(tenantDetails)
+      .where(inArray(tenantDetails.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
+    await db
+      .delete(tenants)
+      .where(inArray(tenants.id, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
 
     await db.delete(planPrices).where(inArray(planPrices.planId, [planHrmsId, planCrmId]));
-    await db.delete(planEntitlements).where(inArray(planEntitlements.planId, [planHrmsId, planCrmId]));
+    await db
+      .delete(planEntitlements)
+      .where(inArray(planEntitlements.planId, [planHrmsId, planCrmId]));
     await db.delete(plans).where(inArray(plans.id, [planHrmsId, planCrmId]));
 
-    await db.delete(users).where(inArray(users.id, [superAdminId, normalUserId, 'usr_p26_invited_admin']));
+    await db
+      .delete(users)
+      .where(inArray(users.id, [superAdminId, normalUserId, 'usr_p26_invited_admin']));
 
     // Seed test users
     await db.insert(users).values({
@@ -154,24 +186,56 @@ describe('BEZENT Phase 02.6 — Backend Remediation, Tenant Orchestration & Runt
   afterAll(async () => {
     if (!isDatabaseConfigured) return;
     const db = getDb();
-    await db.delete(roleAssignments).where(inArray(roleAssignments.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
-    await db.delete(memberships).where(inArray(memberships.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
-    await db.delete(tenantAdmins).where(inArray(tenantAdmins.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
-    await db.delete(invitations).where(inArray(invitations.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
-    await db.delete(tenantSubscriptions).where(inArray(tenantSubscriptions.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
-    await db.delete(tenantModules).where(inArray(tenantModules.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
-    await db.delete(provisioningJobs).where(inArray(provisioningJobs.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
-    await db.delete(transactionalOutbox).where(inArray(transactionalOutbox.aggregateId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
-    await db.delete(auditLogs).where(inArray(auditLogs.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
-    await db.delete(companies).where(inArray(companies.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
-    await db.delete(tenantDetails).where(inArray(tenantDetails.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
-    await db.delete(tenants).where(inArray(tenants.id, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
+    await db
+      .delete(roleAssignments)
+      .where(inArray(roleAssignments.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
+    await db
+      .delete(memberships)
+      .where(inArray(memberships.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
+    await db
+      .delete(tenantAdmins)
+      .where(inArray(tenantAdmins.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
+    await db
+      .delete(invitations)
+      .where(inArray(invitations.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
+    await db
+      .delete(tenantSubscriptions)
+      .where(
+        inArray(tenantSubscriptions.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']),
+      );
+    await db
+      .delete(tenantModules)
+      .where(inArray(tenantModules.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
+    await db
+      .delete(provisioningJobs)
+      .where(inArray(provisioningJobs.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
+    await db
+      .delete(transactionalOutbox)
+      .where(
+        inArray(transactionalOutbox.aggregateId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']),
+      );
+    await db
+      .delete(auditLogs)
+      .where(inArray(auditLogs.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
+    await db
+      .delete(companies)
+      .where(inArray(companies.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
+    await db
+      .delete(tenantDetails)
+      .where(inArray(tenantDetails.tenantId, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
+    await db
+      .delete(tenants)
+      .where(inArray(tenants.id, [testTenantId, 'tnt_p26_legacy', 'tnt_p26_crm']));
 
     await db.delete(planPrices).where(inArray(planPrices.planId, [planHrmsId, planCrmId]));
-    await db.delete(planEntitlements).where(inArray(planEntitlements.planId, [planHrmsId, planCrmId]));
+    await db
+      .delete(planEntitlements)
+      .where(inArray(planEntitlements.planId, [planHrmsId, planCrmId]));
     await db.delete(plans).where(inArray(plans.id, [planHrmsId, planCrmId]));
 
-    await db.delete(users).where(inArray(users.id, [superAdminId, normalUserId, 'usr_p26_invited_admin']));
+    await db
+      .delete(users)
+      .where(inArray(users.id, [superAdminId, normalUserId, 'usr_p26_invited_admin']));
   });
 
   describe('Slice A — Atomic Create Tenant Orchestrator (P0-1)', () => {
@@ -276,20 +340,29 @@ describe('BEZENT Phase 02.6 — Backend Remediation, Tenant Orchestration & Runt
       expect(c?.name).toBe('Acme Apex Corporation');
 
       // Verify Token is HASHED in DB (not plaintext)
-      const [inv] = await db.select().from(invitations).where(eq(invitations.tenantId, testTenantId));
+      const [inv] = await db
+        .select()
+        .from(invitations)
+        .where(eq(invitations.tenantId, testTenantId));
       expect(inv).toBeDefined();
       expect(inv?.token).not.toBe(rawInvitationToken);
       const computedHash = crypto.createHash('sha256').update(rawInvitationToken).digest('hex');
       expect(inv?.token).toBe(computedHash);
 
       // Verify Transactional Outbox Event created
-      const [outboxMsg] = await db.select().from(transactionalOutbox).where(eq(transactionalOutbox.aggregateId, testTenantId));
+      const [outboxMsg] = await db
+        .select()
+        .from(transactionalOutbox)
+        .where(eq(transactionalOutbox.aggregateId, testTenantId));
       expect(outboxMsg).toBeDefined();
       expect(outboxMsg?.eventType).toBe('tenant.invitation.issued');
       expect(outboxMsg?.status).toBe('pending');
 
       // Verify Provisioning Job created
-      const [pJob] = await db.select().from(provisioningJobs).where(eq(provisioningJobs.tenantId, testTenantId));
+      const [pJob] = await db
+        .select()
+        .from(provisioningJobs)
+        .where(eq(provisioningJobs.tenantId, testTenantId));
       expect(pJob).toBeDefined();
       expect(pJob?.status).toBe('pending');
       expect(pJob?.idempotencyKey).toBe(idempotencyKey);
@@ -455,7 +528,12 @@ describe('BEZENT Phase 02.6 — Backend Remediation, Tenant Orchestration & Runt
       const [existingMsg] = await db
         .select()
         .from(transactionalOutbox)
-        .where(and(eq(transactionalOutbox.aggregateId, testTenantId), eq(transactionalOutbox.status, 'pending')));
+        .where(
+          and(
+            eq(transactionalOutbox.aggregateId, testTenantId),
+            eq(transactionalOutbox.status, 'pending'),
+          ),
+        );
 
       if (!existingMsg) {
         await transactionalOutboxService.publishEvent({
@@ -532,7 +610,7 @@ describe('BEZENT Phase 02.6 — Backend Remediation, Tenant Orchestration & Runt
 
       expect(res.status).toBe(200);
       expect(res.body.data.items.length).toBeGreaterThanOrEqual(1);
-      const found = res.body.data.items.find((i: any) => i.id === testTenantId);
+      const found = res.body.data.items.find((i: TenantRecord) => i.id === testTenantId);
       expect(found).toBeDefined();
       expect(found.primaryAdmin?.email).toBe('jane.doe@acmeapex.com');
       expect(found.subscriptionSummary).toBeDefined();

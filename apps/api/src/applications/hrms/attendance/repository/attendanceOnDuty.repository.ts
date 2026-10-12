@@ -6,7 +6,6 @@ import {
   attendanceOnDutyAudits,
   employees,
   departments,
-  locations,
   users,
   employeeLeaveRequests,
   attendanceRegularizations,

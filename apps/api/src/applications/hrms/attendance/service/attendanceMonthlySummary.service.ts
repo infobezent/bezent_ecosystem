@@ -397,7 +397,7 @@ export class AttendanceMonthlySummaryService {
     const updatedSummary = await this.repo.getSummaryById(tenantId, companyId, id);
     await this.readiness.evaluateAndPersist(
       {
-        ...summary,
+        ...(updatedSummary || summary),
         reviewState: 'reviewed',
         reviewedVersion: signOffVersion,
       } as unknown as AttendanceMonthlySummary,

@@ -1,4 +1,4 @@
-import { eq, and, desc, sql, inArray, gte, lte, or, like } from 'drizzle-orm';
+import { eq, and, desc, sql, gte, lte, or, like } from 'drizzle-orm';
 import { getDb } from '../../../../db/connection.js';
 import {
   attendanceMonthlySummaries,

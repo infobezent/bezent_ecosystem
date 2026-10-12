@@ -132,9 +132,9 @@ export function AttendanceExceptionsPage() {
 
   // Pagination & Sorting
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
-  const [sortBy, setSortBy] = useState<ExceptionFilter['sortBy']>('severity');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [pageSize] = useState(20);
+  const [sortBy] = useState<ExceptionFilter['sortBy']>('severity');
+  const [sortOrder] = useState<'asc' | 'desc'>('asc');
 
   // Data State
   const [items, setItems] = useState<AttendanceExceptionCaseItem[]>([]);

@@ -14,6 +14,17 @@ import { eq } from 'drizzle-orm';
 import { seedDatabase } from '../../db/seed.js';
 import type { CompanyAccess, AccessRoleSummary } from '../access/types/access.types.js';
 
+interface CompanyAdminCompanyItem {
+  id: string;
+  role?: string;
+  authoritySource?: string;
+  authorityLabel?: string;
+  isTenantAdmin?: boolean;
+  isMember?: boolean;
+  assignedRoles?: string[];
+  [key: string]: unknown;
+}
+
 describe('Development Identities End-to-End Auth & Access Verification', () => {
   const app = createApp();
 
@@ -102,7 +113,9 @@ describe('Development Identities End-to-End Auth & Access Verification', () => {
       .get('/api/v1/company-admin/companies')
       .set('Authorization', `Bearer ${session.token}`);
     expect(caCompaniesRes.status).toBe(200);
-    const caComp = caCompaniesRes.body.data.find((c: any) => c.id === 'comp_demo_01');
+    const caComp = caCompaniesRes.body.data.find(
+      (c: CompanyAdminCompanyItem) => c.id === 'comp_demo_01',
+    );
     expect(caComp).toBeDefined();
     expect(caComp.role).toBe('company_admin');
     expect(caComp.authoritySource).toBe('company_admin');
@@ -344,7 +357,9 @@ describe('Development Identities End-to-End Auth & Access Verification', () => {
       .get('/api/v1/company-admin/companies')
       .set('Authorization', `Bearer ${session.token}`);
     expect(taCompaniesRes.status).toBe(200);
-    const taComp = taCompaniesRes.body.data.find((c: any) => c.id === 'comp_demo_01');
+    const taComp = taCompaniesRes.body.data.find(
+      (c: CompanyAdminCompanyItem) => c.id === 'comp_demo_01',
+    );
     expect(taComp).toBeDefined();
     expect(taComp.role).toBe('tenant_admin');
     expect(taComp.authoritySource).toBe('tenant_admin');
@@ -375,10 +390,7 @@ describe('Development Identities End-to-End Auth & Access Verification', () => {
     expect(user!.isSuperAdmin).toBe(false);
 
     // 2. Canonical tenant_admins record exists for BEZENT Demo tenant
-    const taRecords = await db
-      .select()
-      .from(tenantAdmins)
-      .where(eq(tenantAdmins.userId, user!.id));
+    const taRecords = await db.select().from(tenantAdmins).where(eq(tenantAdmins.userId, user!.id));
     expect(taRecords).toHaveLength(1);
     expect(taRecords[0]!.tenantId).toBe('tenant_demo_01');
     expect(taRecords[0]!.status).toBe('active');
@@ -398,10 +410,7 @@ describe('Development Identities End-to-End Auth & Access Verification', () => {
     expect(userRoles).toHaveLength(0);
 
     // 5. NO employee records linked
-    const linkedEmployees = await db
-      .select()
-      .from(employees)
-      .where(eq(employees.userId, user!.id));
+    const linkedEmployees = await db.select().from(employees).where(eq(employees.userId, user!.id));
     expect(linkedEmployees).toHaveLength(0);
   });
 
@@ -535,7 +544,9 @@ describe('Development Identities End-to-End Auth & Access Verification', () => {
       .get('/api/v1/company-admin/companies')
       .set('Authorization', `Bearer ${session.token}`);
     expect(dualCompaniesRes.status).toBe(200);
-    const dualComp = dualCompaniesRes.body.data.find((c: any) => c.id === 'comp_demo_01');
+    const dualComp = dualCompaniesRes.body.data.find(
+      (c: CompanyAdminCompanyItem) => c.id === 'comp_demo_01',
+    );
     expect(dualComp).toBeDefined();
     expect(dualComp.authoritySource).toBe('dual');
     expect(dualComp.authorityLabel).toBe('Tenant Admin • Company Admin');

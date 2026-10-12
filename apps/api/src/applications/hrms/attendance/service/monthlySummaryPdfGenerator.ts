@@ -80,7 +80,6 @@ export function generateMonthlySummaryPdf(options: PdfGeneratorOptions): Buffer 
   for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
     const pageNum = pageIdx + 1;
     const pageObjId = 5 + pageIdx * 2;
-    const contentObjId = pageObjId + 1;
     pageObjIds.push(pageObjId);
 
     const pageRecords = records.slice(pageIdx * rowsPerPage, (pageIdx + 1) * rowsPerPage);

@@ -36,7 +36,6 @@ import {
   requestOnDutyClarification,
   provideOnDutyClarification,
   reviewOnDutyDecision,
-  cancelOnDutyRequest,
   previewBulkOnDutyApproval,
   executeBulkOnDutyAction,
   exportOnDutyCsvBlob,
@@ -147,7 +146,7 @@ export function AttendanceOnDutyPage() {
 
   // 3. Pagination State
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize] = useState(25);
 
   // 4. Data State
   const [items, setItems] = useState<OnDutyItemV1[]>([]);

@@ -16,6 +16,22 @@ import {
 import { hashPassword } from '../auth/security.js';
 import { signInForTest } from './support/testSession.js';
 
+interface TestUserAccessItem {
+  userId?: string;
+  email?: string;
+  role?: string;
+  roleLabel?: string;
+  status?: string;
+  isInvitation?: boolean;
+  invitationId?: string;
+}
+
+interface TestRoleItem {
+  code?: string;
+  name?: string;
+  disclaimer?: string;
+}
+
 describe('Company Access V1: Users, Invitations, Roles & Safety Rules', () => {
   const app = createApp();
 
@@ -248,13 +264,13 @@ describe('Company Access V1: Users, Invitations, Roles & Safety Rules', () => {
     expect(Array.isArray(res.body.data)).toBe(true);
     expect(res.body.data.length).toBeGreaterThanOrEqual(2);
 
-    const admin = res.body.data.find((u: any) => u.userId === adminUserId);
+    const admin = res.body.data.find((u: TestUserAccessItem) => u.userId === adminUserId);
     expect(admin).toBeDefined();
     expect(admin.role).toBe('company_admin');
     expect(admin.roleLabel).toBe('Company Admin');
     expect(admin.status).toBe('active');
 
-    const member = res.body.data.find((u: any) => u.userId === memberUserId);
+    const member = res.body.data.find((u: TestUserAccessItem) => u.userId === memberUserId);
     expect(member).toBeDefined();
     expect(member.role).toBe('member');
     expect(member.roleLabel).toBe('Member');
@@ -272,15 +288,19 @@ describe('Company Access V1: Users, Invitations, Roles & Safety Rules', () => {
     const available = res.body.data;
 
     // unassignedUser belongs to tenantMainId but not companyAId, so should be listed
-    const foundUnassigned = available.find((u: any) => u.userId === unassignedUserId);
+    const foundUnassigned = available.find(
+      (u: TestUserAccessItem) => u.userId === unassignedUserId,
+    );
     expect(foundUnassigned).toBeDefined();
 
     // adminUser and memberUser are already in companyAId, so must NOT be in available users
-    expect(available.find((u: any) => u.userId === adminUserId)).toBeUndefined();
-    expect(available.find((u: any) => u.userId === memberUserId)).toBeUndefined();
+    expect(available.find((u: TestUserAccessItem) => u.userId === adminUserId)).toBeUndefined();
+    expect(available.find((u: TestUserAccessItem) => u.userId === memberUserId)).toBeUndefined();
 
     // otherTenantUser belongs to tenantOtherId, so must NOT be in available users
-    expect(available.find((u: any) => u.userId === otherTenantUserId)).toBeUndefined();
+    expect(
+      available.find((u: TestUserAccessItem) => u.userId === otherTenantUserId),
+    ).toBeUndefined();
   });
 
   it('3. Assigns an existing tenant user to company with Member role', async () => {
@@ -303,7 +323,9 @@ describe('Company Access V1: Users, Invitations, Roles & Safety Rules', () => {
       .get(`/api/v1/tenant-admin/companies/${companyAId}/access/users`)
       .set('Authorization', `Bearer ${taToken}`);
 
-    const newlyAssigned = usersRes.body.data.find((u: any) => u.userId === unassignedUserId);
+    const newlyAssigned = usersRes.body.data.find(
+      (u: TestUserAccessItem) => u.userId === unassignedUserId,
+    );
     expect(newlyAssigned).toBeDefined();
     expect(newlyAssigned.role).toBe('member');
   });
@@ -348,7 +370,7 @@ describe('Company Access V1: Users, Invitations, Roles & Safety Rules', () => {
       .set('Authorization', `Bearer ${taToken}`);
 
     const pendingInv = usersRes.body.data.find(
-      (u: any) => u.email === newInviteEmail && u.isInvitation,
+      (u: TestUserAccessItem) => u.email === newInviteEmail && u.isInvitation,
     );
     expect(pendingInv).toBeDefined();
     expect(pendingInv.isInvitation).toBe(true);
@@ -367,7 +389,9 @@ describe('Company Access V1: Users, Invitations, Roles & Safety Rules', () => {
       });
 
     expect(res.status).toBe(400);
-    expect(res.body.error?.message || res.body.message).toMatch(/CROSS_TENANT|Cross-tenant user invitation is prohibited/i);
+    expect(res.body.error?.message || res.body.message).toMatch(
+      /CROSS_TENANT|Cross-tenant user invitation is prohibited/i,
+    );
   });
 
   it('7. Updates company user role (promote Member to Company Admin)', async () => {
@@ -386,7 +410,7 @@ describe('Company Access V1: Users, Invitations, Roles & Safety Rules', () => {
       .get(`/api/v1/tenant-admin/companies/${companyAId}/access/users`)
       .set('Authorization', `Bearer ${taToken}`);
 
-    const updated = usersRes.body.data.find((u: any) => u.userId === memberUserId);
+    const updated = usersRes.body.data.find((u: TestUserAccessItem) => u.userId === memberUserId);
     expect(updated.role).toBe('company_admin');
   });
 
@@ -408,7 +432,9 @@ describe('Company Access V1: Users, Invitations, Roles & Safety Rules', () => {
       });
 
     expect(res.status).toBe(400);
-    expect(res.body.error?.message || res.body.message).toMatch(/sole active Company Administrator|CANNOT_REMOVE_LAST_COMPANY_ADMIN/i);
+    expect(res.body.error?.message || res.body.message).toMatch(
+      /sole active Company Administrator|CANNOT_REMOVE_LAST_COMPANY_ADMIN/i,
+    );
   });
 
   it('9. Enforces Last Company Admin safety rule on revocation', async () => {
@@ -419,7 +445,9 @@ describe('Company Access V1: Users, Invitations, Roles & Safety Rules', () => {
       .set('Authorization', `Bearer ${taToken}`);
 
     expect(res.status).toBe(400);
-    expect(res.body.error?.message || res.body.message).toMatch(/sole active Company Administrator|CANNOT_REMOVE_LAST_COMPANY_ADMIN/i);
+    expect(res.body.error?.message || res.body.message).toMatch(
+      /sole active Company Administrator|CANNOT_REMOVE_LAST_COMPANY_ADMIN/i,
+    );
   });
 
   it('10. Revokes company access for a standard member successfully', async () => {
@@ -436,7 +464,9 @@ describe('Company Access V1: Users, Invitations, Roles & Safety Rules', () => {
       .get(`/api/v1/tenant-admin/companies/${companyAId}/access/users`)
       .set('Authorization', `Bearer ${taToken}`);
 
-    const revokedUser = usersRes.body.data.find((u: any) => u.userId === memberUserId);
+    const revokedUser = usersRes.body.data.find(
+      (u: TestUserAccessItem) => u.userId === memberUserId,
+    );
     expect(revokedUser?.status).toBe('revoked');
   });
 
@@ -448,12 +478,16 @@ describe('Company Access V1: Users, Invitations, Roles & Safety Rules', () => {
       .get(`/api/v1/tenant-admin/companies/${companyAId}/access/users`)
       .set('Authorization', `Bearer ${taToken}`);
 
-    const inv = usersRes.body.data.find((u: any) => u.isInvitation && u.status === 'pending_invitation');
+    const inv = usersRes.body.data.find(
+      (u: TestUserAccessItem) => u.isInvitation && u.status === 'pending_invitation',
+    );
     expect(inv).toBeDefined();
 
     // 11a. Resend
     const resendRes = await request(app)
-      .post(`/api/v1/tenant-admin/companies/${companyAId}/access/invitations/${inv.invitationId}/resend`)
+      .post(
+        `/api/v1/tenant-admin/companies/${companyAId}/access/invitations/${inv.invitationId}/resend`,
+      )
       .set('Authorization', `Bearer ${taToken}`);
 
     expect(resendRes.status).toBe(200);
@@ -470,7 +504,9 @@ describe('Company Access V1: Users, Invitations, Roles & Safety Rules', () => {
       .get(`/api/v1/tenant-admin/companies/${companyAId}/access/users`)
       .set('Authorization', `Bearer ${taToken}`);
 
-    const cancelledInv = afterCancelRes.body.data.find((u: any) => u.invitationId === inv.invitationId);
+    const cancelledInv = afterCancelRes.body.data.find(
+      (u: TestUserAccessItem) => u.invitationId === inv.invitationId,
+    );
     expect(cancelledInv).toBeUndefined();
   });
 
@@ -485,12 +521,12 @@ describe('Company Access V1: Users, Invitations, Roles & Safety Rules', () => {
     expect(Array.isArray(res.body.data)).toBe(true);
     expect(res.body.data.length).toBe(2);
 
-    const memberRole = res.body.data.find((r: any) => r.code === 'member');
+    const memberRole = res.body.data.find((r: TestRoleItem) => r.code === 'member');
     expect(memberRole).toBeDefined();
     expect(memberRole.name).toBe('Member');
     expect(memberRole.disclaimer).toMatch(/Application permissions.*separately/i);
 
-    const adminRole = res.body.data.find((r: any) => r.code === 'company_admin');
+    const adminRole = res.body.data.find((r: TestRoleItem) => r.code === 'company_admin');
     expect(adminRole).toBeDefined();
     expect(adminRole.name).toBe('Company Administrator');
     expect(adminRole.disclaimer).toMatch(/Does not grant Tenant Administrator authority/i);

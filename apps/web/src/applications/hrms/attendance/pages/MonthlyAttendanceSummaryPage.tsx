@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Page,
@@ -33,7 +33,6 @@ import {
   fetchMonthlySummaryDays,
   fetchMonthlySummaryReadiness,
   fetchMonthlySummaryHistory,
-  assignMonthlySummaryReviewer,
   startMonthlySummaryReview,
   requestMonthlySummaryCorrection,
   markMonthlySummaryReviewed,
@@ -58,17 +57,6 @@ import type {
 function getCurrentMonthString(): string {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-}
-
-function formatDate(val?: string | Date | null): string {
-  if (!val) return '—';
-  const d = typeof val === 'string' ? new Date(val) : val;
-  if (isNaN(d.getTime())) return String(val);
-  return d.toLocaleDateString('en-US', {
-    month: 'short',
-    day: '2-digit',
-    year: 'numeric',
-  });
 }
 
 function formatDateTime(val?: string | Date | null): string {
@@ -103,7 +91,7 @@ export function MonthlyAttendanceSummaryPage() {
 
   // Pagination State
   const [page, setPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(20);
+  const [pageSize] = useState<number>(20);
 
   // Data State
   const [loading, setLoading] = useState<boolean>(true);

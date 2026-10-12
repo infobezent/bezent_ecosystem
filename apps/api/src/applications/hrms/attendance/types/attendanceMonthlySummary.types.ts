@@ -1,10 +1,3 @@
-import type {
-  AttendanceMonthlySummary,
-  AttendanceMonthlyReview,
-  AttendanceMonthlyReadinessEvaluation,
-  AttendanceMonthlyAudit,
-} from '../../../../db/schema.js';
-
 export type AttendanceCalculationState = 'pending' | 'calculated' | 'stale' | 'error';
 export type AttendanceReviewState =
   | 'not_reviewed'

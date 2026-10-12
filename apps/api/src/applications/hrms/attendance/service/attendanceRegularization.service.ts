@@ -6,7 +6,7 @@ import {
   attendancePunches,
   employeeNotifications,
 } from '../../../../db/schema.js';
-import { and, eq, gte, lte, desc } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { generateSurrogateId } from '../../../../platform/auth/security.js';
 import { attendanceRepository } from '../repository/attendance.repository.js';
 import { attendanceRegularizationRepository } from '../repository/attendanceRegularization.repository.js';

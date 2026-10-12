@@ -3,17 +3,13 @@
  * Comprehensive Backend Automated Test Suite
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import {
-  getApplicationModules,
-  APPLICATION_MODULE_CATALOG,
-} from '../modules/catalog/applicationModuleCatalog.js';
+import { describe, it, expect, afterAll } from 'vitest';
+import { getApplicationModules } from '../modules/catalog/applicationModuleCatalog.js';
 import { moduleService } from '../modules/service/module.service.js';
 import { planService } from '../plans/service/plan.service.js';
 import { tenantCreationOrchestrationService as orchestrationService } from '../tenants/service/tenantOrchestration.service.js';
 import { effectiveEntitlementService as entitlementService } from '../entitlements/service/effectiveEntitlement.service.js';
 import { accessResolverService as accessResolver } from '../access/service/accessResolver.service.js';
-import { BadRequestError } from '../../app/errors/AppError.js';
 import { getDb } from '../../db/connection.js';
 import {
   tenants,
@@ -35,7 +31,9 @@ describe('Phase 04 — Tenant Module Entitlements Backend', () => {
     const db = getDb();
     for (const tId of createdTenantIds) {
       try {
-        await db.delete(tenantEntitlementOverrides).where(eq(tenantEntitlementOverrides.tenantId, tId));
+        await db
+          .delete(tenantEntitlementOverrides)
+          .where(eq(tenantEntitlementOverrides.tenantId, tId));
         await db.delete(tenantSubscriptions).where(eq(tenantSubscriptions.tenantId, tId));
         await db.delete(provisioningJobs).where(eq(provisioningJobs.tenantId, tId));
         await db.delete(companies).where(eq(companies.tenantId, tId));
@@ -83,7 +81,9 @@ describe('Phase 04 — Tenant Module Entitlements Backend', () => {
   /* ── 2. Plan-Based Defaults & Eligibility ──────────────────────────────── */
   describe('Plan-Based Defaults', () => {
     it('evaluates plan eligibility and locks mandatory modules for HRMS Starter', async () => {
-      const starterPlan = (await planService.listPlans()).find((p) => p.tier === 'starter' && p.applicationCode === 'hrms');
+      const starterPlan = (await planService.listPlans()).find(
+        (p) => p.tier === 'starter' && p.applicationCode === 'hrms',
+      );
       expect(starterPlan).toBeDefined();
 
       const eligibility = await moduleService.getPlanModuleEligibility(starterPlan!.id);
@@ -106,7 +106,9 @@ describe('Phase 04 — Tenant Module Entitlements Backend', () => {
     });
 
     it('includes advanced modules in Enterprise plan', async () => {
-      const enterprisePlan = (await planService.listPlans()).find((p) => p.tier === 'enterprise' && p.applicationCode === 'hrms');
+      const enterprisePlan = (await planService.listPlans()).find(
+        (p) => p.tier === 'enterprise' && p.applicationCode === 'hrms',
+      );
       expect(enterprisePlan).toBeDefined();
 
       const eligibility = await moduleService.getPlanModuleEligibility(enterprisePlan!.id);
@@ -151,7 +153,9 @@ describe('Phase 04 — Tenant Module Entitlements Backend', () => {
 
     it('fails preflight when module dependency is missing', async () => {
       const plans = await planService.listPlans();
-      const enterprisePlan = plans.find((p) => p.applicationCode === 'hrms' && p.tier === 'enterprise')!;
+      const enterprisePlan = plans.find(
+        (p) => p.applicationCode === 'hrms' && p.tier === 'enterprise',
+      )!;
 
       await expect(
         orchestrationService.preflight({
@@ -291,7 +295,9 @@ describe('Phase 04 — Tenant Module Entitlements Backend', () => {
   describe('Pricing & Trial Rules', () => {
     it('fails preflight if trial is requested on a non-trial eligible plan', async () => {
       const plans = await planService.listPlans();
-      const enterprisePlan = plans.find((p) => p.applicationCode === 'hrms' && p.tier === 'enterprise')!;
+      const enterprisePlan = plans.find(
+        (p) => p.applicationCode === 'hrms' && p.tier === 'enterprise',
+      )!;
       expect(enterprisePlan.trialEligible).toBe(false);
 
       await expect(
@@ -321,7 +327,9 @@ describe('Phase 04 — Tenant Module Entitlements Backend', () => {
 
     it('fails preflight if paid activation has unapproved price without commercialAgreementNotes', async () => {
       const plans = await planService.listPlans();
-      const enterprisePlan = plans.find((p) => p.applicationCode === 'hrms' && p.tier === 'enterprise')!;
+      const enterprisePlan = plans.find(
+        (p) => p.applicationCode === 'hrms' && p.tier === 'enterprise',
+      )!;
 
       await expect(
         orchestrationService.preflight({
@@ -351,7 +359,9 @@ describe('Phase 04 — Tenant Module Entitlements Backend', () => {
 
     it('succeeds preflight for enterprise paid activation when commercialAgreementNotes are provided', async () => {
       const plans = await planService.listPlans();
-      const enterprisePlan = plans.find((p) => p.applicationCode === 'hrms' && p.tier === 'enterprise')!;
+      const enterprisePlan = plans.find(
+        (p) => p.applicationCode === 'hrms' && p.tier === 'enterprise',
+      )!;
 
       const result = await orchestrationService.preflight({
         company: {
@@ -371,7 +381,8 @@ describe('Phase 04 — Tenant Module Entitlements Backend', () => {
             planId: enterprisePlan.id,
             accessMode: 'paid',
             licensedSeats: 50,
-            commercialAgreementNotes: 'Signed custom enterprise order form #2026-9901, approved SLA',
+            commercialAgreementNotes:
+              'Signed custom enterprise order form #2026-9901, approved SLA',
             selectedModules: ['organization', 'employees', 'attendance', 'payroll'],
           },
         ],

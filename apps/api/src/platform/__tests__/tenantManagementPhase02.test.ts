@@ -56,7 +56,9 @@ describe('Tenant Management Phase 02 Backend Business Logic & APIs', () => {
     await db.delete(transactionalOutbox).where(eq(transactionalOutbox.aggregateId, testTenantId));
     await db.delete(provisioningJobs).where(eq(provisioningJobs.tenantId, testTenantId));
     await db.delete(tenantLifecycleEvents).where(eq(tenantLifecycleEvents.tenantId, testTenantId));
-    await db.delete(tenantEntitlementOverrides).where(eq(tenantEntitlementOverrides.tenantId, testTenantId));
+    await db
+      .delete(tenantEntitlementOverrides)
+      .where(eq(tenantEntitlementOverrides.tenantId, testTenantId));
     await db.delete(tenantSubscriptions).where(eq(tenantSubscriptions.tenantId, testTenantId));
     await db.delete(invitations).where(eq(invitations.tenantId, testTenantId));
     await db.delete(tenantAdmins).where(eq(tenantAdmins.tenantId, testTenantId));
@@ -159,7 +161,9 @@ describe('Tenant Management Phase 02 Backend Business Logic & APIs', () => {
     await db.delete(transactionalOutbox).where(eq(transactionalOutbox.aggregateId, testTenantId));
     await db.delete(provisioningJobs).where(eq(provisioningJobs.tenantId, testTenantId));
     await db.delete(tenantLifecycleEvents).where(eq(tenantLifecycleEvents.tenantId, testTenantId));
-    await db.delete(tenantEntitlementOverrides).where(eq(tenantEntitlementOverrides.tenantId, testTenantId));
+    await db
+      .delete(tenantEntitlementOverrides)
+      .where(eq(tenantEntitlementOverrides.tenantId, testTenantId));
     await db.delete(tenantSubscriptions).where(eq(tenantSubscriptions.tenantId, testTenantId));
     await db.delete(invitations).where(eq(invitations.tenantId, testTenantId));
     await db.delete(tenantAdmins).where(eq(tenantAdmins.tenantId, testTenantId));
@@ -241,9 +245,7 @@ describe('Tenant Management Phase 02 Backend Business Logic & APIs', () => {
         code: 'p2-zero-temp',
         name: 'Zero Template Plan',
         tier: 'starter',
-        initialPrices: [
-          { currency: 'USD', billingInterval: 'monthly', amountMinorUnits: 0 },
-        ],
+        initialPrices: [{ currency: 'USD', billingInterval: 'monthly', amountMinorUnits: 0 }],
       });
 
       const validation = await planService.validatePriceForCommercialActivation(
@@ -316,7 +318,12 @@ describe('Tenant Management Phase 02 Backend Business Logic & APIs', () => {
     it('calculates seats from unique users and prevents reducing below active usage', async () => {
       // Current active usage: testUserAId has active membership in tenant = 1 seat
       const activeSeats = await subscriptionService.getSubscriptionById(
-        (await subscriptionService.listSubscriptions({ tenantId: testTenantId, applicationCode: 'hrms' }))[0]!.id,
+        (
+          await subscriptionService.listSubscriptions({
+            tenantId: testTenantId,
+            applicationCode: 'hrms',
+          })
+        )[0]!.id,
       );
       expect(activeSeats.currentSeatsUsed).toBeGreaterThanOrEqual(1);
 
@@ -329,7 +336,12 @@ describe('Tenant Management Phase 02 Backend Business Logic & APIs', () => {
     });
 
     it('renews an active/trial subscription', async () => {
-      const sub = (await subscriptionService.listSubscriptions({ tenantId: testTenantId, applicationCode: 'hrms' }))[0]!;
+      const sub = (
+        await subscriptionService.listSubscriptions({
+          tenantId: testTenantId,
+          applicationCode: 'hrms',
+        })
+      )[0]!;
       const renewed = await subscriptionService.renewSubscription(sub.id, {
         periodDays: 30,
       });
@@ -344,7 +356,9 @@ describe('Tenant Management Phase 02 Backend Business Logic & APIs', () => {
       const scheduledSub = await subscriptionService.createSubscription({
         tenantId: testTenantId,
         applicationCode: 'project_management',
-        planId: (await planService.listPlans({ applicationCode: 'project_management' }))[0]?.id || 'plan_pm_starter_v1',
+        planId:
+          (await planService.listPlans({ applicationCode: 'project_management' }))[0]?.id ||
+          'plan_pm_starter_v1',
         accessMode: 'paid',
         scheduledActivationAt: futureDate,
         commercialAgreementNotes: 'Pre-approved commercial annual contract',
@@ -355,8 +369,12 @@ describe('Tenant Management Phase 02 Backend Business Logic & APIs', () => {
     });
 
     it('cancels a subscription non-destructively preserving tenant data', async () => {
-      const subs = await subscriptionService.listSubscriptions({ tenantId: testTenantId, applicationCode: 'crm' });
-      const sub = subs[0] || (await subscriptionService.listSubscriptions({ tenantId: testTenantId }))[0]!;
+      const subs = await subscriptionService.listSubscriptions({
+        tenantId: testTenantId,
+        applicationCode: 'crm',
+      });
+      const sub =
+        subs[0] || (await subscriptionService.listSubscriptions({ tenantId: testTenantId }))[0]!;
       const cancelled = await subscriptionService.cancelSubscription(sub.id, {
         reason: 'Customer requested cancellation during trial',
       });
@@ -409,7 +427,9 @@ describe('Tenant Management Phase 02 Backend Business Logic & APIs', () => {
         testTenantId,
         'hrms',
       );
-      const recruitmentMod = effectiveWithOverride.modules.find((m) => m.moduleCode === 'recruitment');
+      const recruitmentMod = effectiveWithOverride.modules.find(
+        (m) => m.moduleCode === 'recruitment',
+      );
       expect(recruitmentMod).toBeDefined();
       expect(recruitmentMod?.isEnabled).toBe(true);
       expect(recruitmentMod?.source).toBe('override');
@@ -423,11 +443,11 @@ describe('Tenant Management Phase 02 Backend Business Logic & APIs', () => {
       expect(revoked.revokedAt).toBeDefined();
 
       // 4. Verify recruitment is no longer enabled
-      const effectiveAfterRevocation = await effectiveEntitlementService.resolveEffectiveEntitlements(
-        testTenantId,
-        'hrms',
+      const effectiveAfterRevocation =
+        await effectiveEntitlementService.resolveEffectiveEntitlements(testTenantId, 'hrms');
+      const recruitmentAfter = effectiveAfterRevocation.modules.find(
+        (m) => m.moduleCode === 'recruitment',
       );
-      const recruitmentAfter = effectiveAfterRevocation.modules.find((m) => m.moduleCode === 'recruitment');
       expect(recruitmentAfter).toBeUndefined();
     });
 
@@ -475,7 +495,10 @@ describe('Tenant Management Phase 02 Backend Business Logic & APIs', () => {
 
     it('accepts invitation and establishes atomic primary administrator', async () => {
       const db = getDb();
-      const [invRecord] = await db.select().from(invitations).where(eq(invitations.id, invitationId));
+      const [invRecord] = await db
+        .select()
+        .from(invitations)
+        .where(eq(invitations.id, invitationId));
       invitationToken = invRecord!.token;
 
       const result = await primaryAdminService.acceptInvitation(invitationToken);
@@ -664,15 +687,15 @@ describe('Tenant Management Phase 02 Backend Business Logic & APIs', () => {
       expect(outboxMsg.status).toBe('pending');
 
       // Dispatch batch
-      let dispatchedPayload: any = null;
+      let dispatchedPayload: { tenantId?: string; timestamp?: string } | undefined;
       const result = await transactionalOutboxService.processBatch(async (msg) => {
-        dispatchedPayload = msg.payload;
+        dispatchedPayload = msg.payload as { tenantId?: string; timestamp?: string };
       });
 
       expect(result.processed).toBeGreaterThanOrEqual(1);
       expect(result.succeeded).toBeGreaterThanOrEqual(1);
       expect(dispatchedPayload).toBeDefined();
-      expect(dispatchedPayload.tenantId).toBe(testTenantId);
+      expect(dispatchedPayload!.tenantId).toBe(testTenantId);
     });
   });
 
@@ -736,8 +759,8 @@ describe('Tenant Management Phase 02 Backend Business Logic & APIs', () => {
 
       const csvContent = res.text;
       // Formula injection defense verification: cell starting with '=' must be escaped with single quote "'"
-      expect(csvContent).toContain("\"'=cmd|");
-      expect(csvContent).toContain("\"'+attacker");
+      expect(csvContent).toContain('"\'=cmd|');
+      expect(csvContent).toContain('"\'+attacker');
     });
   });
 });

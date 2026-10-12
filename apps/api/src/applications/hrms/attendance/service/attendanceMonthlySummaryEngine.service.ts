@@ -242,8 +242,6 @@ export class AttendanceMonthlySummaryEngineService {
       }
 
       // Attendance classification & non-overlapping day equivalents
-      let dayPresentPortion = 0;
-      let dayAbsentPortion = 0;
       let dayClassification: 'present' | 'absent' | 'half_day' | 'on_leave' | 'on_duty' = 'absent';
 
       if (dayOdPortion >= 1.0) {
@@ -254,11 +252,9 @@ export class AttendanceMonthlySummaryEngineService {
       } else if (rawWorkedMins >= 480 || dailyAtt?.status === 'present') {
         // Full day present
         dayClassification = 'present';
-        dayPresentPortion = 1.0;
         presentDays += 1.0;
       } else if (rawWorkedMins >= 240 || dailyAtt?.status === 'half_day') {
         // Half day present
-        dayPresentPortion = 0.5;
         if (dayOdPortion > 0) {
           // Half day OD + half day present = 1.0 day equivalent
           dayClassification = 'present';
@@ -292,7 +288,6 @@ export class AttendanceMonthlySummaryEngineService {
           absentDays += 1.0 - dayLeavePortion;
         } else {
           dayClassification = 'absent';
-          dayAbsentPortion = 1.0;
           absentDays += 1.0;
         }
       }
