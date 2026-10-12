@@ -4,7 +4,6 @@ import {
   FormGrid,
   FormField,
   Input,
-  PhoneInput,
   Select,
   Button,
   Stack,
@@ -12,6 +11,9 @@ import {
   CardTitle,
   Toolbar,
   Checkbox,
+  CountrySelect,
+  TimezoneSelect,
+  InternationalPhoneInput,
 } from '../../../../design-system/components';
 
 import { RegistrationField, useRegistrationConfig } from '../registration/registrationConfig';
@@ -1185,20 +1187,19 @@ export function PersonalInformation({
             htmlFor="pers-mobile-phone"
             span={span}
           >
-            <PhoneInput
+            <InternationalPhoneInput
               id="pers-mobile-phone"
-              countryCode={mobileCountryCode}
-              onCountryCodeChange={setMobileCountryCode}
-              countryCodeOptions={[
-                { value: '+91', label: '+91 (IN)' },
-                { value: '+1', label: '+1 (US)' },
-                { value: '+44', label: '+44 (UK)' },
-                { value: '+971', label: '+971 (UAE)' },
-                { value: '+65', label: '+65 (SG)' },
-              ]}
+              countryCode={mobileCountryCode.replace('+', '')}
+              defaultCountry="IN"
+              onCountryCodeChange={(code) => setMobileCountryCode(`+${code}`)}
               placeholder={configuredPlaceholder || undefined}
               value={mobilePhone}
-              onChange={(e) => setMobilePhone(e.target.value)}
+              onChange={(val, parsed) => {
+                setMobilePhone(parsed.nationalNumber || val);
+                if (parsed.callingCode) {
+                  setMobileCountryCode(parsed.callingCode);
+                }
+              }}
             />
           </RegistrationField>
         );
@@ -1233,29 +1234,10 @@ export function PersonalInformation({
             htmlFor="pers-timezone"
             span={span}
           >
-            <Select
+            <TimezoneSelect
               id="pers-timezone"
-              value={timeZone}
-              onChange={(e) => setTimeZone(e.target.value)}
-              options={[
-                {
-                  value: '(GMT+05:30) Asia/Kolkata (IST)',
-                  label: '(GMT+05:30) India Standard Time (Asia/Kolkata)',
-                },
-                {
-                  value: '(GMT+00:00) UTC',
-                  label: '(GMT+00:00) UTC (Coordinated Universal Time)',
-                },
-                {
-                  value: '(GMT-05:00) America/New_York (EST)',
-                  label: '(GMT-05:00) Eastern Time (US & Canada)',
-                },
-                {
-                  value: '(GMT+04:00) Asia/Dubai (GST)',
-                  label: '(GMT+04:00) Gulf Standard Time (Dubai)',
-                },
-                { value: '(GMT+08:00) Asia/Singapore (SGT)', label: '(GMT+08:00) Singapore Time' },
-              ]}
+              value={timeZone.includes('Asia/Kolkata') ? 'Asia/Kolkata' : timeZone}
+              onChange={(tz) => setTimeZone(tz)}
             />
           </RegistrationField>
         );
@@ -1419,19 +1401,10 @@ export function PersonalInformation({
             htmlFor="pers-country"
             span={span}
           >
-            <Select
+            <CountrySelect
               id="pers-country"
               value={country}
-              onChange={(e) => setCountry(e.target.value)}
-              options={[
-                { value: 'India', label: 'India' },
-                { value: 'United States', label: 'United States' },
-                { value: 'United Kingdom', label: 'United Kingdom' },
-                { value: 'United Arab Emirates', label: 'United Arab Emirates' },
-                { value: 'Singapore', label: 'Singapore' },
-                { value: 'Australia', label: 'Australia' },
-                { value: 'Canada', label: 'Canada' },
-              ]}
+              onChange={(code, c) => setCountry(c?.name || code)}
             />
           </RegistrationField>
         );
@@ -1593,19 +1566,10 @@ export function PersonalInformation({
             htmlFor="pers-perm-country"
             span={span}
           >
-            <Select
+            <CountrySelect
               id="pers-perm-country"
               value={permanentCountry}
-              onChange={(e) => setPermanentCountry(e.target.value)}
-              options={[
-                { value: 'India', label: 'India' },
-                { value: 'United States', label: 'United States' },
-                { value: 'United Kingdom', label: 'United Kingdom' },
-                { value: 'United Arab Emirates', label: 'United Arab Emirates' },
-                { value: 'Singapore', label: 'Singapore' },
-                { value: 'Australia', label: 'Australia' },
-                { value: 'Canada', label: 'Canada' },
-              ]}
+              onChange={(code, c) => setPermanentCountry(c?.name || code)}
             />
           </RegistrationField>
         );
@@ -1729,21 +1693,21 @@ export function PersonalInformation({
                         />
                       </FormField>
                       <FormField label="Phone" htmlFor={`fam-phone-${fam.id}`}>
-                        <PhoneInput
+                        <InternationalPhoneInput
                           id={`fam-phone-${fam.id}`}
-                          countryCode={fam.countryCode}
+                          countryCode={(fam.countryCode || '+91').replace('+', '')}
+                          defaultCountry="IN"
                           onCountryCodeChange={(code) =>
-                            updateFamilyMember(fam.id, 'countryCode', code)
+                            updateFamilyMember(fam.id, 'countryCode', `+${code}`)
                           }
-                          countryCodeOptions={[
-                            { value: '+91', label: '+91 (IN)' },
-                            { value: '+1', label: '+1 (US)' },
-                            { value: '+44', label: '+44 (UK)' },
-                            { value: '+971', label: '+971 (UAE)' },
-                          ]}
                           placeholder="Phone Number"
                           value={fam.phone}
-                          onChange={(e) => updateFamilyMember(fam.id, 'phone', e.target.value)}
+                          onChange={(val, parsed) => {
+                            updateFamilyMember(fam.id, 'phone', parsed.nationalNumber || val);
+                            if (parsed.callingCode) {
+                              updateFamilyMember(fam.id, 'countryCode', parsed.callingCode);
+                            }
+                          }}
                         />
                       </FormField>
                     </FormGrid>

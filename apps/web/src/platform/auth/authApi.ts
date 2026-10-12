@@ -7,7 +7,7 @@ import { authorizedFetch } from './session';
  */
 
 export type ModuleCode = 'hrms' | 'crm' | 'project_management';
-export type WorkspaceId = 'super_admin' | 'company_admin' | 'hrms' | 'ess';
+export type WorkspaceId = 'super_admin' | 'tenant_admin' | 'company_admin' | 'hrms' | 'ess';
 
 export interface AccessRoleSummary {
   id: string;
@@ -26,6 +26,7 @@ export interface CompanyAccess {
   companyCode: string;
   isMember: boolean;
   isPlatformOversight: boolean;
+  isTenantAdmin?: boolean;
   roles: AccessRoleSummary[];
   permissions: string[];
   enabledModules: ModuleCode[];
@@ -37,6 +38,8 @@ export interface CompanyAccess {
 export interface AccessOverview {
   user: { id: string; email: string; firstName: string; lastName: string; isSuperAdmin: boolean };
   platformWorkspaces: WorkspaceId[];
+  isTenantAdmin?: boolean;
+  defaultTenantId?: string | null;
   companies: CompanyAccess[];
 }
 

@@ -1,4 +1,5 @@
 import { EssRepository } from '../repository/ess.repository.js';
+import { attendanceService } from '../../attendance/service/attendance.service.js';
 import type { EmployeeContext } from '../../../../platform/auth/middleware/auth.middleware.js';
 import { BadRequestError, NotFoundError, ConflictError } from '../../../../app/errors/AppError.js';
 import type {
@@ -153,48 +154,34 @@ export class EssService {
 
   async checkIn(ctx: EmployeeContext, input: CheckInInput) {
     const today = this.getTodayDateString();
-    const checkInTime = this.getCurrentTimeString();
-    try {
-      const record = await this.repo.checkIn(
-        ctx.tenantId,
-        ctx.companyId,
-        ctx.id,
-        today,
-        checkInTime,
-        input.workLocation ?? 'office',
-        input.notes,
-      );
+    const { record, checkInTime } = await attendanceService.recordCheckIn(
+      ctx.tenantId,
+      ctx.companyId,
+      ctx.id,
+      today,
+      input,
+    );
 
-      await this.repo.createNotification({
-        tenantId: ctx.tenantId,
-        companyId: ctx.companyId,
-        employeeId: ctx.id,
-        title: 'Checked In',
-        message: `Successfully checked in today at ${checkInTime}.`,
-        type: 'success',
-      });
+    await this.repo.createNotification({
+      tenantId: ctx.tenantId,
+      companyId: ctx.companyId,
+      employeeId: ctx.id,
+      title: 'Checked In',
+      message: `Successfully checked in today at ${checkInTime}.`,
+      type: 'success',
+    });
 
-      return record;
-    } catch (err: unknown) {
-      if (err instanceof Error && err.message.includes('already recorded')) {
-        throw new ConflictError(err.message);
-      }
-      throw err;
-    }
+    return record;
   }
 
   async checkOut(ctx: EmployeeContext) {
     const today = this.getTodayDateString();
-    const todayAtt = await this.repo.getTodayAttendance(ctx.tenantId, ctx.companyId, ctx.id, today);
-    if (!todayAtt || !todayAtt.checkInTime) {
-      throw new BadRequestError('Cannot check out before checking in today');
-    }
-    if (todayAtt.checkOutTime) {
-      throw new ConflictError('Check out already recorded for today');
-    }
-
-    const checkOutTime = this.getCurrentTimeString();
-    const updated = await this.repo.checkOut(todayAtt.id, checkOutTime);
+    const { updated, checkOutTime } = await attendanceService.recordCheckOut(
+      ctx.tenantId,
+      ctx.companyId,
+      ctx.id,
+      today,
+    );
 
     await this.repo.createNotification({
       tenantId: ctx.tenantId,

@@ -57,15 +57,20 @@ export class AuthService {
     // Landing destination follows the workspaces the user's effective
     // permissions actually grant, never a role name.
     const workspaces = new Set(access.companies.flatMap((c) => c.workspaces));
+    const isTenantAdmin = Boolean(
+      access.isTenantAdmin || access.companies.some((c) => c.isTenantAdmin),
+    );
     const defaultDestination = user.isSuperAdmin
       ? '/super-admin'
-      : workspaces.has('company_admin')
-        ? '/company-admin'
-        : workspaces.has('hrms')
-          ? '/hrms/dashboard'
-          : workspaces.has('ess')
-            ? '/ess'
-            : '/hrms/dashboard';
+      : isTenantAdmin
+        ? '/tenant-admin'
+        : workspaces.has('company_admin')
+          ? '/company-admin'
+          : workspaces.has('hrms')
+            ? '/hrms/dashboard'
+            : workspaces.has('ess')
+              ? '/ess'
+              : '/hrms/dashboard';
 
     return {
       token,

@@ -3,11 +3,13 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { TenantsPage } from '../pages/TenantsPage';
 import { TenantDetailsPage } from '../pages/TenantDetailsPage';
-import { superAdminApi, type TenantRecord } from '../api/superAdminApi';
+import { superAdminApi, type TenantRecord, type TenantSummaryMetrics } from '../api/superAdminApi';
 
 vi.mock('../api/superAdminApi', () => ({
   superAdminApi: {
+    getTenantSummary: vi.fn(),
     listTenants: vi.fn(),
+    listPlans: vi.fn(),
     getTenant: vi.fn(),
     createTenant: vi.fn(),
     updateTenant: vi.fn(),
@@ -23,10 +25,17 @@ vi.mock('../api/superAdminApi', () => ({
   },
 }));
 
-describe('Super Admin - TenantsPage UI', () => {
+describe('Super Admin - Phase 03A TenantsPage UI', () => {
+  const mockSummary: TenantSummaryMetrics = {
+    totalTenants: 12,
+    activeTenants: 8,
+    trialTenants: 3,
+    suspendedTenants: 1,
+  };
+
   const mockTenants: TenantRecord[] = [
     {
-      id: 'tenant_acme_01',
+      id: 'tnt_acme_01',
       name: 'Acme Corporation',
       code: 'ACME',
       contactEmail: 'admin@acme.com',
@@ -34,269 +43,350 @@ describe('Super Admin - TenantsPage UI', () => {
       status: 'active',
       createdAt: '2026-01-01T00:00:00.000Z',
       updatedAt: '2026-01-01T00:00:00.000Z',
-      activeModules: ['hrms'],
-      companiesCount: 1,
-      health: {
-        status: 'healthy',
-        reasons: [
-          'Account is fully configured with active administrators and application entitlements.',
-        ],
-        nextBestAction: null,
+      activeModules: ['hrms', 'crm'],
+      companiesCount: 2,
+      userCount: 42,
+      primaryAdmin: {
+        id: 'usr_pa_01',
+        name: 'Jane Doe',
+        email: 'jane.doe@acme.com',
+        status: 'active',
+        invitedAt: null,
+        acceptedAt: '2026-01-02T00:00:00.000Z',
       },
-      setupProgress: {
-        totalMilestones: 5,
-        completedMilestones: 5,
-        percentage: 100,
-        milestones: [],
-        isComplete: true,
+      subscriptionSummary: {
+        activePlans: ['Enterprise Growth'],
+        totalSeats: 50,
+        hasTrial: false,
       },
+      derivedCommercialClassification: 'active',
     },
     {
-      id: 'tenant_beta_02',
-      name: 'Beta Tech',
+      id: 'tnt_beta_02',
+      name: 'Beta Labs',
       code: 'BETA',
-      contactEmail: 'contact@beta.io',
+      contactEmail: 'contact@betalabs.com',
       contactPhone: null,
-      status: 'suspended',
+      status: 'active',
       createdAt: '2026-02-01T00:00:00.000Z',
       updatedAt: '2026-02-01T00:00:00.000Z',
+      activeModules: ['hrms'],
+      companiesCount: 1,
+      userCount: 5,
+      primaryAdmin: {
+        id: '',
+        name: 'Alex Pending',
+        email: 'alex@betalabs.com',
+        status: 'pending',
+        invitedAt: '2026-02-01T00:00:00.000Z',
+        acceptedAt: null,
+      },
+      subscriptionSummary: {
+        activePlans: ['Starter Trial'],
+        totalSeats: 10,
+        hasTrial: true,
+      },
+      derivedCommercialClassification: 'trial',
+    },
+    {
+      id: 'tnt_gamma_03',
+      name: 'Gamma Tech',
+      code: 'GAMMA',
+      contactEmail: 'support@gammatech.io',
+      contactPhone: null,
+      status: 'suspended',
+      createdAt: '2026-03-01T00:00:00.000Z',
+      updatedAt: '2026-03-01T00:00:00.000Z',
       activeModules: [],
       companiesCount: 0,
-      health: {
-        status: 'critical',
-        reasons: ['Tenant is suspended. Users are restricted from accessing all applications.'],
-        nextBestAction: {
-          action: 'reactivate_tenant',
-          label: 'Reactivate Tenant',
-          targetTab: 'overview',
-        },
-      },
+      userCount: 0,
+      primaryAdmin: null,
+      derivedCommercialClassification: 'suspended',
     },
   ];
 
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-
-  it('renders TenantsPage structure with header, filters, and Add Customer CTA', () => {
+    vi.mocked(superAdminApi.getTenantSummary).mockResolvedValue(mockSummary);
     vi.mocked(superAdminApi.listTenants).mockResolvedValue({
       items: mockTenants,
-      total: 2,
-    });
-
-    const html = renderToStaticMarkup(
-      <MemoryRouter>
-        <TenantsPage />
-      </MemoryRouter>,
-    );
-
-    expect(html).toContain('Tenants / Customers');
-    expect(html).toContain('Add Customer');
-    expect(html).toContain('Search by customer name or code...');
-    expect(html).toContain('All Statuses');
-    expect(html).toContain('All Applications');
-    expect(html).toContain('All Attention States');
-  });
-
-  it('renders loading state initially during data retrieval', () => {
-    vi.mocked(superAdminApi.listTenants).mockResolvedValue({
-      items: mockTenants,
-      total: 2,
-    });
-
-    const html = renderToStaticMarkup(
-      <MemoryRouter>
-        <TenantsPage />
-      </MemoryRouter>,
-    );
-
-    expect(html).toContain('Loading customer tenants...');
-    expect(html).toContain('Add Customer');
-    expect(html).toContain('All Attention States');
-  });
-
-  it('renders safely when health payload is completely missing (neutral fallback)', () => {
-    const tenantNoHealth: TenantRecord = {
-      ...mockTenants[0]!,
-      id: 'tenant_no_health',
-      name: 'No Health Corp',
-      health: undefined,
-    };
-    vi.mocked(superAdminApi.listTenants).mockResolvedValue({
-      items: [tenantNoHealth],
-      total: 1,
-    });
-
-    const html = renderToStaticMarkup(
-      <MemoryRouter>
-        <TenantsPage initialTenants={[tenantNoHealth]} />
-      </MemoryRouter>,
-    );
-
-    expect(html).not.toContain('Cannot read properties of undefined');
-    expect(html).toContain('Tenants / Customers');
-    expect(html).toContain('No Health Corp');
-    expect(html).toContain('Health unavailable');
-  });
-
-  it('renders safely when health reasons array is missing (undefined)', () => {
-    const tenantMissingReasons = {
-      ...mockTenants[0]!,
-      id: 'tenant_missing_reasons',
-      name: 'Missing Reasons Corp',
-      health: {
-        status: 'critical' as const,
-        // reasons is undefined (legacy backend shape)
-        reason: 'Legacy single reason field from backend',
-      } as unknown as TenantRecord['health'],
-    };
-    vi.mocked(superAdminApi.listTenants).mockResolvedValue({
-      items: [tenantMissingReasons as TenantRecord],
-      total: 1,
-    });
-
-    const html = renderToStaticMarkup(
-      <MemoryRouter>
-        <TenantsPage initialTenants={[tenantMissingReasons as TenantRecord]} />
-      </MemoryRouter>,
-    );
-
-    expect(html).not.toContain('Cannot read properties of undefined');
-    expect(html).toContain('Missing Reasons Corp');
-    expect(html).toContain('Critical');
-    expect(html).toContain('Legacy single reason field from backend');
-  });
-
-  it('renders safely when health reasons array is empty', () => {
-    const tenantEmptyReasons: TenantRecord = {
-      ...mockTenants[0]!,
-      id: 'tenant_empty_reasons',
-      name: 'Empty Reasons Corp',
-      health: {
-        status: 'needs_attention',
-        reasons: [],
-        nextBestAction: null,
-      },
-    };
-    vi.mocked(superAdminApi.listTenants).mockResolvedValue({
-      items: [tenantEmptyReasons],
-      total: 1,
-    });
-
-    const html = renderToStaticMarkup(
-      <MemoryRouter>
-        <TenantsPage initialTenants={[tenantEmptyReasons]} />
-      </MemoryRouter>,
-    );
-
-    expect(html).not.toContain('Cannot read properties of undefined');
-    expect(html).toContain('Empty Reasons Corp');
-    expect(html).toContain('Needs Attention');
-  });
-
-  it('renders legacy tenant created before health implementation', () => {
-    const legacyTenant: TenantRecord = {
-      id: 'tenant_legacy_001',
-      name: 'Legacy 2023 Tenant',
-      code: 'LEGACY',
-      contactEmail: null,
-      contactPhone: null,
-      status: 'active',
-      createdAt: '2023-01-01T00:00:00.000Z',
-      updatedAt: '2023-01-01T00:00:00.000Z',
-    };
-    vi.mocked(superAdminApi.listTenants).mockResolvedValue({
-      items: [legacyTenant],
-      total: 1,
-    });
-
-    const html = renderToStaticMarkup(
-      <MemoryRouter>
-        <TenantsPage initialTenants={[legacyTenant]} />
-      </MemoryRouter>,
-    );
-
-    expect(html).not.toContain('Cannot read properties of undefined');
-    expect(html).toContain('Legacy 2023 Tenant');
-    expect(html).toContain('Health unavailable');
-    expect(html).toContain('0 companies');
-    expect(html).toContain('No active apps');
-  });
-
-  it('renders tenant with no companies, no apps, no admin, or suspended state', () => {
-    const variedTenants: TenantRecord[] = [
-      {
-        ...mockTenants[0]!,
-        id: 't_no_company',
-        name: 'No Company Tenant',
-        companiesCount: 0,
-        companies: [],
-        health: {
-          status: 'critical',
-          reasons: ['No legal company entity created.'],
-          nextBestAction: null,
-        },
-      },
-      {
-        ...mockTenants[0]!,
-        id: 't_no_apps',
-        name: 'No Apps Tenant',
-        activeModules: [],
-        health: {
-          status: 'needs_attention',
-          reasons: ['No active application entitlements.'],
-          nextBestAction: null,
-        },
-      },
-      {
-        ...mockTenants[0]!,
-        id: 't_suspended',
-        name: 'Suspended Tenant',
-        status: 'suspended',
-        health: { status: 'critical', reasons: ['Tenant suspended.'], nextBestAction: null },
-      },
-    ];
-    vi.mocked(superAdminApi.listTenants).mockResolvedValue({
-      items: variedTenants,
       total: 3,
     });
-
-    const html = renderToStaticMarkup(
-      <MemoryRouter>
-        <TenantsPage initialTenants={variedTenants} />
-      </MemoryRouter>,
-    );
-
-    expect(html).toContain('No Company Tenant');
-    expect(html).toContain('No Apps Tenant');
-    expect(html).toContain('Suspended Tenant');
-    expect(html).toContain('Critical');
-    expect(html).toContain('Needs Attention');
+    vi.mocked(superAdminApi.listPlans).mockResolvedValue([
+      {
+        id: 'plan_hrms_growth',
+        applicationCode: 'hrms',
+        code: 'HRMS-GROWTH',
+        name: 'Growth Plan',
+        tier: 'growth',
+        status: 'active',
+        trialEligible: true,
+        trialDurationDays: 14,
+      },
+    ]);
   });
 
-  it('renders neutral fallback when health status is malformed or unknown', () => {
-    const malformedTenant = {
-      ...mockTenants[0]!,
-      id: 't_malformed',
-      name: 'Malformed Health Corp',
-      health: {
-        status: 'unknown_status_val' as unknown,
-        reasons: ['corrupted data'],
-      } as unknown as TenantRecord['health'],
-    };
-    vi.mocked(superAdminApi.listTenants).mockResolvedValue({
-      items: [malformedTenant as TenantRecord],
-      total: 1,
+  /* ── 1. Summary Metrics ─────────────────────────────────────────────────── */
+  describe('Summary Metrics (Slice E / Prompt Section 6)', () => {
+    it('renders all four primary metrics: Total, Active, Trial, and Suspended Tenants', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <TenantsPage initialTenants={mockTenants} />
+        </MemoryRouter>,
+      );
+
+      expect(html).toContain('Total Tenants');
+      expect(html).toContain('Active Tenants');
+      expect(html).toContain('Trial Tenants');
+      expect(html).toContain('Suspended Tenants');
     });
 
-    const html = renderToStaticMarkup(
-      <MemoryRouter>
-        <TenantsPage initialTenants={[malformedTenant as TenantRecord]} />
-      </MemoryRouter>,
-    );
+    it('displays exact numerical values from getTenantSummary', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <TenantsPage initialTenants={mockTenants} initialSummary={mockSummary} />
+        </MemoryRouter>,
+      );
 
-    expect(html).toContain('Malformed Health Corp');
-    expect(html).toContain('Health unavailable');
+      expect(html).toContain('12'); // Total
+      expect(html).toContain('8'); // Active
+      expect(html).toContain('3'); // Trial
+      expect(html).toContain('1'); // Suspended
+    });
+
+    it('renders helper description text for each metric card', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <TenantsPage initialTenants={mockTenants} />
+        </MemoryRouter>,
+      );
+
+      expect(html).toContain('All registered customer accounts');
+      expect(html).toContain('Operational customer accounts');
+      expect(html).toContain('Active trial with zero paid');
+      expect(html).toContain('Restricted administrative state');
+    });
+  });
+
+  /* ── 2. Page Header & Actions ───────────────────────────────────────────── */
+  describe('Page Header (Prompt Section 5)', () => {
+    it('renders All Tenants title and standard enterprise subtitle', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <TenantsPage initialTenants={mockTenants} />
+        </MemoryRouter>,
+      );
+
+      expect(html).toContain('All Tenants');
+      expect(html).toContain(
+        'Manage customer organizations, application access, subscriptions, and tenant lifecycle.',
+      );
+    });
+
+    it('renders Refresh and Create Tenant buttons in header', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <TenantsPage initialTenants={mockTenants} />
+        </MemoryRouter>,
+      );
+
+      expect(html).toContain('Refresh');
+      expect(html).toContain('Create Tenant');
+    });
+  });
+
+  /* ── 3. Search & Filter Toolbar ─────────────────────────────────────────── */
+  describe('Search & Filter Toolbar (Prompt Section 7)', () => {
+    it('renders search input with required placeholder', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <TenantsPage initialTenants={mockTenants} />
+        </MemoryRouter>,
+      );
+
+      expect(html).toContain('Search tenants by name, ID, or admin email');
+    });
+
+    it('renders all required status filter options', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <TenantsPage initialTenants={mockTenants} />
+        </MemoryRouter>,
+      );
+
+      expect(html).toContain('All Statuses');
+      expect(html).toContain('Pending Setup');
+    });
+
+    it('renders all required application filter options', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <TenantsPage initialTenants={mockTenants} />
+        </MemoryRouter>,
+      );
+
+      expect(html).toContain('All Applications');
+      expect(html).toContain('HRMS');
+      expect(html).toContain('CRM');
+      expect(html).toContain('Project Management');
+    });
+
+    it('renders created date filter options', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <TenantsPage initialTenants={mockTenants} />
+        </MemoryRouter>,
+      );
+
+      expect(html).toContain('All Time');
+      expect(html).toContain('Last 7 Days');
+      expect(html).toContain('Last 30 Days');
+      expect(html).toContain('Last 90 Days');
+    });
+  });
+
+  /* ── 4. Tenant Management Table ─────────────────────────────────────────── */
+  describe('Tenant Management Table (Prompt Section 8)', () => {
+    it('renders semantic table headers', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <TenantsPage initialTenants={mockTenants} />
+        </MemoryRouter>,
+      );
+
+      expect(html).toContain('Tenant');
+      expect(html).toContain('Primary Admin');
+      expect(html).toContain('Applications');
+      expect(html).toContain('Subscription');
+      expect(html).toContain('Users');
+      expect(html).toContain('Created');
+      expect(html).toContain('Status');
+      expect(html).toContain('Actions');
+    });
+
+    it('renders tenant name, code, and avatar initials', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <TenantsPage initialTenants={mockTenants} />
+        </MemoryRouter>,
+      );
+
+      expect(html).toContain('Acme Corporation');
+      expect(html).toContain('ACME');
+      expect(html).toContain('tnt_acme_01');
+      expect(html).toContain('AC'); // Avatar initials
+    });
+
+    it('renders active Primary Admin name and email', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <TenantsPage initialTenants={mockTenants} />
+        </MemoryRouter>,
+      );
+
+      expect(html).toContain('Jane Doe');
+      expect(html).toContain('jane.doe@acme.com');
+    });
+
+    it('renders Pending Invitation badge for unaccepted admin invitations', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <TenantsPage initialTenants={mockTenants} />
+        </MemoryRouter>,
+      );
+
+      expect(html).toContain('Pending Invitation');
+      expect(html).toContain('alex@betalabs.com');
+    });
+
+    it('renders Not assigned when no primary admin exists', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <TenantsPage initialTenants={mockTenants} />
+        </MemoryRouter>,
+      );
+
+      expect(html).toContain('Not assigned');
+    });
+
+    it('renders enabled Application badges (HRMS, CRM, PM)', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <TenantsPage initialTenants={mockTenants} />
+        </MemoryRouter>,
+      );
+
+      expect(html).toContain('HRMS');
+      expect(html).toContain('CRM');
+    });
+
+    it('renders No applications for unentitled tenants', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <TenantsPage initialTenants={mockTenants} />
+        </MemoryRouter>,
+      );
+
+      expect(html).toContain('No applications');
+    });
+
+    it('renders Paid and Trial badges for subscriptions', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <TenantsPage initialTenants={mockTenants} />
+        </MemoryRouter>,
+      );
+
+      expect(html).toContain('Paid');
+      expect(html).toContain('Trial');
+      expect(html).toContain('Enterprise Growth');
+    });
+
+    it('renders active users vs licensed seats ratio', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <TenantsPage initialTenants={mockTenants} />
+        </MemoryRouter>,
+      );
+
+      expect(html).toContain('42');
+      expect(html).toContain('50');
+    });
+
+    it('renders lifecycle actions: View Tenant, Suspend, and Reactivate', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <TenantsPage initialTenants={mockTenants} />
+        </MemoryRouter>,
+      );
+
+      expect(html).toContain('View Tenant');
+      expect(html).toContain('Suspend');
+      expect(html).toContain('Reactivate');
+    });
+  });
+
+  /* ── 5. Empty & Loading States ─────────────────────────────────────────── */
+  describe('States (Prompt Section 11)', () => {
+    it('renders loading state when initialLoading is true', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <TenantsPage initialLoading={true} />
+        </MemoryRouter>,
+      );
+
+      expect(html).toContain('Loading customer tenants...');
+    });
+
+    it('renders EmptyState when tenant list is empty', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <TenantsPage initialTenants={[]} />
+        </MemoryRouter>,
+      );
+
+      expect(html).toContain('No customer tenants found');
+    });
   });
 });
 
@@ -377,14 +467,6 @@ describe('Super Admin - TenantDetailsPage UI', () => {
         category: 'Workforce',
         version: '1.0.0',
         availability: 'GA',
-      },
-      {
-        code: 'crm',
-        name: 'CRM',
-        description: 'Customer relations',
-        category: 'Sales',
-        version: '1.0.0',
-        availability: 'Beta',
       },
     ]);
     vi.mocked(superAdminApi.listCompanyAdmins).mockResolvedValue([

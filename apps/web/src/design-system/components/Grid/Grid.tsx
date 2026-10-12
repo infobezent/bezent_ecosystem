@@ -1,7 +1,8 @@
 import type { HTMLAttributes, ReactNode, ElementType } from 'react';
 import './Grid.css';
 
-export type GridColumns = 1 | 2 | 3 | 4 | 'auto-fill' | 'auto-fit' | 'sidebar-main' | 'three-pane';
+export type GridColumns =
+  1 | 2 | 3 | 4 | 5 | 6 | 'auto-fill' | 'auto-fit' | 'sidebar-main' | 'three-pane';
 export type GridMinColWidth = 'sm' | 'md' | 'lg';
 export type GridGap = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 

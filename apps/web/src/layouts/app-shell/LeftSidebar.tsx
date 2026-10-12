@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { BezentNavIcon } from '../../design-system/icons';
 import { SubNavFlyout } from './SubNavFlyout';
 import type { ShellNavItem } from './types';
@@ -77,14 +77,15 @@ export function LeftSidebar({
   const navRef = useRef<HTMLElement | null>(null);
   const [containerHeight, setContainerHeight] = useState<number | null>(null);
 
-  const cancelClose = () => {
+  const cancelClose = useCallback(() => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
     closeTimer.current = null;
-  };
-  const closeNow = () => {
+  }, []);
+
+  const closeNow = useCallback(() => {
     cancelClose();
     setFlyoutParentId(null);
-  };
+  }, [cancelClose]);
   // Old behaviour: a 200ms grace, one timer for the whole sidebar. Entering
   // any item cancels it and takes ownership immediately (no stacking).
   const scheduleClose = () => {
@@ -127,7 +128,18 @@ export function LeftSidebar({
     return () => window.removeEventListener('resize', updateHeight);
   }, []);
 
-  useEffect(() => cancelClose, []);
+  useEffect(() => cancelClose, [cancelClose]);
+
+  useEffect(() => {
+    if (!flyoutParentId) return;
+    const handleDocumentClick = (e: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        closeNow();
+      }
+    };
+    document.addEventListener('mousedown', handleDocumentClick);
+    return () => document.removeEventListener('mousedown', handleDocumentClick);
+  }, [flyoutParentId, closeNow]);
 
   // Determine available vertical height inside navigation list
   const effectiveHeight =
@@ -226,7 +238,11 @@ export function LeftSidebar({
               onEnter={() => openFlyout(item)}
               onLeave={scheduleClose}
               onSelect={() => {
-                closeNow();
+                if (!canItemOpenFlyout(item)) {
+                  closeNow();
+                } else {
+                  setFlyoutParentId((prev) => (prev === item.id ? null : item.id));
+                }
                 onSelect?.(item.id);
               }}
               onSubSelect={(subId) => {
@@ -294,6 +310,8 @@ function NavItem({
       <button
         type="button"
         className={`left-sidebar__item ${active ? 'is-active' : ''} ${isCurrentPage ? 'is-current-page' : ''}`.trim()}
+        title={item.label}
+        aria-label={item.label}
         aria-current={active || isCurrentPage ? 'page' : undefined}
         aria-haspopup={hasFlyout ? 'menu' : undefined}
         aria-expanded={hasFlyout ? flyoutOpen : undefined}

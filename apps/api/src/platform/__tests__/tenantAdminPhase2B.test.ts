@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
-import { eq, sql } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 import fs from 'fs';
 import path from 'path';
 import { createApp } from '../../app/server/createApp.js';
@@ -290,6 +290,8 @@ describe('Tenant Admin Phase 2B: Backend Structural Consolidation', () => {
         displayName: 'Apex Global Enterprises',
         website: 'https://apex-global.example.com',
         city: 'Bengaluru Urban',
+        registrationNumber: 'U72900TN2024PTC123456',
+        currency: 'INR',
       };
 
       const res = await request(app)
@@ -301,10 +303,26 @@ describe('Tenant Admin Phase 2B: Backend Structural Consolidation', () => {
       expect(res.body.data.displayName).toBe('Apex Global Enterprises');
       expect(res.body.data.website).toBe('https://apex-global.example.com');
       expect(res.body.data.city).toBe('Bengaluru Urban');
+      expect(res.body.data.registrationNumber).toBe('U72900TN2024PTC123456');
+      expect(res.body.data.currency).toBe('INR');
 
       // Direct verify via canonical companyService
       const canonicalProfile = await companyService.getCompanyProfile(companyA1Id);
       expect(canonicalProfile.displayName).toBe('Apex Global Enterprises');
+      expect(canonicalProfile.registrationNumber).toBe('U72900TN2024PTC123456');
+      expect(canonicalProfile.currency).toBe('INR');
+
+      // Verify updating currency to USD persists
+      const updateCurrencyRes = await request(app)
+        .patch(`/api/v1/tenant-admin/companies/${companyA1Id}/profile`)
+        .set('Authorization', `Bearer ${taAToken}`)
+        .send({ currency: 'USD' })
+        .expect(200);
+
+      expect(updateCurrencyRes.body.data.currency).toBe('USD');
+
+      const refetchedProfile = await companyService.getCompanyProfile(companyA1Id);
+      expect(refetchedProfile.currency).toBe('USD');
     });
 
     it('Delegated Company Admin sees updated details and updates through same canonical validation', async () => {

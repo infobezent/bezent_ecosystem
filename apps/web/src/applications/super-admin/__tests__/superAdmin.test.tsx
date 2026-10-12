@@ -9,17 +9,30 @@ import { destinationPath, resolveActiveNavigation } from '../../../shared/utils/
 const { categories, destinations } = superAdminNavigation;
 
 describe('Super Admin Main Nav → Sub Nav Information Architecture', () => {
-  it('1. Super Admin Main Nav contains exactly 4 entries: Overview, Customers, Access, Governance', () => {
+  it('1. Super Admin Main Nav contains exactly 8 entries in exact order: Overview, Tenants, Subscriptions, Applications, Governance, Operations, Support, Settings', () => {
     const mainNavIds = destinations.filter((d) => d.sidebar).map((d) => d.id);
-    expect(mainNavIds).toEqual(['overview', 'customers', 'access', 'governance']);
+    expect(mainNavIds).toEqual([
+      'overview',
+      'tenants',
+      'subscriptions',
+      'applications',
+      'governance',
+      'operations',
+      'support',
+      'settings',
+    ]);
 
     const labels = destinations.map((d) => d.label);
-    expect(labels).toEqual(['Overview', 'Customers', 'Access', 'Governance']);
-
-    // Access compact label with flyoutTitle override
-    const accessDest = destinations.find((d) => d.id === 'access');
-    expect(accessDest?.label).toBe('Access');
-    expect(accessDest?.flyoutTitle).toBe('Access & Applications');
+    expect(labels).toEqual([
+      'Overview',
+      'Tenants',
+      'Subscriptions',
+      'Applications',
+      'Governance',
+      'Operations',
+      'Support',
+      'Settings',
+    ]);
   });
 
   it('1b. Overview has exactly one child (Dashboard) and resolves directly without flyout', () => {
@@ -33,31 +46,68 @@ describe('Super Admin Main Nav → Sub Nav Information Architecture', () => {
     expect(path).toBe('/super-admin/dashboard');
   });
 
-  it('2. Customers exposes: Tenants, Companies, Customer Provisioning', () => {
-    const customers = destinations.find((d) => d.id === 'customers');
-    expect(customers).toBeDefined();
-    const childIds = customers?.children?.map((c) => c.id);
-    expect(childIds).toEqual(['tenants', 'companies', 'provisioning']);
-    const childLabels = customers?.children?.map((c) => c.label);
-    expect(childLabels).toEqual(['Tenants', 'Companies', 'Customer Provisioning']);
+  it('2. Tenants is a direct navigation destination with no flyout children', () => {
+    const tenants = destinations.find((d) => d.id === 'tenants');
+    expect(tenants).toBeDefined();
+    expect(tenants?.children).toBeUndefined();
+    expect(tenants?.sidebar).toBe(true);
+    expect(tenants?.segment).toBe('tenants');
+    expect(tenants?.label).toBe('Tenants');
+    expect(destinationPath(SUPER_ADMIN_BASE_PATH, tenants!)).toBe('/super-admin/tenants');
   });
 
-  it('3. Access exposes: Platform Users, Company Admins, Application Access', () => {
-    const access = destinations.find((d) => d.id === 'access');
-    expect(access).toBeDefined();
-    const childIds = access?.children?.map((c) => c.id);
-    expect(childIds).toEqual(['users', 'company-admins', 'modules']);
-    const childLabels = access?.children?.map((c) => c.label);
-    expect(childLabels).toEqual(['Platform Users', 'Company Admins', 'Application Access']);
+  it('3. Subscriptions exposes: Plans, Tenant Subscriptions, Entitlements', () => {
+    const subs = destinations.find((d) => d.id === 'subscriptions');
+    expect(subs).toBeDefined();
+    const childIds = subs?.children?.map((c) => c.id);
+    expect(childIds).toEqual(['plans', 'tenant-subscriptions', 'entitlements']);
+    const childLabels = subs?.children?.map((c) => c.label);
+    expect(childLabels).toEqual(['Plans', 'Tenant Subscriptions', 'Entitlements']);
   });
 
-  it('4. Governance exposes: Audit Logs, Platform Settings', () => {
+  it('4. Applications exposes: Application Catalog, Module Catalog', () => {
+    const apps = destinations.find((d) => d.id === 'applications');
+    expect(apps).toBeDefined();
+    const childIds = apps?.children?.map((c) => c.id);
+    expect(childIds).toEqual(['app-catalog', 'module-catalog']);
+    const childLabels = apps?.children?.map((c) => c.label);
+    expect(childLabels).toEqual(['Application Catalog', 'Module Catalog']);
+  });
+
+  it('5. Governance exposes: Audit Logs, Platform Administrators', () => {
     const governance = destinations.find((d) => d.id === 'governance');
     expect(governance).toBeDefined();
     const childIds = governance?.children?.map((c) => c.id);
-    expect(childIds).toEqual(['audit-logs', 'settings']);
+    expect(childIds).toEqual(['audit-logs', 'platform-admins']);
     const childLabels = governance?.children?.map((c) => c.label);
-    expect(childLabels).toEqual(['Audit Logs', 'Platform Settings']);
+    expect(childLabels).toEqual(['Audit Logs', 'Platform Administrators']);
+  });
+
+  it('6. Operations exposes: Tenant Health, Provisioning Jobs', () => {
+    const operations = destinations.find((d) => d.id === 'operations');
+    expect(operations).toBeDefined();
+    const childIds = operations?.children?.map((c) => c.id);
+    expect(childIds).toEqual(['tenant-health', 'provisioning-jobs']);
+    const childLabels = operations?.children?.map((c) => c.label);
+    expect(childLabels).toEqual(['Tenant Health', 'Provisioning Jobs']);
+  });
+
+  it('7. Support exposes: Support Cases, Controlled Support Access', () => {
+    const support = destinations.find((d) => d.id === 'support');
+    expect(support).toBeDefined();
+    const childIds = support?.children?.map((c) => c.id);
+    expect(childIds).toEqual(['support-cases', 'controlled-access']);
+    const childLabels = support?.children?.map((c) => c.label);
+    expect(childLabels).toEqual(['Support Cases', 'Controlled Support Access']);
+  });
+
+  it('8. Settings exposes: Platform Configuration (single child, direct navigate)', () => {
+    const settings = destinations.find((d) => d.id === 'settings');
+    expect(settings).toBeDefined();
+    expect(settings?.children).toHaveLength(1);
+    expect(settings?.children?.[0]?.id).toBe('platform-config');
+    expect(settings?.children?.[0]?.label).toBe('Platform Configuration');
+    expect(settings?.children?.[0]?.path).toBe('settings');
   });
 
   it('has unique destination IDs and category references', () => {
@@ -83,91 +133,112 @@ describe('Super Admin Main Nav → Sub Nav Information Architecture', () => {
 });
 
 describe('Super Admin Route → Main Nav → Sub Nav Active State Resolution', () => {
-  it('5. /super-admin/companies → Customers + Companies active', () => {
+  it('1. /super-admin/dashboard → Overview + Dashboard active', () => {
     const resolved = resolveActiveNavigation(
       superAdminNavigation,
       SUPER_ADMIN_BASE_PATH,
-      '/super-admin/companies',
+      '/super-admin/dashboard',
     );
     expect(resolved).toEqual({
-      destinationId: 'customers',
-      childId: 'companies',
+      destinationId: 'overview',
+      childId: 'dashboard',
     });
   });
 
-  it('6. /super-admin/companies/:companyId → Customers + Companies active', () => {
-    const resolved = resolveActiveNavigation(
-      superAdminNavigation,
-      SUPER_ADMIN_BASE_PATH,
-      '/super-admin/companies/comp_apj3d_01',
-    );
-    expect(resolved).toEqual({
-      destinationId: 'customers',
-      childId: 'companies',
-    });
-  });
-
-  it('7. /super-admin/tenants → Customers + Tenants active', () => {
+  it('2. /super-admin/tenants → Tenants active', () => {
     const resolved = resolveActiveNavigation(
       superAdminNavigation,
       SUPER_ADMIN_BASE_PATH,
       '/super-admin/tenants',
     );
     expect(resolved).toEqual({
-      destinationId: 'customers',
-      childId: 'tenants',
+      destinationId: 'tenants',
     });
   });
 
-  it('8. /super-admin/tenants/:tenantId → Customers + Tenants active', () => {
+  it('3. /super-admin/tenants/create → Tenants active', () => {
     const resolved = resolveActiveNavigation(
       superAdminNavigation,
       SUPER_ADMIN_BASE_PATH,
-      '/super-admin/tenants/tenant_acme_01',
+      '/super-admin/tenants/create',
     );
     expect(resolved).toEqual({
-      destinationId: 'customers',
-      childId: 'tenants',
+      destinationId: 'tenants',
     });
   });
 
-  it('9. /super-admin/users → Access + Platform Users active', () => {
+  it('4. /super-admin/tenants/details → preserves Tenants context', () => {
     const resolved = resolveActiveNavigation(
       superAdminNavigation,
       SUPER_ADMIN_BASE_PATH,
-      '/super-admin/users',
+      '/super-admin/tenants/details',
     );
     expect(resolved).toEqual({
-      destinationId: 'access',
-      childId: 'users',
+      destinationId: 'tenants',
     });
   });
 
-  it('10. /super-admin/company-admins → Access + Company Admins active', () => {
+  it('5. /super-admin/subscriptions/plans → Subscriptions + Plans active', () => {
     const resolved = resolveActiveNavigation(
       superAdminNavigation,
       SUPER_ADMIN_BASE_PATH,
-      '/super-admin/company-admins',
+      '/super-admin/subscriptions/plans',
     );
     expect(resolved).toEqual({
-      destinationId: 'access',
-      childId: 'company-admins',
+      destinationId: 'subscriptions',
+      childId: 'plans',
     });
   });
 
-  it('11. /super-admin/modules → Access + Application Access active', () => {
+  it('6. /super-admin/subscriptions/tenants → Subscriptions + Tenant Subscriptions active', () => {
     const resolved = resolveActiveNavigation(
       superAdminNavigation,
       SUPER_ADMIN_BASE_PATH,
-      '/super-admin/modules',
+      '/super-admin/subscriptions/tenants',
     );
     expect(resolved).toEqual({
-      destinationId: 'access',
-      childId: 'modules',
+      destinationId: 'subscriptions',
+      childId: 'tenant-subscriptions',
     });
   });
 
-  it('12. /super-admin/audit-logs → Governance + Audit Logs active', () => {
+  it('7. /super-admin/subscriptions/entitlements → Subscriptions + Entitlements active', () => {
+    const resolved = resolveActiveNavigation(
+      superAdminNavigation,
+      SUPER_ADMIN_BASE_PATH,
+      '/super-admin/subscriptions/entitlements',
+    );
+    expect(resolved).toEqual({
+      destinationId: 'subscriptions',
+      childId: 'entitlements',
+    });
+  });
+
+  it('8. /super-admin/applications/catalog → Applications + Application Catalog active', () => {
+    const resolved = resolveActiveNavigation(
+      superAdminNavigation,
+      SUPER_ADMIN_BASE_PATH,
+      '/super-admin/applications/catalog',
+    );
+    expect(resolved).toEqual({
+      destinationId: 'applications',
+      childId: 'app-catalog',
+    });
+  });
+
+  it('9. /super-admin/applications/modules → Applications + Module Catalog active', () => {
+    const resolved = resolveActiveNavigation(
+      superAdminNavigation,
+      SUPER_ADMIN_BASE_PATH,
+      '/super-admin/applications/modules',
+    );
+    expect(resolved).toEqual({
+      destinationId: 'applications',
+      childId: 'module-catalog',
+    });
+  });
+
+  it('10. /super-admin/audit-logs → Governance + Audit Logs active', () => {
     const resolved = resolveActiveNavigation(
       superAdminNavigation,
       SUPER_ADMIN_BASE_PATH,
@@ -179,19 +250,79 @@ describe('Super Admin Route → Main Nav → Sub Nav Active State Resolution', (
     });
   });
 
-  it('13. /super-admin/settings → Governance + Platform Settings active', () => {
+  it('11. /super-admin/platform-admins → Governance + Platform Administrators active', () => {
+    const resolved = resolveActiveNavigation(
+      superAdminNavigation,
+      SUPER_ADMIN_BASE_PATH,
+      '/super-admin/platform-admins',
+    );
+    expect(resolved).toEqual({
+      destinationId: 'governance',
+      childId: 'platform-admins',
+    });
+  });
+
+  it('12. /super-admin/operations/health → Operations + Tenant Health active', () => {
+    const resolved = resolveActiveNavigation(
+      superAdminNavigation,
+      SUPER_ADMIN_BASE_PATH,
+      '/super-admin/operations/health',
+    );
+    expect(resolved).toEqual({
+      destinationId: 'operations',
+      childId: 'tenant-health',
+    });
+  });
+
+  it('13. /super-admin/operations/jobs → Operations + Provisioning Jobs active', () => {
+    const resolved = resolveActiveNavigation(
+      superAdminNavigation,
+      SUPER_ADMIN_BASE_PATH,
+      '/super-admin/operations/jobs',
+    );
+    expect(resolved).toEqual({
+      destinationId: 'operations',
+      childId: 'provisioning-jobs',
+    });
+  });
+
+  it('14. /super-admin/support/cases → Support + Support Cases active', () => {
+    const resolved = resolveActiveNavigation(
+      superAdminNavigation,
+      SUPER_ADMIN_BASE_PATH,
+      '/super-admin/support/cases',
+    );
+    expect(resolved).toEqual({
+      destinationId: 'support',
+      childId: 'support-cases',
+    });
+  });
+
+  it('15. /super-admin/support/access → Support + Controlled Support Access active', () => {
+    const resolved = resolveActiveNavigation(
+      superAdminNavigation,
+      SUPER_ADMIN_BASE_PATH,
+      '/super-admin/support/access',
+    );
+    expect(resolved).toEqual({
+      destinationId: 'support',
+      childId: 'controlled-access',
+    });
+  });
+
+  it('16. /super-admin/settings → Settings + Platform Configuration active', () => {
     const resolved = resolveActiveNavigation(
       superAdminNavigation,
       SUPER_ADMIN_BASE_PATH,
       '/super-admin/settings',
     );
     expect(resolved).toEqual({
-      destinationId: 'governance',
-      childId: 'settings',
+      destinationId: 'settings',
+      childId: 'platform-config',
     });
   });
 
-  it('14. Direct URL refresh preserves correct navigation hierarchy across all routes', () => {
+  it('17. Direct URL refresh preserves correct navigation hierarchy across all routes', () => {
     // Overview / Dashboard
     expect(
       resolveActiveNavigation(
@@ -204,19 +335,18 @@ describe('Super Admin Route → Main Nav → Sub Nav Active State Resolution', (
       childId: 'dashboard',
     });
 
-    // Customer Provisioning
+    // Create Tenant
     expect(
       resolveActiveNavigation(
         superAdminNavigation,
         SUPER_ADMIN_BASE_PATH,
-        '/super-admin/provisioning',
+        '/super-admin/tenants/create',
       ),
     ).toEqual({
-      destinationId: 'customers',
-      childId: 'provisioning',
+      destinationId: 'tenants',
     });
 
-    // Deep nested detail routes
+    // Deep nested detail routes under tenants
     expect(
       resolveActiveNavigation(
         superAdminNavigation,
@@ -224,19 +354,7 @@ describe('Super Admin Route → Main Nav → Sub Nav Active State Resolution', (
         '/super-admin/tenants/tenant_xyz/details',
       ),
     ).toEqual({
-      destinationId: 'customers',
-      childId: 'tenants',
-    });
-
-    expect(
-      resolveActiveNavigation(
-        superAdminNavigation,
-        SUPER_ADMIN_BASE_PATH,
-        '/super-admin/companies/comp_xyz/overview',
-      ),
-    ).toEqual({
-      destinationId: 'customers',
-      childId: 'companies',
+      destinationId: 'tenants',
     });
   });
 });
@@ -262,12 +380,23 @@ describe('Super Admin Application Registration', () => {
     expect(childPaths).toContain('dashboard');
     expect(childPaths).toContain('login');
     expect(childPaths).toContain('tenants');
-    expect(childPaths).toContain('companies');
+    expect(childPaths).toContain('tenants/details');
     expect(childPaths).toContain('provisioning');
+    expect(childPaths).toContain('subscriptions/plans');
+    expect(childPaths).toContain('subscriptions/tenants');
+    expect(childPaths).toContain('subscriptions/entitlements');
+    expect(childPaths).toContain('applications/catalog');
+    expect(childPaths).toContain('applications/modules');
+    expect(childPaths).toContain('audit-logs');
+    expect(childPaths).toContain('platform-admins');
+    expect(childPaths).toContain('operations/health');
+    expect(childPaths).toContain('operations/jobs');
+    expect(childPaths).toContain('support/cases');
+    expect(childPaths).toContain('support/access');
+    expect(childPaths).toContain('settings');
+    expect(childPaths).toContain('companies');
     expect(childPaths).toContain('users');
     expect(childPaths).toContain('company-admins');
     expect(childPaths).toContain('modules');
-    expect(childPaths).toContain('audit-logs');
-    expect(childPaths).toContain('settings');
   });
 });

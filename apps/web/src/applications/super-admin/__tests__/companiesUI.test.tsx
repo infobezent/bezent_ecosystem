@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import { CompaniesPage } from '../pages/CompaniesPage';
 import { CompanyDetailsPage } from '../pages/CompanyDetailsPage';
-import { superAdminApi, type CompanyRecord, type TenantRecord } from '../api/superAdminApi';
+import { type CompanyRecord, type TenantRecord } from '../api/superAdminApi';
 import { superAdminNavigation } from '../navigation/superAdminNavigation';
+import { superAdminRoutes } from '../routes/superAdminRoutes';
 
 vi.mock('../api/superAdminApi', async () => {
   const actual =
@@ -452,22 +453,24 @@ describe('Super Admin Companies — Frontend UI & Regression Suite', () => {
   });
 
   describe('Navigation & Information Architecture Invariants', () => {
-    it('36 & 37. Super Admin navigation catalog maps Customers -> Companies correctly', () => {
-      const customersGroup = superAdminNavigation.destinations.find((g) => g.id === 'customers');
-      expect(customersGroup).toBeDefined();
-
-      const companiesItem = customersGroup?.children?.find((i) => i.id === 'companies');
-      expect(companiesItem).toBeDefined();
-      expect(companiesItem?.path).toBe('companies');
+    it('36 & 37. Super Admin deep link preserves companies route', () => {
+      const rootRoute = superAdminRoutes[0];
+      const childPaths = (rootRoute?.children ?? []).map((c) => c.path);
+      expect(childPaths).toContain('companies');
+      expect(childPaths).toContain('companies/:companyId');
     });
 
-    it('38 & 39. Super Admin Main Nav count remains exactly 4 with zero unwanted More item', () => {
-      expect(superAdminNavigation.destinations.length).toBe(4);
+    it('38 & 39. Super Admin Main Nav count matches the 8 canonical groups', () => {
+      expect(superAdminNavigation.destinations.length).toBe(8);
       expect(superAdminNavigation.destinations.map((g) => g.id)).toEqual([
         'overview',
-        'customers',
-        'access',
+        'tenants',
+        'subscriptions',
+        'applications',
         'governance',
+        'operations',
+        'support',
+        'settings',
       ]);
     });
   });

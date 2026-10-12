@@ -9,6 +9,8 @@ import {
   Stack,
   Actions,
   CardTitle,
+  InternationalPhoneInput,
+  LocaleDatePicker,
 } from '../../../../design-system/components';
 import type {
   OrganizationMasters,
@@ -161,12 +163,12 @@ export function NewHireModal({ isOpen, onClose, masters, onSubmit }: NewHireModa
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              <Input
+              <InternationalPhoneInput
                 id="nh-phone"
                 label="Phone Number"
-                type="tel"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(val) => setPhone(val)}
+                defaultCountry="IN"
               />
             </FormGrid>
           </Stack>
@@ -210,13 +212,12 @@ export function NewHireModal({ isOpen, onClose, masters, onSubmit }: NewHireModa
                 options={locationOptions}
                 onChange={(e) => setLocationId(e.target.value)}
               />
-              <Input
+              <LocaleDatePicker
                 id="nh-joining-date"
                 label="Joining Date *"
-                type="date"
                 required
                 value={joiningDate}
-                onChange={(e) => setJoiningDate(e.target.value)}
+                onChange={(val) => setJoiningDate(val)}
               />
             </FormGrid>
 

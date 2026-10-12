@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
-import { Alert, Button, Inline, Input, Stack } from '../../design-system/components';
+import { Alert, Button, Inline, Input, Stack, BezentLogo } from '../../design-system/components';
 import { BezentIcon } from '../../design-system/icons';
 import { useTheme } from '../../app/providers/ThemeProvider';
 import { authApi, AuthApiError, type OtpChallenge } from './authApi';
@@ -236,9 +236,7 @@ export function LoginPage() {
           <Stack gap="lg">
             <Stack gap="xs" align="center">
               <div className="bezent-login__mark-container">
-                <span className="bezent-login__mark" aria-hidden="true">
-                  <BezentIcon name="security" size={26} color="currentColor" />
-                </span>
+                <BezentLogo size={64} />
               </div>
               <h1 className="bezent-login__title">Sign in to BEZENT</h1>
               <p className="bezent-login__subtitle">

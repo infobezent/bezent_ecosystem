@@ -12,8 +12,11 @@ export * from './navigation/companyAdminNavigation';
 export * from './routes/companyAdminRoutes';
 
 /**
- * Company Admin Platform Application Definition
- * Registered in global application catalog (applications.ts) inside canonical AppShell.
+ * Delegated Company Administration Workspace Adapter (ADR-014, ADR-026).
+ * Company Admin is an authority/scope within the Tenant Administration governance model,
+ * not a separate commercial BEZENT Application.
+ * This adapter mounts company-scoped administration routes under `/company-admin/*` with
+ * strict company-boundary authorization.
  */
 export const companyAdminApplication: BezentApplication = {
   id: 'company-admin',

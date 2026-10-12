@@ -21,7 +21,6 @@ import { signInForTest } from '../../__tests__/support/testSession.js';
 import { ValidationError } from '../../../app/errors/AppError.js';
 import {
   validateCreateDepartment,
-  validateUpdateDepartment,
   validateSetDepartmentStatus,
 } from '../validation/department.schema.js';
 import { OrganizationRepository } from '../repository/organization.repository.js';

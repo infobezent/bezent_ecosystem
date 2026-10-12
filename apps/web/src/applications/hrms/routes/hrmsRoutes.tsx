@@ -6,6 +6,16 @@ import { EmployeeAdministrationPage } from '../employee-administration';
 import { DocumentsPage } from '../documents';
 import { SettingsPage } from '../settings';
 import { EmployeeDirectoryPage, EmployeeProfilePage, EMPLOYEES_PATH } from '../employees';
+import {
+  AttendanceOverviewPage,
+  DailyAttendanceLogPage,
+  MonthlyAttendanceSummaryPage,
+  PunchLogsPage,
+  AttendanceRegularizationPage,
+  AttendanceOnDutyPage,
+  AttendanceExceptionsPage,
+  AttendanceReportsPage,
+} from '../attendance';
 import { destinationPath } from '../../../shared/utils/navigation';
 import { useAuth } from '../../../platform/auth';
 import { landingPath } from '../../../platform/auth/landing';
@@ -78,8 +88,8 @@ export const hrmsRoutes: RouteObject[] = [
       ...hrmsNavigation.destinations.flatMap((destination): RouteObject[] => {
         const isAdministration = destination.id === 'administration';
         const isSettings = destination.id === 'settings';
-        // Administration is a navigation group (no overview page); it lands on
-        // its first child, the canonical Employee Directory.
+        const isAttendance = destination.id === 'attendance';
+        // Administration lands on Employees; Attendance lands on Overview.
         return [
           {
             path: destination.segment,
@@ -87,6 +97,8 @@ export const hrmsRoutes: RouteObject[] = [
               <Navigate to={EMPLOYEES_PATH} replace />
             ) : isSettings ? (
               <SettingsPage />
+            ) : isAttendance ? (
+              <Navigate to="/hrms/attendance/overview" replace />
             ) : (
               <ModulePlaceholder
                 application={APPLICATION}
@@ -108,6 +120,22 @@ export const hrmsRoutes: RouteObject[] = [
                 <DocumentsPage />
               ) : isSettings ? (
                 <SettingsPage />
+              ) : isAttendance && child.id === 'overview' ? (
+                <AttendanceOverviewPage />
+              ) : isAttendance && child.id === 'daily-log' ? (
+                <DailyAttendanceLogPage />
+              ) : isAttendance && child.id === 'monthly-summary' ? (
+                <MonthlyAttendanceSummaryPage />
+              ) : isAttendance && child.id === 'punch-logs' ? (
+                <PunchLogsPage />
+              ) : isAttendance && child.id === 'regularization' ? (
+                <AttendanceRegularizationPage />
+              ) : isAttendance && child.id === 'on-duty' ? (
+                <AttendanceOnDutyPage />
+              ) : isAttendance && child.id === 'exceptions' ? (
+                <AttendanceExceptionsPage />
+              ) : isAttendance && child.id === 'reports' ? (
+                <AttendanceReportsPage />
               ) : (
                 <ModulePlaceholder
                   application={APPLICATION}
@@ -120,6 +148,11 @@ export const hrmsRoutes: RouteObject[] = [
           })),
         ];
       }),
+      // Legacy attendance policy path redirected to HR Settings -> Attendance
+      {
+        path: 'attendance/policies',
+        element: <Navigate to="/hrms/settings/attendance" replace />,
+      },
       // Canonical Employee Profile (Employees directory and Employee Administration both link here)
       {
         path: 'administration/employees/:employeeId',

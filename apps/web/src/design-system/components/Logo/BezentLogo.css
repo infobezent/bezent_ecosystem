@@ -1,0 +1,36 @@
+.bezent-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+.bezent-logo__mark {
+  display: inline-block;
+  flex-shrink: 0;
+  object-fit: contain;
+  border-radius: 50%;
+  aspect-ratio: 1 / 1;
+  transition:
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.18s ease;
+}
+
+.bezent-logo__mark:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 6px 16px rgba(130, 40, 218, 0.5));
+}
+
+.bezent-logo__wordmark {
+  font-family: var(--font-family-base, 'Inter', sans-serif);
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--text-brand, var(--text-primary, #0f172a));
+  user-select: none;
+}
+
+[data-theme='dark'] .bezent-logo__wordmark {
+  color: var(--text-primary, #f8fafc);
+}

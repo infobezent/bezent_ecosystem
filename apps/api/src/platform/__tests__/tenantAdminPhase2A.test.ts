@@ -65,7 +65,6 @@ describe('Tenant Admin Phase 2A: Backfill & Canonical APIs', () => {
   let caA1Token: string;
   let normAToken: string;
   let superToken: string;
-  let taBToken: string;
 
   beforeAll(async () => {
     if (!isDatabaseConfigured) return;
@@ -354,8 +353,7 @@ describe('Tenant Admin Phase 2A: Backfill & Canonical APIs', () => {
     const sSuper = await signInForTest(userSuperEmail);
     superToken = sSuper.token;
 
-    const sTaB = await signInForTest(userTaBEmail);
-    taBToken = sTaB.token;
+    await signInForTest(userTaBEmail);
   });
 
   // ==========================================

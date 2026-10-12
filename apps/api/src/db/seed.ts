@@ -21,6 +21,17 @@ import {
   employeeLeaveBalances,
   employeeTasks,
   employeeNotifications,
+  tenantAdmins,
+  plans,
+  planPrices,
+  planEntitlements,
+  tenantLifecycleEvents,
+  attendancePolicies,
+  attendanceGeneralSettings,
+  attendanceRegularizationSettings,
+  attendanceSecuritySettings,
+  attendancePayrollSettings,
+  attendanceDevices,
 } from './schema.js';
 import { and, eq } from 'drizzle-orm';
 import { createUnusableCredential } from '../platform/auth/security.js';
@@ -945,6 +956,490 @@ export async function seedDatabase() {
         'Access your profile, attendance, leave balance, documents and personal requests directly.',
       type: 'info',
       isRead: false,
+    });
+  }
+
+  // 14. Development Identity 5: tenantadmin@bezent.com (Dedicated Tenant Admin)
+  const tenantAdminEmail = 'tenantadmin@bezent.com';
+  const existingTaUser = await db.select().from(users).where(eq(users.email, tenantAdminEmail));
+  let tenantAdminUserId = 'usr_ta_bezent_01';
+  if (existingTaUser.length === 0) {
+    const { hash, salt } = createUnusableCredential(); // passwordless: signs in with Email OTP
+    await db.insert(users).values({
+      id: tenantAdminUserId,
+      email: tenantAdminEmail,
+      passwordHash: hash,
+      salt,
+      firstName: 'Tenant',
+      lastName: 'Admin',
+      status: 'active',
+      isSuperAdmin: false,
+    });
+  } else {
+    tenantAdminUserId = existingTaUser[0]!.id;
+    await db
+      .update(users)
+      .set({ status: 'active', isSuperAdmin: false })
+      .where(eq(users.id, tenantAdminUserId));
+  }
+
+  // Canonical Tenant Admin Authority (tenant_admins record)
+  // Strictly NO memberships, NO company_admin role, NO employee record
+  const existingTaRecord = await db
+    .select()
+    .from(tenantAdmins)
+    .where(and(eq(tenantAdmins.tenantId, tenantId), eq(tenantAdmins.userId, tenantAdminUserId)));
+  if (existingTaRecord.length === 0) {
+    await db.insert(tenantAdmins).values({
+      id: 'ta_bezent_demo_01',
+      tenantId,
+      userId: tenantAdminUserId,
+      status: 'active',
+      isPrimary: true,
+      jobTitle: 'Chief Technology Officer',
+    });
+  } else {
+    await db
+      .update(tenantAdmins)
+      .set({
+        status: 'active',
+        isPrimary: true,
+        jobTitle: 'Chief Technology Officer',
+      })
+      .where(eq(tenantAdmins.id, existingTaRecord[0]!.id));
+  }
+
+  // 17. Tenant Lifecycle Event Baseline
+  const existingLifecycle = await db
+    .select()
+    .from(tenantLifecycleEvents)
+    .where(eq(tenantLifecycleEvents.tenantId, tenantId));
+  if (existingLifecycle.length === 0) {
+    await db.insert(tenantLifecycleEvents).values({
+      id: 'tle_demo_init',
+      tenantId,
+      eventType: 'created',
+      newStatus: 'active',
+      reason: 'Initial platform demonstration tenant seed',
+      actorUserId: tenantAdminUserId,
+      actorEmail: tenantAdminEmail,
+      metadata: { seed: true, phase: 'phase_01' },
+    });
+  }
+
+  // 18. Commercial Subscription Plans Catalog (HRMS, CRM, PM)
+  const defaultPlans: (typeof plans.$inferInsert)[] = [
+    {
+      id: 'plan_hrms_starter',
+      applicationCode: 'hrms',
+      code: 'starter',
+      name: 'HRMS Starter',
+      description: 'Essential core workforce, attendance, and leave management for small teams.',
+      tier: 'starter',
+      status: 'active',
+      version: 1,
+      defaultSeats: 15,
+      minSeats: 1,
+      maxSeats: 50,
+      trialEligible: true,
+      trialDurationDays: 14,
+    },
+    {
+      id: 'plan_hrms_growth',
+      applicationCode: 'hrms',
+      code: 'growth',
+      name: 'HRMS Growth',
+      description:
+        'Advanced workforce administration with recruitment, onboarding, and document management.',
+      tier: 'growth',
+      status: 'active',
+      version: 1,
+      defaultSeats: 50,
+      minSeats: 5,
+      maxSeats: 200,
+      trialEligible: true,
+      trialDurationDays: 14,
+    },
+    {
+      id: 'plan_hrms_enterprise',
+      applicationCode: 'hrms',
+      code: 'enterprise',
+      name: 'HRMS Enterprise',
+      description:
+        'Full-spectrum HR suite with performance, custom reporting, and enterprise governance.',
+      tier: 'enterprise',
+      status: 'active',
+      version: 1,
+      defaultSeats: 200,
+      minSeats: 20,
+      trialEligible: false,
+      trialDurationDays: 0,
+    },
+    {
+      id: 'plan_crm_starter',
+      applicationCode: 'crm',
+      code: 'starter',
+      name: 'CRM Starter',
+      description: 'Lead and contact tracking for emerging sales teams.',
+      tier: 'starter',
+      status: 'active',
+      version: 1,
+      defaultSeats: 5,
+      minSeats: 1,
+      maxSeats: 20,
+      trialEligible: true,
+      trialDurationDays: 14,
+    },
+    {
+      id: 'plan_crm_growth',
+      applicationCode: 'crm',
+      code: 'growth',
+      name: 'CRM Growth',
+      description: 'Pipeline automation, deals, and customer interaction tracking.',
+      tier: 'growth',
+      status: 'active',
+      version: 1,
+      defaultSeats: 25,
+      minSeats: 5,
+      maxSeats: 100,
+      trialEligible: true,
+      trialDurationDays: 14,
+    },
+    {
+      id: 'plan_pm_starter',
+      applicationCode: 'project_management',
+      code: 'starter',
+      name: 'Project Management Starter',
+      description: 'Task boards, milestones, and basic team collaboration.',
+      tier: 'starter',
+      status: 'active',
+      version: 1,
+      defaultSeats: 10,
+      minSeats: 1,
+      maxSeats: 30,
+      trialEligible: true,
+      trialDurationDays: 14,
+    },
+    {
+      id: 'plan_pm_growth',
+      applicationCode: 'project_management',
+      code: 'growth',
+      name: 'Project Management Growth',
+      description: 'Sprint planning, resource workload management, and cross-project metrics.',
+      tier: 'growth',
+      status: 'active',
+      version: 1,
+      defaultSeats: 40,
+      minSeats: 5,
+      maxSeats: 150,
+      trialEligible: true,
+      trialDurationDays: 14,
+    },
+  ];
+
+  for (const p of defaultPlans) {
+    const existing = await db.select().from(plans).where(eq(plans.id, p.id));
+    if (existing.length === 0) {
+      await db.insert(plans).values(p);
+    }
+  }
+
+  // 19. Commercial Plan Prices
+  const defaultPrices: (typeof planPrices.$inferInsert)[] = [
+    {
+      id: 'price_hrms_starter_usd_m',
+      planId: 'plan_hrms_starter',
+      currency: 'USD',
+      billingInterval: 'monthly',
+      amountMinorUnits: 0, // Configurable template: 0 minor units pending finalized business pricing approval
+      status: 'active',
+    },
+    {
+      id: 'price_hrms_starter_inr_m',
+      planId: 'plan_hrms_starter',
+      currency: 'INR',
+      billingInterval: 'monthly',
+      amountMinorUnits: 0,
+      status: 'active',
+    },
+    {
+      id: 'price_hrms_growth_usd_m',
+      planId: 'plan_hrms_growth',
+      currency: 'USD',
+      billingInterval: 'monthly',
+      amountMinorUnits: 0,
+      status: 'active',
+    },
+    {
+      id: 'price_hrms_growth_inr_m',
+      planId: 'plan_hrms_growth',
+      currency: 'INR',
+      billingInterval: 'monthly',
+      amountMinorUnits: 0,
+      status: 'active',
+    },
+    {
+      id: 'price_hrms_ent_usd_m',
+      planId: 'plan_hrms_enterprise',
+      currency: 'USD',
+      billingInterval: 'monthly',
+      amountMinorUnits: 0,
+      status: 'active',
+    },
+  ];
+
+  for (const pr of defaultPrices) {
+    const existing = await db.select().from(planPrices).where(eq(planPrices.id, pr.id));
+    if (existing.length === 0) {
+      await db.insert(planPrices).values(pr);
+    } else {
+      await db
+        .update(planPrices)
+        .set({ amountMinorUnits: pr.amountMinorUnits, status: pr.status })
+        .where(eq(planPrices.id, pr.id));
+    }
+  }
+
+  // 20. Plan Entitlements
+  const defaultEntitlements: (typeof planEntitlements.$inferInsert)[] = [
+    {
+      id: 'ent_hrms_st_org',
+      planId: 'plan_hrms_starter',
+      applicationCode: 'hrms',
+      moduleCode: 'organization',
+      isEnabled: true,
+      limits: { maxDepartments: 10 },
+    },
+    {
+      id: 'ent_hrms_st_emp',
+      planId: 'plan_hrms_starter',
+      applicationCode: 'hrms',
+      moduleCode: 'employees',
+      isEnabled: true,
+      limits: { maxRecords: 50 },
+    },
+    {
+      id: 'ent_hrms_st_att',
+      planId: 'plan_hrms_starter',
+      applicationCode: 'hrms',
+      moduleCode: 'attendance',
+      isEnabled: true,
+    },
+    {
+      id: 'ent_hrms_st_leave',
+      planId: 'plan_hrms_starter',
+      applicationCode: 'hrms',
+      moduleCode: 'leave',
+      isEnabled: true,
+    },
+    {
+      id: 'ent_hrms_gw_rec',
+      planId: 'plan_hrms_growth',
+      applicationCode: 'hrms',
+      moduleCode: 'recruitment',
+      isEnabled: true,
+    },
+    {
+      id: 'ent_hrms_gw_onb',
+      planId: 'plan_hrms_growth',
+      applicationCode: 'hrms',
+      moduleCode: 'onboarding',
+      isEnabled: true,
+    },
+    {
+      id: 'ent_hrms_ent_all',
+      planId: 'plan_hrms_enterprise',
+      applicationCode: 'hrms',
+      moduleCode: 'all_modules',
+      isEnabled: true,
+      limits: { unmetered: true },
+    },
+  ];
+
+  for (const ent of defaultEntitlements) {
+    const existing = await db
+      .select()
+      .from(planEntitlements)
+      .where(eq(planEntitlements.id, ent.id));
+    if (existing.length === 0) {
+      await db.insert(planEntitlements).values(ent);
+    }
+  }
+
+  // 17. Default Attendance Policy
+  const existingPolicy = await db
+    .select()
+    .from(attendancePolicies)
+    .where(eq(attendancePolicies.companyId, companyId));
+
+  if (existingPolicy.length === 0) {
+    console.log('[Seed] Inserting default attendance policy...');
+    await db.insert(attendancePolicies).values({
+      id: 'att_pol_demo_01',
+      tenantId,
+      companyId,
+      policyName: 'Standard Corporate Attendance Policy',
+      version: 1,
+      status: 'published',
+      description: 'Default enterprise policy applying to all departments',
+      scope: 'company',
+      overridesPriority: 0,
+      captureMethods: ['web', 'mobile', 'biometric'],
+      breakDeductionMethod: 'scheduled',
+      enableLateTracking: true,
+      gracePeriodMinutes: 15,
+      enableEarlyExitTracking: true,
+      halfDayThresholdHours: '4.00',
+      fullDayThresholdHours: '8.00',
+      missingPunchPolicy: 'flag_exception',
+      allowRegularization: true,
+      regularizationCutoffDays: 7,
+      requiresApproval: true,
+      effectiveFrom: '2026-01-01',
+      penaltyRules: {
+        enabled: true,
+        lateMarksThreshold: 3,
+        penaltyUnit: 'half_day',
+        period: 'monthly',
+      },
+      odRules: {
+        enabled: true,
+        odTypes: ['Client Visit', 'Business Trip', 'Training / Conference', 'Field Assignment'],
+        allowHalfDay: true,
+        allowHourly: true,
+        allowBackdated: true,
+        maxBackdatedDays: 30,
+        requiresApproval: true,
+        countAsPresent: true,
+      },
+      classificationRules: {
+        minHoursForPresent: 8.0,
+        minHoursForHalfDay: 4.0,
+        insufficientHoursAction: 'half_day',
+      },
+      isActive: true,
+    });
+  }
+
+  // 18. Default Attendance General Settings
+  const existingAttGen = await db
+    .select()
+    .from(attendanceGeneralSettings)
+    .where(eq(attendanceGeneralSettings.companyId, companyId));
+  if (existingAttGen.length === 0) {
+    await db.insert(attendanceGeneralSettings).values({
+      id: 'att_gen_demo_01',
+      tenantId,
+      companyId,
+      timezone: 'Asia/Kolkata',
+      dayBoundaryTime: '00:00:00',
+      trackingStartDate: '2026-01-01',
+      processingMode: 'realtime',
+      manualEntryAllowed: true,
+      employeeVisibility: 'self_only',
+      defaultHistoryViewDays: 30,
+      alertPreferences: {
+        notifyOnMissingPunch: true,
+        notifyOnLateArrival: true,
+        notifyApproverOnRegularization: true,
+        digestFrequency: 'daily',
+      },
+    });
+  }
+
+  // 19. Default Attendance Regularization Settings
+  const existingReg = await db
+    .select()
+    .from(attendanceRegularizationSettings)
+    .where(eq(attendanceRegularizationSettings.companyId, companyId));
+  if (existingReg.length === 0) {
+    await db.insert(attendanceRegularizationSettings).values({
+      id: 'att_reg_demo_01',
+      tenantId,
+      companyId,
+      isEnabled: true,
+      allowedCorrectionTypes: ['missed_in', 'missed_out', 'time_adjustment', 'both_missing'],
+      submissionWindowDays: 7,
+      maxRequestsPerMonth: 3,
+      requireReason: true,
+      requireEvidence: false,
+      approvalHierarchy: 'manager_then_hr',
+      autoApproveGraceMinutes: 0,
+      blockOnPayrollLock: true,
+      allowWithdrawal: true,
+    });
+  }
+
+  // 20. Default Attendance Security Settings
+  const existingSec = await db
+    .select()
+    .from(attendanceSecuritySettings)
+    .where(eq(attendanceSecuritySettings.companyId, companyId));
+  if (existingSec.length === 0) {
+    await db.insert(attendanceSecuritySettings).values({
+      id: 'att_sec_demo_01',
+      tenantId,
+      companyId,
+      enableGps: true,
+      geofenceConfigs: [
+        {
+          locationId: 'loc_chn_01',
+          name: 'Chennai HQ Campus',
+          latitude: 12.9716,
+          longitude: 80.2437,
+          radiusMeters: 250,
+          enforceStrict: false,
+        },
+      ],
+      ipAllowlist: ['192.168.1.0/24', '10.0.0.0/16'],
+      enforceIpRestriction: false,
+      maxDevicesPerEmployee: 2,
+      allowSharedKiosk: true,
+      detectMockLocation: true,
+      detectImpossibleTravel: true,
+      rapidPunchThrottlingSeconds: 60,
+      flagVpnProxy: true,
+    });
+  }
+
+  // 21. Default Attendance Payroll Settings
+  const existingPay = await db
+    .select()
+    .from(attendancePayrollSettings)
+    .where(eq(attendancePayrollSettings.companyId, companyId));
+  if (existingPay.length === 0) {
+    await db.insert(attendancePayrollSettings).values({
+      id: 'att_pay_demo_01',
+      tenantId,
+      companyId,
+      cycleType: 'calendar_month',
+      cutoffDay: 30,
+      requireApprovalBeforeLock: true,
+      autoLockOnCutoff: false,
+      blockingSeverity: 'warning_only',
+    });
+  }
+
+  // 22. Sample Biometric Terminal Device
+  const existingDev = await db
+    .select()
+    .from(attendanceDevices)
+    .where(eq(attendanceDevices.companyId, companyId));
+  if (existingDev.length === 0) {
+    await db.insert(attendanceDevices).values({
+      id: 'att_dev_demo_01',
+      tenantId,
+      companyId,
+      locationId: 'loc_chn_01',
+      deviceName: 'Chennai Main Gate Terminal',
+      deviceCode: 'DEV-CHN-01',
+      deviceType: 'biometric_facial',
+      serialNumber: 'ZK-TECO-FACIAL-99201',
+      ipAddress: '192.168.1.150',
+      port: 4370,
+      status: 'testing',
+      firmwareVersion: 'v2.4.1-build88',
+      metadata: { protocol: 'ZK-Pull-SDK', syncIntervalSec: 30 },
     });
   }
 

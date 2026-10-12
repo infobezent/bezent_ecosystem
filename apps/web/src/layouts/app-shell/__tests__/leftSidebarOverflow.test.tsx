@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { LeftSidebar, type LeftSidebarProps } from '../LeftSidebar';
+import { LeftSidebar } from '../LeftSidebar';
 import type { ShellNavItem } from '../types';
 
 describe('LeftSidebar Generic Overflow & Responsive Launcher Engine', () => {

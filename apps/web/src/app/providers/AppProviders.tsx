@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { ThemeProvider } from './ThemeProvider';
 import { AuthProvider } from '../../platform/auth';
 import { CompanyAdminProvider } from '../../applications/company-admin/context/CompanyAdminContext';
-import { EssProvider } from '../../applications/ess/context/EssContext';
+import { EssProvider } from '../../applications/hrms/ess/context/EssContext';
 
 interface AppProvidersProps {
   children: ReactNode;

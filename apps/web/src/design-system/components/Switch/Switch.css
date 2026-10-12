@@ -5,6 +5,7 @@
 .bezent-switch {
   display: inline-flex;
   align-items: center;
+  min-height: 42px;
   gap: 10px;
   cursor: pointer;
   user-select: none;
@@ -67,6 +68,10 @@
 }
 
 /* ── Compact Size ── */
+.bezent-switch--compact {
+  min-height: 32px;
+}
+
 .bezent-switch--compact .bezent-switch-track {
   width: 32px;
   height: 18px;

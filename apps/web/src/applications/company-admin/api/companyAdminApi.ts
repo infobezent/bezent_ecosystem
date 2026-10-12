@@ -71,6 +71,11 @@ export interface AuthorizedCompanySummary {
   tenantId: string;
   tenantName: string;
   role: string;
+  assignedRoles?: string[];
+  authoritySource?: 'tenant_admin' | 'company_admin' | 'dual' | 'platform_oversight';
+  authorityLabel?: string;
+  isTenantAdmin?: boolean;
+  isMember?: boolean;
 }
 
 export interface CompanyAdminDashboard {
@@ -164,6 +169,7 @@ export interface CompanyUserItem {
   role: 'company_admin' | 'hr_manager' | 'employee' | 'user';
   membershipStatus: 'active' | 'inactive' | 'revoked';
   userStatus: 'active' | 'inactive' | 'suspended';
+  invitationStatus?: 'pending' | 'accepted' | 'expired' | 'cancelled' | null;
   lastLoginAt: string | null;
   joinedAt: string;
 }
@@ -419,6 +425,19 @@ export const companyAdminApi = {
       `/invitations/${id}`,
       {
         method: 'DELETE',
+      },
+      companyId,
+    );
+  },
+
+  async acceptInvitation(
+    idOrToken: string,
+    companyId?: string,
+  ): Promise<{ message: string; invitationId: string; status: string }> {
+    return request(
+      `/invitations/${idOrToken}/accept`,
+      {
+        method: 'POST',
       },
       companyId,
     );
