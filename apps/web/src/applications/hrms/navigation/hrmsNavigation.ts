@@ -153,10 +153,14 @@ export const HRMS_NAV_DESTINATIONS: readonly NavDestination[] = [
     quickAccess: true,
     permissionKey: view('attendance'),
     children: [
+      child('overview', 'Overview', 'dashboard'),
       child('daily-log', 'Daily Log', 'clock'),
       child('monthly-summary', 'Monthly Summary', 'calendar'),
+      child('punch-logs', 'Punch Logs', 'attendance'),
       child('regularization', 'Regularization', 'requests'),
-      child('policies', 'Policies', 'sop'),
+      child('on-duty', 'On-Duty', 'operations'),
+      child('exceptions', 'Exceptions', 'warning'),
+      child('reports', 'Reports', 'reports'),
     ],
   },
   {

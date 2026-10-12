@@ -21,7 +21,8 @@ export interface EssTodayAttendance {
   date: string;
   checkInTime: string | null;
   checkOutTime: string | null;
-  status: 'present' | 'absent' | 'half_day' | 'on_leave' | 'holiday' | 'not_checked_in';
+  status:
+    'present' | 'absent' | 'half_day' | 'on_leave' | 'holiday' | 'incomplete' | 'not_checked_in';
   workLocation: string;
 }
 

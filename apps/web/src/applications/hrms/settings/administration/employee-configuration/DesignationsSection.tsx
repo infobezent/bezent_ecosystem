@@ -5,6 +5,7 @@ import {
   Button,
   Card,
   CardBody,
+  Checkbox,
   EmptyState,
   FormField,
   FormGrid,
@@ -605,18 +606,12 @@ export function DesignationsSection({
                         this designation. Changing the department mapping will not move or modify
                         those employees.
                       </span>
-                      <Inline gap="xs" align="center">
-                        <input
-                          type="checkbox"
-                          id="desig-confirm-move"
-                          checked={confirmStructuralMove}
-                          onChange={(e) => setConfirmStructuralMove(e.target.checked)}
-                        />
-                        <label htmlFor="desig-confirm-move">
-                          I confirm this structural mapping change without altering employee
-                          assignments.
-                        </label>
-                      </Inline>
+                      <Checkbox
+                        id="desig-confirm-move"
+                        checked={confirmStructuralMove}
+                        onChange={(e) => setConfirmStructuralMove(e.target.checked)}
+                        label="I confirm this structural mapping change without altering employee assignments."
+                      />
                     </Stack>
                   </Alert>
                 )}

@@ -4,12 +4,15 @@ import {
   useRef,
   useEffect,
   useCallback,
+  useMemo,
   type InputHTMLAttributes,
   type ChangeEvent,
   type KeyboardEvent,
   type MouseEvent as ReactMouseEvent,
 } from 'react';
 import { BezentIcon } from '../../icons';
+import { CountryFlag } from '../CountryFlag';
+import { getAllCountries, getCountryFlagEmoji } from '../../../shared/globalization';
 import './PhoneInput.css';
 
 export type PhoneInputSize = 'sm' | 'md' | 'lg';
@@ -17,56 +20,29 @@ export type PhoneInputSize = 'sm' | 'md' | 'lg';
 export interface CountryCodeOption {
   value: string;
   label: string;
+  countryCode?: string;
   flag?: string;
 }
 
-export const COUNTRY_FLAG_MAP: Record<string, string> = {
-  '+91': '🇮🇳',
-  '+1': '🇺🇸',
-  '+1-CA': '🇨🇦',
-  '+44': '🇬🇧',
-  '+971': '🇦🇪',
-  '+65': '🇸🇬',
-  '+61': '🇦🇺',
-  '+49': '🇩🇪',
-  '+33': '🇫🇷',
-  '+81': '🇯🇵',
-  '+86': '🇨🇳',
-  '+966': '🇸🇦',
-  '+974': '🇶🇦',
-  '+968': '🇴🇲',
-  '+965': '🇰🇼',
-  '+973': '🇧🇭',
-  '+60': '🇲🇾',
-  '+62': '🇮🇩',
-  '+63': '🇵🇭',
-  '+64': '🇳🇿',
-  '+27': '🇿🇦',
-  '+41': '🇨🇭',
-  '+31': '🇳🇱',
-  '+46': '🇸🇪',
-  '+47': '🇳🇴',
-  '+45': '🇩🇰',
-  '+353': '🇮🇪',
-};
+export const COUNTRY_FLAG_MAP: Record<string, string> = getAllCountries().reduce(
+  (acc, c) => {
+    acc[c.callingCode] = c.flagEmoji || getCountryFlagEmoji(c.code);
+    return acc;
+  },
+  {} as Record<string, string>,
+);
 
 export function getCountryFlag(value: string, explicitFlag?: string): string {
   if (explicitFlag) return explicitFlag;
   return COUNTRY_FLAG_MAP[value] || '🌐';
 }
 
-export const DEFAULT_COUNTRY_CODE_OPTIONS: CountryCodeOption[] = [
-  { value: '+91', label: '+91 (IN)', flag: '🇮🇳' },
-  { value: '+1', label: '+1 (US)', flag: '🇺🇸' },
-  { value: '+44', label: '+44 (UK)', flag: '🇬🇧' },
-  { value: '+971', label: '+971 (UAE)', flag: '🇦🇪' },
-  { value: '+65', label: '+65 (SG)', flag: '🇸🇬' },
-  { value: '+61', label: '+61 (AU)', flag: '🇦🇺' },
-  { value: '+49', label: '+49 (DE)', flag: '🇩🇪' },
-  { value: '+33', label: '+33 (FR)', flag: '🇫🇷' },
-  { value: '+81', label: '+81 (JP)', flag: '🇯🇵' },
-  { value: '+1-CA', label: '+1 (CA)', flag: '🇨🇦' },
-];
+export const DEFAULT_COUNTRY_CODE_OPTIONS: CountryCodeOption[] = getAllCountries().map((c) => ({
+  value: c.callingCode,
+  label: `${c.callingCode} (${c.code})`,
+  countryCode: c.code,
+  flag: c.flagEmoji || getCountryFlagEmoji(c.code),
+}));
 
 export interface PhoneInputProps extends Omit<
   InputHTMLAttributes<HTMLInputElement>,
@@ -112,6 +88,7 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(function
   ref,
 ) {
   const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [internalCountryCode, setInternalCountryCode] = useState<string>(
     countryCode !== undefined ? countryCode : defaultCountryCode,
   );
@@ -129,6 +106,14 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(function
   }, [countryCode]);
 
   const activeCountryCode = countryCode !== undefined ? countryCode : internalCountryCode;
+
+  const filteredCountryOptions = useMemo(() => {
+    if (!searchQuery.trim()) return countryCodeOptions;
+    const q = searchQuery.toLowerCase();
+    return countryCodeOptions.filter(
+      (opt) => opt.label.toLowerCase().includes(q) || opt.value.toLowerCase().includes(q),
+    );
+  }, [countryCodeOptions, searchQuery]);
 
   const selectedOption =
     countryCodeOptions.find((opt) => opt.value === activeCountryCode) ||
@@ -263,7 +248,11 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(function
             aria-label="Select Country Code"
           >
             <span className="bezent-phone-input-flag" aria-hidden="true">
-              {currentFlag}
+              {selectedOption?.countryCode ? (
+                <CountryFlag countryCode={selectedOption.countryCode} size="sm" />
+              ) : (
+                currentFlag
+              )}
             </span>
             <span className="bezent-phone-input-code">
               {selectedOption ? selectedOption.label : activeCountryCode}
@@ -295,37 +284,53 @@ export const PhoneInput = forwardRef<HTMLInputElement, PhoneInputProps>(function
 
           {/* Floating Options Dropdown */}
           {isOpen && (
-            <ul
-              ref={listboxRef}
-              role="listbox"
-              aria-label="Country Codes"
-              className="bezent-phone-input-dropdown"
-            >
-              {countryCodeOptions.map((opt, idx) => {
-                const isSelected = opt.value === activeCountryCode;
-                const isHighlighted = idx === highlightedIndex;
-                const flag = getCountryFlag(opt.value, opt.flag);
-                return (
-                  <li
-                    key={opt.value}
-                    role="option"
-                    aria-selected={isSelected}
-                    className={`bezent-phone-input-option ${isSelected ? 'is-selected' : ''} ${
-                      isHighlighted ? 'is-highlighted' : ''
-                    }`.trim()}
-                    onClick={() => handleSelectCountry(opt)}
-                  >
-                    <div className="bezent-phone-input-option-left">
-                      <span className="bezent-phone-input-flag" aria-hidden="true">
-                        {flag}
-                      </span>
-                      <span className="bezent-phone-input-option-label">{opt.label}</span>
-                    </div>
-                    {isSelected && <BezentIcon name="check" size={13} />}
-                  </li>
-                );
-              })}
-            </ul>
+            <div className="bezent-phone-input-dropdown-panel">
+              <div className="bezent-phone-input-dropdown-search">
+                <input
+                  type="text"
+                  className="bezent-phone-input-search-input"
+                  placeholder="Search countries..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setHighlightedIndex(0);
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  autoFocus
+                />
+              </div>
+              <ul
+                ref={listboxRef}
+                role="listbox"
+                aria-label="Country Codes"
+                className="bezent-phone-input-dropdown"
+              >
+                {filteredCountryOptions.map((opt, idx) => {
+                  const isSelected = opt.value === activeCountryCode;
+                  const isHighlighted = idx === highlightedIndex;
+                  const flag = getCountryFlag(opt.value, opt.flag);
+                  return (
+                    <li
+                      key={`${opt.value}-${idx}`}
+                      role="option"
+                      aria-selected={isSelected}
+                      className={`bezent-phone-input-option ${isSelected ? 'is-selected' : ''} ${
+                        isHighlighted ? 'is-highlighted' : ''
+                      }`.trim()}
+                      onClick={() => handleSelectCountry(opt)}
+                    >
+                      <div className="bezent-phone-input-option-left">
+                        <span className="bezent-phone-input-flag" aria-hidden="true">
+                          {flag}
+                        </span>
+                        <span className="bezent-phone-input-option-label">{opt.label}</span>
+                      </div>
+                      {isSelected && <BezentIcon name="check" size={13} />}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           )}
         </div>
 

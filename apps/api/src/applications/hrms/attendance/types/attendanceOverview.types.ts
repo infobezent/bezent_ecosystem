@@ -1,0 +1,168 @@
+/**
+ * BEZENT HRMS — Attendance Overview V1.0 Types
+ * Strongly typed contracts for the Enterprise Operational Control Center.
+ */
+
+export type OverviewRoleScope =
+  'hr_admin' | 'hr_executive' | 'manager' | 'employee' | 'payroll_user';
+
+export interface OverviewAccessScope {
+  role: OverviewRoleScope;
+  isCompanyWide: boolean;
+  departmentId?: string;
+  employeeId?: string;
+  canViewPayrollReadiness: boolean;
+}
+
+export interface TodayAttendanceKpis {
+  date: string;
+  timezone: string;
+  totalEligibleEmployees: number;
+  presentCount: number; // Present equivalents (1.0 for full, 0.5 for half)
+  absentCount: number; // Absent equivalents
+  onLeaveCount: number; // Leave coverage equivalents
+  onDutyCount: number; // OD coverage equivalents
+  lateArrivalsCount: number;
+  missingPunchCount: number;
+  pendingProcessingCount: number;
+  halfDayCount: number;
+  attendanceRate: number | null; // (present / eligible) * 100
+  processingCompletenessPercent: number; // (finalized / eligible) * 100
+  isFuture: boolean;
+  asOf: string;
+}
+
+export interface AttendanceTrendItem {
+  date: string;
+  dayOfWeek: string;
+  scheduledDayEquivalents: number;
+  presentEquivalentDays: number;
+  absentEquivalentDays: number;
+  leaveCoverageEquivalents: number;
+  odCoverageEquivalents: number;
+  attendanceRate: number | null;
+  absenceRate: number | null;
+  lateOccurrences: number;
+  isFuture: boolean;
+}
+
+export interface AttendanceTrendsResult {
+  range: '7d' | '30d' | 'custom';
+  startDate: string;
+  endDate: string;
+  items: AttendanceTrendItem[];
+  avgAttendanceRate: number | null;
+  avgAbsenceRate: number | null;
+  totalLateOccurrences: number;
+}
+
+export interface DepartmentComparisonItem {
+  departmentId: string;
+  departmentName: string;
+  eligibleEmployees: number;
+  presentEquivalents: number;
+  absentEquivalents: number;
+  leaveCoverage: number;
+  odCoverage: number;
+  attendanceRate: number | null;
+  missingPunchCount: number;
+  unresolvedExceptions: number;
+}
+
+export type ActionQueueType =
+  | 'pending_regularization'
+  | 'pending_on_duty'
+  | 'unresolved_exceptions'
+  | 'missing_punch_issues'
+  | 'pending_monthly_review'
+  | 'payroll_readiness_blockers';
+
+export interface ActionQueueItem {
+  actionType: ActionQueueType;
+  title: string;
+  description: string;
+  authorizedPendingCount: number;
+  severity: 'info' | 'warning' | 'danger';
+  oldestPendingAgeDays: number | null;
+  targetRoute: string;
+  filterParams: Record<string, string>;
+  lastUpdated: string;
+}
+
+export interface ProcessingHealthResult {
+  date: string;
+  eligibleWorkdays: number;
+  processedWorkdays: number;
+  pendingWorkdays: number;
+  failedWorkdays: number;
+  missingScheduleCount: number;
+  unresolvedBlockingExceptions: number;
+  staleMonthlySummaries: number;
+  processingSuccessRate: number | null; // (processed / eligible) * 100
+  denominatorDescription: string;
+  status: 'healthy' | 'degraded' | 'critical' | 'upcoming';
+  asOf: string;
+}
+
+export interface MonthlyPayrollReadinessOverview {
+  month: string;
+  isAuthorized: boolean;
+  totalInScope: number;
+  readyCount: number;
+  needsReviewCount: number;
+  blockedCount: number;
+  calculatingCount: number;
+  reviewedCount: number;
+  pendingReviewCount: number;
+  reopenedCount: number;
+  lockedCount: number;
+  targetRoute: string;
+  filterParams: Record<string, string>;
+}
+
+export interface AttendanceOverviewResult {
+  date: string;
+  timezone: string;
+  asOf: string;
+  dataFreshness: 'realtime' | 'cached';
+  scope: OverviewAccessScope;
+
+  todayKpis: TodayAttendanceKpis;
+  trends: AttendanceTrendsResult;
+  departments: DepartmentComparisonItem[];
+  actionQueue: ActionQueueItem[];
+  processingHealth: ProcessingHealthResult;
+  monthlyReadiness: MonthlyPayrollReadinessOverview;
+
+  // Backwards compatibility for legacy frontend consumers
+  expectedCount: number;
+  presentCount: number;
+  absentCount: number;
+  lateCount: number;
+  onLeaveCount: number;
+  missingPunchCount: number;
+  halfDayCount: number;
+  pendingRegularizationCount: number;
+  attendanceRate: number;
+  departmentBreakdown: Array<{
+    departmentId: string;
+    departmentName: string;
+    present: number;
+    total: number;
+  }>;
+  recentTrends: Array<{
+    date: string;
+    present: number;
+    absent: number;
+    late: number;
+  }>;
+}
+
+export interface OverviewFilterParams {
+  date?: string;
+  month?: string;
+  trendRange?: '7d' | '30d' | 'custom';
+  startDate?: string;
+  endDate?: string;
+  departmentId?: string;
+}

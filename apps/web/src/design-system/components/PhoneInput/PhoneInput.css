@@ -176,18 +176,47 @@
 }
 
 /* ── Country Dropdown Popover ── */
-.bezent-phone-input-dropdown {
+.bezent-phone-input-dropdown-panel {
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
-  min-width: 180px;
-  max-height: 240px;
-  overflow-y: auto;
+  min-width: 200px;
+  max-height: 280px;
+  display: flex;
+  flex-direction: column;
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #dde3ea);
   border-radius: 6px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   z-index: 100;
+  overflow: hidden;
+}
+
+.bezent-phone-input-dropdown-search {
+  padding: 6px;
+  border-bottom: 1px solid var(--border-subtle, #eef2f6);
+}
+
+.bezent-phone-input-search-input {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 12.5px;
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: 4px;
+  outline: none;
+  background: var(--bg-surface, #ffffff);
+  color: var(--text-primary, #000000);
+  box-sizing: border-box;
+}
+
+.bezent-phone-input-search-input:focus {
+  border-color: var(--border-focus, #7cc4fa);
+}
+
+.bezent-phone-input-dropdown {
+  flex: 1;
+  max-height: 220px;
+  overflow-y: auto;
   list-style: none;
   margin: 0;
   padding: 4px;

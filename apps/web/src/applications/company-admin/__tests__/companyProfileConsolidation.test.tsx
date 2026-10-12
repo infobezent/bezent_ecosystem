@@ -1,11 +1,11 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { ReactNode } from 'react';
 import { CompanyProfilePage } from '../pages/CompanyProfilePage';
 import { CompanyOrganizationPage, ORGANIZATION_TABS } from '../pages/CompanyOrganizationPage';
 import { AuthContext, type AuthContextValue } from '../../../platform/auth/AuthProvider';
 import { CompanyAdminProvider } from '../context/CompanyAdminContext';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 
 const mockPermissions = [
   'company.profile.read',

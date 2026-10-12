@@ -15,12 +15,7 @@ import {
 } from '../../../db/schema.js';
 import { signInForTest } from '../../__tests__/support/testSession.js';
 import { hashPassword } from '../../auth/security.js';
-import { ValidationError } from '../../../app/errors/AppError.js';
-import {
-  validateCreateWorkLocation,
-  validateUpdateWorkLocation,
-  isValidIanaTimezone,
-} from '../validation/workLocation.schema.js';
+import { isValidIanaTimezone } from '../validation/workLocation.schema.js';
 
 describe('BEZENT HRMS — Organization Work Locations Integration & Domain Tests', () => {
   const testTenantA = 'tenant_loc_test_a';
@@ -209,7 +204,6 @@ describe('BEZENT HRMS — Organization Work Locations Integration & Domain Tests
 
   let officeLocId: string;
   let branchLocId: string;
-  let remoteLocId: string;
 
   describe('Work Location V1 CRUD, Address & Lifecycle Rules', () => {
     // 1. Create Office with physical address
@@ -333,8 +327,6 @@ describe('BEZENT HRMS — Organization Work Locations Integration & Domain Tests
       expect(res.body.data.city).toBeNull();
       expect(res.body.data.country).toBeNull();
       expect(res.body.data.timezone).toBe('Asia/Kolkata');
-
-      remoteLocId = res.body.data.id;
     });
 
     // 6. Create Remote with optional address

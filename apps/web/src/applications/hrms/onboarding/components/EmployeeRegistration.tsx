@@ -344,9 +344,6 @@ export function EmployeeRegistration({
     setFormData((prev) => ({ ...prev, workingHours: val }));
   };
 
-  const _updateDocuments = (val: Chapter09DocumentsState) => {
-    setFormData((prev) => ({ ...prev, documents: val }));
-  };
 
   // General Form State
   const [employeeId, setEmployeeId] = useState(initialDraft?.employeeId || '');
@@ -415,7 +412,7 @@ export function EmployeeRegistration({
   );
 
   // Repeatable lists state for Personal, Onboarding, Skills, Emergency
-  const [familyMembers, setFamilyMembers] = useState([
+  const [, setFamilyMembers] = useState([
     {
       id: 'fam-1',
       name: 'Sunita Kumar',
@@ -426,7 +423,7 @@ export function EmployeeRegistration({
     { id: 'fam-2', name: 'Aarav Kumar', relationship: 'Child', dob: '2023-01-10', dependent: true },
   ]);
 
-  const [nominationDetails, setNominationDetails] = useState([
+  const [, setNominationDetails] = useState([
     {
       id: 'nom-1',
       nomineeName: 'Sunita Kumar',
@@ -436,7 +433,7 @@ export function EmployeeRegistration({
     },
   ]);
 
-  const [onboardingTasks, setOnboardingTasks] = useState([
+  const [, setOnboardingTasks] = useState([
     {
       id: 'tsk-1',
       taskDescription: 'Submit signed NDA & Confidentiality Agreement',
@@ -460,7 +457,7 @@ export function EmployeeRegistration({
     },
   ]);
 
-  const [assignedAssets, setAssignedAssets] = useState([
+  const [, setAssignedAssets] = useState([
     {
       id: 'ast-1',
       assetName: 'MacBook Pro 16" M3 Max',
@@ -479,7 +476,7 @@ export function EmployeeRegistration({
     },
   ]);
 
-  const [skillsList, setSkillsList] = useState([
+  const [, setSkillsList] = useState([
     {
       id: 'skl-1',
       skill: 'TypeScript / React Framework',
@@ -506,7 +503,7 @@ export function EmployeeRegistration({
     },
   ]);
 
-  const [secondaryContact, setSecondaryContact] = useState<{
+  const [, setSecondaryContact] = useState<{
     name: string;
     relationship: string;
     phone: string;

@@ -15,7 +15,6 @@ import {
 import { hashPassword } from '../auth/security.js';
 import { signInForTest } from './support/testSession.js';
 import { tenantAdminService } from '../tenant-admin/service/tenantAdmin.service.js';
-import { accessResolverService } from '../access/service/accessResolver.service.js';
 import { ConflictError, BadRequestError } from '../../app/errors/AppError.js';
 
 describe('Tenant Admin Authority Foundation (Phase 1)', () => {

@@ -4,7 +4,7 @@ import {
   FormGrid,
   FormField,
   Input,
-  PhoneInput,
+  InternationalPhoneInput,
   Select,
   Textarea,
   Switch,
@@ -24,14 +24,6 @@ const RELATIONSHIP_OPTIONS = [
   { value: 'Relative', label: 'Relative' },
   { value: 'Friend', label: 'Friend' },
   { value: 'Other', label: 'Other' },
-];
-
-const COUNTRY_CODE_OPTIONS = [
-  { value: '+91', label: '+91 (IND)' },
-  { value: '+1', label: '+1 (USA)' },
-  { value: '+44', label: '+44 (UK)' },
-  { value: '+65', label: '+65 (SGP)' },
-  { value: '+971', label: '+971 (UAE)' },
 ];
 
 import type { Chapter05EmergencyState } from '../types/registration.types';
@@ -155,14 +147,19 @@ export function EmergencyContactSection({
 
             {/* 3. Phone */}
             <FormField label="Phone" required error={primaryPhoneError}>
-              <PhoneInput
+              <InternationalPhoneInput
                 id="emergency-primary-phone"
-                countryCode={primaryCountryCode}
-                onCountryCodeChange={setPrimaryCountryCode}
-                countryCodeOptions={COUNTRY_CODE_OPTIONS}
+                countryCode={primaryCountryCode.replace('+', '')}
+                defaultCountry="IN"
+                onCountryCodeChange={(code) => setPrimaryCountryCode(`+${code}`)}
                 placeholder="98765 43210"
                 value={primaryPhone}
-                onChange={(e) => handlePrimaryPhoneChange(e.target.value)}
+                onChange={(val, parsed) => {
+                  handlePrimaryPhoneChange(parsed.nationalNumber || val);
+                  if (parsed.callingCode) {
+                    setPrimaryCountryCode(parsed.callingCode);
+                  }
+                }}
               />
             </FormField>
 
@@ -236,14 +233,19 @@ export function EmergencyContactSection({
 
             {/* 3. Secondary Mobile */}
             <FormField label="Secondary Mobile" error={secondaryMobileError}>
-              <PhoneInput
+              <InternationalPhoneInput
                 id="emergency-secondary-phone"
-                countryCode={secondaryCountryCode}
-                onCountryCodeChange={setSecondaryCountryCode}
-                countryCodeOptions={COUNTRY_CODE_OPTIONS}
+                countryCode={secondaryCountryCode.replace('+', '')}
+                defaultCountry="IN"
+                onCountryCodeChange={(code) => setSecondaryCountryCode(`+${code}`)}
                 placeholder="98765 43211"
                 value={secondaryMobile}
-                onChange={(e) => handleSecondaryMobileChange(e.target.value)}
+                onChange={(val, parsed) => {
+                  handleSecondaryMobileChange(parsed.nationalNumber || val);
+                  if (parsed.callingCode) {
+                    setSecondaryCountryCode(parsed.callingCode);
+                  }
+                }}
               />
             </FormField>
             {/* 4. Secondary Email */}

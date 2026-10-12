@@ -59,6 +59,44 @@
   transform: translateY(-1px);
 }
 
+.bezent-card--tint-blue {
+  background: #f0f7ff;
+  border-color: #c2e7ff;
+}
+
+[data-theme='dark'] .bezent-card--tint-blue {
+  background: rgba(14, 165, 233, 0.08);
+  border-color: rgba(56, 189, 248, 0.28);
+}
+
+.bezent-card--tint-green {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+[data-theme='dark'] .bezent-card--tint-green {
+  background: rgba(34, 197, 94, 0.08);
+  border-color: rgba(74, 222, 128, 0.28);
+}
+
+.bezent-card--tint-amber {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+[data-theme='dark'] .bezent-card--tint-amber {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(251, 191, 36, 0.28);
+}
+
+.bezent-card--hero {
+  border-radius: var(--radius-xl, 16px);
+  overflow: hidden;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    0 10px 24px -8px rgba(15, 23, 42, 0.06);
+}
+
 /* ── Sub-sections ── */
 .bezent-card__header {
   display: flex;
@@ -124,4 +162,83 @@
 
 [data-theme='dark'] .bezent-card__desc {
   color: var(--text-secondary, #94a3b8);
+}
+
+/* ── Compact Stat / Counter Card Primitive ── */
+.bezent-stat-card {
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  border-radius: var(--radius-md, 8px);
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-default, #dde3ea);
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.03));
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.12s ease;
+  user-select: none;
+  min-height: 56px;
+  box-sizing: border-box;
+}
+
+.bezent-stat-card:hover {
+  background: var(--bg-hover, #f0f7ff);
+  border-color: var(--accent-subtle, #c2e7ff);
+  transform: translateY(-1px);
+}
+
+.bezent-stat-card.is-active,
+.bezent-stat-card--active {
+  background: var(--accent-subtle, #e8f0fe);
+  border-color: var(--accent-primary, #1a73e8);
+  box-shadow: 0 0 0 1px var(--accent-primary, #1a73e8);
+}
+
+.bezent-stat-card__label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-secondary, #5f6368);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.bezent-stat-card__val {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary, #000000);
+  line-height: 1.2;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-stat-card {
+  background: var(--bg-card, #081b3a);
+  border-color: var(--card-border, rgba(56, 189, 248, 0.28));
+  box-shadow: 0 2px 8px rgba(2, 11, 28, 0.4);
+}
+
+[data-theme='dark'] .bezent-stat-card:hover {
+  background: rgba(56, 189, 248, 0.08);
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+[data-theme='dark'] .bezent-stat-card.is-active,
+[data-theme='dark'] .bezent-stat-card--active {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: var(--accent-primary, #38bdf8);
+  box-shadow: 0 0 0 1px var(--accent-primary, #38bdf8);
+}
+
+[data-theme='dark'] .bezent-stat-card__label {
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme='dark'] .bezent-stat-card__val {
+  color: var(--text-primary, #f8fafc);
 }
