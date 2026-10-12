@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { superAdminRoutes } from '../routes/superAdminRoutes';
-import { superAdminApi } from '../api/superAdminApi';
 
 vi.mock('../api/superAdminApi', () => ({
   superAdminApi: {

@@ -218,6 +218,69 @@
       "when": 1791450000000,
       "tag": "0030_tenant_management_v1",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "5",
+      "when": 1791500000000,
+      "tag": "0031_attendance_v1_foundation",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "5",
+      "when": 1791550000000,
+      "tag": "0032_attendance_settings_v1_production",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "5",
+      "when": 1791600000000,
+      "tag": "0033_attendance_on_duty_workflow",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "5",
+      "when": 1791650000000,
+      "tag": "0034_punch_logs_v1_enterprise",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "5",
+      "when": 1791700000000,
+      "tag": "0035_attendance_exceptions_v1",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "5",
+      "when": 1791750000000,
+      "tag": "0036_attendance_regularization_v1",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "5",
+      "when": 1791800000000,
+      "tag": "0037_attendance_on_duty_v1",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "5",
+      "when": 1791850000000,
+      "tag": "0038_attendance_monthly_summary_v1",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "5",
+      "when": 1791900000000,
+      "tag": "0039_attendance_reports_v1",
+      "breakpoints": true
     }
   ]
 }

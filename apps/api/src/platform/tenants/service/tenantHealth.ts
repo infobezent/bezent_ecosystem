@@ -1,6 +1,5 @@
 import type {
   CustomerHealth,
-  CustomerHealthStatus,
   SetupProgress,
   SetupMilestone,
   TenantStatus,

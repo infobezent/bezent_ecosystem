@@ -76,7 +76,7 @@ export class ProvisioningJobService {
       conditions.push(eq(provisioningJobs.tenantId, filter.tenantId));
     }
     if (filter.status) {
-      conditions.push(eq(provisioningJobs.status, filter.status as any));
+      conditions.push(eq(provisioningJobs.status, filter.status as ProvisioningJob['status']));
     }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;

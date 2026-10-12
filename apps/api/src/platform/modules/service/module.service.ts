@@ -89,7 +89,7 @@ export class ModuleService {
   async isTenantEntitled(tenantId: string, moduleCode: ModuleCode): Promise<boolean> {
     const tenant = await this.tenantRepo.findById(tenantId);
     if (!tenant || tenant.status === 'suspended') return false;
-    const eff = await effectiveEntitlementService.resolveEffectiveEntitlements(tenantId, moduleCode as any, null);
+    const eff = await effectiveEntitlementService.resolveEffectiveEntitlements(tenantId, moduleCode as unknown as ApplicationCode, null);
     return eff.isEntitled;
   }
 
@@ -186,7 +186,7 @@ export class ModuleService {
 
     const eff = await effectiveEntitlementService.resolveEffectiveEntitlements(
       tenantId,
-      moduleCode as any,
+      moduleCode as unknown as ApplicationCode,
       companyId,
     );
     if (!eff.isEntitled) {
@@ -215,7 +215,7 @@ export class ModuleService {
     for (const item of MODULE_CATALOG) {
       const eff = await effectiveEntitlementService.resolveEffectiveEntitlements(
         tenantId,
-        item.code as any,
+        item.code as unknown as ApplicationCode,
         companyId,
       );
       if (eff.isEntitled) {
@@ -236,7 +236,7 @@ export class ModuleService {
  * every other module requires an explicit enabled record. A company-level
  * record may only narrow the tenant entitlement, never widen it.
  */
-function evaluateEntitlement(
+export function evaluateEntitlement(
   moduleCode: ModuleCode,
   tenantRecord: TenantModuleRecord | null,
   companyRecord: TenantModuleRecord | null,

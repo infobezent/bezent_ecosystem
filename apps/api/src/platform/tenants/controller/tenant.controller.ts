@@ -5,7 +5,7 @@ import {
   validateUpdateTenant,
   validateUpdateCompanyCapacity,
 } from '../validation/tenant.schema.js';
-import type { TenantStatus } from '../types/tenant.types.js';
+import type { TenantStatus, TenantFilter } from '../types/tenant.types.js';
 
 export class TenantController {
   constructor(private readonly service: TenantService = tenantService) {}
@@ -36,8 +36,8 @@ export class TenantController {
         trial: typeof trial === 'string' ? trial === 'true' : undefined,
         createdFrom: typeof createdFrom === 'string' ? createdFrom : undefined,
         createdTo: typeof createdTo === 'string' ? createdTo : undefined,
-        sortBy: typeof sortBy === 'string' ? (sortBy as any) : undefined,
-        sortOrder: typeof sortOrder === 'string' ? (sortOrder as any) : undefined,
+        sortBy: typeof sortBy === 'string' ? (sortBy as TenantFilter['sortBy']) : undefined,
+        sortOrder: typeof sortOrder === 'string' ? (sortOrder as TenantFilter['sortOrder']) : undefined,
         attention:
           typeof attention === 'string'
             ? (attention as import('../types/tenant.types.js').CustomerHealthStatus)

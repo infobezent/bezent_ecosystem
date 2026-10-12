@@ -26,6 +26,12 @@ import {
   planPrices,
   planEntitlements,
   tenantLifecycleEvents,
+  attendancePolicies,
+  attendanceGeneralSettings,
+  attendanceRegularizationSettings,
+  attendanceSecuritySettings,
+  attendancePayrollSettings,
+  attendanceDevices,
 } from './schema.js';
 import { and, eq } from 'drizzle-orm';
 import { createUnusableCredential } from '../platform/auth/security.js';
@@ -1255,6 +1261,183 @@ export async function seedDatabase() {
     if (existing.length === 0) {
       await db.insert(planEntitlements).values(ent);
     }
+  }
+
+  // 17. Default Attendance Policy
+  const existingPolicy = await db
+    .select()
+    .from(attendancePolicies)
+    .where(eq(attendancePolicies.companyId, companyId));
+
+  if (existingPolicy.length === 0) {
+    console.log('[Seed] Inserting default attendance policy...');
+    await db.insert(attendancePolicies).values({
+      id: 'att_pol_demo_01',
+      tenantId,
+      companyId,
+      policyName: 'Standard Corporate Attendance Policy',
+      version: 1,
+      status: 'published',
+      description: 'Default enterprise policy applying to all departments',
+      scope: 'company',
+      overridesPriority: 0,
+      captureMethods: ['web', 'mobile', 'biometric'],
+      breakDeductionMethod: 'scheduled',
+      enableLateTracking: true,
+      gracePeriodMinutes: 15,
+      enableEarlyExitTracking: true,
+      halfDayThresholdHours: '4.00',
+      fullDayThresholdHours: '8.00',
+      missingPunchPolicy: 'flag_exception',
+      allowRegularization: true,
+      regularizationCutoffDays: 7,
+      requiresApproval: true,
+      effectiveFrom: '2026-01-01',
+      penaltyRules: {
+        enabled: true,
+        lateMarksThreshold: 3,
+        penaltyUnit: 'half_day',
+        period: 'monthly',
+      },
+      odRules: {
+        enabled: true,
+        odTypes: ['Client Visit', 'Business Trip', 'Training / Conference', 'Field Assignment'],
+        allowHalfDay: true,
+        allowHourly: true,
+        allowBackdated: true,
+        maxBackdatedDays: 3,
+        requiresApproval: true,
+        countAsPresent: true,
+      },
+      classificationRules: {
+        minHoursForPresent: 8.0,
+        minHoursForHalfDay: 4.0,
+        insufficientHoursAction: 'half_day',
+      },
+      isActive: true,
+    });
+  }
+
+  // 18. Default Attendance General Settings
+  const existingAttGen = await db
+    .select()
+    .from(attendanceGeneralSettings)
+    .where(eq(attendanceGeneralSettings.companyId, companyId));
+  if (existingAttGen.length === 0) {
+    await db.insert(attendanceGeneralSettings).values({
+      id: 'att_gen_demo_01',
+      tenantId,
+      companyId,
+      timezone: 'Asia/Kolkata',
+      dayBoundaryTime: '00:00:00',
+      trackingStartDate: '2026-01-01',
+      processingMode: 'realtime',
+      manualEntryAllowed: true,
+      employeeVisibility: 'self_only',
+      defaultHistoryViewDays: 30,
+      alertPreferences: {
+        notifyOnMissingPunch: true,
+        notifyOnLateArrival: true,
+        notifyApproverOnRegularization: true,
+        digestFrequency: 'daily',
+      },
+    });
+  }
+
+  // 19. Default Attendance Regularization Settings
+  const existingReg = await db
+    .select()
+    .from(attendanceRegularizationSettings)
+    .where(eq(attendanceRegularizationSettings.companyId, companyId));
+  if (existingReg.length === 0) {
+    await db.insert(attendanceRegularizationSettings).values({
+      id: 'att_reg_demo_01',
+      tenantId,
+      companyId,
+      isEnabled: true,
+      allowedCorrectionTypes: ['missed_in', 'missed_out', 'time_adjustment', 'both_missing'],
+      submissionWindowDays: 7,
+      maxRequestsPerMonth: 3,
+      requireReason: true,
+      requireEvidence: false,
+      approvalHierarchy: 'manager_then_hr',
+      autoApproveGraceMinutes: 0,
+      blockOnPayrollLock: true,
+      allowWithdrawal: true,
+    });
+  }
+
+  // 20. Default Attendance Security Settings
+  const existingSec = await db
+    .select()
+    .from(attendanceSecuritySettings)
+    .where(eq(attendanceSecuritySettings.companyId, companyId));
+  if (existingSec.length === 0) {
+    await db.insert(attendanceSecuritySettings).values({
+      id: 'att_sec_demo_01',
+      tenantId,
+      companyId,
+      enableGps: true,
+      geofenceConfigs: [
+        {
+          locationId: 'loc_chn_01',
+          name: 'Chennai HQ Campus',
+          latitude: 12.9716,
+          longitude: 80.2437,
+          radiusMeters: 250,
+          enforceStrict: false,
+        },
+      ],
+      ipAllowlist: ['192.168.1.0/24', '10.0.0.0/16'],
+      enforceIpRestriction: false,
+      maxDevicesPerEmployee: 2,
+      allowSharedKiosk: true,
+      detectMockLocation: true,
+      detectImpossibleTravel: true,
+      rapidPunchThrottlingSeconds: 60,
+      flagVpnProxy: true,
+    });
+  }
+
+  // 21. Default Attendance Payroll Settings
+  const existingPay = await db
+    .select()
+    .from(attendancePayrollSettings)
+    .where(eq(attendancePayrollSettings.companyId, companyId));
+  if (existingPay.length === 0) {
+    await db.insert(attendancePayrollSettings).values({
+      id: 'att_pay_demo_01',
+      tenantId,
+      companyId,
+      cycleType: 'calendar_month',
+      cutoffDay: 30,
+      requireApprovalBeforeLock: true,
+      autoLockOnCutoff: false,
+      blockingSeverity: 'warning_only',
+    });
+  }
+
+  // 22. Sample Biometric Terminal Device
+  const existingDev = await db
+    .select()
+    .from(attendanceDevices)
+    .where(eq(attendanceDevices.companyId, companyId));
+  if (existingDev.length === 0) {
+    await db.insert(attendanceDevices).values({
+      id: 'att_dev_demo_01',
+      tenantId,
+      companyId,
+      locationId: 'loc_chn_01',
+      deviceName: 'Chennai Main Gate Terminal',
+      deviceCode: 'DEV-CHN-01',
+      deviceType: 'biometric_facial',
+      serialNumber: 'ZK-TECO-FACIAL-99201',
+      ipAddress: '192.168.1.150',
+      port: 4370,
+      status: 'testing',
+      firmwareVersion: 'v2.4.1-build88',
+      metadata: { protocol: 'ZK-Pull-SDK', syncIntervalSec: 30 },
+    });
   }
 
   console.log('[Seed] Database seeded successfully for BEZENT Demo Pvt Ltd.');

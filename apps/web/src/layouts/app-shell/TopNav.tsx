@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { BezentIcon } from '../../design-system/icons';
-import { Avatar, IconButton, Badge } from '../../design-system/components';
+import { Avatar, IconButton, Badge, BezentLogo } from '../../design-system/components';
 import { ProfileMenu } from './ProfileMenu';
 import './TopNav.css';
 
@@ -49,9 +49,7 @@ export function TopNav({
   return (
     <header className="top-nav">
       <div className="top-nav__brand">
-        <div className="top-nav__logo" aria-hidden="true">
-          BZ
-        </div>
+        <BezentLogo size={32} />
         <span className="top-nav__wordmark">BEZENT</span>
       </div>
 

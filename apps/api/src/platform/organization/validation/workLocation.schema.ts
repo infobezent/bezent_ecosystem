@@ -269,8 +269,6 @@ export function validateUpdateWorkLocation(input: unknown): UpdateWorkLocationDt
   }
 
   // 4. Address fields
-  const isExplicitRemote = data.type === 'remote';
-
   if (data.addressLine1 !== undefined) {
     if (data.addressLine1 === null || data.addressLine1 === '') {
       if (!isRemoteAddressAllowedEmpty(data)) {

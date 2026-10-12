@@ -19,6 +19,7 @@ import {
 } from '../catalog/accessCatalog.js';
 import type { AuthenticatedUser } from '../../auth/types/auth.types.js';
 import type { AccessOverview, CompanyAccess } from '../types/access.types.js';
+import type { ApplicationCode } from '../../plans/types/plan.types.js';
 
 export const FORBIDDEN_COMPANY_ACCESS = 'FORBIDDEN_COMPANY_ACCESS';
 
@@ -146,7 +147,7 @@ export class AccessResolverService {
       try {
         const eff = await effectiveEntitlementService.resolveEffectiveEntitlements(
           tenantId,
-          appCode as any,
+          appCode as ApplicationCode,
           companyId,
         );
         for (const m of eff.modules) {

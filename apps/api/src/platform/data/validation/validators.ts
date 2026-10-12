@@ -7,10 +7,12 @@ import type {
   IdentifierValidationOptions,
   PhoneValidationOptions,
   PostalValidationOptions,
+  StandardCodeValidationOptions,
   TextValidationOptions,
   UrlValidationOptions,
   ValidationResult,
 } from '../contracts/validation.types.js';
+import { COUNTRIES, CURRENCIES, TIMEZONES } from '../reference/datasets.js';
 
 // Standard RFC 5322-compliant structure regex
 const EMAIL_REGEX =
@@ -365,4 +367,152 @@ export function validatePostalCode(
   }
 
   return { isValid: true, value: trimmed };
+}
+
+/**
+ * Validates ISO 3166-1 alpha-2 country identifier (e.g. "IN", "US").
+ */
+export function validateCountryCode(
+  value: unknown,
+  options: StandardCodeValidationOptions = {},
+): ValidationResult<string> {
+  const { required = false } = options;
+
+  if (value === undefined || value === null || value === '') {
+    if (required) {
+      return { isValid: false, error: 'Country code is required' };
+    }
+    return { isValid: true, value: undefined };
+  }
+
+  if (typeof value !== 'string') {
+    return { isValid: false, error: 'Country code must be a string' };
+  }
+
+  const code = value.trim().toUpperCase();
+  if (!/^[A-Z]{2}$/.test(code)) {
+    return {
+      isValid: false,
+      error: 'Country code must be a valid 2-letter ISO 3166-1 alpha-2 identifier (e.g. IN, US)',
+    };
+  }
+
+  const exists = COUNTRIES.some((c) => c.code === code);
+  if (!exists) {
+    return { isValid: false, error: `Unrecognized ISO country code: ${code}` };
+  }
+
+  return { isValid: true, value: code };
+}
+
+/**
+ * Validates canonical IANA timezone identifier (e.g. "Asia/Kolkata").
+ */
+export function validateTimezone(
+  value: unknown,
+  options: StandardCodeValidationOptions = {},
+): ValidationResult<string> {
+  const { required = false } = options;
+
+  if (value === undefined || value === null || value === '') {
+    if (required) {
+      return { isValid: false, error: 'Timezone identifier is required' };
+    }
+    return { isValid: true, value: undefined };
+  }
+
+  if (typeof value !== 'string') {
+    return { isValid: false, error: 'Timezone must be a string' };
+  }
+
+  const tz = value.trim();
+
+  // Check canonical list first
+  const inList = TIMEZONES.some((t) => t.id.toLowerCase() === tz.toLowerCase());
+  if (inList) {
+    const canonical = TIMEZONES.find((t) => t.id.toLowerCase() === tz.toLowerCase())!;
+    return { isValid: true, value: canonical.id };
+  }
+
+  // Validate via native Intl
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone: tz });
+    return { isValid: true, value: tz };
+  } catch {
+    return { isValid: false, error: `Invalid IANA timezone identifier: ${tz}` };
+  }
+}
+
+/**
+ * Validates ISO 4217 currency identifier (e.g. "INR", "USD").
+ */
+export function validateCurrencyCode(
+  value: unknown,
+  options: StandardCodeValidationOptions = {},
+): ValidationResult<string> {
+  const { required = false } = options;
+
+  if (value === undefined || value === null || value === '') {
+    if (required) {
+      return { isValid: false, error: 'Currency code is required' };
+    }
+    return { isValid: true, value: undefined };
+  }
+
+  if (typeof value !== 'string') {
+    return { isValid: false, error: 'Currency code must be a string' };
+  }
+
+  const code = value.trim().toUpperCase();
+  if (!/^[A-Z]{3}$/.test(code)) {
+    return {
+      isValid: false,
+      error: 'Currency code must be a valid 3-letter ISO 4217 identifier (e.g. INR, USD)',
+    };
+  }
+
+  const exists = CURRENCIES.some((c) => c.code === code);
+  if (!exists) {
+    return { isValid: false, error: `Unrecognized ISO currency code: ${code}` };
+  }
+
+  return { isValid: true, value: code };
+}
+
+/**
+ * Validates BCP 47 locale identifier (e.g. "en-IN", "en-US").
+ */
+export function validateLocale(
+  value: unknown,
+  options: StandardCodeValidationOptions = {},
+): ValidationResult<string> {
+  const { required = false } = options;
+
+  if (value === undefined || value === null || value === '') {
+    if (required) {
+      return { isValid: false, error: 'Locale identifier is required' };
+    }
+    return { isValid: true, value: undefined };
+  }
+
+  if (typeof value !== 'string') {
+    return { isValid: false, error: 'Locale must be a string' };
+  }
+
+  const loc = value.trim();
+
+  // Basic BCP 47 tag syntax check
+  if (!/^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/i.test(loc)) {
+    return { isValid: false, error: `Invalid BCP 47 locale format: ${loc}` };
+  }
+
+  try {
+    if (Intl.DateTimeFormat.supportedLocalesOf([loc]).length === 0) {
+      return { isValid: false, error: `Unsupported BCP 47 locale tag: ${loc}` };
+    }
+  } catch {
+    return { isValid: false, error: `Invalid BCP 47 locale tag: ${loc}` };
+  }
+
+  return { isValid: true, value: loc };
 }

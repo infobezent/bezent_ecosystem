@@ -16,6 +16,9 @@ import {
   Alert,
   LoadingState,
   Toolbar,
+  CountrySelect,
+  TimezoneSelect,
+  InternationalPhoneInput,
 } from '../../../design-system/components';
 import { BezentIcon } from '../../../design-system/icons';
 import {
@@ -30,23 +33,6 @@ import {
   type TenantOrchestrationPreflightResult,
   type TenantOrchestrationResult,
 } from '../api/superAdminApi';
-
-// Top canonical IANA timezones with description
-const COMMON_TIMEZONES = [
-  { value: 'UTC', label: 'UTC — Coordinated Universal Time' },
-  { value: 'America/New_York', label: 'America/New York (Eastern Time)' },
-  { value: 'America/Chicago', label: 'America/Chicago (Central Time)' },
-  { value: 'America/Denver', label: 'America/Denver (Mountain Time)' },
-  { value: 'America/Los_Angeles', label: 'America/Los Angeles (Pacific Time)' },
-  { value: 'Europe/London', label: 'Europe/London (GMT / BST)' },
-  { value: 'Europe/Paris', label: 'Europe/Paris (CET)' },
-  { value: 'Europe/Berlin', label: 'Europe/Berlin (CET)' },
-  { value: 'Asia/Dubai', label: 'Asia/Dubai (GST)' },
-  { value: 'Asia/Kolkata', label: 'Asia/Kolkata (IST)' },
-  { value: 'Asia/Singapore', label: 'Asia/Singapore (SGT)' },
-  { value: 'Asia/Tokyo', label: 'Asia/Tokyo (JST)' },
-  { value: 'Australia/Sydney', label: 'Australia/Sydney (AEST)' },
-];
 
 export interface CreateTenantPageProps {
   initialStep?: 1 | 2 | 3 | 4 | 5;
@@ -310,14 +296,20 @@ export function CreateTenantPage({
 
   // Preflight State
   const [preflightLoading, setPreflightLoading] = useState<boolean>(false);
-  const [preflightResult, setPreflightResult] = useState<TenantOrchestrationPreflightResult | null>(initialPreflightResult);
+  const [preflightResult, setPreflightResult] = useState<TenantOrchestrationPreflightResult | null>(
+    initialPreflightResult,
+  );
   const [preflightError, setPreflightError] = useState<string | null>(null);
 
   // Final Submission & Idempotency
-  const [idempotencyKey, setIdempotencyKey] = useState<string>(() => `sa-tnt-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
+  const [idempotencyKey, setIdempotencyKey] = useState<string>(
+    () => `sa-tnt-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+  );
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [creationResult, setCreationResult] = useState<TenantOrchestrationResult | null>(initialCreationResult);
+  const [creationResult, setCreationResult] = useState<TenantOrchestrationResult | null>(
+    initialCreationResult,
+  );
 
   // Load plans from catalog
   useEffect(() => {
@@ -344,9 +336,18 @@ export function CreateTenantPage({
   }, [fetchEligibleModules]);
 
   // Filter plans by application
-  const hrmsPlans = useMemo(() => availablePlans.filter((p) => p.applicationCode === 'hrms'), [availablePlans]);
-  const crmPlans = useMemo(() => availablePlans.filter((p) => p.applicationCode === 'crm'), [availablePlans]);
-  const pmPlans = useMemo(() => availablePlans.filter((p) => p.applicationCode === 'project_management'), [availablePlans]);
+  const hrmsPlans = useMemo(
+    () => availablePlans.filter((p) => p.applicationCode === 'hrms'),
+    [availablePlans],
+  );
+  const crmPlans = useMemo(
+    () => availablePlans.filter((p) => p.applicationCode === 'crm'),
+    [availablePlans],
+  );
+  const pmPlans = useMemo(
+    () => availablePlans.filter((p) => p.applicationCode === 'project_management'),
+    [availablePlans],
+  );
 
   // Construct canonical payload
   const buildPayload = useCallback((): TenantOrchestrationPayload => {
@@ -360,10 +361,13 @@ export function CreateTenantPage({
         licensedSeats: subscriptionsConfig.hrms.licensedSeats,
         billingCycle: subscriptionsConfig.hrms.billingCycle,
         commercialAgreementNotes: commercialAgreementNotesByApp.hrms.trim() || null,
-        selectedModules: selectedModulesByApp.hrms.length > 0 ? selectedModulesByApp.hrms : undefined,
-        moduleOverrides: moduleOverridesByApp.hrms.length > 0 ? moduleOverridesByApp.hrms : undefined,
+        selectedModules:
+          selectedModulesByApp.hrms.length > 0 ? selectedModulesByApp.hrms : undefined,
+        moduleOverrides:
+          moduleOverridesByApp.hrms.length > 0 ? moduleOverridesByApp.hrms : undefined,
         scheduledActivationAt:
-          subscriptionsConfig.hrms.activationMode === 'scheduled' && subscriptionsConfig.hrms.scheduledDate
+          subscriptionsConfig.hrms.activationMode === 'scheduled' &&
+          subscriptionsConfig.hrms.scheduledDate
             ? new Date(subscriptionsConfig.hrms.scheduledDate).toISOString()
             : null,
       });
@@ -380,7 +384,8 @@ export function CreateTenantPage({
         selectedModules: selectedModulesByApp.crm.length > 0 ? selectedModulesByApp.crm : undefined,
         moduleOverrides: moduleOverridesByApp.crm.length > 0 ? moduleOverridesByApp.crm : undefined,
         scheduledActivationAt:
-          subscriptionsConfig.crm.activationMode === 'scheduled' && subscriptionsConfig.crm.scheduledDate
+          subscriptionsConfig.crm.activationMode === 'scheduled' &&
+          subscriptionsConfig.crm.scheduledDate
             ? new Date(subscriptionsConfig.crm.scheduledDate).toISOString()
             : null,
       });
@@ -394,10 +399,17 @@ export function CreateTenantPage({
         licensedSeats: subscriptionsConfig.project_management.licensedSeats,
         billingCycle: subscriptionsConfig.project_management.billingCycle,
         commercialAgreementNotes: commercialAgreementNotesByApp.project_management.trim() || null,
-        selectedModules: selectedModulesByApp.project_management.length > 0 ? selectedModulesByApp.project_management : undefined,
-        moduleOverrides: moduleOverridesByApp.project_management.length > 0 ? moduleOverridesByApp.project_management : undefined,
+        selectedModules:
+          selectedModulesByApp.project_management.length > 0
+            ? selectedModulesByApp.project_management
+            : undefined,
+        moduleOverrides:
+          moduleOverridesByApp.project_management.length > 0
+            ? moduleOverridesByApp.project_management
+            : undefined,
         scheduledActivationAt:
-          subscriptionsConfig.project_management.activationMode === 'scheduled' && subscriptionsConfig.project_management.scheduledDate
+          subscriptionsConfig.project_management.activationMode === 'scheduled' &&
+          subscriptionsConfig.project_management.scheduledDate
             ? new Date(subscriptionsConfig.project_management.scheduledDate).toISOString()
             : null,
       });
@@ -430,7 +442,15 @@ export function CreateTenantPage({
       },
       subscriptions,
     };
-  }, [companyData, adminData, selectedApps, subscriptionsConfig]);
+  }, [
+    companyData,
+    adminData,
+    selectedApps,
+    subscriptionsConfig,
+    selectedModulesByApp,
+    moduleOverridesByApp,
+    commercialAgreementNotesByApp,
+  ]);
 
   // Execute Preflight Validation
   const runPreflight = useCallback(async () => {
@@ -465,7 +485,10 @@ export function CreateTenantPage({
     if (!companyData.displayName.trim() || companyData.displayName.trim().length < 2) {
       errors.displayName = 'Display name is required (min 2 characters)';
     }
-    if (!companyData.businessEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(companyData.businessEmail.trim())) {
+    if (
+      !companyData.businessEmail.trim() ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(companyData.businessEmail.trim())
+    ) {
       errors.businessEmail = 'A valid business email address is required';
     }
     if (!companyData.country.trim()) {
@@ -488,7 +511,10 @@ export function CreateTenantPage({
     if (!adminData.fullName.trim() || adminData.fullName.trim().length < 2) {
       errors.fullName = 'Administrator full name is required (min 2 characters)';
     }
-    if (!adminData.workEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminData.workEmail.trim())) {
+    if (
+      !adminData.workEmail.trim() ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminData.workEmail.trim())
+    ) {
       errors.workEmail = 'A valid work email address is required';
     }
 
@@ -662,7 +688,8 @@ export function CreateTenantPage({
       const plan = availablePlans.find((p) => p.id === cfg.planId);
       if (cfg.accessMode === 'trial') {
         if (plan && !plan.trialEligible) {
-          errors[`${appCode}Trial`] = `Plan '${plan.name}' is not eligible for trial access. Please switch to Paid mode.`;
+          errors[`${appCode}Trial`] =
+            `Plan '${plan.name}' is not eligible for trial access. Please switch to Paid mode.`;
         }
       } else {
         // Paid mode: check if price is approved or notes provided
@@ -671,7 +698,8 @@ export function CreateTenantPage({
           activePrice && activePrice.amount > 0 && activePrice.status === 'active',
         );
         if (!hasApprovedPrice && !commercialAgreementNotesByApp[appCode]?.trim()) {
-          errors[`${appCode}Agreement`] = `Commercial Agreement Notes are required for '${plan?.name || label}' because standard pricing is not yet approved.`;
+          errors[`${appCode}Agreement`] =
+            `Commercial Agreement Notes are required for '${plan?.name || label}' because standard pricing is not yet approved.`;
         }
       }
 
@@ -682,7 +710,8 @@ export function CreateTenantPage({
         const mandatory = modules.filter((m) => m.isMandatory);
         for (const mand of mandatory) {
           if (!selected.includes(mand.moduleKey)) {
-            errors[`${appCode}Modules`] = `Mandatory module '${mand.name}' must remain selected for ${label}.`;
+            errors[`${appCode}Modules`] =
+              `Mandatory module '${mand.name}' must remain selected for ${label}.`;
             break;
           }
         }
@@ -692,7 +721,8 @@ export function CreateTenantPage({
             for (const dep of modDef.dependencies) {
               if (!selected.includes(dep)) {
                 const depDef = modules.find((m) => m.moduleKey === dep);
-                errors[`${appCode}Modules`] = `Module '${modDef.name}' requires dependency '${depDef?.name || dep}', which is not selected.`;
+                errors[`${appCode}Modules`] =
+                  `Module '${modDef.name}' requires dependency '${depDef?.name || dep}', which is not selected.`;
                 break;
               }
             }
@@ -726,7 +756,9 @@ export function CreateTenantPage({
       setCompletedSteps((prev) => new Set(prev).add(4));
       setCurrentStep(5); // Success step
     } catch (err: unknown) {
-      setSubmitError(err instanceof Error ? err.message : 'Tenant creation failed. You can safely retry.');
+      setSubmitError(
+        err instanceof Error ? err.message : 'Tenant creation failed. You can safely retry.',
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -760,7 +792,11 @@ export function CreateTenantPage({
         <Stack gap="md">
           <Inline justify="between" align="center">
             <Inline gap="sm" align="center">
-              <BezentIcon name={iconName as Parameters<typeof BezentIcon>[0]['name']} size={24} color="currentColor" />
+              <BezentIcon
+                name={iconName as Parameters<typeof BezentIcon>[0]['name']}
+                size={24}
+                color="currentColor"
+              />
               <Stack gap="xs">
                 <strong>{appTitle}</strong>
                 <span className="bezent-caption">{appDescription}</span>
@@ -774,7 +810,9 @@ export function CreateTenantPage({
                 invalidatePreflight();
               }}
             >
-              {isAppEnabled ? `Disable ${appCode.toUpperCase()}` : `Enable ${appCode.toUpperCase()}`}
+              {isAppEnabled
+                ? `Disable ${appCode.toUpperCase()}`
+                : `Enable ${appCode.toUpperCase()}`}
             </Button>
           </Inline>
 
@@ -916,8 +954,8 @@ export function CreateTenantPage({
                   <Stack gap="xs">
                     <span>
                       Standard catalog pricing is not yet approved or configured for plan &apos;
-                      {plan?.name ?? 'selected plan'}&apos;. An authorized commercial agreement reference is required to
-                      activate.
+                      {plan?.name ?? 'selected plan'}&apos;. An authorized commercial agreement
+                      reference is required to activate.
                     </span>
                     <Input
                       label="Commercial Agreement Notes *"
@@ -1050,9 +1088,7 @@ export function CreateTenantPage({
                                     <Button
                                       size="sm"
                                       variant="danger"
-                                      onClick={() =>
-                                        handleRemoveOverride(appCode, mod.moduleKey)
-                                      }
+                                      onClick={() => handleRemoveOverride(appCode, mod.moduleKey)}
                                     >
                                       Revoke
                                     </Button>
@@ -1125,10 +1161,7 @@ export function CreateTenantPage({
                     }
                   }}
                 >
-                  <Badge
-                    variant={isActive ? 'info' : isDone ? 'success' : 'neutral'}
-                    size="md"
-                  >
+                  <Badge variant={isActive ? 'info' : isDone ? 'success' : 'neutral'} size="md">
                     {isDone ? '✓' : String(s.num)}
                   </Badge>
                   <span className={isActive ? 'bezent-heading-sm' : 'bezent-caption'}>
@@ -1150,10 +1183,7 @@ export function CreateTenantPage({
         subtitle="Set up a new customer organization, administrator, and application access."
         actions={
           currentStep !== 5 ? (
-            <Button
-              variant="secondary"
-              onClick={() => navigate('/super-admin/tenants')}
-            >
+            <Button variant="secondary" onClick={() => navigate('/super-admin/tenants')}>
               Cancel
             </Button>
           ) : null
@@ -1178,7 +1208,9 @@ export function CreateTenantPage({
             </Stack>
 
             <Alert variant="info" title="Tenant ID will be generated automatically.">
-              Tenant ID will be generated automatically. Immutable system identifier assigned by the platform backend upon creation. A designated Primary Company will be created inside this new customer tenant.
+              Tenant ID will be generated automatically. Immutable system identifier assigned by the
+              platform backend upon creation. A designated Primary Company will be created inside
+              this new customer tenant.
             </Alert>
 
             {/* Section A: Company Identity */}
@@ -1219,13 +1251,11 @@ export function CreateTenantPage({
                   error={companyErrors.businessEmail}
                   required
                 />
-                <Input
+                <InternationalPhoneInput
                   label="Contact Phone"
-                  type="tel"
-                  placeholder="+1-555-0100"
                   value={companyData.contactPhone || ''}
-                  onChange={(e) => {
-                    setCompanyData({ ...companyData, contactPhone: e.target.value });
+                  onChange={(val) => {
+                    setCompanyData({ ...companyData, contactPhone: val });
                     invalidatePreflight();
                   }}
                 />
@@ -1262,26 +1292,29 @@ export function CreateTenantPage({
             <Stack gap="md">
               <h3 className="bezent-heading-sm">Location & Regional Settings</h3>
               <Grid columns={2} gap="md">
-                <Input
+                <CountrySelect
                   label="Country *"
-                  placeholder="e.g. United States, India, Germany"
                   value={companyData.country}
-                  onChange={(e) => {
-                    setCompanyData({ ...companyData, country: e.target.value });
+                  onChange={(code, country) => {
+                    setCompanyData({
+                      ...companyData,
+                      country: code,
+                      timeZone: country?.defaultTimezone || companyData.timeZone,
+                    });
                     invalidatePreflight();
                   }}
                   error={companyErrors.country}
                   required
                 />
-                <Select
+                <TimezoneSelect
                   label="IANA Timezone *"
                   value={companyData.timeZone}
-                  onChange={(e) => {
-                    setCompanyData({ ...companyData, timeZone: e.target.value });
+                  onChange={(tz) => {
+                    setCompanyData({ ...companyData, timeZone: tz });
                     invalidatePreflight();
                   }}
                   error={companyErrors.timeZone}
-                  options={COMMON_TIMEZONES}
+                  required
                 />
                 <Input
                   label="City"
@@ -1371,12 +1404,15 @@ export function CreateTenantPage({
             <Stack gap="xs">
               <h2 className="bezent-heading-md">Step 2 — Primary Administrator</h2>
               <span className="bezent-caption">
-                Invite the person who will manage this customer&apos;s company and application access.
+                Invite the person who will manage this customer&apos;s company and application
+                access.
               </span>
             </Stack>
 
             <Alert variant="info" title="Passwordless Email OTP Security (72-Hour Validity)">
-              An invitation will be sent to this email address after the tenant is created. The administrator must sign in and accept the invitation before receiving access. Invitation validity: 72 hours. No temporary passwords are used.
+              An invitation will be sent to this email address after the tenant is created. The
+              administrator must sign in and accept the invitation before receiving access.
+              Invitation validity: 72 hours. No temporary passwords are used.
             </Alert>
 
             <Grid columns={2} gap="md">
@@ -1453,13 +1489,15 @@ export function CreateTenantPage({
             <Stack gap="xs">
               <h2 className="bezent-heading-md">Step 3 — Applications & Subscriptions</h2>
               <span className="bezent-caption">
-                Choose which BEZENT Applications this customer can access and configure their subscriptions.
+                Choose which BEZENT Applications this customer can access and configure their
+                subscriptions.
               </span>
             </Stack>
 
             {!selectedApps.hrms && !selectedApps.crm && !selectedApps.project_management && (
               <Alert variant="warning" title="No Applications Selected">
-                You can create this tenant without enabling applications. Applications can be configured later. The customer tenant will remain in Pending Setup state.
+                You can create this tenant without enabling applications. Applications can be
+                configured later. The customer tenant will remain in Pending Setup state.
               </Alert>
             )}
 
@@ -1520,15 +1558,22 @@ export function CreateTenantPage({
             <Stack gap="xs">
               <h2 className="bezent-heading-md">Step 4 — Review & Create</h2>
               <span className="bezent-caption">
-                Review the customer setup, server preflight validation, and transactional provisioning details.
+                Review the customer setup, server preflight validation, and transactional
+                provisioning details.
               </span>
             </Stack>
 
             {/* Server Preflight Alert Area */}
-            {preflightLoading && <LoadingState label="Executing server-side preflight validation..." />}
+            {preflightLoading && (
+              <LoadingState label="Executing server-side preflight validation..." />
+            )}
 
             {preflightError && !submitError && (
-              <Alert variant="error" title="Preflight Validation Failed" onDismiss={() => setPreflightError(null)}>
+              <Alert
+                variant="error"
+                title="Preflight Validation Failed"
+                onDismiss={() => setPreflightError(null)}
+              >
                 {preflightError}
               </Alert>
             )}
@@ -1536,7 +1581,9 @@ export function CreateTenantPage({
             {preflightResult && (
               <Alert
                 variant={preflightResult.valid ? 'success' : 'warning'}
-                title={preflightResult.valid ? 'Preflight Verification Passed' : 'Preflight Warnings'}
+                title={
+                  preflightResult.valid ? 'Preflight Verification Passed' : 'Preflight Warnings'
+                }
               >
                 {preflightResult.warnings.length > 0 ? (
                   <Stack gap="xs">
@@ -1568,19 +1615,27 @@ export function CreateTenantPage({
                 <Grid columns={3} gap="sm">
                   <div>
                     <span className="bezent-caption">Legal Name:</span>
-                    <div><strong>{companyData.legalName}</strong></div>
+                    <div>
+                      <strong>{companyData.legalName}</strong>
+                    </div>
                   </div>
                   <div>
                     <span className="bezent-caption">Display Name:</span>
-                    <div><strong>{companyData.displayName}</strong></div>
+                    <div>
+                      <strong>{companyData.displayName}</strong>
+                    </div>
                   </div>
                   <div>
                     <span className="bezent-caption">Business Email:</span>
-                    <div><strong>{companyData.businessEmail}</strong></div>
+                    <div>
+                      <strong>{companyData.businessEmail}</strong>
+                    </div>
                   </div>
                   <div>
                     <span className="bezent-caption">Country & Timezone:</span>
-                    <div>{companyData.country} ({companyData.timeZone})</div>
+                    <div>
+                      {companyData.country} ({companyData.timeZone})
+                    </div>
                   </div>
                   <div>
                     <span className="bezent-caption">Company Size:</span>
@@ -1588,7 +1643,9 @@ export function CreateTenantPage({
                   </div>
                   <div>
                     <span className="bezent-caption">Tenant ID:</span>
-                    <div><em>Server-generated automatically</em></div>
+                    <div>
+                      <em>Server-generated automatically</em>
+                    </div>
                   </div>
                 </Grid>
               </Stack>
@@ -1606,11 +1663,15 @@ export function CreateTenantPage({
                 <Grid columns={3} gap="sm">
                   <div>
                     <span className="bezent-caption">Administrator:</span>
-                    <div><strong>{adminData.fullName}</strong></div>
+                    <div>
+                      <strong>{adminData.fullName}</strong>
+                    </div>
                   </div>
                   <div>
                     <span className="bezent-caption">Work Email:</span>
-                    <div><strong>{adminData.workEmail}</strong></div>
+                    <div>
+                      <strong>{adminData.workEmail}</strong>
+                    </div>
                   </div>
                   <div>
                     <span className="bezent-caption">Invitation Validity:</span>
@@ -1631,7 +1692,9 @@ export function CreateTenantPage({
                 </Inline>
 
                 {!selectedApps.hrms && !selectedApps.crm && !selectedApps.project_management ? (
-                  <span className="bezent-caption">Zero applications selected (Tenant will require setup later)</span>
+                  <span className="bezent-caption">
+                    Zero applications selected (Tenant will require setup later)
+                  </span>
                 ) : (
                   <Stack gap="md">
                     {(['hrms', 'crm', 'project_management'] as const).map((appCode) => {
@@ -1652,11 +1715,17 @@ export function CreateTenantPage({
                                   {appCode === 'hrms' ? 'HRMS' : appCode === 'crm' ? 'CRM' : 'PM'}
                                 </Badge>
                                 <strong>{plan?.name || cfg.planId}</strong>
-                                <Badge variant="neutral" size="sm">{plan?.tier || 'Standard'}</Badge>
+                                <Badge variant="neutral" size="sm">
+                                  {plan?.tier || 'Standard'}
+                                </Badge>
                               </Inline>
                               <Inline gap="md" align="center">
-                                <span>Seats: <strong>{cfg.licensedSeats}</strong></span>
-                                <span>Mode: <strong>{cfg.accessMode.toUpperCase()}</strong></span>
+                                <span>
+                                  Seats: <strong>{cfg.licensedSeats}</strong>
+                                </span>
+                                <span>
+                                  Mode: <strong>{cfg.accessMode.toUpperCase()}</strong>
+                                </span>
                                 <span>Billing: {cfg.billingCycle}</span>
                               </Inline>
                             </Inline>
@@ -1676,14 +1745,19 @@ export function CreateTenantPage({
                                   {selectedMods.map((modKey) => {
                                     const modDef = eligibleMods.find((m) => m.moduleKey === modKey);
                                     const isMandatory = modDef?.isMandatory;
-                                    const isOverride = overrides.some((o) => o.moduleCode === modKey);
+                                    const isOverride = overrides.some(
+                                      (o) => o.moduleCode === modKey,
+                                    );
                                     return (
                                       <Badge
                                         key={modKey}
-                                        variant={isMandatory ? 'info' : isOverride ? 'warning' : 'success'}
+                                        variant={
+                                          isMandatory ? 'info' : isOverride ? 'warning' : 'success'
+                                        }
                                         size="sm"
                                       >
-                                        {modDef?.name || modKey}{isOverride ? ' (Override)' : ''}
+                                        {modDef?.name || modKey}
+                                        {isOverride ? ' (Override)' : ''}
                                       </Badge>
                                     );
                                   })}
@@ -1697,10 +1771,13 @@ export function CreateTenantPage({
                                   <strong>Authorized Overrides ({overrides.length}):</strong>
                                 </span>
                                 {overrides.map((ovr) => {
-                                  const modDef = eligibleMods.find((m) => m.moduleKey === ovr.moduleCode);
+                                  const modDef = eligibleMods.find(
+                                    (m) => m.moduleKey === ovr.moduleCode,
+                                  );
                                   return (
                                     <span key={ovr.moduleCode} className="bezent-caption">
-                                      • <strong>{modDef?.name || ovr.moduleCode}</strong>: {ovr.overrideType.toUpperCase()} — &quot;{ovr.reason}&quot;
+                                      • <strong>{modDef?.name || ovr.moduleCode}</strong>:{' '}
+                                      {ovr.overrideType.toUpperCase()} — &quot;{ovr.reason}&quot;
                                     </span>
                                   );
                                 })}
@@ -1720,7 +1797,9 @@ export function CreateTenantPage({
               <Stack gap="xs">
                 <h3 className="bezent-heading-sm">4. Transactional Commitment Notice</h3>
                 <span className="bezent-caption">
-                  Clicking &quot;Create Tenant&quot; executes an atomic transaction. Tenant, Primary Company, Subscriptions, Outbox invitation, and initial provisioning jobs are created concurrently. No plaintext passwords or raw tokens are stored.
+                  Clicking &quot;Create Tenant&quot; executes an atomic transaction. Tenant, Primary
+                  Company, Subscriptions, Outbox invitation, and initial provisioning jobs are
+                  created concurrently. No plaintext passwords or raw tokens are stored.
                 </span>
               </Stack>
             </Card>
@@ -1739,7 +1818,11 @@ export function CreateTenantPage({
                   </Button>
                   <Button
                     variant="primary"
-                    disabled={isSubmitting || preflightLoading || (Boolean(preflightResult) && !preflightResult?.valid)}
+                    disabled={
+                      isSubmitting ||
+                      preflightLoading ||
+                      (Boolean(preflightResult) && !preflightResult?.valid)
+                    }
                     onClick={handleFinalSubmit}
                   >
                     {isSubmitting ? 'Creating Tenant...' : 'Create Tenant'}
@@ -1767,27 +1850,37 @@ export function CreateTenantPage({
               <Grid columns={2} gap="md">
                 <div>
                   <span className="bezent-caption">Tenant ID:</span>
-                  <div><code>{creationResult.tenantId}</code></div>
+                  <div>
+                    <code>{creationResult.tenantId}</code>
+                  </div>
                 </div>
                 <div>
                   <span className="bezent-caption">Tenant Code:</span>
-                  <div><strong>{creationResult.tenantCode}</strong></div>
+                  <div>
+                    <strong>{creationResult.tenantCode}</strong>
+                  </div>
                 </div>
                 <div>
                   <span className="bezent-caption">Primary Company ID:</span>
-                  <div><code>{creationResult.primaryCompanyId}</code></div>
+                  <div>
+                    <code>{creationResult.primaryCompanyId}</code>
+                  </div>
                 </div>
                 <div>
                   <span className="bezent-caption">Setup State:</span>
                   <div>
                     <Badge variant="info">
-                      {creationResult.businessSetupState === 'pending_setup' ? 'Pending Setup' : 'Pending Admin Acceptance'}
+                      {creationResult.businessSetupState === 'pending_setup'
+                        ? 'Pending Setup'
+                        : 'Pending Admin Acceptance'}
                     </Badge>
                   </div>
                 </div>
                 <div>
                   <span className="bezent-caption">Primary Administrator:</span>
-                  <div><strong>{creationResult.invitation.email}</strong></div>
+                  <div>
+                    <strong>{creationResult.invitation.email}</strong>
+                  </div>
                 </div>
                 <div>
                   <span className="bezent-caption">Invitation Status:</span>
@@ -1809,14 +1902,13 @@ export function CreateTenantPage({
             </Card>
 
             <Alert variant="info" title="Next Steps">
-              The primary administrator invitation email has been enqueued in the transactional outbox. Once the administrator verifies their email via OTP, their Company Admin workspace access will be unlocked.
+              The primary administrator invitation email has been enqueued in the transactional
+              outbox. Once the administrator verifies their email via OTP, their Company Admin
+              workspace access will be unlocked.
             </Alert>
 
             <Inline gap="md" justify="center">
-              <Button
-                variant="primary"
-                onClick={() => navigate('/super-admin/tenants')}
-              >
+              <Button variant="primary" onClick={() => navigate('/super-admin/tenants')}>
                 Back to All Tenants
               </Button>
               <Button

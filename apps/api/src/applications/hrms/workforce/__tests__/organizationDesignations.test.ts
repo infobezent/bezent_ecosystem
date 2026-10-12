@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { inArray, eq, and } from 'drizzle-orm';
+import { inArray, eq } from 'drizzle-orm';
 import { createApp } from '../../../../app/server/createApp.js';
 import { getDb } from '../../../../db/connection.js';
 import {
@@ -19,7 +19,6 @@ import { hashPassword } from '../../../../platform/auth/security.js';
 import { ValidationError } from '../../../../app/errors/AppError.js';
 import {
   validateCreateDesignation,
-  validateUpdateDesignation,
   validateSetDesignationStatus,
 } from '../validation/designation.schema.js';
 

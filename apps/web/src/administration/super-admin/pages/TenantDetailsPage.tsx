@@ -106,9 +106,7 @@ export function TenantDetailsPage({
   const [entitlements, setEntitlements] = useState<EffectiveEntitlementResult[]>(
     initialEntitlements ?? [],
   );
-  const [overrides, setOverrides] = useState<EntitlementOverrideRecord[]>(
-    initialOverrides ?? [],
-  );
+  const [overrides, setOverrides] = useState<EntitlementOverrideRecord[]>(initialOverrides ?? []);
   const [loadingEntitlements, setLoadingEntitlements] = useState<boolean>(false);
   const [entitlementsError, setEntitlementsError] = useState<string | null>(null);
 
@@ -130,7 +128,7 @@ export function TenantDetailsPage({
   // Tab 5: Activity Audit State
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(initialAuditLogs ?? []);
   const [activityTotal, setActivityTotal] = useState<number>(initialAuditLogs?.length ?? 0);
-  const [activityPage, setActivityPage] = useState<number>(1);
+  const [activityPage] = useState<number>(1);
   const [activityFilterAction, setActivityFilterAction] = useState<string>('');
   const [activityFilterEmail, setActivityFilterEmail] = useState<string>('');
   const [loadingActivity, setLoadingActivity] = useState<boolean>(false);
@@ -177,7 +175,10 @@ export function TenantDetailsPage({
           code: overviewRes.tenant.code,
           contactEmail: overviewRes.tenant.contactEmail,
           contactPhone: overviewRes.tenant.contactPhone,
-          status: overviewRes.tenant.status === 'archived' ? 'suspended' : (overviewRes.tenant.status as TenantRecord['status']),
+          status:
+            overviewRes.tenant.status === 'archived'
+              ? 'suspended'
+              : (overviewRes.tenant.status as TenantRecord['status']),
           createdAt: overviewRes.tenant.createdAt,
           updatedAt: overviewRes.tenant.updatedAt,
           logoUrl: overviewRes.tenant.logoUrl,
@@ -468,14 +469,12 @@ export function TenantDetailsPage({
       <PageHeader
         breadcrumbs={
           <Inline gap="xs" align="center">
-            <Button
-              variant="text"
-              size="sm"
-              onClick={() => navigate('/super-admin/tenants')}
-            >
+            <Button variant="text" size="sm" onClick={() => navigate('/super-admin/tenants')}>
               All Tenants
             </Button>
-            <span className="bezent-caption" aria-hidden="true">&rarr;</span>
+            <span className="bezent-caption" aria-hidden="true">
+              &rarr;
+            </span>
             <span className="bezent-caption">
               {overview?.tenant.name || tenant?.name || 'Tenant Details'}
             </span>
@@ -558,11 +557,7 @@ export function TenantDetailsPage({
           <Inline gap="md" align="center">
             <Inline gap="xs" align="center">
               <span className="bezent-caption">Lifecycle Status:</span>
-              <Badge
-                variant={currentStatus === 'active' ? 'success' : 'danger'}
-                showDot
-                size="md"
-              >
+              <Badge variant={currentStatus === 'active' ? 'success' : 'danger'} showDot size="md">
                 {currentStatus.toUpperCase()}
               </Badge>
             </Inline>
@@ -622,12 +617,12 @@ export function TenantDetailsPage({
           <Stack gap="lg">
             {/* Attention Required Section */}
             {overview?.attentionRequired?.needed && (
-              <Alert
-                variant="warning"
-                title="Attention Required"
-              >
+              <Alert variant="warning" title="Attention Required">
                 <Stack gap="xs">
-                  <span>{overview.attentionRequired.reason || 'Account requires administrative attention.'}</span>
+                  <span>
+                    {overview.attentionRequired.reason ||
+                      'Account requires administrative attention.'}
+                  </span>
                   {overview.attentionRequired.action?.label && (
                     <span className="bezent-caption">
                       Recommended Action: <strong>{overview.attentionRequired.action.label}</strong>
@@ -659,7 +654,9 @@ export function TenantDetailsPage({
                 <Stack gap="xs">
                   <span className="bezent-caption">Company Capacity</span>
                   <h2 className="bezent-heading-lg">
-                    {overview?.companyCapacity ? `${overview.companyCapacity.used} / ${overview.companyCapacity.max}` : '1 / 1'}
+                    {overview?.companyCapacity
+                      ? `${overview.companyCapacity.used} / ${overview.companyCapacity.max}`
+                      : '1 / 1'}
                   </h2>
                   <span className="bezent-caption">
                     {overview?.companyCapacity?.remaining ?? 0} remaining slot(s)
@@ -674,7 +671,9 @@ export function TenantDetailsPage({
                     {overview?.setupProgress?.percentage ?? 100}%
                   </h2>
                   <span className="bezent-caption">
-                    {overview?.setupProgress?.isComplete ? 'All milestones complete' : 'Setup in progress'}
+                    {overview?.setupProgress?.isComplete
+                      ? 'All milestones complete'
+                      : 'Setup in progress'}
                   </span>
                 </Stack>
               </Card>
@@ -689,15 +688,21 @@ export function TenantDetailsPage({
                   <Grid columns={2} gap="sm">
                     <div>
                       <span className="bezent-caption">Legal Name:</span>
-                      <div><strong>{overview?.tenant.name || tenant?.name}</strong></div>
+                      <div>
+                        <strong>{overview?.tenant.name || tenant?.name}</strong>
+                      </div>
                     </div>
                     <div>
                       <span className="bezent-caption">Tenant ID:</span>
-                      <div><code>{tenantId}</code></div>
+                      <div>
+                        <code>{tenantId}</code>
+                      </div>
                     </div>
                     <div>
                       <span className="bezent-caption">Tenant Code:</span>
-                      <div><strong>{overview?.tenant.code || tenant?.code}</strong></div>
+                      <div>
+                        <strong>{overview?.tenant.code || tenant?.code}</strong>
+                      </div>
                     </div>
                     <div>
                       <span className="bezent-caption">Contact Email:</span>
@@ -709,7 +714,11 @@ export function TenantDetailsPage({
                     </div>
                     <div>
                       <span className="bezent-caption">Created Date:</span>
-                      <div>{new Date(overview?.tenant.createdAt || tenant?.createdAt || Date.now()).toLocaleDateString()}</div>
+                      <div>
+                        {new Date(
+                          overview?.tenant.createdAt || tenant?.createdAt || Date.now(),
+                        ).toLocaleDateString()}
+                      </div>
                     </div>
                   </Grid>
                 </Stack>
@@ -723,7 +732,9 @@ export function TenantDetailsPage({
                     <Grid columns={2} gap="sm">
                       <div>
                         <span className="bezent-caption">Full Name:</span>
-                        <div><strong>{overview.primaryAdmin.name}</strong></div>
+                        <div>
+                          <strong>{overview.primaryAdmin.name}</strong>
+                        </div>
                       </div>
                       <div>
                         <span className="bezent-caption">Work Email:</span>
@@ -733,7 +744,9 @@ export function TenantDetailsPage({
                         <span className="bezent-caption">Invitation Status:</span>
                         <div>
                           <Badge
-                            variant={overview.primaryAdmin.status === 'active' ? 'success' : 'warning'}
+                            variant={
+                              overview.primaryAdmin.status === 'active' ? 'success' : 'warning'
+                            }
                             size="sm"
                           >
                             {overview.primaryAdmin.status === 'pending'
@@ -772,7 +785,10 @@ export function TenantDetailsPage({
                         <Stack gap="xs">
                           <Inline justify="between" align="center">
                             <strong>{app.applicationCode.toUpperCase()}</strong>
-                            <Badge variant={app.status === 'active' ? 'success' : 'warning'} size="sm">
+                            <Badge
+                              variant={app.status === 'active' ? 'success' : 'warning'}
+                              size="sm"
+                            >
                               {app.status.toUpperCase()}
                             </Badge>
                           </Inline>
@@ -787,7 +803,8 @@ export function TenantDetailsPage({
                   </Grid>
                 ) : (
                   <Alert variant="info" title="Zero Applications Configured">
-                    This customer tenant was created without active applications. Applications and plans can be configured in the Entitlements tab.
+                    This customer tenant was created without active applications. Applications and
+                    plans can be configured in the Entitlements tab.
                   </Alert>
                 )}
               </Stack>
@@ -819,7 +836,8 @@ export function TenantDetailsPage({
                     <div>
                       <span className="bezent-caption">Execution Attempts:</span>
                       <div>
-                        {overview.provisioningHealth.attemptCount} / {overview.provisioningHealth.maxAttempts}
+                        {overview.provisioningHealth.attemptCount} /{' '}
+                        {overview.provisioningHealth.maxAttempts}
                       </div>
                     </div>
                     <div>
@@ -849,12 +867,18 @@ export function TenantDetailsPage({
         <div id="panel-entitlements" role="tabpanel" aria-labelledby="tab-entitlements">
           <Stack gap="lg">
             {entitlementsError && (
-              <Alert variant="error" title="Entitlements Error" onDismiss={() => setEntitlementsError(null)}>
+              <Alert
+                variant="error"
+                title="Entitlements Error"
+                onDismiss={() => setEntitlementsError(null)}
+              >
                 {entitlementsError}
               </Alert>
             )}
 
-            {loadingEntitlements && <LoadingState label="Loading tenant entitlements and subscriptions..." />}
+            {loadingEntitlements && (
+              <LoadingState label="Loading tenant entitlements and subscriptions..." />
+            )}
 
             {/* Section A: Application Subscriptions */}
             <Card padding="md">
@@ -879,13 +903,20 @@ export function TenantDetailsPage({
                     <TableBody>
                       {subscriptions.map((sub) => (
                         <TableRow key={sub.id}>
-                          <TableCell><strong>{sub.applicationCode.toUpperCase()}</strong></TableCell>
+                          <TableCell>
+                            <strong>{sub.applicationCode.toUpperCase()}</strong>
+                          </TableCell>
                           <TableCell>{sub.planName || sub.planId}</TableCell>
-                          <TableCell>{sub.accessMode === 'trial' ? 'Free Trial' : 'Commercial Paid'}</TableCell>
+                          <TableCell>
+                            {sub.accessMode === 'trial' ? 'Free Trial' : 'Commercial Paid'}
+                          </TableCell>
                           <TableCell>{sub.licensedSeats}</TableCell>
                           <TableCell>{sub.billingCycle}</TableCell>
                           <TableCell>
-                            <Badge variant={sub.status === 'active' ? 'success' : 'warning'} size="sm">
+                            <Badge
+                              variant={sub.status === 'active' ? 'success' : 'warning'}
+                              size="sm"
+                            >
                               {sub.status.toUpperCase()}
                             </Badge>
                           </TableCell>
@@ -897,11 +928,18 @@ export function TenantDetailsPage({
                                   size="sm"
                                   onClick={async () => {
                                     try {
-                                      await superAdminApi.cancelSubscription(sub.id, 'Administrative cancellation');
+                                      await superAdminApi.cancelSubscription(
+                                        sub.id,
+                                        'Administrative cancellation',
+                                      );
                                       setSuccessMessage(`Subscription '${sub.id}' cancelled.`);
                                       await fetchEntitlementsData();
                                     } catch (err: unknown) {
-                                      setEntitlementsError(err instanceof Error ? err.message : 'Failed to cancel subscription');
+                                      setEntitlementsError(
+                                        err instanceof Error
+                                          ? err.message
+                                          : 'Failed to cancel subscription',
+                                      );
                                     }
                                   }}
                                 >
@@ -918,7 +956,11 @@ export function TenantDetailsPage({
                                       setSuccessMessage(`Subscription '${sub.id}' renewed.`);
                                       await fetchEntitlementsData();
                                     } catch (err: unknown) {
-                                      setEntitlementsError(err instanceof Error ? err.message : 'Failed to renew subscription');
+                                      setEntitlementsError(
+                                        err instanceof Error
+                                          ? err.message
+                                          : 'Failed to renew subscription',
+                                      );
                                     }
                                   }}
                                 >
@@ -993,22 +1035,36 @@ export function TenantDetailsPage({
                                   {enabledMods.length > 0 ? (
                                     <Stack gap="xs">
                                       {enabledMods.map((mod) => (
-                                        <Inline key={mod.moduleCode} justify="between" align="center">
+                                        <Inline
+                                          key={mod.moduleCode}
+                                          justify="between"
+                                          align="center"
+                                        >
                                           <Inline gap="xs" align="center">
                                             <code>{mod.moduleCode}</code>
-                                            {mod.moduleCode === 'organization' || mod.moduleCode === 'employees' ? (
-                                              <Badge variant="info" size="sm">Mandatory</Badge>
+                                            {mod.moduleCode === 'organization' ||
+                                            mod.moduleCode === 'employees' ? (
+                                              <Badge variant="info" size="sm">
+                                                Mandatory
+                                              </Badge>
                                             ) : null}
                                           </Inline>
                                           <Inline gap="xs" align="center">
                                             <Badge
-                                              variant={mod.source === 'override' ? 'warning' : 'success'}
+                                              variant={
+                                                mod.source === 'override' ? 'warning' : 'success'
+                                              }
                                               size="sm"
                                             >
-                                              {mod.source === 'override' ? 'Override' : 'Plan Default'}
+                                              {mod.source === 'override'
+                                                ? 'Override'
+                                                : 'Plan Default'}
                                             </Badge>
                                             {mod.overrideReason && (
-                                              <span className="bezent-caption" title={mod.overrideReason}>
+                                              <span
+                                                className="bezent-caption"
+                                                title={mod.overrideReason}
+                                              >
                                                 ({mod.overrideReason})
                                               </span>
                                             )}
@@ -1017,7 +1073,9 @@ export function TenantDetailsPage({
                                       ))}
                                     </Stack>
                                   ) : (
-                                    <span className="bezent-caption">No modules enabled for this application.</span>
+                                    <span className="bezent-caption">
+                                      No modules enabled for this application.
+                                    </span>
                                   )}
                                 </Stack>
                               </Card>
@@ -1027,22 +1085,32 @@ export function TenantDetailsPage({
                                 <Stack gap="xs">
                                   <Inline justify="between" align="center">
                                     <span className="bezent-caption">
-                                      <strong>Disabled / Excluded Modules ({disabledMods.length})</strong>
+                                      <strong>
+                                        Disabled / Excluded Modules ({disabledMods.length})
+                                      </strong>
                                     </span>
                                   </Inline>
                                   {disabledMods.length > 0 ? (
                                     <Stack gap="xs">
                                       {disabledMods.map((mod) => (
-                                        <Inline key={mod.moduleCode} justify="between" align="center">
+                                        <Inline
+                                          key={mod.moduleCode}
+                                          justify="between"
+                                          align="center"
+                                        >
                                           <code>{mod.moduleCode}</code>
                                           <Badge variant="neutral" size="sm">
-                                            {mod.source === 'override' ? 'Override Disabled' : 'Plan Excluded'}
+                                            {mod.source === 'override'
+                                              ? 'Override Disabled'
+                                              : 'Plan Excluded'}
                                           </Badge>
                                         </Inline>
                                       ))}
                                     </Stack>
                                   ) : (
-                                    <span className="bezent-caption">All eligible modules are active.</span>
+                                    <span className="bezent-caption">
+                                      All eligible modules are active.
+                                    </span>
                                   )}
                                 </Stack>
                               </Card>
@@ -1084,8 +1152,12 @@ export function TenantDetailsPage({
                       {overrides.map((ovr) => (
                         <TableRow key={ovr.id}>
                           <TableCell>{ovr.applicationCode.toUpperCase()}</TableCell>
-                          <TableCell><code>{ovr.moduleCode}</code></TableCell>
-                          <TableCell><Badge size="sm">{ovr.overrideType.toUpperCase()}</Badge></TableCell>
+                          <TableCell>
+                            <code>{ovr.moduleCode}</code>
+                          </TableCell>
+                          <TableCell>
+                            <Badge size="sm">{ovr.overrideType.toUpperCase()}</Badge>
+                          </TableCell>
                           <TableCell>{ovr.reason}</TableCell>
                           <TableCell>
                             <Badge variant={ovr.revokedAt ? 'neutral' : 'success'} size="sm">
@@ -1108,7 +1180,9 @@ export function TenantDetailsPage({
                     </TableBody>
                   </Table>
                 ) : (
-                  <span className="bezent-caption">No custom administrative overrides configured.</span>
+                  <span className="bezent-caption">
+                    No custom administrative overrides configured.
+                  </span>
                 )}
               </Stack>
             </Card>
@@ -1123,7 +1197,11 @@ export function TenantDetailsPage({
         <div id="panel-provisioning" role="tabpanel" aria-labelledby="tab-provisioning">
           <Stack gap="lg">
             {jobsError && (
-              <Alert variant="error" title="Provisioning Error" onDismiss={() => setJobsError(null)}>
+              <Alert
+                variant="error"
+                title="Provisioning Error"
+                onDismiss={() => setJobsError(null)}
+              >
                 {jobsError}
               </Alert>
             )}
@@ -1183,7 +1261,9 @@ export function TenantDetailsPage({
                     <TableBody>
                       {jobs.map((job) => (
                         <TableRow key={job.id}>
-                          <TableCell><code>{job.id}</code></TableCell>
+                          <TableCell>
+                            <code>{job.id}</code>
+                          </TableCell>
                           <TableCell>{job.jobType.replace(/_/g, ' ').toUpperCase()}</TableCell>
                           <TableCell>
                             <Badge
@@ -1199,7 +1279,9 @@ export function TenantDetailsPage({
                               {job.status.toUpperCase()}
                             </Badge>
                           </TableCell>
-                          <TableCell>{job.attemptCount} / {job.maxAttempts}</TableCell>
+                          <TableCell>
+                            {job.attemptCount} / {job.maxAttempts}
+                          </TableCell>
                           <TableCell>{new Date(job.createdAt).toLocaleDateString()}</TableCell>
                           <TableCell>
                             <Inline gap="xs">
@@ -1263,7 +1345,9 @@ export function TenantDetailsPage({
                     <Stack gap="xs">
                       <span className="bezent-caption">Worker Status</span>
                       <strong>Operational</strong>
-                      <span className="bezent-caption">Health checked via platform worker heartbeat</span>
+                      <span className="bezent-caption">
+                        Health checked via platform worker heartbeat
+                      </span>
                     </Stack>
                   </Card>
                 </Grid>
@@ -1280,12 +1364,18 @@ export function TenantDetailsPage({
         <div id="panel-lifecycle" role="tabpanel" aria-labelledby="tab-lifecycle">
           <Stack gap="lg">
             {lifecycleError && (
-              <Alert variant="error" title="Lifecycle Error" onDismiss={() => setLifecycleError(null)}>
+              <Alert
+                variant="error"
+                title="Lifecycle Error"
+                onDismiss={() => setLifecycleError(null)}
+              >
                 {lifecycleError}
               </Alert>
             )}
 
-            {loadingLifecycle && <LoadingState label="Loading tenant lifecycle transition history..." />}
+            {loadingLifecycle && (
+              <LoadingState label="Loading tenant lifecycle transition history..." />
+            )}
 
             {/* Current State & Available Actions */}
             <Card padding="md">
@@ -1294,7 +1384,8 @@ export function TenantDetailsPage({
                   <Stack gap="xs">
                     <h3 className="bezent-heading-sm">Current Operational Lifecycle State</h3>
                     <span className="bezent-caption">
-                      Lifecycle status determines global login access and workspace routing across all customer companies.
+                      Lifecycle status determines global login access and workspace routing across
+                      all customer companies.
                     </span>
                   </Stack>
                   <Badge
@@ -1308,17 +1399,11 @@ export function TenantDetailsPage({
 
                 <Inline gap="sm">
                   {currentStatus === 'active' ? (
-                    <Button
-                      variant="danger"
-                      onClick={() => setIsSuspendModalOpen(true)}
-                    >
+                    <Button variant="danger" onClick={() => setIsSuspendModalOpen(true)}>
                       Suspend Tenant
                     </Button>
                   ) : (
-                    <Button
-                      variant="primary"
-                      onClick={() => setIsReactivateModalOpen(true)}
-                    >
+                    <Button variant="primary" onClick={() => setIsReactivateModalOpen(true)}>
                       Reactivate Tenant
                     </Button>
                   )}
@@ -1345,9 +1430,17 @@ export function TenantDetailsPage({
                     <TableBody>
                       {lifecycleEvents.map((event) => (
                         <TableRow key={event.id}>
-                          <TableCell><strong>{event.eventType.toUpperCase()}</strong></TableCell>
-                          <TableCell><Badge size="sm">{event.previousStatus}</Badge></TableCell>
-                          <TableCell><Badge size="sm" variant="success">{event.newStatus}</Badge></TableCell>
+                          <TableCell>
+                            <strong>{event.eventType.toUpperCase()}</strong>
+                          </TableCell>
+                          <TableCell>
+                            <Badge size="sm">{event.previousStatus}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge size="sm" variant="success">
+                              {event.newStatus}
+                            </Badge>
+                          </TableCell>
                           <TableCell>{event.reason || 'None specified'}</TableCell>
                           <TableCell>{event.actorEmail || 'System'}</TableCell>
                           <TableCell>{new Date(event.createdAt).toLocaleString()}</TableCell>
@@ -1374,7 +1467,11 @@ export function TenantDetailsPage({
         <div id="panel-activity" role="tabpanel" aria-labelledby="tab-activity">
           <Stack gap="lg">
             {activityError && (
-              <Alert variant="error" title="Activity Error" onDismiss={() => setActivityError(null)}>
+              <Alert
+                variant="error"
+                title="Activity Error"
+                onDismiss={() => setActivityError(null)}
+              >
                 {activityError}
               </Alert>
             )}
@@ -1435,10 +1532,14 @@ export function TenantDetailsPage({
                       {auditLogs.map((log) => (
                         <TableRow key={log.id}>
                           <TableCell>{new Date(log.createdAt).toLocaleString()}</TableCell>
-                          <TableCell><code>{log.action}</code></TableCell>
+                          <TableCell>
+                            <code>{log.action}</code>
+                          </TableCell>
                           <TableCell>{log.actorEmail || 'System'}</TableCell>
                           <TableCell>{log.targetType}</TableCell>
-                          <TableCell><code>{log.targetId}</code></TableCell>
+                          <TableCell>
+                            <code>{log.targetId}</code>
+                          </TableCell>
                           <TableCell>
                             <Button
                               variant="ghost"
@@ -1477,7 +1578,8 @@ export function TenantDetailsPage({
         >
           <Stack gap="md">
             <Alert variant="warning" title="Impact of Tenant Suspension">
-              Suspending this tenant will immediately restrict login access across all companies and applications for this customer account.
+              Suspending this tenant will immediately restrict login access across all companies and
+              applications for this customer account.
             </Alert>
             <Input
               label="Suspension Reason *"
@@ -1511,7 +1613,8 @@ export function TenantDetailsPage({
         >
           <Stack gap="md">
             <p>
-              Reactivating this tenant restores operational eligibility and allows company members to authenticate into entitled applications.
+              Reactivating this tenant restores operational eligibility and allows company members
+              to authenticate into entitled applications.
             </p>
             <Input
               label="Reactivation Reason"
@@ -1547,7 +1650,9 @@ export function TenantDetailsPage({
               <Select
                 label="Application *"
                 value={overrideApp}
-                onChange={(e) => setOverrideApp(e.target.value as 'hrms' | 'crm' | 'project_management')}
+                onChange={(e) =>
+                  setOverrideApp(e.target.value as 'hrms' | 'crm' | 'project_management')
+                }
                 options={[
                   { value: 'hrms', label: 'HRMS' },
                   { value: 'crm', label: 'CRM' },
@@ -1601,15 +1706,21 @@ export function TenantDetailsPage({
             <Grid columns={2} gap="sm">
               <div>
                 <span className="bezent-caption">Job Type:</span>
-                <div><strong>{selectedJob.jobType}</strong></div>
+                <div>
+                  <strong>{selectedJob.jobType}</strong>
+                </div>
               </div>
               <div>
                 <span className="bezent-caption">Status:</span>
-                <div><Badge size="sm">{selectedJob.status.toUpperCase()}</Badge></div>
+                <div>
+                  <Badge size="sm">{selectedJob.status.toUpperCase()}</Badge>
+                </div>
               </div>
               <div>
                 <span className="bezent-caption">Attempts:</span>
-                <div>{selectedJob.attemptCount} / {selectedJob.maxAttempts}</div>
+                <div>
+                  {selectedJob.attemptCount} / {selectedJob.maxAttempts}
+                </div>
               </div>
               <div>
                 <span className="bezent-caption">Created:</span>
@@ -1650,7 +1761,9 @@ export function TenantDetailsPage({
             <Grid columns={2} gap="sm">
               <div>
                 <span className="bezent-caption">Action:</span>
-                <div><code>{selectedAuditLog.action}</code></div>
+                <div>
+                  <code>{selectedAuditLog.action}</code>
+                </div>
               </div>
               <div>
                 <span className="bezent-caption">Actor:</span>
@@ -1658,7 +1771,9 @@ export function TenantDetailsPage({
               </div>
               <div>
                 <span className="bezent-caption">Target:</span>
-                <div>{selectedAuditLog.targetType} ({selectedAuditLog.targetId})</div>
+                <div>
+                  {selectedAuditLog.targetType} ({selectedAuditLog.targetId})
+                </div>
               </div>
               <div>
                 <span className="bezent-caption">Timestamp:</span>
@@ -1686,3 +1801,5 @@ export function TenantDetailsPage({
     </Page>
   );
 }
+
+export default TenantDetailsPage;

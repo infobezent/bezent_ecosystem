@@ -302,6 +302,80 @@
   gap: 6px;
 }
 
+/* ── Compact Workspace Stat Cards (~72-88px height) ── */
+.bezent-stat-card--compact {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 78px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-default, #dde3ea);
+  background: var(--bg-surface, #ffffff);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.bezent-stat-card--compact:hover {
+  border-color: var(--accent-interactive, #1a73e8);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.bezent-stat-card--compact.is-active {
+  border-color: var(--accent-interactive, #1a73e8);
+  background: var(--bg-surface-secondary, #f0f7ff);
+  box-shadow: 0 0 0 1px var(--accent-interactive, #1a73e8);
+}
+
+.bezent-stat-card--compact .bezent-stat-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.bezent-stat-card--compact .bezent-stat-card__title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary, #5f6368);
+  white-space: nowrap;
+}
+
+.bezent-stat-card--compact .bezent-stat-card__num {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary, #000000);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-stat-card--compact {
+  background: var(--bg-card, #081b3a);
+  border-color: rgba(56, 189, 248, 0.25);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='dark'] .bezent-stat-card--compact:hover {
+  border-color: rgba(56, 189, 248, 0.5);
+}
+
+[data-theme='dark'] .bezent-stat-card--compact.is-active {
+  background: rgba(56, 189, 248, 0.14);
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 1px #38bdf8;
+}
+
+[data-theme='dark'] .bezent-stat-card--compact .bezent-stat-card__title {
+  color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme='dark'] .bezent-stat-card--compact .bezent-stat-card__num {
+  color: var(--text-primary, #f8fafc);
+}
+
 /* ── Contact Info List ── */
 .bezent-contact-avatar {
   width: 52px;

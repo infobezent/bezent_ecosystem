@@ -1,0 +1,162 @@
+/*
+ * BEZENT TimePicker — 24-Hour Stepper Component
+ * Semantic tokens only, fully accessible, zero AM/PM.
+ */
+
+.bezent-time-picker-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.bezent-time-picker-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 42px;
+  padding: 0 8px 0 12px;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-sm, 6px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition:
+    border-color 0.16s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.16s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.bezent-time-picker-box:hover:not(.is-disabled) {
+  border-color: var(--border-focus, #7cc4fa);
+}
+
+.bezent-time-picker-wrapper.is-focused .bezent-time-picker-box {
+  border-color: var(--border-focus, #7cc4fa);
+  box-shadow: 0 0 0 1px var(--border-focus, #7cc4fa);
+}
+
+.bezent-time-picker-wrapper.has-error .bezent-time-picker-box {
+  border-color: var(--status-danger-fg, #ef4444);
+}
+
+.bezent-time-picker-wrapper.is-disabled .bezent-time-picker-box {
+  background-color: var(--bg-surface-secondary, #f8fafc);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Clock Icon */
+.bezent-time-picker-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted, #94a3b8);
+  margin-right: 8px;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+/* 24-Hour Segments Container */
+.bezent-time-picker-segments {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+}
+
+/* Individual segment numeric inputs (HH, mm, ss) */
+.bezent-time-segment-input {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  text-align: center;
+  font-family: inherit;
+  font-size: var(--form-font-size-input, 14px);
+  font-weight: 500;
+  color: var(--text-primary, #0f172a);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.14s ease;
+  user-select: all;
+  box-sizing: border-box;
+}
+
+.bezent-time-segment-input:hover {
+  background: var(--bg-surface-secondary, #f1f5f9);
+  color: var(--text-primary, #0f172a);
+}
+
+.bezent-time-segment-input:focus,
+.bezent-time-segment-input.is-active {
+  background: var(--color-primary-light, #eff6ff);
+  border-color: var(--color-primary-border, #bfdbfe);
+  color: var(--accent-interactive, #1a73e8);
+  font-weight: 600;
+}
+
+/* Separator Colon */
+.bezent-time-separator {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted, #94a3b8);
+  user-select: none;
+}
+
+/* 24h Badge */
+.bezent-time-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  margin-left: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted, #64748b);
+  background: var(--bg-surface-secondary, #f1f5f9);
+  border-radius: 4px;
+  user-select: none;
+}
+
+/* Stepper buttons (▲ / ▼) */
+.bezent-time-steppers {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1px;
+  height: 32px;
+  width: 22px;
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+.bezent-time-step-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 15px;
+  padding: 0;
+  background: var(--bg-surface-secondary, #f8fafc);
+  border: 1px solid var(--border-default, #e2e8f0);
+  border-radius: 3px;
+  color: var(--text-secondary, #64748b);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.bezent-time-step-btn:hover {
+  background: var(--color-primary-light, #eff6ff);
+  border-color: var(--color-primary-border, #bfdbfe);
+  color: var(--accent-interactive, #1a73e8);
+}
+
+.bezent-time-step-btn:active {
+  background: #dbeafe;
+  color: #1d4ed8;
+}

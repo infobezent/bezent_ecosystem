@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import { CompaniesPage } from '../pages/CompaniesPage';
 import { CompanyDetailsPage } from '../pages/CompanyDetailsPage';
-import { superAdminApi, type CompanyRecord, type TenantRecord } from '../api/superAdminApi';
+import { type CompanyRecord, type TenantRecord } from '../api/superAdminApi';
 import { superAdminNavigation } from '../navigation/superAdminNavigation';
 import { superAdminRoutes } from '../routes/superAdminRoutes';
 

@@ -1,0 +1,56 @@
+@import 'flag-icons/css/flag-icons.min.css';
+
+.bezent-country-flag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  line-height: 1;
+  user-select: none;
+}
+
+.bezent-country-flag__icon {
+  border-radius: 2px;
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0.25);
+  display: inline-block;
+  background-size: cover;
+  background-position: center;
+}
+
+.bezent-country-flag--sm .bezent-country-flag__icon {
+  width: 16px;
+  height: 12px;
+}
+
+.bezent-country-flag--md .bezent-country-flag__icon {
+  width: 20px;
+  height: 15px;
+}
+
+.bezent-country-flag--lg .bezent-country-flag__icon {
+  width: 28px;
+  height: 21px;
+}
+
+.bezent-country-flag--sm {
+  font-size: 14px;
+}
+
+.bezent-country-flag--md {
+  font-size: 18px;
+}
+
+.bezent-country-flag--lg {
+  font-size: 24px;
+}
+
+.bezent-country-flag__emoji {
+  display: inline-block;
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif;
+}
+
+.bezent-country-flag__label {
+  margin-left: var(--spacing-xs, 4px);
+  font-size: var(--font-size-sm, 13px);
+  color: var(--text-primary);
+}

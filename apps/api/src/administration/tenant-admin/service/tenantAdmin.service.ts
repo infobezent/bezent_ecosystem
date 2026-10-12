@@ -6,14 +6,23 @@ import {
   platformUserRepository,
   PlatformUserRepository,
 } from '../../../platform/users/repository/user.repository.js';
-import { tenantRepository, TenantRepository } from '../../../platform/tenants/repository/tenant.repository.js';
+import {
+  tenantRepository,
+  TenantRepository,
+} from '../../../platform/tenants/repository/tenant.repository.js';
 import {
   companyRepository,
   CompanyRepository,
 } from '../../../platform/companies/repository/company.repository.js';
-import { moduleRepository, ModuleRepository } from '../../../platform/modules/repository/module.repository.js';
+import {
+  moduleRepository,
+  ModuleRepository,
+} from '../../../platform/modules/repository/module.repository.js';
 import { moduleService, ModuleService } from '../../../platform/modules/service/module.service.js';
-import { companyService, CompanyService } from '../../../platform/companies/service/company.service.js';
+import {
+  companyService,
+  CompanyService,
+} from '../../../platform/companies/service/company.service.js';
 import type { CreateTenantAdminCompanyDto } from '../../../platform/companies/types/company.types.js';
 import { auditService, AuditService } from '../../../platform/audit/service/audit.service.js';
 import { generateSurrogateId } from '../../../platform/auth/security.js';
@@ -41,7 +50,6 @@ import type {
   AvailableTenantUserItem,
   AssignCompanyUserDto,
   InviteCompanyUserDto,
-  UpdateCompanyUserRoleDto,
   CompanyRoleOverviewItem,
 } from '../types/tenantAdmin.types.js';
 import {
@@ -50,7 +58,6 @@ import {
   validateAssignCompanyRoles,
   validateAssignCompanyUser,
   validateInviteCompanyUser,
-  validateUpdateCompanyUserRole,
 } from '../validation/tenantAdmin.schema.js';
 import { MODULE_CATALOG, type ModuleCode } from '../../../platform/modules/types/module.types.js';
 import { getDb } from '../../../db/connection.js';

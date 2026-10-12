@@ -1,12 +1,11 @@
-import { subscriptionRepository, SubscriptionRepository } from '../repository/subscription.repository.js';
+import {
+  subscriptionRepository,
+  SubscriptionRepository,
+} from '../repository/subscription.repository.js';
 import { planService, PlanService } from '../../plans/service/plan.service.js';
 import { tenantRepository, TenantRepository } from '../../tenants/repository/tenant.repository.js';
 import { auditService, AuditService } from '../../audit/service/audit.service.js';
-import {
-  NotFoundError,
-  ConflictError,
-  BadRequestError,
-} from '../../../app/errors/AppError.js';
+import { NotFoundError, ConflictError, BadRequestError } from '../../../app/errors/AppError.js';
 import { generateSurrogateId } from '../../auth/security.js';
 import type {
   SubscriptionRecord,
@@ -58,16 +57,22 @@ export class SubscriptionService {
     }
 
     if (plan.status !== 'active') {
-      throw new BadRequestError(`Plan '${plan.code}' is '${plan.status}' and cannot accept new subscriptions`);
+      throw new BadRequestError(
+        `Plan '${plan.code}' is '${plan.status}' and cannot accept new subscriptions`,
+      );
     }
 
     // Seat limits validation
     const licensedSeats = dto.licensedSeats ?? plan.defaultSeats;
     if (licensedSeats < plan.minSeats) {
-      throw new BadRequestError(`Licensed seats (${licensedSeats}) cannot be less than plan minimum (${plan.minSeats})`);
+      throw new BadRequestError(
+        `Licensed seats (${licensedSeats}) cannot be less than plan minimum (${plan.minSeats})`,
+      );
     }
     if (plan.maxSeats !== null && licensedSeats > plan.maxSeats) {
-      throw new BadRequestError(`Licensed seats (${licensedSeats}) exceeds plan maximum (${plan.maxSeats})`);
+      throw new BadRequestError(
+        `Licensed seats (${licensedSeats}) exceeds plan maximum (${plan.maxSeats})`,
+      );
     }
 
     const currentSeatsUsed = await this.repo.countActiveSeats(dto.tenantId);
@@ -109,7 +114,9 @@ export class SubscriptionService {
           interval,
         );
         if (!priceValidation.approved) {
-          throw new BadRequestError(priceValidation.reason || 'Price not approved for paid activation');
+          throw new BadRequestError(
+            priceValidation.reason || 'Price not approved for paid activation',
+          );
         }
       }
 
@@ -122,7 +129,8 @@ export class SubscriptionService {
           status = 'active';
           activatedAt = now;
           currentPeriodStartsAt = now;
-          const periodDays = (dto.billingCycle === 'annual') ? 365 : (dto.billingCycle === 'quarterly') ? 90 : 30;
+          const periodDays =
+            dto.billingCycle === 'annual' ? 365 : dto.billingCycle === 'quarterly' ? 90 : 30;
           currentPeriodEndsAt = new Date(now.getTime() + periodDays * 86400000);
           renewsAt = currentPeriodEndsAt;
         }
@@ -130,7 +138,8 @@ export class SubscriptionService {
         status = 'active';
         activatedAt = now;
         currentPeriodStartsAt = now;
-        const periodDays = (dto.billingCycle === 'annual') ? 365 : (dto.billingCycle === 'quarterly') ? 90 : 30;
+        const periodDays =
+          dto.billingCycle === 'annual' ? 365 : dto.billingCycle === 'quarterly' ? 90 : 30;
         currentPeriodEndsAt = new Date(now.getTime() + periodDays * 86400000);
         renewsAt = currentPeriodEndsAt;
       }
@@ -138,7 +147,10 @@ export class SubscriptionService {
 
     // Check existing active subscription if trying to create an immediately active/trial subscription
     if (status === 'active' || status === 'trial') {
-      const activeExisting = await this.repo.findActiveByTenantAndApp(dto.tenantId, dto.applicationCode);
+      const activeExisting = await this.repo.findActiveByTenantAndApp(
+        dto.tenantId,
+        dto.applicationCode,
+      );
       if (activeExisting) {
         throw new ConflictError(
           `Tenant '${dto.tenantId}' already has an active subscription for application '${dto.applicationCode}'. Schedule renewal or cancel existing first.`,
@@ -177,7 +189,9 @@ export class SubscriptionService {
         isEnabled ? 'enabled' : 'disabled',
         null,
       );
-    } catch {}
+    } catch {
+      // Best-effort module status synchronization
+    }
 
     await this.audit.logEvent({
       actorUserId: actor?.id,
@@ -217,7 +231,10 @@ export class SubscriptionService {
     }
 
     // Check if another subscription is currently active for this tenant & application
-    const activeExisting = await this.repo.findActiveByTenantAndApp(sub.tenantId, sub.applicationCode);
+    const activeExisting = await this.repo.findActiveByTenantAndApp(
+      sub.tenantId,
+      sub.applicationCode,
+    );
     if (activeExisting && activeExisting.id !== sub.id) {
       throw new ConflictError(
         `Cannot activate subscription '${sub.id}'. Tenant already has active subscription '${activeExisting.id}' for application '${sub.applicationCode}'`,
@@ -225,7 +242,8 @@ export class SubscriptionService {
     }
 
     const now = new Date();
-    const periodDays = (sub.billingCycle === 'annual') ? 365 : (sub.billingCycle === 'quarterly') ? 90 : 30;
+    const periodDays =
+      sub.billingCycle === 'annual' ? 365 : sub.billingCycle === 'quarterly' ? 90 : 30;
     const currentPeriodEndsAt = new Date(now.getTime() + periodDays * 86400000);
 
     const updated = await this.repo.update(id, {
@@ -238,7 +256,9 @@ export class SubscriptionService {
 
     try {
       await this.moduleRepo.setStatus(updated.tenantId, updated.applicationCode, 'enabled', null);
-    } catch {}
+    } catch {
+      // Best-effort module status synchronization
+    }
 
     await this.audit.logEvent({
       actorUserId: actor?.id,
@@ -271,12 +291,12 @@ export class SubscriptionService {
     }
 
     const now = new Date();
-    const defaultDays = (sub.billingCycle === 'annual') ? 365 : (sub.billingCycle === 'quarterly') ? 90 : 30;
+    const defaultDays =
+      sub.billingCycle === 'annual' ? 365 : sub.billingCycle === 'quarterly' ? 90 : 30;
     const extensionDays = dto.periodDays || defaultDays;
 
-    const baseStart = (sub.currentPeriodEndsAt && sub.currentPeriodEndsAt > now)
-      ? sub.currentPeriodEndsAt
-      : now;
+    const baseStart =
+      sub.currentPeriodEndsAt && sub.currentPeriodEndsAt > now ? sub.currentPeriodEndsAt : now;
     const newPeriodEndsAt = new Date(baseStart.getTime() + extensionDays * 86400000);
 
     const updated = await this.repo.update(id, {
@@ -289,7 +309,9 @@ export class SubscriptionService {
 
     try {
       await this.moduleRepo.setStatus(updated.tenantId, updated.applicationCode, 'enabled', null);
-    } catch {}
+    } catch {
+      // Best-effort module status synchronization
+    }
 
     await this.audit.logEvent({
       actorUserId: actor?.id,
@@ -332,7 +354,9 @@ export class SubscriptionService {
 
     try {
       await this.moduleRepo.setStatus(updated.tenantId, updated.applicationCode, 'disabled', null);
-    } catch {}
+    } catch {
+      // Best-effort module status synchronization
+    }
 
     await this.audit.logEvent({
       actorUserId: actor?.id,
@@ -367,9 +391,7 @@ export class SubscriptionService {
         );
       }
       if (plan.maxSeats !== null && dto.licensedSeats > plan.maxSeats) {
-        throw new BadRequestError(
-          `Licensed seats cannot exceed plan maximum (${plan.maxSeats})`,
-        );
+        throw new BadRequestError(`Licensed seats cannot exceed plan maximum (${plan.maxSeats})`);
       }
       const currentUsage = await this.repo.countActiveSeats(sub.tenantId);
       if (dto.licensedSeats < currentUsage) {

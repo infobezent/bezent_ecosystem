@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { eq, and, or, desc, sql } from 'drizzle-orm';
+import { eq, and, or, desc } from 'drizzle-orm';
 import { getDb } from '../../../db/connection.js';
 import {
   tenants,
@@ -8,8 +8,6 @@ import {
   invitations,
   companies,
   memberships,
-  type TenantAdmin,
-  type Invitation,
 } from '../../../db/schema.js';
 import { auditService, AuditService } from '../../audit/service/audit.service.js';
 import { emailService, EmailService } from '../../email/service/email.service.js';
@@ -172,7 +170,9 @@ export class PrimaryAdminService {
     // Lookup company for FK constraint
     const [company] = await db.select().from(companies).where(eq(companies.tenantId, tenantId));
     if (!company) {
-      throw new BadRequestError(`Tenant '${tenantId}' has no initialized companies for invitation linkage`);
+      throw new BadRequestError(
+        `Tenant '${tenantId}' has no initialized companies for invitation linkage`,
+      );
     }
 
     const rawToken = crypto.randomBytes(32).toString('hex');
@@ -217,7 +217,9 @@ export class PrimaryAdminService {
         companyName: tenant.name,
         roleLabel: 'Primary Tenant Administrator',
       });
-    } catch {}
+    } catch {
+      // Best-effort sign-in invitation email dispatch
+    }
 
     await this.audit.logEvent({
       actorUserId: actor?.id,
@@ -266,10 +268,7 @@ export class PrimaryAdminService {
     }
 
     const expiresAt = new Date(Date.now() + 72 * 3600 * 1000); // 72 hours
-    await db
-      .update(invitations)
-      .set({ expiresAt })
-      .where(eq(invitations.id, invitationId));
+    await db.update(invitations).set({ expiresAt }).where(eq(invitations.id, invitationId));
 
     const [tenant] = await db.select().from(tenants).where(eq(tenants.id, tenantId));
 
@@ -280,7 +279,9 @@ export class PrimaryAdminService {
         companyName: tenant?.name || 'BEZENT Platform',
         roleLabel: inv.isPrimaryAdmin ? 'Primary Tenant Administrator' : 'Tenant Administrator',
       });
-    } catch {}
+    } catch {
+      // Best-effort sign-in invitation email dispatch
+    }
 
     await this.audit.logEvent({
       actorUserId: actor?.id,
@@ -449,7 +450,10 @@ export class PrimaryAdminService {
           );
 
         if (existingMembership) {
-          if (existingMembership.status !== 'active' || existingMembership.role !== 'company_admin') {
+          if (
+            existingMembership.status !== 'active' ||
+            existingMembership.role !== 'company_admin'
+          ) {
             await tx
               .update(memberships)
               .set({ status: 'active', role: 'company_admin' })
@@ -580,7 +584,9 @@ export class PrimaryAdminService {
     }
 
     if (admin.isPrimary) {
-      throw new BadRequestError('Cannot remove Primary Admin directly. Reassign Primary Admin first.');
+      throw new BadRequestError(
+        'Cannot remove Primary Admin directly. Reassign Primary Admin first.',
+      );
     }
 
     const allAdmins = await db
@@ -592,10 +598,7 @@ export class PrimaryAdminService {
       throw new BadRequestError('Cannot remove the last active Tenant Admin for this tenant');
     }
 
-    await db
-      .update(tenantAdmins)
-      .set({ status: 'revoked' })
-      .where(eq(tenantAdmins.id, adminId));
+    await db.update(tenantAdmins).set({ status: 'revoked' }).where(eq(tenantAdmins.id, adminId));
 
     await this.audit.logEvent({
       actorUserId: actor?.id,

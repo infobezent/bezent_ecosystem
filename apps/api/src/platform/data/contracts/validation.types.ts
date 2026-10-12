@@ -49,3 +49,7 @@ export interface PostalValidationOptions {
   readonly required?: boolean;
   readonly countryCode?: string;
 }
+
+export interface StandardCodeValidationOptions {
+  readonly required?: boolean;
+}

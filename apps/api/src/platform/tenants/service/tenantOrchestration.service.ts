@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { eq, and, or, like } from 'drizzle-orm';
+import { eq, or, like } from 'drizzle-orm';
 import { getDb } from '../../../db/connection.js';
 import {
   tenants,
@@ -18,13 +18,8 @@ import { planService, PlanService } from '../../plans/service/plan.service.js';
 import { moduleService, ModuleService } from '../../modules/service/module.service.js';
 import { getApplicationModules } from '../../modules/catalog/applicationModuleCatalog.js';
 import { auditService, AuditService } from '../../audit/service/audit.service.js';
+import { ConflictError, BadRequestError } from '../../../app/errors/AppError.js';
 import {
-  ConflictError,
-  BadRequestError,
-  NotFoundError,
-} from '../../../app/errors/AppError.js';
-import {
-  type TenantOrchestrationDto,
   type TenantOrchestrationPreflightResult,
   validateTenantOrchestration,
 } from '../validation/tenantOrchestration.schema.js';
@@ -97,7 +92,6 @@ export class TenantCreationOrchestrationService {
 
     // Validate plans, pricing, seat limits
     const subscriptionSummaries = [];
-    const now = new Date();
 
     for (const sub of dto.subscriptions) {
       const plan = await this.plans.getPlanById(sub.planId);
@@ -107,15 +101,21 @@ export class TenantCreationOrchestrationService {
         );
       }
       if (plan.status !== 'active') {
-        throw new BadRequestError(`Plan '${plan.code}' is '${plan.status}' and cannot accept subscriptions`);
+        throw new BadRequestError(
+          `Plan '${plan.code}' is '${plan.status}' and cannot accept subscriptions`,
+        );
       }
 
       const seats = sub.licensedSeats ?? plan.defaultSeats;
       if (seats < plan.minSeats) {
-        throw new BadRequestError(`Seats for '${sub.applicationCode}' (${seats}) cannot be less than plan minimum (${plan.minSeats})`);
+        throw new BadRequestError(
+          `Seats for '${sub.applicationCode}' (${seats}) cannot be less than plan minimum (${plan.minSeats})`,
+        );
       }
       if (plan.maxSeats !== null && seats > plan.maxSeats) {
-        throw new BadRequestError(`Seats for '${sub.applicationCode}' (${seats}) exceeds plan maximum (${plan.maxSeats})`);
+        throw new BadRequestError(
+          `Seats for '${sub.applicationCode}' (${seats}) exceeds plan maximum (${plan.maxSeats})`,
+        );
       }
 
       if (sub.accessMode === 'trial') {
@@ -130,7 +130,9 @@ export class TenantCreationOrchestrationService {
             sub.billingCycle || 'monthly',
           );
           if (!priceValidation.approved) {
-            throw new BadRequestError(priceValidation.reason || `Price not approved for plan '${plan.name}'`);
+            throw new BadRequestError(
+              priceValidation.reason || `Price not approved for plan '${plan.name}'`,
+            );
           }
         }
       }
@@ -144,13 +146,19 @@ export class TenantCreationOrchestrationService {
         for (const ovr of sub.moduleOverrides) {
           const modDef = appModules.find((m) => m.key === ovr.moduleCode);
           if (!modDef) {
-            throw new BadRequestError(`Cannot override unrecognized module '${ovr.moduleCode}' for application '${sub.applicationCode}'`);
+            throw new BadRequestError(
+              `Cannot override unrecognized module '${ovr.moduleCode}' for application '${sub.applicationCode}'`,
+            );
           }
           if (ovr.overrideType === 'disable' && modDef.isMandatory) {
-            throw new BadRequestError(`Cannot disable mandatory module '${modDef.name}' (${ovr.moduleCode}) via override`);
+            throw new BadRequestError(
+              `Cannot disable mandatory module '${modDef.name}' (${ovr.moduleCode}) via override`,
+            );
           }
           if (!ovr.reason || ovr.reason.trim().length < 3) {
-            throw new BadRequestError(`Override for module '${ovr.moduleCode}' requires an authorized reason (min 3 characters)`);
+            throw new BadRequestError(
+              `Override for module '${ovr.moduleCode}' requires an authorized reason (min 3 characters)`,
+            );
           }
         }
       }
@@ -160,14 +168,18 @@ export class TenantCreationOrchestrationService {
       if (sub.selectedModules) {
         for (const modKey of sub.selectedModules) {
           if (!appModules.some((m) => m.key === modKey)) {
-            throw new BadRequestError(`Invalid module key '${modKey}' for application '${sub.applicationCode}'`);
+            throw new BadRequestError(
+              `Invalid module key '${modKey}' for application '${sub.applicationCode}'`,
+            );
           }
         }
 
         const mandatoryModules = appModules.filter((m) => m.isMandatory);
         for (const mand of mandatoryModules) {
           if (!sub.selectedModules.includes(mand.key)) {
-            throw new BadRequestError(`Mandatory module '${mand.name}' (${mand.key}) cannot be deselected`);
+            throw new BadRequestError(
+              `Mandatory module '${mand.name}' (${mand.key}) cannot be deselected`,
+            );
           }
         }
 
@@ -245,10 +257,7 @@ export class TenantCreationOrchestrationService {
     let requestFingerprint: string | null = null;
 
     if (normalizedKey) {
-      requestFingerprint = crypto
-        .createHash('sha256')
-        .update(JSON.stringify(dto))
-        .digest('hex');
+      requestFingerprint = crypto.createHash('sha256').update(JSON.stringify(dto)).digest('hex');
 
       const [existingJob] = await db
         .select()
@@ -257,7 +266,11 @@ export class TenantCreationOrchestrationService {
 
       if (existingJob) {
         const state = existingJob.stepState as Record<string, unknown> | null;
-        if (state && typeof state.requestFingerprint === 'string' && state.requestFingerprint !== requestFingerprint) {
+        if (
+          state &&
+          typeof state.requestFingerprint === 'string' &&
+          state.requestFingerprint !== requestFingerprint
+        ) {
           throw new ConflictError(
             'Idempotency key was previously reused with a different payload',
             'IDEMPOTENCY_KEY_PAYLOAD_MISMATCH',
@@ -369,7 +382,8 @@ export class TenantCreationOrchestrationService {
             status = 'active';
             activatedAt = now;
             currentPeriodStartsAt = now;
-            const cycleDays = item.billingCycle === 'annual' ? 365 : item.billingCycle === 'quarterly' ? 90 : 30;
+            const cycleDays =
+              item.billingCycle === 'annual' ? 365 : item.billingCycle === 'quarterly' ? 90 : 30;
             currentPeriodEndsAt = new Date(now.getTime() + cycleDays * 86400000);
           }
         } else if (item.accessMode === 'trial') {
@@ -384,7 +398,8 @@ export class TenantCreationOrchestrationService {
           status = 'active';
           activatedAt = now;
           currentPeriodStartsAt = now;
-          const cycleDays = item.billingCycle === 'annual' ? 365 : item.billingCycle === 'quarterly' ? 90 : 30;
+          const cycleDays =
+            item.billingCycle === 'annual' ? 365 : item.billingCycle === 'quarterly' ? 90 : 30;
           currentPeriodEndsAt = new Date(now.getTime() + cycleDays * 86400000);
         }
 
@@ -534,7 +549,8 @@ export class TenantCreationOrchestrationService {
       }
 
       // Step 4: Durable Provisioning Job & Transactional Outbox
-      const setupState = dto.subscriptions.length === 0 ? 'pending_setup' : 'pending_admin_acceptance';
+      const setupState =
+        dto.subscriptions.length === 0 ? 'pending_setup' : 'pending_admin_acceptance';
       const responsePayload = {
         tenantId,
         tenantCode,
@@ -632,7 +648,8 @@ export class TenantCreationOrchestrationService {
       tenantId,
       tenantCode,
       primaryCompanyId: companyId,
-      businessSetupState: dto.subscriptions.length === 0 ? 'pending_setup' : 'pending_admin_acceptance',
+      businessSetupState:
+        dto.subscriptions.length === 0 ? 'pending_setup' : 'pending_admin_acceptance',
       subscriptions: subscriptionResults,
       invitation: {
         id: invId,

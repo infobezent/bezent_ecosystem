@@ -23,7 +23,6 @@ import {
   FormField,
   Grid,
   Divider,
-  Section,
 } from '../../../design-system/components';
 import { BezentIcon } from '../../../design-system/icons';
 import { useCompanyAdmin } from '../context/CompanyAdminContext';
@@ -423,11 +422,7 @@ export function CompanyUsersPage() {
                     <TableCell>{new Date(u.joinedAt).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <Inline gap="xs">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => openUserDetails(u)}
-                        >
+                        <Button variant="ghost" size="sm" onClick={() => openUserDetails(u)}>
                           Details
                         </Button>
                         <Button
@@ -596,11 +591,18 @@ export function CompanyUsersPage() {
                     <Grid columns={2} gap="md">
                       <Stack gap="xs">
                         <span className="bezent-metric-label">GLOBAL IDENTITY</span>
-                        <div><strong>Email:</strong> {userAccess.email}</div>
-                        <div><strong>Global User ID:</strong> <span className="bezent-metric-label">{userAccess.userId}</span></div>
+                        <div>
+                          <strong>Email:</strong> {userAccess.email}
+                        </div>
+                        <div>
+                          <strong>Global User ID:</strong>{' '}
+                          <span className="bezent-metric-label">{userAccess.userId}</span>
+                        </div>
                         <Inline gap="xs" align="center">
                           <span>Account Status:</span>
-                          <Badge variant={viewingUser.userStatus === 'active' ? 'success' : 'danger'}>
+                          <Badge
+                            variant={viewingUser.userStatus === 'active' ? 'success' : 'danger'}
+                          >
                             {viewingUser.userStatus.toUpperCase()}
                           </Badge>
                         </Inline>
@@ -613,7 +615,9 @@ export function CompanyUsersPage() {
                       </Stack>
                       <Stack gap="xs">
                         <span className="bezent-metric-label">COMPANY MEMBERSHIP</span>
-                        <div><strong>Company:</strong> {activeCompany?.name} ({activeCompany?.code})</div>
+                        <div>
+                          <strong>Company:</strong> {activeCompany?.name} ({activeCompany?.code})
+                        </div>
                         <Inline gap="xs" align="center">
                           <span>Membership Status:</span>
                           <Badge
@@ -642,7 +646,10 @@ export function CompanyUsersPage() {
                             {(viewingUser.invitationStatus || 'direct').toUpperCase()}
                           </Badge>
                         </Inline>
-                        <div><strong>Member Since:</strong> {new Date(viewingUser.joinedAt).toLocaleDateString()}</div>
+                        <div>
+                          <strong>Member Since:</strong>{' '}
+                          {new Date(viewingUser.joinedAt).toLocaleDateString()}
+                        </div>
                       </Stack>
                     </Grid>
                   </Stack>
@@ -653,11 +660,15 @@ export function CompanyUsersPage() {
                   <Stack gap="md">
                     <Inline justify="between" align="center">
                       <strong>Assigned Company Roles ({userAccess.roles.length})</strong>
-                      <span className="bezent-metric-label">Scoped strictly to {activeCompany?.name}</span>
+                      <span className="bezent-metric-label">
+                        Scoped strictly to {activeCompany?.name}
+                      </span>
                     </Inline>
 
                     {userAccess.roles.length === 0 ? (
-                      <p className="bezent-metric-label">No explicit roles assigned in this company.</p>
+                      <p className="bezent-metric-label">
+                        No explicit roles assigned in this company.
+                      </p>
                     ) : (
                       <Stack gap="sm">
                         {userAccess.roles.map((r) => (
@@ -665,7 +676,12 @@ export function CompanyUsersPage() {
                             <Inline justify="between" align="center">
                               <Stack gap="none">
                                 <strong>{r.name}</strong>
-                                <span className="bezent-metric-label">Code: {r.code} {r.moduleCode ? `• Application: ${r.moduleCode.toUpperCase()}` : '• Company Admin'}</span>
+                                <span className="bezent-metric-label">
+                                  Code: {r.code}{' '}
+                                  {r.moduleCode
+                                    ? `• Application: ${r.moduleCode.toUpperCase()}`
+                                    : '• Company Admin'}
+                                </span>
                               </Stack>
                               <Inline gap="xs" align="center">
                                 <Badge variant={r.isSystem ? 'info' : 'neutral'}>
@@ -700,7 +716,12 @@ export function CompanyUsersPage() {
                           options={[
                             { value: '', label: 'Select role to assign...' },
                             ...rolesCatalog
-                              .filter((rc) => !userAccess.roles.some((held) => held.id === rc.id || held.code === rc.code))
+                              .filter(
+                                (rc) =>
+                                  !userAccess.roles.some(
+                                    (held) => held.id === rc.id || held.code === rc.code,
+                                  ),
+                              )
                               .map((rc) => ({
                                 value: rc.id,
                                 label: `${rc.name} (${rc.isSystem ? 'System' : 'Custom'}${rc.moduleCode ? ` • ${rc.moduleCode.toUpperCase()}` : ''})`,
@@ -729,7 +750,9 @@ export function CompanyUsersPage() {
                         <Stack gap="none">
                           <span className="bezent-metric-label">HRMS WORKFORCE</span>
                           <strong>
-                            {userAccess.roles.some((r) => r.moduleCode === 'hrms' || r.code === 'company_admin')
+                            {userAccess.roles.some(
+                              (r) => r.moduleCode === 'hrms' || r.code === 'company_admin',
+                            )
                               ? 'Authorized'
                               : 'Standard'}
                           </strong>
@@ -763,7 +786,9 @@ export function CompanyUsersPage() {
                 <Card>
                   <Stack gap="sm">
                     <Inline justify="between" align="center">
-                      <strong>Effective Permissions ({userAccess.effectivePermissions.length})</strong>
+                      <strong>
+                        Effective Permissions ({userAccess.effectivePermissions.length})
+                      </strong>
                       <span className="bezent-metric-label">Consolidated authority matrix</span>
                     </Inline>
                     <Inline gap="xs" wrap>

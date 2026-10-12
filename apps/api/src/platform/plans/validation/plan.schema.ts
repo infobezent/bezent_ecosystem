@@ -50,8 +50,8 @@ export function validateCreatePlan(body: unknown): CreatePlanDto {
     trialEligible: data.trialEligible !== undefined ? Boolean(data.trialEligible) : true,
     trialDurationDays: typeof data.trialDurationDays === 'number' ? data.trialDurationDays : 14,
     isCustom: Boolean(data.isCustom),
-    initialPrices: Array.isArray(data.initialPrices) ? (data.initialPrices as any) : undefined,
-    entitlements: Array.isArray(data.entitlements) ? (data.entitlements as any) : undefined,
+    initialPrices: Array.isArray(data.initialPrices) ? (data.initialPrices as CreatePlanDto['initialPrices']) : undefined,
+    entitlements: Array.isArray(data.entitlements) ? (data.entitlements as CreatePlanDto['entitlements']) : undefined,
   };
 }
 

@@ -7,6 +7,10 @@ import {
   Select,
   Alert,
   Inline,
+  CountrySelect,
+  TimezoneSelect,
+  CurrencySelect,
+  InternationalPhoneInput,
 } from '../../../design-system/components';
 import { BezentIcon } from '../../../design-system/icons';
 import { tenantAdminApi } from '../api/tenantAdminApi';
@@ -65,37 +69,6 @@ const ORGANIZATION_TYPE_OPTIONS = [
   { value: 'Other', label: 'Other' },
 ];
 
-const COUNTRY_OPTIONS = [
-  { value: 'India', label: 'India' },
-  { value: 'United States', label: 'United States' },
-  { value: 'United Kingdom', label: 'United Kingdom' },
-  { value: 'Singapore', label: 'Singapore' },
-  { value: 'Australia', label: 'Australia' },
-  { value: 'Germany', label: 'Germany' },
-  { value: 'Canada', label: 'Canada' },
-  { value: 'United Arab Emirates', label: 'United Arab Emirates' },
-  { value: 'Other', label: 'Other' },
-];
-
-const TIMEZONE_OPTIONS = [
-  { value: 'Asia/Kolkata', label: 'Asia/Kolkata (UTC+05:30)' },
-  { value: 'America/New_York', label: 'America/New_York (UTC-05:00)' },
-  { value: 'America/Los_Angeles', label: 'America/Los_Angeles (UTC-08:00)' },
-  { value: 'Europe/London', label: 'Europe/London (UTC+00:00)' },
-  { value: 'Asia/Singapore', label: 'Asia/Singapore (UTC+08:00)' },
-  { value: 'Asia/Dubai', label: 'Asia/Dubai (UTC+04:00)' },
-  { value: 'Australia/Sydney', label: 'Australia/Sydney (UTC+10:00)' },
-];
-
-const CURRENCY_OPTIONS = [
-  { value: 'INR', label: 'INR (₹) - Indian Rupee' },
-  { value: 'USD', label: 'USD ($) - US Dollar' },
-  { value: 'EUR', label: 'EUR (€) - Euro' },
-  { value: 'GBP', label: 'GBP (£) - British Pound' },
-  { value: 'SGD', label: 'SGD ($) - Singapore Dollar' },
-  { value: 'AED', label: 'AED (د.إ) - UAE Dirham' },
-  { value: 'AUD', label: 'AUD ($) - Australian Dollar' },
-];
 
 export function EditCompanyDrawer({
   isOpen,
@@ -474,11 +447,10 @@ export function EditCompanyDrawer({
                 onChange={(e) => handleFieldChange('postalCode', e.target.value)}
                 placeholder="e.g. 600001"
               />
-              <Select
+              <CountrySelect
                 label="Country"
                 value={formData.country}
-                onChange={(e) => handleFieldChange('country', e.target.value)}
-                options={COUNTRY_OPTIONS}
+                onChange={(code) => handleFieldChange('country', code)}
               />
             </Inline>
           </Stack>
@@ -502,11 +474,11 @@ export function EditCompanyDrawer({
               placeholder="e.g. contact@apj3d.example"
             />
 
-            <Input
+            <InternationalPhoneInput
               label="Primary Contact Phone"
               value={formData.contactPhone}
-              onChange={(e) => handleFieldChange('contactPhone', e.target.value)}
-              placeholder="e.g. +91 44 2345 6789"
+              onChange={(phone) => handleFieldChange('contactPhone', phone)}
+              defaultCountry="IN"
             />
 
             <Input
@@ -528,18 +500,16 @@ export function EditCompanyDrawer({
           </div>
 
           <Stack gap="md">
-            <Select
+            <TimezoneSelect
               label="Time Zone"
               value={formData.timeZone}
-              onChange={(e) => handleFieldChange('timeZone', e.target.value)}
-              options={TIMEZONE_OPTIONS}
+              onChange={(tz) => handleFieldChange('timeZone', tz)}
             />
 
-            <Select
+            <CurrencySelect
               label="Default Currency"
               value={formData.currency}
-              onChange={(e) => handleFieldChange('currency', e.target.value)}
-              options={CURRENCY_OPTIONS}
+              onChange={(curr) => handleFieldChange('currency', curr)}
             />
           </Stack>
         </section>

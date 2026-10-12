@@ -25,6 +25,14 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.bezent-grid--cols-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.bezent-grid--cols-6 {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
 .bezent-grid--cols-sidebar-main {
   grid-template-columns: 280px 1fr;
 }
@@ -105,12 +113,18 @@
   .bezent-grid--cols-4 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  .bezent-grid--cols-5,
+  .bezent-grid--cols-6 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 640px) {
   .bezent-grid--cols-2,
   .bezent-grid--cols-3,
-  .bezent-grid--cols-4 {
+  .bezent-grid--cols-4,
+  .bezent-grid--cols-5,
+  .bezent-grid--cols-6 {
     grid-template-columns: 1fr;
   }
 }

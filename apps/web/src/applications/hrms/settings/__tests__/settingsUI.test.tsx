@@ -109,9 +109,10 @@ describe('BEZENT Common Portal Settings Center UI', () => {
   it('AttendanceSettingsSection renders check-in rules and attendance modes', () => {
     const html = renderToStaticMarkup(<AttendanceSettingsSection />);
 
-    expect(html).toContain('Attendance Settings');
-    expect(html).toContain('Grace Period for Late Arrival');
-    expect(html).toContain('On-site Office Check-in');
+    expect(html).toContain('General');
+    expect(html).toContain('Attendance Policies');
+    expect(html).toContain('Regularization');
+    expect(html).toContain('Capture &amp; Devices');
   });
 
   it('TimesheetsSettingsSection renders entry rules and time categories', () => {

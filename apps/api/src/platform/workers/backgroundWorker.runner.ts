@@ -1,9 +1,6 @@
-import { eq, and, lte, or } from 'drizzle-orm';
+import { eq, and, lte } from 'drizzle-orm';
 import { getDb } from '../../db/connection.js';
-import {
-  tenantSubscriptions,
-  tenantModules,
-} from '../../db/schema.js';
+import { tenantSubscriptions, tenantModules } from '../../db/schema.js';
 import { transactionalOutboxService } from '../outbox/service/transactionalOutbox.service.js';
 import { provisioningJobService } from '../provisioning/service/provisioningJob.service.js';
 import { emailService } from '../email/service/email.service.js';
@@ -25,7 +22,13 @@ class BackgroundWorkerRunner {
     jobsProcessedCount: 0,
   };
 
-  start(options: { outboxIntervalMs?: number; subscriptionIntervalMs?: number; provisioningIntervalMs?: number } = {}) {
+  start(
+    options: {
+      outboxIntervalMs?: number;
+      subscriptionIntervalMs?: number;
+      provisioningIntervalMs?: number;
+    } = {},
+  ) {
     if (this.isRunning) return;
     this.isRunning = true;
 
@@ -71,7 +74,12 @@ class BackgroundWorkerRunner {
     try {
       const result = await transactionalOutboxService.processBatch(async (msg) => {
         if (msg.eventType === 'tenant.invitation.issued') {
-          const payload = msg.payload as Record<string, any>;
+          const payload = msg.payload as {
+            email?: string;
+            name?: string;
+            companyName?: string;
+            roleLabel?: string;
+          };
           if (payload?.email) {
             await emailService.sendSignInInvitation({
               to: payload.email,
@@ -84,7 +92,7 @@ class BackgroundWorkerRunner {
       });
       this.stats.outboxDispatchedCount += result.succeeded;
       return result.succeeded;
-    } catch (err) {
+    } catch {
       return 0;
     }
   }
@@ -144,10 +152,7 @@ class BackgroundWorkerRunner {
         .select()
         .from(tenantSubscriptions)
         .where(
-          and(
-            eq(tenantSubscriptions.status, 'trial'),
-            lte(tenantSubscriptions.trialEndsAt, now),
-          ),
+          and(eq(tenantSubscriptions.status, 'trial'), lte(tenantSubscriptions.trialEndsAt, now)),
         );
 
       for (const sub of dueToExpire) {

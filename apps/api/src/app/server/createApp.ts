@@ -11,6 +11,7 @@ import { onboardingSettingsRouter } from '../../applications/hrms/settings/onboa
 import { employeeRouter } from '../../applications/hrms/employees/routes/employee.route.js';
 import { employeeActionRouter } from '../../applications/hrms/employee-administration/routes/employeeAction.route.js';
 import { employeeDocumentRouter } from '../../applications/hrms/documents/routes/employeeDocument.route.js';
+import { attendanceRouter } from '../../applications/hrms/attendance/routes/attendance.routes.js';
 import { formsRouter } from '../../applications/hrms/settings/forms/routes/forms.route.js';
 import { platformRouter } from '../../platform/routes.js';
 import { companyAdminRouter } from '../../platform/company-admin/routes/companyAdmin.routes.js';
@@ -82,6 +83,7 @@ export function createApp(): Express {
   app.use('/api/v1', employeeRouter);
   app.use('/api/v1', employeeActionRouter);
   app.use('/api/v1', employeeDocumentRouter);
+  app.use('/api/v1', attendanceRouter);
   app.use('/api/v1', formsRouter);
 
   app.use(notFoundHandler);

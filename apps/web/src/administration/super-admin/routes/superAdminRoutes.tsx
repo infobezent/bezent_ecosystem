@@ -5,7 +5,6 @@ import { CreateTenantPage } from '../pages/CreateTenantPage';
 import { TenantDetailsPage } from '../pages/TenantDetailsPage';
 import { CompaniesPage } from '../pages/CompaniesPage';
 import { CompanyDetailsPage } from '../pages/CompanyDetailsPage';
-import { CustomerProvisioningPage } from '../pages/CustomerProvisioningPage';
 import { PlatformUsersPage } from '../pages/PlatformUsersPage';
 import { CompanyAdminsPage } from '../pages/CompanyAdminsPage';
 import { ModuleAccessPage } from '../pages/ModuleAccessPage';

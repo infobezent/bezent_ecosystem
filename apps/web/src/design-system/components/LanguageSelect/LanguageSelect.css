@@ -1,0 +1,171 @@
+/* BEZENT LanguageSelect Component Styles */
+.bezent-language-select-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs, 4px);
+  width: 100%;
+  position: relative;
+}
+
+.bezent-language-select-label {
+  font-size: var(--font-size-sm, 13px);
+  font-weight: var(--font-weight-medium, 500);
+  color: var(--text-primary);
+}
+
+.bezent-language-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 38px;
+  padding: 0 var(--spacing-sm, 8px);
+  background-color: var(--workspace, #ffffff);
+  border: 1px solid var(--border-default, #dadce0);
+  border-radius: var(--radius-sm, 4px);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm, 13px);
+  cursor: pointer;
+  transition: border-color var(--transition-fast, 150ms ease), box-shadow var(--transition-fast, 150ms ease);
+  text-align: left;
+}
+
+.bezent-language-select-trigger:hover:not(:disabled) {
+  border-color: var(--border-hover, #b8bcc2);
+}
+
+.bezent-language-select-trigger:focus-visible,
+.bezent-language-select-trigger.is-open {
+  outline: none;
+  border-color: var(--primary-accent, #1a73e8);
+  box-shadow: 0 0 0 2px var(--focus-ring, rgba(26, 115, 232, 0.2));
+}
+
+.bezent-language-select-trigger:disabled {
+  background-color: var(--bg-surface-secondary, #f1f3f4);
+  color: var(--text-disabled, #80868b);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.bezent-language-select-trigger.has-error {
+  border-color: var(--color-danger, #d93025);
+}
+
+.bezent-language-select-trigger__value {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 8px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bezent-language-select-trigger__placeholder {
+  color: var(--text-placeholder, #5f6368);
+}
+
+.bezent-language-select-trigger__chevron {
+  color: var(--text-secondary);
+  font-size: 16px;
+  transition: transform var(--transition-fast, 150ms ease);
+}
+
+.bezent-language-select-trigger.is-open .bezent-language-select-trigger__chevron {
+  transform: rotate(180deg);
+}
+
+.bezent-language-select-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: var(--workspace, #ffffff);
+  border: 1px solid var(--border-default, #dadce0);
+  border-radius: var(--radius-md, 8px);
+  box-shadow: var(--card-hover-shadow, 0 4px 12px rgba(60, 64, 67, 0.15));
+  max-height: 280px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.bezent-language-select-search {
+  padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+  border-bottom: 1px solid var(--border-default, #dadce0);
+  background-color: var(--bg-surface-secondary, #f8fafc);
+}
+
+.bezent-language-select-search input {
+  width: 100%;
+  height: 32px;
+  padding: 0 var(--spacing-sm, 8px);
+  border: 1px solid var(--border-default, #dadce0);
+  border-radius: var(--radius-sm, 4px);
+  background-color: var(--workspace, #ffffff);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm, 13px);
+  outline: none;
+}
+
+.bezent-language-select-search input:focus {
+  border-color: var(--primary-accent, #1a73e8);
+}
+
+.bezent-language-select-list {
+  list-style: none;
+  margin: 0;
+  padding: var(--spacing-xs, 4px) 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.bezent-language-select-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-xs, 6px) var(--spacing-md, 12px);
+  font-size: var(--font-size-sm, 13px);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast, 100ms ease);
+}
+
+.bezent-language-select-option:hover,
+.bezent-language-select-option.is-highlighted {
+  background-color: var(--bg-hover, #c2e7ff);
+}
+
+.bezent-language-select-option.is-selected {
+  background-color: var(--bg-selected, #c2e7ff);
+  font-weight: var(--font-weight-medium, 500);
+}
+
+.bezent-language-select-option__main {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 8px);
+}
+
+.bezent-language-select-option__meta {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs, 12px);
+}
+
+.bezent-language-select-empty {
+  padding: var(--spacing-md, 12px);
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm, 13px);
+}
+
+.bezent-language-select-error {
+  font-size: var(--font-size-xs, 12px);
+  color: var(--color-danger, #d93025);
+}
+
+.bezent-language-select-helper {
+  font-size: var(--font-size-xs, 12px);
+  color: var(--text-secondary);
+}

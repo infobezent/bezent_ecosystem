@@ -331,6 +331,24 @@ const BASE_PERMISSION_DEFINITIONS: PermissionDefinition[] = [
   hrms('attendance', 'regularize', 'Administer attendance', 'Correct and regularize attendance.', [
     'hrms.attendance.manage',
   ]),
+  hrms('attendance', 'reports', 'View attendance reports', 'Access and preview attendance reports.', [
+    'hrms.attendance.reports.view',
+    'hrms.attendance.reports.read',
+  ]),
+  hrms(
+    'attendance',
+    'reports_export',
+    'Export attendance reports',
+    'Export attendance reports to CSV, Excel or PDF.',
+    ['hrms.attendance.reports.export'],
+  ),
+  hrms(
+    'attendance',
+    'audit',
+    'View attendance audit reports',
+    'Access sensitive attendance audit log reports.',
+    ['hrms.attendance.audit.view', 'hrms.attendance.audit.read'],
+  ),
   hrms('leave', 'view', 'View leave', 'View workforce leave requests and balances.', [
     'hrms.leave.read',
   ]),

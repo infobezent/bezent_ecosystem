@@ -3,8 +3,6 @@ import { getDb } from '../../../db/connection.js';
 import {
   tenantSubscriptions,
   plans,
-  memberships,
-  tenantAdmins,
   type TenantSubscription,
   type NewTenantSubscription,
 } from '../../../db/schema.js';

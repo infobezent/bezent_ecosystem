@@ -14,6 +14,7 @@ import {
   invitations,
   type NewTenantLifecycleEvent,
   type TenantLifecycleEvent,
+  type AuditLog,
 } from '../../../db/schema.js';
 import type {
   CompanyCapacitySummary,
@@ -23,6 +24,7 @@ import type {
   TenantStatus,
   UpdateTenantDto,
   TenantActivityFilter,
+  TenantPrimaryAdminSummary,
 } from '../types/tenant.types.js';
 import { generateSurrogateId } from '../../auth/security.js';
 import {
@@ -415,8 +417,18 @@ export class TenantRepository {
     const userCountMap = new Map<string, number>();
     const moduleMap = new Map<string, string[]>();
     const adminMap = new Map<string, EvaluationAdminInput[]>();
-    const primaryAdminMap = new Map<string, any>();
-    const subscriptionMap = new Map<string, any[]>();
+    const primaryAdminMap = new Map<string, TenantPrimaryAdminSummary>();
+    const subscriptionMap = new Map<
+      string,
+      Array<{
+        tenantId: string;
+        applicationCode: string;
+        planId: string;
+        status: string;
+        accessMode: string;
+        licensedSeats: number;
+      }>
+    >();
 
     if (tenantIds.length > 0) {
       const allCompanies = await db
@@ -744,7 +756,15 @@ export class TenantRepository {
   async listAuditLogsByTenant(
     tenantId: string,
     filterOrLimit?: TenantActivityFilter | number,
-  ): Promise<any> {
+  ): Promise<
+    | AuditLog[]
+    | {
+        items: AuditLog[];
+        total: number;
+        page: number;
+        limit: number;
+      }
+  > {
     const db = getDb();
     if (typeof filterOrLimit === 'number') {
       return db
@@ -805,7 +825,7 @@ export class TenantRepository {
     details?: { suspendedReason?: string | null; suspendedAt?: Date | null; reactivatedAt?: Date | null },
   ): Promise<TenantRecord> {
     const db = getDb();
-    const updateData: Record<string, any> = { status };
+    const updateData: Partial<typeof tenants.$inferInsert> = { status };
     if (details?.suspendedReason !== undefined) updateData.suspendedReason = details.suspendedReason;
     if (details?.suspendedAt !== undefined) updateData.suspendedAt = details.suspendedAt;
     if (details?.reactivatedAt !== undefined) updateData.reactivatedAt = details.reactivatedAt;

@@ -1,4 +1,4 @@
-import { eq, and, or, isNull, lte, desc } from 'drizzle-orm';
+import { eq, and, or, isNull, lte } from 'drizzle-orm';
 import { getDb } from '../../../db/connection.js';
 import {
   transactionalOutbox,
@@ -145,8 +145,9 @@ export class TransactionalOutboxService {
         await handler(msg);
         await this.markPublished(msg.id);
         succeeded++;
-      } catch (err: any) {
-        await this.markFailed(msg.id, err?.message || String(err));
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        await this.markFailed(msg.id, message);
         failed++;
       }
     }

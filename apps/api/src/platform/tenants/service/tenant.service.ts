@@ -8,6 +8,7 @@ import {
   tenantSubscriptions,
   memberships,
   provisioningJobs,
+  type AuditLog,
 } from '../../../db/schema.js';
 import { tenantRepository, TenantRepository } from '../repository/tenant.repository.js';
 import { auditService, AuditService } from '../../audit/service/audit.service.js';
@@ -101,13 +102,14 @@ export class TenantService {
   ): Promise<TenantRecord> {
     const tenant = await this.getTenantById(id);
     const now = new Date();
-    const updated = typeof this.repo.updateTenantStatus === 'function'
-      ? await this.repo.updateTenantStatus(id, 'active', {
-          suspendedReason: null,
-          suspendedAt: null,
-          reactivatedAt: now,
-        })
-      : await this.repo.updateStatus(id, 'active');
+    const updated =
+      typeof this.repo.updateTenantStatus === 'function'
+        ? await this.repo.updateTenantStatus(id, 'active', {
+            suspendedReason: null,
+            suspendedAt: null,
+            reactivatedAt: now,
+          })
+        : await this.repo.updateStatus(id, 'active');
 
     const eventId = generateSurrogateId('tle');
     if (typeof this.repo.recordLifecycleEvent === 'function') {
@@ -147,12 +149,13 @@ export class TenantService {
     }
 
     const now = new Date();
-    const updated = typeof this.repo.updateTenantStatus === 'function'
-      ? await this.repo.updateTenantStatus(id, 'suspended', {
-          suspendedReason: reason,
-          suspendedAt: now,
-        })
-      : await this.repo.updateStatus(id, 'suspended');
+    const updated =
+      typeof this.repo.updateTenantStatus === 'function'
+        ? await this.repo.updateTenantStatus(id, 'suspended', {
+            suspendedReason: reason,
+            suspendedAt: now,
+          })
+        : await this.repo.updateStatus(id, 'suspended');
 
     const eventId = generateSurrogateId('tle');
     if (typeof this.repo.recordLifecycleEvent === 'function') {
@@ -203,11 +206,12 @@ export class TenantService {
       throw new BadRequestError('Tenant is already terminated/archived');
     }
 
-    const updated = typeof this.repo.updateTenantStatus === 'function'
-      ? await this.repo.updateTenantStatus(id, 'archived', {
-          suspendedReason: `Terminated: ${reason}`,
-        })
-      : await this.repo.updateStatus(id, 'archived');
+    const updated =
+      typeof this.repo.updateTenantStatus === 'function'
+        ? await this.repo.updateTenantStatus(id, 'archived', {
+            suspendedReason: `Terminated: ${reason}`,
+          })
+        : await this.repo.updateStatus(id, 'archived');
 
     const eventId = generateSurrogateId('tle');
     if (typeof this.repo.recordLifecycleEvent === 'function') {
@@ -246,7 +250,7 @@ export class TenantService {
     return {
       totalTenants: counts.total,
       activeTenants: counts.active,
-      trialTenants: (counts as any).trial ?? 0,
+      trialTenants: counts.trial ?? 0,
       suspendedTenants: counts.suspended,
     };
   }
@@ -321,10 +325,7 @@ export class TenantService {
         .where(
           and(
             eq(invitations.tenantId, id),
-            or(
-              eq(invitations.authorityType, 'tenant_admin'),
-              eq(invitations.isPrimaryAdmin, true),
-            ),
+            or(eq(invitations.authorityType, 'tenant_admin'), eq(invitations.isPrimaryAdmin, true)),
             eq(invitations.status, 'pending'),
           ),
         );
@@ -369,7 +370,8 @@ export class TenantService {
     const hasPaid = activeSubs.some((s) => s.accessMode !== 'trial' && s.status === 'active');
     const hasTrial = activeSubs.some((s) => s.accessMode === 'trial' || s.status === 'trial');
 
-    let derivedClassification: 'active' | 'trial' | 'suspended' | 'pending_setup' | 'archived' = 'active';
+    let derivedClassification: 'active' | 'trial' | 'suspended' | 'pending_setup' | 'archived' =
+      'active';
     if (tenant.status === 'suspended') {
       derivedClassification = 'suspended';
     } else if (tenant.status === 'archived') {
@@ -462,9 +464,17 @@ export class TenantService {
     await this.getTenantById(id);
     const filterParams = { ...(filter || {}), limit: 1000, page: 1 };
     const res = await this.repo.listAuditLogsByTenant(id, filterParams);
-    const logs = Array.isArray(res) ? res : res.items;
+    const logs: AuditLog[] = Array.isArray(res) ? res : res.items;
 
-    const headers = ['Timestamp', 'Action', 'Target Type', 'Target ID', 'Actor Email', 'Actor User ID', 'Details'];
+    const headers = [
+      'Timestamp',
+      'Action',
+      'Target Type',
+      'Target ID',
+      'Actor Email',
+      'Actor User ID',
+      'Details',
+    ];
 
     const sanitizeCell = (val: unknown): string => {
       if (val === null || val === undefined) return '""';
@@ -482,7 +492,7 @@ export class TenantService {
       return `"${str.replace(/"/g, '""')}"`;
     };
 
-    const rows = logs.map((log: any) => [
+    const rows = logs.map((log) => [
       sanitizeCell(log.createdAt.toISOString()),
       sanitizeCell(log.action),
       sanitizeCell(log.targetType),

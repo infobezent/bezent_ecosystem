@@ -6,7 +6,6 @@ import { TenantsPage } from '../pages/TenantsPage';
 import { CreateTenantPage } from '../pages/CreateTenantPage';
 import { superAdminNavigation } from '../navigation/superAdminNavigation';
 import {
-  superAdminApi,
   type TenantRecord,
   type TenantOverviewData,
   type SubscriptionDetailRecord,
@@ -176,7 +175,8 @@ describe('BEZENT Phase 03C — Super Admin Tenant Details Automated Test Suite',
     derivedCommercialClassification: 'active',
     attentionRequired: {
       needed: true,
-      reason: 'Primary Admin Invitation Pending: Clara Oswald has not yet accepted their invitation credentials.',
+      reason:
+        'Primary Admin Invitation Pending: Clara Oswald has not yet accepted their invitation credentials.',
       action: {
         action: 'resend_invitation',
         label: 'Resend Invitation',
@@ -604,10 +604,7 @@ describe('BEZENT Phase 03C — Super Admin Tenant Details Automated Test Suite',
             <Route
               path="/super-admin/tenants/:tenantId/:tab"
               element={
-                <TenantDetailsPage
-                  initialTenant={mockTenant}
-                  initialOverview={mockOverview}
-                />
+                <TenantDetailsPage initialTenant={mockTenant} initialOverview={mockOverview} />
               }
             />
           </Routes>
@@ -626,10 +623,7 @@ describe('BEZENT Phase 03C — Super Admin Tenant Details Automated Test Suite',
             <Route
               path="/super-admin/tenants/:tenantId/:tab"
               element={
-                <TenantDetailsPage
-                  initialTenant={mockTenant}
-                  initialOverview={mockOverview}
-                />
+                <TenantDetailsPage initialTenant={mockTenant} initialOverview={mockOverview} />
               }
             />
           </Routes>
@@ -654,10 +648,7 @@ describe('BEZENT Phase 03C — Super Admin Tenant Details Automated Test Suite',
             <Route
               path="/super-admin/tenants/:tenantId/:tab"
               element={
-                <TenantDetailsPage
-                  initialTenant={mockTenant}
-                  initialOverview={mockOverview}
-                />
+                <TenantDetailsPage initialTenant={mockTenant} initialOverview={mockOverview} />
               }
             />
           </Routes>
@@ -679,10 +670,7 @@ describe('BEZENT Phase 03C — Super Admin Tenant Details Automated Test Suite',
             <Route
               path="/super-admin/tenants/:tenantId/:tab"
               element={
-                <TenantDetailsPage
-                  initialTenant={mockTenant}
-                  initialOverview={mockOverview}
-                />
+                <TenantDetailsPage initialTenant={mockTenant} initialOverview={mockOverview} />
               }
             />
           </Routes>
@@ -982,13 +970,18 @@ describe('BEZENT Phase 03C — Super Admin Tenant Details Automated Test Suite',
       const html = renderToStaticMarkup(
         <MemoryRouter initialEntries={['/super-admin/tenants/create']}>
           <Routes>
-            <Route path="/super-admin/tenants/create" element={<CreateTenantPage initialPlans={[]} />} />
+            <Route
+              path="/super-admin/tenants/create"
+              element={<CreateTenantPage initialPlans={[]} />}
+            />
           </Routes>
         </MemoryRouter>,
       );
 
       expect(html).toContain('Create Tenant');
-      expect(html).toContain('Set up a new customer organization, administrator, and application access.');
+      expect(html).toContain(
+        'Set up a new customer organization, administrator, and application access.',
+      );
     });
 
     it('23. Super Admin Navigation includes Customer Tenants item', () => {

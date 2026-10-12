@@ -90,3 +90,57 @@
   background-color: var(--bg-hover, #c2e7ff);
   color: var(--text-primary, #001d35);
 }
+
+/* ── Compact Filter Toolbar Grid ── */
+.bezent-filter-toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.4fr) repeat(3, minmax(160px, 1fr)) auto;
+  gap: var(--space-2, 8px);
+  align-items: center;
+  width: 100%;
+}
+
+.bezent-filter-toolbar__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5, 6px);
+  justify-self: end;
+}
+
+.bezent-filter-toolbar__more {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2, 8px);
+  width: 100%;
+  padding-top: var(--space-2, 8px);
+  border-top: 1px solid var(--border-subtle, #e7ebf0);
+}
+
+@media (max-width: 1200px) {
+  .bezent-filter-toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .bezent-filter-toolbar__actions {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
+@media (max-width: 900px) {
+  .bezent-filter-toolbar__more {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .bezent-filter-toolbar {
+    grid-template-columns: 1fr;
+  }
+  .bezent-filter-toolbar__more {
+    grid-template-columns: 1fr;
+  }
+}
+
+[data-theme='dark'] .bezent-filter-toolbar__more {
+  border-top-color: rgba(56, 189, 248, 0.2);
+}

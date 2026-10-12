@@ -19,6 +19,7 @@ import type {
   MismatchItem,
 } from '../types/entitlement.types.js';
 import type { ApplicationCode } from '../../plans/types/plan.types.js';
+import type { ModuleCode } from '../../modules/types/module.types.js';
 import { getDb } from '../../../db/connection.js';
 import { users, type NewTenantEntitlementOverride } from '../../../db/schema.js';
 import { eq } from 'drizzle-orm';
@@ -60,13 +61,11 @@ export class EffectiveEntitlementService {
 
     let planEntitlementsList: Array<{ moduleCode: string; isEnabled: boolean; limits?: Record<string, unknown> | null }> = [];
     let planName: string | null = null;
-    let planCode: string | null = null;
 
     if (activeSub) {
       const plan = await this.planRepo.findById(activeSub.planId);
       if (plan) {
         planName = plan.name;
-        planCode = plan.code;
         planEntitlementsList = plan.entitlements.map((e) => ({
           moduleCode: e.moduleCode,
           isEnabled: e.isEnabled,
@@ -97,7 +96,7 @@ export class EffectiveEntitlementService {
           source = 'none';
         } else {
           // Legacy tenant without commercial subscriptions
-          const legacyTenantEntitlement = await this.moduleRepo.findEntitlement(tenantId, applicationCode as any, null);
+          const legacyTenantEntitlement = await this.moduleRepo.findEntitlement(tenantId, applicationCode as unknown as ModuleCode, null);
           if (legacyTenantEntitlement) {
             if (legacyTenantEntitlement.status === 'enabled') {
               isEntitled = true;
@@ -114,7 +113,7 @@ export class EffectiveEntitlementService {
 
     // If company specified, check if company is within tenant ceiling
     if (companyId) {
-      const legacyCompanyEntitlement = await this.moduleRepo.findEntitlement(tenantId, applicationCode as any, companyId);
+      const legacyCompanyEntitlement = await this.moduleRepo.findEntitlement(tenantId, applicationCode as unknown as ModuleCode, companyId);
       if (legacyCompanyEntitlement?.status === 'disabled') {
         isEntitled = false;
       }
@@ -291,15 +290,15 @@ export class EffectiveEntitlementService {
     const overrides = await this.overrideRepo.listActive(tenantId, applicationCode);
     const legacyRecords = await this.moduleRepo.listByTenant(tenantId, null);
 
-    let plan: any = null;
     let commercialModules: string[] = [];
+    let plan: Awaited<ReturnType<typeof this.planRepo.findById>> | null = null;
 
     if (activeSub) {
       plan = await this.planRepo.findById(activeSub.planId);
       if (plan) {
         commercialModules = plan.entitlements
-          .filter((e: any) => e.isEnabled)
-          .map((e: any) => e.moduleCode);
+          .filter((e) => e.isEnabled)
+          .map((e) => e.moduleCode);
       }
     }
 

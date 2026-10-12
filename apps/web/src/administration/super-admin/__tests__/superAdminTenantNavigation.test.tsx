@@ -1,7 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { LeftSidebar, canItemOpenFlyout } from '../../../layouts/app-shell/LeftSidebar';
-import { SubNavFlyout } from '../../../layouts/app-shell/SubNavFlyout';
 import { superAdminNavigation } from '../navigation/superAdminNavigation';
 import { SUPER_ADMIN_BASE_PATH } from '../routes/superAdminRoutes';
 import { destinationPath, resolveActiveNavigation } from '../../../shared/utils/navigation';
@@ -135,10 +134,7 @@ describe('Super Admin — Direct Tenants Navigation & Routing Verification', () 
 
     it('Governance flyout retains Audit Logs and Platform Administrators', () => {
       const gov = superAdminNavigation.destinations.find((d) => d.id === 'governance')!;
-      expect(gov.children?.map((c) => c.label)).toEqual([
-        'Audit Logs',
-        'Platform Administrators',
-      ]);
+      expect(gov.children?.map((c) => c.label)).toEqual(['Audit Logs', 'Platform Administrators']);
       const govItem = shellItems.find((i) => i.id === 'governance')!;
       expect(canItemOpenFlyout(govItem)).toBe(true);
     });
