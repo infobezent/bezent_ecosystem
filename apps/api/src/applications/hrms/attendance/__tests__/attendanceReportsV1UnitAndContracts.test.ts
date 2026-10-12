@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  REPORT_LIST,
-  getReportDefinition,
-} from '../service/attendanceReportRegistry.js';
+import { REPORT_LIST, getReportDefinition } from '../service/attendanceReportRegistry.js';
 import {
   generateCsvExport,
   generateExcelExport,
@@ -416,7 +413,7 @@ describe('BEZENT HRMS — Attendance Reports V1.0 Unit & Column Contracts', () =
       // Column row
       expect(csvStr).toContain('"Date","Employee ID","Employee Name"');
       // Formula sanitized
-      expect(csvStr).toContain("\"'=MALICIOUS\"");
+      expect(csvStr).toContain('"\'=MALICIOUS"');
       expect(csvStr).toContain('"Alice Smith"');
     });
   });

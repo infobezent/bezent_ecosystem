@@ -49,23 +49,23 @@ describe('Tenant Admin Profile Update Canonical Contract (PATCH /api/v1/tenant-a
       .onDuplicateKeyUpdate({ set: { status: 'active' } });
 
     // 2. Tenant Details
-    await db.delete(tenantDetails).where(or(eq(tenantDetails.tenantId, tenantAId), eq(tenantDetails.tenantId, tenantBId)));
     await db
-      .insert(tenantDetails)
-      .values([
-        {
-          tenantId: tenantAId,
-          code: 'TEN-A-CODE',
-          contactEmail: 'old_contact@tenant-a.example',
-          contactPhone: '+1 555-0100',
-        },
-        {
-          tenantId: tenantBId,
-          code: 'TEN-B-CODE',
-          contactEmail: 'contact@tenant-b.example',
-          contactPhone: '+1 555-0200',
-        },
-      ]);
+      .delete(tenantDetails)
+      .where(or(eq(tenantDetails.tenantId, tenantAId), eq(tenantDetails.tenantId, tenantBId)));
+    await db.insert(tenantDetails).values([
+      {
+        tenantId: tenantAId,
+        code: 'TEN-A-CODE',
+        contactEmail: 'old_contact@tenant-a.example',
+        contactPhone: '+1 555-0100',
+      },
+      {
+        tenantId: tenantBId,
+        code: 'TEN-B-CODE',
+        contactEmail: 'contact@tenant-b.example',
+        contactPhone: '+1 555-0200',
+      },
+    ]);
 
     // 3. Company
     await db
@@ -183,7 +183,10 @@ describe('Tenant Admin Profile Update Canonical Contract (PATCH /api/v1/tenant-a
     const [tRow] = await db.select().from(tenants).where(eq(tenants.id, tenantAId));
     expect(tRow?.name).toBe('Acme Technologies Corporation');
 
-    const [dRow] = await db.select().from(tenantDetails).where(eq(tenantDetails.tenantId, tenantAId));
+    const [dRow] = await db
+      .select()
+      .from(tenantDetails)
+      .where(eq(tenantDetails.tenantId, tenantAId));
     expect(dRow?.contactEmail).toBe('contact@acme-updated.example');
     expect(dRow?.contactPhone).toBe('+1 800-555-0199');
   });
@@ -256,7 +259,10 @@ describe('Tenant Admin Profile Update Canonical Contract (PATCH /api/v1/tenant-a
     expect(tRow?.status).toBe('active');
     expect(tRow?.maxCompanies).toBe(5);
 
-    const [dRow] = await db.select().from(tenantDetails).where(eq(tenantDetails.tenantId, tenantAId));
+    const [dRow] = await db
+      .select()
+      .from(tenantDetails)
+      .where(eq(tenantDetails.tenantId, tenantAId));
     expect(dRow?.code).toBe('TEN-A-CODE');
   });
 
@@ -300,10 +306,7 @@ describe('Tenant Admin Profile Update Canonical Contract (PATCH /api/v1/tenant-a
       });
 
     const db = getDb();
-    const logs = await db
-      .select()
-      .from(auditLogs)
-      .where(eq(auditLogs.tenantId, tenantAId));
+    const logs = await db.select().from(auditLogs).where(eq(auditLogs.tenantId, tenantAId));
 
     const profileUpdateEvents = logs.filter((l) => l.action === 'tenant_profile_updated');
     expect(profileUpdateEvents.length).toBeGreaterThan(0);

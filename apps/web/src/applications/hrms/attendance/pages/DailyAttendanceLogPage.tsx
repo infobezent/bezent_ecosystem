@@ -61,7 +61,9 @@ export function DailyAttendanceLogPage() {
   const [punchSourceFilter, setPunchSourceFilter] = useState('');
 
   // Sorting & Pagination
-  const [sortBy, setSortBy] = useState<'name' | 'code' | 'department' | 'checkIn' | 'checkOut' | 'workedHours' | 'status'>('name');
+  const [sortBy, setSortBy] = useState<
+    'name' | 'code' | 'department' | 'checkIn' | 'checkOut' | 'workedHours' | 'status'
+  >('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [page, setPage] = useState(1);
   const limit = 25;
@@ -94,7 +96,9 @@ export function DailyAttendanceLogPage() {
   const [drawerDetail, setDrawerDetail] = useState<DailyLogEmployeeDetail | null>(null);
   const [drawerLoading, setDrawerLoading] = useState(false);
   const [drawerError, setDrawerError] = useState<string | null>(null);
-  const [drawerTab, setDrawerTab] = useState<'summary' | 'timeline' | 'records' | 'history'>('summary');
+  const [drawerTab, setDrawerTab] = useState<'summary' | 'timeline' | 'records' | 'history'>(
+    'summary',
+  );
 
   // Manual Adjustment Modal State
   const [manualEntryOpen, setManualEntryOpen] = useState(false);
@@ -110,7 +114,10 @@ export function DailyAttendanceLogPage() {
 
   // Bulk Operations State
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
-  const [bulkBannerMessage, setBulkBannerMessage] = useState<{ type: 'success' | 'warning' | 'danger'; text: string } | null>(null);
+  const [bulkBannerMessage, setBulkBannerMessage] = useState<{
+    type: 'success' | 'warning' | 'danger';
+    text: string;
+  } | null>(null);
 
   // Contextual Row Action Menu State
   const [openActionMenuId, setOpenActionMenuId] = useState<string | null>(null);
@@ -231,7 +238,10 @@ export function DailyAttendanceLogPage() {
   };
 
   // Open Employee Detail Drawer
-  const handleOpenDrawer = async (employeeId: string, initialTab: 'summary' | 'timeline' | 'records' | 'history' = 'summary') => {
+  const handleOpenDrawer = async (
+    employeeId: string,
+    initialTab: 'summary' | 'timeline' | 'records' | 'history' = 'summary',
+  ) => {
     setDrawerEmployeeId(employeeId);
     setDrawerTab(initialTab);
     setDrawerLoading(true);
@@ -240,7 +250,9 @@ export function DailyAttendanceLogPage() {
       const detail = await fetchEmployeeDailyDetail(employeeId, date);
       setDrawerDetail(detail);
     } catch (err: unknown) {
-      setDrawerError(err instanceof Error ? err.message : 'Failed to load employee daily attendance detail');
+      setDrawerError(
+        err instanceof Error ? err.message : 'Failed to load employee daily attendance detail',
+      );
     } finally {
       setDrawerLoading(false);
     }
@@ -259,7 +271,13 @@ export function DailyAttendanceLogPage() {
       setCheckInTime(record.checkInTime ?? '09:00');
       setCheckOutTime(record.checkOutTime ?? '18:00');
       setWorkLocation(record.workLocation ?? 'office');
-      setManualStatus(record.status === 'half_day' ? 'half_day' : record.status === 'absent' ? 'absent' : 'present');
+      setManualStatus(
+        record.status === 'half_day'
+          ? 'half_day'
+          : record.status === 'absent'
+            ? 'absent'
+            : 'present',
+      );
     } else {
       setSelectedRecord(null);
       setManualEmployeeId(items[0]?.employeeId ?? '');
@@ -454,13 +472,28 @@ export function DailyAttendanceLogPage() {
         {indicators.map((ind) => {
           let label = ind;
           let variant: 'warning' | 'danger' | 'info' | 'neutral' = 'warning';
-          if (ind === 'late') { label = 'Late'; variant = 'warning'; }
-          else if (ind === 'early_exit') { label = 'Early Exit'; variant = 'warning'; }
-          else if (ind === 'missing_punch_in') { label = 'Missing In'; variant = 'danger'; }
-          else if (ind === 'missing_punch_out') { label = 'Missing Out'; variant = 'danger'; }
-          else if (ind === 'insufficient_hours') { label = 'Short Hours'; variant = 'warning'; }
-          else if (ind === 'regularized') { label = 'Adjusted'; variant = 'info'; }
-          else if (ind === 'device_sync_pending') { label = 'Sync Pending'; variant = 'neutral'; }
+          if (ind === 'late') {
+            label = 'Late';
+            variant = 'warning';
+          } else if (ind === 'early_exit') {
+            label = 'Early Exit';
+            variant = 'warning';
+          } else if (ind === 'missing_punch_in') {
+            label = 'Missing In';
+            variant = 'danger';
+          } else if (ind === 'missing_punch_out') {
+            label = 'Missing Out';
+            variant = 'danger';
+          } else if (ind === 'insufficient_hours') {
+            label = 'Short Hours';
+            variant = 'warning';
+          } else if (ind === 'regularized') {
+            label = 'Adjusted';
+            variant = 'info';
+          } else if (ind === 'device_sync_pending') {
+            label = 'Sync Pending';
+            variant = 'neutral';
+          }
           return (
             <Badge key={ind} variant={variant}>
               {label}
@@ -523,11 +556,7 @@ export function DailyAttendanceLogPage() {
             </Button>
 
             {generalSettings?.manualEntryAllowed !== false && (
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => handleOpenManualEntry()}
-              >
+              <Button variant="primary" size="sm" onClick={() => handleOpenManualEntry()}>
                 + Manual Entry
               </Button>
             )}
@@ -538,9 +567,7 @@ export function DailyAttendanceLogPage() {
       <Stack gap="md">
         {/* Bulk Action Alert Banner */}
         {bulkBannerMessage && (
-          <Alert variant={bulkBannerMessage.type}>
-            {bulkBannerMessage.text}
-          </Alert>
+          <Alert variant={bulkBannerMessage.type}>{bulkBannerMessage.text}</Alert>
         )}
 
         {/* ── Summary Counters Strip (Single Row on Desktop) ── */}
@@ -822,23 +849,53 @@ export function DailyAttendanceLogPage() {
                       onChange={handleToggleSelectAll}
                     />
                   </TableHeaderCell>
-                  <TableHeaderCell onClick={() => { setSortBy('name'); setSortOrder((o) => o === 'asc' ? 'desc' : 'asc'); }}>
+                  <TableHeaderCell
+                    onClick={() => {
+                      setSortBy('name');
+                      setSortOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
+                    }}
+                  >
                     Employee {sortBy === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                   </TableHeaderCell>
-                  <TableHeaderCell onClick={() => { setSortBy('department'); setSortOrder((o) => o === 'asc' ? 'desc' : 'asc'); }}>
+                  <TableHeaderCell
+                    onClick={() => {
+                      setSortBy('department');
+                      setSortOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
+                    }}
+                  >
                     Department {sortBy === 'department' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                   </TableHeaderCell>
                   <TableHeaderCell>Shift</TableHeaderCell>
-                  <TableHeaderCell onClick={() => { setSortBy('checkIn'); setSortOrder((o) => o === 'asc' ? 'desc' : 'asc'); }}>
+                  <TableHeaderCell
+                    onClick={() => {
+                      setSortBy('checkIn');
+                      setSortOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
+                    }}
+                  >
                     Punch In {sortBy === 'checkIn' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                   </TableHeaderCell>
-                  <TableHeaderCell onClick={() => { setSortBy('checkOut'); setSortOrder((o) => o === 'asc' ? 'desc' : 'asc'); }}>
+                  <TableHeaderCell
+                    onClick={() => {
+                      setSortBy('checkOut');
+                      setSortOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
+                    }}
+                  >
                     Punch Out {sortBy === 'checkOut' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                   </TableHeaderCell>
-                  <TableHeaderCell onClick={() => { setSortBy('workedHours'); setSortOrder((o) => o === 'asc' ? 'desc' : 'asc'); }}>
+                  <TableHeaderCell
+                    onClick={() => {
+                      setSortBy('workedHours');
+                      setSortOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
+                    }}
+                  >
                     Worked Hours {sortBy === 'workedHours' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                   </TableHeaderCell>
-                  <TableHeaderCell onClick={() => { setSortBy('status'); setSortOrder((o) => o === 'asc' ? 'desc' : 'asc'); }}>
+                  <TableHeaderCell
+                    onClick={() => {
+                      setSortBy('status');
+                      setSortOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
+                    }}
+                  >
                     Attendance {sortBy === 'status' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                   </TableHeaderCell>
                   <TableHeaderCell>Indicators</TableHeaderCell>
@@ -850,10 +907,14 @@ export function DailyAttendanceLogPage() {
               <TableBody>
                 {items.map((item) => {
                   const isSelected = selectedIds.has(item.employeeId);
-                  const initials = `${item.firstName?.[0] ?? ''}${item.lastName?.[0] ?? ''}`.toUpperCase() || 'EM';
+                  const initials =
+                    `${item.firstName?.[0] ?? ''}${item.lastName?.[0] ?? ''}`.toUpperCase() || 'EM';
 
                   return (
-                    <TableRow key={item.employeeId} className={isSelected ? 'bezent-table__row--selected' : ''}>
+                    <TableRow
+                      key={item.employeeId}
+                      className={isSelected ? 'bezent-table__row--selected' : ''}
+                    >
                       {/* Selection Checkbox */}
                       <TableCell>
                         <Checkbox
@@ -881,7 +942,9 @@ export function DailyAttendanceLogPage() {
 
                       {/* 2. Department */}
                       <TableCell>
-                        <span className="bezent-table-meta-subtitle">{item.departmentName ?? '—'}</span>
+                        <span className="bezent-table-meta-subtitle">
+                          {item.departmentName ?? '—'}
+                        </span>
                       </TableCell>
 
                       {/* 3. Shift */}
@@ -941,7 +1004,9 @@ export function DailyAttendanceLogPage() {
                             className={`bezent-table-action-btn ${openActionMenuId === item.employeeId ? 'is-active' : ''}`}
                             onClick={(e) => {
                               e.stopPropagation();
-                              setOpenActionMenuId((prev) => (prev === item.employeeId ? null : item.employeeId));
+                              setOpenActionMenuId((prev) =>
+                                prev === item.employeeId ? null : item.employeeId,
+                              );
                             }}
                             aria-label="Row actions"
                           >
@@ -1099,7 +1164,8 @@ export function DailyAttendanceLogPage() {
                     {drawerDetail.employee.firstName} {drawerDetail.employee.lastName ?? ''}
                   </span>
                   <span className="bezent-card__desc">
-                    {drawerDetail.employee.employeeCode} • {drawerDetail.employee.departmentName ?? 'Department'}
+                    {drawerDetail.employee.employeeCode} •{' '}
+                    {drawerDetail.employee.departmentName ?? 'Department'}
                   </span>
                 </Stack>
               </Inline>
@@ -1113,7 +1179,10 @@ export function DailyAttendanceLogPage() {
           ) : drawerError ? (
             <Alert variant="danger">{drawerError}</Alert>
           ) : !drawerDetail ? (
-            <EmptyState title="Record Not Found" description="Employee record could not be loaded." />
+            <EmptyState
+              title="Record Not Found"
+              description="Employee record could not be loaded."
+            />
           ) : (
             <Stack gap="md">
               {/* Drawer Navigation Tabs */}
@@ -1173,7 +1242,8 @@ export function DailyAttendanceLogPage() {
                         <Stack gap="none">
                           <span className="bezent-card__desc">Location / Timezone</span>
                           <span>
-                            {drawerDetail.employee.locationName ?? 'Office'} ({drawerDetail.employee.timeZone})
+                            {drawerDetail.employee.locationName ?? 'Office'} (
+                            {drawerDetail.employee.timeZone})
                           </span>
                         </Stack>
                       </Grid>
@@ -1190,7 +1260,9 @@ export function DailyAttendanceLogPage() {
                         </Stack>
                         <Stack gap="none">
                           <span className="bezent-card__desc">Processing State</span>
-                          <span>{renderReviewStateBadge(drawerDetail.attendanceSummary.processingState)}</span>
+                          <span>
+                            {renderReviewStateBadge(drawerDetail.attendanceSummary.processingState)}
+                          </span>
                         </Stack>
                         <Stack gap="none">
                           <span className="bezent-card__desc">Check In</span>
@@ -1202,12 +1274,16 @@ export function DailyAttendanceLogPage() {
                         </Stack>
                         <Stack gap="none">
                           <span className="bezent-card__desc">Net Worked Hours</span>
-                          <strong>{formatWorkedHours(drawerDetail.attendanceSummary.workedMinutes)}</strong>
+                          <strong>
+                            {formatWorkedHours(drawerDetail.attendanceSummary.workedMinutes)}
+                          </strong>
                         </Stack>
                         <Stack gap="none">
                           <span className="bezent-card__desc">Effective Policy</span>
                           <span>
-                            {drawerDetail.attendanceSummary.effectivePolicy?.policyName ?? 'Standard Policy'} (v
+                            {drawerDetail.attendanceSummary.effectivePolicy?.policyName ??
+                              'Standard Policy'}{' '}
+                            (v
                             {drawerDetail.attendanceSummary.effectivePolicy?.version ?? 1})
                           </span>
                         </Stack>
@@ -1310,10 +1386,13 @@ export function DailyAttendanceLogPage() {
                           <Badge variant="info">{drawerDetail.relatedRecords.leave.status}</Badge>
                         </Inline>
                         <span className="bezent-card__desc">
-                          {drawerDetail.relatedRecords.leave.startDate} to {drawerDetail.relatedRecords.leave.endDate}
+                          {drawerDetail.relatedRecords.leave.startDate} to{' '}
+                          {drawerDetail.relatedRecords.leave.endDate}
                         </span>
                         {drawerDetail.relatedRecords.leave.reason && (
-                          <p className="bezent-card__desc">{drawerDetail.relatedRecords.leave.reason}</p>
+                          <p className="bezent-card__desc">
+                            {drawerDetail.relatedRecords.leave.reason}
+                          </p>
                         )}
                       </Stack>
                     </Card>
@@ -1323,13 +1402,18 @@ export function DailyAttendanceLogPage() {
                     <Card padding="sm">
                       <Stack gap="none">
                         <Inline justify="between">
-                          <strong>On-Duty Request: {drawerDetail.relatedRecords.onDuty.odTypeName}</strong>
+                          <strong>
+                            On-Duty Request: {drawerDetail.relatedRecords.onDuty.odTypeName}
+                          </strong>
                           <Badge variant="info">{drawerDetail.relatedRecords.onDuty.status}</Badge>
                         </Inline>
                         <span className="bezent-card__desc">
-                          {drawerDetail.relatedRecords.onDuty.startDate} to {drawerDetail.relatedRecords.onDuty.endDate}
+                          {drawerDetail.relatedRecords.onDuty.startDate} to{' '}
+                          {drawerDetail.relatedRecords.onDuty.endDate}
                         </span>
-                        <p className="bezent-card__desc">{drawerDetail.relatedRecords.onDuty.reason}</p>
+                        <p className="bezent-card__desc">
+                          {drawerDetail.relatedRecords.onDuty.reason}
+                        </p>
                       </Stack>
                     </Card>
                   )}
@@ -1342,7 +1426,8 @@ export function DailyAttendanceLogPage() {
                           <Stack gap="none">
                             <Inline justify="between">
                               <span>
-                                In: {reg.requestedCheckIn || '—'} • Out: {reg.requestedCheckOut || '—'}
+                                In: {reg.requestedCheckIn || '—'} • Out:{' '}
+                                {reg.requestedCheckOut || '—'}
                               </span>
                               <Badge variant="info">{reg.status}</Badge>
                             </Inline>
@@ -1372,13 +1457,21 @@ export function DailyAttendanceLogPage() {
                     <Stack gap="xs">
                       <Inline justify="between">
                         <span>Period Lock Status</span>
-                        <Badge variant={drawerDetail.historyAndActions.isLocked ? 'danger' : 'success'}>
-                          {drawerDetail.historyAndActions.isLocked ? 'Period Locked' : 'Open for Edits'}
+                        <Badge
+                          variant={drawerDetail.historyAndActions.isLocked ? 'danger' : 'success'}
+                        >
+                          {drawerDetail.historyAndActions.isLocked
+                            ? 'Period Locked'
+                            : 'Open for Edits'}
                         </Badge>
                       </Inline>
                       {drawerDetail.historyAndActions.calculationMetadata && (
                         <pre className="bezent-card__desc">
-                          {JSON.stringify(drawerDetail.historyAndActions.calculationMetadata, null, 2)}
+                          {JSON.stringify(
+                            drawerDetail.historyAndActions.calculationMetadata,
+                            null,
+                            2,
+                          )}
                         </pre>
                       )}
                     </Stack>
@@ -1402,8 +1495,8 @@ export function DailyAttendanceLogPage() {
           >
             <Stack gap="md">
               <p className="bezent-card__desc">
-                Adjust punch timings and credit attendance for {date}. Immutable audit records
-                will track this administrative modification.
+                Adjust punch timings and credit attendance for {date}. Immutable audit records will
+                track this administrative modification.
               </p>
 
               {modalError && <Alert variant="danger">{modalError}</Alert>}
@@ -1451,7 +1544,9 @@ export function DailyAttendanceLogPage() {
                 <Select
                   label="Attendance Status"
                   value={manualStatus}
-                  onChange={(e) => setManualStatus(e.target.value as 'present' | 'half_day' | 'absent')}
+                  onChange={(e) =>
+                    setManualStatus(e.target.value as 'present' | 'half_day' | 'absent')
+                  }
                 >
                   <option value="present">Present (Full Day)</option>
                   <option value="half_day">Half Day Credit</option>

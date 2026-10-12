@@ -170,4 +170,3 @@ export function formatPhoneNumber(phoneNumber: string, defaultCountryCode?: stri
   const formattedNational = formatNationalNumberDisplay(parsed.nationalNumber, parsed.countryCode);
   return `${parsed.callingCode} ${formattedNational}`;
 }
-

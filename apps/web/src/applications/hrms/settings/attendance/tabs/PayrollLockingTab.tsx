@@ -48,7 +48,9 @@ export function PayrollLockingTab() {
   const [cutoffDay, setCutoffDay] = useState(25);
   const [requireApprovalBeforeLock, setRequireApprovalBeforeLock] = useState(true);
   const [autoLockOnCutoff, setAutoLockOnCutoff] = useState(false);
-  const [blockingSeverity, setBlockingSeverity] = useState<'hard_block' | 'warning_only'>('hard_block');
+  const [blockingSeverity, setBlockingSeverity] = useState<'hard_block' | 'warning_only'>(
+    'hard_block',
+  );
 
   // Periods & Handover
   const [periods, setPeriods] = useState<AttendancePeriod[]>([]);
@@ -335,8 +337,8 @@ export function PayrollLockingTab() {
                         p.status === 'locked'
                           ? 'danger'
                           : p.status === 'reopened'
-                          ? 'warning'
-                          : 'success'
+                            ? 'warning'
+                            : 'success'
                       }
                     >
                       {p.status.toUpperCase()}
@@ -466,10 +468,7 @@ export function PayrollLockingTab() {
           <Inline justify="end" gap="sm">
             <Button onClick={() => setReadinessModalOpen(false)}>Close</Button>
             {readinessData?.canLock && selectedPeriodCode && (
-              <Button
-                variant="primary"
-                onClick={() => handleExecuteLock(selectedPeriodCode)}
-              >
+              <Button variant="primary" onClick={() => handleExecuteLock(selectedPeriodCode)}>
                 Proceed with Lock
               </Button>
             )}
@@ -480,9 +479,7 @@ export function PayrollLockingTab() {
           <Stack gap="md">
             <Inline justify="between" align="center">
               <span>Overall Readiness:</span>
-              <Badge
-                variant={readinessData.canLock ? 'success' : 'danger'}
-              >
+              <Badge variant={readinessData.canLock ? 'success' : 'danger'}>
                 {readinessData.canLock ? 'READY TO LOCK' : 'BLOCKED'}
               </Badge>
             </Inline>
@@ -500,7 +497,9 @@ export function PayrollLockingTab() {
             </Table>
             {readinessData.warnings && readinessData.warnings.length > 0 && (
               <Alert variant={readinessData.canLock ? 'warning' : 'error'}>
-                <strong>{readinessData.canLock ? 'Notices & Warnings:' : 'Blocking Issues:'}</strong>
+                <strong>
+                  {readinessData.canLock ? 'Notices & Warnings:' : 'Blocking Issues:'}
+                </strong>
                 <ul>
                   {readinessData.warnings.map((r: string, i: number) => (
                     <li key={i}>{r}</li>
@@ -533,7 +532,8 @@ export function PayrollLockingTab() {
       >
         <Stack gap="md">
           <Alert variant="warning">
-            Reopening a period unlocks historical attendance for retroactive adjustments. A formal audit reason is mandatory.
+            Reopening a period unlocks historical attendance for retroactive adjustments. A formal
+            audit reason is mandatory.
           </Alert>
           <Input
             label="Mandatory Business Reopening Reason"

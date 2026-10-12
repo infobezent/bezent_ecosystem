@@ -25,7 +25,8 @@ export class AttendanceOnDutyController {
     try {
       const { tenantId, companyId } = req.companyContext!;
 
-      let approvalStatus = typeof req.query.approvalStatus === 'string' ? req.query.approvalStatus : undefined;
+      let approvalStatus =
+        typeof req.query.approvalStatus === 'string' ? req.query.approvalStatus : undefined;
       if (!approvalStatus && typeof req.query.status === 'string') {
         if (req.query.status === 'pending') approvalStatus = 'submitted';
         else if (req.query.status !== 'all') approvalStatus = req.query.status;
@@ -33,15 +34,19 @@ export class AttendanceOnDutyController {
 
       const filter: OnDutyFilterV1 = {
         approvalStatus,
-        processingStatus: typeof req.query.processingStatus === 'string' ? req.query.processingStatus : undefined,
+        processingStatus:
+          typeof req.query.processingStatus === 'string' ? req.query.processingStatus : undefined,
         odTypeId: typeof req.query.odTypeId === 'string' ? req.query.odTypeId : undefined,
-        durationType: typeof req.query.durationType === 'string' ? req.query.durationType : undefined,
+        durationType:
+          typeof req.query.durationType === 'string' ? req.query.durationType : undefined,
         startDate: typeof req.query.startDate === 'string' ? req.query.startDate : undefined,
         endDate: typeof req.query.endDate === 'string' ? req.query.endDate : undefined,
-        submittedFrom: typeof req.query.submittedFrom === 'string' ? req.query.submittedFrom : undefined,
+        submittedFrom:
+          typeof req.query.submittedFrom === 'string' ? req.query.submittedFrom : undefined,
         submittedTo: typeof req.query.submittedTo === 'string' ? req.query.submittedTo : undefined,
         assignedTo: typeof req.query.assignedTo === 'string' ? req.query.assignedTo : undefined,
-        departmentId: typeof req.query.departmentId === 'string' ? req.query.departmentId : undefined,
+        departmentId:
+          typeof req.query.departmentId === 'string' ? req.query.departmentId : undefined,
         locationId: typeof req.query.locationId === 'string' ? req.query.locationId : undefined,
         employeeId: typeof req.query.employeeId === 'string' ? req.query.employeeId : undefined,
         search: typeof req.query.search === 'string' ? req.query.search : undefined,
@@ -87,7 +92,14 @@ export class AttendanceOnDutyController {
       const { assignedTo, role } = req.body as { assignedTo: string; role?: string };
       if (!assignedTo) throw new BadRequestError('assignedTo user ID is required');
 
-      const result = await this.service.assignReviewer(tenantId, companyId, id, assignedTo, userId, role);
+      const result = await this.service.assignReviewer(
+        tenantId,
+        companyId,
+        id,
+        assignedTo,
+        userId,
+        role,
+      );
       res.json({ success: true, data: result });
     } catch (err) {
       next(err);
@@ -112,7 +124,13 @@ export class AttendanceOnDutyController {
       const userId = req.user?.id ?? 'system';
       const id = req.params.id as string;
       const { notes } = req.body as { notes: string };
-      const result = await this.service.requestClarification(tenantId, companyId, id, notes, userId);
+      const result = await this.service.requestClarification(
+        tenantId,
+        companyId,
+        id,
+        notes,
+        userId,
+      );
       res.json({ success: true, data: result });
     } catch (err) {
       next(err);
@@ -125,7 +143,13 @@ export class AttendanceOnDutyController {
       const userId = req.user?.id ?? 'system';
       const id = req.params.id as string;
       const { response } = req.body as { response: string };
-      const result = await this.service.provideClarification(tenantId, companyId, id, response, userId);
+      const result = await this.service.provideClarification(
+        tenantId,
+        companyId,
+        id,
+        response,
+        userId,
+      );
       res.json({ success: true, data: result });
     } catch (err) {
       next(err);
@@ -139,8 +163,7 @@ export class AttendanceOnDutyController {
     userId: string,
   ): Promise<string | undefined> {
     const fromCtx =
-      req.employeeContext?.id ||
-      (req.user as unknown as { employeeId?: string })?.employeeId;
+      req.employeeContext?.id || (req.user as unknown as { employeeId?: string })?.employeeId;
     if (fromCtx) return fromCtx;
     if (userId && userId !== 'system') {
       const resolved = await this.service.resolveEmployeeIdByUserId(tenantId, companyId, userId);
@@ -156,7 +179,14 @@ export class AttendanceOnDutyController {
       const employeeId = await this.resolveEmployeeId(req, tenantId, companyId, userId);
       const id = req.params.id as string;
       const body = req.body as ReviewOnDutyDecisionInput;
-      const result = await this.service.reviewDecision(tenantId, companyId, id, body, userId, employeeId);
+      const result = await this.service.reviewDecision(
+        tenantId,
+        companyId,
+        id,
+        body,
+        userId,
+        employeeId,
+      );
       res.json({ success: true, data: result });
     } catch (err) {
       next(err);
@@ -186,7 +216,13 @@ export class AttendanceOnDutyController {
         throw new BadRequestError('requestIds array is required');
       }
 
-      const result = await this.service.previewBulkApproval(tenantId, companyId, requestIds, userId, employeeId);
+      const result = await this.service.previewBulkApproval(
+        tenantId,
+        companyId,
+        requestIds,
+        userId,
+        employeeId,
+      );
       res.json({ success: true, data: result });
     } catch (err) {
       next(err);
@@ -203,7 +239,13 @@ export class AttendanceOnDutyController {
         throw new BadRequestError('action and non-empty requestIds array are required');
       }
 
-      const result = await this.service.executeBulkAction(tenantId, companyId, body, userId, employeeId);
+      const result = await this.service.executeBulkAction(
+        tenantId,
+        companyId,
+        body,
+        userId,
+        employeeId,
+      );
       res.json({ success: true, data: result });
     } catch (err) {
       next(err);
@@ -271,7 +313,10 @@ export class AttendanceOnDutyController {
 
       const csvContent = lines.join('\r\n');
       res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-      res.setHeader('Content-Disposition', `attachment; filename="on_duty_register_${new Date().toISOString().slice(0, 10)}.csv"`);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="on_duty_register_${new Date().toISOString().slice(0, 10)}.csv"`,
+      );
       res.send(csvContent);
     } catch (err) {
       next(err);

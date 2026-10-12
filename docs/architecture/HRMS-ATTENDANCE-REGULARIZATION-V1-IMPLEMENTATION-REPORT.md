@@ -11,6 +11,7 @@
 The **Regularization V1.0 — Advanced Enterprise Workspace** is an enterprise-grade, persistent, tenant-isolated full-stack capability within the **BEZENT HRMS** business application (`applications/hrms`).
 
 ### Architecture Audit Findings
+
 - **Legacy Scope:** Previously, attendance correction was handled by a rudimentary `attendanceRegularization.ts` model with basic approval flags and no application ledger, lack of support for 7 specialized request types, and no two-state-machine separation.
 - **Integration Points Identified & Reused:**
   - `employeeAttendance`: Daily attendance records (`date`, `checkInTime`, `checkOutTime`, `totalHoursWorked`, `status`).
@@ -26,15 +27,15 @@ The **Regularization V1.0 — Advanced Enterprise Workspace** is an enterprise-g
 
 Regularization V1.0 introduces full support for seven distinct correction scenarios:
 
-| # | Request Type Key | Name | Dynamic Validation & Fields | Risk Classification |
-|---|------------------|------|-----------------------------|---------------------|
-| 1 | `missing_in` | Missing IN Punch | Requires proposed IN timestamp (`proposedCheckIn`). Original IN must be absent. | Low risk (eligible for controlled bulk approval) |
-| 2 | `missing_out` | Missing OUT Punch | Requires proposed OUT timestamp (`proposedCheckOut`). Original OUT must be absent. | Low risk (eligible for controlled bulk approval) |
-| 3 | `incorrect_time` | Incorrect Punch Time | Requires target punch reference and corrected timestamp. | Medium risk |
-| 4 | `status_correction` | Attendance Status Correction | Expected status (`present`, `half_day`, etc.) and justification. | High risk (requires individual review) |
-| 5 | `worked_hours` | Worked Hours Discrepancy | Claimed hours/minutes and explanatory documentation. | Medium risk |
-| 6 | `both_missing` | Both IN & OUT Missing | Requires both proposed IN and OUT timestamps. | High risk (requires individual review) |
-| 7 | `wrong_direction` | Wrong Punch Direction | Target punch reference and corrected punch interpretation (`IN` $\leftrightarrow$ `OUT`). | Medium risk |
+| #   | Request Type Key    | Name                         | Dynamic Validation & Fields                                                               | Risk Classification                              |
+| --- | ------------------- | ---------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| 1   | `missing_in`        | Missing IN Punch             | Requires proposed IN timestamp (`proposedCheckIn`). Original IN must be absent.           | Low risk (eligible for controlled bulk approval) |
+| 2   | `missing_out`       | Missing OUT Punch            | Requires proposed OUT timestamp (`proposedCheckOut`). Original OUT must be absent.        | Low risk (eligible for controlled bulk approval) |
+| 3   | `incorrect_time`    | Incorrect Punch Time         | Requires target punch reference and corrected timestamp.                                  | Medium risk                                      |
+| 4   | `status_correction` | Attendance Status Correction | Expected status (`present`, `half_day`, etc.) and justification.                          | High risk (requires individual review)           |
+| 5   | `worked_hours`      | Worked Hours Discrepancy     | Claimed hours/minutes and explanatory documentation.                                      | Medium risk                                      |
+| 6   | `both_missing`      | Both IN & OUT Missing        | Requires both proposed IN and OUT timestamps.                                             | High risk (requires individual review)           |
+| 7   | `wrong_direction`   | Wrong Punch Direction        | Target punch reference and corrected punch interpretation (`IN` $\leftrightarrow$ `OUT`). | Medium risk                                      |
 
 ---
 
@@ -100,6 +101,7 @@ stateDiagram-v2
 Migration file: [`0036_attendance_regularization_v1.sql`](file:///e:/Company/bezent_ecosystem/apps/api/src/db/migrations/0036_attendance_regularization_v1.sql)
 
 ### Tables Added
+
 1. **`attendance_regularizations`**:
    - Primary table storing requests, tenant isolation, request types, timestamps, reasons, reviewer assignments, approval status, application status, risk scores, and evidence metadata.
 2. **`attendance_adjustments`**:
@@ -137,7 +139,7 @@ The UI component is implemented at [`AttendanceRegularizationPage.tsx`](file:///
   4. `Approved Today`
   5. `Application Issues`
   6. `Rejected Today`
-  Filter interaction triggers instant table filtering.
+     Filter interaction triggers instant table filtering.
 - **Primary & Advanced Filters:** Search, Approval Status, Request Type, Workday Range, Application Status, Assigned Reviewer, Department, Location, Exception Case.
 - **10-Column Data Table:**
   1. Employee (Avatar, Name, EMP-ID)
@@ -163,6 +165,7 @@ The UI component is implemented at [`AttendanceRegularizationPage.tsx`](file:///
 ## 8. Verification & Test Suite
 
 ### Automated Test Runs
+
 1. **Backend Integration Tests:** [`attendanceRegularizationV1Api.test.ts`](file:///e:/Company/bezent_ecosystem/apps/api/src/applications/hrms/attendance/__tests__/attendanceRegularizationV1Api.test.ts)
    - **Result:** 13/13 Passed (100%).
    - Covered: Submission eligibility, duplicate prevention, self-approval blockage, awaiting info loop, rejection, approval + adjustment ledger write, locked workday defense, bulk controlled processing, CSV export.

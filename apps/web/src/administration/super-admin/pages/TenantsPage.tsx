@@ -170,7 +170,17 @@ export function TenantsPage({
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, statusFilter, applicationFilter, planFilter, dateParams, sortBy, sortOrder, page, pageSize]);
+  }, [
+    debouncedSearch,
+    statusFilter,
+    applicationFilter,
+    planFilter,
+    dateParams,
+    sortBy,
+    sortOrder,
+    page,
+    pageSize,
+  ]);
 
   // Initial and reactive fetch
   useEffect(() => {
@@ -282,17 +292,41 @@ export function TenantsPage({
     const classification = tenant.derivedCommercialClassification || tenant.status;
     switch (classification) {
       case 'active':
-        return <Badge variant="success" showDot size="sm">Active</Badge>;
+        return (
+          <Badge variant="success" showDot size="sm">
+            Active
+          </Badge>
+        );
       case 'trial':
-        return <Badge variant="warning" showDot size="sm">Trial</Badge>;
+        return (
+          <Badge variant="warning" showDot size="sm">
+            Trial
+          </Badge>
+        );
       case 'suspended':
-        return <Badge variant="danger" showDot size="sm">Suspended</Badge>;
+        return (
+          <Badge variant="danger" showDot size="sm">
+            Suspended
+          </Badge>
+        );
       case 'pending_setup':
-        return <Badge variant="neutral" showDot size="sm">Pending Setup</Badge>;
+        return (
+          <Badge variant="neutral" showDot size="sm">
+            Pending Setup
+          </Badge>
+        );
       case 'archived':
-        return <Badge variant="neutral" size="sm">Archived</Badge>;
+        return (
+          <Badge variant="neutral" size="sm">
+            Archived
+          </Badge>
+        );
       default:
-        return <Badge variant="neutral" size="sm">{tenant.status}</Badge>;
+        return (
+          <Badge variant="neutral" size="sm">
+            {tenant.status}
+          </Badge>
+        );
     }
   };
 
@@ -335,9 +369,13 @@ export function TenantsPage({
         <Inline gap="xs" align="center">
           <strong>{plansText}</strong>
           {summary.hasTrial ? (
-            <Badge variant="warning" size="sm">Trial</Badge>
+            <Badge variant="warning" size="sm">
+              Trial
+            </Badge>
           ) : (
-            <Badge variant="success" size="sm">Paid</Badge>
+            <Badge variant="success" size="sm">
+              Paid
+            </Badge>
           )}
         </Inline>
       </Stack>
@@ -381,7 +419,11 @@ export function TenantsPage({
       {/* Summary Metrics Section */}
       <section aria-label="Tenant Summary Metrics">
         {summaryError && (
-          <Alert variant="warning" title="Summary Metrics Unavailable" onDismiss={() => setSummaryError(null)}>
+          <Alert
+            variant="warning"
+            title="Summary Metrics Unavailable"
+            onDismiss={() => setSummaryError(null)}
+          >
             {summaryError}
           </Alert>
         )}
@@ -542,7 +584,11 @@ export function TenantsPage({
           />
 
           {listError && (
-            <Alert variant="error" title="Failed to load tenants" onDismiss={() => setListError(null)}>
+            <Alert
+              variant="error"
+              title="Failed to load tenants"
+              onDismiss={() => setListError(null)}
+            >
               {listError}
             </Alert>
           )}
@@ -551,7 +597,9 @@ export function TenantsPage({
 
           {!loading && tenants.length === 0 && (
             <EmptyState
-              title={activeFilterCount > 0 ? 'No matching customer tenants' : 'No customer tenants found'}
+              title={
+                activeFilterCount > 0 ? 'No matching customer tenants' : 'No customer tenants found'
+              }
               description={
                 activeFilterCount > 0
                   ? 'No customer tenants match your current filter criteria. Try resetting or adjusting your filters.'
@@ -632,7 +680,9 @@ export function TenantsPage({
                             <Inline gap="xs" align="center">
                               <strong>{admin.name}</strong>
                               {admin.status === 'pending' && (
-                                <Badge variant="warning" size="sm">Pending Invitation</Badge>
+                                <Badge variant="warning" size="sm">
+                                  Pending Invitation
+                                </Badge>
                               )}
                             </Inline>
                             <span className="bezent-caption">{admin.email || 'Not assigned'}</span>
@@ -709,7 +759,8 @@ export function TenantsPage({
             <Toolbar
               left={
                 <span className="bezent-caption">
-                  Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} of {total} customer tenants
+                  Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} of {total}{' '}
+                  customer tenants
                 </span>
               }
               right={
@@ -790,7 +841,9 @@ export function TenantsPage({
             )}
 
             <Alert variant="warning" title="Customer-Wide Impact">
-              This action disables all organization workspaces and application access for this customer. Entitlements will be paused until reactivated by an authorized Super Administrator.
+              This action disables all organization workspaces and application access for this
+              customer. Entitlements will be paused until reactivated by an authorized Super
+              Administrator.
             </Alert>
 
             <Input
@@ -830,7 +883,9 @@ export function TenantsPage({
       >
         <Stack gap="sm">
           <Alert variant="info" title="Access Restoration">
-            The customer organization will return to active operational state. Note that reactivation does not automatically restore expired or cancelled application subscriptions.
+            The customer organization will return to active operational state. Note that
+            reactivation does not automatically restore expired or cancelled application
+            subscriptions.
           </Alert>
         </Stack>
       </Modal>

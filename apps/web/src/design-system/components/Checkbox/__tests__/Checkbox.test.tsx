@@ -31,9 +31,7 @@ describe('Design System Checkbox Component', () => {
   });
 
   it('applies disabled state with wrapper modifier and disabled input', () => {
-    const html = renderToStaticMarkup(
-      <Checkbox id="dis-check" label="Disabled Option" disabled />,
-    );
+    const html = renderToStaticMarkup(<Checkbox id="dis-check" label="Disabled Option" disabled />);
 
     expect(html).toContain('bezent-checkbox-wrapper--disabled');
     expect(html).toContain('disabled=""');
@@ -49,12 +47,8 @@ describe('Design System Checkbox Component', () => {
   });
 
   it('supports size modifiers (sm and md)', () => {
-    const htmlSm = renderToStaticMarkup(
-      <Checkbox id="sm-size" label="Small size" size="sm" />,
-    );
-    const htmlMd = renderToStaticMarkup(
-      <Checkbox id="md-size" label="Medium size" size="md" />,
-    );
+    const htmlSm = renderToStaticMarkup(<Checkbox id="sm-size" label="Small size" size="sm" />);
+    const htmlMd = renderToStaticMarkup(<Checkbox id="md-size" label="Medium size" size="md" />);
 
     expect(htmlSm).toContain('bezent-checkbox-wrapper--sm');
     expect(htmlMd).toContain('bezent-checkbox-wrapper--md');

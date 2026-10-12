@@ -209,10 +209,12 @@ describe('BEZENT Platform Rules Engine', () => {
         ruleEngine.evaluate(rule, { status: 'active', department: 'Engineering' }).matched,
       ).toBe(true);
       expect(
-        ruleEngine.evaluate(rule, { status: 'active', department: 'Sales', quotaMet: true }).matched,
+        ruleEngine.evaluate(rule, { status: 'active', department: 'Sales', quotaMet: true })
+          .matched,
       ).toBe(true);
       expect(
-        ruleEngine.evaluate(rule, { status: 'active', department: 'Sales', quotaMet: false }).matched,
+        ruleEngine.evaluate(rule, { status: 'active', department: 'Sales', quotaMet: false })
+          .matched,
       ).toBe(false);
     });
   });
@@ -306,8 +308,12 @@ describe('BEZENT Platform Rules Engine', () => {
 
     it('throws InvalidRuleError when rule is malformed', () => {
       expect(() => ruleEngine.evaluate(null as unknown as Rule, {})).toThrow(InvalidRuleError);
-      expect(() => ruleEngine.evaluate({ id: '' } as unknown as Rule, {})).toThrow(InvalidRuleError);
-      expect(() => ruleEngine.evaluate({ id: '1', name: '' } as unknown as Rule, {})).toThrow(InvalidRuleError);
+      expect(() => ruleEngine.evaluate({ id: '' } as unknown as Rule, {})).toThrow(
+        InvalidRuleError,
+      );
+      expect(() => ruleEngine.evaluate({ id: '1', name: '' } as unknown as Rule, {})).toThrow(
+        InvalidRuleError,
+      );
     });
 
     it('guarantees deterministic evaluation when called repeatedly', () => {

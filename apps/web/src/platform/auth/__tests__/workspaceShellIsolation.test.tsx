@@ -62,9 +62,10 @@ function makeMockAuth(
           enabledModules: ['hrms' as ModuleCode],
           essEligible,
           employeeId: essEligible ? 'emp_01' : null,
-          workspaces: isTenantAdmin && !workspaces.includes('company_admin')
-            ? ['company_admin', ...workspaces]
-            : workspaces,
+          workspaces:
+            isTenantAdmin && !workspaces.includes('company_admin')
+              ? ['company_admin', ...workspaces]
+              : workspaces,
         }
       : null;
 

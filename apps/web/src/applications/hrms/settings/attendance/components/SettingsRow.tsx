@@ -49,9 +49,7 @@ export function SettingsRow({
             </span>
           )}
         </Inline>
-        {description && (
-          <div className="bezent-text-hint">{description}</div>
-        )}
+        {description && <div className="bezent-text-hint">{description}</div>}
       </div>
       <div>{content}</div>
     </Grid>

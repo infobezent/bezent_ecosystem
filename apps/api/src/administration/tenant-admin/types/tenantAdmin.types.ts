@@ -257,4 +257,3 @@ export interface CompanyRoleOverviewItem {
   administrativeCapabilities: string[];
   disclaimer: string;
 }
-

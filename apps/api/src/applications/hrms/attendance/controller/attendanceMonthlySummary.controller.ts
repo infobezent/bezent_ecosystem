@@ -40,11 +40,7 @@ export class AttendanceMonthlySummaryController {
             ? (req.query.reviewState as AttendanceReviewState)
             : undefined,
         isLocked:
-          req.query.isLocked === 'true'
-            ? true
-            : req.query.isLocked === 'false'
-              ? false
-              : undefined,
+          req.query.isLocked === 'true' ? true : req.query.isLocked === 'false' ? false : undefined,
         hasExceptions: req.query.hasExceptions === 'true',
         hasPendingCorrections: req.query.hasPendingCorrections === 'true',
         hasProcessingIssues: req.query.hasProcessingIssues === 'true',
@@ -198,12 +194,7 @@ export class AttendanceMonthlySummaryController {
       const id = req.params.id as string;
       const actorUserId = (req.user as unknown as { id?: string })?.id;
 
-      const data = await this.service.recalculateSummary(
-        tenantId,
-        companyId,
-        id,
-        actorUserId,
-      );
+      const data = await this.service.recalculateSummary(tenantId, companyId, id, actorUserId);
       res.json({ data });
     } catch (err) {
       next(err);
@@ -244,9 +235,7 @@ export class AttendanceMonthlySummaryController {
       const payload = req.method === 'POST' ? req.body : req.query;
 
       const month =
-        typeof payload.month === 'string'
-          ? payload.month
-          : new Date().toISOString().slice(0, 7);
+        typeof payload.month === 'string' ? payload.month : new Date().toISOString().slice(0, 7);
 
       const exportResult = await this.service.exportSummaries(
         tenantId,
@@ -256,18 +245,14 @@ export class AttendanceMonthlySummaryController {
           format: (payload.format as 'csv' | 'excel' | 'pdf') || 'csv',
           level: (payload.level as 'standard' | 'detailed' | 'audit') || 'standard',
           selectedIds: Array.isArray(payload.selectedIds) ? payload.selectedIds : undefined,
-          departmentId:
-            typeof payload.departmentId === 'string' ? payload.departmentId : undefined,
+          departmentId: typeof payload.departmentId === 'string' ? payload.departmentId : undefined,
           search: typeof payload.search === 'string' ? payload.search : undefined,
         },
         actorUserId,
       );
 
       res.setHeader('Content-Type', exportResult.mimeType);
-      res.setHeader(
-        'Content-Disposition',
-        `attachment; filename="${exportResult.filename}"`,
-      );
+      res.setHeader('Content-Disposition', `attachment; filename="${exportResult.filename}"`);
       res.send(exportResult.content);
     } catch (err) {
       next(err);

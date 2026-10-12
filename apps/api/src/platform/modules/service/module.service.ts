@@ -25,7 +25,9 @@ export class ModuleService {
 
   getCatalog(): readonly ModuleCatalogItem[];
   getCatalog(applicationCode: string): ApplicationModuleDefinition[];
-  getCatalog(applicationCode?: string): readonly ModuleCatalogItem[] | ApplicationModuleDefinition[] {
+  getCatalog(
+    applicationCode?: string,
+  ): readonly ModuleCatalogItem[] | ApplicationModuleDefinition[] {
     if (applicationCode) {
       return getApplicationModules(applicationCode as ApplicationCode);
     }
@@ -49,9 +51,7 @@ export class ModuleService {
     const isEnterprise = plan.tier.toLowerCase() === 'enterprise';
 
     return appModules.map((m) => {
-      const explicitEntitlement = plan.entitlements.find(
-        (e) => e.moduleCode === m.key,
-      );
+      const explicitEntitlement = plan.entitlements.find((e) => e.moduleCode === m.key);
 
       let isIncludedInPlan = false;
       if (hasAllModulesEntitlement || isEnterprise) {
@@ -89,7 +89,11 @@ export class ModuleService {
   async isTenantEntitled(tenantId: string, moduleCode: ModuleCode): Promise<boolean> {
     const tenant = await this.tenantRepo.findById(tenantId);
     if (!tenant || tenant.status === 'suspended') return false;
-    const eff = await effectiveEntitlementService.resolveEffectiveEntitlements(tenantId, moduleCode as unknown as ApplicationCode, null);
+    const eff = await effectiveEntitlementService.resolveEffectiveEntitlements(
+      tenantId,
+      moduleCode as unknown as ApplicationCode,
+      null,
+    );
     return eff.isEntitled;
   }
 

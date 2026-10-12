@@ -82,7 +82,10 @@ export function AttendanceReportsPage() {
   // Visual Analytics state
   const [analyticsResult, setAnalyticsResult] = useState<ReportAnalyticsResult | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
-  const [activeDrillDown, setActiveDrillDown] = useState<{ dimension: string; value: string | number } | null>(null);
+  const [activeDrillDown, setActiveDrillDown] = useState<{
+    dimension: string;
+    value: string | number;
+  } | null>(null);
   const [showVisualAnalytics, setShowVisualAnalytics] = useState(true);
 
   // Saved configs state
@@ -182,7 +185,10 @@ export function AttendanceReportsPage() {
     if (!selectedReportDef) return;
     setAnalyticsLoading(true);
     try {
-      const data = await fetchReportAnalytics(selectedReportDef.id, overrideFilters || filterValues);
+      const data = await fetchReportAnalytics(
+        selectedReportDef.id,
+        overrideFilters || filterValues,
+      );
       setAnalyticsResult(data);
     } catch {
       // non-blocking
@@ -223,7 +229,8 @@ export function AttendanceReportsPage() {
   }
 
   function handleBarClick(category: string) {
-    const filterKey = analyticsResult?.charts.departmentComparison?.drillDownField || 'departmentId';
+    const filterKey =
+      analyticsResult?.charts.departmentComparison?.drillDownField || 'departmentId';
     setActiveDrillDown({ dimension: 'Department / Segment', value: category });
     const updated = { ...filterValues, [filterKey]: category };
     setFilterValues(updated);
@@ -267,7 +274,9 @@ export function AttendanceReportsPage() {
         loadHistory();
       }
     } catch (err: unknown) {
-      setPreviewError(err instanceof Error ? err.message : `Failed to export ${format.toUpperCase()}`);
+      setPreviewError(
+        err instanceof Error ? err.message : `Failed to export ${format.toUpperCase()}`,
+      );
     } finally {
       setExportingFormat(null);
     }
@@ -345,7 +354,12 @@ export function AttendanceReportsPage() {
         <Tabs
           items={[
             { id: 'catalog', label: 'Report Catalog' },
-            { id: 'runner', label: selectedReportDef ? `Report Center (${selectedReportDef.code})` : 'Report Center' },
+            {
+              id: 'runner',
+              label: selectedReportDef
+                ? `Report Center (${selectedReportDef.code})`
+                : 'Report Center',
+            },
             { id: 'saved', label: 'Saved Configurations' },
             { id: 'history', label: 'Generation History' },
           ]}
@@ -383,7 +397,8 @@ export function AttendanceReportsPage() {
                     ]}
                   />
                   <Badge variant="neutral">
-                    {filteredCatalog.length} {filteredCatalog.length === 1 ? 'Report' : 'Reports'} Available
+                    {filteredCatalog.length} {filteredCatalog.length === 1 ? 'Report' : 'Reports'}{' '}
+                    Available
                   </Badge>
                 </Inline>
                 <Button variant="secondary" onClick={loadCatalog} disabled={loadingCatalog}>
@@ -404,8 +419,8 @@ export function AttendanceReportsPage() {
                           report.sensitiveClassification === 'audit_restricted'
                             ? 'danger'
                             : report.sensitiveClassification === 'sensitive'
-                            ? 'warning'
-                            : 'neutral'
+                              ? 'warning'
+                              : 'neutral'
                         }
                       >
                         {report.sensitiveClassification.replace(/_/g, ' ')}
@@ -418,7 +433,9 @@ export function AttendanceReportsPage() {
                     </div>
 
                     <Inline gap="xs" wrap>
-                      <Badge variant="neutral">Source: {report.authoritativeSource.split(' ')[0]}</Badge>
+                      <Badge variant="neutral">
+                        Source: {report.authoritativeSource.split(' ')[0]}
+                      </Badge>
                       {report.supportedExportFormats.map((fmt) => (
                         <Badge key={fmt} variant="neutral">
                           {fmt.toUpperCase()}
@@ -496,10 +513,7 @@ export function AttendanceReportsPage() {
                           label={filter.label}
                           value={val}
                           onChange={(e) => handleFilterChange(filter.id, e.target.value)}
-                          options={[
-                            { label: `All ${filter.label}`, value: '' },
-                            ...filter.options,
-                          ]}
+                          options={[{ label: `All ${filter.label}`, value: '' }, ...filter.options]}
                         />
                       );
                     }
@@ -524,7 +538,9 @@ export function AttendanceReportsPage() {
                       disabled={previewLoading || analyticsLoading}
                     >
                       <BezentIcon name="refresh" size={14} />{' '}
-                      {previewLoading || analyticsLoading ? 'Evaluating Data...' : 'Preview Report & Analytics'}
+                      {previewLoading || analyticsLoading
+                        ? 'Evaluating Data...'
+                        : 'Preview Report & Analytics'}
                     </Button>
                     <Button
                       variant="secondary"
@@ -632,7 +648,9 @@ export function AttendanceReportsPage() {
                     <Inline gap="sm" align="center">
                       <Badge variant="neutral">Total Rows: {previewResult.totalRows}</Badge>
                       <Badge variant="neutral">Timezone: {previewResult.timezone}</Badge>
-                      <Badge variant="neutral">Generated: {previewResult.generatedAt.slice(0, 19).replace('T', ' ')}</Badge>
+                      <Badge variant="neutral">
+                        Generated: {previewResult.generatedAt.slice(0, 19).replace('T', ' ')}
+                      </Badge>
                     </Inline>
                     <Inline gap="xs" align="center">
                       <Button
@@ -643,13 +661,15 @@ export function AttendanceReportsPage() {
                         Previous
                       </Button>
                       <Badge variant="info">
-                        Page {previewResult.page} of {Math.max(1, Math.ceil(previewResult.totalRows / pageSize))}
+                        Page {previewResult.page} of{' '}
+                        {Math.max(1, Math.ceil(previewResult.totalRows / pageSize))}
                       </Badge>
                       <Button
                         variant="secondary"
                         onClick={() => handleRunPreview(currentPage + 1)}
                         disabled={
-                          currentPage >= Math.ceil(previewResult.totalRows / pageSize) || previewLoading
+                          currentPage >= Math.ceil(previewResult.totalRows / pageSize) ||
+                          previewLoading
                         }
                       >
                         Next
@@ -667,12 +687,13 @@ export function AttendanceReportsPage() {
                       <TableHead>
                         <TableRow>
                           {previewResult.columns.map((col) => (
-                            <TableHeaderCell
-                              key={col.id}
-                              onClick={() => handleSortClick(col.id)}
-                            >
+                            <TableHeaderCell key={col.id} onClick={() => handleSortClick(col.id)}>
                               {col.label}
-                              {sorting.column === col.id ? (sorting.direction === 'asc' ? ' ↑' : ' ↓') : ''}
+                              {sorting.column === col.id
+                                ? sorting.direction === 'asc'
+                                  ? ' ↑'
+                                  : ' ↓'
+                                : ''}
                             </TableHeaderCell>
                           ))}
                         </TableRow>
@@ -682,7 +703,8 @@ export function AttendanceReportsPage() {
                           <TableRow key={idx}>
                             {previewResult.columns.map((col) => {
                               const val = row[col.id];
-                              const displayVal = val !== null && val !== undefined ? String(val) : '—';
+                              const displayVal =
+                                val !== null && val !== undefined ? String(val) : '—';
                               return (
                                 <TableCell key={col.id}>
                                   {col.type === 'badge' ? (
@@ -713,7 +735,8 @@ export function AttendanceReportsPage() {
               <Inline justify="between" align="center">
                 <Inline gap="sm" align="center">
                   <Badge variant="neutral">
-                    {savedConfigs.length} {savedConfigs.length === 1 ? 'Configuration' : 'Configurations'}
+                    {savedConfigs.length}{' '}
+                    {savedConfigs.length === 1 ? 'Configuration' : 'Configurations'}
                   </Badge>
                 </Inline>
                 <Button variant="secondary" onClick={loadSavedConfigs} disabled={loadingSaved}>
@@ -838,7 +861,8 @@ export function AttendanceReportsPage() {
         >
           <Stack gap="md">
             <p>
-              Save the current filter configuration for <strong>{selectedReportDef?.name}</strong> to your private saved reports list.
+              Save the current filter configuration for <strong>{selectedReportDef?.name}</strong>{' '}
+              to your private saved reports list.
             </p>
             <Input
               label="Configuration Name"
@@ -850,7 +874,11 @@ export function AttendanceReportsPage() {
               <Button variant="secondary" onClick={() => setSaveModalOpen(false)}>
                 Cancel
               </Button>
-              <Button variant="primary" onClick={handleSaveConfig} disabled={savingConfig || !newConfigName.trim()}>
+              <Button
+                variant="primary"
+                onClick={handleSaveConfig}
+                disabled={savingConfig || !newConfigName.trim()}
+              >
                 {savingConfig ? 'Saving...' : 'Save Configuration'}
               </Button>
             </Inline>

@@ -126,13 +126,18 @@ describe('Super Admin — Phase 03B Create Tenant Wizard UI', () => {
       const html = renderToStaticMarkup(
         <MemoryRouter initialEntries={['/super-admin/tenants/create']}>
           <Routes>
-            <Route path="/super-admin/tenants/create" element={<CreateTenantPage initialPlans={mockPlans} />} />
+            <Route
+              path="/super-admin/tenants/create"
+              element={<CreateTenantPage initialPlans={mockPlans} />}
+            />
           </Routes>
         </MemoryRouter>,
       );
 
       expect(html).toContain('Create Tenant');
-      expect(html).toContain('Set up a new customer organization, administrator, and application access.');
+      expect(html).toContain(
+        'Set up a new customer organization, administrator, and application access.',
+      );
     });
 
     it('renders All Tenants CTA buttons linking to Create Tenant', () => {
@@ -196,7 +201,9 @@ describe('Super Admin — Phase 03B Create Tenant Wizard UI', () => {
       );
 
       expect(html).toContain('Tenant ID will be generated automatically.');
-      expect(html).toContain('Immutable system identifier assigned by the platform backend upon creation.');
+      expect(html).toContain(
+        'Immutable system identifier assigned by the platform backend upon creation.',
+      );
     });
 
     it('renders location and registration sections with proper IANA timezone options', () => {
@@ -278,7 +285,9 @@ describe('Super Admin — Phase 03B Create Tenant Wizard UI', () => {
         </MemoryRouter>,
       );
 
-      expect(html).toContain('You can create this tenant without enabling applications. Applications can be configured later.');
+      expect(html).toContain(
+        'You can create this tenant without enabling applications. Applications can be configured later.',
+      );
       expect(html).toContain('No Applications Selected');
     });
 
@@ -429,10 +438,7 @@ describe('Super Admin — Phase 03B Create Tenant Wizard UI', () => {
     it('renders dedicated success screen with confirmed backend IDs and names', () => {
       const html = renderToStaticMarkup(
         <MemoryRouter>
-          <CreateTenantPage
-            initialStep={5}
-            initialCreationResult={mockSuccessResult}
-          />
+          <CreateTenantPage initialStep={5} initialCreationResult={mockSuccessResult} />
         </MemoryRouter>,
       );
 
@@ -445,10 +451,7 @@ describe('Super Admin — Phase 03B Create Tenant Wizard UI', () => {
     it('accurately distinguishes Queued invitation from Delivered', () => {
       const html = renderToStaticMarkup(
         <MemoryRouter>
-          <CreateTenantPage
-            initialStep={5}
-            initialCreationResult={mockSuccessResult}
-          />
+          <CreateTenantPage initialStep={5} initialCreationResult={mockSuccessResult} />
         </MemoryRouter>,
       );
 
@@ -459,10 +462,7 @@ describe('Super Admin — Phase 03B Create Tenant Wizard UI', () => {
     it('accurately distinguishes Provisioning Pending from Provisioning Complete', () => {
       const html = renderToStaticMarkup(
         <MemoryRouter>
-          <CreateTenantPage
-            initialStep={5}
-            initialCreationResult={mockSuccessResult}
-          />
+          <CreateTenantPage initialStep={5} initialCreationResult={mockSuccessResult} />
         </MemoryRouter>,
       );
 
@@ -473,10 +473,7 @@ describe('Super Admin — Phase 03B Create Tenant Wizard UI', () => {
     it('renders Back to All Tenants CTA button', () => {
       const html = renderToStaticMarkup(
         <MemoryRouter>
-          <CreateTenantPage
-            initialStep={5}
-            initialCreationResult={mockSuccessResult}
-          />
+          <CreateTenantPage initialStep={5} initialCreationResult={mockSuccessResult} />
         </MemoryRouter>,
       );
 

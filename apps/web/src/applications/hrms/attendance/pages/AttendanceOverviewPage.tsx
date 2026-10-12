@@ -81,24 +81,14 @@ export function AttendanceOverviewPage() {
         subtitle="Workforce operations, exception triage, and monthly payroll readiness"
         actions={
           <Inline gap="sm">
-            <Button
-              variant="secondary"
-              onClick={handleRefresh}
-              aria-label="Refresh overview"
-            >
+            <Button variant="secondary" onClick={handleRefresh} aria-label="Refresh overview">
               <BezentIcon name="sync" size={16} />
               {refreshing ? 'Refreshing...' : 'Refresh'}
             </Button>
-            <Button
-              variant="secondary"
-              onClick={() => navigate('/hrms/attendance/daily-log')}
-            >
+            <Button variant="secondary" onClick={() => navigate('/hrms/attendance/daily-log')}>
               <BezentIcon name="clock" size={16} /> Daily Log
             </Button>
-            <Button
-              variant="secondary"
-              onClick={() => navigate('/hrms/attendance/regularization')}
-            >
+            <Button variant="secondary" onClick={() => navigate('/hrms/attendance/regularization')}>
               <BezentIcon name="requests" size={16} /> Regularization Queue
             </Button>
             <Button
@@ -226,9 +216,7 @@ export function AttendanceOverviewPage() {
               <Card padding="md">
                 <Stack gap="xs">
                   <span className="bezent-card__desc">On-Duty / Field</span>
-                  <h2 className="bezent-card__title">
-                    {todayKpis ? todayKpis.onDutyCount : 0}
-                  </h2>
+                  <h2 className="bezent-card__title">{todayKpis ? todayKpis.onDutyCount : 0}</h2>
                   <Badge variant="info">Authorized</Badge>
                 </Stack>
               </Card>
@@ -325,7 +313,8 @@ export function AttendanceOverviewPage() {
                       <Stack gap="xs">
                         <strong>Pending Regularizations</strong>
                         <span className="bezent-card__desc">
-                          {data.pendingRegularizationCount} employee regularization request(s) awaiting review
+                          {data.pendingRegularizationCount} employee regularization request(s)
+                          awaiting review
                         </span>
                       </Stack>
                       <Button
@@ -379,9 +368,7 @@ export function AttendanceOverviewPage() {
                             <TableCell>{dept.presentEquivalents}</TableCell>
                             <TableCell>
                               <Badge
-                                variant={
-                                  (dept.attendanceRate ?? 0) >= 80 ? 'success' : 'warning'
-                                }
+                                variant={(dept.attendanceRate ?? 0) >= 80 ? 'success' : 'warning'}
                               >
                                 {dept.attendanceRate !== null ? `${dept.attendanceRate}%` : 'N/A'}
                               </Badge>
@@ -479,9 +466,7 @@ export function AttendanceOverviewPage() {
                             </TableCell>
                             <TableCell>
                               {item.attendanceRate !== null ? (
-                                <Badge
-                                  variant={item.attendanceRate >= 80 ? 'success' : 'warning'}
-                                >
+                                <Badge variant={item.attendanceRate >= 80 ? 'success' : 'warning'}>
                                   {item.attendanceRate}%
                                 </Badge>
                               ) : (
@@ -521,10 +506,10 @@ export function AttendanceOverviewPage() {
                           processingHealth.status === 'healthy'
                             ? 'success'
                             : processingHealth.status === 'degraded'
-                            ? 'warning'
-                            : processingHealth.status === 'upcoming'
-                            ? 'neutral'
-                            : 'danger'
+                              ? 'warning'
+                              : processingHealth.status === 'upcoming'
+                                ? 'neutral'
+                                : 'danger'
                         }
                       >
                         {processingHealth.status.toUpperCase()}
@@ -595,7 +580,8 @@ export function AttendanceOverviewPage() {
                   <div className="bezent-toolbar">
                     <div>
                       <h3 className="bezent-card__title">
-                        Monthly Payroll Readiness ({monthlyReadiness?.month || selectedDate.slice(0, 7)})
+                        Monthly Payroll Readiness (
+                        {monthlyReadiness?.month || selectedDate.slice(0, 7)})
                       </h3>
                       <span className="bezent-card__desc">
                         Readiness sign-off, supervisor review, and lock progress
@@ -631,9 +617,7 @@ export function AttendanceOverviewPage() {
                           <h3 className="bezent-card__title">
                             {monthlyReadiness.needsReviewCount + monthlyReadiness.blockedCount}
                           </h3>
-                          <Badge
-                            variant={monthlyReadiness.blockedCount > 0 ? 'danger' : 'warning'}
-                          >
+                          <Badge variant={monthlyReadiness.blockedCount > 0 ? 'danger' : 'warning'}>
                             {monthlyReadiness.blockedCount} Blocked
                           </Badge>
                         </Stack>
@@ -646,7 +630,8 @@ export function AttendanceOverviewPage() {
                           <Badge variant="neutral">
                             {monthlyReadiness.totalInScope > 0
                               ? `${Math.round(
-                                  (monthlyReadiness.lockedCount / monthlyReadiness.totalInScope) * 100,
+                                  (monthlyReadiness.lockedCount / monthlyReadiness.totalInScope) *
+                                    100,
                                 )}%`
                               : '0%'}
                           </Badge>
@@ -658,7 +643,8 @@ export function AttendanceOverviewPage() {
                       <Inline gap="sm" align="center">
                         <BezentIcon name="lock" size={16} />
                         <span className="bezent-card__desc">
-                          Payroll readiness indicators are restricted to authorized HR and Payroll administrators.
+                          Payroll readiness indicators are restricted to authorized HR and Payroll
+                          administrators.
                         </span>
                       </Inline>
                     </Card>

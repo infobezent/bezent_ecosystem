@@ -38,8 +38,7 @@ export function isSameNormalizedAddress(
   a: NormalizedAddressInput,
   b: NormalizedAddressInput,
 ): boolean {
-  const norm = (s?: string | null) =>
-    (s ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
+  const norm = (s?: string | null) => (s ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
 
   const aAddr1 = norm(a.addressLine1);
   const bAddr1 = norm(b.addressLine1);
@@ -195,11 +194,7 @@ export function AddLocationModal({
 
   // Check if registered office is available on company
   const hasRegisteredOffice = useMemo(() => {
-    return Boolean(
-      company.addressLine1?.trim() &&
-        company.city?.trim() &&
-        company.state?.trim(),
-    );
+    return Boolean(company.addressLine1?.trim() && company.city?.trim() && company.state?.trim());
   }, [company]);
 
   // Check if an existing Work Location already uses the registered office address
@@ -380,9 +375,7 @@ export function AddLocationModal({
           {showRegisteredOfficeShortcut && (
             <div className="bezent-reg-office-banner">
               <div className="bezent-reg-office-banner__info">
-                <span className="bezent-reg-office-banner__title">
-                  Registered office available
-                </span>
+                <span className="bezent-reg-office-banner__title">Registered office available</span>
                 <span className="bezent-reg-office-banner__address" title={registeredOfficeSummary}>
                   {registeredOfficeSummary}
                 </span>

@@ -347,7 +347,9 @@ describe('Company Workspace & Company Overview Verification', () => {
     expect(html).toContain('Applications');
 
     // Company Access page header/content
-    expect(html).toContain('Manage company users, pending invitations, and delegated administrative permissions.');
+    expect(html).toContain(
+      'Manage company users, pending invitations, and delegated administrative permissions.',
+    );
   });
 
   it('9. Company Applications renders inside company workspace without redirecting to global applications', () => {
@@ -432,7 +434,9 @@ describe('Company Workspace & Company Overview Verification', () => {
 
     // 1. Overview boundary check
     const overviewHtml = renderToStaticMarkup(
-      <MemoryRouter initialEntries={['/tenant-admin/tenant/companies/comp_foreign_tenant/overview']}>
+      <MemoryRouter
+        initialEntries={['/tenant-admin/tenant/companies/comp_foreign_tenant/overview']}
+      >
         <TenantAdminContext.Provider value={crossTenantContext}>
           <Routes>
             <Route
@@ -464,7 +468,9 @@ describe('Company Workspace & Company Overview Verification', () => {
 
     // 3. Applications boundary check
     const appsHtml = renderToStaticMarkup(
-      <MemoryRouter initialEntries={['/tenant-admin/tenant/companies/comp_foreign_tenant/applications']}>
+      <MemoryRouter
+        initialEntries={['/tenant-admin/tenant/companies/comp_foreign_tenant/applications']}
+      >
         <TenantAdminContext.Provider value={crossTenantContext}>
           <Routes>
             <Route

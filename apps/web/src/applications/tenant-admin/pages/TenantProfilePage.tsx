@@ -21,8 +21,6 @@ import {
   type ProfileGeneralData,
 } from '../components/EditTenantProfileDrawer';
 
-
-
 interface CanonicalAppDef {
   code: string;
   name: string;
@@ -167,9 +165,10 @@ export function TenantProfilePage({ initialEditMode = false }: TenantProfilePage
   const tenantEmail = profileData.contactEmail || tenant?.contactEmail || 'arjun@acme.com';
   const tenantPhone = profileData.contactPhone || tenant?.contactPhone || '+91 98xxxxxx21';
   const tenantCreated = tenant?.createdAt ? formatDate(tenant.createdAt) : '18 Sep 2026';
-  const locationString = profileData.city && profileData.country
-    ? `${profileData.city}, ${profileData.country}`
-    : 'Bengaluru, India';
+  const locationString =
+    profileData.city && profileData.country
+      ? `${profileData.city}, ${profileData.country}`
+      : 'Bengaluru, India';
 
   // Capacity calculations
   const capacityUsed = capacity?.used ?? 3;
@@ -251,132 +250,134 @@ export function TenantProfilePage({ initialEditMode = false }: TenantProfilePage
                   <img
                     src={profileData.bannerUrl}
                     alt="Tenant cover"
-                  className="bezent-profile-banner__img"
-                />
-              )}
-              <button
-                type="button"
-                className="bezent-profile-banner__action"
-                onClick={() => setIsDrawerOpen(true)}
-                aria-label="Change Cover"
-              >
-                <BezentIcon name="camera" size={16} />
-                <span>Change Cover</span>
-              </button>
-            </div>
+                    className="bezent-profile-banner__img"
+                  />
+                )}
+                <button
+                  type="button"
+                  className="bezent-profile-banner__action"
+                  onClick={() => setIsDrawerOpen(true)}
+                  aria-label="Change Cover"
+                >
+                  <BezentIcon name="camera" size={16} />
+                  <span>Change Cover</span>
+                </button>
+              </div>
 
-            {/* Hero Content Overlay */}
-            <div className="bezent-profile-hero__content">
-              {/* Left Identity Group */}
-              <div className="bezent-profile-hero__identity">
-                {/* Logo Box */}
-                <div className="bezent-profile-logo-box">
-                  {profileData.logoUrl ? (
-                    <img
-                      src={profileData.logoUrl}
-                      alt={`${tenantName} logo`}
-                      className="bezent-profile-logo-img"
-                    />
-                  ) : (
-                    <span className="bezent-profile-logo-fallback">{initials}</span>
-                  )}
-                  <button
-                    type="button"
-                    className="bezent-profile-logo__badge-btn"
-                    onClick={() => setIsDrawerOpen(true)}
-                    title="Change Logo"
-                    aria-label="Change Logo"
-                  >
-                    <BezentIcon name="camera" size={14} />
-                  </button>
+              {/* Hero Content Overlay */}
+              <div className="bezent-profile-hero__content">
+                {/* Left Identity Group */}
+                <div className="bezent-profile-hero__identity">
+                  {/* Logo Box */}
+                  <div className="bezent-profile-logo-box">
+                    {profileData.logoUrl ? (
+                      <img
+                        src={profileData.logoUrl}
+                        alt={`${tenantName} logo`}
+                        className="bezent-profile-logo-img"
+                      />
+                    ) : (
+                      <span className="bezent-profile-logo-fallback">{initials}</span>
+                    )}
+                    <button
+                      type="button"
+                      className="bezent-profile-logo__badge-btn"
+                      onClick={() => setIsDrawerOpen(true)}
+                      title="Change Logo"
+                      aria-label="Change Logo"
+                    >
+                      <BezentIcon name="camera" size={14} />
+                    </button>
+                  </div>
+
+                  {/* Name & Metadata */}
+                  <div className="bezent-profile-hero__meta">
+                    <div className="bezent-profile-hero__title-row">
+                      <h2 className="bezent-profile-hero__title">{tenantName}</h2>
+                      <Badge variant={tenantStatus === 'active' ? 'success' : 'neutral'} showDot>
+                        {statusLabel}
+                      </Badge>
+                    </div>
+                    <p className="bezent-profile-hero__subtitle">
+                      Enterprise Workspace | {profileData.industry || 'Manufacturing'}
+                    </p>
+                    <div className="bezent-profile-hero__tags">
+                      <span className="bezent-profile-hero__tag-item">
+                        <BezentIcon name="organization" size={15} />
+                        <strong>{tenantCode}</strong>
+                        <span className="bezent-profile-hero__tag-label">Tenant Code</span>
+                      </span>
+                      <span className="bezent-profile-hero__tag-item">
+                        <BezentIcon name="pin" size={15} />
+                        <code>{tenantId}</code>
+                        <span className="bezent-profile-hero__tag-label">Tenant ID</span>
+                      </span>
+                      <span className="bezent-profile-hero__tag-item">
+                        <BezentIcon name="pin" size={15} />
+                        <span>{locationString}</span>
+                        <span className="bezent-profile-hero__tag-label">Location</span>
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Name & Metadata */}
-                <div className="bezent-profile-hero__meta">
-                  <div className="bezent-profile-hero__title-row">
-                    <h2 className="bezent-profile-hero__title">{tenantName}</h2>
-                    <Badge variant={tenantStatus === 'active' ? 'success' : 'neutral'} showDot>
-                      {statusLabel}
-                    </Badge>
-                  </div>
-                  <p className="bezent-profile-hero__subtitle">
-                    Enterprise Workspace | {profileData.industry || 'Manufacturing'}
-                  </p>
-                  <div className="bezent-profile-hero__tags">
-                    <span className="bezent-profile-hero__tag-item">
-                      <BezentIcon name="organization" size={15} />
-                      <strong>{tenantCode}</strong>
-                      <span className="bezent-profile-hero__tag-label">Tenant Code</span>
-                    </span>
-                    <span className="bezent-profile-hero__tag-item">
-                      <BezentIcon name="pin" size={15} />
-                      <code>{tenantId}</code>
-                      <span className="bezent-profile-hero__tag-label">Tenant ID</span>
-                    </span>
-                    <span className="bezent-profile-hero__tag-item">
-                      <BezentIcon name="pin" size={15} />
-                      <span>{locationString}</span>
-                      <span className="bezent-profile-hero__tag-label">Location</span>
-                    </span>
+                {/* Right Workspace Setup Card */}
+                <div className="bezent-workspace-setup-card">
+                  <div className="bezent-workspace-setup-card__header">Workspace Setup</div>
+                  <div className="bezent-workspace-setup-list">
+                    <div className="bezent-workspace-setup-item">
+                      <span className="bezent-workspace-setup-item__left">
+                        <span className="bezent-workspace-setup-item__check">
+                          <BezentIcon name="check" size={14} />
+                        </span>
+                        <span>Tenant Profile</span>
+                      </span>
+                      <span className="bezent-workspace-setup-item__val">Complete</span>
+                    </div>
+
+                    <div className="bezent-workspace-setup-item">
+                      <span className="bezent-workspace-setup-item__left">
+                        <span className="bezent-workspace-setup-item__check">
+                          <BezentIcon name="check" size={14} />
+                        </span>
+                        <span>Companies</span>
+                      </span>
+                      <span className="bezent-workspace-setup-item__val">
+                        {capacityUsed} configured
+                      </span>
+                    </div>
+
+                    <div className="bezent-workspace-setup-item">
+                      <span className="bezent-workspace-setup-item__left">
+                        <span className="bezent-workspace-setup-item__check">
+                          <BezentIcon name="check" size={14} />
+                        </span>
+                        <span>Applications</span>
+                      </span>
+                      <span className="bezent-workspace-setup-item__val">
+                        {entitlements.length > 0
+                          ? `${entitlements.length} available`
+                          : '3 available'}
+                      </span>
+                    </div>
+
+                    <div className="bezent-workspace-setup-item">
+                      <span className="bezent-workspace-setup-item__left">
+                        <span className="bezent-workspace-setup-item__check">
+                          <BezentIcon name="check" size={14} />
+                        </span>
+                        <span>Access</span>
+                      </span>
+                      <span className="bezent-workspace-setup-item__val">
+                        {memberCount !== null ? `${memberCount} users` : '12 users'}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-
-              {/* Right Workspace Setup Card */}
-              <div className="bezent-workspace-setup-card">
-                <div className="bezent-workspace-setup-card__header">Workspace Setup</div>
-                <div className="bezent-workspace-setup-list">
-                  <div className="bezent-workspace-setup-item">
-                    <span className="bezent-workspace-setup-item__left">
-                      <span className="bezent-workspace-setup-item__check">
-                        <BezentIcon name="check" size={14} />
-                      </span>
-                      <span>Tenant Profile</span>
-                    </span>
-                    <span className="bezent-workspace-setup-item__val">Complete</span>
-                  </div>
-
-                  <div className="bezent-workspace-setup-item">
-                    <span className="bezent-workspace-setup-item__left">
-                      <span className="bezent-workspace-setup-item__check">
-                        <BezentIcon name="check" size={14} />
-                      </span>
-                      <span>Companies</span>
-                    </span>
-                    <span className="bezent-workspace-setup-item__val">
-                      {capacityUsed} configured
-                    </span>
-                  </div>
-
-                  <div className="bezent-workspace-setup-item">
-                    <span className="bezent-workspace-setup-item__left">
-                      <span className="bezent-workspace-setup-item__check">
-                        <BezentIcon name="check" size={14} />
-                      </span>
-                      <span>Applications</span>
-                    </span>
-                    <span className="bezent-workspace-setup-item__val">
-                      {entitlements.length > 0 ? `${entitlements.length} available` : '3 available'}
-                    </span>
-                  </div>
-
-                  <div className="bezent-workspace-setup-item">
-                    <span className="bezent-workspace-setup-item__left">
-                      <span className="bezent-workspace-setup-item__check">
-                        <BezentIcon name="check" size={14} />
-                      </span>
-                      <span>Access</span>
-                    </span>
-                    <span className="bezent-workspace-setup-item__val">
-                      {memberCount !== null ? `${memberCount} users` : '12 users'}
-                    </span>
-                  </div>
-                </div>
-              </div>
             </div>
-          </div>
-        </Card>
-      </Section>
+          </Card>
+        </Section>
 
         {/* 3. FOUR SUMMARY CARDS */}
         <Grid columns={4} gap="md">
@@ -408,9 +409,7 @@ export function TenantProfilePage({ initialEditMode = false }: TenantProfilePage
                   <span>Users</span>
                 </span>
               </div>
-              <h3 className="bezent-stat-card__num">
-                {memberCount !== null ? memberCount : 128}
-              </h3>
+              <h3 className="bezent-stat-card__num">{memberCount !== null ? memberCount : 128}</h3>
               <span className="bezent-stat-card__subtext">
                 <BezentIcon name="clock" size={14} />
                 <span>Active members</span>
@@ -478,9 +477,7 @@ export function TenantProfilePage({ initialEditMode = false }: TenantProfilePage
                   <strong className="bezent-contact-name">
                     {profileData.contactName || 'Arjun Kumar'}
                   </strong>
-                  <span className="bezent-contact-role">
-                    Operations Manager
-                  </span>
+                  <span className="bezent-contact-role">Operations Manager</span>
                 </Stack>
               </Inline>
 
@@ -527,7 +524,9 @@ export function TenantProfilePage({ initialEditMode = false }: TenantProfilePage
                   <span className="bezent-keyvalue-key">Tenant Code (Read-Only)</span>
                   <span className="bezent-keyvalue-val">
                     <strong>{tenantCode}</strong>
-                    <span className="bezent-profile-hero__tag-label">Controlled by Super Admin</span>
+                    <span className="bezent-profile-hero__tag-label">
+                      Controlled by Super Admin
+                    </span>
                   </span>
                 </div>
 
@@ -537,7 +536,9 @@ export function TenantProfilePage({ initialEditMode = false }: TenantProfilePage
                     <Badge variant={tenantStatus === 'active' ? 'success' : 'neutral'} showDot>
                       {statusLabel}
                     </Badge>
-                    <span className="bezent-profile-hero__tag-label">Platform provisioning state</span>
+                    <span className="bezent-profile-hero__tag-label">
+                      Platform provisioning state
+                    </span>
                   </span>
                 </div>
 
@@ -594,11 +595,7 @@ export function TenantProfilePage({ initialEditMode = false }: TenantProfilePage
           }
           subtitle="Applications enabled for this tenant. Access and assignment can be managed from Application Access."
           actions={
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleNavigateToApps}
-            >
+            <Button variant="secondary" size="sm" onClick={handleNavigateToApps}>
               <Inline gap="xs" align="center">
                 <BezentIcon name="openInNew" size={15} />
                 <span>Manage Applications</span>
@@ -608,8 +605,7 @@ export function TenantProfilePage({ initialEditMode = false }: TenantProfilePage
         >
           <Grid columns={3} gap="md">
             {CANONICAL_APPLICATIONS.map((app, index) => {
-              const isEntitled =
-                entitlements.length === 0 ? true : entitlements.includes(app.code);
+              const isEntitled = entitlements.length === 0 ? true : entitlements.includes(app.code);
               const companyCountText =
                 index === 0
                   ? `${capacityUsed} Companies`
@@ -644,18 +640,14 @@ export function TenantProfilePage({ initialEditMode = false }: TenantProfilePage
                               </Badge>
                             )}
                           </Inline>
-                          <span className="bezent-entitlement-desc">
-                            {app.name}
-                          </span>
+                          <span className="bezent-entitlement-desc">{app.name}</span>
                         </Stack>
                       </div>
                       <BezentIcon name="chevronRight" size={18} color="#94a3b8" />
                     </Inline>
 
                     <Inline justify="between" align="center">
-                      <span className="bezent-entitlement-meta">
-                        {companyCountText}
-                      </span>
+                      <span className="bezent-entitlement-meta">{companyCountText}</span>
                       <span className="bezent-entitlement-status">
                         {isEntitled ? 'Entitled' : 'Not Entitled'}
                       </span>

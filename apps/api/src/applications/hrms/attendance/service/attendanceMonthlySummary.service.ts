@@ -79,11 +79,25 @@ export class AttendanceMonthlySummaryService {
     month: string,
   ): Promise<void> {
     try {
-      const activeEmployees = await this.repo.getActiveEmployeesForMonth(tenantId, companyId, month);
+      const activeEmployees = await this.repo.getActiveEmployeesForMonth(
+        tenantId,
+        companyId,
+        month,
+      );
       for (const emp of activeEmployees) {
-        const existing = await this.repo.getSummaryByEmployeeMonth(tenantId, companyId, emp.id, month);
+        const existing = await this.repo.getSummaryByEmployeeMonth(
+          tenantId,
+          companyId,
+          emp.id,
+          month,
+        );
         if (!existing) {
-          const calcResult = await this.engine.calculateEmployeeMonth(tenantId, companyId, emp.id, month);
+          const calcResult = await this.engine.calculateEmployeeMonth(
+            tenantId,
+            companyId,
+            emp.id,
+            month,
+          );
           await this.repo.upsertSummary(calcResult.summaryData);
           await this.readiness.evaluateAndPersist(
             calcResult.summaryData as AttendanceMonthlySummary,

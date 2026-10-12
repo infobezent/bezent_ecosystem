@@ -177,7 +177,9 @@ export function AttendanceRegularizationPage() {
   const [drawerId, setDrawerId] = useState<string | null>(null);
   const [drawerDetail, setDrawerDetail] = useState<RegularizationDetailV1 | null>(null);
   const [drawerLoading, setDrawerLoading] = useState(false);
-  const [drawerTab, setDrawerTab] = useState<'overview' | 'evidence' | 'decision' | 'history'>('overview');
+  const [drawerTab, setDrawerTab] = useState<'overview' | 'evidence' | 'decision' | 'history'>(
+    'overview',
+  );
   const [drawerActionLoading, setDrawerActionLoading] = useState(false);
   const [decisionType, setDecisionType] = useState<'approved' | 'rejected' | 'clarify'>('approved');
   const [decisionNotes, setDecisionNotes] = useState('');
@@ -193,11 +195,14 @@ export function AttendanceRegularizationPage() {
   const [formClaimedHours, setFormClaimedHours] = useState('8.0');
   const [formDirection, setFormDirection] = useState('IN');
   const [formReason, setFormReason] = useState('');
-  const [formAttachments, setFormAttachments] = useState<Array<{ name: string; size: string; url?: string }>>([]);
+  const [formAttachments, setFormAttachments] = useState<
+    Array<{ name: string; size: string; url?: string }>
+  >([]);
   const [formExceptionId, setFormExceptionId] = useState('');
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [eligibilityResult, setEligibilityResult] = useState<RegularizationEligibilityCheckResult | null>(null);
+  const [eligibilityResult, setEligibilityResult] =
+    useState<RegularizationEligibilityCheckResult | null>(null);
 
   // 8. Bulk Operation Modals State
   const [bulkModalAction, setBulkModalAction] = useState<string | null>(null);
@@ -392,7 +397,10 @@ export function AttendanceRegularizationPage() {
     setDrawerActionLoading(true);
     try {
       if (decisionType === 'clarify') {
-        await requestRegularizationInfo(drawerDetail.id, decisionNotes.trim() || 'Please provide clarification.');
+        await requestRegularizationInfo(
+          drawerDetail.id,
+          decisionNotes.trim() || 'Please provide clarification.',
+        );
       } else {
         await reviewRegularizationDecision(drawerDetail.id, {
           status: decisionType,
@@ -444,7 +452,8 @@ export function AttendanceRegularizationPage() {
     setBulkSubmitting(true);
     try {
       const res = await bulkRegularizationAction({
-        action: bulkModalAction as 'assign' | 'start_review' | 'request_info' | 'bulk_approve' | 'bulk_reject',
+        action: bulkModalAction as
+          'assign' | 'start_review' | 'request_info' | 'bulk_approve' | 'bulk_reject',
         requestIds: Array.from(selectedIds),
         assignedTo: bulkAssignee || undefined,
         notes: bulkReason || undefined,
@@ -620,11 +629,7 @@ export function AttendanceRegularizationPage() {
               </Inline>
             </Card>
 
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setShowExportModal(true)}
-            >
+            <Button variant="secondary" size="sm" onClick={() => setShowExportModal(true)}>
               <BezentIcon name="download" size={14} /> Export
             </Button>
 
@@ -843,10 +848,7 @@ export function AttendanceRegularizationPage() {
 
                 <Stack gap="xs">
                   <span className="bezent-card__desc">Assigned To</span>
-                  <Select
-                    value={assignedTo}
-                    onChange={(e) => setAssignedTo(e.target.value)}
-                  >
+                  <Select value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)}>
                     <option value="all">All Reviewers</option>
                     <option value="unassigned">Unassigned</option>
                   </Select>
@@ -854,20 +856,14 @@ export function AttendanceRegularizationPage() {
 
                 <Stack gap="xs">
                   <span className="bezent-card__desc">Department</span>
-                  <Select
-                    value={departmentId}
-                    onChange={(e) => setDepartmentId(e.target.value)}
-                  >
+                  <Select value={departmentId} onChange={(e) => setDepartmentId(e.target.value)}>
                     <option value="all">All Departments</option>
                   </Select>
                 </Stack>
 
                 <Stack gap="xs">
                   <span className="bezent-card__desc">Branch / Location</span>
-                  <Select
-                    value={locationId}
-                    onChange={(e) => setLocationId(e.target.value)}
-                  >
+                  <Select value={locationId} onChange={(e) => setLocationId(e.target.value)}>
                     <option value="all">All Locations</option>
                   </Select>
                 </Stack>
@@ -885,10 +881,7 @@ export function AttendanceRegularizationPage() {
 
                 <Stack gap="xs">
                   <span className="bezent-card__desc">Request Source</span>
-                  <Select
-                    value={source}
-                    onChange={(e) => setSource(e.target.value)}
-                  >
+                  <Select value={source} onChange={(e) => setSource(e.target.value)}>
                     <option value="all">All Sources</option>
                     <option value="web">Web HR Admin</option>
                     <option value="ess">Employee Self-Service</option>
@@ -915,10 +908,7 @@ export function AttendanceRegularizationPage() {
           <Card padding="sm">
             <Inline justify="between" align="center">
               <Inline gap="md" align="center">
-                <Checkbox
-                  checked={isAllSelected}
-                  onChange={toggleSelectAll}
-                />
+                <Checkbox checked={isAllSelected} onChange={toggleSelectAll} />
                 <strong>{selectedIds.size} selected</strong>
                 <Button
                   variant="ghost"
@@ -996,11 +986,7 @@ export function AttendanceRegularizationPage() {
                   <BezentIcon name="download" size={14} /> Export Selected
                 </Button>
 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedIds(new Set())}
-                >
+                <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>
                   Clear
                 </Button>
               </Inline>
@@ -1028,21 +1014,32 @@ export function AttendanceRegularizationPage() {
             <TableHead>
               <TableRow>
                 <TableHeaderCell className="bezent-table-col--select">
-                  <Checkbox
-                    checked={isAllSelected}
-                    onChange={toggleSelectAll}
-                  />
+                  <Checkbox checked={isAllSelected} onChange={toggleSelectAll} />
                 </TableHeaderCell>
                 <TableHeaderCell className="bezent-table-col--employee">Employee</TableHeaderCell>
                 <TableHeaderCell className="bezent-table-col--workday">Workday</TableHeaderCell>
                 <TableHeaderCell className="bezent-table-col--type">Request Type</TableHeaderCell>
-                <TableHeaderCell className="bezent-table-col--change">Requested Change</TableHeaderCell>
-                <TableHeaderCell className="bezent-table-col--submitted">Submitted At</TableHeaderCell>
-                <TableHeaderCell className="bezent-table-col--assigned">Assigned To</TableHeaderCell>
-                <TableHeaderCell className="bezent-table-col--approval">Approval Status</TableHeaderCell>
-                <TableHeaderCell className="bezent-table-col--application">Application Status</TableHeaderCell>
-                <TableHeaderCell className="bezent-table-col--exception">Related Exception</TableHeaderCell>
-                <TableHeaderCell className="bezent-table-col--actions bezent-table-col--sticky-right">Actions</TableHeaderCell>
+                <TableHeaderCell className="bezent-table-col--change">
+                  Requested Change
+                </TableHeaderCell>
+                <TableHeaderCell className="bezent-table-col--submitted">
+                  Submitted At
+                </TableHeaderCell>
+                <TableHeaderCell className="bezent-table-col--assigned">
+                  Assigned To
+                </TableHeaderCell>
+                <TableHeaderCell className="bezent-table-col--approval">
+                  Approval Status
+                </TableHeaderCell>
+                <TableHeaderCell className="bezent-table-col--application">
+                  Application Status
+                </TableHeaderCell>
+                <TableHeaderCell className="bezent-table-col--exception">
+                  Related Exception
+                </TableHeaderCell>
+                <TableHeaderCell className="bezent-table-col--actions bezent-table-col--sticky-right">
+                  Actions
+                </TableHeaderCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -1059,7 +1056,9 @@ export function AttendanceRegularizationPage() {
                   <TableCell className="bezent-table-col--employee">
                     <div className="bezent-table-cell--avatar-meta">
                       <Avatar
-                        initials={req.employeeName ? req.employeeName.slice(0, 2).toUpperCase() : 'EM'}
+                        initials={
+                          req.employeeName ? req.employeeName.slice(0, 2).toUpperCase() : 'EM'
+                        }
                         alt={req.employeeName}
                         size="sm"
                       />
@@ -1076,13 +1075,18 @@ export function AttendanceRegularizationPage() {
                   <TableCell className="bezent-table-col--workday">
                     <div className="bezent-table-meta-group">
                       <span className="bezent-table-meta-title">{formatDate(req.workday)}</span>
-                      <span className="bezent-table-meta-subtitle">{formatDayOfWeek(req.workday)}</span>
+                      <span className="bezent-table-meta-subtitle">
+                        {formatDayOfWeek(req.workday)}
+                      </span>
                     </div>
                   </TableCell>
 
                   {/* 3. Request Type */}
                   <TableCell className="bezent-table-col--type">
-                    <span className="bezent-table-cell--nowrap" title={REQUEST_TYPE_LABELS[req.requestType] ?? req.requestType}>
+                    <span
+                      className="bezent-table-cell--nowrap"
+                      title={REQUEST_TYPE_LABELS[req.requestType] ?? req.requestType}
+                    >
                       {REQUEST_TYPE_LABELS[req.requestType] ?? req.requestType}
                     </span>
                   </TableCell>
@@ -1098,7 +1102,9 @@ export function AttendanceRegularizationPage() {
                   <TableCell className="bezent-table-col--submitted">
                     <div className="bezent-table-meta-group">
                       <span className="bezent-table-meta-title">{formatDate(req.submittedAt)}</span>
-                      <span className="bezent-table-meta-subtitle">{formatTime(req.submittedAt)}</span>
+                      <span className="bezent-table-meta-subtitle">
+                        {formatTime(req.submittedAt)}
+                      </span>
                     </div>
                   </TableCell>
 
@@ -1119,10 +1125,14 @@ export function AttendanceRegularizationPage() {
                   </TableCell>
 
                   {/* 7. Approval Status */}
-                  <TableCell className="bezent-table-col--approval">{renderApprovalBadge(req.approvalStatus)}</TableCell>
+                  <TableCell className="bezent-table-col--approval">
+                    {renderApprovalBadge(req.approvalStatus)}
+                  </TableCell>
 
                   {/* 8. Application Status */}
-                  <TableCell className="bezent-table-col--application">{renderApplicationBadge(req.applicationStatus)}</TableCell>
+                  <TableCell className="bezent-table-col--application">
+                    {renderApplicationBadge(req.applicationStatus)}
+                  </TableCell>
 
                   {/* 9. Related Exception */}
                   <TableCell className="bezent-table-col--exception">
@@ -1208,7 +1218,11 @@ export function AttendanceRegularizationPage() {
                 <Inline justify="between" align="center">
                   <Inline gap="sm" align="center">
                     <Avatar
-                      initials={drawerDetail.employeeName ? drawerDetail.employeeName.slice(0, 2).toUpperCase() : '?'}
+                      initials={
+                        drawerDetail.employeeName
+                          ? drawerDetail.employeeName.slice(0, 2).toUpperCase()
+                          : '?'
+                      }
                       alt={drawerDetail.employeeName}
                       size="md"
                     />
@@ -1375,7 +1389,8 @@ export function AttendanceRegularizationPage() {
                           <Stack gap="none">
                             <span className="bezent-card__desc">Recorded Attendance</span>
                             <strong>
-                              {drawerDetail.recordedCheckIn || '—'} – {drawerDetail.recordedCheckOut || '—'}
+                              {drawerDetail.recordedCheckIn || '—'} –{' '}
+                              {drawerDetail.recordedCheckOut || '—'}
                             </strong>
                             <span>Status: {drawerDetail.recordedStatus || 'Absent'}</span>
                           </Stack>
@@ -1384,7 +1399,8 @@ export function AttendanceRegularizationPage() {
                           <Stack gap="none">
                             <span className="bezent-card__desc">Requested Correction</span>
                             <strong>
-                              {drawerDetail.proposedCheckIn || '—'} – {drawerDetail.proposedCheckOut || '—'}
+                              {drawerDetail.proposedCheckIn || '—'} –{' '}
+                              {drawerDetail.proposedCheckOut || '—'}
                             </strong>
                             <span>Claim: {drawerDetail.requestedChange}</span>
                           </Stack>
@@ -1585,7 +1601,9 @@ export function AttendanceRegularizationPage() {
             </Stack>
 
             {/* Dynamic Fields */}
-            {(formType === 'missing_in' || formType === 'both_missing' || formType === 'incorrect_time') && (
+            {(formType === 'missing_in' ||
+              formType === 'both_missing' ||
+              formType === 'incorrect_time') && (
               <Stack gap="xs">
                 <span className="bezent-card__desc">Proposed Check-IN Time</span>
                 <Input
@@ -1596,7 +1614,9 @@ export function AttendanceRegularizationPage() {
               </Stack>
             )}
 
-            {(formType === 'missing_out' || formType === 'both_missing' || formType === 'incorrect_time') && (
+            {(formType === 'missing_out' ||
+              formType === 'both_missing' ||
+              formType === 'incorrect_time') && (
               <Stack gap="xs">
                 <span className="bezent-card__desc">Proposed Check-OUT Time</span>
                 <Input
@@ -1636,10 +1656,7 @@ export function AttendanceRegularizationPage() {
             {formType === 'wrong_direction' && (
               <Stack gap="xs">
                 <span className="bezent-card__desc">Corrected Punch Direction</span>
-                <Select
-                  value={formDirection}
-                  onChange={(e) => setFormDirection(e.target.value)}
-                >
+                <Select value={formDirection} onChange={(e) => setFormDirection(e.target.value)}>
                   <option value="IN">Treat as Check-IN</option>
                   <option value="OUT">Treat as Check-OUT</option>
                 </Select>
@@ -1650,7 +1667,11 @@ export function AttendanceRegularizationPage() {
             {eligibilityResult && (
               <Alert
                 variant={eligibilityResult.eligible ? 'success' : 'danger'}
-                title={eligibilityResult.eligible ? 'Eligible for Submission' : 'Ineligible for Submission'}
+                title={
+                  eligibilityResult.eligible
+                    ? 'Eligible for Submission'
+                    : 'Ineligible for Submission'
+                }
               >
                 {eligibilityResult.eligible
                   ? 'All 11 enterprise validation rules passed.'
@@ -1855,11 +1876,7 @@ export function AttendanceRegularizationPage() {
               <Button variant="secondary" onClick={() => setShowExportModal(false)}>
                 Cancel
               </Button>
-              <Button
-                variant="primary"
-                disabled={exporting}
-                onClick={handleExportExecute}
-              >
+              <Button variant="primary" disabled={exporting} onClick={handleExportExecute}>
                 Download Register
               </Button>
             </Inline>

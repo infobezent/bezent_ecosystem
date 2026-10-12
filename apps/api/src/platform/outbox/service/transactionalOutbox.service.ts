@@ -88,10 +88,7 @@ export class TransactionalOutboxService {
 
   async markFailed(id: string, errorMessage: string): Promise<void> {
     const db = getDb();
-    const [msg] = await db
-      .select()
-      .from(transactionalOutbox)
-      .where(eq(transactionalOutbox.id, id));
+    const [msg] = await db.select().from(transactionalOutbox).where(eq(transactionalOutbox.id, id));
 
     if (!msg) return;
 
@@ -118,9 +115,7 @@ export class TransactionalOutboxService {
     deadLetter: number;
   }> {
     const db = getDb();
-    const all = await db
-      .select({ status: transactionalOutbox.status })
-      .from(transactionalOutbox);
+    const all = await db.select({ status: transactionalOutbox.status }).from(transactionalOutbox);
 
     return {
       pending: all.filter((m) => m.status === 'pending').length,

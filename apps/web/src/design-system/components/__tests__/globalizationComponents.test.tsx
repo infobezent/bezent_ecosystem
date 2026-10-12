@@ -31,11 +31,7 @@ describe('Globalization UI Components (Design System)', () => {
   describe('CountrySelect', () => {
     it('renders with label and selected country flag and name', () => {
       const html = renderToStaticMarkup(
-        <CountrySelect
-          label="Select Operating Country"
-          value="IN"
-          onChange={() => {}}
-        />,
+        <CountrySelect label="Select Operating Country" value="IN" onChange={() => {}} />,
       );
       expect(html).toContain('Select Operating Country');
       expect(html).toContain('fi-in');
@@ -45,11 +41,7 @@ describe('Globalization UI Components (Design System)', () => {
 
     it('renders placeholder when no value is provided', () => {
       const html = renderToStaticMarkup(
-        <CountrySelect
-          label="Country"
-          placeholder="Choose a country..."
-          onChange={() => {}}
-        />,
+        <CountrySelect label="Country" placeholder="Choose a country..." onChange={() => {}} />,
       );
       expect(html).toContain('Choose a country...');
     });
@@ -58,11 +50,7 @@ describe('Globalization UI Components (Design System)', () => {
   describe('TimezoneSelect', () => {
     it('renders with current selected timezone and dynamic offset badge', () => {
       const html = renderToStaticMarkup(
-        <TimezoneSelect
-          label="Corporate Timezone"
-          value="Asia/Kolkata"
-          onChange={() => {}}
-        />,
+        <TimezoneSelect label="Corporate Timezone" value="Asia/Kolkata" onChange={() => {}} />,
       );
       expect(html).toContain('Corporate Timezone');
       expect(html).toContain('Asia/Kolkata');
@@ -74,11 +62,7 @@ describe('Globalization UI Components (Design System)', () => {
   describe('CurrencySelect', () => {
     it('renders currency code and symbol', () => {
       const html = renderToStaticMarkup(
-        <CurrencySelect
-          label="Base Currency"
-          value="INR"
-          onChange={() => {}}
-        />,
+        <CurrencySelect label="Base Currency" value="INR" onChange={() => {}} />,
       );
       expect(html).toContain('Base Currency');
       expect(html).toContain('INR');
@@ -90,11 +74,7 @@ describe('Globalization UI Components (Design System)', () => {
   describe('LanguageSelect', () => {
     it('renders language selector with native and English name', () => {
       const html = renderToStaticMarkup(
-        <LanguageSelect
-          label="UI Language"
-          value="ja"
-          onChange={() => {}}
-        />,
+        <LanguageSelect label="UI Language" value="ja" onChange={() => {}} />,
       );
       expect(html).toContain('UI Language');
       expect(html).toContain('日本語');
@@ -136,11 +116,7 @@ describe('Globalization UI Components (Design System)', () => {
   describe('LocaleDatePicker', () => {
     it('renders date picker trigger with calendar icon and formatted date', () => {
       const html = renderToStaticMarkup(
-        <LocaleDatePicker
-          label="Effective Date"
-          value="2026-10-15"
-          onChange={() => {}}
-        />,
+        <LocaleDatePicker label="Effective Date" value="2026-10-15" onChange={() => {}} />,
       );
       expect(html).toContain('Effective Date');
       expect(html).toContain('Oct 15, 2026');

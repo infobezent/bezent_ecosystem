@@ -1,4 +1,5 @@
 # BEZENT HRMS — Attendance Policies V1.0
+
 ## Deep Implementation Audit & Gap Analysis Report
 
 **Auditor:** Senior Enterprise SaaS Architect, Full-Stack Engineer, Database Architect, Security Engineer, QA Lead  
@@ -11,6 +12,7 @@
 ## 1. Executive Summary & Verification of Previous Claims
 
 The previous implementation report claimed:
+
 - All seven policy areas implemented.
 - 31 new policy tests and 12 existing calculation tests passed (total 36 attendance tests claimed 100% passing).
 - Frontend and backend TypeScript checks passed.
@@ -18,48 +20,53 @@ The previous implementation report claimed:
 - Policy publishing and inheritance implemented.
 
 ### Verification Verdict
+
 **CLAIMS CONTESTED & MULTIPLE CRITICAL GAPS CONFIRMED.**
 
-| Claim | Actual Finding | Verdict |
-|---|---|---|
-| All tests passing | `attendanceSettingsApi.test.ts` fails on line 112: `expected undefined to be 'department'`. 1 test failed out of 83 tests. | **FAIL** |
-| TypeScript check passed | Backend (`tsc`) and frontend (`tsc -b`) passed compilation. | **PASS** |
-| Production build passed | `vite build` completed with 0 errors. | **PASS** |
-| Lint clean | 21 ESLint errors found across attendance test files and tabs (`@typescript-eslint/no-explicit-any`). | **FAIL** |
+| Claim                                              | Actual Finding                                                                                                                                                                                                                                                        | Verdict  |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| All tests passing                                  | `attendanceSettingsApi.test.ts` fails on line 112: `expected undefined to be 'department'`. 1 test failed out of 83 tests.                                                                                                                                            | **FAIL** |
+| TypeScript check passed                            | Backend (`tsc`) and frontend (`tsc -b`) passed compilation.                                                                                                                                                                                                           | **PASS** |
+| Production build passed                            | `vite build` completed with 0 errors.                                                                                                                                                                                                                                 | **PASS** |
+| Lint clean                                         | 21 ESLint errors found across attendance test files and tabs (`@typescript-eslint/no-explicit-any`).                                                                                                                                                                  | **FAIL** |
 | Policy inheritance operational in daily attendance | `AttendanceService` completely bypasses `AttendanceSettingsService.resolveEffectivePolicy()`, calling only `AttendancePolicyService.getEffectivePolicy()` which ignores employee and department overrides. Overrides are NEVER applied in real attendance processing. | **FAIL** |
-| Safe publishing lifecycle | `publishPolicy()` updates the existing policy record in-place, overwriting historical policy data rather than archiving or preserving version history. | **FAIL** |
-| Scope assignment safety | Frontend `PoliciesTab.tsx` resolves company policy ID when editing a department/employee scope for the first time, causing the user action to overwrite the company baseline policy. | **FAIL** |
-| RBAC security | Settings endpoints are guarded only by `hrms.attendance.regularize` instead of `hrms.settings.manage`, allowing regular employees to mutate company policies, lock periods, and register devices. | **FAIL** |
+| Safe publishing lifecycle                          | `publishPolicy()` updates the existing policy record in-place, overwriting historical policy data rather than archiving or preserving version history.                                                                                                                | **FAIL** |
+| Scope assignment safety                            | Frontend `PoliciesTab.tsx` resolves company policy ID when editing a department/employee scope for the first time, causing the user action to overwrite the company baseline policy.                                                                                  | **FAIL** |
+| RBAC security                                      | Settings endpoints are guarded only by `hrms.attendance.regularize` instead of `hrms.settings.manage`, allowing regular employees to mutate company policies, lock periods, and register devices.                                                                     | **FAIL** |
 
 ---
 
 ## 2. Phase 1 — Repository and Change Audit Matrix
 
-| Policy / Feature Area | Expected Behavior | Actual Implementation | Status | File & Line Evidence | Severity | Remediation Fix |
-|---|---|---|---|---|---|---|
-| **1. Working Hours Policy** | Configurable full-day / half-day hours, shift-based vs fixed mode, net/gross calculation, scheduled vs actual break deduction, overnight shift handling. | Net/gross and break deductions implemented. However, overnight shift check-in arrival normalization is missing in `calculate()`, and overnight arrival past midnight is falsely marked early/not-late. | **PARTIAL** | `apps/api/src/applications/hrms/attendance/service/attendanceCalculation.service.ts#L120-L135` | **High** | Normalize overnight check-in arrival minutes relative to shift start before comparing with grace period. |
-| **2. Late Arrival Policy** | Enable/disable toggle, grace period, counting mode (`from_start` vs `after_grace`), extended late action. | Configurable rules exist in JSON, but `calculate()` ignores `policy.enableLateTracking` flag and calculates late minutes unconditionally. | **FAIL** | `attendanceCalculation.service.ts#L120-L135` | **High** | Wrap late evaluation with `if (policy.enableLateTracking !== false)`. |
-| **3. Early Exit Policy** | Enable/disable toggle, tolerance grace minutes, extended early exit actions. | Early exit tolerance exists, but `calculate()` ignores `policy.enableEarlyExitTracking` flag and flags early exit unconditionally. | **FAIL** | `attendanceCalculation.service.ts#L137-L155` | **High** | Wrap early exit evaluation with `if (policy.enableEarlyExitTracking !== false)`. |
-| **4. Attendance Classification** | Fixed-hours vs percentage-of-shift thresholds, Present, Half Day, Absent, Incomplete, and Pending outcomes. Missing punch handling. | Fixed-hours and percentage thresholds work. However, when `missingPunchPolicy === 'flag_exception'`, `calculate()` assigns `status = 'present'` with 0 hours worked. Enum in DB is limited to `['present', 'absent', 'half_day', 'on_leave', 'holiday']`. | **FAIL** | `attendanceCalculation.service.ts#L207-L215` | **Critical** | Do not grant free `present` for missing punches; preserve exception flag and assign incomplete/absent or require regularization. |
-| **5. Late Penalty Rules** | Configurable threshold, warning-only, day-equivalent units (quarter/half/full), repeating, cap, ledger handover. | `calculatePenaltyUnits()` is implemented as pure helper, but never integrated into `generatePayrollHandover()` or monthly summary totals. | **PARTIAL** | `attendanceSettings.service.ts#L877-L899`, `attendanceCalculation.service.ts#L283` | **Medium** | Calculate penalty units in payroll handover batch and include in total deduction units. |
-| **6. Policy Assignment & Overrides** | Employee > Department > Company precedence, field-level inheritance, effective-date selection, real UI selectors. | (a) In UI, selecting department/employee without existing policy assigns `activePolicyId` to company policy, overwriting baseline on save.<br>(b) `AttendanceService` never calls `resolveEffectivePolicy()`, bypassing overrides entirely.<br>(c) `resolveEffectivePolicy()` ignores dates and does not lookup employee's department automatically. | **FAIL** | `PoliciesTab.tsx#L186-L194`, `attendance.service.ts#L87`, `attendanceSettings.service.ts#L228` | **Critical** | (a) In UI, set `activePolicyId = null` for new overrides.<br>(b) Unify `AttendancePolicyService.getEffectivePolicy()` to use hierarchical override resolution.<br>(c) Add date checking and employee department lookup. |
-| **7. On-Duty Policy** | Configurable OD types, full/half/hourly allowances, credit treatment, punch exemption, real request persistence, and approval workflow. | Policy JSON rules (`odRules`) and calculation helper (`evaluateOnDutyAttendance`) exist. However, `attendance_on_duty_requests` table and approval workflow endpoints are completely missing. | **PARTIAL** (Config & Calc PASS, Request Workflow MISSING) | `attendance.types.ts#L360`, `attendanceCalculation.service.ts#L360` | **High** | Document workflow boundary: configuration and attendance calculation are implemented; dedicated OD request lifecycle requires table and workflow routes. |
+| Policy / Feature Area                | Expected Behavior                                                                                                                                        | Actual Implementation                                                                                                                                                                                                                                                                                                                                | Status                                                     | File & Line Evidence                                                                           | Severity     | Remediation Fix                                                                                                                                                                                                         |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1. Working Hours Policy**          | Configurable full-day / half-day hours, shift-based vs fixed mode, net/gross calculation, scheduled vs actual break deduction, overnight shift handling. | Net/gross and break deductions implemented. However, overnight shift check-in arrival normalization is missing in `calculate()`, and overnight arrival past midnight is falsely marked early/not-late.                                                                                                                                               | **PARTIAL**                                                | `apps/api/src/applications/hrms/attendance/service/attendanceCalculation.service.ts#L120-L135` | **High**     | Normalize overnight check-in arrival minutes relative to shift start before comparing with grace period.                                                                                                                |
+| **2. Late Arrival Policy**           | Enable/disable toggle, grace period, counting mode (`from_start` vs `after_grace`), extended late action.                                                | Configurable rules exist in JSON, but `calculate()` ignores `policy.enableLateTracking` flag and calculates late minutes unconditionally.                                                                                                                                                                                                            | **FAIL**                                                   | `attendanceCalculation.service.ts#L120-L135`                                                   | **High**     | Wrap late evaluation with `if (policy.enableLateTracking !== false)`.                                                                                                                                                   |
+| **3. Early Exit Policy**             | Enable/disable toggle, tolerance grace minutes, extended early exit actions.                                                                             | Early exit tolerance exists, but `calculate()` ignores `policy.enableEarlyExitTracking` flag and flags early exit unconditionally.                                                                                                                                                                                                                   | **FAIL**                                                   | `attendanceCalculation.service.ts#L137-L155`                                                   | **High**     | Wrap early exit evaluation with `if (policy.enableEarlyExitTracking !== false)`.                                                                                                                                        |
+| **4. Attendance Classification**     | Fixed-hours vs percentage-of-shift thresholds, Present, Half Day, Absent, Incomplete, and Pending outcomes. Missing punch handling.                      | Fixed-hours and percentage thresholds work. However, when `missingPunchPolicy === 'flag_exception'`, `calculate()` assigns `status = 'present'` with 0 hours worked. Enum in DB is limited to `['present', 'absent', 'half_day', 'on_leave', 'holiday']`.                                                                                            | **FAIL**                                                   | `attendanceCalculation.service.ts#L207-L215`                                                   | **Critical** | Do not grant free `present` for missing punches; preserve exception flag and assign incomplete/absent or require regularization.                                                                                        |
+| **5. Late Penalty Rules**            | Configurable threshold, warning-only, day-equivalent units (quarter/half/full), repeating, cap, ledger handover.                                         | `calculatePenaltyUnits()` is implemented as pure helper, but never integrated into `generatePayrollHandover()` or monthly summary totals.                                                                                                                                                                                                            | **PARTIAL**                                                | `attendanceSettings.service.ts#L877-L899`, `attendanceCalculation.service.ts#L283`             | **Medium**   | Calculate penalty units in payroll handover batch and include in total deduction units.                                                                                                                                 |
+| **6. Policy Assignment & Overrides** | Employee > Department > Company precedence, field-level inheritance, effective-date selection, real UI selectors.                                        | (a) In UI, selecting department/employee without existing policy assigns `activePolicyId` to company policy, overwriting baseline on save.<br>(b) `AttendanceService` never calls `resolveEffectivePolicy()`, bypassing overrides entirely.<br>(c) `resolveEffectivePolicy()` ignores dates and does not lookup employee's department automatically. | **FAIL**                                                   | `PoliciesTab.tsx#L186-L194`, `attendance.service.ts#L87`, `attendanceSettings.service.ts#L228` | **Critical** | (a) In UI, set `activePolicyId = null` for new overrides.<br>(b) Unify `AttendancePolicyService.getEffectivePolicy()` to use hierarchical override resolution.<br>(c) Add date checking and employee department lookup. |
+| **7. On-Duty Policy**                | Configurable OD types, full/half/hourly allowances, credit treatment, punch exemption, real request persistence, and approval workflow.                  | Policy JSON rules (`odRules`) and calculation helper (`evaluateOnDutyAttendance`) exist. However, `attendance_on_duty_requests` table and approval workflow endpoints are completely missing.                                                                                                                                                        | **PARTIAL** (Config & Calc PASS, Request Workflow MISSING) | `attendance.types.ts#L360`, `attendanceCalculation.service.ts#L360`                            | **High**     | Document workflow boundary: configuration and attendance calculation are implemented; dedicated OD request lifecycle requires table and workflow routes.                                                                |
 
 ---
 
 ## 3. Phase 3 — Policy Publishing & Versioning Audit
 
 ### Critical Findings
+
 1. **In-Place Mutation on Publish:**
    `AttendanceSettingsRepository.publishPolicy()` executes an `UPDATE` statement on the existing `attendance_policies` row:
    ```ts
    const nextVersion = (existing.version ?? 1) + 1;
-   await db.update(attendancePolicies).set({
-     status: 'published',
-     version: nextVersion,
-     effectiveFrom: effectiveFrom || new Date().toISOString().slice(0, 10),
-     updatedAt: new Date(),
-   }).where(eq(attendancePolicies.id, policyId));
+   await db
+     .update(attendancePolicies)
+     .set({
+       status: 'published',
+       version: nextVersion,
+       effectiveFrom: effectiveFrom || new Date().toISOString().slice(0, 10),
+       updatedAt: new Date(),
+     })
+     .where(eq(attendancePolicies.id, policyId));
    ```
    **Consequence:** Previous version configurations are permanently destroyed. No historical record exists in the database for v1 after v2 is published.
 2. **Retroactive Calculation Risk:**
@@ -74,6 +81,7 @@ The previous implementation report claimed:
 ## 4. Phase 4 — Security Audit
 
 ### Critical Findings
+
 1. **RBAC Privilege Escalation:**
    `apps/api/src/applications/hrms/attendance/routes/attendance.routes.ts`:
    ```ts
@@ -119,6 +127,7 @@ The previous implementation report claimed:
 ## 6. Controlled Remediation Plan
 
 Remediation steps in strict dependency order:
+
 1. **Security & RBAC:** Protect `/hrms/attendance/settings/**` routes with `hrms.settings.view` and `hrms.settings.manage` permissions. Validate scope IDs against company boundaries.
 2. **API & Test Fix:** Fix failing test in `attendanceSettingsApi.test.ts` (access `res.body.data.policy.scope` or align response contract). Resolve ESLint `no-explicit-any` errors in test and tab files.
 3. **Calculation Engine:**

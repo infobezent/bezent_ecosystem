@@ -10,7 +10,9 @@ import {
 import type { ApplicationCode } from '../../plans/types/plan.types.js';
 
 export class EntitlementController {
-  constructor(private readonly service: EffectiveEntitlementService = effectiveEntitlementService) {}
+  constructor(
+    private readonly service: EffectiveEntitlementService = effectiveEntitlementService,
+  ) {}
 
   getEffective = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {

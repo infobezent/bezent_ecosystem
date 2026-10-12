@@ -21,7 +21,8 @@ export class AttendanceRegularizationController {
       const { tenantId, companyId } = req.companyContext!;
 
       // Map legacy status filter if present
-      let approvalStatus = typeof req.query.approvalStatus === 'string' ? req.query.approvalStatus : undefined;
+      let approvalStatus =
+        typeof req.query.approvalStatus === 'string' ? req.query.approvalStatus : undefined;
       if (!approvalStatus && typeof req.query.status === 'string') {
         if (req.query.status === 'pending') {
           approvalStatus = 'submitted';
@@ -33,11 +34,8 @@ export class AttendanceRegularizationController {
       const result = await this.service.listRegularizations(tenantId, companyId, {
         approvalStatus,
         applicationStatus:
-          typeof req.query.applicationStatus === 'string'
-            ? req.query.applicationStatus
-            : undefined,
-        requestType:
-          typeof req.query.requestType === 'string' ? req.query.requestType : undefined,
+          typeof req.query.applicationStatus === 'string' ? req.query.applicationStatus : undefined,
+        requestType: typeof req.query.requestType === 'string' ? req.query.requestType : undefined,
         workdayFrom:
           typeof req.query.workdayFrom === 'string'
             ? req.query.workdayFrom
@@ -52,21 +50,15 @@ export class AttendanceRegularizationController {
               : undefined,
         submittedFrom:
           typeof req.query.submittedFrom === 'string' ? req.query.submittedFrom : undefined,
-        submittedTo:
-          typeof req.query.submittedTo === 'string' ? req.query.submittedTo : undefined,
-        assignedTo:
-          typeof req.query.assignedTo === 'string' ? req.query.assignedTo : undefined,
+        submittedTo: typeof req.query.submittedTo === 'string' ? req.query.submittedTo : undefined,
+        assignedTo: typeof req.query.assignedTo === 'string' ? req.query.assignedTo : undefined,
         departmentId:
           typeof req.query.departmentId === 'string' ? req.query.departmentId : undefined,
-        locationId:
-          typeof req.query.locationId === 'string' ? req.query.locationId : undefined,
+        locationId: typeof req.query.locationId === 'string' ? req.query.locationId : undefined,
         relatedException:
-          typeof req.query.relatedException === 'string'
-            ? req.query.relatedException
-            : undefined,
+          typeof req.query.relatedException === 'string' ? req.query.relatedException : undefined,
         source: typeof req.query.source === 'string' ? req.query.source : undefined,
-        employeeId:
-          typeof req.query.employeeId === 'string' ? req.query.employeeId : undefined,
+        employeeId: typeof req.query.employeeId === 'string' ? req.query.employeeId : undefined,
         search: typeof req.query.search === 'string' ? req.query.search : undefined,
         page: req.query.page ? Number(req.query.page) : 1,
         limit: req.query.limit ? Number(req.query.limit) : 50,
@@ -335,13 +327,11 @@ export class AttendanceRegularizationController {
           ? req.query.workdayFrom
           : filterBody.workdayFrom) || undefined;
       const workdayTo =
-        (typeof req.query.workdayTo === 'string'
-          ? req.query.workdayTo
-          : filterBody.workdayTo) || undefined;
+        (typeof req.query.workdayTo === 'string' ? req.query.workdayTo : filterBody.workdayTo) ||
+        undefined;
       const assignedTo =
-        (typeof req.query.assignedTo === 'string'
-          ? req.query.assignedTo
-          : filterBody.assignedTo) || undefined;
+        (typeof req.query.assignedTo === 'string' ? req.query.assignedTo : filterBody.assignedTo) ||
+        undefined;
       const departmentId =
         (typeof req.query.departmentId === 'string'
           ? req.query.departmentId

@@ -1640,12 +1640,7 @@ export const planPrices = mysqlTable(
       .notNull()
       .references(() => plans.id),
     currency: varchar('currency', { length: 10 }).notNull(),
-    billingInterval: mysqlEnum('billing_interval', [
-      'monthly',
-      'annual',
-      'quarterly',
-      'custom',
-    ])
+    billingInterval: mysqlEnum('billing_interval', ['monthly', 'annual', 'quarterly', 'custom'])
       .default('monthly')
       .notNull(),
     amountMinorUnits: int('amount_minor_units').notNull(),
@@ -1724,12 +1719,7 @@ export const tenantSubscriptions = mysqlTable(
       .default('active')
       .notNull(),
     accessMode: mysqlEnum('access_mode', ['trial', 'paid']).default('paid').notNull(),
-    billingCycle: mysqlEnum('billing_cycle', [
-      'monthly',
-      'annual',
-      'quarterly',
-      'custom',
-    ])
+    billingCycle: mysqlEnum('billing_cycle', ['monthly', 'annual', 'quarterly', 'custom'])
       .default('monthly')
       .notNull(),
     licensedSeats: int('licensed_seats').default(10).notNull(),
@@ -1744,7 +1734,9 @@ export const tenantSubscriptions = mysqlTable(
     renewsAt: timestamp('renews_at'),
     autoRenew: boolean('auto_renew').default(true).notNull(),
     version: int('version').default(1).notNull(),
-    activeSubscriptionScope: varchar('active_subscription_scope', { length: 128 }).generatedAlwaysAs(
+    activeSubscriptionScope: varchar('active_subscription_scope', {
+      length: 128,
+    }).generatedAlwaysAs(
       sql`(CASE WHEN \`status\` IN ('active', 'trial') THEN CONCAT(\`tenant_id\`, ':', \`application_code\`) ELSE NULL END)`,
       { mode: 'stored' },
     ),
@@ -1969,10 +1961,23 @@ export const employeeAttendance = mysqlTable(
     date: varchar('date', { length: 10 }).notNull(),
     checkInTime: varchar('check_in_time', { length: 10 }),
     checkOutTime: varchar('check_out_time', { length: 10 }),
-    status: mysqlEnum('status', ['present', 'absent', 'half_day', 'on_leave', 'holiday', 'incomplete'])
+    status: mysqlEnum('status', [
+      'present',
+      'absent',
+      'half_day',
+      'on_leave',
+      'holiday',
+      'incomplete',
+    ])
       .default('present')
       .notNull(),
-    processingState: mysqlEnum('processing_state', ['incomplete', 'pending_review', 'provisional', 'finalized', 'locked'])
+    processingState: mysqlEnum('processing_state', [
+      'incomplete',
+      'pending_review',
+      'provisional',
+      'finalized',
+      'locked',
+    ])
       .default('finalized')
       .notNull(),
     workLocation: varchar('work_location', { length: 100 }).default('office').notNull(),
@@ -2016,8 +2021,7 @@ export const attendancePunches = mysqlTable(
     companyId: varchar('company_id', { length: 64 })
       .notNull()
       .references(() => companies.id),
-    employeeId: varchar('employee_id', { length: 64 })
-      .references(() => employees.id),
+    employeeId: varchar('employee_id', { length: 64 }).references(() => employees.id),
     rawIdentifier: varchar('raw_identifier', { length: 100 }),
     punchTime: timestamp('punch_time').notNull(),
     workday: varchar('workday', { length: 10 }),
@@ -2248,7 +2252,6 @@ export const attendanceExceptionAudits = mysqlTable(
 export type AttendanceExceptionAudit = typeof attendanceExceptionAudits.$inferSelect;
 export type NewAttendanceExceptionAudit = typeof attendanceExceptionAudits.$inferInsert;
 
-
 /**
  * HRMS Domain: Attendance — Attendance Policies
  */
@@ -2322,7 +2325,9 @@ export const attendanceGeneralSettings = mysqlTable(
       .references(() => companies.id),
     timezone: varchar('timezone', { length: 100 }).default('UTC').notNull(),
     dayBoundaryTime: varchar('day_boundary_time', { length: 8 }).default('00:00:00').notNull(),
-    trackingStartDate: varchar('tracking_start_date', { length: 10 }).default('2026-01-01').notNull(),
+    trackingStartDate: varchar('tracking_start_date', { length: 10 })
+      .default('2026-01-01')
+      .notNull(),
     processingMode: mysqlEnum('processing_mode', ['realtime', 'daily_batch', 'manual'])
       .default('realtime')
       .notNull(),
@@ -2382,7 +2387,8 @@ export const attendanceRegularizationSettings = mysqlTable(
 );
 
 export type AttendanceRegularizationSettings = typeof attendanceRegularizationSettings.$inferSelect;
-export type NewAttendanceRegularizationSettings = typeof attendanceRegularizationSettings.$inferInsert;
+export type NewAttendanceRegularizationSettings =
+  typeof attendanceRegularizationSettings.$inferInsert;
 
 /**
  * HRMS Domain: Attendance — Regularization Requests V1.0
@@ -2429,15 +2435,7 @@ export const attendanceRegularizations = mysqlTable(
     ])
       .default('not_applicable')
       .notNull(),
-    source: mysqlEnum('source', [
-      'web',
-      'ess',
-      'mobile',
-      'system',
-      'biometric',
-      'kiosk',
-      'import',
-    ])
+    source: mysqlEnum('source', ['web', 'ess', 'mobile', 'system', 'biometric', 'kiosk', 'import'])
       .default('web')
       .notNull(),
     assignedTo: varchar('assigned_to', { length: 64 }),
@@ -2455,9 +2453,8 @@ export const attendanceRegularizations = mysqlTable(
     claimedHours: decimal('claimed_hours', { precision: 4, scale: 2 }),
     reason: varchar('reason', { length: 500 }).notNull(),
     evidenceUrls: json('evidence_urls').$type<string[]>(),
-    evidenceAttachments: json('evidence_attachments').$type<
-      Array<{ name: string; size: string; url?: string }>
-    >(),
+    evidenceAttachments:
+      json('evidence_attachments').$type<Array<{ name: string; size: string; url?: string }>>(),
     clarificationRequestedAt: timestamp('clarification_requested_at'),
     clarificationNotes: text('clarification_notes'),
     clarificationProvidedAt: timestamp('clarification_provided_at'),
@@ -2608,9 +2605,8 @@ export const attendanceOnDutyRequests = mysqlTable(
     locationOrSite: varchar('location_or_site', { length: 255 }),
     projectReference: varchar('project_reference', { length: 100 }),
     attachmentUrl: varchar('attachment_url', { length: 500 }),
-    evidenceAttachments: json('evidence_attachments').$type<
-      Array<{ name: string; size: string; url?: string }>
-    >(),
+    evidenceAttachments:
+      json('evidence_attachments').$type<Array<{ name: string; size: string; url?: string }>>(),
     status: mysqlEnum('status', [
       'draft',
       'submitted',
@@ -2843,9 +2839,7 @@ export const attendanceImportBatches = mysqlTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
   },
-  (table) => [
-    index('idx_att_import_tenant_comp').on(table.tenantId, table.companyId),
-  ],
+  (table) => [index('idx_att_import_tenant_comp').on(table.tenantId, table.companyId)],
 );
 
 export type AttendanceImportBatch = typeof attendanceImportBatches.$inferSelect;
@@ -2863,14 +2857,16 @@ export const attendanceSecuritySettings = mysqlTable(
       .notNull()
       .references(() => companies.id),
     enableGps: boolean('enable_gps').default(true).notNull(),
-    geofenceConfigs: json('geofence_configs').$type<Array<{
-      locationId: string;
-      name: string;
-      latitude: number;
-      longitude: number;
-      radiusMeters: number;
-      enforceStrict: boolean;
-    }>>(),
+    geofenceConfigs: json('geofence_configs').$type<
+      Array<{
+        locationId: string;
+        name: string;
+        latitude: number;
+        longitude: number;
+        radiusMeters: number;
+        enforceStrict: boolean;
+      }>
+    >(),
     ipAllowlist: json('ip_allowlist').$type<string[]>(),
     enforceIpRestriction: boolean('enforce_ip_restriction').default(false).notNull(),
     maxDevicesPerEmployee: int('max_devices_per_employee').default(2).notNull(),
@@ -2990,13 +2986,12 @@ export const attendancePayrollHandoverBatches = mysqlTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
   },
-  (table) => [
-    index('idx_att_handover_tenant_comp').on(table.tenantId, table.companyId),
-  ],
+  (table) => [index('idx_att_handover_tenant_comp').on(table.tenantId, table.companyId)],
 );
 
 export type AttendancePayrollHandoverBatch = typeof attendancePayrollHandoverBatches.$inferSelect;
-export type NewAttendancePayrollHandoverBatch = typeof attendancePayrollHandoverBatches.$inferInsert;
+export type NewAttendancePayrollHandoverBatch =
+  typeof attendancePayrollHandoverBatches.$inferInsert;
 
 /**
  * HRMS Domain: Attendance — Configuration & Operational Audit Logs
@@ -3336,12 +3331,7 @@ export const attendanceMonthlySummaries = mysqlTable(
       table.month,
       table.payrollReadiness,
     ),
-    index('idx_att_ms_review').on(
-      table.tenantId,
-      table.companyId,
-      table.month,
-      table.reviewState,
-    ),
+    index('idx_att_ms_review').on(table.tenantId, table.companyId, table.month, table.reviewState),
   ],
 );
 
@@ -3394,15 +3384,14 @@ export const attendanceMonthlyReadinessEvaluations = mysqlTable(
       'needs_review',
       'blocked',
     ]).notNull(),
-    passedChecks: json('passed_checks').$type<
-      Array<{ code: string; name: string; details?: string }>
-    >(),
-    warningChecks: json('warning_checks').$type<
-      Array<{ code: string; name: string; details?: string }>
-    >(),
-    blockingChecks: json('blocking_checks').$type<
-      Array<{ code: string; name: string; details?: string; sourceUrl?: string }>
-    >(),
+    passedChecks:
+      json('passed_checks').$type<Array<{ code: string; name: string; details?: string }>>(),
+    warningChecks:
+      json('warning_checks').$type<Array<{ code: string; name: string; details?: string }>>(),
+    blockingChecks:
+      json('blocking_checks').$type<
+        Array<{ code: string; name: string; details?: string; sourceUrl?: string }>
+      >(),
     evaluatedAt: timestamp('evaluated_at').defaultNow().notNull(),
   },
   (table) => [
@@ -3519,4 +3508,3 @@ export const attendanceReportGenerations = mysqlTable(
 
 export type AttendanceReportGeneration = typeof attendanceReportGenerations.$inferSelect;
 export type NewAttendanceReportGeneration = typeof attendanceReportGenerations.$inferInsert;
-

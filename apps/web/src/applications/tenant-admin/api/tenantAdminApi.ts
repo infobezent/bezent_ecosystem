@@ -152,12 +152,16 @@ export const tenantAdminApi = {
 
   /** Verifies company context within the tenant */
   async getCompanyContext(companyId: string): Promise<TenantAdminCompanySummary> {
-    return request<TenantAdminCompanySummary>(`/companies/${encodeURIComponent(companyId)}/context`);
+    return request<TenantAdminCompanySummary>(
+      `/companies/${encodeURIComponent(companyId)}/context`,
+    );
   },
 
   /** Reads company profile for a managed company */
   async getCompanyProfile(companyId: string): Promise<TenantAdminCompanySummary> {
-    return request<TenantAdminCompanySummary>(`/companies/${encodeURIComponent(companyId)}/profile`);
+    return request<TenantAdminCompanySummary>(
+      `/companies/${encodeURIComponent(companyId)}/profile`,
+    );
   },
 
   /** Updates company profile for a managed company */
@@ -165,10 +169,13 @@ export const tenantAdminApi = {
     companyId: string,
     dto: Partial<TenantAdminCompanySummary>,
   ): Promise<TenantAdminCompanySummary> {
-    return request<TenantAdminCompanySummary>(`/companies/${encodeURIComponent(companyId)}/profile`, {
-      method: 'PATCH',
-      body: JSON.stringify(dto),
-    });
+    return request<TenantAdminCompanySummary>(
+      `/companies/${encodeURIComponent(companyId)}/profile`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(dto),
+      },
+    );
   },
 
   /** Lists tenant administrators */
@@ -194,16 +201,24 @@ export const tenantAdminApi = {
   async getCompanyOrgCounts(companyId: string): Promise<CompanyOrgCounts> {
     try {
       const [structureRes, summaryRes] = await Promise.all([
-        request<{ totalBusinessUnits?: number; totalDivisions?: number; businessUnits?: unknown[] }>(
-          `/companies/${encodeURIComponent(companyId)}/organization/structure`,
-        ).catch(() => ({ totalBusinessUnits: 0, totalDivisions: 0, businessUnits: [] })),
+        request<{
+          totalBusinessUnits?: number;
+          totalDivisions?: number;
+          businessUnits?: unknown[];
+        }>(`/companies/${encodeURIComponent(companyId)}/organization/structure`).catch(() => ({
+          totalBusinessUnits: 0,
+          totalDivisions: 0,
+          businessUnits: [],
+        })),
         request<{ departments?: unknown[]; locations?: unknown[] }>(
           `/companies/${encodeURIComponent(companyId)}/organization/summary`,
         ).catch(() => ({ departments: [], locations: [] })),
       ]);
 
       return {
-        businessUnits: structureRes?.totalBusinessUnits ?? (Array.isArray(structureRes?.businessUnits) ? structureRes.businessUnits.length : 0),
+        businessUnits:
+          structureRes?.totalBusinessUnits ??
+          (Array.isArray(structureRes?.businessUnits) ? structureRes.businessUnits.length : 0),
         divisions: structureRes?.totalDivisions ?? 0,
         departments: Array.isArray(summaryRes?.departments) ? summaryRes.departments.length : 0,
         workLocations: Array.isArray(summaryRes?.locations) ? summaryRes.locations.length : 0,
@@ -249,9 +264,7 @@ export const tenantAdminApi = {
     return rawList.map((item) => {
       const normalizedCode = (item.code || item.moduleCode || item.id || '').trim();
       const isEntitled = Boolean(
-        item.tenantEntitled !== undefined
-          ? item.tenantEntitled
-          : item.status === 'active',
+        item.tenantEntitled !== undefined ? item.tenantEntitled : item.status === 'active',
       );
       return {
         id: item.id || normalizedCode,
@@ -271,7 +284,9 @@ export const tenantAdminApi = {
 
   /** Reads enabled applications for a specific company */
   async getCompanyApplications(companyId: string): Promise<Array<CompanyApplicationItem | string>> {
-    return request<Array<CompanyApplicationItem | string>>(`/companies/${encodeURIComponent(companyId)}/applications`);
+    return request<Array<CompanyApplicationItem | string>>(
+      `/companies/${encodeURIComponent(companyId)}/applications`,
+    );
   },
 
   /** Enables an application for a company within tenant entitlements */
@@ -515,12 +530,13 @@ export const tenantAdminApi = {
   ): Promise<WorkLocationRecord[]> {
     const params = new URLSearchParams();
     if (filters?.status && filters.status !== 'all') params.set('status', filters.status);
-    if (filters?.locationType && filters.locationType !== 'all') params.set('locationType', filters.locationType);
+    if (filters?.locationType && filters.locationType !== 'all')
+      params.set('locationType', filters.locationType);
     if (filters?.search) params.set('search', filters.search);
     const qs = params.toString() ? `?${params.toString()}` : '';
-    const res = await request<WorkLocationRecord[] | { items?: WorkLocationRecord[]; data?: WorkLocationRecord[] }>(
-      `/companies/${encodeURIComponent(companyId)}/organization/work-locations${qs}`,
-    );
+    const res = await request<
+      WorkLocationRecord[] | { items?: WorkLocationRecord[]; data?: WorkLocationRecord[] }
+    >(`/companies/${encodeURIComponent(companyId)}/organization/work-locations${qs}`);
     if (Array.isArray(res)) return res;
     if (Array.isArray((res as { items?: WorkLocationRecord[] }).items)) {
       return (res as { items: WorkLocationRecord[] }).items;
@@ -642,7 +658,10 @@ export const tenantAdminApi = {
         body: JSON.stringify(payload),
       },
     );
-    return (res as { data?: { message: string; user: CompanyAccessUserItem } }).data || (res as unknown as { message: string; user: CompanyAccessUserItem });
+    return (
+      (res as { data?: { message: string; user: CompanyAccessUserItem } }).data ||
+      (res as unknown as { message: string; user: CompanyAccessUserItem })
+    );
   },
 
   /** Invite a new user to the company */
@@ -657,7 +676,10 @@ export const tenantAdminApi = {
         body: JSON.stringify(payload),
       },
     );
-    return (res as { data?: { message: string; invitation: CompanyAccessUserItem } }).data || (res as unknown as { message: string; invitation: CompanyAccessUserItem });
+    return (
+      (res as { data?: { message: string; invitation: CompanyAccessUserItem } }).data ||
+      (res as unknown as { message: string; invitation: CompanyAccessUserItem })
+    );
   },
 
   /** Update a company user's role (member <-> company_admin) */
@@ -677,10 +699,7 @@ export const tenantAdminApi = {
   },
 
   /** Revoke a user's company access */
-  async revokeCompanyUserAccess(
-    companyId: string,
-    userId: string,
-  ): Promise<{ message: string }> {
+  async revokeCompanyUserAccess(companyId: string, userId: string): Promise<{ message: string }> {
     const res = await request<{ data?: { message: string } }>(
       `/companies/${encodeURIComponent(companyId)}/access/users/${encodeURIComponent(userId)}`,
       {

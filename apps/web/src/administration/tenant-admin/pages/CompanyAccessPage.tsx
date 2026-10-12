@@ -30,10 +30,7 @@ import { CompanyWorkspaceHeader } from '../components/CompanyWorkspaceHeader';
 import { CompanyRolesOverviewTab } from '../components/CompanyRolesOverviewTab';
 import { AddCompanyUserModal } from '../components/AddCompanyUserModal';
 import { tenantAdminApi, TenantAdminApiError } from '../api/tenantAdminApi';
-import type {
-  CompanyAccessRole,
-  CompanyAccessUserItem,
-} from '../types/tenantAdmin.types';
+import type { CompanyAccessRole, CompanyAccessUserItem } from '../types/tenantAdmin.types';
 
 function getInitials(name?: string | null): string {
   if (!name) return 'U';
@@ -162,11 +159,9 @@ export function CompanyAccessPage() {
     try {
       setIsUpdatingRole(true);
       setRoleModalError(null);
-      const res = await tenantAdminApi.updateCompanyUserRole(
-        companyId,
-        changeRoleTarget.userId,
-        { role: selectedNewRole },
-      );
+      const res = await tenantAdminApi.updateCompanyUserRole(companyId, changeRoleTarget.userId, {
+        role: selectedNewRole,
+      });
       setFeedback(res.message || 'User role updated successfully');
       setChangeRoleTarget(null);
       loadUsers();
@@ -194,10 +189,7 @@ export function CompanyAccessPage() {
     try {
       setIsRevoking(true);
       setRevokeModalError(null);
-      const res = await tenantAdminApi.revokeCompanyUserAccess(
-        companyId,
-        revokeTarget.userId,
-      );
+      const res = await tenantAdminApi.revokeCompanyUserAccess(companyId, revokeTarget.userId);
       setFeedback(res.message || 'Company access revoked successfully');
       setRevokeTarget(null);
       loadUsers();
@@ -219,10 +211,7 @@ export function CompanyAccessPage() {
     if (!companyId || !item.invitationId) return;
     try {
       setResendingId(item.invitationId);
-      const res = await tenantAdminApi.resendCompanyInvitation(
-        companyId,
-        item.invitationId,
-      );
+      const res = await tenantAdminApi.resendCompanyInvitation(companyId, item.invitationId);
       setFeedback(res.message || `Invitation extended and re-sent to ${item.email}`);
       loadUsers();
     } catch (err) {
@@ -292,10 +281,7 @@ export function CompanyAccessPage() {
     <Page>
       <Stack gap="lg">
         {/* Canonical Selected-Company Workspace Header */}
-        <CompanyWorkspaceHeader
-          company={company}
-          activeSection="access"
-        />
+        <CompanyWorkspaceHeader company={company} activeSection="access" />
 
         {/* Section Page Header */}
         <PageHeader
@@ -418,7 +404,11 @@ export function CompanyAccessPage() {
                       {/* Status Cell */}
                       <TableCell>
                         <Badge status={item.status} showDot>
-                          {item.status === 'active' ? 'Active' : item.status === 'pending' ? 'Pending' : item.status}
+                          {item.status === 'active'
+                            ? 'Active'
+                            : item.status === 'pending'
+                              ? 'Pending'
+                              : item.status}
                         </Badge>
                       </TableCell>
 
@@ -599,9 +589,9 @@ export function CompanyAccessPage() {
             {revokeModalError && <Alert variant="danger">{revokeModalError}</Alert>}
 
             <Alert variant="warning">
-              This will remove the user from {company.displayName || company.name}.
-              Their user account and access to any other companies will remain unaffected.
-              A company must always retain at least one active Company Administrator.
+              This will remove the user from {company.displayName || company.name}. Their user
+              account and access to any other companies will remain unaffected. A company must
+              always retain at least one active Company Administrator.
             </Alert>
           </Stack>
         </Modal>
@@ -644,7 +634,8 @@ export function CompanyAccessPage() {
             {cancelModalError && <Alert variant="danger">{cancelModalError}</Alert>}
 
             <Alert variant="info">
-              The pending sign-in invitation token will be invalidated immediately. The user will not be able to join using the previous email link.
+              The pending sign-in invitation token will be invalidated immediately. The user will
+              not be able to join using the previous email link.
             </Alert>
           </Stack>
         </Modal>

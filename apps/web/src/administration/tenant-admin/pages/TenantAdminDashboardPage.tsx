@@ -97,15 +97,10 @@ export function TenantAdminDashboardPage({
     const fromContext = entitlements.some((e) => {
       if (typeof e !== 'string') return false;
       const normalized = e.trim().toLowerCase();
-      return (
-        normalized === app.code.toLowerCase() ||
-        normalized === app.name.toLowerCase()
-      );
+      return normalized === app.code.toLowerCase() || normalized === app.name.toLowerCase();
     });
     const isEntitled = Boolean(
-      fromApi
-        ? (fromApi.tenantEntitled ?? fromApi.status === 'active')
-        : fromContext,
+      fromApi ? (fromApi.tenantEntitled ?? fromApi.status === 'active') : fromContext,
     );
     return {
       ...app,
@@ -132,7 +127,8 @@ export function TenantAdminDashboardPage({
     attentionItems.push({
       id: 'no_companies',
       variant: 'info',
-      message: 'No companies configured yet. Create a company to begin distributing applications and managing workforce.',
+      message:
+        'No companies configured yet. Create a company to begin distributing applications and managing workforce.',
     });
   }
 
@@ -192,14 +188,13 @@ export function TenantAdminDashboardPage({
               <Stack gap="xs">
                 <span className="text-secondary">Tenant Status</span>
                 <Inline>
-                  <Badge
-                    variant={tenant?.status === 'active' ? 'success' : 'neutral'}
-                    size="md"
-                  >
+                  <Badge variant={tenant?.status === 'active' ? 'success' : 'neutral'} size="md">
                     {(tenant?.status || 'active').toUpperCase()}
                   </Badge>
                 </Inline>
-                <span className="text-secondary">Account ID: {tenant?.code || tenant?.id || '—'}</span>
+                <span className="text-secondary">
+                  Account ID: {tenant?.code || tenant?.id || '—'}
+                </span>
               </Stack>
             </Card>
 
@@ -220,9 +215,7 @@ export function TenantAdminDashboardPage({
             <Card>
               <Stack gap="xs">
                 <span className="text-secondary">Unique Tenant Users</span>
-                <strong>
-                  {members !== null ? members.length : isLoading ? '...' : '—'}
-                </strong>
+                <strong>{members !== null ? members.length : isLoading ? '...' : '—'}</strong>
                 <span className="text-secondary">
                   {adminUsersCount !== null
                     ? `${adminUsersCount} Tenant Admin${adminUsersCount === 1 ? '' : 's'}`
@@ -361,12 +354,11 @@ export function TenantAdminDashboardPage({
                       {app.isEntitled ? 'Enabled' : 'Not Entitled'}
                     </Badge>
                   </Inline>
-                  <span className="text-secondary">
-                    Application Scope: Tenant-wide
-                  </span>
+                  <span className="text-secondary">Application Scope: Tenant-wide</span>
                   {app.isEntitled && app.enabledCompaniesCount > 0 && (
                     <span className="text-secondary">
-                      Active in {app.enabledCompaniesCount} of {companies.length} compan{companies.length === 1 ? 'y' : 'ies'}
+                      Active in {app.enabledCompaniesCount} of {companies.length} compan
+                      {companies.length === 1 ? 'y' : 'ies'}
                     </span>
                   )}
                 </Stack>
@@ -442,7 +434,8 @@ export function TenantAdminDashboardPage({
           <Card>
             <Stack gap="xs">
               <span className="text-secondary">
-                Canonical audit logs record all administrative access, organization changes, and application enablement events.
+                Canonical audit logs record all administrative access, organization changes, and
+                application enablement events.
               </span>
               <Inline>
                 <Button

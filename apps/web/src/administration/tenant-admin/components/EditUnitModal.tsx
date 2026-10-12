@@ -204,11 +204,7 @@ export function EditUnitModal({
           {/* Parent field governed by canonical rules */}
           {selectedUnit.type === 'business_unit' && (
             <FormField label="Parent">
-              <Input
-                value={`${company.name} (Company)`}
-                disabled
-                readOnly
-              />
+              <Input value={`${company.name} (Company)`} disabled readOnly />
             </FormField>
           )}
 
@@ -235,11 +231,7 @@ export function EditUnitModal({
           )}
 
           <FormField label="Unit Name" required>
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
+            <Input value={name} onChange={(e) => setName(e.target.value)} required />
           </FormField>
 
           <FormGrid columns={2}>

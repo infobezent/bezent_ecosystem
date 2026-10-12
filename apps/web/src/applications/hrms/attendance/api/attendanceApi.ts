@@ -100,9 +100,7 @@ export async function fetchAttendanceOverview(
   return body.data;
 }
 
-export async function fetchDailyAttendanceLogV1(
-  params: DailyLogFilter,
-): Promise<DailyLogResponse> {
+export async function fetchDailyAttendanceLogV1(params: DailyLogFilter): Promise<DailyLogResponse> {
   const query = new URLSearchParams();
   query.set('date', params.date);
   if (params.departmentId) query.set('departmentId', params.departmentId);
@@ -170,11 +168,14 @@ export async function recalculateDailyAttendance(payload: {
   employeeIds: string[];
   date: string;
 }): Promise<{ recalculatedCount: number; failures: Array<{ employeeId: string; error: string }> }> {
-  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/daily-log/recalculate`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+  const res = await authorizedFetch(
+    `${appConfig.apiBaseUrl}/hrms/attendance/daily-log/recalculate`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    },
+  );
   const body = await res.json();
   if (!res.ok || !body?.data) {
     throw new Error(body?.error?.message ?? `Failed to recalculate attendance: ${res.status}`);
@@ -186,11 +187,14 @@ export async function bulkFinalizeDailyAttendance(payload: {
   employeeIds: string[];
   date: string;
 }): Promise<{ finalizedCount: number }> {
-  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/daily-log/bulk-finalize`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+  const res = await authorizedFetch(
+    `${appConfig.apiBaseUrl}/hrms/attendance/daily-log/bulk-finalize`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    },
+  );
   const body = await res.json();
   if (!res.ok || !body?.data) {
     throw new Error(body?.error?.message ?? `Failed to finalize attendance: ${res.status}`);
@@ -219,8 +223,6 @@ export async function fetchMonthlyAttendanceSummary(params: {
   }
   return body.data;
 }
-
-
 
 export async function fetchAttendanceExceptions(params: {
   date?: string;
@@ -275,9 +277,7 @@ export async function fetchExceptionCases(
 }
 
 export async function fetchExceptionDetails(id: string): Promise<ExceptionCaseDetail> {
-  const res = await authorizedFetch(
-    `${appConfig.apiBaseUrl}/hrms/attendance/exceptions/${id}`,
-  );
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/exceptions/${id}`);
   const body = await res.json();
   if (!res.ok || !body?.data) {
     throw new Error(body?.error?.message ?? `Failed to fetch exception details: ${res.status}`);
@@ -363,7 +363,9 @@ export async function verifyAndResolveExceptionCase(
   );
   const body = await res.json();
   if (!res.ok || !body?.data) {
-    throw new Error(body?.error?.message ?? `Failed to verify and resolve exception: ${res.status}`);
+    throw new Error(
+      body?.error?.message ?? `Failed to verify and resolve exception: ${res.status}`,
+    );
   }
   return body.data;
 }
@@ -371,14 +373,11 @@ export async function verifyAndResolveExceptionCase(
 export async function bulkExceptionCaseAction(
   input: BulkExceptionActionInput,
 ): Promise<{ success: boolean; affectedCount: number; message: string }> {
-  const res = await authorizedFetch(
-    `${appConfig.apiBaseUrl}/hrms/attendance/exceptions/bulk`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(input),
-    },
-  );
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/exceptions/bulk`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
   const body = await res.json();
   if (!res.ok || !body?.data) {
     throw new Error(body?.error?.message ?? `Failed to execute bulk action: ${res.status}`);
@@ -506,9 +505,7 @@ export async function fetchRegularizationWorkspace(
 }
 
 export async function fetchRegularizationDetails(id: string): Promise<RegularizationDetailV1> {
-  const res = await authorizedFetch(
-    `${appConfig.apiBaseUrl}/hrms/attendance/regularization/${id}`,
-  );
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/regularization/${id}`);
   const body = await res.json();
   if (!res.ok || !body?.data) {
     throw new Error(
@@ -666,14 +663,11 @@ export async function cancelRegularization(
 export async function bulkRegularizationAction(
   payload: BulkRegularizationActionInput,
 ): Promise<BulkRegularizationActionResult> {
-  const res = await authorizedFetch(
-    `${appConfig.apiBaseUrl}/hrms/attendance/regularization/bulk`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    },
-  );
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/regularization/bulk`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
   const body = await res.json();
   if (!res.ok || !body?.data) {
     throw new Error(body?.error?.message ?? `Failed to execute bulk action: ${res.status}`);
@@ -818,7 +812,9 @@ export async function fetchAttendancePoliciesList(params?: {
 }
 
 export async function fetchAttendancePolicyById(id: string): Promise<AttendancePolicy> {
-  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/settings/policies/${id}`);
+  const res = await authorizedFetch(
+    `${appConfig.apiBaseUrl}/hrms/attendance/settings/policies/${id}`,
+  );
   const body = await res.json();
   if (!res.ok || !body?.data) {
     throw new Error(body?.error?.message ?? `Failed to fetch policy: ${res.status}`);
@@ -882,11 +878,14 @@ export async function updateAttendancePolicyV1(
   id: string,
   payload: Partial<AttendancePolicy>,
 ): Promise<AttendancePolicy> {
-  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/settings/policies/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+  const res = await authorizedFetch(
+    `${appConfig.apiBaseUrl}/hrms/attendance/settings/policies/${id}`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    },
+  );
   const body = await res.json();
   if (!res.ok || !body?.data) {
     throw new Error(body?.error?.message ?? `Failed to update policy: ${res.status}`);
@@ -911,7 +910,9 @@ export async function rollbackAttendancePolicyVersion(id: string): Promise<Atten
 /* ── 3. Regularization Settings ── */
 
 export async function fetchRegularizationSettings(): Promise<AttendanceRegularizationSettings> {
-  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/settings/regularization`);
+  const res = await authorizedFetch(
+    `${appConfig.apiBaseUrl}/hrms/attendance/settings/regularization`,
+  );
   const body = await res.json();
   if (!res.ok || !body?.data) {
     throw new Error(
@@ -924,11 +925,14 @@ export async function fetchRegularizationSettings(): Promise<AttendanceRegulariz
 export async function updateRegularizationSettings(
   payload: RegularizationSettingsInput,
 ): Promise<AttendanceRegularizationSettings> {
-  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/settings/regularization`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+  const res = await authorizedFetch(
+    `${appConfig.apiBaseUrl}/hrms/attendance/settings/regularization`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    },
+  );
   const body = await res.json();
   if (!res.ok || !body?.data) {
     throw new Error(
@@ -966,11 +970,14 @@ export async function updateAttendanceDevice(
   id: string,
   payload: Partial<DeviceInput>,
 ): Promise<AttendanceDevice> {
-  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/settings/devices/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+  const res = await authorizedFetch(
+    `${appConfig.apiBaseUrl}/hrms/attendance/settings/devices/${id}`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    },
+  );
   const body = await res.json();
   if (!res.ok || !body?.data) {
     throw new Error(body?.error?.message ?? `Failed to update device: ${res.status}`);
@@ -1003,9 +1010,7 @@ export async function fetchImportBatches(): Promise<AttendanceImportBatch[]> {
   return body.data;
 }
 
-export async function submitBulkImport(
-  payload: BulkImportPayload,
-): Promise<AttendanceImportBatch> {
+export async function submitBulkImport(payload: BulkImportPayload): Promise<AttendanceImportBatch> {
   const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/settings/import`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1093,9 +1098,7 @@ export async function fetchAttendancePeriods(): Promise<AttendancePeriod[]> {
   return body.data;
 }
 
-export async function checkPeriodLockReadiness(
-  periodCode: string,
-): Promise<PeriodLockReadiness> {
+export async function checkPeriodLockReadiness(periodCode: string): Promise<PeriodLockReadiness> {
   const res = await authorizedFetch(
     `${appConfig.apiBaseUrl}/hrms/attendance/settings/payroll/periods/${encodeURIComponent(periodCode)}/readiness`,
   );
@@ -1290,7 +1293,7 @@ export async function fetchOnDutyRequests(params?: {
   if (!res.ok) {
     throw new Error(body?.error?.message ?? `Failed to fetch OD requests: ${res.status}`);
   }
-  return Array.isArray(body.data) ? body.data : body.data?.items ?? [];
+  return Array.isArray(body.data) ? body.data : (body.data?.items ?? []);
 }
 
 export async function fetchOnDutyDetails(id: string): Promise<OnDutyDetailV1> {
@@ -1360,10 +1363,7 @@ export async function startOnDutyReview(id: string): Promise<OnDutyItemV1> {
   return body.data;
 }
 
-export async function requestOnDutyClarification(
-  id: string,
-  notes: string,
-): Promise<OnDutyItemV1> {
+export async function requestOnDutyClarification(id: string, notes: string): Promise<OnDutyItemV1> {
   const res = await authorizedFetch(
     `${appConfig.apiBaseUrl}/hrms/attendance/on-duty/${id}/request-info`,
     {
@@ -1429,10 +1429,7 @@ export async function submitOnDutyDraft(id: string): Promise<OnDutyItemV1> {
   return body.data;
 }
 
-export async function withdrawOnDutyRequest(
-  id: string,
-  reason?: string,
-): Promise<OnDutyItemV1> {
+export async function withdrawOnDutyRequest(id: string, reason?: string): Promise<OnDutyItemV1> {
   const res = await authorizedFetch(
     `${appConfig.apiBaseUrl}/hrms/attendance/on-duty/${id}/withdraw`,
     {
@@ -1448,10 +1445,7 @@ export async function withdrawOnDutyRequest(
   return body.data;
 }
 
-export async function cancelOnDutyRequest(
-  id: string,
-  reason?: string,
-): Promise<OnDutyItemV1> {
+export async function cancelOnDutyRequest(id: string, reason?: string): Promise<OnDutyItemV1> {
   const res = await authorizedFetch(
     `${appConfig.apiBaseUrl}/hrms/attendance/on-duty/${id}/cancel`,
     {
@@ -1498,14 +1492,11 @@ export async function previewBulkOnDutyApproval(
 export async function executeBulkOnDutyAction(
   payload: BulkOnDutyActionInput,
 ): Promise<BulkOnDutyActionResult> {
-  const res = await authorizedFetch(
-    `${appConfig.apiBaseUrl}/hrms/attendance/on-duty/bulk`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    },
-  );
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/on-duty/bulk`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
   const body = await res.json();
   if (!res.ok || !body?.data) {
     throw new Error(body?.error?.message ?? `Failed to execute bulk action: ${res.status}`);
@@ -1514,14 +1505,11 @@ export async function executeBulkOnDutyAction(
 }
 
 export async function exportOnDutyCsvBlob(filter: OnDutyExportFilter): Promise<Blob> {
-  const res = await authorizedFetch(
-    `${appConfig.apiBaseUrl}/hrms/attendance/on-duty/export`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(filter),
-    },
-  );
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/on-duty/export`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(filter),
+  });
   if (!res.ok) {
     const errorText = await res.text().catch(() => '');
     throw new Error(`Export failed (${res.status}): ${errorText}`);
@@ -1546,7 +1534,9 @@ export async function fetchPunchLogs(params: PunchLogFilter): Promise<PunchLogRe
   if (params.page) query.set('page', String(params.page));
   if (params.limit) query.set('limit', String(params.limit));
 
-  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/punch-logs?${query.toString()}`);
+  const res = await authorizedFetch(
+    `${appConfig.apiBaseUrl}/hrms/attendance/punch-logs?${query.toString()}`,
+  );
   const body = await res.json();
   if (!res.ok) {
     throw new Error(body?.error?.message ?? `Failed to fetch punch logs: ${res.status}`);
@@ -1566,7 +1556,9 @@ export async function fetchPunchLogs(params: PunchLogFilter): Promise<PunchLogRe
 }
 
 export async function fetchPunchDetails(id: string): Promise<PunchEventDetail> {
-  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/punch-logs/${encodeURIComponent(id)}`);
+  const res = await authorizedFetch(
+    `${appConfig.apiBaseUrl}/hrms/attendance/punch-logs/${encodeURIComponent(id)}`,
+  );
   const body = await res.json();
   if (!res.ok || !body?.data) {
     throw new Error(body?.error?.message ?? `Failed to fetch punch details: ${res.status}`);
@@ -1574,12 +1566,17 @@ export async function fetchPunchDetails(id: string): Promise<PunchEventDetail> {
   return body.data;
 }
 
-export async function updatePunchInvestigation(payload: UpdatePunchInvestigationInput): Promise<PunchLogItem> {
-  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/punch-logs/investigation`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+export async function updatePunchInvestigation(
+  payload: UpdatePunchInvestigationInput,
+): Promise<PunchLogItem> {
+  const res = await authorizedFetch(
+    `${appConfig.apiBaseUrl}/hrms/attendance/punch-logs/investigation`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    },
+  );
   const body = await res.json();
   if (!res.ok || !body?.data) {
     throw new Error(body?.error?.message ?? `Failed to update investigation: ${res.status}`);
@@ -1587,7 +1584,9 @@ export async function updatePunchInvestigation(payload: UpdatePunchInvestigation
   return body.data;
 }
 
-export async function retryPunchProcessing(punchIds: string[]): Promise<{ retriedCount: number; message: string }> {
+export async function retryPunchProcessing(
+  punchIds: string[],
+): Promise<{ retriedCount: number; message: string }> {
   const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/punch-logs/retry`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1600,7 +1599,9 @@ export async function retryPunchProcessing(punchIds: string[]): Promise<{ retrie
   return body.data;
 }
 
-export async function bulkPunchAction(payload: BulkPunchActionInput): Promise<{ affectedCount: number; message: string }> {
+export async function bulkPunchAction(
+  payload: BulkPunchActionInput,
+): Promise<{ affectedCount: number; message: string }> {
   const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/punch-logs/bulk`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1613,7 +1614,10 @@ export async function bulkPunchAction(payload: BulkPunchActionInput): Promise<{ 
   return body.data;
 }
 
-export async function exportPunchLogsCsv(params: PunchLogFilter, selectedIds?: string[]): Promise<Blob> {
+export async function exportPunchLogsCsv(
+  params: PunchLogFilter,
+  selectedIds?: string[],
+): Promise<Blob> {
   const query = new URLSearchParams();
   if (params.date) query.set('date', params.date);
   if (params.dateFrom) query.set('dateFrom', params.dateFrom);
@@ -1629,7 +1633,9 @@ export async function exportPunchLogsCsv(params: PunchLogFilter, selectedIds?: s
   if (params.search) query.set('search', params.search);
   if (selectedIds && selectedIds.length > 0) query.set('selectedIds', selectedIds.join(','));
 
-  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/punch-logs/export?${query.toString()}`);
+  const res = await authorizedFetch(
+    `${appConfig.apiBaseUrl}/hrms/attendance/punch-logs/export?${query.toString()}`,
+  );
   if (!res.ok) {
     throw new Error(`Failed to export punch logs: ${res.status}`);
   }
@@ -1870,5 +1876,3 @@ export async function exportMonthlySummaryCsv(input: MonthlySummaryExportInput):
   }
   return res.blob();
 }
-
-

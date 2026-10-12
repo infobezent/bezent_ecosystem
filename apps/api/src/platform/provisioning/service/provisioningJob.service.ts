@@ -68,7 +68,11 @@ export class ProvisioningJobService {
     return job;
   }
 
-  async listJobs(filter: { tenantId?: string; status?: string; limit?: number }): Promise<ProvisioningJob[]> {
+  async listJobs(filter: {
+    tenantId?: string;
+    status?: string;
+    limit?: number;
+  }): Promise<ProvisioningJob[]> {
     const db = getDb();
     const conditions = [];
 
@@ -99,10 +103,7 @@ export class ProvisioningJobService {
         and(
           eq(provisioningJobs.status, 'pending'),
           eq(provisioningJobs.retryEligible, true),
-          or(
-            isNull(provisioningJobs.nextAttemptAt),
-            lte(provisioningJobs.nextAttemptAt, now),
-          ),
+          or(isNull(provisioningJobs.nextAttemptAt), lte(provisioningJobs.nextAttemptAt, now)),
         ),
       )
       .orderBy(provisioningJobs.createdAt)
@@ -122,7 +123,11 @@ export class ProvisioningJobService {
     return this.getJobById(candidate.id);
   }
 
-  async updateStep(jobId: string, stepName: string, stepData: Record<string, unknown>): Promise<ProvisioningJob> {
+  async updateStep(
+    jobId: string,
+    stepName: string,
+    stepData: Record<string, unknown>,
+  ): Promise<ProvisioningJob> {
     const db = getDb();
     const job = await this.getJobById(jobId);
 

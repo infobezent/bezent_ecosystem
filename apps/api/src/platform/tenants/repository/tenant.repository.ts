@@ -278,7 +278,11 @@ export class TenantRepository {
   async updateStatus(
     id: string,
     status: TenantStatus,
-    details?: { suspendedReason?: string | null; suspendedAt?: Date | null; reactivatedAt?: Date | null },
+    details?: {
+      suspendedReason?: string | null;
+      suspendedAt?: Date | null;
+      reactivatedAt?: Date | null;
+    },
   ): Promise<TenantRecord> {
     return this.updateTenantStatus(id, status, details);
   }
@@ -361,8 +365,14 @@ export class TenantRepository {
         .where(
           and(
             isTrialBool
-              ? or(eq(tenantSubscriptions.accessMode, 'trial'), eq(tenantSubscriptions.status, 'trial'))
-              : and(ne(tenantSubscriptions.accessMode, 'trial'), eq(tenantSubscriptions.status, 'active')),
+              ? or(
+                  eq(tenantSubscriptions.accessMode, 'trial'),
+                  eq(tenantSubscriptions.status, 'trial'),
+                )
+              : and(
+                  ne(tenantSubscriptions.accessMode, 'trial'),
+                  eq(tenantSubscriptions.status, 'active'),
+                ),
             or(eq(tenantSubscriptions.status, 'active'), eq(tenantSubscriptions.status, 'trial')),
           ),
         );
@@ -381,10 +391,10 @@ export class TenantRepository {
       filter.sortBy === 'name'
         ? tenants.name
         : filter.sortBy === 'status'
-        ? tenants.status
-        : filter.sortBy === 'id'
-        ? tenants.id
-        : tenants.createdAt;
+          ? tenants.status
+          : filter.sortBy === 'id'
+            ? tenants.id
+            : tenants.createdAt;
     const orderExpr = filter.sortOrder === 'asc' ? asc(sortCol) : desc(sortCol);
 
     const rows = await db
@@ -542,10 +552,7 @@ export class TenantRepository {
         .where(
           and(
             inArray(invitations.tenantId, tenantIds),
-            or(
-              eq(invitations.authorityType, 'tenant_admin'),
-              eq(invitations.isPrimaryAdmin, true),
-            ),
+            or(eq(invitations.authorityType, 'tenant_admin'), eq(invitations.isPrimaryAdmin, true)),
             eq(invitations.status, 'pending'),
           ),
         );
@@ -608,7 +615,8 @@ export class TenantRepository {
       const hasTrial = activeSubs.some((s) => s.accessMode === 'trial' || s.status === 'trial');
       const hasPaid = activeSubs.some((s) => s.accessMode !== 'trial' && s.status === 'active');
 
-      let derivedClassification: 'active' | 'trial' | 'suspended' | 'pending_setup' | 'archived' = 'active';
+      let derivedClassification: 'active' | 'trial' | 'suspended' | 'pending_setup' | 'archived' =
+        'active';
       if (r.status === 'suspended') {
         derivedClassification = 'suspended';
       } else if (r.status === 'archived') {
@@ -806,10 +814,7 @@ export class TenantRepository {
       .limit(limit)
       .offset(offset);
 
-    const [totalRow] = await db
-      .select({ total: count() })
-      .from(auditLogs)
-      .where(whereClause);
+    const [totalRow] = await db.select({ total: count() }).from(auditLogs).where(whereClause);
 
     return {
       items,
@@ -822,11 +827,16 @@ export class TenantRepository {
   async updateTenantStatus(
     id: string,
     status: TenantStatus,
-    details?: { suspendedReason?: string | null; suspendedAt?: Date | null; reactivatedAt?: Date | null },
+    details?: {
+      suspendedReason?: string | null;
+      suspendedAt?: Date | null;
+      reactivatedAt?: Date | null;
+    },
   ): Promise<TenantRecord> {
     const db = getDb();
     const updateData: Partial<typeof tenants.$inferInsert> = { status };
-    if (details?.suspendedReason !== undefined) updateData.suspendedReason = details.suspendedReason;
+    if (details?.suspendedReason !== undefined)
+      updateData.suspendedReason = details.suspendedReason;
     if (details?.suspendedAt !== undefined) updateData.suspendedAt = details.suspendedAt;
     if (details?.reactivatedAt !== undefined) updateData.reactivatedAt = details.reactivatedAt;
 

@@ -17,7 +17,10 @@ export function validateCreateOverride(body: unknown): CreateOverrideDto {
   if (!data.tenantId || typeof data.tenantId !== 'string') {
     errors.tenantId = 'tenantId is required';
   }
-  if (!data.applicationCode || !['hrms', 'crm', 'project_management'].includes(String(data.applicationCode))) {
+  if (
+    !data.applicationCode ||
+    !['hrms', 'crm', 'project_management'].includes(String(data.applicationCode))
+  ) {
     errors.applicationCode = 'applicationCode must be hrms, crm, or project_management';
   }
   if (!data.moduleCode || typeof data.moduleCode !== 'string' || !data.moduleCode.trim()) {
@@ -40,9 +43,10 @@ export function validateCreateOverride(body: unknown): CreateOverrideDto {
     applicationCode: data.applicationCode as ApplicationCode,
     moduleCode: String(data.moduleCode).trim(),
     overrideType: data.overrideType as OverrideType,
-    overrideValue: data.overrideValue && typeof data.overrideValue === 'object'
-      ? (data.overrideValue as Record<string, unknown>)
-      : undefined,
+    overrideValue:
+      data.overrideValue && typeof data.overrideValue === 'object'
+        ? (data.overrideValue as Record<string, unknown>)
+        : undefined,
     reason: String(data.reason).trim(),
     validUntil: data.validUntil ? new Date(String(data.validUntil)) : null,
   };

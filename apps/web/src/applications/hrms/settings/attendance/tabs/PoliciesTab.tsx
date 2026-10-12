@@ -55,14 +55,18 @@ export function PoliciesTab() {
   // Policy List & Selection
   const [policies, setPolicies] = useState<AttendancePolicy[]>([]);
   const [activePolicyId, setActivePolicyId] = useState<string | null>(null);
-  const [effectiveResolution, setEffectiveResolution] = useState<EffectivePolicyResolution | null>(null);
+  const [effectiveResolution, setEffectiveResolution] = useState<EffectivePolicyResolution | null>(
+    null,
+  );
 
   // Departments & Employees for Scope selection
   const [departments, setDepartments] = useState<Array<{ id: string; name: string }>>([]);
   const [employees, setEmployees] = useState<Array<{ id: string; fullName: string }>>([]);
 
   // Selected Scope View filter
-  const [selectedScope, setSelectedScope] = useState<'company' | 'department' | 'employee'>('company');
+  const [selectedScope, setSelectedScope] = useState<'company' | 'department' | 'employee'>(
+    'company',
+  );
   const [selectedScopeId, setSelectedScopeId] = useState<string>('');
 
   // Accordion Expand/Collapse state (Working hours open by default)
@@ -86,35 +90,52 @@ export function PoliciesTab() {
   // 1. Working Hours Policy
   const [fullDayHours, setFullDayHours] = useState('8.00');
   const [halfDayHours, setHalfDayHours] = useState('4.00');
-  const [workingHoursMode, setWorkingHoursMode] = useState<'fixed_policy' | 'shift_based'>('fixed_policy');
+  const [workingHoursMode, setWorkingHoursMode] = useState<'fixed_policy' | 'shift_based'>(
+    'fixed_policy',
+  );
   const [netOrGross, setNetOrGross] = useState<'net' | 'gross'>('net');
-  const [breakDeductionMethod, setBreakDeductionMethod] = useState<'scheduled' | 'actual' | 'none'>('scheduled');
+  const [breakDeductionMethod, setBreakDeductionMethod] = useState<'scheduled' | 'actual' | 'none'>(
+    'scheduled',
+  );
 
   // 2. Late Arrival Policy
   const [enableLateTracking, setEnableLateTracking] = useState(true);
   const [gracePeriodMinutes, setGracePeriodMinutes] = useState(15);
-  const [lateCountingMode, setLateCountingMode] = useState<'after_grace' | 'from_start'>('after_grace');
+  const [lateCountingMode, setLateCountingMode] = useState<'after_grace' | 'from_start'>(
+    'after_grace',
+  );
   const [extendedLateThresholdMinutes, setExtendedLateThresholdMinutes] = useState(60);
-  const [extendedLateAction, setExtendedLateAction] = useState<'flag_review' | 'half_day' | 'mark_absent' | 'none'>('flag_review');
+  const [extendedLateAction, setExtendedLateAction] = useState<
+    'flag_review' | 'half_day' | 'mark_absent' | 'none'
+  >('flag_review');
 
   // 3. Early Exit Policy
   const [enableEarlyExitTracking, setEnableEarlyExitTracking] = useState(true);
   const [earlyExitGraceMinutes, setEarlyExitGraceMinutes] = useState(10);
   const [extendedEarlyExitThresholdMinutes, setExtendedEarlyExitThresholdMinutes] = useState(60);
-  const [extendedEarlyExitAction, setExtendedEarlyExitAction] = useState<'flag_review' | 'half_day' | 'mark_absent' | 'none'>('flag_review');
+  const [extendedEarlyExitAction, setExtendedEarlyExitAction] = useState<
+    'flag_review' | 'half_day' | 'mark_absent' | 'none'
+  >('flag_review');
 
   // 4. Attendance Classification
-  const [thresholdMode, setThresholdMode] = useState<'fixed_hours' | 'percentage_of_shift'>('fixed_hours');
+  const [thresholdMode, setThresholdMode] = useState<'fixed_hours' | 'percentage_of_shift'>(
+    'fixed_hours',
+  );
   const [fullDayPercentage, setFullDayPercentage] = useState(100);
   const [halfDayPercentage, setHalfDayPercentage] = useState(50);
-  const [belowMinimumAction, setBelowMinimumAction] = useState<'absent' | 'mark_absent' | 'half_day' | 'flag_exception'>('mark_absent');
-  const [missingPunchPolicy, setMissingPunchPolicy] = useState<'mark_absent' | 'half_day' | 'flag_exception' | 'none'>('flag_exception');
+  const [belowMinimumAction, setBelowMinimumAction] = useState<
+    'absent' | 'mark_absent' | 'half_day' | 'flag_exception'
+  >('mark_absent');
+  const [missingPunchPolicy, setMissingPunchPolicy] = useState<
+    'mark_absent' | 'half_day' | 'flag_exception' | 'none'
+  >('flag_exception');
 
   // 5. Late Penalty Rules
   const [penaltyEnabled, setPenaltyEnabled] = useState(true);
   const [lateMarksThreshold, setLateMarksThreshold] = useState(3);
   const [penaltyUnit, setPenaltyUnit] = useState<PenaltyRulesConfig['penaltyUnit']>('half_day');
-  const [penaltyPeriod, setPenaltyPeriod] = useState<PenaltyRulesConfig['period']>('calendar_month');
+  const [penaltyPeriod, setPenaltyPeriod] =
+    useState<PenaltyRulesConfig['period']>('calendar_month');
   const [penaltyIsRepeating, setPenaltyIsRepeating] = useState(true);
   const [maxPenaltyUnits, setMaxPenaltyUnits] = useState<string>('2.0');
 
@@ -137,7 +158,9 @@ export function PoliciesTab() {
   const [odAllowHalfDay, setOdAllowHalfDay] = useState(true);
   const [odAllowHourly, setOdAllowHourly] = useState(false);
   const [odAllowMultiDay, setOdAllowMultiDay] = useState(true);
-  const [odCreditTreatment, setOdCreditTreatment] = useState<'count_as_present' | 'verified_hours'>('count_as_present');
+  const [odCreditTreatment, setOdCreditTreatment] = useState<'count_as_present' | 'verified_hours'>(
+    'count_as_present',
+  );
   const [odPunchRule, setOdPunchRule] = useState<'exempt' | 'required_at_location'>('exempt');
   const [odExemptGeofence, setOdExemptGeofence] = useState(true);
   const [odAdvanceDays, setOdAdvanceDays] = useState(2);
@@ -152,7 +175,9 @@ export function PoliciesTab() {
   // Review & Publish Modal
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [publishReason, setPublishReason] = useState('');
-  const [publishEffectiveDate, setPublishEffectiveDate] = useState(new Date().toISOString().slice(0, 10));
+  const [publishEffectiveDate, setPublishEffectiveDate] = useState(
+    new Date().toISOString().slice(0, 10),
+  );
 
   // Toggle Accordion section
   const toggleSection = (section: string) => {
@@ -172,22 +197,29 @@ export function PoliciesTab() {
 
       setPolicies(policiesList);
 
-      const deptList = (Array.isArray(deptsRes) ? deptsRes : []).map((d: { id: string; name: string }) => ({
-        id: d.id,
-        name: d.name,
-      }));
+      const deptList = (Array.isArray(deptsRes) ? deptsRes : []).map(
+        (d: { id: string; name: string }) => ({
+          id: d.id,
+          name: d.name,
+        }),
+      );
       setDepartments(deptList);
 
-      const empList = (empsRes.data ?? []).map((e: { id: string; firstName: string; lastName?: string | null }) => ({
-        id: e.id,
-        fullName: `${e.firstName} ${e.lastName || ''}`.trim(),
-      }));
+      const empList = (empsRes.data ?? []).map(
+        (e: { id: string; firstName: string; lastName?: string | null }) => ({
+          id: e.id,
+          fullName: `${e.firstName} ${e.lastName || ''}`.trim(),
+        }),
+      );
       setEmployees(empList);
 
       // Resolve effective policy based on current selected scope
       const empId = selectedScope === 'employee' ? selectedScopeId : undefined;
       const deptId = selectedScope === 'department' ? selectedScopeId : undefined;
-      const resolution = await fetchEffectiveAttendancePolicy({ employeeId: empId, departmentId: deptId });
+      const resolution = await fetchEffectiveAttendancePolicy({
+        employeeId: empId,
+        departmentId: deptId,
+      });
       setEffectiveResolution(resolution);
 
       // Check if an explicit policy record already exists for this exact scope and scopeId
@@ -213,8 +245,10 @@ export function PoliciesTab() {
         setVersion(1);
         const entityName =
           selectedScope === 'department'
-            ? deptList.find((d: { id: string; name: string }) => d.id === selectedScopeId)?.name || 'Department'
-            : empList.find((e: { id: string; fullName: string }) => e.id === selectedScopeId)?.fullName || 'Employee';
+            ? deptList.find((d: { id: string; name: string }) => d.id === selectedScopeId)?.name ||
+              'Department'
+            : empList.find((e: { id: string; fullName: string }) => e.id === selectedScopeId)
+                ?.fullName || 'Employee';
         setPolicyName(`${entityName} Attendance Policy`);
         setDescription(`Custom attendance policy override for ${entityName}`);
         setEffectiveFrom(new Date().toISOString().slice(0, 10));
@@ -241,20 +275,32 @@ export function PoliciesTab() {
       setRequiresApproval(pol.requiresApproval ?? true);
 
       if (pol.classificationRules?.workingHoursConfig) {
-        setWorkingHoursMode(pol.classificationRules.workingHoursConfig.workingHoursMode || 'fixed_policy');
+        setWorkingHoursMode(
+          pol.classificationRules.workingHoursConfig.workingHoursMode || 'fixed_policy',
+        );
         setNetOrGross(pol.classificationRules.workingHoursConfig.netOrGross || 'net');
       }
 
       if (pol.classificationRules?.lateArrivalConfig) {
-        setLateCountingMode(pol.classificationRules.lateArrivalConfig.countingMode || 'after_grace');
-        setExtendedLateThresholdMinutes(pol.classificationRules.lateArrivalConfig.extendedLateThresholdMinutes ?? 60);
-        setExtendedLateAction(pol.classificationRules.lateArrivalConfig.extendedLateAction || 'flag_review');
+        setLateCountingMode(
+          pol.classificationRules.lateArrivalConfig.countingMode || 'after_grace',
+        );
+        setExtendedLateThresholdMinutes(
+          pol.classificationRules.lateArrivalConfig.extendedLateThresholdMinutes ?? 60,
+        );
+        setExtendedLateAction(
+          pol.classificationRules.lateArrivalConfig.extendedLateAction || 'flag_review',
+        );
       }
 
       if (pol.classificationRules?.earlyExitConfig) {
         setEarlyExitGraceMinutes(pol.classificationRules.earlyExitConfig.graceMinutes ?? 10);
-        setExtendedEarlyExitThresholdMinutes(pol.classificationRules.earlyExitConfig.extendedEarlyExitThresholdMinutes ?? 60);
-        setExtendedEarlyExitAction(pol.classificationRules.earlyExitConfig.extendedEarlyExitAction || 'flag_review');
+        setExtendedEarlyExitThresholdMinutes(
+          pol.classificationRules.earlyExitConfig.extendedEarlyExitThresholdMinutes ?? 60,
+        );
+        setExtendedEarlyExitAction(
+          pol.classificationRules.earlyExitConfig.extendedEarlyExitAction || 'flag_review',
+        );
       }
 
       if (pol.classificationRules) {
@@ -270,7 +316,11 @@ export function PoliciesTab() {
         setPenaltyUnit(pol.penaltyRules.penaltyUnit || 'half_day');
         setPenaltyPeriod(pol.penaltyRules.period || 'calendar_month');
         setPenaltyIsRepeating(pol.penaltyRules.isRepeating ?? true);
-        setMaxPenaltyUnits(pol.penaltyRules.maxPenaltyUnits != null ? String(pol.penaltyRules.maxPenaltyUnits) : '2.0');
+        setMaxPenaltyUnits(
+          pol.penaltyRules.maxPenaltyUnits != null
+            ? String(pol.penaltyRules.maxPenaltyUnits)
+            : '2.0',
+        );
       }
 
       if (pol.odRules) {
@@ -513,7 +563,9 @@ export function PoliciesTab() {
         effectiveFrom: publishEffectiveDate,
       });
 
-      setSuccess(`Policy successfully published as version v${published.version} (Effective from ${published.effectiveFrom}).`);
+      setSuccess(
+        `Policy successfully published as version v${published.version} (Effective from ${published.effectiveFrom}).`,
+      );
       setIsPublishModalOpen(false);
       setPublishReason('');
       setIsDirty(false);
@@ -553,12 +605,24 @@ export function PoliciesTab() {
   const renderProvenanceBadge = (fieldKey: string) => {
     const prov = effectiveResolution?.provenance?.[fieldKey];
     if (prov === 'employee') {
-      return <Badge variant="warning" size="sm">Employee Override</Badge>;
+      return (
+        <Badge variant="warning" size="sm">
+          Employee Override
+        </Badge>
+      );
     }
     if (prov === 'department') {
-      return <Badge variant="info" size="sm">Department Override</Badge>;
+      return (
+        <Badge variant="info" size="sm">
+          Department Override
+        </Badge>
+      );
     }
-    return <Badge variant="neutral" size="sm">Company Default</Badge>;
+    return (
+      <Badge variant="neutral" size="sm">
+        Company Default
+      </Badge>
+    );
   };
 
   if (loading) {
@@ -582,12 +646,7 @@ export function PoliciesTab() {
               <span className="bezent-text-hint">Effective: {effectiveFrom}</span>
             </Inline>
             <Inline gap="sm" align="center">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={saving}
-                onClick={handleSaveDraft}
-              >
+              <Button variant="outline" size="sm" disabled={saving} onClick={handleSaveDraft}>
                 Save Draft
               </Button>
               <Button
@@ -690,11 +749,7 @@ export function PoliciesTab() {
                 {workingHoursMode === 'shift_based' ? 'Shift-Based' : 'Fixed Hours'}
               </Badge>
             </Inline>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => toggleSection('workingHours')}
-            >
+            <Button variant="ghost" size="sm" onClick={() => toggleSection('workingHours')}>
               {expandedSections.workingHours ? '▲' : '▼'}
             </Button>
           </Inline>
@@ -813,11 +868,7 @@ export function PoliciesTab() {
                 {enableLateTracking ? `${gracePeriodMinutes}m Grace` : 'Disabled'}
               </Badge>
             </Inline>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => toggleSection('lateArrival')}
-            >
+            <Button variant="ghost" size="sm" onClick={() => toggleSection('lateArrival')}>
               {expandedSections.lateArrival ? '▲' : '▼'}
             </Button>
           </Inline>
@@ -871,8 +922,14 @@ export function PoliciesTab() {
                         handleFieldChange();
                       }}
                       options={[
-                        { value: 'after_grace', label: 'Count Only After Grace (e.g. 9:16 with 15m grace = 1m late)' },
-                        { value: 'from_start', label: 'Count from Shift Start (e.g. 9:16 with 15m grace = 16m late)' },
+                        {
+                          value: 'after_grace',
+                          label: 'Count Only After Grace (e.g. 9:16 with 15m grace = 1m late)',
+                        },
+                        {
+                          value: 'from_start',
+                          label: 'Count from Shift Start (e.g. 9:16 with 15m grace = 16m late)',
+                        },
                       ]}
                     />
                   }
@@ -904,7 +961,9 @@ export function PoliciesTab() {
                     <Select
                       value={extendedLateAction}
                       onChange={(e) => {
-                        setExtendedLateAction(e.target.value as 'flag_review' | 'half_day' | 'mark_absent' | 'none');
+                        setExtendedLateAction(
+                          e.target.value as 'flag_review' | 'half_day' | 'mark_absent' | 'none',
+                        );
                         handleFieldChange();
                       }}
                       options={[
@@ -935,11 +994,7 @@ export function PoliciesTab() {
                 {enableEarlyExitTracking ? `${earlyExitGraceMinutes}m Grace` : 'Disabled'}
               </Badge>
             </Inline>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => toggleSection('earlyExit')}
-            >
+            <Button variant="ghost" size="sm" onClick={() => toggleSection('earlyExit')}>
               {expandedSections.earlyExit ? '▲' : '▼'}
             </Button>
           </Inline>
@@ -1007,7 +1062,9 @@ export function PoliciesTab() {
                     <Select
                       value={extendedEarlyExitAction}
                       onChange={(e) => {
-                        setExtendedEarlyExitAction(e.target.value as 'flag_review' | 'half_day' | 'mark_absent' | 'none');
+                        setExtendedEarlyExitAction(
+                          e.target.value as 'flag_review' | 'half_day' | 'mark_absent' | 'none',
+                        );
                         handleFieldChange();
                       }}
                       options={[
@@ -1038,11 +1095,7 @@ export function PoliciesTab() {
                 {thresholdMode === 'percentage_of_shift' ? 'Percentage Mode' : 'Fixed Hours'}
               </Badge>
             </Inline>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => toggleSection('classification')}
-            >
+            <Button variant="ghost" size="sm" onClick={() => toggleSection('classification')}>
               {expandedSections.classification ? '▲' : '▼'}
             </Button>
           </Inline>
@@ -1115,7 +1168,9 @@ export function PoliciesTab() {
                     <Select
                       value={belowMinimumAction}
                       onChange={(e) => {
-                        setBelowMinimumAction(e.target.value as 'mark_absent' | 'half_day' | 'flag_exception');
+                        setBelowMinimumAction(
+                          e.target.value as 'mark_absent' | 'half_day' | 'flag_exception',
+                        );
                         handleFieldChange();
                       }}
                       options={[
@@ -1134,7 +1189,9 @@ export function PoliciesTab() {
                     <Select
                       value={missingPunchPolicy}
                       onChange={(e) => {
-                        setMissingPunchPolicy(e.target.value as 'mark_absent' | 'half_day' | 'flag_exception' | 'none');
+                        setMissingPunchPolicy(
+                          e.target.value as 'mark_absent' | 'half_day' | 'flag_exception' | 'none',
+                        );
                         handleFieldChange();
                       }}
                       options={[
@@ -1164,11 +1221,7 @@ export function PoliciesTab() {
                 {penaltyEnabled ? `${lateMarksThreshold} Late = 1 Unit` : 'Disabled'}
               </Badge>
             </Inline>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => toggleSection('latePenalty')}
-            >
+            <Button variant="ghost" size="sm" onClick={() => toggleSection('latePenalty')}>
               {expandedSections.latePenalty ? '▲' : '▼'}
             </Button>
           </Inline>
@@ -1218,7 +1271,10 @@ export function PoliciesTab() {
                     <Select
                       value={penaltyUnit}
                       onChange={(e) => {
-                        setPenaltyUnit(e.target.value as 'warning_only' | 'quarter_day' | 'half_day' | 'full_day');
+                        setPenaltyUnit(
+                          e.target.value as
+                            'warning_only' | 'quarter_day' | 'half_day' | 'full_day',
+                        );
                         handleFieldChange();
                       }}
                       options={[
@@ -1239,7 +1295,9 @@ export function PoliciesTab() {
                     <Select
                       value={penaltyPeriod}
                       onChange={(e) => {
-                        setPenaltyPeriod(e.target.value as 'calendar_month' | 'payroll_period' | 'custom_cycle');
+                        setPenaltyPeriod(
+                          e.target.value as 'calendar_month' | 'payroll_period' | 'custom_cycle',
+                        );
                         handleFieldChange();
                       }}
                       options={[
@@ -1263,7 +1321,10 @@ export function PoliciesTab() {
                         handleFieldChange();
                       }}
                       options={[
-                        { value: 'repeat', label: 'Repeat for Every Threshold (3 late = 0.5, 6 late = 1.0)' },
+                        {
+                          value: 'repeat',
+                          label: 'Repeat for Every Threshold (3 late = 0.5, 6 late = 1.0)',
+                        },
                         { value: 'once', label: 'Once Per Period (Capped after first trigger)' },
                       ]}
                     />
@@ -1302,15 +1363,24 @@ export function PoliciesTab() {
           <Inline justify="between" align="center">
             <Inline gap="sm" align="center">
               <CardTitle>6. Policy Assignment & Overrides</CardTitle>
-              <Badge variant={selectedScope === 'employee' ? 'warning' : selectedScope === 'department' ? 'info' : 'neutral'} size="sm">
-                {selectedScope === 'employee' ? 'Employee Override' : selectedScope === 'department' ? 'Department Override' : 'Company Baseline'}
+              <Badge
+                variant={
+                  selectedScope === 'employee'
+                    ? 'warning'
+                    : selectedScope === 'department'
+                      ? 'info'
+                      : 'neutral'
+                }
+                size="sm"
+              >
+                {selectedScope === 'employee'
+                  ? 'Employee Override'
+                  : selectedScope === 'department'
+                    ? 'Department Override'
+                    : 'Company Baseline'}
               </Badge>
             </Inline>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => toggleSection('assignment')}
-            >
+            <Button variant="ghost" size="sm" onClick={() => toggleSection('assignment')}>
               {expandedSections.assignment ? '▲' : '▼'}
             </Button>
           </Inline>
@@ -1379,9 +1449,7 @@ export function PoliciesTab() {
 
             {/* Version Snapshots Table */}
             <Stack gap="xs">
-              <span className="bezent-text-secondary">
-                Published Policy Versions & Snapshots:
-              </span>
+              <span className="bezent-text-secondary">Published Policy Versions & Snapshots:</span>
               <Table hoverable>
                 <TableHead>
                   <TableRow>
@@ -1402,10 +1470,20 @@ export function PoliciesTab() {
                       </TableCell>
                       <TableCell>
                         <Badge
-                          variant={p.scope === 'employee' ? 'warning' : p.scope === 'department' ? 'info' : 'neutral'}
+                          variant={
+                            p.scope === 'employee'
+                              ? 'warning'
+                              : p.scope === 'department'
+                                ? 'info'
+                                : 'neutral'
+                          }
                           size="sm"
                         >
-                          {p.scope === 'employee' ? `Employee: ${p.scopeId}` : p.scope === 'department' ? `Department: ${p.scopeId}` : 'Company'}
+                          {p.scope === 'employee'
+                            ? `Employee: ${p.scopeId}`
+                            : p.scope === 'department'
+                              ? `Department: ${p.scopeId}`
+                              : 'Company'}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -1446,11 +1524,7 @@ export function PoliciesTab() {
                 {odEnabled ? `${odTypes.length} Types Configured` : 'Disabled'}
               </Badge>
             </Inline>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => toggleSection('onDuty')}
-            >
+            <Button variant="ghost" size="sm" onClick={() => toggleSection('onDuty')}>
               {expandedSections.onDuty ? '▲' : '▼'}
             </Button>
           </Inline>
@@ -1565,7 +1639,10 @@ export function PoliciesTab() {
                         }}
                         options={[
                           { value: 'exempt', label: 'Exempt from Biometric & Web Punches' },
-                          { value: 'required_at_location', label: 'Punches Required at OD Location' },
+                          {
+                            value: 'required_at_location',
+                            label: 'Punches Required at OD Location',
+                          },
                         ]}
                       />
                       <Checkbox
@@ -1624,11 +1701,16 @@ export function PoliciesTab() {
                     <Select
                       value={odCreditTreatment}
                       onChange={(e) => {
-                        setOdCreditTreatment(e.target.value as 'count_as_present' | 'verified_hours');
+                        setOdCreditTreatment(
+                          e.target.value as 'count_as_present' | 'verified_hours',
+                        );
                         handleFieldChange();
                       }}
                       options={[
-                        { value: 'count_as_present', label: 'Count as Present (Full Workday Credit)' },
+                        {
+                          value: 'count_as_present',
+                          label: 'Count as Present (Full Workday Credit)',
+                        },
                         { value: 'verified_hours', label: 'Verified Hours Only' },
                       ]}
                     />
@@ -1686,7 +1768,8 @@ export function PoliciesTab() {
         >
           <Stack gap="md">
             <span className="bezent-text-secondary">
-              Publishing will create an immutable version snapshot (v{version + 1}) and activate this configuration across the designated scope.
+              Publishing will create an immutable version snapshot (v{version + 1}) and activate
+              this configuration across the designated scope.
             </span>
 
             <Alert variant="info">
@@ -1694,8 +1777,8 @@ export function PoliciesTab() {
               {selectedScope === 'employee'
                 ? `Employee Override: ${employees.find((e) => e.id === selectedScopeId)?.fullName || selectedScopeId || 'Assigned'}`
                 : selectedScope === 'department'
-                ? `Department Override: ${departments.find((d) => d.id === selectedScopeId)?.name || selectedScopeId || 'Assigned'}`
-                : 'Company Default Policy'}
+                  ? `Department Override: ${departments.find((d) => d.id === selectedScopeId)?.name || selectedScopeId || 'Assigned'}`
+                  : 'Company Default Policy'}
             </Alert>
 
             {/* Validation Checklist */}
@@ -1703,20 +1786,39 @@ export function PoliciesTab() {
               <Stack gap="xs">
                 <strong>Policy Validation Checks:</strong>
                 <Inline gap="xs" align="center">
-                  <Badge variant="success" size="sm">✓ Valid</Badge>
-                  <span>Working Hours: {fullDayHours}h Full / {halfDayHours}h Half threshold ordering verified.</span>
+                  <Badge variant="success" size="sm">
+                    ✓ Valid
+                  </Badge>
+                  <span>
+                    Working Hours: {fullDayHours}h Full / {halfDayHours}h Half threshold ordering
+                    verified.
+                  </span>
                 </Inline>
                 <Inline gap="xs" align="center">
-                  <Badge variant="success" size="sm">✓ Valid</Badge>
-                  <span>Grace Periods: {gracePeriodMinutes}m late grace and {earlyExitGraceMinutes}m early exit grace.</span>
+                  <Badge variant="success" size="sm">
+                    ✓ Valid
+                  </Badge>
+                  <span>
+                    Grace Periods: {gracePeriodMinutes}m late grace and {earlyExitGraceMinutes}m
+                    early exit grace.
+                  </span>
                 </Inline>
                 <Inline gap="xs" align="center">
-                  <Badge variant="success" size="sm">✓ Valid</Badge>
-                  <span>Late Penalties: {lateMarksThreshold} late marks = {penaltyUnit} ({penaltyPeriod}).</span>
+                  <Badge variant="success" size="sm">
+                    ✓ Valid
+                  </Badge>
+                  <span>
+                    Late Penalties: {lateMarksThreshold} late marks = {penaltyUnit} ({penaltyPeriod}
+                    ).
+                  </span>
                 </Inline>
                 <Inline gap="xs" align="center">
-                  <Badge variant="success" size="sm">✓ Valid</Badge>
-                  <span>On-Duty Rules: {odTypes.length} configured types with approval requirements.</span>
+                  <Badge variant="success" size="sm">
+                    ✓ Valid
+                  </Badge>
+                  <span>
+                    On-Duty Rules: {odTypes.length} configured types with approval requirements.
+                  </span>
                 </Inline>
               </Stack>
             </Card>
@@ -1745,7 +1847,8 @@ export function PoliciesTab() {
             </Grid>
 
             <span className="bezent-text-hint">
-              Payroll Lock Protection: Locked periods are strictly protected and will never be altered by policy publication.
+              Payroll Lock Protection: Locked periods are strictly protected and will never be
+              altered by policy publication.
             </span>
 
             <Inline justify="end" gap="sm">

@@ -73,7 +73,8 @@ referenceRouter.get('/organization-types', (_req: Request, res: Response) => {
 
 // GET /api/v1/platform/reference/address-rules/:countryCode
 referenceRouter.get('/address-rules/:countryCode', (req: Request, res: Response) => {
-  const countryCode = typeof req.params.countryCode === 'string' ? req.params.countryCode : undefined;
+  const countryCode =
+    typeof req.params.countryCode === 'string' ? req.params.countryCode : undefined;
   const rules = getAddressRules(countryCode);
   res.json({ data: rules });
 });

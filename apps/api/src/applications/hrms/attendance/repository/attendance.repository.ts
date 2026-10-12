@@ -273,14 +273,7 @@ export class AttendanceRepository {
       filterConditions.push(
         eq(
           attendancePunches.source,
-          filter.source as
-            | 'web'
-            | 'mobile'
-            | 'biometric'
-            | 'manual'
-            | 'api'
-            | 'kiosk'
-            | 'import',
+          filter.source as 'web' | 'mobile' | 'biometric' | 'manual' | 'api' | 'kiosk' | 'import',
         ),
       );
     }
@@ -288,13 +281,7 @@ export class AttendanceRepository {
       filterConditions.push(
         eq(
           attendancePunches.punchType,
-          filter.punchType as
-            | 'in'
-            | 'out'
-            | 'break_in'
-            | 'break_out'
-            | 'auto'
-            | 'unknown',
+          filter.punchType as 'in' | 'out' | 'break_in' | 'break_out' | 'auto' | 'unknown',
         ),
       );
     }
@@ -303,12 +290,7 @@ export class AttendanceRepository {
         eq(
           attendancePunches.validationStatus,
           filter.validationStatus as
-            | 'pending'
-            | 'valid'
-            | 'duplicate'
-            | 'invalid'
-            | 'needs_review'
-            | 'unmatched',
+            'pending' | 'valid' | 'duplicate' | 'invalid' | 'needs_review' | 'unmatched',
         ),
       );
     }
@@ -317,11 +299,7 @@ export class AttendanceRepository {
         eq(
           attendancePunches.processingState,
           filter.processingState as
-            | 'received'
-            | 'processing'
-            | 'processed'
-            | 'failed'
-            | 'retry_pending',
+            'received' | 'processing' | 'processed' | 'failed' | 'retry_pending',
         ),
       );
     }
@@ -593,7 +571,8 @@ export class AttendanceRepository {
     }
 
     const invStatus = input.investigationStatus || input.status || 'open';
-    const invNotes = input.investigationNotes !== undefined ? input.investigationNotes : input.notes;
+    const invNotes =
+      input.investigationNotes !== undefined ? input.investigationNotes : input.notes;
 
     const updates: Partial<typeof attendancePunches.$inferInsert> = {
       investigationStatus: invStatus,
@@ -628,7 +607,11 @@ export class AttendanceRepository {
       );
 
     // Record audit trail
-    let auditAction: 'identity_mapped' | 'investigation_assigned' | 'investigation_resolved' | 'investigation_opened';
+    let auditAction:
+      | 'identity_mapped'
+      | 'investigation_assigned'
+      | 'investigation_resolved'
+      | 'investigation_opened';
     if (input.resolvedEmployeeId) {
       auditAction = 'identity_mapped';
     } else if (invStatus === 'resolved') {
@@ -977,8 +960,10 @@ export class AttendanceRepository {
       if (isLate) indicators.push('late');
       if (isEarlyExit) indicators.push('early_exit');
       if (isMissingPunch || (!checkInTime && checkOutTime)) indicators.push('missing_punch_in');
-      if (isMissingPunch || (checkInTime && !checkOutTime && !isToday)) indicators.push('missing_punch_out');
-      if (status === 'half_day' || (workedMinutes > 0 && workedMinutes < 240)) indicators.push('insufficient_hours');
+      if (isMissingPunch || (checkInTime && !checkOutTime && !isToday))
+        indicators.push('missing_punch_out');
+      if (status === 'half_day' || (workedMinutes > 0 && workedMinutes < 240))
+        indicators.push('insufficient_hours');
       if (isRegularized) indicators.push('regularized');
       if (processingState === 'provisional') indicators.push('device_sync_pending');
 
@@ -1053,7 +1038,11 @@ export class AttendanceRepository {
         counters.unresolved = (counters.unresolved ?? 0) + 1;
       }
 
-      if (item.processingState === 'pending_review' || item.status === 'incomplete' || item.isMissingPunch) {
+      if (
+        item.processingState === 'pending_review' ||
+        item.status === 'incomplete' ||
+        item.isMissingPunch
+      ) {
         counters.pendingReview++;
       }
     }
@@ -1067,7 +1056,9 @@ export class AttendanceRepository {
       } else if (filter.status === 'present') {
         filtered = filtered.filter((r) => r.status === 'present' || r.status === 'half_day');
       } else if (filter.status === 'pending_review') {
-        filtered = filtered.filter((r) => r.processingState === 'pending_review' || r.status === 'incomplete');
+        filtered = filtered.filter(
+          (r) => r.processingState === 'pending_review' || r.status === 'incomplete',
+        );
       } else {
         filtered = filtered.filter((r) => r.status === filter.status);
       }
@@ -1314,15 +1305,20 @@ export class AttendanceRepository {
     const indicators: string[] = [];
     if (att?.isLate) indicators.push('late');
     if (att?.isEarlyExit) indicators.push('early_exit');
-    if (att?.isMissingPunch || (!att?.checkInTime && att?.checkOutTime)) indicators.push('missing_punch_in');
-    if (att?.isMissingPunch || (att?.checkInTime && !att?.checkOutTime && !isToday)) indicators.push('missing_punch_out');
+    if (att?.isMissingPunch || (!att?.checkInTime && att?.checkOutTime))
+      indicators.push('missing_punch_in');
+    if (att?.isMissingPunch || (att?.checkInTime && !att?.checkOutTime && !isToday))
+      indicators.push('missing_punch_out');
     if (att?.status === 'half_day') indicators.push('insufficient_hours');
     if (att?.isRegularized) indicators.push('regularized');
 
     const exceptions: Array<{ type: string; details: string }> = [];
-    if (att?.isLate) exceptions.push({ type: 'Late Arrival', details: `Late by ${att.lateMinutes} minutes` });
-    if (att?.isEarlyExit) exceptions.push({ type: 'Early Exit', details: `Exited ${att.earlyMinutes} minutes early` });
-    if (att?.isMissingPunch) exceptions.push({ type: 'Missing Punch', details: 'Unresolved punch discrepancy' });
+    if (att?.isLate)
+      exceptions.push({ type: 'Late Arrival', details: `Late by ${att.lateMinutes} minutes` });
+    if (att?.isEarlyExit)
+      exceptions.push({ type: 'Early Exit', details: `Exited ${att.earlyMinutes} minutes early` });
+    if (att?.isMissingPunch)
+      exceptions.push({ type: 'Missing Punch', details: 'Unresolved punch discrepancy' });
 
     return {
       employee: {
@@ -1339,7 +1335,13 @@ export class AttendanceRepository {
           scheduleRef: emp.scheduleRef ?? 'General 09:00 - 18:00',
           startTime: emp.scheduleStartTime ?? '09:00',
           endTime: emp.scheduleEndTime ?? '18:00',
-          workingDays: emp.scheduleWorkingDays ?? ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+          workingDays: emp.scheduleWorkingDays ?? [
+            'Monday',
+            'Tuesday',
+            'Wednesday',
+            'Thursday',
+            'Friday',
+          ],
           breakMinutes: emp.scheduleBreakMinutes ?? 60,
           timeZone: emp.scheduleTimezone ?? emp.locationTimezone ?? 'UTC',
         },
@@ -1350,7 +1352,12 @@ export class AttendanceRepository {
         checkInTime: att?.checkInTime ?? null,
         checkOutTime: att?.checkOutTime ?? null,
         workedMinutes: att?.workedMinutes ?? 0,
-        status: (att?.status ?? (leaveRows[0] ? 'on_leave' : odRows[0] ? 'on_duty' : 'absent')) as DailyAttendanceItem['status'],
+        status: (att?.status ??
+          (leaveRows[0]
+            ? 'on_leave'
+            : odRows[0]
+              ? 'on_duty'
+              : 'absent')) as DailyAttendanceItem['status'],
         processingState: att?.processingState ?? 'finalized',
         indicators,
         isLate: att?.isLate ?? false,
@@ -1756,17 +1763,30 @@ export class AttendanceRepository {
         inArray(attendanceExceptions.status, ['open', 'assigned', 'in_review', 'pending_action']),
       );
     } else if (filter.status !== 'all') {
-      filterConditions.push(eq(attendanceExceptions.status, filter.status as 'open' | 'assigned' | 'in_review' | 'pending_action' | 'resolved' | 'closed'));
+      filterConditions.push(
+        eq(
+          attendanceExceptions.status,
+          filter.status as
+            'open' | 'assigned' | 'in_review' | 'pending_action' | 'resolved' | 'closed',
+        ),
+      );
     }
 
     // Severity filter
     if (filter.severity && filter.severity !== 'all') {
-      filterConditions.push(eq(attendanceExceptions.severity, filter.severity as 'low' | 'medium' | 'high' | 'critical'));
+      filterConditions.push(
+        eq(
+          attendanceExceptions.severity,
+          filter.severity as 'low' | 'medium' | 'high' | 'critical',
+        ),
+      );
     }
 
     // Exception type filter
     if (filter.exceptionType && filter.exceptionType !== 'all') {
-      filterConditions.push(eq(attendanceExceptions.exceptionType, filter.exceptionType as ExceptionType));
+      filterConditions.push(
+        eq(attendanceExceptions.exceptionType, filter.exceptionType as ExceptionType),
+      );
     }
 
     // Source filter
@@ -1804,7 +1824,9 @@ export class AttendanceRepository {
 
     // Pending action reason
     if (filter.pendingActionReason && filter.pendingActionReason !== 'all') {
-      filterConditions.push(eq(attendanceExceptions.pendingActionReason, filter.pendingActionReason));
+      filterConditions.push(
+        eq(attendanceExceptions.pendingActionReason, filter.pendingActionReason),
+      );
     }
 
     // Date range with dual interpretation
@@ -1896,13 +1918,29 @@ export class AttendanceRepository {
 
     let orderByClause = [asc(severityOrder), asc(attendanceExceptions.detectedAt)];
     if (filter.sortBy === 'detectedAt') {
-      orderByClause = [filter.sortOrder === 'desc' ? desc(attendanceExceptions.detectedAt) : asc(attendanceExceptions.detectedAt)];
+      orderByClause = [
+        filter.sortOrder === 'desc'
+          ? desc(attendanceExceptions.detectedAt)
+          : asc(attendanceExceptions.detectedAt),
+      ];
     } else if (filter.sortBy === 'workday') {
-      orderByClause = [filter.sortOrder === 'desc' ? desc(attendanceExceptions.workday) : asc(attendanceExceptions.workday)];
+      orderByClause = [
+        filter.sortOrder === 'desc'
+          ? desc(attendanceExceptions.workday)
+          : asc(attendanceExceptions.workday),
+      ];
     } else if (filter.sortBy === 'status') {
-      orderByClause = [filter.sortOrder === 'desc' ? desc(attendanceExceptions.status) : asc(attendanceExceptions.status)];
+      orderByClause = [
+        filter.sortOrder === 'desc'
+          ? desc(attendanceExceptions.status)
+          : asc(attendanceExceptions.status),
+      ];
     } else if (filter.sortBy === 'exceptionType') {
-      orderByClause = [filter.sortOrder === 'desc' ? desc(attendanceExceptions.exceptionType) : asc(attendanceExceptions.exceptionType)];
+      orderByClause = [
+        filter.sortOrder === 'desc'
+          ? desc(attendanceExceptions.exceptionType)
+          : asc(attendanceExceptions.exceptionType),
+      ];
     }
 
     const rows = await db
@@ -2135,7 +2173,8 @@ export class AttendanceRepository {
       companyId: row.companyId,
       employeeId: row.employeeId,
       employeeName: fullName || (row.employeeId ? 'Unknown Employee' : 'Unmatched Employee'),
-      employeeCode: row.employeeNumber || (row.employeeId ? row.employeeId.slice(0, 8) : 'UNMATCHED'),
+      employeeCode:
+        row.employeeNumber || (row.employeeId ? row.employeeId.slice(0, 8) : 'UNMATCHED'),
       departmentName: row.departmentName ?? null,
       workday: row.workday,
       exceptionType: row.exceptionType,
@@ -2250,7 +2289,9 @@ export class AttendanceRepository {
       updates.resolutionType = input.resolutionType;
     }
 
-    let auditAction: 'status_transitioned' | 'resolved' | 'closed' | 'pending_action_marked' | 'reopened' = 'status_transitioned';
+    let auditAction:
+      'status_transitioned' | 'resolved' | 'closed' | 'pending_action_marked' | 'reopened' =
+      'status_transitioned';
     if (input.status === 'resolved') {
       updates.resolvedAt = new Date();
       updates.resolvedByUserId = actorUserId;
@@ -2376,7 +2417,10 @@ export class AttendanceRepository {
       const isRegularizedOrCorrected =
         daily.isRegularized || daily.status === 'present' || isMissingPunchResolved;
 
-      if (!isRegularizedOrCorrected && (existing.exceptionType === 'missing_in' || existing.exceptionType === 'missing_out')) {
+      if (
+        !isRegularizedOrCorrected &&
+        (existing.exceptionType === 'missing_in' || existing.exceptionType === 'missing_out')
+      ) {
         throw new Error(
           'Verification failed: Daily attendance record still has missing punches. Please complete Regularization or Manual Attendance Entry before resolving.',
         );
@@ -2516,8 +2560,7 @@ export class AttendanceRepository {
     });
 
     return res.items.map((i) => {
-      let exType: 'missing_punch' | 'late_arrival' | 'early_exit' | 'short_hours' =
-        'missing_punch';
+      let exType: 'missing_punch' | 'late_arrival' | 'early_exit' | 'short_hours' = 'missing_punch';
       if (i.exceptionType === 'late_arrival') exType = 'late_arrival';
       else if (i.exceptionType === 'early_exit') exType = 'early_exit';
       else if (i.exceptionType === 'insufficient_hours') exType = 'short_hours';
@@ -2988,7 +3031,8 @@ export class AttendanceRepository {
       conditions.push(
         eq(
           attendanceOnDutyRequests.status,
-          filter.status as 'draft' | 'submitted' | 'approved' | 'rejected' | 'withdrawn' | 'cancelled',
+          filter.status as
+            'draft' | 'submitted' | 'approved' | 'rejected' | 'withdrawn' | 'cancelled',
         ),
       );
     }
@@ -3069,7 +3113,14 @@ export class AttendanceRepository {
     tenantId: string,
     companyId: string,
     id: string,
-  ): Promise<(AttendanceOnDutyRequest & { employeeName: string; employeeCode: string; departmentName: string | null }) | null> {
+  ): Promise<
+    | (AttendanceOnDutyRequest & {
+        employeeName: string;
+        employeeCode: string;
+        departmentName: string | null;
+      })
+    | null
+  > {
     const db = getDb();
     const rows = await db
       .select({

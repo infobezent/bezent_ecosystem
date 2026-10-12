@@ -119,7 +119,10 @@ export function requireApplicationAccess(moduleCode: ModuleCode, workspace: Work
  * (e.g. `requireModuleEntitlement('hrms', 'leave')`).
  * Reuses existing effectiveEntitlementService without introducing a second engine.
  */
-export function requireModuleEntitlement(applicationCode: 'hrms' | 'crm' | 'project_management', moduleKey: string) {
+export function requireModuleEntitlement(
+  applicationCode: 'hrms' | 'crm' | 'project_management',
+  moduleKey: string,
+) {
   return (req: Request, res: Response, next: NextFunction) => {
     requireCompanyContext(req, res, async (err?: unknown) => {
       if (err) return next(err);
@@ -133,9 +136,8 @@ export function requireModuleEntitlement(applicationCode: 'hrms' | 'crm' | 'proj
         );
       }
       try {
-        const { effectiveEntitlementService } = await import(
-          '../../entitlements/service/effectiveEntitlement.service.js'
-        );
+        const { effectiveEntitlementService } =
+          await import('../../entitlements/service/effectiveEntitlement.service.js');
         const eff = await effectiveEntitlementService.resolveEffectiveEntitlements(
           access.tenantId,
           applicationCode,

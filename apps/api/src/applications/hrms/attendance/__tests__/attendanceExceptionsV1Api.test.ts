@@ -107,7 +107,9 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Exceptions V1
   describe('GET /api/v1/hrms/attendance/exceptions', () => {
     it('returns paginated exceptions and 6 summary counters', async () => {
       const res = await request(app)
-        .get('/api/v1/hrms/attendance/exceptions?dateFrom=2026-10-01&dateTo=2026-10-15&status=all&limit=100')
+        .get(
+          '/api/v1/hrms/attendance/exceptions?dateFrom=2026-10-01&dateTo=2026-10-15&status=all&limit=100',
+        )
         .set(headers);
 
       expect(res.status).toBe(200);
@@ -210,7 +212,9 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Exceptions V1
         .set(headers);
 
       expect(detailRes.body.data.status).toBe('pending_action');
-      expect(detailRes.body.data.pendingActionReason).toBe('Awaiting employee regularization submission');
+      expect(detailRes.body.data.pendingActionReason).toBe(
+        'Awaiting employee regularization submission',
+      );
       expect(detailRes.body.data.pendingActionAwaitedFrom).toBe('employee');
     });
   });
@@ -232,7 +236,9 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Exceptions V1
         .set(headers);
 
       expect(detailRes.body.data.severity).toBe('critical');
-      const audit = detailRes.body.data.audits.find((a: { action: string; notes: string }) => a.action === 'severity_overridden');
+      const audit = detailRes.body.data.audits.find(
+        (a: { action: string; notes: string }) => a.action === 'severity_overridden',
+      );
       expect(audit).toBeDefined();
       expect(audit.notes).toContain('Payroll processing');
     });
@@ -254,7 +260,9 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Exceptions V1
         .set(headers);
 
       expect(detailRes.body.data.status).toBe('resolved');
-      expect(detailRes.body.data.resolutionNotes).toBe('Verified missing punch rectified via web punch submission');
+      expect(detailRes.body.data.resolutionNotes).toBe(
+        'Verified missing punch rectified via web punch submission',
+      );
       expect(detailRes.body.data.resolvedAt).not.toBeNull();
     });
   });

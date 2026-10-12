@@ -33,8 +33,7 @@ export function formatBusinessIdentifier(
 
   if (merged.includeYear) {
     const fullYear = date.getFullYear();
-    const yearStr =
-      merged.yearFormat === 'YY' ? String(fullYear).slice(-2) : String(fullYear);
+    const yearStr = merged.yearFormat === 'YY' ? String(fullYear).slice(-2) : String(fullYear);
     parts.push(yearStr);
   }
 

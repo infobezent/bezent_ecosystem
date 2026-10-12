@@ -147,14 +147,13 @@ export class AttendanceRegularizationEligibilityService {
     // 8. Rule: Monthly Request Limit
     const targetYear = parseInt(input.workday.slice(0, 4), 10);
     const targetMonth = parseInt(input.workday.slice(5, 7), 10);
-    const monthlyCount =
-      await attendanceRegularizationRepository.countMonthlyRequestsForEmployee(
-        tenantId,
-        companyId,
-        input.employeeId,
-        targetYear,
-        targetMonth,
-      );
+    const monthlyCount = await attendanceRegularizationRepository.countMonthlyRequestsForEmployee(
+      tenantId,
+      companyId,
+      input.employeeId,
+      targetYear,
+      targetMonth,
+    );
 
     if (maxRequestsPerMonth > 0 && monthlyCount >= maxRequestsPerMonth) {
       reasons.push(

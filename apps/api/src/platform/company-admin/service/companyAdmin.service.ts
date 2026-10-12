@@ -539,10 +539,7 @@ export class CompanyAdminService {
     return updated;
   }
 
-  async acceptInvitation(
-    tokenOrId: string,
-    actor?: { id?: string; email?: string },
-  ) {
+  async acceptInvitation(tokenOrId: string, actor?: { id?: string; email?: string }) {
     let inv = await this.repo.findInvitationById(tokenOrId);
     if (!inv) {
       inv = await this.repo.findInvitationByToken(tokenOrId);
@@ -611,10 +608,7 @@ export class CompanyAdminService {
     };
   }
 
-  async acceptPendingInvitationsForEmail(
-    email: string,
-    actor?: { id?: string; email?: string },
-  ) {
+  async acceptPendingInvitationsForEmail(email: string, actor?: { id?: string; email?: string }) {
     const pending = await this.repo.findActiveInvitationsByEmail(email);
     const results = [];
     for (const inv of pending) {

@@ -47,10 +47,10 @@ export function CompanyContextBar({ onCompanyChange }: CompanyContextBarProps) {
                 (activeCompany.role === 'tenant_admin'
                   ? 'Tenant Admin'
                   : activeCompany.role === 'company_admin'
-                  ? 'Company Admin'
-                  : activeCompany.role === 'super_admin'
-                  ? 'Super Admin'
-                  : activeCompany.role)}
+                    ? 'Company Admin'
+                    : activeCompany.role === 'super_admin'
+                      ? 'Super Admin'
+                      : activeCompany.role)}
             </Badge>
             <Badge variant="info" size="sm">
               Tenant: {activeCompany.tenantName}

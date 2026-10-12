@@ -988,12 +988,7 @@ export async function seedDatabase() {
   const existingTaRecord = await db
     .select()
     .from(tenantAdmins)
-    .where(
-      and(
-        eq(tenantAdmins.tenantId, tenantId),
-        eq(tenantAdmins.userId, tenantAdminUserId),
-      ),
-    );
+    .where(and(eq(tenantAdmins.tenantId, tenantId), eq(tenantAdmins.userId, tenantAdminUserId)));
   if (existingTaRecord.length === 0) {
     await db.insert(tenantAdmins).values({
       id: 'ta_bezent_demo_01',
@@ -1054,7 +1049,8 @@ export async function seedDatabase() {
       applicationCode: 'hrms',
       code: 'growth',
       name: 'HRMS Growth',
-      description: 'Advanced workforce administration with recruitment, onboarding, and document management.',
+      description:
+        'Advanced workforce administration with recruitment, onboarding, and document management.',
       tier: 'growth',
       status: 'active',
       version: 1,
@@ -1069,7 +1065,8 @@ export async function seedDatabase() {
       applicationCode: 'hrms',
       code: 'enterprise',
       name: 'HRMS Enterprise',
-      description: 'Full-spectrum HR suite with performance, custom reporting, and enterprise governance.',
+      description:
+        'Full-spectrum HR suite with performance, custom reporting, and enterprise governance.',
       tier: 'enterprise',
       status: 'active',
       version: 1,
@@ -1196,7 +1193,10 @@ export async function seedDatabase() {
     if (existing.length === 0) {
       await db.insert(planPrices).values(pr);
     } else {
-      await db.update(planPrices).set({ amountMinorUnits: pr.amountMinorUnits, status: pr.status }).where(eq(planPrices.id, pr.id));
+      await db
+        .update(planPrices)
+        .set({ amountMinorUnits: pr.amountMinorUnits, status: pr.status })
+        .where(eq(planPrices.id, pr.id));
     }
   }
 
@@ -1257,7 +1257,10 @@ export async function seedDatabase() {
   ];
 
   for (const ent of defaultEntitlements) {
-    const existing = await db.select().from(planEntitlements).where(eq(planEntitlements.id, ent.id));
+    const existing = await db
+      .select()
+      .from(planEntitlements)
+      .where(eq(planEntitlements.id, ent.id));
     if (existing.length === 0) {
       await db.insert(planEntitlements).values(ent);
     }

@@ -225,8 +225,7 @@ export function validateCreateTenantAdminCompany(body: unknown): CreateTenantAdm
     });
     if (!idRes.isValid) {
       errors.code =
-        idRes.error ||
-        'Company Code can only contain letters, numbers, hyphens and underscores';
+        idRes.error || 'Company Code can only contain letters, numbers, hyphens and underscores';
     }
   }
 
@@ -259,12 +258,9 @@ export function validateCreateTenantAdminCompany(body: unknown): CreateTenantAdm
   }
 
   // Contact Phone (Optional)
-  const normCountry = typeof data.country === 'string' ? normalizeCountryCode(data.country) : undefined;
-  if (
-    data.contactPhone !== undefined &&
-    data.contactPhone !== null &&
-    data.contactPhone !== ''
-  ) {
+  const normCountry =
+    typeof data.country === 'string' ? normalizeCountryCode(data.country) : undefined;
+  if (data.contactPhone !== undefined && data.contactPhone !== null && data.contactPhone !== '') {
     const phoneRes = validatePhone(data.contactPhone, {
       countryCode: normCountry ?? undefined,
     });
@@ -274,11 +270,7 @@ export function validateCreateTenantAdminCompany(body: unknown): CreateTenantAdm
   }
 
   // Postal Code (Optional)
-  if (
-    data.postalCode !== undefined &&
-    data.postalCode !== null &&
-    data.postalCode !== ''
-  ) {
+  if (data.postalCode !== undefined && data.postalCode !== null && data.postalCode !== '') {
     const postalRes = validatePostalCode(data.postalCode, {
       countryCode: normCountry ?? undefined,
     });
@@ -327,9 +319,10 @@ export function validateCreateTenantAdminCompany(body: unknown): CreateTenantAdm
     financialYearStart: data.financialYearStart ? String(data.financialYearStart).trim() : null,
     logoUrl: data.logoUrl ? String(data.logoUrl).trim() : null,
     brandingMode:
-      data.brandingMode === 'own_logo' || data.brandingMode === 'tenant_logo' || data.brandingMode === 'initials'
+      data.brandingMode === 'own_logo' ||
+      data.brandingMode === 'tenant_logo' ||
+      data.brandingMode === 'initials'
         ? data.brandingMode
         : undefined,
   };
 }
-

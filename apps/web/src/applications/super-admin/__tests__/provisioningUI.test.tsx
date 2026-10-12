@@ -68,9 +68,9 @@ describe('Super Admin Customer Provisioning — Frontend UI & Regression Suite',
 
   it('5. resolves navigation correctly for /super-admin/tenants/create', () => {
     const resolved = resolveActiveNavigation(
-       superAdminNavigation,
-       SUPER_ADMIN_BASE_PATH,
-       '/super-admin/tenants/create',
+      superAdminNavigation,
+      SUPER_ADMIN_BASE_PATH,
+      '/super-admin/tenants/create',
     );
     expect(resolved).toEqual({
       destinationId: 'tenants',

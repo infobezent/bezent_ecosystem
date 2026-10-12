@@ -35,7 +35,9 @@ describe('Tenant Management Phase 01 Database Foundation — Persistence & Invar
     await db.delete(transactionalOutbox).where(eq(transactionalOutbox.aggregateId, testTenantId));
     await db.delete(provisioningJobs).where(eq(provisioningJobs.tenantId, testTenantId));
     await db.delete(tenantLifecycleEvents).where(eq(tenantLifecycleEvents.tenantId, testTenantId));
-    await db.delete(tenantEntitlementOverrides).where(eq(tenantEntitlementOverrides.tenantId, testTenantId));
+    await db
+      .delete(tenantEntitlementOverrides)
+      .where(eq(tenantEntitlementOverrides.tenantId, testTenantId));
     await db.delete(tenantSubscriptions).where(eq(tenantSubscriptions.tenantId, testTenantId));
     await db.delete(tenantAdmins).where(eq(tenantAdmins.tenantId, testTenantId));
     await db.delete(companies).where(eq(companies.id, testCompanyId));
@@ -96,7 +98,9 @@ describe('Tenant Management Phase 01 Database Foundation — Persistence & Invar
     await db.delete(transactionalOutbox).where(eq(transactionalOutbox.aggregateId, testTenantId));
     await db.delete(provisioningJobs).where(eq(provisioningJobs.tenantId, testTenantId));
     await db.delete(tenantLifecycleEvents).where(eq(tenantLifecycleEvents.tenantId, testTenantId));
-    await db.delete(tenantEntitlementOverrides).where(eq(tenantEntitlementOverrides.tenantId, testTenantId));
+    await db
+      .delete(tenantEntitlementOverrides)
+      .where(eq(tenantEntitlementOverrides.tenantId, testTenantId));
     await db.delete(tenantSubscriptions).where(eq(tenantSubscriptions.tenantId, testTenantId));
     await db.delete(tenantAdmins).where(eq(tenantAdmins.tenantId, testTenantId));
     await db.delete(companies).where(eq(companies.id, testCompanyId));
@@ -172,7 +176,10 @@ describe('Tenant Management Phase 01 Database Foundation — Persistence & Invar
         status: 'active',
       });
 
-      const [stored] = await db.select().from(planPrices).where(eq(planPrices.id, 'pr_test_usd_01'));
+      const [stored] = await db
+        .select()
+        .from(planPrices)
+        .where(eq(planPrices.id, 'pr_test_usd_01'));
       expect(stored).toBeDefined();
       expect(stored?.amountMinorUnits).toBe(4999);
       expect(stored?.currency).toBe('USD');
@@ -204,7 +211,10 @@ describe('Tenant Management Phase 01 Database Foundation — Persistence & Invar
         limits: { geoFencing: true, maxLocations: 5 },
       });
 
-      const [stored] = await db.select().from(planEntitlements).where(eq(planEntitlements.id, 'ent_test_01'));
+      const [stored] = await db
+        .select()
+        .from(planEntitlements)
+        .where(eq(planEntitlements.id, 'ent_test_01'));
       expect(stored?.isEnabled).toBe(true);
       expect(stored?.limits).toEqual({ geoFencing: true, maxLocations: 5 });
 
@@ -247,7 +257,10 @@ describe('Tenant Management Phase 01 Database Foundation — Persistence & Invar
         status: 'active',
       });
 
-      const admins = await db.select().from(tenantAdmins).where(eq(tenantAdmins.tenantId, testTenantId));
+      const admins = await db
+        .select()
+        .from(tenantAdmins)
+        .where(eq(tenantAdmins.tenantId, testTenantId));
       expect(admins).toHaveLength(2);
       expect(admins.every((a) => a.isPrimary === false)).toBe(true);
     });
@@ -287,18 +300,33 @@ describe('Tenant Management Phase 01 Database Foundation — Persistence & Invar
 
       // Updating existing non-primary Admin B to primary without demoting Admin A must also be REJECTED
       await expect(
-        db.update(tenantAdmins).set({ isPrimary: true }).where(eq(tenantAdmins.id, 'ta_test_prim_2')),
+        db
+          .update(tenantAdmins)
+          .set({ isPrimary: true })
+          .where(eq(tenantAdmins.id, 'ta_test_prim_2')),
       ).rejects.toThrow();
     });
 
     it('supports atomic reassignment of Primary Administrator', async () => {
       const db = getDb();
       // Demote Admin A, then promote Admin B
-      await db.update(tenantAdmins).set({ isPrimary: false }).where(eq(tenantAdmins.id, 'ta_test_prim_1'));
-      await db.update(tenantAdmins).set({ isPrimary: true }).where(eq(tenantAdmins.id, 'ta_test_prim_2'));
+      await db
+        .update(tenantAdmins)
+        .set({ isPrimary: false })
+        .where(eq(tenantAdmins.id, 'ta_test_prim_1'));
+      await db
+        .update(tenantAdmins)
+        .set({ isPrimary: true })
+        .where(eq(tenantAdmins.id, 'ta_test_prim_2'));
 
-      const [adminB] = await db.select().from(tenantAdmins).where(eq(tenantAdmins.id, 'ta_test_prim_2'));
-      const [adminA] = await db.select().from(tenantAdmins).where(eq(tenantAdmins.id, 'ta_test_prim_1'));
+      const [adminB] = await db
+        .select()
+        .from(tenantAdmins)
+        .where(eq(tenantAdmins.id, 'ta_test_prim_2'));
+      const [adminA] = await db
+        .select()
+        .from(tenantAdmins)
+        .where(eq(tenantAdmins.id, 'ta_test_prim_1'));
 
       expect(adminB?.isPrimary).toBe(true);
       expect(adminA?.isPrimary).toBe(false);
@@ -485,7 +513,9 @@ describe('Tenant Management Phase 01 Database Foundation — Persistence & Invar
   describe('4. Tenant Entitlement Overrides & Auditability', () => {
     it('persists auditable, time-bounded overrides and revocation metadata', async () => {
       const db = getDb();
-      await db.delete(tenantEntitlementOverrides).where(eq(tenantEntitlementOverrides.tenantId, testTenantId));
+      await db
+        .delete(tenantEntitlementOverrides)
+        .where(eq(tenantEntitlementOverrides.tenantId, testTenantId));
 
       const overrideId = 'ovr_test_01';
       const validUntil = new Date(Date.now() + 30 * 86400000);
@@ -564,7 +594,9 @@ describe('Tenant Management Phase 01 Database Foundation — Persistence & Invar
     it('enforces idempotency key uniqueness on transactional outbox events', async () => {
       const db = getDb();
       const idempotencyKey = 'outbox_idem_p1_event_01';
-      await db.delete(transactionalOutbox).where(eq(transactionalOutbox.idempotencyKey, idempotencyKey));
+      await db
+        .delete(transactionalOutbox)
+        .where(eq(transactionalOutbox.idempotencyKey, idempotencyKey));
 
       await db.insert(transactionalOutbox).values({
         id: 'evt_test_01',
@@ -589,7 +621,9 @@ describe('Tenant Management Phase 01 Database Foundation — Persistence & Invar
         }),
       ).rejects.toThrow();
 
-      await db.delete(transactionalOutbox).where(eq(transactionalOutbox.idempotencyKey, idempotencyKey));
+      await db
+        .delete(transactionalOutbox)
+        .where(eq(transactionalOutbox.idempotencyKey, idempotencyKey));
     });
 
     it('persists provisioning job retry attempts and step state transitions', async () => {
@@ -666,7 +700,10 @@ describe('Tenant Management Phase 01 Database Foundation — Persistence & Invar
         })
         .where(eq(transactionalOutbox.id, eventId));
 
-      const [evt] = await db.select().from(transactionalOutbox).where(eq(transactionalOutbox.id, eventId));
+      const [evt] = await db
+        .select()
+        .from(transactionalOutbox)
+        .where(eq(transactionalOutbox.id, eventId));
       expect(evt?.status).toBe('published');
       expect(evt?.publishedAt).toBeDefined();
       expect(evt?.attemptCount).toBe(1);

@@ -275,10 +275,7 @@ describe('BEZENT HRMS — Missing Punch Classification, Payroll Boundary & On-Du
         ],
       } as unknown as AttendanceRepository;
 
-      const settingsService = new AttendanceSettingsService(
-        mockSettingsRepo,
-        mockAttendanceRepo,
-      );
+      const settingsService = new AttendanceSettingsService(mockSettingsRepo, mockAttendanceRepo);
 
       const { batch, exportData } = await settingsService.generatePayrollHandover(
         'tenant_test_01',
@@ -399,11 +396,7 @@ describe('BEZENT HRMS — Missing Punch Classification, Payroll Boundary & On-Du
         // Return true if employee is emp_on_leave
         return employeeId === 'emp_on_leave';
       },
-      checkDateInLockedPeriod: async (
-        _t: string,
-        _c: string,
-        startDate: string,
-      ) => {
+      checkDateInLockedPeriod: async (_t: string, _c: string, startDate: string) => {
         // Dates before 2026-10-10 are locked
         return startDate < '2026-10-10';
       },

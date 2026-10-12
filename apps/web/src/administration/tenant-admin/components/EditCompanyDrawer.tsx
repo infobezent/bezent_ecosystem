@@ -126,8 +126,12 @@ export function EditCompanyDrawer({
     logoUrl: comp.logoUrl || null,
   });
 
-  const [formData, setFormData] = useState<CompanyMasterFormData>(() => mapCompanyToFormData(company));
-  const [initialSnapshot, setInitialSnapshot] = useState<CompanyMasterFormData>(() => mapCompanyToFormData(company));
+  const [formData, setFormData] = useState<CompanyMasterFormData>(() =>
+    mapCompanyToFormData(company),
+  );
+  const [initialSnapshot, setInitialSnapshot] = useState<CompanyMasterFormData>(() =>
+    mapCompanyToFormData(company),
+  );
   const [selectedLogoFile, setSelectedLogoFile] = useState<File | null>(null);
   const [isLogoRemoved, setIsLogoRemoved] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -267,7 +271,8 @@ export function EditCompanyDrawer({
       onSaveSuccess?.(updatedCompany);
       onClose();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to update company master information.';
+      const msg =
+        err instanceof Error ? err.message : 'Failed to update company master information.';
       setErrorMessage(msg);
     } finally {
       setIsSubmitting(false);
@@ -435,7 +440,8 @@ export function EditCompanyDrawer({
 
           <Stack gap="md">
             <span className="bezent-branding-group__help">
-              Registered Office is the legal entity address. Operational branches, offices, and plants are managed in Organization → Work Locations.
+              Registered Office is the legal entity address. Operational branches, offices, and
+              plants are managed in Organization → Work Locations.
             </span>
 
             <Input

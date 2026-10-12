@@ -110,7 +110,8 @@ export const SUPER_ADMIN_NAV_DESTINATIONS: readonly NavDestination[] = [
     subtitle: 'Plans, tenant subscriptions, and entitlements',
     icon: 'documents',
     segment: 'subscriptions',
-    description: 'Commercial subscription plans, customer subscriptions, and application entitlements.',
+    description:
+      'Commercial subscription plans, customer subscriptions, and application entitlements.',
     categoryId: 'subscriptions',
     sidebar: true,
     children: [

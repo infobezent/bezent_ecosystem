@@ -625,7 +625,8 @@ export interface SubscriptionDetailRecord {
   companyId: string | null;
   applicationCode: 'hrms' | 'crm' | 'project_management';
   planId: string;
-  status: 'pending_activation' | 'active' | 'trial' | 'past_due' | 'suspended' | 'cancelled' | 'expired';
+  status:
+    'pending_activation' | 'active' | 'trial' | 'past_due' | 'suspended' | 'cancelled' | 'expired';
   accessMode: 'trial' | 'paid';
   billingCycle: 'monthly' | 'annual' | 'quarterly' | 'custom';
   licensedSeats: number;
@@ -1095,8 +1096,7 @@ export const superAdminApi = {
     return { items, total: res?.total ?? items.length };
   },
 
-  getProvisioningJob: (id: string) =>
-    request<ProvisioningJobRecord>(`/provisioning/jobs/${id}`),
+  getProvisioningJob: (id: string) => request<ProvisioningJobRecord>(`/provisioning/jobs/${id}`),
 
   retryProvisioningJob: (id: string) =>
     request<{ data: ProvisioningJobRecord; message: string }>(`/provisioning/jobs/${id}/retry`, {

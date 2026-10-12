@@ -197,4 +197,3 @@ tenantAdminRouter.get(
   requireTenantAdminCompanyContext,
   tenantAdminController.getCompanyRolesOverview,
 );
-

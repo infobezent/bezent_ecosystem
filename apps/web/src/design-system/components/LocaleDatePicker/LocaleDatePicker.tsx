@@ -31,8 +31,18 @@ export interface LocaleDatePickerProps {
 }
 
 const MONTH_NAMES_EN = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 export function LocaleDatePicker({
@@ -121,9 +131,7 @@ export function LocaleDatePicker({
     for (let i = 0; i < 7; i++) {
       const d = new Date(baseSunday);
       d.setDate(baseSunday.getDate() + i);
-      days.push(
-        new Intl.DateTimeFormat(locale, { weekday: 'narrow' }).format(d),
-      );
+      days.push(new Intl.DateTimeFormat(locale, { weekday: 'narrow' }).format(d));
     }
     return days;
   }, [locale]);
@@ -371,11 +379,7 @@ export function LocaleDatePicker({
           </div>
 
           <div className="bezent-date-picker-footer">
-            <button
-              type="button"
-              className="bezent-date-picker-action-btn"
-              onClick={handleClear}
-            >
+            <button type="button" className="bezent-date-picker-action-btn" onClick={handleClear}>
               Clear
             </button>
             <button

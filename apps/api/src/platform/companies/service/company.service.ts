@@ -502,8 +502,7 @@ export class CompanyService {
     const normalizedPostal =
       normalizePostalCode(dto.postalCode, normalizedCountry ?? undefined) ||
       (dto.postalCode ? dto.postalCode.trim() : null);
-    const normalizedName =
-      normalizeText(dto.name, { collapseWhitespace: true }) || dto.name.trim();
+    const normalizedName = normalizeText(dto.name, { collapseWhitespace: true }) || dto.name.trim();
     const normalizedDisplayName =
       normalizeText(dto.displayName, { collapseWhitespace: true }) ||
       (dto.displayName ? dto.displayName.trim() : normalizedName);
@@ -576,7 +575,9 @@ export class CompanyService {
         timeZone: dto.timeZone?.trim() || null,
         registrationNumber: dto.registrationNumber ? dto.registrationNumber.trim() : null,
         currency: dto.currency ? dto.currency.trim().toUpperCase() : null,
-        locale: dto.locale ? (referenceDataService.getLocale(dto.locale)?.code ?? dto.locale.trim()) : null,
+        locale: dto.locale
+          ? (referenceDataService.getLocale(dto.locale)?.code ?? dto.locale.trim())
+          : null,
         dateFormat: dto.dateFormat ? dto.dateFormat.trim() : null,
         weekStartsOn: dto.weekStartsOn ? dto.weekStartsOn.trim().toLowerCase() : null,
         financialYearStart: dto.financialYearStart ? dto.financialYearStart.trim() : null,

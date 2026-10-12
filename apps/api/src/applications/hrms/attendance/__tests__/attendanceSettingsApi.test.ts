@@ -32,9 +32,7 @@ describe.skipIf(!isDatabaseConfigured)('Attendance Settings V1.0 API', () => {
   /* ── 1. General Settings ── */
   describe('General Settings', () => {
     it('fetches company general settings', async () => {
-      const res = await request(app)
-        .get('/api/v1/hrms/attendance/settings/general')
-        .set(headers);
+      const res = await request(app).get('/api/v1/hrms/attendance/settings/general').set(headers);
 
       expect(res.status).toBe(200);
       expect(res.body.data).toBeDefined();
@@ -353,4 +351,3 @@ describe.skipIf(!isDatabaseConfigured)('Attendance Settings V1.0 API', () => {
     });
   });
 });
-

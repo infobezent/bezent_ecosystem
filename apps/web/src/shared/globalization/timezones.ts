@@ -46,7 +46,8 @@ export function getTimezoneOffsetDetails(
       timeZone,
       timeZoneName: 'short',
     });
-    const abbr = abbrFormatter.formatToParts(date).find((p) => p.type === 'timeZoneName')?.value || 'UTC';
+    const abbr =
+      abbrFormatter.formatToParts(date).find((p) => p.type === 'timeZoneName')?.value || 'UTC';
 
     return { offset, offsetMinutes, abbreviation: abbr };
   } catch {
@@ -123,7 +124,7 @@ const CANONICAL_TIMEZONE_IDS: readonly string[] = [
 
 export const TIMEZONES: readonly TimezoneInfo[] = CANONICAL_TIMEZONE_IDS.map((id) => {
   const { offset, offsetMinutes, abbreviation } = getTimezoneOffsetDetails(id);
-  const region = id.includes('/') ? (id.split('/')[0] || 'Global') : 'Global';
+  const region = id.includes('/') ? id.split('/')[0] || 'Global' : 'Global';
   return {
     id,
     label: `${id} (${abbreviation} ${offset})`,
@@ -150,7 +151,7 @@ export function getTimezone(id?: string | null): TimezoneInfo | undefined {
   // If valid in Intl, construct dynamically
   try {
     const details = getTimezoneOffsetDetails(id.trim());
-    const region = id.includes('/') ? (id.split('/')[0] || 'Custom') : 'Custom';
+    const region = id.includes('/') ? id.split('/')[0] || 'Custom' : 'Custom';
     return {
       id: id.trim(),
       label: `${id.trim()} (${details.abbreviation} ${details.offset})`,

@@ -3,7 +3,8 @@
  * Strongly typed contracts for the Enterprise Operational Control Center.
  */
 
-export type OverviewRoleScope = 'hr_admin' | 'hr_executive' | 'manager' | 'employee' | 'payroll_user';
+export type OverviewRoleScope =
+  'hr_admin' | 'hr_executive' | 'manager' | 'employee' | 'payroll_user';
 
 export interface OverviewAccessScope {
   role: OverviewRoleScope;
@@ -18,9 +19,9 @@ export interface TodayAttendanceKpis {
   timezone: string;
   totalEligibleEmployees: number;
   presentCount: number; // Present equivalents (1.0 for full, 0.5 for half)
-  absentCount: number;  // Absent equivalents
+  absentCount: number; // Absent equivalents
   onLeaveCount: number; // Leave coverage equivalents
-  onDutyCount: number;  // OD coverage equivalents
+  onDutyCount: number; // OD coverage equivalents
   lateArrivalsCount: number;
   missingPunchCount: number;
   pendingProcessingCount: number;

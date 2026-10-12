@@ -42,7 +42,9 @@ export function resolveActiveNavigation(
         if (normalized === cPath) {
           return { destinationId: destination.id, childId: child.id };
         }
-        if (child.aliases?.some((alias) => normalized === `${basePath}/${alias.replace(/^\//, '')}`)) {
+        if (
+          child.aliases?.some((alias) => normalized === `${basePath}/${alias.replace(/^\//, '')}`)
+        ) {
           return { destinationId: destination.id, childId: child.id };
         }
       }
@@ -57,7 +59,11 @@ export function resolveActiveNavigation(
         const cPath = destinationPath(basePath, destination, child.id);
         if (normalized.startsWith(`${cPath}/`)) {
           if (!bestChildMatch || cPath.length > bestChildMatch.length) {
-            bestChildMatch = { destinationId: destination.id, childId: child.id, length: cPath.length };
+            bestChildMatch = {
+              destinationId: destination.id,
+              childId: child.id,
+              length: cPath.length,
+            };
           }
         }
       }

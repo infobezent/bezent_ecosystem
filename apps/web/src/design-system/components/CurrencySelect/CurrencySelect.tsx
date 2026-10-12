@@ -1,11 +1,4 @@
-import {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-  useMemo,
-  type KeyboardEvent,
-} from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo, type KeyboardEvent } from 'react';
 import {
   getAllCurrencies,
   getCurrency,
@@ -102,14 +95,10 @@ export function CurrencySelect({
       setIsOpen(false);
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setHighlightedIndex((prev) =>
-        prev < filteredCurrencies.length - 1 ? prev + 1 : 0,
-      );
+      setHighlightedIndex((prev) => (prev < filteredCurrencies.length - 1 ? prev + 1 : 0));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setHighlightedIndex((prev) =>
-        prev > 0 ? prev - 1 : filteredCurrencies.length - 1,
-      );
+      setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : filteredCurrencies.length - 1));
     } else if (e.key === 'Enter') {
       e.preventDefault();
       const current = filteredCurrencies[highlightedIndex];
@@ -155,8 +144,12 @@ export function CurrencySelect({
         <span className="bezent-currency-select-trigger__value">
           {selectedCurrency ? (
             <>
-              <span className="bezent-currency-select-trigger__symbol">{selectedCurrency.symbol}</span>
-              <span>{selectedCurrency.code} — {selectedCurrency.name}</span>
+              <span className="bezent-currency-select-trigger__symbol">
+                {selectedCurrency.symbol}
+              </span>
+              <span>
+                {selectedCurrency.code} — {selectedCurrency.name}
+              </span>
             </>
           ) : (
             <span className="bezent-currency-select-trigger__placeholder">{placeholder}</span>

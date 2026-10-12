@@ -16,7 +16,10 @@ import {
 import { BezentIcon } from '../../../design-system/icons';
 import { useTenantAdmin } from '../context/TenantAdminContext';
 import { tenantAdminApi, TenantAdminApiError } from '../api/tenantAdminApi';
-import type { TenantApplicationSummary, TenantAdminCompanySummary } from '../types/tenantAdmin.types';
+import type {
+  TenantApplicationSummary,
+  TenantAdminCompanySummary,
+} from '../types/tenantAdmin.types';
 import {
   referenceDataApi,
   type CountryOption,
@@ -178,7 +181,9 @@ export function CreateCompanyPage() {
       })
       .catch((err) => {
         if (!active) return;
-        setRefDataError(err instanceof Error ? err.message : 'Failed to load reference data from platform');
+        setRefDataError(
+          err instanceof Error ? err.message : 'Failed to load reference data from platform',
+        );
       })
       .finally(() => {
         if (active) setIsRefDataLoading(false);
@@ -222,7 +227,9 @@ export function CreateCompanyPage() {
     setState('');
     setPostalCode('');
 
-    const matched = countries.find((c) => c.code === newCountry || c.name.toLowerCase() === newCountry.toLowerCase());
+    const matched = countries.find(
+      (c) => c.code === newCountry || c.name.toLowerCase() === newCountry.toLowerCase(),
+    );
     if (matched) {
       if (matched.defaultCurrency) setCurrency(matched.defaultCurrency);
       if (matched.defaultTimezone) setTimeZone(matched.defaultTimezone);
@@ -330,7 +337,8 @@ export function CreateCompanyPage() {
   // Capacity calculations
   const capacityUsed = capacity?.used ?? capacity?.currentCompanies ?? 0;
   const capacityMax = capacity?.max ?? capacity?.maxCompanies ?? 5;
-  const capacityRemaining = capacity?.remaining ?? capacity?.availableCapacity ?? Math.max(0, capacityMax - capacityUsed);
+  const capacityRemaining =
+    capacity?.remaining ?? capacity?.availableCapacity ?? Math.max(0, capacityMax - capacityUsed);
   const isAtCapacity =
     capacity?.canCreateCompany === false ||
     (capacity?.isAtCapacity !== undefined ? capacity.isAtCapacity : capacityUsed >= capacityMax);
@@ -374,7 +382,7 @@ export function CreateCompanyPage() {
     const words = target.split(/\s+/).filter(Boolean);
     if (words.length === 0) return 'NC';
     if (words.length === 1) return (words[0] || '').slice(0, 2).toUpperCase();
-    return (((words[0]?.[0]) || '') + ((words[1]?.[0]) || '')).toUpperCase() || 'NC';
+    return ((words[0]?.[0] || '') + (words[1]?.[0] || '')).toUpperCase() || 'NC';
   }, [displayName, legalName]);
 
   // Step Validation
@@ -397,7 +405,8 @@ export function CreateCompanyPage() {
       if (!code.trim()) {
         errs.code = 'Company Code is required';
       } else if (!/^[A-Za-z0-9_-]+$/.test(code.trim())) {
-        errs.code = 'Company Code can only contain alphanumeric characters, hyphens, and underscores';
+        errs.code =
+          'Company Code can only contain alphanumeric characters, hyphens, and underscores';
       } else if (code.trim().length > 50) {
         errs.code = 'Company Code cannot exceed 50 characters';
       }
@@ -510,7 +519,9 @@ export function CreateCompanyPage() {
           result.logoUrl = uploadRes.url;
         } catch (logoErr) {
           const msg = logoErr instanceof Error ? logoErr.message : String(logoErr);
-          postCreationWarnings.push(`Company logo upload failed (${msg}). You can upload it later from Company Details.`);
+          postCreationWarnings.push(
+            `Company logo upload failed (${msg}). You can upload it later from Company Details.`,
+          );
         }
       } else if (logoMode === 'tenant' && result.id) {
         try {
@@ -598,23 +609,37 @@ export function CreateCompanyPage() {
 
               <div className="bezent-wizard-success-meta">
                 <h2>{createdCompany.name || displayName}</h2>
-                <p>Company Code: <strong>{createdCompany.code || code}</strong></p>
+                <p>
+                  Company Code: <strong>{createdCompany.code || code}</strong>
+                </p>
                 <Badge variant="success">Active</Badge>
               </div>
 
-              {distributionWarning && (
-                <Alert variant="warning">{distributionWarning}</Alert>
-              )}
+              {distributionWarning && <Alert variant="warning">{distributionWarning}</Alert>}
 
               <div className="bezent-wizard-success-summary">
                 <div className="bezent-review-block">
                   <h4>Setup Details</h4>
-                  <p><strong>Legal Name:</strong> {createdCompany.legalName || legalName || '—'}</p>
-                  <p><strong>Industry:</strong> {createdCompany.industry || industry || '—'}</p>
-                  <p><strong>Location:</strong> {createdCompany.city || city}, {createdCompany.country || country}</p>
-                  <p><strong>Timezone:</strong> {createdCompany.timeZone || timeZone}</p>
-                  <p><strong>Currency:</strong> {createdCompany.currency || currency || '—'}</p>
-                  <p><strong>Enabled Applications:</strong> {selectedApps.join(', ').toUpperCase() || 'None'}</p>
+                  <p>
+                    <strong>Legal Name:</strong> {createdCompany.legalName || legalName || '—'}
+                  </p>
+                  <p>
+                    <strong>Industry:</strong> {createdCompany.industry || industry || '—'}
+                  </p>
+                  <p>
+                    <strong>Location:</strong> {createdCompany.city || city},{' '}
+                    {createdCompany.country || country}
+                  </p>
+                  <p>
+                    <strong>Timezone:</strong> {createdCompany.timeZone || timeZone}
+                  </p>
+                  <p>
+                    <strong>Currency:</strong> {createdCompany.currency || currency || '—'}
+                  </p>
+                  <p>
+                    <strong>Enabled Applications:</strong>{' '}
+                    {selectedApps.join(', ').toUpperCase() || 'None'}
+                  </p>
                 </div>
               </div>
 
@@ -623,7 +648,9 @@ export function CreateCompanyPage() {
                   variant="primary"
                   onClick={() => {
                     selectCompany(createdCompany.id);
-                    navigate(`/tenant-admin/tenant/companies/${encodeURIComponent(createdCompany.id)}/overview`);
+                    navigate(
+                      `/tenant-admin/tenant/companies/${encodeURIComponent(createdCompany.id)}/overview`,
+                    );
                   }}
                 >
                   Go to Company
@@ -674,7 +701,8 @@ export function CreateCompanyPage() {
                   Your tenant has configured {capacityUsed} of {capacityMax} permitted companies.
                 </p>
                 <p>
-                  To add more companies, contact your Super Administrator to increase your tenant company capacity ceiling.
+                  To add more companies, contact your Super Administrator to increase your tenant
+                  company capacity ceiling.
                 </p>
               </Stack>
 
@@ -694,86 +722,97 @@ export function CreateCompanyPage() {
   }
 
   // Prepared dynamic dropdown options
-  const countryOptions = countries.length > 0
-    ? countries.map((c) => ({
-        value: c.code,
-        label: `${c.flagEmoji ? c.flagEmoji + ' ' : ''}${c.name}`,
-      }))
-    : [
-        { value: 'IN', label: '🇮🇳 India' },
-        { value: 'US', label: '🇺🇸 United States' },
-        { value: 'GB', label: '🇬🇧 United Kingdom' },
-        { value: 'SG', label: '🇸🇬 Singapore' },
-        { value: 'AE', label: '🇦🇪 United Arab Emirates' },
-        { value: 'DE', label: '🇩🇪 Germany' },
-        { value: 'AU', label: '🇦🇺 Australia' },
-        { value: 'CA', label: '🇨🇦 Canada' },
-      ];
+  const countryOptions =
+    countries.length > 0
+      ? countries.map((c) => ({
+          value: c.code,
+          label: `${c.flagEmoji ? c.flagEmoji + ' ' : ''}${c.name}`,
+        }))
+      : [
+          { value: 'IN', label: '🇮🇳 India' },
+          { value: 'US', label: '🇺🇸 United States' },
+          { value: 'GB', label: '🇬🇧 United Kingdom' },
+          { value: 'SG', label: '🇸🇬 Singapore' },
+          { value: 'AE', label: '🇦🇪 United Arab Emirates' },
+          { value: 'DE', label: '🇩🇪 Germany' },
+          { value: 'AU', label: '🇦🇺 Australia' },
+          { value: 'CA', label: '🇨🇦 Canada' },
+        ];
 
-  const industryOptions = industries.length > 0
-    ? industries.map((i) => ({ value: i.id, label: i.label }))
-    : [
-        { value: 'Manufacturing', label: 'Manufacturing' },
-        { value: 'IT Services', label: 'IT Services' },
-        { value: 'Software Development', label: 'Software Development' },
-        { value: 'Automotive', label: 'Automotive' },
-        { value: 'Healthcare', label: 'Healthcare' },
-        { value: 'Financial Services', label: 'Financial Services' },
-        { value: 'Retail & E-Commerce', label: 'Retail & E-Commerce' },
-        { value: 'Other', label: 'Other' },
-      ];
+  const industryOptions =
+    industries.length > 0
+      ? industries.map((i) => ({ value: i.id, label: i.label }))
+      : [
+          { value: 'Manufacturing', label: 'Manufacturing' },
+          { value: 'IT Services', label: 'IT Services' },
+          { value: 'Software Development', label: 'Software Development' },
+          { value: 'Automotive', label: 'Automotive' },
+          { value: 'Healthcare', label: 'Healthcare' },
+          { value: 'Financial Services', label: 'Financial Services' },
+          { value: 'Retail & E-Commerce', label: 'Retail & E-Commerce' },
+          { value: 'Other', label: 'Other' },
+        ];
 
-  const orgTypeOptions = organizationTypes.length > 0
-    ? organizationTypes.map((ot) => ({ value: ot.id, label: ot.label }))
-    : [
-        { value: 'Private Limited', label: 'Private Limited' },
-        { value: 'Public Limited', label: 'Public Limited' },
-        { value: 'Partnership', label: 'Partnership' },
-        { value: 'Sole Proprietorship', label: 'Sole Proprietorship' },
-        { value: 'Limited Liability Partnership (LLP)', label: 'Limited Liability Partnership (LLP)' },
-        { value: 'Non-Profit / NGO', label: 'Non-Profit / NGO' },
-      ];
+  const orgTypeOptions =
+    organizationTypes.length > 0
+      ? organizationTypes.map((ot) => ({ value: ot.id, label: ot.label }))
+      : [
+          { value: 'Private Limited', label: 'Private Limited' },
+          { value: 'Public Limited', label: 'Public Limited' },
+          { value: 'Partnership', label: 'Partnership' },
+          { value: 'Sole Proprietorship', label: 'Sole Proprietorship' },
+          {
+            value: 'Limited Liability Partnership (LLP)',
+            label: 'Limited Liability Partnership (LLP)',
+          },
+          { value: 'Non-Profit / NGO', label: 'Non-Profit / NGO' },
+        ];
 
-  const timezoneOptions = timezones.length > 0
-    ? timezones.map((tz) => ({ value: tz.id, label: tz.label }))
-    : [
-        { value: 'Asia/Kolkata', label: 'Asia/Kolkata (IST +5:30)' },
-        { value: 'America/New_York', label: 'America/New_York (EST -5:00)' },
-        { value: 'Europe/London', label: 'Europe/London (GMT +0:00)' },
-        { value: 'UTC', label: 'UTC' },
-      ];
+  const timezoneOptions =
+    timezones.length > 0
+      ? timezones.map((tz) => ({ value: tz.id, label: tz.label }))
+      : [
+          { value: 'Asia/Kolkata', label: 'Asia/Kolkata (IST +5:30)' },
+          { value: 'America/New_York', label: 'America/New_York (EST -5:00)' },
+          { value: 'Europe/London', label: 'Europe/London (GMT +0:00)' },
+          { value: 'UTC', label: 'UTC' },
+        ];
 
-  const currencyOptions = currencies.length > 0
-    ? currencies.map((c) => ({ value: c.code, label: `${c.code} (${c.symbol})` }))
-    : [
-        { value: 'INR', label: 'INR (₹)' },
-        { value: 'USD', label: 'USD ($)' },
-        { value: 'EUR', label: 'EUR (€)' },
-        { value: 'GBP', label: 'GBP (£)' },
-      ];
+  const currencyOptions =
+    currencies.length > 0
+      ? currencies.map((c) => ({ value: c.code, label: `${c.code} (${c.symbol})` }))
+      : [
+          { value: 'INR', label: 'INR (₹)' },
+          { value: 'USD', label: 'USD ($)' },
+          { value: 'EUR', label: 'EUR (€)' },
+          { value: 'GBP', label: 'GBP (£)' },
+        ];
 
-  const localeOptions = locales.length > 0
-    ? locales.map((l) => ({ value: l.code, label: `${l.name} (${l.code})` }))
-    : [
-        { value: 'en-IN', label: 'English (India)' },
-        { value: 'en-US', label: 'English (United States)' },
-        { value: 'en-GB', label: 'English (United Kingdom)' },
-      ];
+  const localeOptions =
+    locales.length > 0
+      ? locales.map((l) => ({ value: l.code, label: `${l.name} (${l.code})` }))
+      : [
+          { value: 'en-IN', label: 'English (India)' },
+          { value: 'en-US', label: 'English (United States)' },
+          { value: 'en-GB', label: 'English (United Kingdom)' },
+        ];
 
-  const dateFormatOptions = dateFormats.length > 0
-    ? dateFormats.map((df) => ({ value: df.id, label: df.label }))
-    : [
-        { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY' },
-        { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY' },
-        { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD' },
-      ];
+  const dateFormatOptions =
+    dateFormats.length > 0
+      ? dateFormats.map((df) => ({ value: df.id, label: df.label }))
+      : [
+          { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY' },
+          { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY' },
+          { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD' },
+        ];
 
-  const weekStartOptions = weekStartDays.length > 0
-    ? weekStartDays.map((ws) => ({ value: ws.id, label: ws.label }))
-    : [
-        { value: 'monday', label: 'Monday' },
-        { value: 'sunday', label: 'Sunday' },
-      ];
+  const weekStartOptions =
+    weekStartDays.length > 0
+      ? weekStartDays.map((ws) => ({ value: ws.id, label: ws.label }))
+      : [
+          { value: 'monday', label: 'Monday' },
+          { value: 'sunday', label: 'Sunday' },
+        ];
 
   const regionOptions = availableRegions.map((r) => ({
     value: r.name,
@@ -859,9 +898,7 @@ export function CreateCompanyPage() {
           </Alert>
         )}
 
-        {submissionError && (
-          <Alert variant="error">{submissionError}</Alert>
-        )}
+        {submissionError && <Alert variant="error">{submissionError}</Alert>}
 
         {/* 3. WIZARD MAIN + RIGHT CONTEXT LAYOUT */}
         <div className="bezent-wizard-layout">
@@ -922,11 +959,7 @@ export function CreateCompanyPage() {
                           </Inline>
                         </Button>
                         {uploadedLogoPreview && (
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={handleRemoveLogo}
-                          >
+                          <Button variant="danger" size="sm" onClick={handleRemoveLogo}>
                             Remove
                           </Button>
                         )}
@@ -1019,7 +1052,9 @@ export function CreateCompanyPage() {
                     <div className="bezent-wizard-sub-section__icon" aria-hidden="true">
                       <BezentIcon name="user" size={18} />
                     </div>
-                    <h4 className="bezent-wizard-sub-section__title">Primary Contact for this Company</h4>
+                    <h4 className="bezent-wizard-sub-section__title">
+                      Primary Contact for this Company
+                    </h4>
                   </div>
 
                   <div className="bezent-wizard-form-grid">
@@ -1207,7 +1242,8 @@ export function CreateCompanyPage() {
                   <LoadingState label="Loading tenant entitlements..." />
                 ) : entitledApps.length === 0 ? (
                   <Alert variant="warning">
-                    No application entitlements found for this tenant. You can continue creating the company and distribute applications later.
+                    No application entitlements found for this tenant. You can continue creating the
+                    company and distribute applications later.
                   </Alert>
                 ) : (
                   <div className="bezent-app-selection-list">
@@ -1232,7 +1268,7 @@ export function CreateCompanyPage() {
                             <BezentIcon
                               name={
                                 modCode === 'hrms'
-                                    ? 'organization'
+                                  ? 'organization'
                                   : modCode === 'crm'
                                     ? 'user'
                                     : 'tasks'
@@ -1285,13 +1321,32 @@ export function CreateCompanyPage() {
                       <h4>Company Identity</h4>
                     </div>
                     <div className="bezent-review-grid">
-                      <div><span>Legal Name:</span><strong>{legalName || '—'}</strong></div>
-                      <div><span>Display Name:</span><strong>{displayName || '—'}</strong></div>
-                      <div><span>Company Code:</span><strong>{code || '—'}</strong></div>
-                      <div><span>Industry:</span><strong>{industry || '—'}</strong></div>
-                      <div><span>Company Type:</span><strong>{organizationType || '—'}</strong></div>
-                      <div><span>Registration Number:</span><strong>{registrationNumber || '—'}</strong></div>
-                      <div><span>Logo Mode:</span>
+                      <div>
+                        <span>Legal Name:</span>
+                        <strong>{legalName || '—'}</strong>
+                      </div>
+                      <div>
+                        <span>Display Name:</span>
+                        <strong>{displayName || '—'}</strong>
+                      </div>
+                      <div>
+                        <span>Company Code:</span>
+                        <strong>{code || '—'}</strong>
+                      </div>
+                      <div>
+                        <span>Industry:</span>
+                        <strong>{industry || '—'}</strong>
+                      </div>
+                      <div>
+                        <span>Company Type:</span>
+                        <strong>{organizationType || '—'}</strong>
+                      </div>
+                      <div>
+                        <span>Registration Number:</span>
+                        <strong>{registrationNumber || '—'}</strong>
+                      </div>
+                      <div>
+                        <span>Logo Mode:</span>
                         <strong>
                           {logoMode === 'upload'
                             ? 'Uploaded (local preview; cloud storage pending)'
@@ -1310,12 +1365,30 @@ export function CreateCompanyPage() {
                       <h4>Registered Address</h4>
                     </div>
                     <div className="bezent-review-grid">
-                      <div><span>Address Line 1:</span><strong>{addressLine1 || '—'}</strong></div>
-                      <div><span>Address Line 2:</span><strong>{addressLine2 || '—'}</strong></div>
-                      <div><span>Country:</span><strong>{country || '—'}</strong></div>
-                      <div><span>State / Region:</span><strong>{state || '—'}</strong></div>
-                      <div><span>City:</span><strong>{city || '—'}</strong></div>
-                      <div><span>Postal Code:</span><strong>{postalCode || '—'}</strong></div>
+                      <div>
+                        <span>Address Line 1:</span>
+                        <strong>{addressLine1 || '—'}</strong>
+                      </div>
+                      <div>
+                        <span>Address Line 2:</span>
+                        <strong>{addressLine2 || '—'}</strong>
+                      </div>
+                      <div>
+                        <span>Country:</span>
+                        <strong>{country || '—'}</strong>
+                      </div>
+                      <div>
+                        <span>State / Region:</span>
+                        <strong>{state || '—'}</strong>
+                      </div>
+                      <div>
+                        <span>City:</span>
+                        <strong>{city || '—'}</strong>
+                      </div>
+                      <div>
+                        <span>Postal Code:</span>
+                        <strong>{postalCode || '—'}</strong>
+                      </div>
                     </div>
                   </div>
 
@@ -1326,12 +1399,30 @@ export function CreateCompanyPage() {
                       <h4>Regional Settings</h4>
                     </div>
                     <div className="bezent-review-grid">
-                      <div><span>Time Zone:</span><strong>{timeZone || '—'}</strong></div>
-                      <div><span>Currency:</span><strong>{currency || '—'}</strong></div>
-                      <div><span>Locale:</span><strong>{locale || '—'}</strong></div>
-                      <div><span>Date Format:</span><strong>{dateFormat || '—'}</strong></div>
-                      <div><span>Week Starts On:</span><strong>{weekStartsOn || '—'}</strong></div>
-                      <div><span>Financial Year:</span><strong>{financialYearStart || '—'}</strong></div>
+                      <div>
+                        <span>Time Zone:</span>
+                        <strong>{timeZone || '—'}</strong>
+                      </div>
+                      <div>
+                        <span>Currency:</span>
+                        <strong>{currency || '—'}</strong>
+                      </div>
+                      <div>
+                        <span>Locale:</span>
+                        <strong>{locale || '—'}</strong>
+                      </div>
+                      <div>
+                        <span>Date Format:</span>
+                        <strong>{dateFormat || '—'}</strong>
+                      </div>
+                      <div>
+                        <span>Week Starts On:</span>
+                        <strong>{weekStartsOn || '—'}</strong>
+                      </div>
+                      <div>
+                        <span>Financial Year:</span>
+                        <strong>{financialYearStart || '—'}</strong>
+                      </div>
                     </div>
                   </div>
 
@@ -1361,9 +1452,22 @@ export function CreateCompanyPage() {
                       <h4>Tenant Capacity Impact</h4>
                     </div>
                     <div className="bezent-review-capacity-stats">
-                      <div><span>Current:</span><strong>{capacityUsed} / {capacityMax}</strong></div>
-                      <div><span>After Creation:</span><strong>{capacityUsed + 1} / {capacityMax}</strong></div>
-                      <div><span>Remaining:</span><strong>{Math.max(0, capacityRemaining - 1)}</strong></div>
+                      <div>
+                        <span>Current:</span>
+                        <strong>
+                          {capacityUsed} / {capacityMax}
+                        </strong>
+                      </div>
+                      <div>
+                        <span>After Creation:</span>
+                        <strong>
+                          {capacityUsed + 1} / {capacityMax}
+                        </strong>
+                      </div>
+                      <div>
+                        <span>Remaining:</span>
+                        <strong>{Math.max(0, capacityRemaining - 1)}</strong>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1384,11 +1488,7 @@ export function CreateCompanyPage() {
                 </Button>
 
                 {currentStep > 1 && (
-                  <Button
-                    variant="secondary"
-                    onClick={goToPrevStep}
-                    disabled={isSubmitting}
-                  >
+                  <Button variant="secondary" onClick={goToPrevStep} disabled={isSubmitting}>
                     Back
                   </Button>
                 )}
@@ -1403,11 +1503,7 @@ export function CreateCompanyPage() {
                     </Inline>
                   </Button>
                 ) : (
-                  <Button
-                    variant="primary"
-                    onClick={handleCreateCompany}
-                    disabled={isSubmitting}
-                  >
+                  <Button variant="primary" onClick={handleCreateCompany} disabled={isSubmitting}>
                     {isSubmitting ? (
                       <Inline gap="xs" align="center">
                         <BezentIcon name="clock" size={14} />
@@ -1434,9 +1530,17 @@ export function CreateCompanyPage() {
               <div className="bezent-company-preview-identity">
                 <div className="bezent-company-preview-avatar">
                   {logoMode === 'upload' && uploadedLogoPreview ? (
-                    <img src={uploadedLogoPreview} alt="Logo" className="bezent-logo-compact__img" />
+                    <img
+                      src={uploadedLogoPreview}
+                      alt="Logo"
+                      className="bezent-logo-compact__img"
+                    />
                   ) : logoMode === 'tenant' && tenant?.logoUrl ? (
-                    <img src={tenant.logoUrl} alt="Tenant logo" className="bezent-logo-compact__img" />
+                    <img
+                      src={tenant.logoUrl}
+                      alt="Tenant logo"
+                      className="bezent-logo-compact__img"
+                    />
                   ) : (
                     <span>{companyInitials}</span>
                   )}
@@ -1446,13 +1550,15 @@ export function CreateCompanyPage() {
                   <span className="bezent-company-preview-name">
                     {displayName.trim() || legalName.trim() || 'New Company'}
                   </span>
-                  <span className="bezent-company-preview-code">
-                    {code.trim() || '—'}
-                  </span>
+                  <span className="bezent-company-preview-code">{code.trim() || '—'}</span>
                 </div>
               </div>
 
-              {(industry.trim() || organizationType.trim() || contactName.trim() || businessEmail.trim() || contactPhone.trim()) ? (
+              {industry.trim() ||
+              organizationType.trim() ||
+              contactName.trim() ||
+              businessEmail.trim() ||
+              contactPhone.trim() ? (
                 <div className="bezent-company-preview-details">
                   {industry.trim() && (
                     <div className="bezent-company-preview-row">
@@ -1482,7 +1588,9 @@ export function CreateCompanyPage() {
                           <span className="bezent-company-preview-contact-item">{contactName}</span>
                         )}
                         {businessEmail.trim() && (
-                          <span className="bezent-company-preview-contact-sub">{businessEmail}</span>
+                          <span className="bezent-company-preview-contact-sub">
+                            {businessEmail}
+                          </span>
                         )}
                         {contactPhone.trim() && (
                           <span className="bezent-company-preview-contact-sub">{contactPhone}</span>

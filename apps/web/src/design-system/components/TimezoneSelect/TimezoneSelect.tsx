@@ -1,11 +1,4 @@
-import {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-  useMemo,
-  type KeyboardEvent,
-} from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo, type KeyboardEvent } from 'react';
 import {
   getAllTimezones,
   getTimezone,
@@ -104,14 +97,10 @@ export function TimezoneSelect({
       setIsOpen(false);
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setHighlightedIndex((prev) =>
-        prev < filteredTimezones.length - 1 ? prev + 1 : 0,
-      );
+      setHighlightedIndex((prev) => (prev < filteredTimezones.length - 1 ? prev + 1 : 0));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setHighlightedIndex((prev) =>
-        prev > 0 ? prev - 1 : filteredTimezones.length - 1,
-      );
+      setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : filteredTimezones.length - 1));
     } else if (e.key === 'Enter') {
       e.preventDefault();
       const current = filteredTimezones[highlightedIndex];

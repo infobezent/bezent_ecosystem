@@ -16,6 +16,7 @@ This document presents a comprehensive, evidence-based, read-only architectural 
 The audit assesses whether the backend services, repositories, controllers, background engines, and HTTP endpoints are ready to safely support the finalized Super Admin Tenant Management user interface.
 
 ### Key Audit Findings:
+
 1. **Core Data Models & Security Invariants are Rock-Solid:** The database schema (`0030_tenant_management_v1.sql`), virtual column uniqueness (`primary_active_guard`), MySQL transactions, RBAC (`requirePlatformAuth`, `requireSuperAdmin`), and Drizzle repositories function cleanly with 100% test pass rates (58 test suites, 891 tests).
 2. **Critical Gaps in Creation & Orchestration (P0):** The existing `POST /api/v1/platform/provisioning/provision` is a legacy Phase 00 artifact that bypasses commercial plans, does not write to `tenant_subscriptions`, does not issue invitation tokens, and immediately creates active administrators with unusable hashed passwords. There is **no atomic, 4-step tenant creation orchestration API** that accepts the finalized wizard payload.
 3. **Runtime Entitlement Disconnect (P0):** While `effectiveEntitlementService` resolves commercial plan entitlements and overrides, runtime authorization (`accessResolverService` and `ModuleService.getEnabledModules()`) still exclusively checks the legacy `tenant_modules` table. There is no automated bridge synchronizing subscription changes to `tenant_modules`.
@@ -29,17 +30,17 @@ The audit assesses whether the backend services, repositories, controllers, back
 
 A weighted component scoring model was applied across 8 architectural domains:
 
-| Domain | Weight | Readiness | Weighted Score | Status |
-|---|:---:|:---:|:---:|:---:|
-| **1. Commercial Plan & Pricing Catalog** | 10% | 100% | 10.0% | Complete |
-| **2. Subscriptions Engine (Option A Internal)** | 15% | 85% | 12.75% | Partial (Lacks background expiration & scheduled activation workers) |
-| **3. Entitlements & Overrides Engine** | 15% | 75% | 11.25% | Partial (Lacks runtime sync bridge to `tenant_modules`) |
-| **4. Primary Admin & Invitation Engine** | 10% | 80% | 8.0% | Partial (Lacks company membership activation on accept & outbox email) |
-| **5. Tenant Lifecycle & Hardened Governance** | 10% | 95% | 9.5% | Complete |
-| **6. All Tenants Console API (List & Summary)** | 15% | 60% | 9.0% | Partial (Lacks trial metric, primary admin in list, sorting, plan filter) |
-| **7. Create Tenant 4-Step Orchestration API** | 15% | 40% | 6.0% | Incomplete (No unified 4-step transactional endpoint) |
-| **8. Background Engines & Outbox Runtime** | 10% | 50% | 5.0% | Incomplete (Services exist, but not started in server bootstrap) |
-| **Total Weighted Readiness** | **100%** | — | **71.5%** | **CONDITIONAL** |
+| Domain                                          |  Weight  | Readiness | Weighted Score |                                  Status                                   |
+| ----------------------------------------------- | :------: | :-------: | :------------: | :-----------------------------------------------------------------------: |
+| **1. Commercial Plan & Pricing Catalog**        |   10%    |   100%    |     10.0%      |                                 Complete                                  |
+| **2. Subscriptions Engine (Option A Internal)** |   15%    |    85%    |     12.75%     |   Partial (Lacks background expiration & scheduled activation workers)    |
+| **3. Entitlements & Overrides Engine**          |   15%    |    75%    |     11.25%     |          Partial (Lacks runtime sync bridge to `tenant_modules`)          |
+| **4. Primary Admin & Invitation Engine**        |   10%    |    80%    |      8.0%      |  Partial (Lacks company membership activation on accept & outbox email)   |
+| **5. Tenant Lifecycle & Hardened Governance**   |   10%    |    95%    |      9.5%      |                                 Complete                                  |
+| **6. All Tenants Console API (List & Summary)** |   15%    |    60%    |      9.0%      | Partial (Lacks trial metric, primary admin in list, sorting, plan filter) |
+| **7. Create Tenant 4-Step Orchestration API**   |   15%    |    40%    |      6.0%      |           Incomplete (No unified 4-step transactional endpoint)           |
+| **8. Background Engines & Outbox Runtime**      |   10%    |    50%    |      5.0%      |     Incomplete (Services exist, but not started in server bootstrap)      |
+| **Total Weighted Readiness**                    | **100%** |     —     |   **71.5%**    |                              **CONDITIONAL**                              |
 
 ---
 
@@ -60,32 +61,34 @@ The following capabilities were verified directly in source code and automated t
 
 Super Admin $\rightarrow$ Tenants $\rightarrow$ All Tenants view requirements evaluated against current implementation:
 
-| Requirement | Implementation Status | Evidence / Location | Gap / Deficiency |
-|---|:---:|---|---|
-| **Total Tenants Metric** | **COMPLETE** | `TenantService.getSummaryMetrics()` (`apps/api/src/platform/tenants/service/tenant.service.ts:233`) | None. Returns count of all non-archived tenants. |
-| **Active Tenants Metric** | **COMPLETE** | `TenantService.getSummaryMetrics()` (`line 234`) | None. Returns count with `status = 'active'`. |
-| **Suspended Tenants Metric** | **COMPLETE** | `TenantService.getSummaryMetrics()` (`line 235`) | None. Returns count with `status = 'suspended'`. |
-| **Trial Tenants Metric** | **MISSING** | `tenant.service.ts:230` | `getSummaryMetrics()` does NOT return `trialTenants`. Must define deterministic tenant-level classification policy. |
-| **Search by Tenant Name & ID** | **COMPLETE** | `TenantRepository.list()` (`apps/api/src/platform/tenants/repository/tenant.repository.ts:290`) | Searches `tenants.name`, `tenants.id`, `tenantDetails.code`. |
-| **Search by Primary Admin Email** | **MISSING** | `tenant.repository.ts:290-300` | Search only inspects `tenantDetails.contactEmail`. Does NOT search `tenant_admins` $\rightarrow$ `users.email`. |
-| **Status Filtering** | **PARTIAL** | `tenant.repository.ts:287` | Filters `tenants.status` (`active`, `suspended`, `archived`). Cannot filter by `'trial'` because trial is a subscription state, not a tenant state. |
-| **Application Filtering** | **PARTIAL** | `tenant.repository.ts:301-315` | Filters legacy `tenant_modules` table only. Does NOT filter by active `tenant_subscriptions.application_code`. |
-| **Plan Filtering** | **MISSING** | `tenant.repository.ts:280-318` | No `planId` filter supported in query schema or repository. |
-| **Creation Date Range Filtering** | **MISSING** | `tenant.repository.ts:280-318` | No `from` or `to` timestamp filtering supported. |
-| **Server-Side Sorting** | **MISSING** | `tenant.repository.ts:334` | Hardcoded to `.orderBy(desc(tenants.createdAt))`. No dynamic `sortBy` or `sortOrder`. |
-| **Pagination** | **COMPLETE** | `tenant.repository.ts:282-284` | Supports `page` and `limit`, returns `{ items, total }`. |
-| **Tenant Logo / Name / ID** | **PARTIAL** | `tenant.repository.ts:321` | Returns name and ID. Logo URL is not joined or returned in tenant record. |
-| **Primary Admin Details in List** | **MISSING** | `tenant.repository.ts:424` | Returns `adminsCount` (derived from company admins), but does NOT return the Primary Admin's name, email, or status. |
-| **Subscription Summary in List** | **MISSING** | `tenant.repository.ts:424` | Does NOT join `tenant_subscriptions`. Active plans, seats, and trial flags are absent from list items. |
-| **Active vs Licensed Users in List** | **PARTIAL** | `tenant.repository.ts:424` | Returns `userCount` (memberships count), but does not return licensed seats ceiling. |
-| **Lifecycle Actions (Suspend/Activate)** | **COMPLETE** | `POST /tenants/:id/suspend`, `POST /tenants/:id/activate` | Handled by `tenantController.suspend` and `activate`. |
+| Requirement                              | Implementation Status | Evidence / Location                                                                                 | Gap / Deficiency                                                                                                                                    |
+| ---------------------------------------- | :-------------------: | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Total Tenants Metric**                 |     **COMPLETE**      | `TenantService.getSummaryMetrics()` (`apps/api/src/platform/tenants/service/tenant.service.ts:233`) | None. Returns count of all non-archived tenants.                                                                                                    |
+| **Active Tenants Metric**                |     **COMPLETE**      | `TenantService.getSummaryMetrics()` (`line 234`)                                                    | None. Returns count with `status = 'active'`.                                                                                                       |
+| **Suspended Tenants Metric**             |     **COMPLETE**      | `TenantService.getSummaryMetrics()` (`line 235`)                                                    | None. Returns count with `status = 'suspended'`.                                                                                                    |
+| **Trial Tenants Metric**                 |      **MISSING**      | `tenant.service.ts:230`                                                                             | `getSummaryMetrics()` does NOT return `trialTenants`. Must define deterministic tenant-level classification policy.                                 |
+| **Search by Tenant Name & ID**           |     **COMPLETE**      | `TenantRepository.list()` (`apps/api/src/platform/tenants/repository/tenant.repository.ts:290`)     | Searches `tenants.name`, `tenants.id`, `tenantDetails.code`.                                                                                        |
+| **Search by Primary Admin Email**        |      **MISSING**      | `tenant.repository.ts:290-300`                                                                      | Search only inspects `tenantDetails.contactEmail`. Does NOT search `tenant_admins` $\rightarrow$ `users.email`.                                     |
+| **Status Filtering**                     |      **PARTIAL**      | `tenant.repository.ts:287`                                                                          | Filters `tenants.status` (`active`, `suspended`, `archived`). Cannot filter by `'trial'` because trial is a subscription state, not a tenant state. |
+| **Application Filtering**                |      **PARTIAL**      | `tenant.repository.ts:301-315`                                                                      | Filters legacy `tenant_modules` table only. Does NOT filter by active `tenant_subscriptions.application_code`.                                      |
+| **Plan Filtering**                       |      **MISSING**      | `tenant.repository.ts:280-318`                                                                      | No `planId` filter supported in query schema or repository.                                                                                         |
+| **Creation Date Range Filtering**        |      **MISSING**      | `tenant.repository.ts:280-318`                                                                      | No `from` or `to` timestamp filtering supported.                                                                                                    |
+| **Server-Side Sorting**                  |      **MISSING**      | `tenant.repository.ts:334`                                                                          | Hardcoded to `.orderBy(desc(tenants.createdAt))`. No dynamic `sortBy` or `sortOrder`.                                                               |
+| **Pagination**                           |     **COMPLETE**      | `tenant.repository.ts:282-284`                                                                      | Supports `page` and `limit`, returns `{ items, total }`.                                                                                            |
+| **Tenant Logo / Name / ID**              |      **PARTIAL**      | `tenant.repository.ts:321`                                                                          | Returns name and ID. Logo URL is not joined or returned in tenant record.                                                                           |
+| **Primary Admin Details in List**        |      **MISSING**      | `tenant.repository.ts:424`                                                                          | Returns `adminsCount` (derived from company admins), but does NOT return the Primary Admin's name, email, or status.                                |
+| **Subscription Summary in List**         |      **MISSING**      | `tenant.repository.ts:424`                                                                          | Does NOT join `tenant_subscriptions`. Active plans, seats, and trial flags are absent from list items.                                              |
+| **Active vs Licensed Users in List**     |      **PARTIAL**      | `tenant.repository.ts:424`                                                                          | Returns `userCount` (memberships count), but does not return licensed seats ceiling.                                                                |
+| **Lifecycle Actions (Suspend/Activate)** |     **COMPLETE**      | `POST /tenants/:id/suspend`, `POST /tenants/:id/activate`                                           | Handled by `tenantController.suspend` and `activate`.                                                                                               |
 
 ### Deterministic Trial Tenant Classification Policy:
+
 > **Policy:** A Tenant is classified as **Trial** if and only if:
+>
 > 1. It has at least one active subscription in `status = 'trial'`, **AND**
 > 2. It has **zero** subscriptions in `status = 'active'` (paid).
-> 
-> *Rationale:* If a customer has paid for HRMS but is trialing CRM, the customer is commercially an Active Paid Customer with a trialing add-on. They must not be counted as a Trial Tenant.
+>
+> _Rationale:_ If a customer has paid for HRMS but is trialing CRM, the customer is commercially an Active Paid Customer with a trialing add-on. They must not be counted as a Trial Tenant.
 
 ---
 
@@ -93,23 +96,23 @@ Super Admin $\rightarrow$ Tenants $\rightarrow$ All Tenants view requirements ev
 
 Super Admin $\rightarrow$ Tenants $\rightarrow$ Create Tenant (4-Step Wizard) evaluated against backend:
 
-| Step / Requirement | Implementation Status | Evidence / Location | Gap / Deficiency |
-|---|:---:|---|---|
-| **Step 1: Company Profile Fields** | **PARTIAL** | `apps/api/src/platform/tenants/validation/tenant.schema.ts` | Base `createTenant` accepts only name, code, phone, email. Lacks display name, logo URL, website, industry, company size, full address, timezone, tax/reg fields. |
-| **Step 1: Immutable Tenant ID** | **COMPLETE** | `apps/api/src/platform/auth/security.ts:generateSurrogateId` | Generated with prefix `tnt_...`. |
-| **Step 1: Primary Company Creation** | **PARTIAL** | `provisioning.service.ts:146` | Exists in legacy `provisionCustomer`, but absent from base `createTenant`. |
-| **Step 1: Similarity Warnings** | **MISSING** | None | No preflight duplicate similarity check on tenant or company legal name. |
-| **Step 2: Primary Admin Designation** | **COMPLETE** | `apps/api/src/platform/tenants/service/primaryAdmin.service.ts` | Fully supported via `invitePrimaryAdmin`. |
-| **Step 2: Identity Reuse** | **COMPLETE** | `primaryAdmin.service.ts:340` | Checks if user email exists globally; reuses without creating duplicate identity. |
-| **Step 2: Invitation Issuance & Expiry** | **COMPLETE** | `primaryAdmin.service.ts:174-190` | Generates 32-byte secure token, sets 7-day expiration. |
-| **Step 2: No Authority Before Accept** | **COMPLETE** | `primaryAdmin.service.ts:188` | Invitation stays `pending`. `tenant_admins` record is not created until token acceptance. |
-| **Step 3: Multi-Application Selection** | **COMPLETE** | `apps/api/src/platform/plans/` | Plan catalog supports `hrms`, `crm`, `project_management`. |
-| **Step 3: Subscription Creation (Seats/Cycle)** | **COMPLETE** | `apps/api/src/platform/subscriptions/service/subscription.service.ts:42` | `createSubscription` supports plan selection, licensed seats, trial/paid mode, and billing cycles. |
-| **Step 3: Entitlement Preview** | **COMPLETE** | `GET /tenants/:id/entitlements` | Preview endpoint exists. |
-| **Step 4: Server Preflight Validation** | **MISSING** | `provisioning.service.ts:63` | Legacy preflight only checks code and email; does not preflight check plans, prices, or seat allocations. |
-| **Step 4: Idempotency Key Handling** | **PARTIAL** | `provisioningJob.service.ts:28` | Supported in jobs and outbox, but no top-level tenant creation idempotency key check. |
-| **Step 4: Atomic Multi-Entity Transaction** | **MISSING** | None | No single transactional boundary creates Tenant + Primary Company + Subscriptions + Admin Invitation + Outbox Event in one atomic commit. |
-| **Step 4: Asynchronous Email & Provisioning** | **PARTIAL** | `outbox/` & `provisioning/` | Data tables exist, but synchronous email is still called in `primaryAdmin.service.ts:192`. |
+| Step / Requirement                              | Implementation Status | Evidence / Location                                                      | Gap / Deficiency                                                                                                                                                  |
+| ----------------------------------------------- | :-------------------: | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Step 1: Company Profile Fields**              |      **PARTIAL**      | `apps/api/src/platform/tenants/validation/tenant.schema.ts`              | Base `createTenant` accepts only name, code, phone, email. Lacks display name, logo URL, website, industry, company size, full address, timezone, tax/reg fields. |
+| **Step 1: Immutable Tenant ID**                 |     **COMPLETE**      | `apps/api/src/platform/auth/security.ts:generateSurrogateId`             | Generated with prefix `tnt_...`.                                                                                                                                  |
+| **Step 1: Primary Company Creation**            |      **PARTIAL**      | `provisioning.service.ts:146`                                            | Exists in legacy `provisionCustomer`, but absent from base `createTenant`.                                                                                        |
+| **Step 1: Similarity Warnings**                 |      **MISSING**      | None                                                                     | No preflight duplicate similarity check on tenant or company legal name.                                                                                          |
+| **Step 2: Primary Admin Designation**           |     **COMPLETE**      | `apps/api/src/platform/tenants/service/primaryAdmin.service.ts`          | Fully supported via `invitePrimaryAdmin`.                                                                                                                         |
+| **Step 2: Identity Reuse**                      |     **COMPLETE**      | `primaryAdmin.service.ts:340`                                            | Checks if user email exists globally; reuses without creating duplicate identity.                                                                                 |
+| **Step 2: Invitation Issuance & Expiry**        |     **COMPLETE**      | `primaryAdmin.service.ts:174-190`                                        | Generates 32-byte secure token, sets 7-day expiration.                                                                                                            |
+| **Step 2: No Authority Before Accept**          |     **COMPLETE**      | `primaryAdmin.service.ts:188`                                            | Invitation stays `pending`. `tenant_admins` record is not created until token acceptance.                                                                         |
+| **Step 3: Multi-Application Selection**         |     **COMPLETE**      | `apps/api/src/platform/plans/`                                           | Plan catalog supports `hrms`, `crm`, `project_management`.                                                                                                        |
+| **Step 3: Subscription Creation (Seats/Cycle)** |     **COMPLETE**      | `apps/api/src/platform/subscriptions/service/subscription.service.ts:42` | `createSubscription` supports plan selection, licensed seats, trial/paid mode, and billing cycles.                                                                |
+| **Step 3: Entitlement Preview**                 |     **COMPLETE**      | `GET /tenants/:id/entitlements`                                          | Preview endpoint exists.                                                                                                                                          |
+| **Step 4: Server Preflight Validation**         |      **MISSING**      | `provisioning.service.ts:63`                                             | Legacy preflight only checks code and email; does not preflight check plans, prices, or seat allocations.                                                         |
+| **Step 4: Idempotency Key Handling**            |      **PARTIAL**      | `provisioningJob.service.ts:28`                                          | Supported in jobs and outbox, but no top-level tenant creation idempotency key check.                                                                             |
+| **Step 4: Atomic Multi-Entity Transaction**     |      **MISSING**      | None                                                                     | No single transactional boundary creates Tenant + Primary Company + Subscriptions + Admin Invitation + Outbox Event in one atomic commit.                         |
+| **Step 4: Asynchronous Email & Provisioning**   |      **PARTIAL**      | `outbox/` & `provisioning/`                                              | Data tables exist, but synchronous email is still called in `primaryAdmin.service.ts:192`.                                                                        |
 
 ---
 
@@ -118,29 +121,34 @@ Super Admin $\rightarrow$ Tenants $\rightarrow$ Create Tenant (4-Step Wizard) ev
 Super Admin $\rightarrow$ Tenants $\rightarrow$ Tenant Details (5 Tabs) evaluated against backend:
 
 ### Tab 1: Overview
+
 - **Enabled Applications & Subscriptions:** Requires querying `GET /subscriptions?tenantId=...`. Not included in `GET /tenants/:id`.
 - **Primary Admin Summary:** Requires separate query `GET /tenants/:tenantId/primary-admin`.
 - **Company Setup & Health Progress:** Included in `GET /tenants/:id` (`health`, `setupProgress`).
 - **Composite API Gap:** Super Admin UI must issue **4 parallel HTTP requests** to assemble the Overview screen. A dedicated composite endpoint `GET /api/v1/platform/tenants/:id/overview` is recommended.
 
 ### Tab 2: Entitlements
+
 - **Effective Entitlements:** Fully backed by `GET /api/v1/platform/tenants/:tenantId/entitlements`.
 - **Overrides & Revocation:** Fully backed by `GET /overrides`, `POST /overrides`, `POST /overrides/:id/revoke`.
 - **Reconciliation Report:** Fully backed by `GET /reconciliation`.
 - **Entitlement Audit History:** Partial. Filtered through general audit logs.
 
 ### Tab 3: Provisioning
+
 - **Job Listing & Details:** Backed by `GET /provisioning/jobs?tenantId=...` and `GET /provisioning/jobs/:id`.
 - **Step Timeline State:** Serialized in `provisioning_jobs.step_state`.
 - **Manual Retry:** Backed by `POST /provisioning/jobs/:id/retry`.
 - **Operational Gap:** Currently, tenant creation does NOT insert rows into `provisioning_jobs`, leaving this tab empty in production.
 
 ### Tab 4: Lifecycle
+
 - **Status Transitions:** Fully backed by `/suspend`, `/activate`, `/terminate`.
 - **Termination Protection:** Requires `confirmTenantId` and `reason` (min 5 chars).
 - **History Stream:** Backed by `GET /tenants/:id/lifecycle-history` (`tenant_lifecycle_events`).
 
 ### Tab 5: Activity
+
 - **Audit Logs:** Backed by `GET /tenants/:id/activity`.
 - **Sanitized CSV Export:** Backed by `GET /tenants/:id/activity/export` with spreadsheet formula injection protection.
 - **Filter Gap:** Lacks date range (`from`/`to`) and action type query parameters. Lacks pagination (`offset`/`page`).
@@ -150,6 +158,7 @@ Super Admin $\rightarrow$ Tenants $\rightarrow$ Tenant Details (5 Tabs) evaluate
 ## 7. Subscription & Entitlement Findings
 
 ### Operational vs Conceptual Reality:
+
 ```
 Commercial Plan Catalog (Plans, Prices, Tiers)
          ↓
@@ -176,6 +185,7 @@ Legacy tenant_modules Table (direct SQL query in ModuleService)
 ## 8. Invitation & Primary Admin Findings
 
 ### End-to-End Flow Trace:
+
 ```
 Super Admin triggers invite
   → PrimaryAdminService.invitePrimaryAdmin()
@@ -191,6 +201,7 @@ Super Admin triggers invite
 ```
 
 ### Missing Links Identified:
+
 1. **Missing Company Membership on Acceptance:**
    - `PrimaryAdminService.acceptInvitation` (`primaryAdmin.service.ts:388`) inserts into `tenant_admins`, but does **not** insert into `memberships` for the tenant's primary company with `role: 'company_admin'`.
    - When the user signs in, `authService.toAuthenticatedUser()` loads `memberships` from MySQL. Because no membership exists, the user's session contains an empty membership list for the company.
@@ -204,6 +215,7 @@ Super Admin triggers invite
 ## 9. Provisioning & Outbox Findings
 
 ### Architecture Trace:
+
 - **`ProvisioningJobService`** (`apps/api/src/platform/provisioning/service/provisioningJob.service.ts`):
   - Clean implementation of worker claiming via `claimNextJob(workerId)`.
   - Exponential backoff calculation: $\text{backoffMs} = 2^{\text{attemptCount}} \times 1000$.
@@ -220,48 +232,48 @@ Super Admin triggers invite
 
 ## 10. API Contract Inventory
 
-| HTTP Method | Route | Auth Guard | Required Role | Controller & Action | Service & Repository | Status | Evidence Location |
-|---|---|---|---|---|---|:---:|---|
-| `GET` | `/api/v1/platform/plans` | `requirePlatformAuth` | Super Admin | `planController.list` | `PlanService.listPlans` / `PlanRepository.list` | Complete | `plan.routes.ts:9` |
-| `POST` | `/api/v1/platform/plans` | `requirePlatformAuth` | Super Admin | `planController.create` | `PlanService.createPlan` / `PlanRepository.create` | Complete | `plan.routes.ts:10` |
-| `GET` | `/api/v1/platform/plans/:id` | `requirePlatformAuth` | Super Admin | `planController.getById` | `PlanService.getPlanById` / `PlanRepository.findById` | Complete | `plan.routes.ts:11` |
-| `PATCH` | `/api/v1/platform/plans/:id` | `requirePlatformAuth` | Super Admin | `planController.update` | `PlanService.updatePlan` / `PlanRepository.update` | Complete | `plan.routes.ts:12` |
-| `POST` | `/api/v1/platform/plans/:id/prices` | `requirePlatformAuth` | Super Admin | `planController.addPrice` | `PlanService.addPrice` / `PlanRepository.createPrice` | Complete | `plan.routes.ts:15` |
-| `PATCH` | `/api/v1/platform/plans/prices/:priceId` | `requirePlatformAuth` | Super Admin | `planController.updatePrice` | `PlanService.updatePrice` / `PlanRepository.updatePrice` | Complete | `plan.routes.ts:16` |
-| `GET` | `/api/v1/platform/subscriptions` | `requirePlatformAuth` | Super Admin | `subscriptionController.list` | `SubscriptionService.listSubscriptions` / `SubscriptionRepo.list` | Complete | `subscription.routes.ts:9` |
-| `GET` | `/api/v1/platform/subscriptions/:id` | `requirePlatformAuth` | Super Admin | `subscriptionController.getById` | `SubscriptionService.getSubscriptionById` / `SubscriptionRepo.findById` | Complete | `subscription.routes.ts:10` |
-| `PATCH` | `/api/v1/platform/subscriptions/:id` | `requirePlatformAuth` | Super Admin | `subscriptionController.update` | `SubscriptionService.updateSubscription` / `SubscriptionRepo.update` | Complete | `subscription.routes.ts:11` |
-| `POST` | `/api/v1/platform/subscriptions/:id/activate` | `requirePlatformAuth` | Super Admin | `subscriptionController.activate` | `SubscriptionService.activateSubscription` / `SubscriptionRepo.update` | Complete | `subscription.routes.ts:14` |
-| `POST` | `/api/v1/platform/subscriptions/:id/renew` | `requirePlatformAuth` | Super Admin | `subscriptionController.renew` | `SubscriptionService.renewSubscription` / `SubscriptionRepo.update` | Complete | `subscription.routes.ts:15` |
-| `POST` | `/api/v1/platform/subscriptions/:id/cancel` | `requirePlatformAuth` | Super Admin | `subscriptionController.cancel` | `SubscriptionService.cancelSubscription` / `SubscriptionRepo.update` | Complete | `subscription.routes.ts:16` |
-| `GET` | `/api/v1/platform/tenants/:tenantId/subscriptions` | `requirePlatformAuth` | Super Admin | `subscriptionController.listByTenant` | `SubscriptionService.listSubscriptions` / `SubscriptionRepo.list` | Complete | `subscription.routes.ts:19` |
-| `POST` | `/api/v1/platform/tenants/:tenantId/subscriptions` | `requirePlatformAuth` | Super Admin | `subscriptionController.create` | `SubscriptionService.createSubscription` / `SubscriptionRepo.create` | Complete | `subscription.routes.ts:20` |
-| `GET` | `/api/v1/platform/tenants/:tenantId/entitlements` | `requirePlatformAuth` | Super Admin | `entitlementController.getEffective` | `EffectiveEntitlementService.resolveTenantEntitlements` | Complete | `entitlement.routes.ts:9` |
-| `GET` | `/api/v1/platform/tenants/:tenantId/entitlements/reconciliation` | `requirePlatformAuth` | Super Admin | `entitlementController.reconcile` | `EffectiveEntitlementService.reconcileEntitlements` | Complete | `entitlement.routes.ts:10` |
-| `GET` | `/api/v1/platform/tenants/:tenantId/entitlements/overrides` | `requirePlatformAuth` | Super Admin | `entitlementController.listOverrides` | `EffectiveEntitlementService.listOverrides` | Complete | `entitlement.routes.ts:12` |
-| `POST` | `/api/v1/platform/tenants/:tenantId/entitlements/overrides` | `requirePlatformAuth` | Super Admin | `entitlementController.createOverride` | `EffectiveEntitlementService.createOverride` | Complete | `entitlement.routes.ts:13` |
-| `POST` | `/api/v1/platform/tenants/:tenantId/entitlements/overrides/:overrideId/revoke` | `requirePlatformAuth` | Super Admin | `entitlementController.revokeOverride` | `EffectiveEntitlementService.revokeOverride` | Complete | `entitlement.routes.ts:14` |
-| `GET` | `/api/v1/platform/tenants/summary` | `requirePlatformAuth` | Super Admin | `tenantController.getSummary` | `TenantService.getSummaryMetrics` / `TenantRepo.getCounts` | Partial (Lacks trial metric) | `tenant.routes.ts:15` |
-| `GET` | `/api/v1/platform/tenants` | `requirePlatformAuth` | Super Admin | `tenantController.list` | `TenantService.listTenants` / `TenantRepository.list` | Partial (Lacks sorting, plan/admin filter) | `tenant.routes.ts:18` |
-| `POST` | `/api/v1/platform/tenants` | `requirePlatformAuth` | Super Admin | `tenantController.create` | `TenantService.createTenant` / `TenantRepository.create` | Partial (Base CRUD only, not 4-step wizard) | `tenant.routes.ts:19` |
-| `GET` | `/api/v1/platform/tenants/:id` | `requirePlatformAuth` | Super Admin | `tenantController.getById` | `TenantService.getTenantById` / `TenantRepository.findById` | Complete | `tenant.routes.ts:20` |
-| `PATCH` | `/api/v1/platform/tenants/:id` | `requirePlatformAuth` | Super Admin | `tenantController.update` | `TenantService.updateTenant` / `TenantRepository.update` | Complete | `tenant.routes.ts:22` |
-| `POST` | `/api/v1/platform/tenants/:id/activate` | `requirePlatformAuth` | Super Admin | `tenantController.activate` | `TenantService.activateTenant` / `TenantRepository.updateTenantStatus` | Complete | `tenant.routes.ts:25` |
-| `POST` | `/api/v1/platform/tenants/:id/suspend` | `requirePlatformAuth` | Super Admin | `tenantController.suspend` | `TenantService.suspendTenant` / `TenantRepository.updateTenantStatus` | Complete | `tenant.routes.ts:27` |
-| `POST` | `/api/v1/platform/tenants/:id/terminate` | `requirePlatformAuth` | Super Admin | `tenantController.terminate` | `TenantService.terminateTenant` / `TenantRepository.updateTenantStatus` | Complete | `tenant.routes.ts:28` |
-| `GET` | `/api/v1/platform/tenants/:id/lifecycle-history` | `requirePlatformAuth` | Super Admin | `tenantController.getLifecycleHistory` | `TenantService.getLifecycleHistory` / `TenantRepo.listLifecycleEvents` | Complete | `tenant.routes.ts:29` |
-| `GET` | `/api/v1/platform/tenants/:id/activity` | `requirePlatformAuth` | Super Admin | `tenantController.getActivity` | `TenantService.getTenantActivity` / `TenantRepo.listAuditLogs` | Complete | `tenant.routes.ts:32` |
-| `GET` | `/api/v1/platform/tenants/:id/activity/export` | `requirePlatformAuth` | Super Admin | `tenantController.exportActivity` | `TenantService.exportTenantActivityCsv` / `TenantRepo.listAuditLogs` | Complete | `tenant.routes.ts:33` |
-| `GET` | `/api/v1/platform/tenants/:tenantId/primary-admin` | `requirePlatformAuth` | Super Admin | `primaryAdminController.getPrimaryAdmin` | `PrimaryAdminService.getPrimaryAdmin` / Drizzle queries | Complete | `tenant.routes.ts:41` |
-| `POST` | `/api/v1/platform/tenants/:tenantId/primary-admin/invite` | `requirePlatformAuth` | Super Admin | `primaryAdminController.invite` | `PrimaryAdminService.invitePrimaryAdmin` / Drizzle queries | Complete | `tenant.routes.ts:42` |
-| `POST` | `/api/v1/platform/tenants/:tenantId/primary-admin/invitations/:invitationId/resend` | `requirePlatformAuth` | Super Admin | `primaryAdminController.resend` | `PrimaryAdminService.resendInvitation` / Drizzle queries | Complete | `tenant.routes.ts:43` |
-| `DELETE` | `/api/v1/platform/tenants/:tenantId/primary-admin/invitations/:invitationId` | `requirePlatformAuth` | Super Admin | `primaryAdminController.revoke` | `PrimaryAdminService.revokeInvitation` / Drizzle queries | Complete | `tenant.routes.ts:47` |
-| `POST` | `/api/v1/platform/tenants/:tenantId/primary-admin/reassign` | `requirePlatformAuth` | Super Admin | `primaryAdminController.reassign` | `PrimaryAdminService.reassignPrimaryAdmin` / Drizzle queries | Complete | `tenant.routes.ts:51` |
-| `POST` | `/api/v1/platform/tenants/invitations/:token/accept` | None (Public Token) | None | `primaryAdminController.accept` | `PrimaryAdminService.acceptInvitation` / Drizzle queries | Partial (Missing company membership creation) | `tenant.routes.ts:9` |
-| `GET` | `/api/v1/platform/provisioning/jobs` | `requirePlatformAuth` | Super Admin | `customerProvisioningController.listJobs` | `ProvisioningJobService.listJobs` | Complete | `provisioning.routes.ts:13` |
-| `GET` | `/api/v1/platform/provisioning/jobs/:id` | `requirePlatformAuth` | Super Admin | `customerProvisioningController.getJobById` | `ProvisioningJobService.getJobById` | Complete | `provisioning.routes.ts:14` |
-| `POST` | `/api/v1/platform/provisioning/jobs/:id/retry` | `requirePlatformAuth` | Super Admin | `customerProvisioningController.retryJob` | `ProvisioningJobService.retryJob` | Complete | `provisioning.routes.ts:15` |
-| `GET` | `/api/v1/platform/provisioning/outbox/status` | `requirePlatformAuth` | Super Admin | `customerProvisioningController.getOutboxStatus` | `TransactionalOutboxService.getStatus` | Complete | `provisioning.routes.ts:16` |
+| HTTP Method | Route                                                                               | Auth Guard            | Required Role | Controller & Action                              | Service & Repository                                                    |                    Status                     | Evidence Location           |
+| ----------- | ----------------------------------------------------------------------------------- | --------------------- | ------------- | ------------------------------------------------ | ----------------------------------------------------------------------- | :-------------------------------------------: | --------------------------- |
+| `GET`       | `/api/v1/platform/plans`                                                            | `requirePlatformAuth` | Super Admin   | `planController.list`                            | `PlanService.listPlans` / `PlanRepository.list`                         |                   Complete                    | `plan.routes.ts:9`          |
+| `POST`      | `/api/v1/platform/plans`                                                            | `requirePlatformAuth` | Super Admin   | `planController.create`                          | `PlanService.createPlan` / `PlanRepository.create`                      |                   Complete                    | `plan.routes.ts:10`         |
+| `GET`       | `/api/v1/platform/plans/:id`                                                        | `requirePlatformAuth` | Super Admin   | `planController.getById`                         | `PlanService.getPlanById` / `PlanRepository.findById`                   |                   Complete                    | `plan.routes.ts:11`         |
+| `PATCH`     | `/api/v1/platform/plans/:id`                                                        | `requirePlatformAuth` | Super Admin   | `planController.update`                          | `PlanService.updatePlan` / `PlanRepository.update`                      |                   Complete                    | `plan.routes.ts:12`         |
+| `POST`      | `/api/v1/platform/plans/:id/prices`                                                 | `requirePlatformAuth` | Super Admin   | `planController.addPrice`                        | `PlanService.addPrice` / `PlanRepository.createPrice`                   |                   Complete                    | `plan.routes.ts:15`         |
+| `PATCH`     | `/api/v1/platform/plans/prices/:priceId`                                            | `requirePlatformAuth` | Super Admin   | `planController.updatePrice`                     | `PlanService.updatePrice` / `PlanRepository.updatePrice`                |                   Complete                    | `plan.routes.ts:16`         |
+| `GET`       | `/api/v1/platform/subscriptions`                                                    | `requirePlatformAuth` | Super Admin   | `subscriptionController.list`                    | `SubscriptionService.listSubscriptions` / `SubscriptionRepo.list`       |                   Complete                    | `subscription.routes.ts:9`  |
+| `GET`       | `/api/v1/platform/subscriptions/:id`                                                | `requirePlatformAuth` | Super Admin   | `subscriptionController.getById`                 | `SubscriptionService.getSubscriptionById` / `SubscriptionRepo.findById` |                   Complete                    | `subscription.routes.ts:10` |
+| `PATCH`     | `/api/v1/platform/subscriptions/:id`                                                | `requirePlatformAuth` | Super Admin   | `subscriptionController.update`                  | `SubscriptionService.updateSubscription` / `SubscriptionRepo.update`    |                   Complete                    | `subscription.routes.ts:11` |
+| `POST`      | `/api/v1/platform/subscriptions/:id/activate`                                       | `requirePlatformAuth` | Super Admin   | `subscriptionController.activate`                | `SubscriptionService.activateSubscription` / `SubscriptionRepo.update`  |                   Complete                    | `subscription.routes.ts:14` |
+| `POST`      | `/api/v1/platform/subscriptions/:id/renew`                                          | `requirePlatformAuth` | Super Admin   | `subscriptionController.renew`                   | `SubscriptionService.renewSubscription` / `SubscriptionRepo.update`     |                   Complete                    | `subscription.routes.ts:15` |
+| `POST`      | `/api/v1/platform/subscriptions/:id/cancel`                                         | `requirePlatformAuth` | Super Admin   | `subscriptionController.cancel`                  | `SubscriptionService.cancelSubscription` / `SubscriptionRepo.update`    |                   Complete                    | `subscription.routes.ts:16` |
+| `GET`       | `/api/v1/platform/tenants/:tenantId/subscriptions`                                  | `requirePlatformAuth` | Super Admin   | `subscriptionController.listByTenant`            | `SubscriptionService.listSubscriptions` / `SubscriptionRepo.list`       |                   Complete                    | `subscription.routes.ts:19` |
+| `POST`      | `/api/v1/platform/tenants/:tenantId/subscriptions`                                  | `requirePlatformAuth` | Super Admin   | `subscriptionController.create`                  | `SubscriptionService.createSubscription` / `SubscriptionRepo.create`    |                   Complete                    | `subscription.routes.ts:20` |
+| `GET`       | `/api/v1/platform/tenants/:tenantId/entitlements`                                   | `requirePlatformAuth` | Super Admin   | `entitlementController.getEffective`             | `EffectiveEntitlementService.resolveTenantEntitlements`                 |                   Complete                    | `entitlement.routes.ts:9`   |
+| `GET`       | `/api/v1/platform/tenants/:tenantId/entitlements/reconciliation`                    | `requirePlatformAuth` | Super Admin   | `entitlementController.reconcile`                | `EffectiveEntitlementService.reconcileEntitlements`                     |                   Complete                    | `entitlement.routes.ts:10`  |
+| `GET`       | `/api/v1/platform/tenants/:tenantId/entitlements/overrides`                         | `requirePlatformAuth` | Super Admin   | `entitlementController.listOverrides`            | `EffectiveEntitlementService.listOverrides`                             |                   Complete                    | `entitlement.routes.ts:12`  |
+| `POST`      | `/api/v1/platform/tenants/:tenantId/entitlements/overrides`                         | `requirePlatformAuth` | Super Admin   | `entitlementController.createOverride`           | `EffectiveEntitlementService.createOverride`                            |                   Complete                    | `entitlement.routes.ts:13`  |
+| `POST`      | `/api/v1/platform/tenants/:tenantId/entitlements/overrides/:overrideId/revoke`      | `requirePlatformAuth` | Super Admin   | `entitlementController.revokeOverride`           | `EffectiveEntitlementService.revokeOverride`                            |                   Complete                    | `entitlement.routes.ts:14`  |
+| `GET`       | `/api/v1/platform/tenants/summary`                                                  | `requirePlatformAuth` | Super Admin   | `tenantController.getSummary`                    | `TenantService.getSummaryMetrics` / `TenantRepo.getCounts`              |         Partial (Lacks trial metric)          | `tenant.routes.ts:15`       |
+| `GET`       | `/api/v1/platform/tenants`                                                          | `requirePlatformAuth` | Super Admin   | `tenantController.list`                          | `TenantService.listTenants` / `TenantRepository.list`                   |  Partial (Lacks sorting, plan/admin filter)   | `tenant.routes.ts:18`       |
+| `POST`      | `/api/v1/platform/tenants`                                                          | `requirePlatformAuth` | Super Admin   | `tenantController.create`                        | `TenantService.createTenant` / `TenantRepository.create`                |  Partial (Base CRUD only, not 4-step wizard)  | `tenant.routes.ts:19`       |
+| `GET`       | `/api/v1/platform/tenants/:id`                                                      | `requirePlatformAuth` | Super Admin   | `tenantController.getById`                       | `TenantService.getTenantById` / `TenantRepository.findById`             |                   Complete                    | `tenant.routes.ts:20`       |
+| `PATCH`     | `/api/v1/platform/tenants/:id`                                                      | `requirePlatformAuth` | Super Admin   | `tenantController.update`                        | `TenantService.updateTenant` / `TenantRepository.update`                |                   Complete                    | `tenant.routes.ts:22`       |
+| `POST`      | `/api/v1/platform/tenants/:id/activate`                                             | `requirePlatformAuth` | Super Admin   | `tenantController.activate`                      | `TenantService.activateTenant` / `TenantRepository.updateTenantStatus`  |                   Complete                    | `tenant.routes.ts:25`       |
+| `POST`      | `/api/v1/platform/tenants/:id/suspend`                                              | `requirePlatformAuth` | Super Admin   | `tenantController.suspend`                       | `TenantService.suspendTenant` / `TenantRepository.updateTenantStatus`   |                   Complete                    | `tenant.routes.ts:27`       |
+| `POST`      | `/api/v1/platform/tenants/:id/terminate`                                            | `requirePlatformAuth` | Super Admin   | `tenantController.terminate`                     | `TenantService.terminateTenant` / `TenantRepository.updateTenantStatus` |                   Complete                    | `tenant.routes.ts:28`       |
+| `GET`       | `/api/v1/platform/tenants/:id/lifecycle-history`                                    | `requirePlatformAuth` | Super Admin   | `tenantController.getLifecycleHistory`           | `TenantService.getLifecycleHistory` / `TenantRepo.listLifecycleEvents`  |                   Complete                    | `tenant.routes.ts:29`       |
+| `GET`       | `/api/v1/platform/tenants/:id/activity`                                             | `requirePlatformAuth` | Super Admin   | `tenantController.getActivity`                   | `TenantService.getTenantActivity` / `TenantRepo.listAuditLogs`          |                   Complete                    | `tenant.routes.ts:32`       |
+| `GET`       | `/api/v1/platform/tenants/:id/activity/export`                                      | `requirePlatformAuth` | Super Admin   | `tenantController.exportActivity`                | `TenantService.exportTenantActivityCsv` / `TenantRepo.listAuditLogs`    |                   Complete                    | `tenant.routes.ts:33`       |
+| `GET`       | `/api/v1/platform/tenants/:tenantId/primary-admin`                                  | `requirePlatformAuth` | Super Admin   | `primaryAdminController.getPrimaryAdmin`         | `PrimaryAdminService.getPrimaryAdmin` / Drizzle queries                 |                   Complete                    | `tenant.routes.ts:41`       |
+| `POST`      | `/api/v1/platform/tenants/:tenantId/primary-admin/invite`                           | `requirePlatformAuth` | Super Admin   | `primaryAdminController.invite`                  | `PrimaryAdminService.invitePrimaryAdmin` / Drizzle queries              |                   Complete                    | `tenant.routes.ts:42`       |
+| `POST`      | `/api/v1/platform/tenants/:tenantId/primary-admin/invitations/:invitationId/resend` | `requirePlatformAuth` | Super Admin   | `primaryAdminController.resend`                  | `PrimaryAdminService.resendInvitation` / Drizzle queries                |                   Complete                    | `tenant.routes.ts:43`       |
+| `DELETE`    | `/api/v1/platform/tenants/:tenantId/primary-admin/invitations/:invitationId`        | `requirePlatformAuth` | Super Admin   | `primaryAdminController.revoke`                  | `PrimaryAdminService.revokeInvitation` / Drizzle queries                |                   Complete                    | `tenant.routes.ts:47`       |
+| `POST`      | `/api/v1/platform/tenants/:tenantId/primary-admin/reassign`                         | `requirePlatformAuth` | Super Admin   | `primaryAdminController.reassign`                | `PrimaryAdminService.reassignPrimaryAdmin` / Drizzle queries            |                   Complete                    | `tenant.routes.ts:51`       |
+| `POST`      | `/api/v1/platform/tenants/invitations/:token/accept`                                | None (Public Token)   | None          | `primaryAdminController.accept`                  | `PrimaryAdminService.acceptInvitation` / Drizzle queries                | Partial (Missing company membership creation) | `tenant.routes.ts:9`        |
+| `GET`       | `/api/v1/platform/provisioning/jobs`                                                | `requirePlatformAuth` | Super Admin   | `customerProvisioningController.listJobs`        | `ProvisioningJobService.listJobs`                                       |                   Complete                    | `provisioning.routes.ts:13` |
+| `GET`       | `/api/v1/platform/provisioning/jobs/:id`                                            | `requirePlatformAuth` | Super Admin   | `customerProvisioningController.getJobById`      | `ProvisioningJobService.getJobById`                                     |                   Complete                    | `provisioning.routes.ts:14` |
+| `POST`      | `/api/v1/platform/provisioning/jobs/:id/retry`                                      | `requirePlatformAuth` | Super Admin   | `customerProvisioningController.retryJob`        | `ProvisioningJobService.retryJob`                                       |                   Complete                    | `provisioning.routes.ts:15` |
+| `GET`       | `/api/v1/platform/provisioning/outbox/status`                                       | `requirePlatformAuth` | Super Admin   | `customerProvisioningController.getOutboxStatus` | `TransactionalOutboxService.getStatus`                                  |                   Complete                    | `provisioning.routes.ts:16` |
 
 ---
 
@@ -284,12 +296,14 @@ Super Admin triggers invite
 ## 12. P0 / P1 / P2 Issues
 
 ### Priority 0 (Blocking Core Product Architecture)
+
 - **ISSUE-P0-1: Missing 4-Step Create Tenant Orchestration Endpoint.**  
   There is no backend API that can receive the Super Admin 4-step wizard payload and atomically create the Tenant, Primary Company, Subscriptions, Primary Admin invitation, Provisioning Job, and Outbox events within a single database transaction.
 - **ISSUE-P0-2: Runtime Entitlement Disconnect.**  
   Commercial subscriptions created in `tenant_subscriptions` do not grant runtime access to HRMS, CRM, or PM because `accessResolverService` and `ModuleService` query only `tenant_modules`. Creating a subscription currently has zero runtime effect.
 
 ### Priority 1 (High Priority / Console Usability & Operation)
+
 - **ISSUE-P1-1: Background Workers Not Started in Server Runtime.**  
   `ProvisioningJobService` and `TransactionalOutboxService` claiming loops are never initiated in `apps/api/src/main.ts`. Outbox messages and provisioning jobs will stall unless manually processed.
 - **ISSUE-P1-2: Primary Admin Invitation Acceptance Does Not Create Company Membership.**  
@@ -302,6 +316,7 @@ Super Admin triggers invite
   The Super Admin Tenant Details Overview tab requires 4 distinct API calls instead of a clean composite payload.
 
 ### Priority 2 (Medium Priority / Hardening)
+
 - **ISSUE-P2-1: Synchronous Email Call in Invitation Flow.**  
   `PrimaryAdminService.invitePrimaryAdmin` directly awaits SMTP delivery instead of relying on the transactional outbox.
 - **ISSUE-P2-2: Missing Rate Limiting on Invitation Acceptance Route.**  
@@ -355,6 +370,7 @@ Before starting Phase 03 UI development, execute a focused backend remediation s
 
 **Justification:**
 While the database schema, security rules, and granular domain services are verified and passing tests, attempting to build the finalized Super Admin frontend against the current backend will cause immediate integration failure:
+
 1. The 4-step Create Tenant wizard will have no backend endpoint to call.
 2. The All Tenants console table cannot display Primary Admins, active seats, or subscription badges, nor can it sort or filter by plan.
 3. Creating a tenant with subscriptions will not enable the HRMS application for that tenant due to the entitlement runtime disconnect.

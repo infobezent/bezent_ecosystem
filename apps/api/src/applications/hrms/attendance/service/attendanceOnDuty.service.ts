@@ -2,14 +2,8 @@ import {
   AttendanceOnDutyRepository,
   attendanceOnDutyRepository,
 } from '../repository/attendanceOnDuty.repository.js';
-import {
-  AttendanceRepository,
-  attendanceRepository,
-} from '../repository/attendance.repository.js';
-import {
-  AttendancePolicyService,
-  attendancePolicyService,
-} from './attendancePolicy.service.js';
+import { AttendanceRepository, attendanceRepository } from '../repository/attendance.repository.js';
+import { AttendancePolicyService, attendancePolicyService } from './attendancePolicy.service.js';
 import {
   AttendanceCalculationService,
   attendanceCalculationService,
@@ -198,8 +192,7 @@ export class AttendanceOnDutyService {
       dutyPeriodDisplay: `${item.startDate} to ${item.endDate}`,
       durationType: item.durationType as OnDutyDurationType,
       durationHours: Number(item.durationHours || 8),
-      halfDaySession:
-        (item.halfDaySession as 'first_half' | 'second_half' | null) ?? null,
+      halfDaySession: (item.halfDaySession as 'first_half' | 'second_half' | null) ?? null,
       locationOrSite: item.locationOrSite ?? null,
       purpose: item.reason || '',
       projectReference: item.projectReference ?? null,
@@ -215,8 +208,7 @@ export class AttendanceOnDutyService {
       approvalStatus: item.status as OnDutyApprovalStatus,
       status: item.status as OnDutyApprovalStatus,
       currentStage: item.currentStage,
-      processingStatus:
-        (item.processingStatus as OnDutyProcessingStatus) || 'not_applicable',
+      processingStatus: (item.processingStatus as OnDutyProcessingStatus) || 'not_applicable',
       isHighRisk: false,
       riskFactors: [],
       evidenceAttachments:
@@ -267,7 +259,12 @@ export class AttendanceOnDutyService {
         );
         return {
           id: typeKey,
-          name: found?.name || typeKey.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+          name:
+            found?.name ||
+            typeKey
+              .split('_')
+              .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+              .join(' '),
           description: found?.description || 'Authorized official duty assignment',
         };
       });
@@ -285,8 +282,13 @@ export class AttendanceOnDutyService {
   ): Promise<OnDutyDetailV1> {
     if (!input.employeeId) throw new BadRequestError('Employee ID is required');
     if (!input.odTypeId) throw new BadRequestError('On-Duty type is required');
-    if (!input.startDate || !input.endDate) throw new BadRequestError('Start and end date are required');
-    const purpose = (input.purpose || (input as unknown as { reason?: string }).reason || '').trim();
+    if (!input.startDate || !input.endDate)
+      throw new BadRequestError('Start and end date are required');
+    const purpose = (
+      input.purpose ||
+      (input as unknown as { reason?: string }).reason ||
+      ''
+    ).trim();
     if (purpose.length < 3) {
       throw new BadRequestError('A detailed business purpose (minimum 3 characters) is required');
     }
@@ -299,7 +301,9 @@ export class AttendanceOnDutyService {
 
     const durationType = input.durationType || 'full_day';
     if (durationType === 'hourly' && (!input.startTime || !input.endTime)) {
-      throw new BadRequestError('Start time and end time are mandatory for hourly On-Duty requests');
+      throw new BadRequestError(
+        'Start time and end time are mandatory for hourly On-Duty requests',
+      );
     }
 
     const effectivePolicy = await this.policyService.getEffectivePolicy(
@@ -317,7 +321,9 @@ export class AttendanceOnDutyService {
     // Check submission window (past dates)
     const todayStr = new Date().toISOString().slice(0, 10);
     if (input.startDate < todayStr) {
-      const msDiff = new Date(`${todayStr}T00:00:00Z`).getTime() - new Date(`${input.startDate}T00:00:00Z`).getTime();
+      const msDiff =
+        new Date(`${todayStr}T00:00:00Z`).getTime() -
+        new Date(`${input.startDate}T00:00:00Z`).getTime();
       const daysAgo = Math.ceil(msDiff / (1000 * 60 * 60 * 24));
       const maxBackdated = odRules?.backdatedAllowedDays ?? odRules?.maxBackdatedDays ?? 14;
       if (daysAgo > maxBackdated) {
@@ -329,15 +335,30 @@ export class AttendanceOnDutyService {
 
     if (this.isMockRepo && this.mockRepo) {
       if (this.mockRepo.checkDateInLockedPeriod) {
-        const locked = await this.mockRepo.checkDateInLockedPeriod(tenantId, companyId, input.startDate, input.endDate);
+        const locked = await this.mockRepo.checkDateInLockedPeriod(
+          tenantId,
+          companyId,
+          input.startDate,
+          input.endDate,
+        );
         if (locked) {
-          throw new BadRequestError('Cannot submit On-Duty request: One or more dates fall into a locked payroll period');
+          throw new BadRequestError(
+            'Cannot submit On-Duty request: One or more dates fall into a locked payroll period',
+          );
         }
       }
       if (this.mockRepo.checkOverlappingLeave) {
-        const hasLeave = await this.mockRepo.checkOverlappingLeave(tenantId, companyId, input.employeeId, input.startDate, input.endDate);
+        const hasLeave = await this.mockRepo.checkOverlappingLeave(
+          tenantId,
+          companyId,
+          input.employeeId,
+          input.startDate,
+          input.endDate,
+        );
         if (hasLeave) {
-          throw new ConflictError('Cannot submit On-Duty request: An approved leave overlapping these dates already exists');
+          throw new ConflictError(
+            'Cannot submit On-Duty request: An approved leave overlapping these dates already exists',
+          );
         }
       }
       const created = await this.mockRepo.createOnDutyRequest(tenantId, companyId, {
@@ -363,7 +384,12 @@ export class AttendanceOnDutyService {
     }
 
     // Check locked attendance period
-    const isLocked = await this.odRepo.checkDateInLockedPeriod(tenantId, companyId, input.startDate, input.endDate);
+    const isLocked = await this.odRepo.checkDateInLockedPeriod(
+      tenantId,
+      companyId,
+      input.startDate,
+      input.endDate,
+    );
     if (isLocked) {
       throw new BadRequestError(
         'Cannot submit On-Duty request: One or more dates fall into a locked payroll period',
@@ -393,7 +419,9 @@ export class AttendanceOnDutyService {
       input.endDate,
     );
     if (hasLeave) {
-      throw new ConflictError('Employee has approved leave overlapping the requested On-Duty period');
+      throw new ConflictError(
+        'Employee has approved leave overlapping the requested On-Duty period',
+      );
     }
 
     // Resolve OD type label
@@ -463,10 +491,20 @@ export class AttendanceOnDutyService {
       employeeId: input.employeeId,
       workday: wDate,
       durationType: durationType === 'multi_day' ? 'full_day' : durationType,
-      durationHours: durationType === 'hourly' ? durationHours.toFixed(2) : durationType === 'half_day' ? '4.00' : '8.00',
+      durationHours:
+        durationType === 'hourly'
+          ? durationHours.toFixed(2)
+          : durationType === 'half_day'
+            ? '4.00'
+            : '8.00',
       halfDaySession: input.halfDaySession || null,
       creditedStatus: durationType === 'half_day' ? 'half_day' : 'present',
-      creditedWorkedMinutes: durationType === 'hourly' ? Math.round(durationHours * 60) : durationType === 'half_day' ? 240 : 480,
+      creditedWorkedMinutes:
+        durationType === 'hourly'
+          ? Math.round(durationHours * 60)
+          : durationType === 'half_day'
+            ? 240
+            : 480,
       processingStatus: 'not_applicable',
     }));
 
@@ -480,7 +518,9 @@ export class AttendanceOnDutyService {
       onDutyRequestId: id,
       action: effectiveIsDraft ? 'created' : 'submitted',
       actorUserId: submittedByUserId || null,
-      notes: effectiveIsDraft ? 'Draft On-Duty request saved' : `Submitted On-Duty request: ${odTypeName}`,
+      notes: effectiveIsDraft
+        ? 'Draft On-Duty request saved'
+        : `Submitted On-Duty request: ${odTypeName}`,
       oldState: null,
       newState: { status: effectiveIsDraft ? 'draft' : 'submitted', requestNumber },
     });
@@ -687,7 +727,9 @@ export class AttendanceOnDutyService {
       return existing;
     }
     if (existing.approvalStatus !== 'submitted') {
-      throw new BadRequestError(`Cannot start review on request with status '${existing.approvalStatus}'`);
+      throw new BadRequestError(
+        `Cannot start review on request with status '${existing.approvalStatus}'`,
+      );
     }
 
     await this.odRepo.updateRequest(tenantId, companyId, id, {
@@ -765,7 +807,9 @@ export class AttendanceOnDutyService {
     }
     const existing = await this.getRequestById(tenantId, companyId, id);
     if (existing.approvalStatus !== 'awaiting_info') {
-      throw new BadRequestError(`Cannot provide clarification on request with status '${existing.approvalStatus}'`);
+      throw new BadRequestError(
+        `Cannot provide clarification on request with status '${existing.approvalStatus}'`,
+      );
     }
 
     await this.odRepo.updateRequest(tenantId, companyId, id, {
@@ -807,7 +851,8 @@ export class AttendanceOnDutyService {
     const empUserId = await this.odRepo.findEmployeeUserId(existing.employeeId);
     if (
       (reviewerEmployeeId && reviewerEmployeeId === existing.employeeId) ||
-      (reviewerUserId && (reviewerUserId === existing.employeeId || (empUserId && reviewerUserId === empUserId)))
+      (reviewerUserId &&
+        (reviewerUserId === existing.employeeId || (empUserId && reviewerUserId === empUserId)))
     ) {
       throw new ForbiddenError('Self-approval of On-Duty requests is prohibited');
     }
@@ -847,7 +892,13 @@ export class AttendanceOnDutyService {
     }
 
     if (input.action === 'clarify') {
-      return this.requestClarification(tenantId, companyId, id, input.reason || input.notes || 'Please provide details', reviewerUserId);
+      return this.requestClarification(
+        tenantId,
+        companyId,
+        id,
+        input.reason || input.notes || 'Please provide details',
+        reviewerUserId,
+      );
     }
 
     if (input.action === 'rejected') {
@@ -890,22 +941,38 @@ export class AttendanceOnDutyService {
 
     if (input.action === 'approved') {
       // 1. Re-validate payroll lock
-      const isLocked = await this.odRepo.checkDateInLockedPeriod(tenantId, companyId, existing.startDate, existing.endDate);
+      const isLocked = await this.odRepo.checkDateInLockedPeriod(
+        tenantId,
+        companyId,
+        existing.startDate,
+        existing.endDate,
+      );
       if (isLocked) {
-        throw new BadRequestError('Cannot approve On-Duty request: One or more dates fall into a locked payroll period');
+        throw new BadRequestError(
+          'Cannot approve On-Duty request: One or more dates fall into a locked payroll period',
+        );
       }
 
       // 2. Re-validate overlapping leave
-      const hasLeave = await this.odRepo.checkOverlappingLeave(tenantId, companyId, existing.employeeId, existing.startDate, existing.endDate);
+      const hasLeave = await this.odRepo.checkOverlappingLeave(
+        tenantId,
+        companyId,
+        existing.employeeId,
+        existing.startDate,
+        existing.endDate,
+      );
       if (hasLeave) {
-        throw new ConflictError('Cannot approve On-Duty request: Conflicting approved leave exists');
+        throw new ConflictError(
+          'Cannot approve On-Duty request: Conflicting approved leave exists',
+        );
       }
 
       // 3. Mark Approved
       await this.odRepo.updateRequest(tenantId, companyId, id, {
         status: 'approved',
         currentStage: 'approved',
-        decisionReason: input.reason?.trim() || input.notes?.trim() || 'Approved by authorized reviewer',
+        decisionReason:
+          input.reason?.trim() || input.notes?.trim() || 'Approved by authorized reviewer',
         reviewedByUserId: reviewerUserId,
         reviewedAt: new Date(),
         appliedAt: new Date(),
@@ -1014,13 +1081,9 @@ export class AttendanceOnDutyService {
         }
 
         const calcMeta = existingAtt?.calculationMetadata as
-          | { isOdCredit?: boolean; odRequestId?: string }
-          | null
-          | undefined;
+          { isOdCredit?: boolean; odRequestId?: string } | null | undefined;
         const alreadyCredited =
-          existingAtt &&
-          Boolean(calcMeta?.isOdCredit) &&
-          calcMeta?.odRequestId === existing.id;
+          existingAtt && Boolean(calcMeta?.isOdCredit) && calcMeta?.odRequestId === existing.id;
 
         let creditedMinutes = baseOdMinutes;
         let finalStatus: 'present' | 'half_day' =
@@ -1032,12 +1095,23 @@ export class AttendanceOnDutyService {
         } else if (existingAtt && existingAtt.workedMinutes > 0) {
           const combined = existingAtt.workedMinutes + baseOdMinutes;
           creditedMinutes = combined;
-          finalStatus = combined >= fullDayMinutes ? 'present' : combined >= halfDayMinutes ? 'half_day' : 'present';
+          finalStatus =
+            combined >= fullDayMinutes
+              ? 'present'
+              : combined >= halfDayMinutes
+                ? 'half_day'
+                : 'present';
         } else {
-          finalStatus = baseOdMinutes >= fullDayMinutes ? 'present' : baseOdMinutes >= halfDayMinutes ? 'half_day' : 'present';
+          finalStatus =
+            baseOdMinutes >= fullDayMinutes
+              ? 'present'
+              : baseOdMinutes >= halfDayMinutes
+                ? 'half_day'
+                : 'present';
         }
 
-        const attId = existingAtt?.id || `att_od_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        const attId =
+          existingAtt?.id || `att_od_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
         const recordData = {
           tenantId,
           companyId,
@@ -1055,9 +1129,10 @@ export class AttendanceOnDutyService {
           isEarlyExit: false,
           isMissingPunch: false,
           isRegularized: false,
-          notes: existingAtt?.notes && !alreadyCredited
-            ? `${existingAtt.notes} | Approved On-Duty: ${existing.odTypeName}`
-            : `Approved On-Duty: ${existing.odTypeName}`,
+          notes:
+            existingAtt?.notes && !alreadyCredited
+              ? `${existingAtt.notes} | Approved On-Duty: ${existing.odTypeName}`
+              : `Approved On-Duty: ${existing.odTypeName}`,
           calculationMetadata: {
             isOdCredit: true,
             odRequestId: existing.id,
@@ -1130,7 +1205,9 @@ export class AttendanceOnDutyService {
   ): Promise<OnDutyDetailV1> {
     const existing = await this.getRequestById(tenantId, companyId, id);
     if (existing.approvalStatus === 'cancelled' || existing.approvalStatus === 'rejected') {
-      throw new BadRequestError(`Request is already in terminal status '${existing.approvalStatus}'`);
+      throw new BadRequestError(
+        `Request is already in terminal status '${existing.approvalStatus}'`,
+      );
     }
 
     if (this.isMockRepo && this.mockRepo) {
@@ -1143,7 +1220,12 @@ export class AttendanceOnDutyService {
       return this.mapMockToDetail(updated);
     }
 
-    const isLocked = await this.odRepo.checkDateInLockedPeriod(tenantId, companyId, existing.startDate, existing.endDate);
+    const isLocked = await this.odRepo.checkDateInLockedPeriod(
+      tenantId,
+      companyId,
+      existing.startDate,
+      existing.endDate,
+    );
     if (isLocked) {
       throw new BadRequestError('Cannot cancel request for a locked payroll period');
     }
@@ -1196,9 +1278,10 @@ export class AttendanceOnDutyService {
         reason = 'Self-approval is prohibited';
       } else if (item.isHighRisk || item.durationType === 'multi_day') {
         isEligible = false;
-        reason = item.durationType === 'multi_day'
-          ? 'Multi-day request requires individual review'
-          : 'High-risk or retroactive request requires individual review';
+        reason =
+          item.durationType === 'multi_day'
+            ? 'Multi-day request requires individual review'
+            : 'High-risk or retroactive request requires individual review';
       } else if (item.attendanceContext.leaveConflict) {
         isEligible = false;
         reason = 'Overlapping leave conflict';
@@ -1253,7 +1336,13 @@ export class AttendanceOnDutyService {
         }
 
         if (input.action === 'assign') {
-          await this.assignReviewer(tenantId, companyId, reqId, input.assignedTo || actorUserId, actorUserId);
+          await this.assignReviewer(
+            tenantId,
+            companyId,
+            reqId,
+            input.assignedTo || actorUserId,
+            actorUserId,
+          );
           result.succeeded.push(reqId);
         } else if (input.action === 'start_review') {
           if (item.approvalStatus !== 'submitted') {
@@ -1263,7 +1352,13 @@ export class AttendanceOnDutyService {
           await this.startReview(tenantId, companyId, reqId, actorUserId);
           result.succeeded.push(reqId);
         } else if (input.action === 'request_info') {
-          await this.requestClarification(tenantId, companyId, reqId, input.notes || 'Please provide details', actorUserId);
+          await this.requestClarification(
+            tenantId,
+            companyId,
+            reqId,
+            input.notes || 'Please provide details',
+            actorUserId,
+          );
           result.succeeded.push(reqId);
         } else if (input.action === 'bulk_approve') {
           if (actorEmployeeId && actorEmployeeId === item.employeeId) {
@@ -1271,7 +1366,10 @@ export class AttendanceOnDutyService {
             continue;
           }
           if (item.isHighRisk || item.durationType === 'multi_day') {
-            result.skipped.push({ id: reqId, reason: 'Multi-day or high-risk requires individual review' });
+            result.skipped.push({
+              id: reqId,
+              reason: 'Multi-day or high-risk requires individual review',
+            });
             continue;
           }
           await this.reviewDecision(
@@ -1305,7 +1403,11 @@ export class AttendanceOnDutyService {
     return result;
   }
 
-  async resolveEmployeeIdByUserId(tenantId: string, companyId: string, userId: string): Promise<string | null> {
+  async resolveEmployeeIdByUserId(
+    tenantId: string,
+    companyId: string,
+    userId: string,
+  ): Promise<string | null> {
     return this.odRepo.resolveEmployeeIdForUser(tenantId, companyId, userId);
   }
 }

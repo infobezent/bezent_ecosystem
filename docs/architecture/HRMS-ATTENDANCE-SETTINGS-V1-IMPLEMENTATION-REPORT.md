@@ -3,7 +3,7 @@
 **Author:** Principal SaaS Architect, Senior Full-Stack Engineer, Database Architect, Security Engineer, QA Lead  
 **Repository:** `E:\Company\bezent_ecosystem`  
 **Date:** 2026-10-09  
-**Status:** Complete & Production Ready  
+**Status:** Complete & Production Ready
 
 ---
 
@@ -12,6 +12,7 @@
 The **BEZENT HRMS Attendance Settings V1.0** module has been implemented into the existing repository. It delivers enterprise-grade configurability across seven dedicated functional domains accessible under **HRMS &rarr; HR Settings &rarr; Attendance**.
 
 The implementation adheres to:
+
 1. **The BEZENT Constitution (`AGENTS.md`)**:
    - Zero application CSS files (`apps/web/src/applications/**` contains 0 `.css` files).
    - Zero inline styles (`style={{...}}` is absent).
@@ -31,21 +32,22 @@ The implementation adheres to:
 
 Located at **HRMS &rarr; HR Settings &rarr; Attendance**:
 
-| # | Tab Title | Identifier | Functionality Summary |
-|---|-----------|------------|-----------------------|
-| 1 | **General** | `general` | Timezone selection, day boundary cutoff time for night shifts, tracking start date, processing engine mode (`realtime`/`daily_batch`/`manual`), manual entry permissions, employee visibility scope, history display window filter, alert preferences. |
-| 2 | **Attendance Policies** | `policies` | Hierarchical policies registry with priority resolution (**Employee &rarr; Department &rarr; Company**). Versioning, draft/publish lifecycle, working hours, break deduction, late/early-exit tracking, customer-configurable penalty rules, On-Duty (OD) rules, and version rollback. |
-| 3 | **Regularization** | `regularization` | Workflow enablement, allowed discrepancy types checklist, submission window (days), monthly quotas, justification reasons, evidence requirement, multi-level hierarchy (`manager_then_hr`/`manager_only`/`hr_only`/`auto_approve`), auto-approval grace, payroll-lock blocking, self-withdrawal. |
-| 4 | **Capture & Devices** | `capture_devices` | Truthful hardware terminal registry (biometric fingerprint/facial/RFID/kiosk/web), device connection ping & latency tester, canonical attendance ingestion pipeline, bulk CSV/Excel import with preview, column mapping, row-level validation, duplicate prevention, and audited batch rollback. |
-| 5 | **Location & Security** | `location_security` | GPS capture enforcement, multi-geofence campus radius management, office IP/CIDR allowlist with strict enforcement, max devices per employee, shared kiosk mode, anti-spoofing signals (mock location, impossible travel velocity), rapid-punch throttling, and VPN/proxy flagging. |
-| 6 | **Payroll & Locking** | `payroll_locking` | Attendance cycles (`calendar_month`/`custom_cutoff`), cutoff day, lock readiness checks (verifying unresolved missing punches & pending regularizations with `hard_block` vs `warning_only` severity), period locking, authorized reopening with mandatory reason (&ge; 5 characters), and audited payroll handover CSV/JSON generation. |
-| 7 | **Audit & History** | `audit_history` | Append-only, immutable configuration changelog across all 7 domains with category filters, action tracking, user/IP attribution, field-level state diff inspection modal, and JSON audit export. |
+| #   | Tab Title               | Identifier          | Functionality Summary                                                                                                                                                                                                                                                                                                                    |
+| --- | ----------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **General**             | `general`           | Timezone selection, day boundary cutoff time for night shifts, tracking start date, processing engine mode (`realtime`/`daily_batch`/`manual`), manual entry permissions, employee visibility scope, history display window filter, alert preferences.                                                                                   |
+| 2   | **Attendance Policies** | `policies`          | Hierarchical policies registry with priority resolution (**Employee &rarr; Department &rarr; Company**). Versioning, draft/publish lifecycle, working hours, break deduction, late/early-exit tracking, customer-configurable penalty rules, On-Duty (OD) rules, and version rollback.                                                   |
+| 3   | **Regularization**      | `regularization`    | Workflow enablement, allowed discrepancy types checklist, submission window (days), monthly quotas, justification reasons, evidence requirement, multi-level hierarchy (`manager_then_hr`/`manager_only`/`hr_only`/`auto_approve`), auto-approval grace, payroll-lock blocking, self-withdrawal.                                         |
+| 4   | **Capture & Devices**   | `capture_devices`   | Truthful hardware terminal registry (biometric fingerprint/facial/RFID/kiosk/web), device connection ping & latency tester, canonical attendance ingestion pipeline, bulk CSV/Excel import with preview, column mapping, row-level validation, duplicate prevention, and audited batch rollback.                                         |
+| 5   | **Location & Security** | `location_security` | GPS capture enforcement, multi-geofence campus radius management, office IP/CIDR allowlist with strict enforcement, max devices per employee, shared kiosk mode, anti-spoofing signals (mock location, impossible travel velocity), rapid-punch throttling, and VPN/proxy flagging.                                                      |
+| 6   | **Payroll & Locking**   | `payroll_locking`   | Attendance cycles (`calendar_month`/`custom_cutoff`), cutoff day, lock readiness checks (verifying unresolved missing punches & pending regularizations with `hard_block` vs `warning_only` severity), period locking, authorized reopening with mandatory reason (&ge; 5 characters), and audited payroll handover CSV/JSON generation. |
+| 7   | **Audit & History**     | `audit_history`     | Append-only, immutable configuration changelog across all 7 domains with category filters, action tracking, user/IP attribution, field-level state diff inspection modal, and JSON audit export.                                                                                                                                         |
 
 ---
 
 ## 3. Database Foundations & Migrations
 
 ### Migration `0032_attendance_settings_v1_production.sql`
+
 Executed cleanly and registered in Drizzle journal:
 
 - **Extended `attendance_policies`**:
@@ -80,10 +82,12 @@ Executed cleanly and registered in Drizzle journal:
 All endpoints are guarded by tenant context and authorization middleware:
 
 ### General Settings
+
 - `GET /api/v1/hrms/attendance/settings/general`
 - `PUT /api/v1/hrms/attendance/settings/general`
 
 ### Attendance Policies & Overrides
+
 - `GET /api/v1/hrms/attendance/settings/policies`
 - `POST /api/v1/hrms/attendance/settings/policies`
 - `GET /api/v1/hrms/attendance/settings/policies/effective`
@@ -92,25 +96,30 @@ All endpoints are guarded by tenant context and authorization middleware:
 - `POST /api/v1/hrms/attendance/settings/policies/:id/rollback`
 
 ### Regularization Settings
+
 - `GET /api/v1/hrms/attendance/settings/regularization`
 - `PUT /api/v1/hrms/attendance/settings/regularization`
 
 ### Capture & Devices
+
 - `GET /api/v1/hrms/attendance/settings/devices`
 - `POST /api/v1/hrms/attendance/settings/devices`
 - `PUT /api/v1/hrms/attendance/settings/devices/:id`
 - `POST /api/v1/hrms/attendance/settings/devices/:id/test`
 
 ### Bulk Imports & Migration
+
 - `GET /api/v1/hrms/attendance/settings/import/batches`
 - `POST /api/v1/hrms/attendance/settings/import`
 - `POST /api/v1/hrms/attendance/settings/import/batches/:id/rollback`
 
 ### Location & Security
+
 - `GET /api/v1/hrms/attendance/settings/security`
 - `PUT /api/v1/hrms/attendance/settings/security`
 
 ### Payroll & Period Locking
+
 - `GET /api/v1/hrms/attendance/settings/payroll`
 - `PUT /api/v1/hrms/attendance/settings/payroll`
 - `GET /api/v1/hrms/attendance/settings/payroll/periods`
@@ -121,26 +130,27 @@ All endpoints are guarded by tenant context and authorization middleware:
 - `POST /api/v1/hrms/attendance/settings/payroll/handover/generate`
 
 ### Audit & History
+
 - `GET /api/v1/hrms/attendance/settings/audit`
 
 ---
 
 ## 5. Working vs. External Integration-Dependent Features
 
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Settings Persistence (All 7 domains) | **Working** | Live database persistence with tenant & company scoping |
-| Policy Overrides Hierarchy | **Working** | Fully resolved: Employee &rarr; Department &rarr; Company |
-| Policy Version Rollback | **Working** | Restores snapshot as a new version, preserving audit trail |
-| Regularization Workflow Configuration | **Working** | Configurable quotas, windows, and approval routes |
-| Hardware Terminal Registry & Health Ping | **Working** | Truthful health check (real ping response vs network gateway unreachable) |
-| Bulk CSV Import & Reversal | **Working** | Row-level validation, duplicate detection, and audited rollback |
-| Geofencing & IP Allowlists | **Working** | Configurable campus boundaries, CIDR parsing, anti-spoofing flags |
-| Period Locking & Readiness Check | **Working** | Inspects missing punches and pending regularizations |
-| Period Reopening Protection | **Working** | Reopening requires mandatory verified audit reason |
-| Payroll Handover Generation | **Working** | Calculates payable days and deductions, generates downloadable CSV |
-| Physical Biometric Scanner Push | *Integration-Dependent* | Physical hardware requires physical network listener or push gateway adapter |
-| Native Mobile GPS Daemon | *Integration-Dependent* | Mobile browser geolocation is live; native APK/iOS requires native app build |
+| Feature                                  | Status                  | Notes                                                                        |
+| ---------------------------------------- | ----------------------- | ---------------------------------------------------------------------------- |
+| Settings Persistence (All 7 domains)     | **Working**             | Live database persistence with tenant & company scoping                      |
+| Policy Overrides Hierarchy               | **Working**             | Fully resolved: Employee &rarr; Department &rarr; Company                    |
+| Policy Version Rollback                  | **Working**             | Restores snapshot as a new version, preserving audit trail                   |
+| Regularization Workflow Configuration    | **Working**             | Configurable quotas, windows, and approval routes                            |
+| Hardware Terminal Registry & Health Ping | **Working**             | Truthful health check (real ping response vs network gateway unreachable)    |
+| Bulk CSV Import & Reversal               | **Working**             | Row-level validation, duplicate detection, and audited rollback              |
+| Geofencing & IP Allowlists               | **Working**             | Configurable campus boundaries, CIDR parsing, anti-spoofing flags            |
+| Period Locking & Readiness Check         | **Working**             | Inspects missing punches and pending regularizations                         |
+| Period Reopening Protection              | **Working**             | Reopening requires mandatory verified audit reason                           |
+| Payroll Handover Generation              | **Working**             | Calculates payable days and deductions, generates downloadable CSV           |
+| Physical Biometric Scanner Push          | _Integration-Dependent_ | Physical hardware requires physical network listener or push gateway adapter |
+| Native Mobile GPS Daemon                 | _Integration-Dependent_ | Mobile browser geolocation is live; native APK/iOS requires native app build |
 
 ---
 

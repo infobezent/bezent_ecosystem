@@ -19,7 +19,9 @@
   background-color: var(--workspace, #ffffff);
   border: 1px solid var(--border-default, #dadce0);
   border-radius: var(--radius-sm, 4px);
-  transition: border-color var(--transition-fast, 150ms ease), box-shadow var(--transition-fast, 150ms ease);
+  transition:
+    border-color var(--transition-fast, 150ms ease),
+    box-shadow var(--transition-fast, 150ms ease);
 }
 
 .bezent-intl-phone-box:hover:not(.is-disabled) {

@@ -122,29 +122,63 @@ describe.skipIf(!isDatabaseConfigured)(
       // Attendance child/parent cleanup for COMP_ID
       await db.delete(attendancePunchAudits).where(eq(attendancePunchAudits.companyId, COMP_ID));
       await db.delete(attendancePunches).where(eq(attendancePunches.companyId, COMP_ID));
-      await db.delete(attendanceExceptionAudits).where(eq(attendanceExceptionAudits.companyId, COMP_ID));
+      await db
+        .delete(attendanceExceptionAudits)
+        .where(eq(attendanceExceptionAudits.companyId, COMP_ID));
       await db.delete(attendanceExceptions).where(eq(attendanceExceptions.companyId, COMP_ID));
-      await db.delete(attendanceRegularizationAudits).where(eq(attendanceRegularizationAudits.companyId, COMP_ID));
+      await db
+        .delete(attendanceRegularizationAudits)
+        .where(eq(attendanceRegularizationAudits.companyId, COMP_ID));
       await db.delete(attendanceAdjustments).where(eq(attendanceAdjustments.companyId, COMP_ID));
-      await db.delete(attendanceRegularizations).where(eq(attendanceRegularizations.companyId, COMP_ID));
+      await db
+        .delete(attendanceRegularizations)
+        .where(eq(attendanceRegularizations.companyId, COMP_ID));
       await db.delete(attendanceOnDutyAudits).where(eq(attendanceOnDutyAudits.companyId, COMP_ID));
-      await db.delete(attendanceOnDutyWorkdays).where(eq(attendanceOnDutyWorkdays.companyId, COMP_ID));
-      await db.delete(attendanceOnDutyRequests).where(eq(attendanceOnDutyRequests.companyId, COMP_ID));
-      await db.delete(attendanceMonthlyAudits).where(eq(attendanceMonthlyAudits.companyId, COMP_ID));
-      await db.delete(attendanceMonthlyReadinessEvaluations).where(eq(attendanceMonthlyReadinessEvaluations.companyId, COMP_ID));
-      await db.delete(attendanceMonthlyReviews).where(eq(attendanceMonthlyReviews.companyId, COMP_ID));
-      await db.delete(attendanceMonthlySummaries).where(eq(attendanceMonthlySummaries.companyId, COMP_ID));
-      await db.delete(attendanceReportGenerations).where(eq(attendanceReportGenerations.companyId, COMP_ID));
+      await db
+        .delete(attendanceOnDutyWorkdays)
+        .where(eq(attendanceOnDutyWorkdays.companyId, COMP_ID));
+      await db
+        .delete(attendanceOnDutyRequests)
+        .where(eq(attendanceOnDutyRequests.companyId, COMP_ID));
+      await db
+        .delete(attendanceMonthlyAudits)
+        .where(eq(attendanceMonthlyAudits.companyId, COMP_ID));
+      await db
+        .delete(attendanceMonthlyReadinessEvaluations)
+        .where(eq(attendanceMonthlyReadinessEvaluations.companyId, COMP_ID));
+      await db
+        .delete(attendanceMonthlyReviews)
+        .where(eq(attendanceMonthlyReviews.companyId, COMP_ID));
+      await db
+        .delete(attendanceMonthlySummaries)
+        .where(eq(attendanceMonthlySummaries.companyId, COMP_ID));
+      await db
+        .delete(attendanceReportGenerations)
+        .where(eq(attendanceReportGenerations.companyId, COMP_ID));
       await db.delete(attendanceSavedReports).where(eq(attendanceSavedReports.companyId, COMP_ID));
-      await db.delete(attendancePayrollHandoverBatches).where(eq(attendancePayrollHandoverBatches.companyId, COMP_ID));
+      await db
+        .delete(attendancePayrollHandoverBatches)
+        .where(eq(attendancePayrollHandoverBatches.companyId, COMP_ID));
       await db.delete(attendancePeriods).where(eq(attendancePeriods.companyId, COMP_ID));
-      await db.delete(attendanceSettingsAuditLogs).where(eq(attendanceSettingsAuditLogs.companyId, COMP_ID));
-      await db.delete(attendancePayrollSettings).where(eq(attendancePayrollSettings.companyId, COMP_ID));
-      await db.delete(attendanceSecuritySettings).where(eq(attendanceSecuritySettings.companyId, COMP_ID));
-      await db.delete(attendanceImportBatches).where(eq(attendanceImportBatches.companyId, COMP_ID));
+      await db
+        .delete(attendanceSettingsAuditLogs)
+        .where(eq(attendanceSettingsAuditLogs.companyId, COMP_ID));
+      await db
+        .delete(attendancePayrollSettings)
+        .where(eq(attendancePayrollSettings.companyId, COMP_ID));
+      await db
+        .delete(attendanceSecuritySettings)
+        .where(eq(attendanceSecuritySettings.companyId, COMP_ID));
+      await db
+        .delete(attendanceImportBatches)
+        .where(eq(attendanceImportBatches.companyId, COMP_ID));
       await db.delete(attendanceDevices).where(eq(attendanceDevices.companyId, COMP_ID));
-      await db.delete(attendanceRegularizationSettings).where(eq(attendanceRegularizationSettings.companyId, COMP_ID));
-      await db.delete(attendanceGeneralSettings).where(eq(attendanceGeneralSettings.companyId, COMP_ID));
+      await db
+        .delete(attendanceRegularizationSettings)
+        .where(eq(attendanceRegularizationSettings.companyId, COMP_ID));
+      await db
+        .delete(attendanceGeneralSettings)
+        .where(eq(attendanceGeneralSettings.companyId, COMP_ID));
       await db.delete(attendancePolicies).where(eq(attendancePolicies.companyId, COMP_ID));
 
       await db.delete(employeeAttendance).where(eq(employeeAttendance.companyId, COMP_ID));

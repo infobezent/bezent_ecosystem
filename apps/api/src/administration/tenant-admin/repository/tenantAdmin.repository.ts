@@ -655,7 +655,9 @@ export class TenantAdminRepository {
     for (const a of tenantAdminsList) candidateIds.add(a.userId);
 
     // Filter out users already in this company
-    const availableUserIds = Array.from(candidateIds).filter((id) => !existingMemberUserIds.has(id));
+    const availableUserIds = Array.from(candidateIds).filter(
+      (id) => !existingMemberUserIds.has(id),
+    );
     if (availableUserIds.length === 0) {
       return [];
     }

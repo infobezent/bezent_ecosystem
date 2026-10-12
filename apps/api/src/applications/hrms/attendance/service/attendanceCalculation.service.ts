@@ -117,15 +117,25 @@ export class AttendanceCalculationService {
     const isOvernightShift = endMinutes < startMinutes;
 
     // 4. Check-in analysis
-    const lateConfig = (policy.classificationRules as Record<string, unknown> | null)?.lateArrivalConfig as
-      | { countingMode?: 'after_grace' | 'from_start'; extendedLateThresholdMinutes?: number; extendedLateAction?: string }
+    const lateConfig = (policy.classificationRules as Record<string, unknown> | null)
+      ?.lateArrivalConfig as
+      | {
+          countingMode?: 'after_grace' | 'from_start';
+          extendedLateThresholdMinutes?: number;
+          extendedLateAction?: string;
+        }
       | undefined;
-    const earlyConfig = (policy.classificationRules as Record<string, unknown> | null)?.earlyExitConfig as
-      | { graceMinutes?: number; extendedEarlyExitThresholdMinutes?: number; extendedEarlyExitAction?: string }
+    const earlyConfig = (policy.classificationRules as Record<string, unknown> | null)
+      ?.earlyExitConfig as
+      | {
+          graceMinutes?: number;
+          extendedEarlyExitThresholdMinutes?: number;
+          extendedEarlyExitAction?: string;
+        }
       | undefined;
-    const workingConfig = (policy.classificationRules as Record<string, unknown> | null)?.workingHoursConfig as
-      | { netOrGross?: 'net' | 'gross'; workingHoursMode?: string }
-      | undefined;
+    const workingConfig = (policy.classificationRules as Record<string, unknown> | null)
+      ?.workingHoursConfig as
+      { netOrGross?: 'net' | 'gross'; workingHoursMode?: string } | undefined;
 
     if (checkInTime) {
       if (policy.enableLateTracking !== false) {
@@ -159,7 +169,8 @@ export class AttendanceCalculationService {
       if (policy.enableEarlyExitTracking !== false) {
         if (isOvernightShift) {
           const normalizedEnd = endMinutes + 1440;
-          const normalizedCheckOut = checkOutMinutes < startMinutes ? checkOutMinutes + 1440 : checkOutMinutes;
+          const normalizedCheckOut =
+            checkOutMinutes < startMinutes ? checkOutMinutes + 1440 : checkOutMinutes;
           if (normalizedCheckOut < normalizedEnd - earlyExitGrace) {
             isEarlyExit = true;
             earlyMinutes = normalizedEnd - normalizedCheckOut;
@@ -184,7 +195,9 @@ export class AttendanceCalculationService {
         if (policy.breakDeductionMethod === 'none') {
           breakDeduction = 0;
         } else if (policy.breakDeductionMethod === 'actual') {
-          breakDeduction = schedule.lunchMinutes || (grossMinutes >= 240 ? Math.min(schedule.breakMinutes ?? 0, 60) : 0);
+          breakDeduction =
+            schedule.lunchMinutes ||
+            (grossMinutes >= 240 ? Math.min(schedule.breakMinutes ?? 0, 60) : 0);
         } else {
           // 'scheduled'
           breakDeduction = grossMinutes >= 240 ? Math.min(schedule.breakMinutes ?? 0, 60) : 0;
@@ -209,7 +222,10 @@ export class AttendanceCalculationService {
 
     const classificationRules = policy.classificationRules as Record<string, unknown> | null;
     if (classificationRules?.thresholdMode === 'percentage_of_shift') {
-      const shiftGrossHours = Math.max(1, (endMinutes - startMinutes - (schedule.breakMinutes ?? 0)) / 60);
+      const shiftGrossHours = Math.max(
+        1,
+        (endMinutes - startMinutes - (schedule.breakMinutes ?? 0)) / 60,
+      );
       const fullPct = Number(classificationRules.fullDayPercentage ?? 100);
       const halfPct = Number(classificationRules.halfDayPercentage ?? 50);
       fullDayThresholdHours = (fullPct / 100) * shiftGrossHours;
@@ -335,7 +351,11 @@ export class AttendanceCalculationService {
     unitType: string;
     explanation: string;
   } {
-    if (!penaltyRules || !penaltyRules.enabled || lateMarksCount < penaltyRules.lateMarksThreshold) {
+    if (
+      !penaltyRules ||
+      !penaltyRules.enabled ||
+      lateMarksCount < penaltyRules.lateMarksThreshold
+    ) {
       return {
         penaltyUnits: 0,
         triggers: 0,
@@ -360,8 +380,17 @@ export class AttendanceCalculationService {
     // Map penalty unit to day-equivalent units
     let unitValue = 0.5; // default half_day
     if (penaltyRules.penaltyUnit === 'quarter_day') unitValue = 0.25;
-    else if (penaltyRules.penaltyUnit === 'half_day' || penaltyRules.penaltyUnit === 'half_day_deduction') unitValue = 0.5;
-    else if (penaltyRules.penaltyUnit === 'full_day' || penaltyRules.penaltyUnit === 'full_day_deduction' || penaltyRules.penaltyUnit === 'loss_of_pay') unitValue = 1.0;
+    else if (
+      penaltyRules.penaltyUnit === 'half_day' ||
+      penaltyRules.penaltyUnit === 'half_day_deduction'
+    )
+      unitValue = 0.5;
+    else if (
+      penaltyRules.penaltyUnit === 'full_day' ||
+      penaltyRules.penaltyUnit === 'full_day_deduction' ||
+      penaltyRules.penaltyUnit === 'loss_of_pay'
+    )
+      unitValue = 1.0;
 
     let triggers = 1;
     if (penaltyRules.isRepeating) {
@@ -416,7 +445,9 @@ export class AttendanceCalculationService {
     isPunchExempt: boolean;
     creditedWorkedMinutes: number;
   } {
-    const rules = policyOrRules?.odRules || (policyOrRules?.enabled !== undefined ? (policyOrRules as OnDutyRulesConfig) : null);
+    const rules =
+      policyOrRules?.odRules ||
+      (policyOrRules?.enabled !== undefined ? (policyOrRules as OnDutyRulesConfig) : null);
     const duration = od.durationType || od.duration || 'full_day';
     const isApproved = !od.status || od.status === 'approved';
 
@@ -445,8 +476,14 @@ export class AttendanceCalculationService {
     }
 
     const isPresent = rules?.creditTreatment !== 'verified_hours' || duration === 'full_day';
-    const creditedStatus: 'present' | 'half_day' = isPresent && duration !== 'half_day' ? 'present' : 'half_day';
-    const creditedWorkedMinutes = duration === 'full_day' ? 480 : duration === 'half_day' ? 240 : Math.round((od.hours ?? 4) * 60);
+    const creditedStatus: 'present' | 'half_day' =
+      isPresent && duration !== 'half_day' ? 'present' : 'half_day';
+    const creditedWorkedMinutes =
+      duration === 'full_day'
+        ? 480
+        : duration === 'half_day'
+          ? 240
+          : Math.round((od.hours ?? 4) * 60);
     const isPunchExempt = rules?.punchRule !== 'required_at_location';
 
     return {

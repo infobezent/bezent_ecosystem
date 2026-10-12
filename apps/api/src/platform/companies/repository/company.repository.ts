@@ -161,7 +161,8 @@ export class CompanyRepository {
         dateFormat: c.dateFormat ?? null,
         weekStartsOn: c.weekStartsOn ?? null,
         financialYearStart: c.financialYearStart ?? null,
-        brandingMode: (c.brandingMode as 'own_logo' | 'tenant_logo' | 'initials' | null) ?? 'initials',
+        brandingMode:
+          (c.brandingMode as 'own_logo' | 'tenant_logo' | 'initials' | null) ?? 'initials',
         status: c.status as CompanyStatus,
         createdAt: c.createdAt.toISOString(),
         updatedAt: c.updatedAt.toISOString(),
@@ -447,7 +448,8 @@ export class CompanyRepository {
     if (input.country !== undefined) updateSet.country = input.country;
     if (input.postalCode !== undefined) updateSet.postalCode = input.postalCode;
     if (input.timeZone !== undefined) updateSet.timeZone = input.timeZone;
-    if (input.registrationNumber !== undefined) updateSet.registrationNumber = input.registrationNumber;
+    if (input.registrationNumber !== undefined)
+      updateSet.registrationNumber = input.registrationNumber;
     if (input.currency !== undefined) updateSet.currency = input.currency;
     if (input.locale !== undefined) updateSet.locale = input.locale;
     if (input.dateFormat !== undefined) updateSet.dateFormat = input.dateFormat;

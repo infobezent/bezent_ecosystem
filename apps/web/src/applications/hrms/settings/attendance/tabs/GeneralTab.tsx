@@ -23,10 +23,7 @@ import {
 } from '../../../../../design-system/components';
 import { BezentIcon } from '../../../../../design-system/icons';
 import { SettingsRow } from '../components/SettingsRow';
-import {
-  fetchGeneralSettings,
-  updateGeneralSettings,
-} from '../../../attendance/api/attendanceApi';
+import { fetchGeneralSettings, updateGeneralSettings } from '../../../attendance/api/attendanceApi';
 import type {
   AttendanceGeneralSettings,
   ManualEntryConfig,
@@ -56,7 +53,9 @@ export function GeneralTab({ initialSettings }: GeneralTabProps = {}) {
   const [startDateReasonError, setStartDateReasonError] = useState<string | null>(null);
 
   // Section 2: Processing & Entry Permissions
-  const [processingMode, setProcessingMode] = useState<'automatic' | 'manual' | 'daily_batch'>('automatic');
+  const [processingMode, setProcessingMode] = useState<'automatic' | 'manual' | 'daily_batch'>(
+    'automatic',
+  );
   const [employeeVisibility, setEmployeeVisibility] = useState<
     'daily_and_monthly' | 'daily_only' | 'monthly_summary_only'
   >('daily_and_monthly');
@@ -85,9 +84,7 @@ export function GeneralTab({ initialSettings }: GeneralTabProps = {}) {
   );
   const [manualApprovalMode, setManualApprovalMode] = useState<
     'approval_required' | 'direct_finalization'
-  >(
-    initialSettings?.manualEntryConfig?.approvalMode || 'approval_required',
-  );
+  >(initialSettings?.manualEntryConfig?.approvalMode || 'approval_required');
   const [manualRequireReason, setManualRequireReason] = useState(
     initialSettings?.manualEntryConfig?.requireReason ?? true,
   );
@@ -115,12 +112,16 @@ export function GeneralTab({ initialSettings }: GeneralTabProps = {}) {
 
   // Timing & Frequency
   const [missingPunchDelay, setMissingPunchDelay] = useState(30);
-  const [digestFrequency, setDigestFrequency] = useState<'instant' | 'daily' | 'weekly' | 'none'>('daily');
+  const [digestFrequency, setDigestFrequency] = useState<'instant' | 'daily' | 'weekly' | 'none'>(
+    'daily',
+  );
 
   // Escalation
   const [escalationEnabled, setEscalationEnabled] = useState(false);
   const [escalationDeadlineHours, setEscalationDeadlineHours] = useState(48);
-  const [escalationTarget, setEscalationTarget] = useState<'next_level_manager' | 'hr_manager'>('next_level_manager');
+  const [escalationTarget, setEscalationTarget] = useState<'next_level_manager' | 'hr_manager'>(
+    'next_level_manager',
+  );
   const [alertsExpanded, setAlertsExpanded] = useState(false);
 
   const toggleManualRole = (role: string) => {
@@ -142,7 +143,9 @@ export function GeneralTab({ initialSettings }: GeneralTabProps = {}) {
       const data: AttendanceGeneralSettings = await fetchGeneralSettings();
       setTimezone(data.timezone || 'UTC');
       setDayBoundaryMode(data.dayBoundaryMode || 'shift_workday_based');
-      setUnscheduledFallbackCutoff(data.unscheduledFallbackCutoff || data.dayBoundaryTime || '04:00:00');
+      setUnscheduledFallbackCutoff(
+        data.unscheduledFallbackCutoff || data.dayBoundaryTime || '04:00:00',
+      );
       setTrackingStartDate(data.trackingStartDate || '2026-01-01');
       setInitialTrackingStartDate(data.trackingStartDate || '2026-01-01');
 
@@ -151,7 +154,8 @@ export function GeneralTab({ initialSettings }: GeneralTabProps = {}) {
       else setProcessingMode('automatic');
 
       if (data.employeeVisibility === 'daily_only') setEmployeeVisibility('daily_only');
-      else if (data.employeeVisibility === 'monthly_summary_only') setEmployeeVisibility('monthly_summary_only');
+      else if (data.employeeVisibility === 'monthly_summary_only')
+        setEmployeeVisibility('monthly_summary_only');
       else setEmployeeVisibility('daily_and_monthly');
 
       setDefaultHistoryView(data.defaultHistoryView || 'current_month');
@@ -159,8 +163,16 @@ export function GeneralTab({ initialSettings }: GeneralTabProps = {}) {
       setManualEntryAllowed(Boolean(data.manualEntryAllowed));
 
       if (data.manualEntryConfig) {
-        setManualEntryRoles(data.manualEntryConfig.allowedRoles || ['hr', 'reporting_manager', 'company_admin']);
-        setManualEntryMethods(data.manualEntryConfig.allowedMethods || ['actual_times', 'full_day_admin', 'half_day_admin']);
+        setManualEntryRoles(
+          data.manualEntryConfig.allowedRoles || ['hr', 'reporting_manager', 'company_admin'],
+        );
+        setManualEntryMethods(
+          data.manualEntryConfig.allowedMethods || [
+            'actual_times',
+            'full_day_admin',
+            'half_day_admin',
+          ],
+        );
         setManualApprovalMode(data.manualEntryConfig.approvalMode || 'approval_required');
         setManualRequireReason(data.manualEntryConfig.requireReason ?? true);
         setManualRequireAttachment(Boolean(data.manualEntryConfig.requireAttachment));
@@ -225,7 +237,9 @@ export function GeneralTab({ initialSettings }: GeneralTabProps = {}) {
         requireAttachment: manualRequireAttachment,
       };
 
-      const selectedRecipients: ('employee' | 'reporting_manager' | 'assigned_approver' | 'hr' | 'device_admin')[] = [];
+      const selectedRecipients: (
+        'employee' | 'reporting_manager' | 'assigned_approver' | 'hr' | 'device_admin'
+      )[] = [];
       if (recipientEmployee) selectedRecipients.push('employee');
       if (recipientManager) selectedRecipients.push('reporting_manager');
       if (recipientApprover) selectedRecipients.push('assigned_approver');
@@ -238,13 +252,41 @@ export function GeneralTab({ initialSettings }: GeneralTabProps = {}) {
 
       const alertSettingsPayload: AttendanceAlertSettings = {
         events: {
-          missingPunch: { enabled: alertMissingPunch, recipients: selectedRecipients, channels: selectedChannels },
-          lateArrival: { enabled: alertLateArrival, recipients: selectedRecipients, channels: selectedChannels },
-          earlyExit: { enabled: alertEarlyExit, recipients: selectedRecipients, channels: selectedChannels },
-          regularizationPending: { enabled: alertRegularizationPending, recipients: selectedRecipients, channels: selectedChannels },
-          exceptions: { enabled: alertExceptions, recipients: selectedRecipients, channels: selectedChannels },
-          onDutyPending: { enabled: alertOnDutyPending, recipients: selectedRecipients, channels: selectedChannels },
-          deviceSyncFailure: { enabled: alertDeviceSyncFailure, recipients: selectedRecipients, channels: selectedChannels },
+          missingPunch: {
+            enabled: alertMissingPunch,
+            recipients: selectedRecipients,
+            channels: selectedChannels,
+          },
+          lateArrival: {
+            enabled: alertLateArrival,
+            recipients: selectedRecipients,
+            channels: selectedChannels,
+          },
+          earlyExit: {
+            enabled: alertEarlyExit,
+            recipients: selectedRecipients,
+            channels: selectedChannels,
+          },
+          regularizationPending: {
+            enabled: alertRegularizationPending,
+            recipients: selectedRecipients,
+            channels: selectedChannels,
+          },
+          exceptions: {
+            enabled: alertExceptions,
+            recipients: selectedRecipients,
+            channels: selectedChannels,
+          },
+          onDutyPending: {
+            enabled: alertOnDutyPending,
+            recipients: selectedRecipients,
+            channels: selectedChannels,
+          },
+          deviceSyncFailure: {
+            enabled: alertDeviceSyncFailure,
+            recipients: selectedRecipients,
+            channels: selectedChannels,
+          },
         },
         timing: {
           missingPunchDelayMinutes: missingPunchDelay,
@@ -297,7 +339,9 @@ export function GeneralTab({ initialSettings }: GeneralTabProps = {}) {
 
   const handleConfirmStartDateChange = () => {
     if (!startDateReason.trim()) {
-      setStartDateReasonError('A business reason is mandatory when modifying the live tracking start date.');
+      setStartDateReasonError(
+        'A business reason is mandatory when modifying the live tracking start date.',
+      );
       return;
     }
     executeSave(startDateReason.trim());
@@ -315,9 +359,7 @@ export function GeneralTab({ initialSettings }: GeneralTabProps = {}) {
     <Stack gap="lg">
       {error && <Alert variant="error">{error}</Alert>}
       {success && (
-        <Alert variant="success">
-          Attendance settings successfully saved and synchronized.
-        </Alert>
+        <Alert variant="success">Attendance settings successfully saved and synchronized.</Alert>
       )}
 
       {/* ── Minimal 2-Column Settings Layout ── */}
@@ -329,10 +371,7 @@ export function GeneralTab({ initialSettings }: GeneralTabProps = {}) {
             icon="schedule"
             info="Company fallback timezone. Assigned shift timezones take precedence."
           >
-            <TimezoneSelect
-              value={timezone}
-              onChange={(newTz) => setTimezone(newTz)}
-            />
+            <TimezoneSelect value={timezone} onChange={(newTz) => setTimezone(newTz)} />
           </SettingsRow>
 
           <Divider spacing="sm" />
@@ -402,9 +441,7 @@ export function GeneralTab({ initialSettings }: GeneralTabProps = {}) {
             <Select
               value={processingMode}
               onChange={(e) =>
-                setProcessingMode(
-                  e.target.value as 'automatic' | 'manual' | 'daily_batch',
-                )
+                setProcessingMode(e.target.value as 'automatic' | 'manual' | 'daily_batch')
               }
               options={[
                 { value: 'automatic', label: 'Automatic Processing' },
@@ -426,10 +463,7 @@ export function GeneralTab({ initialSettings }: GeneralTabProps = {}) {
               value={employeeVisibility}
               onChange={(e) =>
                 setEmployeeVisibility(
-                  e.target.value as
-                    | 'daily_and_monthly'
-                    | 'daily_only'
-                    | 'monthly_summary_only',
+                  e.target.value as 'daily_and_monthly' | 'daily_only' | 'monthly_summary_only',
                 )
               }
               options={[
@@ -473,9 +507,7 @@ export function GeneralTab({ initialSettings }: GeneralTabProps = {}) {
                   min={1}
                   max={365}
                   value={String(customHistoryDays)}
-                  onChange={(e) =>
-                    setCustomHistoryDays(Number(e.target.value) || 30)
-                  }
+                  onChange={(e) => setCustomHistoryDays(Number(e.target.value) || 30)}
                   placeholder="Specify days (1 - 365)"
                 />
               )}
@@ -833,9 +865,7 @@ export function GeneralTab({ initialSettings }: GeneralTabProps = {}) {
         size="md"
         footer={
           <Inline justify="end" gap="sm">
-            <Button onClick={() => setIsStartDateModalOpen(false)}>
-              Cancel
-            </Button>
+            <Button onClick={() => setIsStartDateModalOpen(false)}>Cancel</Button>
             <Button variant="primary" onClick={handleConfirmStartDateChange} disabled={saving}>
               {saving ? 'Publishing...' : 'Authorize & Publish Changes'}
             </Button>
@@ -844,7 +874,9 @@ export function GeneralTab({ initialSettings }: GeneralTabProps = {}) {
       >
         <Stack gap="md">
           <Alert variant="warning">
-            <strong>Impact Assessment:</strong> Adjusting the Attendance Tracking Start Date changes the live inception threshold for automated absence generation. Historical attendance logs, manual entries, and payroll-locked periods remain strictly preserved.
+            <strong>Impact Assessment:</strong> Adjusting the Attendance Tracking Start Date changes
+            the live inception threshold for automated absence generation. Historical attendance
+            logs, manual entries, and payroll-locked periods remain strictly preserved.
           </Alert>
 
           <div>
@@ -859,7 +891,8 @@ export function GeneralTab({ initialSettings }: GeneralTabProps = {}) {
               error={startDateReasonError || undefined}
             />
             <span className="bezent-text-hint">
-              This reason will be recorded in the immutable attendance audit history alongside your user identity and timestamp.
+              This reason will be recorded in the immutable attendance audit history alongside your
+              user identity and timestamp.
             </span>
           </div>
         </Stack>

@@ -26,9 +26,7 @@ export function KpiSummaryGrid({ kpis }: KpiSummaryGridProps) {
             <span className="bezent-card__desc">{kpi.label}</span>
             <Inline justify="between" align="center">
               <h2 className="bezent-card__title">{kpi.value}</h2>
-              {kpi.variant ? (
-                <Badge variant={kpi.variant}>{kpi.subtext || 'Metric'}</Badge>
-              ) : null}
+              {kpi.variant ? <Badge variant={kpi.variant}>{kpi.subtext || 'Metric'}</Badge> : null}
             </Inline>
             {kpi.subtext && !kpi.variant ? (
               <span className="bezent-card__desc">{kpi.subtext}</span>
@@ -72,13 +70,7 @@ export function DonutChart({ data, onSliceClick }: DonutChartProps) {
         ) : (
           <Inline gap="xl" align="center" justify="between">
             {/* SVG Donut */}
-            <svg
-              width={180}
-              height={180}
-              viewBox="0 0 180 180"
-              aria-label={data.title}
-              role="img"
-            >
+            <svg width={180} height={180} viewBox="0 0 180 180" aria-label={data.title} role="img">
               <circle
                 cx={90}
                 cy={90}
@@ -612,7 +604,11 @@ export interface ActiveDrillDownProps {
   onClear: () => void;
 }
 
-export function ActiveDrillDownBanner({ dimension, value, onClear }: ActiveDrillDownProps): JSX.Element {
+export function ActiveDrillDownBanner({
+  dimension,
+  value,
+  onClear,
+}: ActiveDrillDownProps): JSX.Element {
   return (
     <Card padding="sm" variant="flat">
       <Inline justify="between" align="center">

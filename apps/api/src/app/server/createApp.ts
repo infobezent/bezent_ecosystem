@@ -56,7 +56,13 @@ export function createApp(): Express {
         }
         callback(null, false);
       },
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Company-Id', 'Accept', 'Idempotency-Key'],
+      allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'X-Company-Id',
+        'Accept',
+        'Idempotency-Key',
+      ],
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     }),
   );

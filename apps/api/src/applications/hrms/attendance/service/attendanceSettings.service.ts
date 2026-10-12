@@ -2,10 +2,7 @@ import {
   AttendanceSettingsRepository,
   attendanceSettingsRepository,
 } from '../repository/attendanceSettings.repository.js';
-import {
-  AttendanceRepository,
-  attendanceRepository,
-} from '../repository/attendance.repository.js';
+import { AttendanceRepository, attendanceRepository } from '../repository/attendance.repository.js';
 import { attendanceCalculationService } from './attendanceCalculation.service.js';
 import type {
   AttendancePolicy,
@@ -73,7 +70,9 @@ export class AttendanceSettingsService {
     // 2. Day boundary fallback cutoff format validation
     const cutoffTime = input.unscheduledFallbackCutoff || input.dayBoundaryTime;
     if (cutoffTime && !/^\d{2}:\d{2}(:\d{2})?$/.test(cutoffTime)) {
-      throw new BadRequestError('Day boundary fallback cutoff time must be in HH:mm or HH:mm:ss format');
+      throw new BadRequestError(
+        'Day boundary fallback cutoff time must be in HH:mm or HH:mm:ss format',
+      );
     }
 
     // 3. Controlled modification for Tracking Start Date (Go-Live Date)
@@ -84,7 +83,9 @@ export class AttendanceSettingsService {
       // If tracking start date is changed after initial setup, require change reason
       if (prev?.trackingStartDate && prev.trackingStartDate !== input.trackingStartDate) {
         if (!input.trackingStartDateReason || !input.trackingStartDateReason.trim()) {
-          throw new BadRequestError('A change reason is required when modifying the attendance tracking start date');
+          throw new BadRequestError(
+            'A change reason is required when modifying the attendance tracking start date',
+          );
         }
       }
     }
@@ -131,7 +132,10 @@ export class AttendanceSettingsService {
   async listPolicies(
     tenantId: string,
     companyId: string,
-    filter?: { scope?: 'company' | 'department' | 'employee'; status?: 'draft' | 'published' | 'archived' },
+    filter?: {
+      scope?: 'company' | 'department' | 'employee';
+      status?: 'draft' | 'published' | 'archived';
+    },
   ): Promise<AttendancePolicy[]> {
     return this.repo.listPolicies(tenantId, companyId, filter);
   }
@@ -160,18 +164,32 @@ export class AttendanceSettingsService {
         if (!input.scopeId || !input.scopeId.trim()) {
           throw new BadRequestError('Department ID is required for department policy override');
         }
-        const valid = await this.repo.validateScopeId(tenantId, companyId, 'department', input.scopeId);
+        const valid = await this.repo.validateScopeId(
+          tenantId,
+          companyId,
+          'department',
+          input.scopeId,
+        );
         if (!valid) {
-          throw new BadRequestError(`Department ${input.scopeId} does not exist or does not belong to this company`);
+          throw new BadRequestError(
+            `Department ${input.scopeId} does not exist or does not belong to this company`,
+          );
         }
       }
       if (input.scope === 'employee') {
         if (!input.scopeId || !input.scopeId.trim()) {
           throw new BadRequestError('Employee ID is required for employee policy override');
         }
-        const valid = await this.repo.validateScopeId(tenantId, companyId, 'employee', input.scopeId);
+        const valid = await this.repo.validateScopeId(
+          tenantId,
+          companyId,
+          'employee',
+          input.scopeId,
+        );
         if (!valid) {
-          throw new BadRequestError(`Employee ${input.scopeId} does not exist or does not belong to this company`);
+          throw new BadRequestError(
+            `Employee ${input.scopeId} does not exist or does not belong to this company`,
+          );
         }
       }
     }
@@ -180,7 +198,9 @@ export class AttendanceSettingsService {
     const halfDay = Number(input.halfDayThresholdHours ?? 0);
     const fullDay = Number(input.fullDayThresholdHours ?? 0);
     if (fullDay > 0 && halfDay > 0 && fullDay <= halfDay) {
-      throw new BadRequestError('Full day minimum hours must be greater than half day minimum hours');
+      throw new BadRequestError(
+        'Full day minimum hours must be greater than half day minimum hours',
+      );
     }
 
     if (input.gracePeriodMinutes !== undefined && Number(input.gracePeriodMinutes) < 0) {
@@ -194,7 +214,9 @@ export class AttendanceSettingsService {
         const full = cr.minHoursForPresent ?? fullDay;
         const half = cr.minHoursForHalfDay ?? halfDay;
         if (full > 0 && half > 0 && full <= half) {
-          throw new BadRequestError('Full day minimum hours must be greater than half day minimum hours');
+          throw new BadRequestError(
+            'Full day minimum hours must be greater than half day minimum hours',
+          );
         }
       } else if (cr.thresholdMode === 'percentage_of_shift') {
         const fullPct = cr.fullDayPercentage ?? 100;
@@ -230,10 +252,17 @@ export class AttendanceSettingsService {
     if (input.penaltyRules) {
       const pr = input.penaltyRules as unknown as PenaltyRulesConfig;
       if (pr.enabled) {
-        if (pr.lateMarksThreshold !== undefined && (!Number.isInteger(Number(pr.lateMarksThreshold)) || Number(pr.lateMarksThreshold) < 1)) {
+        if (
+          pr.lateMarksThreshold !== undefined &&
+          (!Number.isInteger(Number(pr.lateMarksThreshold)) || Number(pr.lateMarksThreshold) < 1)
+        ) {
           throw new BadRequestError('Late marks threshold must be a positive integer');
         }
-        if (pr.maxPenaltyUnits !== undefined && pr.maxPenaltyUnits !== null && Number(pr.maxPenaltyUnits) < 0) {
+        if (
+          pr.maxPenaltyUnits !== undefined &&
+          pr.maxPenaltyUnits !== null &&
+          Number(pr.maxPenaltyUnits) < 0
+        ) {
           throw new BadRequestError('Maximum penalty units cannot be negative');
         }
       }
@@ -251,7 +280,8 @@ export class AttendanceSettingsService {
 
     let effectiveDeptId = departmentId;
     if (employeeId && !effectiveDeptId) {
-      effectiveDeptId = (await this.repo.getEmployeeDepartmentId(tenantId, companyId, employeeId)) ?? undefined;
+      effectiveDeptId =
+        (await this.repo.getEmployeeDepartmentId(tenantId, companyId, employeeId)) ?? undefined;
     }
 
     const all = await this.repo.listPolicies(tenantId, companyId, {
@@ -302,14 +332,28 @@ export class AttendanceSettingsService {
     const resolved: AttendancePolicy = { ...companyPolicy };
 
     for (const key of inheritableKeys) {
-      if (empPolicy && (empPolicy as Record<string, unknown>)[key] !== null && (empPolicy as Record<string, unknown>)[key] !== undefined) {
+      if (
+        empPolicy &&
+        (empPolicy as Record<string, unknown>)[key] !== null &&
+        (empPolicy as Record<string, unknown>)[key] !== undefined
+      ) {
         (resolved as Record<string, unknown>)[key] = (empPolicy as Record<string, unknown>)[key];
         provenance[key] = 'employee';
-      } else if (deptPolicy && (deptPolicy as Record<string, unknown>)[key] !== null && (deptPolicy as Record<string, unknown>)[key] !== undefined) {
+      } else if (
+        deptPolicy &&
+        (deptPolicy as Record<string, unknown>)[key] !== null &&
+        (deptPolicy as Record<string, unknown>)[key] !== undefined
+      ) {
         (resolved as Record<string, unknown>)[key] = (deptPolicy as Record<string, unknown>)[key];
         provenance[key] = 'department';
-      } else if (companyPolicy && (companyPolicy as Record<string, unknown>)[key] !== null && (companyPolicy as Record<string, unknown>)[key] !== undefined) {
-        (resolved as Record<string, unknown>)[key] = (companyPolicy as Record<string, unknown>)[key];
+      } else if (
+        companyPolicy &&
+        (companyPolicy as Record<string, unknown>)[key] !== null &&
+        (companyPolicy as Record<string, unknown>)[key] !== undefined
+      ) {
+        (resolved as Record<string, unknown>)[key] = (companyPolicy as Record<string, unknown>)[
+          key
+        ];
         provenance[key] = 'company';
       } else {
         provenance[key] = 'default';
@@ -407,7 +451,12 @@ export class AttendanceSettingsService {
     const prev = await this.getPolicyById(tenantId, companyId, policyId);
     await this.validatePolicyInput(tenantId, companyId, prev, false);
 
-    const published = await this.repo.publishPolicy(tenantId, companyId, policyId, input.effectiveFrom);
+    const published = await this.repo.publishPolicy(
+      tenantId,
+      companyId,
+      policyId,
+      input.effectiveFrom,
+    );
 
     await this.repo.recordAuditLog(tenantId, companyId, {
       category: 'policy',
@@ -452,14 +501,16 @@ export class AttendanceSettingsService {
       enableEarlyExitTracking: target.enableEarlyExitTracking,
       halfDayThresholdHours: Number(target.halfDayThresholdHours),
       fullDayThresholdHours: Number(target.fullDayThresholdHours),
-      missingPunchPolicy: target.missingPunchPolicy as 'mark_absent' | 'half_day' | 'flag_exception' | 'none',
+      missingPunchPolicy: target.missingPunchPolicy as
+        'mark_absent' | 'half_day' | 'flag_exception' | 'none',
       allowRegularization: target.allowRegularization,
       regularizationCutoffDays: target.regularizationCutoffDays,
       requiresApproval: target.requiresApproval,
       effectiveFrom: new Date().toISOString().slice(0, 10),
       penaltyRules: target.penaltyRules as unknown as PenaltyRulesConfig | undefined,
       odRules: target.odRules as unknown as OnDutyRulesConfig | undefined,
-      classificationRules: target.classificationRules as unknown as ClassificationRulesConfig | undefined,
+      classificationRules: target.classificationRules as unknown as
+        ClassificationRulesConfig | undefined,
     });
 
     await this.repo.recordAuditLog(tenantId, companyId, {
@@ -578,7 +629,8 @@ export class AttendanceSettingsService {
     if (!device) throw new NotFoundError(`Device ${deviceId} not found`);
 
     // In V1 enterprise integration, perform health evaluation
-    const isMockIp = device.ipAddress?.startsWith('192.168.') || device.ipAddress?.startsWith('10.');
+    const isMockIp =
+      device.ipAddress?.startsWith('192.168.') || device.ipAddress?.startsWith('10.');
     const latencyMs = Math.floor(Math.random() * 40) + 12;
     const isOnline = Boolean(device.ipAddress && isMockIp);
 
@@ -799,14 +851,20 @@ export class AttendanceSettingsService {
 
     const warnings: string[] = [];
     if (pendingRegs.length > 0) {
-      warnings.push(`${pendingRegs.length} employee regularization request(s) remain pending in this period.`);
+      warnings.push(
+        `${pendingRegs.length} employee regularization request(s) remain pending in this period.`,
+      );
     }
     if (unresolvedMissingPunches > 0) {
-      warnings.push(`${unresolvedMissingPunches} missing punch instance(s) have not been reconciled.`);
+      warnings.push(
+        `${unresolvedMissingPunches} missing punch instance(s) have not been reconciled.`,
+      );
     }
 
     const payrollSettings = await this.getPayrollSettings(tenantId, companyId);
-    const canLock = payrollSettings.blockingSeverity === 'warning_only' || (pendingRegs.length === 0 && unresolvedMissingPunches === 0);
+    const canLock =
+      payrollSettings.blockingSeverity === 'warning_only' ||
+      (pendingRegs.length === 0 && unresolvedMissingPunches === 0);
 
     return {
       canLock,
@@ -854,7 +912,9 @@ export class AttendanceSettingsService {
     clientIp?: string,
   ): Promise<AttendancePeriod> {
     if (!reason || reason.trim().length < 5) {
-      throw new BadRequestError('A detailed reason (minimum 5 characters) is required to reopen a locked period');
+      throw new BadRequestError(
+        'A detailed reason (minimum 5 characters) is required to reopen a locked period',
+      );
     }
 
     const unlocked = await this.repo.unlockPeriod(tenantId, companyId, periodCode, userId, reason);
@@ -899,7 +959,8 @@ export class AttendanceSettingsService {
     const daysInMonth = new Date(year, month, 0).getDate();
 
     const effectivePolicy = await this.resolveEffectivePolicy(tenantId, companyId);
-    const penaltyRules = effectivePolicy.policy.penaltyRules as unknown as PenaltyRulesConfig | null;
+    const penaltyRules = effectivePolicy.policy
+      .penaltyRules as unknown as PenaltyRulesConfig | null;
 
     let totalEligibleDays = 0;
     let totalRecommendedPenaltyUnits = 0;
@@ -908,17 +969,26 @@ export class AttendanceSettingsService {
       const days = Object.values(r.days ?? {});
       const lateMarks = days.filter((d) => d.isLate).length;
       const unresolvedExceptions = days.filter(
-        (d) => d.isMissingPunch || d.status === 'incomplete' || d.processingState === 'pending_review',
+        (d) =>
+          d.isMissingPunch || d.status === 'incomplete' || d.processingState === 'pending_review',
       ).length;
 
       // 2. Policy-derived penalty recommendation (ADVISORY, NOT DIRECT DEDUCTION OF ATTENDANCE PAYABLE DAYS)
       const penalty = penaltyRules
         ? attendanceCalculationService.calculatePenaltyUnits(lateMarks, penaltyRules)
-        : { penaltyUnits: 0, triggers: 0, isCapped: false, isWarningOnly: false, unitType: 'none', explanation: 'No penalty rules configured' };
+        : {
+            penaltyUnits: 0,
+            triggers: 0,
+            isCapped: false,
+            isWarningOnly: false,
+            unitType: 'none',
+            explanation: 'No penalty rules configured',
+          };
       const penaltyDays = penalty.penaltyUnits ?? 0;
 
       // Eligible work days based strictly on attendance facts:
-      const eligibleWorkDays = r.totals.present + r.totals.halfDay * 0.5 + r.totals.onLeave + r.totals.holiday;
+      const eligibleWorkDays =
+        r.totals.present + r.totals.halfDay * 0.5 + r.totals.onLeave + r.totals.holiday;
       const readinessStatus: 'ready' | 'blocked' | 'requires_review' =
         unresolvedExceptions > 0 ? 'requires_review' : 'ready';
 

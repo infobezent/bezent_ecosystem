@@ -1,12 +1,5 @@
 import { useState, useEffect } from 'react';
-import {
-  Alert,
-  Badge,
-  Card,
-  Grid,
-  LoadingState,
-  Stack,
-} from '../../../design-system/components';
+import { Alert, Badge, Card, Grid, LoadingState, Stack } from '../../../design-system/components';
 import { tenantAdminApi } from '../api/tenantAdminApi';
 import type { CompanyRoleOverviewItem } from '../types/tenantAdmin.types';
 
@@ -78,13 +71,10 @@ export function CompanyRolesOverviewTab({ companyId }: CompanyRolesOverviewTabPr
 
   return (
     <Stack gap="lg">
-      <Alert
-        variant="info"
-        title="Company Scope & Application Boundary"
-      >
-        Company roles govern organizational identity, delegation, and administrative ownership for this company.
-        Access to specific business applications (HRMS, CRM, Project Management) and fine-grained operational roles
-        are managed independently within those applications.
+      <Alert variant="info" title="Company Scope & Application Boundary">
+        Company roles govern organizational identity, delegation, and administrative ownership for
+        this company. Access to specific business applications (HRMS, CRM, Project Management) and
+        fine-grained operational roles are managed independently within those applications.
       </Alert>
 
       <Grid columns={2} gap="lg">
@@ -92,9 +82,7 @@ export function CompanyRolesOverviewTab({ companyId }: CompanyRolesOverviewTabPr
           <Card key={r.code}>
             <Stack gap="md">
               <Stack gap="xs">
-                <Badge variant={r.code === 'company_admin' ? 'info' : 'neutral'}>
-                  {r.scope}
-                </Badge>
+                <Badge variant={r.code === 'company_admin' ? 'info' : 'neutral'}>{r.scope}</Badge>
                 <h3>{r.name}</h3>
                 <p>{r.description}</p>
               </Stack>
@@ -108,9 +96,7 @@ export function CompanyRolesOverviewTab({ companyId }: CompanyRolesOverviewTabPr
                 </Stack>
               </Stack>
 
-              <Alert variant="info">
-                {r.disclaimer}
-              </Alert>
+              <Alert variant="info">{r.disclaimer}</Alert>
             </Stack>
           </Card>
         ))}

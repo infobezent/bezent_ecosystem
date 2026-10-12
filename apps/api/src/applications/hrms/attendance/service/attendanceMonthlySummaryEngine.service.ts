@@ -115,9 +115,7 @@ export class AttendanceMonthlySummaryEngineService {
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${month}-${String(day).padStart(2, '0')}`;
       const dayDate = new Date(year, monthNum - 1, day);
-      const dayOfWeekName = dayDate
-        .toLocaleDateString('en-US', { weekday: 'long' })
-        .toLowerCase();
+      const dayOfWeekName = dayDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
 
       // Check joining date boundary
       if (dateStr < joiningDate) {
@@ -152,7 +150,10 @@ export class AttendanceMonthlySummaryEngineService {
       pendingCorrections += pendingRegs.length;
 
       // Check OD processing issue
-      if (odWorkday && (odWorkday.processingStatus === 'failed' || odWorkday.processingStatus === 'blocked')) {
+      if (
+        odWorkday &&
+        (odWorkday.processingStatus === 'failed' || odWorkday.processingStatus === 'blocked')
+      ) {
         processingIssues++;
       }
 
@@ -293,10 +294,7 @@ export class AttendanceMonthlySummaryEngineService {
       }
 
       // Policy credited minutes = raw worked + credited OD minutes
-      const dayCreditedMins = Math.min(
-        standardDailyScheduledMinutes,
-        rawWorkedMins + dayOdMins,
-      );
+      const dayCreditedMins = Math.min(standardDailyScheduledMinutes, rawWorkedMins + dayOdMins);
       policyCreditedMinutes += dayCreditedMins;
 
       // Late & Early exit counts
@@ -356,7 +354,9 @@ export class AttendanceMonthlySummaryEngineService {
       unresolvedExceptions,
       pendingCorrections,
       processingIssues,
-      dailyHashes: dailyRecords.map((d) => `${d.date}:${d.classification}:${d.actualWorkedMinutes}:${d.onDutyMinutes}`),
+      dailyHashes: dailyRecords.map(
+        (d) => `${d.date}:${d.classification}:${d.actualWorkedMinutes}:${d.onDutyMinutes}`,
+      ),
     });
 
     const sourceFingerprint = createHash('sha256').update(fingerprintPayload).digest('hex');
@@ -387,7 +387,8 @@ export class AttendanceMonthlySummaryEngineService {
       }
     }
 
-    const summaryId = existing?.id ?? `att_ms_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const summaryId =
+      existing?.id ?? `att_ms_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
     const summaryData: NewAttendanceMonthlySummary = {
       id: summaryId,
@@ -427,7 +428,9 @@ export class AttendanceMonthlySummaryEngineService {
       reviewedVersion: existing?.reviewedVersion ?? null,
       reviewNotes: existing?.reviewNotes ?? null,
       correctionRequestNotes: existing?.correctionRequestNotes ?? null,
-      reopenReason: isStaleReview ? 'Summary invalidated due to daily attendance source updates' : existing?.reopenReason ?? null,
+      reopenReason: isStaleReview
+        ? 'Summary invalidated due to daily attendance source updates'
+        : (existing?.reopenReason ?? null),
       lastCalculatedAt: new Date(),
     };
 
@@ -439,5 +442,4 @@ export class AttendanceMonthlySummaryEngineService {
   }
 }
 
-export const attendanceMonthlySummaryEngineService =
-  new AttendanceMonthlySummaryEngineService();
+export const attendanceMonthlySummaryEngineService = new AttendanceMonthlySummaryEngineService();

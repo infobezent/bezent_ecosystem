@@ -50,7 +50,13 @@ describe('HRMS Attendance — Reports V1.0 Frontend Tests', () => {
     const html = renderToStaticMarkup(
       <KpiSummaryGrid
         kpis={[
-          { id: 'total', label: 'Total Records', value: '150', subtext: '+5.2% vs previous period', variant: 'success' },
+          {
+            id: 'total',
+            label: 'Total Records',
+            value: '150',
+            subtext: '+5.2% vs previous period',
+            variant: 'success',
+          },
           { id: 'rate', label: 'Attendance Rate', value: '94.2%', subtext: 'Present / Scheduled' },
           { id: 'anomalies', label: 'Unresolved Anomalies', value: '3', variant: 'warning' },
         ]}
@@ -75,9 +81,24 @@ describe('HRMS Attendance — Reports V1.0 Frontend Tests', () => {
           subtitle: 'Workforce breakdown across current filtered scope',
           chartType: 'donut',
           slices: [
-            { key: 'present', label: 'Present', value: 85, colorToken: 'var(--color-success, #16a34a)' },
-            { key: 'absent', label: 'Absent', value: 10, colorToken: 'var(--color-danger, #dc2626)' },
-            { key: 'on_leave', label: 'On Leave', value: 5, colorToken: 'var(--color-warning, #d97706)' },
+            {
+              key: 'present',
+              label: 'Present',
+              value: 85,
+              colorToken: 'var(--color-success, #16a34a)',
+            },
+            {
+              key: 'absent',
+              label: 'Absent',
+              value: 10,
+              colorToken: 'var(--color-danger, #dc2626)',
+            },
+            {
+              key: 'on_leave',
+              label: 'On Leave',
+              value: 5,
+              colorToken: 'var(--color-warning, #d97706)',
+            },
           ],
         }}
       />,
@@ -184,13 +205,10 @@ describe('HRMS Attendance — Reports V1.0 Frontend Tests', () => {
   });
 
   it('renders ActiveDrillDownBanner with active dimension and clear action', async () => {
-    const { ActiveDrillDownBanner } = await import('../components/analytics/AttendanceReportCharts');
+    const { ActiveDrillDownBanner } =
+      await import('../components/analytics/AttendanceReportCharts');
     const html = renderToStaticMarkup(
-      <ActiveDrillDownBanner
-        dimension="Status Distribution"
-        value="Absent"
-        onClear={() => {}}
-      />,
+      <ActiveDrillDownBanner dimension="Status Distribution" value="Absent" onClear={() => {}} />,
     );
 
     expect(html).toContain('Active Chart Filter:');

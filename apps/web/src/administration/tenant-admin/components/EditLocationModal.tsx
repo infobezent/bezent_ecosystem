@@ -66,7 +66,9 @@ export function EditLocationModal({
   const [state, setState] = useState(location?.state || '');
   const [country, setCountry] = useState(location?.country || company.country || 'India');
   const [postalCode, setPostalCode] = useState(location?.postalCode || '');
-  const [timezone, setTimezone] = useState(location?.timezone || company.timeZone || 'Asia/Kolkata');
+  const [timezone, setTimezone] = useState(
+    location?.timezone || company.timeZone || 'Asia/Kolkata',
+  );
   const [description, setDescription] = useState(location?.description || '');
   const [status, setStatus] = useState<WorkLocationStatus>(location?.status || 'active');
   const [loading, setLoading] = useState(false);

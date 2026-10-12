@@ -357,7 +357,10 @@ export function validatePostalCode(
   if (upperCountry && POSTAL_PATTERNS[upperCountry]) {
     const spec = POSTAL_PATTERNS[upperCountry];
     if (!spec.regex.test(trimmed)) {
-      return { isValid: false, error: `Invalid postal code for ${upperCountry}: ${spec.description}` };
+      return {
+        isValid: false,
+        error: `Invalid postal code for ${upperCountry}: ${spec.description}`,
+      };
     }
   } else {
     // Generic fallback for international postal codes

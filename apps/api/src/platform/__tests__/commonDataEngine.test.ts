@@ -50,7 +50,11 @@ import {
   UnsupportedStorageError,
 } from '../data/files/index.js';
 import { assertUnique, buildUniquenessKey } from '../data/uniqueness/index.js';
-import type { UniquenessChecker, UniquenessCheckParams, UniquenessCheckResult } from '../data/contracts/uniqueness.types.js';
+import type {
+  UniquenessChecker,
+  UniquenessCheckParams,
+  UniquenessCheckResult,
+} from '../data/contracts/uniqueness.types.js';
 
 describe('BEZENT Common Data Engine (Platform Infrastructure)', () => {
   describe('1. Validation Engine', () => {

@@ -601,10 +601,8 @@ export class AttendanceOverviewService {
       let absenceRate: number | null = null;
 
       if (!isFuture && scheduledDayEquivalents > 0) {
-        attendanceRate =
-          Math.round((presentEquivalents / scheduledDayEquivalents) * 100 * 10) / 10;
-        absenceRate =
-          Math.round((absentEquivalents / scheduledDayEquivalents) * 100 * 10) / 10;
+        attendanceRate = Math.round((presentEquivalents / scheduledDayEquivalents) * 100 * 10) / 10;
+        absenceRate = Math.round((absentEquivalents / scheduledDayEquivalents) * 100 * 10) / 10;
 
         cumulativeAttendanceRate += attendanceRate;
         cumulativeAbsenceRate += absenceRate;
@@ -781,7 +779,8 @@ export class AttendanceOverviewService {
     });
 
     for (const emp of empRows) {
-      const deptKey = emp.departmentId && deptMap.has(emp.departmentId) ? emp.departmentId : unassignedKey;
+      const deptKey =
+        emp.departmentId && deptMap.has(emp.departmentId) ? emp.departmentId : unassignedKey;
       const stat = deptMap.get(deptKey)!;
       stat.eligible++;
 
@@ -808,9 +807,7 @@ export class AttendanceOverviewService {
       if (entry.eligible === 0) continue;
 
       const rate =
-        entry.eligible > 0
-          ? Math.round((entry.present / entry.eligible) * 100 * 10) / 10
-          : null;
+        entry.eligible > 0 ? Math.round((entry.present / entry.eligible) * 100 * 10) / 10 : null;
 
       results.push({
         departmentId: entry.id,
@@ -849,7 +846,11 @@ export class AttendanceOverviewService {
     const regConditions = [
       eq(attendanceRegularizations.tenantId, tenantId),
       eq(attendanceRegularizations.companyId, companyId),
-      inArray(attendanceRegularizations.approvalStatus, ['submitted', 'under_review', 'awaiting_info']),
+      inArray(attendanceRegularizations.approvalStatus, [
+        'submitted',
+        'under_review',
+        'awaiting_info',
+      ]),
     ];
     if (scopedEmployeeIds && scopedEmployeeIds.length > 0) {
       regConditions.push(inArray(attendanceRegularizations.employeeId, scopedEmployeeIds));
@@ -1008,7 +1009,11 @@ export class AttendanceOverviewService {
       eq(attendanceMonthlySummaries.tenantId, tenantId),
       eq(attendanceMonthlySummaries.companyId, companyId),
       eq(attendanceMonthlySummaries.month, currentMonth),
-      inArray(attendanceMonthlySummaries.reviewState, ['not_reviewed', 'in_review', 'needs_correction']),
+      inArray(attendanceMonthlySummaries.reviewState, [
+        'not_reviewed',
+        'in_review',
+        'needs_correction',
+      ]),
     ];
     if (scopedEmployeeIds && scopedEmployeeIds.length > 0) {
       msConditions.push(inArray(attendanceMonthlySummaries.employeeId, scopedEmployeeIds));
@@ -1073,11 +1078,7 @@ export class AttendanceOverviewService {
     access?: CompanyAccess,
     user?: AuthenticatedUser,
   ): Promise<ProcessingHealthResult> {
-    const { companyLocalToday } = await this.resolveTimezoneAndDate(
-      tenantId,
-      companyId,
-      date,
-    );
+    const { companyLocalToday } = await this.resolveTimezoneAndDate(tenantId, companyId, date);
     const { scopedEmployeeIds } = await this.resolveUserScope(tenantId, companyId, user, access);
 
     const isFuture = date > companyLocalToday;
@@ -1148,7 +1149,10 @@ export class AttendanceOverviewService {
     for (const att of attRows) {
       if (att.processingState === 'finalized' || att.processingState === 'locked') {
         processedWorkdays++;
-      } else if (att.processingState === 'provisional' || att.processingState === 'pending_review') {
+      } else if (
+        att.processingState === 'provisional' ||
+        att.processingState === 'pending_review'
+      ) {
         pendingWorkdays++;
       } else if (att.processingState === 'incomplete') {
         failedWorkdays++;
@@ -1248,9 +1252,15 @@ export class AttendanceOverviewService {
     access?: CompanyAccess,
     user?: AuthenticatedUser,
   ): Promise<MonthlyPayrollReadinessOverview> {
-    const { scope, scopedEmployeeIds } = await this.resolveUserScope(tenantId, companyId, user, access);
+    const { scope, scopedEmployeeIds } = await this.resolveUserScope(
+      tenantId,
+      companyId,
+      user,
+      access,
+    );
 
-    const month = monthStr && /^\d{4}-\d{2}$/.test(monthStr) ? monthStr : new Date().toISOString().slice(0, 7);
+    const month =
+      monthStr && /^\d{4}-\d{2}$/.test(monthStr) ? monthStr : new Date().toISOString().slice(0, 7);
 
     if (!scope.canViewPayrollReadiness) {
       return {
@@ -1306,8 +1316,10 @@ export class AttendanceOverviewService {
       else if (r.payrollReadiness === 'calculating') calculatingCount++;
 
       if (r.reviewState === 'reviewed') reviewedCount++;
-      else if (r.reviewState === 'not_reviewed' || r.reviewState === 'in_review') pendingReviewCount++;
-      else if (r.reviewState === 'needs_correction' || r.reviewState === 'reopened') reopenedCount++;
+      else if (r.reviewState === 'not_reviewed' || r.reviewState === 'in_review')
+        pendingReviewCount++;
+      else if (r.reviewState === 'needs_correction' || r.reviewState === 'reopened')
+        reopenedCount++;
 
       if (r.isLocked) lockedCount++;
     }

@@ -69,7 +69,8 @@ export class CustomerProvisioningController {
 
   getOutboxStatus = async (_req: Request, res: Response, next: NextFunction) => {
     try {
-      const { transactionalOutboxService } = await import('../../outbox/service/transactionalOutbox.service.js');
+      const { transactionalOutboxService } =
+        await import('../../outbox/service/transactionalOutbox.service.js');
       const status = await transactionalOutboxService.getStatus();
       res.status(200).json({ data: status });
     } catch (err) {

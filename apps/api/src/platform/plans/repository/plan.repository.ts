@@ -39,7 +39,10 @@ export class PlanRepository {
     return this.mapToDetail(plan, prices, entitlements);
   }
 
-  async findByCode(applicationCode: ApplicationCode, code: string): Promise<PlanDetailRecord | null> {
+  async findByCode(
+    applicationCode: ApplicationCode,
+    code: string,
+  ): Promise<PlanDetailRecord | null> {
     const db = getDb();
     const [plan] = await db
       .select()

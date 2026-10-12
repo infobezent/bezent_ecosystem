@@ -48,12 +48,7 @@ export const TENANT_BANNER_POLICY: FileValidationPolicy = {
 
 export const EMPLOYEE_DOCUMENT_POLICY: FileValidationPolicy = {
   name: 'Employee Document',
-  allowedMimeTypes: [
-    'application/pdf',
-    'image/png',
-    'image/jpeg',
-    'image/webp',
-  ],
+  allowedMimeTypes: ['application/pdf', 'image/png', 'image/jpeg', 'image/webp'],
   allowedExtensions: ['.pdf', '.png', '.jpg', '.jpeg', '.webp'],
   maxSizeBytes: 10 * 1024 * 1024, // 10MB
 };

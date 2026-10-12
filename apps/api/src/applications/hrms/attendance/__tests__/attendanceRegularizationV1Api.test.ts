@@ -180,7 +180,9 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Regularizatio
   describe('GET /api/v1/hrms/attendance/regularization/workspace', () => {
     it('returns paginated regularization items and all 6 summary counters', async () => {
       const res = await request(app)
-        .get('/api/v1/hrms/attendance/regularization/workspace?workdayFrom=2026-10-01&workdayTo=2026-10-15')
+        .get(
+          '/api/v1/hrms/attendance/regularization/workspace?workdayFrom=2026-10-01&workdayTo=2026-10-15',
+        )
         .set(headers);
 
       expect(res.status).toBe(200);
@@ -198,7 +200,9 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Regularizatio
       expect(counters).toHaveProperty('rejectedToday');
 
       expect(Array.isArray(items)).toBe(true);
-      const found = items.find((i: { id: string; requestType: string; requestedChange: string }) => i.id === regId1);
+      const found = items.find(
+        (i: { id: string; requestType: string; requestedChange: string }) => i.id === regId1,
+      );
       expect(found).toBeDefined();
       expect(found.requestType).toBe('missing_out');
       expect(found.requestedChange).toContain('06:05 PM');
@@ -206,7 +210,9 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Regularizatio
 
     it('filters correctly by approvalStatus and requestType', async () => {
       const res = await request(app)
-        .get('/api/v1/hrms/attendance/regularization/workspace?approvalStatus=under_review&requestType=incorrect_time')
+        .get(
+          '/api/v1/hrms/attendance/regularization/workspace?approvalStatus=under_review&requestType=incorrect_time',
+        )
         .set(headers);
 
       expect(res.status).toBe(200);
@@ -299,7 +305,9 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Regularizatio
         .set(headers);
 
       expect(detail.body.data.assignedTo).toBe(reviewerUserId);
-      expect(detail.body.data.audits.some((a: { action: string }) => a.action === 'assigned')).toBe(true);
+      expect(detail.body.data.audits.some((a: { action: string }) => a.action === 'assigned')).toBe(
+        true,
+      );
     });
 
     it('requests more information (awaiting_info)', async () => {
@@ -416,7 +424,9 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Regularizatio
       expect(res.status).toBe(200);
       expect(res.body.data).toHaveProperty('skipped');
       // regIdBoth is high-risk both_missing, requiring individual review
-      expect(res.body.data.skipped.some((s: { id: string; reason?: string }) => s.id === regIdBoth)).toBe(true);
+      expect(
+        res.body.data.skipped.some((s: { id: string; reason?: string }) => s.id === regIdBoth),
+      ).toBe(true);
     });
   });
 

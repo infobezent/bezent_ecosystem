@@ -243,8 +243,8 @@ export function CaptureDevicesTab() {
                         d.status === 'online'
                           ? 'success'
                           : d.status === 'testing'
-                          ? 'info'
-                          : 'danger'
+                            ? 'info'
+                            : 'danger'
                       }
                       size="sm"
                     >
@@ -337,8 +337,8 @@ export function CaptureDevicesTab() {
                         b.status === 'completed'
                           ? 'success'
                           : b.status === 'reversed'
-                          ? 'warning'
-                          : 'danger'
+                            ? 'warning'
+                            : 'danger'
                       }
                       size="sm"
                     >
@@ -348,11 +348,7 @@ export function CaptureDevicesTab() {
                   <TableCell>{new Date(b.createdAt).toLocaleDateString()}</TableCell>
                   <TableCell>
                     {b.status === 'completed' && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRollbackBatch(b.id)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => handleRollbackBatch(b.id)}>
                         Revert Batch
                       </Button>
                     )}
@@ -471,7 +467,9 @@ export function CaptureDevicesTab() {
               <label className="bezent-label">Ingestion Mode</label>
               <Select
                 value={batchType}
-                onChange={(e) => setBatchType(e.target.value as 'raw_punches' | 'historical_summary')}
+                onChange={(e) =>
+                  setBatchType(e.target.value as 'raw_punches' | 'historical_summary')
+                }
                 options={[
                   { value: 'raw_punches', label: 'Raw Punches (Timestamp events)' },
                   { value: 'historical_summary', label: 'Historical Daily Summary Records' },

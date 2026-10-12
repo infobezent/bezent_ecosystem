@@ -45,10 +45,14 @@ import type {
 
 export function PunchLogsPage() {
   // ── Date Presets & Filter State ──────────────────────────────────────────
-  const [datePreset, setDatePreset] = useState<'today' | 'yesterday' | 'last_7_days' | 'this_month' | 'custom'>('today');
+  const [datePreset, setDatePreset] = useState<
+    'today' | 'yesterday' | 'last_7_days' | 'this_month' | 'custom'
+  >('today');
   const [dateFrom, setDateFrom] = useState(() => new Date().toISOString().slice(0, 10));
   const [dateTo, setDateTo] = useState(() => new Date().toISOString().slice(0, 10));
-  const [dateInterpretation, setDateInterpretation] = useState<'event_timestamp' | 'workday'>('event_timestamp');
+  const [dateInterpretation, setDateInterpretation] = useState<'event_timestamp' | 'workday'>(
+    'event_timestamp',
+  );
 
   // ── Primary Filters ───────────────────────────────────────────────────────
   const [search, setSearch] = useState('');
@@ -95,14 +99,18 @@ export function PunchLogsPage() {
   // ── Details Drawer ────────────────────────────────────────────────────────
   const [drawerPunchId, setDrawerPunchId] = useState<string | null>(null);
   const [drawerDetail, setDrawerDetail] = useState<PunchEventDetail | null>(null);
-  const [drawerTab, setDrawerTab] = useState<'overview' | 'timeline' | 'linked' | 'history'>('overview');
+  const [drawerTab, setDrawerTab] = useState<'overview' | 'timeline' | 'linked' | 'history'>(
+    'overview',
+  );
   const [drawerLoading, setDrawerLoading] = useState(false);
   const [drawerError, setDrawerError] = useState<string | null>(null);
 
   // ── Investigation Modal ───────────────────────────────────────────────────
   const [investigationModalOpen, setInvestigationModalOpen] = useState(false);
   const [investigatingPunch, setInvestigatingPunch] = useState<PunchLogItem | null>(null);
-  const [investigationStatus, setInvestigationStatus] = useState<'open' | 'assigned' | 'in_review' | 'resolved' | 'closed'>('open');
+  const [investigationStatus, setInvestigationStatus] = useState<
+    'open' | 'assigned' | 'in_review' | 'resolved' | 'closed'
+  >('open');
   const [assignedTo, setAssignedTo] = useState('');
   const [investigationNotes, setInvestigationNotes] = useState('');
   const [resolvedEmployeeId, setResolvedEmployeeId] = useState('');
@@ -110,7 +118,10 @@ export function PunchLogsPage() {
   const [investigationSubmitting, setInvestigationSubmitting] = useState(false);
 
   // ── Bulk Banner & Feedback ────────────────────────────────────────────────
-  const [bannerMessage, setBannerMessage] = useState<{ type: 'success' | 'danger' | 'info'; text: string } | null>(null);
+  const [bannerMessage, setBannerMessage] = useState<{
+    type: 'success' | 'danger' | 'info';
+    text: string;
+  } | null>(null);
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
 
   // ── Export Modal ──────────────────────────────────────────────────────────
@@ -168,7 +179,9 @@ export function PunchLogsPage() {
   }, []);
 
   // ── Date Preset Handler ───────────────────────────────────────────────────
-  const applyDatePreset = (preset: 'today' | 'yesterday' | 'last_7_days' | 'this_month' | 'custom') => {
+  const applyDatePreset = (
+    preset: 'today' | 'yesterday' | 'last_7_days' | 'this_month' | 'custom',
+  ) => {
     setDatePreset(preset);
     const now = new Date();
     const todayStr = now.toISOString().slice(0, 10);
@@ -241,7 +254,10 @@ export function PunchLogsPage() {
   }, [loadData]);
 
   // ── Drawer Loader ─────────────────────────────────────────────────────────
-  const handleOpenDrawer = async (punchId: string, initialTab: 'overview' | 'timeline' | 'linked' | 'history' = 'overview') => {
+  const handleOpenDrawer = async (
+    punchId: string,
+    initialTab: 'overview' | 'timeline' | 'linked' | 'history' = 'overview',
+  ) => {
     setDrawerPunchId(punchId);
     setDrawerTab(initialTab);
     setDrawerLoading(true);
@@ -266,7 +282,9 @@ export function PunchLogsPage() {
   // ── Investigation Handlers ────────────────────────────────────────────────
   const handleOpenInvestigation = (punch: PunchLogItem) => {
     setInvestigatingPunch(punch);
-    setInvestigationStatus(punch.investigationStatus !== 'none' ? punch.investigationStatus : 'open');
+    setInvestigationStatus(
+      punch.investigationStatus !== 'none' ? punch.investigationStatus : 'open',
+    );
     setAssignedTo(punch.assignedTo || '');
     setInvestigationNotes(punch.investigationNotes || '');
     setResolvedEmployeeId(punch.employeeId || '');
@@ -287,7 +305,10 @@ export function PunchLogsPage() {
         resolvedEmployeeId: resolvedEmployeeId.trim() || undefined,
         resolutionReason: resolutionReason.trim() || undefined,
       });
-      setBannerMessage({ type: 'success', text: `Investigation updated for event ${investigatingPunch.id}` });
+      setBannerMessage({
+        type: 'success',
+        text: `Investigation updated for event ${investigatingPunch.id}`,
+      });
       setInvestigationModalOpen(false);
       setInvestigatingPunch(null);
       await loadData();
@@ -475,12 +496,7 @@ export function PunchLogsPage() {
               value={datePreset}
               onChange={(e) =>
                 applyDatePreset(
-                  e.target.value as
-                    | 'today'
-                    | 'yesterday'
-                    | 'last_7_days'
-                    | 'this_month'
-                    | 'custom',
+                  e.target.value as 'today' | 'yesterday' | 'last_7_days' | 'this_month' | 'custom',
                 )
               }
               aria-label="Date Range Preset"
@@ -516,19 +532,11 @@ export function PunchLogsPage() {
               </Inline>
             )}
 
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => applyDatePreset('today')}
-            >
+            <Button variant="secondary" size="sm" onClick={() => applyDatePreset('today')}>
               Today
             </Button>
 
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setExportModalOpen(true)}
-            >
+            <Button variant="secondary" size="sm" onClick={() => setExportModalOpen(true)}>
               <BezentIcon name="download" size={16} /> Export
             </Button>
           </Inline>
@@ -537,11 +545,7 @@ export function PunchLogsPage() {
 
       <Stack gap="md">
         {/* Bulk Action Alert Banner */}
-        {bannerMessage && (
-          <Alert variant={bannerMessage.type}>
-            {bannerMessage.text}
-          </Alert>
-        )}
+        {bannerMessage && <Alert variant={bannerMessage.type}>{bannerMessage.text}</Alert>}
 
         {/* ── Six Summary Counters Strip (Single Desktop Row) ── */}
         <Grid columns={6} gap="sm">
@@ -693,9 +697,7 @@ export function PunchLogsPage() {
                     label="Date Interpretation"
                     value={dateInterpretation}
                     onChange={(e) => {
-                      setDateInterpretation(
-                        e.target.value as 'event_timestamp' | 'workday',
-                      );
+                      setDateInterpretation(e.target.value as 'event_timestamp' | 'workday');
                       setPage(1);
                     }}
                   >
@@ -776,9 +778,7 @@ export function PunchLogsPage() {
         {selectedIds.size > 0 && (
           <Card padding="sm">
             <Inline justify="between" align="center">
-              <span className="bezent-table-meta-title">
-                {selectedIds.size} event(s) selected
-              </span>
+              <span className="bezent-table-meta-title">{selectedIds.size} event(s) selected</span>
               <Inline gap="sm" align="center">
                 <Button
                   variant="secondary"
@@ -806,11 +806,7 @@ export function PunchLogsPage() {
                 >
                   Export Selected
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedIds(new Set())}
-                >
+                <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>
                   Clear Selection
                 </Button>
               </Inline>
@@ -877,10 +873,7 @@ export function PunchLogsPage() {
                   const isMenuOpen = activeMenuId === punch.id;
 
                   return (
-                    <TableRow
-                      key={punch.id}
-                      onClick={() => handleOpenDrawer(punch.id)}
-                    >
+                    <TableRow key={punch.id} onClick={() => handleOpenDrawer(punch.id)}>
                       {/* Checkbox */}
                       <TableCell
                         onClick={(e) => {
@@ -899,18 +892,18 @@ export function PunchLogsPage() {
                       <TableCell>
                         <div className="bezent-table-cell--avatar-meta">
                           <Avatar
-                            initials={punch.employeeName ? punch.employeeName.slice(0, 2).toUpperCase() : '?'}
+                            initials={
+                              punch.employeeName
+                                ? punch.employeeName.slice(0, 2).toUpperCase()
+                                : '?'
+                            }
                             alt={punch.employeeName || 'Unmatched'}
                             src={punch.avatarUrl}
                             size="sm"
                           />
                           <div className="bezent-table-meta-group">
-                            <span className="bezent-table-meta-title">
-                              {punch.employeeName}
-                            </span>
-                            <span className="bezent-table-meta-subtitle">
-                              {punch.employeeCode}
-                            </span>
+                            <span className="bezent-table-meta-title">{punch.employeeName}</span>
+                            <span className="bezent-table-meta-subtitle">{punch.employeeCode}</span>
                           </div>
                         </div>
                       </TableCell>
@@ -929,8 +922,8 @@ export function PunchLogsPage() {
                             punch.punchType === 'in'
                               ? 'success'
                               : punch.punchType === 'out'
-                              ? 'neutral'
-                              : 'warning'
+                                ? 'neutral'
+                                : 'warning'
                           }
                         >
                           {punch.punchType.toUpperCase()}
@@ -939,26 +932,21 @@ export function PunchLogsPage() {
 
                       {/* 4. Source */}
                       <TableCell>
-                        <Badge variant="neutral">
-                          {punch.source.toUpperCase()}
-                        </Badge>
+                        <Badge variant="neutral">{punch.source.toUpperCase()}</Badge>
                       </TableCell>
 
                       {/* 5. Device / Location */}
                       <TableCell>
                         <span className="bezent-table-meta-title">
                           {punch.workLocation ||
-                            (punch.deviceMetadata as { deviceId?: string } | null)
-                              ?.deviceId ||
+                            (punch.deviceMetadata as { deviceId?: string } | null)?.deviceId ||
                             '-'}
                         </span>
                       </TableCell>
 
                       {/* 6. Workday */}
                       <TableCell>
-                        <span className="bezent-table-meta-subtitle">
-                          {punch.workday || '-'}
-                        </span>
+                        <span className="bezent-table-meta-subtitle">{punch.workday || '-'}</span>
                       </TableCell>
 
                       {/* 7. Validation */}
@@ -968,10 +956,11 @@ export function PunchLogsPage() {
                             punch.validationStatus === 'valid'
                               ? 'success'
                               : punch.validationStatus === 'duplicate'
-                              ? 'warning'
-                              : punch.validationStatus === 'unmatched' || punch.validationStatus === 'invalid'
-                              ? 'danger'
-                              : 'neutral'
+                                ? 'warning'
+                                : punch.validationStatus === 'unmatched' ||
+                                    punch.validationStatus === 'invalid'
+                                  ? 'danger'
+                                  : 'neutral'
                           }
                         >
                           {punch.validationStatus.replace('_', ' ').toUpperCase()}
@@ -985,8 +974,8 @@ export function PunchLogsPage() {
                             punch.processingState === 'processed'
                               ? 'success'
                               : punch.processingState === 'failed'
-                              ? 'danger'
-                              : 'neutral'
+                                ? 'danger'
+                                : 'neutral'
                           }
                         >
                           {punch.processingState.replace('_', ' ').toUpperCase()}
@@ -1005,9 +994,7 @@ export function PunchLogsPage() {
                       </TableCell>
 
                       {/* 10. Actions (Contextual Ellipsis Menu) */}
-                      <TableCell
-                        onClick={(e) => e.stopPropagation()}
-                      >
+                      <TableCell onClick={(e) => e.stopPropagation()}>
                         <div
                           className="bezent-table-action-menu"
                           ref={isMenuOpen ? menuRef : undefined}
@@ -1062,7 +1049,10 @@ export function PunchLogsPage() {
                                 type="button"
                                 className="bezent-table-action-menu__item"
                                 onClick={() => handleRetryProcessing([punch.id])}
-                                disabled={punch.processingState !== 'failed' && punch.processingState !== 'retry_pending'}
+                                disabled={
+                                  punch.processingState !== 'failed' &&
+                                  punch.processingState !== 'retry_pending'
+                                }
                               >
                                 Retry Processing
                               </button>
@@ -1090,7 +1080,8 @@ export function PunchLogsPage() {
         {totalCount > 0 && (
           <Inline justify="between" align="center">
             <span className="bezent-card__desc">
-              Showing {(page - 1) * limit + 1}–{Math.min(page * limit, totalCount)} of {totalCount} events
+              Showing {(page - 1) * limit + 1}–{Math.min(page * limit, totalCount)} of {totalCount}{' '}
+              events
             </span>
             <Inline gap="xs" align="center">
               <Button
@@ -1129,12 +1120,16 @@ export function PunchLogsPage() {
                   {drawerDetail?.employeeName || 'Punch Event Details'}
                 </span>
                 {drawerDetail && (
-                  <Badge variant={drawerDetail.validationStatus === 'valid' ? 'success' : 'warning'}>
+                  <Badge
+                    variant={drawerDetail.validationStatus === 'valid' ? 'success' : 'warning'}
+                  >
                     {drawerDetail.validationStatus.toUpperCase()}
                   </Badge>
                 )}
                 {drawerDetail && (
-                  <Badge variant={drawerDetail.processingState === 'processed' ? 'success' : 'danger'}>
+                  <Badge
+                    variant={drawerDetail.processingState === 'processed' ? 'success' : 'danger'}
+                  >
                     {drawerDetail.processingState.toUpperCase()}
                   </Badge>
                 )}
@@ -1148,11 +1143,7 @@ export function PunchLogsPage() {
             <Tabs
               items={drawerTabs}
               activeId={drawerTab}
-              onChange={(id) =>
-                setDrawerTab(
-                  id as 'overview' | 'timeline' | 'linked' | 'history',
-                )
-              }
+              onChange={(id) => setDrawerTab(id as 'overview' | 'timeline' | 'linked' | 'history')}
             />
           }
         >
@@ -1192,21 +1183,27 @@ export function PunchLogsPage() {
                       </Inline>
                       <Inline justify="between">
                         <span className="bezent-card__desc">Raw Identifier:</span>
-                        <span>{drawerDetail.rawIdentifier || drawerDetail.employeeCode || '-'}</span>
+                        <span>
+                          {drawerDetail.rawIdentifier || drawerDetail.employeeCode || '-'}
+                        </span>
                       </Inline>
                     </Stack>
                   </Card>
 
                   <Card padding="sm">
                     <Stack gap="xs">
-                      <span className="bezent-stat-card__label">VALIDATION & ENGINE PROCESSING</span>
+                      <span className="bezent-stat-card__label">
+                        VALIDATION & ENGINE PROCESSING
+                      </span>
                       <Inline justify="between">
                         <span className="bezent-card__desc">Assigned Workday:</span>
                         <strong>{drawerDetail.workday || 'Unassigned'}</strong>
                       </Inline>
                       <Inline justify="between">
                         <span className="bezent-card__desc">Validation Result:</span>
-                        <Badge variant={drawerDetail.validationStatus === 'valid' ? 'success' : 'danger'}>
+                        <Badge
+                          variant={drawerDetail.validationStatus === 'valid' ? 'success' : 'danger'}
+                        >
                           {drawerDetail.validationStatus.toUpperCase()}
                         </Badge>
                       </Inline>
@@ -1218,16 +1215,18 @@ export function PunchLogsPage() {
                       )}
                       <Inline justify="between">
                         <span className="bezent-card__desc">Processing State:</span>
-                        <Badge variant={drawerDetail.processingState === 'processed' ? 'success' : 'danger'}>
+                        <Badge
+                          variant={
+                            drawerDetail.processingState === 'processed' ? 'success' : 'danger'
+                          }
+                        >
                           {drawerDetail.processingState.toUpperCase()}
                         </Badge>
                       </Inline>
                       {drawerDetail.processingError && (
                         <Inline justify="between">
                           <span className="bezent-card__desc">Processing Error:</span>
-                          <Badge variant="danger">
-                            {drawerDetail.processingError}
-                          </Badge>
+                          <Badge variant="danger">{drawerDetail.processingError}</Badge>
                         </Inline>
                       )}
                       <Inline justify="between">
@@ -1236,7 +1235,9 @@ export function PunchLogsPage() {
                       </Inline>
                       <Inline justify="between">
                         <span className="bezent-card__desc">Investigation State:</span>
-                        <Badge variant="neutral">{drawerDetail.investigationStatus.toUpperCase()}</Badge>
+                        <Badge variant="neutral">
+                          {drawerDetail.investigationStatus.toUpperCase()}
+                        </Badge>
                       </Inline>
                     </Stack>
                   </Card>
@@ -1253,7 +1254,10 @@ export function PunchLogsPage() {
                       variant="primary"
                       size="sm"
                       onClick={() => handleRetryProcessing([drawerDetail.id])}
-                      disabled={drawerDetail.processingState !== 'failed' && drawerDetail.processingState !== 'retry_pending'}
+                      disabled={
+                        drawerDetail.processingState !== 'failed' &&
+                        drawerDetail.processingState !== 'retry_pending'
+                      }
                     >
                       Retry Processing
                     </Button>
@@ -1264,7 +1268,9 @@ export function PunchLogsPage() {
               {/* Tab 2: Timeline */}
               {drawerTab === 'timeline' && (
                 <Stack gap="sm">
-                  <span className="bezent-stat-card__label">RELATED EMPLOYEE PUNCH TIMELINE (±2 DAYS)</span>
+                  <span className="bezent-stat-card__label">
+                    RELATED EMPLOYEE PUNCH TIMELINE (±2 DAYS)
+                  </span>
                   {drawerDetail.timeline && drawerDetail.timeline.length > 0 ? (
                     drawerDetail.timeline.map((item) => (
                       <Card key={item.id} padding="sm">
@@ -1279,7 +1285,9 @@ export function PunchLogsPage() {
                           </Inline>
                           <Inline gap="xs">
                             <Badge variant="neutral">{item.source}</Badge>
-                            <Badge variant={item.validationStatus === 'valid' ? 'success' : 'warning'}>
+                            <Badge
+                              variant={item.validationStatus === 'valid' ? 'success' : 'warning'}
+                            >
                               {item.validationStatus}
                             </Badge>
                           </Inline>
@@ -1341,10 +1349,13 @@ export function PunchLogsPage() {
                         <Stack gap="none">
                           <Inline justify="between" align="center">
                             <strong>{audit.action.replace('_', ' ').toUpperCase()}</strong>
-                            <span className="bezent-card__desc">{formatDateTime(audit.createdAt)}</span>
+                            <span className="bezent-card__desc">
+                              {formatDateTime(audit.createdAt)}
+                            </span>
                           </Inline>
                           <span className="bezent-card__desc">
-                            Actor: {audit.actorUserId || 'System'} • {audit.notes || 'Automated lifecycle step'}
+                            Actor: {audit.actorUserId || 'System'} •{' '}
+                            {audit.notes || 'Automated lifecycle step'}
                           </span>
                         </Stack>
                       </Card>
@@ -1370,7 +1381,8 @@ export function PunchLogsPage() {
           >
             <Stack gap="md">
               <span className="bezent-card__desc">
-                Review and record an authorized investigation outcome. Immutable raw event timestamps and codes will remain untouched.
+                Review and record an authorized investigation outcome. Immutable raw event
+                timestamps and codes will remain untouched.
               </span>
 
               <Select
@@ -1378,12 +1390,7 @@ export function PunchLogsPage() {
                 value={investigationStatus}
                 onChange={(e) =>
                   setInvestigationStatus(
-                    e.target.value as
-                      | 'open'
-                      | 'assigned'
-                      | 'in_review'
-                      | 'resolved'
-                      | 'closed',
+                    e.target.value as 'open' | 'assigned' | 'in_review' | 'resolved' | 'closed',
                   )
                 }
               >
@@ -1456,9 +1463,7 @@ export function PunchLogsPage() {
               <Select
                 label="Export Scope"
                 value={exportScope}
-                onChange={(e) =>
-                  setExportScope(e.target.value as 'all' | 'selected')
-                }
+                onChange={(e) => setExportScope(e.target.value as 'all' | 'selected')}
               >
                 <option value="all">All Filtered Events ({totalCount} events)</option>
                 {selectedIds.size > 0 && (
@@ -1468,7 +1473,9 @@ export function PunchLogsPage() {
 
               <Card padding="sm">
                 <Stack gap="none">
-                  <span className="bezent-card__desc">Active Range: {dateFrom} to {dateTo}</span>
+                  <span className="bezent-card__desc">
+                    Active Range: {dateFrom} to {dateTo}
+                  </span>
                   <span className="bezent-card__desc">Date Mode: {dateInterpretation}</span>
                 </Stack>
               </Card>
@@ -1477,11 +1484,7 @@ export function PunchLogsPage() {
                 <Button variant="secondary" onClick={() => setExportModalOpen(false)}>
                   Cancel
                 </Button>
-                <Button
-                  variant="primary"
-                  onClick={handleExecuteExport}
-                  disabled={isExporting}
-                >
+                <Button variant="primary" onClick={handleExecuteExport} disabled={isExporting}>
                   {isExporting ? 'Generating...' : 'Download CSV'}
                 </Button>
               </Inline>

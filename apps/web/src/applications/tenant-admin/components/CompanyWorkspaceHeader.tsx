@@ -1,11 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import {
-  Badge,
-  Button,
-  Inline,
-  Stack,
-  Tabs,
-} from '../../../design-system/components';
+import { Badge, Button, Inline, Stack, Tabs } from '../../../design-system/components';
 import { BezentIcon } from '../../../design-system/icons';
 import type { TenantAdminCompanySummary } from '../types/tenantAdmin.types';
 
@@ -109,7 +103,7 @@ export function CompanyWorkspaceHeader({
                 •
               </span>
               <Badge variant={isActive ? 'success' : 'neutral'} size="sm">
-                {isActive ? 'Active' : (company.status ? company.status.toUpperCase() : 'INACTIVE')}
+                {isActive ? 'Active' : company.status ? company.status.toUpperCase() : 'INACTIVE'}
               </Badge>
             </div>
             {locationDisplay ? (
@@ -123,11 +117,7 @@ export function CompanyWorkspaceHeader({
 
         {activeSection === 'overview' && (
           <div className="bezent-company-overview-header__right">
-            <Button
-              variant="primary"
-              size="md"
-              onClick={() => onEditCompany?.()}
-            >
+            <Button variant="primary" size="md" onClick={() => onEditCompany?.()}>
               <Inline gap="xs" align="center">
                 <BezentIcon name="edit" size={14} />
                 <span>Edit Company</span>

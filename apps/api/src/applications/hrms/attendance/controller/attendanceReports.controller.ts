@@ -6,9 +6,7 @@ import {
 import type { ReportId } from '../types/attendanceReports.types.js';
 
 export class AttendanceReportsController {
-  constructor(
-    private readonly service: AttendanceReportsService = attendanceReportsService,
-  ) {}
+  constructor(private readonly service: AttendanceReportsService = attendanceReportsService) {}
 
   getCatalog = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -89,10 +87,7 @@ export class AttendanceReportsController {
       );
 
       res.setHeader('Content-Type', exportResult.mimeType);
-      res.setHeader(
-        'Content-Disposition',
-        `attachment; filename="${exportResult.fileName}"`,
-      );
+      res.setHeader('Content-Disposition', `attachment; filename="${exportResult.fileName}"`);
       res.setHeader('X-Report-Row-Count', String(exportResult.rowCount));
       res.setHeader('X-Report-History-Id', exportResult.historyId);
       res.send(exportResult.buffer);
@@ -105,7 +100,8 @@ export class AttendanceReportsController {
     try {
       const { tenantId, companyId } = req.companyContext!;
       const ownerUserId = req.user?.id ?? 'system';
-      const reportId = typeof req.query.reportId === 'string' ? (req.query.reportId as ReportId) : undefined;
+      const reportId =
+        typeof req.query.reportId === 'string' ? (req.query.reportId as ReportId) : undefined;
 
       const list = await this.service.listSavedConfigurations(
         tenantId,
@@ -185,7 +181,8 @@ export class AttendanceReportsController {
     try {
       const { tenantId, companyId } = req.companyContext!;
       const actorUserId = req.query.mine === 'true' ? req.user?.id : undefined;
-      const reportId = typeof req.query.reportId === 'string' ? (req.query.reportId as ReportId) : undefined;
+      const reportId =
+        typeof req.query.reportId === 'string' ? (req.query.reportId as ReportId) : undefined;
 
       const history = await this.service.listHistory(tenantId, companyId, actorUserId, reportId);
       res.json({ data: history });
@@ -208,10 +205,7 @@ export class AttendanceReportsController {
       );
 
       res.setHeader('Content-Type', exportResult.mimeType);
-      res.setHeader(
-        'Content-Disposition',
-        `attachment; filename="${exportResult.fileName}"`,
-      );
+      res.setHeader('Content-Disposition', `attachment; filename="${exportResult.fileName}"`);
       res.setHeader('X-Report-Row-Count', String(exportResult.rowCount));
       res.setHeader('X-Report-History-Id', exportResult.historyId);
       res.send(exportResult.buffer);

@@ -108,7 +108,9 @@ export const OPERATOR_REGISTRY: Record<RuleOperator, OperatorFn> = {
 
   IN: (actual: unknown, expected: unknown): boolean => {
     if (!Array.isArray(expected)) {
-      throw new TypeMismatchError(`Operator IN requires expected value to be an Array, received: ${typeof expected}`);
+      throw new TypeMismatchError(
+        `Operator IN requires expected value to be an Array, received: ${typeof expected}`,
+      );
     }
     if (isDateLike(actual)) {
       const actualTs = toTimestamp(actual);
@@ -131,7 +133,9 @@ export const OPERATOR_REGISTRY: Record<RuleOperator, OperatorFn> = {
     }
     if (typeof actual === 'string') {
       if (typeof expected !== 'string') {
-        throw new TypeMismatchError(`String CONTAINS requires expected value to be string, received: ${typeof expected}`);
+        throw new TypeMismatchError(
+          `String CONTAINS requires expected value to be string, received: ${typeof expected}`,
+        );
       }
       return actual.includes(expected);
     }

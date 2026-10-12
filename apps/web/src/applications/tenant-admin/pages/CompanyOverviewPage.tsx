@@ -1,12 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import {
-  Page,
-  Stack,
-  Badge,
-  EmptyState,
-  LoadingState,
-} from '../../../design-system/components';
+import { Page, Stack, Badge, EmptyState, LoadingState } from '../../../design-system/components';
 import { BezentIcon } from '../../../design-system/icons';
 import { useTenantAdmin } from '../context/TenantAdminContext';
 import { CompanyWorkspaceHeader } from '../components/CompanyWorkspaceHeader';
@@ -249,7 +243,11 @@ export function CompanyOverviewPage({
   const isForeignCompany = !isContextLoading && companies.length > 0 && !companyFromContext;
 
   // Handle cross-tenant violation or not-found company
-  if (accessDenied || isForeignCompany || (!isContextLoading && !isDataLoading && !effectiveCompany)) {
+  if (
+    accessDenied ||
+    isForeignCompany ||
+    (!isContextLoading && !isDataLoading && !effectiveCompany)
+  ) {
     return (
       <Page>
         <EmptyState
@@ -286,7 +284,9 @@ export function CompanyOverviewPage({
     ]
       .filter(Boolean)
       .join(', ') ||
-    [effectiveCompany.city, effectiveCompany.state, effectiveCompany.country].filter(Boolean).join(', ') ||
+    [effectiveCompany.city, effectiveCompany.state, effectiveCompany.country]
+      .filter(Boolean)
+      .join(', ') ||
     effectiveCompany.location ||
     effectiveCompany.country ||
     '—';
@@ -324,9 +324,7 @@ export function CompanyOverviewPage({
               </div>
               <div className="bezent-snapshot-item">
                 <span className="bezent-snapshot-item__label">Company Code</span>
-                <span className="bezent-snapshot-item__value">
-                  {effectiveCompany.code || '—'}
-                </span>
+                <span className="bezent-snapshot-item__value">{effectiveCompany.code || '—'}</span>
               </div>
               <div className="bezent-snapshot-item">
                 <span className="bezent-snapshot-item__label">Company Type</span>
@@ -502,9 +500,7 @@ export function CompanyOverviewPage({
                   <BezentIcon name="apps" size={18} />
                 </div>
                 <div className="bezent-overview-metric-card__content">
-                  <span className="bezent-overview-metric-card__value">
-                    {companyApps.length}
-                  </span>
+                  <span className="bezent-overview-metric-card__value">{companyApps.length}</span>
                   <div className="bezent-overview-metric-card__label-row">
                     <span>Applications</span>
                     <BezentIcon
@@ -567,9 +563,7 @@ export function CompanyOverviewPage({
                   </div>
                   <div className="bezent-overview-table-row">
                     <span className="bezent-overview-table-row__label">Divisions</span>
-                    <span className="bezent-overview-table-row__value">
-                      {orgCounts.divisions}
-                    </span>
+                    <span className="bezent-overview-table-row__value">{orgCounts.divisions}</span>
                   </div>
                   <div className="bezent-overview-table-row">
                     <span className="bezent-overview-table-row__label">Departments</span>
@@ -617,9 +611,7 @@ export function CompanyOverviewPage({
                   </span>
                 </div>
                 <div className="bezent-overview-table-row">
-                  <span className="bezent-overview-table-row__label">
-                    Delegated administrators
-                  </span>
+                  <span className="bezent-overview-table-row__label">Delegated administrators</span>
                   <span className="bezent-overview-table-row__value">
                     {adminCounts.companyAdmins}
                   </span>

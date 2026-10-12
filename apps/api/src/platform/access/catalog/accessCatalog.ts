@@ -331,10 +331,13 @@ const BASE_PERMISSION_DEFINITIONS: PermissionDefinition[] = [
   hrms('attendance', 'regularize', 'Administer attendance', 'Correct and regularize attendance.', [
     'hrms.attendance.manage',
   ]),
-  hrms('attendance', 'reports', 'View attendance reports', 'Access and preview attendance reports.', [
-    'hrms.attendance.reports.view',
-    'hrms.attendance.reports.read',
-  ]),
+  hrms(
+    'attendance',
+    'reports',
+    'View attendance reports',
+    'Access and preview attendance reports.',
+    ['hrms.attendance.reports.view', 'hrms.attendance.reports.read'],
+  ),
   hrms(
     'attendance',
     'reports_export',

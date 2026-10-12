@@ -242,9 +242,7 @@ export const REGIONS_BY_COUNTRY: Record<string, readonly RegionReference[]> = {
     { countryCode: 'AE', code: 'FUJ', name: 'Fujairah', type: 'Emirate' },
     { countryCode: 'AE', code: 'UAQ', name: 'Umm Al Quwain', type: 'Emirate' },
   ],
-  SG: [
-    { countryCode: 'SG', code: 'SG', name: 'Singapore', type: 'City-State' },
-  ],
+  SG: [{ countryCode: 'SG', code: 'SG', name: 'Singapore', type: 'City-State' }],
   DE: [
     { countryCode: 'DE', code: 'BW', name: 'Baden-Württemberg', type: 'State' },
     { countryCode: 'DE', code: 'BY', name: 'Bavaria', type: 'State' },
@@ -271,38 +269,170 @@ export const CURRENCIES: readonly CurrencyReference[] = [
 
 export const TIMEZONES: readonly TimezoneReference[] = [
   { id: 'Asia/Kolkata', label: 'Asia/Kolkata (IST +5:30)', offset: '+05:30', abbreviation: 'IST' },
-  { id: 'America/New_York', label: 'America/New_York (EST -5:00)', offset: '-05:00', abbreviation: 'EST' },
-  { id: 'America/Chicago', label: 'America/Chicago (CST -6:00)', offset: '-06:00', abbreviation: 'CST' },
-  { id: 'America/Denver', label: 'America/Denver (MST -7:00)', offset: '-07:00', abbreviation: 'MST' },
-  { id: 'America/Los_Angeles', label: 'America/Los_Angeles (PST -8:00)', offset: '-08:00', abbreviation: 'PST' },
-  { id: 'America/Toronto', label: 'America/Toronto (EST -5:00)', offset: '-05:00', abbreviation: 'EST' },
-  { id: 'Europe/London', label: 'Europe/London (GMT +0:00)', offset: '+00:00', abbreviation: 'GMT' },
-  { id: 'Europe/Berlin', label: 'Europe/Berlin (CET +1:00)', offset: '+01:00', abbreviation: 'CET' },
+  {
+    id: 'America/New_York',
+    label: 'America/New_York (EST -5:00)',
+    offset: '-05:00',
+    abbreviation: 'EST',
+  },
+  {
+    id: 'America/Chicago',
+    label: 'America/Chicago (CST -6:00)',
+    offset: '-06:00',
+    abbreviation: 'CST',
+  },
+  {
+    id: 'America/Denver',
+    label: 'America/Denver (MST -7:00)',
+    offset: '-07:00',
+    abbreviation: 'MST',
+  },
+  {
+    id: 'America/Los_Angeles',
+    label: 'America/Los_Angeles (PST -8:00)',
+    offset: '-08:00',
+    abbreviation: 'PST',
+  },
+  {
+    id: 'America/Toronto',
+    label: 'America/Toronto (EST -5:00)',
+    offset: '-05:00',
+    abbreviation: 'EST',
+  },
+  {
+    id: 'Europe/London',
+    label: 'Europe/London (GMT +0:00)',
+    offset: '+00:00',
+    abbreviation: 'GMT',
+  },
+  {
+    id: 'Europe/Berlin',
+    label: 'Europe/Berlin (CET +1:00)',
+    offset: '+01:00',
+    abbreviation: 'CET',
+  },
   { id: 'Europe/Paris', label: 'Europe/Paris (CET +1:00)', offset: '+01:00', abbreviation: 'CET' },
-  { id: 'Europe/Amsterdam', label: 'Europe/Amsterdam (CET +1:00)', offset: '+01:00', abbreviation: 'CET' },
-  { id: 'Europe/Dublin', label: 'Europe/Dublin (GMT +0:00)', offset: '+00:00', abbreviation: 'GMT' },
+  {
+    id: 'Europe/Amsterdam',
+    label: 'Europe/Amsterdam (CET +1:00)',
+    offset: '+01:00',
+    abbreviation: 'CET',
+  },
+  {
+    id: 'Europe/Dublin',
+    label: 'Europe/Dublin (GMT +0:00)',
+    offset: '+00:00',
+    abbreviation: 'GMT',
+  },
   { id: 'Asia/Dubai', label: 'Asia/Dubai (GST +4:00)', offset: '+04:00', abbreviation: 'GST' },
-  { id: 'Asia/Singapore', label: 'Asia/Singapore (SGT +8:00)', offset: '+08:00', abbreviation: 'SGT' },
+  {
+    id: 'Asia/Singapore',
+    label: 'Asia/Singapore (SGT +8:00)',
+    offset: '+08:00',
+    abbreviation: 'SGT',
+  },
   { id: 'Asia/Tokyo', label: 'Asia/Tokyo (JST +9:00)', offset: '+09:00', abbreviation: 'JST' },
   { id: 'Asia/Riyadh', label: 'Asia/Riyadh (AST +3:00)', offset: '+03:00', abbreviation: 'AST' },
-  { id: 'Australia/Sydney', label: 'Australia/Sydney (AEST +10:00)', offset: '+10:00', abbreviation: 'AEST' },
-  { id: 'Pacific/Auckland', label: 'Pacific/Auckland (NZST +12:00)', offset: '+12:00', abbreviation: 'NZST' },
+  {
+    id: 'Australia/Sydney',
+    label: 'Australia/Sydney (AEST +10:00)',
+    offset: '+10:00',
+    abbreviation: 'AEST',
+  },
+  {
+    id: 'Pacific/Auckland',
+    label: 'Pacific/Auckland (NZST +12:00)',
+    offset: '+12:00',
+    abbreviation: 'NZST',
+  },
   { id: 'UTC', label: 'UTC (Coordinated Universal Time)', offset: '+00:00', abbreviation: 'UTC' },
 ] as const;
 
 export const LOCALES: readonly LocaleReference[] = [
-  { code: 'en-IN', name: 'English (India)', nativeName: 'English (India)', languageCode: 'en', countryCode: 'IN' },
-  { code: 'en-US', name: 'English (United States)', nativeName: 'English (US)', languageCode: 'en', countryCode: 'US' },
-  { code: 'en-GB', name: 'English (United Kingdom)', nativeName: 'English (UK)', languageCode: 'en', countryCode: 'GB' },
-  { code: 'en-SG', name: 'English (Singapore)', nativeName: 'English (Singapore)', languageCode: 'en', countryCode: 'SG' },
-  { code: 'en-AE', name: 'English (UAE)', nativeName: 'English (UAE)', languageCode: 'en', countryCode: 'AE' },
-  { code: 'en-AU', name: 'English (Australia)', nativeName: 'English (Australia)', languageCode: 'en', countryCode: 'AU' },
-  { code: 'en-CA', name: 'English (Canada)', nativeName: 'English (Canada)', languageCode: 'en', countryCode: 'CA' },
-  { code: 'de-DE', name: 'German (Germany)', nativeName: 'Deutsch (Deutschland)', languageCode: 'de', countryCode: 'DE' },
-  { code: 'fr-FR', name: 'French (France)', nativeName: 'Français (France)', languageCode: 'fr', countryCode: 'FR' },
-  { code: 'ja-JP', name: 'Japanese (Japan)', nativeName: '日本語 (日本)', languageCode: 'ja', countryCode: 'JP' },
-  { code: 'ar-AE', name: 'Arabic (UAE)', nativeName: 'العربية (الإمارات)', languageCode: 'ar', countryCode: 'AE' },
-  { code: 'hi-IN', name: 'Hindi (India)', nativeName: 'हिन्दी (भारत)', languageCode: 'hi', countryCode: 'IN' },
+  {
+    code: 'en-IN',
+    name: 'English (India)',
+    nativeName: 'English (India)',
+    languageCode: 'en',
+    countryCode: 'IN',
+  },
+  {
+    code: 'en-US',
+    name: 'English (United States)',
+    nativeName: 'English (US)',
+    languageCode: 'en',
+    countryCode: 'US',
+  },
+  {
+    code: 'en-GB',
+    name: 'English (United Kingdom)',
+    nativeName: 'English (UK)',
+    languageCode: 'en',
+    countryCode: 'GB',
+  },
+  {
+    code: 'en-SG',
+    name: 'English (Singapore)',
+    nativeName: 'English (Singapore)',
+    languageCode: 'en',
+    countryCode: 'SG',
+  },
+  {
+    code: 'en-AE',
+    name: 'English (UAE)',
+    nativeName: 'English (UAE)',
+    languageCode: 'en',
+    countryCode: 'AE',
+  },
+  {
+    code: 'en-AU',
+    name: 'English (Australia)',
+    nativeName: 'English (Australia)',
+    languageCode: 'en',
+    countryCode: 'AU',
+  },
+  {
+    code: 'en-CA',
+    name: 'English (Canada)',
+    nativeName: 'English (Canada)',
+    languageCode: 'en',
+    countryCode: 'CA',
+  },
+  {
+    code: 'de-DE',
+    name: 'German (Germany)',
+    nativeName: 'Deutsch (Deutschland)',
+    languageCode: 'de',
+    countryCode: 'DE',
+  },
+  {
+    code: 'fr-FR',
+    name: 'French (France)',
+    nativeName: 'Français (France)',
+    languageCode: 'fr',
+    countryCode: 'FR',
+  },
+  {
+    code: 'ja-JP',
+    name: 'Japanese (Japan)',
+    nativeName: '日本語 (日本)',
+    languageCode: 'ja',
+    countryCode: 'JP',
+  },
+  {
+    code: 'ar-AE',
+    name: 'Arabic (UAE)',
+    nativeName: 'العربية (الإمارات)',
+    languageCode: 'ar',
+    countryCode: 'AE',
+  },
+  {
+    code: 'hi-IN',
+    name: 'Hindi (India)',
+    nativeName: 'हिन्दी (भारत)',
+    languageCode: 'hi',
+    countryCode: 'IN',
+  },
 ] as const;
 
 export const LANGUAGES: readonly LanguageReference[] = [
@@ -317,11 +447,36 @@ export const LANGUAGES: readonly LanguageReference[] = [
 ] as const;
 
 export const DATE_FORMATS: readonly DateFormatReference[] = [
-  { id: 'DD/MM/YYYY', pattern: 'DD/MM/YYYY', label: 'DD/MM/YYYY (e.g. 06/10/2026)', example: '06/10/2026' },
-  { id: 'MM/DD/YYYY', pattern: 'MM/DD/YYYY', label: 'MM/DD/YYYY (e.g. 10/06/2026)', example: '10/06/2026' },
-  { id: 'YYYY-MM-DD', pattern: 'YYYY-MM-DD', label: 'YYYY-MM-DD (ISO standard: 2026-10-06)', example: '2026-10-06' },
-  { id: 'DD-MM-YYYY', pattern: 'DD-MM-YYYY', label: 'DD-MM-YYYY (e.g. 06-10-2026)', example: '06-10-2026' },
-  { id: 'DD MMM YYYY', pattern: 'DD MMM YYYY', label: 'DD MMM YYYY (e.g. 06 Oct 2026)', example: '06 Oct 2026' },
+  {
+    id: 'DD/MM/YYYY',
+    pattern: 'DD/MM/YYYY',
+    label: 'DD/MM/YYYY (e.g. 06/10/2026)',
+    example: '06/10/2026',
+  },
+  {
+    id: 'MM/DD/YYYY',
+    pattern: 'MM/DD/YYYY',
+    label: 'MM/DD/YYYY (e.g. 10/06/2026)',
+    example: '10/06/2026',
+  },
+  {
+    id: 'YYYY-MM-DD',
+    pattern: 'YYYY-MM-DD',
+    label: 'YYYY-MM-DD (ISO standard: 2026-10-06)',
+    example: '2026-10-06',
+  },
+  {
+    id: 'DD-MM-YYYY',
+    pattern: 'DD-MM-YYYY',
+    label: 'DD-MM-YYYY (e.g. 06-10-2026)',
+    example: '06-10-2026',
+  },
+  {
+    id: 'DD MMM YYYY',
+    pattern: 'DD MMM YYYY',
+    label: 'DD MMM YYYY (e.g. 06 Oct 2026)',
+    example: '06 Oct 2026',
+  },
 ] as const;
 
 export const WEEK_START_DAYS: readonly WeekStartDayReference[] = [
@@ -338,7 +493,11 @@ export const INDUSTRIES: readonly IndustryReference[] = [
   { id: 'Healthcare', label: 'Healthcare & Life Sciences', category: 'Health' },
   { id: 'Financial Services', label: 'Financial Services & Banking', category: 'Finance' },
   { id: 'Retail & E-Commerce', label: 'Retail & E-Commerce', category: 'Commerce' },
-  { id: 'Construction & Real Estate', label: 'Construction & Real Estate', category: 'Real Estate' },
+  {
+    id: 'Construction & Real Estate',
+    label: 'Construction & Real Estate',
+    category: 'Real Estate',
+  },
   { id: 'Education & Training', label: 'Education & EdTech', category: 'Education' },
   { id: 'Telecommunications', label: 'Telecommunications', category: 'Technology' },
   { id: 'Media & Entertainment', label: 'Media & Entertainment', category: 'Creative' },
@@ -351,12 +510,44 @@ export const INDUSTRIES: readonly IndustryReference[] = [
 ] as const;
 
 export const ORGANIZATION_TYPES: readonly OrganizationTypeReference[] = [
-  { id: 'Private Limited', label: 'Private Limited Company (Pvt Ltd)', description: 'Privately held legal corporate entity' },
-  { id: 'Public Limited', label: 'Public Limited Company (Ltd)', description: 'Publicly traded or widely held company' },
-  { id: 'Limited Liability Partnership (LLP)', label: 'Limited Liability Partnership (LLP)', description: 'Partnership with limited liability protection' },
-  { id: 'Partnership', label: 'Partnership Firm', description: 'General or conventional partnership' },
-  { id: 'Sole Proprietorship', label: 'Sole Proprietorship', description: 'Individual unincorporated business entity' },
-  { id: 'Non-Profit / NGO', label: 'Non-Profit Organization / NGO', description: 'Section 8 or charitable organization' },
-  { id: 'Branch Office', label: 'Branch / Representative Office', description: 'Regional branch of an existing corporate entity' },
-  { id: 'Subsidiary', label: 'Subsidiary Entity', description: 'Controlled operating entity of a parent organization' },
+  {
+    id: 'Private Limited',
+    label: 'Private Limited Company (Pvt Ltd)',
+    description: 'Privately held legal corporate entity',
+  },
+  {
+    id: 'Public Limited',
+    label: 'Public Limited Company (Ltd)',
+    description: 'Publicly traded or widely held company',
+  },
+  {
+    id: 'Limited Liability Partnership (LLP)',
+    label: 'Limited Liability Partnership (LLP)',
+    description: 'Partnership with limited liability protection',
+  },
+  {
+    id: 'Partnership',
+    label: 'Partnership Firm',
+    description: 'General or conventional partnership',
+  },
+  {
+    id: 'Sole Proprietorship',
+    label: 'Sole Proprietorship',
+    description: 'Individual unincorporated business entity',
+  },
+  {
+    id: 'Non-Profit / NGO',
+    label: 'Non-Profit Organization / NGO',
+    description: 'Section 8 or charitable organization',
+  },
+  {
+    id: 'Branch Office',
+    label: 'Branch / Representative Office',
+    description: 'Regional branch of an existing corporate entity',
+  },
+  {
+    id: 'Subsidiary',
+    label: 'Subsidiary Entity',
+    description: 'Controlled operating entity of a parent organization',
+  },
 ] as const;

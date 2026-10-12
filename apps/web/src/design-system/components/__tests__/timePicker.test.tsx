@@ -5,9 +5,7 @@ import { TimePicker } from '../TimePicker';
 
 describe('Design System TimePicker Component (24-Hour Military Time)', () => {
   it('renders with 24-hour format and default time', () => {
-    const html = renderToStaticMarkup(
-      <TimePicker value="04:00:00" onChange={() => {}} />
-    );
+    const html = renderToStaticMarkup(<TimePicker value="04:00:00" onChange={() => {}} />);
 
     expect(html).toContain('04');
     expect(html).toContain('00');
@@ -19,11 +17,7 @@ describe('Design System TimePicker Component (24-Hour Military Time)', () => {
 
   it('renders aria-label and accessible controls', () => {
     const html = renderToStaticMarkup(
-      <TimePicker
-        value="14:30:00"
-        onChange={() => {}}
-        aria-label="Attendance Day Cutoff"
-      />
+      <TimePicker value="14:30:00" onChange={() => {}} aria-label="Attendance Day Cutoff" />,
     );
 
     expect(html).toContain('aria-label="Attendance Day Cutoff"');
@@ -34,9 +28,7 @@ describe('Design System TimePicker Component (24-Hour Military Time)', () => {
   });
 
   it('renders disabled state correctly', () => {
-    const html = renderToStaticMarkup(
-      <TimePicker value="04:00:00" onChange={() => {}} disabled />
-    );
+    const html = renderToStaticMarkup(<TimePicker value="04:00:00" onChange={() => {}} disabled />);
 
     expect(html).toContain('bezent-time-picker--disabled');
     expect(html).toContain('disabled');

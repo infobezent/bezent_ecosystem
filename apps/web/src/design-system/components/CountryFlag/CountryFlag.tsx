@@ -43,9 +43,7 @@ export const CountryFlag = memo(function CountryFlag({
           🌐
         </span>
       )}
-      {showLabel && country && (
-        <span className="bezent-country-flag__label">{country.name}</span>
-      )}
+      {showLabel && country && <span className="bezent-country-flag__label">{country.name}</span>}
     </span>
   );
 });

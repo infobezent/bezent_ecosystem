@@ -116,9 +116,13 @@ export function MonthlyAttendanceSummaryPage() {
   const [drawerLoading, setDrawerLoading] = useState<boolean>(false);
   const [drawerSummary, setDrawerSummary] = useState<MonthlySummaryRow | null>(null);
   const [drawerDays, setDrawerDays] = useState<MonthlySummaryDailyRecord[]>([]);
-  const [drawerReadiness, setDrawerReadiness] = useState<MonthlySummaryReadinessReport | null>(null);
+  const [drawerReadiness, setDrawerReadiness] = useState<MonthlySummaryReadinessReport | null>(
+    null,
+  );
   const [drawerHistory, setDrawerHistory] = useState<MonthlySummaryReviewHistoryItem[]>([]);
-  const [drawerTab, setDrawerTab] = useState<'overview' | 'days' | 'readiness' | 'history'>('overview');
+  const [drawerTab, setDrawerTab] = useState<'overview' | 'days' | 'readiness' | 'history'>(
+    'overview',
+  );
 
   // Review Dialog State
   const [reviewDialogTarget, setReviewDialogTarget] = useState<MonthlySummaryRow | null>(null);
@@ -159,13 +163,9 @@ export function MonthlyAttendanceSummaryPage() {
         search: search.trim() || undefined,
         departmentId: departmentId === 'all' ? undefined : departmentId,
         payrollReadiness:
-          payrollReadiness === 'all'
-            ? undefined
-            : (payrollReadiness as AttendancePayrollReadiness),
+          payrollReadiness === 'all' ? undefined : (payrollReadiness as AttendancePayrollReadiness),
         reviewState:
-          reviewStateFilter === 'all'
-            ? undefined
-            : (reviewStateFilter as AttendanceReviewState),
+          reviewStateFilter === 'all' ? undefined : (reviewStateFilter as AttendanceReviewState),
         isLocked:
           lockStatusFilter === 'locked'
             ? true
@@ -395,9 +395,7 @@ export function MonthlyAttendanceSummaryPage() {
         selectedIds: exportScope === 'selected' ? Array.from(selectedIds) : undefined,
         departmentId: departmentId === 'all' ? undefined : departmentId,
         payrollReadiness:
-          payrollReadiness === 'all'
-            ? undefined
-            : (payrollReadiness as AttendancePayrollReadiness),
+          payrollReadiness === 'all' ? undefined : (payrollReadiness as AttendancePayrollReadiness),
         search: search.trim() || undefined,
       });
 
@@ -631,9 +629,7 @@ export function MonthlyAttendanceSummaryPage() {
               </Inline>
 
               <span className="bezent-card__desc">
-                {activeCounter && (
-                  <Badge variant="info">Counter Filter: {activeCounter}</Badge>
-                )}
+                {activeCounter && <Badge variant="info">Counter Filter: {activeCounter}</Badge>}
               </span>
             </Inline>
 
@@ -709,28 +705,16 @@ export function MonthlyAttendanceSummaryPage() {
             <Inline justify="between" align="center">
               <Inline gap="sm" align="center">
                 <Badge variant="info">{selectedIds.size} Selected</Badge>
-                <Button
-                  variant="primary"
-                  onClick={() => handleTriggerBulk('mark_reviewed')}
-                >
+                <Button variant="primary" onClick={() => handleTriggerBulk('mark_reviewed')}>
                   Bulk Mark Reviewed
                 </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => handleTriggerBulk('start_review')}
-                >
+                <Button variant="secondary" onClick={() => handleTriggerBulk('start_review')}>
                   Bulk Start Review
                 </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => handleTriggerBulk('request_correction')}
-                >
+                <Button variant="secondary" onClick={() => handleTriggerBulk('request_correction')}>
                   Bulk Request Correction
                 </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => handleTriggerBulk('recalculate')}
-                >
+                <Button variant="secondary" onClick={() => handleTriggerBulk('recalculate')}>
                   Bulk Recalculate
                 </Button>
               </Inline>
@@ -798,9 +782,7 @@ export function MonthlyAttendanceSummaryPage() {
                       <Inline gap="xs" align="center">
                         <Avatar
                           initials={
-                            row.employeeName
-                              ? row.employeeName.slice(0, 2).toUpperCase()
-                              : 'EM'
+                            row.employeeName ? row.employeeName.slice(0, 2).toUpperCase() : 'EM'
                           }
                           alt={row.employeeName}
                         />
@@ -809,9 +791,7 @@ export function MonthlyAttendanceSummaryPage() {
                             type="button"
                             className="bezent-button--ghost"
                             onClick={() =>
-                              navigate(
-                                `/hrms/administration/employees/${row.employeeId}`,
-                              )
+                              navigate(`/hrms/administration/employees/${row.employeeId}`)
                             }
                           >
                             <strong>{row.employeeName}</strong>
@@ -887,8 +867,9 @@ export function MonthlyAttendanceSummaryPage() {
                         {row.earlyExitOccurrences > 0 && (
                           <Badge variant="neutral">{row.earlyExitOccurrences}E</Badge>
                         )}
-                        {row.lateOccurrences === 0 &&
-                          row.earlyExitOccurrences === 0 && <span>—</span>}
+                        {row.lateOccurrences === 0 && row.earlyExitOccurrences === 0 && (
+                          <span>—</span>
+                        )}
                       </Inline>
                     </TableCell>
 
@@ -896,18 +877,12 @@ export function MonthlyAttendanceSummaryPage() {
                     <TableCell>
                       <Inline gap="xs">
                         {row.unresolvedExceptions > 0 && (
-                          <Badge variant="danger">
-                            {row.unresolvedExceptions} Ex
-                          </Badge>
+                          <Badge variant="danger">{row.unresolvedExceptions} Ex</Badge>
                         )}
                         {row.pendingCorrections > 0 && (
-                          <Badge variant="warning">
-                            {row.pendingCorrections} Reg
-                          </Badge>
+                          <Badge variant="warning">{row.pendingCorrections} Reg</Badge>
                         )}
-                        {row.processingIssues > 0 && (
-                          <Badge variant="danger">Err</Badge>
-                        )}
+                        {row.processingIssues > 0 && <Badge variant="danger">Err</Badge>}
                         {row.unresolvedExceptions === 0 &&
                           row.pendingCorrections === 0 &&
                           row.processingIssues === 0 && <span>None</span>}
@@ -925,10 +900,7 @@ export function MonthlyAttendanceSummaryPage() {
                     {/* 12. Actions */}
                     <TableCell>
                       <Inline gap="xs">
-                        <Button
-                          variant="secondary"
-                          onClick={() => handleOpenDrawer(row)}
-                        >
+                        <Button variant="secondary" onClick={() => handleOpenDrawer(row)}>
                           View
                         </Button>
                         <Button
@@ -942,10 +914,7 @@ export function MonthlyAttendanceSummaryPage() {
                         >
                           {row.reviewState === 'reviewed' ? 'Reopen' : 'Review'}
                         </Button>
-                        <Button
-                          variant="ghost"
-                          onClick={() => handleRecalculateSingle(row.id)}
-                        >
+                        <Button variant="ghost" onClick={() => handleRecalculateSingle(row.id)}>
                           <BezentIcon name="refresh" size={14} />
                         </Button>
                       </Inline>
@@ -964,11 +933,7 @@ export function MonthlyAttendanceSummaryPage() {
               Showing Page {page} of {totalPages} ({totalCount} total)
             </span>
             <Inline gap="xs">
-              <Button
-                variant="secondary"
-                disabled={page <= 1}
-                onClick={() => setPage(page - 1)}
-              >
+              <Button variant="secondary" disabled={page <= 1} onClick={() => setPage(page - 1)}>
                 Previous
               </Button>
               <Button
@@ -1099,9 +1064,7 @@ export function MonthlyAttendanceSummaryPage() {
                         </Stack>
                         <Stack gap="none">
                           <span className="bezent-card__desc">Assigned Reviewer</span>
-                          <span>
-                            {drawerSummary.assignedReviewerName ?? 'Unassigned'}
-                          </span>
+                          <span>{drawerSummary.assignedReviewerName ?? 'Unassigned'}</span>
                         </Stack>
                         <Stack gap="none">
                           <span className="bezent-card__desc">Last Sign-off</span>
@@ -1170,9 +1133,7 @@ export function MonthlyAttendanceSummaryPage() {
                           </TableCell>
                           <TableCell>
                             {d.hasException && <Badge variant="danger">Ex</Badge>}
-                            {d.hasPendingRegularization && (
-                              <Badge variant="warning">Reg</Badge>
-                            )}
+                            {d.hasPendingRegularization && <Badge variant="warning">Reg</Badge>}
                             {!d.hasException && !d.hasPendingRegularization && <span>—</span>}
                           </TableCell>
                         </TableRow>
@@ -1185,31 +1146,29 @@ export function MonthlyAttendanceSummaryPage() {
               {/* Tab 3: Issues & Readiness */}
               {drawerTab === 'readiness' && (
                 <Stack gap="md">
-                  {drawerReadiness?.blockingChecks &&
-                    drawerReadiness.blockingChecks.length > 0 && (
-                      <Alert variant="danger" title="Blocking Readiness Issues">
-                        <Stack gap="xs">
-                          {drawerReadiness.blockingChecks.map((b) => (
-                            <span key={b.code}>
-                              <strong>{b.name}:</strong> {b.details}
-                            </span>
-                          ))}
-                        </Stack>
-                      </Alert>
-                    )}
+                  {drawerReadiness?.blockingChecks && drawerReadiness.blockingChecks.length > 0 && (
+                    <Alert variant="danger" title="Blocking Readiness Issues">
+                      <Stack gap="xs">
+                        {drawerReadiness.blockingChecks.map((b) => (
+                          <span key={b.code}>
+                            <strong>{b.name}:</strong> {b.details}
+                          </span>
+                        ))}
+                      </Stack>
+                    </Alert>
+                  )}
 
-                  {drawerReadiness?.warningChecks &&
-                    drawerReadiness.warningChecks.length > 0 && (
-                      <Alert variant="warning" title="Readiness Warnings">
-                        <Stack gap="xs">
-                          {drawerReadiness.warningChecks.map((w) => (
-                            <span key={w.code}>
-                              <strong>{w.name}:</strong> {w.details}
-                            </span>
-                          ))}
-                        </Stack>
-                      </Alert>
-                    )}
+                  {drawerReadiness?.warningChecks && drawerReadiness.warningChecks.length > 0 && (
+                    <Alert variant="warning" title="Readiness Warnings">
+                      <Stack gap="xs">
+                        {drawerReadiness.warningChecks.map((w) => (
+                          <span key={w.code}>
+                            <strong>{w.name}:</strong> {w.details}
+                          </span>
+                        ))}
+                      </Stack>
+                    </Alert>
+                  )}
 
                   <Card padding="sm">
                     <Stack gap="xs">
@@ -1241,20 +1200,17 @@ export function MonthlyAttendanceSummaryPage() {
                         <Card key={h.id} padding="sm">
                           <Stack gap="xs">
                             <Inline justify="between" align="center">
-                              <strong>
-                                Status: {h.reviewStatus.replace('_', ' ')}
-                              </strong>
+                              <strong>Status: {h.reviewStatus.replace('_', ' ')}</strong>
                               <span className="bezent-card__desc">
                                 {formatDateTime(h.createdAt)}
                               </span>
                             </Inline>
                             <span>
-                              Reviewer: {h.reviewerName ?? h.reviewerUserId} (Version {h.reviewedSummaryVersion})
+                              Reviewer: {h.reviewerName ?? h.reviewerUserId} (Version{' '}
+                              {h.reviewedSummaryVersion})
                             </span>
                             {h.reviewNotes && <span>Notes: {h.reviewNotes}</span>}
-                            {h.reopenReason && (
-                              <span>Reopen Reason: {h.reopenReason}</span>
-                            )}
+                            {h.reopenReason && <span>Reopen Reason: {h.reopenReason}</span>}
                           </Stack>
                         </Card>
                       ))}
@@ -1338,13 +1294,9 @@ export function MonthlyAttendanceSummaryPage() {
               <LoadingState label="Checking eligibility for selected records..." />
             ) : bulkExecutionResult ? (
               <Stack gap="md">
-                <Alert
-                  variant="success"
-                  title="Bulk Operation Completed"
-                >
+                <Alert variant="success" title="Bulk Operation Completed">
                   Succeeded: {bulkExecutionResult.succeeded.length} | Skipped:{' '}
-                  {bulkExecutionResult.skipped.length} | Failed:{' '}
-                  {bulkExecutionResult.failed.length}
+                  {bulkExecutionResult.skipped.length} | Failed: {bulkExecutionResult.failed.length}
                 </Alert>
                 <Button variant="primary" onClick={() => setShowBulkModal(false)}>
                   Done
@@ -1415,9 +1367,7 @@ export function MonthlyAttendanceSummaryPage() {
               onChange={(e) => setExportScope(e.target.value as typeof exportScope)}
             >
               <option value="all">All Filtered Records ({totalCount})</option>
-              <option value="selected">
-                Selected Records Only ({selectedIds.size})
-              </option>
+              <option value="selected">Selected Records Only ({selectedIds.size})</option>
             </Select>
 
             <Inline justify="end" gap="sm">
@@ -1428,11 +1378,7 @@ export function MonthlyAttendanceSummaryPage() {
               >
                 Cancel
               </Button>
-              <Button
-                variant="primary"
-                disabled={exporting}
-                onClick={handleExecuteExport}
-              >
+              <Button variant="primary" disabled={exporting} onClick={handleExecuteExport}>
                 {exporting ? 'Exporting...' : 'Export File'}
               </Button>
             </Inline>

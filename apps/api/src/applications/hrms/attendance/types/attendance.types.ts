@@ -24,8 +24,10 @@ import type {
   AttendanceRegularizationAudit,
 } from '../../../../db/schema.js';
 
-export type AttendanceStatus = 'present' | 'absent' | 'half_day' | 'on_leave' | 'holiday' | 'incomplete';
-export type AttendanceProcessingState = 'incomplete' | 'pending_review' | 'provisional' | 'finalized' | 'locked';
+export type AttendanceStatus =
+  'present' | 'absent' | 'half_day' | 'on_leave' | 'holiday' | 'incomplete';
+export type AttendanceProcessingState =
+  'incomplete' | 'pending_review' | 'provisional' | 'finalized' | 'locked';
 
 export type AttendanceGeneralSettingsWithV1 = AttendanceGeneralSettings & {
   dayBoundaryMode?: string;
@@ -336,7 +338,14 @@ export interface PunchLogItem {
   deviceMetadata?: Record<string, unknown> | null | unknown;
   notes?: string | null;
   isDuplicate?: boolean;
-  validationStatus: 'pending' | 'pending_validation' | 'valid' | 'duplicate' | 'invalid' | 'needs_review' | 'unmatched';
+  validationStatus:
+    | 'pending'
+    | 'pending_validation'
+    | 'valid'
+    | 'duplicate'
+    | 'invalid'
+    | 'needs_review'
+    | 'unmatched';
   validationReason?: string | null;
   processingState: 'received' | 'processing' | 'processed' | 'failed' | 'retry_pending';
   processingError?: string | null;
@@ -377,7 +386,14 @@ export interface PunchLogFilter {
   syncJobId?: string;
   page?: number;
   limit?: number;
-  sortBy?: 'punchTime' | 'employeeName' | 'punchType' | 'source' | 'validationStatus' | 'processingState' | 'workday';
+  sortBy?:
+    | 'punchTime'
+    | 'employeeName'
+    | 'punchType'
+    | 'source'
+    | 'validationStatus'
+    | 'processingState'
+    | 'workday';
   sortOrder?: 'asc' | 'desc';
 }
 
@@ -472,12 +488,7 @@ export type ExceptionType =
 export type ExceptionSeverity = 'critical' | 'high' | 'medium' | 'low';
 
 export type ExceptionStatus =
-  | 'open'
-  | 'assigned'
-  | 'in_review'
-  | 'pending_action'
-  | 'resolved'
-  | 'closed';
+  'open' | 'assigned' | 'in_review' | 'pending_action' | 'resolved' | 'closed';
 
 export type ExceptionSource =
   | 'biometric'
@@ -861,7 +872,13 @@ export interface GeneralSettingsInput {
   processingMode?: 'automatic' | 'realtime' | 'daily_batch' | 'manual';
   manualEntryAllowed?: boolean;
   manualEntryConfig?: ManualEntryConfig;
-  employeeVisibility?: 'daily_and_monthly' | 'daily_only' | 'monthly_summary_only' | 'self_only' | 'department' | 'company';
+  employeeVisibility?:
+    | 'daily_and_monthly'
+    | 'daily_only'
+    | 'monthly_summary_only'
+    | 'self_only'
+    | 'department'
+    | 'company';
   defaultHistoryView?: string;
   defaultHistoryViewDays?: number;
   alertPreferences?: Record<string, unknown>;
@@ -886,7 +903,8 @@ export interface DeviceInput {
   locationId?: string | null;
   deviceName: string;
   deviceCode: string;
-  deviceType: 'biometric_fingerprint' | 'biometric_facial' | 'rfid_card' | 'mobile_kiosk' | 'web_terminal';
+  deviceType:
+    'biometric_fingerprint' | 'biometric_facial' | 'rfid_card' | 'mobile_kiosk' | 'web_terminal';
   serialNumber?: string | null;
   ipAddress?: string | null;
   port?: number | null;
@@ -938,7 +956,13 @@ export interface PeriodUnlockInput {
 }
 
 export interface SettingsAuditFilter {
-  category?: 'general' | 'policy' | 'regularization' | 'capture_device' | 'location_security' | 'payroll_locking';
+  category?:
+    | 'general'
+    | 'policy'
+    | 'regularization'
+    | 'capture_device'
+    | 'location_security'
+    | 'payroll_locking';
   action?: string;
   startDate?: string;
   endDate?: string;
@@ -1064,29 +1088,13 @@ export type RegularizationRequestType =
   | 'wrong_direction';
 
 export type RegularizationApprovalStatus =
-  | 'draft'
-  | 'submitted'
-  | 'under_review'
-  | 'awaiting_info'
-  | 'approved'
-  | 'rejected'
-  | 'cancelled';
+  'draft' | 'submitted' | 'under_review' | 'awaiting_info' | 'approved' | 'rejected' | 'cancelled';
 
 export type RegularizationApplicationStatus =
-  | 'not_applicable'
-  | 'pending_application'
-  | 'applied'
-  | 'failed'
-  | 'blocked';
+  'not_applicable' | 'pending_application' | 'applied' | 'failed' | 'blocked';
 
 export type RegularizationSource =
-  | 'web'
-  | 'ess'
-  | 'mobile'
-  | 'system'
-  | 'biometric'
-  | 'kiosk'
-  | 'import';
+  'web' | 'ess' | 'mobile' | 'system' | 'biometric' | 'kiosk' | 'import';
 
 export interface RegularizationSummaryCounters {
   pendingReview: number;
@@ -1320,13 +1328,7 @@ export interface RegularizationExportFilter extends RegularizationFilterV1 {
    ══════════════════════════════════════════════════════════════════════ */
 
 export type OnDutyTypeKey =
-  | 'client_visit'
-  | 'site_visit'
-  | 'training'
-  | 'travel'
-  | 'branch_visit'
-  | 'assignment'
-  | 'other';
+  'client_visit' | 'site_visit' | 'training' | 'travel' | 'branch_visit' | 'assignment' | 'other';
 
 export type OnDutyDurationType = 'hourly' | 'half_day' | 'full_day' | 'multi_day';
 
@@ -1556,4 +1558,3 @@ export type {
   AttendanceOnDutyAuditRecord,
   NewAttendanceOnDutyAuditRecord,
 };
-

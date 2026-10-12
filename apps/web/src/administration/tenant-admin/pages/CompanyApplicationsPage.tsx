@@ -48,7 +48,9 @@ export function CompanyApplicationsPage() {
           company={company}
           activeSection="applications"
           onEditCompany={() =>
-            navigate(`/tenant-admin/tenant/companies/${encodeURIComponent(company.id)}/overview?edit=true`)
+            navigate(
+              `/tenant-admin/tenant/companies/${encodeURIComponent(company.id)}/overview?edit=true`,
+            )
           }
         />
         <EmptyState

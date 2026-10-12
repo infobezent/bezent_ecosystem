@@ -25,13 +25,7 @@ export type ReportCategory =
   | 'audit_security';
 
 export type ReportColumnType =
-  | 'string'
-  | 'number'
-  | 'date'
-  | 'time'
-  | 'status'
-  | 'badge'
-  | 'currency';
+  'string' | 'number' | 'date' | 'time' | 'status' | 'badge' | 'currency';
 
 export interface ReportColumnDefinition {
   id: string;
@@ -43,13 +37,7 @@ export interface ReportColumnDefinition {
   defaultVisible?: boolean;
 }
 
-export type ReportFilterType =
-  | 'date'
-  | 'month'
-  | 'date_range'
-  | 'select'
-  | 'text'
-  | 'number';
+export type ReportFilterType = 'date' | 'month' | 'date_range' | 'select' | 'text' | 'number';
 
 export interface ReportFilterOption {
   label: string;
@@ -236,4 +224,3 @@ export interface ReportAnalyticsResult {
   };
   limitations?: string[];
 }
-

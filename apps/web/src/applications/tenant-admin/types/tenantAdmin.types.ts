@@ -71,7 +71,6 @@ export interface TenantAdminCompanySummary {
   adminsCount?: number;
 }
 
-
 export interface TenantAdminCapacitySummary {
   used?: number;
   max?: number;
@@ -248,12 +247,7 @@ export interface OrganizationHierarchy {
 }
 
 export type LocationType =
-  | 'office'
-  | 'branch'
-  | 'plant_factory'
-  | 'client_site'
-  | 'remote'
-  | 'other';
+  'office' | 'branch' | 'plant_factory' | 'client_site' | 'remote' | 'other';
 
 export type WorkLocationStatus = 'active' | 'inactive';
 
@@ -334,5 +328,3 @@ export interface CompanyRoleOverviewItem {
   administrativeCapabilities: string[];
   disclaimer: string;
 }
-
-

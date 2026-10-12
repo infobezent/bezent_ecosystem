@@ -5,10 +5,7 @@ import {
   type TenantEntitlementOverride,
   type NewTenantEntitlementOverride,
 } from '../../../db/schema.js';
-import type {
-  EntitlementOverrideRecord,
-  ApplicationCode,
-} from '../types/entitlement.types.js';
+import type { EntitlementOverrideRecord, ApplicationCode } from '../types/entitlement.types.js';
 
 export class EntitlementOverrideRepository {
   async findById(id: string): Promise<EntitlementOverrideRecord | null> {

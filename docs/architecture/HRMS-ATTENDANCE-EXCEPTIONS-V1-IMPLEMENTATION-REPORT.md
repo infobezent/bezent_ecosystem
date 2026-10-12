@@ -5,7 +5,7 @@
 > **Module:** Attendance  
 > **Workspace:** Exceptions Case Management V1.0  
 > **Status:** Production-Ready & Fully Verified  
-> **Date:** October 2026  
+> **Date:** October 2026
 
 ---
 
@@ -22,6 +22,7 @@ The implementation strictly satisfies the **Option B Enterprise layout specifica
 Two dedicated, tenant-isolated tables govern the Exceptions domain:
 
 ### 2.1 `attendance_exceptions` Table
+
 - **Primary Key:** `id varchar(64)` (surrogate ID generated via `generateSurrogateId('aexc')`).
 - **Multi-Tenancy & Scoping:** `tenant_id varchar(64) NOT NULL`, `company_id varchar(64) NOT NULL`.
 - **Identity Links:**
@@ -44,6 +45,7 @@ Two dedicated, tenant-isolated tables govern the Exceptions domain:
   - `UNIQUE INDEX idx_att_exc_dedup (tenant_id, company_id, source_record_type, source_record_id, exception_type)` guarantees idempotent detection scans without duplicate case creation.
 
 ### 2.2 `attendance_exception_audits` Table
+
 - Append-only immutable audit trail capturing every state change, triage assignment, severity override, and resolution event.
 - Supported actions: `detected`, `assigned`, `reassigned`, `status_transitioned`, `severity_overridden`, `pending_action_marked`, `note_added`, `resolution_verified`, `resolved`, `closed`, `reopened`.
 - Tracks `actor_user_id`, `old_state (json)`, `new_state (json)`, `notes (text)`, and `created_at`.
@@ -56,6 +58,7 @@ The backend capability strictly adheres to BEZENT's canonical layered domain pat
 `routes` → `controller` → `service` → `repository` → `Drizzle MySQL`
 
 ### 3.1 Registered Endpoints (`/api/v1/hrms/attendance/exceptions`)
+
 1. `GET /api/v1/hrms/attendance/exceptions`:
    - Triggers idempotent anomaly detection scan on the active timeframe (`detectAndSyncExceptions`).
    - Evaluates dual date interpretations (`workday` vs `detected_at`).
@@ -84,25 +87,30 @@ The backend capability strictly adheres to BEZENT's canonical layered domain pat
 Following the **Option B Enterprise** visual hierarchy and UX specification:
 
 ### 4.1 Header & Workday Controls
+
 - Compact PageHeader (`Attendance / Exceptions`).
 - Quick date preset selector (`Today`, `Yesterday`, `Last 7 Days`, `This Month`, `Custom Range`) with custom date range pickers.
 - Global "Today" quick button and "Export" action button.
 
 ### 4.2 Single-Row Summary Counters Strip
+
 Six interactive stat cards laid out in a single desktop row using `<Grid columns={6} gap="sm">`:
+
 1. **ACTIVE CASES**: Sum of Open, Assigned, In Review, and Pending Action cases.
 2. **CRITICAL**: Active cases with critical payroll or compliance impact.
 3. **HIGH PRIORITY**: Active cases with high operational priority.
 4. **UNASSIGNED**: Cases requiring triage and assignment.
 5. **PENDING ACTION**: Cases awaiting action from employee, manager, or hardware sync.
 6. **RESOLVED TODAY**: Cases successfully closed/resolved on the current day.
-Each card functions as a quick filter shortcut with active border indicators.
+   Each card functions as a quick filter shortcut with active border indicators.
 
 ### 4.3 Progressive Disclosure Filter Bar
+
 - **Primary Filter Row:** Full-text Search (Employee Name, Code, Case ID), Workflow Status dropdown, Severity dropdown, Anomaly Type dropdown, "More Filters" toggle button, and "Reset" button.
 - **Advanced Expandable Row:** Date interpretation toggle (`workday` vs `detected_at`), Ingestion Source filter, Assignment Queue filter, Pending Reason filter.
 
 ### 4.4 10-Column Data Table with Contextual Menu
+
 1. `Selection Checkbox`: Master select-all checkbox with indeterminate state.
 2. `Employee`: Composite avatar, full employee name, and code (or "Unmatched Employee" badge).
 3. `Workday`: Workday date with day-of-week formatting.
@@ -116,7 +124,9 @@ Each card functions as a quick filter shortcut with active border indicators.
 11. `Actions`: Contextual `⋯` IconButton opening drawer actions.
 
 ### 4.5 Contextual Bulk Operations Bar
+
 Appears when one or more rows are selected:
+
 - Selected count indicator.
 - `Assign / Reassign` button (modal).
 - `Start Review` button.
@@ -125,7 +135,9 @@ Appears when one or more rows are selected:
 - `Clear Selection` button.
 
 ### 4.6 4-Tab Investigation Drawer
+
 Sliding right-side drawer displaying comprehensive case intelligence:
+
 - **Tab 1: Overview:** Case metadata, assignment status, pending action reasons, root cause, resolution notes.
 - **Tab 2: Evidence & Context:** Related punch events within ±2 days, linked daily attendance record, shift rules, and conflict details.
 - **Tab 3: Workflow Actions:** Triage assignment, severity override, mark pending action, verified resolution submission.
@@ -143,16 +155,16 @@ Sliding right-side drawer displaying comprehensive case intelligence:
 
 ## 6. Verification & Test Summary
 
-| Layer | Test Suite | Tests Executed | Status |
-| :--- | :--- | :---: | :---: |
-| **Backend API** | `attendanceExceptionsV1Api.test.ts` | 10 passed / 0 failed | **PASS** |
-| **Backend Regression** | `punchLogsV1Api.test.ts` | 8 passed / 0 failed | **PASS** |
-| **Backend Regression** | `attendanceApi.test.ts` | 14 passed / 0 failed | **PASS** |
-| **Frontend Web** | `attendanceExceptionsPageV1.test.tsx` | 3 passed / 0 failed | **PASS** |
-| **Frontend Web** | `dailyAttendanceLogV1.test.tsx` | 4 passed / 0 failed | **PASS** |
-| **Frontend Web** | `punchLogsPageV1.test.tsx` | 3 passed / 0 failed | **PASS** |
-| **Frontend Web** | `attendanceViews.test.tsx` | 12 passed / 0 failed | **PASS** |
-| **Typecheck** | `tsc -b apps/api/tsconfig.json --noEmit` | Clean (0 errors) | **PASS** |
-| **Typecheck** | `tsc -b apps/web/tsconfig.json --noEmit` | Clean (0 errors) | **PASS** |
+| Layer                  | Test Suite                               |    Tests Executed    |  Status  |
+| :--------------------- | :--------------------------------------- | :------------------: | :------: |
+| **Backend API**        | `attendanceExceptionsV1Api.test.ts`      | 10 passed / 0 failed | **PASS** |
+| **Backend Regression** | `punchLogsV1Api.test.ts`                 | 8 passed / 0 failed  | **PASS** |
+| **Backend Regression** | `attendanceApi.test.ts`                  | 14 passed / 0 failed | **PASS** |
+| **Frontend Web**       | `attendanceExceptionsPageV1.test.tsx`    | 3 passed / 0 failed  | **PASS** |
+| **Frontend Web**       | `dailyAttendanceLogV1.test.tsx`          | 4 passed / 0 failed  | **PASS** |
+| **Frontend Web**       | `punchLogsPageV1.test.tsx`               | 3 passed / 0 failed  | **PASS** |
+| **Frontend Web**       | `attendanceViews.test.tsx`               | 12 passed / 0 failed | **PASS** |
+| **Typecheck**          | `tsc -b apps/api/tsconfig.json --noEmit` |   Clean (0 errors)   | **PASS** |
+| **Typecheck**          | `tsc -b apps/web/tsconfig.json --noEmit` |   Clean (0 errors)   | **PASS** |
 
 The Attendance Exceptions V1.0 workspace is complete, verified, and operational.

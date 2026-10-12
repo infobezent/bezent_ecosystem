@@ -458,9 +458,7 @@ export class AttendanceRegularizationService {
 
     const reg = existing.reg;
     if (['approved', 'rejected', 'cancelled'].includes(reg.approvalStatus)) {
-      throw new ConflictError(
-        `Cannot reassign request in finalized state (${reg.approvalStatus})`,
-      );
+      throw new ConflictError(`Cannot reassign request in finalized state (${reg.approvalStatus})`);
     }
 
     const oldAssigned = reg.assignedTo;
@@ -1008,9 +1006,7 @@ export class AttendanceRegularizationService {
 
     const reg = existing.reg;
     if (['approved', 'rejected', 'cancelled'].includes(reg.approvalStatus)) {
-      throw new ConflictError(
-        `Cannot cancel request in finalized state (${reg.approvalStatus})`,
-      );
+      throw new ConflictError(`Cannot cancel request in finalized state (${reg.approvalStatus})`);
     }
 
     const updated = await this.repo.updateRegularization(tenantId, companyId, id, {
@@ -1118,7 +1114,10 @@ export class AttendanceRegularizationService {
               .from(employees)
               .where(eq(employees.id, reg.employeeId))
               .limit(1);
-            if (actorUserId === reg.employeeId || (bulkEmp?.userId && actorUserId === bulkEmp.userId)) {
+            if (
+              actorUserId === reg.employeeId ||
+              (bulkEmp?.userId && actorUserId === bulkEmp.userId)
+            ) {
               skipped.push({ id: reqId, reason: 'Self-approval restriction prevents bulk action' });
               continue;
             }

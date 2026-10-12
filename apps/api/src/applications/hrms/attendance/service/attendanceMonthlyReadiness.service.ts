@@ -33,7 +33,12 @@ export class AttendanceMonthlyReadinessService {
   ): ReadinessEvaluationResult {
     const passedChecks: Array<{ code: string; name: string; details?: string }> = [];
     const warningChecks: Array<{ code: string; name: string; details?: string }> = [];
-    const blockingChecks: Array<{ code: string; name: string; details?: string; sourceUrl?: string }> = [];
+    const blockingChecks: Array<{
+      code: string;
+      name: string;
+      details?: string;
+      sourceUrl?: string;
+    }> = [];
 
     // Check 1: Required daily attendance processed
     const pastPendingDays = dailyRecords.filter(
@@ -115,7 +120,8 @@ export class AttendanceMonthlyReadinessService {
       passedChecks.push({
         code: 'LEAVE_RECONCILED',
         name: 'Leave Coverage Reconciled',
-        details: 'Leave requests and attendance coverage correctly separated without double-counting.',
+        details:
+          'Leave requests and attendance coverage correctly separated without double-counting.',
       });
     }
 
@@ -154,13 +160,17 @@ export class AttendanceMonthlyReadinessService {
       blockingChecks.push({
         code: 'REVIEW_CORRECTION_REQUESTED',
         name: 'Correction Requested During Review',
-        details: summary.correctionRequestNotes ?? 'A reviewer requested corrections before payroll handoff.',
+        details:
+          summary.correctionRequestNotes ??
+          'A reviewer requested corrections before payroll handoff.',
       });
     } else if (summary.reviewState === 'reopened') {
       blockingChecks.push({
         code: 'REVIEW_REOPENED',
         name: 'Review Reopened',
-        details: summary.reopenReason ?? 'The previous sign-off was reopened due to source changes or admin action.',
+        details:
+          summary.reopenReason ??
+          'The previous sign-off was reopened due to source changes or admin action.',
       });
     } else {
       warningChecks.push({
@@ -282,7 +292,9 @@ export class AttendanceMonthlyReadinessService {
       passedChecks: result.passedChecks,
       warningChecks: result.warningChecks,
       blockingChecks: result.blockingChecks,
-      evaluatedAt: evaluationRecord.evaluatedAt ? (evaluationRecord.evaluatedAt as Date).toISOString() : new Date().toISOString(),
+      evaluatedAt: evaluationRecord.evaluatedAt
+        ? (evaluationRecord.evaluatedAt as Date).toISOString()
+        : new Date().toISOString(),
     };
   }
 }

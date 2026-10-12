@@ -5,6 +5,7 @@
 Phase 02.6 closes all verified architectural, security, and runtime gaps identified in the Phase 02.5 audit. It transitions BEZENT's Tenant Management and Subscription backend from static isolated data services into a fully integrated, transactionally atomic, and operationally resilient modular-monolith backend ready for the finalized Super Admin frontend.
 
 Key deliverables completed:
+
 - **Slice A (P0-1):** Production Atomic Create Tenant Orchestrator (`TenantCreationOrchestrationService`) supporting 4-step wizard payloads, durable SHA-256 idempotency caching with payload-mismatch conflict detection, and transactional rollback across tenant, company, subscriptions, pending invitation, initial provisioning jobs, outbox events, and audit logs.
 - **Slice B (P0-2):** Commercial Entitlement to Runtime Access Integration. Reconciled `tenant_subscriptions` -> `effectiveEntitlementService` -> `moduleService` -> `tenant_modules`. Integrated commercial plan entitlements into runtime request authorization while maintaining backward compatibility for unseeded legacy tenants.
 - **Slice C (P1-2, P2-1, P2-2):** Hardened Primary Admin Invitation Acceptance workflow with token hashing (SHA-256), 72-hour expiry, authenticated identity binding, IP/fingerprint rate limiting, and atomic creation of Primary Company `memberships` (`company_admin` role) and RBAC synchronization.
@@ -18,25 +19,25 @@ Key deliverables completed:
 
 ## 2. Confirmed Phase 02.5 Issues & Remediation Status
 
-| Issue ID | Severity | Description | Phase 02.6 Remediation Status |
-|---|---|---|---|
-| **P0-1** | Critical | Missing atomic Create Tenant orchestration across 4-step wizard entities | **RESOLVED.** Implemented `TenantCreationOrchestrationService` with complete multi-table transaction rollback and durable idempotency. |
-| **P0-2** | Critical | Commercial entitlements disconnected from runtime authorization (`moduleService`) | **RESOLVED.** Integrated `effectiveEntitlementService` into `moduleService.isTenantEntitled` and runtime access guards. |
-| **P1-1** | High | Background workers (outbox, provisioning, sweeper) not registered in runtime | **RESOLVED.** Implemented `BackgroundWorkerRunner`, registered in `main.ts` with bounded intervals and graceful shutdown. |
-| **P1-2** | High | Primary Admin invitation acceptance missing company membership creation | **RESOLVED.** `PrimaryAdminService.acceptInvitation` atomically provisions primary company membership with `company_admin` role and RBAC sync. |
-| **P1-3** | High | Missing trial tenant summary metric in `GET /tenants/summary` | **RESOLVED.** Added deterministic `trialTenants` counter: active trial sub with 0 active paid subs. |
-| **P1-4** | High | Tenant list missing search, filtering, sorting, and projections | **RESOLVED.** Implemented comprehensive list repository queries with whitelist sort and primary admin projection. |
-| **P1-5** | High | Missing composite Tenant Overview API | **RESOLVED.** Implemented `GET /api/v1/platform/tenants/:id/overview`. |
-| **P2-1** | Medium | Synchronous invitation email delivery | **RESOLVED.** Asynchronous delivery via transactional outbox worker (`tenant.invitation.issued`). |
-| **P2-2** | Medium | Missing public invitation acceptance rate limiting | **RESOLVED.** Added `invitationAcceptRateLimiter` middleware enforcing IP and token fingerprint bounds. |
-| **P2-3** | Medium | Missing scheduled subscription activation and expiry processing | **RESOLVED.** Implemented lifecycle sweeper in `BackgroundWorkerRunner` checking scheduled activations and expired trials every 60s. |
+| Issue ID | Severity | Description                                                                       | Phase 02.6 Remediation Status                                                                                                                  |
+| -------- | -------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **P0-1** | Critical | Missing atomic Create Tenant orchestration across 4-step wizard entities          | **RESOLVED.** Implemented `TenantCreationOrchestrationService` with complete multi-table transaction rollback and durable idempotency.         |
+| **P0-2** | Critical | Commercial entitlements disconnected from runtime authorization (`moduleService`) | **RESOLVED.** Integrated `effectiveEntitlementService` into `moduleService.isTenantEntitled` and runtime access guards.                        |
+| **P1-1** | High     | Background workers (outbox, provisioning, sweeper) not registered in runtime      | **RESOLVED.** Implemented `BackgroundWorkerRunner`, registered in `main.ts` with bounded intervals and graceful shutdown.                      |
+| **P1-2** | High     | Primary Admin invitation acceptance missing company membership creation           | **RESOLVED.** `PrimaryAdminService.acceptInvitation` atomically provisions primary company membership with `company_admin` role and RBAC sync. |
+| **P1-3** | High     | Missing trial tenant summary metric in `GET /tenants/summary`                     | **RESOLVED.** Added deterministic `trialTenants` counter: active trial sub with 0 active paid subs.                                            |
+| **P1-4** | High     | Tenant list missing search, filtering, sorting, and projections                   | **RESOLVED.** Implemented comprehensive list repository queries with whitelist sort and primary admin projection.                              |
+| **P1-5** | High     | Missing composite Tenant Overview API                                             | **RESOLVED.** Implemented `GET /api/v1/platform/tenants/:id/overview`.                                                                         |
+| **P2-1** | Medium   | Synchronous invitation email delivery                                             | **RESOLVED.** Asynchronous delivery via transactional outbox worker (`tenant.invitation.issued`).                                              |
+| **P2-2** | Medium   | Missing public invitation acceptance rate limiting                                | **RESOLVED.** Added `invitationAcceptRateLimiter` middleware enforcing IP and token fingerprint bounds.                                        |
+| **P2-3** | Medium   | Missing scheduled subscription activation and expiry processing                   | **RESOLVED.** Implemented lifecycle sweeper in `BackgroundWorkerRunner` checking scheduled activations and expired trials every 60s.           |
 
 ---
 
 ## 3. Architecture Decisions
 
 1. **Option A Internal Billing (No External Gateway):** Subscriptions and plans are managed purely through platform repositories and internal business logic. No Stripe/PayPal/Razorpay dependencies.
-2. **Modular Monolith Layering Invariants:** 
+2. **Modular Monolith Layering Invariants:**
    `routes -> controller -> service -> repository -> database (Drizzle MySQL)`.
    Business domains consume platform services; cross-application platform capabilities (`platform/workers`, `platform/entitlements`, `platform/tenants`) remain neutral and reusable.
 3. **Dual Entitlement Authority Reconciliation:**
@@ -51,6 +52,7 @@ Key deliverables completed:
 ## 4. Exact Changed Files
 
 ### New Files Created
+
 - `apps/api/src/platform/tenants/service/tenantOrchestration.service.ts` — 4-step atomic orchestration, preflight validation, and durable idempotency.
 - `apps/api/src/platform/tenants/controller/tenantOrchestration.controller.ts` — Controller handlers for preflight and final orchestration endpoints.
 - `apps/api/src/platform/tenants/validation/tenantOrchestration.schema.ts` — Validation schemas and IANA timezone validator.
@@ -61,6 +63,7 @@ Key deliverables completed:
 - `apps/api/src/platform/__tests__/tenantManagementPhase026.test.ts` — 20 dedicated end-to-end integration tests covering Slices A through G.
 
 ### Modified Files
+
 - `apps/api/src/main.ts` — Bootstraps `backgroundWorkerRunner` alongside Express HTTP server, with SIGINT/SIGTERM shutdown handlers.
 - `apps/api/src/platform/tenants/routes/tenant.routes.ts` — Registered orchestration routes, overview route, activity export route, and invitation routes.
 - `apps/api/src/platform/tenants/service/tenant.service.ts` — Implemented `getTenantOverview`, `exportActivityCsv`, and updated `getTenantSummary`.
@@ -74,10 +77,12 @@ Key deliverables completed:
 ## 5. New and Modified API Contracts
 
 ### 1. Tenant Creation Preflight
+
 - **Method:** `POST`
 - **Path:** `/api/v1/platform/tenants/orchestrate/preflight`
 - **Auth:** Super Admin (`requirePlatformAuth`, `requireSuperAdmin`)
 - **Response:**
+
 ```json
 {
   "success": true,
@@ -95,11 +100,13 @@ Key deliverables completed:
 ```
 
 ### 2. Atomic Tenant Orchestration
+
 - **Method:** `POST`
 - **Path:** `/api/v1/platform/tenants/orchestrate`
 - **Headers:** `Idempotency-Key: <unique-uuid>`
 - **Auth:** Super Admin
 - **Response:**
+
 ```json
 {
   "success": true,
@@ -130,11 +137,13 @@ Key deliverables completed:
 ```
 
 ### 3. Primary Admin Invitation Acceptance
+
 - **Method:** `POST`
 - **Path:** `/api/v1/platform/tenants/invitations/:token/accept`
 - **Auth:** Authenticated User matching the invited email address (`requirePlatformAuth`)
 - **Rate Limit:** 10 requests per minute per IP / token
 - **Response:**
+
 ```json
 {
   "success": true,
@@ -148,12 +157,14 @@ Key deliverables completed:
 ```
 
 ### 4. Tenant Overview DTO
+
 - **Method:** `GET`
 - **Path:** `/api/v1/platform/tenants/:id/overview`
 - **Auth:** Super Admin
 - **Response:** Aggregated DTO with `tenant`, `company`, `primaryAdmin`, `applications`, `subscriptions`, `seatUsage`, and `attentionItems`.
 
 ### 5. Worker Status
+
 - **Method:** `GET`
 - **Path:** `/api/v1/platform/provisioning/workers/status`
 - **Auth:** Super Admin
@@ -164,6 +175,7 @@ Key deliverables completed:
 ## 6. Idempotency & Transaction Boundaries
 
 ### Idempotency Storage & Protocol
+
 - Utilizes the `idempotency_keys` table.
 - Keys are hashed with SHA-256 alongside actor user ID (`sa_actor_id:idempotencyKey`).
 - When a duplicate request arrives:
@@ -171,7 +183,9 @@ Key deliverables completed:
   - If the payload hash differs, the request is immediately rejected with HTTP 409 `IDEMPOTENCY_KEY_PAYLOAD_MISMATCH`.
 
 ### Transaction Boundary
+
 All records within `TenantCreationOrchestrationService.orchestrate` are wrapped in a single database transaction (`db.transaction(async (tx) => { ... })`):
+
 1. Insert `tenants` record.
 2. Insert `tenant_details` record.
 3. Insert `companies` record (primary company).
@@ -190,6 +204,7 @@ If any operation fails, Drizzle rolls back the entire transaction. No orphan rec
 ## 7. Runtime Entitlement & Legacy Compatibility Policy
 
 ### Decision
+
 A unified entitlement evaluation policy was implemented in `effectiveEntitlementService.resolveEffectiveEntitlements`:
 
 1. **Commercial Subscription Priority:** If the tenant has an active commercial subscription in `tenant_subscriptions`, `isEntitled` is granted via `source: 'commercial_subscription'`.
@@ -232,6 +247,7 @@ A unified entitlement evaluation policy was implemented in `effectiveEntitlement
 ## 10. Automated Test Results
 
 ### 1. Dedicated Phase 02.6 Test Suite
+
 - **File:** `apps/api/src/platform/__tests__/tenantManagementPhase026.test.ts`
 - **Result:** **20 passed (20 total)**
 - **Coverage:**
@@ -244,6 +260,7 @@ A unified entitlement evaluation policy was implemented in `effectiveEntitlement
   - Slice G: Activity log filtering and formula-injection-defended CSV export.
 
 ### 2. Full Backend Regression Suite
+
 - **Command:** `npm test --workspace=apps/api`
 - **Result:** **911 passed (911 total) across 59 test files**
 - **Failures:** 0
@@ -251,10 +268,12 @@ A unified entitlement evaluation policy was implemented in `effectiveEntitlement
 - **Database:** Real MySQL 8.4 Server instance running locally.
 
 ### 3. TypeScript Typecheck
+
 - **API (`apps/api`):** `tsc -p tsconfig.json --noEmit` — **0 errors (PASS)**
 - **Web (`apps/web`):** `tsc -b --noEmit` — **0 errors (PASS)**
 
 ### 4. Build Gate
+
 - **API Build (`apps/api`):** `tsc -p tsconfig.json` — **0 errors (PASS)**
 
 ---

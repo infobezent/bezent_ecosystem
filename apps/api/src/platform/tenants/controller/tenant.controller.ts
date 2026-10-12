@@ -37,7 +37,8 @@ export class TenantController {
         createdFrom: typeof createdFrom === 'string' ? createdFrom : undefined,
         createdTo: typeof createdTo === 'string' ? createdTo : undefined,
         sortBy: typeof sortBy === 'string' ? (sortBy as TenantFilter['sortBy']) : undefined,
-        sortOrder: typeof sortOrder === 'string' ? (sortOrder as TenantFilter['sortOrder']) : undefined,
+        sortOrder:
+          typeof sortOrder === 'string' ? (sortOrder as TenantFilter['sortOrder']) : undefined,
         attention:
           typeof attention === 'string'
             ? (attention as import('../types/tenant.types.js').CustomerHealthStatus)

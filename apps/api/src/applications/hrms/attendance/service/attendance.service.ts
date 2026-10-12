@@ -225,10 +225,15 @@ export class AttendanceService {
     employeeIds: string[],
     date: string,
     adminUserId: string,
-  ): Promise<{ recalculatedCount: number; failures: Array<{ employeeId: string; error: string }> }> {
+  ): Promise<{
+    recalculatedCount: number;
+    failures: Array<{ employeeId: string; error: string }>;
+  }> {
     const isLocked = await this.repo.checkDateInLockedPeriod(tenantId, companyId, date, date);
     if (isLocked) {
-      throw new BadRequestError(`Cannot recalculate attendance for ${date}: Period is locked for payroll`);
+      throw new BadRequestError(
+        `Cannot recalculate attendance for ${date}: Period is locked for payroll`,
+      );
     }
 
     let recalculatedCount = 0;
@@ -260,7 +265,8 @@ export class AttendanceService {
           return `${h}:${m}`;
         };
 
-        const firstInTime = inPunches.length > 0 ? toTimeStr(inPunches[inPunches.length - 1]?.punchTime) : null;
+        const firstInTime =
+          inPunches.length > 0 ? toTimeStr(inPunches[inPunches.length - 1]?.punchTime) : null;
         const lastOutTime = outPunches.length > 0 ? toTimeStr(outPunches[0]?.punchTime) : null;
 
         const isToday = date === new Date().toISOString().slice(0, 10);
@@ -356,11 +362,19 @@ export class AttendanceService {
     );
   }
 
-  async getPunchLogs(tenantId: string, companyId: string, filter: PunchLogFilter): Promise<PunchLogResult> {
+  async getPunchLogs(
+    tenantId: string,
+    companyId: string,
+    filter: PunchLogFilter,
+  ): Promise<PunchLogResult> {
     return this.repo.getPunches(tenantId, companyId, filter);
   }
 
-  async getPunchDetails(tenantId: string, companyId: string, punchId: string): Promise<PunchEventDetail> {
+  async getPunchDetails(
+    tenantId: string,
+    companyId: string,
+    punchId: string,
+  ): Promise<PunchEventDetail> {
     const detail = await this.repo.getPunchById(tenantId, companyId, punchId);
     if (!detail) {
       throw new NotFoundError(`Punch event not found: ${punchId}`);
@@ -447,8 +461,8 @@ export class AttendanceService {
         typeof item.punchTime === 'string'
           ? item.punchTime
           : item.punchTime
-          ? (item.punchTime as Date).toISOString()
-          : '';
+            ? (item.punchTime as Date).toISOString()
+            : '';
       const row = [
         item.id,
         item.employeeCode,
@@ -456,9 +470,7 @@ export class AttendanceService {
         punchTimeStr,
         item.punchType.toUpperCase(),
         item.source,
-        item.workLocation ||
-        (item.deviceMetadata as { deviceId?: string } | null)?.deviceId ||
-        '-',
+        item.workLocation || (item.deviceMetadata as { deviceId?: string } | null)?.deviceId || '-',
         item.workday || '-',
         item.validationStatus,
         item.processingState,
@@ -528,7 +540,13 @@ export class AttendanceService {
     resolutionNotes: string,
     actorUserId: string,
   ): Promise<AttendanceExceptionCaseItem> {
-    return this.repo.verifyAndResolveException(tenantId, companyId, exceptionId, resolutionNotes, actorUserId);
+    return this.repo.verifyAndResolveException(
+      tenantId,
+      companyId,
+      exceptionId,
+      resolutionNotes,
+      actorUserId,
+    );
   }
 
   async bulkExceptionAction(
@@ -902,9 +920,7 @@ export class AttendanceService {
 
     for (const r of rows) {
       const workedHours =
-        r.workedMinutes > 0
-          ? `${Math.floor(r.workedMinutes / 60)}h ${r.workedMinutes % 60}m`
-          : '-';
+        r.workedMinutes > 0 ? `${Math.floor(r.workedMinutes / 60)}h ${r.workedMinutes % 60}m` : '-';
       const line = [
         sanitizeCell(r.date),
         sanitizeCell(r.employeeCode),

@@ -276,7 +276,11 @@ describe('Tenant Admin → Company Organization Structure (Administration Tree)'
       const overviewHtml = renderToStaticMarkup(
         <MemoryRouter>
           <TenantAdminContext.Provider value={mockContext}>
-            <CompanyWorkspaceHeader company={mockCompany} activeSection="overview" onEditCompany={vi.fn()} />
+            <CompanyWorkspaceHeader
+              company={mockCompany}
+              activeSection="overview"
+              onEditCompany={vi.fn()}
+            />
           </TenantAdminContext.Provider>
         </MemoryRouter>,
       );
@@ -310,7 +314,9 @@ describe('Tenant Admin → Company Organization Structure (Administration Tree)'
   describe('2. Populated Structure Layout & Toolbar', () => {
     it('renders populated hierarchy with exactly ONE Add Unit action, no Add Business Unit CTA, and hierarchy explorer', () => {
       const html = renderToStaticMarkup(
-        <MemoryRouter initialEntries={['/tenant-admin/tenant/companies/comp_apj3d/organization/structure']}>
+        <MemoryRouter
+          initialEntries={['/tenant-admin/tenant/companies/comp_apj3d/organization/structure']}
+        >
           <TenantAdminContext.Provider value={mockContext}>
             <Routes>
               <Route
@@ -329,7 +335,9 @@ describe('Tenant Admin → Company Organization Structure (Administration Tree)'
       );
 
       // Subtitle
-      expect(html).toContain("Manage the company&#x27;s organizational structure and work locations.");
+      expect(html).toContain(
+        'Manage the company&#x27;s organizational structure and work locations.',
+      );
       // Sub-navigation tabs
       expect(html).toContain('Structure');
       expect(html).toContain('Work Locations');
@@ -448,7 +456,9 @@ describe('Tenant Admin → Company Organization Structure (Administration Tree)'
       };
 
       const html = renderToStaticMarkup(
-        <MemoryRouter initialEntries={['/tenant-admin/tenant/companies/comp_apj3d/organization/structure']}>
+        <MemoryRouter
+          initialEntries={['/tenant-admin/tenant/companies/comp_apj3d/organization/structure']}
+        >
           <TenantAdminContext.Provider value={mockContext}>
             <Routes>
               <Route
@@ -486,7 +496,11 @@ describe('Tenant Admin → Company Organization Structure (Administration Tree)'
   describe('5. Tenant Boundary Protection', () => {
     it('blocks access and displays cross-tenant violation when accessing foreign company ID', () => {
       const html = renderToStaticMarkup(
-        <MemoryRouter initialEntries={['/tenant-admin/tenant/companies/comp_foreign_999/organization/structure']}>
+        <MemoryRouter
+          initialEntries={[
+            '/tenant-admin/tenant/companies/comp_foreign_999/organization/structure',
+          ]}
+        >
           <TenantAdminContext.Provider value={mockContext}>
             <Routes>
               <Route
@@ -508,7 +522,9 @@ describe('Tenant Admin → Company Organization Structure (Administration Tree)'
     it('while structure data is loading, neither creation CTA flashes before state is known', () => {
       // Without initialHierarchy, page starts in isLoadingData = true
       const html = renderToStaticMarkup(
-        <MemoryRouter initialEntries={['/tenant-admin/tenant/companies/comp_apj3d/organization/structure']}>
+        <MemoryRouter
+          initialEntries={['/tenant-admin/tenant/companies/comp_apj3d/organization/structure']}
+        >
           <TenantAdminContext.Provider value={mockContext}>
             <Routes>
               <Route

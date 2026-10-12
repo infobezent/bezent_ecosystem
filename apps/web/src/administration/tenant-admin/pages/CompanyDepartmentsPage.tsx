@@ -44,9 +44,13 @@ export function CompanyDepartmentsPage() {
             activeId="organization"
             onChange={(id) => {
               if (id === 'overview') {
-                navigate(`/tenant-admin/tenant/companies/${encodeURIComponent(company.id)}/overview`);
+                navigate(
+                  `/tenant-admin/tenant/companies/${encodeURIComponent(company.id)}/overview`,
+                );
               } else if (id === 'details') {
-                navigate(`/tenant-admin/tenant/companies/${encodeURIComponent(company.id)}/details`);
+                navigate(
+                  `/tenant-admin/tenant/companies/${encodeURIComponent(company.id)}/details`,
+                );
               }
             }}
             items={[

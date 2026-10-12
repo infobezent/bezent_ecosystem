@@ -59,16 +59,16 @@ describe('Tenant Admin → Company Workspace → Access V1 Frontend (Administrat
   });
 
   it('2. Renders CompanyRolesOverviewTab with canonical role cards and disclaimers', () => {
-    const html = renderToStaticMarkup(
-      <CompanyRolesOverviewTab companyId="comp_apj3d" />,
-    );
+    const html = renderToStaticMarkup(<CompanyRolesOverviewTab companyId="comp_apj3d" />);
 
     // Canonical role definitions
     expect(html).toContain('Member');
     expect(html).toContain('Company Administrator');
     expect(html).toContain('Company Scope &amp; Application Boundary');
     expect(html).toContain('Administrative Capabilities');
-    expect(html).toContain('Application permissions (HRMS, CRM, Project Management) are provisioned and managed separately');
+    expect(html).toContain(
+      'Application permissions (HRMS, CRM, Project Management) are provisioned and managed separately',
+    );
     expect(html).toContain('Does not grant Tenant Administrator authority across other companies');
   });
 

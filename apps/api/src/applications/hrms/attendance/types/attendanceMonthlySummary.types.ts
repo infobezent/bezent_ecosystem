@@ -1,10 +1,6 @@
 export type AttendanceCalculationState = 'pending' | 'calculated' | 'stale' | 'error';
 export type AttendanceReviewState =
-  | 'not_reviewed'
-  | 'in_review'
-  | 'needs_correction'
-  | 'reviewed'
-  | 'reopened';
+  'not_reviewed' | 'in_review' | 'needs_correction' | 'reviewed' | 'reopened';
 export type AttendancePayrollReadiness = 'calculating' | 'ready' | 'needs_review' | 'blocked';
 
 export interface MonthlySummaryRow {
@@ -98,7 +94,15 @@ export interface MonthlySummaryDailyRecord {
   scheduleStartTime?: string;
   scheduleEndTime?: string;
   scheduledMinutes: number;
-  classification: 'present' | 'absent' | 'half_day' | 'on_leave' | 'on_duty' | 'weekly_off' | 'holiday' | 'pending';
+  classification:
+    | 'present'
+    | 'absent'
+    | 'half_day'
+    | 'on_leave'
+    | 'on_duty'
+    | 'weekly_off'
+    | 'holiday'
+    | 'pending';
   actualWorkedMinutes: number;
   policyCreditedMinutes: number;
   onDutyMinutes: number;

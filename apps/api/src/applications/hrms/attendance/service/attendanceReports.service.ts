@@ -1,9 +1,6 @@
 import { randomUUID } from 'crypto';
 import { BadRequestError, ForbiddenError, NotFoundError } from '../../../../app/errors/AppError.js';
-import {
-  REPORT_LIST,
-  getReportDefinition,
-} from './attendanceReportRegistry.js';
+import { REPORT_LIST, getReportDefinition } from './attendanceReportRegistry.js';
 import {
   attendanceReportsRepository,
   AttendanceReportsRepository,
@@ -33,9 +30,7 @@ import { getDb } from '../../../../db/connection.js';
 import { auditLogs } from '../../../../db/schema.js';
 
 export class AttendanceReportsService {
-  constructor(
-    private readonly repo: AttendanceReportsRepository = attendanceReportsRepository,
-  ) {}
+  constructor(private readonly repo: AttendanceReportsRepository = attendanceReportsRepository) {}
 
   // ════════════════════════════════════════════════════════════════════════
   // 1. CATALOG & DEFINITIONS
@@ -45,9 +40,10 @@ export class AttendanceReportsService {
     const held = access?.permissions ?? [];
     return REPORT_LIST.map((def) => {
       // For R15, mark whether user holds the specific audit permission
-      const isPermitted = def.id === 'R15'
-        ? held.includes('hrms.attendance.audit') || held.includes('hrms.attendance.audit.view')
-        : true; // other reports covered by standard attendance read/view
+      const isPermitted =
+        def.id === 'R15'
+          ? held.includes('hrms.attendance.audit') || held.includes('hrms.attendance.audit.view')
+          : true; // other reports covered by standard attendance read/view
       return {
         ...def,
         isPermitted,
@@ -130,46 +126,106 @@ export class AttendanceReportsService {
     let rawRows: Record<string, unknown>[] = [];
     switch (def.id) {
       case 'R01':
-        rawRows = await this.repo.queryR01DailyAttendance(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR01DailyAttendance(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R02':
-        rawRows = await this.repo.queryR02MonthlyAttendance(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR02MonthlyAttendance(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R03':
-        rawRows = await this.repo.queryR03AttendanceTrend(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR03AttendanceTrend(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R04':
-        rawRows = await this.repo.queryR04WorkingHours(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR04WorkingHours(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R05':
-        rawRows = await this.repo.queryR05LateAndEarlyExit(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR05LateAndEarlyExit(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R06':
         rawRows = await this.repo.queryR06Overtime(tenantId, companyId, options, scopedEmployeeIds);
         break;
       case 'R07':
-        rawRows = await this.repo.queryR07Absenteeism(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR07Absenteeism(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R08':
-        rawRows = await this.repo.queryR08LeaveImpact(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR08LeaveImpact(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R09':
-        rawRows = await this.repo.queryR09MissingPunch(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR09MissingPunch(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R10':
-        rawRows = await this.repo.queryR10AttendanceExceptions(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR10AttendanceExceptions(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R11':
-        rawRows = await this.repo.queryR11Regularization(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR11Regularization(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R12':
         rawRows = await this.repo.queryR12OnDuty(tenantId, companyId, options, scopedEmployeeIds);
         break;
       case 'R13':
-        rawRows = await this.repo.queryR13PayrollReadiness(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR13PayrollReadiness(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R14':
-        rawRows = await this.repo.queryR14MonthlyReview(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR14MonthlyReview(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R15':
         rawRows = await this.repo.queryR15AttendanceAudit(tenantId, companyId, options);
@@ -248,46 +304,106 @@ export class AttendanceReportsService {
     let rawRows: Record<string, unknown>[] = [];
     switch (def.id) {
       case 'R01':
-        rawRows = await this.repo.queryR01DailyAttendance(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR01DailyAttendance(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R02':
-        rawRows = await this.repo.queryR02MonthlyAttendance(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR02MonthlyAttendance(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R03':
-        rawRows = await this.repo.queryR03AttendanceTrend(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR03AttendanceTrend(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R04':
-        rawRows = await this.repo.queryR04WorkingHours(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR04WorkingHours(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R05':
-        rawRows = await this.repo.queryR05LateAndEarlyExit(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR05LateAndEarlyExit(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R06':
         rawRows = await this.repo.queryR06Overtime(tenantId, companyId, options, scopedEmployeeIds);
         break;
       case 'R07':
-        rawRows = await this.repo.queryR07Absenteeism(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR07Absenteeism(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R08':
-        rawRows = await this.repo.queryR08LeaveImpact(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR08LeaveImpact(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R09':
-        rawRows = await this.repo.queryR09MissingPunch(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR09MissingPunch(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R10':
-        rawRows = await this.repo.queryR10AttendanceExceptions(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR10AttendanceExceptions(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R11':
-        rawRows = await this.repo.queryR11Regularization(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR11Regularization(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R12':
         rawRows = await this.repo.queryR12OnDuty(tenantId, companyId, options, scopedEmployeeIds);
         break;
       case 'R13':
-        rawRows = await this.repo.queryR13PayrollReadiness(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR13PayrollReadiness(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R14':
-        rawRows = await this.repo.queryR14MonthlyReview(tenantId, companyId, options, scopedEmployeeIds);
+        rawRows = await this.repo.queryR14MonthlyReview(
+          tenantId,
+          companyId,
+          options,
+          scopedEmployeeIds,
+        );
         break;
       case 'R15':
         rawRows = await this.repo.queryR15AttendanceAudit(tenantId, companyId, options);
@@ -404,22 +520,24 @@ export class AttendanceReportsService {
 
     // Record Audit Log
     try {
-      await getDb().insert(auditLogs).values({
-        id: randomUUID(),
-        tenantId,
-        companyId,
-        actorUserId: actorUser?.id ?? 'system',
-        actorEmail: actorUser?.email ?? 'system',
-        action: 'attendance_report.exported',
-        targetType: 'attendance_report',
-        targetId: def.id,
-        metadata: {
-          reportId: def.id,
-          format: exportInput.format,
-          rowCount: preview.totalRows,
-          fileName,
-        },
-      });
+      await getDb()
+        .insert(auditLogs)
+        .values({
+          id: randomUUID(),
+          tenantId,
+          companyId,
+          actorUserId: actorUser?.id ?? 'system',
+          actorEmail: actorUser?.email ?? 'system',
+          action: 'attendance_report.exported',
+          targetType: 'attendance_report',
+          targetId: def.id,
+          metadata: {
+            reportId: def.id,
+            format: exportInput.format,
+            rowCount: preview.totalRows,
+            fileName,
+          },
+        });
     } catch {
       // Audit fail non-blocking
     }
@@ -511,9 +629,13 @@ export class AttendanceReportsService {
     }
 
     const updated = await this.repo.updateSavedReport(tenantId, companyId, id, ownerUserId, {
-      configurationName: input.configurationName !== undefined ? input.configurationName.trim() : existing.configurationName,
+      configurationName:
+        input.configurationName !== undefined
+          ? input.configurationName.trim()
+          : existing.configurationName,
       filters: input.filters !== undefined ? input.filters : existing.filters,
-      selectedColumns: input.selectedColumns !== undefined ? input.selectedColumns : existing.selectedColumns,
+      selectedColumns:
+        input.selectedColumns !== undefined ? input.selectedColumns : existing.selectedColumns,
       sorting: input.sorting !== undefined ? input.sorting : existing.sorting,
     });
 
@@ -609,21 +731,23 @@ export class AttendanceReportsService {
 
     // Record audit of download
     try {
-      await getDb().insert(auditLogs).values({
-        id: randomUUID(),
-        tenantId,
-        companyId,
-        actorUserId: actorUser?.id ?? 'system',
-        actorEmail: actorUser?.email ?? 'system',
-        action: 'attendance_report.downloaded',
-        targetType: 'attendance_report',
-        targetId: historyItem.id,
-        metadata: {
-          reportId: historyItem.reportId,
-          historyId: historyItem.id,
-          format: historyItem.outputFormat,
-        },
-      });
+      await getDb()
+        .insert(auditLogs)
+        .values({
+          id: randomUUID(),
+          tenantId,
+          companyId,
+          actorUserId: actorUser?.id ?? 'system',
+          actorEmail: actorUser?.email ?? 'system',
+          action: 'attendance_report.downloaded',
+          targetType: 'attendance_report',
+          targetId: historyItem.id,
+          metadata: {
+            reportId: historyItem.reportId,
+            historyId: historyItem.id,
+            format: historyItem.outputFormat,
+          },
+        });
     } catch {
       // Non-blocking
     }

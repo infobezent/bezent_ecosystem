@@ -22,7 +22,10 @@ export function validateCreateSubscription(body: unknown): CreateSubscriptionDto
   if (!data.tenantId || typeof data.tenantId !== 'string') {
     errors.tenantId = 'tenantId is required';
   }
-  if (!data.applicationCode || !['hrms', 'crm', 'project_management'].includes(String(data.applicationCode))) {
+  if (
+    !data.applicationCode ||
+    !['hrms', 'crm', 'project_management'].includes(String(data.applicationCode))
+  ) {
     errors.applicationCode = 'applicationCode must be hrms, crm, or project_management';
   }
   if (!data.planId || typeof data.planId !== 'string') {
@@ -45,10 +48,14 @@ export function validateCreateSubscription(body: unknown): CreateSubscriptionDto
     accessMode: data.accessMode as AccessMode,
     billingCycle: data.billingCycle ? (String(data.billingCycle) as BillingCycle) : 'monthly',
     licensedSeats: typeof data.licensedSeats === 'number' ? data.licensedSeats : undefined,
-    scheduledActivationAt: data.scheduledActivationAt ? new Date(String(data.scheduledActivationAt)) : null,
+    scheduledActivationAt: data.scheduledActivationAt
+      ? new Date(String(data.scheduledActivationAt))
+      : null,
     autoRenew: data.autoRenew !== undefined ? Boolean(data.autoRenew) : true,
     currency: data.currency ? String(data.currency).trim().toUpperCase() : 'USD',
-    commercialAgreementNotes: data.commercialAgreementNotes ? String(data.commercialAgreementNotes).trim() : undefined,
+    commercialAgreementNotes: data.commercialAgreementNotes
+      ? String(data.commercialAgreementNotes).trim()
+      : undefined,
   };
 }
 
@@ -72,7 +79,9 @@ export function validateCancelSubscription(body: unknown): CancelSubscriptionDto
 
   const data = body as Record<string, unknown>;
   if (!data.reason || typeof data.reason !== 'string' || data.reason.trim().length < 3) {
-    throw new ValidationError('Validation failed', { reason: 'Cancellation reason is required (min 3 chars)' });
+    throw new ValidationError('Validation failed', {
+      reason: 'Cancellation reason is required (min 3 chars)',
+    });
   }
 
   return {
@@ -94,7 +103,9 @@ export function validateRenewSubscription(body: unknown): RenewSubscriptionDto {
 export function parseSubscriptionFilter(query: Record<string, unknown>): SubscriptionFilter {
   return {
     tenantId: query.tenantId ? String(query.tenantId) : undefined,
-    applicationCode: query.applicationCode ? (String(query.applicationCode) as ApplicationCode) : undefined,
+    applicationCode: query.applicationCode
+      ? (String(query.applicationCode) as ApplicationCode)
+      : undefined,
     status: query.status ? (String(query.status) as SubscriptionStatus) : undefined,
   };
 }

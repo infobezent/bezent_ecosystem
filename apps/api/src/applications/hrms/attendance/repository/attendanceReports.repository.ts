@@ -45,10 +45,7 @@ export class AttendanceReportsRepository {
   }
 
   async getEmployeesMap(tenantId: string, companyId: string, employeeIds?: string[]) {
-    const conditions = [
-      eq(employees.tenantId, tenantId),
-      eq(employees.companyId, companyId),
-    ];
+    const conditions = [eq(employees.tenantId, tenantId), eq(employees.companyId, companyId)];
     if (employeeIds && employeeIds.length > 0) {
       conditions.push(inArray(employees.id, employeeIds));
     }
@@ -70,16 +67,19 @@ export class AttendanceReportsRepository {
       .leftJoin(locations, eq(employees.locationId, locations.id))
       .where(and(...conditions));
 
-    const map = new Map<string, {
-      id: string;
-      code: string;
-      name: string;
-      departmentId: string | null;
-      departmentName: string;
-      locationId: string | null;
-      locationName: string;
-      managerId: string | null;
-    }>();
+    const map = new Map<
+      string,
+      {
+        id: string;
+        code: string;
+        name: string;
+        departmentId: string | null;
+        departmentName: string;
+        locationId: string | null;
+        locationName: string;
+        managerId: string | null;
+      }
+    >();
 
     for (const r of rows) {
       const name = `${r.firstName} ${r.lastName || ''}`.trim();
@@ -109,7 +109,10 @@ export class AttendanceReportsRepository {
     scopedEmployeeIds?: string[],
   ) {
     const { filters } = options;
-    const startDate = (filters.startDate as string) || (filters.date as string) || new Date().toISOString().slice(0, 10);
+    const startDate =
+      (filters.startDate as string) ||
+      (filters.date as string) ||
+      new Date().toISOString().slice(0, 10);
     const endDate = (filters.endDate as string) || startDate;
 
     const conditions = [
@@ -120,7 +123,12 @@ export class AttendanceReportsRepository {
     ];
 
     if (filters.status && typeof filters.status === 'string') {
-      conditions.push(eq(employeeAttendance.status, filters.status as typeof employeeAttendance.$inferSelect.status));
+      conditions.push(
+        eq(
+          employeeAttendance.status,
+          filters.status as typeof employeeAttendance.$inferSelect.status,
+        ),
+      );
     }
     if (filters.employeeId && typeof filters.employeeId === 'string') {
       conditions.push(eq(employeeAttendance.employeeId, filters.employeeId));
@@ -176,7 +184,8 @@ export class AttendanceReportsRepository {
       })
       .map((r) => {
         const workedHours = Number((r.workedMinutes / 60).toFixed(2));
-        const creditedHours = r.status === 'present' ? workedHours : r.status === 'half_day' ? 4 : 0;
+        const creditedHours =
+          r.status === 'present' ? workedHours : r.status === 'half_day' ? 4 : 0;
         let exceptionStatus = 'Normal';
         if (r.isMissingPunch) exceptionStatus = 'Missing Punch';
         else if (r.isLate && r.isEarlyExit) exceptionStatus = 'Late & Early Exit';
@@ -249,7 +258,8 @@ export class AttendanceReportsRepository {
       .filter((r) => {
         if (filters.departmentId && r.departmentId !== filters.departmentId) return false;
         if (filters.reviewState && r.summary.reviewState !== filters.reviewState) return false;
-        if (filters.payrollReadiness && r.summary.payrollReadiness !== filters.payrollReadiness) return false;
+        if (filters.payrollReadiness && r.summary.payrollReadiness !== filters.payrollReadiness)
+          return false;
         if (filters.search) {
           const s = String(filters.search).toLowerCase();
           const fullName = `${r.firstName} ${r.lastName || ''}`.toLowerCase();
@@ -322,15 +332,18 @@ export class AttendanceReportsRepository {
       .where(and(...conditions));
 
     // Group by period (Month or Date) + Department
-    const groupMap = new Map<string, {
-      period: string;
-      departmentBranch: string;
-      scheduledDays: number;
-      presentDays: number;
-      absentDays: number;
-      leaveDays: number;
-      lateCount: number;
-    }>();
+    const groupMap = new Map<
+      string,
+      {
+        period: string;
+        departmentBranch: string;
+        scheduledDays: number;
+        presentDays: number;
+        absentDays: number;
+        leaveDays: number;
+        lateCount: number;
+      }
+    >();
 
     for (const r of rows) {
       const period = r.date.slice(0, 7); // Monthly period grouping
@@ -361,8 +374,10 @@ export class AttendanceReportsRepository {
     }
 
     return Array.from(groupMap.values()).map((g) => {
-      const attendanceRate = g.scheduledDays > 0 ? Number(((g.presentDays / g.scheduledDays) * 100).toFixed(1)) : 'N/A';
-      const absenceRate = g.scheduledDays > 0 ? Number(((g.absentDays / g.scheduledDays) * 100).toFixed(1)) : 'N/A';
+      const attendanceRate =
+        g.scheduledDays > 0 ? Number(((g.presentDays / g.scheduledDays) * 100).toFixed(1)) : 'N/A';
+      const absenceRate =
+        g.scheduledDays > 0 ? Number(((g.absentDays / g.scheduledDays) * 100).toFixed(1)) : 'N/A';
 
       return {
         period: g.period,
@@ -424,7 +439,8 @@ export class AttendanceReportsRepository {
     return rows.map((r) => {
       const scheduledMinutes = 480; // Standard 8h shift
       const actualWorkedMinutes = r.workedMinutes;
-      const policyCreditedMinutes = r.status === 'present' ? actualWorkedMinutes : r.status === 'half_day' ? 240 : 0;
+      const policyCreditedMinutes =
+        r.status === 'present' ? actualWorkedMinutes : r.status === 'half_day' ? 240 : 0;
       const differenceMinutes = policyCreditedMinutes - scheduledMinutes;
 
       return {
@@ -495,7 +511,7 @@ export class AttendanceReportsRepository {
       else if (r.isLate) policyViolationStatus = 'Late Arrival';
       else if (r.isEarlyExit) policyViolationStatus = 'Early Exit';
 
-      const graceApplied = (r.lateMinutes > 0 && r.lateMinutes <= 15) ? 'Yes (15m)' : 'No';
+      const graceApplied = r.lateMinutes > 0 && r.lateMinutes <= 15 ? 'Yes (15m)' : 'No';
 
       return {
         date: r.date,
@@ -559,7 +575,10 @@ export class AttendanceReportsRepository {
     return rows.map((r) => {
       const scheduledMinutes = 480;
       const actualWorkedHours = Number((r.workedMinutes / 60).toFixed(2));
-      const extraWorkedHours = Math.max(0, Number(((r.workedMinutes - scheduledMinutes) / 60).toFixed(2)));
+      const extraWorkedHours = Math.max(
+        0,
+        Number(((r.workedMinutes - scheduledMinutes) / 60).toFixed(2)),
+      );
 
       return {
         date: r.date,
@@ -618,15 +637,18 @@ export class AttendanceReportsRepository {
       .orderBy(employeeAttendance.employeeId, employeeAttendance.date);
 
     // Group per employee
-    const empMap = new Map<string, {
-      code: string;
-      name: string;
-      dept: string;
-      scheduledDays: number;
-      absentDays: number;
-      consecutiveDays: number;
-      currentConsecutive: number;
-    }>();
+    const empMap = new Map<
+      string,
+      {
+        code: string;
+        name: string;
+        dept: string;
+        scheduledDays: number;
+        absentDays: number;
+        consecutiveDays: number;
+        currentConsecutive: number;
+      }
+    >();
 
     for (const r of rows) {
       if (!empMap.has(r.employeeId)) {
@@ -655,7 +677,8 @@ export class AttendanceReportsRepository {
     }
 
     return Array.from(empMap.values()).map((e) => {
-      const absenceRate = e.scheduledDays > 0 ? Number(((e.absentDays / e.scheduledDays) * 100).toFixed(1)) : 'N/A';
+      const absenceRate =
+        e.scheduledDays > 0 ? Number(((e.absentDays / e.scheduledDays) * 100).toFixed(1)) : 'N/A';
       return {
         employeeId: e.code,
         employeeName: e.name,
@@ -776,8 +799,16 @@ export class AttendanceReportsRepository {
     const todayMs = new Date().getTime();
 
     return rows.map((r) => {
-      const missingDirection = !r.checkInTime ? 'Missing In' : !r.checkOutTime ? 'Missing Out' : 'Both Missing';
-      const availablePunch = r.checkInTime ? formatTimeDisplay(r.checkInTime) : r.checkOutTime ? formatTimeDisplay(r.checkOutTime) : 'None';
+      const missingDirection = !r.checkInTime
+        ? 'Missing In'
+        : !r.checkOutTime
+          ? 'Missing Out'
+          : 'Both Missing';
+      const availablePunch = r.checkInTime
+        ? formatTimeDisplay(r.checkInTime)
+        : r.checkOutTime
+          ? formatTimeDisplay(r.checkOutTime)
+          : 'None';
       const rowDateMs = new Date(r.date).getTime();
       const agingDays = Math.max(0, Math.floor((todayMs - rowDateMs) / (1000 * 60 * 60 * 24)));
 
@@ -854,7 +885,9 @@ export class AttendanceReportsRepository {
         createdAt: e.createdAt.toISOString().slice(0, 10),
         agingDays,
         resolvedAt: e.resolvedAt ? e.resolvedAt.toISOString().slice(0, 10) : '—',
-        resolutionType: e.resolutionType ? capitalize(e.resolutionType.replace(/_/g, ' ')) : 'Pending',
+        resolutionType: e.resolutionType
+          ? capitalize(e.resolutionType.replace(/_/g, ' '))
+          : 'Pending',
       };
     });
   }
@@ -911,7 +944,8 @@ export class AttendanceReportsRepository {
         processingStatus: capitalize(reg.applicationStatus.replace(/_/g, ' ')),
         reviewer: reg.assignedTo ?? 'Manager / HR',
         decisionAt: reg.decidedAt ? reg.decidedAt.toISOString().slice(0, 10) : '—',
-        appliedCorrectionReference: reg.appliedAdjustmentId ?? (reg.applicationStatus === 'applied' ? 'ADJ-AUTO' : '—'),
+        appliedCorrectionReference:
+          reg.appliedAdjustmentId ?? (reg.applicationStatus === 'applied' ? 'ADJ-AUTO' : '—'),
       };
     });
   }
@@ -957,7 +991,8 @@ export class AttendanceReportsRepository {
     return rows.map((r) => {
       const od = r.od;
       const reqDur = od.durationHours ? `${od.durationHours}h` : 'Full Day';
-      const appDur = od.status === 'approved' ? (od.durationHours ? `${od.durationHours}h` : 'Full Day') : '—';
+      const appDur =
+        od.status === 'approved' ? (od.durationHours ? `${od.durationHours}h` : 'Full Day') : '—';
       const creditDays = od.status === 'approved' ? (od.durationType === 'half_day' ? 0.5 : 1) : 0;
 
       return {
@@ -1020,9 +1055,10 @@ export class AttendanceReportsRepository {
     return rows.map((r) => {
       const s = r.summary;
       const ev = r.eval;
-      const blockingReasons = ev?.blockingChecks && Array.isArray(ev.blockingChecks) && ev.blockingChecks.length > 0
-        ? ev.blockingChecks.map((b) => b.name).join('; ')
-        : 'None';
+      const blockingReasons =
+        ev?.blockingChecks && Array.isArray(ev.blockingChecks) && ev.blockingChecks.length > 0
+          ? ev.blockingChecks.map((b) => b.name).join('; ')
+          : 'None';
 
       return {
         attendanceMonth: s.month,
@@ -1039,7 +1075,9 @@ export class AttendanceReportsRepository {
         readinessStatus: capitalize(s.payrollReadiness.replace(/_/g, ' ')),
         blockingReasons,
         lockState: s.isLocked ? 'Locked' : 'Open',
-        evaluatedAt: ev?.evaluatedAt ? ev.evaluatedAt.toISOString().slice(0, 10) : s.lastCalculatedAt.toISOString().slice(0, 10),
+        evaluatedAt: ev?.evaluatedAt
+          ? ev.evaluatedAt.toISOString().slice(0, 10)
+          : s.lastCalculatedAt.toISOString().slice(0, 10),
       };
     });
   }
@@ -1109,11 +1147,7 @@ export class AttendanceReportsRepository {
   // R15 — ATTENDANCE AUDIT (SENSITIVE)
   // ════════════════════════════════════════════════════════════════════════
 
-  async queryR15AttendanceAudit(
-    tenantId: string,
-    companyId: string,
-    options: ReportQueryOptions,
-  ) {
+  async queryR15AttendanceAudit(tenantId: string, companyId: string, options: ReportQueryOptions) {
     const { filters } = options;
     const startDate = (filters.startDate as string) || new Date().toISOString().slice(0, 8) + '01';
     const endDate = (filters.endDate as string) || new Date().toISOString().slice(0, 10);
@@ -1212,7 +1246,12 @@ export class AttendanceReportsRepository {
 
   async createSavedReport(item: NewAttendanceSavedReport): Promise<AttendanceSavedReport> {
     await this.db.insert(attendanceSavedReports).values(item);
-    const found = await this.findSavedReportById(item.tenantId, item.companyId, item.id, item.ownerUserId);
+    const found = await this.findSavedReportById(
+      item.tenantId,
+      item.companyId,
+      item.id,
+      item.ownerUserId,
+    );
     return found!;
   }
 

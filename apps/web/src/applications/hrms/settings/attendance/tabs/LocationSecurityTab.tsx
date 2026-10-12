@@ -138,7 +138,9 @@ export function LocationSecurityTab() {
   return (
     <Stack gap="lg">
       {error && <Alert variant="error">{error}</Alert>}
-      {success && <Alert variant="success">Location & Security settings updated successfully.</Alert>}
+      {success && (
+        <Alert variant="success">Location & Security settings updated successfully.</Alert>
+      )}
 
       <Card variant="flat" padding="lg">
         <Stack gap="md">
@@ -347,10 +349,7 @@ export function LocationSecurityTab() {
             icon="security"
             info="Audits punches submitted through suspicious proxy tunnels."
           >
-            <Switch
-              checked={flagVpnProxy}
-              onChange={(e) => setFlagVpnProxy(e.target.checked)}
-            />
+            <Switch checked={flagVpnProxy} onChange={(e) => setFlagVpnProxy(e.target.checked)} />
           </SettingsRow>
         </Stack>
       </Card>

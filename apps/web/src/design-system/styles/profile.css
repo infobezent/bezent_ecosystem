@@ -816,7 +816,9 @@
   background: var(--surface-primary, #ffffff);
   border: 1px solid var(--border-subtle, #e2e8f0);
   border-radius: 10px;
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.12), 0 2px 6px -1px rgba(15, 23, 42, 0.06);
+  box-shadow:
+    0 4px 20px -2px rgba(15, 23, 42, 0.12),
+    0 2px 6px -1px rgba(15, 23, 42, 0.06);
   padding: 16px;
   z-index: 50;
   display: flex;
@@ -3185,5 +3187,3 @@
 .bezent-form-disclosure-btn:hover {
   color: var(--brand-hover, #0369a1);
 }
-
-

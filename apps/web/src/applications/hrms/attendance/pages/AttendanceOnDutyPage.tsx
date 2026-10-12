@@ -171,7 +171,9 @@ export function AttendanceOnDutyPage() {
   const [drawerId, setDrawerId] = useState<string | null>(null);
   const [drawerDetail, setDrawerDetail] = useState<OnDutyDetailV1 | null>(null);
   const [drawerLoading, setDrawerLoading] = useState(false);
-  const [drawerTab, setDrawerTab] = useState<'overview' | 'evidence' | 'decision' | 'history'>('overview');
+  const [drawerTab, setDrawerTab] = useState<'overview' | 'evidence' | 'decision' | 'history'>(
+    'overview',
+  );
   const [drawerActionLoading, setDrawerActionLoading] = useState(false);
   const [decisionType, setDecisionType] = useState<'approved' | 'rejected' | 'clarify'>('approved');
   const [decisionNotes, setDecisionNotes] = useState('');
@@ -187,19 +189,23 @@ export function AttendanceOnDutyPage() {
   const [formEndDate, setFormEndDate] = useState(getTodayString());
   const [formStartTime, setFormStartTime] = useState('09:00');
   const [formEndTime, setFormEndTime] = useState('18:00');
-  const [formHalfDaySession, setFormHalfDaySession] = useState<'first_half' | 'second_half'>('first_half');
+  const [formHalfDaySession, setFormHalfDaySession] = useState<'first_half' | 'second_half'>(
+    'first_half',
+  );
   const [formLocation, setFormLocation] = useState('');
   const [formPurpose, setFormPurpose] = useState('');
   const [formProjectRef, setFormProjectRef] = useState('');
-  const [formAttachments, setFormAttachments] = useState<Array<{ name: string; size: string; url?: string }>>([]);
+  const [formAttachments, setFormAttachments] = useState<
+    Array<{ name: string; size: string; url?: string }>
+  >([]);
   const [formNewAttachmentName, setFormNewAttachmentName] = useState('');
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   // 8. Bulk Operations State
-  const [bulkModalAction, setBulkModalAction] = useState<
-    BulkOnDutyActionInput['action'] | null
-  >(null);
+  const [bulkModalAction, setBulkModalAction] = useState<BulkOnDutyActionInput['action'] | null>(
+    null,
+  );
   const [bulkAssignee, setBulkAssignee] = useState('');
   const [bulkReason, setBulkReason] = useState('');
   const [bulkSubmitting, setBulkSubmitting] = useState(false);
@@ -463,12 +469,18 @@ export function AttendanceOnDutyPage() {
     if (locationId !== 'all') count++;
     if (conflictStatus !== 'all') count++;
     return count;
-  }, [durationType, submittedFrom, submittedTo, assignedTo, departmentId, locationId, conflictStatus]);
+  }, [
+    durationType,
+    submittedFrom,
+    submittedTo,
+    assignedTo,
+    departmentId,
+    locationId,
+    conflictStatus,
+  ]);
 
   // Bulk operation executor
-  const handleOpenBulkModal = async (
-    action: BulkOnDutyActionInput['action'],
-  ) => {
+  const handleOpenBulkModal = async (action: BulkOnDutyActionInput['action']) => {
     setBulkModalAction(action);
     setBulkReason('');
     setBulkResultReport(null);
@@ -626,7 +638,8 @@ export function AttendanceOnDutyPage() {
           <span>
             On-Duty (OD)
             <span className="bezent-sr-only">
-              Manage client visits, site deployments, field duties, and official external work approvals
+              Manage client visits, site deployments, field duties, and official external work
+              approvals
             </span>
           </span>
         }
@@ -979,10 +992,7 @@ export function AttendanceOnDutyPage() {
           <Card padding="sm">
             <Inline justify="between" align="center">
               <Inline gap="md" align="center">
-                <Checkbox
-                  checked={isAllSelected}
-                  onChange={toggleSelectAll}
-                />
+                <Checkbox checked={isAllSelected} onChange={toggleSelectAll} />
                 <strong>{selectedIds.size} selected</strong>
                 <Button
                   variant="ghost"
@@ -994,11 +1004,7 @@ export function AttendanceOnDutyPage() {
               </Inline>
 
               <Inline gap="xs" align="center">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => handleOpenBulkModal('assign')}
-                >
+                <Button variant="secondary" size="sm" onClick={() => handleOpenBulkModal('assign')}>
                   <BezentIcon name="person" size={14} /> Assign
                 </Button>
 
@@ -1045,11 +1051,7 @@ export function AttendanceOnDutyPage() {
                   <BezentIcon name="download" size={14} /> Export Selected
                 </Button>
 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedIds(new Set())}
-                >
+                <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>
                   Clear
                 </Button>
               </Inline>
@@ -1077,10 +1079,7 @@ export function AttendanceOnDutyPage() {
             <TableHead>
               <TableRow>
                 <TableHeaderCell className="bezent-table-col--select">
-                  <Checkbox
-                    checked={isAllSelected}
-                    onChange={toggleSelectAll}
-                  />
+                  <Checkbox checked={isAllSelected} onChange={toggleSelectAll} />
                 </TableHeaderCell>
                 <TableHeaderCell className="bezent-table-col--employee">Employee</TableHeaderCell>
                 <TableHeaderCell>Duty Period</TableHeaderCell>
@@ -1111,7 +1110,9 @@ export function AttendanceOnDutyPage() {
                   <TableCell className="bezent-table-col--employee">
                     <div className="bezent-table-cell--avatar-meta">
                       <Avatar
-                        initials={req.employeeName ? req.employeeName.slice(0, 2).toUpperCase() : 'EM'}
+                        initials={
+                          req.employeeName ? req.employeeName.slice(0, 2).toUpperCase() : 'EM'
+                        }
                         alt={req.employeeName}
                         size="sm"
                       />
@@ -1164,7 +1165,10 @@ export function AttendanceOnDutyPage() {
                   {/* 5. Location / Purpose */}
                   <TableCell>
                     <div className="bezent-table-meta-group">
-                      <span className="bezent-table-meta-title" title={req.locationOrSite || req.purpose}>
+                      <span
+                        className="bezent-table-meta-title"
+                        title={req.locationOrSite || req.purpose}
+                      >
                         {req.locationOrSite || 'On-Site / External'}
                       </span>
                       <span className="bezent-table-meta-subtitle" title={req.purpose}>
@@ -1179,7 +1183,12 @@ export function AttendanceOnDutyPage() {
                     <div className="bezent-table-meta-group">
                       <span className="bezent-table-meta-title">{formatDate(req.submittedAt)}</span>
                       <span className="bezent-table-meta-subtitle">
-                        {req.submittedAt ? new Date(req.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
+                        {req.submittedAt
+                          ? new Date(req.submittedAt).toLocaleTimeString([], {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })
+                          : '—'}
                       </span>
                     </div>
                   </TableCell>
@@ -1207,7 +1216,9 @@ export function AttendanceOnDutyPage() {
                         size="sm"
                         onClick={() => handleOpenDrawer(req.id)}
                       >
-                        {req.approvalStatus === 'submitted' || req.approvalStatus === 'under_review' ? 'Review' : 'View'}
+                        {req.approvalStatus === 'submitted' || req.approvalStatus === 'under_review'
+                          ? 'Review'
+                          : 'View'}
                       </Button>
                     </Inline>
                   </TableCell>
@@ -1221,7 +1232,8 @@ export function AttendanceOnDutyPage() {
         {totalPages > 1 && (
           <Inline justify="between" align="center">
             <span className="bezent-card__desc">
-              Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, totalCount)} of {totalCount} requests
+              Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, totalCount)} of{' '}
+              {totalCount} requests
             </span>
             <Inline gap="xs">
               <Button
@@ -1265,13 +1277,18 @@ export function AttendanceOnDutyPage() {
               <Inline justify="between" align="center">
                 <Inline gap="sm" align="center">
                   <Avatar
-                    initials={drawerDetail.employeeName ? drawerDetail.employeeName.slice(0, 2).toUpperCase() : 'EM'}
+                    initials={
+                      drawerDetail.employeeName
+                        ? drawerDetail.employeeName.slice(0, 2).toUpperCase()
+                        : 'EM'
+                    }
                     alt={drawerDetail.employeeName}
                   />
                   <Stack gap="none">
                     <strong>{drawerDetail.employeeName}</strong>
                     <span className="bezent-card__desc">
-                      {drawerDetail.employeeCode} {drawerDetail.departmentName ? `• ${drawerDetail.departmentName}` : ''}
+                      {drawerDetail.employeeCode}{' '}
+                      {drawerDetail.departmentName ? `• ${drawerDetail.departmentName}` : ''}
                     </span>
                   </Stack>
                 </Inline>
@@ -1304,19 +1321,24 @@ export function AttendanceOnDutyPage() {
                           <span className="bezent-card__desc">Duty Period</span>
                           <strong>
                             {formatDate(drawerDetail.startDate)}
-                            {drawerDetail.startDate !== drawerDetail.endDate ? ` to ${formatDate(drawerDetail.endDate)}` : ''}
+                            {drawerDetail.startDate !== drawerDetail.endDate
+                              ? ` to ${formatDate(drawerDetail.endDate)}`
+                              : ''}
                           </strong>
                         </Stack>
                         <Stack gap="none">
                           <span className="bezent-card__desc">OD Type</span>
                           <strong>
-                            {OD_TYPE_LABELS[drawerDetail.odTypeId] ?? drawerDetail.odTypeName ?? drawerDetail.odTypeId}
+                            {OD_TYPE_LABELS[drawerDetail.odTypeId] ??
+                              drawerDetail.odTypeName ??
+                              drawerDetail.odTypeId}
                           </strong>
                         </Stack>
                         <Stack gap="none">
                           <span className="bezent-card__desc">Duration Type</span>
                           <span>
-                            {DURATION_TYPE_LABELS[drawerDetail.durationType]} ({drawerDetail.durationHours} hrs)
+                            {DURATION_TYPE_LABELS[drawerDetail.durationType]} (
+                            {drawerDetail.durationHours} hrs)
                           </span>
                         </Stack>
                         <Stack gap="none">
@@ -1338,7 +1360,9 @@ export function AttendanceOnDutyPage() {
                   {/* Attendance Context & Conflicts */}
                   <Card padding="sm">
                     <Stack gap="xs">
-                      <span className="bezent-table-meta-title">Attendance Policy & Conflict Checks</span>
+                      <span className="bezent-table-meta-title">
+                        Attendance Policy & Conflict Checks
+                      </span>
                       <Grid columns={2} gap="sm">
                         <Stack gap="none">
                           <span className="bezent-card__desc">Assigned Shift Schedule</span>
@@ -1350,11 +1374,17 @@ export function AttendanceOnDutyPage() {
                         </Stack>
                         <Stack gap="none">
                           <span className="bezent-card__desc">Punches Summary</span>
-                          <span>{drawerDetail.attendanceContext?.recordedPunchesSummary || 'No punches recorded'}</span>
+                          <span>
+                            {drawerDetail.attendanceContext?.recordedPunchesSummary ||
+                              'No punches recorded'}
+                          </span>
                         </Stack>
                         <Stack gap="none">
                           <span className="bezent-card__desc">Leave Conflict</span>
-                          <span>{drawerDetail.attendanceContext?.leaveConflict || 'No conflicting leaves'}</span>
+                          <span>
+                            {drawerDetail.attendanceContext?.leaveConflict ||
+                              'No conflicting leaves'}
+                          </span>
                         </Stack>
                         <Stack gap="none">
                           <span className="bezent-card__desc">Payroll State</span>
@@ -1423,11 +1453,7 @@ export function AttendanceOnDutyPage() {
                         Start Review
                       </Button>
                     </Inline>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={() => setDrawerTab('decision')}
-                    >
+                    <Button variant="primary" size="sm" onClick={() => setDrawerTab('decision')}>
                       Review & Decide
                     </Button>
                   </Inline>
@@ -1440,7 +1466,8 @@ export function AttendanceOnDutyPage() {
                   <Card padding="sm">
                     <Stack gap="xs">
                       <span className="bezent-table-meta-title">Evidence & Attachments</span>
-                      {drawerDetail.evidenceAttachments && drawerDetail.evidenceAttachments.length > 0 ? (
+                      {drawerDetail.evidenceAttachments &&
+                      drawerDetail.evidenceAttachments.length > 0 ? (
                         drawerDetail.evidenceAttachments.map((att, idx) => (
                           <Inline key={idx} justify="between" align="center">
                             <Inline gap="xs" align="center">
@@ -1470,7 +1497,8 @@ export function AttendanceOnDutyPage() {
                               <strong>Reviewer Request:</strong>
                               <p className="bezent-card__desc">{drawerDetail.clarificationNotes}</p>
                               <span className="bezent-card__desc">
-                                Requested at: {formatDateTime(drawerDetail.clarificationRequestedAt)}
+                                Requested at:{' '}
+                                {formatDateTime(drawerDetail.clarificationRequestedAt)}
                               </span>
                             </Stack>
                           </Card>
@@ -1479,7 +1507,9 @@ export function AttendanceOnDutyPage() {
                           <Card padding="sm">
                             <Stack gap="none">
                               <strong>Employee Response:</strong>
-                              <p className="bezent-card__desc">{drawerDetail.clarificationResponse}</p>
+                              <p className="bezent-card__desc">
+                                {drawerDetail.clarificationResponse}
+                              </p>
                               <span className="bezent-card__desc">
                                 Provided at: {formatDateTime(drawerDetail.clarificationProvidedAt)}
                               </span>
@@ -1573,8 +1603,9 @@ export function AttendanceOnDutyPage() {
 
                       {decisionType === 'approved' && (
                         <Alert variant="info" title="Attendance Credit Impact">
-                          Approving this request will credit On-Duty attendance for all scheduled workdays
-                          in the duty period ({formatDate(drawerDetail.startDate)} to {formatDate(drawerDetail.endDate)}).
+                          Approving this request will credit On-Duty attendance for all scheduled
+                          workdays in the duty period ({formatDate(drawerDetail.startDate)} to{' '}
+                          {formatDate(drawerDetail.endDate)}).
                         </Alert>
                       )}
 
@@ -1654,10 +1685,7 @@ export function AttendanceOnDutyPage() {
                 </Stack>
                 <Stack gap="xs">
                   <label className="bezent-card__desc">On-Duty Type</label>
-                  <Select
-                    value={formOdTypeId}
-                    onChange={(e) => setFormOdTypeId(e.target.value)}
-                  >
+                  <Select value={formOdTypeId} onChange={(e) => setFormOdTypeId(e.target.value)}>
                     {configuredTypes.map((t) => (
                       <option key={t.id} value={t.id}>
                         {t.name}
@@ -1710,7 +1738,9 @@ export function AttendanceOnDutyPage() {
                     <label className="bezent-card__desc">Half Day Session</label>
                     <Select
                       value={formHalfDaySession}
-                      onChange={(e) => setFormHalfDaySession(e.target.value as 'first_half' | 'second_half')}
+                      onChange={(e) =>
+                        setFormHalfDaySession(e.target.value as 'first_half' | 'second_half')
+                      }
                     >
                       <option value="first_half">First Half (Morning Session)</option>
                       <option value="second_half">Second Half (Afternoon Session)</option>
@@ -1804,7 +1834,9 @@ export function AttendanceOnDutyPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setFormAttachments(formAttachments.filter((_, idx) => idx !== i))}
+                      onClick={() =>
+                        setFormAttachments(formAttachments.filter((_, idx) => idx !== i))
+                      }
                     >
                       Remove
                     </Button>
@@ -1834,7 +1866,8 @@ export function AttendanceOnDutyPage() {
                     <Stack gap="none">
                       <span className="bezent-card__desc">Period</span>
                       <span>
-                        {formStartDate} {formDurationType === 'multi_day' ? `to ${formEndDate}` : ''}
+                        {formStartDate}{' '}
+                        {formDurationType === 'multi_day' ? `to ${formEndDate}` : ''}
                       </span>
                     </Stack>
                     <Stack gap="none">
@@ -1856,9 +1889,7 @@ export function AttendanceOnDutyPage() {
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={() =>
-                    setNewStep((prev) => Math.max(1, prev - 1) as 1 | 2 | 3 | 4 | 5)
-                  }
+                  onClick={() => setNewStep((prev) => Math.max(1, prev - 1) as 1 | 2 | 3 | 4 | 5)}
                 >
                   Back
                 </Button>
@@ -1872,9 +1903,7 @@ export function AttendanceOnDutyPage() {
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() =>
-                    setNewStep((prev) => Math.min(5, prev + 1) as 1 | 2 | 3 | 4 | 5)
-                  }
+                  onClick={() => setNewStep((prev) => Math.min(5, prev + 1) as 1 | 2 | 3 | 4 | 5)}
                 >
                   Next
                 </Button>
@@ -1952,7 +1981,9 @@ export function AttendanceOnDutyPage() {
                     <Stack gap="xs">
                       <span className="bezent-table-meta-title">Approval Eligibility Preview</span>
                       <span>Eligible for instant approval: {bulkPreview.eligibleCount}</span>
-                      <span>Requires individual review / ineligible: {bulkPreview.notEligibleCount}</span>
+                      <span>
+                        Requires individual review / ineligible: {bulkPreview.notEligibleCount}
+                      </span>
                     </Stack>
                   </Card>
                 )}
@@ -1998,9 +2029,7 @@ export function AttendanceOnDutyPage() {
               <label className="bezent-card__desc">Export Scope</label>
               <Select
                 value={exportScope}
-                onChange={(e) =>
-                  setExportScope(e.target.value as 'selected' | 'filtered')
-                }
+                onChange={(e) => setExportScope(e.target.value as 'selected' | 'filtered')}
               >
                 <option value="filtered">Current Filtered View ({totalCount} items)</option>
                 <option value="selected" disabled={selectedIds.size === 0}>
@@ -2013,9 +2042,7 @@ export function AttendanceOnDutyPage() {
               <label className="bezent-card__desc">File Format</label>
               <Select
                 value={exportFormat}
-                onChange={(e) =>
-                  setExportFormat(e.target.value as 'csv' | 'excel' | 'pdf')
-                }
+                onChange={(e) => setExportFormat(e.target.value as 'csv' | 'excel' | 'pdf')}
               >
                 <option value="csv">CSV (Comma Separated Values)</option>
                 <option value="excel">Excel (.xlsx)</option>
@@ -2028,9 +2055,7 @@ export function AttendanceOnDutyPage() {
               <Select
                 value={exportLevel}
                 onChange={(e) =>
-                  setExportLevel(
-                    e.target.value as 'standard' | 'detailed' | 'audit',
-                  )
+                  setExportLevel(e.target.value as 'standard' | 'detailed' | 'audit')
                 }
               >
                 <option value="standard">Standard Summary</option>

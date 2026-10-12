@@ -41,11 +41,7 @@ export class PrimaryAdminController {
       const tenantId = String(req.params.tenantId);
       const invitationId = String(req.params.invitationId);
       const actor = req.user ? { id: req.user.id, email: req.user.email } : undefined;
-      const data = await this.service.resendInvitation(
-        tenantId,
-        invitationId,
-        actor,
-      );
+      const data = await this.service.resendInvitation(tenantId, invitationId, actor);
       res.json({ data });
     } catch (err) {
       next(err);
@@ -79,11 +75,7 @@ export class PrimaryAdminController {
       }
 
       const actor = req.user ? { id: req.user.id, email: req.user.email } : undefined;
-      await this.service.reassignPrimaryAdmin(
-        tenantId,
-        userId.trim(),
-        actor,
-      );
+      await this.service.reassignPrimaryAdmin(tenantId, userId.trim(), actor);
       res.json({ success: true, message: 'Primary Admin reassigned successfully' });
     } catch (err) {
       next(err);

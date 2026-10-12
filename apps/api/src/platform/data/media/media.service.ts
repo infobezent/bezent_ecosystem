@@ -441,7 +441,9 @@ export class MediaService {
       if (activeOwn[0]) {
         resolvedLogoUrl = await this.storageProvider.getUrl(activeOwn[0].storageKey);
       } else {
-        throw new ValidationError('Company does not have an uploaded logo. Please upload one first.');
+        throw new ValidationError(
+          'Company does not have an uploaded logo. Please upload one first.',
+        );
       }
     } else {
       // 'initials'

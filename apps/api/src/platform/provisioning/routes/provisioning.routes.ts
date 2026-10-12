@@ -13,5 +13,11 @@ provisioningRouter.post('/provisioning/provision', customerProvisioningControlle
 provisioningRouter.get('/provisioning/jobs', customerProvisioningController.listJobs);
 provisioningRouter.get('/provisioning/jobs/:id', customerProvisioningController.getJobById);
 provisioningRouter.post('/provisioning/jobs/:id/retry', customerProvisioningController.retryJob);
-provisioningRouter.get('/provisioning/outbox/status', customerProvisioningController.getOutboxStatus);
-provisioningRouter.get('/provisioning/workers/status', customerProvisioningController.getWorkerStatus);
+provisioningRouter.get(
+  '/provisioning/outbox/status',
+  customerProvisioningController.getOutboxStatus,
+);
+provisioningRouter.get(
+  '/provisioning/workers/status',
+  customerProvisioningController.getWorkerStatus,
+);

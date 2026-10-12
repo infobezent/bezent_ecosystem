@@ -82,23 +82,24 @@ Step 5: Success State
 
 ## 5. Files Created and Modified
 
-| File | Change Type | Purpose |
-| :--- | :--- | :--- |
-| `apps/web/src/applications/super-admin/pages/CreateTenantPage.tsx` | **Created** | Complete 4-step wizard implementation with accessible stepper, responsive layout, preflight integration, idempotency, and success screen |
-| `apps/web/src/applications/super-admin/__tests__/createTenantUI.test.tsx` | **Created** | Comprehensive 21-test suite verifying navigation, step validations, preflight, zero-apps, idempotency, and success states |
-| `apps/web/src/applications/super-admin/api/superAdminApi.ts` | **Modified** | Added DTO types (`Step1CompanyPayload`, `Step2PrimaryAdminPayload`, `Step3SubscriptionPayload`, `TenantOrchestrationPayload`, `TenantOrchestrationPreflightResult`, `TenantOrchestrationResult`), `preflightTenantOrchestration`, and `orchestrateTenantCreation` |
-| `apps/web/src/applications/super-admin/routes/superAdminRoutes.tsx` | **Modified** | Registered canonical `tenants/create` route with `RequireSuperAdmin` guard before `tenants/:tenantId` |
-| `apps/web/src/administration/super-admin/navigation/superAdminNavigation.ts` | **Modified** | Updated `create-tenant` path to `'tenants/create'` with alias support for `'provisioning'` |
-| `apps/web/src/applications/super-admin/pages/TenantsPage.tsx` | **Modified** | Wired header button and empty state CTA to navigate to `/super-admin/tenants/create` |
-| `apps/web/src/shared/types/navigation.ts` | **Modified** | Added optional `aliases?: readonly string[]` to `NavChild` interface |
-| `apps/web/src/shared/utils/navigation.ts` | **Modified** | Extended `resolveActiveNavigation` to match child aliases |
-| `docs/architecture/TENANT-MANAGEMENT-PHASE-03B.md` | **Created** | Phase 03B architectural documentation and verification report |
+| File                                                                         | Change Type  | Purpose                                                                                                                                                                                                                                                           |
+| :--------------------------------------------------------------------------- | :----------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/web/src/applications/super-admin/pages/CreateTenantPage.tsx`           | **Created**  | Complete 4-step wizard implementation with accessible stepper, responsive layout, preflight integration, idempotency, and success screen                                                                                                                          |
+| `apps/web/src/applications/super-admin/__tests__/createTenantUI.test.tsx`    | **Created**  | Comprehensive 21-test suite verifying navigation, step validations, preflight, zero-apps, idempotency, and success states                                                                                                                                         |
+| `apps/web/src/applications/super-admin/api/superAdminApi.ts`                 | **Modified** | Added DTO types (`Step1CompanyPayload`, `Step2PrimaryAdminPayload`, `Step3SubscriptionPayload`, `TenantOrchestrationPayload`, `TenantOrchestrationPreflightResult`, `TenantOrchestrationResult`), `preflightTenantOrchestration`, and `orchestrateTenantCreation` |
+| `apps/web/src/applications/super-admin/routes/superAdminRoutes.tsx`          | **Modified** | Registered canonical `tenants/create` route with `RequireSuperAdmin` guard before `tenants/:tenantId`                                                                                                                                                             |
+| `apps/web/src/administration/super-admin/navigation/superAdminNavigation.ts` | **Modified** | Updated `create-tenant` path to `'tenants/create'` with alias support for `'provisioning'`                                                                                                                                                                        |
+| `apps/web/src/applications/super-admin/pages/TenantsPage.tsx`                | **Modified** | Wired header button and empty state CTA to navigate to `/super-admin/tenants/create`                                                                                                                                                                              |
+| `apps/web/src/shared/types/navigation.ts`                                    | **Modified** | Added optional `aliases?: readonly string[]` to `NavChild` interface                                                                                                                                                                                              |
+| `apps/web/src/shared/utils/navigation.ts`                                    | **Modified** | Extended `resolveActiveNavigation` to match child aliases                                                                                                                                                                                                         |
+| `docs/architecture/TENANT-MANAGEMENT-PHASE-03B.md`                           | **Created**  | Phase 03B architectural documentation and verification report                                                                                                                                                                                                     |
 
 ---
 
 ## 6. Actual API Contracts
 
 ### A. Preflight Validation
+
 - **Method & URL:** `POST /api/v1/platform/tenants/orchestrate/preflight`
 - **Request Payload:**
   ```json
@@ -136,9 +137,7 @@ Step 5: Success State
   {
     "valid": true,
     "tenantSetupPolicy": "ready_to_create",
-    "warnings": [
-      "A company with similar name \"Apex International\" exists in the platform."
-    ],
+    "warnings": ["A company with similar name \"Apex International\" exists in the platform."],
     "summary": {
       "companyName": "Apex Innovations LLC",
       "tenantName": "Apex Innovations LLC",
@@ -159,6 +158,7 @@ Step 5: Success State
   ```
 
 ### B. Final Tenant Creation Orchestration
+
 - **Method & URL:** `POST /api/v1/platform/tenants/orchestrate`
 - **Headers:** `Idempotency-Key: sa-tnt-<timestamp>-<random>`
 - **Request Payload:** Identical to validated preflight payload
@@ -195,29 +195,29 @@ Step 5: Success State
 
 ## 7. Field Mapping
 
-| UI Field Label | Form State Property | Backend DTO Property | Required | Notes |
-| :--- | :--- | :--- | :--- | :--- |
-| Legal Company Name | `companyData.legalName` | `company.legalName` | Yes | Validated for min 2 chars |
-| Display Name | `companyData.displayName` | `company.displayName` | Yes | Commercial trade name |
-| Business Email | `companyData.businessEmail` | `company.businessEmail` | Yes | Checked for conflict in preflight |
-| Country | `companyData.country` | `company.country` | Yes | Operational jurisdiction |
-| IANA Timezone | `companyData.timeZone` | `company.timeZone` | Yes | Validated IANA canonical string |
-| Contact Phone | `companyData.contactPhone` | `company.contactPhone` | No | Stored with primary company |
-| Website URL | `companyData.website` | `company.website` | No | URL format validated |
-| Company Size | `companyData.companySize` | `company.companySize` | No | Bracket string (e.g., '11-50') |
-| Registration Number | `companyData.registrationNumber` | `company.registrationNumber` | No | CIN / Corporate ID |
-| Tax Identifier | `companyData.taxIdentifier` | `company.taxIdentifier` | No | GSTIN / EIN / VAT |
-| Administrator Full Name | `adminData.fullName` | `admin.fullName` | Yes | Invitee name |
-| Administrator Work Email | `adminData.workEmail` | `admin.workEmail` | Yes | Invitee email |
-| Administrator Phone | `adminData.phone` | `admin.phone` | No | Invitee contact phone |
-| Job Title | `adminData.jobTitle` | `admin.jobTitle` | No | Primary administrator title |
-| Applications | `selectedApps[code]` | `subscriptions[].applicationCode` | No | Supports zero applications |
-| Plan Selection | `subscriptionsConfig[code].planId` | `subscriptions[].planId` | Cond. | Filtered from real catalog |
-| Access Mode | `subscriptionsConfig[code].accessMode` | `subscriptions[].accessMode` | Cond. | 'trial' or 'paid' |
-| Licensed Seats | `subscriptionsConfig[code].licensedSeats` | `subscriptions[].licensedSeats` | Cond. | Min 1 integer |
-| Billing Cycle | `subscriptionsConfig[code].billingCycle` | `subscriptions[].billingCycle` | Cond. | 'monthly', 'quarterly', 'annual' |
-| Activation Mode | `subscriptionsConfig[code].activationMode` | `subscriptions[].activationMode` | Cond. | 'immediate' or 'scheduled' |
-| Scheduled Date | `subscriptionsConfig[code].scheduledDate` | `subscriptions[].scheduledDate` | Cond. | Validated future date |
+| UI Field Label           | Form State Property                        | Backend DTO Property              | Required | Notes                             |
+| :----------------------- | :----------------------------------------- | :-------------------------------- | :------- | :-------------------------------- |
+| Legal Company Name       | `companyData.legalName`                    | `company.legalName`               | Yes      | Validated for min 2 chars         |
+| Display Name             | `companyData.displayName`                  | `company.displayName`             | Yes      | Commercial trade name             |
+| Business Email           | `companyData.businessEmail`                | `company.businessEmail`           | Yes      | Checked for conflict in preflight |
+| Country                  | `companyData.country`                      | `company.country`                 | Yes      | Operational jurisdiction          |
+| IANA Timezone            | `companyData.timeZone`                     | `company.timeZone`                | Yes      | Validated IANA canonical string   |
+| Contact Phone            | `companyData.contactPhone`                 | `company.contactPhone`            | No       | Stored with primary company       |
+| Website URL              | `companyData.website`                      | `company.website`                 | No       | URL format validated              |
+| Company Size             | `companyData.companySize`                  | `company.companySize`             | No       | Bracket string (e.g., '11-50')    |
+| Registration Number      | `companyData.registrationNumber`           | `company.registrationNumber`      | No       | CIN / Corporate ID                |
+| Tax Identifier           | `companyData.taxIdentifier`                | `company.taxIdentifier`           | No       | GSTIN / EIN / VAT                 |
+| Administrator Full Name  | `adminData.fullName`                       | `admin.fullName`                  | Yes      | Invitee name                      |
+| Administrator Work Email | `adminData.workEmail`                      | `admin.workEmail`                 | Yes      | Invitee email                     |
+| Administrator Phone      | `adminData.phone`                          | `admin.phone`                     | No       | Invitee contact phone             |
+| Job Title                | `adminData.jobTitle`                       | `admin.jobTitle`                  | No       | Primary administrator title       |
+| Applications             | `selectedApps[code]`                       | `subscriptions[].applicationCode` | No       | Supports zero applications        |
+| Plan Selection           | `subscriptionsConfig[code].planId`         | `subscriptions[].planId`          | Cond.    | Filtered from real catalog        |
+| Access Mode              | `subscriptionsConfig[code].accessMode`     | `subscriptions[].accessMode`      | Cond.    | 'trial' or 'paid'                 |
+| Licensed Seats           | `subscriptionsConfig[code].licensedSeats`  | `subscriptions[].licensedSeats`   | Cond.    | Min 1 integer                     |
+| Billing Cycle            | `subscriptionsConfig[code].billingCycle`   | `subscriptions[].billingCycle`    | Cond.    | 'monthly', 'quarterly', 'annual'  |
+| Activation Mode          | `subscriptionsConfig[code].activationMode` | `subscriptions[].activationMode`  | Cond.    | 'immediate' or 'scheduled'        |
+| Scheduled Date           | `subscriptionsConfig[code].scheduledDate`  | `subscriptions[].scheduledDate`   | Cond.    | Validated future date             |
 
 ---
 
@@ -266,6 +266,7 @@ Step 5: Success State
 ## 12. Success-State Handling
 
 After successful creation, Step 5 renders a dedicated completion screen:
+
 - **Tenant ID & Code:** Displays backend-confirmed `tenantId` and `tenantCode`.
 - **Primary Company ID:** Displays confirmed `primaryCompanyId`.
 - **Primary Administrator:** Displays invitee email address.
@@ -287,6 +288,7 @@ After successful creation, Step 5 renders a dedicated completion screen:
 ## 14. Test Results
 
 ### 1. Wizard UI Test Suite (`apps/web/src/applications/super-admin/__tests__/createTenantUI.test.tsx`)
+
 - **Total Tests:** 21
 - **Passed:** 21 (100%)
 - **Failed:** 0
@@ -300,6 +302,7 @@ After successful creation, Step 5 renders a dedicated completion screen:
   - Step 5 Success screen with accurate "Queued" and "Pending Async" labeling
 
 ### 2. Full Super Admin Frontend Test Suite
+
 - **Test Files:** 9 passed (100%)
   - `accessAndApplications.test.tsx` (PASS)
   - `companiesUI.test.tsx` (PASS)
@@ -313,9 +316,11 @@ After successful creation, Step 5 renders a dedicated completion screen:
 - **Total Tests:** 136 passed, 0 failed
 
 ### 3. Backend Phase 02.6 Orchestration Test Suite (`apps/api/src/platform/__tests__/tenantManagementPhase026.test.ts`)
+
 - **Total Tests:** 20 passed, 0 failed
 
 ### 4. Build & Typecheck Quality Gates
+
 - `npm run typecheck --workspace=apps/web`: **PASSED (exit code 0)**
 - `npm run typecheck --workspace=apps/api`: **PASSED (exit code 0)**
 - `npm run build --workspace=apps/web`: **PASSED (exit code 0, 486 modules transformed, zero bundle errors)**
@@ -354,6 +359,7 @@ After successful creation, Step 5 renders a dedicated completion screen:
 ## 17. Phase 03C Readiness
 
 The repository is fully ready for **Phase 03C (Tenant Details & Subscriptions Management)**:
+
 1. Canonical routes for `/super-admin/tenants/:tenantId` are established.
 2. Navigation, preflight, and orchestration contracts are stabilized.
 3. Subscriptions catalog DTOs and API clients are established in `superAdminApi.ts`.

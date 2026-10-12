@@ -125,8 +125,12 @@ describe('Company Persistence & Common Data Integration — Phase 2', () => {
       const db = getDb();
 
       // Clean up past runs
-      await db.delete(auditLogs).where(sql`${auditLogs.tenantId} IN (${tenantMainId}, ${tenantOtherId})`);
-      await db.delete(companies).where(sql`${companies.tenantId} IN (${tenantMainId}, ${tenantOtherId})`);
+      await db
+        .delete(auditLogs)
+        .where(sql`${auditLogs.tenantId} IN (${tenantMainId}, ${tenantOtherId})`);
+      await db
+        .delete(companies)
+        .where(sql`${companies.tenantId} IN (${tenantMainId}, ${tenantOtherId})`);
       await db.delete(tenants).where(sql`${tenants.id} IN (${tenantMainId}, ${tenantOtherId})`);
 
       // Insert test tenants: tenantMainId has capacity = 2
@@ -139,7 +143,9 @@ describe('Company Persistence & Common Data Integration — Phase 2', () => {
       const tenantRepo = new TenantRepository();
       const moduleSvc = {} as unknown as ModuleService;
       const companyAdminSvc = {} as unknown as CompanyAdminService;
-      const auditSvc = { logEvent: vi.fn().mockResolvedValue(undefined) } as unknown as AuditService;
+      const auditSvc = {
+        logEvent: vi.fn().mockResolvedValue(undefined),
+      } as unknown as AuditService;
 
       companyService = new CompanyService(
         companyRepo,
@@ -153,8 +159,12 @@ describe('Company Persistence & Common Data Integration — Phase 2', () => {
     afterAll(async () => {
       if (!isDatabaseConfigured) return;
       const db = getDb();
-      await db.delete(auditLogs).where(sql`${auditLogs.tenantId} IN (${tenantMainId}, ${tenantOtherId})`);
-      await db.delete(companies).where(sql`${companies.tenantId} IN (${tenantMainId}, ${tenantOtherId})`);
+      await db
+        .delete(auditLogs)
+        .where(sql`${auditLogs.tenantId} IN (${tenantMainId}, ${tenantOtherId})`);
+      await db
+        .delete(companies)
+        .where(sql`${companies.tenantId} IN (${tenantMainId}, ${tenantOtherId})`);
       await db.delete(tenants).where(sql`${tenants.id} IN (${tenantMainId}, ${tenantOtherId})`);
     });
 
@@ -185,11 +195,9 @@ describe('Company Persistence & Common Data Integration — Phase 2', () => {
         financialYearStart: '04-01',
       };
 
-      const created = await companyService.createCompanyForTenantAdmin(
-        tenantMainId,
-        input,
-        { id: 'usr_ta_tester' },
-      );
+      const created = await companyService.createCompanyForTenantAdmin(tenantMainId, input, {
+        id: 'usr_ta_tester',
+      });
 
       expect(created.id).toBeDefined();
 
@@ -231,7 +239,9 @@ describe('Company Persistence & Common Data Integration — Phase 2', () => {
       };
 
       await expect(
-        companyService.createCompanyForTenantAdmin(tenantMainId, duplicateInput, { id: 'usr_ta_tester' }),
+        companyService.createCompanyForTenantAdmin(tenantMainId, duplicateInput, {
+          id: 'usr_ta_tester',
+        }),
       ).rejects.toThrow(ConflictError);
     });
 

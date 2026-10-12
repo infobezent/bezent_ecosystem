@@ -18,7 +18,8 @@ export interface LeaveBalanceRuleFacts {
 export const LEAVE_BALANCE_SUFFICIENCY_RULE: Rule = {
   id: 'hrms.leave.balance_sufficiency',
   name: 'Leave Balance Sufficiency Rule',
-  description: 'Verifies that an employee has sufficient available leave balance for non-unpaid leave requests',
+  description:
+    'Verifies that an employee has sufficient available leave balance for non-unpaid leave requests',
   conditions: {
     combinator: 'ANY',
     conditions: [

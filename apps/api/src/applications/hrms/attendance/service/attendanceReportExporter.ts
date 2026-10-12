@@ -201,7 +201,8 @@ export function generateExcelExport(
     for (const col of columns) {
       const val = row[col.id];
       const isNum = typeof val === 'number';
-      const cellStyle = col.align === 'right' ? 'DataRight' : col.align === 'center' ? 'DataCenter' : 'DataLeft';
+      const cellStyle =
+        col.align === 'right' ? 'DataRight' : col.align === 'center' ? 'DataCenter' : 'DataLeft';
 
       if (isNum) {
         xml += `    <Cell ss:StyleID="${cellStyle}"><Data ss:Type="Number">${val}</Data></Cell>\n`;
@@ -444,7 +445,10 @@ export function generatePdfExport(
 ): Buffer {
   const rowsPerPage = 22;
   const hasAnalyticsPage = Boolean(metadata.analytics);
-  const tablePages = Math.max(rows.length === 0 && !hasAnalyticsPage ? 1 : 0, Math.ceil(rows.length / rowsPerPage));
+  const tablePages = Math.max(
+    rows.length === 0 && !hasAnalyticsPage ? 1 : 0,
+    Math.ceil(rows.length / rowsPerPage),
+  );
   const totalPages = (hasAnalyticsPage ? 1 : 0) + tablePages;
 
   // US Letter Landscape: 792 x 612 pt

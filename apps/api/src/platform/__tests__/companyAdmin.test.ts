@@ -262,9 +262,7 @@ describe('Company Admin Platform Subsystem (Phase 2)', () => {
     await db
       .delete(memberships)
       .where(and(eq(memberships.userId, userEmpId), eq(memberships.companyId, companyA2Id)));
-    await db
-      .delete(invitations)
-      .where(eq(invitations.companyId, companyA2Id));
+    await db.delete(invitations).where(eq(invitations.companyId, companyA2Id));
   });
 
   describe('Authorization & Multi-Company Boundary Enforcements', () => {

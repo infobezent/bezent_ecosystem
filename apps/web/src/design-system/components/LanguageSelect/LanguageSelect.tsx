@@ -1,16 +1,5 @@
-import {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-  useMemo,
-  type KeyboardEvent,
-} from 'react';
-import {
-  getAllLanguages,
-  searchLanguages,
-  type LanguageInfo,
-} from '../../../shared/globalization';
+import { useState, useRef, useEffect, useCallback, useMemo, type KeyboardEvent } from 'react';
+import { getAllLanguages, searchLanguages, type LanguageInfo } from '../../../shared/globalization';
 import { BezentIcon } from '../../icons';
 import './LanguageSelect.css';
 
@@ -105,14 +94,10 @@ export function LanguageSelect({
       setIsOpen(false);
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setHighlightedIndex((prev) =>
-        prev < filteredLanguages.length - 1 ? prev + 1 : 0,
-      );
+      setHighlightedIndex((prev) => (prev < filteredLanguages.length - 1 ? prev + 1 : 0));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setHighlightedIndex((prev) =>
-        prev > 0 ? prev - 1 : filteredLanguages.length - 1,
-      );
+      setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : filteredLanguages.length - 1));
     } else if (e.key === 'Enter') {
       e.preventDefault();
       const current = filteredLanguages[highlightedIndex];
@@ -157,7 +142,9 @@ export function LanguageSelect({
       >
         <span className="bezent-language-select-trigger__value">
           {selectedLanguage ? (
-            <span>{selectedLanguage.name} ({selectedLanguage.nativeName})</span>
+            <span>
+              {selectedLanguage.name} ({selectedLanguage.nativeName})
+            </span>
           ) : (
             <span className="bezent-language-select-trigger__placeholder">{placeholder}</span>
           )}

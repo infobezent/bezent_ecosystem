@@ -36,7 +36,8 @@ export function TenantApplicationAccessPage() {
               id: 'app_hrms',
               code: 'hrms',
               name: 'Human Resource Management (HRMS)',
-              description: 'Workforce, Attendance, Leave, Payroll, Performance, and Employee Self-Service.',
+              description:
+                'Workforce, Attendance, Leave, Payroll, Performance, and Employee Self-Service.',
               enabledCompaniesCount: 1,
               totalCompaniesCount: 1,
               status: 'active',

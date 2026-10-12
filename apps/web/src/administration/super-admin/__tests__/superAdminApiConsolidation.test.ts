@@ -157,7 +157,12 @@ describe('Stage 1 — Canonical Super Admin API Client Consolidation', () => {
       primaryCompanyId: 'comp_123',
       businessSetupState: 'pending_setup',
       subscriptions: [],
-      invitation: { id: 'inv_1', email: 'admin@acme.com', status: 'pending', expiresAt: '2026-12-31' },
+      invitation: {
+        id: 'inv_1',
+        email: 'admin@acme.com',
+        status: 'pending',
+        expiresAt: '2026-12-31',
+      },
       provisioningJobId: 'job_123',
       provisioningStatus: 'pending',
       idempotentReplay: false,

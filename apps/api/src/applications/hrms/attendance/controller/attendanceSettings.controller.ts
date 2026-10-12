@@ -7,9 +7,7 @@ import type { SettingsAuditFilter } from '../types/attendance.types.js';
 import { BadRequestError } from '../../../../app/errors/AppError.js';
 
 export class AttendanceSettingsController {
-  constructor(
-    private readonly service: AttendanceSettingsService = attendanceSettingsService,
-  ) {}
+  constructor(private readonly service: AttendanceSettingsService = attendanceSettingsService) {}
 
   /* ── 1. General Settings ────────────────────────────────────────── */
 
@@ -44,8 +42,14 @@ export class AttendanceSettingsController {
   listPolicies = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { tenantId, companyId } = req.companyContext!;
-      const scope = typeof req.query.scope === 'string' ? (req.query.scope as 'company' | 'department' | 'employee') : undefined;
-      const status = typeof req.query.status === 'string' ? (req.query.status as 'draft' | 'published' | 'archived') : undefined;
+      const scope =
+        typeof req.query.scope === 'string'
+          ? (req.query.scope as 'company' | 'department' | 'employee')
+          : undefined;
+      const status =
+        typeof req.query.status === 'string'
+          ? (req.query.status as 'draft' | 'published' | 'archived')
+          : undefined;
       const data = await this.service.listPolicies(tenantId, companyId, { scope, status });
       res.json({ data });
     } catch (err) {
@@ -68,9 +72,16 @@ export class AttendanceSettingsController {
   resolveEffectivePolicy = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { tenantId, companyId } = req.companyContext!;
-      const employeeId = typeof req.query.employeeId === 'string' ? req.query.employeeId : undefined;
-      const departmentId = typeof req.query.departmentId === 'string' ? req.query.departmentId : undefined;
-      const data = await this.service.resolveEffectivePolicy(tenantId, companyId, employeeId, departmentId);
+      const employeeId =
+        typeof req.query.employeeId === 'string' ? req.query.employeeId : undefined;
+      const departmentId =
+        typeof req.query.departmentId === 'string' ? req.query.departmentId : undefined;
+      const data = await this.service.resolveEffectivePolicy(
+        tenantId,
+        companyId,
+        employeeId,
+        departmentId,
+      );
       res.json({ data });
     } catch (err) {
       next(err);
@@ -439,7 +450,10 @@ export class AttendanceSettingsController {
   getAuditLogs = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { tenantId, companyId } = req.companyContext!;
-      const category = typeof req.query.category === 'string' ? (req.query.category as SettingsAuditFilter['category']) : undefined;
+      const category =
+        typeof req.query.category === 'string'
+          ? (req.query.category as SettingsAuditFilter['category'])
+          : undefined;
       const action = typeof req.query.action === 'string' ? req.query.action : undefined;
       const page = req.query.page ? Number(req.query.page) : 1;
       const limit = req.query.limit ? Number(req.query.limit) : 50;

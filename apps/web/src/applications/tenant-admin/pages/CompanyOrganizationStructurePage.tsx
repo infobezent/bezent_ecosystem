@@ -64,7 +64,9 @@ export function CompanyOrganizationStructurePage({
   );
 
   const [companyDetail, setCompanyDetail] = useState<TenantAdminCompanySummary | null>(null);
-  const [hierarchy, setHierarchy] = useState<OrganizationHierarchy | null>(initialHierarchy ?? null);
+  const [hierarchy, setHierarchy] = useState<OrganizationHierarchy | null>(
+    initialHierarchy ?? null,
+  );
   const [departments, setDepartments] = useState<DepartmentRecord[]>(initialDepartments ?? []);
   const [eligibleHeads, setEligibleHeads] = useState<EligibleHead[]>(initialEligibleHeads ?? []);
   const [isLoadingData, setIsLoadingData] = useState<boolean>(!initialHierarchy);
@@ -74,7 +76,9 @@ export function CompanyOrganizationStructurePage({
 
   // Search & Type Filter state
   const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState<'all' | 'business_unit' | 'division' | 'department'>('all');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'business_unit' | 'division' | 'department'>(
+    'all',
+  );
 
   // Expansion state
   const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>(() => {
@@ -105,7 +109,9 @@ export function CompanyOrganizationStructurePage({
   // Modals state
   const [isAddUnitModalOpen, setIsAddUnitModalOpen] = useState(false);
   const [addUnitDefaultType, setAddUnitDefaultType] = useState<UnitType>('business_unit');
-  const [addUnitDefaultParentId, setAddUnitDefaultParentId] = useState<string | undefined>(undefined);
+  const [addUnitDefaultParentId, setAddUnitDefaultParentId] = useState<string | undefined>(
+    undefined,
+  );
   const [isEditUnitModalOpen, setIsEditUnitModalOpen] = useState(false);
   const [unitToEdit, setUnitToEdit] = useState<SelectedUnitToEdit | null>(null);
 
@@ -199,7 +205,11 @@ export function CompanyOrganizationStructurePage({
 
   // Cross-tenant boundary check
   const isForeignCompany = !isContextLoading && companies.length > 0 && !companyFromContext;
-  if (accessDenied || isForeignCompany || (!isContextLoading && !isLoadingData && !effectiveCompany)) {
+  if (
+    accessDenied ||
+    isForeignCompany ||
+    (!isContextLoading && !isLoadingData && !effectiveCompany)
+  ) {
     return (
       <Page>
         <EmptyState
@@ -291,10 +301,7 @@ export function CompanyOrganizationStructurePage({
     <Page>
       <Stack gap="lg">
         {/* 1. Canonical Workspace Header (activeSection="organization") */}
-        <CompanyWorkspaceHeader
-          company={effectiveCompany}
-          activeSection="organization"
-        />
+        <CompanyWorkspaceHeader company={effectiveCompany} activeSection="organization" />
 
         {/* 2. Organization Section Sub-Header & Sub-Navigation */}
         <PageHeader
@@ -349,7 +356,9 @@ export function CompanyOrganizationStructurePage({
                 <Select
                   value={typeFilter}
                   onChange={(e) =>
-                    setTypeFilter(e.target.value as 'all' | 'business_unit' | 'division' | 'department')
+                    setTypeFilter(
+                      e.target.value as 'all' | 'business_unit' | 'division' | 'department',
+                    )
                   }
                   options={[
                     { value: 'all', label: 'All Types' },
@@ -410,9 +419,14 @@ export function CompanyOrganizationStructurePage({
               </div>
 
               <div className="bezent-structure-panel__body">
-                <div className="bezent-tree-container" role="tree" aria-label="Organization Structure Hierarchy">
+                <div
+                  className="bezent-tree-container"
+                  role="tree"
+                  aria-label="Organization Structure Hierarchy"
+                >
                   {/* Root Company Node */}
-                  {(typeFilter === 'all' || isMatch(effectiveCompany.name, effectiveCompany.code)) && (
+                  {(typeFilter === 'all' ||
+                    isMatch(effectiveCompany.name, effectiveCompany.code)) && (
                     <div
                       className={`bezent-tree-node bezent-tree-node__indent-0 ${
                         selectedNode?.type === 'company' ? 'is-selected' : ''
@@ -472,12 +486,24 @@ export function CompanyOrganizationStructurePage({
                       // Check if BU or any descendant matches search
                       const buDirectMatch = isMatch(bu.name, bu.code);
                       const descendantDivMatch = buDivisions.some((d) => isMatch(d.name, d.code));
-                      const descendantDeptMatch = buDepartments.some((d) => isMatch(d.name, d.code));
+                      const descendantDeptMatch = buDepartments.some((d) =>
+                        isMatch(d.name, d.code),
+                      );
                       const buHasMatch = buDirectMatch || descendantDivMatch || descendantDeptMatch;
 
                       if (normalizedQuery && !buHasMatch) return null;
-                      if (typeFilter === 'department' && !descendantDeptMatch && buDepartments.length === 0) return null;
-                      if (typeFilter === 'division' && !descendantDivMatch && buDivisions.length === 0) return null;
+                      if (
+                        typeFilter === 'department' &&
+                        !descendantDeptMatch &&
+                        buDepartments.length === 0
+                      )
+                        return null;
+                      if (
+                        typeFilter === 'division' &&
+                        !descendantDivMatch &&
+                        buDivisions.length === 0
+                      )
+                        return null;
 
                       const isBuExpanded = !!expandedNodes[buKey] || Boolean(normalizedQuery);
                       const isBuSelected =
@@ -486,7 +512,9 @@ export function CompanyOrganizationStructurePage({
                       return (
                         <div key={bu.id} className="bezent-tree-item">
                           {/* Business Unit Row */}
-                          {(typeFilter === 'all' || typeFilter === 'business_unit' || buHasMatch) && (
+                          {(typeFilter === 'all' ||
+                            typeFilter === 'business_unit' ||
+                            buHasMatch) && (
                             <div
                               className={`bezent-tree-node bezent-tree-node__indent-1 ${
                                 isBuSelected ? 'is-selected' : ''
@@ -549,12 +577,19 @@ export function CompanyOrganizationStructurePage({
                               const divDepts = departmentsByDivision.get(div.id) || [];
 
                               const divDirectMatch = isMatch(div.name, div.code);
-                              const deptMatch = divDepts.some((dept) => isMatch(dept.name, dept.code));
+                              const deptMatch = divDepts.some((dept) =>
+                                isMatch(dept.name, dept.code),
+                              );
                               const divHasMatch = divDirectMatch || deptMatch;
 
                               if (normalizedQuery && !divHasMatch) return null;
                               if (typeFilter === 'business_unit') return null;
-                              if (typeFilter === 'department' && !deptMatch && divDepts.length === 0) return null;
+                              if (
+                                typeFilter === 'department' &&
+                                !deptMatch &&
+                                divDepts.length === 0
+                              )
+                                return null;
 
                               const isDivExpanded =
                                 !!expandedNodes[divKey] || Boolean(normalizedQuery);
@@ -564,7 +599,9 @@ export function CompanyOrganizationStructurePage({
                               return (
                                 <div key={div.id} className="bezent-tree-item">
                                   {/* Division Row */}
-                                  {(typeFilter === 'all' || typeFilter === 'division' || divHasMatch) && (
+                                  {(typeFilter === 'all' ||
+                                    typeFilter === 'division' ||
+                                    divHasMatch) && (
                                     <div
                                       className={`bezent-tree-node bezent-tree-node__indent-2 ${
                                         isDivSelected ? 'is-selected' : ''
@@ -612,7 +649,9 @@ export function CompanyOrganizationStructurePage({
                                       </div>
                                       <div className="bezent-tree-node__right">
                                         {div.code && <Badge variant="neutral">{div.code}</Badge>}
-                                        <span className="bezent-tree-node__type-badge">Division</span>
+                                        <span className="bezent-tree-node__type-badge">
+                                          Division
+                                        </span>
                                         {div.status === 'inactive' && (
                                           <Badge variant="neutral">Inactive</Badge>
                                         )}
@@ -666,11 +705,17 @@ export function CompanyOrganizationStructurePage({
                                             <span className="bezent-tree-node__icon">
                                               <BezentIcon name="employees" size={16} />
                                             </span>
-                                            <span className="bezent-tree-node__name">{dept.name}</span>
+                                            <span className="bezent-tree-node__name">
+                                              {dept.name}
+                                            </span>
                                           </div>
                                           <div className="bezent-tree-node__right">
-                                            {dept.code && <Badge variant="neutral">{dept.code}</Badge>}
-                                            <span className="bezent-tree-node__type-badge">Department</span>
+                                            {dept.code && (
+                                              <Badge variant="neutral">{dept.code}</Badge>
+                                            )}
+                                            <span className="bezent-tree-node__type-badge">
+                                              Department
+                                            </span>
                                             {dept.status === 'inactive' && (
                                               <Badge variant="neutral">Inactive</Badge>
                                             )}
@@ -704,7 +749,9 @@ export function CompanyOrganizationStructurePage({
                     <div className="bezent-unit-details__header">
                       <div className="bezent-unit-details__title-group">
                         <h3 className="bezent-unit-details__title">{effectiveCompany.name}</h3>
-                        <span className="bezent-unit-details__type">Company (Root Organization Entity)</span>
+                        <span className="bezent-unit-details__type">
+                          Company (Root Organization Entity)
+                        </span>
                       </div>
                       <Badge variant="success">Active</Badge>
                     </div>
@@ -749,7 +796,7 @@ export function CompanyOrganizationStructurePage({
                 )}
 
                 {/* 2. Business Unit Selected */}
-                {selectedNode?.type === 'business_unit' && (
+                {selectedNode?.type === 'business_unit' &&
                   (() => {
                     const bu = selectedNode.data as BusinessUnitRecord;
                     const buDivs = bu.divisions || [];
@@ -785,7 +832,9 @@ export function CompanyOrganizationStructurePage({
                         <div className="bezent-unit-details__fields">
                           <div className="bezent-unit-details__field">
                             <span className="bezent-unit-details__field-label">Code</span>
-                            <span className="bezent-unit-details__field-value">{bu.code || '—'}</span>
+                            <span className="bezent-unit-details__field-value">
+                              {bu.code || '—'}
+                            </span>
                           </div>
                           <div className="bezent-unit-details__field">
                             <span className="bezent-unit-details__field-label">Parent</span>
@@ -828,11 +877,10 @@ export function CompanyOrganizationStructurePage({
                         </div>
                       </div>
                     );
-                  })()
-                )}
+                  })()}
 
                 {/* 3. Division Selected */}
-                {selectedNode?.type === 'division' && (
+                {selectedNode?.type === 'division' &&
                   (() => {
                     const div = selectedNode.data as DivisionRecord;
                     const divDepts = departmentsByDivision.get(div.id) || [];
@@ -852,7 +900,9 @@ export function CompanyOrganizationStructurePage({
 
                         <div className="bezent-unit-details__stats">
                           <div className="bezent-unit-details__stat">
-                            <span className="bezent-unit-details__stat-value">{divDepts.length}</span>
+                            <span className="bezent-unit-details__stat-value">
+                              {divDepts.length}
+                            </span>
                             <span className="bezent-unit-details__stat-label">Departments</span>
                           </div>
                         </div>
@@ -860,16 +910,22 @@ export function CompanyOrganizationStructurePage({
                         <div className="bezent-unit-details__fields">
                           <div className="bezent-unit-details__field">
                             <span className="bezent-unit-details__field-label">Code</span>
-                            <span className="bezent-unit-details__field-value">{div.code || '—'}</span>
+                            <span className="bezent-unit-details__field-value">
+                              {div.code || '—'}
+                            </span>
                           </div>
                           <div className="bezent-unit-details__field">
-                            <span className="bezent-unit-details__field-label">Parent Business Unit</span>
+                            <span className="bezent-unit-details__field-label">
+                              Parent Business Unit
+                            </span>
                             <span className="bezent-unit-details__field-value">
                               {div.businessUnitName || parentBu?.name || '—'}
                             </span>
                           </div>
                           <div className="bezent-unit-details__field">
-                            <span className="bezent-unit-details__field-label">Head of Division</span>
+                            <span className="bezent-unit-details__field-label">
+                              Head of Division
+                            </span>
                             <span className="bezent-unit-details__field-value">
                               {div.headEmployeeName || 'Not assigned'}
                             </span>
@@ -903,15 +959,16 @@ export function CompanyOrganizationStructurePage({
                         </div>
                       </div>
                     );
-                  })()
-                )}
+                  })()}
 
                 {/* 4. Department Selected */}
-                {selectedNode?.type === 'department' && (
+                {selectedNode?.type === 'department' &&
                   (() => {
                     const dept = selectedNode.data as DepartmentRecord;
                     const parentDiv = allDivisions.find((d) => d.id === dept.divisionId);
-                    const parentBu = businessUnits.find((b) => b.id === (dept.businessUnitId || parentDiv?.businessUnitId));
+                    const parentBu = businessUnits.find(
+                      (b) => b.id === (dept.businessUnitId || parentDiv?.businessUnitId),
+                    );
 
                     return (
                       <div className="bezent-unit-details">
@@ -928,10 +985,14 @@ export function CompanyOrganizationStructurePage({
                         <div className="bezent-unit-details__fields">
                           <div className="bezent-unit-details__field">
                             <span className="bezent-unit-details__field-label">Code</span>
-                            <span className="bezent-unit-details__field-value">{dept.code || '—'}</span>
+                            <span className="bezent-unit-details__field-value">
+                              {dept.code || '—'}
+                            </span>
                           </div>
                           <div className="bezent-unit-details__field">
-                            <span className="bezent-unit-details__field-label">Parent Division</span>
+                            <span className="bezent-unit-details__field-label">
+                              Parent Division
+                            </span>
                             <span className="bezent-unit-details__field-value">
                               {dept.divisionName || parentDiv?.name || '—'}
                             </span>
@@ -943,7 +1004,9 @@ export function CompanyOrganizationStructurePage({
                             </span>
                           </div>
                           <div className="bezent-unit-details__field">
-                            <span className="bezent-unit-details__field-label">Head of Department</span>
+                            <span className="bezent-unit-details__field-label">
+                              Head of Department
+                            </span>
                             <span className="bezent-unit-details__field-value">
                               {dept.headEmployeeName || 'Not assigned'}
                             </span>
@@ -967,8 +1030,7 @@ export function CompanyOrganizationStructurePage({
                         </div>
                       </div>
                     );
-                  })()
-                )}
+                  })()}
               </div>
             </div>
           </div>

@@ -9,9 +9,7 @@ import type { BezentApplication } from '../../shared/types/application';
  * Commercial business applications: top-level business products (ADR-014).
  * CRM and Project Management join here when implemented.
  */
-export const COMMERCIAL_APPLICATIONS: readonly BezentApplication[] = [
-  hrmsApplication,
-];
+export const COMMERCIAL_APPLICATIONS: readonly BezentApplication[] = [hrmsApplication];
 
 /**
  * All workspaces mounted inside the global AppShell.

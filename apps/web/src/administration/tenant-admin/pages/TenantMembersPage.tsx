@@ -82,7 +82,10 @@ export function TenantMembersPage() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={member.status === 'active' ? 'success' : 'neutral'} size="sm">
+                        <Badge
+                          variant={member.status === 'active' ? 'success' : 'neutral'}
+                          size="sm"
+                        >
                           {member.status.toUpperCase()}
                         </Badge>
                       </TableCell>

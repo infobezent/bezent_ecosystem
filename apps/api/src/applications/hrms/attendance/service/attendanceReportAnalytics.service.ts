@@ -85,7 +85,9 @@ export function buildReportAnalytics(
 
       const eligibleDays = presentCount + absentCount + halfDayCount + leaveCount;
       const attendanceRateStr =
-        eligibleDays > 0 ? `${(((presentCount + halfDayCount * 0.5) / eligibleDays) * 100).toFixed(1)}%` : 'N/A';
+        eligibleDays > 0
+          ? `${(((presentCount + halfDayCount * 0.5) / eligibleDays) * 100).toFixed(1)}%`
+          : 'N/A';
 
       kpis = [
         { id: 'total', label: 'Total Records', value: totalRows, variant: 'neutral' },
@@ -98,9 +100,19 @@ export function buildReportAnalytics(
 
       // Status Donut
       const slices: StatusDistributionSlice[] = [
-        { label: 'Present', value: presentCount, colorToken: 'var(--status-success)', key: 'present' },
+        {
+          label: 'Present',
+          value: presentCount,
+          colorToken: 'var(--status-success)',
+          key: 'present',
+        },
         { label: 'Absent', value: absentCount, colorToken: 'var(--status-danger)', key: 'absent' },
-        { label: 'Half Day', value: halfDayCount, colorToken: 'var(--status-warning)', key: 'half_day' },
+        {
+          label: 'Half Day',
+          value: halfDayCount,
+          colorToken: 'var(--status-warning)',
+          key: 'half_day',
+        },
         { label: 'On Leave', value: leaveCount, colorToken: 'var(--status-info)', key: 'on_leave' },
       ];
       charts.statusDistribution = {
@@ -121,8 +133,16 @@ export function buildReportAnalytics(
         yAxisLabel: 'Headcount',
         categories: topDepts.map((d) => d[0]),
         series: [
-          { name: 'Present', colorToken: 'var(--status-success)', values: topDepts.map((d) => d[1].present) },
-          { name: 'Absent', colorToken: 'var(--status-danger)', values: topDepts.map((d) => d[1].absent) },
+          {
+            name: 'Present',
+            colorToken: 'var(--status-success)',
+            values: topDepts.map((d) => d[1].present),
+          },
+          {
+            name: 'Absent',
+            colorToken: 'var(--status-danger)',
+            values: topDepts.map((d) => d[1].absent),
+          },
         ],
         drillDownField: 'departmentId',
       };
@@ -141,7 +161,8 @@ export function buildReportAnalytics(
               colorToken: 'var(--accent-primary)',
               points: sortedDates.map((dt) => {
                 const stat = dateMap.get(dt)!;
-                const r = stat.eligible > 0 ? Number(((stat.present / stat.eligible) * 100).toFixed(1)) : 0;
+                const r =
+                  stat.eligible > 0 ? Number(((stat.present / stat.eligible) * 100).toFixed(1)) : 0;
                 return { label: dt, value: r };
               }),
             },
@@ -167,7 +188,10 @@ export function buildReportAnalytics(
       let totalLeave = 0;
       let totalOd = 0;
 
-      const deptMap = new Map<string, { present: number; absent: number; leave: number; od: number; total: number }>();
+      const deptMap = new Map<
+        string,
+        { present: number; absent: number; leave: number; od: number; total: number }
+      >();
       const readinessMap = new Map<string, number>();
 
       for (const r of rawRows) {
@@ -197,29 +221,71 @@ export function buildReportAnalytics(
       }
 
       const overallRateStr =
-        totalSched > 0 ? `${((totalPres / totalSched) * 100).toFixed(1)}%` : totalRows > 0 ? '100%' : 'N/A';
+        totalSched > 0
+          ? `${((totalPres / totalSched) * 100).toFixed(1)}%`
+          : totalRows > 0
+            ? '100%'
+            : 'N/A';
 
       kpis = [
         { id: 'employees', label: 'Employees Summarized', value: totalRows, variant: 'neutral' },
-        { id: 'present_days', label: 'Total Present Days', value: totalPres.toFixed(1), variant: 'success' },
-        { id: 'absent_days', label: 'Total Absent Days', value: totalAbs.toFixed(1), variant: 'danger' },
-        { id: 'leave_days', label: 'Total Leave Days', value: totalLeave.toFixed(1), variant: 'info' },
+        {
+          id: 'present_days',
+          label: 'Total Present Days',
+          value: totalPres.toFixed(1),
+          variant: 'success',
+        },
+        {
+          id: 'absent_days',
+          label: 'Total Absent Days',
+          value: totalAbs.toFixed(1),
+          variant: 'danger',
+        },
+        {
+          id: 'leave_days',
+          label: 'Total Leave Days',
+          value: totalLeave.toFixed(1),
+          variant: 'info',
+        },
         { id: 'od_days', label: 'Total On-Duty Days', value: totalOd.toFixed(1), variant: 'info' },
         { id: 'rate', label: 'Attendance Rate', value: overallRateStr, variant: 'info' },
       ];
 
       // Readiness Donut
       const readinessSlices: StatusDistributionSlice[] = [
-        { label: 'Ready', value: readinessMap.get('Ready') || 0, colorToken: 'var(--status-success)', key: 'Ready' },
-        { label: 'Pending Exceptions', value: readinessMap.get('Pending Exceptions') || 0, colorToken: 'var(--status-warning)', key: 'Pending Exceptions' },
-        { label: 'Blocked', value: readinessMap.get('Blocked') || 0, colorToken: 'var(--status-danger)', key: 'Blocked' },
-        { label: 'Not Evaluated', value: readinessMap.get('Not Evaluated') || 0, colorToken: 'var(--text-muted)', key: 'Not Evaluated' },
+        {
+          label: 'Ready',
+          value: readinessMap.get('Ready') || 0,
+          colorToken: 'var(--status-success)',
+          key: 'Ready',
+        },
+        {
+          label: 'Pending Exceptions',
+          value: readinessMap.get('Pending Exceptions') || 0,
+          colorToken: 'var(--status-warning)',
+          key: 'Pending Exceptions',
+        },
+        {
+          label: 'Blocked',
+          value: readinessMap.get('Blocked') || 0,
+          colorToken: 'var(--status-danger)',
+          key: 'Blocked',
+        },
+        {
+          label: 'Not Evaluated',
+          value: readinessMap.get('Not Evaluated') || 0,
+          colorToken: 'var(--text-muted)',
+          key: 'Not Evaluated',
+        },
       ].filter((s) => s.value > 0);
 
       charts.statusDistribution = {
         title: 'Payroll Readiness Status',
         chartType: 'donut',
-        slices: readinessSlices.length > 0 ? readinessSlices : [{ label: 'Evaluated', value: totalRows, colorToken: 'var(--accent-primary)' }],
+        slices:
+          readinessSlices.length > 0
+            ? readinessSlices
+            : [{ label: 'Evaluated', value: totalRows, colorToken: 'var(--accent-primary)' }],
         drillDownField: 'payrollReadiness',
       };
 
@@ -234,15 +300,35 @@ export function buildReportAnalytics(
         yAxisLabel: 'Employee-Days',
         categories: topDepts.map((d) => d[0]),
         series: [
-          { name: 'Present Days', colorToken: 'var(--status-success)', values: topDepts.map((d) => Number(d[1].present.toFixed(1))) },
-          { name: 'Absent Days', colorToken: 'var(--status-danger)', values: topDepts.map((d) => Number(d[1].absent.toFixed(1))) },
-          { name: 'Leave Days', colorToken: 'var(--status-info)', values: topDepts.map((d) => Number(d[1].leave.toFixed(1))) },
-          { name: 'On-Duty Days', colorToken: 'var(--accent-primary)', values: topDepts.map((d) => Number(d[1].od.toFixed(1))) },
+          {
+            name: 'Present Days',
+            colorToken: 'var(--status-success)',
+            values: topDepts.map((d) => Number(d[1].present.toFixed(1))),
+          },
+          {
+            name: 'Absent Days',
+            colorToken: 'var(--status-danger)',
+            values: topDepts.map((d) => Number(d[1].absent.toFixed(1))),
+          },
+          {
+            name: 'Leave Days',
+            colorToken: 'var(--status-info)',
+            values: topDepts.map((d) => Number(d[1].leave.toFixed(1))),
+          },
+          {
+            name: 'On-Duty Days',
+            colorToken: 'var(--accent-primary)',
+            values: topDepts.map((d) => Number(d[1].od.toFixed(1))),
+          },
         ],
         drillDownField: 'departmentId',
       };
 
-      supportedDimensions.push({ field: 'department', label: 'Department', targetFilterKey: 'departmentId' });
+      supportedDimensions.push({
+        field: 'department',
+        label: 'Department',
+        targetFilterKey: 'departmentId',
+      });
       break;
     }
 
@@ -288,11 +374,31 @@ export function buildReportAnalytics(
         totalSchedDays > 0 ? `${((totalAbsEquiv / totalSchedDays) * 100).toFixed(1)}%` : 'N/A';
 
       kpis = [
-        { id: 'scheduled', label: 'Scheduled Employee-Days', value: totalSchedDays, variant: 'neutral' },
-        { id: 'present_equiv', label: 'Present Equivalents', value: totalPresEquiv.toFixed(1), variant: 'success' },
-        { id: 'absent_equiv', label: 'Absent Equivalents', value: totalAbsEquiv.toFixed(1), variant: 'danger' },
+        {
+          id: 'scheduled',
+          label: 'Scheduled Employee-Days',
+          value: totalSchedDays,
+          variant: 'neutral',
+        },
+        {
+          id: 'present_equiv',
+          label: 'Present Equivalents',
+          value: totalPresEquiv.toFixed(1),
+          variant: 'success',
+        },
+        {
+          id: 'absent_equiv',
+          label: 'Absent Equivalents',
+          value: totalAbsEquiv.toFixed(1),
+          variant: 'danger',
+        },
         { id: 'rate', label: 'Cumulative Attendance Rate', value: overallRateStr, variant: 'info' },
-        { id: 'abs_rate', label: 'Cumulative Absence Rate', value: overallAbsRateStr, variant: 'warning' },
+        {
+          id: 'abs_rate',
+          label: 'Cumulative Absence Rate',
+          value: overallAbsRateStr,
+          variant: 'warning',
+        },
         { id: 'late', label: 'Total Late Occurrences', value: totalLate, variant: 'warning' },
       ];
 
@@ -301,7 +407,13 @@ export function buildReportAnalytics(
         chartType: 'line',
         xAxisLabel: 'Period',
         yAxisLabel: 'Attendance Rate (%)',
-        series: [{ name: 'Attendance Rate (%)', colorToken: 'var(--accent-primary)', points: seriesPoints }],
+        series: [
+          {
+            name: 'Attendance Rate (%)',
+            colorToken: 'var(--accent-primary)',
+            points: seriesPoints,
+          },
+        ],
       };
 
       const topDepts = Array.from(deptRates.entries()).slice(0, 6);
@@ -315,7 +427,9 @@ export function buildReportAnalytics(
           {
             name: 'Attendance Rate (%)',
             colorToken: 'var(--status-success)',
-            values: topDepts.map((d) => (d[1].scheduled > 0 ? Number(((d[1].present / d[1].scheduled) * 100).toFixed(1)) : 0)),
+            values: topDepts.map((d) =>
+              d[1].scheduled > 0 ? Number(((d[1].present / d[1].scheduled) * 100).toFixed(1)) : 0,
+            ),
           },
         ],
       };
@@ -352,10 +466,30 @@ export function buildReportAnalytics(
       }
 
       kpis = [
-        { id: 'scheduled', label: 'Total Scheduled Hours', value: (schedMin / 60).toFixed(1), variant: 'neutral' },
-        { id: 'actual', label: 'Actual Worked Hours', value: (actualMin / 60).toFixed(1), variant: 'success' },
-        { id: 'policy', label: 'Credited Hours', value: (policyMin / 60).toFixed(1), variant: 'info' },
-        { id: 'variance', label: 'Difference / Variance Hours', value: (diffMin / 60).toFixed(1), variant: diffMin >= 0 ? 'success' : 'warning' },
+        {
+          id: 'scheduled',
+          label: 'Total Scheduled Hours',
+          value: (schedMin / 60).toFixed(1),
+          variant: 'neutral',
+        },
+        {
+          id: 'actual',
+          label: 'Actual Worked Hours',
+          value: (actualMin / 60).toFixed(1),
+          variant: 'success',
+        },
+        {
+          id: 'policy',
+          label: 'Credited Hours',
+          value: (policyMin / 60).toFixed(1),
+          variant: 'info',
+        },
+        {
+          id: 'variance',
+          label: 'Difference / Variance Hours',
+          value: (diffMin / 60).toFixed(1),
+          variant: diffMin >= 0 ? 'success' : 'warning',
+        },
       ];
 
       const topDepts = Array.from(deptMap.entries()).slice(0, 6);
@@ -366,8 +500,16 @@ export function buildReportAnalytics(
         yAxisLabel: 'Hours',
         categories: topDepts.map((d) => d[0]),
         series: [
-          { name: 'Scheduled Hours', colorToken: 'var(--text-muted)', values: topDepts.map((d) => Number((d[1].sched / 60).toFixed(1))) },
-          { name: 'Actual Worked Hours', colorToken: 'var(--accent-primary)', values: topDepts.map((d) => Number((d[1].actual / 60).toFixed(1))) },
+          {
+            name: 'Scheduled Hours',
+            colorToken: 'var(--text-muted)',
+            values: topDepts.map((d) => Number((d[1].sched / 60).toFixed(1))),
+          },
+          {
+            name: 'Actual Worked Hours',
+            colorToken: 'var(--accent-primary)',
+            values: topDepts.map((d) => Number((d[1].actual / 60).toFixed(1))),
+          },
         ],
         drillDownField: 'departmentId',
       };
@@ -405,7 +547,12 @@ export function buildReportAnalytics(
         { id: 'late_count', label: 'Late Arrivals', value: lateCount, variant: 'warning' },
         { id: 'early_count', label: 'Early Exits', value: earlyCount, variant: 'warning' },
         { id: 'late_minutes', label: 'Total Late Minutes', value: totalLateMin, variant: 'danger' },
-        { id: 'early_minutes', label: 'Total Early Minutes', value: totalEarlyMin, variant: 'warning' },
+        {
+          id: 'early_minutes',
+          label: 'Total Early Minutes',
+          value: totalEarlyMin,
+          variant: 'warning',
+        },
         { id: 'violations', label: 'Policy Violations', value: violationCount, variant: 'danger' },
       ];
 
@@ -418,7 +565,13 @@ export function buildReportAnalytics(
         xAxisLabel: 'Department',
         yAxisLabel: 'Late Minutes',
         categories: topDepts.map((d) => d[0]),
-        series: [{ name: 'Late Minutes', colorToken: 'var(--status-danger)', values: topDepts.map((d) => d[1]) }],
+        series: [
+          {
+            name: 'Late Minutes',
+            colorToken: 'var(--status-danger)',
+            values: topDepts.map((d) => d[1]),
+          },
+        ],
         drillDownField: 'departmentId',
       };
       break;
@@ -457,10 +610,27 @@ export function buildReportAnalytics(
 
       kpis = [
         { id: 'scheduled', label: 'Scheduled Hours', value: schedH.toFixed(1), variant: 'neutral' },
-        { id: 'actual', label: 'Actual Worked Hours', value: actualH.toFixed(1), variant: 'success' },
+        {
+          id: 'actual',
+          label: 'Actual Worked Hours',
+          value: actualH.toFixed(1),
+          variant: 'success',
+        },
         { id: 'extra', label: 'Extra Worked Hours', value: extraH.toFixed(1), variant: 'warning' },
-        { id: 'approved_ot', label: 'Approved OT Hours', value: 'N/A', subtext: 'OT workflow limitation', variant: 'neutral' },
-        { id: 'approval_status', label: 'Approval Status', value: 'N/A', subtext: 'No OT approval source', variant: 'neutral' },
+        {
+          id: 'approved_ot',
+          label: 'Approved OT Hours',
+          value: 'N/A',
+          subtext: 'OT workflow limitation',
+          variant: 'neutral',
+        },
+        {
+          id: 'approval_status',
+          label: 'Approval Status',
+          value: 'N/A',
+          subtext: 'No OT approval source',
+          variant: 'neutral',
+        },
       ];
 
       const topDepts = Array.from(deptMap.entries()).slice(0, 6);
@@ -471,8 +641,16 @@ export function buildReportAnalytics(
         yAxisLabel: 'Hours',
         categories: topDepts.map((d) => d[0]),
         series: [
-          { name: 'Actual Worked', colorToken: 'var(--accent-primary)', values: topDepts.map((d) => Number(d[1].actual.toFixed(1))) },
-          { name: 'Extra Worked', colorToken: 'var(--status-warning)', values: topDepts.map((d) => Number(d[1].extra.toFixed(1))) },
+          {
+            name: 'Actual Worked',
+            colorToken: 'var(--accent-primary)',
+            values: topDepts.map((d) => Number(d[1].actual.toFixed(1))),
+          },
+          {
+            name: 'Extra Worked',
+            colorToken: 'var(--status-warning)',
+            values: topDepts.map((d) => Number(d[1].extra.toFixed(1))),
+          },
         ],
         drillDownField: 'departmentId',
       };
@@ -516,13 +694,34 @@ export function buildReportAnalytics(
         deptMap.set(dept, dStat);
       }
 
-      const overallAbsRate = totalEligible > 0 ? `${((totalAbsent / totalEligible) * 100).toFixed(1)}%` : 'N/A';
+      const overallAbsRate =
+        totalEligible > 0 ? `${((totalAbsent / totalEligible) * 100).toFixed(1)}%` : 'N/A';
 
       kpis = [
-        { id: 'scheduled', label: 'Eligible Scheduled Days', value: totalEligible, variant: 'neutral' },
-        { id: 'absent_days', label: 'Absent Equivalent Days', value: totalAbsent.toFixed(1), variant: 'danger' },
-        { id: 'abs_rate', label: 'Organization Absence Rate', value: overallAbsRate, variant: 'warning' },
-        { id: 'chronic', label: 'Prolonged Absences (>=3 days)', value: chronicCount, variant: 'danger' },
+        {
+          id: 'scheduled',
+          label: 'Eligible Scheduled Days',
+          value: totalEligible,
+          variant: 'neutral',
+        },
+        {
+          id: 'absent_days',
+          label: 'Absent Equivalent Days',
+          value: totalAbsent.toFixed(1),
+          variant: 'danger',
+        },
+        {
+          id: 'abs_rate',
+          label: 'Organization Absence Rate',
+          value: overallAbsRate,
+          variant: 'warning',
+        },
+        {
+          id: 'chronic',
+          label: 'Prolonged Absences (>=3 days)',
+          value: chronicCount,
+          variant: 'danger',
+        },
       ];
 
       const topDepts = Array.from(deptMap.entries()).slice(0, 6);
@@ -536,7 +735,9 @@ export function buildReportAnalytics(
           {
             name: 'Absence Rate (%)',
             colorToken: 'var(--status-danger)',
-            values: topDepts.map((d) => (d[1].eligible > 0 ? Number(((d[1].absent / d[1].eligible) * 100).toFixed(1)) : 0)),
+            values: topDepts.map((d) =>
+              d[1].eligible > 0 ? Number(((d[1].absent / d[1].eligible) * 100).toFixed(1)) : 0,
+            ),
           },
         ],
         drillDownField: 'departmentId',
@@ -572,9 +773,19 @@ export function buildReportAnalytics(
 
       kpis = [
         { id: 'requests', label: 'Total Leave Requests', value: totalRows, variant: 'neutral' },
-        { id: 'days', label: 'Approved Leave Days', value: approvedDays.toFixed(1), variant: 'info' },
+        {
+          id: 'days',
+          label: 'Approved Leave Days',
+          value: approvedDays.toFixed(1),
+          variant: 'info',
+        },
         { id: 'approved', label: 'Approved Requests', value: approvedCount, variant: 'success' },
-        { id: 'conflicts', label: 'Overlap / Conflicts', value: conflictCount, variant: conflictCount > 0 ? 'warning' : 'neutral' },
+        {
+          id: 'conflicts',
+          label: 'Overlap / Conflicts',
+          value: conflictCount,
+          variant: conflictCount > 0 ? 'warning' : 'neutral',
+        },
       ];
 
       charts.statusDistribution = {
@@ -598,7 +809,13 @@ export function buildReportAnalytics(
         xAxisLabel: 'Department',
         yAxisLabel: 'Leave Days',
         categories: topDepts.map((d) => d[0]),
-        series: [{ name: 'Leave Days', colorToken: 'var(--status-info)', values: topDepts.map((d) => Number(d[1].toFixed(1))) }],
+        series: [
+          {
+            name: 'Leave Days',
+            colorToken: 'var(--status-info)',
+            values: topDepts.map((d) => Number(d[1].toFixed(1))),
+          },
+        ],
         drillDownField: 'departmentId',
       };
       break;
@@ -634,15 +851,30 @@ export function buildReportAnalytics(
         { id: 'missing_in', label: 'Missing Check-In', value: missingIn, variant: 'warning' },
         { id: 'missing_out', label: 'Missing Check-Out', value: missingOut, variant: 'warning' },
         { id: 'unresolved', label: 'Unresolved Count', value: unresolved, variant: 'danger' },
-        { id: 'avg_aging', label: 'Avg Aging (Days)', value: totalRows > 0 ? (totalAging / totalRows).toFixed(1) : 0, variant: 'neutral' },
+        {
+          id: 'avg_aging',
+          label: 'Avg Aging (Days)',
+          value: totalRows > 0 ? (totalAging / totalRows).toFixed(1) : 0,
+          variant: 'neutral',
+        },
       ];
 
       charts.statusDistribution = {
         title: 'Missing Punch Breakdown',
         chartType: 'donut',
         slices: [
-          { label: 'Missing Check-In', value: missingIn, colorToken: 'var(--status-warning)', key: 'Check-in' },
-          { label: 'Missing Check-Out', value: missingOut, colorToken: 'var(--status-danger)', key: 'Check-out' },
+          {
+            label: 'Missing Check-In',
+            value: missingIn,
+            colorToken: 'var(--status-warning)',
+            key: 'Check-in',
+          },
+          {
+            label: 'Missing Check-Out',
+            value: missingOut,
+            colorToken: 'var(--status-danger)',
+            key: 'Check-out',
+          },
         ],
         drillDownField: 'missingInOut',
       };
@@ -656,7 +888,13 @@ export function buildReportAnalytics(
         xAxisLabel: 'Department',
         yAxisLabel: 'Incidents',
         categories: topDepts.map((d) => d[0]),
-        series: [{ name: 'Missing Punches', colorToken: 'var(--status-warning)', values: topDepts.map((d) => d[1]) }],
+        series: [
+          {
+            name: 'Missing Punches',
+            colorToken: 'var(--status-warning)',
+            values: topDepts.map((d) => d[1]),
+          },
+        ],
         drillDownField: 'departmentId',
       };
       break;
@@ -680,7 +918,8 @@ export function buildReportAnalytics(
 
         if (st.includes('pending') || st.includes('open')) pendingCount++;
         if (st.includes('resolved')) resolvedCount++;
-        if (sev.toLowerCase().includes('high') || sev.toLowerCase().includes('critical')) highCriticalCount++;
+        if (sev.toLowerCase().includes('high') || sev.toLowerCase().includes('critical'))
+          highCriticalCount++;
 
         severityMap.set(sev, (severityMap.get(sev) || 0) + 1);
         typeMap.set(type, (typeMap.get(type) || 0) + 1);
@@ -690,17 +929,42 @@ export function buildReportAnalytics(
         { id: 'total', label: 'Total Exceptions', value: totalRows, variant: 'neutral' },
         { id: 'pending', label: 'Open / Pending', value: pendingCount, variant: 'warning' },
         { id: 'resolved', label: 'Resolved', value: resolvedCount, variant: 'success' },
-        { id: 'critical', label: 'High / Critical Severity', value: highCriticalCount, variant: highCriticalCount > 0 ? 'danger' : 'neutral' },
+        {
+          id: 'critical',
+          label: 'High / Critical Severity',
+          value: highCriticalCount,
+          variant: highCriticalCount > 0 ? 'danger' : 'neutral',
+        },
       ];
 
       charts.statusDistribution = {
         title: 'Exceptions by Severity',
         chartType: 'donut',
         slices: [
-          { label: 'Critical', value: severityMap.get('Critical') || 0, colorToken: 'var(--status-danger)', key: 'Critical' },
-          { label: 'High', value: severityMap.get('High') || 0, colorToken: 'var(--status-warning)', key: 'High' },
-          { label: 'Medium', value: severityMap.get('Medium') || 0, colorToken: 'var(--status-info)', key: 'Medium' },
-          { label: 'Low', value: severityMap.get('Low') || 0, colorToken: 'var(--text-muted)', key: 'Low' },
+          {
+            label: 'Critical',
+            value: severityMap.get('Critical') || 0,
+            colorToken: 'var(--status-danger)',
+            key: 'Critical',
+          },
+          {
+            label: 'High',
+            value: severityMap.get('High') || 0,
+            colorToken: 'var(--status-warning)',
+            key: 'High',
+          },
+          {
+            label: 'Medium',
+            value: severityMap.get('Medium') || 0,
+            colorToken: 'var(--status-info)',
+            key: 'Medium',
+          },
+          {
+            label: 'Low',
+            value: severityMap.get('Low') || 0,
+            colorToken: 'var(--text-muted)',
+            key: 'Low',
+          },
         ].filter((s) => s.value > 0),
         drillDownField: 'severity',
       };
@@ -714,7 +978,13 @@ export function buildReportAnalytics(
         xAxisLabel: 'Exception Type',
         yAxisLabel: 'Count',
         categories: topTypes.map((t) => t[0]),
-        series: [{ name: 'Incidents', colorToken: 'var(--accent-primary)', values: topTypes.map((t) => t[1]) }],
+        series: [
+          {
+            name: 'Incidents',
+            colorToken: 'var(--accent-primary)',
+            values: topTypes.map((t) => t[1]),
+          },
+        ],
         drillDownField: 'exceptionType',
       };
       break;
@@ -746,16 +1016,36 @@ export function buildReportAnalytics(
         { id: 'approved', label: 'Approved', value: approvedCount, variant: 'success' },
         { id: 'pending', label: 'Pending Review', value: pendingCount, variant: 'warning' },
         { id: 'rejected', label: 'Rejected', value: rejectedCount, variant: 'danger' },
-        { id: 'rate', label: 'Approval Rate', value: totalRows > 0 ? `${((approvedCount / totalRows) * 100).toFixed(1)}%` : 'N/A', variant: 'info' },
+        {
+          id: 'rate',
+          label: 'Approval Rate',
+          value: totalRows > 0 ? `${((approvedCount / totalRows) * 100).toFixed(1)}%` : 'N/A',
+          variant: 'info',
+        },
       ];
 
       charts.statusDistribution = {
         title: 'Regularization Decisions',
         chartType: 'donut',
         slices: [
-          { label: 'Approved', value: approvedCount, colorToken: 'var(--status-success)', key: 'Approved' },
-          { label: 'Pending', value: pendingCount, colorToken: 'var(--status-warning)', key: 'Pending' },
-          { label: 'Rejected', value: rejectedCount, colorToken: 'var(--status-danger)', key: 'Rejected' },
+          {
+            label: 'Approved',
+            value: approvedCount,
+            colorToken: 'var(--status-success)',
+            key: 'Approved',
+          },
+          {
+            label: 'Pending',
+            value: pendingCount,
+            colorToken: 'var(--status-warning)',
+            key: 'Pending',
+          },
+          {
+            label: 'Rejected',
+            value: rejectedCount,
+            colorToken: 'var(--status-danger)',
+            key: 'Rejected',
+          },
         ].filter((s) => s.value > 0),
         drillDownField: 'approvalStatus',
       };
@@ -767,7 +1057,9 @@ export function buildReportAnalytics(
         xAxisLabel: 'Request Type',
         yAxisLabel: 'Count',
         categories: types.map((t) => t[0]),
-        series: [{ name: 'Requests', colorToken: 'var(--accent-primary)', values: types.map((t) => t[1]) }],
+        series: [
+          { name: 'Requests', colorToken: 'var(--accent-primary)', values: types.map((t) => t[1]) },
+        ],
         drillDownField: 'requestType',
       };
       break;
@@ -803,19 +1095,44 @@ export function buildReportAnalytics(
 
       kpis = [
         { id: 'total', label: 'Total OD Requests', value: totalRows, variant: 'neutral' },
-        { id: 'approved_hrs', label: 'Approved OD Hours', value: approvedHours.toFixed(1), variant: 'success' },
+        {
+          id: 'approved_hrs',
+          label: 'Approved OD Hours',
+          value: approvedHours.toFixed(1),
+          variant: 'success',
+        },
         { id: 'pending', label: 'Pending Requests', value: pendingCount, variant: 'warning' },
         { id: 'rejected', label: 'Rejected Requests', value: rejectedCount, variant: 'danger' },
-        { id: 'rate', label: 'Approval Rate', value: totalRows > 0 ? `${((approvedCount / totalRows) * 100).toFixed(1)}%` : 'N/A', variant: 'info' },
+        {
+          id: 'rate',
+          label: 'Approval Rate',
+          value: totalRows > 0 ? `${((approvedCount / totalRows) * 100).toFixed(1)}%` : 'N/A',
+          variant: 'info',
+        },
       ];
 
       charts.statusDistribution = {
         title: 'On-Duty Request Decisions',
         chartType: 'donut',
         slices: [
-          { label: 'Approved', value: approvedCount, colorToken: 'var(--status-success)', key: 'Approved' },
-          { label: 'Pending', value: pendingCount, colorToken: 'var(--status-warning)', key: 'Pending' },
-          { label: 'Rejected', value: rejectedCount, colorToken: 'var(--status-danger)', key: 'Rejected' },
+          {
+            label: 'Approved',
+            value: approvedCount,
+            colorToken: 'var(--status-success)',
+            key: 'Approved',
+          },
+          {
+            label: 'Pending',
+            value: pendingCount,
+            colorToken: 'var(--status-warning)',
+            key: 'Pending',
+          },
+          {
+            label: 'Rejected',
+            value: rejectedCount,
+            colorToken: 'var(--status-danger)',
+            key: 'Rejected',
+          },
         ].filter((s) => s.value > 0),
         drillDownField: 'approvalStatus',
       };
@@ -827,7 +1144,13 @@ export function buildReportAnalytics(
         xAxisLabel: 'Department',
         yAxisLabel: 'Hours',
         categories: topDepts.map((d) => d[0]),
-        series: [{ name: 'Approved Hours', colorToken: 'var(--accent-primary)', values: topDepts.map((d) => Number(d[1].toFixed(1))) }],
+        series: [
+          {
+            name: 'Approved Hours',
+            colorToken: 'var(--accent-primary)',
+            values: topDepts.map((d) => Number(d[1].toFixed(1))),
+          },
+        ],
         drillDownField: 'departmentId',
       };
       break;
@@ -865,9 +1188,24 @@ export function buildReportAnalytics(
       kpis = [
         { id: 'total', label: 'Evaluated Staff', value: totalRows, variant: 'neutral' },
         { id: 'ready', label: 'Payroll Ready', value: readyCount, variant: 'success' },
-        { id: 'blocked', label: 'Blocked / Action Needed', value: blockedCount, variant: blockedCount > 0 ? 'danger' : 'neutral' },
-        { id: 'exceptions', label: 'Unresolved Exceptions', value: totalExceptions, variant: totalExceptions > 0 ? 'warning' : 'neutral' },
-        { id: 'corrections', label: 'Pending Corrections', value: totalCorrections, variant: totalCorrections > 0 ? 'warning' : 'neutral' },
+        {
+          id: 'blocked',
+          label: 'Blocked / Action Needed',
+          value: blockedCount,
+          variant: blockedCount > 0 ? 'danger' : 'neutral',
+        },
+        {
+          id: 'exceptions',
+          label: 'Unresolved Exceptions',
+          value: totalExceptions,
+          variant: totalExceptions > 0 ? 'warning' : 'neutral',
+        },
+        {
+          id: 'corrections',
+          label: 'Pending Corrections',
+          value: totalCorrections,
+          variant: totalCorrections > 0 ? 'warning' : 'neutral',
+        },
       ];
 
       charts.statusDistribution = {
@@ -875,7 +1213,12 @@ export function buildReportAnalytics(
         chartType: 'donut',
         slices: [
           { label: 'Ready', value: readyCount, colorToken: 'var(--status-success)', key: 'Ready' },
-          { label: 'Blocked / Pending', value: blockedCount, colorToken: 'var(--status-danger)', key: 'Blocked' },
+          {
+            label: 'Blocked / Pending',
+            value: blockedCount,
+            colorToken: 'var(--status-danger)',
+            key: 'Blocked',
+          },
         ].filter((s) => s.value > 0),
         drillDownField: 'readinessStatus',
       };
@@ -888,8 +1231,16 @@ export function buildReportAnalytics(
         yAxisLabel: 'Employees',
         categories: topDepts.map((d) => d[0]),
         series: [
-          { name: 'Ready', colorToken: 'var(--status-success)', values: topDepts.map((d) => d[1].ready) },
-          { name: 'Blocked', colorToken: 'var(--status-danger)', values: topDepts.map((d) => d[1].blocked) },
+          {
+            name: 'Ready',
+            colorToken: 'var(--status-success)',
+            values: topDepts.map((d) => d[1].ready),
+          },
+          {
+            name: 'Blocked',
+            colorToken: 'var(--status-danger)',
+            values: topDepts.map((d) => d[1].blocked),
+          },
         ],
         drillDownField: 'departmentId',
       };
@@ -924,17 +1275,42 @@ export function buildReportAnalytics(
         { id: 'reviewed', label: 'Reviewed', value: reviewedCount, variant: 'success' },
         { id: 'in_progress', label: 'In Progress', value: inProgressCount, variant: 'warning' },
         { id: 'pending', label: 'Pending Review', value: pendingCount, variant: 'neutral' },
-        { id: 'reopened', label: 'Reopened Reviews', value: reopenedCount, variant: reopenedCount > 0 ? 'danger' : 'neutral' },
+        {
+          id: 'reopened',
+          label: 'Reopened Reviews',
+          value: reopenedCount,
+          variant: reopenedCount > 0 ? 'danger' : 'neutral',
+        },
       ];
 
       charts.statusDistribution = {
         title: 'Monthly Review States',
         chartType: 'donut',
         slices: [
-          { label: 'Reviewed', value: reviewedCount, colorToken: 'var(--status-success)', key: 'Reviewed' },
-          { label: 'In Progress', value: inProgressCount, colorToken: 'var(--status-warning)', key: 'In Progress' },
-          { label: 'Pending', value: pendingCount, colorToken: 'var(--text-muted)', key: 'Pending' },
-          { label: 'Reopened', value: reopenedCount, colorToken: 'var(--status-danger)', key: 'Reopened' },
+          {
+            label: 'Reviewed',
+            value: reviewedCount,
+            colorToken: 'var(--status-success)',
+            key: 'Reviewed',
+          },
+          {
+            label: 'In Progress',
+            value: inProgressCount,
+            colorToken: 'var(--status-warning)',
+            key: 'In Progress',
+          },
+          {
+            label: 'Pending',
+            value: pendingCount,
+            colorToken: 'var(--text-muted)',
+            key: 'Pending',
+          },
+          {
+            label: 'Reopened',
+            value: reopenedCount,
+            colorToken: 'var(--status-danger)',
+            key: 'Reopened',
+          },
         ].filter((s) => s.value > 0),
         drillDownField: 'reviewState',
       };
@@ -946,7 +1322,13 @@ export function buildReportAnalytics(
         xAxisLabel: 'Reviewer',
         yAxisLabel: 'Employees',
         categories: topReviewers.map((r) => r[0]),
-        series: [{ name: 'Assigned', colorToken: 'var(--accent-primary)', values: topReviewers.map((r) => r[1]) }],
+        series: [
+          {
+            name: 'Assigned',
+            colorToken: 'var(--accent-primary)',
+            values: topReviewers.map((r) => r[1]),
+          },
+        ],
         drillDownField: 'assignedReviewer',
       };
       break;

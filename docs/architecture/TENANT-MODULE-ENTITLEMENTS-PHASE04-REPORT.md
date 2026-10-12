@@ -1,4 +1,5 @@
 # Phase 04 — Tenant Module Entitlements & Subscription Configuration
+
 ## Architecture & Production Implementation Report
 
 - **Date:** October 9, 2026
@@ -25,6 +26,7 @@ $$\text{Application} \longrightarrow \text{Subscription Plan} \longrightarrow \t
 ## 1. Architecture Changes
 
 ### Canonical Entitlement Chain
+
 1. **Application Layer:** When a tenant enables an application (e.g., `hrms`), the backend module catalog defines all available capabilities, their mandatory/optional status, plan inclusions, and dependency tree.
 2. **Subscription Plan Layer:** Each plan (e.g., `HRMS Starter`, `HRMS Professional`, `HRMS Enterprise`) defines the set of included modules, trial eligibility, seat limits, and approved billing cycle prices.
 3. **Tenant Module Entitlements Layer:** Selected modules determine tenant-level feature enablement.
@@ -39,6 +41,7 @@ $$\text{Application} \longrightarrow \text{Subscription Plan} \longrightarrow \t
 ## 2. Server-Defined Module Catalog Integration
 
 Authoritative module definitions live on the backend in `apps/api/src/platform/modules/catalog/applicationModuleCatalog.ts`:
+
 - **HRMS Modules:**
   - `organization` (Mandatory, Starter+)
   - `employees` (Mandatory, Starter+, depends on `organization`)
@@ -65,6 +68,7 @@ Authoritative module definitions live on the backend in `apps/api/src/platform/m
   - `resource_management` (Optional, Enterprise+, depends on `tasks`)
 
 ### API Endpoints
+
 - `GET /api/v1/platform/modules/catalog?applicationCode=:code`: Returns application module catalog with metadata, mandatory status, and dependencies.
 - `GET /api/v1/platform/plans/:id/modules`: Returns plan-specific module eligibility, indicating whether each module is included in the plan or requires an override.
 
@@ -103,12 +107,13 @@ Authoritative module definitions live on the backend in `apps/api/src/platform/m
 ## 4. Pricing and Trial Validation Behavior
 
 Resolved previous blockers:
+
 1. **Unapproved / Zero-Price Plans:**
-   - In Step 3, if a selected plan has no approved pricing in the catalog for the selected billing cycle, a prominent warning alert explains: *"Standard catalog pricing is not yet approved or configured for plan '{name}'. An authorized commercial agreement reference is required to activate."*
+   - In Step 3, if a selected plan has no approved pricing in the catalog for the selected billing cycle, a prominent warning alert explains: _"Standard catalog pricing is not yet approved or configured for plan '{name}'. An authorized commercial agreement reference is required to activate."_
    - Requires the user to enter `commercialAgreementNotes` before proceeding.
    - Prevents unpriced combinations from failing silently at review.
 2. **Trial Ineligibility:**
-   - If the user selects Access Mode `trial` for a plan where `trialEligible === false` (e.g., Enterprise), an alert immediately displays: *"Plan '{name}' is not eligible for free trials. Please switch Access Mode to Commercial Paid License."*
+   - If the user selects Access Mode `trial` for a plan where `trialEligible === false` (e.g., Enterprise), an alert immediately displays: _"Plan '{name}' is not eligible for free trials. Please switch Access Mode to Commercial Paid License."_
    - Disables the Next button and blocks transition to Step 4 until resolved.
 3. **Seat Bound Validation:**
    - Licensed seats are checked against plan minimums and maximums both client-side and in server preflight.
@@ -118,6 +123,7 @@ Resolved previous blockers:
 ## 5. Step 4 Review & Creation Integration
 
 `CreateTenantPage.tsx` Step 4 (Review & Create) provides full transparency:
+
 - Company details, legal name, country, primary admin.
 - Enabled applications with plan name, access mode, seat count, and billing cycle.
 - **Selected Modules:** Count summary badge and comma-separated module key list.
@@ -133,6 +139,7 @@ Resolved previous blockers:
 ## 6. Backend Persistence & Atomic Orchestration
 
 `apps/api/src/platform/tenants/service/tenantOrchestration.service.ts`:
+
 - **Validation in Preflight & Orchestrate:**
   - Validates that mandatory modules are never omitted.
   - Validates all module dependencies (e.g., selecting `attendance` without `employees` throws `BadRequestError`).
@@ -157,6 +164,7 @@ Resolved previous blockers:
 ## 7. Runtime Entitlement Enforcement
 
 Module entitlements are strictly enforced on the server, not solely via frontend navigation hiding:
+
 1. `effectiveEntitlementService.resolveEffectiveEntitlements(tenantId, appCode, companyId)`:
    - Queries base plan inclusions from `tenantSubscriptions`.
    - Applies overrides from `tenantEntitlementOverrides`.
@@ -173,6 +181,7 @@ Module entitlements are strictly enforced on the server, not solely via frontend
 ## 8. Tenant Details Integration
 
 `apps/web/src/administration/super-admin/pages/TenantDetailsPage.tsx`:
+
 - **Tab 2 (Entitlements) Section B:** "Effective Entitlements & Runtime Access":
   - Shows module access breakdown grouped by application.
   - **Enabled Modules Table:**
@@ -191,6 +200,7 @@ Module entitlements are strictly enforced on the server, not solely via frontend
 ## 9. Files Changed
 
 ### Backend (`apps/api`)
+
 1. `src/platform/modules/catalog/applicationModuleCatalog.ts`: Server-defined catalog for HRMS, CRM, PM modules with dependencies and mandatory flags.
 2. `src/platform/modules/types/module.types.ts`: TypeScript contracts for application modules and plan eligibility.
 3. `src/platform/modules/service/module.service.ts`: Catalog retrieval, eligibility calculation, and overloaded methods.
@@ -204,6 +214,7 @@ Module entitlements are strictly enforced on the server, not solely via frontend
 11. `src/platform/__tests__/tenantModuleEntitlementsPhase04.test.ts`: 14 comprehensive backend automated tests.
 
 ### Frontend (`apps/web`)
+
 1. `src/administration/super-admin/api/superAdminApi.ts`: Added `getApplicationModules`, `getPlanModules`, and updated payload interfaces.
 2. `src/administration/super-admin/pages/CreateTenantPage.tsx`: Implemented Step 3 Module matrix, pricing/trial validation, override dialog, and Step 4 review integration.
 3. `src/administration/super-admin/pages/TenantDetailsPage.tsx`: Implemented Tab 2 Section B Effective Entitlements module breakdown.
@@ -214,10 +225,13 @@ Module entitlements are strictly enforced on the server, not solely via frontend
 ## 10. Automated Tests & Build Results
 
 ### 1. Backend Test Suite
+
 ```bash
 npx vitest run apps/api/src/platform/__tests__/tenantModuleEntitlementsPhase04.test.ts
 ```
+
 **Result:**
+
 - `14 passed (14 tests)` in 641ms.
 - Verified:
   - Catalog retrieval for HRMS, CRM, and PM
@@ -234,10 +248,13 @@ npx vitest run apps/api/src/platform/__tests__/tenantModuleEntitlementsPhase04.t
   - Runtime permission denial for deselected modules
 
 ### 2. Frontend Test Suite
+
 ```bash
 npx vitest run apps/web/src/administration/super-admin/__tests__/tenantModuleEntitlementsPhase04UI.test.tsx
 ```
+
 **Result:**
+
 - `8 passed (8 tests)` in 103ms.
 - Verified:
   - Step 3 module list rendering with mandatory locks and optional toggles
@@ -249,27 +266,36 @@ npx vitest run apps/web/src/administration/super-admin/__tests__/tenantModuleEnt
   - Tenant Details Tab 2 effective module breakdown table with badges
 
 ### 3. Full Super Admin Regression Suite
+
 ```bash
 npx vitest run apps/web/src/administration/super-admin/__tests__/
 ```
+
 **Result:**
+
 - `14 test files passed (14)`
 - `205 tests passed (205)`
 
 ### 4. TypeScript Typechecks
+
 ```bash
 npm run typecheck --workspace=apps/api
 npm run typecheck --workspace=apps/web
 ```
+
 **Result:**
+
 - Both completed with Exit Code 0 (clean).
 
 ### 5. Production Builds
+
 ```bash
 npm run build --workspace=apps/api
 npm run build --workspace=apps/web
 ```
+
 **Result:**
+
 - `apps/api`: Exit Code 0 (`tsc -p tsconfig.json`).
 - `apps/web`: Exit Code 0 (`tsc -b && vite build` built in 8.75s).
 
@@ -278,6 +304,7 @@ npm run build --workspace=apps/web
 ## 11. Remaining Configuration Requirements
 
 No blockers remain for standard operation. For production deployment, the following standard configuration items are noted:
+
 1. **Catalog Pricing Approval:** As new plans or currency tiers are added to `plans` and `plan_prices`, pricing teams should set status to `active` to enable self-service selection without requiring commercial agreement notes.
 2. **Additional Application Catalogs:** If future business applications (Finance, Inventory, Support) are introduced, their module keys should be registered into `APPLICATION_MODULE_CATALOG` following ADR-014.
 

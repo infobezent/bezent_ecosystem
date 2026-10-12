@@ -113,7 +113,9 @@ export async function downloadReportExport(
 
 export async function fetchSavedReports(reportId?: ReportId): Promise<SavedReportConfiguration[]> {
   const query = reportId ? `?reportId=${encodeURIComponent(reportId)}` : '';
-  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/reports/saved${query}`);
+  const res = await authorizedFetch(
+    `${appConfig.apiBaseUrl}/hrms/attendance/reports/saved${query}`,
+  );
   const body = await res.json();
   if (!res.ok || !body?.data) {
     throw new Error(body?.error?.message ?? `Failed to fetch saved reports: ${res.status}`);

@@ -5,6 +5,7 @@
 Phase 03A delivers a production-grade, enterprise SaaS **All Tenants** management interface for the BEZENT Super Admin platform. Built in React, Vite, and TypeScript within the existing global `AppShell`, the interface adopts the Gmail-inspired visual hierarchy (clean neutral backgrounds, `#D3E3FD` subtle accents, `#C2E7FF` soft highlights, restrained cards, and high contrast typography) without introducing any application-level CSS or violating repository architectural boundaries.
 
 Key achievements:
+
 - **Zero Application CSS Rule Compliance:** Fully composed using BEZENT design system primitives (`Page`, `PageHeader`, `Card`, `Grid`, `Stack`, `Inline`, `Toolbar`, `Table`, `Badge`, `Avatar`, `Button`, `Input`, `Select`, `Modal`, `Alert`, `LoadingState`, `EmptyState`). Zero `.css` files created in `apps/web/src/applications/**`, zero inline `style={{ ... }}` attributes.
 - **Real Backend Contract Integration:** Integrated directly with Phase 02.6 endpoints:
   - `GET /api/v1/platform/tenants/summary` (displaying 4 metrics: Total, Active, Trial, Suspended).
@@ -42,35 +43,37 @@ Key achievements:
 
 The All Tenants implementation relies exclusively on the canonized BEZENT Design System:
 
-| Primitive | Category | Role in All Tenants Screen |
-|---|---|---|
-| `Page` | Layout | Root container enforcing standard shell gutters and max width. |
-| `PageHeader` | Layout | Page title ("All Tenants"), subtitle, and header action buttons (Refresh, Create Tenant). |
-| `Card` | Display | Container for metric cards (`variant="flat"`) and main data table card (`variant="default"`). |
-| `Grid` | Layout | 4-column responsive grid layout (`columns={4} gap="md"`) for summary metrics. |
-| `Stack` | Layout | Vertical flex composition for cards, cells, modal dialogs, and toolbar rows. |
-| `Inline` | Layout | Horizontal flex composition for badges, avatars, pagination, and filter dropdowns. |
-| `Toolbar` | Actions | Filter controls and search bar layout with left/right distribution. |
-| `Table` | Data | Semantic `table`, `thead`, `tbody`, `tr`, `th`, and `td` container for tenant records. |
-| `Avatar` | Display | Initials-based avatar fallback and tenant logo container (`size="md"`). |
-| `Badge` | Feedback | Status indicators (`Active`, `Trial`, `Suspended`, `Pending Setup`, `Paid`). |
-| `Button` | Actions | Interactive controls (`Refresh`, `Create Tenant`, `Suspend`, `Reactivate`, `View Tenant`). |
-| `Input` | Forms | Search box and suspension reason form input. |
-| `Select` | Forms | Dropdown menus for Status, Application, Plan, Date range, and Page Size. |
-| `Modal` | Overlay | Accessible dialogs for Suspend and Reactivate confirmation flows. |
-| `Alert` | Feedback | Success notifications, API error banners, and modal impact warnings. |
-| `LoadingState` | Feedback | Accessible spinner with status label during initial data retrieval. |
-| `EmptyState` | Data | Descriptive zero-state graphics and recovery CTA when no records match. |
-| `BezentIcon` | Display | Vector icons (`organization`, `check`, `assignment`, `lock`, `refresh`, `plus`, `chevronLeft`, `chevronRight`). |
+| Primitive      | Category | Role in All Tenants Screen                                                                                      |
+| -------------- | -------- | --------------------------------------------------------------------------------------------------------------- |
+| `Page`         | Layout   | Root container enforcing standard shell gutters and max width.                                                  |
+| `PageHeader`   | Layout   | Page title ("All Tenants"), subtitle, and header action buttons (Refresh, Create Tenant).                       |
+| `Card`         | Display  | Container for metric cards (`variant="flat"`) and main data table card (`variant="default"`).                   |
+| `Grid`         | Layout   | 4-column responsive grid layout (`columns={4} gap="md"`) for summary metrics.                                   |
+| `Stack`        | Layout   | Vertical flex composition for cards, cells, modal dialogs, and toolbar rows.                                    |
+| `Inline`       | Layout   | Horizontal flex composition for badges, avatars, pagination, and filter dropdowns.                              |
+| `Toolbar`      | Actions  | Filter controls and search bar layout with left/right distribution.                                             |
+| `Table`        | Data     | Semantic `table`, `thead`, `tbody`, `tr`, `th`, and `td` container for tenant records.                          |
+| `Avatar`       | Display  | Initials-based avatar fallback and tenant logo container (`size="md"`).                                         |
+| `Badge`        | Feedback | Status indicators (`Active`, `Trial`, `Suspended`, `Pending Setup`, `Paid`).                                    |
+| `Button`       | Actions  | Interactive controls (`Refresh`, `Create Tenant`, `Suspend`, `Reactivate`, `View Tenant`).                      |
+| `Input`        | Forms    | Search box and suspension reason form input.                                                                    |
+| `Select`       | Forms    | Dropdown menus for Status, Application, Plan, Date range, and Page Size.                                        |
+| `Modal`        | Overlay  | Accessible dialogs for Suspend and Reactivate confirmation flows.                                               |
+| `Alert`        | Feedback | Success notifications, API error banners, and modal impact warnings.                                            |
+| `LoadingState` | Feedback | Accessible spinner with status label during initial data retrieval.                                             |
+| `EmptyState`   | Data     | Descriptive zero-state graphics and recovery CTA when no records match.                                         |
+| `BezentIcon`   | Display  | Vector icons (`organization`, `check`, `assignment`, `lock`, `refresh`, `plus`, `chevronLeft`, `chevronRight`). |
 
 ---
 
 ## 4. Files Created & Modified
 
 ### Created
+
 - None (All Tenants screen replaces pre-existing draft implementation directly in `apps/web/src/applications/super-admin/pages/TenantsPage.tsx`).
 
 ### Modified
+
 1. `apps/web/src/applications/super-admin/pages/TenantsPage.tsx`
    - Complete rewrite adhering to Phase 03A specification.
    - Integrated summary metrics, debounced search, dynamic filters, server-side sorting, pagination, and lifecycle modals.
@@ -88,8 +91,10 @@ The All Tenants implementation relies exclusively on the canonized BEZENT Design
 ## 5. Actual API Contracts Consumed
 
 ### 1. Summary Metrics
+
 - **Endpoint:** `GET /api/v1/platform/tenants/summary`
 - **Response Format:**
+
 ```json
 {
   "data": {
@@ -102,8 +107,10 @@ The All Tenants implementation relies exclusively on the canonized BEZENT Design
 ```
 
 ### 2. Tenant List
+
 - **Endpoint:** `GET /api/v1/platform/tenants?search=&status=&application=&planId=&createdFrom=&createdTo=&sortBy=createdAt&sortOrder=desc&page=1&limit=20`
 - **Response Format:**
+
 ```json
 {
   "data": {
@@ -140,8 +147,10 @@ The All Tenants implementation relies exclusively on the canonized BEZENT Design
 ```
 
 ### 3. Plans Catalog
+
 - **Endpoint:** `GET /api/v1/platform/plans`
 - **Response Format:**
+
 ```json
 {
   "data": [
@@ -161,6 +170,7 @@ The All Tenants implementation relies exclusively on the canonized BEZENT Design
 ```
 
 ### 4. Lifecycle Actions
+
 - **Suspend:** `POST /api/v1/platform/tenants/:id/suspend` with body `{"reason": "Administrative suspension"}`.
 - **Reactivate:** `POST /api/v1/platform/tenants/:id/activate` with body `{"reason": "Administrative reactivation"}`.
 
@@ -168,15 +178,15 @@ The All Tenants implementation relies exclusively on the canonized BEZENT Design
 
 ## 6. Search, Filter & Sort Mapping
 
-| UI Control | State Variable | Backend Query Parameter | Mapping Behavior |
-|---|---|---|---|
-| Search Field | `debouncedSearch` | `search` | 300ms debounce; searches tenant name, tenant ID, or admin email. |
-| Status Select | `statusFilter` | `status` | Maps `'all'` to undefined, otherwise `'active'`, `'trial'`, `'suspended'`, `'pending_setup'`. |
-| Application Select | `applicationFilter` | `application` | Maps `'all'` to undefined, otherwise `'hrms'`, `'crm'`, `'project_management'`. |
-| Plan Select | `planFilter` | `planId` | Dynamic options from `listPlans()`; maps selected ID to `planId`. |
-| Created Date | `dateFilter` | `createdFrom`, `createdTo` | Computes ISO timestamp boundaries for Last 7, 30, or 90 days. |
-| Table Header Clicks | `sortBy`, `sortOrder` | `sortBy`, `sortOrder` | Supports `'name'`, `'createdAt'`, `'status'`, `'id'` with `'asc'` / `'desc'`. |
-| Page & Size | `page`, `pageSize` | `page`, `limit` | Resets to page 1 on search or filter mutation; limit options: 10, 20, 50. |
+| UI Control          | State Variable        | Backend Query Parameter    | Mapping Behavior                                                                              |
+| ------------------- | --------------------- | -------------------------- | --------------------------------------------------------------------------------------------- |
+| Search Field        | `debouncedSearch`     | `search`                   | 300ms debounce; searches tenant name, tenant ID, or admin email.                              |
+| Status Select       | `statusFilter`        | `status`                   | Maps `'all'` to undefined, otherwise `'active'`, `'trial'`, `'suspended'`, `'pending_setup'`. |
+| Application Select  | `applicationFilter`   | `application`              | Maps `'all'` to undefined, otherwise `'hrms'`, `'crm'`, `'project_management'`.               |
+| Plan Select         | `planFilter`          | `planId`                   | Dynamic options from `listPlans()`; maps selected ID to `planId`.                             |
+| Created Date        | `dateFilter`          | `createdFrom`, `createdTo` | Computes ISO timestamp boundaries for Last 7, 30, or 90 days.                                 |
+| Table Header Clicks | `sortBy`, `sortOrder` | `sortBy`, `sortOrder`      | Supports `'name'`, `'createdAt'`, `'status'`, `'id'` with `'asc'` / `'desc'`.                 |
+| Page & Size         | `page`, `pageSize`    | `page`, `limit`            | Resets to page 1 on search or filter mutation; limit options: 10, 20, 50.                     |
 
 ---
 

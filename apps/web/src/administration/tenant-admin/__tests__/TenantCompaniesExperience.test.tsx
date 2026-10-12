@@ -196,7 +196,9 @@ describe('Tenant Admin Companies Experience Visual & Functional Verification', (
     );
 
     expect(html).toContain('No companies yet');
-    expect(html).toContain('Create your first legal entity to begin configuring your organization.');
+    expect(html).toContain(
+      'Create your first legal entity to begin configuring your organization.',
+    );
     expect(html).toContain('+ Add First Company');
   });
 

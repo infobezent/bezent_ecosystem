@@ -12,7 +12,9 @@
   object-fit: contain;
   border-radius: 50%;
   aspect-ratio: 1 / 1;
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), filter 0.18s ease;
+  transition:
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.18s ease;
 }
 
 .bezent-logo__mark:hover {

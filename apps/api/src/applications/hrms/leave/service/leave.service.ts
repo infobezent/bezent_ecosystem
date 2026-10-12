@@ -1,11 +1,12 @@
 import { LeaveRepository, leaveRepository } from '../repository/leave.repository.js';
 import { BadRequestError, ConflictError } from '../../../../app/errors/AppError.js';
-import type { ApplyLeaveInput, LeaveBalanceSummary, EmployeeLeaveRequest } from '../types/leave.types.js';
+import type {
+  ApplyLeaveInput,
+  LeaveBalanceSummary,
+  EmployeeLeaveRequest,
+} from '../types/leave.types.js';
 import { ruleEngine } from '../../../../platform/rules/index.js';
-import {
-  LEAVE_BALANCE_SUFFICIENCY_RULE,
-  type LeaveBalanceRuleFacts,
-} from '../rules/leaveRules.js';
+import { LEAVE_BALANCE_SUFFICIENCY_RULE, type LeaveBalanceRuleFacts } from '../rules/leaveRules.js';
 
 export class LeaveService {
   constructor(private readonly repo: LeaveRepository = leaveRepository) {}

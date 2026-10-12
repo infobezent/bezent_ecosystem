@@ -5,9 +5,7 @@ import {
 } from '../service/attendanceOverview.service.js';
 
 export class AttendanceOverviewController {
-  constructor(
-    private readonly service: AttendanceOverviewService = attendanceOverviewService,
-  ) {}
+  constructor(private readonly service: AttendanceOverviewService = attendanceOverviewService) {}
 
   /**
    * GET /hrms/attendance/overview
@@ -20,8 +18,8 @@ export class AttendanceOverviewController {
         req.query.trendRange === '30d'
           ? '30d'
           : req.query.trendRange === 'custom'
-          ? 'custom'
-          : '7d';
+            ? 'custom'
+            : '7d';
 
       const params = {
         date: typeof req.query.date === 'string' ? req.query.date : undefined,
@@ -54,17 +52,9 @@ export class AttendanceOverviewController {
     try {
       const { tenantId, companyId } = req.companyContext!;
       const date =
-        typeof req.query.date === 'string'
-          ? req.query.date
-          : new Date().toISOString().slice(0, 10);
+        typeof req.query.date === 'string' ? req.query.date : new Date().toISOString().slice(0, 10);
 
-      const data = await this.service.getTodayKpis(
-        tenantId,
-        companyId,
-        date,
-        req.access,
-        req.user,
-      );
+      const data = await this.service.getTodayKpis(tenantId, companyId, date, req.access, req.user);
 
       res.json({ data });
     } catch (err) {
@@ -82,8 +72,8 @@ export class AttendanceOverviewController {
         req.query.trendRange === '30d'
           ? '30d'
           : req.query.trendRange === 'custom'
-          ? 'custom'
-          : '7d';
+            ? 'custom'
+            : '7d';
 
       const params = {
         date: typeof req.query.date === 'string' ? req.query.date : undefined,
@@ -107,9 +97,7 @@ export class AttendanceOverviewController {
     try {
       const { tenantId, companyId } = req.companyContext!;
       const date =
-        typeof req.query.date === 'string'
-          ? req.query.date
-          : new Date().toISOString().slice(0, 10);
+        typeof req.query.date === 'string' ? req.query.date : new Date().toISOString().slice(0, 10);
 
       const data = await this.service.getDepartmentComparison(
         tenantId,
@@ -145,9 +133,7 @@ export class AttendanceOverviewController {
     try {
       const { tenantId, companyId } = req.companyContext!;
       const date =
-        typeof req.query.date === 'string'
-          ? req.query.date
-          : new Date().toISOString().slice(0, 10);
+        typeof req.query.date === 'string' ? req.query.date : new Date().toISOString().slice(0, 10);
 
       const data = await this.service.getProcessingHealth(
         tenantId,

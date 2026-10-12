@@ -1,11 +1,4 @@
-import {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-  useMemo,
-  type KeyboardEvent,
-} from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo, type KeyboardEvent } from 'react';
 import {
   getAllCountries,
   getCountry,
@@ -105,14 +98,10 @@ export function CountrySelect({
       setIsOpen(false);
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setHighlightedIndex((prev) =>
-        prev < filteredCountries.length - 1 ? prev + 1 : 0,
-      );
+      setHighlightedIndex((prev) => (prev < filteredCountries.length - 1 ? prev + 1 : 0));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setHighlightedIndex((prev) =>
-        prev > 0 ? prev - 1 : filteredCountries.length - 1,
-      );
+      setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : filteredCountries.length - 1));
     } else if (e.key === 'Enter') {
       e.preventDefault();
       const current = filteredCountries[highlightedIndex];
@@ -214,9 +203,7 @@ export function CountrySelect({
                       <CountryFlag countryCode={c.code} size="sm" />
                       <span>{c.name}</span>
                     </div>
-                    <span className="bezent-country-select-option__meta">
-                      {c.callingCode}
-                    </span>
+                    <span className="bezent-country-select-option__meta">{c.callingCode}</span>
                   </li>
                 );
               })

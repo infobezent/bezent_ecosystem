@@ -3,14 +3,7 @@
  * Manages company regional preferences and user display preferences.
  */
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useMemo,
-  useCallback,
-  type ReactNode,
-} from 'react';
+import { createContext, useContext, useState, useMemo, useCallback, type ReactNode } from 'react';
 import {
   formatDate as formatBaseDate,
   formatTime as formatBaseTime,
@@ -41,8 +34,14 @@ export interface PreferencesContextValue {
   setUserPreferences: (prefs: Partial<UserPreferences>) => void;
 
   // Convenient bound formatting helpers
-  formatDate: (date: Date | string | number, options?: { dateStyle?: 'full' | 'long' | 'medium' | 'short' }) => string;
-  formatTime: (date: Date | string | number, options?: { timeStyle?: 'full' | 'long' | 'medium' | 'short' }) => string;
+  formatDate: (
+    date: Date | string | number,
+    options?: { dateStyle?: 'full' | 'long' | 'medium' | 'short' },
+  ) => string;
+  formatTime: (
+    date: Date | string | number,
+    options?: { timeStyle?: 'full' | 'long' | 'medium' | 'short' },
+  ) => string;
   formatDateTime: (date: Date | string | number) => string;
   formatCurrency: (amount: number, currencyCode?: string) => string;
 
@@ -50,10 +49,7 @@ export interface PreferencesContextValue {
    * Strictly evaluates date in company/policy timezone (e.g. for attendance logs).
    * Invariant: Never overrides policy timezone with user browser timezone!
    */
-  formatPolicyTimestamp: (
-    date: Date | string | number,
-    policyTimezone?: string,
-  ) => string;
+  formatPolicyTimestamp: (date: Date | string | number, policyTimezone?: string) => string;
 }
 
 const DEFAULT_COMPANY_PREFERENCES: CompanyPreferences = {
@@ -118,7 +114,10 @@ export function PreferencesProvider({
   }, []);
 
   const formatDate = useCallback(
-    (date: Date | string | number, options?: { dateStyle?: 'full' | 'long' | 'medium' | 'short' }) => {
+    (
+      date: Date | string | number,
+      options?: { dateStyle?: 'full' | 'long' | 'medium' | 'short' },
+    ) => {
       return formatBaseDate(date, {
         locale: userPreferences.preferredLocale,
         timeZone: userPreferences.preferredDisplayTimezone,
@@ -129,7 +128,10 @@ export function PreferencesProvider({
   );
 
   const formatTime = useCallback(
-    (date: Date | string | number, options?: { timeStyle?: 'full' | 'long' | 'medium' | 'short' }) => {
+    (
+      date: Date | string | number,
+      options?: { timeStyle?: 'full' | 'long' | 'medium' | 'short' },
+    ) => {
       return formatBaseTime(date, {
         locale: userPreferences.preferredLocale,
         timeZone: userPreferences.preferredDisplayTimezone,

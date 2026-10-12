@@ -1,13 +1,16 @@
-import { entitlementOverrideRepository, EntitlementOverrideRepository } from '../repository/entitlementOverride.repository.js';
-import { subscriptionRepository, SubscriptionRepository } from '../../subscriptions/repository/subscription.repository.js';
+import {
+  entitlementOverrideRepository,
+  EntitlementOverrideRepository,
+} from '../repository/entitlementOverride.repository.js';
+import {
+  subscriptionRepository,
+  SubscriptionRepository,
+} from '../../subscriptions/repository/subscription.repository.js';
 import { planRepository, PlanRepository } from '../../plans/repository/plan.repository.js';
 import { moduleRepository, ModuleRepository } from '../../modules/repository/module.repository.js';
 import { tenantRepository, TenantRepository } from '../../tenants/repository/tenant.repository.js';
 import { auditService, AuditService } from '../../audit/service/audit.service.js';
-import {
-  NotFoundError,
-  BadRequestError,
-} from '../../../app/errors/AppError.js';
+import { NotFoundError, BadRequestError } from '../../../app/errors/AppError.js';
 import { generateSurrogateId } from '../../auth/security.js';
 import type {
   EffectiveEntitlementResult,
@@ -59,7 +62,11 @@ export class EffectiveEntitlementService {
     const activeSub = await this.subRepo.findActiveByTenantAndApp(tenantId, applicationCode);
     const overrides = await this.overrideRepo.listActive(tenantId, applicationCode);
 
-    let planEntitlementsList: Array<{ moduleCode: string; isEnabled: boolean; limits?: Record<string, unknown> | null }> = [];
+    let planEntitlementsList: Array<{
+      moduleCode: string;
+      isEnabled: boolean;
+      limits?: Record<string, unknown> | null;
+    }> = [];
     let planName: string | null = null;
 
     if (activeSub) {
@@ -96,7 +103,11 @@ export class EffectiveEntitlementService {
           source = 'none';
         } else {
           // Legacy tenant without commercial subscriptions
-          const legacyTenantEntitlement = await this.moduleRepo.findEntitlement(tenantId, applicationCode as unknown as ModuleCode, null);
+          const legacyTenantEntitlement = await this.moduleRepo.findEntitlement(
+            tenantId,
+            applicationCode as unknown as ModuleCode,
+            null,
+          );
           if (legacyTenantEntitlement) {
             if (legacyTenantEntitlement.status === 'enabled') {
               isEntitled = true;
@@ -113,7 +124,11 @@ export class EffectiveEntitlementService {
 
     // If company specified, check if company is within tenant ceiling
     if (companyId) {
-      const legacyCompanyEntitlement = await this.moduleRepo.findEntitlement(tenantId, applicationCode as unknown as ModuleCode, companyId);
+      const legacyCompanyEntitlement = await this.moduleRepo.findEntitlement(
+        tenantId,
+        applicationCode as unknown as ModuleCode,
+        companyId,
+      );
       if (legacyCompanyEntitlement?.status === 'disabled') {
         isEntitled = false;
       }
@@ -193,7 +208,11 @@ export class EffectiveEntitlementService {
     let authorizedByUserId = actor?.id;
     if (!authorizedByUserId) {
       const db = getDb();
-      const [sa] = await db.select({ id: users.id }).from(users).where(eq(users.isSuperAdmin, true)).limit(1);
+      const [sa] = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.isSuperAdmin, true))
+        .limit(1);
       authorizedByUserId = sa?.id || 'usr_superadmin_01';
     }
 
@@ -250,15 +269,15 @@ export class EffectiveEntitlementService {
     let revokedByUserId = actor?.id;
     if (!revokedByUserId) {
       const db = getDb();
-      const [sa] = await db.select({ id: users.id }).from(users).where(eq(users.isSuperAdmin, true)).limit(1);
+      const [sa] = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.isSuperAdmin, true))
+        .limit(1);
       revokedByUserId = sa?.id || 'usr_superadmin_01';
     }
 
-    const revoked = await this.overrideRepo.revoke(
-      overrideId,
-      revokedByUserId,
-      dto.reason,
-    );
+    const revoked = await this.overrideRepo.revoke(overrideId, revokedByUserId, dto.reason);
 
     await this.audit.logEvent({
       actorUserId: actor?.id,
@@ -280,7 +299,10 @@ export class EffectiveEntitlementService {
     return this.overrideRepo.listAllByTenant(tenantId);
   }
 
-  async reconcile(tenantId: string, applicationCode: ApplicationCode): Promise<ReconciliationReport> {
+  async reconcile(
+    tenantId: string,
+    applicationCode: ApplicationCode,
+  ): Promise<ReconciliationReport> {
     const tenant = await this.tenantRepo.findById(tenantId);
     if (!tenant) {
       throw new NotFoundError(`Tenant '${tenantId}' not found`);
@@ -296,9 +318,7 @@ export class EffectiveEntitlementService {
     if (activeSub) {
       plan = await this.planRepo.findById(activeSub.planId);
       if (plan) {
-        commercialModules = plan.entitlements
-          .filter((e) => e.isEnabled)
-          .map((e) => e.moduleCode);
+        commercialModules = plan.entitlements.filter((e) => e.isEnabled).map((e) => e.moduleCode);
       }
     }
 

@@ -34,6 +34,7 @@ Decides and executes business action
 ## What the Rules Engine IS vs. What It IS NOT
 
 ### The Rules Engine IS:
+
 - **A generic evaluator:** Pure, synchronous, side-effect free in-memory condition evaluator.
 - **A condition / operator model:** Atomic conditions and composable groups (`ALL`, `ANY`).
 - **Fact-based:** Evaluates runtime facts passed as explicit data dictionaries without arbitrary access to `req`, `db`, or full entities.
@@ -41,6 +42,7 @@ Decides and executes business action
 - **Deterministic:** Repeated evaluation with identical facts always yields identical outcomes.
 
 ### The Rules Engine IS NOT:
+
 - **NOT RBAC / Authorization:** Permission checks, company access, and role assignments remain in `platform/access`. Never replace `requirePermission()` with rule evaluation.
 - **NOT DTO / Schema Validation:** Request body parsing and structural types remain in Zod schemas under `validation/`.
 - **NOT Common Data Validation:** Syntax, format, postal code, phone, and address rules remain in `platform/data/`.
@@ -56,20 +58,20 @@ Decides and executes business action
 
 The engine exposes 12 strictly typed, deterministic operators:
 
-| Operator | Purpose | Type Enforcement |
-| :--- | :--- | :--- |
-| `EQUALS` | Strict equality | Strict primitives, arrays (element-wise), dates |
-| `NOT_EQUALS` | Negation of `EQUALS` | Same as `EQUALS` |
-| `GREATER_THAN` | Relational strictly greater | Numbers or Dates (no string-number coercion) |
-| `GREATER_THAN_OR_EQUAL` | Relational greater than or equal | Numbers or Dates |
-| `LESS_THAN` | Relational strictly less | Numbers or Dates |
-| `LESS_THAN_OR_EQUAL` | Relational less than or equal | Numbers or Dates |
-| `IN` | Inclusion in array | Expected value must be an Array |
-| `NOT_IN` | Exclusion from array | Expected value must be an Array |
-| `CONTAINS` | Substring or array element match | Actual must be string or Array |
-| `NOT_CONTAINS` | Negation of `CONTAINS` | Actual must be string or Array |
-| `EXISTS` | Fact presence check | Value is neither `undefined` nor `null` |
-| `NOT_EXISTS` | Fact absence check | Value is `undefined` or `null` |
+| Operator                | Purpose                          | Type Enforcement                                |
+| :---------------------- | :------------------------------- | :---------------------------------------------- |
+| `EQUALS`                | Strict equality                  | Strict primitives, arrays (element-wise), dates |
+| `NOT_EQUALS`            | Negation of `EQUALS`             | Same as `EQUALS`                                |
+| `GREATER_THAN`          | Relational strictly greater      | Numbers or Dates (no string-number coercion)    |
+| `GREATER_THAN_OR_EQUAL` | Relational greater than or equal | Numbers or Dates                                |
+| `LESS_THAN`             | Relational strictly less         | Numbers or Dates                                |
+| `LESS_THAN_OR_EQUAL`    | Relational less than or equal    | Numbers or Dates                                |
+| `IN`                    | Inclusion in array               | Expected value must be an Array                 |
+| `NOT_IN`                | Exclusion from array             | Expected value must be an Array                 |
+| `CONTAINS`              | Substring or array element match | Actual must be string or Array                  |
+| `NOT_CONTAINS`          | Negation of `CONTAINS`           | Actual must be string or Array                  |
+| `EXISTS`                | Fact presence check              | Value is neither `undefined` nor `null`         |
+| `NOT_EXISTS`            | Fact absence check               | Value is `undefined` or `null`                  |
 
 ---
 
@@ -78,6 +80,7 @@ The engine exposes 12 strictly typed, deterministic operators:
 ### HRMS Leave Domain (`applications/hrms/leave/`)
 
 1. **Rule Definition (`rules/leaveRules.ts`):**
+
 ```typescript
 export const LEAVE_BALANCE_SUFFICIENCY_RULE: Rule = {
   id: 'hrms.leave.balance_sufficiency',
@@ -109,6 +112,7 @@ export const LEAVE_BALANCE_SUFFICIENCY_RULE: Rule = {
 ```
 
 2. **Domain Service Evaluation (`service/leave.service.ts`):**
+
 ```typescript
 const facts: LeaveBalanceRuleFacts = {
   leaveType: input.leaveType,

@@ -34,7 +34,20 @@ export class AttendanceOnDutyRepository {
   formatDutyPeriod(startDate: string, endDate: string): string {
     const formatDate = (dStr: string) => {
       const d = new Date(`${dStr}T00:00:00Z`);
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ];
       const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
       const month = months[d.getUTCMonth()];
       const day = String(d.getUTCDate()).padStart(2, '0');
@@ -165,8 +178,20 @@ export class AttendanceOnDutyRepository {
 
     // Check conflicts context
     const [leaveConflict, regConflict, isPayrollLocked] = await Promise.all([
-      this.checkOverlappingLeave(tenantId, companyId, row.req.employeeId, row.req.startDate, row.req.endDate),
-      this.checkOverlappingRegularization(tenantId, companyId, row.req.employeeId, row.req.startDate, row.req.endDate),
+      this.checkOverlappingLeave(
+        tenantId,
+        companyId,
+        row.req.employeeId,
+        row.req.startDate,
+        row.req.endDate,
+      ),
+      this.checkOverlappingRegularization(
+        tenantId,
+        companyId,
+        row.req.employeeId,
+        row.req.startDate,
+        row.req.endDate,
+      ),
       this.checkDateInLockedPeriod(tenantId, companyId, row.req.startDate, row.req.endDate),
     ]);
 
@@ -286,7 +311,20 @@ export class AttendanceOnDutyRepository {
     }
 
     if (filter.approvalStatus && filter.approvalStatus !== 'all') {
-      conditions.push(eq(attendanceOnDutyRequests.status, filter.approvalStatus as 'draft' | 'submitted' | 'under_review' | 'approved' | 'rejected' | 'withdrawn' | 'awaiting_info' | 'cancelled'));
+      conditions.push(
+        eq(
+          attendanceOnDutyRequests.status,
+          filter.approvalStatus as
+            | 'draft'
+            | 'submitted'
+            | 'under_review'
+            | 'approved'
+            | 'rejected'
+            | 'withdrawn'
+            | 'awaiting_info'
+            | 'cancelled',
+        ),
+      );
     }
 
     if (filter.odTypeId && filter.odTypeId !== 'all') {
@@ -310,7 +348,12 @@ export class AttendanceOnDutyRepository {
     }
 
     if (filter.durationType && filter.durationType !== 'all') {
-      conditions.push(eq(attendanceOnDutyRequests.durationType, filter.durationType as 'full_day' | 'half_day' | 'hourly' | 'multi_day'));
+      conditions.push(
+        eq(
+          attendanceOnDutyRequests.durationType,
+          filter.durationType as 'full_day' | 'half_day' | 'hourly' | 'multi_day',
+        ),
+      );
     }
 
     if (filter.assignedTo && filter.assignedTo !== 'all') {
@@ -333,7 +376,9 @@ export class AttendanceOnDutyRepository {
       conditions.push(gte(attendanceOnDutyRequests.submittedAt, new Date(filter.submittedFrom)));
     }
     if (filter.submittedTo) {
-      conditions.push(lte(attendanceOnDutyRequests.submittedAt, new Date(`${filter.submittedTo}T23:59:59`)));
+      conditions.push(
+        lte(attendanceOnDutyRequests.submittedAt, new Date(`${filter.submittedTo}T23:59:59`)),
+      );
     }
 
     if (filter.search && filter.search.trim()) {
@@ -560,7 +605,11 @@ export class AttendanceOnDutyRepository {
             eq(attendanceRegularizations.tenantId, tenantId),
             eq(attendanceRegularizations.companyId, companyId),
             eq(attendanceRegularizations.employeeId, employeeId),
-            inArray(attendanceRegularizations.approvalStatus, ['submitted', 'under_review', 'approved']),
+            inArray(attendanceRegularizations.approvalStatus, [
+              'submitted',
+              'under_review',
+              'approved',
+            ]),
             gte(attendanceRegularizations.workday, startDate),
             lte(attendanceRegularizations.workday, endDate),
           ),
@@ -607,10 +656,7 @@ export class AttendanceOnDutyRepository {
     await db.insert(attendanceOnDutyWorkdays).values(workdays);
   }
 
-  async updateWorkday(
-    id: string,
-    patch: Partial<NewAttendanceOnDutyWorkdayRecord>,
-  ): Promise<void> {
+  async updateWorkday(id: string, patch: Partial<NewAttendanceOnDutyWorkdayRecord>): Promise<void> {
     const db = getDb();
     await db
       .update(attendanceOnDutyWorkdays)
@@ -681,7 +727,12 @@ export class AttendanceOnDutyRepository {
             eq(attendanceExceptions.companyId, companyId),
             eq(attendanceExceptions.employeeId, employeeId),
             eq(attendanceExceptions.workday, workday),
-            inArray(attendanceExceptions.status, ['open', 'assigned', 'in_review', 'pending_action']),
+            inArray(attendanceExceptions.status, [
+              'open',
+              'assigned',
+              'in_review',
+              'pending_action',
+            ]),
           ),
         );
 
@@ -703,7 +754,12 @@ export class AttendanceOnDutyRepository {
             eq(attendanceExceptions.companyId, companyId),
             eq(attendanceExceptions.employeeId, employeeId),
             eq(attendanceExceptions.workday, workday),
-            inArray(attendanceExceptions.status, ['open', 'assigned', 'in_review', 'pending_action']),
+            inArray(attendanceExceptions.status, [
+              'open',
+              'assigned',
+              'in_review',
+              'pending_action',
+            ]),
           ),
         );
 

@@ -19,7 +19,10 @@ export function validateCreatePlan(body: unknown): CreatePlanDto {
   const data = body as Record<string, unknown>;
   const errors: Record<string, string> = {};
 
-  if (!data.applicationCode || !['hrms', 'crm', 'project_management'].includes(String(data.applicationCode))) {
+  if (
+    !data.applicationCode ||
+    !['hrms', 'crm', 'project_management'].includes(String(data.applicationCode))
+  ) {
     errors.applicationCode = 'applicationCode must be hrms, crm, or project_management';
   }
   if (!data.code || typeof data.code !== 'string' || !data.code.trim()) {
@@ -50,8 +53,12 @@ export function validateCreatePlan(body: unknown): CreatePlanDto {
     trialEligible: data.trialEligible !== undefined ? Boolean(data.trialEligible) : true,
     trialDurationDays: typeof data.trialDurationDays === 'number' ? data.trialDurationDays : 14,
     isCustom: Boolean(data.isCustom),
-    initialPrices: Array.isArray(data.initialPrices) ? (data.initialPrices as CreatePlanDto['initialPrices']) : undefined,
-    entitlements: Array.isArray(data.entitlements) ? (data.entitlements as CreatePlanDto['entitlements']) : undefined,
+    initialPrices: Array.isArray(data.initialPrices)
+      ? (data.initialPrices as CreatePlanDto['initialPrices'])
+      : undefined,
+    entitlements: Array.isArray(data.entitlements)
+      ? (data.entitlements as CreatePlanDto['entitlements'])
+      : undefined,
   };
 }
 
@@ -68,9 +75,11 @@ export function validateUpdatePlan(body: unknown): UpdatePlanDto {
     status: data.status ? (String(data.status).trim() as PlanStatus) : undefined,
     defaultSeats: typeof data.defaultSeats === 'number' ? data.defaultSeats : undefined,
     minSeats: typeof data.minSeats === 'number' ? data.minSeats : undefined,
-    maxSeats: typeof data.maxSeats === 'number' || data.maxSeats === null ? data.maxSeats : undefined,
+    maxSeats:
+      typeof data.maxSeats === 'number' || data.maxSeats === null ? data.maxSeats : undefined,
     trialEligible: data.trialEligible !== undefined ? Boolean(data.trialEligible) : undefined,
-    trialDurationDays: typeof data.trialDurationDays === 'number' ? data.trialDurationDays : undefined,
+    trialDurationDays:
+      typeof data.trialDurationDays === 'number' ? data.trialDurationDays : undefined,
   };
 }
 
@@ -85,7 +94,10 @@ export function validateCreatePlanPrice(body: unknown): CreatePlanPriceDto {
   if (!data.currency || typeof data.currency !== 'string') {
     errors.currency = 'Currency is required';
   }
-  if (!data.billingInterval || !['monthly', 'annual', 'quarterly', 'custom'].includes(String(data.billingInterval))) {
+  if (
+    !data.billingInterval ||
+    !['monthly', 'annual', 'quarterly', 'custom'].includes(String(data.billingInterval))
+  ) {
     errors.billingInterval = 'billingInterval must be monthly, annual, quarterly, or custom';
   }
   if (typeof data.amountMinorUnits !== 'number' || data.amountMinorUnits < 0) {
@@ -116,13 +128,20 @@ export function validateUpdatePlanPrice(body: unknown): UpdatePlanPriceDto {
   return {
     amountMinorUnits: typeof data.amountMinorUnits === 'number' ? data.amountMinorUnits : undefined,
     status: data.status ? (String(data.status) as 'active' | 'deprecated') : undefined,
-    effectiveTo: data.effectiveTo !== undefined ? (data.effectiveTo ? new Date(String(data.effectiveTo)) : null) : undefined,
+    effectiveTo:
+      data.effectiveTo !== undefined
+        ? data.effectiveTo
+          ? new Date(String(data.effectiveTo))
+          : null
+        : undefined,
   };
 }
 
 export function parsePlanFilter(query: Record<string, unknown>): PlanFilter {
   return {
-    applicationCode: query.applicationCode ? (String(query.applicationCode) as ApplicationCode) : undefined,
+    applicationCode: query.applicationCode
+      ? (String(query.applicationCode) as ApplicationCode)
+      : undefined,
     status: query.status ? (String(query.status) as PlanStatus) : undefined,
     tier: query.tier ? String(query.tier) : undefined,
     search: query.search ? String(query.search) : undefined,

@@ -38,9 +38,7 @@ export function sanitizeFilename(originalName: string): string {
   }
 
   // Clean extension: lowercase, alphanumeric
-  const cleanExt = rawExt
-    .toLowerCase()
-    .replace(/[^a-z0-9.]/g, '');
+  const cleanExt = rawExt.toLowerCase().replace(/[^a-z0-9.]/g, '');
 
   // Truncate length safely (max 100 chars for base)
   if (cleanBase.length > 100) {
@@ -75,7 +73,9 @@ export function validateFile(
     errors.push('File cannot be empty (0 bytes)');
   } else if (input.size > policy.maxSizeBytes) {
     const maxMb = (policy.maxSizeBytes / (1024 * 1024)).toFixed(1);
-    errors.push(`File size (${(input.size / (1024 * 1024)).toFixed(2)} MB) exceeds allowed limit of ${maxMb} MB`);
+    errors.push(
+      `File size (${(input.size / (1024 * 1024)).toFixed(2)} MB) exceeds allowed limit of ${maxMb} MB`,
+    );
   }
 
   // 2. Extension Check
@@ -115,7 +115,9 @@ export function validateFile(
       errors.push(`Image width (${width}px) exceeds maximum allowed width of ${maxWidth}px`);
     }
     if (minHeight !== undefined && height < minHeight) {
-      errors.push(`Image height (${height}px) is less than minimum allowed height of ${minHeight}px`);
+      errors.push(
+        `Image height (${height}px) is less than minimum allowed height of ${minHeight}px`,
+      );
     }
     if (maxHeight !== undefined && height > maxHeight) {
       errors.push(`Image height (${height}px) exceeds maximum allowed height of ${maxHeight}px`);
@@ -173,12 +175,7 @@ export function verifyFileSignature(
   const mime = declaredMimeType.trim().toLowerCase();
 
   // PNG: 89 50 4E 47 0D 0A 1A 0A
-  if (
-    bytes[0] === 0x89 &&
-    bytes[1] === 0x50 &&
-    bytes[2] === 0x4e &&
-    bytes[3] === 0x47
-  ) {
+  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) {
     return { matches: mime === 'image/png', detectedMimeType: 'image/png' };
   }
 
@@ -206,12 +203,7 @@ export function verifyFileSignature(
   }
 
   // PDF: %PDF (25 50 44 46)
-  if (
-    bytes[0] === 0x25 &&
-    bytes[1] === 0x50 &&
-    bytes[2] === 0x44 &&
-    bytes[3] === 0x46
-  ) {
+  if (bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46) {
     return { matches: mime === 'application/pdf', detectedMimeType: 'application/pdf' };
   }
 

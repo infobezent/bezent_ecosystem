@@ -5,10 +5,7 @@ import { TenantAdminContext, type TenantAdminContextValue } from '../context/Ten
 import { CompanyLocationsPage } from '../pages/CompanyLocationsPage';
 import { AddLocationModal, isSameNormalizedAddress } from '../components/AddLocationModal';
 import { EditLocationModal } from '../components/EditLocationModal';
-import type {
-  TenantAdminCompanySummary,
-  WorkLocationRecord,
-} from '../types/tenantAdmin.types';
+import type { TenantAdminCompanySummary, WorkLocationRecord } from '../types/tenantAdmin.types';
 
 describe('Tenant Admin → Company Organization → Work Locations V1', () => {
   const mockCompany: TenantAdminCompanySummary = {
@@ -157,7 +154,9 @@ describe('Tenant Admin → Company Organization → Work Locations V1', () => {
   describe('1. Workspace Shell Invariants & Clean Hierarchy', () => {
     it('renders unified CompanyWorkspaceHeader with Organization active and NO Edit Company', () => {
       const html = renderToStaticMarkup(
-        <MemoryRouter initialEntries={['/tenant-admin/tenant/companies/comp_apj3d/organization/work-locations']}>
+        <MemoryRouter
+          initialEntries={['/tenant-admin/tenant/companies/comp_apj3d/organization/work-locations']}
+        >
           <TenantAdminContext.Provider value={mockContext}>
             <Routes>
               <Route
@@ -206,7 +205,9 @@ describe('Tenant Admin → Company Organization → Work Locations V1', () => {
       }
 
       renderToStaticMarkup(
-        <MemoryRouter initialEntries={['/tenant-admin/tenant/companies/comp_apj3d/organization/locations']}>
+        <MemoryRouter
+          initialEntries={['/tenant-admin/tenant/companies/comp_apj3d/organization/locations']}
+        >
           <Routes>
             <Route
               path="/tenant-admin/tenant/companies/:companyId/organization/locations"
@@ -216,14 +217,18 @@ describe('Tenant Admin → Company Organization → Work Locations V1', () => {
         </MemoryRouter>,
       );
 
-      expect(redirectedTo).toBe('/tenant-admin/tenant/companies/comp_apj3d/organization/work-locations');
+      expect(redirectedTo).toBe(
+        '/tenant-admin/tenant/companies/comp_apj3d/organization/work-locations',
+      );
     });
   });
 
   describe('2. Populated Work Locations Presentation', () => {
     it('renders real location records with name, code, type, location summary, and status', () => {
       const html = renderToStaticMarkup(
-        <MemoryRouter initialEntries={['/tenant-admin/tenant/companies/comp_apj3d/organization/work-locations']}>
+        <MemoryRouter
+          initialEntries={['/tenant-admin/tenant/companies/comp_apj3d/organization/work-locations']}
+        >
           <TenantAdminContext.Provider value={mockContext}>
             <Routes>
               <Route
@@ -275,7 +280,9 @@ describe('Tenant Admin → Company Organization → Work Locations V1', () => {
   describe('3. Single Creation CTA Invariant', () => {
     it('when 0 locations exist, shows clean Empty State with exactly ONE Add Location CTA', () => {
       const html = renderToStaticMarkup(
-        <MemoryRouter initialEntries={['/tenant-admin/tenant/companies/comp_apj3d/organization/work-locations']}>
+        <MemoryRouter
+          initialEntries={['/tenant-admin/tenant/companies/comp_apj3d/organization/work-locations']}
+        >
           <TenantAdminContext.Provider value={mockContext}>
             <Routes>
               <Route
@@ -358,7 +365,9 @@ describe('Tenant Admin → Company Organization → Work Locations V1', () => {
       );
 
       expect(htmlWithOffice).toContain('Registered office available');
-      expect(htmlWithOffice).toContain('Plot 42, SIPCOT Industrial Complex, Hosur, Tamil Nadu, 635126, India');
+      expect(htmlWithOffice).toContain(
+        'Plot 42, SIPCOT Industrial Complex, Hosur, Tamil Nadu, 635126, India',
+      );
       expect(htmlWithOffice).toContain('Use registered office');
 
       const companyWithoutOffice: TenantAdminCompanySummary = {
@@ -556,7 +565,11 @@ describe('Tenant Admin → Company Organization → Work Locations V1', () => {
   describe('6. Cross-Tenant Boundary Protection', () => {
     it('blocks foreign company ID and shows tenant isolation warning', () => {
       const html = renderToStaticMarkup(
-        <MemoryRouter initialEntries={['/tenant-admin/tenant/companies/comp_foreign_999/organization/work-locations']}>
+        <MemoryRouter
+          initialEntries={[
+            '/tenant-admin/tenant/companies/comp_foreign_999/organization/work-locations',
+          ]}
+        >
           <TenantAdminContext.Provider value={mockContext}>
             <Routes>
               <Route

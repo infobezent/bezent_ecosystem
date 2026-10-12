@@ -8,7 +8,10 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { TenantAdminContext, type TenantAdminContextValue } from '../context/TenantAdminContext';
 import { TenantProfilePage } from '../pages/TenantProfilePage';
-import { EditTenantProfileDrawer, type ProfileGeneralData } from '../components/EditTenantProfileDrawer';
+import {
+  EditTenantProfileDrawer,
+  type ProfileGeneralData,
+} from '../components/EditTenantProfileDrawer';
 import { CreateCompanyPage } from '../pages/CreateCompanyPage';
 import { CompanyDetailsPage } from '../pages/CompanyDetailsPage';
 
@@ -21,7 +24,8 @@ describe('Phase 3 Media & Branding Frontend Integration', () => {
     contactEmail: 'admin@acme.com',
     contactPhone: '+1-555-0100',
     logoUrl: 'http://localhost:4000/api/v1/platform/media/tenants/ten_main_123/logo/logo1.png',
-    bannerUrl: 'http://localhost:4000/api/v1/platform/media/tenants/ten_main_123/banner/banner1.jpg',
+    bannerUrl:
+      'http://localhost:4000/api/v1/platform/media/tenants/ten_main_123/banner/banner1.jpg',
     createdAt: '2025-01-01T00:00:00.000Z',
   };
 
@@ -47,7 +51,8 @@ describe('Phase 3 Media & Branding Frontend Integration', () => {
         code: 'ACME-OPS',
         status: 'active',
         brandingMode: 'own_logo',
-        logoUrl: 'http://localhost:4000/api/v1/platform/media/tenants/ten_main_123/companies/comp_1/logo/c1.png',
+        logoUrl:
+          'http://localhost:4000/api/v1/platform/media/tenants/ten_main_123/companies/comp_1/logo/c1.png',
       },
       {
         id: 'comp_2',
@@ -104,8 +109,12 @@ describe('Phase 3 Media & Branding Frontend Integration', () => {
         </MemoryRouter>,
       );
 
-      expect(html).toContain('src="http://localhost:4000/api/v1/platform/media/tenants/ten_main_123/logo/logo1.png"');
-      expect(html).toContain('src="http://localhost:4000/api/v1/platform/media/tenants/ten_main_123/banner/banner1.jpg"');
+      expect(html).toContain(
+        'src="http://localhost:4000/api/v1/platform/media/tenants/ten_main_123/logo/logo1.png"',
+      );
+      expect(html).toContain(
+        'src="http://localhost:4000/api/v1/platform/media/tenants/ten_main_123/banner/banner1.jpg"',
+      );
       expect(html).toContain('Change Cover');
     });
 
@@ -197,7 +206,9 @@ describe('Phase 3 Media & Branding Frontend Integration', () => {
 
       expect(html).toContain('Acme Operations — Company Details');
       expect(html).toContain('Custom Logo');
-      expect(html).toContain('src="http://localhost:4000/api/v1/platform/media/tenants/ten_main_123/companies/comp_1/logo/c1.png"');
+      expect(html).toContain(
+        'src="http://localhost:4000/api/v1/platform/media/tenants/ten_main_123/companies/comp_1/logo/c1.png"',
+      );
     });
 
     it('renders Tenant Logo mode badge for tenant_logo company', () => {

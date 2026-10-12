@@ -58,16 +58,13 @@ export function TimePicker({
   const [isFocused, setIsFocused] = useState(false);
 
   // Parse hours, minutes, seconds from value
-  const parseTime = useCallback(
-    (timeStr: string) => {
-      const parts = (timeStr || '00:00:00').split(':');
-      const h = Math.min(23, Math.max(0, parseInt(parts[0] || '0', 10) || 0));
-      const m = Math.min(59, Math.max(0, parseInt(parts[1] || '0', 10) || 0));
-      const s = Math.min(59, Math.max(0, parseInt(parts[2] || '0', 10) || 0));
-      return { hours: h, minutes: m, seconds: s };
-    },
-    [],
-  );
+  const parseTime = useCallback((timeStr: string) => {
+    const parts = (timeStr || '00:00:00').split(':');
+    const h = Math.min(23, Math.max(0, parseInt(parts[0] || '0', 10) || 0));
+    const m = Math.min(59, Math.max(0, parseInt(parts[1] || '0', 10) || 0));
+    const s = Math.min(59, Math.max(0, parseInt(parts[2] || '0', 10) || 0));
+    return { hours: h, minutes: m, seconds: s };
+  }, []);
 
   const hasSeconds = propShowSeconds ?? (value ? value.split(':').length >= 3 : true);
   const parsed = parseTime(value);
@@ -230,16 +227,14 @@ export function TimePicker({
   const handleBlur = () => {
     // Check if focus moved outside the component
     setTimeout(() => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(document.activeElement)
-      ) {
+      if (containerRef.current && !containerRef.current.contains(document.activeElement)) {
         setIsFocused(false);
       }
     }, 0);
   };
 
-  const inputId = id || (label ? `bezent-time-${label.toLowerCase().replace(/\s+/g, '-')}` : undefined);
+  const inputId =
+    id || (label ? `bezent-time-${label.toLowerCase().replace(/\s+/g, '-')}` : undefined);
 
   return (
     <div
@@ -249,7 +244,11 @@ export function TimePicker({
       {label && (
         <label htmlFor={inputId ? `${inputId}-hours` : undefined} className="bezent-input-label">
           {label}
-          {required && <span className="bezent-required-indicator" aria-hidden="true">*</span>}
+          {required && (
+            <span className="bezent-required-indicator" aria-hidden="true">
+              *
+            </span>
+          )}
         </label>
       )}
 
@@ -264,14 +263,27 @@ export function TimePicker({
       >
         {/* Clock Glyph */}
         <span className="bezent-time-picker-icon" aria-hidden="true">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <circle cx="12" cy="12" r="10" />
             <polyline points="12 6 12 12 16 14" />
           </svg>
         </span>
 
         {/* 24-Hour Segments: HH : mm : ss */}
-        <div className="bezent-time-picker-segments" role="group" aria-label={ariaLabel || label || 'Time Picker'}>
+        <div
+          className="bezent-time-picker-segments"
+          role="group"
+          aria-label={ariaLabel || label || 'Time Picker'}
+        >
           {/* Hours Input */}
           <input
             ref={hoursInputRef}
@@ -292,7 +304,9 @@ export function TimePicker({
             onWheel={(e) => handleWheel('hours', e)}
           />
 
-          <span className="bezent-time-separator" aria-hidden="true">:</span>
+          <span className="bezent-time-separator" aria-hidden="true">
+            :
+          </span>
 
           {/* Minutes Input */}
           <input
@@ -316,7 +330,9 @@ export function TimePicker({
 
           {hasSeconds && (
             <>
-              <span className="bezent-time-separator" aria-hidden="true">:</span>
+              <span className="bezent-time-separator" aria-hidden="true">
+                :
+              </span>
 
               {/* Seconds Input */}
               <input
@@ -340,7 +356,9 @@ export function TimePicker({
             </>
           )}
 
-          <span className="bezent-time-badge" title="24-Hour notation">24h</span>
+          <span className="bezent-time-badge" title="24-Hour notation">
+            24h
+          </span>
         </div>
 
         {/* Stepper Buttons (▲ / ▼) */}
@@ -354,7 +372,14 @@ export function TimePicker({
               aria-label={`Increment ${activeSegment}`}
               title={`Increase ${activeSegment} (+1)`}
             >
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <svg
+                width="10"
+                height="10"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
                 <polyline points="18 15 12 9 6 15" />
               </svg>
             </button>
@@ -366,7 +391,14 @@ export function TimePicker({
               aria-label={`Decrement ${activeSegment}`}
               title={`Decrease ${activeSegment} (-1)`}
             >
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <svg
+                width="10"
+                height="10"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
                 <polyline points="6 9 12 15 18 9" />
               </svg>
             </button>
@@ -379,9 +411,7 @@ export function TimePicker({
           {error}
         </span>
       ) : helperText ? (
-        <span className="bezent-input-feedback">
-          {helperText}
-        </span>
+        <span className="bezent-input-feedback">{helperText}</span>
       ) : null}
     </div>
   );

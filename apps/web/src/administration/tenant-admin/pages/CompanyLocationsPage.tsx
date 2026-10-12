@@ -30,9 +30,7 @@ export interface CompanyLocationsPageProps {
   initialLocations?: WorkLocationRecord[];
 }
 
-export function CompanyLocationsPage({
-  initialLocations,
-}: CompanyLocationsPageProps = {}) {
+export function CompanyLocationsPage({ initialLocations }: CompanyLocationsPageProps = {}) {
   const { companyId } = useParams<{ companyId: string }>();
   const navigate = useNavigate();
   const { companies, isLoading: isContextLoading, selectCompany } = useTenantAdmin();
@@ -57,7 +55,9 @@ export function CompanyLocationsPage({
 
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [selectedLocationToEdit, setSelectedLocationToEdit] = useState<WorkLocationRecord | null>(null);
+  const [selectedLocationToEdit, setSelectedLocationToEdit] = useState<WorkLocationRecord | null>(
+    null,
+  );
 
   // Sync selected company in context
   useEffect(() => {
@@ -84,7 +84,8 @@ export function CompanyLocationsPage({
       }
       setLocations(Array.isArray(locationsRes) ? locationsRes : []);
     } catch (err: unknown) {
-      const errorStatus = (err as { status?: number; response?: { status?: number } })?.status ||
+      const errorStatus =
+        (err as { status?: number; response?: { status?: number } })?.status ||
         (err as { response?: { status?: number } })?.response?.status;
       if (errorStatus === 403 || errorStatus === 404) {
         setAccessDenied(true);
@@ -150,7 +151,11 @@ export function CompanyLocationsPage({
 
   // Cross-tenant boundary check
   const isForeignCompany = !isContextLoading && companies.length > 0 && !companyFromContext;
-  if (accessDenied || isForeignCompany || (!isContextLoading && !isLoadingData && !effectiveCompany)) {
+  if (
+    accessDenied ||
+    isForeignCompany ||
+    (!isContextLoading && !isLoadingData && !effectiveCompany)
+  ) {
     return (
       <Page>
         <EmptyState
@@ -213,10 +218,7 @@ export function CompanyLocationsPage({
     <Page>
       <Stack gap="lg">
         {/* 1. Canonical Workspace Header (activeSection="organization") */}
-        <CompanyWorkspaceHeader
-          company={effectiveCompany}
-          activeSection="organization"
-        />
+        <CompanyWorkspaceHeader company={effectiveCompany} activeSection="organization" />
 
         {/* 2. Organization Section Sub-Header & Sub-Navigation */}
         <PageHeader
@@ -379,9 +381,7 @@ export function CompanyLocationsPage({
                       )}
                     </div>
                     <div className="bezent-location-row__address">
-                      <span>
-                        {[loc.city, loc.state, loc.country].filter(Boolean).join(', ')}
-                      </span>
+                      <span>{[loc.city, loc.state, loc.country].filter(Boolean).join(', ')}</span>
                       {loc.timezone && (
                         <>
                           <span className="bezent-location-row__dot">•</span>
@@ -392,10 +392,7 @@ export function CompanyLocationsPage({
                   </div>
 
                   <div className="bezent-location-row__actions">
-                    <Badge
-                      variant={loc.status === 'active' ? 'success' : 'neutral'}
-                      size="sm"
-                    >
+                    <Badge variant={loc.status === 'active' ? 'success' : 'neutral'} size="sm">
                       {loc.status === 'active' ? 'Active' : 'Inactive'}
                     </Badge>
                     <BezentIcon name="chevronRight" size={16} />

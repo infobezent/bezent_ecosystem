@@ -103,9 +103,7 @@ export function AuditHistoryTab() {
                 ]}
               />
             </div>
-            <span className="bezent-text-secondary">
-              {total} total changes recorded
-            </span>
+            <span className="bezent-text-secondary">{total} total changes recorded</span>
           </Inline>
 
           <Table hoverable>
@@ -130,17 +128,15 @@ export function AuditHistoryTab() {
               ) : (
                 logs.map((log) => (
                   <TableRow key={log.id}>
-                    <TableCell>
-                      {new Date(log.createdAt).toLocaleString()}
-                    </TableCell>
+                    <TableCell>{new Date(log.createdAt).toLocaleString()}</TableCell>
                     <TableCell>
                       <Badge
                         variant={
                           log.category === 'policy'
                             ? 'info'
                             : log.category === 'payroll_locking'
-                            ? 'warning'
-                            : 'neutral'
+                              ? 'warning'
+                              : 'neutral'
                         }
                         size="sm"
                       >
@@ -149,22 +145,14 @@ export function AuditHistoryTab() {
                     </TableCell>
                     <TableCell>
                       <strong>{log.action.replace('_', ' ')}</strong>
-                      {log.entityType && (
-                        <div className="bezent-text-hint">{log.entityType}</div>
-                      )}
+                      {log.entityType && <div className="bezent-text-hint">{log.entityType}</div>}
                     </TableCell>
                     <TableCell>
                       <div>User: {log.changedByUserId || 'system'}</div>
-                      {log.clientIp && (
-                        <div className="bezent-text-hint">IP: {log.clientIp}</div>
-                      )}
+                      {log.clientIp && <div className="bezent-text-hint">IP: {log.clientIp}</div>}
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setSelectedLog(log)}
-                      >
+                      <Button variant="outline" size="sm" onClick={() => setSelectedLog(log)}>
                         View Diff
                       </Button>
                     </TableCell>

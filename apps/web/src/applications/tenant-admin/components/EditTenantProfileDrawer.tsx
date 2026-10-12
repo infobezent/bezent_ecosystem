@@ -11,7 +11,10 @@ import {
 } from '../../../design-system/components';
 import { BezentIcon } from '../../../design-system/icons';
 import { tenantAdminApi } from '../api/tenantAdminApi';
-import type { TenantAdminTenantSummary, TenantAdminCapacitySummary } from '../types/tenantAdmin.types';
+import type {
+  TenantAdminTenantSummary,
+  TenantAdminCapacitySummary,
+} from '../types/tenantAdmin.types';
 
 export interface ProfileGeneralData {
   name: string;
@@ -274,7 +277,8 @@ export function EditTenantProfileDrawer({
           await tenantAdminApi.removeTenantBanner();
           updatedFormData.bannerUrl = null;
         } catch (removeBannerErr: unknown) {
-          const errMsg = removeBannerErr instanceof Error ? removeBannerErr.message : 'Cover removal failed';
+          const errMsg =
+            removeBannerErr instanceof Error ? removeBannerErr.message : 'Cover removal failed';
           warnings.push(`Cover could not be removed: ${errMsg}`);
         }
       }
@@ -293,9 +297,7 @@ export function EditTenantProfileDrawer({
       onClose();
     } catch (err: unknown) {
       const msg =
-        err instanceof Error
-          ? err.message
-          : 'Unable to save profile changes. Please try again.';
+        err instanceof Error ? err.message : 'Unable to save profile changes. Please try again.';
       setErrorMessage(msg);
       // DO NOT close drawer on failed save
     } finally {
@@ -411,11 +413,7 @@ export function EditTenantProfileDrawer({
               ) : null}
             </div>
             <Inline gap="xs" align="center">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => bannerInputRef.current?.click()}
-              >
+              <Button variant="secondary" size="sm" onClick={() => bannerInputRef.current?.click()}>
                 Change Cover
               </Button>
               {formData.bannerUrl && (
@@ -523,7 +521,10 @@ export function EditTenantProfileDrawer({
         </section>
 
         {/* 4. PLATFORM MANAGED (READ ONLY) */}
-        <section className="bezent-drawer-section" aria-label="Platform Information (Super Admin Governed)">
+        <section
+          className="bezent-drawer-section"
+          aria-label="Platform Information (Super Admin Governed)"
+        >
           <div className="bezent-drawer-section__header">
             <span className="bezent-drawer-section__icon">
               <BezentIcon name="lock" size={16} />

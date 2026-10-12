@@ -1,6 +1,6 @@
 /**
  * BEZENT Platform Rules Engine — Rule & Condition Type Contracts
- * 
+ *
  * Domain-neutral types defining rules, conditions, and condition groups.
  * The engine does NOT know what facts mean; it only knows how to evaluate
  * structured conditions against runtime fact dictionaries.
@@ -27,15 +27,17 @@ export interface FactReference {
 }
 
 export function isFactReference(val: unknown): val is FactReference {
-  return typeof val === 'object' && val !== null && 'fact' in val && typeof (val as FactReference).fact === 'string';
+  return (
+    typeof val === 'object' &&
+    val !== null &&
+    'fact' in val &&
+    typeof (val as FactReference).fact === 'string'
+  );
 }
 
 export type RulePrimitiveValue = string | number | boolean | null | Date;
 
-export type RuleConditionValue =
-  | RulePrimitiveValue
-  | RulePrimitiveValue[]
-  | FactReference;
+export type RuleConditionValue = RulePrimitiveValue | RulePrimitiveValue[] | FactReference;
 
 export type RuleFacts = Record<string, unknown> | object;
 

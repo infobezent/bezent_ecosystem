@@ -1,9 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ruleEngine } from '../../../../platform/rules/index.js';
-import {
-  LEAVE_BALANCE_SUFFICIENCY_RULE,
-  type LeaveBalanceRuleFacts,
-} from '../rules/leaveRules.js';
+import { LEAVE_BALANCE_SUFFICIENCY_RULE, type LeaveBalanceRuleFacts } from '../rules/leaveRules.js';
 
 describe('HRMS Leave Domain — Business Rules Evaluation', () => {
   it('allows unpaid leave even when available balance is zero', () => {

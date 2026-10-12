@@ -1,17 +1,21 @@
-import {
-  useState,
-  useRef,
-  useEffect,
-  useMemo,
-  type ChangeEvent,
-} from 'react';
+import { useState, useRef, useEffect, useMemo, type ChangeEvent } from 'react';
 import { formatDate, formatDateIso } from '../../../shared/globalization';
 import { BezentIcon } from '../../icons';
 import './DateRangePicker.css';
 
 const MONTH_NAMES_EN = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 export interface DateRange {
@@ -262,7 +266,11 @@ export function DateRangePicker({
       {isOpen && (
         <div className="bezent-date-range-popover" role="dialog" aria-label="Select date range">
           <div className="bezent-date-range-presets">
-            <button type="button" className="bezent-date-range-preset-btn" onClick={() => applyPreset(0)}>
+            <button
+              type="button"
+              className="bezent-date-range-preset-btn"
+              onClick={() => applyPreset(0)}
+            >
               Today
             </button>
             <button
@@ -276,10 +284,18 @@ export function DateRangePicker({
             >
               Yesterday
             </button>
-            <button type="button" className="bezent-date-range-preset-btn" onClick={() => applyPreset(6)}>
+            <button
+              type="button"
+              className="bezent-date-range-preset-btn"
+              onClick={() => applyPreset(6)}
+            >
               Last 7 Days
             </button>
-            <button type="button" className="bezent-date-range-preset-btn" onClick={() => applyPreset(29)}>
+            <button
+              type="button"
+              className="bezent-date-range-preset-btn"
+              onClick={() => applyPreset(29)}
+            >
               Last 30 Days
             </button>
             <button type="button" className="bezent-date-range-preset-btn" onClick={applyThisMonth}>
@@ -312,7 +328,9 @@ export function DateRangePicker({
                 <select
                   className="bezent-date-range-month-select"
                   value={viewMonth}
-                  onChange={(e: ChangeEvent<HTMLSelectElement>) => setViewMonth(Number(e.target.value))}
+                  onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                    setViewMonth(Number(e.target.value))
+                  }
                   aria-label="Select month"
                 >
                   {monthOptions.map((m) => (
@@ -325,7 +343,9 @@ export function DateRangePicker({
                 <select
                   className="bezent-date-range-year-select"
                   value={viewYear}
-                  onChange={(e: ChangeEvent<HTMLSelectElement>) => setViewYear(Number(e.target.value))}
+                  onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                    setViewYear(Number(e.target.value))
+                  }
                   aria-label="Select year"
                 >
                   {yearOptions.map((y) => (
@@ -364,7 +384,10 @@ export function DateRangePicker({
                 const isStart = internalStart === d.dateIso;
                 const isEnd = internalEnd === d.dateIso;
                 const inRange =
-                  internalStart && internalEnd && d.dateIso > internalStart && d.dateIso < internalEnd;
+                  internalStart &&
+                  internalEnd &&
+                  d.dateIso > internalStart &&
+                  d.dateIso < internalEnd;
 
                 return (
                   <button

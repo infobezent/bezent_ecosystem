@@ -1,5 +1,8 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
-import { requirePlatformAuth, requireSuperAdmin } from '../../../platform/auth/middleware/auth.middleware.js';
+import {
+  requirePlatformAuth,
+  requireSuperAdmin,
+} from '../../../platform/auth/middleware/auth.middleware.js';
 import { tenantAdminRepository } from '../repository/tenantAdmin.repository.js';
 import { tenantAdminService } from '../service/tenantAdmin.service.js';
 import { tenantAdminBackfillService } from '../service/tenantAdminBackfill.service.js';

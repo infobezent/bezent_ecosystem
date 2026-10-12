@@ -55,7 +55,9 @@ export function CompanyDetailsPage() {
             activeId="details"
             onChange={(id) => {
               if (id === 'overview') {
-                navigate(`/tenant-admin/tenant/companies/${encodeURIComponent(company.id)}/overview`);
+                navigate(
+                  `/tenant-admin/tenant/companies/${encodeURIComponent(company.id)}/overview`,
+                );
               } else if (id === 'organization') {
                 navigate(
                   `/tenant-admin/tenant/companies/${encodeURIComponent(company.id)}/organization/structure`,

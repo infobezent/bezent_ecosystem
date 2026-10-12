@@ -1,13 +1,7 @@
 import type { ApplicationCode } from '../../plans/types/plan.types.js';
 
 export type SubscriptionStatus =
-  | 'pending_activation'
-  | 'active'
-  | 'trial'
-  | 'past_due'
-  | 'suspended'
-  | 'cancelled'
-  | 'expired';
+  'pending_activation' | 'active' | 'trial' | 'past_due' | 'suspended' | 'cancelled' | 'expired';
 
 export type AccessMode = 'trial' | 'paid';
 export type BillingCycle = 'monthly' | 'annual' | 'quarterly' | 'custom';

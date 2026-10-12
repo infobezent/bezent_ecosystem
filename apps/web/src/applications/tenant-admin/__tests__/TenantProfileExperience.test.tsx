@@ -157,7 +157,7 @@ describe('Tenant Profile Experience Visual & Functional Verification', () => {
         tenant={mockTenant}
         capacity={mockContext.capacity}
         initialData={initialDrawerData}
-      />
+      />,
     );
 
     // Modal drawer container
@@ -226,9 +226,9 @@ describe('Tenant Profile Experience Visual & Functional Verification', () => {
   });
 
   it('5. Save Changes surfaces error message on API failure without closing drawer', async () => {
-    const updateSpy = vi.spyOn(tenantAdminApi, 'updateTenantDetails').mockRejectedValue(
-      new TenantAdminApiError('Network error or server unavailable', 500),
-    );
+    const updateSpy = vi
+      .spyOn(tenantAdminApi, 'updateTenantDetails')
+      .mockRejectedValue(new TenantAdminApiError('Network error or server unavailable', 500));
 
     await expect(
       tenantAdminApi.updateTenantDetails({

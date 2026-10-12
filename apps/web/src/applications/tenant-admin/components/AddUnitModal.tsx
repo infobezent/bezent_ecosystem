@@ -231,11 +231,7 @@ export function AddUnitModal({
           {/* Parent field governed by canonical rules */}
           {unitType === 'business_unit' && (
             <FormField label="Parent">
-              <Input
-                value={`${company.name} (Company)`}
-                disabled
-                readOnly
-              />
+              <Input value={`${company.name} (Company)`} disabled readOnly />
             </FormField>
           )}
 

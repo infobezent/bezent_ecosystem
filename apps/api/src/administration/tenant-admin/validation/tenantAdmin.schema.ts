@@ -298,4 +298,3 @@ export function validateUpdateCompanyUserRole(body: unknown): UpdateCompanyUserR
     role: role as CompanyAccessRole,
   };
 }
-

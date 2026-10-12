@@ -52,13 +52,7 @@ export class AttendanceController {
         sortBy:
           typeof req.query.sortBy === 'string'
             ? (req.query.sortBy as
-                | 'name'
-                | 'code'
-                | 'department'
-                | 'checkIn'
-                | 'checkOut'
-                | 'workedHours'
-                | 'status')
+                'name' | 'code' | 'department' | 'checkIn' | 'checkOut' | 'workedHours' | 'status')
             : undefined,
         sortOrder:
           req.query.sortOrder === 'asc' || req.query.sortOrder === 'desc'
@@ -224,7 +218,9 @@ export class AttendanceController {
   retryPunchProcessing = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { tenantId, companyId } = req.companyContext!;
-      const punchIds = Array.isArray(req.body.punchIds) ? req.body.punchIds : [req.body.punchId].filter(Boolean);
+      const punchIds = Array.isArray(req.body.punchIds)
+        ? req.body.punchIds
+        : [req.body.punchId].filter(Boolean);
       const data = await this.service.retryProcessing(
         tenantId,
         companyId,
@@ -653,7 +649,8 @@ export class AttendanceController {
         status: typeof req.query.status === 'string' ? req.query.status : undefined,
         startDate: typeof req.query.startDate === 'string' ? req.query.startDate : undefined,
         endDate: typeof req.query.endDate === 'string' ? req.query.endDate : undefined,
-        departmentId: typeof req.query.departmentId === 'string' ? req.query.departmentId : undefined,
+        departmentId:
+          typeof req.query.departmentId === 'string' ? req.query.departmentId : undefined,
       };
       const items = await this.onDutyService.listRequests(tenantId, companyId, filter);
       res.json({ data: items });
@@ -743,4 +740,3 @@ export class AttendanceController {
 }
 
 export const attendanceController = new AttendanceController();
-

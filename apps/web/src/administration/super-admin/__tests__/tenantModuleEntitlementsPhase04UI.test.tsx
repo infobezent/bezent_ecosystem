@@ -249,7 +249,9 @@ describe('Phase 04 — Tenant Module Entitlements UI Suite', () => {
                     hrms: { planId: 'plan_hrms_starter', accessMode: 'paid', licensedSeats: 25 },
                   }}
                   initialEligibleModulesByApp={{ hrms: mockStarterEligibility }}
-                  initialSelectedModulesByApp={{ hrms: ['organization', 'employees', 'attendance'] }}
+                  initialSelectedModulesByApp={{
+                    hrms: ['organization', 'employees', 'attendance'],
+                  }}
                 />
               }
             />
@@ -290,7 +292,9 @@ describe('Phase 04 — Tenant Module Entitlements UI Suite', () => {
                     hrms: { planId: 'plan_hrms_starter', accessMode: 'paid', licensedSeats: 25 },
                   }}
                   initialEligibleModulesByApp={{ hrms: mockStarterEligibility }}
-                  initialSelectedModulesByApp={{ hrms: ['organization', 'employees', 'attendance'] }}
+                  initialSelectedModulesByApp={{
+                    hrms: ['organization', 'employees', 'attendance'],
+                  }}
                 />
               }
             />
@@ -320,7 +324,9 @@ describe('Phase 04 — Tenant Module Entitlements UI Suite', () => {
                     hrms: { planId: 'plan_hrms_starter', accessMode: 'paid', licensedSeats: 25 },
                   }}
                   initialEligibleModulesByApp={{ hrms: mockStarterEligibility }}
-                  initialSelectedModulesByApp={{ hrms: ['organization', 'employees', 'attendance'] }}
+                  initialSelectedModulesByApp={{
+                    hrms: ['organization', 'employees', 'attendance'],
+                  }}
                 />
               }
             />
@@ -347,7 +353,9 @@ describe('Phase 04 — Tenant Module Entitlements UI Suite', () => {
                     hrms: { planId: 'plan_hrms_starter', accessMode: 'paid', licensedSeats: 25 },
                   }}
                   initialEligibleModulesByApp={{ hrms: mockStarterEligibility }}
-                  initialSelectedModulesByApp={{ hrms: ['organization', 'employees', 'attendance'] }}
+                  initialSelectedModulesByApp={{
+                    hrms: ['organization', 'employees', 'attendance'],
+                  }}
                 />
               }
             />
@@ -438,7 +446,10 @@ describe('Phase 04 — Tenant Module Entitlements UI Suite', () => {
                 <CreateTenantPage
                   initialStep={4}
                   initialPlans={mockPlans}
-                  initialCompanyData={{ legalName: 'Apex Global Inc', businessEmail: 'admin@apex.com' }}
+                  initialCompanyData={{
+                    legalName: 'Apex Global Inc',
+                    businessEmail: 'admin@apex.com',
+                  }}
                   initialAdminData={{ fullName: 'Jane Doe', workEmail: 'jane@apex.com' }}
                   initialSelectedApps={{ hrms: true, crm: false, project_management: false }}
                   initialSubscriptionsConfig={{
@@ -449,7 +460,9 @@ describe('Phase 04 — Tenant Module Entitlements UI Suite', () => {
                     },
                   }}
                   initialEligibleModulesByApp={{ hrms: mockStarterEligibility }}
-                  initialSelectedModulesByApp={{ hrms: ['organization', 'employees', 'attendance'] }}
+                  initialSelectedModulesByApp={{
+                    hrms: ['organization', 'employees', 'attendance'],
+                  }}
                 />
               }
             />
@@ -599,9 +612,15 @@ describe('Phase 04 — Tenant Module Entitlements UI Suite', () => {
                 <TenantDetailsPage
                   initialTenant={mockOverview.tenant as unknown as TenantRecord}
                   initialOverview={mockOverview as unknown as TenantOverviewData}
-                  initialSubscriptions={mockOverview.subscriptions as unknown as SubscriptionDetailRecord[]}
-                  initialEntitlements={mockOverview.effectiveEntitlements as unknown as EffectiveEntitlementResult[]}
-                  initialOverrides={mockOverview.overrides as unknown as EntitlementOverrideRecord[]}
+                  initialSubscriptions={
+                    mockOverview.subscriptions as unknown as SubscriptionDetailRecord[]
+                  }
+                  initialEntitlements={
+                    mockOverview.effectiveEntitlements as unknown as EffectiveEntitlementResult[]
+                  }
+                  initialOverrides={
+                    mockOverview.overrides as unknown as EntitlementOverrideRecord[]
+                  }
                   initialLoading={false}
                 />
               }

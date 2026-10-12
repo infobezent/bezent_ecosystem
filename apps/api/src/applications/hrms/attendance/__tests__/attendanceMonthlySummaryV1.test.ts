@@ -1,13 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  AttendanceMonthlySummaryEngineService,
-} from '../service/attendanceMonthlySummaryEngine.service.js';
-import {
-  AttendanceMonthlyReadinessService,
-} from '../service/attendanceMonthlyReadiness.service.js';
-import {
-  AttendanceMonthlySummaryService,
-} from '../service/attendanceMonthlySummary.service.js';
+import { AttendanceMonthlySummaryEngineService } from '../service/attendanceMonthlySummaryEngine.service.js';
+import { AttendanceMonthlyReadinessService } from '../service/attendanceMonthlyReadiness.service.js';
+import { AttendanceMonthlySummaryService } from '../service/attendanceMonthlySummary.service.js';
 import type { AttendanceMonthlySummaryRepository } from '../repository/attendanceMonthlySummary.repository.js';
 import type {
   AttendanceMonthlySummary,
@@ -135,8 +129,12 @@ describe('BEZENT HRMS — Attendance → Monthly Summary V1.0 Test Suite', () =>
       sendNotification: async () => {},
     };
 
-    engine = new AttendanceMonthlySummaryEngineService(mockRepo as AttendanceMonthlySummaryRepository);
-    readinessService = new AttendanceMonthlyReadinessService(mockRepo as AttendanceMonthlySummaryRepository);
+    engine = new AttendanceMonthlySummaryEngineService(
+      mockRepo as AttendanceMonthlySummaryRepository,
+    );
+    readinessService = new AttendanceMonthlyReadinessService(
+      mockRepo as AttendanceMonthlySummaryRepository,
+    );
     summaryService = new AttendanceMonthlySummaryService(
       mockRepo as AttendanceMonthlySummaryRepository,
       engine,
@@ -385,7 +383,9 @@ describe('BEZENT HRMS — Attendance → Monthly Summary V1.0 Test Suite', () =>
       expect(recalc.isStaleReview).toBe(true);
       expect(recalc.summaryData.version).toBe(2);
       expect(recalc.summaryData.reviewState).toBe('reopened');
-      expect(recalc.summaryData.reopenReason).toContain('Summary invalidated due to daily attendance source updates');
+      expect(recalc.summaryData.reopenReason).toContain(
+        'Summary invalidated due to daily attendance source updates',
+      );
     });
   });
 

@@ -13,10 +13,7 @@ import {
   Tabs,
 } from '../../../design-system/components';
 import { tenantAdminApi, TenantAdminApiError } from '../api/tenantAdminApi';
-import type {
-  AvailableTenantUserItem,
-  CompanyAccessRole,
-} from '../types/tenantAdmin.types';
+import type { AvailableTenantUserItem, CompanyAccessRole } from '../types/tenantAdmin.types';
 
 export interface AddCompanyUserModalProps {
   isOpen: boolean;
@@ -218,7 +215,8 @@ export function AddCompanyUserModal({
           ) : availableUsers.length === 0 ? (
             <Stack gap="sm">
               <Alert variant="info">
-                All existing tenant users currently belong to this company, or no other users exist in the organization.
+                All existing tenant users currently belong to this company, or no other users exist
+                in the organization.
               </Alert>
               <Inline justify="start">
                 <Button
@@ -303,7 +301,8 @@ export function AddCompanyUserModal({
               </FormField>
 
               <Alert variant="info">
-                An invitation email will be dispatched immediately. The recipient will be provided passwordless sign-in directly into this company.
+                An invitation email will be dispatched immediately. The recipient will be provided
+                passwordless sign-in directly into this company.
               </Alert>
             </Stack>
           </form>

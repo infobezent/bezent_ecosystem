@@ -90,7 +90,8 @@ export function evaluateAtomicCondition(
   const passed = opFn(actualValue, expectedValue);
   const reason = passed
     ? undefined
-    : condition.description ?? `Condition failed: fact '${condition.fact}' ${condition.operator} expected value`;
+    : (condition.description ??
+      `Condition failed: fact '${condition.fact}' ${condition.operator} expected value`);
 
   return {
     fact: condition.fact,
@@ -137,7 +138,9 @@ export function evaluateConditionNode(
     } else if (node.combinator === 'ANY') {
       matched = childMatchOutcomes.some((m) => m === true);
     } else {
-      throw new InvalidRuleError(`Unsupported condition combinator: '${String((node as RuleConditionGroup).combinator)}'`);
+      throw new InvalidRuleError(
+        `Unsupported condition combinator: '${String((node as RuleConditionGroup).combinator)}'`,
+      );
     }
 
     return { matched, results: allResults };

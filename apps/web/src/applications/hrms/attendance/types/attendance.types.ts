@@ -1,4 +1,5 @@
-export type OverviewRoleScope = 'hr_admin' | 'hr_executive' | 'manager' | 'employee' | 'payroll_user';
+export type OverviewRoleScope =
+  'hr_admin' | 'hr_executive' | 'manager' | 'employee' | 'payroll_user';
 
 export interface OverviewAccessScope {
   role: OverviewRoleScope;
@@ -343,7 +344,6 @@ export interface MonthlySummaryEmployeeRow {
   };
 }
 
-
 export interface RegularizationItem {
   id: string;
   employeeId: string;
@@ -374,29 +374,13 @@ export type RegularizationRequestType =
   | 'wrong_direction';
 
 export type RegularizationApprovalStatus =
-  | 'draft'
-  | 'submitted'
-  | 'under_review'
-  | 'awaiting_info'
-  | 'approved'
-  | 'rejected'
-  | 'cancelled';
+  'draft' | 'submitted' | 'under_review' | 'awaiting_info' | 'approved' | 'rejected' | 'cancelled';
 
 export type RegularizationApplicationStatus =
-  | 'not_applicable'
-  | 'pending_application'
-  | 'applied'
-  | 'failed'
-  | 'blocked';
+  'not_applicable' | 'pending_application' | 'applied' | 'failed' | 'blocked';
 
 export type RegularizationSource =
-  | 'web'
-  | 'ess'
-  | 'mobile'
-  | 'system'
-  | 'biometric'
-  | 'kiosk'
-  | 'import';
+  'web' | 'ess' | 'mobile' | 'system' | 'biometric' | 'kiosk' | 'import';
 
 export interface RegularizationSummaryCounters {
   pendingReview: number;
@@ -622,12 +606,7 @@ export type ExceptionType =
 export type ExceptionSeverity = 'critical' | 'high' | 'medium' | 'low';
 
 export type ExceptionStatus =
-  | 'open'
-  | 'assigned'
-  | 'in_review'
-  | 'pending_action'
-  | 'resolved'
-  | 'closed';
+  'open' | 'assigned' | 'in_review' | 'pending_action' | 'resolved' | 'closed';
 
 export type ExceptionSource =
   | 'biometric'
@@ -873,7 +852,14 @@ export interface EarlyExitConfig {
 export interface PenaltyRulesConfig {
   enabled: boolean;
   lateMarksThreshold: number;
-  penaltyUnit: 'warning_only' | 'quarter_day' | 'half_day' | 'full_day' | 'loss_of_pay' | 'half_day_deduction' | 'full_day_deduction';
+  penaltyUnit:
+    | 'warning_only'
+    | 'quarter_day'
+    | 'half_day'
+    | 'full_day'
+    | 'loss_of_pay'
+    | 'half_day_deduction'
+    | 'full_day_deduction';
   period: 'calendar_month' | 'payroll_period' | 'custom_cycle' | 'monthly' | 'payroll_cycle';
   isRepeating?: boolean;
   maxPenaltyUnits?: number | null;
@@ -987,7 +973,13 @@ export interface AttendanceGeneralSettings {
   processingMode: 'automatic' | 'realtime' | 'daily_batch' | 'manual';
   manualEntryAllowed: boolean;
   manualEntryConfig?: ManualEntryConfig | null;
-  employeeVisibility: 'daily_and_monthly' | 'daily_only' | 'monthly_summary_only' | 'self_only' | 'department' | 'company';
+  employeeVisibility:
+    | 'daily_and_monthly'
+    | 'daily_only'
+    | 'monthly_summary_only'
+    | 'self_only'
+    | 'department'
+    | 'company';
   defaultHistoryView?: string;
   defaultHistoryViewDays: number;
   alertPreferences?: Record<string, unknown> | null;
@@ -1007,7 +999,13 @@ export interface GeneralSettingsInput {
   processingMode?: 'automatic' | 'realtime' | 'daily_batch' | 'manual';
   manualEntryAllowed?: boolean;
   manualEntryConfig?: ManualEntryConfig;
-  employeeVisibility?: 'daily_and_monthly' | 'daily_only' | 'monthly_summary_only' | 'self_only' | 'department' | 'company';
+  employeeVisibility?:
+    | 'daily_and_monthly'
+    | 'daily_only'
+    | 'monthly_summary_only'
+    | 'self_only'
+    | 'department'
+    | 'company';
   defaultHistoryView?: string;
   defaultHistoryViewDays?: number;
   alertPreferences?: Record<string, unknown>;
@@ -1052,7 +1050,8 @@ export interface AttendanceDevice {
   locationId?: string | null;
   deviceName: string;
   deviceCode: string;
-  deviceType: 'biometric_fingerprint' | 'biometric_facial' | 'rfid_card' | 'mobile_kiosk' | 'web_terminal';
+  deviceType:
+    'biometric_fingerprint' | 'biometric_facial' | 'rfid_card' | 'mobile_kiosk' | 'web_terminal';
   serialNumber?: string | null;
   ipAddress?: string | null;
   port?: number | null;
@@ -1069,7 +1068,8 @@ export interface DeviceInput {
   locationId?: string | null;
   deviceName: string;
   deviceCode: string;
-  deviceType: 'biometric_fingerprint' | 'biometric_facial' | 'rfid_card' | 'mobile_kiosk' | 'web_terminal';
+  deviceType:
+    'biometric_fingerprint' | 'biometric_facial' | 'rfid_card' | 'mobile_kiosk' | 'web_terminal';
   serialNumber?: string | null;
   ipAddress?: string | null;
   port?: number | null;
@@ -1213,7 +1213,13 @@ export interface AttendanceSettingsAuditLog {
   id: string;
   tenantId: string;
   companyId: string;
-  category: 'general' | 'policy' | 'regularization' | 'capture_device' | 'location_security' | 'payroll_locking';
+  category:
+    | 'general'
+    | 'policy'
+    | 'regularization'
+    | 'capture_device'
+    | 'location_security'
+    | 'payroll_locking';
   action: string;
   entityId?: string | null;
   entityType?: string | null;
@@ -1528,7 +1534,8 @@ export interface PunchLogItem {
   deviceMetadata?: unknown;
   workLocation?: string | null;
   workday?: string | null;
-  validationStatus: 'pending_validation' | 'valid' | 'duplicate' | 'invalid' | 'needs_review' | 'unmatched';
+  validationStatus:
+    'pending_validation' | 'valid' | 'duplicate' | 'invalid' | 'needs_review' | 'unmatched';
   validationReason?: string | null;
   processingState: 'received' | 'processing' | 'processed' | 'failed' | 'retry_pending';
   processingError?: string | null;
@@ -1555,7 +1562,15 @@ export interface PunchAuditRecord {
   tenantId: string;
   companyId: string;
   punchId: string;
-  action: 'ingested' | 'validated' | 'processed' | 'retry_attempted' | 'investigation_opened' | 'investigation_assigned' | 'investigation_resolved' | 'identity_mapped';
+  action:
+    | 'ingested'
+    | 'validated'
+    | 'processed'
+    | 'retry_attempted'
+    | 'investigation_opened'
+    | 'investigation_assigned'
+    | 'investigation_resolved'
+    | 'identity_mapped';
   actorUserId?: string | null;
   details?: Record<string, unknown> | null;
   notes?: string | null;
@@ -1604,11 +1619,7 @@ export interface BulkPunchActionInput {
 
 export type AttendanceCalculationState = 'pending' | 'calculated' | 'stale' | 'error';
 export type AttendanceReviewState =
-  | 'not_reviewed'
-  | 'in_review'
-  | 'needs_correction'
-  | 'reviewed'
-  | 'reopened';
+  'not_reviewed' | 'in_review' | 'needs_correction' | 'reviewed' | 'reopened';
 export type AttendancePayrollReadiness = 'calculating' | 'ready' | 'needs_review' | 'blocked';
 
 export interface MonthlySummaryRow {
@@ -1799,4 +1810,3 @@ export interface MonthlySummaryQueryResult {
   pageSize: number;
   totalPages: number;
 }
-

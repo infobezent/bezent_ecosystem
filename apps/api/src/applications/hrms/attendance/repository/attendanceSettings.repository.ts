@@ -60,33 +60,65 @@ export class AttendanceSettingsRepository {
     const prefs = (row.alertPreferences ?? {}) as Record<string, unknown>;
     return {
       ...row,
-      dayBoundaryMode: (prefs.dayBoundaryMode as AttendanceGeneralSettingsWithV1['dayBoundaryMode']) ?? 'shift_workday_based',
-      unscheduledFallbackCutoff: (prefs.unscheduledFallbackCutoff as string) ?? row.dayBoundaryTime ?? '04:00:00',
+      dayBoundaryMode:
+        (prefs.dayBoundaryMode as AttendanceGeneralSettingsWithV1['dayBoundaryMode']) ??
+        'shift_workday_based',
+      unscheduledFallbackCutoff:
+        (prefs.unscheduledFallbackCutoff as string) ?? row.dayBoundaryTime ?? '04:00:00',
       trackingStartDateReason: (prefs.trackingStartDateReason as string | null) ?? null,
-      trackingStartDateEffectiveFrom: (prefs.trackingStartDateEffectiveFrom as string | null) ?? null,
-      processingMode: (row.processingMode === 'realtime' ? 'automatic' : row.processingMode) as AttendanceGeneralSettingsWithV1['processingMode'],
-      manualEntryConfig: (prefs.manualEntryConfig as AttendanceGeneralSettingsWithV1['manualEntryConfig']) ?? {
-        allowedRoles: ['hr', 'reporting_manager', 'company_admin'],
-        allowedMethods: ['actual_times', 'full_day_admin', 'half_day_admin'],
-        approvalMode: 'approval_required',
-        requireReason: true,
-        requireAttachment: false,
-      },
-      employeeVisibility: (row.employeeVisibility === 'self_only' ? 'daily_and_monthly' : row.employeeVisibility) as AttendanceGeneralSettingsWithV1['employeeVisibility'],
-      defaultHistoryView: (prefs.defaultHistoryView as AttendanceGeneralSettingsWithV1['defaultHistoryView']) ?? 'current_month',
+      trackingStartDateEffectiveFrom:
+        (prefs.trackingStartDateEffectiveFrom as string | null) ?? null,
+      processingMode: (row.processingMode === 'realtime'
+        ? 'automatic'
+        : row.processingMode) as AttendanceGeneralSettingsWithV1['processingMode'],
+      manualEntryConfig:
+        (prefs.manualEntryConfig as AttendanceGeneralSettingsWithV1['manualEntryConfig']) ?? {
+          allowedRoles: ['hr', 'reporting_manager', 'company_admin'],
+          allowedMethods: ['actual_times', 'full_day_admin', 'half_day_admin'],
+          approvalMode: 'approval_required',
+          requireReason: true,
+          requireAttachment: false,
+        },
+      employeeVisibility: (row.employeeVisibility === 'self_only'
+        ? 'daily_and_monthly'
+        : row.employeeVisibility) as AttendanceGeneralSettingsWithV1['employeeVisibility'],
+      defaultHistoryView:
+        (prefs.defaultHistoryView as AttendanceGeneralSettingsWithV1['defaultHistoryView']) ??
+        'current_month',
       alertSettings: (prefs.alertSettings as AttendanceGeneralSettingsWithV1['alertSettings']) ?? {
         events: {
-          missingPunch: { enabled: (prefs.notifyOnMissingPunch as boolean) ?? true, recipients: ['employee', 'reporting_manager'], channels: ['in_app', 'email'] },
-          lateArrival: { enabled: (prefs.notifyOnLateArrival as boolean) ?? true, recipients: ['employee', 'reporting_manager'], channels: ['in_app', 'email'] },
+          missingPunch: {
+            enabled: (prefs.notifyOnMissingPunch as boolean) ?? true,
+            recipients: ['employee', 'reporting_manager'],
+            channels: ['in_app', 'email'],
+          },
+          lateArrival: {
+            enabled: (prefs.notifyOnLateArrival as boolean) ?? true,
+            recipients: ['employee', 'reporting_manager'],
+            channels: ['in_app', 'email'],
+          },
           earlyExit: { enabled: false, recipients: ['employee'], channels: ['in_app'] },
-          regularizationPending: { enabled: (prefs.notifyApproverOnRegularization as boolean) ?? true, recipients: ['assigned_approver', 'reporting_manager'], channels: ['in_app', 'email'] },
-          exceptions: { enabled: true, recipients: ['reporting_manager', 'hr'], channels: ['in_app'] },
+          regularizationPending: {
+            enabled: (prefs.notifyApproverOnRegularization as boolean) ?? true,
+            recipients: ['assigned_approver', 'reporting_manager'],
+            channels: ['in_app', 'email'],
+          },
+          exceptions: {
+            enabled: true,
+            recipients: ['reporting_manager', 'hr'],
+            channels: ['in_app'],
+          },
           onDutyPending: { enabled: true, recipients: ['assigned_approver'], channels: ['in_app'] },
-          deviceSyncFailure: { enabled: true, recipients: ['device_admin', 'hr'], channels: ['in_app', 'email'] },
+          deviceSyncFailure: {
+            enabled: true,
+            recipients: ['device_admin', 'hr'],
+            channels: ['in_app', 'email'],
+          },
         },
         timing: {
           missingPunchDelayMinutes: 30,
-          digestFrequency: (prefs.digestFrequency as 'instant' | 'daily' | 'weekly' | 'none') ?? 'daily',
+          digestFrequency:
+            (prefs.digestFrequency as 'instant' | 'daily' | 'weekly' | 'none') ?? 'daily',
           reminderIntervalHours: 24,
         },
         escalation: {
@@ -105,41 +137,75 @@ export class AttendanceSettingsRepository {
   ): Promise<AttendanceGeneralSettingsWithV1> {
     const db = getDb();
     const existing = await this.getGeneralSettings(tenantId, companyId);
-    const existingPrefs = ((existing?.alertPreferences as Record<string, unknown>) ?? {});
+    const existingPrefs = (existing?.alertPreferences as Record<string, unknown>) ?? {};
 
-    const dayBoundaryMode = (input.dayBoundaryMode ?? existingPrefs.dayBoundaryMode ?? 'shift_workday_based') as string;
-    const unscheduledFallbackCutoff = (input.unscheduledFallbackCutoff ?? input.dayBoundaryTime ?? existingPrefs.unscheduledFallbackCutoff ?? existing?.dayBoundaryTime ?? '04:00:00') as string;
-    const defaultHistoryView = (input.defaultHistoryView ?? existingPrefs.defaultHistoryView ?? 'current_month') as string;
-    const trackingStartDateReason = (input.trackingStartDateReason ?? existingPrefs.trackingStartDateReason ?? null) as string | null;
-    const trackingStartDateEffectiveFrom = (input.trackingStartDateEffectiveFrom ?? existingPrefs.trackingStartDateEffectiveFrom ?? null) as string | null;
-    const manualEntryConfig = (input.manualEntryConfig ?? existingPrefs.manualEntryConfig ?? {
-      allowedRoles: ['hr', 'reporting_manager', 'company_admin'],
-      allowedMethods: ['actual_times', 'full_day_admin', 'half_day_admin'],
-      approvalMode: 'approval_required',
-      requireReason: true,
-      requireAttachment: false,
-    });
-    const alertSettings = (input.alertSettings ?? existingPrefs.alertSettings ?? {
-      events: {
-        missingPunch: { enabled: true, recipients: ['employee', 'reporting_manager'], channels: ['in_app', 'email'] },
-        lateArrival: { enabled: true, recipients: ['employee', 'reporting_manager'], channels: ['in_app', 'email'] },
-        earlyExit: { enabled: false, recipients: ['employee'], channels: ['in_app'] },
-        regularizationPending: { enabled: true, recipients: ['assigned_approver', 'reporting_manager'], channels: ['in_app', 'email'] },
-        exceptions: { enabled: true, recipients: ['reporting_manager', 'hr'], channels: ['in_app'] },
-        onDutyPending: { enabled: true, recipients: ['assigned_approver'], channels: ['in_app'] },
-        deviceSyncFailure: { enabled: true, recipients: ['device_admin', 'hr'], channels: ['in_app', 'email'] },
-      },
-      timing: {
-        missingPunchDelayMinutes: 30,
-        digestFrequency: 'daily',
-        reminderIntervalHours: 24,
-      },
-      escalation: {
-        enabled: false,
-        deadlineHours: 48,
-        targetRole: 'next_level_manager',
-      },
-    }) as AttendanceAlertSettings;
+    const dayBoundaryMode = (input.dayBoundaryMode ??
+      existingPrefs.dayBoundaryMode ??
+      'shift_workday_based') as string;
+    const unscheduledFallbackCutoff = (input.unscheduledFallbackCutoff ??
+      input.dayBoundaryTime ??
+      existingPrefs.unscheduledFallbackCutoff ??
+      existing?.dayBoundaryTime ??
+      '04:00:00') as string;
+    const defaultHistoryView = (input.defaultHistoryView ??
+      existingPrefs.defaultHistoryView ??
+      'current_month') as string;
+    const trackingStartDateReason = (input.trackingStartDateReason ??
+      existingPrefs.trackingStartDateReason ??
+      null) as string | null;
+    const trackingStartDateEffectiveFrom = (input.trackingStartDateEffectiveFrom ??
+      existingPrefs.trackingStartDateEffectiveFrom ??
+      null) as string | null;
+    const manualEntryConfig = input.manualEntryConfig ??
+      existingPrefs.manualEntryConfig ?? {
+        allowedRoles: ['hr', 'reporting_manager', 'company_admin'],
+        allowedMethods: ['actual_times', 'full_day_admin', 'half_day_admin'],
+        approvalMode: 'approval_required',
+        requireReason: true,
+        requireAttachment: false,
+      };
+    const alertSettings = (input.alertSettings ??
+      existingPrefs.alertSettings ?? {
+        events: {
+          missingPunch: {
+            enabled: true,
+            recipients: ['employee', 'reporting_manager'],
+            channels: ['in_app', 'email'],
+          },
+          lateArrival: {
+            enabled: true,
+            recipients: ['employee', 'reporting_manager'],
+            channels: ['in_app', 'email'],
+          },
+          earlyExit: { enabled: false, recipients: ['employee'], channels: ['in_app'] },
+          regularizationPending: {
+            enabled: true,
+            recipients: ['assigned_approver', 'reporting_manager'],
+            channels: ['in_app', 'email'],
+          },
+          exceptions: {
+            enabled: true,
+            recipients: ['reporting_manager', 'hr'],
+            channels: ['in_app'],
+          },
+          onDutyPending: { enabled: true, recipients: ['assigned_approver'], channels: ['in_app'] },
+          deviceSyncFailure: {
+            enabled: true,
+            recipients: ['device_admin', 'hr'],
+            channels: ['in_app', 'email'],
+          },
+        },
+        timing: {
+          missingPunchDelayMinutes: 30,
+          digestFrequency: 'daily',
+          reminderIntervalHours: 24,
+        },
+        escalation: {
+          enabled: false,
+          deadlineHours: 48,
+          targetRole: 'next_level_manager',
+        },
+      }) as AttendanceAlertSettings;
 
     const mergedAlertPreferences = {
       ...existingPrefs,
@@ -158,10 +224,22 @@ export class AttendanceSettingsRepository {
     };
 
     // Calculate defaultHistoryViewDays based on defaultHistoryView
-    let calculatedHistoryDays = typeof input.defaultHistoryViewDays === 'number' ? input.defaultHistoryViewDays : (existing?.defaultHistoryViewDays ?? 30);
+    let calculatedHistoryDays =
+      typeof input.defaultHistoryViewDays === 'number'
+        ? input.defaultHistoryViewDays
+        : (existing?.defaultHistoryViewDays ?? 30);
     if (input.defaultHistoryView === 'today') calculatedHistoryDays = 1;
-    else if (input.defaultHistoryView === 'current_week' || input.defaultHistoryView === 'last_7_days') calculatedHistoryDays = 7;
-    else if (input.defaultHistoryView === 'current_month' || input.defaultHistoryView === 'previous_month' || input.defaultHistoryView === 'last_30_days') calculatedHistoryDays = 30;
+    else if (
+      input.defaultHistoryView === 'current_week' ||
+      input.defaultHistoryView === 'last_7_days'
+    )
+      calculatedHistoryDays = 7;
+    else if (
+      input.defaultHistoryView === 'current_month' ||
+      input.defaultHistoryView === 'previous_month' ||
+      input.defaultHistoryView === 'last_30_days'
+    )
+      calculatedHistoryDays = 30;
     else if (input.defaultHistoryView === 'last_60_days') calculatedHistoryDays = 60;
     else if (input.defaultHistoryView === 'last_90_days') calculatedHistoryDays = 90;
 
@@ -281,12 +359,7 @@ export class AttendanceSettingsRepository {
       const rows = await db
         .select({ id: departments.id })
         .from(departments)
-        .where(
-          and(
-            eq(departments.companyId, companyId),
-            eq(departments.id, scopeId),
-          ),
-        )
+        .where(and(eq(departments.companyId, companyId), eq(departments.id, scopeId)))
         .limit(1);
       return rows.length > 0;
     } else {
@@ -332,8 +405,7 @@ export class AttendanceSettingsRepository {
   ): Promise<AttendancePolicy> {
     const db = getDb();
     const id = generateSurrogateId('att_pol');
-    const priority =
-      input.scope === 'employee' ? 20 : input.scope === 'department' ? 10 : 0;
+    const priority = input.scope === 'employee' ? 20 : input.scope === 'department' ? 10 : 0;
 
     await db.insert(attendancePolicies).values({
       id,
@@ -416,7 +488,9 @@ export class AttendanceSettingsRepository {
           ? { requiresApproval: input.requiresApproval }
           : {}),
         ...(input.effectiveFrom ? { effectiveFrom: input.effectiveFrom } : {}),
-        ...(input.penaltyRules ? { penaltyRules: input.penaltyRules as unknown as Record<string, unknown> } : {}),
+        ...(input.penaltyRules
+          ? { penaltyRules: input.penaltyRules as unknown as Record<string, unknown> }
+          : {}),
         ...(input.odRules ? { odRules: input.odRules as unknown as Record<string, unknown> } : {}),
         ...(input.classificationRules
           ? { classificationRules: input.classificationRules as unknown as Record<string, unknown> }
@@ -445,7 +519,8 @@ export class AttendanceSettingsRepository {
         .update(attendancePolicies)
         .set({
           status: 'published',
-          effectiveFrom: effectiveFrom || existing.effectiveFrom || new Date().toISOString().slice(0, 10),
+          effectiveFrom:
+            effectiveFrom || existing.effectiveFrom || new Date().toISOString().slice(0, 10),
           updatedAt: new Date(),
         })
         .where(eq(attendancePolicies.id, policyId));
@@ -576,10 +651,7 @@ export class AttendanceSettingsRepository {
       .select()
       .from(attendanceDevices)
       .where(
-        and(
-          eq(attendanceDevices.tenantId, tenantId),
-          eq(attendanceDevices.companyId, companyId),
-        ),
+        and(eq(attendanceDevices.tenantId, tenantId), eq(attendanceDevices.companyId, companyId)),
       )
       .orderBy(desc(attendanceDevices.createdAt));
   }
@@ -882,10 +954,7 @@ export class AttendanceSettingsRepository {
       .select()
       .from(attendancePeriods)
       .where(
-        and(
-          eq(attendancePeriods.tenantId, tenantId),
-          eq(attendancePeriods.companyId, companyId),
-        ),
+        and(eq(attendancePeriods.tenantId, tenantId), eq(attendancePeriods.companyId, companyId)),
       )
       .orderBy(desc(attendancePeriods.startDate));
   }
@@ -1060,7 +1129,13 @@ export class AttendanceSettingsRepository {
     tenantId: string,
     companyId: string,
     data: {
-      category: 'general' | 'policy' | 'regularization' | 'capture_device' | 'location_security' | 'payroll_locking';
+      category:
+        | 'general'
+        | 'policy'
+        | 'regularization'
+        | 'capture_device'
+        | 'location_security'
+        | 'payroll_locking';
       action: string;
       entityId?: string;
       entityType?: string;
@@ -1103,10 +1178,14 @@ export class AttendanceSettingsRepository {
       conditions.push(eq(attendanceSettingsAuditLogs.category, filter.category));
     }
     if (filter?.startDate) {
-      conditions.push(gte(attendanceSettingsAuditLogs.createdAt, new Date(`${filter.startDate}T00:00:00.000Z`)));
+      conditions.push(
+        gte(attendanceSettingsAuditLogs.createdAt, new Date(`${filter.startDate}T00:00:00.000Z`)),
+      );
     }
     if (filter?.endDate) {
-      conditions.push(lte(attendanceSettingsAuditLogs.createdAt, new Date(`${filter.endDate}T23:59:59.999Z`)));
+      conditions.push(
+        lte(attendanceSettingsAuditLogs.createdAt, new Date(`${filter.endDate}T23:59:59.999Z`)),
+      );
     }
 
     const limit = Math.min(100, Math.max(1, filter?.limit ?? 25));

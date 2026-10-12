@@ -44,10 +44,16 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Overview V1.0
     // 0. Clean up prior test runs for tenantId
     await db.delete(employeeAttendance).where(eq(employeeAttendance.tenantId, tenantId));
     await db.delete(attendanceExceptions).where(eq(attendanceExceptions.tenantId, tenantId));
-    await db.delete(attendanceRegularizations).where(eq(attendanceRegularizations.tenantId, tenantId));
-    await db.delete(attendanceOnDutyRequests).where(eq(attendanceOnDutyRequests.tenantId, tenantId));
+    await db
+      .delete(attendanceRegularizations)
+      .where(eq(attendanceRegularizations.tenantId, tenantId));
+    await db
+      .delete(attendanceOnDutyRequests)
+      .where(eq(attendanceOnDutyRequests.tenantId, tenantId));
     await db.delete(employeeLeaveRequests).where(eq(employeeLeaveRequests.tenantId, tenantId));
-    await db.delete(attendanceMonthlySummaries).where(eq(attendanceMonthlySummaries.tenantId, tenantId));
+    await db
+      .delete(attendanceMonthlySummaries)
+      .where(eq(attendanceMonthlySummaries.tenantId, tenantId));
     await db.delete(employees).where(eq(employees.tenantId, tenantId));
     await db.delete(departments).where(eq(departments.tenantId, tenantId));
 
@@ -331,7 +337,11 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Overview V1.0
     expect(kpis.attendanceRate).toBeNull();
     expect(kpis.pendingProcessingCount).toBeGreaterThanOrEqual(1);
 
-    const health = await attendanceOverviewService.getProcessingHealth(tenantId, companyId, futureDate);
+    const health = await attendanceOverviewService.getProcessingHealth(
+      tenantId,
+      companyId,
+      futureDate,
+    );
     expect(health.status).toBe('upcoming');
     expect(health.processingSuccessRate).toBeNull();
   });
@@ -363,7 +373,11 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Overview V1.0
    * ─────────────────────────────────────────────────────────────────── */
 
   it('groups attendance statistics accurately by authorized department', async () => {
-    const depts = await attendanceOverviewService.getDepartmentComparison(tenantId, companyId, testDate);
+    const depts = await attendanceOverviewService.getDepartmentComparison(
+      tenantId,
+      companyId,
+      testDate,
+    );
 
     expect(depts.length).toBeGreaterThanOrEqual(2);
 
@@ -410,13 +424,19 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Overview V1.0
    * ─────────────────────────────────────────────────────────────────── */
 
   it('evaluates processing health with documented denominator and pipeline status', async () => {
-    const health = await attendanceOverviewService.getProcessingHealth(tenantId, companyId, testDate);
+    const health = await attendanceOverviewService.getProcessingHealth(
+      tenantId,
+      companyId,
+      testDate,
+    );
 
     expect(health.eligibleWorkdays).toBe(3);
     expect(health.processedWorkdays).toBe(2); // empActive1 & empActive2 finalized
     expect(health.pendingWorkdays).toBe(1); // empActive3 provisional
     expect(health.unresolvedBlockingExceptions).toBeGreaterThanOrEqual(1);
-    expect(health.denominatorDescription).toContain('Processed Finalized (2) / Eligible Workdays (3)');
+    expect(health.denominatorDescription).toContain(
+      'Processed Finalized (2) / Eligible Workdays (3)',
+    );
   });
 
   /* ───────────────────────────────────────────────────────────────────
@@ -461,7 +481,11 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Overview V1.0
 
   it('enforces strict tenant & cross-company isolation against data leakage', async () => {
     // Overview for otherCompanyId
-    const otherKpis = await attendanceOverviewService.getTodayKpis(tenantId, otherCompanyId, testDate);
+    const otherKpis = await attendanceOverviewService.getTodayKpis(
+      tenantId,
+      otherCompanyId,
+      testDate,
+    );
 
     // Only empOtherComp exists in otherCompanyId
     expect(otherKpis.totalEligibleEmployees).toBe(1);
@@ -588,9 +612,7 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Overview V1.0
   it('GET /hrms/attendance/overview/actions returns action required queue endpoint', async () => {
     const app = createApp();
 
-    const res = await request(app)
-      .get('/api/v1/hrms/attendance/overview/actions')
-      .set(headers);
+    const res = await request(app).get('/api/v1/hrms/attendance/overview/actions').set(headers);
 
     expect(res.status).toBe(200);
     expect(res.body.data.length).toBe(6);

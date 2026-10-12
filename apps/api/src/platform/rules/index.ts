@@ -20,15 +20,9 @@ export type {
   Rule,
 } from './model/rule.types.js';
 
-export {
-  isFactReference,
-  isConditionGroup,
-} from './model/rule.types.js';
+export { isFactReference, isConditionGroup } from './model/rule.types.js';
 
-export type {
-  ConditionEvaluationResult,
-  RuleEvaluationResult,
-} from './model/evaluation.types.js';
+export type { ConditionEvaluationResult, RuleEvaluationResult } from './model/evaluation.types.js';
 
 export {
   RuleError,
@@ -39,10 +33,7 @@ export {
   InvalidConditionError,
 } from './errors/rule.errors.js';
 
-export {
-  OPERATOR_REGISTRY,
-  getOperator,
-} from './operators/operatorRegistry.js';
+export { OPERATOR_REGISTRY, getOperator } from './operators/operatorRegistry.js';
 
 export {
   resolveFactValue,
@@ -51,9 +42,4 @@ export {
   evaluateConditionNode,
 } from './engine/conditionEvaluator.js';
 
-export {
-  RuleEngine,
-  ruleEngine,
-  evaluateRule,
-  evaluateRules,
-} from './engine/ruleEngine.js';
+export { RuleEngine, ruleEngine, evaluateRule, evaluateRules } from './engine/ruleEngine.js';

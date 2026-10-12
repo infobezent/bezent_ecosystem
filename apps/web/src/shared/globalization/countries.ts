@@ -342,10 +342,7 @@ const COUNTRY_MAP = new Map<string, CountryInfo>(
 export function getCountry(codeOrName?: string | null): CountryInfo | undefined {
   if (!codeOrName) return undefined;
   const trimmed = codeOrName.trim();
-  return (
-    COUNTRY_MAP.get(trimmed.toUpperCase()) ||
-    COUNTRY_MAP.get(trimmed.toLowerCase())
-  );
+  return COUNTRY_MAP.get(trimmed.toUpperCase()) || COUNTRY_MAP.get(trimmed.toLowerCase());
 }
 
 export function getAllCountries(): readonly CountryInfo[] {

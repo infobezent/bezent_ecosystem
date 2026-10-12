@@ -34,6 +34,7 @@ This audit assesses the actual implemented state of the **BEZENT HRMS Business A
 ### 2.1 Workspace and Boundaries
 
 In accordance with [ADR-014](file:///e:/Company/bezent_ecosystem/docs/architecture/ADRs.md) and [AGENTS.md](file:///e:/Company/bezent_ecosystem/AGENTS.md):
+
 - **HRMS is an Application, not a Module:** It lives at `applications/hrms` in both web and API.
 - **Modules are Capabilities inside HRMS:** Organization, Employees, Onboarding, Documents, Attendance, Leave, etc.
 - **Employee Self-Service (ESS) is an Experience, not a separate application:** It provides permission-scoped access (`/ess`) over the same underlying data models.
@@ -84,30 +85,30 @@ apps/api/src/applications/hrms/
 
 The 19 destinations from `hrmsNavigation.ts` plus cross-cutting domains are inventoried below based on concrete repository evidence:
 
-| # | Module / Destination | Frontend Implementation | Backend Implementation | Database Schema | Test Coverage | Classification |
-|---|---|---|---|---|---|---|
-| 1 | **Dashboard** | `ModulePlaceholder.tsx` (renders Overview, Analytics, Activity) | None (except ESS dashboard `/api/v1/ess/dashboard`) | None (Aggregations across tables) | Catalog navigation tests | **PLACEHOLDER** (Admin) / **FUNCTIONAL** (ESS) |
-| 2 | **Employees** | `EmployeeDirectoryPage`, `EmployeeProfilePage` (10 tabs, full sub-forms) | `EmployeeController`, `EmployeeService`, `EmployeeProfileService`, `EmployeeRepository` | `employees`, `employee_personal_details`, `employee_family_members`, `employee_nominees`, `employee_bank_accounts`, `employee_skills`, `employee_work_schedules` | Unit, schema, validation & MySQL db integration tests | **FUNCTIONAL** |
-| 3 | **Employee Administration** | `EmployeeAdministrationPage` (Action queue, 5 transition modals, history drawer) | `EmployeeActionController`, `EmployeeActionService`, `EmployeeActionRepository` | `employee_actions`, `employee_action_history` | API tests, UI tests, validation tests, MySQL integration tests | **FUNCTIONAL** |
-| 4 | **Onboarding** | `OnboardingPage` (stages, candidate tracking), `EmployeeRegistrationPage` | `OnboardingController`, `OnboardingService`, `OnboardingRepository` | `onboarding_cases`, `onboarding_case_stage_history`, `onboarding_general_settings`, `onboarding_stage_configs`, etc. | 7 frontend test files, 3 backend test files | **FUNCTIONAL** |
-| 5 | **Documents** | `DocumentsPage` (list, upload modal, filter drawer, employee selector) | `EmployeeDocumentController`, `EmployeeDocumentService`, `EmployeeDocumentRepository` | `employee_documents` | UI tests, validation tests, MySQL integration tests | **FUNCTIONAL** |
-| 6 | **Organization** | Integrated via Settings & Platform (`/company-admin/organization`) | `OrganizationController`, `DepartmentController`, `WorkLocationController`, `workforceRouter` | `departments`, `designations`, `locations`, `job_levels`, `grades`, `business_units`, `divisions` | Frontend UI tests, backend MySQL integration tests | **FUNCTIONAL** |
-| 7 | **Attendance** | Admin: `ModulePlaceholder.tsx`<br>Settings: `AttendanceSettingsSection.tsx` (UI stub)<br>ESS: `EssAttendancePage.tsx` | Admin: **None** (No routes mounted)<br>Core: `AttendanceService`, `AttendanceRepository`<br>ESS: `/api/v1/ess/attendance/*` | `employee_attendance` (single daily check-in/out record)<br>`employee_requests` (regularization) | ESS Supertest integration tests; no admin attendance tests | **PARTIAL**<br>(Admin: PLACEHOLDER, ESS: FUNCTIONAL, Core: PARTIAL) |
-| 8 | **Leave** | Admin: `ModulePlaceholder.tsx`<br>Settings: `LeaveSettingsSection.tsx` (UI stub)<br>ESS: `EssLeavePage.tsx` | Admin: **None** (No routes mounted)<br>Core: `LeaveService`, `LeaveRepository`, `leaveRules.ts`<br>ESS: `/api/v1/ess/leave/*` | `employee_leave_balances`, `employee_leave_requests` | Rule engine unit tests (`leaveRules.test.ts`), ESS integration tests | **PARTIAL**<br>(Admin: PLACEHOLDER, ESS: FUNCTIONAL, Core: PARTIAL) |
-| 9 | **Timesheets** | Admin: `ModulePlaceholder.tsx`<br>Settings: `TimesheetsSettingsSection.tsx` (UI stub)<br>ESS: `EssTimesheetsPage.tsx` | Admin: **None**<br>ESS: `/api/v1/ess/timesheets` | `employee_timesheets` | ESS integration tests | **PARTIAL**<br>(Admin: PLACEHOLDER, ESS: FUNCTIONAL) |
-| 10 | **Shifts** | `ModulePlaceholder.tsx` | None | None (Only static `employee_work_schedules` per employee) | Catalog navigation tests | **PLACEHOLDER** |
-| 11 | **Recruitment** | `ModulePlaceholder.tsx` (children: Job Openings, Candidates, Interviews, Offers) | None | None | Catalog navigation tests | **PLACEHOLDER** |
-| 12 | **Performance** | Admin: `ModulePlaceholder.tsx`<br>Settings: `PerformanceSettingsSection.tsx` (UI stub) | None | None | Catalog navigation tests | **PLACEHOLDER** |
-| 13 | **Learning** | `ModulePlaceholder.tsx` | None | None | Catalog navigation tests | **PLACEHOLDER** |
-| 14 | **Career Paths** | `ModulePlaceholder.tsx` | None | None | Catalog navigation tests | **PLACEHOLDER** |
-| 15 | **Payroll** | Admin: `ModulePlaceholder.tsx`<br>ESS: `EssPayslipsPage.tsx` (placeholder) | None | None | Catalog navigation tests | **PLACEHOLDER** |
-| 16 | **Compensation** | `ModulePlaceholder.tsx` | None | None | Catalog navigation tests | **PLACEHOLDER** |
-| 17 | **Benefits** | `ModulePlaceholder.tsx` | None | None | Catalog navigation tests | **PLACEHOLDER** |
-| 18 | **Assets** | `ModulePlaceholder.tsx` | None | None | Catalog navigation tests | **PLACEHOLDER** |
-| 19 | **Employee Requests** | Admin: `ModulePlaceholder.tsx`<br>ESS: `EssRequestsPage.tsx` (submits profile/regularization/doc requests) | Admin: **None**<br>ESS: `/api/v1/ess/requests` | `employee_requests` | ESS integration tests | **PARTIAL**<br>(Admin: PLACEHOLDER, ESS: FUNCTIONAL) |
-| 20 | **Standard Operations (SOP)** | `ModulePlaceholder.tsx` | None | None | Catalog navigation tests | **PLACEHOLDER** |
-| 21 | **Reports** | `ModulePlaceholder.tsx` | None | None | Catalog navigation tests | **PLACEHOLDER** |
-| 22 | **HR Settings** | `SettingsPage.tsx` with tabs: Onboarding, Forms, Designations, Job Levels/Grades, Attendance, Leave, Timesheets, Performance | Forms & Onboarding settings routers mounted under `/api/v1/hrms/settings/*` | `form_customizations`, `form_field_overrides`, `form_custom_fields`, `onboarding_*` | 7 frontend test files, 4 backend test files | **PARTIAL**<br>(Workforce/Forms: FUNCTIONAL, Time/Leave: UI-ONLY) |
+| #   | Module / Destination          | Frontend Implementation                                                                                                      | Backend Implementation                                                                                                        | Database Schema                                                                                                                                                  | Test Coverage                                                        | Classification                                                      |
+| --- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| 1   | **Dashboard**                 | `ModulePlaceholder.tsx` (renders Overview, Analytics, Activity)                                                              | None (except ESS dashboard `/api/v1/ess/dashboard`)                                                                           | None (Aggregations across tables)                                                                                                                                | Catalog navigation tests                                             | **PLACEHOLDER** (Admin) / **FUNCTIONAL** (ESS)                      |
+| 2   | **Employees**                 | `EmployeeDirectoryPage`, `EmployeeProfilePage` (10 tabs, full sub-forms)                                                     | `EmployeeController`, `EmployeeService`, `EmployeeProfileService`, `EmployeeRepository`                                       | `employees`, `employee_personal_details`, `employee_family_members`, `employee_nominees`, `employee_bank_accounts`, `employee_skills`, `employee_work_schedules` | Unit, schema, validation & MySQL db integration tests                | **FUNCTIONAL**                                                      |
+| 3   | **Employee Administration**   | `EmployeeAdministrationPage` (Action queue, 5 transition modals, history drawer)                                             | `EmployeeActionController`, `EmployeeActionService`, `EmployeeActionRepository`                                               | `employee_actions`, `employee_action_history`                                                                                                                    | API tests, UI tests, validation tests, MySQL integration tests       | **FUNCTIONAL**                                                      |
+| 4   | **Onboarding**                | `OnboardingPage` (stages, candidate tracking), `EmployeeRegistrationPage`                                                    | `OnboardingController`, `OnboardingService`, `OnboardingRepository`                                                           | `onboarding_cases`, `onboarding_case_stage_history`, `onboarding_general_settings`, `onboarding_stage_configs`, etc.                                             | 7 frontend test files, 3 backend test files                          | **FUNCTIONAL**                                                      |
+| 5   | **Documents**                 | `DocumentsPage` (list, upload modal, filter drawer, employee selector)                                                       | `EmployeeDocumentController`, `EmployeeDocumentService`, `EmployeeDocumentRepository`                                         | `employee_documents`                                                                                                                                             | UI tests, validation tests, MySQL integration tests                  | **FUNCTIONAL**                                                      |
+| 6   | **Organization**              | Integrated via Settings & Platform (`/company-admin/organization`)                                                           | `OrganizationController`, `DepartmentController`, `WorkLocationController`, `workforceRouter`                                 | `departments`, `designations`, `locations`, `job_levels`, `grades`, `business_units`, `divisions`                                                                | Frontend UI tests, backend MySQL integration tests                   | **FUNCTIONAL**                                                      |
+| 7   | **Attendance**                | Admin: `ModulePlaceholder.tsx`<br>Settings: `AttendanceSettingsSection.tsx` (UI stub)<br>ESS: `EssAttendancePage.tsx`        | Admin: **None** (No routes mounted)<br>Core: `AttendanceService`, `AttendanceRepository`<br>ESS: `/api/v1/ess/attendance/*`   | `employee_attendance` (single daily check-in/out record)<br>`employee_requests` (regularization)                                                                 | ESS Supertest integration tests; no admin attendance tests           | **PARTIAL**<br>(Admin: PLACEHOLDER, ESS: FUNCTIONAL, Core: PARTIAL) |
+| 8   | **Leave**                     | Admin: `ModulePlaceholder.tsx`<br>Settings: `LeaveSettingsSection.tsx` (UI stub)<br>ESS: `EssLeavePage.tsx`                  | Admin: **None** (No routes mounted)<br>Core: `LeaveService`, `LeaveRepository`, `leaveRules.ts`<br>ESS: `/api/v1/ess/leave/*` | `employee_leave_balances`, `employee_leave_requests`                                                                                                             | Rule engine unit tests (`leaveRules.test.ts`), ESS integration tests | **PARTIAL**<br>(Admin: PLACEHOLDER, ESS: FUNCTIONAL, Core: PARTIAL) |
+| 9   | **Timesheets**                | Admin: `ModulePlaceholder.tsx`<br>Settings: `TimesheetsSettingsSection.tsx` (UI stub)<br>ESS: `EssTimesheetsPage.tsx`        | Admin: **None**<br>ESS: `/api/v1/ess/timesheets`                                                                              | `employee_timesheets`                                                                                                                                            | ESS integration tests                                                | **PARTIAL**<br>(Admin: PLACEHOLDER, ESS: FUNCTIONAL)                |
+| 10  | **Shifts**                    | `ModulePlaceholder.tsx`                                                                                                      | None                                                                                                                          | None (Only static `employee_work_schedules` per employee)                                                                                                        | Catalog navigation tests                                             | **PLACEHOLDER**                                                     |
+| 11  | **Recruitment**               | `ModulePlaceholder.tsx` (children: Job Openings, Candidates, Interviews, Offers)                                             | None                                                                                                                          | None                                                                                                                                                             | Catalog navigation tests                                             | **PLACEHOLDER**                                                     |
+| 12  | **Performance**               | Admin: `ModulePlaceholder.tsx`<br>Settings: `PerformanceSettingsSection.tsx` (UI stub)                                       | None                                                                                                                          | None                                                                                                                                                             | Catalog navigation tests                                             | **PLACEHOLDER**                                                     |
+| 13  | **Learning**                  | `ModulePlaceholder.tsx`                                                                                                      | None                                                                                                                          | None                                                                                                                                                             | Catalog navigation tests                                             | **PLACEHOLDER**                                                     |
+| 14  | **Career Paths**              | `ModulePlaceholder.tsx`                                                                                                      | None                                                                                                                          | None                                                                                                                                                             | Catalog navigation tests                                             | **PLACEHOLDER**                                                     |
+| 15  | **Payroll**                   | Admin: `ModulePlaceholder.tsx`<br>ESS: `EssPayslipsPage.tsx` (placeholder)                                                   | None                                                                                                                          | None                                                                                                                                                             | Catalog navigation tests                                             | **PLACEHOLDER**                                                     |
+| 16  | **Compensation**              | `ModulePlaceholder.tsx`                                                                                                      | None                                                                                                                          | None                                                                                                                                                             | Catalog navigation tests                                             | **PLACEHOLDER**                                                     |
+| 17  | **Benefits**                  | `ModulePlaceholder.tsx`                                                                                                      | None                                                                                                                          | None                                                                                                                                                             | Catalog navigation tests                                             | **PLACEHOLDER**                                                     |
+| 18  | **Assets**                    | `ModulePlaceholder.tsx`                                                                                                      | None                                                                                                                          | None                                                                                                                                                             | Catalog navigation tests                                             | **PLACEHOLDER**                                                     |
+| 19  | **Employee Requests**         | Admin: `ModulePlaceholder.tsx`<br>ESS: `EssRequestsPage.tsx` (submits profile/regularization/doc requests)                   | Admin: **None**<br>ESS: `/api/v1/ess/requests`                                                                                | `employee_requests`                                                                                                                                              | ESS integration tests                                                | **PARTIAL**<br>(Admin: PLACEHOLDER, ESS: FUNCTIONAL)                |
+| 20  | **Standard Operations (SOP)** | `ModulePlaceholder.tsx`                                                                                                      | None                                                                                                                          | None                                                                                                                                                             | Catalog navigation tests                                             | **PLACEHOLDER**                                                     |
+| 21  | **Reports**                   | `ModulePlaceholder.tsx`                                                                                                      | None                                                                                                                          | None                                                                                                                                                             | Catalog navigation tests                                             | **PLACEHOLDER**                                                     |
+| 22  | **HR Settings**               | `SettingsPage.tsx` with tabs: Onboarding, Forms, Designations, Job Levels/Grades, Attendance, Leave, Timesheets, Performance | Forms & Onboarding settings routers mounted under `/api/v1/hrms/settings/*`                                                   | `form_customizations`, `form_field_overrides`, `form_custom_fields`, `onboarding_*`                                                                              | 7 frontend test files, 4 backend test files                          | **PARTIAL**<br>(Workforce/Forms: FUNCTIONAL, Time/Leave: UI-ONLY)   |
 
 ---
 
@@ -116,6 +117,7 @@ The 19 destinations from `hrmsNavigation.ts` plus cross-cutting domains are inve
 ### 4.1 Route Generation & Rendering Engine
 
 In `apps/web/src/applications/hrms/routes/hrmsRoutes.tsx`, routes are dynamically generated by iterating over `hrmsNavigation.destinations`:
+
 - When `destination.id === 'administration'`, it maps children:
   - `employees` → `<EmployeeDirectoryPage />`
   - `employee-administration` → `<EmployeeAdministrationPage />`
@@ -137,6 +139,7 @@ In `apps/web/src/applications/hrms/routes/hrmsRoutes.tsx`, routes are dynamicall
 ### 4.2 Dead or Misleading UI Stubs
 
 In `apps/web/src/applications/hrms/settings/`:
+
 - [`AttendanceSettingsSection.tsx`](file:///e:/Company/bezent_ecosystem/apps/web/src/applications/hrms/settings/attendance/AttendanceSettingsSection.tsx): Maintains local state (`gracePeriodMins: 15`, `defaultShift: "09:00 AM - 06:00 PM"`, `attendanceTypes`), uses an artificial `setTimeout(() => setSaved(false), 3000)` on save, and makes **zero HTTP API calls**.
 - [`LeaveSettingsSection.tsx`](file:///e:/Company/bezent_ecosystem/apps/web/src/applications/hrms/settings/leave/LeaveSettingsSection.tsx): Maintains hardcoded `DEFAULT_LEAVE_TYPES` array in React component state with no persistence backend.
 - [`TimesheetsSettingsSection.tsx`](file:///e:/Company/bezent_ecosystem/apps/web/src/applications/hrms/settings/timesheets/TimesheetsSettingsSection.tsx): Local React component state with no persistence backend.
@@ -173,6 +176,7 @@ app.use('/api/v1', formsRouter);
 ```
 
 **Critical Architectural Gap:**
+
 - `attendanceRouter`: **Does not exist**. No administrative attendance router is mounted.
 - `leaveRouter`: **Does not exist**. No administrative leave router is mounted.
 - `shiftRouter`: **Does not exist**.
@@ -180,6 +184,7 @@ app.use('/api/v1', formsRouter);
 ### 5.2 The Hidden Backend Services
 
 Although no administrative routes are mounted for Attendance and Leave, core business code exists under `apps/api/src/applications/hrms/`:
+
 1. [`apps/api/src/applications/hrms/attendance/`](file:///e:/Company/bezent_ecosystem/apps/api/src/applications/hrms/attendance):
    - `attendanceRepository`: Queries and updates table `employee_attendance` (`getTodayAttendance`, `checkIn`, `checkOut`, `getAttendanceHistory`).
    - `attendanceService`: Enforces daily check-in uniqueness and check-out ordering.
@@ -237,6 +242,7 @@ employee_requests            -- Generic request queue: 'profile_change', 'attend
 ### 6.2 Missing & Non-Existent Tables
 
 The following enterprise attendance, shift, and leave structures **do NOT exist** anywhere in schema or migrations:
+
 1. `punch_events` / `attendance_raw_logs`: No table exists to store granular biometric or mobile punches, punch types (IN, OUT, BREAK_IN, BREAK_OUT), device IDs, geo-coordinates, or raw timestamps.
 2. `shifts` / `shift_masters`: No master table for shifts (shift code, name, grace periods, half-day hours, overnight flags).
 3. `shift_rosters` / `shift_assignments`: No table exists to assign employees to rotating or scheduled shifts by date range or pattern.
@@ -248,46 +254,52 @@ The following enterprise attendance, shift, and leave structures **do NOT exist*
 
 ## 7. Module Ownership Matrix
 
-| Domain | Owning Module | Responsibilities | Current Implementation State |
-|---|---|---|---|
-| **Employee Identity & History** | `applications/hrms/employees` & `employee-administration` | Canonical identity, employment history, profile details, job changes, probation, separation. | **Fully Functional & Canonical**. Reusable by all modules. |
-| **Shift Management** | `applications/hrms/shifts` (Future) | Shift masters, shift schedules, rotating rosters, weekly-off definitions, shift allowances. | **Missing**. Only static `employee_work_schedules` exists on Employee Profile. |
-| **Punches & Clocking** | `applications/hrms/attendance` | Biometric/device ingestion, web check-in/out, raw punch validation, geofencing. | **Partial**. Single check-in/out in `employee_attendance`; raw punch event model missing. |
-| **Attendance Calculations** | `applications/hrms/attendance` | Daily attendance computation, total hours, late marks, early exits, overtime, half-day / absent flags. | **Missing**. Status is either manual or defaulting to 'present' on check-in. |
-| **Leave Policies & Requests** | `applications/hrms/leave` | Leave entitlement policies, balance tracking, accruals, leave requests, approvals. | **Partial**. Balances and requests exist for ESS; Admin policies and approvals missing. |
-| **Regularization** | `applications/hrms/attendance` | Missed punch correction, shift correction, regularization workflow and approval. | **Partial**. Submissions land in `employee_requests`; admin review missing. |
+| Domain                          | Owning Module                                             | Responsibilities                                                                                       | Current Implementation State                                                              |
+| ------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| **Employee Identity & History** | `applications/hrms/employees` & `employee-administration` | Canonical identity, employment history, profile details, job changes, probation, separation.           | **Fully Functional & Canonical**. Reusable by all modules.                                |
+| **Shift Management**            | `applications/hrms/shifts` (Future)                       | Shift masters, shift schedules, rotating rosters, weekly-off definitions, shift allowances.            | **Missing**. Only static `employee_work_schedules` exists on Employee Profile.            |
+| **Punches & Clocking**          | `applications/hrms/attendance`                            | Biometric/device ingestion, web check-in/out, raw punch validation, geofencing.                        | **Partial**. Single check-in/out in `employee_attendance`; raw punch event model missing. |
+| **Attendance Calculations**     | `applications/hrms/attendance`                            | Daily attendance computation, total hours, late marks, early exits, overtime, half-day / absent flags. | **Missing**. Status is either manual or defaulting to 'present' on check-in.              |
+| **Leave Policies & Requests**   | `applications/hrms/leave`                                 | Leave entitlement policies, balance tracking, accruals, leave requests, approvals.                     | **Partial**. Balances and requests exist for ESS; Admin policies and approvals missing.   |
+| **Regularization**              | `applications/hrms/attendance`                            | Missed punch correction, shift correction, regularization workflow and approval.                       | **Partial**. Submissions land in `employee_requests`; admin review missing.               |
 
 ---
 
 ## 8. Attendance–Leave–Shift Integration Analysis
 
 ### Proposed Workflow Dependency Trace:
+
 `Employee → Shift Assignment → Punch Events → Attendance Calculation → Daily Attendance`  
 and  
 `Leave → Attendance Reconciliation`
 
 #### Step 1: Employee Integration
+
 - **Existing Implementation:** [`apps/api/src/applications/hrms/employees/`](file:///e:/Company/bezent_ecosystem/apps/api/src/applications/hrms/employees)
 - **Available Service:** `EmployeeService.getById(tenantId, companyId, employeeId)`
 - **Evaluation:** **100% READY**. Clean multi-tenant queries, active status filtering, and referential integrity to `companies.id`.
 
 #### Step 2: Shift Assignment Integration
+
 - **Existing Implementation:** None for dynamic shifts. Only [`employee_work_schedules`](file:///e:/Company/bezent_ecosystem/apps/api/src/db/schema.ts#L898) (`workingDays`, `startTime`, `endTime`, `breakMinutes`, `lunchMinutes`, `timeZone`).
 - **Missing Capability:** No date-ranged shift assignments, no shift rotations, no shift codes.
 - **Integration Risk:** If Attendance depends immediately on a complex dynamic shift roster module before one is built, Attendance will be blocked.
 - **Architectural Solution:** Attendance V1 must use `employee_work_schedules` as the default fallback schedule, with a contract ready to consume `shift_assignments` once the Shift module is built.
 
 #### Step 3: Punch Events Ingestion
+
 - **Existing Implementation:** ESS `POST /api/v1/ess/attendance/check-in` writes directly to `employee_attendance.checkInTime`.
 - **Missing Capability:** No support for multiple daily punches, biometric device imports, mobile geolocation logging, or punch history.
 - **Integration Risk:** Overwriting `checkInTime` directly loses punch auditability and prevents multiple breaks/intermittent punches.
 
 #### Step 4: Attendance Calculation Engine
+
 - **Existing Implementation:** None. Time calculation is currently client-side or omitted.
 - **Missing Capability:** Calculation of worked hours, late duration, early departure, half-day threshold comparison, and overtime calculation.
 - **Integration Risk:** Business logic duplication between administrative attendance computation and ESS summary views.
 
 #### Step 5: Leave → Attendance Reconciliation
+
 - **Existing Implementation:** `employee_leave_requests` table exists.
 - **Missing Capability:** When a leave request is marked `approved`, no automated mechanism marks `employee_attendance.status = 'on_leave'` for the corresponding date range.
 - **Integration Risk:** Employees on approved leave could be marked 'absent' by daily attendance calculation.
@@ -302,6 +314,7 @@ Permissions follow the standard chain:
 $$\text{User} \longrightarrow \text{Company Membership} \longrightarrow \text{Roles} \longrightarrow \text{Role Permissions} \longrightarrow \text{Capability}$$
 
 Standard HRMS permissions defined in seed/system roles:
+
 - `hrms.employees.read`, `hrms.employees.create`, `hrms.employees.manage`
 - `hrms.onboarding.read`, `hrms.onboarding.manage`
 - `hrms.documents.read`, `hrms.documents.manage`
@@ -309,11 +322,13 @@ Standard HRMS permissions defined in seed/system roles:
 - `hrms.settings.view`, `hrms.settings.manage`
 
 ### 9.2 Attendance & Leave Permission Status
+
 - In catalog: `hrmsNavigation.ts` defines `permissionKey: "hrms.attendance.view"` and `"hrms.leave.view"`.
 - In backend seed / roles: These keys exist in system definitions but have **no routes protecting administrative attendance or leave** because those routes are not yet mounted!
 - In ESS: Access is granted to any user with an active employee record linked via `email` and company membership, guarded by `RequireEssWorkspace`.
 
 ### 9.3 Cross-Tenant Isolation
+
 - Tested in [`hrmsApiSecurity.test.ts`](file:///e:/Company/bezent_ecosystem/apps/api/src/applications/hrms/__tests__/hrmsApiSecurity.test.ts): Verified that `X-Company-Id` is strictly a client claim; server validates membership and tenant ownership. Requests targeting other companies return `404` or `403`.
 
 ---
@@ -323,6 +338,7 @@ Standard HRMS permissions defined in seed/system roles:
 Validation commands were executed in read-only mode across the monorepo:
 
 ### 10.1 TypeScript Typechecks
+
 ```bash
 npm run typecheck --workspace=apps/api
 # Exit code: 0 (0 errors)
@@ -332,6 +348,7 @@ npm run typecheck --workspace=apps/web
 ```
 
 ### 10.2 Frontend HRMS Test Suite
+
 ```bash
 npx vitest run apps/web/src/applications/hrms
 # Result: 21 test files passed (304 tests passed, 0 failed)
@@ -339,15 +356,19 @@ npx vitest run apps/web/src/applications/hrms
 ```
 
 ### 10.3 Backend HRMS Test Suite
+
 ```bash
 npx vitest run apps/api/src/applications/hrms
 # Result: 19 test files passed, 2 test files had assertion failures (323 passed, 2 failed out of 325)
 # Duration: 36.64s
 ```
-*Note on the 2 backend test failures:* Both failures occurred in `onboarding/stageLifecycle.test.ts` (expecting 409, received 400) and `settings/onboarding/dynamicStages.test.ts` (stage deletion constraint check), caused by existing test data in the active local MySQL database. Neither affects the Employee or Attendance core repositories.
+
+_Note on the 2 backend test failures:_ Both failures occurred in `onboarding/stageLifecycle.test.ts` (expecting 409, received 400) and `settings/onboarding/dynamicStages.test.ts` (stage deletion constraint check), caused by existing test data in the active local MySQL database. Neither affects the Employee or Attendance core repositories.
 
 ### 10.4 Production Bundles
+
 Production builds executed successfully across both workspaces:
+
 - `apps/api`: `tsc -p tsconfig.json` clean output.
 - `apps/web`: Vite production build bundled 489 modules without error.
 
@@ -356,6 +377,7 @@ Production builds executed successfully across both workspaces:
 ## 11. Gap Analysis
 
 ### A. Existing Strengths (Safe to Reuse Without Modification)
+
 1. **Canonical Employee Model & Repository:** `EmployeeService` and `EmployeeRepository` provide complete employee data, active employment filtering, and company scoping.
 2. **Static Work Schedules:** `employee_work_schedules` stores valid working days, start/end times, and break durations.
 3. **ESS Attendance Pipeline:** `AttendanceRepository` and `EssAttendancePage` already provide operational check-in/out logic and regularization submission.
@@ -363,6 +385,7 @@ Production builds executed successfully across both workspaces:
 5. **Rules Engine:** `ruleEngine` in `platform/rules` is operational and already evaluated in `leaveRules.test.ts`.
 
 ### B. Architecture Problems (Must Be Corrected Before/During Attendance Work)
+
 1. **[P0] Absence of Granular Punch Audit Trail:** Table `employee_attendance` only holds single `check_in_time` and `check_out_time` strings. If an employee punches multiple times or needs correction, previous punches are lost. A dedicated `punch_events` table is required.
 2. **[P0] Unmounted Admin Attendance Router:** There is no `/api/v1/hrms/attendance` router mounted in `createApp.ts`. Administrative API consumers have no backend contract.
 3. **[P1] Mock State in Settings:** `AttendanceSettingsSection.tsx` is completely decoupled from any database table. Saving does not persist.
@@ -370,6 +393,7 @@ Production builds executed successfully across both workspaces:
 5. **[P2] Single-Day Attendance Model:** Current schema has `date: varchar(10)` with unique index `(tenant_id, company_id, employee_id, date)`. Overnight shifts spanning midnight cannot be cleanly represented without formal shift boundaries.
 
 ### C. Missing Functionality (To Be Implemented)
+
 1. **Administrative Attendance Dashboard & Daily Log:** Table view of all company employees for a selected date, showing check-in time, check-out time, work location, status, and calculated hours.
 2. **Attendance Regularization Approval Queue:** An administrative interface to review and approve/reject attendance regularization requests submitted through ESS.
 3. **Monthly Attendance Summary & Grid:** Matrix of employees vs. days of the month showing Present / Absent / Leave / Half-Day / Holiday badges.
@@ -396,14 +420,14 @@ The following existing components in the monorepo should be reused directly for 
 
 ## 13. Attendance Implementation Readiness
 
-| Subsystem | Readiness Score | Evaluation & Blockers |
-|---|---|---|
-| **Employee Identity** | **100% READY** | Employee directory, active status, department/designation links are fully functional. |
-| **Shift Domain** | **NOT READY** | No shift tables exist. **Blocker Bypass:** Attendance V1 must use `employee_work_schedules` as the default schedule. |
-| **Leave Domain** | **60% READY** | ESS leave exists. Administrative leave reconciliation is missing. |
-| **Attendance Core Schema** | **70% READY** | `employee_attendance` exists. Needs a supporting `punch_events` table and policy schema. |
-| **Attendance Backend Services** | **50% READY** | Repository exists for ESS. Administrative controller, calculation engine, and approval service are missing. |
-| **Attendance Frontend** | **20% READY** | ESS attendance page exists. Administrative screens are pure placeholders. |
+| Subsystem                       | Readiness Score | Evaluation & Blockers                                                                                                |
+| ------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **Employee Identity**           | **100% READY**  | Employee directory, active status, department/designation links are fully functional.                                |
+| **Shift Domain**                | **NOT READY**   | No shift tables exist. **Blocker Bypass:** Attendance V1 must use `employee_work_schedules` as the default schedule. |
+| **Leave Domain**                | **60% READY**   | ESS leave exists. Administrative leave reconciliation is missing.                                                    |
+| **Attendance Core Schema**      | **70% READY**   | `employee_attendance` exists. Needs a supporting `punch_events` table and policy schema.                             |
+| **Attendance Backend Services** | **50% READY**   | Repository exists for ESS. Administrative controller, calculation engine, and approval service are missing.          |
+| **Attendance Frontend**         | **20% READY**   | ESS attendance page exists. Administrative screens are pure placeholders.                                            |
 
 ---
 
@@ -412,10 +436,12 @@ The following existing components in the monorepo should be reused directly for 
 Do NOT attempt to build Shifts, Attendance, and Leave simultaneously. Follow this strict phased sequence:
 
 ### Phase 1: Database Foundation & Punch Model
+
 1. Create a non-destructive migration introducing `attendance_punches` (raw punch audit log) and `attendance_policies` (persisted rules).
 2. Maintain full backward compatibility with the existing `employee_attendance` table so ESS check-in/out continues to function without regression.
 
 ### Phase 2: Administrative Attendance Backend Services
+
 1. Create `AttendanceCalculationService` to compute daily hours, late marks, and statuses based on `employee_work_schedules`.
 2. Implement `AdminAttendanceService` and `AttendanceController` handling:
    - `GET /api/v1/hrms/attendance/daily-log?date=YYYY-MM-DD`
@@ -426,12 +452,14 @@ Do NOT attempt to build Shifts, Attendance, and Leave simultaneously. Follow thi
 3. Mount `attendanceRouter` under `/api/v1/hrms/attendance` with permissions `hrms.attendance.view` and `hrms.attendance.manage`.
 
 ### Phase 3: Administrative Attendance Frontend Pages
+
 1. Build `DailyAttendanceLogPage.tsx` using Design System `Table`, `Badge`, and `Toolbar`.
 2. Build `MonthlyAttendanceSummaryPage.tsx` with date-grid navigation.
 3. Build `AttendanceRegularizationPage.tsx` to approve/reject employee requests.
 4. Replace `<ModulePlaceholder>` entries in `hrmsRoutes.tsx` for `attendance` and its sub-navigation children.
 
 ### Phase 4: Shift Module Development (Deferred)
+
 - Do NOT rewrite or delay Attendance for dynamic shifts. Once Attendance V1 is stable, build `applications/hrms/shifts` as an independent domain and wire shift assignments into the attendance calculation engine via a clean adapter contract.
 
 ---

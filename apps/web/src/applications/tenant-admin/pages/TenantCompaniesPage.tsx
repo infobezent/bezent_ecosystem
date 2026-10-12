@@ -21,7 +21,7 @@ import { tenantAdminApi } from '../api/tenantAdminApi';
 import type { TenantAdminCompanySummary } from '../types/tenantAdmin.types';
 
 const COLOR_VARIANTS = ['blue', 'amber', 'teal', 'purple', 'rose'] as const;
-type ColorVariant = typeof COLOR_VARIANTS[number];
+type ColorVariant = (typeof COLOR_VARIANTS)[number];
 
 function getCompanyColorVariant(name: string, index: number): ColorVariant {
   let hash = index;
@@ -176,18 +176,14 @@ export function TenantCompaniesPage({
     () => enrichedCompanies || contextCompanies || [],
     [enrichedCompanies, contextCompanies],
   );
-  const isLoading = (isContextLoading && companies.length === 0) || (isEnrichLoading && companies.length === 0);
+  const isLoading =
+    (isContextLoading && companies.length === 0) || (isEnrichLoading && companies.length === 0);
   const error = contextError || fetchError;
 
   // Capacity calculations
   const capacityUsed =
-    contextCapacity?.used ??
-    contextCapacity?.currentCompanies ??
-    companies.length;
-  const capacityMax =
-    contextCapacity?.max ??
-    contextCapacity?.maxCompanies ??
-    5;
+    contextCapacity?.used ?? contextCapacity?.currentCompanies ?? companies.length;
+  const capacityMax = contextCapacity?.max ?? contextCapacity?.maxCompanies ?? 5;
   const capacityRemaining =
     contextCapacity?.remaining ??
     contextCapacity?.availableCapacity ??
@@ -413,7 +409,9 @@ export function TenantCompaniesPage({
               <div className="bezent-company-capacity-card__meta">
                 <span className="bezent-company-capacity-card__label">Company Capacity</span>
                 <span className="bezent-company-capacity-card__value">
-                  <strong>{capacityUsed} of {capacityMax}</strong>{' '}
+                  <strong>
+                    {capacityUsed} of {capacityMax}
+                  </strong>{' '}
                   <span className="bezent-company-capacity-card__unit">companies</span>
                 </span>
               </div>
@@ -476,8 +474,14 @@ export function TenantCompaniesPage({
 
                 {/* STATUS Group - Mutually exclusive single-select radios */}
                 <div className="bezent-filter-group">
-                  <span className="bezent-filter-group__label" id="filter-status-label">STATUS</span>
-                  <div className="bezent-filter-radio-group" role="radiogroup" aria-labelledby="filter-status-label">
+                  <span className="bezent-filter-group__label" id="filter-status-label">
+                    STATUS
+                  </span>
+                  <div
+                    className="bezent-filter-radio-group"
+                    role="radiogroup"
+                    aria-labelledby="filter-status-label"
+                  >
                     {[
                       { value: 'all', label: 'All' },
                       { value: 'active', label: 'Active' },
@@ -500,7 +504,9 @@ export function TenantCompaniesPage({
 
                 {/* LOCATION Group - Accessible Select Dropdown */}
                 <div className="bezent-filter-group">
-                  <span className="bezent-filter-group__label" id="filter-location-label">LOCATION</span>
+                  <span className="bezent-filter-group__label" id="filter-location-label">
+                    LOCATION
+                  </span>
                   <Select
                     size="sm"
                     width="full"
@@ -517,8 +523,14 @@ export function TenantCompaniesPage({
                 {/* APPLICATIONS Group - Multi-Select Checkboxes */}
                 {availableApplications.length > 0 && (
                   <div className="bezent-filter-group">
-                    <span className="bezent-filter-group__label" id="filter-apps-label">APPLICATIONS</span>
-                    <div className="bezent-filter-checkbox-group" role="group" aria-labelledby="filter-apps-label">
+                    <span className="bezent-filter-group__label" id="filter-apps-label">
+                      APPLICATIONS
+                    </span>
+                    <div
+                      className="bezent-filter-checkbox-group"
+                      role="group"
+                      aria-labelledby="filter-apps-label"
+                    >
                       {availableApplications.map((app) => (
                         <Checkbox
                           key={app.key}
@@ -548,11 +560,7 @@ export function TenantCompaniesPage({
                   >
                     Clear all
                   </button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={handleApplyFilters}
-                  >
+                  <Button variant="primary" size="sm" onClick={handleApplyFilters}>
                     Apply
                   </Button>
                 </div>
@@ -591,8 +599,7 @@ export function TenantCompaniesPage({
         {/* 5. RESULT COUNT */}
         {companies.length > 0 && (
           <div className="bezent-companies-result-count">
-            {filteredCompanies.length}{' '}
-            {filteredCompanies.length === 1 ? 'Company' : 'Companies'}
+            {filteredCompanies.length} {filteredCompanies.length === 1 ? 'Company' : 'Companies'}
           </div>
         )}
 
@@ -704,7 +711,9 @@ export function TenantCompaniesPage({
                           )}
                         </>
                       ) : (
-                        <span className="bezent-company-card__no-apps">No applications enabled</span>
+                        <span className="bezent-company-card__no-apps">
+                          No applications enabled
+                        </span>
                       )}
                     </div>
                   </div>
@@ -721,7 +730,9 @@ export function TenantCompaniesPage({
 
                     {locationStr && (
                       <>
-                        <span className="bezent-company-card__meta-divider" aria-hidden="true">|</span>
+                        <span className="bezent-company-card__meta-divider" aria-hidden="true">
+                          |
+                        </span>
                         <span className="bezent-company-card__meta-item">
                           <BezentIcon name="pin" size={14} />
                           <span>{locationStr}</span>
@@ -731,7 +742,9 @@ export function TenantCompaniesPage({
 
                     {formattedDate && (
                       <>
-                        <span className="bezent-company-card__meta-divider" aria-hidden="true">|</span>
+                        <span className="bezent-company-card__meta-divider" aria-hidden="true">
+                          |
+                        </span>
                         <span className="bezent-company-card__meta-item">
                           <BezentIcon name="calendar" size={14} />
                           <span>Created {formattedDate}</span>

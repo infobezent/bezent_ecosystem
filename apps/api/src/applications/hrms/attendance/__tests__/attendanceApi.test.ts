@@ -215,7 +215,9 @@ describe.skipIf(!isDatabaseConfigured)('Administrative Attendance API', () => {
 
     it('fetches daily attendance log V1 with counters, pagination, and sorting', async () => {
       const res = await request(app)
-        .get('/api/v1/hrms/attendance/daily-log?date=2026-10-09&page=1&limit=10&sortBy=name&sortOrder=asc')
+        .get(
+          '/api/v1/hrms/attendance/daily-log?date=2026-10-09&page=1&limit=10&sortBy=name&sortOrder=asc',
+        )
         .set(headers);
 
       expect(res.status).toBe(200);

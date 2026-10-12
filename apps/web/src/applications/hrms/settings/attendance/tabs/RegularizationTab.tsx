@@ -219,7 +219,8 @@ export function RegularizationTab() {
                   value={approvalHierarchy}
                   onChange={(e) =>
                     setApprovalHierarchy(
-                      e.target.value as 'manager_only' | 'hr_only' | 'manager_then_hr' | 'auto_approve',
+                      e.target.value as
+                        'manager_only' | 'hr_only' | 'manager_then_hr' | 'auto_approve',
                     )
                   }
                   options={[

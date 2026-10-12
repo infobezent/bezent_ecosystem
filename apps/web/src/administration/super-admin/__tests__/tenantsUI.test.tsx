@@ -149,9 +149,9 @@ describe('Super Admin - Phase 03A TenantsPage UI', () => {
       );
 
       expect(html).toContain('12'); // Total
-      expect(html).toContain('8');  // Active
-      expect(html).toContain('3');  // Trial
-      expect(html).toContain('1');  // Suspended
+      expect(html).toContain('8'); // Active
+      expect(html).toContain('3'); // Trial
+      expect(html).toContain('1'); // Suspended
     });
 
     it('renders helper description text for each metric card', () => {

@@ -16,7 +16,12 @@ import { appRoutes } from '../../../app/router/AppRouter';
 import { AuthContext, type AuthContextValue } from '../../../platform/auth/AuthProvider';
 import { ThemeProvider } from '../../../app/providers/ThemeProvider';
 import { CompanyAdminContext } from '../../../applications/company-admin/context/CompanyAdminContext';
-import type { AccessOverview, CompanyAccess, ModuleCode, WorkspaceId } from '../../../platform/auth/authApi';
+import type {
+  AccessOverview,
+  CompanyAccess,
+  ModuleCode,
+  WorkspaceId,
+} from '../../../platform/auth/authApi';
 import { TenantAdminDashboardPage } from '../pages/TenantAdminDashboardPage';
 import { TenantDetailsPage } from '../pages/TenantDetailsPage';
 import { TenantProfilePage } from '../pages/TenantProfilePage';
@@ -63,7 +68,8 @@ function createMockAuth(opts: {
     workspaces,
   };
 
-  const companies = opts.companies ?? (workspaces.length > 0 || isTenantAdmin ? [defaultCompany] : []);
+  const companies =
+    opts.companies ?? (workspaces.length > 0 || isTenantAdmin ? [defaultCompany] : []);
 
   const access: AccessOverview = {
     user: {
@@ -180,48 +186,119 @@ describe('Tenant Admin Navigation Catalog — Frozen V1 IA & Integrity', () => {
     expect(r1?.childId).toBe('dashboard');
 
     // Tenant / Details
-    const r2 = resolveActiveNavigation(app.navigation, app.basePath, '/tenant-admin/tenant/details');
+    const r2 = resolveActiveNavigation(
+      app.navigation,
+      app.basePath,
+      '/tenant-admin/tenant/details',
+    );
     expect(r2?.destinationId).toBe('tenant');
     expect(r2?.childId).toBe('tenant-details');
 
     // Tenant / Companies
-    const r3 = resolveActiveNavigation(app.navigation, app.basePath, '/tenant-admin/tenant/companies');
+    const r3 = resolveActiveNavigation(
+      app.navigation,
+      app.basePath,
+      '/tenant-admin/tenant/companies',
+    );
     expect(r3?.destinationId).toBe('tenant');
     expect(r3?.childId).toBe('companies');
 
     // Access / Users
-    const r4 = resolveActiveNavigation(app.navigation, app.basePath, '/tenant-admin/access/users/members');
+    const r4 = resolveActiveNavigation(
+      app.navigation,
+      app.basePath,
+      '/tenant-admin/access/users/members',
+    );
     expect(r4?.destinationId).toBe('access');
     expect(r4?.childId).toBe('users');
 
     // Applications / Access
-    const r5 = resolveActiveNavigation(app.navigation, app.basePath, '/tenant-admin/applications/access');
+    const r5 = resolveActiveNavigation(
+      app.navigation,
+      app.basePath,
+      '/tenant-admin/applications/access',
+    );
     expect(r5?.destinationId).toBe('applications');
     expect(r5?.childId).toBe('application-access');
 
     // Governance / Audit Logs
-    const r6 = resolveActiveNavigation(app.navigation, app.basePath, '/tenant-admin/governance/audit-logs');
+    const r6 = resolveActiveNavigation(
+      app.navigation,
+      app.basePath,
+      '/tenant-admin/governance/audit-logs',
+    );
     expect(r6?.destinationId).toBe('governance');
     expect(r6?.childId).toBe('audit-logs');
 
     // Deep-links across Tenant hierarchy
-    expect(resolveActiveNavigation(app.navigation, app.basePath, '/tenant-admin/tenant/companies/new')?.destinationId).toBe('tenant');
-    expect(resolveActiveNavigation(app.navigation, app.basePath, '/tenant-admin/tenant/companies/comp_001/overview')?.destinationId).toBe('tenant');
-    expect(resolveActiveNavigation(app.navigation, app.basePath, '/tenant-admin/tenant/companies/comp_001/details')?.destinationId).toBe('tenant');
-    expect(resolveActiveNavigation(app.navigation, app.basePath, '/tenant-admin/tenant/companies/comp_001/organization/structure')?.destinationId).toBe('tenant');
-    expect(resolveActiveNavigation(app.navigation, app.basePath, '/tenant-admin/tenant/companies/comp_001/organization/departments')?.destinationId).toBe('tenant');
-    expect(resolveActiveNavigation(app.navigation, app.basePath, '/tenant-admin/tenant/companies/comp_001/organization/locations')?.destinationId).toBe('tenant');
+    expect(
+      resolveActiveNavigation(app.navigation, app.basePath, '/tenant-admin/tenant/companies/new')
+        ?.destinationId,
+    ).toBe('tenant');
+    expect(
+      resolveActiveNavigation(
+        app.navigation,
+        app.basePath,
+        '/tenant-admin/tenant/companies/comp_001/overview',
+      )?.destinationId,
+    ).toBe('tenant');
+    expect(
+      resolveActiveNavigation(
+        app.navigation,
+        app.basePath,
+        '/tenant-admin/tenant/companies/comp_001/details',
+      )?.destinationId,
+    ).toBe('tenant');
+    expect(
+      resolveActiveNavigation(
+        app.navigation,
+        app.basePath,
+        '/tenant-admin/tenant/companies/comp_001/organization/structure',
+      )?.destinationId,
+    ).toBe('tenant');
+    expect(
+      resolveActiveNavigation(
+        app.navigation,
+        app.basePath,
+        '/tenant-admin/tenant/companies/comp_001/organization/departments',
+      )?.destinationId,
+    ).toBe('tenant');
+    expect(
+      resolveActiveNavigation(
+        app.navigation,
+        app.basePath,
+        '/tenant-admin/tenant/companies/comp_001/organization/locations',
+      )?.destinationId,
+    ).toBe('tenant');
 
     // Deep-links across Access hierarchy
-    expect(resolveActiveNavigation(app.navigation, app.basePath, '/tenant-admin/access/users/invitations')?.destinationId).toBe('access');
-    expect(resolveActiveNavigation(app.navigation, app.basePath, '/tenant-admin/access/roles')?.destinationId).toBe('access');
+    expect(
+      resolveActiveNavigation(
+        app.navigation,
+        app.basePath,
+        '/tenant-admin/access/users/invitations',
+      )?.destinationId,
+    ).toBe('access');
+    expect(
+      resolveActiveNavigation(app.navigation, app.basePath, '/tenant-admin/access/roles')
+        ?.destinationId,
+    ).toBe('access');
 
     // Deep-links across Applications hierarchy
-    expect(resolveActiveNavigation(app.navigation, app.basePath, '/tenant-admin/applications/setup')?.destinationId).toBe('applications');
+    expect(
+      resolveActiveNavigation(app.navigation, app.basePath, '/tenant-admin/applications/setup')
+        ?.destinationId,
+    ).toBe('applications');
 
     // Deep-links across Governance hierarchy
-    expect(resolveActiveNavigation(app.navigation, app.basePath, '/tenant-admin/governance')?.destinationId).toBe('governance');
-    expect(resolveActiveNavigation(app.navigation, app.basePath, '/tenant-admin/governance/audit-logs')?.destinationId).toBe('governance');
+    expect(
+      resolveActiveNavigation(app.navigation, app.basePath, '/tenant-admin/governance')
+        ?.destinationId,
+    ).toBe('governance');
+    expect(
+      resolveActiveNavigation(app.navigation, app.basePath, '/tenant-admin/governance/audit-logs')
+        ?.destinationId,
+    ).toBe('governance');
   });
 
   it('5. canonical default route resolution matches all 5 main navigation destinations', () => {
@@ -246,7 +323,9 @@ describe('Tenant Admin Navigation Catalog — Frozen V1 IA & Integrity', () => {
 
     // Governance -> /tenant-admin/governance/audit-logs
     const governance = destinations.find((d) => d.id === 'governance')!;
-    expect(destinationPath(app.basePath, governance, 'audit-logs')).toBe('/tenant-admin/governance/audit-logs');
+    expect(destinationPath(app.basePath, governance, 'audit-logs')).toBe(
+      '/tenant-admin/governance/audit-logs',
+    );
   });
 });
 
@@ -514,7 +593,9 @@ describe('Tenant Admin Route Access & Workspace Boundaries', () => {
   });
 });
 
-function createMockTenantAdminContext(overrides: Partial<TenantAdminContextValue> = {}): TenantAdminContextValue {
+function createMockTenantAdminContext(
+  overrides: Partial<TenantAdminContextValue> = {},
+): TenantAdminContextValue {
   return {
     tenantId: 'tenant_123',
     tenantName: 'Acme Global Corp',
@@ -583,7 +664,9 @@ function renderDashboardWithMockContext(
         element: (
           <TenantAdminContext.Provider value={ctx}>
             <TenantAdminDashboardPage
-              initialApplications={initialApplications as unknown as TenantApplicationSummary[] | null}
+              initialApplications={
+                initialApplications as unknown as TenantApplicationSummary[] | null
+              }
             />
           </TenantAdminContext.Provider>
         ),
@@ -852,9 +935,9 @@ describe('Tenant Admin Phase 3B — Tenant Details Product Tests (11-20)', () =>
   });
 
   it('19. API error does not corrupt context state', async () => {
-    const updateSpy = vi.spyOn(tenantAdminApi, 'updateTenantDetails').mockRejectedValue(
-      new TenantAdminApiError('Tenant update not supported', 404),
-    );
+    const updateSpy = vi
+      .spyOn(tenantAdminApi, 'updateTenantDetails')
+      .mockRejectedValue(new TenantAdminApiError('Tenant update not supported', 404));
 
     const ctx = createMockTenantAdminContext();
 
@@ -1236,5 +1319,3 @@ describe('Tenant Profile Workspace & Navigation Tests', () => {
     expect(html).toContain('Platform Governed');
   });
 });
-
-

@@ -141,7 +141,12 @@ export function normalizePostalCode(
     return clean;
   }
 
-  if (upperCountry === 'IN' || upperCountry === 'US' || upperCountry === 'AU' || upperCountry === 'DE') {
+  if (
+    upperCountry === 'IN' ||
+    upperCountry === 'US' ||
+    upperCountry === 'AU' ||
+    upperCountry === 'DE'
+  ) {
     // Strip extraneous whitespace
     return trimmed.replace(/\s+/g, '');
   }

@@ -119,7 +119,9 @@ describe('HRMS Attendance Module V1 Frontend', () => {
         </MemoryRouter>,
       );
       expect(html).toContain('Attendance Overview');
-      expect(html).toContain('Workforce operations, exception triage, and monthly payroll readiness');
+      expect(html).toContain(
+        'Workforce operations, exception triage, and monthly payroll readiness',
+      );
     });
 
     it('renders DailyAttendanceLogPage without crashing', () => {

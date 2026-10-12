@@ -35,7 +35,8 @@ export const APPLICATION_MODULE_CATALOG: readonly ApplicationModuleDefinition[] 
     key: 'organization',
     applicationCode: 'hrms',
     name: 'Organization Masters',
-    description: 'Departments, designations, work locations, job levels, and organizational structure.',
+    description:
+      'Departments, designations, work locations, job levels, and organizational structure.',
     category: 'Workforce Core',
     availability: 'GA',
     isMandatory: true,
@@ -81,7 +82,8 @@ export const APPLICATION_MODULE_CATALOG: readonly ApplicationModuleDefinition[] 
     key: 'leave',
     applicationCode: 'hrms',
     name: 'Leave & Absence Management',
-    description: 'Leave balance calculation, leave applications, multi-tier approvals, and holiday calendars.',
+    description:
+      'Leave balance calculation, leave applications, multi-tier approvals, and holiday calendars.',
     category: 'Time & Attendance',
     availability: 'GA',
     isMandatory: false,
@@ -92,7 +94,8 @@ export const APPLICATION_MODULE_CATALOG: readonly ApplicationModuleDefinition[] 
     key: 'onboarding',
     applicationCode: 'hrms',
     name: 'Dynamic Onboarding & Preboarding',
-    description: 'Pre-hire task lists, candidate verification, stage checklists, and employee conversion.',
+    description:
+      'Pre-hire task lists, candidate verification, stage checklists, and employee conversion.',
     category: 'Talent Acquisition',
     availability: 'GA',
     isMandatory: false,
@@ -103,7 +106,8 @@ export const APPLICATION_MODULE_CATALOG: readonly ApplicationModuleDefinition[] 
     key: 'recruitment',
     applicationCode: 'hrms',
     name: 'Recruitment & Job Openings',
-    description: 'Job requisitions, candidate pipelines, interview workflows, and candidate evaluation.',
+    description:
+      'Job requisitions, candidate pipelines, interview workflows, and candidate evaluation.',
     category: 'Talent Acquisition',
     availability: 'GA',
     isMandatory: false,
@@ -114,7 +118,8 @@ export const APPLICATION_MODULE_CATALOG: readonly ApplicationModuleDefinition[] 
     key: 'documents',
     applicationCode: 'hrms',
     name: 'Workforce Document Management',
-    description: 'Compliance document uploads, verification workflows, and employee record attachments.',
+    description:
+      'Compliance document uploads, verification workflows, and employee record attachments.',
     category: 'Workforce Core',
     availability: 'GA',
     isMandatory: false,
@@ -125,7 +130,8 @@ export const APPLICATION_MODULE_CATALOG: readonly ApplicationModuleDefinition[] 
     key: 'timesheets',
     applicationCode: 'hrms',
     name: 'Timesheets & Project Time Logs',
-    description: 'Weekly employee timesheet submission, manager approvals, and billable project hours.',
+    description:
+      'Weekly employee timesheet submission, manager approvals, and billable project hours.',
     category: 'Time & Attendance',
     availability: 'GA',
     isMandatory: false,
@@ -160,7 +166,8 @@ export const APPLICATION_MODULE_CATALOG: readonly ApplicationModuleDefinition[] 
     key: 'contacts',
     applicationCode: 'crm',
     name: 'Contacts & Directory',
-    description: 'Client contacts, email interactions, communication logs, and relationship history.',
+    description:
+      'Client contacts, email interactions, communication logs, and relationship history.',
     category: 'Customer Intelligence',
     availability: 'Planned',
     isMandatory: true,
@@ -171,7 +178,8 @@ export const APPLICATION_MODULE_CATALOG: readonly ApplicationModuleDefinition[] 
     key: 'accounts',
     applicationCode: 'crm',
     name: 'Accounts & Client Companies',
-    description: 'Customer account directory, corporate hierarchy, and account executive assignments.',
+    description:
+      'Customer account directory, corporate hierarchy, and account executive assignments.',
     category: 'Customer Intelligence',
     availability: 'Planned',
     isMandatory: true,
@@ -193,7 +201,8 @@ export const APPLICATION_MODULE_CATALOG: readonly ApplicationModuleDefinition[] 
     key: 'deals',
     applicationCode: 'crm',
     name: 'Deals & Opportunities',
-    description: 'Sales deal progression, revenue estimations, win probabilities, and expected close dates.',
+    description:
+      'Sales deal progression, revenue estimations, win probabilities, and expected close dates.',
     category: 'Sales Pipeline',
     availability: 'Planned',
     isMandatory: false,
@@ -204,7 +213,8 @@ export const APPLICATION_MODULE_CATALOG: readonly ApplicationModuleDefinition[] 
     key: 'pipelines',
     applicationCode: 'crm',
     name: 'Pipelines & Stage Automation',
-    description: 'Customizable stage funnels, transition validation rules, and automated notifications.',
+    description:
+      'Customizable stage funnels, transition validation rules, and automated notifications.',
     category: 'Sales Pipeline',
     availability: 'Planned',
     isMandatory: false,
@@ -239,7 +249,8 @@ export const APPLICATION_MODULE_CATALOG: readonly ApplicationModuleDefinition[] 
     key: 'tasks',
     applicationCode: 'project_management',
     name: 'Task Management & Work Items',
-    description: 'Task assignments, sub-tasks, priority tracking, checklists, and delivery deadlines.',
+    description:
+      'Task assignments, sub-tasks, priority tracking, checklists, and delivery deadlines.',
     category: 'Project Delivery',
     availability: 'Planned',
     isMandatory: true,

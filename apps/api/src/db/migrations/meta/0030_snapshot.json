@@ -82,39 +82,27 @@
       "indexes": {
         "idx_audit_logs_actor": {
           "name": "idx_audit_logs_actor",
-          "columns": [
-            "actor_user_id"
-          ],
+          "columns": ["actor_user_id"],
           "isUnique": false
         },
         "idx_audit_logs_target": {
           "name": "idx_audit_logs_target",
-          "columns": [
-            "target_type",
-            "target_id"
-          ],
+          "columns": ["target_type", "target_id"],
           "isUnique": false
         },
         "idx_audit_logs_tenant_company": {
           "name": "idx_audit_logs_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_audit_logs_action": {
           "name": "idx_audit_logs_action",
-          "columns": [
-            "action"
-          ],
+          "columns": ["action"],
           "isUnique": false
         },
         "idx_audit_logs_created_at": {
           "name": "idx_audit_logs_created_at",
-          "columns": [
-            "created_at"
-          ],
+          "columns": ["created_at"],
           "isUnique": false
         }
       },
@@ -122,9 +110,7 @@
       "compositePrimaryKeys": {
         "audit_logs_id": {
           "name": "audit_logs_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -219,25 +205,17 @@
       "indexes": {
         "idx_otp_email_created": {
           "name": "idx_otp_email_created",
-          "columns": [
-            "email",
-            "created_at"
-          ],
+          "columns": ["email", "created_at"],
           "isUnique": false
         },
         "idx_otp_ip_created": {
           "name": "idx_otp_ip_created",
-          "columns": [
-            "request_ip",
-            "created_at"
-          ],
+          "columns": ["request_ip", "created_at"],
           "isUnique": false
         },
         "idx_otp_user": {
           "name": "idx_otp_user",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": false
         }
       },
@@ -246,12 +224,8 @@
           "name": "auth_otp_challenges_user_id_users_id_fk",
           "tableFrom": "auth_otp_challenges",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -259,9 +233,7 @@
       "compositePrimaryKeys": {
         "auth_otp_challenges_id": {
           "name": "auth_otp_challenges_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -348,18 +320,12 @@
       "indexes": {
         "idx_business_units_tenant_company": {
           "name": "idx_business_units_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_business_units_company_code": {
           "name": "idx_business_units_company_code",
-          "columns": [
-            "company_id",
-            "code"
-          ],
+          "columns": ["company_id", "code"],
           "isUnique": false
         }
       },
@@ -368,12 +334,8 @@
           "name": "business_units_company_id_companies_id_fk",
           "tableFrom": "business_units",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -381,12 +343,8 @@
           "name": "business_units_head_employee_id_employees_id_fk",
           "tableFrom": "business_units",
           "tableTo": "employees",
-          "columnsFrom": [
-            "head_employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["head_employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -394,9 +352,7 @@
       "compositePrimaryKeys": {
         "business_units_id": {
           "name": "business_units_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -631,16 +587,12 @@
       "indexes": {
         "idx_companies_tenant_id": {
           "name": "idx_companies_tenant_id",
-          "columns": [
-            "tenant_id"
-          ],
+          "columns": ["tenant_id"],
           "isUnique": false
         },
         "idx_companies_code": {
           "name": "idx_companies_code",
-          "columns": [
-            "code"
-          ],
+          "columns": ["code"],
           "isUnique": false
         }
       },
@@ -648,9 +600,7 @@
       "compositePrimaryKeys": {
         "companies_id": {
           "name": "companies_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -758,39 +708,27 @@
       "indexes": {
         "idx_departments_tenant_company": {
           "name": "idx_departments_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_departments_business_unit": {
           "name": "idx_departments_business_unit",
-          "columns": [
-            "business_unit_id"
-          ],
+          "columns": ["business_unit_id"],
           "isUnique": false
         },
         "idx_departments_division": {
           "name": "idx_departments_division",
-          "columns": [
-            "division_id"
-          ],
+          "columns": ["division_id"],
           "isUnique": false
         },
         "idx_departments_parent": {
           "name": "idx_departments_parent",
-          "columns": [
-            "parent_department_id"
-          ],
+          "columns": ["parent_department_id"],
           "isUnique": false
         },
         "idx_departments_company_code": {
           "name": "idx_departments_company_code",
-          "columns": [
-            "company_id",
-            "code"
-          ],
+          "columns": ["company_id", "code"],
           "isUnique": false
         }
       },
@@ -799,12 +737,8 @@
           "name": "departments_company_id_companies_id_fk",
           "tableFrom": "departments",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -812,12 +746,8 @@
           "name": "departments_business_unit_id_business_units_id_fk",
           "tableFrom": "departments",
           "tableTo": "business_units",
-          "columnsFrom": [
-            "business_unit_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["business_unit_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -825,12 +755,8 @@
           "name": "departments_division_id_divisions_id_fk",
           "tableFrom": "departments",
           "tableTo": "divisions",
-          "columnsFrom": [
-            "division_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["division_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -838,12 +764,8 @@
           "name": "departments_parent_department_id_departments_id_fk",
           "tableFrom": "departments",
           "tableTo": "departments",
-          "columnsFrom": [
-            "parent_department_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["parent_department_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -851,12 +773,8 @@
           "name": "departments_head_employee_id_employees_id_fk",
           "tableFrom": "departments",
           "tableTo": "employees",
-          "columnsFrom": [
-            "head_employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["head_employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -864,9 +782,7 @@
       "compositePrimaryKeys": {
         "departments_id": {
           "name": "departments_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -953,25 +869,17 @@
       "indexes": {
         "idx_designations_tenant_company": {
           "name": "idx_designations_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_designations_company_code": {
           "name": "idx_designations_company_code",
-          "columns": [
-            "company_id",
-            "code"
-          ],
+          "columns": ["company_id", "code"],
           "isUnique": true
         },
         "idx_designations_department": {
           "name": "idx_designations_department",
-          "columns": [
-            "department_id"
-          ],
+          "columns": ["department_id"],
           "isUnique": false
         }
       },
@@ -980,12 +888,8 @@
           "name": "designations_company_id_companies_id_fk",
           "tableFrom": "designations",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -993,12 +897,8 @@
           "name": "designations_department_id_departments_id_fk",
           "tableFrom": "designations",
           "tableTo": "departments",
-          "columnsFrom": [
-            "department_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["department_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1006,9 +906,7 @@
       "compositePrimaryKeys": {
         "designations_id": {
           "name": "designations_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1102,25 +1000,17 @@
       "indexes": {
         "idx_divisions_tenant_company": {
           "name": "idx_divisions_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_divisions_business_unit": {
           "name": "idx_divisions_business_unit",
-          "columns": [
-            "business_unit_id"
-          ],
+          "columns": ["business_unit_id"],
           "isUnique": false
         },
         "idx_divisions_company_code": {
           "name": "idx_divisions_company_code",
-          "columns": [
-            "company_id",
-            "code"
-          ],
+          "columns": ["company_id", "code"],
           "isUnique": false
         }
       },
@@ -1129,12 +1019,8 @@
           "name": "divisions_company_id_companies_id_fk",
           "tableFrom": "divisions",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1142,12 +1028,8 @@
           "name": "divisions_business_unit_id_business_units_id_fk",
           "tableFrom": "divisions",
           "tableTo": "business_units",
-          "columnsFrom": [
-            "business_unit_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["business_unit_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1155,12 +1037,8 @@
           "name": "divisions_head_employee_id_employees_id_fk",
           "tableFrom": "divisions",
           "tableTo": "employees",
-          "columnsFrom": [
-            "head_employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["head_employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1168,9 +1046,7 @@
       "compositePrimaryKeys": {
         "divisions_id": {
           "name": "divisions_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1228,10 +1104,7 @@
       "indexes": {
         "idx_email_outbox_recipient": {
           "name": "idx_email_outbox_recipient",
-          "columns": [
-            "recipient",
-            "created_at"
-          ],
+          "columns": ["recipient", "created_at"],
           "isUnique": false
         }
       },
@@ -1239,9 +1112,7 @@
       "compositePrimaryKeys": {
         "email_outbox_id": {
           "name": "email_outbox_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1325,17 +1196,12 @@
       "indexes": {
         "idx_employee_action_history_tenant_company": {
           "name": "idx_employee_action_history_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_employee_action_history_action": {
           "name": "idx_employee_action_history_action",
-          "columns": [
-            "action_id"
-          ],
+          "columns": ["action_id"],
           "isUnique": false
         }
       },
@@ -1344,12 +1210,8 @@
           "name": "employee_action_history_company_id_companies_id_fk",
           "tableFrom": "employee_action_history",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1357,12 +1219,8 @@
           "name": "employee_action_history_action_id_employee_actions_id_fk",
           "tableFrom": "employee_action_history",
           "tableTo": "employee_actions",
-          "columnsFrom": [
-            "action_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["action_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1370,9 +1228,7 @@
       "compositePrimaryKeys": {
         "employee_action_history_id": {
           "name": "employee_action_history_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1502,25 +1358,17 @@
       "indexes": {
         "idx_employee_actions_tenant_company": {
           "name": "idx_employee_actions_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_employee_actions_employee": {
           "name": "idx_employee_actions_employee",
-          "columns": [
-            "employee_id"
-          ],
+          "columns": ["employee_id"],
           "isUnique": false
         },
         "idx_employee_actions_type_status": {
           "name": "idx_employee_actions_type_status",
-          "columns": [
-            "action_type",
-            "status"
-          ],
+          "columns": ["action_type", "status"],
           "isUnique": false
         }
       },
@@ -1529,12 +1377,8 @@
           "name": "employee_actions_company_id_companies_id_fk",
           "tableFrom": "employee_actions",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1542,12 +1386,8 @@
           "name": "employee_actions_employee_id_employees_id_fk",
           "tableFrom": "employee_actions",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1555,9 +1395,7 @@
       "compositePrimaryKeys": {
         "employee_actions_id": {
           "name": "employee_actions_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1659,34 +1497,22 @@
       "indexes": {
         "idx_emp_att_tenant_company": {
           "name": "idx_emp_att_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_emp_att_employee": {
           "name": "idx_emp_att_employee",
-          "columns": [
-            "employee_id"
-          ],
+          "columns": ["employee_id"],
           "isUnique": false
         },
         "idx_emp_att_date": {
           "name": "idx_emp_att_date",
-          "columns": [
-            "date"
-          ],
+          "columns": ["date"],
           "isUnique": false
         },
         "idx_emp_att_emp_date": {
           "name": "idx_emp_att_emp_date",
-          "columns": [
-            "tenant_id",
-            "company_id",
-            "employee_id",
-            "date"
-          ],
+          "columns": ["tenant_id", "company_id", "employee_id", "date"],
           "isUnique": true
         }
       },
@@ -1695,12 +1521,8 @@
           "name": "employee_attendance_company_id_companies_id_fk",
           "tableFrom": "employee_attendance",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1708,12 +1530,8 @@
           "name": "employee_attendance_employee_id_employees_id_fk",
           "tableFrom": "employee_attendance",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1721,9 +1539,7 @@
       "compositePrimaryKeys": {
         "employee_attendance_id": {
           "name": "employee_attendance_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -1808,10 +1624,7 @@
       "indexes": {
         "idx_emp_bank_tenant_company": {
           "name": "idx_emp_bank_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         }
       },
@@ -1820,12 +1633,8 @@
           "name": "employee_bank_accounts_employee_id_employees_id_fk",
           "tableFrom": "employee_bank_accounts",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1833,12 +1642,8 @@
           "name": "employee_bank_accounts_company_id_companies_id_fk",
           "tableFrom": "employee_bank_accounts",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1846,9 +1651,7 @@
       "compositePrimaryKeys": {
         "employee_bank_accounts_employee_id": {
           "name": "employee_bank_accounts_employee_id",
-          "columns": [
-            "employee_id"
-          ]
+          "columns": ["employee_id"]
         }
       },
       "uniqueConstraints": {},
@@ -1949,31 +1752,22 @@
       "indexes": {
         "idx_employee_documents_tenant_company": {
           "name": "idx_employee_documents_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_employee_documents_employee": {
           "name": "idx_employee_documents_employee",
-          "columns": [
-            "employee_id"
-          ],
+          "columns": ["employee_id"],
           "isUnique": false
         },
         "idx_employee_documents_status": {
           "name": "idx_employee_documents_status",
-          "columns": [
-            "status"
-          ],
+          "columns": ["status"],
           "isUnique": false
         },
         "idx_employee_documents_expiry": {
           "name": "idx_employee_documents_expiry",
-          "columns": [
-            "expiry_date"
-          ],
+          "columns": ["expiry_date"],
           "isUnique": false
         }
       },
@@ -1982,12 +1776,8 @@
           "name": "employee_documents_company_id_companies_id_fk",
           "tableFrom": "employee_documents",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1995,12 +1785,8 @@
           "name": "employee_documents_employee_id_employees_id_fk",
           "tableFrom": "employee_documents",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2008,9 +1794,7 @@
       "compositePrimaryKeys": {
         "employee_documents_id": {
           "name": "employee_documents_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -2101,18 +1885,12 @@
       "indexes": {
         "idx_emp_emergency_tenant_company": {
           "name": "idx_emp_emergency_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_emp_emergency_employee_priority": {
           "name": "idx_emp_emergency_employee_priority",
-          "columns": [
-            "employee_id",
-            "priority"
-          ],
+          "columns": ["employee_id", "priority"],
           "isUnique": true
         }
       },
@@ -2121,12 +1899,8 @@
           "name": "employee_emergency_contacts_company_id_companies_id_fk",
           "tableFrom": "employee_emergency_contacts",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2134,12 +1908,8 @@
           "name": "employee_emergency_contacts_employee_id_employees_id_fk",
           "tableFrom": "employee_emergency_contacts",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2147,9 +1917,7 @@
       "compositePrimaryKeys": {
         "employee_emergency_contacts_id": {
           "name": "employee_emergency_contacts_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -2226,17 +1994,12 @@
       "indexes": {
         "idx_emp_family_tenant_company": {
           "name": "idx_emp_family_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_emp_family_employee": {
           "name": "idx_emp_family_employee",
-          "columns": [
-            "employee_id"
-          ],
+          "columns": ["employee_id"],
           "isUnique": false
         }
       },
@@ -2245,12 +2008,8 @@
           "name": "employee_family_members_company_id_companies_id_fk",
           "tableFrom": "employee_family_members",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2258,12 +2017,8 @@
           "name": "employee_family_members_employee_id_employees_id_fk",
           "tableFrom": "employee_family_members",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2271,9 +2026,7 @@
       "compositePrimaryKeys": {
         "employee_family_members_id": {
           "name": "employee_family_members_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -2369,28 +2122,17 @@
       "indexes": {
         "idx_emp_leave_bal_tenant_comp": {
           "name": "idx_emp_leave_bal_tenant_comp",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_emp_leave_bal_employee": {
           "name": "idx_emp_leave_bal_employee",
-          "columns": [
-            "employee_id"
-          ],
+          "columns": ["employee_id"],
           "isUnique": false
         },
         "idx_emp_leave_bal_type_year": {
           "name": "idx_emp_leave_bal_type_year",
-          "columns": [
-            "tenant_id",
-            "company_id",
-            "employee_id",
-            "leave_type",
-            "year"
-          ],
+          "columns": ["tenant_id", "company_id", "employee_id", "leave_type", "year"],
           "isUnique": true
         }
       },
@@ -2399,12 +2141,8 @@
           "name": "employee_leave_balances_company_id_companies_id_fk",
           "tableFrom": "employee_leave_balances",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2412,12 +2150,8 @@
           "name": "employee_leave_balances_employee_id_employees_id_fk",
           "tableFrom": "employee_leave_balances",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2425,9 +2159,7 @@
       "compositePrimaryKeys": {
         "employee_leave_balances_id": {
           "name": "employee_leave_balances_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -2542,32 +2274,22 @@
       "indexes": {
         "idx_emp_leave_req_tenant_comp": {
           "name": "idx_emp_leave_req_tenant_comp",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_emp_leave_req_employee": {
           "name": "idx_emp_leave_req_employee",
-          "columns": [
-            "employee_id"
-          ],
+          "columns": ["employee_id"],
           "isUnique": false
         },
         "idx_emp_leave_req_status": {
           "name": "idx_emp_leave_req_status",
-          "columns": [
-            "status"
-          ],
+          "columns": ["status"],
           "isUnique": false
         },
         "idx_emp_leave_req_dates": {
           "name": "idx_emp_leave_req_dates",
-          "columns": [
-            "start_date",
-            "end_date"
-          ],
+          "columns": ["start_date", "end_date"],
           "isUnique": false
         }
       },
@@ -2576,12 +2298,8 @@
           "name": "employee_leave_requests_company_id_companies_id_fk",
           "tableFrom": "employee_leave_requests",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2589,12 +2307,8 @@
           "name": "employee_leave_requests_employee_id_employees_id_fk",
           "tableFrom": "employee_leave_requests",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2602,9 +2316,7 @@
       "compositePrimaryKeys": {
         "employee_leave_requests_id": {
           "name": "employee_leave_requests_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -2674,17 +2386,12 @@
       "indexes": {
         "idx_emp_nominee_tenant_company": {
           "name": "idx_emp_nominee_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_emp_nominee_employee": {
           "name": "idx_emp_nominee_employee",
-          "columns": [
-            "employee_id"
-          ],
+          "columns": ["employee_id"],
           "isUnique": false
         }
       },
@@ -2693,12 +2400,8 @@
           "name": "employee_nominees_company_id_companies_id_fk",
           "tableFrom": "employee_nominees",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2706,12 +2409,8 @@
           "name": "employee_nominees_employee_id_employees_id_fk",
           "tableFrom": "employee_nominees",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2719,9 +2418,7 @@
       "compositePrimaryKeys": {
         "employee_nominees_id": {
           "name": "employee_nominees_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -2807,31 +2504,22 @@
       "indexes": {
         "idx_emp_notif_tenant_comp": {
           "name": "idx_emp_notif_tenant_comp",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_emp_notif_employee": {
           "name": "idx_emp_notif_employee",
-          "columns": [
-            "employee_id"
-          ],
+          "columns": ["employee_id"],
           "isUnique": false
         },
         "idx_emp_notif_read": {
           "name": "idx_emp_notif_read",
-          "columns": [
-            "is_read"
-          ],
+          "columns": ["is_read"],
           "isUnique": false
         },
         "idx_emp_notif_created": {
           "name": "idx_emp_notif_created",
-          "columns": [
-            "created_at"
-          ],
+          "columns": ["created_at"],
           "isUnique": false
         }
       },
@@ -2840,12 +2528,8 @@
           "name": "employee_notifications_company_id_companies_id_fk",
           "tableFrom": "employee_notifications",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2853,12 +2537,8 @@
           "name": "employee_notifications_employee_id_employees_id_fk",
           "tableFrom": "employee_notifications",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2866,9 +2546,7 @@
       "compositePrimaryKeys": {
         "employee_notifications_id": {
           "name": "employee_notifications_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -3115,10 +2793,7 @@
       "indexes": {
         "idx_emp_personal_tenant_company": {
           "name": "idx_emp_personal_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         }
       },
@@ -3127,12 +2802,8 @@
           "name": "employee_personal_details_employee_id_employees_id_fk",
           "tableFrom": "employee_personal_details",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3140,12 +2811,8 @@
           "name": "employee_personal_details_company_id_companies_id_fk",
           "tableFrom": "employee_personal_details",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3153,9 +2820,7 @@
       "compositePrimaryKeys": {
         "employee_personal_details_employee_id": {
           "name": "employee_personal_details_employee_id",
-          "columns": [
-            "employee_id"
-          ]
+          "columns": ["employee_id"]
         }
       },
       "uniqueConstraints": {},
@@ -3256,25 +2921,17 @@
       "indexes": {
         "idx_emp_requests_tenant_comp": {
           "name": "idx_emp_requests_tenant_comp",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_emp_requests_employee": {
           "name": "idx_emp_requests_employee",
-          "columns": [
-            "employee_id"
-          ],
+          "columns": ["employee_id"],
           "isUnique": false
         },
         "idx_emp_requests_type_status": {
           "name": "idx_emp_requests_type_status",
-          "columns": [
-            "request_type",
-            "status"
-          ],
+          "columns": ["request_type", "status"],
           "isUnique": false
         }
       },
@@ -3283,12 +2940,8 @@
           "name": "employee_requests_company_id_companies_id_fk",
           "tableFrom": "employee_requests",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3296,12 +2949,8 @@
           "name": "employee_requests_employee_id_employees_id_fk",
           "tableFrom": "employee_requests",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3309,9 +2958,7 @@
       "compositePrimaryKeys": {
         "employee_requests_id": {
           "name": "employee_requests_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -3423,17 +3070,12 @@
       "indexes": {
         "idx_emp_skill_tenant_company": {
           "name": "idx_emp_skill_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_emp_skill_employee": {
           "name": "idx_emp_skill_employee",
-          "columns": [
-            "employee_id"
-          ],
+          "columns": ["employee_id"],
           "isUnique": false
         }
       },
@@ -3442,12 +3084,8 @@
           "name": "employee_skills_company_id_companies_id_fk",
           "tableFrom": "employee_skills",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3455,12 +3093,8 @@
           "name": "employee_skills_employee_id_employees_id_fk",
           "tableFrom": "employee_skills",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3468,12 +3102,8 @@
           "name": "employee_skills_examiner_employee_id_employees_id_fk",
           "tableFrom": "employee_skills",
           "tableTo": "employees",
-          "columnsFrom": [
-            "examiner_employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["examiner_employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3481,12 +3111,8 @@
           "name": "employee_skills_verified_by_employee_id_employees_id_fk",
           "tableFrom": "employee_skills",
           "tableTo": "employees",
-          "columnsFrom": [
-            "verified_by_employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["verified_by_employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3494,12 +3120,8 @@
           "name": "employee_skills_mentor_employee_id_employees_id_fk",
           "tableFrom": "employee_skills",
           "tableTo": "employees",
-          "columnsFrom": [
-            "mentor_employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["mentor_employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3507,9 +3129,7 @@
       "compositePrimaryKeys": {
         "employee_skills_id": {
           "name": "employee_skills_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -3604,24 +3224,17 @@
       "indexes": {
         "idx_emp_tasks_tenant_comp": {
           "name": "idx_emp_tasks_tenant_comp",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_emp_tasks_employee": {
           "name": "idx_emp_tasks_employee",
-          "columns": [
-            "employee_id"
-          ],
+          "columns": ["employee_id"],
           "isUnique": false
         },
         "idx_emp_tasks_status": {
           "name": "idx_emp_tasks_status",
-          "columns": [
-            "status"
-          ],
+          "columns": ["status"],
           "isUnique": false
         }
       },
@@ -3630,12 +3243,8 @@
           "name": "employee_tasks_company_id_companies_id_fk",
           "tableFrom": "employee_tasks",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3643,12 +3252,8 @@
           "name": "employee_tasks_employee_id_employees_id_fk",
           "tableFrom": "employee_tasks",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3656,9 +3261,7 @@
       "compositePrimaryKeys": {
         "employee_tasks_id": {
           "name": "employee_tasks_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -3752,31 +3355,22 @@
       "indexes": {
         "idx_emp_timesheet_tenant_comp": {
           "name": "idx_emp_timesheet_tenant_comp",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_emp_timesheet_employee": {
           "name": "idx_emp_timesheet_employee",
-          "columns": [
-            "employee_id"
-          ],
+          "columns": ["employee_id"],
           "isUnique": false
         },
         "idx_emp_timesheet_date": {
           "name": "idx_emp_timesheet_date",
-          "columns": [
-            "date"
-          ],
+          "columns": ["date"],
           "isUnique": false
         },
         "idx_emp_timesheet_status": {
           "name": "idx_emp_timesheet_status",
-          "columns": [
-            "status"
-          ],
+          "columns": ["status"],
           "isUnique": false
         }
       },
@@ -3785,12 +3379,8 @@
           "name": "employee_timesheets_company_id_companies_id_fk",
           "tableFrom": "employee_timesheets",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3798,12 +3388,8 @@
           "name": "employee_timesheets_employee_id_employees_id_fk",
           "tableFrom": "employee_timesheets",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3811,9 +3397,7 @@
       "compositePrimaryKeys": {
         "employee_timesheets_id": {
           "name": "employee_timesheets_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -3914,10 +3498,7 @@
       "indexes": {
         "idx_emp_work_tenant_company": {
           "name": "idx_emp_work_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         }
       },
@@ -3926,12 +3507,8 @@
           "name": "employee_work_schedules_employee_id_employees_id_fk",
           "tableFrom": "employee_work_schedules",
           "tableTo": "employees",
-          "columnsFrom": [
-            "employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3939,12 +3516,8 @@
           "name": "employee_work_schedules_company_id_companies_id_fk",
           "tableFrom": "employee_work_schedules",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3952,9 +3525,7 @@
       "compositePrimaryKeys": {
         "employee_work_schedules_employee_id": {
           "name": "employee_work_schedules_employee_id",
-          "columns": [
-            "employee_id"
-          ]
+          "columns": ["employee_id"]
         }
       },
       "uniqueConstraints": {},
@@ -4161,79 +3732,52 @@
       "indexes": {
         "idx_employees_tenant_company": {
           "name": "idx_employees_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_employees_company_emp_no": {
           "name": "idx_employees_company_emp_no",
-          "columns": [
-            "tenant_id",
-            "company_id",
-            "employee_number"
-          ],
+          "columns": ["tenant_id", "company_id", "employee_number"],
           "isUnique": true
         },
         "idx_employees_company_ref_code": {
           "name": "idx_employees_company_ref_code",
-          "columns": [
-            "tenant_id",
-            "company_id",
-            "referral_code"
-          ],
+          "columns": ["tenant_id", "company_id", "referral_code"],
           "isUnique": true
         },
         "idx_employees_email": {
           "name": "idx_employees_email",
-          "columns": [
-            "tenant_id",
-            "company_id",
-            "email"
-          ],
+          "columns": ["tenant_id", "company_id", "email"],
           "isUnique": false
         },
         "idx_employees_department": {
           "name": "idx_employees_department",
-          "columns": [
-            "department_id"
-          ],
+          "columns": ["department_id"],
           "isUnique": false
         },
         "idx_employees_designation": {
           "name": "idx_employees_designation",
-          "columns": [
-            "designation_id"
-          ],
+          "columns": ["designation_id"],
           "isUnique": false
         },
         "idx_employees_location": {
           "name": "idx_employees_location",
-          "columns": [
-            "location_id"
-          ],
+          "columns": ["location_id"],
           "isUnique": false
         },
         "idx_employees_user_id": {
           "name": "idx_employees_user_id",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": false
         },
         "idx_employees_reporting_manager": {
           "name": "idx_employees_reporting_manager",
-          "columns": [
-            "reporting_manager_id"
-          ],
+          "columns": ["reporting_manager_id"],
           "isUnique": false
         },
         "idx_employees_referred_by": {
           "name": "idx_employees_referred_by",
-          "columns": [
-            "referred_by_employee_id"
-          ],
+          "columns": ["referred_by_employee_id"],
           "isUnique": false
         }
       },
@@ -4242,12 +3786,8 @@
           "name": "employees_company_id_companies_id_fk",
           "tableFrom": "employees",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4255,12 +3795,8 @@
           "name": "employees_department_id_departments_id_fk",
           "tableFrom": "employees",
           "tableTo": "departments",
-          "columnsFrom": [
-            "department_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["department_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4268,12 +3804,8 @@
           "name": "employees_designation_id_designations_id_fk",
           "tableFrom": "employees",
           "tableTo": "designations",
-          "columnsFrom": [
-            "designation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["designation_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4281,12 +3813,8 @@
           "name": "employees_location_id_locations_id_fk",
           "tableFrom": "employees",
           "tableTo": "locations",
-          "columnsFrom": [
-            "location_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["location_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4294,12 +3822,8 @@
           "name": "employees_reporting_manager_id_employees_id_fk",
           "tableFrom": "employees",
           "tableTo": "employees",
-          "columnsFrom": [
-            "reporting_manager_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["reporting_manager_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4307,12 +3831,8 @@
           "name": "employees_referred_by_employee_id_employees_id_fk",
           "tableFrom": "employees",
           "tableTo": "employees",
-          "columnsFrom": [
-            "referred_by_employee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["referred_by_employee_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4320,9 +3840,7 @@
       "compositePrimaryKeys": {
         "employees_id": {
           "name": "employees_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -4450,12 +3968,7 @@
       "indexes": {
         "idx_form_custom_fields_key": {
           "name": "idx_form_custom_fields_key",
-          "columns": [
-            "tenant_id",
-            "company_id",
-            "form_key",
-            "field_key"
-          ],
+          "columns": ["tenant_id", "company_id", "form_key", "field_key"],
           "isUnique": true
         }
       },
@@ -4464,12 +3977,8 @@
           "name": "form_custom_fields_company_id_companies_id_fk",
           "tableFrom": "form_custom_fields",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4477,9 +3986,7 @@
       "compositePrimaryKeys": {
         "form_custom_fields_id": {
           "name": "form_custom_fields_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -4552,11 +4059,7 @@
       "indexes": {
         "idx_form_customizations_key": {
           "name": "idx_form_customizations_key",
-          "columns": [
-            "tenant_id",
-            "company_id",
-            "form_key"
-          ],
+          "columns": ["tenant_id", "company_id", "form_key"],
           "isUnique": true
         }
       },
@@ -4565,12 +4068,8 @@
           "name": "form_customizations_company_id_companies_id_fk",
           "tableFrom": "form_customizations",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4578,9 +4077,7 @@
       "compositePrimaryKeys": {
         "form_customizations_id": {
           "name": "form_customizations_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -4687,12 +4184,7 @@
       "indexes": {
         "idx_form_field_overrides_key": {
           "name": "idx_form_field_overrides_key",
-          "columns": [
-            "tenant_id",
-            "company_id",
-            "form_key",
-            "field_key"
-          ],
+          "columns": ["tenant_id", "company_id", "form_key", "field_key"],
           "isUnique": true
         }
       },
@@ -4701,12 +4193,8 @@
           "name": "form_field_overrides_company_id_companies_id_fk",
           "tableFrom": "form_field_overrides",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4714,9 +4202,7 @@
       "compositePrimaryKeys": {
         "form_field_overrides_id": {
           "name": "form_field_overrides_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -4803,34 +4289,22 @@
       "indexes": {
         "idx_grades_tenant_company": {
           "name": "idx_grades_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_grades_company_code": {
           "name": "idx_grades_company_code",
-          "columns": [
-            "company_id",
-            "code"
-          ],
+          "columns": ["company_id", "code"],
           "isUnique": true
         },
         "idx_grades_company_rank": {
           "name": "idx_grades_company_rank",
-          "columns": [
-            "company_id",
-            "rank"
-          ],
+          "columns": ["company_id", "rank"],
           "isUnique": true
         },
         "idx_grades_company_status": {
           "name": "idx_grades_company_status",
-          "columns": [
-            "company_id",
-            "status"
-          ],
+          "columns": ["company_id", "status"],
           "isUnique": false
         }
       },
@@ -4839,12 +4313,8 @@
           "name": "grades_company_id_companies_id_fk",
           "tableFrom": "grades",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4852,9 +4322,7 @@
       "compositePrimaryKeys": {
         "grades_id": {
           "name": "grades_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -4971,31 +4439,22 @@
       "indexes": {
         "idx_invitations_token": {
           "name": "idx_invitations_token",
-          "columns": [
-            "token"
-          ],
+          "columns": ["token"],
           "isUnique": true
         },
         "idx_invitations_tenant_company": {
           "name": "idx_invitations_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_invitations_email": {
           "name": "idx_invitations_email",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": false
         },
         "idx_invitations_status": {
           "name": "idx_invitations_status",
-          "columns": [
-            "status"
-          ],
+          "columns": ["status"],
           "isUnique": false
         }
       },
@@ -5004,12 +4463,8 @@
           "name": "invitations_tenant_id_tenants_id_fk",
           "tableFrom": "invitations",
           "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tenant_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -5017,12 +4472,8 @@
           "name": "invitations_company_id_companies_id_fk",
           "tableFrom": "invitations",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -5030,12 +4481,8 @@
           "name": "invitations_invited_by_user_id_users_id_fk",
           "tableFrom": "invitations",
           "tableTo": "users",
-          "columnsFrom": [
-            "invited_by_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["invited_by_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -5043,9 +4490,7 @@
       "compositePrimaryKeys": {
         "invitations_id": {
           "name": "invitations_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -5132,34 +4577,22 @@
       "indexes": {
         "idx_job_levels_tenant_company": {
           "name": "idx_job_levels_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_job_levels_company_code": {
           "name": "idx_job_levels_company_code",
-          "columns": [
-            "company_id",
-            "code"
-          ],
+          "columns": ["company_id", "code"],
           "isUnique": true
         },
         "idx_job_levels_company_rank": {
           "name": "idx_job_levels_company_rank",
-          "columns": [
-            "company_id",
-            "rank"
-          ],
+          "columns": ["company_id", "rank"],
           "isUnique": true
         },
         "idx_job_levels_company_status": {
           "name": "idx_job_levels_company_status",
-          "columns": [
-            "company_id",
-            "status"
-          ],
+          "columns": ["company_id", "status"],
           "isUnique": false
         }
       },
@@ -5168,12 +4601,8 @@
           "name": "job_levels_company_id_companies_id_fk",
           "tableFrom": "job_levels",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5181,9 +4610,7 @@
       "compositePrimaryKeys": {
         "job_levels_id": {
           "name": "job_levels_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -5320,25 +4747,17 @@
       "indexes": {
         "idx_locations_tenant_company": {
           "name": "idx_locations_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_locations_company": {
           "name": "idx_locations_company",
-          "columns": [
-            "company_id"
-          ],
+          "columns": ["company_id"],
           "isUnique": false
         },
         "idx_locations_company_code": {
           "name": "idx_locations_company_code",
-          "columns": [
-            "company_id",
-            "code"
-          ],
+          "columns": ["company_id", "code"],
           "isUnique": true
         }
       },
@@ -5347,12 +4766,8 @@
           "name": "locations_company_id_companies_id_fk",
           "tableFrom": "locations",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5360,9 +4775,7 @@
       "compositePrimaryKeys": {
         "locations_id": {
           "name": "locations_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -5491,24 +4904,17 @@
       "indexes": {
         "idx_media_assets_tenant_id": {
           "name": "idx_media_assets_tenant_id",
-          "columns": [
-            "tenant_id"
-          ],
+          "columns": ["tenant_id"],
           "isUnique": false
         },
         "idx_media_assets_owner": {
           "name": "idx_media_assets_owner",
-          "columns": [
-            "owner_type",
-            "owner_id"
-          ],
+          "columns": ["owner_type", "owner_id"],
           "isUnique": false
         },
         "idx_media_assets_status": {
           "name": "idx_media_assets_status",
-          "columns": [
-            "status"
-          ],
+          "columns": ["status"],
           "isUnique": false
         }
       },
@@ -5516,9 +4922,7 @@
       "compositePrimaryKeys": {
         "media_assets_id": {
           "name": "media_assets_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -5591,26 +4995,17 @@
       "indexes": {
         "idx_memberships_user": {
           "name": "idx_memberships_user",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": false
         },
         "idx_memberships_tenant_company": {
           "name": "idx_memberships_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_memberships_user_company_role": {
           "name": "idx_memberships_user_company_role",
-          "columns": [
-            "user_id",
-            "company_id",
-            "role"
-          ],
+          "columns": ["user_id", "company_id", "role"],
           "isUnique": true
         }
       },
@@ -5619,12 +5014,8 @@
           "name": "memberships_user_id_users_id_fk",
           "tableFrom": "memberships",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -5632,12 +5023,8 @@
           "name": "memberships_company_id_companies_id_fk",
           "tableFrom": "memberships",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5645,9 +5032,7 @@
       "compositePrimaryKeys": {
         "memberships_id": {
           "name": "memberships_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -5724,24 +5109,17 @@
       "indexes": {
         "idx_case_history_tenant_company": {
           "name": "idx_case_history_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_case_history_case_id": {
           "name": "idx_case_history_case_id",
-          "columns": [
-            "case_id"
-          ],
+          "columns": ["case_id"],
           "isUnique": false
         },
         "idx_case_history_created_at": {
           "name": "idx_case_history_created_at",
-          "columns": [
-            "created_at"
-          ],
+          "columns": ["created_at"],
           "isUnique": false
         }
       },
@@ -5750,12 +5128,8 @@
           "name": "onboarding_case_stage_history_company_id_companies_id_fk",
           "tableFrom": "onboarding_case_stage_history",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -5763,12 +5137,8 @@
           "name": "onboarding_case_stage_history_case_id_onboarding_cases_id_fk",
           "tableFrom": "onboarding_case_stage_history",
           "tableTo": "onboarding_cases",
-          "columnsFrom": [
-            "case_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["case_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5776,9 +5146,7 @@
       "compositePrimaryKeys": {
         "onboarding_case_stage_history_id": {
           "name": "onboarding_case_stage_history_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -5945,31 +5313,22 @@
       "indexes": {
         "idx_onboarding_tenant_company": {
           "name": "idx_onboarding_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_onboarding_email": {
           "name": "idx_onboarding_email",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": false
         },
         "idx_onboarding_stage": {
           "name": "idx_onboarding_stage",
-          "columns": [
-            "stage"
-          ],
+          "columns": ["stage"],
           "isUnique": false
         },
         "idx_onboarding_status": {
           "name": "idx_onboarding_status",
-          "columns": [
-            "status"
-          ],
+          "columns": ["status"],
           "isUnique": false
         }
       },
@@ -5978,12 +5337,8 @@
           "name": "onboarding_cases_company_id_companies_id_fk",
           "tableFrom": "onboarding_cases",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -5991,12 +5346,8 @@
           "name": "onboarding_cases_department_id_departments_id_fk",
           "tableFrom": "onboarding_cases",
           "tableTo": "departments",
-          "columnsFrom": [
-            "department_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["department_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6004,12 +5355,8 @@
           "name": "onboarding_cases_designation_id_designations_id_fk",
           "tableFrom": "onboarding_cases",
           "tableTo": "designations",
-          "columnsFrom": [
-            "designation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["designation_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6017,12 +5364,8 @@
           "name": "onboarding_cases_location_id_locations_id_fk",
           "tableFrom": "onboarding_cases",
           "tableTo": "locations",
-          "columnsFrom": [
-            "location_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["location_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -6030,9 +5373,7 @@
       "compositePrimaryKeys": {
         "onboarding_cases_id": {
           "name": "onboarding_cases_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -6144,17 +5485,12 @@
       "indexes": {
         "idx_onboarding_checklists_company": {
           "name": "idx_onboarding_checklists_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_onboarding_checklists_stage": {
           "name": "idx_onboarding_checklists_stage",
-          "columns": [
-            "stage_key"
-          ],
+          "columns": ["stage_key"],
           "isUnique": false
         }
       },
@@ -6163,12 +5499,8 @@
           "name": "onboarding_checklist_templates_company_id_companies_id_fk",
           "tableFrom": "onboarding_checklist_templates",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -6176,9 +5508,7 @@
       "compositePrimaryKeys": {
         "onboarding_checklist_templates_id": {
           "name": "onboarding_checklist_templates_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -6269,10 +5599,7 @@
       "indexes": {
         "idx_onboarding_conv_tenant_company": {
           "name": "idx_onboarding_conv_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": true
         }
       },
@@ -6281,12 +5608,8 @@
           "name": "onboarding_conversion_settings_company_id_companies_id_fk",
           "tableFrom": "onboarding_conversion_settings",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -6294,9 +5617,7 @@
       "compositePrimaryKeys": {
         "onboarding_conversion_settings_id": {
           "name": "onboarding_conversion_settings_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -6408,19 +5729,12 @@
       "indexes": {
         "idx_onboarding_docs_company": {
           "name": "idx_onboarding_docs_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_onboarding_docs_type": {
           "name": "idx_onboarding_docs_type",
-          "columns": [
-            "tenant_id",
-            "company_id",
-            "document_type"
-          ],
+          "columns": ["tenant_id", "company_id", "document_type"],
           "isUnique": true
         }
       },
@@ -6429,12 +5743,8 @@
           "name": "onboarding_document_requirements_company_id_companies_id_fk",
           "tableFrom": "onboarding_document_requirements",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -6442,9 +5752,7 @@
       "compositePrimaryKeys": {
         "onboarding_document_requirements_id": {
           "name": "onboarding_document_requirements_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -6541,19 +5849,12 @@
       "indexes": {
         "idx_onboarding_fields_company": {
           "name": "idx_onboarding_fields_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_onboarding_fields_key": {
           "name": "idx_onboarding_fields_key",
-          "columns": [
-            "tenant_id",
-            "company_id",
-            "field_key"
-          ],
+          "columns": ["tenant_id", "company_id", "field_key"],
           "isUnique": true
         }
       },
@@ -6562,12 +5863,8 @@
           "name": "onboarding_field_configs_company_id_companies_id_fk",
           "tableFrom": "onboarding_field_configs",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -6575,9 +5872,7 @@
       "compositePrimaryKeys": {
         "onboarding_field_configs_id": {
           "name": "onboarding_field_configs_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -6659,10 +5954,7 @@
       "indexes": {
         "idx_onboarding_gen_tenant_company": {
           "name": "idx_onboarding_gen_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": true
         }
       },
@@ -6671,12 +5963,8 @@
           "name": "onboarding_general_settings_company_id_companies_id_fk",
           "tableFrom": "onboarding_general_settings",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6684,12 +5972,8 @@
           "name": "onboarding_general_settings_default_location_id_locations_id_fk",
           "tableFrom": "onboarding_general_settings",
           "tableTo": "locations",
-          "columnsFrom": [
-            "default_location_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["default_location_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -6697,9 +5981,7 @@
       "compositePrimaryKeys": {
         "onboarding_general_settings_id": {
           "name": "onboarding_general_settings_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -6811,19 +6093,12 @@
       "indexes": {
         "idx_onboarding_stages_company": {
           "name": "idx_onboarding_stages_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_onboarding_stages_key": {
           "name": "idx_onboarding_stages_key",
-          "columns": [
-            "tenant_id",
-            "company_id",
-            "stage_key"
-          ],
+          "columns": ["tenant_id", "company_id", "stage_key"],
           "isUnique": true
         }
       },
@@ -6832,12 +6107,8 @@
           "name": "onboarding_stage_configs_company_id_companies_id_fk",
           "tableFrom": "onboarding_stage_configs",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -6845,9 +6116,7 @@
       "compositePrimaryKeys": {
         "onboarding_stage_configs_id": {
           "name": "onboarding_stage_configs_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -6920,17 +6189,12 @@
       "indexes": {
         "idx_plan_entitlements_plan_mod": {
           "name": "idx_plan_entitlements_plan_mod",
-          "columns": [
-            "plan_id",
-            "module_code"
-          ],
+          "columns": ["plan_id", "module_code"],
           "isUnique": true
         },
         "idx_plan_entitlements_app": {
           "name": "idx_plan_entitlements_app",
-          "columns": [
-            "application_code"
-          ],
+          "columns": ["application_code"],
           "isUnique": false
         }
       },
@@ -6939,12 +6203,8 @@
           "name": "plan_entitlements_plan_id_plans_id_fk",
           "tableFrom": "plan_entitlements",
           "tableTo": "plans",
-          "columnsFrom": [
-            "plan_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["plan_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -6952,9 +6212,7 @@
       "compositePrimaryKeys": {
         "plan_entitlements_id": {
           "name": "plan_entitlements_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -7043,12 +6301,7 @@
       "indexes": {
         "idx_plan_prices_plan_curr_interval": {
           "name": "idx_plan_prices_plan_curr_interval",
-          "columns": [
-            "plan_id",
-            "currency",
-            "billing_interval",
-            "status"
-          ],
+          "columns": ["plan_id", "currency", "billing_interval", "status"],
           "isUnique": false
         }
       },
@@ -7057,12 +6310,8 @@
           "name": "plan_prices_plan_id_plans_id_fk",
           "tableFrom": "plan_prices",
           "tableTo": "plans",
-          "columnsFrom": [
-            "plan_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["plan_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -7070,9 +6319,7 @@
       "compositePrimaryKeys": {
         "plan_prices_id": {
           "name": "plan_prices_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -7207,18 +6454,12 @@
       "indexes": {
         "idx_plans_app_code": {
           "name": "idx_plans_app_code",
-          "columns": [
-            "application_code",
-            "code"
-          ],
+          "columns": ["application_code", "code"],
           "isUnique": true
         },
         "idx_plans_app_status": {
           "name": "idx_plans_app_status",
-          "columns": [
-            "application_code",
-            "status"
-          ],
+          "columns": ["application_code", "status"],
           "isUnique": false
         }
       },
@@ -7226,9 +6467,7 @@
       "compositePrimaryKeys": {
         "plans_id": {
           "name": "plans_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -7375,23 +6614,17 @@
       "indexes": {
         "idx_prov_jobs_idempotency": {
           "name": "idx_prov_jobs_idempotency",
-          "columns": [
-            "idempotency_key"
-          ],
+          "columns": ["idempotency_key"],
           "isUnique": true
         },
         "idx_prov_jobs_tenant": {
           "name": "idx_prov_jobs_tenant",
-          "columns": [
-            "tenant_id"
-          ],
+          "columns": ["tenant_id"],
           "isUnique": false
         },
         "idx_prov_jobs_status": {
           "name": "idx_prov_jobs_status",
-          "columns": [
-            "status"
-          ],
+          "columns": ["status"],
           "isUnique": false
         }
       },
@@ -7400,12 +6633,8 @@
           "name": "provisioning_jobs_tenant_id_tenants_id_fk",
           "tableFrom": "provisioning_jobs",
           "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tenant_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -7413,12 +6642,8 @@
           "name": "provisioning_jobs_company_id_companies_id_fk",
           "tableFrom": "provisioning_jobs",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -7426,9 +6651,7 @@
       "compositePrimaryKeys": {
         "provisioning_jobs_id": {
           "name": "provisioning_jobs_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -7522,33 +6745,22 @@
       "indexes": {
         "idx_role_assignments_tenant_company": {
           "name": "idx_role_assignments_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_role_assignments_user": {
           "name": "idx_role_assignments_user",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": false
         },
         "idx_role_assignments_role": {
           "name": "idx_role_assignments_role",
-          "columns": [
-            "role_id"
-          ],
+          "columns": ["role_id"],
           "isUnique": false
         },
         "idx_role_assignments_user_company_role": {
           "name": "idx_role_assignments_user_company_role",
-          "columns": [
-            "user_id",
-            "company_id",
-            "role_id"
-          ],
+          "columns": ["user_id", "company_id", "role_id"],
           "isUnique": true
         }
       },
@@ -7557,12 +6769,8 @@
           "name": "role_assignments_user_id_users_id_fk",
           "tableFrom": "role_assignments",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -7570,12 +6778,8 @@
           "name": "role_assignments_role_id_roles_id_fk",
           "tableFrom": "role_assignments",
           "tableTo": "roles",
-          "columnsFrom": [
-            "role_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["role_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -7583,12 +6787,8 @@
           "name": "role_assignments_company_id_companies_id_fk",
           "tableFrom": "role_assignments",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -7596,9 +6796,7 @@
       "compositePrimaryKeys": {
         "role_assignments_id": {
           "name": "role_assignments_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -7663,18 +6861,12 @@
       "indexes": {
         "idx_role_permissions_tenant_company": {
           "name": "idx_role_permissions_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_role_permissions_role_perm": {
           "name": "idx_role_permissions_role_perm",
-          "columns": [
-            "role_id",
-            "permission_id"
-          ],
+          "columns": ["role_id", "permission_id"],
           "isUnique": true
         }
       },
@@ -7683,12 +6875,8 @@
           "name": "role_permissions_company_id_companies_id_fk",
           "tableFrom": "role_permissions",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -7696,12 +6884,8 @@
           "name": "role_permissions_role_id_roles_id_fk",
           "tableFrom": "role_permissions",
           "tableTo": "roles",
-          "columnsFrom": [
-            "role_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["role_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -7709,9 +6893,7 @@
       "compositePrimaryKeys": {
         "role_permissions_id": {
           "name": "role_permissions_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -7820,19 +7002,12 @@
       "indexes": {
         "idx_roles_tenant_company": {
           "name": "idx_roles_tenant_company",
-          "columns": [
-            "tenant_id",
-            "company_id"
-          ],
+          "columns": ["tenant_id", "company_id"],
           "isUnique": false
         },
         "idx_roles_company_code": {
           "name": "idx_roles_company_code",
-          "columns": [
-            "tenant_id",
-            "company_id",
-            "code"
-          ],
+          "columns": ["tenant_id", "company_id", "code"],
           "isUnique": true
         }
       },
@@ -7841,12 +7016,8 @@
           "name": "roles_company_id_companies_id_fk",
           "tableFrom": "roles",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -7854,9 +7025,7 @@
       "compositePrimaryKeys": {
         "roles_id": {
           "name": "roles_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -7921,23 +7090,17 @@
       "indexes": {
         "idx_sessions_token": {
           "name": "idx_sessions_token",
-          "columns": [
-            "token"
-          ],
+          "columns": ["token"],
           "isUnique": true
         },
         "idx_sessions_user": {
           "name": "idx_sessions_user",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": false
         },
         "idx_sessions_expires_at": {
           "name": "idx_sessions_expires_at",
-          "columns": [
-            "expires_at"
-          ],
+          "columns": ["expires_at"],
           "isUnique": false
         }
       },
@@ -7946,12 +7109,8 @@
           "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -7959,9 +7118,7 @@
       "compositePrimaryKeys": {
         "sessions_id": {
           "name": "sessions_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -8046,38 +7203,27 @@
       "indexes": {
         "idx_tenant_admins_tenant": {
           "name": "idx_tenant_admins_tenant",
-          "columns": [
-            "tenant_id"
-          ],
+          "columns": ["tenant_id"],
           "isUnique": false
         },
         "idx_tenant_admins_user": {
           "name": "idx_tenant_admins_user",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": false
         },
         "idx_tenant_admins_status": {
           "name": "idx_tenant_admins_status",
-          "columns": [
-            "status"
-          ],
+          "columns": ["status"],
           "isUnique": false
         },
         "idx_tenant_admins_tenant_user": {
           "name": "idx_tenant_admins_tenant_user",
-          "columns": [
-            "tenant_id",
-            "user_id"
-          ],
+          "columns": ["tenant_id", "user_id"],
           "isUnique": true
         },
         "idx_tenant_admins_single_primary": {
           "name": "idx_tenant_admins_single_primary",
-          "columns": [
-            "primary_tenant_scope"
-          ],
+          "columns": ["primary_tenant_scope"],
           "isUnique": true
         }
       },
@@ -8086,12 +7232,8 @@
           "name": "tenant_admins_tenant_id_tenants_id_fk",
           "tableFrom": "tenant_admins",
           "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tenant_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -8099,12 +7241,8 @@
           "name": "tenant_admins_user_id_users_id_fk",
           "tableFrom": "tenant_admins",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -8112,9 +7250,7 @@
       "compositePrimaryKeys": {
         "tenant_admins_id": {
           "name": "tenant_admins_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -8172,9 +7308,7 @@
       "indexes": {
         "idx_tenant_details_code": {
           "name": "idx_tenant_details_code",
-          "columns": [
-            "code"
-          ],
+          "columns": ["code"],
           "isUnique": true
         }
       },
@@ -8183,12 +7317,8 @@
           "name": "tenant_details_tenant_id_tenants_id_fk",
           "tableFrom": "tenant_details",
           "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tenant_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -8196,9 +7326,7 @@
       "compositePrimaryKeys": {
         "tenant_details_tenant_id": {
           "name": "tenant_details_tenant_id",
-          "columns": [
-            "tenant_id"
-          ]
+          "columns": ["tenant_id"]
         }
       },
       "uniqueConstraints": {},
@@ -8328,19 +7456,12 @@
       "indexes": {
         "idx_entitlement_overrides_tenant_mod": {
           "name": "idx_entitlement_overrides_tenant_mod",
-          "columns": [
-            "tenant_id",
-            "application_code",
-            "module_code"
-          ],
+          "columns": ["tenant_id", "application_code", "module_code"],
           "isUnique": false
         },
         "idx_entitlement_overrides_valid": {
           "name": "idx_entitlement_overrides_valid",
-          "columns": [
-            "tenant_id",
-            "valid_until"
-          ],
+          "columns": ["tenant_id", "valid_until"],
           "isUnique": false
         }
       },
@@ -8349,12 +7470,8 @@
           "name": "tenant_entitlement_overrides_tenant_id_tenants_id_fk",
           "tableFrom": "tenant_entitlement_overrides",
           "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tenant_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -8362,12 +7479,8 @@
           "name": "tenant_entitlement_overrides_company_id_companies_id_fk",
           "tableFrom": "tenant_entitlement_overrides",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -8375,12 +7488,8 @@
           "name": "tenant_entitlement_overrides_authorized_by_user_id_users_id_fk",
           "tableFrom": "tenant_entitlement_overrides",
           "tableTo": "users",
-          "columnsFrom": [
-            "authorized_by_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["authorized_by_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -8388,12 +7497,8 @@
           "name": "tenant_entitlement_overrides_revoked_by_user_id_users_id_fk",
           "tableFrom": "tenant_entitlement_overrides",
           "tableTo": "users",
-          "columnsFrom": [
-            "revoked_by_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["revoked_by_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -8401,9 +7506,7 @@
       "compositePrimaryKeys": {
         "tenant_entitlement_overrides_id": {
           "name": "tenant_entitlement_overrides_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -8487,17 +7590,12 @@
       "indexes": {
         "idx_lifecycle_tenant_created": {
           "name": "idx_lifecycle_tenant_created",
-          "columns": [
-            "tenant_id",
-            "created_at"
-          ],
+          "columns": ["tenant_id", "created_at"],
           "isUnique": false
         },
         "idx_lifecycle_event_type": {
           "name": "idx_lifecycle_event_type",
-          "columns": [
-            "event_type"
-          ],
+          "columns": ["event_type"],
           "isUnique": false
         }
       },
@@ -8506,12 +7604,8 @@
           "name": "tenant_lifecycle_events_tenant_id_tenants_id_fk",
           "tableFrom": "tenant_lifecycle_events",
           "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tenant_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -8519,12 +7613,8 @@
           "name": "tenant_lifecycle_events_actor_user_id_users_id_fk",
           "tableFrom": "tenant_lifecycle_events",
           "tableTo": "users",
-          "columnsFrom": [
-            "actor_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["actor_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -8532,9 +7622,7 @@
       "compositePrimaryKeys": {
         "tenant_lifecycle_events_id": {
           "name": "tenant_lifecycle_events_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -8615,18 +7703,12 @@
       "indexes": {
         "idx_tenant_modules_tenant": {
           "name": "idx_tenant_modules_tenant",
-          "columns": [
-            "tenant_id"
-          ],
+          "columns": ["tenant_id"],
           "isUnique": false
         },
         "idx_tenant_modules_tenant_company_module": {
           "name": "idx_tenant_modules_tenant_company_module",
-          "columns": [
-            "tenant_id",
-            "company_id",
-            "module_code"
-          ],
+          "columns": ["tenant_id", "company_id", "module_code"],
           "isUnique": true
         }
       },
@@ -8634,9 +7716,7 @@
       "compositePrimaryKeys": {
         "tenant_modules_id": {
           "name": "tenant_modules_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -8823,31 +7903,22 @@
       "indexes": {
         "idx_tenant_subscriptions_active_scope": {
           "name": "idx_tenant_subscriptions_active_scope",
-          "columns": [
-            "active_subscription_scope"
-          ],
+          "columns": ["active_subscription_scope"],
           "isUnique": true
         },
         "idx_tenant_subscriptions_tenant_app": {
           "name": "idx_tenant_subscriptions_tenant_app",
-          "columns": [
-            "tenant_id",
-            "application_code"
-          ],
+          "columns": ["tenant_id", "application_code"],
           "isUnique": false
         },
         "idx_tenant_subscriptions_plan": {
           "name": "idx_tenant_subscriptions_plan",
-          "columns": [
-            "plan_id"
-          ],
+          "columns": ["plan_id"],
           "isUnique": false
         },
         "idx_tenant_subscriptions_status": {
           "name": "idx_tenant_subscriptions_status",
-          "columns": [
-            "status"
-          ],
+          "columns": ["status"],
           "isUnique": false
         }
       },
@@ -8856,12 +7927,8 @@
           "name": "tenant_subscriptions_tenant_id_tenants_id_fk",
           "tableFrom": "tenant_subscriptions",
           "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tenant_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -8869,12 +7936,8 @@
           "name": "tenant_subscriptions_company_id_companies_id_fk",
           "tableFrom": "tenant_subscriptions",
           "tableTo": "companies",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -8882,12 +7945,8 @@
           "name": "tenant_subscriptions_plan_id_plans_id_fk",
           "tableFrom": "tenant_subscriptions",
           "tableTo": "plans",
-          "columnsFrom": [
-            "plan_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["plan_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -8895,9 +7954,7 @@
       "compositePrimaryKeys": {
         "tenant_subscriptions_id": {
           "name": "tenant_subscriptions_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -8994,9 +8051,7 @@
       "compositePrimaryKeys": {
         "tenants_id": {
           "name": "tenants_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -9113,25 +8168,17 @@
       "indexes": {
         "idx_outbox_idempotency": {
           "name": "idx_outbox_idempotency",
-          "columns": [
-            "idempotency_key"
-          ],
+          "columns": ["idempotency_key"],
           "isUnique": true
         },
         "idx_outbox_status_next": {
           "name": "idx_outbox_status_next",
-          "columns": [
-            "status",
-            "next_attempt_at"
-          ],
+          "columns": ["status", "next_attempt_at"],
           "isUnique": false
         },
         "idx_outbox_aggregate": {
           "name": "idx_outbox_aggregate",
-          "columns": [
-            "aggregate_type",
-            "aggregate_id"
-          ],
+          "columns": ["aggregate_type", "aggregate_id"],
           "isUnique": false
         }
       },
@@ -9139,9 +8186,7 @@
       "compositePrimaryKeys": {
         "transactional_outbox_id": {
           "name": "transactional_outbox_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -9243,16 +8288,12 @@
       "indexes": {
         "idx_users_email": {
           "name": "idx_users_email",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         },
         "idx_users_status": {
           "name": "idx_users_status",
-          "columns": [
-            "status"
-          ],
+          "columns": ["status"],
           "isUnique": false
         }
       },
@@ -9260,9 +8301,7 @@
       "compositePrimaryKeys": {
         "users_id": {
           "name": "users_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},

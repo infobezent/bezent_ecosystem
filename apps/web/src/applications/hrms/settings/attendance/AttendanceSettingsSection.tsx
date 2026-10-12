@@ -1,9 +1,5 @@
 import { useState } from 'react';
-import {
-  Stack,
-  Tabs,
-  type TabItem,
-} from '../../../../design-system/components';
+import { Stack, Tabs, type TabItem } from '../../../../design-system/components';
 import { GeneralTab } from './tabs/GeneralTab';
 import { PoliciesTab } from './tabs/PoliciesTab';
 import { RegularizationTab } from './tabs/RegularizationTab';

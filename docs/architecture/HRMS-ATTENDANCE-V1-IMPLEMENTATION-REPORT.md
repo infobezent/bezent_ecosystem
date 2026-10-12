@@ -21,6 +21,7 @@ All 7 administrative attendance views and the HR Settings Attendance configurati
 ## 2. Architecture & Domain Boundaries
 
 ### 2.1 Module Decoupling (Attendance vs. Shift vs. Leave)
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    HRMS Application                         │
@@ -62,19 +63,21 @@ All 7 administrative attendance views and the HR Settings Attendance configurati
 ## 3. Database Changes (Non-Destructive Migration)
 
 All database updates were applied non-destructively through standard Drizzle migrations:
+
 - **Migration:** `apps/api/src/db/migrations/0031_attendance_v1_foundation.sql`
 - **Journal Index:** `31` in `meta/_journal.json`
 - **Execution:** Successfully applied to MySQL database via `npm run db:migrate`.
 
 ### 3.1 Tables Added / Enhanced
 
-| Table Name | Change | Purpose |
-| :--- | :--- | :--- |
-| `attendance_punches` | **Created** | Immutable append-only log of all raw punch events. Tracks `punch_time`, `punch_type` (`in`, `out`, `break_in`, `break_out`, `auto`), `source` (`web`, `mobile`, `biometric`, `manual`, `api`), `work_location`, `device_metadata`, `notes`, and `is_duplicate`. Enforces `(tenant_id, company_id, employee_id)` indexing. |
-| `attendance_policies` | **Created** | Configurable tenant attendance rules. Tracks `standard_work_hours`, `half_day_threshold_hours`, `late_grace_minutes`, `early_exit_tolerance_minutes`, `missing_punch_penalty`, `regularization_window_days`, `auto_half_day_on_late_count`, and `effective_from`. |
-| `employee_attendance` | **Enhanced** | Added calculation columns: `worked_minutes`, `late_minutes`, `early_minutes`, `is_late`, `is_early_exit`, `is_missing_punch`, `is_regularized`, `shift_schedule_ref`, `calculation_metadata` (JSON). |
+| Table Name            | Change       | Purpose                                                                                                                                                                                                                                                                                                                   |
+| :-------------------- | :----------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `attendance_punches`  | **Created**  | Immutable append-only log of all raw punch events. Tracks `punch_time`, `punch_type` (`in`, `out`, `break_in`, `break_out`, `auto`), `source` (`web`, `mobile`, `biometric`, `manual`, `api`), `work_location`, `device_metadata`, `notes`, and `is_duplicate`. Enforces `(tenant_id, company_id, employee_id)` indexing. |
+| `attendance_policies` | **Created**  | Configurable tenant attendance rules. Tracks `standard_work_hours`, `half_day_threshold_hours`, `late_grace_minutes`, `early_exit_tolerance_minutes`, `missing_punch_penalty`, `regularization_window_days`, `auto_half_day_on_late_count`, and `effective_from`.                                                         |
+| `employee_attendance` | **Enhanced** | Added calculation columns: `worked_minutes`, `late_minutes`, `early_minutes`, `is_late`, `is_early_exit`, `is_missing_punch`, `is_regularized`, `shift_schedule_ref`, `calculation_metadata` (JSON).                                                                                                                      |
 
 ### 3.2 Seed Data
+
 - Idempotent seed entry added to `apps/api/src/db/seed.ts` for default company attendance policy (`att_pol_demo_01`).
 - Preserves all existing seed records without reset or destruction.
 
@@ -113,37 +116,40 @@ Implemented deterministic server-side calculation engine in `apps/api/src/applic
 Mounted at `/api/v1/hrms/attendance` in `apps/api/src/app/server/createApp.ts`.
 
 ### 5.1 RBAC & Tenant Scoping
+
 - Guarded by `requireReadWrite(['hrms.attendance.view'], 'hrms.attendance.regularize')` and `requireApplicationAccess('hrms', 'hrms')`.
 - All repository queries explicitly enforce `eq(table.tenantId, tenantId)` and `eq(table.companyId, companyId)`.
 - No cross-tenant data leakage.
 
 ### 5.2 Endpoint Matrix
 
-| Method | Path | Description | Access Scope |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/v1/hrms/attendance/overview` | Aggregated attendance KPIs, trends & department breakdown | HR Admin (`hrms.attendance.view`) |
-| `GET` | `/api/v1/hrms/attendance/daily` | Filterable daily attendance log with drill-downs | HR Admin (`hrms.attendance.view`) |
-| `GET` | `/api/v1/hrms/attendance/monthly` | Employee-by-day attendance muster roll matrix | HR Admin (`hrms.attendance.view`) |
-| `GET` | `/api/v1/hrms/attendance/punches` | Immutable raw punch event logs | HR Admin (`hrms.attendance.view`) |
-| `GET` | `/api/v1/hrms/attendance/exceptions` | Detected missing punches, late arrivals, short hours | HR Admin (`hrms.attendance.view`) |
-| `GET` | `/api/v1/hrms/attendance/regularization` | Queue of employee attendance regularization requests | HR Admin (`hrms.attendance.view`) |
-| `PATCH` | `/api/v1/hrms/attendance/regularization/:id/review`| Approve or reject regularization with reviewer remarks | HR Admin (`hrms.attendance.regularize`) |
-| `POST` | `/api/v1/hrms/attendance/manual-correction` | Authorized manual adjustment with audit reason | HR Admin (`hrms.attendance.regularize`) |
-| `GET` | `/api/v1/hrms/attendance/policy` | Effective tenant attendance policy | HR Admin (`hrms.attendance.view`) |
-| `PUT` | `/api/v1/hrms/attendance/policy` | Update attendance rules, thresholds, and grace periods | HR Admin (`hrms.settings.manage`) |
-| `GET` | `/api/v1/hrms/attendance/export/csv` | Statutory muster roll & daily register CSV export | HR Admin (`hrms.attendance.view`) |
+| Method  | Path                                                | Description                                               | Access Scope                            |
+| :------ | :-------------------------------------------------- | :-------------------------------------------------------- | :-------------------------------------- |
+| `GET`   | `/api/v1/hrms/attendance/overview`                  | Aggregated attendance KPIs, trends & department breakdown | HR Admin (`hrms.attendance.view`)       |
+| `GET`   | `/api/v1/hrms/attendance/daily`                     | Filterable daily attendance log with drill-downs          | HR Admin (`hrms.attendance.view`)       |
+| `GET`   | `/api/v1/hrms/attendance/monthly`                   | Employee-by-day attendance muster roll matrix             | HR Admin (`hrms.attendance.view`)       |
+| `GET`   | `/api/v1/hrms/attendance/punches`                   | Immutable raw punch event logs                            | HR Admin (`hrms.attendance.view`)       |
+| `GET`   | `/api/v1/hrms/attendance/exceptions`                | Detected missing punches, late arrivals, short hours      | HR Admin (`hrms.attendance.view`)       |
+| `GET`   | `/api/v1/hrms/attendance/regularization`            | Queue of employee attendance regularization requests      | HR Admin (`hrms.attendance.view`)       |
+| `PATCH` | `/api/v1/hrms/attendance/regularization/:id/review` | Approve or reject regularization with reviewer remarks    | HR Admin (`hrms.attendance.regularize`) |
+| `POST`  | `/api/v1/hrms/attendance/manual-correction`         | Authorized manual adjustment with audit reason            | HR Admin (`hrms.attendance.regularize`) |
+| `GET`   | `/api/v1/hrms/attendance/policy`                    | Effective tenant attendance policy                        | HR Admin (`hrms.attendance.view`)       |
+| `PUT`   | `/api/v1/hrms/attendance/policy`                    | Update attendance rules, thresholds, and grace periods    | HR Admin (`hrms.settings.manage`)       |
+| `GET`   | `/api/v1/hrms/attendance/export/csv`                | Statutory muster roll & daily register CSV export         | HR Admin (`hrms.attendance.view`)       |
 
 ---
 
 ## 6. ESS Attendance Compatibility (Zero Regression)
 
 The canonical attendance write path was centralized in `AttendanceService` and reused by `EssService`:
+
 - `EssService.checkIn()` now delegates to `AttendanceService.recordCheckIn()`.
 - `EssService.checkOut()` now delegates to `AttendanceService.recordCheckOut()`.
 - `EssService.getAttendanceHistory()` reads canonical calculated logs and status codes.
 - `EssService.regularizeAttendance()` records requests in `employee_requests` with standard type `attendance_regularization`.
 
 ### Verification:
+
 All 23 existing ESS unit tests in `apps/api/src/applications/hrms/ess/__tests__/ess.test.ts` pass with **100% success**.
 
 ---
@@ -151,7 +157,9 @@ All 23 existing ESS unit tests in `apps/api/src/applications/hrms/ess/__tests__/
 ## 7. Frontend Navigation & Pages
 
 ### 7.1 Canonical Left-Sidebar Flyout (`hrmsNavigation.ts`)
+
 The Attendance flyout contains exactly the 7 required items:
+
 1. **Overview** (`/hrms/attendance/overview`)
 2. **Daily Log** (`/hrms/attendance/daily-log`)
 3. **Monthly Summary** (`/hrms/attendance/monthly-summary`)
@@ -206,6 +214,7 @@ All views were implemented using BEZENT Design System components (`Page`, `PageH
 ## 8. Test Verification & Results
 
 ### 8.1 Backend Tests (`Vitest`)
+
 ```
 ✓ src/applications/hrms/ess/__tests__/ess.test.ts (23 tests)
 ✓ src/applications/hrms/attendance/__tests__/attendanceApi.test.ts (11 tests)
@@ -217,6 +226,7 @@ Test Files  3 passed (3)
 ```
 
 ### 8.2 Frontend Tests (`Vitest`)
+
 ```
 ✓ src/applications/hrms/attendance/__tests__/attendanceViews.test.tsx (11 tests)
 
@@ -226,6 +236,7 @@ Test Files  1 passed (1)
 ```
 
 ### 8.3 Monorepo Typecheck & Build
+
 ```
 npm run typecheck --workspace=apps/api  -->  PASSED (0 errors)
 npm run typecheck --workspace=apps/web  -->  PASSED (0 errors)
@@ -234,6 +245,7 @@ npm run build --workspace=apps/web      -->  PASSED (Vite production bundle buil
 ```
 
 ### 8.4 Lint & Code Formatting
+
 ```
 npx eslint on all attendance code       -->  PASSED (0 errors, 0 warnings)
 npx prettier --check on all attendance  -->  PASSED (All files formatted)
@@ -244,42 +256,45 @@ npx prettier --check on all attendance  -->  PASSED (All files formatted)
 ## 9. Files Changed & Created
 
 ### 9.1 Database & Migrations
-- `apps/api/src/db/migrations/0031_attendance_v1_foundation.sql` *(Created)*
-- `apps/api/src/db/migrations/meta/_journal.json` *(Updated)*
-- `apps/api/src/db/schema.ts` *(Updated)*
-- `apps/api/src/db/seed.ts` *(Updated)*
+
+- `apps/api/src/db/migrations/0031_attendance_v1_foundation.sql` _(Created)_
+- `apps/api/src/db/migrations/meta/_journal.json` _(Updated)_
+- `apps/api/src/db/schema.ts` _(Updated)_
+- `apps/api/src/db/seed.ts` _(Updated)_
 
 ### 9.2 Backend Attendance Module
-- `apps/api/src/applications/hrms/attendance/index.ts` *(Updated)*
-- `apps/api/src/applications/hrms/attendance/types/attendance.types.ts` *(Updated)*
-- `apps/api/src/applications/hrms/attendance/repository/attendance.repository.ts` *(Updated)*
-- `apps/api/src/applications/hrms/attendance/service/attendance.service.ts` *(Updated)*
-- `apps/api/src/applications/hrms/attendance/service/attendanceCalculation.service.ts` *(Created)*
-- `apps/api/src/applications/hrms/attendance/service/attendancePolicy.service.ts` *(Created)*
-- `apps/api/src/applications/hrms/attendance/service/shiftSchedule.provider.ts` *(Created)*
-- `apps/api/src/applications/hrms/attendance/controller/attendance.controller.ts` *(Created)*
-- `apps/api/src/applications/hrms/attendance/routes/attendance.routes.ts` *(Created)*
-- `apps/api/src/applications/hrms/attendance/__tests__/attendanceCalculation.test.ts` *(Created)*
-- `apps/api/src/applications/hrms/attendance/__tests__/attendanceApi.test.ts` *(Created)*
-- `apps/api/src/applications/hrms/ess/service/ess.service.ts` *(Updated)*
-- `apps/api/src/app/server/createApp.ts` *(Updated)*
+
+- `apps/api/src/applications/hrms/attendance/index.ts` _(Updated)_
+- `apps/api/src/applications/hrms/attendance/types/attendance.types.ts` _(Updated)_
+- `apps/api/src/applications/hrms/attendance/repository/attendance.repository.ts` _(Updated)_
+- `apps/api/src/applications/hrms/attendance/service/attendance.service.ts` _(Updated)_
+- `apps/api/src/applications/hrms/attendance/service/attendanceCalculation.service.ts` _(Created)_
+- `apps/api/src/applications/hrms/attendance/service/attendancePolicy.service.ts` _(Created)_
+- `apps/api/src/applications/hrms/attendance/service/shiftSchedule.provider.ts` _(Created)_
+- `apps/api/src/applications/hrms/attendance/controller/attendance.controller.ts` _(Created)_
+- `apps/api/src/applications/hrms/attendance/routes/attendance.routes.ts` _(Created)_
+- `apps/api/src/applications/hrms/attendance/__tests__/attendanceCalculation.test.ts` _(Created)_
+- `apps/api/src/applications/hrms/attendance/__tests__/attendanceApi.test.ts` _(Created)_
+- `apps/api/src/applications/hrms/ess/service/ess.service.ts` _(Updated)_
+- `apps/api/src/app/server/createApp.ts` _(Updated)_
 
 ### 9.3 Frontend Attendance Module
-- `apps/web/src/applications/hrms/attendance/index.ts` *(Created)*
-- `apps/web/src/applications/hrms/attendance/types/attendance.types.ts` *(Created)*
-- `apps/web/src/applications/hrms/attendance/api/attendanceApi.ts` *(Created)*
-- `apps/web/src/applications/hrms/attendance/pages/index.ts` *(Created)*
-- `apps/web/src/applications/hrms/attendance/pages/AttendanceOverviewPage.tsx` *(Created)*
-- `apps/web/src/applications/hrms/attendance/pages/DailyAttendanceLogPage.tsx` *(Created)*
-- `apps/web/src/applications/hrms/attendance/pages/MonthlyAttendanceSummaryPage.tsx` *(Created)*
-- `apps/web/src/applications/hrms/attendance/pages/PunchLogsPage.tsx` *(Created)*
-- `apps/web/src/applications/hrms/attendance/pages/AttendanceRegularizationPage.tsx` *(Created)*
-- `apps/web/src/applications/hrms/attendance/pages/AttendanceExceptionsPage.tsx` *(Created)*
-- `apps/web/src/applications/hrms/attendance/pages/AttendanceReportsPage.tsx` *(Created)*
-- `apps/web/src/applications/hrms/attendance/__tests__/attendanceViews.test.tsx` *(Created)*
-- `apps/web/src/applications/hrms/settings/attendance/AttendanceSettingsSection.tsx` *(Updated)*
-- `apps/web/src/applications/hrms/navigation/hrmsNavigation.ts` *(Updated)*
-- `apps/web/src/applications/hrms/routes/hrmsRoutes.tsx` *(Updated)*
+
+- `apps/web/src/applications/hrms/attendance/index.ts` _(Created)_
+- `apps/web/src/applications/hrms/attendance/types/attendance.types.ts` _(Created)_
+- `apps/web/src/applications/hrms/attendance/api/attendanceApi.ts` _(Created)_
+- `apps/web/src/applications/hrms/attendance/pages/index.ts` _(Created)_
+- `apps/web/src/applications/hrms/attendance/pages/AttendanceOverviewPage.tsx` _(Created)_
+- `apps/web/src/applications/hrms/attendance/pages/DailyAttendanceLogPage.tsx` _(Created)_
+- `apps/web/src/applications/hrms/attendance/pages/MonthlyAttendanceSummaryPage.tsx` _(Created)_
+- `apps/web/src/applications/hrms/attendance/pages/PunchLogsPage.tsx` _(Created)_
+- `apps/web/src/applications/hrms/attendance/pages/AttendanceRegularizationPage.tsx` _(Created)_
+- `apps/web/src/applications/hrms/attendance/pages/AttendanceExceptionsPage.tsx` _(Created)_
+- `apps/web/src/applications/hrms/attendance/pages/AttendanceReportsPage.tsx` _(Created)_
+- `apps/web/src/applications/hrms/attendance/__tests__/attendanceViews.test.tsx` _(Created)_
+- `apps/web/src/applications/hrms/settings/attendance/AttendanceSettingsSection.tsx` _(Updated)_
+- `apps/web/src/applications/hrms/navigation/hrmsNavigation.ts` _(Updated)_
+- `apps/web/src/applications/hrms/routes/hrmsRoutes.tsx` _(Updated)_
 
 ---
 

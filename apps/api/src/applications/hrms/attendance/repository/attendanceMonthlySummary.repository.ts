@@ -277,10 +277,7 @@ export class AttendanceMonthlySummaryRepository {
       });
   }
 
-  async updateSummary(
-    id: string,
-    updates: Partial<NewAttendanceMonthlySummary>,
-  ): Promise<void> {
+  async updateSummary(id: string, updates: Partial<NewAttendanceMonthlySummary>): Promise<void> {
     const db = getDb();
     await db
       .update(attendanceMonthlySummaries)
@@ -353,7 +350,17 @@ export class AttendanceMonthlySummaryRepository {
     tenantId: string,
     companyId: string,
     month: string,
-  ): Promise<Array<{ id: string; employeeNumber: string; firstName: string; lastName: string | null; joiningDate: string; employmentStatus: string; departmentId: string | null }>> {
+  ): Promise<
+    Array<{
+      id: string;
+      employeeNumber: string;
+      firstName: string;
+      lastName: string | null;
+      joiningDate: string;
+      employmentStatus: string;
+      departmentId: string | null;
+    }>
+  > {
     const db = getDb();
     const monthEnd = `${month}-31`;
 

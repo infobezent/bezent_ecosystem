@@ -19,8 +19,14 @@ attendanceRouter.use(
 attendanceRouter.get('/hrms/attendance/overview', attendanceOverviewController.getOverview);
 attendanceRouter.get('/hrms/attendance/overview/today', attendanceOverviewController.getTodayKpis);
 attendanceRouter.get('/hrms/attendance/overview/trends', attendanceOverviewController.getTrends);
-attendanceRouter.get('/hrms/attendance/overview/departments', attendanceOverviewController.getDepartments);
-attendanceRouter.get('/hrms/attendance/overview/actions', attendanceOverviewController.getActionQueue);
+attendanceRouter.get(
+  '/hrms/attendance/overview/departments',
+  attendanceOverviewController.getDepartments,
+);
+attendanceRouter.get(
+  '/hrms/attendance/overview/actions',
+  attendanceOverviewController.getActionQueue,
+);
 attendanceRouter.get(
   '/hrms/attendance/overview/processing-health',
   attendanceOverviewController.getProcessingHealth,
@@ -46,15 +52,12 @@ attendanceRouter.post(
 );
 
 // 3. Monthly Summary V1.0
-attendanceRouter.get(
-  '/hrms/attendance/monthly-summary',
-  (req, res, next) => {
-    if (req.query.view === 'matrix') {
-      return attendanceController.getMonthlySummary(req, res, next);
-    }
-    return attendanceMonthlySummaryController.getWorkspace(req, res, next);
-  },
-);
+attendanceRouter.get('/hrms/attendance/monthly-summary', (req, res, next) => {
+  if (req.query.view === 'matrix') {
+    return attendanceController.getMonthlySummary(req, res, next);
+  }
+  return attendanceMonthlySummaryController.getWorkspace(req, res, next);
+});
 attendanceRouter.get(
   '/hrms/attendance/monthly-summary/workspace',
   attendanceMonthlySummaryController.getWorkspace,
@@ -124,17 +127,35 @@ attendanceRouter.post(
   '/hrms/attendance/punch-logs/investigation',
   attendanceController.updatePunchInvestigation,
 );
-attendanceRouter.post('/hrms/attendance/punch-logs/retry', attendanceController.retryPunchProcessing);
+attendanceRouter.post(
+  '/hrms/attendance/punch-logs/retry',
+  attendanceController.retryPunchProcessing,
+);
 attendanceRouter.post('/hrms/attendance/punch-logs/bulk', attendanceController.bulkPunchAction);
 
 // 5. Exceptions
 attendanceRouter.get('/hrms/attendance/exceptions', attendanceController.getExceptions);
-attendanceRouter.get('/hrms/attendance/exceptions/export', attendanceController.exportExceptionsCsv);
+attendanceRouter.get(
+  '/hrms/attendance/exceptions/export',
+  attendanceController.exportExceptionsCsv,
+);
 attendanceRouter.get('/hrms/attendance/exceptions/:id', attendanceController.getExceptionDetails);
-attendanceRouter.post('/hrms/attendance/exceptions/:id/assign', attendanceController.assignException);
-attendanceRouter.post('/hrms/attendance/exceptions/:id/status', attendanceController.updateExceptionStatus);
-attendanceRouter.post('/hrms/attendance/exceptions/:id/severity', attendanceController.overrideExceptionSeverity);
-attendanceRouter.post('/hrms/attendance/exceptions/:id/verify-resolve', attendanceController.verifyAndResolveException);
+attendanceRouter.post(
+  '/hrms/attendance/exceptions/:id/assign',
+  attendanceController.assignException,
+);
+attendanceRouter.post(
+  '/hrms/attendance/exceptions/:id/status',
+  attendanceController.updateExceptionStatus,
+);
+attendanceRouter.post(
+  '/hrms/attendance/exceptions/:id/severity',
+  attendanceController.overrideExceptionSeverity,
+);
+attendanceRouter.post(
+  '/hrms/attendance/exceptions/:id/verify-resolve',
+  attendanceController.verifyAndResolveException,
+);
 attendanceRouter.post('/hrms/attendance/exceptions/bulk', attendanceController.bulkExceptionAction);
 
 // 6. Regularization Workflow V1.0
@@ -208,32 +229,62 @@ attendanceRouter.post(
 );
 
 // 6b. On-Duty (OD) Operational Workflow V1.0
-attendanceRouter.get('/hrms/attendance/on-duty/types', attendanceOnDutyController.getConfiguredOdTypes);
+attendanceRouter.get(
+  '/hrms/attendance/on-duty/types',
+  attendanceOnDutyController.getConfiguredOdTypes,
+);
 attendanceRouter.get('/hrms/attendance/on-duty', attendanceOnDutyController.listWorkspace);
 attendanceRouter.post('/hrms/attendance/on-duty', attendanceOnDutyController.createRequest);
 attendanceRouter.get('/hrms/attendance/on-duty/export', attendanceOnDutyController.exportRequests);
 attendanceRouter.post('/hrms/attendance/on-duty/export', attendanceOnDutyController.exportRequests);
-attendanceRouter.post('/hrms/attendance/on-duty/bulk-preview', attendanceOnDutyController.previewBulkApproval);
+attendanceRouter.post(
+  '/hrms/attendance/on-duty/bulk-preview',
+  attendanceOnDutyController.previewBulkApproval,
+);
 attendanceRouter.post('/hrms/attendance/on-duty/bulk', attendanceOnDutyController.bulkAction);
 attendanceRouter.get('/hrms/attendance/on-duty/:id', attendanceOnDutyController.getRequestDetails);
-attendanceRouter.post('/hrms/attendance/on-duty/:id/assign', attendanceOnDutyController.assignReviewer);
-attendanceRouter.post('/hrms/attendance/on-duty/:id/start-review', attendanceOnDutyController.startReview);
-attendanceRouter.post('/hrms/attendance/on-duty/:id/request-info', attendanceOnDutyController.requestClarification);
-attendanceRouter.post('/hrms/attendance/on-duty/:id/clarify', attendanceOnDutyController.provideClarification);
-attendanceRouter.post('/hrms/attendance/on-duty/:id/decision', attendanceOnDutyController.reviewDecision);
-attendanceRouter.patch('/hrms/attendance/on-duty/:id/review', attendanceOnDutyController.reviewDecision);
-attendanceRouter.post('/hrms/attendance/on-duty/:id/review', attendanceOnDutyController.reviewDecision);
-attendanceRouter.post('/hrms/attendance/on-duty/:id/cancel', attendanceOnDutyController.cancelRequest);
-attendanceRouter.post('/hrms/attendance/on-duty/:id/withdraw', attendanceOnDutyController.cancelRequest);
+attendanceRouter.post(
+  '/hrms/attendance/on-duty/:id/assign',
+  attendanceOnDutyController.assignReviewer,
+);
+attendanceRouter.post(
+  '/hrms/attendance/on-duty/:id/start-review',
+  attendanceOnDutyController.startReview,
+);
+attendanceRouter.post(
+  '/hrms/attendance/on-duty/:id/request-info',
+  attendanceOnDutyController.requestClarification,
+);
+attendanceRouter.post(
+  '/hrms/attendance/on-duty/:id/clarify',
+  attendanceOnDutyController.provideClarification,
+);
+attendanceRouter.post(
+  '/hrms/attendance/on-duty/:id/decision',
+  attendanceOnDutyController.reviewDecision,
+);
+attendanceRouter.patch(
+  '/hrms/attendance/on-duty/:id/review',
+  attendanceOnDutyController.reviewDecision,
+);
+attendanceRouter.post(
+  '/hrms/attendance/on-duty/:id/review',
+  attendanceOnDutyController.reviewDecision,
+);
+attendanceRouter.post(
+  '/hrms/attendance/on-duty/:id/cancel',
+  attendanceOnDutyController.cancelRequest,
+);
+attendanceRouter.post(
+  '/hrms/attendance/on-duty/:id/withdraw',
+  attendanceOnDutyController.cancelRequest,
+);
 
 // 7. Manual Correction
 attendanceRouter.post('/hrms/attendance/manual-correction', attendanceController.manualCorrection);
 
 // 8. Attendance Reports V1.0 Endpoints
-attendanceRouter.get(
-  '/hrms/attendance/reports/catalog',
-  attendanceReportsController.getCatalog,
-);
+attendanceRouter.get('/hrms/attendance/reports/catalog', attendanceReportsController.getCatalog);
 attendanceRouter.post(
   '/hrms/attendance/reports/:reportId/preview',
   attendanceReportsController.previewReport,
@@ -248,10 +299,7 @@ attendanceRouter.post(
 );
 
 // Saved Report Configurations
-attendanceRouter.get(
-  '/hrms/attendance/reports/saved',
-  attendanceReportsController.getSavedReports,
-);
+attendanceRouter.get('/hrms/attendance/reports/saved', attendanceReportsController.getSavedReports);
 attendanceRouter.post(
   '/hrms/attendance/reports/saved',
   attendanceReportsController.createSavedReport,
@@ -266,10 +314,7 @@ attendanceRouter.delete(
 );
 
 // Report Generation History & Download
-attendanceRouter.get(
-  '/hrms/attendance/reports/history',
-  attendanceReportsController.getHistory,
-);
+attendanceRouter.get('/hrms/attendance/reports/history', attendanceReportsController.getHistory);
 attendanceRouter.get(
   '/hrms/attendance/reports/history/:id',
   attendanceReportsController.downloadHistoryFile,
@@ -296,46 +341,127 @@ attendanceRouter.use(
 );
 
 // General
-attendanceRouter.get('/hrms/attendance/settings/general', attendanceSettingsController.getGeneralSettings);
-attendanceRouter.put('/hrms/attendance/settings/general', attendanceSettingsController.updateGeneralSettings);
+attendanceRouter.get(
+  '/hrms/attendance/settings/general',
+  attendanceSettingsController.getGeneralSettings,
+);
+attendanceRouter.put(
+  '/hrms/attendance/settings/general',
+  attendanceSettingsController.updateGeneralSettings,
+);
 
 // Policies & Overrides
-attendanceRouter.get('/hrms/attendance/settings/policies', attendanceSettingsController.listPolicies);
-attendanceRouter.post('/hrms/attendance/settings/policies', attendanceSettingsController.createPolicy);
-attendanceRouter.get('/hrms/attendance/settings/policies/effective', attendanceSettingsController.resolveEffectivePolicy);
-attendanceRouter.get('/hrms/attendance/settings/policies/:id', attendanceSettingsController.getPolicyById);
-attendanceRouter.put('/hrms/attendance/settings/policies/:id', attendanceSettingsController.updatePolicy);
-attendanceRouter.post('/hrms/attendance/settings/policies/:id/publish', attendanceSettingsController.publishPolicy);
-attendanceRouter.post('/hrms/attendance/settings/policies/:id/rollback', attendanceSettingsController.rollbackPolicyVersion);
+attendanceRouter.get(
+  '/hrms/attendance/settings/policies',
+  attendanceSettingsController.listPolicies,
+);
+attendanceRouter.post(
+  '/hrms/attendance/settings/policies',
+  attendanceSettingsController.createPolicy,
+);
+attendanceRouter.get(
+  '/hrms/attendance/settings/policies/effective',
+  attendanceSettingsController.resolveEffectivePolicy,
+);
+attendanceRouter.get(
+  '/hrms/attendance/settings/policies/:id',
+  attendanceSettingsController.getPolicyById,
+);
+attendanceRouter.put(
+  '/hrms/attendance/settings/policies/:id',
+  attendanceSettingsController.updatePolicy,
+);
+attendanceRouter.post(
+  '/hrms/attendance/settings/policies/:id/publish',
+  attendanceSettingsController.publishPolicy,
+);
+attendanceRouter.post(
+  '/hrms/attendance/settings/policies/:id/rollback',
+  attendanceSettingsController.rollbackPolicyVersion,
+);
 
 // Regularization
-attendanceRouter.get('/hrms/attendance/settings/regularization', attendanceSettingsController.getRegularizationSettings);
-attendanceRouter.put('/hrms/attendance/settings/regularization', attendanceSettingsController.updateRegularizationSettings);
+attendanceRouter.get(
+  '/hrms/attendance/settings/regularization',
+  attendanceSettingsController.getRegularizationSettings,
+);
+attendanceRouter.put(
+  '/hrms/attendance/settings/regularization',
+  attendanceSettingsController.updateRegularizationSettings,
+);
 
 // Capture & Devices
 attendanceRouter.get('/hrms/attendance/settings/devices', attendanceSettingsController.listDevices);
-attendanceRouter.post('/hrms/attendance/settings/devices', attendanceSettingsController.registerDevice);
-attendanceRouter.put('/hrms/attendance/settings/devices/:id', attendanceSettingsController.updateDevice);
-attendanceRouter.post('/hrms/attendance/settings/devices/:id/test', attendanceSettingsController.testDeviceConnection);
+attendanceRouter.post(
+  '/hrms/attendance/settings/devices',
+  attendanceSettingsController.registerDevice,
+);
+attendanceRouter.put(
+  '/hrms/attendance/settings/devices/:id',
+  attendanceSettingsController.updateDevice,
+);
+attendanceRouter.post(
+  '/hrms/attendance/settings/devices/:id/test',
+  attendanceSettingsController.testDeviceConnection,
+);
 
 // Bulk Imports & Migration
-attendanceRouter.get('/hrms/attendance/settings/import/batches', attendanceSettingsController.listImportBatches);
-attendanceRouter.post('/hrms/attendance/settings/import', attendanceSettingsController.processBulkImport);
-attendanceRouter.post('/hrms/attendance/settings/import/batches/:id/rollback', attendanceSettingsController.rollbackImportBatch);
+attendanceRouter.get(
+  '/hrms/attendance/settings/import/batches',
+  attendanceSettingsController.listImportBatches,
+);
+attendanceRouter.post(
+  '/hrms/attendance/settings/import',
+  attendanceSettingsController.processBulkImport,
+);
+attendanceRouter.post(
+  '/hrms/attendance/settings/import/batches/:id/rollback',
+  attendanceSettingsController.rollbackImportBatch,
+);
 
 // Location & Security
-attendanceRouter.get('/hrms/attendance/settings/security', attendanceSettingsController.getSecuritySettings);
-attendanceRouter.put('/hrms/attendance/settings/security', attendanceSettingsController.updateSecuritySettings);
+attendanceRouter.get(
+  '/hrms/attendance/settings/security',
+  attendanceSettingsController.getSecuritySettings,
+);
+attendanceRouter.put(
+  '/hrms/attendance/settings/security',
+  attendanceSettingsController.updateSecuritySettings,
+);
 
 // Payroll & Locking
-attendanceRouter.get('/hrms/attendance/settings/payroll', attendanceSettingsController.getPayrollSettings);
-attendanceRouter.put('/hrms/attendance/settings/payroll', attendanceSettingsController.updatePayrollSettings);
-attendanceRouter.get('/hrms/attendance/settings/payroll/periods', attendanceSettingsController.listPeriods);
-attendanceRouter.get('/hrms/attendance/settings/payroll/periods/:code/readiness', attendanceSettingsController.checkPeriodLockReadiness);
-attendanceRouter.post('/hrms/attendance/settings/payroll/periods/:code/lock', attendanceSettingsController.lockPeriod);
-attendanceRouter.post('/hrms/attendance/settings/payroll/periods/:code/unlock', attendanceSettingsController.unlockPeriod);
-attendanceRouter.get('/hrms/attendance/settings/payroll/handover', attendanceSettingsController.listHandoverBatches);
-attendanceRouter.post('/hrms/attendance/settings/payroll/handover/generate', attendanceSettingsController.generatePayrollHandover);
+attendanceRouter.get(
+  '/hrms/attendance/settings/payroll',
+  attendanceSettingsController.getPayrollSettings,
+);
+attendanceRouter.put(
+  '/hrms/attendance/settings/payroll',
+  attendanceSettingsController.updatePayrollSettings,
+);
+attendanceRouter.get(
+  '/hrms/attendance/settings/payroll/periods',
+  attendanceSettingsController.listPeriods,
+);
+attendanceRouter.get(
+  '/hrms/attendance/settings/payroll/periods/:code/readiness',
+  attendanceSettingsController.checkPeriodLockReadiness,
+);
+attendanceRouter.post(
+  '/hrms/attendance/settings/payroll/periods/:code/lock',
+  attendanceSettingsController.lockPeriod,
+);
+attendanceRouter.post(
+  '/hrms/attendance/settings/payroll/periods/:code/unlock',
+  attendanceSettingsController.unlockPeriod,
+);
+attendanceRouter.get(
+  '/hrms/attendance/settings/payroll/handover',
+  attendanceSettingsController.listHandoverBatches,
+);
+attendanceRouter.post(
+  '/hrms/attendance/settings/payroll/handover/generate',
+  attendanceSettingsController.generatePayrollHandover,
+);
 
 // Audit & History
 attendanceRouter.get('/hrms/attendance/settings/audit', attendanceSettingsController.getAuditLogs);
