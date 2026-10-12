@@ -6,8 +6,10 @@ import {
   index,
   boolean,
   int,
+  decimal,
   uniqueIndex,
   json,
+  text,
   type AnyMySqlColumn,
 } from 'drizzle-orm/mysql-core';
 import { sql } from 'drizzle-orm';
@@ -1967,11 +1969,23 @@ export const employeeAttendance = mysqlTable(
     date: varchar('date', { length: 10 }).notNull(),
     checkInTime: varchar('check_in_time', { length: 10 }),
     checkOutTime: varchar('check_out_time', { length: 10 }),
-    status: mysqlEnum('status', ['present', 'absent', 'half_day', 'on_leave', 'holiday'])
+    status: mysqlEnum('status', ['present', 'absent', 'half_day', 'on_leave', 'holiday', 'incomplete'])
       .default('present')
+      .notNull(),
+    processingState: mysqlEnum('processing_state', ['incomplete', 'pending_review', 'provisional', 'finalized', 'locked'])
+      .default('finalized')
       .notNull(),
     workLocation: varchar('work_location', { length: 100 }).default('office').notNull(),
     notes: varchar('notes', { length: 500 }),
+    workedMinutes: int('worked_minutes').default(0).notNull(),
+    lateMinutes: int('late_minutes').default(0).notNull(),
+    earlyMinutes: int('early_minutes').default(0).notNull(),
+    isLate: boolean('is_late').default(false).notNull(),
+    isEarlyExit: boolean('is_early_exit').default(false).notNull(),
+    isMissingPunch: boolean('is_missing_punch').default(false).notNull(),
+    isRegularized: boolean('is_regularized').default(false).notNull(),
+    shiftScheduleRef: varchar('shift_schedule_ref', { length: 100 }),
+    calculationMetadata: json('calculation_metadata').$type<Record<string, unknown>>(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
   },
@@ -1990,6 +2004,1038 @@ export const employeeAttendance = mysqlTable(
 
 export type EmployeeAttendance = typeof employeeAttendance.$inferSelect;
 export type NewEmployeeAttendance = typeof employeeAttendance.$inferInsert;
+
+/**
+ * HRMS Domain: Attendance — Punch Event History (Raw Logs)
+ */
+export const attendancePunches = mysqlTable(
+  'attendance_punches',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    employeeId: varchar('employee_id', { length: 64 })
+      .references(() => employees.id),
+    rawIdentifier: varchar('raw_identifier', { length: 100 }),
+    punchTime: timestamp('punch_time').notNull(),
+    workday: varchar('workday', { length: 10 }),
+    punchType: mysqlEnum('punch_type', ['in', 'out', 'break_in', 'break_out', 'auto', 'unknown'])
+      .default('in')
+      .notNull(),
+    source: mysqlEnum('source', ['web', 'mobile', 'biometric', 'manual', 'api', 'kiosk', 'import'])
+      .default('web')
+      .notNull(),
+    deviceMetadata: json('device_metadata').$type<Record<string, unknown>>(),
+    workLocation: varchar('work_location', { length: 100 }).default('office').notNull(),
+    notes: varchar('notes', { length: 500 }),
+    isDuplicate: boolean('is_duplicate').default(false).notNull(),
+    validationStatus: mysqlEnum('validation_status', [
+      'pending',
+      'valid',
+      'duplicate',
+      'invalid',
+      'needs_review',
+      'unmatched',
+    ])
+      .default('valid')
+      .notNull(),
+    validationReason: varchar('validation_reason', { length: 255 }),
+    processingState: mysqlEnum('processing_state', [
+      'received',
+      'processing',
+      'processed',
+      'failed',
+      'retry_pending',
+    ])
+      .default('processed')
+      .notNull(),
+    processingError: varchar('processing_error', { length: 500 }),
+    retryCount: int('retry_count').default(0).notNull(),
+    investigationStatus: mysqlEnum('investigation_status', [
+      'none',
+      'open',
+      'assigned',
+      'in_review',
+      'resolved',
+      'closed',
+    ])
+      .default('none')
+      .notNull(),
+    assignedTo: varchar('assigned_to', { length: 64 }),
+    investigationNotes: varchar('investigation_notes', { length: 1000 }),
+    resolvedAt: timestamp('resolved_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_att_punches_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_att_punches_employee').on(table.employeeId),
+    index('idx_att_punches_time').on(table.punchTime),
+    index('idx_att_punches_workday').on(table.workday),
+    index('idx_att_punches_validation').on(table.validationStatus),
+    index('idx_att_punches_processing').on(table.processingState),
+  ],
+);
+
+export type AttendancePunch = typeof attendancePunches.$inferSelect;
+export type NewAttendancePunch = typeof attendancePunches.$inferInsert;
+
+/**
+ * HRMS Domain: Attendance — Punch Event Lifecycle & Investigation Audit Log
+ */
+export const attendancePunchAudits = mysqlTable(
+  'attendance_punch_audits',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 }).notNull(),
+    punchId: varchar('punch_id', { length: 64 }).notNull(),
+    action: mysqlEnum('action', [
+      'ingested',
+      'validated',
+      'processed',
+      'retry_attempted',
+      'investigation_opened',
+      'investigation_assigned',
+      'investigation_resolved',
+      'identity_mapped',
+    ]).notNull(),
+    actorUserId: varchar('actor_user_id', { length: 64 }),
+    details: json('details').$type<Record<string, unknown>>(),
+    notes: varchar('notes', { length: 1000 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_att_punch_audits_tenant_punch').on(table.tenantId, table.punchId),
+    index('idx_att_punch_audits_created').on(table.createdAt),
+  ],
+);
+
+export type AttendancePunchAudit = typeof attendancePunchAudits.$inferSelect;
+export type NewAttendancePunchAudit = typeof attendancePunchAudits.$inferInsert;
+
+/**
+ * HRMS Domain: Attendance — Exceptions & Anomalies Case Management
+ */
+export const attendanceExceptions = mysqlTable(
+  'attendance_exceptions',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 }).notNull(),
+    employeeId: varchar('employee_id', { length: 64 }),
+    workday: varchar('workday', { length: 10 }),
+    exceptionType: mysqlEnum('exception_type', [
+      'missing_in',
+      'missing_out',
+      'late_arrival',
+      'early_exit',
+      'insufficient_hours',
+      'shift_mismatch',
+      'duplicate_punch',
+      'unmatched_employee',
+      'invalid_punch',
+      'device_sync_failure',
+      'leave_conflict',
+      'on_duty_conflict',
+      'regularization_conflict',
+    ]).notNull(),
+    severity: mysqlEnum('severity', ['critical', 'high', 'medium', 'low'])
+      .default('medium')
+      .notNull(),
+    source: mysqlEnum('source', [
+      'biometric',
+      'web',
+      'mobile',
+      'kiosk',
+      'import',
+      'engine',
+      'leave_system',
+      'od_system',
+      'regularization_system',
+      'system',
+    ])
+      .default('engine')
+      .notNull(),
+    sourceRecordType: varchar('source_record_type', { length: 50 }).notNull(),
+    sourceRecordId: varchar('source_record_id', { length: 64 }).notNull(),
+    title: varchar('title', { length: 255 }).notNull(),
+    description: text('description'),
+    status: mysqlEnum('status', [
+      'open',
+      'assigned',
+      'in_review',
+      'pending_action',
+      'resolved',
+      'closed',
+    ])
+      .default('open')
+      .notNull(),
+    assignedTo: varchar('assigned_to', { length: 64 }),
+    assignedQueue: varchar('assigned_queue', { length: 64 }),
+    pendingActionReason: varchar('pending_action_reason', { length: 255 }),
+    pendingActionAwaitedFrom: varchar('pending_action_awaited_from', { length: 64 }),
+    resolutionType: varchar('resolution_type', { length: 64 }),
+    resolutionNotes: text('resolution_notes'),
+    resolutionEvidence: json('resolution_evidence').$type<Record<string, unknown>>(),
+    resolvedAt: timestamp('resolved_at'),
+    resolvedByUserId: varchar('resolved_by_user_id', { length: 64 }),
+    closedAt: timestamp('closed_at'),
+    closedByUserId: varchar('closed_by_user_id', { length: 64 }),
+    detectedAt: timestamp('detected_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_att_exc_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_att_exc_employee').on(table.employeeId),
+    index('idx_att_exc_workday').on(table.workday),
+    index('idx_att_exc_status').on(table.status),
+    index('idx_att_exc_severity').on(table.severity),
+    index('idx_att_exc_type').on(table.exceptionType),
+    index('idx_att_exc_detected').on(table.detectedAt),
+    index('idx_att_exc_assigned').on(table.assignedTo),
+    uniqueIndex('idx_att_exc_dedup').on(
+      table.tenantId,
+      table.companyId,
+      table.sourceRecordType,
+      table.sourceRecordId,
+      table.exceptionType,
+    ),
+  ],
+);
+
+export type AttendanceException = typeof attendanceExceptions.$inferSelect;
+export type NewAttendanceException = typeof attendanceExceptions.$inferInsert;
+
+/**
+ * HRMS Domain: Attendance — Exception Case Audit History
+ */
+export const attendanceExceptionAudits = mysqlTable(
+  'attendance_exception_audits',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 }).notNull(),
+    exceptionId: varchar('exception_id', { length: 64 }).notNull(),
+    action: mysqlEnum('action', [
+      'detected',
+      'assigned',
+      'reassigned',
+      'status_transitioned',
+      'severity_overridden',
+      'pending_action_marked',
+      'note_added',
+      'resolution_verified',
+      'resolved',
+      'closed',
+      'reopened',
+    ]).notNull(),
+    actorUserId: varchar('actor_user_id', { length: 64 }),
+    oldState: json('old_state').$type<Record<string, unknown>>(),
+    newState: json('new_state').$type<Record<string, unknown>>(),
+    notes: text('notes'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_att_exc_aud_tenant_comp_exc').on(table.tenantId, table.companyId, table.exceptionId),
+    index('idx_att_exc_aud_created').on(table.createdAt),
+  ],
+);
+
+export type AttendanceExceptionAudit = typeof attendanceExceptionAudits.$inferSelect;
+export type NewAttendanceExceptionAudit = typeof attendanceExceptionAudits.$inferInsert;
+
+
+/**
+ * HRMS Domain: Attendance — Attendance Policies
+ */
+export const attendancePolicies = mysqlTable(
+  'attendance_policies',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    policyName: varchar('policy_name', { length: 100 }).notNull(),
+    version: int('version').default(1).notNull(),
+    status: mysqlEnum('status', ['draft', 'published', 'archived']).default('published').notNull(),
+    description: varchar('description', { length: 500 }),
+    scope: mysqlEnum('scope', ['company', 'department', 'employee']).default('company').notNull(),
+    scopeId: varchar('scope_id', { length: 64 }),
+    overridesPriority: int('overrides_priority').default(0).notNull(),
+    captureMethods: json('capture_methods').$type<string[]>().notNull(),
+    breakDeductionMethod: mysqlEnum('break_deduction_method', ['scheduled', 'actual', 'none'])
+      .default('scheduled')
+      .notNull(),
+    enableLateTracking: boolean('enable_late_tracking').default(true).notNull(),
+    gracePeriodMinutes: int('grace_period_minutes').default(15).notNull(),
+    enableEarlyExitTracking: boolean('enable_early_exit_tracking').default(true).notNull(),
+    halfDayThresholdHours: decimal('half_day_threshold_hours', { precision: 4, scale: 2 })
+      .default('4.00')
+      .notNull(),
+    fullDayThresholdHours: decimal('full_day_threshold_hours', { precision: 4, scale: 2 })
+      .default('8.00')
+      .notNull(),
+    missingPunchPolicy: mysqlEnum('missing_punch_policy', [
+      'mark_absent',
+      'half_day',
+      'flag_exception',
+      'none',
+    ])
+      .default('flag_exception')
+      .notNull(),
+    allowRegularization: boolean('allow_regularization').default(true).notNull(),
+    regularizationCutoffDays: int('regularization_cutoff_days').default(7).notNull(),
+    requiresApproval: boolean('requires_approval').default(true).notNull(),
+    effectiveFrom: varchar('effective_from', { length: 10 }).notNull(),
+    penaltyRules: json('penalty_rules').$type<Record<string, unknown>>(),
+    odRules: json('od_rules').$type<Record<string, unknown>>(),
+    classificationRules: json('classification_rules').$type<Record<string, unknown>>(),
+    isActive: boolean('is_active').default(true).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_att_policy_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_att_policy_active').on(table.isActive),
+    index('idx_att_policy_scope').on(table.scope, table.scopeId),
+  ],
+);
+
+export type AttendancePolicy = typeof attendancePolicies.$inferSelect;
+export type NewAttendancePolicy = typeof attendancePolicies.$inferInsert;
+
+/**
+ * HRMS Domain: Attendance — General Settings
+ */
+export const attendanceGeneralSettings = mysqlTable(
+  'attendance_general_settings',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    timezone: varchar('timezone', { length: 100 }).default('UTC').notNull(),
+    dayBoundaryTime: varchar('day_boundary_time', { length: 8 }).default('00:00:00').notNull(),
+    trackingStartDate: varchar('tracking_start_date', { length: 10 }).default('2026-01-01').notNull(),
+    processingMode: mysqlEnum('processing_mode', ['realtime', 'daily_batch', 'manual'])
+      .default('realtime')
+      .notNull(),
+    manualEntryAllowed: boolean('manual_entry_allowed').default(true).notNull(),
+    employeeVisibility: mysqlEnum('employee_visibility', ['self_only', 'department', 'company'])
+      .default('self_only')
+      .notNull(),
+    defaultHistoryViewDays: int('default_history_view_days').default(30).notNull(),
+    alertPreferences: json('alert_preferences').$type<Record<string, unknown>>(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_att_gen_settings_company').on(table.companyId),
+    index('idx_att_gen_settings_tenant_comp').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type AttendanceGeneralSettings = typeof attendanceGeneralSettings.$inferSelect;
+export type NewAttendanceGeneralSettings = typeof attendanceGeneralSettings.$inferInsert;
+
+/**
+ * HRMS Domain: Attendance — Regularization Settings
+ */
+export const attendanceRegularizationSettings = mysqlTable(
+  'attendance_regularization_settings',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    isEnabled: boolean('is_enabled').default(true).notNull(),
+    allowedCorrectionTypes: json('allowed_correction_types').$type<string[]>(),
+    submissionWindowDays: int('submission_window_days').default(7).notNull(),
+    maxRequestsPerMonth: int('max_requests_per_month').default(3).notNull(),
+    requireReason: boolean('require_reason').default(true).notNull(),
+    requireEvidence: boolean('require_evidence').default(false).notNull(),
+    approvalHierarchy: mysqlEnum('approval_hierarchy', [
+      'manager_only',
+      'hr_only',
+      'manager_then_hr',
+      'auto_approve',
+    ])
+      .default('manager_then_hr')
+      .notNull(),
+    autoApproveGraceMinutes: int('auto_approve_grace_minutes').default(0).notNull(),
+    blockOnPayrollLock: boolean('block_on_payroll_lock').default(true).notNull(),
+    allowWithdrawal: boolean('allow_withdrawal').default(true).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_att_reg_settings_company').on(table.companyId),
+    index('idx_att_reg_settings_tenant_comp').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type AttendanceRegularizationSettings = typeof attendanceRegularizationSettings.$inferSelect;
+export type NewAttendanceRegularizationSettings = typeof attendanceRegularizationSettings.$inferInsert;
+
+/**
+ * HRMS Domain: Attendance — Regularization Requests V1.0
+ */
+export const attendanceRegularizations = mysqlTable(
+  'attendance_regularizations',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    requestNumber: varchar('request_number', { length: 32 }).notNull(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    employeeId: varchar('employee_id', { length: 64 })
+      .notNull()
+      .references(() => employees.id),
+    workday: varchar('workday', { length: 10 }).notNull(),
+    requestType: mysqlEnum('request_type', [
+      'missing_in',
+      'missing_out',
+      'incorrect_time',
+      'status_correction',
+      'worked_hours',
+      'both_missing',
+      'wrong_direction',
+    ]).notNull(),
+    approvalStatus: mysqlEnum('approval_status', [
+      'draft',
+      'submitted',
+      'under_review',
+      'awaiting_info',
+      'approved',
+      'rejected',
+      'cancelled',
+    ])
+      .default('submitted')
+      .notNull(),
+    applicationStatus: mysqlEnum('application_status', [
+      'not_applicable',
+      'pending_application',
+      'applied',
+      'failed',
+      'blocked',
+    ])
+      .default('not_applicable')
+      .notNull(),
+    source: mysqlEnum('source', [
+      'web',
+      'ess',
+      'mobile',
+      'system',
+      'biometric',
+      'kiosk',
+      'import',
+    ])
+      .default('web')
+      .notNull(),
+    assignedTo: varchar('assigned_to', { length: 64 }),
+    assignedQueue: varchar('assigned_queue', { length: 64 }),
+    assignedAt: timestamp('assigned_at'),
+    relatedExceptionId: varchar('related_exception_id', { length: 64 }),
+    targetPunchId: varchar('target_punch_id', { length: 64 }),
+    targetPunchDirection: varchar('target_punch_direction', { length: 20 }),
+    recordedCheckIn: varchar('recorded_check_in', { length: 19 }),
+    recordedCheckOut: varchar('recorded_check_out', { length: 19 }),
+    recordedStatus: varchar('recorded_status', { length: 50 }),
+    proposedCheckIn: varchar('proposed_check_in', { length: 19 }),
+    proposedCheckOut: varchar('proposed_check_out', { length: 19 }),
+    proposedStatus: varchar('proposed_status', { length: 50 }),
+    claimedHours: decimal('claimed_hours', { precision: 4, scale: 2 }),
+    reason: varchar('reason', { length: 500 }).notNull(),
+    evidenceUrls: json('evidence_urls').$type<string[]>(),
+    evidenceAttachments: json('evidence_attachments').$type<
+      Array<{ name: string; size: string; url?: string }>
+    >(),
+    clarificationRequestedAt: timestamp('clarification_requested_at'),
+    clarificationNotes: text('clarification_notes'),
+    clarificationProvidedAt: timestamp('clarification_provided_at'),
+    clarificationResponse: text('clarification_response'),
+    decisionReason: varchar('decision_reason', { length: 500 }),
+    decidedByUserId: varchar('decided_by_user_id', { length: 64 }),
+    decidedAt: timestamp('decided_at'),
+    appliedAt: timestamp('applied_at'),
+    applicationError: varchar('application_error', { length: 500 }),
+    applicationBlockedReason: varchar('application_blocked_reason', { length: 500 }),
+    appliedAdjustmentId: varchar('applied_adjustment_id', { length: 64 }),
+    isHighRisk: boolean('is_high_risk').default(false).notNull(),
+    riskFactors: json('risk_factors').$type<string[]>(),
+    submittedAt: timestamp('submitted_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_att_reg_request_num').on(table.companyId, table.requestNumber),
+    index('idx_att_reg_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_att_reg_employee').on(table.employeeId),
+    index('idx_att_reg_workday').on(table.workday),
+    index('idx_att_reg_appr_status').on(table.approvalStatus),
+    index('idx_att_reg_appl_status').on(table.applicationStatus),
+    index('idx_att_reg_type').on(table.requestType),
+    index('idx_att_reg_assigned').on(table.assignedTo),
+    index('idx_att_reg_submitted').on(table.submittedAt),
+  ],
+);
+
+export type AttendanceRegularization = typeof attendanceRegularizations.$inferSelect;
+export type NewAttendanceRegularization = typeof attendanceRegularizations.$inferInsert;
+
+/**
+ * HRMS Domain: Attendance — Approved Attendance Adjustments (Audit & Application Ledger)
+ */
+export const attendanceAdjustments = mysqlTable(
+  'attendance_adjustments',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    employeeId: varchar('employee_id', { length: 64 })
+      .notNull()
+      .references(() => employees.id),
+    workday: varchar('workday', { length: 10 }).notNull(),
+    regularizationId: varchar('regularization_id', { length: 64 }),
+    adjustmentType: varchar('adjustment_type', { length: 50 }).notNull(),
+    originalCheckIn: varchar('original_check_in', { length: 19 }),
+    originalCheckOut: varchar('original_check_out', { length: 19 }),
+    originalStatus: varchar('original_status', { length: 50 }),
+    originalWorkedMinutes: int('original_worked_minutes').default(0).notNull(),
+    adjustedCheckIn: varchar('adjusted_check_in', { length: 19 }),
+    adjustedCheckOut: varchar('adjusted_check_out', { length: 19 }),
+    adjustedStatus: varchar('adjusted_status', { length: 50 }),
+    adjustedWorkedMinutes: int('adjusted_worked_minutes').default(0).notNull(),
+    approvedByUserId: varchar('approved_by_user_id', { length: 64 }).notNull(),
+    appliedByUserId: varchar('applied_by_user_id', { length: 64 }).notNull(),
+    status: mysqlEnum('status', ['applied', 'reverted']).default('applied').notNull(),
+    metadata: json('metadata').$type<Record<string, unknown>>(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_att_adj_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_att_adj_employee').on(table.employeeId),
+    index('idx_att_adj_workday').on(table.workday),
+    index('idx_att_adj_reg_id').on(table.regularizationId),
+  ],
+);
+
+export type AttendanceAdjustment = typeof attendanceAdjustments.$inferSelect;
+export type NewAttendanceAdjustment = typeof attendanceAdjustments.$inferInsert;
+
+/**
+ * HRMS Domain: Attendance — Regularization Request Lifecycle & Audit Trail
+ */
+export const attendanceRegularizationAudits = mysqlTable(
+  'attendance_regularization_audits',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 }).notNull(),
+    regularizationId: varchar('regularization_id', { length: 64 }).notNull(),
+    action: mysqlEnum('action', [
+      'created',
+      'submitted',
+      'assigned',
+      'reassigned',
+      'review_started',
+      'info_requested',
+      'info_provided',
+      'approved',
+      'rejected',
+      'cancelled',
+      'applied',
+      'apply_failed',
+      'apply_blocked',
+      'recalculated',
+    ]).notNull(),
+    actorUserId: varchar('actor_user_id', { length: 64 }),
+    oldState: json('old_state').$type<Record<string, unknown>>(),
+    newState: json('new_state').$type<Record<string, unknown>>(),
+    notes: text('notes'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_att_regaud_tenant_comp_reg').on(
+      table.tenantId,
+      table.companyId,
+      table.regularizationId,
+    ),
+    index('idx_att_regaud_created').on(table.createdAt),
+  ],
+);
+
+export type AttendanceRegularizationAudit = typeof attendanceRegularizationAudits.$inferSelect;
+export type NewAttendanceRegularizationAudit = typeof attendanceRegularizationAudits.$inferInsert;
+
+/**
+ * HRMS Domain: Attendance — On-Duty (OD) Requests V1.0
+ */
+export const attendanceOnDutyRequests = mysqlTable(
+  'attendance_on_duty_requests',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    requestNumber: varchar('request_number', { length: 32 }).notNull().default(''),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    employeeId: varchar('employee_id', { length: 64 })
+      .notNull()
+      .references(() => employees.id),
+    odTypeId: varchar('od_type_id', { length: 64 }).notNull(),
+    odTypeName: varchar('od_type_name', { length: 100 }).notNull(),
+    startDate: varchar('start_date', { length: 10 }).notNull(),
+    endDate: varchar('end_date', { length: 10 }).notNull(),
+    startTime: varchar('start_time', { length: 8 }),
+    endTime: varchar('end_time', { length: 8 }),
+    durationType: mysqlEnum('duration_type', ['full_day', 'half_day', 'hourly', 'multi_day'])
+      .default('full_day')
+      .notNull(),
+    halfDaySession: mysqlEnum('half_day_session', ['first_half', 'second_half']),
+    durationHours: decimal('duration_hours', { precision: 4, scale: 2 }).default('8.00'),
+    reason: varchar('reason', { length: 500 }).notNull(),
+    locationOrSite: varchar('location_or_site', { length: 255 }),
+    projectReference: varchar('project_reference', { length: 100 }),
+    attachmentUrl: varchar('attachment_url', { length: 500 }),
+    evidenceAttachments: json('evidence_attachments').$type<
+      Array<{ name: string; size: string; url?: string }>
+    >(),
+    status: mysqlEnum('status', [
+      'draft',
+      'submitted',
+      'under_review',
+      'awaiting_info',
+      'approved',
+      'rejected',
+      'withdrawn',
+      'cancelled',
+    ])
+      .default('submitted')
+      .notNull(),
+    processingStatus: mysqlEnum('processing_status', [
+      'not_applicable',
+      'pending',
+      'applied',
+      'partially_applied',
+      'processing_issues',
+      'blocked',
+      'failed',
+    ])
+      .default('not_applicable')
+      .notNull(),
+    currentStage: varchar('current_stage', { length: 50 }).default('pending_manager').notNull(),
+    assignedTo: varchar('assigned_to', { length: 64 }),
+    assignedAt: timestamp('assigned_at'),
+    assignedRole: varchar('assigned_role', { length: 50 }),
+    submittedAt: timestamp('submitted_at'),
+    submittedByUserId: varchar('submitted_by_user_id', { length: 64 }),
+    reviewedByUserId: varchar('reviewed_by_user_id', { length: 64 }),
+    reviewedAt: timestamp('reviewed_at'),
+    decisionReason: varchar('decision_reason', { length: 500 }),
+    withdrawnAt: timestamp('withdrawn_at'),
+    withdrawnReason: varchar('withdrawn_reason', { length: 500 }),
+    cancelledAt: timestamp('cancelled_at'),
+    cancelledReason: varchar('cancelled_reason', { length: 500 }),
+    clarificationRequestedAt: timestamp('clarification_requested_at'),
+    clarificationNotes: text('clarification_notes'),
+    clarificationProvidedAt: timestamp('clarification_provided_at'),
+    clarificationResponse: text('clarification_response'),
+    appliedAt: timestamp('applied_at'),
+    appliedByUserId: varchar('applied_by_user_id', { length: 64 }),
+    processingError: varchar('processing_error', { length: 500 }),
+    processingBlockedReason: varchar('processing_blocked_reason', { length: 500 }),
+    isHighRisk: boolean('is_high_risk').default(false).notNull(),
+    riskFactors: json('risk_factors').$type<string[]>(),
+    effectivePolicyVersion: int('effective_policy_version').default(1).notNull(),
+    auditMetadata: json('audit_metadata').$type<Record<string, unknown>>(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_att_od_tenant_company').on(table.tenantId, table.companyId),
+    index('idx_att_od_employee').on(table.employeeId),
+    index('idx_att_od_dates').on(table.startDate, table.endDate),
+    index('idx_att_od_status').on(table.status),
+    index('idx_att_od_processing').on(table.processingStatus),
+    index('idx_att_od_assigned').on(table.assignedTo),
+    index('idx_att_od_req_num').on(table.companyId, table.requestNumber),
+  ],
+);
+
+export type AttendanceOnDutyRequest = typeof attendanceOnDutyRequests.$inferSelect;
+export type NewAttendanceOnDutyRequest = typeof attendanceOnDutyRequests.$inferInsert;
+export type AttendanceOnDutyRequestRecord = AttendanceOnDutyRequest;
+export type NewAttendanceOnDutyRequestRecord = NewAttendanceOnDutyRequest;
+
+/**
+ * HRMS Domain: Attendance — On-Duty (OD) Per-Workday Tracking
+ */
+export const attendanceOnDutyWorkdays = mysqlTable(
+  'attendance_on_duty_workdays',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 }).notNull(),
+    onDutyRequestId: varchar('on_duty_request_id', { length: 64 })
+      .notNull()
+      .references(() => attendanceOnDutyRequests.id, { onDelete: 'cascade' }),
+    employeeId: varchar('employee_id', { length: 64 }).notNull(),
+    workday: varchar('workday', { length: 10 }).notNull(),
+    durationType: mysqlEnum('duration_type', ['full_day', 'half_day', 'hourly'])
+      .default('full_day')
+      .notNull(),
+    durationHours: decimal('duration_hours', { precision: 4, scale: 2 }).default('8.00'),
+    halfDaySession: mysqlEnum('half_day_session', ['first_half', 'second_half']),
+    creditedStatus: mysqlEnum('credited_status', ['present', 'half_day'])
+      .default('present')
+      .notNull(),
+    creditedWorkedMinutes: int('credited_worked_minutes').default(480).notNull(),
+    processingStatus: mysqlEnum('processing_status', [
+      'not_applicable',
+      'pending',
+      'applied',
+      'blocked',
+      'failed',
+    ])
+      .default('pending')
+      .notNull(),
+    appliedAttendanceId: varchar('applied_attendance_id', { length: 64 }),
+    errorMessage: varchar('error_message', { length: 500 }),
+    blockedReason: varchar('blocked_reason', { length: 500 }),
+    appliedAt: timestamp('applied_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_att_od_workday_lookup').on(table.tenantId, table.companyId, table.workday),
+    index('idx_att_od_workday_req').on(table.onDutyRequestId),
+    index('idx_att_od_workday_emp').on(table.employeeId),
+  ],
+);
+
+export type AttendanceOnDutyWorkdayRecord = typeof attendanceOnDutyWorkdays.$inferSelect;
+export type NewAttendanceOnDutyWorkdayRecord = typeof attendanceOnDutyWorkdays.$inferInsert;
+
+/**
+ * HRMS Domain: Attendance — On-Duty (OD) Audit History
+ */
+export const attendanceOnDutyAudits = mysqlTable(
+  'attendance_on_duty_audits',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 }).notNull(),
+    onDutyRequestId: varchar('on_duty_request_id', { length: 64 })
+      .notNull()
+      .references(() => attendanceOnDutyRequests.id, { onDelete: 'cascade' }),
+    action: mysqlEnum('action', [
+      'created',
+      'submitted',
+      'assigned',
+      'reassigned',
+      'review_started',
+      'info_requested',
+      'info_provided',
+      'approved',
+      'rejected',
+      'cancelled',
+      'withdrawn',
+      'applied',
+      'apply_failed',
+      'apply_blocked',
+      'recalculated',
+    ]).notNull(),
+    actorUserId: varchar('actor_user_id', { length: 64 }),
+    oldState: json('old_state').$type<Record<string, unknown>>(),
+    newState: json('new_state').$type<Record<string, unknown>>(),
+    notes: text('notes'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_att_od_audit_req').on(table.onDutyRequestId),
+    index('idx_att_od_audit_created').on(table.createdAt),
+  ],
+);
+
+export type AttendanceOnDutyAuditRecord = typeof attendanceOnDutyAudits.$inferSelect;
+export type NewAttendanceOnDutyAuditRecord = typeof attendanceOnDutyAudits.$inferInsert;
+
+/**
+ * HRMS Domain: Attendance — Devices & Hardware Terminals
+ */
+export const attendanceDevices = mysqlTable(
+  'attendance_devices',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    locationId: varchar('location_id', { length: 64 }).references(() => locations.id),
+    deviceName: varchar('device_name', { length: 100 }).notNull(),
+    deviceCode: varchar('device_code', { length: 50 }).notNull(),
+    deviceType: mysqlEnum('device_type', [
+      'biometric_fingerprint',
+      'biometric_facial',
+      'rfid_card',
+      'mobile_kiosk',
+      'web_terminal',
+    ])
+      .default('biometric_fingerprint')
+      .notNull(),
+    serialNumber: varchar('serial_number', { length: 100 }),
+    ipAddress: varchar('ip_address', { length: 45 }),
+    port: int('port'),
+    status: mysqlEnum('status', ['online', 'offline', 'disabled', 'testing'])
+      .default('offline')
+      .notNull(),
+    lastHeartbeatAt: timestamp('last_heartbeat_at'),
+    firmwareVersion: varchar('firmware_version', { length: 50 }),
+    metadata: json('metadata').$type<Record<string, unknown>>(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_att_devices_company_code').on(table.companyId, table.deviceCode),
+    index('idx_att_devices_tenant_comp').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type AttendanceDevice = typeof attendanceDevices.$inferSelect;
+export type NewAttendanceDevice = typeof attendanceDevices.$inferInsert;
+
+/**
+ * HRMS Domain: Attendance — Import & Migration Batches
+ */
+export const attendanceImportBatches = mysqlTable(
+  'attendance_import_batches',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    batchType: mysqlEnum('batch_type', ['raw_punches', 'historical_summary'])
+      .default('raw_punches')
+      .notNull(),
+    fileName: varchar('file_name', { length: 255 }).notNull(),
+    totalRows: int('total_rows').default(0).notNull(),
+    successRows: int('success_rows').default(0).notNull(),
+    failedRows: int('failed_rows').default(0).notNull(),
+    duplicateRows: int('duplicate_rows').default(0).notNull(),
+    status: mysqlEnum('status', ['pending', 'processing', 'completed', 'reversed', 'failed'])
+      .default('completed')
+      .notNull(),
+    importedByUserId: varchar('imported_by_user_id', { length: 64 }),
+    columnMapping: json('column_mapping').$type<Record<string, string>>(),
+    errorLog: json('error_log').$type<Array<{ row: number; reason: string }>>(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_att_import_tenant_comp').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type AttendanceImportBatch = typeof attendanceImportBatches.$inferSelect;
+export type NewAttendanceImportBatch = typeof attendanceImportBatches.$inferInsert;
+
+/**
+ * HRMS Domain: Attendance — Location & Security Settings
+ */
+export const attendanceSecuritySettings = mysqlTable(
+  'attendance_security_settings',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    enableGps: boolean('enable_gps').default(true).notNull(),
+    geofenceConfigs: json('geofence_configs').$type<Array<{
+      locationId: string;
+      name: string;
+      latitude: number;
+      longitude: number;
+      radiusMeters: number;
+      enforceStrict: boolean;
+    }>>(),
+    ipAllowlist: json('ip_allowlist').$type<string[]>(),
+    enforceIpRestriction: boolean('enforce_ip_restriction').default(false).notNull(),
+    maxDevicesPerEmployee: int('max_devices_per_employee').default(2).notNull(),
+    allowSharedKiosk: boolean('allow_shared_kiosk').default(true).notNull(),
+    detectMockLocation: boolean('detect_mock_location').default(true).notNull(),
+    detectImpossibleTravel: boolean('detect_impossible_travel').default(true).notNull(),
+    rapidPunchThrottlingSeconds: int('rapid_punch_throttling_seconds').default(60).notNull(),
+    flagVpnProxy: boolean('flag_vpn_proxy').default(true).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_att_sec_settings_company').on(table.companyId),
+    index('idx_att_sec_settings_tenant_comp').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type AttendanceSecuritySettings = typeof attendanceSecuritySettings.$inferSelect;
+export type NewAttendanceSecuritySettings = typeof attendanceSecuritySettings.$inferInsert;
+
+/**
+ * HRMS Domain: Attendance — Payroll Integration & Period Locking Settings
+ */
+export const attendancePayrollSettings = mysqlTable(
+  'attendance_payroll_settings',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    cycleType: mysqlEnum('cycle_type', ['calendar_month', 'custom_cutoff'])
+      .default('calendar_month')
+      .notNull(),
+    cutoffDay: int('cutoff_day').default(30).notNull(),
+    requireApprovalBeforeLock: boolean('require_approval_before_lock').default(true).notNull(),
+    autoLockOnCutoff: boolean('auto_lock_on_cutoff').default(false).notNull(),
+    blockingSeverity: mysqlEnum('blocking_severity', ['hard_block', 'warning_only'])
+      .default('warning_only')
+      .notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_att_pay_settings_company').on(table.companyId),
+    index('idx_att_pay_settings_tenant_comp').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type AttendancePayrollSettings = typeof attendancePayrollSettings.$inferSelect;
+export type NewAttendancePayrollSettings = typeof attendancePayrollSettings.$inferInsert;
+
+/**
+ * HRMS Domain: Attendance — Attendance Cutoff Periods & Lock Registry
+ */
+export const attendancePeriods = mysqlTable(
+  'attendance_periods',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    periodCode: varchar('period_code', { length: 20 }).notNull(),
+    startDate: varchar('start_date', { length: 10 }).notNull(),
+    endDate: varchar('end_date', { length: 10 }).notNull(),
+    status: mysqlEnum('status', ['open', 'locked', 'finalized']).default('open').notNull(),
+    lockedAt: timestamp('locked_at'),
+    lockedByUserId: varchar('locked_by_user_id', { length: 64 }),
+    finalizedAt: timestamp('finalized_at'),
+    finalizedByUserId: varchar('finalized_by_user_id', { length: 64 }),
+    unlockedAt: timestamp('unlocked_at'),
+    unlockedByUserId: varchar('unlocked_by_user_id', { length: 64 }),
+    unlockReason: varchar('unlock_reason', { length: 500 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_att_periods_comp_code').on(table.companyId, table.periodCode),
+    index('idx_att_periods_tenant_comp').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type AttendancePeriod = typeof attendancePeriods.$inferSelect;
+export type NewAttendancePeriod = typeof attendancePeriods.$inferInsert;
+
+/**
+ * HRMS Domain: Attendance — Payroll Handover Export Batches
+ */
+export const attendancePayrollHandoverBatches = mysqlTable(
+  'attendance_payroll_handover_batches',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    periodId: varchar('period_id', { length: 64 })
+      .notNull()
+      .references(() => attendancePeriods.id),
+    batchNumber: varchar('batch_number', { length: 50 }).notNull(),
+    totalEmployees: int('total_employees').default(0).notNull(),
+    totalPayableDays: decimal('total_payable_days', { precision: 8, scale: 2 })
+      .default('0.00')
+      .notNull(),
+    totalDeductionUnits: decimal('total_deduction_units', { precision: 8, scale: 2 })
+      .default('0.00')
+      .notNull(),
+    exportedFormat: mysqlEnum('exported_format', ['csv', 'json', 'api_push'])
+      .default('csv')
+      .notNull(),
+    status: mysqlEnum('status', ['generated', 'transferred', 'reconciled'])
+      .default('generated')
+      .notNull(),
+    generatedByUserId: varchar('generated_by_user_id', { length: 64 }),
+    summarySnapshot: json('summary_snapshot').$type<Record<string, unknown>>(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_att_handover_tenant_comp').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type AttendancePayrollHandoverBatch = typeof attendancePayrollHandoverBatches.$inferSelect;
+export type NewAttendancePayrollHandoverBatch = typeof attendancePayrollHandoverBatches.$inferInsert;
+
+/**
+ * HRMS Domain: Attendance — Configuration & Operational Audit Logs
+ */
+export const attendanceSettingsAuditLogs = mysqlTable(
+  'attendance_settings_audit_logs',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    category: mysqlEnum('category', [
+      'general',
+      'policy',
+      'regularization',
+      'capture_device',
+      'location_security',
+      'payroll_locking',
+    ]).notNull(),
+    action: varchar('action', { length: 50 }).notNull(),
+    entityId: varchar('entity_id', { length: 64 }),
+    entityType: varchar('entity_type', { length: 50 }),
+    previousValues: json('previous_values').$type<Record<string, unknown>>(),
+    newValues: json('new_values').$type<Record<string, unknown>>(),
+    changedByUserId: varchar('changed_by_user_id', { length: 64 }),
+    clientIp: varchar('client_ip', { length: 45 }),
+    userAgent: varchar('user_agent', { length: 255 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_att_audit_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_att_audit_cat').on(table.category),
+    index('idx_att_audit_created').on(table.createdAt),
+  ],
+);
+
+export type AttendanceSettingsAuditLog = typeof attendanceSettingsAuditLogs.$inferSelect;
+export type NewAttendanceSettingsAuditLog = typeof attendanceSettingsAuditLogs.$inferInsert;
 
 /**
  * HRMS Domain: Employee Self-Service (ESS) — Leave Balances
@@ -2210,3 +3256,267 @@ export const employeeNotifications = mysqlTable(
 
 export type EmployeeNotification = typeof employeeNotifications.$inferSelect;
 export type NewEmployeeNotification = typeof employeeNotifications.$inferInsert;
+
+/**
+ * HRMS Domain: Attendance — Monthly Summary V1.0
+ */
+export const attendanceMonthlySummaries = mysqlTable(
+  'attendance_monthly_summaries',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    employeeId: varchar('employee_id', { length: 64 })
+      .notNull()
+      .references(() => employees.id),
+    month: varchar('month', { length: 7 }).notNull(), // 'YYYY-MM'
+    timezone: varchar('timezone', { length: 50 }).notNull().default('UTC'),
+    scheduledDays: int('scheduled_days').notNull().default(0),
+    scheduledMinutes: int('scheduled_minutes').notNull().default(0),
+    presentDays: decimal('present_days', { precision: 4, scale: 2 }).notNull().default('0.00'),
+    absentDays: decimal('absent_days', { precision: 4, scale: 2 }).notNull().default('0.00'),
+    leaveDays: decimal('leave_days', { precision: 4, scale: 2 }).notNull().default('0.00'),
+    onDutyDays: decimal('on_duty_days', { precision: 4, scale: 2 }).notNull().default('0.00'),
+    weeklyOffDays: int('weekly_off_days').notNull().default(0),
+    holidayDays: int('holiday_days').notNull().default(0),
+    actualWorkedMinutes: int('actual_worked_minutes').notNull().default(0),
+    policyCreditedMinutes: int('policy_credited_minutes').notNull().default(0),
+    lateOccurrences: int('late_occurrences').notNull().default(0),
+    lateMinutes: int('late_minutes').notNull().default(0),
+    earlyExitOccurrences: int('early_exit_occurrences').notNull().default(0),
+    earlyExitMinutes: int('early_exit_minutes').notNull().default(0),
+    unresolvedExceptions: int('unresolved_exceptions').notNull().default(0),
+    pendingCorrections: int('pending_corrections').notNull().default(0),
+    processingIssues: int('processing_issues').notNull().default(0),
+    calculationState: mysqlEnum('calculation_state', ['pending', 'calculated', 'stale', 'error'])
+      .notNull()
+      .default('calculated'),
+    reviewState: mysqlEnum('review_state', [
+      'not_reviewed',
+      'in_review',
+      'needs_correction',
+      'reviewed',
+      'reopened',
+    ])
+      .notNull()
+      .default('not_reviewed'),
+    payrollReadiness: mysqlEnum('payroll_readiness', [
+      'calculating',
+      'ready',
+      'needs_review',
+      'blocked',
+    ])
+      .notNull()
+      .default('needs_review'),
+    isLocked: boolean('is_locked').notNull().default(false),
+    periodLockId: varchar('period_lock_id', { length: 64 }),
+    version: int('version').notNull().default(1),
+    sourceFingerprint: varchar('source_fingerprint', { length: 64 }).notNull().default(''),
+    assignedReviewerId: varchar('assigned_reviewer_id', { length: 64 }),
+    assignedAt: timestamp('assigned_at'),
+    reviewedByUserId: varchar('reviewed_by_user_id', { length: 64 }),
+    reviewedAt: timestamp('reviewed_at'),
+    reviewedVersion: int('reviewed_version'),
+    reviewNotes: text('review_notes'),
+    correctionRequestNotes: text('correction_request_notes'),
+    reopenReason: text('reopen_reason'),
+    lastCalculatedAt: timestamp('last_calculated_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_att_ms_unique').on(table.companyId, table.employeeId, table.month),
+    index('idx_att_ms_tenant_comp_month').on(table.tenantId, table.companyId, table.month),
+    index('idx_att_ms_emp_month').on(table.employeeId, table.month),
+    index('idx_att_ms_readiness').on(
+      table.tenantId,
+      table.companyId,
+      table.month,
+      table.payrollReadiness,
+    ),
+    index('idx_att_ms_review').on(
+      table.tenantId,
+      table.companyId,
+      table.month,
+      table.reviewState,
+    ),
+  ],
+);
+
+export type AttendanceMonthlySummary = typeof attendanceMonthlySummaries.$inferSelect;
+export type NewAttendanceMonthlySummary = typeof attendanceMonthlySummaries.$inferInsert;
+
+export const attendanceMonthlyReviews = mysqlTable(
+  'attendance_monthly_reviews',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 }).notNull(),
+    monthlySummaryId: varchar('monthly_summary_id', { length: 64 })
+      .notNull()
+      .references(() => attendanceMonthlySummaries.id, { onDelete: 'cascade' }),
+    reviewerUserId: varchar('reviewer_user_id', { length: 64 }).notNull(),
+    reviewStatus: mysqlEnum('review_status', [
+      'in_review',
+      'needs_correction',
+      'reviewed',
+      'reopened',
+    ]).notNull(),
+    reviewedSummaryVersion: int('reviewed_summary_version').notNull(),
+    reviewNotes: text('review_notes'),
+    reopenReason: text('reopen_reason'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_att_mr_summary').on(table.monthlySummaryId),
+    index('idx_att_mr_tenant_comp').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type AttendanceMonthlyReview = typeof attendanceMonthlyReviews.$inferSelect;
+export type NewAttendanceMonthlyReview = typeof attendanceMonthlyReviews.$inferInsert;
+
+export const attendanceMonthlyReadinessEvaluations = mysqlTable(
+  'attendance_monthly_readiness_evaluations',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 }).notNull(),
+    monthlySummaryId: varchar('monthly_summary_id', { length: 64 })
+      .notNull()
+      .references(() => attendanceMonthlySummaries.id, { onDelete: 'cascade' }),
+    evaluationVersion: int('evaluation_version').notNull(),
+    readinessStatus: mysqlEnum('readiness_status', [
+      'calculating',
+      'ready',
+      'needs_review',
+      'blocked',
+    ]).notNull(),
+    passedChecks: json('passed_checks').$type<
+      Array<{ code: string; name: string; details?: string }>
+    >(),
+    warningChecks: json('warning_checks').$type<
+      Array<{ code: string; name: string; details?: string }>
+    >(),
+    blockingChecks: json('blocking_checks').$type<
+      Array<{ code: string; name: string; details?: string; sourceUrl?: string }>
+    >(),
+    evaluatedAt: timestamp('evaluated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_att_mre_summary').on(table.monthlySummaryId),
+    index('idx_att_mre_tenant_comp').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type AttendanceMonthlyReadinessEvaluation =
+  typeof attendanceMonthlyReadinessEvaluations.$inferSelect;
+export type NewAttendanceMonthlyReadinessEvaluation =
+  typeof attendanceMonthlyReadinessEvaluations.$inferInsert;
+
+export const attendanceMonthlyAudits = mysqlTable(
+  'attendance_monthly_audits',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 }).notNull(),
+    monthlySummaryId: varchar('monthly_summary_id', { length: 64 })
+      .notNull()
+      .references(() => attendanceMonthlySummaries.id, { onDelete: 'cascade' }),
+    action: mysqlEnum('action', [
+      'created',
+      'recalculated',
+      'assigned',
+      'review_started',
+      'correction_requested',
+      'reviewed',
+      'reopened',
+      'locked',
+      'unlocked',
+    ]).notNull(),
+    actorUserId: varchar('actor_user_id', { length: 64 }),
+    oldState: json('old_state').$type<Record<string, unknown>>(),
+    newState: json('new_state').$type<Record<string, unknown>>(),
+    notes: text('notes'),
+    summaryVersion: int('summary_version').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_att_ma_summary').on(table.monthlySummaryId),
+    index('idx_att_ma_tenant_comp').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type AttendanceMonthlyAudit = typeof attendanceMonthlyAudits.$inferSelect;
+export type NewAttendanceMonthlyAudit = typeof attendanceMonthlyAudits.$inferInsert;
+
+/**
+ * HRMS Domain: Attendance — Saved Report Configurations V1.0
+ */
+export const attendanceSavedReports = mysqlTable(
+  'attendance_saved_reports',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    ownerUserId: varchar('owner_user_id', { length: 64 })
+      .notNull()
+      .references(() => users.id),
+    reportId: varchar('report_id', { length: 64 }).notNull(),
+    configurationName: varchar('configuration_name', { length: 150 }).notNull(),
+    filters: json('filters').$type<Record<string, unknown>>(),
+    selectedColumns: json('selected_columns').$type<string[]>(),
+    sorting: json('sorting').$type<{ column: string; direction: 'asc' | 'desc' }>(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_att_sr_tenant_comp_owner').on(table.tenantId, table.companyId, table.ownerUserId),
+    index('idx_att_sr_report').on(table.reportId),
+  ],
+);
+
+export type AttendanceSavedReport = typeof attendanceSavedReports.$inferSelect;
+export type NewAttendanceSavedReport = typeof attendanceSavedReports.$inferInsert;
+
+/**
+ * HRMS Domain: Attendance — Report Generation & Download History V1.0
+ */
+export const attendanceReportGenerations = mysqlTable(
+  'attendance_report_generations',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    actorUserId: varchar('actor_user_id', { length: 64 }).notNull(),
+    reportId: varchar('report_id', { length: 64 }).notNull(),
+    filtersSnapshot: json('filters_snapshot').$type<Record<string, unknown>>(),
+    selectedColumnsSnapshot: json('selected_columns_snapshot').$type<string[]>(),
+    outputFormat: mysqlEnum('output_format', ['csv', 'xlsx', 'pdf']).notNull(),
+    generationStatus: mysqlEnum('generation_status', ['pending', 'completed', 'failed'])
+      .notNull()
+      .default('completed'),
+    generatedAt: timestamp('generated_at').defaultNow().notNull(),
+    reportingCutoff: varchar('reporting_cutoff', { length: 50 }),
+    rowCount: int('row_count').notNull().default(0),
+    fileReference: varchar('file_reference', { length: 255 }),
+    expirationAt: timestamp('expiration_at'),
+    errorMetadata: json('error_metadata').$type<Record<string, unknown>>(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_att_rg_tenant_comp_actor').on(table.tenantId, table.companyId, table.actorUserId),
+    index('idx_att_rg_report').on(table.reportId),
+    index('idx_att_rg_created').on(table.createdAt),
+  ],
+);
+
+export type AttendanceReportGeneration = typeof attendanceReportGenerations.$inferSelect;
+export type NewAttendanceReportGeneration = typeof attendanceReportGenerations.$inferInsert;
+
