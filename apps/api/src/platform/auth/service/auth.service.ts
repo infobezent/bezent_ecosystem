@@ -5,7 +5,11 @@ import {
   AccessResolverService,
 } from '../../access/service/accessResolver.service.js';
 import { generateSessionToken, isWellFormedSessionToken } from '../security.js';
-import { UnauthorizedError, ForbiddenError } from '../../../app/errors/AppError.js';
+import {
+  UnauthorizedError,
+  ForbiddenError,
+  SessionCreationError,
+} from '../../../app/errors/AppError.js';
 import type { AuthenticatedUser, LoginResult } from '../types/auth.types.js';
 import type { User } from '../../../db/schema.js';
 
@@ -52,7 +56,15 @@ export class AuthService {
       metadata: { method: 'email_otp' },
     });
 
-    const access = await this.access.resolveOverview(authenticatedUser);
+    let access;
+    try {
+      access = await this.access.resolveOverview(authenticatedUser);
+    } catch (err) {
+      console.error('[auth] Failed to initialize session and resolve access overview:', err);
+      throw new SessionCreationError(
+        'Unable to initialize user workspace session. Please try again shortly or contact your administrator.',
+      );
+    }
 
     // Landing destination follows the workspaces the user's effective
     // permissions actually grant, never a role name.

@@ -66,3 +66,13 @@ export class ForbiddenError extends AppError {
     this.name = 'ForbiddenError';
   }
 }
+
+export class SessionCreationError extends AppError {
+  constructor(
+    message = 'Failed to create authenticated session',
+    code = 'SESSION_CREATION_FAILED',
+  ) {
+    super(message, 500, code);
+    this.name = 'SessionCreationError';
+  }
+}

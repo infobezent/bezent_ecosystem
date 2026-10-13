@@ -68,6 +68,18 @@ export function errorHandler(
     return;
   }
 
+  // Handle database execution/schema errors (e.g., ER_BAD_FIELD_ERROR) without leaking SQL details
+  if (errorCode !== undefined && errorCode.startsWith('ER_')) {
+    console.error('[errorHandler] Database execution error:', err);
+    res.status(500).json({
+      error: {
+        code: 'DATABASE_ERROR',
+        message: 'Database service encountered an error while processing the request',
+      },
+    });
+    return;
+  }
+
   const isAppError = err instanceof AppError;
   const statusCode = isAppError ? err.statusCode : 500;
   const code = isAppError ? err.code : 'INTERNAL_ERROR';
@@ -81,7 +93,8 @@ export function errorHandler(
     body.error.details = err.details;
   }
 
-  if (env.nodeEnv !== 'production' && err instanceof Error) {
+  // Never expose stack traces outside development (UAT, staging, production)
+  if (env.nodeEnv === 'development' && err instanceof Error) {
     body.error.stack = err.stack;
   }
 

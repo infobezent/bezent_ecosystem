@@ -117,7 +117,7 @@ export class OtpAuthService {
           'If you did not try to sign in, you can ignore this email.',
       });
 
-      if (env.nodeEnv !== 'production' && env.email.transport === 'outbox') {
+      if (env.nodeEnv === 'development' && env.email.transport === 'outbox') {
         console.log(
           `[auth:dev] Sign-in OTP\nEmail: ${user.email}\nOTP: ${code}\nExpires in: ${OTP_TTL_MINUTES} minutes`,
         );
@@ -168,10 +168,12 @@ export class OtpAuthService {
       timingSafeEqualHex(digestOtpCode(OTP_SECRET, challenge.id, code), challenge.codeDigest);
 
     // Temporary non-production UAT-only fixed OTP mechanism:
-    // Only active if NODE_ENV is NOT production, UAT_FIXED_OTP is configured,
-    // challenge belongs to an eligible user (userId != null), and code matches.
+    // Only active if NODE_ENV is NOT production, explicit UAT feature flag ENABLE_UAT_FIXED_OTP is enabled,
+    // UAT_FIXED_OTP is configured, challenge belongs to an eligible active user (userId != null),
+    // and code matches.
     const isUatFixedMatch =
       env.nodeEnv !== 'production' &&
+      env.enableUatFixedOtp &&
       typeof env.uatFixedOtp === 'string' &&
       env.uatFixedOtp.length > 0 &&
       challenge.userId !== null &&
