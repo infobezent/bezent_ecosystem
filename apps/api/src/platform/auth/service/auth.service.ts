@@ -5,7 +5,11 @@ import {
   AccessResolverService,
 } from '../../access/service/accessResolver.service.js';
 import { generateSessionToken, isWellFormedSessionToken } from '../security.js';
-import { UnauthorizedError, ForbiddenError, SessionCreationError } from '../../../app/errors/AppError.js';
+import {
+  UnauthorizedError,
+  ForbiddenError,
+  SessionCreationError,
+} from '../../../app/errors/AppError.js';
 import type { AuthenticatedUser, LoginResult } from '../types/auth.types.js';
 import type { User } from '../../../db/schema.js';
 

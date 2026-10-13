@@ -53,15 +53,18 @@ function describe(err: unknown): { message: string; codeLocked?: boolean } {
       case 'DATABASE_UNAVAILABLE':
       case 'DATABASE_ERROR':
         return {
-          message: 'Unable to connect to BEZENT services. Please check your connection or try again shortly.',
+          message:
+            'Unable to connect to BEZENT services. Please check your connection or try again shortly.',
         };
       case 'SESSION_CREATION_FAILED':
         return {
-          message: 'Your code was verified, but we were unable to open your workspace session. Please try again shortly or contact your administrator.',
+          message:
+            'Your code was verified, but we were unable to open your workspace session. Please try again shortly or contact your administrator.',
         };
       case 'INTERNAL_ERROR':
         return {
-          message: 'An unexpected server error occurred while signing in. Please try again shortly.',
+          message:
+            'An unexpected server error occurred while signing in. Please try again shortly.',
         };
       default:
         return { message: err.message || 'Something went wrong. Please try again.' };
