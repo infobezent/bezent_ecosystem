@@ -10,6 +10,7 @@ import {
   attendanceExceptions,
   attendanceRegularizations,
   attendanceMonthlySummaries,
+  attendanceOvertimeRequests,
 } from '../../../../db/schema.js';
 import { attendanceSettingsService } from './attendanceSettings.service.js';
 import { getDayOfWeekName } from './attendanceCalculation.service.js';
@@ -1061,6 +1062,32 @@ export class AttendanceOverviewService {
       oldestPendingAgeDays: null,
       targetRoute: '/hrms/attendance/monthly-summary',
       filterParams: { month: currentMonth, readiness: 'blocked' },
+      lastUpdated: new Date().toISOString(),
+    });
+
+    // 7. Pending Overtime Claims
+    const otConditions = [
+      eq(attendanceOvertimeRequests.tenantId, tenantId),
+      eq(attendanceOvertimeRequests.companyId, companyId),
+      inArray(attendanceOvertimeRequests.status, ['submitted', 'pending_approval']),
+    ];
+    if (scopedEmployeeIds && scopedEmployeeIds.length > 0) {
+      otConditions.push(inArray(attendanceOvertimeRequests.employeeId, scopedEmployeeIds));
+    }
+    const pendingOtRequests = await db
+      .select({ id: attendanceOvertimeRequests.id })
+      .from(attendanceOvertimeRequests)
+      .where(and(...otConditions));
+
+    queue.push({
+      actionType: 'pending_overtime_claims',
+      title: 'Pending Overtime Claims',
+      description: 'Employee overtime claims awaiting manager review and policy verification',
+      authorizedPendingCount: pendingOtRequests.length,
+      severity: pendingOtRequests.length > 0 ? 'warning' : 'info',
+      oldestPendingAgeDays: null,
+      targetRoute: '/hrms/attendance/overtime',
+      filterParams: { status: 'submitted' },
       lastUpdated: new Date().toISOString(),
     });
 

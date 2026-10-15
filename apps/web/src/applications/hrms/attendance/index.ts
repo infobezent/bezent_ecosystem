@@ -1,5 +1,7 @@
 export * from './types/attendance.types';
 export * from './api/attendanceApi';
+export * from './api/attendanceOvertimeApi';
+export * from './api/attendanceCompOffApi';
 export * from './pages/AttendanceOverviewPage';
 export * from './pages/DailyAttendanceLogPage';
 export * from './pages/MonthlyAttendanceSummaryPage';
@@ -8,3 +10,5 @@ export * from './pages/AttendanceRegularizationPage';
 export * from './pages/AttendanceExceptionsPage';
 export * from './pages/AttendanceReportsPage';
 export * from './pages/AttendanceOnDutyPage';
+export * from './pages/AttendanceOvertimePage';
+export * from './pages/AttendanceCompOffPage';

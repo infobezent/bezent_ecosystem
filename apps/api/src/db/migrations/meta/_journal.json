@@ -281,6 +281,20 @@
       "when": 1791900000000,
       "tag": "0039_attendance_reports_v1",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "5",
+      "when": 1791950000000,
+      "tag": "0040_attendance_overtime_v1",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "5",
+      "when": 1792000000000,
+      "tag": "0041_attendance_comp_off_v1",
+      "breakpoints": true
     }
   ]
 }
