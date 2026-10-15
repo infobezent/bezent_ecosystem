@@ -148,4 +148,3 @@ export const authApi = {
     return call('/auth/logout', { method: 'POST' });
   },
 };
-

@@ -17,4 +17,3 @@ authRouter.post('/auth/login', passwordLoginRateLimiter, authController.login);
 
 authRouter.post('/auth/logout', requirePlatformAuth, authController.logout);
 authRouter.get('/auth/me', requirePlatformAuth, authController.me);
-

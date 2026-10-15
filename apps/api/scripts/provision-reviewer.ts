@@ -1,12 +1,6 @@
 import crypto from 'node:crypto';
 import { getDb, isDatabaseConfigured, closePool } from '../src/db/connection.js';
-import {
-  users,
-  memberships,
-  roleAssignments,
-  tenants,
-  companies,
-} from '../src/db/schema.js';
+import { users, memberships, roleAssignments, tenants, companies } from '../src/db/schema.js';
 import { eq, and } from 'drizzle-orm';
 import { hashPassword, generateSurrogateId } from '../src/platform/auth/security.js';
 import { getDeploymentEnv } from '../src/app/config/env.js';
@@ -51,7 +45,7 @@ function parseArgs(): ProvisionOptions {
     email: options.email.trim().toLowerCase(),
     role,
     firstName: options.firstName ?? 'Reviewer',
-    lastName: options.lastName ?? (role.replace('_', ' ').toUpperCase()),
+    lastName: options.lastName ?? role.replace('_', ' ').toUpperCase(),
     tenantId: options.tenantId ?? 'tenant_demo_01',
     companyId: options.companyId ?? 'comp_demo_01',
   };
@@ -60,12 +54,16 @@ function parseArgs(): ProvisionOptions {
 async function main() {
   const deploymentEnv = getDeploymentEnv();
   if (deploymentEnv === 'production' || deploymentEnv === 'prod') {
-    console.error('[Safety Blocker] Cannot run reviewer provisioning script directly in production deployment.');
+    console.error(
+      '[Safety Blocker] Cannot run reviewer provisioning script directly in production deployment.',
+    );
     process.exit(1);
   }
 
   if (!isDatabaseConfigured) {
-    console.error('[Error] Database is not configured. Set DATABASE_URL or DB_* environment variables.');
+    console.error(
+      '[Error] Database is not configured. Set DATABASE_URL or DB_* environment variables.',
+    );
     process.exit(1);
   }
 
@@ -82,7 +80,9 @@ async function main() {
   const [company] = await db.select().from(companies).where(eq(companies.id, opts.companyId!));
 
   if (!tenant || !company) {
-    console.error(`[Error] Target tenant (${opts.tenantId}) or company (${opts.companyId}) not found in database.`);
+    console.error(
+      `[Error] Target tenant (${opts.tenantId}) or company (${opts.companyId}) not found in database.`,
+    );
     console.error('Please ensure the database is seeded first (npm run db:seed).');
     await closePool();
     process.exit(1);

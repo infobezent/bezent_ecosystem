@@ -53,4 +53,3 @@ export function validatePasswordLoginPayload(body: unknown): { email: string; pa
   }
   return { email: (email as string).trim().toLowerCase(), password: password as string };
 }
-

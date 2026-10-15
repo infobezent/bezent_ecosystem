@@ -56,7 +56,8 @@ function describe(err: unknown): { message: string; codeLocked?: boolean } {
         };
       case 'PASSWORD_LOGIN_DISABLED':
         return {
-          message: 'Password sign-in is not available in this environment. Please use a one-time code.',
+          message:
+            'Password sign-in is not available in this environment. Please use a one-time code.',
         };
       case 'UNAUTHORIZED':
         return {
@@ -411,13 +412,7 @@ export function LoginPage() {
                     disabled={busy}
                     required
                   />
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    size="lg"
-                    loading={busy}
-                    disabled={busy}
-                  >
+                  <Button type="submit" variant="primary" size="lg" loading={busy} disabled={busy}>
                     Sign in with password
                   </Button>
                 </Stack>

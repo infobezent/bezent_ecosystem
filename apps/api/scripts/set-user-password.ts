@@ -80,7 +80,9 @@ async function main() {
   const dbHost = (env.db.host || '').toLowerCase();
   const isLocalHost = dbHost === 'localhost' || dbHost === '127.0.0.1' || dbHost === '';
   if (!isLocalHost) {
-    console.error('[Safety Blocker] Database host is not local. Operation aborted to protect external environments.');
+    console.error(
+      '[Safety Blocker] Database host is not local. Operation aborted to protect external environments.',
+    );
     process.exit(1);
   }
 
@@ -95,14 +97,20 @@ async function main() {
   const [existingUser] = await db.select().from(users).where(eq(users.email, targetEmail));
   if (!existingUser) {
     console.error(`[Error] User with email '${targetEmail}' does not exist.`);
-    console.error('This script only updates passwords for existing accounts to prevent duplicate or orphaned users.');
+    console.error(
+      'This script only updates passwords for existing accounts to prevent duplicate or orphaned users.',
+    );
     await closePool();
     process.exit(1);
   }
 
   console.log(`\n=== BEZENT Local Password Setup ===`);
-  console.log(`Target Account: ${existingUser.firstName} ${existingUser.lastName} <${existingUser.email}> (ID: ${existingUser.id})`);
-  console.log(`Environment:    ${deploymentEnv} (Local MySQL: ${env.db.host}:${env.db.port} / ${env.db.name})`);
+  console.log(
+    `Target Account: ${existingUser.firstName} ${existingUser.lastName} <${existingUser.email}> (ID: ${existingUser.id})`,
+  );
+  console.log(
+    `Environment:    ${deploymentEnv} (Local MySQL: ${env.db.host}:${env.db.port} / ${env.db.name})`,
+  );
   console.log(`Safety:         Only passwordHash and salt will be modified.`);
   console.log(`                Memberships, roles, and tenant bindings will be preserved.\n`);
 

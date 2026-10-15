@@ -36,8 +36,7 @@ export function createApp(options?: AppOptions): Express {
   const app = express();
 
   // Narrow proxy trust configuration (defaults to false / fail-closed)
-  const trustProxyConfig =
-    options?.trustProxy !== undefined ? options.trustProxy : env.trustProxy;
+  const trustProxyConfig = options?.trustProxy !== undefined ? options.trustProxy : env.trustProxy;
   app.set('trust proxy', trustProxyConfig);
 
   const allowedOrigins = new Set<string>(
