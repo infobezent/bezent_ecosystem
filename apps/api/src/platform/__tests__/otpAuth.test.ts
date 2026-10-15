@@ -506,13 +506,24 @@ describe.skipIf(!isDatabaseConfigured)('Email OTP authentication (ADR-018)', () 
     });
 
     it('assertProductionAuthConfig throws if fixed OTP flags are configured in production', () => {
+      const origDepEnv = process.env.BEZENT_DEPLOYMENT_ENV;
+      const origNodeEnv = process.env.NODE_ENV;
+      const origReviewAuth = process.env.ENABLE_REVIEW_PASSWORD_AUTH;
+      delete process.env.BEZENT_DEPLOYMENT_ENV;
+      delete process.env.ENABLE_REVIEW_PASSWORD_AUTH;
       process.env.NODE_ENV = 'production';
       process.env.ENABLE_UAT_FIXED_OTP = 'true';
       process.env.UAT_FIXED_OTP = '123456';
 
-      expect(() => assertProductionAuthConfig()).toThrow(
-        'Fixed OTP feature flags cannot be configured in production environment',
-      );
+      try {
+        expect(() => assertProductionAuthConfig()).toThrow(
+          'Fixed OTP feature flags cannot be configured in production environment',
+        );
+      } finally {
+        if (origDepEnv) process.env.BEZENT_DEPLOYMENT_ENV = origDepEnv;
+        if (origNodeEnv) process.env.NODE_ENV = origNodeEnv;
+        if (origReviewAuth) process.env.ENABLE_REVIEW_PASSWORD_AUTH = origReviewAuth;
+      }
     });
 
     it('normal generated OTP still works', async () => {
@@ -552,12 +563,19 @@ describe.skipIf(!isDatabaseConfigured)('Email OTP authentication (ADR-018)', () 
   });
 
   describe('Retired and sensitive paths', () => {
-    it('answers password sign-in with 410 for every account', async () => {
-      const res = await request(app)
-        .post('/api/v1/platform/auth/login')
-        .send({ email: email(USERS.superAdmin), password: 'anything' });
-      expect(res.status).toBe(410);
-      expect(res.body.error.code).toBe('PASSWORD_LOGIN_DISABLED');
+    it('answers password sign-in with 410 for every account when password auth is disabled', async () => {
+      const origFlag = process.env.ENABLE_REVIEW_PASSWORD_AUTH;
+      delete process.env.ENABLE_REVIEW_PASSWORD_AUTH;
+
+      try {
+        const res = await request(app)
+          .post('/api/v1/platform/auth/login')
+          .send({ email: email(USERS.superAdmin), password: 'anything' });
+        expect(res.status).toBe(410);
+        expect(res.body.error.code).toBe('PASSWORD_LOGIN_DISABLED');
+      } finally {
+        if (origFlag) process.env.ENABLE_REVIEW_PASSWORD_AUTH = origFlag;
+      }
     });
 
     it('never records codes in the audit trail', async () => {
