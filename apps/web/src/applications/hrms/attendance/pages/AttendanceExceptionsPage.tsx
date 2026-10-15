@@ -926,6 +926,7 @@ export function AttendanceExceptionsPage() {
             <Alert variant="danger">{error}</Alert>
           ) : items.length === 0 ? (
             <EmptyState
+              variant="attendance"
               title="No Exception Cases Found"
               description="There are currently no attendance anomalies or exceptions matching your filter criteria."
               primaryAction={{

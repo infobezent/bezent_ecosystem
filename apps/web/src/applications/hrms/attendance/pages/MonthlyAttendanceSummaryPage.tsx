@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Page,
   PageHeader,
@@ -72,8 +71,6 @@ function formatDateTime(val?: string | Date | null): string {
 }
 
 export function MonthlyAttendanceSummaryPage() {
-  const navigate = useNavigate();
-
   // Navigation & Primary Filter State
   const [selectedMonth, setSelectedMonth] = useState<string>(getCurrentMonthString());
   const [search, setSearch] = useState<string>('');
@@ -469,8 +466,8 @@ export function MonthlyAttendanceSummaryPage() {
         <Card padding="sm">
           <Inline justify="between" align="center">
             <Inline gap="sm" align="center">
-              <Button variant="secondary" onClick={handlePrevMonth}>
-                <BezentIcon name="chevron-left" size={16} /> Prev Month
+              <Button variant="secondary" size="control" onClick={handlePrevMonth}>
+                <BezentIcon name="chevronLeft" size={16} /> Prev Month
               </Button>
               <Input
                 type="month"
@@ -480,11 +477,12 @@ export function MonthlyAttendanceSummaryPage() {
                   setPage(1);
                 }}
               />
-              <Button variant="secondary" onClick={handleNextMonth}>
-                Next Month <BezentIcon name="chevron-right" size={16} />
+              <Button variant="secondary" size="control" onClick={handleNextMonth}>
+                Next Month <BezentIcon name="chevronRight" size={16} />
               </Button>
               <Button
                 variant="ghost"
+                size="control"
                 onClick={() => {
                   setSelectedMonth(getCurrentMonthString());
                   setPage(1);
@@ -501,90 +499,91 @@ export function MonthlyAttendanceSummaryPage() {
         </Card>
 
         {/* Six Summary Counters */}
-        <Grid columns={6} gap="md">
-          <Card
-            padding="sm"
+        {/* Six Summary Counters Strip */}
+        <Grid columns={6} gap="sm">
+          <div
+            className={`bezent-stat-card ${activeCounter === 'all' ? 'is-active' : ''}`}
             onClick={() => {
               setActiveCounter(activeCounter === 'all' ? null : 'all');
               setPage(1);
             }}
+            role="button"
+            tabIndex={0}
+            title="Total scheduled workforce in monthly cycle"
           >
-            <Stack gap="xs">
-              <span className="bezent-card__desc">Total Employees</span>
-              <strong>{counters.totalEmployees}</strong>
-              <Badge variant="neutral">Workforce</Badge>
-            </Stack>
-          </Card>
+            <span className="bezent-stat-card__label">Total Employees</span>
+            <span className="bezent-stat-card__val">{counters.totalEmployees}</span>
+          </div>
 
-          <Card
-            padding="sm"
+          <div
+            className={`bezent-stat-card ${activeCounter === 'ready' ? 'is-active' : ''}`}
             onClick={() => {
               setActiveCounter(activeCounter === 'ready' ? null : 'ready');
               setPage(1);
             }}
+            role="button"
+            tabIndex={0}
+            title="Employees ready for payroll handoff"
           >
-            <Stack gap="xs">
-              <span className="bezent-card__desc">Ready for Payroll</span>
-              <strong>{counters.readyForPayroll}</strong>
-              <Badge variant="success">Eligible Handoff</Badge>
-            </Stack>
-          </Card>
+            <span className="bezent-stat-card__label">Ready for Payroll</span>
+            <span className="bezent-stat-card__val">{counters.readyForPayroll}</span>
+          </div>
 
-          <Card
-            padding="sm"
+          <div
+            className={`bezent-stat-card ${activeCounter === 'needs_review' ? 'is-active' : ''}`}
             onClick={() => {
               setActiveCounter(activeCounter === 'needs_review' ? null : 'needs_review');
               setPage(1);
             }}
+            role="button"
+            tabIndex={0}
+            title="Records awaiting supervisor or HR sign-off"
           >
-            <Stack gap="xs">
-              <span className="bezent-card__desc">Needs Review</span>
-              <strong>{counters.needsReview}</strong>
-              <Badge variant="warning">Awaiting HR Sign-off</Badge>
-            </Stack>
-          </Card>
+            <span className="bezent-stat-card__label">Needs Review</span>
+            <span className="bezent-stat-card__val">{counters.needsReview}</span>
+          </div>
 
-          <Card
-            padding="sm"
+          <div
+            className={`bezent-stat-card ${activeCounter === 'issues' ? 'is-active' : ''}`}
             onClick={() => {
               setActiveCounter(activeCounter === 'issues' ? null : 'issues');
               setPage(1);
             }}
+            role="button"
+            tabIndex={0}
+            title="Blocking errors and processing discrepancies"
           >
-            <Stack gap="xs">
-              <span className="bezent-card__desc">Processing Issues</span>
-              <strong>{counters.processingIssues}</strong>
-              <Badge variant="danger">Blocking Errors</Badge>
-            </Stack>
-          </Card>
+            <span className="bezent-stat-card__label">Processing Issues</span>
+            <span className="bezent-stat-card__val">{counters.processingIssues}</span>
+          </div>
 
-          <Card
-            padding="sm"
+          <div
+            className={`bezent-stat-card ${activeCounter === 'locked' ? 'is-active' : ''}`}
             onClick={() => {
               setActiveCounter(activeCounter === 'locked' ? null : 'locked');
               setPage(1);
             }}
+            role="button"
+            tabIndex={0}
+            title="Finalized and locked attendance records"
           >
-            <Stack gap="xs">
-              <span className="bezent-card__desc">Period Locked</span>
-              <strong>{counters.locked}</strong>
-              <Badge variant="neutral">Frozen Records</Badge>
-            </Stack>
-          </Card>
+            <span className="bezent-stat-card__label">Period Locked</span>
+            <span className="bezent-stat-card__val">{counters.locked}</span>
+          </div>
 
-          <Card
-            padding="sm"
+          <div
+            className={`bezent-stat-card ${activeCounter === 'corrections' ? 'is-active' : ''}`}
             onClick={() => {
               setActiveCounter(activeCounter === 'corrections' ? null : 'corrections');
               setPage(1);
             }}
+            role="button"
+            tabIndex={0}
+            title="In-flight regularization and correction requests"
           >
-            <Stack gap="xs">
-              <span className="bezent-card__desc">Pending Corrections</span>
-              <strong>{counters.pendingCorrections}</strong>
-              <Badge variant="info">In Flight</Badge>
-            </Stack>
-          </Card>
+            <span className="bezent-stat-card__label">Pending Corrections</span>
+            <span className="bezent-stat-card__val">{counters.pendingCorrections}</span>
+          </div>
         </Grid>
 
         {/* Primary and Advanced Filters */}
@@ -738,6 +737,7 @@ export function MonthlyAttendanceSummaryPage() {
           </Alert>
         ) : rows.length === 0 ? (
           <EmptyState
+            variant="attendance"
             title="No Monthly Summaries Found"
             description="No employee attendance records match the current filters for this period."
           />
@@ -779,36 +779,37 @@ export function MonthlyAttendanceSummaryPage() {
 
                     {/* 1. Employee */}
                     <TableCell>
-                      <Inline gap="xs" align="center">
+                      <div className="bezent-table-cell--avatar-meta">
                         <Avatar
                           initials={
                             row.employeeName ? row.employeeName.slice(0, 2).toUpperCase() : 'EM'
                           }
                           alt={row.employeeName}
+                          size="sm"
                         />
-                        <Stack gap="none">
+                        <div className="bezent-table-meta-group">
                           <button
                             type="button"
-                            className="bezent-button--ghost"
-                            onClick={() =>
-                              navigate(`/hrms/administration/employees/${row.employeeId}`)
-                            }
+                            className="bezent-table-meta-title"
+                            onClick={() => handleOpenDrawer(row)}
                           >
-                            <strong>{row.employeeName}</strong>
+                            {row.employeeName}
                           </button>
-                          <span className="bezent-card__desc">
+                          <span className="bezent-table-meta-subtitle">
                             {row.employeeCode} • {row.departmentName}
                           </span>
-                        </Stack>
-                      </Inline>
+                        </div>
+                      </div>
                     </TableCell>
 
                     {/* 2. Scheduled Days */}
                     <TableCell>
-                      <strong>{row.scheduledDays}d</strong>
-                      <span className="bezent-card__desc">
-                        {Math.round(row.scheduledMinutes / 60)}h
-                      </span>
+                      <Stack gap="none">
+                        <strong>{row.scheduledDays}d</strong>
+                        <span className="bezent-table-meta-subtitle">
+                          {Math.round(row.scheduledMinutes / 60)}h
+                        </span>
+                      </Stack>
                     </TableCell>
 
                     {/* 3. Present */}
@@ -852,10 +853,12 @@ export function MonthlyAttendanceSummaryPage() {
 
                     {/* 8. Worked / Credited Hours */}
                     <TableCell>
-                      <strong>{row.actualWorkedHours}h</strong>
-                      <span className="bezent-card__desc">
-                        Credited: {row.policyCreditedHours}h
-                      </span>
+                      <Stack gap="none">
+                        <strong>{row.actualWorkedHours}h</strong>
+                        <span className="bezent-table-meta-subtitle">
+                          Credited: {row.policyCreditedHours}h
+                        </span>
+                      </Stack>
                     </TableCell>
 
                     {/* 9. Late / Early */}

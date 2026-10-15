@@ -173,24 +173,9 @@
   opacity: 1;
 }
 
-/* High-contrast indicator bar: moved to ::after so ::before stays as the
-   selection/hover pill. The pill is suppressed on current-page items since
-   selection is owned by the More button in that state. */
+/* When More launcher takes active rail focus, current-page item suppresses the selection pill */
 .left-sidebar__item.is-current-page::before {
   background: transparent !important;
-}
-
-.left-sidebar__item.is-current-page::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 22px;
-  border-radius: 0 3px 3px 0;
-  background: var(--nav-icon-active);
-  opacity: 1;
 }
 
 .left-sidebar__more-dot {

@@ -826,6 +826,7 @@ export function PunchLogsPage() {
           </Alert>
         ) : items.length === 0 ? (
           <EmptyState
+            variant="attendance"
             title="No Punch Events"
             description="No attendance punch logs found matching your filter criteria."
           />
