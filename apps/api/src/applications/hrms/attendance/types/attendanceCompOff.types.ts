@@ -37,19 +37,10 @@ export type {
   NewAttendanceCompOffAudit,
 };
 
-export type CompOffRoundingRule =
-  | 'exact'
-  | 'round_down_half_day'
-  | 'round_nearest_half_day';
+export type CompOffRoundingRule = 'exact' | 'round_down_half_day' | 'round_nearest_half_day';
 
 export type CompOffRequestStatus =
-  | 'draft'
-  | 'submitted'
-  | 'pending_approval'
-  | 'approved'
-  | 'rejected'
-  | 'withdrawn'
-  | 'cancelled';
+  'draft' | 'submitted' | 'pending_approval' | 'approved' | 'rejected' | 'withdrawn' | 'cancelled';
 
 export type CompOffEntitlementStatus =
   | 'active'
@@ -61,12 +52,7 @@ export type CompOffEntitlementStatus =
   | 'reversed';
 
 export type CompOffHandoffStatus =
-  | 'pending_handoff'
-  | 'acknowledged'
-  | 'credited'
-  | 'rejected'
-  | 'failed'
-  | 'reversed';
+  'pending_handoff' | 'acknowledged' | 'credited' | 'rejected' | 'failed' | 'reversed';
 
 export type CompOffDayType = 'regular' | 'weekly_off' | 'holiday';
 

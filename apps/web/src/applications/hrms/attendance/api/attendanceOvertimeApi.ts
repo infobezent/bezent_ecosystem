@@ -67,7 +67,14 @@ export interface OvertimeRequestItem {
     size?: string;
     uploadedAt?: string;
   }>;
-  status: 'draft' | 'submitted' | 'pending_approval' | 'approved' | 'rejected' | 'withdrawn' | 'cancelled';
+  status:
+    | 'draft'
+    | 'submitted'
+    | 'pending_approval'
+    | 'approved'
+    | 'rejected'
+    | 'withdrawn'
+    | 'cancelled';
   settlementStatus:
     | 'unallocated'
     | 'partially_allocated'
@@ -108,7 +115,8 @@ export interface OvertimeSettlementItem {
   workDate?: string;
   allocationType: 'payable' | 'comp_off';
   allocatedMinutes: number;
-  status: 'pending_handoff' | 'exported_to_payroll' | 'credited_to_comp_off' | 'reversed' | 'rejected';
+  status:
+    'pending_handoff' | 'exported_to_payroll' | 'credited_to_comp_off' | 'reversed' | 'rejected';
   batchReference: string | null;
   allocatedByUserId: string | null;
   allocatedByUserName?: string | null;
@@ -158,7 +166,8 @@ export interface OvertimePolicyItem {
   dailyCapMinutes: number;
   weeklyCapMinutes: number;
   monthlyCapMinutes: number;
-  roundingRule: 'exact' | 'round_down_15' | 'round_nearest_15' | 'round_down_30' | 'round_nearest_30';
+  roundingRule:
+    'exact' | 'round_down_15' | 'round_nearest_15' | 'round_down_30' | 'round_nearest_30';
   requiresPreApproval: boolean;
   submissionWindowDays: number;
   allowPayable: boolean;
@@ -342,7 +351,10 @@ export async function decideOvertimeRequest(
   return body.data;
 }
 
-export async function withdrawOvertimeRequest(id: string, reason: string): Promise<OvertimeRequestItem> {
+export async function withdrawOvertimeRequest(
+  id: string,
+  reason: string,
+): Promise<OvertimeRequestItem> {
   const url = `${appConfig.apiBaseUrl}/hrms/attendance/overtime/requests/${id}/withdraw`;
   const res = await authorizedFetch(url, {
     method: 'POST',
@@ -356,7 +368,10 @@ export async function withdrawOvertimeRequest(id: string, reason: string): Promi
   return body.data;
 }
 
-export async function cancelOvertimeRequest(id: string, reason: string): Promise<OvertimeRequestItem> {
+export async function cancelOvertimeRequest(
+  id: string,
+  reason: string,
+): Promise<OvertimeRequestItem> {
   const url = `${appConfig.apiBaseUrl}/hrms/attendance/overtime/requests/${id}/cancel`;
   const res = await authorizedFetch(url, {
     method: 'POST',
@@ -397,7 +412,10 @@ export async function fetchOvertimeSettlements(params?: {
   status?: string;
   page?: number;
   limit?: number;
-}): Promise<{ items: OvertimeSettlementItem[]; meta: { total: number; page: number; limit: number } }> {
+}): Promise<{
+  items: OvertimeSettlementItem[];
+  meta: { total: number; page: number; limit: number };
+}> {
   const query = new URLSearchParams();
   if (params?.employeeId) query.set('employeeId', params.employeeId);
   if (params?.status) query.set('status', params.status);
@@ -454,7 +472,9 @@ export async function fetchOvertimePolicyDetail(id: string): Promise<OvertimePol
   return body.data;
 }
 
-export async function createOvertimePolicy(payload: Partial<OvertimePolicyItem>): Promise<OvertimePolicyItem> {
+export async function createOvertimePolicy(
+  payload: Partial<OvertimePolicyItem>,
+): Promise<OvertimePolicyItem> {
   const url = `${appConfig.apiBaseUrl}/hrms/attendance/overtime/policies`;
   const res = await authorizedFetch(url, {
     method: 'POST',

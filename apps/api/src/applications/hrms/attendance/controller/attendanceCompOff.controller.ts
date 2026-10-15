@@ -52,7 +52,12 @@ export class AttendanceCompOffController {
         throw new BadRequestError('employeeId and workDate query parameters are required.');
       }
 
-      const result = await this.service.getWorkdayContext(tenantId, companyId, employeeId, workDate);
+      const result = await this.service.getWorkdayContext(
+        tenantId,
+        companyId,
+        employeeId,
+        workDate,
+      );
       res.json({ success: true, data: result });
     } catch (err) {
       next(err);
@@ -64,8 +69,12 @@ export class AttendanceCompOffController {
       const { tenantId, companyId } = req.companyContext!;
       const filter: CompOffFilterQuery = {
         employeeId: typeof req.query.employeeId === 'string' ? req.query.employeeId : undefined,
-        departmentId: typeof req.query.departmentId === 'string' ? req.query.departmentId : undefined,
-        status: typeof req.query.status === 'string' ? (req.query.status as CompOffRequestStatus | 'all') : undefined,
+        departmentId:
+          typeof req.query.departmentId === 'string' ? req.query.departmentId : undefined,
+        status:
+          typeof req.query.status === 'string'
+            ? (req.query.status as CompOffRequestStatus | 'all')
+            : undefined,
         startDate: typeof req.query.startDate === 'string' ? req.query.startDate : undefined,
         endDate: typeof req.query.endDate === 'string' ? req.query.endDate : undefined,
         workDate: typeof req.query.workDate === 'string' ? req.query.workDate : undefined,
@@ -74,7 +83,11 @@ export class AttendanceCompOffController {
       };
 
       const result = await this.service.listRequests(tenantId, companyId, filter);
-      res.json({ success: true, data: result.items, pagination: { total: result.total, page: result.page, limit: result.limit } });
+      res.json({
+        success: true,
+        data: result.items,
+        pagination: { total: result.total, page: result.page, limit: result.limit },
+      });
     } catch (err) {
       next(err);
     }
@@ -98,7 +111,13 @@ export class AttendanceCompOffController {
         evidenceAttachments: req.body.evidenceAttachments,
       };
 
-      const data = await this.service.createRequest(tenantId, companyId, input, actorUserId, actorRole);
+      const data = await this.service.createRequest(
+        tenantId,
+        companyId,
+        input,
+        actorUserId,
+        actorRole,
+      );
       res.status(201).json({ success: true, data });
     } catch (err) {
       next(err);
@@ -127,7 +146,8 @@ export class AttendanceCompOffController {
       const { tenantId, companyId } = req.companyContext!;
       const reviewerUserId = req.user?.id;
       const primaryRole = req.user?.memberships?.[0]?.role ?? 'manager';
-      const isHrAdmin = primaryRole === 'hr_manager' || primaryRole === 'admin' || primaryRole === 'super_admin';
+      const isHrAdmin =
+        primaryRole === 'hr_manager' || primaryRole === 'admin' || primaryRole === 'super_admin';
 
       const data = await this.service.getApprovalQueue(tenantId, companyId, {
         reviewerUserId,
@@ -150,9 +170,13 @@ export class AttendanceCompOffController {
 
       const input: DecideCompOffRequestInput = {
         decision: req.body.decision,
-        approvedCreditDays: req.body.approvedCreditDays !== undefined ? Number(req.body.approvedCreditDays) : undefined,
+        approvedCreditDays:
+          req.body.approvedCreditDays !== undefined
+            ? Number(req.body.approvedCreditDays)
+            : undefined,
         reviewNotes: req.body.reviewNotes,
-        expectedVersion: req.body.expectedVersion !== undefined ? Number(req.body.expectedVersion) : undefined,
+        expectedVersion:
+          req.body.expectedVersion !== undefined ? Number(req.body.expectedVersion) : undefined,
       };
 
       const data = await this.service.decideRequest(
@@ -177,7 +201,13 @@ export class AttendanceCompOffController {
       const userId = req.user?.id ?? 'usr_anonymous';
       const reason = req.body.reason || 'Withdrawn by requester';
 
-      const data = await this.service.withdrawRequest(tenantId, companyId, requestId, userId, reason);
+      const data = await this.service.withdrawRequest(
+        tenantId,
+        companyId,
+        requestId,
+        userId,
+        reason,
+      );
       res.json({ success: true, data });
     } catch (err) {
       next(err);
@@ -189,13 +219,20 @@ export class AttendanceCompOffController {
       const { tenantId, companyId } = req.companyContext!;
       const filter = {
         employeeId: typeof req.query.employeeId === 'string' ? req.query.employeeId : undefined,
-        status: typeof req.query.status === 'string' ? (req.query.status as CompOffEntitlementStatus | 'all') : undefined,
+        status:
+          typeof req.query.status === 'string'
+            ? (req.query.status as CompOffEntitlementStatus | 'all')
+            : undefined,
         page: req.query.page ? parseInt(req.query.page as string, 10) : 1,
         limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 20,
       };
 
       const result = await this.service.listEntitlements(tenantId, companyId, filter);
-      res.json({ success: true, data: result.items, pagination: { total: result.total, page: result.page, limit: result.limit } });
+      res.json({
+        success: true,
+        data: result.items,
+        pagination: { total: result.total, page: result.page, limit: result.limit },
+      });
     } catch (err) {
       next(err);
     }
@@ -250,13 +287,20 @@ export class AttendanceCompOffController {
       const { tenantId, companyId } = req.companyContext!;
       const filter = {
         employeeId: typeof req.query.employeeId === 'string' ? req.query.employeeId : undefined,
-        status: typeof req.query.status === 'string' ? (req.query.status as CompOffHandoffStatus | 'all') : undefined,
+        status:
+          typeof req.query.status === 'string'
+            ? (req.query.status as CompOffHandoffStatus | 'all')
+            : undefined,
         page: req.query.page ? parseInt(req.query.page as string, 10) : 1,
         limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 20,
       };
 
       const result = await this.service.listHandoffs(tenantId, companyId, filter);
-      res.json({ success: true, data: result.items, pagination: { total: result.total, page: result.page, limit: result.limit } });
+      res.json({
+        success: true,
+        data: result.items,
+        pagination: { total: result.total, page: result.page, limit: result.limit },
+      });
     } catch (err) {
       next(err);
     }
@@ -265,7 +309,10 @@ export class AttendanceCompOffController {
   listPolicies = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { tenantId, companyId } = req.companyContext!;
-      const status = typeof req.query.status === 'string' ? (req.query.status as 'draft' | 'published' | 'archived') : undefined;
+      const status =
+        typeof req.query.status === 'string'
+          ? (req.query.status as 'draft' | 'published' | 'archived')
+          : undefined;
       const data = await this.service.listPolicies(tenantId, companyId, status);
       res.json({ success: true, data });
     } catch (err) {
@@ -296,4 +343,3 @@ export class AttendanceCompOffController {
 }
 
 export const attendanceCompOffController = new AttendanceCompOffController();
-

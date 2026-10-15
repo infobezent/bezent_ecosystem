@@ -92,7 +92,10 @@ describe('BEZENT HRMS — Attendance Comp-Off V1.0 Regression & Runtime Defense 
       status: 403,
       json: async () => ({
         success: false,
-        error: { message: 'Access denied: You do not have permission to access Comp-Off resources (403 Forbidden).' },
+        error: {
+          message:
+            'Access denied: You do not have permission to access Comp-Off resources (403 Forbidden).',
+        },
       }),
     };
 

@@ -75,9 +75,7 @@ describe('BEZENT HRMS — Overtime Calculation Engine V1.0 Unit Tests', () => {
   });
 
   it('handles overnight shift intervals crossing midnight', () => {
-    const overnightIntervals = [
-      { startTime: '22:00', endTime: '02:00', durationMinutes: 240 },
-    ];
+    const overnightIntervals = [{ startTime: '22:00', endTime: '02:00', durationMinutes: 240 }];
     const result = calcService.validateSourceIntervals(overnightIntervals);
     expect(result.isValid).toBe(true);
     expect(result.totalIntervalMinutes).toBe(240);
@@ -218,7 +216,9 @@ describe('BEZENT HRMS — Overtime Calculation Engine V1.0 Unit Tests', () => {
     expect(res.isEligible).toBe(false);
     expect(res.eligibleOtMinutes).toBe(0);
     expect(res.nonEligibilityReason).toContain('Eligibility unavailable');
-    expect(res.nonEligibilityReason).toContain('authoritative shift schedule or approved company policy baseline');
+    expect(res.nonEligibilityReason).toContain(
+      'authoritative shift schedule or approved company policy baseline',
+    );
   });
 
   it('Phase 0 Regression: flags compliance review when statutory rules are unresolved or unverified', () => {
@@ -281,7 +281,8 @@ describe('BEZENT HRMS — Overtime Calculation Engine V1.0 Unit Tests', () => {
     expect(resVerified.appliedCap?.type).toBe('statutory');
     expect(resVerified.appliedCap?.cappedMinutes).toBe(0); // 3000 - 3000 = 0 available
     expect(resVerified.eligibleOtMinutes).toBe(0);
-    expect(resVerified.complianceNotes?.some((n) => n.includes('verified statutory quarterly limit'))).toBe(true);
+    expect(
+      resVerified.complianceNotes?.some((n) => n.includes('verified statutory quarterly limit')),
+    ).toBe(true);
   });
 });
-

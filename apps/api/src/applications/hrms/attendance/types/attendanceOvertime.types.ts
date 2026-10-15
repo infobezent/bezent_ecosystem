@@ -42,20 +42,10 @@ export type {
 };
 
 export type OvertimeRoundingRule =
-  | 'exact'
-  | 'round_down_15'
-  | 'round_nearest_15'
-  | 'round_down_30'
-  | 'round_nearest_30';
+  'exact' | 'round_down_15' | 'round_nearest_15' | 'round_down_30' | 'round_nearest_30';
 
 export type OvertimeRequestStatus =
-  | 'draft'
-  | 'submitted'
-  | 'pending_approval'
-  | 'approved'
-  | 'rejected'
-  | 'withdrawn'
-  | 'cancelled';
+  'draft' | 'submitted' | 'pending_approval' | 'approved' | 'rejected' | 'withdrawn' | 'cancelled';
 
 export type OvertimeSettlementStatus =
   | 'unallocated'
@@ -69,11 +59,7 @@ export type OvertimeSettlementStatus =
 export type OvertimeDayType = 'regular' | 'weekly_off' | 'holiday';
 export type OvertimeAllocationType = 'payable' | 'comp_off';
 export type OvertimeSettlementRecordStatus =
-  | 'pending_handoff'
-  | 'exported_to_payroll'
-  | 'credited_to_comp_off'
-  | 'reversed'
-  | 'rejected';
+  'pending_handoff' | 'exported_to_payroll' | 'credited_to_comp_off' | 'reversed' | 'rejected';
 
 export interface OvertimeSourceInterval {
   startTime: string; // HH:mm
@@ -164,7 +150,8 @@ export interface OvertimeSettlementItem {
   workDate?: string;
   allocationType: OvertimeAllocationType;
   allocatedMinutes: number;
-  status: 'pending_handoff' | 'exported_to_payroll' | 'credited_to_comp_off' | 'reversed' | 'rejected';
+  status:
+    'pending_handoff' | 'exported_to_payroll' | 'credited_to_comp_off' | 'reversed' | 'rejected';
   batchReference: string | null;
   allocatedByUserId: string | null;
   allocatedByUserName?: string | null;

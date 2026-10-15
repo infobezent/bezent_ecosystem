@@ -98,7 +98,9 @@ describe.skipIf(!isDatabaseConfigured)(
       const db = getDb();
       await db
         .delete(roleAssignments)
-        .where(and(eq(roleAssignments.userId, managerUserId), eq(roleAssignments.companyId, companyId)));
+        .where(
+          and(eq(roleAssignments.userId, managerUserId), eq(roleAssignments.companyId, companyId)),
+        );
       await db
         .delete(memberships)
         .where(and(eq(memberships.userId, managerUserId), eq(memberships.companyId, companyId)));

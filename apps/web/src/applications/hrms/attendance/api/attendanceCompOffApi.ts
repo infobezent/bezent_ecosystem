@@ -63,7 +63,14 @@ export interface CompOffRequestItem {
     url?: string;
     sizeBytes?: number;
   }>;
-  status: 'draft' | 'submitted' | 'pending_approval' | 'approved' | 'rejected' | 'withdrawn' | 'cancelled';
+  status:
+    | 'draft'
+    | 'submitted'
+    | 'pending_approval'
+    | 'approved'
+    | 'rejected'
+    | 'withdrawn'
+    | 'cancelled';
   currentStage: string;
   assignedTo: string | null;
   assignedToName?: string | null;
@@ -228,7 +235,10 @@ interface ApiResponseEnvelope<T = unknown> {
 }
 
 function normalizePagedList<T>(
-  body: ApiResponseEnvelope<T[] | { items?: T[]; total?: number; page?: number; limit?: number }> | null | undefined,
+  body:
+    | ApiResponseEnvelope<T[] | { items?: T[]; total?: number; page?: number; limit?: number }>
+    | null
+    | undefined,
   fallbackLimit = 20,
 ): { items: T[]; total: number; page: number; limit: number } {
   if (Array.isArray(body?.data)) {
@@ -239,7 +249,12 @@ function normalizePagedList<T>(
       limit: typeof body.pagination?.limit === 'number' ? body.pagination.limit : fallbackLimit,
     };
   }
-  if (body?.data && typeof body.data === 'object' && 'items' in body.data && Array.isArray((body.data as { items: T[] }).items)) {
+  if (
+    body?.data &&
+    typeof body.data === 'object' &&
+    'items' in body.data &&
+    Array.isArray((body.data as { items: T[] }).items)
+  ) {
     const dataObj = body.data as { items: T[]; total?: number; page?: number; limit?: number };
     return {
       items: dataObj.items,
@@ -256,7 +271,11 @@ function normalizePagedList<T>(
   };
 }
 
-function handleApiError(res: Response, body: ApiResponseEnvelope | null | undefined, fallbackMessage: string): never {
+function handleApiError(
+  res: Response,
+  body: ApiResponseEnvelope | null | undefined,
+  fallbackMessage: string,
+): never {
   if (res.status === 403) {
     throw new Error(
       body?.error?.message ??
@@ -360,9 +379,15 @@ export async function fetchCompOffRequests(filter?: {
   const qs = query.toString();
   const url = `${appConfig.apiBaseUrl}/hrms/attendance/comp-off/requests${qs ? `?${qs}` : ''}`;
   const res = await authorizedFetch(url);
-  let body: ApiResponseEnvelope<CompOffRequestItem[] | { items?: CompOffRequestItem[]; total?: number; page?: number; limit?: number }> | null = null;
+  let body: ApiResponseEnvelope<
+    | CompOffRequestItem[]
+    | { items?: CompOffRequestItem[]; total?: number; page?: number; limit?: number }
+  > | null = null;
   try {
-    body = (await res.json()) as ApiResponseEnvelope<CompOffRequestItem[] | { items?: CompOffRequestItem[]; total?: number; page?: number; limit?: number }>;
+    body = (await res.json()) as ApiResponseEnvelope<
+      | CompOffRequestItem[]
+      | { items?: CompOffRequestItem[]; total?: number; page?: number; limit?: number }
+    >;
   } catch {
     body = null;
   }
@@ -382,7 +407,9 @@ export async function fetchCompOffRequestDetail(
   const res = await authorizedFetch(url);
   let body: ApiResponseEnvelope<CompOffRequestItem & { audits?: CompOffAuditItem[] }> | null = null;
   try {
-    body = (await res.json()) as ApiResponseEnvelope<CompOffRequestItem & { audits?: CompOffAuditItem[] }>;
+    body = (await res.json()) as ApiResponseEnvelope<
+      CompOffRequestItem & { audits?: CompOffAuditItem[] }
+    >;
   } catch {
     body = null;
   }
@@ -428,7 +455,10 @@ export async function createCompOffRequest(payload: {
 /**
  * Withdraw Comp-Off Request
  */
-export async function withdrawCompOffRequest(id: string, reason: string): Promise<CompOffRequestItem> {
+export async function withdrawCompOffRequest(
+  id: string,
+  reason: string,
+): Promise<CompOffRequestItem> {
   const url = `${appConfig.apiBaseUrl}/hrms/attendance/comp-off/requests/${id}/withdraw`;
   const res = await authorizedFetch(url, {
     method: 'POST',
@@ -450,7 +480,10 @@ export async function withdrawCompOffRequest(id: string, reason: string): Promis
 /**
  * Cancel Comp-Off Request
  */
-export async function cancelCompOffRequest(id: string, reason: string): Promise<CompOffRequestItem> {
+export async function cancelCompOffRequest(
+  id: string,
+  reason: string,
+): Promise<CompOffRequestItem> {
   const url = `${appConfig.apiBaseUrl}/hrms/attendance/comp-off/requests/${id}/cancel`;
   const res = await authorizedFetch(url, {
     method: 'POST',
@@ -475,9 +508,12 @@ export async function cancelCompOffRequest(id: string, reason: string): Promise<
 export async function fetchCompOffApprovalQueue(): Promise<CompOffRequestItem[]> {
   const url = `${appConfig.apiBaseUrl}/hrms/attendance/comp-off/approvals`;
   const res = await authorizedFetch(url);
-  let body: ApiResponseEnvelope<CompOffRequestItem[] | { items?: CompOffRequestItem[] }> | null = null;
+  let body: ApiResponseEnvelope<CompOffRequestItem[] | { items?: CompOffRequestItem[] }> | null =
+    null;
   try {
-    body = (await res.json()) as ApiResponseEnvelope<CompOffRequestItem[] | { items?: CompOffRequestItem[] }>;
+    body = (await res.json()) as ApiResponseEnvelope<
+      CompOffRequestItem[] | { items?: CompOffRequestItem[] }
+    >;
   } catch {
     body = null;
   }
@@ -487,7 +523,12 @@ export async function fetchCompOffApprovalQueue(): Promise<CompOffRequestItem[]>
   if (Array.isArray(body?.data)) {
     return body.data;
   }
-  if (body?.data && typeof body.data === 'object' && 'items' in body.data && Array.isArray((body.data as { items: CompOffRequestItem[] }).items)) {
+  if (
+    body?.data &&
+    typeof body.data === 'object' &&
+    'items' in body.data &&
+    Array.isArray((body.data as { items: CompOffRequestItem[] }).items)
+  ) {
     return (body.data as { items: CompOffRequestItem[] }).items;
   }
   return [];
@@ -541,9 +582,15 @@ export async function fetchCompOffEntitlements(filter?: {
   const qs = query.toString();
   const url = `${appConfig.apiBaseUrl}/hrms/attendance/comp-off/entitlements${qs ? `?${qs}` : ''}`;
   const res = await authorizedFetch(url);
-  let body: ApiResponseEnvelope<CompOffEntitlementItem[] | { items?: CompOffEntitlementItem[]; total?: number; page?: number; limit?: number }> | null = null;
+  let body: ApiResponseEnvelope<
+    | CompOffEntitlementItem[]
+    | { items?: CompOffEntitlementItem[]; total?: number; page?: number; limit?: number }
+  > | null = null;
   try {
-    body = (await res.json()) as ApiResponseEnvelope<CompOffEntitlementItem[] | { items?: CompOffEntitlementItem[]; total?: number; page?: number; limit?: number }>;
+    body = (await res.json()) as ApiResponseEnvelope<
+      | CompOffEntitlementItem[]
+      | { items?: CompOffEntitlementItem[]; total?: number; page?: number; limit?: number }
+    >;
   } catch {
     body = null;
   }
@@ -596,9 +643,15 @@ export async function fetchCompOffHandoffs(filter?: {
   const qs = query.toString();
   const url = `${appConfig.apiBaseUrl}/hrms/attendance/comp-off/handoffs${qs ? `?${qs}` : ''}`;
   const res = await authorizedFetch(url);
-  let body: ApiResponseEnvelope<CompOffHandoffItem[] | { items?: CompOffHandoffItem[]; total?: number; page?: number; limit?: number }> | null = null;
+  let body: ApiResponseEnvelope<
+    | CompOffHandoffItem[]
+    | { items?: CompOffHandoffItem[]; total?: number; page?: number; limit?: number }
+  > | null = null;
   try {
-    body = (await res.json()) as ApiResponseEnvelope<CompOffHandoffItem[] | { items?: CompOffHandoffItem[]; total?: number; page?: number; limit?: number }>;
+    body = (await res.json()) as ApiResponseEnvelope<
+      | CompOffHandoffItem[]
+      | { items?: CompOffHandoffItem[]; total?: number; page?: number; limit?: number }
+    >;
   } catch {
     body = null;
   }
@@ -640,9 +693,12 @@ export async function fetchCompOffPolicies(status?: string): Promise<CompOffPoli
   const qs = query.toString();
   const url = `${appConfig.apiBaseUrl}/hrms/attendance/comp-off/policies${qs ? `?${qs}` : ''}`;
   const res = await authorizedFetch(url);
-  let body: ApiResponseEnvelope<CompOffPolicyItem[] | { items?: CompOffPolicyItem[] }> | null = null;
+  let body: ApiResponseEnvelope<CompOffPolicyItem[] | { items?: CompOffPolicyItem[] }> | null =
+    null;
   try {
-    body = (await res.json()) as ApiResponseEnvelope<CompOffPolicyItem[] | { items?: CompOffPolicyItem[] }>;
+    body = (await res.json()) as ApiResponseEnvelope<
+      CompOffPolicyItem[] | { items?: CompOffPolicyItem[] }
+    >;
   } catch {
     body = null;
   }
@@ -652,7 +708,12 @@ export async function fetchCompOffPolicies(status?: string): Promise<CompOffPoli
   if (Array.isArray(body?.data)) {
     return body.data;
   }
-  if (body?.data && typeof body.data === 'object' && 'items' in body.data && Array.isArray((body.data as { items: CompOffPolicyItem[] }).items)) {
+  if (
+    body?.data &&
+    typeof body.data === 'object' &&
+    'items' in body.data &&
+    Array.isArray((body.data as { items: CompOffPolicyItem[] }).items)
+  ) {
     return (body.data as { items: CompOffPolicyItem[] }).items;
   }
   return [];
@@ -675,4 +736,3 @@ export async function fetchCompOffAudits(requestId: string): Promise<CompOffAudi
   }
   return Array.isArray(body?.data) ? body.data : [];
 }
-

@@ -44,7 +44,11 @@ export class AttendanceCompOffCalculationService {
 
     for (const interval of intervals) {
       if (!interval.startTime || !interval.endTime) {
-        return { isValid: false, totalIntervalMinutes: 0, errorMessage: 'Interval must have startTime and endTime' };
+        return {
+          isValid: false,
+          totalIntervalMinutes: 0,
+          errorMessage: 'Interval must have startTime and endTime',
+        };
       }
 
       const start = parseTime(interval.startTime);
@@ -185,7 +189,8 @@ export class AttendanceCompOffCalculationService {
         eligibleCreditDays: 0,
         eligibleCreditMinutes: 0,
         isEligible: false,
-        nonEligibilityReason: 'Comp-Off earning is not permitted for weekly offs under this policy.',
+        nonEligibilityReason:
+          'Comp-Off earning is not permitted for weekly offs under this policy.',
         complianceNotes,
       };
     }
@@ -209,7 +214,8 @@ export class AttendanceCompOffCalculationService {
         eligibleCreditDays: 0,
         eligibleCreditMinutes: 0,
         isEligible: false,
-        nonEligibilityReason: 'Comp-Off earning is not permitted on regular workdays under this policy.',
+        nonEligibilityReason:
+          'Comp-Off earning is not permitted on regular workdays under this policy.',
         complianceNotes,
       };
     }

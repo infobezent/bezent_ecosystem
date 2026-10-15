@@ -85,7 +85,8 @@ export function AttendanceOvertimePage() {
 
   // Detail Modal
   const [selectedRequest, setSelectedRequest] = useState<
-    (OvertimeRequestItem & { settlements: OvertimeSettlementItem[]; audits: OvertimeAuditItem[] }) | null
+    | (OvertimeRequestItem & { settlements: OvertimeSettlementItem[]; audits: OvertimeAuditItem[] })
+    | null
   >(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
 
@@ -472,7 +473,9 @@ export function AttendanceOvertimePage() {
                   />
                   <Select
                     value={statusFilter}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setStatusFilter(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                      setStatusFilter(e.target.value)
+                    }
                     options={[
                       { label: 'All Statuses', value: 'all' },
                       { label: 'Submitted', value: 'submitted' },
@@ -484,7 +487,9 @@ export function AttendanceOvertimePage() {
                   />
                   <Select
                     value={settlementFilter}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSettlementFilter(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                      setSettlementFilter(e.target.value)
+                    }
                     options={[
                       { label: 'All Settlements', value: 'all' },
                       { label: 'Unallocated', value: 'unallocated' },
@@ -539,13 +544,19 @@ export function AttendanceOvertimePage() {
                         <TableCell>{(r.eligibleOtMinutes / 60).toFixed(1)}h</TableCell>
                         <TableCell>{(r.requestedOtMinutes / 60).toFixed(1)}h</TableCell>
                         <TableCell>
-                          {r.status === 'approved' ? `${(r.approvedOtMinutes / 60).toFixed(1)}h` : '—'}
+                          {r.status === 'approved'
+                            ? `${(r.approvedOtMinutes / 60).toFixed(1)}h`
+                            : '—'}
                         </TableCell>
                         <TableCell>{renderStatusBadge(r.status)}</TableCell>
                         <TableCell>{renderSettlementBadge(r.settlementStatus)}</TableCell>
                         <TableCell>
                           <Inline gap="xs">
-                            <Button variant="ghost" size="sm" onClick={() => handleOpenDetail(r.id)}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleOpenDetail(r.id)}
+                            >
                               View
                             </Button>
                             {(r.status === 'submitted' || r.status === 'pending_approval') && (
@@ -579,13 +590,12 @@ export function AttendanceOvertimePage() {
           <Stack gap="md">
             <Card>
               <h3>Pending Supervisor Approval Queue</h3>
-              <p>
-                Review overtime requests submitted against authoritative attendance records.
-              </p>
+              <p>Review overtime requests submitted against authoritative attendance records.</p>
             </Card>
 
             <Card>
-              {requests.filter((r) => r.status === 'submitted' || r.status === 'pending_approval').length === 0 ? (
+              {requests.filter((r) => r.status === 'submitted' || r.status === 'pending_approval')
+                .length === 0 ? (
                 <EmptyState
                   title="Approval Queue Clean"
                   description="All submitted overtime claims have been evaluated."
@@ -662,13 +672,17 @@ export function AttendanceOvertimePage() {
             <Card>
               <h3>Approved Overtime Entitlement Register</h3>
               <p>
-                Approved overtime hours ready for settlement allocation into Payable Overtime or Comp-Off credits.
+                Approved overtime hours ready for settlement allocation into Payable Overtime or
+                Comp-Off credits.
               </p>
             </Card>
 
             <Card>
               {requests.filter((r) => r.status === 'approved').length === 0 ? (
-                <EmptyState title="No Approved Overtime" description="No approved overtime records found." />
+                <EmptyState
+                  title="No Approved Overtime"
+                  description="No approved overtime records found."
+                />
               ) : (
                 <Table>
                   <TableHead>
@@ -735,14 +749,15 @@ export function AttendanceOvertimePage() {
           <Stack gap="md">
             <Card>
               <h3>Overtime Settlement Ledger & Handoff</h3>
-              <p>
-                Audit ledger of overtime hours exported to Payroll or converted to Comp-Off.
-              </p>
+              <p>Audit ledger of overtime hours exported to Payroll or converted to Comp-Off.</p>
             </Card>
 
             <Card>
               {settlements.length === 0 ? (
-                <EmptyState title="No Settlements" description="No overtime settlement allocations recorded yet." />
+                <EmptyState
+                  title="No Settlements"
+                  description="No overtime settlement allocations recorded yet."
+                />
               ) : (
                 <Table>
                   <TableHead>
@@ -767,7 +782,9 @@ export function AttendanceOvertimePage() {
                         <TableCell>{s.workDate || '—'}</TableCell>
                         <TableCell>
                           <Badge variant={s.allocationType === 'payable' ? 'info' : 'success'}>
-                            {s.allocationType === 'payable' ? 'Payable Overtime' : 'Comp-Off Credit'}
+                            {s.allocationType === 'payable'
+                              ? 'Payable Overtime'
+                              : 'Comp-Off Credit'}
                           </Badge>
                         </TableCell>
                         <TableCell>{(s.allocatedMinutes / 60).toFixed(1)}h</TableCell>
@@ -807,13 +824,17 @@ export function AttendanceOvertimePage() {
             <Card>
               <h3>Configured Overtime Policies</h3>
               <p>
-                Organizational policies governing overtime calculation caps, eligibility, and rounding rules.
+                Organizational policies governing overtime calculation caps, eligibility, and
+                rounding rules.
               </p>
             </Card>
 
             <Card>
               {policies.length === 0 ? (
-                <EmptyState title="No Policies Found" description="No overtime policies configured." />
+                <EmptyState
+                  title="No Policies Found"
+                  description="No overtime policies configured."
+                />
               ) : (
                 <Table>
                   <TableHead>
@@ -867,7 +888,8 @@ export function AttendanceOvertimePage() {
           <Stack gap="md">
             <Grid columns={2} gap="sm">
               <div>
-                <strong>Employee:</strong> {selectedRequest.employeeName} ({selectedRequest.employeeCode})
+                <strong>Employee:</strong> {selectedRequest.employeeName} (
+                {selectedRequest.employeeCode})
               </div>
               <div>
                 <strong>Work Date:</strong> {selectedRequest.workDate} ({selectedRequest.dayType})
@@ -876,16 +898,20 @@ export function AttendanceOvertimePage() {
                 <strong>Scheduled:</strong> {(selectedRequest.scheduledMinutes / 60).toFixed(1)} hrs
               </div>
               <div>
-                <strong>Actual Worked:</strong> {(selectedRequest.actualWorkedMinutes / 60).toFixed(1)} hrs
+                <strong>Actual Worked:</strong>{' '}
+                {(selectedRequest.actualWorkedMinutes / 60).toFixed(1)} hrs
               </div>
               <div>
-                <strong>Extra Worked:</strong> {(selectedRequest.extraWorkedMinutes / 60).toFixed(1)} hrs
+                <strong>Extra Worked:</strong>{' '}
+                {(selectedRequest.extraWorkedMinutes / 60).toFixed(1)} hrs
               </div>
               <div>
-                <strong>Policy-Eligible:</strong> {(selectedRequest.eligibleOtMinutes / 60).toFixed(1)} hrs
+                <strong>Policy-Eligible:</strong>{' '}
+                {(selectedRequest.eligibleOtMinutes / 60).toFixed(1)} hrs
               </div>
               <div>
-                <strong>Requested OT:</strong> {(selectedRequest.requestedOtMinutes / 60).toFixed(1)} hrs
+                <strong>Requested OT:</strong>{' '}
+                {(selectedRequest.requestedOtMinutes / 60).toFixed(1)} hrs
               </div>
               <div>
                 <strong>Approved OT:</strong>{' '}
@@ -897,7 +923,8 @@ export function AttendanceOvertimePage() {
                 <strong>Approval Status:</strong> {renderStatusBadge(selectedRequest.status)}
               </div>
               <div>
-                <strong>Settlement Status:</strong> {renderSettlementBadge(selectedRequest.settlementStatus)}
+                <strong>Settlement Status:</strong>{' '}
+                {renderSettlementBadge(selectedRequest.settlementStatus)}
               </div>
             </Grid>
 
@@ -953,15 +980,24 @@ export function AttendanceOvertimePage() {
             <Input
               label="Employee ID / Code"
               value={createEmployeeId}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCreateEmployeeId(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setCreateEmployeeId(e.target.value)
+              }
               placeholder="e.g. EMP-0002"
             />
             <Input
               label="Work Date (YYYY-MM-DD)"
               value={createWorkDate}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCreateWorkDate(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setCreateWorkDate(e.target.value)
+              }
             />
-            <Button variant="secondary" size="sm" onClick={handleCheckEligibility} disabled={checkingEligibility}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleCheckEligibility}
+              disabled={checkingEligibility}
+            >
               {checkingEligibility ? 'Verifying...' : 'Check Attendance Eligibility'}
             </Button>
 
@@ -977,12 +1013,16 @@ export function AttendanceOvertimePage() {
               <Input
                 label="Start Time (HH:mm)"
                 value={createStartTime}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCreateStartTime(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setCreateStartTime(e.target.value)
+                }
               />
               <Input
                 label="End Time (HH:mm)"
                 value={createEndTime}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCreateEndTime(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setCreateEndTime(e.target.value)
+                }
               />
             </Inline>
 
@@ -990,7 +1030,9 @@ export function AttendanceOvertimePage() {
               label="Requested Overtime (Minutes)"
               type="number"
               value={String(createMinutes)}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCreateMinutes(parseInt(e.target.value, 10) || 0)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setCreateMinutes(parseInt(e.target.value, 10) || 0)
+              }
             />
 
             <Input
@@ -1037,7 +1079,9 @@ export function AttendanceOvertimePage() {
                 label="Approved Minutes"
                 type="number"
                 value={String(reviewMinutes)}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setReviewMinutes(parseInt(e.target.value, 10) || 0)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setReviewMinutes(parseInt(e.target.value, 10) || 0)
+                }
               />
             )}
 
@@ -1081,14 +1125,18 @@ export function AttendanceOvertimePage() {
               label="Payable Overtime (Minutes)"
               type="number"
               value={String(settlePayableMins)}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSettlePayableMins(parseInt(e.target.value, 10) || 0)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setSettlePayableMins(parseInt(e.target.value, 10) || 0)
+              }
             />
 
             <Input
               label="Comp-Off Entitlement (Minutes)"
               type="number"
               value={String(settleCompOffMins)}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSettleCompOffMins(parseInt(e.target.value, 10) || 0)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setSettleCompOffMins(parseInt(e.target.value, 10) || 0)
+              }
             />
 
             <Input
@@ -1119,13 +1167,16 @@ export function AttendanceOvertimePage() {
         >
           <Stack gap="md">
             <Alert variant="warning">
-              Reversing this settlement will restore the unallocated overtime balance on the request.
+              Reversing this settlement will restore the unallocated overtime balance on the
+              request.
             </Alert>
 
             <Input
               label="Reason for Reversal"
               value={reversalReason}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setReversalReason(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setReversalReason(e.target.value)
+              }
               placeholder="e.g. Payroll batch adjustment or duplicate allocation"
             />
 

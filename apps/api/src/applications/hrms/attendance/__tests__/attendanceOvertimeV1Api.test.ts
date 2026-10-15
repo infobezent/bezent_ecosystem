@@ -14,7 +14,10 @@ import {
   users,
 } from '../../../../db/schema.js';
 import { hashPassword } from '../../../../platform/auth/security.js';
-import { hrmsTestHeaders, signInForTest } from '../../../../platform/__tests__/support/testSession.js';
+import {
+  hrmsTestHeaders,
+  signInForTest,
+} from '../../../../platform/__tests__/support/testSession.js';
 
 describe.skipIf(!isDatabaseConfigured)(
   'BEZENT HRMS — Attendance Overtime V1.0 API Acceptance, Lifecycle & Settlement Suite',
@@ -38,8 +41,12 @@ describe.skipIf(!isDatabaseConfigured)(
       const db = getDb();
 
       // Clean up test records
-      await db.delete(attendanceOvertimeSettlements).where(eq(attendanceOvertimeSettlements.employeeId, empId));
-      await db.delete(attendanceOvertimeRequests).where(eq(attendanceOvertimeRequests.employeeId, empId));
+      await db
+        .delete(attendanceOvertimeSettlements)
+        .where(eq(attendanceOvertimeSettlements.employeeId, empId));
+      await db
+        .delete(attendanceOvertimeRequests)
+        .where(eq(attendanceOvertimeRequests.employeeId, empId));
       await db.delete(employeeAttendance).where(eq(employeeAttendance.employeeId, empId));
 
       // Ensure test employee exists
@@ -164,7 +171,9 @@ describe.skipIf(!isDatabaseConfigured)(
 
     it('1. GET /hrms/attendance/overtime/eligibility verifies workday attendance & eligible duration', async () => {
       const res = await request(app)
-        .get(`/api/v1/hrms/attendance/overtime/eligibility?employeeId=${empId}&workDate=${testDate}`)
+        .get(
+          `/api/v1/hrms/attendance/overtime/eligibility?employeeId=${empId}&workDate=${testDate}`,
+        )
         .set(headers);
 
       expect(res.status).toBe(200);
@@ -208,7 +217,9 @@ describe.skipIf(!isDatabaseConfigured)(
         });
 
       expect(res.status).toBe(409);
-      expect(res.body.error.message).toContain('Multiple active claims for the same date are prohibited');
+      expect(res.body.error.message).toContain(
+        'Multiple active claims for the same date are prohibited',
+      );
     });
 
     it('4. Rejects claims exceeding calculated eligible duration', async () => {
@@ -226,9 +237,7 @@ describe.skipIf(!isDatabaseConfigured)(
     });
 
     it('5. GET /hrms/attendance/overtime/overview returns accurate operational metrics', async () => {
-      const res = await request(app)
-        .get('/api/v1/hrms/attendance/overtime/overview')
-        .set(headers);
+      const res = await request(app).get('/api/v1/hrms/attendance/overtime/overview').set(headers);
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
@@ -323,7 +332,8 @@ describe.skipIf(!isDatabaseConfigured)(
       expect(res.body.data.length).toBeGreaterThanOrEqual(2);
 
       const payableSet = res.body.data.find(
-        (s: { allocationType?: string; status?: string; id?: string }) => s.allocationType === 'payable',
+        (s: { allocationType?: string; status?: string; id?: string }) =>
+          s.allocationType === 'payable',
       );
       expect(payableSet).toBeDefined();
       expect(payableSet.status).toBe('pending_handoff');

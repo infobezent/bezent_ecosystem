@@ -98,7 +98,10 @@ export class AttendanceOvertimeRepository {
           ),
         ),
       )
-      .orderBy(desc(attendanceOvertimePolicies.overridesPriority), desc(attendanceOvertimePolicies.version));
+      .orderBy(
+        desc(attendanceOvertimePolicies.overridesPriority),
+        desc(attendanceOvertimePolicies.version),
+      );
 
     if (candidatePolicies.length === 0) {
       return null;
@@ -342,7 +345,9 @@ export class AttendanceOvertimeRepository {
       settlementStatus: r.settlementStatus,
       currentStage: r.currentStage,
       assignedTo: r.assignedTo,
-      assignedToName: row.assignedUser ? `${row.assignedUser.firstName} ${row.assignedUser.lastName || ''}`.trim() : null,
+      assignedToName: row.assignedUser
+        ? `${row.assignedUser.firstName} ${row.assignedUser.lastName || ''}`.trim()
+        : null,
       assignedAt: r.assignedAt,
       assignedRole: r.assignedRole,
       submittedAt: r.submittedAt,
@@ -449,7 +454,10 @@ export class AttendanceOvertimeRepository {
       )
       .leftJoin(users, eq(attendanceOvertimeRequests.assignedTo, users.id))
       .where(whereClause)
-      .orderBy(desc(attendanceOvertimeRequests.workDate), desc(attendanceOvertimeRequests.createdAt))
+      .orderBy(
+        desc(attendanceOvertimeRequests.workDate),
+        desc(attendanceOvertimeRequests.createdAt),
+      )
       .limit(limit)
       .offset(offset);
 
@@ -482,12 +490,15 @@ export class AttendanceOvertimeRepository {
       reason: row.req.reason,
       locationOrSite: row.req.locationOrSite,
       taskOrProject: row.req.taskOrProject,
-      evidenceAttachments: (row.req.evidenceAttachments as unknown as OvertimeEvidenceAttachment[]) || [],
+      evidenceAttachments:
+        (row.req.evidenceAttachments as unknown as OvertimeEvidenceAttachment[]) || [],
       status: row.req.status,
       settlementStatus: row.req.settlementStatus,
       currentStage: row.req.currentStage,
       assignedTo: row.req.assignedTo,
-      assignedToName: row.assignedUser ? `${row.assignedUser.firstName} ${row.assignedUser.lastName || ''}`.trim() : null,
+      assignedToName: row.assignedUser
+        ? `${row.assignedUser.firstName} ${row.assignedUser.lastName || ''}`.trim()
+        : null,
       assignedAt: row.req.assignedAt,
       assignedRole: row.req.assignedRole,
       submittedAt: row.req.submittedAt,
@@ -528,7 +539,9 @@ export class AttendanceOvertimeRepository {
     }
 
     const [row] = await db
-      .select({ total: sql<number>`coalesce(sum(${attendanceOvertimeRequests.approvedOtMinutes}), 0)` })
+      .select({
+        total: sql<number>`coalesce(sum(${attendanceOvertimeRequests.approvedOtMinutes}), 0)`,
+      })
       .from(attendanceOvertimeRequests)
       .where(and(...conditions));
 
@@ -557,7 +570,9 @@ export class AttendanceOvertimeRepository {
     }
 
     const [row] = await db
-      .select({ total: sql<number>`coalesce(sum(${attendanceOvertimeRequests.approvedOtMinutes}), 0)` })
+      .select({
+        total: sql<number>`coalesce(sum(${attendanceOvertimeRequests.approvedOtMinutes}), 0)`,
+      })
       .from(attendanceOvertimeRequests)
       .where(and(...conditions));
 
@@ -623,7 +638,9 @@ export class AttendanceOvertimeRepository {
   // SETTLEMENT METHODS
   // ==========================================
 
-  async createSettlement(data: NewAttendanceOvertimeSettlement): Promise<AttendanceOvertimeSettlement> {
+  async createSettlement(
+    data: NewAttendanceOvertimeSettlement,
+  ): Promise<AttendanceOvertimeSettlement> {
     const db = getDb();
     await db.insert(attendanceOvertimeSettlements).values(data);
     const [created] = await db
@@ -763,7 +780,9 @@ export class AttendanceOvertimeRepository {
       status: r.set.status,
       batchReference: r.set.batchReference,
       allocatedByUserId: r.set.allocatedByUserId,
-      allocatedByUserName: r.allocUser ? `${r.allocUser.firstName} ${r.allocUser.lastName || ''}`.trim() : null,
+      allocatedByUserName: r.allocUser
+        ? `${r.allocUser.firstName} ${r.allocUser.lastName || ''}`.trim()
+        : null,
       allocatedAt: r.set.allocatedAt,
       notes: r.set.notes,
       reversalReason: r.set.reversalReason,

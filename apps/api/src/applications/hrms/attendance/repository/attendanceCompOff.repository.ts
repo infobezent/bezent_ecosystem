@@ -236,7 +236,12 @@ export class AttendanceCompOffRepository {
           eq(attendanceCompOffRequests.companyId, companyId),
           eq(attendanceCompOffRequests.employeeId, employeeId),
           eq(attendanceCompOffRequests.workDate, workDate),
-          inArray(attendanceCompOffRequests.status, ['draft', 'submitted', 'pending_approval', 'approved']),
+          inArray(attendanceCompOffRequests.status, [
+            'draft',
+            'submitted',
+            'pending_approval',
+            'approved',
+          ]),
         ),
       )
       .limit(1);
@@ -253,7 +258,9 @@ export class AttendanceCompOffRepository {
     companyId: string,
     employeeId: string,
     workDate: string,
-  ): Promise<Array<{ allocatedMinutes: number; allocationType: 'payable' | 'comp_off'; status: string }>> {
+  ): Promise<
+    Array<{ allocatedMinutes: number; allocationType: 'payable' | 'comp_off'; status: string }>
+  > {
     const db = getDb();
 
     const rows = await db
@@ -384,7 +391,8 @@ export class AttendanceCompOffRepository {
       reason: r.req.reason,
       locationOrSite: r.req.locationOrSite,
       taskOrProject: r.req.taskOrProject,
-      evidenceAttachments: (r.req.evidenceAttachments as CompOffRequestItem['evidenceAttachments']) || [],
+      evidenceAttachments:
+        (r.req.evidenceAttachments as CompOffRequestItem['evidenceAttachments']) || [],
       status: r.req.status,
       currentStage: r.req.currentStage,
       assignedTo: r.req.assignedTo,
@@ -526,7 +534,8 @@ export class AttendanceCompOffRepository {
       reason: r.req.reason,
       locationOrSite: r.req.locationOrSite,
       taskOrProject: r.req.taskOrProject,
-      evidenceAttachments: (r.req.evidenceAttachments as CompOffRequestItem['evidenceAttachments']) || [],
+      evidenceAttachments:
+        (r.req.evidenceAttachments as CompOffRequestItem['evidenceAttachments']) || [],
       status: r.req.status,
       currentStage: r.req.currentStage,
       assignedTo: r.req.assignedTo,
@@ -618,7 +627,8 @@ export class AttendanceCompOffRepository {
       reason: r.req.reason,
       locationOrSite: r.req.locationOrSite,
       taskOrProject: r.req.taskOrProject,
-      evidenceAttachments: (r.req.evidenceAttachments as CompOffRequestItem['evidenceAttachments']) || [],
+      evidenceAttachments:
+        (r.req.evidenceAttachments as CompOffRequestItem['evidenceAttachments']) || [],
       status: r.req.status,
       currentStage: r.req.currentStage,
       assignedTo: r.req.assignedTo,
@@ -644,7 +654,9 @@ export class AttendanceCompOffRepository {
   /**
    * Entitlements Ledger methods
    */
-  async createEntitlement(data: NewAttendanceCompOffEntitlement): Promise<AttendanceCompOffEntitlement> {
+  async createEntitlement(
+    data: NewAttendanceCompOffEntitlement,
+  ): Promise<AttendanceCompOffEntitlement> {
     const db = getDb();
     await db.insert(attendanceCompOffEntitlements).values(data);
     const [created] = await db
@@ -771,7 +783,9 @@ export class AttendanceCompOffRepository {
       creditedLeaveBalanceId: r.ent.creditedLeaveBalanceId,
       reversalReason: r.ent.reversalReason,
       reversedByUserId: r.ent.reversedByUserId,
-      reversedByUserName: r.reverser ? `${r.reverser.firstName} ${r.reverser.lastName}`.trim() : null,
+      reversedByUserName: r.reverser
+        ? `${r.reverser.firstName} ${r.reverser.lastName}`.trim()
+        : null,
       reversedAt: r.ent.reversedAt,
       createdAt: r.ent.createdAt,
       updatedAt: r.ent.updatedAt,

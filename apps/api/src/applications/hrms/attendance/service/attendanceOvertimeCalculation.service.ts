@@ -25,7 +25,10 @@ export class AttendanceOvertimeCalculationService {
   /**
    * Applies the configured rounding rule to raw minute value
    */
-  applyRounding(minutes: number, rule: OvertimeRoundingRule): { roundedMinutes: number; delta: number } {
+  applyRounding(
+    minutes: number,
+    rule: OvertimeRoundingRule,
+  ): { roundedMinutes: number; delta: number } {
     if (minutes <= 0) return { roundedMinutes: 0, delta: 0 };
 
     let rounded: number;
@@ -81,7 +84,11 @@ export class AttendanceOvertimeCalculationService {
 
     for (const interval of intervals) {
       if (!interval.startTime || !interval.endTime) {
-        return { isValid: false, totalIntervalMinutes: 0, errorMessage: 'Interval must have startTime and endTime' };
+        return {
+          isValid: false,
+          totalIntervalMinutes: 0,
+          errorMessage: 'Interval must have startTime and endTime',
+        };
       }
 
       const start = parseTime(interval.startTime);
@@ -199,7 +206,8 @@ export class AttendanceOvertimeCalculationService {
         extraWorkedMinutes: 0,
         eligibleOtMinutes: 0,
         isEligible: false,
-        nonEligibilityReason: 'Overtime is not permitted on regular working days under this policy.',
+        nonEligibilityReason:
+          'Overtime is not permitted on regular working days under this policy.',
         roundingAdjustmentMinutes: 0,
         complianceNotes,
       };
@@ -332,7 +340,10 @@ export class AttendanceOvertimeCalculationService {
       );
     }
 
-    if (statutoryRules.statutoryMaxDailyMinutes && calculatedMinutes > statutoryRules.statutoryMaxDailyMinutes) {
+    if (
+      statutoryRules.statutoryMaxDailyMinutes &&
+      calculatedMinutes > statutoryRules.statutoryMaxDailyMinutes
+    ) {
       appliedCap = {
         type: 'statutory',
         originalMinutes: calculatedMinutes,
@@ -358,7 +369,10 @@ export class AttendanceOvertimeCalculationService {
     }
 
     if (statutoryRules.statutoryMaxWeeklyMinutes) {
-      const statutoryAvailableWeekly = Math.max(0, statutoryRules.statutoryMaxWeeklyMinutes - priorWeekly);
+      const statutoryAvailableWeekly = Math.max(
+        0,
+        statutoryRules.statutoryMaxWeeklyMinutes - priorWeekly,
+      );
       if (calculatedMinutes > statutoryAvailableWeekly) {
         appliedCap = {
           type: 'statutory',
@@ -386,7 +400,10 @@ export class AttendanceOvertimeCalculationService {
     }
 
     if (statutoryRules.statutoryMaxMonthlyMinutes) {
-      const statutoryAvailableMonthly = Math.max(0, statutoryRules.statutoryMaxMonthlyMinutes - priorMonthly);
+      const statutoryAvailableMonthly = Math.max(
+        0,
+        statutoryRules.statutoryMaxMonthlyMinutes - priorMonthly,
+      );
       if (calculatedMinutes > statutoryAvailableMonthly) {
         appliedCap = {
           type: 'statutory',
@@ -405,7 +422,10 @@ export class AttendanceOvertimeCalculationService {
     // Only apply if verified jurisdiction-specific legal constraint is configured.
     if (statutoryRules.statutoryMaxQuarterlyMinutes && statutoryRules.isJurisdictionVerified) {
       const priorQuarterly = context.priorQuarterlyApprovedMinutes || 0;
-      const statutoryAvailableQuarterly = Math.max(0, statutoryRules.statutoryMaxQuarterlyMinutes - priorQuarterly);
+      const statutoryAvailableQuarterly = Math.max(
+        0,
+        statutoryRules.statutoryMaxQuarterlyMinutes - priorQuarterly,
+      );
       if (calculatedMinutes > statutoryAvailableQuarterly) {
         appliedCap = {
           type: 'statutory',

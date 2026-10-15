@@ -3558,7 +3558,9 @@ export const attendanceOvertimePolicies = mysqlTable(
     defaultSettlementPreference: mysqlEnum('default_settlement_preference', ['payable', 'comp_off'])
       .default('payable')
       .notNull(),
-    approvalHierarchy: varchar('approval_hierarchy', { length: 50 }).default('manager_then_hr').notNull(),
+    approvalHierarchy: varchar('approval_hierarchy', { length: 50 })
+      .default('manager_then_hr')
+      .notNull(),
     statutoryRules: json('statutory_rules').$type<Record<string, unknown>>(),
     isActive: boolean('is_active').default(true).notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -3590,8 +3592,12 @@ export const attendanceOvertimeRequests = mysqlTable(
       .notNull()
       .references(() => employees.id),
     workDate: varchar('work_date', { length: 10 }).notNull(),
-    dayType: mysqlEnum('day_type', ['regular', 'weekly_off', 'holiday']).default('regular').notNull(),
-    sourceRecordType: varchar('source_record_type', { length: 50 }).default('daily_attendance').notNull(),
+    dayType: mysqlEnum('day_type', ['regular', 'weekly_off', 'holiday'])
+      .default('regular')
+      .notNull(),
+    sourceRecordType: varchar('source_record_type', { length: 50 })
+      .default('daily_attendance')
+      .notNull(),
     sourceRecordId: varchar('source_record_id', { length: 64 }),
     policyId: varchar('policy_id', { length: 64 }),
     policyVersion: int('policy_version').default(1).notNull(),
@@ -3784,7 +3790,9 @@ export const attendanceCompOffPolicies = mysqlTable(
     minimumQualifyingMinutes: int('minimum_qualifying_minutes').default(240).notNull(),
     halfDayThresholdMinutes: int('half_day_threshold_minutes').default(240).notNull(),
     fullDayThresholdMinutes: int('full_day_threshold_minutes').default(480).notNull(),
-    conversionRate: decimal('conversion_rate', { precision: 4, scale: 2 }).default('1.00').notNull(),
+    conversionRate: decimal('conversion_rate', { precision: 4, scale: 2 })
+      .default('1.00')
+      .notNull(),
     roundingRule: mysqlEnum('rounding_rule', [
       'exact',
       'round_down_half_day',
@@ -3793,9 +3801,14 @@ export const attendanceCompOffPolicies = mysqlTable(
       .default('round_down_half_day')
       .notNull(),
     submissionDeadlineDays: int('submission_deadline_days').default(14).notNull(),
-    approvalHierarchy: varchar('approval_hierarchy', { length: 50 }).default('manager_then_hr').notNull(),
+    approvalHierarchy: varchar('approval_hierarchy', { length: 50 })
+      .default('manager_then_hr')
+      .notNull(),
     validityDays: int('validity_days').default(60).notNull(),
-    maxEarningLimitPerMonthDays: decimal('max_earning_limit_per_month_days', { precision: 4, scale: 2 })
+    maxEarningLimitPerMonthDays: decimal('max_earning_limit_per_month_days', {
+      precision: 4,
+      scale: 2,
+    })
       .default('2.00')
       .notNull(),
     allowCarryForward: boolean('allow_carry_forward').default(false).notNull(),
@@ -3831,29 +3844,41 @@ export const attendanceCompOffRequests = mysqlTable(
       .notNull()
       .references(() => employees.id),
     workDate: varchar('work_date', { length: 10 }).notNull(),
-    dayType: mysqlEnum('day_type', ['regular', 'weekly_off', 'holiday']).default('weekly_off').notNull(),
-    sourceRecordType: varchar('source_record_type', { length: 50 }).default('daily_attendance').notNull(),
+    dayType: mysqlEnum('day_type', ['regular', 'weekly_off', 'holiday'])
+      .default('weekly_off')
+      .notNull(),
+    sourceRecordType: varchar('source_record_type', { length: 50 })
+      .default('daily_attendance')
+      .notNull(),
     sourceRecordId: varchar('source_record_id', { length: 64 }),
     policyId: varchar('policy_id', { length: 64 }),
     policyVersion: int('policy_version').default(1).notNull(),
     scheduledMinutes: int('scheduled_minutes').default(0).notNull(),
     actualWorkedMinutes: int('actual_worked_minutes').default(0).notNull(),
     qualifyingWorkedMinutes: int('qualifying_worked_minutes').default(0).notNull(),
-    requestedCreditDays: decimal('requested_credit_days', { precision: 4, scale: 2 }).default('1.00').notNull(),
-    approvedCreditDays: decimal('approved_credit_days', { precision: 4, scale: 2 }).default('0.00').notNull(),
-    sourceIntervals: json('source_intervals').$type<Array<{
-      startTime: string;
-      endTime: string;
-      durationMinutes: number;
-    }>>(),
+    requestedCreditDays: decimal('requested_credit_days', { precision: 4, scale: 2 })
+      .default('1.00')
+      .notNull(),
+    approvedCreditDays: decimal('approved_credit_days', { precision: 4, scale: 2 })
+      .default('0.00')
+      .notNull(),
+    sourceIntervals: json('source_intervals').$type<
+      Array<{
+        startTime: string;
+        endTime: string;
+        durationMinutes: number;
+      }>
+    >(),
     reason: varchar('reason', { length: 500 }).notNull(),
     locationOrSite: varchar('location_or_site', { length: 255 }),
     taskOrProject: varchar('task_or_project', { length: 255 }),
-    evidenceAttachments: json('evidence_attachments').$type<Array<{
-      name: string;
-      url: string;
-      sizeBytes?: number;
-    }>>(),
+    evidenceAttachments: json('evidence_attachments').$type<
+      Array<{
+        name: string;
+        url: string;
+        sizeBytes?: number;
+      }>
+    >(),
     status: mysqlEnum('status', [
       'draft',
       'submitted',
@@ -4026,4 +4051,3 @@ export const attendanceCompOffAudits = mysqlTable(
 
 export type AttendanceCompOffAudit = typeof attendanceCompOffAudits.$inferSelect;
 export type NewAttendanceCompOffAudit = typeof attendanceCompOffAudits.$inferInsert;
-

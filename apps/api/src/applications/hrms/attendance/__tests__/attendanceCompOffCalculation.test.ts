@@ -223,7 +223,9 @@ describe('BEZENT HRMS — Comp-Off Calculation Engine (V1.0) Suite', () => {
     const res = calcService.calculateCompOff(context, basePolicy);
     expect(res.isEligible).toBe(true);
     expect(res.eligibleCreditDays).toBe(0.5); // capped from 1.0 to 0.5
-    expect(res.complianceNotes?.some((n) => n.includes('Capped by monthly maximum earning limit'))).toBe(true);
+    expect(
+      res.complianceNotes?.some((n) => n.includes('Capped by monthly maximum earning limit')),
+    ).toBe(true);
   });
 
   it('10. Validates source intervals for invalid format, inverted times, and overlaps', () => {

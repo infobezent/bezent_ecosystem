@@ -34,10 +34,7 @@ import {
   bulkPunchAction,
   exportPunchLogsCsv,
 } from '../api/attendanceApi';
-import {
-  fetchDepartments,
-  fetchWorkLocations,
-} from '../../api/organizationMastersApi';
+import { fetchDepartments, fetchWorkLocations } from '../../api/organizationMastersApi';
 import type {
   PunchLogItem,
   PunchLogSummaryCounters,

@@ -34,7 +34,8 @@ export class AttendanceOvertimeController {
       const filter = {
         startDate: typeof req.query.startDate === 'string' ? req.query.startDate : undefined,
         endDate: typeof req.query.endDate === 'string' ? req.query.endDate : undefined,
-        departmentId: typeof req.query.departmentId === 'string' ? req.query.departmentId : undefined,
+        departmentId:
+          typeof req.query.departmentId === 'string' ? req.query.departmentId : undefined,
         employeeId: typeof req.query.employeeId === 'string' ? req.query.employeeId : undefined,
       };
       const data = await this.service.getOverview(tenantId, companyId, filter);
@@ -54,7 +55,12 @@ export class AttendanceOvertimeController {
         throw new BadRequestError('employeeId and workDate query parameters are required.');
       }
 
-      const result = await this.service.getWorkdayContext(tenantId, companyId, employeeId, workDate);
+      const result = await this.service.getWorkdayContext(
+        tenantId,
+        companyId,
+        employeeId,
+        workDate,
+      );
       res.json({ success: true, data: result });
     } catch (err) {
       next(err);
@@ -66,8 +72,12 @@ export class AttendanceOvertimeController {
       const { tenantId, companyId } = req.companyContext!;
       const filter: OvertimeFilterQuery = {
         employeeId: typeof req.query.employeeId === 'string' ? req.query.employeeId : undefined,
-        departmentId: typeof req.query.departmentId === 'string' ? req.query.departmentId : undefined,
-        status: typeof req.query.status === 'string' ? (req.query.status as OvertimeRequestStatus) : undefined,
+        departmentId:
+          typeof req.query.departmentId === 'string' ? req.query.departmentId : undefined,
+        status:
+          typeof req.query.status === 'string'
+            ? (req.query.status as OvertimeRequestStatus)
+            : undefined,
         settlementStatus:
           typeof req.query.settlementStatus === 'string'
             ? (req.query.settlementStatus as OvertimeSettlementStatus)
@@ -172,7 +182,14 @@ export class AttendanceOvertimeController {
       const role = req.user?.memberships?.[0]?.role ?? 'payroll_admin';
       const body = req.body as AllocateOvertimeSettlementInput;
 
-      const data = await this.service.allocateSettlement(tenantId, companyId, id, body, userId, role);
+      const data = await this.service.allocateSettlement(
+        tenantId,
+        companyId,
+        id,
+        body,
+        userId,
+        role,
+      );
       res.json({ success: true, data });
     } catch (err) {
       next(err);

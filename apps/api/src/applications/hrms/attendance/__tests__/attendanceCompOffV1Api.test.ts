@@ -17,7 +17,10 @@ import {
   users,
 } from '../../../../db/schema.js';
 import { hashPassword } from '../../../../platform/auth/security.js';
-import { hrmsTestHeaders, signInForTest } from '../../../../platform/__tests__/support/testSession.js';
+import {
+  hrmsTestHeaders,
+  signInForTest,
+} from '../../../../platform/__tests__/support/testSession.js';
 
 describe.skipIf(!isDatabaseConfigured)(
   'BEZENT HRMS — Comp-Off V1.0 API Acceptance, Lifecycle & Integration Suite',
@@ -42,11 +45,21 @@ describe.skipIf(!isDatabaseConfigured)(
       const db = getDb();
 
       // Clean up previous test records
-      await db.delete(attendanceCompOffHandoffs).where(eq(attendanceCompOffHandoffs.employeeId, empId));
-      await db.delete(attendanceCompOffEntitlements).where(eq(attendanceCompOffEntitlements.employeeId, empId));
-      await db.delete(attendanceCompOffRequests).where(eq(attendanceCompOffRequests.employeeId, empId));
-      await db.delete(attendanceOvertimeSettlements).where(eq(attendanceOvertimeSettlements.employeeId, empId));
-      await db.delete(attendanceOvertimeRequests).where(eq(attendanceOvertimeRequests.employeeId, empId));
+      await db
+        .delete(attendanceCompOffHandoffs)
+        .where(eq(attendanceCompOffHandoffs.employeeId, empId));
+      await db
+        .delete(attendanceCompOffEntitlements)
+        .where(eq(attendanceCompOffEntitlements.employeeId, empId));
+      await db
+        .delete(attendanceCompOffRequests)
+        .where(eq(attendanceCompOffRequests.employeeId, empId));
+      await db
+        .delete(attendanceOvertimeSettlements)
+        .where(eq(attendanceOvertimeSettlements.employeeId, empId));
+      await db
+        .delete(attendanceOvertimeRequests)
+        .where(eq(attendanceOvertimeRequests.employeeId, empId));
       await db.delete(employeeAttendance).where(eq(employeeAttendance.employeeId, empId));
 
       // Ensure test employee exists
@@ -106,7 +119,10 @@ describe.skipIf(!isDatabaseConfigured)(
       reviewerHeaders = { authorization: `Bearer ${reviewerToken}`, 'x-company-id': companyId };
 
       // Ensure reviewer employee profile exists
-      const existingReviewerEmp = await db.select().from(employees).where(eq(employees.id, reviewerEmpId));
+      const existingReviewerEmp = await db
+        .select()
+        .from(employees)
+        .where(eq(employees.id, reviewerEmpId));
       if (existingReviewerEmp.length === 0) {
         await db.insert(employees).values({
           id: reviewerEmpId,
@@ -171,7 +187,9 @@ describe.skipIf(!isDatabaseConfigured)(
 
     it('1. GET /hrms/attendance/comp-off/eligibility evaluates workday attendance & qualifying credit', async () => {
       const res = await request(app)
-        .get(`/api/v1/hrms/attendance/comp-off/eligibility?employeeId=${empId}&workDate=${testDate}`)
+        .get(
+          `/api/v1/hrms/attendance/comp-off/eligibility?employeeId=${empId}&workDate=${testDate}`,
+        )
         .set(headers);
 
       expect(res.status).toBe(200);
@@ -215,7 +233,9 @@ describe.skipIf(!isDatabaseConfigured)(
         });
 
       expect(res.status).toBe(409);
-      expect(res.body.error.message).toContain('Multiple active claims for the same date are prohibited');
+      expect(res.body.error.message).toContain(
+        'Multiple active claims for the same date are prohibited',
+      );
     });
 
     it('4. Rejects request when credit exceeds policy-eligible duration', async () => {
@@ -233,9 +253,7 @@ describe.skipIf(!isDatabaseConfigured)(
     });
 
     it('5. GET /hrms/attendance/comp-off/overview returns accurate operational metrics', async () => {
-      const res = await request(app)
-        .get('/api/v1/hrms/attendance/comp-off/overview')
-        .set(headers);
+      const res = await request(app).get('/api/v1/hrms/attendance/comp-off/overview').set(headers);
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
@@ -317,7 +335,9 @@ describe.skipIf(!isDatabaseConfigured)(
       expect(res.body.data.length).toBeGreaterThanOrEqual(1);
 
       const handoff = res.body.data[0];
-      expect(handoff.idempotencyKey).toBe(`co_handoff_${tenantId}_${companyId}_${testEntitlementId}`);
+      expect(handoff.idempotencyKey).toBe(
+        `co_handoff_${tenantId}_${companyId}_${testEntitlementId}`,
+      );
       expect(handoff.creditDays).toBe(1.0);
       expect(handoff.leaveTypeCode).toBe('comp_off');
       expect(handoff.status).toBe('acknowledged');
@@ -328,7 +348,8 @@ describe.skipIf(!isDatabaseConfigured)(
         .post(`/api/v1/hrms/attendance/comp-off/entitlements/${testEntitlementId}/reverse`)
         .set(reviewerHeaders)
         .send({
-          reversalReason: 'Duplicate work logged in error by employee. Reversing credited entitlement.',
+          reversalReason:
+            'Duplicate work logged in error by employee. Reversing credited entitlement.',
         });
 
       expect(res.status).toBe(200);
@@ -400,8 +421,12 @@ describe.skipIf(!isDatabaseConfigured)(
 
     afterAll(async () => {
       const db = getDb();
-      await db.delete(attendanceOvertimeSettlements).where(eq(attendanceOvertimeSettlements.employeeId, empId));
-      await db.delete(attendanceOvertimeRequests).where(eq(attendanceOvertimeRequests.employeeId, empId));
+      await db
+        .delete(attendanceOvertimeSettlements)
+        .where(eq(attendanceOvertimeSettlements.employeeId, empId));
+      await db
+        .delete(attendanceOvertimeRequests)
+        .where(eq(attendanceOvertimeRequests.employeeId, empId));
     });
-  }
+  },
 );

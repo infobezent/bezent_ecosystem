@@ -149,7 +149,9 @@ export class AttendanceCompOffService {
           .limit(1);
 
         if (publishedAttPolicy) {
-          scheduledMinutes = Math.round(parseFloat(publishedAttPolicy.fullDayThresholdHours || '8') * 60);
+          scheduledMinutes = Math.round(
+            parseFloat(publishedAttPolicy.fullDayThresholdHours || '8') * 60,
+          );
         } else if (att?.shiftScheduleRef) {
           scheduledMinutes = 480;
         } else {
@@ -215,7 +217,8 @@ export class AttendanceCompOffService {
           eligibleCreditDays: 0,
           eligibleCreditMinutes: 0,
           isEligible: false,
-          nonEligibilityReason: 'No active Comp-Off policy configured for this organization or work date.',
+          nonEligibilityReason:
+            'No active Comp-Off policy configured for this organization or work date.',
         },
       };
     }
@@ -246,7 +249,9 @@ export class AttendanceCompOffService {
       throw new BadRequestError('Reason is required');
     }
     if (typeof input.requestedCreditDays !== 'number' || input.requestedCreditDays <= 0) {
-      throw new BadRequestError('Requested credit days must be a positive number (e.g. 0.5 or 1.0)');
+      throw new BadRequestError(
+        'Requested credit days must be a positive number (e.g. 0.5 or 1.0)',
+      );
     }
 
     // 2. Prevent duplicate active claims for the same work date
@@ -404,15 +409,20 @@ export class AttendanceCompOffService {
 
     // 2. Self-Approval Prevention
     if (current.submittedByUserId === reviewerUserId) {
-      throw new ForbiddenError('Self-approval violation: Requester cannot approve or reject their own claim.');
+      throw new ForbiddenError(
+        'Self-approval violation: Requester cannot approve or reject their own claim.',
+      );
     }
 
-    const isHrAdmin = reviewerRole === 'hr_manager' || reviewerRole === 'admin' || reviewerRole === 'super_admin';
+    const isHrAdmin =
+      reviewerRole === 'hr_manager' || reviewerRole === 'admin' || reviewerRole === 'super_admin';
     const isAssigned =
       current.assignedTo === reviewerUserId || current.assignedTo === reviewerRole || isHrAdmin;
 
     if (!isAssigned) {
-      throw new ForbiddenError('Access denied: You are not the assigned reviewer or authorized HR admin for this claim.');
+      throw new ForbiddenError(
+        'Access denied: You are not the assigned reviewer or authorized HR admin for this claim.',
+      );
     }
 
     if (input.decision === 'rejected') {
@@ -562,7 +572,11 @@ export class AttendanceCompOffService {
    * If the canonical Leave module is incomplete or does not have comp_off leave ledger,
    * leaves status as 'pending_handoff' / 'acknowledged' with full documented contract payload.
    */
-  async executeLeaveHandoff(tenantId: string, companyId: string, handoffId: string): Promise<AttendanceCompOffHandoff> {
+  async executeLeaveHandoff(
+    tenantId: string,
+    companyId: string,
+    handoffId: string,
+  ): Promise<AttendanceCompOffHandoff> {
     const handoff = await this.repo.getHandoffById(tenantId, companyId, handoffId);
     if (!handoff) {
       throw new NotFoundError(`Handoff record with ID '${handoffId}' not found.`);
@@ -690,7 +704,8 @@ export class AttendanceCompOffService {
       details: { reversalReason, entitlementId },
     });
 
-    const [updated] = (await this.repo.listEntitlements(tenantId, companyId, { id: entitlementId })).items;
+    const [updated] = (await this.repo.listEntitlements(tenantId, companyId, { id: entitlementId }))
+      .items;
     return updated!;
   }
 
@@ -806,7 +821,8 @@ export class AttendanceCompOffService {
     await this.repo.updateEntitlement(tenantId, companyId, entitlementId, { handoffId });
     await this.executeLeaveHandoff(tenantId, companyId, handoffId);
 
-    const [created] = (await this.repo.listEntitlements(tenantId, companyId, { id: entitlementId })).items;
+    const [created] = (await this.repo.listEntitlements(tenantId, companyId, { id: entitlementId }))
+      .items;
     return created!;
   }
 
@@ -827,7 +843,11 @@ export class AttendanceCompOffService {
     return this.repo.getApprovalQueue(tenantId, companyId, reviewerContext);
   }
 
-  async listEntitlements(tenantId: string, companyId: string, filter: CompOffEntitlementFilterQuery) {
+  async listEntitlements(
+    tenantId: string,
+    companyId: string,
+    filter: CompOffEntitlementFilterQuery,
+  ) {
     return this.repo.listEntitlements(tenantId, companyId, filter);
   }
 
@@ -835,15 +855,27 @@ export class AttendanceCompOffService {
     return this.repo.listHandoffs(tenantId, companyId, filter);
   }
 
-  async getOverview(tenantId: string, companyId: string, filter?: { startDate?: string; endDate?: string; departmentId?: string; employeeId?: string }) {
+  async getOverview(
+    tenantId: string,
+    companyId: string,
+    filter?: { startDate?: string; endDate?: string; departmentId?: string; employeeId?: string },
+  ) {
     return this.repo.getOverviewMetrics(tenantId, companyId, filter);
   }
 
-  async listPolicies(tenantId: string, companyId: string, status?: 'draft' | 'published' | 'archived') {
+  async listPolicies(
+    tenantId: string,
+    companyId: string,
+    status?: 'draft' | 'published' | 'archived',
+  ) {
     return this.repo.listPolicies(tenantId, companyId, status);
   }
 
-  async createPolicy(tenantId: string, companyId: string, input: Partial<AttendanceCompOffPolicy> & { policyName: string; effectiveFrom: string }) {
+  async createPolicy(
+    tenantId: string,
+    companyId: string,
+    input: Partial<AttendanceCompOffPolicy> & { policyName: string; effectiveFrom: string },
+  ) {
     const policyId = generateSurrogateId('att_co_pol_');
     return this.repo.createPolicy({
       id: policyId,

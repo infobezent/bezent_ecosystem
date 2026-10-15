@@ -35,10 +35,7 @@ import {
   downloadAttendanceCsv,
   fetchGeneralSettings,
 } from '../api/attendanceApi';
-import {
-  fetchDepartments,
-  fetchWorkLocations,
-} from '../../api/organizationMastersApi';
+import { fetchDepartments, fetchWorkLocations } from '../../api/organizationMastersApi';
 import type {
   DailyAttendanceItem,
   DailyLogSummaryCounters,

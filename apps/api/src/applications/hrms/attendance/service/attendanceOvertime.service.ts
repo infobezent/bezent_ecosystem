@@ -10,7 +10,12 @@
  * - Tenant and company isolation on all operations
  */
 
-import { BadRequestError, NotFoundError, ConflictError, ForbiddenError } from '../../../../app/errors/AppError.js';
+import {
+  BadRequestError,
+  NotFoundError,
+  ConflictError,
+  ForbiddenError,
+} from '../../../../app/errors/AppError.js';
 import { getDb } from '../../../../db/connection.js';
 import {
   employees,
@@ -167,8 +172,12 @@ export class AttendanceOvertimeService {
           .limit(1);
 
         if (publishedAttPolicy) {
-          const fullDayMins = Math.round(parseFloat(publishedAttPolicy.fullDayThresholdHours || '8') * 60);
-          const halfDayMins = Math.round(parseFloat(publishedAttPolicy.halfDayThresholdHours || '4') * 60);
+          const fullDayMins = Math.round(
+            parseFloat(publishedAttPolicy.fullDayThresholdHours || '8') * 60,
+          );
+          const halfDayMins = Math.round(
+            parseFloat(publishedAttPolicy.halfDayThresholdHours || '4') * 60,
+          );
           scheduledMinutes = att?.status === 'half_day' ? halfDayMins : fullDayMins;
           hasAuthoritativeBaseline = true;
         } else if (att?.shiftScheduleRef) {
@@ -190,8 +199,20 @@ export class AttendanceOvertimeService {
     const { startOfMonth, endOfMonth } = this.getMonthBounds(workDate);
 
     const [priorWeeklyApprovedMinutes, priorMonthlyApprovedMinutes] = await Promise.all([
-      this.repo.getPriorApprovedMinutesForWeek(tenantId, companyId, employeeId, startOfWeek, endOfWeek),
-      this.repo.getPriorApprovedMinutesForMonth(tenantId, companyId, employeeId, startOfMonth, endOfMonth),
+      this.repo.getPriorApprovedMinutesForWeek(
+        tenantId,
+        companyId,
+        employeeId,
+        startOfWeek,
+        endOfWeek,
+      ),
+      this.repo.getPriorApprovedMinutesForMonth(
+        tenantId,
+        companyId,
+        employeeId,
+        startOfMonth,
+        endOfMonth,
+      ),
     ]);
 
     const context: OvertimeWorkdayContext = {
@@ -247,7 +268,8 @@ export class AttendanceOvertimeService {
           extraWorkedMinutes: Math.max(0, actualWorkedMinutes - scheduledMinutes),
           eligibleOtMinutes: 0,
           isEligible: false,
-          nonEligibilityReason: 'No active overtime policy configured for this organization or work date.',
+          nonEligibilityReason:
+            'No active overtime policy configured for this organization or work date.',
           roundingAdjustmentMinutes: 0,
         },
       };
@@ -444,17 +466,23 @@ export class AttendanceOvertimeService {
     }
 
     if (req.status !== 'submitted' && req.status !== 'pending_approval') {
-      throw new BadRequestError(`Cannot decide request in status '${req.status}'. Must be submitted or pending approval.`);
+      throw new BadRequestError(
+        `Cannot decide request in status '${req.status}'. Must be submitted or pending approval.`,
+      );
     }
 
     // 2. Concurrency check
     if (input.expectedVersion !== undefined && req.version !== input.expectedVersion) {
-      throw new ConflictError('Overtime request was modified by another transaction. Please refresh and try again.');
+      throw new ConflictError(
+        'Overtime request was modified by another transaction. Please refresh and try again.',
+      );
     }
 
     // 3. Self-approval prevention
     if (actorUserId === req.submittedByUserId) {
-      throw new ForbiddenError('Self-approval violation: Requester cannot approve or reject their own overtime request.');
+      throw new ForbiddenError(
+        'Self-approval violation: Requester cannot approve or reject their own overtime request.',
+      );
     }
 
     const [actorEmp] = await db
@@ -469,7 +497,9 @@ export class AttendanceOvertimeService {
       );
 
     if (actorEmp && actorEmp.id === req.employeeId) {
-      throw new ForbiddenError('Self-approval violation: An employee cannot approve their own overtime claim.');
+      throw new ForbiddenError(
+        'Self-approval violation: An employee cannot approve their own overtime claim.',
+      );
     }
 
     // 4. Process Decision
@@ -498,7 +528,8 @@ export class AttendanceOvertimeService {
         clientIp: null,
       });
     } else if (input.decision === 'approved') {
-      const approvedMinutes = input.approvedOtMinutes !== undefined ? input.approvedOtMinutes : req.requestedOtMinutes;
+      const approvedMinutes =
+        input.approvedOtMinutes !== undefined ? input.approvedOtMinutes : req.requestedOtMinutes;
       if (approvedMinutes <= 0) {
         throw new BadRequestError('Approved overtime minutes must be greater than zero.');
       }
@@ -651,7 +682,9 @@ export class AttendanceOvertimeService {
     }
 
     if (req.status !== 'approved') {
-      throw new BadRequestError(`Cannot allocate settlement for request with status '${req.status}'. Must be approved.`);
+      throw new BadRequestError(
+        `Cannot allocate settlement for request with status '${req.status}'. Must be approved.`,
+      );
     }
 
     const payableMins = input.payableMinutes || 0;
@@ -669,13 +702,19 @@ export class AttendanceOvertimeService {
     }
 
     // Verify policy allowances
-    const policy = req.policyId ? await this.repo.getPolicyById(tenantId, companyId, req.policyId) : null;
+    const policy = req.policyId
+      ? await this.repo.getPolicyById(tenantId, companyId, req.policyId)
+      : null;
     if (policy) {
       if (payableMins > 0 && !policy.allowPayable) {
-        throw new BadRequestError('Payable overtime is not permitted by the governing overtime policy.');
+        throw new BadRequestError(
+          'Payable overtime is not permitted by the governing overtime policy.',
+        );
       }
       if (compOffMins > 0 && !policy.allowCompOff) {
-        throw new BadRequestError('Comp-Off conversion is not permitted by the governing overtime policy.');
+        throw new BadRequestError(
+          'Comp-Off conversion is not permitted by the governing overtime policy.',
+        );
       }
     }
 
@@ -779,7 +818,9 @@ export class AttendanceOvertimeService {
 
     const req = await this.repo.findRequestRecordById(tenantId, companyId, setRecord.requestId);
     if (!req) {
-      throw new NotFoundError(`Associated overtime request with ID '${setRecord.requestId}' not found.`);
+      throw new NotFoundError(
+        `Associated overtime request with ID '${setRecord.requestId}' not found.`,
+      );
     }
 
     // Mark settlement as reversed
@@ -872,7 +913,11 @@ export class AttendanceOvertimeService {
     return policy;
   }
 
-  async createPolicy(tenantId: string, companyId: string, input: Partial<NewAttendanceOvertimePolicy>) {
+  async createPolicy(
+    tenantId: string,
+    companyId: string,
+    input: Partial<NewAttendanceOvertimePolicy>,
+  ) {
     const policyId = generateSurrogateId('att_ot_pol_');
     return this.repo.createPolicy({
       id: policyId,
@@ -890,7 +935,11 @@ export class AttendanceOvertimeService {
       isEnabled: input.isEnabled ?? true,
       eligibleEmploymentTypes: input.eligibleEmploymentTypes || ['full_time'],
       eligibleDepartments: input.eligibleDepartments || [],
-      workdayEligibility: input.workdayEligibility || { regularWorkday: true, weeklyOff: true, holiday: true },
+      workdayEligibility: input.workdayEligibility || {
+        regularWorkday: true,
+        weeklyOff: true,
+        holiday: true,
+      },
       minimumQualifyingMinutes: input.minimumQualifyingMinutes ?? 30,
       dailyCapMinutes: input.dailyCapMinutes ?? 240,
       weeklyCapMinutes: input.weeklyCapMinutes ?? 720,

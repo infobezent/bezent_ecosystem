@@ -64,13 +64,7 @@ import {
 } from '../api/attendanceCompOffApi';
 
 type CompOffTab =
-  | 'overview'
-  | 'requests'
-  | 'approvals'
-  | 'entitlements'
-  | 'handoffs'
-  | 'policies'
-  | 'audits';
+  'overview' | 'requests' | 'approvals' | 'entitlements' | 'handoffs' | 'policies' | 'audits';
 
 function getErrorMessage(err: unknown, fallback: string): string {
   if (err instanceof Error) return err.message;
@@ -156,10 +150,10 @@ export function AttendanceCompOffPage() {
         typeof data?.total === 'number'
           ? data.total
           : Array.isArray(data?.items)
-          ? data.items.length
-          : Array.isArray(data)
-          ? (data as unknown[]).length
-          : 0,
+            ? data.items.length
+            : Array.isArray(data)
+              ? (data as unknown[]).length
+              : 0,
       );
     } catch (err) {
       setError(getErrorMessage(err, 'Failed to load Comp-Off claims.'));
@@ -178,8 +172,8 @@ export function AttendanceCompOffPage() {
         Array.isArray(data)
           ? data
           : Array.isArray((data as { items?: CompOffRequestItem[] })?.items)
-          ? (data as { items: CompOffRequestItem[] }).items
-          : [],
+            ? (data as { items: CompOffRequestItem[] }).items
+            : [],
       );
     } catch (err) {
       setError(getErrorMessage(err, 'Failed to load approval queue.'));
@@ -201,10 +195,10 @@ export function AttendanceCompOffPage() {
         typeof data?.total === 'number'
           ? data.total
           : Array.isArray(data?.items)
-          ? data.items.length
-          : Array.isArray(data)
-          ? (data as unknown[]).length
-          : 0,
+            ? data.items.length
+            : Array.isArray(data)
+              ? (data as unknown[]).length
+              : 0,
       );
     } catch (err) {
       setError(getErrorMessage(err, 'Failed to load entitlements ledger.'));
@@ -226,10 +220,10 @@ export function AttendanceCompOffPage() {
         typeof data?.total === 'number'
           ? data.total
           : Array.isArray(data?.items)
-          ? data.items.length
-          : Array.isArray(data)
-          ? (data as unknown[]).length
-          : 0,
+            ? data.items.length
+            : Array.isArray(data)
+              ? (data as unknown[]).length
+              : 0,
       );
     } catch (err) {
       setError(getErrorMessage(err, 'Failed to load leave handoffs.'));
@@ -248,8 +242,8 @@ export function AttendanceCompOffPage() {
         Array.isArray(data)
           ? data
           : Array.isArray((data as { items?: CompOffPolicyItem[] })?.items)
-          ? (data as { items: CompOffPolicyItem[] }).items
-          : [],
+            ? (data as { items: CompOffPolicyItem[] }).items
+            : [],
       );
     } catch (err) {
       setError(getErrorMessage(err, 'Failed to load Comp-Off policies.'));
@@ -266,7 +260,15 @@ export function AttendanceCompOffPage() {
     else if (activeTab === 'handoffs') loadHandoffs();
     else if (activeTab === 'policies') loadPolicies();
     else if (activeTab === 'audits') loadRequests();
-  }, [activeTab, loadOverview, loadRequests, loadApprovalQueue, loadEntitlements, loadHandoffs, loadPolicies]);
+  }, [
+    activeTab,
+    loadOverview,
+    loadRequests,
+    loadApprovalQueue,
+    loadEntitlements,
+    loadHandoffs,
+    loadPolicies,
+  ]);
 
   // Run Real-Time Eligibility Evaluation
   const handleEvaluateEligibility = async () => {
@@ -545,16 +547,15 @@ export function AttendanceCompOffPage() {
 
           <Card title="Governance & Double Benefit Protection Rules">
             <Stack gap="md">
-              <p>
-                BEZENT HRMS Comp-Off V1.0 enforces authoritative attendance reconciliation:
-              </p>
+              <p>BEZENT HRMS Comp-Off V1.0 enforces authoritative attendance reconciliation:</p>
               <Grid columns={2} gap="md">
                 <Card>
                   <Stack gap="sm">
                     <strong>1. Overtime vs Comp-Off Protection</strong>
                     <small>
-                      An approved work interval cannot generate both payable overtime and Comp-Off credit.
-                      Any allocated overtime minutes are systematically deducted before qualifying credit is evaluated.
+                      An approved work interval cannot generate both payable overtime and Comp-Off
+                      credit. Any allocated overtime minutes are systematically deducted before
+                      qualifying credit is evaluated.
                     </small>
                   </Stack>
                 </Card>
@@ -562,8 +563,9 @@ export function AttendanceCompOffPage() {
                   <Stack gap="sm">
                     <strong>2. Conversion Thresholds & Daily Baseline</strong>
                     <small>
-                      Qualifying duration requires verified full-day (480 mins) or half-day (240 mins) thresholds.
-                      Missing or incomplete punches require regularization before entitlement eligibility.
+                      Qualifying duration requires verified full-day (480 mins) or half-day (240
+                      mins) thresholds. Missing or incomplete punches require regularization before
+                      entitlement eligibility.
                     </small>
                   </Stack>
                 </Card>
@@ -571,8 +573,9 @@ export function AttendanceCompOffPage() {
                   <Stack gap="sm">
                     <strong>3. Canonical Leave Hand-off Contract</strong>
                     <small>
-                      Attendance durably records earning entitlements and synchronizes via idempotent leave handoff
-                      contracts without creating an uncoordinated secondary leave ledger inside Attendance.
+                      Attendance durably records earning entitlements and synchronizes via
+                      idempotent leave handoff contracts without creating an uncoordinated secondary
+                      leave ledger inside Attendance.
                     </small>
                   </Stack>
                 </Card>
@@ -580,8 +583,8 @@ export function AttendanceCompOffPage() {
                   <Stack gap="sm">
                     <strong>4. Immutable Audit & Self-Approval Prevention</strong>
                     <small>
-                      Requesters cannot review their own claims. Every state transition is recorded in an immutable
-                      audit log with optimistic concurrency version control.
+                      Requesters cannot review their own claims. Every state transition is recorded
+                      in an immutable audit log with optimistic concurrency version control.
                     </small>
                   </Stack>
                 </Card>
@@ -661,11 +664,19 @@ export function AttendanceCompOffPage() {
                       <TableCell>{renderBadge(r.status)}</TableCell>
                       <TableCell>
                         <Inline gap="sm">
-                          <Button size="sm" variant="secondary" onClick={() => handleViewDetail(r.id)}>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => handleViewDetail(r.id)}
+                          >
                             View
                           </Button>
                           {['submitted', 'pending_approval'].includes(r.status) && (
-                            <Button size="sm" variant="secondary" onClick={() => handleWithdraw(r.id)}>
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => handleWithdraw(r.id)}
+                            >
                               Withdraw
                             </Button>
                           )}
@@ -1037,7 +1048,11 @@ export function AttendanceCompOffPage() {
                       <TableCell>{String(r.submittedAt || '').slice(0, 19)}</TableCell>
                       <TableCell>{r.reviewedByUserId || 'Pending Review'}</TableCell>
                       <TableCell>
-                        <Button size="sm" variant="secondary" onClick={() => handleViewDetail(r.id)}>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => handleViewDetail(r.id)}
+                        >
                           Audit Detail
                         </Button>
                       </TableCell>
@@ -1073,7 +1088,11 @@ export function AttendanceCompOffPage() {
             required
           />
 
-          <Button variant="secondary" onClick={handleEvaluateEligibility} disabled={eligibilityCheck.loading}>
+          <Button
+            variant="secondary"
+            onClick={handleEvaluateEligibility}
+            disabled={eligibilityCheck.loading}
+          >
             {eligibilityCheck.loading ? 'Evaluating...' : 'Evaluate Eligibility & Worked Duration'}
           </Button>
 
@@ -1157,7 +1176,9 @@ export function AttendanceCompOffPage() {
       <Modal
         isOpen={detailModalOpen}
         onClose={() => setDetailModalOpen(false)}
-        title={selectedRequest ? `Claim Details: ${selectedRequest.requestNumber}` : 'Claim Details'}
+        title={
+          selectedRequest ? `Claim Details: ${selectedRequest.requestNumber}` : 'Claim Details'
+        }
       >
         {selectedRequest && (
           <Stack gap="md">
@@ -1205,7 +1226,7 @@ export function AttendanceCompOffPage() {
             )}
 
             <Card title="Audit Log">
-              {((selectedRequest.audits ?? []).length === 0) ? (
+              {(selectedRequest.audits ?? []).length === 0 ? (
                 <small>No audit events recorded for this request.</small>
               ) : (
                 <Table>
@@ -1307,8 +1328,8 @@ export function AttendanceCompOffPage() {
         {targetEntitlement && (
           <Stack gap="md">
             <Alert variant="warning" title="Warning">
-              Reversing this entitlement will roll back credit from the canonical Leave ledger.
-              This action is permanent and audited.
+              Reversing this entitlement will roll back credit from the canonical Leave ledger. This
+              action is permanent and audited.
             </Alert>
 
             <Stack gap="none">
