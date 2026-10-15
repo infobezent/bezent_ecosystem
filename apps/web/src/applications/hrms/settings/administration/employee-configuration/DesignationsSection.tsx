@@ -35,7 +35,7 @@ import {
   deactivateDesignation,
   reactivateDesignation,
 } from './api/designationApi';
-import { fetchDepartments } from '../../../../company-admin/organization/api/departmentApi';
+import { fetchDepartments } from '../../../api/organizationMastersApi';
 import type { DesignationRecord, DesignationStatus } from './types/designation';
 import type { DepartmentRecord } from '../../../../company-admin/organization/types/department';
 

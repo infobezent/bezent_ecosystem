@@ -13,18 +13,18 @@
 
 :root {
   --shell-topbar-height: 64px;
-  --shell-sidebar-width: 90px;
+  --shell-sidebar-width: 104px;
   --shell-right-rail-width: 56px;
   --shell-bottom-bar-height: 36px;
   --shell-utility-drawer-width: 370px;
   --shell-ai-panel-width: 340px;
 
-  /* Left-nav item geometry — old `SIDEBAR_NAV_TOKENS` (Phase 0B.5). */
-  --shell-nav-item-width: 78px;
-  --shell-nav-item-height: 68px;
-  --shell-nav-item-gap: 2px;
-  --shell-nav-label-max-width: 74px;
-  --shell-nav-label-area-height: 24px;
+  /* Left-nav item geometry (104px rail, 44x44 tile, 8px gap) */
+  --shell-nav-item-width: 88px;
+  --shell-nav-item-height: 64px;
+  --shell-nav-item-gap: 8px;
+  --shell-nav-label-max-width: 96px;
+  --shell-nav-label-area-height: 16px;
   --shell-subnav-flyout-width: 250px;
   --shell-launcher-width: 710px;
 

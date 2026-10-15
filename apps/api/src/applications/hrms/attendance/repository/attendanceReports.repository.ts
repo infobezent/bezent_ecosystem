@@ -8,6 +8,7 @@ import {
   attendanceExceptions,
   attendanceRegularizations,
   attendanceOnDutyRequests,
+  attendanceOvertimeRequests,
   employeeLeaveRequests,
   auditLogs,
   attendanceSavedReports,
@@ -565,10 +566,22 @@ export class AttendanceReportsRepository {
         firstName: employees.firstName,
         lastName: employees.lastName,
         departmentName: departments.name,
+        approvedOtMinutes: attendanceOvertimeRequests.approvedOtMinutes,
+        otStatus: attendanceOvertimeRequests.status,
       })
       .from(employeeAttendance)
       .innerJoin(employees, eq(employeeAttendance.employeeId, employees.id))
       .leftJoin(departments, eq(employees.departmentId, departments.id))
+      .leftJoin(
+        attendanceOvertimeRequests,
+        and(
+          eq(attendanceOvertimeRequests.employeeId, employeeAttendance.employeeId),
+          eq(attendanceOvertimeRequests.workDate, employeeAttendance.date),
+          eq(attendanceOvertimeRequests.tenantId, tenantId),
+          eq(attendanceOvertimeRequests.companyId, companyId),
+          eq(attendanceOvertimeRequests.status, 'approved'),
+        ),
+      )
       .where(and(...conditions))
       .orderBy(desc(employeeAttendance.date));
 
@@ -580,6 +593,11 @@ export class AttendanceReportsRepository {
         Number(((r.workedMinutes - scheduledMinutes) / 60).toFixed(2)),
       );
 
+      const hasApprovedOt =
+        r.approvedOtMinutes !== null &&
+        r.approvedOtMinutes !== undefined &&
+        r.otStatus === 'approved';
+
       return {
         date: r.date,
         employeeId: r.employeeCode || r.employeeId,
@@ -588,8 +606,11 @@ export class AttendanceReportsRepository {
         scheduledHours: 8.0,
         actualWorkedHours,
         extraWorkedHours,
-        approvedOtHours: 'N/A', // Rule: do not invent approved overtime without dedicated approval workflow
-        approvalStatus: 'N/A',
+        approvedOtHours:
+          hasApprovedOt && r.approvedOtMinutes != null
+            ? Number((r.approvedOtMinutes / 60).toFixed(2))
+            : 'N/A',
+        approvalStatus: hasApprovedOt ? 'Approved' : 'N/A',
         otPolicy: 'Pre-Approval Required',
         processingStatus: capitalize(r.processingState),
       };

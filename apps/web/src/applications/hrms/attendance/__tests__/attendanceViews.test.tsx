@@ -60,7 +60,7 @@ describe('HRMS Attendance Module V1 Frontend', () => {
   });
 
   describe('Attendance Navigation and Flyout', () => {
-    it('defines exactly the 8 canonical Attendance flyout items in hrmsNavigation', () => {
+    it('defines exactly the 10 canonical Attendance flyout items in hrmsNavigation', () => {
       const attendanceNav = hrmsNavigation.destinations.find((item) => item.id === 'attendance');
       expect(attendanceNav).toBeDefined();
       expect(attendanceNav?.children).toBeDefined();
@@ -73,6 +73,8 @@ describe('HRMS Attendance Module V1 Frontend', () => {
         'punch-logs',
         'regularization',
         'on-duty',
+        'overtime',
+        'comp-off',
         'exceptions',
         'reports',
       ]);

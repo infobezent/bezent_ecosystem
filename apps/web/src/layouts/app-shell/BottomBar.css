@@ -11,7 +11,7 @@
   display: flex;
   align-items: center;
   padding: 0 14px;
-  background: var(--bg-footer, var(--bg-header));
+  background: var(--shell-bottom-bar-bg, var(--bg-footer, #f6f8fc));
   /* BottomBar visually continues the soft application canvas with no divider line. */
 }
 

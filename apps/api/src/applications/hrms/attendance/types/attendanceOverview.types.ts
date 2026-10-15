@@ -72,6 +72,7 @@ export interface DepartmentComparisonItem {
 export type ActionQueueType =
   | 'pending_regularization'
   | 'pending_on_duty'
+  | 'pending_overtime_claims'
   | 'unresolved_exceptions'
   | 'missing_punch_issues'
   | 'pending_monthly_review'

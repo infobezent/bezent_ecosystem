@@ -6,3 +6,5 @@ export * from './AttendanceRegularizationPage';
 export * from './AttendanceOnDutyPage';
 export * from './AttendanceExceptionsPage';
 export * from './AttendanceReportsPage';
+export * from './AttendanceOvertimePage';
+export * from './AttendanceCompOffPage';

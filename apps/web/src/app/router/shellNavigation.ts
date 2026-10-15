@@ -22,37 +22,87 @@ export function toShellNavItems(
   app: BezentApplication,
   activeId?: string,
   canFn?: (permission: string) => boolean,
+  dynamicIds?: string[],
 ): ShellNavItem[] {
+  const isAccessible = (d: (typeof app.navigation.destinations)[number]) => {
+    if (d.permissionKey && canFn && !canFn(d.permissionKey)) return false;
+    if (d.children !== undefined) {
+      const accessibleChildren = d.children.filter((c) => {
+        if (c.permissionKey && canFn && !canFn(c.permissionKey)) return false;
+        return true;
+      });
+      if (accessibleChildren.length === 0) return false;
+    }
+    return true;
+  };
+
+  const toNavItem = (d: (typeof app.navigation.destinations)[number]): ShellNavItem => {
+    const accessibleChildren = d.children
+      ? d.children.filter((c) => {
+          if (c.permissionKey && canFn && !canFn(c.permissionKey)) return false;
+          return true;
+        })
+      : undefined;
+
+    return {
+      id: d.id,
+      label: d.label,
+      flyoutTitle: d.flyoutTitle,
+      icon: d.icon,
+      subtitle: d.subtitle,
+      subItems: accessibleChildren?.map((c) => ({ id: c.id, label: c.label, icon: c.icon })),
+    };
+  };
+
+  if (dynamicIds) {
+    const destMap = new Map(app.navigation.destinations.map((d) => [d.id, d]));
+    const items: ShellNavItem[] = [];
+
+    // 1. Fixed top items: Dashboard, then Administration immediately below
+    const dashboardDest = destMap.get('dashboard');
+    if (dashboardDest && isAccessible(dashboardDest)) {
+      items.push(toNavItem(dashboardDest));
+    }
+    const adminDest = destMap.get('administration') ?? destMap.get('admin');
+    if (adminDest && isAccessible(adminDest) && adminDest !== dashboardDest) {
+      items.push(toNavItem(adminDest));
+    }
+
+    // 2. Dynamic items in ordered sequence (excluding fixed items and settings)
+    for (const id of dynamicIds) {
+      if (id === 'dashboard' || id === 'administration' || id === 'admin' || id === 'settings') {
+        continue;
+      }
+      const dest = destMap.get(id);
+      if (dest && isAccessible(dest) && !items.some((i) => i.id === dest.id)) {
+        items.push(toNavItem(dest));
+      }
+    }
+
+    // 3. If activeId is a dynamic destination not in dynamicIds, keep it visible immediately above More
+    if (
+      activeId &&
+      activeId !== 'dashboard' &&
+      activeId !== 'administration' &&
+      activeId !== 'admin' &&
+      activeId !== 'settings' &&
+      !items.some((i) => i.id === activeId)
+    ) {
+      const activeDest = destMap.get(activeId);
+      if (activeDest && isAccessible(activeDest)) {
+        items.push(toNavItem(activeDest));
+      }
+    }
+
+    return items;
+  }
+
   return app.navigation.destinations
     .filter((d) => {
       if (!d.sidebar && !(d.id === activeId && d.categoryId)) return false;
-      if (d.permissionKey && canFn && !canFn(d.permissionKey)) return false;
-      if (d.children !== undefined) {
-        const accessibleChildren = d.children.filter((c) => {
-          if (c.permissionKey && canFn && !canFn(c.permissionKey)) return false;
-          return true;
-        });
-        if (accessibleChildren.length === 0) return false;
-      }
-      return true;
+      return isAccessible(d);
     })
-    .map((d) => {
-      const accessibleChildren = d.children
-        ? d.children.filter((c) => {
-            if (c.permissionKey && canFn && !canFn(c.permissionKey)) return false;
-            return true;
-          })
-        : undefined;
-
-      return {
-        id: d.id,
-        label: d.label,
-        flyoutTitle: d.flyoutTitle,
-        icon: d.icon,
-        subtitle: d.subtitle,
-        subItems: accessibleChildren?.map((c) => ({ id: c.id, label: c.label, icon: c.icon })),
-      };
-    });
+    .map(toNavItem);
 }
 
 /** Every destination that has a launcher category, for the More launcher. */
@@ -61,6 +111,7 @@ export function toShellLauncher(
   active: ActiveNavigation | undefined,
   navigateTo: (path: string) => void,
   canFn?: (permission: string) => boolean,
+  onModuleSelect?: (id: string) => void,
 ): ShellLauncher {
   const items: ShellLauncherItem[] = app.navigation.destinations.flatMap((d) => {
     if (!d.categoryId) return [];
@@ -90,6 +141,7 @@ export function toShellLauncher(
     items,
     activeItemId: active?.destinationId,
     onSelect: (id) => {
+      onModuleSelect?.(id);
       const destination = app.navigation.destinations.find((d) => d.id === id);
       if (destination) {
         const accessibleChildren = destination.children?.filter((c) => {

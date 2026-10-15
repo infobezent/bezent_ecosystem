@@ -32,6 +32,7 @@ import {
   attendanceSecuritySettings,
   attendancePayrollSettings,
   attendanceDevices,
+  attendanceOvertimePolicies,
 } from './schema.js';
 import { and, eq } from 'drizzle-orm';
 import { createUnusableCredential } from '../platform/auth/security.js';
@@ -1440,6 +1441,47 @@ export async function seedDatabase() {
       status: 'testing',
       firmwareVersion: 'v2.4.1-build88',
       metadata: { protocol: 'ZK-Pull-SDK', syncIntervalSec: 30 },
+    });
+  }
+
+  // 23. Default Attendance Overtime Policy
+  const existingOtPolicy = await db
+    .select()
+    .from(attendanceOvertimePolicies)
+    .where(eq(attendanceOvertimePolicies.companyId, companyId));
+  if (existingOtPolicy.length === 0) {
+    await db.insert(attendanceOvertimePolicies).values({
+      id: 'att_ot_pol_demo_01',
+      tenantId,
+      companyId,
+      policyName: 'Standard Overtime Policy',
+      version: 1,
+      status: 'published',
+      description: 'Standard company overtime policy with daily, weekly and monthly limits.',
+      scope: 'company',
+      overridesPriority: 0,
+      effectiveFrom: '2024-01-01',
+      effectiveTo: null,
+      isEnabled: true,
+      eligibleEmploymentTypes: ['full_time', 'contract'],
+      eligibleDepartments: [],
+      workdayEligibility: { regularWorkday: true, weeklyOff: true, holiday: true },
+      minimumQualifyingMinutes: 60,
+      dailyCapMinutes: 240,
+      weeklyCapMinutes: 720,
+      monthlyCapMinutes: 2400,
+      roundingRule: 'round_down_15',
+      requiresPreApproval: false,
+      submissionWindowDays: 14,
+      allowPayable: true,
+      allowCompOff: true,
+      defaultSettlementPreference: 'payable',
+      approvalHierarchy: 'manager_then_hr',
+      statutoryRules: {
+        statutoryMaxDailyMinutes: 300,
+        statutoryMaxWeeklyMinutes: 900,
+      },
+      isActive: true,
     });
   }
 

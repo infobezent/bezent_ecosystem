@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { BezentNavIcon } from '../../design-system/icons';
+import { BezentNavIcon, type BezentIconName } from '../../design-system/icons';
+import { Tooltip } from '../../design-system/components/Tooltip';
 import { SubNavFlyout } from './SubNavFlyout';
 import type { ShellNavItem } from './types';
 import './LeftSidebar.css';
@@ -18,6 +19,10 @@ export interface LeftSidebarProps {
     onToggle: () => void;
     hasLauncherOnlyItems?: boolean;
   };
+  /** Fixed Settings item anchored at the bottom of the Left Sidebar (Change 01) */
+  settingsItem?: ShellNavItem | null;
+  /** Selection callback when bottom Settings is clicked */
+  onSettingsSelect?: () => void;
   /** Optional container height override for deterministic testing */
   testAvailableHeight?: number;
   /** Optional flyout parent ID override for deterministic testing */
@@ -34,13 +39,62 @@ export function canItemOpenFlyout(item: ShellNavItem): boolean {
 }
 
 /**
- * Canonical layout tokens from design-system/tokens/layout.css:
- * --shell-nav-item-height: 68px
- * --shell-nav-item-gap: 2px
+ * Short labels mapping per specification:
+ * - Administration: 'Administration' (Change 01)
+ * - Settings: 'Settings'
+ * - Leave, Attendance, Timesheets, Performance.
  */
-const NAV_ITEM_HEIGHT = 68;
-const NAV_ITEM_GAP = 2;
-const NAV_LIST_PADDING_BOTTOM = 8;
+const SHORT_NAV_LABELS: Record<string, string> = {
+  dashboard: 'Dashboard',
+  administration: 'Administration',
+  admin: 'Administration',
+  leave: 'Leave',
+  attendance: 'Attendance',
+  timesheets: 'Timesheets',
+  performance: 'Performance',
+  settings: 'Settings',
+};
+
+export function getShortNavLabel(item: ShellNavItem): string {
+  const shortLabel = SHORT_NAV_LABELS[item.id];
+  if (shortLabel) {
+    return shortLabel;
+  }
+  if (item.label.toLowerCase() === 'administration' || item.label.toLowerCase() === 'admin') {
+    return 'Administration';
+  }
+  if (item.label.toLowerCase() === 'settings' || item.label.toLowerCase() === 'hr settings') {
+    return 'Settings';
+  }
+  return item.label;
+}
+
+export function isAdminNavItem(item: ShellNavItem): boolean {
+  return (
+    item.id === 'administration' ||
+    item.id === 'admin' ||
+    item.label.toLowerCase() === 'administration' ||
+    item.label.toLowerCase() === 'admin'
+  );
+}
+
+export function isSettingsNavItem(item: ShellNavItem): boolean {
+  return (
+    item.id === 'settings' ||
+    item.label.toLowerCase() === 'settings' ||
+    item.label.toLowerCase() === 'hr settings'
+  );
+}
+
+/**
+ * Canonical layout tokens from design-system/tokens/layout.css:
+ * --shell-nav-item-height: 64px
+ * --shell-nav-item-gap: 8px
+ */
+const NAV_ITEM_HEIGHT = 64;
+const NAV_ITEM_GAP = 8;
+const NAV_LIST_PADDING_BOTTOM = 6;
+const PINNED_BOTTOM_HEIGHT = 64 + 16; // 64px item + 1px divider + margins
 
 function getRequiredHeight(count: number): number {
   if (count <= 0) return 0;
@@ -48,19 +102,12 @@ function getRequiredHeight(count: number): number {
 }
 
 /**
- * Global left navigation rail. Source: old approved UI `LeftNav` +
- * `ZohoRailBtn` (`App.tsx` 621-1019). It renders whatever `items` it is
- * given — the catalog (HRMS or otherwise) is supplied by the caller.
- * The More button (when given) opens the generic launcher; the old
- * user-swappable dynamic slot needed persisted preferences and is not
- * migrated.
- *
- * Flyout model: ONE state value, `flyoutParentId`, decides which item (if
- * any) owns the sub-navigation flyout, so at most one flyout can exist.
- * It is driven by hover/focus only and is independent of selection, which
- * comes from the URL through `activeId`. The flyout is rendered inside the
- * owning item's wrapper (so it is CSS-anchored to that item, scroll-safe,
- * with no inline style) — but only for the owner, never for other items.
+ * Global left navigation rail.
+ * - 104px width, flat on shell background
+ * - 44x44 rounded-6 tile with 22px centered icon
+ * - Short label below (12px, 500 weight, 1 line)
+ * - Active: accent-soft fill, weight 600, 6px radius
+ * - Structure: Dashboard (fixed) -> Administration (fixed) -> Dynamic items -> More -> Settings (fixed bottom)
  */
 export function LeftSidebar({
   items,
@@ -69,6 +116,8 @@ export function LeftSidebar({
   activeSubId,
   onSubSelect,
   more,
+  settingsItem,
+  onSettingsSelect,
   testAvailableHeight,
   testFlyoutParentId,
 }: LeftSidebarProps) {
@@ -86,16 +135,14 @@ export function LeftSidebar({
     cancelClose();
     setFlyoutParentId(null);
   }, [cancelClose]);
-  // Old behaviour: a 200ms grace, one timer for the whole sidebar. Entering
-  // any item cancels it and takes ownership immediately (no stacking).
+
   const scheduleClose = () => {
     cancelClose();
     closeTimer.current = setTimeout(() => setFlyoutParentId(null), 200);
   };
+
   const openFlyout = (item: ShellNavItem) => {
     cancelClose();
-    // Items without sub-navigation or with exactly one sub-item never open a flyout.
-    // Single-child destinations navigate directly to that destination on select.
     setFlyoutParentId(canItemOpenFlyout(item) ? item.id : null);
   };
 
@@ -141,72 +188,116 @@ export function LeftSidebar({
     return () => document.removeEventListener('mousedown', handleDocumentClick);
   }, [flyoutParentId, closeNow]);
 
+  // Resolve fixed items: Dashboard & Administration at top, Settings anchored at bottom
+  const dashboardItem = items.find((item) => item.id === 'dashboard');
+  const adminItem = items.find(isAdminNavItem);
+  const resolvedSettingsItem = settingsItem ?? items.find(isSettingsNavItem);
+
+  const fixedTopItems: ShellNavItem[] = [];
+  if (dashboardItem) fixedTopItems.push(dashboardItem);
+  if (adminItem && adminItem !== dashboardItem) fixedTopItems.push(adminItem);
+
+  // Dynamic rail items: all items excluding fixed top items and settings
+  const dynamicItems = items.filter(
+    (item) =>
+      item !== dashboardItem &&
+      item !== adminItem &&
+      (!resolvedSettingsItem || item.id !== resolvedSettingsItem.id),
+  );
+
   // Determine available vertical height inside navigation list
-  const effectiveHeight =
-    testAvailableHeight ??
-    containerHeight ??
-    (typeof window !== 'undefined' ? Math.max(0, window.innerHeight - 64 - 36 - 8 - 6 - 8) : 800);
+  const reservedForPinned = resolvedSettingsItem ? PINNED_BOTTOM_HEIGHT : 0;
+  const availableHeight =
+    testAvailableHeight !== undefined
+      ? Math.max(0, testAvailableHeight - NAV_LIST_PADDING_BOTTOM - reservedForPinned)
+      : containerHeight !== null
+        ? Math.max(0, containerHeight - NAV_LIST_PADDING_BOTTOM)
+        : typeof window !== 'undefined'
+          ? Math.max(0, window.innerHeight - 64 - 36 - 8 - 6 - 8 - NAV_LIST_PADDING_BOTTOM - reservedForPinned)
+          : 800;
 
-  const availableHeight = Math.max(0, effectiveHeight - NAV_LIST_PADDING_BOTTOM);
-
-  // Generic capacity and overflow calculation
-  const totalItemsHeight = getRequiredHeight(items.length);
+  // Capacity calculation
+  const fixedTopHeight = getRequiredHeight(fixedTopItems.length);
+  const totalItemsHeight = getRequiredHeight(fixedTopItems.length + dynamicItems.length);
   const allItemsFit = totalItemsHeight <= availableHeight;
 
-  let visibleItems: ShellNavItem[];
+  let visibleDynamicItems: ShellNavItem[];
   let shouldRenderMore: boolean;
 
   if (allItemsFit) {
     if (more?.hasLauncherOnlyItems) {
-      // All items fit, but launcher contains additional destinations
-      const heightWithMore = totalItemsHeight + NAV_ITEM_GAP + NAV_ITEM_HEIGHT;
+      const heightWithMore = totalItemsHeight + (totalItemsHeight > 0 ? NAV_ITEM_GAP : 0) + NAV_ITEM_HEIGHT;
       if (heightWithMore <= availableHeight) {
-        visibleItems = items;
+        visibleDynamicItems = dynamicItems;
         shouldRenderMore = true;
       } else {
-        const availableForItems = availableHeight - (NAV_ITEM_HEIGHT + NAV_ITEM_GAP);
+        const availableForDynamic =
+          availableHeight - fixedTopHeight - (fixedTopItems.length > 0 ? NAV_ITEM_GAP : 0) - (NAV_ITEM_HEIGHT + NAV_ITEM_GAP);
         const fitCount = Math.max(
-          1,
+          0,
           Math.min(
-            items.length - 1,
-            Math.floor((availableForItems + NAV_ITEM_GAP) / (NAV_ITEM_HEIGHT + NAV_ITEM_GAP)),
+            dynamicItems.length,
+            Math.floor((availableForDynamic + NAV_ITEM_GAP) / (NAV_ITEM_HEIGHT + NAV_ITEM_GAP)),
           ),
         );
-        visibleItems = items.slice(0, fitCount);
+        if (fitCount >= dynamicItems.length) {
+          visibleDynamicItems = dynamicItems;
+        } else {
+          const activeIdx = activeId ? dynamicItems.findIndex((d) => d.id === activeId) : -1;
+          const activeItem = activeIdx >= 0 ? dynamicItems[activeIdx] : undefined;
+          if (activeItem && activeIdx >= fitCount) {
+            const needed = Math.max(0, fitCount - 1);
+            visibleDynamicItems = [...dynamicItems.slice(Math.max(0, activeIdx - needed), activeIdx), activeItem];
+          } else {
+            visibleDynamicItems = dynamicItems.slice(0, fitCount);
+          }
+        }
         shouldRenderMore = true;
       }
     } else {
-      // All items fit and no launcher-only items exist: DO NOT render More
-      visibleItems = items;
+      visibleDynamicItems = dynamicItems;
       shouldRenderMore = false;
     }
   } else {
-    // Items genuinely overflow available rail space
-    const availableForItems = availableHeight - (NAV_ITEM_HEIGHT + NAV_ITEM_GAP);
+    const availableForDynamic =
+      availableHeight - fixedTopHeight - (fixedTopItems.length > 0 ? NAV_ITEM_GAP : 0) - (NAV_ITEM_HEIGHT + NAV_ITEM_GAP);
     const fitCount = Math.max(
-      1,
+      0,
       Math.min(
-        items.length - 1,
-        Math.floor((availableForItems + NAV_ITEM_GAP) / (NAV_ITEM_HEIGHT + NAV_ITEM_GAP)),
+        dynamicItems.length,
+        Math.floor((availableForDynamic + NAV_ITEM_GAP) / (NAV_ITEM_HEIGHT + NAV_ITEM_GAP)),
       ),
     );
-    visibleItems = items.slice(0, fitCount);
+    if (fitCount >= dynamicItems.length) {
+      visibleDynamicItems = dynamicItems;
+    } else {
+      const activeIdx = activeId ? dynamicItems.findIndex((d) => d.id === activeId) : -1;
+      const activeItem = activeIdx >= 0 ? dynamicItems[activeIdx] : undefined;
+      if (activeItem && activeIdx >= fitCount) {
+        const needed = Math.max(0, fitCount - 1);
+        visibleDynamicItems = [...dynamicItems.slice(Math.max(0, activeIdx - needed), activeIdx), activeItem];
+      } else {
+        visibleDynamicItems = dynamicItems.slice(0, fitCount);
+      }
+    }
     shouldRenderMore = Boolean(more);
   }
 
-  // The More launcher takes precedence: no flyout while it is open.
+  const visibleItems = [...fixedTopItems, ...visibleDynamicItems];
+
   const activeFlyoutParent = testFlyoutParentId !== undefined ? testFlyoutParentId : flyoutParentId;
   const visibleFlyoutId = more?.open ? null : activeFlyoutParent;
 
-  // Single active rail item invariant (BZ-03):
-  // At any given time, only ONE rail item has active styling.
-  // When More launcher is open, More is the active item; the current page item receives a secondary dimmed current style.
   const isMoreOpen = !!more?.open;
   const activeRailItem = isMoreOpen ? 'more' : activeId;
 
-  // If the active item is in overflow, More indicates active selection
+  const isSettingsActive = Boolean(resolvedSettingsItem && resolvedSettingsItem.id === activeId);
+  const isTopFixedActive = Boolean(fixedTopItems.some((item) => item.id === activeId));
   const isActiveItemInOverflow = Boolean(
-    activeId && !visibleItems.some((item) => item.id === activeId),
+    activeId &&
+      !isSettingsActive &&
+      !isTopFixedActive &&
+      !visibleItems.some((item) => item.id === activeId),
   );
   const isMoreButtonActive =
     activeRailItem === 'more' || (!isMoreOpen && (Boolean(more?.active) || isActiveItemInOverflow));
@@ -222,52 +313,87 @@ export function LeftSidebar({
       aria-label="Primary navigation"
       onKeyDown={onKeyDown}
     >
-      <nav ref={navRef} className="left-sidebar__list">
-        {visibleItems.map((item) => {
-          const isActive = item.id === activeRailItem;
-          const isCurrentPage = isMoreOpen && item.id === activeId;
+      <div className="left-sidebar__container">
+        <nav ref={navRef} className="left-sidebar__list">
+          {visibleItems.map((item) => {
+            const isActive = item.id === activeRailItem;
+            const isCurrentPage = isMoreOpen && item.id === activeId;
 
-          return (
+            return (
+              <NavItem
+                key={item.id}
+                item={item}
+                active={isActive}
+                isCurrentPage={isCurrentPage}
+                activeSubId={item.id === activeId ? activeSubId : undefined}
+                flyoutOpen={visibleFlyoutId === item.id}
+                onEnter={() => openFlyout(item)}
+                onLeave={scheduleClose}
+                onSelect={() => {
+                  if (!canItemOpenFlyout(item)) {
+                    closeNow();
+                  } else {
+                    setFlyoutParentId((prev) => (prev === item.id ? null : item.id));
+                  }
+                  onSelect?.(item.id);
+                }}
+                onSubSelect={(subId) => {
+                  closeNow();
+                  onSubSelect?.(item.id, subId);
+                }}
+              />
+            );
+          })}
+          {more && shouldRenderMore && (
+            <MoreButton {...more} active={isMoreButtonActive} onEnter={closeNow} />
+          )}
+        </nav>
+
+        {resolvedSettingsItem && (
+          <div className="left-sidebar__bottom">
+            <div className="left-sidebar__divider" role="separator" aria-orientation="horizontal" />
             <NavItem
-              key={item.id}
-              item={item}
-              active={isActive}
-              isCurrentPage={isCurrentPage}
-              activeSubId={item.id === activeId ? activeSubId : undefined}
-              flyoutOpen={visibleFlyoutId === item.id}
-              onEnter={() => openFlyout(item)}
+              key={resolvedSettingsItem.id}
+              item={resolvedSettingsItem}
+              overrideIcon="settings"
+              active={resolvedSettingsItem.id === activeRailItem}
+              isCurrentPage={isMoreOpen && resolvedSettingsItem.id === activeId}
+              activeSubId={resolvedSettingsItem.id === activeId ? activeSubId : undefined}
+              flyoutOpen={visibleFlyoutId === resolvedSettingsItem.id}
+              onEnter={() => openFlyout(resolvedSettingsItem)}
               onLeave={scheduleClose}
               onSelect={() => {
-                if (!canItemOpenFlyout(item)) {
+                if (!canItemOpenFlyout(resolvedSettingsItem)) {
                   closeNow();
                 } else {
-                  setFlyoutParentId((prev) => (prev === item.id ? null : item.id));
+                  setFlyoutParentId((prev) =>
+                    prev === resolvedSettingsItem.id ? null : resolvedSettingsItem.id,
+                  );
                 }
-                onSelect?.(item.id);
+                if (onSettingsSelect) {
+                  onSettingsSelect();
+                } else {
+                  onSelect?.(resolvedSettingsItem.id);
+                }
               }}
               onSubSelect={(subId) => {
                 closeNow();
-                onSubSelect?.(item.id, subId);
+                onSubSelect?.(resolvedSettingsItem.id, subId);
               }}
             />
-          );
-        })}
-        {more && shouldRenderMore && (
-          <MoreButton {...more} active={isMoreButtonActive} onEnter={closeNow} />
+          </div>
         )}
-      </nav>
+      </div>
     </aside>
   );
 }
 
 /**
- * Sidebar nav item (icon + up-to-two-line label). Kept here rather than in
- * design-system/components: its geometry (78x68, label area) is defined by
- * the shell's rail, and it is only meaningful inside it. The icon visuals
- * are the design-system `BezentNavIcon`.
+ * Sidebar nav item (44x44 rounded-12 tile with 22px icon, short label below).
  */
 function NavItem({
   item,
+  overrideIcon,
   active,
   isCurrentPage,
   activeSubId,
@@ -278,10 +404,10 @@ function NavItem({
   onSubSelect,
 }: {
   item: ShellNavItem;
+  overrideIcon?: BezentIconName;
   active: boolean;
   isCurrentPage?: boolean;
   activeSubId?: string;
-  /** Whether THIS item currently owns the sidebar's single flyout. */
   flyoutOpen: boolean;
   onEnter: () => void;
   onLeave: () => void;
@@ -290,6 +416,8 @@ function NavItem({
 }) {
   const [hovered, setHovered] = useState(false);
   const hasFlyout = canItemOpenFlyout(item);
+  const displayLabel = getShortNavLabel(item);
+  const iconName = overrideIcon ?? item.icon;
 
   return (
     <div
@@ -304,7 +432,10 @@ function NavItem({
       }}
       onFocus={onEnter}
       onBlur={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) onLeave();
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+          setHovered(false);
+          onLeave();
+        }
       }}
     >
       <button
@@ -317,15 +448,18 @@ function NavItem({
         aria-expanded={hasFlyout ? flyoutOpen : undefined}
         onClick={onSelect}
       >
-        <BezentNavIcon name={item.icon} active={active} hovered={hovered} size={20}>
-          {typeof item.badge === 'number' && item.badge > 0 && (
-            <span className="left-sidebar__badge-dot" aria-hidden="true" />
-          )}
-        </BezentNavIcon>
+        <div className="left-sidebar__icon-tile">
+          <BezentNavIcon name={iconName} active={active} hovered={hovered} size={22}>
+            {typeof item.badge === 'number' && item.badge > 0 && (
+              <span className="left-sidebar__badge-dot" aria-hidden="true" />
+            )}
+          </BezentNavIcon>
+        </div>
         <span className="left-sidebar__label-area">
-          <span className="left-sidebar__label">{item.label}</span>
+          <span className="left-sidebar__label">{displayLabel}</span>
         </span>
       </button>
+      {hovered && !flyoutOpen && <Tooltip label={item.label} direction="right" />}
       {flyoutOpen && hasFlyout && (
         <SubNavFlyout item={item} activeSubId={activeSubId} onSelect={onSubSelect} />
       )}
@@ -357,23 +491,30 @@ function MoreButton({
       }}
       onMouseLeave={() => setHovered(false)}
       onFocus={onEnter}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setHovered(false);
+      }}
     >
       <button
         type="button"
         className={`left-sidebar__item ${selected ? 'is-active' : ''}`.trim()}
+        title="More"
+        aria-label="More"
         data-more-toggle=""
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={onToggle}
       >
-        <BezentNavIcon name="more" active={selected} hovered={hovered} size={20}>
-          {/* Old behaviour: a dot marks More when the active destination lives inside it. */}
-          {active && !open && <span className="left-sidebar__more-dot" aria-hidden="true" />}
-        </BezentNavIcon>
+        <div className="left-sidebar__icon-tile">
+          <BezentNavIcon name="more" active={selected} hovered={hovered} size={22}>
+            {active && !open && <span className="left-sidebar__more-dot" aria-hidden="true" />}
+          </BezentNavIcon>
+        </div>
         <span className="left-sidebar__label-area">
           <span className="left-sidebar__label">More</span>
         </span>
       </button>
+      {hovered && !open && <Tooltip label="More" direction="right" />}
     </div>
   );
 }

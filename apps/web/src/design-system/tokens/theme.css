@@ -22,6 +22,16 @@
 
 :root,
 [data-theme='light'] {
+  /* Shell Semantic Tokens — Restored Original Canvas & Selected State */
+  --shell-topbar-bg: #f6f8fc;
+  --shell-sidebar-bg: #f6f8fc;
+  --shell-right-rail-bg: #f6f8fc;
+  --shell-bottom-bar-bg: #f6f8fc;
+  --shell-workspace-bg: #f6f8fc;
+  --shell-content-surface: #ffffff;
+  --shell-nav-selected-bg: #c2e7ff;
+  --shell-border-subtle: #e7ebf0;
+
   /* Core Google Workspace-Inspired Surfaces */
   --bezent-logo-surface: #c2e7ff;
   --bezent-logo-text: #001d35;
@@ -30,8 +40,8 @@
   --workspace: #ffffff;
 
   /* Surfaces */
-  --bg-app: var(--app-canvas);
-  --bg-surface: var(--workspace);
+  --bg-app: var(--shell-workspace-bg);
+  --bg-surface: var(--shell-content-surface);
   --bg-surface-secondary: #f0f4f9;
   --bg-card: #ffffff;
   --card-bg: #ffffff;
@@ -40,9 +50,9 @@
   --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
   --card-hover-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
   --card-radius: 8px;
-  --bg-header: var(--app-canvas);
-  --bg-sidebar: var(--app-canvas);
-  --bg-footer: var(--app-canvas);
+  --bg-header: var(--shell-topbar-bg);
+  --bg-sidebar: var(--shell-sidebar-bg);
+  --bg-footer: var(--shell-bottom-bar-bg);
   --bg-popup: #ffffff;
   --bg-popup-header: #ffffff;
   --bg-search: #eaf1fb;
@@ -89,7 +99,7 @@
   /* Chrome separator between TopNav and workspace: deliberately softer than
      --border-default so the top bar reads as part of the app canvas rather
      than a structural frame edge. */
-  --header-border-bottom: #e7ebf0;
+  --header-border-bottom: var(--shell-border-subtle, #e7ebf0);
 
   /* BEZENT Global Icon System — Light Theme Tokens */
   --icon-default: #444746;
@@ -335,6 +345,16 @@
 }
 
 [data-theme='dark'] {
+  /* Premium Shell Tokens — Dark Mode (Preserved) */
+  --shell-topbar-bg: #020b1c;
+  --shell-sidebar-bg: #020b1c;
+  --shell-right-rail-bg: #020b1c;
+  --shell-bottom-bar-bg: #020b1c;
+  --shell-workspace-bg: #020b1c;
+  --shell-content-surface: #061633;
+  --shell-nav-selected-bg: #0b254e;
+  --shell-border-subtle: rgba(56, 189, 248, 0.24);
+
   /* Core Brand & Canvas Surfaces */
   --bezent-logo-surface: #0b254e;
   --bezent-logo-text: #38bdf8;
