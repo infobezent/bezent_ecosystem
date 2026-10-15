@@ -45,6 +45,15 @@
   font-size: 13px;
 }
 
+/* Control-matched size: exactly matches Input md & Select md (42px) */
+.bezent-btn--control {
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 6px;
+  font-size: var(--form-font-size-input, 13.5px);
+  box-sizing: border-box;
+}
+
 /* ── Variants ── */
 
 /* Primary */

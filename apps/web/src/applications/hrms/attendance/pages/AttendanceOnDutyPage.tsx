@@ -1071,6 +1071,7 @@ export function AttendanceOnDutyPage() {
           </Alert>
         ) : items.length === 0 ? (
           <EmptyState
+            variant="attendance"
             title="No On-Duty Requests Found"
             description="There are currently no On-Duty requests matching the specified date range and filters."
           />

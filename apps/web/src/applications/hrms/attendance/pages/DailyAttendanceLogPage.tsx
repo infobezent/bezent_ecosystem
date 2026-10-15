@@ -518,11 +518,11 @@ export function DailyAttendanceLogPage() {
             <Inline gap="xs" align="center">
               <Button
                 variant="secondary"
-                size="sm"
+                size="control"
                 onClick={handlePrevDay}
                 aria-label="Previous workday"
               >
-                ‹
+                <BezentIcon name="chevronLeft" size={14} />
               </Button>
               <Input
                 type="date"
@@ -534,13 +534,13 @@ export function DailyAttendanceLogPage() {
               />
               <Button
                 variant="secondary"
-                size="sm"
+                size="control"
                 onClick={handleNextDay}
                 aria-label="Next workday"
               >
-                ›
+                <BezentIcon name="chevronRight" size={14} />
               </Button>
-              <Button variant="secondary" size="sm" onClick={handleToday}>
+              <Button variant="secondary" size="control" onClick={handleToday}>
                 Today
               </Button>
             </Inline>
@@ -834,6 +834,7 @@ export function DailyAttendanceLogPage() {
           </Alert>
         ) : items.length === 0 ? (
           <EmptyState
+            variant="attendance"
             title="No Attendance Records"
             description="No employee attendance records matched the selected date and filters."
           />

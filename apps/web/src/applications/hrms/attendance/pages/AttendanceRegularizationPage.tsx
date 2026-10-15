@@ -1006,6 +1006,7 @@ export function AttendanceRegularizationPage() {
           </Alert>
         ) : items.length === 0 ? (
           <EmptyState
+            variant="attendance"
             title="No Regularization Requests Found"
             description="There are currently no attendance correction requests matching the specified filters."
           />

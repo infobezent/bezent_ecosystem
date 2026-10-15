@@ -679,6 +679,7 @@ export function AttendanceReportsPage() {
 
                   {previewResult.rows.length === 0 ? (
                     <EmptyState
+                      variant="attendance"
                       title="No records found"
                       description="No attendance records match the selected date bounds and filters."
                     />
