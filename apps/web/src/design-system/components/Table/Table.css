@@ -443,6 +443,9 @@ button.bezent-table-meta-title:hover {
   background-color: rgba(8, 27, 58, 0.95);
 }
 
-[data-theme='dark'] .bezent-table.is-hoverable .bezent-table__row:hover .bezent-table-col--sticky-right {
+[data-theme='dark']
+  .bezent-table.is-hoverable
+  .bezent-table__row:hover
+  .bezent-table-col--sticky-right {
   background-color: #0b254e;
 }

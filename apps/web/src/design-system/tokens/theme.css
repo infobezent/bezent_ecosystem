@@ -476,9 +476,11 @@
   /* Floating Surfaces & Shadows */
   --floating-surface-bg: #081b3a;
   --floating-surface-header-bg: #081b3a;
-  --subnav-header-bg: linear-gradient(135deg,
-      rgba(22, 131, 255, 0.35) 0%,
-      rgba(11, 37, 78, 0.95) 100%);
+  --subnav-header-bg: linear-gradient(
+    135deg,
+    rgba(22, 131, 255, 0.35) 0%,
+    rgba(11, 37, 78, 0.95) 100%
+  );
   --subnav-header-title: #ffffff;
   --subnav-header-subtitle: #bae6fd;
   --floating-surface-border: rgba(56, 189, 248, 0.16);

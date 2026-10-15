@@ -205,7 +205,9 @@ export function AttendanceOverviewPage() {
 
               <div
                 className="bezent-stat-card--compact"
-                onClick={() => navigate(`/hrms/attendance/daily-log?date=${selectedDate}&status=present`)}
+                onClick={() =>
+                  navigate(`/hrms/attendance/daily-log?date=${selectedDate}&status=present`)
+                }
                 role="button"
                 tabIndex={0}
                 title="View checked-in employees"
@@ -224,7 +226,9 @@ export function AttendanceOverviewPage() {
 
               <div
                 className="bezent-stat-card--compact"
-                onClick={() => navigate(`/hrms/attendance/daily-log?date=${selectedDate}&status=absent`)}
+                onClick={() =>
+                  navigate(`/hrms/attendance/daily-log?date=${selectedDate}&status=absent`)
+                }
                 role="button"
                 tabIndex={0}
                 title="View absent employees with no punch"
@@ -243,7 +247,9 @@ export function AttendanceOverviewPage() {
 
               <div
                 className="bezent-stat-card--compact"
-                onClick={() => navigate(`/hrms/attendance/daily-log?date=${selectedDate}&status=on_leave`)}
+                onClick={() =>
+                  navigate(`/hrms/attendance/daily-log?date=${selectedDate}&status=on_leave`)
+                }
                 role="button"
                 tabIndex={0}
                 title="View employees on approved leave"
@@ -272,14 +278,18 @@ export function AttendanceOverviewPage() {
                   <Badge variant="info">Authorized</Badge>
                 </div>
                 <Inline justify="between" align="center">
-                  <span className="bezent-stat-card__num">{todayKpis ? todayKpis.onDutyCount : 0}</span>
+                  <span className="bezent-stat-card__num">
+                    {todayKpis ? todayKpis.onDutyCount : 0}
+                  </span>
                   <BezentIcon name="requests" size={18} />
                 </Inline>
               </div>
 
               <div
                 className="bezent-stat-card--compact"
-                onClick={() => navigate(`/hrms/attendance/daily-log?date=${selectedDate}&indicator=late`)}
+                onClick={() =>
+                  navigate(`/hrms/attendance/daily-log?date=${selectedDate}&indicator=late`)
+                }
                 role="button"
                 tabIndex={0}
                 title="View late arrivals after shift grace period"
@@ -319,16 +329,18 @@ export function AttendanceOverviewPage() {
 
               <div
                 className="bezent-stat-card--compact"
-                onClick={() => navigate(`/hrms/attendance/daily-log?date=${selectedDate}&processingState=pending_review`)}
+                onClick={() =>
+                  navigate(
+                    `/hrms/attendance/daily-log?date=${selectedDate}&processingState=pending_review`,
+                  )
+                }
                 role="button"
                 tabIndex={0}
                 title="View records in progress or pending review"
               >
                 <div className="bezent-stat-card__header">
                   <span className="bezent-stat-card__title">Pending Processing</span>
-                  <Badge variant="neutral">
-                    {todayKpis?.isFuture ? 'Future' : 'In Progress'}
-                  </Badge>
+                  <Badge variant="neutral">{todayKpis?.isFuture ? 'Future' : 'In Progress'}</Badge>
                 </div>
                 <Inline justify="between" align="center">
                   <span className="bezent-stat-card__num">
@@ -674,7 +686,8 @@ export function AttendanceOverviewPage() {
                       variant="ghost"
                       onClick={() =>
                         navigate(
-                          `/hrms/attendance/monthly-summary?month=${monthlyReadiness?.month || selectedDate.slice(0, 7)
+                          `/hrms/attendance/monthly-summary?month=${
+                            monthlyReadiness?.month || selectedDate.slice(0, 7)
                           }`,
                         )
                       }
@@ -712,9 +725,9 @@ export function AttendanceOverviewPage() {
                           <Badge variant="neutral">
                             {monthlyReadiness.totalInScope > 0
                               ? `${Math.round(
-                                (monthlyReadiness.lockedCount / monthlyReadiness.totalInScope) *
-                                100,
-                              )}%`
+                                  (monthlyReadiness.lockedCount / monthlyReadiness.totalInScope) *
+                                    100,
+                                )}%`
                               : '0%'}
                           </Badge>
                         </Stack>

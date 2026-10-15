@@ -10,8 +10,7 @@
   height: 100dvh;
   overflow: hidden;
   display: grid;
-  grid-template-columns:
-    var(--shell-sidebar-width) minmax(0, 1fr) var(--app-shell-rail-width);
+  grid-template-columns: var(--shell-sidebar-width) minmax(0, 1fr) var(--app-shell-rail-width);
   grid-template-rows: var(--shell-topbar-height) minmax(0, 1fr) var(--shell-bottom-bar-height);
   grid-template-areas:
     'top top top'
@@ -66,9 +65,11 @@
   margin: 8px 12px 12px 8px;
   border-radius: 14px;
   border: 1px solid var(--border-default, #e2e8f0);
-  box-shadow: var(--shadow-workspace,
-      0 1px 3px rgba(15, 23, 42, 0.05),
-      0 4px 12px rgba(15, 23, 42, 0.03));
+  box-shadow: var(
+    --shadow-workspace,
+    0 1px 3px rgba(15, 23, 42, 0.05),
+    0 4px 12px rgba(15, 23, 42, 0.03)
+  );
 }
 
 /* Flush workspace variant */
@@ -101,7 +102,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-
   .app-shell,
   .app-shell__drawer {
     transition: none;
