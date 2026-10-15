@@ -344,7 +344,6 @@ export function EmployeeRegistration({
     setFormData((prev) => ({ ...prev, workingHours: val }));
   };
 
-
   // General Form State
   const [employeeId, setEmployeeId] = useState(initialDraft?.employeeId || '');
 

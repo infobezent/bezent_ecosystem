@@ -219,19 +219,13 @@
   border-radius: 50%;
   background: transparent;
   padding: 0;
-  box-shadow:
-    0 10px 28px -4px rgba(140, 28, 248, 0.45),
-    0 0 0 4px rgba(255, 255, 255, 0.85);
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
+  box-shadow: none;
+  transition: transform 0.25s ease;
 }
 
 .bezent-login__mark:hover {
   transform: scale(1.08);
-  box-shadow:
-    0 14px 34px -4px rgba(140, 28, 248, 0.6),
-    0 0 0 5px rgba(255, 255, 255, 0.95);
+  box-shadow: none;
 }
 
 .bezent-login__mark-img {
@@ -557,15 +551,11 @@
 }
 
 [data-theme='dark'] .bezent-login__mark {
-  box-shadow:
-    0 10px 32px -4px rgba(140, 28, 248, 0.55),
-    0 0 0 3px rgba(140, 28, 248, 0.4);
+  box-shadow: none;
 }
 
 [data-theme='dark'] .bezent-login__mark:hover {
-  box-shadow:
-    0 14px 40px -4px rgba(140, 28, 248, 0.75),
-    0 0 0 4px rgba(140, 28, 248, 0.6);
+  box-shadow: none;
 }
 
 [data-theme='dark'] .bezent-login__glass-card {
