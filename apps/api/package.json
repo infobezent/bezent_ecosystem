@@ -13,7 +13,9 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx src/db/seed.ts",
-    "dev:mail": "tsx src/platform/email/devOutbox.cli.ts"
+    "dev:mail": "tsx src/platform/email/devOutbox.cli.ts",
+    "provision:reviewer": "tsx scripts/provision-reviewer.ts",
+    "auth:set-password": "tsx scripts/set-user-password.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",

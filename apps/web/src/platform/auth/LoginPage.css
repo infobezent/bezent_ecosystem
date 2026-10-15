@@ -751,3 +751,48 @@
     transform: translateY(-95px);
   }
 }
+
+/* ── Auth Mode Tabs (Review / Developer Mode) ── */
+
+.bezent-login__glass-card .bezent-tabs--pills {
+  display: flex;
+  width: 100%;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  gap: 4px;
+  box-sizing: border-box;
+}
+
+[data-theme='dark'] .bezent-login__glass-card .bezent-tabs--pills {
+  background: rgba(15, 23, 42, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.bezent-login__glass-card .bezent-tabs--pills .bezent-tab {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #334155;
+  transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme='dark'] .bezent-login__glass-card .bezent-tabs--pills .bezent-tab {
+  color: #94a3b8;
+}
+
+.bezent-login__glass-card .bezent-tabs--pills .bezent-tab.is-active {
+  background: #c2e7ff;
+  color: #001d35;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+

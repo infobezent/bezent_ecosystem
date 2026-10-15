@@ -34,3 +34,23 @@ export function validateOtpVerifyPayload(body: unknown): { challengeId: string; 
   }
   return { challengeId: (challengeId as string).trim(), code: (code as string).trim() };
 }
+
+export function validatePasswordLoginPayload(body: unknown): { email: string; password: string } {
+  const { email, password } = asObject(body);
+  const errors: Record<string, string> = {};
+  if (typeof email !== 'string' || !email.trim()) {
+    errors.email = 'Email is required';
+  } else if (email.length > 255 || !EMAIL_PATTERN.test(email.trim())) {
+    errors.email = 'Invalid email format';
+  }
+  if (typeof password !== 'string' || !password) {
+    errors.password = 'Password is required';
+  } else if (password.length > 255) {
+    errors.password = 'Password exceeds maximum length';
+  }
+  if (Object.keys(errors).length > 0) {
+    throw new ValidationError('Validation failed', errors);
+  }
+  return { email: (email as string).trim().toLowerCase(), password: password as string };
+}
+

@@ -1,7 +1,12 @@
 import type { Request, Response, NextFunction } from 'express';
 import { authService, AuthService } from '../service/auth.service.js';
 import { otpAuthService, OtpAuthService, OtpRateLimitedError } from '../service/otpAuth.service.js';
-import { validateOtpRequestPayload, validateOtpVerifyPayload } from '../validation/auth.schema.js';
+import {
+  validateOtpRequestPayload,
+  validateOtpVerifyPayload,
+  validatePasswordLoginPayload,
+} from '../validation/auth.schema.js';
+import { isReviewPasswordAuthEnabled } from '../../../app/config/env.js';
 import { AppError } from '../../../app/errors/AppError.js';
 
 export class AuthController {
@@ -9,6 +14,15 @@ export class AuthController {
     private readonly service: AuthService = authService,
     private readonly otp: OtpAuthService = otpAuthService,
   ) {}
+
+  /** GET /auth/config — public discovery of enabled authentication mechanisms. */
+  getConfig = (_req: Request, res: Response) => {
+    res.status(200).json({
+      data: {
+        passwordAuthAvailable: isReviewPasswordAuthEnabled(),
+      },
+    });
+  };
 
   /** POST /auth/otp/request — same response whether or not the account exists. */
   requestOtp = async (req: Request, res: Response, next: NextFunction) => {
@@ -35,7 +49,25 @@ export class AuthController {
     }
   };
 
-  /** POST /auth/login — password sign-in was retired by ADR-018. */
+  /** POST /auth/login — password sign-in for developers and reviewers in approved environments. */
+  login = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!isReviewPasswordAuthEnabled()) {
+        throw new AppError(
+          'Password sign-in is not available in this environment. Request a one-time code at /platform/auth/otp/request.',
+          410,
+          'PASSWORD_LOGIN_DISABLED',
+        );
+      }
+      const { email, password } = validatePasswordLoginPayload(req.body);
+      const result = await this.service.passwordLogin(email, password);
+      res.status(200).json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /** Retired password endpoint handler for backwards compatibility. */
   passwordLoginDisabled = (_req: Request, _res: Response, next: NextFunction) => {
     next(
       new AppError(

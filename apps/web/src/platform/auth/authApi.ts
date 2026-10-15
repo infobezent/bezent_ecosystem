@@ -108,7 +108,16 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
   return body.data as T;
 }
 
+export interface AuthConfig {
+  passwordAuthAvailable: boolean;
+}
+
 export const authApi = {
+  /** Retrieves public authentication configuration (e.g. if review password login is active). */
+  getConfig(): Promise<AuthConfig> {
+    return call('/auth/config');
+  },
+
   /** Sends a sign-in code. The response is identical whether or not the email has an account. */
   requestOtp(email: string): Promise<OtpChallenge> {
     return call('/auth/otp/request', { method: 'POST', body: JSON.stringify({ email }) });
@@ -122,6 +131,14 @@ export const authApi = {
     });
   },
 
+  /** Password sign-in for developers and reviewers in approved environments. */
+  loginWithPassword(email: string, password: string): Promise<SignInResult> {
+    return call('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+  },
+
   /** The signed-in user's companies and workspaces, re-resolved by the server. */
   getAccess(): Promise<AccessOverview> {
     return call('/access');
@@ -131,3 +148,4 @@ export const authApi = {
     return call('/auth/logout', { method: 'POST' });
   },
 };
+
