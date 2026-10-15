@@ -402,7 +402,7 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Overview V1.0
   it('aggregates pending action items with severity, age, and valid routes', async () => {
     const queue = await attendanceOverviewService.getActionQueue(tenantId, companyId);
 
-    expect(queue.length).toBe(6);
+    expect(queue.length).toBe(7);
 
     const reg = queue.find((q) => q.actionType === 'pending_regularization');
     expect(reg).toBeDefined();
@@ -417,6 +417,10 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Overview V1.0
     const mp = queue.find((q) => q.actionType === 'missing_punch_issues');
     expect(mp).toBeDefined();
     expect(mp?.targetRoute).toBe('/hrms/attendance/daily-log');
+
+    const ot = queue.find((q) => q.actionType === 'pending_overtime_claims');
+    expect(ot).toBeDefined();
+    expect(ot?.targetRoute).toBe('/hrms/attendance/overtime');
   });
 
   /* ───────────────────────────────────────────────────────────────────
@@ -562,7 +566,7 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Overview V1.0
     expect(data.departments.length).toBeGreaterThanOrEqual(2);
 
     expect(data.actionQueue).toBeDefined();
-    expect(data.actionQueue.length).toBe(6);
+    expect(data.actionQueue.length).toBe(7);
 
     expect(data.processingHealth).toBeDefined();
     expect(data.monthlyReadiness).toBeDefined();
@@ -615,7 +619,7 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Overview V1.0
     const res = await request(app).get('/api/v1/hrms/attendance/overview/actions').set(headers);
 
     expect(res.status).toBe(200);
-    expect(res.body.data.length).toBe(6);
+    expect(res.body.data.length).toBe(7);
   });
 
   it('GET /hrms/attendance/overview/processing-health returns health diagnostics endpoint', async () => {
