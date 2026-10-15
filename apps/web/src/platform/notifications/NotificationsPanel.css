@@ -297,7 +297,7 @@
   margin-top: 5px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: var(--accent-primary);
+  background: var(--accent-interactive, #1a73e8);
 }
 
 @media (prefers-reduced-motion: reduce) {

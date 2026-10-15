@@ -163,14 +163,15 @@
   --brand-primary: #041e49;
   --brand-logo-bg: var(--bezent-logo-surface);
   --brand-logo-text: var(--bezent-logo-text);
-  --accent-primary: #041e49;
-  --accent-hover: #001d35;
-  --accent-pressed: #001224;
+  --accent-primary: #c2e7ff;
+  --accent-primary-text: #001d35;
+  --accent-hover: #a8dbfc;
+  --accent-pressed: #90cefa;
   --accent-soft: var(--primary);
   --accent-subtle: #e8f0fe;
-  --accent-dark: #041e49;
+  --accent-dark: #c2e7ff;
   --accent-heading: #1f1f1f;
-  --accent-interactive: #1a73e8;
+  --accent-interactive: #001d35;
 
   /* Shared Floating Surface Tokens */
   --floating-surface-bg: #ffffff;
@@ -483,6 +484,7 @@
   --brand-logo-bg: linear-gradient(135deg, #1683ff 0%, #0353b3 100%);
   --brand-logo-text: #ffffff;
   --accent-primary: #1683ff;
+  --accent-primary-text: #ffffff;
   --accent-hover: #38bdf8;
   --accent-pressed: #0d65cb;
   --accent-soft: rgba(22, 131, 255, 0.2);
