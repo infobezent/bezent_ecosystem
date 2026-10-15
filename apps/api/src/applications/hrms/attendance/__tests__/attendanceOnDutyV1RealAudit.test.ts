@@ -426,9 +426,9 @@ describe.skipIf(!isDatabaseConfigured)(
     describe('2. Multi-Day OD Integrity & Workday Ledger', () => {
       it('handles 3-day OD with Day 1 applied, Day 2 locked/blocked, Day 3 pending', async () => {
         const db = getDb();
-        const day1 = '2026-10-10'; // past eligible (2 days ago)
+        const day1 = '2026-10-10'; // past eligible
         const day2 = '2026-10-11'; // yesterday (to be locked in payroll period)
-        const day3 = '2026-10-15'; // future date (in 3 days)
+        const day3 = new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10); // future date
 
         // Ensure previous test lock periods are cleared before multi-day request creation
         await db

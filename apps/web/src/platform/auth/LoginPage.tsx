@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
-import { Alert, Button, Inline, Input, Stack, BezentLogo } from '../../design-system/components';
+import { Alert, Button, Inline, Input, Stack } from '../../design-system/components';
 import { BezentIcon } from '../../design-system/icons';
 import { useTheme } from '../../app/providers/ThemeProvider';
 import { authApi, AuthApiError, type OtpChallenge } from './authApi';
 import { useAuth } from './AuthProvider';
 import { landingPath, safeNextPath } from './landing';
 import { LoginBackground } from './LoginBackground';
+import bezentMark from '../../assets/bezent-mark.png';
 import './LoginPage.css';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -258,7 +259,9 @@ export function LoginPage() {
           <Stack gap="lg">
             <Stack gap="xs" align="center">
               <div className="bezent-login__mark-container">
-                <BezentLogo size={64} />
+                <span className="bezent-login__mark" aria-hidden="true">
+                  <img src={bezentMark} alt="BEZENT" className="bezent-login__mark-img" />
+                </span>
               </div>
               <h1 className="bezent-login__title">Sign in to BEZENT</h1>
               <p className="bezent-login__subtitle">

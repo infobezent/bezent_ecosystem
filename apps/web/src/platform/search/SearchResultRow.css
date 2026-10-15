@@ -19,7 +19,7 @@
 
 .search-result-row.is-highlighted {
   background: var(--search-row-hover);
-  border-left-color: var(--accent-primary);
+  border-left-color: var(--accent-interactive, #1a73e8);
 }
 
 .search-result-row__main {

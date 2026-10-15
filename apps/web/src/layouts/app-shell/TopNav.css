@@ -28,33 +28,46 @@
 .top-nav__logo {
   width: 32px;
   height: 32px;
-  border-radius: 6px;
-  background: var(--brand-logo-bg, var(--bezent-logo-surface, #c2e7ff));
-  color: var(--brand-logo-text, var(--bezent-logo-text, #001d35));
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-family: var(--font-family-base);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: -0.2px;
-  line-height: 1;
-  transition: background-color 0.14s ease;
+  overflow: hidden;
+  user-select: none;
+  background: transparent;
+  transition:
+    transform 0.18s ease,
+    filter 0.18s ease;
 }
 
 .top-nav__logo:hover {
-  background: #b3defa;
+  transform: scale(1.08);
+}
+
+.top-nav__logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .top-nav__wordmark {
-  font-family: var(--font-family-base);
-  font-size: 22px;
-  font-weight: 500;
-  color: var(--text-brand, #444746);
-  letter-spacing: -0.3px;
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  height: 24px;
   user-select: none;
+}
+
+.top-nav__wordmark-img {
+  height: 22px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.top-nav__wordmark-img--dark {
+  display: none;
 }
 
 /* ── Search slot ─────────────────────────────────────────────────────── */
@@ -179,18 +192,19 @@
 /* ── Dark Mode Header Accents ────────────────────────────────────────── */
 
 [data-theme='dark'] .top-nav__logo {
-  background: linear-gradient(135deg, #1683ff 0%, #0353b3 100%);
-  color: #ffffff;
-  box-shadow:
-    0 0 14px rgba(22, 131, 255, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  background: transparent;
+  box-shadow: none;
+  filter: none;
 }
 
 [data-theme='dark'] .top-nav__logo:hover {
-  background: linear-gradient(135deg, #38bdf8 0%, #1683ff 100%);
-  box-shadow: 0 0 18px rgba(56, 189, 248, 0.6);
+  filter: none;
 }
 
-[data-theme='dark'] .top-nav__wordmark {
-  color: #f8fafc;
+[data-theme='dark'] .top-nav__wordmark-img--light {
+  display: none;
+}
+
+[data-theme='dark'] .top-nav__wordmark-img--dark {
+  display: block;
 }
