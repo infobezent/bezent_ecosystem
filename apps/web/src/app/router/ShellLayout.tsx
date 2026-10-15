@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Outlet, useLocation, useNavigate, useMatches, Navigate } from 'react-router-dom';
 import {
   AppShell,
@@ -6,16 +6,6 @@ import {
   type WorkspaceVariant,
   type BezentRouteHandle,
 } from '../../layouts/app-shell';
-import {
-  type NavPersistenceContext,
-  type StoredNavState,
-  buildNavStorageKey,
-  isFixedNavId,
-  isSettingsNavId,
-  loadStoredNavState,
-  saveStoredNavState,
-  updateDynamicNavList,
-} from '../../layouts/app-shell/navigationPreferences';
 import { ApprovalsDrawer } from '../../platform/approvals';
 import { CalendarDrawer } from '../../platform/calendar';
 import { NotesDrawer } from '../../platform/notes';
@@ -132,113 +122,9 @@ export function ShellLayout() {
     }
   }, [application, auth, access, activeCompany]);
 
-  const { userName, userEmail, userInitials, userRole } = useMemo(
-    () => resolveProfileIdentity(access, activeCompany),
-    [access, activeCompany],
-  );
-
-  const userId = access?.user?.id ?? null;
-  const tenantId = activeCompany?.tenantId ?? access?.defaultTenantId ?? null;
-  const applicationId = application?.id ?? 'global';
-  const role = activeCompany?.roles?.[0]?.code ?? userRole ?? null;
-
-  const persistenceContext: NavPersistenceContext = useMemo(
-    () => ({
-      userId,
-      tenantId,
-      applicationId,
-      role,
-    }),
-    [userId, tenantId, applicationId, role],
-  );
-
-  const permittedDestinations = useMemo(() => {
-    if (!application) return [];
-    return application.navigation.destinations.filter((d) => {
-      if (d.permissionKey && can && !can(d.permissionKey)) return false;
-      return true;
-    });
-  }, [application, can]);
-
-  const permittedIds = useMemo(
-    () => permittedDestinations.map((d) => d.id),
-    [permittedDestinations],
-  );
-
-  const defaultDynamicIds = useMemo(() => {
-    return permittedDestinations
-      .filter((d) => d.sidebar && !isFixedNavId(d.id) && !isSettingsNavId(d.id))
-      .map((d) => d.id);
-  }, [permittedDestinations]);
-
-  const [dynamicNavState, setDynamicNavState] = useState<StoredNavState>(() => {
-    const stored = loadStoredNavState(persistenceContext, permittedIds);
-    if (stored && stored.dynamicIds.length > 0) {
-      return stored;
-    }
-    const initialUsage: Record<string, number> = {};
-    const now = Date.now();
-    defaultDynamicIds.forEach((id, idx) => {
-      initialUsage[id] = now - (defaultDynamicIds.length - idx) * 1000;
-    });
-    return { dynamicIds: defaultDynamicIds, recentUsage: initialUsage };
-  });
-
-  const storageKey = useMemo(() => buildNavStorageKey(persistenceContext), [persistenceContext]);
-
-  useEffect(() => {
-    const stored = loadStoredNavState(persistenceContext, permittedIds);
-    if (stored && stored.dynamicIds.length > 0) {
-      setDynamicNavState(stored);
-    } else {
-      const initialUsage: Record<string, number> = {};
-      const now = Date.now();
-      defaultDynamicIds.forEach((id, idx) => {
-        initialUsage[id] = now - (defaultDynamicIds.length - idx) * 1000;
-      });
-      setDynamicNavState({ dynamicIds: defaultDynamicIds, recentUsage: initialUsage });
-    }
-  }, [storageKey, permittedIds, defaultDynamicIds, persistenceContext]);
-
-  const handleSelectModule = useCallback(
-    (id: string) => {
-      if (isFixedNavId(id) || isSettingsNavId(id)) return;
-      setDynamicNavState((prev) => {
-        const updated = updateDynamicNavList({
-          currentDynamicIds: prev.dynamicIds,
-          selectedId: id,
-          capacity: 10,
-          recentUsage: prev.recentUsage,
-        });
-        saveStoredNavState(persistenceContext, updated);
-        return updated;
-      });
-    },
-    [persistenceContext],
-  );
-
-  useEffect(() => {
-    if (!activeId || isFixedNavId(activeId) || isSettingsNavId(activeId)) return;
-    if (!permittedIds.includes(activeId)) return;
-
-    setDynamicNavState((prev) => {
-      const updated = updateDynamicNavList({
-        currentDynamicIds: prev.dynamicIds,
-        selectedId: activeId,
-        capacity: 10,
-        recentUsage: prev.recentUsage,
-      });
-      saveStoredNavState(persistenceContext, updated);
-      return updated;
-    });
-  }, [activeId, permittedIds, persistenceContext]);
-
   const navItems = useMemo(
-    () =>
-      application
-        ? toShellNavItems(application, activeId, can, dynamicNavState.dynamicIds)
-        : [],
-    [application, activeId, can, dynamicNavState.dynamicIds],
+    () => (application ? toShellNavItems(application, activeId, can) : []),
+    [application, activeId, can],
   );
   const utility = useActiveUtility();
   const data = useDevUtilityData();
@@ -315,6 +201,11 @@ export function ShellLayout() {
     }
   }
 
+  const { userName, userEmail, userInitials, userRole } = useMemo(
+    () => resolveProfileIdentity(access, activeCompany),
+    [access, activeCompany],
+  );
+
   const handleSignOut = useCallback(async () => {
     if (signOut) await signOut();
     navigate('/login', { replace: true });
@@ -361,22 +252,6 @@ export function ShellLayout() {
     navigate('/hrms/settings');
   }, [access, activeCompany, application, navigate]);
 
-  const settingsDestination = application?.navigation.destinations.find(
-    (d) => d.id === 'settings' || d.segment === 'settings',
-  );
-  const canViewSettings = settingsDestination
-    ? !settingsDestination.permissionKey || !can || can(settingsDestination.permissionKey)
-    : true;
-
-  const settingsItem = useMemo(() => {
-    if (!canViewSettings) return null;
-    return {
-      id: 'settings',
-      label: 'Settings',
-      icon: 'settings' as const,
-    };
-  }, [canViewSettings]);
-
   if (!isAuthorizedForActiveApp && access) {
     return <Navigate to={landingPath(access)} replace />;
   }
@@ -410,13 +285,7 @@ export function ShellLayout() {
             navigate(destinationPath(application.basePath, destination, subId));
           }
         }}
-        launcher={
-          application
-            ? toShellLauncher(application, active, navigate, can, handleSelectModule)
-            : undefined
-        }
-        settingsItem={settingsItem}
-        onSettingsSelect={handleAccountSettings}
+        launcher={application ? toShellLauncher(application, active, navigate, can) : undefined}
         userInitials={userInitials}
         userName={userName}
         userEmail={userEmail}
@@ -425,7 +294,7 @@ export function ShellLayout() {
         onAccountSettings={handleAccountSettings}
         onSignOut={handleSignOut}
         onSwitchAccount={handleSwitchAccount}
-        onSettingsClick={handleAccountSettings}
+        onSettingsClick={() => navigate('/hrms/settings')}
         notificationCount={data.notifications.filter((n) => !n.read).length}
         notificationsOpen={utility.activeId === 'notifications'}
         onNotificationsToggle={() => utility.toggle('notifications')}

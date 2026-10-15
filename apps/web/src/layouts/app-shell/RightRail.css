@@ -12,7 +12,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: var(--shell-right-rail-bg, var(--app-canvas, #f6f8fc));
+  background: var(--app-canvas, #f6f8fc);
   padding: 16px 0 12px;
 }
 
@@ -236,7 +236,7 @@
 
 .bezent-right-rail-btn.is-active,
 .bezent-right-rail-btn.is-active:hover {
-  background-color: var(--shell-nav-selected-bg, var(--primary, #c2e7ff));
+  background-color: var(--primary, #d3e3fd);
 }
 
 .right-rail__badge-dot {
@@ -247,7 +247,7 @@
   height: 8px;
   border-radius: 50%;
   background-color: #b3261e;
-  box-shadow: 0 0 0 2px var(--shell-right-rail-bg, var(--app-canvas, #f6f8fc));
+  box-shadow: 0 0 0 2px var(--app-canvas, #f6f8fc);
   pointer-events: none;
 }
 
@@ -381,7 +381,7 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  background: var(--shell-right-rail-bg, var(--bg-sidebar, var(--bg-header)));
+  background: var(--bg-sidebar, var(--bg-header));
   border: 1px solid var(--border-default);
   border-right: none;
   border-radius: 6px 0 0 6px;

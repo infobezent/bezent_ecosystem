@@ -18,7 +18,7 @@
     'top top top'
     'left main right'
     'bottom bottom bottom';
-  background: var(--shell-workspace-bg, var(--bg-app, #f6f8fc));
+  background: var(--bg-app, #f8fafc);
   transition: grid-template-columns 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -62,10 +62,10 @@
   min-width: 0;
   min-height: 0;
   overflow: auto;
-  background: var(--shell-content-surface, var(--bg-surface, #ffffff));
+  background: var(--bg-surface, #ffffff);
   margin: 8px 12px 12px 8px;
   border-radius: 14px;
-  border: 1px solid var(--shell-border-subtle, var(--border-default, #e7ebf0));
+  border: 1px solid var(--border-default, #e2e8f0);
   box-shadow: var(
     --shadow-workspace,
     0 1px 3px rgba(15, 23, 42, 0.05),

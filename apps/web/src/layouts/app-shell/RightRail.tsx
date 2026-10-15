@@ -20,7 +20,7 @@ export interface RightRailProps {
   notificationCount?: number;
   notificationsOpen?: boolean;
   onNotificationsToggle?: () => void;
-  _onAccountSettings?: () => void;
+  onAccountSettings?: () => void;
 }
 
 /**
@@ -39,10 +39,11 @@ export function RightRail({
   onAddon,
   onAI,
   onQuickCreate,
-  _onAccountSettings,
+  onAccountSettings,
 }: RightRailProps) {
   const [aiHovered, setAiHovered] = useState(false);
   const [createHovered, setCreateHovered] = useState(false);
+  const [settingsHovered, setSettingsHovered] = useState(false);
   const [addonHovered, setAddonHovered] = useState(false);
 
   return (
@@ -144,6 +145,24 @@ export function RightRail({
 
             <div className="right-rail__footer">
               <ThemeButton isDark={isDarkTheme} onToggle={onToggleTheme} />
+              <div className="right-rail__anchor">
+                <button
+                  type="button"
+                  className="bezent-right-rail-btn"
+                  aria-label="Settings"
+                  onClick={onAccountSettings}
+                  onMouseEnter={() => setSettingsHovered(true)}
+                  onMouseLeave={() => setSettingsHovered(false)}
+                >
+                  <BezentIcon
+                    name="settings"
+                    size={20}
+                    color="var(--right-rail-icon-default, #444746)"
+                    strokeWidth={1.8}
+                  />
+                </button>
+                {settingsHovered && <Tooltip label="Settings" direction="left" />}
+              </div>
               <button
                 type="button"
                 className="right-rail__collapse"

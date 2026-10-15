@@ -1,61 +1,21 @@
 /*
- * BEZENT LeftSidebar — 104px Primary Navigation Rail
- *
- * Implements the refreshed left rail specification:
- * - 104px flat rail sitting on shell background (no card, no shadow, no extra border)
- * - Vertically stacked items with 8px gap
- * - 44x44 rounded-12 icon tile (uniform neutral tint token)
- * - 22px icon centered inside tile
- * - Label below (12px, 500 weight, centered, max 1 line, no ellipsis)
- * - Active item: selected fill (var(--shell-nav-selected-bg, #c2e7ff)), label weight 600
- * - Hover: tile shifts to neutral-hover
- * - Admin pinned at the bottom separated by a 1px divider
- * - Focus-visible ring on each item
+ * BEZENT LeftSidebar — source: old approved UI `LeftNav`/`ZohoRailBtn`
+ * (`App.tsx` 621-1019) with `SIDEBAR_NAV_TOKENS` (now --shell-nav-* tokens).
  */
 
 .left-sidebar {
   grid-area: left;
   position: relative;
-  z-index: var(--z-sidebar, 90);
+  z-index: var(--z-sidebar);
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: var(--shell-sidebar-width, 104px);
-  min-width: var(--shell-sidebar-width, 104px);
-  max-width: var(--shell-sidebar-width, 104px);
-  height: 100%;
   min-height: 0;
-  box-sizing: border-box;
-  padding: 8px 6px 12px 8px;
-  background: var(--shell-sidebar-bg, var(--bg-sidebar, #f6f8fc));
-  font-family: var(--font-family-base);
-  border: none;
-  box-shadow: none;
-}
-
-.left-sidebar__container {
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-radius: var(--radius-md, 8px);
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow:
-    0 12px 28px -4px rgba(15, 23, 42, 0.09),
-    0 4px 10px -2px rgba(15, 23, 42, 0.04),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
   padding: 8px 0 6px;
-  box-sizing: border-box;
-  overflow: hidden;
-  transition:
-    background-color 200ms ease,
-    border-color 200ms ease,
-    box-shadow 200ms ease;
+  background: var(--bg-sidebar, var(--bg-header));
+  font-family: var(--font-family-base);
+  /* No border-right: surface contrast between --bg-sidebar (#F6F8FC) and
+     --bg-surface (#FFF) provides the visual separation naturally. */
 }
 
 .left-sidebar__list {
@@ -65,27 +25,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--shell-nav-item-gap, 8px);
-  padding: 0 0 6px;
+  gap: var(--shell-nav-item-gap);
+  padding-bottom: 8px;
   overflow-x: hidden;
   overflow-y: auto;
-}
-
-.left-sidebar__bottom {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex-shrink: 0;
-  padding-bottom: 2px;
-}
-
-.left-sidebar__divider {
-  width: 48px;
-  height: 1px;
-  background: var(--border-subtle, #e7ebf0);
-  margin: 6px 0 8px;
-  flex-shrink: 0;
 }
 
 .left-sidebar__item-wrap {
@@ -97,104 +40,57 @@
 }
 
 .left-sidebar__item {
-  width: var(--shell-nav-item-width, 88px);
-  height: var(--shell-nav-item-height, 64px);
+  width: var(--shell-nav-item-width);
+  height: var(--shell-nav-item-height);
   box-sizing: border-box;
-  padding: 0;
+  padding: 0 2px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 4px;
   flex-shrink: 0;
   border: none;
-  border-radius: var(--radius-sm, 6px);
+  border-radius: 6px;
   background: transparent;
   cursor: pointer;
   font-family: inherit;
   outline: none;
   position: relative;
-  user-select: none;
 }
 
-/* ── Focus-visible Ring ──────────────────────────────────────────────── */
-.left-sidebar__item:focus-visible {
-  outline: none;
-}
-
-.left-sidebar__item:focus-visible .left-sidebar__icon-tile {
-  outline: 2px solid var(--border-focus, #7cc4fa);
-  outline-offset: 2px;
-}
-
-/* ── 44x44 Rounded-6 Tile (matching Right Rail AI & Quick Create reference) ── */
-.left-sidebar__icon-tile {
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  min-height: 44px;
-  border-radius: var(--radius-sm, 6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* ── Selection/hover pill ──────────────────────────────────────────────
+   Gmail-inspired navigation rail capsule pill: 56px wide x 32px tall,
+   fully rounded (border-radius: 16px) centered around the icon. */
+.left-sidebar__item::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56px;
+  height: 32px;
+  border-radius: 16px;
   background: transparent;
-  border: 1px solid transparent;
-  box-sizing: border-box;
-  position: relative;
-  transition:
-    background-color var(--motion-duration-nav-icon, 0.15s) ease,
-    border-color var(--motion-duration-nav-icon, 0.15s) ease;
+  transition: background-color var(--motion-duration-nav-icon) ease;
+  pointer-events: none;
+  z-index: 0;
 }
 
-.left-sidebar__item:hover .left-sidebar__icon-tile {
-  background: var(--nav-hover, rgba(4, 30, 73, 0.08));
+.left-sidebar__item:hover::before {
+  background: var(--nav-hover);
 }
 
-.left-sidebar__item.is-active .left-sidebar__icon-tile {
-  background: var(--shell-nav-selected-bg, var(--nav-selected, #c2e7ff));
-  border-color: transparent;
+.left-sidebar__item.is-active::before {
+  background: var(--nav-selected);
 }
 
-.left-sidebar__item.is-active:hover .left-sidebar__icon-tile {
-  background: var(--shell-nav-selected-bg, var(--nav-selected, #c2e7ff));
-  border-color: transparent;
-}
-
-/* Suppress redundant nested background on BezentNavIcon inside the tile */
-.left-sidebar .bezent-nav-icon-anchor {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.left-sidebar .bezent-nav-icon-box {
-  background: transparent !important;
-  width: 22px !important;
-  height: 22px !important;
-  min-width: 22px !important;
-  min-height: 22px !important;
-  padding: 0 !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.left-sidebar__item .bezent-material-icon {
-  font-size: 22px;
-  width: 22px;
-  height: 22px;
-  color: var(--nav-icon-default, #444746);
-  --icon-fill-val: 0 !important;
-}
-
-.left-sidebar__item:hover .bezent-material-icon {
-  color: var(--nav-icon-hover, #1f1f1f);
+.left-sidebar__item.is-active:hover::before {
+  background: var(--nav-selected);
 }
 
 .left-sidebar__item.is-active .bezent-material-icon {
-  color: var(--nav-icon-active, #041e49);
+  color: var(--nav-icon-active);
   --icon-fill-val: 1 !important;
   font-variation-settings:
     'FILL' 1,
@@ -203,43 +99,72 @@
     'opsz' 24 !important;
 }
 
-/* ── Label Area (12px, 500 weight, centered, max 1 line, no ellipsis) ── */
+.left-sidebar__item:not(.is-active) .bezent-material-icon {
+  --icon-fill-val: 0 !important;
+}
+
+/* Suppress the icon-box's own container background inside the sidebar —
+   the square above is the selection surface; the icon only changes colour.
+   The anchor gets position+z-index so icon content sits above the square. */
+.left-sidebar .bezent-nav-icon-box.is-selected,
+.left-sidebar .bezent-nav-icon-box.is-hovered {
+  background: transparent;
+}
+
+.left-sidebar .bezent-nav-icon-anchor {
+  position: relative;
+  z-index: 1;
+}
+
+.left-sidebar__item:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
+}
+
+/* Fixed two-line label area so items with 1- or 2-line labels align. */
 .left-sidebar__label-area {
   width: 100%;
-  max-width: var(--shell-nav-label-max-width, 96px);
-  height: var(--shell-nav-label-area-height, 16px);
+  max-width: var(--shell-nav-label-max-width);
+  height: var(--shell-nav-label-area-height);
   flex-shrink: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  overflow: hidden;
 }
 
 .left-sidebar__label {
-  display: block;
-  white-space: nowrap;
+  width: 100%;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: clip;
+  text-overflow: ellipsis;
   font-family: var(--font-family-base);
   font-size: var(--font-size-sm, 12px);
   font-weight: var(--font-weight-medium, 500);
-  line-height: 16px;
+  line-height: 14px;
   text-align: center;
-  color: var(--nav-label-default, #000000);
-  transition: color var(--motion-duration-icon, 0.15s) ease;
+  color: var(--nav-label-default);
+  transition: color var(--motion-duration-icon) ease;
 }
 
 .left-sidebar__item:hover .left-sidebar__label {
-  color: var(--nav-label-hover, #000000);
+  color: var(--nav-label-hover);
 }
 
 .left-sidebar__item.is-active .left-sidebar__label {
-  font-weight: 600;
-  color: var(--nav-label-active, #000000);
+  font-weight: 650;
+  color: var(--nav-label-active);
 }
 
-/* ── Current-page Dimmed Style (when More launcher takes active focus) ── */
-.left-sidebar__item.is-current-page .left-sidebar__icon-tile {
-  opacity: 0.85;
+/* Dimmed current-page indicator when More launcher takes active rail focus (BZ-03) */
+.left-sidebar__item.is-current-page {
+  position: relative;
+}
+
+.left-sidebar__item.is-current-page .bezent-nav-icon-anchor {
+  opacity: 0.75;
 }
 
 .left-sidebar__item.is-current-page .left-sidebar__label {
@@ -268,13 +193,12 @@
   opacity: 1;
 }
 
-/* ── Badges & Dots ───────────────────────────────────────────────────── */
 .left-sidebar__more-dot {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 6px;
-  height: 6px;
+  top: 4px;
+  right: 4px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: var(--nav-icon-active);
   pointer-events: none;
@@ -282,61 +206,36 @@
 
 .left-sidebar__badge-dot {
   position: absolute;
-  top: -1px;
-  right: -1px;
+  top: 1px;
+  right: 1px;
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: #b3261e;
-  box-shadow: 0 0 0 2px var(--shell-sidebar-bg, var(--app-canvas, #f6f8fc));
+  box-shadow: 0 0 0 2px var(--app-canvas, #f6f8fc);
   pointer-events: none;
 }
 
 /* ── Dark Mode Navigation & Active State ─────────────────────────────── */
-[data-theme='dark'] .left-sidebar {
-  background: var(--shell-sidebar-bg, #020b1c);
+
+[data-theme='dark'] .left-sidebar__item:hover::before {
+  background: rgba(22, 131, 255, 0.12);
 }
 
-[data-theme='dark'] .left-sidebar__container {
-  background: rgba(15, 23, 42, 0.72);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow:
-    0 14px 32px -4px rgba(0, 0, 0, 0.55),
-    0 4px 12px -2px rgba(0, 0, 0, 0.35),
-    0 0 0 1px rgba(255, 255, 255, 0.04);
+[data-theme='dark'] .left-sidebar__item.is-active::before {
+  background: var(--nav-selected, #0b254e);
+  border: none;
+  box-shadow: none;
+  transform: translateX(-50%);
 }
 
-[data-theme='dark'] .left-sidebar__icon-tile {
-  background: transparent;
-  border-color: transparent;
-}
-
-[data-theme='dark'] .left-sidebar__item:hover .left-sidebar__icon-tile {
-  background: var(--nav-hover, rgba(22, 131, 255, 0.12));
-}
-
-[data-theme='dark'] .left-sidebar__item.is-active .left-sidebar__icon-tile {
-  background: var(--shell-nav-selected-bg, var(--nav-selected, #0b254e));
-  border-color: transparent;
-}
-
-[data-theme='dark'] .left-sidebar__item.is-active:hover .left-sidebar__icon-tile {
-  background: var(--shell-nav-selected-bg, var(--nav-selected, #0b254e));
-  border-color: transparent;
-}
-
-[data-theme='dark'] .left-sidebar__item .bezent-material-icon {
-  color: var(--nav-icon-default, #94a3b8);
-}
-
-[data-theme='dark'] .left-sidebar__item:hover .bezent-material-icon {
-  color: var(--nav-icon-hover, #f8fafc);
+[data-theme='dark'] .left-sidebar__item.is-active:hover::before {
+  background: var(--nav-selected, #0b254e);
 }
 
 [data-theme='dark'] .left-sidebar__item.is-active .bezent-material-icon {
   color: #38bdf8;
+  filter: none;
 }
 
 [data-theme='dark'] .left-sidebar__label {
@@ -349,11 +248,7 @@
 
 [data-theme='dark'] .left-sidebar__item.is-active .left-sidebar__label {
   color: var(--nav-label-active, #ffffff);
-  font-weight: 600;
-}
-
-[data-theme='dark'] .left-sidebar__divider {
-  background: rgba(255, 255, 255, 0.08);
+  font-weight: 650;
 }
 
 [data-theme='dark'] .left-sidebar__badge-dot {

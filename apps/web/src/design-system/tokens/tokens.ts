@@ -34,16 +34,6 @@ export const THEME_TOKENS = {
     hover: 'var(--bg-hover)',
     selected: 'var(--bg-selected)',
   },
-  shell: {
-    topbarBg: 'var(--shell-topbar-bg)',
-    sidebarBg: 'var(--shell-sidebar-bg)',
-    rightRailBg: 'var(--shell-right-rail-bg)',
-    bottomBarBg: 'var(--shell-bottom-bar-bg)',
-    workspaceBg: 'var(--shell-workspace-bg)',
-    contentSurface: 'var(--shell-content-surface)',
-    navSelectedBg: 'var(--shell-nav-selected-bg)',
-    borderSubtle: 'var(--shell-border-subtle)',
-  },
   text: {
     brand: 'var(--text-brand)',
     primary: 'var(--text-primary)',

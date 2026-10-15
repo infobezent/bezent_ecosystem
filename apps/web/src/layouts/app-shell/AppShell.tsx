@@ -44,10 +44,6 @@ export interface AppShellProps {
   notificationsOpen?: boolean;
   onNotificationsToggle?: () => void;
   onSettingsClick?: () => void;
-  /** Bottom-anchored Settings item (Change 01) */
-  settingsItem?: ShellNavItem | null;
-  /** Selection callback when bottom Settings is clicked */
-  onSettingsSelect?: () => void;
   /**
    * Workspace presentation variant.
    * - 'default': standard floating card workspace with outer margins, radius, and shadow.
@@ -96,8 +92,6 @@ export function AppShell({
   notificationsOpen,
   onNotificationsToggle,
   onSettingsClick,
-  settingsItem,
-  onSettingsSelect,
   workspaceVariant = 'default',
   children,
 }: AppShellProps) {
@@ -113,8 +107,6 @@ export function AppShell({
   const hasLauncherOnlyItems = Boolean(
     launcher?.items.some((launcherItem) => !navItems.some((nav) => nav.id === launcherItem.id)),
   );
-
-  const handleSettingsSelect = onSettingsSelect || onSettingsClick || onAccountSettings;
 
   return (
     <div
@@ -151,8 +143,6 @@ export function AppShell({
         }}
         activeSubId={activeSubId}
         onSubSelect={onSubSelect}
-        settingsItem={settingsItem}
-        onSettingsSelect={handleSettingsSelect}
         more={
           launcher
             ? {
@@ -192,6 +182,7 @@ export function AppShell({
         notificationCount={notificationCount}
         notificationsOpen={notificationsOpen}
         onNotificationsToggle={onNotificationsToggle}
+        onAccountSettings={onSettingsClick || onAccountSettings}
       />
       <BottomBar />
     </div>
