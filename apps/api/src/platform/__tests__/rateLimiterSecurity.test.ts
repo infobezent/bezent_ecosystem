@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
-import type { Request } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { createApp } from '../../app/server/createApp.js';
 import {
   getSafeClientIp,
@@ -155,11 +155,11 @@ describe('Auth Rate Limiter & Proxy Security', () => {
 
       const mockRes = {
         setHeader: () => {},
-      } as unknown as any;
+      } as unknown as Response;
 
-      let nextError: any = null;
-      const next = (err?: any) => {
-        nextError = err;
+      let nextError: (Error & { statusCode?: number; code?: string }) | undefined;
+      const next: NextFunction = (err?: unknown) => {
+        nextError = err as (Error & { statusCode?: number; code?: string }) | undefined;
       };
 
       // Request 1: allowed
@@ -173,8 +173,8 @@ describe('Auth Rate Limiter & Proxy Security', () => {
       // Request 3: blocked
       customLimiter(mockReq, mockRes, next);
       expect(nextError).toBeDefined();
-      expect(nextError.statusCode).toBe(429);
-      expect(nextError.code).toBe('TEST_RATE_LIMIT');
+      expect(nextError?.statusCode).toBe(429);
+      expect(nextError?.code).toBe('TEST_RATE_LIMIT');
 
       // Reset allows again
       customLimiter.reset();

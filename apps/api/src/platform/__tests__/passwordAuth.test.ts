@@ -3,12 +3,7 @@ import request from 'supertest';
 import { eq, inArray } from 'drizzle-orm';
 import { createApp } from '../../app/server/createApp.js';
 import { isDatabaseConfigured, getDb } from '../../db/connection.js';
-import {
-  env,
-  assertProductionAuthConfig,
-  isReviewPasswordAuthEnabled,
-  getDeploymentEnv,
-} from '../../app/config/env.js';
+import { assertProductionAuthConfig, isReviewPasswordAuthEnabled } from '../../app/config/env.js';
 import {
   auditLogs,
   companies,
@@ -35,18 +30,26 @@ describe.skipIf(!isDatabaseConfigured)('Review Password Authentication & Access'
   const suspendedEmail = 'reviewer.suspended@bezent-review.example';
   const inactiveEmail = 'reviewer.inactive@bezent-review.example';
 
-  let reviewerUserId = 'usr_pwd_reviewer';
-  let suspendedUserId = 'usr_pwd_suspended';
-  let inactiveUserId = 'usr_pwd_inactive';
+  const reviewerUserId = 'usr_pwd_reviewer';
+  const suspendedUserId = 'usr_pwd_suspended';
+  const inactiveUserId = 'usr_pwd_inactive';
 
   beforeAll(async () => {
     const db = getDb();
 
     // Clean up past runs
-    await db.delete(sessions).where(inArray(sessions.userId, [reviewerUserId, suspendedUserId, inactiveUserId]));
-    await db.delete(roleAssignments).where(inArray(roleAssignments.userId, [reviewerUserId, suspendedUserId, inactiveUserId]));
-    await db.delete(memberships).where(inArray(memberships.userId, [reviewerUserId, suspendedUserId, inactiveUserId]));
-    await db.delete(users).where(inArray(users.id, [reviewerUserId, suspendedUserId, inactiveUserId]));
+    await db
+      .delete(sessions)
+      .where(inArray(sessions.userId, [reviewerUserId, suspendedUserId, inactiveUserId]));
+    await db
+      .delete(roleAssignments)
+      .where(inArray(roleAssignments.userId, [reviewerUserId, suspendedUserId, inactiveUserId]));
+    await db
+      .delete(memberships)
+      .where(inArray(memberships.userId, [reviewerUserId, suspendedUserId, inactiveUserId]));
+    await db
+      .delete(users)
+      .where(inArray(users.id, [reviewerUserId, suspendedUserId, inactiveUserId]));
     await db.delete(companies).where(inArray(companies.id, [companyId, otherCompanyId]));
     await db.delete(tenants).where(inArray(tenants.id, [tenantId, otherTenantId]));
 
@@ -59,7 +62,13 @@ describe.skipIf(!isDatabaseConfigured)('Review Password Authentication & Access'
     // Seed test companies
     await db.insert(companies).values([
       { id: companyId, tenantId, name: 'Review Company Inc', code: 'REV_INC', status: 'active' },
-      { id: otherCompanyId, tenantId: otherTenantId, name: 'Foreign Company Inc', code: 'FOR_INC', status: 'active' },
+      {
+        id: otherCompanyId,
+        tenantId: otherTenantId,
+        name: 'Foreign Company Inc',
+        code: 'FOR_INC',
+        status: 'active',
+      },
     ]);
 
     // Ensure HR system role exists
@@ -202,9 +211,10 @@ describe.skipIf(!isDatabaseConfigured)('Review Password Authentication & Access'
     });
 
     it('rejects non-existent email with generic 401 error (no account enumeration)', async () => {
-      const res = await request(app)
-        .post('/api/v1/platform/auth/login')
-        .send({ email: 'nonexistent.reviewer@bezent-review.example', password: 'SomePassword123!' });
+      const res = await request(app).post('/api/v1/platform/auth/login').send({
+        email: 'nonexistent.reviewer@bezent-review.example',
+        password: 'SomePassword123!',
+      });
 
       expect(res.status).toBe(401);
       expect(res.body.error.message).toBe('Invalid email or password');
@@ -245,7 +255,10 @@ describe.skipIf(!isDatabaseConfigured)('Review Password Authentication & Access'
 
       // Verify session stored securely as sha256 digest in database
       const db = getDb();
-      const dbSessions = await db.select().from(sessions).where(eq(sessions.userId, reviewerUserId));
+      const dbSessions = await db
+        .select()
+        .from(sessions)
+        .where(eq(sessions.userId, reviewerUserId));
       expect(dbSessions.length).toBeGreaterThan(0);
       const activeSession = dbSessions.find((s) => s.revokedAt === null);
       expect(activeSession).toBeDefined();
