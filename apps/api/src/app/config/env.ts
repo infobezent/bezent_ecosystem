@@ -1,5 +1,6 @@
 import 'dotenv/config';
 
+// Load environment configuration
 function optional(name: string): string | undefined {
   const value = process.env[name];
   return value && value.length > 0 ? value : undefined;
@@ -41,9 +42,22 @@ export const env = {
   },
   /** Key for OTP code digests (ADR-018). Must be a long random secret in production. */
   otpSecret: optional('OTP_SECRET'),
+  /** Explicit feature flag for non-production UAT fixed OTP. Never active in production. */
+  get enableUatFixedOtp(): boolean {
+    if (this.nodeEnv === 'production') return false;
+    return process.env.ENABLE_UAT_FIXED_OTP === 'true';
+  },
+  set enableUatFixedOtp(value: boolean) {
+    if (value) {
+      process.env.ENABLE_UAT_FIXED_OTP = 'true';
+    } else {
+      delete process.env.ENABLE_UAT_FIXED_OTP;
+    }
+  },
   /** Fixed OTP for non-production UAT environments only. Never active in production. */
   get uatFixedOtp(): string | undefined {
     if (this.nodeEnv === 'production') return undefined;
+    if (!this.enableUatFixedOtp) return undefined;
     return optional('UAT_FIXED_OTP');
   },
   set uatFixedOtp(value: string | undefined) {
@@ -55,19 +69,81 @@ export const env = {
   },
   /** Public URL of the web app, used in sign-in invitation emails. */
   webAppUrl: required('WEB_APP_URL', 'http://localhost:3000'),
+  /** Deployment environment identity (e.g., development, test, review, production). */
+  get deploymentEnv(): string {
+    return getDeploymentEnv();
+  },
+  /** Review password authentication feature flag. Active only in approved environments. */
+  get enableReviewPasswordAuth(): boolean {
+    return isReviewPasswordAuthEnabled();
+  },
+  /** Trusted proxy configuration for Express (fail-closed to false if unconfigured). */
+  get trustProxy(): boolean | number | string {
+    return parseTrustProxy(process.env.TRUST_PROXY ?? process.env.BEZENT_TRUST_PROXY);
+  },
 };
+
+export function parseTrustProxy(value: string | undefined): boolean | number | string {
+  if (!value || value === 'false') return false;
+  if (value === 'true') return true;
+  const numeric = Number(value);
+  if (!isNaN(numeric) && Number.isInteger(numeric) && numeric > 0) {
+    return numeric;
+  }
+  return value;
+}
+
+export const ALLOWED_REVIEW_ENVIRONMENTS: readonly string[] = Object.freeze([
+  'development',
+  'test',
+  'local',
+  'review',
+  'preview',
+  'staging',
+]);
+
+export function getDeploymentEnv(): string {
+  return (process.env.BEZENT_DEPLOYMENT_ENV ?? env.nodeEnv).toLowerCase().trim();
+}
+
+export function isReviewPasswordAuthEnabled(): boolean {
+  if (process.env.ENABLE_REVIEW_PASSWORD_AUTH !== 'true') {
+    return false;
+  }
+  const currentEnv = getDeploymentEnv();
+  return ALLOWED_REVIEW_ENVIRONMENTS.includes(currentEnv);
+}
 
 /**
  * Production must deliver OTP codes over SMTP with a real OTP secret; it never
  * falls back to the development outbox. Called once at API startup.
+ * Fails closed if review authentication or fixed OTP flags are active in production.
  */
 export function assertProductionAuthConfig(): void {
-  if (env.nodeEnv !== 'production') return;
+  const currentEnv = getDeploymentEnv();
+  const isProduction =
+    currentEnv === 'production' ||
+    currentEnv === 'prod' ||
+    (env.nodeEnv === 'production' && !process.env.BEZENT_DEPLOYMENT_ENV);
+
+  if (process.env.ENABLE_REVIEW_PASSWORD_AUTH === 'true') {
+    if (isProduction || !ALLOWED_REVIEW_ENVIRONMENTS.includes(currentEnv)) {
+      throw new Error(
+        `Review password authentication cannot be enabled in environment '${currentEnv}'. It is restricted to: ${ALLOWED_REVIEW_ENVIRONMENTS.join(', ')}`,
+      );
+    }
+  }
+
+  if (!isProduction) return;
+
   const missing: string[] = [];
   if (env.email.transport !== 'smtp') missing.push('EMAIL_TRANSPORT=smtp');
   if (!env.email.smtp.host) missing.push('SMTP_HOST');
   if (!env.email.from) missing.push('MAIL_FROM');
   if (!env.otpSecret || env.otpSecret.length < 32) missing.push('OTP_SECRET (32+ chars)');
+  if (process.env.ENABLE_UAT_FIXED_OTP === 'true' || process.env.UAT_FIXED_OTP) {
+    throw new Error('Fixed OTP feature flags cannot be configured in production environment');
+  }
   if (missing.length > 0) {
     throw new Error(`Authentication is not configured for production: ${missing.join(', ')}`);
   }

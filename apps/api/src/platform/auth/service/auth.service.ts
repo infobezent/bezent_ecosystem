@@ -4,16 +4,24 @@ import {
   accessResolverService,
   AccessResolverService,
 } from '../../access/service/accessResolver.service.js';
-import { generateSessionToken, isWellFormedSessionToken } from '../security.js';
-import { UnauthorizedError, ForbiddenError } from '../../../app/errors/AppError.js';
+import { generateSessionToken, isWellFormedSessionToken, verifyPassword } from '../security.js';
+import { isReviewPasswordAuthEnabled } from '../../../app/config/env.js';
+import {
+  UnauthorizedError,
+  ForbiddenError,
+  SessionCreationError,
+} from '../../../app/errors/AppError.js';
 import type { AuthenticatedUser, LoginResult } from '../types/auth.types.js';
 import type { User } from '../../../db/schema.js';
 
 export const SESSION_TTL_HOURS = 24;
 
+const DUMMY_SALT = '00000000000000000000000000000000';
+const DUMMY_HASH = '0'.repeat(128);
+
 /**
- * Platform sessions (ADR-018). There is ONE way to obtain a session for every
- * user: a verified Email OTP (see OtpAuthService), which calls issueSession.
+ * Platform sessions (ADR-018). Provides session issuance for verified identities:
+ * primary production sign-in via Email OTP, and gated review/dev password authentication.
  * Authorization is never decided here; it is resolved per request (ADR-017).
  */
 export class AuthService {
@@ -24,10 +32,37 @@ export class AuthService {
   ) {}
 
   /**
+   * Authenticates a user with email + password in approved review/development environments.
+   * Gated strictly server-side; fails closed in production.
+   * Constant-time verification prevents username enumeration.
+   */
+  async passwordLogin(email: string, password: string): Promise<LoginResult> {
+    if (!isReviewPasswordAuthEnabled()) {
+      throw new ForbiddenError('Password login is not available in this environment');
+    }
+
+    const user = await this.repo.findUserByEmail(email);
+    if (!user || !user.passwordHash || !user.salt) {
+      verifyPassword(password, DUMMY_HASH, DUMMY_SALT);
+      throw new UnauthorizedError('Invalid email or password');
+    }
+
+    const isMatch = verifyPassword(password, user.passwordHash, user.salt);
+    if (!isMatch) {
+      throw new UnauthorizedError('Invalid email or password');
+    }
+
+    return this.issueSession(user, 'password');
+  }
+
+  /**
    * Opens a session for an already-verified identity and resolves what it may
    * reach: platform workspaces, companies, roles, permissions and workspaces.
    */
-  async issueSession(user: User): Promise<LoginResult> {
+  async issueSession(
+    user: User,
+    method: 'email_otp' | 'password' = 'email_otp',
+  ): Promise<LoginResult> {
     if (user.status === 'suspended') {
       throw new ForbiddenError('Account is suspended. Please contact administrator.');
     }
@@ -49,10 +84,18 @@ export class AuthService {
       action: 'user_logged_in',
       targetType: 'user',
       targetId: user.id,
-      metadata: { method: 'email_otp' },
+      metadata: { method },
     });
 
-    const access = await this.access.resolveOverview(authenticatedUser);
+    let access;
+    try {
+      access = await this.access.resolveOverview(authenticatedUser);
+    } catch (err) {
+      console.error('[auth] Failed to initialize session and resolve access overview:', err);
+      throw new SessionCreationError(
+        'Unable to initialize user workspace session. Please try again shortly or contact your administrator.',
+      );
+    }
 
     // Landing destination follows the workspaces the user's effective
     // permissions actually grant, never a role name.

@@ -32,7 +32,7 @@ import {
   publishAttendancePolicy,
   rollbackAttendancePolicyVersion,
 } from '../../../attendance/api/attendanceApi';
-import { fetchDepartments } from '../../../../company-admin/organization/api/departmentApi';
+import { fetchDepartments } from '../../../api/organizationMastersApi';
 import { fetchEmployees } from '../../../employees/api/employeesApi';
 import type {
   AttendancePolicy,

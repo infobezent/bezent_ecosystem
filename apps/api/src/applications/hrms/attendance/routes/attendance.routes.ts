@@ -6,6 +6,8 @@ import { attendanceOnDutyController } from '../controller/attendanceOnDuty.contr
 import { attendanceMonthlySummaryController } from '../controller/attendanceMonthlySummary.controller.js';
 import { attendanceReportsController } from '../controller/attendanceReports.controller.js';
 import { attendanceOverviewController } from '../controller/attendanceOverview.controller.js';
+import { attendanceOvertimeController } from '../controller/attendanceOvertime.controller.js';
+import { attendanceCompOffController } from '../controller/attendanceCompOff.controller.js';
 import { requireReadWrite } from '../../../../platform/access/middleware/access.middleware.js';
 
 export const attendanceRouter = Router();
@@ -278,6 +280,135 @@ attendanceRouter.post(
 attendanceRouter.post(
   '/hrms/attendance/on-duty/:id/withdraw',
   attendanceOnDutyController.cancelRequest,
+);
+
+// 6c. Overtime (OT) Operational Workflow V1.0
+attendanceRouter.get(
+  '/hrms/attendance/overtime/overview',
+  attendanceOvertimeController.getOverview,
+);
+attendanceRouter.get(
+  '/hrms/attendance/overtime/eligibility',
+  attendanceOvertimeController.checkEligibility,
+);
+attendanceRouter.get(
+  '/hrms/attendance/overtime/requests',
+  attendanceOvertimeController.listRequests,
+);
+attendanceRouter.post(
+  '/hrms/attendance/overtime/requests',
+  attendanceOvertimeController.createRequest,
+);
+attendanceRouter.get(
+  '/hrms/attendance/overtime/requests/:id',
+  attendanceOvertimeController.getRequestDetails,
+);
+attendanceRouter.post(
+  '/hrms/attendance/overtime/requests/:id/decision',
+  attendanceOvertimeController.decideRequest,
+);
+attendanceRouter.post(
+  '/hrms/attendance/overtime/requests/:id/withdraw',
+  attendanceOvertimeController.withdrawRequest,
+);
+attendanceRouter.post(
+  '/hrms/attendance/overtime/requests/:id/cancel',
+  attendanceOvertimeController.cancelRequest,
+);
+attendanceRouter.post(
+  '/hrms/attendance/overtime/requests/:id/settle',
+  attendanceOvertimeController.allocateSettlement,
+);
+attendanceRouter.get(
+  '/hrms/attendance/overtime/settlements',
+  attendanceOvertimeController.listSettlements,
+);
+attendanceRouter.post(
+  '/hrms/attendance/overtime/settlements/:settlementId/reverse',
+  attendanceOvertimeController.reverseSettlement,
+);
+attendanceRouter.get(
+  '/hrms/attendance/overtime/policies',
+  attendanceOvertimeController.listPolicies,
+);
+attendanceRouter.post(
+  '/hrms/attendance/overtime/policies',
+  attendanceOvertimeController.createPolicy,
+);
+attendanceRouter.get(
+  '/hrms/attendance/overtime/policies/:id',
+  attendanceOvertimeController.getPolicyDetails,
+);
+attendanceRouter.put(
+  '/hrms/attendance/overtime/policies/:id',
+  attendanceOvertimeController.updatePolicy,
+);
+
+// 6d. Compensatory Off (Comp-Off) Operational Workflow V1.0
+attendanceRouter.get('/hrms/attendance/comp-off/overview', attendanceCompOffController.getOverview);
+attendanceRouter.get(
+  '/hrms/attendance/comp-off/eligibility',
+  attendanceCompOffController.checkEligibility,
+);
+attendanceRouter.get(
+  '/hrms/attendance/comp-off/requests',
+  attendanceCompOffController.listRequests,
+);
+attendanceRouter.post(
+  '/hrms/attendance/comp-off/requests',
+  attendanceCompOffController.createRequest,
+);
+attendanceRouter.get(
+  '/hrms/attendance/comp-off/requests/:id',
+  attendanceCompOffController.getRequestDetail,
+);
+attendanceRouter.post(
+  '/hrms/attendance/comp-off/requests/:id/decision',
+  attendanceCompOffController.decideRequest,
+);
+attendanceRouter.post(
+  '/hrms/attendance/comp-off/requests/:id/withdraw',
+  attendanceCompOffController.withdrawRequest,
+);
+attendanceRouter.post(
+  '/hrms/attendance/comp-off/requests/:id/cancel',
+  attendanceCompOffController.withdrawRequest,
+);
+attendanceRouter.get(
+  '/hrms/attendance/comp-off/approvals',
+  attendanceCompOffController.getApprovalQueue,
+);
+attendanceRouter.get(
+  '/hrms/attendance/comp-off/approval-queue',
+  attendanceCompOffController.getApprovalQueue,
+);
+attendanceRouter.get(
+  '/hrms/attendance/comp-off/entitlements',
+  attendanceCompOffController.listEntitlements,
+);
+attendanceRouter.post(
+  '/hrms/attendance/comp-off/entitlements/:id/reverse',
+  attendanceCompOffController.reverseEntitlement,
+);
+attendanceRouter.post(
+  '/hrms/attendance/comp-off/from-overtime/:settlementId',
+  attendanceCompOffController.convertFromOvertime,
+);
+attendanceRouter.get(
+  '/hrms/attendance/comp-off/handoffs',
+  attendanceCompOffController.listHandoffs,
+);
+attendanceRouter.get(
+  '/hrms/attendance/comp-off/policies',
+  attendanceCompOffController.listPolicies,
+);
+attendanceRouter.post(
+  '/hrms/attendance/comp-off/policies',
+  attendanceCompOffController.createPolicy,
+);
+attendanceRouter.get(
+  '/hrms/attendance/comp-off/requests/:id/audits',
+  attendanceCompOffController.getRequestAudits,
 );
 
 // 7. Manual Correction

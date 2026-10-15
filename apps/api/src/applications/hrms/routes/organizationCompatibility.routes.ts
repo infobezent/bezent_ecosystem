@@ -27,9 +27,17 @@ organizationCompatibilityRouter.get(
   '/hrms/organization/masters',
   requireAnyPermission(
     'hrms.organization.read',
+    'hrms.organization.view',
     'hrms.employees.read',
+    'hrms.employees.view',
     'hrms.employees.create',
     'hrms.onboarding.read',
+    'hrms.attendance.view',
+    'hrms.attendance.read',
+    'hrms.settings.view',
+    'hrms.settings.read',
+    'company.organization.view',
+    'company.organization.read',
   ),
   organizationController.getMasters,
 );
@@ -136,8 +144,14 @@ organizationCompatibilityRouter.patch(
 // Departments
 const viewDepartmentPermissions = requireAnyPermission(
   'organization.departments.view',
+  'company.organization.view',
+  'company.organization.read',
   'hrms.organization.read',
   'hrms.organization.view',
+  'hrms.attendance.view',
+  'hrms.attendance.read',
+  'hrms.employees.view',
+  'hrms.employees.read',
   'hrms.settings.read',
   'hrms.settings.view',
 );
@@ -251,8 +265,14 @@ organizationCompatibilityRouter.post(
 const viewWorkLocationPermissions = requireAnyPermission(
   'organization.workLocations.view',
   'organization.locations.view',
+  'company.organization.view',
+  'company.organization.read',
   'hrms.organization.read',
   'hrms.organization.view',
+  'hrms.attendance.view',
+  'hrms.attendance.read',
+  'hrms.employees.view',
+  'hrms.employees.read',
   'hrms.settings.read',
   'hrms.settings.view',
 );

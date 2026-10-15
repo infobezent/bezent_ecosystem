@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
-import { Alert, Button, Inline, Input, Stack } from '../../design-system/components';
+import { Alert, Button, Inline, Input, Stack, Tabs } from '../../design-system/components';
 import { BezentIcon } from '../../design-system/icons';
 import { useTheme } from '../../app/providers/ThemeProvider';
 import { authApi, AuthApiError, type OtpChallenge } from './authApi';
@@ -14,6 +14,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const CODE_PATTERN = /^\d{6}$/;
 
 type Step = 'email' | 'code';
+type AuthMode = 'otp' | 'password';
 
 function useLoginTheme() {
   try {
@@ -45,8 +46,47 @@ function describe(err: unknown): { message: string; codeLocked?: boolean } {
           message: 'Too many incorrect attempts. For your security, request a new code.',
           codeLocked: true,
         };
+      case 'OTP_RATE_LIMITED':
+        return {
+          message: 'Too many code requests. Please wait a moment before trying again.',
+        };
+      case 'LOGIN_RATE_LIMIT_EXCEEDED':
+        return {
+          message: 'Too many login attempts. Please wait a moment before trying again.',
+        };
+      case 'PASSWORD_LOGIN_DISABLED':
+        return {
+          message:
+            'Password sign-in is not available in this environment. Please use a one-time code.',
+        };
+      case 'UNAUTHORIZED':
+        return {
+          message: 'Invalid email or password.',
+        };
+      case 'FORBIDDEN':
+        return {
+          message: err.message || 'Access is denied for this account.',
+        };
+      case 'NETWORK_ERROR':
+      case 'SERVICE_UNAVAILABLE':
+      case 'DATABASE_UNAVAILABLE':
+      case 'DATABASE_ERROR':
+        return {
+          message:
+            'Unable to connect to BEZENT services. Please check your connection or try again shortly.',
+        };
+      case 'SESSION_CREATION_FAILED':
+        return {
+          message:
+            'Your credentials were verified, but we were unable to open your workspace session. Please try again shortly or contact your administrator.',
+        };
+      case 'INTERNAL_ERROR':
+        return {
+          message:
+            'An unexpected server error occurred while signing in. Please try again shortly.',
+        };
       default:
-        return { message: err.message };
+        return { message: err.message || 'Something went wrong. Please try again.' };
     }
   }
   return { message: 'Something went wrong. Please try again.' };
@@ -54,8 +94,8 @@ function describe(err: unknown): { message: string; codeLocked?: boolean } {
 
 /**
  * The ONE sign-in page for every BEZENT user — Super Admin, Company Admin, HR,
- * Manager, Employee and custom roles (ADR-018). Passwordless: email → one-time
- * code → session. What the user may open is resolved by the server afterwards.
+ * Manager, Employee and custom roles (ADR-018). Passwordless OTP primary,
+ * with gated reviewer/developer password authentication in review environments.
  */
 export function LoginPage() {
   const navigate = useNavigate();
@@ -65,11 +105,15 @@ export function LoginPage() {
   const isDark = resolvedTheme === 'dark';
   const next = safeNextPath(params.get('next'));
 
+  const [authMode, setAuthMode] = useState<AuthMode>('otp');
+  const [passwordAuthAvailable, setPasswordAuthAvailable] = useState<boolean>(false);
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
   const [challenge, setChallenge] = useState<OtpChallenge | null>(null);
   const [emailError, setEmailError] = useState<string | undefined>();
+  const [passwordError, setPasswordError] = useState<string | undefined>();
   const [codeError, setCodeError] = useState<string | undefined>();
   const [alert, setAlert] = useState<string | null>(null);
   const [codeLocked, setCodeLocked] = useState(false);
@@ -80,6 +124,30 @@ export function LoginPage() {
 
   const code = otp.join('');
   const resendIn = secondsUntil(resendAt);
+
+  // Checks if password authentication is available for review/development in this environment
+  const requestedMode = params.get('mode');
+
+  useEffect(() => {
+    let isMounted = true;
+    authApi
+      .getConfig()
+      .then((cfg) => {
+        if (isMounted && cfg.passwordAuthAvailable) {
+          setPasswordAuthAvailable(true);
+          if (requestedMode === 'password') {
+            setAuthMode('password');
+          }
+        }
+      })
+      .catch((err) => {
+        // Safe default: remains false in case of network issue
+        console.warn('[auth] Could not retrieve platform auth config:', err);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, [requestedMode]);
 
   // Drives the resend countdown.
   useEffect(() => {
@@ -130,6 +198,41 @@ export function LoginPage() {
     }
     setEmailError(undefined);
     await sendCode(address);
+  }
+
+  async function onSubmitPassword(event: FormEvent) {
+    event.preventDefault();
+    const address = email.trim().toLowerCase();
+    let hasError = false;
+
+    if (!EMAIL_PATTERN.test(address)) {
+      setEmailError('Enter a valid work email address.');
+      hasError = true;
+    } else {
+      setEmailError(undefined);
+    }
+
+    if (!password) {
+      setPasswordError('Enter your password.');
+      hasError = true;
+    } else {
+      setPasswordError(undefined);
+    }
+
+    if (hasError) return;
+
+    setBusy(true);
+    setAlert(null);
+    try {
+      const result = await authApi.loginWithPassword(address, password);
+      completeSignIn(result);
+      navigate(next ?? result.defaultDestination, { replace: true });
+    } catch (err) {
+      const described = describe(err);
+      setAlert(described.message);
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function onSubmitCode(event: FormEvent) {
@@ -243,11 +346,30 @@ export function LoginPage() {
               </div>
               <h1 className="bezent-login__title">Sign in to BEZENT</h1>
               <p className="bezent-login__subtitle">
-                {step === 'email'
-                  ? 'Use your work email. We will send you a one-time sign-in code.'
-                  : `Enter the 6-digit code sent to ${email.trim().toLowerCase()}.`}
+                {authMode === 'password'
+                  ? 'Enter your reviewer or developer credentials to access BEZENT.'
+                  : step === 'email'
+                    ? 'Use your work email. We will send you a one-time sign-in code.'
+                    : `Enter the 6-digit code sent to ${email.trim().toLowerCase()}.`}
               </p>
             </Stack>
+
+            {passwordAuthAvailable && (
+              <Tabs
+                variant="pills"
+                activeId={authMode}
+                onChange={(id) => {
+                  setAuthMode(id as AuthMode);
+                  setAlert(null);
+                  setEmailError(undefined);
+                  setPasswordError(undefined);
+                }}
+                items={[
+                  { id: 'otp', label: 'One-Time Code' },
+                  { id: 'password', label: 'Password' },
+                ]}
+              />
+            )}
 
             {status === 'loading' && <Alert variant="info">Checking your existing session…</Alert>}
 
@@ -262,7 +384,40 @@ export function LoginPage() {
               </Alert>
             )}
 
-            {step === 'email' ? (
+            {authMode === 'password' ? (
+              <form onSubmit={onSubmitPassword} noValidate>
+                <Stack gap="md">
+                  <Input
+                    label="Work email"
+                    type="email"
+                    name="email"
+                    autoComplete="email"
+                    placeholder="name@company.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    error={emailError}
+                    disabled={busy}
+                    autoFocus
+                    required
+                  />
+                  <Input
+                    label="Password"
+                    type="password"
+                    name="password"
+                    autoComplete="current-password"
+                    placeholder="••••••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    error={passwordError}
+                    disabled={busy}
+                    required
+                  />
+                  <Button type="submit" variant="primary" size="lg" loading={busy} disabled={busy}>
+                    Sign in with password
+                  </Button>
+                </Stack>
+              </form>
+            ) : step === 'email' ? (
               <form onSubmit={onSubmitEmail} noValidate>
                 <Stack gap="md">
                   <Input
@@ -371,7 +526,9 @@ export function LoginPage() {
             )}
 
             <p className="bezent-login__footnote">
-              One sign-in for every BEZENT workspace. No password is needed.
+              {authMode === 'password'
+                ? 'Reviewer and developer sign-in active in this environment.'
+                : 'One sign-in for every BEZENT workspace. No password is needed.'}
             </p>
           </Stack>
         </div>

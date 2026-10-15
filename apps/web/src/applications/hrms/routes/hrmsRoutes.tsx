@@ -13,6 +13,8 @@ import {
   PunchLogsPage,
   AttendanceRegularizationPage,
   AttendanceOnDutyPage,
+  AttendanceOvertimePage,
+  AttendanceCompOffPage,
   AttendanceExceptionsPage,
   AttendanceReportsPage,
 } from '../attendance';
@@ -132,6 +134,10 @@ export const hrmsRoutes: RouteObject[] = [
                 <AttendanceRegularizationPage />
               ) : isAttendance && child.id === 'on-duty' ? (
                 <AttendanceOnDutyPage />
+              ) : isAttendance && child.id === 'overtime' ? (
+                <AttendanceOvertimePage />
+              ) : isAttendance && child.id === 'comp-off' ? (
+                <AttendanceCompOffPage />
               ) : isAttendance && child.id === 'exceptions' ? (
                 <AttendanceExceptionsPage />
               ) : isAttendance && child.id === 'reports' ? (

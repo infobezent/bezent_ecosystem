@@ -22,6 +22,7 @@ import { attendanceOnDutyService } from '../service/attendanceOnDuty.service.js'
 
 describe.skipIf(!isDatabaseConfigured)(
   'BEZENT HRMS — Attendance On-Duty V1.0 Functional Acceptance & Security Audit',
+
   () => {
     const app = createApp();
     const tenantId = 'tenant_demo_01';

@@ -159,6 +159,8 @@ export const HRMS_NAV_DESTINATIONS: readonly NavDestination[] = [
       child('punch-logs', 'Punch Logs', 'attendance'),
       child('regularization', 'Regularization', 'requests'),
       child('on-duty', 'On-Duty', 'operations'),
+      child('overtime', 'Overtime', 'timeTracker'),
+      child('comp-off', 'Comp-Off', 'calendar'),
       child('exceptions', 'Exceptions', 'warning'),
       child('reports', 'Reports', 'reports'),
     ],

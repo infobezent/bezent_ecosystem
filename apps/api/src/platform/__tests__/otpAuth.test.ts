@@ -3,7 +3,7 @@ import request from 'supertest';
 import { eq, inArray } from 'drizzle-orm';
 import { createApp } from '../../app/server/createApp.js';
 import { isDatabaseConfigured, getDb } from '../../db/connection.js';
-import { env } from '../../app/config/env.js';
+import { env, assertProductionAuthConfig } from '../../app/config/env.js';
 import {
   auditLogs,
   authOtpChallenges,
@@ -316,6 +316,7 @@ describe.skipIf(!isDatabaseConfigured)('Email OTP authentication (ADR-018)', () 
   describe('UAT Fixed OTP support (temporary non-production mechanism)', () => {
     const originalNodeEnv = process.env.NODE_ENV;
     const originalUatOtp = process.env.UAT_FIXED_OTP;
+    const originalEnableUat = process.env.ENABLE_UAT_FIXED_OTP;
 
     beforeEach(async () => {
       await getDb()
@@ -339,6 +340,11 @@ describe.skipIf(!isDatabaseConfigured)('Email OTP authentication (ADR-018)', () 
       } else {
         delete process.env.UAT_FIXED_OTP;
       }
+      if (originalEnableUat !== undefined) {
+        process.env.ENABLE_UAT_FIXED_OTP = originalEnableUat;
+      } else {
+        delete process.env.ENABLE_UAT_FIXED_OTP;
+      }
       await getDb()
         .delete(authOtpChallenges)
         .where(
@@ -349,8 +355,9 @@ describe.skipIf(!isDatabaseConfigured)('Email OTP authentication (ADR-018)', () 
         .where(inArray(emailOutbox.recipient, [email(USERS.uat), email(USERS.suspended), UNKNOWN]));
     });
 
-    it('staging + configured fixed OTP -> success', async () => {
+    it('staging + ENABLE_UAT_FIXED_OTP=true + configured fixed OTP -> success', async () => {
       process.env.NODE_ENV = 'staging';
+      process.env.ENABLE_UAT_FIXED_OTP = 'true';
       process.env.UAT_FIXED_OTP = '123456';
 
       const requested = await requestCode(email(USERS.uat));
@@ -369,8 +376,43 @@ describe.skipIf(!isDatabaseConfigured)('Email OTP authentication (ADR-018)', () 
       expect(row?.status).toBe('consumed');
     });
 
+    it('staging + ENABLE_UAT_FIXED_OTP missing -> fixed OTP must NOT work', async () => {
+      process.env.NODE_ENV = 'staging';
+      delete process.env.ENABLE_UAT_FIXED_OTP;
+      process.env.UAT_FIXED_OTP = '123456';
+
+      expect(env.enableUatFixedOtp).toBe(false);
+      expect(env.uatFixedOtp).toBeUndefined();
+
+      const requested = await requestCode(email(USERS.uat));
+      expect(requested.status).toBe(202);
+      const { challengeId } = requested.body.data;
+
+      const res = await verify(challengeId, '123456');
+      expect(res.status).toBe(401);
+      expect(res.body.error.code).toBe('OTP_INVALID');
+    });
+
+    it('staging + ENABLE_UAT_FIXED_OTP=false -> fixed OTP must NOT work', async () => {
+      process.env.NODE_ENV = 'staging';
+      process.env.ENABLE_UAT_FIXED_OTP = 'false';
+      process.env.UAT_FIXED_OTP = '123456';
+
+      expect(env.enableUatFixedOtp).toBe(false);
+      expect(env.uatFixedOtp).toBeUndefined();
+
+      const requested = await requestCode(email(USERS.uat));
+      expect(requested.status).toBe(202);
+      const { challengeId } = requested.body.data;
+
+      const res = await verify(challengeId, '123456');
+      expect(res.status).toBe(401);
+      expect(res.body.error.code).toBe('OTP_INVALID');
+    });
+
     it('wrong fixed OTP -> failure', async () => {
       process.env.NODE_ENV = 'staging';
+      process.env.ENABLE_UAT_FIXED_OTP = 'true';
       process.env.UAT_FIXED_OTP = '123456';
 
       const requested = await requestCode(email(USERS.uat));
@@ -384,6 +426,7 @@ describe.skipIf(!isDatabaseConfigured)('Email OTP authentication (ADR-018)', () 
 
     it('expired challenge -> failure', async () => {
       process.env.NODE_ENV = 'staging';
+      process.env.ENABLE_UAT_FIXED_OTP = 'true';
       process.env.UAT_FIXED_OTP = '123456';
 
       const requested = await requestCode(email(USERS.uat));
@@ -402,6 +445,7 @@ describe.skipIf(!isDatabaseConfigured)('Email OTP authentication (ADR-018)', () 
 
     it('unknown user -> failure even with fixed OTP', async () => {
       process.env.NODE_ENV = 'staging';
+      process.env.ENABLE_UAT_FIXED_OTP = 'true';
       process.env.UAT_FIXED_OTP = '123456';
 
       const requested = await requestCode(UNKNOWN);
@@ -415,6 +459,7 @@ describe.skipIf(!isDatabaseConfigured)('Email OTP authentication (ADR-018)', () 
 
     it('inactive/suspended user -> failure even with fixed OTP', async () => {
       process.env.NODE_ENV = 'staging';
+      process.env.ENABLE_UAT_FIXED_OTP = 'true';
       process.env.UAT_FIXED_OTP = '123456';
 
       const requested = await requestCode(email(USERS.suspended));
@@ -428,6 +473,7 @@ describe.skipIf(!isDatabaseConfigured)('Email OTP authentication (ADR-018)', () 
 
     it('consumed challenge cannot be reused', async () => {
       process.env.NODE_ENV = 'staging';
+      process.env.ENABLE_UAT_FIXED_OTP = 'true';
       process.env.UAT_FIXED_OTP = '123456';
 
       const requested = await requestCode(email(USERS.uat));
@@ -442,10 +488,12 @@ describe.skipIf(!isDatabaseConfigured)('Email OTP authentication (ADR-018)', () 
       expect(replay.body.error.code).toBe('OTP_INVALID');
     });
 
-    it('production + UAT_FIXED_OTP -> fixed OTP must NOT work', async () => {
+    it('production + ENABLE_UAT_FIXED_OTP + UAT_FIXED_OTP -> fixed OTP must NOT work', async () => {
       process.env.NODE_ENV = 'production';
+      process.env.ENABLE_UAT_FIXED_OTP = 'true';
       process.env.UAT_FIXED_OTP = '123456';
 
+      expect(env.enableUatFixedOtp).toBe(false);
       expect(env.uatFixedOtp).toBeUndefined();
 
       const requested = await requestCode(email(USERS.uat));
@@ -457,8 +505,30 @@ describe.skipIf(!isDatabaseConfigured)('Email OTP authentication (ADR-018)', () 
       expect(res.body.error.code).toBe('OTP_INVALID');
     });
 
+    it('assertProductionAuthConfig throws if fixed OTP flags are configured in production', () => {
+      const origDepEnv = process.env.BEZENT_DEPLOYMENT_ENV;
+      const origNodeEnv = process.env.NODE_ENV;
+      const origReviewAuth = process.env.ENABLE_REVIEW_PASSWORD_AUTH;
+      delete process.env.BEZENT_DEPLOYMENT_ENV;
+      delete process.env.ENABLE_REVIEW_PASSWORD_AUTH;
+      process.env.NODE_ENV = 'production';
+      process.env.ENABLE_UAT_FIXED_OTP = 'true';
+      process.env.UAT_FIXED_OTP = '123456';
+
+      try {
+        expect(() => assertProductionAuthConfig()).toThrow(
+          'Fixed OTP feature flags cannot be configured in production environment',
+        );
+      } finally {
+        if (origDepEnv) process.env.BEZENT_DEPLOYMENT_ENV = origDepEnv;
+        if (origNodeEnv) process.env.NODE_ENV = origNodeEnv;
+        if (origReviewAuth) process.env.ENABLE_REVIEW_PASSWORD_AUTH = origReviewAuth;
+      }
+    });
+
     it('normal generated OTP still works', async () => {
       process.env.NODE_ENV = 'staging';
+      process.env.ENABLE_UAT_FIXED_OTP = 'true';
       process.env.UAT_FIXED_OTP = '123456';
 
       const requested = await requestCode(email(USERS.uat));
@@ -476,21 +546,36 @@ describe.skipIf(!isDatabaseConfigured)('Email OTP authentication (ADR-018)', () 
 
     it('cannot login using fixed OTP without first requesting a challenge', async () => {
       process.env.NODE_ENV = 'staging';
+      process.env.ENABLE_UAT_FIXED_OTP = 'true';
       process.env.UAT_FIXED_OTP = '123456';
 
       const res = await verify('fake-challenge-id', '123456');
       expect(res.status).toBe(401);
       expect(res.body.error.code).toBe('OTP_INVALID');
     });
+
+    it('non-development responses never expose stack traces', async () => {
+      process.env.NODE_ENV = 'staging';
+      const res = await verify('fake-challenge-id', '123456');
+      expect(res.status).toBe(401);
+      expect(res.body.error.stack).toBeUndefined();
+    });
   });
 
   describe('Retired and sensitive paths', () => {
-    it('answers password sign-in with 410 for every account', async () => {
-      const res = await request(app)
-        .post('/api/v1/platform/auth/login')
-        .send({ email: email(USERS.superAdmin), password: 'anything' });
-      expect(res.status).toBe(410);
-      expect(res.body.error.code).toBe('PASSWORD_LOGIN_DISABLED');
+    it('answers password sign-in with 410 for every account when password auth is disabled', async () => {
+      const origFlag = process.env.ENABLE_REVIEW_PASSWORD_AUTH;
+      delete process.env.ENABLE_REVIEW_PASSWORD_AUTH;
+
+      try {
+        const res = await request(app)
+          .post('/api/v1/platform/auth/login')
+          .send({ email: email(USERS.superAdmin), password: 'anything' });
+        expect(res.status).toBe(410);
+        expect(res.body.error.code).toBe('PASSWORD_LOGIN_DISABLED');
+      } finally {
+        if (origFlag) process.env.ENABLE_REVIEW_PASSWORD_AUTH = origFlag;
+      }
     });
 
     it('never records codes in the audit trail', async () => {

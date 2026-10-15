@@ -91,17 +91,33 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
   };
   if (!response.ok) {
     const retryAfter = Number(response.headers.get('Retry-After'));
+    const isGatewayError =
+      response.status === 502 || response.status === 503 || response.status === 504;
+    const fallbackMessage = isGatewayError
+      ? 'BEZENT service is temporarily unavailable. Please try again shortly.'
+      : `Request failed with status ${response.status}`;
+    const fallbackCode = isGatewayError ? 'SERVICE_UNAVAILABLE' : 'REQUEST_FAILED';
+
     throw new AuthApiError(
-      body.error?.message ?? `Request failed with status ${response.status}`,
+      body.error?.message ?? fallbackMessage,
       response.status,
-      body.error?.code ?? 'REQUEST_FAILED',
+      body.error?.code ?? fallbackCode,
       Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : null,
     );
   }
   return body.data as T;
 }
 
+export interface AuthConfig {
+  passwordAuthAvailable: boolean;
+}
+
 export const authApi = {
+  /** Retrieves public authentication configuration (e.g. if review password login is active). */
+  getConfig(): Promise<AuthConfig> {
+    return call('/auth/config');
+  },
+
   /** Sends a sign-in code. The response is identical whether or not the email has an account. */
   requestOtp(email: string): Promise<OtpChallenge> {
     return call('/auth/otp/request', { method: 'POST', body: JSON.stringify({ email }) });
@@ -112,6 +128,14 @@ export const authApi = {
     return call('/auth/otp/verify', {
       method: 'POST',
       body: JSON.stringify({ challengeId, code }),
+    });
+  },
+
+  /** Password sign-in for developers and reviewers in approved environments. */
+  loginWithPassword(email: string, password: string): Promise<SignInResult> {
+    return call('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
     });
   },
 
