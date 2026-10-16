@@ -514,22 +514,26 @@ export function EssAttendancePage() {
               <Inline gap="sm" align="center">
                 <Badge
                   variant={
-                    today.status === 'working'
-                      ? 'success'
-                      : today.status === 'on_break'
-                        ? 'warning'
-                        : today.status === 'checked_out'
-                          ? 'neutral'
+                    today.isOnBreak
+                      ? 'warning'
+                      : today.checkOutTime
+                        ? 'neutral'
+                        : today.checkInTime ||
+                            today.status === 'present' ||
+                            today.status === 'working'
+                          ? 'success'
                           : 'neutral'
                   }
                   size="md"
                 >
-                  {today.status === 'working'
-                    ? 'Working'
-                    : today.status === 'on_break'
-                      ? `On Break (${today.currentBreakType || 'Break'})`
-                      : today.status === 'checked_out'
-                        ? 'Checked Out'
+                  {today.isOnBreak
+                    ? `On Break (${today.currentBreakType || 'Break'})`
+                    : today.checkOutTime
+                      ? 'Checked Out'
+                      : today.checkInTime ||
+                          today.status === 'present' ||
+                          today.status === 'working'
+                        ? 'Working'
                         : 'Not Checked In'}
                 </Badge>
               </Inline>

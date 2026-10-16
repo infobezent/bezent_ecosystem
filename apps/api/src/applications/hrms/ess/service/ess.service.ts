@@ -7,6 +7,7 @@ import type { EmployeeContext } from '../../../../platform/auth/middleware/auth.
 import { BadRequestError, NotFoundError, ConflictError } from '../../../../app/errors/AppError.js';
 import type {
   EssDashboardData,
+  EssTodayAttendance,
   EssFullProfile,
   CreateProfileChangeRequestInput,
   UpdateContactDetailsInput,
@@ -555,7 +556,7 @@ export class EssService {
         date: today,
         checkInTime: todayAtt?.checkInTime ?? null,
         checkOutTime: todayAtt?.checkOutTime ?? null,
-        status: computedStatus,
+        status: (todayAtt ? todayAtt.status : 'not_checked_in') as EssTodayAttendance['status'],
         workLocation: todayAtt?.workLocation ?? 'office',
         notes: todayAtt?.notes ?? null,
         workedMinutes: todayAtt?.workedMinutes ?? 0,
