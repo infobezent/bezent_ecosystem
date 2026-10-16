@@ -8,6 +8,7 @@ import {
 } from '../../../../db/schema.js';
 import { generateSurrogateId } from '../../../../platform/auth/security.js';
 import type { LeaveType } from '../types/leave.types.js';
+import { NotFoundError, ConflictError } from '../../../../app/errors/AppError.js';
 
 export class LeaveRepository {
   async getLeaveBalances(
@@ -168,10 +169,10 @@ export class LeaveRepository {
       );
 
     if (!existing) {
-      throw new Error('Leave request not found');
+      throw new NotFoundError('Leave request not found');
     }
     if (existing.status !== 'pending') {
-      throw new Error(`Cannot cancel leave request with status '${existing.status}'`);
+      throw new ConflictError(`Cannot cancel leave request with status '${existing.status}'`);
     }
 
     await db

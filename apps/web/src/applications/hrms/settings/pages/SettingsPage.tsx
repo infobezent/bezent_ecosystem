@@ -125,8 +125,9 @@ function RoutedSettingsPage() {
     searchParams.get('module') === 'onboarding' ||
     searchParams.get('tab') === 'onboarding' ||
     searchParams.has('sub');
+  const requestedModule = SETTINGS_MODULE_CARDS.find((m) => m.id === searchParams.get('module'));
   const initialModule: SettingsModuleId =
-    isWorkflowSettings || hasOnboardingParam ? 'onboarding' : 'overview';
+    isWorkflowSettings || hasOnboardingParam ? 'onboarding' : (requestedModule?.id ?? 'overview');
   return <SettingsPageInner initialModule={initialModule} />;
 }
 

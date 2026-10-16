@@ -157,7 +157,7 @@ export const hrmsRoutes: RouteObject[] = [
       // Legacy attendance policy path redirected to HR Settings -> Attendance
       {
         path: 'attendance/policies',
-        element: <Navigate to="/hrms/settings/attendance" replace />,
+        element: <Navigate to="/hrms/settings?module=attendance" replace />,
       },
       // Canonical Employee Profile (Employees directory and Employee Administration both link here)
       {

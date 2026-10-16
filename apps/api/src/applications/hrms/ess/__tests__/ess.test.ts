@@ -539,6 +539,22 @@ describe('Employee Self Service (ESS) Backend API (Phase 3)', () => {
     });
   });
 
+  describe('Unknown record ids', () => {
+    it.each([
+      ['post', '/api/v1/ess/leave/missing-id/cancel'],
+      ['post', '/api/v1/ess/requests/missing-id/cancel'],
+      ['patch', '/api/v1/ess/notifications/missing-id/read'],
+    ] as const)('%s %s answers 404 instead of 500', async (method, url) => {
+      const res = await request(app)
+        [method](url)
+        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('X-Company-Id', companyId)
+        .send({});
+
+      expect(res.status).toBe(404);
+    });
+  });
+
   describe('Tasks & Notifications', () => {
     it('retrieves assigned tasks', async () => {
       const res = await request(app)
