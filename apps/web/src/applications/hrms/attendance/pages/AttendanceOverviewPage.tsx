@@ -21,6 +21,7 @@ import {
   LoadingState,
   Alert,
   EmptyState,
+  Divider,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { fetchAttendanceOverview } from '../api/attendanceApi';
@@ -106,19 +107,28 @@ export function AttendanceOverviewPage() {
         {data ? (
           <Toolbar
             left={
-              <Inline gap="md" align="center">
-                <Input
-                  label="Work Date"
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                />
-                <Button
-                  variant="secondary"
-                  onClick={() => setSelectedDate(new Date().toISOString().slice(0, 10))}
-                >
-                  Today
-                </Button>
+              <Inline gap="md" align="end">
+                {/* Date Selection Unit */}
+                <Inline gap="xs" align="end">
+                  <Input
+                    label="Work Date"
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                  />
+                  <Button
+                    variant="secondary"
+                    size="control"
+                    onClick={() => setSelectedDate(new Date().toISOString().slice(0, 10))}
+                  >
+                    Today
+                  </Button>
+                </Inline>
+
+                {/* Visual Separator */}
+                <Divider orientation="vertical" spacing="sm" />
+
+                {/* Trend Window Filter */}
                 <Select
                   label="Trend Window"
                   value={trendRange}
@@ -159,6 +169,7 @@ export function AttendanceOverviewPage() {
           </Alert>
         ) : !data ? (
           <EmptyState
+            variant="attendance"
             title="No Attendance Data Found"
             description="Could not find attendance operational data for this date."
           />
@@ -172,88 +183,172 @@ export function AttendanceOverviewPage() {
               </p>
             </div>
 
-            <Grid columns="auto-fit" minColWidth="sm" gap="md">
-              <Card padding="md">
-                <Stack gap="xs">
-                  <span className="bezent-card__desc">Eligible Workforce</span>
-                  <h2 className="bezent-card__title">
+            <Grid columns={4} gap="sm">
+              <div
+                className="bezent-stat-card--compact"
+                onClick={() => navigate(`/hrms/attendance/daily-log?date=${selectedDate}`)}
+                role="button"
+                tabIndex={0}
+                title="View all scheduled employees for today"
+              >
+                <div className="bezent-stat-card__header">
+                  <span className="bezent-stat-card__title">Eligible Workforce</span>
+                  <Badge variant="neutral">Scheduled</Badge>
+                </div>
+                <Inline justify="between" align="center">
+                  <span className="bezent-stat-card__num">
                     {todayKpis ? todayKpis.totalEligibleEmployees : data.expectedCount}
-                  </h2>
-                  <Badge variant="neutral">Active Scheduled</Badge>
-                </Stack>
-              </Card>
+                  </span>
+                  <BezentIcon name="employees" size={18} />
+                </Inline>
+              </div>
 
-              <Card padding="md">
-                <Stack gap="xs">
-                  <span className="bezent-card__desc">Present</span>
-                  <h2 className="bezent-card__title">
-                    {todayKpis ? todayKpis.presentCount : data.presentCount}
-                  </h2>
+              <div
+                className="bezent-stat-card--compact"
+                onClick={() =>
+                  navigate(`/hrms/attendance/daily-log?date=${selectedDate}&status=present`)
+                }
+                role="button"
+                tabIndex={0}
+                title="View checked-in employees"
+              >
+                <div className="bezent-stat-card__header">
+                  <span className="bezent-stat-card__title">Present</span>
                   <Badge variant="success">Checked In</Badge>
-                </Stack>
-              </Card>
+                </div>
+                <Inline justify="between" align="center">
+                  <span className="bezent-stat-card__num">
+                    {todayKpis ? todayKpis.presentCount : data.presentCount}
+                  </span>
+                  <BezentIcon name="approvals" size={18} />
+                </Inline>
+              </div>
 
-              <Card padding="md">
-                <Stack gap="xs">
-                  <span className="bezent-card__desc">Absent</span>
-                  <h2 className="bezent-card__title">
-                    {todayKpis ? todayKpis.absentCount : data.absentCount}
-                  </h2>
+              <div
+                className="bezent-stat-card--compact"
+                onClick={() =>
+                  navigate(`/hrms/attendance/daily-log?date=${selectedDate}&status=absent`)
+                }
+                role="button"
+                tabIndex={0}
+                title="View absent employees with no punch"
+              >
+                <div className="bezent-stat-card__header">
+                  <span className="bezent-stat-card__title">Absent</span>
                   <Badge variant={data.absentCount > 0 ? 'danger' : 'neutral'}>No Punch</Badge>
-                </Stack>
-              </Card>
+                </div>
+                <Inline justify="between" align="center">
+                  <span className="bezent-stat-card__num">
+                    {todayKpis ? todayKpis.absentCount : data.absentCount}
+                  </span>
+                  <BezentIcon name="security" size={18} />
+                </Inline>
+              </div>
 
-              <Card padding="md">
-                <Stack gap="xs">
-                  <span className="bezent-card__desc">On Leave</span>
-                  <h2 className="bezent-card__title">
-                    {todayKpis ? todayKpis.onLeaveCount : data.onLeaveCount}
-                  </h2>
+              <div
+                className="bezent-stat-card--compact"
+                onClick={() =>
+                  navigate(`/hrms/attendance/daily-log?date=${selectedDate}&status=on_leave`)
+                }
+                role="button"
+                tabIndex={0}
+                title="View employees on approved leave"
+              >
+                <div className="bezent-stat-card__header">
+                  <span className="bezent-stat-card__title">On Leave</span>
                   <Badge variant="info">Approved</Badge>
-                </Stack>
-              </Card>
+                </div>
+                <Inline justify="between" align="center">
+                  <span className="bezent-stat-card__num">
+                    {todayKpis ? todayKpis.onLeaveCount : data.onLeaveCount}
+                  </span>
+                  <BezentIcon name="leave" size={18} />
+                </Inline>
+              </div>
 
-              <Card padding="md">
-                <Stack gap="xs">
-                  <span className="bezent-card__desc">On-Duty / Field</span>
-                  <h2 className="bezent-card__title">{todayKpis ? todayKpis.onDutyCount : 0}</h2>
+              <div
+                className="bezent-stat-card--compact"
+                onClick={() => navigate('/hrms/attendance/on-duty')}
+                role="button"
+                tabIndex={0}
+                title="View authorized On-Duty and field deployments"
+              >
+                <div className="bezent-stat-card__header">
+                  <span className="bezent-stat-card__title">On-Duty / Field</span>
                   <Badge variant="info">Authorized</Badge>
-                </Stack>
-              </Card>
+                </div>
+                <Inline justify="between" align="center">
+                  <span className="bezent-stat-card__num">
+                    {todayKpis ? todayKpis.onDutyCount : 0}
+                  </span>
+                  <BezentIcon name="requests" size={18} />
+                </Inline>
+              </div>
 
-              <Card padding="md">
-                <Stack gap="xs">
-                  <span className="bezent-card__desc">Late Arrivals</span>
-                  <h2 className="bezent-card__title">
-                    {todayKpis ? todayKpis.lateArrivalsCount : data.lateCount}
-                  </h2>
+              <div
+                className="bezent-stat-card--compact"
+                onClick={() =>
+                  navigate(`/hrms/attendance/daily-log?date=${selectedDate}&indicator=late`)
+                }
+                role="button"
+                tabIndex={0}
+                title="View late arrivals after shift grace period"
+              >
+                <div className="bezent-stat-card__header">
+                  <span className="bezent-stat-card__title">Late Arrivals</span>
                   <Badge variant="warning">After Grace</Badge>
-                </Stack>
-              </Card>
+                </div>
+                <Inline justify="between" align="center">
+                  <span className="bezent-stat-card__num">
+                    {todayKpis ? todayKpis.lateArrivalsCount : data.lateCount}
+                  </span>
+                  <BezentIcon name="clock" size={18} />
+                </Inline>
+              </div>
 
-              <Card padding="md">
-                <Stack gap="xs">
-                  <span className="bezent-card__desc">Missing Punch</span>
-                  <h2 className="bezent-card__title">
-                    {todayKpis ? todayKpis.missingPunchCount : data.missingPunchCount}
-                  </h2>
+              <div
+                className="bezent-stat-card--compact"
+                onClick={() => navigate('/hrms/attendance/exceptions?type=missing_in')}
+                role="button"
+                tabIndex={0}
+                title="View missing check-in and check-out punches"
+              >
+                <div className="bezent-stat-card__header">
+                  <span className="bezent-stat-card__title">Missing Punch</span>
                   <Badge variant={data.missingPunchCount > 0 ? 'warning' : 'neutral'}>
                     Incomplete
                   </Badge>
-                </Stack>
-              </Card>
+                </div>
+                <Inline justify="between" align="center">
+                  <span className="bezent-stat-card__num">
+                    {todayKpis ? todayKpis.missingPunchCount : data.missingPunchCount}
+                  </span>
+                  <BezentIcon name="security" size={18} />
+                </Inline>
+              </div>
 
-              <Card padding="md">
-                <Stack gap="xs">
-                  <span className="bezent-card__desc">Pending Processing</span>
-                  <h2 className="bezent-card__title">
+              <div
+                className="bezent-stat-card--compact"
+                onClick={() =>
+                  navigate(
+                    `/hrms/attendance/daily-log?date=${selectedDate}&processingState=pending_review`,
+                  )
+                }
+                role="button"
+                tabIndex={0}
+                title="View records in progress or pending review"
+              >
+                <div className="bezent-stat-card__header">
+                  <span className="bezent-stat-card__title">Pending Processing</span>
+                  <Badge variant="neutral">{todayKpis?.isFuture ? 'Future' : 'In Progress'}</Badge>
+                </div>
+                <Inline justify="between" align="center">
+                  <span className="bezent-stat-card__num">
                     {todayKpis ? todayKpis.pendingProcessingCount : 0}
-                  </h2>
-                  <Badge variant="neutral">
-                    {todayKpis?.isFuture ? 'Future Date' : 'In Progress'}
-                  </Badge>
-                </Stack>
-              </Card>
+                  </span>
+                  <BezentIcon name="sync" size={18} />
+                </Inline>
+              </div>
             </Grid>
 
             {/* 2. ACTION REQUIRED QUEUE */}
@@ -277,7 +372,7 @@ export function AttendanceOverviewPage() {
                 {actionQueue && actionQueue.length > 0 ? (
                   <Grid columns="auto-fit" minColWidth="md" gap="md">
                     {actionQueue.map((action) => (
-                      <Card key={action.actionType} variant="flat" padding="md">
+                      <Card key={action.actionType} hoverable variant="flat" padding="md">
                         <Stack gap="sm">
                           <Inline justify="between" align="center">
                             <strong>{action.title}</strong>
@@ -294,13 +389,13 @@ export function AttendanceOverviewPage() {
                           <Inline justify="end">
                             <Button
                               size="sm"
-                              variant={action.authorizedPendingCount > 0 ? 'primary' : 'secondary'}
+                              variant={action.authorizedPendingCount > 0 ? 'primary' : 'outline'}
                               onClick={() => {
                                 const qs = new URLSearchParams(action.filterParams).toString();
                                 navigate(`${action.targetRoute}${qs ? `?${qs}` : ''}`);
                               }}
                             >
-                              Triage Queue
+                              {action.authorizedPendingCount > 0 ? 'Triage Queue' : 'View Queue'}
                             </Button>
                           </Inline>
                         </Stack>
@@ -342,7 +437,7 @@ export function AttendanceOverviewPage() {
                       </span>
                     </div>
                     <Button
-                      variant="ghost"
+                      variant="text"
                       onClick={() => navigate(`/hrms/attendance/daily-log?date=${selectedDate}`)}
                     >
                       View All

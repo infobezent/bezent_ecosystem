@@ -10,9 +10,7 @@
   height: 100dvh;
   overflow: hidden;
   display: grid;
-  grid-template-columns:
-    var(--shell-sidebar-width) minmax(0, 1fr)
-    var(--app-shell-rail-width);
+  grid-template-columns: var(--shell-sidebar-width) minmax(0, 1fr) var(--app-shell-rail-width);
   grid-template-rows: var(--shell-topbar-height) minmax(0, 1fr) var(--shell-bottom-bar-height);
   grid-template-areas:
     'top top top'
@@ -51,6 +49,7 @@
     transform: translateX(16px);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;

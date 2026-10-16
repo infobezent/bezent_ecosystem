@@ -349,14 +349,18 @@ describe('BEZENT Phase 02.6 — Backend Remediation, Tenant Orchestration & Runt
       const computedHash = crypto.createHash('sha256').update(rawInvitationToken).digest('hex');
       expect(inv?.token).toBe(computedHash);
 
-      // Verify Transactional Outbox Event created
-      const [outboxMsg] = await db
+      // Verify Transactional Outbox Events created
+      const outboxMessages = await db
         .select()
         .from(transactionalOutbox)
         .where(eq(transactionalOutbox.aggregateId, testTenantId));
-      expect(outboxMsg).toBeDefined();
-      expect(outboxMsg?.eventType).toBe('tenant.invitation.issued');
-      expect(outboxMsg?.status).toBe('pending');
+      expect(outboxMessages.length).toBeGreaterThanOrEqual(2);
+      const invitationMsg = outboxMessages.find((m) => m.eventType === 'tenant.invitation.issued');
+      expect(invitationMsg).toBeDefined();
+      expect(invitationMsg?.status).toBe('pending');
+      const createdMsg = outboxMessages.find((m) => m.eventType === 'tenant.created');
+      expect(createdMsg).toBeDefined();
+      expect(createdMsg?.status).toBe('pending');
 
       // Verify Provisioning Job created
       const [pJob] = await db
