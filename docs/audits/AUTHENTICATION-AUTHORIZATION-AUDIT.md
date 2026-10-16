@@ -6,13 +6,13 @@
 > **Stack:** React 18 + Vite + TypeScript, Express 4 + TypeScript, Drizzle ORM, MySQL 8.4  
 > **Evaluation Mode:** Read-Only Source Code Analysis & Non-Destructive Test Execution  
 > **Audit Date:** 2026-10-15  
-> **Status:** COMPLETED  
+> **Status:** COMPLETED
 
 ---
 
 ## 1. Executive Summary
 
-An exhaustive, read-only security audit of the BEZENT Ecosystem was performed focusing on **Authentication, Authorization (RBAC/PBAC), Multi-Tenant Isolation, Application Entitlements, and Session Security**. 
+An exhaustive, read-only security audit of the BEZENT Ecosystem was performed focusing on **Authentication, Authorization (RBAC/PBAC), Multi-Tenant Isolation, Application Entitlements, and Session Security**.
 
 The architecture follows architectural principles established under **ADR-017 (Unified Company-Scoped Authorization & Effective Permissions)** and **ADR-018 (Unified Passwordless Email-OTP Authentication & Single-Session Foundation)**.
 
@@ -109,7 +109,7 @@ flowchart TD
     TokenVal --> CompGuard[requireCompanyContext]
     CompGuard --> ReadHeader[Read X-Company-Id Claim]
     ReadHeader --> Resolver[accessResolverService.resolveCompanyAccess]
-    
+
     subgraph AccessResolver [Server-Side Database Verification]
         Resolver --> ChkCompany[Verify Company & Tenant Active Status]
         Resolver --> ChkMembership[Verify Active User Membership in Company]
@@ -130,18 +130,18 @@ flowchart TD
 
 Backend enforcement in [access.middleware.ts](file:///e:/Company/bezent_ecosystem/apps/api/src/platform/access/middleware/access.middleware.ts):
 
-| Middleware | Target Scope | Security Function | Behavior on Denial |
-| :--- | :--- | :--- | :--- |
-| `requirePlatformAuth` | Global | Validates Bearer token in MySQL `sessions` and checks `users.status === 'active'`. | `401 Unauthorized` |
-| `requireSuperAdmin` | Platform | Checks `req.user.isSuperAdmin === true`. | `403 Forbidden ('Super Admin privileges required')` |
-| `requireTenantAdmin` | Tenant | Checks active entry in `tenant_admins` table and verifies tenant status. | `403 Forbidden ('Tenant Administrator authority required')` |
-| `requireCompanyContext` | Company | Resolves client claim `X-Company-Id` against MySQL `memberships`, `companies`, and `tenants`. | `400 Bad Request` (missing) / `403 Forbidden` |
-| `requireWorkspace` | Workspace | Validates caller's effective workspaces include target (`super_admin`, `tenant_admin`, `company_admin`, `hrms`, `ess`). | `403 Forbidden (Opaque error code)` |
-| `requireApplicationAccess` | Application | Validates company entitlement for application code and user workspace entry. | `403 Forbidden ('MODULE_DISABLED' or 'FORBIDDEN_WORKSPACE')` |
-| `requireModuleEntitlement` | Module | Validates specific sub-module within application is entitled under tenant plan. | `403 Forbidden ('MODULE_ENTITLEMENT_DENIED')` |
-| `requirePermission` | Action | Validates effective permission list includes required canonical key or alias. | `403 Forbidden ('FORBIDDEN_PERMISSION')` |
-| `requireAnyPermission` | Action | Passes if user holds any of the listed permissions. | `403 Forbidden ('FORBIDDEN_PERMISSION')` |
-| `requireReadWrite` | REST Resource | Enforces read permissions for GET/HEAD; enforces write permission for POST/PUT/PATCH/DELETE. | `403 Forbidden ('FORBIDDEN_PERMISSION')` |
+| Middleware                 | Target Scope  | Security Function                                                                                                       | Behavior on Denial                                           |
+| :------------------------- | :------------ | :---------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------- |
+| `requirePlatformAuth`      | Global        | Validates Bearer token in MySQL `sessions` and checks `users.status === 'active'`.                                      | `401 Unauthorized`                                           |
+| `requireSuperAdmin`        | Platform      | Checks `req.user.isSuperAdmin === true`.                                                                                | `403 Forbidden ('Super Admin privileges required')`          |
+| `requireTenantAdmin`       | Tenant        | Checks active entry in `tenant_admins` table and verifies tenant status.                                                | `403 Forbidden ('Tenant Administrator authority required')`  |
+| `requireCompanyContext`    | Company       | Resolves client claim `X-Company-Id` against MySQL `memberships`, `companies`, and `tenants`.                           | `400 Bad Request` (missing) / `403 Forbidden`                |
+| `requireWorkspace`         | Workspace     | Validates caller's effective workspaces include target (`super_admin`, `tenant_admin`, `company_admin`, `hrms`, `ess`). | `403 Forbidden (Opaque error code)`                          |
+| `requireApplicationAccess` | Application   | Validates company entitlement for application code and user workspace entry.                                            | `403 Forbidden ('MODULE_DISABLED' or 'FORBIDDEN_WORKSPACE')` |
+| `requireModuleEntitlement` | Module        | Validates specific sub-module within application is entitled under tenant plan.                                         | `403 Forbidden ('MODULE_ENTITLEMENT_DENIED')`                |
+| `requirePermission`        | Action        | Validates effective permission list includes required canonical key or alias.                                           | `403 Forbidden ('FORBIDDEN_PERMISSION')`                     |
+| `requireAnyPermission`     | Action        | Passes if user holds any of the listed permissions.                                                                     | `403 Forbidden ('FORBIDDEN_PERMISSION')`                     |
+| `requireReadWrite`         | REST Resource | Enforces read permissions for GET/HEAD; enforces write permission for POST/PUT/PATCH/DELETE.                            | `403 Forbidden ('FORBIDDEN_PERMISSION')`                     |
 
 ---
 
@@ -149,27 +149,27 @@ Backend enforcement in [access.middleware.ts](file:///e:/Company/bezent_ecosyste
 
 System roles are defined immutably in code ([accessCatalog.ts](file:///e:/Company/bezent_ecosystem/apps/api/src/platform/access/catalog/accessCatalog.ts#L502-L530)) while role identity lives in the `roles` table.
 
-| Capability / Permission Area | Super Admin | Tenant Admin | Company Admin | HR Manager | Manager | Employee (ESS) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Platform Tenant Management** | YES | NO | NO | NO | NO | NO |
-| **Platform Provisioning & Plans** | YES | NO | NO | NO | NO | NO |
-| **Platform Governance & Audit** | YES | NO | NO | NO | NO | NO |
-| **Tenant Profile & Capacity** | YES | YES | NO | NO | NO | NO |
-| **Tenant Company Creation** | YES | YES | NO | NO | NO | NO |
-| **Tenant Admin Assignment** | YES | YES (peer) | NO | NO | NO | NO |
-| **Company Profile & Branding** | YES (Oversight) | YES | YES | NO | NO | NO |
-| **Company User Invitation & Roles** | YES (Oversight) | YES | YES | NO | NO | NO |
-| **Company Custom Role Creation** | YES (Oversight) | YES | YES | NO | NO | NO |
-| **HRMS Organization Masters** | NO | NO | Read/Write | Read/Write | View Only | NO |
-| **HRMS Employee Management** | NO | NO | Full Admin | Full Admin | Direct Reports | NO |
-| **HRMS Attendance & Punches** | NO | NO | Full Admin | Full Admin | Team View | Self View/Punch |
-| **HRMS Overtime & Comp-Off** | NO | NO | Full Admin | Full Admin | Team Approvals | Self Claim |
-| **HRMS Leave Management** | NO | NO | Full Admin | Full Admin | Team Approvals | Self Apply |
-| **HRMS Onboarding Workflows** | NO | NO | Full Admin | Full Admin | NO | NO |
-| **HRMS Form Engine Customization** | NO | NO | Full Admin | Full Admin | NO | NO |
-| **ESS Personal Profile Changes** | NO | NO | NO | NO | NO | Self Request |
+| Capability / Permission Area        |   Super Admin   | Tenant Admin | Company Admin | HR Manager |    Manager     | Employee (ESS)  |
+| :---------------------------------- | :-------------: | :----------: | :-----------: | :--------: | :------------: | :-------------: |
+| **Platform Tenant Management**      |       YES       |      NO      |      NO       |     NO     |       NO       |       NO        |
+| **Platform Provisioning & Plans**   |       YES       |      NO      |      NO       |     NO     |       NO       |       NO        |
+| **Platform Governance & Audit**     |       YES       |      NO      |      NO       |     NO     |       NO       |       NO        |
+| **Tenant Profile & Capacity**       |       YES       |     YES      |      NO       |     NO     |       NO       |       NO        |
+| **Tenant Company Creation**         |       YES       |     YES      |      NO       |     NO     |       NO       |       NO        |
+| **Tenant Admin Assignment**         |       YES       |  YES (peer)  |      NO       |     NO     |       NO       |       NO        |
+| **Company Profile & Branding**      | YES (Oversight) |     YES      |      YES      |     NO     |       NO       |       NO        |
+| **Company User Invitation & Roles** | YES (Oversight) |     YES      |      YES      |     NO     |       NO       |       NO        |
+| **Company Custom Role Creation**    | YES (Oversight) |     YES      |      YES      |     NO     |       NO       |       NO        |
+| **HRMS Organization Masters**       |       NO        |      NO      |  Read/Write   | Read/Write |   View Only    |       NO        |
+| **HRMS Employee Management**        |       NO        |      NO      |  Full Admin   | Full Admin | Direct Reports |       NO        |
+| **HRMS Attendance & Punches**       |       NO        |      NO      |  Full Admin   | Full Admin |   Team View    | Self View/Punch |
+| **HRMS Overtime & Comp-Off**        |       NO        |      NO      |  Full Admin   | Full Admin | Team Approvals |   Self Claim    |
+| **HRMS Leave Management**           |       NO        |      NO      |  Full Admin   | Full Admin | Team Approvals |   Self Apply    |
+| **HRMS Onboarding Workflows**       |       NO        |      NO      |  Full Admin   | Full Admin |       NO       |       NO        |
+| **HRMS Form Engine Customization**  |       NO        |      NO      |  Full Admin   | Full Admin |       NO       |       NO        |
+| **ESS Personal Profile Changes**    |       NO        |      NO      |      NO       |     NO     |       NO       |  Self Request   |
 
-*Note on Super Admin Invariant:* Super Admin receives only `SUPER_ADMIN_COMPANY_OVERSIGHT` in a company where they have no direct membership. They cannot view or manage employee PII, attendance, or payroll data unless an explicit company membership is provisioned.
+_Note on Super Admin Invariant:_ Super Admin receives only `SUPER_ADMIN_COMPANY_OVERSIGHT` in a company where they have no direct membership. They cannot view or manage employee PII, attendance, or payroll data unless an explicit company membership is provisioned.
 
 ---
 
@@ -222,23 +222,23 @@ System roles are defined immutably in code ([accessCatalog.ts](file:///e:/Compan
 
 ## 6. Endpoint Protection Coverage
 
-| Router Prefix | Mount Path | Authentication Guard | Authorization Guard | Tenant Isolation Enforcement |
-| :--- | :--- | :--- | :--- | :--- |
-| **Health** | `/api/v1/health` | None (Public) | None | N/A (Static health check) |
-| **Auth** | `/api/v1/platform/auth` | Public (request/verify) / `requirePlatformAuth` (logout, me) | Single-use OTP digest | Account status checks |
-| **Reference** | `/api/v1/platform/reference` | None (Public metadata) | None | Global non-sensitive reference data |
-| **Media** | `/api/v1/platform/media` | None (Public) | Path traversal protection (`..`) | **None (Gap: unauthenticated asset access)** |
-| **Super Admin** | `/api/v1/platform/*` | `requirePlatformAuth` | `requireSuperAdmin` | Platform-wide administrative governance |
-| **Tenant Admin** | `/api/v1/tenant-admin` | `requirePlatformAuth` | `requireTenantAdmin` | Verified against `tenant_admins` table |
-| **Company Admin** | `/api/v1/company-admin` | `requirePlatformAuth` | `requireWorkspace('company_admin')` | Verified against `memberships` & `companies` |
-| **ESS** | `/api/v1/ess` | `requirePlatformAuth` | `requireEssAuth` | Bound to authenticated user's linked `employees` record |
-| **HRMS Root** | `/api/v1/hrms/*` | `requirePlatformAuth` | `requireApplicationAccess('hrms')` | Bound to verified `req.companyContext` |
-| **Workforce** | `/api/v1/hrms/workforce` | Inherited from `/hrms` | `requireAnyPermission` | `req.companyContext` tenant/company scoping |
-| **Employees** | `/api/v1/hrms/employees` | Inherited from `/hrms` | `requirePermission` | `req.companyContext` tenant/company scoping |
-| **Attendance** | `/api/v1/hrms/attendance` | Inherited from `/hrms` | Route-level permissions | `req.companyContext` tenant/company scoping |
-| **Onboarding** | `/api/v1/hrms/onboarding` | Inherited from `/hrms` | Route-level permissions | `req.companyContext` tenant/company scoping |
-| **Documents** | `/api/v1/hrms/employee-documents` | Inherited from `/hrms` | `requireReadWrite` | `req.companyContext` tenant/company scoping |
-| **Forms** | `/api/v1/hrms/settings/forms` | Inherited from `/hrms` | `requireReadWrite` | `req.companyContext` tenant/company scoping |
+| Router Prefix     | Mount Path                        | Authentication Guard                                         | Authorization Guard                 | Tenant Isolation Enforcement                            |
+| :---------------- | :-------------------------------- | :----------------------------------------------------------- | :---------------------------------- | :------------------------------------------------------ |
+| **Health**        | `/api/v1/health`                  | None (Public)                                                | None                                | N/A (Static health check)                               |
+| **Auth**          | `/api/v1/platform/auth`           | Public (request/verify) / `requirePlatformAuth` (logout, me) | Single-use OTP digest               | Account status checks                                   |
+| **Reference**     | `/api/v1/platform/reference`      | None (Public metadata)                                       | None                                | Global non-sensitive reference data                     |
+| **Media**         | `/api/v1/platform/media`          | None (Public)                                                | Path traversal protection (`..`)    | **None (Gap: unauthenticated asset access)**            |
+| **Super Admin**   | `/api/v1/platform/*`              | `requirePlatformAuth`                                        | `requireSuperAdmin`                 | Platform-wide administrative governance                 |
+| **Tenant Admin**  | `/api/v1/tenant-admin`            | `requirePlatformAuth`                                        | `requireTenantAdmin`                | Verified against `tenant_admins` table                  |
+| **Company Admin** | `/api/v1/company-admin`           | `requirePlatformAuth`                                        | `requireWorkspace('company_admin')` | Verified against `memberships` & `companies`            |
+| **ESS**           | `/api/v1/ess`                     | `requirePlatformAuth`                                        | `requireEssAuth`                    | Bound to authenticated user's linked `employees` record |
+| **HRMS Root**     | `/api/v1/hrms/*`                  | `requirePlatformAuth`                                        | `requireApplicationAccess('hrms')`  | Bound to verified `req.companyContext`                  |
+| **Workforce**     | `/api/v1/hrms/workforce`          | Inherited from `/hrms`                                       | `requireAnyPermission`              | `req.companyContext` tenant/company scoping             |
+| **Employees**     | `/api/v1/hrms/employees`          | Inherited from `/hrms`                                       | `requirePermission`                 | `req.companyContext` tenant/company scoping             |
+| **Attendance**    | `/api/v1/hrms/attendance`         | Inherited from `/hrms`                                       | Route-level permissions             | `req.companyContext` tenant/company scoping             |
+| **Onboarding**    | `/api/v1/hrms/onboarding`         | Inherited from `/hrms`                                       | Route-level permissions             | `req.companyContext` tenant/company scoping             |
+| **Documents**     | `/api/v1/hrms/employee-documents` | Inherited from `/hrms`                                       | `requireReadWrite`                  | `req.companyContext` tenant/company scoping             |
+| **Forms**         | `/api/v1/hrms/settings/forms`     | Inherited from `/hrms`                                       | `requireReadWrite`                  | `req.companyContext` tenant/company scoping             |
 
 ---
 
@@ -406,6 +406,7 @@ System roles are defined immutably in code ([accessCatalog.ts](file:///e:/Compan
 ### 8.1 Inventory of Existing Passing Security Tests
 
 Safe, non-destructive test execution verified **120 passing security tests** across 6 test suites:
+
 - `apps/api/src/platform/__tests__/otpAuth.test.ts` (OTP issuance, cooldown, attempt limits, timing-safe checks, UAT flag guards)
 - `apps/api/src/platform/__tests__/auth.test.ts` (Session validation, token revocation, account suspension checks)
 - `apps/api/src/platform/__tests__/rbac.test.ts` (Permission catalog, system roles, permission expansion)
@@ -479,6 +480,7 @@ Phase 3: Scale & Performance Architecture (Pre-General Availability)
 ## Summary of Strengths, Critical Gaps & Top 5 Recommended Actions
 
 ### Verified Strengths
+
 1. **Zero Client Trust in Tenant Identity:** Client-supplied `X-Company-Id` is strictly a claim; true `tenantId` is always queried server-side from verified database relationships.
 2. **Timing-Safe Single-Use OTP Authentication:** Keyed HMAC-SHA256 digests, single-use database consumption (`recordAttempt` + `consume`), and uniform response times prevent account enumeration.
 3. **Real-Time Entitlement Enforcement:** No stale in-memory authorization cache; disabled applications or suspended accounts take effect on the very next HTTP request.
@@ -486,6 +488,7 @@ Phase 3: Scale & Performance Architecture (Pre-General Availability)
 5. **Automated Test Integrity:** 120 automated security tests pass with 100% success rate across OTP authentication, session management, RBAC, and workspace isolation.
 
 ### Critical Gaps
+
 1. **Unprotected Reverse-Proxy IP Rate Limiting:** Missing Express `trust proxy` configuration allows attackers to spoof `X-Forwarded-For` and bypass IP-level rate limits.
 2. **Client-Side Session Token Storage in `localStorage`:** Bearer tokens are exposed to browser JavaScript, creating vulnerability to potential XSS exfiltration.
 3. **Unguarded Standalone Frontend Routes:** Unprivileged roles can render standalone onboarding and form-builder interfaces.
@@ -493,6 +496,7 @@ Phase 3: Scale & Performance Architecture (Pre-General Availability)
 5. **Database Overhead Under Concurrent Load:** 6-10 database queries executed on every authenticated request to evaluate access permissions.
 
 ### Top Five Recommended Actions
+
 1. **Configure `app.set('trust proxy', 1)`** in `createApp.ts` to secure IP rate limiting against header spoofing.
 2. **Add `<RequireHrmsWorkspace>`** to the standalone utility route definitions in `AppRouter.tsx`.
 3. **Migrate Session Token Storage** from browser `localStorage` to `HttpOnly`, `Secure`, `SameSite=Lax` cookies.
