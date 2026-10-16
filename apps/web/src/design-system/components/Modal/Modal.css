@@ -265,16 +265,14 @@
   margin-top: 0;
 }
 
-.bezent-modal__header--brand .bezent-btn-draft,
-.bezent-modal__header--brand .onboarding-page__drafts-btn {
+.bezent-modal__header--brand .bezent-btn-draft {
   background: #ffffff;
   color: #041e49;
   border: 1px solid #dde3ea;
   box-shadow: 0 1px 2px rgba(4, 30, 73, 0.08);
 }
 
-.bezent-modal__header--brand .bezent-btn-draft:hover,
-.bezent-modal__header--brand .onboarding-page__drafts-btn:hover {
+.bezent-modal__header--brand .bezent-btn-draft:hover {
   background: #f0f4f9;
   color: #041e49;
   border-color: #1a73e8;
@@ -321,16 +319,14 @@
   color: rgba(56, 189, 248, 0.32);
 }
 
-[data-theme='dark'] .bezent-modal__header--brand .bezent-btn-draft,
-[data-theme='dark'] .bezent-modal__header--brand .onboarding-page__drafts-btn {
+[data-theme='dark'] .bezent-modal__header--brand .bezent-btn-draft {
   background: rgba(56, 189, 248, 0.08);
   color: #f8fafc;
   border: 1px solid rgba(56, 189, 248, 0.32);
   box-shadow: 0 1px 3px rgba(2, 11, 28, 0.5);
 }
 
-[data-theme='dark'] .bezent-modal__header--brand .bezent-btn-draft:hover,
-[data-theme='dark'] .bezent-modal__header--brand .onboarding-page__drafts-btn:hover {
+[data-theme='dark'] .bezent-modal__header--brand .bezent-btn-draft:hover {
   background: rgba(22, 131, 255, 0.22);
   color: #ffffff;
   border-color: #1683ff;
@@ -356,8 +352,7 @@
   background: var(--bg-surface, #ffffff);
 }
 
-.bezent-modal--workspace .bezent-modal__body,
-.employee-registration-workspace-content {
+.bezent-modal--workspace .bezent-modal__body {
   background: var(--app-canvas, #f6f8fc);
 }
 

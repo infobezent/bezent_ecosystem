@@ -1,0 +1,1629 @@
+/* ==========================================================================
+   BEZENT Design System — HRMS Application Stylesheet
+   Centralized styles for the HRMS business application, including
+   Employee Self-Service (ESS), Attendance, Onboarding, and HR Administration.
+   All styles conform to BEZENT design tokens and support Light / Dark themes.
+   ========================================================================== */
+
+/* ==========================================================================
+   1. HRMS ESS Attendance Hero
+   ========================================================================== */
+/* ==========================================================================
+   BEZENT ESS ATTENDANCE HERO
+   Premium Dynamic Greeting & Attendance Workspace Component
+   ========================================================================== */
+
+.ess-attendance-hero {
+  position: relative;
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 4px 24px -2px rgba(15, 23, 42, 0.06);
+  transition:
+    background 0.4s ease,
+    border-color 0.4s ease,
+    box-shadow 0.4s ease;
+  font-family: inherit;
+  color: var(--color-text-primary, #1e293b);
+}
+
+/* ── Decorative Background Vector Atmosphere ───────────────────────────── */
+.ess-hero-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 240px;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.ess-hero-backdrop-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ── Top Header Section: Identity, Quote, Attendance Buttons ──────────── */
+.ess-hero-top {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 28px 32px 20px 32px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* Left: Employee Identity */
+.ess-hero-identity {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1 1 420px;
+  min-width: 320px;
+}
+
+.ess-hero-avatar-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.ess-hero-avatar-ring {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  border-radius: 50%;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.ess-hero-avatar-ring:hover {
+  transform: scale(1.03);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.ess-hero-identity-details {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ess-hero-date-badge {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5f6368;
+  margin-bottom: 2px;
+}
+
+.ess-hero-greeting-heading {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #202124;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ess-hero-sun-icon {
+  display: inline-flex;
+  align-items: center;
+  font-size: 22px;
+  animation: essHeroGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes essHeroGlow {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.2));
+  }
+  100% {
+    transform: scale(1.06);
+    filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.5));
+  }
+}
+
+.ess-hero-designation-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #3c4043;
+}
+
+.ess-hero-designation-title {
+  font-weight: 600;
+  color: #202124;
+}
+
+.ess-hero-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #5f6368;
+  margin-top: 3px;
+  flex-wrap: wrap;
+}
+
+.ess-hero-emp-id strong {
+  color: #202124;
+  font-weight: 600;
+}
+
+.ess-hero-status-pill {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  background-color: #e6f4ea;
+  color: #137333;
+  text-transform: uppercase;
+}
+
+.ess-hero-profile-link {
+  color: #1a73e8;
+  font-size: 12.5px;
+  font-weight: 500;
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.15s ease;
+}
+
+.ess-hero-profile-link:hover {
+  color: #1557b0;
+  text-decoration: underline;
+}
+
+/* Center: Motivational Message */
+.ess-hero-quote-area {
+  flex: 0 1 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+}
+
+.ess-hero-quote-text {
+  font-size: 13.5px;
+  font-weight: 500;
+  font-style: italic;
+  color: #374151;
+  text-align: center;
+  line-height: 1.4;
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+/* Right: Horizontal Attendance Action Buttons */
+.ess-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.ess-hero-btn {
+  height: 44px;
+  min-width: 136px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 22px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  outline: none;
+  white-space: nowrap;
+}
+
+.ess-hero-btn:focus-visible {
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.35);
+}
+
+/* Primary Check In Pill Button */
+.ess-hero-btn-checkin {
+  background-color: #1a73e8;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(26, 115, 232, 0.25);
+}
+
+.ess-hero-btn-checkin:hover:not(:disabled) {
+  background-color: #1557b0;
+  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.35);
+  transform: translateY(-1px);
+}
+
+.ess-hero-btn-checkin:active:not(:disabled) {
+  transform: translateY(0);
+  background-color: #0d47a1;
+}
+
+/* Secondary Check Out Pill Button */
+.ess-hero-btn-checkout {
+  background-color: #ffffff;
+  color: #1a73e8;
+  border: 1.5px solid #1a73e8;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.ess-hero-btn-checkout:hover:not(:disabled) {
+  background-color: #f0f7ff;
+  border-color: #1557b0;
+  color: #1557b0;
+  transform: translateY(-1px);
+}
+
+.ess-hero-btn-checkout:active:not(:disabled) {
+  transform: translateY(0);
+  background-color: #e3ecfa;
+}
+
+.ess-hero-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* ── Middle: Frosted Glass Attendance Information Panel ─────────────────── */
+.ess-hero-glass-panel {
+  position: relative;
+  z-index: 2;
+  margin: 8px 32px 18px 32px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+  display: grid;
+  grid-template-columns: 1.35fr 1fr 1fr 1fr 1fr 1.35fr;
+  align-items: center;
+  padding: 16px 20px;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+/* Individual Metric Column */
+.ess-glass-col {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 2px 14px;
+  border-right: 1px solid rgba(226, 232, 240, 0.8);
+  min-width: 0;
+}
+
+.ess-glass-col:last-child {
+  border-right: none;
+  padding-right: 4px;
+}
+
+/* Circular Metric Icon Badge */
+.ess-glass-icon-badge {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.ess-glass-icon-badge:hover {
+  transform: scale(1.05);
+}
+
+.ess-glass-icon-blue {
+  background-color: #e8f0fe;
+  color: #1a73e8;
+}
+
+.ess-glass-icon-green {
+  background-color: #e6f4ea;
+  color: #137333;
+}
+
+.ess-glass-icon-coral {
+  background-color: #fce8e6;
+  color: #c5221f;
+}
+
+.ess-glass-icon-purple {
+  background-color: #f3e8fd;
+  color: #7627bb;
+}
+
+.ess-glass-icon-amber {
+  background-color: #fef7e0;
+  color: #b06000;
+}
+
+/* Metric Text Stack */
+.ess-glass-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ess-glass-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #5f6368;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.ess-glass-val {
+  font-size: 18px;
+  font-weight: 700;
+  color: #202124;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.ess-glass-clock-val {
+  font-size: 19px;
+  font-weight: 700;
+  color: #202124;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ess-glass-sub {
+  font-size: 11.5px;
+  color: #5f6368;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Status Column Details */
+.ess-glass-status-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding-left: 14px;
+}
+
+.ess-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.ess-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.ess-status-badge-checked-out {
+  background-color: #e8eaed;
+  color: #3c4043;
+}
+.ess-status-badge-checked-out .ess-status-dot {
+  background-color: #5f6368;
+}
+
+.ess-status-badge-working {
+  background-color: #e6f4ea;
+  color: #137333;
+}
+.ess-status-badge-working .ess-status-dot {
+  background-color: #188038;
+  animation: essDotPulse 2s infinite;
+}
+
+.ess-status-badge-break {
+  background-color: #fef7e0;
+  color: #b06000;
+}
+.ess-status-badge-break .ess-status-dot {
+  background-color: #e37400;
+  animation: essDotPulse 2s infinite;
+}
+
+.ess-status-badge-neutral {
+  background-color: #f1f3f4;
+  color: #5f6368;
+}
+.ess-status-badge-neutral .ess-status-dot {
+  background-color: #9aa0a6;
+}
+
+@keyframes essDotPulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+}
+
+.ess-glass-shift-info {
+  font-size: 12px;
+  color: #3c4043;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.ess-glass-location-info {
+  font-size: 11.5px;
+  color: #5f6368;
+  white-space: nowrap;
+}
+
+/* Break Toggle Link in Glass Panel */
+.ess-glass-break-link {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #1a73e8;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-top: 2px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.ess-glass-break-link:hover {
+  text-decoration: underline;
+}
+
+/* ── Bottom Section: Daily Briefing Strip ───────────────────────────────── */
+.ess-hero-briefing {
+  position: relative;
+  z-index: 2;
+  margin: 0 32px 24px 32px;
+  background: rgba(240, 246, 255, 0.78);
+  border: 1px solid rgba(219, 234, 254, 0.85);
+  border-radius: 12px;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.3s ease;
+}
+
+.ess-briefing-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.ess-briefing-icon-wrapper {
+  color: #1a73e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ess-briefing-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ess-briefing-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ess-briefing-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.ess-briefing-badge {
+  font-size: 11px;
+  font-weight: 600;
+  background-color: #fef7e0;
+  color: #b06000;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  letter-spacing: 0.02em;
+}
+
+.ess-briefing-badge-clear {
+  background-color: #e6f4ea;
+  color: #137333;
+}
+
+.ess-briefing-summary {
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ess-briefing-action-btn {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a73e8;
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  border-radius: 6px;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.ess-briefing-action-btn:hover {
+  background-color: rgba(26, 115, 232, 0.08);
+  color: #1557b0;
+}
+
+/* ==========================================================================
+   DYNAMIC TIME-BASED THEMES (APPLIES STRICTLY TO HERO CONTAINER ONLY)
+   ========================================================================== */
+
+/* ── 1. Morning Theme (05:00 - 11:59) ─────────────────────────────────── */
+.ess-attendance-hero[data-time-period='morning'] {
+  border-color: rgba(254, 240, 138, 0.8);
+}
+.ess-attendance-hero[data-time-period='morning'] .ess-hero-greeting-heading {
+  color: #1e293b;
+}
+
+/* ── 2. Afternoon Theme (12:00 - 16:59) ───────────────────────────────── */
+.ess-attendance-hero[data-time-period='afternoon'] {
+  border-color: rgba(254, 215, 170, 0.8);
+}
+.ess-attendance-hero[data-time-period='afternoon'] .ess-hero-greeting-heading {
+  color: #1e293b;
+}
+
+/* ── 3. Evening Theme (17:00 - 20:59) ─────────────────────────────────── */
+.ess-attendance-hero[data-time-period='evening'] {
+  border-color: rgba(244, 114, 182, 0.6);
+}
+.ess-attendance-hero[data-time-period='evening'] .ess-hero-greeting-heading {
+  color: #312e81;
+}
+.ess-attendance-hero[data-time-period='evening'] .ess-hero-quote-text {
+  color: #4338ca;
+}
+
+/* ── 4. Night Theme (21:00 - 04:59) ───────────────────────────────────── */
+.ess-attendance-hero[data-time-period='night'] {
+  background: #0f172a;
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 4px 28px -2px rgba(15, 23, 42, 0.4);
+}
+.ess-attendance-hero[data-time-period='night'] .ess-hero-date-badge {
+  color: #94a3b8;
+}
+.ess-attendance-hero[data-time-period='night'] .ess-hero-greeting-heading {
+  color: #f8fafc;
+}
+.ess-attendance-hero[data-time-period='night'] .ess-hero-designation-row {
+  color: #cbd5e1;
+}
+.ess-attendance-hero[data-time-period='night'] .ess-hero-designation-title {
+  color: #f1f5f9;
+}
+.ess-attendance-hero[data-time-period='night'] .ess-hero-meta-row {
+  color: #94a3b8;
+}
+.ess-attendance-hero[data-time-period='night'] .ess-hero-emp-id strong {
+  color: #f8fafc;
+}
+.ess-attendance-hero[data-time-period='night'] .ess-hero-profile-link {
+  color: #60a5fa;
+}
+.ess-attendance-hero[data-time-period='night'] .ess-hero-quote-text {
+  color: #e2e8f0;
+}
+.ess-attendance-hero[data-time-period='night'] .ess-hero-btn-checkout {
+  background-color: rgba(30, 41, 59, 0.8);
+  color: #60a5fa;
+  border-color: #3b82f6;
+}
+.ess-attendance-hero[data-time-period='night'] .ess-hero-btn-checkout:hover:not(:disabled) {
+  background-color: rgba(30, 41, 59, 1);
+  color: #93c5fd;
+}
+.ess-attendance-hero[data-time-period='night'] .ess-hero-glass-panel {
+  background: rgba(15, 23, 42, 0.78);
+  border-color: rgba(51, 65, 85, 0.65);
+}
+.ess-attendance-hero[data-time-period='night'] .ess-glass-col {
+  border-right-color: rgba(51, 65, 85, 0.7);
+}
+.ess-attendance-hero[data-time-period='night'] .ess-glass-label {
+  color: #94a3b8;
+}
+.ess-attendance-hero[data-time-period='night'] .ess-glass-val,
+.ess-attendance-hero[data-time-period='night'] .ess-glass-clock-val {
+  color: #f8fafc;
+}
+.ess-attendance-hero[data-time-period='night'] .ess-glass-sub {
+  color: #94a3b8;
+}
+.ess-attendance-hero[data-time-period='night'] .ess-glass-shift-info {
+  color: #cbd5e1;
+}
+.ess-attendance-hero[data-time-period='night'] .ess-glass-location-info {
+  color: #94a3b8;
+}
+.ess-attendance-hero[data-time-period='night'] .ess-hero-briefing {
+  background: rgba(30, 41, 59, 0.75);
+  border-color: rgba(51, 65, 85, 0.8);
+}
+.ess-attendance-hero[data-time-period='night'] .ess-briefing-title {
+  color: #f8fafc;
+}
+.ess-attendance-hero[data-time-period='night'] .ess-briefing-summary {
+  color: #cbd5e1;
+}
+.ess-attendance-hero[data-time-period='night'] .ess-briefing-action-btn {
+  color: #60a5fa;
+}
+
+/* ==========================================================================
+   RESPONSIVE LAYOUTS
+   ========================================================================== */
+
+/* Tablet (max-width: 1080px) */
+@media (max-width: 1080px) {
+  .ess-hero-top {
+    padding: 24px 24px 16px 24px;
+  }
+  .ess-hero-quote-area {
+    display: none;
+  }
+  .ess-hero-glass-panel {
+    margin: 8px 24px 16px 24px;
+    grid-template-columns: repeat(3, 1fr);
+    row-gap: 16px;
+    padding: 16px;
+  }
+  .ess-glass-col:nth-child(3) {
+    border-right: none;
+  }
+  .ess-glass-col:nth-child(4) {
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+    padding-top: 12px;
+  }
+  .ess-glass-col:nth-child(5) {
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+    padding-top: 12px;
+  }
+  .ess-glass-col:nth-child(6) {
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+    padding-top: 12px;
+    border-right: none;
+  }
+  .ess-attendance-hero[data-time-period='night'] .ess-glass-col:nth-child(4),
+  .ess-attendance-hero[data-time-period='night'] .ess-glass-col:nth-child(5),
+  .ess-attendance-hero[data-time-period='night'] .ess-glass-col:nth-child(6) {
+    border-top-color: rgba(51, 65, 85, 0.7);
+  }
+  .ess-hero-briefing {
+    margin: 0 24px 20px 24px;
+  }
+}
+
+/* Mobile (max-width: 768px) */
+@media (max-width: 768px) {
+  .ess-hero-top {
+    flex-direction: column;
+    padding: 20px 16px 14px 16px;
+    gap: 16px;
+  }
+  .ess-hero-identity {
+    flex-direction: row;
+    gap: 14px;
+    min-width: 0;
+  }
+  .ess-hero-greeting-heading {
+    font-size: 20px;
+  }
+  .ess-hero-actions {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+  }
+  .ess-hero-btn {
+    flex: 1;
+    min-width: 0;
+    padding: 0 12px;
+    font-size: 13.5px;
+  }
+  .ess-hero-glass-panel {
+    margin: 6px 16px 14px 16px;
+    grid-template-columns: repeat(2, 1fr);
+    padding: 12px;
+    row-gap: 14px;
+  }
+  .ess-glass-col:nth-child(2) {
+    border-right: none;
+  }
+  .ess-glass-col:nth-child(3) {
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+    padding-top: 10px;
+  }
+  .ess-glass-col:nth-child(4) {
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+    padding-top: 10px;
+    border-right: none;
+  }
+  .ess-glass-col:nth-child(5) {
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+    padding-top: 10px;
+  }
+  .ess-glass-col:nth-child(6) {
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+    padding-top: 10px;
+    border-right: none;
+  }
+  .ess-attendance-hero[data-time-period='night'] .ess-glass-col:nth-child(3),
+  .ess-attendance-hero[data-time-period='night'] .ess-glass-col:nth-child(4),
+  .ess-attendance-hero[data-time-period='night'] .ess-glass-col:nth-child(5),
+  .ess-attendance-hero[data-time-period='night'] .ess-glass-col:nth-child(6) {
+    border-top-color: rgba(51, 65, 85, 0.7);
+  }
+  .ess-hero-briefing {
+    margin: 0 16px 16px 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 12px 14px;
+  }
+  .ess-briefing-action-btn {
+    align-self: flex-end;
+  }
+}
+
+/* ==========================================================================
+   2. HRMS Attendance Monthly Calendar & Snapshot
+   ========================================================================== */
+/* BEZENT Monthly Attendance Snapshot & Calendar Component Styles */
+
+.bezent-attendance-snapshot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md, 16px);
+  width: 100%;
+}
+
+.bezent-attendance-snapshot__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: var(--spacing-lg, 24px);
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .bezent-attendance-snapshot__layout {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md, 16px);
+  }
+}
+
+/* ── Calendar Column (Left) ── */
+.bezent-attendance-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md, 16px);
+}
+
+.bezent-attendance-calendar__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.bezent-attendance-calendar__month-title {
+  font-size: var(--font-size-md, 16px);
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+/* ── Calendar Grid ── */
+.bezent-attendance-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px 6px;
+  width: 100%;
+}
+
+.bezent-attendance-calendar__weekday {
+  text-align: center;
+  font-size: var(--font-size-xs, 12px);
+  font-weight: var(--font-weight-medium, 500);
+  color: var(--text-secondary);
+  padding-bottom: 6px;
+  user-select: none;
+}
+
+.bezent-attendance-calendar__day-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+}
+
+.bezent-attendance-calendar__day {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 52px;
+  height: 36px;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: var(--font-size-sm, 13px);
+  font-weight: var(--font-weight-medium, 500);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0;
+  outline: none;
+}
+
+.bezent-attendance-calendar__day:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: scale(1.05);
+}
+
+.bezent-attendance-calendar__day:disabled {
+  cursor: default;
+}
+
+/* Day Status Colors */
+.bezent-attendance-calendar__day--present {
+  background-color: #00a86b;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.bezent-attendance-calendar__day--late {
+  background-color: #f59e0b;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.bezent-attendance-calendar__day--absent {
+  background-color: #ef4444;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.bezent-attendance-calendar__day--leave {
+  background-color: #8b5cf6;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.bezent-attendance-calendar__day--holiday {
+  background-color: #3b82f6;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.bezent-attendance-calendar__day--weekly-off {
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.bezent-attendance-calendar__day--unclassified {
+  background: transparent;
+  color: var(--text-primary);
+}
+
+/* Today & Selection Highlights */
+.bezent-attendance-calendar__day--today {
+  box-shadow: 0 0 0 2px var(--primary-accent, #1a73e8);
+}
+
+.bezent-attendance-calendar__day--selected {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
+}
+
+/* Empty filler day */
+.bezent-attendance-calendar__day--empty {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ── Legend ── */
+.bezent-attendance-calendar__legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md, 16px);
+  padding-top: var(--spacing-xs, 4px);
+}
+
+.bezent-attendance-calendar__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-xs, 12px);
+  color: var(--text-secondary);
+}
+
+.bezent-attendance-calendar__legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.bezent-attendance-calendar__legend-dot--present {
+  background-color: #00a86b;
+}
+
+.bezent-attendance-calendar__legend-dot--late {
+  background-color: #f59e0b;
+}
+
+.bezent-attendance-calendar__legend-dot--absent {
+  background-color: #ef4444;
+}
+
+.bezent-attendance-calendar__legend-dot--leave {
+  background-color: #8b5cf6;
+}
+
+/* ── Selected Date Details Box ── */
+.bezent-attendance-calendar__details {
+  border-top: 1px solid var(--border-default, #dde3ea);
+  padding-top: var(--spacing-sm, 12px);
+  margin-top: var(--spacing-xs, 4px);
+}
+
+/* ── Summary Column (Right) ── */
+.bezent-attendance-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md, 12px);
+  height: 100%;
+}
+
+.bezent-attendance-summary__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md, 18px) var(--spacing-sm, 12px);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-md, 8px);
+  background: var(--bg-surface, #ffffff);
+  text-align: center;
+  gap: var(--spacing-xs, 6px);
+  transition: all 0.15s ease;
+}
+
+.bezent-attendance-summary__card:hover {
+  background: var(--card-hover-bg, #f8fafd);
+  border-color: var(--border-hover, #c4c7c5);
+}
+
+.bezent-attendance-summary__icon {
+  color: var(--icon-default, #5f6368);
+  margin-bottom: 2px;
+}
+
+.bezent-attendance-summary__value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-primary, #000000);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.bezent-attendance-summary__label {
+  font-size: var(--font-size-xs, 12px);
+  font-weight: var(--font-weight-medium, 500);
+  color: var(--text-secondary, #5f6368);
+}
+
+/* ==========================================================================
+   3. HRMS Onboarding & Candidate Registration Workspace
+   ========================================================================== */
+
+.employee-registration-workspace-content {
+  background: var(--app-canvas, #f6f8fc);
+}
+
+.employee-registration-workspace-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md, 16px);
+  padding: 16px 24px;
+}
+
+.bezent-modal__header--brand .onboarding-page__drafts-btn,
+.onboarding-page__drafts-btn,
+.bezent-btn-draft {
+  background: #ffffff;
+  color: #041e49;
+  border: 1px solid #dde3ea;
+  box-shadow: 0 1px 2px rgba(4, 30, 73, 0.08);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius-md, 8px);
+  transition: all 0.2s ease;
+}
+
+.bezent-modal__header--brand .onboarding-page__drafts-btn:hover,
+.onboarding-page__drafts-btn:hover,
+.bezent-btn-draft:hover {
+  background: var(--bg-surface-secondary, #f0f4f9);
+  border-color: var(--border-focus, #1a73e8);
+  color: var(--brand-primary, #041e49);
+}
+
+[data-theme='dark'] .bezent-modal__header--brand .onboarding-page__drafts-btn,
+[data-theme='dark'] .onboarding-page__drafts-btn,
+[data-theme='dark'] .bezent-btn-draft {
+  background: rgba(56, 189, 248, 0.08);
+  color: #f8fafc;
+  border: 1px solid rgba(56, 189, 248, 0.32);
+  box-shadow: 0 1px 3px rgba(2, 11, 28, 0.5);
+}
+
+[data-theme='dark'] .bezent-modal__header--brand .onboarding-page__drafts-btn:hover,
+[data-theme='dark'] .onboarding-page__drafts-btn:hover,
+[data-theme='dark'] .bezent-btn-draft:hover {
+  background: rgba(22, 131, 255, 0.22);
+  color: #ffffff;
+  border-color: #1683ff;
+}
+
+.review-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg, 24px);
+  width: 100%;
+}
+
+/* ==========================================================================
+   4. HRMS Settings & Administration Customization Builder
+   ========================================================================== */
+
+.admin-builder-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: var(--bezent-btn-sec-bg, #c2e7ff);
+  color: var(--bezent-btn-sec-text, #071e49);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm, 6px);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.admin-builder-action-btn:hover:not(:disabled) {
+  background: var(--bezent-btn-sec-hover, #a8dbfc);
+  color: var(--bezent-btn-sec-text, #071e49);
+}
+
+.admin-builder-action-btn:active:not(:disabled) {
+  background: #90d0fa;
+}
+
+.admin-builder-action-btn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  background: var(--bg-canvas, #f0f4f9);
+  color: var(--text-tertiary, #000000);
+  border-color: var(--border-default, #dde3ea);
+}
+
+.admin-builder-action-btn--delete {
+  color: var(--status-danger-fg, #ef4444);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.admin-builder-action-btn--delete:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--status-danger-fg, #ef4444);
+}
+
+.admin-builder-option-remove-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.75;
+  transition: opacity 0.15s ease;
+}
+
+.admin-builder-option-remove-btn:hover {
+  opacity: 1;
+}
+
+[data-theme='dark'] .admin-builder-action-btn {
+  background: var(--bezent-btn-sec-bg, #1a273b);
+  color: var(--bezent-btn-sec-text, #c2e7ff);
+}
+
+[data-theme='dark'] .admin-builder-action-btn:hover:not(:disabled) {
+  background: var(--bezent-btn-sec-hover, #233550);
+}
+
+[data-theme='dark'] .admin-builder-action-btn:disabled {
+  background: var(--bg-canvas, #0b0f17);
+  color: var(--text-tertiary, #555b68);
+  border-color: var(--border-default, #2a313d);
+}
+
+/* ==========================================================================
+   6. HRMS ESS My Profile Workspace & Personal Tab (Option A)
+   ========================================================================== */
+
+/* Profile Header Card */
+.ess-profile-header-card {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: 14px;
+  padding: 14px 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+}
+
+[data-theme='dark'] .ess-profile-header-card {
+  background: var(--bg-surface, #1e2430);
+  border-color: var(--border-default, #2a313d);
+}
+
+.ess-profile-header-identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ess-profile-header-avatar {
+  flex-shrink: 0;
+}
+
+.ess-profile-header-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ess-profile-header-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ess-profile-header-name {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text-primary, #1e293b);
+  letter-spacing: -0.015em;
+}
+
+[data-theme='dark'] .ess-profile-header-name {
+  color: var(--text-primary, #f1f5f9);
+}
+
+.ess-profile-header-subrow {
+  display: flex;
+  align-items: center;
+  gap: 6px 8px;
+  font-size: 13px;
+  color: var(--text-secondary, #475569);
+  flex-wrap: wrap;
+}
+
+[data-theme='dark'] .ess-profile-header-subrow {
+  color: var(--text-secondary, #94a3b8);
+}
+
+.ess-profile-dot-separator {
+  color: var(--text-tertiary, #94a3b8);
+  font-size: 12px;
+  user-select: none;
+}
+
+.ess-profile-header-quick-card {
+  background: var(--bg-surface-secondary, #f8fafc);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: 10px;
+  padding: 8px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 150px;
+  text-align: center;
+}
+
+[data-theme='dark'] .ess-profile-header-quick-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--border-default, #2a313d);
+}
+
+.ess-profile-header-quick-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary, #64748b);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ess-profile-header-quick-val {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+}
+
+[data-theme='dark'] .ess-profile-header-quick-val {
+  color: var(--text-primary, #f8fafc);
+}
+
+.ess-profile-header-quick-type {
+  font-size: 11.5px;
+  color: var(--text-tertiary, #64748b);
+}
+
+/* Compact Profile Completeness Strip */
+.ess-profile-completeness-strip {
+  background: var(--bg-surface-secondary, #f0f7ff);
+  border: 1px solid var(--border-interactive, #c2e7ff);
+  border-radius: 10px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  transition: all 0.2s ease;
+}
+
+[data-theme='dark'] .ess-profile-completeness-strip {
+  background: rgba(66, 133, 244, 0.08);
+  border-color: rgba(66, 133, 244, 0.25);
+}
+
+.ess-profile-completeness-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 260px;
+  flex-wrap: wrap;
+}
+
+.ess-profile-completeness-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary, #1e293b);
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .ess-profile-completeness-title {
+  color: var(--text-primary, #f1f5f9);
+}
+
+.ess-profile-completeness-bar-wrap {
+  flex: 1;
+  min-width: 120px;
+  max-width: 240px;
+}
+
+.ess-profile-completeness-count {
+  font-size: 12.5px;
+  color: var(--text-secondary, #475569);
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .ess-profile-completeness-count {
+  color: var(--text-secondary, #94a3b8);
+}
+
+.ess-profile-completeness-tray {
+  margin-top: 8px;
+}
+
+/* Horizontal Tab Bar Container */
+.ess-profile-tabs-wrapper {
+  margin-top: 4px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border-default, #dde3ea);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.ess-profile-tabs-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+/* Option A — Expanded Sections Container */
+.ess-profile-sections-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Individual Section Panel */
+.ess-profile-section-panel {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: 12px;
+  padding: 14px 18px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+[data-theme='dark'] .ess-profile-section-panel {
+  background: var(--bg-surface, #1e2430);
+  border-color: var(--border-default, #2a313d);
+}
+
+.ess-profile-section-panel:hover {
+  border-color: var(--border-hover, #cbd5e1);
+}
+
+/* Section Header */
+.ess-profile-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle, #f1f5f9);
+  flex-wrap: wrap;
+}
+
+[data-theme='dark'] .ess-profile-section-header {
+  border-bottom-color: var(--border-default, #2a313d);
+}
+
+.ess-profile-section-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ess-profile-section-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: rgba(26, 115, 232, 0.08);
+  color: var(--accent-interactive, #1a73e8);
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .ess-profile-section-icon-badge {
+  background: rgba(66, 133, 244, 0.16);
+  color: #8ab4f8;
+}
+
+.ess-profile-section-heading {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary, #1e293b);
+  letter-spacing: -0.01em;
+}
+
+[data-theme='dark'] .ess-profile-section-heading {
+  color: var(--text-primary, #f1f5f9);
+}
+
+.ess-profile-section-desc {
+  margin: 1px 0 0 0;
+  font-size: 12.5px;
+  color: var(--text-secondary, #64748b);
+  line-height: 1.35;
+}
+
+[data-theme='dark'] .ess-profile-section-desc {
+  color: var(--text-secondary, #94a3b8);
+}
+
+/* Responsive Field Grid */
+.ess-profile-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px 24px;
+}
+
+@media (max-width: 768px) {
+  .ess-profile-field-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+/* Field Item */
+.ess-profile-field-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ess-profile-field-label-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ess-profile-field-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+[data-theme='dark'] .ess-profile-field-label {
+  color: var(--text-secondary, #94a3b8);
+}
+
+.ess-profile-field-value {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary, #0f172a);
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+[data-theme='dark'] .ess-profile-field-value {
+  color: var(--text-primary, #f8fafc);
+}
+
+.ess-profile-field-value.is-empty {
+  color: var(--text-tertiary, #94a3b8);
+  font-weight: 400;
+  font-style: italic;
+}
+
+.ess-profile-field-helper {
+  font-size: 11.5px;
+  color: var(--text-tertiary, #64748b);
+  line-height: 1.3;
+}
+
+[data-theme='dark'] .ess-profile-field-helper {
+  color: var(--text-tertiary, #64748b);
+}
+
+/* Address Block in Field Grid */
+.ess-profile-address-block {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 13.5px;
+  color: var(--text-primary, #0f172a);
+  line-height: 1.4;
+}
+
+[data-theme='dark'] .ess-profile-address-block {
+  color: var(--text-primary, #f8fafc);
+}
+
+/* Emergency Contacts List Grid */
+.ess-profile-emergency-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .ess-profile-emergency-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ess-profile-emergency-card {
+  background: var(--bg-surface-secondary, #f8fafc);
+  border: 1px solid var(--border-default, #e2e8f0);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+[data-theme='dark'] .ess-profile-emergency-card {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: var(--border-default, #2a313d);
+}
+
+.ess-profile-emergency-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ess-profile-emergency-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 6px;
+  border-top: 1px dashed var(--border-subtle, #e2e8f0);
+}
+
+[data-theme='dark'] .ess-profile-emergency-actions {
+  border-top-color: var(--border-default, #2a313d);
+}

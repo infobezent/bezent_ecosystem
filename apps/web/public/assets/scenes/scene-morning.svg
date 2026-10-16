@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 240" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <!-- Morning Sky Gradient -->
+    <linearGradient id="mor-sky" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fffbeb" stop-opacity="1" />
+      <stop offset="35%" stop-color="#fef3c7" stop-opacity="0.95" />
+      <stop offset="70%" stop-color="#fde68a" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.9" />
+    </linearGradient>
+
+    <!-- Fresh Golden Morning Sun Glow -->
+    <radialGradient id="mor-sun-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+      <stop offset="30%" stop-color="#fef08a" stop-opacity="0.95" />
+      <stop offset="65%" stop-color="#f59e0b" stop-opacity="0.45" />
+      <stop offset="100%" stop-color="#fbbf24" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Sun Disc -->
+    <radialGradient id="mor-sun-core" cx="45%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="60%" stop-color="#fef9c3" />
+      <stop offset="100%" stop-color="#fde047" />
+    </radialGradient>
+
+    <!-- Morning Mist Mountain -->
+    <linearGradient id="mor-mountain" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fde68a" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#fed7aa" stop-opacity="0.1" />
+    </linearGradient>
+
+    <!-- Skyline Gradients -->
+    <linearGradient id="mor-skyline-back" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#93c5fd" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#e0f2fe" stop-opacity="0.05" />
+    </linearGradient>
+    <linearGradient id="mor-skyline-mid" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#cbd5e1" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#f1f5f9" stop-opacity="0.1" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="240" fill="url(#mor-sky)" />
+  <path d="M480 240 Q620 120 760 160 T1050 135 L1200 155 L1200 240 Z" fill="url(#mor-mountain)" />
+
+  <circle cx="680" cy="170" r="135" fill="url(#mor-sun-glow)" />
+  <circle cx="680" cy="170" r="48" fill="url(#mor-sun-core)" />
+
+  <!-- Morning Skyline -->
+  <path d="M520 240 L520 185 L535 185 L535 175 L555 175 L555 190 L570 190 L570 165 L585 165 L585 155 L600 155 L600 190 L620 190 L620 140 L630 140 L630 130 L635 110 L640 130 L640 190 L660 190 L660 170 L680 170 L680 240 Z" fill="url(#mor-skyline-back)" />
+  <path d="M720 240 L720 175 L740 175 L740 150 L755 150 L755 160 L775 160 L775 135 L785 125 L795 135 L795 180 L820 180 L820 155 L840 155 L840 190 L870 190 L870 160 L890 160 L890 240 Z" fill="url(#mor-skyline-back)" />
+  <path d="M640 240 L640 180 L655 180 L655 165 L675 165 L675 190 L695 190 L695 175 L710 175 L710 160 L720 150 L720 130 L723 90 L726 130 L726 150 L735 160 L735 195 L760 195 L760 170 L780 170 L780 240 Z" fill="url(#mor-skyline-mid)" />
+  <path d="M840 240 L840 175 L860 175 L860 145 L885 145 L885 165 L910 165 L910 135 L925 135 L925 120 L935 120 L935 180 L960 180 L960 155 L985 155 L985 195 L1020 195 L1020 240 Z" fill="url(#mor-skyline-mid)" />
+
+  <!-- Window Mullions -->
+  <line x1="810" y1="0" x2="810" y2="240" stroke="#ffffff" stroke-width="8" stroke-opacity="0.5" />
+  <line x1="810" y1="0" x2="810" y2="240" stroke="#e2e8f0" stroke-width="1.5" stroke-opacity="0.6" />
+  <line x1="1080" y1="0" x2="1080" y2="240" stroke="#ffffff" stroke-width="8" stroke-opacity="0.45" />
+  <line x1="1080" y1="0" x2="1080" y2="240" stroke="#e2e8f0" stroke-width="1.5" stroke-opacity="0.5" />
+
+  <!-- Morning Foliage (Fresh emerald & mint) -->
+  <g id="office-plants-morning" transform="translate(1010, 50)">
+    <path d="M120 190 C125 130 90 90 60 70 C50 95 65 140 115 190 Z" fill="#065f46" fill-opacity="0.45" />
+    <path d="M160 190 C170 120 140 75 105 50 C95 80 115 135 155 190 Z" fill="#047857" fill-opacity="0.55" />
+    <path d="M85 190 C95 135 60 95 20 80 C15 110 35 150 80 190 Z" fill="#059669" fill-opacity="0.75" />
+    <path d="M110 190 C130 115 85 65 40 45 C30 80 60 135 105 190 Z" fill="#10b981" fill-opacity="0.85" />
+    <path d="M140 190 C165 105 115 50 65 25 C55 65 90 130 135 190 Z" fill="#34d399" fill-opacity="0.8" />
+    <path d="M60 190 C70 145 40 115 5 105 C0 130 20 160 55 190 Z" fill="#6ee7b7" fill-opacity="0.9" />
+    <path d="M85 190 C105 130 70 85 25 70 C20 100 45 150 80 190 Z" fill="#a7f3d0" fill-opacity="0.95" />
+  </g>
+</svg>

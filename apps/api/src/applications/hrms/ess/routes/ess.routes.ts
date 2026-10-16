@@ -16,12 +16,18 @@ essRouter.get('/dashboard', essController.getDashboard);
 
 // 2. Profile & Profile Change Requests
 essRouter.get('/profile', essController.getProfile);
+essRouter.put('/profile/personal', essController.updateContactDetails);
+essRouter.put('/profile/emergency-contacts', essController.updateEmergencyContacts);
+essRouter.put('/profile/family-members', essController.updateFamilyMembers);
+essRouter.get('/profile/change-requests', essController.getProfileChangeRequests);
 essRouter.post('/profile/change-requests', essController.createProfileChangeRequest);
 
 // 3. Attendance
 essRouter.get('/attendance', essController.getAttendance);
 essRouter.post('/attendance/check-in', essController.checkIn);
 essRouter.post('/attendance/check-out', essController.checkOut);
+essRouter.post('/attendance/break-start', essController.startBreak);
+essRouter.post('/attendance/break-end', essController.endBreak);
 essRouter.post('/attendance/regularize', essController.regularizeAttendance);
 
 // 4. Leave
@@ -40,6 +46,7 @@ essRouter.post('/documents/upload', essController.submitDocument);
 
 // 7. Requests (Unified Ledger)
 essRouter.get('/requests', essController.getRequests);
+essRouter.post('/requests', essController.createRequest);
 essRouter.post('/requests/:id/cancel', essController.cancelRequest);
 
 // 8. Tasks

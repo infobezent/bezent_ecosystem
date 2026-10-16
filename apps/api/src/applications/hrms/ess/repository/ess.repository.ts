@@ -26,12 +26,19 @@ import {
   type EmployeeNotification,
 } from '../../../../db/schema.js';
 import { generateSurrogateId } from '../../../../platform/auth/security.js';
-import type { EssEmployeeSummary, EssFullProfile } from '../types/ess.types.js';
+import type {
+  EssEmployeeSummary,
+  EssFullProfile,
+  UpdateContactDetailsInput,
+  EmergencyContactItemInput,
+  FamilyMemberItemInput,
+} from '../types/ess.types.js';
 import {
   attendanceRepository,
   AttendanceRepository,
 } from '../../attendance/repository/attendance.repository.js';
 import { leaveRepository, LeaveRepository } from '../../leave/repository/leave.repository.js';
+import { alias } from 'drizzle-orm/mysql-core';
 
 export class EssRepository {
   constructor(
@@ -40,21 +47,31 @@ export class EssRepository {
   ) {}
   async getEmployeeSummary(employeeId: string): Promise<EssEmployeeSummary | null> {
     const db = getDb();
+    const manager = alias(employees, 'reporting_manager');
     const rows = await db
       .select({
         emp: employees,
         dept: departments,
         desig: designations,
         loc: locations,
+        gender: employeePersonalDetails.gender,
+        mgrFirstName: manager.firstName,
+        mgrLastName: manager.lastName,
       })
       .from(employees)
       .leftJoin(departments, eq(employees.departmentId, departments.id))
       .leftJoin(designations, eq(employees.designationId, designations.id))
       .leftJoin(locations, eq(employees.locationId, locations.id))
+      .leftJoin(employeePersonalDetails, eq(employees.id, employeePersonalDetails.employeeId))
+      .leftJoin(manager, eq(employees.reportingManagerId, manager.id))
       .where(eq(employees.id, employeeId));
 
     const row = rows[0];
     if (!row) return null;
+
+    const reportingManagerName = row.mgrFirstName
+      ? `${row.mgrFirstName} ${row.mgrLastName ?? ''}`.trim()
+      : null;
 
     return {
       id: row.emp.id,
@@ -70,9 +87,13 @@ export class EssRepository {
       designationTitle: row.desig?.name ?? null,
       locationId: row.emp.locationId,
       locationName: row.loc?.name ?? null,
+      reportingManagerId: row.emp.reportingManagerId ?? null,
+      reportingManagerName,
       employmentType: row.emp.employmentType,
       employmentStatus: row.emp.employmentStatus,
       joiningDate: row.emp.joiningDate,
+      gender: row.gender ?? null,
+      avatarPreference: null,
     };
   }
 
@@ -137,6 +158,169 @@ export class EssRepository {
     };
   }
 
+  async updateContactDetails(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+    data: UpdateContactDetailsInput,
+  ): Promise<void> {
+    const db = getDb();
+    const [existing] = await db
+      .select({ employeeId: employeePersonalDetails.employeeId })
+      .from(employeePersonalDetails)
+      .where(
+        and(
+          eq(employeePersonalDetails.tenantId, tenantId),
+          eq(employeePersonalDetails.companyId, companyId),
+          eq(employeePersonalDetails.employeeId, employeeId),
+        ),
+      );
+
+    const updatePayload: Record<string, unknown> = { updatedAt: new Date() };
+    if (data.personalEmail !== undefined) updatePayload.personalEmail = data.personalEmail;
+    if (data.homePhone !== undefined) updatePayload.homePhone = data.homePhone;
+    if (data.businessPhone !== undefined) updatePayload.businessPhone = data.businessPhone;
+    if (data.workPhone !== undefined) updatePayload.workPhone = data.workPhone;
+    if (data.addressStreet !== undefined) updatePayload.addressStreet = data.addressStreet;
+    if (data.addressLine2 !== undefined) updatePayload.addressLine2 = data.addressLine2;
+    if (data.addressCity !== undefined) updatePayload.addressCity = data.addressCity;
+    if (data.addressDistrict !== undefined) updatePayload.addressDistrict = data.addressDistrict;
+    if (data.addressState !== undefined) updatePayload.addressState = data.addressState;
+    if (data.addressPostalCode !== undefined)
+      updatePayload.addressPostalCode = data.addressPostalCode;
+    if (data.addressCountry !== undefined) updatePayload.addressCountry = data.addressCountry;
+    if (data.isPermanentSameAsCurrent !== undefined)
+      updatePayload.isPermanentSameAsCurrent = data.isPermanentSameAsCurrent;
+    if (data.permanentAddressStreet !== undefined)
+      updatePayload.permanentAddressStreet = data.permanentAddressStreet;
+    if (data.permanentAddressLine2 !== undefined)
+      updatePayload.permanentAddressLine2 = data.permanentAddressLine2;
+    if (data.permanentAddressCity !== undefined)
+      updatePayload.permanentAddressCity = data.permanentAddressCity;
+    if (data.permanentAddressDistrict !== undefined)
+      updatePayload.permanentAddressDistrict = data.permanentAddressDistrict;
+    if (data.permanentAddressState !== undefined)
+      updatePayload.permanentAddressState = data.permanentAddressState;
+    if (data.permanentAddressPostalCode !== undefined)
+      updatePayload.permanentAddressPostalCode = data.permanentAddressPostalCode;
+    if (data.permanentAddressCountry !== undefined)
+      updatePayload.permanentAddressCountry = data.permanentAddressCountry;
+
+    if (existing) {
+      await db
+        .update(employeePersonalDetails)
+        .set(updatePayload)
+        .where(
+          and(
+            eq(employeePersonalDetails.tenantId, tenantId),
+            eq(employeePersonalDetails.companyId, companyId),
+            eq(employeePersonalDetails.employeeId, employeeId),
+          ),
+        );
+    } else {
+      await db.insert(employeePersonalDetails).values({
+        tenantId,
+        companyId,
+        employeeId,
+        ...updatePayload,
+      });
+    }
+  }
+
+  async updateEmergencyContacts(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+    items: EmergencyContactItemInput[],
+  ): Promise<void> {
+    const db = getDb();
+    await db.transaction(async (tx) => {
+      await tx
+        .delete(employeeEmergencyContacts)
+        .where(
+          and(
+            eq(employeeEmergencyContacts.tenantId, tenantId),
+            eq(employeeEmergencyContacts.companyId, companyId),
+            eq(employeeEmergencyContacts.employeeId, employeeId),
+          ),
+        );
+
+      if (items.length > 0) {
+        await tx.insert(employeeEmergencyContacts).values(
+          items.map((item) => ({
+            id: generateSurrogateId('eec'),
+            tenantId,
+            companyId,
+            employeeId,
+            priority: item.priority,
+            name: item.name,
+            relationship: item.relationship,
+            phone: item.phone,
+            email: item.email ?? null,
+            address: item.address ?? null,
+            isPrivate: item.isPrivate ?? false,
+          })),
+        );
+      }
+    });
+  }
+
+  async updateFamilyMembers(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+    items: FamilyMemberItemInput[],
+  ): Promise<void> {
+    const db = getDb();
+    await db.transaction(async (tx) => {
+      await tx
+        .delete(employeeFamilyMembers)
+        .where(
+          and(
+            eq(employeeFamilyMembers.tenantId, tenantId),
+            eq(employeeFamilyMembers.companyId, companyId),
+            eq(employeeFamilyMembers.employeeId, employeeId),
+          ),
+        );
+
+      if (items.length > 0) {
+        await tx.insert(employeeFamilyMembers).values(
+          items.map((item, index) => ({
+            id: generateSurrogateId('efm'),
+            tenantId,
+            companyId,
+            employeeId,
+            name: item.name,
+            relationship: item.relationship,
+            dateOfBirth: item.dateOfBirth ?? null,
+            phone: item.phone ?? null,
+            sortOrder: index,
+          })),
+        );
+      }
+    });
+  }
+
+  async getProfileChangeRequests(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+  ): Promise<EmployeeRequest[]> {
+    const db = getDb();
+    return db
+      .select()
+      .from(employeeRequests)
+      .where(
+        and(
+          eq(employeeRequests.tenantId, tenantId),
+          eq(employeeRequests.companyId, companyId),
+          eq(employeeRequests.employeeId, employeeId),
+          eq(employeeRequests.requestType, 'profile_change'),
+        ),
+      )
+      .orderBy(desc(employeeRequests.createdAt));
+  }
+
   // ── Attendance Domain (Delegated to applications/hrms/attendance) ──────────
   async getTodayAttendance(
     tenantId: string,
@@ -178,6 +362,15 @@ export class EssRepository {
     limit: number = 30,
   ): Promise<EmployeeAttendance[]> {
     return this.attendanceRepo.getAttendanceHistory(tenantId, companyId, employeeId, limit);
+  }
+
+  async getEmployeeDayPunches(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+    date: string,
+  ) {
+    return this.attendanceRepo.getEmployeeDayPunches(tenantId, companyId, employeeId, date);
   }
 
   // ── Leave Domain (Delegated to applications/hrms/leave) ───────────────────

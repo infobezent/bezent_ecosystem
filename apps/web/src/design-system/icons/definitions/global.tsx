@@ -1316,6 +1316,13 @@ export const GLOBAL_ICON_DEFINITIONS: Record<string, IconDefinition> = {
       <circle cx="12" cy="7" r="4" />
     </g>
   )),
+  logIn: glyph('logIn', 'Log in', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+      <polyline points="10 17 15 12 10 7" />
+      <line x1="15" y1="12" x2="3" y2="12" />
+    </g>
+  )),
   logOut: glyph('logOut', 'Log out', (c, sw) => (
     <g {...S(c, sw)}>
       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -1381,6 +1388,13 @@ export const GLOBAL_ICON_DEFINITIONS: Record<string, IconDefinition> = {
         fill="none"
       />
       <circle cx="12" cy="13" r="4" fill="none" />
+    </g>
+  )),
+  coffee: glyph('coffee', 'Coffee', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M10 2v2M14 2v2M6 2v2" />
+      <path d="M16 8h1a4 4 0 0 1 0 8h-1" />
+      <path d="M2 8h14v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" />
     </g>
   )),
 };
