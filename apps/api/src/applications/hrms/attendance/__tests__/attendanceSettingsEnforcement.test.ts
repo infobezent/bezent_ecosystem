@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import net from 'node:net';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import request from 'supertest';
 import { and, eq } from 'drizzle-orm';
 import { createApp } from '../../../../app/server/createApp.js';
@@ -7,6 +8,7 @@ import {
   attendancePunches,
   attendanceRegularizations,
   employeeAttendance,
+  employeeNotifications,
   employeeRequests,
   employees,
   memberships,
@@ -31,6 +33,9 @@ import { subtractDays, summarizeByMonth } from '../service/attendanceEmployeeVie
 import { isCorrectionTypeAllowed } from '../service/attendanceRegularizationEligibility.service.js';
 import { attendanceRegularizationService } from '../service/attendanceRegularization.service.js';
 import { boundaryToMilliseconds, resolveWorkday } from '../service/attendanceWorkday.service.js';
+import { isProbeableHost, probeTcp } from '../service/attendanceDeviceProbe.js';
+import { attendanceAutoLockService } from '../service/attendanceAutoLock.service.js';
+import { attendanceService } from '../service/attendance.service.js';
 import {
   computePeriodBounds,
   daysBetweenInclusive,
@@ -169,6 +174,29 @@ describe('Attendance settings helpers (pure)', () => {
     expect(resolveWorkday(earlyMorning, undefined)).toBe('2026-10-16');
     // Rolls back across a month end too.
     expect(resolveWorkday(new Date(2026, 10, 1, 2, 0, 0), '04:00:00')).toBe('2026-10-31');
+  });
+
+  it('only probes addresses that can be terminals', async () => {
+    expect(isProbeableHost('192.168.1.50')).toBe(true);
+    expect(isProbeableHost('terminal-01.office.local')).toBe(true);
+    expect(isProbeableHost('169.254.169.254')).toBe(false);
+    expect(isProbeableHost('0.0.0.0')).toBe(false);
+    expect(isProbeableHost('')).toBe(false);
+    expect((await probeTcp('169.254.169.254', 80)).error).toBe('blocked');
+    expect((await probeTcp('127.0.0.1', 70000)).error).toBe('blocked');
+  });
+
+  it('reports reachability and latency of a real TCP endpoint', async () => {
+    const server = net.createServer((socket) => socket.end());
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const port = (server.address() as net.AddressInfo).port;
+    const up = await probeTcp('127.0.0.1', port);
+    expect(up.reachable).toBe(true);
+    expect(up.latencyMs).toBeGreaterThan(0);
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+    const down = await probeTcp('127.0.0.1', port);
+    expect(down.reachable).toBe(false);
+    expect(down.error).toBe('refused');
   });
 });
 
@@ -930,6 +958,257 @@ describe.skipIf(!isDatabaseConfigured)(
         const checkedOut = await checkOut();
         expect(checkedOut.status).toBe(200);
         expect(checkedOut.body.data.date).toBe(expected);
+      });
+    });
+
+    describe('Lock readiness counts pending regularizations of the period only', () => {
+      const readiness = (code: string) =>
+        request(app)
+          .get(`/api/v1/hrms/attendance/settings/payroll/periods/${code}/readiness`)
+          .set(hr);
+
+      it('does not count requests that belong to other periods', async () => {
+        await hrPut('payroll', { cycleType: 'calendar_month' });
+        const db = getDb();
+        await db.delete(employeeRequests).where(eq(employeeRequests.employeeId, employeeId));
+        await db.insert(employeeRequests).values({
+          id: 'req_enf_period_01',
+          tenantId,
+          companyId,
+          employeeId,
+          requestType: 'attendance_regularization',
+          subject: 'Period scoped request',
+          details: { date: '2026-02-12', checkInTime: '09:00', checkOutTime: '18:00', reason: 'x' },
+          status: 'pending',
+        });
+        try {
+          expect((await readiness('2026-02')).body.data.pendingRegularizations).toBe(1);
+          expect((await readiness('2026-03')).body.data.pendingRegularizations).toBe(0);
+        } finally {
+          await db.delete(employeeRequests).where(eq(employeeRequests.id, 'req_enf_period_01'));
+        }
+      });
+    });
+
+    describe('Auto-lock on cutoff', () => {
+      const autoTenant = 'tenant_autolock_01';
+      const autoCompany = 'comp_autolock_01';
+      let autoHr: Record<string, string>;
+      const putPayroll = (body: object) =>
+        request(app).put('/api/v1/hrms/attendance/settings/payroll').set(autoHr).send(body);
+      const periodStatus = async (code: string) => {
+        const res = await request(app)
+          .get('/api/v1/hrms/attendance/settings/payroll/periods')
+          .set(autoHr);
+        return res.body.data.find((p: { periodCode: string }) => p.periodCode === code);
+      };
+      const sweep = (now: string) =>
+        attendanceAutoLockService.runSweep({ now: new Date(now), companyId: autoCompany });
+
+      beforeAll(async () => {
+        autoHr = await hrmsTestHeaders(autoCompany, autoTenant);
+      });
+
+      afterAll(async () => {
+        await putPayroll({ autoLockOnCutoff: false, cycleType: 'calendar_month' });
+        await removeHrmsTestAccess([autoCompany]);
+      });
+
+      it('does nothing for a company that has not switched it on', async () => {
+        await putPayroll({
+          autoLockOnCutoff: false,
+          cycleType: 'calendar_month',
+          requireApprovalBeforeLock: false,
+          blockingSeverity: 'warning_only',
+        });
+        expect(await sweep('2026-03-05T10:00:00Z')).toEqual([]);
+      });
+
+      it('locks the period that has just ended, once, and never the current one', async () => {
+        await putPayroll({ autoLockOnCutoff: true });
+        const first = await sweep('2026-03-05T10:00:00Z');
+        expect(first).toEqual([
+          expect.objectContaining({ periodCode: '2026-02', outcome: 'locked' }),
+        ]);
+        expect((await periodStatus('2026-02')).status).toBe('locked');
+        expect(await periodStatus('2026-03')).toBeUndefined();
+
+        const again = await sweep('2026-03-06T10:00:00Z');
+        expect(again[0]).toMatchObject({ periodCode: '2026-02', outcome: 'already_locked' });
+      });
+
+      it('respects a period an administrator re-opened', async () => {
+        await request(app)
+          .post('/api/v1/hrms/attendance/settings/payroll/periods/2026-02/unlock')
+          .set(autoHr)
+          .send({ reason: 'Late corrections needed' });
+        const result = await sweep('2026-03-07T10:00:00Z');
+        expect(result[0]).toMatchObject({ periodCode: '2026-02', outcome: 'reopened_by_admin' });
+        expect((await periodStatus('2026-02')).status).toBe('open');
+      });
+
+      it('follows a custom cutoff day', async () => {
+        await putPayroll({ cycleType: 'custom_cutoff', cutoffDay: 25 });
+        // 2026-04-20 is still inside period 2026-04 (26 Mar - 25 Apr), so 2026-03 has just ended.
+        const before = await sweep('2026-04-20T10:00:00Z');
+        expect(before[0]).toMatchObject({ periodCode: '2026-03', outcome: 'locked' });
+        const locked = await periodStatus('2026-03');
+        expect(locked).toMatchObject({ startDate: '2026-02-26', endDate: '2026-03-25' });
+      });
+
+      it('leaves a period open while the lock rules are not met', async () => {
+        await putPayroll({ cycleType: 'calendar_month', requireApprovalBeforeLock: true });
+        const result = await sweep('2026-07-05T10:00:00Z');
+        expect(result[0]).toMatchObject({ periodCode: '2026-06', outcome: 'not_ready' });
+        expect((await periodStatus('2026-06'))?.status ?? 'open').toBe('open');
+      });
+    });
+
+    describe('Attendance alerts reach the in-app notification feed', () => {
+      const alertConfig = (lateArrival: object, regularizationPending?: object) => ({
+        alertSettings: {
+          events: {
+            lateArrival,
+            regularizationPending: regularizationPending ?? {
+              enabled: false,
+              recipients: [],
+              channels: ['in_app'],
+            },
+          },
+          timing: { digestFrequency: 'instant' },
+          escalation: { enabled: false },
+        },
+      });
+      const notificationsFor = (id: string, title: string) =>
+        getDb()
+          .select()
+          .from(employeeNotifications)
+          .where(
+            and(eq(employeeNotifications.employeeId, id), eq(employeeNotifications.title, title)),
+          );
+      const clearNotifications = async () => {
+        for (const id of [employeeId, 'emp_enf_mgr']) {
+          await getDb()
+            .delete(employeeNotifications)
+            .where(eq(employeeNotifications.employeeId, id));
+        }
+      };
+
+      beforeAll(async () => {
+        await getDb()
+          .insert(employees)
+          .values({
+            id: 'emp_enf_mgr',
+            tenantId,
+            companyId,
+            employeeNumber: 'EMP-ENF-MGR',
+            firstName: 'Enforce',
+            lastName: 'Manager',
+            email: 'enf_mgr@test.example',
+            joiningDate: '2024-01-01',
+            employmentStatus: 'active',
+            employmentType: 'full_time',
+          })
+          .onDuplicateKeyUpdate({ set: { employmentStatus: 'active' } });
+        await getDb()
+          .update(employees)
+          .set({ reportingManagerId: 'emp_enf_mgr' })
+          .where(eq(employees.id, employeeId));
+      });
+
+      afterAll(async () => {
+        vi.restoreAllMocks();
+        await clearNotifications();
+        await hrPut(
+          'general',
+          alertConfig({ enabled: true, recipients: ['employee'], channels: ['in_app'] }),
+        );
+      });
+
+      it('notifies the employee and manager of a late arrival, when enabled for in-app', async () => {
+        vi.spyOn(attendanceService, 'getCurrentTimeString').mockReturnValue('11:30');
+        await clearNotifications();
+        await resetPunchesAndAttendance();
+        await resetSecurity();
+        await hrPut(
+          'general',
+          alertConfig({
+            enabled: true,
+            recipients: ['employee', 'reporting_manager'],
+            channels: ['in_app'],
+          }),
+        );
+
+        expect((await checkIn()).status).toBe(200);
+        const own = await notificationsFor(employeeId, 'Late arrival');
+        const manager = await notificationsFor('emp_enf_mgr', 'Late arrival');
+        expect(own).toHaveLength(1);
+        expect(own[0]?.message).toContain('11:30');
+        expect(manager).toHaveLength(1);
+        expect(manager[0]?.message).toContain('Enforce Tester');
+      });
+
+      it('stays quiet when the event is off or in-app is not selected', async () => {
+        vi.spyOn(attendanceService, 'getCurrentTimeString').mockReturnValue('11:30');
+        for (const config of [
+          { enabled: false, recipients: ['employee'], channels: ['in_app'] },
+          { enabled: true, recipients: ['employee'], channels: ['email'] },
+        ]) {
+          await clearNotifications();
+          await resetPunchesAndAttendance();
+          await hrPut('general', alertConfig(config));
+          expect((await checkIn()).status).toBe(200);
+          expect(await notificationsFor(employeeId, 'Late arrival')).toHaveLength(0);
+        }
+      });
+
+      it('tells the assigned approver about a pending regularization, once', async () => {
+        await clearNotifications();
+        await resetRegularizations();
+        await hrPut('regularization', {
+          isEnabled: true,
+          submissionWindowDays: 30,
+          maxRequestsPerMonth: 50,
+          requireReason: true,
+          approvalHierarchy: 'manager_then_hr',
+          autoApproveGraceMinutes: 0,
+          allowedCorrectionTypes: [],
+        });
+        await hrPut(
+          'general',
+          alertConfig(
+            { enabled: false, recipients: [], channels: ['in_app'] },
+            {
+              enabled: true,
+              recipients: ['assigned_approver', 'reporting_manager', 'employee'],
+              channels: ['in_app'],
+            },
+          ),
+        );
+
+        const res = await request(app)
+          .post('/api/v1/hrms/attendance/regularization')
+          .set(hr)
+          .send({
+            employeeId,
+            workday: isoDaysAgo(3),
+            requestType: 'incorrect_time',
+            proposedCheckIn: '09:00',
+            proposedCheckOut: '18:00',
+            reason: 'Alert test',
+          });
+        expect(res.status).toBe(201);
+
+        const approverNotes = await notificationsFor(
+          'emp_enf_mgr',
+          'Regularization request pending',
+        );
+        expect(approverNotes).toHaveLength(1);
+        expect(approverNotes[0]?.type).toBe('action_required');
+        // The submitter already gets their own confirmation, so no duplicate alert.
+        expect(await notificationsFor(employeeId, 'Regularization request pending')).toHaveLength(
+          0,
+        );
       });
     });
   },

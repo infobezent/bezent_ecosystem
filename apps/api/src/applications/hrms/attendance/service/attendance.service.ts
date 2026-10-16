@@ -4,6 +4,7 @@ import {
   attendanceCalculationService,
 } from './attendanceCalculation.service.js';
 import { AttendancePolicyService, attendancePolicyService } from './attendancePolicy.service.js';
+import { AttendanceAlertService, attendanceAlertService } from './attendanceAlert.service.js';
 import {
   AttendanceManualEntryService,
   attendanceManualEntryService,
@@ -56,6 +57,7 @@ export class AttendanceService {
     private readonly scheduleProvider: DefaultShiftScheduleProvider = defaultShiftScheduleProvider,
     private readonly securityService: AttendanceSecurityService = attendanceSecurityService,
     private readonly manualEntryService: AttendanceManualEntryService = attendanceManualEntryService,
+    private readonly alertService: AttendanceAlertService = attendanceAlertService,
   ) {}
 
   getCurrentTimeString(): string {
@@ -143,6 +145,21 @@ export class AttendanceService {
         calculationMetadata: calc.calculationMetadata,
       });
 
+      if (calc.isLate) {
+        await this.alertService.notify(
+          tenantId,
+          companyId,
+          'lateArrival',
+          { employeeId },
+          {
+            title: 'Late arrival',
+            detail: `checked in at ${checkInTime}, ${calc.lateMinutes} minute(s) after the allowed start.`,
+            link: '/hrms/attendance/daily-log',
+            type: 'warning',
+          },
+        );
+      }
+
       return { record: updated, checkInTime };
     } catch (err: unknown) {
       if (err instanceof Error && err.message.includes('already recorded')) {
@@ -226,6 +243,21 @@ export class AttendanceService {
       shiftScheduleRef: calc.shiftScheduleRef,
       calculationMetadata: calc.calculationMetadata,
     });
+
+    if (calc.isEarlyExit) {
+      await this.alertService.notify(
+        tenantId,
+        companyId,
+        'earlyExit',
+        { employeeId },
+        {
+          title: 'Early exit',
+          detail: `checked out at ${checkOutTime}, ${calc.earlyMinutes} minute(s) before the scheduled end.`,
+          link: '/hrms/attendance/daily-log',
+          type: 'warning',
+        },
+      );
+    }
 
     return { updated, checkOutTime };
   }

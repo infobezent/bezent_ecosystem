@@ -4,6 +4,7 @@ import {
 } from '../repository/attendanceSettings.repository.js';
 import { AttendanceRepository, attendanceRepository } from '../repository/attendance.repository.js';
 import { attendanceCalculationService } from './attendanceCalculation.service.js';
+import { DEFAULT_DEVICE_PORT, probeTcp } from './attendanceDeviceProbe.js';
 import {
   computePeriodBounds,
   daysBetweenInclusive,
@@ -633,24 +634,34 @@ export class AttendanceSettingsService {
     const device = await this.repo.getDeviceById(tenantId, companyId, deviceId);
     if (!device) throw new NotFoundError(`Device ${deviceId} not found`);
 
-    // In V1 enterprise integration, perform health evaluation
-    const isMockIp =
-      device.ipAddress?.startsWith('192.168.') || device.ipAddress?.startsWith('10.');
-    const latencyMs = Math.floor(Math.random() * 40) + 12;
-    const isOnline = Boolean(device.ipAddress && isMockIp);
+    if (!device.ipAddress) {
+      return {
+        status: 'offline',
+        latencyMs: 0,
+        message: `Device ${device.deviceCode} has no host or IP address configured.`,
+      };
+    }
 
-    const newStatus = isOnline ? 'online' : 'offline';
+    const port = device.port ?? DEFAULT_DEVICE_PORT;
+    const probe = await probeTcp(device.ipAddress, port);
+    const status = probe.reachable ? 'online' : 'offline';
     await this.repo.updateDevice(tenantId, companyId, deviceId, {
-      status: newStatus,
-      lastHeartbeatAt: isOnline ? new Date() : undefined,
+      status,
+      lastHeartbeatAt: probe.reachable ? new Date() : undefined,
     });
 
+    const reasons: Record<NonNullable<typeof probe.error>, string> = {
+      timeout: 'the connection timed out',
+      refused: 'the connection was refused',
+      unreachable: 'the host could not be reached',
+      blocked: 'the address is not allowed for device checks',
+    };
     return {
-      status: newStatus,
-      latencyMs,
-      message: isOnline
-        ? `Device ${device.deviceCode} responded within ${latencyMs}ms (Health: Operational)`
-        : `Device ${device.deviceCode} is unreachable at ${device.ipAddress || 'unconfigured host'}. Check network gateway.`,
+      status,
+      latencyMs: probe.latencyMs,
+      message: probe.reachable
+        ? `Device ${device.deviceCode} accepted a connection on ${device.ipAddress}:${port} in ${probe.latencyMs}ms.`
+        : `Device ${device.deviceCode} is unreachable at ${device.ipAddress}:${port}: ${reasons[probe.error ?? 'unreachable']}.`,
     };
   }
 
@@ -792,9 +803,12 @@ export class AttendanceSettingsService {
     const payrollSettings = await this.getPayrollSettings(tenantId, companyId);
 
     // Inspect pending regularizations and missing punches
-    const pendingRegs = await this.attRepo.getRegularizationRequests(tenantId, companyId, {
-      status: 'pending',
-    });
+    const pendingRegularizations = await this.repo.countPendingRegularizationsInRange(
+      tenantId,
+      companyId,
+      period.startDate,
+      period.endDate,
+    );
     const rows = await this.attRepo.getPeriodMatrix(
       tenantId,
       companyId,
@@ -812,9 +826,9 @@ export class AttendanceSettingsService {
     }
 
     const warnings: string[] = [];
-    if (pendingRegs.length > 0) {
+    if (pendingRegularizations > 0) {
       warnings.push(
-        `${pendingRegs.length} employee regularization request(s) remain pending in this period.`,
+        `${pendingRegularizations} employee regularization request(s) remain pending in this period.`,
       );
     }
     if (unresolvedMissingPunches > 0) {
@@ -846,12 +860,12 @@ export class AttendanceSettingsService {
     const canLock =
       !approvalMissing &&
       (payrollSettings.blockingSeverity === 'warning_only' ||
-        (pendingRegs.length === 0 && unresolvedMissingPunches === 0));
+        (pendingRegularizations === 0 && unresolvedMissingPunches === 0));
 
     return {
       canLock,
       unresolvedMissingPunches,
-      pendingRegularizations: pendingRegs.length,
+      pendingRegularizations,
       unreviewedMonthlySummaries,
       warnings,
     };
