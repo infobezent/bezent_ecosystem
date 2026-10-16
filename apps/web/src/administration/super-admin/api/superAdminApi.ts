@@ -887,7 +887,7 @@ export const superAdminApi = {
     },
   ) =>
     request<CompanyRecord>(`/companies/${id}`, {
-      method: 'PATCH',
+      method: 'PUT',
       body: JSON.stringify(data),
     }),
 
@@ -950,7 +950,7 @@ export const superAdminApi = {
 
   updateUserStatus: (id: string, status: 'active' | 'suspended' | 'inactive') =>
     request<PlatformUserSummary>(`/users/${id}/status`, {
-      method: 'PATCH',
+      method: 'PUT',
       body: JSON.stringify({ status }),
     }),
 

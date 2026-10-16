@@ -345,7 +345,21 @@ export const companyAdminApi = {
     if (params?.limit) query.set('limit', String(params.limit));
 
     const qs = query.toString() ? `?${query.toString()}` : '';
-    return request(`/users${qs}`, {}, companyId);
+    // The list endpoint answers { data, pagination }; `request` would drop the pagination.
+    const response = await authorizedFetch(`${API_BASE}/users${qs}`, {
+      headers: getHeaders(companyId),
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(body?.error?.message || `Request failed with status ${response.status}`);
+    }
+    const users: CompanyUserItem[] = Array.isArray(body?.data) ? body.data : [];
+    return {
+      users,
+      total: body?.pagination?.total ?? users.length,
+      page: body?.pagination?.page ?? 1,
+      limit: body?.pagination?.limit ?? users.length,
+    };
   },
 
   async inviteUser(

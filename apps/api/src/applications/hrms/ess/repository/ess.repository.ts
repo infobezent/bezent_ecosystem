@@ -27,6 +27,7 @@ import {
 } from '../../../../db/schema.js';
 import { generateSurrogateId } from '../../../../platform/auth/security.js';
 import type { EssEmployeeSummary, EssFullProfile } from '../types/ess.types.js';
+import { NotFoundError, ConflictError } from '../../../../app/errors/AppError.js';
 import {
   attendanceRepository,
   AttendanceRepository,
@@ -425,10 +426,10 @@ export class EssRepository {
       .where(and(eq(employeeRequests.id, id), eq(employeeRequests.employeeId, employeeId)));
 
     if (!existing) {
-      throw new Error('Request not found');
+      throw new NotFoundError('Request not found');
     }
     if (existing.status !== 'pending') {
-      throw new Error(`Cannot cancel request with status '${existing.status}'`);
+      throw new ConflictError(`Cannot cancel request with status '${existing.status}'`);
     }
 
     await db
@@ -468,7 +469,7 @@ export class EssRepository {
       .where(and(eq(employeeTasks.id, id), eq(employeeTasks.employeeId, employeeId)));
 
     if (!existing) {
-      throw new Error('Task not found');
+      throw new NotFoundError('Task not found');
     }
 
     await db.update(employeeTasks).set({ status }).where(eq(employeeTasks.id, id));
@@ -535,7 +536,7 @@ export class EssRepository {
       );
 
     if (!existing) {
-      throw new Error('Notification not found');
+      throw new NotFoundError('Notification not found');
     }
 
     await db

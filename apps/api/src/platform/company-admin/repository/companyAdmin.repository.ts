@@ -13,6 +13,9 @@ import {
   onboardingCases,
   onboardingGeneralSettings,
   onboardingFieldConfigs,
+  onboardingStageConfigs,
+  employeeLeaveBalances,
+  employeeWorkSchedules,
   type Company,
   type NewMembership,
   type NewInvitation,
@@ -448,9 +451,33 @@ export class CompanyAdminRepository {
       .from(onboardingFieldConfigs)
       .where(eq(onboardingFieldConfigs.companyId, companyId));
 
+    const stages = await db
+      .select({ id: onboardingStageConfigs.id })
+      .from(onboardingStageConfigs)
+      .where(
+        and(
+          eq(onboardingStageConfigs.companyId, companyId),
+          eq(onboardingStageConfigs.isActive, true),
+        ),
+      );
+
+    const leaveRows = await db
+      .selectDistinct({ leaveType: employeeLeaveBalances.leaveType })
+      .from(employeeLeaveBalances)
+      .where(eq(employeeLeaveBalances.companyId, companyId));
+
+    const scheduleRows = await db
+      .selectDistinct({ workSchedule: employeeWorkSchedules.workSchedule })
+      .from(employeeWorkSchedules)
+      .where(eq(employeeWorkSchedules.companyId, companyId));
+
     return {
-      generalSettings: generalSettings ?? null,
-      fieldSettingsCount: fieldSettings.length,
+      onboardingStepsConfigured: stages.length,
+      protectedSystemFields: fieldSettings.filter((f) => f.isSystem).map((f) => f.label),
+      hrmsSettingsConfigured: Boolean(generalSettings),
+      employmentTypes: [...employees.employmentType.enumValues],
+      leaveTypes: leaveRows.map((r) => r.leaveType),
+      workSchedules: scheduleRows.flatMap((r) => (r.workSchedule ? [r.workSchedule] : [])),
     };
   }
 }

@@ -877,7 +877,16 @@ describe('Company Admin Platform Subsystem (Phase 2)', () => {
         .set('x-company-id', companyAId);
 
       expect(res.status).toBe(200);
-      expect(res.body.data.fieldSettingsCount).toBeDefined();
+      expect(typeof res.body.data.onboardingStepsConfigured).toBe('number');
+      expect(typeof res.body.data.hrmsSettingsConfigured).toBe('boolean');
+      for (const key of [
+        'protectedSystemFields',
+        'employmentTypes',
+        'leaveTypes',
+        'workSchedules',
+      ]) {
+        expect(Array.isArray(res.body.data[key])).toBe(true);
+      }
     });
   });
 

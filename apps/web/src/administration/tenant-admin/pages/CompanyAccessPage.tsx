@@ -381,8 +381,8 @@ export function CompanyAccessPage() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredUsers.map((item) => (
-                    <TableRow key={item.id}>
+                  {filteredUsers.map((item, index) => (
+                    <TableRow key={`${item.id}-${index}`}>
                       {/* User Cell */}
                       <TableCell>
                         <Inline gap="sm" align="center">
