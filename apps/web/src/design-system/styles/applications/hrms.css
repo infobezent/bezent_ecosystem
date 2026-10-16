@@ -21,7 +21,10 @@
   background: var(--color-surface, #ffffff);
   border: 1px solid rgba(226, 232, 240, 0.85);
   box-shadow: 0 4px 24px -2px rgba(15, 23, 42, 0.06);
-  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+  transition:
+    background 0.4s ease,
+    border-color 0.4s ease,
+    box-shadow 0.4s ease;
   font-family: inherit;
   color: var(--color-text-primary, #1e293b);
 }
@@ -73,7 +76,9 @@
 .ess-hero-avatar-ring {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
   border-radius: 50%;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .ess-hero-avatar-ring:hover {
@@ -115,8 +120,14 @@
 }
 
 @keyframes essHeroGlow {
-  0% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.2)); }
-  100% { transform: scale(1.06); filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.5)); }
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.2));
+  }
+  100% {
+    transform: scale(1.06);
+    filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.5));
+  }
 }
 
 .ess-hero-designation-row {
@@ -453,9 +464,18 @@
 }
 
 @keyframes essDotPulse {
-  0% { transform: scale(0.95); opacity: 0.8; }
-  50% { transform: scale(1.3); opacity: 1; }
-  100% { transform: scale(0.95); opacity: 0.8; }
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
 }
 
 .ess-glass-shift-info {
@@ -580,7 +600,9 @@
   white-space: nowrap;
   flex-shrink: 0;
   border-radius: 6px;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .ess-briefing-action-btn:hover {
@@ -593,105 +615,105 @@
    ========================================================================== */
 
 /* ── 1. Morning Theme (05:00 - 11:59) ─────────────────────────────────── */
-.ess-attendance-hero[data-time-period="morning"] {
+.ess-attendance-hero[data-time-period='morning'] {
   border-color: rgba(254, 240, 138, 0.8);
 }
-.ess-attendance-hero[data-time-period="morning"] .ess-hero-greeting-heading {
+.ess-attendance-hero[data-time-period='morning'] .ess-hero-greeting-heading {
   color: #1e293b;
 }
 
 /* ── 2. Afternoon Theme (12:00 - 16:59) ───────────────────────────────── */
-.ess-attendance-hero[data-time-period="afternoon"] {
+.ess-attendance-hero[data-time-period='afternoon'] {
   border-color: rgba(254, 215, 170, 0.8);
 }
-.ess-attendance-hero[data-time-period="afternoon"] .ess-hero-greeting-heading {
+.ess-attendance-hero[data-time-period='afternoon'] .ess-hero-greeting-heading {
   color: #1e293b;
 }
 
 /* ── 3. Evening Theme (17:00 - 20:59) ─────────────────────────────────── */
-.ess-attendance-hero[data-time-period="evening"] {
+.ess-attendance-hero[data-time-period='evening'] {
   border-color: rgba(244, 114, 182, 0.6);
 }
-.ess-attendance-hero[data-time-period="evening"] .ess-hero-greeting-heading {
+.ess-attendance-hero[data-time-period='evening'] .ess-hero-greeting-heading {
   color: #312e81;
 }
-.ess-attendance-hero[data-time-period="evening"] .ess-hero-quote-text {
+.ess-attendance-hero[data-time-period='evening'] .ess-hero-quote-text {
   color: #4338ca;
 }
 
 /* ── 4. Night Theme (21:00 - 04:59) ───────────────────────────────────── */
-.ess-attendance-hero[data-time-period="night"] {
+.ess-attendance-hero[data-time-period='night'] {
   background: #0f172a;
   border-color: rgba(99, 102, 241, 0.4);
   box-shadow: 0 4px 28px -2px rgba(15, 23, 42, 0.4);
 }
-.ess-attendance-hero[data-time-period="night"] .ess-hero-date-badge {
+.ess-attendance-hero[data-time-period='night'] .ess-hero-date-badge {
   color: #94a3b8;
 }
-.ess-attendance-hero[data-time-period="night"] .ess-hero-greeting-heading {
+.ess-attendance-hero[data-time-period='night'] .ess-hero-greeting-heading {
   color: #f8fafc;
 }
-.ess-attendance-hero[data-time-period="night"] .ess-hero-designation-row {
+.ess-attendance-hero[data-time-period='night'] .ess-hero-designation-row {
   color: #cbd5e1;
 }
-.ess-attendance-hero[data-time-period="night"] .ess-hero-designation-title {
+.ess-attendance-hero[data-time-period='night'] .ess-hero-designation-title {
   color: #f1f5f9;
 }
-.ess-attendance-hero[data-time-period="night"] .ess-hero-meta-row {
+.ess-attendance-hero[data-time-period='night'] .ess-hero-meta-row {
   color: #94a3b8;
 }
-.ess-attendance-hero[data-time-period="night"] .ess-hero-emp-id strong {
+.ess-attendance-hero[data-time-period='night'] .ess-hero-emp-id strong {
   color: #f8fafc;
 }
-.ess-attendance-hero[data-time-period="night"] .ess-hero-profile-link {
+.ess-attendance-hero[data-time-period='night'] .ess-hero-profile-link {
   color: #60a5fa;
 }
-.ess-attendance-hero[data-time-period="night"] .ess-hero-quote-text {
+.ess-attendance-hero[data-time-period='night'] .ess-hero-quote-text {
   color: #e2e8f0;
 }
-.ess-attendance-hero[data-time-period="night"] .ess-hero-btn-checkout {
+.ess-attendance-hero[data-time-period='night'] .ess-hero-btn-checkout {
   background-color: rgba(30, 41, 59, 0.8);
   color: #60a5fa;
   border-color: #3b82f6;
 }
-.ess-attendance-hero[data-time-period="night"] .ess-hero-btn-checkout:hover:not(:disabled) {
+.ess-attendance-hero[data-time-period='night'] .ess-hero-btn-checkout:hover:not(:disabled) {
   background-color: rgba(30, 41, 59, 1);
   color: #93c5fd;
 }
-.ess-attendance-hero[data-time-period="night"] .ess-hero-glass-panel {
+.ess-attendance-hero[data-time-period='night'] .ess-hero-glass-panel {
   background: rgba(15, 23, 42, 0.78);
   border-color: rgba(51, 65, 85, 0.65);
 }
-.ess-attendance-hero[data-time-period="night"] .ess-glass-col {
+.ess-attendance-hero[data-time-period='night'] .ess-glass-col {
   border-right-color: rgba(51, 65, 85, 0.7);
 }
-.ess-attendance-hero[data-time-period="night"] .ess-glass-label {
+.ess-attendance-hero[data-time-period='night'] .ess-glass-label {
   color: #94a3b8;
 }
-.ess-attendance-hero[data-time-period="night"] .ess-glass-val,
-.ess-attendance-hero[data-time-period="night"] .ess-glass-clock-val {
+.ess-attendance-hero[data-time-period='night'] .ess-glass-val,
+.ess-attendance-hero[data-time-period='night'] .ess-glass-clock-val {
   color: #f8fafc;
 }
-.ess-attendance-hero[data-time-period="night"] .ess-glass-sub {
+.ess-attendance-hero[data-time-period='night'] .ess-glass-sub {
   color: #94a3b8;
 }
-.ess-attendance-hero[data-time-period="night"] .ess-glass-shift-info {
+.ess-attendance-hero[data-time-period='night'] .ess-glass-shift-info {
   color: #cbd5e1;
 }
-.ess-attendance-hero[data-time-period="night"] .ess-glass-location-info {
+.ess-attendance-hero[data-time-period='night'] .ess-glass-location-info {
   color: #94a3b8;
 }
-.ess-attendance-hero[data-time-period="night"] .ess-hero-briefing {
+.ess-attendance-hero[data-time-period='night'] .ess-hero-briefing {
   background: rgba(30, 41, 59, 0.75);
   border-color: rgba(51, 65, 85, 0.8);
 }
-.ess-attendance-hero[data-time-period="night"] .ess-briefing-title {
+.ess-attendance-hero[data-time-period='night'] .ess-briefing-title {
   color: #f8fafc;
 }
-.ess-attendance-hero[data-time-period="night"] .ess-briefing-summary {
+.ess-attendance-hero[data-time-period='night'] .ess-briefing-summary {
   color: #cbd5e1;
 }
-.ess-attendance-hero[data-time-period="night"] .ess-briefing-action-btn {
+.ess-attendance-hero[data-time-period='night'] .ess-briefing-action-btn {
   color: #60a5fa;
 }
 
@@ -729,9 +751,9 @@
     padding-top: 12px;
     border-right: none;
   }
-  .ess-attendance-hero[data-time-period="night"] .ess-glass-col:nth-child(4),
-  .ess-attendance-hero[data-time-period="night"] .ess-glass-col:nth-child(5),
-  .ess-attendance-hero[data-time-period="night"] .ess-glass-col:nth-child(6) {
+  .ess-attendance-hero[data-time-period='night'] .ess-glass-col:nth-child(4),
+  .ess-attendance-hero[data-time-period='night'] .ess-glass-col:nth-child(5),
+  .ess-attendance-hero[data-time-period='night'] .ess-glass-col:nth-child(6) {
     border-top-color: rgba(51, 65, 85, 0.7);
   }
   .ess-hero-briefing {
@@ -792,10 +814,10 @@
     padding-top: 10px;
     border-right: none;
   }
-  .ess-attendance-hero[data-time-period="night"] .ess-glass-col:nth-child(3),
-  .ess-attendance-hero[data-time-period="night"] .ess-glass-col:nth-child(4),
-  .ess-attendance-hero[data-time-period="night"] .ess-glass-col:nth-child(5),
-  .ess-attendance-hero[data-time-period="night"] .ess-glass-col:nth-child(6) {
+  .ess-attendance-hero[data-time-period='night'] .ess-glass-col:nth-child(3),
+  .ess-attendance-hero[data-time-period='night'] .ess-glass-col:nth-child(4),
+  .ess-attendance-hero[data-time-period='night'] .ess-glass-col:nth-child(5),
+  .ess-attendance-hero[data-time-period='night'] .ess-glass-col:nth-child(6) {
     border-top-color: rgba(51, 65, 85, 0.7);
   }
   .ess-hero-briefing {
@@ -808,7 +830,6 @@
     align-self: flex-end;
   }
 }
-
 
 /* ==========================================================================
    2. HRMS Attendance Monthly Calendar & Snapshot
@@ -1059,7 +1080,6 @@
   font-weight: var(--font-weight-medium, 500);
   color: var(--text-secondary, #5f6368);
 }
-
 
 /* ==========================================================================
    3. HRMS Onboarding & Candidate Registration Workspace
@@ -1402,7 +1422,9 @@
   border-radius: 12px;
   padding: 14px 18px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 [data-theme='dark'] .ess-profile-section-panel {
@@ -1605,5 +1627,3 @@
 [data-theme='dark'] .ess-profile-emergency-actions {
   border-top-color: var(--border-default, #2a313d);
 }
-
-

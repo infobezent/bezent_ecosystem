@@ -388,7 +388,8 @@ export function EssProfilePage() {
       setStatusMessage({
         type: 'success',
         title: 'Contact Details Updated',
-        description: 'Your contact telephone numbers and residential addresses have been saved successfully.',
+        description:
+          'Your contact telephone numbers and residential addresses have been saved successfully.',
       });
     } catch (err: unknown) {
       setContactError(err instanceof Error ? err.message : 'Failed to update contact details');
@@ -452,7 +453,9 @@ export function EssProfilePage() {
       } else {
         // Adding new contact
         if (currentList.length >= 2) {
-          throw new Error('You may configure at most two emergency contacts (primary and secondary).');
+          throw new Error(
+            'You may configure at most two emergency contacts (primary and secondary).',
+          );
         }
         nextList = [...currentList, { ...emergencyForm }];
       }
@@ -682,7 +685,6 @@ export function EssProfilePage() {
     }
   };
 
-
   // ── Render States ───────────────────────────────────────────────────
   if (loading) return <LoadingState label="Loading employee profile..." />;
   if (error)
@@ -757,11 +759,7 @@ export function EssProfilePage() {
                 (Approved records will update automatically once verified by human resources).
               </span>
             </Inline>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setActiveTab('change_requests')}
-            >
+            <Button variant="ghost" size="sm" onClick={() => setActiveTab('change_requests')}>
               View Requests
             </Button>
           </Inline>
@@ -817,9 +815,7 @@ export function EssProfilePage() {
                 <span>
                   Reporting Manager:{' '}
                   <strong>
-                    {reportingManager?.name ||
-                      emp.reportingManagerName ||
-                      'Not assigned'}
+                    {reportingManager?.name || emp.reportingManagerName || 'Not assigned'}
                   </strong>
                   {reportingManager?.designation && ` (${reportingManager.designation})`}
                 </span>
@@ -854,10 +850,7 @@ export function EssProfilePage() {
         <div className="ess-profile-completeness-left">
           <BezentIcon name="check" size={16} />
           <span className="ess-profile-completeness-title">Profile Completeness</span>
-          <Badge
-            variant={completeness.percentage >= 80 ? 'success' : 'warning'}
-            size="sm"
-          >
+          <Badge variant={completeness.percentage >= 80 ? 'success' : 'warning'} size="sm">
             {completeness.percentage}%
           </Badge>
           <div className="ess-profile-completeness-bar-wrap">
@@ -874,11 +867,7 @@ export function EssProfilePage() {
           </span>
         </div>
 
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => setShowMissingTray(!showMissingTray)}
-        >
+        <Button variant="secondary" size="sm" onClick={() => setShowMissingTray(!showMissingTray)}>
           {showMissingTray ? 'Hide Missing Details' : 'Review Missing Details'}
         </Button>
       </div>
@@ -1067,9 +1056,7 @@ export function EssProfilePage() {
                 <div className="ess-profile-field-label-row">
                   <span className="ess-profile-field-label">Date of Birth</span>
                 </div>
-                <span
-                  className={`ess-profile-field-value ${!pd?.dateOfBirth ? 'is-empty' : ''}`}
-                >
+                <span className={`ess-profile-field-value ${!pd?.dateOfBirth ? 'is-empty' : ''}`}>
                   {pd?.dateOfBirth ? formatDate(pd.dateOfBirth) : 'Not specified'}
                 </span>
                 <span className="ess-profile-field-helper">
@@ -1081,9 +1068,7 @@ export function EssProfilePage() {
                 <div className="ess-profile-field-label-row">
                   <span className="ess-profile-field-label">Gender</span>
                 </div>
-                <span
-                  className={`ess-profile-field-value ${!pd?.gender ? 'is-empty' : ''}`}
-                >
+                <span className={`ess-profile-field-value ${!pd?.gender ? 'is-empty' : ''}`}>
                   {pd?.gender ? formatLabel(pd.gender) : 'Not specified'}
                 </span>
               </div>
@@ -1092,9 +1077,7 @@ export function EssProfilePage() {
                 <div className="ess-profile-field-label-row">
                   <span className="ess-profile-field-label">Marital Status</span>
                 </div>
-                <span
-                  className={`ess-profile-field-value ${!pd?.maritalStatus ? 'is-empty' : ''}`}
-                >
+                <span className={`ess-profile-field-value ${!pd?.maritalStatus ? 'is-empty' : ''}`}>
                   {pd?.maritalStatus ? formatLabel(pd.maritalStatus) : 'Not specified'}
                 </span>
                 <span className="ess-profile-field-helper">
@@ -1106,9 +1089,7 @@ export function EssProfilePage() {
                 <div className="ess-profile-field-label-row">
                   <span className="ess-profile-field-label">Blood Group</span>
                 </div>
-                <span
-                  className={`ess-profile-field-value ${!pd?.bloodGroup ? 'is-empty' : ''}`}
-                >
+                <span className={`ess-profile-field-value ${!pd?.bloodGroup ? 'is-empty' : ''}`}>
                   {pd?.bloodGroup || 'Not specified'}
                 </span>
                 <span className="ess-profile-field-helper">
@@ -1120,9 +1101,7 @@ export function EssProfilePage() {
                 <div className="ess-profile-field-label-row">
                   <span className="ess-profile-field-label">Nationality</span>
                 </div>
-                <span
-                  className={`ess-profile-field-value ${!pd?.nationality ? 'is-empty' : ''}`}
-                >
+                <span className={`ess-profile-field-value ${!pd?.nationality ? 'is-empty' : ''}`}>
                   {pd?.nationality || 'Not specified'}
                 </span>
                 <span className="ess-profile-field-helper">
@@ -1217,9 +1196,7 @@ export function EssProfilePage() {
                   <div className="ess-profile-field-label-row">
                     <span className="ess-profile-field-label">Primary / Home Phone</span>
                   </div>
-                  <span
-                    className={`ess-profile-field-value ${!pd?.homePhone ? 'is-empty' : ''}`}
-                  >
+                  <span className={`ess-profile-field-value ${!pd?.homePhone ? 'is-empty' : ''}`}>
                     {pd?.homePhone || 'Not provided'}
                   </span>
                 </div>
@@ -1338,9 +1315,7 @@ export function EssProfilePage() {
                     <div className="ess-profile-address-block">
                       <div>{pd.addressStreet}</div>
                       {pd.addressLine2 && <div>{pd.addressLine2}</div>}
-                      <div>
-                        {[pd.addressCity, pd.addressDistrict].filter(Boolean).join(', ')}
-                      </div>
+                      <div>{[pd.addressCity, pd.addressDistrict].filter(Boolean).join(', ')}</div>
                       <div>
                         {[pd.addressState, pd.addressPostalCode].filter(Boolean).join(' - ')}
                       </div>
@@ -1598,7 +1573,8 @@ export function EssProfilePage() {
                 <div>
                   <h3 className="ess-profile-section-heading">Emergency Contacts</h3>
                   <p className="ess-profile-section-desc">
-                    Designated primary and secondary contacts notified in medical or workplace exigencies
+                    Designated primary and secondary contacts notified in medical or workplace
+                    exigencies
                   </p>
                 </div>
               </div>
@@ -1926,7 +1902,6 @@ export function EssProfilePage() {
           </FormSection>
         </Stack>
       </Modal>
-
 
       {/* ── Phase 4 / Phase 9: Profile Change Request Modal ──────── */}
       <Modal

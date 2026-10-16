@@ -32,15 +32,11 @@ import {
   type EssAttendanceRecord,
 } from '../api/essApi';
 
-
-
 export function EssDashboardPage() {
   const navigate = useNavigate();
   const [data, setData] = useState<EssDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-
 
   // Punch Loading
   const [punchLoading, setPunchLoading] = useState(false);
@@ -51,7 +47,9 @@ export function EssDashboardPage() {
   const [showSalary, setShowSalary] = useState(false);
 
   // Company Feed category filter
-  const [feedCategory, setFeedCategory] = useState<'all' | 'celebrations' | 'people' | 'events'>('all');
+  const [feedCategory, setFeedCategory] = useState<'all' | 'celebrations' | 'people' | 'events'>(
+    'all',
+  );
   const [localPosts, setLocalPosts] = useState<EssFeedPost[]>([]);
 
   // Feed comment dialog
@@ -254,7 +252,9 @@ export function EssDashboardPage() {
       return localPosts.filter((p) => p.type === 'new_joiner');
     }
     if (feedCategory === 'events') {
-      return localPosts.filter((p) => p.type === 'event' || p.type === 'holiday' || p.type === 'announcement');
+      return localPosts.filter(
+        (p) => p.type === 'event' || p.type === 'holiday' || p.type === 'announcement',
+      );
     }
     return localPosts;
   }, [localPosts, feedCategory]);
@@ -284,16 +284,18 @@ export function EssDashboardPage() {
   const hasPunchedIn = !!today.checkInTime;
   const hasPunchedOut = !!today.checkOutTime;
 
-
-
   const canCheckIn = !hasPunchedIn;
   const canCheckOut = hasPunchedIn && !hasPunchedOut;
   const checkInDisabledReason = hasPunchedIn
-    ? (hasPunchedOut ? 'Already checked out for today' : 'Already checked in today')
+    ? hasPunchedOut
+      ? 'Already checked out for today'
+      : 'Already checked in today'
     : undefined;
   const checkOutDisabledReason = !hasPunchedIn
     ? 'Check in first to record attendance'
-    : (hasPunchedOut ? 'Already checked out for today' : undefined);
+    : hasPunchedOut
+      ? 'Already checked out for today'
+      : undefined;
 
   return (
     <Page>
@@ -460,11 +462,7 @@ export function EssDashboardPage() {
                         >
                           {act.priority.replace('_', ' ').toUpperCase()}
                         </Badge>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => navigate(act.link)}
-                        >
+                        <Button variant="secondary" size="sm" onClick={() => navigate(act.link)}>
                           Action
                         </Button>
                       </Inline>
@@ -500,7 +498,10 @@ export function EssDashboardPage() {
 
               <Card variant="flat" padding="sm">
                 <Inline justify="between" align="center">
-                  <span>Next approved leave: <strong>{data.nextApprovedLeave || 'No upcoming leave'}</strong></span>
+                  <span>
+                    Next approved leave:{' '}
+                    <strong>{data.nextApprovedLeave || 'No upcoming leave'}</strong>
+                  </span>
                   <Button variant="primary" size="sm" onClick={() => navigate('/ess/leave')}>
                     Apply Leave
                   </Button>
@@ -525,7 +526,11 @@ export function EssDashboardPage() {
                   </Badge>
                 </Inline>
                 <Inline gap="sm" align="baseline">
-                  <h2>{showSalary ? `₹ ${payslip?.actualAmount?.toLocaleString('en-IN') || '84,500'}` : '₹ ••••••'}</h2>
+                  <h2>
+                    {showSalary
+                      ? `₹ ${payslip?.actualAmount?.toLocaleString('en-IN') || '84,500'}`
+                      : '₹ ••••••'}
+                  </h2>
                   <span>{showSalary ? 'Net Disbursed' : 'Net pay hidden for privacy'}</span>
                 </Inline>
               </Stack>
@@ -608,7 +613,9 @@ export function EssDashboardPage() {
                         <Avatar initials={post.title[0] || 'C'} size="md" />
                         <Stack gap="xs">
                           <strong>{post.title}</strong>
-                          <span>{post.subtitle} • {post.date}</span>
+                          <span>
+                            {post.subtitle} • {post.date}
+                          </span>
                         </Stack>
                       </Inline>
                       <Badge variant="info" size="sm">
@@ -673,7 +680,9 @@ export function EssDashboardPage() {
                       </Card>
                       <Stack gap="xs">
                         <strong>{evt.title}</strong>
-                        <span>{evt.category} • {evt.teamOrVenue}</span>
+                        <span>
+                          {evt.category} • {evt.teamOrVenue}
+                        </span>
                       </Stack>
                     </Inline>
                   </Card>
@@ -744,7 +753,9 @@ export function EssDashboardPage() {
               <Inline justify="between" align="center">
                 <Stack gap="xs">
                   <span>Reporting Manager</span>
-                  <strong>{team?.reportingManagerName} ({team?.reportingManagerDesignation})</strong>
+                  <strong>
+                    {team?.reportingManagerName} ({team?.reportingManagerDesignation})
+                  </strong>
                 </Stack>
                 <Badge variant="info" size="sm">
                   {team?.teamMembers?.length || 4} Members
@@ -793,8 +804,12 @@ export function EssDashboardPage() {
             <Stack gap="md">
               <Inline justify="between" align="center">
                 <Stack gap="xs">
-                  <strong>{emp.firstName} {emp.lastName || ''}</strong>
-                  <span>{emp.employeeNumber} • {emp.designationTitle || 'Software Engineer'}</span>
+                  <strong>
+                    {emp.firstName} {emp.lastName || ''}
+                  </strong>
+                  <span>
+                    {emp.employeeNumber} • {emp.designationTitle || 'Software Engineer'}
+                  </span>
                 </Stack>
                 <Button variant="secondary" size="sm" onClick={() => navigate('/ess/profile')}>
                   View Profile
@@ -831,7 +846,9 @@ export function EssDashboardPage() {
                 </Stack>
                 <Stack gap="xs">
                   <span>Joining Date</span>
-                  <strong>{emp.joiningDate ? new Date(emp.joiningDate).toLocaleDateString() : '—'}</strong>
+                  <strong>
+                    {emp.joiningDate ? new Date(emp.joiningDate).toLocaleDateString() : '—'}
+                  </strong>
                 </Stack>
               </Grid>
             </Stack>
@@ -850,11 +867,7 @@ export function EssDashboardPage() {
               <Button variant="secondary" onClick={() => setCommentModalPost(null)}>
                 Cancel
               </Button>
-              <Button
-                variant="primary"
-                onClick={handleAddComment}
-                disabled={!commentText.trim()}
-              >
+              <Button variant="primary" onClick={handleAddComment} disabled={!commentText.trim()}>
                 Post Comment
               </Button>
             </Inline>
@@ -890,16 +903,13 @@ export function EssDashboardPage() {
         >
           <Stack gap="md">
             <p>
-              Choose your preferred cartoon avatar character for the BEZENT ESS Dashboard.
-              By default, your verified profile details determine your character.
+              Choose your preferred cartoon avatar character for the BEZENT ESS Dashboard. By
+              default, your verified profile details determine your character.
             </p>
 
             <Grid columns={3} gap="md">
               {/* Male Character */}
-              <Card
-                variant={avatarPreference === 'male' ? 'tint-blue' : 'flat'}
-                padding="sm"
-              >
+              <Card variant={avatarPreference === 'male' ? 'tint-blue' : 'flat'} padding="sm">
                 <Stack gap="sm" align="center">
                   <EmployeeCartoonAvatar
                     avatarVariant="male"
@@ -919,10 +929,7 @@ export function EssDashboardPage() {
               </Card>
 
               {/* Female Character */}
-              <Card
-                variant={avatarPreference === 'female' ? 'tint-blue' : 'flat'}
-                padding="sm"
-              >
+              <Card variant={avatarPreference === 'female' ? 'tint-blue' : 'flat'} padding="sm">
                 <Stack gap="sm" align="center">
                   <EmployeeCartoonAvatar
                     avatarVariant="female"
@@ -942,10 +949,7 @@ export function EssDashboardPage() {
               </Card>
 
               {/* Neutral Default Character */}
-              <Card
-                variant={avatarPreference === 'neutral' ? 'tint-blue' : 'flat'}
-                padding="sm"
-              >
+              <Card variant={avatarPreference === 'neutral' ? 'tint-blue' : 'flat'} padding="sm">
                 <Stack gap="sm" align="center">
                   <EmployeeCartoonAvatar
                     avatarVariant="neutral"

@@ -1,9 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import {
-  EmployeeCartoonAvatar,
-  resolveCartoonAvatarVariant,
-} from '../EmployeeCartoonAvatar';
+import { EmployeeCartoonAvatar, resolveCartoonAvatarVariant } from '../EmployeeCartoonAvatar';
 
 describe('EmployeeCartoonAvatar & resolveCartoonAvatarVariant', () => {
   describe('Avatar Selection Logic (Priority Hierarchy)', () => {
@@ -40,11 +37,7 @@ describe('EmployeeCartoonAvatar & resolveCartoonAvatarVariant', () => {
   describe('Component Rendering', () => {
     it('renders male cartoon character with actual high-res image and accessible labels', () => {
       const html = renderToStaticMarkup(
-        <EmployeeCartoonAvatar
-          avatarVariant="male"
-          employeeName="Arjun Mehta"
-          size="hero"
-        />
+        <EmployeeCartoonAvatar avatarVariant="male" employeeName="Arjun Mehta" size="hero" />,
       );
 
       expect(html).toContain('bezent-cartoon-avatar');
@@ -55,11 +48,7 @@ describe('EmployeeCartoonAvatar & resolveCartoonAvatarVariant', () => {
 
     it('renders female cartoon character with actual high-res image and accessible labels', () => {
       const html = renderToStaticMarkup(
-        <EmployeeCartoonAvatar
-          avatarVariant="female"
-          employeeName="Priya Sharma"
-          size="hero"
-        />
+        <EmployeeCartoonAvatar avatarVariant="female" employeeName="Priya Sharma" size="hero" />,
       );
 
       expect(html).toContain('bezent-cartoon-avatar');
@@ -77,7 +66,7 @@ describe('EmployeeCartoonAvatar & resolveCartoonAvatarVariant', () => {
 
     it('resolves female avatar from profile gender automatically', () => {
       const html = renderToStaticMarkup(
-        <EmployeeCartoonAvatar gender="female" employeeName="Kavya" />
+        <EmployeeCartoonAvatar gender="female" employeeName="Kavya" />,
       );
 
       expect(html).toContain('aria-label="Kavya&#x27;s avatar (female)"');
@@ -86,10 +75,7 @@ describe('EmployeeCartoonAvatar & resolveCartoonAvatarVariant', () => {
 
     it('supports custom profile image src over default cartoon avatar', () => {
       const html = renderToStaticMarkup(
-        <EmployeeCartoonAvatar
-          src="/custom-uploaded-photo.jpg"
-          employeeName="Custom Employee"
-        />
+        <EmployeeCartoonAvatar src="/custom-uploaded-photo.jpg" employeeName="Custom Employee" />,
       );
 
       expect(html).toContain('src="/custom-uploaded-photo.jpg"');
@@ -102,7 +88,7 @@ describe('EmployeeCartoonAvatar & resolveCartoonAvatarVariant', () => {
           size="128"
           employeeName="Test Employee"
           onClick={() => {}}
-        />
+        />,
       );
 
       expect(html).toContain('bezent-cartoon-avatar--interactive');

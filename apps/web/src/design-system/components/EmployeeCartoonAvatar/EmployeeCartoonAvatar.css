@@ -16,7 +16,9 @@
   user-select: none;
   overflow: hidden;
   background-color: var(--color-surface-container, #f1f5f9);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .bezent-cartoon-avatar__image,

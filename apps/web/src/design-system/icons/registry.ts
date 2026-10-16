@@ -116,8 +116,8 @@ export const CANONICAL_CONCEPT_MAP: Record<string, string> = {
   gemini: 'gemini',
   pin: 'pin',
   coffee: 'coffee',
-  'local_cafe': 'coffee',
-  'break': 'coffee',
+  local_cafe: 'coffee',
+  break: 'coffee',
 
   // HRMS Concepts
   employees: 'employees',

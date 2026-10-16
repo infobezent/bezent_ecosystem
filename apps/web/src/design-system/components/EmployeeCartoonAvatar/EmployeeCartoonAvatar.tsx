@@ -32,7 +32,7 @@ export interface EmployeeCartoonAvatarProps {
  */
 export function resolveCartoonAvatarVariant(
   preference?: string | null,
-  gender?: string | null
+  gender?: string | null,
 ): CartoonAvatarVariant {
   if (preference) {
     const p = preference.trim().toLowerCase();
@@ -78,14 +78,8 @@ function MaleCartoonSvg({ title }: { title: string }) {
       {/* Inner Character Elements - Clipped cleanly to circle */}
       <g clipPath="url(#male-avatar-clip)">
         {/* Back Hair */}
-        <path
-          d="M32 54 C30 42 36 32 46 26 L30 48 C29 55 31 65 35 68 Z"
-          fill="#241B16"
-        />
-        <path
-          d="M96 54 C98 42 92 32 82 26 L98 48 C99 55 97 65 93 68 Z"
-          fill="#241B16"
-        />
+        <path d="M32 54 C30 42 36 32 46 26 L30 48 C29 55 31 65 35 68 Z" fill="#241B16" />
+        <path d="M96 54 C98 42 92 32 82 26 L98 48 C99 55 97 65 93 68 Z" fill="#241B16" />
 
         {/* Neck */}
         <rect x="52" y="74" width="24" height="20" rx="3" fill="#FBD8BA" />
@@ -213,10 +207,7 @@ function MaleCartoonSvg({ title }: { title: string }) {
         />
 
         {/* Warm Smiling Mouth */}
-        <path
-          d="M56 71 Q64 79 72 71 Q64 75 56 71 Z"
-          fill="#CF4E4E"
-        />
+        <path d="M56 71 Q64 79 72 71 Q64 75 56 71 Z" fill="#CF4E4E" />
         <path
           d="M58 71.5 Q64 74 70 71.5"
           stroke="#FFFFFF"
@@ -338,14 +329,8 @@ function FemaleCartoonSvg({ title }: { title: string }) {
           fill="#201713"
         />
         {/* Parted Bangs framing temples */}
-        <path
-          d="M36 46 C44 38 56 39 63 43 C54 44 44 48 39 56 Z"
-          fill="#291E19"
-        />
-        <path
-          d="M92 46 C84 38 72 39 65 43 C74 44 84 48 89 56 Z"
-          fill="#291E19"
-        />
+        <path d="M36 46 C44 38 56 39 63 43 C54 44 44 48 39 56 Z" fill="#291E19" />
+        <path d="M92 46 C84 38 72 39 65 43 C74 44 84 48 89 56 Z" fill="#291E19" />
         {/* Hair Sheen */}
         <path
           d="M50 23 C60 22 72 23 78 27"
@@ -373,23 +358,13 @@ function FemaleCartoonSvg({ title }: { title: string }) {
 
         {/* Expressive Smiling Eyes with Lashes */}
         {/* Left Eye */}
-        <path
-          d="M44 57.5 L46 56"
-          stroke="#201713"
-          strokeWidth="1.2"
-          strokeLinecap="round"
-        />
+        <path d="M44 57.5 L46 56" stroke="#201713" strokeWidth="1.2" strokeLinecap="round" />
         <ellipse cx="50.5" cy="59.5" rx="4.5" ry="5" fill="#201713" />
         <circle cx="52" cy="58" r="1.6" fill="#FFFFFF" />
         <circle cx="49" cy="61.5" r="0.8" fill="#FFFFFF" opacity="0.75" />
 
         {/* Right Eye */}
-        <path
-          d="M84 57.5 L82 56"
-          stroke="#201713"
-          strokeWidth="1.2"
-          strokeLinecap="round"
-        />
+        <path d="M84 57.5 L82 56" stroke="#201713" strokeWidth="1.2" strokeLinecap="round" />
         <ellipse cx="77.5" cy="59.5" rx="4.5" ry="5" fill="#201713" />
         <circle cx="79" cy="58" r="1.6" fill="#FFFFFF" />
         <circle cx="76" cy="61.5" r="0.8" fill="#FFFFFF" opacity="0.75" />
@@ -408,10 +383,7 @@ function FemaleCartoonSvg({ title }: { title: string }) {
         />
 
         {/* Warm Smiling Lips */}
-        <path
-          d="M56 71.5 Q64 79 72 71.5 Q64 75 56 71.5 Z"
-          fill="#D3455E"
-        />
+        <path d="M56 71.5 Q64 79 72 71.5 Q64 75 56 71.5 Z" fill="#D3455E" />
         <path
           d="M58 72 Q64 74.5 70 72"
           stroke="#FFFFFF"
@@ -576,10 +548,7 @@ function NeutralCartoonSvg({ title }: { title: string }) {
         />
 
         {/* Warm Smiling Mouth */}
-        <path
-          d="M56 71 Q64 79 72 71 Q64 75 56 71 Z"
-          fill="#CF4E4E"
-        />
+        <path d="M56 71 Q64 79 72 71 Q64 75 56 71 Z" fill="#CF4E4E" />
         <path
           d="M58 71.5 Q64 74 70 71.5"
           stroke="#FFFFFF"
@@ -626,7 +595,8 @@ export function EmployeeCartoonAvatar({
   const [imageError, setImageError] = useState(false);
 
   // Size calculation
-  const sizeClass = size !== 'hero' ? `bezent-cartoon-avatar--${size}` : 'bezent-cartoon-avatar--hero';
+  const sizeClass =
+    size !== 'hero' ? `bezent-cartoon-avatar--${size}` : 'bezent-cartoon-avatar--hero';
   const isInteractive = Boolean(onClick);
   const interactiveClass = isInteractive ? 'bezent-cartoon-avatar--interactive' : '';
   const classes = `bezent-cartoon-avatar ${sizeClass} ${interactiveClass} ${className}`.trim();

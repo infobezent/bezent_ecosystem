@@ -447,7 +447,10 @@ export const essApi = {
   getAttendance: (params?: { month?: string }) =>
     req<{
       today: EssTodayAttendance & { notes?: string | null };
-      summary?: EssAttendanceSummaryCounters & { attendancePercent?: number; totalWorkingDays?: number };
+      summary?: EssAttendanceSummaryCounters & {
+        attendancePercent?: number;
+        totalWorkingDays?: number;
+      };
       history: EssAttendanceRecord[];
       monthlySummary?: EssMonthlyAttendanceSummary[];
       view?: EssAttendanceView;

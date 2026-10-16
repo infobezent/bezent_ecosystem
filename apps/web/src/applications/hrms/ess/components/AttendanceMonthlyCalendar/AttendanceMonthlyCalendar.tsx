@@ -1,5 +1,12 @@
 import { useState, useMemo, type ReactNode } from 'react';
-import { Card, Badge, Button, IconButton, Inline, Stack } from '../../../../../design-system/components';
+import {
+  Card,
+  Badge,
+  Button,
+  IconButton,
+  Inline,
+  Stack,
+} from '../../../../../design-system/components';
 import { BezentIcon } from '../../../../../design-system/icons';
 import type { EssAttendanceRecord } from '../../api/essApi';
 
@@ -101,7 +108,9 @@ export function AttendanceMonthlyCalendar({
     if (now.getFullYear() === next.getFullYear() && now.getMonth() === next.getMonth()) {
       setSelectedDateStr(todayStr);
     } else {
-      setSelectedDateStr(`${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-01`);
+      setSelectedDateStr(
+        `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-01`,
+      );
     }
     onMonthChange?.(next);
   };
@@ -129,7 +138,15 @@ export function AttendanceMonthlyCalendar({
     const cells: Array<{
       dateStr: string;
       dayNum: number | null;
-      statusType: 'present' | 'late' | 'absent' | 'leave' | 'holiday' | 'weekly-off' | 'unclassified' | 'empty';
+      statusType:
+        | 'present'
+        | 'late'
+        | 'absent'
+        | 'leave'
+        | 'holiday'
+        | 'weekly-off'
+        | 'unclassified'
+        | 'empty';
       isToday: boolean;
       record?: EssAttendanceRecord;
     }> = [];
@@ -154,7 +171,9 @@ export function AttendanceMonthlyCalendar({
       const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
       const record = recordsMap.get(dateStr);
 
-      let statusType: 'present' | 'late' | 'absent' | 'leave' | 'holiday' | 'weekly-off' | 'unclassified' = 'unclassified';
+      let statusType:
+        'present' | 'late' | 'absent' | 'leave' | 'holiday' | 'weekly-off' | 'unclassified' =
+        'unclassified';
 
       if (record) {
         if (record.status === 'present') {
@@ -236,11 +255,7 @@ export function AttendanceMonthlyCalendar({
           <div className="bezent-attendance-calendar">
             {/* Month Navigation */}
             <div className="bezent-attendance-calendar__nav">
-              <IconButton
-                label="Previous Month"
-                onClick={handlePrevMonth}
-                disabled={loading}
-              >
+              <IconButton label="Previous Month" onClick={handlePrevMonth} disabled={loading}>
                 <BezentIcon name="chevronLeft" size={18} />
               </IconButton>
 
@@ -330,7 +345,18 @@ export function AttendanceMonthlyCalendar({
                   <Stack gap="xs">
                     <Inline gap="xs" align="center" wrap>
                       <span>
-                        Attendance: <strong>{selectedRecord.isLate ? 'Late (Present)' : selectedRecord.status === 'present' ? 'Present' : selectedRecord.status === 'on_leave' ? 'On Leave' : selectedRecord.status === 'absent' ? 'Absent' : selectedRecord.status}</strong>
+                        Attendance:{' '}
+                        <strong>
+                          {selectedRecord.isLate
+                            ? 'Late (Present)'
+                            : selectedRecord.status === 'present'
+                              ? 'Present'
+                              : selectedRecord.status === 'on_leave'
+                                ? 'On Leave'
+                                : selectedRecord.status === 'absent'
+                                  ? 'Absent'
+                                  : selectedRecord.status}
+                        </strong>
                       </span>
                       {selectedRecord.shiftScheduleRef && (
                         <>
@@ -341,22 +367,37 @@ export function AttendanceMonthlyCalendar({
                     </Inline>
 
                     <Inline gap="md" align="center" wrap>
-                      <span>Check In: <strong>{formatDisplayTime(selectedRecord.checkInTime)}</strong></span>
-                      <span>Check Out: <strong>{formatDisplayTime(selectedRecord.checkOutTime)}</strong></span>
-                      {selectedRecord.workedMinutes !== undefined && selectedRecord.workedMinutes > 0 && (
-                        <span>Worked: <strong>{formatMinutes(selectedRecord.workedMinutes)}</strong></span>
-                      )}
+                      <span>
+                        Check In: <strong>{formatDisplayTime(selectedRecord.checkInTime)}</strong>
+                      </span>
+                      <span>
+                        Check Out: <strong>{formatDisplayTime(selectedRecord.checkOutTime)}</strong>
+                      </span>
+                      {selectedRecord.workedMinutes !== undefined &&
+                        selectedRecord.workedMinutes > 0 && (
+                          <span>
+                            Worked: <strong>{formatMinutes(selectedRecord.workedMinutes)}</strong>
+                          </span>
+                        )}
                       {selectedRecord.notes && (
-                        <span>Notes: <strong>{selectedRecord.notes}</strong></span>
+                        <span>
+                          Notes: <strong>{selectedRecord.notes}</strong>
+                        </span>
                       )}
                     </Inline>
                   </Stack>
                 ) : isSelectedWeekend ? (
-                  <span>Attendance: <strong>Weekly Off</strong></span>
+                  <span>
+                    Attendance: <strong>Weekly Off</strong>
+                  </span>
                 ) : isSelectedFuture ? (
-                  <span>Attendance: <strong>Scheduled</strong></span>
+                  <span>
+                    Attendance: <strong>Scheduled</strong>
+                  </span>
                 ) : (
-                  <span>Attendance: <strong>No punch recorded</strong></span>
+                  <span>
+                    Attendance: <strong>No punch recorded</strong>
+                  </span>
                 )}
               </Stack>
             </div>
@@ -369,12 +410,8 @@ export function AttendanceMonthlyCalendar({
               <div className="bezent-attendance-summary__icon">
                 <BezentIcon name="calendar" size={22} />
               </div>
-              <div className="bezent-attendance-summary__value">
-                {summary.presentDays}
-              </div>
-              <div className="bezent-attendance-summary__label">
-                Present
-              </div>
+              <div className="bezent-attendance-summary__value">{summary.presentDays}</div>
+              <div className="bezent-attendance-summary__label">Present</div>
             </div>
 
             {/* Card 2: Late */}
@@ -382,12 +419,8 @@ export function AttendanceMonthlyCalendar({
               <div className="bezent-attendance-summary__icon">
                 <BezentIcon name="clock" size={22} />
               </div>
-              <div className="bezent-attendance-summary__value">
-                {summary.lateDays}
-              </div>
-              <div className="bezent-attendance-summary__label">
-                Late
-              </div>
+              <div className="bezent-attendance-summary__value">{summary.lateDays}</div>
+              <div className="bezent-attendance-summary__label">Late</div>
             </div>
 
             {/* Card 3: Absent */}
@@ -395,12 +428,8 @@ export function AttendanceMonthlyCalendar({
               <div className="bezent-attendance-summary__icon">
                 <BezentIcon name="close" size={22} />
               </div>
-              <div className="bezent-attendance-summary__value">
-                {summary.absentDays}
-              </div>
-              <div className="bezent-attendance-summary__label">
-                Absent
-              </div>
+              <div className="bezent-attendance-summary__value">{summary.absentDays}</div>
+              <div className="bezent-attendance-summary__label">Absent</div>
             </div>
 
             {/* Card 4: Attendance Percentage */}
@@ -408,12 +437,8 @@ export function AttendanceMonthlyCalendar({
               <div className="bezent-attendance-summary__icon">
                 <BezentIcon name="reports" size={22} />
               </div>
-              <div className="bezent-attendance-summary__value">
-                {summary.attendancePercent}%
-              </div>
-              <div className="bezent-attendance-summary__label">
-                Attendance
-              </div>
+              <div className="bezent-attendance-summary__value">{summary.attendancePercent}%</div>
+              <div className="bezent-attendance-summary__label">Attendance</div>
             </div>
           </div>
         </div>

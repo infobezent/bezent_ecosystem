@@ -186,16 +186,25 @@ export class EssRepository {
     if (data.addressCity !== undefined) updatePayload.addressCity = data.addressCity;
     if (data.addressDistrict !== undefined) updatePayload.addressDistrict = data.addressDistrict;
     if (data.addressState !== undefined) updatePayload.addressState = data.addressState;
-    if (data.addressPostalCode !== undefined) updatePayload.addressPostalCode = data.addressPostalCode;
+    if (data.addressPostalCode !== undefined)
+      updatePayload.addressPostalCode = data.addressPostalCode;
     if (data.addressCountry !== undefined) updatePayload.addressCountry = data.addressCountry;
-    if (data.isPermanentSameAsCurrent !== undefined) updatePayload.isPermanentSameAsCurrent = data.isPermanentSameAsCurrent;
-    if (data.permanentAddressStreet !== undefined) updatePayload.permanentAddressStreet = data.permanentAddressStreet;
-    if (data.permanentAddressLine2 !== undefined) updatePayload.permanentAddressLine2 = data.permanentAddressLine2;
-    if (data.permanentAddressCity !== undefined) updatePayload.permanentAddressCity = data.permanentAddressCity;
-    if (data.permanentAddressDistrict !== undefined) updatePayload.permanentAddressDistrict = data.permanentAddressDistrict;
-    if (data.permanentAddressState !== undefined) updatePayload.permanentAddressState = data.permanentAddressState;
-    if (data.permanentAddressPostalCode !== undefined) updatePayload.permanentAddressPostalCode = data.permanentAddressPostalCode;
-    if (data.permanentAddressCountry !== undefined) updatePayload.permanentAddressCountry = data.permanentAddressCountry;
+    if (data.isPermanentSameAsCurrent !== undefined)
+      updatePayload.isPermanentSameAsCurrent = data.isPermanentSameAsCurrent;
+    if (data.permanentAddressStreet !== undefined)
+      updatePayload.permanentAddressStreet = data.permanentAddressStreet;
+    if (data.permanentAddressLine2 !== undefined)
+      updatePayload.permanentAddressLine2 = data.permanentAddressLine2;
+    if (data.permanentAddressCity !== undefined)
+      updatePayload.permanentAddressCity = data.permanentAddressCity;
+    if (data.permanentAddressDistrict !== undefined)
+      updatePayload.permanentAddressDistrict = data.permanentAddressDistrict;
+    if (data.permanentAddressState !== undefined)
+      updatePayload.permanentAddressState = data.permanentAddressState;
+    if (data.permanentAddressPostalCode !== undefined)
+      updatePayload.permanentAddressPostalCode = data.permanentAddressPostalCode;
+    if (data.permanentAddressCountry !== undefined)
+      updatePayload.permanentAddressCountry = data.permanentAddressCountry;
 
     if (existing) {
       await db

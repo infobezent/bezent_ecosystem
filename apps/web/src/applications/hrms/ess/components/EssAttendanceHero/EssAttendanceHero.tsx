@@ -125,7 +125,11 @@ function getTimePeriod(hour: number): TimePeriod {
   return 'night';
 }
 
-function getGreetingAndQuote(period: TimePeriod): { greeting: string; quote: string; icon: string } {
+function getGreetingAndQuote(period: TimePeriod): {
+  greeting: string;
+  quote: string;
+  icon: string;
+} {
   switch (period) {
     case 'morning':
       return {
@@ -189,10 +193,11 @@ export const EssAttendanceHero: React.FC<EssAttendanceHeroProps> = ({
     return getTimePeriod(now.getHours());
   }, [forcedTimePeriod, now]);
 
-  const { greeting, quote, icon: greetingIcon } = useMemo(
-    () => getGreetingAndQuote(currentPeriod),
-    [currentPeriod],
-  );
+  const {
+    greeting,
+    quote,
+    icon: greetingIcon,
+  } = useMemo(() => getGreetingAndQuote(currentPeriod), [currentPeriod]);
 
   // Formatted date string (e.g., FRIDAY, OCTOBER 16, 2026)
   const formattedDate = useMemo(() => {
@@ -275,7 +280,9 @@ export const EssAttendanceHero: React.FC<EssAttendanceHeroProps> = ({
     }
     if (attendance.status === 'on_break' || isOnBreak) {
       return {
-        label: attendance.currentBreakType ? `On Break (${attendance.currentBreakType})` : 'On Break',
+        label: attendance.currentBreakType
+          ? `On Break (${attendance.currentBreakType})`
+          : 'On Break',
         className: 'ess-status-badge-break',
       };
     }
@@ -502,9 +509,7 @@ export const EssAttendanceHero: React.FC<EssAttendanceHeroProps> = ({
                   {pendingCount} {pendingCount === 1 ? 'action' : 'actions'}
                 </span>
               ) : (
-                <span className="ess-briefing-badge ess-briefing-badge-clear">
-                  All clear
-                </span>
+                <span className="ess-briefing-badge ess-briefing-badge-clear">All clear</span>
               )}
             </div>
             <span className="ess-briefing-summary">{actionsSummary}</span>

@@ -74,7 +74,10 @@ export class EssService {
     const presentCount = attWorkspace.summary.presentDays;
     const absentCount = attWorkspace.summary.absentDays;
     const lateCount = attWorkspace.summary.lateMarksCount;
-    const totalWorkingDays = Math.max(1, presentCount + absentCount + attWorkspace.summary.halfDays);
+    const totalWorkingDays = Math.max(
+      1,
+      presentCount + absentCount + attWorkspace.summary.halfDays,
+    );
     const attendancePercent = Math.min(
       100,
       Math.round(((presentCount + attWorkspace.summary.halfDays * 0.5) / totalWorkingDays) * 100),
@@ -148,8 +151,7 @@ export class EssService {
         type: 'new_joiner' as const,
         title: 'Welcome our new teammate, Karthik Raja!',
         subtitle: 'New Joiner • Engineering Department',
-        message:
-          'Karthik joins us as Senior Frontend Engineer. Welcome aboard and happy building!',
+        message: 'Karthik joins us as Senior Frontend Engineer. Welcome aboard and happy building!',
         date: 'Yesterday',
         badge: 'New Joiner',
         likesCount: 22,
@@ -319,7 +321,10 @@ export class EssService {
     return request;
   }
 
-  async updateContactDetails(ctx: EmployeeContext, input: UpdateContactDetailsInput): Promise<EssFullProfile> {
+  async updateContactDetails(
+    ctx: EmployeeContext,
+    input: UpdateContactDetailsInput,
+  ): Promise<EssFullProfile> {
     if (input.personalEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.personalEmail.trim())) {
       throw new BadRequestError('Invalid personal email format');
     }
@@ -337,13 +342,27 @@ export class EssService {
       addressPostalCode: input.addressPostalCode?.trim() || null,
       addressCountry: input.addressCountry?.trim() || null,
       isPermanentSameAsCurrent: input.isPermanentSameAsCurrent ?? true,
-      permanentAddressStreet: input.isPermanentSameAsCurrent ? (input.addressStreet?.trim() || null) : (input.permanentAddressStreet?.trim() || null),
-      permanentAddressLine2: input.isPermanentSameAsCurrent ? (input.addressLine2?.trim() || null) : (input.permanentAddressLine2?.trim() || null),
-      permanentAddressCity: input.isPermanentSameAsCurrent ? (input.addressCity?.trim() || null) : (input.permanentAddressCity?.trim() || null),
-      permanentAddressDistrict: input.isPermanentSameAsCurrent ? (input.addressDistrict?.trim() || null) : (input.permanentAddressDistrict?.trim() || null),
-      permanentAddressState: input.isPermanentSameAsCurrent ? (input.addressState?.trim() || null) : (input.permanentAddressState?.trim() || null),
-      permanentAddressPostalCode: input.isPermanentSameAsCurrent ? (input.addressPostalCode?.trim() || null) : (input.permanentAddressPostalCode?.trim() || null),
-      permanentAddressCountry: input.isPermanentSameAsCurrent ? (input.addressCountry?.trim() || null) : (input.permanentAddressCountry?.trim() || null),
+      permanentAddressStreet: input.isPermanentSameAsCurrent
+        ? input.addressStreet?.trim() || null
+        : input.permanentAddressStreet?.trim() || null,
+      permanentAddressLine2: input.isPermanentSameAsCurrent
+        ? input.addressLine2?.trim() || null
+        : input.permanentAddressLine2?.trim() || null,
+      permanentAddressCity: input.isPermanentSameAsCurrent
+        ? input.addressCity?.trim() || null
+        : input.permanentAddressCity?.trim() || null,
+      permanentAddressDistrict: input.isPermanentSameAsCurrent
+        ? input.addressDistrict?.trim() || null
+        : input.permanentAddressDistrict?.trim() || null,
+      permanentAddressState: input.isPermanentSameAsCurrent
+        ? input.addressState?.trim() || null
+        : input.permanentAddressState?.trim() || null,
+      permanentAddressPostalCode: input.isPermanentSameAsCurrent
+        ? input.addressPostalCode?.trim() || null
+        : input.permanentAddressPostalCode?.trim() || null,
+      permanentAddressCountry: input.isPermanentSameAsCurrent
+        ? input.addressCountry?.trim() || null
+        : input.permanentAddressCountry?.trim() || null,
     });
 
     return this.getFullProfile(ctx);
@@ -354,7 +373,9 @@ export class EssService {
       throw new BadRequestError('Emergency contacts must be an array');
     }
     if (items.length > 2) {
-      throw new BadRequestError('At most two emergency contacts (one primary, one secondary) are allowed');
+      throw new BadRequestError(
+        'At most two emergency contacts (one primary, one secondary) are allowed',
+      );
     }
 
     const priorities = items.map((i) => i.priority);
@@ -377,7 +398,9 @@ export class EssService {
         throw new BadRequestError(`Emergency contact [${i}] phone is required`);
       }
       if (item.priority !== 'primary' && item.priority !== 'secondary') {
-        throw new BadRequestError(`Emergency contact [${i}] priority must be 'primary' or 'secondary'`);
+        throw new BadRequestError(
+          `Emergency contact [${i}] priority must be 'primary' or 'secondary'`,
+        );
       }
     }
 

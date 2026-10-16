@@ -163,4 +163,3 @@ describe('ESS My Profile Page (Personal Tab V1.0)', () => {
     expect(sparseProfile.emergencyContacts.length).toBe(0);
   });
 });
-
