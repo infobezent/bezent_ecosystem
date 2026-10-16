@@ -252,7 +252,7 @@ describe('BEZENT HRMS — Missing Punch Classification, Payroll Boundary & On-Du
       } as unknown as AttendanceSettingsRepository;
 
       const mockAttendanceRepo = {
-        getMonthlyMatrix: async () => [
+        getPeriodMatrix: async () => [
           {
             employeeId: 'emp_01',
             employeeCode: 'EMP001',

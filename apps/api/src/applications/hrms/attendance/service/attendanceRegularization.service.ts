@@ -1,16 +1,25 @@
-import { BadRequestError, NotFoundError, ConflictError } from '../../../../app/errors/AppError.js';
+import {
+  BadRequestError,
+  NotFoundError,
+  ConflictError,
+  ForbiddenError,
+} from '../../../../app/errors/AppError.js';
 import { getDb } from '../../../../db/connection.js';
 import {
   employeeAttendance,
   employees,
   attendancePunches,
   employeeNotifications,
+  type AttendanceRegularization,
 } from '../../../../db/schema.js';
 import { and, eq } from 'drizzle-orm';
 import { generateSurrogateId } from '../../../../platform/auth/security.js';
 import { attendanceRepository } from '../repository/attendance.repository.js';
 import { attendanceRegularizationRepository } from '../repository/attendanceRegularization.repository.js';
-import { attendanceRegularizationEligibilityService } from './attendanceRegularizationEligibility.service.js';
+import {
+  attendanceRegularizationEligibilityService,
+  type RegularizationWorkflowSettings,
+} from './attendanceRegularizationEligibility.service.js';
 import { attendanceCalculationService } from './attendanceCalculation.service.js';
 import { DefaultShiftScheduleProvider } from './shiftSchedule.provider.js';
 import { attendancePolicyService } from './attendancePolicy.service.js';
@@ -27,6 +36,16 @@ import type {
   RegularizationExportFilter,
   RegularizationRequestType,
 } from '../types/attendance.types.js';
+
+const AUTO_APPROVAL_ACTOR = 'system:auto-approval';
+
+function minutesBetween(a: string, b: string): number {
+  const toMinutes = (hhmm: string) => {
+    const [h, m] = hhmm.split(':');
+    return Number(h) * 60 + Number(m);
+  };
+  return Math.abs(toMinutes(a) - toMinutes(b));
+}
 
 export class AttendanceRegularizationService {
   private readonly scheduleProvider = new DefaultShiftScheduleProvider();
@@ -77,9 +96,11 @@ export class AttendanceRegularizationService {
       throw new BadRequestError('Valid workday (YYYY-MM-DD) is required');
     }
 
-    if (!input.reason || input.reason.trim().length === 0) {
+    const workflow = await this.eligibilityService.getWorkflowSettings(tenantId, companyId);
+    if (workflow.requireReason && (!input.reason || input.reason.trim().length === 0)) {
       throw new BadRequestError('Reason is required');
     }
+    const reason = input.reason?.trim() || 'No reason provided';
 
     // 2. Validate request type specific parameters
     this.validateRequestTypeFields(input);
@@ -131,7 +152,9 @@ export class AttendanceRegularizationService {
       .where(eq(employees.id, employeeId))
       .limit(1);
 
-    const assignedTo = empDetails?.reportingManagerId ?? null;
+    // "HR only" skips the reporting manager and goes straight to the HR queue.
+    const assignedTo =
+      workflow.approvalHierarchy === 'hr_only' ? null : (empDetails?.reportingManagerId ?? null);
     const approvalStatus = input.isDraft ? 'draft' : 'submitted';
 
     const newRecord = await this.repo.createRegularization({
@@ -158,7 +181,7 @@ export class AttendanceRegularizationService {
       proposedCheckOut: input.proposedCheckOut || null,
       proposedStatus: input.proposedStatus || null,
       claimedHours: input.claimedHours ? String(input.claimedHours) : null,
-      reason: input.reason.trim(),
+      reason,
       evidenceAttachments: input.evidenceAttachments || [],
       isHighRisk: eligibility?.isHighRisk ?? false,
       riskFactors: eligibility?.riskFactors ?? [],
@@ -194,9 +217,62 @@ export class AttendanceRegularizationService {
         `Your attendance correction request ${requestNumber} for ${input.workday} has been submitted.`,
         '/hrms/attendance/regularization',
       );
+
+      if (this.qualifiesForAutoApproval(workflow, input, att)) {
+        return this.autoApprove(tenantId, companyId, regId, workflow, newRecord);
+      }
     }
 
     return newRecord;
+  }
+
+  /**
+   * Auto-approval, per company settings: the "Zero-Touch" hierarchy approves every
+   * submitted request; otherwise a time correction is approved when the proposed
+   * punch times are within the grace minutes of what was recorded.
+   */
+  private qualifiesForAutoApproval(
+    workflow: RegularizationWorkflowSettings,
+    input: RegularizationSubmissionInput,
+    recorded: { checkInTime: string | null; checkOutTime: string | null } | undefined,
+  ): boolean {
+    if (workflow.approvalHierarchy === 'auto_approve') return true;
+    if (workflow.autoApproveGraceMinutes <= 0 || input.requestType !== 'incorrect_time') {
+      return false;
+    }
+    const diffs = [
+      [recorded?.checkInTime, input.proposedCheckIn],
+      [recorded?.checkOutTime, input.proposedCheckOut],
+    ].flatMap(([from, to]) => (from && to ? [minutesBetween(from, to)] : []));
+    return diffs.length > 0 && diffs.every((d) => d <= workflow.autoApproveGraceMinutes);
+  }
+
+  private async autoApprove(
+    tenantId: string,
+    companyId: string,
+    id: string,
+    workflow: RegularizationWorkflowSettings,
+    fallback: AttendanceRegularization,
+  ) {
+    try {
+      await this.reviewRequest(
+        tenantId,
+        companyId,
+        id,
+        {
+          status: 'approved',
+          reason:
+            workflow.approvalHierarchy === 'auto_approve'
+              ? 'Auto-approved: company approval hierarchy is zero-touch.'
+              : `Auto-approved: within ${workflow.autoApproveGraceMinutes} minute(s) of the recorded time.`,
+        },
+        AUTO_APPROVAL_ACTOR,
+      );
+      return (await this.repo.getRegularizationById(tenantId, companyId, id))?.reg ?? fallback;
+    } catch {
+      // The request stays submitted for manual review; the audit trail already shows it.
+      return fallback;
+    }
   }
 
   /**
@@ -1007,6 +1083,22 @@ export class AttendanceRegularizationService {
     const reg = existing.reg;
     if (['approved', 'rejected', 'cancelled'].includes(reg.approvalStatus)) {
       throw new ConflictError(`Cannot cancel request in finalized state (${reg.approvalStatus})`);
+    }
+
+    // Withdrawal by the requesting employee can be switched off in company settings.
+    const [requester] = await getDb()
+      .select({ userId: employees.userId })
+      .from(employees)
+      .where(eq(employees.id, reg.employeeId))
+      .limit(1);
+    if (requester?.userId && requester.userId === actorUserId) {
+      const workflow = await this.eligibilityService.getWorkflowSettings(tenantId, companyId);
+      if (!workflow.allowWithdrawal) {
+        throw new ForbiddenError(
+          'Employees cannot withdraw regularization requests under company attendance settings.',
+          'WITHDRAWAL_DISABLED',
+        );
+      }
     }
 
     const updated = await this.repo.updateRegularization(tenantId, companyId, id, {

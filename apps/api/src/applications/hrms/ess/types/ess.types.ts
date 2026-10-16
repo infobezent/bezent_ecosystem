@@ -83,6 +83,15 @@ export interface CreateProfileChangeRequestInput {
 export interface CheckInInput {
   workLocation?: string;
   notes?: string;
+  /** Client-reported location/device details (latitude, longitude, accuracy, ...). */
+  deviceMetadata?: Record<string, unknown>;
+  /** Set by the server from the request, never from the client body. */
+  clientIp?: string;
+}
+
+export interface CheckOutInput {
+  deviceMetadata?: Record<string, unknown>;
+  clientIp?: string;
 }
 
 export interface RegularizeAttendanceInput {

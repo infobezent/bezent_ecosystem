@@ -545,6 +545,11 @@ export class AttendanceController {
         companyId,
         req.body,
         req.user?.id ?? 'system',
+        {
+          roleCodes: (req.access?.roles ?? []).map((role) => role.code),
+          isSuperAdmin: Boolean(req.user?.isSuperAdmin),
+          isTenantAdmin: Boolean(req.access?.isTenantAdmin),
+        },
       );
       res.status(200).json({ data: record });
     } catch (err) {

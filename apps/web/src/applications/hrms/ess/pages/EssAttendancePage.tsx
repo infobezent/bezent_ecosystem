@@ -22,11 +22,42 @@ import {
   FormGrid,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
-import { essApi, type EssAttendanceRecord, type EssTodayAttendance } from '../api/essApi';
+import {
+  essApi,
+  isLocationRequiredError,
+  type EssAttendanceRecord,
+  type EssAttendanceView,
+  type EssMonthlyAttendanceSummary,
+  type EssTodayAttendance,
+  type PunchDeviceMetadata,
+} from '../api/essApi';
+
+/** Asks the browser for the current position. Only used when the company requires location. */
+function readCurrentPosition(): Promise<PunchDeviceMetadata> {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error('Location is required to punch, but this browser cannot provide it.'));
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) =>
+        resolve({
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+          accuracy: pos.coords.accuracy,
+        }),
+      () =>
+        reject(new Error('Location is required to punch. Please allow location access and retry.')),
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  });
+}
 
 type AttendanceWorkspace = {
   today: EssTodayAttendance & { notes?: string | null };
   history: EssAttendanceRecord[];
+  monthlySummary?: EssMonthlyAttendanceSummary[];
+  view?: EssAttendanceView;
 };
 
 export function EssAttendancePage() {
@@ -67,7 +98,15 @@ export function EssAttendancePage() {
     setPunchError(null);
     setPunchSuccess(null);
     try {
-      await essApi.checkIn({ workLocation: 'office' });
+      try {
+        await essApi.checkIn({ workLocation: 'office' });
+      } catch (err: unknown) {
+        if (!isLocationRequiredError(err)) throw err;
+        await essApi.checkIn({
+          workLocation: 'office',
+          deviceMetadata: await readCurrentPosition(),
+        });
+      }
       setPunchSuccess('Checked in successfully!');
       await load();
     } catch (err: unknown) {
@@ -82,7 +121,12 @@ export function EssAttendancePage() {
     setPunchError(null);
     setPunchSuccess(null);
     try {
-      await essApi.checkOut();
+      try {
+        await essApi.checkOut();
+      } catch (err: unknown) {
+        if (!isLocationRequiredError(err)) throw err;
+        await essApi.checkOut({ deviceMetadata: await readCurrentPosition() });
+      }
       setPunchSuccess('Checked out successfully!');
       await load();
     } catch (err: unknown) {
@@ -121,6 +165,9 @@ export function EssAttendancePage() {
   if (!workspace) return null;
 
   const today = workspace.today;
+  const monthlySummary = workspace.monthlySummary ?? [];
+  const historyDays = workspace.view?.historyDays ?? 60;
+  const monthlySummaryOnly = workspace.view?.visibility === 'monthly_summary_only';
   const hasPunchedIn = !!today.checkInTime;
   const hasPunchedOut = !!today.checkOutTime;
 
@@ -220,10 +267,38 @@ export function EssAttendancePage() {
 
       {/* Attendance History */}
       <Section title="Attendance History">
-        <Toolbar left={<span>Last 60 days</span>} />
-        {workspace.history.length === 0 ? (
+        <Toolbar left={<span>Last {historyDays} days</span>} />
+        {monthlySummary.length > 0 && (
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableHeaderCell>Month</TableHeaderCell>
+                <TableHeaderCell>Present</TableHeaderCell>
+                <TableHeaderCell>Half Day</TableHeaderCell>
+                <TableHeaderCell>Absent</TableHeaderCell>
+                <TableHeaderCell>On Leave</TableHeaderCell>
+                <TableHeaderCell>Late Days</TableHeaderCell>
+                <TableHeaderCell>Hours Worked</TableHeaderCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {monthlySummary.map((m) => (
+                <TableRow key={m.month}>
+                  <TableCell>{m.month}</TableCell>
+                  <TableCell>{m.present}</TableCell>
+                  <TableCell>{m.halfDay}</TableCell>
+                  <TableCell>{m.absent}</TableCell>
+                  <TableCell>{m.onLeave}</TableCell>
+                  <TableCell>{m.lateDays}</TableCell>
+                  <TableCell>{(m.workedMinutes / 60).toFixed(1)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+        {monthlySummaryOnly ? null : workspace.history.length === 0 ? (
           <Alert variant="info" title="No Records">
-            No attendance records found for the past 60 days.
+            No attendance records found for the past {historyDays} days.
           </Alert>
         ) : (
           <Table>

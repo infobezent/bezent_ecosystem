@@ -1,5 +1,8 @@
 import { EssRepository } from '../repository/ess.repository.js';
 import { attendanceService } from '../../attendance/service/attendance.service.js';
+import { attendanceWorkdayService } from '../../attendance/service/attendanceWorkday.service.js';
+import { attendanceEmployeeViewService } from '../../attendance/service/attendanceEmployeeView.service.js';
+import { attendanceRegularizationEligibilityService } from '../../attendance/service/attendanceRegularizationEligibility.service.js';
 import type { EmployeeContext } from '../../../../platform/auth/middleware/auth.middleware.js';
 import { BadRequestError, NotFoundError, ConflictError } from '../../../../app/errors/AppError.js';
 import type {
@@ -7,6 +10,7 @@ import type {
   EssFullProfile,
   CreateProfileChangeRequestInput,
   CheckInInput,
+  CheckOutInput,
   RegularizeAttendanceInput,
   ApplyLeaveInput,
   LogTimesheetInput,
@@ -16,14 +20,6 @@ import type {
 export class EssService {
   constructor(private readonly repo: EssRepository = new EssRepository()) {}
 
-  private getTodayDateString(): string {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
   private getCurrentTimeString(): string {
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, '0');
@@ -32,7 +28,7 @@ export class EssService {
   }
 
   async getDashboardData(ctx: EmployeeContext): Promise<EssDashboardData> {
-    const today = this.getTodayDateString();
+    const today = await attendanceWorkdayService.currentWorkday(ctx.tenantId, ctx.companyId);
     const currentYear = new Date().getFullYear();
 
     const [summary, todayAtt, balances, allRequests, allTasks, notifications] = await Promise.all([
@@ -133,10 +129,10 @@ export class EssService {
   }
 
   async getAttendanceWorkspace(ctx: EmployeeContext) {
-    const today = this.getTodayDateString();
-    const [todayAtt, history] = await Promise.all([
+    const today = await attendanceWorkdayService.currentWorkday(ctx.tenantId, ctx.companyId);
+    const [todayAtt, employeeView] = await Promise.all([
       this.repo.getTodayAttendance(ctx.tenantId, ctx.companyId, ctx.id, today),
-      this.repo.getAttendanceHistory(ctx.tenantId, ctx.companyId, ctx.id, 60),
+      attendanceEmployeeViewService.getView(ctx.tenantId, ctx.companyId, ctx.id, today),
     ]);
 
     return {
@@ -148,12 +144,14 @@ export class EssService {
         workLocation: todayAtt?.workLocation ?? 'office',
         notes: todayAtt?.notes ?? null,
       },
-      history,
+      history: employeeView.history,
+      monthlySummary: employeeView.monthlySummary,
+      view: employeeView.view,
     };
   }
 
   async checkIn(ctx: EmployeeContext, input: CheckInInput) {
-    const today = this.getTodayDateString();
+    const today = await attendanceWorkdayService.currentWorkday(ctx.tenantId, ctx.companyId);
     const { record, checkInTime } = await attendanceService.recordCheckIn(
       ctx.tenantId,
       ctx.companyId,
@@ -174,13 +172,14 @@ export class EssService {
     return record;
   }
 
-  async checkOut(ctx: EmployeeContext) {
-    const today = this.getTodayDateString();
+  async checkOut(ctx: EmployeeContext, input?: CheckOutInput) {
+    const today = await attendanceWorkdayService.currentWorkday(ctx.tenantId, ctx.companyId);
     const { updated, checkOutTime } = await attendanceService.recordCheckOut(
       ctx.tenantId,
       ctx.companyId,
       ctx.id,
       today,
+      input,
     );
 
     await this.repo.createNotification({
@@ -196,8 +195,38 @@ export class EssService {
   }
 
   async regularizeAttendance(ctx: EmployeeContext, input: RegularizeAttendanceInput) {
-    if (!input.date || !input.checkInTime || !input.checkOutTime || !input.reason) {
-      throw new BadRequestError('Date, check-in time, check-out time, and reason are required');
+    const workflow = await attendanceRegularizationEligibilityService.getWorkflowSettings(
+      ctx.tenantId,
+      ctx.companyId,
+    );
+    if (
+      !input.date ||
+      !input.checkInTime ||
+      !input.checkOutTime ||
+      (workflow.requireReason && !input.reason?.trim())
+    ) {
+      throw new BadRequestError(
+        workflow.requireReason
+          ? 'Date, check-in time, check-out time, and reason are required'
+          : 'Date, check-in time and check-out time are required',
+      );
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(input.date)) {
+      throw new BadRequestError('Date must be in YYYY-MM-DD format');
+    }
+
+    // Same company-configured rules as the HR submission path (enabled flag,
+    // window, monthly quota, evidence, tracking start, payroll lock).
+    const eligibility = await attendanceRegularizationEligibilityService.checkEligibility(
+      ctx.tenantId,
+      ctx.companyId,
+      { employeeId: ctx.id, workday: input.date, requestType: 'incorrect_time' },
+      0,
+    );
+    if (!eligibility.eligible) {
+      throw new BadRequestError(
+        `Regularization submission ineligible: ${eligibility.reasons.join(' ')}`,
+      );
     }
 
     const request = await this.repo.createRequest({
@@ -210,7 +239,7 @@ export class EssService {
         date: input.date,
         checkInTime: input.checkInTime,
         checkOutTime: input.checkOutTime,
-        reason: input.reason,
+        reason: input.reason?.trim() || 'No reason provided',
       },
     });
 
