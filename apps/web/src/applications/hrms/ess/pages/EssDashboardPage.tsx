@@ -136,13 +136,15 @@ export function EssDashboardPage() {
     try {
       const monthStr = `${newDate.getFullYear()}-${String(newDate.getMonth() + 1).padStart(2, '0')}`;
       const att = await essApi.getAttendance({ month: monthStr });
-      setMonthSummary({
-        presentDays: att.summary.presentDays,
-        lateDays: att.summary.lateMarksCount ?? 0,
-        absentDays: att.summary.absentDays,
-        attendancePercent: att.summary.attendancePercent ?? 0,
-        totalWorkingDays: att.summary.totalWorkingDays,
-      });
+      if (att.summary) {
+        setMonthSummary({
+          presentDays: att.summary.presentDays,
+          lateDays: att.summary.lateMarksCount ?? 0,
+          absentDays: att.summary.absentDays,
+          attendancePercent: att.summary.attendancePercent ?? 0,
+          totalWorkingDays: att.summary.totalWorkingDays,
+        });
+      }
       setMonthHistory(att.history || []);
     } catch {
       // safe fallback on error

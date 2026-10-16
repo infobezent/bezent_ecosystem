@@ -62,8 +62,8 @@ function readCurrentPosition(): Promise<PunchDeviceMetadata> {
 }
 
 type AttendanceWorkspace = {
-  today: EssTodayAttendance;
-  summary: EssAttendanceSummaryCounters;
+  today: EssTodayAttendance & { notes?: string | null };
+  summary?: EssAttendanceSummaryCounters & { attendancePercent?: number; totalWorkingDays?: number };
   history: EssAttendanceRecord[];
   monthlySummary?: EssMonthlyAttendanceSummary[];
   view?: EssAttendanceView;
@@ -391,7 +391,15 @@ export function EssAttendancePage() {
   if (!workspace) return null;
 
   const today = workspace.today;
-  const summary = workspace.summary;
+  const summary = workspace.summary ?? {
+    presentDays: 0,
+    absentDays: 0,
+    halfDays: 0,
+    leaveDays: 0,
+    lateMarksCount: 0,
+    regularizationQuotaUsed: 0,
+    regularizationQuotaLimit: 3,
+  };
   const shift = today.shift;
   const monthlySummary = workspace.monthlySummary ?? [];
   const historyDays = workspace.view?.historyDays ?? 60;

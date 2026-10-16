@@ -476,7 +476,6 @@ export const essApi = {
       method: 'POST',
       body: JSON.stringify(payload || {}),
     }),
-    }),
   regularizeAttendance: (payload: {
     date: string;
     checkInTime: string;

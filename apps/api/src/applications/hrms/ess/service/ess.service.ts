@@ -979,6 +979,10 @@ export class EssService {
     return { markedCount: count };
   }
 
+  private getTodayDateString(): string {
+    return new Date().toISOString().slice(0, 10);
+  }
+
   getPayslipsStatus(_ctx: EmployeeContext) {
     // In this phase, Payroll engine is unconfigured / not enabled.
     // Respects rule: "If payroll is not implemented, keep this feature disabled without creating mock data."
