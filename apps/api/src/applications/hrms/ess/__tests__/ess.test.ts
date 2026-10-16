@@ -199,6 +199,95 @@ describe('Employee Self Service (ESS) Backend API (Phase 3)', () => {
       expect(res.body.data.status).toBe('pending');
       expect(res.body.data.requestType).toBe('profile_change');
     });
+
+    it('updates contact details directly via self-service', async () => {
+      const res = await request(app)
+        .put('/api/v1/ess/profile/personal')
+        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('X-Company-Id', companyId)
+        .send({
+          personalEmail: 'alex.doe.personal@gmail.com',
+          homePhone: '+91 9123456789',
+          addressStreet: '123 Residency Road',
+          addressCity: 'Bengaluru',
+          addressState: 'Karnataka',
+          addressPostalCode: '560025',
+          addressCountry: 'India',
+          isPermanentSameAsCurrent: true,
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.personal.personalEmail).toBe('alex.doe.personal@gmail.com');
+      expect(res.body.data.personal.addressCity).toBe('Bengaluru');
+    });
+
+    it('updates emergency contacts with valid primary uniqueness', async () => {
+      const res = await request(app)
+        .put('/api/v1/ess/profile/emergency-contacts')
+        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('X-Company-Id', companyId)
+        .send([
+          {
+            priority: 'primary',
+            name: 'Pooja Doe',
+            relationship: 'Spouse',
+            phone: '+91 9988776655',
+            email: 'pooja.doe@example.com',
+            address: '123 Residency Road, Bengaluru',
+          },
+        ]);
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.emergencyContacts).toHaveLength(1);
+      expect(res.body.data.emergencyContacts[0].name).toBe('Pooja Doe');
+      expect(res.body.data.emergencyContacts[0].priority).toBe('primary');
+    });
+
+    it('rejects emergency contacts without a primary contact', async () => {
+      const res = await request(app)
+        .put('/api/v1/ess/profile/emergency-contacts')
+        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('X-Company-Id', companyId)
+        .send([
+          {
+            priority: 'secondary',
+            name: 'Rohan Doe',
+            relationship: 'Brother',
+            phone: '+91 9988776654',
+          },
+        ]);
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toContain('primary emergency contact is required');
+    });
+
+    it('updates family members and retrieves profile change requests', async () => {
+      const famRes = await request(app)
+        .put('/api/v1/ess/profile/family-members')
+        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('X-Company-Id', companyId)
+        .send([
+          {
+            name: 'Aarav Doe',
+            relationship: 'Son',
+            dateOfBirth: '2020-05-15',
+            phone: '+91 9988776655',
+          },
+        ]);
+
+      expect(famRes.status).toBe(200);
+      expect(famRes.body.data.familyMembers).toHaveLength(1);
+      expect(famRes.body.data.familyMembers[0].name).toBe('Aarav Doe');
+
+      const reqRes = await request(app)
+        .get('/api/v1/ess/profile/change-requests')
+        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('X-Company-Id', companyId);
+
+      expect(reqRes.status).toBe(200);
+      expect(Array.isArray(reqRes.body.data)).toBe(true);
+      expect(reqRes.body.data.length).toBeGreaterThan(0);
+    });
   });
 
   describe('Attendance Tracking', () => {

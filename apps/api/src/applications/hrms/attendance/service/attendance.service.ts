@@ -262,6 +262,88 @@ export class AttendanceService {
     return { updated, checkOutTime };
   }
 
+  async recordBreakStart(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+    date: string,
+    breakType: 'tea' | 'lunch' | 'personal' = 'tea',
+    notes?: string,
+  ) {
+    const todayAtt = await this.repo.getTodayAttendance(tenantId, companyId, employeeId, date);
+    if (!todayAtt || !todayAtt.checkInTime) {
+      throw new BadRequestError('Cannot start break before checking in today');
+    }
+    if (todayAtt.checkOutTime) {
+      throw new BadRequestError('Cannot start break after checking out today');
+    }
+
+    const punches = await this.repo.getEmployeeDayPunches(tenantId, companyId, employeeId, date);
+    const lastBreakPunch = punches
+      .filter((p) => p.punchType === 'break_out' || p.punchType === 'break_in')
+      .pop();
+    if (lastBreakPunch && lastBreakPunch.punchType === 'break_out') {
+      throw new ConflictError('Already on a break');
+    }
+
+    const breakPunch = await this.repo.recordPunch(
+      tenantId,
+      companyId,
+      employeeId,
+      'break_out',
+      'web',
+      todayAtt.workLocation,
+      notes ? `${breakType}: ${notes}` : breakType,
+    );
+
+    return { breakPunch, breakType, startTime: this.getCurrentTimeString() };
+  }
+
+  async recordBreakEnd(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+    date: string,
+    notes?: string,
+  ) {
+    const todayAtt = await this.repo.getTodayAttendance(tenantId, companyId, employeeId, date);
+    if (!todayAtt || !todayAtt.checkInTime) {
+      throw new BadRequestError('Cannot end break before checking in today');
+    }
+    if (todayAtt.checkOutTime) {
+      throw new BadRequestError('Cannot end break after checking out today');
+    }
+
+    const punches = await this.repo.getEmployeeDayPunches(tenantId, companyId, employeeId, date);
+    const lastBreakPunch = punches
+      .filter((p) => p.punchType === 'break_out' || p.punchType === 'break_in')
+      .pop();
+    if (!lastBreakPunch || lastBreakPunch.punchType !== 'break_out') {
+      throw new BadRequestError('Not currently on a break');
+    }
+
+    const breakPunch = await this.repo.recordPunch(
+      tenantId,
+      companyId,
+      employeeId,
+      'break_in',
+      'web',
+      todayAtt.workLocation,
+      notes,
+    );
+
+    return { breakPunch, endTime: this.getCurrentTimeString() };
+  }
+
+  async getEmployeeDayPunches(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+    date: string,
+  ) {
+    return this.repo.getEmployeeDayPunches(tenantId, companyId, employeeId, date);
+  }
+
   async getAttendanceHistory(
     tenantId: string,
     companyId: string,

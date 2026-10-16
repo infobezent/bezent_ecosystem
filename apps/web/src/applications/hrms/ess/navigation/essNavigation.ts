@@ -52,8 +52,7 @@ export const ESS_NAV_DESTINATIONS: readonly NavDestination[] = [
     subtitle: 'Personal & Employment Details',
     description:
       'View and update personal information, emergency contacts, bank account and skills.',
-    categoryId: 'my-workspace',
-    sidebar: true,
+    sidebar: false,
   },
 
   // Time & Attendance

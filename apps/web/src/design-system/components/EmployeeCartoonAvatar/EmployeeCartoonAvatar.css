@@ -1,0 +1,89 @@
+/*
+ * BEZENT EmployeeCartoonAvatar — Canonical 2D vector cartoon character avatar.
+ * Adheres to Design System tokens and enterprise styling standards.
+ */
+
+.bezent-cartoon-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-sizing: border-box;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  user-select: none;
+  overflow: hidden;
+  background-color: var(--color-surface-container, #f1f5f9);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.bezent-cartoon-avatar__image,
+.bezent-cartoon-avatar__svg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
+}
+
+.bezent-cartoon-avatar--sm {
+  width: 32px;
+  height: 32px;
+}
+
+.bezent-cartoon-avatar--md {
+  width: 48px;
+  height: 48px;
+}
+
+.bezent-cartoon-avatar--lg {
+  width: 80px;
+  height: 80px;
+}
+
+.bezent-cartoon-avatar--xl {
+  width: 104px;
+  height: 104px;
+}
+
+.bezent-cartoon-avatar--hero {
+  width: 120px;
+  height: 120px;
+}
+
+.bezent-cartoon-avatar--128 {
+  width: 128px;
+  height: 128px;
+}
+
+/* Responsive downscaling on narrow screens */
+@media (max-width: 640px) {
+  .bezent-cartoon-avatar--hero,
+  .bezent-cartoon-avatar--128 {
+    width: 88px;
+    height: 88px;
+  }
+}
+
+/* Interactive avatar */
+.bezent-cartoon-avatar--interactive {
+  cursor: pointer;
+}
+
+.bezent-cartoon-avatar--interactive:hover {
+  transform: scale(1.03);
+}
+
+.bezent-cartoon-avatar--interactive:focus-visible {
+  outline: 2px solid var(--color-primary, #0052cc);
+  outline-offset: 3px;
+}
+
+/* Dark mode subtle contrast ring */
+[data-theme='dark'] .bezent-cartoon-avatar {
+  box-shadow: 0 0 0 1px var(--color-border-subtle, rgba(255, 255, 255, 0.12));
+}

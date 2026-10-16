@@ -7,6 +7,7 @@ export type ButtonSize = 'sm' | 'md' | 'lg' | 'control';
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className'> {
   variant?: ButtonVariant;
   size?: ButtonSize;
+  shape?: 'rounded' | 'pill';
   loading?: boolean;
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
@@ -21,6 +22,7 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
 export function Button({
   variant = 'primary',
   size = 'md',
+  shape = 'rounded',
   loading = false,
   leftIcon,
   rightIcon,
@@ -31,13 +33,14 @@ export function Button({
   ...rest
 }: ButtonProps) {
   const isDisabled = disabled || loading;
+  const shapeClass = shape === 'pill' ? 'bezent-btn--pill' : '';
 
   return (
     <button
       type={type}
       disabled={isDisabled}
       aria-busy={loading}
-      className={`bezent-btn bezent-btn--${variant} bezent-btn--${size} ${loading ? 'bezent-btn--loading' : ''} ${className || ''}`.trim()}
+      className={`bezent-btn bezent-btn--${variant} bezent-btn--${size} ${shapeClass} ${loading ? 'bezent-btn--loading' : ''} ${className || ''}`.trim()}
       {...rest}
     >
       {loading && <span className="bezent-btn__spinner" aria-hidden="true" />}

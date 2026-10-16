@@ -1,6 +1,7 @@
 import type { BezentApplication } from '../../shared/types/application';
 import { hrmsNavigation } from './navigation';
 import { HRMS_BASE_PATH, HRMS_DEFAULT_DESTINATION_ID, hrmsRoutes } from './routes';
+import '../../design-system/styles/applications/hrms.css';
 
 /** What HRMS hands the global app: identity, navigation catalog, routes. */
 export const hrmsApplication: BezentApplication = {

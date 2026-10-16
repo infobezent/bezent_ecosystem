@@ -32,9 +32,46 @@ export class EssController {
     }
   };
 
+  updateContactDetails = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const profile = await this.service.updateContactDetails(req.employeeContext!, req.body);
+      res.status(200).json({ data: profile });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  updateEmergencyContacts = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const profile = await this.service.updateEmergencyContacts(req.employeeContext!, req.body);
+      res.status(200).json({ data: profile });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  updateFamilyMembers = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const profile = await this.service.updateFamilyMembers(req.employeeContext!, req.body);
+      res.status(200).json({ data: profile });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  getProfileChangeRequests = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const requests = await this.service.getProfileChangeRequests(req.employeeContext!);
+      res.status(200).json({ data: requests });
+    } catch (err) {
+      next(err);
+    }
+  };
+
   getAttendance = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const attendance = await this.service.getAttendanceWorkspace(req.employeeContext!);
+      const month = typeof req.query.month === 'string' ? req.query.month : undefined;
+      const attendance = await this.service.getAttendanceWorkspace(req.employeeContext!, month);
       res.status(200).json({ data: attendance });
     } catch (err) {
       next(err);
@@ -60,6 +97,24 @@ export class EssController {
         clientIp: req.ip,
       });
       res.status(200).json({ data: record });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  startBreak = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await this.service.startBreak(req.employeeContext!, req.body);
+      res.status(200).json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  endBreak = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await this.service.endBreak(req.employeeContext!, req.body);
+      res.status(200).json({ data: result });
     } catch (err) {
       next(err);
     }
@@ -159,6 +214,15 @@ export class EssController {
     try {
       const result = await this.service.cancelRequest(req.employeeContext!, requireRecordId(req));
       res.status(200).json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  createRequest = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await this.service.createServiceRequest(req.employeeContext!, req.body);
+      res.status(201).json({ data: result });
     } catch (err) {
       next(err);
     }

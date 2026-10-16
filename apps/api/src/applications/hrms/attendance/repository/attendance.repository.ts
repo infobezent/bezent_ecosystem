@@ -247,6 +247,30 @@ export class AttendanceRepository {
     return created!;
   }
 
+  async getEmployeeDayPunches(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+    dateStr: string,
+  ): Promise<AttendancePunch[]> {
+    const db = getDb();
+    const startOfDay = new Date(`${dateStr}T00:00:00.000Z`);
+    const endOfDay = new Date(`${dateStr}T23:59:59.999Z`);
+    return db
+      .select()
+      .from(attendancePunches)
+      .where(
+        and(
+          eq(attendancePunches.tenantId, tenantId),
+          eq(attendancePunches.companyId, companyId),
+          eq(attendancePunches.employeeId, employeeId),
+          gte(attendancePunches.punchTime, startOfDay),
+          lte(attendancePunches.punchTime, endOfDay),
+        ),
+      )
+      .orderBy(asc(attendancePunches.punchTime));
+  }
+
   /** Maps each identifier (employee id or employee number) to the employee's id. */
   async findEmployeesByIdentifiers(
     tenantId: string,
