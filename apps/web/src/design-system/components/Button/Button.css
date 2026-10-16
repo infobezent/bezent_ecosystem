@@ -235,3 +235,10 @@
   display: inline-flex;
   align-items: center;
 }
+
+/* ── Pill Shape ── */
+.bezent-btn--pill {
+  border-radius: 9999px;
+  padding-left: 20px;
+  padding-right: 20px;
+}

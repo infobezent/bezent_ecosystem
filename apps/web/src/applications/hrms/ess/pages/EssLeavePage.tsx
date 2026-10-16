@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Page,
   PageHeader,
@@ -11,6 +11,7 @@ import {
   Button,
   Alert,
   LoadingState,
+  Toolbar,
   Table,
   TableHead,
   TableBody,
@@ -21,6 +22,10 @@ import {
   FormSection,
   FormGrid,
   EmptyState,
+  ProgressBar,
+  Select,
+  Input,
+  Divider,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { essApi, type EssLeaveBalanceItem, type EssLeaveRequest } from '../api/essApi';
@@ -31,10 +36,27 @@ type LeaveWorkspace = {
   holidays: Array<{ name: string; date: string; dayOfWeek: string }>;
 };
 
+const LEAVE_TYPE_OPTIONS = [
+  { value: 'annual', label: 'Annual / Paid Leave' },
+  { value: 'sick', label: 'Sick Leave' },
+  { value: 'casual', label: 'Casual Leave' },
+  { value: 'unpaid', label: 'Unpaid Leave (Loss of Pay)' },
+];
+
+const STATUS_FILTER_OPTIONS = [
+  { value: 'all', label: 'All Requests' },
+  { value: 'pending', label: 'Pending Review' },
+  { value: 'approved', label: 'Approved' },
+  { value: 'rejected', label: 'Rejected' },
+  { value: 'cancelled', label: 'Cancelled' },
+];
+
 export function EssLeavePage() {
   const [workspace, setWorkspace] = useState<LeaveWorkspace | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Apply Leave Modal state
   const [applyOpen, setApplyOpen] = useState(false);
   const [applyLoading, setApplyLoading] = useState(false);
   const [applyError, setApplyError] = useState<string | null>(null);
@@ -43,7 +65,14 @@ export function EssLeavePage() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [reason, setReason] = useState('');
+
+  // Cancel & Detail Modal state
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [confirmCancelRequest, setConfirmCancelRequest] = useState<EssLeaveRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<EssLeaveRequest | null>(null);
+
+  // Filters
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -61,6 +90,26 @@ export function EssLeavePage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Calculate requested days
+  const requestedDays = useMemo(() => {
+    if (!startDate || !endDate) return 0;
+    const s = new Date(startDate);
+    const e = new Date(endDate);
+    if (isNaN(s.getTime()) || isNaN(e.getTime()) || e < s) return 0;
+    const diff = Math.abs(e.getTime() - s.getTime());
+    return Math.ceil(diff / (1000 * 60 * 60 * 24)) + 1;
+  }, [startDate, endDate]);
+
+  const selectedBalance = useMemo(() => {
+    if (!workspace?.balances) return null;
+    return workspace.balances.find((b) => b.leaveType === leaveType) || null;
+  }, [workspace?.balances, leaveType]);
+
+  const isInsufficientBalance =
+    leaveType !== 'unpaid' &&
+    selectedBalance !== null &&
+    requestedDays > selectedBalance.availableDays;
 
   const handleApplyLeave = async () => {
     setApplyLoading(true);
@@ -80,11 +129,13 @@ export function EssLeavePage() {
     }
   };
 
-  const handleCancelLeave = async (id: string) => {
-    setCancellingId(id);
+  const handleConfirmCancel = async () => {
+    if (!confirmCancelRequest) return;
+    setCancellingId(confirmCancelRequest.id);
     try {
-      await essApi.cancelLeave(id);
-      setSuccessMsg('Leave request cancelled.');
+      await essApi.cancelLeave(confirmCancelRequest.id);
+      setSuccessMsg('Leave request cancelled successfully.');
+      setConfirmCancelRequest(null);
       await load();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to cancel leave');
@@ -92,6 +143,13 @@ export function EssLeavePage() {
       setCancellingId(null);
     }
   };
+
+  // Filter requests
+  const filteredRequests = useMemo(() => {
+    if (!workspace?.requests) return [];
+    if (statusFilter === 'all') return workspace.requests;
+    return workspace.requests.filter((r) => r.status === statusFilter);
+  }, [workspace?.requests, statusFilter]);
 
   if (loading) return <LoadingState label="Loading leave workspace..." />;
   if (error)
@@ -109,11 +167,13 @@ export function EssLeavePage() {
     unpaid: 'neutral',
   };
 
+  const todayStr = new Date().toISOString().split('T')[0] ?? '';
+
   return (
     <Page>
       <PageHeader
-        title="Leave"
-        subtitle="Leave balances, requests and holiday calendar"
+        title="Leave Management"
+        subtitle="View annual leave balances, submit leave applications, track approvals, and holiday calendar"
         actions={
           <Button
             id="ess-apply-leave-btn"
@@ -132,123 +192,201 @@ export function EssLeavePage() {
         </Alert>
       )}
 
-      {/* Leave Balances */}
-      <Section title="Leave Balances" subtitle={`Year ${new Date().getFullYear()}`}>
+      {/* ── Leave Balances ────────────────────────────────────────── */}
+      <Section
+        title="Leave Balances"
+        subtitle={`Annual entitlement for year ${new Date().getFullYear()}`}
+      >
         <Grid columns={4} gap="md">
-          {workspace.balances.map((bal) => (
-            <Card key={bal.leaveType}>
-              <Stack gap="sm">
-                <Badge variant={balanceColors[bal.leaveType] ?? 'neutral'}>
-                  {capitalise(bal.leaveType)}
-                </Badge>
-                <Inline gap="sm" align="baseline">
-                  <strong>{bal.availableDays}</strong>
-                  <span>/ {bal.totalDays} days</span>
-                </Inline>
-                <Grid columns={2} gap="xs">
-                  <span>Used: {bal.usedDays}</span>
-                  <span>Pending: {bal.pendingDays}</span>
-                </Grid>
-              </Stack>
-            </Card>
-          ))}
-        </Grid>
-      </Section>
+          {workspace.balances.map((bal) => {
+            const usedPct =
+              bal.totalDays > 0
+                ? Math.min(100, Math.round((bal.usedDays / bal.totalDays) * 100))
+                : 0;
+            return (
+              <Card key={bal.leaveType} variant="default">
+                <Stack gap="md">
+                  <Inline justify="between" align="center">
+                    <Badge variant={balanceColors[bal.leaveType] ?? 'neutral'} size="md">
+                      {capitalise(bal.leaveType)} Leave
+                    </Badge>
+                    <Inline gap="xs" align="baseline">
+                      <strong>{bal.availableDays}</strong>
+                      <span>days left</span>
+                    </Inline>
+                  </Inline>
 
-      {/* Leave Requests */}
-      <Section title="My Leave Requests">
-        {workspace.requests.length === 0 ? (
-          <EmptyState
-            title="No Leave Requests"
-            description="You have not applied for any leaves yet."
-            primaryAction={{ label: 'Apply for Leave', onClick: () => setApplyOpen(true) }}
-          />
-        ) : (
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableHeaderCell>Type</TableHeaderCell>
-                <TableHeaderCell>From</TableHeaderCell>
-                <TableHeaderCell>To</TableHeaderCell>
-                <TableHeaderCell>Days</TableHeaderCell>
-                <TableHeaderCell>Reason</TableHeaderCell>
-                <TableHeaderCell>Status</TableHeaderCell>
-                <TableHeaderCell>Actions</TableHeaderCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {workspace.requests.map((req) => (
-                <TableRow key={req.id}>
-                  <TableCell>
-                    <Badge variant={balanceColors[req.leaveType] ?? 'neutral'}>
-                      {capitalise(req.leaveType)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{req.startDate}</TableCell>
-                  <TableCell>{req.endDate}</TableCell>
-                  <TableCell>{req.totalDays}</TableCell>
-                  <TableCell>{req.reason}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        req.status === 'approved'
-                          ? 'success'
-                          : req.status === 'rejected'
-                            ? 'danger'
-                            : req.status === 'cancelled'
-                              ? 'neutral'
-                              : 'warning'
-                      }
-                    >
-                      {capitalise(req.status)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {req.status === 'pending' && (
-                      <Button
-                        id={`cancel-leave-${req.id}`}
-                        variant="ghost"
+                  {bal.leaveType !== 'unpaid' ? (
+                    <Stack gap="xs">
+                      <ProgressBar
+                        value={bal.usedDays}
+                        max={bal.totalDays}
+                        variant={usedPct > 80 ? 'danger' : 'primary'}
                         size="sm"
-                        onClick={() => handleCancelLeave(req.id)}
-                        loading={cancellingId === req.id}
-                      >
-                        Cancel
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </Section>
-
-      {/* Holiday Calendar */}
-      <Section title="Holiday Calendar">
-        <Grid columns={3} gap="sm">
-          {workspace.holidays.map((h) => (
-            <Card key={h.date}>
-              <Inline gap="md" align="center">
-                <BezentIcon name="calendar" size={18} />
-                <Stack gap="xs">
-                  <strong>{h.name}</strong>
-                  <span>
-                    {h.date} · {h.dayOfWeek}
-                  </span>
+                      />
+                      <Inline justify="between" align="center">
+                        <span>
+                          Used: {bal.usedDays} of {bal.totalDays}
+                        </span>
+                        {bal.pendingDays > 0 && <span>Pending: {bal.pendingDays}</span>}
+                      </Inline>
+                    </Stack>
+                  ) : (
+                    <span>No quota limit (Loss of pay)</span>
+                  )}
                 </Stack>
-              </Inline>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
         </Grid>
       </Section>
 
-      {/* Apply Leave Modal */}
+      {/* ── Leave Requests ────────────────────────────────────────── */}
+      <Section
+        title="My Leave History"
+        subtitle="Track approval status or cancel pending leave requests"
+      >
+        <Stack gap="md">
+          <Toolbar
+            left={
+              <Inline gap="sm" align="center">
+                <Select
+                  size="sm"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  options={STATUS_FILTER_OPTIONS}
+                />
+              </Inline>
+            }
+            right={
+              <span>
+                Showing <strong>{filteredRequests.length}</strong> request(s)
+              </span>
+            }
+          />
+
+          {filteredRequests.length === 0 ? (
+            <EmptyState
+              title="No Leave Requests Found"
+              description={
+                statusFilter === 'all'
+                  ? 'You have not submitted any leave applications yet.'
+                  : `No leave applications with status "${statusFilter}".`
+              }
+              primaryAction={{ label: 'Apply for Leave', onClick: () => setApplyOpen(true) }}
+            />
+          ) : (
+            <Card>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableHeaderCell>Leave Type</TableHeaderCell>
+                    <TableHeaderCell>Start Date</TableHeaderCell>
+                    <TableHeaderCell>End Date</TableHeaderCell>
+                    <TableHeaderCell>Days</TableHeaderCell>
+                    <TableHeaderCell>Reason</TableHeaderCell>
+                    <TableHeaderCell>Status</TableHeaderCell>
+                    <TableHeaderCell>Actions</TableHeaderCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {filteredRequests.map((req) => (
+                    <TableRow key={req.id}>
+                      <TableCell>
+                        <Badge variant={balanceColors[req.leaveType] ?? 'neutral'}>
+                          {capitalise(req.leaveType)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{req.startDate}</TableCell>
+                      <TableCell>{req.endDate}</TableCell>
+                      <TableCell>
+                        <strong>{req.totalDays} day(s)</strong>
+                      </TableCell>
+                      <TableCell>{req.reason}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            req.status === 'approved'
+                              ? 'success'
+                              : req.status === 'rejected'
+                                ? 'danger'
+                                : req.status === 'cancelled'
+                                  ? 'neutral'
+                                  : 'warning'
+                          }
+                        >
+                          {capitalise(req.status)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Inline gap="xs" align="center">
+                          <Button variant="ghost" size="sm" onClick={() => setSelectedRequest(req)}>
+                            Details
+                          </Button>
+                          {req.status === 'pending' && (
+                            <Button
+                              id={`cancel-leave-${req.id}`}
+                              variant="danger"
+                              size="sm"
+                              onClick={() => setConfirmCancelRequest(req)}
+                            >
+                              Cancel
+                            </Button>
+                          )}
+                        </Inline>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          )}
+        </Stack>
+      </Section>
+
+      {/* ── Holiday Calendar ──────────────────────────────────────── */}
+      <Section
+        title="Upcoming Holidays"
+        subtitle="Public and mandatory holidays for the current calendar year"
+      >
+        <Grid columns={3} gap="md">
+          {workspace.holidays.map((h) => {
+            const isPast = h.date < todayStr;
+            return (
+              <Card key={h.date} variant={isPast ? 'flat' : 'default'}>
+                <Inline gap="md" align="center">
+                  <BezentIcon name="calendar" size={24} />
+                  <Stack gap="xs">
+                    <Inline gap="xs" align="center">
+                      <strong>{h.name}</strong>
+                      {isPast ? (
+                        <Badge variant="neutral" size="sm">
+                          Past
+                        </Badge>
+                      ) : (
+                        <Badge variant="info" size="sm">
+                          Upcoming
+                        </Badge>
+                      )}
+                    </Inline>
+                    <span>
+                      {h.date} • {h.dayOfWeek}
+                    </span>
+                  </Stack>
+                </Inline>
+              </Card>
+            );
+          })}
+        </Grid>
+      </Section>
+
+      {/* ── Apply Leave Modal ─────────────────────────────────────── */}
       <Modal
         isOpen={applyOpen}
         title="Apply for Leave"
         onClose={() => setApplyOpen(false)}
         footer={
-          <Inline gap="sm">
+          <Inline gap="sm" justify="end">
             <Button id="leave-cancel" variant="secondary" onClick={() => setApplyOpen(false)}>
               Cancel
             </Button>
@@ -257,6 +395,7 @@ export function EssLeavePage() {
               variant="primary"
               onClick={handleApplyLeave}
               loading={applyLoading}
+              disabled={isInsufficientBalance || requestedDays <= 0}
             >
               Submit Application
             </Button>
@@ -269,47 +408,159 @@ export function EssLeavePage() {
               {applyError}
             </Alert>
           )}
+
+          {isInsufficientBalance && (
+            <Alert variant="warning" title="Insufficient Leave Balance">
+              You have requested {requestedDays} day(s), but your available balance for{' '}
+              {capitalise(leaveType)} Leave is only {selectedBalance?.availableDays} day(s).
+            </Alert>
+          )}
+
           <FormSection title="Leave Details">
             <FormGrid columns={1}>
-              <label>
-                Leave Type
-                <select
-                  value={leaveType}
-                  onChange={(e) => setLeaveType(e.target.value as typeof leaveType)}
-                >
-                  <option value="annual">Annual Leave</option>
-                  <option value="sick">Sick Leave</option>
-                  <option value="casual">Casual Leave</option>
-                  <option value="unpaid">Unpaid Leave</option>
-                </select>
-              </label>
-              <Grid columns={2} gap="sm">
-                <label>
-                  Start Date
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                  />
-                </label>
-                <label>
-                  End Date
-                  <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-                </label>
-              </Grid>
-              <label>
-                Reason
-                <textarea
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  rows={3}
-                  placeholder="Provide reason for leave..."
+              <Select
+                label="Leave Type"
+                value={leaveType}
+                onChange={(e) => setLeaveType(e.target.value as typeof leaveType)}
+                options={LEAVE_TYPE_OPTIONS}
+              />
+
+              <Grid columns={2} gap="md">
+                <Input
+                  label="Start Date"
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
                 />
-              </label>
+                <Input
+                  label="End Date"
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </Grid>
+
+              {requestedDays > 0 && (
+                <Card variant="flat" padding="sm">
+                  <Inline justify="between" align="center">
+                    <span>
+                      Total Duration: <strong>{requestedDays} day(s)</strong>
+                    </span>
+                    {selectedBalance && leaveType !== 'unpaid' && (
+                      <span>
+                        Available Balance: <strong>{selectedBalance.availableDays} day(s)</strong>
+                      </span>
+                    )}
+                  </Inline>
+                </Card>
+              )}
+
+              <Input
+                label="Reason"
+                placeholder="State your reason for leave (e.g. Vacation, Medical rest, Family occasion)..."
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+              />
             </FormGrid>
           </FormSection>
         </Stack>
       </Modal>
+
+      {/* ── Cancel Confirmation Modal ─────────────────────────────── */}
+      {confirmCancelRequest && (
+        <Modal
+          isOpen={true}
+          title="Confirm Leave Cancellation"
+          onClose={() => setConfirmCancelRequest(null)}
+          footer={
+            <Inline gap="sm" justify="end">
+              <Button variant="secondary" onClick={() => setConfirmCancelRequest(null)}>
+                Keep Request
+              </Button>
+              <Button
+                variant="danger"
+                onClick={handleConfirmCancel}
+                loading={cancellingId === confirmCancelRequest.id}
+              >
+                Yes, Cancel Leave
+              </Button>
+            </Inline>
+          }
+        >
+          <Stack gap="md">
+            <span>
+              Are you sure you want to cancel your{' '}
+              <strong>{capitalise(confirmCancelRequest.leaveType)} Leave</strong> request from{' '}
+              <strong>{confirmCancelRequest.startDate}</strong> to{' '}
+              <strong>{confirmCancelRequest.endDate}</strong> ({confirmCancelRequest.totalDays}{' '}
+              day(s))?
+            </span>
+            <span>Your leave balance will be restored automatically.</span>
+          </Stack>
+        </Modal>
+      )}
+
+      {/* ── Request Details Modal ─────────────────────────────────── */}
+      {selectedRequest && (
+        <Modal
+          isOpen={true}
+          title="Leave Request Details"
+          onClose={() => setSelectedRequest(null)}
+          footer={
+            <Button variant="secondary" onClick={() => setSelectedRequest(null)}>
+              Close
+            </Button>
+          }
+        >
+          <Stack gap="md">
+            <Grid columns={2} gap="md">
+              <Stack gap="xs">
+                <span>Leave Type</span>
+                <Badge variant={balanceColors[selectedRequest.leaveType] ?? 'neutral'}>
+                  {capitalise(selectedRequest.leaveType)}
+                </Badge>
+              </Stack>
+              <Stack gap="xs">
+                <span>Status</span>
+                <Badge
+                  variant={
+                    selectedRequest.status === 'approved'
+                      ? 'success'
+                      : selectedRequest.status === 'rejected'
+                        ? 'danger'
+                        : selectedRequest.status === 'cancelled'
+                          ? 'neutral'
+                          : 'warning'
+                  }
+                >
+                  {capitalise(selectedRequest.status)}
+                </Badge>
+              </Stack>
+              <Stack gap="xs">
+                <span>Start Date</span>
+                <strong>{selectedRequest.startDate}</strong>
+              </Stack>
+              <Stack gap="xs">
+                <span>End Date</span>
+                <strong>{selectedRequest.endDate}</strong>
+              </Stack>
+              <Stack gap="xs">
+                <span>Total Days</span>
+                <strong>{selectedRequest.totalDays} day(s)</strong>
+              </Stack>
+              <Stack gap="xs">
+                <span>Applied On</span>
+                <span>{new Date(selectedRequest.createdAt).toLocaleDateString()}</span>
+              </Stack>
+            </Grid>
+            <Divider />
+            <Stack gap="xs">
+              <span>Reason</span>
+              <p>{selectedRequest.reason}</p>
+            </Stack>
+          </Stack>
+        </Modal>
+      )}
     </Page>
   );
 }
