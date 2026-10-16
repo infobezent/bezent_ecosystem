@@ -2,6 +2,7 @@ import { createApp } from './app/server/createApp.js';
 import { assertProductionAuthConfig, env } from './app/config/env.js';
 import { closePool, ensureDatabaseConnected, isDatabaseConfigured } from './db/connection.js';
 import { backgroundWorkerRunner } from './platform/workers/backgroundWorker.runner.js';
+import { attendanceAutoLockService } from './applications/hrms/attendance/service/attendanceAutoLock.service.js';
 
 assertProductionAuthConfig();
 
@@ -16,6 +17,8 @@ async function startServer(): Promise<void> {
     console.log('[db] MySQL connected');
     backgroundWorkerRunner.start();
     console.log('[workers] Background worker runner started');
+    attendanceAutoLockService.start();
+    console.log('[workers] Attendance auto-lock sweep started');
   }
 
   const app = createApp();
@@ -27,6 +30,7 @@ async function startServer(): Promise<void> {
   const shutdown = async (signal: string) => {
     console.log(`[bezent-api] received ${signal}, shutting down gracefully...`);
     backgroundWorkerRunner.stop();
+    attendanceAutoLockService.stop();
     server.close(async () => {
       await closePool();
       console.log('[bezent-api] shutdown complete');

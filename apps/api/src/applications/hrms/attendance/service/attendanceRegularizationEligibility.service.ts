@@ -13,9 +13,71 @@ import { attendanceRegularizationRepository } from '../repository/attendanceRegu
 import type {
   RegularizationEligibilityCheckInput,
   RegularizationEligibilityCheckResult,
+  RegularizationRequestType,
 } from '../types/attendance.types.js';
 
+/**
+ * The settings screen offers correction categories; a request type maps onto
+ * one or more of them. Companies created before the screen existed hold the
+ * legacy ids (`missed_in`, `time_adjustment`, ...), so both spellings count.
+ * Request types with no category (status/worked-hours/wrong-direction) are
+ * never restricted.
+ */
+const CATEGORIES_BY_REQUEST_TYPE: Partial<Record<RegularizationRequestType, string[]>> = {
+  missing_in: ['missed_check_in', 'missed_in'],
+  missing_out: ['missed_check_out', 'missed_out'],
+  both_missing: ['both_punches', 'both_missing'],
+  incorrect_time: ['late_arrival', 'early_exit', 'shift_timing_mismatch', 'time_adjustment'],
+};
+
+const KNOWN_CATEGORIES = new Set(Object.values(CATEGORIES_BY_REQUEST_TYPE).flat());
+
+/**
+ * An empty list, or one with no recognised category, means "no restriction"
+ * (the screen starts with nothing ticked).
+ */
+export function isCorrectionTypeAllowed(
+  allowedCategories: string[] | null | undefined,
+  requestType: RegularizationRequestType,
+): boolean {
+  const recognised = (allowedCategories ?? []).filter((c) => KNOWN_CATEGORIES.has(c));
+  if (recognised.length === 0) return true;
+  const categories = CATEGORIES_BY_REQUEST_TYPE[requestType];
+  if (!categories) return true;
+  return categories.some((category) => recognised.includes(category));
+}
+
+export interface RegularizationWorkflowSettings {
+  requireReason: boolean;
+  allowWithdrawal: boolean;
+  approvalHierarchy: 'manager_only' | 'hr_only' | 'manager_then_hr' | 'auto_approve';
+  autoApproveGraceMinutes: number;
+}
+
 export class AttendanceRegularizationEligibilityService {
+  /** Workflow-related regularization settings with the same defaults as an unconfigured company. */
+  async getWorkflowSettings(
+    tenantId: string,
+    companyId: string,
+  ): Promise<RegularizationWorkflowSettings> {
+    const [row] = await getDb()
+      .select()
+      .from(attendanceRegularizationSettings)
+      .where(
+        and(
+          eq(attendanceRegularizationSettings.tenantId, tenantId),
+          eq(attendanceRegularizationSettings.companyId, companyId),
+        ),
+      )
+      .limit(1);
+    return {
+      requireReason: row?.requireReason ?? true,
+      allowWithdrawal: row?.allowWithdrawal ?? true,
+      approvalHierarchy: row?.approvalHierarchy ?? 'manager_then_hr',
+      autoApproveGraceMinutes: row?.autoApproveGraceMinutes ?? 0,
+    };
+  }
+
   /**
    * Evaluates comprehensive submission eligibility and risk profile
    */
@@ -94,10 +156,18 @@ export class AttendanceRegularizationEligibilityService {
     const submissionWindowDays = regSettings?.submissionWindowDays ?? 7;
     const maxRequestsPerMonth = regSettings?.maxRequestsPerMonth ?? 3;
     const requireEvidence = regSettings?.requireEvidence ?? false;
+    const blockOnPayrollLock = regSettings?.blockOnPayrollLock ?? true;
 
     // 3. Rule: Check if Regularization is disabled globally
     if (regSettings && !regSettings.isEnabled) {
       reasons.push('Attendance regularization is currently disabled in company settings.');
+    }
+
+    // 3b. Rule: Correction category must be enabled in company settings
+    if (!isCorrectionTypeAllowed(regSettings?.allowedCorrectionTypes, input.requestType)) {
+      reasons.push(
+        `This type of correction (${input.requestType.replace(/_/g, ' ')}) is not enabled in company attendance settings.`,
+      );
     }
 
     // 4. Rule: Future Workday restriction
@@ -233,9 +303,12 @@ export class AttendanceRegularizationEligibilityService {
       input.workday,
     );
     if (isLocked) {
-      reasons.push(
-        `Workday (${input.workday}) falls in an attendance period that is locked for payroll handover. Adjustments are restricted.`,
-      );
+      const lockMessage = `Workday (${input.workday}) falls in an attendance period that is locked for payroll handover. Adjustments are restricted.`;
+      if (blockOnPayrollLock) {
+        reasons.push(lockMessage);
+      } else {
+        warnings.push(`${lockMessage} Submission allowed by company settings.`);
+      }
       riskFactors.push('payroll_period_locked');
     }
 

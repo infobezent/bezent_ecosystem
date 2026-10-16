@@ -44,6 +44,8 @@ export interface CheckInInput {
   notes?: string;
   source?: 'web' | 'mobile' | 'biometric' | 'manual' | 'api';
   deviceMetadata?: Record<string, unknown>;
+  /** Set by the server from the request, never from the client body. */
+  clientIp?: string;
 }
 
 export interface RegularizeAttendanceInput {

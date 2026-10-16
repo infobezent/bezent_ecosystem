@@ -235,6 +235,23 @@ export interface EssAttendanceRecord {
   shiftScheduleRef?: string | null;
 }
 
+export interface EssMonthlyAttendanceSummary {
+  month: string;
+  present: number;
+  halfDay: number;
+  absent: number;
+  onLeave: number;
+  holiday: number;
+  lateDays: number;
+  workedMinutes: number;
+}
+
+/** How the company's attendance settings shape the employee's own history view. */
+export interface EssAttendanceView {
+  visibility: string;
+  historyDays: number;
+}
+
 export interface EssTimesheet {
   id: string;
   date: string;
@@ -378,9 +395,20 @@ async function req<T>(path: string, options: RequestInit = {}): Promise<T> {
       body?.error?.message ??
       (typeof body?.error === 'string' ? body.error : undefined) ??
       `Request failed with status ${resp.status}`;
-    throw new Error(msg);
+    throw Object.assign(new Error(msg), { code: body?.error?.code as string | undefined });
   }
   return (body?.data !== undefined ? body.data : body) as T;
+}
+
+/** The server asks for the employee's location before it will accept a punch. */
+export function isLocationRequiredError(err: unknown): boolean {
+  return err instanceof Error && (err as Error & { code?: string }).code === 'LOCATION_REQUIRED';
+}
+
+export interface PunchDeviceMetadata {
+  latitude: number;
+  longitude: number;
+  accuracy?: number;
 }
 
 /* ── API methods ─────────────────────────────────────────────────── */
@@ -418,19 +446,26 @@ export const essApi = {
   // Attendance
   getAttendance: (params?: { month?: string }) =>
     req<{
-      today: EssTodayAttendance;
-      summary: EssAttendanceSummaryCounters & { attendancePercent?: number; totalWorkingDays?: number };
+      today: EssTodayAttendance & { notes?: string | null };
+      summary?: EssAttendanceSummaryCounters & { attendancePercent?: number; totalWorkingDays?: number };
       history: EssAttendanceRecord[];
+      monthlySummary?: EssMonthlyAttendanceSummary[];
+      view?: EssAttendanceView;
     }>(params?.month ? `/attendance?month=${encodeURIComponent(params.month)}` : '/attendance'),
   checkIn: (payload: {
     workLocation?: 'office' | 'wfh' | 'on_duty' | 'field' | string;
     notes?: string;
+    deviceMetadata?: PunchDeviceMetadata;
   }) =>
     req<EssAttendanceRecord>('/attendance/check-in', {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
-  checkOut: () => req<EssAttendanceRecord>('/attendance/check-out', { method: 'POST' }),
+  checkOut: (payload?: { deviceMetadata?: PunchDeviceMetadata }) =>
+    req<EssAttendanceRecord>('/attendance/check-out', {
+      method: 'POST',
+      body: JSON.stringify(payload ?? {}),
+    }),
   startBreak: (payload: { breakType?: 'tea' | 'lunch' | 'personal'; notes?: string }) =>
     req<{ message: string; punch: EssPunchEvent }>('/attendance/break-start', {
       method: 'POST',
@@ -440,6 +475,7 @@ export const essApi = {
     req<{ message: string; punch: EssPunchEvent }>('/attendance/break-end', {
       method: 'POST',
       body: JSON.stringify(payload || {}),
+    }),
     }),
   regularizeAttendance: (payload: {
     date: string;

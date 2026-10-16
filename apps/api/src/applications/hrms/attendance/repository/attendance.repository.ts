@@ -23,6 +23,7 @@ import {
 } from '../../../../db/schema.js';
 import { generateSurrogateId } from '../../../../platform/auth/security.js';
 import { getDayOfWeekName } from '../service/attendanceCalculation.service.js';
+import { addDays } from '../service/attendancePeriodCalendar.js';
 import type {
   DailyAttendanceItem,
   DailyLogFilter,
@@ -172,6 +173,28 @@ export class AttendanceRepository {
       .limit(limit);
   }
 
+  /** An employee's own daily records on or after `sinceDate` (YYYY-MM-DD), newest first. */
+  async getAttendanceHistorySince(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+    sinceDate: string,
+  ): Promise<EmployeeAttendance[]> {
+    const db = getDb();
+    return db
+      .select()
+      .from(employeeAttendance)
+      .where(
+        and(
+          eq(employeeAttendance.tenantId, tenantId),
+          eq(employeeAttendance.companyId, companyId),
+          eq(employeeAttendance.employeeId, employeeId),
+          gte(employeeAttendance.date, sinceDate),
+        ),
+      )
+      .orderBy(desc(employeeAttendance.date));
+  }
+
   async recordPunch(
     tenantId: string,
     companyId: string,
@@ -246,6 +269,155 @@ export class AttendanceRepository {
         ),
       )
       .orderBy(asc(attendancePunches.punchTime));
+  }
+
+  /** Maps each identifier (employee id or employee number) to the employee's id. */
+  async findEmployeesByIdentifiers(
+    tenantId: string,
+    companyId: string,
+    identifiers: string[],
+  ): Promise<Map<string, string>> {
+    const result = new Map<string, string>();
+    if (identifiers.length === 0) return result;
+    const db = getDb();
+    const rows = await db
+      .select({ id: employees.id, employeeNumber: employees.employeeNumber })
+      .from(employees)
+      .where(
+        and(
+          eq(employees.tenantId, tenantId),
+          eq(employees.companyId, companyId),
+          or(inArray(employees.id, identifiers), inArray(employees.employeeNumber, identifiers)),
+        ),
+      );
+    for (const row of rows) {
+      result.set(row.id, row.id);
+      if (row.employeeNumber) result.set(row.employeeNumber, row.id);
+    }
+    return result;
+  }
+
+  /** Keys (`employeeId|epochMs|punchType`) of punches already stored in a time range. */
+  async findExistingPunchKeys(
+    tenantId: string,
+    companyId: string,
+    employeeIds: string[],
+    from: Date,
+    to: Date,
+  ): Promise<Set<string>> {
+    const keys = new Set<string>();
+    if (employeeIds.length === 0) return keys;
+    const db = getDb();
+    const rows = await db
+      .select({
+        employeeId: attendancePunches.employeeId,
+        punchTime: attendancePunches.punchTime,
+        punchType: attendancePunches.punchType,
+      })
+      .from(attendancePunches)
+      .where(
+        and(
+          eq(attendancePunches.tenantId, tenantId),
+          eq(attendancePunches.companyId, companyId),
+          inArray(attendancePunches.employeeId, employeeIds),
+          gte(attendancePunches.punchTime, from),
+          lte(attendancePunches.punchTime, to),
+        ),
+      );
+    for (const row of rows) {
+      keys.add(`${row.employeeId}|${row.punchTime.getTime()}|${row.punchType}`);
+    }
+    return keys;
+  }
+
+  async insertPunches(rows: Array<typeof attendancePunches.$inferInsert>): Promise<void> {
+    if (rows.length === 0) return;
+    const db = getDb();
+    for (let i = 0; i < rows.length; i += 500) {
+      await db.insert(attendancePunches).values(rows.slice(i, i + 500));
+    }
+  }
+
+  /** Distinct employee/workday pairs touched by an import batch. */
+  async listPunchDaysByImportBatch(
+    tenantId: string,
+    companyId: string,
+    batchId: string,
+  ): Promise<Array<{ employeeId: string; workday: string }>> {
+    const db = getDb();
+    const rows = await db
+      .selectDistinct({
+        employeeId: attendancePunches.employeeId,
+        workday: attendancePunches.workday,
+      })
+      .from(attendancePunches)
+      .where(
+        and(
+          eq(attendancePunches.tenantId, tenantId),
+          eq(attendancePunches.companyId, companyId),
+          sql`JSON_UNQUOTE(JSON_EXTRACT(${attendancePunches.deviceMetadata}, '$.importBatchId')) = ${batchId}`,
+        ),
+      );
+    return rows.flatMap((r) =>
+      r.employeeId && r.workday ? [{ employeeId: r.employeeId, workday: r.workday }] : [],
+    );
+  }
+
+  async deletePunchesByImportBatch(
+    tenantId: string,
+    companyId: string,
+    batchId: string,
+  ): Promise<void> {
+    const db = getDb();
+    await db
+      .delete(attendancePunches)
+      .where(
+        and(
+          eq(attendancePunches.tenantId, tenantId),
+          eq(attendancePunches.companyId, companyId),
+          sql`JSON_UNQUOTE(JSON_EXTRACT(${attendancePunches.deviceMetadata}, '$.importBatchId')) = ${batchId}`,
+        ),
+      );
+  }
+
+  /** Removes only the daily records an import created (tagged in calculationMetadata). */
+  async deleteDailyRecordsByImportBatch(
+    tenantId: string,
+    companyId: string,
+    batchId: string,
+  ): Promise<void> {
+    const db = getDb();
+    await db
+      .delete(employeeAttendance)
+      .where(
+        and(
+          eq(employeeAttendance.tenantId, tenantId),
+          eq(employeeAttendance.companyId, companyId),
+          sql`JSON_UNQUOTE(JSON_EXTRACT(${employeeAttendance.calculationMetadata}, '$.importBatchId')) = ${batchId}`,
+        ),
+      );
+  }
+
+  /** Most recent punch of an employee, newest first. Used by punch-security checks. */
+  async getLatestPunch(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+  ): Promise<AttendancePunch | null> {
+    const db = getDb();
+    const [latest] = await db
+      .select()
+      .from(attendancePunches)
+      .where(
+        and(
+          eq(attendancePunches.tenantId, tenantId),
+          eq(attendancePunches.companyId, companyId),
+          eq(attendancePunches.employeeId, employeeId),
+        ),
+      )
+      .orderBy(desc(attendancePunches.punchTime))
+      .limit(1);
+    return latest ?? null;
   }
 
   async getPunches(
@@ -2861,11 +3033,30 @@ export class AttendanceRepository {
     departmentId?: string,
     search?: string,
   ): Promise<MonthlySummaryEmployeeRow[]> {
-    const db = getDb();
     const monthStr = String(month).padStart(2, '0');
-    const startDate = `${year}-${monthStr}-01`;
     const lastDay = new Date(year, month, 0).getDate();
-    const endDate = `${year}-${monthStr}-${String(lastDay).padStart(2, '0')}`;
+    return this.getPeriodMatrix(
+      tenantId,
+      companyId,
+      `${year}-${monthStr}-01`,
+      `${year}-${monthStr}-${String(lastDay).padStart(2, '0')}`,
+      departmentId,
+      search,
+    );
+  }
+
+  /** Per-employee daily matrix for any inclusive date range (calendar month or payroll cycle). */
+  async getPeriodMatrix(
+    tenantId: string,
+    companyId: string,
+    startDate: string,
+    endDate: string,
+    departmentId?: string,
+    search?: string,
+  ): Promise<MonthlySummaryEmployeeRow[]> {
+    const db = getDb();
+    const dates: string[] = [];
+    for (let day = startDate; day <= endDate; day = addDays(day, 1)) dates.push(day);
 
     const conditions = [
       eq(employees.tenantId, tenantId),
@@ -2921,8 +3112,7 @@ export class AttendanceRepository {
         totalLateMinutes: 0,
       };
 
-      for (let d = 1; d <= lastDay; d++) {
-        const dayStr = `${year}-${monthStr}-${String(d).padStart(2, '0')}`;
+      for (const dayStr of dates) {
         const att = attMap.get(`${emp.employeeId}_${dayStr}`);
 
         if (att) {
@@ -2945,8 +3135,7 @@ export class AttendanceRepository {
           totals.totalLateMinutes += att.lateMinutes;
         } else {
           // Unrecorded: check if weekend
-          const dObj = new Date(Date.UTC(year, month - 1, d));
-          const dayOfWeek = dObj.getUTCDay();
+          const dayOfWeek = new Date(`${dayStr}T00:00:00Z`).getUTCDay();
           const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
           days[dayStr] = {

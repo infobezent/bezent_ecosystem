@@ -4,6 +4,16 @@ import {
   attendanceCalculationService,
 } from './attendanceCalculation.service.js';
 import { AttendancePolicyService, attendancePolicyService } from './attendancePolicy.service.js';
+import { AttendanceAlertService, attendanceAlertService } from './attendanceAlert.service.js';
+import {
+  AttendanceManualEntryService,
+  attendanceManualEntryService,
+  type ManualEntryActor,
+} from './attendanceManualEntry.service.js';
+import {
+  AttendanceSecurityService,
+  attendanceSecurityService,
+} from './attendanceSecurity.service.js';
 import {
   DefaultShiftScheduleProvider,
   defaultShiftScheduleProvider,
@@ -45,6 +55,9 @@ export class AttendanceService {
     private readonly calculator: AttendanceCalculationService = attendanceCalculationService,
     private readonly policyService: AttendancePolicyService = attendancePolicyService,
     private readonly scheduleProvider: DefaultShiftScheduleProvider = defaultShiftScheduleProvider,
+    private readonly securityService: AttendanceSecurityService = attendanceSecurityService,
+    private readonly manualEntryService: AttendanceManualEntryService = attendanceManualEntryService,
+    private readonly alertService: AttendanceAlertService = attendanceAlertService,
   ) {}
 
   getCurrentTimeString(): string {
@@ -71,6 +84,16 @@ export class AttendanceService {
     input: CheckInInput,
   ): Promise<{ record: EmployeeAttendance; checkInTime: string }> {
     const checkInTime = this.getCurrentTimeString();
+    const security = await this.securityService.assertPunchAllowed(
+      tenantId,
+      companyId,
+      employeeId,
+      {
+        punchType: 'in',
+        clientIp: input.clientIp,
+        deviceMetadata: input.deviceMetadata,
+      },
+    );
     try {
       // 1. Audit punch event
       await this.repo.recordPunch(
@@ -81,7 +104,7 @@ export class AttendanceService {
         input.source ?? 'web',
         input.workLocation ?? 'office',
         input.notes,
-        input.deviceMetadata,
+        security.deviceMetadata,
       );
 
       // 2. Base check-in record
@@ -122,6 +145,21 @@ export class AttendanceService {
         calculationMetadata: calc.calculationMetadata,
       });
 
+      if (calc.isLate) {
+        await this.alertService.notify(
+          tenantId,
+          companyId,
+          'lateArrival',
+          { employeeId },
+          {
+            title: 'Late arrival',
+            detail: `checked in at ${checkInTime}, ${calc.lateMinutes} minute(s) after the allowed start.`,
+            link: '/hrms/attendance/daily-log',
+            type: 'warning',
+          },
+        );
+      }
+
       return { record: updated, checkInTime };
     } catch (err: unknown) {
       if (err instanceof Error && err.message.includes('already recorded')) {
@@ -136,7 +174,12 @@ export class AttendanceService {
     companyId: string,
     employeeId: string,
     date: string,
-    input?: { source?: 'web' | 'mobile' | 'biometric' | 'manual' | 'api'; notes?: string },
+    input?: {
+      source?: 'web' | 'mobile' | 'biometric' | 'manual' | 'api';
+      notes?: string;
+      clientIp?: string;
+      deviceMetadata?: Record<string, unknown>;
+    },
   ): Promise<{ updated: EmployeeAttendance; checkOutTime: string }> {
     const todayAtt = await this.repo.getTodayAttendance(tenantId, companyId, employeeId, date);
     if (!todayAtt || !todayAtt.checkInTime) {
@@ -147,6 +190,16 @@ export class AttendanceService {
     }
 
     const checkOutTime = this.getCurrentTimeString();
+    const security = await this.securityService.assertPunchAllowed(
+      tenantId,
+      companyId,
+      employeeId,
+      {
+        punchType: 'out',
+        clientIp: input?.clientIp,
+        deviceMetadata: input?.deviceMetadata,
+      },
+    );
 
     // 1. Audit punch event
     await this.repo.recordPunch(
@@ -157,6 +210,7 @@ export class AttendanceService {
       input?.source ?? 'web',
       todayAtt.workLocation,
       input?.notes,
+      security.deviceMetadata,
     );
 
     // 2. Base check-out record
@@ -189,6 +243,21 @@ export class AttendanceService {
       shiftScheduleRef: calc.shiftScheduleRef,
       calculationMetadata: calc.calculationMetadata,
     });
+
+    if (calc.isEarlyExit) {
+      await this.alertService.notify(
+        tenantId,
+        companyId,
+        'earlyExit',
+        { employeeId },
+        {
+          title: 'Early exit',
+          detail: `checked out at ${checkOutTime}, ${calc.earlyMinutes} minute(s) before the scheduled end.`,
+          link: '/hrms/attendance/daily-log',
+          type: 'warning',
+        },
+      );
+    }
 
     return { updated, checkOutTime };
   }
@@ -734,10 +803,20 @@ export class AttendanceService {
     companyId: string,
     input: ManualCorrectionInput,
     adminUserId: string,
+    actor?: ManualEntryActor,
   ): Promise<EmployeeAttendance> {
-    if (!input.employeeId || !input.date || !input.reason) {
-      throw new BadRequestError('Employee ID, date, and reason are required for correction');
+    // Company manual-entry settings apply to interactive admin entries only.
+    const { reasonRequired } = actor
+      ? await this.manualEntryService.assertAllowed(tenantId, companyId, input, actor)
+      : { reasonRequired: true };
+    if (!input.employeeId || !input.date || (reasonRequired && !input.reason?.trim())) {
+      throw new BadRequestError(
+        reasonRequired
+          ? 'Employee ID, date, and reason are required for correction'
+          : 'Employee ID and date are required for correction',
+      );
     }
+    const reason = input.reason?.trim() || 'Manual correction';
 
     const isLocked = await this.repo.checkDateInLockedPeriod(
       tenantId,
@@ -760,7 +839,7 @@ export class AttendanceService {
         'in',
         'manual',
         input.workLocation ?? 'office',
-        `Admin correction by ${adminUserId}: ${input.reason}`,
+        `Admin correction by ${adminUserId}: ${reason}`,
       );
     }
     if (input.checkOutTime) {
@@ -771,7 +850,7 @@ export class AttendanceService {
         'out',
         'manual',
         input.workLocation ?? 'office',
-        `Admin correction by ${adminUserId}: ${input.reason}`,
+        `Admin correction by ${adminUserId}: ${reason}`,
       );
     }
 
@@ -821,12 +900,12 @@ export class AttendanceService {
       isEarlyExit: calc.isEarlyExit,
       isMissingPunch: false,
       isRegularized: true,
-      notes: input.notes ?? `Corrected: ${input.reason}`,
+      notes: input.notes ?? `Corrected: ${reason}`,
       shiftScheduleRef: calc.shiftScheduleRef,
       calculationMetadata: {
         ...calc.calculationMetadata,
         correctedByUserId: adminUserId,
-        correctionReason: input.reason,
+        correctionReason: reason,
       },
     };
 

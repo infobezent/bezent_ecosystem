@@ -335,21 +335,58 @@ describe('Employee Self Service (ESS) Backend API (Phase 3)', () => {
       expect(res.status).toBe(409);
     });
 
+    const isoDaysAgo = (days: number): string => {
+      const d = new Date();
+      d.setUTCDate(d.getUTCDate() - days);
+      return d.toISOString().slice(0, 10);
+    };
+
     it('submits an attendance regularization request', async () => {
       const res = await request(app)
         .post('/api/v1/ess/attendance/regularize')
         .set('Authorization', `Bearer ${employeeToken}`)
         .set('X-Company-Id', companyId)
         .send({
-          date: '2026-09-28',
+          date: isoDaysAgo(2),
           checkInTime: '09:15',
           checkOutTime: '18:30',
-          reason: 'Biometric device scanner glitch on 28th',
+          reason: 'Biometric device scanner glitch',
         });
 
       expect(res.status).toBe(201);
       expect(res.body.data.requestType).toBe('attendance_regularization');
       expect(res.body.data.status).toBe('pending');
+    });
+
+    it('rejects a regularization request outside the configured submission window', async () => {
+      const res = await request(app)
+        .post('/api/v1/ess/attendance/regularize')
+        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('X-Company-Id', companyId)
+        .send({
+          date: isoDaysAgo(60),
+          checkInTime: '09:15',
+          checkOutTime: '18:30',
+          reason: 'Too old to regularize',
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toContain('ineligible');
+    });
+
+    it('rejects a regularization request with a malformed date', async () => {
+      const res = await request(app)
+        .post('/api/v1/ess/attendance/regularize')
+        .set('Authorization', `Bearer ${employeeToken}`)
+        .set('X-Company-Id', companyId)
+        .send({
+          date: '28/09/2026',
+          checkInTime: '09:15',
+          checkOutTime: '18:30',
+          reason: 'Bad date format',
+        });
+
+      expect(res.status).toBe(400);
     });
   });
 
