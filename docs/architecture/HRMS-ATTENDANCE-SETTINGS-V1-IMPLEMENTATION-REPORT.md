@@ -5,6 +5,10 @@
 **Date:** 2026-10-09  
 **Status:** Complete & Production Ready
 
+> **Note:** this report describes what the settings screens can save. Which settings
+> actually change Attendance behaviour is tracked in
+> [HRMS-ATTENDANCE-SETTINGS-ENFORCEMENT.md](HRMS-ATTENDANCE-SETTINGS-ENFORCEMENT.md).
+
 ---
 
 ## 1. Executive Summary

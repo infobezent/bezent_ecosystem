@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, lte, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, lte, sql } from 'drizzle-orm';
 import { getDb } from '../../../../db/connection.js';
 import {
   attendancePolicies,
@@ -10,6 +10,8 @@ import {
   attendancePayrollSettings,
   attendancePeriods,
   attendanceMonthlySummaries,
+  attendanceRegularizations,
+  employeeRequests,
   attendancePayrollHandoverBatches,
   attendanceSettingsAuditLogs,
   employees,
@@ -1037,6 +1039,27 @@ export class AttendanceSettingsRepository {
     return rows[0] ?? null;
   }
 
+  /** Companies that switched on "auto-lock on cutoff", with their payroll cycle. */
+  async listAutoLockCompanies(): Promise<
+    Array<{
+      tenantId: string;
+      companyId: string;
+      cycleType: 'calendar_month' | 'custom_cutoff';
+      cutoffDay: number;
+    }>
+  > {
+    const db = getDb();
+    return db
+      .select({
+        tenantId: attendancePayrollSettings.tenantId,
+        companyId: attendancePayrollSettings.companyId,
+        cycleType: attendancePayrollSettings.cycleType,
+        cutoffDay: attendancePayrollSettings.cutoffDay,
+      })
+      .from(attendancePayrollSettings)
+      .where(eq(attendancePayrollSettings.autoLockOnCutoff, true));
+  }
+
   /** Re-aligns an OPEN period with the company's current payroll cycle. */
   async updateOpenPeriodBounds(
     tenantId: string,
@@ -1056,6 +1079,51 @@ export class AttendanceSettingsRepository {
           eq(attendancePeriods.status, 'open'),
         ),
       );
+  }
+
+  /**
+   * Regularization requests still waiting for a decision whose workday falls in
+   * [startDate, endDate]: both the V1 workflow and the legacy ESS requests.
+   */
+  async countPendingRegularizationsInRange(
+    tenantId: string,
+    companyId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<number> {
+    const db = getDb();
+    const [v1] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(attendanceRegularizations)
+      .where(
+        and(
+          eq(attendanceRegularizations.tenantId, tenantId),
+          eq(attendanceRegularizations.companyId, companyId),
+          gte(attendanceRegularizations.workday, startDate),
+          lte(attendanceRegularizations.workday, endDate),
+          inArray(attendanceRegularizations.approvalStatus, [
+            'submitted',
+            'under_review',
+            'awaiting_info',
+          ]),
+        ),
+      );
+    const legacy = await db
+      .select({ details: employeeRequests.details })
+      .from(employeeRequests)
+      .where(
+        and(
+          eq(employeeRequests.tenantId, tenantId),
+          eq(employeeRequests.companyId, companyId),
+          eq(employeeRequests.requestType, 'attendance_regularization'),
+          eq(employeeRequests.status, 'pending'),
+        ),
+      );
+    const legacyInRange = legacy.filter((row) => {
+      const date = (row.details as { date?: string } | null)?.date;
+      return typeof date === 'string' && date >= startDate && date <= endDate;
+    }).length;
+    return Number(v1?.count ?? 0) + legacyInRange;
   }
 
   /** Monthly summaries of a `YYYY-MM` month and how many are not yet reviewed. */

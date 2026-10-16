@@ -15,6 +15,7 @@ import {
 import { and, eq } from 'drizzle-orm';
 import { generateSurrogateId } from '../../../../platform/auth/security.js';
 import { attendanceRepository } from '../repository/attendance.repository.js';
+import { attendanceAlertService } from './attendanceAlert.service.js';
 import { attendanceRegularizationRepository } from '../repository/attendanceRegularization.repository.js';
 import {
   attendanceRegularizationEligibilityService,
@@ -216,6 +217,19 @@ export class AttendanceRegularizationService {
         'Regularization Request Submitted',
         `Your attendance correction request ${requestNumber} for ${input.workday} has been submitted.`,
         '/hrms/attendance/regularization',
+      );
+
+      await attendanceAlertService.notify(
+        tenantId,
+        companyId,
+        'regularizationPending',
+        { employeeId, approverEmployeeId: assignedTo },
+        {
+          title: 'Regularization request pending',
+          detail: `submitted request ${requestNumber} for ${input.workday}, which needs a decision.`,
+          link: '/hrms/attendance/regularization',
+          type: 'action_required',
+        },
       );
 
       if (this.qualifiesForAutoApproval(workflow, input, att)) {

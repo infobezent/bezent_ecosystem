@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
+import net from 'node:net';
 import request from 'supertest';
 import { createApp } from '../../../../app/server/createApp.js';
 import { isDatabaseConfigured, getDb } from '../../../../db/connection.js';
@@ -179,28 +180,45 @@ describe.skipIf(!isDatabaseConfigured)('Attendance Settings V1.0 API', () => {
     let testDeviceId: string;
     let importBatchId: string;
 
-    it('registers hardware terminal and tests connection ping truthfully', async () => {
-      const regRes = await request(app)
-        .post('/api/v1/hrms/attendance/settings/devices')
-        .set(headers)
-        .send({
-          deviceName: 'Building A Front Door Terminal',
-          deviceCode: `TERM-HQ-${Date.now().toString().slice(-4)}`,
-          deviceType: 'biometric_fingerprint',
-          ipAddress: '192.168.1.50',
-          port: 4370,
-        });
+    it('registers a terminal and reports a truthful connection check', async () => {
+      // A real listener stands in for the terminal.
+      const listener = net.createServer((socket) => socket.end());
+      await new Promise<void>((resolve) => listener.listen(0, '127.0.0.1', resolve));
+      const openPort = (listener.address() as net.AddressInfo).port;
 
-      expect(regRes.status).toBe(201);
-      testDeviceId = regRes.body.data.id;
+      const register = (port: number) =>
+        request(app)
+          .post('/api/v1/hrms/attendance/settings/devices')
+          .set(headers)
+          .send({
+            deviceName: 'Building A Front Door Terminal',
+            deviceCode: `TERM-${port}-${Date.now().toString().slice(-6)}`,
+            deviceType: 'biometric_fingerprint',
+            ipAddress: '127.0.0.1',
+            port,
+          });
+      const test = (id: string) =>
+        request(app).post(`/api/v1/hrms/attendance/settings/devices/${id}/test`).set(headers);
 
-      const testRes = await request(app)
-        .post(`/api/v1/hrms/attendance/settings/devices/${testDeviceId}/test`)
-        .set(headers);
+      try {
+        const regRes = await register(openPort);
+        expect(regRes.status).toBe(201);
+        testDeviceId = regRes.body.data.id;
 
-      expect(testRes.status).toBe(200);
-      expect(testRes.body.data.status).toBe('online');
-      expect(testRes.body.data.latencyMs).toBeGreaterThan(0);
+        const online = await test(testDeviceId);
+        expect(online.status).toBe(200);
+        expect(online.body.data.status).toBe('online');
+        expect(online.body.data.latencyMs).toBeGreaterThan(0);
+        expect(online.body.data.message).toContain(`127.0.0.1:${openPort}`);
+      } finally {
+        await new Promise<void>((resolve) => listener.close(() => resolve()));
+      }
+
+      // Same terminal, nothing listening any more: must be reported offline.
+      const offline = await test(testDeviceId);
+      expect(offline.status).toBe(200);
+      expect(offline.body.data.status).toBe('offline');
+      expect(offline.body.data.message).toContain('unreachable');
     });
 
     const importDay = '2026-08-10';
