@@ -4,6 +4,11 @@ import {
 } from '../repository/attendanceSettings.repository.js';
 import { AttendanceRepository, attendanceRepository } from '../repository/attendance.repository.js';
 import { attendanceCalculationService } from './attendanceCalculation.service.js';
+import {
+  computePeriodBounds,
+  daysBetweenInclusive,
+  periodCodeForDate,
+} from './attendancePeriodCalendar.js';
 import type {
   AttendancePolicy,
   AttendanceGeneralSettingsWithV1,
@@ -653,85 +658,6 @@ export class AttendanceSettingsService {
     return this.repo.listImportBatches(tenantId, companyId);
   }
 
-  async processBulkImport(
-    tenantId: string,
-    companyId: string,
-    data: {
-      batchType: 'raw_punches' | 'historical_summary';
-      fileName: string;
-      rows: Array<Record<string, unknown>>;
-      columnMapping?: Record<string, string>;
-    },
-    userId?: string,
-  ): Promise<AttendanceImportBatch> {
-    const totalRows = data.rows.length;
-    let successRows = 0;
-    let failedRows = 0;
-    const errorLog: Array<{ row: number; reason: string }> = [];
-
-    // Row-level validation and canonical ingestion
-    for (let i = 0; i < data.rows.length; i++) {
-      const row = data.rows[i]!;
-      const rowNum = i + 1;
-
-      const employeeId = String(row.employeeId || row.employee_id || '');
-      const date = String(row.date || row.timestamp || '');
-
-      if (!employeeId) {
-        failedRows++;
-        errorLog.push({ row: rowNum, reason: 'Missing employee identifier' });
-        continue;
-      }
-      if (!date) {
-        failedRows++;
-        errorLog.push({ row: rowNum, reason: 'Missing date or timestamp' });
-        continue;
-      }
-
-      successRows++;
-    }
-
-    const batch = await this.repo.createImportBatch(tenantId, companyId, {
-      batchType: data.batchType,
-      fileName: data.fileName,
-      totalRows,
-      successRows,
-      failedRows,
-      duplicateRows: 0,
-      status: failedRows === totalRows ? 'failed' : 'completed',
-      importedByUserId: userId,
-      columnMapping: data.columnMapping,
-      errorLog: errorLog.length > 0 ? errorLog : undefined,
-    });
-
-    await this.repo.recordAuditLog(tenantId, companyId, {
-      category: 'capture_device',
-      action: 'import_batch_processed',
-      entityId: batch.id,
-      entityType: 'attendance_import_batches',
-      newValues: { total: totalRows, success: successRows, failed: failedRows },
-      changedByUserId: userId,
-    });
-
-    return batch;
-  }
-
-  async rollbackImportBatch(
-    tenantId: string,
-    companyId: string,
-    batchId: string,
-    userId?: string,
-  ): Promise<void> {
-    await this.repo.updateImportBatchStatus(tenantId, companyId, batchId, 'reversed');
-    await this.repo.recordAuditLog(tenantId, companyId, {
-      category: 'capture_device',
-      action: 'import_batch_reversed',
-      entityId: batchId,
-      entityType: 'attendance_import_batches',
-      changedByUserId: userId,
-    });
-  }
-
   /* ── 5. Location & Security Settings ────────────────────────────── */
 
   async getSecuritySettings(
@@ -802,22 +728,53 @@ export class AttendanceSettingsService {
     return updated;
   }
 
+  /**
+   * The period for `periodCode`, created on first use and (while still open)
+   * re-aligned to the company's current payroll cycle. Locked periods keep the
+   * boundaries they were locked with.
+   */
+  private async ensurePeriod(
+    tenantId: string,
+    companyId: string,
+    periodCode: string,
+  ): Promise<AttendancePeriod> {
+    const settings = await this.getPayrollSettings(tenantId, companyId);
+    const bounds = computePeriodBounds(periodCode, settings.cycleType, settings.cutoffDay);
+    if (!bounds) {
+      throw new BadRequestError(`Invalid period code '${periodCode}'. Use YYYY-MM.`);
+    }
+    const existing = await this.repo.getPeriodByCode(tenantId, companyId, periodCode);
+    if (!existing) {
+      return this.repo.upsertPeriod(tenantId, companyId, bounds);
+    }
+    if (
+      existing.status === 'open' &&
+      (existing.startDate !== bounds.startDate || existing.endDate !== bounds.endDate)
+    ) {
+      await this.repo.updateOpenPeriodBounds(tenantId, companyId, periodCode, bounds);
+      return (await this.repo.getPeriodByCode(tenantId, companyId, periodCode))!;
+    }
+    return existing;
+  }
+
   async listPeriods(tenantId: string, companyId: string): Promise<AttendancePeriod[]> {
     const periods = await this.repo.listPeriods(tenantId, companyId);
-    if (periods.length > 0) return periods;
-
-    // Bootstrap current month period
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const periodCode = `${year}-${month}`;
-    const lastDay = new Date(year, now.getMonth() + 1, 0).getDate();
-    const created = await this.repo.upsertPeriod(tenantId, companyId, {
-      periodCode,
-      startDate: `${year}-${month}-01`,
-      endDate: `${year}-${month}-${lastDay}`,
-    });
-    return [created];
+    const settings = await this.getPayrollSettings(tenantId, companyId);
+    const currentCode = periodCodeForDate(
+      new Date().toISOString().slice(0, 10),
+      settings.cycleType,
+      settings.cutoffDay,
+    );
+    if (periods.length === 0) {
+      return [await this.ensurePeriod(tenantId, companyId, currentCode)];
+    }
+    // Open periods follow the current cycle settings; locked ones are left as locked.
+    const aligned = await Promise.all(
+      periods.map((p) =>
+        p.status === 'open' ? this.ensurePeriod(tenantId, companyId, p.periodCode) : p,
+      ),
+    );
+    return aligned;
   }
 
   async checkPeriodLockReadiness(
@@ -828,17 +785,22 @@ export class AttendanceSettingsService {
     canLock: boolean;
     unresolvedMissingPunches: number;
     pendingRegularizations: number;
+    unreviewedMonthlySummaries: number;
     warnings: string[];
   }> {
-    const [yearStr, monthStr] = periodCode.split('-');
-    const year = Number(yearStr) || new Date().getFullYear();
-    const month = Number(monthStr) || new Date().getMonth() + 1;
+    const period = await this.ensurePeriod(tenantId, companyId, periodCode);
+    const payrollSettings = await this.getPayrollSettings(tenantId, companyId);
 
     // Inspect pending regularizations and missing punches
     const pendingRegs = await this.attRepo.getRegularizationRequests(tenantId, companyId, {
       status: 'pending',
     });
-    const rows = await this.attRepo.getMonthlyMatrix(tenantId, companyId, year, month);
+    const rows = await this.attRepo.getPeriodMatrix(
+      tenantId,
+      companyId,
+      period.startDate,
+      period.endDate,
+    );
 
     let unresolvedMissingPunches = 0;
     for (const emp of rows) {
@@ -861,15 +823,36 @@ export class AttendanceSettingsService {
       );
     }
 
-    const payrollSettings = await this.getPayrollSettings(tenantId, companyId);
+    // "Require approval before lock" is a hard requirement, independent of the
+    // blocking severity used for the soft checks above.
+    let unreviewedMonthlySummaries = 0;
+    let approvalMissing = false;
+    if (payrollSettings.requireApprovalBeforeLock) {
+      const reviews = await this.repo.countMonthlySummaryReviews(tenantId, companyId, periodCode);
+      unreviewedMonthlySummaries = reviews.notReviewed;
+      if (reviews.total === 0) {
+        approvalMissing = true;
+        warnings.push(
+          `No reviewed monthly attendance summary exists for ${periodCode}; company settings require review before locking.`,
+        );
+      } else if (reviews.notReviewed > 0) {
+        approvalMissing = true;
+        warnings.push(
+          `${reviews.notReviewed} monthly attendance summar${reviews.notReviewed === 1 ? 'y is' : 'ies are'} not reviewed; company settings require review before locking.`,
+        );
+      }
+    }
+
     const canLock =
-      payrollSettings.blockingSeverity === 'warning_only' ||
-      (pendingRegs.length === 0 && unresolvedMissingPunches === 0);
+      !approvalMissing &&
+      (payrollSettings.blockingSeverity === 'warning_only' ||
+        (pendingRegs.length === 0 && unresolvedMissingPunches === 0));
 
     return {
       canLock,
       unresolvedMissingPunches,
       pendingRegularizations: pendingRegs.length,
+      unreviewedMonthlySummaries,
       warnings,
     };
   }
@@ -917,6 +900,7 @@ export class AttendanceSettingsService {
       );
     }
 
+    await this.ensurePeriod(tenantId, companyId, periodCode);
     const unlocked = await this.repo.unlockPeriod(tenantId, companyId, periodCode, userId, reason);
 
     await this.repo.recordAuditLog(tenantId, companyId, {
@@ -947,16 +931,18 @@ export class AttendanceSettingsService {
     userId?: string,
     clientIp?: string,
   ): Promise<{ batch: AttendancePayrollHandoverBatch; exportData: string }> {
-    const periods = await this.listPeriods(tenantId, companyId);
+    let periods = await this.repo.listPeriods(tenantId, companyId);
+    if (periods.length === 0) periods = await this.listPeriods(tenantId, companyId);
     const period = periods.find((p) => p.periodCode === periodCode);
     if (!period) throw new NotFoundError(`Period ${periodCode} not found`);
 
-    const [yearStr, monthStr] = periodCode.split('-');
-    const year = Number(yearStr);
-    const month = Number(monthStr);
-
-    const rows = await this.attRepo.getMonthlyMatrix(tenantId, companyId, year, month);
-    const daysInMonth = new Date(year, month, 0).getDate();
+    const rows = await this.attRepo.getPeriodMatrix(
+      tenantId,
+      companyId,
+      period.startDate,
+      period.endDate,
+    );
+    const daysInMonth = daysBetweenInclusive(period.startDate, period.endDate);
 
     const effectivePolicy = await this.resolveEffectivePolicy(tenantId, companyId);
     const penaltyRules = effectivePolicy.policy

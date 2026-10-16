@@ -2,7 +2,13 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../../../../app/server/createApp.js';
 import { isDatabaseConfigured, getDb } from '../../../../db/connection.js';
-import { departments } from '../../../../db/schema.js';
+import { and, eq } from 'drizzle-orm';
+import {
+  attendancePunches,
+  departments,
+  employeeAttendance,
+  employees,
+} from '../../../../db/schema.js';
 import { hrmsTestHeaders } from '../../../../platform/__tests__/support/testSession.js';
 
 describe.skipIf(!isDatabaseConfigured)('Attendance Settings V1.0 API', () => {
@@ -27,6 +33,21 @@ describe.skipIf(!isDatabaseConfigured)('Attendance Settings V1.0 API', () => {
       name: 'Engineering',
       code: 'ENG',
     });
+    await db
+      .insert(employees)
+      .values({
+        id: 'emp_import_01',
+        tenantId,
+        companyId,
+        employeeNumber: 'EMP-IMP-001',
+        firstName: 'Import',
+        lastName: 'Tester',
+        email: 'import.tester@example.com',
+        joiningDate: '2024-01-01',
+        employmentStatus: 'active',
+        employmentType: 'full_time',
+      })
+      .onDuplicateKeyUpdate({ set: { employmentStatus: 'active' } });
   });
 
   /* ── 1. General Settings ── */
@@ -182,31 +203,111 @@ describe.skipIf(!isDatabaseConfigured)('Attendance Settings V1.0 API', () => {
       expect(testRes.body.data.latencyMs).toBeGreaterThan(0);
     });
 
-    it('processes bulk punch import and allows audited reversal', async () => {
-      const impRes = await request(app)
+    const importDay = '2026-08-10';
+    const importPunches = (batchId: string) =>
+      getDb()
+        .select()
+        .from(attendancePunches)
+        .where(
+          and(
+            eq(attendancePunches.employeeId, 'emp_import_01'),
+            eq(attendancePunches.source, 'import'),
+          ),
+        )
+        .then((rows) =>
+          rows.filter(
+            (r) =>
+              (r.deviceMetadata as { importBatchId?: string } | null)?.importBatchId === batchId,
+          ),
+        );
+    const importDaily = () =>
+      getDb()
+        .select()
+        .from(employeeAttendance)
+        .where(
+          and(
+            eq(employeeAttendance.employeeId, 'emp_import_01'),
+            eq(employeeAttendance.date, importDay),
+          ),
+        );
+    const postImport = (rows: object[]) =>
+      request(app)
         .post('/api/v1/hrms/attendance/settings/import')
         .set(headers)
-        .send({
-          batchType: 'raw_punches',
-          fileName: 'biometric_test_batch.csv',
-          rows: [
-            { employeeId: 'EMP-001', date: '2026-10-01 09:00:00', punchType: 'in' },
-            { employeeId: 'EMP-001', date: '2026-10-01 18:00:00', punchType: 'out' },
-          ],
-        });
-
-      expect(impRes.status).toBe(201);
-      expect(impRes.body.data.totalRows).toBe(2);
-      expect(impRes.body.data.successRows).toBe(2);
-      importBatchId = impRes.body.data.id;
-
-      // Reverse import
-      const rollbackRes = await request(app)
-        .post(`/api/v1/hrms/attendance/settings/import/batches/${importBatchId}/rollback`)
+        .send({ batchType: 'raw_punches', fileName: 'biometric_test_batch.csv', rows });
+    const rollback = (id: string) =>
+      request(app)
+        .post(`/api/v1/hrms/attendance/settings/import/batches/${id}/rollback`)
         .set(headers);
 
+    it('imports real punches, derives the daily record and reverses exactly what it created', async () => {
+      await getDb()
+        .delete(employeeAttendance)
+        .where(eq(employeeAttendance.employeeId, 'emp_import_01'));
+      await getDb()
+        .delete(attendancePunches)
+        .where(eq(attendancePunches.employeeId, 'emp_import_01'));
+
+      const impRes = await postImport([
+        { employeeId: 'EMP-IMP-001', date: `${importDay} 09:00:00`, punchType: 'in' },
+        { employeeId: 'EMP-IMP-001', date: `${importDay} 18:00:00`, punchType: 'out' },
+        { employeeId: 'EMP-IMP-001', date: `${importDay} 09:00:00`, punchType: 'in' },
+        { employeeId: 'NOPE-1', date: `${importDay} 09:00:00`, punchType: 'in' },
+        { employeeId: 'EMP-IMP-001', date: `${importDay} 10:00:00`, punchType: 'sideways' },
+      ]);
+
+      expect(impRes.status).toBe(201);
+      expect(impRes.body.data.totalRows).toBe(5);
+      expect(impRes.body.data.successRows).toBe(2);
+      expect(impRes.body.data.duplicateRows).toBe(1);
+      expect(impRes.body.data.failedRows).toBe(2);
+      const reasons = (impRes.body.data.errorLog as Array<{ reason: string }>).map((e) => e.reason);
+      expect(reasons.some((r) => r.includes("Unknown employee 'NOPE-1'"))).toBe(true);
+      expect(reasons.some((r) => r.includes('punch type'))).toBe(true);
+      importBatchId = impRes.body.data.id;
+
+      expect(await importPunches(importBatchId)).toHaveLength(2);
+      const [daily] = await importDaily();
+      expect(daily?.checkInTime).toBe('09:00');
+      expect(daily?.checkOutTime).toBe('18:00');
+
+      const rollbackRes = await rollback(importBatchId);
       expect(rollbackRes.status).toBe(200);
       expect(rollbackRes.body.success).toBe(true);
+      expect(await importPunches(importBatchId)).toHaveLength(0);
+      expect(await importDaily()).toHaveLength(0);
+
+      expect((await rollback(importBatchId)).status).toBe(409);
+    });
+
+    it('never overwrites an existing daily record and keeps it when a later batch is reversed', async () => {
+      const first = await postImport([
+        { employeeId: 'EMP-IMP-001', date: `${importDay} 09:00:00`, punchType: 'in' },
+        { employeeId: 'EMP-IMP-001', date: `${importDay} 18:00:00`, punchType: 'out' },
+      ]);
+      expect(first.body.data.successRows).toBe(2);
+      const second = await postImport([
+        { employeeId: 'EMP-IMP-001', date: `${importDay} 12:00:00`, punchType: 'in' },
+      ]);
+      expect(second.body.data.successRows).toBe(1);
+
+      const [daily] = await importDaily();
+      expect(daily?.checkInTime).toBe('09:00');
+
+      await rollback(second.body.data.id);
+      expect(await importDaily()).toHaveLength(1);
+      await rollback(first.body.data.id);
+      expect(await importDaily()).toHaveLength(0);
+    });
+
+    it('rejects unsupported or empty imports', async () => {
+      const empty = await postImport([]);
+      expect(empty.status).toBe(400);
+      const summary = await request(app)
+        .post('/api/v1/hrms/attendance/settings/import')
+        .set(headers)
+        .send({ batchType: 'historical_summary', fileName: 'x.csv', rows: [{ a: 1 }] });
+      expect(summary.status).toBe(400);
     });
   });
 
@@ -256,10 +357,11 @@ describe.skipIf(!isDatabaseConfigured)('Attendance Settings V1.0 API', () => {
       expect(readyRes.body.data).toHaveProperty('canLock');
 
       // 2. Lock Period (warning_only mode allows lock if discrepancies present)
-      await request(app)
-        .put('/api/v1/hrms/attendance/settings/payroll')
-        .set(headers)
-        .send({ blockingSeverity: 'warning_only' });
+      await request(app).put('/api/v1/hrms/attendance/settings/payroll').set(headers).send({
+        cycleType: 'calendar_month',
+        requireApprovalBeforeLock: false,
+        blockingSeverity: 'warning_only',
+      });
 
       const lockRes = await request(app)
         .post(`/api/v1/hrms/attendance/settings/payroll/periods/${periodCode}/lock`)

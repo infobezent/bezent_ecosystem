@@ -3,11 +3,18 @@ import {
   AttendanceSettingsService,
   attendanceSettingsService,
 } from '../service/attendanceSettings.service.js';
+import {
+  AttendanceImportService,
+  attendanceImportService,
+} from '../service/attendanceImport.service.js';
 import type { SettingsAuditFilter } from '../types/attendance.types.js';
 import { BadRequestError } from '../../../../app/errors/AppError.js';
 
 export class AttendanceSettingsController {
-  constructor(private readonly service: AttendanceSettingsService = attendanceSettingsService) {}
+  constructor(
+    private readonly service: AttendanceSettingsService = attendanceSettingsService,
+    private readonly importService: AttendanceImportService = attendanceImportService,
+  ) {}
 
   /* ── 1. General Settings ────────────────────────────────────────── */
 
@@ -264,7 +271,7 @@ export class AttendanceSettingsController {
       if (!batchType || !fileName || !Array.isArray(rows)) {
         throw new BadRequestError('batchType, fileName, and rows array are required');
       }
-      const data = await this.service.processBulkImport(
+      const data = await this.importService.processBulkImport(
         tenantId,
         companyId,
         { batchType, fileName, rows, columnMapping },
@@ -281,7 +288,7 @@ export class AttendanceSettingsController {
       const { tenantId, companyId } = req.companyContext!;
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
       if (!id) throw new BadRequestError('Batch ID is required');
-      await this.service.rollbackImportBatch(tenantId, companyId, id, req.user?.id);
+      await this.importService.rollbackImportBatch(tenantId, companyId, id, req.user?.id);
       res.json({ success: true, message: 'Import batch reversed successfully' });
     } catch (err) {
       next(err);

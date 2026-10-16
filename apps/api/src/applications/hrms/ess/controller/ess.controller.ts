@@ -43,7 +43,10 @@ export class EssController {
 
   checkIn = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const record = await this.service.checkIn(req.employeeContext!, req.body);
+      const record = await this.service.checkIn(req.employeeContext!, {
+        ...req.body,
+        clientIp: req.ip,
+      });
       res.status(200).json({ data: record });
     } catch (err) {
       next(err);
@@ -52,7 +55,10 @@ export class EssController {
 
   checkOut = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const record = await this.service.checkOut(req.employeeContext!);
+      const record = await this.service.checkOut(req.employeeContext!, {
+        deviceMetadata: req.body?.deviceMetadata,
+        clientIp: req.ip,
+      });
       res.status(200).json({ data: record });
     } catch (err) {
       next(err);

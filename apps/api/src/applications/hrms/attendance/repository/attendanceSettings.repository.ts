@@ -9,6 +9,7 @@ import {
   attendanceSecuritySettings,
   attendancePayrollSettings,
   attendancePeriods,
+  attendanceMonthlySummaries,
   attendancePayrollHandoverBatches,
   attendanceSettingsAuditLogs,
   employees,
@@ -79,9 +80,12 @@ export class AttendanceSettingsRepository {
           requireReason: true,
           requireAttachment: false,
         },
-      employeeVisibility: (row.employeeVisibility === 'self_only'
-        ? 'daily_and_monthly'
-        : row.employeeVisibility) as AttendanceGeneralSettingsWithV1['employeeVisibility'],
+      // The DB enum only knows self_only/department/company, so the finer-grained
+      // employee view (daily_only, monthly_summary_only, ...) lives in alertPreferences.
+      employeeVisibility: ((prefs.employeeVisibilityMode as string | undefined) ??
+        (row.employeeVisibility === 'self_only'
+          ? 'daily_and_monthly'
+          : row.employeeVisibility)) as AttendanceGeneralSettingsWithV1['employeeVisibility'],
       defaultHistoryView:
         (prefs.defaultHistoryView as AttendanceGeneralSettingsWithV1['defaultHistoryView']) ??
         'current_month',
@@ -217,6 +221,7 @@ export class AttendanceSettingsRepository {
       trackingStartDateEffectiveFrom,
       manualEntryConfig,
       alertSettings,
+      employeeVisibilityMode: input.employeeVisibility ?? existingPrefs.employeeVisibilityMode,
       notifyOnMissingPunch: alertSettings?.events?.missingPunch?.enabled ?? true,
       notifyOnLateArrival: alertSettings?.events?.lateArrival?.enabled ?? true,
       notifyApproverOnRegularization: alertSettings?.events?.regularizationPending?.enabled ?? true,
@@ -789,6 +794,59 @@ export class AttendanceSettingsRepository {
     return rows[0]!;
   }
 
+  async getImportBatch(
+    tenantId: string,
+    companyId: string,
+    batchId: string,
+  ): Promise<AttendanceImportBatch | null> {
+    const db = getDb();
+    const rows = await db
+      .select()
+      .from(attendanceImportBatches)
+      .where(
+        and(
+          eq(attendanceImportBatches.tenantId, tenantId),
+          eq(attendanceImportBatches.companyId, companyId),
+          eq(attendanceImportBatches.id, batchId),
+        ),
+      )
+      .limit(1);
+    return rows[0] ?? null;
+  }
+
+  async finalizeImportBatch(
+    tenantId: string,
+    companyId: string,
+    batchId: string,
+    result: {
+      status: 'completed' | 'failed';
+      successRows: number;
+      failedRows: number;
+      duplicateRows: number;
+      errorLog?: Array<{ row: number; reason: string }>;
+    },
+  ): Promise<AttendanceImportBatch> {
+    const db = getDb();
+    await db
+      .update(attendanceImportBatches)
+      .set({
+        status: result.status,
+        successRows: result.successRows,
+        failedRows: result.failedRows,
+        duplicateRows: result.duplicateRows,
+        errorLog: result.errorLog ?? null,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(attendanceImportBatches.tenantId, tenantId),
+          eq(attendanceImportBatches.companyId, companyId),
+          eq(attendanceImportBatches.id, batchId),
+        ),
+      );
+    return (await this.getImportBatch(tenantId, companyId, batchId))!;
+  }
+
   async updateImportBatchStatus(
     tenantId: string,
     companyId: string,
@@ -977,6 +1035,50 @@ export class AttendanceSettingsRepository {
       )
       .limit(1);
     return rows[0] ?? null;
+  }
+
+  /** Re-aligns an OPEN period with the company's current payroll cycle. */
+  async updateOpenPeriodBounds(
+    tenantId: string,
+    companyId: string,
+    periodCode: string,
+    bounds: { startDate: string; endDate: string },
+  ): Promise<void> {
+    const db = getDb();
+    await db
+      .update(attendancePeriods)
+      .set({ startDate: bounds.startDate, endDate: bounds.endDate, updatedAt: new Date() })
+      .where(
+        and(
+          eq(attendancePeriods.tenantId, tenantId),
+          eq(attendancePeriods.companyId, companyId),
+          eq(attendancePeriods.periodCode, periodCode),
+          eq(attendancePeriods.status, 'open'),
+        ),
+      );
+  }
+
+  /** Monthly summaries of a `YYYY-MM` month and how many are not yet reviewed. */
+  async countMonthlySummaryReviews(
+    tenantId: string,
+    companyId: string,
+    month: string,
+  ): Promise<{ total: number; notReviewed: number }> {
+    const db = getDb();
+    const rows = await db
+      .select({ reviewState: attendanceMonthlySummaries.reviewState })
+      .from(attendanceMonthlySummaries)
+      .where(
+        and(
+          eq(attendanceMonthlySummaries.tenantId, tenantId),
+          eq(attendanceMonthlySummaries.companyId, companyId),
+          eq(attendanceMonthlySummaries.month, month),
+        ),
+      );
+    return {
+      total: rows.length,
+      notReviewed: rows.filter((r) => r.reviewState !== 'reviewed').length,
+    };
   }
 
   async upsertPeriod(

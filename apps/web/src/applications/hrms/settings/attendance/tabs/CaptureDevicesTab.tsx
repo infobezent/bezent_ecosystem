@@ -149,12 +149,14 @@ export function CaptureDevicesTab() {
         rows.push(rowObj);
       }
 
-      await submitBulkImport({
+      const batch = await submitBulkImport({
         batchType,
         fileName,
         rows,
       });
-      setSuccess(`Import batch processed (${rows.length} rows evaluated).`);
+      setSuccess(
+        `Import batch processed: ${batch.successRows} imported, ${batch.duplicateRows} duplicates skipped, ${batch.failedRows} rejected.`,
+      );
       setIsImportModalOpen(false);
       setCsvContent('');
       await loadData();
@@ -470,10 +472,7 @@ export function CaptureDevicesTab() {
                 onChange={(e) =>
                   setBatchType(e.target.value as 'raw_punches' | 'historical_summary')
                 }
-                options={[
-                  { value: 'raw_punches', label: 'Raw Punches (Timestamp events)' },
-                  { value: 'historical_summary', label: 'Historical Daily Summary Records' },
-                ]}
+                options={[{ value: 'raw_punches', label: 'Raw Punches (Timestamp events)' }]}
               />
             </div>
             <div>
