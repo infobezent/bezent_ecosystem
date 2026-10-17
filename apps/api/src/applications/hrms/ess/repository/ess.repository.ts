@@ -16,6 +16,8 @@ import {
   employeeRequests,
   employeeTasks,
   employeeNotifications,
+  employeeActions,
+  attendanceRegularizations,
   type EmployeeAttendance,
   type EmployeeLeaveBalance,
   type EmployeeLeaveRequest,
@@ -24,12 +26,14 @@ import {
   type EmployeeRequest,
   type EmployeeTask,
   type EmployeeNotification,
+  type AttendanceRegularization,
 } from '../../../../db/schema.js';
 import { generateSurrogateId } from '../../../../platform/auth/security.js';
 import { NotFoundError, ConflictError } from '../../../../app/errors/AppError.js';
 import type {
   EssEmployeeSummary,
   EssFullProfile,
+  EssCareerEvent,
   UpdateContactDetailsInput,
   EmergencyContactItemInput,
   FamilyMemberItemInput,
@@ -49,6 +53,7 @@ export class EssRepository {
   async getEmployeeSummary(employeeId: string): Promise<EssEmployeeSummary | null> {
     const db = getDb();
     const manager = alias(employees, 'reporting_manager');
+    const mgrDesig = alias(designations, 'reporting_manager_desig');
     const rows = await db
       .select({
         emp: employees,
@@ -58,6 +63,7 @@ export class EssRepository {
         gender: employeePersonalDetails.gender,
         mgrFirstName: manager.firstName,
         mgrLastName: manager.lastName,
+        mgrDesigName: mgrDesig.name,
       })
       .from(employees)
       .leftJoin(departments, eq(employees.departmentId, departments.id))
@@ -65,6 +71,7 @@ export class EssRepository {
       .leftJoin(locations, eq(employees.locationId, locations.id))
       .leftJoin(employeePersonalDetails, eq(employees.id, employeePersonalDetails.employeeId))
       .leftJoin(manager, eq(employees.reportingManagerId, manager.id))
+      .leftJoin(mgrDesig, eq(manager.designationId, mgrDesig.id))
       .where(eq(employees.id, employeeId));
 
     const row = rows[0];
@@ -82,69 +89,241 @@ export class EssRepository {
       firstName: row.emp.firstName,
       lastName: row.emp.lastName,
       email: row.emp.email,
+      workPhone: row.emp.phone ?? null,
       departmentId: row.emp.departmentId,
       departmentName: row.dept?.name ?? null,
+      departmentCode: row.dept?.code ?? null,
       designationId: row.emp.designationId,
       designationTitle: row.desig?.name ?? null,
+      designationCode: row.desig?.code ?? null,
       locationId: row.emp.locationId,
       locationName: row.loc?.name ?? null,
       reportingManagerId: row.emp.reportingManagerId ?? null,
       reportingManagerName,
+      reportingManagerDesignation: row.mgrDesigName ?? null,
       employmentType: row.emp.employmentType,
       employmentStatus: row.emp.employmentStatus,
       joiningDate: row.emp.joiningDate,
+      probationEndDate: row.emp.probationEndDate ?? null,
+      confirmationDate: row.emp.confirmationDate ?? null,
+      confirmedJoiningDate: row.emp.confirmedJoiningDate ?? null,
+      contractEndDate: row.emp.contractEndDate ?? null,
+      noticePeriodDays: row.emp.noticePeriodDays ?? null,
       gender: row.gender ?? null,
       avatarPreference: null,
     };
   }
 
-  async getFullProfile(employeeId: string): Promise<EssFullProfile | null> {
+  private sanitizeDisplayLabel(val: unknown): string | null {
+    if (!val || typeof val !== 'string') return null;
+    const trimmed = val.trim();
+    if (trimmed.length === 0) return null;
+
+    // Reject UUIDs
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)) {
+      return null;
+    }
+
+    // Reject surrogate IDs (e.g. desig_..., dept_..., loc_..., emp_..., usr_...)
+    if (/^(desig|dept|loc|emp|usr|comp|tnt|action)_[0-9a-zA-Z_]+$/i.test(trimmed)) {
+      return null;
+    }
+
+    return trimmed;
+  }
+
+  async getCareerHistory(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+  ): Promise<EssCareerEvent[]> {
+    const db = getDb();
+    const rows = await db
+      .select({
+        id: employeeActions.id,
+        actionType: employeeActions.actionType,
+        effectiveDate: employeeActions.effectiveDate,
+        changeData: employeeActions.changeData,
+        appliedAt: employeeActions.appliedAt,
+        createdAt: employeeActions.createdAt,
+      })
+      .from(employeeActions)
+      .where(
+        and(
+          eq(employeeActions.tenantId, tenantId),
+          eq(employeeActions.companyId, companyId),
+          eq(employeeActions.employeeId, employeeId),
+          eq(employeeActions.status, 'applied'),
+          inArray(employeeActions.actionType, [
+            'designation_change',
+            'department_change',
+            'location_transfer',
+            'employment_type_change',
+            'confirm_employee',
+          ]),
+        ),
+      )
+      .orderBy(desc(employeeActions.effectiveDate), desc(employeeActions.createdAt));
+
+    const EMPLOYMENT_TYPE_MAP: Record<string, string> = {
+      full_time: 'Full Time',
+      part_time: 'Part Time',
+      contract: 'Contract',
+      intern: 'Intern',
+      probation: 'Probation',
+      temporary: 'Temporary',
+    };
+
+    return rows.map((row) => {
+      let eventLabel = 'Career Update';
+      let previousValue: string | null = null;
+      let newValue: string | null = null;
+
+      // Extract safe labels from changeData without exposing raw internal json or reasons
+      const changeSet = row.changeData as {
+        changes?: Array<{
+          field: string;
+          from?: string | null;
+          to?: string | null;
+          fromLabel?: string | null;
+          toLabel?: string | null;
+        }>;
+      } | null;
+
+      const changes = Array.isArray(changeSet?.changes) ? changeSet!.changes : [];
+
+      switch (row.actionType) {
+        case 'designation_change': {
+          eventLabel = 'Designation Change';
+          const desigChange = changes.find((c) => c.field === 'designationId');
+          if (desigChange) {
+            previousValue = this.sanitizeDisplayLabel(desigChange.fromLabel);
+            newValue = this.sanitizeDisplayLabel(desigChange.toLabel);
+          }
+          break;
+        }
+        case 'department_change': {
+          eventLabel = 'Department Transfer';
+          const deptChange = changes.find((c) => c.field === 'departmentId');
+          if (deptChange) {
+            previousValue = this.sanitizeDisplayLabel(deptChange.fromLabel);
+            newValue = this.sanitizeDisplayLabel(deptChange.toLabel);
+          }
+          break;
+        }
+        case 'location_transfer': {
+          eventLabel = 'Location Transfer';
+          const locChange = changes.find((c) => c.field === 'locationId');
+          if (locChange) {
+            previousValue = this.sanitizeDisplayLabel(locChange.fromLabel);
+            newValue = this.sanitizeDisplayLabel(locChange.toLabel);
+          }
+          break;
+        }
+        case 'employment_type_change': {
+          eventLabel = 'Employment Type Change';
+          const typeChange = changes.find((c) => c.field === 'employmentType');
+          if (typeChange) {
+            previousValue =
+              this.sanitizeDisplayLabel(typeChange.fromLabel) ??
+              (typeChange.from && EMPLOYMENT_TYPE_MAP[typeChange.from]
+                ? (EMPLOYMENT_TYPE_MAP[typeChange.from] ?? null)
+                : null);
+            newValue =
+              this.sanitizeDisplayLabel(typeChange.toLabel) ??
+              (typeChange.to && EMPLOYMENT_TYPE_MAP[typeChange.to]
+                ? (EMPLOYMENT_TYPE_MAP[typeChange.to] ?? null)
+                : null);
+          }
+          break;
+        }
+        case 'confirm_employee': {
+          eventLabel = 'Probation Confirmation';
+          previousValue = 'Probation';
+          newValue = 'Confirmed (Active)';
+          break;
+        }
+      }
+
+      return {
+        id: row.id,
+        eventType: row.actionType as EssCareerEvent['eventType'],
+        eventLabel,
+        effectiveDate: row.effectiveDate,
+        previousValue,
+        newValue,
+        appliedAt: row.appliedAt ? row.appliedAt.toISOString() : null,
+      };
+    });
+  }
+
+  async getFullProfile(
+    employeeId: string,
+    tenantId?: string,
+    companyId?: string,
+  ): Promise<EssFullProfile | null> {
     const summary = await this.getEmployeeSummary(employeeId);
     if (!summary) return null;
 
     const db = getDb();
+    const effectiveTenantId = tenantId ?? summary.tenantId;
+    const effectiveCompanyId = companyId ?? summary.companyId;
 
-    const [personalRows, familyRows, emergencyRows, bankRows, skillRows, scheduleRows] =
-      await Promise.all([
-        db
-          .select()
-          .from(employeePersonalDetails)
-          .where(eq(employeePersonalDetails.employeeId, employeeId)),
-        db
-          .select()
-          .from(employeeFamilyMembers)
-          .where(eq(employeeFamilyMembers.employeeId, employeeId))
-          .orderBy(employeeFamilyMembers.sortOrder),
-        db
-          .select()
-          .from(employeeEmergencyContacts)
-          .where(eq(employeeEmergencyContacts.employeeId, employeeId)),
-        db
-          .select()
-          .from(employeeBankAccounts)
-          .where(eq(employeeBankAccounts.employeeId, employeeId)),
-        db
-          .select()
-          .from(employeeSkills)
-          .where(eq(employeeSkills.employeeId, employeeId))
-          .orderBy(employeeSkills.sortOrder),
-        db
-          .select()
-          .from(employeeWorkSchedules)
-          .where(eq(employeeWorkSchedules.employeeId, employeeId)),
-      ]);
+    const [
+      personalRows,
+      familyRows,
+      emergencyRows,
+      bankRows,
+      skillRows,
+      scheduleRows,
+      careerHistory,
+    ] = await Promise.all([
+      db
+        .select()
+        .from(employeePersonalDetails)
+        .where(eq(employeePersonalDetails.employeeId, employeeId)),
+      db
+        .select()
+        .from(employeeFamilyMembers)
+        .where(eq(employeeFamilyMembers.employeeId, employeeId))
+        .orderBy(employeeFamilyMembers.sortOrder),
+      db
+        .select()
+        .from(employeeEmergencyContacts)
+        .where(eq(employeeEmergencyContacts.employeeId, employeeId)),
+      db.select().from(employeeBankAccounts).where(eq(employeeBankAccounts.employeeId, employeeId)),
+      db
+        .select()
+        .from(employeeSkills)
+        .where(eq(employeeSkills.employeeId, employeeId))
+        .orderBy(employeeSkills.sortOrder),
+      db
+        .select()
+        .from(employeeWorkSchedules)
+        .where(eq(employeeWorkSchedules.employeeId, employeeId)),
+      this.getCareerHistory(effectiveTenantId, effectiveCompanyId, employeeId),
+    ]);
 
     const bank = bankRows[0];
     let maskedBank: EssFullProfile['bankAccount'] = null;
     if (bank) {
-      const rawNum = bank.accountNumber ?? '';
-      const masked = rawNum.length > 4 ? `••••••••${rawNum.slice(-4)}` : rawNum;
+      const rawNum = (bank.accountNumber ?? '').trim();
+      // Masking: account numbers with 4 or fewer characters must NOT be returned unmasked
+      let masked = '••••••••';
+      if (rawNum.length > 4) {
+        masked = `••••••••${rawNum.slice(-4)}`;
+      } else if (rawNum.length > 0) {
+        masked = '••••••••';
+      } else {
+        masked = '—';
+      }
       maskedBank = {
         bankName: bank.bankName,
         accountHolderName: bank.accountHolderName,
         maskedAccountNumber: masked,
         ifscCode: bank.ifscCode,
-        branchName: bank.branchName,
+        branchName: bank.branchName ?? null,
+        bankLocation: bank.bankLocation ?? null,
       };
     }
 
@@ -156,6 +335,7 @@ export class EssRepository {
       bankAccount: maskedBank,
       skills: skillRows,
       workSchedule: scheduleRows[0] ?? null,
+      careerHistory,
     };
   }
 
@@ -365,6 +545,20 @@ export class EssRepository {
     return this.attendanceRepo.getAttendanceHistory(tenantId, companyId, employeeId, limit);
   }
 
+  async getEmployeeAttendanceForMonth(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+    yearMonth: string,
+  ): Promise<EmployeeAttendance[]> {
+    return this.attendanceRepo.getEmployeeAttendanceForMonth(
+      tenantId,
+      companyId,
+      employeeId,
+      yearMonth,
+    );
+  }
+
   async getEmployeeDayPunches(
     tenantId: string,
     companyId: string,
@@ -510,6 +704,102 @@ export class EssRepository {
       .where(inArray(employeeTimesheets.id, targetIds));
 
     return targetIds.length;
+  }
+
+  async getTimesheetById(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+    id: string,
+  ): Promise<EmployeeTimesheet | null> {
+    const db = getDb();
+    const [row] = await db
+      .select()
+      .from(employeeTimesheets)
+      .where(
+        and(
+          eq(employeeTimesheets.id, id),
+          eq(employeeTimesheets.tenantId, tenantId),
+          eq(employeeTimesheets.companyId, companyId),
+          eq(employeeTimesheets.employeeId, employeeId),
+        ),
+      );
+    return row ?? null;
+  }
+
+  async updateTimesheet(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+    id: string,
+    data: {
+      date?: string;
+      projectName?: string;
+      taskDescription?: string;
+      hours?: number;
+    },
+  ): Promise<EmployeeTimesheet | null> {
+    const db = getDb();
+    const existing = await this.getTimesheetById(tenantId, companyId, employeeId, id);
+    if (!existing || existing.status !== 'draft') {
+      return null;
+    }
+
+    const updates: Partial<{
+      date: string;
+      projectName: string;
+      taskDescription: string;
+      hours: number;
+    }> = {};
+
+    if (data.date !== undefined) updates.date = data.date;
+    if (data.projectName !== undefined) updates.projectName = data.projectName;
+    if (data.taskDescription !== undefined) updates.taskDescription = data.taskDescription;
+    if (data.hours !== undefined) updates.hours = data.hours;
+
+    if (Object.keys(updates).length > 0) {
+      await db
+        .update(employeeTimesheets)
+        .set(updates)
+        .where(
+          and(
+            eq(employeeTimesheets.id, id),
+            eq(employeeTimesheets.tenantId, tenantId),
+            eq(employeeTimesheets.companyId, companyId),
+            eq(employeeTimesheets.employeeId, employeeId),
+            eq(employeeTimesheets.status, 'draft'),
+          ),
+        );
+    }
+
+    return this.getTimesheetById(tenantId, companyId, employeeId, id);
+  }
+
+  async deleteTimesheet(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+    id: string,
+  ): Promise<boolean> {
+    const db = getDb();
+    const existing = await this.getTimesheetById(tenantId, companyId, employeeId, id);
+    if (!existing || existing.status !== 'draft') {
+      return false;
+    }
+
+    await db
+      .delete(employeeTimesheets)
+      .where(
+        and(
+          eq(employeeTimesheets.id, id),
+          eq(employeeTimesheets.tenantId, tenantId),
+          eq(employeeTimesheets.companyId, companyId),
+          eq(employeeTimesheets.employeeId, employeeId),
+          eq(employeeTimesheets.status, 'draft'),
+        ),
+      );
+
+    return true;
   }
 
   // Documents
@@ -807,5 +1097,25 @@ export class EssRepository {
       .from(employeeNotifications)
       .where(eq(employeeNotifications.id, id));
     return created!;
+  }
+
+  // Attendance Regularization
+  async getAttendanceRegularizations(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+  ): Promise<AttendanceRegularization[]> {
+    const db = getDb();
+    return db
+      .select()
+      .from(attendanceRegularizations)
+      .where(
+        and(
+          eq(attendanceRegularizations.tenantId, tenantId),
+          eq(attendanceRegularizations.companyId, companyId),
+          eq(attendanceRegularizations.employeeId, employeeId),
+        ),
+      )
+      .orderBy(desc(attendanceRegularizations.submittedAt));
   }
 }

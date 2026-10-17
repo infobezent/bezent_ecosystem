@@ -30,7 +30,13 @@ import {
   type EssEmergencyContact,
   type EssFamilyMember,
   type EssRequest,
+  type EssDocument,
+  type EssCareerEvent,
 } from '../api/essApi';
+import { EssProfessionalTab } from '../components/EssProfessionalTab';
+import { EssBankIdTab } from '../components/EssBankIdTab';
+import { EssChangeRequestsTab } from '../components/EssChangeRequestsTab';
+import { EssPrivacyTab } from '../components/EssPrivacyTab';
 
 const PROFILE_TABS: TabItem[] = [
   { id: 'personal', label: 'Personal' },
@@ -203,6 +209,7 @@ function calculateProfileCompleteness(profile: EssFullProfile): {
 export function EssProfilePage() {
   const [profile, setProfile] = useState<EssFullProfile | null>(null);
   const [changeRequests, setChangeRequests] = useState<EssRequest[]>([]);
+  const [documents, setDocuments] = useState<EssDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -267,24 +274,46 @@ export function EssProfilePage() {
     designation?: string;
   } | null>(null);
 
+  // ── Career History State ────────────────────────────────────────────
+  const [careerHistory, setCareerHistory] = useState<EssCareerEvent[]>([]);
+  const [careerHistoryLoading, setCareerHistoryLoading] = useState(false);
+  const [careerHistoryError, setCareerHistoryError] = useState<string | null>(null);
+
   // ── Data Loader ─────────────────────────────────────────────────────
   const loadProfile = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setCareerHistoryLoading(true);
+    setCareerHistoryError(null);
     try {
-      const [profileData, requestsData, dashboardData] = await Promise.all([
+      const [profileData, requestsData, dashboardData, docsRes, careerRes] = await Promise.all([
         essApi.getProfile(),
         essApi.getProfileChangeRequests().catch(() => []),
         essApi.getDashboard().catch(() => null),
+        essApi.getDocuments().catch(() => ({ documents: [] })),
+        essApi.getCareerHistory().catch((err) => {
+          setCareerHistoryError(err?.message || 'Failed to load career history');
+          return null;
+        }),
       ]);
       setProfile(profileData);
       setChangeRequests(requestsData);
+      setDocuments(docsRes?.documents || []);
+
+      if (careerRes) {
+        setCareerHistory(careerRes);
+      } else if (profileData.careerHistory) {
+        setCareerHistory(profileData.careerHistory);
+      }
 
       const mgrName =
         profileData.employee.reportingManagerName ||
         dashboardData?.myTeam?.reportingManagerName ||
         null;
-      const mgrDesig = dashboardData?.myTeam?.reportingManagerDesignation || undefined;
+      const mgrDesig =
+        profileData.employee.reportingManagerDesignation ||
+        dashboardData?.myTeam?.reportingManagerDesignation ||
+        undefined;
       if (mgrName) {
         setReportingManager({
           name: mgrName,
@@ -627,9 +656,19 @@ export function EssProfilePage() {
   };
 
   // ── Profile Change Request Handlers ─────────────────────────────────
-  const handleOpenChangeRequest = (prefilledField?: string) => {
+  const handleOpenChangeRequest = (
+    prefilledField?: string,
+    prefilledSection?: 'personal' | 'emergency_contact' | 'bank_account' | 'address',
+  ) => {
+    if (prefilledSection) {
+      setChangeSection(prefilledSection);
+    } else {
+      setChangeSection('personal');
+    }
     if (prefilledField) {
       setChangeField(prefilledField);
+    } else {
+      setChangeField('name');
     }
     setChangeProposedValue('');
     setChangeReason('');
@@ -641,6 +680,11 @@ export function EssProfilePage() {
     setSubmittingChange(true);
     setChangeError(null);
     try {
+      if (changeSection === 'bank_account') {
+        throw new Error(
+          'Bank account modifications cannot be submitted through generic change requests. Please visit the Bank & ID tab to review HR-guided statutory verification procedures.',
+        );
+      }
       if (!changeProposedValue.trim()) {
         throw new Error('Please specify the proposed new value.');
       }
@@ -649,12 +693,19 @@ export function EssProfilePage() {
       }
 
       const fieldLabels: Record<string, string> = {
-        name: 'Full Name',
+        name: 'Legal Full Name',
         dateOfBirth: 'Date of Birth',
         gender: 'Gender',
         maritalStatus: 'Marital Status',
         bloodGroup: 'Blood Group',
         nationality: 'Nationality',
+        addressStreet: 'Residential Street Address',
+        addressCity: 'City / Town',
+        addressPostalCode: 'Postal PIN Code',
+        addressState: 'State / Province',
+        emergencyContactName: 'Primary Contact Name',
+        emergencyContactPhone: 'Primary Contact Phone',
+        emergencyContactRelationship: 'Relationship to Contact',
       };
 
       const fieldLabel = fieldLabels[changeField] || changeField;
@@ -1747,6 +1798,42 @@ export function EssProfilePage() {
         </div>
       )}
 
+      {/* ── Tab: Professional (Seven Finalized Sections) ─────────── */}
+      {activeTab === 'professional' && profile && (
+        <EssProfessionalTab
+          profile={profile}
+          documents={documents}
+          reportingManagerDesignation={reportingManager?.designation}
+          careerHistory={careerHistory}
+          careerHistoryLoading={careerHistoryLoading}
+          careerHistoryError={careerHistoryError}
+        />
+      )}
+
+      {/* ── Tab: Bank & ID (Four Finalized Sections) ─────────────── */}
+      {activeTab === 'bank_id' && profile && (
+        <EssBankIdTab profile={profile} documents={documents} />
+      )}
+
+      {/* ── Tab: Change Requests (V1 Production Tab) ─────────────── */}
+      {activeTab === 'change_requests' && (
+        <EssChangeRequestsTab
+          changeRequests={changeRequests}
+          loading={loading}
+          onRefresh={loadProfile}
+          onRequestNewChange={() => handleOpenChangeRequest()}
+        />
+      )}
+
+      {/* ── Tab: Privacy (V1 Production Tab) ────────────────────── */}
+      {activeTab === 'privacy' && profile && (
+        <EssPrivacyTab
+          profile={profile}
+          onNavigateToChangeRequests={() => setActiveTab('change_requests')}
+          onRequestCorrection={() => handleOpenChangeRequest()}
+        />
+      )}
+
       {/* ── Emergency Contact Modal ───────────────────────────────── */}
       <Modal
         isOpen={emergencyModalOpen}
@@ -1922,6 +2009,7 @@ export function EssProfilePage() {
               variant="primary"
               onClick={handleSubmitChangeRequest}
               loading={submittingChange}
+              disabled={submittingChange || changeSection === 'bank_account'}
             >
               Submit for HR Review
             </Button>
@@ -1945,72 +2033,137 @@ export function EssProfilePage() {
               <Select
                 label="Category Section"
                 value={changeSection}
-                onChange={(e) => setChangeSection(e.target.value as typeof changeSection)}
+                onChange={(e) => {
+                  const s = e.target.value as typeof changeSection;
+                  setChangeSection(s);
+                  setChangeProposedValue('');
+                  if (s === 'personal') setChangeField('name');
+                  else if (s === 'address') setChangeField('addressStreet');
+                  else if (s === 'emergency_contact') setChangeField('emergencyContactName');
+                  else setChangeField('');
+                }}
                 options={CHANGE_SECTIONS}
               />
 
-              {changeSection === 'personal' && (
-                <Select
-                  label="Specific Field to Correct"
-                  value={changeField}
-                  onChange={(e) => setChangeField(e.target.value)}
-                  options={[
-                    { value: 'name', label: 'Legal Full Name' },
-                    { value: 'dateOfBirth', label: 'Date of Birth' },
-                    { value: 'gender', label: 'Gender' },
-                    { value: 'maritalStatus', label: 'Marital Status' },
-                    { value: 'bloodGroup', label: 'Blood Group' },
-                    { value: 'nationality', label: 'Nationality' },
-                  ]}
-                />
-              )}
-
-              {changeField === 'gender' ? (
-                <Select
-                  label="Proposed Value"
-                  value={changeProposedValue}
-                  onChange={(e) => setChangeProposedValue(e.target.value)}
-                  options={GENDER_OPTIONS}
-                />
-              ) : changeField === 'maritalStatus' ? (
-                <Select
-                  label="Proposed Value"
-                  value={changeProposedValue}
-                  onChange={(e) => setChangeProposedValue(e.target.value)}
-                  options={MARITAL_STATUS_OPTIONS}
-                />
-              ) : changeField === 'bloodGroup' ? (
-                <Select
-                  label="Proposed Value"
-                  value={changeProposedValue}
-                  onChange={(e) => setChangeProposedValue(e.target.value)}
-                  options={BLOOD_GROUP_OPTIONS}
-                />
-              ) : changeField === 'dateOfBirth' ? (
-                <Input
-                  type="date"
-                  label="Proposed Date of Birth"
-                  value={changeProposedValue}
-                  onChange={(e) => setChangeProposedValue(e.target.value)}
-                />
+              {changeSection === 'bank_account' ? (
+                <Alert variant="warning" title="Controlled Statutory Verification Protocol">
+                  Salary bank account modifications cannot be submitted through generic change
+                  requests. To safeguard employee payroll funds, please refer to the Bank &amp; ID
+                  tab for instructions and submit verified cancelled cheque documentation directly
+                  to HR Administration.
+                </Alert>
               ) : (
-                <Input
-                  label="Proposed New Value"
-                  placeholder="Enter exact new legal value"
-                  value={changeProposedValue}
-                  onChange={(e) => setChangeProposedValue(e.target.value)}
-                  required
-                />
-              )}
+                <>
+                  {changeSection === 'personal' && (
+                    <Select
+                      label="Specific Field to Correct"
+                      value={changeField}
+                      onChange={(e) => {
+                        setChangeField(e.target.value);
+                        setChangeProposedValue('');
+                      }}
+                      options={[
+                        { value: 'name', label: 'Legal Full Name' },
+                        { value: 'dateOfBirth', label: 'Date of Birth' },
+                        { value: 'gender', label: 'Gender' },
+                        { value: 'maritalStatus', label: 'Marital Status' },
+                        { value: 'bloodGroup', label: 'Blood Group' },
+                        { value: 'nationality', label: 'Nationality' },
+                      ]}
+                    />
+                  )}
 
-              <Input
-                label="Official Reason / Justification"
-                placeholder="e.g. Legal name update after marriage, corrected birth certificate record"
-                value={changeReason}
-                onChange={(e) => setChangeReason(e.target.value)}
-                required
-                helperText="Provide context for HR verification."
-              />
+                  {changeSection === 'address' && (
+                    <Select
+                      label="Specific Field to Correct"
+                      value={changeField}
+                      onChange={(e) => {
+                        setChangeField(e.target.value);
+                        setChangeProposedValue('');
+                      }}
+                      options={[
+                        { value: 'addressStreet', label: 'Residential Street Address' },
+                        { value: 'addressCity', label: 'City / Town' },
+                        { value: 'addressPostalCode', label: 'Postal PIN Code' },
+                        { value: 'addressState', label: 'State / Province' },
+                      ]}
+                    />
+                  )}
+
+                  {changeSection === 'emergency_contact' && (
+                    <Select
+                      label="Specific Field to Correct"
+                      value={changeField}
+                      onChange={(e) => {
+                        setChangeField(e.target.value);
+                        setChangeProposedValue('');
+                      }}
+                      options={[
+                        { value: 'emergencyContactName', label: 'Primary Contact Name' },
+                        { value: 'emergencyContactPhone', label: 'Primary Contact Phone' },
+                        {
+                          value: 'emergencyContactRelationship',
+                          label: 'Relationship to Contact',
+                        },
+                      ]}
+                    />
+                  )}
+
+                  {changeField === 'gender' ? (
+                    <Select
+                      label="Proposed Value"
+                      value={changeProposedValue}
+                      onChange={(e) => setChangeProposedValue(e.target.value)}
+                      options={GENDER_OPTIONS}
+                    />
+                  ) : changeField === 'maritalStatus' ? (
+                    <Select
+                      label="Proposed Value"
+                      value={changeProposedValue}
+                      onChange={(e) => setChangeProposedValue(e.target.value)}
+                      options={MARITAL_STATUS_OPTIONS}
+                    />
+                  ) : changeField === 'bloodGroup' ? (
+                    <Select
+                      label="Proposed Value"
+                      value={changeProposedValue}
+                      onChange={(e) => setChangeProposedValue(e.target.value)}
+                      options={BLOOD_GROUP_OPTIONS}
+                    />
+                  ) : changeField === 'emergencyContactRelationship' ? (
+                    <Select
+                      label="Proposed Relationship"
+                      value={changeProposedValue}
+                      onChange={(e) => setChangeProposedValue(e.target.value)}
+                      options={RELATIONSHIP_OPTIONS}
+                    />
+                  ) : changeField === 'dateOfBirth' ? (
+                    <Input
+                      type="date"
+                      label="Proposed Date of Birth"
+                      value={changeProposedValue}
+                      onChange={(e) => setChangeProposedValue(e.target.value)}
+                    />
+                  ) : (
+                    <Input
+                      label="Proposed New Value"
+                      placeholder="Enter exact new legal value"
+                      value={changeProposedValue}
+                      onChange={(e) => setChangeProposedValue(e.target.value)}
+                      required
+                    />
+                  )}
+
+                  <Input
+                    label="Official Reason / Justification"
+                    placeholder="e.g. Legal name update after marriage, corrected birth certificate record"
+                    value={changeReason}
+                    onChange={(e) => setChangeReason(e.target.value)}
+                    required
+                    helperText="Provide context for HR verification."
+                  />
+                </>
+              )}
             </FormGrid>
           </FormSection>
         </Stack>

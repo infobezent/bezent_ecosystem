@@ -65,9 +65,13 @@ export class AttendanceCalculationService {
     }
 
     const dayName = getDayOfWeekName(date);
-    const isWorkingDay = schedule.workingDays.some(
-      (d) => d.toLowerCase() === dayName.toLowerCase(),
-    );
+    const dayIndex = new Date(`${date}T00:00:00.000Z`).getUTCDay();
+    const isWorkingDay = (schedule.workingDays as Array<string | number>).some((d) => {
+      if (typeof d === 'number') {
+        return d === dayIndex || (d === 7 && dayIndex === 0);
+      }
+      return String(d).toLowerCase() === dayName.toLowerCase();
+    });
 
     // 2. Off-day / Weekend handling
     if (!isWorkingDay && !checkInTime && !checkOutTime) {

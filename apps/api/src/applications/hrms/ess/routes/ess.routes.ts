@@ -16,6 +16,7 @@ essRouter.get('/dashboard', essController.getDashboard);
 
 // 2. Profile & Profile Change Requests
 essRouter.get('/profile', essController.getProfile);
+essRouter.get('/career-history', essController.getCareerHistory);
 essRouter.put('/profile/personal', essController.updateContactDetails);
 essRouter.put('/profile/emergency-contacts', essController.updateEmergencyContacts);
 essRouter.put('/profile/family-members', essController.updateFamilyMembers);
@@ -29,6 +30,7 @@ essRouter.post('/attendance/check-out', essController.checkOut);
 essRouter.post('/attendance/break-start', essController.startBreak);
 essRouter.post('/attendance/break-end', essController.endBreak);
 essRouter.post('/attendance/regularize', essController.regularizeAttendance);
+essRouter.get('/attendance/regularizations', essController.getAttendanceRegularizations);
 
 // 4. Leave
 essRouter.get('/leave', essController.getLeaveWorkspace);
@@ -38,6 +40,8 @@ essRouter.post('/leave/:id/cancel', essController.cancelLeave);
 // 5. Timesheets
 essRouter.get('/timesheets', essController.getTimesheets);
 essRouter.post('/timesheets/log', essController.logTimesheet);
+essRouter.patch('/timesheets/:id', essController.updateTimesheet);
+essRouter.delete('/timesheets/:id', essController.deleteTimesheet);
 essRouter.post('/timesheets/submit', essController.submitTimesheets);
 
 // 6. Documents

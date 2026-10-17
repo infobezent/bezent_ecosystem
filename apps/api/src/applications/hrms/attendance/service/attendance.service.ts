@@ -1,3 +1,4 @@
+import { getDb } from '../../../../db/connection.js';
 import { AttendanceRepository, attendanceRepository } from '../repository/attendance.repository.js';
 import {
   AttendanceCalculationService,
@@ -18,6 +19,7 @@ import {
   DefaultShiftScheduleProvider,
   defaultShiftScheduleProvider,
 } from './shiftSchedule.provider.js';
+import { attendanceWorkdayService, formatTimeInTimezone } from './attendanceWorkday.service.js';
 import { BadRequestError, ConflictError, NotFoundError } from '../../../../app/errors/AppError.js';
 import type {
   CheckInInput,
@@ -60,8 +62,10 @@ export class AttendanceService {
     private readonly alertService: AttendanceAlertService = attendanceAlertService,
   ) {}
 
-  getCurrentTimeString(): string {
-    const now = new Date();
+  getCurrentTimeString(now: Date = new Date(), timeZone?: string): string {
+    if (timeZone) {
+      return formatTimeInTimezone(now, timeZone);
+    }
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
     return `${hours}:${minutes}`;
@@ -83,7 +87,23 @@ export class AttendanceService {
     date: string,
     input: CheckInInput,
   ): Promise<{ record: EmployeeAttendance; checkInTime: string }> {
-    const checkInTime = this.getCurrentTimeString();
+    // 1. Check payroll lock before mutation
+    const isLocked = await this.repo.checkDateInLockedPeriod(tenantId, companyId, date, date);
+    if (isLocked) {
+      throw new BadRequestError(
+        `Cannot record attendance check-in for date ${date}: Period is locked for payroll`,
+      );
+    }
+
+    // 2. Resolve timezone & authoritative punch time
+    const now = new Date();
+    const effectiveTz = await attendanceWorkdayService.resolveTimezone(
+      tenantId,
+      companyId,
+      employeeId,
+    );
+    const checkInTime = this.getCurrentTimeString(now, effectiveTz);
+
     const security = await this.securityService.assertPunchAllowed(
       tenantId,
       companyId,
@@ -94,58 +114,75 @@ export class AttendanceService {
         deviceMetadata: input.deviceMetadata,
       },
     );
+
     try {
-      // 1. Audit punch event
-      await this.repo.recordPunch(
-        tenantId,
-        companyId,
-        employeeId,
-        'in',
-        input.source ?? 'web',
-        input.workLocation ?? 'office',
-        input.notes,
-        security.deviceMetadata,
-      );
+      const db = getDb();
+      const { updated, lateArrivalAlert } = await db.transaction(async (tx) => {
+        // 1. Base check-in record (handles atomic insertion or row-locked update)
+        const record = await this.repo.checkIn(
+          tenantId,
+          companyId,
+          employeeId,
+          date,
+          checkInTime,
+          input.workLocation ?? 'office',
+          input.notes,
+          tx,
+        );
 
-      // 2. Base check-in record
-      const record = await this.repo.checkIn(
-        tenantId,
-        companyId,
-        employeeId,
-        date,
-        checkInTime,
-        input.workLocation ?? 'office',
-        input.notes,
-      );
+        // 2. Audit punch event
+        await this.repo.recordPunch(
+          tenantId,
+          companyId,
+          employeeId,
+          'in',
+          input.source ?? 'web',
+          input.workLocation ?? 'office',
+          input.notes,
+          security.deviceMetadata,
+          now,
+          date,
+          tx,
+        );
 
-      // 3. Calculation engine
-      const [schedule, policy, onLeave] = await Promise.all([
-        this.scheduleProvider.getEmployeeSchedule(tenantId, companyId, employeeId, date),
-        this.policyService.getEffectivePolicy(tenantId, companyId, date, employeeId),
-        this.scheduleProvider.isEmployeeOnApprovedLeave(tenantId, companyId, employeeId, date),
-      ]);
+        // 3. Calculation engine
+        const [schedule, policy, onLeave] = await Promise.all([
+          this.scheduleProvider.getEmployeeSchedule(tenantId, companyId, employeeId, date),
+          this.policyService.getEffectivePolicy(tenantId, companyId, date, employeeId),
+          this.scheduleProvider.isEmployeeOnApprovedLeave(tenantId, companyId, employeeId, date),
+        ]);
 
-      const calc = this.calculator.calculate({
-        date,
-        checkInTime,
-        checkOutTime: null,
-        schedule,
-        policy,
-        isOnApprovedLeave: onLeave,
-        isToday: true,
+        const calc = this.calculator.calculate({
+          date,
+          checkInTime,
+          checkOutTime: null,
+          schedule,
+          policy,
+          isOnApprovedLeave: onLeave,
+          isToday: true,
+        });
+
+        // 4. Update metrics
+        const updatedRecord = await this.repo.updateDailyAttendance(
+          record.id,
+          {
+            lateMinutes: calc.lateMinutes,
+            isLate: calc.isLate,
+            status: calc.status,
+            processingState: calc.processingState,
+            shiftScheduleRef: calc.shiftScheduleRef,
+            calculationMetadata: calc.calculationMetadata,
+          },
+          tx,
+        );
+
+        return {
+          updated: updatedRecord,
+          lateArrivalAlert: calc.isLate ? { lateMinutes: calc.lateMinutes } : null,
+        };
       });
 
-      // 4. Update metrics
-      const updated = await this.repo.updateDailyAttendance(record.id, {
-        lateMinutes: calc.lateMinutes,
-        isLate: calc.isLate,
-        status: calc.status,
-        processingState: calc.processingState,
-        shiftScheduleRef: calc.shiftScheduleRef,
-        calculationMetadata: calc.calculationMetadata,
-      });
-
-      if (calc.isLate) {
+      if (lateArrivalAlert) {
         await this.alertService.notify(
           tenantId,
           companyId,
@@ -153,7 +190,7 @@ export class AttendanceService {
           { employeeId },
           {
             title: 'Late arrival',
-            detail: `checked in at ${checkInTime}, ${calc.lateMinutes} minute(s) after the allowed start.`,
+            detail: `checked in at ${checkInTime}, ${lateArrivalAlert.lateMinutes} minute(s) after the allowed start.`,
             link: '/hrms/attendance/daily-log',
             type: 'warning',
           },
@@ -162,8 +199,25 @@ export class AttendanceService {
 
       return { record: updated, checkInTime };
     } catch (err: unknown) {
-      if (err instanceof Error && err.message.includes('already recorded')) {
-        throw new ConflictError(err.message);
+      if (err instanceof ConflictError) {
+        throw err;
+      }
+      const causeMsg =
+        err &&
+        typeof err === 'object' &&
+        'cause' in err &&
+        (err as { cause?: { message?: string } }).cause?.message
+          ? String((err as { cause?: { message?: string } }).cause?.message)
+          : '';
+      const raw = `${err instanceof Error ? err.message : ''} ${causeMsg}`;
+      if (
+        raw.includes('already recorded') ||
+        raw.includes('ER_DUP_ENTRY') ||
+        raw.includes('Duplicate entry') ||
+        raw.includes('ER_LOCK_DEADLOCK') ||
+        raw.includes('Deadlock')
+      ) {
+        throw new ConflictError('Attendance check-in already recorded for today');
       }
       throw err;
     }
@@ -181,15 +235,23 @@ export class AttendanceService {
       deviceMetadata?: Record<string, unknown>;
     },
   ): Promise<{ updated: EmployeeAttendance; checkOutTime: string }> {
-    const todayAtt = await this.repo.getTodayAttendance(tenantId, companyId, employeeId, date);
-    if (!todayAtt || !todayAtt.checkInTime) {
-      throw new BadRequestError('Cannot check out before checking in today');
-    }
-    if (todayAtt.checkOutTime) {
-      throw new ConflictError('Check out already recorded for today');
+    // 1. Check payroll lock before mutation
+    const isLocked = await this.repo.checkDateInLockedPeriod(tenantId, companyId, date, date);
+    if (isLocked) {
+      throw new BadRequestError(
+        `Cannot record attendance check-out for date ${date}: Period is locked for payroll`,
+      );
     }
 
-    const checkOutTime = this.getCurrentTimeString();
+    // 2. Resolve timezone & authoritative punch time
+    const now = new Date();
+    const effectiveTz = await attendanceWorkdayService.resolveTimezone(
+      tenantId,
+      companyId,
+      employeeId,
+    );
+    const checkOutTime = this.getCurrentTimeString(now, effectiveTz);
+
     const security = await this.securityService.assertPunchAllowed(
       tenantId,
       companyId,
@@ -201,65 +263,116 @@ export class AttendanceService {
       },
     );
 
-    // 1. Audit punch event
-    await this.repo.recordPunch(
-      tenantId,
-      companyId,
-      employeeId,
-      'out',
-      input?.source ?? 'web',
-      todayAtt.workLocation,
-      input?.notes,
-      security.deviceMetadata,
-    );
+    try {
+      const db = getDb();
+      const { updated, earlyExitAlert } = await db.transaction(async (tx) => {
+        const todayAtt = await this.repo.getTodayAttendanceForUpdate(
+          tenantId,
+          companyId,
+          employeeId,
+          date,
+          tx,
+        );
+        if (!todayAtt || !todayAtt.checkInTime) {
+          throw new BadRequestError('Cannot check out before checking in today');
+        }
+        if (todayAtt.checkOutTime) {
+          throw new ConflictError('Check out already recorded for today');
+        }
 
-    // 2. Base check-out record
-    await this.repo.checkOut(todayAtt.id, checkOutTime);
+        // 1. Audit punch event
+        await this.repo.recordPunch(
+          tenantId,
+          companyId,
+          employeeId,
+          'out',
+          input?.source ?? 'web',
+          todayAtt.workLocation,
+          input?.notes,
+          security.deviceMetadata,
+          now,
+          date,
+          tx,
+        );
 
-    // 3. Calculation engine
-    const [schedule, policy, onLeave] = await Promise.all([
-      this.scheduleProvider.getEmployeeSchedule(tenantId, companyId, employeeId, date),
-      this.policyService.getEffectivePolicy(tenantId, companyId, date, employeeId),
-      this.scheduleProvider.isEmployeeOnApprovedLeave(tenantId, companyId, employeeId, date),
-    ]);
+        // 2. Base check-out record
+        await this.repo.checkOut(todayAtt.id, checkOutTime, tx);
 
-    const calc = this.calculator.calculate({
-      date,
-      checkInTime: todayAtt.checkInTime,
-      checkOutTime,
-      schedule,
-      policy,
-      isOnApprovedLeave: onLeave,
-      isToday: true,
-    });
+        // 3. Calculation engine
+        const [schedule, policy, onLeave] = await Promise.all([
+          this.scheduleProvider.getEmployeeSchedule(tenantId, companyId, employeeId, date),
+          this.policyService.getEffectivePolicy(tenantId, companyId, date, employeeId),
+          this.scheduleProvider.isEmployeeOnApprovedLeave(tenantId, companyId, employeeId, date),
+        ]);
 
-    // 4. Update metrics
-    const updated = await this.repo.updateDailyAttendance(todayAtt.id, {
-      workedMinutes: calc.workedMinutes,
-      earlyMinutes: calc.earlyMinutes,
-      isEarlyExit: calc.isEarlyExit,
-      status: calc.status,
-      processingState: calc.processingState,
-      shiftScheduleRef: calc.shiftScheduleRef,
-      calculationMetadata: calc.calculationMetadata,
-    });
+        const calc = this.calculator.calculate({
+          date,
+          checkInTime: todayAtt.checkInTime,
+          checkOutTime,
+          schedule,
+          policy,
+          isOnApprovedLeave: onLeave,
+          isToday: true,
+        });
 
-    if (calc.isEarlyExit) {
-      await this.alertService.notify(
-        tenantId,
-        companyId,
-        'earlyExit',
-        { employeeId },
-        {
-          title: 'Early exit',
-          detail: `checked out at ${checkOutTime}, ${calc.earlyMinutes} minute(s) before the scheduled end.`,
-          link: '/hrms/attendance/daily-log',
-          type: 'warning',
-        },
-      );
+        // 4. Update metrics
+        const updatedRecord = await this.repo.updateDailyAttendance(
+          todayAtt.id,
+          {
+            workedMinutes: calc.workedMinutes,
+            earlyMinutes: calc.earlyMinutes,
+            isEarlyExit: calc.isEarlyExit,
+            status: calc.status,
+            processingState: calc.processingState,
+            shiftScheduleRef: calc.shiftScheduleRef,
+            calculationMetadata: calc.calculationMetadata,
+          },
+          tx,
+        );
+
+        return {
+          updated: updatedRecord,
+          earlyExitAlert: calc.isEarlyExit ? { earlyMinutes: calc.earlyMinutes } : null,
+        };
+      });
+
+      if (earlyExitAlert) {
+        await this.alertService.notify(
+          tenantId,
+          companyId,
+          'earlyExit',
+          { employeeId },
+          {
+            title: 'Early exit',
+            detail: `checked out at ${checkOutTime}, ${earlyExitAlert.earlyMinutes} minute(s) before the scheduled end.`,
+            link: '/hrms/attendance/daily-log',
+            type: 'warning',
+          },
+        );
+      }
+
+      return { updated, checkOutTime };
+    } catch (err: unknown) {
+      if (err instanceof ConflictError || err instanceof BadRequestError) {
+        throw err;
+      }
+      const causeMsg =
+        err &&
+        typeof err === 'object' &&
+        'cause' in err &&
+        (err as { cause?: { message?: string } }).cause?.message
+          ? String((err as { cause?: { message?: string } }).cause?.message)
+          : '';
+      const raw = `${err instanceof Error ? err.message : ''} ${causeMsg}`;
+      if (
+        raw.includes('already recorded') ||
+        raw.includes('ER_DUP_ENTRY') ||
+        raw.includes('Duplicate entry')
+      ) {
+        throw new ConflictError('Check out already recorded for today');
+      }
+      throw err;
     }
-
-    return { updated, checkOutTime };
   }
 
   async recordBreakStart(
@@ -270,33 +383,67 @@ export class AttendanceService {
     breakType: 'tea' | 'lunch' | 'personal' = 'tea',
     notes?: string,
   ) {
-    const todayAtt = await this.repo.getTodayAttendance(tenantId, companyId, employeeId, date);
-    if (!todayAtt || !todayAtt.checkInTime) {
-      throw new BadRequestError('Cannot start break before checking in today');
-    }
-    if (todayAtt.checkOutTime) {
-      throw new BadRequestError('Cannot start break after checking out today');
-    }
-
-    const punches = await this.repo.getEmployeeDayPunches(tenantId, companyId, employeeId, date);
-    const lastBreakPunch = punches
-      .filter((p) => p.punchType === 'break_out' || p.punchType === 'break_in')
-      .pop();
-    if (lastBreakPunch && lastBreakPunch.punchType === 'break_out') {
-      throw new ConflictError('Already on a break');
+    const isLocked = await this.repo.checkDateInLockedPeriod(tenantId, companyId, date, date);
+    if (isLocked) {
+      throw new BadRequestError(
+        `Cannot record break for date ${date}: Period is locked for payroll`,
+      );
     }
 
-    const breakPunch = await this.repo.recordPunch(
+    const now = new Date();
+    const effectiveTz = await attendanceWorkdayService.resolveTimezone(
       tenantId,
       companyId,
       employeeId,
-      'break_out',
-      'web',
-      todayAtt.workLocation,
-      notes ? `${breakType}: ${notes}` : breakType,
     );
+    const startTime = this.getCurrentTimeString(now, effectiveTz);
 
-    return { breakPunch, breakType, startTime: this.getCurrentTimeString() };
+    const db = getDb();
+    const breakPunch = await db.transaction(async (tx) => {
+      const todayAtt = await this.repo.getTodayAttendanceForUpdate(
+        tenantId,
+        companyId,
+        employeeId,
+        date,
+        tx,
+      );
+      if (!todayAtt || !todayAtt.checkInTime) {
+        throw new BadRequestError('Cannot start break before checking in today');
+      }
+      if (todayAtt.checkOutTime) {
+        throw new BadRequestError('Cannot start break after checking out today');
+      }
+
+      const punches = await this.repo.getEmployeeDayPunches(
+        tenantId,
+        companyId,
+        employeeId,
+        date,
+        tx,
+      );
+      const lastBreakPunch = punches
+        .filter((p) => p.punchType === 'break_out' || p.punchType === 'break_in')
+        .pop();
+      if (lastBreakPunch && lastBreakPunch.punchType === 'break_out') {
+        throw new ConflictError('Already on a break');
+      }
+
+      return await this.repo.recordPunch(
+        tenantId,
+        companyId,
+        employeeId,
+        'break_out',
+        'web',
+        todayAtt.workLocation,
+        notes ? `${breakType}: ${notes}` : breakType,
+        undefined,
+        now,
+        date,
+        tx,
+      );
+    });
+
+    return { breakPunch, breakType, startTime };
   }
 
   async recordBreakEnd(
@@ -306,33 +453,67 @@ export class AttendanceService {
     date: string,
     notes?: string,
   ) {
-    const todayAtt = await this.repo.getTodayAttendance(tenantId, companyId, employeeId, date);
-    if (!todayAtt || !todayAtt.checkInTime) {
-      throw new BadRequestError('Cannot end break before checking in today');
-    }
-    if (todayAtt.checkOutTime) {
-      throw new BadRequestError('Cannot end break after checking out today');
-    }
-
-    const punches = await this.repo.getEmployeeDayPunches(tenantId, companyId, employeeId, date);
-    const lastBreakPunch = punches
-      .filter((p) => p.punchType === 'break_out' || p.punchType === 'break_in')
-      .pop();
-    if (!lastBreakPunch || lastBreakPunch.punchType !== 'break_out') {
-      throw new BadRequestError('Not currently on a break');
+    const isLocked = await this.repo.checkDateInLockedPeriod(tenantId, companyId, date, date);
+    if (isLocked) {
+      throw new BadRequestError(
+        `Cannot record break for date ${date}: Period is locked for payroll`,
+      );
     }
 
-    const breakPunch = await this.repo.recordPunch(
+    const now = new Date();
+    const effectiveTz = await attendanceWorkdayService.resolveTimezone(
       tenantId,
       companyId,
       employeeId,
-      'break_in',
-      'web',
-      todayAtt.workLocation,
-      notes,
     );
+    const endTime = this.getCurrentTimeString(now, effectiveTz);
 
-    return { breakPunch, endTime: this.getCurrentTimeString() };
+    const db = getDb();
+    const breakPunch = await db.transaction(async (tx) => {
+      const todayAtt = await this.repo.getTodayAttendanceForUpdate(
+        tenantId,
+        companyId,
+        employeeId,
+        date,
+        tx,
+      );
+      if (!todayAtt || !todayAtt.checkInTime) {
+        throw new BadRequestError('Cannot end break before checking in today');
+      }
+      if (todayAtt.checkOutTime) {
+        throw new BadRequestError('Cannot end break after checking out today');
+      }
+
+      const punches = await this.repo.getEmployeeDayPunches(
+        tenantId,
+        companyId,
+        employeeId,
+        date,
+        tx,
+      );
+      const lastBreakPunch = punches
+        .filter((p) => p.punchType === 'break_out' || p.punchType === 'break_in')
+        .pop();
+      if (!lastBreakPunch || lastBreakPunch.punchType !== 'break_out') {
+        throw new BadRequestError('Not currently on a break');
+      }
+
+      return await this.repo.recordPunch(
+        tenantId,
+        companyId,
+        employeeId,
+        'break_in',
+        'web',
+        todayAtt.workLocation,
+        notes,
+        undefined,
+        now,
+        date,
+        tx,
+      );
+    });
+
+    return { breakPunch, endTime };
   }
 
   async getEmployeeDayPunches(
