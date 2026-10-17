@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
+import { and, eq } from 'drizzle-orm';
 import { createApp } from '../../../../app/server/createApp.js';
 import { isDatabaseConfigured, getDb } from '../../../../db/connection.js';
 import { attendancePunches, employees } from '../../../../db/schema.js';
@@ -21,6 +22,17 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Punch Logs V1
   beforeAll(async () => {
     headers = await hrmsTestHeaders(companyId, tenantId);
     const db = getDb();
+
+    // Clean up previous test punches for empId to ensure idempotent CSV exports
+    await db
+      .delete(attendancePunches)
+      .where(
+        and(
+          eq(attendancePunches.tenantId, tenantId),
+          eq(attendancePunches.companyId, companyId),
+          eq(attendancePunches.employeeId, empId),
+        ),
+      );
 
     // Ensure test employee exists
     await db

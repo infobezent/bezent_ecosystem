@@ -5,6 +5,7 @@ import { and, eq } from 'drizzle-orm';
 import { createApp } from '../../../../app/server/createApp.js';
 import { isDatabaseConfigured, getDb } from '../../../../db/connection.js';
 import {
+  attendancePeriods,
   attendancePunches,
   attendanceRegularizations,
   employeeAttendance,
@@ -44,8 +45,8 @@ import {
 
 const isoDaysAgo = (days: number): string => {
   const d = new Date();
-  d.setUTCDate(d.getUTCDate() - days);
-  return d.toISOString().slice(0, 10);
+  const todayStr = d.toLocaleDateString('en-CA');
+  return subtractDays(todayStr, days);
 };
 
 describe('Attendance settings helpers (pure)', () => {
@@ -1007,10 +1008,12 @@ describe.skipIf(!isDatabaseConfigured)(
 
       beforeAll(async () => {
         autoHr = await hrmsTestHeaders(autoCompany, autoTenant);
+        await getDb().delete(attendancePeriods).where(eq(attendancePeriods.companyId, autoCompany));
       });
 
       afterAll(async () => {
         await putPayroll({ autoLockOnCutoff: false, cycleType: 'calendar_month' });
+        await getDb().delete(attendancePeriods).where(eq(attendancePeriods.companyId, autoCompany));
         await removeHrmsTestAccess([autoCompany]);
       });
 

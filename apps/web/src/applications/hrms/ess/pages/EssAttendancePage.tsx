@@ -9,10 +9,8 @@ import {
   Grid,
   Badge,
   Button,
-  IconButton,
   Alert,
   LoadingState,
-  Toolbar,
   Table,
   TableHead,
   TableBody,
@@ -25,41 +23,22 @@ import {
   ProgressBar,
   Select,
   Input,
-  Divider,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import {
   essApi,
-  isLocationRequiredError,
   type EssAttendanceRecord,
   type EssAttendanceView,
   type EssMonthlyAttendanceSummary,
   type EssTodayAttendance,
   type EssAttendanceSummaryCounters,
-  type EssPunchEvent,
-  type PunchDeviceMetadata,
+  type EssAttendanceRegularizationDto,
 } from '../api/essApi';
-
-/** Asks the browser for the current position. Only used when the company requires location. */
-function readCurrentPosition(): Promise<PunchDeviceMetadata> {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject(new Error('Location is required to punch, but this browser cannot provide it.'));
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (pos) =>
-        resolve({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-          accuracy: pos.coords.accuracy,
-        }),
-      () =>
-        reject(new Error('Location is required to punch. Please allow location access and retry.')),
-      { enableHighAccuracy: true, timeout: 10000 },
-    );
-  });
-}
+import { useEssAttendance, formatDisplayTime, formatMinutes } from '../hooks';
+import {
+  AttendanceMonthlyCalendar,
+  AttendanceSummaryMetricsCards,
+} from '../components/AttendanceMonthlyCalendar';
 
 type AttendanceWorkspace = {
   today: EssTodayAttendance & { notes?: string | null };
@@ -85,57 +64,28 @@ const BREAK_OPTIONS: Array<{ value: 'tea' | 'lunch' | 'personal'; label: string;
   { value: 'personal', label: 'Personal Break', desc: 'As needed' },
 ];
 
-function formatTime(isoString: string | null | undefined): string {
-  if (!isoString) return '—';
-  try {
-    const d = new Date(isoString);
-    if (isNaN(d.getTime())) return isoString;
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  } catch {
-    return isoString;
-  }
-}
-
-function formatMinutes(mins: number): string {
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  if (h === 0) return `${m}m`;
-  return `${h}h ${m}m`;
-}
-
 export function EssAttendancePage() {
   const [workspace, setWorkspace] = useState<AttendanceWorkspace | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Live Clock
-  const [now, setNow] = useState<Date>(new Date());
-  useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
+  // Month and Date Selection State
+  const [calendarDate, setCalendarDate] = useState<Date>(new Date());
+  const [selectedDateStr, setSelectedDateStr] = useState<string>(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  });
 
   // Punch actions
-  const [punchLoading, setPunchLoading] = useState(false);
-  const [punchError, setPunchError] = useState<string | null>(null);
-  const [punchSuccess, setPunchSuccess] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<string>('office');
 
   // Break Modal
   const [breakModalOpen, setBreakModalOpen] = useState(false);
   const [selectedBreakType, setSelectedBreakType] = useState<'tea' | 'lunch' | 'personal'>('tea');
   const [breakNotes, setBreakNotes] = useState('');
-  const [breakLoading, setBreakLoading] = useState(false);
 
-  // Calendar State
-  const [calendarDate, setCalendarDate] = useState<Date>(new Date());
-  const [selectedDayRecord, setSelectedDayRecord] = useState<{
-    dateStr: string;
-    record?: EssAttendanceRecord;
-    isToday?: boolean;
-  } | null>(null);
-
-  // Regularization Modal
+  // Regularization list and modal
+  const [regularizations, setRegularizations] = useState<EssAttendanceRegularizationDto[]>([]);
   const [regularizeOpen, setRegularizeOpen] = useState(false);
   const [regDate, setRegDate] = useState('');
   const [regCheckIn, setRegCheckIn] = useState('09:00');
@@ -149,101 +99,178 @@ export function EssAttendancePage() {
     setLoading(true);
     setError(null);
     try {
-      const data = await essApi.getAttendance();
+      const monthStr = `${calendarDate.getFullYear()}-${String(calendarDate.getMonth() + 1).padStart(2, '0')}`;
+      const [data, regData] = await Promise.all([
+        essApi.getAttendance({ month: monthStr }),
+        essApi.getAttendanceRegularizations().catch(() => []),
+      ]);
       setWorkspace(data);
+      setRegularizations(regData);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to load attendance');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [calendarDate]);
 
   useEffect(() => {
     load();
   }, [load]);
 
-  const handleCheckIn = async () => {
-    setPunchLoading(true);
-    setPunchError(null);
-    setPunchSuccess(null);
+  const handleMonthChange = async (newDate: Date) => {
+    setCalendarDate(newDate);
+    const monthStr = `${newDate.getFullYear()}-${String(newDate.getMonth() + 1).padStart(2, '0')}`;
     try {
-      try {
-        await essApi.checkIn({ workLocation: selectedLocation });
-      } catch (err: unknown) {
-        if (!isLocationRequiredError(err)) throw err;
-        await essApi.checkIn({
-          workLocation: selectedLocation,
-          deviceMetadata: await readCurrentPosition(),
-        });
-      }
-      setPunchSuccess('Checked in successfully!');
-      await load();
+      const data = await essApi.getAttendance({ month: monthStr });
+      setWorkspace((prev) => {
+        if (!prev) return data;
+        return {
+          ...prev,
+          summary: data.summary ?? prev.summary,
+          history: data.history,
+          monthlySummary: data.monthlySummary ?? prev.monthlySummary,
+        };
+      });
     } catch (err: unknown) {
-      setPunchError(err instanceof Error ? err.message : 'Check-in failed');
-    } finally {
-      setPunchLoading(false);
+      setError(err instanceof Error ? err.message : 'Failed to load monthly attendance');
     }
+  };
+
+  const {
+    now,
+    today,
+    isShiftAssigned,
+    shiftName,
+    shiftTimes,
+    hasPunchedIn,
+    hasPunchedOut,
+    isOnBreak,
+    statusLabel,
+    grossMinutes,
+    liveBreakMinutes,
+    netWorkedMinutes,
+    requiredShiftMinutes,
+    progressPercent,
+    canCheckIn,
+    canCheckOut,
+    canStartBreak,
+    canEndBreak,
+    checkInDisabledReason,
+    checkOutDisabledReason,
+    punchLoading,
+    punchError,
+    punchSuccess,
+    handleCheckIn: performCheckIn,
+    handleCheckOut: performCheckOut,
+    handleStartBreak: performStartBreak,
+    handleEndBreak: performEndBreak,
+  } = useEssAttendance({
+    todayAttendance: workspace?.today,
+    onRefresh: load,
+  });
+
+  const handleCheckIn = async () => {
+    await performCheckIn(selectedLocation);
   };
 
   const handleCheckOut = async () => {
-    setPunchLoading(true);
-    setPunchError(null);
-    setPunchSuccess(null);
-    try {
-      try {
-        await essApi.checkOut();
-      } catch (err: unknown) {
-        if (!isLocationRequiredError(err)) throw err;
-        await essApi.checkOut({ deviceMetadata: await readCurrentPosition() });
-      }
-      setPunchSuccess('Checked out successfully!');
-      await load();
-    } catch (err: unknown) {
-      setPunchError(err instanceof Error ? err.message : 'Check-out failed');
-    } finally {
-      setPunchLoading(false);
-    }
+    await performCheckOut();
   };
 
   const handleStartBreak = async () => {
-    setBreakLoading(true);
-    setPunchError(null);
-    try {
-      await essApi.startBreak({ breakType: selectedBreakType, notes: breakNotes });
+    const success = await performStartBreak(selectedBreakType, breakNotes);
+    if (success) {
       setBreakModalOpen(false);
       setBreakNotes('');
-      setPunchSuccess(`Started ${selectedBreakType} break.`);
-      await load();
-    } catch (err: unknown) {
-      setPunchError(err instanceof Error ? err.message : 'Failed to start break');
-    } finally {
-      setBreakLoading(false);
     }
   };
 
   const handleEndBreak = async () => {
-    setBreakLoading(true);
-    setPunchError(null);
-    try {
-      await essApi.endBreak();
-      setPunchSuccess('Break ended. Welcome back to work!');
-      await load();
-    } catch (err: unknown) {
-      setPunchError(err instanceof Error ? err.message : 'Failed to end break');
-    } finally {
-      setBreakLoading(false);
-    }
+    await performEndBreak();
   };
 
+  // Selected date record details
+  const selectedRecord = useMemo(() => {
+    if (!workspace?.history || !selectedDateStr) return null;
+    return workspace.history.find((h) => h.date === selectedDateStr) ?? null;
+  }, [workspace?.history, selectedDateStr]);
+
+  const todayStr = useMemo(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }, []);
+
+  const isSelectedDateToday = selectedDateStr === todayStr;
+
+  const selectedDateFormatted = useMemo(() => {
+    if (!selectedDateStr) return '';
+    const [y, m, d] = selectedDateStr.split('-').map(Number);
+    if (!y || !m || !d) return selectedDateStr;
+    const dateObj = new Date(y, m - 1, d);
+    return dateObj.toLocaleDateString([], {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  }, [selectedDateStr]);
+
+  const selectedDayOfWeek = useMemo(() => {
+    if (!selectedDateStr) return 0;
+    const [y, m, d] = selectedDateStr.split('-').map(Number);
+    if (!y || !m || !d) return 0;
+    return new Date(y, m - 1, d).getDay();
+  }, [selectedDateStr]);
+
+  const isSelectedWeekend = selectedDayOfWeek === 0 || selectedDayOfWeek === 6;
+  const isSelectedFuture = selectedDateStr > todayStr;
+
+  // Active regularization for selected date
+  const activeRegForSelectedDay = useMemo(() => {
+    if (!selectedDateStr) return null;
+    return (
+      regularizations.find(
+        (r) =>
+          r.workday === selectedDateStr &&
+          ['submitted', 'under_review', 'awaiting_info', 'approved'].includes(r.approvalStatus),
+      ) ?? null
+    );
+  }, [selectedDateStr, regularizations]);
+
+  const activeRegForModalDate = useMemo(() => {
+    if (!regDate) return null;
+    return (
+      regularizations.find(
+        (r) =>
+          r.workday === regDate &&
+          ['submitted', 'under_review', 'awaiting_info', 'approved'].includes(r.approvalStatus),
+      ) ?? null
+    );
+  }, [regDate, regularizations]);
+
   const handleRegularize = async () => {
+    if (!regDate || !regReason.trim()) {
+      setRegError('Workday date and reason are required.');
+      return;
+    }
+    if (activeRegForModalDate) {
+      setRegError(
+        `A regularization request (${activeRegForModalDate.requestNumber}) is already active for ${regDate}.`,
+      );
+      return;
+    }
     setRegLoading(true);
     setRegError(null);
     try {
       await essApi.regularizeAttendance({
         date: regDate,
+        workday: regDate,
         checkInTime: regCheckIn,
         checkOutTime: regCheckOut,
-        reason: regReason,
+        proposedCheckIn: regCheckIn,
+        proposedCheckOut: regCheckOut,
+        reason: regReason.trim(),
+        requestType: 'punch_correction',
       });
       setRegSuccess(true);
       setRegularizeOpen(false);
@@ -256,134 +283,6 @@ export function EssAttendancePage() {
     }
   };
 
-  // Calendar weeks generator
-  const calendarWeeks = useMemo(() => {
-    const year = calendarDate.getFullYear();
-    const month = calendarDate.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const totalDays = lastDay.getDate();
-
-    // Monday as day 0: Sunday is 0 in JS -> 6, Mon is 1 -> 0
-    const startDayIndex = (firstDay.getDay() + 6) % 7;
-
-    const weeks: Array<
-      Array<{
-        dateStr: string;
-        dayNum: number | null;
-        isCurrentMonth: boolean;
-        isToday: boolean;
-        record?: EssAttendanceRecord;
-        statusCode: string;
-        badgeVariant: 'success' | 'danger' | 'warning' | 'info' | 'neutral';
-      }>
-    > = [];
-
-    const todayStr = new Date().toISOString().split('T')[0] ?? '';
-    const recordsMap = new Map<string, EssAttendanceRecord>();
-    if (workspace?.history) {
-      workspace.history.forEach((rec) => recordsMap.set(rec.date, rec));
-    }
-
-    let currentWeek: Array<{
-      dateStr: string;
-      dayNum: number | null;
-      isCurrentMonth: boolean;
-      isToday: boolean;
-      record?: EssAttendanceRecord;
-      statusCode: string;
-      badgeVariant: 'success' | 'danger' | 'warning' | 'info' | 'neutral';
-    }> = [];
-
-    // Preceding padding
-    for (let i = 0; i < startDayIndex; i++) {
-      currentWeek.push({
-        dateStr: '',
-        dayNum: null,
-        isCurrentMonth: false,
-        isToday: false,
-        statusCode: '',
-        badgeVariant: 'neutral',
-      });
-    }
-
-    for (let day = 1; day <= totalDays; day++) {
-      const dayDate = new Date(year, month, day);
-      const dayOfWeek = dayDate.getDay();
-      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      const isToday = dateStr === todayStr;
-      const record = recordsMap.get(dateStr);
-
-      let statusCode = '—';
-      let badgeVariant: 'success' | 'danger' | 'warning' | 'info' | 'neutral' = 'neutral';
-
-      if (record) {
-        if (record.status === 'present') {
-          if (record.workLocation === 'wfh') {
-            statusCode = 'WFH';
-            badgeVariant = 'info';
-          } else if (record.workLocation === 'on_duty' || record.workLocation === 'field') {
-            statusCode = 'OD';
-            badgeVariant = 'info';
-          } else {
-            statusCode = 'P';
-            badgeVariant = 'success';
-          }
-        } else if (record.status === 'half_day') {
-          statusCode = 'HD';
-          badgeVariant = 'warning';
-        } else if (record.status === 'on_leave') {
-          statusCode = 'L';
-          badgeVariant = 'info';
-        } else if (record.status === 'holiday') {
-          statusCode = 'H';
-          badgeVariant = 'neutral';
-        } else if (record.status === 'absent') {
-          statusCode = 'A';
-          badgeVariant = 'danger';
-        }
-      } else if (dayOfWeek === 0 || dayOfWeek === 6) {
-        statusCode = 'WO';
-        badgeVariant = 'neutral';
-      } else if (dateStr < todayStr) {
-        statusCode = 'A';
-        badgeVariant = 'danger';
-      }
-
-      currentWeek.push({
-        dateStr,
-        dayNum: day,
-        isCurrentMonth: true,
-        isToday,
-        record,
-        statusCode,
-        badgeVariant,
-      });
-
-      if (currentWeek.length === 7) {
-        weeks.push(currentWeek);
-        currentWeek = [];
-      }
-    }
-
-    // Trailing padding
-    if (currentWeek.length > 0) {
-      while (currentWeek.length < 7) {
-        currentWeek.push({
-          dateStr: '',
-          dayNum: null,
-          isCurrentMonth: false,
-          isToday: false,
-          statusCode: '',
-          badgeVariant: 'neutral',
-        });
-      }
-      weeks.push(currentWeek);
-    }
-
-    return weeks;
-  }, [calendarDate, workspace?.history]);
-
   if (loading) return <LoadingState label="Loading attendance..." />;
   if (error)
     return (
@@ -393,7 +292,6 @@ export function EssAttendancePage() {
     );
   if (!workspace) return null;
 
-  const today = workspace.today;
   const summary = workspace.summary ?? {
     presentDays: 0,
     absentDays: 0,
@@ -402,46 +300,17 @@ export function EssAttendancePage() {
     lateMarksCount: 0,
     regularizationQuotaUsed: 0,
     regularizationQuotaLimit: 3,
+    workedMinutes: 0,
+    missingPunchesCount: 0,
+    attendancePercent: 0,
+    totalWorkingDays: 0,
   };
-  const shift = today.shift;
-  const monthlySummary = workspace.monthlySummary ?? [];
-  const historyDays = workspace.view?.historyDays ?? 60;
-  const monthlySummaryOnly = workspace.view?.visibility === 'monthly_summary_only';
-  const hasPunchedIn = !!today.checkInTime;
-  const hasPunchedOut = !!today.checkOutTime;
-  const isOnBreak = !!today.isOnBreak;
-
-  // Live timer computations
-  let grossMinutes = 0;
-  if (hasPunchedIn && today.checkInTime) {
-    const inTime = new Date(today.checkInTime).getTime();
-    const endRef =
-      hasPunchedOut && today.checkOutTime ? new Date(today.checkOutTime).getTime() : now.getTime();
-    if (!isNaN(inTime) && !isNaN(endRef) && endRef >= inTime) {
-      grossMinutes = Math.floor((endRef - inTime) / 60000);
-    }
-  }
-
-  let liveBreakMinutes = today.breakMinutes || 0;
-  if (isOnBreak && today.currentBreakStartTime) {
-    const bStart = new Date(today.currentBreakStartTime).getTime();
-    if (!isNaN(bStart) && now.getTime() >= bStart) {
-      liveBreakMinutes += Math.floor((now.getTime() - bStart) / 60000);
-    }
-  }
-
-  const netWorkedMinutes = Math.max(0, grossMinutes - liveBreakMinutes);
-  const requiredShiftMinutes = shift?.requiredHours ? shift.requiredHours * 60 : 480;
-  const progressPercent = Math.min(
-    100,
-    Math.round((netWorkedMinutes / requiredShiftMinutes) * 100),
-  );
 
   return (
     <Page>
       <PageHeader
-        title="Attendance & Timesheet"
-        subtitle="Real-time attendance punch, daily shift progress, monthly calendar, and regularization requests"
+        title="Attendance & Time"
+        subtitle="Your attendance, working hours, and daily records"
         actions={
           <Button
             id="ess-attendance-regularize-btn"
@@ -449,6 +318,7 @@ export function EssAttendancePage() {
             leftIcon={<BezentIcon name="edit" size={16} />}
             onClick={() => {
               setRegDate(today.date);
+              setRegError(null);
               setRegularizeOpen(true);
             }}
           >
@@ -469,639 +339,624 @@ export function EssAttendancePage() {
       )}
       {regSuccess && (
         <Alert variant="success" title="Request Submitted">
-          Your attendance regularization request has been submitted for manager approval.
+          Your attendance regularization request has been submitted for manager review.
         </Alert>
       )}
 
-      {/* ── Today's Hero Card ────────────────────────────────────── */}
-      <Section title="Today's Attendance">
-        <Card variant="default">
-          <Stack gap="lg">
-            {/* Header row: Live clock + shift info + status badge */}
-            <Inline gap="md" align="center" justify="between" wrap>
-              <Inline gap="md" align="center">
-                <BezentIcon name="attendance" size={28} />
-                <Stack gap="xs">
-                  <Inline gap="sm" align="center">
-                    <strong>
-                      {now.toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit',
-                      })}
-                    </strong>
-                    <span>•</span>
-                    <span>
-                      {now.toLocaleDateString([], {
-                        weekday: 'short',
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
-                    </span>
-                  </Inline>
-                  <Inline gap="xs" align="center">
-                    <span>
-                      Shift: <strong>{shift?.name || 'General Shift'}</strong> (
-                      {shift?.startTime || '09:00'} - {shift?.endTime || '18:00'})
-                    </span>
-                    <span>•</span>
-                    <span>Req: {shift?.requiredHours || 8}h</span>
-                  </Inline>
-                </Stack>
-              </Inline>
-
-              <Inline gap="sm" align="center">
+      {/* ── Compact Today Attendance Panel (Option B) ─────────────── */}
+      <div className="ess-attendance-today-card">
+        <div className="ess-today-workspace__main-row">
+          {/* Clock and Status Group */}
+          <div className="ess-today-workspace__identity">
+            <div className="ess-today-workspace__icon-box">
+              <BezentIcon name="attendance" size={22} />
+            </div>
+            <div className="ess-today-workspace__clock-info">
+              <div className="ess-today-workspace__time-row">
+                <span className="ess-today-workspace__time">
+                  {now.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                  })}
+                </span>
+                <span className="ess-today-workspace__date">
+                  {now.toLocaleDateString([], {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}
+                </span>
+              </div>
+              <div className="ess-today-workspace__status-row">
                 <Badge
                   variant={
-                    today.isOnBreak
+                    isOnBreak
                       ? 'warning'
-                      : today.checkOutTime
+                      : hasPunchedOut
                         ? 'neutral'
-                        : today.checkInTime ||
-                            today.status === 'present' ||
-                            today.status === 'working'
+                        : hasPunchedIn
                           ? 'success'
                           : 'neutral'
                   }
-                  size="md"
+                  size="sm"
                 >
-                  {today.isOnBreak
-                    ? `On Break (${today.currentBreakType || 'Break'})`
-                    : today.checkOutTime
-                      ? 'Checked Out'
-                      : today.checkInTime ||
-                          today.status === 'present' ||
-                          today.status === 'working'
-                        ? 'Working'
-                        : 'Not Checked In'}
+                  {statusLabel}
                 </Badge>
-              </Inline>
-            </Inline>
+              </div>
+            </div>
+          </div>
 
-            <Divider />
+          {/* Shift & Timing Pillars Group */}
+          <div className="ess-today-workspace__pillars">
+            <div className="ess-today-pillar">
+              <span className="ess-today-pillar__label">Shift Schedule</span>
+              <span className="ess-today-pillar__value">
+                {!isShiftAssigned ? 'Open Attendance' : shiftTimes || shiftName}
+              </span>
+            </div>
+            <div className="ess-today-pillar">
+              <span className="ess-today-pillar__label">Check In</span>
+              <span className="ess-today-pillar__value">
+                {formatDisplayTime(today.checkInTime)}
+              </span>
+            </div>
+            <div className="ess-today-pillar">
+              <span className="ess-today-pillar__label">Check Out</span>
+              <span className="ess-today-pillar__value">
+                {formatDisplayTime(today.checkOutTime)}
+              </span>
+            </div>
+            <div className="ess-today-pillar">
+              <span className="ess-today-pillar__label">Gross / Net</span>
+              <span className="ess-today-pillar__value">
+                {formatMinutes(grossMinutes)} / {formatMinutes(netWorkedMinutes)}
+              </span>
+            </div>
+            <div className="ess-today-pillar">
+              <span className="ess-today-pillar__label">Break</span>
+              <span className="ess-today-pillar__value">{formatMinutes(liveBreakMinutes)}</span>
+            </div>
+          </div>
 
-            {/* Metrics & Progress row */}
-            <Grid columns={4} gap="md">
-              <Stack gap="xs">
-                <span>Check-In Time</span>
-                <strong>{formatTime(today.checkInTime)}</strong>
-              </Stack>
-              <Stack gap="xs">
-                <span>Check-Out Time</span>
-                <strong>{formatTime(today.checkOutTime)}</strong>
-              </Stack>
-              <Stack gap="xs">
-                <span>Gross / Net Hours</span>
-                <strong>
-                  {formatMinutes(grossMinutes)} / {formatMinutes(netWorkedMinutes)}
-                </strong>
-              </Stack>
-              <Stack gap="xs">
-                <span>Total Break Taken</span>
-                <strong>{formatMinutes(liveBreakMinutes)}</strong>
-              </Stack>
-            </Grid>
+          {/* Actions Group */}
+          <div className="ess-today-workspace__actions">
+            {!hasPunchedIn && (
+              <div className="ess-today-workspace__mode-select">
+                <Select
+                  aria-label="Work Mode"
+                  size="sm"
+                  value={selectedLocation}
+                  onChange={(e) => setSelectedLocation(e.target.value)}
+                  options={WORK_LOCATION_OPTIONS}
+                />
+              </div>
+            )}
 
-            {/* Shift Progress Bar */}
-            <Stack gap="xs">
-              <Inline justify="between" align="center">
-                <span>Shift Completion Progress</span>
-                <strong>
-                  {formatMinutes(netWorkedMinutes)} of {formatMinutes(requiredShiftMinutes)} (
-                  {progressPercent}%)
-                </strong>
-              </Inline>
-              <ProgressBar
-                value={netWorkedMinutes}
-                max={requiredShiftMinutes}
-                variant={progressPercent >= 100 ? 'success' : 'primary'}
-                size="md"
-              />
-            </Stack>
+            {!hasPunchedIn && (
+              <Button
+                id="att-check-in"
+                variant="primary"
+                onClick={handleCheckIn}
+                disabled={!canCheckIn || punchLoading}
+                loading={punchLoading}
+                title={checkInDisabledReason}
+                leftIcon={<BezentIcon name="check" size={16} />}
+              >
+                Check In
+              </Button>
+            )}
 
-            <Divider />
-
-            {/* Controls row */}
-            <Inline gap="md" align="center" justify="between" wrap>
-              <Inline gap="sm" align="center">
-                {!hasPunchedIn && (
-                  <Select
-                    label="Work Mode"
-                    size="sm"
-                    value={selectedLocation}
-                    onChange={(e) => setSelectedLocation(e.target.value)}
-                    options={WORK_LOCATION_OPTIONS}
-                  />
-                )}
-                {hasPunchedIn && (
-                  <span>
-                    Work Location: <strong>{today.workLocation.toUpperCase()}</strong>
-                  </span>
-                )}
-              </Inline>
-
-              <Inline gap="sm" align="center">
-                {/* Check In Button */}
-                {!hasPunchedIn && (
+            {hasPunchedIn && !hasPunchedOut && (
+              <>
+                {!isOnBreak ? (
                   <Button
-                    id="att-check-in"
-                    variant="primary"
-                    onClick={handleCheckIn}
+                    id="att-take-break"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setBreakModalOpen(true)}
+                    disabled={!canStartBreak || punchLoading}
                     loading={punchLoading}
-                    leftIcon={<BezentIcon name="check" size={16} />}
+                    leftIcon={<BezentIcon name="coffee" size={15} />}
                   >
-                    Check In
+                    Take Break
+                  </Button>
+                ) : (
+                  <Button
+                    id="att-end-break"
+                    variant="primary"
+                    size="sm"
+                    onClick={handleEndBreak}
+                    disabled={!canEndBreak || punchLoading}
+                    loading={punchLoading}
+                    leftIcon={<BezentIcon name="check" size={15} />}
+                  >
+                    End Break
                   </Button>
                 )}
 
-                {/* Working actions */}
-                {hasPunchedIn && !hasPunchedOut && (
-                  <>
-                    {!isOnBreak ? (
-                      <Button
-                        id="att-take-break"
-                        variant="secondary"
-                        onClick={() => setBreakModalOpen(true)}
-                        loading={breakLoading}
-                        leftIcon={<BezentIcon name="coffee" size={16} />}
-                      >
-                        Take Break
-                      </Button>
-                    ) : (
-                      <Button
-                        id="att-end-break"
-                        variant="primary"
-                        onClick={handleEndBreak}
-                        loading={breakLoading}
-                        leftIcon={<BezentIcon name="check" size={16} />}
-                      >
-                        End Break
-                      </Button>
-                    )}
+                <Button
+                  id="att-check-out"
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleCheckOut}
+                  disabled={!canCheckOut || punchLoading}
+                  loading={punchLoading}
+                  title={checkOutDisabledReason}
+                  leftIcon={<BezentIcon name="close" size={15} />}
+                >
+                  Check Out
+                </Button>
+              </>
+            )}
 
-                    <Button
-                      id="att-check-out"
-                      variant="secondary"
-                      onClick={handleCheckOut}
-                      loading={punchLoading}
-                      leftIcon={<BezentIcon name="close" size={16} />}
-                    >
-                      Check Out
-                    </Button>
-                  </>
-                )}
+            {hasPunchedIn && hasPunchedOut && (
+              <Badge variant="success" size="md">
+                Day Completed
+              </Badge>
+            )}
+          </div>
+        </div>
 
-                {hasPunchedIn && hasPunchedOut && (
-                  <Badge variant="success" size="md">
-                    Day Completed
+        {isShiftAssigned && (
+          <div className="ess-today-workspace__progress-strip">
+            <div className="ess-today-workspace__progress-header">
+              <span>Shift Target Progress</span>
+              <span className="ess-today-progress-stat">
+                {formatMinutes(netWorkedMinutes)} of {formatMinutes(requiredShiftMinutes)} (
+                {progressPercent}%)
+              </span>
+            </div>
+            <ProgressBar
+              value={netWorkedMinutes}
+              max={requiredShiftMinutes}
+              variant={progressPercent >= 100 ? 'success' : 'primary'}
+              size="sm"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* ── Monthly Summary Metrics Strip (Option B) ─────────────── */}
+      <AttendanceSummaryMetricsCards
+        summary={{
+          presentDays: summary.presentDays,
+          absentDays: summary.absentDays,
+          halfDays: summary.halfDays,
+          lateDays: summary.lateMarksCount,
+          lateMarksCount: summary.lateMarksCount,
+          workedMinutes: summary.workedMinutes,
+          missingPunchesCount: summary.missingPunchesCount,
+          attendancePercent: summary.attendancePercent ?? 0,
+          totalWorkingDays: summary.totalWorkingDays,
+        }}
+      />
+
+      {/* ── Calendar & Daily Details Two-Column Workspace (Option B) ── */}
+      <div className="ess-attendance-workspace-layout">
+        <div className="ess-attendance-workspace-layout__calendar">
+          <AttendanceMonthlyCalendar
+            initialDate={calendarDate}
+            summary={{
+              presentDays: summary.presentDays,
+              absentDays: summary.absentDays,
+              halfDays: summary.halfDays,
+              lateDays: summary.lateMarksCount,
+              lateMarksCount: summary.lateMarksCount,
+              workedMinutes: summary.workedMinutes,
+              missingPunchesCount: summary.missingPunchesCount,
+              attendancePercent: summary.attendancePercent ?? 0,
+              totalWorkingDays: summary.totalWorkingDays,
+            }}
+            history={workspace.history}
+            selectedDateStr={selectedDateStr}
+            onSelectDate={(newDateStr) => setSelectedDateStr(newDateStr)}
+            onMonthChange={handleMonthChange}
+            loading={loading}
+            hideHeader={true}
+            hideInlineDetails={true}
+            hideSummaryCards={true}
+          />
+        </div>
+
+        <div className="ess-attendance-workspace-layout__details">
+          <Card variant="default">
+            <div className="ess-daily-details-panel">
+              <div className="ess-daily-details__header">
+                <div className="ess-daily-details__title-group">
+                  <span className="ess-daily-details__title">{selectedDateFormatted}</span>
+                  <span className="ess-daily-details__subtitle">
+                    {isSelectedDateToday
+                      ? "Today's live attendance details"
+                      : 'Daily shift and attendance record'}
+                  </span>
+                </div>
+                {activeRegForSelectedDay ? (
+                  <Badge variant="warning" size="sm">
+                    REGULARIZATION PENDING
+                  </Badge>
+                ) : selectedRecord ? (
+                  <Badge
+                    variant={
+                      selectedRecord.isMissingPunch
+                        ? 'danger'
+                        : selectedRecord.isLate
+                          ? 'warning'
+                          : selectedRecord.status === 'present'
+                            ? 'success'
+                            : selectedRecord.status === 'half_day'
+                              ? 'warning'
+                              : selectedRecord.status === 'on_leave'
+                                ? 'info'
+                                : selectedRecord.status === 'holiday'
+                                  ? 'neutral'
+                                  : 'danger'
+                    }
+                    size="sm"
+                  >
+                    {selectedRecord.isMissingPunch
+                      ? 'MISSING PUNCH'
+                      : selectedRecord.isLate
+                        ? 'LATE ARRIVAL'
+                        : selectedRecord.status.replace(/_/g, ' ').toUpperCase()}
+                  </Badge>
+                ) : isSelectedWeekend ? (
+                  <Badge variant="neutral" size="sm">
+                    REST DAY
+                  </Badge>
+                ) : isSelectedFuture ? (
+                  <Badge variant="neutral" size="sm">
+                    UPCOMING
+                  </Badge>
+                ) : (
+                  <Badge variant="danger" size="sm">
+                    NO PUNCH
                   </Badge>
                 )}
-              </Inline>
-            </Inline>
-          </Stack>
-        </Card>
-      </Section>
+              </div>
 
-      {/* ── Today's Punch Timeline Strip ────────────────────────── */}
-      {today.punches && today.punches.length > 0 && (
-        <Section title="Today's Activity Log" subtitle="Punches recorded during today's shift">
-          <Card>
-            <Table compact>
+              {activeRegForSelectedDay && (
+                <Alert variant="warning" title="Active Regularization Request">
+                  Request <strong>{activeRegForSelectedDay.requestNumber}</strong> is currently{' '}
+                  <strong>{activeRegForSelectedDay.approvalStatus.toUpperCase()}</strong>{' '}
+                  (Application status: {activeRegForSelectedDay.applicationStatus.toUpperCase()}).
+                  {activeRegForSelectedDay.decisionRemarks && (
+                    <div>Remarks: {activeRegForSelectedDay.decisionRemarks}</div>
+                  )}
+                </Alert>
+              )}
+
+              {selectedRecord ? (
+                <Stack gap="md">
+                  <div className="ess-daily-details__grid">
+                    <div className="ess-daily-details__metric">
+                      <span className="ess-daily-details__metric-label">Check In</span>
+                      <span className="ess-daily-details__metric-value">
+                        {formatDisplayTime(selectedRecord.checkInTime)}
+                      </span>
+                    </div>
+                    <div className="ess-daily-details__metric">
+                      <span className="ess-daily-details__metric-label">Check Out</span>
+                      <span className="ess-daily-details__metric-value">
+                        {formatDisplayTime(selectedRecord.checkOutTime)}
+                      </span>
+                    </div>
+                    <div className="ess-daily-details__metric">
+                      <span className="ess-daily-details__metric-label">Worked Time</span>
+                      <span className="ess-daily-details__metric-value">
+                        {selectedRecord.workedMinutes !== undefined
+                          ? formatMinutes(selectedRecord.workedMinutes)
+                          : '0m'}
+                      </span>
+                    </div>
+                    <div className="ess-daily-details__metric">
+                      <span className="ess-daily-details__metric-label">Break Duration</span>
+                      <span className="ess-daily-details__metric-value">
+                        {selectedRecord.breakMinutes !== undefined
+                          ? formatMinutes(selectedRecord.breakMinutes)
+                          : '0m'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="ess-daily-details__meta-list">
+                    <div className="ess-daily-details__meta-item">
+                      <span className="ess-daily-details__meta-label">Work Location:</span>
+                      <strong>{selectedRecord.workLocation.toUpperCase()}</strong>
+                    </div>
+                    {selectedRecord.shiftScheduleRef && (
+                      <div className="ess-daily-details__meta-item">
+                        <span className="ess-daily-details__meta-label">Shift:</span>
+                        <strong>{selectedRecord.shiftScheduleRef}</strong>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="ess-daily-details__flags">
+                    {selectedRecord.isLate && (
+                      <Badge variant="warning" size="sm">
+                        Late ({selectedRecord.lateMinutes}m)
+                      </Badge>
+                    )}
+                    {selectedRecord.isEarlyExit && (
+                      <Badge variant="warning" size="sm">
+                        Early Exit ({selectedRecord.earlyMinutes}m)
+                      </Badge>
+                    )}
+                    {selectedRecord.isMissingPunch && (
+                      <Badge variant="danger" size="sm">
+                        Missing Punch
+                      </Badge>
+                    )}
+                    {selectedRecord.isRegularized && (
+                      <Badge variant="info" size="sm">
+                        Regularized
+                      </Badge>
+                    )}
+                    {!selectedRecord.isLate &&
+                      !selectedRecord.isEarlyExit &&
+                      !selectedRecord.isMissingPunch &&
+                      !selectedRecord.isRegularized && (
+                        <Badge variant="neutral" size="sm">
+                          Standard Shift
+                        </Badge>
+                      )}
+                  </div>
+
+                  {selectedRecord.notes && (
+                    <Stack gap="xs">
+                      <span className="ess-daily-details__meta-label">Notes</span>
+                      <div>{selectedRecord.notes}</div>
+                    </Stack>
+                  )}
+
+                  {isSelectedDateToday && today.punches && today.punches.length > 0 && (
+                    <div className="ess-daily-details__timeline">
+                      <span className="ess-daily-details__meta-label">Punches Timeline</span>
+                      <Table compact>
+                        <TableHead>
+                          <TableRow>
+                            <TableHeaderCell>Time</TableHeaderCell>
+                            <TableHeaderCell>Action</TableHeaderCell>
+                            <TableHeaderCell>Location / Mode</TableHeaderCell>
+                            <TableHeaderCell>Source</TableHeaderCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {today.punches.map((p) => (
+                            <TableRow key={p.id}>
+                              <TableCell>
+                                <strong>{formatDisplayTime(p.punchTime)}</strong>
+                              </TableCell>
+                              <TableCell>
+                                <Badge
+                                  variant={
+                                    p.punchType === 'in'
+                                      ? 'success'
+                                      : p.punchType === 'out'
+                                        ? 'neutral'
+                                        : p.punchType === 'break_out'
+                                          ? 'warning'
+                                          : 'info'
+                                  }
+                                  size="sm"
+                                >
+                                  {p.punchType === 'in'
+                                    ? 'Check In'
+                                    : p.punchType === 'out'
+                                      ? 'Check Out'
+                                      : p.punchType === 'break_out'
+                                        ? 'Break Start'
+                                        : p.punchType === 'break_in'
+                                          ? 'Break End'
+                                          : p.punchType}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>{p.workLocation.toUpperCase()}</TableCell>
+                              <TableCell>{p.source || 'Web ESS'}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+
+                  <div className="ess-daily-details__actions">
+                    <Button
+                      id="daily-detail-regularize-btn"
+                      variant="secondary"
+                      size="sm"
+                      disabled={Boolean(activeRegForSelectedDay)}
+                      leftIcon={<BezentIcon name="edit" size={15} />}
+                      onClick={() => {
+                        setRegDate(selectedDateStr);
+                        setRegCheckIn(selectedRecord.checkInTime || '09:00');
+                        setRegCheckOut(selectedRecord.checkOutTime || '18:00');
+                        setRegError(null);
+                        setRegularizeOpen(true);
+                      }}
+                    >
+                      {activeRegForSelectedDay ? 'Regularization Pending' : 'Regularize This Day'}
+                    </Button>
+                  </div>
+                </Stack>
+              ) : isSelectedWeekend ? (
+                <div className="ess-attendance-compact-contextual">
+                  <div className="ess-attendance-compact-contextual__meta">
+                    <div className="ess-attendance-compact-contextual__icon">
+                      <BezentIcon name="calendar" size={18} />
+                    </div>
+                    <div className="ess-attendance-compact-contextual__texts">
+                      <span className="ess-attendance-compact-contextual__title">Weekly Off</span>
+                      <span className="ess-attendance-compact-contextual__desc">
+                        Scheduled rest day • No shift attendance required for this date
+                      </span>
+                    </div>
+                  </div>
+                  <Badge variant="neutral" size="sm">
+                    REST DAY
+                  </Badge>
+                </div>
+              ) : isSelectedFuture ? (
+                <div className="ess-attendance-compact-contextual">
+                  <div className="ess-attendance-compact-contextual__meta">
+                    <div className="ess-attendance-compact-contextual__icon">
+                      <BezentIcon name="clock" size={18} />
+                    </div>
+                    <div className="ess-attendance-compact-contextual__texts">
+                      <span className="ess-attendance-compact-contextual__title">
+                        Scheduled Workday
+                      </span>
+                      <span className="ess-attendance-compact-contextual__desc">
+                        This workday has not occurred yet. Punches will become active on this date.
+                      </span>
+                    </div>
+                  </div>
+                  <Badge variant="neutral" size="sm">
+                    UPCOMING
+                  </Badge>
+                </div>
+              ) : (
+                <div className="ess-attendance-compact-contextual">
+                  <div className="ess-attendance-compact-contextual__meta">
+                    <div className="ess-attendance-compact-contextual__icon">
+                      <BezentIcon name="alert" size={18} />
+                    </div>
+                    <div className="ess-attendance-compact-contextual__texts">
+                      <span className="ess-attendance-compact-contextual__title">
+                        No Attendance Recorded
+                      </span>
+                      <span className="ess-attendance-compact-contextual__desc">
+                        No attendance punch or activity was recorded for this past workday.
+                      </span>
+                    </div>
+                  </div>
+                  <Button
+                    id="daily-detail-regularize-btn"
+                    variant="secondary"
+                    size="sm"
+                    disabled={Boolean(activeRegForSelectedDay)}
+                    leftIcon={<BezentIcon name="edit" size={15} />}
+                    onClick={() => {
+                      if (activeRegForSelectedDay) return;
+                      setRegDate(selectedDateStr);
+                      setRegCheckIn('09:00');
+                      setRegCheckOut('18:00');
+                      setRegError(null);
+                      setRegularizeOpen(true);
+                    }}
+                  >
+                    {activeRegForSelectedDay ? 'Regularization Pending' : 'Regularize Attendance'}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      {/* ── Attendance Regularizations Section ──────────────────────── */}
+      <Section
+        title="Attendance Regularizations"
+        actions={
+          <Button
+            variant="secondary"
+            size="sm"
+            leftIcon={<BezentIcon name="plus" size={16} />}
+            onClick={() => {
+              setRegDate(selectedDateStr || today.date);
+              setRegReason('');
+              setRegError(null);
+              setRegularizeOpen(true);
+            }}
+          >
+            New Request
+          </Button>
+        }
+      >
+        <Card variant="flat">
+          {regularizations.length === 0 ? (
+            <div className="ess-attendance-compact-empty">
+              <div className="ess-attendance-compact-empty__icon">
+                <BezentIcon name="edit" size={18} />
+              </div>
+              <div className="ess-attendance-compact-empty__content">
+                <span className="ess-attendance-compact-empty__title">
+                  No Regularization Requests
+                </span>
+                <span className="ess-attendance-compact-empty__desc">
+                  You have not submitted any attendance regularizations. Click &quot;New
+                  Request&quot; to regularize any missed punches or attendance exceptions.
+                </span>
+              </div>
+            </div>
+          ) : (
+            <Table>
               <TableHead>
                 <TableRow>
-                  <TableHeaderCell>Time</TableHeaderCell>
-                  <TableHeaderCell>Action</TableHeaderCell>
-                  <TableHeaderCell>Location / Mode</TableHeaderCell>
-                  <TableHeaderCell>Source</TableHeaderCell>
-                  <TableHeaderCell>Notes</TableHeaderCell>
+                  <TableHeaderCell>Request #</TableHeaderCell>
+                  <TableHeaderCell>Workday</TableHeaderCell>
+                  <TableHeaderCell>Correction</TableHeaderCell>
+                  <TableHeaderCell>Reason</TableHeaderCell>
+                  <TableHeaderCell>Approval Status</TableHeaderCell>
+                  <TableHeaderCell>Application Status</TableHeaderCell>
+                  <TableHeaderCell>Decision Remarks</TableHeaderCell>
+                  <TableHeaderCell>Submitted</TableHeaderCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {today.punches.map((p: EssPunchEvent) => (
-                  <TableRow key={p.id}>
+                {regularizations.map((reg) => (
+                  <TableRow key={reg.id}>
                     <TableCell>
-                      <strong>{formatTime(p.punchTime)}</strong>
+                      <strong>{reg.requestNumber}</strong>
+                    </TableCell>
+                    <TableCell>{reg.workday}</TableCell>
+                    <TableCell>
+                      {reg.proposedCheckIn || reg.proposedCheckOut
+                        ? `${reg.proposedCheckIn || '--:--'} – ${reg.proposedCheckOut || '--:--'}`
+                        : reg.proposedCorrection || '—'}
+                    </TableCell>
+                    <TableCell>{reg.reason}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          reg.approvalStatus === 'approved'
+                            ? 'success'
+                            : reg.approvalStatus === 'rejected'
+                              ? 'danger'
+                              : 'warning'
+                        }
+                        size="sm"
+                      >
+                        {reg.approvalStatus.toUpperCase()}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge
                         variant={
-                          p.punchType === 'in'
+                          reg.applicationStatus === 'applied'
                             ? 'success'
-                            : p.punchType === 'out'
-                              ? 'neutral'
-                              : p.punchType === 'break_out'
-                                ? 'warning'
-                                : 'info'
+                            : reg.applicationStatus === 'failed'
+                              ? 'danger'
+                              : 'neutral'
                         }
                         size="sm"
                       >
-                        {p.punchType === 'in'
-                          ? 'Check In'
-                          : p.punchType === 'out'
-                            ? 'Check Out'
-                            : p.punchType === 'break_out'
-                              ? 'Break Start'
-                              : p.punchType === 'break_in'
-                                ? 'Break End'
-                                : p.punchType}
+                        {reg.applicationStatus.toUpperCase()}
                       </Badge>
                     </TableCell>
-                    <TableCell>{p.workLocation.toUpperCase()}</TableCell>
-                    <TableCell>{p.source || 'Web ESS'}</TableCell>
-                    <TableCell>{p.notes || '—'}</TableCell>
+                    <TableCell>{reg.decisionRemarks || '—'}</TableCell>
+                    <TableCell>
+                      {reg.submittedAt ? new Date(reg.submittedAt).toLocaleDateString() : '—'}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          </Card>
-        </Section>
-      )}
-
-      {/* Attendance History */}
-      <Section title="Attendance History">
-        <Toolbar left={<span>Last {historyDays} days</span>} />
-        {monthlySummary.length > 0 && (
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableHeaderCell>Month</TableHeaderCell>
-                <TableHeaderCell>Present</TableHeaderCell>
-                <TableHeaderCell>Half Day</TableHeaderCell>
-                <TableHeaderCell>Absent</TableHeaderCell>
-                <TableHeaderCell>On Leave</TableHeaderCell>
-                <TableHeaderCell>Late Days</TableHeaderCell>
-                <TableHeaderCell>Hours Worked</TableHeaderCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {monthlySummary.map((m) => (
-                <TableRow key={m.month}>
-                  <TableCell>{m.month}</TableCell>
-                  <TableCell>{m.present}</TableCell>
-                  <TableCell>{m.halfDay}</TableCell>
-                  <TableCell>{m.absent}</TableCell>
-                  <TableCell>{m.onLeave}</TableCell>
-                  <TableCell>{m.lateDays}</TableCell>
-                  <TableCell>{(m.workedMinutes / 60).toFixed(1)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-        {monthlySummaryOnly ? null : workspace.history.length === 0 ? (
-          <Alert variant="info" title="No Records">
-            No attendance records found for the past {historyDays} days.
-          </Alert>
-        ) : (
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableHeaderCell>Date</TableHeaderCell>
-                <TableHeaderCell>Check In</TableHeaderCell>
-                <TableHeaderCell>Check Out</TableHeaderCell>
-                <TableHeaderCell>Location</TableHeaderCell>
-                <TableHeaderCell>Status</TableHeaderCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {workspace.history.map((rec) => (
-                <TableRow key={rec.id}>
-                  <TableCell>{rec.date}</TableCell>
-                  <TableCell>{rec.checkInTime ?? '—'}</TableCell>
-                  <TableCell>{rec.checkOutTime ?? '—'}</TableCell>
-                  <TableCell>{rec.workLocation}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        rec.status === 'present'
-                          ? 'success'
-                          : rec.status === 'absent'
-                            ? 'danger'
-                            : 'warning'
-                      }
-                    >
-                      {rec.status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </Section>
-
-      {/* ── Monthly Summary Counters Strip ───────────────────────── */}
-      <Section
-        title="Monthly Attendance Summary"
-        subtitle="Current billing / payroll cycle summary"
-      >
-        <Grid columns={6} gap="md">
-          <Card variant="flat">
-            <Stack gap="xs" align="center">
-              <span>Present Days</span>
-              <strong>{summary.presentDays}</strong>
-            </Stack>
-          </Card>
-          <Card variant="flat">
-            <Stack gap="xs" align="center">
-              <span>Absent Days</span>
-              <strong>{summary.absentDays}</strong>
-            </Stack>
-          </Card>
-          <Card variant="flat">
-            <Stack gap="xs" align="center">
-              <span>Half Days</span>
-              <strong>{summary.halfDays}</strong>
-            </Stack>
-          </Card>
-          <Card variant="flat">
-            <Stack gap="xs" align="center">
-              <span>Leave Days</span>
-              <strong>{summary.leaveDays}</strong>
-            </Stack>
-          </Card>
-          <Card variant="flat">
-            <Stack gap="xs" align="center">
-              <span>Late Marks</span>
-              <strong>{summary.lateMarksCount}</strong>
-            </Stack>
-          </Card>
-          <Card variant="flat">
-            <Stack gap="xs" align="center">
-              <span>Regularization Quota</span>
-              <strong>
-                {summary.regularizationQuotaUsed} / {summary.regularizationQuotaLimit}
-              </strong>
-            </Stack>
-          </Card>
-        </Grid>
-      </Section>
-
-      {/* ── Monthly Attendance Calendar Grid (Spec 4.1) ─────────── */}
-      <Section
-        title="Attendance Calendar"
-        subtitle="Click any date to view daily punch log and regularize attendance"
-      >
-        <Card>
-          <Stack gap="md">
-            {/* Calendar Controls */}
-            <Toolbar
-              left={
-                <Inline gap="sm" align="center">
-                  <IconButton
-                    label="Previous Month"
-                    onClick={() =>
-                      setCalendarDate(
-                        new Date(calendarDate.getFullYear(), calendarDate.getMonth() - 1, 1),
-                      )
-                    }
-                  >
-                    <BezentIcon name="chevron-left" size={18} />
-                  </IconButton>
-                  <strong>
-                    {calendarDate.toLocaleDateString([], { month: 'long', year: 'numeric' })}
-                  </strong>
-                  <IconButton
-                    label="Next Month"
-                    onClick={() =>
-                      setCalendarDate(
-                        new Date(calendarDate.getFullYear(), calendarDate.getMonth() + 1, 1),
-                      )
-                    }
-                  >
-                    <BezentIcon name="chevron-right" size={18} />
-                  </IconButton>
-                </Inline>
-              }
-              right={
-                <Button variant="ghost" size="sm" onClick={() => setCalendarDate(new Date())}>
-                  Today
-                </Button>
-              }
-            />
-
-            {/* Calendar 7-Column Table */}
-            <Table compact>
-              <TableHead>
-                <TableRow>
-                  <TableHeaderCell>Mon</TableHeaderCell>
-                  <TableHeaderCell>Tue</TableHeaderCell>
-                  <TableHeaderCell>Wed</TableHeaderCell>
-                  <TableHeaderCell>Thu</TableHeaderCell>
-                  <TableHeaderCell>Fri</TableHeaderCell>
-                  <TableHeaderCell>Sat</TableHeaderCell>
-                  <TableHeaderCell>Sun</TableHeaderCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {calendarWeeks.map((week, wIdx) => (
-                  <TableRow key={wIdx}>
-                    {week.map((cell, cIdx) => (
-                      <TableCell key={cIdx}>
-                        {cell.dayNum ? (
-                          <Card
-                            variant={cell.isToday ? 'interactive' : 'flat'}
-                            padding="sm"
-                            onClick={() =>
-                              setSelectedDayRecord({
-                                dateStr: cell.dateStr,
-                                record: cell.record,
-                                isToday: cell.isToday,
-                              })
-                            }
-                          >
-                            <Stack gap="xs" align="center">
-                              <Inline justify="between" align="center">
-                                <strong>{cell.dayNum}</strong>
-                                {cell.isToday && (
-                                  <Badge variant="info" size="sm">
-                                    Today
-                                  </Badge>
-                                )}
-                              </Inline>
-                              {cell.statusCode !== '—' && (
-                                <Badge variant={cell.badgeVariant} size="sm">
-                                  {cell.statusCode}
-                                </Badge>
-                              )}
-                            </Stack>
-                          </Card>
-                        ) : (
-                          <span>—</span>
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-
-            {/* Legend */}
-            <Divider />
-            <Inline gap="md" align="center" wrap>
-              <span>
-                <strong>Legend:</strong>
-              </span>
-              <Inline gap="xs" align="center">
-                <Badge variant="success" size="sm">
-                  P
-                </Badge>
-                <span>Present</span>
-              </Inline>
-              <Inline gap="xs" align="center">
-                <Badge variant="danger" size="sm">
-                  A
-                </Badge>
-                <span>Absent</span>
-              </Inline>
-              <Inline gap="xs" align="center">
-                <Badge variant="warning" size="sm">
-                  HD
-                </Badge>
-                <span>Half Day</span>
-              </Inline>
-              <Inline gap="xs" align="center">
-                <Badge variant="info" size="sm">
-                  L
-                </Badge>
-                <span>Leave</span>
-              </Inline>
-              <Inline gap="xs" align="center">
-                <Badge variant="info" size="sm">
-                  WFH
-                </Badge>
-                <span>Work From Home</span>
-              </Inline>
-              <Inline gap="xs" align="center">
-                <Badge variant="info" size="sm">
-                  OD
-                </Badge>
-                <span>On Duty</span>
-              </Inline>
-              <Inline gap="xs" align="center">
-                <Badge variant="neutral" size="sm">
-                  WO
-                </Badge>
-                <span>Weekly Off</span>
-              </Inline>
-              <Inline gap="xs" align="center">
-                <Badge variant="neutral" size="sm">
-                  H
-                </Badge>
-                <span>Holiday</span>
-              </Inline>
-            </Inline>
-          </Stack>
+          )}
         </Card>
       </Section>
-
-      {/* ── Daily Detail Modal (Spec 4.2) ────────────────────────── */}
-      {selectedDayRecord && (
-        <Modal
-          isOpen={true}
-          title={`Attendance Details — ${selectedDayRecord.dateStr}`}
-          onClose={() => setSelectedDayRecord(null)}
-          footer={
-            <Inline gap="sm" justify="between">
-              <Button variant="secondary" onClick={() => setSelectedDayRecord(null)}>
-                Close
-              </Button>
-              <Button
-                variant="primary"
-                leftIcon={<BezentIcon name="edit" size={16} />}
-                onClick={() => {
-                  setRegDate(selectedDayRecord.dateStr);
-                  setSelectedDayRecord(null);
-                  setRegularizeOpen(true);
-                }}
-              >
-                Regularize This Day
-              </Button>
-            </Inline>
-          }
-        >
-          <Stack gap="md">
-            <Grid columns={2} gap="md">
-              <Stack gap="xs">
-                <span>Date</span>
-                <strong>{selectedDayRecord.dateStr}</strong>
-              </Stack>
-              <Stack gap="xs">
-                <span>Status</span>
-                <Badge
-                  variant={
-                    selectedDayRecord.record?.status === 'present'
-                      ? 'success'
-                      : selectedDayRecord.record?.status === 'absent'
-                        ? 'danger'
-                        : 'warning'
-                  }
-                  size="md"
-                >
-                  {selectedDayRecord.record?.status?.toUpperCase() || 'NO PUNCH'}
-                </Badge>
-              </Stack>
-              <Stack gap="xs">
-                <span>Check-In</span>
-                <strong>{formatTime(selectedDayRecord.record?.checkInTime)}</strong>
-              </Stack>
-              <Stack gap="xs">
-                <span>Check-Out</span>
-                <strong>{formatTime(selectedDayRecord.record?.checkOutTime)}</strong>
-              </Stack>
-              <Stack gap="xs">
-                <span>Worked Time</span>
-                <strong>
-                  {selectedDayRecord.record?.workedMinutes !== undefined
-                    ? formatMinutes(selectedDayRecord.record.workedMinutes)
-                    : '—'}
-                </strong>
-              </Stack>
-              <Stack gap="xs">
-                <span>Break Duration</span>
-                <strong>
-                  {selectedDayRecord.record?.breakMinutes !== undefined
-                    ? formatMinutes(selectedDayRecord.record.breakMinutes)
-                    : '—'}
-                </strong>
-              </Stack>
-              <Stack gap="xs">
-                <span>Work Location</span>
-                <strong>{selectedDayRecord.record?.workLocation || 'Office'}</strong>
-              </Stack>
-              <Stack gap="xs">
-                <span>Flags</span>
-                <Inline gap="xs" wrap>
-                  {selectedDayRecord.record?.isLate && (
-                    <Badge variant="warning" size="sm">
-                      Late ({selectedDayRecord.record.lateMinutes}m)
-                    </Badge>
-                  )}
-                  {selectedDayRecord.record?.isEarlyExit && (
-                    <Badge variant="warning" size="sm">
-                      Early Exit ({selectedDayRecord.record.earlyMinutes}m)
-                    </Badge>
-                  )}
-                  {selectedDayRecord.record?.isMissingPunch && (
-                    <Badge variant="danger" size="sm">
-                      Missing Punch
-                    </Badge>
-                  )}
-                  {selectedDayRecord.record?.isRegularized && (
-                    <Badge variant="info" size="sm">
-                      Regularized
-                    </Badge>
-                  )}
-                  {!selectedDayRecord.record && (
-                    <span>No recorded punch events for this date.</span>
-                  )}
-                </Inline>
-              </Stack>
-            </Grid>
-          </Stack>
-        </Modal>
-      )}
 
       {/* ── Break Selection Modal ─────────────────────────────────── */}
       <Modal
@@ -1110,13 +965,19 @@ export function EssAttendancePage() {
         onClose={() => setBreakModalOpen(false)}
         footer={
           <Inline gap="sm" justify="end">
-            <Button variant="secondary" onClick={() => setBreakModalOpen(false)}>
+            <Button
+              id="att-break-cancel"
+              variant="secondary"
+              onClick={() => setBreakModalOpen(false)}
+              disabled={punchLoading}
+            >
               Cancel
             </Button>
             <Button
+              id="att-break-submit"
               variant="primary"
               onClick={handleStartBreak}
-              loading={breakLoading}
+              loading={punchLoading}
               leftIcon={<BezentIcon name="coffee" size={16} />}
             >
               Start Break
@@ -1149,7 +1010,7 @@ export function EssAttendancePage() {
         </Stack>
       </Modal>
 
-      {/* ── Regularization Modal (Spec 5.1) ───────────────────────── */}
+      {/* ── Regularization Modal (Phase 3 Integration) ─────────────── */}
       <Modal
         isOpen={regularizeOpen}
         title="Attendance Regularization Request"
@@ -1164,6 +1025,7 @@ export function EssAttendancePage() {
               variant="primary"
               onClick={handleRegularize}
               loading={regLoading}
+              disabled={Boolean(activeRegForModalDate) || !regDate || !regReason.trim()}
             >
               Submit Request
             </Button>
@@ -1171,8 +1033,15 @@ export function EssAttendancePage() {
         }
       >
         <Stack gap="md">
+          {activeRegForModalDate && (
+            <Alert variant="warning" title="Active Request Exists">
+              A regularization request ({activeRegForModalDate.requestNumber}) is already{' '}
+              <strong>{activeRegForModalDate.approvalStatus.toUpperCase()}</strong> for {regDate}.
+              Duplicate submissions are not permitted.
+            </Alert>
+          )}
           {regError && (
-            <Alert variant="error" title="Error">
+            <Alert variant="error" title="Submission Error">
               {regError}
             </Alert>
           )}

@@ -1,4 +1,4 @@
-import { useState, useMemo, type ReactNode } from 'react';
+import { useState, useEffect, useMemo, type ReactNode } from 'react';
 import {
   Card,
   Badge,
@@ -12,8 +12,12 @@ import type { EssAttendanceRecord } from '../../api/essApi';
 
 export interface AttendanceSummaryMetrics {
   presentDays: number;
-  lateDays: number;
   absentDays: number;
+  halfDays?: number;
+  lateDays?: number;
+  lateMarksCount?: number;
+  workedMinutes?: number;
+  missingPunchesCount?: number;
   attendancePercent: number;
   totalWorkingDays?: number;
 }
@@ -22,10 +26,16 @@ export interface AttendanceMonthlyCalendarProps {
   initialDate?: Date;
   summary: AttendanceSummaryMetrics;
   history?: EssAttendanceRecord[];
+  selectedDateStr?: string;
+  onSelectDate?: (dateStr: string) => void;
   onMonthChange?: (newDate: Date) => void;
   onViewDetailsClick?: () => void;
   loading?: boolean;
   extraHeaderActions?: ReactNode;
+  hideHeaderTitle?: boolean;
+  hideHeader?: boolean;
+  hideInlineDetails?: boolean;
+  hideSummaryCards?: boolean;
 }
 
 function formatDisplayTime(timeStr?: string | null): string {
@@ -60,22 +70,153 @@ function formatMinutes(mins?: number): string {
 
 const WEEKDAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+interface DayTileContent {
+  statusLabel: string;
+  subLabel?: string;
+  accessibleLabel: string;
+}
+
+function getDayTileContent(
+  cell: {
+    dateStr: string;
+    dayNum: number | null;
+    statusType: string;
+    isToday: boolean;
+    record?: EssAttendanceRecord;
+  },
+  monthName: string,
+): DayTileContent {
+  const { dayNum, statusType, record } = cell;
+  let statusLabel = '';
+  let subLabel: string | undefined = undefined;
+  let speechDuration = '';
+
+  switch (statusType) {
+    case 'present':
+      statusLabel = 'Present';
+      if (record?.workedMinutes !== undefined && record.workedMinutes > 0) {
+        subLabel = formatMinutes(record.workedMinutes);
+        const hours = Math.floor(record.workedMinutes / 60);
+        const mins = record.workedMinutes % 60;
+        speechDuration = `, ${hours > 0 ? `${hours} hour${hours > 1 ? 's' : ''}` : ''}${mins > 0 ? ` ${mins} minute${mins > 1 ? 's' : ''}` : ''}`;
+      }
+      break;
+
+    case 'late':
+      statusLabel = 'Late';
+      if (record?.workedMinutes !== undefined && record.workedMinutes > 0) {
+        subLabel = formatMinutes(record.workedMinutes);
+        const hours = Math.floor(record.workedMinutes / 60);
+        const mins = record.workedMinutes % 60;
+        speechDuration = `, ${hours > 0 ? `${hours} hour${hours > 1 ? 's' : ''}` : ''}${mins > 0 ? ` ${mins} minute${mins > 1 ? 's' : ''}` : ''}`;
+      }
+      break;
+
+    case 'half-day':
+      statusLabel = 'Half Day';
+      if (record?.workedMinutes !== undefined && record.workedMinutes > 0) {
+        subLabel = formatMinutes(record.workedMinutes);
+        const hours = Math.floor(record.workedMinutes / 60);
+        const mins = record.workedMinutes % 60;
+        speechDuration = `, ${hours > 0 ? `${hours} hour${hours > 1 ? 's' : ''}` : ''}${mins > 0 ? ` ${mins} minute${mins > 1 ? 's' : ''}` : ''}`;
+      }
+      break;
+
+    case 'absent':
+      statusLabel = 'Absent';
+      break;
+
+    case 'missing-punch':
+      statusLabel = 'Missing Punch';
+      if (record?.workedMinutes !== undefined && record.workedMinutes > 0) {
+        subLabel = formatMinutes(record.workedMinutes);
+        const hours = Math.floor(record.workedMinutes / 60);
+        const mins = record.workedMinutes % 60;
+        speechDuration = `, ${hours > 0 ? `${hours} hour${hours > 1 ? 's' : ''}` : ''}${mins > 0 ? ` ${mins} minute${mins > 1 ? 's' : ''}` : ''}`;
+      } else {
+        subLabel = 'Action Req';
+      }
+      break;
+
+    case 'leave':
+      statusLabel = 'Leave';
+      if (record?.notes && record.notes.trim()) {
+        subLabel = record.notes.trim();
+      } else {
+        subLabel = 'Approved';
+      }
+      break;
+
+    case 'holiday':
+      statusLabel = 'Holiday';
+      if (record?.notes && record.notes.trim()) {
+        subLabel = record.notes.trim();
+      } else {
+        subLabel = 'Public Holiday';
+      }
+      break;
+
+    case 'weekly-off':
+      statusLabel = 'Weekly Off';
+      subLabel = 'Rest Day';
+      break;
+
+    case 'pending':
+      statusLabel = 'Pending';
+      break;
+
+    default:
+      if (cell.dateStr && cell.dateStr > new Date().toISOString().slice(0, 10)) {
+        statusLabel = 'Scheduled';
+      }
+      break;
+  }
+
+  const accessibleLabel = statusLabel
+    ? `${monthName} ${dayNum}, ${statusLabel}${speechDuration || (subLabel ? `, ${subLabel}` : '')}.`
+    : `${monthName} ${dayNum}.`;
+
+  return { statusLabel, subLabel, accessibleLabel };
+}
+
 export function AttendanceMonthlyCalendar({
   initialDate = new Date(),
   summary,
   history = [],
+  selectedDateStr: propSelectedDateStr,
+  onSelectDate,
   onMonthChange,
   onViewDetailsClick,
   loading = false,
+  extraHeaderActions,
+  hideHeaderTitle = false,
+  hideHeader = false,
+  hideInlineDetails = false,
+  hideSummaryCards = false,
 }: AttendanceMonthlyCalendarProps) {
   const [currentDate, setCurrentDate] = useState<Date>(initialDate);
+
+  useEffect(() => {
+    if (initialDate) {
+      setCurrentDate((prev) => {
+        if (
+          prev.getFullYear() === initialDate.getFullYear() &&
+          prev.getMonth() === initialDate.getMonth()
+        ) {
+          return prev;
+        }
+        return initialDate;
+      });
+    }
+  }, [initialDate]);
 
   const todayStr = useMemo(() => {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   }, []);
 
-  const [selectedDateStr, setSelectedDateStr] = useState<string>(() => {
+  const [internalSelectedDateStr, setInternalSelectedDateStr] = useState<string>(() => {
+    if (propSelectedDateStr) return propSelectedDateStr;
     const year = initialDate.getFullYear();
     const month = initialDate.getMonth();
     const now = new Date();
@@ -84,6 +225,8 @@ export function AttendanceMonthlyCalendar({
     }
     return `${year}-${String(month + 1).padStart(2, '0')}-01`;
   });
+
+  const activeSelectedDateStr = propSelectedDateStr ?? internalSelectedDateStr;
 
   // Check if current view is the current or a future month
   const isCurrentOrFutureMonth = useMemo(() => {
@@ -96,7 +239,9 @@ export function AttendanceMonthlyCalendar({
   const handlePrevMonth = () => {
     const prev = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
     setCurrentDate(prev);
-    setSelectedDateStr(`${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}-01`);
+    const newSelected = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}-01`;
+    setInternalSelectedDateStr(newSelected);
+    onSelectDate?.(newSelected);
     onMonthChange?.(prev);
   };
 
@@ -105,14 +250,26 @@ export function AttendanceMonthlyCalendar({
     const next = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
     setCurrentDate(next);
     const now = new Date();
+    let newSelected = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-01`;
     if (now.getFullYear() === next.getFullYear() && now.getMonth() === next.getMonth()) {
-      setSelectedDateStr(todayStr);
-    } else {
-      setSelectedDateStr(
-        `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-01`,
-      );
+      newSelected = todayStr;
     }
+    setInternalSelectedDateStr(newSelected);
+    onSelectDate?.(newSelected);
     onMonthChange?.(next);
+  };
+
+  const handleToday = () => {
+    const now = new Date();
+    setCurrentDate(now);
+    setInternalSelectedDateStr(todayStr);
+    onSelectDate?.(todayStr);
+    onMonthChange?.(now);
+  };
+
+  const handleSelectDay = (dateStr: string) => {
+    setInternalSelectedDateStr(dateStr);
+    onSelectDate?.(dateStr);
   };
 
   // Map history records by date
@@ -141,9 +298,12 @@ export function AttendanceMonthlyCalendar({
       statusType:
         | 'present'
         | 'late'
+        | 'half-day'
         | 'absent'
+        | 'missing-punch'
         | 'leave'
         | 'holiday'
+        | 'pending'
         | 'weekly-off'
         | 'unclassified'
         | 'empty';
@@ -172,23 +332,41 @@ export function AttendanceMonthlyCalendar({
       const record = recordsMap.get(dateStr);
 
       let statusType:
-        'present' | 'late' | 'absent' | 'leave' | 'holiday' | 'weekly-off' | 'unclassified' =
-        'unclassified';
+        | 'present'
+        | 'late'
+        | 'half-day'
+        | 'absent'
+        | 'missing-punch'
+        | 'leave'
+        | 'holiday'
+        | 'pending'
+        | 'weekly-off'
+        | 'unclassified' = 'unclassified';
 
-      if (record) {
-        if (record.status === 'present') {
+      if (isFuture) {
+        if (record?.status === 'on_leave') {
+          statusType = 'leave';
+        } else if (record?.status === 'holiday') {
+          statusType = 'holiday';
+        } else {
+          statusType = 'unclassified';
+        }
+      } else if (record) {
+        if (record.isMissingPunch) {
+          statusType = 'missing-punch';
+        } else if (record.status === 'present') {
           statusType = record.isLate ? 'late' : 'present';
+        } else if (record.status === 'half_day') {
+          statusType = 'half-day';
         } else if (record.status === 'absent') {
           statusType = 'absent';
         } else if (record.status === 'on_leave') {
           statusType = 'leave';
         } else if (record.status === 'holiday') {
           statusType = 'holiday';
-        } else if (record.status === 'half_day') {
-          statusType = 'late';
+        } else if (record.status === 'incomplete') {
+          statusType = 'pending';
         }
-      } else if (isFuture) {
-        statusType = 'unclassified';
       } else if (isWeekend) {
         statusType = 'weekly-off';
       } else {
@@ -209,48 +387,63 @@ export function AttendanceMonthlyCalendar({
 
   // Selected date record details
   const selectedRecord = useMemo(() => {
-    return recordsMap.get(selectedDateStr);
-  }, [recordsMap, selectedDateStr]);
+    return recordsMap.get(activeSelectedDateStr);
+  }, [recordsMap, activeSelectedDateStr]);
 
   const formattedSelectedDate = useMemo(() => {
-    if (!selectedDateStr) return '';
-    const [y, m, d] = selectedDateStr.split('-').map(Number);
-    if (!y || !m || !d) return selectedDateStr;
+    if (!activeSelectedDateStr) return '';
+    const [y, m, d] = activeSelectedDateStr.split('-').map(Number);
+    if (!y || !m || !d) return activeSelectedDateStr;
     const dateObj = new Date(y, m - 1, d);
     return dateObj.toLocaleDateString([], {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
     });
-  }, [selectedDateStr]);
+  }, [activeSelectedDateStr]);
 
   const selectedDayOfWeek = useMemo(() => {
-    if (!selectedDateStr) return 0;
-    const [y, m, d] = selectedDateStr.split('-').map(Number);
+    if (!activeSelectedDateStr) return 0;
+    const [y, m, d] = activeSelectedDateStr.split('-').map(Number);
     if (!y || !m || !d) return 0;
     return new Date(y, m - 1, d).getDay();
-  }, [selectedDateStr]);
+  }, [activeSelectedDateStr]);
 
   const isSelectedWeekend = selectedDayOfWeek === 0 || selectedDayOfWeek === 6;
-  const isSelectedFuture = selectedDateStr > todayStr;
+  const isSelectedFuture = activeSelectedDateStr > todayStr;
+
+  const monthName = useMemo(() => {
+    return currentDate.toLocaleDateString([], { month: 'long' });
+  }, [currentDate]);
 
   return (
     <Card variant="default">
       <Stack gap="md">
         {/* Header Strip */}
-        <Inline justify="between" align="center" wrap>
-          <Stack gap="xs">
-            <h2>Monthly Attendance</h2>
-            <span>Your attendance overview</span>
-          </Stack>
+        {!hideHeader && (
+          <Inline justify="between" align="center" wrap>
+            {!hideHeaderTitle ? (
+              <Stack gap="xs">
+                <h2>Monthly Attendance</h2>
+                <span>Your attendance overview and daily shift records</span>
+              </Stack>
+            ) : (
+              <div />
+            )}
 
-          <Badge variant="success" size="md">
-            {summary.attendancePercent}% Attendance
-          </Badge>
-        </Inline>
+            <Inline gap="sm" align="center">
+              {extraHeaderActions}
+              <Badge variant="success" size="md">
+                {summary.attendancePercent}% Attendance
+              </Badge>
+            </Inline>
+          </Inline>
+        )}
 
-        {/* 60/40 Responsive Split Layout */}
-        <div className="bezent-attendance-snapshot__layout">
+        {/* Responsive Layout */}
+        <div
+          className={`bezent-attendance-snapshot__layout ${hideSummaryCards ? 'bezent-attendance-snapshot__layout--calendar-only' : ''}`.trim()}
+        >
           {/* Left: Calendar & Selected Date Details */}
           <div className="bezent-attendance-calendar">
             {/* Month Navigation */}
@@ -270,6 +463,10 @@ export function AttendanceMonthlyCalendar({
               >
                 <BezentIcon name="chevronRight" size={18} />
               </IconButton>
+
+              <Button variant="ghost" size="sm" onClick={handleToday} disabled={loading}>
+                Today
+              </Button>
             </div>
 
             {/* 7-Column Calendar Grid */}
@@ -284,25 +481,59 @@ export function AttendanceMonthlyCalendar({
                 if (cell.statusType === 'empty') {
                   return (
                     <div key={`empty-${idx}`} className="bezent-attendance-calendar__day-wrapper">
-                      <span className="bezent-attendance-calendar__day bezent-attendance-calendar__day--empty" />
+                      <span className="bezent-attendance-calendar__tile bezent-attendance-calendar__day bezent-attendance-calendar__day--empty" />
                     </div>
                   );
                 }
 
-                const isSelected = cell.dateStr === selectedDateStr;
-                const statusClass = `bezent-attendance-calendar__day--${cell.statusType}`;
-                const todayClass = cell.isToday ? 'bezent-attendance-calendar__day--today' : '';
-                const selectedClass = isSelected ? 'bezent-attendance-calendar__day--selected' : '';
+                const isSelected = cell.dateStr === activeSelectedDateStr;
+                const statusTileClass = `bezent-attendance-calendar__tile--${cell.statusType}`;
+                const statusDayClass = `bezent-attendance-calendar__day--${cell.statusType}`;
+                const todayClass = cell.isToday
+                  ? 'bezent-attendance-calendar__tile--today bezent-attendance-calendar__day--today'
+                  : '';
+                const selectedClass = isSelected
+                  ? 'bezent-attendance-calendar__tile--selected bezent-attendance-calendar__day--selected'
+                  : '';
+
+                const tile = getDayTileContent(cell, monthName);
 
                 return (
                   <div key={cell.dateStr} className="bezent-attendance-calendar__day-wrapper">
                     <button
                       type="button"
-                      className={`bezent-attendance-calendar__day ${statusClass} ${todayClass} ${selectedClass}`.trim()}
-                      onClick={() => setSelectedDateStr(cell.dateStr)}
-                      aria-label={`Date ${cell.dayNum}, Status: ${cell.statusType}`}
+                      className={`bezent-attendance-calendar__tile bezent-attendance-calendar__day ${statusTileClass} ${statusDayClass} ${todayClass} ${selectedClass}`.trim()}
+                      onClick={() => handleSelectDay(cell.dateStr)}
+                      aria-label={tile.accessibleLabel}
+                      aria-pressed={isSelected}
                     >
-                      {cell.dayNum}
+                      <div className="bezent-attendance-calendar__tile-top">
+                        <span className="bezent-attendance-calendar__tile-date">{cell.dayNum}</span>
+                        {cell.isToday && (
+                          <span
+                            className="bezent-attendance-calendar__tile-today-pill"
+                            title="Today"
+                          >
+                            Today
+                          </span>
+                        )}
+                        {cell.record?.isRegularized && !cell.isToday && (
+                          <span
+                            className="bezent-attendance-calendar__tile-reg-dot"
+                            title="Regularized"
+                          />
+                        )}
+                      </div>
+
+                      {tile.statusLabel && (
+                        <div className="bezent-attendance-calendar__tile-status">
+                          {tile.statusLabel}
+                        </div>
+                      )}
+
+                      {tile.subLabel && (
+                        <div className="bezent-attendance-calendar__tile-sub">{tile.subLabel}</div>
+                      )}
                     </button>
                   </div>
                 );
@@ -320,129 +551,236 @@ export function AttendanceMonthlyCalendar({
                 <span>Late</span>
               </div>
               <div className="bezent-attendance-calendar__legend-item">
+                <span className="bezent-attendance-calendar__legend-dot bezent-attendance-calendar__legend-dot--half-day" />
+                <span>Half Day</span>
+              </div>
+              <div className="bezent-attendance-calendar__legend-item">
                 <span className="bezent-attendance-calendar__legend-dot bezent-attendance-calendar__legend-dot--absent" />
                 <span>Absent</span>
+              </div>
+              <div className="bezent-attendance-calendar__legend-item">
+                <span className="bezent-attendance-calendar__legend-dot bezent-attendance-calendar__legend-dot--missing-punch" />
+                <span>Missing Punch</span>
               </div>
               <div className="bezent-attendance-calendar__legend-item">
                 <span className="bezent-attendance-calendar__legend-dot bezent-attendance-calendar__legend-dot--leave" />
                 <span>Leave</span>
               </div>
+              <div className="bezent-attendance-calendar__legend-item">
+                <span className="bezent-attendance-calendar__legend-dot bezent-attendance-calendar__legend-dot--holiday" />
+                <span>Holiday</span>
+              </div>
+              <div className="bezent-attendance-calendar__legend-item">
+                <span className="bezent-attendance-calendar__legend-dot bezent-attendance-calendar__legend-dot--weekly-off" />
+                <span>Weekly Off</span>
+              </div>
             </div>
 
             {/* Selected Date Details Box */}
-            <div className="bezent-attendance-calendar__details">
-              <Stack gap="xs">
-                <Inline justify="between" align="center" wrap>
-                  <strong>{formattedSelectedDate}</strong>
-                  {onViewDetailsClick && (
-                    <Button variant="ghost" size="sm" onClick={onViewDetailsClick}>
-                      View Attendance Details →
-                    </Button>
-                  )}
-                </Inline>
+            {!hideInlineDetails && (
+              <div className="bezent-attendance-calendar__details">
+                <Stack gap="xs">
+                  <Inline justify="between" align="center" wrap>
+                    <strong>{formattedSelectedDate}</strong>
+                    {onViewDetailsClick && (
+                      <Button variant="ghost" size="sm" onClick={onViewDetailsClick}>
+                        View Attendance Details →
+                      </Button>
+                    )}
+                  </Inline>
 
-                {selectedRecord ? (
-                  <Stack gap="xs">
-                    <Inline gap="xs" align="center" wrap>
-                      <span>
-                        Attendance:{' '}
-                        <strong>
-                          {selectedRecord.isLate
-                            ? 'Late (Present)'
-                            : selectedRecord.status === 'present'
-                              ? 'Present'
-                              : selectedRecord.status === 'on_leave'
-                                ? 'On Leave'
-                                : selectedRecord.status === 'absent'
-                                  ? 'Absent'
-                                  : selectedRecord.status}
-                        </strong>
-                      </span>
-                      {selectedRecord.shiftScheduleRef && (
-                        <>
-                          <span>•</span>
-                          <span>{selectedRecord.shiftScheduleRef}</span>
-                        </>
-                      )}
-                    </Inline>
+                  {selectedRecord ? (
+                    <Stack gap="xs">
+                      <Inline gap="xs" align="center" wrap>
+                        <span>
+                          Attendance:{' '}
+                          <strong>
+                            {selectedRecord.isMissingPunch
+                              ? 'Missing Punch'
+                              : selectedRecord.isLate
+                                ? 'Late (Present)'
+                                : selectedRecord.status === 'half_day'
+                                  ? 'Half Day'
+                                  : selectedRecord.status === 'present'
+                                    ? 'Present'
+                                    : selectedRecord.status === 'on_leave'
+                                      ? 'On Leave'
+                                      : selectedRecord.status === 'holiday'
+                                        ? 'Holiday'
+                                        : selectedRecord.status === 'absent'
+                                          ? 'Absent'
+                                          : selectedRecord.status}
+                          </strong>
+                        </span>
+                        {selectedRecord.shiftScheduleRef && (
+                          <>
+                            <span>•</span>
+                            <span>{selectedRecord.shiftScheduleRef}</span>
+                          </>
+                        )}
+                      </Inline>
 
-                    <Inline gap="md" align="center" wrap>
-                      <span>
-                        Check In: <strong>{formatDisplayTime(selectedRecord.checkInTime)}</strong>
-                      </span>
-                      <span>
-                        Check Out: <strong>{formatDisplayTime(selectedRecord.checkOutTime)}</strong>
-                      </span>
-                      {selectedRecord.workedMinutes !== undefined &&
-                        selectedRecord.workedMinutes > 0 && (
+                      <Inline gap="md" align="center" wrap>
+                        <span>
+                          Check In: <strong>{formatDisplayTime(selectedRecord.checkInTime)}</strong>
+                        </span>
+                        <span>
+                          Check Out:{' '}
+                          <strong>{formatDisplayTime(selectedRecord.checkOutTime)}</strong>
+                        </span>
+                        {selectedRecord.workedMinutes !== undefined &&
+                          selectedRecord.workedMinutes > 0 && (
+                            <span>
+                              Worked: <strong>{formatMinutes(selectedRecord.workedMinutes)}</strong>
+                            </span>
+                          )}
+                        {selectedRecord.notes && (
                           <span>
-                            Worked: <strong>{formatMinutes(selectedRecord.workedMinutes)}</strong>
+                            Notes: <strong>{selectedRecord.notes}</strong>
                           </span>
                         )}
-                      {selectedRecord.notes && (
-                        <span>
-                          Notes: <strong>{selectedRecord.notes}</strong>
-                        </span>
-                      )}
-                    </Inline>
-                  </Stack>
-                ) : isSelectedWeekend ? (
-                  <span>
-                    Attendance: <strong>Weekly Off</strong>
-                  </span>
-                ) : isSelectedFuture ? (
-                  <span>
-                    Attendance: <strong>Scheduled</strong>
-                  </span>
-                ) : (
-                  <span>
-                    Attendance: <strong>No punch recorded</strong>
-                  </span>
-                )}
-              </Stack>
-            </div>
+                      </Inline>
+                    </Stack>
+                  ) : isSelectedWeekend ? (
+                    <span>
+                      Attendance: <strong>Weekly Off</strong>
+                    </span>
+                  ) : isSelectedFuture ? (
+                    <span>
+                      Attendance: <strong>Scheduled</strong>
+                    </span>
+                  ) : (
+                    <span>
+                      Attendance: <strong>No punch recorded</strong>
+                    </span>
+                  )}
+                </Stack>
+              </div>
+            )}
           </div>
 
-          {/* Right: 4 Attendance Summary Cards (2x2 Grid) */}
-          <div className="bezent-attendance-summary">
-            {/* Card 1: Present */}
-            <div className="bezent-attendance-summary__card">
-              <div className="bezent-attendance-summary__icon">
-                <BezentIcon name="calendar" size={22} />
+          {/* Right: 6 Attendance Summary Cards (2x3 Grid) */}
+          {!hideSummaryCards && (
+            <div className="bezent-attendance-summary">
+              <div className="bezent-attendance-summary__card bezent-attendance-summary__card--present">
+                <div className="bezent-attendance-summary__icon">
+                  <BezentIcon name="calendar" size={20} />
+                </div>
+                <div className="bezent-attendance-summary__value">{summary.presentDays}</div>
+                <div className="bezent-attendance-summary__label">Present Days</div>
               </div>
-              <div className="bezent-attendance-summary__value">{summary.presentDays}</div>
-              <div className="bezent-attendance-summary__label">Present</div>
-            </div>
 
-            {/* Card 2: Late */}
-            <div className="bezent-attendance-summary__card">
-              <div className="bezent-attendance-summary__icon">
-                <BezentIcon name="clock" size={22} />
+              <div className="bezent-attendance-summary__card bezent-attendance-summary__card--absent">
+                <div className="bezent-attendance-summary__icon">
+                  <BezentIcon name="close" size={20} />
+                </div>
+                <div className="bezent-attendance-summary__value">{summary.absentDays}</div>
+                <div className="bezent-attendance-summary__label">Absent Days</div>
               </div>
-              <div className="bezent-attendance-summary__value">{summary.lateDays}</div>
-              <div className="bezent-attendance-summary__label">Late</div>
-            </div>
 
-            {/* Card 3: Absent */}
-            <div className="bezent-attendance-summary__card">
-              <div className="bezent-attendance-summary__icon">
-                <BezentIcon name="close" size={22} />
+              <div className="bezent-attendance-summary__card bezent-attendance-summary__card--half-day">
+                <div className="bezent-attendance-summary__icon">
+                  <BezentIcon name="clock" size={20} />
+                </div>
+                <div className="bezent-attendance-summary__value">{summary.halfDays ?? 0}</div>
+                <div className="bezent-attendance-summary__label">Half Days</div>
               </div>
-              <div className="bezent-attendance-summary__value">{summary.absentDays}</div>
-              <div className="bezent-attendance-summary__label">Absent</div>
-            </div>
 
-            {/* Card 4: Attendance Percentage */}
-            <div className="bezent-attendance-summary__card">
-              <div className="bezent-attendance-summary__icon">
-                <BezentIcon name="reports" size={22} />
+              <div className="bezent-attendance-summary__card bezent-attendance-summary__card--late">
+                <div className="bezent-attendance-summary__icon">
+                  <BezentIcon name="clock" size={20} />
+                </div>
+                <div className="bezent-attendance-summary__value">
+                  {summary.lateDays ?? summary.lateMarksCount ?? 0}
+                </div>
+                <div className="bezent-attendance-summary__label">Late Arrivals</div>
               </div>
-              <div className="bezent-attendance-summary__value">{summary.attendancePercent}%</div>
-              <div className="bezent-attendance-summary__label">Attendance</div>
+
+              <div className="bezent-attendance-summary__card bezent-attendance-summary__card--worked">
+                <div className="bezent-attendance-summary__icon">
+                  <BezentIcon name="reports" size={20} />
+                </div>
+                <div className="bezent-attendance-summary__value">
+                  {summary.workedMinutes !== undefined
+                    ? `${Math.floor(summary.workedMinutes / 60)}h ${summary.workedMinutes % 60}m`
+                    : '—'}
+                </div>
+                <div className="bezent-attendance-summary__label">Worked Hours</div>
+              </div>
+
+              <div className="bezent-attendance-summary__card bezent-attendance-summary__card--missing-punch">
+                <div className="bezent-attendance-summary__icon">
+                  <BezentIcon name="alert" size={20} />
+                </div>
+                <div className="bezent-attendance-summary__value">
+                  {summary.missingPunchesCount ?? 0}
+                </div>
+                <div className="bezent-attendance-summary__label">Missing Punches</div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </Stack>
     </Card>
+  );
+}
+
+export function AttendanceSummaryMetricsCards({ summary }: { summary: AttendanceSummaryMetrics }) {
+  return (
+    <div className="bezent-attendance-summary-strip">
+      <div className="bezent-attendance-summary__card bezent-attendance-summary__card--present">
+        <div className="bezent-attendance-summary__icon">
+          <BezentIcon name="calendar" size={20} />
+        </div>
+        <div className="bezent-attendance-summary__value">{summary.presentDays}</div>
+        <div className="bezent-attendance-summary__label">Present Days</div>
+      </div>
+
+      <div className="bezent-attendance-summary__card bezent-attendance-summary__card--absent">
+        <div className="bezent-attendance-summary__icon">
+          <BezentIcon name="close" size={20} />
+        </div>
+        <div className="bezent-attendance-summary__value">{summary.absentDays}</div>
+        <div className="bezent-attendance-summary__label">Absent Days</div>
+      </div>
+
+      <div className="bezent-attendance-summary__card bezent-attendance-summary__card--half-day">
+        <div className="bezent-attendance-summary__icon">
+          <BezentIcon name="clock" size={20} />
+        </div>
+        <div className="bezent-attendance-summary__value">{summary.halfDays ?? 0}</div>
+        <div className="bezent-attendance-summary__label">Half Days</div>
+      </div>
+
+      <div className="bezent-attendance-summary__card bezent-attendance-summary__card--late">
+        <div className="bezent-attendance-summary__icon">
+          <BezentIcon name="clock" size={20} />
+        </div>
+        <div className="bezent-attendance-summary__value">
+          {summary.lateDays ?? summary.lateMarksCount ?? 0}
+        </div>
+        <div className="bezent-attendance-summary__label">Late Arrivals</div>
+      </div>
+
+      <div className="bezent-attendance-summary__card bezent-attendance-summary__card--worked">
+        <div className="bezent-attendance-summary__icon">
+          <BezentIcon name="reports" size={20} />
+        </div>
+        <div className="bezent-attendance-summary__value">
+          {summary.workedMinutes !== undefined
+            ? `${Math.floor(summary.workedMinutes / 60)}h ${summary.workedMinutes % 60}m`
+            : '—'}
+        </div>
+        <div className="bezent-attendance-summary__label">Worked Hours</div>
+      </div>
+
+      <div className="bezent-attendance-summary__card bezent-attendance-summary__card--missing-punch">
+        <div className="bezent-attendance-summary__icon">
+          <BezentIcon name="alert" size={20} />
+        </div>
+        <div className="bezent-attendance-summary__value">{summary.missingPunchesCount ?? 0}</div>
+        <div className="bezent-attendance-summary__label">Missing Punches</div>
+      </div>
+    </div>
   );
 }
