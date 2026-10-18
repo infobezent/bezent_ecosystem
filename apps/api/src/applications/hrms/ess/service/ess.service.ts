@@ -2,13 +2,18 @@ import { EssRepository } from '../repository/ess.repository.js';
 import { attendanceService } from '../../attendance/service/attendance.service.js';
 import { attendanceWorkdayService } from '../../attendance/service/attendanceWorkday.service.js';
 import { attendanceEmployeeViewService } from '../../attendance/service/attendanceEmployeeView.service.js';
+import { defaultShiftScheduleProvider } from '../../attendance/service/shiftSchedule.provider.js';
+import { attendanceRegularizationService } from '../../attendance/service/attendanceRegularization.service.js';
 import { attendanceRegularizationEligibilityService } from '../../attendance/service/attendanceRegularizationEligibility.service.js';
+import type { AttendanceRegularization, EmployeeAttendance } from '../../../../db/schema.js';
+import type { RegularizationRequestType } from '../../attendance/types/attendance.types.js';
 import type { EmployeeContext } from '../../../../platform/auth/middleware/auth.middleware.js';
 import { BadRequestError, NotFoundError, ConflictError } from '../../../../app/errors/AppError.js';
 import type {
   EssDashboardData,
   EssTodayAttendance,
   EssFullProfile,
+  EssCareerEvent,
   CreateProfileChangeRequestInput,
   UpdateContactDetailsInput,
   EmergencyContactItemInput,
@@ -17,9 +22,13 @@ import type {
   BreakPunchInput,
   CheckOutInput,
   RegularizeAttendanceInput,
+  EssAttendanceRegularizationDto,
   ApplyLeaveInput,
   LogTimesheetInput,
+  UpdateTimesheetInput,
   SubmitDocumentInput,
+  EssDocumentDto,
+  EssProfileChangeRequestDto,
 } from '../types/ess.types.js';
 
 export class EssService {
@@ -33,7 +42,6 @@ export class EssService {
   }
 
   async getDashboardData(ctx: EmployeeContext): Promise<EssDashboardData> {
-    const today = await attendanceWorkdayService.currentWorkday(ctx.tenantId, ctx.companyId);
     const currentYear = new Date().getFullYear();
 
     const [summary, attWorkspace, balances, allRequests, allTasks, notifications] =
@@ -124,11 +132,18 @@ export class EssService {
       },
     ];
 
+    const shiftTiming =
+      attWorkspace.today.shift?.isAssigned !== false &&
+      attWorkspace.today.shift?.startTime &&
+      attWorkspace.today.shift?.endTime
+        ? `${attWorkspace.today.shift.startTime}–${attWorkspace.today.shift.endTime}`
+        : attWorkspace.today.shift?.name || 'Unassigned';
+
     const dailyBriefing = {
       pendingActionsCount: 3 + pendingRequestsCount,
       actionsSummary:
         'You have 1 attendance correction, 1 policy acknowledgment and 1 assigned training pending.',
-      todayShift: '09:00–18:00',
+      todayShift: shiftTiming,
       workLocation: attWorkspace.today.workLocation || 'Office',
       upcomingEventTitle: 'Engineering All-Hands Meeting',
     };
@@ -278,22 +293,115 @@ export class EssService {
   }
 
   async getFullProfile(ctx: EmployeeContext): Promise<EssFullProfile> {
-    const profile = await this.repo.getFullProfile(ctx.id);
+    const profile = await this.repo.getFullProfile(ctx.id, ctx.tenantId, ctx.companyId);
     if (!profile) {
       throw new NotFoundError('Employee profile not found');
     }
     return profile;
   }
 
-  async createProfileChangeRequest(ctx: EmployeeContext, input: CreateProfileChangeRequestInput) {
+  async getCareerHistory(ctx: EmployeeContext): Promise<EssCareerEvent[]> {
+    return this.repo.getCareerHistory(ctx.tenantId, ctx.companyId, ctx.id);
+  }
+
+  async createProfileChangeRequest(
+    ctx: EmployeeContext,
+    input: CreateProfileChangeRequestInput,
+  ): Promise<EssProfileChangeRequestDto> {
     if (!input.subject || !input.subject.trim()) {
       throw new BadRequestError('Subject is required for change request');
     }
     if (!input.section) {
       throw new BadRequestError('Section is required');
     }
-    if (!input.changes || Object.keys(input.changes).length === 0) {
+    const validSections = ['personal', 'address', 'emergency_contact', 'bank_account'];
+    if (!validSections.includes(input.section)) {
+      throw new BadRequestError(`Invalid section. Must be one of: ${validSections.join(', ')}`);
+    }
+
+    // Security Gate: Reject unencrypted bank account updates through generic change-requests
+    if (input.section === 'bank_account') {
+      throw new BadRequestError(
+        'Bank account modifications cannot be submitted through generic change requests. Salary bank account changes require official physical or verified proof submission to HR Administration for statutory compliance.',
+      );
+    }
+
+    if (
+      !input.changes ||
+      typeof input.changes !== 'object' ||
+      Object.keys(input.changes).length === 0
+    ) {
       throw new BadRequestError('Changes payload cannot be empty');
+    }
+
+    // Validate fields inside changes based on section to prevent arbitrary junk injection
+    const allowedFieldsBySection: Record<string, string[]> = {
+      personal: [
+        'field',
+        'fieldLabel',
+        'proposedValue',
+        'name',
+        'firstName',
+        'lastName',
+        'dateOfBirth',
+        'gender',
+        'maritalStatus',
+        'bloodGroup',
+        'nationality',
+        'nativeLanguage',
+      ],
+      address: [
+        'field',
+        'fieldLabel',
+        'proposedValue',
+        'addressStreet',
+        'addressLine2',
+        'addressCity',
+        'addressDistrict',
+        'addressState',
+        'addressPostalCode',
+        'addressCountry',
+        'permanentAddressStreet',
+        'permanentAddressLine2',
+        'permanentAddressCity',
+        'permanentAddressDistrict',
+        'permanentAddressState',
+        'permanentAddressPostalCode',
+        'permanentAddressCountry',
+      ],
+      emergency_contact: [
+        'field',
+        'fieldLabel',
+        'proposedValue',
+        'name',
+        'emergencyContactName',
+        'relationship',
+        'emergencyContactRelationship',
+        'phone',
+        'emergencyContactPhone',
+        'email',
+        'address',
+        'priority',
+      ],
+    };
+
+    const allowed = allowedFieldsBySection[input.section] || [];
+    const changeKeys = Object.keys(input.changes);
+    const hasValidKey = changeKeys.some((k) => allowed.includes(k));
+    if (!hasValidKey) {
+      throw new BadRequestError(`No recognized fields provided for section '${input.section}'`);
+    }
+
+    // If explicit field key is passed in structured payload, validate against allowed section fields
+    if (typeof input.changes.field === 'string') {
+      const allowedSpecific = allowed.filter(
+        (k) => !['field', 'fieldLabel', 'proposedValue'].includes(k),
+      );
+      if (!allowedSpecific.includes(input.changes.field)) {
+        throw new BadRequestError(
+          `Invalid field key '${input.changes.field}' for section '${input.section}'`,
+        );
+      }
     }
 
     const request = await this.repo.createRequest({
@@ -305,7 +413,7 @@ export class EssService {
       details: {
         section: input.section,
         changes: input.changes,
-        reason: input.reason,
+        reason: input.reason?.trim() || null,
       },
     });
 
@@ -316,10 +424,28 @@ export class EssService {
       title: 'Profile Change Request Submitted',
       message: `Your request to update ${input.section} has been submitted for HR review.`,
       type: 'info',
-      link: '/ess/requests',
+      link: '/ess/profile',
     });
 
-    return request;
+    return {
+      id: request.id,
+      requestType: request.requestType,
+      subject: request.subject,
+      section: input.section,
+      reason: input.reason?.trim() || null,
+      changes: this.sanitizeRequestChanges(input.section, input.changes),
+      details: request.details as EssProfileChangeRequestDto['details'],
+      status: request.status,
+      reviewerNotes: request.reviewerNotes ?? null,
+      createdAt:
+        request.createdAt instanceof Date
+          ? request.createdAt.toISOString()
+          : new Date(request.createdAt).toISOString(),
+      updatedAt:
+        request.updatedAt instanceof Date
+          ? request.updatedAt.toISOString()
+          : new Date(request.updatedAt).toISOString(),
+    };
   }
 
   async updateContactDetails(
@@ -440,12 +566,80 @@ export class EssService {
     return this.getFullProfile(ctx);
   }
 
-  async getProfileChangeRequests(ctx: EmployeeContext) {
-    return this.repo.getProfileChangeRequests(ctx.tenantId, ctx.companyId, ctx.id);
+  async getProfileChangeRequests(ctx: EmployeeContext): Promise<EssProfileChangeRequestDto[]> {
+    const rawList = await this.repo.getProfileChangeRequests(ctx.tenantId, ctx.companyId, ctx.id);
+    return rawList.map((r) => {
+      const details = (r.details || {}) as Record<string, unknown>;
+      const section = typeof details.section === 'string' ? details.section : 'personal';
+      const rawChanges = (details.changes || {}) as Record<string, unknown>;
+      const sanitizedChanges = this.sanitizeRequestChanges(section, rawChanges);
+
+      return {
+        id: r.id,
+        requestType: r.requestType,
+        subject: r.subject,
+        section,
+        reason: typeof details.reason === 'string' ? details.reason : null,
+        changes: sanitizedChanges,
+        details: {
+          ...details,
+          section,
+          changes: sanitizedChanges,
+        },
+        status: r.status,
+        reviewerNotes: r.reviewerNotes ?? null,
+        createdAt: r.createdAt.toISOString(),
+        updatedAt: r.updatedAt.toISOString(),
+      };
+    });
+  }
+
+  private sanitizeRequestChanges(
+    section: string,
+    rawChanges: Record<string, unknown>,
+  ): Record<string, unknown> {
+    if (!rawChanges || typeof rawChanges !== 'object') return {};
+    const sanitized: Record<string, unknown> = { ...rawChanges };
+
+    const fieldName = String(rawChanges.field || '').toLowerCase();
+    if (
+      section === 'bank_account' ||
+      fieldName.includes('bank') ||
+      fieldName.includes('account') ||
+      'accountNumber' in sanitized
+    ) {
+      if (typeof sanitized.proposedValue === 'string') {
+        const val = sanitized.proposedValue.trim();
+        sanitized.proposedValue = val.length > 4 ? `••••••••${val.slice(-4)}` : '••••••••';
+      }
+      if (typeof sanitized.accountNumber === 'string') {
+        const val = sanitized.accountNumber.trim();
+        sanitized.accountNumber = val.length > 4 ? `••••••••${val.slice(-4)}` : '••••••••';
+      }
+    }
+
+    if (fieldName.includes('aadhaar')) {
+      if (typeof sanitized.proposedValue === 'string') {
+        const digits = sanitized.proposedValue.replace(/\D/g, '');
+        sanitized.proposedValue = `•••• •••• ${digits.slice(-4) || '••••'}`;
+      }
+    } else if (fieldName.includes('pan')) {
+      if (typeof sanitized.proposedValue === 'string') {
+        const clean = sanitized.proposedValue.toUpperCase().replace(/\s/g, '');
+        sanitized.proposedValue = clean.length >= 4 ? `••••••${clean.slice(-4)}` : '••••••••';
+      }
+    }
+
+    return sanitized;
   }
 
   async getAttendanceWorkspace(ctx: EmployeeContext, month?: string) {
-    const today = await attendanceWorkdayService.currentWorkday(ctx.tenantId, ctx.companyId);
+    const today = await attendanceWorkdayService.currentWorkday(
+      ctx.tenantId,
+      ctx.companyId,
+      new Date(),
+      ctx.id,
+    );
     const [todayAtt, history, rawPunches, employeeView] = await Promise.all([
       this.repo.getTodayAttendance(ctx.tenantId, ctx.companyId, ctx.id, today),
       this.repo.getAttendanceHistory(ctx.tenantId, ctx.companyId, ctx.id, 90),
@@ -490,31 +684,27 @@ export class EssService {
       }
     }
 
-    // Determine rich day status according to specification Section 3
-    let computedStatus:
-      | 'present'
-      | 'absent'
-      | 'half_day'
-      | 'on_leave'
-      | 'holiday'
-      | 'weekly_off'
-      | 'incomplete'
-      | 'not_checked_in'
-      | 'working'
-      | 'on_break'
-      | 'checked_out' = 'not_checked_in';
-
-    if (todayAtt?.checkOutTime) {
-      computedStatus = 'checked_out';
-    } else if (todayAtt?.checkInTime) {
-      computedStatus = isOnBreak ? 'on_break' : 'working';
-    } else if (todayAtt?.status) {
-      computedStatus = todayAtt.status;
-    }
-
     // Calculate monthly summary counters for target month
     const targetMonthPrefix = month || today.slice(0, 7); // YYYY-MM
-    const currentMonthRecords = history.filter((h) => h.date.startsWith(targetMonthPrefix));
+    let targetMonthRecords: EmployeeAttendance[] = [];
+    if (month) {
+      targetMonthRecords = await this.repo.getEmployeeAttendanceForMonth(
+        ctx.tenantId,
+        ctx.companyId,
+        ctx.id,
+        month,
+      );
+    }
+
+    const recordsMap = new Map<string, EmployeeAttendance>();
+    for (const h of history) {
+      recordsMap.set(h.date, h);
+    }
+    for (const h of targetMonthRecords) {
+      recordsMap.set(h.date, h);
+    }
+    const combinedRecords = Array.from(recordsMap.values());
+    const currentMonthRecords = combinedRecords.filter((h) => h.date.startsWith(targetMonthPrefix));
 
     const presentDays = currentMonthRecords.filter((r) => r.status === 'present').length;
     const absentDays = currentMonthRecords.filter((r) => r.status === 'absent').length;
@@ -522,6 +712,8 @@ export class EssService {
     const leaveDays = currentMonthRecords.filter((r) => r.status === 'on_leave').length;
     const lateMarksCount = currentMonthRecords.filter((r) => r.isLate).length;
     const regularizationQuotaUsed = currentMonthRecords.filter((r) => r.isRegularized).length;
+    const workedMinutes = currentMonthRecords.reduce((acc, r) => acc + (r.workedMinutes || 0), 0);
+    const missingPunchesCount = currentMonthRecords.filter((r) => r.isMissingPunch).length;
 
     const totalWorkingDays = Math.max(0, presentDays + absentDays + halfDays);
     const attendancePercent =
@@ -538,18 +730,31 @@ export class EssService {
       lateMarksCount,
       regularizationQuotaUsed,
       regularizationQuotaLimit: 3,
+      workedMinutes,
+      missingPunchesCount,
       attendancePercent,
       totalWorkingDays,
     };
 
-    const shift = {
-      name: 'General Shift',
-      startTime: '09:00',
-      endTime: '18:00',
-      requiredHours: 8,
-      graceMinutes: 15,
-      breakAllowanceMinutes: 60,
-    };
+    const shift = await defaultShiftScheduleProvider.getAssignedShiftDetails(
+      ctx.tenantId,
+      ctx.companyId,
+      ctx.id,
+    );
+
+    let returnedHistory = employeeView?.history ?? history;
+    if (month && targetMonthRecords.length > 0) {
+      const historyMap = new Map<string, EmployeeAttendance>();
+      for (const rec of returnedHistory) {
+        historyMap.set(rec.date, rec);
+      }
+      for (const rec of targetMonthRecords) {
+        historyMap.set(rec.date, rec);
+      }
+      returnedHistory = Array.from(historyMap.values()).sort((a, b) =>
+        b.date.localeCompare(a.date),
+      );
+    }
 
     return {
       today: {
@@ -568,14 +773,19 @@ export class EssService {
         punches,
       },
       summary,
-      history: employeeView?.history ?? history,
+      history: returnedHistory,
       monthlySummary: employeeView?.monthlySummary,
       view: employeeView?.view,
     };
   }
 
   async startBreak(ctx: EmployeeContext, input: BreakPunchInput) {
-    const today = this.getTodayDateString();
+    const today = await attendanceWorkdayService.currentWorkday(
+      ctx.tenantId,
+      ctx.companyId,
+      new Date(),
+      ctx.id,
+    );
     const result = await attendanceService.recordBreakStart(
       ctx.tenantId,
       ctx.companyId,
@@ -599,7 +809,12 @@ export class EssService {
   }
 
   async endBreak(ctx: EmployeeContext, input?: { notes?: string }) {
-    const today = this.getTodayDateString();
+    const today = await attendanceWorkdayService.currentWorkday(
+      ctx.tenantId,
+      ctx.companyId,
+      new Date(),
+      ctx.id,
+    );
     const result = await attendanceService.recordBreakEnd(
       ctx.tenantId,
       ctx.companyId,
@@ -622,7 +837,12 @@ export class EssService {
   }
 
   async checkIn(ctx: EmployeeContext, input: CheckInInput) {
-    const today = await attendanceWorkdayService.currentWorkday(ctx.tenantId, ctx.companyId);
+    const today = await attendanceWorkdayService.currentWorkday(
+      ctx.tenantId,
+      ctx.companyId,
+      new Date(),
+      ctx.id,
+    );
     const { record, checkInTime } = await attendanceService.recordCheckIn(
       ctx.tenantId,
       ctx.companyId,
@@ -644,7 +864,12 @@ export class EssService {
   }
 
   async checkOut(ctx: EmployeeContext, input?: CheckOutInput) {
-    const today = await attendanceWorkdayService.currentWorkday(ctx.tenantId, ctx.companyId);
+    const today = await attendanceWorkdayService.currentWorkday(
+      ctx.tenantId,
+      ctx.companyId,
+      new Date(),
+      ctx.id,
+    );
     const { updated, checkOutTime } = await attendanceService.recordCheckOut(
       ctx.tenantId,
       ctx.companyId,
@@ -665,66 +890,135 @@ export class EssService {
     return updated;
   }
 
-  async regularizeAttendance(ctx: EmployeeContext, input: RegularizeAttendanceInput) {
+  private mapToRegularizationDto(reg: AttendanceRegularization): EssAttendanceRegularizationDto {
+    const formatProposedCorrection = () => {
+      if (reg.proposedCheckIn && reg.proposedCheckOut) {
+        return `${reg.proposedCheckIn} – ${reg.proposedCheckOut}`;
+      }
+      if (reg.proposedCheckIn) {
+        return `Check-in: ${reg.proposedCheckIn}`;
+      }
+      if (reg.proposedCheckOut) {
+        return `Check-out: ${reg.proposedCheckOut}`;
+      }
+      if (reg.proposedStatus) {
+        return `Status: ${reg.proposedStatus}`;
+      }
+      if (reg.claimedHours) {
+        return `Claimed Hours: ${reg.claimedHours}h`;
+      }
+      return reg.requestType.replace(/_/g, ' ');
+    };
+
+    return {
+      id: reg.id,
+      requestNumber: reg.requestNumber,
+      workday: reg.workday,
+      date: reg.workday,
+      requestType: reg.requestType,
+      category: reg.requestType,
+      approvalStatus: reg.approvalStatus,
+      status: reg.approvalStatus === 'submitted' ? 'pending' : reg.approvalStatus,
+      applicationStatus: reg.applicationStatus,
+      proposedCorrection: formatProposedCorrection(),
+      proposedCheckIn: reg.proposedCheckIn ?? null,
+      proposedCheckOut: reg.proposedCheckOut ?? null,
+      proposedStatus: reg.proposedStatus ?? null,
+      claimedHours: reg.claimedHours ? Number(reg.claimedHours) : null,
+      reason: reg.reason,
+      decisionRemarks: reg.decisionReason ?? null,
+      decisionReason: reg.decisionReason ?? null,
+      decidedAt: reg.decidedAt ? reg.decidedAt.toISOString() : null,
+      submittedAt: reg.submittedAt.toISOString(),
+      createdAt: reg.createdAt.toISOString(),
+    };
+  }
+
+  async regularizeAttendance(
+    ctx: EmployeeContext,
+    input: RegularizeAttendanceInput,
+    actorUserId?: string,
+  ): Promise<EssAttendanceRegularizationDto> {
+    const workday = input.workday || input.date;
+    if (!workday) {
+      throw new BadRequestError('Date is required');
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(workday)) {
+      throw new BadRequestError('Date must be in YYYY-MM-DD format');
+    }
+
+    // Resolve proposed times
+    const proposedCheckIn = (input.proposedCheckIn || input.checkInTime || '').trim() || undefined;
+    const proposedCheckOut =
+      (input.proposedCheckOut || input.checkOutTime || '').trim() || undefined;
+
+    let requestType: RegularizationRequestType = 'incorrect_time';
+    if (input.requestType) {
+      const validTypes: RegularizationRequestType[] = [
+        'missing_in',
+        'missing_out',
+        'incorrect_time',
+        'status_correction',
+        'worked_hours',
+        'both_missing',
+        'wrong_direction',
+      ];
+      if (!validTypes.includes(input.requestType as RegularizationRequestType)) {
+        throw new BadRequestError(`Invalid regularization request type: ${input.requestType}`);
+      }
+      requestType = input.requestType as RegularizationRequestType;
+    } else if (proposedCheckIn && !proposedCheckOut) {
+      requestType = 'missing_in';
+    } else if (!proposedCheckIn && proposedCheckOut) {
+      requestType = 'missing_out';
+    } else if (input.proposedStatus) {
+      requestType = 'status_correction';
+    } else if (input.claimedHours !== undefined && input.claimedHours !== null) {
+      requestType = 'worked_hours';
+    }
+
     const workflow = await attendanceRegularizationEligibilityService.getWorkflowSettings(
       ctx.tenantId,
       ctx.companyId,
     );
-    if (
-      !input.date ||
-      !input.checkInTime ||
-      !input.checkOutTime ||
-      (workflow.requireReason && !input.reason?.trim())
-    ) {
-      throw new BadRequestError(
-        workflow.requireReason
-          ? 'Date, check-in time, check-out time, and reason are required'
-          : 'Date, check-in time and check-out time are required',
-      );
-    }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(input.date)) {
-      throw new BadRequestError('Date must be in YYYY-MM-DD format');
+    const reason = input.reason?.trim();
+    if (workflow.requireReason && (!reason || reason.length === 0)) {
+      throw new BadRequestError('Reason is required for attendance regularization');
     }
 
-    // Same company-configured rules as the HR submission path (enabled flag,
-    // window, monthly quota, evidence, tracking start, payroll lock).
-    const eligibility = await attendanceRegularizationEligibilityService.checkEligibility(
+    const record = await attendanceRegularizationService.submitRequest(
       ctx.tenantId,
       ctx.companyId,
-      { employeeId: ctx.id, workday: input.date, requestType: 'incorrect_time' },
-      0,
-    );
-    if (!eligibility.eligible) {
-      throw new BadRequestError(
-        `Regularization submission ineligible: ${eligibility.reasons.join(' ')}`,
-      );
-    }
-
-    const request = await this.repo.createRequest({
-      tenantId: ctx.tenantId,
-      companyId: ctx.companyId,
-      employeeId: ctx.id,
-      requestType: 'attendance_regularization',
-      subject: `Attendance Regularization for ${input.date}`,
-      details: {
-        date: input.date,
-        checkInTime: input.checkInTime,
-        checkOutTime: input.checkOutTime,
-        reason: input.reason?.trim() || 'No reason provided',
+      {
+        employeeId: ctx.id,
+        workday,
+        requestType,
+        proposedCheckIn,
+        proposedCheckOut,
+        proposedStatus: input.proposedStatus || undefined,
+        claimedHours:
+          input.claimedHours !== undefined && input.claimedHours !== null
+            ? Number(input.claimedHours)
+            : undefined,
+        reason: reason || 'No reason provided',
+        evidenceAttachments: input.evidenceAttachments,
       },
-    });
+      actorUserId || ctx.id,
+      true, // isSelfService
+    );
 
-    await this.repo.createNotification({
-      tenantId: ctx.tenantId,
-      companyId: ctx.companyId,
-      employeeId: ctx.id,
-      title: 'Regularization Request Submitted',
-      message: `Your attendance regularization request for ${input.date} has been submitted.`,
-      type: 'info',
-      link: '/ess/requests',
-    });
+    return this.mapToRegularizationDto(record);
+  }
 
-    return request;
+  async getAttendanceRegularizations(
+    ctx: EmployeeContext,
+  ): Promise<EssAttendanceRegularizationDto[]> {
+    const records = await this.repo.getAttendanceRegularizations(
+      ctx.tenantId,
+      ctx.companyId,
+      ctx.id,
+    );
+    return records.map((r) => this.mapToRegularizationDto(r));
   }
 
   async getLeaveWorkspace(ctx: EmployeeContext) {
@@ -891,12 +1185,120 @@ export class EssService {
     return { submittedCount: count };
   }
 
-  async getDocumentsWorkspace(ctx: EmployeeContext) {
-    const documents = await this.repo.getDocuments(ctx.tenantId, ctx.companyId, ctx.id);
-    return { documents };
+  async updateTimesheet(ctx: EmployeeContext, id: string, input: UpdateTimesheetInput) {
+    if (input.hours !== undefined && (input.hours <= 0 || input.hours > 24)) {
+      throw new BadRequestError('Logged hours must be between 1 and 24 hours per entry');
+    }
+    const updated = await this.repo.updateTimesheet(ctx.tenantId, ctx.companyId, ctx.id, id, {
+      ...(input.date ? { date: input.date } : {}),
+      ...(input.projectName ? { projectName: input.projectName.trim() } : {}),
+      ...(input.taskDescription ? { taskDescription: input.taskDescription.trim() } : {}),
+      ...(input.hours !== undefined ? { hours: Math.round(input.hours) } : {}),
+    });
+    if (!updated) {
+      throw new BadRequestError(
+        'Timesheet entry not found or cannot be modified because it is not in draft status',
+      );
+    }
+    return updated;
   }
 
-  async submitDocument(ctx: EmployeeContext, input: SubmitDocumentInput) {
+  async deleteTimesheet(ctx: EmployeeContext, id: string) {
+    const deleted = await this.repo.deleteTimesheet(ctx.tenantId, ctx.companyId, ctx.id, id);
+    if (!deleted) {
+      throw new BadRequestError(
+        'Timesheet entry not found or cannot be deleted because it is not in draft status',
+      );
+    }
+    return { success: true };
+  }
+
+  private maskDocumentIdentifier(
+    documentName: string,
+    rawNumber: string | null | undefined,
+  ): string | null {
+    if (!rawNumber || typeof rawNumber !== 'string') return null;
+    const trimmed = rawNumber.trim();
+    if (trimmed.length === 0) return null;
+
+    const docNameLower = documentName.toLowerCase();
+
+    // 1. Aadhaar Card (12 digits) - standard UIDAI masking: •••• •••• 1234
+    if (docNameLower.includes('aadhaar') || docNameLower.includes('aadhar')) {
+      const digitsOnly = trimmed.replace(/\D/g, '');
+      const last4 = digitsOnly.slice(-4);
+      return `•••• •••• ${last4.length === 4 ? last4 : '••••'}`;
+    }
+
+    // 2. PAN Card (10 chars, e.g. ABCDE1234F) - standard financial masking: ••••••1234F
+    if (docNameLower.includes('pan')) {
+      const clean = trimmed.toUpperCase().replace(/\s/g, '');
+      if (clean.length >= 5) {
+        return `••••••${clean.slice(-4)}`;
+      }
+      return '••••••••';
+    }
+
+    // 3. Passport (e.g. P1234567) - mask middle: P••••567
+    if (docNameLower.includes('passport')) {
+      const clean = trimmed.toUpperCase().replace(/\s/g, '');
+      if (clean.length > 4) {
+        return `${clean[0]}••••${clean.slice(-3)}`;
+      }
+      return '••••••••';
+    }
+
+    // 4. UAN, PF, ESI, Bank Account / Cheque
+    if (
+      docNameLower.includes('uan') ||
+      docNameLower.includes('pf') ||
+      docNameLower.includes('provident') ||
+      docNameLower.includes('esi') ||
+      docNameLower.includes('cheque') ||
+      docNameLower.includes('passbook') ||
+      docNameLower.includes('account')
+    ) {
+      const clean = trimmed.replace(/\s/g, '');
+      if (clean.length > 4) {
+        return `••••••••${clean.slice(-4)}`;
+      }
+      return '••••••••';
+    }
+
+    // 5. Generic fallback for other sensitive numbers
+    const clean = trimmed.replace(/\s/g, '');
+    if (clean.length > 4) {
+      return `••••••••${clean.slice(-4)}`;
+    }
+    return '••••••••';
+  }
+
+  async getDocumentsWorkspace(ctx: EmployeeContext): Promise<{ documents: EssDocumentDto[] }> {
+    const documents = await this.repo.getDocuments(ctx.tenantId, ctx.companyId, ctx.id);
+    const safeDocuments: EssDocumentDto[] = documents.map((doc) => {
+      const maskedNumber = this.maskDocumentIdentifier(doc.documentName, doc.documentNumber);
+      // Only expose remarks if employee action/clarification is needed (rejected/resubmission)
+      const safeRemarks =
+        doc.status === 'resubmission_required' || doc.status === 'rejected'
+          ? doc.verificationRemarks
+          : null;
+
+      return {
+        id: doc.id,
+        category: doc.category,
+        documentName: doc.documentName,
+        documentNumber: maskedNumber,
+        status: doc.status,
+        expiryDate: doc.expiryDate ?? null,
+        verificationRemarks: safeRemarks,
+        createdAt: doc.createdAt.toISOString(),
+        updatedAt: doc.updatedAt.toISOString(),
+      };
+    });
+    return { documents: safeDocuments };
+  }
+
+  async submitDocument(ctx: EmployeeContext, input: SubmitDocumentInput): Promise<EssDocumentDto> {
     if (!input.category || !input.documentName) {
       throw new BadRequestError('Document category and name are required');
     }
@@ -921,12 +1323,47 @@ export class EssService {
       link: '/ess/documents',
     });
 
-    return doc;
+    return {
+      id: doc.id,
+      category: doc.category,
+      documentName: doc.documentName,
+      documentNumber: this.maskDocumentIdentifier(doc.documentName, doc.documentNumber),
+      status: doc.status,
+      expiryDate: doc.expiryDate ?? null,
+      verificationRemarks: null,
+      createdAt: doc.createdAt.toISOString(),
+      updatedAt: doc.updatedAt.toISOString(),
+    };
   }
 
   async getRequestsWorkspace(ctx: EmployeeContext) {
-    const requests = await this.repo.getRequests(ctx.tenantId, ctx.companyId, ctx.id);
-    return { requests };
+    const [generalRequests, regularizations] = await Promise.all([
+      this.repo.getRequests(ctx.tenantId, ctx.companyId, ctx.id),
+      this.repo.getAttendanceRegularizations(ctx.tenantId, ctx.companyId, ctx.id),
+    ]);
+    const mappedRegs = regularizations.map((r) => ({
+      id: r.id,
+      tenantId: r.tenantId,
+      companyId: r.companyId,
+      employeeId: r.employeeId,
+      requestType: 'attendance_regularization',
+      subject: `Attendance Regularization for ${r.workday} (${r.requestNumber})`,
+      status: (r.approvalStatus === 'submitted' ? 'pending' : r.approvalStatus) as
+        'pending' | 'approved' | 'rejected' | 'cancelled',
+      reviewerNotes: r.decisionReason ?? null,
+      details: {
+        requestNumber: r.requestNumber,
+        workday: r.workday,
+        regularizationType: r.requestType,
+        proposedCheckIn: r.proposedCheckIn,
+        proposedCheckOut: r.proposedCheckOut,
+        reason: r.reason,
+        decisionRemarks: r.decisionReason,
+      },
+      createdAt: r.submittedAt,
+      updatedAt: r.updatedAt,
+    }));
+    return { requests: [...generalRequests, ...mappedRegs] };
   }
 
   async createServiceRequest(

@@ -60,14 +60,18 @@ import type {
   CreateOnDutyRequestInput,
 } from '../types/attendance.types.js';
 
+type DbClient =
+  ReturnType<typeof getDb> | Parameters<Parameters<ReturnType<typeof getDb>['transaction']>[0]>[0];
+
 export class AttendanceRepository {
   async getTodayAttendance(
     tenantId: string,
     companyId: string,
     employeeId: string,
     date: string,
+    tx?: DbClient,
   ): Promise<EmployeeAttendance | null> {
-    const db = getDb();
+    const db = tx ?? getDb();
     const rows = await db
       .select()
       .from(employeeAttendance)
@@ -79,6 +83,29 @@ export class AttendanceRepository {
           eq(employeeAttendance.date, date),
         ),
       );
+    return rows[0] ?? null;
+  }
+
+  async getTodayAttendanceForUpdate(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+    date: string,
+    tx?: DbClient,
+  ): Promise<EmployeeAttendance | null> {
+    const db = tx ?? getDb();
+    const rows = await db
+      .select()
+      .from(employeeAttendance)
+      .where(
+        and(
+          eq(employeeAttendance.tenantId, tenantId),
+          eq(employeeAttendance.companyId, companyId),
+          eq(employeeAttendance.employeeId, employeeId),
+          eq(employeeAttendance.date, date),
+        ),
+      )
+      .for('update');
     return rows[0] ?? null;
   }
 
@@ -100,11 +127,19 @@ export class AttendanceRepository {
     checkInTime: string,
     workLocation: string,
     notes?: string,
+    tx?: DbClient,
   ): Promise<EmployeeAttendance> {
-    const db = getDb();
-    const existing = await this.getTodayAttendance(tenantId, companyId, employeeId, date);
+    const db = tx ?? getDb();
+    const existing = await this.getTodayAttendance(tenantId, companyId, employeeId, date, db);
     if (existing) {
-      if (existing.checkInTime) {
+      const locked = await this.getTodayAttendanceForUpdate(
+        tenantId,
+        companyId,
+        employeeId,
+        date,
+        db,
+      );
+      if (locked?.checkInTime) {
         throw new Error('Attendance check-in already recorded for today');
       }
       await db
@@ -112,7 +147,7 @@ export class AttendanceRepository {
         .set({
           checkInTime,
           workLocation,
-          notes: notes ?? existing.notes,
+          notes: notes ?? locked?.notes,
         })
         .where(eq(employeeAttendance.id, existing.id));
       const [updated] = await db
@@ -142,8 +177,8 @@ export class AttendanceRepository {
     return created!;
   }
 
-  async checkOut(id: string, checkOutTime: string): Promise<EmployeeAttendance> {
-    const db = getDb();
+  async checkOut(id: string, checkOutTime: string, tx?: DbClient): Promise<EmployeeAttendance> {
+    const db = tx ?? getDb();
     await db.update(employeeAttendance).set({ checkOutTime }).where(eq(employeeAttendance.id, id));
     const [updated] = await db
       .select()
@@ -191,6 +226,29 @@ export class AttendanceRepository {
           eq(employeeAttendance.employeeId, employeeId),
           gte(employeeAttendance.date, sinceDate),
         ),
+      );
+  }
+
+  async getEmployeeAttendanceForMonth(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+    yearMonth: string,
+  ): Promise<EmployeeAttendance[]> {
+    const db = getDb();
+    const startDate = `${yearMonth}-01`;
+    const endDate = `${yearMonth}-31`;
+    return db
+      .select()
+      .from(employeeAttendance)
+      .where(
+        and(
+          eq(employeeAttendance.tenantId, tenantId),
+          eq(employeeAttendance.companyId, companyId),
+          eq(employeeAttendance.employeeId, employeeId),
+          gte(employeeAttendance.date, startDate),
+          lte(employeeAttendance.date, endDate),
+        ),
       )
       .orderBy(desc(employeeAttendance.date));
   }
@@ -205,8 +263,10 @@ export class AttendanceRepository {
     notes?: string,
     deviceMetadata?: Record<string, unknown>,
     punchDate?: Date,
+    workday?: string,
+    tx?: DbClient,
   ): Promise<AttendancePunch> {
-    const db = getDb();
+    const db = tx ?? getDb();
     const punchTime = punchDate ?? new Date();
 
     // Check for duplicate punch within 60 seconds
@@ -235,6 +295,7 @@ export class AttendanceRepository {
       companyId,
       employeeId,
       punchTime,
+      workday: workday ?? null,
       punchType,
       source,
       deviceMetadata: deviceMetadata ?? null,
@@ -252,8 +313,9 @@ export class AttendanceRepository {
     companyId: string,
     employeeId: string,
     dateStr: string,
+    tx?: DbClient,
   ): Promise<AttendancePunch[]> {
-    const db = getDb();
+    const db = tx ?? getDb();
     const startOfDay = new Date(`${dateStr}T00:00:00.000Z`);
     const endOfDay = new Date(`${dateStr}T23:59:59.999Z`);
     return db
@@ -264,8 +326,13 @@ export class AttendanceRepository {
           eq(attendancePunches.tenantId, tenantId),
           eq(attendancePunches.companyId, companyId),
           eq(attendancePunches.employeeId, employeeId),
-          gte(attendancePunches.punchTime, startOfDay),
-          lte(attendancePunches.punchTime, endOfDay),
+          or(
+            eq(attendancePunches.workday, dateStr),
+            and(
+              gte(attendancePunches.punchTime, startOfDay),
+              lte(attendancePunches.punchTime, endOfDay),
+            ),
+          ),
         ),
       )
       .orderBy(asc(attendancePunches.punchTime));
@@ -1120,7 +1187,9 @@ export class AttendanceRepository {
         'Thursday',
         'Friday',
       ];
-      const isWorkingDay = workingDays.some((d) => d.toLowerCase() === dayOfWeek.toLowerCase());
+      const isWorkingDay = workingDays.some(
+        (d) => String(d).toLowerCase() === dayOfWeek.toLowerCase(),
+      );
 
       const shiftStart = emp.scheduleStartTime || '09:00';
       const shiftEnd = emp.scheduleEndTime || '18:00';
@@ -1652,8 +1721,9 @@ export class AttendanceRepository {
   async updateDailyAttendance(
     id: string,
     updates: Partial<typeof employeeAttendance.$inferInsert>,
+    tx?: DbClient,
   ): Promise<EmployeeAttendance> {
-    const db = getDb();
+    const db = tx ?? getDb();
     await db.update(employeeAttendance).set(updates).where(eq(employeeAttendance.id, id));
 
     const [updated] = await db
@@ -3467,7 +3537,7 @@ export class AttendanceRepository {
         and(
           eq(attendancePeriods.tenantId, tenantId),
           eq(attendancePeriods.companyId, companyId),
-          eq(attendancePeriods.status, 'locked'),
+          inArray(attendancePeriods.status, ['locked', 'finalized']),
           lte(attendancePeriods.startDate, endDate),
           gte(attendancePeriods.endDate, startDate),
         ),

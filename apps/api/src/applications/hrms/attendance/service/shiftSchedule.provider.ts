@@ -1,8 +1,25 @@
 import { eq, and, lte, gte } from 'drizzle-orm';
 import { getDb } from '../../../../db/connection.js';
-import { employeeWorkSchedules, employeeLeaveRequests } from '../../../../db/schema.js';
+import {
+  employeeWorkSchedules,
+  employeeLeaveRequests,
+  type EmployeeWorkSchedule,
+} from '../../../../db/schema.js';
 import type { ShiftSchedule } from '../types/attendance.types.js';
-import { DEFAULT_WORK_SCHEDULE } from './attendanceCalculation.service.js';
+import { DEFAULT_WORK_SCHEDULE, timeToMinutes } from './attendanceCalculation.service.js';
+
+export interface AssignedShiftDetails {
+  isAssigned: boolean;
+  name: string | null;
+  startTime: string | null;
+  endTime: string | null;
+  requiredHours: number;
+  graceMinutes: number;
+  breakAllowanceMinutes: number;
+  timeZone: string | null;
+  effectiveTimezone: string | null;
+  workingDays: (string | number)[];
+}
 
 export interface ShiftScheduleProvider {
   getEmployeeSchedule(
@@ -14,20 +31,81 @@ export interface ShiftScheduleProvider {
 }
 
 export class DefaultShiftScheduleProvider implements ShiftScheduleProvider {
-  async getEmployeeSchedule(
-    _tenantId: string,
-    _companyId: string,
+  async getRawSchedule(
+    tenantId: string,
+    companyId: string,
     employeeId: string,
-    _date?: string,
-  ): Promise<ShiftSchedule> {
+  ): Promise<EmployeeWorkSchedule | null> {
     const db = getDb();
     const rows = await db
       .select()
       .from(employeeWorkSchedules)
-      .where(eq(employeeWorkSchedules.employeeId, employeeId))
+      .where(
+        and(
+          eq(employeeWorkSchedules.tenantId, tenantId),
+          eq(employeeWorkSchedules.companyId, companyId),
+          eq(employeeWorkSchedules.employeeId, employeeId),
+        ),
+      )
       .limit(1);
 
-    const schedule = rows[0];
+    return rows[0] ?? null;
+  }
+
+  async getAssignedShiftDetails(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+    effectiveCompanyTimezone: string = 'UTC',
+    graceMinutes: number = 15,
+  ): Promise<AssignedShiftDetails> {
+    const raw = await this.getRawSchedule(tenantId, companyId, employeeId);
+    if (!raw) {
+      return {
+        isAssigned: false,
+        name: null,
+        startTime: null,
+        endTime: null,
+        requiredHours: 0,
+        graceMinutes: 0,
+        breakAllowanceMinutes: 0,
+        timeZone: effectiveCompanyTimezone,
+        effectiveTimezone: effectiveCompanyTimezone,
+        workingDays: [],
+      };
+    }
+
+    const startMinutes = timeToMinutes(raw.startTime);
+    const endMinutes = timeToMinutes(raw.endTime);
+    const grossMinutes =
+      endMinutes >= startMinutes ? endMinutes - startMinutes : 1440 - startMinutes + endMinutes;
+    const breakMinutes = (raw.breakMinutes ?? 0) + (raw.lunchMinutes ?? 0);
+    const netMinutes = Math.max(0, grossMinutes - breakMinutes);
+    const requiredHours = Number((netMinutes / 60).toFixed(2));
+
+    const effectiveTz = raw.timeZone || effectiveCompanyTimezone;
+
+    return {
+      isAssigned: true,
+      name: raw.workSchedule || raw.workingCalendar || 'Assigned Shift',
+      startTime: raw.startTime,
+      endTime: raw.endTime,
+      requiredHours,
+      graceMinutes,
+      breakAllowanceMinutes: raw.breakMinutes ?? 60,
+      timeZone: effectiveTz,
+      effectiveTimezone: effectiveTz,
+      workingDays: raw.workingDays ?? [],
+    };
+  }
+
+  async getEmployeeSchedule(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+    _date?: string,
+  ): Promise<ShiftSchedule> {
+    const schedule = await this.getRawSchedule(tenantId, companyId, employeeId);
     if (!schedule) {
       return DEFAULT_WORK_SCHEDULE;
     }

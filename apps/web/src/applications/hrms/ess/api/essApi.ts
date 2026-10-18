@@ -16,19 +16,43 @@ export interface EssEmployeeSummary {
   firstName: string;
   lastName: string | null;
   email: string;
+  workPhone?: string | null;
   departmentId: string | null;
   departmentName?: string | null;
+  departmentCode?: string | null;
   designationId: string | null;
   designationTitle?: string | null;
+  designationCode?: string | null;
   locationId: string | null;
   locationName?: string | null;
   reportingManagerId?: string | null;
   reportingManagerName?: string | null;
+  reportingManagerDesignation?: string | null;
   employmentType: string;
   employmentStatus: string;
   joiningDate: string;
+  probationEndDate?: string | null;
+  confirmationDate?: string | null;
+  confirmedJoiningDate?: string | null;
+  contractEndDate?: string | null;
+  noticePeriodDays?: number | null;
   gender?: string | null;
   avatarPreference?: 'male' | 'female' | 'neutral' | string | null;
+}
+
+export interface EssCareerEvent {
+  id: string;
+  eventType:
+    | 'designation_change'
+    | 'department_change'
+    | 'location_transfer'
+    | 'employment_type_change'
+    | 'confirm_employee';
+  eventLabel: string;
+  effectiveDate: string;
+  previousValue: string | null;
+  newValue: string | null;
+  appliedAt: string | null;
 }
 
 export interface EssPunchEvent {
@@ -41,12 +65,16 @@ export interface EssPunchEvent {
 }
 
 export interface EssShiftDetails {
-  name: string;
-  startTime: string;
-  endTime: string;
+  name: string | null;
+  startTime: string | null;
+  endTime: string | null;
   requiredHours: number;
   graceMinutes: number;
   breakAllowanceMinutes: number;
+  isAssigned?: boolean;
+  timeZone?: string | null;
+  effectiveTimezone?: string | null;
+  workingDays?: (string | number)[];
 }
 
 export interface EssAttendanceSummaryCounters {
@@ -58,6 +86,8 @@ export interface EssAttendanceSummaryCounters {
   lateMarksCount: number;
   regularizationQuotaUsed: number;
   regularizationQuotaLimit: number;
+  workedMinutes?: number;
+  missingPunchesCount?: number;
 }
 
 export interface EssTodayAttendance {
@@ -221,7 +251,7 @@ export interface EssAttendanceRecord {
   date: string;
   checkInTime: string | null;
   checkOutTime: string | null;
-  status: 'present' | 'absent' | 'half_day' | 'on_leave' | 'holiday';
+  status: 'present' | 'absent' | 'half_day' | 'on_leave' | 'holiday' | 'incomplete';
   workLocation: string;
   notes?: string | null;
   workedMinutes?: number;
@@ -272,10 +302,12 @@ export interface EssDocument {
     | 'bank_payroll'
     | 'tax_other';
   documentName: string;
+  documentType?: string | null;
   documentNumber?: string | null;
   status:
     'pending' | 'under_review' | 'verified' | 'rejected' | 'resubmission_required' | 'expired';
   expiryDate?: string | null;
+  verificationRemarks?: string | null;
   createdAt: string;
 }
 
@@ -289,6 +321,36 @@ export interface EssRequest {
   reviewerNotes?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface EssAttendanceRegularizationDto {
+  id: string;
+  requestNumber: string;
+  workday: string;
+  date: string;
+  requestType: string;
+  category?: string;
+  approvalStatus:
+    | 'draft'
+    | 'submitted'
+    | 'under_review'
+    | 'awaiting_info'
+    | 'approved'
+    | 'rejected'
+    | 'cancelled';
+  status: string;
+  applicationStatus: 'not_applicable' | 'pending_application' | 'applied' | 'failed' | 'blocked';
+  proposedCorrection: string;
+  proposedCheckIn?: string | null;
+  proposedCheckOut?: string | null;
+  proposedStatus?: string | null;
+  claimedHours?: number | null;
+  reason: string;
+  decisionRemarks?: string | null;
+  decisionReason?: string | null;
+  decidedAt?: string | null;
+  submittedAt: string;
+  createdAt: string;
 }
 
 export interface EssTask {
@@ -354,6 +416,28 @@ export interface EssFamilyMember {
   sortOrder?: number;
 }
 
+export interface EssSkill {
+  id?: string;
+  skillName: string;
+  skillType: string;
+  proficiency: 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert' | string;
+  level?: string | null;
+  assessedOn?: string | null;
+  yearsOfExperience?: number | null;
+  sortOrder?: number;
+}
+
+export interface EssWorkSchedule {
+  workingCalendar?: string | null;
+  workSchedule?: string | null;
+  workingDays?: string[];
+  startTime?: string | null;
+  endTime?: string | null;
+  breakMinutes?: number | null;
+  lunchMinutes?: number | null;
+  timeZone?: string | null;
+}
+
 export interface EssFullProfile {
   employee: EssEmployeeSummary;
   personal: EssPersonalDetails | null;
@@ -365,9 +449,11 @@ export interface EssFullProfile {
     maskedAccountNumber: string;
     ifscCode: string;
     branchName: string | null;
+    bankLocation?: string | null;
   } | null;
-  skills: Record<string, unknown>[];
-  workSchedule: Record<string, unknown> | null;
+  skills: EssSkill[];
+  workSchedule: EssWorkSchedule | null;
+  careerHistory?: EssCareerEvent[];
 }
 
 /* ── HTTP client ──────────────────────────────────────────────────── */
@@ -402,7 +488,18 @@ async function req<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 /** The server asks for the employee's location before it will accept a punch. */
 export function isLocationRequiredError(err: unknown): boolean {
-  return err instanceof Error && (err as Error & { code?: string }).code === 'LOCATION_REQUIRED';
+  if (!err) return false;
+  const code = (err as { code?: string })?.code;
+  if (code === 'LOCATION_REQUIRED') return true;
+  const message = (err as { message?: string })?.message;
+  if (
+    typeof message === 'string' &&
+    (message.includes('LOCATION_REQUIRED') ||
+      message.toLowerCase().includes('location is required'))
+  ) {
+    return true;
+  }
+  return false;
 }
 
 export interface PunchDeviceMetadata {
@@ -419,6 +516,7 @@ export const essApi = {
 
   // Profile
   getProfile: () => req<EssFullProfile>('/profile'),
+  getCareerHistory: () => req<EssCareerEvent[]>('/career-history'),
   updateContactDetails: (payload: Partial<EssPersonalDetails>) =>
     req<EssFullProfile>('/profile/personal', {
       method: 'PUT',
@@ -479,13 +577,24 @@ export const essApi = {
       method: 'POST',
       body: JSON.stringify(payload || {}),
     }),
+  getAttendanceRegularizations: () =>
+    req<EssAttendanceRegularizationDto[]>('/attendance/regularizations'),
   regularizeAttendance: (payload: {
     date: string;
-    checkInTime: string;
-    checkOutTime: string;
+    workday?: string;
+    checkInTime?: string;
+    checkOutTime?: string;
+    proposedCheckIn?: string;
+    proposedCheckOut?: string;
+    proposedStatus?: string;
+    claimedHours?: number;
+    requestType?: string;
     reason: string;
   }) =>
-    req<EssRequest>('/attendance/regularize', { method: 'POST', body: JSON.stringify(payload) }),
+    req<EssAttendanceRegularizationDto>('/attendance/regularize', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
 
   // Leave
   getLeave: () =>
@@ -510,6 +619,17 @@ export const essApi = {
     taskDescription: string;
     hours: number;
   }) => req<EssTimesheet>('/timesheets/log', { method: 'POST', body: JSON.stringify(payload) }),
+  updateTimesheet: (
+    id: string,
+    payload: {
+      date?: string;
+      projectName?: string;
+      taskDescription?: string;
+      hours?: number;
+    },
+  ) => req<EssTimesheet>(`/timesheets/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  deleteTimesheet: (id: string) =>
+    req<{ success: boolean }>(`/timesheets/${id}`, { method: 'DELETE' }),
   submitTimesheets: (ids?: string[]) =>
     req<{ submittedCount: number }>('/timesheets/submit', {
       method: 'POST',

@@ -31,17 +31,13 @@ import {
   type EssFeedPost,
   type EssAttendanceRecord,
 } from '../api/essApi';
+import { useEssAttendance } from '../hooks';
 
 export function EssDashboardPage() {
   const navigate = useNavigate();
   const [data, setData] = useState<EssDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Punch Loading
-  const [punchLoading, setPunchLoading] = useState(false);
-  const [punchError, setPunchError] = useState<string | null>(null);
-  const [punchSuccess, setPunchSuccess] = useState<string | null>(null);
 
   // Payslip privacy toggle
   const [showSalary, setShowSalary] = useState(false);
@@ -151,63 +147,23 @@ export function EssDashboardPage() {
     }
   };
 
-  const handlePunchIn = async () => {
-    setPunchLoading(true);
-    setPunchError(null);
-    setPunchSuccess(null);
-    try {
-      await essApi.checkIn({ workLocation: 'office' });
-      setPunchSuccess('Checked in successfully!');
-      await fetchDashboard();
-    } catch (err: unknown) {
-      setPunchError(err instanceof Error ? err.message : 'Check-in failed');
-    } finally {
-      setPunchLoading(false);
-    }
-  };
-
-  const handlePunchOut = async () => {
-    setPunchLoading(true);
-    setPunchError(null);
-    setPunchSuccess(null);
-    try {
-      await essApi.checkOut();
-      setPunchSuccess('Checked out successfully!');
-      await fetchDashboard();
-    } catch (err: unknown) {
-      setPunchError(err instanceof Error ? err.message : 'Check-out failed');
-    } finally {
-      setPunchLoading(false);
-    }
-  };
-
-  const handleStartBreak = async () => {
-    setPunchLoading(true);
-    setPunchError(null);
-    try {
-      await essApi.startBreak({ breakType: 'tea', notes: 'Short tea break' });
-      setPunchSuccess('Started break.');
-      await fetchDashboard();
-    } catch (err: unknown) {
-      setPunchError(err instanceof Error ? err.message : 'Failed to start break');
-    } finally {
-      setPunchLoading(false);
-    }
-  };
-
-  const handleEndBreak = async () => {
-    setPunchLoading(true);
-    setPunchError(null);
-    try {
-      await essApi.endBreak();
-      setPunchSuccess('Break ended. Back to work!');
-      await fetchDashboard();
-    } catch (err: unknown) {
-      setPunchError(err instanceof Error ? err.message : 'Failed to end break');
-    } finally {
-      setPunchLoading(false);
-    }
-  };
+  const {
+    today: attendanceToday,
+    canCheckIn,
+    canCheckOut,
+    checkInDisabledReason,
+    checkOutDisabledReason,
+    punchLoading,
+    punchError,
+    punchSuccess,
+    handleCheckIn,
+    handleCheckOut,
+    handleStartBreak,
+    handleEndBreak,
+  } = useEssAttendance({
+    todayAttendance: data?.todayAttendance,
+    onRefresh: fetchDashboard,
+  });
 
   const handleToggleLike = (postId: string) => {
     setLocalPosts((prev) =>
@@ -275,27 +231,11 @@ export function EssDashboardPage() {
     );
 
   const emp = data.employee;
-  const today = data.todayAttendance;
+  const today = attendanceToday;
   const briefing = data.dailyBriefing;
   const growth = data.growth;
   const payslip = data.latestPayslip;
   const team = data.myTeam;
-
-  const hasPunchedIn = !!today.checkInTime;
-  const hasPunchedOut = !!today.checkOutTime;
-
-  const canCheckIn = !hasPunchedIn;
-  const canCheckOut = hasPunchedIn && !hasPunchedOut;
-  const checkInDisabledReason = hasPunchedIn
-    ? hasPunchedOut
-      ? 'Already checked out for today'
-      : 'Already checked in today'
-    : undefined;
-  const checkOutDisabledReason = !hasPunchedIn
-    ? 'Check in first to record attendance'
-    : hasPunchedOut
-      ? 'Already checked out for today'
-      : undefined;
 
   return (
     <Page>
@@ -346,9 +286,9 @@ export function EssDashboardPage() {
         canCheckOut={canCheckOut}
         checkInDisabledReason={checkInDisabledReason}
         checkOutDisabledReason={checkOutDisabledReason}
-        onCheckIn={handlePunchIn}
-        onCheckOut={handlePunchOut}
-        onStartBreak={handleStartBreak}
+        onCheckIn={() => handleCheckIn('office')}
+        onCheckOut={handleCheckOut}
+        onStartBreak={() => handleStartBreak('tea')}
         onEndBreak={handleEndBreak}
         onAvatarClick={() => setShowAvatarModal(true)}
         onViewProfileClick={() => navigate('/ess/profile')}

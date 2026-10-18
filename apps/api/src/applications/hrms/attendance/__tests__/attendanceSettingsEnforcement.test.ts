@@ -5,6 +5,7 @@ import { and, eq } from 'drizzle-orm';
 import { createApp } from '../../../../app/server/createApp.js';
 import { isDatabaseConfigured, getDb } from '../../../../db/connection.js';
 import {
+  attendancePeriods,
   attendancePunches,
   attendanceRegularizations,
   employeeAttendance,
@@ -32,7 +33,11 @@ import {
 import { subtractDays, summarizeByMonth } from '../service/attendanceEmployeeView.service.js';
 import { isCorrectionTypeAllowed } from '../service/attendanceRegularizationEligibility.service.js';
 import { attendanceRegularizationService } from '../service/attendanceRegularization.service.js';
-import { boundaryToMilliseconds, resolveWorkday } from '../service/attendanceWorkday.service.js';
+import {
+  boundaryToMilliseconds,
+  resolveWorkday,
+  formatDateInTimezone,
+} from '../service/attendanceWorkday.service.js';
 import { isProbeableHost, probeTcp } from '../service/attendanceDeviceProbe.js';
 import { attendanceAutoLockService } from '../service/attendanceAutoLock.service.js';
 import { attendanceService } from '../service/attendance.service.js';
@@ -43,9 +48,8 @@ import {
 } from '../service/attendancePeriodCalendar.js';
 
 const isoDaysAgo = (days: number): string => {
-  const d = new Date();
-  d.setUTCDate(d.getUTCDate() - days);
-  return d.toISOString().slice(0, 10);
+  const todayStr = formatDateInTimezone(new Date(), 'Asia/Kolkata');
+  return subtractDays(todayStr, days);
 };
 
 describe('Attendance settings helpers (pure)', () => {
@@ -944,11 +948,13 @@ describe.skipIf(!isDatabaseConfigured)(
         await resetSecurity();
 
         await hrPut('general', { dayBoundaryTime: '00:00:00' });
-        expect(await todayRecord()).toBe(resolveWorkday(new Date(), '00:00:00'));
+        const genRes = await request(app).get('/api/v1/hrms/attendance/settings/general').set(hr);
+        const tz = genRes.body.data?.timezone ?? 'Asia/Kolkata';
+        expect(await todayRecord()).toBe(resolveWorkday(new Date(), '00:00:00', tz));
 
         // A boundary just before midnight makes "today" still belong to the previous workday.
         await hrPut('general', { dayBoundaryTime: '23:59:00' });
-        const expected = resolveWorkday(new Date(), '23:59:00');
+        const expected = resolveWorkday(new Date(), '23:59:00', tz);
         expect(await todayRecord()).toBe(expected);
 
         const checkedIn = await checkIn();
@@ -1007,10 +1013,12 @@ describe.skipIf(!isDatabaseConfigured)(
 
       beforeAll(async () => {
         autoHr = await hrmsTestHeaders(autoCompany, autoTenant);
+        await getDb().delete(attendancePeriods).where(eq(attendancePeriods.companyId, autoCompany));
       });
 
       afterAll(async () => {
         await putPayroll({ autoLockOnCutoff: false, cycleType: 'calendar_month' });
+        await getDb().delete(attendancePeriods).where(eq(attendancePeriods.companyId, autoCompany));
         await removeHrmsTestAccess([autoCompany]);
       });
 

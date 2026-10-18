@@ -23,6 +23,15 @@ export class EssController {
     }
   };
 
+  getCareerHistory = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = await this.service.getCareerHistory(req.employeeContext!);
+      res.status(200).json({ data });
+    } catch (err) {
+      next(err);
+    }
+  };
+
   createProfileChangeRequest = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.service.createProfileChangeRequest(req.employeeContext!, req.body);
@@ -122,8 +131,21 @@ export class EssController {
 
   regularizeAttendance = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await this.service.regularizeAttendance(req.employeeContext!, req.body);
+      const result = await this.service.regularizeAttendance(
+        req.employeeContext!,
+        req.body,
+        req.user?.id,
+      );
       res.status(201).json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  getAttendanceRegularizations = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = await this.service.getAttendanceRegularizations(req.employeeContext!);
+      res.status(200).json({ data });
     } catch (err) {
       next(err);
     }
@@ -177,6 +199,28 @@ export class EssController {
   submitTimesheets = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.service.submitTimesheets(req.employeeContext!, req.body?.ids);
+      res.status(200).json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  updateTimesheet = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const entry = await this.service.updateTimesheet(
+        req.employeeContext!,
+        requireRecordId(req),
+        req.body,
+      );
+      res.status(200).json({ data: entry });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  deleteTimesheet = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await this.service.deleteTimesheet(req.employeeContext!, requireRecordId(req));
       res.status(200).json({ data: result });
     } catch (err) {
       next(err);

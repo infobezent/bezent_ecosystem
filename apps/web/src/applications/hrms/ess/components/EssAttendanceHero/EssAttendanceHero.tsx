@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { BezentIcon } from '../../../../../design-system/icons';
 import { EmployeeCartoonAvatar } from '../../../../../design-system/components';
 import { HeroSceneIllustration, type TimePeriod } from './HeroSceneIllustration';
+import type { EssShiftDetails } from '../../api/essApi';
 
 export interface EssHeroEmployee {
   firstName: string;
@@ -25,11 +26,7 @@ export interface EssHeroAttendance {
   currentBreakType?: string | null;
   currentBreakStartTime?: string | null;
   status?: string;
-  shift?: {
-    name?: string;
-    startTime?: string;
-    endTime?: string;
-  };
+  shift?: EssShiftDetails | null;
   workLocation?: string;
 }
 
@@ -242,7 +239,7 @@ export const EssAttendanceHero: React.FC<EssAttendanceHeroProps> = ({
       attendance.date || now.toISOString().split('T')[0],
       attendance.checkInTime,
     );
-    const inTime = inDate ? inDate.getTime() : NaN;
+    let inTime = inDate ? inDate.getTime() : NaN;
     let endRef = now.getTime();
     if (hasPunchedOut && attendance.checkOutTime) {
       const outDate = parseAttendanceTimestamp(
@@ -250,6 +247,13 @@ export const EssAttendanceHero: React.FC<EssAttendanceHeroProps> = ({
         attendance.checkOutTime,
       );
       endRef = outDate ? outDate.getTime() : now.getTime();
+      if (!isNaN(inTime) && !isNaN(endRef) && endRef < inTime) {
+        // Overnight shift: checkout occurred on next calendar day
+        endRef += 24 * 60 * 60 * 1000;
+      }
+    } else if (!isNaN(inTime) && endRef < inTime) {
+      // Overnight in-progress: check-in was yesterday, current time is past midnight
+      inTime -= 24 * 60 * 60 * 1000;
     }
     if (!isNaN(inTime) && !isNaN(endRef) && endRef >= inTime) {
       grossMinutes = Math.floor((endRef - inTime) / 60000);
@@ -262,9 +266,15 @@ export const EssAttendanceHero: React.FC<EssAttendanceHeroProps> = ({
       attendance.date || now.toISOString().split('T')[0],
       attendance.currentBreakStartTime,
     );
-    const bStart = bStartDate ? bStartDate.getTime() : NaN;
-    if (!isNaN(bStart) && now.getTime() >= bStart) {
-      liveBreakMinutes += Math.floor((now.getTime() - bStart) / 60000);
+    let bStart = bStartDate ? bStartDate.getTime() : NaN;
+    if (!isNaN(bStart)) {
+      if (now.getTime() < bStart) {
+        // Overnight break rollover
+        bStart -= 24 * 60 * 60 * 1000;
+      }
+      if (now.getTime() >= bStart) {
+        liveBreakMinutes += Math.floor((now.getTime() - bStart) / 60000);
+      }
     }
   }
 
@@ -302,8 +312,12 @@ export const EssAttendanceHero: React.FC<EssAttendanceHeroProps> = ({
   const actionsSummary =
     briefing?.actionsSummary || 'All regular daily tasks and approvals are up to date.';
 
-  const shiftName = attendance.shift?.name || 'General Shift';
-  const shiftTimes = `${attendance.shift?.startTime || '09:00'}–${attendance.shift?.endTime || '18:00'}`;
+  const isShiftAssigned = attendance.shift?.isAssigned !== false && Boolean(attendance.shift?.name);
+  const shiftName = isShiftAssigned ? attendance.shift!.name! : 'Unassigned';
+  const shiftTimes =
+    isShiftAssigned && attendance.shift?.startTime && attendance.shift?.endTime
+      ? `${attendance.shift.startTime}–${attendance.shift.endTime}`
+      : 'No scheduled shift';
   const workLocation = attendance.workLocation || 'Office';
 
   return (
@@ -485,6 +499,7 @@ export const EssAttendanceHero: React.FC<EssAttendanceHeroProps> = ({
           {hasPunchedIn && !hasPunchedOut && (
             <button
               type="button"
+              id="dashboard-break-btn"
               className="ess-glass-break-link"
               onClick={isOnBreak ? onEndBreak : onStartBreak}
               disabled={punchLoading}
