@@ -11,6 +11,7 @@ import {
   CardTitle,
   EmptyState,
   Grid,
+  IconButton,
   Inline,
   Input,
   Label,
@@ -439,26 +440,25 @@ export function OnboardingPage({ title = 'Onboarding', onAddNewHire }: Onboardin
                         <TableCell align="right">
                           <Inline gap="xs" justify="end" align="center">
                             {!isCompleted && item.status === 'active' && (
-                              <Button
-                                variant="outline"
-                                size="sm"
+                              <IconButton
+                                label={`Transition ${item.fullName}`}
                                 onClick={() => openTransitionModal(item)}
-                                aria-label={`Transition ${item.fullName}`}
                               >
-                                Transition
-                              </Button>
+                                <BezentIcon name="arrowRight" size={18} />
+                              </IconButton>
                             )}
-                            <Button
-                              variant={isCompleted ? 'ghost' : 'outline'}
-                              size="sm"
+                            <IconButton
+                              label={
+                                isCompleted
+                                  ? `View ${item.fullName}`
+                                  : item.stage === 'preboarding'
+                                    ? `Start Registration (${item.fullName})`
+                                    : `Continue Registration (${item.fullName})`
+                              }
                               onClick={() => handleRowAction(item)}
                             >
-                              {isCompleted
-                                ? 'View'
-                                : item.stage === 'preboarding'
-                                  ? 'Start Registration'
-                                  : 'Continue Registration'}
-                            </Button>
+                              <BezentIcon name={isCompleted ? 'openInNew' : 'edit'} size={18} />
+                            </IconButton>
                           </Inline>
                         </TableCell>
                       </TableRow>

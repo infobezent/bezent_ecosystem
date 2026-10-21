@@ -292,18 +292,24 @@ export function EssAttendancePage() {
     );
   if (!workspace) return null;
 
-  const summary = workspace.summary ?? {
-    presentDays: 0,
-    absentDays: 0,
-    halfDays: 0,
-    leaveDays: 0,
-    lateMarksCount: 0,
-    regularizationQuotaUsed: 0,
-    regularizationQuotaLimit: 3,
-    workedMinutes: 0,
-    missingPunchesCount: 0,
-    attendancePercent: 0,
-    totalWorkingDays: 0,
+  const calculatedWorkedMinutes =
+    workspace.summary?.workedMinutes ??
+    (workspace.history && workspace.history.length > 0
+      ? workspace.history.reduce((acc, r) => acc + (r.workedMinutes || 0), 0)
+      : 0);
+
+  const summary = {
+    presentDays: workspace.summary?.presentDays ?? 0,
+    absentDays: workspace.summary?.absentDays ?? 0,
+    halfDays: workspace.summary?.halfDays ?? 0,
+    leaveDays: workspace.summary?.leaveDays ?? 0,
+    lateMarksCount: workspace.summary?.lateMarksCount ?? 0,
+    regularizationQuotaUsed: workspace.summary?.regularizationQuotaUsed ?? 0,
+    regularizationQuotaLimit: workspace.summary?.regularizationQuotaLimit ?? 3,
+    workedMinutes: calculatedWorkedMinutes,
+    missingPunchesCount: workspace.summary?.missingPunchesCount ?? 0,
+    attendancePercent: workspace.summary?.attendancePercent ?? 0,
+    totalWorkingDays: workspace.summary?.totalWorkingDays ?? 0,
   };
 
   return (
@@ -315,7 +321,7 @@ export function EssAttendancePage() {
           <Button
             id="ess-attendance-regularize-btn"
             variant="secondary"
-            leftIcon={<BezentIcon name="edit" size={16} />}
+            leftIcon={<BezentIcon name="regularizeAttendance" size={16} />}
             onClick={() => {
               setRegDate(today.date);
               setRegError(null);
@@ -442,7 +448,7 @@ export function EssAttendancePage() {
                 disabled={!canCheckIn || punchLoading}
                 loading={punchLoading}
                 title={checkInDisabledReason}
-                leftIcon={<BezentIcon name="check" size={16} />}
+                leftIcon={<BezentIcon name="checkIn" size={16} />}
               >
                 Check In
               </Button>
@@ -458,7 +464,7 @@ export function EssAttendancePage() {
                     onClick={() => setBreakModalOpen(true)}
                     disabled={!canStartBreak || punchLoading}
                     loading={punchLoading}
-                    leftIcon={<BezentIcon name="coffee" size={15} />}
+                    leftIcon={<BezentIcon name="startBreak" size={15} />}
                   >
                     Take Break
                   </Button>
@@ -470,7 +476,7 @@ export function EssAttendancePage() {
                     onClick={handleEndBreak}
                     disabled={!canEndBreak || punchLoading}
                     loading={punchLoading}
-                    leftIcon={<BezentIcon name="check" size={15} />}
+                    leftIcon={<BezentIcon name="endBreak" size={15} />}
                   >
                     End Break
                   </Button>
@@ -484,7 +490,7 @@ export function EssAttendancePage() {
                   disabled={!canCheckOut || punchLoading}
                   loading={punchLoading}
                   title={checkOutDisabledReason}
-                  leftIcon={<BezentIcon name="close" size={15} />}
+                  leftIcon={<BezentIcon name="checkOut" size={15} />}
                 >
                   Check Out
                 </Button>
@@ -531,6 +537,7 @@ export function EssAttendancePage() {
           attendancePercent: summary.attendancePercent ?? 0,
           totalWorkingDays: summary.totalWorkingDays,
         }}
+        history={workspace.history}
       />
 
       {/* ── Calendar & Daily Details Two-Column Workspace (Option B) ── */}
@@ -768,7 +775,7 @@ export function EssAttendancePage() {
                       variant="secondary"
                       size="sm"
                       disabled={Boolean(activeRegForSelectedDay)}
-                      leftIcon={<BezentIcon name="edit" size={15} />}
+                      leftIcon={<BezentIcon name="regularizeAttendance" size={15} />}
                       onClick={() => {
                         setRegDate(selectedDateStr);
                         setRegCheckIn(selectedRecord.checkInTime || '09:00');
@@ -837,7 +844,7 @@ export function EssAttendancePage() {
                     variant="secondary"
                     size="sm"
                     disabled={Boolean(activeRegForSelectedDay)}
-                    leftIcon={<BezentIcon name="edit" size={15} />}
+                    leftIcon={<BezentIcon name="regularizeAttendance" size={15} />}
                     onClick={() => {
                       if (activeRegForSelectedDay) return;
                       setRegDate(selectedDateStr);

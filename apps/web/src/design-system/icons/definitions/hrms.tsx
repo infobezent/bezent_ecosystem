@@ -1,5 +1,19 @@
-import type { IconDefinition } from '../types';
+import type { JSX } from 'react';
+import type { BezentIconRenderProps, IconDefinition } from '../types';
 import { strokeProps as S } from './shared';
+
+function hrmsGlyph(
+  name: string,
+  label: string,
+  draw: (color: string, strokeWidth: number) => JSX.Element,
+): IconDefinition {
+  const render = ({ size, color, strokeWidth = 1.8 }: BezentIconRenderProps) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      {draw(color, strokeWidth)}
+    </svg>
+  );
+  return { name, label, category: 'hrms', outline: render, solid: render };
+}
 
 /**
  * HRMS-flavored BEZENT icons. These live in the global icon system (icons
@@ -912,4 +926,99 @@ export const HRMS_ICON_DEFINITIONS: Record<string, IconDefinition> = {
       </svg>
     ),
   },
+  checkIn: hrmsGlyph('checkIn', 'Check In', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M10 17l5-5-5-5" />
+      <path d="M15 12H3" />
+      <path d="M12 3h6a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3h-6" />
+    </g>
+  )),
+  checkOut: hrmsGlyph('checkOut', 'Check Out', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M14 7l-5 5 5 5" />
+      <path d="M9 12h12" />
+      <path d="M12 3H6a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3h6" />
+    </g>
+  )),
+  startBreak: hrmsGlyph('startBreak', 'Start Break', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M5 8h11v7a5.5 5.5 0 0 1-11 0V8Z" />
+      <path d="M16 9h2a3 3 0 0 1 0 6h-2" />
+      <path d="M4 21h14" />
+      <path d="M8 3v2M13 3v2" />
+    </g>
+  )),
+  endBreak: hrmsGlyph('endBreak', 'End Break', (c, sw) => (
+    <g {...S(c, sw)}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="m10 8 6 4-6 4V8Z" />
+    </g>
+  )),
+  missingPunch: hrmsGlyph('missingPunch', 'Missing Punch', (c, sw) => (
+    <g {...S(c, sw)}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 6v6l3 2" />
+      <path d="M12 17v.5" />
+    </g>
+  )),
+  workedHours: hrmsGlyph('workedHours', 'Worked Hours', (c, sw) => (
+    <g {...S(c, sw)}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l4 2" />
+      <path d="M7 19.5l1.5-1.5" />
+    </g>
+  )),
+  breakDuration: hrmsGlyph('breakDuration', 'Break Duration', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M9 2h6M12 2v3" />
+      <circle cx="12" cy="14" r="8" />
+      <path d="M12 10v4l3 2" />
+      <path d="m18 6 1.5-1.5" />
+    </g>
+  )),
+  lateArrival: hrmsGlyph('lateArrival', 'Late Arrival', (c, sw) => (
+    <g {...S(c, sw)}>
+      <circle cx="11" cy="12" r="9" />
+      <path d="M11 7v5l3 2" />
+      <path d="M19 19l3 3" />
+    </g>
+  )),
+  presentDays: hrmsGlyph('presentDays', 'Present Days', (c, sw) => (
+    <g {...S(c, sw)}>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M7 3v4M17 3v4M3 10h18" />
+      <path d="m8 15 2.5 2.5L16 12" />
+    </g>
+  )),
+  absentDays: hrmsGlyph('absentDays', 'Absent Days', (c, sw) => (
+    <g {...S(c, sw)}>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M7 3v4M17 3v4M3 10h18" />
+      <path d="m9 13 6 6m0-6-6 6" />
+    </g>
+  )),
+  halfDay: hrmsGlyph('halfDay', 'Half Day', (c, sw) => (
+    <g {...S(c, sw)}>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M7 3v4M17 3v4M3 10h18" />
+      <path d="M12 13v5M12 13a5 5 0 0 1 5 5" />
+    </g>
+  )),
+  regularizeAttendance: hrmsGlyph('regularizeAttendance', 'Regularize Attendance', (c, sw) => (
+    <g {...S(c, sw)}>
+      <rect x="4" y="4" width="14" height="17" rx="2" />
+      <path d="M8 2v4M14 2v4M4 9h14" />
+      <path d="m11 17 7-7 3 3-7 7-4 1 1-4Z" />
+    </g>
+  )),
+  helpdesk: hrmsGlyph('helpdesk', 'Helpdesk', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M4 14a8 8 0 0 1 16 0" strokeLinecap="round" />
+      <circle cx="12" cy="13" r="5" />
+      <rect x="2" y="11.5" width="3" height="5" rx="1.5" />
+      <rect x="19" y="11.5" width="3" height="5" rx="1.5" />
+      <path d="M19 16.5v.5a3 3 0 0 1-3 3h-2" strokeLinecap="round" />
+      <circle cx="13" cy="20" r="1" fill={c} />
+    </g>
+  )),
 };

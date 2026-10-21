@@ -22,12 +22,37 @@
 
 :root,
 [data-theme='light'] {
-  /* Core Google Workspace-Inspired Surfaces */
-  --bezent-logo-surface: #c2e7ff;
-  --bezent-logo-text: #001d35;
-  --primary: #c2e7ff;
-  --app-canvas: #f6f8fc;
+  /* Core Enterprise SaaS Surfaces */
+  --bezent-logo-surface: #dcebff;
+  --bezent-logo-text: #202938;
+  --primary: #dcebff;
+  --primary-accent: #3978f6;
+  --app-canvas: #f4f6fb;
   --workspace: #ffffff;
+
+  /* Premium Pastel Enterprise Tokens */
+  --pastel-blue: #e5eeff;
+  --action-blue: #3978f6;
+  --pastel-lavender: #ede5ff;
+  --lavender-accent: #8265de;
+  --pastel-mint: #ddf6e8;
+  --green-accent: #168b61;
+  --pastel-peach: #ffe5d8;
+  --coral-accent: #f07865;
+  --pastel-rose: #ffe4ea;
+  --red-accent: #de5264;
+
+  /* Legacy & Semantic Pastel Mappings */
+  --pastel-sky: #dcebff;
+  --pastel-blush: #ffe5ea;
+  --pastel-butter: #ffe8dc;
+
+  --pastel-mint-text: #159a68;
+  --pastel-sky-text: #1e3a8a;
+  --pastel-blush-text: #e45163;
+  --pastel-lavender-text: #4c1d95;
+  --pastel-peach-text: #7c2d12;
+  --pastel-butter-text: #7c2d12;
 
   /* Surfaces */
   --bg-app: var(--app-canvas);
@@ -35,11 +60,11 @@
   --bg-surface-secondary: #f0f4f9;
   --bg-card: #ffffff;
   --card-bg: #ffffff;
-  --card-border: #dde3ea;
+  --card-border: #e5eaf2;
   --card-hover-bg: #f8fafc;
-  --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
-  --card-hover-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
-  --card-radius: 8px;
+  --card-shadow: 0 4px 18px rgba(31, 45, 75, 0.045);
+  --card-hover-shadow: 0 6px 24px rgba(31, 45, 75, 0.08);
+  --card-radius: 14px;
   --bg-header: var(--app-canvas);
   --bg-sidebar: var(--app-canvas);
   --bg-footer: var(--app-canvas);
@@ -68,28 +93,28 @@
   --nav-label-active: #000000;
 
   /* Typography — Strict Semantic Tokens */
-  --text-brand: #000000;
-  --text-primary: #000000;
-  --text-body: #1f1f1f;
-  --text-secondary: #5f6368;
-  --text-tertiary: #5f6368;
-  --text-muted: #747775;
-  --text-disabled: #8e918f;
+  --text-brand: #20283a;
+  --text-primary: #20283a;
+  --text-body: #20283a;
+  --text-secondary: #65728a;
+  --text-tertiary: #65728a;
+  --text-muted: #8b96a8;
+  --text-disabled: #a0aec0;
   --text-inverse: #ffffff;
 
   /* Borders */
-  --border-default: #dde3ea;
-  --border-subtle: #e7ebf0;
-  --border-divider: #dde3ea;
-  --border-focus: #7cc4fa;
-  --focus-ring: #7cc4fa;
-  --table-border: #dde3ea;
-  --table-head-divider: #dde3ea;
-  --table-row-divider: #e7ebf0;
+  --border-default: #e4e9f2;
+  --border-subtle: #e4e9f2;
+  --border-divider: #e4e9f2;
+  --border-focus: #3978f6;
+  --focus-ring: #3978f6;
+  --table-border: #e5eaf2;
+  --table-head-divider: #e5eaf2;
+  --table-row-divider: #e5eaf2;
   /* Chrome separator between TopNav and workspace: deliberately softer than
      --border-default so the top bar reads as part of the app canvas rather
      than a structural frame edge. */
-  --header-border-bottom: #e7ebf0;
+  --header-border-bottom: #e5eaf2;
 
   /* BEZENT Global Icon System — Light Theme Tokens */
   --icon-default: #444746;
@@ -322,10 +347,11 @@
   --drawer-reveal-icon-border: rgba(31, 31, 31, 0.12);
 
   /* Semantic status tones */
-  --status-danger-fg: #b91c1c;
-  --status-danger-bg: #fee2e2;
-  --status-warning-fg: #b45309;
-  --status-warning-bg: #fef3c7;
+  --status-danger-fg: #de5264;
+  --status-danger-bg: #ffe6ec;
+  --status-warning: #f07865;
+  --status-warning-fg: #c2410c;
+  --status-warning-bg: #ffe8dc;
   --status-neutral-fg: #5f6368;
   --status-neutral-bg: #f1f4f9;
   --status-success-fg: #059669;

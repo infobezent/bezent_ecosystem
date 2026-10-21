@@ -2,20 +2,16 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Page,
-  Section,
   Card,
   Grid,
   Stack,
   Inline,
-  Badge,
   Button,
   Alert,
   LoadingState,
   EmptyState,
   ProgressBar,
-  Avatar,
   EmployeeCartoonAvatar,
-  Divider,
   Modal,
   Input,
 } from '../../../../design-system/components';
@@ -239,562 +235,586 @@ export function EssDashboardPage() {
 
   return (
     <Page>
-      {punchError && (
-        <Alert variant="error" title="Action Error">
-          {punchError}
-        </Alert>
-      )}
-      {punchSuccess && (
-        <Alert variant="success" title="Success">
-          {punchSuccess}
-        </Alert>
-      )}
+      <div className="ess-dashboard-content">
+        {punchError && (
+          <Alert variant="error" title="Action Error">
+            {punchError}
+          </Alert>
+        )}
+        {punchSuccess && (
+          <Alert variant="success" title="Success">
+            {punchSuccess}
+          </Alert>
+        )}
 
-      {/* ── 1. Unified Employee Welcome + Attendance Hero Card (Approved Design) ─── */}
-      <EssAttendanceHero
-        employee={{
-          firstName: emp.firstName,
-          lastName: emp.lastName,
-          gender: emp.gender,
-          avatarPreference,
-          designationTitle: emp.designationTitle,
-          departmentName: emp.departmentName,
-          employeeNumber: emp.employeeNumber,
-          locationName: emp.locationName,
-          employmentStatus: emp.employmentStatus,
-        }}
-        attendance={{
-          date: today.date,
-          checkInTime: today.checkInTime,
-          checkOutTime: today.checkOutTime,
-          workedMinutes: today.workedMinutes,
-          breakMinutes: today.breakMinutes,
-          isOnBreak: today.isOnBreak,
-          currentBreakType: today.currentBreakType,
-          currentBreakStartTime: today.currentBreakStartTime,
-          status: today.status,
-          shift: today.shift,
-          workLocation: today.workLocation,
-        }}
-        briefing={{
-          pendingActionsCount: briefing.pendingActionsCount,
-          actionsSummary: briefing.actionsSummary,
-        }}
-        timezone="IST"
-        punchLoading={punchLoading}
-        canCheckIn={canCheckIn}
-        canCheckOut={canCheckOut}
-        checkInDisabledReason={checkInDisabledReason}
-        checkOutDisabledReason={checkOutDisabledReason}
-        onCheckIn={() => handleCheckIn('office')}
-        onCheckOut={handleCheckOut}
-        onStartBreak={() => handleStartBreak('tea')}
-        onEndBreak={handleEndBreak}
-        onAvatarClick={() => setShowAvatarModal(true)}
-        onViewProfileClick={() => navigate('/ess/profile')}
-        onViewActionsClick={() => navigate('/ess/requests')}
-      />
+        {/* ── 1. Unified Employee Welcome + Attendance Hero Card (Approved Design) ─── */}
+        <EssAttendanceHero
+          employee={{
+            firstName: emp.firstName,
+            lastName: emp.lastName,
+            gender: emp.gender,
+            avatarPreference,
+            designationTitle: emp.designationTitle,
+            departmentName: emp.departmentName,
+            employeeNumber: emp.employeeNumber,
+            locationName: emp.locationName,
+            employmentStatus: emp.employmentStatus,
+          }}
+          attendance={{
+            date: today.date,
+            checkInTime: today.checkInTime,
+            checkOutTime: today.checkOutTime,
+            workedMinutes: today.workedMinutes,
+            breakMinutes: today.breakMinutes,
+            isOnBreak: today.isOnBreak,
+            currentBreakType: today.currentBreakType,
+            currentBreakStartTime: today.currentBreakStartTime,
+            status: today.status,
+            shift: today.shift,
+            workLocation: today.workLocation,
+          }}
+          briefing={{
+            pendingActionsCount: briefing.pendingActionsCount,
+            actionsSummary: briefing.actionsSummary,
+          }}
+          timezone="IST"
+          punchLoading={punchLoading}
+          canCheckIn={canCheckIn}
+          canCheckOut={canCheckOut}
+          checkInDisabledReason={checkInDisabledReason}
+          checkOutDisabledReason={checkOutDisabledReason}
+          onCheckIn={() => handleCheckIn('office')}
+          onCheckOut={handleCheckOut}
+          onStartBreak={() => handleStartBreak('tea')}
+          onEndBreak={handleEndBreak}
+          onAvatarClick={() => setShowAvatarModal(true)}
+          onViewProfileClick={() => navigate('/ess/profile')}
+          onViewActionsClick={() => navigate('/ess/requests')}
+        />
 
-      {/* ── 2. Monthly Attendance Snapshot (Approved V1.0 Layout) ─── */}
-      <AttendanceMonthlyCalendar
-        initialDate={selectedMonthDate}
-        summary={monthSummary}
-        history={monthHistory}
-        loading={monthLoading}
-        onMonthChange={handleMonthChange}
-        onViewDetailsClick={() => navigate('/ess/attendance')}
-      />
+        {/* ── 2. Quick Actions ──────────────────────────────────────── */}
+        <div className="ess-section-block">
+          <div className="ess-section-header">
+            <h2 className="ess-section-title">Quick Actions</h2>
+            <p className="ess-section-subtitle">Frequently used shortcuts</p>
+          </div>
+          <div className="ess-quick-actions-card">
+            <div className="ess-quick-actions-grid">
+              <button
+                type="button"
+                className="ess-quick-action-tile ess-quick-action-tile--blue"
+                onClick={() => navigate('/ess/leave')}
+              >
+                <div className="ess-quick-action-icon-wrap">
+                  <BezentIcon name="leave" size={20} />
+                </div>
+                <span className="ess-quick-action-label">Apply Leave</span>
+              </button>
 
-      {/* ── 3. Quick Actions ──────────────────────────────────────── */}
-      <Section title="Quick Actions" subtitle="Frequently used shortcuts">
-        <Card variant="default">
-          <Grid columns={4} gap="sm">
-            <Card variant="interactive" padding="sm" onClick={() => navigate('/ess/leave')}>
-              <Stack gap="xs" align="center">
-                <BezentIcon name="leave" size={20} />
-                <strong>Apply Leave</strong>
-              </Stack>
-            </Card>
+              <button
+                type="button"
+                className="ess-quick-action-tile ess-quick-action-tile--mint"
+                onClick={() => navigate('/ess/attendance')}
+              >
+                <div className="ess-quick-action-icon-wrap">
+                  <BezentIcon name="attendance" size={20} />
+                </div>
+                <span className="ess-quick-action-label">Regularize</span>
+              </button>
 
-            <Card variant="interactive" padding="sm" onClick={() => navigate('/ess/attendance')}>
-              <Stack gap="xs" align="center">
-                <BezentIcon name="attendance" size={20} />
-                <strong>Regularize</strong>
-              </Stack>
-            </Card>
+              <button
+                type="button"
+                className="ess-quick-action-tile ess-quick-action-tile--lavender"
+                onClick={() => navigate('/ess/payslips')}
+              >
+                <div className="ess-quick-action-icon-wrap">
+                  <BezentIcon name="payroll" size={20} />
+                </div>
+                <span className="ess-quick-action-label">Payslip</span>
+              </button>
 
-            <Card variant="interactive" padding="sm" onClick={() => navigate('/ess/payslips')}>
-              <Stack gap="xs" align="center">
-                <BezentIcon name="payroll" size={20} />
-                <strong>Payslip</strong>
-              </Stack>
-            </Card>
+              <button
+                type="button"
+                className="ess-quick-action-tile ess-quick-action-tile--peach"
+                onClick={() => navigate('/ess/requests')}
+              >
+                <div className="ess-quick-action-icon-wrap">
+                  <BezentIcon name="helpdesk" size={20} />
+                </div>
+                <span className="ess-quick-action-label">Helpdesk</span>
+              </button>
 
-            <Card variant="interactive" padding="sm" onClick={() => navigate('/ess/requests')}>
-              <Stack gap="xs" align="center">
-                <BezentIcon name="helpdesk" size={20} />
-                <strong>Helpdesk</strong>
-              </Stack>
-            </Card>
+              <button
+                type="button"
+                className="ess-quick-action-tile ess-quick-action-tile--teal"
+                onClick={() => navigate('/ess/documents')}
+              >
+                <div className="ess-quick-action-icon-wrap">
+                  <BezentIcon name="documents" size={20} />
+                </div>
+                <span className="ess-quick-action-label">Documents</span>
+              </button>
 
-            <Card variant="interactive" padding="sm" onClick={() => navigate('/ess/documents')}>
-              <Stack gap="xs" align="center">
-                <BezentIcon name="documents" size={20} />
-                <strong>Documents</strong>
-              </Stack>
-            </Card>
+              <button
+                type="button"
+                className="ess-quick-action-tile ess-quick-action-tile--rose"
+                onClick={() => navigate('/ess/profile')}
+              >
+                <div className="ess-quick-action-icon-wrap">
+                  <BezentIcon name="employees" size={20} />
+                </div>
+                <span className="ess-quick-action-label">My Job</span>
+              </button>
 
-            <Card variant="interactive" padding="sm" onClick={() => navigate('/ess/profile')}>
-              <Stack gap="xs" align="center">
-                <BezentIcon name="employees" size={20} />
-                <strong>My Job</strong>
-              </Stack>
-            </Card>
+              <button
+                type="button"
+                className="ess-quick-action-tile ess-quick-action-tile--indigo"
+                onClick={() => navigate('/ess/tasks')}
+              >
+                <div className="ess-quick-action-icon-wrap">
+                  <BezentIcon name="tasks" size={20} />
+                </div>
+                <span className="ess-quick-action-label">Learning</span>
+              </button>
 
-            <Card variant="interactive" padding="sm" onClick={() => navigate('/ess/tasks')}>
-              <Stack gap="xs" align="center">
-                <BezentIcon name="tasks" size={20} />
-                <strong>Learning</strong>
-              </Stack>
-            </Card>
+              <button
+                type="button"
+                className="ess-quick-action-tile ess-quick-action-tile--plum"
+                onClick={() => navigate('/ess/timesheets')}
+              >
+                <div className="ess-quick-action-icon-wrap">
+                  <BezentIcon name="timesheets" size={20} />
+                </div>
+                <span className="ess-quick-action-label">Timesheets</span>
+              </button>
+            </div>
+          </div>
+        </div>
 
-            <Card variant="interactive" padding="sm" onClick={() => navigate('/ess/timesheets')}>
-              <Stack gap="xs" align="center">
-                <BezentIcon name="timesheets" size={20} />
-                <strong>Timesheets</strong>
-              </Stack>
-            </Card>
-          </Grid>
-        </Card>
-      </Section>
+        {/* ── 3. Monthly Attendance Snapshot (Approved V1.0 Layout) ─── */}
+        <AttendanceMonthlyCalendar
+          initialDate={selectedMonthDate}
+          summary={monthSummary}
+          history={monthHistory}
+          loading={monthLoading}
+          onMonthChange={handleMonthChange}
+          onViewDetailsClick={() => navigate('/ess/attendance')}
+        />
 
-      {/* ── 5. My Action Center & 6. Leave Balance ─────────────────── */}
-      <Grid columns={2} gap="md">
-        {/* 5. My Action Center */}
-        <Section title="My Action Center" subtitle="Items requiring employee attention">
-          <Card variant="default">
-            <Stack gap="md">
-              <Inline justify="between" align="center">
-                <strong>Pending Action Items</strong>
-                <Badge variant="warning" size="sm">
-                  {data.actionCenterTasks.length} Pending
-                </Badge>
-              </Inline>
+        {/* ── 5. My Action Center & 6. Leave Balance ─────────────────── */}
+        <div className="ess-dashboard-row-2col">
+          {/* 5. My Action Center */}
+          <div className="ess-panel-card">
+            <div className="ess-panel-header">
+              <div className="ess-panel-header-titles">
+                <h2 className="ess-panel-title">My Action Center</h2>
+                <p className="ess-panel-subtitle">Items requiring employee attention</p>
+              </div>
+              <div className="ess-action-center-badge">
+                <span className="ess-action-center-badge-dot" />
+                <span>{data.actionCenterTasks.length} Pending</span>
+              </div>
+            </div>
 
-              <Stack gap="xs">
-                {data.actionCenterTasks.map((act) => (
-                  <Card key={act.id} variant="flat" padding="sm">
-                    <Inline justify="between" align="center" wrap>
-                      <Stack gap="xs">
-                        <strong>{act.title}</strong>
-                        <span>{act.subtitle}</span>
-                      </Stack>
-                      <Inline gap="sm" align="center">
-                        <Badge
-                          variant={
-                            act.priority === 'urgent'
-                              ? 'danger'
-                              : act.priority === 'action_required'
-                                ? 'warning'
-                                : 'info'
-                          }
-                          size="sm"
-                        >
-                          {act.priority.replace('_', ' ').toUpperCase()}
-                        </Badge>
-                        <Button variant="secondary" size="sm" onClick={() => navigate(act.link)}>
-                          Action
-                        </Button>
-                      </Inline>
-                    </Inline>
-                  </Card>
-                ))}
-              </Stack>
-            </Stack>
-          </Card>
-        </Section>
+            <div className="ess-action-items-list">
+              {data.actionCenterTasks.map((act) => (
+                <div key={act.id} className="ess-action-item-card">
+                  <div className="ess-action-item-info">
+                    <div className="ess-action-item-title">{act.title}</div>
+                    <div className="ess-action-item-desc">{act.subtitle}</div>
+                  </div>
+                  <div className="ess-action-item-controls">
+                    <span
+                      className={`ess-action-priority-badge ess-action-priority-badge--${act.priority}`}
+                    >
+                      {act.priority.replace('_', ' ').toUpperCase()}
+                    </span>
+                    <button
+                      type="button"
+                      className="ess-action-item-btn"
+                      onClick={() => navigate(act.link)}
+                    >
+                      Action
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-        {/* 6. Leave Balance & Upcoming Leave */}
-        <Section title="My Leave" subtitle="Available quotas and next approved leave">
-          <Card variant="default">
-            <Stack gap="md">
-              <Inline justify="between" align="center">
-                <strong>Leave Entitlements</strong>
-                <Button variant="ghost" size="sm" onClick={() => navigate('/ess/leave')}>
-                  View Details →
-                </Button>
-              </Inline>
+          {/* 6. Leave Balance & Upcoming Leave */}
+          <div className="ess-panel-card">
+            <div className="ess-panel-header">
+              <div className="ess-panel-header-titles">
+                <h2 className="ess-panel-title">My Leave</h2>
+                <p className="ess-panel-subtitle">Available quotas and next approved leave</p>
+              </div>
+              <button
+                type="button"
+                className="ess-panel-header-link"
+                onClick={() => navigate('/ess/leave')}
+              >
+                View Details →
+              </button>
+            </div>
 
-              <Grid columns={3} gap="sm">
-                {data.leaveBalances.slice(0, 3).map((bal) => (
-                  <Card key={bal.leaveType} variant="flat" padding="sm">
-                    <Stack gap="xs" align="center">
-                      <h1>{bal.availableDays}</h1>
-                      <span>{bal.leaveType.toUpperCase()} LEAVE</span>
-                    </Stack>
-                  </Card>
-                ))}
-              </Grid>
+            <div className="ess-leave-quotas-grid">
+              {data.leaveBalances.slice(0, 3).map((bal, idx) => {
+                const colorVariant = idx === 0 ? 'blue' : idx === 1 ? 'mint' : 'lavender';
+                return (
+                  <div
+                    key={bal.leaveType}
+                    className={`ess-leave-quota-card ess-leave-quota-card--${colorVariant}`}
+                  >
+                    <div className="ess-leave-quota-number">{bal.availableDays}</div>
+                    <div className="ess-leave-quota-label">{bal.leaveType.toUpperCase()} LEAVE</div>
+                    <div className="ess-leave-quota-sub">Days Available</div>
+                  </div>
+                );
+              })}
+            </div>
 
-              <Card variant="flat" padding="sm">
-                <Inline justify="between" align="center">
-                  <span>
-                    Next approved leave:{' '}
-                    <strong>{data.nextApprovedLeave || 'No upcoming leave'}</strong>
-                  </span>
-                  <Button variant="primary" size="sm" onClick={() => navigate('/ess/leave')}>
-                    Apply Leave
-                  </Button>
-                </Inline>
-              </Card>
-            </Stack>
-          </Card>
-        </Section>
-      </Grid>
+            <div className="ess-next-leave-card">
+              <div className="ess-next-leave-info">
+                <div className="ess-next-leave-icon">
+                  <BezentIcon name="calendar" size={16} />
+                </div>
+                <div className="ess-next-leave-text">
+                  Next approved leave:{' '}
+                  <strong>{data.nextApprovedLeave || 'No upcoming leave'}</strong>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="ess-apply-leave-btn"
+                onClick={() => navigate('/ess/leave')}
+              >
+                Apply Leave
+              </button>
+            </div>
+          </div>
+        </div>
 
-      {/* ── 7. Latest Payslip & Pay Information ────────────────────── */}
-      <Section title="Latest Payslip & Compensation">
-        <Card variant="default">
-          <Inline justify="between" align="center" wrap>
-            <Inline gap="md" align="center">
-              <BezentIcon name="payroll" size={32} />
-              <Stack gap="xs">
-                <Inline gap="sm" align="center">
-                  <strong>Latest Payslip — {payslip?.month || 'September 2026'}</strong>
-                  <Badge variant="success" size="sm">
-                    Available
-                  </Badge>
-                </Inline>
-                <Inline gap="sm" align="baseline">
-                  <h2>
+        {/* ── 7. Latest Payslip & Pay Information ────────────────────── */}
+        <div className="ess-panel-card ess-payslip-panel">
+          <div className="ess-payslip-content">
+            <div className="ess-payslip-left">
+              <div className="ess-payslip-icon-wrap">
+                <BezentIcon name="payroll" size={28} />
+              </div>
+              <div className="ess-payslip-info">
+                <div className="ess-payslip-header-row">
+                  <h2 className="ess-payslip-title">
+                    Latest Payslip — {payslip?.month || 'September 2026'}
+                  </h2>
+                  <span className="ess-payslip-status-badge">Available</span>
+                </div>
+                <div className="ess-payslip-amount-row">
+                  <span className="ess-payslip-amount">
                     {showSalary
                       ? `₹ ${payslip?.actualAmount?.toLocaleString('en-IN') || '84,500'}`
                       : '₹ ••••••'}
-                  </h2>
-                  <span>{showSalary ? 'Net Disbursed' : 'Net pay hidden for privacy'}</span>
-                </Inline>
-              </Stack>
-            </Inline>
+                  </span>
+                  <span className="ess-payslip-amount-sub">
+                    {showSalary ? 'Net Disbursed' : 'Net pay hidden for privacy'}
+                  </span>
+                </div>
+              </div>
+            </div>
 
-            <Inline gap="sm" align="center">
-              <Button
-                variant="secondary"
-                size="sm"
-                leftIcon={<BezentIcon name="lock" size={16} />}
+            <div className="ess-payslip-actions">
+              <button
+                type="button"
+                className="ess-btn-secondary"
                 onClick={() => setShowSalary(!showSalary)}
               >
-                {showSalary ? 'Hide Amount' : 'Secure View'}
-              </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                leftIcon={<BezentIcon name="download" size={16} />}
+                <BezentIcon name="lock" size={15} />
+                <span>{showSalary ? 'Hide Amount' : 'Secure View'}</span>
+              </button>
+              <button
+                type="button"
+                className="ess-btn-primary"
                 onClick={() => navigate('/ess/payslips')}
               >
-                Download PDF
-              </Button>
-            </Inline>
-          </Inline>
-        </Card>
-      </Section>
+                <BezentIcon name="download" size={15} />
+                <span>Download PDF</span>
+              </button>
+            </div>
+          </div>
+        </div>
 
-      {/* ── 8. Company Feed — Employee Connect ─────────────────────── */}
-      <Section
-        title="Company Feed — Employee Connect"
-        subtitle="Celebrate milestones, welcome joiners, and stay updated across the company"
-      >
-        <Card variant="default">
-          <Stack gap="md">
-            {/* Feed Category Tabs */}
-            <Inline justify="between" align="center" wrap>
-              <Inline gap="xs" align="center">
-                <Button
-                  variant={feedCategory === 'all' ? 'primary' : 'secondary'}
-                  size="sm"
-                  onClick={() => setFeedCategory('all')}
-                >
-                  All
-                </Button>
-                <Button
-                  variant={feedCategory === 'celebrations' ? 'primary' : 'secondary'}
-                  size="sm"
-                  onClick={() => setFeedCategory('celebrations')}
-                >
-                  Celebrations
-                </Button>
-                <Button
-                  variant={feedCategory === 'people' ? 'primary' : 'secondary'}
-                  size="sm"
-                  onClick={() => setFeedCategory('people')}
-                >
-                  People
-                </Button>
-                <Button
-                  variant={feedCategory === 'events' ? 'primary' : 'secondary'}
-                  size="sm"
-                  onClick={() => setFeedCategory('events')}
-                >
-                  Events
-                </Button>
-              </Inline>
+        {/* ── 8. Company Feed — Employee Connect ─────────────────────── */}
+        <div className="ess-panel-card">
+          <div className="ess-panel-header">
+            <div className="ess-panel-header-titles">
+              <h2 className="ess-panel-title">Company Feed — Employee Connect</h2>
+              <p className="ess-panel-subtitle">
+                Celebrate milestones, welcome joiners, and stay updated across the company
+              </p>
+            </div>
+            <button
+              type="button"
+              className="ess-panel-header-link"
+              onClick={() => navigate('/ess/feed')}
+            >
+              View Full Feed →
+            </button>
+          </div>
 
-              <Button variant="ghost" size="sm" onClick={() => navigate('/ess/feed')}>
-                View Full Feed →
-              </Button>
-            </Inline>
+          {/* Feed Category Filter Bar */}
+          <div className="ess-feed-filter-bar">
+            <button
+              type="button"
+              className={`ess-feed-filter-btn ${feedCategory === 'all' ? 'is-active' : ''}`}
+              onClick={() => setFeedCategory('all')}
+            >
+              All
+            </button>
+            <button
+              type="button"
+              className={`ess-feed-filter-btn ${feedCategory === 'celebrations' ? 'is-active' : ''}`}
+              onClick={() => setFeedCategory('celebrations')}
+            >
+              Celebrations
+            </button>
+            <button
+              type="button"
+              className={`ess-feed-filter-btn ${feedCategory === 'people' ? 'is-active' : ''}`}
+              onClick={() => setFeedCategory('people')}
+            >
+              People
+            </button>
+            <button
+              type="button"
+              className={`ess-feed-filter-btn ${feedCategory === 'events' ? 'is-active' : ''}`}
+              onClick={() => setFeedCategory('events')}
+            >
+              Events
+            </button>
+          </div>
 
-            {/* Posts Stream */}
-            <Stack gap="sm">
-              {filteredFeedPosts.map((post) => (
-                <Card key={post.id} variant="flat">
-                  <Stack gap="xs">
-                    <Inline justify="between" align="center">
-                      <Inline gap="sm" align="center">
-                        <Avatar initials={post.title[0] || 'C'} size="md" />
-                        <Stack gap="xs">
-                          <strong>{post.title}</strong>
-                          <span>
-                            {post.subtitle} • {post.date}
-                          </span>
-                        </Stack>
-                      </Inline>
-                      <Badge variant="info" size="sm">
-                        {post.badge}
-                      </Badge>
-                    </Inline>
+          {/* Posts Stream */}
+          <div className="ess-feed-stream">
+            {filteredFeedPosts.map((post) => (
+              <div key={post.id} className="ess-feed-post-card">
+                <div className="ess-feed-post-header">
+                  <div className="ess-feed-post-author">
+                    <div className="ess-feed-post-avatar">{post.title[0] || 'C'}</div>
+                    <div className="ess-feed-post-meta">
+                      <span className="ess-feed-post-title">{post.title}</span>
+                      <span className="ess-feed-post-sub">
+                        {post.subtitle} • {post.date}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="ess-feed-post-badge">{post.badge}</span>
+                </div>
 
-                    <p>{post.message}</p>
+                <p className="ess-feed-post-message">{post.message}</p>
 
-                    <Divider />
+                <div className="ess-feed-post-footer">
+                  <button
+                    type="button"
+                    className={`ess-feed-action-btn ${post.hasLiked ? 'is-liked' : ''}`}
+                    onClick={() => handleToggleLike(post.id)}
+                  >
+                    <BezentIcon name="heart" size={14} />
+                    <span>
+                      {post.hasLiked ? 'Liked' : 'Like'} ({post.likesCount})
+                    </span>
+                  </button>
 
-                    {/* Interaction Buttons: Like, Comment */}
-                    <Inline gap="md" align="center">
-                      <Button
-                        variant={post.hasLiked ? 'primary' : 'ghost'}
-                        size="sm"
-                        leftIcon={<BezentIcon name="heart" size={14} />}
-                        onClick={() => handleToggleLike(post.id)}
-                      >
-                        {post.hasLiked ? 'Liked' : 'Like'} ({post.likesCount})
-                      </Button>
+                  <button
+                    type="button"
+                    className="ess-feed-action-btn"
+                    onClick={() => setCommentModalPost(post)}
+                  >
+                    <BezentIcon name="chat" size={14} />
+                    <span>Comment ({post.commentsCount})</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        leftIcon={<BezentIcon name="chat" size={14} />}
-                        onClick={() => setCommentModalPost(post)}
-                      >
-                        Comment ({post.commentsCount})
-                      </Button>
-                    </Inline>
-                  </Stack>
-                </Card>
+        {/* ── 9. Upcoming Events & 10. Goals, Performance & Learning ─── */}
+        <div className="ess-dashboard-row-2col">
+          {/* 9. Upcoming Events */}
+          <div className="ess-panel-card">
+            <div className="ess-panel-header">
+              <div className="ess-panel-header-titles">
+                <h2 className="ess-panel-title">Upcoming Events & Holidays</h2>
+                <p className="ess-panel-subtitle">Scheduled Events</p>
+              </div>
+              <button
+                type="button"
+                className="ess-panel-header-link"
+                onClick={() => navigate('/ess/leave')}
+              >
+                Calendar →
+              </button>
+            </div>
+
+            <div className="ess-events-list">
+              {data.upcomingEvents.map((evt) => (
+                <div key={evt.id} className="ess-event-card">
+                  <div className="ess-event-date-tile">
+                    <span className="ess-event-date-month">{evt.monthShort}</span>
+                    <span className="ess-event-date-day">{evt.dayNumber}</span>
+                  </div>
+                  <div className="ess-event-details">
+                    <span className="ess-event-title">{evt.title}</span>
+                    <span className="ess-event-venue">
+                      {evt.category} • {evt.teamOrVenue}
+                    </span>
+                  </div>
+                </div>
               ))}
-            </Stack>
-          </Stack>
-        </Card>
-      </Section>
+            </div>
+          </div>
 
-      {/* ── 9. Upcoming Events & 10. Goals, Performance & Learning ─── */}
-      <Grid columns={2} gap="md">
-        {/* 9. Upcoming Events */}
-        <Section title="Upcoming Events & Holidays">
-          <Card variant="default">
-            <Stack gap="md">
-              <Inline justify="between" align="center">
-                <strong>Scheduled Events</strong>
-                <Button variant="ghost" size="sm" onClick={() => navigate('/ess/leave')}>
-                  Calendar →
-                </Button>
-              </Inline>
+          {/* 10. Goals, Performance & Learning */}
+          <div className="ess-panel-card">
+            <div className="ess-panel-header">
+              <div className="ess-panel-header-titles">
+                <h2 className="ess-panel-title">My Growth</h2>
+                <p className="ess-panel-subtitle">Learning & Goals</p>
+              </div>
+              <button
+                type="button"
+                className="ess-panel-header-link"
+                onClick={() => navigate('/ess/tasks')}
+              >
+                View Progress →
+              </button>
+            </div>
 
-              <Stack gap="xs">
-                {data.upcomingEvents.map((evt) => (
-                  <Card key={evt.id} variant="flat" padding="sm">
-                    <Inline gap="md" align="center">
-                      <Card variant="default" padding="sm">
-                        <Stack gap="xs" align="center">
-                          <span>{evt.monthShort}</span>
-                          <strong>{evt.dayNumber}</strong>
-                        </Stack>
-                      </Card>
-                      <Stack gap="xs">
-                        <strong>{evt.title}</strong>
-                        <span>
-                          {evt.category} • {evt.teamOrVenue}
-                        </span>
-                      </Stack>
-                    </Inline>
-                  </Card>
-                ))}
-              </Stack>
-            </Stack>
-          </Card>
-        </Section>
+            <div className="ess-learning-card">
+              <div className="ess-learning-header">
+                <span className="ess-learning-label">Learning Progress</span>
+                <span className="ess-learning-percent">
+                  {growth.learningProgressPercent}% completed
+                </span>
+              </div>
+              <ProgressBar
+                value={growth.learningProgressPercent}
+                max={100}
+                variant="primary"
+                size="md"
+              />
+              <span className="ess-learning-sub">
+                {growth.activeCoursesCount} active courses in progress
+              </span>
+            </div>
 
-        {/* 10. Goals, Performance & Learning */}
-        <Section title="My Growth">
-          <Card variant="default">
-            <Stack gap="md">
-              <Inline justify="between" align="center">
-                <strong>Learning & Goals</strong>
-                <Button variant="ghost" size="sm" onClick={() => navigate('/ess/tasks')}>
-                  View Progress →
-                </Button>
-              </Inline>
+            <div className="ess-growth-metrics-grid">
+              <div className="ess-growth-metric-tile ess-growth-metric-tile--blue">
+                <span className="ess-growth-metric-val">{growth.activeGoalsCount}</span>
+                <span className="ess-growth-metric-lbl">Active Goals</span>
+              </div>
+              <div className="ess-growth-metric-tile ess-growth-metric-tile--lavender">
+                <span className="ess-growth-metric-val">{growth.pendingReviewsCount}</span>
+                <span className="ess-growth-metric-lbl">Pending Reviews</span>
+              </div>
+              <div className="ess-growth-metric-tile ess-growth-metric-tile--mint">
+                <span className="ess-growth-metric-val">{growth.nextDeadline || 'Oct 31'}</span>
+                <span className="ess-growth-metric-lbl">Next Deadline</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
-              <Card variant="flat" padding="sm">
-                <Stack gap="xs">
-                  <Inline justify="between" align="center">
-                    <span>Learning Progress</span>
-                    <strong>{growth.learningProgressPercent}% completed</strong>
-                  </Inline>
-                  <ProgressBar
-                    value={growth.learningProgressPercent}
-                    max={100}
-                    variant="primary"
-                    size="md"
-                  />
-                  <span>{growth.activeCoursesCount} active courses in progress</span>
-                </Stack>
-              </Card>
+        {/* ── 11. My Team & 12. My Profile Snapshot ─────────────────── */}
+        <div className="ess-dashboard-row-2col">
+          {/* 11. My Team */}
+          <div className="ess-panel-card">
+            <div className="ess-panel-header">
+              <div className="ess-panel-header-titles">
+                <h2 className="ess-panel-title">My Team</h2>
+                <p className="ess-panel-subtitle">
+                  Reporting Manager: {team?.reportingManagerName} (
+                  {team?.reportingManagerDesignation})
+                </p>
+              </div>
+              <div className="ess-team-count-badge">{team?.teamMembers?.length || 4} Members</div>
+            </div>
 
-              <Grid columns={3} gap="sm">
-                <Card variant="flat" padding="sm">
-                  <Stack gap="xs" align="center">
-                    <strong>{growth.activeGoalsCount}</strong>
-                    <span>Active Goals</span>
-                  </Stack>
-                </Card>
-                <Card variant="flat" padding="sm">
-                  <Stack gap="xs" align="center">
-                    <strong>{growth.pendingReviewsCount}</strong>
-                    <span>Pending Reviews</span>
-                  </Stack>
-                </Card>
-                <Card variant="flat" padding="sm">
-                  <Stack gap="xs" align="center">
-                    <strong>{growth.nextDeadline || 'Oct 31'}</strong>
-                    <span>Next Deadline</span>
-                  </Stack>
-                </Card>
-              </Grid>
-            </Stack>
-          </Card>
-        </Section>
-      </Grid>
+            <div className="ess-team-members-list">
+              {team?.teamMembers.map((member) => (
+                <div key={member.id} className="ess-team-member-card">
+                  <div className="ess-team-member-identity">
+                    <div className="ess-team-member-avatar">{member.name[0] || 'T'}</div>
+                    <div className="ess-team-member-info">
+                      <span className="ess-team-member-name">{member.name}</span>
+                      <span className="ess-team-member-role">{member.designation}</span>
+                    </div>
+                  </div>
 
-      {/* ── 11. My Team & 12. My Profile Snapshot ─────────────────── */}
-      <Grid columns={2} gap="md">
-        {/* 11. My Team (Conditional Widget) */}
-        <Section title="My Team">
-          <Card variant="default">
-            <Stack gap="md">
-              <Inline justify="between" align="center">
-                <Stack gap="xs">
-                  <span>Reporting Manager</span>
-                  <strong>
-                    {team?.reportingManagerName} ({team?.reportingManagerDesignation})
-                  </strong>
-                </Stack>
-                <Badge variant="info" size="sm">
-                  {team?.teamMembers?.length || 4} Members
-                </Badge>
-              </Inline>
+                  <div className={`ess-team-status-badge ess-team-status-badge--${member.status}`}>
+                    <span className="ess-team-status-dot" />
+                    <span>
+                      {member.status.replace('_', ' ').toUpperCase()} • {member.workLocation}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-              <Divider />
+          {/* 12. My Profile Snapshot */}
+          <div className="ess-panel-card">
+            <div className="ess-panel-header">
+              <div className="ess-panel-header-titles">
+                <h2 className="ess-panel-title">
+                  {emp.firstName} {emp.lastName || ''}
+                </h2>
+                <p className="ess-panel-subtitle">
+                  {emp.employeeNumber} • {emp.designationTitle || 'Software Engineer'}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="ess-panel-header-btn"
+                onClick={() => navigate('/ess/profile')}
+              >
+                View Profile
+              </button>
+            </div>
 
-              <Stack gap="xs">
-                {team?.teamMembers.map((member) => (
-                  <Card key={member.id} variant="flat" padding="sm">
-                    <Inline justify="between" align="center">
-                      <Inline gap="sm" align="center">
-                        <Avatar initials={member.name[0] || 'T'} size="sm" />
-                        <Stack gap="xs">
-                          <strong>{member.name}</strong>
-                          <span>{member.designation}</span>
-                        </Stack>
-                      </Inline>
+            <div className="ess-profile-completeness-card">
+              <div className="ess-profile-completeness-header">
+                <span className="ess-profile-completeness-label">Profile Completeness</span>
+                <span className="ess-profile-completeness-val">{data.profileCompleteness}%</span>
+              </div>
+              <ProgressBar value={data.profileCompleteness} max={100} variant="success" size="sm" />
+            </div>
 
-                      <Badge
-                        variant={
-                          member.status === 'working'
-                            ? 'success'
-                            : member.status === 'on_break'
-                              ? 'warning'
-                              : member.status === 'on_leave'
-                                ? 'danger'
-                                : 'neutral'
-                        }
-                        size="sm"
-                      >
-                        {member.status.replace('_', ' ').toUpperCase()} • {member.workLocation}
-                      </Badge>
-                    </Inline>
-                  </Card>
-                ))}
-              </Stack>
-            </Stack>
-          </Card>
-        </Section>
-
-        {/* 12. My Profile Snapshot */}
-        <Section title="My Profile Snapshot">
-          <Card variant="default">
-            <Stack gap="md">
-              <Inline justify="between" align="center">
-                <Stack gap="xs">
-                  <strong>
-                    {emp.firstName} {emp.lastName || ''}
-                  </strong>
-                  <span>
-                    {emp.employeeNumber} • {emp.designationTitle || 'Software Engineer'}
-                  </span>
-                </Stack>
-                <Button variant="secondary" size="sm" onClick={() => navigate('/ess/profile')}>
-                  View Profile
-                </Button>
-              </Inline>
-
-              <Card variant="flat" padding="sm">
-                <Stack gap="xs">
-                  <Inline justify="between" align="center">
-                    <span>Profile Completeness</span>
-                    <strong>{data.profileCompleteness}%</strong>
-                  </Inline>
-                  <ProgressBar
-                    value={data.profileCompleteness}
-                    max={100}
-                    variant="success"
-                    size="sm"
-                  />
-                </Stack>
-              </Card>
-
-              <Grid columns={2} gap="sm">
-                <Stack gap="xs">
-                  <span>Department</span>
-                  <strong>{emp.departmentName || 'Engineering'}</strong>
-                </Stack>
-                <Stack gap="xs">
-                  <span>Work Location</span>
-                  <strong>{emp.locationName || 'Chennai'}</strong>
-                </Stack>
-                <Stack gap="xs">
-                  <span>Employment Type</span>
-                  <strong>{emp.employmentType || 'Permanent'}</strong>
-                </Stack>
-                <Stack gap="xs">
-                  <span>Joining Date</span>
-                  <strong>
-                    {emp.joiningDate ? new Date(emp.joiningDate).toLocaleDateString() : '—'}
-                  </strong>
-                </Stack>
-              </Grid>
-            </Stack>
-          </Card>
-        </Section>
-      </Grid>
+            <div className="ess-profile-info-grid">
+              <div className="ess-profile-info-item">
+                <span className="ess-profile-info-label">Department</span>
+                <span className="ess-profile-info-value">
+                  {emp.departmentName || 'Engineering'}
+                </span>
+              </div>
+              <div className="ess-profile-info-item">
+                <span className="ess-profile-info-label">Work Location</span>
+                <span className="ess-profile-info-value">{emp.locationName || 'Chennai'}</span>
+              </div>
+              <div className="ess-profile-info-item">
+                <span className="ess-profile-info-label">Employment Type</span>
+                <span className="ess-profile-info-value">{emp.employmentType || 'Permanent'}</span>
+              </div>
+              <div className="ess-profile-info-item">
+                <span className="ess-profile-info-label">Joining Date</span>
+                <span className="ess-profile-info-value">
+                  {emp.joiningDate ? new Date(emp.joiningDate).toLocaleDateString() : '—'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* ── Comment Dialog Modal ──────────────────────────────────── */}
       {commentModalPost && (
