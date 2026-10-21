@@ -115,7 +115,14 @@ export interface RewardCatalogueItemInput {
 }
 
 export interface UpdateRewardStatusDto {
-  status: 'eligible' | 'pending_approval' | 'approved' | 'assigned' | 'dispatched' | 'fulfilled' | 'cancelled';
+  status:
+    | 'eligible'
+    | 'pending_approval'
+    | 'approved'
+    | 'assigned'
+    | 'dispatched'
+    | 'fulfilled'
+    | 'cancelled';
   notes?: string;
   reason?: string;
 }

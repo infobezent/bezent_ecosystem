@@ -4084,11 +4084,7 @@ export const milestoneConfigs = mysqlTable(
   },
   (table) => [
     index('idx_milestone_cfg_tenant_comp').on(table.tenantId, table.companyId),
-    uniqueIndex('idx_milestone_cfg_key').on(
-      table.tenantId,
-      table.companyId,
-      table.milestoneKey,
-    ),
+    uniqueIndex('idx_milestone_cfg_key').on(table.tenantId, table.companyId, table.milestoneKey),
   ],
 );
 
@@ -4261,9 +4257,7 @@ export const companyFeedPosts = mysqlTable(
     posterImageUrl: varchar('poster_image_url', { length: 500 }),
     likesCount: int('likes_count').notNull().default(0),
     commentsCount: int('comments_count').notNull().default(0),
-    status: mysqlEnum('status', ['draft', 'published', 'archived'])
-      .default('published')
-      .notNull(),
+    status: mysqlEnum('status', ['draft', 'published', 'archived']).default('published').notNull(),
     metadata: json('metadata').$type<Record<string, unknown>>(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
@@ -4277,4 +4271,3 @@ export const companyFeedPosts = mysqlTable(
 
 export type CompanyFeedPost = typeof companyFeedPosts.$inferSelect;
 export type NewCompanyFeedPost = typeof companyFeedPosts.$inferInsert;
-

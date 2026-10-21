@@ -279,11 +279,7 @@ function SortableChapterItem({
             aria-label={isLocked ? 'Protected final step' : 'Reordering locked'}
             title={isLocked ? 'Protected final step' : 'Reordering locked'}
           >
-            {isLocked ? (
-              <BezentIcon name="lock" size={14} />
-            ) : (
-              <BezentIcon name="more" size={14} />
-            )}
+            {isLocked ? <BezentIcon name="lock" size={14} /> : <BezentIcon name="more" size={14} />}
           </span>
         )}
         <span className="bezent-structure-num">{displayNum}</span>

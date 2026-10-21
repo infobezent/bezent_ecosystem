@@ -2022,7 +2022,13 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
           { ...generalSection, key: 'sec_3', label: 'Chapter Three', order: 3 },
           { ...generalSection, key: 'sec_4', label: 'Chapter Four', order: 4 },
           { ...generalSection, key: 'sec_5', label: 'Chapter Five', order: 5 },
-          { ...generalSection, key: 'review', label: 'Review & Finalize', order: 6, protected: true },
+          {
+            ...generalSection,
+            key: 'review',
+            label: 'Review & Finalize',
+            order: 6,
+            protected: true,
+          },
         ];
 
         // Move Chapter 5 (index 4) above Chapter 2 (index 1)
@@ -2061,7 +2067,13 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
           { ...generalSection, key: 'sec_3', label: 'Chapter Three', order: 3 },
           { ...generalSection, key: 'sec_4', label: 'Chapter Four', order: 4 },
           { ...generalSection, key: 'sec_5', label: 'Chapter Five', order: 5 },
-          { ...generalSection, key: 'review', label: 'Review & Finalize', order: 6, protected: true },
+          {
+            ...generalSection,
+            key: 'review',
+            label: 'Review & Finalize',
+            order: 6,
+            protected: true,
+          },
         ];
 
         // Move Chapter 2 (index 1) below Chapter 5 (index 4)
@@ -2096,11 +2108,21 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
       it('prevents moving the Review & Finalize chapter', () => {
         const sections: ResolvedFormSection[] = [
           { ...generalSection, key: 'sec_1', label: 'Chapter One', order: 1 },
-          { ...generalSection, key: 'review', label: 'Review & Finalize', order: 2, protected: true },
+          {
+            ...generalSection,
+            key: 'review',
+            label: 'Review & Finalize',
+            order: 2,
+            protected: true,
+          },
         ];
 
         // Reordering logic check: if fromSecKey === 'review', abort
-        const handleChapterReorder = (fromKey: string, toKey: string, current: ResolvedFormSection[]) => {
+        const handleChapterReorder = (
+          fromKey: string,
+          toKey: string,
+          current: ResolvedFormSection[],
+        ) => {
           if (fromKey === 'review') return current;
           const fromIdx = current.findIndex((s) => s.key === fromKey);
           let toIdx = current.findIndex((s) => s.key === toKey);
@@ -2122,10 +2144,20 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
         const sections: ResolvedFormSection[] = [
           { ...generalSection, key: 'sec_1', label: 'Chapter One', order: 1 },
           { ...generalSection, key: 'sec_2', label: 'Chapter Two', order: 2 },
-          { ...generalSection, key: 'review', label: 'Review & Finalize', order: 3, protected: true },
+          {
+            ...generalSection,
+            key: 'review',
+            label: 'Review & Finalize',
+            order: 3,
+            protected: true,
+          },
         ];
 
-        const handleChapterReorder = (fromKey: string, toKey: string, current: ResolvedFormSection[]) => {
+        const handleChapterReorder = (
+          fromKey: string,
+          toKey: string,
+          current: ResolvedFormSection[],
+        ) => {
           if (fromKey === 'review') return current;
           const fromIdx = current.findIndex((s) => s.key === fromKey);
           let toIdx = current.findIndex((s) => s.key === toKey);
@@ -2150,7 +2182,14 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
           { ...generalSection, key: 'personal', label: 'Personal Details', order: 1 },
           { ...generalSection, key: 'general', label: 'General Information', order: 2 },
           { ...customSection, key: 'custom_sec_123', label: 'Certifications', order: 3 },
-          { ...generalSection, key: 'review', label: 'Review & Finalize', order: 4, protected: true, configurable: false },
+          {
+            ...generalSection,
+            key: 'review',
+            label: 'Review & Finalize',
+            order: 4,
+            protected: true,
+            configurable: false,
+          },
         ];
 
         const newSectionOrder = reorderedSections.map((s) => s.key);
@@ -2168,7 +2207,12 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
             })),
         };
 
-        expect(dto.metadata.sectionOrder).toEqual(['personal', 'general', 'custom_sec_123', 'review']);
+        expect(dto.metadata.sectionOrder).toEqual([
+          'personal',
+          'general',
+          'custom_sec_123',
+          'review',
+        ]);
         expect(dto.sections).toEqual([
           { key: 'personal', order: 1 },
           { key: 'general', order: 2 },

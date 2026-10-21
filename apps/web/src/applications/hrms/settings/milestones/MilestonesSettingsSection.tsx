@@ -322,7 +322,9 @@ export function MilestonesSettingsSection() {
                             <Button
                               variant="secondary"
                               size="sm"
-                              onClick={() => handleUpdateRewardStatus(a.id, 'approved', 'Approved by HR')}
+                              onClick={() =>
+                                handleUpdateRewardStatus(a.id, 'approved', 'Approved by HR')
+                              }
                             >
                               Approve
                             </Button>
@@ -360,11 +362,7 @@ export function MilestonesSettingsSection() {
               <Button variant="secondary" onClick={() => setEditingConfig(null)}>
                 Cancel
               </Button>
-              <Button
-                variant="primary"
-                disabled={configSaving}
-                onClick={handleSaveConfig}
-              >
+              <Button variant="primary" disabled={configSaving} onClick={handleSaveConfig}>
                 {configSaving ? 'Saving...' : 'Save Configuration'}
               </Button>
             </Inline>

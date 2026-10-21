@@ -280,11 +280,14 @@ export const milestonesApi = {
     rewardId: string;
     notes?: string;
   }): Promise<EmployeeRewardAssignmentDto> {
-    const res = await request<{ data: EmployeeRewardAssignmentDto }>('/hrms/milestones/rewards/assign', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
+    const res = await request<{ data: EmployeeRewardAssignmentDto }>(
+      '/hrms/milestones/rewards/assign',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      },
+    );
     return res.data;
   },
 

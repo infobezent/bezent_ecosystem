@@ -110,9 +110,17 @@ export class MilestoneService {
     companyId: string,
     employeeId: string,
   ): Promise<EmployeeMilestoneOverview> {
-    const workingHours = await this.hoursService.calculateWorkingHours(tenantId, companyId, employeeId);
+    const workingHours = await this.hoursService.calculateWorkingHours(
+      tenantId,
+      companyId,
+      employeeId,
+    );
     const configs = await this.repo.getMilestoneConfigs(tenantId, companyId);
-    const existingAchievements = await this.repo.getEmployeeAchievements(tenantId, companyId, employeeId);
+    const existingAchievements = await this.repo.getEmployeeAchievements(
+      tenantId,
+      companyId,
+      employeeId,
+    );
     const achievedKeys = new Set(existingAchievements.map((a) => a.milestoneKey));
 
     const employeeContext = await this.repo.getEmployeeWithContext(tenantId, companyId, employeeId);
@@ -120,11 +128,16 @@ export class MilestoneService {
       throw new AppError('Employee not found in this company context', 404, 'EMPLOYEE_NOT_FOUND');
     }
 
-    const { employee, company, designationTitle, departmentName, profilePhotoUrl } = employeeContext;
+    const { employee, company, designationTitle, departmentName, profilePhotoUrl } =
+      employeeContext;
     const employeeFullName = [employee.firstName, employee.lastName].filter(Boolean).join(' ');
 
     for (const cfg of configs) {
-      if (cfg.isActive && workingHours.lifetimeHours >= cfg.requiredHours && !achievedKeys.has(cfg.milestoneKey)) {
+      if (
+        cfg.isActive &&
+        workingHours.lifetimeHours >= cfg.requiredHours &&
+        !achievedKeys.has(cfg.milestoneKey)
+      ) {
         // Unlock new achievement
         const achievementId = `msach_${Date.now()}_${randomUUID().slice(0, 8)}`;
         const achievedDate = new Date().toISOString().slice(0, 10);
@@ -174,7 +187,11 @@ export class MilestoneService {
           await this.repo.createNotification(notification);
 
           // Seed default reward assignment if catalogue has items (Feature 3 Requirement 7)
-          const catalogue = await this.repo.getRewardsCatalogue(tenantId, companyId, cfg.milestoneKey);
+          const catalogue = await this.repo.getRewardsCatalogue(
+            tenantId,
+            companyId,
+            cfg.milestoneKey,
+          );
           if (catalogue.length > 0 && catalogue[0]) {
             const reward = catalogue[0];
             const assignment: NewEmployeeRewardAssignment = {
@@ -272,12 +289,17 @@ export class MilestoneService {
         }
       : null;
 
-    const updatedAchievement = await this.repo.updateAchievement(achievement.id, tenantId, companyId, {
-      status: 'published',
-      posterPublishedAt: new Date(),
-      feedPostId: publishedFeedId,
-      posterData: updatedPosterData,
-    });
+    const updatedAchievement = await this.repo.updateAchievement(
+      achievement.id,
+      tenantId,
+      companyId,
+      {
+        status: 'published',
+        posterPublishedAt: new Date(),
+        feedPostId: publishedFeedId,
+        posterData: updatedPosterData,
+      },
+    );
 
     return {
       achievement: updatedAchievement ?? achievement,
@@ -320,7 +342,11 @@ export class MilestoneService {
   /**
    * Retrieves catalogue of milestone rewards.
    */
-  async getRewardsCatalogue(tenantId: string, companyId: string, milestoneKey?: string): Promise<RewardsCatalogueItem[]> {
+  async getRewardsCatalogue(
+    tenantId: string,
+    companyId: string,
+    milestoneKey?: string,
+  ): Promise<RewardsCatalogueItem[]> {
     return this.repo.getRewardsCatalogue(tenantId, companyId, milestoneKey);
   }
 

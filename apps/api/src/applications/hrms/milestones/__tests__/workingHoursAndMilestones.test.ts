@@ -3,7 +3,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { WorkingHoursService } from '../service/workingHours.service.js';
 import { MilestoneService } from '../service/milestone.service.js';
 import type { MilestoneRepository } from '../repository/milestone.repository.js';
-import type { EmployeeAttendance, MilestoneConfig, EmployeeMilestoneAchievement } from '../../../../db/schema.js';
+import type {
+  EmployeeAttendance,
+  MilestoneConfig,
+  EmployeeMilestoneAchievement,
+} from '../../../../db/schema.js';
 
 describe('Employee Lifetime Working Hours & Milestone Recognition System', () => {
   const tenantId = 't_test';
@@ -67,7 +71,9 @@ describe('Employee Lifetime Working Hours & Milestone Recognition System', () =>
         } as MilestoneConfig,
       ]),
       upsertMilestoneConfig: vi.fn(),
-      getEmployeeAchievements: vi.fn().mockImplementation(() => Promise.resolve([...achievementsStore])),
+      getEmployeeAchievements: vi
+        .fn()
+        .mockImplementation(() => Promise.resolve([...achievementsStore])),
       recordAchievement: vi.fn().mockImplementation((ach) => {
         const item = { ...ach, id: 'ach_123', achievedAt: new Date() };
         achievementsStore.push(item);
@@ -93,9 +99,20 @@ describe('Employee Lifetime Working Hours & Milestone Recognition System', () =>
       ]),
       upsertRewardCatalogueItem: vi.fn(),
       getRewardAssignments: vi.fn().mockResolvedValue([]),
-      createRewardAssignment: vi.fn().mockImplementation((assign) => Promise.resolve({ ...assign, id: 'assign_1', createdAt: new Date(), updatedAt: new Date() })),
+      createRewardAssignment: vi.fn().mockImplementation((assign) =>
+        Promise.resolve({
+          ...assign,
+          id: 'assign_1',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }),
+      ),
       updateRewardAssignmentStatus: vi.fn(),
-      createCompanyFeedPost: vi.fn().mockImplementation((post) => Promise.resolve({ ...post, id: 'post_1', createdAt: new Date() })),
+      createCompanyFeedPost: vi
+        .fn()
+        .mockImplementation((post) =>
+          Promise.resolve({ ...post, id: 'post_1', createdAt: new Date() }),
+        ),
       getCompanyFeedPosts: vi.fn().mockResolvedValue([]),
     };
 
@@ -136,7 +153,11 @@ describe('Employee Lifetime Working Hours & Milestone Recognition System', () =>
       (mockRepo.getEmployeeAttendanceRecords as any).mockResolvedValue(records);
       (mockRepo.getEmployeeApprovedTimesheets as any).mockResolvedValue([]);
 
-      const result = await workingHoursService.calculateWorkingHours(tenantId, companyId, employeeId);
+      const result = await workingHoursService.calculateWorkingHours(
+        tenantId,
+        companyId,
+        employeeId,
+      );
 
       expect(result.attendanceHours).toBe(16.5);
       expect(result.timesheetDedupedHours).toBe(0);
@@ -174,7 +195,11 @@ describe('Employee Lifetime Working Hours & Milestone Recognition System', () =>
       (mockRepo.getEmployeeAttendanceRecords as any).mockResolvedValue(records);
       (mockRepo.getEmployeeApprovedTimesheets as any).mockResolvedValue([]);
 
-      const result = await workingHoursService.calculateWorkingHours(tenantId, companyId, employeeId);
+      const result = await workingHoursService.calculateWorkingHours(
+        tenantId,
+        companyId,
+        employeeId,
+      );
 
       expect(result.attendanceHours).toBe(8);
       expect(result.lifetimeHours).toBe(8);
@@ -199,7 +224,11 @@ describe('Employee Lifetime Working Hours & Milestone Recognition System', () =>
       (mockRepo.getEmployeeAttendanceRecords as any).mockResolvedValue(records);
       (mockRepo.getEmployeeApprovedTimesheets as any).mockResolvedValue([]);
 
-      const result = await workingHoursService.calculateWorkingHours(tenantId, companyId, employeeId);
+      const result = await workingHoursService.calculateWorkingHours(
+        tenantId,
+        companyId,
+        employeeId,
+      );
 
       expect(result.lifetimeHours).toBe(8);
       expect(result.totalVerifiedWorkdays).toBe(1);
@@ -243,7 +272,11 @@ describe('Employee Lifetime Working Hours & Milestone Recognition System', () =>
       (mockRepo.getEmployeeAttendanceRecords as any).mockResolvedValue(attendance);
       (mockRepo.getEmployeeApprovedTimesheets as any).mockResolvedValue(timesheets);
 
-      const result = await workingHoursService.calculateWorkingHours(tenantId, companyId, employeeId);
+      const result = await workingHoursService.calculateWorkingHours(
+        tenantId,
+        companyId,
+        employeeId,
+      );
 
       // Attendance on 2026-01-15 is 8 hours
       // Standalone timesheet on 2026-01-16 is 7.5 hours
@@ -289,7 +322,11 @@ describe('Employee Lifetime Working Hours & Milestone Recognition System', () =>
       (mockRepo.getEmployeeAttendanceRecords as any).mockResolvedValue(attendance);
       (mockRepo.getEmployeeApprovedTimesheets as any).mockResolvedValue([]);
 
-      const result = await workingHoursService.calculateWorkingHours(tenantId, companyId, employeeId);
+      const result = await workingHoursService.calculateWorkingHours(
+        tenantId,
+        companyId,
+        employeeId,
+      );
 
       expect(result.lifetimeHours).toBe(26);
       expect(result.yearlySummaries).toEqual([
@@ -319,7 +356,11 @@ describe('Employee Lifetime Working Hours & Milestone Recognition System', () =>
       (mockRepo.getEmployeeAttendanceRecords as any).mockResolvedValue(attendance);
       (mockRepo.getEmployeeApprovedTimesheets as any).mockResolvedValue([]);
 
-      const overview = await milestoneService.evaluateEmployeeMilestones(tenantId, companyId, employeeId);
+      const overview = await milestoneService.evaluateEmployeeMilestones(
+        tenantId,
+        companyId,
+        employeeId,
+      );
 
       expect(overview.workingHours.lifetimeHours).toBe(99990);
       expect(overview.milestones).toHaveLength(1);
@@ -348,7 +389,11 @@ describe('Employee Lifetime Working Hours & Milestone Recognition System', () =>
       (mockRepo.getEmployeeAttendanceRecords as any).mockResolvedValue(attendance);
       (mockRepo.getEmployeeApprovedTimesheets as any).mockResolvedValue([]);
 
-      const overview = await milestoneService.evaluateEmployeeMilestones(tenantId, companyId, employeeId);
+      const overview = await milestoneService.evaluateEmployeeMilestones(
+        tenantId,
+        companyId,
+        employeeId,
+      );
 
       expect(overview.workingHours.lifetimeHours).toBe(100005);
       const m = overview.milestones[0]!;
@@ -401,7 +446,11 @@ describe('Employee Lifetime Working Hours & Milestone Recognition System', () =>
       // Mock existing achievement already in DB
       achievementsStore = [existingAchievement as any];
 
-      const overview = await milestoneService.evaluateEmployeeMilestones(tenantId, companyId, employeeId);
+      const overview = await milestoneService.evaluateEmployeeMilestones(
+        tenantId,
+        companyId,
+        employeeId,
+      );
 
       expect(overview.milestones[0]!.isAchieved).toBe(true);
       // recordAchievement and createNotification MUST NOT be called again
@@ -546,7 +595,11 @@ describe('Employee Lifetime Working Hours & Milestone Recognition System', () =>
         updatedAt: new Date(),
       });
 
-      const saved = await milestoneService.updateMilestoneConfig(tenantId, companyId, updatedConfigInput);
+      const saved = await milestoneService.updateMilestoneConfig(
+        tenantId,
+        companyId,
+        updatedConfigInput,
+      );
       expect(saved.title).toBe('Century Pioneer Updated');
       expect(saved.badgeIcon).toBe('trophy');
       expect(mockRepo.upsertMilestoneConfig).toHaveBeenCalledTimes(1);

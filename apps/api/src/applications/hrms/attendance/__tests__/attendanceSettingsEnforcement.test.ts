@@ -459,11 +459,14 @@ describe.skipIf(!isDatabaseConfigured)(
         const locRemoteId = 'loc_test_remote';
 
         // Insert test work locations
-        await db.insert(locations).ignore().values([
-          { id: locAId, tenantId, companyId, name: 'Branch A', type: 'office' },
-          { id: locBId, tenantId, companyId, name: 'Branch B', type: 'office' },
-          { id: locRemoteId, tenantId, companyId, name: 'Remote Office', type: 'remote' },
-        ]);
+        await db
+          .insert(locations)
+          .ignore()
+          .values([
+            { id: locAId, tenantId, companyId, name: 'Branch A', type: 'office' },
+            { id: locBId, tenantId, companyId, name: 'Branch B', type: 'office' },
+            { id: locRemoteId, tenantId, companyId, name: 'Remote Office', type: 'remote' },
+          ]);
 
         const fenceA = {
           locationId: locAId,
@@ -488,20 +491,29 @@ describe.skipIf(!isDatabaseConfigured)(
         await db.update(employees).set({ locationId: locAId }).where(eq(employees.id, employeeId));
 
         // Punching inside Branch A succeeds
-        const inA = await checkIn({ workLocation: 'office', deviceMetadata: { latitude: 12.9716, longitude: 80.2437 } });
+        const inA = await checkIn({
+          workLocation: 'office',
+          deviceMetadata: { latitude: 12.9716, longitude: 80.2437 },
+        });
         expect(inA.status).toBe(200);
 
         await resetPunchesAndAttendance();
 
         // Punching inside Branch B (even though Branch B has a valid geofence) fails because employee is assigned to Branch A
-        const inB = await checkIn({ workLocation: 'office', deviceMetadata: { latitude: 13.0827, longitude: 80.2707 } });
+        const inB = await checkIn({
+          workLocation: 'office',
+          deviceMetadata: { latitude: 13.0827, longitude: 80.2707 },
+        });
         expect(inB.status).toBe(403);
         expect(inB.body.error.code).toBe('OUTSIDE_GEOFENCE');
 
         await resetPunchesAndAttendance();
 
         // 2. Assign employee to Remote
-        await db.update(employees).set({ locationId: locRemoteId }).where(eq(employees.id, employeeId));
+        await db
+          .update(employees)
+          .set({ locationId: locRemoteId })
+          .where(eq(employees.id, employeeId));
         const remotePunch = await checkIn({ workLocation: 'remote', deviceMetadata: {} });
         expect(remotePunch.status).toBe(200);
 

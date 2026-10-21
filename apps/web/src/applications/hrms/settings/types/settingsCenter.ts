@@ -69,7 +69,8 @@ export const SETTINGS_MODULE_CARDS: SettingsModuleCard[] = [
   {
     id: 'milestones',
     name: 'Milestones & Rewards',
-    description: 'Configure lifetime working-hour recognition milestones, poster templates, and gift catalogue.',
+    description:
+      'Configure lifetime working-hour recognition milestones, poster templates, and gift catalogue.',
     icon: 'award',
   },
 ];

@@ -560,7 +560,10 @@ export function EssDashboardPage() {
                           </span>
                         </Stack>
                       </Inline>
-                      <Badge variant={post.type === 'milestone_poster' ? 'warning' : 'info'} size="sm">
+                      <Badge
+                        variant={post.type === 'milestone_poster' ? 'warning' : 'info'}
+                        size="sm"
+                      >
                         {post.badge}
                       </Badge>
                     </Inline>
@@ -575,7 +578,11 @@ export function EssDashboardPage() {
                             <strong>{post.posterData.milestoneTitle}</strong>
                             <span>
                               {post.posterData.employeeName} has achieved{' '}
-                              <strong>{post.posterData.hours?.toLocaleString() || '100,000'} lifetime working hours</strong>!
+                              <strong>
+                                {post.posterData.hours?.toLocaleString() || '100,000'} lifetime
+                                working hours
+                              </strong>
+                              !
                             </span>
                             {post.posterData.quote && (
                               <span className="bezent-text-muted">

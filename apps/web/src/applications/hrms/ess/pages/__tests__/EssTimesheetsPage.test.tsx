@@ -70,7 +70,11 @@ describe('EssTimesheetsPage Component', () => {
 
   it('renders weekly summary sections and attendance reconciliation card', () => {
     const html = renderToStaticMarkup(
-      <EssTimesheetsPage initialLoading={false} initialTimesheets={mockTimesheets} />,
+      <EssTimesheetsPage
+        initialLoading={false}
+        initialTimesheets={mockTimesheets}
+        initialMonday={new Date('2026-10-12T00:00:00')}
+      />,
     );
 
     // Weekly Summary KPIs
@@ -102,7 +106,11 @@ describe('EssTimesheetsPage Component', () => {
 
   it('renders weekly grid table with project rows, daily hour pills, and totals when records exist', () => {
     const html = renderToStaticMarkup(
-      <EssTimesheetsPage initialLoading={false} initialTimesheets={mockTimesheets} />,
+      <EssTimesheetsPage
+        initialLoading={false}
+        initialTimesheets={mockTimesheets}
+        initialMonday={new Date('2026-10-12T00:00:00')}
+      />,
     );
 
     // Grid container
@@ -122,7 +130,11 @@ describe('EssTimesheetsPage Component', () => {
 
   it('renders draft submission action button when draft entries exist', () => {
     const html = renderToStaticMarkup(
-      <EssTimesheetsPage initialLoading={false} initialTimesheets={mockTimesheets} />,
+      <EssTimesheetsPage
+        initialLoading={false}
+        initialTimesheets={mockTimesheets}
+        initialMonday={new Date('2026-10-12T00:00:00')}
+      />,
     );
 
     expect(html).toContain('Submit Timesheet (1 Draft)');
@@ -130,7 +142,11 @@ describe('EssTimesheetsPage Component', () => {
 
   it('renders action buttons only for draft entries, and marks approved entries as Finalized', () => {
     const html = renderToStaticMarkup(
-      <EssTimesheetsPage initialLoading={false} initialTimesheets={mockTimesheets} />,
+      <EssTimesheetsPage
+        initialLoading={false}
+        initialTimesheets={mockTimesheets}
+        initialMonday={new Date('2026-10-12T00:00:00')}
+      />,
     );
 
     // Edit and Delete buttons for draft

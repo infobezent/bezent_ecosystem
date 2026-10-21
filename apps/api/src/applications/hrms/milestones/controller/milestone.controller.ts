@@ -33,7 +33,11 @@ export class MilestoneController {
     try {
       const { tenantId, companyId } = this.getContext(req);
       const employeeId = this.getParam(req, 'employeeId');
-      const summary = await this.workingHoursService.calculateWorkingHours(tenantId, companyId, employeeId);
+      const summary = await this.workingHoursService.calculateWorkingHours(
+        tenantId,
+        companyId,
+        employeeId,
+      );
       res.json({ data: summary });
     } catch (err) {
       next(err);
@@ -44,7 +48,11 @@ export class MilestoneController {
     try {
       const { tenantId, companyId } = this.getContext(req);
       const employeeId = this.getParam(req, 'employeeId');
-      const overview = await this.milestoneService.getEmployeeMilestoneOverview(tenantId, companyId, employeeId);
+      const overview = await this.milestoneService.getEmployeeMilestoneOverview(
+        tenantId,
+        companyId,
+        employeeId,
+      );
       res.json({ data: overview });
     } catch (err) {
       next(err);
@@ -55,7 +63,11 @@ export class MilestoneController {
     try {
       const { tenantId, companyId } = this.getContext(req);
       const employeeId = this.getParam(req, 'employeeId');
-      const overview = await this.milestoneService.evaluateEmployeeMilestones(tenantId, companyId, employeeId);
+      const overview = await this.milestoneService.evaluateEmployeeMilestones(
+        tenantId,
+        companyId,
+        employeeId,
+      );
       res.json({ data: overview, message: 'Milestone evaluation completed successfully.' });
     } catch (err) {
       next(err);
@@ -67,7 +79,12 @@ export class MilestoneController {
       const { tenantId, companyId } = this.getContext(req);
       const achievementId = this.getParam(req, 'achievementId');
       const userId = (req as unknown as { user?: { id?: string } })?.user?.id || 'admin_user';
-      const result = await this.milestoneService.publishAchievementPoster(tenantId, companyId, achievementId, userId);
+      const result = await this.milestoneService.publishAchievementPoster(
+        tenantId,
+        companyId,
+        achievementId,
+        userId,
+      );
       res.json({
         data: result.achievement,
         feedPostId: result.feedPostId,
@@ -91,7 +108,11 @@ export class MilestoneController {
   updateMilestoneConfig = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { tenantId, companyId } = this.getContext(req);
-      const config = await this.milestoneService.updateMilestoneConfig(tenantId, companyId, req.body);
+      const config = await this.milestoneService.updateMilestoneConfig(
+        tenantId,
+        companyId,
+        req.body,
+      );
       res.json({ data: config, message: 'Milestone configuration saved.' });
     } catch (err) {
       next(err);
@@ -102,7 +123,11 @@ export class MilestoneController {
     try {
       const { tenantId, companyId } = this.getContext(req);
       const milestoneKey = req.query.milestoneKey as string | undefined;
-      const items = await this.milestoneService.getRewardsCatalogue(tenantId, companyId, milestoneKey);
+      const items = await this.milestoneService.getRewardsCatalogue(
+        tenantId,
+        companyId,
+        milestoneKey,
+      );
       res.json({ data: items });
     } catch (err) {
       next(err);
@@ -112,7 +137,11 @@ export class MilestoneController {
   addRewardCatalogueItem = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { tenantId, companyId } = this.getContext(req);
-      const item = await this.milestoneService.addRewardCatalogueItem(tenantId, companyId, req.body);
+      const item = await this.milestoneService.addRewardCatalogueItem(
+        tenantId,
+        companyId,
+        req.body,
+      );
       res.status(201).json({ data: item, message: 'Reward catalogue item created.' });
     } catch (err) {
       next(err);
@@ -123,7 +152,11 @@ export class MilestoneController {
     try {
       const { tenantId, companyId } = this.getContext(req);
       const employeeId = req.query.employeeId as string | undefined;
-      const assignments = await this.milestoneService.getRewardAssignments(tenantId, companyId, employeeId);
+      const assignments = await this.milestoneService.getRewardAssignments(
+        tenantId,
+        companyId,
+        employeeId,
+      );
       res.json({ data: assignments });
     } catch (err) {
       next(err);
@@ -135,7 +168,11 @@ export class MilestoneController {
       const { tenantId, companyId } = this.getContext(req);
       const { employeeId, achievementId, rewardId, notes } = req.body;
       if (!employeeId || !achievementId || !rewardId) {
-        throw new AppError('employeeId, achievementId, and rewardId are required', 400, 'MISSING_FIELDS');
+        throw new AppError(
+          'employeeId, achievementId, and rewardId are required',
+          400,
+          'MISSING_FIELDS',
+        );
       }
 
       const userId = (req as unknown as { user?: { id?: string } })?.user?.id || 'admin_user';
@@ -166,7 +203,10 @@ export class MilestoneController {
         userId,
         req.body,
       );
-      res.json({ data: updated, message: `Reward assignment status updated to ${req.body.status}.` });
+      res.json({
+        data: updated,
+        message: `Reward assignment status updated to ${req.body.status}.`,
+      });
     } catch (err) {
       next(err);
     }

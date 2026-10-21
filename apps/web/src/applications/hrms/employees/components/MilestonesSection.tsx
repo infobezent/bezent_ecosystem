@@ -17,10 +17,7 @@ import {
   TableCell,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
-import {
-  milestonesApi,
-  type EmployeeMilestoneOverview,
-} from '../../milestones/api/milestonesApi';
+import { milestonesApi, type EmployeeMilestoneOverview } from '../../milestones/api/milestonesApi';
 
 export interface MilestonesSectionProps {
   employeeId: string;
@@ -275,7 +272,9 @@ export function MilestonesSection({ employeeId }: MilestonesSectionProps) {
 
                         <Stack gap="xs">
                           <span className="bezent-text-muted">Enterprise Milestone</span>
-                          <strong>{ach.milestoneHours.toLocaleString()} Verified Working Hours</strong>
+                          <strong>
+                            {ach.milestoneHours.toLocaleString()} Verified Working Hours
+                          </strong>
                           <span>{poster?.companyName}</span>
                         </Stack>
 

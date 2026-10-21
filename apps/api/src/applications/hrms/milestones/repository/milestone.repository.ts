@@ -146,10 +146,7 @@ export class MilestoneRepository {
       .select()
       .from(milestoneConfigs)
       .where(
-        and(
-          eq(milestoneConfigs.tenantId, tenantId),
-          eq(milestoneConfigs.companyId, companyId),
-        ),
+        and(eq(milestoneConfigs.tenantId, tenantId), eq(milestoneConfigs.companyId, companyId)),
       )
       .orderBy(milestoneConfigs.requiredHours);
 
@@ -162,7 +159,8 @@ export class MilestoneRepository {
       companyId,
       milestoneKey: '100k_hours',
       title: '100,000 Hours Legend',
-      description: 'Awarded to employees reaching 100,000 verified lifetime working hours of dedicated enterprise service.',
+      description:
+        'Awarded to employees reaching 100,000 verified lifetime working hours of dedicated enterprise service.',
       requiredHours: 100000,
       badgeIcon: 'award',
       badgeLabel: 'Centurion of Service',
@@ -269,7 +267,9 @@ export class MilestoneRepository {
   /**
    * Atomically records a newly achieved milestone (only once per employee per milestone).
    */
-  async recordAchievement(achievement: NewEmployeeMilestoneAchievement): Promise<EmployeeMilestoneAchievement | null> {
+  async recordAchievement(
+    achievement: NewEmployeeMilestoneAchievement,
+  ): Promise<EmployeeMilestoneAchievement | null> {
     const [existing] = await getDb()
       .select()
       .from(employeeMilestoneAchievements)
@@ -334,7 +334,11 @@ export class MilestoneRepository {
   /**
    * Gets reward catalogue items.
    */
-  async getRewardsCatalogue(tenantId: string, companyId: string, milestoneKey?: string): Promise<RewardsCatalogueItem[]> {
+  async getRewardsCatalogue(
+    tenantId: string,
+    companyId: string,
+    milestoneKey?: string,
+  ): Promise<RewardsCatalogueItem[]> {
     const conditions = [
       eq(rewardsCatalogue.tenantId, tenantId),
       eq(rewardsCatalogue.companyId, companyId),
@@ -358,7 +362,8 @@ export class MilestoneRepository {
       companyId,
       milestoneKey: '100k_hours',
       name: 'Custom Engraved Centurion Chronograph Watch & Golden Plaque',
-      description: 'Handcrafted luxury timepiece engraved with the employee name, employee number, and 100,000 Hours dedication inscription.',
+      description:
+        'Handcrafted luxury timepiece engraved with the employee name, employee number, and 100,000 Hours dedication inscription.',
       category: 'gift',
       imageUrl: '/assets/rewards/luxury_chronograph.png',
       isActive: true,
@@ -369,7 +374,8 @@ export class MilestoneRepository {
       companyId,
       milestoneKey: '100k_hours',
       name: 'Executive Sabbatical Grant (4 Weeks Fully Paid Recharge)',
-      description: 'Four consecutive weeks of fully compensated leave plus travel stipend to honor a decade of continuous service excellence.',
+      description:
+        'Four consecutive weeks of fully compensated leave plus travel stipend to honor a decade of continuous service excellence.',
       category: 'experience',
       imageUrl: '/assets/rewards/sabbatical_grant.png',
       isActive: true,
@@ -417,7 +423,9 @@ export class MilestoneRepository {
   /**
    * Creates a reward assignment.
    */
-  async createRewardAssignment(assignment: NewEmployeeRewardAssignment): Promise<EmployeeRewardAssignment> {
+  async createRewardAssignment(
+    assignment: NewEmployeeRewardAssignment,
+  ): Promise<EmployeeRewardAssignment> {
     await getDb().insert(employeeRewardAssignments).values(assignment);
     const [created] = await getDb()
       .select()
@@ -503,7 +511,11 @@ export class MilestoneRepository {
   /**
    * Lists published company feed posts.
    */
-  async getCompanyFeedPosts(tenantId: string, companyId: string, limit = 20): Promise<CompanyFeedPost[]> {
+  async getCompanyFeedPosts(
+    tenantId: string,
+    companyId: string,
+    limit = 20,
+  ): Promise<CompanyFeedPost[]> {
     return getDb()
       .select()
       .from(companyFeedPosts)

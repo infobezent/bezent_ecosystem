@@ -169,7 +169,8 @@ export class EssService {
       likesCount: post.likesCount ?? 0,
       commentsCount: post.commentsCount ?? 0,
       hasLiked: false,
-      posterData: (post.metadata as Record<string, unknown> | null)?.posterData as EssFeedPost['posterData'],
+      posterData: (post.metadata as Record<string, unknown> | null)
+        ?.posterData as EssFeedPost['posterData'],
     }));
 
     const defaultCompanyFeed: EssFeedPost[] = [

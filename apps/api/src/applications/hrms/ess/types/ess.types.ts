@@ -137,7 +137,14 @@ export interface EssActionCenterItem {
 
 export interface EssFeedPost {
   id: string;
-  type: 'birthday' | 'new_joiner' | 'anniversary' | 'holiday' | 'event' | 'announcement' | 'milestone_poster';
+  type:
+    | 'birthday'
+    | 'new_joiner'
+    | 'anniversary'
+    | 'holiday'
+    | 'event'
+    | 'announcement'
+    | 'milestone_poster';
   title: string;
   subtitle: string;
   message: string;

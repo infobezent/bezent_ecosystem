@@ -139,7 +139,12 @@ export class WorkingHoursService {
 
         // Update yearly
         if (!yearlyMap.has(year)) {
-          yearlyMap.set(year, { attendanceHours: 0, timesheetHours: 0, totalHours: 0, workdays: new Set() });
+          yearlyMap.set(year, {
+            attendanceHours: 0,
+            timesheetHours: 0,
+            totalHours: 0,
+            workdays: new Set(),
+          });
         }
         const yEntry = yearlyMap.get(year)!;
         yEntry.attendanceHours += attHours;
@@ -149,7 +154,12 @@ export class WorkingHoursService {
 
         // Update monthly
         if (!monthlyMap.has(month)) {
-          monthlyMap.set(month, { attendanceHours: 0, timesheetHours: 0, totalHours: 0, workdays: new Set() });
+          monthlyMap.set(month, {
+            attendanceHours: 0,
+            timesheetHours: 0,
+            totalHours: 0,
+            workdays: new Set(),
+          });
         }
         const mEntry = monthlyMap.get(month)!;
         mEntry.attendanceHours += attHours;
