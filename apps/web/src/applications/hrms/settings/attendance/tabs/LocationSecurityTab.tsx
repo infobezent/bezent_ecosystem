@@ -27,6 +27,10 @@ import type {
   AttendanceSecuritySettings,
   GeofenceConfigItem,
 } from '../../../attendance/types/attendance.types';
+import {
+  fetchHrmsWorkLocations,
+  type WorkLocationRecord,
+} from '../../../api/organizationMastersApi';
 
 export function LocationSecurityTab() {
   const [loading, setLoading] = useState(true);
@@ -46,6 +50,8 @@ export function LocationSecurityTab() {
   const [flagVpnProxy, setFlagVpnProxy] = useState(true);
 
   // New Geofence form
+  const [workLocations, setWorkLocations] = useState<WorkLocationRecord[]>([]);
+  const [selectedLocationId, setSelectedLocationId] = useState('');
   const [geoName, setGeoName] = useState('');
   const [geoLat, setGeoLat] = useState('12.9716');
   const [geoLng, setGeoLng] = useState('77.5946');
@@ -71,6 +77,13 @@ export function LocationSecurityTab() {
       setDetectImpossibleTravel(Boolean(data.detectImpossibleTravel));
       setRapidPunchThrottlingSeconds(data.rapidPunchThrottlingSeconds ?? 60);
       setFlagVpnProxy(Boolean(data.flagVpnProxy));
+
+      try {
+        const locs = await fetchHrmsWorkLocations({ status: 'active' });
+        setWorkLocations(locs);
+      } catch {
+        // Work locations load failure is non-blocking
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to load security settings');
     } finally {
@@ -83,16 +96,18 @@ export function LocationSecurityTab() {
   }, [loadSettings]);
 
   const handleAddGeofence = () => {
-    if (!geoName.trim() || !geoLat || !geoLng) return;
+    if (!selectedLocationId || !geoLat || !geoLng) return;
+    const matched = workLocations.find((w) => w.id === selectedLocationId);
     const newG: GeofenceConfigItem = {
-      locationId: `geo_${Date.now()}`,
-      name: geoName.trim(),
+      locationId: selectedLocationId,
+      name: matched ? matched.name : geoName.trim() || 'Work Location',
       latitude: Number(geoLat),
       longitude: Number(geoLng),
       radiusMeters: Number(geoRadius) || 100,
       enforceStrict: geoStrict,
     };
     setGeofences((prev) => [...prev, newG]);
+    setSelectedLocationId('');
     setGeoName('');
   };
 
@@ -193,11 +208,25 @@ export function LocationSecurityTab() {
 
                 {/* Add geofence inline */}
                 <Grid columns={3} gap="sm">
-                  <Input
-                    label="Campus Name"
-                    value={geoName}
-                    onChange={(e) => setGeoName(e.target.value)}
-                    placeholder="e.g. Branch Office"
+                  <Select
+                    label="Work Location"
+                    value={selectedLocationId}
+                    onChange={(e) => {
+                      const locId = e.target.value;
+                      setSelectedLocationId(locId);
+                      const matched = workLocations.find((w) => w.id === locId);
+                      if (matched) {
+                        setGeoName(matched.name);
+                      }
+                    }}
+                    options={[
+                      { value: '', label: '-- Select Work Location --' },
+                      ...workLocations.map((w) => ({
+                        value: w.id,
+                        label: `${w.name}${w.code ? ` (${w.code})` : ''}${w.city ? ` — ${w.city}` : ''}`,
+                        disabled: geofences.some((g) => g.locationId === w.id),
+                      })),
+                    ]}
                   />
                   <Input
                     label="Latitude"
@@ -221,7 +250,11 @@ export function LocationSecurityTab() {
                   />
                   <div>
                     <label className="bezent-label">&nbsp;</label>
-                    <Button variant="outline" onClick={handleAddGeofence}>
+                    <Button
+                      variant="outline"
+                      onClick={handleAddGeofence}
+                      disabled={!selectedLocationId || !geoLat || !geoLng}
+                    >
                       Add Geofence Boundary
                     </Button>
                   </div>

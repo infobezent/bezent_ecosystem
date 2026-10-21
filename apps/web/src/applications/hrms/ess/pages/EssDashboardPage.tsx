@@ -202,7 +202,9 @@ export function EssDashboardPage() {
   const filteredFeedPosts = useMemo(() => {
     if (feedCategory === 'all') return localPosts;
     if (feedCategory === 'celebrations') {
-      return localPosts.filter((p) => p.type === 'birthday' || p.type === 'anniversary');
+      return localPosts.filter(
+        (p) => p.type === 'birthday' || p.type === 'anniversary' || p.type === 'milestone_poster',
+      );
     }
     if (feedCategory === 'people') {
       return localPosts.filter((p) => p.type === 'new_joiner');
@@ -558,12 +560,32 @@ export function EssDashboardPage() {
                           </span>
                         </Stack>
                       </Inline>
-                      <Badge variant="info" size="sm">
+                      <Badge variant={post.type === 'milestone_poster' ? 'warning' : 'info'} size="sm">
                         {post.badge}
                       </Badge>
                     </Inline>
 
                     <p>{post.message}</p>
+
+                    {post.type === 'milestone_poster' && post.posterData && (
+                      <Card variant="tint-amber" padding="md">
+                        <Inline gap="md" align="center">
+                          <BezentIcon name="award" size={28} />
+                          <Stack gap="xs">
+                            <strong>{post.posterData.milestoneTitle}</strong>
+                            <span>
+                              {post.posterData.employeeName} has achieved{' '}
+                              <strong>{post.posterData.hours?.toLocaleString() || '100,000'} lifetime working hours</strong>!
+                            </span>
+                            {post.posterData.quote && (
+                              <span className="bezent-text-muted">
+                                &ldquo;{post.posterData.quote}&rdquo;
+                              </span>
+                            )}
+                          </Stack>
+                        </Inline>
+                      </Card>
+                    )}
 
                     <Divider />
 

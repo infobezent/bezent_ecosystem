@@ -1,4 +1,5 @@
 import { EssRepository } from '../repository/ess.repository.js';
+import { milestoneRepository } from '../../milestones/repository/milestone.repository.js';
 import { attendanceService } from '../../attendance/service/attendance.service.js';
 import { attendanceWorkdayService } from '../../attendance/service/attendanceWorkday.service.js';
 import { attendanceEmployeeViewService } from '../../attendance/service/attendanceEmployeeView.service.js';
@@ -29,6 +30,7 @@ import type {
   SubmitDocumentInput,
   EssDocumentDto,
   EssProfileChangeRequestDto,
+  EssFeedPost,
 } from '../types/ess.types.js';
 
 export class EssService {
@@ -148,8 +150,29 @@ export class EssService {
       upcomingEventTitle: 'Engineering All-Hands Meeting',
     };
 
-    // Social Company Feed posts
-    const companyFeed = [
+    // Published milestone achievement posters & Social Company Feed posts
+    const publishedFeed = await milestoneRepository
+      .getCompanyFeedPosts(ctx.tenantId, ctx.companyId, 10)
+      .catch(() => []);
+
+    const milestoneFeedPosts: EssFeedPost[] = publishedFeed.map((post) => ({
+      id: post.id,
+      type: 'milestone_poster' as const,
+      title: post.title,
+      subtitle: post.subtitle ?? 'Milestone Recognition',
+      message: post.message,
+      date: new Date(post.createdAt).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      }),
+      badge: post.badge || 'Milestone',
+      likesCount: post.likesCount ?? 0,
+      commentsCount: post.commentsCount ?? 0,
+      hasLiked: false,
+      posterData: (post.metadata as Record<string, unknown> | null)?.posterData as EssFeedPost['posterData'],
+    }));
+
+    const defaultCompanyFeed: EssFeedPost[] = [
       {
         id: 'feed-1',
         type: 'birthday' as const,
@@ -188,6 +211,8 @@ export class EssService {
         hasLiked: false,
       },
     ];
+
+    const companyFeed = [...milestoneFeedPosts, ...defaultCompanyFeed];
 
     // Upcoming calendar events
     const upcomingEvents = [

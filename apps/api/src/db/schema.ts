@@ -4051,3 +4051,230 @@ export const attendanceCompOffAudits = mysqlTable(
 
 export type AttendanceCompOffAudit = typeof attendanceCompOffAudits.$inferSelect;
 export type NewAttendanceCompOffAudit = typeof attendanceCompOffAudits.$inferInsert;
+
+/**
+ * HRMS Domain: Workforce Recognition — Milestones Configuration V1.0
+ */
+export const milestoneConfigs = mysqlTable(
+  'milestone_configs',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    milestoneKey: varchar('milestone_key', { length: 64 }).notNull(),
+    title: varchar('title', { length: 255 }).notNull(),
+    description: text('description'),
+    requiredHours: int('required_hours').notNull().default(100000),
+    badgeIcon: varchar('badge_icon', { length: 100 }).notNull().default('award'),
+    badgeLabel: varchar('badge_label', { length: 100 }).notNull().default('Centurion of Service'),
+    posterTemplate: json('poster_template').$type<{
+      titleTemplate?: string;
+      subtitleTemplate?: string;
+      primaryColor?: string;
+      includePhoto?: boolean;
+      includeDepartment?: boolean;
+      includeJoiningDate?: boolean;
+    }>(),
+    approvalRequired: boolean('approval_required').notNull().default(true),
+    isActive: boolean('is_active').notNull().default(true),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_milestone_cfg_tenant_comp').on(table.tenantId, table.companyId),
+    uniqueIndex('idx_milestone_cfg_key').on(
+      table.tenantId,
+      table.companyId,
+      table.milestoneKey,
+    ),
+  ],
+);
+
+export type MilestoneConfig = typeof milestoneConfigs.$inferSelect;
+export type NewMilestoneConfig = typeof milestoneConfigs.$inferInsert;
+
+/**
+ * HRMS Domain: Workforce Recognition — Employee Milestone Achievements V1.0
+ */
+export const employeeMilestoneAchievements = mysqlTable(
+  'employee_milestone_achievements',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    employeeId: varchar('employee_id', { length: 64 })
+      .notNull()
+      .references(() => employees.id),
+    milestoneKey: varchar('milestone_key', { length: 64 }).notNull(),
+    milestoneTitle: varchar('milestone_title', { length: 255 }).notNull(),
+    milestoneHours: int('milestone_hours').notNull(),
+    achievedHours: decimal('achieved_hours', { precision: 10, scale: 2 }).notNull(),
+    status: mysqlEnum('status', ['unlocked', 'reviewed', 'published'])
+      .default('unlocked')
+      .notNull(),
+    achievedAt: timestamp('achieved_at').defaultNow().notNull(),
+    notifiedAt: timestamp('notified_at'),
+    posterPublishedAt: timestamp('poster_published_at'),
+    posterData: json('poster_data').$type<{
+      employeeName: string;
+      employeeNumber?: string;
+      designation?: string;
+      department?: string;
+      companyName: string;
+      photoUrl?: string;
+      milestoneHours: number;
+      milestoneTitle: string;
+      achievedDate: string;
+      publishedToFeed: boolean;
+    }>(),
+    feedPostId: varchar('feed_post_id', { length: 64 }),
+    metadata: json('metadata').$type<Record<string, unknown>>(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_emp_ms_ach_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_emp_ms_ach_emp').on(table.employeeId),
+    uniqueIndex('idx_emp_ms_ach_unique').on(
+      table.tenantId,
+      table.companyId,
+      table.employeeId,
+      table.milestoneKey,
+    ),
+  ],
+);
+
+export type EmployeeMilestoneAchievement = typeof employeeMilestoneAchievements.$inferSelect;
+export type NewEmployeeMilestoneAchievement = typeof employeeMilestoneAchievements.$inferInsert;
+
+/**
+ * HRMS Domain: Workforce Recognition — Rewards Catalogue V1.0
+ */
+export const rewardsCatalogue = mysqlTable(
+  'rewards_catalogue',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    milestoneKey: varchar('milestone_key', { length: 64 }).notNull(),
+    name: varchar('name', { length: 255 }).notNull(),
+    description: text('description'),
+    category: varchar('category', { length: 100 }).notNull().default('gift'),
+    imageUrl: varchar('image_url', { length: 500 }),
+    isActive: boolean('is_active').notNull().default(true),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_rew_cat_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_rew_cat_ms').on(table.milestoneKey),
+  ],
+);
+
+export type RewardsCatalogueItem = typeof rewardsCatalogue.$inferSelect;
+export type NewRewardsCatalogueItem = typeof rewardsCatalogue.$inferInsert;
+
+/**
+ * HRMS Domain: Workforce Recognition — Employee Reward Assignments V1.0
+ */
+export const employeeRewardAssignments = mysqlTable(
+  'employee_reward_assignments',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    employeeId: varchar('employee_id', { length: 64 })
+      .notNull()
+      .references(() => employees.id),
+    achievementId: varchar('achievement_id', { length: 64 }).notNull(),
+    rewardId: varchar('reward_id', { length: 64 }).notNull(),
+    rewardName: varchar('reward_name', { length: 255 }).notNull(),
+    status: mysqlEnum('status', [
+      'eligible',
+      'pending_approval',
+      'approved',
+      'assigned',
+      'dispatched',
+      'fulfilled',
+      'cancelled',
+    ])
+      .default('eligible')
+      .notNull(),
+    approvedByUserId: varchar('approved_by_user_id', { length: 64 }),
+    approvedAt: timestamp('approved_at'),
+    fulfilledAt: timestamp('fulfilled_at'),
+    notes: text('notes'),
+    auditHistory: json('audit_history').$type<
+      Array<{
+        status: string;
+        changedBy: string;
+        timestamp: string;
+        reason?: string;
+      }>
+    >(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_emp_rew_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_emp_rew_emp').on(table.employeeId),
+    index('idx_emp_rew_ach').on(table.achievementId),
+  ],
+);
+
+export type EmployeeRewardAssignment = typeof employeeRewardAssignments.$inferSelect;
+export type NewEmployeeRewardAssignment = typeof employeeRewardAssignments.$inferInsert;
+
+/**
+ * Platform / HRMS: Company Feed Posts V1.0
+ */
+export const companyFeedPosts = mysqlTable(
+  'company_feed_posts',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    authorId: varchar('author_id', { length: 64 }),
+    type: mysqlEnum('type', [
+      'birthday',
+      'new_joiner',
+      'anniversary',
+      'holiday',
+      'event',
+      'announcement',
+      'milestone_poster',
+    ]).notNull(),
+    title: varchar('title', { length: 255 }).notNull(),
+    subtitle: varchar('subtitle', { length: 255 }).notNull(),
+    message: text('message').notNull(),
+    badge: varchar('badge', { length: 100 }).notNull(),
+    posterImageUrl: varchar('poster_image_url', { length: 500 }),
+    likesCount: int('likes_count').notNull().default(0),
+    commentsCount: int('comments_count').notNull().default(0),
+    status: mysqlEnum('status', ['draft', 'published', 'archived'])
+      .default('published')
+      .notNull(),
+    metadata: json('metadata').$type<Record<string, unknown>>(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_feed_posts_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_feed_posts_status').on(table.status),
+    index('idx_feed_posts_created').on(table.createdAt),
+  ],
+);
+
+export type CompanyFeedPost = typeof companyFeedPosts.$inferSelect;
+export type NewCompanyFeedPost = typeof companyFeedPosts.$inferInsert;
+

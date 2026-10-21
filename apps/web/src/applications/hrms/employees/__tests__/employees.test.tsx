@@ -474,6 +474,7 @@ describe('Employee Profile', () => {
       'Accounts',
       'Skills',
       'Work',
+      'Hours & Milestones',
       'History',
     ]);
     const html = renderTab(fullProfile, 'overview');

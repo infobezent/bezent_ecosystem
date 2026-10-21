@@ -136,8 +136,14 @@ export class AttendanceSecurityService {
     const now = input.now ?? new Date();
     const coords = readCoordinates(input.deviceMetadata);
 
+    const locationInfo = await this.attendanceRepo.getEmployeeLocationInfo(
+      tenantId,
+      companyId,
+      employeeId,
+    );
+
     this.checkIpAllowlist(settings, input.clientIp, flags);
-    this.checkGeofence(settings, coords, flags);
+    this.checkGeofence(settings, coords, flags, locationInfo);
     await this.checkLatestPunch(
       settings,
       tenantId,
@@ -180,10 +186,29 @@ export class AttendanceSecurityService {
     settings: AttendanceSecuritySettings,
     coords: Coordinates | null,
     flags: string[],
+    locationInfo?: { locationId: string | null; locationType: string | null } | null,
   ): void {
     const fences = settings.geofenceConfigs ?? [];
     if (fences.length === 0) return;
-    const hasStrictFence = fences.some((f) => f.enforceStrict);
+
+    // 1. If employee's location is remote, bypass physical office geofence checks
+    if (locationInfo?.locationType === 'remote') {
+      return;
+    }
+
+    // 2. Look for the geofence boundary matching the employee's assigned work location
+    const assignedFence = locationInfo?.locationId
+      ? fences.find((f) => f.locationId === locationInfo.locationId)
+      : null;
+
+    // 3. If employee is assigned to a work location that has NO geofence configured, bypass GPS check
+    if (locationInfo?.locationId && !assignedFence) {
+      return;
+    }
+
+    // 4. Target fences: assigned work location fence if assigned; otherwise fallback to company fences
+    const targetFences = assignedFence ? [assignedFence] : fences;
+    const hasStrictFence = targetFences.some((f) => f.enforceStrict);
 
     if (!coords) {
       if (hasStrictFence) {
@@ -196,14 +221,16 @@ export class AttendanceSecurityService {
       return;
     }
 
-    const insideAny = fences.some(
+    const insidePermitted = targetFences.some(
       (f) =>
         distanceMeters(coords, { latitude: f.latitude, longitude: f.longitude }) <= f.radiusMeters,
     );
-    if (insideAny) return;
+    if (insidePermitted) return;
     if (hasStrictFence) {
       throw new ForbiddenError(
-        'You are outside the permitted attendance location.',
+        assignedFence
+          ? `You are outside your assigned work location (${assignedFence.name}) geofence boundary.`
+          : 'You are outside the permitted attendance location.',
         'OUTSIDE_GEOFENCE',
       );
     }

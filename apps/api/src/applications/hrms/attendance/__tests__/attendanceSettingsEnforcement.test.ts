@@ -12,6 +12,7 @@ import {
   employeeNotifications,
   employeeRequests,
   employees,
+  locations,
   memberships,
   users,
 } from '../../../../db/schema.js';
@@ -447,6 +448,65 @@ describe.skipIf(!isDatabaseConfigured)(
         expect((punch?.deviceMetadata as { securityFlags?: string[] }).securityFlags).toContain(
           'outside_geofence',
         );
+      });
+
+      it('strictly enforces employee assigned work location geofence', async () => {
+        await resetPunchesAndAttendance();
+        const db = getDb();
+
+        const locAId = 'loc_test_branch_a';
+        const locBId = 'loc_test_branch_b';
+        const locRemoteId = 'loc_test_remote';
+
+        // Insert test work locations
+        await db.insert(locations).ignore().values([
+          { id: locAId, tenantId, companyId, name: 'Branch A', type: 'office' },
+          { id: locBId, tenantId, companyId, name: 'Branch B', type: 'office' },
+          { id: locRemoteId, tenantId, companyId, name: 'Remote Office', type: 'remote' },
+        ]);
+
+        const fenceA = {
+          locationId: locAId,
+          name: 'Branch A',
+          latitude: 12.9716,
+          longitude: 80.2437,
+          radiusMeters: 100,
+          enforceStrict: true,
+        };
+        const fenceB = {
+          locationId: locBId,
+          name: 'Branch B',
+          latitude: 13.0827,
+          longitude: 80.2707,
+          radiusMeters: 100,
+          enforceStrict: true,
+        };
+
+        await hrPut('security', { geofenceConfigs: [fenceA, fenceB] });
+
+        // 1. Assign employee to Branch A
+        await db.update(employees).set({ locationId: locAId }).where(eq(employees.id, employeeId));
+
+        // Punching inside Branch A succeeds
+        const inA = await checkIn({ workLocation: 'office', deviceMetadata: { latitude: 12.9716, longitude: 80.2437 } });
+        expect(inA.status).toBe(200);
+
+        await resetPunchesAndAttendance();
+
+        // Punching inside Branch B (even though Branch B has a valid geofence) fails because employee is assigned to Branch A
+        const inB = await checkIn({ workLocation: 'office', deviceMetadata: { latitude: 13.0827, longitude: 80.2707 } });
+        expect(inB.status).toBe(403);
+        expect(inB.body.error.code).toBe('OUTSIDE_GEOFENCE');
+
+        await resetPunchesAndAttendance();
+
+        // 2. Assign employee to Remote
+        await db.update(employees).set({ locationId: locRemoteId }).where(eq(employees.id, employeeId));
+        const remotePunch = await checkIn({ workLocation: 'remote', deviceMetadata: {} });
+        expect(remotePunch.status).toBe(200);
+
+        // Reset employee location back to null
+        await db.update(employees).set({ locationId: null }).where(eq(employees.id, employeeId));
       });
 
       it('enforces the office IP allowlist only when enforcement is on', async () => {

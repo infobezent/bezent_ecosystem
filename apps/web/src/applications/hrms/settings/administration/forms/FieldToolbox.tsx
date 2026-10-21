@@ -1,5 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useDraggable } from '@dnd-kit/core';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Alert, Badge, Input, Pane } from '../../../../../design-system/components';
 import { BezentIcon } from '../../../../../design-system/icons';
 import { CHAPTER_METADATA, type ToolboxItem } from './types';
@@ -25,6 +27,7 @@ export interface FieldToolboxProps {
   onSelectForm?: () => void;
   /** Which entity is currently selected — used to highlight form root row */
   selectedEntity?: 'form' | 'chapter' | 'section' | 'field' | null;
+  canManage?: boolean;
 }
 
 const CATEGORY_TITLES: Record<ToolboxItem['category'], string> = {
@@ -194,6 +197,137 @@ function DraggableToolboxItem({
   );
 }
 
+interface SortableChapterItemProps {
+  secKey: string;
+  label: string;
+  displayNum: string;
+  isSelected: boolean;
+  isLocked: boolean;
+  isMandatory: boolean;
+  isVisible: boolean;
+  canDrag: boolean;
+  onSelect?: () => void;
+  onToggleVisibility?: () => void;
+}
+
+function SortableChapterItem({
+  secKey,
+  label,
+  displayNum,
+  isSelected,
+  isLocked,
+  isMandatory,
+  isVisible,
+  canDrag,
+  onSelect,
+  onToggleVisibility,
+}: SortableChapterItemProps) {
+  const isDraggable = !isLocked && canDrag;
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+    isOver,
+  } = useSortable({
+    id: `chapter-${secKey}`,
+    disabled: !isDraggable,
+    data: {
+      isChapter: true,
+      sectionKey: secKey,
+    },
+  });
+
+  const dragStyle = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+    zIndex: isDragging ? 50 : undefined,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      // eslint-disable-next-line no-restricted-syntax
+      style={dragStyle}
+      role="listitem"
+      className={`bezent-structure-item ${isSelected ? 'is-active' : ''} ${isLocked ? 'is-locked' : ''} ${isDragging ? 'is-dragging' : ''} ${isOver ? 'is-drop-target' : ''}`}
+      onClick={() => onSelect?.()}
+      title={`Chapter ${displayNum}: ${label}${isLocked ? ' (Protected Final Step)' : ''}`}
+    >
+      <div className="bezent-structure-item__left">
+        {isDraggable ? (
+          <button
+            type="button"
+            ref={setActivatorNodeRef}
+            className={`bezent-structure-handle is-draggable ${isDragging ? 'is-dragging' : ''}`}
+            aria-label={`Drag handle for Chapter ${displayNum}: ${label}`}
+            title={`Drag to reorder Chapter ${displayNum}`}
+            {...attributes}
+            {...listeners}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <BezentIcon name="more" size={14} />
+          </button>
+        ) : (
+          <span
+            className="bezent-structure-handle is-locked"
+            aria-label={isLocked ? 'Protected final step' : 'Reordering locked'}
+            title={isLocked ? 'Protected final step' : 'Reordering locked'}
+          >
+            {isLocked ? (
+              <BezentIcon name="lock" size={14} />
+            ) : (
+              <BezentIcon name="more" size={14} />
+            )}
+          </span>
+        )}
+        <span className="bezent-structure-num">{displayNum}</span>
+        <span className="bezent-structure-name">{label}</span>
+      </div>
+
+      <div className="bezent-structure-item__right">
+        {/* Visibility status */}
+        <button
+          type="button"
+          className="bezent-structure-icon-btn"
+          disabled={isMandatory}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!isMandatory) onToggleVisibility?.();
+          }}
+          title={
+            isMandatory
+              ? 'Mandatory system chapter cannot be hidden'
+              : isVisible
+                ? 'Visible in employee registration'
+                : 'Hidden from employee registration'
+          }
+          aria-label={`${label} visibility: ${isVisible ? 'Visible' : 'Hidden'}`}
+        >
+          <BezentIcon name={isVisible ? 'visibility' : 'visibilityOff'} size={14} />
+        </button>
+
+        {/* Navigation arrow or lock */}
+        {isLocked ? (
+          <span
+            title="Review & Finalize (Protected final step)"
+            aria-label="Review & Finalize (Protected final step)"
+          >
+            <BezentIcon name="lock" size={12} />
+          </span>
+        ) : (
+          <BezentIcon name="chevronRight" size={12} />
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function FieldToolbox({
   onAddField,
   activeSectionLabel,
@@ -211,6 +345,7 @@ export function FieldToolbox({
   onQuickAddCustomField,
   onSelectForm,
   selectedEntity,
+  canManage = true,
 }: FieldToolboxProps) {
   // If sections is supplied, default to 'structure' mode as required by prompt Section 5
   // If not supplied (like in initial unit tests), default to 'fields' mode
@@ -309,75 +444,39 @@ export function FieldToolbox({
             </span>
           </div>
 
-          <div className="bezent-structure-list" role="list">
-            {(sections ?? CHAPTER_METADATA).map((sec, idx) => {
-              const secKey = sec.key;
-              const chapterMeta = CHAPTER_METADATA.find((c) => c.key === secKey);
-              const label = sec.label || chapterMeta?.label || secKey;
-              const isSelected = activeSectionKey === secKey;
-              const isLocked = secKey === 'review';
-              const isMandatory = MANDATORY_KEYS.includes(secKey);
-              const isVisible = 'visible' in sec ? sec.visible !== false : true;
-              const displayNum = String(idx + 1).padStart(2, '0');
+          <SortableContext
+            items={(sections ?? CHAPTER_METADATA).map((s) => `chapter-${s.key}`)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="bezent-structure-list" role="list">
+              {(sections ?? CHAPTER_METADATA).map((sec, idx) => {
+                const secKey = sec.key;
+                const chapterMeta = CHAPTER_METADATA.find((c) => c.key === secKey);
+                const label = sec.label || chapterMeta?.label || secKey;
+                const isSelected = activeSectionKey === secKey;
+                const isLocked = secKey === 'review';
+                const isMandatory = MANDATORY_KEYS.includes(secKey);
+                const isVisible = 'visible' in sec ? sec.visible !== false : true;
+                const displayNum = String(idx + 1).padStart(2, '0');
 
-              return (
-                <div
-                  key={secKey}
-                  role="listitem"
-                  className={`bezent-structure-item ${isSelected ? 'is-active' : ''} ${isLocked ? 'is-locked' : ''}`}
-                  onClick={() => onSelectSection?.(secKey)}
-                  title={`Chapter ${displayNum}: ${label}${isLocked ? ' (Protected Final Step)' : ''}`}
-                >
-                  <div className="bezent-structure-item__left">
-                    <span className="bezent-structure-handle" aria-hidden="true">
-                      {isLocked ? (
-                        <BezentIcon name="lock" size={14} />
-                      ) : (
-                        <BezentIcon name="more" size={14} />
-                      )}
-                    </span>
-                    <span className="bezent-structure-num">{displayNum}</span>
-                    <span className="bezent-structure-name">{label}</span>
-                  </div>
-
-                  <div className="bezent-structure-item__right">
-                    {/* Visibility status */}
-                    <button
-                      type="button"
-                      className="bezent-structure-icon-btn"
-                      disabled={isMandatory}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (!isMandatory) onToggleSectionVisibility?.(secKey);
-                      }}
-                      title={
-                        isMandatory
-                          ? 'Mandatory system chapter cannot be hidden'
-                          : isVisible
-                            ? 'Visible in employee registration'
-                            : 'Hidden from employee registration'
-                      }
-                      aria-label={`${label} visibility: ${isVisible ? 'Visible' : 'Hidden'}`}
-                    >
-                      <BezentIcon name={isVisible ? 'visibility' : 'visibilityOff'} size={14} />
-                    </button>
-
-                    {/* Navigation arrow or lock */}
-                    {isLocked ? (
-                      <span
-                        title="Review & Finalize (Protected final step)"
-                        aria-label="Review & Finalize (Protected final step)"
-                      >
-                        <BezentIcon name="lock" size={12} />
-                      </span>
-                    ) : (
-                      <BezentIcon name="chevronRight" size={12} />
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                return (
+                  <SortableChapterItem
+                    key={secKey}
+                    secKey={secKey}
+                    label={label}
+                    displayNum={displayNum}
+                    isSelected={isSelected}
+                    isLocked={isLocked}
+                    isMandatory={isMandatory}
+                    isVisible={isVisible}
+                    canDrag={canManage}
+                    onSelect={() => onSelectSection?.(secKey)}
+                    onToggleVisibility={() => onToggleSectionVisibility?.(secKey)}
+                  />
+                );
+              })}
+            </div>
+          </SortableContext>
 
           {/* Quick Add Custom Field Action */}
           <button
