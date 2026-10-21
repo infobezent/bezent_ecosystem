@@ -16,7 +16,7 @@ import type {
   AttendanceRegularizationSettings,
   AttendanceDevice,
   AttendanceImportBatch,
-  AttendanceSecuritySettings,
+  AttendanceSecuritySettingsWithRemote,
   AttendancePayrollSettings,
   AttendancePeriod,
   AttendancePayrollHandoverBatch,
@@ -679,7 +679,7 @@ export class AttendanceSettingsService {
   async getSecuritySettings(
     tenantId: string,
     companyId: string,
-  ): Promise<AttendanceSecuritySettings> {
+  ): Promise<AttendanceSecuritySettingsWithRemote> {
     const settings = await this.repo.getSecuritySettings(tenantId, companyId);
     if (settings) return settings;
     return this.repo.upsertSecuritySettings(tenantId, companyId, {});
@@ -691,7 +691,7 @@ export class AttendanceSettingsService {
     input: SecuritySettingsInput,
     userId?: string,
     clientIp?: string,
-  ): Promise<AttendanceSecuritySettings> {
+  ): Promise<AttendanceSecuritySettingsWithRemote> {
     const prev = await this.getSecuritySettings(tenantId, companyId);
     const updated = await this.repo.upsertSecuritySettings(tenantId, companyId, input);
 

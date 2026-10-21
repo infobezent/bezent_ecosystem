@@ -941,6 +941,32 @@ export interface SecuritySettingsInput {
   detectImpossibleTravel?: boolean;
   rapidPunchThrottlingSeconds?: number;
   flagVpnProxy?: boolean;
+  allowWebPunch?: boolean;
+  allowMobilePunch?: boolean;
+  requireSelfiePunch?: boolean;
+  allowPunchOutsideGeofence?: boolean;
+}
+
+export interface AttendanceSecuritySettingsWithRemote {
+  id: string;
+  tenantId: string;
+  companyId: string;
+  enableGps: boolean;
+  geofenceConfigs?: GeofenceConfigItem[] | null;
+  ipAllowlist?: string[] | null;
+  enforceIpRestriction: boolean;
+  maxDevicesPerEmployee: number;
+  allowSharedKiosk: boolean;
+  detectMockLocation: boolean;
+  detectImpossibleTravel: boolean;
+  rapidPunchThrottlingSeconds: number;
+  flagVpnProxy: boolean;
+  allowWebPunch?: boolean;
+  allowMobilePunch?: boolean;
+  requireSelfiePunch?: boolean;
+  allowPunchOutsideGeofence?: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface PayrollSettingsInput {

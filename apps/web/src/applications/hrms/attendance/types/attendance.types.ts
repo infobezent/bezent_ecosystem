@@ -1137,6 +1137,10 @@ export interface AttendanceSecuritySettings {
   detectImpossibleTravel: boolean;
   rapidPunchThrottlingSeconds: number;
   flagVpnProxy: boolean;
+  allowWebPunch?: boolean;
+  allowMobilePunch?: boolean;
+  requireSelfiePunch?: boolean;
+  allowPunchOutsideGeofence?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -1152,6 +1156,10 @@ export interface SecuritySettingsInput {
   detectImpossibleTravel?: boolean;
   rapidPunchThrottlingSeconds?: number;
   flagVpnProxy?: boolean;
+  allowWebPunch?: boolean;
+  allowMobilePunch?: boolean;
+  requireSelfiePunch?: boolean;
+  allowPunchOutsideGeofence?: boolean;
 }
 
 export interface AttendancePayrollSettings {

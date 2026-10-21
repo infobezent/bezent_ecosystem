@@ -21,7 +21,6 @@ import {
   type AttendanceRegularizationSettings,
   type AttendanceDevice,
   type AttendanceImportBatch,
-  type AttendanceSecuritySettings,
   type AttendancePayrollSettings,
   type AttendancePeriod,
   type AttendancePayrollHandoverBatch,
@@ -43,6 +42,7 @@ import type {
   UpdateShiftRosterSettingsInput,
   CreateShiftInput,
   UpdateShiftInput,
+  AttendanceSecuritySettingsWithRemote,
 } from '../types/attendance.types.js';
 
 export const DEFAULT_COMPANY_SHIFTS: CompanyShiftTemplate[] = [
@@ -942,7 +942,7 @@ export class AttendanceSettingsRepository {
   async getSecuritySettings(
     tenantId: string,
     companyId: string,
-  ): Promise<AttendanceSecuritySettings | null> {
+  ): Promise<AttendanceSecuritySettingsWithRemote | null> {
     const db = getDb();
     const rows = await db
       .select()
@@ -954,14 +954,43 @@ export class AttendanceSettingsRepository {
         ),
       )
       .limit(1);
-    return rows[0] ?? null;
+
+    const base = rows[0] ?? null;
+    if (!base) return null;
+
+    const genRows = await db
+      .select({ alertPreferences: attendanceGeneralSettings.alertPreferences })
+      .from(attendanceGeneralSettings)
+      .where(
+        and(
+          eq(attendanceGeneralSettings.tenantId, tenantId),
+          eq(attendanceGeneralSettings.companyId, companyId),
+        ),
+      )
+      .limit(1);
+
+    const prefs = (genRows[0]?.alertPreferences ?? {}) as Record<string, unknown>;
+    const remote = (prefs.remotePunchConfig ?? {}) as {
+      allowWebPunch?: boolean;
+      allowMobilePunch?: boolean;
+      requireSelfiePunch?: boolean;
+      allowPunchOutsideGeofence?: boolean;
+    };
+
+    return {
+      ...base,
+      allowWebPunch: remote.allowWebPunch ?? true,
+      allowMobilePunch: remote.allowMobilePunch ?? true,
+      requireSelfiePunch: remote.requireSelfiePunch ?? false,
+      allowPunchOutsideGeofence: remote.allowPunchOutsideGeofence ?? false,
+    };
   }
 
   async upsertSecuritySettings(
     tenantId: string,
     companyId: string,
     input: SecuritySettingsInput,
-  ): Promise<AttendanceSecuritySettings> {
+  ): Promise<AttendanceSecuritySettingsWithRemote> {
     const db = getDb();
     const existing = await this.getSecuritySettings(tenantId, companyId);
 
@@ -994,25 +1023,87 @@ export class AttendanceSettingsRepository {
           updatedAt: new Date(),
         })
         .where(eq(attendanceSecuritySettings.id, existing.id));
-      return (await this.getSecuritySettings(tenantId, companyId))!;
+    } else {
+      const id = generateSurrogateId('att_sec');
+      await db.insert(attendanceSecuritySettings).values({
+        id,
+        tenantId,
+        companyId,
+        enableGps: input.enableGps ?? true,
+        geofenceConfigs: input.geofenceConfigs ?? [],
+        ipAllowlist: input.ipAllowlist ?? ['192.168.1.0/24'],
+        enforceIpRestriction: input.enforceIpRestriction ?? false,
+        maxDevicesPerEmployee: input.maxDevicesPerEmployee ?? 2,
+        allowSharedKiosk: input.allowSharedKiosk ?? true,
+        detectMockLocation: input.detectMockLocation ?? true,
+        detectImpossibleTravel: input.detectImpossibleTravel ?? true,
+        rapidPunchThrottlingSeconds: input.rapidPunchThrottlingSeconds ?? 60,
+        flagVpnProxy: input.flagVpnProxy ?? true,
+      });
     }
 
-    const id = generateSurrogateId('att_sec');
-    await db.insert(attendanceSecuritySettings).values({
-      id,
-      tenantId,
-      companyId,
-      enableGps: input.enableGps ?? true,
-      geofenceConfigs: input.geofenceConfigs ?? [],
-      ipAllowlist: input.ipAllowlist ?? ['192.168.1.0/24'],
-      enforceIpRestriction: input.enforceIpRestriction ?? false,
-      maxDevicesPerEmployee: input.maxDevicesPerEmployee ?? 2,
-      allowSharedKiosk: input.allowSharedKiosk ?? true,
-      detectMockLocation: input.detectMockLocation ?? true,
-      detectImpossibleTravel: input.detectImpossibleTravel ?? true,
-      rapidPunchThrottlingSeconds: input.rapidPunchThrottlingSeconds ?? 60,
-      flagVpnProxy: input.flagVpnProxy ?? true,
-    });
+    if (
+      input.allowWebPunch !== undefined ||
+      input.allowMobilePunch !== undefined ||
+      input.requireSelfiePunch !== undefined ||
+      input.allowPunchOutsideGeofence !== undefined
+    ) {
+      const genRows = await db
+        .select()
+        .from(attendanceGeneralSettings)
+        .where(
+          and(
+            eq(attendanceGeneralSettings.tenantId, tenantId),
+            eq(attendanceGeneralSettings.companyId, companyId),
+          ),
+        )
+        .limit(1);
+      const row = genRows[0];
+      const prefs = (row?.alertPreferences ?? {}) as Record<string, unknown>;
+      const existingRemote = (prefs.remotePunchConfig ?? {}) as Record<string, unknown>;
+      const updatedRemote = {
+        ...existingRemote,
+        ...(input.allowWebPunch !== undefined ? { allowWebPunch: input.allowWebPunch } : {}),
+        ...(input.allowMobilePunch !== undefined
+          ? { allowMobilePunch: input.allowMobilePunch }
+          : {}),
+        ...(input.requireSelfiePunch !== undefined
+          ? { requireSelfiePunch: input.requireSelfiePunch }
+          : {}),
+        ...(input.allowPunchOutsideGeofence !== undefined
+          ? { allowPunchOutsideGeofence: input.allowPunchOutsideGeofence }
+          : {}),
+      };
+      const updatedPrefs = {
+        ...prefs,
+        remotePunchConfig: updatedRemote,
+      };
+
+      if (row) {
+        await db
+          .update(attendanceGeneralSettings)
+          .set({
+            alertPreferences: updatedPrefs,
+            updatedAt: new Date(),
+          })
+          .where(eq(attendanceGeneralSettings.id, row.id));
+      } else {
+        await db.insert(attendanceGeneralSettings).values({
+          id: generateSurrogateId('ags'),
+          tenantId,
+          companyId,
+          timezone: 'UTC',
+          dayBoundaryTime: '00:00:00',
+          trackingStartDate: '2026-01-01',
+          processingMode: 'realtime',
+          manualEntryAllowed: true,
+          employeeVisibility: 'self_only',
+          defaultHistoryViewDays: 30,
+          alertPreferences: updatedPrefs,
+        });
+      }
+    }
+
     return (await this.getSecuritySettings(tenantId, companyId))!;
   }
 

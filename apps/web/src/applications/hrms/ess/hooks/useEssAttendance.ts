@@ -332,7 +332,10 @@ export function useEssAttendance(options: UseEssAttendanceOptions = {}): UseEssA
           essApi.checkIn({
             workLocation: location || workLocation || 'office',
             notes,
-            deviceMetadata,
+            deviceMetadata: {
+              ...(deviceMetadata ?? {}),
+              source: 'web',
+            },
           }),
         );
         setPunchSuccess('Checked in successfully!');
@@ -359,7 +362,14 @@ export function useEssAttendance(options: UseEssAttendanceOptions = {}): UseEssA
     setPunchError(null);
     setPunchSuccess(null);
     try {
-      await executePunchWithLocation((deviceMetadata) => essApi.checkOut({ deviceMetadata }));
+      await executePunchWithLocation((deviceMetadata) =>
+        essApi.checkOut({
+          deviceMetadata: {
+            ...(deviceMetadata ?? {}),
+            source: 'web',
+          },
+        }),
+      );
       setPunchSuccess('Checked out successfully!');
       if (onRefresh) {
         await onRefresh();
