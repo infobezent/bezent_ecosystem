@@ -552,10 +552,17 @@ export class AttendanceRegularizationService {
     }
 
     const oldAssigned = reg.assignedTo;
+    let assignedQueue = reg.assignedQueue;
+    if (reg.assignedQueue === 'manager_queue') {
+      assignedQueue = 'manager_queue';
+    } else {
+      assignedQueue = assignedTo ? 'hr_queue' : 'hr_unassigned';
+    }
+
     const updated = await this.repo.updateRegularization(tenantId, companyId, id, {
       assignedTo,
       assignedAt: new Date(),
-      assignedQueue: assignedTo ? 'assigned_reviewer' : 'hr_unassigned',
+      assignedQueue,
     });
 
     await this.repo.createAudit({
@@ -789,7 +796,67 @@ export class AttendanceRegularizationService {
     }
 
     // --- APPROVAL FLOW ---
-    // 3. Recheck Payroll Lock state
+    const workflow = await this.eligibilityService.getWorkflowSettings(tenantId, companyId);
+    const isStage1ManagerApproval =
+      workflow.approvalHierarchy === 'manager_then_hr' && reg.assignedQueue === 'manager_queue';
+
+    if (isStage1ManagerApproval) {
+      const updated = await this.repo.updateRegularization(tenantId, companyId, id, {
+        approvalStatus: 'submitted',
+        assignedQueue: 'hr_queue',
+        assignedTo: null,
+        assignedAt: new Date(),
+        decisionReason: decisionReason.trim() || 'Approved by Reporting Manager',
+      });
+
+      await this.repo.createAudit({
+        id: generateSurrogateId('regaud'),
+        tenantId,
+        companyId,
+        regularizationId: id,
+        action: 'approved',
+        actorUserId,
+        oldState: {
+          approvalStatus: reg.approvalStatus,
+          assignedQueue: reg.assignedQueue,
+          assignedTo: reg.assignedTo,
+        },
+        newState: {
+          approvalStatus: 'submitted',
+          assignedQueue: 'hr_queue',
+          assignedTo: null,
+        },
+        notes: decisionReason.trim()
+          ? `Stage 1: Approved by Reporting Manager: ${decisionReason.trim()}; forwarded to HR queue for final review`
+          : 'Stage 1: Approved by Reporting Manager; forwarded to HR queue for final review',
+      });
+
+      await this.sendNotification(
+        tenantId,
+        companyId,
+        reg.employeeId,
+        'Regularization Stage 1 Approved',
+        `Your correction request ${reg.requestNumber} for ${reg.workday} has been approved by your manager and forwarded to HR for final review.`,
+        '/hrms/attendance/regularization',
+      );
+
+      await attendanceAlertService.notify(
+        tenantId,
+        companyId,
+        'regularizationPending',
+        { employeeId: reg.employeeId, approverEmployeeId: null },
+        {
+          title: 'Regularization request pending HR approval',
+          detail: `Manager approved request ${reg.requestNumber} for ${reg.workday}. Forwarded to HR queue for final review.`,
+          link: '/hrms/attendance/regularization',
+          type: 'action_required',
+        },
+      );
+
+      return updated;
+    }
+
+    // 3. Recheck Payroll Lock state (Stage 2 or single-stage approval)
     const isLocked = await this.attRepo.checkDateInLockedPeriod(
       tenantId,
       companyId,

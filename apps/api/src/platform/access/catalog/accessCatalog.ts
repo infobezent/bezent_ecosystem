@@ -520,6 +520,7 @@ export const SYSTEM_ROLES: SystemRoleDefinition[] = [
       'hrms.team.view',
       'hrms.employees.view',
       'hrms.attendance.view',
+      'hrms.attendance.regularize',
       'hrms.leave.view',
       'hrms.leave.approve',
     ]),

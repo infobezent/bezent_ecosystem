@@ -406,6 +406,8 @@ export interface EssAttendanceRegularizationDto {
   decisionReason: string | null;
   decidedAt?: string | null;
   submittedAt: string;
+  assignedTo?: string | null;
+  assignedQueue?: string | null;
   createdAt: string;
 }
 

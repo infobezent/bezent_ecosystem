@@ -1291,6 +1291,7 @@ export interface RegularizationFilterV1 {
   submittedFrom?: string;
   submittedTo?: string;
   assignedTo?: string;
+  assignedQueue?: string;
   departmentId?: string;
   locationId?: string;
   relatedException?: string;

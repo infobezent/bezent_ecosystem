@@ -52,6 +52,8 @@ export class AttendanceRegularizationController {
           typeof req.query.submittedFrom === 'string' ? req.query.submittedFrom : undefined,
         submittedTo: typeof req.query.submittedTo === 'string' ? req.query.submittedTo : undefined,
         assignedTo: typeof req.query.assignedTo === 'string' ? req.query.assignedTo : undefined,
+        assignedQueue:
+          typeof req.query.assignedQueue === 'string' ? req.query.assignedQueue : undefined,
         departmentId:
           typeof req.query.departmentId === 'string' ? req.query.departmentId : undefined,
         locationId: typeof req.query.locationId === 'string' ? req.query.locationId : undefined,
@@ -332,6 +334,10 @@ export class AttendanceRegularizationController {
       const assignedTo =
         (typeof req.query.assignedTo === 'string' ? req.query.assignedTo : filterBody.assignedTo) ||
         undefined;
+      const assignedQueue =
+        (typeof req.query.assignedQueue === 'string'
+          ? req.query.assignedQueue
+          : filterBody.assignedQueue) || undefined;
       const departmentId =
         (typeof req.query.departmentId === 'string'
           ? req.query.departmentId
@@ -344,6 +350,7 @@ export class AttendanceRegularizationController {
         workdayFrom,
         workdayTo,
         assignedTo,
+        assignedQueue,
         departmentId,
         selectedIds,
       });

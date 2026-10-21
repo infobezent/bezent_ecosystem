@@ -956,6 +956,8 @@ export class EssService {
       decisionReason: reg.decisionReason ?? null,
       decidedAt: reg.decidedAt ? reg.decidedAt.toISOString() : null,
       submittedAt: reg.submittedAt.toISOString(),
+      assignedTo: reg.assignedTo ?? null,
+      assignedQueue: reg.assignedQueue ?? null,
       createdAt: reg.createdAt.toISOString(),
     };
   }
