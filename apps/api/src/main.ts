@@ -3,6 +3,7 @@ import { assertProductionAuthConfig, env } from './app/config/env.js';
 import { closePool, ensureDatabaseConnected, isDatabaseConfigured } from './db/connection.js';
 import { backgroundWorkerRunner } from './platform/workers/backgroundWorker.runner.js';
 import { attendanceAutoLockService } from './applications/hrms/attendance/service/attendanceAutoLock.service.js';
+import { syncAllUnlinkedEmployees } from './applications/hrms/employees/service/employeeUserBridge.service.js';
 
 assertProductionAuthConfig();
 
@@ -19,6 +20,16 @@ async function startServer(): Promise<void> {
     console.log('[workers] Background worker runner started');
     attendanceAutoLockService.start();
     console.log('[workers] Attendance auto-lock sweep started');
+    try {
+      const syncedCount = await syncAllUnlinkedEmployees();
+      if (syncedCount > 0) {
+        console.log(
+          `[auth] Provisioned ${syncedCount} unlinked employee user accounts for ESS access`,
+        );
+      }
+    } catch (err) {
+      console.warn('[auth] Employee user sync on startup skipped/failed:', err);
+    }
   }
 
   const app = createApp();
