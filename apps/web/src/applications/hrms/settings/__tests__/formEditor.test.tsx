@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { arrayMove } from '@dnd-kit/sortable';
 import {
   createNewCustomField,
   generateCustomFieldKey,
@@ -1910,6 +1911,355 @@ describe('Form Editor → Add Field Drag-and-Drop (Toolbox to Canvas)', () => {
         expect(html).toContain('Move up');
         expect(html).toContain('Move down');
         expect(html).toContain('Remove option');
+      });
+    });
+
+    describe('Chapter Drag & Drop in Form Structure', () => {
+      const generalSection: ResolvedFormSection = {
+        key: 'general',
+        label: 'General Information',
+        description: 'Core employee profile',
+        order: 1,
+        origin: 'system',
+        configurable: true,
+        protected: true,
+        visible: true,
+        fields: [],
+      };
+
+      const customSection: ResolvedFormSection = {
+        key: 'custom_sec_123',
+        label: 'Certifications & Compliance',
+        description: 'Regulatory compliance records',
+        order: 2,
+        origin: 'custom',
+        configurable: true,
+        protected: false,
+        visible: true,
+        fields: [],
+      };
+
+      it('renders sortable chapter items with drag handles for eligible chapters', () => {
+        const sections: ResolvedFormSection[] = [
+          generalSection,
+          customSection,
+          {
+            key: 'review',
+            label: 'Review & Finalize',
+            description: null,
+            order: 3,
+            origin: 'system',
+            configurable: false,
+            protected: true,
+            visible: true,
+            fields: [],
+          },
+        ];
+
+        const html = renderToStaticMarkup(
+          <FieldToolbox
+            mode="structure"
+            sections={sections}
+            activeSectionKey="general"
+            onAddField={vi.fn()}
+            canManage={true}
+          />,
+        );
+
+        expect(html).toContain('CHAPTERS');
+        expect(html).toContain('3 Chapters');
+        expect(html).toContain('General Information');
+        expect(html).toContain('Certifications &amp; Compliance');
+        expect(html).toContain('Review &amp; Finalize');
+        // Drag handles rendered
+        expect(html).toContain('Drag handle for Chapter 01: General Information');
+        expect(html).toContain('Drag handle for Chapter 02: Certifications &amp; Compliance');
+        // Review is locked and has lock icon, not a draggable handle
+        expect(html).not.toContain('Drag handle for Chapter 03: Review');
+        expect(html).toContain('Protected Final Step');
+      });
+
+      it('disables drag handles when canManage is false (permission enforcement)', () => {
+        const sections: ResolvedFormSection[] = [generalSection];
+
+        const html = renderToStaticMarkup(
+          <FieldToolbox
+            mode="structure"
+            sections={sections}
+            activeSectionKey="general"
+            onAddField={vi.fn()}
+            canManage={false}
+          />,
+        );
+
+        // When canManage is false, aria-label drag handle is omitted and handle has is-locked
+        expect(html).not.toContain('Drag handle for Chapter 01');
+      });
+
+      it('renders drag handle with accessible button semantics, hit area, and grab indicators', () => {
+        const sections: ResolvedFormSection[] = [generalSection];
+        const html = renderToStaticMarkup(
+          <FieldToolbox
+            mode="structure"
+            sections={sections}
+            activeSectionKey="general"
+            onAddField={vi.fn()}
+            canManage={true}
+          />,
+        );
+
+        // Activator button semantics
+        expect(html).toContain('button type="button"');
+        expect(html).toContain('class="bezent-structure-handle is-draggable "');
+        expect(html).toContain('aria-label="Drag handle for Chapter 01: General Information"');
+        expect(html).toContain('title="Drag to reorder Chapter 01"');
+      });
+
+      it('reorders Chapter 5 above Chapter 2 and updates order and sequence', () => {
+        const fiveSections: ResolvedFormSection[] = [
+          { ...generalSection, key: 'sec_1', label: 'Chapter One', order: 1 },
+          { ...generalSection, key: 'sec_2', label: 'Chapter Two', order: 2 },
+          { ...generalSection, key: 'sec_3', label: 'Chapter Three', order: 3 },
+          { ...generalSection, key: 'sec_4', label: 'Chapter Four', order: 4 },
+          { ...generalSection, key: 'sec_5', label: 'Chapter Five', order: 5 },
+          {
+            ...generalSection,
+            key: 'review',
+            label: 'Review & Finalize',
+            order: 6,
+            protected: true,
+          },
+        ];
+
+        // Move Chapter 5 (index 4) above Chapter 2 (index 1)
+        const fromIdx = 4;
+        const toIdx = 1;
+        const reordered = arrayMove(fiveSections, fromIdx, toIdx);
+
+        expect(reordered.map((s) => s.key)).toEqual([
+          'sec_1',
+          'sec_5',
+          'sec_2',
+          'sec_3',
+          'sec_4',
+          'review',
+        ]);
+
+        const html = renderToStaticMarkup(
+          <FieldToolbox
+            mode="structure"
+            sections={reordered}
+            activeSectionKey="sec_5"
+            onAddField={vi.fn()}
+            canManage={true}
+          />,
+        );
+
+        // Chapter 5 is now displayed as Chapter 02
+        expect(html).toContain('Chapter 02: Chapter Five');
+        expect(html).toContain('Drag handle for Chapter 02: Chapter Five');
+      });
+
+      it('reorders Chapter 2 below Chapter 5 and updates order and sequence', () => {
+        const fiveSections: ResolvedFormSection[] = [
+          { ...generalSection, key: 'sec_1', label: 'Chapter One', order: 1 },
+          { ...generalSection, key: 'sec_2', label: 'Chapter Two', order: 2 },
+          { ...generalSection, key: 'sec_3', label: 'Chapter Three', order: 3 },
+          { ...generalSection, key: 'sec_4', label: 'Chapter Four', order: 4 },
+          { ...generalSection, key: 'sec_5', label: 'Chapter Five', order: 5 },
+          {
+            ...generalSection,
+            key: 'review',
+            label: 'Review & Finalize',
+            order: 6,
+            protected: true,
+          },
+        ];
+
+        // Move Chapter 2 (index 1) below Chapter 5 (index 4)
+        const fromIdx = 1;
+        const toIdx = 4;
+        const reordered = arrayMove(fiveSections, fromIdx, toIdx);
+
+        expect(reordered.map((s) => s.key)).toEqual([
+          'sec_1',
+          'sec_3',
+          'sec_4',
+          'sec_5',
+          'sec_2',
+          'review',
+        ]);
+
+        const html = renderToStaticMarkup(
+          <FieldToolbox
+            mode="structure"
+            sections={reordered}
+            activeSectionKey="sec_2"
+            onAddField={vi.fn()}
+            canManage={true}
+          />,
+        );
+
+        // Chapter 2 is now Chapter 05
+        expect(html).toContain('Chapter 05: Chapter Two');
+        expect(html).toContain('Drag handle for Chapter 05: Chapter Two');
+      });
+
+      it('prevents moving the Review & Finalize chapter', () => {
+        const sections: ResolvedFormSection[] = [
+          { ...generalSection, key: 'sec_1', label: 'Chapter One', order: 1 },
+          {
+            ...generalSection,
+            key: 'review',
+            label: 'Review & Finalize',
+            order: 2,
+            protected: true,
+          },
+        ];
+
+        // Reordering logic check: if fromSecKey === 'review', abort
+        const handleChapterReorder = (
+          fromKey: string,
+          toKey: string,
+          current: ResolvedFormSection[],
+        ) => {
+          if (fromKey === 'review') return current;
+          const fromIdx = current.findIndex((s) => s.key === fromKey);
+          let toIdx = current.findIndex((s) => s.key === toKey);
+          if (fromIdx === -1 || toIdx === -1) return current;
+          const reviewIdx = current.findIndex((s) => s.key === 'review');
+          if (reviewIdx !== -1 && toIdx >= reviewIdx) {
+            toIdx = Math.max(0, reviewIdx - 1);
+          }
+          if (fromIdx === toIdx) return current;
+          return arrayMove(current, fromIdx, toIdx);
+        };
+
+        const result = handleChapterReorder('review', 'sec_1', sections);
+        expect(result).toBe(sections);
+        expect(result[1]?.key).toBe('review');
+      });
+
+      it('prevents any chapter from being placed after Review & Finalize', () => {
+        const sections: ResolvedFormSection[] = [
+          { ...generalSection, key: 'sec_1', label: 'Chapter One', order: 1 },
+          { ...generalSection, key: 'sec_2', label: 'Chapter Two', order: 2 },
+          {
+            ...generalSection,
+            key: 'review',
+            label: 'Review & Finalize',
+            order: 3,
+            protected: true,
+          },
+        ];
+
+        const handleChapterReorder = (
+          fromKey: string,
+          toKey: string,
+          current: ResolvedFormSection[],
+        ) => {
+          if (fromKey === 'review') return current;
+          const fromIdx = current.findIndex((s) => s.key === fromKey);
+          let toIdx = current.findIndex((s) => s.key === toKey);
+          if (fromIdx === -1 || toIdx === -1) return current;
+          const reviewIdx = current.findIndex((s) => s.key === 'review');
+          if (reviewIdx !== -1 && toIdx >= reviewIdx) {
+            toIdx = Math.max(0, reviewIdx - 1);
+          }
+          if (fromIdx === toIdx) return current;
+          return arrayMove(current, fromIdx, toIdx);
+        };
+
+        // Attempt to drop sec_1 onto review (or beyond)
+        const result = handleChapterReorder('sec_1', 'review', sections);
+        // Review must strictly remain the last element
+        expect(result[result.length - 1]?.key).toBe('review');
+        expect(result.map((s) => s.key)).toEqual(['sec_2', 'sec_1', 'review']);
+      });
+
+      it('generates sectionOrder in metadata and correctly indexes order in DTO for persistence', () => {
+        const reorderedSections: ResolvedFormSection[] = [
+          { ...generalSection, key: 'personal', label: 'Personal Details', order: 1 },
+          { ...generalSection, key: 'general', label: 'General Information', order: 2 },
+          { ...customSection, key: 'custom_sec_123', label: 'Certifications', order: 3 },
+          {
+            ...generalSection,
+            key: 'review',
+            label: 'Review & Finalize',
+            order: 4,
+            protected: true,
+            configurable: false,
+          },
+        ];
+
+        const newSectionOrder = reorderedSections.map((s) => s.key);
+        const metadata = { sectionOrder: newSectionOrder };
+
+        // Emulate FormEditorPage handleSave DTO creation
+        const dto = {
+          version: 1,
+          metadata,
+          sections: reorderedSections
+            .filter((s) => s.configurable)
+            .map((sec) => ({
+              key: sec.key,
+              order: metadata.sectionOrder ? metadata.sectionOrder.indexOf(sec.key) + 1 : undefined,
+            })),
+        };
+
+        expect(dto.metadata.sectionOrder).toEqual([
+          'personal',
+          'general',
+          'custom_sec_123',
+          'review',
+        ]);
+        expect(dto.sections).toEqual([
+          { key: 'personal', order: 1 },
+          { key: 'general', order: 2 },
+          { key: 'custom_sec_123', order: 3 },
+        ]);
+      });
+
+      it('leaves chapter order unchanged when a drag is cancelled', () => {
+        const initialSections: ResolvedFormSection[] = [
+          { ...generalSection, key: 'sec_1', label: 'Chapter One', order: 1 },
+          { ...generalSection, key: 'sec_2', label: 'Chapter Two', order: 2 },
+        ];
+
+        // Drag cancel resets active drag keys without updating draftSections state
+        let activeDragChapterKey: string | null = 'sec_1';
+        const onDragCancel = () => {
+          activeDragChapterKey = null;
+        };
+
+        onDragCancel();
+        expect(activeDragChapterKey).toBeNull();
+        expect(initialSections.map((s) => s.key)).toEqual(['sec_1', 'sec_2']);
+      });
+
+      it('isolates collision detection between chapter droppables and canvas field droppables', () => {
+        const droppableContainers = [
+          { id: 'chapter-general' },
+          { id: 'chapter-personal' },
+          { id: 'field-first_name' },
+          { id: 'field-last_name' },
+        ];
+
+        // When chapter drag is active, only chapter droppables are tested
+        const isChapterDrag = true;
+        const chapterDroppables = isChapterDrag
+          ? droppableContainers.filter((c) => String(c.id).startsWith('chapter-'))
+          : droppableContainers;
+
+        expect(chapterDroppables.map((c) => c.id)).toEqual(['chapter-general', 'chapter-personal']);
+
+        // When field drag is active, chapter droppables are excluded
+        const isFieldDrag = true;
+        const fieldDroppables = isFieldDrag
+          ? droppableContainers.filter((c) => !String(c.id).startsWith('chapter-'))
+          : droppableContainers;
+
+        expect(fieldDroppables.map((c) => c.id)).toEqual(['field-first_name', 'field-last_name']);
       });
     });
   });

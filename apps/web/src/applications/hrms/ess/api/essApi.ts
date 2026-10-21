@@ -155,7 +155,14 @@ export interface EssActionCenterItem {
 
 export interface EssFeedPost {
   id: string;
-  type: 'birthday' | 'new_joiner' | 'anniversary' | 'holiday' | 'event' | 'announcement';
+  type:
+    | 'birthday'
+    | 'new_joiner'
+    | 'anniversary'
+    | 'holiday'
+    | 'event'
+    | 'announcement'
+    | 'milestone_poster';
   title: string;
   subtitle: string;
   message: string;
@@ -164,6 +171,17 @@ export interface EssFeedPost {
   likesCount: number;
   commentsCount: number;
   hasLiked?: boolean;
+  posterData?: {
+    employeeName: string;
+    milestoneKey: string;
+    milestoneTitle: string;
+    hours: number;
+    headline: string;
+    quote: string;
+    posterUrl?: string;
+    avatarUrl?: string;
+    issuedAt?: string;
+  };
 }
 
 export interface EssUpcomingEventItem {

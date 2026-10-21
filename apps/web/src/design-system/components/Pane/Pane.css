@@ -893,9 +893,47 @@
 
 .bezent-structure-handle {
   color: var(--text-muted, #94a3b8);
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 3px;
+  margin: -3px 0 -3px -3px;
+  border-radius: var(--radius-xs, 4px);
   cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  line-height: 1;
+}
+
+.bezent-structure-handle.is-draggable:hover {
+  background-color: var(--bg-hover, #f1f5f9);
+  color: var(--text-primary, #0f172a);
+}
+
+.bezent-structure-handle.is-draggable:active,
+.bezent-structure-handle.is-dragging {
+  cursor: grabbing !important;
+  color: var(--accent-interactive, #1a73e8);
+}
+
+.bezent-structure-handle.is-locked {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.bezent-structure-item.is-dragging {
+  opacity: 0.4;
+  border-style: dashed;
+  border-color: var(--accent-interactive, #1a73e8);
+}
+
+.bezent-structure-item.is-drop-target {
+  border-color: var(--accent-interactive, #1a73e8);
+  background-color: var(--color-primary-light, #eff6ff);
+  box-shadow: 0 0 0 1px var(--accent-interactive, #1a73e8);
 }
 
 .bezent-structure-num {

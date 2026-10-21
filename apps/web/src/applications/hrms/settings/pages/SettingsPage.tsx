@@ -23,6 +23,7 @@ import { LeaveSettingsSection } from '../leave';
 import { AttendanceSettingsSection } from '../attendance';
 import { TimesheetsSettingsSection } from '../timesheets';
 import { PerformanceSettingsSection } from '../performance';
+import { MilestonesSettingsSection } from '../milestones/MilestonesSettingsSection';
 
 export interface SettingsPageInnerProps {
   initialModule?: SettingsModuleId;
@@ -110,6 +111,7 @@ export function SettingsPageInner({ initialModule = 'overview' }: SettingsPageIn
             {activeModule === 'performance' && <PerformanceSettingsSection />}
             {activeModule === 'employees' && <EmployeesSettingsSection />}
             {activeModule === 'hr-settings' && <HRSettingsSection />}
+            {activeModule === 'milestones' && <MilestonesSettingsSection />}
           </div>
         </Stack>
       )}

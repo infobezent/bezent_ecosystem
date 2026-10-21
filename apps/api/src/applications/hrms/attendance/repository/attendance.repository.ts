@@ -3571,6 +3571,35 @@ export class AttendanceRepository {
 
     return rows[0] ?? null;
   }
+
+  /**
+   * Fetch employee's assigned work location ID and location type for geofence enforcement.
+   */
+  async getEmployeeLocationInfo(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+  ): Promise<{ locationId: string | null; locationType: string | null } | null> {
+    const db = getDb();
+    const rows = await db
+      .select({
+        locationId: employees.locationId,
+        locationType: locations.type,
+      })
+      .from(employees)
+      .leftJoin(locations, eq(employees.locationId, locations.id))
+      .where(
+        and(
+          eq(employees.tenantId, tenantId),
+          eq(employees.companyId, companyId),
+          eq(employees.id, employeeId),
+        ),
+      )
+      .limit(1);
+
+    if (rows.length === 0) return null;
+    return rows[0]!;
+  }
 }
 
 export const attendanceRepository = new AttendanceRepository();
