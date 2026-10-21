@@ -229,20 +229,25 @@ export class EmployeeService {
         })
       : await this.repo.create(tenantId, companyId, validatedDto);
 
-    // Auto-provision User login and company membership for instant ESS access
-    try {
-      await provisionUserForEmployee(tenantId, companyId, {
-        id: created.id,
-        email: validatedDto.email,
-        firstName: validatedDto.firstName,
-        lastName: validatedDto.lastName ?? null,
-        userId: created.userId,
-      });
-    } catch (err) {
-      console.warn(
-        `[auth:bridge] Failed to auto-provision user for employee ${validatedDto.email}:`,
-        err,
-      );
+    // Auto-provision User login and company membership if explicitly requested
+    const shouldAutoProvision = Boolean(
+      inputObj.autoProvisionUser || inputObj.enablePortalAccess,
+    );
+    if (shouldAutoProvision) {
+      try {
+        await provisionUserForEmployee(tenantId, companyId, {
+          id: created.id,
+          email: validatedDto.email,
+          firstName: validatedDto.firstName,
+          lastName: validatedDto.lastName ?? null,
+          userId: created.userId,
+        });
+      } catch (err) {
+        console.warn(
+          `[auth:bridge] Failed to auto-provision user for employee ${validatedDto.email}:`,
+          err,
+        );
+      }
     }
 
     // 6. Return full detailed representation
