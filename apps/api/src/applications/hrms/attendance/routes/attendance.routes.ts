@@ -407,6 +407,14 @@ attendanceRouter.post(
   attendanceCompOffController.createPolicy,
 );
 attendanceRouter.get(
+  '/hrms/attendance/comp-off/policies/:id',
+  attendanceCompOffController.getPolicyDetails,
+);
+attendanceRouter.put(
+  '/hrms/attendance/comp-off/policies/:id',
+  attendanceCompOffController.updatePolicy,
+);
+attendanceRouter.get(
   '/hrms/attendance/comp-off/requests/:id/audits',
   attendanceCompOffController.getRequestAudits,
 );
@@ -509,6 +517,25 @@ attendanceRouter.post(
 attendanceRouter.post(
   '/hrms/attendance/settings/policies/:id/rollback',
   attendanceSettingsController.rollbackPolicyVersion,
+);
+
+// Shifts & Rosters
+attendanceRouter.get(
+  '/hrms/attendance/settings/shifts',
+  attendanceSettingsController.getShiftSettings,
+);
+attendanceRouter.put(
+  '/hrms/attendance/settings/shifts',
+  attendanceSettingsController.updateShiftSettings,
+);
+attendanceRouter.post('/hrms/attendance/settings/shifts', attendanceSettingsController.createShift);
+attendanceRouter.put(
+  '/hrms/attendance/settings/shifts/:id',
+  attendanceSettingsController.updateShift,
+);
+attendanceRouter.delete(
+  '/hrms/attendance/settings/shifts/:id',
+  attendanceSettingsController.deleteShift,
 );
 
 // Regularization

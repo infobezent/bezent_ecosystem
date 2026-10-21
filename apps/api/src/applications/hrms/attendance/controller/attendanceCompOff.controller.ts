@@ -330,6 +330,28 @@ export class AttendanceCompOffController {
     }
   };
 
+  getPolicyDetails = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { tenantId, companyId } = req.companyContext!;
+      const policyId = req.params.id as string;
+      const data = await this.service.getPolicyById(tenantId, companyId, policyId);
+      res.json({ success: true, data });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  updatePolicy = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { tenantId, companyId } = req.companyContext!;
+      const policyId = req.params.id as string;
+      const data = await this.service.updatePolicy(tenantId, companyId, policyId, req.body);
+      res.json({ success: true, data });
+    } catch (err) {
+      next(err);
+    }
+  };
+
   getRequestAudits = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { tenantId, companyId } = req.companyContext!;

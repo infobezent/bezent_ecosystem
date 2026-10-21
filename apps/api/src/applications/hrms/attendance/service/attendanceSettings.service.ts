@@ -34,6 +34,11 @@ import type {
   ClassificationRulesConfig,
   EffectivePolicyResolution,
   PublishPolicyInput,
+  CompanyShiftTemplate,
+  ShiftRosterSettings,
+  UpdateShiftRosterSettingsInput,
+  CreateShiftInput,
+  UpdateShiftInput,
 } from '../types/attendance.types.js';
 import { BadRequestError, NotFoundError } from '../../../../app/errors/AppError.js';
 
@@ -1120,6 +1125,123 @@ export class AttendanceSettingsService {
     filter?: SettingsAuditFilter,
   ): Promise<{ items: AttendanceSettingsAuditLog[]; total: number }> {
     return this.repo.queryAuditLogs(tenantId, companyId, filter);
+  }
+
+  /* ── 8. Shift & Roster Configuration ────────────────────────────── */
+
+  async getShiftRosterSettings(tenantId: string, companyId: string): Promise<ShiftRosterSettings> {
+    return this.repo.getShiftRosterSettings(tenantId, companyId);
+  }
+
+  async updateShiftRosterSettings(
+    tenantId: string,
+    companyId: string,
+    input: UpdateShiftRosterSettingsInput,
+    userId?: string,
+    clientIp?: string,
+  ): Promise<ShiftRosterSettings> {
+    const prev = await this.repo.getShiftRosterSettings(tenantId, companyId);
+    const updated = await this.repo.updateShiftRosterSettings(tenantId, companyId, input);
+
+    await this.repo.recordAuditLog(tenantId, companyId, {
+      category: 'general',
+      action: 'roster_settings_updated',
+      entityId: companyId,
+      entityType: 'shift_roster_settings',
+      previousValues: prev as unknown as Record<string, unknown>,
+      newValues: updated as unknown as Record<string, unknown>,
+      changedByUserId: userId,
+      clientIp,
+    });
+
+    return updated;
+  }
+
+  async createCompanyShift(
+    tenantId: string,
+    companyId: string,
+    input: CreateShiftInput,
+    userId?: string,
+    clientIp?: string,
+  ): Promise<CompanyShiftTemplate> {
+    if (!input.name || !input.code || !input.startTime || !input.endTime) {
+      throw new BadRequestError('Shift name, code, start time, and end time are required');
+    }
+
+    const created = await this.repo.createCompanyShift(tenantId, companyId, input);
+
+    await this.repo.recordAuditLog(tenantId, companyId, {
+      category: 'general',
+      action: 'shift_created',
+      entityId: created.id,
+      entityType: 'company_shifts',
+      newValues: created as unknown as Record<string, unknown>,
+      changedByUserId: userId,
+      clientIp,
+    });
+
+    return created;
+  }
+
+  async updateCompanyShift(
+    tenantId: string,
+    companyId: string,
+    shiftId: string,
+    input: UpdateShiftInput,
+    userId?: string,
+    clientIp?: string,
+  ): Promise<CompanyShiftTemplate> {
+    const prevSettings = await this.repo.getShiftRosterSettings(tenantId, companyId);
+    const prevShift = prevSettings.shifts.find((s) => s.id === shiftId);
+    if (!prevShift) {
+      throw new NotFoundError(`Shift template '${shiftId}' was not found`);
+    }
+
+    const updated = await this.repo.updateCompanyShift(tenantId, companyId, shiftId, input);
+    if (!updated) {
+      throw new NotFoundError(`Shift template '${shiftId}' was not found`);
+    }
+
+    await this.repo.recordAuditLog(tenantId, companyId, {
+      category: 'general',
+      action: 'shift_updated',
+      entityId: shiftId,
+      entityType: 'company_shifts',
+      previousValues: prevShift as unknown as Record<string, unknown>,
+      newValues: updated as unknown as Record<string, unknown>,
+      changedByUserId: userId,
+      clientIp,
+    });
+
+    return updated;
+  }
+
+  async deleteCompanyShift(
+    tenantId: string,
+    companyId: string,
+    shiftId: string,
+    userId?: string,
+    clientIp?: string,
+  ): Promise<{ success: boolean }> {
+    const prevSettings = await this.repo.getShiftRosterSettings(tenantId, companyId);
+    const prevShift = prevSettings.shifts.find((s) => s.id === shiftId);
+    if (!prevShift) {
+      throw new NotFoundError(`Shift template '${shiftId}' was not found`);
+    }
+
+    const success = await this.repo.deleteCompanyShift(tenantId, companyId, shiftId);
+
+    await this.repo.recordAuditLog(tenantId, companyId, {
+      category: 'general',
+      action: 'shift_deleted',
+      entityId: shiftId,
+      entityType: 'company_shifts',
+      previousValues: prevShift as unknown as Record<string, unknown>,
+      changedByUserId: userId,
+      clientIp,
+    });
+
+    return { success };
   }
 }
 

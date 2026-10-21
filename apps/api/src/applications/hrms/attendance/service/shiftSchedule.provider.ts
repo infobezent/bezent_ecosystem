@@ -7,6 +7,7 @@ import {
 } from '../../../../db/schema.js';
 import type { ShiftSchedule } from '../types/attendance.types.js';
 import { DEFAULT_WORK_SCHEDULE, timeToMinutes } from './attendanceCalculation.service.js';
+import { attendanceSettingsRepository } from '../repository/attendanceSettings.repository.js';
 
 export interface AssignedShiftDetails {
   isAssigned: boolean;
@@ -27,6 +28,9 @@ export interface ShiftScheduleProvider {
     companyId: string,
     employeeId: string,
     date?: string,
+    punchInTime?: string,
+    enableAutoShiftAllocation?: boolean,
+    shiftMatchingWindowMinutes?: number,
   ): Promise<ShiftSchedule>;
 }
 
@@ -99,12 +103,134 @@ export class DefaultShiftScheduleProvider implements ShiftScheduleProvider {
     };
   }
 
+  /**
+   * Automatically resolves the closest matching company shift based on check-in punch time.
+   */
+  async resolveAutoAllocatedShift(
+    tenantId: string,
+    companyId: string,
+    punchInTime: string,
+    matchingWindowMinutes: number = 60,
+  ): Promise<ShiftSchedule | null> {
+    const db = getDb();
+    const schedules = await db
+      .selectDistinct({
+        workSchedule: employeeWorkSchedules.workSchedule,
+        startTime: employeeWorkSchedules.startTime,
+        endTime: employeeWorkSchedules.endTime,
+        workingDays: employeeWorkSchedules.workingDays,
+        breakMinutes: employeeWorkSchedules.breakMinutes,
+        lunchMinutes: employeeWorkSchedules.lunchMinutes,
+        timeZone: employeeWorkSchedules.timeZone,
+      })
+      .from(employeeWorkSchedules)
+      .where(
+        and(
+          eq(employeeWorkSchedules.tenantId, tenantId),
+          eq(employeeWorkSchedules.companyId, companyId),
+        ),
+      );
+
+    const roster = await attendanceSettingsRepository
+      .getShiftRosterSettings(tenantId, companyId)
+      .catch(() => null);
+
+    const candidates: Array<{
+      name: string;
+      startTime: string;
+      endTime: string;
+      workingDays: (string | number)[];
+      breakMinutes: number;
+      lunchMinutes: number;
+      timeZone: string | null;
+    }> = [];
+
+    if (roster && roster.shifts) {
+      for (const s of roster.shifts) {
+        if (s.isActive && s.startTime && s.endTime) {
+          candidates.push({
+            name: s.name,
+            startTime: s.startTime,
+            endTime: s.endTime,
+            workingDays: s.workingDays,
+            breakMinutes: s.breakMinutes,
+            lunchMinutes: s.lunchMinutes,
+            timeZone: null,
+          });
+        }
+      }
+    }
+
+    for (const sch of schedules) {
+      if (
+        sch.startTime &&
+        sch.endTime &&
+        !candidates.some((c) => c.startTime === sch.startTime && c.endTime === sch.endTime)
+      ) {
+        candidates.push({
+          name: sch.workSchedule || 'Assigned Shift',
+          startTime: sch.startTime,
+          endTime: sch.endTime,
+          workingDays: sch.workingDays ?? DEFAULT_WORK_SCHEDULE.workingDays,
+          breakMinutes: sch.breakMinutes ?? DEFAULT_WORK_SCHEDULE.breakMinutes,
+          lunchMinutes: sch.lunchMinutes ?? DEFAULT_WORK_SCHEDULE.lunchMinutes,
+          timeZone: sch.timeZone ?? null,
+        });
+      }
+    }
+
+    if (candidates.length === 0) return null;
+
+    const punchMinutes = timeToMinutes(punchInTime.slice(0, 5));
+    let closestCandidate: (typeof candidates)[0] | null = null;
+    let minDiff = Infinity;
+
+    for (const cand of candidates) {
+      const shiftStartMin = timeToMinutes(cand.startTime);
+      const diff = Math.min(
+        Math.abs(punchMinutes - shiftStartMin),
+        1440 - Math.abs(punchMinutes - shiftStartMin),
+      );
+      if (diff <= matchingWindowMinutes && diff < minDiff) {
+        minDiff = diff;
+        closestCandidate = cand;
+      }
+    }
+
+    if (!closestCandidate) return null;
+
+    return {
+      workingDays: closestCandidate.workingDays
+        ? closestCandidate.workingDays.map(String)
+        : DEFAULT_WORK_SCHEDULE.workingDays,
+      startTime: closestCandidate.startTime,
+      endTime: closestCandidate.endTime,
+      breakMinutes: closestCandidate.breakMinutes ?? DEFAULT_WORK_SCHEDULE.breakMinutes,
+      lunchMinutes: closestCandidate.lunchMinutes ?? DEFAULT_WORK_SCHEDULE.lunchMinutes,
+      timeZone: closestCandidate.timeZone ?? DEFAULT_WORK_SCHEDULE.timeZone,
+      scheduleRef: closestCandidate.name || 'auto_allocated_shift',
+    };
+  }
+
   async getEmployeeSchedule(
     tenantId: string,
     companyId: string,
     employeeId: string,
     _date?: string,
+    punchInTime?: string,
+    enableAutoShiftAllocation?: boolean,
+    shiftMatchingWindowMinutes?: number,
   ): Promise<ShiftSchedule> {
+    if (enableAutoShiftAllocation && punchInTime) {
+      const autoMatched = await this.resolveAutoAllocatedShift(
+        tenantId,
+        companyId,
+        punchInTime,
+        shiftMatchingWindowMinutes || 60,
+      );
+      if (autoMatched) return autoMatched;
+    }
+
     const schedule = await this.getRawSchedule(tenantId, companyId, employeeId);
     if (!schedule) {
       return DEFAULT_WORK_SCHEDULE;

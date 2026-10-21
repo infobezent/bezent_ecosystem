@@ -736,3 +736,52 @@ export async function fetchCompOffAudits(requestId: string): Promise<CompOffAudi
   }
   return Array.isArray(body?.data) ? body.data : [];
 }
+
+/**
+ * Create Comp-Off Policy
+ */
+export async function createCompOffPolicy(
+  payload: Partial<CompOffPolicyItem>,
+): Promise<CompOffPolicyItem> {
+  const url = `${appConfig.apiBaseUrl}/hrms/attendance/comp-off/policies`;
+  const res = await authorizedFetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  let body: ApiResponseEnvelope<CompOffPolicyItem> | null = null;
+  try {
+    body = (await res.json()) as ApiResponseEnvelope<CompOffPolicyItem>;
+  } catch {
+    body = null;
+  }
+  if (!res.ok || !body?.data) {
+    handleApiError(res, body, 'Failed to create comp-off policy');
+  }
+  return body.data;
+}
+
+/**
+ * Update Comp-Off Policy
+ */
+export async function updateCompOffPolicy(
+  id: string,
+  payload: Partial<CompOffPolicyItem>,
+): Promise<CompOffPolicyItem> {
+  const url = `${appConfig.apiBaseUrl}/hrms/attendance/comp-off/policies/${id}`;
+  const res = await authorizedFetch(url, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  let body: ApiResponseEnvelope<CompOffPolicyItem> | null = null;
+  try {
+    body = (await res.json()) as ApiResponseEnvelope<CompOffPolicyItem>;
+  } catch {
+    body = null;
+  }
+  if (!res.ok || !body?.data) {
+    handleApiError(res, body, 'Failed to update comp-off policy');
+  }
+  return body.data;
+}
