@@ -8,6 +8,7 @@ import {
 } from '../validation/employee.schema.js';
 import type { EmployeeDetails, PaginatedEmployeesResult } from '../types/employee.types.js';
 import { NotFoundError, ConflictError, BadRequestError } from '../../../../app/errors/AppError.js';
+import { provisionUserForEmployee } from './employeeUserBridge.service.js';
 
 export class EmployeeService {
   constructor(
@@ -227,6 +228,22 @@ export class EmployeeService {
           return employee;
         })
       : await this.repo.create(tenantId, companyId, validatedDto);
+
+    // Auto-provision User login and company membership for instant ESS access
+    try {
+      await provisionUserForEmployee(tenantId, companyId, {
+        id: created.id,
+        email: validatedDto.email,
+        firstName: validatedDto.firstName,
+        lastName: validatedDto.lastName ?? null,
+        userId: created.userId,
+      });
+    } catch (err) {
+      console.warn(
+        `[auth:bridge] Failed to auto-provision user for employee ${validatedDto.email}:`,
+        err,
+      );
+    }
 
     // 6. Return full detailed representation
     const fullDetails = await this.repo.getById(tenantId, companyId, created.id);
