@@ -179,6 +179,114 @@ function getDayTileContent(
   return { statusLabel, subLabel, accessibleLabel };
 }
 
+function AttendanceCardSparkline({
+  variant,
+  value,
+  history = [],
+  color,
+  fillColor,
+}: {
+  variant: 'present' | 'absent' | 'half-day' | 'late' | 'worked' | 'missing-punch';
+  value: number;
+  history?: EssAttendanceRecord[];
+  color: string;
+  fillColor: string;
+}) {
+  const points = useMemo(() => {
+    if (history && history.length > 0) {
+      const segments = 5;
+      const segSize = Math.max(1, Math.floor(history.length / segments));
+      const res: number[] = [];
+      for (let i = 0; i < segments; i++) {
+        const slice = history.slice(i * segSize, (i + 1) * segSize);
+        let count = 0;
+        if (variant === 'present') {
+          count = slice.filter((r) => r.status === 'present').length;
+        } else if (variant === 'absent') {
+          count = slice.filter((r) => r.status === 'absent').length;
+        } else if (variant === 'half-day') {
+          count = slice.filter((r) => r.status === 'half_day').length;
+        } else if (variant === 'late') {
+          count = slice.filter((r) => r.isLate).length;
+        } else if (variant === 'worked') {
+          count = slice.reduce((acc, r) => acc + (r.workedMinutes || 0), 0) / 60;
+        } else if (variant === 'missing-punch') {
+          count = slice.filter((r) => r.status === 'incomplete' || r.isMissingPunch).length;
+        }
+        res.push(count);
+      }
+      return res;
+    }
+
+    if (value === 0) {
+      return [0, 0, 0, 0, 0];
+    }
+
+    return [
+      Math.max(0, Math.round(value * 0.15)),
+      Math.max(0, Math.round(value * 0.2)),
+      Math.max(0, Math.round(value * 0.3)),
+      Math.max(0, Math.round(value * 0.25)),
+      Math.max(0, Math.round(value * 0.35)),
+    ];
+  }, [history, variant, value]);
+
+  const isAllZero = points.every((p) => p === 0);
+  const width = 80;
+  const height = 24;
+  const paddingY = 4;
+  const maxVal = Math.max(...points, 1);
+  const plotHeight = height - paddingY * 2;
+
+  const coords = points.map((pt, i) => {
+    const x = (i / (points.length - 1)) * width;
+    const y = isAllZero ? height - 6 : height - paddingY - (pt / maxVal) * plotHeight;
+    return { x, y };
+  });
+
+  const firstCoord = coords[0] ?? { x: 0, y: height - 6 };
+  let pathD = `M ${firstCoord.x},${firstCoord.y}`;
+  for (let i = 0; i < coords.length - 1; i++) {
+    const curr = coords[i] ?? { x: 0, y: height - 6 };
+    const next = coords[i + 1] ?? { x: width, y: height - 6 };
+    const mx = (curr.x + next.x) / 2;
+    pathD += ` C ${mx},${curr.y} ${mx},${next.y} ${next.x},${next.y}`;
+  }
+
+  const areaD = `${pathD} L ${width},${height} L 0,${height} Z`;
+  const lastCoord = coords[coords.length - 1] ?? { x: width, y: height - 6 };
+  const gradId = `spark-grad-${variant}-${value}`;
+
+  return (
+    <div className="bezent-attendance-summary__sparkline">
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        className="bezent-attendance-summary__sparkline-svg"
+        aria-hidden="true"
+      >
+        <defs>
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={fillColor} stopOpacity="0.75" />
+            <stop offset="100%" stopColor={fillColor} stopOpacity="0.05" />
+          </linearGradient>
+        </defs>
+        {!isAllZero && <path d={areaD} fill={`url(#${gradId})`} />}
+        <path
+          d={pathD}
+          fill="none"
+          stroke={color}
+          strokeWidth="1.75"
+          strokeDasharray={isAllZero ? '3 3' : undefined}
+          strokeOpacity={isAllZero ? 0.45 : 1}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <circle cx={lastCoord.x} cy={lastCoord.y} r="2.5" fill={color} />
+      </svg>
+    </div>
+  );
+}
+
 export function AttendanceMonthlyCalendar({
   initialDate = new Date(),
   summary,
@@ -663,59 +771,83 @@ export function AttendanceMonthlyCalendar({
           {!hideSummaryCards && (
             <div className="bezent-attendance-summary">
               <div className="bezent-attendance-summary__card bezent-attendance-summary__card--present">
-                <div className="bezent-attendance-summary__icon">
-                  <BezentIcon name="calendar" size={20} />
-                </div>
                 <div className="bezent-attendance-summary__value">{summary.presentDays}</div>
                 <div className="bezent-attendance-summary__label">Present Days</div>
+                <AttendanceCardSparkline
+                  variant="present"
+                  value={summary.presentDays}
+                  history={history}
+                  color="#159a68"
+                  fillColor="#ddf7e9"
+                />
               </div>
 
               <div className="bezent-attendance-summary__card bezent-attendance-summary__card--absent">
-                <div className="bezent-attendance-summary__icon">
-                  <BezentIcon name="close" size={20} />
-                </div>
                 <div className="bezent-attendance-summary__value">{summary.absentDays}</div>
                 <div className="bezent-attendance-summary__label">Absent Days</div>
+                <AttendanceCardSparkline
+                  variant="absent"
+                  value={summary.absentDays}
+                  history={history}
+                  color="#de5264"
+                  fillColor="#ffe6ec"
+                />
               </div>
 
               <div className="bezent-attendance-summary__card bezent-attendance-summary__card--half-day">
-                <div className="bezent-attendance-summary__icon">
-                  <BezentIcon name="clock" size={20} />
-                </div>
                 <div className="bezent-attendance-summary__value">{summary.halfDays ?? 0}</div>
                 <div className="bezent-attendance-summary__label">Half Days</div>
+                <AttendanceCardSparkline
+                  variant="half-day"
+                  value={summary.halfDays ?? 0}
+                  history={history}
+                  color="#ea580c"
+                  fillColor="#ffe9de"
+                />
               </div>
 
               <div className="bezent-attendance-summary__card bezent-attendance-summary__card--late">
-                <div className="bezent-attendance-summary__icon">
-                  <BezentIcon name="clock" size={20} />
-                </div>
                 <div className="bezent-attendance-summary__value">
                   {summary.lateDays ?? summary.lateMarksCount ?? 0}
                 </div>
                 <div className="bezent-attendance-summary__label">Late Arrivals</div>
+                <AttendanceCardSparkline
+                  variant="late"
+                  value={summary.lateDays ?? summary.lateMarksCount ?? 0}
+                  history={history}
+                  color="#f07865"
+                  fillColor="#ffe8dc"
+                />
               </div>
 
               <div className="bezent-attendance-summary__card bezent-attendance-summary__card--worked">
-                <div className="bezent-attendance-summary__icon">
-                  <BezentIcon name="reports" size={20} />
-                </div>
                 <div className="bezent-attendance-summary__value">
-                  {summary.workedMinutes !== undefined
+                  {summary.workedMinutes !== undefined && summary.workedMinutes > 0
                     ? `${Math.floor(summary.workedMinutes / 60)}h ${summary.workedMinutes % 60}m`
-                    : '—'}
+                    : '0'}
                 </div>
                 <div className="bezent-attendance-summary__label">Worked Hours</div>
+                <AttendanceCardSparkline
+                  variant="worked"
+                  value={summary.workedMinutes ? Math.floor(summary.workedMinutes / 60) : 0}
+                  history={history}
+                  color="#3978f6"
+                  fillColor="#e8f1ff"
+                />
               </div>
 
               <div className="bezent-attendance-summary__card bezent-attendance-summary__card--missing-punch">
-                <div className="bezent-attendance-summary__icon">
-                  <BezentIcon name="alert" size={20} />
-                </div>
                 <div className="bezent-attendance-summary__value">
                   {summary.missingPunchesCount ?? 0}
                 </div>
                 <div className="bezent-attendance-summary__label">Missing Punches</div>
+                <AttendanceCardSparkline
+                  variant="missing-punch"
+                  value={summary.missingPunchesCount ?? 0}
+                  history={history}
+                  color="#8265de"
+                  fillColor="#ede5ff"
+                />
               </div>
             </div>
           )}
@@ -725,61 +857,91 @@ export function AttendanceMonthlyCalendar({
   );
 }
 
-export function AttendanceSummaryMetricsCards({ summary }: { summary: AttendanceSummaryMetrics }) {
+export function AttendanceSummaryMetricsCards({
+  summary,
+  history = [],
+}: {
+  summary: AttendanceSummaryMetrics;
+  history?: EssAttendanceRecord[];
+}) {
   return (
     <div className="bezent-attendance-summary-strip">
       <div className="bezent-attendance-summary__card bezent-attendance-summary__card--present">
-        <div className="bezent-attendance-summary__icon">
-          <BezentIcon name="calendar" size={20} />
-        </div>
         <div className="bezent-attendance-summary__value">{summary.presentDays}</div>
         <div className="bezent-attendance-summary__label">Present Days</div>
+        <AttendanceCardSparkline
+          variant="present"
+          value={summary.presentDays}
+          history={history}
+          color="#159a68"
+          fillColor="#ddf7e9"
+        />
       </div>
 
       <div className="bezent-attendance-summary__card bezent-attendance-summary__card--absent">
-        <div className="bezent-attendance-summary__icon">
-          <BezentIcon name="close" size={20} />
-        </div>
         <div className="bezent-attendance-summary__value">{summary.absentDays}</div>
         <div className="bezent-attendance-summary__label">Absent Days</div>
+        <AttendanceCardSparkline
+          variant="absent"
+          value={summary.absentDays}
+          history={history}
+          color="#de5264"
+          fillColor="#ffe6ec"
+        />
       </div>
 
       <div className="bezent-attendance-summary__card bezent-attendance-summary__card--half-day">
-        <div className="bezent-attendance-summary__icon">
-          <BezentIcon name="clock" size={20} />
-        </div>
         <div className="bezent-attendance-summary__value">{summary.halfDays ?? 0}</div>
         <div className="bezent-attendance-summary__label">Half Days</div>
+        <AttendanceCardSparkline
+          variant="half-day"
+          value={summary.halfDays ?? 0}
+          history={history}
+          color="#ea580c"
+          fillColor="#ffe9de"
+        />
       </div>
 
       <div className="bezent-attendance-summary__card bezent-attendance-summary__card--late">
-        <div className="bezent-attendance-summary__icon">
-          <BezentIcon name="clock" size={20} />
-        </div>
         <div className="bezent-attendance-summary__value">
           {summary.lateDays ?? summary.lateMarksCount ?? 0}
         </div>
         <div className="bezent-attendance-summary__label">Late Arrivals</div>
+        <AttendanceCardSparkline
+          variant="late"
+          value={summary.lateDays ?? summary.lateMarksCount ?? 0}
+          history={history}
+          color="#f07865"
+          fillColor="#ffe8dc"
+        />
       </div>
 
       <div className="bezent-attendance-summary__card bezent-attendance-summary__card--worked">
-        <div className="bezent-attendance-summary__icon">
-          <BezentIcon name="reports" size={20} />
-        </div>
         <div className="bezent-attendance-summary__value">
-          {summary.workedMinutes !== undefined
+          {summary.workedMinutes !== undefined && summary.workedMinutes > 0
             ? `${Math.floor(summary.workedMinutes / 60)}h ${summary.workedMinutes % 60}m`
-            : '—'}
+            : '0'}
         </div>
         <div className="bezent-attendance-summary__label">Worked Hours</div>
+        <AttendanceCardSparkline
+          variant="worked"
+          value={summary.workedMinutes ? Math.floor(summary.workedMinutes / 60) : 0}
+          history={history}
+          color="#3978f6"
+          fillColor="#e8f1ff"
+        />
       </div>
 
       <div className="bezent-attendance-summary__card bezent-attendance-summary__card--missing-punch">
-        <div className="bezent-attendance-summary__icon">
-          <BezentIcon name="alert" size={20} />
-        </div>
         <div className="bezent-attendance-summary__value">{summary.missingPunchesCount ?? 0}</div>
         <div className="bezent-attendance-summary__label">Missing Punches</div>
+        <AttendanceCardSparkline
+          variant="missing-punch"
+          value={summary.missingPunchesCount ?? 0}
+          history={history}
+          color="#8265de"
+          fillColor="#ede5ff"
+        />
       </div>
     </div>
   );

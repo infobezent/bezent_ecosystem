@@ -165,7 +165,7 @@ export function ProfileMenu({
           }}
         >
           <span className="profile-menu__item-icon">
-            <BezentIcon name="helpCircle" size={18} />
+            <BezentIcon name="helpdesk" size={18} />
           </span>
           <div className="profile-menu__item-content">
             <span className="profile-menu__item-label">Help & Support</span>

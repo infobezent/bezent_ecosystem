@@ -419,7 +419,7 @@ export const EssAttendanceHero: React.FC<EssAttendanceHeroProps> = ({
             <BezentIcon
               name="logOut"
               size={17}
-              color={currentPeriod === 'night' ? '#60a5fa' : '#1a73e8'}
+              color={currentPeriod === 'night' ? '#60a5fa' : '#3978f6'}
             />
             <span>Check Out</span>
           </button>
@@ -431,7 +431,7 @@ export const EssAttendanceHero: React.FC<EssAttendanceHeroProps> = ({
         {/* 1. Current Time */}
         <div className="ess-glass-col">
           <div className="ess-glass-icon-badge ess-glass-icon-blue" aria-hidden="true">
-            <BezentIcon name="clock" size={20} color="#1a73e8" />
+            <BezentIcon name="clock" size={20} color="#3978f6" />
           </div>
           <div className="ess-glass-content">
             <span className="ess-glass-label">Current Time • {timezone}</span>
@@ -443,7 +443,7 @@ export const EssAttendanceHero: React.FC<EssAttendanceHeroProps> = ({
         {/* 2. Check In */}
         <div className="ess-glass-col">
           <div className="ess-glass-icon-badge ess-glass-icon-green" aria-hidden="true">
-            <BezentIcon name="logIn" size={20} color="#137333" />
+            <BezentIcon name="logIn" size={20} color="#159a68" />
           </div>
           <div className="ess-glass-content">
             <span className="ess-glass-label">Check In</span>
@@ -454,7 +454,7 @@ export const EssAttendanceHero: React.FC<EssAttendanceHeroProps> = ({
         {/* 3. Check Out */}
         <div className="ess-glass-col">
           <div className="ess-glass-icon-badge ess-glass-icon-coral" aria-hidden="true">
-            <BezentIcon name="logOut" size={20} color="#c5221f" />
+            <BezentIcon name="logOut" size={20} color="#e45163" />
           </div>
           <div className="ess-glass-content">
             <span className="ess-glass-label">Check Out</span>
@@ -465,7 +465,7 @@ export const EssAttendanceHero: React.FC<EssAttendanceHeroProps> = ({
         {/* 4. Worked Hours */}
         <div className="ess-glass-col">
           <div className="ess-glass-icon-badge ess-glass-icon-purple" aria-hidden="true">
-            <BezentIcon name="timer" size={20} color="#7627bb" />
+            <BezentIcon name="workedHours" size={20} color="#8b72e8" />
           </div>
           <div className="ess-glass-content">
             <span className="ess-glass-label">Worked Hours</span>
@@ -475,8 +475,8 @@ export const EssAttendanceHero: React.FC<EssAttendanceHeroProps> = ({
 
         {/* 5. Break Duration */}
         <div className="ess-glass-col">
-          <div className="ess-glass-icon-badge ess-glass-icon-amber" aria-hidden="true">
-            <BezentIcon name="coffee" size={20} color="#b06000" />
+          <div className="ess-glass-icon-badge ess-glass-icon-peach" aria-hidden="true">
+            <BezentIcon name="breakDuration" size={20} color="#f07865" />
           </div>
           <div className="ess-glass-content">
             <span className="ess-glass-label">Break Duration</span>
@@ -514,7 +514,7 @@ export const EssAttendanceHero: React.FC<EssAttendanceHeroProps> = ({
       <div className="ess-hero-briefing">
         <div className="ess-briefing-left">
           <div className="ess-briefing-icon-wrapper" aria-hidden="true">
-            <BezentIcon name="sparkles" size={20} color="#1a73e8" />
+            <BezentIcon name="sparkles" size={20} color="#3978f6" />
           </div>
           <div className="ess-briefing-content">
             <div className="ess-briefing-header">

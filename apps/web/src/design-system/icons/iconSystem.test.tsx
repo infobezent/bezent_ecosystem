@@ -113,4 +113,30 @@ describe('BEZENT Icon System — Google Material Symbols Outlined (ADR-015)', ()
       expect(getMaterialSymbolGlyph(name)).toBe(expectedGlyph);
     }
   });
+
+  it('Attendance action icons resolve to correct Material Symbols ligatures', () => {
+    const attendanceExpectations: Record<string, string> = {
+      checkIn: 'login',
+      checkin: 'login',
+      'check-in': 'login',
+      checkOut: 'logout',
+      checkout: 'logout',
+      'check-out': 'logout',
+      startBreak: 'coffee',
+      endBreak: 'play_arrow',
+      regularizeAttendance: 'edit_calendar',
+      breakDuration: 'timer',
+      'break-duration': 'timer',
+      workedHours: 'schedule',
+      'worked-hours': 'schedule',
+      helpdesk: 'support_agent',
+      'help-desk': 'support_agent',
+    };
+
+    for (const [name, expectedGlyph] of Object.entries(attendanceExpectations)) {
+      expect(getMaterialSymbolGlyph(name)).toBe(expectedGlyph);
+      const html = renderToStaticMarkup(<BezentIcon name={name as BezentIconName} />);
+      expect(html).toContain(`>${expectedGlyph}</span>`);
+    }
+  });
 });
