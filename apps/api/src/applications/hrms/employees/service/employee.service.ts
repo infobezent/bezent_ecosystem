@@ -230,9 +230,7 @@ export class EmployeeService {
       : await this.repo.create(tenantId, companyId, validatedDto);
 
     // Auto-provision User login and company membership if explicitly requested
-    const shouldAutoProvision = Boolean(
-      inputObj.autoProvisionUser || inputObj.enablePortalAccess,
-    );
+    const shouldAutoProvision = Boolean(inputObj.autoProvisionUser || inputObj.enablePortalAccess);
     if (shouldAutoProvision) {
       try {
         await provisionUserForEmployee(tenantId, companyId, {
