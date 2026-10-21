@@ -129,12 +129,20 @@ const REQUEST_TYPE_LABELS: Record<RegularizationRequestType, string> = {
   wrong_direction: 'Wrong Direction',
 };
 
+const QUEUE_TABS = [
+  { id: 'all', label: 'All Requests' },
+  { id: 'manager_queue', label: 'Manager Review Queue' },
+  { id: 'hr_queue', label: 'HR Review Queue' },
+  { id: 'hr_unassigned', label: 'Unassigned HR Queue' },
+];
+
 export function AttendanceRegularizationPage() {
   // 1. Date Range State (defaults to current month)
   const [workdayFrom, setWorkdayFrom] = useState(getStartOfMonthString());
   const [workdayTo, setWorkdayTo] = useState(getTodayString());
 
   // 2. Filter State
+  const [assignedQueue, setAssignedQueue] = useState<string>('all');
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [approvalStatus, setApprovalStatus] = useState<string>('all');
@@ -239,6 +247,7 @@ export function AttendanceRegularizationPage() {
         workdayFrom,
         workdayTo,
         search: debouncedSearch.trim() || undefined,
+        assignedQueue: assignedQueue === 'all' ? undefined : assignedQueue,
         approvalStatus: approvalStatus === 'all' ? undefined : approvalStatus,
         applicationStatus: applicationStatus === 'all' ? undefined : applicationStatus,
         requestType: requestType === 'all' ? undefined : requestType,
@@ -267,6 +276,7 @@ export function AttendanceRegularizationPage() {
     workdayFrom,
     workdayTo,
     debouncedSearch,
+    assignedQueue,
     approvalStatus,
     applicationStatus,
     requestType,
@@ -365,6 +375,7 @@ export function AttendanceRegularizationPage() {
 
   // Reset Filters
   const handleResetFilters = () => {
+    setAssignedQueue('all');
     setSearch('');
     setApprovalStatus('all');
     setRequestType('all');
@@ -508,6 +519,7 @@ export function AttendanceRegularizationPage() {
         {
           workdayFrom,
           workdayTo,
+          assignedQueue: assignedQueue === 'all' ? undefined : assignedQueue,
           approvalStatus: approvalStatus === 'all' ? undefined : approvalStatus,
           applicationStatus: applicationStatus === 'all' ? undefined : applicationStatus,
           requestType: requestType === 'all' ? undefined : requestType,
@@ -533,8 +545,11 @@ export function AttendanceRegularizationPage() {
     }
   };
 
-  // Semantic Approval Badge
-  const renderApprovalBadge = (status: RegularizationApprovalStatus) => {
+  // Semantic Approval Badge with Multi-Stage Queue Awareness
+  const renderApprovalBadge = (
+    status: RegularizationApprovalStatus,
+    queue?: string | null,
+  ) => {
     switch (status) {
       case 'approved':
         return <Badge variant="success">Approved</Badge>;
@@ -550,6 +565,15 @@ export function AttendanceRegularizationPage() {
         return <Badge variant="neutral">Draft</Badge>;
       case 'submitted':
       default:
+        if (queue === 'manager_queue') {
+          return <Badge variant="warning">Pending Manager</Badge>;
+        }
+        if (queue === 'hr_queue') {
+          return <Badge variant="info">Stage 1 Approved (Pending HR)</Badge>;
+        }
+        if (queue === 'hr_unassigned') {
+          return <Badge variant="neutral">Pending HR (Unassigned)</Badge>;
+        }
         return <Badge variant="warning">Pending Review</Badge>;
     }
   };
@@ -735,6 +759,17 @@ export function AttendanceRegularizationPage() {
             <span className="bezent-stat-card__num">{counters.rejectedToday}</span>
           </div>
         </Grid>
+
+        {/* 2.5 Multi-Stage Workspace Queue Switcher Tabs */}
+        <Tabs
+          variant="pills"
+          items={QUEUE_TABS}
+          activeId={assignedQueue}
+          onChange={(tabId) => {
+            setAssignedQueue(tabId);
+            setPage(1);
+          }}
+        />
 
         {/* 3. Primary Filter Toolbar */}
         <Card padding="sm">
@@ -1127,7 +1162,7 @@ export function AttendanceRegularizationPage() {
 
                   {/* 7. Approval Status */}
                   <TableCell className="bezent-table-col--approval">
-                    {renderApprovalBadge(req.approvalStatus)}
+                    {renderApprovalBadge(req.approvalStatus, req.assignedQueue)}
                   </TableCell>
 
                   {/* 8. Application Status */}
@@ -1236,7 +1271,7 @@ export function AttendanceRegularizationPage() {
                   </Inline>
 
                   <Inline gap="xs" align="center">
-                    {renderApprovalBadge(drawerDetail.approvalStatus)}
+                    {renderApprovalBadge(drawerDetail.approvalStatus, drawerDetail.assignedQueue)}
                     {renderApplicationBadge(drawerDetail.applicationStatus)}
                   </Inline>
                 </Inline>
@@ -1257,6 +1292,122 @@ export function AttendanceRegularizationPage() {
               {/* Tab 1: Overview */}
               {drawerTab === 'overview' && (
                 <Stack gap="md">
+                  {/* Multi-Stage Approval Workflow Progression */}
+                  <Card padding="sm">
+                    <Stack gap="sm">
+                      <Inline justify="between" align="center">
+                        <span className="bezent-table-meta-title">Approval Workflow Progression</span>
+                        <Badge
+                          variant={
+                            drawerDetail.approvalStatus === 'approved'
+                              ? 'success'
+                              : drawerDetail.approvalStatus === 'rejected'
+                                ? 'danger'
+                                : 'info'
+                          }
+                        >
+                          {drawerDetail.approvalStatus === 'approved'
+                            ? 'Workflow Completed'
+                            : drawerDetail.approvalStatus === 'rejected'
+                              ? 'Request Rejected'
+                              : drawerDetail.assignedQueue === 'manager_queue'
+                                ? 'Stage 1 of 2'
+                                : 'Stage 2 of 2'}
+                        </Badge>
+                      </Inline>
+
+                      <Grid columns={3} gap="sm">
+                        {/* Step 1: Employee Submission */}
+                        <Card padding="sm">
+                          <Stack gap="xs">
+                            <Inline gap="xs" align="center">
+                              <Badge variant="success">Step 1</Badge>
+                              <strong>Submission</strong>
+                            </Inline>
+                            <span className="bezent-card__desc">
+                              Submitted {formatDateTime(drawerDetail.submittedAt)}
+                            </span>
+                            <span className="bezent-card__desc">
+                              Source: {drawerDetail.source.toUpperCase()}
+                            </span>
+                          </Stack>
+                        </Card>
+
+                        {/* Step 2: Manager Review */}
+                        <Card padding="sm">
+                          <Stack gap="xs">
+                            <Inline gap="xs" align="center">
+                              <Badge
+                                variant={
+                                  drawerDetail.assignedQueue === 'manager_queue' &&
+                                  drawerDetail.approvalStatus === 'submitted'
+                                    ? 'warning'
+                                    : drawerDetail.approvalStatus === 'rejected' &&
+                                        drawerDetail.assignedQueue === 'manager_queue'
+                                      ? 'danger'
+                                      : 'success'
+                                }
+                              >
+                                Step 2
+                              </Badge>
+                              <strong>Manager Review</strong>
+                            </Inline>
+                            <span className="bezent-card__desc">
+                              {drawerDetail.assignedQueue === 'manager_queue' &&
+                              drawerDetail.approvalStatus === 'submitted'
+                                ? 'Awaiting Manager decision'
+                                : drawerDetail.approvalStatus === 'rejected' &&
+                                    drawerDetail.assignedQueue === 'manager_queue'
+                                  ? 'Rejected at Stage 1'
+                                  : 'Stage 1 Approved'}
+                            </span>
+                            <span className="bezent-card__desc">
+                              Reviewer: {drawerDetail.assignedToName || 'Reporting Manager'}
+                            </span>
+                          </Stack>
+                        </Card>
+
+                        {/* Step 3: HR Final Review & Application */}
+                        <Card padding="sm">
+                          <Stack gap="xs">
+                            <Inline gap="xs" align="center">
+                              <Badge
+                                variant={
+                                  drawerDetail.approvalStatus === 'approved'
+                                    ? 'success'
+                                    : drawerDetail.approvalStatus === 'rejected' &&
+                                        drawerDetail.assignedQueue !== 'manager_queue'
+                                      ? 'danger'
+                                      : drawerDetail.assignedQueue === 'hr_queue' ||
+                                          drawerDetail.assignedQueue === 'hr_unassigned'
+                                        ? 'warning'
+                                        : 'neutral'
+                                }
+                              >
+                                Step 3
+                              </Badge>
+                              <strong>HR Final Review</strong>
+                            </Inline>
+                            <span className="bezent-card__desc">
+                              {drawerDetail.approvalStatus === 'approved'
+                                ? 'Approved & Applied'
+                                : drawerDetail.approvalStatus === 'rejected' &&
+                                    drawerDetail.assignedQueue !== 'manager_queue'
+                                  ? 'Rejected at Stage 2'
+                                  : drawerDetail.assignedQueue === 'hr_queue' ||
+                                      drawerDetail.assignedQueue === 'hr_unassigned'
+                                    ? 'Awaiting HR validation & apply'
+                                    : 'Pending Manager Stage 1'}
+                            </span>
+                            <span className="bezent-card__desc">
+                              Application: {drawerDetail.applicationStatus}
+                            </span>
+                          </Stack>
+                        </Card>
+                      </Grid>
+                    </Stack>
+                  </Card>
+
                   <Card padding="sm">
                     <Stack gap="xs">
                       <span className="bezent-table-meta-title">Request Information</span>
@@ -1298,6 +1449,18 @@ export function AttendanceRegularizationPage() {
                         <Stack gap="none">
                           <span className="bezent-card__desc">Assigned To</span>
                           <span>{drawerDetail.assignedToName || 'Unassigned'}</span>
+                        </Stack>
+                        <Stack gap="none">
+                          <span className="bezent-card__desc">Review Queue</span>
+                          <strong>
+                            {drawerDetail.assignedQueue === 'manager_queue'
+                              ? 'Manager Review Queue'
+                              : drawerDetail.assignedQueue === 'hr_queue'
+                                ? 'HR Review Queue'
+                                : drawerDetail.assignedQueue === 'hr_unassigned'
+                                  ? 'Unassigned HR Queue'
+                                  : drawerDetail.assignedQueue || 'Direct Review'}
+                          </strong>
                         </Stack>
                         <Stack gap="none">
                           <span className="bezent-card__desc">Related Exception</span>

@@ -472,6 +472,7 @@ export async function fetchRegularizationWorkspace(
   if (filter.submittedFrom) query.set('submittedFrom', filter.submittedFrom);
   if (filter.submittedTo) query.set('submittedTo', filter.submittedTo);
   if (filter.assignedTo) query.set('assignedTo', filter.assignedTo);
+  if (filter.assignedQueue) query.set('assignedQueue', filter.assignedQueue);
   if (filter.departmentId) query.set('departmentId', filter.departmentId);
   if (filter.locationId) query.set('locationId', filter.locationId);
   if (filter.relatedException) query.set('relatedException', filter.relatedException);
@@ -691,6 +692,7 @@ export async function exportRegularizationsCsvBlob(
   if (filter.applicationStatus) query.set('applicationStatus', filter.applicationStatus);
   if (filter.requestType) query.set('requestType', filter.requestType);
   if (filter.assignedTo) query.set('assignedTo', filter.assignedTo);
+  if (filter.assignedQueue) query.set('assignedQueue', filter.assignedQueue);
   if (filter.departmentId) query.set('departmentId', filter.departmentId);
   if (selectedIds && selectedIds.length > 0) {
     query.set('selectedIds', selectedIds.join(','));
