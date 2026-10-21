@@ -362,6 +362,16 @@ export class AttendanceCompOffController {
       next(err);
     }
   };
+
+  triggerAutoLapse = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { tenantId, companyId } = req.companyContext!;
+      const data = await this.service.lapseExpiredCompOffEntitlements(tenantId, companyId);
+      res.json({ success: true, data });
+    } catch (err) {
+      next(err);
+    }
+  };
 }
 
 export const attendanceCompOffController = new AttendanceCompOffController();

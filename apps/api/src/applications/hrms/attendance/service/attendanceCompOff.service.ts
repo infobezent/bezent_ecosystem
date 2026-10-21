@@ -989,3 +989,5 @@ export class AttendanceCompOffService {
     return { lapsedCount: expiredRows.length };
   }
 }
+
+export const attendanceCompOffService = new AttendanceCompOffService();

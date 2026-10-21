@@ -626,6 +626,27 @@ export async function reverseCompOffEntitlement(
 }
 
 /**
+ * Trigger Comp-Off Auto-Lapse Background Sweep
+ */
+export async function triggerCompOffAutoLapse(): Promise<{ lapsedCount: number }> {
+  const url = `${appConfig.apiBaseUrl}/hrms/attendance/comp-off/entitlements/auto-lapse`;
+  const res = await authorizedFetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  let body: ApiResponseEnvelope<{ lapsedCount: number }> | null = null;
+  try {
+    body = (await res.json()) as ApiResponseEnvelope<{ lapsedCount: number }>;
+  } catch {
+    body = null;
+  }
+  if (!res.ok || !body?.data) {
+    handleApiError(res, body, 'Failed to trigger comp-off auto-lapse');
+  }
+  return body.data;
+}
+
+/**
  * List Leave Handoff Contract Records
  */
 export async function fetchCompOffHandoffs(filter?: {

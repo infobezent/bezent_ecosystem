@@ -391,6 +391,10 @@ attendanceRouter.post(
   attendanceCompOffController.reverseEntitlement,
 );
 attendanceRouter.post(
+  '/hrms/attendance/comp-off/entitlements/auto-lapse',
+  attendanceCompOffController.triggerAutoLapse,
+);
+attendanceRouter.post(
   '/hrms/attendance/comp-off/from-overtime/:settlementId',
   attendanceCompOffController.convertFromOvertime,
 );

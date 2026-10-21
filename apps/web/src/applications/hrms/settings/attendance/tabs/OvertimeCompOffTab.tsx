@@ -26,12 +26,14 @@ import {
   fetchCompOffPolicies,
   createCompOffPolicy,
   updateCompOffPolicy,
+  triggerCompOffAutoLapse,
   type CompOffPolicyItem,
 } from '../../../attendance/api/attendanceCompOffApi';
 
 export function OvertimeCompOffTab() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [lapsing, setLapsing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -182,6 +184,24 @@ export function OvertimeCompOffTab() {
       setError(err instanceof Error ? err.message : 'Failed to save policies');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleRunAutoLapse = async () => {
+    setLapsing(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const res = await triggerCompOffAutoLapse();
+      setSuccess(
+        res.lapsedCount > 0
+          ? `Comp-Off auto-lapse sweep completed: ${res.lapsedCount} expired entitlement(s) successfully lapsed.`
+          : 'Comp-Off auto-lapse sweep completed: No expired entitlements found to lapse.',
+      );
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to execute comp-off auto-lapse sweep');
+    } finally {
+      setLapsing(false);
     }
   };
 
@@ -478,6 +498,20 @@ export function OvertimeCompOffTab() {
             description="Guarantees that work hours claimed for Overtime payment cannot also generate Comp-Off."
           >
             <Badge variant="info">Enforced by System Rules</Badge>
+          </SettingsRow>
+
+          <Divider />
+
+          <SettingsRow
+            label="Automated Expiry Sweeper"
+            description="Background daemon runs hourly to auto-expire comp-off entitlements past their validity date and log an audit trail."
+          >
+            <Inline gap="sm" align="center">
+              <Badge variant="success">Active (Hourly Daemon)</Badge>
+              <Button variant="outline" size="sm" onClick={handleRunAutoLapse} disabled={lapsing}>
+                {lapsing ? 'Sweeping...' : 'Run Sweep Now'}
+              </Button>
+            </Inline>
           </SettingsRow>
         </Stack>
       </Card>
