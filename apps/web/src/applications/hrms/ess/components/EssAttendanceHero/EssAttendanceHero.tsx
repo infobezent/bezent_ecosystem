@@ -328,7 +328,7 @@ export const EssAttendanceHero: React.FC<EssAttendanceHeroProps> = ({
     >
       {/* Decorative Vector Scene Backdrop */}
       <div className="ess-hero-backdrop" aria-hidden="true">
-        <HeroSceneIllustration period={currentPeriod} className="ess-hero-backdrop-svg" />
+        <HeroSceneIllustration period={currentPeriod} now={now} className="ess-hero-backdrop-svg" />
       </div>
 
       {/* ── Top Header Section ── */}
