@@ -18,7 +18,11 @@ import {
  * triggered it.
  */
 
-export type AttendanceAlertEvent = 'lateArrival' | 'earlyExit' | 'regularizationPending';
+export type AttendanceAlertEvent =
+  | 'lateArrival'
+  | 'earlyExit'
+  | 'regularizationPending'
+  | 'missingPunch';
 
 export interface AttendanceAlertSubject {
   employeeId: string;

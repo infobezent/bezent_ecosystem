@@ -159,6 +159,10 @@ attendanceRouter.post(
   attendanceController.verifyAndResolveException,
 );
 attendanceRouter.post('/hrms/attendance/exceptions/bulk', attendanceController.bulkExceptionAction);
+attendanceRouter.post(
+  '/hrms/attendance/missing-punch/sweep',
+  attendanceController.triggerMissingPunchSweep,
+);
 
 // 6. Regularization Workflow V1.0
 attendanceRouter.get(

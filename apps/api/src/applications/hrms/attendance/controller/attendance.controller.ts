@@ -8,6 +8,9 @@ import {
   AttendanceOnDutyService,
   attendanceOnDutyService,
 } from '../service/attendanceOnDuty.service.js';
+import {
+  attendanceMissingPunchDetectorService,
+} from '../service/attendanceMissingPunchDetector.service.js';
 import { BadRequestError } from '../../../../app/errors/AppError.js';
 
 export class AttendanceController {
@@ -453,6 +456,25 @@ export class AttendanceController {
         req.user?.id ?? 'system',
       );
       res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  triggerMissingPunchSweep = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { tenantId, companyId } = req.companyContext!;
+      const targetDate = typeof req.body?.targetDate === 'string' ? req.body.targetDate : undefined;
+      const result = await attendanceMissingPunchDetectorService.runSweep({
+        tenantId,
+        companyId,
+        targetDate,
+      });
+      res.json({
+        success: true,
+        data: result,
+        message: `Missing punch sweep completed: detected ${result.detectedCount} missing punch(es) and sent ${result.alertCount} alert(s)`,
+      });
     } catch (err) {
       next(err);
     }

@@ -23,7 +23,11 @@ import {
 } from '../../../../../design-system/components';
 import { BezentIcon } from '../../../../../design-system/icons';
 import { SettingsRow } from '../components/SettingsRow';
-import { fetchGeneralSettings, updateGeneralSettings } from '../../../attendance/api/attendanceApi';
+import {
+  fetchGeneralSettings,
+  updateGeneralSettings,
+  triggerMissingPunchSweep,
+} from '../../../attendance/api/attendanceApi';
 import type {
   AttendanceGeneralSettings,
   ManualEntryConfig,
@@ -39,6 +43,8 @@ export function GeneralTab({ initialSettings }: GeneralTabProps = {}) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [sweepingMissingPunches, setSweepingMissingPunches] = useState(false);
+  const [sweepMessage, setSweepMessage] = useState<string | null>(null);
 
   // Section 1: Timezone & Day Boundary
   const [timezone, setTimezone] = useState('UTC');
@@ -361,6 +367,7 @@ export function GeneralTab({ initialSettings }: GeneralTabProps = {}) {
       {success && (
         <Alert variant="success">Attendance settings successfully saved and synchronized.</Alert>
       )}
+      {sweepMessage && <Alert variant="info">{sweepMessage}</Alert>}
 
       {/* ── Minimal 2-Column Settings Layout ── */}
       <Card variant="flat" padding="lg">
@@ -847,6 +854,43 @@ export function GeneralTab({ initialSettings }: GeneralTabProps = {}) {
               </Stack>
             </Card>
           )}
+
+          <Divider />
+
+          <SettingsRow
+            label="Automated Missing Punch Sweeper"
+            description="Background daemon runs periodically to detect unclosed past workdays, enforce missing punch policy (absent, half-day, or incomplete), log audit exceptions, and alert employees."
+          >
+            <Inline gap="sm" align="center">
+              <Badge variant="success">Active (Periodic Daemon)</Badge>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  setSweepingMissingPunches(true);
+                  setSweepMessage(null);
+                  setError(null);
+                  try {
+                    const res = await triggerMissingPunchSweep();
+                    setSweepMessage(
+                      res.detectedCount > 0
+                        ? `Missing punch sweep completed: detected ${res.detectedCount} missing punch(es) and dispatched ${res.alertCount} notification(s).`
+                        : 'Missing punch sweep completed: no pending missing punches detected.',
+                    );
+                  } catch (err: unknown) {
+                    setError(
+                      err instanceof Error ? err.message : 'Failed to execute missing punch sweep',
+                    );
+                  } finally {
+                    setSweepingMissingPunches(false);
+                  }
+                }}
+                disabled={sweepingMissingPunches}
+              >
+                {sweepingMissingPunches ? 'Sweeping...' : 'Run Sweep Now'}
+              </Button>
+            </Inline>
+          </SettingsRow>
         </Stack>
       </Card>
 
