@@ -11,6 +11,7 @@ import {
   SkillsSection,
   WorkSection,
 } from './ProfileSections';
+import { MilestonesSection } from './MilestonesSection';
 
 /**
  * Profile tabs — one per implemented employee-record domain. Onboarding tasks
@@ -23,6 +24,7 @@ export const PROFILE_TABS = [
   { id: 'accounts', label: 'Accounts' },
   { id: 'skills', label: 'Skills' },
   { id: 'work', label: 'Work' },
+  { id: 'milestones', label: 'Hours & Milestones' },
   { id: 'history', label: 'History' },
 ] as const;
 
@@ -94,6 +96,7 @@ export function EmployeeProfileView({
         <SkillsSection skills={profile.skills} onOpenEmployee={onOpenEmployee} />
       )}
       {activeTab === 'work' && <WorkSection workSchedule={profile.workSchedule} />}
+      {activeTab === 'milestones' && <MilestonesSection employeeId={employee.id} />}
       {activeTab === 'history' && history}
     </Stack>
   );

@@ -198,7 +198,9 @@ export function EssDashboardPage() {
   const filteredFeedPosts = useMemo(() => {
     if (feedCategory === 'all') return localPosts;
     if (feedCategory === 'celebrations') {
-      return localPosts.filter((p) => p.type === 'birthday' || p.type === 'anniversary');
+      return localPosts.filter(
+        (p) => p.type === 'birthday' || p.type === 'anniversary' || p.type === 'milestone_poster',
+      );
     }
     if (feedCategory === 'people') {
       return localPosts.filter((p) => p.type === 'new_joiner');
@@ -607,10 +609,38 @@ export function EssDashboardPage() {
                       </span>
                     </div>
                   </div>
-                  <span className="ess-feed-post-badge">{post.badge}</span>
+                  <span
+                    className={`ess-feed-post-badge ${post.type === 'milestone_poster' ? 'ess-feed-post-badge--amber' : ''}`}
+                  >
+                    {post.badge}
+                  </span>
                 </div>
 
                 <p className="ess-feed-post-message">{post.message}</p>
+
+                {post.type === 'milestone_poster' && post.posterData && (
+                  <Card variant="tint-amber" padding="md">
+                    <Inline gap="md" align="center">
+                      <BezentIcon name="award" size={28} />
+                      <Stack gap="xs">
+                        <strong>{post.posterData.milestoneTitle}</strong>
+                        <span>
+                          {post.posterData.employeeName} has achieved{' '}
+                          <strong>
+                            {post.posterData.hours?.toLocaleString() || '100,000'} lifetime working
+                            hours
+                          </strong>
+                          !
+                        </span>
+                        {post.posterData.quote && (
+                          <span className="bezent-text-muted">
+                            &ldquo;{post.posterData.quote}&rdquo;
+                          </span>
+                        )}
+                      </Stack>
+                    </Inline>
+                  </Card>
+                )}
 
                 <div className="ess-feed-post-footer">
                   <button

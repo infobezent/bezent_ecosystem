@@ -295,6 +295,13 @@
       "when": 1792000000000,
       "tag": "0041_attendance_comp_off_v1",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "5",
+      "when": 1792050000000,
+      "tag": "0042_employee_milestones_and_rewards",
+      "breakpoints": true
     }
   ]
 }

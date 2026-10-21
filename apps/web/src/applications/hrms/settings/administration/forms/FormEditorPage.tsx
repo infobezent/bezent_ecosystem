@@ -4,6 +4,7 @@ import {
   DndContext,
   DragOverlay,
   PointerSensor,
+  KeyboardSensor,
   closestCenter,
   pointerWithin,
   rectIntersection,
@@ -14,7 +15,7 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core';
-import { arrayMove } from '@dnd-kit/sortable';
+import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import {
   Alert,
   Badge,
@@ -79,6 +80,8 @@ export function FormEditorPage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   // Tracks the field key being dragged — used to render the DragOverlay ghost.
   const [activeDragFieldKey, setActiveDragFieldKey] = useState<string | null>(null);
+  // Tracks the chapter key being dragged in Form Structure panel.
+  const [activeDragChapterKey, setActiveDragChapterKey] = useState<string | null>(null);
   // Tracks the toolbox item being dragged — used to render the DragOverlay ghost.
   const [activeDragToolboxItem, setActiveDragToolboxItem] = useState<{
     type: CustomFieldType;
@@ -90,6 +93,8 @@ export function FormEditorPage() {
   const auth = useContext(AuthContext);
   const canManage = auth
     ? auth.isCompanyAdmin ||
+      auth.can('hrms.settings.manage') ||
+      auth.can('hrms.administration.manage') ||
       auth.can('hrms:settings:manage') ||
       auth.can('hrms:administration:manage')
     : true;
@@ -444,12 +449,15 @@ export function FormEditorPage() {
     setSelectedSubgroupKey(null);
   }, []);
 
-  // Drag sensors with distance activation to distinguish clicks from drags
+  // Drag sensors with distance activation to distinguish clicks from drags and keyboard reordering
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 5,
       },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
     }),
   );
 
@@ -743,6 +751,8 @@ export function FormEditorPage() {
   const handleDragStart = useCallback((event: DragStartEvent) => {
     const data = event.active.data.current as
       | {
+          isChapter?: boolean;
+          sectionKey?: string;
           isField?: boolean;
           fieldKey?: string;
           isToolbox?: boolean;
@@ -751,29 +761,40 @@ export function FormEditorPage() {
         }
       | undefined;
 
-    if (data?.isField && data.fieldKey) {
+    if ((data?.isChapter && data.sectionKey) || String(event.active.id).startsWith('chapter-')) {
+      const secKey = data?.sectionKey || String(event.active.id).replace('chapter-', '');
+      setActiveDragChapterKey(secKey);
+      setActiveDragFieldKey(null);
+      setActiveDragToolboxItem(null);
+    } else if (data?.isField && data.fieldKey) {
       setActiveDragFieldKey(data.fieldKey);
       setActiveDragToolboxItem(null);
+      setActiveDragChapterKey(null);
     } else if (data?.isToolbox && data.type && data.label) {
       setActiveDragToolboxItem({ type: data.type, label: data.label });
       setActiveDragFieldKey(null);
+      setActiveDragChapterKey(null);
     }
   }, []);
 
   const handleDragCancel = useCallback((_event: DragCancelEvent) => {
     setActiveDragFieldKey(null);
     setActiveDragToolboxItem(null);
+    setActiveDragChapterKey(null);
   }, []);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       setActiveDragFieldKey(null);
       setActiveDragToolboxItem(null);
+      setActiveDragChapterKey(null);
       const { active, over } = event;
       if (!over || active.id === over.id || String(over.id).startsWith('toolbox-')) return;
 
       const activeData = active.data.current as
         | {
+            isChapter?: boolean;
+            sectionKey?: string;
             isToolbox?: boolean;
             type?: CustomFieldType;
             label?: string;
@@ -784,6 +805,7 @@ export function FormEditorPage() {
 
       const overData = over.data.current as
         | {
+            isChapter?: boolean;
             sectionKey?: string;
             groupKey?: string;
             isField?: boolean;
@@ -793,6 +815,41 @@ export function FormEditorPage() {
             dropPosition?: 'before' | 'after';
           }
         | undefined;
+
+      // ── Chapter reorder in Form Structure panel ─────────────────────────────
+      if (activeData?.isChapter || String(active.id).startsWith('chapter-')) {
+        const fromSecKey = activeData?.sectionKey || String(active.id).replace('chapter-', '');
+        const toSecKey =
+          overData?.sectionKey ||
+          (String(over.id).startsWith('chapter-')
+            ? String(over.id).replace('chapter-', '')
+            : undefined);
+
+        if (!toSecKey || fromSecKey === toSecKey) return;
+        if (fromSecKey === 'review') return; // Review is permanently locked
+
+        setDraftSections((prev) => {
+          const fromIdx = prev.findIndex((s) => s.key === fromSecKey);
+          let toIdx = prev.findIndex((s) => s.key === toSecKey);
+          if (fromIdx === -1 || toIdx === -1) return prev;
+
+          // Review must always remain the final step
+          const reviewIdx = prev.findIndex((s) => s.key === 'review');
+          if (reviewIdx !== -1 && toIdx >= reviewIdx) {
+            toIdx = Math.max(0, reviewIdx - 1);
+          }
+
+          if (fromIdx === toIdx) return prev;
+
+          const reordered = arrayMove(prev, fromIdx, toIdx);
+          setMetadata((metaPrev) => ({
+            ...metaPrev,
+            sectionOrder: reordered.map((s) => s.key),
+          }));
+          return reordered;
+        });
+        return;
+      }
 
       // ── Toolbox → canvas ──────────────────────────────────────────────────
       if (activeData?.isToolbox && activeData.type) {
@@ -912,7 +969,28 @@ export function FormEditorPage() {
    */
   const collisionDetectionStrategy: CollisionDetection = useCallback(
     (args) => {
-      const pointerCollisions = pointerWithin(args);
+      const isChapterDrag = Boolean(
+        args.active.data.current?.isChapter || String(args.active.id).startsWith('chapter-'),
+      );
+
+      if (isChapterDrag) {
+        // Exclusively collide with chapter droppables during chapter reordering
+        const chapterContainers = args.droppableContainers.filter((c) =>
+          String(c.id).startsWith('chapter-'),
+        );
+        const chapterArgs = { ...args, droppableContainers: chapterContainers };
+        const pointerCollisions = pointerWithin(chapterArgs);
+        if (pointerCollisions.length > 0) return pointerCollisions;
+        return closestCenter(chapterArgs);
+      }
+
+      // For canvas fields and toolbox items, exclude chapter droppables
+      const fieldContainers = args.droppableContainers.filter(
+        (c) => !String(c.id).startsWith('chapter-'),
+      );
+      const fieldArgs = { ...args, droppableContainers: fieldContainers };
+
+      const pointerCollisions = pointerWithin(fieldArgs);
       if (pointerCollisions.length > 0) {
         const specific = pointerCollisions.find(
           (c) => c.id !== `section-${activeSectionKey}` && !String(c.id).startsWith('section-'),
@@ -923,7 +1001,7 @@ export function FormEditorPage() {
         return pointerCollisions;
       }
 
-      const rectCollisions = rectIntersection(args);
+      const rectCollisions = rectIntersection(fieldArgs);
       if (rectCollisions.length > 0) {
         const specific = rectCollisions.find(
           (c) => c.id !== `section-${activeSectionKey}` && !String(c.id).startsWith('section-'),
@@ -934,7 +1012,7 @@ export function FormEditorPage() {
         return rectCollisions;
       }
 
-      return closestCenter(args);
+      return closestCenter(fieldArgs);
     },
     [activeSectionKey],
   );
@@ -1235,6 +1313,7 @@ export function FormEditorPage() {
             isConfigurable={activeSection?.configurable ?? true}
             onSelectForm={handleSelectForm}
             selectedEntity={selectedEntity}
+            canManage={canManage}
           />
 
           {/* Center Canvas */}
@@ -1287,6 +1366,17 @@ export function FormEditorPage() {
 
         {/* DragOverlay renders a floating ghost card that follows the cursor */}
         <DragOverlay>
+          {activeDragChapterKey !== null &&
+            (() => {
+              const sec = draftSections.find((s) => s.key === activeDragChapterKey);
+              if (!sec) return null;
+              return (
+                <div className="bezent-drag-overlay-chip">
+                  <BezentIcon name="more" size={14} />
+                  <span>{sec.label || sec.key}</span>
+                </div>
+              );
+            })()}
           {activeDragFieldKey !== null &&
             (() => {
               const field = draftSections

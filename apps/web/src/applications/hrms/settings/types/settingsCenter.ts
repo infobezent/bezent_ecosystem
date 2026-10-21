@@ -7,7 +7,8 @@ export type SettingsModuleId =
   | 'timesheets'
   | 'performance'
   | 'employees'
-  | 'hr-settings';
+  | 'hr-settings'
+  | 'milestones';
 
 export interface SettingsModuleCard {
   id: SettingsModuleId;
@@ -64,6 +65,13 @@ export const SETTINGS_MODULE_CARDS: SettingsModuleCard[] = [
     name: 'HR Settings',
     description: 'Manage employee change requests and published company policies.',
     icon: 'hrSettings',
+  },
+  {
+    id: 'milestones',
+    name: 'Milestones & Rewards',
+    description:
+      'Configure lifetime working-hour recognition milestones, poster templates, and gift catalogue.',
+    icon: 'award',
   },
 ];
 

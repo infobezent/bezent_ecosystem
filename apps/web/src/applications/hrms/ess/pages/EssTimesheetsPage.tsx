@@ -73,12 +73,14 @@ export interface EssTimesheetsPageProps {
   initialTimesheets?: EssTimesheet[];
   initialAttendance?: EssAttendanceRecord[];
   initialLoading?: boolean;
+  initialMonday?: Date;
 }
 
 export function EssTimesheetsPage({
   initialTimesheets,
   initialAttendance,
   initialLoading,
+  initialMonday,
 }: EssTimesheetsPageProps = {}) {
   const [timesheets, setTimesheets] = useState<EssTimesheet[]>(() => initialTimesheets ?? []);
   const [attendanceRecords, setAttendanceRecords] = useState<EssAttendanceRecord[]>(
@@ -91,7 +93,9 @@ export function EssTimesheetsPage({
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   // Active week selection
-  const [activeMonday, setActiveMonday] = useState<Date>(() => getMonday(new Date()));
+  const [activeMonday, setActiveMonday] = useState<Date>(() =>
+    initialMonday ? getMonday(initialMonday) : getMonday(new Date()),
+  );
 
   // Status Filter for bottom history
   const [statusFilter, setStatusFilter] = useState('all');
