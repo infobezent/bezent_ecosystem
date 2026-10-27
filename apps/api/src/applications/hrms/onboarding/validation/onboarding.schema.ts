@@ -502,6 +502,14 @@ export function validateListNewHiresQuery(query: Record<string, unknown>): {
   pageSize: number;
   stage?: string;
   search?: string;
+  departmentId?: string;
+  departmentIds?: string[];
+  locationId?: string;
+  locationIds?: string[];
+  employmentType?: string;
+  status?: string;
+  joiningDateFrom?: string;
+  joiningDateTo?: string;
 } {
   let page = 1;
   if (query.page !== undefined && query.page !== null && query.page !== '') {
@@ -539,5 +547,79 @@ export function validateListNewHiresQuery(query: Record<string, unknown>): {
     search = rawSearch.trim();
   }
 
-  return { page, pageSize, stage, search };
+  let departmentId: string | undefined;
+  if (typeof query.departmentId === 'string' && query.departmentId.trim()) {
+    departmentId = query.departmentId.trim();
+  }
+
+  let departmentIds: string[] | undefined;
+  if (Array.isArray(query.departmentIds)) {
+    departmentIds = query.departmentIds.filter(
+      (id): id is string => typeof id === 'string' && id.trim().length > 0,
+    );
+  } else if (typeof query.departmentIds === 'string' && query.departmentIds.trim()) {
+    departmentIds = query.departmentIds
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+
+  let locationId: string | undefined;
+  if (typeof query.locationId === 'string' && query.locationId.trim()) {
+    locationId = query.locationId.trim();
+  }
+
+  let locationIds: string[] | undefined;
+  if (Array.isArray(query.locationIds)) {
+    locationIds = query.locationIds.filter(
+      (id): id is string => typeof id === 'string' && id.trim().length > 0,
+    );
+  } else if (typeof query.locationIds === 'string' && query.locationIds.trim()) {
+    locationIds = query.locationIds
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+
+  let employmentType: string | undefined;
+  if (
+    typeof query.employmentType === 'string' &&
+    VALID_EMPLOYMENT_TYPES.includes(query.employmentType as EmploymentType)
+  ) {
+    employmentType = query.employmentType;
+  }
+
+  let status: string | undefined;
+  if (typeof query.status === 'string' && query.status.trim()) {
+    const trimmed = query.status.trim().toLowerCase();
+    const VALID_STATUSES = ['draft', 'active', 'withdrawn', 'completed'];
+    if (VALID_STATUSES.includes(trimmed)) {
+      status = trimmed;
+    }
+  }
+
+  let joiningDateFrom: string | undefined;
+  if (typeof query.joiningDateFrom === 'string' && DATE_REGEX.test(query.joiningDateFrom.trim())) {
+    joiningDateFrom = query.joiningDateFrom.trim();
+  }
+
+  let joiningDateTo: string | undefined;
+  if (typeof query.joiningDateTo === 'string' && DATE_REGEX.test(query.joiningDateTo.trim())) {
+    joiningDateTo = query.joiningDateTo.trim();
+  }
+
+  return {
+    page,
+    pageSize,
+    stage,
+    search,
+    departmentId,
+    departmentIds,
+    locationId,
+    locationIds,
+    employmentType,
+    status,
+    joiningDateFrom,
+    joiningDateTo,
+  };
 }

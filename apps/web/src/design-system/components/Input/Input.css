@@ -71,6 +71,11 @@
   padding: 0 16px;
 }
 
+/* ── Pill Shape ── */
+.bezent-input-wrapper--pill .bezent-input-box {
+  border-radius: var(--radius-full, 9999px) !important;
+}
+
 /* ── Native Input Field ── */
 .bezent-input--narrow {
   width: 120px;
@@ -376,6 +381,12 @@
   border-color: var(--border-focus, #1a73e8);
 }
 
+.bezent-search-field::placeholder,
+.bezent-search-box input::placeholder {
+  color: var(--search-placeholder, #475569);
+  opacity: 1;
+}
+
 .bezent-search-clear-btn {
   display: inline-flex;
   align-items: center;
@@ -504,4 +515,59 @@
   outline: none;
   border-color: var(--border-focus, #7cc4fa);
   box-shadow: none;
+}
+
+/* ── Pill Shape for Search Inputs (Enterprise Reference) ── */
+.bezent-input-wrapper--pill .bezent-input-box {
+  border-radius: 9999px;
+  background-color: var(--bg-surface-secondary, #f1f5f9);
+  border: 1px solid transparent;
+  height: 42px;
+  padding-left: 8px;
+  padding-right: 14px;
+}
+
+.bezent-input-wrapper--pill .bezent-input-box:hover {
+  background-color: #e9eef5;
+  border-color: #cbd5e1;
+}
+
+.bezent-input-wrapper--pill .bezent-input-box:focus-within {
+  background-color: #ffffff;
+  border-color: #7cc4fa;
+  box-shadow: 0 0 0 3px rgba(124, 196, 250, 0.25);
+}
+
+.bezent-input-wrapper--pill .bezent-search-field {
+  background: transparent;
+  font-size: 13.5px;
+  color: #0f172a;
+}
+
+.bezent-input-wrapper--pill .bezent-search-field::placeholder {
+  color: var(--search-placeholder, #475569);
+  font-size: 13.5px;
+}
+
+[data-theme='dark'] .bezent-input-wrapper--pill .bezent-input-box {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .bezent-input-wrapper--pill .bezent-input-box:hover {
+  background-color: #243147;
+}
+
+[data-theme='dark'] .bezent-input-wrapper--pill .bezent-input-box:focus-within {
+  background-color: #0f172a;
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+}
+
+[data-theme='dark'] .bezent-input-wrapper--pill .bezent-search-field {
+  color: #f8fafc;
+}
+
+[data-theme='dark'] .bezent-input-wrapper--pill .bezent-search-field::placeholder {
+  color: var(--search-placeholder, #94a3b8);
 }

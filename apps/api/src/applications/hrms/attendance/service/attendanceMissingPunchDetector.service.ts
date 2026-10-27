@@ -23,10 +23,7 @@ import {
   defaultShiftScheduleProvider,
   type DefaultShiftScheduleProvider,
 } from './shiftSchedule.provider.js';
-import {
-  attendanceAlertService,
-  type AttendanceAlertService,
-} from './attendanceAlert.service.js';
+import { attendanceAlertService, type AttendanceAlertService } from './attendanceAlert.service.js';
 
 export const MISSING_PUNCH_INTERVAL_MS = 30 * 60 * 1000; // Sweep every 30 minutes
 
@@ -54,12 +51,14 @@ export class AttendanceMissingPunchDetectorService {
    * on closed/past workdays. Applies company missingPunchPolicy, creates exception
    * audit records, and emits in-app notifications.
    */
-  async runSweep(options: {
-    tenantId?: string;
-    companyId?: string;
-    targetDate?: string;
-    now?: Date;
-  } = {}): Promise<MissingPunchSweepResult> {
+  async runSweep(
+    options: {
+      tenantId?: string;
+      companyId?: string;
+      targetDate?: string;
+      now?: Date;
+    } = {},
+  ): Promise<MissingPunchSweepResult> {
     const db = getDb();
     const now = options.now ?? new Date();
 
@@ -266,5 +265,4 @@ export class AttendanceMissingPunchDetectorService {
   }
 }
 
-export const attendanceMissingPunchDetectorService =
-  new AttendanceMissingPunchDetectorService();
+export const attendanceMissingPunchDetectorService = new AttendanceMissingPunchDetectorService();

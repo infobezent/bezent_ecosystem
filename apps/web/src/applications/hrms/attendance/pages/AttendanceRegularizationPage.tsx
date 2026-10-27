@@ -546,10 +546,7 @@ export function AttendanceRegularizationPage() {
   };
 
   // Semantic Approval Badge with Multi-Stage Queue Awareness
-  const renderApprovalBadge = (
-    status: RegularizationApprovalStatus,
-    queue?: string | null,
-  ) => {
+  const renderApprovalBadge = (status: RegularizationApprovalStatus, queue?: string | null) => {
     switch (status) {
       case 'approved':
         return <Badge variant="success">Approved</Badge>;
@@ -1296,7 +1293,9 @@ export function AttendanceRegularizationPage() {
                   <Card padding="sm">
                     <Stack gap="sm">
                       <Inline justify="between" align="center">
-                        <span className="bezent-table-meta-title">Approval Workflow Progression</span>
+                        <span className="bezent-table-meta-title">
+                          Approval Workflow Progression
+                        </span>
                         <Badge
                           variant={
                             drawerDetail.approvalStatus === 'approved'

@@ -96,6 +96,14 @@ export interface FetchNewHiresOptions {
   pageSize?: number;
   stage?: string;
   search?: string;
+  departmentId?: string;
+  departmentIds?: string[];
+  locationId?: string;
+  locationIds?: string[];
+  employmentType?: string;
+  status?: string;
+  joiningDateFrom?: string;
+  joiningDateTo?: string;
 }
 
 export interface PaginatedNewHiresResponse {
@@ -122,6 +130,18 @@ export async function fetchNewHiresPaginated(
   if (options.pageSize) params.set('pageSize', String(options.pageSize));
   if (options.stage && options.stage !== 'all') params.set('stage', options.stage);
   if (options.search) params.set('search', options.search);
+  if (options.departmentId) params.set('departmentId', options.departmentId);
+  if (options.departmentIds && options.departmentIds.length > 0) {
+    params.set('departmentIds', options.departmentIds.join(','));
+  }
+  if (options.locationId) params.set('locationId', options.locationId);
+  if (options.locationIds && options.locationIds.length > 0) {
+    params.set('locationIds', options.locationIds.join(','));
+  }
+  if (options.employmentType) params.set('employmentType', options.employmentType);
+  if (options.status) params.set('status', options.status);
+  if (options.joiningDateFrom) params.set('joiningDateFrom', options.joiningDateFrom);
+  if (options.joiningDateTo) params.set('joiningDateTo', options.joiningDateTo);
 
   const queryString = params.toString() ? `?${params.toString()}` : '';
   const res = await authorizedFetch(

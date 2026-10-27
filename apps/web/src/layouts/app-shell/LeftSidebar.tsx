@@ -223,9 +223,10 @@ export function LeftSidebar({
       onKeyDown={onKeyDown}
     >
       <nav ref={navRef} className="left-sidebar__list">
-        {visibleItems.map((item) => {
+        {visibleItems.map((item, index) => {
           const isActive = item.id === activeRailItem;
           const isCurrentPage = isMoreOpen && item.id === activeId;
+          const shouldAlignBottom = index >= Math.ceil(visibleItems.length / 2);
 
           return (
             <NavItem
@@ -235,6 +236,7 @@ export function LeftSidebar({
               isCurrentPage={isCurrentPage}
               activeSubId={item.id === activeId ? activeSubId : undefined}
               flyoutOpen={visibleFlyoutId === item.id}
+              flyoutAlign={shouldAlignBottom ? 'bottom' : 'top'}
               onEnter={() => openFlyout(item)}
               onLeave={scheduleClose}
               onSelect={() => {
@@ -272,6 +274,7 @@ function NavItem({
   isCurrentPage,
   activeSubId,
   flyoutOpen,
+  flyoutAlign,
   onEnter,
   onLeave,
   onSelect,
@@ -283,6 +286,7 @@ function NavItem({
   activeSubId?: string;
   /** Whether THIS item currently owns the sidebar's single flyout. */
   flyoutOpen: boolean;
+  flyoutAlign?: 'top' | 'bottom';
   onEnter: () => void;
   onLeave: () => void;
   onSelect: () => void;
@@ -310,7 +314,7 @@ function NavItem({
       <button
         type="button"
         className={`left-sidebar__item ${active ? 'is-active' : ''} ${isCurrentPage ? 'is-current-page' : ''}`.trim()}
-        title={item.label}
+        title={hasFlyout ? undefined : item.label}
         aria-label={item.label}
         aria-current={active || isCurrentPage ? 'page' : undefined}
         aria-haspopup={hasFlyout ? 'menu' : undefined}
@@ -327,7 +331,12 @@ function NavItem({
         </span>
       </button>
       {flyoutOpen && hasFlyout && (
-        <SubNavFlyout item={item} activeSubId={activeSubId} onSelect={onSubSelect} />
+        <SubNavFlyout
+          item={item}
+          activeSubId={activeSubId}
+          align={flyoutAlign}
+          onSelect={onSubSelect}
+        />
       )}
     </div>
   );

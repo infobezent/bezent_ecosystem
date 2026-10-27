@@ -5,6 +5,7 @@ import { TasksPage } from '../../platform/tasks';
 import { ApprovalsPage } from '../../platform/approvals';
 import { NotesPage } from '../../platform/notes';
 import { EmployeeRegistrationPage } from '../../applications/hrms/onboarding';
+import { EmployeeEditPage } from '../../applications/hrms/employees/pages/EmployeeEditPage';
 import { FormEditorPage } from '../../applications/hrms/settings/administration/forms';
 import { DevPlaceholderPage } from './DevPlaceholderPage';
 import { DesignSystemShowcase } from './DesignSystemShowcase';
@@ -77,6 +78,63 @@ export const appRoutes: RouteObject[] = [
     errorElement: <RouteErrorBoundary />,
   },
 
+  // Standalone utility workspaces (Calendar, Tasks, Approvals, Notes, Employee Registration, Form Editor)
+  // These run OUTSIDE the main application ShellLayout as dedicated full-screen workspaces.
+  {
+    element: (
+      <RequireAuth>
+        <StandaloneUtilityLayout />
+      </RequireAuth>
+    ),
+    errorElement: <RouteErrorBoundary />,
+    children: [
+      { path: '/calendar', element: <CalendarPage /> },
+      { path: '/tasks', element: <TasksPage /> },
+      { path: '/approvals', element: <ApprovalsPage /> },
+      { path: '/notes', element: <NotesPage /> },
+      {
+        path: '/hrms/workforce/onboarding/registration',
+        element: <EmployeeRegistrationPage />,
+      },
+      {
+        path: '/hrms/workforce/onboarding/registration/:caseId',
+        element: <EmployeeRegistrationPage />,
+      },
+      {
+        path: '/hrms/administration/onboarding/registration',
+        element: <EmployeeRegistrationPage />,
+      },
+      {
+        path: '/hrms/administration/onboarding/registration/:caseId',
+        element: <EmployeeRegistrationPage />,
+      },
+      {
+        path: '/hrms/onboarding/registration',
+        element: <Navigate to="/hrms/workforce/onboarding/registration" replace />,
+      },
+      {
+        path: '/hrms/onboarding/registration/:caseId',
+        element: <EmployeeRegistrationPage />,
+      },
+      {
+        path: '/hrms/settings/forms/:formKey',
+        element: <FormEditorPage />,
+      },
+      {
+        path: '/hrms/settings/forms',
+        element: <FormEditorPage />,
+      },
+      {
+        path: '/hrms/workforce/employees/:employeeId/edit',
+        element: <EmployeeEditPage />,
+      },
+      {
+        path: '/hrms/administration/employees/:employeeId/edit',
+        element: <EmployeeEditPage />,
+      },
+    ],
+  },
+
   // 1. Super Admin Workspace — Workspace Guard is strictly ABOVE the shell layout
   {
     element: (
@@ -128,7 +186,7 @@ export const appRoutes: RouteObject[] = [
     ],
   },
 
-  // 3. HRMS Administration Workspace — Workspace Guard is strictly ABOVE the shell layout
+  // 4. HRMS Administration Workspace — Workspace Guard is strictly ABOVE the shell layout
   {
     element: (
       <RequireAuth>
@@ -145,7 +203,7 @@ export const appRoutes: RouteObject[] = [
     ],
   },
 
-  // 4. Employee Self Service Workspace — Workspace Guard is strictly ABOVE the shell layout
+  // 5. Employee Self Service Workspace — Workspace Guard is strictly ABOVE the shell layout
   {
     element: (
       <RequireAuth>
@@ -158,35 +216,6 @@ export const appRoutes: RouteObject[] = [
         element: <ShellLayout />,
         errorElement: <RouteErrorBoundary />,
         children: essRoutes,
-      },
-    ],
-  },
-  {
-    element: (
-      <RequireAuth>
-        <StandaloneUtilityLayout />
-      </RequireAuth>
-    ),
-    children: [
-      { path: '/calendar', element: <CalendarPage /> },
-      { path: '/tasks', element: <TasksPage /> },
-      { path: '/approvals', element: <ApprovalsPage /> },
-      { path: '/notes', element: <NotesPage /> },
-      {
-        path: '/hrms/administration/onboarding/registration',
-        element: <EmployeeRegistrationPage />,
-      },
-      {
-        path: '/hrms/administration/onboarding/registration/:caseId',
-        element: <EmployeeRegistrationPage />,
-      },
-      {
-        path: '/hrms/settings/forms/:formKey',
-        element: <FormEditorPage />,
-      },
-      {
-        path: '/hrms/settings/forms',
-        element: <FormEditorPage />,
       },
     ],
   },

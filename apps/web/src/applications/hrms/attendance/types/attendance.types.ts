@@ -13,7 +13,9 @@ export interface TodayAttendanceKpis {
   date: string;
   timezone: string;
   totalEligibleEmployees: number;
+  presentHeadcount?: number;
   presentCount: number;
+  presentEquivalentDays?: number;
   absentCount: number;
   onLeaveCount: number;
   onDutyCount: number;
@@ -31,7 +33,9 @@ export interface AttendanceTrendItem {
   date: string;
   dayOfWeek: string;
   scheduledDayEquivalents: number;
+  scheduledHeadcount?: number;
   presentEquivalentDays: number;
+  presentHeadcount?: number;
   absentEquivalentDays: number;
   leaveCoverageEquivalents: number;
   odCoverageEquivalents: number;
@@ -55,6 +59,7 @@ export interface DepartmentComparisonItem {
   departmentId: string;
   departmentName: string;
   eligibleEmployees: number;
+  presentHeadcount?: number;
   presentEquivalents: number;
   absentEquivalents: number;
   leaveCoverage: number;
@@ -67,6 +72,7 @@ export interface DepartmentComparisonItem {
 export type ActionQueueType =
   | 'pending_regularization'
   | 'pending_on_duty'
+  | 'pending_overtime_claims'
   | 'unresolved_exceptions'
   | 'missing_punch_issues'
   | 'pending_monthly_review'
@@ -87,15 +93,41 @@ export interface ActionQueueItem {
 export interface ProcessingHealthResult {
   date: string;
   eligibleWorkdays: number;
-  processedWorkdays: number;
+  processedWorkdays: number; // Finalized workdays
   pendingWorkdays: number;
   failedWorkdays: number;
-  missingScheduleCount: number;
+
+  // Metric A: Processing Success Rate (Successful Attempts / Completed Attempts * 100)
+  attemptedWorkdays: number;
+  processingSuccessRate: number | null; // null if attemptedWorkdays === 0
+
+  // Metric B: Reconciliation Completion Rate (Finalized / Eligible Workdays * 100)
+  reconciliationCompletionRate: number | null;
+
+  // Schedule Integrity
+  assignedScheduleCount: number;
+  fallbackScheduleCount: number;
+  unresolvedScheduleCount: number;
+  missingScheduleCount: number; // backward compatibility alias for unresolvedScheduleCount
+
+  // Blocking Exceptions
   unresolvedBlockingExceptions: number;
+  workdayBlockingExceptions?: number;
+  cumulativeBlockingExceptions?: number;
+  historicalBlockingExceptions?: number;
+
   staleMonthlySummaries: number;
-  processingSuccessRate: number | null;
   denominatorDescription: string;
-  status: 'healthy' | 'degraded' | 'critical' | 'upcoming';
+  status:
+    | 'healthy'
+    | 'in_progress'
+    | 'attention_required'
+    | 'degraded'
+    | 'critical'
+    | 'upcoming'
+    | 'unknown';
+  operationalStage?:
+    'not_started' | 'in_progress' | 'completed' | 'failed' | 'blocked' | 'attention_required';
   asOf: string;
 }
 
@@ -171,8 +203,17 @@ export interface DailyAttendanceItem {
   date: string;
   checkInTime: string | null;
   checkOutTime: string | null;
-  status: 'present' | 'absent' | 'half_day' | 'on_leave' | 'on_duty' | 'holiday' | 'incomplete';
-  processingState?: 'incomplete' | 'pending_review' | 'provisional' | 'finalized' | 'locked';
+  status:
+    | 'present'
+    | 'absent'
+    | 'half_day'
+    | 'on_leave'
+    | 'on_duty'
+    | 'holiday'
+    | 'incomplete'
+    | 'not_checked_in';
+  processingState?:
+    'incomplete' | 'pending_review' | 'provisional' | 'finalized' | 'locked' | 'pending_processing';
   workLocation: string;
   workedMinutes: number;
   lateMinutes: number;
@@ -1733,6 +1774,11 @@ export interface MonthlySummaryCounters {
   processingIssues: number;
   locked: number;
   pendingCorrections: number;
+  pending?: number;
+  approved?: number;
+  frozen?: number;
+  lossOfPayDays?: number;
+  overtimeHours?: number;
 }
 
 export interface MonthlySummaryFilter {

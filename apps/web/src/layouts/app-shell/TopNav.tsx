@@ -3,14 +3,13 @@ import { BezentIcon } from '../../design-system/icons';
 import { Avatar, IconButton, Badge } from '../../design-system/components';
 import { ProfileMenu } from './ProfileMenu';
 import bezentMark from '../../assets/bezent-mark.png';
-import bezentWordmarkLight from '../../assets/bezent-wordmark-light.png';
-import bezentWordmarkDark from '../../assets/bezent-wordmark-dark.png';
 import './TopNav.css';
 
 export interface TopNavProps {
   userInitials: string;
   userName?: string;
   userEmail?: string;
+  userPhoto?: string;
   userRole?: string;
   notificationCount?: number;
   /** Global Search (or any replacement), supplied by the host. */
@@ -35,6 +34,7 @@ export function TopNav({
   userInitials,
   userName = 'User',
   userEmail = '',
+  userPhoto,
   userRole = 'Member',
   notificationCount,
   search,
@@ -55,17 +55,8 @@ export function TopNav({
         <div className="top-nav__logo" aria-hidden="true">
           <img src={bezentMark} alt="" className="top-nav__logo-img" />
         </div>
-        <span className="top-nav__wordmark" aria-label="BEZENT">
-          <img
-            src={bezentWordmarkLight}
-            alt="BEZENT"
-            className="top-nav__wordmark-img top-nav__wordmark-img--light"
-          />
-          <img
-            src={bezentWordmarkDark}
-            alt="BEZENT"
-            className="top-nav__wordmark-img top-nav__wordmark-img--dark"
-          />
+        <span className="top-nav__wordmark" aria-label="bezent">
+          <span className="top-nav__wordmark-text">bezent</span>
         </span>
       </div>
 
@@ -107,13 +98,23 @@ export function TopNav({
             aria-haspopup="menu"
             onClick={() => setProfileOpen((prev) => !prev)}
           >
-            <Avatar initials={userInitials} />
+            <Avatar
+              src={userPhoto}
+              initials={userInitials || undefined}
+              icon={
+                !userPhoto && !userInitials ? (
+                  <BezentIcon name="user" size={18} color="currentColor" />
+                ) : undefined
+              }
+              alt={userName || 'User Profile'}
+            />
           </button>
 
           <ProfileMenu
             isOpen={profileOpen}
             onClose={() => setProfileOpen(false)}
             userInitials={userInitials}
+            userPhoto={userPhoto}
             userName={userName}
             userEmail={userEmail}
             userRole={userRole}

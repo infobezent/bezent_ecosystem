@@ -134,4 +134,12 @@ export interface ListNewHiresParams {
   pageSize?: number;
   stage?: string;
   search?: string;
+  departmentId?: string;
+  departmentIds?: string[];
+  locationId?: string;
+  locationIds?: string[];
+  employmentType?: string;
+  status?: string;
+  joiningDateFrom?: string;
+  joiningDateTo?: string;
 }

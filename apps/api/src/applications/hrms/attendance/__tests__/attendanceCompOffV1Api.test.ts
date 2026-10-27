@@ -156,14 +156,10 @@ describe.skipIf(!isDatabaseConfigured)(
         calculationMetadata: { scheduledMinutes: 0 },
       });
 
-      // Ensure Comp-Off policy is active
-      const polExists = await db
-        .select()
-        .from(attendanceCompOffPolicies)
-        .where(eq(attendanceCompOffPolicies.id, 'att_co_pol_demo_01'));
-
-      if (polExists.length === 0) {
-        await db.insert(attendanceCompOffPolicies).values({
+      // Ensure Comp-Off policy is active with 60 days submission deadline
+      await db
+        .insert(attendanceCompOffPolicies)
+        .values({
           id: 'att_co_pol_demo_01',
           tenantId,
           companyId,
@@ -179,12 +175,18 @@ describe.skipIf(!isDatabaseConfigured)(
           fullDayThresholdMinutes: 480,
           conversionRate: '1.00',
           roundingRule: 'round_down_half_day',
-          submissionDeadlineDays: 14,
+          submissionDeadlineDays: 60,
           validityDays: 60,
           maxEarningLimitPerMonthDays: '2.00',
           isActive: true,
+        })
+        .onDuplicateKeyUpdate({
+          set: {
+            submissionDeadlineDays: 60,
+            isEnabled: true,
+            isActive: true,
+          },
         });
-      }
     });
 
     it('1. GET /hrms/attendance/comp-off/eligibility evaluates workday attendance & qualifying credit', async () => {

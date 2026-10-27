@@ -27,7 +27,7 @@
   --bezent-logo-text: #202938;
   --primary: #dcebff;
   --primary-accent: #3978f6;
-  --app-canvas: #f4f6fb;
+  --app-canvas: #edf0f5;
   --workspace: #ffffff;
 
   /* Premium Pastel Enterprise Tokens */
@@ -141,20 +141,20 @@
   --icon-fill: var(--icon-fill-default);
   --icon-accent: #041e49;
 
-  /* Search Tokens — BEZENT Google Workspace-Inspired Blue/Neutral UI */
-  --search-bg: #eaf1fb;
+  /* Search Tokens — High-Contrast Modern Enterprise UI */
+  --search-bg: #f1f5f9;
   --search-expanded-bg: #ffffff;
-  --search-text: #1f1f1f;
-  --search-placeholder: #5f6368;
-  --search-icon: #444746;
-  --search-filter-icon: #444746;
-  --search-filter-text: #444746;
-  --search-border: #dde3ea;
-  --search-border-hover: #bdc6d1;
-  --search-border-focus: #1a73e8;
+  --search-text: #0f172a;
+  --search-placeholder: #475569;
+  --search-icon: #1e293b;
+  --search-filter-icon: #334155;
+  --search-filter-text: #334155;
+  --search-border: #cbd5e1;
+  --search-border-hover: #94a3b8;
+  --search-border-focus: #0f172a;
   --search-row-separator: #f1f4f9;
   --search-filter-separator: #f1f4f9;
-  --search-hover: #dfe8f6;
+  --search-hover: #e2e8f0;
   --search-shadow: 0 1px 3px 1px rgba(60, 64, 67, 0.15), 0 2px 8px 4px rgba(60, 64, 67, 0.08);
   /* Search panel drop shadow */
   --search-panel-shadow: 0 4px 20px rgba(60, 64, 67, 0.18);

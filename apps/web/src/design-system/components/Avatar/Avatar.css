@@ -63,3 +63,71 @@
   object-fit: cover;
   display: block;
 }
+
+/* ── Table Sizing & Colors (Enterprise Reference) ── */
+.bezent-avatar--table {
+  width: 36px;
+  height: 36px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.bezent-avatar--blue {
+  background-color: #dcebfc;
+  color: #1d4ed8;
+}
+
+.bezent-avatar--pink {
+  background-color: #ffe4e6;
+  color: #be123c;
+}
+
+.bezent-avatar--purple {
+  background-color: #ede9fe;
+  color: #6d28d9;
+}
+
+.bezent-avatar--amber {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.bezent-avatar--green {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.bezent-avatar--cyan {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+[data-theme='dark'] .bezent-avatar--blue {
+  background-color: rgba(29, 78, 216, 0.25);
+  color: #93c5fd;
+}
+
+[data-theme='dark'] .bezent-avatar--pink {
+  background-color: rgba(190, 18, 60, 0.25);
+  color: #fda4af;
+}
+
+[data-theme='dark'] .bezent-avatar--purple {
+  background-color: rgba(109, 40, 217, 0.25);
+  color: #d8b4fe;
+}
+
+[data-theme='dark'] .bezent-avatar--amber {
+  background-color: rgba(180, 83, 9, 0.25);
+  color: #fde68a;
+}
+
+[data-theme='dark'] .bezent-avatar--green {
+  background-color: rgba(21, 128, 61, 0.25);
+  color: #86efac;
+}
+
+[data-theme='dark'] .bezent-avatar--cyan {
+  background-color: rgba(3, 105, 161, 0.25);
+  color: #7dd3fc;
+}

@@ -8,9 +8,7 @@ import {
   AttendanceOnDutyService,
   attendanceOnDutyService,
 } from '../service/attendanceOnDuty.service.js';
-import {
-  attendanceMissingPunchDetectorService,
-} from '../service/attendanceMissingPunchDetector.service.js';
+import { attendanceMissingPunchDetectorService } from '../service/attendanceMissingPunchDetector.service.js';
 import { BadRequestError } from '../../../../app/errors/AppError.js';
 
 export class AttendanceController {

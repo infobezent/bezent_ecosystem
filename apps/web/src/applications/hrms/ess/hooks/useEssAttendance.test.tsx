@@ -248,7 +248,7 @@ describe('useEssAttendance in React Component', () => {
     expect(essApi.checkIn).toHaveBeenCalledWith({
       workLocation: 'office',
       notes: 'Test check in',
-      deviceMetadata: { latitude: 12.9716, longitude: 77.5946 },
+      deviceMetadata: { latitude: 12.9716, longitude: 77.5946, source: 'web' },
     });
   });
 

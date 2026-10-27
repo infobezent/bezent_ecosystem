@@ -33,6 +33,7 @@ export interface SelectProps extends Omit<
   placeholder?: string;
   size?: SelectSize;
   width?: 'full' | 'auto';
+  placement?: 'bottom' | 'top';
   options?: SelectOption[];
   className?: string;
   children?: ReactNode;
@@ -95,6 +96,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
     placeholder = 'Select option...',
     size = 'md',
     width = 'full',
+    placement = 'bottom',
     options: optionsProp,
     id,
     disabled,
@@ -266,7 +268,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
   return (
     <div
       ref={containerRef}
-      className={`bezent-select-wrapper bezent-select-wrapper--${size} bezent-select-wrapper--width-${width} ${
+      className={`bezent-select-wrapper bezent-select-wrapper--${size} bezent-select-wrapper--width-${width} bezent-select-wrapper--placement-${placement} ${
         error ? 'has-error' : ''
       } ${disabled ? 'is-disabled' : ''} ${isOpen ? 'is-open' : ''} ${className || ''}`.trim()}
       onKeyDown={handleKeyDown}

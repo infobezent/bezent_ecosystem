@@ -12,6 +12,8 @@ import {
   AttendanceOnDutyPage,
   AttendanceExceptionsPage,
   AttendanceReportsPage,
+  AttendanceOvertimePage,
+  AttendanceCompOffPage,
 } from '../pages';
 import * as attendanceApi from '../api/attendanceApi';
 
@@ -132,7 +134,7 @@ describe('HRMS Attendance Module V1 Frontend', () => {
           <DailyAttendanceLogPage />
         </MemoryRouter>,
       );
-      expect(html).toContain('Daily Log');
+      expect(html).toContain('Daily Attendance');
       expect(html).toContain('Scheduled');
     });
 
@@ -142,8 +144,8 @@ describe('HRMS Attendance Module V1 Frontend', () => {
           <MonthlyAttendanceSummaryPage />
         </MemoryRouter>,
       );
-      expect(html).toContain('Monthly Attendance Summary');
-      expect(html).toContain('Workforce monthly calendar matrix');
+      expect(html).toContain('Monthly Summary');
+      expect(html).toContain('Review each employee’s month-end attendance and send it to payroll.');
     });
 
     it('renders PunchLogsPage without crashing', () => {
@@ -153,7 +155,7 @@ describe('HRMS Attendance Module V1 Frontend', () => {
         </MemoryRouter>,
       );
       expect(html).toContain('Punch Logs');
-      expect(html).toContain('Total Events');
+      expect(html).toContain('Total Punches');
     });
 
     it('renders AttendanceRegularizationPage without crashing', () => {
@@ -192,8 +194,28 @@ describe('HRMS Attendance Module V1 Frontend', () => {
           <AttendanceReportsPage />
         </MemoryRouter>,
       );
-      expect(html).toContain('Attendance Reporting Center');
-      expect(html).toContain('Report Catalog');
+      expect(html).toContain('Reports');
+      expect(html).toContain('Available Reports');
+    });
+
+    it('renders AttendanceOvertimePage without crashing', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <AttendanceOvertimePage />
+        </MemoryRouter>,
+      );
+      expect(html).toContain('Overtime');
+      expect(html).toContain('Pending Approval');
+    });
+
+    it('renders AttendanceCompOffPage without crashing', () => {
+      const html = renderToStaticMarkup(
+        <MemoryRouter>
+          <AttendanceCompOffPage />
+        </MemoryRouter>,
+      );
+      expect(html).toContain('Comp-Off');
+      expect(html).toContain('Run Expiry Check');
     });
   });
 });

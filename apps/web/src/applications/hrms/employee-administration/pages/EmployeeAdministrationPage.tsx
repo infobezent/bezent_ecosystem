@@ -57,14 +57,31 @@ interface ProbationState {
   error: string | null;
 }
 
+export interface EmployeeAdministrationPageProps {
+  title?: string;
+  subtitle?: string;
+  eyebrow?: string;
+  defaultCategory?: ActionTabId;
+}
+
 /**
  * Employee Administration — the HR operational queue of employment actions
  * (job changes, probation decisions, transfers, status changes, separations)
  * performed on existing employees.
  */
-export function EmployeeAdministrationPage() {
+export function EmployeeAdministrationPage({
+  title = 'Employee Administration',
+  subtitle = 'Manage employee changes, confirmations, transfers and employment actions.',
+  eyebrow = 'HRMS · Workforce',
+  defaultCategory = 'all',
+}: EmployeeAdministrationPageProps = {}) {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<ActionTabId>('all');
+  const [activeTab, setActiveTab] = useState<ActionTabId>(defaultCategory);
+
+  useEffect(() => {
+    setActiveTab(defaultCategory);
+    setPage(1);
+  }, [defaultCategory]);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [reloadKey, setReloadKey] = useState(0);
@@ -180,15 +197,25 @@ export function EmployeeAdministrationPage() {
   return (
     <Page maxWidth="full" gap="lg">
       <PageHeader
-        eyebrow="HRMS · Administration"
-        title="Employee Administration"
-        subtitle="Manage employee changes, confirmations, transfers and employment actions."
+        eyebrow={eyebrow}
+        title={title}
+        subtitle={subtitle}
         actions={
           <Button
             variant="primary"
             leftIcon={<BezentIcon name="plusSign" size={16} />}
             onClick={() =>
-              openNewAction(activeTab === 'probation' ? { category: 'probation' } : {})
+              openNewAction(
+                activeTab === 'probation'
+                  ? { category: 'probation' }
+                  : activeTab === 'transfer'
+                    ? { category: 'transfer' }
+                    : activeTab === 'job_changes'
+                      ? { category: 'job_changes' }
+                      : activeTab === 'separation'
+                        ? { category: 'separation' }
+                        : {},
+              )
             }
           >
             New Employee Action

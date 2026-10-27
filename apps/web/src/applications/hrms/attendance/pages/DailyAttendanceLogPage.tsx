@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Page,
   PageHeader,
@@ -24,6 +25,7 @@ import {
   Alert,
   EmptyState,
   Avatar,
+  StatusBadge,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import {
@@ -36,28 +38,56 @@ import {
   fetchGeneralSettings,
 } from '../api/attendanceApi';
 import { fetchDepartments, fetchWorkLocations } from '../../api/organizationMastersApi';
+import { getEmployeeAvatarId, getAvatarColor } from '../../employees/model/employeeModel';
 import type {
   DailyAttendanceItem,
   DailyLogSummaryCounters,
   DailyLogEmployeeDetail,
   AttendanceGeneralSettings,
 } from '../types/attendance.types';
+import {
+  AttendanceFilterPanel,
+  type AttendanceFilterState,
+  EMPTY_ATTENDANCE_FILTER_STATE,
+  countActiveAttendanceFilters,
+} from '../components/AttendanceFilterPanel';
 
 export function DailyAttendanceLogPage() {
-  // Primary Filters
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [departmentId, setDepartmentId] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [processingStateFilter, setProcessingStateFilter] = useState('');
+  const [searchParams] = useSearchParams();
 
-  // Advanced Filters
-  const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false);
-  const [shiftRefFilter, setShiftRefFilter] = useState('');
-  const [locationIdFilter, setLocationIdFilter] = useState('');
-  const [indicatorFilter, setIndicatorFilter] = useState('');
-  const [punchSourceFilter, setPunchSourceFilter] = useState('');
+  // Primary Filters (initialized from URL search parameters if available)
+  const [date, setDate] = useState(
+    () => searchParams.get('date') || new Date().toISOString().slice(0, 10),
+  );
+  const [search, setSearch] = useState(() => searchParams.get('search') || '');
+  const [debouncedSearch, setDebouncedSearch] = useState(() => searchParams.get('search') || '');
+  const [appliedFilters, setAppliedFilters] = useState<AttendanceFilterState>(() => ({
+    departmentId: searchParams.get('departmentId') || '',
+    status: searchParams.get('status') || '',
+    shiftRef: searchParams.get('shiftRef') || '',
+    locationId: searchParams.get('locationId') || '',
+    processingState: searchParams.get('processingState') || '',
+    indicator: searchParams.get('indicator') || '',
+    punchSource: searchParams.get('punchSource') || '',
+  }));
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+
+  // Sync state when URL searchParams update
+  useEffect(() => {
+    const pDate = searchParams.get('date');
+    if (pDate && pDate !== date) setDate(pDate);
+
+    const nextFilters: AttendanceFilterState = {
+      departmentId: searchParams.get('departmentId') || '',
+      status: searchParams.get('status') || '',
+      shiftRef: searchParams.get('shiftRef') || '',
+      locationId: searchParams.get('locationId') || '',
+      processingState: searchParams.get('processingState') || '',
+      indicator: searchParams.get('indicator') || '',
+      punchSource: searchParams.get('punchSource') || '',
+    };
+    setAppliedFilters(nextFilters);
+  }, [searchParams]);
 
   // Sorting & Pagination
   const [sortBy, setSortBy] = useState<
@@ -99,7 +129,7 @@ export function DailyAttendanceLogPage() {
     'summary',
   );
 
-  // Manual Adjustment Modal State
+  // Edit Attendance / Manual Adjustment Modal State
   const [manualEntryOpen, setManualEntryOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<DailyAttendanceItem | null>(null);
   const [manualEmployeeId, setManualEmployeeId] = useState('');
@@ -107,9 +137,14 @@ export function DailyAttendanceLogPage() {
   const [checkOutTime, setCheckOutTime] = useState('');
   const [workLocation, setWorkLocation] = useState('office');
   const [correctionReason, setCorrectionReason] = useState('');
-  const [manualStatus, setManualStatus] = useState<'present' | 'half_day' | 'absent'>('present');
+  const [remarks, setRemarks] = useState('');
+  const [manualStatus, setManualStatus] = useState<string>('present');
   const [submittingCorrection, setSubmittingCorrection] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
+
+  // Finalize Day Bulk Sign-off State
+  const [finalizeModalOpen, setFinalizeModalOpen] = useState(false);
+  const [finalizingDay, setFinalizingDay] = useState(false);
 
   // Bulk Operations State
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
@@ -158,14 +193,14 @@ export function DailyAttendanceLogPage() {
     try {
       const res = await fetchDailyAttendanceLogV1({
         date,
-        departmentId: departmentId || undefined,
-        status: statusFilter || undefined,
+        departmentId: appliedFilters.departmentId || undefined,
+        status: appliedFilters.status || undefined,
         search: debouncedSearch || undefined,
-        processingState: processingStateFilter || undefined,
-        shiftRef: shiftRefFilter || undefined,
-        locationId: locationIdFilter || undefined,
-        indicator: indicatorFilter || undefined,
-        punchSource: punchSourceFilter || undefined,
+        processingState: appliedFilters.processingState || undefined,
+        shiftRef: appliedFilters.shiftRef || undefined,
+        locationId: appliedFilters.locationId || undefined,
+        indicator: appliedFilters.indicator || undefined,
+        punchSource: appliedFilters.punchSource || undefined,
         page,
         limit,
         sortBy,
@@ -180,21 +215,7 @@ export function DailyAttendanceLogPage() {
     } finally {
       setLoading(false);
     }
-  }, [
-    date,
-    departmentId,
-    statusFilter,
-    debouncedSearch,
-    processingStateFilter,
-    shiftRefFilter,
-    locationIdFilter,
-    indicatorFilter,
-    punchSourceFilter,
-    page,
-    limit,
-    sortBy,
-    sortOrder,
-  ]);
+  }, [date, appliedFilters, debouncedSearch, page, limit, sortBy, sortOrder]);
 
   useEffect(() => {
     loadData();
@@ -222,16 +243,9 @@ export function DailyAttendanceLogPage() {
 
   // Reset all filters
   const handleResetFilters = () => {
-    setDate(new Date().toISOString().slice(0, 10));
     setSearch('');
     setDebouncedSearch('');
-    setDepartmentId('');
-    setStatusFilter('');
-    setProcessingStateFilter('');
-    setShiftRefFilter('');
-    setLocationIdFilter('');
-    setIndicatorFilter('');
-    setPunchSourceFilter('');
+    setAppliedFilters(EMPTY_ATTENDANCE_FILTER_STATE);
     setSelectedIds(new Set());
     setPage(1);
   };
@@ -262,7 +276,7 @@ export function DailyAttendanceLogPage() {
     setDrawerDetail(null);
   };
 
-  // Manual Adjustment Handlers
+  // Manual Adjustment / Edit Attendance Handlers
   const handleOpenManualEntry = (record?: DailyAttendanceItem) => {
     if (record) {
       setSelectedRecord(record);
@@ -270,13 +284,8 @@ export function DailyAttendanceLogPage() {
       setCheckInTime(record.checkInTime ?? '09:00');
       setCheckOutTime(record.checkOutTime ?? '18:00');
       setWorkLocation(record.workLocation ?? 'office');
-      setManualStatus(
-        record.status === 'half_day'
-          ? 'half_day'
-          : record.status === 'absent'
-            ? 'absent'
-            : 'present',
-      );
+      setManualStatus(record.status ?? 'present');
+      setRemarks(record.notes ?? '');
     } else {
       setSelectedRecord(null);
       setManualEmployeeId(items[0]?.employeeId ?? '');
@@ -284,6 +293,7 @@ export function DailyAttendanceLogPage() {
       setCheckOutTime('18:00');
       setWorkLocation('office');
       setManualStatus('present');
+      setRemarks('');
     }
     setCorrectionReason('');
     setModalError(null);
@@ -296,23 +306,33 @@ export function DailyAttendanceLogPage() {
       return;
     }
     if (!correctionReason.trim()) {
-      setModalError('Please specify the reason for manual attendance entry');
+      setModalError('Please select a reason before saving.');
       return;
     }
 
     setSubmittingCorrection(true);
     setModalError(null);
     try {
+      const reasonCombined = remarks.trim()
+        ? `[${manualStatus.toUpperCase()}] ${correctionReason} — ${remarks.trim()}`
+        : `[${manualStatus.toUpperCase()}] ${correctionReason}`;
+
       await submitManualCorrection({
         employeeId: manualEmployeeId,
         date,
         checkInTime: checkInTime || undefined,
         checkOutTime: checkOutTime || undefined,
         workLocation,
-        reason:
-          manualStatus === 'present'
-            ? correctionReason.trim()
-            : `[${manualStatus.toUpperCase()}] ${correctionReason.trim()}`,
+        notes: remarks.trim() || undefined,
+        reason: reasonCombined,
+      });
+
+      const empName = selectedRecord
+        ? `${selectedRecord.firstName} ${selectedRecord.lastName ?? ''}`.trim()
+        : 'employee';
+      setBulkBannerMessage({
+        type: 'success',
+        text: `Attendance updated for ${empName}.`,
       });
       setManualEntryOpen(false);
       setSelectedRecord(null);
@@ -320,8 +340,8 @@ export function DailyAttendanceLogPage() {
       if (drawerEmployeeId === manualEmployeeId) {
         handleOpenDrawer(manualEmployeeId, drawerTab);
       }
-    } catch (err: unknown) {
-      setModalError(err instanceof Error ? err.message : 'Failed to save manual attendance');
+    } catch {
+      setModalError('Could not update attendance. Please try again.');
     } finally {
       setSubmittingCorrection(false);
     }
@@ -423,25 +443,47 @@ export function DailyAttendanceLogPage() {
     return `${h}h ${m}m`;
   };
 
-  // Status Badge Helper
-  const renderStatusBadge = (status: DailyAttendanceItem['status']) => {
-    switch (status) {
-      case 'present':
-        return <Badge variant="success">Present</Badge>;
-      case 'half_day':
-        return <Badge variant="warning">Half Day</Badge>;
-      case 'on_leave':
-        return <Badge variant="info">On Leave</Badge>;
-      case 'on_duty':
-        return <Badge variant="info">On-Duty</Badge>;
-      case 'holiday':
-        return <Badge variant="neutral">Holiday / Off</Badge>;
-      case 'incomplete':
-        return <Badge variant="danger">Incomplete</Badge>;
-      case 'absent':
-      default:
-        return <Badge variant="danger">Absent</Badge>;
-    }
+  // Status Labels and Codes mapping (Spec Section 3)
+  const STATUS_CONFIG: Record<
+    string,
+    { label: string; code: string; variant: 'success' | 'danger' | 'warning' | 'info' | 'neutral' }
+  > = {
+    present: { label: 'Present', code: 'P', variant: 'success' },
+    absent: { label: 'Absent', code: 'A', variant: 'danger' },
+    half_day: { label: 'Half Day', code: 'HD', variant: 'warning' },
+    weekly_off: { label: 'Weekly Off', code: 'WO', variant: 'neutral' },
+    holiday: { label: 'Holiday', code: 'H', variant: 'neutral' },
+    on_leave: { label: 'On Leave', code: 'L', variant: 'info' },
+    work_from_home: { label: 'Work From Home', code: 'WFH', variant: 'info' },
+    on_duty: { label: 'On Duty', code: 'OD', variant: 'info' },
+    missing_punch: { label: 'Missed Punch', code: '—', variant: 'danger' },
+    incomplete: { label: 'Missed Punch', code: '—', variant: 'danger' },
+    not_checked_in: { label: 'Pending', code: '—', variant: 'neutral' },
+    pending: { label: 'Pending', code: '—', variant: 'warning' },
+  };
+
+  const renderStatusBadge = (status: string) => {
+    const config = STATUS_CONFIG[status] || {
+      label: status.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+      code: '—',
+      variant: 'neutral' as const,
+    };
+    return (
+      <span title={`Code: ${config.code}`}>
+        <Badge variant={config.variant}>{config.label}</Badge>
+      </span>
+    );
+  };
+
+  const formatPunchSource = (src?: string | null) => {
+    if (!src) return '—';
+    const s = src.toLowerCase();
+    if (s === 'biometric') return 'Biometric';
+    if (s === 'web') return 'Web';
+    if (s === 'mobile') return 'Mobile';
+    if (s === 'manual') return 'Manual';
+    if (s === 'import' || s === 'api') return 'Import';
+    return src.charAt(0).toUpperCase() + src.slice(1);
   };
 
   // Processing State Badge Helper
@@ -461,14 +503,25 @@ export function DailyAttendanceLogPage() {
     }
   };
 
-  // Indicators Rendering Helper
-  const renderIndicators = (indicators?: string[]) => {
+  // Indicators Rendering Helper (Filters out raw duplicate status flags like 'not_checked_in' / 'absent')
+  const renderIndicators = (indicators?: string[], status?: string) => {
     if (!indicators || indicators.length === 0) {
-      return <span className="bezent-card__desc">—</span>;
+      return <span className="bezent-table-meta-subtitle">—</span>;
+    }
+    const filtered = indicators.filter(
+      (ind) =>
+        ind !== 'not_checked_in' &&
+        ind !== 'absent' &&
+        ind !== 'present' &&
+        ind !== status &&
+        ind !== 'half_day',
+    );
+    if (filtered.length === 0) {
+      return <span className="bezent-table-meta-subtitle">—</span>;
     }
     return (
       <Inline gap="xs" wrap>
-        {indicators.map((ind) => {
+        {filtered.map((ind) => {
           let label = ind;
           let variant: 'warning' | 'danger' | 'info' | 'neutral' = 'warning';
           if (ind === 'late') {
@@ -503,22 +556,85 @@ export function DailyAttendanceLogPage() {
     );
   };
 
-  const hasAdvancedFilters = Boolean(
-    shiftRefFilter || locationIdFilter || indicatorFilter || punchSourceFilter,
-  );
+  const formatProcessingStateLabel = (state: string) => {
+    switch (state) {
+      case 'provisional':
+        return 'Provisional';
+      case 'pending_processing':
+        return 'Pending Processing';
+      case 'incomplete':
+        return 'Incomplete';
+      case 'pending_review':
+        return 'Pending Review';
+      case 'finalized':
+        return 'Finalized';
+      case 'locked':
+        return 'Locked';
+      default:
+        return state;
+    }
+  };
+
+  const formatIndicatorLabel = (ind: string) => {
+    switch (ind) {
+      case 'late':
+        return 'Late Arrival';
+      case 'early_exit':
+        return 'Early Exit';
+      case 'missing_punch_in':
+        return 'Missed Punch In';
+      case 'missing_punch_out':
+        return 'Missed Punch Out';
+      case 'insufficient_hours':
+        return 'Short Hours';
+      case 'regularized':
+        return 'Adjusted';
+      case 'device_sync_pending':
+        return 'Sync Pending';
+      default:
+        return ind;
+    }
+  };
+
+  const formatShiftName = (shift?: string | null): string => {
+    if (!shift) return '—';
+    return (
+      shift
+        .replace(/\s*\(\s*\d{1,2}:\d{2}.*?\)/g, '')
+        .replace(/\s+\d{1,2}:\d{2}\s*[-–]\s*\d{1,2}:\d{2}.*$/g, '')
+        .trim() || shift
+    );
+  };
+
+  const appliedCount = countActiveAttendanceFilters(appliedFilters);
+  const hasActiveFilters = Boolean(search.trim() || appliedCount > 0);
+  const isMonthLocked = items.length > 0 && items.every((i) => i.processingState === 'locked');
+  const dayOfWeek = (() => {
+    try {
+      return new Date(`${date}T00:00:00`).getDay();
+    } catch {
+      return -1;
+    }
+  })();
+  const isWeeklyOffDay = dayOfWeek === 0 || dayOfWeek === 6;
+  const isHolidayDay = Boolean(items.length > 0 && items.every((i) => i.status === 'holiday'));
 
   return (
     <Page>
-      {/* ── Page Header ── */}
+      {/* ── Page Header (Spec Section 1) ── */}
       <PageHeader
-        title="Daily Log"
+        eyebrow="Attendance › Daily Attendance"
+        title="Daily Attendance"
+        subtitle="Review and correct each employee’s attendance for the selected date."
         actions={
           <Inline gap="sm" align="center">
             {/* Workday navigation */}
             <Inline gap="xs" align="center">
+              <span className="bezent-filter-strip-label">Date:</span>
               <Button
-                variant="secondary"
-                size="control"
+                variant="outline"
+                size="md"
+                shape="rounded"
                 onClick={handlePrevDay}
                 aria-label="Previous workday"
               >
@@ -526,6 +642,7 @@ export function DailyAttendanceLogPage() {
               </Button>
               <Input
                 type="date"
+                aria-label="Date"
                 value={date}
                 onChange={(e) => {
                   setDate(e.target.value);
@@ -533,14 +650,15 @@ export function DailyAttendanceLogPage() {
                 }}
               />
               <Button
-                variant="secondary"
-                size="control"
+                variant="outline"
+                size="md"
+                shape="rounded"
                 onClick={handleNextDay}
                 aria-label="Next workday"
               >
                 <BezentIcon name="chevronRight" size={14} />
               </Button>
-              <Button variant="secondary" size="control" onClick={handleToday}>
+              <Button variant="outline" size="md" shape="rounded" onClick={handleToday}>
                 Today
               </Button>
             </Inline>
@@ -548,230 +666,407 @@ export function DailyAttendanceLogPage() {
             {/* Export & Actions */}
             <Button
               variant="secondary"
-              size="sm"
+              size="md"
+              shape="rounded"
+              leftIcon={<BezentIcon name="download" size={16} />}
               onClick={() => downloadAttendanceCsv('daily', { date })}
             >
-              <BezentIcon name="download" size={16} /> Export
+              Export
             </Button>
 
             {generalSettings?.manualEntryAllowed !== false && (
-              <Button variant="primary" size="sm" onClick={() => handleOpenManualEntry()}>
+              <Button
+                variant="secondary"
+                size="md"
+                shape="rounded"
+                onClick={() => handleOpenManualEntry()}
+              >
                 + Manual Entry
               </Button>
             )}
+
+            <Button
+              variant="primary"
+              size="md"
+              shape="rounded"
+              disabled={isMonthLocked || (counters.pendingReview === 0 && counters.scheduled === 0)}
+              title={
+                isMonthLocked
+                  ? 'Locked for payroll'
+                  : counters.pendingReview === 0 && counters.scheduled === 0
+                    ? 'Select a date with pending records to finalize.'
+                    : 'Finalize Day'
+              }
+              onClick={() => setFinalizeModalOpen(true)}
+            >
+              Finalize Day
+            </Button>
           </Inline>
         }
       />
 
       <Stack gap="md">
+        {/* Section 8: Locked Month Warning Banner */}
+        {isMonthLocked && (
+          <Alert
+            variant="warning"
+            title="This month is locked for payroll. Attendance cannot be edited."
+          >
+            Attendance records for this pay period have been locked for payroll processing.
+          </Alert>
+        )}
+
         {/* Bulk Action Alert Banner */}
         {bulkBannerMessage && (
           <Alert variant={bulkBannerMessage.type}>{bulkBannerMessage.text}</Alert>
         )}
 
-        {/* ── Summary Counters Strip (Single Row on Desktop) ── */}
-        <Grid columns={6} gap="sm">
+        {/* ── Summary Counters Strip (4 Spacious Cards matching Employee Directory) ── */}
+        <Grid columns={4} gap="md">
+          {/* Scheduled */}
           <div
-            className={`bezent-stat-card ${statusFilter === 'scheduled' ? 'is-active' : ''}`}
-            onClick={() => setStatusFilter((curr) => (curr === 'scheduled' ? '' : 'scheduled'))}
+            className={`bezent-kpi-card bezent-kpi-card--interactive bezent-kpi-card--blue ${appliedFilters.status === 'scheduled' ? 'is-active' : ''}`}
+            onClick={() => {
+              setAppliedFilters((curr) => ({
+                ...curr,
+                status: curr.status === 'scheduled' ? '' : 'scheduled',
+              }));
+              setPage(1);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setAppliedFilters((curr) => ({
+                  ...curr,
+                  status: curr.status === 'scheduled' ? '' : 'scheduled',
+                }));
+                setPage(1);
+              }
+            }}
             role="button"
             tabIndex={0}
+            title="Filter by Scheduled"
           >
-            <span className="bezent-stat-card__label">Scheduled</span>
-            <span className="bezent-stat-card__val">{counters.scheduled}</span>
+            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--blue">
+              <BezentIcon name="workforce" size={20} />
+            </div>
+            <div className="bezent-kpi-card__info">
+              <p className="bezent-kpi-card__title">Scheduled</p>
+              <p className="bezent-kpi-card__value">{counters.scheduled}</p>
+              <p className="bezent-kpi-card__caption">Expected workforce</p>
+            </div>
           </div>
 
+          {/* Present */}
           <div
-            className={`bezent-stat-card ${statusFilter === 'present' ? 'is-active' : ''}`}
-            onClick={() => setStatusFilter((curr) => (curr === 'present' ? '' : 'present'))}
+            className={`bezent-kpi-card bezent-kpi-card--interactive bezent-kpi-card--green ${appliedFilters.status === 'present' ? 'is-active' : ''}`}
+            onClick={() => {
+              setAppliedFilters((curr) => ({
+                ...curr,
+                status: curr.status === 'present' ? '' : 'present',
+              }));
+              setPage(1);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setAppliedFilters((curr) => ({
+                  ...curr,
+                  status: curr.status === 'present' ? '' : 'present',
+                }));
+                setPage(1);
+              }
+            }}
             role="button"
             tabIndex={0}
+            title="Filter by Present"
           >
-            <span className="bezent-stat-card__label">Present</span>
-            <span className="bezent-stat-card__val">{counters.present}</span>
+            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--green">
+              <BezentIcon name="check" size={20} />
+            </div>
+            <div className="bezent-kpi-card__info">
+              <p className="bezent-kpi-card__title">Present</p>
+              <p className="bezent-kpi-card__value">{counters.present}</p>
+              <p className="bezent-kpi-card__caption">Confirmed checked-in</p>
+            </div>
           </div>
 
+          {/* Absent */}
           <div
-            className={`bezent-stat-card ${statusFilter === 'absent' ? 'is-active' : ''}`}
-            onClick={() => setStatusFilter((curr) => (curr === 'absent' ? '' : 'absent'))}
+            className={`bezent-kpi-card bezent-kpi-card--interactive bezent-kpi-card--red ${appliedFilters.status === 'absent' ? 'is-active' : ''}`}
+            onClick={() => {
+              setAppliedFilters((curr) => ({
+                ...curr,
+                status: curr.status === 'absent' ? '' : 'absent',
+              }));
+              setPage(1);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setAppliedFilters((curr) => ({
+                  ...curr,
+                  status: curr.status === 'absent' ? '' : 'absent',
+                }));
+                setPage(1);
+              }
+            }}
             role="button"
             tabIndex={0}
+            title="Filter by Absent"
           >
-            <span className="bezent-stat-card__label">Absent</span>
-            <span className="bezent-stat-card__val">{counters.absent}</span>
+            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--red">
+              <BezentIcon name="close" size={20} />
+            </div>
+            <div className="bezent-kpi-card__info">
+              <p className="bezent-kpi-card__title">Absent</p>
+              <p className="bezent-kpi-card__value">{counters.absent}</p>
+              <p className="bezent-kpi-card__caption">Not checked-in</p>
+            </div>
           </div>
 
+          {/* Pending Review */}
           <div
-            className={`bezent-stat-card ${statusFilter === 'on_leave' ? 'is-active' : ''}`}
-            onClick={() => setStatusFilter((curr) => (curr === 'on_leave' ? '' : 'on_leave'))}
+            className={`bezent-kpi-card bezent-kpi-card--interactive bezent-kpi-card--orange ${
+              appliedFilters.processingState === 'pending_processing' ||
+              appliedFilters.processingState === 'pending_review' ||
+              appliedFilters.status === 'pending_review'
+                ? 'is-active'
+                : ''
+            }`}
+            onClick={() => {
+              setAppliedFilters((curr) => ({
+                ...curr,
+                processingState:
+                  curr.processingState === 'pending_processing' ||
+                  curr.processingState === 'pending_review'
+                    ? ''
+                    : 'pending_processing',
+                status: curr.status === 'pending_review' ? '' : curr.status,
+              }));
+              setPage(1);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setAppliedFilters((curr) => ({
+                  ...curr,
+                  processingState:
+                    curr.processingState === 'pending_processing' ||
+                    curr.processingState === 'pending_review'
+                      ? ''
+                      : 'pending_processing',
+                  status: curr.status === 'pending_review' ? '' : curr.status,
+                }));
+                setPage(1);
+              }
+            }}
             role="button"
             tabIndex={0}
+            title="Filter by Pending Review"
           >
-            <span className="bezent-stat-card__label">On Leave</span>
-            <span className="bezent-stat-card__val">{counters.onLeave}</span>
-          </div>
-
-          <div
-            className={`bezent-stat-card ${statusFilter === 'on_duty' ? 'is-active' : ''}`}
-            onClick={() => setStatusFilter((curr) => (curr === 'on_duty' ? '' : 'on_duty'))}
-            role="button"
-            tabIndex={0}
-          >
-            <span className="bezent-stat-card__label">On-Duty</span>
-            <span className="bezent-stat-card__val">{counters.onDuty}</span>
-          </div>
-
-          <div
-            className={`bezent-stat-card ${statusFilter === 'pending_review' ? 'is-active' : ''}`}
-            onClick={() =>
-              setStatusFilter((curr) => (curr === 'pending_review' ? '' : 'pending_review'))
-            }
-            role="button"
-            tabIndex={0}
-          >
-            <span className="bezent-stat-card__label">Pending Review</span>
-            <span className="bezent-stat-card__val">{counters.pendingReview}</span>
+            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--orange">
+              <BezentIcon name="tasks" size={20} />
+            </div>
+            <div className="bezent-kpi-card__info">
+              <p className="bezent-kpi-card__title">Pending Review</p>
+              <p className="bezent-kpi-card__value">{counters.pendingReview}</p>
+              <p className="bezent-kpi-card__caption">Exceptions awaiting action</p>
+            </div>
           </div>
         </Grid>
 
-        {/* ── Filters Toolbar ── */}
-        <Card padding="sm">
-          <Stack gap="sm">
-            <div className="bezent-filter-toolbar">
-              <SearchInput
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search employee name or code..."
+        {/* ── Search & Filter Toolbar directly below KPI Cards (Workforce Directory Pattern) ── */}
+        <div className="bezent-directory-toolbar">
+          <div className="bezent-directory-toolbar__search">
+            <SearchInput
+              value={search}
+              shape="rounded"
+              aria-label="Search by name or employee ID"
+              onChange={(e) => setSearch(e.target.value)}
+              onClear={() => setSearch('')}
+              placeholder="Search by name or employee ID"
+            />
+          </div>
+
+          <div className="bezent-directory-toolbar__actions">
+            <div className="bezent-filter-anchor">
+              <Button
+                variant={appliedCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
+                size="md"
+                shape="rounded"
+                className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
+                leftIcon={<BezentIcon name="filter" size={16} />}
+                onClick={() => setIsFilterPanelOpen((prev) => !prev)}
+              >
+                Filters
+                {appliedCount > 0 && (
+                  <span className="bezent-btn__filter-count">{appliedCount}</span>
+                )}
+              </Button>
+
+              <AttendanceFilterPanel
+                isOpen={isFilterPanelOpen}
+                onClose={() => setIsFilterPanelOpen(false)}
+                appliedFilters={appliedFilters}
+                onApply={(newFilters) => {
+                  setAppliedFilters(newFilters);
+                  setPage(1);
+                }}
+                departments={departments}
+                workLocations={workLocations}
               />
-
-              <Select
-                value={departmentId}
-                onChange={(e) => {
-                  setDepartmentId(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="">All Departments</option>
-                {departments.map((dept) => (
-                  <option key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </option>
-                ))}
-              </Select>
-
-              <Select
-                value={statusFilter}
-                onChange={(e) => {
-                  setStatusFilter(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="">All Classifications</option>
-                <option value="present">Present</option>
-                <option value="half_day">Half Day</option>
-                <option value="absent">Absent</option>
-                <option value="on_leave">On Leave</option>
-                <option value="on_duty">On-Duty</option>
-                <option value="holiday">Holiday / Off</option>
-                <option value="incomplete">Incomplete / Unresolved</option>
-              </Select>
-
-              <Select
-                value={processingStateFilter}
-                onChange={(e) => {
-                  setProcessingStateFilter(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="">All Processing States</option>
-                <option value="provisional">Provisional</option>
-                <option value="incomplete">Incomplete</option>
-                <option value="pending_review">Pending Review</option>
-                <option value="finalized">Finalized</option>
-                <option value="locked">Locked</option>
-              </Select>
-
-              <div className="bezent-filter-toolbar__actions">
-                <Button
-                  variant={isAdvancedFiltersOpen || hasAdvancedFilters ? 'primary' : 'secondary'}
-                  size="sm"
-                  onClick={() => setIsAdvancedFiltersOpen((prev) => !prev)}
-                >
-                  {isAdvancedFiltersOpen ? 'Hide Filters' : 'More Filters'}
-                  {hasAdvancedFilters ? ' •' : ''}
-                </Button>
-                <Button variant="ghost" size="sm" onClick={handleResetFilters}>
-                  Reset
-                </Button>
-              </div>
             </div>
 
-            {/* Collapsible Advanced Filters */}
-            {isAdvancedFiltersOpen && (
-              <div className="bezent-filter-toolbar__more">
-                <Select
-                  value={shiftRefFilter}
-                  onChange={(e) => {
-                    setShiftRefFilter(e.target.value);
-                    setPage(1);
-                  }}
-                >
-                  <option value="">All Shifts</option>
-                  <option value="General 09:00 - 18:00">General 09:00 - 18:00</option>
-                  <option value="Morning 06:00 - 14:00">Morning 06:00 - 14:00</option>
-                  <option value="Night 22:00 - 06:00">Night 22:00 - 06:00</option>
-                </Select>
+            <Button
+              variant="outline"
+              size="md"
+              shape="rounded"
+              leftIcon={<BezentIcon name="reset" size={16} />}
+              onClick={handleResetFilters}
+              disabled={!hasActiveFilters}
+            >
+              Reset
+            </Button>
 
-                <Select
-                  value={locationIdFilter}
-                  onChange={(e) => {
-                    setLocationIdFilter(e.target.value);
-                    setPage(1);
-                  }}
-                >
-                  <option value="">All Work Locations</option>
-                  {workLocations.map((loc) => (
-                    <option key={loc.id} value={loc.id}>
-                      {loc.name}
-                    </option>
-                  ))}
-                </Select>
+            <span className="bezent-records-badge">{totalCount} Records</span>
+          </div>
+        </div>
 
-                <Select
-                  value={indicatorFilter}
-                  onChange={(e) => {
-                    setIndicatorFilter(e.target.value);
+        {/* Active Filter Chips Strip */}
+        {appliedCount > 0 && (
+          <div className="bezent-active-chips-strip">
+            {appliedFilters.departmentId && (
+              <span className="bezent-active-filter-chip">
+                <span>{`Department: ${departments.find((d) => d.id === appliedFilters.departmentId)?.name || appliedFilters.departmentId}`}</span>
+                <button
+                  type="button"
+                  className="bezent-active-filter-chip__remove"
+                  aria-label="Remove department filter"
+                  onClick={() => {
+                    setAppliedFilters((prev) => ({ ...prev, departmentId: '' }));
                     setPage(1);
                   }}
                 >
-                  <option value="">All Indicators</option>
-                  <option value="late">Late Arrival</option>
-                  <option value="early_exit">Early Exit</option>
-                  <option value="missing_punch_in">Missing Punch In</option>
-                  <option value="missing_punch_out">Missing Punch Out</option>
-                  <option value="insufficient_hours">Short Hours</option>
-                  <option value="regularized">Adjusted / Regularized</option>
-                  <option value="device_sync_pending">Device Sync Pending</option>
-                </Select>
-
-                <Select
-                  value={punchSourceFilter}
-                  onChange={(e) => {
-                    setPunchSourceFilter(e.target.value);
-                    setPage(1);
-                  }}
-                >
-                  <option value="">All Punch Sources</option>
-                  <option value="web">Web Portal</option>
-                  <option value="mobile">Mobile App</option>
-                  <option value="biometric">Biometric Device</option>
-                  <option value="manual">Manual Entry</option>
-                  <option value="api">API Integration</option>
-                </Select>
-              </div>
+                  ×
+                </button>
+              </span>
             )}
-          </Stack>
-        </Card>
+
+            {appliedFilters.status && (
+              <span className="bezent-active-filter-chip">
+                <span>{`Status: ${STATUS_CONFIG[appliedFilters.status]?.label || appliedFilters.status}`}</span>
+                <button
+                  type="button"
+                  className="bezent-active-filter-chip__remove"
+                  aria-label="Remove status filter"
+                  onClick={() => {
+                    setAppliedFilters((prev) => ({ ...prev, status: '' }));
+                    setPage(1);
+                  }}
+                >
+                  ×
+                </button>
+              </span>
+            )}
+
+            {appliedFilters.shiftRef && (
+              <span className="bezent-active-filter-chip">
+                <span>{`Shift: ${formatShiftName(appliedFilters.shiftRef)}`}</span>
+                <button
+                  type="button"
+                  className="bezent-active-filter-chip__remove"
+                  aria-label="Remove shift filter"
+                  onClick={() => {
+                    setAppliedFilters((prev) => ({ ...prev, shiftRef: '' }));
+                    setPage(1);
+                  }}
+                >
+                  ×
+                </button>
+              </span>
+            )}
+
+            {appliedFilters.locationId && (
+              <span className="bezent-active-filter-chip">
+                <span>{`Location: ${workLocations.find((l) => l.id === appliedFilters.locationId)?.name || appliedFilters.locationId}`}</span>
+                <button
+                  type="button"
+                  className="bezent-active-filter-chip__remove"
+                  aria-label="Remove location filter"
+                  onClick={() => {
+                    setAppliedFilters((prev) => ({ ...prev, locationId: '' }));
+                    setPage(1);
+                  }}
+                >
+                  ×
+                </button>
+              </span>
+            )}
+
+            {appliedFilters.processingState && (
+              <span className="bezent-active-filter-chip">
+                <span>{`State: ${formatProcessingStateLabel(appliedFilters.processingState)}`}</span>
+                <button
+                  type="button"
+                  className="bezent-active-filter-chip__remove"
+                  aria-label="Remove processing state filter"
+                  onClick={() => {
+                    setAppliedFilters((prev) => ({ ...prev, processingState: '' }));
+                    setPage(1);
+                  }}
+                >
+                  ×
+                </button>
+              </span>
+            )}
+
+            {appliedFilters.indicator && (
+              <span className="bezent-active-filter-chip">
+                <span>{`Indicator: ${formatIndicatorLabel(appliedFilters.indicator)}`}</span>
+                <button
+                  type="button"
+                  className="bezent-active-filter-chip__remove"
+                  aria-label="Remove indicator filter"
+                  onClick={() => {
+                    setAppliedFilters((prev) => ({ ...prev, indicator: '' }));
+                    setPage(1);
+                  }}
+                >
+                  ×
+                </button>
+              </span>
+            )}
+
+            {appliedFilters.punchSource && (
+              <span className="bezent-active-filter-chip">
+                <span>{`Source: ${formatPunchSource(appliedFilters.punchSource)}`}</span>
+                <button
+                  type="button"
+                  className="bezent-active-filter-chip__remove"
+                  aria-label="Remove punch source filter"
+                  onClick={() => {
+                    setAppliedFilters((prev) => ({ ...prev, punchSource: '' }));
+                    setPage(1);
+                  }}
+                >
+                  ×
+                </button>
+              </span>
+            )}
+
+            <button
+              type="button"
+              className="bezent-active-chips__clear-all"
+              onClick={() => {
+                setAppliedFilters(EMPTY_ATTENDANCE_FILTER_STATE);
+                setPage(1);
+              }}
+            >
+              Clear all
+            </button>
+          </div>
+        )}
 
         {/* ── Bulk Actions Contextual Toolbar ── */}
         {selectedIds.size > 0 && (
@@ -822,22 +1117,48 @@ export function DailyAttendanceLogPage() {
           </Card>
         )}
 
-        {/* ── Table & Pagination ── */}
+        {/* ── Table & Pagination (Spec Section 4 & 9) ── */}
         {loading ? (
           <LoadingState label="Loading daily attendance records..." />
         ) : error ? (
-          <Alert variant="danger" title="Error Loading Daily Log">
-            {error}
-            <Button variant="secondary" onClick={loadData}>
-              Retry
-            </Button>
+          <Alert variant="danger" title="Could not load attendance">
+            <Stack gap="xs">
+              <p>Something went wrong while loading.</p>
+              <Button variant="secondary" onClick={loadData}>
+                Retry
+              </Button>
+            </Stack>
           </Alert>
         ) : items.length === 0 ? (
-          <EmptyState
-            variant="attendance"
-            title="No Attendance Records"
-            description="No employee attendance records matched the selected date and filters."
-          />
+          hasActiveFilters ? (
+            <EmptyState
+              variant="attendance"
+              title="No matching employees"
+              description="No employees match your filters."
+              primaryAction={{
+                label: 'Reset Filters',
+                onClick: handleResetFilters,
+              }}
+            />
+          ) : isWeeklyOffDay ? (
+            <EmptyState
+              variant="attendance"
+              title={`${date} is a Weekly Off`}
+              description="Attendance is not tracked for this day."
+            />
+          ) : isHolidayDay ? (
+            <EmptyState
+              variant="attendance"
+              title={`${date} is a Holiday`}
+              description="Attendance is not tracked for this day."
+            />
+          ) : (
+            <EmptyState
+              variant="attendance"
+              title="No attendance records"
+              description={`There are no attendance records for ${date}.`}
+            />
+          )
         ) : (
           <Card padding="none">
             <Table compact hoverable>
@@ -847,6 +1168,7 @@ export function DailyAttendanceLogPage() {
                     <Checkbox
                       checked={selectedIds.size === items.length && items.length > 0}
                       onChange={handleToggleSelectAll}
+                      aria-label="Select all"
                     />
                   </TableHeaderCell>
                   <TableHeaderCell
@@ -857,14 +1179,6 @@ export function DailyAttendanceLogPage() {
                   >
                     Employee {sortBy === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                   </TableHeaderCell>
-                  <TableHeaderCell
-                    onClick={() => {
-                      setSortBy('department');
-                      setSortOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
-                    }}
-                  >
-                    Department {sortBy === 'department' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
-                  </TableHeaderCell>
                   <TableHeaderCell>Shift</TableHeaderCell>
                   <TableHeaderCell
                     onClick={() => {
@@ -872,7 +1186,7 @@ export function DailyAttendanceLogPage() {
                       setSortOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
                     }}
                   >
-                    Punch In {sortBy === 'checkIn' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+                    In {sortBy === 'checkIn' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                   </TableHeaderCell>
                   <TableHeaderCell
                     onClick={() => {
@@ -880,7 +1194,7 @@ export function DailyAttendanceLogPage() {
                       setSortOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
                     }}
                   >
-                    Punch Out {sortBy === 'checkOut' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+                    Out {sortBy === 'checkOut' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                   </TableHeaderCell>
                   <TableHeaderCell
                     onClick={() => {
@@ -888,19 +1202,25 @@ export function DailyAttendanceLogPage() {
                       setSortOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
                     }}
                   >
-                    Worked Hours {sortBy === 'workedHours' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+                    Hours {sortBy === 'workedHours' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                   </TableHeaderCell>
+                  <TableHeaderCell>Break</TableHeaderCell>
                   <TableHeaderCell
                     onClick={() => {
                       setSortBy('status');
                       setSortOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
                     }}
                   >
-                    Attendance {sortBy === 'status' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+                    Status {sortBy === 'status' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                   </TableHeaderCell>
-                  <TableHeaderCell>Indicators</TableHeaderCell>
-                  <TableHeaderCell>Review State</TableHeaderCell>
-                  <TableHeaderCell>Actions</TableHeaderCell>
+                  <TableHeaderCell>Late</TableHeaderCell>
+                  <TableHeaderCell>Early Out</TableHeaderCell>
+                  <TableHeaderCell>Overtime</TableHeaderCell>
+                  <TableHeaderCell>Source</TableHeaderCell>
+                  <TableHeaderCell>Remarks</TableHeaderCell>
+                  <TableHeaderCell className="bezent-table-col--actions bezent-table-col--sticky-right">
+                    Actions
+                  </TableHeaderCell>
                 </TableRow>
               </TableHead>
 
@@ -920,13 +1240,20 @@ export function DailyAttendanceLogPage() {
                         <Checkbox
                           checked={isSelected}
                           onChange={() => handleToggleSelectRow(item.employeeId)}
+                          aria-label={`Select ${item.firstName}`}
                         />
                       </TableCell>
 
                       {/* 1. Employee */}
                       <TableCell>
                         <div className="bezent-table-cell--avatar-meta">
-                          <Avatar initials={initials} size="sm" />
+                          <Avatar
+                            avatarId={getEmployeeAvatarId(item.employeeId)}
+                            initials={initials}
+                            color={getAvatarColor(item.employeeId)}
+                            size="md"
+                            alt={`${item.firstName} ${item.lastName ?? ''}`}
+                          />
                           <div className="bezent-table-meta-group">
                             <button
                               type="button"
@@ -935,69 +1262,93 @@ export function DailyAttendanceLogPage() {
                             >
                               {item.firstName} {item.lastName ?? ''}
                             </button>
-                            <span className="bezent-table-meta-subtitle">{item.employeeCode}</span>
+                            <span className="bezent-table-meta-subtitle">
+                              {item.employeeCode}
+                              {item.departmentName ? ` • ${item.departmentName}` : ''}
+                            </span>
                           </div>
                         </div>
                       </TableCell>
 
-                      {/* 2. Department */}
+                      {/* 2. Shift */}
                       <TableCell>
                         <span className="bezent-table-meta-subtitle">
-                          {item.departmentName ?? '—'}
+                          {formatShiftName(item.shiftName || item.shiftScheduleRef)}
                         </span>
                       </TableCell>
 
-                      {/* 3. Shift */}
+                      {/* 3. In */}
                       <TableCell>
-                        <span className="bezent-table-meta-subtitle">
-                          {item.shiftScheduleRef ?? 'General 09:00 - 18:00'}
+                        <span className="bezent-table-meta-title">
+                          {item.checkInTime ? item.checkInTime.slice(0, 5) : '—'}
                         </span>
                       </TableCell>
 
-                      {/* 4. Punch In */}
+                      {/* 4. Out */}
                       <TableCell>
-                        {item.checkInTime ? (
-                          <Inline gap="xs" align="center">
-                            <span>{item.checkInTime}</span>
-                            {item.isLate ? (
-                              <Badge variant="warning">+{item.lateMinutes}m</Badge>
-                            ) : null}
-                          </Inline>
-                        ) : (
-                          <span className="bezent-table-meta-subtitle">—</span>
-                        )}
+                        <span className="bezent-table-meta-title">
+                          {item.checkOutTime ? item.checkOutTime.slice(0, 5) : '—'}
+                        </span>
                       </TableCell>
 
-                      {/* 5. Punch Out */}
-                      <TableCell>
-                        {item.checkOutTime ? (
-                          <Inline gap="xs" align="center">
-                            <span>{item.checkOutTime}</span>
-                            {item.isEarlyExit ? (
-                              <Badge variant="warning">-{item.earlyMinutes}m</Badge>
-                            ) : null}
-                          </Inline>
-                        ) : (
-                          <span className="bezent-table-meta-subtitle">—</span>
-                        )}
-                      </TableCell>
-
-                      {/* 6. Worked Hours */}
+                      {/* 5. Hours */}
                       <TableCell>
                         <strong>{formatWorkedHours(item.workedMinutes)}</strong>
                       </TableCell>
 
-                      {/* 7. Attendance Classification */}
+                      {/* 6. Break */}
+                      <TableCell>
+                        <span className="bezent-table-meta-subtitle">—</span>
+                      </TableCell>
+
+                      {/* 7. Status */}
                       <TableCell>{renderStatusBadge(item.status)}</TableCell>
 
-                      {/* 8. Indicators */}
-                      <TableCell>{renderIndicators(item.indicators)}</TableCell>
-
-                      {/* 9. Review State */}
-                      <TableCell>{renderReviewStateBadge(item.processingState)}</TableCell>
-
-                      {/* 10. Actions Menu */}
+                      {/* 8. Late */}
                       <TableCell>
+                        {item.lateMinutes && item.lateMinutes > 0 ? (
+                          <span className="bezent-table-meta-title">{item.lateMinutes} min</span>
+                        ) : (
+                          <span className="bezent-table-meta-subtitle">—</span>
+                        )}
+                      </TableCell>
+
+                      {/* 9. Early Out */}
+                      <TableCell>
+                        {item.earlyMinutes && item.earlyMinutes > 0 ? (
+                          <span className="bezent-table-meta-title">{item.earlyMinutes} min</span>
+                        ) : (
+                          <span className="bezent-table-meta-subtitle">—</span>
+                        )}
+                      </TableCell>
+
+                      {/* 10. Overtime */}
+                      <TableCell>
+                        {item.workedMinutes > 480 ? (
+                          <span className="bezent-table-meta-title">
+                            {formatWorkedHours(item.workedMinutes - 480)}
+                          </span>
+                        ) : (
+                          <span className="bezent-table-meta-subtitle">—</span>
+                        )}
+                      </TableCell>
+
+                      {/* 11. Source */}
+                      <TableCell>
+                        <span className="bezent-table-meta-subtitle">
+                          {formatPunchSource(item.punchSource)}
+                        </span>
+                      </TableCell>
+
+                      {/* 12. Remarks */}
+                      <TableCell>
+                        <span className="bezent-table-meta-subtitle">
+                          {item.notes?.trim() || '—'}
+                        </span>
+                      </TableCell>
+
+                      {/* 13. Actions (Spec Section 5) */}
+                      <TableCell className="bezent-table-col--actions bezent-table-col--sticky-right">
                         <div className="bezent-table-action-menu">
                           <button
                             type="button"
@@ -1020,90 +1371,36 @@ export function DailyAttendanceLogPage() {
                               <button
                                 type="button"
                                 className="bezent-table-action-menu__item"
+                                disabled={isMonthLocked}
+                                title={isMonthLocked ? 'Locked for payroll' : 'Edit Attendance'}
                                 onClick={() => {
                                   setOpenActionMenuId(null);
-                                  handleOpenDrawer(item.employeeId);
+                                  handleOpenManualEntry(item);
                                 }}
                               >
-                                <BezentIcon name="view" size={14} /> View Details
+                                <BezentIcon name="edit" size={14} /> Edit Attendance
                               </button>
                               <button
                                 type="button"
                                 className="bezent-table-action-menu__item"
                                 onClick={() => {
                                   setOpenActionMenuId(null);
-                                  handleOpenDrawer(item.employeeId);
+                                  handleOpenDrawer(item.employeeId, 'timeline');
                                 }}
                               >
-                                <BezentIcon name="clock" size={14} /> View Punch Timeline
+                                <BezentIcon name="clock" size={14} /> View Punches
                               </button>
-                              {generalSettings?.manualEntryAllowed !== false && (
-                                <button
-                                  type="button"
-                                  className="bezent-table-action-menu__item"
-                                  disabled={item.processingState === 'locked'}
-                                  onClick={() => {
-                                    setOpenActionMenuId(null);
-                                    handleOpenManualEntry(item);
-                                  }}
-                                >
-                                  <BezentIcon name="edit" size={14} /> Manual Entry / Adjustment
-                                </button>
-                              )}
                               <button
                                 type="button"
                                 className="bezent-table-action-menu__item"
-                                disabled={item.processingState === 'locked'}
+                                disabled={isMonthLocked}
+                                title={isMonthLocked ? 'Locked for payroll' : 'Regularize'}
                                 onClick={() => {
                                   setOpenActionMenuId(null);
                                   handleOpenDrawer(item.employeeId);
                                 }}
                               >
-                                <BezentIcon name="refresh" size={14} /> Initiate Regularization
-                              </button>
-                              {item.isMissingPunch && (
-                                <button
-                                  type="button"
-                                  className="bezent-table-action-menu__item"
-                                  onClick={() => {
-                                    setOpenActionMenuId(null);
-                                    handleOpenDrawer(item.employeeId);
-                                  }}
-                                >
-                                  <BezentIcon name="alert-triangle" size={14} /> Review Exception
-                                </button>
-                              )}
-                              <button
-                                type="button"
-                                className="bezent-table-action-menu__item"
-                                onClick={() => {
-                                  setOpenActionMenuId(null);
-                                  handleOpenDrawer(item.employeeId);
-                                }}
-                              >
-                                <BezentIcon name="calendar" size={14} /> View Leave / OD
-                              </button>
-                              <div className="bezent-table-action-menu__divider" />
-                              <button
-                                type="button"
-                                className="bezent-table-action-menu__item"
-                                disabled={item.processingState === 'locked'}
-                                onClick={() => {
-                                  setOpenActionMenuId(null);
-                                  handleRecalculateSingle(item.employeeId);
-                                }}
-                              >
-                                <BezentIcon name="refresh" size={14} /> Recalculate
-                              </button>
-                              <button
-                                type="button"
-                                className="bezent-table-action-menu__item"
-                                onClick={() => {
-                                  setOpenActionMenuId(null);
-                                  handleOpenDrawer(item.employeeId);
-                                }}
-                              >
-                                <BezentIcon name="history" size={14} /> View Audit History
+                                <BezentIcon name="refresh" size={14} /> Regularize
                               </button>
                             </div>
                           )}
@@ -1230,7 +1527,9 @@ export function DailyAttendanceLogPage() {
                         </Stack>
                         <Stack gap="none">
                           <span className="bezent-card__desc">Assigned Shift</span>
-                          <span>{drawerDetail.employee.assignedShift.scheduleRef}</span>
+                          <span>
+                            {formatShiftName(drawerDetail.employee.assignedShift.scheduleRef)}
+                          </span>
                         </Stack>
                         <Stack gap="none">
                           <span className="bezent-card__desc">Shift Window</span>
@@ -1482,27 +1781,22 @@ export function DailyAttendanceLogPage() {
           )}
         </Modal>
 
-        {/* ── Manual Attendance Entry Modal ── */}
+        {/* ── Edit Attendance Modal (Spec Section 6) ── */}
         {manualEntryOpen && (
-          <Modal
-            isOpen={true}
-            onClose={() => setManualEntryOpen(false)}
-            title={
-              selectedRecord
-                ? `Manual Attendance: ${selectedRecord.firstName} ${selectedRecord.lastName ?? ''}`
-                : 'Create Manual Attendance Entry'
-            }
-          >
+          <Modal isOpen={true} onClose={() => setManualEntryOpen(false)} title="Edit Attendance">
             <Stack gap="md">
               <p className="bezent-card__desc">
-                Adjust punch timings and credit attendance for {date}. Immutable audit records will
-                track this administrative modification.
+                {selectedRecord
+                  ? `${selectedRecord.firstName} ${selectedRecord.lastName ?? ''}`.trim()
+                  : 'Employee'}{' '}
+                · {date}
               </p>
 
               {modalError && <Alert variant="danger">{modalError}</Alert>}
 
               {!selectedRecord && (
                 <Select
+                  label="Employee"
                   value={manualEmployeeId}
                   onChange={(e) => setManualEmployeeId(e.target.value)}
                 >
@@ -1515,51 +1809,59 @@ export function DailyAttendanceLogPage() {
                 </Select>
               )}
 
+              <Select
+                label="Status"
+                value={manualStatus}
+                onChange={(e) => setManualStatus(e.target.value)}
+              >
+                <option value="present">Present</option>
+                <option value="half_day">Half Day</option>
+                <option value="absent">Absent</option>
+                <option value="on_leave">On Leave</option>
+                <option value="on_duty">On Duty</option>
+                <option value="work_from_home">Work From Home</option>
+              </Select>
+
               <Inline gap="md">
                 <Input
-                  label="Punch In Time"
+                  label="In Time"
                   type="time"
                   value={checkInTime}
                   onChange={(e) => setCheckInTime(e.target.value)}
                 />
                 <Input
-                  label="Punch Out Time"
+                  label="Out Time"
                   type="time"
                   value={checkOutTime}
                   onChange={(e) => setCheckOutTime(e.target.value)}
                 />
               </Inline>
 
-              <Inline gap="md">
-                <Select
-                  label="Work Location"
-                  value={workLocation}
-                  onChange={(e) => setWorkLocation(e.target.value)}
-                >
-                  <option value="office">Office</option>
-                  <option value="remote">Remote</option>
-                  <option value="field">Field</option>
-                </Select>
-
-                <Select
-                  label="Attendance Status"
-                  value={manualStatus}
-                  onChange={(e) =>
-                    setManualStatus(e.target.value as 'present' | 'half_day' | 'absent')
-                  }
-                >
-                  <option value="present">Present (Full Day)</option>
-                  <option value="half_day">Half Day Credit</option>
-                  <option value="absent">Absent</option>
-                </Select>
-              </Inline>
+              <Select
+                label="Reason for change (required)"
+                value={correctionReason}
+                onChange={(e) => {
+                  setCorrectionReason(e.target.value);
+                  setModalError(null);
+                }}
+              >
+                <option value="">Select a reason</option>
+                <option value="System down">System down</option>
+                <option value="Weather">Weather</option>
+                <option value="Strike">Strike</option>
+                <option value="Client site">Client site</option>
+                <option value="Forgot to punch">Forgot to punch</option>
+                <option value="Other">Other</option>
+              </Select>
 
               <Input
-                label="Reason for Adjustment"
-                placeholder="e.g. Card malfunction, onsite client visit authorized by manager"
-                value={correctionReason}
-                onChange={(e) => setCorrectionReason(e.target.value)}
+                label="Remarks (optional)"
+                placeholder="Additional notes..."
+                value={remarks}
+                onChange={(e) => setRemarks(e.target.value)}
               />
+
+              <p className="bezent-card__desc">Every change is recorded in the audit log.</p>
 
               <Inline justify="end" gap="sm">
                 <Button variant="secondary" onClick={() => setManualEntryOpen(false)}>
@@ -1570,7 +1872,81 @@ export function DailyAttendanceLogPage() {
                   onClick={handleSaveCorrection}
                   disabled={submittingCorrection}
                 >
-                  {submittingCorrection ? 'Saving...' : 'Save Adjustment'}
+                  {submittingCorrection ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </Inline>
+            </Stack>
+          </Modal>
+        )}
+
+        {/* ── Finalize Day Confirmation Modal (Spec Section 7) ── */}
+        {finalizeModalOpen && (
+          <Modal
+            isOpen={true}
+            onClose={() => setFinalizeModalOpen(false)}
+            title={`Finalize attendance for ${date}?`}
+          >
+            <Stack gap="md">
+              <p>
+                {
+                  items.filter(
+                    (i) =>
+                      i.processingState !== 'locked' &&
+                      !i.isMissingPunch &&
+                      i.processingState !== 'incomplete',
+                  ).length
+                }{' '}
+                employees will be finalized.{' '}
+                {
+                  items.filter(
+                    (i) =>
+                      i.isMissingPunch ||
+                      i.processingState === 'incomplete' ||
+                      i.processingState === 'pending_review',
+                  ).length
+                }{' '}
+                records with unresolved issues will be skipped.
+              </p>
+
+              <Inline justify="end" gap="sm">
+                <Button variant="secondary" onClick={() => setFinalizeModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  disabled={finalizingDay}
+                  onClick={async () => {
+                    setFinalizingDay(true);
+                    try {
+                      const eligible = items.filter(
+                        (i) =>
+                          i.processingState !== 'locked' &&
+                          !i.isMissingPunch &&
+                          i.processingState !== 'incomplete',
+                      );
+                      const skippedCount = items.length - eligible.length;
+                      const res = await bulkFinalizeDailyAttendance({
+                        employeeIds: eligible.map((i) => i.employeeId),
+                        date,
+                      });
+                      setBulkBannerMessage({
+                        type: 'success',
+                        text: `${res.finalizedCount} records finalized. ${skippedCount} skipped.`,
+                      });
+                      setFinalizeModalOpen(false);
+                      await loadData();
+                    } catch (err: unknown) {
+                      setBulkBannerMessage({
+                        type: 'danger',
+                        text: err instanceof Error ? err.message : 'Could not finalize attendance.',
+                      });
+                      setFinalizeModalOpen(false);
+                    } finally {
+                      setFinalizingDay(false);
+                    }
+                  }}
+                >
+                  {finalizingDay ? 'Finalizing...' : 'Finalize'}
                 </Button>
               </Inline>
             </Stack>

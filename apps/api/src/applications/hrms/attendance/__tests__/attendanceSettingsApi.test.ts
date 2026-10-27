@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import net from 'node:net';
 import request from 'supertest';
 import { createApp } from '../../../../app/server/createApp.js';
@@ -6,7 +6,7 @@ import { isDatabaseConfigured, getDb } from '../../../../db/connection.js';
 import { and, eq } from 'drizzle-orm';
 import {
   attendancePunches,
-  departments,
+  attendanceRegularizationSettings,
   employeeAttendance,
   employees,
 } from '../../../../db/schema.js';
@@ -27,13 +27,6 @@ describe.skipIf(!isDatabaseConfigured)('Attendance Settings V1.0 API', () => {
     otherHeaders = await hrmsTestHeaders(otherCompanyId, tenantId);
 
     const db = getDb();
-    await db.insert(departments).ignore().values({
-      id: 'dept_engineering',
-      tenantId,
-      companyId,
-      name: 'Engineering',
-      code: 'ENG',
-    });
     await db
       .insert(employees)
       .values({
@@ -102,7 +95,7 @@ describe.skipIf(!isDatabaseConfigured)('Attendance Settings V1.0 API', () => {
         .send({
           policyName: 'Engineering Shift Policy',
           scope: 'department',
-          scopeId: 'dept_engineering',
+          scopeId: 'dept_eng_01',
           status: 'published',
           fullDayThresholdHours: 8.5,
           halfDayThresholdHours: 4.5,
@@ -135,12 +128,12 @@ describe.skipIf(!isDatabaseConfigured)('Attendance Settings V1.0 API', () => {
 
     it('resolves effective policy following hierarchy: Employee -> Department -> Company', async () => {
       const res = await request(app)
-        .get('/api/v1/hrms/attendance/settings/policies/effective?departmentId=dept_engineering')
+        .get('/api/v1/hrms/attendance/settings/policies/effective?departmentId=dept_eng_01')
         .set(headers);
 
       expect(res.status).toBe(200);
       expect(res.body.data.policy.scope).toBe('department');
-      expect(res.body.data.policy.scopeId).toBe('dept_engineering');
+      expect(res.body.data.policy.scopeId).toBe('dept_eng_01');
     });
 
     it('rolls back a policy snapshot creating a new active version', async () => {
@@ -469,5 +462,25 @@ describe.skipIf(!isDatabaseConfigured)('Attendance Settings V1.0 API', () => {
       expect(res.status).toBe(400);
       expect(res.body.error.message).toMatch(/does not exist/i);
     });
+  });
+
+  afterAll(async () => {
+    const db = getDb();
+    // Restore default regularization settings for comp_demo_01 to prevent cross-suite interference
+    await db
+      .update(attendanceRegularizationSettings)
+      .set({
+        isEnabled: true,
+        allowedCorrectionTypes: null,
+        submissionWindowDays: 30,
+        maxRequestsPerMonth: 20,
+        requireReason: true,
+      })
+      .where(
+        and(
+          eq(attendanceRegularizationSettings.tenantId, tenantId),
+          eq(attendanceRegularizationSettings.companyId, companyId),
+        ),
+      );
   });
 });

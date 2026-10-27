@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Outlet, useLocation, useNavigate, useMatches, Navigate } from 'react-router-dom';
 import {
   AppShell,
@@ -122,9 +122,35 @@ export function ShellLayout() {
     }
   }, [application, auth, access, activeCompany]);
 
+  const [dynamicSlotId, setDynamicSlotId] = useState<string>(() => {
+    try {
+      return localStorage.getItem('bezent:dynamic-nav-slot') || 'learning';
+    } catch {
+      return 'learning';
+    }
+  });
+
+  useEffect(() => {
+    if (!application || !activeId) return;
+    const isFixed = application.navigation.destinations.some((d) => d.sidebar && d.id === activeId);
+    if (!isFixed) {
+      const isKnown = application.navigation.destinations.some(
+        (d) => d.id === activeId && d.categoryId,
+      );
+      if (isKnown) {
+        setDynamicSlotId(activeId);
+        try {
+          localStorage.setItem('bezent:dynamic-nav-slot', activeId);
+        } catch {
+          // ignore storage errors
+        }
+      }
+    }
+  }, [application, activeId]);
+
   const navItems = useMemo(
-    () => (application ? toShellNavItems(application, activeId, can) : []),
-    [application, activeId, can],
+    () => (application ? toShellNavItems(application, activeId, can, dynamicSlotId) : []),
+    [application, activeId, can, dynamicSlotId],
   );
   const utility = useActiveUtility();
   const data = useDevUtilityData();
@@ -289,6 +315,10 @@ export function ShellLayout() {
         userInitials={userInitials}
         userName={userName}
         userEmail={userEmail}
+        userPhoto={
+          (access?.user as { avatarUrl?: string; photoUrl?: string } | undefined)?.avatarUrl ||
+          (access?.user as { avatarUrl?: string; photoUrl?: string } | undefined)?.photoUrl
+        }
         userRole={userRole}
         onMyProfile={handleMyProfile}
         onAccountSettings={handleAccountSettings}

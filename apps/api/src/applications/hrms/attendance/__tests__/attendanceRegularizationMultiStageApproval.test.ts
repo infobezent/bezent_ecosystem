@@ -392,10 +392,7 @@ describe.skipIf(!isDatabaseConfigured)(
       await db
         .delete(roleAssignments)
         .where(
-          and(
-            eq(roleAssignments.tenantId, tenantId),
-            eq(roleAssignments.companyId, companyId),
-          ),
+          and(eq(roleAssignments.tenantId, tenantId), eq(roleAssignments.companyId, companyId)),
         );
       await removeHrmsTestAccess([companyId]);
     });
@@ -672,7 +669,9 @@ describe.skipIf(!isDatabaseConfigured)(
 
         expect(detailRes.body.data.approvalStatus).toBe('rejected');
         expect(detailRes.body.data.applicationStatus).toBe('not_applicable');
-        expect(detailRes.body.data.decisionReason).toContain('Client reported no physical presence');
+        expect(detailRes.body.data.decisionReason).toContain(
+          'Client reported no physical presence',
+        );
 
         // Verify attendance remained untouched
         const [att] = await db
@@ -742,7 +741,8 @@ describe.skipIf(!isDatabaseConfigured)(
           .set(hrHeaders)
           .send({
             decision: 'rejected',
-            reason: 'UPS generator was operational; biometric logs show other staff swiped normally.',
+            reason:
+              'UPS generator was operational; biometric logs show other staff swiped normally.',
           });
         expect(hrRes.status).toBe(200);
 

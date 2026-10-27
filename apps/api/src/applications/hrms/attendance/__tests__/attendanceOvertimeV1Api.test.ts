@@ -32,7 +32,7 @@ describe.skipIf(!isDatabaseConfigured)(
     const reviewerEmpId = 'emp_ot_reviewer_001';
     const reviewerUserId = 'usr_ot_reviewer_operator';
     const reviewerEmail = 'ot.reviewer@bezent-test.example';
-    const testDate = '2026-10-08';
+    const testDate = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     let testRequestId: string;
     let testSettlementId: string;
 

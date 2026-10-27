@@ -135,6 +135,30 @@ export class DepartmentService {
       }
     }
 
+    // 6. Name uniqueness within tenant, company, and hierarchy scope
+    const existingName = await this.repo.findDepartmentByNameAndScope(
+      tenantId,
+      companyId,
+      trimmedName,
+      {
+        parentDepartmentId,
+        businessUnitId,
+        divisionId,
+      },
+    );
+    if (existingName) {
+      const statusNote = existingName.status === 'inactive' ? ' (currently inactive)' : '';
+      const contextNote = parentDepartmentId
+        ? ' under the selected parent department'
+        : businessUnitId
+          ? ' in the selected business unit'
+          : '';
+      throw new ConflictError(
+        `Department with name "${trimmedName}" already exists in this company${contextNote}${statusNote}`,
+        'DUPLICATE_DEPARTMENT_NAME',
+      );
+    }
+
     const created = await this.repo.createDepartment(tenantId, companyId, {
       name: trimmedName,
       code: trimmedCode,
@@ -300,6 +324,30 @@ export class DepartmentService {
       ) {
         throw new BadRequestError('Department head must be an active employee in this company');
       }
+    }
+
+    // 6. Name uniqueness check within tenant, company, and hierarchy scope
+    const existingName = await this.repo.findDepartmentByNameAndScope(
+      tenantId,
+      companyId,
+      trimmedName,
+      {
+        parentDepartmentId,
+        businessUnitId,
+        divisionId,
+      },
+    );
+    if (existingName && existingName.id !== id) {
+      const statusNote = existingName.status === 'inactive' ? ' (currently inactive)' : '';
+      const contextNote = parentDepartmentId
+        ? ' under the selected parent department'
+        : businessUnitId
+          ? ' in the selected business unit'
+          : '';
+      throw new ConflictError(
+        `Department with name "${trimmedName}" already exists in this company${contextNote}${statusNote}`,
+        'DUPLICATE_DEPARTMENT_NAME',
+      );
     }
 
     const isStructuralMove =

@@ -93,6 +93,16 @@ export const MODULE_LABELS: Record<string, string> = {
   tenants: 'Tenants',
   companies: 'Companies',
   requests: 'Service Requests',
+  recruitment: 'Recruitment & Hiring',
+  payroll: 'Payroll',
+  learning: 'Learning',
+  shifts: 'Shifts',
+  career: 'Career Paths',
+  compensation: 'Compensation',
+  benefits: 'Benefits',
+  assets: 'Assets',
+  sop: 'Standard Operations',
+  reports: 'Reports',
 };
 
 function platform(
@@ -372,6 +382,59 @@ const BASE_PERMISSION_DEFINITIONS: PermissionDefinition[] = [
   ),
   hrms('team', 'view', 'View my team', 'View the members of teams the user manages.', [
     'hrms.team.read',
+  ]),
+  hrms(
+    'recruitment',
+    'view',
+    'View recruitment',
+    'Manage hiring workflows and candidate pipelines.',
+    ['hrms.recruitment.read'],
+  ),
+  hrms('payroll', 'view', 'View payroll', 'Manage payroll processing and employee pay.', [
+    'hrms.payroll.read',
+  ]),
+  hrms('learning', 'view', 'View learning', 'Courses, training programs, and skill development.', [
+    'hrms.learning.read',
+  ]),
+  hrms('shifts', 'view', 'View shifts', 'Schedule work shifts, rotations, and rosters.', [
+    'hrms.shifts.read',
+  ]),
+  hrms(
+    'career',
+    'view',
+    'View career paths',
+    'Career progression, competencies, and promotion tracks.',
+    ['hrms.career.read'],
+  ),
+  hrms(
+    'compensation',
+    'view',
+    'View compensation',
+    'Salary structures, bonuses, and compensation bands.',
+    ['hrms.compensation.read'],
+  ),
+  hrms('benefits', 'view', 'View benefits', 'Health insurance, employee perks, and allowances.', [
+    'hrms.benefits.read',
+  ]),
+  hrms(
+    'assets',
+    'view',
+    'View assets',
+    'Track company equipment, laptops, and hardware licenses.',
+    ['hrms.assets.read'],
+  ),
+  hrms(
+    'requests',
+    'view',
+    'View employee requests',
+    'Helpdesk, letter requests, and workplace services.',
+    ['hrms.requests.read'],
+  ),
+  hrms('sop', 'view', 'View standard operations', 'Standard operating procedures and policies.', [
+    'hrms.sop.read',
+  ]),
+  hrms('reports', 'view', 'View HR reports', 'HR reports and analytics across every module.', [
+    'hrms.reports.read',
   ]),
 
   // Employee Self-Service (own record only)

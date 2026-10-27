@@ -108,7 +108,7 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Exceptions V1
     it('returns paginated exceptions and 6 summary counters', async () => {
       const res = await request(app)
         .get(
-          '/api/v1/hrms/attendance/exceptions?dateFrom=2026-10-01&dateTo=2026-10-15&status=all&limit=100',
+          '/api/v1/hrms/attendance/exceptions?dateFrom=2026-10-01&dateTo=2026-10-15&status=all&limit=100&search=EMP-EXC-001',
         )
         .set(headers);
 

@@ -29,6 +29,9 @@ export type AttendanceStatus =
 export type AttendanceProcessingState =
   'incomplete' | 'pending_review' | 'provisional' | 'finalized' | 'locked';
 
+export type DailyAttendanceStatus = AttendanceStatus | 'not_checked_in';
+export type DailyAttendanceProcessingState = AttendanceProcessingState | 'pending_processing';
+
 export type AttendanceGeneralSettingsWithV1 = AttendanceGeneralSettings & {
   dayBoundaryMode?: string;
   unscheduledFallbackCutoff?: string;
@@ -125,8 +128,8 @@ export interface DailyAttendanceItem {
   date: string;
   checkInTime: string | null;
   checkOutTime: string | null;
-  status: AttendanceStatus;
-  processingState?: AttendanceProcessingState;
+  status: DailyAttendanceStatus;
+  processingState?: DailyAttendanceProcessingState;
   workLocation: string;
   workedMinutes: number;
   lateMinutes: number;
@@ -209,8 +212,8 @@ export interface DailyLogEmployeeDetail {
     checkInTime: string | null;
     checkOutTime: string | null;
     workedMinutes: number;
-    status: AttendanceStatus;
-    processingState: AttendanceProcessingState;
+    status: DailyAttendanceStatus;
+    processingState: DailyAttendanceProcessingState;
     indicators: string[];
     isLate: boolean;
     lateMinutes: number;

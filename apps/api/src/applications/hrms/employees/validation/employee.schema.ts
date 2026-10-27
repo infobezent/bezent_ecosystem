@@ -444,12 +444,34 @@ export function validateListEmployeesParams(input: Record<string, unknown>): Lis
     params.departmentId = input.departmentId.trim();
   }
 
+  if (Array.isArray(input.departmentIds)) {
+    params.departmentIds = input.departmentIds.filter(
+      (id): id is string => typeof id === 'string' && id.trim().length > 0,
+    );
+  } else if (typeof input.departmentIds === 'string' && input.departmentIds.trim()) {
+    params.departmentIds = input.departmentIds
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+
   if (typeof input.designationId === 'string' && input.designationId.trim()) {
     params.designationId = input.designationId.trim();
   }
 
   if (typeof input.locationId === 'string' && input.locationId.trim()) {
     params.locationId = input.locationId.trim();
+  }
+
+  if (Array.isArray(input.locationIds)) {
+    params.locationIds = input.locationIds.filter(
+      (id): id is string => typeof id === 'string' && id.trim().length > 0,
+    );
+  } else if (typeof input.locationIds === 'string' && input.locationIds.trim()) {
+    params.locationIds = input.locationIds
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
   }
 
   if (
@@ -464,6 +486,14 @@ export function validateListEmployeesParams(input: Record<string, unknown>): Lis
     VALID_EMPLOYMENT_STATUSES.includes(input.employmentStatus as EmploymentStatus)
   ) {
     params.employmentStatus = input.employmentStatus as EmploymentStatus;
+  }
+
+  if (typeof input.joiningDateFrom === 'string' && DATE_REGEX.test(input.joiningDateFrom.trim())) {
+    params.joiningDateFrom = input.joiningDateFrom.trim();
+  }
+
+  if (typeof input.joiningDateTo === 'string' && DATE_REGEX.test(input.joiningDateTo.trim())) {
+    params.joiningDateTo = input.joiningDateTo.trim();
   }
 
   return params;

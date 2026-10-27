@@ -218,6 +218,7 @@ export function GlobalSearch({
         <button
           type="button"
           className="global-search__filter-toggle"
+          aria-label="Filter"
           aria-expanded={open}
           onClick={(e) => {
             e.stopPropagation();
@@ -226,7 +227,7 @@ export function GlobalSearch({
           }}
         >
           <BezentIcon name="filter" size={18} color="currentColor" strokeWidth={1.8} />
-          <span>Filter</span>
+          <span className="global-search__filter-label">Filter</span>
         </button>
       </div>
 

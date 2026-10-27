@@ -241,27 +241,29 @@ describe('Workspace & Shell Isolation Boundaries', () => {
 
       // Full representative HRMS sidebar navigation must be present
       expect(html).toContain('Dashboard');
-      expect(html).toContain('Administration');
+      expect(html).toContain('Workforce');
+      expect(html).toContain('Hiring');
       expect(html).toContain('Leave');
       expect(html).toContain('Attendance');
-      expect(html).toContain('Timesheets');
+      expect(html).toContain('Payroll');
       expect(html).toContain('Performance');
+      expect(html).toContain('Learning');
     });
 
     it('ALLOWS direct URL /hrms/employees and renders HRMS shell without access denied', () => {
       const html = renderAt('/hrms/employees', hrAuth);
       expect(html).not.toContain('Access Denied');
       expect(html).not.toContain('Unauthorized');
-      expect(html).toContain('Administration');
+      expect(html).toContain('Workforce');
     });
 
     it('ALLOWS canonical URL /hrms/administration/employees and renders employee directory with subnav', () => {
       const html = renderAt('/hrms/administration/employees', hrAuth);
       expect(html).not.toContain('Access Denied');
       expect(html).not.toContain('Unauthorized');
-      expect(html).toContain('Administration');
+      expect(html).toContain('Workforce');
       expect(html).toContain('Employees');
-      expect(html).toContain('Find employees and view their employment information');
+      expect(html).toContain('Manage and explore your workforce directory');
     });
 
     it('ALLOWS direct URL /hrms/onboarding and renders onboarding without access denied', () => {

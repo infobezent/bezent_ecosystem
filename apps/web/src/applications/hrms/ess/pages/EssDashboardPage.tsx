@@ -279,7 +279,13 @@ export function EssDashboardPage() {
             pendingActionsCount: briefing.pendingActionsCount,
             actionsSummary: briefing.actionsSummary,
           }}
-          timezone="IST"
+          timezone={
+            attendanceToday?.timezone ||
+            data?.todayAttendance?.timezone ||
+            attendanceToday?.shift?.effectiveTimezone ||
+            data?.todayAttendance?.shift?.effectiveTimezone ||
+            'IST'
+          }
           punchLoading={punchLoading}
           canCheckIn={canCheckIn}
           canCheckOut={canCheckOut}

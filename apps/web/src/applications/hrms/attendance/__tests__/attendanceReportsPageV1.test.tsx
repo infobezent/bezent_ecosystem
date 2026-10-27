@@ -4,45 +4,49 @@ import { MemoryRouter } from 'react-router-dom';
 import { AttendanceReportsPage } from '../pages/AttendanceReportsPage';
 
 describe('HRMS Attendance — Reports V1.0 Frontend Tests', () => {
-  it('renders Attendance Reporting Center header and subtitle', () => {
+  it('renders Reports header, subtitle and breadcrumb', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <AttendanceReportsPage />
       </MemoryRouter>,
     );
 
-    expect(html).toContain('Attendance Reporting Center');
-    expect(html).toContain('15 Authoritative statutory muster registers');
+    expect(html).toContain('Reports');
+    expect(html).toContain(
+      'Generate attendance reports and export them for payroll, audit and review.',
+    );
+    expect(html).toContain('Attendance › Reports');
   });
 
-  it('renders all 4 navigation tabs (Catalog, Center, Saved, History)', () => {
+  it('renders Available Reports catalog with search and open report actions', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <AttendanceReportsPage />
       </MemoryRouter>,
     );
 
-    expect(html).toContain('Report Catalog');
-    expect(html).toContain('Report Center');
-    expect(html).toContain('Saved Configurations');
-    expect(html).toContain('Generation History');
+    expect(html).toContain('Available Reports');
+    expect(html).toContain('Search reports');
+    expect(html).toContain('Open Report');
   });
 
-  it('renders category filtering dropdown with all 7 categories', () => {
+  it('renders all 7 canonical report templates and descriptions', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <AttendanceReportsPage />
       </MemoryRouter>,
     );
 
-    expect(html).toContain('All Categories (15 Reports)');
-    expect(html).toContain('Daily Operations');
-    expect(html).toContain('Monthly Registers');
-    expect(html).toContain('Trends &amp; Analytics');
-    expect(html).toContain('Exceptions &amp; Compliance');
-    expect(html).toContain('Operational Workflows');
-    expect(html).toContain('Payroll Handover');
-    expect(html).toContain('Audit &amp; Security');
+    expect(html).toContain('Daily Attendance');
+    expect(html).toContain('Monthly Muster Roll');
+    expect(html).toContain(
+      'Status grid for the month with totals for present, absent, leave and payable days.',
+    );
+    expect(html).toContain('Attendance Summary');
+    expect(html).toContain('Late, Early and Missed Punch');
+    expect(html).toContain('Regularization');
+    expect(html).toContain('Overtime and Comp-Off');
+    expect(html).toContain('Absenteeism');
   });
 
   it('renders KpiSummaryGrid with report-specific KPI metrics and change indicators', async () => {

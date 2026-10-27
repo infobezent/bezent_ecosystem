@@ -17,6 +17,7 @@ import {
   employeeBankAccounts,
   employeeDocuments,
   attendanceRegularizations,
+  attendanceRegularizationSettings,
 } from '../../../../db/schema.js';
 
 import { hashPassword } from '../../../../platform/auth/security.js';
@@ -581,13 +582,31 @@ describe('Employee Self Service (ESS) Backend API (Phase 3)', () => {
       if (isDatabaseConfigured) {
         const db = getDb();
         await db
+          .insert(attendanceRegularizationSettings)
+          .values({
+            id: 'reg_set_ess_01',
+            tenantId,
+            companyId,
+            isEnabled: true,
+            allowedCorrectionTypes: null,
+            submissionWindowDays: 30,
+            maxRequestsPerMonth: 20,
+          })
+          .onDuplicateKeyUpdate({
+            set: {
+              isEnabled: true,
+              allowedCorrectionTypes: null,
+              submissionWindowDays: 30,
+              maxRequestsPerMonth: 20,
+            },
+          });
+        await db
           .delete(attendanceRegularizations)
           .where(
             and(
               eq(attendanceRegularizations.tenantId, tenantId),
               eq(attendanceRegularizations.companyId, companyId),
               eq(attendanceRegularizations.employeeId, employeeId),
-              eq(attendanceRegularizations.workday, regDate),
             ),
           );
       }

@@ -53,16 +53,20 @@ describe('Organization Departments Unit & Integration Tests (V1)', () => {
 
     // Clean up
     await db
+      .update(departments)
+      .set({ parentDepartmentId: null, headEmployeeId: null })
+      .where(inArray(departments.companyId, [testCompanyA, testCompanyB]));
+    await db.delete(employees).where(inArray(employees.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(designations)
+      .where(inArray(designations.companyId, [testCompanyA, testCompanyB]));
+    await db
       .delete(departments)
       .where(inArray(departments.companyId, [testCompanyA, testCompanyB]));
     await db.delete(divisions).where(inArray(divisions.companyId, [testCompanyA, testCompanyB]));
     await db
       .delete(businessUnits)
       .where(inArray(businessUnits.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(employees).where(inArray(employees.companyId, [testCompanyA, testCompanyB]));
-    await db
-      .delete(designations)
-      .where(inArray(designations.companyId, [testCompanyA, testCompanyB]));
     await db
       .delete(roleAssignments)
       .where(inArray(roleAssignments.companyId, [testCompanyA, testCompanyB]));
@@ -290,16 +294,20 @@ describe('Organization Departments Unit & Integration Tests (V1)', () => {
   afterAll(async () => {
     const db = getDb();
     await db
+      .update(departments)
+      .set({ parentDepartmentId: null, headEmployeeId: null })
+      .where(inArray(departments.companyId, [testCompanyA, testCompanyB]));
+    await db.delete(employees).where(inArray(employees.companyId, [testCompanyA, testCompanyB]));
+    await db
+      .delete(designations)
+      .where(inArray(designations.companyId, [testCompanyA, testCompanyB]));
+    await db
       .delete(departments)
       .where(inArray(departments.companyId, [testCompanyA, testCompanyB]));
     await db.delete(divisions).where(inArray(divisions.companyId, [testCompanyA, testCompanyB]));
     await db
       .delete(businessUnits)
       .where(inArray(businessUnits.companyId, [testCompanyA, testCompanyB]));
-    await db.delete(employees).where(inArray(employees.companyId, [testCompanyA, testCompanyB]));
-    await db
-      .delete(designations)
-      .where(inArray(designations.companyId, [testCompanyA, testCompanyB]));
     await db
       .delete(roleAssignments)
       .where(inArray(roleAssignments.companyId, [testCompanyA, testCompanyB]));

@@ -78,12 +78,39 @@ export class AttendanceSettingsService {
       }
     }
 
-    // 2. Day boundary fallback cutoff format validation
-    const cutoffTime = input.unscheduledFallbackCutoff || input.dayBoundaryTime;
-    if (cutoffTime && !/^\d{2}:\d{2}(:\d{2})?$/.test(cutoffTime)) {
+    // 2. Workday Rollover Mode & Cutoff Validation
+    if (
+      input.dayBoundaryMode &&
+      !['shift_workday_based', 'calendar_midnight'].includes(input.dayBoundaryMode)
+    ) {
       throw new BadRequestError(
-        'Day boundary fallback cutoff time must be in HH:mm or HH:mm:ss format',
+        'Invalid workday rollover mode. Must be shift_workday_based or calendar_midnight',
       );
+    }
+
+    if (input.dayBoundaryMode === 'calendar_midnight') {
+      input.unscheduledFallbackCutoff = '00:00:00';
+      input.dayBoundaryTime = '00:00:00';
+    } else {
+      const cutoffTime = input.unscheduledFallbackCutoff || input.dayBoundaryTime;
+      if (cutoffTime) {
+        const match = /^(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(cutoffTime);
+        if (!match) {
+          throw new BadRequestError(
+            'Day boundary fallback cutoff time must be in HH:mm or HH:mm:ss format',
+          );
+        }
+        const [hours, minutes, seconds] = [
+          Number(match[1]),
+          Number(match[2]),
+          Number(match[3] ?? 0),
+        ];
+        if (hours > 23 || minutes > 59 || seconds > 59) {
+          throw new BadRequestError(
+            'Day boundary fallback cutoff time must be a valid 24-hour time (00:00:00 to 23:59:59)',
+          );
+        }
+      }
     }
 
     // 3. Controlled modification for Tracking Start Date (Go-Live Date)
@@ -91,6 +118,23 @@ export class AttendanceSettingsService {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(input.trackingStartDate)) {
         throw new BadRequestError('Tracking start date must be in YYYY-MM-DD format');
       }
+      const targetDate = new Date(`${input.trackingStartDate}T00:00:00Z`);
+      if (isNaN(targetDate.getTime())) {
+        throw new BadRequestError('Invalid tracking start date');
+      }
+      const maxFuture = new Date();
+      maxFuture.setFullYear(maxFuture.getFullYear() + 1);
+      if (targetDate > maxFuture) {
+        throw new BadRequestError(
+          'Tracking start date cannot be scheduled more than 1 year in advance',
+        );
+      }
+      const minPast = new Date();
+      minPast.setFullYear(minPast.getFullYear() - 10);
+      if (targetDate < minPast) {
+        throw new BadRequestError('Tracking start date cannot be more than 10 years in the past');
+      }
+
       // If tracking start date is changed after initial setup, require change reason
       if (prev?.trackingStartDate && prev.trackingStartDate !== input.trackingStartDate) {
         if (!input.trackingStartDateReason || !input.trackingStartDateReason.trim()) {
@@ -121,6 +165,25 @@ export class AttendanceSettingsService {
 
     const updated = await this.repo.upsertGeneralSettings(tenantId, companyId, input);
 
+    const isTzModified = Boolean(
+      prev?.timezone && input.timezone && prev.timezone !== input.timezone,
+    );
+    const isStartModified = Boolean(
+      prev?.trackingStartDate &&
+      input.trackingStartDate &&
+      prev.trackingStartDate !== input.trackingStartDate,
+    );
+
+    const reasonSummary =
+      input.trackingStartDateReason ||
+      (isTzModified && isStartModified
+        ? `Timezone changed to ${input.timezone} and go-live date changed to ${input.trackingStartDate}`
+        : isTzModified
+          ? `Timezone changed from ${prev?.timezone} to ${input.timezone}`
+          : isStartModified
+            ? `Tracking start date changed to ${input.trackingStartDate}`
+            : 'Attendance general settings updated');
+
     await this.repo.recordAuditLog(tenantId, companyId, {
       category: 'general',
       action: 'updated',
@@ -129,7 +192,7 @@ export class AttendanceSettingsService {
       previousValues: prev as unknown as Record<string, unknown>,
       newValues: {
         ...(input as Record<string, unknown>),
-        changeReason: input.trackingStartDateReason || 'Attendance general settings updated',
+        changeReason: reasonSummary,
       },
       changedByUserId: userId,
       clientIp,

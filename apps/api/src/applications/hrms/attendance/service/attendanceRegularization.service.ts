@@ -798,7 +798,9 @@ export class AttendanceRegularizationService {
     // --- APPROVAL FLOW ---
     const workflow = await this.eligibilityService.getWorkflowSettings(tenantId, companyId);
     const isStage1ManagerApproval =
-      workflow.approvalHierarchy === 'manager_then_hr' && reg.assignedQueue === 'manager_queue';
+      actorUserId !== AUTO_APPROVAL_ACTOR &&
+      workflow.approvalHierarchy === 'manager_then_hr' &&
+      reg.assignedQueue === 'manager_queue';
 
     if (isStage1ManagerApproval) {
       const updated = await this.repo.updateRegularization(tenantId, companyId, id, {

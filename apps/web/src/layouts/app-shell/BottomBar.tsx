@@ -21,7 +21,7 @@ export function BottomBar() {
   return (
     <footer className="bottom-bar">
       <div className="bottom-bar__meta">
-        <span className="bottom-bar__text">&copy; {new Date().getFullYear()} BEZENT</span>
+        <span className="bottom-bar__text">&copy; {new Date().getFullYear()} bezent</span>
         <span className="bottom-bar__separator" aria-hidden="true" />
         <div className="bottom-bar__status">
           <span className="bottom-bar__status-dot" aria-hidden="true" />
@@ -48,7 +48,7 @@ function FooterButton({ icon, label }: { icon: BezentIconName; label: string }) 
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        <BezentIcon name={icon} size={18} color="currentColor" strokeWidth={1.75} />
+        <BezentIcon name={icon} size={16} color="currentColor" strokeWidth={1.75} />
         <span>{label}</span>
       </button>
       {hovered && <Tooltip label={label} direction="up" />}

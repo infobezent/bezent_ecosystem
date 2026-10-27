@@ -159,10 +159,18 @@ describe('BEZENT HRMS — Attendance Overview V1.0 Frontend Page', () => {
       processedWorkdays: 43,
       pendingWorkdays: 2,
       failedWorkdays: 0,
+      attemptedWorkdays: 43,
+      processingSuccessRate: 100,
+      reconciliationCompletionRate: 95.6,
+      assignedScheduleCount: 45,
+      fallbackScheduleCount: 0,
+      unresolvedScheduleCount: 0,
       missingScheduleCount: 0,
       unresolvedBlockingExceptions: 1,
+      workdayBlockingExceptions: 0,
+      cumulativeBlockingExceptions: 1,
+      historicalBlockingExceptions: 1,
       staleMonthlySummaries: 0,
-      processingSuccessRate: 95.6,
       denominatorDescription: 'Processed Finalized (43) / Eligible Workdays (45)',
       asOf: '2026-10-10T12:00:00Z',
     },
@@ -212,9 +220,21 @@ describe('BEZENT HRMS — Attendance Overview V1.0 Frontend Page', () => {
 
     expect(html).toContain('Attendance Overview');
     expect(html).toContain('Workforce operations, exception triage, and monthly payroll readiness');
-    expect(html).toContain('Daily Log');
+    expect(html).toContain('Daily Attendance');
     expect(html).toContain('Regularization Queue');
     expect(html).toContain('Monthly Summary');
+  });
+
+  it('renders processing health card with wrapping description and truthful blocking exception labels', () => {
+    // When overview data is loaded, verify the markup adheres to wrapping standards
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <AttendanceOverviewPage />
+      </MemoryRouter>,
+    );
+
+    // Ensure the non-wrapping table subtitle class is NOT used on the overview page
+    expect(html).not.toContain('bezent-table-meta-subtitle');
   });
 
   it('handles API fetch execution without error and exposes filter controls', async () => {
@@ -242,6 +262,12 @@ describe('BEZENT HRMS — Attendance Overview V1.0 Frontend Page', () => {
     expect(result.todayKpis?.attendanceRate).toBe(85.6);
     expect(result.actionQueue?.length).toBe(6);
     expect(result.processingHealth?.status).toBe('healthy');
+    expect(result.processingHealth?.processingSuccessRate).toBe(100);
+    expect(result.processingHealth?.reconciliationCompletionRate).toBe(95.6);
+    expect(result.processingHealth?.assignedScheduleCount).toBe(45);
+    expect(result.processingHealth?.fallbackScheduleCount).toBe(0);
+    expect(result.processingHealth?.unresolvedScheduleCount).toBe(0);
+    expect(result.processingHealth?.historicalBlockingExceptions).toBe(1);
     expect(result.monthlyReadiness?.isAuthorized).toBe(true);
     expect(capturedDate).toBe('2026-10-10');
     expect(capturedOptions?.trendRange).toBe('7d');

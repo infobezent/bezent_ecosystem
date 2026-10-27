@@ -10,9 +10,9 @@
 
 .notif-panel {
   position: fixed;
-  top: calc(var(--shell-topbar-height) + 8px);
-  bottom: calc(var(--shell-bottom-bar-height) + 12px);
-  right: calc(var(--app-shell-rail-width, 0px) + 12px);
+  top: var(--shell-topbar-height);
+  bottom: var(--shell-bottom-bar-height);
+  right: var(--app-shell-rail-width, 0px);
   z-index: var(--z-notification-panel, var(--z-utility-drawer, 80));
   width: var(--shell-utility-drawer-width, 370px);
   max-width: calc(

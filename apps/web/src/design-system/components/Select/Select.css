@@ -176,6 +176,29 @@
   }
 }
 
+/* ── Dropdown Placement Top (Dropup) ── */
+.bezent-select-wrapper--placement-top .bezent-select-dropdown {
+  top: auto;
+  bottom: calc(100% + 4px);
+  animation: bezentSelectFadeInUp 0.14s ease-out;
+}
+
+@keyframes bezentSelectFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bezent-select-wrapper--sm .bezent-select-option {
+  padding: 5px 8px;
+  font-size: 12.5px;
+}
+
 .bezent-select-dropdown-list {
   list-style: none;
   margin: 0;

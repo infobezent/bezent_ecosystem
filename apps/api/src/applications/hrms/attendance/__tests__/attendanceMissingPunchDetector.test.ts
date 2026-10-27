@@ -42,10 +42,7 @@ describe.skipIf(!isDatabaseConfigured)(
       await db
         .delete(employeeAttendance)
         .where(
-          and(
-            eq(employeeAttendance.tenantId, tenantId),
-            eq(employeeAttendance.employeeId, empId),
-          ),
+          and(eq(employeeAttendance.tenantId, tenantId), eq(employeeAttendance.employeeId, empId)),
         );
       await db
         .delete(employeeNotifications)
@@ -57,11 +54,7 @@ describe.skipIf(!isDatabaseConfigured)(
         );
 
       // Ensure test employee exists
-      const existingEmp = await db
-        .select()
-        .from(employees)
-        .where(eq(employees.id, empId))
-        .limit(1);
+      const existingEmp = await db.select().from(employees).where(eq(employees.id, empId)).limit(1);
 
       if (existingEmp.length === 0) {
         await db.insert(employees).values({
@@ -131,10 +124,7 @@ describe.skipIf(!isDatabaseConfigured)(
       await db
         .delete(employeeAttendance)
         .where(
-          and(
-            eq(employeeAttendance.tenantId, tenantId),
-            eq(employeeAttendance.employeeId, empId),
-          ),
+          and(eq(employeeAttendance.tenantId, tenantId), eq(employeeAttendance.employeeId, empId)),
         );
       await db
         .delete(employeeNotifications)

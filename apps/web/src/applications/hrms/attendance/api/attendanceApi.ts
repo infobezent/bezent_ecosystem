@@ -1966,14 +1966,11 @@ export interface MissingPunchSweepResponse {
 export async function triggerMissingPunchSweep(
   targetDate?: string,
 ): Promise<MissingPunchSweepResponse> {
-  const res = await authorizedFetch(
-    `${appConfig.apiBaseUrl}/hrms/attendance/missing-punch/sweep`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(targetDate ? { targetDate } : {}),
-    },
-  );
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/missing-punch/sweep`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(targetDate ? { targetDate } : {}),
+  });
   const body = await res.json();
   if (!res.ok || !body?.data) {
     throw new Error(body?.error?.message ?? `Failed to run missing punch sweep: ${res.status}`);

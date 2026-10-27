@@ -24,6 +24,7 @@ import {
   Alert,
   EmptyState,
   Avatar,
+  Textarea,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import {
@@ -42,31 +43,141 @@ import type {
   PunchLogFilter,
 } from '../types/attendance.types';
 
+// ============================================================================
+// Section 4: Status and Source Helpers
+// ============================================================================
+interface StatusBadgeConfig {
+  label: string;
+  tooltip: string;
+  variant: 'success' | 'warning' | 'danger' | 'info' | 'neutral';
+}
+
+function getPunchResultBadge(punch: PunchLogItem): StatusBadgeConfig {
+  if (punch.processingState === 'failed') {
+    return {
+      label: 'Failed',
+      tooltip: 'Could not be processed. Retry or investigate.',
+      variant: 'danger',
+    };
+  }
+  if (punch.processingState === 'processing' || punch.processingState === 'received') {
+    return {
+      label: 'Processing',
+      tooltip: 'Waiting to be processed.',
+      variant: 'info',
+    };
+  }
+  if (
+    punch.validationStatus === 'needs_review' ||
+    punch.validationStatus === 'unmatched' ||
+    punch.investigationStatus === 'in_review' ||
+    punch.investigationStatus === 'open' ||
+    punch.investigationStatus === 'assigned'
+  ) {
+    return {
+      label: 'Flagged',
+      tooltip: 'Needs review before it is counted.',
+      variant: 'warning',
+    };
+  }
+  if (punch.validationStatus === 'invalid' || punch.validationStatus === 'duplicate') {
+    return {
+      label: 'Rejected',
+      tooltip: 'Not counted in attendance.',
+      variant: 'danger',
+    };
+  }
+  return {
+    label: 'Accepted',
+    tooltip: "Counted in the day's attendance.",
+    variant: 'success',
+  };
+}
+
+function formatSourceLabel(source?: string | null): string {
+  if (!source) return '—';
+  const s = source.toLowerCase().trim();
+  if (s === 'biometric' || s === 'device') return 'Biometric';
+  if (s === 'web') return 'Web';
+  if (s === 'mobile') return 'Mobile';
+  if (s === 'manual') return 'Manual';
+  if (s === 'import') return 'Import';
+  if (s === 'kiosk') return 'Biometric';
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function formatDirectionLabel(direction?: string | null): string {
+  if (!direction) return '—';
+  const d = direction.toLowerCase().trim();
+  if (d === 'in' || d === 'break_in') return 'In';
+  if (d === 'out' || d === 'break_out') return 'Out';
+  return d.charAt(0).toUpperCase() + d.slice(1);
+}
+
+function format24HourTime(ts?: string | null): string {
+  if (!ts) return '—';
+  try {
+    const d = new Date(ts);
+    if (isNaN(d.getTime())) return ts;
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const seconds = String(d.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  } catch {
+    return ts;
+  }
+}
+
+function extractTerminalDeviceName(punch: PunchLogItem): string {
+  const meta = punch.deviceMetadata as Record<string, unknown> | null | undefined;
+  if (!meta) return '—';
+  const terminal =
+    (meta.terminalName as string) ||
+    (meta.deviceName as string) ||
+    (meta.terminal as string) ||
+    (meta.terminal_name as string) ||
+    (meta.name as string);
+  if (terminal) return String(terminal);
+  const deviceId = meta.deviceId || meta.device_id;
+  if (
+    deviceId &&
+    typeof deviceId === 'string' &&
+    !deviceId.includes('.') &&
+    !deviceId.includes(':')
+  ) {
+    return String(deviceId);
+  }
+  return '—';
+}
+
+function extractSelfieThumbnail(punch: PunchLogItem): string | null {
+  const meta = punch.deviceMetadata as Record<string, unknown> | null | undefined;
+  if (!meta) return null;
+  return (
+    (meta.selfieUrl as string) || (meta.photoUrl as string) || (meta.imageUrl as string) || null
+  );
+}
+
 export function PunchLogsPage() {
-  // ── Date Presets & Filter State ──────────────────────────────────────────
-  const [datePreset, setDatePreset] = useState<
-    'today' | 'yesterday' | 'last_7_days' | 'this_month' | 'custom'
-  >('today');
+  // ── 1. Page Header Date Range & Basis State ────────────────────────────────
   const [dateFrom, setDateFrom] = useState(() => new Date().toISOString().slice(0, 10));
   const [dateTo, setDateTo] = useState(() => new Date().toISOString().slice(0, 10));
   const [dateInterpretation, setDateInterpretation] = useState<'event_timestamp' | 'workday'>(
     'event_timestamp',
   );
 
-  // ── Primary Filters ───────────────────────────────────────────────────────
+  // ── 3. Filter Bar State ───────────────────────────────────────────────────
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [sourceFilter, setSourceFilter] = useState('');
-  const [validationFilter, setValidationFilter] = useState('');
+  const [sourceFilter, setSourceFilter] = useState('all');
+  const [deviceFilter, setDeviceFilter] = useState('all');
+  const [resultFilter, setResultFilter] = useState('all');
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
-  // ── Advanced Filters ──────────────────────────────────────────────────────
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-  const [departmentId, setDepartmentId] = useState('');
-  const [locationId, setLocationId] = useState('');
-  const [punchTypeFilter, setPunchTypeFilter] = useState('');
-  const [processingStateFilter, setProcessingStateFilter] = useState('');
-
-  // ── Sorting & Pagination ──────────────────────────────────────────────────
+  // ── Pagination State ──────────────────────────────────────────────────────
   const [page, setPage] = useState(1);
   const limit = 25;
 
@@ -95,33 +206,36 @@ export function PunchLogsPage() {
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
-  // ── Details Drawer ────────────────────────────────────────────────────────
+  // ── 7. Punch Detail Drawer State ──────────────────────────────────────────
   const [drawerPunchId, setDrawerPunchId] = useState<string | null>(null);
   const [drawerDetail, setDrawerDetail] = useState<PunchEventDetail | null>(null);
-  const [drawerTab, setDrawerTab] = useState<'overview' | 'timeline' | 'linked' | 'history'>(
-    'overview',
+  const [drawerTab, setDrawerTab] = useState<'info' | 'location' | 'processing' | 'history'>(
+    'info',
   );
   const [drawerLoading, setDrawerLoading] = useState(false);
   const [drawerError, setDrawerError] = useState<string | null>(null);
 
-  // ── Investigation Modal ───────────────────────────────────────────────────
+  // ── 8. Investigate Flow Modal State ───────────────────────────────────────
   const [investigationModalOpen, setInvestigationModalOpen] = useState(false);
   const [investigatingPunch, setInvestigatingPunch] = useState<PunchLogItem | null>(null);
-  const [investigationStatus, setInvestigationStatus] = useState<
-    'open' | 'assigned' | 'in_review' | 'resolved' | 'closed'
-  >('open');
-  const [assignedTo, setAssignedTo] = useState('');
-  const [investigationNotes, setInvestigationNotes] = useState('');
-  const [resolvedEmployeeId, setResolvedEmployeeId] = useState('');
-  const [resolutionReason, setResolutionReason] = useState('');
+  const [investigationDecision, setInvestigationDecision] = useState<'accept' | 'reject'>('accept');
+  const [investigationReason, setInvestigationReason] = useState('');
+  const [investigationComment, setInvestigationComment] = useState('');
+  const [investigationValidationError, setInvestigationValidationError] = useState<string | null>(
+    null,
+  );
   const [investigationSubmitting, setInvestigationSubmitting] = useState(false);
 
-  // ── Bulk Banner & Feedback ────────────────────────────────────────────────
+  // ── 9. Retry Processing Confirmation Modal State ──────────────────────────
+  const [retryModalOpen, setRetryModalOpen] = useState(false);
+  const [retryPunchTarget, setRetryPunchTarget] = useState<PunchLogItem | null>(null);
+  const [retrySubmitting, setRetrySubmitting] = useState(false);
+
+  // ── Feedback Toast / Banner ───────────────────────────────────────────────
   const [bannerMessage, setBannerMessage] = useState<{
-    type: 'success' | 'danger' | 'info';
+    type: 'success' | 'danger' | 'info' | 'warning';
     text: string;
   } | null>(null);
-  const [bulkActionLoading, setBulkActionLoading] = useState(false);
 
   // ── Export Modal ──────────────────────────────────────────────────────────
   const [exportModalOpen, setExportModalOpen] = useState(false);
@@ -137,100 +251,94 @@ export function PunchLogsPage() {
     return () => clearTimeout(handler);
   }, [search]);
 
-  // ── Close action menu on click outside ────────────────────────────────────
+  // ── Close action menu & filter panel on click outside ─────────────────────
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      const target = e.target as HTMLElement;
+      if (!target.closest?.('.bezent-table-action-menu')) {
         setActiveMenuId(null);
       }
-    }
-    if (activeMenuId) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [activeMenuId]);
-
-  // ── Load Auxiliary Filters ────────────────────────────────────────────────
-  useEffect(() => {
-    let mounted = true;
-    Promise.allSettled([fetchDepartments(), fetchWorkLocations()]).then(([deptRes, locRes]) => {
-      if (!mounted) return;
-      if (deptRes.status === 'fulfilled' && Array.isArray(deptRes.value)) {
-        setDepartments(
-          deptRes.value.map((d: { id: string; name: string }) => ({
-            id: d.id,
-            name: d.name,
-          })),
-        );
+      if (!target.closest?.('.bezent-filter-anchor')) {
+        setIsFilterPanelOpen(false);
       }
-      if (locRes.status === 'fulfilled' && Array.isArray(locRes.value)) {
-        setWorkLocations(
-          locRes.value.map((l: { id: string; name: string }) => ({
-            id: l.id,
-            name: l.name,
-          })),
-        );
-      }
-    });
-    return () => {
-      mounted = false;
-    };
+    }
+    window.addEventListener('mousedown', handleClickOutside);
+    return () => window.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // ── Date Preset Handler ───────────────────────────────────────────────────
-  const applyDatePreset = (
-    preset: 'today' | 'yesterday' | 'last_7_days' | 'this_month' | 'custom',
-  ) => {
-    setDatePreset(preset);
-    const now = new Date();
-    const todayStr = now.toISOString().slice(0, 10);
+  // ── Fetch Master Metadata on Mount ────────────────────────────────────────
+  useEffect(() => {
+    Promise.all([
+      fetchDepartments({ status: 'active' }).catch(() => []),
+      fetchWorkLocations({ status: 'active' }).catch(() => []),
+    ]).then(([depts, locs]) => {
+      setDepartments(depts.map((d) => ({ id: d.id, name: d.name })));
+      setWorkLocations(locs.map((l) => ({ id: l.id, name: l.name })));
+    });
+  }, []);
 
-    if (preset === 'today') {
-      setDateFrom(todayStr);
-      setDateTo(todayStr);
-    } else if (preset === 'yesterday') {
-      const y = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-      const yStr = y.toISOString().slice(0, 10);
-      setDateFrom(yStr);
-      setDateTo(yStr);
-    } else if (preset === 'last_7_days') {
-      const past = new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000);
-      setDateFrom(past.toISOString().slice(0, 10));
-      setDateTo(todayStr);
-    } else if (preset === 'this_month') {
-      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-      setDateFrom(firstDay.toISOString().slice(0, 10));
-      setDateTo(todayStr);
-    }
-    setPage(1);
-  };
+  // ── Distinct Device Names from Items for Filter ───────────────────────────
+  const knownDevices = useMemo(() => {
+    const set = new Set<string>();
+    items.forEach((item) => {
+      const term = extractTerminalDeviceName(item);
+      if (term && term !== '—') set.add(term);
+    });
+    return Array.from(set);
+  }, [items]);
 
-  // ── Load Punch Logs from Real Backend ─────────────────────────────────────
+  // ── Active Filter Count Calculation ───────────────────────────────────────
+  const appliedFilterCount = useMemo(() => {
+    let count = 0;
+    if (sourceFilter !== 'all') count += 1;
+    if (deviceFilter !== 'all') count += 1;
+    if (resultFilter !== 'all') count += 1;
+    return count;
+  }, [sourceFilter, deviceFilter, resultFilter]);
+
+  const hasActiveFilters = Boolean(
+    search.trim() || sourceFilter !== 'all' || deviceFilter !== 'all' || resultFilter !== 'all',
+  );
+
+  // ── Data Loader ───────────────────────────────────────────────────────────
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const filter: PunchLogFilter = {
-        dateFrom: dateFrom || undefined,
-        dateTo: dateTo || undefined,
+        dateFrom,
+        dateTo,
         dateInterpretation,
         search: debouncedSearch || undefined,
-        source: sourceFilter || undefined,
-        validationStatus: validationFilter || undefined,
-        departmentId: departmentId || undefined,
-        locationId: locationId || undefined,
-        punchType: punchTypeFilter || undefined,
-        processingState: processingStateFilter || undefined,
+        source: sourceFilter === 'all' ? undefined : sourceFilter,
+        validationStatus:
+          resultFilter === 'accepted'
+            ? 'valid'
+            : resultFilter === 'flagged'
+              ? 'needs_review'
+              : resultFilter === 'rejected'
+                ? 'invalid'
+                : undefined,
+        processingState: resultFilter === 'failed' ? 'failed' : undefined,
         page,
         limit,
       };
 
-      const res = await fetchPunchLogs(filter);
-      setItems(res.punches);
-      setCounters(res.counters);
-      setTotalCount(res.total);
+      const result = await fetchPunchLogs(filter);
+      setItems(result.punches || []);
+      setCounters(
+        result.counters || {
+          total: 0,
+          valid: 0,
+          needsReview: 0,
+          duplicates: 0,
+          unmatched: 0,
+          processingFailed: 0,
+        },
+      );
+      setTotalCount(result.total || 0);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to load punch logs');
+      setError(err instanceof Error ? err.message : 'Could not load punch logs');
     } finally {
       setLoading(false);
     }
@@ -240,33 +348,40 @@ export function PunchLogsPage() {
     dateInterpretation,
     debouncedSearch,
     sourceFilter,
-    validationFilter,
-    departmentId,
-    locationId,
-    punchTypeFilter,
-    processingStateFilter,
+    resultFilter,
     page,
+    limit,
   ]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  // ── Drawer Loader ─────────────────────────────────────────────────────────
+  // ── Reset Filters ─────────────────────────────────────────────────────────
+  const handleResetFilters = () => {
+    setSearch('');
+    setDebouncedSearch('');
+    setSourceFilter('all');
+    setDeviceFilter('all');
+    setResultFilter('all');
+    setSelectedIds(new Set());
+    setPage(1);
+  };
+
+  // ── 7. Drawer Open & Fetch Handler ────────────────────────────────────────
   const handleOpenDrawer = async (
     punchId: string,
-    initialTab: 'overview' | 'timeline' | 'linked' | 'history' = 'overview',
+    tab: 'info' | 'location' | 'processing' | 'history' = 'info',
   ) => {
     setDrawerPunchId(punchId);
-    setDrawerTab(initialTab);
+    setDrawerTab(tab);
     setDrawerLoading(true);
     setDrawerError(null);
-    setActiveMenuId(null);
     try {
       const detail = await fetchPunchDetails(punchId);
       setDrawerDetail(detail);
     } catch (err: unknown) {
-      setDrawerError(err instanceof Error ? err.message : 'Failed to load punch details');
+      setDrawerError(err instanceof Error ? err.message : 'Failed to fetch punch details');
     } finally {
       setDrawerLoading(false);
     }
@@ -275,38 +390,37 @@ export function PunchLogsPage() {
   const handleCloseDrawer = () => {
     setDrawerPunchId(null);
     setDrawerDetail(null);
-    setDrawerError(null);
   };
 
-  // ── Investigation Handlers ────────────────────────────────────────────────
+  // ── 8. Investigate Flow Handlers ──────────────────────────────────────────
   const handleOpenInvestigation = (punch: PunchLogItem) => {
-    setInvestigatingPunch(punch);
-    setInvestigationStatus(
-      punch.investigationStatus !== 'none' ? punch.investigationStatus : 'open',
-    );
-    setAssignedTo(punch.assignedTo || '');
-    setInvestigationNotes(punch.investigationNotes || '');
-    setResolvedEmployeeId(punch.employeeId || '');
-    setResolutionReason('');
     setActiveMenuId(null);
+    setInvestigatingPunch(punch);
+    setInvestigationDecision('accept');
+    setInvestigationReason('');
+    setInvestigationComment('');
+    setInvestigationValidationError(null);
     setInvestigationModalOpen(true);
   };
 
   const handleSaveInvestigation = async () => {
     if (!investigatingPunch) return;
+    if (!investigationReason.trim() || !investigationComment.trim()) {
+      setInvestigationValidationError('Please add a reason and comment before saving.');
+      return;
+    }
+    setInvestigationValidationError(null);
     setInvestigationSubmitting(true);
     try {
+      const isAccept = investigationDecision === 'accept';
       await updatePunchInvestigation({
         punchId: investigatingPunch.id,
-        investigationStatus,
-        assignedTo: assignedTo.trim() || undefined,
-        investigationNotes: investigationNotes.trim() || undefined,
-        resolvedEmployeeId: resolvedEmployeeId.trim() || undefined,
-        resolutionReason: resolutionReason.trim() || undefined,
+        investigationStatus: isAccept ? 'resolved' : 'closed',
+        investigationNotes: `[Decision: ${isAccept ? 'Accepted' : 'Rejected'}] Reason: ${investigationReason.trim()} | Comment: ${investigationComment.trim()}`,
       });
       setBannerMessage({
         type: 'success',
-        text: `Investigation updated for event ${investigatingPunch.id}`,
+        text: `Punch marked as ${isAccept ? 'Accepted' : 'Rejected'}.`,
       });
       setInvestigationModalOpen(false);
       setInvestigatingPunch(null);
@@ -317,39 +431,46 @@ export function PunchLogsPage() {
     } catch (err: unknown) {
       setBannerMessage({
         type: 'danger',
-        text: err instanceof Error ? err.message : 'Failed to update investigation',
+        text: err instanceof Error ? err.message : 'Could not save investigation decision.',
       });
     } finally {
       setInvestigationSubmitting(false);
     }
   };
 
-  // ── Retry Processing Handler ──────────────────────────────────────────────
-  const handleRetryProcessing = async (punchIds: string[]) => {
+  // ── 9. Retry Processing Flow Handlers ─────────────────────────────────────
+  const handleOpenRetryConfirmation = (punch: PunchLogItem) => {
     setActiveMenuId(null);
-    setBulkActionLoading(true);
+    setRetryPunchTarget(punch);
+    setRetryModalOpen(true);
+  };
+
+  const handleExecuteRetry = async () => {
+    if (!retryPunchTarget) return;
+    setRetrySubmitting(true);
     try {
-      const res = await retryPunchProcessing(punchIds);
+      await retryPunchProcessing([retryPunchTarget.id]);
       setBannerMessage({
         type: 'success',
-        text: res.message || `Successfully retried ${res.retriedCount} punch event(s)`,
+        text: 'Punch processed successfully.',
       });
-      setSelectedIds(new Set());
+      setRetryModalOpen(false);
+      setRetryPunchTarget(null);
       await loadData();
-      if (drawerPunchId && punchIds.includes(drawerPunchId)) {
-        handleOpenDrawer(drawerPunchId, drawerTab);
+      if (drawerPunchId === retryPunchTarget.id) {
+        handleOpenDrawer(retryPunchTarget.id, drawerTab);
       }
     } catch (err: unknown) {
       setBannerMessage({
         type: 'danger',
-        text: err instanceof Error ? err.message : 'Retry processing failed',
+        text: 'Could not process this punch. Please check the details and try again.',
       });
     } finally {
-      setBulkActionLoading(false);
+      setRetrySubmitting(false);
     }
   };
 
-  // ── Bulk Actions Handlers ─────────────────────────────────────────────────
+  // ── Row Selection Handlers ────────────────────────────────────────────────
   const handleToggleSelectAll = () => {
     if (selectedIds.size === items.length && items.length > 0) {
       setSelectedIds(new Set());
@@ -367,33 +488,6 @@ export function PunchLogsPage() {
     });
   };
 
-  const handleBulkMarkInvestigation = async () => {
-    if (selectedIds.size === 0) return;
-    setBulkActionLoading(true);
-    try {
-      const res = await bulkPunchAction({
-        action: 'mark_investigation',
-        punchIds: Array.from(selectedIds),
-        notes: 'Flagged for bulk investigation review',
-      });
-      setBannerMessage({ type: 'success', text: res.message });
-      setSelectedIds(new Set());
-      await loadData();
-    } catch (err: unknown) {
-      setBannerMessage({
-        type: 'danger',
-        text: err instanceof Error ? err.message : 'Bulk action failed',
-      });
-    } finally {
-      setBulkActionLoading(false);
-    }
-  };
-
-  const handleBulkRetry = async () => {
-    if (selectedIds.size === 0) return;
-    await handleRetryProcessing(Array.from(selectedIds));
-  };
-
   // ── Export Handler ────────────────────────────────────────────────────────
   const handleExecuteExport = async () => {
     setIsExporting(true);
@@ -405,12 +499,16 @@ export function PunchLogsPage() {
           dateTo,
           dateInterpretation,
           search: debouncedSearch || undefined,
-          source: sourceFilter || undefined,
-          validationStatus: validationFilter || undefined,
-          departmentId: departmentId || undefined,
-          locationId: locationId || undefined,
-          punchType: punchTypeFilter || undefined,
-          processingState: processingStateFilter || undefined,
+          source: sourceFilter === 'all' ? undefined : sourceFilter,
+          validationStatus:
+            resultFilter === 'accepted'
+              ? 'valid'
+              : resultFilter === 'flagged'
+                ? 'needs_review'
+                : resultFilter === 'rejected'
+                  ? 'invalid'
+                  : undefined,
+          processingState: resultFilter === 'failed' ? 'failed' : undefined,
         },
         selectedList,
       );
@@ -436,367 +534,446 @@ export function PunchLogsPage() {
     }
   };
 
-  // ── Reset Filters ─────────────────────────────────────────────────────────
-  const handleResetFilters = () => {
-    applyDatePreset('today');
-    setDateInterpretation('event_timestamp');
-    setSearch('');
-    setDebouncedSearch('');
-    setSourceFilter('');
-    setValidationFilter('');
-    setDepartmentId('');
-    setLocationId('');
-    setPunchTypeFilter('');
-    setProcessingStateFilter('');
-    setSelectedIds(new Set());
-    setPage(1);
-  };
-
-  // ── Formatting Utilities ──────────────────────────────────────────────────
-  const formatDateTime = (ts: string) => {
-    try {
-      const d = new Date(ts);
-      return d.toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-      });
-    } catch {
-      return ts;
-    }
-  };
-
   const totalPages = Math.max(1, Math.ceil(totalCount / limit));
 
-  // ── Drawer Tab Definitions ────────────────────────────────────────────────
+  // Drawer Tabs
   const drawerTabs = useMemo(
     () => [
-      { id: 'overview', label: 'Overview' },
-      { id: 'timeline', label: 'Timeline' },
-      { id: 'linked', label: 'Linked Attendance' },
-      { id: 'history', label: 'History & Audit' },
+      { id: 'info', label: 'Punch Information' },
+      { id: 'location', label: 'Location' },
+      { id: 'processing', label: 'Processing' },
+      { id: 'history', label: 'History' },
     ],
     [],
   );
 
   return (
     <Page>
-      {/* ── Page Header ── */}
+      {/* ── 1. Page Header (Spec Section 1) ── */}
       <PageHeader
+        eyebrow="Attendance › Punch Logs"
         title="Punch Logs"
-        breadcrumbs={<span>Attendance / Punch Logs</span>}
+        subtitle="Review every raw punch captured from devices, web and mobile."
         actions={
           <Inline gap="sm" align="center">
-            {/* Date Preset Selector */}
-            <Select
-              value={datePreset}
-              onChange={(e) =>
-                applyDatePreset(
-                  e.target.value as 'today' | 'yesterday' | 'last_7_days' | 'this_month' | 'custom',
-                )
-              }
-              aria-label="Date Range Preset"
+            {/* Date Range Inputs */}
+            <Inline gap="xs" align="center">
+              <span className="bezent-table-meta-subtitle">Date Range:</span>
+              <Input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => {
+                  setDateFrom(e.target.value);
+                  setPage(1);
+                }}
+                aria-label="Start date"
+              />
+              <span className="bezent-card__desc">to</span>
+              <Input
+                type="date"
+                value={dateTo}
+                onChange={(e) => {
+                  setDateTo(e.target.value);
+                  setPage(1);
+                }}
+                aria-label="End date"
+              />
+            </Inline>
+
+            {/* Date Basis Toggle with Spec Tooltips */}
+            <div className="bezent-segmented-toggle">
+              <button
+                type="button"
+                className={`bezent-segmented-toggle__btn ${
+                  dateInterpretation === 'event_timestamp' ? 'is-active' : ''
+                }`}
+                onClick={() => {
+                  setDateInterpretation('event_timestamp');
+                  setPage(1);
+                }}
+                title="Event Time: Filter by the exact time the punch was made. Matches Punch Time in the table."
+              >
+                Event Time
+              </button>
+              <button
+                type="button"
+                className={`bezent-segmented-toggle__btn ${
+                  dateInterpretation === 'workday' ? 'is-active' : ''
+                }`}
+                onClick={() => {
+                  setDateInterpretation('workday');
+                  setPage(1);
+                }}
+                title="Workday: Filter by the attendance date the punch belongs to. Night shift punches after midnight stay on the shift's workday."
+              >
+                Workday
+              </button>
+            </div>
+
+            {/* Secondary Button: Export */}
+            <Button
+              variant="outline"
+              size="md"
+              shape="rounded"
+              leftIcon={<BezentIcon name="download" size={16} />}
+              onClick={() => setExportModalOpen(true)}
             >
-              <option value="today">Today</option>
-              <option value="yesterday">Yesterday</option>
-              <option value="last_7_days">Last 7 Days</option>
-              <option value="this_month">This Month</option>
-              <option value="custom">Custom Range</option>
-            </Select>
-
-            {datePreset === 'custom' && (
-              <Inline gap="xs" align="center">
-                <Input
-                  type="date"
-                  value={dateFrom}
-                  onChange={(e) => {
-                    setDateFrom(e.target.value);
-                    setPage(1);
-                  }}
-                  aria-label="Start date"
-                />
-                <span className="bezent-card__desc">to</span>
-                <Input
-                  type="date"
-                  value={dateTo}
-                  onChange={(e) => {
-                    setDateTo(e.target.value);
-                    setPage(1);
-                  }}
-                  aria-label="End date"
-                />
-              </Inline>
-            )}
-
-            <Button variant="secondary" size="sm" onClick={() => applyDatePreset('today')}>
-              Today
-            </Button>
-
-            <Button variant="secondary" size="sm" onClick={() => setExportModalOpen(true)}>
-              <BezentIcon name="download" size={16} /> Export
+              Export
             </Button>
           </Inline>
         }
       />
 
       <Stack gap="md">
-        {/* Bulk Action Alert Banner */}
-        {bannerMessage && <Alert variant={bannerMessage.type}>{bannerMessage.text}</Alert>}
+        {/* Banner Notification */}
+        {bannerMessage && (
+          <Alert variant={bannerMessage.type} dismissible onDismiss={() => setBannerMessage(null)}>
+            {bannerMessage.text}
+          </Alert>
+        )}
 
-        {/* ── Six Summary Counters Strip (Single Desktop Row) ── */}
-        <Grid columns={6} gap="sm">
+        {/* ── 2. Summary Cards (Spec Section 2) ── */}
+        <Grid columns={5} gap="sm">
+          {/* Card 1: Total Punches */}
           <div
-            className={`bezent-stat-card ${validationFilter === '' && processingStateFilter === '' ? 'is-active' : ''}`}
+            className={`bezent-kpi-card ${resultFilter === 'all' ? 'is-active' : ''}`}
             onClick={() => {
-              setValidationFilter('');
-              setProcessingStateFilter('');
+              setResultFilter('all');
               setPage(1);
             }}
-            title="Total captured punch events within selected timeframe"
+            title="Total raw punches captured in selected date range"
             role="button"
             tabIndex={0}
           >
-            <span className="bezent-stat-card__label">Total Events</span>
-            <span className="bezent-stat-card__val">{counters.total}</span>
+            <div className="bezent-kpi-card__header">
+              <span className="bezent-kpi-card__title">Total Punches</span>
+            </div>
+            <div className="bezent-kpi-card__value-row">
+              <span className="bezent-kpi-card__value">{counters.total}</span>
+            </div>
           </div>
 
+          {/* Card 2: Accepted */}
           <div
-            className={`bezent-stat-card ${validationFilter === 'valid' ? 'is-active' : ''}`}
+            className={`bezent-kpi-card ${resultFilter === 'accepted' ? 'is-active' : ''}`}
             onClick={() => {
-              setValidationFilter((curr) => (curr === 'valid' ? '' : 'valid'));
+              setResultFilter((curr) => (curr === 'accepted' ? 'all' : 'accepted'));
               setPage(1);
             }}
-            title="Events that passed integrity validation rules"
+            title="Punches counted in the day's attendance"
             role="button"
             tabIndex={0}
           >
-            <span className="bezent-stat-card__label">Valid</span>
-            <span className="bezent-stat-card__val">{counters.valid}</span>
+            <div className="bezent-kpi-card__header">
+              <span className="bezent-kpi-card__title">Accepted</span>
+            </div>
+            <div className="bezent-kpi-card__value-row">
+              <span className="bezent-kpi-card__value">{counters.valid}</span>
+            </div>
           </div>
 
+          {/* Card 3: Flagged */}
           <div
-            className={`bezent-stat-card ${validationFilter === 'needs_review' ? 'is-active' : ''}`}
+            className={`bezent-kpi-card ${resultFilter === 'flagged' ? 'is-active' : ''}`}
             onClick={() => {
-              setValidationFilter((curr) => (curr === 'needs_review' ? '' : 'needs_review'));
+              setResultFilter((curr) => (curr === 'flagged' ? 'all' : 'flagged'));
               setPage(1);
             }}
-            title="Punches requiring supervisor review or under investigation"
+            title="Needs review before it is counted"
             role="button"
             tabIndex={0}
           >
-            <span className="bezent-stat-card__label">Needs Review</span>
-            <span className="bezent-stat-card__val">{counters.needsReview}</span>
+            <div className="bezent-kpi-card__header">
+              <span className="bezent-kpi-card__title">Flagged</span>
+            </div>
+            <div className="bezent-kpi-card__value-row">
+              <span className="bezent-kpi-card__value">
+                {counters.needsReview + counters.unmatched}
+              </span>
+            </div>
           </div>
 
+          {/* Card 4: Rejected */}
           <div
-            className={`bezent-stat-card ${validationFilter === 'duplicate' ? 'is-active' : ''}`}
+            className={`bezent-kpi-card ${resultFilter === 'rejected' ? 'is-active' : ''}`}
             onClick={() => {
-              setValidationFilter((curr) => (curr === 'duplicate' ? '' : 'duplicate'));
+              setResultFilter((curr) => (curr === 'rejected' ? 'all' : 'rejected'));
               setPage(1);
             }}
-            title="Rapid repeat punches identified as duplicates"
+            title="Not counted in attendance"
             role="button"
             tabIndex={0}
           >
-            <span className="bezent-stat-card__label">Duplicates</span>
-            <span className="bezent-stat-card__val">{counters.duplicates}</span>
+            <div className="bezent-kpi-card__header">
+              <span className="bezent-kpi-card__title">Rejected</span>
+            </div>
+            <div className="bezent-kpi-card__value-row">
+              <span className="bezent-kpi-card__value">{counters.duplicates}</span>
+            </div>
           </div>
 
+          {/* Card 5: Failed to Process */}
           <div
-            className={`bezent-stat-card ${validationFilter === 'unmatched' ? 'is-active' : ''}`}
+            className={`bezent-kpi-card ${resultFilter === 'failed' ? 'is-active' : ''}`}
             onClick={() => {
-              setValidationFilter((curr) => (curr === 'unmatched' ? '' : 'unmatched'));
+              setResultFilter((curr) => (curr === 'failed' ? 'all' : 'failed'));
               setPage(1);
             }}
-            title="Clock events not yet mapped to an active employee profile"
+            title="Could not be processed. Retry or investigate."
             role="button"
             tabIndex={0}
           >
-            <span className="bezent-stat-card__label">Unmatched</span>
-            <span className="bezent-stat-card__val">{counters.unmatched}</span>
-          </div>
-
-          <div
-            className={`bezent-stat-card ${processingStateFilter === 'failed' ? 'is-active' : ''}`}
-            onClick={() => {
-              setProcessingStateFilter((curr) => (curr === 'failed' ? '' : 'failed'));
-              setPage(1);
-            }}
-            title="Technical pipeline or downstream ingestion failures"
-            role="button"
-            tabIndex={0}
-          >
-            <span className="bezent-stat-card__label">Processing Failed</span>
-            <span className="bezent-stat-card__val">{counters.processingFailed}</span>
+            <div className="bezent-kpi-card__header">
+              <span className="bezent-kpi-card__title">Failed to Process</span>
+            </div>
+            <div className="bezent-kpi-card__value-row">
+              <span className="bezent-kpi-card__value">{counters.processingFailed}</span>
+            </div>
           </div>
         </Grid>
 
-        {/* ── Progressive Disclosure Filters ── */}
-        <Card padding="sm">
-          <Stack gap="sm">
-            <div className="bezent-filter-toolbar">
-              <SearchInput
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search employee name or code..."
-              />
+        {/* ── 3. Filter Bar (Spec Section 3 — Workforce Directory Pattern) ── */}
+        <div className="bezent-directory-toolbar">
+          <div className="bezent-directory-toolbar__search">
+            <SearchInput
+              value={search}
+              shape="rounded"
+              aria-label="Search by name or employee ID"
+              placeholder="Search by name or employee ID"
+              onChange={(e) => setSearch(e.target.value)}
+              onClear={() => setSearch('')}
+            />
+          </div>
 
-              <Select
-                value={sourceFilter}
-                onChange={(e) => {
-                  setSourceFilter(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="">All Sources</option>
-                <option value="biometric">Biometric Device</option>
-                <option value="web">Web Portal</option>
-                <option value="mobile">Mobile Application</option>
-                <option value="kiosk">On-Site Kiosk</option>
-                <option value="import">Batch Import</option>
-              </Select>
-
-              <Select
-                value={validationFilter}
-                onChange={(e) => {
-                  setValidationFilter(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="">All Results</option>
-                <option value="valid">Valid</option>
-                <option value="pending_validation">Pending Validation</option>
-                <option value="duplicate">Duplicate</option>
-                <option value="invalid">Invalid</option>
-                <option value="needs_review">Needs Review</option>
-                <option value="unmatched">Unmatched</option>
-              </Select>
-
+          <div className="bezent-directory-toolbar__actions">
+            <div className="bezent-filter-anchor">
               <Button
-                variant={isAdvancedOpen ? 'primary' : 'secondary'}
-                size="sm"
-                onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+                variant={appliedFilterCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
+                size="md"
+                shape="rounded"
+                className={appliedFilterCount > 0 ? 'bezent-btn--filters-active' : ''}
+                leftIcon={<BezentIcon name="filter" size={16} />}
+                onClick={() => setIsFilterPanelOpen((prev) => !prev)}
               >
-                More Filters {isAdvancedOpen ? '▲' : '▼'}
+                Filters
+                {appliedFilterCount > 0 && (
+                  <span className="bezent-btn__filter-count">{appliedFilterCount}</span>
+                )}
               </Button>
 
-              <Button variant="ghost" size="sm" onClick={handleResetFilters}>
-                Reset
-              </Button>
+              {isFilterPanelOpen && (
+                <div className="bezent-filter-panel" onClick={(e) => e.stopPropagation()}>
+                  {/* Panel Header */}
+                  <div className="bezent-filter-panel__header">
+                    <div className="bezent-filter-panel__title-group">
+                      <BezentIcon name="filter" size={16} />
+                      <h3 className="bezent-filter-panel__title">Filter Punch Logs</h3>
+                    </div>
+                    <button
+                      type="button"
+                      className="bezent-filter-panel__close-btn"
+                      aria-label="Close filter panel"
+                      onClick={() => setIsFilterPanelOpen(false)}
+                    >
+                      <BezentIcon name="close" size={18} />
+                    </button>
+                  </div>
+
+                  {/* Panel Form Body */}
+                  <div className="bezent-filter-panel__body-compact">
+                    <div className="bezent-filter-form-grid">
+                      {/* Source Filter */}
+                      <div className="bezent-filter-form-group">
+                        <label className="bezent-filter-label" htmlFor="filter-source">
+                          Source
+                        </label>
+                        <div className="bezent-filter-select-wrap">
+                          <select
+                            id="filter-source"
+                            className="bezent-filter-select-control"
+                            value={sourceFilter}
+                            onChange={(e) => {
+                              setSourceFilter(e.target.value);
+                              setPage(1);
+                            }}
+                          >
+                            <option value="all">All Sources</option>
+                            <option value="biometric">Biometric</option>
+                            <option value="web">Web</option>
+                            <option value="mobile">Mobile</option>
+                            <option value="manual">Manual</option>
+                            <option value="import">Import</option>
+                          </select>
+                          <span className="bezent-filter-select-chevron">
+                            <BezentIcon name="chevronDown" size={16} />
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Device Filter */}
+                      <div className="bezent-filter-form-group">
+                        <label className="bezent-filter-label" htmlFor="filter-device">
+                          Device
+                        </label>
+                        <div className="bezent-filter-select-wrap">
+                          <select
+                            id="filter-device"
+                            className="bezent-filter-select-control"
+                            value={deviceFilter}
+                            onChange={(e) => {
+                              setDeviceFilter(e.target.value);
+                              setPage(1);
+                            }}
+                          >
+                            <option value="all">All Devices</option>
+                            {knownDevices.map((dev) => (
+                              <option key={dev} value={dev}>
+                                {dev}
+                              </option>
+                            ))}
+                          </select>
+                          <span className="bezent-filter-select-chevron">
+                            <BezentIcon name="chevronDown" size={16} />
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Result Filter */}
+                      <div className="bezent-filter-form-group--full">
+                        <label className="bezent-filter-label" htmlFor="filter-result">
+                          Result
+                        </label>
+                        <div className="bezent-filter-select-wrap">
+                          <select
+                            id="filter-result"
+                            className="bezent-filter-select-control"
+                            value={resultFilter}
+                            onChange={(e) => {
+                              setResultFilter(e.target.value);
+                              setPage(1);
+                            }}
+                          >
+                            <option value="all">All</option>
+                            <option value="accepted">Accepted</option>
+                            <option value="flagged">Flagged</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="failed">Failed to Process</option>
+                          </select>
+                          <span className="bezent-filter-select-chevron">
+                            <BezentIcon name="chevronDown" size={16} />
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Panel Footer */}
+                  <div className="bezent-filter-panel__footer-compact">
+                    <button
+                      type="button"
+                      className="bezent-filter-panel__clear-btn"
+                      onClick={handleResetFilters}
+                      disabled={!hasActiveFilters}
+                    >
+                      Clear all
+                    </button>
+                    <div className="bezent-filter-panel__footer-actions">
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        shape="rounded"
+                        onClick={() => setIsFilterPanelOpen(false)}
+                      >
+                        Apply Filters
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Expandable Advanced Filters */}
-            {isAdvancedOpen && (
-              <div className="bezent-filter-toolbar__more">
-                <Inline gap="md" wrap>
-                  <Select
-                    label="Date Interpretation"
-                    value={dateInterpretation}
-                    onChange={(e) => {
-                      setDateInterpretation(e.target.value as 'event_timestamp' | 'workday');
-                      setPage(1);
-                    }}
-                  >
-                    <option value="event_timestamp">Event Timestamp (UTC/Captured)</option>
-                    <option value="workday">Attendance Workday (Engine-Assigned)</option>
-                  </Select>
-
-                  <Select
-                    label="Department"
-                    value={departmentId}
-                    onChange={(e) => {
-                      setDepartmentId(e.target.value);
-                      setPage(1);
-                    }}
-                  >
-                    <option value="">All Departments</option>
-                    {departments.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name}
-                      </option>
-                    ))}
-                  </Select>
-
-                  <Select
-                    label="Branch / Location"
-                    value={locationId}
-                    onChange={(e) => {
-                      setLocationId(e.target.value);
-                      setPage(1);
-                    }}
-                  >
-                    <option value="">All Locations</option>
-                    {workLocations.map((l) => (
-                      <option key={l.id} value={l.id}>
-                        {l.name}
-                      </option>
-                    ))}
-                  </Select>
-
-                  <Select
-                    label="Punch Type"
-                    value={punchTypeFilter}
-                    onChange={(e) => {
-                      setPunchTypeFilter(e.target.value);
-                      setPage(1);
-                    }}
-                  >
-                    <option value="">All Punch Types</option>
-                    <option value="in">IN</option>
-                    <option value="out">OUT</option>
-                    <option value="break_in">Break IN</option>
-                    <option value="break_out">Break OUT</option>
-                    <option value="unknown">Unknown</option>
-                  </Select>
-
-                  <Select
-                    label="Processing State"
-                    value={processingStateFilter}
-                    onChange={(e) => {
-                      setProcessingStateFilter(e.target.value);
-                      setPage(1);
-                    }}
-                  >
-                    <option value="">All Processing States</option>
-                    <option value="processed">Processed</option>
-                    <option value="processing">Processing</option>
-                    <option value="received">Received</option>
-                    <option value="failed">Failed</option>
-                    <option value="retry_pending">Retry Pending</option>
-                  </Select>
-                </Inline>
-              </div>
+            {hasActiveFilters && (
+              <Button
+                variant="outline"
+                size="md"
+                shape="rounded"
+                leftIcon={<BezentIcon name="reset" size={14} />}
+                onClick={handleResetFilters}
+              >
+                Reset Filters
+              </Button>
             )}
-          </Stack>
-        </Card>
+
+            <span className="bezent-records-badge">{totalCount} Records</span>
+          </div>
+        </div>
+
+        {/* Active Filter Chips Strip */}
+        {appliedFilterCount > 0 && (
+          <div className="bezent-active-chips-strip">
+            {sourceFilter !== 'all' && (
+              <span className="bezent-active-filter-chip">
+                <span>{`Source: ${formatSourceLabel(sourceFilter)}`}</span>
+                <button
+                  type="button"
+                  className="bezent-active-filter-chip__remove"
+                  aria-label="Remove source filter"
+                  onClick={() => {
+                    setSourceFilter('all');
+                    setPage(1);
+                  }}
+                >
+                  ×
+                </button>
+              </span>
+            )}
+
+            {deviceFilter !== 'all' && (
+              <span className="bezent-active-filter-chip">
+                <span>{`Device: ${deviceFilter}`}</span>
+                <button
+                  type="button"
+                  className="bezent-active-filter-chip__remove"
+                  aria-label="Remove device filter"
+                  onClick={() => {
+                    setDeviceFilter('all');
+                    setPage(1);
+                  }}
+                >
+                  ×
+                </button>
+              </span>
+            )}
+
+            {resultFilter !== 'all' && (
+              <span className="bezent-active-filter-chip">
+                <span>{`Result: ${resultFilter.charAt(0).toUpperCase() + resultFilter.slice(1)}`}</span>
+                <button
+                  type="button"
+                  className="bezent-active-filter-chip__remove"
+                  aria-label="Remove result filter"
+                  onClick={() => {
+                    setResultFilter('all');
+                    setPage(1);
+                  }}
+                >
+                  ×
+                </button>
+              </span>
+            )}
+          </div>
+        )}
 
         {/* ── Contextual Bulk Selection Bar ── */}
         {selectedIds.size > 0 && (
           <Card padding="sm">
             <Inline justify="between" align="center">
-              <span className="bezent-table-meta-title">{selectedIds.size} event(s) selected</span>
+              <span className="bezent-table-meta-title">
+                {selectedIds.size} punch event(s) selected
+              </span>
               <Inline gap="sm" align="center">
                 <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={handleBulkRetry}
-                  disabled={bulkActionLoading}
-                >
-                  Retry Processing
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={handleBulkMarkInvestigation}
-                  disabled={bulkActionLoading}
-                >
-                  Mark for Investigation
-                </Button>
-                <Button
-                  variant="secondary"
+                  variant="outline"
                   size="sm"
                   onClick={() => {
                     setExportScope('selected');
@@ -813,28 +990,42 @@ export function PunchLogsPage() {
           </Card>
         )}
 
-        {/* ── Main Data View ── */}
+        {/* ── 10. Empty & Error States / 5. Main Table (Spec Section 5 & 10) ── */}
         {loading ? (
           <LoadingState label="Fetching attendance punch events..." />
         ) : error ? (
-          <Alert variant="danger" title="Error Loading Punch Logs">
-            {error}
-            <Button variant="secondary" onClick={loadData}>
-              Retry
-            </Button>
+          <Alert variant="danger" title="Could not load punch logs">
+            <span>Something went wrong while loading.</span>
+            <Inline gap="xs">
+              <Button variant="secondary" size="sm" onClick={loadData}>
+                Retry
+              </Button>
+            </Inline>
           </Alert>
         ) : items.length === 0 ? (
-          <EmptyState
-            variant="attendance"
-            title="No Punch Events"
-            description="No attendance punch logs found matching your filter criteria."
-          />
+          hasActiveFilters ? (
+            <EmptyState
+              variant="attendance"
+              title="No matching punches"
+              description="No punches match your filters."
+              primaryAction={{
+                label: 'Reset Filters',
+                onClick: handleResetFilters,
+              }}
+            />
+          ) : (
+            <EmptyState
+              variant="attendance"
+              title="No punches found"
+              description="No punches were captured for the selected date range."
+            />
+          )
         ) : (
-          <div className="bezent-table-container">
+          <Card padding="none">
             <Table compact hoverable>
               <TableHead>
                 <TableRow>
-                  {/* Row Selection Checkbox */}
+                  {/* Select Checkbox */}
                   <TableHeaderCell className="bezent-table-col--select">
                     <Checkbox
                       checked={selectedIds.size === items.length && items.length > 0}
@@ -844,23 +1035,21 @@ export function PunchLogsPage() {
                   </TableHeaderCell>
                   {/* 1. Employee */}
                   <TableHeaderCell>Employee</TableHeaderCell>
-                  {/* 2. Punch Date & Time */}
-                  <TableHeaderCell>Punch Date & Time</TableHeaderCell>
-                  {/* 3. Punch Type */}
-                  <TableHeaderCell>Punch Type</TableHeaderCell>
+                  {/* 2. Punch Time (Matches Event Time basis) */}
+                  <TableHeaderCell>Punch Time</TableHeaderCell>
+                  {/* 3. Direction */}
+                  <TableHeaderCell>Direction</TableHeaderCell>
                   {/* 4. Source */}
                   <TableHeaderCell>Source</TableHeaderCell>
-                  {/* 5. Device / Location */}
-                  <TableHeaderCell>Device / Location</TableHeaderCell>
-                  {/* 6. Workday */}
-                  <TableHeaderCell>Workday</TableHeaderCell>
-                  {/* 7. Validation */}
-                  <TableHeaderCell>Validation</TableHeaderCell>
-                  {/* 8. Processing State */}
-                  <TableHeaderCell>Processing State</TableHeaderCell>
-                  {/* 9. Linked Attendance */}
-                  <TableHeaderCell>Linked Attendance</TableHeaderCell>
-                  {/* 10. Actions */}
+                  {/* 5. Device */}
+                  <TableHeaderCell>Device</TableHeaderCell>
+                  {/* 6. Location */}
+                  <TableHeaderCell>Location</TableHeaderCell>
+                  {/* 7. Result */}
+                  <TableHeaderCell>Result</TableHeaderCell>
+                  {/* 8. Used in Calculation */}
+                  <TableHeaderCell>Used in Calculation</TableHeaderCell>
+                  {/* 9. Actions (Sticky Right) */}
                   <TableHeaderCell className="bezent-table-col--actions bezent-table-col--sticky-right">
                     Actions
                   </TableHeaderCell>
@@ -871,6 +1060,13 @@ export function PunchLogsPage() {
                 {items.map((punch) => {
                   const isSelected = selectedIds.has(punch.id);
                   const isMenuOpen = activeMenuId === punch.id;
+                  const resultBadge = getPunchResultBadge(punch);
+                  const deviceName = extractTerminalDeviceName(punch);
+                  const selfieUrl = extractSelfieThumbnail(punch);
+                  const isUsedInCalc =
+                    punch.linkedAttendanceId !== null &&
+                    punch.linkedAttendanceId !== undefined &&
+                    resultBadge.label === 'Accepted';
 
                   return (
                     <TableRow key={punch.id} onClick={() => handleOpenDrawer(punch.id)}>
@@ -888,7 +1084,7 @@ export function PunchLogsPage() {
                         />
                       </TableCell>
 
-                      {/* 1. Employee (Avatar + Plain text name & ID) */}
+                      {/* 1. Employee (Avatar + Name + ID + optional selfie thumbnail) */}
                       <TableCell>
                         <div className="bezent-table-cell--avatar-meta">
                           <Avatar
@@ -898,103 +1094,65 @@ export function PunchLogsPage() {
                                 : '?'
                             }
                             alt={punch.employeeName || 'Unmatched'}
-                            src={punch.avatarUrl}
+                            src={selfieUrl || punch.avatarUrl}
                             size="sm"
                           />
                           <div className="bezent-table-meta-group">
-                            <span className="bezent-table-meta-title">{punch.employeeName}</span>
-                            <span className="bezent-table-meta-subtitle">{punch.employeeCode}</span>
+                            <span className="bezent-table-meta-title">
+                              {punch.employeeName || 'Unmatched Identity'}
+                            </span>
+                            <span className="bezent-table-meta-subtitle">
+                              {punch.employeeCode || punch.rawIdentifier || '—'}
+                            </span>
                           </div>
                         </div>
                       </TableCell>
 
-                      {/* 2. Punch Date & Time */}
+                      {/* 2. Punch Time (Date + HH:MM:SS 24-hr format) */}
                       <TableCell>
                         <span className="bezent-table-meta-title">
-                          {formatDateTime(punch.punchTime)}
+                          {format24HourTime(punch.punchTime)}
                         </span>
                       </TableCell>
 
-                      {/* 3. Punch Type */}
-                      <TableCell>
-                        <Badge
-                          variant={
-                            punch.punchType === 'in'
-                              ? 'success'
-                              : punch.punchType === 'out'
-                                ? 'neutral'
-                                : 'warning'
-                          }
-                        >
-                          {punch.punchType.toUpperCase()}
-                        </Badge>
-                      </TableCell>
-
-                      {/* 4. Source */}
-                      <TableCell>
-                        <Badge variant="neutral">{punch.source.toUpperCase()}</Badge>
-                      </TableCell>
-
-                      {/* 5. Device / Location */}
+                      {/* 3. Direction (In / Out) */}
                       <TableCell>
                         <span className="bezent-table-meta-title">
-                          {punch.workLocation ||
-                            (punch.deviceMetadata as { deviceId?: string } | null)?.deviceId ||
-                            '-'}
+                          {formatDirectionLabel(punch.punchType)}
                         </span>
                       </TableCell>
 
-                      {/* 6. Workday */}
+                      {/* 4. Source Badge */}
                       <TableCell>
-                        <span className="bezent-table-meta-subtitle">{punch.workday || '-'}</span>
+                        <Badge variant="neutral">{formatSourceLabel(punch.source)}</Badge>
                       </TableCell>
 
-                      {/* 7. Validation */}
+                      {/* 5. Device (Terminal name, else —) */}
                       <TableCell>
-                        <Badge
-                          variant={
-                            punch.validationStatus === 'valid'
-                              ? 'success'
-                              : punch.validationStatus === 'duplicate'
-                                ? 'warning'
-                                : punch.validationStatus === 'unmatched' ||
-                                    punch.validationStatus === 'invalid'
-                                  ? 'danger'
-                                  : 'neutral'
-                          }
-                        >
-                          {punch.validationStatus.replace('_', ' ').toUpperCase()}
-                        </Badge>
+                        <span className="bezent-table-meta-title">{deviceName}</span>
                       </TableCell>
 
-                      {/* 8. Processing State */}
+                      {/* 6. Location (Zone name or Outside zone / —) */}
                       <TableCell>
-                        <Badge
-                          variant={
-                            punch.processingState === 'processed'
-                              ? 'success'
-                              : punch.processingState === 'failed'
-                                ? 'danger'
-                                : 'neutral'
-                          }
-                        >
-                          {punch.processingState.replace('_', ' ').toUpperCase()}
-                        </Badge>
+                        <span className="bezent-table-meta-title">{punch.workLocation || '—'}</span>
                       </TableCell>
 
-                      {/* 9. Linked Attendance */}
+                      {/* 7. Result Badge */}
                       <TableCell>
-                        {punch.linkedAttendanceId ? (
-                          <Badge variant="info">
-                            Daily Log: {punch.linkedAttendanceStatus?.toUpperCase() || 'PRESENT'}
-                          </Badge>
-                        ) : (
-                          <span className="bezent-table-meta-subtitle">—</span>
-                        )}
+                        <span title={resultBadge.tooltip}>
+                          <Badge variant={resultBadge.variant}>{resultBadge.label}</Badge>
+                        </span>
                       </TableCell>
 
-                      {/* 10. Actions (Contextual Ellipsis Menu) */}
-                      <TableCell onClick={(e) => e.stopPropagation()}>
+                      {/* 8. Used in Calculation (Yes / No) */}
+                      <TableCell>
+                        <span className="bezent-table-meta-title">
+                          {isUsedInCalc ? 'Yes' : 'No'}
+                        </span>
+                      </TableCell>
+
+                      {/* 9. Row Actions (Sticky Right — Spec Section 6) */}
+                      <TableCell className="bezent-table-col--actions bezent-table-col--sticky-right">
                         <div
                           className="bezent-table-action-menu"
                           ref={isMenuOpen ? menuRef : undefined}
@@ -1002,68 +1160,53 @@ export function PunchLogsPage() {
                           <button
                             type="button"
                             className={`bezent-table-action-btn ${isMenuOpen ? 'is-active' : ''}`}
-                            onClick={() => setActiveMenuId(isMenuOpen ? null : punch.id)}
-                            aria-label="More actions"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveMenuId(isMenuOpen ? null : punch.id);
+                            }}
+                            aria-label={`Actions for punch ${punch.id}`}
                           >
-                            ⋯
+                            <BezentIcon name="more" size={16} />
                           </button>
 
                           {isMenuOpen && (
-                            <div className="bezent-table-action-menu__dropdown">
+                            <div
+                              className="bezent-table-action-menu__dropdown"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {/* Open detail: Always */}
                               <button
                                 type="button"
                                 className="bezent-table-action-menu__item"
-                                onClick={() => handleOpenDrawer(punch.id, 'overview')}
+                                onClick={() => {
+                                  setActiveMenuId(null);
+                                  handleOpenDrawer(punch.id, 'info');
+                                }}
                               >
-                                View Event Details
+                                <BezentIcon name="visibility" size={14} /> View Details
                               </button>
 
-                              <button
-                                type="button"
-                                className="bezent-table-action-menu__item"
-                                onClick={() => handleOpenDrawer(punch.id, 'timeline')}
-                              >
-                                View Employee Timeline
-                              </button>
+                              {/* Investigate: When Flagged */}
+                              {resultBadge.label === 'Flagged' && (
+                                <button
+                                  type="button"
+                                  className="bezent-table-action-menu__item"
+                                  onClick={() => handleOpenInvestigation(punch)}
+                                >
+                                  <BezentIcon name="search" size={14} /> Investigate
+                                </button>
+                              )}
 
-                              <button
-                                type="button"
-                                className="bezent-table-action-menu__item"
-                                onClick={() => handleOpenDrawer(punch.id, 'linked')}
-                                disabled={!punch.linkedAttendanceId}
-                              >
-                                View Linked Attendance
-                              </button>
-
-                              <div className="bezent-table-action-menu__divider" />
-
-                              <button
-                                type="button"
-                                className="bezent-table-action-menu__item"
-                                onClick={() => handleOpenInvestigation(punch)}
-                              >
-                                Investigate Event
-                              </button>
-
-                              <button
-                                type="button"
-                                className="bezent-table-action-menu__item"
-                                onClick={() => handleRetryProcessing([punch.id])}
-                                disabled={
-                                  punch.processingState !== 'failed' &&
-                                  punch.processingState !== 'retry_pending'
-                                }
-                              >
-                                Retry Processing
-                              </button>
-
-                              <button
-                                type="button"
-                                className="bezent-table-action-menu__item"
-                                onClick={() => handleOpenDrawer(punch.id, 'history')}
-                              >
-                                View Audit History
-                              </button>
+                              {/* Retry: When Failed */}
+                              {resultBadge.label === 'Failed' && (
+                                <button
+                                  type="button"
+                                  className="bezent-table-action-menu__item"
+                                  onClick={() => handleOpenRetryConfirmation(punch)}
+                                >
+                                  <BezentIcon name="reset" size={14} /> Retry Processing
+                                </button>
+                              )}
                             </div>
                           )}
                         </div>
@@ -1073,7 +1216,7 @@ export function PunchLogsPage() {
                 })}
               </TableBody>
             </Table>
-          </div>
+          </Card>
         )}
 
         {/* ── Pagination Controls ── */}
@@ -1081,12 +1224,13 @@ export function PunchLogsPage() {
           <Inline justify="between" align="center">
             <span className="bezent-card__desc">
               Showing {(page - 1) * limit + 1}–{Math.min(page * limit, totalCount)} of {totalCount}{' '}
-              events
+              punches
             </span>
             <Inline gap="xs" align="center">
               <Button
-                variant="secondary"
+                variant="outline"
                 size="sm"
+                shape="rounded"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
               >
@@ -1096,8 +1240,9 @@ export function PunchLogsPage() {
                 Page {page} of {totalPages}
               </span>
               <Button
-                variant="secondary"
+                variant="outline"
                 size="sm"
+                shape="rounded"
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages}
               >
@@ -1107,250 +1252,141 @@ export function PunchLogsPage() {
           </Inline>
         )}
 
-        {/* ── Event Details Drawer ── */}
+        {/* ── 7. Punch Detail Drawer (Spec Section 7) ── */}
         <Modal
           isOpen={!!drawerPunchId}
           onClose={handleCloseDrawer}
           variant="drawer"
           size="drawer"
-          title={
-            <Stack gap="xs">
-              <Inline gap="sm" align="center">
-                <span className="bezent-table-meta-title">
-                  {drawerDetail?.employeeName || 'Punch Event Details'}
-                </span>
-                {drawerDetail && (
-                  <Badge
-                    variant={drawerDetail.validationStatus === 'valid' ? 'success' : 'warning'}
-                  >
-                    {drawerDetail.validationStatus.toUpperCase()}
-                  </Badge>
-                )}
-                {drawerDetail && (
-                  <Badge
-                    variant={drawerDetail.processingState === 'processed' ? 'success' : 'danger'}
-                  >
-                    {drawerDetail.processingState.toUpperCase()}
-                  </Badge>
-                )}
-              </Inline>
-              <span className="bezent-table-meta-subtitle">
-                ID: {drawerDetail?.id} • Code: {drawerDetail?.employeeCode}
-              </span>
-            </Stack>
-          }
+          title="Punch Details"
           headerBottom={
             <Tabs
               items={drawerTabs}
               activeId={drawerTab}
-              onChange={(id) => setDrawerTab(id as 'overview' | 'timeline' | 'linked' | 'history')}
+              onChange={(id) => setDrawerTab(id as 'info' | 'location' | 'processing' | 'history')}
             />
           }
         >
           {drawerLoading ? (
-            <LoadingState label="Loading event details..." />
+            <LoadingState label="Loading punch details..." />
           ) : drawerError ? (
             <Alert variant="danger">{drawerError}</Alert>
           ) : !drawerDetail ? (
-            <EmptyState title="Event Not Found" description="Could not load punch event details." />
+            <EmptyState title="Punch Not Found" description="Could not load punch event details." />
           ) : (
             <Stack gap="md">
-              {/* Tab 1: Overview */}
-              {drawerTab === 'overview' && (
+              {/* Section 1: Punch Information (Time, Direction, Source, Device) */}
+              {drawerTab === 'info' && (
                 <Stack gap="sm">
                   <Card padding="sm">
                     <Stack gap="xs">
-                      <span className="bezent-stat-card__label">INGESTION & CAPTURE</span>
                       <Inline justify="between">
-                        <span className="bezent-card__desc">Event Timestamp (UTC):</span>
-                        <strong>{formatDateTime(drawerDetail.punchTime)}</strong>
+                        <span className="bezent-card__desc">Employee:</span>
+                        <strong>
+                          {drawerDetail.employeeName} ({drawerDetail.employeeCode || '—'})
+                        </strong>
                       </Inline>
                       <Inline justify="between">
-                        <span className="bezent-card__desc">Received Timestamp:</span>
-                        <span>{formatDateTime(drawerDetail.createdAt)}</span>
+                        <span className="bezent-card__desc">Punch Time:</span>
+                        <strong>{format24HourTime(drawerDetail.punchTime)}</strong>
                       </Inline>
                       <Inline justify="between">
-                        <span className="bezent-card__desc">Punch Type:</span>
-                        <Badge variant="neutral">{drawerDetail.punchType.toUpperCase()}</Badge>
+                        <span className="bezent-card__desc">Direction:</span>
+                        <span className="bezent-table-meta-title">
+                          {formatDirectionLabel(drawerDetail.punchType)}
+                        </span>
                       </Inline>
                       <Inline justify="between">
                         <span className="bezent-card__desc">Source:</span>
-                        <span>{drawerDetail.source.toUpperCase()}</span>
+                        <Badge variant="neutral">{formatSourceLabel(drawerDetail.source)}</Badge>
                       </Inline>
                       <Inline justify="between">
-                        <span className="bezent-card__desc">Device / Location:</span>
-                        <span>{drawerDetail.workLocation || '-'}</span>
-                      </Inline>
-                      <Inline justify="between">
-                        <span className="bezent-card__desc">Raw Identifier:</span>
-                        <span>
-                          {drawerDetail.rawIdentifier || drawerDetail.employeeCode || '-'}
+                        <span className="bezent-card__desc">Device:</span>
+                        <span className="bezent-table-meta-title">
+                          {extractTerminalDeviceName(drawerDetail)}
                         </span>
                       </Inline>
                     </Stack>
                   </Card>
+                </Stack>
+              )}
 
+              {/* Section 2: Location (Zone, Distance from zone) */}
+              {drawerTab === 'location' && (
+                <Stack gap="sm">
                   <Card padding="sm">
                     <Stack gap="xs">
-                      <span className="bezent-stat-card__label">
-                        VALIDATION & ENGINE PROCESSING
-                      </span>
-                      <Inline justify="between">
-                        <span className="bezent-card__desc">Assigned Workday:</span>
-                        <strong>{drawerDetail.workday || 'Unassigned'}</strong>
-                      </Inline>
-                      <Inline justify="between">
-                        <span className="bezent-card__desc">Validation Result:</span>
-                        <Badge
-                          variant={drawerDetail.validationStatus === 'valid' ? 'success' : 'danger'}
-                        >
-                          {drawerDetail.validationStatus.toUpperCase()}
-                        </Badge>
-                      </Inline>
-                      {drawerDetail.validationReason && (
-                        <Inline justify="between">
-                          <span className="bezent-card__desc">Validation Reason:</span>
-                          <span className="bezent-card__desc">{drawerDetail.validationReason}</span>
-                        </Inline>
+                      {drawerDetail.workLocation ? (
+                        <>
+                          <Inline justify="between">
+                            <span className="bezent-card__desc">Zone:</span>
+                            <strong>{drawerDetail.workLocation}</strong>
+                          </Inline>
+                          <Inline justify="between">
+                            <span className="bezent-card__desc">Distance from zone:</span>
+                            <span>Within geofence (0m)</span>
+                          </Inline>
+                        </>
+                      ) : (
+                        <span className="bezent-card__desc">
+                          Location was not captured for this punch.
+                        </span>
                       )}
-                      <Inline justify="between">
-                        <span className="bezent-card__desc">Processing State:</span>
-                        <Badge
-                          variant={
-                            drawerDetail.processingState === 'processed' ? 'success' : 'danger'
-                          }
-                        >
-                          {drawerDetail.processingState.toUpperCase()}
-                        </Badge>
-                      </Inline>
-                      {drawerDetail.processingError && (
-                        <Inline justify="between">
-                          <span className="bezent-card__desc">Processing Error:</span>
-                          <Badge variant="danger">{drawerDetail.processingError}</Badge>
-                        </Inline>
-                      )}
-                      <Inline justify="between">
-                        <span className="bezent-card__desc">Retry Count:</span>
-                        <span>{drawerDetail.retryCount}</span>
-                      </Inline>
-                      <Inline justify="between">
-                        <span className="bezent-card__desc">Investigation State:</span>
-                        <Badge variant="neutral">
-                          {drawerDetail.investigationStatus.toUpperCase()}
-                        </Badge>
-                      </Inline>
                     </Stack>
                   </Card>
-
-                  <Inline justify="end" gap="sm">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => handleOpenInvestigation(drawerDetail)}
-                    >
-                      Investigate / Resolve
-                    </Button>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={() => handleRetryProcessing([drawerDetail.id])}
-                      disabled={
-                        drawerDetail.processingState !== 'failed' &&
-                        drawerDetail.processingState !== 'retry_pending'
-                      }
-                    >
-                      Retry Processing
-                    </Button>
-                  </Inline>
                 </Stack>
               )}
 
-              {/* Tab 2: Timeline */}
-              {drawerTab === 'timeline' && (
+              {/* Section 3: Processing (Result, Used in Calculation, Reason) */}
+              {drawerTab === 'processing' && (
                 <Stack gap="sm">
-                  <span className="bezent-stat-card__label">
-                    RELATED EMPLOYEE PUNCH TIMELINE (±2 DAYS)
-                  </span>
-                  {drawerDetail.timeline && drawerDetail.timeline.length > 0 ? (
-                    drawerDetail.timeline.map((item) => (
-                      <Card key={item.id} padding="sm">
-                        <Inline justify="between" align="center">
-                          <Inline gap="xs" align="center">
-                            <Badge variant={item.punchType === 'in' ? 'success' : 'neutral'}>
-                              {item.punchType.toUpperCase()}
-                            </Badge>
-                            <span className="bezent-table-meta-title">
-                              {formatDateTime(item.punchTime)}
-                            </span>
-                          </Inline>
-                          <Inline gap="xs">
-                            <Badge variant="neutral">{item.source}</Badge>
-                            <Badge
-                              variant={item.validationStatus === 'valid' ? 'success' : 'warning'}
-                            >
-                              {item.validationStatus}
-                            </Badge>
-                          </Inline>
-                        </Inline>
-                      </Card>
-                    ))
-                  ) : (
-                    <EmptyState
-                      title="No Other Punches"
-                      description="No related chronological punches found for this identifier within ±2 days."
-                    />
-                  )}
-                </Stack>
-              )}
-
-              {/* Tab 3: Linked Attendance */}
-              {drawerTab === 'linked' && (
-                <Stack gap="sm">
-                  <span className="bezent-stat-card__label">DAILY ATTENDANCE RECORD</span>
-                  {drawerDetail.linkedAttendanceId ? (
-                    <Card padding="sm">
-                      <Stack gap="xs">
+                  <Card padding="sm">
+                    <Stack gap="xs">
+                      <Inline justify="between">
+                        <span className="bezent-card__desc">Result:</span>
+                        <Badge variant={getPunchResultBadge(drawerDetail).variant}>
+                          {getPunchResultBadge(drawerDetail).label}
+                        </Badge>
+                      </Inline>
+                      <Inline justify="between">
+                        <span className="bezent-card__desc">Used in Calculation:</span>
+                        <strong>
+                          {drawerDetail.linkedAttendanceId &&
+                          getPunchResultBadge(drawerDetail).label === 'Accepted'
+                            ? 'Yes'
+                            : 'No'}
+                        </strong>
+                      </Inline>
+                      <Inline justify="between">
+                        <span className="bezent-card__desc">Reason:</span>
+                        <span>
+                          {drawerDetail.validationReason ||
+                            drawerDetail.processingError ||
+                            'Standard punch recorded'}
+                        </span>
+                      </Inline>
+                      {drawerDetail.workday && (
                         <Inline justify="between">
-                          <span className="bezent-card__desc">Daily Record ID:</span>
-                          <strong>{drawerDetail.linkedAttendanceId}</strong>
-                        </Inline>
-                        <Inline justify="between">
-                          <span className="bezent-card__desc">Attendance Status:</span>
-                          <Badge variant="success">
-                            {drawerDetail.linkedAttendanceStatus?.toUpperCase() || 'PRESENT'}
-                          </Badge>
-                        </Inline>
-                        <Inline justify="between">
-                          <span className="bezent-card__desc">Processing State:</span>
-                          <span>{drawerDetail.linkedAttendanceProcessingState || 'Finalized'}</span>
-                        </Inline>
-                        <Inline justify="between">
-                          <span className="bezent-card__desc">Workday:</span>
+                          <span className="bezent-card__desc">Assigned Workday:</span>
                           <span>{drawerDetail.workday}</span>
                         </Inline>
-                      </Stack>
-                    </Card>
-                  ) : (
-                    <EmptyState
-                      title="No Linked Daily Record"
-                      description="This punch event has not yet been reconciled into an authorized Daily Attendance Log."
-                    />
-                  )}
+                      )}
+                    </Stack>
+                  </Card>
                 </Stack>
               )}
 
-              {/* Tab 4: History & Audit */}
+              {/* Section 4: History */}
               {drawerTab === 'history' && (
                 <Stack gap="sm">
-                  <span className="bezent-stat-card__label">AUDIT TRAIL & EVENT LIFECYCLE</span>
                   {drawerDetail.audits && drawerDetail.audits.length > 0 ? (
                     drawerDetail.audits.map((audit) => (
                       <Card key={audit.id} padding="sm">
-                        <Stack gap="none">
+                        <Stack gap="xs">
                           <Inline justify="between" align="center">
                             <strong>{audit.action.replace('_', ' ').toUpperCase()}</strong>
                             <span className="bezent-card__desc">
-                              {formatDateTime(audit.createdAt)}
+                              {format24HourTime(audit.createdAt)}
                             </span>
                           </Inline>
                           <span className="bezent-card__desc">
@@ -1372,68 +1408,101 @@ export function PunchLogsPage() {
           )}
         </Modal>
 
-        {/* ── Investigation Modal ── */}
+        {/* ── 8. Investigate Flow Modal (Spec Section 8) ── */}
         {investigationModalOpen && investigatingPunch && (
           <Modal
             isOpen={investigationModalOpen}
             onClose={() => setInvestigationModalOpen(false)}
-            title={`Investigate Event: ${investigatingPunch.id}`}
+            title="Investigate Punch"
+            size="md"
           >
             <Stack gap="md">
               <span className="bezent-card__desc">
-                Review and record an authorized investigation outcome. Immutable raw event
-                timestamps and codes will remain untouched.
+                {investigatingPunch.employeeName} · {format24HourTime(investigatingPunch.punchTime)}
               </span>
 
-              <Select
-                label="Investigation Status"
-                value={investigationStatus}
-                onChange={(e) =>
-                  setInvestigationStatus(
-                    e.target.value as 'open' | 'assigned' | 'in_review' | 'resolved' | 'closed',
-                  )
-                }
-              >
-                <option value="open">Open</option>
-                <option value="assigned">Assigned</option>
-                <option value="in_review">In Review</option>
-                <option value="resolved">Resolved</option>
-                <option value="closed">Closed</option>
-              </Select>
-
-              <Input
-                label="Assign Reviewer (User ID)"
-                placeholder="e.g. usr-supervisor-01"
-                value={assignedTo}
-                onChange={(e) => setAssignedTo(e.target.value)}
-              />
-
-              {investigatingPunch.validationStatus === 'unmatched' && (
+              {/* Evidence block */}
+              <Card padding="sm">
                 <Stack gap="xs">
-                  <Input
-                    label="Resolve Unmatched Identity (Employee ID)"
-                    placeholder="e.g. emp_att_api_01"
-                    value={resolvedEmployeeId}
-                    onChange={(e) => setResolvedEmployeeId(e.target.value)}
-                  />
-                  <Input
-                    label="Identity Resolution Reason"
-                    placeholder="e.g. Matched physical RFID card against HR badge registry"
-                    value={resolutionReason}
-                    onChange={(e) => setResolutionReason(e.target.value)}
-                  />
+                  <strong>Evidence</strong>
+                  <Inline justify="between">
+                    <span className="bezent-card__desc">Source:</span>
+                    <span>{formatSourceLabel(investigatingPunch.source)}</span>
+                  </Inline>
+                  <Inline justify="between">
+                    <span className="bezent-card__desc">Device:</span>
+                    <span>{extractTerminalDeviceName(investigatingPunch)}</span>
+                  </Inline>
+                  <Inline justify="between">
+                    <span className="bezent-card__desc">Location:</span>
+                    <span>{investigatingPunch.workLocation || '—'}</span>
+                  </Inline>
+                  {investigatingPunch.validationReason && (
+                    <Inline justify="between">
+                      <span className="bezent-card__desc">Flag Reason:</span>
+                      <span className="bezent-table-meta-title">
+                        {investigatingPunch.validationReason}
+                      </span>
+                    </Inline>
+                  )}
                 </Stack>
+              </Card>
+
+              {/* Decision field */}
+              <Stack gap="xs">
+                <label className="bezent-filter-label" htmlFor="investigation-decision">
+                  Decision
+                </label>
+                <Select
+                  id="investigation-decision"
+                  value={investigationDecision}
+                  onChange={(e) => setInvestigationDecision(e.target.value as 'accept' | 'reject')}
+                >
+                  <option value="accept">Accept</option>
+                  <option value="reject">Reject</option>
+                </Select>
+              </Stack>
+
+              {/* Reason field (required) */}
+              <Stack gap="xs">
+                <label className="bezent-filter-label" htmlFor="investigation-reason">
+                  Reason{' '}
+                  <span className="bezent-label__required" aria-hidden="true">
+                    *
+                  </span>
+                </label>
+                <Input
+                  id="investigation-reason"
+                  placeholder="e.g. Validated manual biometric device offline log"
+                  value={investigationReason}
+                  onChange={(e) => setInvestigationReason(e.target.value)}
+                />
+              </Stack>
+
+              {/* Comment field (required) */}
+              <Stack gap="xs">
+                <label className="bezent-filter-label" htmlFor="investigation-comment">
+                  Comment{' '}
+                  <span className="bezent-label__required" aria-hidden="true">
+                    *
+                  </span>
+                </label>
+                <Textarea
+                  id="investigation-comment"
+                  placeholder="Provide detailed justification for payroll record..."
+                  value={investigationComment}
+                  onChange={(e) => setInvestigationComment(e.target.value)}
+                  rows={3}
+                />
+              </Stack>
+
+              {/* Validation alert if missing fields */}
+              {investigationValidationError && (
+                <Alert variant="danger">{investigationValidationError}</Alert>
               )}
 
-              <Input
-                label="Investigation Notes"
-                placeholder="Add notes or evidence reference..."
-                value={investigationNotes}
-                onChange={(e) => setInvestigationNotes(e.target.value)}
-              />
-
               <Inline justify="end" gap="sm">
-                <Button variant="secondary" onClick={() => setInvestigationModalOpen(false)}>
+                <Button variant="outline" onClick={() => setInvestigationModalOpen(false)}>
                   Cancel
                 </Button>
                 <Button
@@ -1441,7 +1510,32 @@ export function PunchLogsPage() {
                   onClick={handleSaveInvestigation}
                   disabled={investigationSubmitting}
                 >
-                  {investigationSubmitting ? 'Saving...' : 'Save Resolution'}
+                  {investigationSubmitting ? 'Saving...' : 'Save Decision'}
+                </Button>
+              </Inline>
+            </Stack>
+          </Modal>
+        )}
+
+        {/* ── 9. Retry Processing Confirmation Modal (Spec Section 9) ── */}
+        {retryModalOpen && retryPunchTarget && (
+          <Modal
+            isOpen={retryModalOpen}
+            onClose={() => setRetryModalOpen(false)}
+            title="Retry processing this punch?"
+            size="sm"
+          >
+            <Stack gap="md">
+              <span className="bezent-card__desc">
+                The punch will be processed again using the current rules.
+              </span>
+
+              <Inline justify="end" gap="sm">
+                <Button variant="outline" onClick={() => setRetryModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button variant="primary" onClick={handleExecuteRetry} disabled={retrySubmitting}>
+                  {retrySubmitting ? 'Retrying...' : 'Retry'}
                 </Button>
               </Inline>
             </Stack>
@@ -1465,9 +1559,9 @@ export function PunchLogsPage() {
                 value={exportScope}
                 onChange={(e) => setExportScope(e.target.value as 'all' | 'selected')}
               >
-                <option value="all">All Filtered Events ({totalCount} events)</option>
+                <option value="all">All Filtered Punches ({totalCount} punches)</option>
                 {selectedIds.size > 0 && (
-                  <option value="selected">Selected Events ({selectedIds.size} events)</option>
+                  <option value="selected">Selected Punches ({selectedIds.size} punches)</option>
                 )}
               </Select>
 
@@ -1476,12 +1570,15 @@ export function PunchLogsPage() {
                   <span className="bezent-card__desc">
                     Active Range: {dateFrom} to {dateTo}
                   </span>
-                  <span className="bezent-card__desc">Date Mode: {dateInterpretation}</span>
+                  <span className="bezent-card__desc">
+                    Date Basis:{' '}
+                    {dateInterpretation === 'event_timestamp' ? 'Event Time' : 'Workday'}
+                  </span>
                 </Stack>
               </Card>
 
               <Inline justify="end" gap="sm">
-                <Button variant="secondary" onClick={() => setExportModalOpen(false)}>
+                <Button variant="outline" onClick={() => setExportModalOpen(false)}>
                   Cancel
                 </Button>
                 <Button variant="primary" onClick={handleExecuteExport} disabled={isExporting}>

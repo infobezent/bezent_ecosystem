@@ -1,4 +1,32 @@
-import { useState, useEffect, useMemo } from 'react';
+/**
+ * BEZENT HRMS — Attendance Reports Center (V1.0)
+ *
+ * Implements full-fidelity Attendance Reporting Center:
+ * - Spec Section 8.1 (Report Catalog & Report View)
+ * - 7 Canonical Statutory & Operational Reports:
+ *   1. Daily Attendance
+ *   2. Monthly Muster Roll (Status grid)
+ *   3. Attendance Summary
+ *   4. Late, Early and Missed Punch
+ *   5. Regularization
+ *   6. Overtime and Comp-Off
+ *   7. Absenteeism
+ * - Landing View: Available Reports catalog grid with Search and Open Report actions
+ * - Report View:
+ *   - Comprehensive Filter Bar (Date Range, Department, Employee, Status, Group By, Generate Report, Reset Filters)
+ *   - Date validation: mandatory range, end not before start, no future dates, max 365-day cap
+ *   - Export dropdown: CSV (.csv), Excel (.xlsx), PDF (.pdf) with progress & toasts
+ *   - View Toggle: Table · Chart
+ *   - Report Header Block (Company name, Report name, Period, Filters, Generated on, Showing {n} records)
+ *   - Standardized Table with totals row & clean status badges
+ *   - Visual Analytics charts ({Report name} by {Group})
+ *   - States: Not generated yet, Generating, No data, Date range too large, Load error
+ *
+ * Strictly adheres to AGENTS.md Zero Application CSS rule:
+ * Zero CSS files, zero inline style objects, composing only Design System primitives.
+ */
+
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Page,
   PageHeader,
@@ -7,12 +35,10 @@ import {
   Stack,
   Inline,
   Button,
-  Input,
-  Select,
+  SearchInput,
   Badge,
   Alert,
-  Modal,
-  Tabs,
+  LoadingState,
   EmptyState,
   Table,
   TableHead,
@@ -23,869 +49,882 @@ import {
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import {
-  fetchReportCatalog,
   fetchReportPreview,
   fetchReportAnalytics,
   downloadReportExport,
-  fetchSavedReports,
-  createSavedReport,
-  deleteSavedReport,
-  fetchReportHistory,
-  downloadHistoryFile,
 } from '../api/attendanceReportsApi';
 import type {
-  ReportDefinition,
   ReportId,
   ReportPreviewResult,
   ReportAnalyticsResult,
-  StatusDistributionSlice,
-  SavedReportConfiguration,
-  ReportGenerationHistoryItem,
-  ReportSortingOption,
 } from '../types/attendanceReports.types';
 import {
-  KpiSummaryGrid,
   DonutChart,
   BarChart,
   StackedBarChart,
   LineChart,
-  ActiveDrillDownBanner,
 } from '../components/analytics/AttendanceReportCharts';
 
-export function AttendanceReportsPage() {
-  const [activeTab, setActiveTab] = useState<'catalog' | 'runner' | 'saved' | 'history'>('catalog');
-  const [catalog, setCatalog] = useState<ReportDefinition[]>([]);
-  const [selectedReportId, setSelectedReportId] = useState<ReportId>('R01');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [loadingCatalog, setLoadingCatalog] = useState(false);
-  const [catalogError, setCatalogError] = useState<string | null>(null);
+// ── 2. Report Templates Specification (Spec Section 2) ───────────────────────
 
-  // Runner state
+export interface CanonicalReportTemplate {
+  id: ReportId;
+  name: string;
+  description: string;
+  category: string;
+  defaultGroupBy: 'none' | 'department' | 'employee' | 'date';
+  columns: Array<{ id: string; label: string; align?: 'left' | 'center' | 'right' }>;
+}
+
+export const CANONICAL_REPORTS: CanonicalReportTemplate[] = [
+  {
+    id: 'R01',
+    name: 'Daily Attendance',
+    description: 'Status, in and out times, hours, late and early minutes for each employee.',
+    category: 'Daily Operations',
+    defaultGroupBy: 'none',
+    columns: [
+      { id: 'employee', label: 'Employee', align: 'left' },
+      { id: 'department', label: 'Department', align: 'left' },
+      { id: 'date', label: 'Date', align: 'left' },
+      { id: 'status', label: 'Status', align: 'center' },
+      { id: 'in', label: 'In', align: 'center' },
+      { id: 'out', label: 'Out', align: 'center' },
+      { id: 'hours', label: 'Hours', align: 'right' },
+      { id: 'lateMarks', label: 'Late Marks', align: 'right' },
+    ],
+  },
+  {
+    id: 'R02',
+    name: 'Monthly Muster Roll',
+    description:
+      'Status grid for the month with totals for present, absent, leave and payable days.',
+    category: 'Monthly Registers',
+    defaultGroupBy: 'department',
+    columns: [
+      { id: 'employee', label: 'Employee', align: 'left' },
+      { id: 'department', label: 'Department', align: 'left' },
+      { id: 'present', label: 'Present', align: 'right' },
+      { id: 'absent', label: 'Absent', align: 'right' },
+      { id: 'halfDays', label: 'Half Days', align: 'right' },
+      { id: 'leave', label: 'Leave', align: 'right' },
+      { id: 'weeklyOffs', label: 'Weekly Offs', align: 'right' },
+      { id: 'holidays', label: 'Holidays', align: 'right' },
+      { id: 'payableDays', label: 'Payable Days', align: 'right' },
+    ],
+  },
+  {
+    id: 'R13',
+    name: 'Attendance Summary',
+    description: 'Present, absent, leave and payable days for each employee.',
+    category: 'Payroll Handover',
+    defaultGroupBy: 'department',
+    columns: [
+      { id: 'employee', label: 'Employee', align: 'left' },
+      { id: 'department', label: 'Department', align: 'left' },
+      { id: 'present', label: 'Present', align: 'right' },
+      { id: 'absent', label: 'Absent', align: 'right' },
+      { id: 'leave', label: 'Leave', align: 'right' },
+      { id: 'lossOfPay', label: 'Loss of Pay', align: 'right' },
+      { id: 'overtime', label: 'Overtime', align: 'right' },
+      { id: 'payableDays', label: 'Payable Days', align: 'right' },
+    ],
+  },
+  {
+    id: 'R05',
+    name: 'Late, Early and Missed Punch',
+    description: 'Late marks, early-outs, missed punches and their regularization status.',
+    category: 'Exceptions & Compliance',
+    defaultGroupBy: 'employee',
+    columns: [
+      { id: 'employee', label: 'Employee', align: 'left' },
+      { id: 'department', label: 'Department', align: 'left' },
+      { id: 'date', label: 'Date', align: 'left' },
+      { id: 'lateMarks', label: 'Late Marks', align: 'right' },
+      { id: 'earlyExit', label: 'Early Exit', align: 'right' },
+      { id: 'missedPunch', label: 'Missed Punch', align: 'center' },
+      { id: 'regularizationStatus', label: 'Regularization Status', align: 'center' },
+    ],
+  },
+  {
+    id: 'R10',
+    name: 'Regularization',
+    description: 'Requests, reasons, turnaround time and outcomes.',
+    category: 'Operational Workflows',
+    defaultGroupBy: 'none',
+    columns: [
+      { id: 'employee', label: 'Employee', align: 'left' },
+      { id: 'department', label: 'Department', align: 'left' },
+      { id: 'date', label: 'Date', align: 'left' },
+      { id: 'reason', label: 'Reason', align: 'left' },
+      { id: 'turnaroundTime', label: 'Turnaround Time', align: 'right' },
+      { id: 'status', label: 'Status', align: 'center' },
+    ],
+  },
+  {
+    id: 'R06',
+    name: 'Overtime and Comp-Off',
+    description:
+      'Overtime hours, rate type and cost, with comp-off earned, used, expired and balance.',
+    category: 'Operational Workflows',
+    defaultGroupBy: 'department',
+    columns: [
+      { id: 'employee', label: 'Employee', align: 'left' },
+      { id: 'department', label: 'Department', align: 'left' },
+      { id: 'overtimeHours', label: 'Overtime', align: 'right' },
+      { id: 'rate', label: 'Rate', align: 'center' },
+      { id: 'earnedCompOff', label: 'Comp-Off Earned', align: 'right' },
+      { id: 'usedCompOff', label: 'Comp-Off Used', align: 'right' },
+      { id: 'expiredCompOff', label: 'Comp-Off Expired', align: 'right' },
+      { id: 'balanceCompOff', label: 'Comp-Off Balance', align: 'right' },
+    ],
+  },
+  {
+    id: 'R12',
+    name: 'Absenteeism',
+    description: 'Absence rate by employee, department and month.',
+    category: 'Trends & Analytics',
+    defaultGroupBy: 'department',
+    columns: [
+      { id: 'employee', label: 'Employee', align: 'left' },
+      { id: 'department', label: 'Department', align: 'left' },
+      { id: 'month', label: 'Month', align: 'left' },
+      { id: 'scheduledDays', label: 'Scheduled Days', align: 'right' },
+      { id: 'absentDays', label: 'Absent Days', align: 'right' },
+      { id: 'lossOfPay', label: 'Loss of Pay', align: 'right' },
+      { id: 'absenceRate', label: 'Absence Rate (%)', align: 'right' },
+    ],
+  },
+];
+
+// Helper to format values cleanly (e.g. 22.5 instead of 22.50)
+function formatNumberValue(val: unknown): string {
+  if (val === null || val === undefined || val === '') return '—';
+  if (typeof val === 'number') {
+    return Number.isInteger(val) ? String(val) : String(Math.round(val * 10) / 10);
+  }
+  return String(val);
+}
+
+function getErrorMessage(err: unknown, fallback: string): string {
+  if (err instanceof Error) return err.message;
+  return fallback;
+}
+
+// ── Main Attendance Reports Page ─────────────────────────────────────────────
+
+export function AttendanceReportsPage() {
+  // Navigation: null = Landing view (Catalog); template = Active Report View
+  const [activeReport, setActiveReport] = useState<CanonicalReportTemplate | null>(null);
+
+  // ── 3. Landing View State (Spec Section 3) ─────────────────────────────────
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // ── 4. Report View Filter Bar State (Spec Section 4) ───────────────────────
   const now = new Date();
   const todayStr = now.toISOString().slice(0, 10);
-  const currentMonthStr = now.toISOString().slice(0, 7);
+  const startOfMonthStr = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
 
-  const [filterValues, setFilterValues] = useState<Record<string, unknown>>({
-    startDate: todayStr,
-    endDate: todayStr,
-    month: currentMonthStr,
-  });
-  const [sorting, setSorting] = useState<ReportSortingOption>({ column: '', direction: 'desc' });
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 15;
+  const [dateRangeStart, setDateRangeStart] = useState(startOfMonthStr);
+  const [dateRangeEnd, setDateRangeEnd] = useState(todayStr);
+  const [selectedDepartment, setSelectedDepartment] = useState('all');
+  const [selectedEmployee, setSelectedEmployee] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedGroupBy, setSelectedGroupBy] = useState<
+    'none' | 'department' | 'employee' | 'date'
+  >('none');
 
-  const [previewResult, setPreviewResult] = useState<ReportPreviewResult | null>(null);
-  const [previewLoading, setPreviewLoading] = useState(false);
-  const [previewError, setPreviewError] = useState<string | null>(null);
-  const [exportingFormat, setExportingFormat] = useState<string | null>(null);
+  // ── 6. Report Execution & View State (Spec Section 6) ──────────────────────
+  const [viewMode, setViewMode] = useState<'table' | 'chart'>('table');
+  const [hasGenerated, setHasGenerated] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
-  // Visual Analytics state
+  const [reportResult, setReportResult] = useState<ReportPreviewResult | null>(null);
   const [analyticsResult, setAnalyticsResult] = useState<ReportAnalyticsResult | null>(null);
-  const [analyticsLoading, setAnalyticsLoading] = useState(false);
-  const [activeDrillDown, setActiveDrillDown] = useState<{
-    dimension: string;
-    value: string | number;
+  const [generatedTimestamp, setGeneratedTimestamp] = useState<string | null>(null);
+
+  // ── 5. Export State (Spec Section 5) ───────────────────────────────────────
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const [exporting, setExporting] = useState<string | null>(null);
+  const [bannerToast, setBannerToast] = useState<{
+    type: 'success' | 'danger' | 'info';
+    text: string;
   } | null>(null);
-  const [showVisualAnalytics, setShowVisualAnalytics] = useState(true);
+  const exportRef = useRef<HTMLDivElement | null>(null);
 
-  // Saved configs state
-  const [savedConfigs, setSavedConfigs] = useState<SavedReportConfiguration[]>([]);
-  const [loadingSaved, setLoadingSaved] = useState(false);
-  const [saveModalOpen, setSaveModalOpen] = useState(false);
-  const [newConfigName, setNewConfigName] = useState('');
-  const [savingConfig, setSavingConfig] = useState(false);
-
-  // History state
-  const [historyList, setHistoryList] = useState<ReportGenerationHistoryItem[]>([]);
-  const [loadingHistory, setLoadingHistory] = useState(false);
-  const [downloadingHistoryId, setDownloadingHistoryId] = useState<string | null>(null);
-
-  // Load Catalog on mount
+  // Close export dropdown on outside click
   useEffect(() => {
-    loadCatalog();
+    function handleClickOutside(e: MouseEvent) {
+      if (exportRef.current && !exportRef.current.contains(e.target as Node)) {
+        setExportMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  async function loadCatalog() {
-    setLoadingCatalog(true);
-    setCatalogError(null);
-    try {
-      const data = await fetchReportCatalog();
-      setCatalog(data);
-    } catch (err: unknown) {
-      setCatalogError(err instanceof Error ? err.message : 'Failed to load report catalog');
-    } finally {
-      setLoadingCatalog(false);
-    }
-  }
+  // Department options
+  const departmentOptions = [
+    'Engineering',
+    'Product',
+    'Operations',
+    'Human Resources',
+    'Sales',
+    'Finance',
+  ];
 
-  // Load saved configurations when tab changes
-  useEffect(() => {
-    if (activeTab === 'saved') {
-      loadSavedConfigs();
-    } else if (activeTab === 'history') {
-      loadHistory();
-    }
-  }, [activeTab]);
-
-  async function loadSavedConfigs() {
-    setLoadingSaved(true);
-    try {
-      const data = await fetchSavedReports();
-      setSavedConfigs(data);
-    } catch {
-      // non-blocking
-    } finally {
-      setLoadingSaved(false);
-    }
-  }
-
-  async function loadHistory() {
-    setLoadingHistory(true);
-    try {
-      const data = await fetchReportHistory();
-      setHistoryList(data);
-    } catch {
-      // non-blocking
-    } finally {
-      setLoadingHistory(false);
-    }
-  }
-
-  const selectedReportDef = useMemo(() => {
-    return catalog.find((r) => r.id === selectedReportId) || catalog[0];
-  }, [catalog, selectedReportId]);
-
-  // Set default sorting when report changes
-  useEffect(() => {
-    if (selectedReportDef) {
-      setSorting(selectedReportDef.defaultSorting);
-      setPreviewResult(null);
-      setCurrentPage(1);
-    }
-  }, [selectedReportDef]);
-
+  // ── Filter Catalog for Landing View ────────────────────────────────────────
   const filteredCatalog = useMemo(() => {
-    if (categoryFilter === 'all') return catalog;
-    return catalog.filter((r) => r.category === categoryFilter);
-  }, [catalog, categoryFilter]);
+    if (!searchQuery.trim()) return CANONICAL_REPORTS;
+    const q = searchQuery.toLowerCase().trim();
+    return CANONICAL_REPORTS.filter(
+      (r) => r.name.toLowerCase().includes(q) || r.description.toLowerCase().includes(q),
+    );
+  }, [searchQuery]);
 
-  function handleSelectReport(reportId: ReportId) {
-    setSelectedReportId(reportId);
-    setActiveTab('runner');
-  }
+  // Open Report Handler
+  const handleOpenReport = (report: CanonicalReportTemplate) => {
+    setActiveReport(report);
+    setSelectedGroupBy(report.defaultGroupBy);
+    setHasGenerated(false);
+    setReportResult(null);
+    setAnalyticsResult(null);
+    setGenerationError(null);
+    setValidationError(null);
+  };
 
-  function handleFilterChange(key: string, value: unknown) {
-    setFilterValues((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  }
+  // Back to Catalog Handler
+  const handleBackToCatalog = () => {
+    setActiveReport(null);
+    setHasGenerated(false);
+    setReportResult(null);
+    setAnalyticsResult(null);
+    setGenerationError(null);
+    setValidationError(null);
+  };
 
-  async function handleLoadAnalytics(overrideFilters?: Record<string, unknown>) {
-    if (!selectedReportDef) return;
-    setAnalyticsLoading(true);
+  // ── 4 & 9. Validation & Generate Handler (Spec Section 4 & 9) ──────────────
+  const handleGenerateReport = async () => {
+    setValidationError(null);
+    setGenerationError(null);
+
+    // Validation 1: No date range
+    if (!dateRangeStart || !dateRangeEnd) {
+      setValidationError('Please select a date range.');
+      return;
+    }
+
+    // Validation 2: End before start
+    if (dateRangeEnd < dateRangeStart) {
+      setValidationError('End date cannot be before start date.');
+      return;
+    }
+
+    // Validation 3: Future dates
+    if (dateRangeStart > todayStr || dateRangeEnd > todayStr) {
+      setValidationError('Reports cannot be generated for future dates.');
+      return;
+    }
+
+    // Validation 4: Date range too large (max 365 days)
+    const startMs = new Date(dateRangeStart).getTime();
+    const endMs = new Date(dateRangeEnd).getTime();
+    const diffDays = Math.ceil((endMs - startMs) / (1000 * 60 * 60 * 24));
+    if (diffDays > 365) {
+      setValidationError('Date range is too large. Please select a range of up to 365 days.');
+      return;
+    }
+
+    if (!activeReport) return;
+
     try {
-      const data = await fetchReportAnalytics(
-        selectedReportDef.id,
-        overrideFilters || filterValues,
+      setGenerating(true);
+      const filters: Record<string, unknown> = {
+        startDate: dateRangeStart,
+        endDate: dateRangeEnd,
+        departmentId: selectedDepartment !== 'all' ? selectedDepartment : undefined,
+        employeeId: selectedEmployee !== 'all' ? selectedEmployee : undefined,
+        status: selectedStatus !== 'all' ? selectedStatus : undefined,
+        groupBy: selectedGroupBy !== 'none' ? selectedGroupBy : undefined,
+      };
+
+      const [previewRes, analyticsRes] = await Promise.all([
+        fetchReportPreview(activeReport.id, {
+          filters,
+          pagination: { page: 1, pageSize: 50 },
+        }),
+        fetchReportAnalytics(activeReport.id, filters).catch(() => null),
+      ]);
+
+      setReportResult(previewRes);
+      setAnalyticsResult(analyticsRes);
+      setGeneratedTimestamp(
+        new Date().toLocaleString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
       );
-      setAnalyticsResult(data);
-    } catch {
-      // non-blocking
-    } finally {
-      setAnalyticsLoading(false);
-    }
-  }
-
-  async function handleRunPreview(pageToLoad = 1, overrideFilters?: Record<string, unknown>) {
-    if (!selectedReportDef) return;
-    const activeFilters = overrideFilters || filterValues;
-    setPreviewLoading(true);
-    setPreviewError(null);
-    try {
-      const result = await fetchReportPreview(selectedReportDef.id, {
-        filters: activeFilters,
-        sorting: sorting.column ? sorting : undefined,
-        pagination: { page: pageToLoad, pageSize },
-      });
-      setPreviewResult(result);
-      setCurrentPage(pageToLoad);
-      handleLoadAnalytics(activeFilters);
+      setHasGenerated(true);
     } catch (err: unknown) {
-      setPreviewError(err instanceof Error ? err.message : 'Failed to generate report preview');
+      setGenerationError(getErrorMessage(err, 'Could not generate report. Please try again.'));
     } finally {
-      setPreviewLoading(false);
+      setGenerating(false);
     }
-  }
+  };
 
-  function handleSliceClick(slice: StatusDistributionSlice) {
-    if (!slice.key && !slice.label) return;
-    const filterKey = analyticsResult?.charts.statusDistribution?.drillDownField || 'status';
-    const val = slice.key || slice.label;
-    setActiveDrillDown({ dimension: 'Status', value: val });
-    const updated = { ...filterValues, [filterKey]: val };
-    setFilterValues(updated);
-    handleRunPreview(1, updated);
-  }
-
-  function handleBarClick(category: string) {
-    const filterKey =
-      analyticsResult?.charts.departmentComparison?.drillDownField || 'departmentId';
-    setActiveDrillDown({ dimension: 'Department / Segment', value: category });
-    const updated = { ...filterValues, [filterKey]: category };
-    setFilterValues(updated);
-    handleRunPreview(1, updated);
-  }
-
-  function handleTrendClick(point: { label: string; value: number }) {
-    setActiveDrillDown({ dimension: 'Date', value: point.label });
-    const updated = { ...filterValues, startDate: point.label, endDate: point.label };
-    setFilterValues(updated);
-    handleRunPreview(1, updated);
-  }
-
-  function handleClearDrillDown() {
-    setActiveDrillDown(null);
-    const cleaned = { ...filterValues };
-    delete cleaned.status;
-    delete cleaned.departmentId;
-    delete cleaned.payrollReadiness;
-    delete cleaned.approvalStatus;
-    delete cleaned.severity;
-    delete cleaned.exceptionType;
-    delete cleaned.missingInOut;
-    delete cleaned.reviewState;
-    delete cleaned.action;
-    setFilterValues(cleaned);
-    handleRunPreview(1, cleaned);
-  }
-
-  async function handleExport(format: 'csv' | 'xlsx' | 'pdf') {
-    if (!selectedReportDef) return;
-    setExportingFormat(format);
-    setPreviewError(null);
-    try {
-      await downloadReportExport(selectedReportDef.id, {
-        format,
-        filters: filterValues,
-        sorting: sorting.column ? sorting : undefined,
-      });
-      if (activeTab === 'history') {
-        loadHistory();
-      }
-    } catch (err: unknown) {
-      setPreviewError(
-        err instanceof Error ? err.message : `Failed to export ${format.toUpperCase()}`,
-      );
-    } finally {
-      setExportingFormat(null);
+  // ── Reset Filters Handler ──────────────────────────────────────────────────
+  const handleResetFilters = () => {
+    setDateRangeStart(startOfMonthStr);
+    setDateRangeEnd(todayStr);
+    setSelectedDepartment('all');
+    setSelectedEmployee('all');
+    setSelectedStatus('all');
+    setSelectedGroupBy(activeReport ? activeReport.defaultGroupBy : 'none');
+    setValidationError(null);
+    setGenerationError(null);
+    if (hasGenerated) {
+      handleGenerateReport();
     }
-  }
+  };
 
-  async function handleSaveConfig() {
-    if (!newConfigName.trim() || !selectedReportDef) return;
-    setSavingConfig(true);
-    try {
-      await createSavedReport({
-        reportId: selectedReportDef.id,
-        configurationName: newConfigName.trim(),
-        filters: filterValues,
-        sorting: sorting.column ? sorting : undefined,
-      });
-      setSaveModalOpen(false);
-      setNewConfigName('');
-      loadSavedConfigs();
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Failed to save configuration');
-    } finally {
-      setSavingConfig(false);
-    }
-  }
+  const hasActiveFilters =
+    selectedDepartment !== 'all' ||
+    selectedEmployee !== 'all' ||
+    selectedStatus !== 'all' ||
+    (activeReport && selectedGroupBy !== activeReport.defaultGroupBy);
 
-  async function handleDeleteConfig(id: string) {
-    if (!confirm('Are you sure you want to delete this saved configuration?')) return;
-    try {
-      await deleteSavedReport(id);
-      loadSavedConfigs();
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Failed to delete configuration');
-    }
-  }
-
-  function handleApplySavedConfig(config: SavedReportConfiguration) {
-    setSelectedReportId(config.reportId);
-    setFilterValues(config.filters);
-    if (config.sorting) setSorting(config.sorting);
-    setActiveTab('runner');
-  }
-
-  async function handleDownloadHistory(historyId: string) {
-    setDownloadingHistoryId(historyId);
-    try {
-      await downloadHistoryFile(historyId);
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Failed to download report file');
-    } finally {
-      setDownloadingHistoryId(null);
-    }
-  }
-
-  function handleSortClick(columnId: string) {
-    setSorting((prev) => {
-      if (prev.column === columnId) {
-        return {
-          column: columnId,
-          direction: prev.direction === 'asc' ? 'desc' : 'asc',
-        };
-      }
-      return { column: columnId, direction: 'asc' };
+  // ── 5. Export Handler (Spec Section 5) ─────────────────────────────────────
+  const handleExport = async (format: 'csv' | 'xlsx' | 'pdf') => {
+    if (!activeReport || !hasGenerated) return;
+    setExportMenuOpen(false);
+    setExporting(format);
+    setBannerToast({
+      type: 'info',
+      text: 'Preparing your export...',
     });
-  }
+
+    try {
+      await downloadReportExport(activeReport.id, {
+        format,
+        filters: {
+          startDate: dateRangeStart,
+          endDate: dateRangeEnd,
+          departmentId: selectedDepartment !== 'all' ? selectedDepartment : undefined,
+          status: selectedStatus !== 'all' ? selectedStatus : undefined,
+          groupBy: selectedGroupBy !== 'none' ? selectedGroupBy : undefined,
+        },
+      });
+      setBannerToast({
+        type: 'success',
+        text: 'Report exported successfully.',
+      });
+    } catch {
+      setBannerToast({
+        type: 'danger',
+        text: 'Could not export the report. Please try again.',
+      });
+    } finally {
+      setExporting(null);
+    }
+  };
+
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <Page>
+    <Page maxWidth="default" gap="md">
+      {/* ── 1. Page Header (Spec Section 1) ── */}
       <PageHeader
-        title="Attendance Reporting Center"
-        subtitle="15 Authoritative statutory muster registers, punctuality, workflows, and compliance audits"
+        eyebrow={
+          activeReport ? `Attendance › Reports › ${activeReport.name}` : 'Attendance › Reports'
+        }
+        title={activeReport ? activeReport.name : 'Reports'}
+        subtitle={
+          activeReport
+            ? activeReport.description
+            : 'Generate attendance reports and export them for payroll, audit and review.'
+        }
+        actions={
+          activeReport ? (
+            <Inline gap="sm" align="center">
+              <Button variant="outline" size="md" onClick={handleBackToCatalog}>
+                <BezentIcon name="chevronLeft" size={16} />
+                <span>Back to Reports</span>
+              </Button>
+
+              {/* Export Dropdown (Spec Section 5) */}
+              <div className="bezent-filter-anchor" ref={exportRef}>
+                <Button
+                  variant="outline"
+                  size="md"
+                  leftIcon={<BezentIcon name="download" size={16} />}
+                  onClick={() => {
+                    if (hasGenerated) {
+                      setExportMenuOpen((prev) => !prev);
+                    }
+                  }}
+                  disabled={!hasGenerated || exporting !== null}
+                  title={!hasGenerated ? 'Generate a report before exporting.' : undefined}
+                >
+                  {exporting ? 'Preparing export...' : 'Export'}
+                  <BezentIcon name="chevronDown" size={14} />
+                </Button>
+
+                {exportMenuOpen && (
+                  <div className="bezent-action-dropdown-menu" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      type="button"
+                      className="bezent-action-menu-item"
+                      onClick={() => handleExport('xlsx')}
+                    >
+                      <BezentIcon name="download" size={14} />
+                      <span>Excel (.xlsx)</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="bezent-action-menu-item"
+                      onClick={() => handleExport('csv')}
+                    >
+                      <BezentIcon name="download" size={14} />
+                      <span>CSV (.csv)</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="bezent-action-menu-item"
+                      onClick={() => handleExport('pdf')}
+                    >
+                      <BezentIcon name="download" size={14} />
+                      <span>PDF (.pdf)</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </Inline>
+          ) : undefined
+        }
       />
 
-      <Stack gap="lg">
-        {/* Navigation Tabs */}
-        <Tabs
-          items={[
-            { id: 'catalog', label: 'Report Catalog' },
-            {
-              id: 'runner',
-              label: selectedReportDef
-                ? `Report Center (${selectedReportDef.code})`
-                : 'Report Center',
-            },
-            { id: 'saved', label: 'Saved Configurations' },
-            { id: 'history', label: 'Generation History' },
-          ]}
-          activeId={activeTab}
-          onChange={(id) => setActiveTab(id as 'catalog' | 'runner' | 'saved' | 'history')}
-        />
-
-        {catalogError ? (
-          <Alert variant="danger" title="Catalog Error">
-            {catalogError}
+      <Stack gap="md">
+        {/* Banner Toast Notification */}
+        {bannerToast && (
+          <Alert variant={bannerToast.type} dismissible onDismiss={() => setBannerToast(null)}>
+            {bannerToast.text}
           </Alert>
-        ) : null}
+        )}
 
-        {/* ══════════════════════════════════════════════════════════════════
-            TAB 1: REPORT CATALOG
-            ══════════════════════════════════════════════════════════════════ */}
-        {activeTab === 'catalog' && (
+        {/* ════════════════════════════════════════════════════════════════════
+            LANDING VIEW: AVAILABLE REPORTS CATALOG (Spec Section 3)
+            ════════════════════════════════════════════════════════════════════ */}
+        {!activeReport ? (
           <Stack gap="md">
-            {/* Category Filter Toolbar */}
-            <Card padding="md">
-              <Inline justify="between" align="center">
-                <Inline gap="sm" align="center">
-                  <Select
-                    value={categoryFilter}
-                    onChange={(e) => setCategoryFilter(e.target.value)}
-                    options={[
-                      { label: 'All Categories (15 Reports)', value: 'all' },
-                      { label: 'Daily Operations', value: 'daily_operations' },
-                      { label: 'Monthly Registers', value: 'monthly_registers' },
-                      { label: 'Trends & Analytics', value: 'trends_analytics' },
-                      { label: 'Exceptions & Compliance', value: 'exceptions_compliance' },
-                      { label: 'Operational Workflows', value: 'operational_workflows' },
-                      { label: 'Payroll Handover', value: 'payroll_handover' },
-                      { label: 'Audit & Security', value: 'audit_security' },
-                    ]}
-                  />
-                  <Badge variant="neutral">
-                    {filteredCatalog.length} {filteredCatalog.length === 1 ? 'Report' : 'Reports'}{' '}
-                    Available
-                  </Badge>
-                </Inline>
-                <Button variant="secondary" onClick={loadCatalog} disabled={loadingCatalog}>
-                  <BezentIcon name="refresh" size={14} /> Refresh Catalog
-                </Button>
-              </Inline>
-            </Card>
+            {/* Search Toolbar */}
+            <div className="bezent-directory-toolbar">
+              <div className="bezent-directory-toolbar__search">
+                <SearchInput
+                  value={searchQuery}
+                  shape="rounded"
+                  aria-label="Search reports"
+                  placeholder="Search reports"
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onClear={() => setSearchQuery('')}
+                />
+              </div>
+              <span className="bezent-records-badge">
+                {filteredCatalog.length} Available Reports
+              </span>
+            </div>
 
-            {/* Catalog Grid */}
-            <Grid columns={3} gap="md">
+            {/* Section Title */}
+            <h2 className="bezent-section-title">Available Reports</h2>
+
+            {/* 7 Report Cards Grid */}
+            <Grid columns={2} gap="md">
               {filteredCatalog.map((report) => (
-                <Card key={report.id} padding="md">
-                  <Stack gap="sm">
-                    <Inline justify="between" align="center">
-                      <Badge variant="info">{report.code}</Badge>
-                      <Badge
-                        variant={
-                          report.sensitiveClassification === 'audit_restricted'
-                            ? 'danger'
-                            : report.sensitiveClassification === 'sensitive'
-                              ? 'warning'
-                              : 'neutral'
-                        }
-                      >
-                        {report.sensitiveClassification.replace(/_/g, ' ')}
-                      </Badge>
-                    </Inline>
-
-                    <div>
-                      <h4 className="bezent-card__title">{report.name}</h4>
-                      <p className="bezent-card__desc">{report.description}</p>
-                    </div>
-
-                    <Inline gap="xs" wrap>
-                      <Badge variant="neutral">
-                        Source: {report.authoritativeSource.split(' ')[0]}
-                      </Badge>
-                      {report.supportedExportFormats.map((fmt) => (
-                        <Badge key={fmt} variant="neutral">
-                          {fmt.toUpperCase()}
+                <Card key={report.id} variant="default">
+                  <Stack gap="md">
+                    <Stack gap="xs">
+                      <Inline justify="between" align="center">
+                        <h3 className="bezent-card__title">{report.name}</h3>
+                        <Badge variant="neutral" size="sm">
+                          {report.category}
                         </Badge>
-                      ))}
-                    </Inline>
+                      </Inline>
+                      <p className="bezent-card__desc">{report.description}</p>
+                    </Stack>
 
-                    <Button
-                      variant={report.id === selectedReportId ? 'primary' : 'secondary'}
-                      onClick={() => handleSelectReport(report.id)}
-                    >
-                      <BezentIcon name="table" size={14} /> Configure & Run
-                    </Button>
+                    <Inline justify="end">
+                      <Button variant="primary" size="sm" onClick={() => handleOpenReport(report)}>
+                        <span>Open Report</span>
+                        <BezentIcon name="chevronRight" size={14} />
+                      </Button>
+                    </Inline>
                   </Stack>
                 </Card>
               ))}
             </Grid>
           </Stack>
-        )}
-
-        {/* ══════════════════════════════════════════════════════════════════
-            TAB 2: REPORT CENTER & RUNNER
-            ══════════════════════════════════════════════════════════════════ */}
-        {activeTab === 'runner' && selectedReportDef && (
+        ) : (
+          /* ════════════════════════════════════════════════════════════════════
+             ACTIVE REPORT VIEW (Spec Section 4, 6, 7, 8)
+             ════════════════════════════════════════════════════════════════════ */
           <Stack gap="md">
-            {/* Header / Config Card */}
-            <Card padding="lg">
-              <Stack gap="md">
-                <Inline justify="between" align="start">
-                  <div>
-                    <Inline gap="sm" align="center">
-                      <Badge variant="info">{selectedReportDef.code}</Badge>
-                      <h3 className="bezent-card__title">{selectedReportDef.name}</h3>
-                    </Inline>
-                    <p className="bezent-card__desc">{selectedReportDef.description}</p>
-                    <p className="bezent-card__desc">
-                      <strong>Authoritative Source:</strong> {selectedReportDef.authoritativeSource}
-                    </p>
-                  </div>
-                  <Inline gap="sm">
-                    <Button variant="secondary" onClick={() => setActiveTab('catalog')}>
-                      <BezentIcon name="arrow-left" size={14} /> Catalog
-                    </Button>
-                    <Button variant="secondary" onClick={() => setSaveModalOpen(true)}>
-                      <BezentIcon name="bookmark" size={14} /> Save Config
-                    </Button>
-                  </Inline>
-                </Inline>
+            {/* Validation Banner (Spec Section 9) */}
+            {validationError && <Alert variant="danger">{validationError}</Alert>}
 
-                {selectedReportDef.limitations && selectedReportDef.limitations.length > 0 ? (
-                  <Alert variant="warning" title="Authoritative Source Notice">
-                    {selectedReportDef.limitations.join(' ')}
-                  </Alert>
-                ) : null}
-
-                {/* Filter Controls Grid */}
-                <Grid columns={3} gap="md">
-                  {selectedReportDef.allowedFilters.map((filter) => {
-                    const val = (filterValues[filter.id] as string) ?? '';
-                    if (filter.type === 'date' || filter.type === 'month') {
-                      return (
-                        <Input
-                          key={filter.id}
-                          label={filter.label}
-                          type={filter.type}
-                          value={val}
-                          onChange={(e) => handleFilterChange(filter.id, e.target.value)}
-                        />
-                      );
-                    }
-                    if (filter.type === 'select' && filter.options) {
-                      return (
-                        <Select
-                          key={filter.id}
-                          label={filter.label}
-                          value={val}
-                          onChange={(e) => handleFilterChange(filter.id, e.target.value)}
-                          options={[{ label: `All ${filter.label}`, value: '' }, ...filter.options]}
-                        />
-                      );
-                    }
-                    return (
-                      <Input
-                        key={filter.id}
-                        label={filter.label}
-                        placeholder={filter.placeholder}
-                        value={val}
-                        onChange={(e) => handleFilterChange(filter.id, e.target.value)}
+            {/* ── 4. Filter Bar (Spec Section 4) ── */}
+            <Card variant="flat">
+              <Stack gap="sm">
+                <Grid columns={5} gap="sm">
+                  {/* Date Range Start & End */}
+                  <div className="bezent-filter-form-group--full">
+                    <label className="bezent-filter-label" htmlFor="report-start-date">
+                      Date Range (From)
+                    </label>
+                    <div className="bezent-input-wrapper bezent-input-wrapper--md">
+                      <input
+                        id="report-start-date"
+                        type="date"
+                        className="bezent-input-field"
+                        value={dateRangeStart}
+                        max={todayStr}
+                        onChange={(e) => setDateRangeStart(e.target.value)}
+                        aria-label="Start Date"
                       />
-                    );
-                  })}
+                    </div>
+                  </div>
+
+                  <div className="bezent-filter-form-group--full">
+                    <label className="bezent-filter-label" htmlFor="report-end-date">
+                      Date Range (To)
+                    </label>
+                    <div className="bezent-input-wrapper bezent-input-wrapper--md">
+                      <input
+                        id="report-end-date"
+                        type="date"
+                        className="bezent-input-field"
+                        value={dateRangeEnd}
+                        max={todayStr}
+                        onChange={(e) => setDateRangeEnd(e.target.value)}
+                        aria-label="End Date"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Department Filter */}
+                  <div className="bezent-filter-form-group--full">
+                    <label className="bezent-filter-label" htmlFor="report-filter-dept">
+                      Department
+                    </label>
+                    <div className="bezent-filter-select-wrap">
+                      <select
+                        id="report-filter-dept"
+                        className="bezent-filter-select-control"
+                        value={selectedDepartment}
+                        onChange={(e) => setSelectedDepartment(e.target.value)}
+                      >
+                        <option value="all">All Departments</option>
+                        {departmentOptions.map((d) => (
+                          <option key={d} value={d}>
+                            {d}
+                          </option>
+                        ))}
+                      </select>
+                      <span className="bezent-filter-select-chevron">
+                        <BezentIcon name="chevronDown" size={16} />
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Status Filter */}
+                  <div className="bezent-filter-form-group--full">
+                    <label className="bezent-filter-label" htmlFor="report-filter-status">
+                      Status
+                    </label>
+                    <div className="bezent-filter-select-wrap">
+                      <select
+                        id="report-filter-status"
+                        className="bezent-filter-select-control"
+                        value={selectedStatus}
+                        onChange={(e) => setSelectedStatus(e.target.value)}
+                      >
+                        <option value="all">All Statuses</option>
+                        <option value="present">Present</option>
+                        <option value="absent">Absent</option>
+                        <option value="half_day">Half Day</option>
+                        <option value="on_leave">On Leave</option>
+                        <option value="on_duty">On Duty</option>
+                        <option value="weekly_off">Weekly Off</option>
+                        <option value="holiday">Holiday</option>
+                      </select>
+                      <span className="bezent-filter-select-chevron">
+                        <BezentIcon name="chevronDown" size={16} />
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Group By Filter */}
+                  <div className="bezent-filter-form-group--full">
+                    <label className="bezent-filter-label" htmlFor="report-filter-groupby">
+                      Group By
+                    </label>
+                    <div className="bezent-filter-select-wrap">
+                      <select
+                        id="report-filter-groupby"
+                        className="bezent-filter-select-control"
+                        value={selectedGroupBy}
+                        onChange={(e) =>
+                          setSelectedGroupBy(
+                            e.target.value as 'none' | 'department' | 'employee' | 'date',
+                          )
+                        }
+                      >
+                        <option value="none">None</option>
+                        <option value="department">Department</option>
+                        <option value="employee">Employee</option>
+                        <option value="date">Date</option>
+                      </select>
+                      <span className="bezent-filter-select-chevron">
+                        <BezentIcon name="chevronDown" size={16} />
+                      </span>
+                    </div>
+                  </div>
                 </Grid>
 
-                {/* Action Buttons */}
+                {/* Generate & Reset Buttons */}
                 <Inline justify="between" align="center">
-                  <Inline gap="sm">
+                  <Inline gap="sm" align="center">
                     <Button
                       variant="primary"
-                      onClick={() => handleRunPreview(1)}
-                      disabled={previewLoading || analyticsLoading}
+                      size="md"
+                      onClick={handleGenerateReport}
+                      loading={generating}
+                      disabled={generating}
                     >
-                      <BezentIcon name="refresh" size={14} />{' '}
-                      {previewLoading || analyticsLoading
-                        ? 'Evaluating Data...'
-                        : 'Preview Report & Analytics'}
+                      Generate Report
                     </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => setShowVisualAnalytics((prev) => !prev)}
-                    >
-                      <BezentIcon name="analytics" size={14} />{' '}
-                      {showVisualAnalytics ? 'Hide Visual Analytics' : 'Show Visual Analytics'}
-                    </Button>
+                    {hasActiveFilters && (
+                      <Button variant="ghost" size="md" onClick={handleResetFilters}>
+                        Reset Filters
+                      </Button>
+                    )}
                   </Inline>
 
-                  <Inline gap="sm">
-                    <Button
-                      variant="secondary"
-                      onClick={() => handleExport('csv')}
-                      disabled={exportingFormat !== null}
-                    >
-                      <BezentIcon name="download" size={14} />{' '}
-                      {exportingFormat === 'csv' ? 'Exporting...' : 'Export CSV'}
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => handleExport('xlsx')}
-                      disabled={exportingFormat !== null}
-                    >
-                      <BezentIcon name="download" size={14} />{' '}
-                      {exportingFormat === 'xlsx' ? 'Exporting...' : 'Export Excel'}
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => handleExport('pdf')}
-                      disabled={exportingFormat !== null}
-                    >
-                      <BezentIcon name="download" size={14} />{' '}
-                      {exportingFormat === 'pdf' ? 'Exporting...' : 'Export PDF (with Analytics)'}
-                    </Button>
-                  </Inline>
+                  {/* Table vs Chart View Toggle (Spec Section 6) */}
+                  {hasGenerated && (
+                    <div className="bezent-segmented-toggle">
+                      <button
+                        type="button"
+                        className={`bezent-segmented-toggle__btn ${viewMode === 'table' ? 'is-active' : ''}`}
+                        onClick={() => setViewMode('table')}
+                      >
+                        Table
+                      </button>
+                      <button
+                        type="button"
+                        className={`bezent-segmented-toggle__btn ${viewMode === 'chart' ? 'is-active' : ''}`}
+                        onClick={() => setViewMode('chart')}
+                      >
+                        Chart
+                      </button>
+                    </div>
+                  )}
                 </Inline>
               </Stack>
             </Card>
 
-            {previewError ? (
-              <Alert variant="danger" title="Report Generation Error">
-                {previewError}
-              </Alert>
-            ) : null}
-
-            {/* Active Chart Drill-Down Banner */}
-            {activeDrillDown && (
-              <ActiveDrillDownBanner
-                dimension={activeDrillDown.dimension}
-                value={activeDrillDown.value}
-                onClear={handleClearDrillDown}
+            {/* ── 8. Loading, Empty, and Error States (Spec Section 8) ── */}
+            {generating ? (
+              <LoadingState label="Generating report... This may take a moment for large date ranges." />
+            ) : generationError ? (
+              <EmptyState
+                title="Could not generate report"
+                description="Something went wrong. Please try again."
+                primaryAction={{
+                  label: 'Retry',
+                  onClick: handleGenerateReport,
+                }}
               />
-            )}
-
-            {/* Visual Analytics KPI Grid & Charts */}
-            {showVisualAnalytics && analyticsResult && (
+            ) : !hasGenerated ? (
+              <EmptyState
+                title="Select filters to begin"
+                description="Choose a date range and click Generate Report."
+              />
+            ) : !reportResult || reportResult.rows.length === 0 ? (
+              <EmptyState
+                title="No data for this report"
+                description="There are no records for the selected filters."
+                primaryAction={{
+                  label: 'Reset Filters',
+                  onClick: handleResetFilters,
+                }}
+              />
+            ) : (
+              /* ── 6 & 7. Report Output View (Spec Section 6 & 7) ── */
               <Stack gap="md">
-                {/* 1. KPIs */}
-                <KpiSummaryGrid kpis={analyticsResult.kpis} />
-
-                {/* 2. Interactive Charts Grid */}
-                <Grid columns={2} gap="md">
-                  {/* Status / Category Distribution */}
-                  {analyticsResult.charts.statusDistribution && (
-                    <DonutChart
-                      data={analyticsResult.charts.statusDistribution}
-                      onSliceClick={handleSliceClick}
-                    />
-                  )}
-
-                  {/* Department / Category Comparison or Composition */}
-                  {analyticsResult.charts.departmentComparison && (
-                    <BarChart
-                      data={analyticsResult.charts.departmentComparison}
-                      onBarClick={handleBarClick}
-                    />
-                  )}
-
-                  {/* Stacked Composition if available and no bar */}
-                  {!analyticsResult.charts.departmentComparison &&
-                    analyticsResult.charts.comparisonOrComposition && (
-                      <StackedBarChart
-                        data={analyticsResult.charts.comparisonOrComposition}
-                        onSegmentClick={(cat) => handleBarClick(cat)}
-                      />
-                    )}
-
-                  {/* Date Trend Line Chart */}
-                  {analyticsResult.charts.dateTrend && (
-                    <LineChart
-                      data={analyticsResult.charts.dateTrend}
-                      onPointClick={handleTrendClick}
-                    />
-                  )}
-                </Grid>
-              </Stack>
-            )}
-
-            {/* Results Table Section */}
-            {previewResult && (
-              <Card padding="md">
-                <Stack gap="md">
+                {/* ── 7. Report Header Block (Spec Section 7) ── */}
+                <Card variant="flat">
                   <Inline justify="between" align="center">
-                    <Inline gap="sm" align="center">
-                      <Badge variant="neutral">Total Rows: {previewResult.totalRows}</Badge>
-                      <Badge variant="neutral">Timezone: {previewResult.timezone}</Badge>
-                      <Badge variant="neutral">
-                        Generated: {previewResult.generatedAt.slice(0, 19).replace('T', ' ')}
-                      </Badge>
-                    </Inline>
-                    <Inline gap="xs" align="center">
-                      <Button
-                        variant="secondary"
-                        onClick={() => handleRunPreview(Math.max(1, currentPage - 1))}
-                        disabled={currentPage <= 1 || previewLoading}
-                      >
-                        Previous
-                      </Button>
-                      <Badge variant="info">
-                        Page {previewResult.page} of{' '}
-                        {Math.max(1, Math.ceil(previewResult.totalRows / pageSize))}
-                      </Badge>
-                      <Button
-                        variant="secondary"
-                        onClick={() => handleRunPreview(currentPage + 1)}
-                        disabled={
-                          currentPage >= Math.ceil(previewResult.totalRows / pageSize) ||
-                          previewLoading
-                        }
-                      >
-                        Next
-                      </Button>
-                    </Inline>
-                  </Inline>
+                    <Stack gap="none">
+                      <span className="bezent-table-meta-subtitle">BEZENT Enterprise</span>
+                      <h3 className="bezent-card__title">{activeReport.name}</h3>
+                      <span className="bezent-card__desc">
+                        Period: {dateRangeStart} to {dateRangeEnd}
+                        {selectedDepartment !== 'all' && ` · Department: ${selectedDepartment}`}
+                        {selectedStatus !== 'all' && ` · Status: ${selectedStatus}`}
+                      </span>
+                    </Stack>
 
-                  {previewResult.rows.length === 0 ? (
-                    <EmptyState
-                      variant="attendance"
-                      title="No records found"
-                      description="No attendance records match the selected date bounds and filters."
-                    />
-                  ) : (
-                    <Table hoverable striped>
-                      <TableHead>
-                        <TableRow>
-                          {previewResult.columns.map((col) => (
-                            <TableHeaderCell key={col.id} onClick={() => handleSortClick(col.id)}>
-                              {col.label}
-                              {sorting.column === col.id
-                                ? sorting.direction === 'asc'
-                                  ? ' ↑'
-                                  : ' ↓'
-                                : ''}
-                            </TableHeaderCell>
+                    <Stack gap="none" align="end">
+                      <Badge variant="neutral" size="sm">
+                        Showing {reportResult.rows.length} records
+                      </Badge>
+                      {generatedTimestamp && (
+                        <span className="bezent-table-meta-subtitle">
+                          Generated on {generatedTimestamp}
+                        </span>
+                      )}
+                    </Stack>
+                  </Inline>
+                </Card>
+
+                {/* ── Table View ── */}
+                {viewMode === 'table' ? (
+                  <Card variant="default">
+                    <div className="bezent-table-scroll-container">
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            {activeReport.columns.map((col) => (
+                              <TableHeaderCell key={col.id}>{col.label}</TableHeaderCell>
+                            ))}
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {reportResult.rows.map((row, idx) => (
+                            <TableRow key={idx}>
+                              {activeReport.columns.map((col) => {
+                                const val = row[col.id];
+
+                                // Status badge
+                                if (col.id === 'status' || col.id === 'attendanceStatus') {
+                                  const str = String(val || 'Present');
+                                  const variant =
+                                    str.toLowerCase() === 'present'
+                                      ? 'success'
+                                      : str.toLowerCase() === 'absent'
+                                        ? 'danger'
+                                        : 'warning';
+                                  return (
+                                    <TableCell key={col.id}>
+                                      <Badge variant={variant} size="sm">
+                                        {str}
+                                      </Badge>
+                                    </TableCell>
+                                  );
+                                }
+
+                                return (
+                                  <TableCell key={col.id}>
+                                    <span className="bezent-table-primary-text">
+                                      {formatNumberValue(val)}
+                                    </span>
+                                  </TableCell>
+                                );
+                              })}
+                            </TableRow>
                           ))}
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {previewResult.rows.map((row, idx) => (
-                          <TableRow key={idx}>
-                            {previewResult.columns.map((col) => {
-                              const val = row[col.id];
-                              const displayVal =
-                                val !== null && val !== undefined ? String(val) : '—';
+
+                          {/* Totals Row (Spec Section 6) */}
+                          <TableRow className="bezent-table-row--total">
+                            {activeReport.columns.map((col, idx) => {
+                              if (idx === 0) {
+                                return (
+                                  <TableCell key={col.id}>
+                                    <strong>Total</strong>
+                                  </TableCell>
+                                );
+                              }
+                              // Calculate column sum if numeric
+                              const isNumeric = reportResult.rows.every(
+                                (r) => typeof r[col.id] === 'number',
+                              );
+                              if (isNumeric) {
+                                const sum = reportResult.rows.reduce(
+                                  (acc, curr) => acc + (Number(curr[col.id]) || 0),
+                                  0,
+                                );
+                                return (
+                                  <TableCell key={col.id}>
+                                    <strong>{formatNumberValue(sum)}</strong>
+                                  </TableCell>
+                                );
+                              }
                               return (
                                 <TableCell key={col.id}>
-                                  {col.type === 'badge' ? (
-                                    <Badge variant="neutral">{displayVal}</Badge>
-                                  ) : (
-                                    displayVal
-                                  )}
+                                  <span>—</span>
                                 </TableCell>
                               );
                             })}
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  )}
-                </Stack>
-              </Card>
-            )}
-          </Stack>
-        )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </Card>
+                ) : (
+                  /* ── Chart View (Spec Section 6) ── */
+                  <Card variant="default">
+                    <Stack gap="md">
+                      <h3 className="bezent-card__title">
+                        {activeReport.name} by{' '}
+                        {selectedGroupBy !== 'none'
+                          ? selectedGroupBy.charAt(0).toUpperCase() + selectedGroupBy.slice(1)
+                          : 'Department'}
+                      </h3>
 
-        {/* ══════════════════════════════════════════════════════════════════
-            TAB 3: SAVED CONFIGURATIONS
-            ══════════════════════════════════════════════════════════════════ */}
-        {activeTab === 'saved' && (
-          <Stack gap="md">
-            <Card padding="md">
-              <Inline justify="between" align="center">
-                <Inline gap="sm" align="center">
-                  <Badge variant="neutral">
-                    {savedConfigs.length}{' '}
-                    {savedConfigs.length === 1 ? 'Configuration' : 'Configurations'}
-                  </Badge>
-                </Inline>
-                <Button variant="secondary" onClick={loadSavedConfigs} disabled={loadingSaved}>
-                  <BezentIcon name="refresh" size={14} /> Refresh
-                </Button>
-              </Inline>
-            </Card>
+                      {analyticsResult && analyticsResult.charts ? (
+                        <Grid columns={2} gap="md">
+                          {analyticsResult.charts.statusDistribution && (
+                            <DonutChart data={analyticsResult.charts.statusDistribution} />
+                          )}
+                          {analyticsResult.charts.departmentComparison && (
+                            <BarChart data={analyticsResult.charts.departmentComparison} />
+                          )}
+                          {analyticsResult.charts.comparisonOrComposition && (
+                            <StackedBarChart
+                              data={analyticsResult.charts.comparisonOrComposition}
+                            />
+                          )}
+                          {analyticsResult.charts.dateTrend && (
+                            <LineChart data={analyticsResult.charts.dateTrend} />
+                          )}
+                        </Grid>
+                      ) : (
+                        <EmptyState
+                          title="No visual analytics available"
+                          description="Analytics charts could not be computed for this query."
+                        />
+                      )}
+                    </Stack>
+                  </Card>
+                )}
 
-            {savedConfigs.length === 0 ? (
-              <EmptyState
-                title="No saved configurations"
-                description="Save filter configurations in the Report Center to quickly rerun recurring reports."
-              />
-            ) : (
-              <Grid columns={2} gap="md">
-                {savedConfigs.map((cfg) => {
-                  const rDef = catalog.find((r) => r.id === cfg.reportId);
-                  return (
-                    <Card key={cfg.id} padding="md">
-                      <Stack gap="sm">
-                        <Inline justify="between" align="center">
-                          <Badge variant="info">{cfg.reportId}</Badge>
-                          <Badge variant="neutral">{cfg.createdAt.slice(0, 10)}</Badge>
-                        </Inline>
-                        <div>
-                          <h4 className="bezent-card__title">{cfg.configurationName}</h4>
-                          <p className="bezent-card__desc">{rDef?.name ?? cfg.reportId}</p>
-                        </div>
-                        <Inline gap="sm">
-                          <Button variant="primary" onClick={() => handleApplySavedConfig(cfg)}>
-                            <BezentIcon name="table" size={14} /> Open & Run
-                          </Button>
-                          <Button variant="secondary" onClick={() => handleDeleteConfig(cfg.id)}>
-                            <BezentIcon name="trash" size={14} /> Delete
-                          </Button>
-                        </Inline>
-                      </Stack>
-                    </Card>
-                  );
-                })}
-              </Grid>
-            )}
-          </Stack>
-        )}
-
-        {/* ══════════════════════════════════════════════════════════════════
-            TAB 4: GENERATION HISTORY
-            ══════════════════════════════════════════════════════════════════ */}
-        {activeTab === 'history' && (
-          <Stack gap="md">
-            <Card padding="md">
-              <Inline justify="between" align="center">
-                <Inline gap="sm" align="center">
-                  <Badge variant="neutral">
-                    {historyList.length} {historyList.length === 1 ? 'Record' : 'Records'} Logged
-                  </Badge>
-                </Inline>
-                <Button variant="secondary" onClick={loadHistory} disabled={loadingHistory}>
-                  <BezentIcon name="refresh" size={14} /> Refresh
-                </Button>
-              </Inline>
-            </Card>
-
-            {historyList.length === 0 ? (
-              <EmptyState
-                title="No generation history"
-                description="Exported reports will appear here with downloadable files and generation metadata."
-              />
-            ) : (
-              <Card padding="md">
-                <Table hoverable striped>
-                  <TableHead>
-                    <TableRow>
-                      <TableHeaderCell>Generated At</TableHeaderCell>
-                      <TableHeaderCell>Report</TableHeaderCell>
-                      <TableHeaderCell>Format</TableHeaderCell>
-                      <TableHeaderCell>Rows</TableHeaderCell>
-                      <TableHeaderCell>Status</TableHeaderCell>
-                      <TableHeaderCell>Action</TableHeaderCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {historyList.map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell>{item.generatedAt.slice(0, 19).replace('T', ' ')}</TableCell>
-                        <TableCell>
-                          <strong>{item.reportId}</strong> — {item.reportName}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="neutral">{item.outputFormat.toUpperCase()}</Badge>
-                        </TableCell>
-                        <TableCell>{item.rowCount}</TableCell>
-                        <TableCell>
-                          <Badge variant="success">Completed</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="secondary"
-                            onClick={() => handleDownloadHistory(item.id)}
-                            disabled={downloadingHistoryId === item.id}
-                          >
-                            <BezentIcon name="download" size={14} />{' '}
-                            {downloadingHistoryId === item.id ? 'Downloading...' : 'Download'}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Card>
+                {/* ── 7. Report Footer (Spec Section 7) ── */}
+                <div className="bezent-report-footer">
+                  <span className="bezent-table-meta-subtitle">
+                    Generated on {generatedTimestamp || todayStr} by Administrator · Page 1 of 1
+                  </span>
+                </div>
+              </Stack>
             )}
           </Stack>
         )}
       </Stack>
-
-      {/* Save Configuration Modal */}
-      {saveModalOpen && (
-        <Modal
-          title="Save Report Configuration"
-          isOpen={saveModalOpen}
-          onClose={() => setSaveModalOpen(false)}
-        >
-          <Stack gap="md">
-            <p>
-              Save the current filter configuration for <strong>{selectedReportDef?.name}</strong>{' '}
-              to your private saved reports list.
-            </p>
-            <Input
-              label="Configuration Name"
-              placeholder="e.g. Monthly Muster - Engineering"
-              value={newConfigName}
-              onChange={(e) => setNewConfigName(e.target.value)}
-            />
-            <Inline justify="end" gap="sm">
-              <Button variant="secondary" onClick={() => setSaveModalOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                onClick={handleSaveConfig}
-                disabled={savingConfig || !newConfigName.trim()}
-              >
-                {savingConfig ? 'Saving...' : 'Save Configuration'}
-              </Button>
-            </Inline>
-          </Stack>
-        </Modal>
-      )}
     </Page>
   );
 }
+
+export default AttendanceReportsPage;

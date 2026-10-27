@@ -1,21 +1,18 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Page,
   PageHeader,
   Toolbar,
   Card,
+  CardHeader,
+  CardTitle,
+  CardBody,
   Grid,
   Stack,
   Inline,
   Button,
   Badge,
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-  TableHeaderCell,
   Input,
   Select,
   LoadingState,
@@ -23,9 +20,21 @@ import {
   EmptyState,
   Divider,
 } from '../../../../design-system/components';
-import { BezentIcon } from '../../../../design-system/icons';
+import { BezentIcon, type BezentIconName } from '../../../../design-system/icons';
 import { fetchAttendanceOverview } from '../api/attendanceApi';
 import type { AttendanceOverviewKpis } from '../types/attendance.types';
+
+const DEPT_PIE_COLORS = [
+  '#0284c7', // Sky Blue
+  '#10b981', // Emerald
+  '#8b5cf6', // Violet
+  '#f59e0b', // Amber
+  '#ec4899', // Pink
+  '#06b6d4', // Cyan
+  '#6366f1', // Indigo
+  '#14b8a6', // Teal
+  '#f97316', // Orange
+];
 
 export function AttendanceOverviewPage() {
   const navigate = useNavigate();
@@ -73,66 +82,209 @@ export function AttendanceOverviewPage() {
   const monthlyReadiness = data?.monthlyReadiness;
   const scope = data?.scope;
 
+  const deptItems = useMemo(() => {
+    if (departments && departments.length > 0) return departments;
+    if (data?.departmentBreakdown && data.departmentBreakdown.length > 0) {
+      return data.departmentBreakdown.map((d) => ({
+        departmentId: d.departmentId,
+        departmentName: d.departmentName,
+        eligibleEmployees: d.total,
+        presentHeadcount: Math.round(d.present),
+        presentEquivalents: d.present,
+        attendanceRate: d.total > 0 ? Math.round((d.present / d.total) * 100) : 0,
+      }));
+    }
+    return [];
+  }, [departments, data?.departmentBreakdown]);
+
+  const trendItems = useMemo(() => {
+    if (trends && trends.items && trends.items.length > 0) {
+      return trends.items.slice(-7);
+    }
+    if (data?.recentTrends && data.recentTrends.length > 0) {
+      return data.recentTrends.map((r) => {
+        const total = r.present + r.absent;
+        const rate = total > 0 ? Math.round((r.present / total) * 100) : 0;
+        const d = new Date(r.date);
+        const dayOfWeek = isNaN(d.getTime())
+          ? 'Day'
+          : d.toLocaleDateString('en-US', { weekday: 'short' });
+        return {
+          date: r.date,
+          dayOfWeek,
+          scheduledHeadcount: total,
+          scheduledDayEquivalents: total,
+          presentHeadcount: Math.round(r.present),
+          presentEquivalentDays: r.present,
+          attendanceRate: rate,
+          lateOccurrences: r.late,
+        };
+      });
+    }
+    return [];
+  }, [trends, data?.recentTrends]);
+
   const currentAttendanceRate = todayKpis?.attendanceRate ?? data?.attendanceRate ?? 0;
+
+  // Pulse & Distribution metrics
+  const totalEmployees = todayKpis?.totalEligibleEmployees ?? data?.expectedCount ?? 0;
+  const presentHeadcount = todayKpis
+    ? (todayKpis.presentHeadcount ?? Math.ceil(todayKpis.presentCount))
+    : data
+      ? Math.ceil(data.presentCount)
+      : 0;
+  const presentFte = todayKpis ? todayKpis.presentCount : data ? data.presentCount : 0;
+  const onLeaveCount = todayKpis ? todayKpis.onLeaveCount : data ? data.onLeaveCount : 0;
+  const onDutyCount = todayKpis ? todayKpis.onDutyCount : 0;
+  const absentCount = todayKpis ? todayKpis.absentCount : data ? data.absentCount : 0;
+  const pendingCount = todayKpis ? todayKpis.pendingProcessingCount : 0;
+  const lateCount = todayKpis ? todayKpis.lateArrivalsCount : data ? data.lateCount : 0;
+  const missingPunchCount = todayKpis
+    ? todayKpis.missingPunchCount
+    : data
+      ? data.missingPunchCount
+      : 0;
+  const blockingExceptionsCount =
+    processingHealth?.cumulativeBlockingExceptions ??
+    processingHealth?.unresolvedBlockingExceptions ??
+    0;
+
+  // Segment widths (%)
+  const presentPct = totalEmployees > 0 ? (presentHeadcount / totalEmployees) * 100 : 0;
+  const leavePct = totalEmployees > 0 ? (onLeaveCount / totalEmployees) * 100 : 0;
+  const dutyPct = totalEmployees > 0 ? (onDutyCount / totalEmployees) * 100 : 0;
+  const absentPct = totalEmployees > 0 ? (absentCount / totalEmployees) * 100 : 0;
+  const pendingPct =
+    totalEmployees > 0 && presentPct + leavePct + dutyPct + absentPct === 0
+      ? 100
+      : Math.max(0, 100 - (presentPct + leavePct + dutyPct + absentPct));
+
+  const totalOpenWorkflowItems = actionQueue
+    ? actionQueue.reduce((acc, q) => acc + q.authorizedPendingCount, 0)
+    : (data?.pendingRegularizationCount ?? 0);
+
+  const getActionIcon = (actionType: string): BezentIconName => {
+    switch (actionType) {
+      case 'pending_regularization':
+        return 'requests';
+      case 'pending_on_duty':
+        return 'operations';
+      case 'unresolved_exceptions':
+        return 'warning';
+      case 'missing_punch_issues':
+        return 'clock';
+      case 'pending_monthly_review':
+        return 'reports';
+      case 'payroll_readiness_blockers':
+        return 'lock';
+      default:
+        return 'calendar';
+    }
+  };
+
+  const getActionColor = (severity: string): 'warning' | 'info' | 'danger' | 'purple' => {
+    if (severity === 'danger') return 'danger';
+    if (severity === 'info') return 'info';
+    if (severity === 'warning') return 'warning';
+    return 'purple';
+  };
 
   return (
     <Page>
       <PageHeader
+        eyebrow="HRMS · Attendance"
         title="Attendance Overview"
         subtitle="Workforce operations, exception triage, and monthly payroll readiness"
         actions={
-          <Inline gap="sm">
-            <Button variant="secondary" onClick={handleRefresh} aria-label="Refresh overview">
-              <BezentIcon name="sync" size={16} />
+          <Inline gap="sm" align="center">
+            <Button
+              variant="secondary"
+              leftIcon={<BezentIcon name="sync" size={16} />}
+              onClick={handleRefresh}
+              disabled={loading || refreshing}
+              aria-label="Refresh overview"
+            >
               {refreshing ? 'Refreshing...' : 'Refresh'}
-            </Button>
-            <Button variant="secondary" onClick={() => navigate('/hrms/attendance/daily-log')}>
-              <BezentIcon name="clock" size={16} /> Daily Log
-            </Button>
-            <Button variant="secondary" onClick={() => navigate('/hrms/attendance/regularization')}>
-              <BezentIcon name="requests" size={16} /> Regularization Queue
             </Button>
             <Button
               variant="secondary"
+              leftIcon={<BezentIcon name="clock" size={16} />}
+              onClick={() => navigate('/hrms/attendance/daily-log')}
+            >
+              Daily Attendance
+            </Button>
+            <Button
+              variant="secondary"
+              leftIcon={<BezentIcon name="requests" size={16} />}
+              onClick={() => navigate('/hrms/attendance/regularization')}
+            >
+              Regularization Queue
+            </Button>
+            <Button
+              variant="secondary"
+              leftIcon={<BezentIcon name="reports" size={16} />}
               onClick={() => navigate('/hrms/attendance/monthly-summary')}
             >
-              <BezentIcon name="reports" size={16} /> Monthly Summary
+              Monthly Summary
             </Button>
           </Inline>
         }
       />
 
       <Stack gap="lg">
-        {/* Scope and Freshness Info Banner */}
+        {/* Scope and Freshness Filter Bar */}
         {data ? (
           <Toolbar
             left={
-              <Inline gap="md" align="end">
-                {/* Date Selection Unit */}
-                <Inline gap="xs" align="end">
+              <Inline gap="md" align="center">
+                <Inline gap="xs" align="center">
+                  <Button
+                    variant="outline"
+                    size="md"
+                    onClick={() => {
+                      const d = new Date(`${selectedDate}T00:00:00`);
+                      d.setDate(d.getDate() - 1);
+                      setSelectedDate(d.toISOString().slice(0, 10));
+                    }}
+                    aria-label="Previous day"
+                  >
+                    <BezentIcon name="chevronLeft" size={14} />
+                  </Button>
                   <Input
-                    label="Work Date"
                     type="date"
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
+                    aria-label="Work Date"
+                    size="md"
                   />
                   <Button
+                    variant="outline"
+                    size="md"
+                    onClick={() => {
+                      const d = new Date(`${selectedDate}T00:00:00`);
+                      d.setDate(d.getDate() + 1);
+                      setSelectedDate(d.toISOString().slice(0, 10));
+                    }}
+                    aria-label="Next day"
+                  >
+                    <BezentIcon name="chevronRight" size={14} />
+                  </Button>
+                  <Button
                     variant="secondary"
-                    size="control"
+                    size="md"
                     onClick={() => setSelectedDate(new Date().toISOString().slice(0, 10))}
+                    disabled={selectedDate === new Date().toISOString().slice(0, 10)}
                   >
                     Today
                   </Button>
                 </Inline>
 
-                {/* Visual Separator */}
                 <Divider orientation="vertical" spacing="sm" />
 
-                {/* Trend Window Filter */}
                 <Select
-                  label="Trend Window"
                   value={trendRange}
                   onChange={(e) => setTrendRange(e.target.value as '7d' | '30d')}
+                  aria-label="Trend Window"
                   options={[
                     { value: '7d', label: 'Last 7 Days' },
                     { value: '30d', label: 'Last 30 Days' },
@@ -175,578 +327,699 @@ export function AttendanceOverviewPage() {
           />
         ) : (
           <>
-            {/* 1. TODAY ATTENDANCE KPIS */}
-            <div>
-              <h3 className="bezent-card__title">Today Attendance Situation ({selectedDate})</h3>
-              <p className="bezent-card__desc">
-                Authoritative workforce presence, approved leave coverage, and punch anomalies
-              </p>
+            {/* 1. MINIMALIST ATTENDANCE COMMAND STRIP */}
+            <div className="bezent-command-strip">
+              <div className="bezent-command-strip__stats">
+                <div
+                  className="bezent-command-stat"
+                  onClick={() => navigate(`/hrms/attendance/daily-log?date=${selectedDate}`)}
+                  role="button"
+                  tabIndex={0}
+                  title="View scheduled workforce"
+                >
+                  <span className="bezent-command-stat__dot bezent-command-stat__dot--blue" />
+                  <span className="bezent-command-stat__value">{totalEmployees}</span>
+                  <span className="bezent-command-stat__label">Scheduled Workforce</span>
+                </div>
+
+                <div
+                  className="bezent-command-stat"
+                  onClick={() =>
+                    navigate(`/hrms/attendance/daily-log?date=${selectedDate}&status=present`)
+                  }
+                  role="button"
+                  tabIndex={0}
+                  title="View present employees"
+                >
+                  <span className="bezent-command-stat__dot bezent-command-stat__dot--green" />
+                  <span className="bezent-command-stat__value">{presentHeadcount}</span>
+                  <span className="bezent-command-stat__label">
+                    Present ({Math.round(presentPct)}%)
+                  </span>
+                </div>
+
+                <div
+                  className="bezent-command-stat"
+                  onClick={() =>
+                    navigate(`/hrms/attendance/daily-log?date=${selectedDate}&status=on_leave`)
+                  }
+                  role="button"
+                  tabIndex={0}
+                  title="View employees on leave"
+                >
+                  <span className="bezent-command-stat__dot bezent-command-stat__dot--amber" />
+                  <span className="bezent-command-stat__value">{onLeaveCount}</span>
+                  <span className="bezent-command-stat__label">On Leave</span>
+                </div>
+
+                <div
+                  className="bezent-command-stat"
+                  onClick={() => navigate('/hrms/attendance/on-duty')}
+                  role="button"
+                  tabIndex={0}
+                  title="View on-duty employees"
+                >
+                  <span className="bezent-command-stat__dot bezent-command-stat__dot--purple" />
+                  <span className="bezent-command-stat__value">{onDutyCount}</span>
+                  <span className="bezent-command-stat__label">On-Duty / Field</span>
+                </div>
+
+                <div
+                  className="bezent-command-stat"
+                  onClick={() =>
+                    navigate(`/hrms/attendance/daily-log?date=${selectedDate}&status=absent`)
+                  }
+                  role="button"
+                  tabIndex={0}
+                  title="View absent employees"
+                >
+                  <span className="bezent-command-stat__dot bezent-command-stat__dot--red" />
+                  <span className="bezent-command-stat__value">{absentCount}</span>
+                  <span className="bezent-command-stat__label">Absent</span>
+                </div>
+
+                <div
+                  className="bezent-command-stat"
+                  onClick={() =>
+                    navigate(
+                      `/hrms/attendance/daily-log?date=${selectedDate}&processingState=pending_processing`,
+                    )
+                  }
+                  role="button"
+                  tabIndex={0}
+                  title="View in progress shifts"
+                >
+                  <span className="bezent-command-stat__dot bezent-command-stat__dot--blue" />
+                  <span className="bezent-command-stat__value">
+                    {pendingCount || totalEmployees}
+                  </span>
+                  <span className="bezent-command-stat__label">In Progress</span>
+                </div>
+              </div>
+
+              <Inline gap="xs" align="center">
+                <div
+                  className="bezent-alert-pill bezent-alert-pill--warning"
+                  onClick={() =>
+                    navigate(`/hrms/attendance/daily-log?date=${selectedDate}&indicator=late`)
+                  }
+                  role="button"
+                  tabIndex={0}
+                >
+                  <BezentIcon name="clock" size={14} />
+                  <span>
+                    <strong>{lateCount}</strong> Late
+                  </span>
+                </div>
+                <div
+                  className="bezent-alert-pill bezent-alert-pill--danger"
+                  onClick={() => navigate('/hrms/attendance/exceptions?type=missing_in')}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <BezentIcon name="warning" size={14} />
+                  <span>
+                    <strong>{missingPunchCount}</strong> Missing
+                  </span>
+                </div>
+                <div
+                  className="bezent-alert-pill bezent-alert-pill--neutral"
+                  onClick={() => navigate('/hrms/attendance/exceptions')}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <BezentIcon name="lock" size={14} />
+                  <span>
+                    <strong>{blockingExceptionsCount}</strong> Blockers
+                  </span>
+                </div>
+              </Inline>
             </div>
 
-            <Grid columns={4} gap="sm">
-              <div
-                className="bezent-stat-card--compact"
-                onClick={() => navigate(`/hrms/attendance/daily-log?date=${selectedDate}`)}
-                role="button"
-                tabIndex={0}
-                title="View all scheduled employees for today"
-              >
-                <div className="bezent-stat-card__header">
-                  <span className="bezent-stat-card__title">Eligible Workforce</span>
-                  <Badge variant="neutral">Scheduled</Badge>
+            {/* 2. 4 PRIMARY ACTION TILES (CLEAN, BOLD, ZERO PARAGRAPH SENTENCES) */}
+            <Grid columns={4} gap="md">
+              {/* Tile 1: Regularization Queue */}
+              <div className="bezent-action-tile">
+                <div>
+                  <div className="bezent-action-tile__top">
+                    <div className="bezent-action-tile__icon bezent-action-tile__icon--amber">
+                      <BezentIcon name="requests" size={18} />
+                    </div>
+                    <span className="bezent-action-tile__title">Regularizations</span>
+                  </div>
+                  <div className="bezent-action-tile__mid">
+                    <span className="bezent-action-tile__count">
+                      {actionQueue?.find((q) => q.actionType === 'pending_regularization')
+                        ?.authorizedPendingCount ?? data.pendingRegularizationCount}
+                    </span>
+                    <Badge variant="warning" size="sm">
+                      Pending
+                    </Badge>
+                  </div>
                 </div>
-                <Inline justify="between" align="center">
-                  <span className="bezent-stat-card__num">
-                    {todayKpis ? todayKpis.totalEligibleEmployees : data.expectedCount}
+                <div className="bezent-action-tile__bottom">
+                  <span className="bezent-action-tile__tag">
+                    {actionQueue?.find((q) => q.actionType === 'pending_regularization')
+                      ?.oldestPendingAgeDays
+                      ? `Oldest: ${
+                          actionQueue.find((q) => q.actionType === 'pending_regularization')
+                            ?.oldestPendingAgeDays
+                        }d`
+                      : 'Awaiting Review'}
                   </span>
-                  <BezentIcon name="employees" size={18} />
-                </Inline>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => navigate('/hrms/attendance/regularization')}
+                  >
+                    Triage →
+                  </Button>
+                </div>
               </div>
 
-              <div
-                className="bezent-stat-card--compact"
-                onClick={() =>
-                  navigate(`/hrms/attendance/daily-log?date=${selectedDate}&status=present`)
-                }
-                role="button"
-                tabIndex={0}
-                title="View checked-in employees"
-              >
-                <div className="bezent-stat-card__header">
-                  <span className="bezent-stat-card__title">Present</span>
-                  <Badge variant="success">Checked In</Badge>
+              {/* Tile 2: Unresolved Exceptions */}
+              <div className="bezent-action-tile">
+                <div>
+                  <div className="bezent-action-tile__top">
+                    <div className="bezent-action-tile__icon bezent-action-tile__icon--red">
+                      <BezentIcon name="warning" size={18} />
+                    </div>
+                    <span className="bezent-action-tile__title">Exceptions</span>
+                  </div>
+                  <div className="bezent-action-tile__mid">
+                    <span className="bezent-action-tile__count">
+                      {actionQueue?.find((q) => q.actionType === 'unresolved_exceptions')
+                        ?.authorizedPendingCount ?? 0}
+                    </span>
+                    <Badge variant="danger" size="sm">
+                      Open
+                    </Badge>
+                  </div>
                 </div>
-                <Inline justify="between" align="center">
-                  <span className="bezent-stat-card__num">
-                    {todayKpis ? todayKpis.presentCount : data.presentCount}
+                <div className="bezent-action-tile__bottom">
+                  <span className="bezent-action-tile__tag">
+                    {blockingExceptionsCount > 0
+                      ? `${blockingExceptionsCount} Blocking Payroll`
+                      : 'Policy Deviations'}
                   </span>
-                  <BezentIcon name="approvals" size={18} />
-                </Inline>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => navigate('/hrms/attendance/exceptions')}
+                  >
+                    Triage →
+                  </Button>
+                </div>
               </div>
 
-              <div
-                className="bezent-stat-card--compact"
-                onClick={() =>
-                  navigate(`/hrms/attendance/daily-log?date=${selectedDate}&status=absent`)
-                }
-                role="button"
-                tabIndex={0}
-                title="View absent employees with no punch"
-              >
-                <div className="bezent-stat-card__header">
-                  <span className="bezent-stat-card__title">Absent</span>
-                  <Badge variant={data.absentCount > 0 ? 'danger' : 'neutral'}>No Punch</Badge>
+              {/* Tile 3: Missing Punches */}
+              <div className="bezent-action-tile">
+                <div>
+                  <div className="bezent-action-tile__top">
+                    <div className="bezent-action-tile__icon bezent-action-tile__icon--rose">
+                      <BezentIcon name="clock" size={18} />
+                    </div>
+                    <span className="bezent-action-tile__title">Missing Punches</span>
+                  </div>
+                  <div className="bezent-action-tile__mid">
+                    <span className="bezent-action-tile__count">
+                      {actionQueue?.find((q) => q.actionType === 'missing_punch_issues')
+                        ?.authorizedPendingCount ?? missingPunchCount}
+                    </span>
+                    <Badge variant={missingPunchCount > 0 ? 'danger' : 'neutral'} size="sm">
+                      Action
+                    </Badge>
+                  </div>
                 </div>
-                <Inline justify="between" align="center">
-                  <span className="bezent-stat-card__num">
-                    {todayKpis ? todayKpis.absentCount : data.absentCount}
-                  </span>
-                  <BezentIcon name="security" size={18} />
-                </Inline>
+                <div className="bezent-action-tile__bottom">
+                  <span className="bezent-action-tile__tag">Single-Swipe Records</span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => navigate('/hrms/attendance/daily-log?isMissingPunch=true')}
+                  >
+                    Resolve →
+                  </Button>
+                </div>
               </div>
 
-              <div
-                className="bezent-stat-card--compact"
-                onClick={() =>
-                  navigate(`/hrms/attendance/daily-log?date=${selectedDate}&status=on_leave`)
-                }
-                role="button"
-                tabIndex={0}
-                title="View employees on approved leave"
-              >
-                <div className="bezent-stat-card__header">
-                  <span className="bezent-stat-card__title">On Leave</span>
-                  <Badge variant="info">Approved</Badge>
+              {/* Tile 4: Monthly Reviews & Blockers */}
+              <div className="bezent-action-tile">
+                <div>
+                  <div className="bezent-action-tile__top">
+                    <div className="bezent-action-tile__icon bezent-action-tile__icon--blue">
+                      <BezentIcon name="reports" size={18} />
+                    </div>
+                    <span className="bezent-action-tile__title">Monthly Sign-Off</span>
+                  </div>
+                  <div className="bezent-action-tile__mid">
+                    <span className="bezent-action-tile__count">
+                      {actionQueue?.find((q) => q.actionType === 'pending_monthly_review')
+                        ?.authorizedPendingCount ??
+                        monthlyReadiness?.needsReviewCount ??
+                        0}
+                    </span>
+                    <Badge variant="info" size="sm">
+                      In Review
+                    </Badge>
+                  </div>
                 </div>
-                <Inline justify="between" align="center">
-                  <span className="bezent-stat-card__num">
-                    {todayKpis ? todayKpis.onLeaveCount : data.onLeaveCount}
+                <div className="bezent-action-tile__bottom">
+                  <span className="bezent-action-tile__tag">
+                    {monthlyReadiness
+                      ? `${monthlyReadiness.readyCount} Ready · ${monthlyReadiness.blockedCount} Blocked`
+                      : 'Payroll Cutoff'}
                   </span>
-                  <BezentIcon name="leave" size={18} />
-                </Inline>
-              </div>
-
-              <div
-                className="bezent-stat-card--compact"
-                onClick={() => navigate('/hrms/attendance/on-duty')}
-                role="button"
-                tabIndex={0}
-                title="View authorized On-Duty and field deployments"
-              >
-                <div className="bezent-stat-card__header">
-                  <span className="bezent-stat-card__title">On-Duty / Field</span>
-                  <Badge variant="info">Authorized</Badge>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      navigate(
+                        `/hrms/attendance/monthly-summary?month=${
+                          monthlyReadiness?.month || selectedDate.slice(0, 7)
+                        }`,
+                      )
+                    }
+                  >
+                    Review →
+                  </Button>
                 </div>
-                <Inline justify="between" align="center">
-                  <span className="bezent-stat-card__num">
-                    {todayKpis ? todayKpis.onDutyCount : 0}
-                  </span>
-                  <BezentIcon name="requests" size={18} />
-                </Inline>
-              </div>
-
-              <div
-                className="bezent-stat-card--compact"
-                onClick={() =>
-                  navigate(`/hrms/attendance/daily-log?date=${selectedDate}&indicator=late`)
-                }
-                role="button"
-                tabIndex={0}
-                title="View late arrivals after shift grace period"
-              >
-                <div className="bezent-stat-card__header">
-                  <span className="bezent-stat-card__title">Late Arrivals</span>
-                  <Badge variant="warning">After Grace</Badge>
-                </div>
-                <Inline justify="between" align="center">
-                  <span className="bezent-stat-card__num">
-                    {todayKpis ? todayKpis.lateArrivalsCount : data.lateCount}
-                  </span>
-                  <BezentIcon name="clock" size={18} />
-                </Inline>
-              </div>
-
-              <div
-                className="bezent-stat-card--compact"
-                onClick={() => navigate('/hrms/attendance/exceptions?type=missing_in')}
-                role="button"
-                tabIndex={0}
-                title="View missing check-in and check-out punches"
-              >
-                <div className="bezent-stat-card__header">
-                  <span className="bezent-stat-card__title">Missing Punch</span>
-                  <Badge variant={data.missingPunchCount > 0 ? 'warning' : 'neutral'}>
-                    Incomplete
-                  </Badge>
-                </div>
-                <Inline justify="between" align="center">
-                  <span className="bezent-stat-card__num">
-                    {todayKpis ? todayKpis.missingPunchCount : data.missingPunchCount}
-                  </span>
-                  <BezentIcon name="security" size={18} />
-                </Inline>
-              </div>
-
-              <div
-                className="bezent-stat-card--compact"
-                onClick={() =>
-                  navigate(
-                    `/hrms/attendance/daily-log?date=${selectedDate}&processingState=pending_review`,
-                  )
-                }
-                role="button"
-                tabIndex={0}
-                title="View records in progress or pending review"
-              >
-                <div className="bezent-stat-card__header">
-                  <span className="bezent-stat-card__title">Pending Processing</span>
-                  <Badge variant="neutral">{todayKpis?.isFuture ? 'Future' : 'In Progress'}</Badge>
-                </div>
-                <Inline justify="between" align="center">
-                  <span className="bezent-stat-card__num">
-                    {todayKpis ? todayKpis.pendingProcessingCount : 0}
-                  </span>
-                  <BezentIcon name="sync" size={18} />
-                </Inline>
               </div>
             </Grid>
 
-            {/* 2. ACTION REQUIRED QUEUE */}
-            <Card padding="lg">
-              <Stack gap="md">
-                <div className="bezent-toolbar">
-                  <div>
-                    <h3 className="bezent-card__title">Action Required Queue</h3>
-                    <span className="bezent-card__desc">
-                      Consolidated workflow items awaiting supervisor and HR administrator triage
-                    </span>
-                  </div>
-                  <Badge variant="neutral">
-                    {actionQueue
-                      ? actionQueue.reduce((acc, q) => acc + q.authorizedPendingCount, 0)
-                      : data.pendingRegularizationCount}{' '}
-                    Actionable
-                  </Badge>
-                </div>
-
-                {actionQueue && actionQueue.length > 0 ? (
-                  <Grid columns="auto-fit" minColWidth="md" gap="md">
-                    {actionQueue.map((action) => (
-                      <Card key={action.actionType} hoverable variant="flat" padding="md">
-                        <Stack gap="sm">
-                          <Inline justify="between" align="center">
-                            <strong>{action.title}</strong>
-                            <Badge variant={action.severity}>
-                              {action.authorizedPendingCount} Pending
-                            </Badge>
-                          </Inline>
-                          <span className="bezent-card__desc">{action.description}</span>
-                          {action.oldestPendingAgeDays !== null ? (
-                            <span className="bezent-card__desc">
-                              Oldest request: {action.oldestPendingAgeDays} day(s) old
-                            </span>
-                          ) : null}
-                          <Inline justify="end">
-                            <Button
-                              size="sm"
-                              variant={action.authorizedPendingCount > 0 ? 'primary' : 'outline'}
-                              onClick={() => {
-                                const qs = new URLSearchParams(action.filterParams).toString();
-                                navigate(`${action.targetRoute}${qs ? `?${qs}` : ''}`);
-                              }}
-                            >
-                              {action.authorizedPendingCount > 0 ? 'Triage Queue' : 'View Queue'}
-                            </Button>
-                          </Inline>
-                        </Stack>
-                      </Card>
-                    ))}
-                  </Grid>
-                ) : (
-                  <Card variant="flat" padding="md">
-                    <Inline justify="between" align="center">
-                      <Stack gap="xs">
-                        <strong>Pending Regularizations</strong>
-                        <span className="bezent-card__desc">
-                          {data.pendingRegularizationCount} employee regularization request(s)
-                          awaiting review
-                        </span>
-                      </Stack>
-                      <Button
-                        variant={data.pendingRegularizationCount > 0 ? 'primary' : 'secondary'}
-                        onClick={() => navigate('/hrms/attendance/regularization')}
-                      >
-                        Review Queue
-                      </Button>
-                    </Inline>
-                  </Card>
-                )}
-              </Stack>
-            </Card>
-
-            {/* 3. TRENDS & DEPARTMENT COMPARISON */}
+            {/* 3. TWO CLEAN BALANCED PANELS */}
             <Grid columns={2} gap="lg">
-              {/* Department Comparison */}
-              <Card padding="lg">
-                <Stack gap="md">
-                  <div className="bezent-toolbar">
-                    <div>
-                      <h3 className="bezent-card__title">Department Comparison</h3>
-                      <span className="bezent-card__desc">
-                        Workforce presence and exceptions by authorized department
-                      </span>
-                    </div>
-                    <Button
-                      variant="text"
-                      onClick={() => navigate(`/hrms/attendance/daily-log?date=${selectedDate}`)}
-                    >
-                      View All
-                    </Button>
-                  </div>
-
-                  {departments && departments.length > 0 ? (
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableHeaderCell>Department</TableHeaderCell>
-                          <TableHeaderCell>Eligible</TableHeaderCell>
-                          <TableHeaderCell>Present</TableHeaderCell>
-                          <TableHeaderCell>Rate</TableHeaderCell>
-                          <TableHeaderCell>Action</TableHeaderCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {departments.map((dept) => (
-                          <TableRow key={dept.departmentId}>
-                            <TableCell>{dept.departmentName}</TableCell>
-                            <TableCell>{dept.eligibleEmployees}</TableCell>
-                            <TableCell>{dept.presentEquivalents}</TableCell>
-                            <TableCell>
-                              <Badge
-                                variant={(dept.attendanceRate ?? 0) >= 80 ? 'success' : 'warning'}
-                              >
-                                {dept.attendanceRate !== null ? `${dept.attendanceRate}%` : 'N/A'}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() =>
-                                  navigate(
-                                    `/hrms/attendance/daily-log?departmentId=${encodeURIComponent(
-                                      dept.departmentId,
-                                    )}&date=${encodeURIComponent(selectedDate)}`,
-                                  )
-                                }
-                              >
-                                Drill Down
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  ) : data.departmentBreakdown.length > 0 ? (
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableHeaderCell>Department</TableHeaderCell>
-                          <TableHeaderCell>Present</TableHeaderCell>
-                          <TableHeaderCell>Total</TableHeaderCell>
-                          <TableHeaderCell>Rate</TableHeaderCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {data.departmentBreakdown.map((dept) => {
-                          const rate =
-                            dept.total > 0 ? Math.round((dept.present / dept.total) * 100) : 0;
-                          return (
-                            <TableRow key={dept.departmentId}>
-                              <TableCell>{dept.departmentName}</TableCell>
-                              <TableCell>{dept.present}</TableCell>
-                              <TableCell>{dept.total}</TableCell>
-                              <TableCell>
-                                <Badge variant={rate >= 80 ? 'success' : 'warning'}>{rate}%</Badge>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  ) : (
+              {/* Left Panel: Department Attendance (Pie Chart) */}
+              <Card padding="md">
+                <CardHeader>
+                  <CardTitle>Department Attendance</CardTitle>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => navigate(`/hrms/attendance/daily-log?date=${selectedDate}`)}
+                  >
+                    View All
+                  </Button>
+                </CardHeader>
+                <CardBody>
+                  {deptItems.length === 0 ? (
                     <EmptyState
                       title="No Department Data"
                       description="No departments found for current authorized scope."
                     />
+                  ) : (
+                    (() => {
+                      const totalDeptPresent = deptItems.reduce(
+                        (sum, d) => sum + (d.presentHeadcount ?? Math.ceil(d.presentEquivalents)),
+                        0,
+                      );
+                      const radius = 64;
+                      const strokeWidth = 26;
+                      const circumference = 2 * Math.PI * radius;
+                      let accumulatedPercent = 0;
+
+                      return (
+                        <div className="bezent-dept-pie-layout">
+                          {/* Left: SVG Pie/Donut Chart */}
+                          <div className="bezent-dept-pie-chart-wrap">
+                            <svg
+                              width={170}
+                              height={170}
+                              viewBox="0 0 170 170"
+                              className="bezent-dept-pie-svg"
+                              role="img"
+                              aria-label="Department Attendance Distribution Pie Chart"
+                            >
+                              {/* SVG Donut */}
+                              <circle
+                                cx={85}
+                                cy={85}
+                                r={radius}
+                                fill="transparent"
+                                stroke="var(--border-subtle, #e2e8f0)"
+                                strokeWidth={strokeWidth}
+                              />
+                              {totalDeptPresent > 0 &&
+                                deptItems.map((dept, idx) => {
+                                  const val =
+                                    dept.presentHeadcount ?? Math.ceil(dept.presentEquivalents);
+                                  if (val <= 0) return null;
+                                  const percent = val / totalDeptPresent;
+                                  const strokeDasharray = `${percent * circumference} ${circumference}`;
+                                  const strokeDashoffset = -accumulatedPercent * circumference;
+                                  accumulatedPercent += percent;
+                                  const color = DEPT_PIE_COLORS[idx % DEPT_PIE_COLORS.length];
+
+                                  return (
+                                    <circle
+                                      key={dept.departmentId}
+                                      cx={85}
+                                      cy={85}
+                                      r={radius}
+                                      fill="transparent"
+                                      stroke={color}
+                                      strokeWidth={strokeWidth}
+                                      strokeDasharray={strokeDasharray}
+                                      strokeDashoffset={strokeDashoffset}
+                                      transform="rotate(-90 85 85)"
+                                      cursor="pointer"
+                                      onClick={() =>
+                                        navigate(
+                                          `/hrms/attendance/daily-log?departmentId=${encodeURIComponent(
+                                            dept.departmentId,
+                                          )}&date=${encodeURIComponent(selectedDate)}`,
+                                        )
+                                      }
+                                    >
+                                      <title>{`${dept.departmentName}: ${val} present (${
+                                        dept.attendanceRate ?? 0
+                                      }%)`}</title>
+                                    </circle>
+                                  );
+                                })}
+                              {/* Center Total Text */}
+                              <text
+                                x="50%"
+                                y="46%"
+                                dominantBaseline="middle"
+                                textAnchor="middle"
+                                fill="var(--text-primary, #0f172a)"
+                                fontSize="22"
+                                fontWeight="800"
+                              >
+                                {totalDeptPresent}
+                              </text>
+                              <text
+                                x="50%"
+                                y="60%"
+                                dominantBaseline="middle"
+                                textAnchor="middle"
+                                fill="var(--text-muted, #64748b)"
+                                fontSize="10"
+                                fontWeight="600"
+                              >
+                                Present FTE
+                              </text>
+                            </svg>
+                          </div>
+
+                          {/* Right: Department Attendance Breakdown List */}
+                          <div className="bezent-dept-pie-legend">
+                            {deptItems.map((dept, idx) => {
+                              const rate = dept.attendanceRate ?? 0;
+                              const presentVal =
+                                dept.presentHeadcount ?? Math.ceil(dept.presentEquivalents);
+                              return (
+                                <div
+                                  key={dept.departmentId}
+                                  className="bezent-dept-pie-legend-row"
+                                  onClick={() =>
+                                    navigate(
+                                      `/hrms/attendance/daily-log?departmentId=${encodeURIComponent(
+                                        dept.departmentId,
+                                      )}&date=${encodeURIComponent(selectedDate)}`,
+                                    )
+                                  }
+                                  title={`Click to view ${dept.departmentName} Daily Attendance`}
+                                >
+                                  <div className="bezent-dept-pie-legend-info">
+                                    <span
+                                      className={`bezent-dept-pie-legend-dot bezent-dept-pie-legend-dot--${
+                                        idx % 9
+                                      }`}
+                                    />
+                                    <span className="bezent-dept-pie-legend-name">
+                                      {dept.departmentName}
+                                    </span>
+                                  </div>
+                                  <div className="bezent-dept-pie-legend-stats">
+                                    <span className="bezent-dept-pie-legend-count">
+                                      {presentVal} / {dept.eligibleEmployees}
+                                    </span>
+                                    <Badge size="sm" variant={rate >= 80 ? 'success' : 'warning'}>
+                                      {dept.attendanceRate !== null ? `${rate}%` : 'N/A'}
+                                    </Badge>
+                                    <span className="bezent-dept-pie-legend-arrow">
+                                      <BezentIcon name="chevronRight" size={14} />
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()
                   )}
-                </Stack>
+                </CardBody>
               </Card>
 
-              {/* Attendance Trends */}
-              <Card padding="lg">
-                <Stack gap="md">
-                  <div className="bezent-toolbar">
-                    <div>
-                      <h3 className="bezent-card__title">
-                        Attendance Trends ({trends?.range === '30d' ? '30 Days' : '7 Days'})
-                      </h3>
-                      <span className="bezent-card__desc">
-                        Scheduled vs present daily history and late occurrences
-                      </span>
-                    </div>
-                    {trends?.avgAttendanceRate !== null ? (
-                      <Badge variant="success">Avg: {trends?.avgAttendanceRate}%</Badge>
-                    ) : null}
-                  </div>
-
-                  {trends && trends.items.length > 0 ? (
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableHeaderCell>Date</TableHeaderCell>
-                          <TableHeaderCell>Day</TableHeaderCell>
-                          <TableHeaderCell>Present</TableHeaderCell>
-                          <TableHeaderCell>Rate</TableHeaderCell>
-                          <TableHeaderCell>Late</TableHeaderCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {trends.items.slice(-7).map((item) => (
-                          <TableRow key={item.date}>
-                            <TableCell>{item.date}</TableCell>
-                            <TableCell>{item.dayOfWeek.slice(0, 3)}</TableCell>
-                            <TableCell>
-                              {item.presentEquivalentDays} / {item.scheduledDayEquivalents}
-                            </TableCell>
-                            <TableCell>
-                              {item.attendanceRate !== null ? (
-                                <Badge variant={item.attendanceRate >= 80 ? 'success' : 'warning'}>
-                                  {item.attendanceRate}%
-                                </Badge>
-                              ) : (
-                                <Badge variant="neutral">Upcoming</Badge>
-                              )}
-                            </TableCell>
-                            <TableCell>{item.lateOccurrences}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  ) : (
+              {/* Right Panel: Attendance Trends (Column Trend Chart) */}
+              <Card padding="md">
+                <CardHeader>
+                  <CardTitle>
+                    Attendance Trends ({trends?.range === '30d' ? '30 Days' : '7 Days'})
+                  </CardTitle>
+                  {trends?.avgAttendanceRate !== null && trends?.avgAttendanceRate !== undefined ? (
+                    <Badge variant="success" size="sm">
+                      Avg: {trends.avgAttendanceRate}%
+                    </Badge>
+                  ) : null}
+                </CardHeader>
+                <CardBody>
+                  {trendItems.length === 0 ? (
                     <EmptyState
                       title="No Trend Data"
                       description="No trend history available for current period."
                     />
-                  )}
-                </Stack>
-              </Card>
-            </Grid>
-
-            {/* 4. PROCESSING HEALTH & MONTHLY PAYROLL READINESS */}
-            <Grid columns={2} gap="lg">
-              {/* Processing Health */}
-              <Card padding="lg">
-                <Stack gap="md">
-                  <div className="bezent-toolbar">
-                    <div>
-                      <h3 className="bezent-card__title">Attendance Processing Health</h3>
-                      <span className="bezent-card__desc">
-                        Reconciliation completeness and pipeline diagnostic indicators
-                      </span>
-                    </div>
-                    {processingHealth ? (
-                      <Badge
-                        variant={
-                          processingHealth.status === 'healthy'
-                            ? 'success'
-                            : processingHealth.status === 'degraded'
-                              ? 'warning'
-                              : processingHealth.status === 'upcoming'
-                                ? 'neutral'
-                                : 'danger'
-                        }
-                      >
-                        {processingHealth.status.toUpperCase()}
-                      </Badge>
-                    ) : null}
-                  </div>
-
-                  {processingHealth ? (
-                    <Grid columns={2} gap="md">
-                      <Card variant="flat" padding="sm">
-                        <Stack gap="xs">
-                          <span className="bezent-card__desc">Processing Success Rate</span>
-                          <strong>
-                            {processingHealth.processingSuccessRate !== null
-                              ? `${processingHealth.processingSuccessRate}%`
-                              : 'Upcoming'}
-                          </strong>
-                          <span className="bezent-card__desc">
-                            {processingHealth.denominatorDescription}
-                          </span>
-                        </Stack>
-                      </Card>
-
-                      <Card variant="flat" padding="sm">
-                        <Stack gap="xs">
-                          <span className="bezent-card__desc">Workday Reconciliation</span>
-                          <strong>
-                            {processingHealth.processedWorkdays} Finalized /{' '}
-                            {processingHealth.pendingWorkdays} Pending
-                          </strong>
-                          <span className="bezent-card__desc">
-                            {processingHealth.failedWorkdays} Failed Workdays
-                          </span>
-                        </Stack>
-                      </Card>
-
-                      <Card variant="flat" padding="sm">
-                        <Stack gap="xs">
-                          <span className="bezent-card__desc">Schedule Integrity</span>
-                          <strong>
-                            {processingHealth.missingScheduleCount === 0
-                              ? '100% Configured'
-                              : `${processingHealth.missingScheduleCount} Missing`}
-                          </strong>
-                          <span className="bezent-card__desc">
-                            Active employees lacking shift schedule
-                          </span>
-                        </Stack>
-                      </Card>
-
-                      <Card variant="flat" padding="sm">
-                        <Stack gap="xs">
-                          <span className="bezent-card__desc">Blocking Exceptions</span>
-                          <strong>{processingHealth.unresolvedBlockingExceptions}</strong>
-                          <span className="bezent-card__desc">
-                            Critical/High severity exceptions
-                          </span>
-                        </Stack>
-                      </Card>
-                    </Grid>
-                  ) : null}
-                </Stack>
-              </Card>
-
-              {/* Monthly Payroll Readiness */}
-              <Card padding="lg">
-                <Stack gap="md">
-                  <div className="bezent-toolbar">
-                    <div>
-                      <h3 className="bezent-card__title">
-                        Monthly Payroll Readiness (
-                        {monthlyReadiness?.month || selectedDate.slice(0, 7)})
-                      </h3>
-                      <span className="bezent-card__desc">
-                        Readiness sign-off, supervisor review, and lock progress
-                      </span>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      onClick={() =>
-                        navigate(
-                          `/hrms/attendance/monthly-summary?month=${
-                            monthlyReadiness?.month || selectedDate.slice(0, 7)
-                          }`,
-                        )
-                      }
-                    >
-                      Open Workspace
-                    </Button>
-                  </div>
-
-                  {monthlyReadiness && monthlyReadiness.isAuthorized ? (
-                    <Grid columns={3} gap="md">
-                      <Card variant="flat" padding="sm">
-                        <Stack gap="xs">
-                          <span className="bezent-card__desc">Ready for Payroll</span>
-                          <h3 className="bezent-card__title">{monthlyReadiness.readyCount}</h3>
-                          <Badge variant="success">Unblocked</Badge>
-                        </Stack>
-                      </Card>
-
-                      <Card variant="flat" padding="sm">
-                        <Stack gap="xs">
-                          <span className="bezent-card__desc">Needs Review / Blocked</span>
-                          <h3 className="bezent-card__title">
-                            {monthlyReadiness.needsReviewCount + monthlyReadiness.blockedCount}
-                          </h3>
-                          <Badge variant={monthlyReadiness.blockedCount > 0 ? 'danger' : 'warning'}>
-                            {monthlyReadiness.blockedCount} Blocked
-                          </Badge>
-                        </Stack>
-                      </Card>
-
-                      <Card variant="flat" padding="sm">
-                        <Stack gap="xs">
-                          <span className="bezent-card__desc">Locked Records</span>
-                          <h3 className="bezent-card__title">{monthlyReadiness.lockedCount}</h3>
-                          <Badge variant="neutral">
-                            {monthlyReadiness.totalInScope > 0
-                              ? `${Math.round(
-                                  (monthlyReadiness.lockedCount / monthlyReadiness.totalInScope) *
-                                    100,
-                                )}%`
-                              : '0%'}
-                          </Badge>
-                        </Stack>
-                      </Card>
-                    </Grid>
                   ) : (
-                    <Card variant="flat" padding="md">
-                      <Inline gap="sm" align="center">
-                        <BezentIcon name="lock" size={16} />
-                        <span className="bezent-card__desc">
-                          Payroll readiness indicators are restricted to authorized HR and Payroll
-                          administrators.
+                    <div className="bezent-trend-chart-card">
+                      <div className="bezent-trend-columns">
+                        {trendItems.map((item) => {
+                          const rate = item.attendanceRate ?? 0;
+                          const isGood = rate >= 80;
+                          const barHeight = rate > 0 ? Math.min(100, Math.max(6, rate)) : 0;
+                          const dayLabel = item.dayOfWeek.slice(0, 3);
+                          const dateLabel = item.date.length >= 10 ? item.date.slice(5) : item.date;
+                          return (
+                            <div
+                              key={item.date}
+                              className="bezent-trend-col"
+                              title={`${item.date} (${item.dayOfWeek}): ${rate}% attendance | Present: ${
+                                item.presentHeadcount ?? Math.ceil(item.presentEquivalentDays)
+                              }/${
+                                item.scheduledHeadcount ?? item.scheduledDayEquivalents
+                              } | Late: ${item.lateOccurrences}`}
+                              onClick={() =>
+                                navigate(`/hrms/attendance/daily-log?date=${item.date}`)
+                              }
+                            >
+                              <span className="bezent-trend-col__rate">
+                                {item.attendanceRate !== null ? `${rate}%` : '—'}
+                              </span>
+                              <div className="bezent-trend-col__bar-wrap">
+                                <svg
+                                  width="100%"
+                                  height="100"
+                                  viewBox="0 0 28 100"
+                                  preserveAspectRatio="none"
+                                >
+                                  <defs>
+                                    <linearGradient
+                                      id={`trendGradGood-${item.date}`}
+                                      x1="0"
+                                      y1="0"
+                                      x2="0"
+                                      y2="1"
+                                    >
+                                      <stop offset="0%" stopColor="#10b981" />
+                                      <stop offset="100%" stopColor="#047857" />
+                                    </linearGradient>
+                                    <linearGradient
+                                      id={`trendGradWarn-${item.date}`}
+                                      x1="0"
+                                      y1="0"
+                                      x2="0"
+                                      y2="1"
+                                    >
+                                      <stop offset="0%" stopColor="#f59e0b" />
+                                      <stop offset="100%" stopColor="#b45309" />
+                                    </linearGradient>
+                                  </defs>
+                                  <rect
+                                    x="0"
+                                    y={100 - barHeight}
+                                    width="28"
+                                    height={barHeight}
+                                    rx="3"
+                                    fill={
+                                      isGood
+                                        ? `url(#trendGradGood-${item.date})`
+                                        : `url(#trendGradWarn-${item.date})`
+                                    }
+                                  />
+                                </svg>
+                              </div>
+                              <div className="bezent-trend-col__day">
+                                {dayLabel}
+                                <span className="bezent-trend-col__date">{dateLabel}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="bezent-trend-footer">
+                        <div className="bezent-trend-legend">
+                          <span className="bezent-trend-legend__item">
+                            <span className="bezent-trend-legend__dot bezent-trend-legend__dot--good" />
+                            Optimal (≥80%)
+                          </span>
+                          <span className="bezent-trend-legend__item">
+                            <span className="bezent-trend-legend__dot bezent-trend-legend__dot--warn" />
+                            Attention (&lt;80%)
+                          </span>
+                        </div>
+                        <span>
+                          Total Late (7d):{' '}
+                          <strong>
+                            {trendItems.reduce((acc, curr) => acc + (curr.lateOccurrences || 0), 0)}
+                          </strong>
                         </span>
-                      </Inline>
-                    </Card>
+                      </div>
+                    </div>
                   )}
-                </Stack>
+                </CardBody>
               </Card>
             </Grid>
+
+            {/* 4. MONTHLY PAYROLL READINESS */}
+            {monthlyReadiness && monthlyReadiness.isAuthorized ? (
+              <Card padding="md">
+                <CardHeader>
+                  <CardTitle>
+                    Monthly Payroll Readiness ({monthlyReadiness?.month || selectedDate.slice(0, 7)}
+                    )
+                  </CardTitle>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() =>
+                      navigate(
+                        `/hrms/attendance/monthly-summary?month=${
+                          monthlyReadiness?.month || selectedDate.slice(0, 7)
+                        }`,
+                      )
+                    }
+                  >
+                    Open Workspace
+                  </Button>
+                </CardHeader>
+                <CardBody>
+                  <Stack gap="md">
+                    <Grid columns={3} gap="sm">
+                      <div className="bezent-pulse-stat bezent-pulse-stat--static">
+                        <span className="bezent-pulse-stat__label">
+                          <span className="bezent-pulse-stat__dot bezent-pulse-stat__dot--green" />
+                          Ready
+                        </span>
+                        <span className="bezent-pulse-stat__value">
+                          {monthlyReadiness.readyCount}
+                        </span>
+                        <span className="bezent-pulse-stat__caption">Unblocked</span>
+                      </div>
+
+                      <div className="bezent-pulse-stat bezent-pulse-stat--static">
+                        <span className="bezent-pulse-stat__label">
+                          <span className="bezent-pulse-stat__dot bezent-pulse-stat__dot--amber" />
+                          Review
+                        </span>
+                        <span className="bezent-pulse-stat__value">
+                          {monthlyReadiness.needsReviewCount + monthlyReadiness.blockedCount}
+                        </span>
+                        <span className="bezent-pulse-stat__caption">
+                          {monthlyReadiness.blockedCount > 0
+                            ? `${monthlyReadiness.blockedCount} Blocked`
+                            : 'In Review'}
+                        </span>
+                      </div>
+
+                      <div className="bezent-pulse-stat bezent-pulse-stat--static">
+                        <span className="bezent-pulse-stat__label">
+                          <span className="bezent-pulse-stat__dot bezent-pulse-stat__dot--blue" />
+                          Locked
+                        </span>
+                        <span className="bezent-pulse-stat__value">
+                          {monthlyReadiness.lockedCount}
+                        </span>
+                        <span className="bezent-pulse-stat__caption">
+                          {monthlyReadiness.totalInScope > 0
+                            ? `${Math.round(
+                                (monthlyReadiness.lockedCount / monthlyReadiness.totalInScope) *
+                                  100,
+                              )}%`
+                            : '0%'}
+                        </span>
+                      </div>
+                    </Grid>
+
+                    <div>
+                      <div className="bezent-progress-label">
+                        <span className="bezent-progress-label__title">
+                          Cutoff Readiness Progress
+                        </span>
+                        <span className="bezent-progress-label__value">
+                          {monthlyReadiness.totalInScope > 0
+                            ? `${Math.round(
+                                (monthlyReadiness.readyCount / monthlyReadiness.totalInScope) * 100,
+                              )}% Ready`
+                            : '0%'}
+                        </span>
+                      </div>
+                      <div className="bezent-segmented-bar">
+                        <svg
+                          width="100%"
+                          height="10"
+                          viewBox="0 0 100 10"
+                          preserveAspectRatio="none"
+                        >
+                          {(() => {
+                            const total = monthlyReadiness.totalInScope || 1;
+                            const readyW = (monthlyReadiness.readyCount / total) * 100;
+                            const reviewW = (monthlyReadiness.needsReviewCount / total) * 100;
+                            const blockedW = (monthlyReadiness.blockedCount / total) * 100;
+                            return (
+                              <>
+                                {readyW > 0 && (
+                                  <rect x={0} y={0} width={readyW} height={10} fill="#10b981" />
+                                )}
+                                {reviewW > 0 && (
+                                  <rect
+                                    x={readyW}
+                                    y={0}
+                                    width={reviewW}
+                                    height={10}
+                                    fill="#f59e0b"
+                                  />
+                                )}
+                                {blockedW > 0 && (
+                                  <rect
+                                    x={readyW + reviewW}
+                                    y={0}
+                                    width={blockedW}
+                                    height={10}
+                                    fill="#ef4444"
+                                  />
+                                )}
+                              </>
+                            );
+                          })()}
+                        </svg>
+                      </div>
+                    </div>
+                  </Stack>
+                </CardBody>
+              </Card>
+            ) : null}
           </>
         )}
       </Stack>

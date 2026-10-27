@@ -222,6 +222,7 @@ export interface ReviewSectionProps {
   submitError?: string | null;
   createdEmployee?: { id: string; employeeNumber?: string | null; name?: string } | null;
   onDone?: () => void;
+  mode?: 'registration' | 'edit';
 }
 
 export function ReviewSection({
@@ -239,6 +240,7 @@ export function ReviewSection({
   submitError = null,
   createdEmployee = null,
   onDone,
+  mode = 'registration',
 }: ReviewSectionProps) {
   const [showValidationModal, setShowValidationModal] = useState(false);
 
@@ -1313,9 +1315,15 @@ export function ReviewSection({
       <Card>
         <Inline justify="between" align="center">
           <Stack gap="xs">
-            <CardTitle>Registration Review &amp; Completion</CardTitle>
+            <CardTitle>
+              {mode === 'edit'
+                ? 'Update Review & Save Changes'
+                : 'Registration Review & Completion'}
+            </CardTitle>
             <span className="bezent-card__desc">
-              Ensure all sections are verified before generating the official employee record.
+              {mode === 'edit'
+                ? 'Ensure all updated sections are verified before saving changes to the employee record.'
+                : 'Ensure all sections are verified before generating the official employee record.'}
             </span>
           </Stack>
           <Button
@@ -1325,7 +1333,13 @@ export function ReviewSection({
             disabled={isSubmitting}
             onClick={handleFinalCreateClick}
           >
-            {isSubmitting ? 'Creating Employee...' : 'Create Employee'}
+            {isSubmitting
+              ? mode === 'edit'
+                ? 'Saving Changes...'
+                : 'Creating Employee...'
+              : mode === 'edit'
+                ? 'Save Changes'
+                : 'Create Employee'}
           </Button>
         </Inline>
       </Card>
@@ -1335,7 +1349,11 @@ export function ReviewSection({
         <Modal
           isOpen={showValidationModal}
           onClose={() => setShowValidationModal(false)}
-          title={`Cannot Create Employee — Pending Items (${pendingItems.length})`}
+          title={
+            mode === 'edit'
+              ? `Cannot Save Changes — Pending Items (${pendingItems.length})`
+              : `Cannot Create Employee — Pending Items (${pendingItems.length})`
+          }
           size="md"
         >
           <Stack gap="md">

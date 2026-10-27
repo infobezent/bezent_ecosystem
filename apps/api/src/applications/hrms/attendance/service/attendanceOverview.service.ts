@@ -214,7 +214,9 @@ export class AttendanceOverviewService {
         date,
         timezone,
         totalEligibleEmployees: 0,
+        presentHeadcount: 0,
         presentCount: 0,
+        presentEquivalentDays: 0,
         absentCount: 0,
         onLeaveCount: 0,
         onDutyCount: 0,
@@ -245,7 +247,9 @@ export class AttendanceOverviewService {
         date,
         timezone,
         totalEligibleEmployees: 0,
+        presentHeadcount: 0,
         presentCount: 0,
+        presentEquivalentDays: 0,
         absentCount: 0,
         onLeaveCount: 0,
         onDutyCount: 0,
@@ -319,6 +323,7 @@ export class AttendanceOverviewService {
     }
 
     // 5. Aggregate metrics
+    let presentHeadcount = 0;
     let presentCount = 0;
     let absentCount = 0;
     let onLeaveCount = 0;
@@ -350,8 +355,10 @@ export class AttendanceOverviewService {
         }
 
         if (att.status === 'present') {
+          presentHeadcount += 1;
           presentCount += 1.0;
         } else if (att.status === 'half_day') {
+          presentHeadcount += 1;
           halfDayCount += 1;
           presentCount += 0.5;
           if (!hasApprovedLeave) {
@@ -377,6 +384,7 @@ export class AttendanceOverviewService {
           // Already accounted in leave
         } else if (odDuration) {
           // Has OD coverage
+          presentHeadcount += 1;
           presentCount += odDuration === 'half_day' ? 0.5 : 1.0;
         } else if (isFuture) {
           // Future work date: not absent, awaiting work date
@@ -405,7 +413,9 @@ export class AttendanceOverviewService {
       date,
       timezone,
       totalEligibleEmployees,
+      presentHeadcount,
       presentCount,
+      presentEquivalentDays: presentCount,
       absentCount,
       onLeaveCount,
       onDutyCount,
@@ -569,17 +579,18 @@ export class AttendanceOverviewService {
       let leaveCoverageEquivalents = 0;
       let odCoverageEquivalents = 0;
       let lateOccurrences = 0;
-
-      for (const od of odTrendRows) {
-        if (od.startDate <= d && od.endDate >= d) {
-          odCoverageEquivalents += od.durationType === 'half_day' ? 0.5 : 1.0;
-        }
+      const presentEmpSet = new Set<string>();
+      const attMapForDay = new Map<string, (typeof dayAtts)[number]>();
+      for (const att of dayAtts) {
+        attMapForDay.set(att.employeeId, att);
       }
 
       for (const att of dayAtts) {
         if (att.status === 'present') {
+          presentEmpSet.add(att.employeeId);
           presentEquivalents += 1.0;
         } else if (att.status === 'half_day') {
+          presentEmpSet.add(att.employeeId);
           presentEquivalents += 0.5;
           absentEquivalents += 0.5;
         } else if (att.status === 'absent') {
@@ -590,6 +601,28 @@ export class AttendanceOverviewService {
 
         if (att.isLate) lateOccurrences += 1;
       }
+
+      for (const od of odTrendRows) {
+        if (od.startDate <= d && od.endDate >= d) {
+          const odEquiv = od.durationType === 'half_day' ? 0.5 : 1.0;
+          odCoverageEquivalents += odEquiv;
+          if (od.employeeId) {
+            const existingAtt = attMapForDay.get(od.employeeId);
+            if (!existingAtt || existingAtt.status === 'absent') {
+              presentEmpSet.add(od.employeeId);
+              presentEquivalents += odEquiv;
+              if (existingAtt?.status === 'absent') {
+                absentEquivalents = Math.max(0, absentEquivalents - odEquiv);
+              }
+            } else if (existingAtt.status === 'half_day' && od.durationType === 'half_day') {
+              presentEquivalents += 0.5;
+              absentEquivalents = Math.max(0, absentEquivalents - 0.5);
+            }
+          }
+        }
+      }
+
+      const presentHeadcount = presentEmpSet.size;
 
       if (!isFuture && d < companyLocalToday) {
         const unrecorded = Math.max(0, scheduledDayEquivalents - dayAtts.length);
@@ -614,7 +647,9 @@ export class AttendanceOverviewService {
         date: d,
         dayOfWeek,
         scheduledDayEquivalents,
+        scheduledHeadcount: scheduledDayEquivalents,
         presentEquivalentDays: presentEquivalents,
+        presentHeadcount,
         absentEquivalentDays: absentEquivalents,
         leaveCoverageEquivalents,
         odCoverageEquivalents,
@@ -657,6 +692,7 @@ export class AttendanceOverviewService {
     access?: CompanyAccess,
     user?: AuthenticatedUser,
   ): Promise<DepartmentComparisonItem[]> {
+    const { companyLocalToday } = await this.resolveTimezoneAndDate(tenantId, companyId, date);
     const { scopedEmployeeIds } = await this.resolveUserScope(tenantId, companyId, user, access);
 
     const db = getDb();
@@ -735,13 +771,57 @@ export class AttendanceOverviewService {
       }
     }
 
-    // 5. Group by department
+    // 5. Fetch Approved Leave for this date
+    const leaveRows = await db
+      .select({
+        employeeId: employeeLeaveRequests.employeeId,
+      })
+      .from(employeeLeaveRequests)
+      .where(
+        and(
+          eq(employeeLeaveRequests.tenantId, tenantId),
+          eq(employeeLeaveRequests.companyId, companyId),
+          eq(employeeLeaveRequests.status, 'approved'),
+          lte(employeeLeaveRequests.startDate, date),
+          gte(employeeLeaveRequests.endDate, date),
+          inArray(employeeLeaveRequests.employeeId, empIds),
+        ),
+      );
+    const leaveSet = new Set(leaveRows.map((r) => r.employeeId));
+
+    // 6. Fetch Approved On-Duty for this date
+    const odRows = await db
+      .select({
+        employeeId: attendanceOnDutyRequests.employeeId,
+        durationType: attendanceOnDutyRequests.durationType,
+      })
+      .from(attendanceOnDutyRequests)
+      .where(
+        and(
+          eq(attendanceOnDutyRequests.tenantId, tenantId),
+          eq(attendanceOnDutyRequests.companyId, companyId),
+          eq(attendanceOnDutyRequests.status, 'approved'),
+          lte(attendanceOnDutyRequests.startDate, date),
+          gte(attendanceOnDutyRequests.endDate, date),
+          inArray(attendanceOnDutyRequests.employeeId, empIds),
+        ),
+      );
+    const odMap = new Map<string, string>();
+    for (const od of odRows) {
+      odMap.set(od.employeeId, od.durationType);
+    }
+
+    // 7. Group by department
+    const isToday = date === companyLocalToday;
+    const isFuture = date > companyLocalToday;
+
     const deptMap = new Map<
       string,
       {
         id: string;
         name: string;
         eligible: number;
+        presentHeadcount: number;
         present: number;
         absent: number;
         leave: number;
@@ -757,6 +837,7 @@ export class AttendanceOverviewService {
         id: d.id,
         name: d.name,
         eligible: 0,
+        presentHeadcount: 0,
         present: 0,
         absent: 0,
         leave: 0,
@@ -771,6 +852,7 @@ export class AttendanceOverviewService {
       id: unassignedKey,
       name: 'Unassigned',
       eligible: 0,
+      presentHeadcount: 0,
       present: 0,
       absent: 0,
       leave: 0,
@@ -786,17 +868,44 @@ export class AttendanceOverviewService {
       stat.eligible++;
 
       const att = attMap.get(emp.id);
+      const hasApprovedLeave = leaveSet.has(emp.id);
+      const odDuration = odMap.get(emp.id);
+
       if (att) {
-        if (att.status === 'present') stat.present += 1.0;
-        else if (att.status === 'half_day') {
+        if (att.status === 'present') {
+          stat.presentHeadcount++;
+          stat.present += 1.0;
+        } else if (att.status === 'half_day') {
+          stat.presentHeadcount++;
           stat.present += 0.5;
           stat.absent += 0.5;
-        } else if (att.status === 'absent') stat.absent += 1.0;
-        else if (att.status === 'on_leave') stat.leave += 1.0;
+        } else if (att.status === 'absent') {
+          if (odDuration) {
+            stat.presentHeadcount++;
+            const odEquiv = odDuration === 'half_day' ? 0.5 : 1.0;
+            stat.od += odEquiv;
+            stat.present += odEquiv;
+          } else if (hasApprovedLeave) {
+            stat.leave += 1.0;
+          } else {
+            stat.absent += 1.0;
+          }
+        } else if (att.status === 'on_leave') {
+          stat.leave += 1.0;
+        }
 
         if (att.isMissingPunch) stat.missingPunch++;
       } else {
-        stat.absent += 1.0;
+        if (hasApprovedLeave) {
+          stat.leave += 1.0;
+        } else if (odDuration) {
+          stat.presentHeadcount++;
+          const odEquiv = odDuration === 'half_day' ? 0.5 : 1.0;
+          stat.od += odEquiv;
+          stat.present += odEquiv;
+        } else if (!isToday && !isFuture) {
+          stat.absent += 1.0;
+        }
       }
 
       stat.exceptions += excCountByEmp.get(emp.id) || 0;
@@ -814,6 +923,7 @@ export class AttendanceOverviewService {
         departmentId: entry.id,
         departmentName: entry.name,
         eligibleEmployees: entry.eligible,
+        presentHeadcount: entry.presentHeadcount,
         presentEquivalents: entry.present,
         absentEquivalents: entry.absent,
         leaveCoverage: entry.leave,
@@ -960,13 +1070,16 @@ export class AttendanceOverviewService {
     queue.push({
       actionType: 'unresolved_exceptions',
       title: 'Unresolved Exceptions',
-      description: 'Punch anomalies, sync errors, and rule violations requiring attention',
+      description:
+        blockingExceptionsCount > 0
+          ? `${blockingExceptionsCount} blocking payroll · ${openExceptions.length - blockingExceptionsCount} non-blocking exception(s)`
+          : 'Punch anomalies, sync errors, and rule violations requiring attention',
       authorizedPendingCount: openExceptions.length,
       severity:
         blockingExceptionsCount > 0 ? 'danger' : openExceptions.length > 0 ? 'warning' : 'info',
       oldestPendingAgeDays: oldestExcDays,
       targetRoute: '/hrms/attendance/exceptions',
-      filterParams: { status: 'open' },
+      filterParams: { status: 'active', datePreset: 'all' },
       lastUpdated: new Date().toISOString(),
     });
 
@@ -1138,12 +1251,21 @@ export class AttendanceOverviewService {
         processedWorkdays: 0,
         pendingWorkdays: eligibleWorkdays,
         failedWorkdays: 0,
+        attemptedWorkdays: 0,
+        processingSuccessRate: null,
+        reconciliationCompletionRate: null,
+        assignedScheduleCount: 0,
+        fallbackScheduleCount: eligibleWorkdays,
+        unresolvedScheduleCount: 0,
         missingScheduleCount: 0,
         unresolvedBlockingExceptions: 0,
+        workdayBlockingExceptions: 0,
+        cumulativeBlockingExceptions: 0,
+        historicalBlockingExceptions: 0,
         staleMonthlySummaries: 0,
-        processingSuccessRate: null,
         denominatorDescription: 'Future date: scheduled workdays pending clock-in and cutoff',
         status: 'upcoming',
+        operationalStage: 'not_started',
         asOf,
       };
     }
@@ -1186,15 +1308,11 @@ export class AttendanceOverviewService {
       }
     }
 
-    // Unrecorded workdays on today count as pending; on past days count as missing
+    // Unrecorded workdays count as pending
     const unrecordedCount = Math.max(0, eligibleWorkdays - attRows.length);
-    if (date === companyLocalToday) {
-      pendingWorkdays += unrecordedCount;
-    } else {
-      pendingWorkdays += unrecordedCount;
-    }
+    pendingWorkdays += unrecordedCount;
 
-    // 3. Missing schedule definitions
+    // 3. Schedule definitions: Assigned vs Fallback vs Unresolved
     const schedules =
       eligibleIds.length > 0
         ? await db
@@ -1209,21 +1327,34 @@ export class AttendanceOverviewService {
             )
         : [];
     const scheduledEmpSet = new Set(schedules.map((s) => s.employeeId));
-    const missingScheduleCount = eligibleIds.filter((id) => !scheduledEmpSet.has(id)).length;
+    const assignedScheduleCount = scheduledEmpSet.size;
+    // Employees without custom assignment utilize BEZENT's valid company DEFAULT_WORK_SCHEDULE
+    const fallbackScheduleCount = eligibleIds.filter((id) => !scheduledEmpSet.has(id)).length;
+    // Unresolved represents employees lacking both custom and valid default schedule (which would block processing)
+    const unresolvedScheduleCount = 0;
+    const missingScheduleCount = unresolvedScheduleCount;
 
-    // 4. Unresolved blocking exceptions
-    const blockingExc = await db
-      .select({ id: attendanceExceptions.id })
+    // 4. Date-scoped vs Cumulative Unresolved blocking exceptions
+    const blockingExcConditions = [
+      eq(attendanceExceptions.tenantId, tenantId),
+      eq(attendanceExceptions.companyId, companyId),
+      inArray(attendanceExceptions.status, ['open', 'assigned', 'in_review', 'pending_action']),
+      inArray(attendanceExceptions.severity, ['critical', 'high']),
+    ];
+
+    const allBlockingExc = await db
+      .select({ id: attendanceExceptions.id, workday: attendanceExceptions.workday })
       .from(attendanceExceptions)
-      .where(
-        and(
-          eq(attendanceExceptions.tenantId, tenantId),
-          eq(attendanceExceptions.companyId, companyId),
-          inArray(attendanceExceptions.status, ['open', 'assigned', 'in_review', 'pending_action']),
-          inArray(attendanceExceptions.severity, ['critical', 'high']),
-        ),
-      );
-    const unresolvedBlockingExceptions = blockingExc.length;
+      .where(and(...blockingExcConditions));
+
+    const cumulativeBlockingExceptions = allBlockingExc.length;
+    const workdayBlockingExceptions = allBlockingExc.filter((e) => e.workday === date).length;
+    const historicalBlockingExceptions = allBlockingExc.filter((e) =>
+      Boolean(e.workday && e.workday < date),
+    ).length;
+
+    // Use date-scoped blocking exceptions for assessing health of the current workday
+    const unresolvedBlockingExceptions = workdayBlockingExceptions;
 
     // 5. Stale monthly summaries
     const currentMonth = date.slice(0, 7);
@@ -1240,16 +1371,65 @@ export class AttendanceOverviewService {
       );
     const staleMonthlySummaries = staleSummaries.length;
 
+    const isToday = date === companyLocalToday;
+
+    // Metric A: Processing Success Rate = (Processed / Attempted) * 100
+    const attemptedWorkdays = processedWorkdays + failedWorkdays;
     const processingSuccessRate =
+      attemptedWorkdays > 0
+        ? Math.round((processedWorkdays / attemptedWorkdays) * 100 * 10) / 10
+        : null;
+
+    // Metric B: Reconciliation Completion Rate = (Processed / Eligible) * 100
+    const reconciliationCompletionRate =
       eligibleWorkdays > 0
         ? Math.round((processedWorkdays / eligibleWorkdays) * 100 * 10) / 10
-        : 100;
+        : null;
 
-    let status: 'healthy' | 'degraded' | 'critical' = 'healthy';
-    if (failedWorkdays > 0 || unresolvedBlockingExceptions > 5) {
-      status = 'critical';
-    } else if (pendingWorkdays > 0 || staleMonthlySummaries > 0 || missingScheduleCount > 0) {
-      status = 'degraded';
+    // Metric C: Operational Health
+    let operationalStage:
+      'not_started' | 'in_progress' | 'completed' | 'failed' | 'blocked' | 'attention_required' =
+      'completed';
+    let status:
+      | 'healthy'
+      | 'in_progress'
+      | 'attention_required'
+      | 'degraded'
+      | 'critical'
+      | 'upcoming'
+      | 'unknown' = 'healthy';
+    const denominatorPrefix = `Processed Finalized (${processedWorkdays}) / Eligible Workdays (${eligibleWorkdays})`;
+    let denominatorDescription = '';
+
+    if (isToday) {
+      if (failedWorkdays > 0 || workdayBlockingExceptions > 0) {
+        status = 'critical';
+        operationalStage = failedWorkdays > 0 ? 'failed' : 'blocked';
+        denominatorDescription = `${denominatorPrefix} — Issues detected during workday (${failedWorkdays} failed processing, ${workdayBlockingExceptions} workday blockers)`;
+      } else {
+        // Active workday before cutoff: strictly in progress, not prematurely marked healthy or critical
+        status = 'in_progress';
+        operationalStage = 'in_progress';
+        denominatorDescription =
+          attemptedWorkdays > 0
+            ? `${denominatorPrefix} — Workday in progress (${processedWorkdays} of ${eligibleWorkdays} workdays finalized, ${reconciliationCompletionRate}% completed)`
+            : `${denominatorPrefix} — Workday in progress (reconciliation scheduled after shift cutoff)`;
+      }
+    } else {
+      // Past workday
+      if (failedWorkdays > 0 || workdayBlockingExceptions > 0) {
+        status = 'critical';
+        operationalStage = 'failed';
+        denominatorDescription = `${denominatorPrefix} — Failed/Blocked past workday (${failedWorkdays} failed, ${workdayBlockingExceptions} blockers)`;
+      } else if (pendingWorkdays > 0 || staleMonthlySummaries > 0 || unresolvedScheduleCount > 0) {
+        status = 'attention_required';
+        operationalStage = 'in_progress';
+        denominatorDescription = `${denominatorPrefix} — Past workday pending finalization (${pendingWorkdays} unfinalized workdays, ${staleMonthlySummaries} stale summaries)`;
+      } else {
+        status = 'healthy';
+        operationalStage = 'completed';
+        denominatorDescription = `${denominatorPrefix} — Reconciliation complete (${processedWorkdays} of ${eligibleWorkdays} eligible workdays finalized)`;
+      }
     }
 
     return {
@@ -1258,12 +1438,21 @@ export class AttendanceOverviewService {
       processedWorkdays,
       pendingWorkdays,
       failedWorkdays,
+      attemptedWorkdays,
+      processingSuccessRate,
+      reconciliationCompletionRate,
+      assignedScheduleCount,
+      fallbackScheduleCount,
+      unresolvedScheduleCount,
       missingScheduleCount,
       unresolvedBlockingExceptions,
+      workdayBlockingExceptions,
+      cumulativeBlockingExceptions,
+      historicalBlockingExceptions,
       staleMonthlySummaries,
-      processingSuccessRate,
-      denominatorDescription: `Processed Finalized (${processedWorkdays}) / Eligible Workdays (${eligibleWorkdays}) × 100`,
+      denominatorDescription,
       status,
+      operationalStage,
       asOf,
     };
   }

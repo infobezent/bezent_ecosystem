@@ -11,7 +11,7 @@
   flex-direction: column;
   align-items: center;
   min-height: 0;
-  padding: 8px 0 6px;
+  padding: 16px 0 12px;
   background: var(--bg-sidebar, var(--bg-header));
   font-family: var(--font-family-base);
   /* No border-right: surface contrast between --bg-sidebar (#F6F8FC) and
@@ -39,6 +39,11 @@
   flex-shrink: 0;
 }
 
+/* SubNavFlyout aligns flush with top of main workspace card */
+.subnav-flyout {
+  top: calc(var(--shell-topbar-height) + 4px);
+}
+
 .left-sidebar__item {
   width: var(--shell-nav-item-width);
   height: var(--shell-nav-item-height);
@@ -59,20 +64,22 @@
   position: relative;
 }
 
-/* ── Selection/hover pill ──────────────────────────────────────────────
-   Gmail-inspired navigation rail capsule pill: 56px wide x 32px tall,
-   fully rounded (border-radius: 16px) centered around the icon. */
+/* ── Selection/hover surface ──────────────────────────────────────────
+   Teams / Fluent 2 style symmetrical squircle: 40px wide x 40px tall,
+   border-radius: 8px (var(--radius-md)), framing the icon box cleanly. */
 .left-sidebar__item::before {
   content: '';
   position: absolute;
-  top: 4px;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 56px;
-  height: 32px;
-  border-radius: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md, 8px);
   background: transparent;
-  transition: background-color var(--motion-duration-nav-icon) ease;
+  transition:
+    background-color var(--motion-duration-nav-icon) ease,
+    transform var(--motion-duration-nav-icon) ease;
   pointer-events: none;
   z-index: 0;
 }
@@ -144,6 +151,7 @@
   font-size: var(--font-size-sm, 12px);
   font-weight: var(--font-weight-medium, 500);
   line-height: 14px;
+  letter-spacing: -0.15px;
   text-align: center;
   color: var(--nav-label-default);
   transition: color var(--motion-duration-icon) ease;

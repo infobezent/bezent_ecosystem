@@ -3,21 +3,21 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
 import { DailyAttendanceLogPage } from '../pages/DailyAttendanceLogPage';
 
-describe('HRMS Attendance — Daily Log V1.0 Frontend Tests', () => {
-  it('renders Daily Log V1.0 page header and workday navigation controls', () => {
+describe('HRMS Attendance — Daily Attendance V1.0 Frontend Tests', () => {
+  it('renders Daily Attendance V1.0 page header and workday navigation controls', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <DailyAttendanceLogPage />
       </MemoryRouter>,
     );
 
-    expect(html).toContain('Daily Log');
+    expect(html).toContain('Daily Attendance');
     expect(html).toContain('+ Manual Entry');
     expect(html).toContain('Export');
     expect(html).toContain('Today');
   });
 
-  it('renders all 6 Summary Counters with semantic labels', () => {
+  it('renders Workforce-style Summary Counters with semantic labels', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <DailyAttendanceLogPage />
@@ -27,24 +27,20 @@ describe('HRMS Attendance — Daily Log V1.0 Frontend Tests', () => {
     expect(html).toContain('Scheduled');
     expect(html).toContain('Present');
     expect(html).toContain('Absent');
-    expect(html).toContain('On Leave');
-    expect(html).toContain('On-Duty');
     expect(html).toContain('Pending Review');
   });
 
-  it('renders primary filter inputs (Search, Department, Classification, Processing State)', () => {
+  it('renders Workforce-style directory toolbar with search, filters trigger, reset button and records badge', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <DailyAttendanceLogPage />
       </MemoryRouter>,
     );
 
-    expect(html).toContain('Search employee name or code...');
-    expect(html).toContain('All Departments');
-    expect(html).toContain('All Classifications');
-    expect(html).toContain('All Processing States');
-    expect(html).toContain('More Filters');
+    expect(html).toContain('Search by name or employee ID');
+    expect(html).toContain('Filters');
     expect(html).toContain('Reset');
+    expect(html).toContain('Records');
   });
 
   it('contains the 10 finalized data table column headers in proper order', () => {

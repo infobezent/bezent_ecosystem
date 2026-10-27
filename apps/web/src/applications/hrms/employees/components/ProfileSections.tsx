@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import {
+  Alert,
   Badge,
   Button,
   EmptyState,
@@ -432,5 +433,378 @@ export function WorkSection({ workSchedule }: { workSchedule: WorkSchedule | nul
         ]}
       />
     </Section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// 8 Canonical Profile Sections for the Employee Workspace
+// ---------------------------------------------------------------------------
+
+/** 1. Personal Section */
+export function CanonicalPersonalSection({ profile }: { profile: EmployeeProfile }) {
+  return (
+    <Stack gap="lg">
+      <PersonalSection profile={profile} />
+    </Stack>
+  );
+}
+
+/** 2. Employment Section */
+export function EmploymentSection({
+  employee,
+  onNavigateWorkflow,
+}: {
+  employee: EmployeeRecord;
+  onNavigateWorkflow: (path: string) => void;
+}) {
+  return (
+    <Stack gap="lg">
+      <Section
+        title="Employment Status & Terms"
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onNavigateWorkflow('/hrms/workforce/promotions')}
+          >
+            Request Term Change
+          </Button>
+        }
+      >
+        <Fields
+          items={[
+            { label: 'Employee ID', value: employee.employeeNumber },
+            {
+              label: 'Employment Status',
+              value: (
+                <Badge variant={employmentStatusVariant(employee.employmentStatus)} size="sm">
+                  {EMPLOYMENT_STATUS_LABELS[employee.employmentStatus]}
+                </Badge>
+              ),
+            },
+            { label: 'Employment Type', value: employmentTypeLabel(employee.employmentType) },
+            { label: 'Joining Date', value: formatDate(employee.joiningDate) },
+            {
+              label: 'Source of Hire',
+              value: employee.sourceOfHire
+                ? SOURCE_OF_HIRE_LABELS[employee.sourceOfHire]
+                : 'Direct',
+            },
+            { label: 'Notice Period', value: formatNoticePeriod(employee.noticePeriodDays) },
+          ]}
+        />
+      </Section>
+
+      <Section
+        title="Probation & Lifecycle"
+        actions={
+          employee.employmentStatus === 'probation' ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onNavigateWorkflow('/hrms/workforce/promotions')}
+            >
+              Confirm / Extend
+            </Button>
+          ) : undefined
+        }
+      >
+        <Fields
+          items={[
+            {
+              label: 'Probation End Date',
+              value: employee.probationEndDate
+                ? formatDate(employee.probationEndDate)
+                : 'Not specified',
+            },
+            {
+              label: 'Confirmation Date',
+              value: employee.confirmationDate
+                ? formatDate(employee.confirmationDate)
+                : 'Pending Confirmation',
+            },
+            {
+              label: 'Contract End Date',
+              value: employee.contractEndDate
+                ? formatDate(employee.contractEndDate)
+                : 'Permanent / N/A',
+            },
+            {
+              label: 'Last Working Date',
+              value: employee.lastWorkingDate ? formatDate(employee.lastWorkingDate) : 'Active',
+            },
+          ]}
+        />
+      </Section>
+    </Stack>
+  );
+}
+
+/** 3. Organization Section */
+export function OrganizationSection({
+  employee,
+  onOpenEmployee,
+  onNavigateWorkflow,
+}: {
+  employee: EmployeeRecord;
+  onOpenEmployee: (id: string) => void;
+  onNavigateWorkflow: (path: string) => void;
+}) {
+  return (
+    <Stack gap="lg">
+      <Section
+        title="Position & Placement"
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onNavigateWorkflow('/hrms/workforce/transfers')}
+          >
+            Initiate Transfer
+          </Button>
+        }
+      >
+        <Fields
+          items={[
+            { label: 'Department', value: employee.departmentName ?? 'Not assigned' },
+            { label: 'Designation', value: employee.designationName ?? 'Not assigned' },
+            { label: 'Work Location', value: employee.locationName ?? 'Headquarters' },
+            {
+              label: 'Reporting Manager',
+              value:
+                employee.reportingManagerId && employee.reportingManagerName ? (
+                  <Button
+                    variant="text"
+                    size="sm"
+                    onClick={() => onOpenEmployee(employee.reportingManagerId!)}
+                  >
+                    {employee.reportingManagerName}
+                  </Button>
+                ) : (
+                  'Not assigned'
+                ),
+            },
+          ]}
+        />
+      </Section>
+    </Stack>
+  );
+}
+
+/** 4. Contact Section */
+export function ContactSection({ profile }: { profile: EmployeeProfile }) {
+  const { employee, personal, emergencyContacts } = profile;
+  const currentAddress = personal
+    ? [
+        personal.addressStreet,
+        personal.addressLine2,
+        personal.addressCity,
+        personal.addressDistrict,
+        personal.addressState,
+        personal.addressPostalCode,
+        personal.addressCountry,
+      ]
+        .filter(Boolean)
+        .join(', ')
+    : '';
+
+  const permanentAddress = personal
+    ? personal.isPermanentSameAsCurrent
+      ? currentAddress
+      : [
+          personal.permanentAddressStreet,
+          personal.permanentAddressLine2,
+          personal.permanentAddressCity,
+          personal.permanentAddressDistrict,
+          personal.permanentAddressState,
+          personal.permanentAddressPostalCode,
+          personal.permanentAddressCountry,
+        ]
+          .filter(Boolean)
+          .join(', ')
+    : '';
+
+  return (
+    <Stack gap="lg">
+      <Section title="Work & Personal Contacts">
+        <Fields
+          items={[
+            { label: 'Work Email', value: employee.email },
+            { label: 'Work Phone', value: employee.phone ?? '—' },
+            { label: 'Personal Email', value: personal?.personalEmail ?? '—' },
+            {
+              label: 'Home / Mobile Phone',
+              value: personal?.homePhone ?? personal?.businessPhone ?? '—',
+            },
+          ]}
+        />
+      </Section>
+
+      <Section title="Addresses">
+        <Fields
+          items={[
+            { label: 'Current Address', value: currentAddress || 'Not recorded' },
+            { label: 'Permanent Address', value: permanentAddress || 'Same as current address' },
+          ]}
+        />
+      </Section>
+
+      <EmergencyContactsSection contacts={emergencyContacts} />
+    </Stack>
+  );
+}
+
+/** 5. Payroll Section */
+export function PayrollSection({ profile }: { profile: EmployeeProfile }) {
+  const { bankAccount } = profile;
+
+  return (
+    <Stack gap="lg">
+      {bankAccount ? (
+        <Section title="Salary Bank Account">
+          <Fields
+            items={[
+              { label: 'Account Holder', value: bankAccount.accountHolderName },
+              { label: 'Account Number', value: bankAccount.accountNumberMasked },
+              { label: 'IFSC / Bank Code', value: bankAccount.ifscCode },
+              { label: 'Bank Name', value: bankAccount.bankName },
+              { label: 'Branch Name', value: bankAccount.branchName ?? '—' },
+              { label: 'Bank Location', value: bankAccount.bankLocation ?? '—' },
+            ]}
+          />
+        </Section>
+      ) : (
+        <NothingRecorded
+          title="No bank account recorded"
+          description="Salary disbursement bank account will appear here once configured."
+        />
+      )}
+
+      <Section title="Statutory Identifiers & Tax">
+        <Fields
+          items={[
+            { label: 'Statutory Compliance', value: 'Standard Company Rules' },
+            { label: 'Tax Regime', value: 'Authorized Payroll Group' },
+            { label: 'Disbursement Frequency', value: 'Monthly' },
+          ]}
+        />
+      </Section>
+    </Stack>
+  );
+}
+
+/** 6. Documents Section */
+export function DocumentsSection({
+  documents,
+  loading,
+  error,
+  onViewDocument,
+  onRetry,
+}: {
+  documents: Array<{
+    id: string;
+    documentName: string;
+    category: string;
+    status: string;
+    expiryDate: string | null;
+    updatedAt: string;
+  }>;
+  loading: boolean;
+  error: string | null;
+  onViewDocument: (id: string) => void;
+  onRetry: () => void;
+}) {
+  if (loading) {
+    return (
+      <NothingRecorded
+        title="Loading documents..."
+        description="Fetching employee document records."
+      />
+    );
+  }
+
+  if (error) {
+    return (
+      <Stack gap="sm">
+        <Alert variant="error" title="Could not load employee documents">
+          {error}
+        </Alert>
+        <Button variant="outline" size="sm" onClick={onRetry}>
+          Retry
+        </Button>
+      </Stack>
+    );
+  }
+
+  if (documents.length === 0) {
+    return (
+      <NothingRecorded
+        title="No documents recorded"
+        description="Employee identity, address proof, and qualification documents will appear here once submitted."
+      />
+    );
+  }
+
+  return (
+    <Table hoverable aria-label="Employee Documents">
+      <TableHead>
+        <TableRow>
+          <TableHeaderCell>Document Name</TableHeaderCell>
+          <TableHeaderCell>Category</TableHeaderCell>
+          <TableHeaderCell>Status</TableHeaderCell>
+          <TableHeaderCell>Expiry Date</TableHeaderCell>
+          <TableHeaderCell>Updated</TableHeaderCell>
+          <TableHeaderCell>Actions</TableHeaderCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {documents.map((doc) => (
+          <TableRow key={doc.id}>
+            <TableCell>{doc.documentName}</TableCell>
+            <TableCell>{doc.category}</TableCell>
+            <TableCell>
+              <Badge variant={doc.status === 'verified' ? 'success' : 'neutral'} size="sm">
+                {doc.status}
+              </Badge>
+            </TableCell>
+            <TableCell>{formatDate(doc.expiryDate)}</TableCell>
+            <TableCell>{formatDate(doc.updatedAt)}</TableCell>
+            <TableCell>
+              <Button variant="text" size="sm" onClick={() => onViewDocument(doc.id)}>
+                View
+              </Button>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
+
+/** 7. Accounts & Access Section */
+export function SystemAccountsSection({ employee }: { employee: EmployeeRecord }) {
+  return (
+    <Stack gap="lg">
+      <Section title="BEZENT Platform Access">
+        <Fields
+          items={[
+            { label: 'Work Email / Username', value: employee.email },
+            {
+              label: 'Platform Access Status',
+              value: (
+                <Badge
+                  variant={employee.employmentStatus === 'active' ? 'success' : 'neutral'}
+                  size="sm"
+                >
+                  {employee.employmentStatus === 'active' ? 'Active SSO / Password' : 'Restricted'}
+                </Badge>
+              ),
+            },
+            { label: 'Employee Directory Profile', value: 'Accessible in Company Workspace' },
+            { label: 'Assigned Identity Model', value: 'Employee ≠ User (Linked Member)' },
+          ]}
+        />
+      </Section>
+    </Stack>
   );
 }

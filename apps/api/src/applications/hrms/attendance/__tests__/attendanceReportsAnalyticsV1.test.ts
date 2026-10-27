@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
+import { eq, and } from 'drizzle-orm';
 import { createApp } from '../../../../app/server/createApp.js';
 import { isDatabaseConfigured, getDb } from '../../../../db/connection.js';
 import {
@@ -224,7 +225,7 @@ describe.skipIf(!isDatabaseConfigured)(
 
     const runSuffix = Date.now().toString().slice(-6);
     const testEmpId1 = generateSurrogateId('emp');
-    const testDeptId = generateSurrogateId('dpt');
+    let testDeptId: string;
     const empNum1 = `ANL1_${runSuffix}`;
 
     let headers: Record<string, string>;
@@ -233,17 +234,27 @@ describe.skipIf(!isDatabaseConfigured)(
       headers = await hrmsTestHeaders(companyId, tenantId);
       const db = getDb();
 
-      // Insert department
-      await db
-        .insert(departments)
-        .values({
+      // Look up existing department or insert if missing
+      const [existingDept] = await db
+        .select({ id: departments.id })
+        .from(departments)
+        .where(
+          and(eq(departments.companyId, companyId), eq(departments.name, 'Analytics Engineering')),
+        )
+        .limit(1);
+
+      if (existingDept) {
+        testDeptId = existingDept.id;
+      } else {
+        testDeptId = generateSurrogateId('dpt');
+        await db.insert(departments).values({
           id: testDeptId,
           tenantId,
           companyId,
           name: 'Analytics Engineering',
           code: `ANL-ENG-${runSuffix}`,
-        })
-        .onDuplicateKeyUpdate({ set: { name: 'Analytics Engineering' } });
+        });
+      }
 
       // Insert employee
       await db.insert(employees).values([
@@ -440,6 +451,15 @@ describe.skipIf(!isDatabaseConfigured)(
       expect(pdfText.startsWith('%PDF-1.4')).toBe(true);
       expect(pdfText.includes('Executive Visual Analytics')).toBe(true);
       expect(pdfText.trim().endsWith('%%EOF')).toBe(true);
+    });
+
+    afterAll(async () => {
+      const db = getDb();
+      await db.delete(employeeAttendance).where(eq(employeeAttendance.employeeId, testEmpId1));
+      await db
+        .delete(attendanceMonthlySummaries)
+        .where(eq(attendanceMonthlySummaries.employeeId, testEmpId1));
+      await db.delete(employees).where(eq(employees.id, testEmpId1));
     });
   },
 );
