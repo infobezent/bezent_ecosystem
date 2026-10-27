@@ -250,6 +250,10 @@ export class AttendanceRegularizationRepository {
       }
     }
 
+    if (filter.assignedQueue && filter.assignedQueue !== 'all') {
+      conditions.push(eq(attendanceRegularizations.assignedQueue, filter.assignedQueue));
+    }
+
     if (filter.source && filter.source !== 'all') {
       conditions.push(
         eq(

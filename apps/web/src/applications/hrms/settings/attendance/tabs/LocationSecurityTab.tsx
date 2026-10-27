@@ -48,6 +48,10 @@ export function LocationSecurityTab() {
   const [detectImpossibleTravel, setDetectImpossibleTravel] = useState(true);
   const [rapidPunchThrottlingSeconds, setRapidPunchThrottlingSeconds] = useState(60);
   const [flagVpnProxy, setFlagVpnProxy] = useState(true);
+  const [allowWebPunch, setAllowWebPunch] = useState(true);
+  const [allowMobilePunch, setAllowMobilePunch] = useState(true);
+  const [requireSelfiePunch, setRequireSelfiePunch] = useState(false);
+  const [allowPunchOutsideGeofence, setAllowPunchOutsideGeofence] = useState(false);
 
   // New Geofence form
   const [workLocations, setWorkLocations] = useState<WorkLocationRecord[]>([]);
@@ -77,6 +81,10 @@ export function LocationSecurityTab() {
       setDetectImpossibleTravel(Boolean(data.detectImpossibleTravel));
       setRapidPunchThrottlingSeconds(data.rapidPunchThrottlingSeconds ?? 60);
       setFlagVpnProxy(Boolean(data.flagVpnProxy));
+      setAllowWebPunch(data.allowWebPunch ?? true);
+      setAllowMobilePunch(data.allowMobilePunch ?? true);
+      setRequireSelfiePunch(Boolean(data.requireSelfiePunch));
+      setAllowPunchOutsideGeofence(Boolean(data.allowPunchOutsideGeofence));
 
       try {
         const locs = await fetchHrmsWorkLocations({ status: 'active' });
@@ -136,6 +144,10 @@ export function LocationSecurityTab() {
         detectImpossibleTravel,
         rapidPunchThrottlingSeconds,
         flagVpnProxy,
+        allowWebPunch,
+        allowMobilePunch,
+        requireSelfiePunch,
+        allowPunchOutsideGeofence,
       });
       setSuccess(true);
       setTimeout(() => setSuccess(false), 4000);
@@ -156,6 +168,58 @@ export function LocationSecurityTab() {
       {success && (
         <Alert variant="success">Location & Security settings updated successfully.</Alert>
       )}
+
+      {/* Self-Service (ESS) Remote & Mobile Punch Controls */}
+      <Card variant="flat" padding="lg">
+        <Stack gap="md">
+          <SettingsRow
+            label="Allow Web Browser Punch"
+            icon="devices"
+            info="Allows employees to clock in / out directly through the BEZENT web application dashboard."
+          >
+            <Switch checked={allowWebPunch} onChange={(e) => setAllowWebPunch(e.target.checked)} />
+          </SettingsRow>
+
+          <Divider spacing="sm" />
+
+          <SettingsRow
+            label="Allow Mobile App Punch"
+            icon="devices"
+            info="Enables attendance capture through the native iOS & Android BEZENT mobile apps."
+          >
+            <Switch
+              checked={allowMobilePunch}
+              onChange={(e) => setAllowMobilePunch(e.target.checked)}
+            />
+          </SettingsRow>
+
+          <Divider spacing="sm" />
+
+          <SettingsRow
+            label="Require Facial Selfie on Punch"
+            icon="security"
+            info="Enforces a live facial photo selfie capture with each punch submission to prevent buddy punching."
+          >
+            <Switch
+              checked={requireSelfiePunch}
+              onChange={(e) => setRequireSelfiePunch(e.target.checked)}
+            />
+          </SettingsRow>
+
+          <Divider spacing="sm" />
+
+          <SettingsRow
+            label="Allow Punch Outside Geofence (Audit Exception)"
+            icon="hub"
+            info="Permits punches outside assigned office geofence while raising an audit exception flag instead of hard blocking."
+          >
+            <Switch
+              checked={allowPunchOutsideGeofence}
+              onChange={(e) => setAllowPunchOutsideGeofence(e.target.checked)}
+            />
+          </SettingsRow>
+        </Stack>
+      </Card>
 
       <Card variant="flat" padding="lg">
         <Stack gap="md">

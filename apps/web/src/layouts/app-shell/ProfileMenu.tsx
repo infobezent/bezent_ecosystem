@@ -9,6 +9,7 @@ export interface ProfileMenuProps {
   userInitials: string;
   userName?: string;
   userEmail?: string;
+  userPhoto?: string;
   userRole?: string;
   onMyProfile?: () => void;
   onAccountSettings?: () => void;
@@ -32,6 +33,7 @@ export function ProfileMenu({
   userInitials,
   userName = 'User',
   userEmail = '',
+  userPhoto,
   userRole = 'Member',
   onMyProfile,
   onAccountSettings,
@@ -44,6 +46,12 @@ export function ProfileMenu({
   useEffect(() => {
     if (!isOpen) return;
 
+    // Focus first focusable item on mount
+    const firstFocusable = menuRef.current?.querySelector<HTMLElement>(
+      'button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+    );
+    firstFocusable?.focus();
+
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         onClose();
@@ -52,7 +60,32 @@ export function ProfileMenu({
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
+        event.preventDefault();
         onClose();
+        return;
+      }
+
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        if (!menuRef.current) return;
+        event.preventDefault();
+        const focusables = Array.from(
+          menuRef.current.querySelectorAll<HTMLElement>(
+            'button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+          ),
+        );
+        if (focusables.length === 0) return;
+
+        const currentIndex = focusables.indexOf(document.activeElement as HTMLElement);
+        let nextIndex: number;
+        if (event.key === 'ArrowDown') {
+          nextIndex = currentIndex >= 0 ? (currentIndex + 1) % focusables.length : 0;
+        } else {
+          nextIndex =
+            currentIndex >= 0
+              ? (currentIndex - 1 + focusables.length) % focusables.length
+              : focusables.length - 1;
+        }
+        focusables[nextIndex]?.focus();
       }
     }
 
@@ -77,7 +110,7 @@ export function ProfileMenu({
     >
       <div className="profile-menu__header">
         <div className="profile-menu__avatar-wrapper">
-          <Avatar initials={userInitials} size="lg" />
+          <Avatar initials={userInitials} src={userPhoto} size="lg" />
         </div>
         <div className="profile-menu__user-info">
           <div className="profile-menu__name">{userName}</div>
@@ -92,7 +125,7 @@ export function ProfileMenu({
             onClose();
           }}
         >
-          Manage your BEZENT Account
+          Manage your bezent Account
         </button>
       </div>
 

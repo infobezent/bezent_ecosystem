@@ -9,12 +9,13 @@ import {
   type NewOnboardingCase,
   type OnboardingCase,
 } from '../../../../db/schema.js';
-import { eq, and, desc, asc, like, or, count } from 'drizzle-orm';
+import { eq, and, desc, asc, like, or, count, inArray, gte, lte, type SQL } from 'drizzle-orm';
 import type {
   OnboardingCaseListItem,
   OnboardingCaseHistoryItem,
   PaginatedNewHiresResult,
   StageCounts,
+  ListNewHiresParams,
 } from '../types/onboarding.types.js';
 
 export class OnboardingRepository {
@@ -82,14 +83,22 @@ export class OnboardingRepository {
   async listNewHiresPaginated(
     tenantId: string,
     companyId: string,
-    params: {
-      page: number;
-      pageSize: number;
-      stage?: string;
-      search?: string;
-    },
+    params: ListNewHiresParams = {},
   ): Promise<PaginatedNewHiresResult> {
-    const { page, pageSize, stage, search } = params;
+    const page = params.page && params.page > 0 ? params.page : 1;
+    const pageSize = params.pageSize && params.pageSize > 0 ? params.pageSize : 25;
+    const {
+      stage,
+      search,
+      departmentId,
+      departmentIds,
+      locationId,
+      locationIds,
+      employmentType,
+      status,
+      joiningDateFrom,
+      joiningDateTo,
+    } = params;
 
     const db = getDb();
 
@@ -121,13 +130,43 @@ export class OnboardingRepository {
     counts.all = totalCases;
 
     // 2. Build filtered conditions for items and total count
-    const conditions = [
+    const conditions: SQL[] = [
       eq(onboardingCases.tenantId, tenantId),
       eq(onboardingCases.companyId, companyId),
     ];
 
     if (stage && stage !== 'all') {
       conditions.push(eq(onboardingCases.stage, stage as OnboardingCaseListItem['stage']));
+    }
+
+    if (departmentIds && departmentIds.length > 0) {
+      conditions.push(inArray(onboardingCases.departmentId, departmentIds));
+    } else if (departmentId) {
+      conditions.push(eq(onboardingCases.departmentId, departmentId));
+    }
+
+    if (locationIds && locationIds.length > 0) {
+      conditions.push(inArray(onboardingCases.locationId, locationIds));
+    } else if (locationId) {
+      conditions.push(eq(onboardingCases.locationId, locationId));
+    }
+
+    if (employmentType) {
+      conditions.push(
+        eq(onboardingCases.employmentType, employmentType as OnboardingCase['employmentType']),
+      );
+    }
+
+    if (status) {
+      conditions.push(eq(onboardingCases.status, status as OnboardingCase['status']));
+    }
+
+    if (joiningDateFrom) {
+      conditions.push(gte(onboardingCases.joiningDate, joiningDateFrom));
+    }
+
+    if (joiningDateTo) {
+      conditions.push(lte(onboardingCases.joiningDate, joiningDateTo));
     }
 
     if (search) {

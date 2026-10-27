@@ -159,6 +159,10 @@ attendanceRouter.post(
   attendanceController.verifyAndResolveException,
 );
 attendanceRouter.post('/hrms/attendance/exceptions/bulk', attendanceController.bulkExceptionAction);
+attendanceRouter.post(
+  '/hrms/attendance/missing-punch/sweep',
+  attendanceController.triggerMissingPunchSweep,
+);
 
 // 6. Regularization Workflow V1.0
 attendanceRouter.get(
@@ -391,6 +395,10 @@ attendanceRouter.post(
   attendanceCompOffController.reverseEntitlement,
 );
 attendanceRouter.post(
+  '/hrms/attendance/comp-off/entitlements/auto-lapse',
+  attendanceCompOffController.triggerAutoLapse,
+);
+attendanceRouter.post(
   '/hrms/attendance/comp-off/from-overtime/:settlementId',
   attendanceCompOffController.convertFromOvertime,
 );
@@ -405,6 +413,14 @@ attendanceRouter.get(
 attendanceRouter.post(
   '/hrms/attendance/comp-off/policies',
   attendanceCompOffController.createPolicy,
+);
+attendanceRouter.get(
+  '/hrms/attendance/comp-off/policies/:id',
+  attendanceCompOffController.getPolicyDetails,
+);
+attendanceRouter.put(
+  '/hrms/attendance/comp-off/policies/:id',
+  attendanceCompOffController.updatePolicy,
 );
 attendanceRouter.get(
   '/hrms/attendance/comp-off/requests/:id/audits',
@@ -509,6 +525,25 @@ attendanceRouter.post(
 attendanceRouter.post(
   '/hrms/attendance/settings/policies/:id/rollback',
   attendanceSettingsController.rollbackPolicyVersion,
+);
+
+// Shifts & Rosters
+attendanceRouter.get(
+  '/hrms/attendance/settings/shifts',
+  attendanceSettingsController.getShiftSettings,
+);
+attendanceRouter.put(
+  '/hrms/attendance/settings/shifts',
+  attendanceSettingsController.updateShiftSettings,
+);
+attendanceRouter.post('/hrms/attendance/settings/shifts', attendanceSettingsController.createShift);
+attendanceRouter.put(
+  '/hrms/attendance/settings/shifts/:id',
+  attendanceSettingsController.updateShift,
+);
+attendanceRouter.delete(
+  '/hrms/attendance/settings/shifts/:id',
+  attendanceSettingsController.deleteShift,
 );
 
 // Regularization

@@ -244,9 +244,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [activeCompany],
   );
 
+  const isSuperAdmin = Boolean(access?.user.isSuperAdmin);
+  const isCompanyAdmin = Boolean(
+    activeCompany?.roles.some((r) => r.code === 'company_admin') ||
+    activeCompany?.isPlatformOversight,
+  );
+
   const can = useCallback(
     (permission: string): boolean => {
+      if (isSuperAdmin || isCompanyAdmin) return true;
       if (heldPermissions.has(permission)) return true;
+      if (heldPermissions.has('hrms.administration.view') && permission.startsWith('hrms.')) {
+        return true;
+      }
       // Also check standard aliases: read/view, update/edit
       const alt = permission.endsWith('.view')
         ? permission.replace(/\.view$/, '.read')
@@ -259,7 +269,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               : null;
       return alt ? heldPermissions.has(alt) : false;
     },
-    [heldPermissions],
+    [heldPermissions, isSuperAdmin, isCompanyAdmin],
   );
 
   const canAny = useCallback(
@@ -275,12 +285,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hasApplicationAccess = useCallback(
     (moduleCode: ModuleCode | string): boolean => enabledModules.has(moduleCode as ModuleCode),
     [enabledModules],
-  );
-
-  const isSuperAdmin = Boolean(access?.user.isSuperAdmin);
-  const isCompanyAdmin = Boolean(
-    activeCompany?.roles.some((r) => r.code === 'company_admin') ||
-    activeCompany?.isPlatformOversight,
   );
 
   const value = useMemo<AuthContextValue>(

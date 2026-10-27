@@ -575,6 +575,112 @@ describe.skipIf(!isDatabaseConfigured)(
         expect(flags).toContain('impossible_travel');
         expect(flags).toContain('mock_location_suspected');
       });
+
+      it('enforces remote ESS web and mobile punch restrictions', async () => {
+        await resetPunchesAndAttendance();
+
+        // 1. Disable web punch
+        await hrPut('security', { allowWebPunch: false, allowMobilePunch: true });
+        const webPunch = await checkIn({
+          workLocation: 'office',
+          deviceMetadata: { ...inside, source: 'web' },
+        });
+        expect(webPunch.status).toBe(403);
+        expect(webPunch.body.error.code).toBe('WEB_PUNCH_DISABLED');
+
+        // Re-enable web punch
+        await hrPut('security', { allowWebPunch: true });
+        const webPunchOk = await checkIn({
+          workLocation: 'office',
+          deviceMetadata: { ...inside, source: 'web' },
+        });
+        expect(webPunchOk.status).toBe(200);
+
+        await resetPunchesAndAttendance();
+
+        // 2. Disable mobile punch
+        await hrPut('security', { allowMobilePunch: false });
+        const mobilePunch = await checkIn({
+          workLocation: 'office',
+          deviceMetadata: { ...inside, source: 'mobile' },
+        });
+        expect(mobilePunch.status).toBe(403);
+        expect(mobilePunch.body.error.code).toBe('MOBILE_PUNCH_DISABLED');
+
+        // Re-enable mobile punch
+        await hrPut('security', { allowMobilePunch: true });
+        const mobilePunchOk = await checkIn({
+          workLocation: 'office',
+          deviceMetadata: { ...inside, source: 'mobile' },
+        });
+        expect(mobilePunchOk.status).toBe(200);
+      });
+
+      it('enforces selfie verification requirement when enabled', async () => {
+        await resetPunchesAndAttendance();
+        await hrPut('security', { requireSelfiePunch: true });
+
+        // Missing selfie
+        const noSelfie = await checkIn({
+          workLocation: 'office',
+          deviceMetadata: { ...inside },
+        });
+        expect(noSelfie.status).toBe(400);
+        expect(noSelfie.body.error.code).toBe('SELFIE_REQUIRED');
+
+        // With selfie
+        const withSelfie = await checkIn({
+          workLocation: 'office',
+          deviceMetadata: {
+            ...inside,
+            selfieUrl: 'https://storage.bezent.internal/selfies/abc.jpg',
+          },
+        });
+        expect(withSelfie.status).toBe(200);
+
+        // Reset
+        await hrPut('security', { requireSelfiePunch: false });
+      });
+
+      it('permits punch outside strict geofence with audit exception flag when allowPunchOutsideGeofence is enabled', async () => {
+        await resetPunchesAndAttendance();
+        await hrPut('security', {
+          geofenceConfigs: [{ ...campus, enforceStrict: true }],
+          allowPunchOutsideGeofence: false,
+        });
+
+        // Hard block when disabled
+        const blocked = await checkIn({
+          workLocation: 'office',
+          deviceMetadata: faraway,
+        });
+        expect(blocked.status).toBe(403);
+        expect(blocked.body.error.code).toBe('OUTSIDE_GEOFENCE');
+
+        // Soft audit exception when enabled
+        await hrPut('security', {
+          allowPunchOutsideGeofence: true,
+        });
+        const allowed = await checkIn({
+          workLocation: 'office',
+          deviceMetadata: faraway,
+        });
+        expect(allowed.status).toBe(200);
+
+        const [punch] = await getDb()
+          .select()
+          .from(attendancePunches)
+          .where(eq(attendancePunches.employeeId, employeeId));
+        const flags =
+          (punch?.deviceMetadata as { securityFlags?: string[] } | null)?.securityFlags ?? [];
+        expect(flags).toContain('outside_geofence_allowed');
+
+        // Reset
+        await hrPut('security', {
+          geofenceConfigs: [],
+          allowPunchOutsideGeofence: false,
+        });
+      });
     });
 
     describe('Manual attendance entry settings apply to HR corrections', () => {

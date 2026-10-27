@@ -22,6 +22,7 @@ export interface AppShellProps {
   userInitials: string;
   userName?: string;
   userEmail?: string;
+  userPhoto?: string;
   userRole?: string;
   onMyProfile?: () => void;
   onAccountSettings?: () => void;
@@ -75,6 +76,7 @@ export function AppShell({
   userInitials,
   userName,
   userEmail,
+  userPhoto,
   userRole,
   onMyProfile,
   onAccountSettings,
@@ -122,6 +124,7 @@ export function AppShell({
         userInitials={userInitials}
         userName={userName}
         userEmail={userEmail}
+        userPhoto={userPhoto}
         userRole={userRole}
         onMyProfile={onMyProfile}
         onAccountSettings={onAccountSettings}

@@ -51,24 +51,25 @@ describe('BEZENT HRMS — Punch Logs V1.0 Frontend Page', () => {
     );
 
     expect(html).toContain('Punch Logs');
-    expect(html).toContain('Attendance / Punch Logs');
-    expect(html).toContain('Today');
+    expect(html).toContain('Attendance › Punch Logs');
+    expect(html).toContain('Review every raw punch captured from devices, web and mobile.');
+    expect(html).toContain('Event Time');
+    expect(html).toContain('Workday');
     expect(html).toContain('Export');
   });
 
-  it('renders exactly all six summary counters', () => {
+  it('renders exactly all five summary counters', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <PunchLogsPage />
       </MemoryRouter>,
     );
 
-    expect(html).toContain('Total Events');
-    expect(html).toContain('Valid');
-    expect(html).toContain('Needs Review');
-    expect(html).toContain('Duplicates');
-    expect(html).toContain('Unmatched');
-    expect(html).toContain('Processing Failed');
+    expect(html).toContain('Total Punches');
+    expect(html).toContain('Accepted');
+    expect(html).toContain('Flagged');
+    expect(html).toContain('Rejected');
+    expect(html).toContain('Failed to Process');
   });
 
   it('renders primary filter bar controls', () => {
@@ -78,15 +79,7 @@ describe('BEZENT HRMS — Punch Logs V1.0 Frontend Page', () => {
       </MemoryRouter>,
     );
 
-    expect(html).toContain('Search employee name or code...');
-    expect(html).toContain('All Sources');
-    expect(html).toContain('Biometric Device');
-    expect(html).toContain('Web Portal');
-    expect(html).toContain('Mobile Application');
-    expect(html).toContain('On-Site Kiosk');
-    expect(html).toContain('Batch Import');
-    expect(html).toContain('All Results');
-    expect(html).toContain('More Filters');
-    expect(html).toContain('Reset');
+    expect(html).toContain('Search by name or employee ID');
+    expect(html).toContain('Filters');
   });
 });

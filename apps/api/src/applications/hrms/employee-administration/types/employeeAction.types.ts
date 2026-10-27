@@ -128,8 +128,12 @@ export interface ListEmployeeActionsParams {
   pageSize: number;
   category?: EmployeeActionCategory;
   actionType?: EmployeeActionType;
+  actionTypes?: EmployeeActionType[];
   status?: EmployeeActionStatus;
   employeeId?: string;
+  departmentId?: string;
+  effectiveDateFrom?: string;
+  effectiveDateTo?: string;
   search?: string;
 }
 
@@ -173,8 +177,17 @@ export interface EmployeeActionDetail extends EmployeeActionListItem {
 
 export type ActionCategoryCounts = Record<'all' | EmployeeActionCategory, number>;
 
+export interface ActionStatusCounts {
+  all: number;
+  pending: number;
+  applied: number;
+  cancelled: number;
+  upcoming: number;
+}
+
 export interface PaginatedEmployeeActionsResult {
   items: EmployeeActionListItem[];
   pagination: PaginationMetadata;
   counts: ActionCategoryCounts;
+  statusCounts: ActionStatusCounts;
 }

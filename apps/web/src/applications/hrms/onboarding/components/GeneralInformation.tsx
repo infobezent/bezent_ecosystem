@@ -21,12 +21,14 @@ export interface GeneralInformationProps {
   employeeId?: string;
   data?: Partial<Chapter01GeneralState>;
   onChange?: (data: Partial<Chapter01GeneralState>) => void;
+  mode?: 'registration' | 'edit';
 }
 
 export function GeneralInformation({
   employeeId: employeeIdProp,
   data,
   onChange,
+  mode = 'registration',
 }: GeneralInformationProps) {
   // State for all canonical general fields
   const [employeeId, setEmployeeId] = useState(data?.employeeId ?? employeeIdProp ?? '');
@@ -370,20 +372,30 @@ export function GeneralInformation({
             value={department}
             htmlFor="reg-department"
             span={span}
+            helperText={
+              mode === 'edit'
+                ? 'Department transfers require formal workflow approval. Use Workforce > Transfers.'
+                : undefined
+            }
           >
             <Select
               id="reg-department"
               value={department}
+              disabled={mode === 'edit'}
               onChange={(e) => handleDepartmentChange(e.target.value)}
-              options={
-                configuredOptions || [
+              options={(() => {
+                const baseOptions = configuredOptions || [
                   { value: 'Engineering', label: 'Engineering' },
                   { value: 'Human Resources', label: 'Human Resources' },
                   { value: 'Finance', label: 'Finance' },
                   { value: 'Operations', label: 'Operations' },
                   { value: 'other', label: 'Other' },
-                ]
-              }
+                ];
+                if (department && !baseOptions.some((o) => o.value === department)) {
+                  return [{ value: department, label: department }, ...baseOptions];
+                }
+                return baseOptions;
+              })()}
             />
           </RegistrationField>
         );
@@ -414,20 +426,30 @@ export function GeneralInformation({
             value={designation}
             htmlFor="reg-designation"
             span={span}
+            helperText={
+              mode === 'edit'
+                ? 'Promotions and designation changes require formal workflow approval. Use Workforce > Promotions.'
+                : undefined
+            }
           >
             <Select
               id="reg-designation"
               value={designation}
+              disabled={mode === 'edit'}
               onChange={(e) => setDesignation(e.target.value)}
-              options={
-                configuredOptions || [
+              options={(() => {
+                const baseOptions = configuredOptions || [
                   { value: 'Software Engineer', label: 'Software Engineer' },
                   { value: 'Financial Analyst', label: 'Financial Analyst' },
                   { value: 'Senior HR Specialist', label: 'Senior HR Specialist' },
                   { value: 'Product Manager', label: 'Product Manager' },
                   { value: 'other', label: 'Other' },
-                ]
-              }
+                ];
+                if (designation && !baseOptions.some((o) => o.value === designation)) {
+                  return [{ value: designation, label: designation }, ...baseOptions];
+                }
+                return baseOptions;
+              })()}
             />
           </RegistrationField>
         );
@@ -468,6 +490,11 @@ export function GeneralInformation({
             htmlFor="reg-reporting-manager"
             span={span}
             disabled
+            helperText={
+              mode === 'edit'
+                ? 'Reporting manager reassignments require manager approval workflows.'
+                : undefined
+            }
           >
             <Input
               id="reg-reporting-manager"
@@ -516,14 +543,18 @@ export function GeneralInformation({
               id="reg-office-location"
               value={officeLocation}
               onChange={(e) => setOfficeLocation(e.target.value)}
-              options={
-                configuredOptions || [
+              options={(() => {
+                const baseOptions = configuredOptions || [
                   { value: 'Chennai - Main Office', label: 'Chennai - Main Office' },
                   { value: 'Bengaluru', label: 'Bengaluru' },
                   { value: 'Hyderabad', label: 'Hyderabad' },
                   { value: 'other', label: 'Other' },
-                ]
-              }
+                ];
+                if (officeLocation && !baseOptions.some((o) => o.value === officeLocation)) {
+                  return [{ value: officeLocation, label: officeLocation }, ...baseOptions];
+                }
+                return baseOptions;
+              })()}
             />
           </RegistrationField>
         );

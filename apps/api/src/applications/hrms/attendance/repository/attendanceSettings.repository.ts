@@ -16,11 +16,11 @@ import {
   attendanceSettingsAuditLogs,
   employees,
   departments,
+  employeeWorkSchedules,
   type AttendancePolicy,
   type AttendanceRegularizationSettings,
   type AttendanceDevice,
   type AttendanceImportBatch,
-  type AttendanceSecuritySettings,
   type AttendancePayrollSettings,
   type AttendancePeriod,
   type AttendancePayrollHandoverBatch,
@@ -37,7 +37,76 @@ import type {
   SettingsAuditFilter,
   AttendanceGeneralSettingsWithV1,
   AttendanceAlertSettings,
+  CompanyShiftTemplate,
+  ShiftRosterSettings,
+  UpdateShiftRosterSettingsInput,
+  CreateShiftInput,
+  UpdateShiftInput,
+  AttendanceSecuritySettingsWithRemote,
 } from '../types/attendance.types.js';
+
+export const DEFAULT_COMPANY_SHIFTS: CompanyShiftTemplate[] = [
+  {
+    id: 'shift_gen_std',
+    name: 'General Shift',
+    code: 'GEN-09',
+    startTime: '09:00',
+    endTime: '18:00',
+    workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+    breakMinutes: 60,
+    lunchMinutes: 30,
+    graceMinutes: 15,
+    isOvernight: false,
+    color: '#2563EB',
+    description: 'Standard 9-hour daytime office shift with 60-min break allowance',
+    isActive: true,
+  },
+  {
+    id: 'shift_mor_06',
+    name: 'Morning Shift',
+    code: 'MOR-06',
+    startTime: '06:00',
+    endTime: '14:30',
+    workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    breakMinutes: 45,
+    lunchMinutes: 30,
+    graceMinutes: 10,
+    isOvernight: false,
+    color: '#059669',
+    description: 'Early morning operations and field support shift',
+    isActive: true,
+  },
+  {
+    id: 'shift_eve_14',
+    name: 'Evening Shift',
+    code: 'EVE-14',
+    startTime: '14:00',
+    endTime: '22:30',
+    workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+    breakMinutes: 45,
+    lunchMinutes: 30,
+    graceMinutes: 10,
+    isOvernight: false,
+    color: '#D97706',
+    description: 'Afternoon to late evening operational shift',
+    isActive: true,
+  },
+  {
+    id: 'shift_nig_22',
+    name: 'Night Shift',
+    code: 'NIG-22',
+    startTime: '22:00',
+    endTime: '06:30',
+    workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+    breakMinutes: 60,
+    lunchMinutes: 30,
+    graceMinutes: 15,
+    isOvernight: true,
+    color: '#7C3AED',
+    description: 'Overnight shift spanning across midnight to next morning',
+    isActive: true,
+  },
+];
 
 export class AttendanceSettingsRepository {
   /* ── 1. General Settings ────────────────────────────────────────── */
@@ -873,7 +942,7 @@ export class AttendanceSettingsRepository {
   async getSecuritySettings(
     tenantId: string,
     companyId: string,
-  ): Promise<AttendanceSecuritySettings | null> {
+  ): Promise<AttendanceSecuritySettingsWithRemote | null> {
     const db = getDb();
     const rows = await db
       .select()
@@ -885,14 +954,43 @@ export class AttendanceSettingsRepository {
         ),
       )
       .limit(1);
-    return rows[0] ?? null;
+
+    const base = rows[0] ?? null;
+    if (!base) return null;
+
+    const genRows = await db
+      .select({ alertPreferences: attendanceGeneralSettings.alertPreferences })
+      .from(attendanceGeneralSettings)
+      .where(
+        and(
+          eq(attendanceGeneralSettings.tenantId, tenantId),
+          eq(attendanceGeneralSettings.companyId, companyId),
+        ),
+      )
+      .limit(1);
+
+    const prefs = (genRows[0]?.alertPreferences ?? {}) as Record<string, unknown>;
+    const remote = (prefs.remotePunchConfig ?? {}) as {
+      allowWebPunch?: boolean;
+      allowMobilePunch?: boolean;
+      requireSelfiePunch?: boolean;
+      allowPunchOutsideGeofence?: boolean;
+    };
+
+    return {
+      ...base,
+      allowWebPunch: remote.allowWebPunch ?? true,
+      allowMobilePunch: remote.allowMobilePunch ?? true,
+      requireSelfiePunch: remote.requireSelfiePunch ?? false,
+      allowPunchOutsideGeofence: remote.allowPunchOutsideGeofence ?? false,
+    };
   }
 
   async upsertSecuritySettings(
     tenantId: string,
     companyId: string,
     input: SecuritySettingsInput,
-  ): Promise<AttendanceSecuritySettings> {
+  ): Promise<AttendanceSecuritySettingsWithRemote> {
     const db = getDb();
     const existing = await this.getSecuritySettings(tenantId, companyId);
 
@@ -925,25 +1023,87 @@ export class AttendanceSettingsRepository {
           updatedAt: new Date(),
         })
         .where(eq(attendanceSecuritySettings.id, existing.id));
-      return (await this.getSecuritySettings(tenantId, companyId))!;
+    } else {
+      const id = generateSurrogateId('att_sec');
+      await db.insert(attendanceSecuritySettings).values({
+        id,
+        tenantId,
+        companyId,
+        enableGps: input.enableGps ?? true,
+        geofenceConfigs: input.geofenceConfigs ?? [],
+        ipAllowlist: input.ipAllowlist ?? ['192.168.1.0/24'],
+        enforceIpRestriction: input.enforceIpRestriction ?? false,
+        maxDevicesPerEmployee: input.maxDevicesPerEmployee ?? 2,
+        allowSharedKiosk: input.allowSharedKiosk ?? true,
+        detectMockLocation: input.detectMockLocation ?? true,
+        detectImpossibleTravel: input.detectImpossibleTravel ?? true,
+        rapidPunchThrottlingSeconds: input.rapidPunchThrottlingSeconds ?? 60,
+        flagVpnProxy: input.flagVpnProxy ?? true,
+      });
     }
 
-    const id = generateSurrogateId('att_sec');
-    await db.insert(attendanceSecuritySettings).values({
-      id,
-      tenantId,
-      companyId,
-      enableGps: input.enableGps ?? true,
-      geofenceConfigs: input.geofenceConfigs ?? [],
-      ipAllowlist: input.ipAllowlist ?? ['192.168.1.0/24'],
-      enforceIpRestriction: input.enforceIpRestriction ?? false,
-      maxDevicesPerEmployee: input.maxDevicesPerEmployee ?? 2,
-      allowSharedKiosk: input.allowSharedKiosk ?? true,
-      detectMockLocation: input.detectMockLocation ?? true,
-      detectImpossibleTravel: input.detectImpossibleTravel ?? true,
-      rapidPunchThrottlingSeconds: input.rapidPunchThrottlingSeconds ?? 60,
-      flagVpnProxy: input.flagVpnProxy ?? true,
-    });
+    if (
+      input.allowWebPunch !== undefined ||
+      input.allowMobilePunch !== undefined ||
+      input.requireSelfiePunch !== undefined ||
+      input.allowPunchOutsideGeofence !== undefined
+    ) {
+      const genRows = await db
+        .select()
+        .from(attendanceGeneralSettings)
+        .where(
+          and(
+            eq(attendanceGeneralSettings.tenantId, tenantId),
+            eq(attendanceGeneralSettings.companyId, companyId),
+          ),
+        )
+        .limit(1);
+      const row = genRows[0];
+      const prefs = (row?.alertPreferences ?? {}) as Record<string, unknown>;
+      const existingRemote = (prefs.remotePunchConfig ?? {}) as Record<string, unknown>;
+      const updatedRemote = {
+        ...existingRemote,
+        ...(input.allowWebPunch !== undefined ? { allowWebPunch: input.allowWebPunch } : {}),
+        ...(input.allowMobilePunch !== undefined
+          ? { allowMobilePunch: input.allowMobilePunch }
+          : {}),
+        ...(input.requireSelfiePunch !== undefined
+          ? { requireSelfiePunch: input.requireSelfiePunch }
+          : {}),
+        ...(input.allowPunchOutsideGeofence !== undefined
+          ? { allowPunchOutsideGeofence: input.allowPunchOutsideGeofence }
+          : {}),
+      };
+      const updatedPrefs = {
+        ...prefs,
+        remotePunchConfig: updatedRemote,
+      };
+
+      if (row) {
+        await db
+          .update(attendanceGeneralSettings)
+          .set({
+            alertPreferences: updatedPrefs,
+            updatedAt: new Date(),
+          })
+          .where(eq(attendanceGeneralSettings.id, row.id));
+      } else {
+        await db.insert(attendanceGeneralSettings).values({
+          id: generateSurrogateId('ags'),
+          tenantId,
+          companyId,
+          timezone: 'UTC',
+          dayBoundaryTime: '00:00:00',
+          trackingStartDate: '2026-01-01',
+          processingMode: 'realtime',
+          manualEntryAllowed: true,
+          employeeVisibility: 'self_only',
+          defaultHistoryViewDays: 30,
+          alertPreferences: updatedPrefs,
+        });
+      }
+    }
+
     return (await this.getSecuritySettings(tenantId, companyId))!;
   }
 
@@ -1344,8 +1504,23 @@ export class AttendanceSettingsRepository {
       eq(attendanceSettingsAuditLogs.tenantId, tenantId),
       eq(attendanceSettingsAuditLogs.companyId, companyId),
     ];
-    if (filter?.category) {
-      conditions.push(eq(attendanceSettingsAuditLogs.category, filter.category));
+    if (
+      filter?.category &&
+      [
+        'general',
+        'policy',
+        'regularization',
+        'capture_device',
+        'location_security',
+        'payroll_locking',
+      ].includes(filter.category)
+    ) {
+      conditions.push(
+        eq(
+          attendanceSettingsAuditLogs.category,
+          filter.category as AttendanceSettingsAuditLog['category'],
+        ),
+      );
     }
     if (filter?.startDate) {
       conditions.push(
@@ -1379,6 +1554,215 @@ export class AttendanceSettingsRepository {
       items,
       total: Number(totalRes[0]?.count ?? items.length),
     };
+  }
+
+  /* ── 9. Shift & Roster Configuration ────────────────────────────── */
+
+  async getShiftRosterSettings(tenantId: string, companyId: string): Promise<ShiftRosterSettings> {
+    const db = getDb();
+    const rows = await db
+      .select()
+      .from(attendanceGeneralSettings)
+      .where(
+        and(
+          eq(attendanceGeneralSettings.tenantId, tenantId),
+          eq(attendanceGeneralSettings.companyId, companyId),
+        ),
+      )
+      .limit(1);
+
+    const row = rows[0];
+    const prefs = (row?.alertPreferences ?? {}) as Record<string, unknown>;
+    const rawRoster = prefs.shiftRosterConfig as Partial<ShiftRosterSettings> | undefined;
+
+    const baseShifts: CompanyShiftTemplate[] =
+      rawRoster?.shifts && rawRoster.shifts.length > 0 ? rawRoster.shifts : DEFAULT_COMPANY_SHIFTS;
+
+    // Retrieve active employee counts assigned to each shift from employeeWorkSchedules
+    const scheduleCounts = await db
+      .select({
+        workSchedule: employeeWorkSchedules.workSchedule,
+        count: sql<number>`count(*)`,
+      })
+      .from(employeeWorkSchedules)
+      .where(
+        and(
+          eq(employeeWorkSchedules.tenantId, tenantId),
+          eq(employeeWorkSchedules.companyId, companyId),
+        ),
+      )
+      .groupBy(employeeWorkSchedules.workSchedule);
+
+    const countMap = new Map<string, number>();
+    for (const sc of scheduleCounts) {
+      if (sc.workSchedule) {
+        countMap.set(sc.workSchedule.toLowerCase(), Number(sc.count));
+      }
+    }
+
+    const shiftsWithCounts = baseShifts.map((shift) => {
+      const assignedCount =
+        countMap.get(shift.name.toLowerCase()) ??
+        countMap.get(shift.code.toLowerCase()) ??
+        countMap.get(shift.id.toLowerCase()) ??
+        0;
+      return {
+        ...shift,
+        assignedEmployeesCount: assignedCount,
+      };
+    });
+
+    return {
+      shifts: shiftsWithCounts,
+      autoShiftAllocation: {
+        enabled: rawRoster?.autoShiftAllocation?.enabled ?? true,
+        matchingWindowMinutes: rawRoster?.autoShiftAllocation?.matchingWindowMinutes ?? 60,
+        fallbackShiftId: rawRoster?.autoShiftAllocation?.fallbackShiftId ?? 'shift_gen_std',
+        allowOvernightSpanning: rawRoster?.autoShiftAllocation?.allowOvernightSpanning ?? true,
+      },
+      shiftSwapRules: {
+        allowEmployeeRequests: rawRoster?.shiftSwapRules?.allowEmployeeRequests ?? true,
+        cutoffHours: rawRoster?.shiftSwapRules?.cutoffHours ?? 24,
+        requireManagerApproval: rawRoster?.shiftSwapRules?.requireManagerApproval ?? true,
+      },
+    };
+  }
+
+  async updateShiftRosterSettings(
+    tenantId: string,
+    companyId: string,
+    input: UpdateShiftRosterSettingsInput,
+  ): Promise<ShiftRosterSettings> {
+    const db = getDb();
+    const current = await this.getShiftRosterSettings(tenantId, companyId);
+    const existing = await db
+      .select()
+      .from(attendanceGeneralSettings)
+      .where(
+        and(
+          eq(attendanceGeneralSettings.tenantId, tenantId),
+          eq(attendanceGeneralSettings.companyId, companyId),
+        ),
+      )
+      .limit(1);
+
+    const mergedSettings: ShiftRosterSettings = {
+      shifts: input.shifts ?? current.shifts,
+      autoShiftAllocation: {
+        ...current.autoShiftAllocation,
+        ...(input.autoShiftAllocation ?? {}),
+      },
+      shiftSwapRules: {
+        ...current.shiftSwapRules,
+        ...(input.shiftSwapRules ?? {}),
+      },
+    };
+
+    const row = existing[0];
+    const prefs = (row?.alertPreferences ?? {}) as Record<string, unknown>;
+    const updatedPrefs = {
+      ...prefs,
+      shiftRosterConfig: mergedSettings,
+    };
+
+    if (row) {
+      await db
+        .update(attendanceGeneralSettings)
+        .set({
+          alertPreferences: updatedPrefs,
+          updatedAt: new Date(),
+        })
+        .where(eq(attendanceGeneralSettings.id, row.id));
+    } else {
+      await db.insert(attendanceGeneralSettings).values({
+        id: generateSurrogateId('ags'),
+        tenantId,
+        companyId,
+        timezone: 'UTC',
+        dayBoundaryTime: '00:00:00',
+        trackingStartDate: '2026-01-01',
+        processingMode: 'realtime',
+        manualEntryAllowed: true,
+        employeeVisibility: 'self_only',
+        defaultHistoryViewDays: 30,
+        alertPreferences: updatedPrefs,
+      });
+    }
+
+    return this.getShiftRosterSettings(tenantId, companyId);
+  }
+
+  async createCompanyShift(
+    tenantId: string,
+    companyId: string,
+    shiftInput: CreateShiftInput,
+  ): Promise<CompanyShiftTemplate> {
+    const current = await this.getShiftRosterSettings(tenantId, companyId);
+    const newShift: CompanyShiftTemplate = {
+      id: shiftInput.id || `shift_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      name: shiftInput.name,
+      code: shiftInput.code,
+      startTime: shiftInput.startTime,
+      endTime: shiftInput.endTime,
+      workingDays: shiftInput.workingDays,
+      breakMinutes: shiftInput.breakMinutes ?? 60,
+      lunchMinutes: shiftInput.lunchMinutes ?? 30,
+      graceMinutes: shiftInput.graceMinutes ?? 15,
+      isOvernight: shiftInput.isOvernight ?? false,
+      color: shiftInput.color ?? '#2563EB',
+      description: shiftInput.description ?? '',
+      isActive: shiftInput.isActive ?? true,
+      assignedEmployeesCount: 0,
+    };
+
+    const updatedShifts = [...current.shifts, newShift];
+    await this.updateShiftRosterSettings(tenantId, companyId, { shifts: updatedShifts });
+    return newShift;
+  }
+
+  async updateCompanyShift(
+    tenantId: string,
+    companyId: string,
+    shiftId: string,
+    shiftUpdate: UpdateShiftInput,
+  ): Promise<CompanyShiftTemplate | null> {
+    const current = await this.getShiftRosterSettings(tenantId, companyId);
+    const index = current.shifts.findIndex((s) => s.id === shiftId);
+    if (index === -1) return null;
+
+    const existing = current.shifts[index];
+    if (!existing) return null;
+
+    const updated: CompanyShiftTemplate = {
+      ...existing,
+      id: existing.id,
+      name: shiftUpdate.name ?? existing.name,
+      code: shiftUpdate.code ?? existing.code,
+      startTime: shiftUpdate.startTime ?? existing.startTime,
+      endTime: shiftUpdate.endTime ?? existing.endTime,
+      workingDays: shiftUpdate.workingDays ?? existing.workingDays,
+      breakMinutes: shiftUpdate.breakMinutes ?? existing.breakMinutes,
+      lunchMinutes: shiftUpdate.lunchMinutes ?? existing.lunchMinutes,
+      graceMinutes: shiftUpdate.graceMinutes ?? existing.graceMinutes,
+      isOvernight: shiftUpdate.isOvernight ?? existing.isOvernight,
+      color: shiftUpdate.color ?? existing.color,
+      description: shiftUpdate.description ?? existing.description,
+      isActive: shiftUpdate.isActive ?? existing.isActive,
+    };
+
+    current.shifts[index] = updated;
+    await this.updateShiftRosterSettings(tenantId, companyId, { shifts: current.shifts });
+    return updated;
+  }
+
+  async deleteCompanyShift(tenantId: string, companyId: string, shiftId: string): Promise<boolean> {
+    const current = await this.getShiftRosterSettings(tenantId, companyId);
+    const initialLen = current.shifts.length;
+    const filtered = current.shifts.filter((s) => s.id !== shiftId);
+    if (filtered.length === initialLen) return false;
+
+    await this.updateShiftRosterSettings(tenantId, companyId, { shifts: filtered });
+    return true;
   }
 }
 

@@ -24,10 +24,11 @@ import {
   employeeAttendance,
   attendancePolicies,
   attendanceOvertimeSettlements,
+  attendanceCompOffEntitlements,
   type AttendanceCompOffPolicy,
   type AttendanceCompOffHandoff,
 } from '../../../../db/schema.js';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray, lt } from 'drizzle-orm';
 import { generateSurrogateId } from '../../../../platform/auth/security.js';
 import { AttendanceCompOffRepository } from '../repository/attendanceCompOff.repository.js';
 import { AttendanceCompOffCalculationService } from './attendanceCompOffCalculation.service.js';
@@ -914,7 +915,79 @@ export class AttendanceCompOffService {
     });
   }
 
+  async getPolicyById(tenantId: string, companyId: string, policyId: string) {
+    const policy = await this.repo.getPolicyById(tenantId, companyId, policyId);
+    if (!policy) throw new NotFoundError('Comp-off policy not found');
+    return policy;
+  }
+
+  async updatePolicy(
+    tenantId: string,
+    companyId: string,
+    policyId: string,
+    input: Partial<AttendanceCompOffPolicy>,
+  ) {
+    const existing = await this.repo.getPolicyById(tenantId, companyId, policyId);
+    if (!existing) throw new NotFoundError('Comp-off policy not found');
+    return this.repo.updatePolicy(tenantId, companyId, policyId, input);
+  }
+
   async getAuditsForRequest(tenantId: string, companyId: string, requestId: string) {
     return this.repo.getAuditsForRequest(tenantId, companyId, requestId);
   }
+
+  /**
+   * Scans for active comp-off entitlements past their expires_at date and marks them 'expired'.
+   */
+  async lapseExpiredCompOffEntitlements(
+    tenantId?: string,
+    companyId?: string,
+  ): Promise<{ lapsedCount: number }> {
+    const db = getDb();
+    const today = this.formatDate(new Date());
+
+    const conditions = [
+      inArray(attendanceCompOffEntitlements.status, ['active', 'pending_handoff']),
+      lt(attendanceCompOffEntitlements.expiresAt, today),
+    ];
+    if (tenantId) conditions.push(eq(attendanceCompOffEntitlements.tenantId, tenantId));
+    if (companyId) conditions.push(eq(attendanceCompOffEntitlements.companyId, companyId));
+
+    const expiredRows = await db
+      .select({
+        id: attendanceCompOffEntitlements.id,
+        requestId: attendanceCompOffEntitlements.requestId,
+        tenantId: attendanceCompOffEntitlements.tenantId,
+        companyId: attendanceCompOffEntitlements.companyId,
+      })
+      .from(attendanceCompOffEntitlements)
+      .where(and(...conditions));
+
+    if (expiredRows.length === 0) {
+      return { lapsedCount: 0 };
+    }
+
+    for (const row of expiredRows) {
+      await db
+        .update(attendanceCompOffEntitlements)
+        .set({ status: 'expired' })
+        .where(eq(attendanceCompOffEntitlements.id, row.id));
+
+      await this.repo.logAudit({
+        id: generateSurrogateId('co_aud_'),
+        tenantId: row.tenantId,
+        companyId: row.companyId,
+        requestId: row.requestId,
+        action: 'expired_auto_lapse',
+        fromStatus: 'active',
+        toStatus: 'expired',
+        performedByUserId: 'SYSTEM_DAEMON',
+        details: { reason: 'Comp-Off validity period exceeded without utilization' },
+      });
+    }
+
+    return { lapsedCount: expiredRows.length };
+  }
 }
+
+export const attendanceCompOffService = new AttendanceCompOffService();

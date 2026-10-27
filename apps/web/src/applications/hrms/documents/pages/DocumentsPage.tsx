@@ -39,11 +39,21 @@ interface ListState {
   error: string | null;
 }
 
+export interface DocumentsPageProps {
+  title?: string;
+  subtitle?: string;
+  eyebrow?: string;
+}
+
 /**
- * Administration → Documents — the centralized operational area for employee
+ * Workforce → Records / Documents — the centralized operational area for employee
  * documents across the employee lifecycle.
  */
-export function DocumentsPage() {
+export function DocumentsPage({
+  title = 'Documents',
+  subtitle = 'Manage, verify and monitor employee documents.',
+  eyebrow = 'HRMS · Workforce',
+}: DocumentsPageProps = {}) {
   const navigate = useNavigate();
   const [view, setView] = useState<DocumentView>('all');
   const [search, setSearch] = useState('');
@@ -128,11 +138,7 @@ export function DocumentsPage() {
 
   return (
     <Page maxWidth="full" gap="lg">
-      <PageHeader
-        eyebrow="HRMS · Administration"
-        title="Documents"
-        subtitle="Manage, verify and monitor employee documents."
-      />
+      <PageHeader eyebrow={eyebrow} title={title} subtitle={subtitle} />
 
       <Tabs
         activeId={view}

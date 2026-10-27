@@ -116,9 +116,20 @@ export function StandaloneUtilityLayout() {
   const isRegistration = location.pathname.includes('/onboarding/registration');
   const isFormEditor = location.pathname.includes('/settings/forms');
 
-  // Employee Registration and Form Editor occupy the complete standalone browser workspace
+  // Identify if current page is Employee Edit
+  const isEmployeeEdit = useMemo(() => {
+    return /\/employees\/[^/]+\/edit/i.test(location.pathname);
+  }, [location.pathname]);
+
+  const employeeEditBackUrl = useMemo(() => {
+    if (!isEmployeeEdit) return null;
+    const viewProfilePath = location.pathname.replace(/\/edit\/?$/i, '');
+    return viewProfilePath || '/hrms/workforce/employees';
+  }, [isEmployeeEdit, location.pathname]);
+
+  // Employee Registration, Form Editor, and Employee Edit occupy the complete standalone browser workspace
   // without the utility top bar or companion rail.
-  if (isRegistration || isFormEditor) {
+  if (isRegistration || isFormEditor || isEmployeeEdit) {
     return (
       <div className="standalone-layout standalone-layout--registration">
         <main className="standalone-layout__main standalone-layout__main--registration">
@@ -129,6 +140,10 @@ export function StandaloneUtilityLayout() {
   }
 
   function handleBack() {
+    if (isEmployeeEdit && employeeEditBackUrl) {
+      navigate(employeeEditBackUrl);
+      return;
+    }
     if (window.history.length > 2) {
       navigate(-1);
     } else {
@@ -192,7 +207,11 @@ export function StandaloneUtilityLayout() {
   }
 
   return (
-    <div className="standalone-layout">
+    <div
+      className={`standalone-layout ${
+        isEmployeeEdit ? 'standalone-layout--employee-edit' : ''
+      }`.trim()}
+    >
       {/* ── Standalone App Top Bar (No HRMS nav bars) ────────────────── */}
       <header className="standalone-header">
         <div className="standalone-header__left">
@@ -200,17 +219,26 @@ export function StandaloneUtilityLayout() {
             type="button"
             className="standalone-header__back-btn"
             onClick={handleBack}
-            title="Back to BEZENT Workspace"
+            title={isEmployeeEdit ? 'Back to Profile' : 'Back to BEZENT Workspace'}
           >
             <BezentIcon name="arrowLeft" size={16} color="currentColor" />
-            <span>Workspace</span>
+            <span>{isEmployeeEdit ? 'Back to Profile' : 'Workspace'}</span>
           </button>
 
           <span className="standalone-header__divider" aria-hidden="true" />
 
           <div className="standalone-header__brand">
-            <CompanionIcon name={currentCapability.icon} size={26} active />
-            <span className="standalone-header__title">{currentCapability.title}</span>
+            {isEmployeeEdit ? (
+              <>
+                <BezentIcon name="employees" size={18} color="currentColor" />
+                <span className="standalone-header__title">Edit Employee</span>
+              </>
+            ) : (
+              <>
+                <CompanionIcon name={currentCapability.icon} size={26} active />
+                <span className="standalone-header__title">{currentCapability.title}</span>
+              </>
+            )}
           </div>
         </div>
 
@@ -255,87 +283,97 @@ export function StandaloneUtilityLayout() {
             />
           </div>
 
-          <button
-            type="button"
-            className={`standalone-header__side-toggle ${panelOpen ? 'is-active' : ''}`.trim()}
-            onClick={() => setPanelOpen((v) => !v)}
-            title={panelOpen ? 'Collapse companion panel' : 'Expand companion panel'}
-          >
-            <BezentIcon
-              name={panelOpen ? 'chevronRight' : 'chevronLeft'}
-              size={16}
-              color="currentColor"
-            />
-            <span>{panelOpen ? 'Panel' : 'Expand'}</span>
-          </button>
+          {!isEmployeeEdit && (
+            <button
+              type="button"
+              className={`standalone-header__side-toggle ${panelOpen ? 'is-active' : ''}`.trim()}
+              onClick={() => setPanelOpen((v) => !v)}
+              title={panelOpen ? 'Collapse companion panel' : 'Expand companion panel'}
+            >
+              <BezentIcon
+                name={panelOpen ? 'chevronRight' : 'chevronLeft'}
+                size={16}
+                color="currentColor"
+              />
+              <span>{panelOpen ? 'Panel' : 'Expand'}</span>
+            </button>
+          )}
         </div>
       </header>
 
       {/* ── Main Layout Body ─────────────────────────────────────────── */}
       <div className="standalone-layout__body">
         {/* Full-page main capability view */}
-        <main className="standalone-layout__main">
+        <main
+          className={`standalone-layout__main ${
+            isEmployeeEdit ? 'standalone-layout__main--employee-edit' : ''
+          }`.trim()}
+        >
           <Outlet context={data} />
         </main>
 
-        {/* Side Drawer if a remaining utility is opened */}
-        {activeDrawerCapability && (
-          <aside className="standalone-layout__drawer">
-            <UtilityDrawerShell
-              key={activeDrawerCapability.id}
-              title={activeDrawerCapability.title}
-              icon={activeDrawerCapability.icon}
-              onClose={() => setActiveDrawerId(null)}
-            >
-              {renderDrawer(activeDrawerCapability.id)}
-            </UtilityDrawerShell>
-          </aside>
-        )}
-
-        {/* Expandable Companion Rail: remaining icons seen on expansion */}
-        <aside
-          className={`standalone-companion-rail ${panelOpen ? 'is-open' : 'is-collapsed'}`.trim()}
-        >
-          <div className="standalone-companion-rail__items">
-            {remainingCapabilities.map((cap) => {
-              const isActive = activeDrawerId === cap.id;
-              return (
-                <button
-                  key={cap.id}
-                  type="button"
-                  className={`standalone-companion-rail__btn ${isActive ? 'is-active' : ''}`.trim()}
-                  onClick={() => setActiveDrawerId(isActive ? null : cap.id)}
-                  title={cap.title}
+        {!isEmployeeEdit && (
+          <>
+            {/* Side Drawer if a remaining utility is opened */}
+            {activeDrawerCapability && (
+              <aside className="standalone-layout__drawer">
+                <UtilityDrawerShell
+                  key={activeDrawerCapability.id}
+                  title={activeDrawerCapability.title}
+                  icon={activeDrawerCapability.icon}
+                  onClose={() => setActiveDrawerId(null)}
                 >
-                  <CompanionIcon name={cap.icon} size={22} active={isActive} />
-                </button>
-              );
-            })}
-          </div>
+                  {renderDrawer(activeDrawerCapability.id)}
+                </UtilityDrawerShell>
+              </aside>
+            )}
 
-          <div className="standalone-companion-rail__footer">
-            <button
-              type="button"
-              className="standalone-companion-rail__collapse-btn"
-              onClick={() => setPanelOpen(false)}
-              title="Hide side panel"
+            {/* Expandable Companion Rail: remaining icons seen on expansion */}
+            <aside
+              className={`standalone-companion-rail ${panelOpen ? 'is-open' : 'is-collapsed'}`.trim()}
             >
-              <BezentIcon name="chevronRight" size={16} color="currentColor" />
-            </button>
-          </div>
-        </aside>
+              <div className="standalone-companion-rail__items">
+                {remainingCapabilities.map((cap) => {
+                  const isActive = activeDrawerId === cap.id;
+                  return (
+                    <button
+                      key={cap.id}
+                      type="button"
+                      className={`standalone-companion-rail__btn ${isActive ? 'is-active' : ''}`.trim()}
+                      onClick={() => setActiveDrawerId(isActive ? null : cap.id)}
+                      title={cap.title}
+                    >
+                      <CompanionIcon name={cap.icon} size={22} active={isActive} />
+                    </button>
+                  );
+                })}
+              </div>
 
-        {/* Floating trigger button when companion rail is collapsed */}
-        {!panelOpen && (
-          <button
-            type="button"
-            className="standalone-collapsed-trigger"
-            onClick={() => setPanelOpen(true)}
-            title="Show companion utilities"
-          >
-            <BezentIcon name="chevronLeft" size={16} color="currentColor" />
-            <span>Companion</span>
-          </button>
+              <div className="standalone-companion-rail__footer">
+                <button
+                  type="button"
+                  className="standalone-companion-rail__collapse-btn"
+                  onClick={() => setPanelOpen(false)}
+                  title="Hide side panel"
+                >
+                  <BezentIcon name="chevronRight" size={16} color="currentColor" />
+                </button>
+              </div>
+            </aside>
+
+            {/* Floating trigger button when companion rail is collapsed */}
+            {!panelOpen && (
+              <button
+                type="button"
+                className="standalone-collapsed-trigger"
+                onClick={() => setPanelOpen(true)}
+                title="Show companion utilities"
+              >
+                <BezentIcon name="chevronLeft" size={16} color="currentColor" />
+                <span>Companion</span>
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>

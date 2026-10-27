@@ -8,7 +8,7 @@ import {
   type Employee,
   type NewEmployee,
 } from '../../../../db/schema.js';
-import { eq, and, desc, like, or, count, type SQL } from 'drizzle-orm';
+import { eq, and, desc, like, or, count, inArray, gte, lte, type SQL } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/mysql-core';
 import type {
   CreateEmployeeDto,
@@ -324,7 +324,9 @@ export class EmployeeRepository {
       eq(employees.companyId, companyId),
     ];
 
-    if (params.departmentId) {
+    if (params.departmentIds && params.departmentIds.length > 0) {
+      conditions.push(inArray(employees.departmentId, params.departmentIds));
+    } else if (params.departmentId) {
       conditions.push(eq(employees.departmentId, params.departmentId));
     }
 
@@ -332,7 +334,9 @@ export class EmployeeRepository {
       conditions.push(eq(employees.designationId, params.designationId));
     }
 
-    if (params.locationId) {
+    if (params.locationIds && params.locationIds.length > 0) {
+      conditions.push(inArray(employees.locationId, params.locationIds));
+    } else if (params.locationId) {
       conditions.push(eq(employees.locationId, params.locationId));
     }
 
@@ -342,6 +346,14 @@ export class EmployeeRepository {
 
     if (params.employmentStatus) {
       conditions.push(eq(employees.employmentStatus, params.employmentStatus));
+    }
+
+    if (params.joiningDateFrom) {
+      conditions.push(gte(employees.joiningDate, params.joiningDateFrom));
+    }
+
+    if (params.joiningDateTo) {
+      conditions.push(lte(employees.joiningDate, params.joiningDateTo));
     }
 
     if (params.search) {

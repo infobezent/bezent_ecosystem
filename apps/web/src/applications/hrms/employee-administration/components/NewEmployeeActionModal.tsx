@@ -32,6 +32,7 @@ import type { EmployeeActionCategory } from '../api/employeeAdministrationApi';
 export interface NewEmployeeActionPreset {
   employee?: EmployeeRecord;
   actionType?: EmployeeActionType;
+  allowedActionTypes?: EmployeeActionType[];
   /** Restricts offered action types, e.g. the probation view offers only probation decisions. */
   category?: EmployeeActionCategory;
 }
@@ -124,9 +125,11 @@ export function NewEmployeeActionModal({
     [employees, selectedEmployee],
   );
 
-  const actionTypes = preset?.category
-    ? ACTION_TYPES.filter((type) => type.category === preset.category)
-    : ACTION_TYPES;
+  const actionTypes = preset?.allowedActionTypes
+    ? ACTION_TYPES.filter((type) => preset.allowedActionTypes!.includes(type.type))
+    : preset?.category
+      ? ACTION_TYPES.filter((type) => type.category === preset.category)
+      : ACTION_TYPES;
 
   const loadState: 'loading' | 'error' | 'ready' = loadError
     ? 'error'

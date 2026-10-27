@@ -1,11 +1,17 @@
 import type { EmploymentStatus, EmploymentType, SourceOfHire } from '../api/employeesApi';
 
 /** Canonical employee route base. The Employee Directory lives here. */
-export const EMPLOYEES_PATH = '/hrms/administration/employees';
+export const EMPLOYEES_PATH = '/hrms/workforce/employees';
+export const LEGACY_EMPLOYEES_PATH = '/hrms/administration/employees';
 
 /** The single canonical Employee Profile location. */
 export function employeeProfilePath(employeeId: string): string {
   return `${EMPLOYEES_PATH}/${encodeURIComponent(employeeId)}`;
+}
+
+/** The standalone Employee Edit workspace location. */
+export function employeeEditPath(employeeId: string): string {
+  return `${EMPLOYEES_PATH}/${encodeURIComponent(employeeId)}/edit`;
 }
 
 export const EMPLOYMENT_TYPE_OPTIONS: { value: EmploymentType; label: string }[] = [
@@ -16,6 +22,7 @@ export const EMPLOYMENT_TYPE_OPTIONS: { value: EmploymentType; label: string }[]
 ];
 
 export const EMPLOYMENT_STATUS_LABELS: Record<EmploymentStatus, string> = {
+  pending_activation: 'Pending Activation',
   active: 'Active',
   probation: 'Probation',
   notice: 'Notice Period',
@@ -41,9 +48,68 @@ export function employmentStatusVariant(
       return 'warning';
     case 'terminated':
       return 'danger';
+    case 'pending_activation':
+    case 'resigned':
     default:
       return 'neutral';
   }
+}
+
+export function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2 && parts[0] && parts[parts.length - 1]) {
+    const first = parts[0][0] || '';
+    const last = parts[parts.length - 1]![0] || '';
+    return `${first}${last}`.toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
+}
+
+export const AVATAR_COLORS: ('blue' | 'pink' | 'purple' | 'amber' | 'green' | 'cyan')[] = [
+  'blue',
+  'pink',
+  'purple',
+  'amber',
+  'green',
+  'cyan',
+];
+
+export function getAvatarColor(
+  id: string,
+): 'blue' | 'pink' | 'purple' | 'amber' | 'green' | 'cyan' {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = (hash << 5) - hash + id.charCodeAt(i);
+    hash |= 0;
+  }
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]!;
+}
+
+/**
+ * Canonical verified 3D human avatars used for workforce directory representation.
+ */
+export const DIRECTORY_3D_AVATARS: readonly string[] = [
+  'human-3d-dev-male',
+  'human-3d-exec-female',
+  'human-3d-product-male',
+  'human-3d-hr-female',
+  'human-3d-lead-female',
+  'human-3d-finance-male',
+  'human-classic-male',
+  'human-classic-female',
+] as const;
+
+/**
+ * Returns a stable, deterministic 3D avatar ID for an employee based on their ID or employee number,
+ * ensuring consistent and diverse 3D avatars across the workforce directory.
+ */
+export function getEmployeeAvatarId(id: string): string {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = (hash << 5) - hash + id.charCodeAt(i);
+    hash |= 0;
+  }
+  return DIRECTORY_3D_AVATARS[Math.abs(hash) % DIRECTORY_3D_AVATARS.length]!;
 }
 
 const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;

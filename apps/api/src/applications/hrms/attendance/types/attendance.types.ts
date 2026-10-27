@@ -29,6 +29,9 @@ export type AttendanceStatus =
 export type AttendanceProcessingState =
   'incomplete' | 'pending_review' | 'provisional' | 'finalized' | 'locked';
 
+export type DailyAttendanceStatus = AttendanceStatus | 'not_checked_in';
+export type DailyAttendanceProcessingState = AttendanceProcessingState | 'pending_processing';
+
 export type AttendanceGeneralSettingsWithV1 = AttendanceGeneralSettings & {
   dayBoundaryMode?: string;
   unscheduledFallbackCutoff?: string;
@@ -125,8 +128,8 @@ export interface DailyAttendanceItem {
   date: string;
   checkInTime: string | null;
   checkOutTime: string | null;
-  status: AttendanceStatus;
-  processingState?: AttendanceProcessingState;
+  status: DailyAttendanceStatus;
+  processingState?: DailyAttendanceProcessingState;
   workLocation: string;
   workedMinutes: number;
   lateMinutes: number;
@@ -209,8 +212,8 @@ export interface DailyLogEmployeeDetail {
     checkInTime: string | null;
     checkOutTime: string | null;
     workedMinutes: number;
-    status: AttendanceStatus;
-    processingState: AttendanceProcessingState;
+    status: DailyAttendanceStatus;
+    processingState: DailyAttendanceProcessingState;
     indicators: string[];
     isLate: boolean;
     lateMinutes: number;
@@ -725,6 +728,11 @@ export interface WorkingHoursConfig {
   breakDeductionMethod?: 'scheduled' | 'actual' | 'none';
   fullDayHours?: number;
   halfDayHours?: number;
+  shiftAssignmentMode?: 'roster_assigned' | 'auto_detect_punch';
+  enableAutoShiftAllocation?: boolean;
+  shiftMatchingWindowMinutes?: number;
+  fallbackShiftName?: string;
+  allowOvernightSpanning?: boolean;
 }
 
 export interface LateArrivalConfig {
@@ -936,6 +944,32 @@ export interface SecuritySettingsInput {
   detectImpossibleTravel?: boolean;
   rapidPunchThrottlingSeconds?: number;
   flagVpnProxy?: boolean;
+  allowWebPunch?: boolean;
+  allowMobilePunch?: boolean;
+  requireSelfiePunch?: boolean;
+  allowPunchOutsideGeofence?: boolean;
+}
+
+export interface AttendanceSecuritySettingsWithRemote {
+  id: string;
+  tenantId: string;
+  companyId: string;
+  enableGps: boolean;
+  geofenceConfigs?: GeofenceConfigItem[] | null;
+  ipAllowlist?: string[] | null;
+  enforceIpRestriction: boolean;
+  maxDevicesPerEmployee: number;
+  allowSharedKiosk: boolean;
+  detectMockLocation: boolean;
+  detectImpossibleTravel: boolean;
+  rapidPunchThrottlingSeconds: number;
+  flagVpnProxy: boolean;
+  allowWebPunch?: boolean;
+  allowMobilePunch?: boolean;
+  requireSelfiePunch?: boolean;
+  allowPunchOutsideGeofence?: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface PayrollSettingsInput {
@@ -961,7 +995,9 @@ export interface SettingsAuditFilter {
   category?:
     | 'general'
     | 'policy'
+    | 'shifts'
     | 'regularization'
+    | 'overtime_compoff'
     | 'capture_device'
     | 'location_security'
     | 'payroll_locking';
@@ -973,6 +1009,44 @@ export interface SettingsAuditFilter {
   limit?: number;
   offset?: number;
 }
+
+export interface CompanyShiftTemplate {
+  id: string;
+  name: string;
+  code: string;
+  startTime: string; // 'HH:mm'
+  endTime: string; // 'HH:mm'
+  workingDays: string[]; // ['Monday', 'Tuesday', ...]
+  breakMinutes: number;
+  lunchMinutes: number;
+  graceMinutes: number;
+  isOvernight: boolean;
+  color?: string;
+  description?: string;
+  isActive: boolean;
+  assignedEmployeesCount?: number;
+}
+
+export interface ShiftRosterSettings {
+  shifts: CompanyShiftTemplate[];
+  autoShiftAllocation: {
+    enabled: boolean;
+    matchingWindowMinutes: number;
+    fallbackShiftId?: string;
+    allowOvernightSpanning: boolean;
+  };
+  shiftSwapRules: {
+    allowEmployeeRequests: boolean;
+    cutoffHours: number;
+    requireManagerApproval: boolean;
+  };
+}
+
+export type UpdateShiftRosterSettingsInput = Partial<ShiftRosterSettings>;
+export type CreateShiftInput = Omit<CompanyShiftTemplate, 'id' | 'assignedEmployeesCount'> & {
+  id?: string;
+};
+export type UpdateShiftInput = Partial<CreateShiftInput>;
 
 export interface CreateOnDutyRequestInput {
   employeeId: string;
@@ -1220,6 +1294,7 @@ export interface RegularizationFilterV1 {
   submittedFrom?: string;
   submittedTo?: string;
   assignedTo?: string;
+  assignedQueue?: string;
   departmentId?: string;
   locationId?: string;
   relatedException?: string;

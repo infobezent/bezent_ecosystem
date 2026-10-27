@@ -7,7 +7,7 @@ import {
   attendanceSettingsRepository,
   type AttendanceSettingsRepository,
 } from '../repository/attendanceSettings.repository.js';
-import type { AttendanceSecuritySettings } from '../../../../db/schema.js';
+import type { AttendanceSecuritySettingsWithRemote } from '../types/attendance.types.js';
 
 /**
  * Enforces the company's Location & Security settings on employee self-punches
@@ -132,6 +132,44 @@ export class AttendanceSecurityService {
       return { flags: [], deviceMetadata: baseMetadata };
     }
 
+    const isWeb =
+      input.deviceMetadata?.source === 'web' ||
+      input.deviceMetadata?.clientType === 'web' ||
+      input.deviceMetadata?.platform === 'web';
+    if (settings.allowWebPunch === false && isWeb) {
+      throw new ForbiddenError(
+        'Web punch is disabled by your organization attendance policy.',
+        'WEB_PUNCH_DISABLED',
+      );
+    }
+
+    const isMobile =
+      input.deviceMetadata?.source === 'mobile' ||
+      input.deviceMetadata?.clientType === 'mobile' ||
+      input.deviceMetadata?.platform === 'mobile' ||
+      input.deviceMetadata?.isMobile === true;
+    if (settings.allowMobilePunch === false && isMobile) {
+      throw new ForbiddenError(
+        'Mobile app punch is disabled by your organization attendance policy.',
+        'MOBILE_PUNCH_DISABLED',
+      );
+    }
+
+    if (settings.requireSelfiePunch) {
+      const hasSelfie = Boolean(
+        input.deviceMetadata?.selfieUrl ||
+        input.deviceMetadata?.photoUrl ||
+        input.deviceMetadata?.selfieImage ||
+        input.deviceMetadata?.hasSelfie,
+      );
+      if (!hasSelfie) {
+        throw new BadRequestError(
+          'Selfie photo verification is required to punch attendance.',
+          'SELFIE_REQUIRED',
+        );
+      }
+    }
+
     const flags: string[] = [];
     const now = input.now ?? new Date();
     const coords = readCoordinates(input.deviceMetadata);
@@ -165,7 +203,7 @@ export class AttendanceSecurityService {
   }
 
   private checkIpAllowlist(
-    settings: AttendanceSecuritySettings,
+    settings: AttendanceSecuritySettingsWithRemote,
     clientIp: string | undefined,
     flags: string[],
   ): void {
@@ -183,7 +221,7 @@ export class AttendanceSecurityService {
   }
 
   private checkGeofence(
-    settings: AttendanceSecuritySettings,
+    settings: AttendanceSecuritySettingsWithRemote,
     coords: Coordinates | null,
     flags: string[],
     locationInfo?: { locationId: string | null; locationType: string | null } | null,
@@ -227,6 +265,10 @@ export class AttendanceSecurityService {
     );
     if (insidePermitted) return;
     if (hasStrictFence) {
+      if (settings.allowPunchOutsideGeofence) {
+        flags.push('outside_geofence_allowed');
+        return;
+      }
       throw new ForbiddenError(
         assignedFence
           ? `You are outside your assigned work location (${assignedFence.name}) geofence boundary.`
@@ -238,7 +280,7 @@ export class AttendanceSecurityService {
   }
 
   private async checkLatestPunch(
-    settings: AttendanceSecuritySettings,
+    settings: AttendanceSecuritySettingsWithRemote,
     tenantId: string,
     companyId: string,
     employeeId: string,

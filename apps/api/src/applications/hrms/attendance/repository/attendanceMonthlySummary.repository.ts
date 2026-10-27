@@ -218,6 +218,11 @@ export class AttendanceMonthlySummaryRepository {
         processingIssues: sql<number>`count(case when ${attendanceMonthlySummaries.processingIssues} > 0 then 1 end)`,
         locked: sql<number>`count(case when ${attendanceMonthlySummaries.isLocked} = true then 1 end)`,
         pendingCorrections: sql<number>`count(case when ${attendanceMonthlySummaries.pendingCorrections} > 0 then 1 end)`,
+        pending: sql<number>`count(case when (${attendanceMonthlySummaries.isLocked} = false or ${attendanceMonthlySummaries.isLocked} is null) and (${attendanceMonthlySummaries.reviewState} in ('not_reviewed', 'in_review', 'needs_correction', 'reopened') or ${attendanceMonthlySummaries.reviewState} is null) then 1 end)`,
+        approved: sql<number>`count(case when (${attendanceMonthlySummaries.isLocked} = false or ${attendanceMonthlySummaries.isLocked} is null) and ${attendanceMonthlySummaries.reviewState} = 'reviewed' then 1 end)`,
+        frozen: sql<number>`count(case when ${attendanceMonthlySummaries.isLocked} = true then 1 end)`,
+        lossOfPayDays: sql<number>`coalesce(sum(${attendanceMonthlySummaries.absentDays}), 0)`,
+        overtimeMinutes: sql<number>`coalesce(sum(case when ${attendanceMonthlySummaries.actualWorkedMinutes} > ${attendanceMonthlySummaries.scheduledMinutes} then (${attendanceMonthlySummaries.actualWorkedMinutes} - ${attendanceMonthlySummaries.scheduledMinutes}) else 0 end), 0)`,
       })
       .from(attendanceMonthlySummaries)
       .where(
@@ -229,13 +234,28 @@ export class AttendanceMonthlySummaryRepository {
       );
 
     const c = rows[0];
+    const totalEmployees = Number(c?.totalEmployees ?? 0);
+    const locked = Number(c?.locked ?? 0);
+    const frozen = Number(c?.frozen ?? locked);
+    const approved = Number(c?.approved ?? c?.readyForPayroll ?? 0);
+    const pending = Number(
+      c?.pending ?? c?.needsReview ?? Math.max(0, totalEmployees - approved - frozen),
+    );
+    const lossOfPayDays = Number(Number(c?.lossOfPayDays ?? 0).toFixed(2));
+    const overtimeHours = Number((Number(c?.overtimeMinutes ?? 0) / 60).toFixed(1));
+
     return {
-      totalEmployees: Number(c?.totalEmployees ?? 0),
+      totalEmployees,
       readyForPayroll: Number(c?.readyForPayroll ?? 0),
       needsReview: Number(c?.needsReview ?? 0),
       processingIssues: Number(c?.processingIssues ?? 0),
-      locked: Number(c?.locked ?? 0),
+      locked,
       pendingCorrections: Number(c?.pendingCorrections ?? 0),
+      pending,
+      approved,
+      frozen,
+      lossOfPayDays,
+      overtimeHours,
     };
   }
 

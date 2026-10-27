@@ -242,3 +242,52 @@
   padding-left: 20px;
   padding-right: 20px;
 }
+
+/* ── Enterprise Header Buttons (Import / Export) ── */
+.bezent-btn--import {
+  background-color: #ffffff;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.bezent-btn--import:hover:not(:disabled) {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.bezent-btn--export {
+  background-color: #c8e5fc;
+  color: #0f172a;
+  border: 1px solid #c8e5fc;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.bezent-btn--export:hover:not(:disabled) {
+  background-color: #b6defa;
+  border-color: #b6defa;
+  color: #0f172a;
+  transform: translateY(-1px);
+}
+
+[data-theme='dark'] .bezent-btn--import {
+  background-color: #0f172a;
+  color: #f8fafc;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .bezent-btn--import:hover:not(:disabled) {
+  background-color: #1e293b;
+}
+
+[data-theme='dark'] .bezent-btn--export {
+  background-color: rgba(2, 132, 199, 0.25);
+  color: #e0f2fe;
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+[data-theme='dark'] .bezent-btn--export:hover:not(:disabled) {
+  background-color: rgba(2, 132, 199, 0.35);
+  color: #ffffff;
+}

@@ -72,6 +72,11 @@ import type {
   MonthlySummaryBulkPreviewResult,
   MonthlySummaryExportInput,
   MonthlySummaryQueryResult,
+  CompanyShiftTemplate,
+  ShiftRosterSettings,
+  UpdateShiftRosterSettingsInput,
+  CreateShiftInput,
+  UpdateShiftInput,
 } from '../types/attendance.types';
 
 export async function fetchAttendanceOverview(
@@ -467,6 +472,7 @@ export async function fetchRegularizationWorkspace(
   if (filter.submittedFrom) query.set('submittedFrom', filter.submittedFrom);
   if (filter.submittedTo) query.set('submittedTo', filter.submittedTo);
   if (filter.assignedTo) query.set('assignedTo', filter.assignedTo);
+  if (filter.assignedQueue) query.set('assignedQueue', filter.assignedQueue);
   if (filter.departmentId) query.set('departmentId', filter.departmentId);
   if (filter.locationId) query.set('locationId', filter.locationId);
   if (filter.relatedException) query.set('relatedException', filter.relatedException);
@@ -686,6 +692,7 @@ export async function exportRegularizationsCsvBlob(
   if (filter.applicationStatus) query.set('applicationStatus', filter.applicationStatus);
   if (filter.requestType) query.set('requestType', filter.requestType);
   if (filter.assignedTo) query.set('assignedTo', filter.assignedTo);
+  if (filter.assignedQueue) query.set('assignedQueue', filter.assignedQueue);
   if (filter.departmentId) query.set('departmentId', filter.departmentId);
   if (selectedIds && selectedIds.length > 0) {
     query.set('selectedIds', selectedIds.join(','));
@@ -905,6 +912,78 @@ export async function rollbackAttendancePolicyVersion(id: string): Promise<Atten
     throw new Error(body?.error?.message ?? `Failed to rollback policy: ${res.status}`);
   }
   return body.data;
+}
+
+/* ── 2b. Shift & Roster Settings ── */
+
+export async function fetchShiftRosterSettings(): Promise<ShiftRosterSettings> {
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/settings/shifts`);
+  const body = await res.json();
+  if (!res.ok || !body?.data) {
+    throw new Error(body?.error?.message ?? `Failed to fetch shift settings: ${res.status}`);
+  }
+  return body.data;
+}
+
+export async function updateShiftRosterSettings(
+  payload: UpdateShiftRosterSettingsInput,
+): Promise<ShiftRosterSettings> {
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/settings/shifts`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const body = await res.json();
+  if (!res.ok || !body?.data) {
+    throw new Error(body?.error?.message ?? `Failed to update shift settings: ${res.status}`);
+  }
+  return body.data;
+}
+
+export async function createCompanyShift(payload: CreateShiftInput): Promise<CompanyShiftTemplate> {
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/settings/shifts`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const body = await res.json();
+  if (!res.ok || !body?.data) {
+    throw new Error(body?.error?.message ?? `Failed to create company shift: ${res.status}`);
+  }
+  return body.data;
+}
+
+export async function updateCompanyShift(
+  id: string,
+  payload: UpdateShiftInput,
+): Promise<CompanyShiftTemplate> {
+  const res = await authorizedFetch(
+    `${appConfig.apiBaseUrl}/hrms/attendance/settings/shifts/${id}`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    },
+  );
+  const body = await res.json();
+  if (!res.ok || !body?.data) {
+    throw new Error(body?.error?.message ?? `Failed to update company shift: ${res.status}`);
+  }
+  return body.data;
+}
+
+export async function deleteCompanyShift(id: string): Promise<boolean> {
+  const res = await authorizedFetch(
+    `${appConfig.apiBaseUrl}/hrms/attendance/settings/shifts/${id}`,
+    {
+      method: 'DELETE',
+    },
+  );
+  const body = await res.json();
+  if (!res.ok) {
+    throw new Error(body?.error?.message ?? `Failed to delete company shift: ${res.status}`);
+  }
+  return true;
 }
 
 /* ── 3. Regularization Settings ── */
@@ -1875,4 +1954,26 @@ export async function exportMonthlySummaryCsv(input: MonthlySummaryExportInput):
     throw new Error(`Failed to export monthly summary: ${res.status}`);
   }
   return res.blob();
+}
+
+export interface MissingPunchSweepResponse {
+  detectedCount: number;
+  updatedAttendanceCount: number;
+  alertCount: number;
+  companiesEvaluated: number;
+}
+
+export async function triggerMissingPunchSweep(
+  targetDate?: string,
+): Promise<MissingPunchSweepResponse> {
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}/hrms/attendance/missing-punch/sweep`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(targetDate ? { targetDate } : {}),
+  });
+  const body = await res.json();
+  if (!res.ok || !body?.data) {
+    throw new Error(body?.error?.message ?? `Failed to run missing punch sweep: ${res.status}`);
+  }
+  return body.data;
 }

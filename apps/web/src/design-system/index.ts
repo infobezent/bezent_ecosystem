@@ -20,3 +20,6 @@ export * from './tokens/tokens';
 
 /** Icon system */
 export * from './icons/index';
+
+/** Avatar catalog & resolution engine */
+export * from './avatar';

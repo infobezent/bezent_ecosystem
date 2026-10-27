@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, inArray, like, or, type SQL } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, inArray, like, lte, or, type SQL } from 'drizzle-orm';
 import { getDb } from '../../../../db/connection.js';
 import {
   employeeActionHistory,
@@ -13,6 +13,7 @@ import {
   EMPLOYEE_ACTION_CATEGORIES,
   actionTypesForCategory,
   type ActionCategoryCounts,
+  type ActionStatusCounts,
   type EmployeeActionChangeSet,
   type EmployeeActionHistoryItem,
   type EmployeeActionListItem,
@@ -179,6 +180,11 @@ export class EmployeeActionRepository {
     const shared: SQL[] = [...this.scope(tenantId, companyId)];
     if (params.status) shared.push(eq(employeeActions.status, params.status));
     if (params.employeeId) shared.push(eq(employeeActions.employeeId, params.employeeId));
+    if (params.departmentId) shared.push(eq(employees.departmentId, params.departmentId));
+    if (params.effectiveDateFrom)
+      shared.push(gte(employeeActions.effectiveDate, params.effectiveDateFrom));
+    if (params.effectiveDateTo)
+      shared.push(lte(employeeActions.effectiveDate, params.effectiveDateTo));
     if (params.search) {
       const pattern = `%${params.search}%`;
       shared.push(
@@ -197,10 +203,41 @@ export class EmployeeActionRepository {
       );
     }
     if (params.actionType) listConditions.push(eq(employeeActions.actionType, params.actionType));
+    if (params.actionTypes && params.actionTypes.length > 0) {
+      listConditions.push(inArray(employeeActions.actionType, params.actionTypes));
+    }
 
     const listWhere = and(...listConditions);
 
-    const [totalRows, rows, typeCounts] = await Promise.all([
+    // Conditions for status counts (filtered by category / actionTypes / department / search, but NOT restricted to single status or pagination)
+    const statusConditions: SQL[] = [...this.scope(tenantId, companyId)];
+    if (params.category) {
+      statusConditions.push(
+        inArray(employeeActions.actionType, actionTypesForCategory(params.category)),
+      );
+    }
+    if (params.actionType) statusConditions.push(eq(employeeActions.actionType, params.actionType));
+    if (params.actionTypes && params.actionTypes.length > 0) {
+      statusConditions.push(inArray(employeeActions.actionType, params.actionTypes));
+    }
+    if (params.employeeId) statusConditions.push(eq(employeeActions.employeeId, params.employeeId));
+    if (params.departmentId) statusConditions.push(eq(employees.departmentId, params.departmentId));
+    if (params.effectiveDateFrom)
+      statusConditions.push(gte(employeeActions.effectiveDate, params.effectiveDateFrom));
+    if (params.effectiveDateTo)
+      statusConditions.push(lte(employeeActions.effectiveDate, params.effectiveDateTo));
+    if (params.search) {
+      const pattern = `%${params.search}%`;
+      statusConditions.push(
+        or(
+          like(employees.firstName, pattern),
+          like(employees.lastName, pattern),
+          like(employees.employeeNumber, pattern),
+        )!,
+      );
+    }
+
+    const [totalRows, rows, typeCounts, statusRows] = await Promise.all([
       db
         .select({ total: count() })
         .from(employeeActions)
@@ -231,6 +268,23 @@ export class EmployeeActionRepository {
         )
         .where(and(...shared))
         .groupBy(employeeActions.actionType),
+      db
+        .select({
+          status: employeeActions.status,
+          effectiveDate: employeeActions.effectiveDate,
+          total: count(),
+        })
+        .from(employeeActions)
+        .innerJoin(
+          employees,
+          and(
+            eq(employeeActions.employeeId, employees.id),
+            eq(employees.tenantId, tenantId),
+            eq(employees.companyId, companyId),
+          ),
+        )
+        .where(and(...statusConditions))
+        .groupBy(employeeActions.status, employeeActions.effectiveDate),
     ]);
 
     const counts = Object.fromEntries(
@@ -239,6 +293,30 @@ export class EmployeeActionRepository {
     for (const row of typeCounts) {
       counts.all += row.total;
       counts[ACTION_TYPE_CATEGORY[row.actionType]] += row.total;
+    }
+
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const statusCounts: ActionStatusCounts = {
+      all: 0,
+      pending: 0,
+      applied: 0,
+      cancelled: 0,
+      upcoming: 0,
+    };
+    for (const row of statusRows) {
+      const c = Number(row.total);
+      statusCounts.all += c;
+      if (row.status === 'pending') {
+        statusCounts.pending += c;
+        if (row.effectiveDate > today) {
+          statusCounts.upcoming += c;
+        }
+      } else if (row.status === 'applied') {
+        statusCounts.applied += c;
+      } else if (row.status === 'cancelled') {
+        statusCounts.cancelled += c;
+      }
     }
 
     const totalItems = totalRows[0]?.total ?? 0;
@@ -252,6 +330,7 @@ export class EmployeeActionRepository {
         totalPages: Math.ceil(totalItems / pageSize) || 1,
       },
       counts,
+      statusCounts,
     };
   }
 

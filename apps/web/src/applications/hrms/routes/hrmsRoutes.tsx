@@ -2,8 +2,13 @@ import { Navigate, Outlet, type RouteObject } from 'react-router-dom';
 import { hrmsNavigation } from '../navigation';
 import { ModulePlaceholder } from '../pages/ModulePlaceholder';
 import { OnboardingPage } from '../onboarding';
+import { TransfersPage } from '../transfers';
+import { PromotionsPage } from '../promotions';
+import { OffboardingPage } from '../offboarding';
 import { EmployeeAdministrationPage } from '../employee-administration';
 import { DocumentsPage } from '../documents';
+import { RecordsPage } from '../records';
+import { WorkforceOverviewPage } from '../overview';
 import { SettingsPage } from '../settings';
 import { EmployeeDirectoryPage, EmployeeProfilePage, EMPLOYEES_PATH } from '../employees';
 import {
@@ -65,13 +70,17 @@ export function RequireHrmsWorkspace() {
  * HRMS routes, generated from the ONE canonical navigation catalog — there
  * is no separate route map to keep in sync.
  *
- * Administration maps:
+ * Workforce maps:
+ * - overview -> Workforce Overview placeholder
  * - employees -> canonical Employee Directory; employees/:employeeId -> canonical Employee Profile
- * - employee-administration -> Employee Administration action queue (employment actions on existing employees)
- * - onboarding -> Direct Employee Registration form workspace
- * - documents -> Documents main page (canonical employee documents)
+ * - onboarding -> Direct Employee Registration and onboarding pipeline workspace
+ * - transfers -> Employee Administration action queue filtered to Transfers
+ * - promotions -> Employee Administration action queue filtered to Job Changes / Promotions
+ * - offboarding -> Employee Administration action queue filtered to Separations / Offboarding
+ * - records -> Documents main page (canonical workforce documents & records)
  *
- * Backward-compatible aliases ensure legacy `/hrms/onboarding` and `/hrms/administrative` deep links resolve.
+ * Backward-compatible aliases ensure legacy `/hrms/administration/*`, `/hrms/onboarding`,
+ * and `/hrms/administrative` deep links resolve.
  */
 const basePath = HRMS_BASE_PATH.replace(/^\//, '');
 const defaultDestination = hrmsNavigation.destinations.find(
@@ -88,15 +97,15 @@ export const hrmsRoutes: RouteObject[] = [
         element: <Navigate to={destinationPath(HRMS_BASE_PATH, defaultDestination)} replace />,
       },
       ...hrmsNavigation.destinations.flatMap((destination): RouteObject[] => {
-        const isAdministration = destination.id === 'administration';
+        const isWorkforce = destination.id === 'workforce';
         const isSettings = destination.id === 'settings';
         const isAttendance = destination.id === 'attendance';
-        // Administration lands on Employees; Attendance lands on Overview.
+        // Workforce lands on Overview; Attendance lands on Overview.
         return [
           {
             path: destination.segment,
-            element: isAdministration ? (
-              <Navigate to={EMPLOYEES_PATH} replace />
+            element: isWorkforce ? (
+              <Navigate to="/hrms/workforce/overview" replace />
             ) : isSettings ? (
               <SettingsPage />
             ) : isAttendance ? (
@@ -112,14 +121,20 @@ export const hrmsRoutes: RouteObject[] = [
           ...(destination.children ?? []).map((child): RouteObject => ({
             path: `${destination.segment}/${child.id}`,
             element:
-              isAdministration && child.id === 'employees' ? (
+              isWorkforce && child.id === 'overview' ? (
+                <WorkforceOverviewPage />
+              ) : isWorkforce && child.id === 'employees' ? (
                 <EmployeeDirectoryPage />
-              ) : isAdministration && child.id === 'employee-administration' ? (
-                <EmployeeAdministrationPage />
-              ) : isAdministration && child.id === 'onboarding' ? (
+              ) : isWorkforce && child.id === 'onboarding' ? (
                 <OnboardingPage title="Onboarding" />
-              ) : isAdministration && child.id === 'documents' ? (
-                <DocumentsPage />
+              ) : isWorkforce && child.id === 'transfers' ? (
+                <TransfersPage />
+              ) : isWorkforce && child.id === 'promotions' ? (
+                <PromotionsPage />
+              ) : isWorkforce && child.id === 'offboarding' ? (
+                <OffboardingPage />
+              ) : isWorkforce && child.id === 'records' ? (
+                <RecordsPage />
               ) : isSettings ? (
                 <SettingsPage />
               ) : isAttendance && child.id === 'overview' ? (
@@ -159,17 +174,54 @@ export const hrmsRoutes: RouteObject[] = [
         path: 'attendance/policies',
         element: <Navigate to="/hrms/settings?module=attendance" replace />,
       },
-      // Canonical Employee Profile (Employees directory and Employee Administration both link here)
+      // Canonical Employee Profile (under Workforce and legacy Administration)
+      {
+        path: 'workforce/employees/:employeeId',
+        element: <EmployeeProfilePage />,
+      },
       {
         path: 'administration/employees/:employeeId',
         element: <EmployeeProfilePage />,
       },
 
-      // Legacy top-level Employees URL (no longer a navigation destination)
+      // Legacy top-level Employees URL (redirects to canonical Workforce / Employees)
       {
         path: 'employees',
         element: <Navigate to={EMPLOYEES_PATH} replace />,
       },
+
+      // Backward-compatible routes for existing Administration & legacy deep links
+      {
+        path: 'administration',
+        element: <Navigate to="/hrms/workforce/overview" replace />,
+      },
+      {
+        path: 'administration/employees',
+        element: <EmployeeDirectoryPage />,
+      },
+      {
+        path: 'administration/onboarding',
+        element: <OnboardingPage title="Onboarding" />,
+      },
+      {
+        path: 'administration/employee-administration',
+        element: (
+          <EmployeeAdministrationPage
+            title="Employee Administration"
+            subtitle="Manage employee changes, confirmations, transfers and employment actions."
+            defaultCategory="all"
+          />
+        ),
+      },
+      {
+        path: 'administration/documents',
+        element: <DocumentsPage />,
+      },
+      {
+        path: 'administration/*',
+        element: <Navigate to="/hrms/workforce/overview" replace />,
+      },
+
       // Backward-compatible routes for existing Onboarding and Administrative URLs
       {
         path: 'onboarding',
@@ -185,23 +237,23 @@ export const hrmsRoutes: RouteObject[] = [
       },
       {
         path: 'onboarding/*',
-        element: <Navigate to="/hrms/administration/onboarding" replace />,
+        element: <Navigate to="/hrms/workforce/onboarding" replace />,
       },
       {
         path: 'administrative/employee-administration',
-        element: <Navigate to="/hrms/administration/employee-administration" replace />,
+        element: <Navigate to="/hrms/workforce/transfers" replace />,
       },
       {
         path: 'administrative/onboarding',
-        element: <Navigate to="/hrms/administration/onboarding" replace />,
+        element: <Navigate to="/hrms/workforce/onboarding" replace />,
       },
       {
         path: 'administrative/documents',
-        element: <Navigate to="/hrms/administration/documents" replace />,
+        element: <Navigate to="/hrms/workforce/records" replace />,
       },
       {
         path: 'administrative/*',
-        element: <Navigate to="/hrms/administration/employee-administration" replace />,
+        element: <Navigate to="/hrms/workforce/overview" replace />,
       },
       // Organization masters are now owned by Company Administration.
       // These backward-compatible redirects preserve any existing deep links into

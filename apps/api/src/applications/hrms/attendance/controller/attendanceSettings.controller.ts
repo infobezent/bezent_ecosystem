@@ -477,6 +477,83 @@ export class AttendanceSettingsController {
       next(err);
     }
   };
+
+  /* ── 8. Shift & Roster Configuration ────────────────────────────── */
+
+  getShiftSettings = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { tenantId, companyId } = req.companyContext!;
+      const data = await this.service.getShiftRosterSettings(tenantId, companyId);
+      res.json({ data });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  updateShiftSettings = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { tenantId, companyId } = req.companyContext!;
+      const data = await this.service.updateShiftRosterSettings(
+        tenantId,
+        companyId,
+        req.body,
+        req.user?.id,
+        req.ip,
+      );
+      res.json({ data });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  createShift = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { tenantId, companyId } = req.companyContext!;
+      const data = await this.service.createCompanyShift(
+        tenantId,
+        companyId,
+        req.body,
+        req.user?.id,
+        req.ip,
+      );
+      res.status(201).json({ data });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  updateShift = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { tenantId, companyId } = req.companyContext!;
+      const data = await this.service.updateCompanyShift(
+        tenantId,
+        companyId,
+        req.params.id as string,
+        req.body,
+        req.user?.id,
+        req.ip,
+      );
+      res.json({ data });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  deleteShift = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { tenantId, companyId } = req.companyContext!;
+      const data = await this.service.deleteCompanyShift(
+        tenantId,
+        companyId,
+        req.params.id as string,
+        req.user?.id,
+        req.ip,
+      );
+      res.json({ data });
+    } catch (err) {
+      next(err);
+    }
+  };
 }
 
 export const attendanceSettingsController = new AttendanceSettingsController();

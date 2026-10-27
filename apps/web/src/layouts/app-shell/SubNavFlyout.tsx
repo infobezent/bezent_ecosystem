@@ -20,24 +20,72 @@ import './SubNavFlyout.css';
 export function SubNavFlyout({
   item,
   activeSubId,
+  align,
   onSelect,
 }: {
   item: ShellNavItem;
   /** Selected sub-destination (derived by the host from the URL). */
   activeSubId?: string;
+  align?: 'top' | 'bottom';
   onSelect?: (subId: string) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [alignUp, setAlignUp] = useState(false);
+  const [alignUp, setAlignUp] = useState(align === 'bottom');
 
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const bottomBar = parseFloat(
-      getComputedStyle(document.documentElement).getPropertyValue('--shell-bottom-bar-height'),
+    const parentWrap = el.closest('.left-sidebar__item-wrap');
+    const navItemBtn = parentWrap?.querySelector('.left-sidebar__item');
+    if (!navItemBtn) return;
+
+    const btnRect = navItemBtn.getBoundingClientRect();
+    const topBarHeight = parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue('--shell-topbar-height') || '50',
     );
-    // Measured in the default (top-aligned) position, before the class flips.
-    setAlignUp(el.getBoundingClientRect().bottom > window.innerHeight - (bottomBar || 0) - 8);
+    const bottomBarHeight = parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue('--shell-bottom-bar-height') ||
+        '28',
+    );
+
+    const minTop = topBarHeight + 4;
+    const maxBottom = window.innerHeight - bottomBarHeight - 4;
+    const flyoutHeight = el.getBoundingClientRect().height;
+
+    // Center of nav icon inside squircle (pill top is 0, height is 40px, center is at +20px)
+    const iconCenterY = btnRect.top + 20;
+
+    // Anchor the flyout so its pointer beak (at 28px from top of header) aligns directly with the icon
+    const BEAK_OFFSET_TOP = 28;
+    let targetTop = iconCenterY - BEAK_OFFSET_TOP;
+
+    // If flyout would run below the bottom bar, shift it up
+    if (targetTop + flyoutHeight > maxBottom) {
+      targetTop = maxBottom - flyoutHeight;
+    }
+
+    // Never cross above the Main workspace card's top line.
+    // When hovering near the top (e.g. Dashboard), snap flush to minTop so it aligns seamlessly with the Main line.
+    if (targetTop <= minTop + 10) {
+      targetTop = minTop;
+    }
+
+    el.style.top = `${Math.round(targetTop)}px`;
+
+    // Pointer beak position relative to the flyout
+    const pointerOffset = Math.max(16, Math.min(flyoutHeight - 16, iconCenterY - targetTop));
+    el.style.setProperty('--subnav-pointer-top', `${Math.round(pointerOffset)}px`);
+
+    const header = el.querySelector('.subnav-flyout__header');
+    const headerHeight = header ? header.getBoundingClientRect().height : 54;
+    if (pointerOffset <= headerHeight) {
+      el.style.setProperty(
+        '--subnav-pointer-bg',
+        'var(--subnav-header-bg, var(--nav-selected, #c2e7ff))',
+      );
+    } else {
+      el.style.setProperty('--subnav-pointer-bg', 'var(--floating-surface-bg, #ffffff)');
+    }
   }, [item.id]);
 
   return (

@@ -41,6 +41,7 @@ export class EmployeeActionController {
         data: result.items,
         pagination: result.pagination,
         counts: result.counts,
+        statusCounts: result.statusCounts,
       });
     } catch (err) {
       next(err);

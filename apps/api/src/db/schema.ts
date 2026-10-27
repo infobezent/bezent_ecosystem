@@ -148,6 +148,8 @@ export const departments = mysqlTable(
     index('idx_departments_division').on(table.divisionId),
     index('idx_departments_parent').on(table.parentDepartmentId),
     index('idx_departments_company_code').on(table.companyId, table.code),
+    // Functional unique index enforced via migration 0043:
+    // uq_departments_company_parent_name ON departments (company_id, (COALESCE(parent_department_id, '__ROOT__')), (LOWER(TRIM(name))))
   ],
 );
 

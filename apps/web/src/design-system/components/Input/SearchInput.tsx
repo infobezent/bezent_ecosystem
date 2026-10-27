@@ -7,6 +7,7 @@ export interface SearchInputProps extends Omit<
   'size' | 'className'
 > {
   size?: 'sm' | 'md' | 'lg';
+  shape?: 'rounded' | 'pill';
   onClear?: () => void;
   className?: string;
 }
@@ -17,6 +18,7 @@ export interface SearchInputProps extends Omit<
 export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(function SearchInput(
   {
     size = 'md',
+    shape = 'rounded',
     value,
     onChange,
     onClear,
@@ -28,10 +30,11 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(functi
   ref,
 ) {
   const hasValue = Boolean(value);
+  const shapeClass = shape === 'pill' ? 'bezent-input-wrapper--pill' : '';
 
   return (
     <div
-      className={`bezent-input-wrapper bezent-search-wrapper bezent-input-wrapper--${size} ${disabled ? 'is-disabled' : ''} ${className || ''}`.trim()}
+      className={`bezent-input-wrapper bezent-search-wrapper bezent-input-wrapper--${size} ${shapeClass} ${disabled ? 'is-disabled' : ''} ${className || ''}`.trim()}
     >
       <div className="bezent-input-box bezent-search-box">
         <span className="bezent-input-icon bezent-input-icon--left" aria-hidden="true">

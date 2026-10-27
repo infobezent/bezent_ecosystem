@@ -1375,6 +1375,19 @@ export const GLOBAL_ICON_DEFINITIONS: Record<string, IconDefinition> = {
       <line x1="12" y1="3" x2="12" y2="15" />
     </g>
   )),
+  download: glyph('download', 'Download', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" fill="none" />
+      <polyline points="7 10 12 15 17 10" fill="none" />
+      <line x1="12" y1="15" x2="12" y2="3" />
+    </g>
+  )),
+  reset: glyph('reset', 'Reset', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" fill="none" />
+      <polyline points="3 3 3 8 8 8" fill="none" />
+    </g>
+  )),
   lock: glyph('lock', 'Lock', (c, sw) => (
     <g {...S(c, sw)}>
       <rect x="3" y="11" width="18" height="11" rx="2" ry="2" fill="none" />
@@ -1395,6 +1408,21 @@ export const GLOBAL_ICON_DEFINITIONS: Record<string, IconDefinition> = {
       <path d="M10 2v2M14 2v2M6 2v2" />
       <path d="M16 8h1a4 4 0 0 1 0 8h-1" />
       <path d="M2 8h14v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" />
+    </g>
+  )),
+  userCheck: glyph('userCheck', 'User check', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="8.5" cy="7" r="4" />
+      <polyline points="17 11 19 13 23 9" />
+    </g>
+  )),
+  userX: glyph('userX', 'User inactive', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="8.5" cy="7" r="4" />
+      <line x1="17" y1="9" x2="21" y2="13" />
+      <line x1="21" y1="9" x2="17" y2="13" />
     </g>
   )),
 };

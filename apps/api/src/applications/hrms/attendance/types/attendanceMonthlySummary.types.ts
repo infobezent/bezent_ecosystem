@@ -62,6 +62,11 @@ export interface MonthlySummaryCounters {
   processingIssues: number;
   locked: number;
   pendingCorrections: number;
+  pending?: number;
+  approved?: number;
+  frozen?: number;
+  lossOfPayDays?: number;
+  overtimeHours?: number;
 }
 
 export interface MonthlySummaryFilter {

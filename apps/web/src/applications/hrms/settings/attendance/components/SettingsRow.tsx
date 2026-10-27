@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Grid, Inline } from '../../../../../design-system/components';
+import { Grid, Inline, Stack } from '../../../../../design-system/components';
 import { BezentIcon } from '../../../../../design-system/icons';
 
 export interface SettingsRowProps {
@@ -15,7 +15,7 @@ export interface SettingsRowProps {
 
 /**
  * Standard two-column SettingsRow for clean, minimal configuration layouts.
- * Left: Icon + Label + Info Tooltip
+ * Left: Icon + Label + Visible Subtitle Info
  * Right: Interactive Form Control
  * Responsive: Automatically stacks on narrow screens via Design System Grid.
  */
@@ -29,12 +29,12 @@ export function SettingsRow({
   description,
   align = 'center',
 }: SettingsRowProps) {
-  const tooltipText = tooltip || info;
+  const tooltipText = tooltip;
   const content = control ?? children;
 
   return (
-    <Grid columns={2} gap="md">
-      <div>
+    <Grid columns={2} gap="lg">
+      <Stack gap="xs">
         <Inline gap="xs" align={align}>
           {icon && <BezentIcon name={icon} size={16} />}
           <span className="bezent-label">{label}</span>
@@ -49,8 +49,9 @@ export function SettingsRow({
             </span>
           )}
         </Inline>
-        {description && <div className="bezent-text-hint">{description}</div>}
-      </div>
+        {info && <p className="bezent-form-field__helper">{info}</p>}
+        {description && <div>{description}</div>}
+      </Stack>
       <div>{content}</div>
     </Grid>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Page,
   PageHeader,
@@ -30,32 +30,39 @@ import {
   fetchMonthlySummaryWorkspace,
   fetchMonthlySummaryById,
   fetchMonthlySummaryDays,
-  fetchMonthlySummaryReadiness,
   fetchMonthlySummaryHistory,
   startMonthlySummaryReview,
   requestMonthlySummaryCorrection,
   markMonthlySummaryReviewed,
   reopenMonthlySummaryReview,
-  recalculateMonthlySummary,
-  previewMonthlySummaryBulkAction,
   executeMonthlySummaryBulkAction,
   exportMonthlySummaryCsv,
+  lockAttendancePeriod,
 } from '../api/attendanceApi';
+import { fetchDepartments } from '../../api/organizationMastersApi';
+import { getEmployeeAvatarId, getAvatarColor } from '../../employees/model/employeeModel';
 import type {
   MonthlySummaryRow,
   MonthlySummaryCounters,
   MonthlySummaryFilter,
   MonthlySummaryDailyRecord,
-  MonthlySummaryReadinessReport,
   MonthlySummaryReviewHistoryItem,
-  MonthlySummaryBulkPreviewResult,
-  AttendancePayrollReadiness,
   AttendanceReviewState,
 } from '../types/attendance.types';
 
 function getCurrentMonthString(): string {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function formatMonthYear(monthStr: string): string {
+  try {
+    const [year, month] = monthStr.split('-');
+    const d = new Date(Number(year), Number(month) - 1, 1);
+    return d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+  } catch {
+    return monthStr;
+  }
 }
 
 function formatDateTime(val?: string | Date | null): string {
@@ -70,25 +77,77 @@ function formatDateTime(val?: string | Date | null): string {
   });
 }
 
+function formatDays(val: number | string | undefined | null): string {
+  if (val === undefined || val === null || val === '') return '—';
+  const num = typeof val === 'string' ? parseFloat(val) : val;
+  if (isNaN(num)) return '—';
+  if (num === 0) return '0';
+  // Allow decimals like 22.5, never trailing zero like 22.50
+  return Number(num.toFixed(2)).toString();
+}
+
+function formatOvertime(minutes?: number | null): string {
+  if (!minutes || minutes <= 0) return '—';
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return `${h}h ${m}m`;
+}
+
+interface ReviewStatusConfig {
+  key: 'pending' | 'in_review' | 'approved' | 'frozen';
+  label: string;
+  tooltip: string;
+  variant: 'neutral' | 'warning' | 'success' | 'info';
+}
+
+function getReviewStatusConfig(row: MonthlySummaryRow): ReviewStatusConfig {
+  if (row.isLocked || (row.reviewState as string) === 'frozen') {
+    return {
+      key: 'frozen',
+      label: 'Frozen',
+      tooltip: 'Locked for payroll. No further edits.',
+      variant: 'neutral',
+    };
+  }
+  if (row.reviewState === 'reviewed' || (row.reviewState as string) === 'approved') {
+    return {
+      key: 'approved',
+      label: 'Approved',
+      tooltip: 'Reviewed and ready for payroll.',
+      variant: 'success',
+    };
+  }
+  if (row.reviewState === 'in_review') {
+    return {
+      key: 'in_review',
+      label: 'In Review',
+      tooltip: 'Under review by HR.',
+      variant: 'warning',
+    };
+  }
+  return {
+    key: 'pending',
+    label: 'Pending',
+    tooltip: 'Not yet reviewed.',
+    variant: 'neutral',
+  };
+}
+
 export function MonthlyAttendanceSummaryPage() {
   // Navigation & Primary Filter State
   const [selectedMonth, setSelectedMonth] = useState<string>(getCurrentMonthString());
   const [search, setSearch] = useState<string>('');
+  const [debouncedSearch, setDebouncedSearch] = useState<string>('');
   const [departmentId, setDepartmentId] = useState<string>('all');
-  const [payrollReadiness, setPayrollReadiness] = useState<string>('all');
+  const [reviewStatusFilter, setReviewStatusFilter] = useState<string>('all');
   const [activeCounter, setActiveCounter] = useState<string | null>(null);
 
-  // Advanced Filters
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState<boolean>(false);
-  const [reviewStateFilter, setReviewStateFilter] = useState<string>('all');
-  const [lockStatusFilter, setLockStatusFilter] = useState<string>('all');
-  const [filterExceptions, setFilterExceptions] = useState<boolean>(false);
-  const [filterPendingCorrections, setFilterPendingCorrections] = useState<boolean>(false);
-  const [filterProcessingIssues, setFilterProcessingIssues] = useState<boolean>(false);
+  // Departments Master
+  const [departments, setDepartments] = useState<Array<{ id: string; name: string }>>([]);
 
   // Pagination State
   const [page, setPage] = useState<number>(1);
-  const [pageSize] = useState<number>(20);
+  const pageSize = 25;
 
   // Data State
   const [loading, setLoading] = useState<boolean>(true);
@@ -101,47 +160,84 @@ export function MonthlyAttendanceSummaryPage() {
     processingIssues: 0,
     locked: 0,
     pendingCorrections: 0,
+    pending: 0,
+    approved: 0,
+    frozen: 0,
+    lossOfPayDays: 0,
+    overtimeHours: 0,
   });
   const [totalCount, setTotalCount] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
 
-  // Selection State
+  // Row Selection State
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // Toast / Banner State
+  const [bannerMessage, setBannerMessage] = useState<{
+    type: 'success' | 'warning' | 'danger' | 'info';
+    text: string;
+  } | null>(null);
+
+  // Row Context Menu State
+  const [openActionMenuId, setOpenActionMenuId] = useState<string | null>(null);
+
+  // Floating Filter Panel State
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState<boolean>(false);
+
+  // Close context menu and filter panel on outside click
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest?.('.bezent-table-action-menu')) {
+        setOpenActionMenuId(null);
+      }
+      if (!target.closest?.('.bezent-filter-anchor')) {
+        setIsFilterPanelOpen(false);
+      }
+    };
+    window.addEventListener('click', handleOutsideClick);
+    return () => window.removeEventListener('click', handleOutsideClick);
+  }, []);
+
+  // Debounce search input
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [search]);
+
+  // Load Departments Master on mount
+  useEffect(() => {
+    fetchDepartments({ status: 'active' })
+      .then((depts) => setDepartments(depts.map((d) => ({ id: d.id, name: d.name }))))
+      .catch(() => setDepartments([]));
+  }, []);
 
   // Drilldown Drawer State
   const [drawerId, setDrawerId] = useState<string | null>(null);
   const [drawerLoading, setDrawerLoading] = useState<boolean>(false);
   const [drawerSummary, setDrawerSummary] = useState<MonthlySummaryRow | null>(null);
   const [drawerDays, setDrawerDays] = useState<MonthlySummaryDailyRecord[]>([]);
-  const [drawerReadiness, setDrawerReadiness] = useState<MonthlySummaryReadinessReport | null>(
-    null,
-  );
   const [drawerHistory, setDrawerHistory] = useState<MonthlySummaryReviewHistoryItem[]>([]);
-  const [drawerTab, setDrawerTab] = useState<'overview' | 'days' | 'readiness' | 'history'>(
-    'overview',
-  );
+  const [drawerTab, setDrawerTab] = useState<'summary' | 'days' | 'history'>('summary');
+  const [drawerReviewNote, setDrawerReviewNote] = useState<string>('');
+  const [selectedPunchDay, setSelectedPunchDay] = useState<MonthlySummaryDailyRecord | null>(null);
 
-  // Review Dialog State
-  const [reviewDialogTarget, setReviewDialogTarget] = useState<MonthlySummaryRow | null>(null);
-  const [reviewDialogAction, setReviewDialogAction] = useState<
-    'review' | 'start' | 'correction' | 'reopen' | null
-  >(null);
-  const [reviewNotes, setReviewNotes] = useState<string>('');
-  const [reviewSubmitting, setReviewSubmitting] = useState<boolean>(false);
+  // Single Row Action Dialog (Send Back / Request Correction)
+  const [sendBackTarget, setSendBackTarget] = useState<MonthlySummaryRow | null>(null);
+  const [sendBackNotes, setSendBackNotes] = useState<string>('');
+  const [sendBackSubmitting, setSendBackSubmitting] = useState<boolean>(false);
 
   // Bulk Operations State
-  const [showBulkModal, setShowBulkModal] = useState<boolean>(false);
-  const [bulkAction, setBulkAction] = useState<
-    'mark_reviewed' | 'start_review' | 'request_correction' | 'recalculate' | null
-  >(null);
-  const [bulkPreview, setBulkPreview] = useState<MonthlySummaryBulkPreviewResult | null>(null);
-  const [bulkPreviewLoading, setBulkPreviewLoading] = useState<boolean>(false);
-  const [bulkExecuting, setBulkExecuting] = useState<boolean>(false);
-  const [bulkExecutionResult, setBulkExecutionResult] = useState<{
-    succeeded: string[];
-    skipped: Array<{ id: string; reason: string }>;
-    failed: Array<{ id: string; error: string }>;
-  } | null>(null);
+  const [showBulkApproveModal, setShowBulkApproveModal] = useState<boolean>(false);
+  const [bulkSubmitting, setBulkSubmitting] = useState<boolean>(false);
+  const [showSkippedRecordsModal, setShowSkippedRecordsModal] = useState<boolean>(false);
+
+  // Freeze Period State
+  const [showFreezeModal, setShowFreezeModal] = useState<boolean>(false);
+  const [freezeSubmitting, setFreezeSubmitting] = useState<boolean>(false);
 
   // Export State
   const [showExportModal, setShowExportModal] = useState<boolean>(false);
@@ -150,6 +246,21 @@ export function MonthlyAttendanceSummaryPage() {
   const [exportScope, setExportScope] = useState<'selected' | 'all'>('all');
   const [exporting, setExporting] = useState<boolean>(false);
 
+  // Determine Period Status
+  const isPeriodFrozen = Boolean(
+    (counters.frozen &&
+      counters.frozen === counters.totalEmployees &&
+      counters.totalEmployees > 0) ||
+    (rows.length > 0 && rows.every((r) => r.isLocked)) ||
+    (counters.locked && counters.locked === counters.totalEmployees && counters.totalEmployees > 0),
+  );
+
+  const isFreezeReady = Boolean(
+    counters.totalEmployees > 0 &&
+    (counters.approved ?? counters.readyForPayroll ?? 0) === counters.totalEmployees &&
+    !isPeriodFrozen,
+  );
+
   // Load Workspace Data
   const loadWorkspace = useCallback(async () => {
     setLoading(true);
@@ -157,21 +268,17 @@ export function MonthlyAttendanceSummaryPage() {
     try {
       const filter: MonthlySummaryFilter = {
         month: selectedMonth,
-        search: search.trim() || undefined,
+        search: debouncedSearch.trim() || undefined,
         departmentId: departmentId === 'all' ? undefined : departmentId,
-        payrollReadiness:
-          payrollReadiness === 'all' ? undefined : (payrollReadiness as AttendancePayrollReadiness),
         reviewState:
-          reviewStateFilter === 'all' ? undefined : (reviewStateFilter as AttendanceReviewState),
-        isLocked:
-          lockStatusFilter === 'locked'
-            ? true
-            : lockStatusFilter === 'unlocked'
-              ? false
-              : undefined,
-        hasExceptions: filterExceptions || undefined,
-        hasPendingCorrections: filterPendingCorrections || undefined,
-        hasProcessingIssues: filterProcessingIssues || undefined,
+          reviewStatusFilter === 'pending'
+            ? ('not_reviewed' as AttendanceReviewState)
+            : reviewStatusFilter === 'in_review'
+              ? ('in_review' as AttendanceReviewState)
+              : reviewStatusFilter === 'approved'
+                ? ('reviewed' as AttendanceReviewState)
+                : undefined,
+        isLocked: reviewStatusFilter === 'frozen' ? true : undefined,
         counterFilter: (activeCounter as MonthlySummaryFilter['counterFilter']) || undefined,
         page,
         pageSize,
@@ -189,15 +296,10 @@ export function MonthlyAttendanceSummaryPage() {
     }
   }, [
     selectedMonth,
-    search,
+    debouncedSearch,
     departmentId,
-    payrollReadiness,
+    reviewStatusFilter,
     activeCounter,
-    reviewStateFilter,
-    lockStatusFilter,
-    filterExceptions,
-    filterPendingCorrections,
-    filterProcessingIssues,
     page,
     pageSize,
   ]);
@@ -214,6 +316,7 @@ export function MonthlyAttendanceSummaryPage() {
     const d = new Date(y, m - 2, 1);
     setSelectedMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
     setPage(1);
+    setSelectedIds(new Set());
   };
 
   const handleNextMonth = () => {
@@ -223,20 +326,28 @@ export function MonthlyAttendanceSummaryPage() {
     const d = new Date(y, m, 1);
     setSelectedMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
     setPage(1);
+    setSelectedIds(new Set());
   };
 
   const handleResetFilters = () => {
     setSearch('');
+    setDebouncedSearch('');
     setDepartmentId('all');
-    setPayrollReadiness('all');
+    setReviewStatusFilter('all');
     setActiveCounter(null);
-    setReviewStateFilter('all');
-    setLockStatusFilter('all');
-    setFilterExceptions(false);
-    setFilterPendingCorrections(false);
-    setFilterProcessingIssues(false);
+    setSelectedIds(new Set());
     setPage(1);
   };
+
+  const appliedFilterCount =
+    (departmentId !== 'all' ? 1 : 0) + (reviewStatusFilter !== 'all' ? 1 : 0);
+
+  const hasActiveFilters = Boolean(
+    search.trim() ||
+    departmentId !== 'all' ||
+    reviewStatusFilter !== 'all' ||
+    activeCounter !== null,
+  );
 
   // Row selection
   const handleToggleSelectAll = (checked: boolean) => {
@@ -261,20 +372,22 @@ export function MonthlyAttendanceSummaryPage() {
   const handleOpenDrawer = async (row: MonthlySummaryRow) => {
     setDrawerId(row.id);
     setDrawerLoading(true);
-    setDrawerTab('overview');
+    setDrawerTab('summary');
+    setDrawerReviewNote(row.reviewNotes ?? '');
     try {
-      const [summary, days, readiness, history] = await Promise.all([
+      const [summary, days, history] = await Promise.all([
         fetchMonthlySummaryById(row.id),
         fetchMonthlySummaryDays(row.id),
-        fetchMonthlySummaryReadiness(row.id),
         fetchMonthlySummaryHistory(row.id),
       ]);
       setDrawerSummary(summary);
       setDrawerDays(days);
-      setDrawerReadiness(readiness);
       setDrawerHistory(history);
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Failed to load employee drilldown');
+      setBannerMessage({
+        type: 'danger',
+        text: err instanceof Error ? err.message : 'Failed to load employee details',
+      });
     } finally {
       setDrawerLoading(false);
     }
@@ -284,100 +397,139 @@ export function MonthlyAttendanceSummaryPage() {
     setDrawerId(null);
     setDrawerSummary(null);
     setDrawerDays([]);
-    setDrawerReadiness(null);
     setDrawerHistory([]);
+    setSelectedPunchDay(null);
   };
 
-  // Review Actions
-  const handleOpenReviewDialog = (
-    row: MonthlySummaryRow,
-    action: 'review' | 'start' | 'correction' | 'reopen',
-  ) => {
-    setReviewDialogTarget(row);
-    setReviewDialogAction(action);
-    setReviewNotes('');
-  };
-
-  const handleSubmitReviewAction = async () => {
-    if (!reviewDialogTarget || !reviewDialogAction) return;
-    setReviewSubmitting(true);
+  // Single Row Actions
+  const handleSendForReview = async (row: MonthlySummaryRow) => {
     try {
-      if (reviewDialogAction === 'start') {
-        await startMonthlySummaryReview(reviewDialogTarget.id);
-      } else if (reviewDialogAction === 'review') {
-        await markMonthlySummaryReviewed(reviewDialogTarget.id, reviewNotes || undefined);
-      } else if (reviewDialogAction === 'correction') {
-        if (!reviewNotes.trim()) {
-          alert('Correction notes are mandatory');
-          setReviewSubmitting(false);
-          return;
-        }
-        await requestMonthlySummaryCorrection(reviewDialogTarget.id, reviewNotes);
-      } else if (reviewDialogAction === 'reopen') {
-        if (!reviewNotes.trim()) {
-          alert('Reopen reason is mandatory');
-          setReviewSubmitting(false);
-          return;
-        }
-        await reopenMonthlySummaryReview(reviewDialogTarget.id, reviewNotes);
-      }
-
-      setReviewDialogTarget(null);
-      setReviewDialogAction(null);
-      await loadWorkspace();
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Action failed');
-    } finally {
-      setReviewSubmitting(false);
-    }
-  };
-
-  // Recalculate single summary
-  const handleRecalculateSingle = async (id: string) => {
-    try {
-      await recalculateMonthlySummary(id);
-      await loadWorkspace();
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Recalculation failed');
-    }
-  };
-
-  // Bulk Operations
-  const handleTriggerBulk = async (
-    action: 'mark_reviewed' | 'start_review' | 'request_correction' | 'recalculate',
-  ) => {
-    if (selectedIds.size === 0) return;
-    setBulkAction(action);
-    setShowBulkModal(true);
-    setBulkPreview(null);
-    setBulkExecutionResult(null);
-    setBulkPreviewLoading(true);
-    try {
-      const preview = await previewMonthlySummaryBulkAction(action, Array.from(selectedIds));
-      setBulkPreview(preview);
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Failed to preview bulk action');
-    } finally {
-      setBulkPreviewLoading(false);
-    }
-  };
-
-  const handleExecuteBulk = async () => {
-    if (!bulkAction || selectedIds.size === 0) return;
-    setBulkExecuting(true);
-    try {
-      const result = await executeMonthlySummaryBulkAction({
-        action: bulkAction,
-        summaryIds: Array.from(selectedIds),
-        correctionNotes: 'Bulk review correction request',
+      await startMonthlySummaryReview(row.id);
+      setBannerMessage({
+        type: 'success',
+        text: `${row.employeeName} sent for review.`,
       });
-      setBulkExecutionResult(result);
-      setSelectedIds(new Set());
       await loadWorkspace();
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Bulk action failed');
+      setBannerMessage({
+        type: 'danger',
+        text: err instanceof Error ? err.message : 'Failed to start review',
+      });
+    }
+  };
+
+  const handleApproveRow = async (row: MonthlySummaryRow) => {
+    try {
+      await markMonthlySummaryReviewed(row.id, drawerReviewNote || undefined);
+      setBannerMessage({
+        type: 'success',
+        text: `${row.employeeName} attendance summary approved.`,
+      });
+      await loadWorkspace();
+    } catch (err: unknown) {
+      setBannerMessage({
+        type: 'danger',
+        text: err instanceof Error ? err.message : 'Failed to approve attendance',
+      });
+    }
+  };
+
+  const handleOpenSendBackDialog = (row: MonthlySummaryRow) => {
+    setSendBackTarget(row);
+    setSendBackNotes('');
+  };
+
+  const handleSubmitSendBack = async () => {
+    if (!sendBackTarget) return;
+    setSendBackSubmitting(true);
+    try {
+      await requestMonthlySummaryCorrection(
+        sendBackTarget.id,
+        sendBackNotes.trim() || 'Review returned for correction',
+      );
+      setBannerMessage({
+        type: 'success',
+        text: `${sendBackTarget.employeeName} returned for correction.`,
+      });
+      setSendBackTarget(null);
+      await loadWorkspace();
+    } catch (err: unknown) {
+      setBannerMessage({
+        type: 'danger',
+        text: err instanceof Error ? err.message : 'Failed to return review',
+      });
     } finally {
-      setBulkExecuting(false);
+      setSendBackSubmitting(false);
+    }
+  };
+
+  // Bulk Approval Calculation
+  const { eligibleRecords, skippedRecords } = useMemo(() => {
+    const selectedRows = rows.filter((r) => selectedIds.has(r.id));
+    const eligible: MonthlySummaryRow[] = [];
+    const skipped: Array<{ row: MonthlySummaryRow; reason: string }> = [];
+
+    for (const r of selectedRows) {
+      if (r.isLocked) {
+        skipped.push({ row: r, reason: 'Record is already frozen for payroll' });
+      } else if (r.unresolvedExceptions > 0) {
+        skipped.push({ row: r, reason: 'Pending missed punches' });
+      } else if (r.pendingCorrections > 0) {
+        skipped.push({ row: r, reason: 'Unapproved overtime' });
+      } else if (r.processingIssues > 0) {
+        skipped.push({ row: r, reason: 'Leave conflict' });
+      } else {
+        eligible.push(r);
+      }
+    }
+
+    return { eligibleRecords: eligible, skippedRecords: skipped };
+  }, [rows, selectedIds]);
+
+  const handleExecuteBulkApprove = async () => {
+    if (eligibleRecords.length === 0) return;
+    setBulkSubmitting(true);
+    try {
+      await executeMonthlySummaryBulkAction({
+        action: 'mark_reviewed',
+        summaryIds: eligibleRecords.map((r) => r.id),
+      });
+
+      setBannerMessage({
+        type: 'success',
+        text: `${eligibleRecords.length} approved. ${skippedRecords.length} skipped.`,
+      });
+      setSelectedIds(new Set());
+      setShowBulkApproveModal(false);
+      await loadWorkspace();
+    } catch (err: unknown) {
+      setBannerMessage({
+        type: 'danger',
+        text: err instanceof Error ? err.message : 'Bulk approval failed',
+      });
+    } finally {
+      setBulkSubmitting(false);
+    }
+  };
+
+  // Freeze Period Operation
+  const handleExecuteFreezePeriod = async () => {
+    setFreezeSubmitting(true);
+    try {
+      await lockAttendancePeriod(selectedMonth);
+      setBannerMessage({
+        type: 'success',
+        text: `${formatMonthYear(selectedMonth)} attendance has been frozen.`,
+      });
+      setShowFreezeModal(false);
+      await loadWorkspace();
+    } catch (err: unknown) {
+      setBannerMessage({
+        type: 'danger',
+        text: err instanceof Error ? err.message : 'Failed to freeze attendance period',
+      });
+    } finally {
+      setFreezeSubmitting(false);
     }
   };
 
@@ -391,9 +543,7 @@ export function MonthlyAttendanceSummaryPage() {
         level: exportLevel,
         selectedIds: exportScope === 'selected' ? Array.from(selectedIds) : undefined,
         departmentId: departmentId === 'all' ? undefined : departmentId,
-        payrollReadiness:
-          payrollReadiness === 'all' ? undefined : (payrollReadiness as AttendancePayrollReadiness),
-        search: search.trim() || undefined,
+        search: debouncedSearch.trim() || undefined,
       });
 
       const url = window.URL.createObjectURL(blob);
@@ -406,572 +556,787 @@ export function MonthlyAttendanceSummaryPage() {
       a.remove();
       setShowExportModal(false);
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Export failed');
+      setBannerMessage({
+        type: 'danger',
+        text: err instanceof Error ? err.message : 'Export failed',
+      });
     } finally {
       setExporting(false);
     }
   };
 
-  // Badges
-  const renderReadinessBadge = (readiness: AttendancePayrollReadiness) => {
-    switch (readiness) {
-      case 'ready':
-        return <Badge variant="success">Ready for Payroll</Badge>;
-      case 'blocked':
-        return <Badge variant="danger">Blocked</Badge>;
-      case 'needs_review':
-        return <Badge variant="warning">Needs Review</Badge>;
-      case 'calculating':
-        return <Badge variant="info">Calculating</Badge>;
-      default:
-        return <Badge variant="neutral">{readiness}</Badge>;
-    }
-  };
-
-  const renderReviewBadge = (state: AttendanceReviewState) => {
-    switch (state) {
-      case 'reviewed':
-        return <Badge variant="success">Reviewed</Badge>;
-      case 'in_review':
-        return <Badge variant="info">In Review</Badge>;
-      case 'needs_correction':
-        return <Badge variant="danger">Correction Req.</Badge>;
-      case 'reopened':
-        return <Badge variant="warning">Reopened</Badge>;
-      case 'not_reviewed':
-      default:
-        return <Badge variant="neutral">Not Reviewed</Badge>;
-    }
-  };
-
   return (
     <Page>
+      {/* 1. Page Header (Spec Section 1) */}
       <PageHeader
-        title="Monthly Attendance Summary"
-        subtitle="Workforce monthly calendar matrix — deterministic monthly aggregation, version-aware sign-off and payroll readiness workspace"
+        eyebrow="Attendance › Monthly Summary"
+        title="Monthly Summary"
+        subtitle="Review each employee’s month-end attendance and send it to payroll."
         actions={
-          <Inline gap="sm">
-            <Button variant="secondary" onClick={() => setShowExportModal(true)}>
-              <BezentIcon name="download" size={16} /> Export
+          <Inline gap="sm" align="center">
+            {/* Period Selector */}
+            <Inline gap="xs" align="center">
+              <span className="bezent-filter-strip-label">Period:</span>
+              <Button
+                variant="outline"
+                size="md"
+                shape="rounded"
+                onClick={handlePrevMonth}
+                aria-label="Previous month"
+              >
+                <BezentIcon name="chevronLeft" size={14} />
+              </Button>
+              <Input
+                type="month"
+                aria-label="Period"
+                value={selectedMonth}
+                onChange={(e) => {
+                  setSelectedMonth(e.target.value);
+                  setPage(1);
+                  setSelectedIds(new Set());
+                }}
+              />
+              <Button
+                variant="outline"
+                size="md"
+                shape="rounded"
+                onClick={handleNextMonth}
+                aria-label="Next month"
+              >
+                <BezentIcon name="chevronRight" size={14} />
+              </Button>
+            </Inline>
+
+            {/* Secondary Button: Export */}
+            <Button
+              variant="secondary"
+              size="md"
+              shape="rounded"
+              leftIcon={<BezentIcon name="download" size={16} />}
+              onClick={() => setShowExportModal(true)}
+            >
+              Export
             </Button>
-            <Button variant="secondary" onClick={loadWorkspace}>
-              <BezentIcon name="refresh" size={16} /> Refresh
+
+            {/* Primary Button: Freeze Period (Spec Section 8) */}
+            <Button
+              variant="primary"
+              size="md"
+              shape="rounded"
+              disabled={!isFreezeReady || isPeriodFrozen}
+              title={
+                isPeriodFrozen
+                  ? `${formatMonthYear(selectedMonth)} is frozen for payroll.`
+                  : !isFreezeReady
+                    ? 'All employees must be approved before freezing.'
+                    : 'Freeze Period'
+              }
+              onClick={() => setShowFreezeModal(true)}
+            >
+              Freeze Period
             </Button>
           </Inline>
         }
       />
 
-      <Stack gap="lg">
-        {/* Month Navigator Toolbar */}
-        <Card padding="sm">
-          <Inline justify="between" align="center">
-            <Inline gap="sm" align="center">
-              <Button variant="secondary" size="control" onClick={handlePrevMonth}>
-                <BezentIcon name="chevronLeft" size={16} /> Prev Month
-              </Button>
-              <Input
-                type="month"
-                value={selectedMonth}
-                onChange={(e) => {
-                  setSelectedMonth(e.target.value);
-                  setPage(1);
-                }}
-              />
-              <Button variant="secondary" size="control" onClick={handleNextMonth}>
-                Next Month <BezentIcon name="chevronRight" size={16} />
-              </Button>
-              <Button
-                variant="ghost"
-                size="control"
-                onClick={() => {
-                  setSelectedMonth(getCurrentMonthString());
-                  setPage(1);
-                }}
-              >
-                Current Month
-              </Button>
-            </Inline>
+      <Stack gap="md">
+        {/* Frozen Period Warning Banner (Spec Section 8) */}
+        {isPeriodFrozen && (
+          <Alert
+            variant="warning"
+            title={`${formatMonthYear(selectedMonth)} is frozen for payroll. Corrections are handled as arrears.`}
+          >
+            Attendance records for this pay period are locked. Any further adjustments must be
+            processed as payroll arrears.
+          </Alert>
+        )}
 
-            <span className="bezent-card__desc">
-              Viewing scope for <strong>{selectedMonth}</strong> ({totalCount} employees)
-            </span>
-          </Inline>
-        </Card>
+        {/* Dynamic Status Notification Banner */}
+        {bannerMessage && <Alert variant={bannerMessage.type}>{bannerMessage.text}</Alert>}
 
-        {/* Six Summary Counters */}
-        {/* Six Summary Counters Strip */}
-        <Grid columns={6} gap="sm">
+        {/* 3. Summary Cards Strip (Spec Section 3) */}
+        <Grid columns={6} gap="md">
+          {/* 1. Employees */}
           <div
-            className={`bezent-stat-card ${activeCounter === 'all' ? 'is-active' : ''}`}
+            className={`bezent-kpi-card bezent-kpi-card--interactive bezent-kpi-card--blue ${reviewStatusFilter === 'all' && activeCounter === null ? 'is-active' : ''}`}
             onClick={() => {
-              setActiveCounter(activeCounter === 'all' ? null : 'all');
+              setReviewStatusFilter('all');
+              setActiveCounter(null);
               setPage(1);
             }}
             role="button"
             tabIndex={0}
-            title="Total scheduled workforce in monthly cycle"
+            title="Total recorded workforce"
           >
-            <span className="bezent-stat-card__label">Total Employees</span>
-            <span className="bezent-stat-card__val">{counters.totalEmployees}</span>
+            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--blue">
+              <BezentIcon name="employees" size={20} />
+            </div>
+            <div className="bezent-kpi-card__info">
+              <p className="bezent-kpi-card__title">Employees</p>
+              <p className="bezent-kpi-card__value">{counters.totalEmployees}</p>
+              <p className="bezent-kpi-card__caption">Total workforce</p>
+            </div>
           </div>
 
+          {/* 2. Pending */}
           <div
-            className={`bezent-stat-card ${activeCounter === 'ready' ? 'is-active' : ''}`}
+            className={`bezent-kpi-card bezent-kpi-card--interactive bezent-kpi-card--amber ${reviewStatusFilter === 'pending' ? 'is-active' : ''}`}
             onClick={() => {
-              setActiveCounter(activeCounter === 'ready' ? null : 'ready');
+              setReviewStatusFilter((c) => (c === 'pending' ? 'all' : 'pending'));
+              setActiveCounter(null);
               setPage(1);
             }}
             role="button"
             tabIndex={0}
-            title="Employees ready for payroll handoff"
+            title="Attendance summaries awaiting review"
           >
-            <span className="bezent-stat-card__label">Ready for Payroll</span>
-            <span className="bezent-stat-card__val">{counters.readyForPayroll}</span>
+            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--amber">
+              <BezentIcon name="clock" size={20} />
+            </div>
+            <div className="bezent-kpi-card__info">
+              <p className="bezent-kpi-card__title">Pending</p>
+              <p className="bezent-kpi-card__value">
+                {counters.pending ?? counters.needsReview ?? 0}
+              </p>
+              <p className="bezent-kpi-card__caption">Awaiting review</p>
+            </div>
           </div>
 
+          {/* 3. Approved */}
           <div
-            className={`bezent-stat-card ${activeCounter === 'needs_review' ? 'is-active' : ''}`}
+            className={`bezent-kpi-card bezent-kpi-card--interactive bezent-kpi-card--green ${reviewStatusFilter === 'approved' ? 'is-active' : ''}`}
             onClick={() => {
-              setActiveCounter(activeCounter === 'needs_review' ? null : 'needs_review');
+              setReviewStatusFilter((c) => (c === 'approved' ? 'all' : 'approved'));
+              setActiveCounter(null);
               setPage(1);
             }}
             role="button"
             tabIndex={0}
-            title="Records awaiting supervisor or HR sign-off"
+            title="Reviewed and ready for payroll"
           >
-            <span className="bezent-stat-card__label">Needs Review</span>
-            <span className="bezent-stat-card__val">{counters.needsReview}</span>
+            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--green">
+              <BezentIcon name="check" size={20} />
+            </div>
+            <div className="bezent-kpi-card__info">
+              <p className="bezent-kpi-card__title">Approved</p>
+              <p className="bezent-kpi-card__value">
+                {counters.approved ?? counters.readyForPayroll ?? 0}
+              </p>
+              <p className="bezent-kpi-card__caption">Ready for payroll</p>
+            </div>
           </div>
 
+          {/* 4. Frozen */}
           <div
-            className={`bezent-stat-card ${activeCounter === 'issues' ? 'is-active' : ''}`}
+            className={`bezent-kpi-card bezent-kpi-card--interactive bezent-kpi-card--purple ${reviewStatusFilter === 'frozen' ? 'is-active' : ''}`}
             onClick={() => {
-              setActiveCounter(activeCounter === 'issues' ? null : 'issues');
+              setReviewStatusFilter((c) => (c === 'frozen' ? 'all' : 'frozen'));
+              setActiveCounter(null);
               setPage(1);
             }}
             role="button"
             tabIndex={0}
-            title="Blocking errors and processing discrepancies"
+            title="Locked for payroll"
           >
-            <span className="bezent-stat-card__label">Processing Issues</span>
-            <span className="bezent-stat-card__val">{counters.processingIssues}</span>
+            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--purple">
+              <BezentIcon name="lock" size={20} />
+            </div>
+            <div className="bezent-kpi-card__info">
+              <p className="bezent-kpi-card__title">Frozen</p>
+              <p className="bezent-kpi-card__value">{counters.frozen ?? counters.locked ?? 0}</p>
+              <p className="bezent-kpi-card__caption">Locked for payroll</p>
+            </div>
           </div>
 
+          {/* 5. Loss of Pay Days */}
           <div
-            className={`bezent-stat-card ${activeCounter === 'locked' ? 'is-active' : ''}`}
-            onClick={() => {
-              setActiveCounter(activeCounter === 'locked' ? null : 'locked');
-              setPage(1);
-            }}
-            role="button"
-            tabIndex={0}
-            title="Finalized and locked attendance records"
+            className="bezent-kpi-card bezent-kpi-card--red"
+            title="Total unpaid loss of pay days across workforce"
           >
-            <span className="bezent-stat-card__label">Period Locked</span>
-            <span className="bezent-stat-card__val">{counters.locked}</span>
+            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--red">
+              <BezentIcon name="close" size={20} />
+            </div>
+            <div className="bezent-kpi-card__info">
+              <p className="bezent-kpi-card__title">Loss of Pay Days</p>
+              <p className="bezent-kpi-card__value">{formatDays(counters.lossOfPayDays)}</p>
+              <p className="bezent-kpi-card__caption">Total unpaid days</p>
+            </div>
           </div>
 
+          {/* 6. Overtime Hours */}
           <div
-            className={`bezent-stat-card ${activeCounter === 'corrections' ? 'is-active' : ''}`}
-            onClick={() => {
-              setActiveCounter(activeCounter === 'corrections' ? null : 'corrections');
-              setPage(1);
-            }}
-            role="button"
-            tabIndex={0}
-            title="In-flight regularization and correction requests"
+            className="bezent-kpi-card bezent-kpi-card--blue"
+            title="Total credited overtime hours"
           >
-            <span className="bezent-stat-card__label">Pending Corrections</span>
-            <span className="bezent-stat-card__val">{counters.pendingCorrections}</span>
+            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--blue">
+              <BezentIcon name="tasks" size={20} />
+            </div>
+            <div className="bezent-kpi-card__info">
+              <p className="bezent-kpi-card__title">Overtime Hours</p>
+              <p className="bezent-kpi-card__value">
+                {counters.overtimeHours ? `${counters.overtimeHours}h` : '0h'}
+              </p>
+              <p className="bezent-kpi-card__caption">Approved overtime</p>
+            </div>
           </div>
         </Grid>
 
-        {/* Primary and Advanced Filters */}
-        <Card padding="md">
-          <Stack gap="md">
-            <Inline justify="between" align="center">
-              <Inline gap="md" align="center">
-                <SearchInput
-                  placeholder="Search employee by name, code..."
-                  value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setPage(1);
-                  }}
-                />
+        {/* 4. Filter Bar (Spec Section 4 — Workforce Directory Floating Filter Pattern) */}
+        <div className="bezent-directory-toolbar">
+          <div className="bezent-directory-toolbar__search">
+            <SearchInput
+              placeholder="Search by name or employee ID"
+              aria-label="Search"
+              shape="rounded"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onClear={() => setSearch('')}
+            />
+          </div>
 
-                <Select
-                  value={payrollReadiness}
-                  onChange={(e) => {
-                    setPayrollReadiness(e.target.value);
-                    setPage(1);
-                  }}
-                >
-                  <option value="all">All Readiness States</option>
-                  <option value="ready">Ready for Payroll</option>
-                  <option value="needs_review">Needs Review</option>
-                  <option value="blocked">Blocked</option>
-                  <option value="calculating">Calculating</option>
-                </Select>
+          <div className="bezent-directory-toolbar__actions">
+            <div className="bezent-filter-anchor">
+              <Button
+                variant={appliedFilterCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
+                size="md"
+                shape="rounded"
+                className={appliedFilterCount > 0 ? 'bezent-btn--filters-active' : ''}
+                leftIcon={<BezentIcon name="filter" size={16} />}
+                onClick={() => setIsFilterPanelOpen((prev) => !prev)}
+              >
+                Filters
+                {appliedFilterCount > 0 && (
+                  <span className="bezent-btn__filter-count">{appliedFilterCount}</span>
+                )}
+              </Button>
 
-                <Button
-                  variant="secondary"
-                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                >
-                  <BezentIcon name="filter" size={16} />{' '}
-                  {showAdvancedFilters ? 'Hide Advanced Filters' : 'More Filters'}
-                </Button>
+              {isFilterPanelOpen && (
+                <div className="bezent-filter-panel" onClick={(e) => e.stopPropagation()}>
+                  {/* 1. Header with icon and clean close button */}
+                  <div className="bezent-filter-panel__header">
+                    <div className="bezent-filter-panel__title-group">
+                      <BezentIcon name="filter" size={16} />
+                      <h3 className="bezent-filter-panel__title">Filter Attendance</h3>
+                    </div>
+                    <button
+                      type="button"
+                      className="bezent-filter-panel__close-btn"
+                      aria-label="Close filter panel"
+                      onClick={() => setIsFilterPanelOpen(false)}
+                    >
+                      <BezentIcon name="close" size={18} />
+                    </button>
+                  </div>
 
-                <Button variant="ghost" onClick={handleResetFilters}>
-                  Reset
-                </Button>
-              </Inline>
+                  {/* 2. Compact 2-Column Form Body */}
+                  <div className="bezent-filter-panel__body-compact">
+                    <div className="bezent-filter-form-grid">
+                      <div className="bezent-filter-form-group">
+                        <label className="bezent-filter-label" htmlFor="filter-department">
+                          Department
+                        </label>
+                        <div className="bezent-filter-select-wrap">
+                          <select
+                            id="filter-department"
+                            className="bezent-filter-select-control"
+                            value={departmentId}
+                            onChange={(e) => {
+                              setDepartmentId(e.target.value);
+                              setPage(1);
+                            }}
+                          >
+                            <option value="all">All Departments</option>
+                            {departments.map((dept) => (
+                              <option key={dept.id} value={dept.id}>
+                                {dept.name}
+                              </option>
+                            ))}
+                          </select>
+                          <span className="bezent-filter-select-chevron">
+                            <BezentIcon name="chevronDown" size={16} />
+                          </span>
+                        </div>
+                      </div>
 
-              <span className="bezent-card__desc">
-                {activeCounter && <Badge variant="info">Counter Filter: {activeCounter}</Badge>}
-              </span>
-            </Inline>
+                      <div className="bezent-filter-form-group">
+                        <label className="bezent-filter-label" htmlFor="filter-review-status">
+                          Review Status
+                        </label>
+                        <div className="bezent-filter-select-wrap">
+                          <select
+                            id="filter-review-status"
+                            className="bezent-filter-select-control"
+                            value={reviewStatusFilter}
+                            onChange={(e) => {
+                              setReviewStatusFilter(e.target.value);
+                              setPage(1);
+                            }}
+                          >
+                            <option value="all">All Statuses</option>
+                            <option value="pending">Pending</option>
+                            <option value="in_review">In Review</option>
+                            <option value="approved">Approved</option>
+                            <option value="frozen">Frozen</option>
+                          </select>
+                          <span className="bezent-filter-select-chevron">
+                            <BezentIcon name="chevronDown" size={16} />
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-            {/* Advanced Filters Expandable Drawer/Section */}
-            {showAdvancedFilters && (
-              <Card padding="sm">
-                <Grid columns={4} gap="md">
-                  <Select
-                    value={reviewStateFilter}
-                    onChange={(e) => {
-                      setReviewStateFilter(e.target.value);
-                      setPage(1);
-                    }}
-                  >
-                    <option value="all">All Review States</option>
-                    <option value="not_reviewed">Not Reviewed</option>
-                    <option value="in_review">In Review</option>
-                    <option value="needs_correction">Needs Correction</option>
-                    <option value="reviewed">Reviewed</option>
-                    <option value="reopened">Reopened</option>
-                  </Select>
+                  {/* 3. Standard Footer Actions */}
+                  <div className="bezent-filter-panel__footer-compact">
+                    <button
+                      type="button"
+                      className="bezent-filter-panel__clear-btn"
+                      onClick={handleResetFilters}
+                      disabled={!hasActiveFilters}
+                    >
+                      Clear all
+                    </button>
+                    <div className="bezent-filter-panel__footer-actions">
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        shape="rounded"
+                        onClick={() => setIsFilterPanelOpen(false)}
+                      >
+                        Apply Filters
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
-                  <Select
-                    value={lockStatusFilter}
-                    onChange={(e) => {
-                      setLockStatusFilter(e.target.value);
-                      setPage(1);
-                    }}
-                  >
-                    <option value="all">All Lock States</option>
-                    <option value="locked">Locked Only</option>
-                    <option value="unlocked">Unlocked Only</option>
-                  </Select>
-
-                  <Inline gap="sm" align="center">
-                    <Checkbox
-                      checked={filterExceptions}
-                      onChange={(e) => {
-                        setFilterExceptions(e.target.checked);
-                        setPage(1);
-                      }}
-                      label="Has Exceptions"
-                    />
-                    <Checkbox
-                      checked={filterPendingCorrections}
-                      onChange={(e) => {
-                        setFilterPendingCorrections(e.target.checked);
-                        setPage(1);
-                      }}
-                      label="Pending Regularizations"
-                    />
-                  </Inline>
-
-                  <Inline gap="sm" align="center">
-                    <Checkbox
-                      checked={filterProcessingIssues}
-                      onChange={(e) => {
-                        setFilterProcessingIssues(e.target.checked);
-                        setPage(1);
-                      }}
-                      label="Processing Issues"
-                    />
-                  </Inline>
-                </Grid>
-              </Card>
+            {hasActiveFilters && (
+              <Button
+                variant="outline"
+                size="md"
+                shape="rounded"
+                leftIcon={<BezentIcon name="reset" size={14} />}
+                onClick={handleResetFilters}
+              >
+                Reset Filters
+              </Button>
             )}
-          </Stack>
-        </Card>
 
-        {/* Controlled Bulk Operations Toolbar (Appears when rows selected) */}
+            <span className="bezent-records-badge">{totalCount} Records</span>
+          </div>
+        </div>
+
+        {/* Active Filter Chips Strip */}
+        {appliedFilterCount > 0 && (
+          <div className="bezent-active-chips-strip">
+            {departmentId !== 'all' && (
+              <span className="bezent-active-filter-chip">
+                <span>
+                  {`Department: ${departments.find((d) => d.id === departmentId)?.name || departmentId}`}
+                </span>
+                <button
+                  type="button"
+                  className="bezent-active-filter-chip__remove"
+                  aria-label="Remove department filter"
+                  onClick={() => {
+                    setDepartmentId('all');
+                    setPage(1);
+                  }}
+                >
+                  ×
+                </button>
+              </span>
+            )}
+
+            {reviewStatusFilter !== 'all' && (
+              <span className="bezent-active-filter-chip">
+                <span>
+                  {`Status: ${
+                    reviewStatusFilter === 'in_review'
+                      ? 'In Review'
+                      : reviewStatusFilter.charAt(0).toUpperCase() + reviewStatusFilter.slice(1)
+                  }`}
+                </span>
+                <button
+                  type="button"
+                  className="bezent-active-filter-chip__remove"
+                  aria-label="Remove review status filter"
+                  onClick={() => {
+                    setReviewStatusFilter('all');
+                    setPage(1);
+                  }}
+                >
+                  ×
+                </button>
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* 7. Bulk Approval Selection Bar (Spec Section 7) */}
         {selectedIds.size > 0 && (
           <Card padding="sm">
             <Inline justify="between" align="center">
               <Inline gap="sm" align="center">
-                <Badge variant="info">{selectedIds.size} Selected</Badge>
-                <Button variant="primary" onClick={() => handleTriggerBulk('mark_reviewed')}>
-                  Bulk Mark Reviewed
+                <strong>{selectedIds.size} employees selected</strong>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  shape="rounded"
+                  onClick={() => setShowBulkApproveModal(true)}
+                >
+                  Approve Selected
                 </Button>
-                <Button variant="secondary" onClick={() => handleTriggerBulk('start_review')}>
-                  Bulk Start Review
-                </Button>
-                <Button variant="secondary" onClick={() => handleTriggerBulk('request_correction')}>
-                  Bulk Request Correction
-                </Button>
-                <Button variant="secondary" onClick={() => handleTriggerBulk('recalculate')}>
-                  Bulk Recalculate
-                </Button>
+                {skippedRecords.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowSkippedRecordsModal(true)}
+                  >
+                    View skipped records ({skippedRecords.length})
+                  </Button>
+                )}
               </Inline>
 
-              <Button variant="ghost" onClick={() => setSelectedIds(new Set())}>
+              <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>
                 Clear Selection
               </Button>
             </Inline>
           </Card>
         )}
 
-        {/* Main 12-Column Table */}
+        {/* 5. Main 15-Column Table & Pagination (Spec Section 5 & 10) */}
         {loading ? (
           <LoadingState label="Computing authoritative monthly attendance summaries..." />
         ) : error ? (
-          <Alert variant="danger" title="Error Loading Monthly Summaries">
-            {error}
-            <Button variant="secondary" onClick={loadWorkspace}>
-              Retry
-            </Button>
+          <Alert variant="danger" title="Could not load monthly summary">
+            <Stack gap="xs">
+              <p>Something went wrong while loading.</p>
+              <Button variant="secondary" onClick={loadWorkspace}>
+                Retry
+              </Button>
+            </Stack>
           </Alert>
         ) : rows.length === 0 ? (
-          <EmptyState
-            variant="attendance"
-            title="No Monthly Summaries Found"
-            description="No employee attendance records match the current filters for this period."
-          />
+          hasActiveFilters ? (
+            <EmptyState
+              variant="attendance"
+              title="No matching employees"
+              description="No employees match your filters."
+              primaryAction={{
+                label: 'Reset Filters',
+                onClick: handleResetFilters,
+              }}
+            />
+          ) : (
+            <EmptyState
+              variant="attendance"
+              title="No attendance data for this period"
+              description={`Attendance has not been generated for ${formatMonthYear(selectedMonth)}.`}
+            />
+          )
         ) : (
           <Card padding="none">
             <Table>
               <TableHead>
                 <TableRow>
+                  {/* 1. Bulk Select Checkbox */}
                   <TableHeaderCell>
                     <Checkbox
                       checked={selectedIds.size === rows.length && rows.length > 0}
                       onChange={(e) => handleToggleSelectAll(e.target.checked)}
+                      aria-label="Select all rows"
                     />
                   </TableHeaderCell>
+                  {/* 2. Employee */}
                   <TableHeaderCell>Employee</TableHeaderCell>
-                  <TableHeaderCell>Scheduled</TableHeaderCell>
+                  {/* 3. Department */}
+                  <TableHeaderCell>Department</TableHeaderCell>
+                  {/* 4. Present */}
                   <TableHeaderCell>Present</TableHeaderCell>
+                  {/* 5. Absent */}
                   <TableHeaderCell>Absent</TableHeaderCell>
+                  {/* 6. Half Days */}
+                  <TableHeaderCell>Half Days</TableHeaderCell>
+                  {/* 7. Leave */}
                   <TableHeaderCell>Leave</TableHeaderCell>
-                  <TableHeaderCell>On-Duty</TableHeaderCell>
-                  <TableHeaderCell>WO / Hol</TableHeaderCell>
-                  <TableHeaderCell>Worked / Credited</TableHeaderCell>
-                  <TableHeaderCell>Late / Early</TableHeaderCell>
-                  <TableHeaderCell>Exceptions</TableHeaderCell>
-                  <TableHeaderCell>Review / Readiness</TableHeaderCell>
-                  <TableHeaderCell>Actions</TableHeaderCell>
+                  {/* 8. Weekly Offs */}
+                  <TableHeaderCell>Weekly Offs</TableHeaderCell>
+                  {/* 9. Holidays */}
+                  <TableHeaderCell>Holidays</TableHeaderCell>
+                  {/* 10. Late Marks */}
+                  <TableHeaderCell>Late Marks</TableHeaderCell>
+                  {/* 11. Loss of Pay */}
+                  <TableHeaderCell>
+                    <span title="LOP">Loss of Pay</span>
+                  </TableHeaderCell>
+                  {/* 12. Overtime */}
+                  <TableHeaderCell>Overtime</TableHeaderCell>
+                  {/* 13. Payable Days (Key Column) */}
+                  <TableHeaderCell>Payable Days</TableHeaderCell>
+                  {/* 14. Review Status */}
+                  <TableHeaderCell>Review Status</TableHeaderCell>
+                  {/* 15. Actions */}
+                  <TableHeaderCell className="bezent-table-col--actions bezent-table-col--sticky-right">
+                    Actions
+                  </TableHeaderCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows.map((row) => (
-                  <TableRow key={row.id}>
-                    {/* Checkbox */}
-                    <TableCell>
-                      <Checkbox
-                        checked={selectedIds.has(row.id)}
-                        onChange={() => handleToggleSelectRow(row.id)}
-                      />
-                    </TableCell>
+                {rows.map((row) => {
+                  const statusConfig = getReviewStatusConfig(row);
+                  const isRowFrozen = statusConfig.key === 'frozen';
+                  const overtimeMinutes =
+                    row.actualWorkedMinutes > row.scheduledMinutes
+                      ? row.actualWorkedMinutes - row.scheduledMinutes
+                      : 0;
+                  const payableDays = Math.max(
+                    0,
+                    Number(row.presentDays || 0) +
+                      Number(row.leaveDays || 0) +
+                      Number(row.weeklyOffDays || 0) +
+                      Number(row.holidayDays || 0),
+                  );
 
-                    {/* 1. Employee */}
-                    <TableCell>
-                      <div className="bezent-table-cell--avatar-meta">
-                        <Avatar
-                          initials={
-                            row.employeeName ? row.employeeName.slice(0, 2).toUpperCase() : 'EM'
-                          }
-                          alt={row.employeeName}
-                          size="sm"
+                  return (
+                    <TableRow key={row.id}>
+                      {/* 1. Checkbox */}
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedIds.has(row.id)}
+                          onChange={() => handleToggleSelectRow(row.id)}
+                          aria-label={`Select ${row.employeeName}`}
                         />
-                        <div className="bezent-table-meta-group">
+                      </TableCell>
+
+                      {/* 2. Employee */}
+                      <TableCell>
+                        <div className="bezent-table-cell--avatar-meta">
+                          <Avatar
+                            avatarId={getEmployeeAvatarId(row.employeeId)}
+                            initials={
+                              row.employeeName ? row.employeeName.slice(0, 2).toUpperCase() : 'EM'
+                            }
+                            color={getAvatarColor(row.employeeId)}
+                            alt={row.employeeName}
+                            size="md"
+                          />
+                          <div className="bezent-table-meta-group">
+                            <button
+                              type="button"
+                              className="bezent-table-meta-title"
+                              onClick={() => handleOpenDrawer(row)}
+                            >
+                              {row.employeeName}
+                            </button>
+                            <span className="bezent-table-meta-subtitle">{row.employeeCode}</span>
+                          </div>
+                        </div>
+                      </TableCell>
+
+                      {/* 3. Department */}
+                      <TableCell>
+                        <span className="bezent-table-meta-subtitle">
+                          {row.departmentName || '—'}
+                        </span>
+                      </TableCell>
+
+                      {/* 4. Present */}
+                      <TableCell>
+                        <span className="bezent-table-meta-title">
+                          {formatDays(row.presentDays)}
+                        </span>
+                      </TableCell>
+
+                      {/* 5. Absent */}
+                      <TableCell>
+                        <span className="bezent-table-meta-title">
+                          {formatDays(row.absentDays)}
+                        </span>
+                      </TableCell>
+
+                      {/* 6. Half Days */}
+                      <TableCell>
+                        <span className="bezent-table-meta-title">
+                          {formatDays((row as unknown as { halfDays?: number }).halfDays ?? 0)}
+                        </span>
+                      </TableCell>
+
+                      {/* 7. Leave */}
+                      <TableCell>
+                        <span className="bezent-table-meta-title">{formatDays(row.leaveDays)}</span>
+                      </TableCell>
+
+                      {/* 8. Weekly Offs */}
+                      <TableCell>
+                        <span className="bezent-table-meta-title">
+                          {row.weeklyOffDays ? String(row.weeklyOffDays) : '—'}
+                        </span>
+                      </TableCell>
+
+                      {/* 9. Holidays */}
+                      <TableCell>
+                        <span className="bezent-table-meta-title">
+                          {row.holidayDays ? String(row.holidayDays) : '—'}
+                        </span>
+                      </TableCell>
+
+                      {/* 10. Late Marks */}
+                      <TableCell>
+                        <span className="bezent-table-meta-title">
+                          {row.lateOccurrences ? String(row.lateOccurrences) : '—'}
+                        </span>
+                      </TableCell>
+
+                      {/* 11. Loss of Pay */}
+                      <TableCell>
+                        <span className="bezent-table-meta-title">
+                          {formatDays(row.absentDays)}
+                        </span>
+                      </TableCell>
+
+                      {/* 12. Overtime */}
+                      <TableCell>
+                        <span className="bezent-table-meta-title">
+                          {formatOvertime(overtimeMinutes)}
+                        </span>
+                      </TableCell>
+
+                      {/* 13. Payable Days (Key Column) */}
+                      <TableCell>
+                        <span className="bezent-table-meta-title">
+                          <strong>{formatDays(payableDays)}</strong>
+                        </span>
+                      </TableCell>
+
+                      {/* 14. Review Status */}
+                      <TableCell>
+                        <span title={statusConfig.tooltip}>
+                          <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>
+                        </span>
+                      </TableCell>
+
+                      {/* 15. Actions (Spec Section 6) */}
+                      <TableCell className="bezent-table-col--actions bezent-table-col--sticky-right">
+                        <div className="bezent-table-action-menu">
                           <button
                             type="button"
-                            className="bezent-table-meta-title"
-                            onClick={() => handleOpenDrawer(row)}
+                            className={`bezent-table-action-btn ${openActionMenuId === row.id ? 'is-active' : ''}`}
+                            aria-label={`Actions for ${row.employeeName}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenActionMenuId(openActionMenuId === row.id ? null : row.id);
+                            }}
                           >
-                            {row.employeeName}
+                            <BezentIcon name="more" size={16} />
                           </button>
-                          <span className="bezent-table-meta-subtitle">
-                            {row.employeeCode} • {row.departmentName}
-                          </span>
+                          {openActionMenuId === row.id && (
+                            <div className="bezent-table-action-menu__dropdown">
+                              <button
+                                type="button"
+                                className="bezent-table-action-menu__item"
+                                onClick={() => {
+                                  setOpenActionMenuId(null);
+                                  handleOpenDrawer(row);
+                                }}
+                              >
+                                <BezentIcon name="visibility" size={14} /> View Details
+                              </button>
+                              <button
+                                type="button"
+                                className="bezent-table-action-menu__item"
+                                disabled={isRowFrozen}
+                                title={isRowFrozen ? 'Frozen for payroll' : 'Send for Review'}
+                                onClick={() => {
+                                  setOpenActionMenuId(null);
+                                  handleSendForReview(row);
+                                }}
+                              >
+                                <BezentIcon name="share" size={14} /> Send for Review
+                              </button>
+                              <button
+                                type="button"
+                                className="bezent-table-action-menu__item"
+                                disabled={isRowFrozen}
+                                title={isRowFrozen ? 'Frozen for payroll' : 'Approve'}
+                                onClick={() => {
+                                  setOpenActionMenuId(null);
+                                  handleApproveRow(row);
+                                }}
+                              >
+                                <BezentIcon name="check" size={14} /> Approve
+                              </button>
+                              <button
+                                type="button"
+                                className="bezent-table-action-menu__item"
+                                disabled={isRowFrozen}
+                                title={isRowFrozen ? 'Frozen for payroll' : 'Send Back'}
+                                onClick={() => {
+                                  setOpenActionMenuId(null);
+                                  handleOpenSendBackDialog(row);
+                                }}
+                              >
+                                <BezentIcon name="undo" size={14} /> Send Back
+                              </button>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    </TableCell>
-
-                    {/* 2. Scheduled Days */}
-                    <TableCell>
-                      <Stack gap="none">
-                        <strong>{row.scheduledDays}d</strong>
-                        <span className="bezent-table-meta-subtitle">
-                          {Math.round(row.scheduledMinutes / 60)}h
-                        </span>
-                      </Stack>
-                    </TableCell>
-
-                    {/* 3. Present */}
-                    <TableCell>
-                      <strong>{row.presentDays}d</strong>
-                    </TableCell>
-
-                    {/* 4. Absent */}
-                    <TableCell>
-                      {row.absentDays > 0 ? (
-                        <Badge variant="danger">{row.absentDays}d</Badge>
-                      ) : (
-                        <span>0d</span>
-                      )}
-                    </TableCell>
-
-                    {/* 5. Leave */}
-                    <TableCell>
-                      {row.leaveDays > 0 ? (
-                        <Badge variant="info">{row.leaveDays}d</Badge>
-                      ) : (
-                        <span>0d</span>
-                      )}
-                    </TableCell>
-
-                    {/* 6. On-Duty */}
-                    <TableCell>
-                      {row.onDutyDays > 0 ? (
-                        <Badge variant="success">{row.onDutyDays}d</Badge>
-                      ) : (
-                        <span>0d</span>
-                      )}
-                    </TableCell>
-
-                    {/* 7. Weekly Off / Holiday */}
-                    <TableCell>
-                      <span>
-                        {row.weeklyOffDays} / {row.holidayDays}
-                      </span>
-                    </TableCell>
-
-                    {/* 8. Worked / Credited Hours */}
-                    <TableCell>
-                      <Stack gap="none">
-                        <strong>{row.actualWorkedHours}h</strong>
-                        <span className="bezent-table-meta-subtitle">
-                          Credited: {row.policyCreditedHours}h
-                        </span>
-                      </Stack>
-                    </TableCell>
-
-                    {/* 9. Late / Early */}
-                    <TableCell>
-                      <Inline gap="xs">
-                        {row.lateOccurrences > 0 && (
-                          <Badge variant="warning">{row.lateOccurrences}L</Badge>
-                        )}
-                        {row.earlyExitOccurrences > 0 && (
-                          <Badge variant="neutral">{row.earlyExitOccurrences}E</Badge>
-                        )}
-                        {row.lateOccurrences === 0 && row.earlyExitOccurrences === 0 && (
-                          <span>—</span>
-                        )}
-                      </Inline>
-                    </TableCell>
-
-                    {/* 10. Exceptions */}
-                    <TableCell>
-                      <Inline gap="xs">
-                        {row.unresolvedExceptions > 0 && (
-                          <Badge variant="danger">{row.unresolvedExceptions} Ex</Badge>
-                        )}
-                        {row.pendingCorrections > 0 && (
-                          <Badge variant="warning">{row.pendingCorrections} Reg</Badge>
-                        )}
-                        {row.processingIssues > 0 && <Badge variant="danger">Err</Badge>}
-                        {row.unresolvedExceptions === 0 &&
-                          row.pendingCorrections === 0 &&
-                          row.processingIssues === 0 && <span>None</span>}
-                      </Inline>
-                    </TableCell>
-
-                    {/* 11. Review / Payroll State */}
-                    <TableCell>
-                      <Stack gap="xs">
-                        {renderReviewBadge(row.reviewState)}
-                        {renderReadinessBadge(row.payrollReadiness)}
-                      </Stack>
-                    </TableCell>
-
-                    {/* 12. Actions */}
-                    <TableCell>
-                      <Inline gap="xs">
-                        <Button variant="secondary" onClick={() => handleOpenDrawer(row)}>
-                          View
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          onClick={() =>
-                            handleOpenReviewDialog(
-                              row,
-                              row.reviewState === 'reviewed' ? 'reopen' : 'review',
-                            )
-                          }
-                        >
-                          {row.reviewState === 'reviewed' ? 'Reopen' : 'Review'}
-                        </Button>
-                        <Button variant="ghost" onClick={() => handleRecalculateSingle(row.id)}>
-                          <BezentIcon name="refresh" size={14} />
-                        </Button>
-                      </Inline>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
-          </Card>
-        )}
 
-        {/* Pagination Toolbar */}
-        {totalPages > 1 && (
-          <Inline justify="between" align="center">
-            <span className="bezent-card__desc">
-              Showing Page {page} of {totalPages} ({totalCount} total)
-            </span>
-            <Inline gap="xs">
-              <Button variant="secondary" disabled={page <= 1} onClick={() => setPage(page - 1)}>
-                Previous
-              </Button>
-              <Button
-                variant="secondary"
-                disabled={page >= totalPages}
-                onClick={() => setPage(page + 1)}
-              >
-                Next
-              </Button>
-            </Inline>
-          </Inline>
+            {/* Pagination Controls */}
+            <div className="bezent-table-footer">
+              <Inline justify="between" align="center">
+                <span className="bezent-card__desc">
+                  Showing {rows.length} of {totalCount} records (Page {page} of {totalPages})
+                </span>
+                <Inline gap="xs" align="center">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    disabled={page <= 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    disabled={page >= totalPages}
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  >
+                    Next
+                  </Button>
+                </Inline>
+              </Inline>
+            </div>
+          </Card>
         )}
       </Stack>
 
-      {/* 4-Tab Employee Monthly Drill-down Drawer (Modal size="lg") */}
-      {drawerId && (
+      {/* 9. Employee Detail Drawer Modal (Spec Section 9) */}
+      {drawerId && drawerSummary && (
         <Modal
-          title={
-            drawerSummary
-              ? `Monthly Drill-down: ${drawerSummary.employeeName} (${drawerSummary.month})`
-              : 'Loading Employee Summary...'
-          }
+          title={`${drawerSummary.employeeName} · ${formatMonthYear(drawerSummary.month)}`}
           isOpen={true}
           onClose={handleCloseDrawer}
           size="lg"
         >
-          {drawerLoading || !drawerSummary ? (
+          {drawerLoading ? (
             <LoadingState label="Fetching complete monthly attendance breakdown..." />
           ) : (
             <Stack gap="md">
-              {/* Header Badges */}
               <Inline justify="between" align="center">
                 <Inline gap="sm" align="center">
                   <Avatar
+                    avatarId={getEmployeeAvatarId(drawerSummary.employeeId)}
                     initials={drawerSummary.employeeName.slice(0, 2).toUpperCase()}
+                    color={getAvatarColor(drawerSummary.employeeId)}
                     alt={drawerSummary.employeeName}
                   />
                   <Stack gap="none">
@@ -983,32 +1348,35 @@ export function MonthlyAttendanceSummaryPage() {
                 </Inline>
 
                 <Inline gap="xs">
-                  {renderReviewBadge(drawerSummary.reviewState)}
-                  {renderReadinessBadge(drawerSummary.payrollReadiness)}
-                  {drawerSummary.isLocked && <Badge variant="neutral">Locked</Badge>}
+                  {(() => {
+                    const cfg = getReviewStatusConfig(drawerSummary);
+                    return (
+                      <span title={cfg.tooltip}>
+                        <Badge variant={cfg.variant}>{cfg.label}</Badge>
+                      </span>
+                    );
+                  })()}
                 </Inline>
               </Inline>
 
-              {/* 4 Tabs */}
               <Tabs
                 items={[
-                  { id: 'overview', label: 'Overview' },
+                  { id: 'summary', label: 'Attendance Summary' },
                   { id: 'days', label: 'Daily Breakdown' },
-                  { id: 'readiness', label: 'Issues & Readiness' },
                   { id: 'history', label: 'Review History' },
                 ]}
                 activeId={drawerTab}
                 onChange={(tabId) => setDrawerTab(tabId as typeof drawerTab)}
               />
 
-              {/* Tab 1: Overview */}
-              {drawerTab === 'overview' && (
+              {/* Section 1: Attendance Summary */}
+              {drawerTab === 'summary' && (
                 <Stack gap="md">
                   <Grid columns={3} gap="sm">
                     <Card padding="sm">
                       <Stack gap="none">
                         <span className="bezent-card__desc">Scheduled Days</span>
-                        <strong>{drawerSummary.scheduledDays} days</strong>
+                        <strong>{formatDays(drawerSummary.scheduledDays)} days</strong>
                         <span>{drawerSummary.scheduledMinutes} mins</span>
                       </Stack>
                     </Card>
@@ -1016,30 +1384,22 @@ export function MonthlyAttendanceSummaryPage() {
                     <Card padding="sm">
                       <Stack gap="none">
                         <span className="bezent-card__desc">Present Equivalents</span>
-                        <strong>{drawerSummary.presentDays} days</strong>
-                        <span>Credited: {drawerSummary.policyCreditedHours}h</span>
+                        <strong>{formatDays(drawerSummary.presentDays)} days</strong>
+                        <span>Worked: {drawerSummary.actualWorkedHours}h</span>
                       </Stack>
                     </Card>
 
                     <Card padding="sm">
                       <Stack gap="none">
-                        <span className="bezent-card__desc">Absent Equivalents</span>
-                        <strong>{drawerSummary.absentDays} days</strong>
-                        <span>Actual Worked: {drawerSummary.actualWorkedHours}h</span>
+                        <span className="bezent-card__desc">Absent Days (LOP)</span>
+                        <strong>{formatDays(drawerSummary.absentDays)} days</strong>
                       </Stack>
                     </Card>
 
                     <Card padding="sm">
                       <Stack gap="none">
                         <span className="bezent-card__desc">Leave Coverage</span>
-                        <strong>{drawerSummary.leaveDays} days</strong>
-                      </Stack>
-                    </Card>
-
-                    <Card padding="sm">
-                      <Stack gap="none">
-                        <span className="bezent-card__desc">On-Duty Coverage</span>
-                        <strong>{drawerSummary.onDutyDays} days</strong>
+                        <strong>{formatDays(drawerSummary.leaveDays)} days</strong>
                       </Stack>
                     </Card>
 
@@ -1051,62 +1411,69 @@ export function MonthlyAttendanceSummaryPage() {
                         </strong>
                       </Stack>
                     </Card>
+
+                    <Card padding="sm">
+                      <Stack gap="none">
+                        <span className="bezent-card__desc">Payable Days</span>
+                        <strong>
+                          {formatDays(
+                            Number(drawerSummary.presentDays || 0) +
+                              Number(drawerSummary.leaveDays || 0) +
+                              Number(drawerSummary.weeklyOffDays || 0) +
+                              Number(drawerSummary.holidayDays || 0),
+                          )}{' '}
+                          days
+                        </strong>
+                      </Stack>
+                    </Card>
                   </Grid>
 
-                  <Card padding="sm">
-                    <Stack gap="xs">
-                      <strong>Governance & Version Metadata</strong>
-                      <Grid columns={2} gap="sm">
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Summary Version</span>
-                          <span>Version {drawerSummary.version}</span>
-                        </Stack>
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Fingerprint</span>
-                          <span>{drawerSummary.sourceFingerprint.slice(0, 16)}...</span>
-                        </Stack>
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Assigned Reviewer</span>
-                          <span>{drawerSummary.assignedReviewerName ?? 'Unassigned'}</span>
-                        </Stack>
-                        <Stack gap="none">
-                          <span className="bezent-card__desc">Last Sign-off</span>
-                          <span>
-                            {drawerSummary.reviewedAt
-                              ? formatDateTime(drawerSummary.reviewedAt)
-                              : 'Not Signed Off'}
-                          </span>
-                        </Stack>
-                      </Grid>
-                    </Stack>
-                  </Card>
+                  <Stack gap="xs">
+                    <span className="bezent-card__desc">Review note (optional)</span>
+                    <Input
+                      placeholder="Add an optional review note..."
+                      value={drawerReviewNote}
+                      onChange={(e) => setDrawerReviewNote(e.target.value)}
+                    />
+                  </Stack>
                 </Stack>
               )}
 
-              {/* Tab 2: Daily Breakdown */}
+              {/* Section 2: Daily Breakdown */}
               {drawerTab === 'days' && (
-                <Card padding="none">
+                <Stack gap="sm">
+                  <span className="bezent-card__desc">
+                    Click any day row to view complete punch details.
+                  </span>
                   <Table>
                     <TableHead>
                       <TableRow>
                         <TableHeaderCell>Date</TableHeaderCell>
                         <TableHeaderCell>Shift</TableHeaderCell>
-                        <TableHeaderCell>Classification</TableHeaderCell>
-                        <TableHeaderCell>Worked Mins</TableHeaderCell>
-                        <TableHeaderCell>OD Credit</TableHeaderCell>
-                        <TableHeaderCell>Leave</TableHeaderCell>
-                        <TableHeaderCell>Late / Early</TableHeaderCell>
-                        <TableHeaderCell>Exceptions</TableHeaderCell>
+                        <TableHeaderCell>Schedule</TableHeaderCell>
+                        <TableHeaderCell>Worked</TableHeaderCell>
+                        <TableHeaderCell>Status</TableHeaderCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {drawerDays.map((d) => (
-                        <TableRow key={d.date}>
+                        <TableRow key={d.date} onClick={() => setSelectedPunchDay(d)}>
                           <TableCell>
-                            <strong>{d.date}</strong>
-                            <span className="bezent-card__desc">{d.dayOfWeek}</span>
+                            <button
+                              type="button"
+                              className="bezent-table-meta-title"
+                              onClick={() => setSelectedPunchDay(d)}
+                            >
+                              {d.date}
+                            </button>
                           </TableCell>
-                          <TableCell>{d.shiftName ?? 'Standard'}</TableCell>
+                          <TableCell>{d.shiftName || 'Standard'}</TableCell>
+                          <TableCell>
+                            {d.scheduleStartTime && d.scheduleEndTime
+                              ? `${d.scheduleStartTime.slice(0, 5)} - ${d.scheduleEndTime.slice(0, 5)}`
+                              : '—'}
+                          </TableCell>
+                          <TableCell>{formatOvertime(d.actualWorkedMinutes)}</TableCell>
                           <TableCell>
                             <Badge
                               variant={
@@ -1114,7 +1481,7 @@ export function MonthlyAttendanceSummaryPage() {
                                   ? 'success'
                                   : d.classification === 'absent'
                                     ? 'danger'
-                                    : d.classification === 'on_duty'
+                                    : d.classification === 'on_leave'
                                       ? 'info'
                                       : 'neutral'
                               }
@@ -1122,215 +1489,291 @@ export function MonthlyAttendanceSummaryPage() {
                               {d.classification.replace('_', ' ')}
                             </Badge>
                           </TableCell>
-                          <TableCell>{d.actualWorkedMinutes}m</TableCell>
-                          <TableCell>{d.onDutyMinutes > 0 ? `${d.onDutyMinutes}m` : '—'}</TableCell>
-                          <TableCell>{d.leaveMinutes ? `${d.leaveMinutes}m` : '—'}</TableCell>
-                          <TableCell>
-                            <Inline gap="xs">
-                              {d.isLate && <Badge variant="warning">{d.lateMinutes}m</Badge>}
-                              {d.isEarlyExit && (
-                                <Badge variant="neutral">{d.earlyExitMinutes}m</Badge>
-                              )}
-                              {!d.isLate && !d.isEarlyExit && <span>—</span>}
-                            </Inline>
-                          </TableCell>
-                          <TableCell>
-                            {d.hasException && <Badge variant="danger">Ex</Badge>}
-                            {d.hasPendingRegularization && <Badge variant="warning">Reg</Badge>}
-                            {!d.hasException && !d.hasPendingRegularization && <span>—</span>}
-                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
-                </Card>
-              )}
-
-              {/* Tab 3: Issues & Readiness */}
-              {drawerTab === 'readiness' && (
-                <Stack gap="md">
-                  {drawerReadiness?.blockingChecks && drawerReadiness.blockingChecks.length > 0 && (
-                    <Alert variant="danger" title="Blocking Readiness Issues">
-                      <Stack gap="xs">
-                        {drawerReadiness.blockingChecks.map((b) => (
-                          <span key={b.code}>
-                            <strong>{b.name}:</strong> {b.details}
-                          </span>
-                        ))}
-                      </Stack>
-                    </Alert>
-                  )}
-
-                  {drawerReadiness?.warningChecks && drawerReadiness.warningChecks.length > 0 && (
-                    <Alert variant="warning" title="Readiness Warnings">
-                      <Stack gap="xs">
-                        {drawerReadiness.warningChecks.map((w) => (
-                          <span key={w.code}>
-                            <strong>{w.name}:</strong> {w.details}
-                          </span>
-                        ))}
-                      </Stack>
-                    </Alert>
-                  )}
-
-                  <Card padding="sm">
-                    <Stack gap="xs">
-                      <strong>Passed Readiness Checks</strong>
-                      {drawerReadiness?.passedChecks.map((p) => (
-                        <Inline key={p.code} gap="xs" align="center">
-                          <Badge variant="success">PASS</Badge>
-                          <span>
-                            <strong>{p.name}:</strong> {p.details}
-                          </span>
-                        </Inline>
-                      ))}
-                    </Stack>
-                  </Card>
                 </Stack>
               )}
 
-              {/* Tab 4: Review History */}
+              {/* Section 3: Review History */}
               {drawerTab === 'history' && (
-                <Card padding="sm">
+                <Stack gap="sm">
                   {drawerHistory.length === 0 ? (
                     <EmptyState
                       title="No Review History"
                       description="This summary has not had any sign-off or correction events recorded yet."
                     />
                   ) : (
-                    <Stack gap="md">
-                      {drawerHistory.map((h) => (
-                        <Card key={h.id} padding="sm">
-                          <Stack gap="xs">
-                            <Inline justify="between" align="center">
-                              <strong>Status: {h.reviewStatus.replace('_', ' ')}</strong>
-                              <span className="bezent-card__desc">
-                                {formatDateTime(h.createdAt)}
-                              </span>
-                            </Inline>
-                            <span>
-                              Reviewer: {h.reviewerName ?? h.reviewerUserId} (Version{' '}
-                              {h.reviewedSummaryVersion})
-                            </span>
-                            {h.reviewNotes && <span>Notes: {h.reviewNotes}</span>}
-                            {h.reopenReason && <span>Reopen Reason: {h.reopenReason}</span>}
-                          </Stack>
-                        </Card>
-                      ))}
-                    </Stack>
+                    drawerHistory.map((h) => (
+                      <Card key={h.id} padding="sm">
+                        <Stack gap="xs">
+                          <Inline justify="between" align="center">
+                            <strong>Status: {h.reviewStatus.replace('_', ' ')}</strong>
+                            <span className="bezent-card__desc">{formatDateTime(h.createdAt)}</span>
+                          </Inline>
+                          <span>
+                            Reviewer: {h.reviewerName ?? h.reviewerUserId} (Version{' '}
+                            {h.reviewedSummaryVersion})
+                          </span>
+                          {h.reviewNotes && <span>Notes: {h.reviewNotes}</span>}
+                          {h.reopenReason && <span>Reason: {h.reopenReason}</span>}
+                        </Stack>
+                      </Card>
+                    ))
                   )}
-                </Card>
+                </Stack>
               )}
 
-              <Inline justify="end" gap="sm">
-                <Button variant="secondary" onClick={handleCloseDrawer}>
+              <Inline justify="between" align="center">
+                <Button variant="outline" onClick={handleCloseDrawer}>
                   Close
                 </Button>
+                {!drawerSummary.isLocked && (
+                  <Inline gap="xs">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        handleCloseDrawer();
+                        handleOpenSendBackDialog(drawerSummary);
+                      }}
+                    >
+                      Send Back
+                    </Button>
+                    <Button
+                      variant="primary"
+                      onClick={() => {
+                        handleCloseDrawer();
+                        handleApproveRow(drawerSummary);
+                      }}
+                    >
+                      Approve
+                    </Button>
+                  </Inline>
+                )}
               </Inline>
             </Stack>
           )}
         </Modal>
       )}
 
-      {/* Review Dialog Modal */}
-      {reviewDialogTarget && (
+      {/* Punch Details Modal (Section 9 Cell Click) */}
+      {selectedPunchDay && (
         <Modal
-          title={
-            reviewDialogAction === 'review'
-              ? `Sign Off Monthly Summary — ${reviewDialogTarget.employeeName}`
-              : reviewDialogAction === 'correction'
-                ? `Request Correction — ${reviewDialogTarget.employeeName}`
-                : `Reopen Review — ${reviewDialogTarget.employeeName}`
-          }
+          title={`Punch details for ${selectedPunchDay.date}`}
           isOpen={true}
-          onClose={() => setReviewDialogTarget(null)}
+          onClose={() => setSelectedPunchDay(null)}
           size="md"
         >
           <Stack gap="md">
-            <span>
-              Action target: <strong>{reviewDialogTarget.employeeName}</strong> for attendance month{' '}
-              <strong>{reviewDialogTarget.month}</strong> (Version {reviewDialogTarget.version}).
-            </span>
+            <Grid columns={2} gap="sm">
+              <Card padding="sm">
+                <Stack gap="none">
+                  <span className="bezent-card__desc">Scheduled Time</span>
+                  <strong>
+                    {selectedPunchDay.scheduleStartTime && selectedPunchDay.scheduleEndTime
+                      ? `${selectedPunchDay.scheduleStartTime} - ${selectedPunchDay.scheduleEndTime}`
+                      : '—'}
+                  </strong>
+                </Stack>
+              </Card>
+              <Card padding="sm">
+                <Stack gap="none">
+                  <span className="bezent-card__desc">Assigned Shift</span>
+                  <strong>{selectedPunchDay.shiftName || 'Standard'}</strong>
+                </Stack>
+              </Card>
+              <Card padding="sm">
+                <Stack gap="none">
+                  <span className="bezent-card__desc">Classification</span>
+                  <strong>{selectedPunchDay.classification.replace('_', ' ')}</strong>
+                </Stack>
+              </Card>
+              <Card padding="sm">
+                <Stack gap="none">
+                  <span className="bezent-card__desc">Total Worked</span>
+                  <strong>{formatOvertime(selectedPunchDay.actualWorkedMinutes)}</strong>
+                </Stack>
+              </Card>
+            </Grid>
 
-            <Input
-              placeholder={
-                reviewDialogAction === 'correction'
-                  ? 'Enter mandatory correction request details...'
-                  : reviewDialogAction === 'reopen'
-                    ? 'Enter mandatory reason for reopening review...'
-                    : 'Enter optional review sign-off notes...'
-              }
-              value={reviewNotes}
-              onChange={(e) => setReviewNotes(e.target.value)}
-            />
+            {selectedPunchDay.exceptionTypes && selectedPunchDay.exceptionTypes.length > 0 && (
+              <Stack gap="xs">
+                <strong>Recorded Exceptions</strong>
+                <Inline gap="xs">
+                  {selectedPunchDay.exceptionTypes.map((ex, idx) => (
+                    <Badge key={idx} variant="warning">
+                      {ex.replace('_', ' ')}
+                    </Badge>
+                  ))}
+                </Inline>
+              </Stack>
+            )}
 
-            <Inline justify="end" gap="sm">
-              <Button
-                variant="secondary"
-                disabled={reviewSubmitting}
-                onClick={() => setReviewDialogTarget(null)}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                disabled={reviewSubmitting}
-                onClick={handleSubmitReviewAction}
-              >
-                {reviewSubmitting ? 'Submitting...' : 'Confirm'}
+            <Inline justify="end">
+              <Button variant="secondary" onClick={() => setSelectedPunchDay(null)}>
+                Close
               </Button>
             </Inline>
           </Stack>
         </Modal>
       )}
 
-      {/* Controlled Bulk Confirmation & Preview Modal */}
-      {showBulkModal && (
+      {/* 7. Bulk Approval Confirmation Modal (Spec Section 7) */}
+      {showBulkApproveModal && (
         <Modal
-          title={`Bulk Action Preview: ${bulkAction?.replace('_', ' ')}`}
+          title={`Approve ${selectedIds.size} employees for ${formatMonthYear(selectedMonth)}?`}
           isOpen={true}
-          onClose={() => setShowBulkModal(false)}
+          onClose={() => setShowBulkApproveModal(false)}
           size="md"
         >
           <Stack gap="md">
-            {bulkPreviewLoading ? (
-              <LoadingState label="Checking eligibility for selected records..." />
-            ) : bulkExecutionResult ? (
-              <Stack gap="md">
-                <Alert variant="success" title="Bulk Operation Completed">
-                  Succeeded: {bulkExecutionResult.succeeded.length} | Skipped:{' '}
-                  {bulkExecutionResult.skipped.length} | Failed: {bulkExecutionResult.failed.length}
-                </Alert>
-                <Button variant="primary" onClick={() => setShowBulkModal(false)}>
-                  Done
-                </Button>
-              </Stack>
-            ) : (
-              <Stack gap="md">
-                <span>
-                  Total Selected: <strong>{bulkPreview?.totalSelected}</strong> | Eligible:{' '}
-                  <strong>{bulkPreview?.eligibleCount}</strong> | Ineligible:{' '}
-                  <strong>{bulkPreview?.notEligibleCount}</strong>
-                </span>
+            <p>
+              {eligibleRecords.length} will be approved. {skippedRecords.length} with unresolved
+              issues will be skipped.
+            </p>
 
-                <Inline justify="end" gap="sm">
-                  <Button
-                    variant="secondary"
-                    disabled={bulkExecuting}
-                    onClick={() => setShowBulkModal(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="primary"
-                    disabled={bulkExecuting || bulkPreview?.eligibleCount === 0}
-                    onClick={handleExecuteBulk}
-                  >
-                    {bulkExecuting ? 'Executing...' : 'Confirm Bulk Execution'}
-                  </Button>
-                </Inline>
-              </Stack>
+            {skippedRecords.length > 0 && (
+              <Alert variant="warning" title="Skipped Records Preview">
+                <Stack gap="xs">
+                  {skippedRecords.slice(0, 5).map(({ row, reason }) => (
+                    <span key={row.id}>
+                      <strong>{row.employeeName}:</strong> {reason}
+                    </span>
+                  ))}
+                  {skippedRecords.length > 5 && (
+                    <span>...and {skippedRecords.length - 5} more.</span>
+                  )}
+                </Stack>
+              </Alert>
             )}
+
+            <Inline justify="end" gap="sm">
+              <Button
+                variant="outline"
+                disabled={bulkSubmitting}
+                onClick={() => setShowBulkApproveModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                disabled={bulkSubmitting || eligibleRecords.length === 0}
+                onClick={handleExecuteBulkApprove}
+              >
+                {bulkSubmitting ? 'Approving...' : 'Approve'}
+              </Button>
+            </Inline>
+          </Stack>
+        </Modal>
+      )}
+
+      {/* Skipped Records Detail Modal */}
+      {showSkippedRecordsModal && (
+        <Modal
+          title={`Skipped records for ${formatMonthYear(selectedMonth)}`}
+          isOpen={true}
+          onClose={() => setShowSkippedRecordsModal(false)}
+          size="md"
+        >
+          <Stack gap="md">
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableHeaderCell>Employee</TableHeaderCell>
+                  <TableHeaderCell>Reason</TableHeaderCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {skippedRecords.map(({ row, reason }) => (
+                  <TableRow key={row.id}>
+                    <TableCell>
+                      <strong>{row.employeeName}</strong> ({row.employeeCode})
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="warning">{reason}</Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <Inline justify="end">
+              <Button variant="secondary" onClick={() => setShowSkippedRecordsModal(false)}>
+                Close
+              </Button>
+            </Inline>
+          </Stack>
+        </Modal>
+      )}
+
+      {/* 8. Freeze Period Confirmation Modal (Spec Section 8) */}
+      {showFreezeModal && (
+        <Modal
+          title={`Freeze attendance for ${formatMonthYear(selectedMonth)}?`}
+          isOpen={true}
+          onClose={() => setShowFreezeModal(false)}
+          size="md"
+        >
+          <Stack gap="md">
+            <p>
+              Attendance will become read-only and be sent to payroll. Later corrections will go to
+              the arrears register.
+            </p>
+
+            <Inline justify="end" gap="sm">
+              <Button
+                variant="outline"
+                disabled={freezeSubmitting}
+                onClick={() => setShowFreezeModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                disabled={freezeSubmitting}
+                onClick={handleExecuteFreezePeriod}
+              >
+                {freezeSubmitting ? 'Freezing...' : 'Freeze'}
+              </Button>
+            </Inline>
+          </Stack>
+        </Modal>
+      )}
+
+      {/* Send Back / Correction Modal (Spec Section 6) */}
+      {sendBackTarget && (
+        <Modal
+          title={`Send Back — ${sendBackTarget.employeeName}`}
+          isOpen={true}
+          onClose={() => setSendBackTarget(null)}
+          size="md"
+        >
+          <Stack gap="md">
+            <p>
+              Return monthly attendance summary for <strong>{sendBackTarget.employeeName}</strong> (
+              {sendBackTarget.month}) for correction.
+            </p>
+            <Input
+              placeholder="Enter reason for sending back..."
+              value={sendBackNotes}
+              onChange={(e) => setSendBackNotes(e.target.value)}
+            />
+            <Inline justify="end" gap="sm">
+              <Button
+                variant="outline"
+                disabled={sendBackSubmitting}
+                onClick={() => setSendBackTarget(null)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                disabled={sendBackSubmitting}
+                onClick={handleSubmitSendBack}
+              >
+                {sendBackSubmitting ? 'Submitting...' : 'Send Back'}
+              </Button>
+            </Inline>
           </Stack>
         </Modal>
       )}
@@ -1375,14 +1818,14 @@ export function MonthlyAttendanceSummaryPage() {
 
             <Inline justify="end" gap="sm">
               <Button
-                variant="secondary"
+                variant="outline"
                 disabled={exporting}
                 onClick={() => setShowExportModal(false)}
               >
                 Cancel
               </Button>
               <Button variant="primary" disabled={exporting} onClick={handleExecuteExport}>
-                {exporting ? 'Exporting...' : 'Export File'}
+                {exporting ? 'Exporting...' : 'Export'}
               </Button>
             </Inline>
           </Stack>

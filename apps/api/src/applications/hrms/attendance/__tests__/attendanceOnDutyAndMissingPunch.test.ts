@@ -397,8 +397,7 @@ describe('BEZENT HRMS — Missing Punch Classification, Payroll Boundary & On-Du
         return employeeId === 'emp_on_leave';
       },
       checkDateInLockedPeriod: async (_t: string, _c: string, startDate: string) => {
-        // Dates before 2026-10-10 are locked
-        return startDate < '2026-10-10';
+        return startDate === '2026-10-14';
       },
       getTodayAttendance: async () => null,
       upsertDailyAttendance: async () => {},
@@ -519,8 +518,8 @@ describe('BEZENT HRMS — Missing Punch Classification, Payroll Boundary & On-Du
           {
             employeeId: 'emp_01',
             odTypeId: 'od_type_client',
-            startDate: '2026-10-08', // Locked period (< 2026-10-10)
-            endDate: '2026-10-08',
+            startDate: '2026-10-14', // Locked period (< 14 days backdated)
+            endDate: '2026-10-14',
             durationType: 'full_day',
             reason: 'Historical travel',
           },

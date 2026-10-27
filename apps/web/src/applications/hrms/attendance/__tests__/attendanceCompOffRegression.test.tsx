@@ -16,14 +16,15 @@ describe('BEZENT HRMS — Attendance Comp-Off V1.0 Regression & Runtime Defense 
       </MemoryRouter>,
     );
 
-    expect(html).toContain('Comp-Off Management');
-    expect(html).toContain('Overview');
-    expect(html).toContain('Earning Requests');
-    expect(html).toContain('Approval Queue');
-    expect(html).toContain('Approved Earnings');
-    expect(html).toContain('Credit Handoff Status');
-    expect(html).toContain('Policies');
-    expect(html).toContain('Audit History');
+    expect(html).toContain('Comp-Off');
+    expect(html).toContain('Attendance › Comp-Off');
+    expect(html).toContain('Track comp-off earned, used and expired for each employee.');
+    expect(html).toContain('Run Expiry Check');
+    expect(html).toContain('Export');
+    expect(html).toContain('Grant Comp-Off');
+    expect(html).toContain('Earnings');
+    expect(html).toContain('Balances');
+    expect(html).toContain('Leave Handoff');
   });
 
   it('Issue 1 Regression: safely renders Earning Requests when API returns empty items without length crash', () => {

@@ -78,8 +78,8 @@ export class DocumentsApiError extends Error {
   }
 }
 
-async function request<T>(path: string): Promise<T> {
-  const res = await authorizedFetch(`${appConfig.apiBaseUrl}${path}`);
+async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const res = await authorizedFetch(`${appConfig.apiBaseUrl}${path}`, options);
   let body: unknown = null;
   try {
     body = await res.json();
@@ -112,5 +112,24 @@ export async function fetchDocument(id: string): Promise<EmployeeDocument> {
   const body = await request<{ data: EmployeeDocument }>(
     `/hrms/employee-documents/${encodeURIComponent(id)}`,
   );
+  return body.data;
+}
+
+export interface CreateEmployeeDocumentInput {
+  employeeId: string;
+  category: DocumentCategory;
+  documentName: string;
+  documentNumber?: string | null;
+  expiryDate?: string | null;
+}
+
+export async function createDocument(
+  input: CreateEmployeeDocumentInput,
+): Promise<EmployeeDocument> {
+  const body = await request<{ data: EmployeeDocument }>('/hrms/employee-documents', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
   return body.data;
 }

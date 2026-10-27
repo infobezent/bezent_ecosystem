@@ -102,4 +102,17 @@ describe('BEZENT HRMS — Attendance Regularization V1.0 Frontend Workspace', ()
     expect(html).toContain('More Filters');
     expect(html).toContain('Loading regularization workspace...');
   });
+
+  it('renders multi-stage workspace queue switcher tabs', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <AttendanceRegularizationPage />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('All Requests');
+    expect(html).toContain('Manager Review Queue');
+    expect(html).toContain('HR Review Queue');
+    expect(html).toContain('Unassigned HR Queue');
+  });
 });

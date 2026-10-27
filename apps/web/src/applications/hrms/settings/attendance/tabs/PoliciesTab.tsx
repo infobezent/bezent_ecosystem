@@ -98,6 +98,14 @@ export function PoliciesTab() {
     'scheduled',
   );
 
+  // 1b. Shift Allocation Automation State
+  const [shiftAssignmentMode, setShiftAssignmentMode] = useState<
+    'roster_assigned' | 'auto_detect_punch'
+  >('roster_assigned');
+  const [shiftMatchingWindowMinutes, setShiftMatchingWindowMinutes] = useState(60);
+  const [fallbackShiftName, setFallbackShiftName] = useState('Standard General Shift');
+  const [allowOvernightSpanning, setAllowOvernightSpanning] = useState(true);
+
   // 2. Late Arrival Policy
   const [enableLateTracking, setEnableLateTracking] = useState(true);
   const [gracePeriodMinutes, setGracePeriodMinutes] = useState(15);
@@ -279,6 +287,18 @@ export function PoliciesTab() {
           pol.classificationRules.workingHoursConfig.workingHoursMode || 'fixed_policy',
         );
         setNetOrGross(pol.classificationRules.workingHoursConfig.netOrGross || 'net');
+        setShiftAssignmentMode(
+          pol.classificationRules.workingHoursConfig.shiftAssignmentMode || 'roster_assigned',
+        );
+        setShiftMatchingWindowMinutes(
+          pol.classificationRules.workingHoursConfig.shiftMatchingWindowMinutes ?? 60,
+        );
+        setFallbackShiftName(
+          pol.classificationRules.workingHoursConfig.fallbackShiftName || 'Standard General Shift',
+        );
+        setAllowOvernightSpanning(
+          pol.classificationRules.workingHoursConfig.allowOvernightSpanning ?? true,
+        );
       }
 
       if (pol.classificationRules?.lateArrivalConfig) {
@@ -380,6 +400,11 @@ export function PoliciesTab() {
       halfDayHours: Number(halfDayHours),
       netOrGross,
       breakDeductionMethod,
+      shiftAssignmentMode,
+      enableAutoShiftAllocation: shiftAssignmentMode === 'auto_detect_punch',
+      shiftMatchingWindowMinutes,
+      fallbackShiftName,
+      allowOvernightSpanning,
     };
 
     const lateArrival: LateArrivalConfig = {
@@ -481,6 +506,10 @@ export function PoliciesTab() {
     belowMinimumAction,
     workingHoursMode,
     netOrGross,
+    shiftAssignmentMode,
+    shiftMatchingWindowMinutes,
+    fallbackShiftName,
+    allowOvernightSpanning,
     lateCountingMode,
     extendedLateThresholdMinutes,
     extendedLateAction,
@@ -812,6 +841,92 @@ export function PoliciesTab() {
                 />
               }
             />
+            {workingHoursMode === 'shift_based' && (
+              <>
+                <Divider spacing="sm" />
+                <SettingsRow
+                  label="Shift Assignment Strategy"
+                  tooltip="Assign shift from predefined roster or automatically detect closest shift matching punch-in time."
+                  control={
+                    <Select
+                      value={shiftAssignmentMode}
+                      onChange={(e) => {
+                        const val = e.target.value as 'roster_assigned' | 'auto_detect_punch';
+                        setShiftAssignmentMode(val);
+                        handleFieldChange();
+                      }}
+                      options={[
+                        {
+                          value: 'roster_assigned',
+                          label: 'Fixed Roster (Pre-Assigned Shift Schedule)',
+                        },
+                        {
+                          value: 'auto_detect_punch',
+                          label: 'Auto-Shift Allocation (Punch Time Matching)',
+                        },
+                      ]}
+                    />
+                  }
+                />
+
+                {shiftAssignmentMode === 'auto_detect_punch' && (
+                  <>
+                    <Divider spacing="sm" />
+                    <SettingsRow
+                      label="Shift Matching Window (Minutes)"
+                      tooltip="Threshold window around shift start time to allocate the shift."
+                      control={
+                        <Select
+                          value={String(shiftMatchingWindowMinutes)}
+                          onChange={(e) => {
+                            setShiftMatchingWindowMinutes(Number(e.target.value));
+                            handleFieldChange();
+                          }}
+                          options={[
+                            { value: '30', label: '±30 Minutes' },
+                            { value: '45', label: '±45 Minutes' },
+                            { value: '60', label: '±60 Minutes (Recommended)' },
+                            { value: '90', label: '±90 Minutes' },
+                            { value: '120', label: '±120 Minutes (2 Hours)' },
+                          ]}
+                        />
+                      }
+                    />
+
+                    <Divider spacing="sm" />
+                    <SettingsRow
+                      label="Unscheduled Fallback Shift"
+                      tooltip="Fallback shift allocated when employee punches outside all matching windows."
+                      control={
+                        <Input
+                          value={fallbackShiftName}
+                          onChange={(e) => {
+                            setFallbackShiftName(e.target.value);
+                            handleFieldChange();
+                          }}
+                          placeholder="e.g. Standard General Shift (09:00 - 18:00)"
+                        />
+                      }
+                    />
+
+                    <Divider spacing="sm" />
+                    <SettingsRow
+                      label="Allow Overnight Shift Spanning"
+                      tooltip="Permits automatic matching of night shifts that cross midnight."
+                      control={
+                        <Switch
+                          checked={allowOvernightSpanning}
+                          onChange={(e) => {
+                            setAllowOvernightSpanning(e.target.checked);
+                            handleFieldChange();
+                          }}
+                        />
+                      }
+                    />
+                  </>
+                )}
+              </>
+            )}
             <Divider spacing="sm" />
 
             <SettingsRow

@@ -11,7 +11,13 @@ export type SourceOfHire =
   'direct_applicant' | 'referral' | 'agency' | 'campus' | 'linkedin' | 'other';
 export type EmploymentType = 'full_time' | 'part_time' | 'contract' | 'intern';
 export type EmploymentStatus =
-  'active' | 'probation' | 'notice' | 'terminated' | 'suspended' | 'resigned';
+  | 'pending_activation'
+  | 'active'
+  | 'probation'
+  | 'notice'
+  | 'terminated'
+  | 'suspended'
+  | 'resigned';
 
 export interface EmployeeRecord {
   id: string;
@@ -55,8 +61,13 @@ export interface EmployeeListResponse {
 export interface ListEmployeesQuery {
   search?: string;
   departmentId?: string;
+  departmentIds?: string[];
   locationId?: string;
+  locationIds?: string[];
+  employmentType?: EmploymentType;
   employmentStatus?: EmploymentStatus;
+  joiningDateFrom?: string;
+  joiningDateTo?: string;
   page?: number;
   pageSize?: number;
 }
@@ -100,7 +111,15 @@ export async function fetchEmployees(
 ): Promise<EmployeeListResponse> {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
-    if (value !== undefined && value !== null && value !== '') params.set(key, String(value));
+    if (value !== undefined && value !== null && value !== '') {
+      if (Array.isArray(value)) {
+        if (value.length > 0) {
+          params.set(key, value.join(','));
+        }
+      } else {
+        params.set(key, String(value));
+      }
+    }
   }
   const qs = params.toString();
   return request<EmployeeListResponse>(`/hrms/employees${qs ? `?${qs}` : ''}`);
@@ -131,11 +150,20 @@ export interface PersonalDetails {
   businessPhone: string | null;
   workPhone: string | null;
   addressStreet: string | null;
+  addressLine2?: string | null;
   addressCity: string | null;
   addressDistrict: string | null;
   addressState: string | null;
   addressPostalCode: string | null;
   addressCountry: string | null;
+  isPermanentSameAsCurrent?: boolean;
+  permanentAddressStreet?: string | null;
+  permanentAddressLine2?: string | null;
+  permanentAddressCity?: string | null;
+  permanentAddressDistrict?: string | null;
+  permanentAddressState?: string | null;
+  permanentAddressPostalCode?: string | null;
+  permanentAddressCountry?: string | null;
 }
 
 export interface FamilyMember {
@@ -210,6 +238,7 @@ export interface EmployeeProfile {
   bankAccount: BankAccount | null;
   skills: Skill[];
   workSchedule: WorkSchedule | null;
+  parentGuardians?: Array<{ id: string; name: string; relationship: string }>;
 }
 
 export async function fetchEmployeeProfile(id: string): Promise<EmployeeProfile> {
@@ -278,4 +307,107 @@ export async function createEmployee(payload: CreateEmployeeRequest): Promise<Em
   }
 
   return (body as { data: EmployeeRecord }).data;
+}
+
+export type UpdateEmployeeRequest = Partial<
+  Pick<
+    EmployeeRecord,
+    | 'firstName'
+    | 'lastName'
+    | 'email'
+    | 'phone'
+    | 'departmentId'
+    | 'designationId'
+    | 'locationId'
+    | 'reportingManagerId'
+    | 'employmentType'
+    | 'employmentStatus'
+    | 'probationEndDate'
+    | 'confirmationDate'
+    | 'lastWorkingDate'
+    | 'contractEndDate'
+    | 'noticePeriodDays'
+  >
+>;
+
+export async function updateEmployee(
+  employeeId: string,
+  payload: UpdateEmployeeRequest,
+): Promise<EmployeeRecord> {
+  const res = await authorizedFetch(
+    `${appConfig.apiBaseUrl}/hrms/employees/${encodeURIComponent(employeeId)}`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    },
+  );
+
+  let body: unknown = null;
+  try {
+    body = await res.json();
+  } catch {
+    body = null;
+  }
+
+  if (!res.ok) {
+    const error = (
+      body as { error?: { message?: string; code?: string; details?: unknown } } | null
+    )?.error;
+    throw new EmployeesApiError(
+      error?.message ?? `Request failed with status ${res.status}`,
+      res.status,
+      error?.code ?? 'REQUEST_FAILED',
+    );
+  }
+
+  return (body as { data: EmployeeRecord }).data;
+}
+
+export type EmployeeDetailSectionKey =
+  | 'personal'
+  | 'family-members'
+  | 'nominees'
+  | 'emergency-contacts'
+  | 'bank-account'
+  | 'skills'
+  | 'work-schedule';
+
+export async function updateEmployeeSection(
+  employeeId: string,
+  section: EmployeeDetailSectionKey,
+  payload: unknown,
+): Promise<EmployeeProfile> {
+  const res = await authorizedFetch(
+    `${appConfig.apiBaseUrl}/hrms/employees/${encodeURIComponent(employeeId)}/${section}`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    },
+  );
+
+  let body: unknown = null;
+  try {
+    body = await res.json();
+  } catch {
+    body = null;
+  }
+
+  if (!res.ok) {
+    const error = (
+      body as { error?: { message?: string; code?: string; details?: unknown } } | null
+    )?.error;
+    throw new EmployeesApiError(
+      error?.message ?? `Request failed with status ${res.status}`,
+      res.status,
+      error?.code ?? 'REQUEST_FAILED',
+    );
+  }
+
+  return (body as { data: EmployeeProfile }).data;
 }

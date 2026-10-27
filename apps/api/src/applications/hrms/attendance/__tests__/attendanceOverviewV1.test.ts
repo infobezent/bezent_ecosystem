@@ -12,6 +12,7 @@ import {
   attendanceExceptions,
   attendanceRegularizations,
   attendanceMonthlySummaries,
+  employeeNotifications,
 } from '../../../../db/schema.js';
 import { generateSurrogateId } from '../../../../platform/auth/security.js';
 import { hrmsTestHeaders } from '../../../../platform/__tests__/support/testSession.js';
@@ -54,6 +55,7 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Overview V1.0
     await db
       .delete(attendanceMonthlySummaries)
       .where(eq(attendanceMonthlySummaries.tenantId, tenantId));
+    await db.delete(employeeNotifications).where(eq(employeeNotifications.tenantId, tenantId));
     await db.delete(employees).where(eq(employees.tenantId, tenantId));
     await db.delete(departments).where(eq(departments.tenantId, tenantId));
 
@@ -412,6 +414,7 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Overview V1.0
     const exc = queue.find((q) => q.actionType === 'unresolved_exceptions');
     expect(exc).toBeDefined();
     expect(exc?.authorizedPendingCount).toBeGreaterThanOrEqual(1);
+    expect(exc?.description).toContain('blocking payroll');
     expect(exc?.targetRoute).toBe('/hrms/attendance/exceptions');
 
     const mp = queue.find((q) => q.actionType === 'missing_punch_issues');
@@ -438,6 +441,9 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Overview V1.0
     expect(health.processedWorkdays).toBe(2); // empActive1 & empActive2 finalized
     expect(health.pendingWorkdays).toBe(1); // empActive3 provisional
     expect(health.unresolvedBlockingExceptions).toBeGreaterThanOrEqual(1);
+    expect(health.workdayBlockingExceptions).toBeGreaterThanOrEqual(1);
+    expect(health.cumulativeBlockingExceptions).toBeGreaterThanOrEqual(1);
+    expect(typeof health.historicalBlockingExceptions).toBe('number');
     expect(health.denominatorDescription).toContain(
       'Processed Finalized (2) / Eligible Workdays (3)',
     );

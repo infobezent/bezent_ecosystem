@@ -347,6 +347,22 @@ export function validateListEmployeeActionsQuery(
     params.actionType = input.actionType as EmployeeActionType;
   }
 
+  if (Array.isArray(input.actionTypes)) {
+    const valid = input.actionTypes.filter(
+      (type): type is EmployeeActionType =>
+        typeof type === 'string' && EMPLOYEE_ACTION_TYPES.includes(type as EmployeeActionType),
+    );
+    if (valid.length > 0) params.actionTypes = valid;
+  } else if (typeof input.actionTypes === 'string' && input.actionTypes.trim()) {
+    const valid = input.actionTypes
+      .split(',')
+      .map((s) => s.trim())
+      .filter((type): type is EmployeeActionType =>
+        EMPLOYEE_ACTION_TYPES.includes(type as EmployeeActionType),
+      );
+    if (valid.length > 0) params.actionTypes = valid;
+  }
+
   if (
     typeof input.status === 'string' &&
     EMPLOYEE_ACTION_STATUSES.includes(input.status as EmployeeActionStatus)
@@ -356,6 +372,21 @@ export function validateListEmployeeActionsQuery(
 
   if (typeof input.employeeId === 'string' && input.employeeId.trim()) {
     params.employeeId = input.employeeId.trim();
+  }
+
+  if (typeof input.departmentId === 'string' && input.departmentId.trim()) {
+    params.departmentId = input.departmentId.trim();
+  }
+
+  if (
+    typeof input.effectiveDateFrom === 'string' &&
+    isValidIsoDate(input.effectiveDateFrom.trim())
+  ) {
+    params.effectiveDateFrom = input.effectiveDateFrom.trim();
+  }
+
+  if (typeof input.effectiveDateTo === 'string' && isValidIsoDate(input.effectiveDateTo.trim())) {
+    params.effectiveDateTo = input.effectiveDateTo.trim();
   }
 
   if (typeof input.search === 'string' && input.search.trim()) {

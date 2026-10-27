@@ -27,17 +27,17 @@
 /* Overlay utility drawer */
 .app-shell__drawer {
   position: absolute;
-  top: calc(var(--shell-topbar-height) + 8px);
-  bottom: calc(var(--shell-bottom-bar-height) + 12px);
-  right: calc(var(--app-shell-rail-width) + 12px);
+  top: var(--shell-topbar-height);
+  bottom: var(--shell-bottom-bar-height);
+  right: var(--app-shell-rail-width);
   width: var(--shell-utility-drawer-width);
-  max-width: calc(100vw - var(--shell-sidebar-width) - var(--app-shell-rail-width) - 24px);
+  max-width: calc(100vw - var(--shell-sidebar-width) - var(--app-shell-rail-width));
   z-index: var(--z-utility-drawer);
   min-width: 0;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  border-radius: 16px;
+  border-radius: 12px 0 0 12px;
   overflow: hidden;
   box-shadow: var(--shadow-utility-drawer);
   animation: appShellDrawerSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -62,14 +62,52 @@
   min-height: 0;
   overflow: auto;
   background: var(--bg-surface, #ffffff);
-  margin: 8px 12px 12px 8px;
-  border-radius: 14px;
-  border: 1px solid var(--border-default, #e2e8f0);
-  box-shadow: var(
-    --shadow-workspace,
-    0 1px 3px rgba(15, 23, 42, 0.05),
-    0 4px 12px rgba(15, 23, 42, 0.03)
-  );
+  margin: 4px 6px 4px 4px;
+  border-radius: 8px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow:
+    0 0 2px rgba(15, 23, 42, 0.04),
+    0 2px 8px rgba(15, 23, 42, 0.04);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(15, 23, 42, 0.15) transparent;
+  transition:
+    margin 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    border-radius 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.app-shell__workspace::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.app-shell__workspace::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-shell__workspace::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.15);
+  border-radius: 9999px;
+}
+
+.app-shell__workspace::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 23, 42, 0.25);
+}
+
+[data-theme='dark'] .app-shell__workspace {
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.4),
+    0 0 1px rgba(255, 255, 255, 0.1);
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+[data-theme='dark'] .app-shell__workspace::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+[data-theme='dark'] .app-shell__workspace::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 /* Flush workspace variant */

@@ -2,19 +2,23 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   Alert,
+  AvatarPicker,
   Button,
   EmptyState,
   LoadingState,
   Page,
   Stack,
 } from '../../../../design-system/components';
+import { useOptionalAuth } from '../../../../platform/auth';
 import { EmployeesApiError, fetchEmployeeProfile, type EmployeeProfile } from '../api/employeesApi';
 import {
   fetchEmployeeActions,
   type EmployeeActionListItem,
 } from '../../employee-administration/api/employeeAdministrationApi';
 import { EmployeeActionDetailModal } from '../../employee-administration/components/EmployeeActionDetailModal';
-import { EMPLOYEES_PATH, employeeProfilePath } from '../model/employeeModel';
+import { fetchDocuments, type EmployeeDocument } from '../../documents/api/documentsApi';
+import { DocumentDetailModal } from '../../documents/components/DocumentDetail';
+import { EMPLOYEES_PATH, employeeProfilePath, getEmployeeAvatarId } from '../model/employeeModel';
 import {
   EmployeeProfileView,
   isProfileTab,
@@ -36,6 +40,12 @@ interface HistoryState {
   error: string | null;
 }
 
+interface DocumentsState {
+  status: 'loading' | 'error' | 'ready';
+  documents: EmployeeDocument[];
+  error: string | null;
+}
+
 function todayIsoDate(): string {
   const now = new Date();
   const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -43,32 +53,56 @@ function todayIsoDate(): string {
   return `${now.getFullYear()}-${month}-${day}`;
 }
 
-/** Route: /hrms/administration/employees/:employeeId — the canonical Employee Profile. */
+/**
+ * Route: /hrms/workforce/employees/:employeeId (and legacy /hrms/administration/employees/:employeeId)
+ * Canonical Employee Profile Workspace View.
+ */
 export function EmployeeProfilePage() {
   const { employeeId } = useParams<{ employeeId: string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const auth = useOptionalAuth();
+  const canEdit = auth ? auth.can('hrms.employees.update') : true;
+
   const requestedTab = searchParams.get('tab');
-  const activeTab: ProfileTabId = isProfileTab(requestedTab) ? requestedTab : 'overview';
+  const activeTab: ProfileTabId = isProfileTab(requestedTab) ? requestedTab : 'personal';
 
   const [state, setState] = useState<ProfileState>({ status: 'loading' });
+
+  // History state
   const [history, setHistory] = useState<HistoryState>({
     status: 'loading',
     actions: [],
     error: null,
   });
   const [openActionId, setOpenActionId] = useState<string | null>(null);
-  const [reloadKey, setReloadKey] = useState(0);
 
+  // Documents state
+  const [documentsState, setDocumentsState] = useState<DocumentsState>({
+    status: 'loading',
+    documents: [],
+    error: null,
+  });
+  const [openDocId, setOpenDocId] = useState<string | null>(null);
+
+  // Avatar picker state
+  const [selectedAvatarId, setSelectedAvatarId] = useState<string | null>(null);
+  const [isAvatarPickerOpen, setIsAvatarPickerOpen] = useState(false);
+
+  const [reloadKey, setReloadKey] = useState(0);
   const reload = useCallback(() => setReloadKey((key) => key + 1), []);
 
+  // Fetch Core Profile
   useEffect(() => {
     if (!employeeId) return;
     let active = true;
     setState({ status: 'loading' });
 
     fetchEmployeeProfile(employeeId)
-      .then((profile) => active && setState({ status: 'ready', profile }))
+      .then((profile) => {
+        if (!active) return;
+        setState({ status: 'ready', profile });
+      })
       .catch((err: unknown) => {
         if (!active) return;
         if (err instanceof EmployeesApiError && err.status === 404) {
@@ -76,7 +110,7 @@ export function EmployeeProfilePage() {
         } else {
           setState({
             status: 'error',
-            error: err instanceof Error ? err.message : 'Failed to load employee',
+            error: err instanceof Error ? err.message : 'Failed to load employee profile',
           });
         }
       });
@@ -86,7 +120,7 @@ export function EmployeeProfilePage() {
     };
   }, [employeeId, reloadKey]);
 
-  // Employment history is loaded when its tab is shown.
+  // Fetch Employment history when tab is 'history'
   useEffect(() => {
     if (!employeeId || activeTab !== 'history') return;
     let active = true;
@@ -108,14 +142,50 @@ export function EmployeeProfilePage() {
     };
   }, [employeeId, activeTab, reloadKey]);
 
-  const backToDirectory = () => navigate(EMPLOYEES_PATH);
+  // Fetch Documents when tab is 'documents'
+  useEffect(() => {
+    if (!employeeId || activeTab !== 'documents') return;
+    let active = true;
+    setDocumentsState((prev) => ({ ...prev, status: 'loading', error: null }));
+
+    fetchDocuments({ employeeId, pageSize: 50 })
+      .then(
+        (res) => active && setDocumentsState({ status: 'ready', documents: res.data, error: null }),
+      )
+      .catch((err: unknown) => {
+        if (!active) return;
+        setDocumentsState({
+          status: 'error',
+          documents: [],
+          error: err instanceof Error ? err.message : 'Failed to load employee documents',
+        });
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [employeeId, activeTab, reloadKey]);
+
+  const backToDirectory = () => {
+    navigate(EMPLOYEES_PATH);
+  };
+
   const openEmployee = (id: string) => navigate(employeeProfilePath(id));
-  const changeTab = (tab: ProfileTabId) =>
-    setSearchParams(tab === 'overview' ? {} : { tab }, { replace: true });
+
+  const changeTab = (tab: ProfileTabId) => {
+    setSearchParams(tab === 'personal' ? {} : { tab }, { replace: true });
+  };
+
+  const handleStartEdit = () => {
+    if (!canEdit || !employeeId) return;
+    navigate(`/hrms/workforce/employees/${encodeURIComponent(employeeId)}/edit`);
+  };
 
   return (
     <Page maxWidth="full" gap="lg">
-      {state.status === 'loading' && <LoadingState label="Loading employee…" minHeight="md" />}
+      {state.status === 'loading' && (
+        <LoadingState label="Loading employee profile…" minHeight="md" />
+      )}
 
       {state.status === 'error' && (
         <Stack gap="sm" align="start">
@@ -145,6 +215,19 @@ export function EmployeeProfilePage() {
           onTabChange={changeTab}
           onBack={backToDirectory}
           onOpenEmployee={openEmployee}
+          onNavigateWorkflow={(path) => navigate(path)}
+          onEditProfile={handleStartEdit}
+          canEdit={canEdit}
+          avatarId={
+            selectedAvatarId ??
+            getEmployeeAvatarId(state.profile.employee.id || state.profile.employee.employeeNumber)
+          }
+          onOpenAvatarPicker={() => setIsAvatarPickerOpen(true)}
+          documents={documentsState.documents}
+          documentsLoading={documentsState.status === 'loading'}
+          documentsError={documentsState.error}
+          onViewDocument={(docId) => setOpenDocId(docId)}
+          onRetryDocuments={reload}
           history={
             <EmploymentHistory
               status={history.status}
@@ -157,17 +240,38 @@ export function EmployeeProfilePage() {
         />
       )}
 
+      {/* Avatar Selection Dialog */}
+      {state.status === 'ready' && (
+        <AvatarPicker
+          isOpen={isAvatarPickerOpen}
+          onClose={() => setIsAvatarPickerOpen(false)}
+          selectedAvatarId={
+            selectedAvatarId ??
+            getEmployeeAvatarId(state.profile.employee.id || state.profile.employee.employeeNumber)
+          }
+          onSelectAvatar={(avatarId) => {
+            setSelectedAvatarId(avatarId);
+            setIsAvatarPickerOpen(false);
+          }}
+          title={`Choose Avatar for ${state.profile.employee.fullName}`}
+          description="Select an enterprise-verified 3D avatar identity for this employee profile."
+        />
+      )}
+
+      {/* Workflow Action Detail Modal */}
       <EmployeeActionDetailModal
         actionId={openActionId}
         today={todayIsoDate()}
         onClose={() => setOpenActionId(null)}
-        // Applying/cancelling from here changes the current record — reload it.
         onChanged={() => reload()}
         onOpenEmployee={(id) => {
           setOpenActionId(null);
           if (id !== employeeId) openEmployee(id);
         }}
       />
+
+      {/* Document View Modal */}
+      <DocumentDetailModal documentId={openDocId} onClose={() => setOpenDocId(null)} />
     </Page>
   );
 }
