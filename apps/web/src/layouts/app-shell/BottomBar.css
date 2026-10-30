@@ -59,13 +59,13 @@
 }
 
 .bottom-bar__button {
-  height: 28px;
+  height: 24px;
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 0 8px;
+  padding: 0 6px;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   background: transparent;
   color: var(--footer-icon);
   cursor: pointer;

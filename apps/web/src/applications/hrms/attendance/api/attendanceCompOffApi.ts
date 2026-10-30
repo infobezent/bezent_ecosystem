@@ -626,6 +626,27 @@ export async function reverseCompOffEntitlement(
 }
 
 /**
+ * Trigger Comp-Off Auto-Lapse Background Sweep
+ */
+export async function triggerCompOffAutoLapse(): Promise<{ lapsedCount: number }> {
+  const url = `${appConfig.apiBaseUrl}/hrms/attendance/comp-off/entitlements/auto-lapse`;
+  const res = await authorizedFetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  let body: ApiResponseEnvelope<{ lapsedCount: number }> | null = null;
+  try {
+    body = (await res.json()) as ApiResponseEnvelope<{ lapsedCount: number }>;
+  } catch {
+    body = null;
+  }
+  if (!res.ok || !body?.data) {
+    handleApiError(res, body, 'Failed to trigger comp-off auto-lapse');
+  }
+  return body.data;
+}
+
+/**
  * List Leave Handoff Contract Records
  */
 export async function fetchCompOffHandoffs(filter?: {
@@ -735,4 +756,53 @@ export async function fetchCompOffAudits(requestId: string): Promise<CompOffAudi
     handleApiError(res, body, 'Failed to fetch audits');
   }
   return Array.isArray(body?.data) ? body.data : [];
+}
+
+/**
+ * Create Comp-Off Policy
+ */
+export async function createCompOffPolicy(
+  payload: Partial<CompOffPolicyItem>,
+): Promise<CompOffPolicyItem> {
+  const url = `${appConfig.apiBaseUrl}/hrms/attendance/comp-off/policies`;
+  const res = await authorizedFetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  let body: ApiResponseEnvelope<CompOffPolicyItem> | null = null;
+  try {
+    body = (await res.json()) as ApiResponseEnvelope<CompOffPolicyItem>;
+  } catch {
+    body = null;
+  }
+  if (!res.ok || !body?.data) {
+    handleApiError(res, body, 'Failed to create comp-off policy');
+  }
+  return body.data;
+}
+
+/**
+ * Update Comp-Off Policy
+ */
+export async function updateCompOffPolicy(
+  id: string,
+  payload: Partial<CompOffPolicyItem>,
+): Promise<CompOffPolicyItem> {
+  const url = `${appConfig.apiBaseUrl}/hrms/attendance/comp-off/policies/${id}`;
+  const res = await authorizedFetch(url, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  let body: ApiResponseEnvelope<CompOffPolicyItem> | null = null;
+  try {
+    body = (await res.json()) as ApiResponseEnvelope<CompOffPolicyItem>;
+  } catch {
+    body = null;
+  }
+  if (!res.ok || !body?.data) {
+    handleApiError(res, body, 'Failed to update comp-off policy');
+  }
+  return body.data;
 }

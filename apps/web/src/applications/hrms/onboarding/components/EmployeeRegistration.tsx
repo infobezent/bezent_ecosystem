@@ -17,6 +17,7 @@ import {
   Modal,
   Alert,
   PageHeader,
+  IconButton,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { GeneralInformation } from './GeneralInformation';
@@ -179,6 +180,16 @@ export interface EmployeeRegistrationProps {
   submitError?: string | null;
   createdEmployee?: { id: string; employeeNumber?: string | null; name?: string } | null;
   initialDraft?: EmployeeRegistrationDraft | null;
+
+  // Standalone Edit Employee Workspace mode
+  mode?: 'registration' | 'edit';
+  initialFormData?: RegistrationFormData;
+  employeeId?: string;
+  employeeName?: string;
+  employeeNumber?: string;
+  onSaveEdit?: (formData: RegistrationFormData) => Promise<void>;
+  isSavingEdit?: boolean;
+  saveEditError?: string | null;
 }
 
 import { useCustomFieldsOptional } from '../../settings/context/CustomFieldsContext';
@@ -194,7 +205,16 @@ export function EmployeeRegistration({
   submitError = null,
   createdEmployee = null,
   initialDraft,
+  mode = 'registration',
+  initialFormData,
+  employeeId: employeeIdProp,
+  employeeName,
+  employeeNumber,
+  onSaveEdit,
+  isSavingEdit = false,
+  saveEditError = null,
 }: EmployeeRegistrationProps) {
+  const isEditMode = mode === 'edit';
   // Optional: custom-fields context is only present inside the settings builder;
   // the registration form renders without it in production. Call the hook
   // unconditionally (Rules of Hooks) and branch on the returned value.
@@ -283,6 +303,9 @@ export function EmployeeRegistration({
 
   // Authoritative centralized registration form state
   const [formData, setFormData] = useState<RegistrationFormData>(() => {
+    if (initialFormData) {
+      return initialFormData;
+    }
     if (initialDraft?.formData) {
       return initialDraft.formData;
     }
@@ -345,43 +368,74 @@ export function EmployeeRegistration({
   };
 
   // General Form State
-  const [employeeId, setEmployeeId] = useState(initialDraft?.employeeId || '');
+  const [employeeId, setEmployeeId] = useState(
+    initialFormData?.general.employeeId || employeeIdProp || initialDraft?.employeeId || '',
+  );
 
-  // Auto-fetch next unique Employee ID from backend on mount
+  // Sync initialFormData when loaded or changed asynchronously
   useEffect(() => {
-    if (!initialDraft?.employeeId) {
-      authorizedFetch(`${appConfig.apiBaseUrl}/hrms/employees/next-number`)
-        .then((res) => {
-          if (!res.ok) throw new Error('Failed to fetch next number');
-          return res.json();
-        })
-        .then((body) => {
-          if (body?.data?.employeeNumber) {
-            const nextNum = body.data.employeeNumber;
-            setEmployeeId(nextNum);
-            setFormData((prev) => ({
-              ...prev,
-              general: { ...prev.general, employeeId: nextNum },
-            }));
-            if (savedStepDataRef.current['general']) {
-              (savedStepDataRef.current['general'] as Record<string, unknown>).employeeId = nextNum;
-            }
-          }
-        })
-        .catch(() => {
-          // Fallback if backend dev server is temporarily uncontactable
-          setEmployeeId('EMP2026001');
+    if (initialFormData) {
+      setFormData(initialFormData);
+      if (initialFormData.general.employeeId) {
+        setEmployeeId(initialFormData.general.employeeId);
+      }
+      if (initialFormData.documents?.items) {
+        setDocumentsList(initialFormData.documents.items as unknown as DocumentItemState[]);
+      }
+      savedStepDataRef.current = {
+        personal: JSON.parse(JSON.stringify(initialFormData.personal)),
+        general: JSON.parse(JSON.stringify(initialFormData.general)),
+        onboarding: JSON.parse(JSON.stringify(initialFormData.onboarding)),
+        skills: JSON.parse(JSON.stringify(initialFormData.skills)),
+        emergency: JSON.parse(JSON.stringify(initialFormData.emergency)),
+        accounts: JSON.parse(JSON.stringify(initialFormData.accounts)),
+        online_access: JSON.parse(JSON.stringify(initialFormData.onlineAccess)),
+        working_hours: JSON.parse(JSON.stringify(initialFormData.workingHours)),
+      };
+    }
+  }, [initialFormData]);
+
+  // Auto-fetch next unique Employee ID from backend on mount (Registration mode only)
+  useEffect(() => {
+    if (
+      isEditMode ||
+      initialFormData?.general.employeeId ||
+      employeeIdProp ||
+      initialDraft?.employeeId
+    ) {
+      return;
+    }
+    authorizedFetch(`${appConfig.apiBaseUrl}/hrms/employees/next-number`)
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch next number');
+        return res.json();
+      })
+      .then((body) => {
+        if (body?.data?.employeeNumber) {
+          const nextNum = body.data.employeeNumber;
+          setEmployeeId(nextNum);
           setFormData((prev) => ({
             ...prev,
-            general: { ...prev.general, employeeId: 'EMP2026001' },
+            general: { ...prev.general, employeeId: nextNum },
           }));
           if (savedStepDataRef.current['general']) {
-            (savedStepDataRef.current['general'] as Record<string, unknown>).employeeId =
-              'EMP2026001';
+            (savedStepDataRef.current['general'] as Record<string, unknown>).employeeId = nextNum;
           }
-        });
-    }
-  }, [initialDraft?.employeeId]);
+        }
+      })
+      .catch(() => {
+        // Fallback if backend dev server is temporarily uncontactable
+        setEmployeeId('EMP2026001');
+        setFormData((prev) => ({
+          ...prev,
+          general: { ...prev.general, employeeId: 'EMP2026001' },
+        }));
+        if (savedStepDataRef.current['general']) {
+          (savedStepDataRef.current['general'] as Record<string, unknown>).employeeId =
+            'EMP2026001';
+        }
+      });
+  }, [isEditMode, initialFormData?.general.employeeId, employeeIdProp, initialDraft?.employeeId]);
 
   // Document Section State
   const [documentsList, setDocumentsList] = useState<DocumentItemState[]>(
@@ -602,18 +656,29 @@ export function EmployeeRegistration({
 
   // Checkpoint snapshots for each section to track unsaved edits cleanly
   const savedStepDataRef = useRef<Record<string, unknown>>(
-    initialDraft?.formData
+    initialFormData
       ? {
-          personal: JSON.parse(JSON.stringify(initialDraft.formData.personal)),
-          general: JSON.parse(JSON.stringify(initialDraft.formData.general)),
-          onboarding: JSON.parse(JSON.stringify(initialDraft.formData.onboarding)),
-          skills: JSON.parse(JSON.stringify(initialDraft.formData.skills)),
-          emergency: JSON.parse(JSON.stringify(initialDraft.formData.emergency)),
-          accounts: JSON.parse(JSON.stringify(initialDraft.formData.accounts)),
-          online_access: JSON.parse(JSON.stringify(initialDraft.formData.onlineAccess)),
-          working_hours: JSON.parse(JSON.stringify(initialDraft.formData.workingHours)),
+          personal: JSON.parse(JSON.stringify(initialFormData.personal)),
+          general: JSON.parse(JSON.stringify(initialFormData.general)),
+          onboarding: JSON.parse(JSON.stringify(initialFormData.onboarding)),
+          skills: JSON.parse(JSON.stringify(initialFormData.skills)),
+          emergency: JSON.parse(JSON.stringify(initialFormData.emergency)),
+          accounts: JSON.parse(JSON.stringify(initialFormData.accounts)),
+          online_access: JSON.parse(JSON.stringify(initialFormData.onlineAccess)),
+          working_hours: JSON.parse(JSON.stringify(initialFormData.workingHours)),
         }
-      : {},
+      : initialDraft?.formData
+        ? {
+            personal: JSON.parse(JSON.stringify(initialDraft.formData.personal)),
+            general: JSON.parse(JSON.stringify(initialDraft.formData.general)),
+            onboarding: JSON.parse(JSON.stringify(initialDraft.formData.onboarding)),
+            skills: JSON.parse(JSON.stringify(initialDraft.formData.skills)),
+            emergency: JSON.parse(JSON.stringify(initialDraft.formData.emergency)),
+            accounts: JSON.parse(JSON.stringify(initialDraft.formData.accounts)),
+            online_access: JSON.parse(JSON.stringify(initialDraft.formData.onlineAccess)),
+            working_hours: JSON.parse(JSON.stringify(initialDraft.formData.workingHours)),
+          }
+        : {},
   );
 
   const getSectionSnapshot = useCallback(
@@ -852,7 +917,12 @@ export function EmployeeRegistration({
     (destination: string | '__EXIT__') => {
       if (destination === activeSection) return;
 
-      if (isSectionDirty(activeSection)) {
+      const isDirty =
+        destination === '__EXIT__'
+          ? allSections.some((s) => isSectionDirty(s.id))
+          : isSectionDirty(activeSection);
+
+      if (isDirty) {
         setPendingDestination(destination);
         setShowUnsavedModal(true);
       } else {
@@ -863,8 +933,35 @@ export function EmployeeRegistration({
         }
       }
     },
-    [activeSection, isSectionDirty, onCancel, navigateToSection],
+    [activeSection, allSections, isSectionDirty, onCancel, navigateToSection],
   );
+
+  const handleSaveEditClick = useCallback(async () => {
+    if (isSavingEdit || isSubmitting) return;
+
+    if (!formData.personal.firstName.trim()) {
+      showToast('First Name is required.');
+      return;
+    }
+
+    if (onSaveEdit) {
+      await onSaveEdit(formData);
+    }
+  }, [formData, isSavingEdit, isSubmitting, onSaveEdit]);
+
+  useEffect(() => {
+    if (!isEditMode) return;
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (allSections.some((s) => isSectionDirty(s.id))) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [isEditMode, allSections, isSectionDirty]);
 
   const handleModalCancel = useCallback(() => {
     setShowUnsavedModal(false);
@@ -1014,21 +1111,45 @@ export function EmployeeRegistration({
       {/* Region A: Workspace Header */}
       <div className="bezent-modal__header bezent-modal__header--brand">
         <PageHeader
-          title="Employee Registration"
-          subtitle={employeeIdentityContext ?? undefined}
+          title={isEditMode ? 'Edit Employee' : 'Employee Registration'}
+          subtitle={
+            isEditMode
+              ? employeeIdentityContext ||
+                (employeeName ? `${employeeName} • ${employeeNumber || employeeId}` : undefined)
+              : (employeeIdentityContext ?? undefined)
+          }
           actions={
             <Inline gap="md" align="center">
-              <button
-                type="button"
-                className="onboarding-page__drafts-btn bezent-btn-draft"
-                onClick={() => {
-                  refreshDrafts();
-                  setIsDraftsModalOpen(true);
-                }}
+              {!isEditMode && (
+                <button
+                  type="button"
+                  className="onboarding-page__drafts-btn bezent-btn-draft"
+                  onClick={() => {
+                    refreshDrafts();
+                    setIsDraftsModalOpen(true);
+                  }}
+                >
+                  <BezentIcon name="documents" size={16} />
+                  <span>View Drafts ({draftsList.length})</span>
+                </button>
+              )}
+              {isEditMode && (
+                <Button
+                  variant="primary"
+                  type="button"
+                  disabled={isSavingEdit || isSubmitting}
+                  onClick={handleSaveEditClick}
+                >
+                  {isSavingEdit ? 'Saving Changes...' : 'Save Changes'}
+                </Button>
+              )}
+              <IconButton
+                label={isEditMode ? 'Back to Employee Profile' : 'Close registration'}
+                variant="ghost"
+                onClick={() => requestNavigation('__EXIT__')}
               >
-                <BezentIcon name="documents" size={16} />
-                <span>View Drafts ({draftsList.length})</span>
-              </button>
+                <BezentIcon name="close" size={18} />
+              </IconButton>
             </Inline>
           }
         />
@@ -1060,6 +1181,7 @@ export function EmployeeRegistration({
               <GeneralInformation
                 employeeId={employeeId}
                 data={formData.general}
+                mode={mode}
                 onChange={updateGeneral}
               />
             ) : activeSection === 'personal' ? (
@@ -1092,6 +1214,7 @@ export function EmployeeRegistration({
             ) : activeSection === 'review' ? (
               <ReviewSection
                 data={reviewData}
+                mode={mode}
                 onEditSection={(sectionId) => requestNavigation(sectionId)}
                 onDeleteFamilyMember={handleDeleteFamilyMember}
                 onDeleteNominee={handleDeleteNominee}
@@ -1101,14 +1224,16 @@ export function EmployeeRegistration({
                 onDeleteSecondaryContact={handleDeleteSecondaryContact}
                 onDeleteDocument={handleDeleteDocument}
                 onCreateEmployee={() => {
-                  if (onSubmit) {
+                  if (isEditMode) {
+                    void handleSaveEditClick();
+                  } else if (onSubmit) {
                     void onSubmit(formData);
                   } else if (onSave) {
                     onSave(reviewData as unknown as Record<string, unknown>);
                   }
                 }}
-                isSubmitting={isSubmitting}
-                submitError={submitError}
+                isSubmitting={isEditMode ? isSavingEdit : isSubmitting}
+                submitError={isEditMode ? saveEditError : submitError}
                 createdEmployee={createdEmployee}
                 onDone={onCancel}
               />
@@ -1262,9 +1387,11 @@ export function EmployeeRegistration({
               >
                 ← Back
               </Button>
-              <Button variant="secondary" type="button" onClick={() => handleSaveDraft(false)}>
-                💾 Save Draft
-              </Button>
+              {!isEditMode && (
+                <Button variant="secondary" type="button" onClick={() => handleSaveDraft(false)}>
+                  💾 Save Draft
+                </Button>
+              )}
               <Button
                 variant="secondary"
                 type="button"
@@ -1275,7 +1402,23 @@ export function EmployeeRegistration({
             </Actions>
           }
           right={
-            activeSection !== 'review' ? (
+            isEditMode ? (
+              <Inline gap="sm">
+                {activeSection !== 'review' && (
+                  <Button variant="secondary" type="button" onClick={handleNext}>
+                    Next →
+                  </Button>
+                )}
+                <Button
+                  variant="primary"
+                  type="button"
+                  disabled={isSavingEdit || isSubmitting}
+                  onClick={handleSaveEditClick}
+                >
+                  {isSavingEdit ? 'Saving Changes...' : 'Save Changes'}
+                </Button>
+              </Inline>
+            ) : activeSection !== 'review' ? (
               <Button variant="secondary" type="button" onClick={handleNext}>
                 Save &amp; Next →
               </Button>
@@ -1285,13 +1428,15 @@ export function EmployeeRegistration({
       </div>
 
       {/* Drafts Modal */}
-      <DraftsModal
-        isOpen={isDraftsModalOpen}
-        drafts={draftsList}
-        onClose={() => setIsDraftsModalOpen(false)}
-        onContinueDraft={handleContinueDraft}
-        onDeleteDraft={handleDeleteDraft}
-      />
+      {!isEditMode && (
+        <DraftsModal
+          isOpen={isDraftsModalOpen}
+          drafts={draftsList}
+          onClose={() => setIsDraftsModalOpen(false)}
+          onContinueDraft={handleContinueDraft}
+          onDeleteDraft={handleDeleteDraft}
+        />
+      )}
 
       {/* Unsaved Changes Modal */}
       {showUnsavedModal && (
@@ -1303,18 +1448,24 @@ export function EmployeeRegistration({
           footer={
             <Actions align="end" gap="sm">
               <Button variant="secondary" type="button" onClick={handleModalCancel}>
-                Cancel
+                {isEditMode ? 'Keep Editing' : 'Cancel'}
               </Button>
               <Button variant="secondary" type="button" onClick={handleModalLeaveWithoutSaving}>
-                Leave Without Saving
+                {isEditMode ? 'Discard & Exit' : 'Leave Without Saving'}
               </Button>
-              <Button variant="secondary" type="button" onClick={handleModalSaveDraft}>
-                Save Draft
-              </Button>
+              {!isEditMode && (
+                <Button variant="secondary" type="button" onClick={handleModalSaveDraft}>
+                  Save Draft
+                </Button>
+              )}
             </Actions>
           }
         >
-          <p>You have unsaved changes. Save as draft before leaving?</p>
+          <p>
+            {isEditMode
+              ? 'You have unsaved changes. Are you sure you want to discard them and return to the Employee Profile?'
+              : 'You have unsaved changes. Save as draft before leaving?'}
+          </p>
         </Modal>
       )}
     </>

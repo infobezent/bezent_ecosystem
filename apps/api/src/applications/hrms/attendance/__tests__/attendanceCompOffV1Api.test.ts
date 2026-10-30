@@ -8,6 +8,7 @@ import {
   attendanceCompOffRequests,
   attendanceCompOffEntitlements,
   attendanceCompOffHandoffs,
+  attendanceCompOffAudits,
   attendanceOvertimeSettlements,
   attendanceOvertimeRequests,
   employeeAttendance,
@@ -21,6 +22,7 @@ import {
   hrmsTestHeaders,
   signInForTest,
 } from '../../../../platform/__tests__/support/testSession.js';
+import { attendanceCompOffExpiryService } from '../service/attendanceCompOffExpiry.service.js';
 
 describe.skipIf(!isDatabaseConfigured)(
   'BEZENT HRMS — Comp-Off V1.0 API Acceptance, Lifecycle & Integration Suite',
@@ -154,14 +156,10 @@ describe.skipIf(!isDatabaseConfigured)(
         calculationMetadata: { scheduledMinutes: 0 },
       });
 
-      // Ensure Comp-Off policy is active
-      const polExists = await db
-        .select()
-        .from(attendanceCompOffPolicies)
-        .where(eq(attendanceCompOffPolicies.id, 'att_co_pol_demo_01'));
-
-      if (polExists.length === 0) {
-        await db.insert(attendanceCompOffPolicies).values({
+      // Ensure Comp-Off policy is active with 60 days submission deadline
+      await db
+        .insert(attendanceCompOffPolicies)
+        .values({
           id: 'att_co_pol_demo_01',
           tenantId,
           companyId,
@@ -177,12 +175,18 @@ describe.skipIf(!isDatabaseConfigured)(
           fullDayThresholdMinutes: 480,
           conversionRate: '1.00',
           roundingRule: 'round_down_half_day',
-          submissionDeadlineDays: 14,
+          submissionDeadlineDays: 60,
           validityDays: 60,
           maxEarningLimitPerMonthDays: '2.00',
           isActive: true,
+        })
+        .onDuplicateKeyUpdate({
+          set: {
+            submissionDeadlineDays: 60,
+            isEnabled: true,
+            isActive: true,
+          },
         });
-      }
     });
 
     it('1. GET /hrms/attendance/comp-off/eligibility evaluates workday attendance & qualifying credit', async () => {
@@ -417,6 +421,113 @@ describe.skipIf(!isDatabaseConfigured)(
       expect(actions).toContain('submitted');
       expect(actions).toContain('approved');
       expect(actions).toContain('reversed');
+    });
+
+    it('14. POST /hrms/attendance/comp-off/entitlements/auto-lapse triggers background expiry sweep', async () => {
+      const db = getDb();
+      const expiredEntId = 'ent_test_auto_lapse_001';
+      const activeEntId = 'ent_test_active_future_001';
+
+      // Insert an expired active entitlement (expiresAt in the past)
+      await db.insert(attendanceCompOffEntitlements).values({
+        id: expiredEntId,
+        tenantId,
+        companyId,
+        employeeId: empId,
+        requestId: testRequestId,
+        workDate: '2025-10-01',
+        earnedDays: '1.00',
+        earnedMinutes: 480,
+        validFrom: '2025-10-01',
+        expiresAt: '2026-01-01',
+        status: 'active',
+      });
+
+      // Insert a future active entitlement
+      await db.insert(attendanceCompOffEntitlements).values({
+        id: activeEntId,
+        tenantId,
+        companyId,
+        employeeId: empId,
+        requestId: testRequestId,
+        workDate: '2026-10-01',
+        earnedDays: '1.00',
+        earnedMinutes: 480,
+        validFrom: '2026-10-01',
+        expiresAt: '2026-12-31',
+        status: 'active',
+      });
+
+      const res = await request(app)
+        .post('/api/v1/hrms/attendance/comp-off/entitlements/auto-lapse')
+        .set(headers);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.lapsedCount).toBeGreaterThanOrEqual(1);
+
+      // Verify past entitlement is expired
+      const [lapsedRow] = await db
+        .select()
+        .from(attendanceCompOffEntitlements)
+        .where(eq(attendanceCompOffEntitlements.id, expiredEntId));
+      expect(lapsedRow?.status).toBe('expired');
+
+      // Verify future entitlement is still active
+      const [activeRow] = await db
+        .select()
+        .from(attendanceCompOffEntitlements)
+        .where(eq(attendanceCompOffEntitlements.id, activeEntId));
+      expect(activeRow?.status).toBe('active');
+
+      // Clean up test rows
+      await db
+        .delete(attendanceCompOffEntitlements)
+        .where(eq(attendanceCompOffEntitlements.id, expiredEntId));
+      await db
+        .delete(attendanceCompOffEntitlements)
+        .where(eq(attendanceCompOffEntitlements.id, activeEntId));
+    });
+
+    it('15. AttendanceCompOffExpiryService.runSweep sweeps and logs audit records', async () => {
+      const db = getDb();
+      const sweepEntId = 'ent_test_daemon_sweep_001';
+
+      await db.insert(attendanceCompOffEntitlements).values({
+        id: sweepEntId,
+        tenantId,
+        companyId,
+        employeeId: empId,
+        requestId: testRequestId,
+        workDate: '2025-09-01',
+        earnedDays: '0.50',
+        earnedMinutes: 240,
+        validFrom: '2025-09-01',
+        expiresAt: '2025-12-01',
+        status: 'active',
+      });
+
+      const result = await attendanceCompOffExpiryService.runSweep({ tenantId, companyId });
+      expect(result.lapsedCount).toBeGreaterThanOrEqual(1);
+
+      // Verify status is expired
+      const [row] = await db
+        .select()
+        .from(attendanceCompOffEntitlements)
+        .where(eq(attendanceCompOffEntitlements.id, sweepEntId));
+      expect(row?.status).toBe('expired');
+
+      // Verify audit trail logged
+      const audits = await db
+        .select()
+        .from(attendanceCompOffAudits)
+        .where(eq(attendanceCompOffAudits.requestId, testRequestId));
+      const actions = audits.map((a) => a.action);
+      expect(actions).toContain('expired_auto_lapse');
+
+      await db
+        .delete(attendanceCompOffEntitlements)
+        .where(eq(attendanceCompOffEntitlements.id, sweepEntId));
     });
 
     afterAll(async () => {

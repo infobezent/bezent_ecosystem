@@ -27,8 +27,8 @@
 }
 
 .bezent-table__head .bezent-table__th {
-  padding: 12px 16px;
-  font-size: 12px;
+  padding: 10px 14px;
+  font-size: 11.5px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -45,9 +45,13 @@
     box-shadow 0.14s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.bezent-table__row.is-menu-open {
+  z-index: 50;
+}
+
 /* ── Cells ── */
 .bezent-table__td {
-  padding: 14px 16px;
+  padding: 10px 14px;
   vertical-align: middle;
   color: var(--text-primary, #000000);
   border-bottom: 1px solid var(--table-row-divider, var(--border-subtle, #e7ebf0));
@@ -139,6 +143,71 @@ button.bezent-table-meta-title:hover {
   white-space: nowrap;
 }
 
+button.bezent-table-meta-subtitle {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+button.bezent-table-meta-subtitle:hover {
+  color: var(--accent-interactive, #1a73e8);
+  text-decoration: underline;
+}
+
+/* ── Transfer & Transition Cell Layouts ── */
+.bezent-transfer-transition {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
+.bezent-transfer-from {
+  color: var(--text-secondary, #5f6368);
+  font-weight: 400;
+}
+
+.bezent-transfer-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary, #9aa0a6);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.bezent-transfer-to {
+  color: var(--text-primary, #1f1f1f);
+  font-weight: 600;
+}
+
+.bezent-table-meta-dim {
+  color: var(--text-tertiary, #9aa0a6);
+  font-size: 13px;
+}
+
+button.bezent-table-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+button.bezent-table-link-btn:hover {
+  color: var(--accent-interactive, #1a73e8);
+  text-decoration: underline;
+}
+
 /* ── Table Action Menu & Ellipsis Button ── */
 .bezent-table-action-menu {
   position: relative;
@@ -190,6 +259,14 @@ button.bezent-table-meta-title:hover {
   display: flex;
   flex-direction: column;
   gap: 1px;
+}
+
+.bezent-table-action-menu__dropdown--upwards {
+  top: auto;
+  bottom: calc(100% + 4px);
+  box-shadow:
+    0 -10px 25px -4px rgba(15, 23, 42, 0.12),
+    0 -4px 10px -2px rgba(15, 23, 42, 0.06);
 }
 
 .bezent-table-action-menu__item {
@@ -448,4 +525,175 @@ button.bezent-table-meta-title:hover {
   .bezent-table__row:hover
   .bezent-table-col--sticky-right {
   background-color: #0b254e;
+}
+
+/* ── Sortable Column Header (Enterprise Reference) ── */
+.bezent-table-th-sortable {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  text-transform: uppercase;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #475569;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+  text-align: left;
+}
+
+.bezent-table-th-sortable:hover {
+  color: #0f172a;
+}
+
+.bezent-table-th-sortable:focus-visible {
+  outline: 2px solid var(--bezent-color-primary-500, #3b82f6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.bezent-table-th-sortable--active {
+  color: var(--bezent-color-primary-600, #2563eb);
+}
+
+.bezent-table-sort-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 11px;
+  opacity: 0;
+  transition:
+    opacity 0.15s ease,
+    color 0.14s ease,
+    transform 0.14s ease;
+}
+
+.bezent-table-th-sortable:hover .bezent-table-sort-arrow {
+  opacity: 0.55;
+  color: #475569;
+}
+
+.bezent-table-sort-arrow--active {
+  opacity: 1 !important;
+  color: var(--bezent-color-primary-600, #2563eb);
+  font-weight: 700;
+}
+
+[data-theme='dark'] .bezent-table-th-sortable {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-table-th-sortable:hover {
+  color: #f8fafc;
+}
+
+[data-theme='dark'] .bezent-table-th-sortable--active {
+  color: var(--bezent-color-primary-400, #60a5fa);
+}
+
+[data-theme='dark'] .bezent-table-sort-arrow {
+  color: #64748b;
+  opacity: 0;
+}
+
+[data-theme='dark'] .bezent-table-th-sortable:hover .bezent-table-sort-arrow {
+  opacity: 0.65;
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .bezent-table-sort-arrow--active {
+  opacity: 1 !important;
+  color: var(--bezent-color-primary-400, #60a5fa);
+}
+
+/* ── Enterprise Pagination (Enterprise Reference) ── */
+.bezent-pagination {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bezent-pagination__btn,
+.bezent-pagination__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 0.14s ease,
+    border-color 0.14s ease,
+    color 0.14s ease;
+  user-select: none;
+}
+
+.bezent-pagination__btn:hover:not(:disabled):not(.is-active),
+.bezent-pagination__button:hover:not(:disabled):not(.is-active) {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.bezent-pagination__btn.is-active,
+.bezent-pagination__button.is-active {
+  background: #c8e5fc;
+  color: #0f172a;
+  border-color: #c8e5fc;
+  font-weight: 600;
+}
+
+.bezent-pagination__btn:disabled,
+.bezent-pagination__button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.bezent-pagination__ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 32px;
+  color: #94a3b8;
+  font-size: 13px;
+  user-select: none;
+}
+
+[data-theme='dark'] .bezent-pagination__btn,
+[data-theme='dark'] .bezent-pagination__button {
+  background: #0f172a;
+  border-color: #1e293b;
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-pagination__btn:hover:not(:disabled):not(.is-active),
+[data-theme='dark'] .bezent-pagination__button:hover:not(:disabled):not(.is-active) {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+[data-theme='dark'] .bezent-pagination__btn.is-active,
+[data-theme='dark'] .bezent-pagination__button.is-active {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+}
+
+[data-theme='dark'] .bezent-pagination__ellipsis {
+  color: #64748b;
 }

@@ -6,15 +6,16 @@
 .bezent-page {
   display: flex;
   flex-direction: column;
+  flex: 1;
   min-height: 100%;
   width: 100%;
   margin: 0 auto;
   box-sizing: border-box;
-  padding: 24px 32px;
+  padding: 16px 20px 32px 20px;
 }
 
 .bezent-page--max-width-default {
-  max-width: 1400px;
+  max-width: 1380px;
 }
 
 .bezent-page--max-width-narrow {
@@ -22,7 +23,11 @@
 }
 
 .bezent-page--max-width-full {
-  max-width: 100%;
+  max-width: 1440px;
+}
+
+.bezent-page > .bezent-stack:last-child {
+  flex: 1;
 }
 
 .bezent-page--gap-none {

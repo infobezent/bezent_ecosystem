@@ -762,10 +762,17 @@ export class EssService {
       totalWorkingDays,
     };
 
+    const effectiveTz = await attendanceWorkdayService.resolveTimezone(
+      ctx.tenantId,
+      ctx.companyId,
+      ctx.id,
+    );
+
     const shift = await defaultShiftScheduleProvider.getAssignedShiftDetails(
       ctx.tenantId,
       ctx.companyId,
       ctx.id,
+      effectiveTz,
     );
 
     let returnedHistory = employeeView?.history ?? history;
@@ -785,6 +792,7 @@ export class EssService {
     return {
       today: {
         date: today,
+        timezone: effectiveTz,
         checkInTime: todayAtt?.checkInTime ?? null,
         checkOutTime: todayAtt?.checkOutTime ?? null,
         status: (todayAtt ? todayAtt.status : 'not_checked_in') as EssTodayAttendance['status'],
@@ -956,6 +964,8 @@ export class EssService {
       decisionReason: reg.decisionReason ?? null,
       decidedAt: reg.decidedAt ? reg.decidedAt.toISOString() : null,
       submittedAt: reg.submittedAt.toISOString(),
+      assignedTo: reg.assignedTo ?? null,
+      assignedQueue: reg.assignedQueue ?? null,
       createdAt: reg.createdAt.toISOString(),
     };
   }

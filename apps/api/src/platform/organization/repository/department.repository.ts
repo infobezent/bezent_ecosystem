@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { eq, and, sql, asc, type SQL } from 'drizzle-orm';
+import { eq, and, sql, asc, isNull, type SQL } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/mysql-core';
 import { getDb } from '../../../db/connection.js';
 import {
@@ -177,6 +177,53 @@ export class DepartmentRepository {
           sql`LOWER(${departments.code}) = LOWER(${code})`,
         ),
       )
+      .limit(1);
+
+    if (!rows[0]) return null;
+    return this.findDepartmentById(tenantId, companyId, rows[0].id);
+  }
+
+  async findDepartmentByNameAndScope(
+    tenantId: string,
+    companyId: string,
+    name: string,
+    scope: {
+      parentDepartmentId?: string | null;
+      businessUnitId?: string | null;
+      divisionId?: string | null;
+    } = {},
+  ): Promise<DepartmentRecord | null> {
+    const db = getDb();
+    const normalizedName = name.trim().toLowerCase();
+
+    const conditions: SQL[] = [
+      eq(departments.tenantId, tenantId),
+      eq(departments.companyId, companyId),
+      sql`LOWER(TRIM(${departments.name})) = ${normalizedName}`,
+    ];
+
+    if (scope.parentDepartmentId) {
+      conditions.push(eq(departments.parentDepartmentId, scope.parentDepartmentId));
+    } else {
+      conditions.push(isNull(departments.parentDepartmentId));
+    }
+
+    if (scope.businessUnitId) {
+      conditions.push(eq(departments.businessUnitId, scope.businessUnitId));
+    } else {
+      conditions.push(isNull(departments.businessUnitId));
+    }
+
+    if (scope.divisionId) {
+      conditions.push(eq(departments.divisionId, scope.divisionId));
+    } else {
+      conditions.push(isNull(departments.divisionId));
+    }
+
+    const rows = await db
+      .select({ id: departments.id })
+      .from(departments)
+      .where(and(...conditions))
       .limit(1);
 
     if (!rows[0]) return null;

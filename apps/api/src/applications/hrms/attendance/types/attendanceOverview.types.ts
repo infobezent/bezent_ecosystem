@@ -18,7 +18,9 @@ export interface TodayAttendanceKpis {
   date: string;
   timezone: string;
   totalEligibleEmployees: number;
-  presentCount: number; // Present equivalents (1.0 for full, 0.5 for half)
+  presentHeadcount: number; // Integer count of unique employees with recognized presence
+  presentCount: number; // Present equivalents (1.0 for full, 0.5 for half) - maintained for backward compatibility
+  presentEquivalentDays: number; // Weighted attendance-day equivalents
   absentCount: number; // Absent equivalents
   onLeaveCount: number; // Leave coverage equivalents
   onDutyCount: number; // OD coverage equivalents
@@ -36,7 +38,9 @@ export interface AttendanceTrendItem {
   date: string;
   dayOfWeek: string;
   scheduledDayEquivalents: number;
+  scheduledHeadcount?: number;
   presentEquivalentDays: number;
+  presentHeadcount?: number;
   absentEquivalentDays: number;
   leaveCoverageEquivalents: number;
   odCoverageEquivalents: number;
@@ -60,6 +64,7 @@ export interface DepartmentComparisonItem {
   departmentId: string;
   departmentName: string;
   eligibleEmployees: number;
+  presentHeadcount?: number;
   presentEquivalents: number;
   absentEquivalents: number;
   leaveCoverage: number;
@@ -93,15 +98,41 @@ export interface ActionQueueItem {
 export interface ProcessingHealthResult {
   date: string;
   eligibleWorkdays: number;
-  processedWorkdays: number;
+  processedWorkdays: number; // Finalized workdays
   pendingWorkdays: number;
   failedWorkdays: number;
-  missingScheduleCount: number;
+
+  // Metric A: Processing Success Rate (Successful Attempts / Completed Attempts * 100)
+  attemptedWorkdays: number;
+  processingSuccessRate: number | null; // null if attemptedWorkdays === 0
+
+  // Metric B: Reconciliation Completion Rate (Finalized / Eligible Workdays * 100)
+  reconciliationCompletionRate: number | null;
+
+  // Schedule Integrity
+  assignedScheduleCount: number;
+  fallbackScheduleCount: number;
+  unresolvedScheduleCount: number;
+  missingScheduleCount: number; // backward compatibility alias for unresolvedScheduleCount
+
+  // Blocking Exceptions
   unresolvedBlockingExceptions: number;
+  workdayBlockingExceptions?: number;
+  cumulativeBlockingExceptions?: number;
+  historicalBlockingExceptions?: number;
+
   staleMonthlySummaries: number;
-  processingSuccessRate: number | null; // (processed / eligible) * 100
   denominatorDescription: string;
-  status: 'healthy' | 'degraded' | 'critical' | 'upcoming';
+  status:
+    | 'healthy'
+    | 'in_progress'
+    | 'attention_required'
+    | 'degraded'
+    | 'critical'
+    | 'upcoming'
+    | 'unknown';
+  operationalStage?:
+    'not_started' | 'in_progress' | 'completed' | 'failed' | 'blocked' | 'attention_required';
   asOf: string;
 }
 

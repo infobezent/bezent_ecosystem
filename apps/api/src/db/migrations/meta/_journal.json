@@ -302,6 +302,13 @@
       "when": 1792050000000,
       "tag": "0042_employee_milestones_and_rewards",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "5",
+      "when": 1792700000000,
+      "tag": "0043_department_unique_hierarchy",
+      "breakpoints": true
     }
   ]
 }

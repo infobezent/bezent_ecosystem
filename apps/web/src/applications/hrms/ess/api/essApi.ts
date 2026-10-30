@@ -114,6 +114,7 @@ export interface EssTodayAttendance {
   currentBreakStartTime?: string | null;
   shift?: EssShiftDetails;
   punches?: EssPunchEvent[];
+  timezone?: string;
 }
 
 export interface EssLeaveBalanceItem {
@@ -521,9 +522,15 @@ export function isLocationRequiredError(err: unknown): boolean {
 }
 
 export interface PunchDeviceMetadata {
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
   accuracy?: number;
+  source?: 'web' | 'mobile' | 'kiosk' | string;
+  clientType?: string;
+  platform?: string;
+  selfieUrl?: string;
+  mockLocation?: boolean;
+  [key: string]: unknown;
 }
 
 /* ── API methods ─────────────────────────────────────────────────── */

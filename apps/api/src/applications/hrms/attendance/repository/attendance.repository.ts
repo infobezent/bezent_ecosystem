@@ -1173,7 +1173,9 @@ export class AttendanceRepository {
     }
 
     const dayOfWeek = getDayOfWeekName(filter.date);
-    const isToday = filter.date === new Date().toISOString().slice(0, 10);
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const isToday = filter.date === todayStr;
+    const isFuture = filter.date > todayStr;
 
     const allItems: (DailyAttendanceItem & { isScheduledDay: boolean })[] = empList.map((emp) => {
       const att = attMap.get(emp.employeeId);
@@ -1194,6 +1196,11 @@ export class AttendanceRepository {
       const shiftStart = emp.scheduleStartTime || '09:00';
       const shiftEnd = emp.scheduleEndTime || '18:00';
       const shiftScheduleRef = emp.scheduleRef || `General ${shiftStart} - ${shiftEnd}`;
+      const shiftName =
+        (emp.scheduleRef || 'General')
+          .replace(/\s*\(\s*\d{1,2}:\d{2}.*?\)/g, '')
+          .replace(/\s+\d{1,2}:\d{2}\s*[-–]\s*\d{1,2}:\d{2}.*$/g, '')
+          .trim() || 'General';
 
       let status: DailyAttendanceItem['status'];
       let processingState: DailyAttendanceItem['processingState'] = 'finalized';
@@ -1216,12 +1223,17 @@ export class AttendanceRepository {
         status = 'on_leave';
       } else if (!isWorkingDay) {
         status = 'holiday';
+      } else if (isToday || isFuture) {
+        status = 'not_checked_in';
+        processingState = 'provisional';
       } else {
         status = 'absent';
+        processingState = 'finalized';
       }
 
       // Compute indicators
       const indicators: string[] = [];
+      if (status === 'not_checked_in') indicators.push('not_checked_in');
       if (isLate) indicators.push('late');
       if (isEarlyExit) indicators.push('early_exit');
       if (isMissingPunch || (!checkInTime && checkOutTime)) indicators.push('missing_punch_in');
@@ -1247,7 +1259,7 @@ export class AttendanceRepository {
         locationId: emp.locationId ?? null,
         locationName: emp.locationName ?? null,
         shiftScheduleRef,
-        shiftName: shiftScheduleRef,
+        shiftName,
         punchSource,
         indicators,
         date: filter.date,
@@ -1305,6 +1317,8 @@ export class AttendanceRepository {
 
       if (
         item.processingState === 'pending_review' ||
+        item.processingState === 'provisional' ||
+        item.status === 'not_checked_in' ||
         item.status === 'incomplete' ||
         item.isMissingPunch
       ) {
@@ -1322,7 +1336,16 @@ export class AttendanceRepository {
         filtered = filtered.filter((r) => r.status === 'present' || r.status === 'half_day');
       } else if (filter.status === 'pending_review') {
         filtered = filtered.filter(
-          (r) => r.processingState === 'pending_review' || r.status === 'incomplete',
+          (r) =>
+            r.processingState === 'pending_review' ||
+            r.processingState === 'provisional' ||
+            r.status === 'not_checked_in' ||
+            r.status === 'incomplete' ||
+            r.isMissingPunch,
+        );
+      } else if (filter.status === 'not_checked_in') {
+        filtered = filtered.filter(
+          (r) => r.status === 'not_checked_in' || r.processingState === 'provisional',
         );
       } else {
         filtered = filtered.filter((r) => r.status === filter.status);
@@ -1330,15 +1353,45 @@ export class AttendanceRepository {
     }
 
     if (filter.processingState && filter.processingState !== 'all') {
-      filtered = filtered.filter((r) => r.processingState === filter.processingState);
+      if (
+        filter.processingState === 'pending_review' ||
+        filter.processingState === 'pending_processing'
+      ) {
+        filtered = filtered.filter(
+          (r) =>
+            r.processingState === 'pending_review' ||
+            r.processingState === 'provisional' ||
+            r.processingState === 'pending_processing' ||
+            r.status === 'not_checked_in' ||
+            r.status === 'incomplete',
+        );
+      } else {
+        filtered = filtered.filter((r) => r.processingState === filter.processingState);
+      }
     }
 
     if (filter.shiftRef && filter.shiftRef !== 'all') {
-      filtered = filtered.filter((r) => r.shiftScheduleRef === filter.shiftRef);
+      const q = filter.shiftRef.trim().toLowerCase();
+      filtered = filtered.filter(
+        (r) =>
+          r.shiftScheduleRef?.toLowerCase() === q ||
+          r.shiftName?.toLowerCase() === q ||
+          r.shiftScheduleRef?.toLowerCase().startsWith(q) ||
+          r.shiftName?.toLowerCase().startsWith(q),
+      );
     }
 
     if (filter.indicator && filter.indicator !== 'all') {
-      filtered = filtered.filter((r) => r.indicators?.includes(filter.indicator!));
+      if (filter.indicator === 'missing_punch') {
+        filtered = filtered.filter(
+          (r) =>
+            r.isMissingPunch ||
+            r.indicators?.includes('missing_punch_in') ||
+            r.indicators?.includes('missing_punch_out'),
+        );
+      } else {
+        filtered = filtered.filter((r) => r.indicators?.includes(filter.indicator!));
+      }
     }
 
     if (filter.punchSource && filter.punchSource !== 'all') {
@@ -2024,7 +2077,7 @@ export class AttendanceRepository {
     ];
 
     // Status filter
-    if (!filter.status || filter.status === 'active') {
+    if (!filter.status || filter.status === 'active' || filter.status === 'all_unresolved') {
       filterConditions.push(
         inArray(attendanceExceptions.status, ['open', 'assigned', 'in_review', 'pending_action']),
       );

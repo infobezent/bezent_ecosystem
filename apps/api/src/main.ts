@@ -3,6 +3,8 @@ import { assertProductionAuthConfig, env } from './app/config/env.js';
 import { closePool, ensureDatabaseConnected, isDatabaseConfigured } from './db/connection.js';
 import { backgroundWorkerRunner } from './platform/workers/backgroundWorker.runner.js';
 import { attendanceAutoLockService } from './applications/hrms/attendance/service/attendanceAutoLock.service.js';
+import { attendanceCompOffExpiryService } from './applications/hrms/attendance/service/attendanceCompOffExpiry.service.js';
+import { attendanceMissingPunchDetectorService } from './applications/hrms/attendance/service/attendanceMissingPunchDetector.service.js';
 import { syncAllUnlinkedEmployees } from './applications/hrms/employees/service/employeeUserBridge.service.js';
 
 assertProductionAuthConfig();
@@ -20,6 +22,10 @@ async function startServer(): Promise<void> {
     console.log('[workers] Background worker runner started');
     attendanceAutoLockService.start();
     console.log('[workers] Attendance auto-lock sweep started');
+    attendanceCompOffExpiryService.start();
+    console.log('[workers] Attendance comp-off expiry auto-lapse daemon started');
+    attendanceMissingPunchDetectorService.start();
+    console.log('[workers] Attendance missing punch detector sweeper started');
     try {
       const syncedCount = await syncAllUnlinkedEmployees();
       if (syncedCount > 0) {
@@ -42,6 +48,8 @@ async function startServer(): Promise<void> {
     console.log(`[bezent-api] received ${signal}, shutting down gracefully...`);
     backgroundWorkerRunner.stop();
     attendanceAutoLockService.stop();
+    attendanceCompOffExpiryService.stop();
+    attendanceMissingPunchDetectorService.stop();
     server.close(async () => {
       await closePool();
       console.log('[bezent-api] shutdown complete');

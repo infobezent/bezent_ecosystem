@@ -1113,7 +1113,14 @@ export function PersonalInformation({
 
       case 'personal.parentGuardians':
         return (
-          <RegistrationField key={key} fieldKey={key} value={parentGuardians} span="full">
+          <RegistrationField
+            key={key}
+            fieldKey={key}
+            value={parentGuardians}
+            span="full"
+            hideLabel
+            orientation="vertical"
+          >
             <Stack gap="md">
               <Toolbar
                 left={<CardTitle>{label}</CardTitle>}

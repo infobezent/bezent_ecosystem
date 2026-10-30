@@ -96,10 +96,19 @@ export interface EmployeeActionDetail extends EmployeeActionListItem {
 
 export type ActionCategoryCounts = Record<'all' | EmployeeActionCategory, number>;
 
+export interface ActionStatusCounts {
+  all: number;
+  pending: number;
+  applied: number;
+  cancelled: number;
+  upcoming: number;
+}
+
 export interface EmployeeActionListResponse {
   data: EmployeeActionListItem[];
   pagination: PaginationMetadata;
   counts: ActionCategoryCounts;
+  statusCounts?: ActionStatusCounts;
 }
 
 export type ActionValueKey =
@@ -125,8 +134,13 @@ export interface CreateEmployeeActionPayload {
 
 export interface ListEmployeeActionsQuery {
   category?: EmployeeActionCategory;
+  actionType?: EmployeeActionType;
+  actionTypes?: EmployeeActionType[] | string;
   status?: EmployeeActionStatus;
   employeeId?: string;
+  departmentId?: string;
+  effectiveDateFrom?: string;
+  effectiveDateTo?: string;
   search?: string;
   page?: number;
   pageSize?: number;
@@ -154,7 +168,11 @@ function toQueryString(params: object): string {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== null && value !== '') {
-      search.set(key, String(value));
+      if (Array.isArray(value)) {
+        if (value.length > 0) search.set(key, value.join(','));
+      } else {
+        search.set(key, String(value));
+      }
     }
   }
   const query = search.toString();

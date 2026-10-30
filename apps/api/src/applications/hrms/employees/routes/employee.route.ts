@@ -37,6 +37,11 @@ employeeRouter.get(
   requirePermission('hrms.employees.read'),
   controller.getEmployeeById,
 );
+employeeRouter.patch(
+  '/hrms/employees/:employeeId',
+  requirePermission('hrms.employees.update'),
+  controller.updateEmployee,
+);
 
 // Canonical Employee Profile: current record + employee-owned details.
 employeeRouter.get(

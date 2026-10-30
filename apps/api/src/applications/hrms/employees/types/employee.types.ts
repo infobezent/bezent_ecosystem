@@ -107,8 +107,12 @@ export interface ListEmployeesParams {
   pageSize?: number;
   search?: string;
   departmentId?: string;
+  departmentIds?: string[];
   designationId?: string;
   locationId?: string;
+  locationIds?: string[];
   employmentType?: EmploymentType;
   employmentStatus?: EmploymentStatus;
+  joiningDateFrom?: string;
+  joiningDateTo?: string;
 }

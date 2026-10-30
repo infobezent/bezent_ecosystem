@@ -176,6 +176,37 @@ describe('HRMS Onboarding UI Components & Pages', () => {
     expect(html).toContain('Save Draft');
     expect(html).toContain('Cancel');
     expect(html).toContain('Save &amp; Next →');
+    expect(html).toContain('Close registration');
+  });
+
+  it('routes /hrms/workforce/onboarding/registration to StandaloneUtilityLayout with EmployeeRegistrationPage', () => {
+    const standaloneRoute = appRoutes.find((r) => {
+      const element = r.element as
+        React.ReactElement<{ children?: React.ReactElement }> | undefined;
+      return (
+        element?.type === RequireAuth && element.props.children?.type === StandaloneUtilityLayout
+      );
+    });
+    expect(standaloneRoute).toBeDefined();
+
+    const canonicalRoute = standaloneRoute?.children?.find(
+      (r) => r.path === '/hrms/workforce/onboarding/registration',
+    );
+    expect(canonicalRoute).toBeDefined();
+    expect((canonicalRoute!.element as React.ReactElement).type).toBe(EmployeeRegistrationPage);
+
+    const caseRoute = standaloneRoute?.children?.find(
+      (r) => r.path === '/hrms/workforce/onboarding/registration/:caseId',
+    );
+    expect(caseRoute).toBeDefined();
+    expect((caseRoute!.element as React.ReactElement).type).toBe(EmployeeRegistrationPage);
+
+    // Verify ShellLayout's hrmsRoutes does NOT contain registration
+    const basePathRoute = hrmsRoutes[0];
+    const leakedRegistration = basePathRoute?.children?.find((r) =>
+      r.path?.includes('registration'),
+    );
+    expect(leakedRegistration).toBeUndefined();
   });
 
   it('hrmsRoutes routes administration/employee-administration to Employee Administration', () => {

@@ -4,13 +4,24 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter, Navigate, matchRoutes } from 'react-router-dom';
 import { hrmsNavigation } from '../../navigation';
 import { hrmsRoutes } from '../../routes/hrmsRoutes';
-import { EmployeeDirectoryPage } from '../pages/EmployeeDirectoryPage';
+import { EmployeeDirectoryPage, computeWorkforceKpiValues } from '../pages/EmployeeDirectoryPage';
 import { EmployeeProfilePage } from '../pages/EmployeeProfilePage';
+import { EmployeeEditPage } from '../pages/EmployeeEditPage';
+import { EmployeeRegistration } from '../../onboarding/components/EmployeeRegistration';
+import { PersonalInformation } from '../../onboarding/components/PersonalInformation';
+import { RegistrationConfigProvider } from '../../onboarding/registration/registrationConfig';
+import { StandaloneUtilityLayout } from '../../../../app/router/StandaloneUtilityLayout';
+import { ThemeProvider } from '../../../../app/providers/ThemeProvider';
 import { EmployeeDirectoryTable } from '../components/EmployeeDirectoryTable';
 import { EmployeeProfileView } from '../components/EmployeeProfileView';
 import { EmployeeAdministrationPage } from '../../employee-administration';
 import { OnboardingPage } from '../../onboarding';
+import { TransfersPage } from '../../transfers';
+import { PromotionsPage } from '../../promotions';
+import { OffboardingPage } from '../../offboarding';
 import { DocumentsPage } from '../../documents';
+import { RecordsPage } from '../../records';
+import { WorkforceOverviewPage } from '../../overview';
 import {
   EmployeesApiError,
   fetchEmployee,
@@ -22,7 +33,9 @@ import {
 import { EmploymentHistory } from '../components/EmploymentHistory';
 import { PROFILE_TABS, type ProfileTabId } from '../components/EmployeeProfileView';
 import type { EmployeeActionListItem } from '../../employee-administration/api/employeeAdministrationApi';
-import { EMPLOYEES_PATH, employeeProfilePath } from '../model/employeeModel';
+import { EMPLOYEES_PATH, employeeProfilePath, employeeEditPath } from '../model/employeeModel';
+import { profileToRegistrationData } from '../model/employeeRegistrationAdapter';
+import { AuthContext, type AuthContextValue } from '../../../../platform/auth';
 
 const noop = () => {};
 
@@ -116,45 +129,119 @@ function renderDirectory() {
   );
 }
 
-describe('Administration navigation', () => {
-  it('contains Employees, Employee Administration, Onboarding, Documents — in order', () => {
-    const administration = hrmsNavigation.destinations.find((d) => d.id === 'administration');
-    expect(administration?.children?.map((c) => [c.id, c.label])).toEqual([
+function renderDirectoryWithAuth(permissions: string[]) {
+  const mockAuth: AuthContextValue = {
+    status: 'authenticated',
+    error: null,
+    errorKind: null,
+    access: null,
+    activeCompany: {
+      tenantId: 'tenant_demo_001',
+      tenantName: 'Acme Holding',
+      companyId: 'comp_demo_001',
+      companyName: 'Acme Corp',
+      companyCode: 'ACME',
+      isMember: true,
+      isPlatformOversight: false,
+      roles: [],
+      permissions,
+      enabledModules: ['hrms'],
+      essEligible: true,
+      employeeId: null,
+      workspaces: ['hrms'],
+    },
+    can: (p: string) => permissions.includes(p),
+    canAny: (ps: readonly string[]) => ps.some((p) => permissions.includes(p)),
+    canAll: (ps: readonly string[]) => ps.every((p) => permissions.includes(p)),
+    hasApplicationAccess: () => true,
+    isSuperAdmin: false,
+    isCompanyAdmin: false,
+    completeSignIn: noop,
+    selectCompany: () => true,
+    refreshAccess: async () => {},
+    signOut: async () => {},
+  };
+
+  return renderToStaticMarkup(
+    <AuthContext.Provider value={mockAuth}>
+      <MemoryRouter>
+        <EmployeeDirectoryPage />
+      </MemoryRouter>
+    </AuthContext.Provider>,
+  );
+}
+
+describe('Workforce navigation', () => {
+  it('contains Overview, Employees, Onboarding, Transfers, Promotions, Offboarding, Records — in order', () => {
+    const workforce = hrmsNavigation.destinations.find((d) => d.id === 'workforce');
+    expect(workforce?.children?.map((c) => [c.id, c.label])).toEqual([
+      ['overview', 'Overview'],
       ['employees', 'Employees'],
-      ['employee-administration', 'Employee Administration'],
       ['onboarding', 'Onboarding'],
-      ['documents', 'Documents'],
+      ['transfers', 'Transfers'],
+      ['promotions', 'Promotions'],
+      ['offboarding', 'Offboarding'],
+      ['records', 'Records'],
     ]);
   });
 });
 
-describe('HRMS routing for Administration', () => {
-  it('Administration → Employees renders the Employee Directory', () => {
+describe('HRMS routing for Workforce & Administration compatibility', () => {
+  it('Workforce → Employees renders the Employee Directory', () => {
+    expect(routeFor('/hrms/workforce/employees').route.element).toEqual(<EmployeeDirectoryPage />);
+  });
+
+  it('Administration → Employees compatibility renders the Employee Directory', () => {
     expect(routeFor('/hrms/administration/employees').route.element).toEqual(
       <EmployeeDirectoryPage />,
     );
   });
 
   it('direct URL to an employee resolves the canonical Employee Profile with its id', () => {
-    const { route, params } = routeFor('/hrms/administration/employees/emp_demo_003');
+    const { route, params } = routeFor('/hrms/workforce/employees/emp_demo_003');
     expect(route.element).toEqual(<EmployeeProfilePage />);
     expect(params.employeeId).toBe('emp_demo_003');
-    expect(employeeProfilePath('emp_demo_003')).toBe('/hrms/administration/employees/emp_demo_003');
+    expect(employeeProfilePath('emp_demo_003')).toBe('/hrms/workforce/employees/emp_demo_003');
+
+    // Administration compatibility
+    const adminRoute = routeFor('/hrms/administration/employees/emp_demo_003');
+    expect(adminRoute.route.element).toEqual(<EmployeeProfilePage />);
+    expect(adminRoute.params.employeeId).toBe('emp_demo_003');
   });
 
-  it('the Administration group and the Employees shortcut both land on the one Directory', () => {
+  it('the Workforce group and the Employees shortcut land on their respective destinations', () => {
+    expect(routeFor('/hrms/workforce').route.element).toEqual(
+      <Navigate to="/hrms/workforce/overview" replace />,
+    );
     expect(routeFor('/hrms/administration').route.element).toEqual(
-      <Navigate to={EMPLOYEES_PATH} replace />,
+      <Navigate to="/hrms/workforce/overview" replace />,
     );
     expect(routeFor('/hrms/employees').route.element).toEqual(
       <Navigate to={EMPLOYEES_PATH} replace />,
     );
   });
 
-  it('keeps Employee Administration, Onboarding and Documents routes unchanged', () => {
-    expect(routeFor('/hrms/administration/employee-administration').route.element).toEqual(
-      <EmployeeAdministrationPage />,
+  it('routes Workforce sub-navigation items and preserves Administration compatibility', () => {
+    expect((routeFor('/hrms/workforce/overview').route.element as ReactElement).type).toBe(
+      WorkforceOverviewPage,
     );
+    expect((routeFor('/hrms/workforce/transfers').route.element as ReactElement).type).toBe(
+      TransfersPage,
+    );
+    expect((routeFor('/hrms/workforce/promotions').route.element as ReactElement).type).toBe(
+      PromotionsPage,
+    );
+    expect((routeFor('/hrms/workforce/offboarding').route.element as ReactElement).type).toBe(
+      OffboardingPage,
+    );
+    expect((routeFor('/hrms/workforce/records').route.element as ReactElement).type).toBe(
+      RecordsPage,
+    );
+
+    // Administration compatibility routes
+    expect(
+      (routeFor('/hrms/administration/employee-administration').route.element as ReactElement).type,
+    ).toBe(EmployeeAdministrationPage);
     const onboarding = routeFor('/hrms/administration/onboarding').route;
     expect(onboarding.element).toEqual(<OnboardingPage title="Onboarding" />);
     expect((routeFor('/hrms/administration/documents').route.element as ReactElement).type).toBe(
@@ -167,12 +254,18 @@ describe('Employees Directory page', () => {
   it('renders header, description, search, filters and a loading state', () => {
     const html = renderDirectory();
     expect(html).toContain('Employees');
-    expect(html).toContain('Find employees and view their employment information.');
-    expect(html).not.toContain('View and manage employee records');
-    expect(html).toContain('Search employees...');
-    expect(html).toContain('All departments');
-    expect(html).toContain('All locations');
-    expect(html).toContain('All statuses');
+    expect(html).toContain('Manage and explore your workforce directory');
+    expect(html).toContain('Import');
+    expect(html).toContain('Export');
+    expect(html).toContain('Total Employees');
+    expect(html).toContain('Active Employees');
+    expect(html).toContain('Pending Activation');
+    expect(html).toContain('Inactive Employees');
+    expect(html).not.toContain('On Leave');
+    expect(html).not.toContain('Employee Directory');
+    expect(html).toContain('Search by name, employee ID, email, department...');
+    expect(html).toContain('Filters');
+    expect(html).toContain('Reset');
     expect(html).toContain('Loading employees');
   });
 
@@ -191,10 +284,58 @@ describe('Employees Directory page', () => {
       expect(html).not.toContain(text);
     }
   });
+
+  it('displays record count as plain muted text and disables reset without active filters', () => {
+    const html = renderDirectory();
+    expect(html).toContain('bezent-records-text');
+    expect(html).toMatch(/<button[^>]*disabled[^>]*>.*Reset.*<\/button>/s);
+  });
+
+  it('renders skeleton shimmer placeholders for KPI metrics while loading', () => {
+    const html = renderDirectory();
+    expect(html).toContain('bezent-kpi-card__skeleton');
+    expect(html).toContain('aria-label="Loading metric"');
+  });
+
+  it('renders "—" fallback when KPI metric counts are unavailable', () => {
+    const nullKpis = computeWorkforceKpiValues({
+      totalItems: null,
+      activeItems: null,
+      probationItems: null,
+      pendingActivationItems: null,
+      terminatedItems: null,
+      suspendedItems: null,
+      resignedItems: null,
+      employees: [],
+    });
+
+    expect(nullKpis.total).toBeNull();
+    expect(nullKpis.active).toBeNull();
+    expect(nullKpis.pendingActivation).toBeNull();
+    expect(nullKpis.inactive).toBeNull();
+  });
+
+  it('gates Import and Export buttons by canonical permission keys', () => {
+    const both = renderDirectoryWithAuth(['hrms.employees.create', 'hrms.employees.view']);
+    expect(both).toContain('Import');
+    expect(both).toContain('Export');
+
+    const exportOnly = renderDirectoryWithAuth(['hrms.employees.view']);
+    expect(exportOnly).not.toContain('Import');
+    expect(exportOnly).toContain('Export');
+
+    const importOnly = renderDirectoryWithAuth(['hrms.employees.create']);
+    expect(importOnly).toContain('Import');
+    expect(importOnly).not.toContain('Export');
+
+    const none = renderDirectoryWithAuth([]);
+    expect(none).not.toContain('Import');
+    expect(none).not.toContain('Export');
+  });
 });
 
 describe('EmployeeDirectoryTable', () => {
-  it('renders real employee records with every directory column', () => {
+  it('renders real employee records with approved directory columns', () => {
     const html = renderToStaticMarkup(
       <EmployeeDirectoryTable
         status="ready"
@@ -203,17 +344,7 @@ describe('EmployeeDirectoryTable', () => {
         onOpenEmployee={noop}
       />,
     );
-    for (const header of [
-      'Employee',
-      'Employee ID',
-      'Department',
-      'Designation',
-      'Location',
-      'Reporting Manager',
-      'Employment Type',
-      'Joining Date',
-      'Status',
-    ]) {
+    for (const header of ['Employee', 'Department', 'Employment', 'Status', 'Actions']) {
       expect(html).toContain(`>${header}<`);
     }
     for (const value of [
@@ -221,15 +352,29 @@ describe('EmployeeDirectoryTable', () => {
       'EMP-0003',
       'Product',
       'Product Manager',
-      'Chennai (HQ)',
       'Arjun Mehta',
+      'EMP-0002',
+      'Engineering',
+      'Software Engineer',
       'Full Time',
-      'Jun 1, 2026',
       'Probation',
       'Active',
     ]) {
       expect(html).toContain(value);
     }
+  });
+
+  it('renders employee avatar image with 3d catalog asset and initials fallback', () => {
+    const html = renderToStaticMarkup(
+      <EmployeeDirectoryTable
+        status="ready"
+        employees={[kavya]}
+        onRetry={noop}
+        onOpenEmployee={noop}
+      />,
+    );
+    expect(html).toContain('src="/assets/avatars/3d/');
+    expect(html).toContain('alt="Kavya Iyer"');
   });
 
   it('employee name and ID open the canonical profile', () => {
@@ -267,6 +412,55 @@ describe('EmployeeDirectoryTable', () => {
     expect(error).toContain('Retry');
     expect(render({})).toContain('No employees yet');
     expect(render({ filtered: true })).toContain('No matching employees');
+  });
+
+  it('renders honest empty state with Clear filters action button when filtered', () => {
+    const onClear = vi.fn();
+    const tree = EmployeeDirectoryTable({
+      status: 'ready',
+      employees: [],
+      onRetry: noop,
+      onOpenEmployee: noop,
+      filtered: true,
+      onClearFilters: onClear,
+    }) as ReactElement<{ primaryAction?: { label: string; onClick: () => void } }>;
+
+    expect(tree.props.primaryAction?.label).toBe('Clear filters');
+    tree.props.primaryAction?.onClick();
+    expect(onClear).toHaveBeenCalledTimes(1);
+
+    const html = renderToStaticMarkup(tree);
+    expect(html).toContain('No matching employees');
+    expect(html).toContain('Clear filters');
+  });
+
+  it('supports interactive sort headers when onSort is provided', () => {
+    const onSort = vi.fn();
+    const tree = EmployeeDirectoryTable({
+      status: 'ready',
+      employees: [kavya, arjun],
+      onRetry: noop,
+      onOpenEmployee: noop,
+      sortColumn: 'employee',
+      sortDirection: 'asc',
+      onSort,
+    });
+
+    const html = renderToStaticMarkup(tree);
+    expect(html).toContain('aria-sort="ascending"');
+    expect(html).toContain('↑');
+
+    const [sortBtn] = findElements(
+      tree,
+      (el) =>
+        typeof (el.props as { onClick?: unknown })?.onClick === 'function' &&
+        Boolean(
+          (el.props as { 'aria-label'?: string })?.['aria-label']?.includes('Sort by Employee'),
+        ),
+    );
+    expect(sortBtn).toBeDefined();
+    (sortBtn!.props as { onClick: () => void }).onClick();
+    expect(onSort).toHaveBeenCalledWith('employee');
   });
 });
 
@@ -466,19 +660,19 @@ describe('Employee Profile', () => {
     }
   });
 
-  it('offers only implemented record sections — no Tasks, Review, Documents, Assets or Access', () => {
+  it('offers the 8 canonical profile workspace sections and excludes non-profile onboarding steps', () => {
     expect(PROFILE_TABS.map((tab) => tab.label)).toEqual([
-      'Overview',
       'Personal',
-      'Emergency Contacts',
+      'Employment',
+      'Organization',
+      'Contact',
+      'Payroll',
+      'Documents',
       'Accounts',
-      'Skills',
-      'Work',
-      'Hours & Milestones',
       'History',
     ]);
     const html = renderTab(fullProfile, 'overview');
-    for (const absent of ['>Review<', '>Tasks<', '>Documents<', '>Assets<', '>Online Access<']) {
+    for (const absent of ['>Review<', '>Tasks<', '>Assets<', '>Online Access<']) {
       expect(html).not.toContain(absent);
     }
   });
@@ -684,5 +878,618 @@ describe('Employment History', () => {
       />,
     );
     expect(html).toContain('Engineering → Product');
+  });
+});
+
+describe('computeWorkforceKpiValues', () => {
+  const refDate = new Date('2026-10-23T12:00:00Z');
+
+  it('computes total, active, and inactive employees from backend counts', () => {
+    const kpis = computeWorkforceKpiValues({
+      totalItems: 42,
+      activeItems: 35,
+      terminatedItems: 2,
+      suspendedItems: 1,
+      resignedItems: 3,
+      employees: [],
+      companyTimezone: 'Asia/Kolkata',
+      referenceDate: refDate,
+    });
+
+    expect(kpis.total).toBe(42);
+    expect(kpis.active).toBe(35);
+    // Inactive is terminated + suspended + resigned (2 + 1 + 3 = 6)
+    // Note: total (42) does NOT have to equal active (35) + inactive (6), as there can be probation/notice
+    expect(kpis.inactive).toBe(6);
+  });
+
+  it('computes pending activation and active workforce combining active and probation counts', () => {
+    const kpis = computeWorkforceKpiValues({
+      totalItems: 96,
+      activeItems: 12,
+      probationItems: 11,
+      pendingActivationItems: 73,
+      terminatedItems: 0,
+      suspendedItems: 0,
+      resignedItems: 0,
+      employees: [],
+      companyTimezone: 'Asia/Kolkata',
+      referenceDate: refDate,
+    });
+
+    expect(kpis.total).toBe(96);
+    expect(kpis.active).toBe(23); // 12 active + 11 probation
+    expect(kpis.pendingActivation).toBe(73);
+    expect(kpis.inactive).toBe(0);
+    // Check that Total = Active Workforce + Pending Activation + Inactive
+    expect(kpis.total).toBe(kpis.active! + kpis.pendingActivation! + kpis.inactive!);
+  });
+
+  it('accurately counts New Joiners within current calendar month in company timezone', () => {
+    const employees: EmployeeRecord[] = [
+      // Joined earlier this month - eligible
+      { ...kavya, id: 'e1', joiningDate: '2026-10-05', employmentStatus: 'active' },
+      // Joined today - eligible
+      { ...kavya, id: 'e2', joiningDate: '2026-10-23', employmentStatus: 'probation' },
+      // Future join date in this month - EXCLUDED
+      { ...kavya, id: 'e3', joiningDate: '2026-10-28', employmentStatus: 'active' },
+      // Joined in previous month - EXCLUDED
+      { ...kavya, id: 'e4', joiningDate: '2026-09-30', employmentStatus: 'active' },
+      // Joined in next month - EXCLUDED
+      { ...kavya, id: 'e5', joiningDate: '2026-11-01', employmentStatus: 'active' },
+      // Joined this month but pending onboarding (pending_activation) - EXCLUDED
+      { ...kavya, id: 'e6', joiningDate: '2026-10-10', employmentStatus: 'pending_activation' },
+    ];
+
+    const kpis = computeWorkforceKpiValues({
+      totalItems: 6,
+      activeItems: 4,
+      terminatedItems: 0,
+      suspendedItems: 0,
+      resignedItems: 0,
+      employees,
+      companyTimezone: 'Asia/Kolkata',
+      referenceDate: refDate,
+    });
+
+    // Only e1 and e2 are valid New Joiners
+    expect(kpis.newJoiners).toBe(2);
+  });
+
+  it('respects the company configured timezone for month boundaries', () => {
+    // Reference instant: 2026-10-31 23:30:00 UTC
+    // In UTC / America/New_York (UTC-4): It is October 31 (2026-10)
+    // In Asia/Kolkata (UTC+5:30): It is November 01 05:00:00 (2026-11)
+    const instant = new Date('2026-10-31T23:30:00Z');
+
+    const octEmployee: EmployeeRecord = {
+      ...kavya,
+      id: 'e_oct',
+      joiningDate: '2026-10-31',
+      employmentStatus: 'active',
+    };
+    const novEmployee: EmployeeRecord = {
+      ...kavya,
+      id: 'e_nov',
+      joiningDate: '2026-11-01',
+      employmentStatus: 'active',
+    };
+
+    // When company timezone is America/New_York (where current month is 2026-10)
+    const nyKpis = computeWorkforceKpiValues({
+      totalItems: 2,
+      activeItems: 2,
+      terminatedItems: 0,
+      suspendedItems: 0,
+      resignedItems: 0,
+      employees: [octEmployee, novEmployee],
+      companyTimezone: 'America/New_York',
+      referenceDate: instant,
+    });
+    // For NY, octEmployee is in current month and joined today (<= 2026-10-31), novEmployee is future month
+    expect(nyKpis.newJoiners).toBe(1);
+
+    // When company timezone is Asia/Kolkata (where current month has rolled over to 2026-11)
+    const kolkataKpis = computeWorkforceKpiValues({
+      totalItems: 2,
+      activeItems: 2,
+      terminatedItems: 0,
+      suspendedItems: 0,
+      resignedItems: 0,
+      employees: [octEmployee, novEmployee],
+      companyTimezone: 'Asia/Kolkata',
+      referenceDate: instant,
+    });
+    // For Kolkata, current date is 2026-11-01, novEmployee is joined today, octEmployee was previous month
+    expect(kolkataKpis.newJoiners).toBe(1);
+  });
+
+  it('returns null for metrics when sources are unavailable', () => {
+    const kpis = computeWorkforceKpiValues({
+      totalItems: null,
+      activeItems: null,
+      terminatedItems: null,
+      suspendedItems: null,
+      resignedItems: null,
+      employees: [],
+      companyTimezone: 'Asia/Kolkata',
+      referenceDate: refDate,
+    });
+
+    expect(kpis.total).toBeNull();
+    expect(kpis.active).toBeNull();
+    expect(kpis.newJoiners).toBeNull();
+    expect(kpis.inactive).toBeNull();
+  });
+});
+
+describe('Standalone Edit Employee Workspace & Adapter', () => {
+  it('computes correct canonical paths for employee edit', () => {
+    expect(employeeEditPath('EMP-001')).toBe('/hrms/workforce/employees/EMP-001/edit');
+    expect(employeeEditPath('emp_123/special')).toBe(
+      '/hrms/workforce/employees/emp_123%2Fspecial/edit',
+    );
+  });
+
+  it('renders Edit Profile button in header when canEdit is true and invokes onEditProfile', () => {
+    const onEditProfile = vi.fn();
+    const view = EmployeeProfileView({
+      profile: {
+        employee: kavya,
+        personal: null,
+        familyMembers: [],
+        nominees: [],
+        emergencyContacts: [],
+        bankAccount: null,
+        skills: [],
+        workSchedule: null,
+      },
+      activeTab: 'personal',
+      onTabChange: noop,
+      onBack: noop,
+      onOpenEmployee: noop,
+      canEdit: true,
+      onEditProfile,
+      history: null,
+    });
+
+    const editBtn = clickableWithText(view, 'Edit Profile');
+    expect(editBtn).toBeDefined();
+    editBtn.onClick();
+    expect(onEditProfile).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not render Edit Profile button when canEdit is false', () => {
+    const html = renderToStaticMarkup(
+      <EmployeeProfileView
+        profile={{
+          employee: kavya,
+          personal: null,
+          familyMembers: [],
+          nominees: [],
+          emergencyContacts: [],
+          bankAccount: null,
+          skills: [],
+          workSchedule: null,
+        }}
+        activeTab="personal"
+        onTabChange={noop}
+        onBack={noop}
+        onOpenEmployee={noop}
+        canEdit={false}
+        history={null}
+      />,
+    );
+
+    expect(html).not.toContain('Edit Profile');
+  });
+
+  it('maps loaded EmployeeProfile into complete 10-chapter RegistrationFormData', () => {
+    const sampleProfile: EmployeeProfile = {
+      employee: {
+        ...kavya,
+        phone: '+91 99887 76655',
+      },
+      personal: {
+        middleName: 'R.',
+        preferredName: 'Kavi',
+        gender: 'Female',
+        dateOfBirth: '1995-05-12',
+        maritalStatus: 'Married',
+        bloodGroup: 'B+',
+        nationality: 'Indian',
+        nativeLanguage: 'Tamil',
+        fatherName: 'Ramanathan Iyer',
+        guardianName: null,
+        personalEmail: 'kavya.personal@example.com',
+        homePhone: null,
+        businessPhone: null,
+        workPhone: '+91 99887 76655',
+        addressStreet: '12 Temple Street',
+        addressLine2: 'Apt 4B',
+        addressCity: 'Chennai',
+        addressDistrict: 'Chennai',
+        addressState: 'Tamil Nadu',
+        addressPostalCode: '600001',
+        addressCountry: 'India',
+        isPermanentSameAsCurrent: true,
+        permanentAddressStreet: null,
+        permanentAddressLine2: null,
+        permanentAddressCity: null,
+        permanentAddressDistrict: null,
+        permanentAddressState: null,
+        permanentAddressPostalCode: null,
+        permanentAddressCountry: null,
+      },
+      familyMembers: [
+        {
+          id: 'fm_1',
+          name: 'Rohan Iyer',
+          relationship: 'Spouse',
+          dateOfBirth: '1993-02-10',
+          phone: '+91 98765 43210',
+        },
+      ],
+      nominees: [
+        {
+          id: 'nom_1',
+          name: 'Rohan Iyer',
+          relationship: 'Spouse',
+          sharePercentage: 100,
+        },
+      ],
+      emergencyContacts: [
+        {
+          id: 'ec_1',
+          priority: 'primary',
+          name: 'Rohan Iyer',
+          relationship: 'Spouse',
+          phone: '+91 98765 43210',
+          email: 'rohan@example.com',
+          address: '12 Temple Street, Chennai',
+          isPrivate: false,
+        },
+      ],
+      bankAccount: {
+        accountHolderName: 'Kavya Iyer',
+        accountNumberMasked: '••••••••1234',
+        ifscCode: 'HDFC0001234',
+        bankName: 'HDFC Bank',
+        branchName: 'T Nagar',
+        bankLocation: 'Chennai',
+      },
+      skills: [
+        {
+          id: 'sk_1',
+          skillName: 'Product Strategy',
+          skillType: 'Functional',
+          proficiency: 'Advanced',
+          level: 'L3',
+          assessedOn: '2026-01-15',
+          yearsOfExperience: 5,
+          examinerEmployeeId: null,
+          verifiedByEmployeeId: null,
+          mentorEmployeeId: null,
+          examinerName: null,
+          verifiedByName: null,
+          mentorName: null,
+        },
+      ],
+      workSchedule: {
+        workingCalendar: 'India Corporate Calendar 2026',
+        workSchedule: 'Standard General Shift (9:00 AM – 6:00 PM)',
+        workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        startTime: '09:00',
+        endTime: '18:00',
+        breakMinutes: 60,
+        lunchMinutes: 45,
+        timeZone: 'Asia/Kolkata',
+      },
+    };
+
+    const formData = profileToRegistrationData(sampleProfile);
+
+    // Verify Chapter 01 (General)
+    expect(formData.general.employeeId).toBe('EMP-0003');
+    expect(formData.general.department).toBe('Product');
+    expect(formData.general.designation).toBe('Product Manager');
+    expect(formData.general.employmentStatus).toBe('probation');
+
+    // Verify Chapter 02 (Personal)
+    expect(formData.personal.firstName).toBe('Kavya');
+    expect(formData.personal.lastName).toBe('Iyer');
+    expect(formData.personal.preferredName).toBe('Kavi');
+    expect(formData.personal.dob).toBe('1995-05-12');
+    expect(formData.personal.bloodGroup).toBe('B+');
+    expect(formData.personal.personalEmail).toBe('kavya.personal@example.com');
+    expect(formData.personal.currentCity).toBe('Chennai');
+    expect(formData.personal.parentGuardians).toHaveLength(1);
+    expect(formData.personal.parentGuardians[0]!.name).toBe('Ramanathan Iyer');
+    expect(formData.personal.familyMembers).toHaveLength(1);
+    expect(formData.personal.familyMembers[0]!.name).toBe('Rohan Iyer');
+    expect(formData.personal.nominationDetails).toHaveLength(1);
+
+    // Verify Chapter 04 (Skills)
+    expect(formData.skills.skills).toHaveLength(1);
+    expect(formData.skills.skills[0]!.skillName).toBe('Product Strategy');
+
+    // Verify Chapter 05 (Emergency Contact)
+    expect(formData.emergency.primaryContact?.name).toBe('Rohan Iyer');
+    expect(formData.emergency.primaryContact?.relationship).toBe('Spouse');
+
+    // Verify Chapter 06 (Accounts)
+    expect(formData.accounts.bankAccount?.accountHolderName).toBe('Kavya Iyer');
+    expect(formData.accounts.bankAccount?.ifscCode).toBe('HDFC0001234');
+    expect(formData.accounts.bankAccount?.accountNumber).toBe('••••••••1234');
+
+    // Verify Chapter 07 (Online Access)
+    expect(formData.onlineAccess.officialEmail).toBe('kavya.iyer@bezent-demo.example');
+
+    // Verify Chapter 08 (Working Hours)
+    expect(formData.workingHours.timeZone).toBe('Asia/Kolkata');
+    expect(formData.workingHours.workingDays).toContain('Monday');
+  });
+
+  it('profileToRegistrationData safely handles null personal, bankAccount, and workSchedule sections without throwing', () => {
+    const minimalProfile: EmployeeProfile = {
+      employee: {
+        id: 'emp_1792670253491_39c00882',
+        employeeNumber: 'ANL1_253491',
+        firstName: 'Alan',
+        lastName: 'Turing',
+        fullName: 'Alan Turing',
+        email: 'alan.253491@example.com',
+        phone: null,
+        departmentId: 'dpt_1791789754381_fd66c650',
+        departmentName: 'Analytics Engineering',
+        designationId: null,
+        designationName: null,
+        locationId: null,
+        locationName: null,
+        reportingManagerId: null,
+        referralCode: null,
+        referredByEmployeeId: null,
+        joiningDate: '2026-01-01',
+        confirmedJoiningDate: null,
+        probationEndDate: null,
+        confirmationDate: null,
+        lastWorkingDate: null,
+        sourceOfHire: null,
+        noticePeriodDays: null,
+        contractEndDate: null,
+        employmentType: 'full_time',
+        employmentStatus: 'pending_activation',
+        createdAt: '2026-10-22T11:57:37.000Z',
+        updatedAt: '2026-10-23T04:16:35.000Z',
+        reportingManagerName: null,
+        referredByName: null,
+      } as unknown as EmployeeRecord,
+      personal: null,
+      familyMembers: [],
+      parentGuardians: [],
+      nominees: [],
+      emergencyContacts: [],
+      bankAccount: null,
+      skills: [],
+      workSchedule: null,
+    };
+
+    const formData = profileToRegistrationData(minimalProfile);
+
+    expect(formData.general.employeeId).toBe('ANL1_253491');
+    expect(formData.general.department).toBe('Analytics Engineering');
+    expect(formData.personal.firstName).toBe('Alan');
+    expect(formData.personal.lastName).toBe('Turing');
+    expect(formData.personal.dob).toBe('');
+    expect(formData.skills.skills).toEqual([]);
+    expect(formData.accounts.bankAccount).toBeNull();
+    expect(formData.workingHours.workingDays).toBeDefined();
+  });
+
+  it('renders Standalone EmployeeRegistration in edit mode with RegistrationConfigProvider without crashing', () => {
+    const minimalProfile: EmployeeProfile = {
+      employee: {
+        id: 'emp_1792670253491_39c00882',
+        employeeNumber: 'ANL1_253491',
+        firstName: 'Alan',
+        lastName: 'Turing',
+        fullName: 'Alan Turing',
+        email: 'alan.253491@example.com',
+        phone: null,
+        departmentName: 'Analytics Engineering',
+        employmentType: 'full_time',
+        employmentStatus: 'pending_activation',
+        joiningDate: '2026-01-01',
+      } as unknown as EmployeeRecord,
+      personal: null,
+      familyMembers: [],
+      nominees: [],
+      emergencyContacts: [],
+      bankAccount: null,
+      skills: [],
+      workSchedule: null,
+    };
+
+    const formData = profileToRegistrationData(minimalProfile);
+
+    const dummyConfig = {
+      sections: [
+        { id: 'personal', label: 'Personal Information', configurable: true },
+        { id: 'general', label: 'General', configurable: true },
+        { id: 'onboarding', label: 'Administration', configurable: true },
+        { id: 'skills', label: 'Skills', configurable: true },
+        { id: 'emergency', label: 'Emergency Contact', configurable: true },
+        { id: 'accounts', label: 'Accounts', configurable: true },
+        { id: 'online_access', label: 'Online Access', configurable: true },
+        { id: 'working_hours', label: 'Working Hours', configurable: true },
+        { id: 'documents', label: 'Documents', configurable: true },
+        { id: 'review', label: 'Review', configurable: true },
+      ],
+      fields: [
+        {
+          key: 'personal.firstName',
+          section: 'personal',
+          label: 'First Name',
+          protected: true,
+          protectedReason: 'Required by law',
+          configurable: false,
+          enabled: true,
+          required: true,
+          defaultEnabled: true,
+          defaultRequired: true,
+          overridden: false,
+        },
+        {
+          key: 'personal.lastName',
+          section: 'personal',
+          label: 'Last Name',
+          protected: false,
+          protectedReason: null,
+          configurable: true,
+          enabled: true,
+          required: false,
+          defaultEnabled: true,
+          defaultRequired: false,
+          overridden: false,
+        },
+        {
+          key: 'general.department',
+          section: 'general',
+          label: 'Department',
+          protected: false,
+          protectedReason: null,
+          configurable: true,
+          enabled: true,
+          required: false,
+          defaultEnabled: true,
+          defaultRequired: false,
+          overridden: false,
+        },
+      ],
+    };
+
+    const html = renderToStaticMarkup(
+      <MemoryRouter initialEntries={['/hrms/workforce/employees/emp_1792670253491_39c00882/edit']}>
+        <RegistrationConfigProvider configuration={dummyConfig}>
+          <EmployeeRegistration
+            mode="edit"
+            employeeId="emp_1792670253491_39c00882"
+            employeeName="Alan Turing"
+            employeeNumber="ANL1_253491"
+            initialFormData={formData}
+            onCancel={noop}
+            onSaveEdit={async () => {}}
+          />
+        </RegistrationConfigProvider>
+      </MemoryRouter>,
+    );
+
+    // Header & Actions
+    expect(html).toContain('Edit Employee');
+    expect(html).toContain('Alan Turing');
+    expect(html).toContain('ANL1_253491');
+    expect(html).toContain('Save Changes');
+    expect(html).toContain('Back to Employee Profile');
+
+    // Chapters present in navigation
+    expect(html).toContain('Personal Information');
+    expect(html).toContain('General');
+    expect(html).toContain('Administration');
+    expect(html).toContain('Skills');
+    expect(html).toContain('Emergency Contact');
+    expect(html).toContain('Accounts');
+    expect(html).toContain('Online Access');
+    expect(html).toContain('Working Hours');
+    expect(html).toContain('Documents');
+    expect(html).toContain('Review');
+  });
+
+  it('renders EmployeeEditPage loading state when fetching profile', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter initialEntries={['/hrms/workforce/employees/emp_1792670253491_39c00882/edit']}>
+        <EmployeeEditPage />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('Loading employee workspace for editing...');
+  });
+
+  it('renders StandaloneUtilityLayout in edit mode as clean full-width workspace without duplicate utility top bar or companion rail', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter initialEntries={['/hrms/workforce/employees/emp_1792670253491_39c00882/edit']}>
+        <ThemeProvider>
+          <StandaloneUtilityLayout />
+        </ThemeProvider>
+      </MemoryRouter>,
+    );
+
+    // Redundant top bar is removed so the workspace renders full-width without header duplication
+    expect(html).not.toContain('standalone-header');
+    expect(html).not.toContain('standalone-companion-rail');
+    expect(html).toContain('standalone-layout--registration');
+  });
+
+  it('renders StandaloneUtilityLayout with Workspace and companion rail on standard utility routes', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter initialEntries={['/calendar']}>
+        <ThemeProvider>
+          <StandaloneUtilityLayout />
+        </ThemeProvider>
+      </MemoryRouter>,
+    );
+
+    // Standard Workspace header
+    expect(html).toContain('Workspace');
+    expect(html).toContain('Calendar');
+
+    // Utility side controls are present
+    expect(html).toContain('standalone-header__side-toggle');
+    expect(html).toContain('standalone-companion-rail');
+  });
+
+  it('renders Parent / Guardian Details as a single section heading without duplicate form field label', () => {
+    const dummyConfigWithPG = {
+      sections: [{ id: 'personal', label: 'Personal Information', configurable: true }],
+      fields: [
+        {
+          key: 'personal.parentGuardians',
+          section: 'personal',
+          label: 'Parent / Guardian Details',
+          type: 'text' as const,
+          category: 'Personal Information',
+          protected: false,
+          protectedReason: null,
+          configurable: true,
+          enabled: true,
+          required: false,
+          defaultEnabled: true,
+          defaultRequired: false,
+          overridden: false,
+        },
+      ],
+    };
+
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <RegistrationConfigProvider configuration={dummyConfigWithPG}>
+          <PersonalInformation
+            data={{
+              parentGuardians: [{ id: 'pg_1', relationship: 'Father', name: 'John Turing' }],
+            }}
+          />
+        </RegistrationConfigProvider>
+      </MemoryRouter>,
+    );
+
+    // The heading and action button are rendered cleanly
+    expect(html).toContain('Parent / Guardian Details');
+    expect(html).toContain('+ Add Parent / Guardian');
+    expect(html).toContain('Parent / Guardian #1');
+    expect(html).toContain('John Turing');
+
+    // FormField does not generate a duplicate left-column label before the toolbar
+    // Count occurrences of "Parent / Guardian Details" - should appear exactly once (in CardTitle)
+    const matches = html.match(/Parent \/ Guardian Details/g);
+    expect(matches?.length).toBe(1);
   });
 });

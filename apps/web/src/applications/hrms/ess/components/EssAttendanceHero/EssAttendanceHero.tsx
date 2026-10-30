@@ -3,6 +3,7 @@ import { BezentIcon } from '../../../../../design-system/icons';
 import { EmployeeCartoonAvatar } from '../../../../../design-system/components';
 import { HeroSceneIllustration, type TimePeriod } from './HeroSceneIllustration';
 import type { EssShiftDetails } from '../../api/essApi';
+import { getTimezoneOffsetDetails } from '../../../../../shared/globalization';
 
 export interface EssHeroEmployee {
   firstName: string;
@@ -53,6 +54,18 @@ export interface EssAttendanceHeroProps {
   onAvatarClick?: () => void;
   onViewProfileClick?: () => void;
   onViewActionsClick?: () => void;
+}
+
+function resolveIanaTimezone(tz?: string | null): string | undefined {
+  if (!tz) return undefined;
+  const clean = tz.trim();
+  if (clean === 'IST') return 'Asia/Kolkata';
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone: clean });
+    return clean;
+  } catch {
+    return undefined;
+  }
 }
 
 function formatDisplayTime(timeStr?: string | null): string {
@@ -184,11 +197,32 @@ export const EssAttendanceHero: React.FC<EssAttendanceHeroProps> = ({
     return () => clearInterval(timer);
   }, []);
 
+  const resolvedIanaTimezone = useMemo(() => {
+    return resolveIanaTimezone(timezone);
+  }, [timezone]);
+
+  // Determine current hour in the resolved timezone for greeting and scene
+  const currentHour = useMemo(() => {
+    if (!resolvedIanaTimezone) return now.getHours();
+    try {
+      const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: resolvedIanaTimezone,
+        hour: 'numeric',
+        hour12: false,
+      }).formatToParts(now);
+      const hStr = parts.find((p) => p.type === 'hour')?.value;
+      const num = hStr ? parseInt(hStr, 10) : now.getHours();
+      return num === 24 ? 0 : num;
+    } catch {
+      return now.getHours();
+    }
+  }, [now, resolvedIanaTimezone]);
+
   // Determine current time period and theme
   const currentPeriod = useMemo<TimePeriod>(() => {
     if (forcedTimePeriod) return forcedTimePeriod;
-    return getTimePeriod(now.getHours());
-  }, [forcedTimePeriod, now]);
+    return getTimePeriod(currentHour);
+  }, [forcedTimePeriod, currentHour]);
 
   const {
     greeting,
@@ -196,37 +230,56 @@ export const EssAttendanceHero: React.FC<EssAttendanceHeroProps> = ({
     icon: greetingIcon,
   } = useMemo(() => getGreetingAndQuote(currentPeriod), [currentPeriod]);
 
+  // Display label for timezone badge (e.g. "EDT", "IST", etc.)
+  const displayTimezone = useMemo(() => {
+    if (!timezone) return 'IST';
+    const clean = timezone.trim();
+    if (clean === 'IST' || clean === 'Asia/Kolkata') return 'IST';
+    try {
+      const { abbreviation } = getTimezoneOffsetDetails(clean, now);
+      if (abbreviation && abbreviation !== 'UTC' && abbreviation !== 'GMT') {
+        return abbreviation;
+      }
+      return clean;
+    } catch {
+      return clean;
+    }
+  }, [timezone, now]);
+
   // Formatted date string (e.g., FRIDAY, OCTOBER 16, 2026)
   const formattedDate = useMemo(() => {
     return now
       .toLocaleDateString('en-US', {
+        timeZone: resolvedIanaTimezone,
         weekday: 'long',
         month: 'long',
         day: 'numeric',
         year: 'numeric',
       })
       .toUpperCase();
-  }, [now]);
+  }, [now, resolvedIanaTimezone]);
 
   // Formatted sub-date for clock (e.g. Fri, 16 Oct 2026)
   const formattedSubDate = useMemo(() => {
     return now.toLocaleDateString('en-US', {
+      timeZone: resolvedIanaTimezone,
       weekday: 'short',
       day: 'numeric',
       month: 'short',
       year: 'numeric',
     });
-  }, [now]);
+  }, [now, resolvedIanaTimezone]);
 
   // Live digital clock string (e.g. 01:05:40 PM)
   const formattedClock = useMemo(() => {
     return now.toLocaleTimeString('en-US', {
+      timeZone: resolvedIanaTimezone,
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
       hour12: true,
     });
-  }, [now]);
+  }, [now, resolvedIanaTimezone]);
 
   // Worked hours and break duration computation
   const hasPunchedIn = Boolean(attendance.checkInTime);
@@ -434,7 +487,7 @@ export const EssAttendanceHero: React.FC<EssAttendanceHeroProps> = ({
             <BezentIcon name="clock" size={20} color="#3978f6" />
           </div>
           <div className="ess-glass-content">
-            <span className="ess-glass-label">Current Time • {timezone}</span>
+            <span className="ess-glass-label">Current Time • {displayTimezone}</span>
             <span className="ess-glass-clock-val">{formattedClock}</span>
             <span className="ess-glass-sub">{formattedSubDate}</span>
           </div>

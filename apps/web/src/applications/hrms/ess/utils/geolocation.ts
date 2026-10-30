@@ -58,6 +58,18 @@ export function formatPunchErrorMessage(err: unknown): string {
     if (e.code === 'PUNCH_THROTTLED') {
       return e.message || 'Please wait before punching again.';
     }
+    if (e.code === 'WEB_PUNCH_DISABLED') {
+      return (
+        e.message ||
+        'Web browser punch is disabled by your organization attendance policy. Please use an authorized kiosk or mobile device.'
+      );
+    }
+    if (e.code === 'MOBILE_PUNCH_DISABLED') {
+      return e.message || 'Mobile app punch is disabled by your organization attendance policy.';
+    }
+    if (e.code === 'SELFIE_REQUIRED') {
+      return e.message || 'Selfie photo verification is required to punch attendance.';
+    }
     if (e.message) {
       // Prevent stack trace or raw coordinate leakage in UI
       if (

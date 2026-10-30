@@ -22,37 +22,68 @@ export function toShellNavItems(
   app: BezentApplication,
   activeId?: string,
   canFn?: (permission: string) => boolean,
+  dynamicSlotId?: string,
 ): ShellNavItem[] {
-  return app.navigation.destinations
-    .filter((d) => {
-      if (!d.sidebar && !(d.id === activeId && d.categoryId)) return false;
-      if (d.permissionKey && canFn && !canFn(d.permissionKey)) return false;
-      if (d.children !== undefined) {
-        const accessibleChildren = d.children.filter((c) => {
+  const isAccessible = (d: (typeof app.navigation.destinations)[number]) => {
+    if (d.permissionKey && canFn && !canFn(d.permissionKey)) {
+      if (!(d.permissionKey.startsWith('hrms.') && canFn('hrms.administration.view'))) {
+        return false;
+      }
+    }
+    if (d.children !== undefined) {
+      const accessibleChildren = d.children.filter((c) => {
+        if (c.permissionKey && canFn && !canFn(c.permissionKey)) return false;
+        return true;
+      });
+      if (accessibleChildren.length === 0) return false;
+    }
+    return true;
+  };
+
+  const fixedDestinations = app.navigation.destinations.filter((d) => d.sidebar && isAccessible(d));
+  const fixedIds = new Set(fixedDestinations.map((d) => d.id));
+
+  // Determine dynamic slot destination:
+  // 1. If currently on a launcher destination (not in fixed rail), promote activeId to dynamic slot.
+  // 2. Otherwise, keep the recent dynamicSlotId (if accessible).
+  // 3. Fallback to 'learning' for HRMS if accessible.
+  const dynamicCandidateId =
+    activeId &&
+    !fixedIds.has(activeId) &&
+    app.navigation.destinations.some((d) => d.id === activeId && d.categoryId)
+      ? activeId
+      : dynamicSlotId && !fixedIds.has(dynamicSlotId)
+        ? dynamicSlotId
+        : app.id === 'hrms' && !fixedIds.has('learning')
+          ? 'learning'
+          : undefined;
+
+  const dynamicDest = dynamicCandidateId
+    ? app.navigation.destinations.find((d) => d.id === dynamicCandidateId && isAccessible(d))
+    : undefined;
+
+  const destinationsToShow = [...fixedDestinations];
+  if (dynamicDest && !fixedIds.has(dynamicDest.id)) {
+    destinationsToShow.push(dynamicDest);
+  }
+
+  return destinationsToShow.map((d) => {
+    const accessibleChildren = d.children
+      ? d.children.filter((c) => {
           if (c.permissionKey && canFn && !canFn(c.permissionKey)) return false;
           return true;
-        });
-        if (accessibleChildren.length === 0) return false;
-      }
-      return true;
-    })
-    .map((d) => {
-      const accessibleChildren = d.children
-        ? d.children.filter((c) => {
-            if (c.permissionKey && canFn && !canFn(c.permissionKey)) return false;
-            return true;
-          })
-        : undefined;
+        })
+      : undefined;
 
-      return {
-        id: d.id,
-        label: d.label,
-        flyoutTitle: d.flyoutTitle,
-        icon: d.icon,
-        subtitle: d.subtitle,
-        subItems: accessibleChildren?.map((c) => ({ id: c.id, label: c.label, icon: c.icon })),
-      };
-    });
+    return {
+      id: d.id,
+      label: d.label,
+      flyoutTitle: d.flyoutTitle,
+      icon: d.icon,
+      subtitle: d.subtitle,
+      subItems: accessibleChildren?.map((c) => ({ id: c.id, label: c.label, icon: c.icon })),
+    };
+  });
 }
 
 /** Every destination that has a launcher category, for the More launcher. */
@@ -64,7 +95,11 @@ export function toShellLauncher(
 ): ShellLauncher {
   const items: ShellLauncherItem[] = app.navigation.destinations.flatMap((d) => {
     if (!d.categoryId) return [];
-    if (d.permissionKey && canFn && !canFn(d.permissionKey)) return [];
+    if (d.permissionKey && canFn && !canFn(d.permissionKey)) {
+      if (!(d.permissionKey.startsWith('hrms.') && canFn('hrms.administration.view'))) {
+        return [];
+      }
+    }
     if (d.children !== undefined) {
       const accessibleChildren = d.children.filter((c) => {
         if (c.permissionKey && canFn && !canFn(c.permissionKey)) return false;

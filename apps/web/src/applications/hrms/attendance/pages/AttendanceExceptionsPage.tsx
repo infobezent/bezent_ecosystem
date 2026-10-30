@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Page,
   PageHeader,
@@ -110,29 +111,75 @@ const EXCEPTION_TYPE_LABELS: Record<ExceptionType, string> = {
 };
 
 export function AttendanceExceptionsPage() {
+  const [searchParams] = useSearchParams();
+
   // Date State
+  const initialDateFrom = searchParams.get('dateFrom') || searchParams.get('date') || '';
+  const initialDateTo = searchParams.get('dateTo') || searchParams.get('date') || '';
+  const urlPreset = searchParams.get('datePreset') as
+    'today' | 'yesterday' | 'last7' | 'this_month' | 'all' | 'custom' | null;
+  const initialPreset = urlPreset || (initialDateFrom ? 'custom' : 'this_month');
+
   const [datePreset, setDatePreset] = useState<
-    'today' | 'yesterday' | 'last7' | 'this_month' | 'custom'
-  >('this_month');
-  const [dateFrom, setDateFrom] = useState(getStartOfMonthString());
-  const [dateTo, setDateTo] = useState(getTodayString());
+    'today' | 'yesterday' | 'last7' | 'this_month' | 'all' | 'custom'
+  >(() => initialPreset);
+  const [dateFrom, setDateFrom] = useState(() =>
+    initialPreset === 'all' ? '' : initialDateFrom || getStartOfMonthString(),
+  );
+  const [dateTo, setDateTo] = useState(() =>
+    initialPreset === 'all' ? '' : initialDateTo || getTodayString(),
+  );
   const [dateInterpretation, setDateInterpretation] = useState<'workday' | 'detected_at'>(
-    'workday',
+    () => (searchParams.get('dateInterpretation') as 'workday' | 'detected_at') || 'workday',
   );
 
   // Filters State
-  const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('active');
-  const [severityFilter, setSeverityFilter] = useState('all');
-  const [typeFilter, setTypeFilter] = useState('all');
-  const [sourceFilter, setSourceFilter] = useState('all');
-  const [assignmentFilter, setAssignmentFilter] = useState('all');
-  const [departmentFilter, setDepartmentFilter] = useState('');
+  const [search, setSearch] = useState(() => searchParams.get('search') || '');
+  const [debouncedSearch, setDebouncedSearch] = useState(() => searchParams.get('search') || '');
+  const [statusFilter, setStatusFilter] = useState(() => searchParams.get('status') || 'active');
+  const [severityFilter, setSeverityFilter] = useState(() => searchParams.get('severity') || 'all');
+  const [typeFilter, setTypeFilter] = useState(
+    () => searchParams.get('type') || searchParams.get('exceptionType') || 'all',
+  );
+  const [sourceFilter, setSourceFilter] = useState(() => searchParams.get('source') || 'all');
+  const [assignmentFilter, setAssignmentFilter] = useState(
+    () => searchParams.get('assignment') || 'all',
+  );
+  const [departmentFilter, setDepartmentFilter] = useState(
+    () => searchParams.get('departmentId') || '',
+  );
   const [pendingActionReasonFilter, setPendingActionReasonFilter] = useState('all');
 
   // Progressive Disclosure
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(() =>
+    Boolean(
+      searchParams.get('source') ||
+      searchParams.get('assignment') ||
+      searchParams.get('departmentId') ||
+      (searchParams.get('severity') && searchParams.get('severity') !== 'all'),
+    ),
+  );
+
+  // Sync state when URL searchParams update
+  useEffect(() => {
+    const pStatus = searchParams.get('status');
+    if (pStatus !== null && pStatus !== statusFilter) setStatusFilter(pStatus);
+
+    const pType = searchParams.get('type') || searchParams.get('exceptionType');
+    if (pType !== null && pType !== typeFilter) setTypeFilter(pType);
+
+    const pSev = searchParams.get('severity');
+    if (pSev !== null && pSev !== severityFilter) {
+      setSeverityFilter(pSev);
+      if (pSev !== 'all') setShowAdvancedFilters(true);
+    }
+
+    const pDatePreset = searchParams.get('datePreset') as
+      'today' | 'yesterday' | 'last7' | 'this_month' | 'all' | 'custom' | null;
+    if (pDatePreset && pDatePreset !== datePreset) {
+      handleDatePresetChange(pDatePreset);
+    }
+  }, [searchParams]);
 
   // Pagination & Sorting
   const [page, setPage] = useState(1);
@@ -207,7 +254,7 @@ export function AttendanceExceptionsPage() {
 
   // Date Preset Handling
   const handleDatePresetChange = (
-    preset: 'today' | 'yesterday' | 'last7' | 'this_month' | 'custom',
+    preset: 'today' | 'yesterday' | 'last7' | 'this_month' | 'all' | 'custom',
   ) => {
     setDatePreset(preset);
     setPage(1);
@@ -230,6 +277,10 @@ export function AttendanceExceptionsPage() {
       case 'this_month':
         setDateFrom(getStartOfMonthString());
         setDateTo(today);
+        break;
+      case 'all':
+        setDateFrom('');
+        setDateTo('');
         break;
       case 'custom':
         break;
@@ -596,7 +647,8 @@ export function AttendanceExceptionsPage() {
               value={datePreset}
               onChange={(e) =>
                 handleDatePresetChange(
-                  e.target.value as 'today' | 'yesterday' | 'last7' | 'this_month' | 'custom',
+                  e.target.value as
+                    'today' | 'yesterday' | 'last7' | 'this_month' | 'all' | 'custom',
                 )
               }
               aria-label="Date preset selector"
@@ -605,6 +657,7 @@ export function AttendanceExceptionsPage() {
               <option value="yesterday">Yesterday</option>
               <option value="last7">Last 7 Days</option>
               <option value="this_month">This Month</option>
+              <option value="all">All Time</option>
               <option value="custom">Custom Range</option>
             </Select>
 

@@ -319,13 +319,34 @@
 /* ── Standalone Registration Workspace ───────────────────────────────── */
 .standalone-layout--registration {
   background: var(--bg-surface);
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 .standalone-layout__main--registration {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  width: 100vw;
+  height: 100dvh;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  background: var(--bg-surface);
+}
+
+/* ── Standalone Employee Edit Workspace ──────────────────────────────── */
+.standalone-layout--employee-edit {
+  background: var(--bg-surface);
+}
+
+.standalone-layout__main--employee-edit {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
   overflow: hidden;
   background: var(--bg-surface);
 }

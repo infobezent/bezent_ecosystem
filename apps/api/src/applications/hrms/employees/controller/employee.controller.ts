@@ -127,6 +127,28 @@ export class EmployeeController {
     }
   };
 
+  updateEmployee = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const companyContext = req.companyContext;
+      if (!companyContext) {
+        throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
+      }
+
+      const updated = await this.service.updateEmployee(
+        companyContext.tenantId,
+        companyContext.companyId,
+        requireEmployeeId(req),
+        req.body,
+      );
+
+      res.json({
+        data: updated,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
+
   getEmployeeProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const companyContext = req.companyContext;

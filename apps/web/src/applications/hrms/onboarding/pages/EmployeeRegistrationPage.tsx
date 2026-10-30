@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useNavigate, useLocation, useParams, Navigate } from 'react-router-dom';
 import { EmployeeRegistration } from '../components/EmployeeRegistration';
 import type { EmployeeRegistrationDraft } from '../components/DraftsModal';
+import type { ReviewSectionData } from '../components/ReviewSection';
 import { RegistrationConfigLoader } from '../registration/registrationConfig';
 import { createEmployee } from '../../employees/api/employeesApi';
 import {
@@ -9,11 +10,55 @@ import {
   type OrganizationMasters,
 } from '../../api/organizationMastersApi';
 import { buildCreateEmployeePayload, type RegistrationFormData } from '../types/registration.types';
+import { useOptionalAuth } from '../../../../platform/auth';
+import { landingPath } from '../../../../platform/auth/landing';
+import { LoadingState } from '../../../../design-system/components';
 
 export function EmployeeRegistrationPage({ onCancel }: { onCancel?: () => void } = {}) {
   const navigate = useNavigate();
   const location = useLocation();
-  const initialDraft = (location.state as { draft?: EmployeeRegistrationDraft })?.draft || null;
+  const { caseId } = useParams<{ caseId?: string }>();
+  const auth = useOptionalAuth();
+
+  const state = location.state as {
+    draft?: EmployeeRegistrationDraft;
+    caseId?: string;
+    newHire?: { id: string; candidateName?: string; employeeName?: string };
+  } | null;
+
+  const directDraft = state?.draft || null;
+  const candidateName = state?.newHire?.candidateName || state?.newHire?.employeeName;
+  const effectiveCaseId = caseId || state?.caseId;
+
+  const initialDraft: EmployeeRegistrationDraft | null = useMemo(() => {
+    if (directDraft) return directDraft;
+    if (effectiveCaseId || candidateName) {
+      return {
+        id: effectiveCaseId || 'case-draft',
+        employeeId: effectiveCaseId ? `CASE-${effectiveCaseId.slice(-6).toUpperCase()}` : '',
+        employeeName: candidateName || 'New Hire Case',
+        activeSection: 'general',
+        completedSectionsCount: 0,
+        pendingSectionLabels: [],
+        lastUpdated: new Date().toISOString(),
+        reviewData: {
+          personal: {},
+          general: {},
+          onboarding: {},
+          skills: [],
+          emergency: [],
+          accounts: {},
+          onlineAccess: {},
+          workingHours: {},
+          documents: [],
+          documentsList: [],
+          isExperiencedHire: false,
+          passportPhoto: { fileName: '', filePreviewUrl: '' },
+        } as unknown as ReviewSectionData,
+      };
+    }
+    return null;
+  }, [directDraft, effectiveCaseId, candidateName]);
 
   const [masters, setMasters] = useState<OrganizationMasters | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,13 +84,13 @@ export function EmployeeRegistrationPage({ onCancel }: { onCancel?: () => void }
     };
   }, []);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     if (onCancel) {
       onCancel();
     } else {
-      navigate('/hrms/administration/onboarding');
+      navigate('/hrms/workforce/onboarding');
     }
-  };
+  }, [onCancel, navigate]);
 
   const handleSubmit = useCallback(
     async (formData: RegistrationFormData) => {
@@ -90,6 +135,17 @@ export function EmployeeRegistrationPage({ onCancel }: { onCancel?: () => void }
     },
     [isSubmitting, masters, initialDraft?.id],
   );
+
+  // RBAC workspace guard: If an active authenticated session exists, ensure the user has HRMS access.
+  if (auth?.status === 'loading') {
+    return <LoadingState label="Verifying access…" fill />;
+  }
+  if (auth?.status === 'authenticated' && auth.activeCompany) {
+    const hasHrmsWorkspace = auth.activeCompany.workspaces.includes('hrms');
+    if (!hasHrmsWorkspace && auth.access) {
+      return <Navigate to={landingPath(auth.access)} replace />;
+    }
+  }
 
   // The form renders only once the company's resolved Registration configuration is loaded.
   return (

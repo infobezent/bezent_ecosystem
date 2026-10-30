@@ -16,7 +16,7 @@ import type {
   AttendanceRegularizationSettings,
   AttendanceDevice,
   AttendanceImportBatch,
-  AttendanceSecuritySettings,
+  AttendanceSecuritySettingsWithRemote,
   AttendancePayrollSettings,
   AttendancePeriod,
   AttendancePayrollHandoverBatch,
@@ -34,6 +34,11 @@ import type {
   ClassificationRulesConfig,
   EffectivePolicyResolution,
   PublishPolicyInput,
+  CompanyShiftTemplate,
+  ShiftRosterSettings,
+  UpdateShiftRosterSettingsInput,
+  CreateShiftInput,
+  UpdateShiftInput,
 } from '../types/attendance.types.js';
 import { BadRequestError, NotFoundError } from '../../../../app/errors/AppError.js';
 
@@ -73,12 +78,39 @@ export class AttendanceSettingsService {
       }
     }
 
-    // 2. Day boundary fallback cutoff format validation
-    const cutoffTime = input.unscheduledFallbackCutoff || input.dayBoundaryTime;
-    if (cutoffTime && !/^\d{2}:\d{2}(:\d{2})?$/.test(cutoffTime)) {
+    // 2. Workday Rollover Mode & Cutoff Validation
+    if (
+      input.dayBoundaryMode &&
+      !['shift_workday_based', 'calendar_midnight'].includes(input.dayBoundaryMode)
+    ) {
       throw new BadRequestError(
-        'Day boundary fallback cutoff time must be in HH:mm or HH:mm:ss format',
+        'Invalid workday rollover mode. Must be shift_workday_based or calendar_midnight',
       );
+    }
+
+    if (input.dayBoundaryMode === 'calendar_midnight') {
+      input.unscheduledFallbackCutoff = '00:00:00';
+      input.dayBoundaryTime = '00:00:00';
+    } else {
+      const cutoffTime = input.unscheduledFallbackCutoff || input.dayBoundaryTime;
+      if (cutoffTime) {
+        const match = /^(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(cutoffTime);
+        if (!match) {
+          throw new BadRequestError(
+            'Day boundary fallback cutoff time must be in HH:mm or HH:mm:ss format',
+          );
+        }
+        const [hours, minutes, seconds] = [
+          Number(match[1]),
+          Number(match[2]),
+          Number(match[3] ?? 0),
+        ];
+        if (hours > 23 || minutes > 59 || seconds > 59) {
+          throw new BadRequestError(
+            'Day boundary fallback cutoff time must be a valid 24-hour time (00:00:00 to 23:59:59)',
+          );
+        }
+      }
     }
 
     // 3. Controlled modification for Tracking Start Date (Go-Live Date)
@@ -86,6 +118,23 @@ export class AttendanceSettingsService {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(input.trackingStartDate)) {
         throw new BadRequestError('Tracking start date must be in YYYY-MM-DD format');
       }
+      const targetDate = new Date(`${input.trackingStartDate}T00:00:00Z`);
+      if (isNaN(targetDate.getTime())) {
+        throw new BadRequestError('Invalid tracking start date');
+      }
+      const maxFuture = new Date();
+      maxFuture.setFullYear(maxFuture.getFullYear() + 1);
+      if (targetDate > maxFuture) {
+        throw new BadRequestError(
+          'Tracking start date cannot be scheduled more than 1 year in advance',
+        );
+      }
+      const minPast = new Date();
+      minPast.setFullYear(minPast.getFullYear() - 10);
+      if (targetDate < minPast) {
+        throw new BadRequestError('Tracking start date cannot be more than 10 years in the past');
+      }
+
       // If tracking start date is changed after initial setup, require change reason
       if (prev?.trackingStartDate && prev.trackingStartDate !== input.trackingStartDate) {
         if (!input.trackingStartDateReason || !input.trackingStartDateReason.trim()) {
@@ -116,6 +165,25 @@ export class AttendanceSettingsService {
 
     const updated = await this.repo.upsertGeneralSettings(tenantId, companyId, input);
 
+    const isTzModified = Boolean(
+      prev?.timezone && input.timezone && prev.timezone !== input.timezone,
+    );
+    const isStartModified = Boolean(
+      prev?.trackingStartDate &&
+      input.trackingStartDate &&
+      prev.trackingStartDate !== input.trackingStartDate,
+    );
+
+    const reasonSummary =
+      input.trackingStartDateReason ||
+      (isTzModified && isStartModified
+        ? `Timezone changed to ${input.timezone} and go-live date changed to ${input.trackingStartDate}`
+        : isTzModified
+          ? `Timezone changed from ${prev?.timezone} to ${input.timezone}`
+          : isStartModified
+            ? `Tracking start date changed to ${input.trackingStartDate}`
+            : 'Attendance general settings updated');
+
     await this.repo.recordAuditLog(tenantId, companyId, {
       category: 'general',
       action: 'updated',
@@ -124,7 +192,7 @@ export class AttendanceSettingsService {
       previousValues: prev as unknown as Record<string, unknown>,
       newValues: {
         ...(input as Record<string, unknown>),
-        changeReason: input.trackingStartDateReason || 'Attendance general settings updated',
+        changeReason: reasonSummary,
       },
       changedByUserId: userId,
       clientIp,
@@ -674,7 +742,7 @@ export class AttendanceSettingsService {
   async getSecuritySettings(
     tenantId: string,
     companyId: string,
-  ): Promise<AttendanceSecuritySettings> {
+  ): Promise<AttendanceSecuritySettingsWithRemote> {
     const settings = await this.repo.getSecuritySettings(tenantId, companyId);
     if (settings) return settings;
     return this.repo.upsertSecuritySettings(tenantId, companyId, {});
@@ -686,7 +754,7 @@ export class AttendanceSettingsService {
     input: SecuritySettingsInput,
     userId?: string,
     clientIp?: string,
-  ): Promise<AttendanceSecuritySettings> {
+  ): Promise<AttendanceSecuritySettingsWithRemote> {
     const prev = await this.getSecuritySettings(tenantId, companyId);
     const updated = await this.repo.upsertSecuritySettings(tenantId, companyId, input);
 
@@ -1120,6 +1188,123 @@ export class AttendanceSettingsService {
     filter?: SettingsAuditFilter,
   ): Promise<{ items: AttendanceSettingsAuditLog[]; total: number }> {
     return this.repo.queryAuditLogs(tenantId, companyId, filter);
+  }
+
+  /* ── 8. Shift & Roster Configuration ────────────────────────────── */
+
+  async getShiftRosterSettings(tenantId: string, companyId: string): Promise<ShiftRosterSettings> {
+    return this.repo.getShiftRosterSettings(tenantId, companyId);
+  }
+
+  async updateShiftRosterSettings(
+    tenantId: string,
+    companyId: string,
+    input: UpdateShiftRosterSettingsInput,
+    userId?: string,
+    clientIp?: string,
+  ): Promise<ShiftRosterSettings> {
+    const prev = await this.repo.getShiftRosterSettings(tenantId, companyId);
+    const updated = await this.repo.updateShiftRosterSettings(tenantId, companyId, input);
+
+    await this.repo.recordAuditLog(tenantId, companyId, {
+      category: 'general',
+      action: 'roster_settings_updated',
+      entityId: companyId,
+      entityType: 'shift_roster_settings',
+      previousValues: prev as unknown as Record<string, unknown>,
+      newValues: updated as unknown as Record<string, unknown>,
+      changedByUserId: userId,
+      clientIp,
+    });
+
+    return updated;
+  }
+
+  async createCompanyShift(
+    tenantId: string,
+    companyId: string,
+    input: CreateShiftInput,
+    userId?: string,
+    clientIp?: string,
+  ): Promise<CompanyShiftTemplate> {
+    if (!input.name || !input.code || !input.startTime || !input.endTime) {
+      throw new BadRequestError('Shift name, code, start time, and end time are required');
+    }
+
+    const created = await this.repo.createCompanyShift(tenantId, companyId, input);
+
+    await this.repo.recordAuditLog(tenantId, companyId, {
+      category: 'general',
+      action: 'shift_created',
+      entityId: created.id,
+      entityType: 'company_shifts',
+      newValues: created as unknown as Record<string, unknown>,
+      changedByUserId: userId,
+      clientIp,
+    });
+
+    return created;
+  }
+
+  async updateCompanyShift(
+    tenantId: string,
+    companyId: string,
+    shiftId: string,
+    input: UpdateShiftInput,
+    userId?: string,
+    clientIp?: string,
+  ): Promise<CompanyShiftTemplate> {
+    const prevSettings = await this.repo.getShiftRosterSettings(tenantId, companyId);
+    const prevShift = prevSettings.shifts.find((s) => s.id === shiftId);
+    if (!prevShift) {
+      throw new NotFoundError(`Shift template '${shiftId}' was not found`);
+    }
+
+    const updated = await this.repo.updateCompanyShift(tenantId, companyId, shiftId, input);
+    if (!updated) {
+      throw new NotFoundError(`Shift template '${shiftId}' was not found`);
+    }
+
+    await this.repo.recordAuditLog(tenantId, companyId, {
+      category: 'general',
+      action: 'shift_updated',
+      entityId: shiftId,
+      entityType: 'company_shifts',
+      previousValues: prevShift as unknown as Record<string, unknown>,
+      newValues: updated as unknown as Record<string, unknown>,
+      changedByUserId: userId,
+      clientIp,
+    });
+
+    return updated;
+  }
+
+  async deleteCompanyShift(
+    tenantId: string,
+    companyId: string,
+    shiftId: string,
+    userId?: string,
+    clientIp?: string,
+  ): Promise<{ success: boolean }> {
+    const prevSettings = await this.repo.getShiftRosterSettings(tenantId, companyId);
+    const prevShift = prevSettings.shifts.find((s) => s.id === shiftId);
+    if (!prevShift) {
+      throw new NotFoundError(`Shift template '${shiftId}' was not found`);
+    }
+
+    const success = await this.repo.deleteCompanyShift(tenantId, companyId, shiftId);
+
+    await this.repo.recordAuditLog(tenantId, companyId, {
+      category: 'general',
+      action: 'shift_deleted',
+      entityId: shiftId,
+      entityType: 'company_shifts',
+      previousValues: prevShift as unknown as Record<string, unknown>,
+      changedByUserId: userId,
+      clientIp,
+    });
+
+    return { success };
   }
 }
 

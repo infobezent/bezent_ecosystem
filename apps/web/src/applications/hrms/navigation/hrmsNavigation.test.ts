@@ -71,22 +71,26 @@ describe('canonical HRMS navigation catalog', () => {
   it('freezes the primary sidebar order', () => {
     expect(destinations.filter((d) => d.sidebar).map((d) => d.id)).toEqual([
       'dashboard',
-      'administration',
-      'leave',
+      'workforce',
+      'recruitment',
       'attendance',
-      'timesheets',
+      'leave',
+      'payroll',
       'performance',
     ]);
   });
 
-  it('has no top-level Employees destination — employees live under Administration', () => {
+  it('has no top-level Employees destination — employees live under Workforce', () => {
     expect(destinations.map((d) => d.id)).not.toContain('employees');
-    const administration = destinations.find((d) => d.id === 'administration');
-    expect(administration?.children?.map((c) => c.id)).toEqual([
+    const workforce = destinations.find((d) => d.id === 'workforce');
+    expect(workforce?.children?.map((c) => c.id)).toEqual([
+      'overview',
       'employees',
-      'employee-administration',
       'onboarding',
-      'documents',
+      'transfers',
+      'promotions',
+      'offboarding',
+      'records',
     ]);
   });
 });

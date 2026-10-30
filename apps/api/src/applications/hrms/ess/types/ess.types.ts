@@ -106,6 +106,7 @@ export interface EssTodayAttendance {
   currentBreakStartTime?: string | null;
   shift?: EssShiftDetails;
   punches?: EssPunchEvent[];
+  timezone?: string;
 }
 
 export interface EssLeaveBalanceItem {
@@ -406,6 +407,8 @@ export interface EssAttendanceRegularizationDto {
   decisionReason: string | null;
   decidedAt?: string | null;
   submittedAt: string;
+  assignedTo?: string | null;
+  assignedQueue?: string | null;
   createdAt: string;
 }
 
