@@ -1,4 +1,5 @@
 import type { ImgHTMLAttributes } from 'react';
+import { BezentWordmark } from './BezentWordmark';
 import bezentLogoSrc from '../../../assets/bezent_logo.png';
 import './BezentLogo.css';
 
@@ -51,7 +52,10 @@ export function BezentLogo({
     return (
       <div className={`bezent-logo ${className}`.trim()}>
         {imgMark}
-        <span className="bezent-logo__wordmark">BEZENT</span>
+        <BezentWordmark
+          height={typeof pixelSize === 'number' ? Math.round(pixelSize * 0.65) : 20}
+          className="bezent-logo__wordmark"
+        />
       </div>
     );
   }

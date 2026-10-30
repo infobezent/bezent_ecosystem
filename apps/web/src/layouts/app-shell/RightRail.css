@@ -14,12 +14,13 @@
   align-items: center;
   background: var(--app-canvas, #f6f8fc);
   padding: 16px 0 12px;
+  transform: translateX(-1px);
 }
 
 /* Open: let tooltips extend left over the workspace and keep rail inside its column */
 .app-shell--rail-open .right-rail {
   overflow: visible;
-  width: var(--shell-right-rail-width, 48px);
+  width: var(--shell-right-rail-width, 46px);
   margin-left: 0;
 }
 

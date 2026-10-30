@@ -24,6 +24,10 @@
   --app-shell-rail-width: var(--shell-right-rail-width);
 }
 
+.app-shell--rail-open .app-shell__workspace {
+  margin-right: 12px;
+}
+
 /* Overlay utility drawer */
 .app-shell__drawer {
   position: absolute;
@@ -62,8 +66,8 @@
   min-height: 0;
   overflow: auto;
   background: var(--bg-surface, #ffffff);
-  margin: 4px 6px 4px 4px;
-  border-radius: 8px;
+  margin: 8px 16px 8px 18px;
+  border-radius: 12px;
   border: 1px solid rgba(15, 23, 42, 0.08);
   box-shadow:
     0 0 2px rgba(15, 23, 42, 0.04),

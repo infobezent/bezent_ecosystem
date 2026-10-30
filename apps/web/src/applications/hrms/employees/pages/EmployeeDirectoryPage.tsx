@@ -497,7 +497,7 @@ export function EmployeeDirectoryPage() {
   };
 
   return (
-    <Page maxWidth="default" gap="md" className="employees-directory-page">
+    <Page maxWidth="full" gap="md" className="employees-directory-page">
       {/* 1. Page Header */}
       <PageHeader
         eyebrow="WORKFORCE / EMPLOYEES"

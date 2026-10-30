@@ -190,8 +190,9 @@ export function AttendanceOverviewPage() {
   };
 
   return (
-    <Page>
+    <Page className="attendance-clay-overview">
       <PageHeader
+        className="attendance-clay-header"
         eyebrow="HRMS · Attendance"
         title="Attendance Overview"
         subtitle="Workforce operations, exception triage, and monthly payroll readiness"
@@ -199,6 +200,7 @@ export function AttendanceOverviewPage() {
           <Inline gap="sm" align="center">
             <Button
               variant="secondary"
+              className="attendance-clay-header-btn"
               leftIcon={<BezentIcon name="sync" size={16} />}
               onClick={handleRefresh}
               disabled={loading || refreshing}
@@ -208,6 +210,7 @@ export function AttendanceOverviewPage() {
             </Button>
             <Button
               variant="secondary"
+              className="attendance-clay-header-btn"
               leftIcon={<BezentIcon name="clock" size={16} />}
               onClick={() => navigate('/hrms/attendance/daily-log')}
             >
@@ -215,6 +218,7 @@ export function AttendanceOverviewPage() {
             </Button>
             <Button
               variant="secondary"
+              className="attendance-clay-header-btn"
               leftIcon={<BezentIcon name="requests" size={16} />}
               onClick={() => navigate('/hrms/attendance/regularization')}
             >
@@ -222,6 +226,7 @@ export function AttendanceOverviewPage() {
             </Button>
             <Button
               variant="secondary"
+              className="attendance-clay-header-btn"
               leftIcon={<BezentIcon name="reports" size={16} />}
               onClick={() => navigate('/hrms/attendance/monthly-summary')}
             >
@@ -234,80 +239,91 @@ export function AttendanceOverviewPage() {
       <Stack gap="lg">
         {/* Scope and Freshness Filter Bar */}
         {data ? (
-          <Toolbar
-            left={
-              <Inline gap="md" align="center">
-                <Inline gap="xs" align="center">
-                  <Button
-                    variant="outline"
-                    size="md"
-                    onClick={() => {
-                      const d = new Date(`${selectedDate}T00:00:00`);
-                      d.setDate(d.getDate() - 1);
-                      setSelectedDate(d.toISOString().slice(0, 10));
-                    }}
-                    aria-label="Previous day"
-                  >
-                    <BezentIcon name="chevronLeft" size={14} />
-                  </Button>
-                  <Input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    aria-label="Work Date"
-                    size="md"
+          <div className="attendance-clay-toolbar">
+            <Toolbar
+              left={
+                <Inline gap="md" align="center">
+                  <Inline gap="xs" align="center">
+                    <Button
+                      variant="outline"
+                      size="md"
+                      className="attendance-clay-header-btn"
+                      onClick={() => {
+                        const d = new Date(`${selectedDate}T00:00:00`);
+                        d.setDate(d.getDate() - 1);
+                        setSelectedDate(d.toISOString().slice(0, 10));
+                      }}
+                      aria-label="Previous day"
+                    >
+                      <BezentIcon name="chevronLeft" size={14} />
+                    </Button>
+                    <Input
+                      type="date"
+                      value={selectedDate}
+                      onChange={(e) => setSelectedDate(e.target.value)}
+                      aria-label="Work Date"
+                      size="md"
+                    />
+                    <Button
+                      variant="outline"
+                      size="md"
+                      className="attendance-clay-header-btn"
+                      onClick={() => {
+                        const d = new Date(`${selectedDate}T00:00:00`);
+                        d.setDate(d.getDate() + 1);
+                        setSelectedDate(d.toISOString().slice(0, 10));
+                      }}
+                      aria-label="Next day"
+                    >
+                      <BezentIcon name="chevronRight" size={14} />
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="md"
+                      className="attendance-clay-header-btn"
+                      onClick={() => setSelectedDate(new Date().toISOString().slice(0, 10))}
+                      disabled={selectedDate === new Date().toISOString().slice(0, 10)}
+                    >
+                      Today
+                    </Button>
+                  </Inline>
+
+                  <Divider orientation="vertical" spacing="sm" />
+
+                  <Select
+                    value={trendRange}
+                    onChange={(e) => setTrendRange(e.target.value as '7d' | '30d')}
+                    aria-label="Trend Window"
+                    options={[
+                      { value: '7d', label: 'Last 7 Days' },
+                      { value: '30d', label: 'Last 30 Days' },
+                    ]}
                   />
-                  <Button
-                    variant="outline"
-                    size="md"
-                    onClick={() => {
-                      const d = new Date(`${selectedDate}T00:00:00`);
-                      d.setDate(d.getDate() + 1);
-                      setSelectedDate(d.toISOString().slice(0, 10));
-                    }}
-                    aria-label="Next day"
-                  >
-                    <BezentIcon name="chevronRight" size={14} />
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="md"
-                    onClick={() => setSelectedDate(new Date().toISOString().slice(0, 10))}
-                    disabled={selectedDate === new Date().toISOString().slice(0, 10)}
-                  >
-                    Today
-                  </Button>
                 </Inline>
-
-                <Divider orientation="vertical" spacing="sm" />
-
-                <Select
-                  value={trendRange}
-                  onChange={(e) => setTrendRange(e.target.value as '7d' | '30d')}
-                  aria-label="Trend Window"
-                  options={[
-                    { value: '7d', label: 'Last 7 Days' },
-                    { value: '30d', label: 'Last 30 Days' },
-                  ]}
-                />
-              </Inline>
-            }
-            right={
-              <Inline gap="sm" align="center">
-                {scope ? (
-                  <Badge variant="neutral">
-                    Scope: {scope.isCompanyWide ? 'Company-wide' : scope.role.toUpperCase()}
-                  </Badge>
-                ) : null}
-                <Badge variant={currentAttendanceRate >= 80 ? 'success' : 'warning'}>
-                  Attendance Rate: {currentAttendanceRate}%
-                </Badge>
-                <Badge variant="info">
-                  {data.dataFreshness === 'realtime' ? 'Live Data' : 'Cached'}
-                </Badge>
-              </Inline>
-            }
-          />
+              }
+              right={
+                <Inline gap="sm" align="center">
+                  {scope ? (
+                    <span className="attendance-clay-badge attendance-clay-badge--scope">
+                      Scope: {scope.isCompanyWide ? 'Company-wide' : scope.role.toUpperCase()}
+                    </span>
+                  ) : null}
+                  <span
+                    className={`attendance-clay-badge ${
+                      currentAttendanceRate >= 80
+                        ? 'attendance-clay-badge--rate-good'
+                        : 'attendance-clay-badge--rate-warn'
+                    }`}
+                  >
+                    Attendance Rate: {currentAttendanceRate}%
+                  </span>
+                  <span className="attendance-clay-badge attendance-clay-badge--live">
+                    {data.dataFreshness === 'realtime' ? 'Live Data' : 'Cached'}
+                  </span>
+                </Inline>
+              }
+            />
+          </div>
         ) : null}
 
         {loading ? (
@@ -327,23 +343,23 @@ export function AttendanceOverviewPage() {
           />
         ) : (
           <>
-            {/* 1. MINIMALIST ATTENDANCE COMMAND STRIP */}
-            <div className="bezent-command-strip">
-              <div className="bezent-command-strip__stats">
+            {/* 1. INFLATED 3D ATTENDANCE COMMAND STRIP */}
+            <div className="attendance-clay-strip">
+              <div className="attendance-clay-strip__stats">
                 <div
-                  className="bezent-command-stat"
+                  className="attendance-clay-stat-item"
                   onClick={() => navigate(`/hrms/attendance/daily-log?date=${selectedDate}`)}
                   role="button"
                   tabIndex={0}
                   title="View scheduled workforce"
                 >
-                  <span className="bezent-command-stat__dot bezent-command-stat__dot--blue" />
-                  <span className="bezent-command-stat__value">{totalEmployees}</span>
-                  <span className="bezent-command-stat__label">Scheduled Workforce</span>
+                  <span className="attendance-clay-dot attendance-clay-dot--blue" />
+                  <span className="attendance-clay-stat-item__value">{totalEmployees}</span>
+                  <span className="attendance-clay-stat-item__label">Scheduled Workforce</span>
                 </div>
 
                 <div
-                  className="bezent-command-stat"
+                  className="attendance-clay-stat-item"
                   onClick={() =>
                     navigate(`/hrms/attendance/daily-log?date=${selectedDate}&status=present`)
                   }
@@ -351,15 +367,15 @@ export function AttendanceOverviewPage() {
                   tabIndex={0}
                   title="View present employees"
                 >
-                  <span className="bezent-command-stat__dot bezent-command-stat__dot--green" />
-                  <span className="bezent-command-stat__value">{presentHeadcount}</span>
-                  <span className="bezent-command-stat__label">
+                  <span className="attendance-clay-dot attendance-clay-dot--green" />
+                  <span className="attendance-clay-stat-item__value">{presentHeadcount}</span>
+                  <span className="attendance-clay-stat-item__label">
                     Present ({Math.round(presentPct)}%)
                   </span>
                 </div>
 
                 <div
-                  className="bezent-command-stat"
+                  className="attendance-clay-stat-item"
                   onClick={() =>
                     navigate(`/hrms/attendance/daily-log?date=${selectedDate}&status=on_leave`)
                   }
@@ -367,25 +383,25 @@ export function AttendanceOverviewPage() {
                   tabIndex={0}
                   title="View employees on leave"
                 >
-                  <span className="bezent-command-stat__dot bezent-command-stat__dot--amber" />
-                  <span className="bezent-command-stat__value">{onLeaveCount}</span>
-                  <span className="bezent-command-stat__label">On Leave</span>
+                  <span className="attendance-clay-dot attendance-clay-dot--amber" />
+                  <span className="attendance-clay-stat-item__value">{onLeaveCount}</span>
+                  <span className="attendance-clay-stat-item__label">On Leave</span>
                 </div>
 
                 <div
-                  className="bezent-command-stat"
+                  className="attendance-clay-stat-item"
                   onClick={() => navigate('/hrms/attendance/on-duty')}
                   role="button"
                   tabIndex={0}
                   title="View on-duty employees"
                 >
-                  <span className="bezent-command-stat__dot bezent-command-stat__dot--purple" />
-                  <span className="bezent-command-stat__value">{onDutyCount}</span>
-                  <span className="bezent-command-stat__label">On-Duty / Field</span>
+                  <span className="attendance-clay-dot attendance-clay-dot--purple" />
+                  <span className="attendance-clay-stat-item__value">{onDutyCount}</span>
+                  <span className="attendance-clay-stat-item__label">On-Duty / Field</span>
                 </div>
 
                 <div
-                  className="bezent-command-stat"
+                  className="attendance-clay-stat-item"
                   onClick={() =>
                     navigate(`/hrms/attendance/daily-log?date=${selectedDate}&status=absent`)
                   }
@@ -393,13 +409,13 @@ export function AttendanceOverviewPage() {
                   tabIndex={0}
                   title="View absent employees"
                 >
-                  <span className="bezent-command-stat__dot bezent-command-stat__dot--red" />
-                  <span className="bezent-command-stat__value">{absentCount}</span>
-                  <span className="bezent-command-stat__label">Absent</span>
+                  <span className="attendance-clay-dot attendance-clay-dot--red" />
+                  <span className="attendance-clay-stat-item__value">{absentCount}</span>
+                  <span className="attendance-clay-stat-item__label">Absent</span>
                 </div>
 
                 <div
-                  className="bezent-command-stat"
+                  className="attendance-clay-stat-item"
                   onClick={() =>
                     navigate(
                       `/hrms/attendance/daily-log?date=${selectedDate}&processingState=pending_processing`,
@@ -409,17 +425,17 @@ export function AttendanceOverviewPage() {
                   tabIndex={0}
                   title="View in progress shifts"
                 >
-                  <span className="bezent-command-stat__dot bezent-command-stat__dot--blue" />
-                  <span className="bezent-command-stat__value">
+                  <span className="attendance-clay-dot attendance-clay-dot--blue" />
+                  <span className="attendance-clay-stat-item__value">
                     {pendingCount || totalEmployees}
                   </span>
-                  <span className="bezent-command-stat__label">In Progress</span>
+                  <span className="attendance-clay-stat-item__label">In Progress</span>
                 </div>
               </div>
 
               <Inline gap="xs" align="center">
                 <div
-                  className="bezent-alert-pill bezent-alert-pill--warning"
+                  className="attendance-clay-alert-pill attendance-clay-alert-pill--late"
                   onClick={() =>
                     navigate(`/hrms/attendance/daily-log?date=${selectedDate}&indicator=late`)
                   }
@@ -432,7 +448,7 @@ export function AttendanceOverviewPage() {
                   </span>
                 </div>
                 <div
-                  className="bezent-alert-pill bezent-alert-pill--danger"
+                  className="attendance-clay-alert-pill attendance-clay-alert-pill--missing"
                   onClick={() => navigate('/hrms/attendance/exceptions?type=missing_in')}
                   role="button"
                   tabIndex={0}
@@ -443,7 +459,7 @@ export function AttendanceOverviewPage() {
                   </span>
                 </div>
                 <div
-                  className="bezent-alert-pill bezent-alert-pill--neutral"
+                  className="attendance-clay-alert-pill attendance-clay-alert-pill--blocker"
                   onClick={() => navigate('/hrms/attendance/exceptions')}
                   role="button"
                   tabIndex={0}
@@ -456,29 +472,32 @@ export function AttendanceOverviewPage() {
               </Inline>
             </div>
 
-            {/* 2. 4 PRIMARY ACTION TILES (CLEAN, BOLD, ZERO PARAGRAPH SENTENCES) */}
+            {/* 2. FOUR PRIMARY 3D CLAY STATISTIC CARDS */}
             <Grid columns={4} gap="md">
-              {/* Tile 1: Regularization Queue */}
-              <div className="bezent-action-tile">
+              {/* Card 1: Regularizations — Lavender */}
+              <div className="attendance-clay-card attendance-clay-card--lavender">
                 <div>
-                  <div className="bezent-action-tile__top">
-                    <div className="bezent-action-tile__icon bezent-action-tile__icon--amber">
+                  <div className="attendance-clay-card__top">
+                    <div className="attendance-clay-card__title-group">
+                      <span className="attendance-clay-card__dot attendance-clay-card__dot--lavender" />
+                      <span className="attendance-clay-card__title">Regularizations</span>
+                    </div>
+                    <div className="attendance-clay-icon attendance-clay-icon--lavender">
                       <BezentIcon name="requests" size={18} />
                     </div>
-                    <span className="bezent-action-tile__title">Regularizations</span>
                   </div>
-                  <div className="bezent-action-tile__mid">
-                    <span className="bezent-action-tile__count">
+                  <div className="attendance-clay-card__mid">
+                    <span className="attendance-clay-card__count">
                       {actionQueue?.find((q) => q.actionType === 'pending_regularization')
                         ?.authorizedPendingCount ?? data.pendingRegularizationCount}
                     </span>
-                    <Badge variant="warning" size="sm">
+                    <span className="attendance-clay-pill attendance-clay-pill--warning">
                       Pending
-                    </Badge>
+                    </span>
                   </div>
                 </div>
-                <div className="bezent-action-tile__bottom">
-                  <span className="bezent-action-tile__tag">
+                <div className="attendance-clay-card__bottom">
+                  <span className="attendance-clay-card__tag">
                     {actionQueue?.find((q) => q.actionType === 'pending_regularization')
                       ?.oldestPendingAgeDays
                       ? `Oldest: ${
@@ -489,7 +508,7 @@ export function AttendanceOverviewPage() {
                   </span>
                   <Button
                     size="sm"
-                    variant="outline"
+                    className="attendance-clay-btn"
                     onClick={() => navigate('/hrms/attendance/regularization')}
                   >
                     Triage →
@@ -497,34 +516,35 @@ export function AttendanceOverviewPage() {
                 </div>
               </div>
 
-              {/* Tile 2: Unresolved Exceptions */}
-              <div className="bezent-action-tile">
+              {/* Card 2: Exceptions — Peach */}
+              <div className="attendance-clay-card attendance-clay-card--peach">
                 <div>
-                  <div className="bezent-action-tile__top">
-                    <div className="bezent-action-tile__icon bezent-action-tile__icon--red">
+                  <div className="attendance-clay-card__top">
+                    <div className="attendance-clay-card__title-group">
+                      <span className="attendance-clay-card__dot attendance-clay-card__dot--peach" />
+                      <span className="attendance-clay-card__title">Exceptions</span>
+                    </div>
+                    <div className="attendance-clay-icon attendance-clay-icon--peach">
                       <BezentIcon name="warning" size={18} />
                     </div>
-                    <span className="bezent-action-tile__title">Exceptions</span>
                   </div>
-                  <div className="bezent-action-tile__mid">
-                    <span className="bezent-action-tile__count">
+                  <div className="attendance-clay-card__mid">
+                    <span className="attendance-clay-card__count">
                       {actionQueue?.find((q) => q.actionType === 'unresolved_exceptions')
                         ?.authorizedPendingCount ?? 0}
                     </span>
-                    <Badge variant="danger" size="sm">
-                      Open
-                    </Badge>
+                    <span className="attendance-clay-pill attendance-clay-pill--danger">Open</span>
                   </div>
                 </div>
-                <div className="bezent-action-tile__bottom">
-                  <span className="bezent-action-tile__tag">
+                <div className="attendance-clay-card__bottom">
+                  <span className="attendance-clay-card__tag">
                     {blockingExceptionsCount > 0
                       ? `${blockingExceptionsCount} Blocking Payroll`
                       : 'Policy Deviations'}
                   </span>
                   <Button
                     size="sm"
-                    variant="outline"
+                    className="attendance-clay-btn"
                     onClick={() => navigate('/hrms/attendance/exceptions')}
                   >
                     Triage →
@@ -532,30 +552,39 @@ export function AttendanceOverviewPage() {
                 </div>
               </div>
 
-              {/* Tile 3: Missing Punches */}
-              <div className="bezent-action-tile">
+              {/* Card 3: Missing Punches — Pink */}
+              <div className="attendance-clay-card attendance-clay-card--pink">
                 <div>
-                  <div className="bezent-action-tile__top">
-                    <div className="bezent-action-tile__icon bezent-action-tile__icon--rose">
+                  <div className="attendance-clay-card__top">
+                    <div className="attendance-clay-card__title-group">
+                      <span className="attendance-clay-card__dot attendance-clay-card__dot--pink" />
+                      <span className="attendance-clay-card__title">Missing Punches</span>
+                    </div>
+                    <div className="attendance-clay-icon attendance-clay-icon--pink">
                       <BezentIcon name="clock" size={18} />
                     </div>
-                    <span className="bezent-action-tile__title">Missing Punches</span>
                   </div>
-                  <div className="bezent-action-tile__mid">
-                    <span className="bezent-action-tile__count">
+                  <div className="attendance-clay-card__mid">
+                    <span className="attendance-clay-card__count">
                       {actionQueue?.find((q) => q.actionType === 'missing_punch_issues')
                         ?.authorizedPendingCount ?? missingPunchCount}
                     </span>
-                    <Badge variant={missingPunchCount > 0 ? 'danger' : 'neutral'} size="sm">
+                    <span
+                      className={`attendance-clay-pill ${
+                        missingPunchCount > 0
+                          ? 'attendance-clay-pill--danger'
+                          : 'attendance-clay-pill--neutral'
+                      }`}
+                    >
                       Action
-                    </Badge>
+                    </span>
                   </div>
                 </div>
-                <div className="bezent-action-tile__bottom">
-                  <span className="bezent-action-tile__tag">Single-Swipe Records</span>
+                <div className="attendance-clay-card__bottom">
+                  <span className="attendance-clay-card__tag">Single-Swipe Records</span>
                   <Button
                     size="sm"
-                    variant="outline"
+                    className="attendance-clay-btn"
                     onClick={() => navigate('/hrms/attendance/daily-log?isMissingPunch=true')}
                   >
                     Resolve →
@@ -563,36 +592,39 @@ export function AttendanceOverviewPage() {
                 </div>
               </div>
 
-              {/* Tile 4: Monthly Reviews & Blockers */}
-              <div className="bezent-action-tile">
+              {/* Card 4: Monthly Sign-Off — Blue */}
+              <div className="attendance-clay-card attendance-clay-card--blue">
                 <div>
-                  <div className="bezent-action-tile__top">
-                    <div className="bezent-action-tile__icon bezent-action-tile__icon--blue">
+                  <div className="attendance-clay-card__top">
+                    <div className="attendance-clay-card__title-group">
+                      <span className="attendance-clay-card__dot attendance-clay-card__dot--blue" />
+                      <span className="attendance-clay-card__title">Monthly Sign-Off</span>
+                    </div>
+                    <div className="attendance-clay-icon attendance-clay-icon--blue">
                       <BezentIcon name="reports" size={18} />
                     </div>
-                    <span className="bezent-action-tile__title">Monthly Sign-Off</span>
                   </div>
-                  <div className="bezent-action-tile__mid">
-                    <span className="bezent-action-tile__count">
+                  <div className="attendance-clay-card__mid">
+                    <span className="attendance-clay-card__count">
                       {actionQueue?.find((q) => q.actionType === 'pending_monthly_review')
                         ?.authorizedPendingCount ??
                         monthlyReadiness?.needsReviewCount ??
                         0}
                     </span>
-                    <Badge variant="info" size="sm">
+                    <span className="attendance-clay-pill attendance-clay-pill--info">
                       In Review
-                    </Badge>
+                    </span>
                   </div>
                 </div>
-                <div className="bezent-action-tile__bottom">
-                  <span className="bezent-action-tile__tag">
+                <div className="attendance-clay-card__bottom">
+                  <span className="attendance-clay-card__tag">
                     {monthlyReadiness
                       ? `${monthlyReadiness.readyCount} Ready · ${monthlyReadiness.blockedCount} Blocked`
                       : 'Payroll Cutoff'}
                   </span>
                   <Button
                     size="sm"
-                    variant="outline"
+                    className="attendance-clay-btn"
                     onClick={() =>
                       navigate(
                         `/hrms/attendance/monthly-summary?month=${
@@ -607,15 +639,16 @@ export function AttendanceOverviewPage() {
               </div>
             </Grid>
 
-            {/* 3. TWO CLEAN BALANCED PANELS */}
+            {/* 3. TWO BALANCED 3D CLAY PANELS */}
             <Grid columns={2} gap="lg">
-              {/* Left Panel: Department Attendance (Pie Chart) */}
-              <Card padding="md">
+              {/* Left Panel: Department Attendance */}
+              <Card padding="md" className="attendance-clay-panel">
                 <CardHeader>
                   <CardTitle>Department Attendance</CardTitle>
                   <Button
                     size="sm"
                     variant="ghost"
+                    className="attendance-clay-header-btn"
                     onClick={() => navigate(`/hrms/attendance/daily-log?date=${selectedDate}`)}
                   >
                     View All
@@ -640,7 +673,7 @@ export function AttendanceOverviewPage() {
 
                       return (
                         <div className="bezent-dept-pie-layout">
-                          {/* Left: SVG Pie/Donut Chart */}
+                          {/* Left: SVG Clay Donut Chart */}
                           <div className="bezent-dept-pie-chart-wrap">
                             <svg
                               width={170}
@@ -650,13 +683,13 @@ export function AttendanceOverviewPage() {
                               role="img"
                               aria-label="Department Attendance Distribution Pie Chart"
                             >
-                              {/* SVG Donut */}
+                              {/* Soft Clay Inset Ring */}
                               <circle
                                 cx={85}
                                 cy={85}
                                 r={radius}
                                 fill="transparent"
-                                stroke="var(--border-subtle, #e2e8f0)"
+                                stroke="#e8edf7"
                                 strokeWidth={strokeWidth}
                               />
                               {totalDeptPresent > 0 &&
@@ -697,13 +730,15 @@ export function AttendanceOverviewPage() {
                                     </circle>
                                   );
                                 })}
+                              {/* 3D Elevated Center Disc */}
+                              <circle cx={85} cy={85} r={46} className="attendance-clay-donut-center" />
                               {/* Center Total Text */}
                               <text
                                 x="50%"
                                 y="46%"
                                 dominantBaseline="middle"
                                 textAnchor="middle"
-                                fill="var(--text-primary, #0f172a)"
+                                fill="#222a3b"
                                 fontSize="22"
                                 fontWeight="800"
                               >
@@ -714,16 +749,16 @@ export function AttendanceOverviewPage() {
                                 y="60%"
                                 dominantBaseline="middle"
                                 textAnchor="middle"
-                                fill="var(--text-muted, #64748b)"
-                                fontSize="10"
-                                fontWeight="600"
+                                fill="#68758f"
+                                fontSize="10.5"
+                                fontWeight="700"
                               >
                                 Present FTE
                               </text>
                             </svg>
                           </div>
 
-                          {/* Right: Department Attendance Breakdown List */}
+                          {/* Right: Department Attendance Elevated Pastel Clay Rows */}
                           <div className="bezent-dept-pie-legend">
                             {deptItems.map((dept, idx) => {
                               const rate = dept.attendanceRate ?? 0;
@@ -732,7 +767,9 @@ export function AttendanceOverviewPage() {
                               return (
                                 <div
                                   key={dept.departmentId}
-                                  className="bezent-dept-pie-legend-row"
+                                  className={`attendance-clay-dept-row attendance-clay-dept-row--${
+                                    idx % 9
+                                  }`}
                                   onClick={() =>
                                     navigate(
                                       `/hrms/attendance/daily-log?departmentId=${encodeURIComponent(
@@ -774,8 +811,8 @@ export function AttendanceOverviewPage() {
                 </CardBody>
               </Card>
 
-              {/* Right Panel: Attendance Trends (Column Trend Chart) */}
-              <Card padding="md">
+              {/* Right Panel: Attendance Trends (7 Days) */}
+              <Card padding="md" className="attendance-clay-panel">
                 <CardHeader>
                   <CardTitle>
                     Attendance Trends ({trends?.range === '30d' ? '30 Days' : '7 Days'})
@@ -793,8 +830,8 @@ export function AttendanceOverviewPage() {
                       description="No trend history available for current period."
                     />
                   ) : (
-                    <div className="bezent-trend-chart-card">
-                      <div className="bezent-trend-columns">
+                    <div className="attendance-clay-trend-card">
+                      <div className="attendance-clay-trend-columns">
                         {trendItems.map((item) => {
                           const rate = item.attendanceRate ?? 0;
                           const isGood = rate >= 80;
@@ -804,7 +841,7 @@ export function AttendanceOverviewPage() {
                           return (
                             <div
                               key={item.date}
-                              className="bezent-trend-col"
+                              className="attendance-clay-trend-col"
                               title={`${item.date} (${item.dayOfWeek}): ${rate}% attendance | Present: ${
                                 item.presentHeadcount ?? Math.ceil(item.presentEquivalentDays)
                               }/${
@@ -814,10 +851,10 @@ export function AttendanceOverviewPage() {
                                 navigate(`/hrms/attendance/daily-log?date=${item.date}`)
                               }
                             >
-                              <span className="bezent-trend-col__rate">
+                              <span className="attendance-clay-trend-col__rate">
                                 {item.attendanceRate !== null ? `${rate}%` : '—'}
                               </span>
-                              <div className="bezent-trend-col__bar-wrap">
+                              <div className="attendance-clay-trend-col__bar-wrap">
                                 <svg
                                   width="100%"
                                   height="100"
@@ -832,8 +869,8 @@ export function AttendanceOverviewPage() {
                                       x2="0"
                                       y2="1"
                                     >
-                                      <stop offset="0%" stopColor="#10b981" />
-                                      <stop offset="100%" stopColor="#047857" />
+                                      <stop offset="0%" stopColor="#34d399" />
+                                      <stop offset="100%" stopColor="#059669" />
                                     </linearGradient>
                                     <linearGradient
                                       id={`trendGradWarn-${item.date}`}
@@ -842,8 +879,8 @@ export function AttendanceOverviewPage() {
                                       x2="0"
                                       y2="1"
                                     >
-                                      <stop offset="0%" stopColor="#f59e0b" />
-                                      <stop offset="100%" stopColor="#b45309" />
+                                      <stop offset="0%" stopColor="#fbbf24" />
+                                      <stop offset="100%" stopColor="#d97706" />
                                     </linearGradient>
                                   </defs>
                                   <rect
@@ -851,7 +888,7 @@ export function AttendanceOverviewPage() {
                                     y={100 - barHeight}
                                     width="28"
                                     height={barHeight}
-                                    rx="3"
+                                    rx="6"
                                     fill={
                                       isGood
                                         ? `url(#trendGradGood-${item.date})`
@@ -892,9 +929,9 @@ export function AttendanceOverviewPage() {
               </Card>
             </Grid>
 
-            {/* 4. MONTHLY PAYROLL READINESS */}
+            {/* 4. MONTHLY PAYROLL READINESS — 3 PASTEL CLAY PANELS */}
             {monthlyReadiness && monthlyReadiness.isAuthorized ? (
-              <Card padding="md">
+              <Card padding="md" className="attendance-clay-panel">
                 <CardHeader>
                   <CardTitle>
                     Monthly Payroll Readiness ({monthlyReadiness?.month || selectedDate.slice(0, 7)}
@@ -903,6 +940,7 @@ export function AttendanceOverviewPage() {
                   <Button
                     size="sm"
                     variant="ghost"
+                    className="attendance-clay-header-btn"
                     onClick={() =>
                       navigate(
                         `/hrms/attendance/monthly-summary?month=${
@@ -917,41 +955,44 @@ export function AttendanceOverviewPage() {
                 <CardBody>
                   <Stack gap="md">
                     <Grid columns={3} gap="sm">
-                      <div className="bezent-pulse-stat bezent-pulse-stat--static">
-                        <span className="bezent-pulse-stat__label">
+                      {/* Ready Panel — Mint */}
+                      <div className="attendance-clay-readiness-card attendance-clay-readiness-card--mint">
+                        <span className="attendance-clay-readiness-card__label">
                           <span className="bezent-pulse-stat__dot bezent-pulse-stat__dot--green" />
                           Ready
                         </span>
-                        <span className="bezent-pulse-stat__value">
+                        <span className="attendance-clay-readiness-card__value">
                           {monthlyReadiness.readyCount}
                         </span>
-                        <span className="bezent-pulse-stat__caption">Unblocked</span>
+                        <span className="attendance-clay-readiness-card__caption">Unblocked</span>
                       </div>
 
-                      <div className="bezent-pulse-stat bezent-pulse-stat--static">
-                        <span className="bezent-pulse-stat__label">
+                      {/* Review Panel — Peach */}
+                      <div className="attendance-clay-readiness-card attendance-clay-readiness-card--peach">
+                        <span className="attendance-clay-readiness-card__label">
                           <span className="bezent-pulse-stat__dot bezent-pulse-stat__dot--amber" />
                           Review
                         </span>
-                        <span className="bezent-pulse-stat__value">
+                        <span className="attendance-clay-readiness-card__value">
                           {monthlyReadiness.needsReviewCount + monthlyReadiness.blockedCount}
                         </span>
-                        <span className="bezent-pulse-stat__caption">
+                        <span className="attendance-clay-readiness-card__caption">
                           {monthlyReadiness.blockedCount > 0
                             ? `${monthlyReadiness.blockedCount} Blocked`
                             : 'In Review'}
                         </span>
                       </div>
 
-                      <div className="bezent-pulse-stat bezent-pulse-stat--static">
-                        <span className="bezent-pulse-stat__label">
+                      {/* Locked Panel — Lavender */}
+                      <div className="attendance-clay-readiness-card attendance-clay-readiness-card--lavender">
+                        <span className="attendance-clay-readiness-card__label">
                           <span className="bezent-pulse-stat__dot bezent-pulse-stat__dot--blue" />
                           Locked
                         </span>
-                        <span className="bezent-pulse-stat__value">
+                        <span className="attendance-clay-readiness-card__value">
                           {monthlyReadiness.lockedCount}
                         </span>
-                        <span className="bezent-pulse-stat__caption">
+                        <span className="attendance-clay-readiness-card__caption">
                           {monthlyReadiness.totalInScope > 0
                             ? `${Math.round(
                                 (monthlyReadiness.lockedCount / monthlyReadiness.totalInScope) *
@@ -975,11 +1016,11 @@ export function AttendanceOverviewPage() {
                             : '0%'}
                         </span>
                       </div>
-                      <div className="bezent-segmented-bar">
+                      <div className="attendance-clay-progress-track">
                         <svg
                           width="100%"
-                          height="10"
-                          viewBox="0 0 100 10"
+                          height="12"
+                          viewBox="0 0 100 12"
                           preserveAspectRatio="none"
                         >
                           {(() => {
@@ -990,14 +1031,21 @@ export function AttendanceOverviewPage() {
                             return (
                               <>
                                 {readyW > 0 && (
-                                  <rect x={0} y={0} width={readyW} height={10} fill="#10b981" />
+                                  <rect
+                                    x={0}
+                                    y={0}
+                                    width={readyW}
+                                    height={12}
+                                    rx={readyW >= 100 ? 6 : 0}
+                                    fill="#10b981"
+                                  />
                                 )}
                                 {reviewW > 0 && (
                                   <rect
                                     x={readyW}
                                     y={0}
                                     width={reviewW}
-                                    height={10}
+                                    height={12}
                                     fill="#f59e0b"
                                   />
                                 )}
@@ -1006,7 +1054,8 @@ export function AttendanceOverviewPage() {
                                     x={readyW + reviewW}
                                     y={0}
                                     width={blockedW}
-                                    height={10}
+                                    height={12}
+                                    rx={readyW + reviewW + blockedW >= 100 ? 6 : 0}
                                     fill="#ef4444"
                                   />
                                 )}

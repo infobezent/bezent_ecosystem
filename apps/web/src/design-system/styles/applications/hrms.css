@@ -5366,3 +5366,754 @@
 [data-theme='dark'] .ess-profile-info-value {
   color: #f4f4f5;
 }
+
+/* ==========================================================================
+   BEZENT HRMS ATTENDANCE OVERVIEW — PREMIUM 3D CLAYMORPHISM SYSTEM
+   Light pastel palette, soft ambient shadows, inner highlights, floating icons,
+   and inflated 3D surfaces (Inter typography with high contrast navy/charcoal).
+   ========================================================================== */
+
+/* ── Page Canvas Atmosphere ── */
+.attendance-clay-overview {
+  background-color: #ffffff;
+  font-family: var(--font-family-base, 'Inter', -apple-system, BlinkMacSystemFont, sans-serif);
+  color: #252b3b;
+}
+
+/* ── Clay Header Styling ── */
+.attendance-clay-header .bezent-page-header__eyebrow {
+  color: #6366f1 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  font-size: 11.5px !important;
+  text-transform: uppercase !important;
+}
+
+.attendance-clay-header .bezent-page-header__title {
+  color: #222a3b !important;
+  font-weight: 800 !important;
+  font-size: 28px !important;
+  letter-spacing: -0.025em !important;
+}
+
+.attendance-clay-header .bezent-page-header__subtitle {
+  color: #68758f !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+/* ── Clay Header Action Buttons ── */
+.attendance-clay-header-btn {
+  background: linear-gradient(135deg, #ffffff 0%, #f1f4fb 100%) !important;
+  color: #252b3b !important;
+  border: none !important;
+  border-radius: 14px !important;
+  padding: 8px 16px !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  box-shadow:
+    0 4px 12px -2px rgba(37, 43, 59, 0.08),
+    0 2px 4px 0 rgba(37, 43, 59, 0.03),
+    inset 1px 2px 3px rgba(255, 255, 255, 0.95),
+    inset -1px -2px 3px rgba(37, 43, 59, 0.05) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.attendance-clay-header-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #ffffff 0%, #e8f0fe 100%) !important;
+  box-shadow:
+    0 8px 18px -3px rgba(37, 43, 59, 0.12),
+    0 3px 6px 0 rgba(37, 43, 59, 0.04),
+    inset 1px 2px 3px rgba(255, 255, 255, 1),
+    inset -1px -2px 3px rgba(37, 43, 59, 0.06) !important;
+}
+
+.attendance-clay-header-btn:active:not(:disabled) {
+  transform: translateY(1px) scale(0.98);
+  box-shadow:
+    0 2px 6px -1px rgba(37, 43, 59, 0.08),
+    inset 0 2px 4px rgba(37, 43, 59, 0.08) !important;
+}
+
+/* ── Clay Date Filter & Controls Toolbar ── */
+.attendance-clay-toolbar {
+  background: linear-gradient(135deg, #ffffff 0%, #f6f8fd 100%);
+  border: none !important;
+  border-radius: 20px;
+  padding: 10px 18px;
+  box-shadow:
+    0 10px 24px -4px rgba(37, 43, 59, 0.06),
+    0 2px 6px -1px rgba(37, 43, 59, 0.03),
+    inset 2px 3px 5px rgba(255, 255, 255, 0.95),
+    inset -2px -3px 6px rgba(37, 43, 59, 0.03);
+}
+
+.attendance-clay-toolbar .bezent-toolbar {
+  background: transparent;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+}
+
+.attendance-clay-toolbar input[type='date'],
+.attendance-clay-toolbar .bezent-input {
+  background: #f1f4fb !important;
+  border: 1px solid #dce4f2 !important;
+  border-radius: 12px !important;
+  color: #252b3b !important;
+  font-weight: 600 !important;
+  box-shadow: inset 0 2px 4px rgba(37, 43, 59, 0.06) !important;
+  padding: 6px 12px !important;
+}
+
+.attendance-clay-toolbar select,
+.attendance-clay-toolbar .bezent-select {
+  background: #f1f4fb !important;
+  border: 1px solid #dce4f2 !important;
+  border-radius: 12px !important;
+  color: #252b3b !important;
+  font-weight: 600 !important;
+  box-shadow:
+    0 2px 6px -1px rgba(37, 43, 59, 0.05),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+  padding: 6px 12px !important;
+}
+
+/* Floating Clay Badges */
+.attendance-clay-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  border: none !important;
+  box-shadow:
+    0 4px 10px -2px rgba(37, 43, 59, 0.06),
+    inset 1px 2px 3px rgba(255, 255, 255, 0.9),
+    inset -1px -1px 2px rgba(37, 43, 59, 0.04);
+}
+
+.attendance-clay-badge--scope {
+  background: linear-gradient(135deg, #f0f4fc 0%, #e2eaf7 100%);
+  color: #475569;
+}
+
+.attendance-clay-badge--rate-good {
+  background: linear-gradient(135deg, #ebf9f2 0%, #c8f0dc 100%);
+  color: #0d7048;
+}
+
+.attendance-clay-badge--rate-warn {
+  background: linear-gradient(135deg, #fff4ec 0%, #ffdcc2 100%);
+  color: #b45309;
+}
+
+.attendance-clay-badge--live {
+  background: linear-gradient(135deg, #edf5ff 0%, #cde7ff 100%);
+  color: #1e40af;
+}
+
+/* ── 1. Attendance Summary Bar (Inflated 3D Clay Capsule) ── */
+.attendance-clay-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  background: linear-gradient(135deg, #ffffff 0%, #f7f9fd 100%) !important;
+  border: none !important;
+  border-radius: 22px !important;
+  box-shadow:
+    0 12px 28px -6px rgba(37, 43, 59, 0.07),
+    0 4px 10px -2px rgba(37, 43, 59, 0.03),
+    inset 2px 3px 5px 0 rgba(255, 255, 255, 0.95),
+    inset -3px -4px 8px 0 rgba(37, 43, 59, 0.04) !important;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.attendance-clay-strip__stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.attendance-clay-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 14px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.attendance-clay-stat-item:hover {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 4px 12px -2px rgba(37, 43, 59, 0.06),
+    inset 0 1px 2px rgba(255, 255, 255, 0.95);
+  transform: translateY(-1px);
+}
+
+.attendance-clay-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  box-shadow:
+    0 3px 6px -1px rgba(37, 43, 59, 0.2),
+    inset 0 1px 2px rgba(255, 255, 255, 0.9),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.attendance-clay-dot--blue {
+  background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
+}
+.attendance-clay-dot--green {
+  background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+}
+.attendance-clay-dot--amber {
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+}
+.attendance-clay-dot--purple {
+  background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+}
+.attendance-clay-dot--red {
+  background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+}
+
+.attendance-clay-stat-item__value {
+  font-size: 21px;
+  font-weight: 800;
+  color: #222a3b;
+  letter-spacing: -0.02em;
+}
+
+.attendance-clay-stat-item__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #68758f;
+}
+
+/* Clay Alert Pills */
+.attendance-clay-alert-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow:
+    0 4px 12px -2px rgba(37, 43, 59, 0.08),
+    inset 1px 2px 3px rgba(255, 255, 255, 0.95),
+    inset -1px -2px 3px rgba(37, 43, 59, 0.05);
+}
+
+.attendance-clay-alert-pill:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 18px -3px rgba(37, 43, 59, 0.12),
+    inset 1px 2px 3px rgba(255, 255, 255, 1);
+}
+
+.attendance-clay-alert-pill--late {
+  background: linear-gradient(135deg, #fff7ed 0%, #ffdcc2 100%);
+  color: #b45309;
+}
+.attendance-clay-alert-pill--missing {
+  background: linear-gradient(135deg, #fff1f2 0%, #ffe0eb 100%);
+  color: #be123c;
+}
+.attendance-clay-alert-pill--blocker {
+  background: linear-gradient(135deg, #f5f3ff 0%, #e9e1ff 100%);
+  color: #5b21b6;
+}
+
+/* ── 2. Four Primary 3D Statistic Cards (Compact Borderless 3D Clay Objects) ── */
+.attendance-clay-card {
+  border-radius: 20px !important;
+  padding: 14px 18px 12px 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  border: none !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.attendance-clay-card:hover {
+  transform: translateY(-3px) !important;
+}
+
+/* Card 1: Lavender (Matching Total Candidates in reference) */
+.attendance-clay-card--lavender {
+  background: linear-gradient(145deg, #f3ebff 0%, #e6d7ff 100%) !important;
+  box-shadow:
+    0 10px 20px -4px rgba(160, 125, 230, 0.28),
+    0 3px 6px -2px rgba(160, 125, 230, 0.16),
+    inset 2.5px 2.5px 5px rgba(255, 255, 255, 0.95),
+    inset -2.5px -3px 6px rgba(150, 110, 220, 0.26) !important;
+}
+
+.attendance-clay-card--lavender:hover {
+  box-shadow:
+    0 14px 26px -4px rgba(160, 125, 230, 0.38),
+    0 5px 10px -2px rgba(160, 125, 230, 0.22),
+    inset 2.5px 2.5px 5px rgba(255, 255, 255, 1),
+    inset -2.5px -3px 6px rgba(150, 110, 220, 0.3) !important;
+}
+
+/* Card 2: Peach (Exceptions) */
+.attendance-clay-card--peach {
+  background: linear-gradient(145deg, #fff3ea 0%, #fedecb 100%) !important;
+  box-shadow:
+    0 10px 20px -4px rgba(240, 140, 95, 0.26),
+    0 3px 6px -2px rgba(240, 140, 95, 0.14),
+    inset 2.5px 2.5px 5px rgba(255, 255, 255, 0.95),
+    inset -2.5px -3px 6px rgba(220, 110, 60, 0.24) !important;
+}
+
+.attendance-clay-card--peach:hover {
+  box-shadow:
+    0 14px 26px -4px rgba(240, 140, 95, 0.36),
+    0 5px 10px -2px rgba(240, 140, 95, 0.2),
+    inset 2.5px 2.5px 5px rgba(255, 255, 255, 1),
+    inset -2.5px -3px 6px rgba(220, 110, 60, 0.28) !important;
+}
+
+/* Card 3: Pink (Missing Punches) */
+.attendance-clay-card--pink {
+  background: linear-gradient(145deg, #fff0f5 0%, #fcd9e5 100%) !important;
+  box-shadow:
+    0 10px 20px -4px rgba(235, 115, 155, 0.26),
+    0 3px 6px -2px rgba(235, 115, 155, 0.14),
+    inset 2.5px 2.5px 5px rgba(255, 255, 255, 0.95),
+    inset -2.5px -3px 6px rgba(215, 80, 120, 0.24) !important;
+}
+
+.attendance-clay-card--pink:hover {
+  box-shadow:
+    0 14px 26px -4px rgba(235, 115, 155, 0.36),
+    0 5px 10px -2px rgba(235, 115, 155, 0.2),
+    inset 2.5px 2.5px 5px rgba(255, 255, 255, 1),
+    inset -2.5px -3px 6px rgba(215, 80, 120, 0.28) !important;
+}
+
+/* Card 4: Blue (Matching In Pipeline in reference) */
+.attendance-clay-card--blue {
+  background: linear-gradient(145deg, #edf5ff 0%, #d8ebff 100%) !important;
+  box-shadow:
+    0 10px 20px -4px rgba(96, 165, 250, 0.28),
+    0 3px 6px -2px rgba(96, 165, 250, 0.16),
+    inset 2.5px 2.5px 5px rgba(255, 255, 255, 0.95),
+    inset -2.5px -3px 6px rgba(60, 130, 230, 0.26) !important;
+}
+
+.attendance-clay-card--blue:hover {
+  box-shadow:
+    0 14px 26px -4px rgba(96, 165, 250, 0.38),
+    0 5px 10px -2px rgba(96, 165, 250, 0.22),
+    inset 2.5px 2.5px 5px rgba(255, 255, 255, 1),
+    inset -2.5px -3px 6px rgba(60, 130, 230, 0.3) !important;
+}
+
+.attendance-clay-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.attendance-clay-card__title-group {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.attendance-clay-card__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.attendance-clay-card__dot--lavender {
+  background: #7c3aed;
+}
+.attendance-clay-card__dot--peach {
+  background: #ea580c;
+}
+.attendance-clay-card__dot--pink {
+  background: #e11d48;
+}
+.attendance-clay-card__dot--blue {
+  background: #2563eb;
+}
+
+/* 3D Embossed Squircle Icon Button (Matching Screenshot) */
+.attendance-clay-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: none !important;
+  box-shadow:
+    0 3px 6px -1px rgba(0, 0, 0, 0.08),
+    inset 1.5px 1.5px 2.5px rgba(255, 255, 255, 0.9),
+    inset -1.5px -1.5px 3px rgba(0, 0, 0, 0.08) !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.attendance-clay-card:hover .attendance-clay-icon {
+  transform: scale(1.05);
+}
+
+.attendance-clay-icon--lavender {
+  background: linear-gradient(135deg, #f5efff 0%, #e0d0fe 100%) !important;
+  color: #5b21b6 !important;
+}
+.attendance-clay-icon--peach {
+  background: linear-gradient(135deg, #fff3ea 0%, #fed8c2 100%) !important;
+  color: #9a3412 !important;
+}
+.attendance-clay-icon--pink {
+  background: linear-gradient(135deg, #fff0f5 0%, #fcd2e1 100%) !important;
+  color: #9f1239 !important;
+}
+.attendance-clay-icon--blue {
+  background: linear-gradient(135deg, #edf5ff 0%, #cfe3fe 100%) !important;
+  color: #1e40af !important;
+}
+
+.attendance-clay-card__title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #252b3b;
+  letter-spacing: -0.01em;
+}
+
+.attendance-clay-card__mid {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 1px;
+}
+
+.attendance-clay-card__count {
+  font-size: 28px;
+  font-weight: 800;
+  color: #222a3b;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+/* Clay Status Pill */
+.attendance-clay-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  border: none !important;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.05),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.85);
+}
+
+.attendance-clay-pill--warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+.attendance-clay-pill--danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.attendance-clay-pill--info {
+  background: #dbeafe;
+  color: #1e40af;
+}
+.attendance-clay-pill--neutral {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.attendance-clay-card__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.attendance-clay-card__tag {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #475569;
+}
+
+/* Tactile 3D Clay Button */
+.attendance-clay-btn {
+  background: #ffffff !important;
+  color: #222a3b !important;
+  border: none !important;
+  border-radius: 10px !important;
+  padding: 4px 12px !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  box-shadow:
+    0 3px 8px -2px rgba(37, 43, 59, 0.12),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.95),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.06) !important;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.attendance-clay-btn:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 5px 12px -2px rgba(37, 43, 59, 0.16),
+    inset 1px 1px 2px rgba(255, 255, 255, 1) !important;
+}
+
+.attendance-clay-btn:active {
+  transform: translateY(1px) scale(0.97);
+  box-shadow:
+    0 1px 3px rgba(37, 43, 59, 0.08),
+    inset 0 2px 4px rgba(37, 43, 59, 0.08) !important;
+}
+
+/* ── 3. Panels (Department Attendance & Attendance Trends) ── */
+.attendance-clay-panel {
+  background: linear-gradient(145deg, #ffffff 0%, #f6f8fd 100%) !important;
+  border: none !important;
+  border-radius: 22px !important;
+  box-shadow:
+    0 12px 28px -6px rgba(37, 43, 59, 0.07),
+    0 4px 10px -2px rgba(37, 43, 59, 0.03),
+    inset 2px 3px 5px 0 rgba(255, 255, 255, 0.95),
+    inset -3px -4px 8px 0 rgba(37, 43, 59, 0.03) !important;
+  overflow: hidden;
+}
+
+.attendance-clay-panel .bezent-card-header {
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(37, 43, 59, 0.05);
+}
+
+.attendance-clay-panel .bezent-card-title {
+  font-size: 17px !important;
+  font-weight: 800 !important;
+  color: #222a3b !important;
+  letter-spacing: -0.015em;
+}
+
+/* Department Donut Center Disc */
+.attendance-clay-donut-center {
+  fill: #ffffff;
+  filter: drop-shadow(0 4px 10px rgba(37, 43, 59, 0.08));
+}
+
+/* Department Rows as Elevated Pastel Clay Elements */
+.attendance-clay-dept-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 14px !important;
+  border-radius: 14px !important;
+  border: none !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  cursor: pointer;
+}
+
+/* All department rows unified to a balanced soft pastel clay colour */
+.attendance-clay-dept-row,
+.attendance-clay-dept-row--0,
+.attendance-clay-dept-row--1,
+.attendance-clay-dept-row--2,
+.attendance-clay-dept-row--3,
+.attendance-clay-dept-row--4,
+.attendance-clay-dept-row--5,
+.attendance-clay-dept-row--6,
+.attendance-clay-dept-row--7,
+.attendance-clay-dept-row--8 {
+  background: linear-gradient(135deg, #edf4fc 0%, #d8e8f8 100%) !important;
+  border: none !important;
+  box-shadow:
+    0 4px 10px -2px rgba(37, 43, 59, 0.06),
+    inset 2px 2px 4px rgba(255, 255, 255, 0.95),
+    inset -2px -2px 4px rgba(37, 43, 59, 0.04) !important;
+}
+
+.attendance-clay-dept-row:hover {
+  transform: translateX(3px) translateY(-1px) !important;
+  background: linear-gradient(135deg, #e2eefb 0%, #cde2f7 100%) !important;
+  box-shadow:
+    0 8px 16px -3px rgba(37, 43, 59, 0.1),
+    inset 1px 2px 3px rgba(255, 255, 255, 1) !important;
+}
+
+.attendance-clay-dept-row .bezent-dept-pie-legend-name {
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  color: #222a3b !important;
+}
+
+.attendance-clay-dept-row .bezent-dept-pie-legend-count {
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  color: #475569 !important;
+}
+
+/* ── 4. Attendance Trends Clay Chart ── */
+.attendance-clay-trend-card {
+  padding: 8px 4px;
+}
+
+.attendance-clay-trend-columns {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  align-items: end;
+  height: 175px;
+  padding: 10px 6px;
+  border-bottom: 1px solid rgba(37, 43, 59, 0.06);
+}
+
+.attendance-clay-trend-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  justify-content: flex-end;
+  padding: 6px 3px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.attendance-clay-trend-col:hover {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 12px -2px rgba(37, 43, 59, 0.06);
+  transform: translateY(-2px);
+}
+
+.attendance-clay-trend-col__bar-wrap {
+  width: 100%;
+  max-width: 32px;
+  height: 105px;
+  display: flex;
+  align-items: flex-end;
+  background: #edf1f8;
+  border-radius: 10px;
+  box-shadow:
+    inset 0 3px 6px rgba(37, 43, 59, 0.08),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+  position: relative;
+}
+
+.attendance-clay-trend-col__rate {
+  font-size: 12px;
+  font-weight: 800;
+  color: #222a3b;
+  margin-bottom: 4px;
+}
+
+/* ── 5. Monthly Payroll Readiness Clay Panels (Borderless Clay Objects) ── */
+.attendance-clay-readiness-card {
+  border-radius: 18px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: none !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.attendance-clay-readiness-card:hover {
+  transform: translateY(-2px);
+}
+
+.attendance-clay-readiness-card--mint {
+  background: linear-gradient(145deg, #ebfaf1 0%, #d1f3e0 100%) !important;
+  box-shadow:
+    0 10px 22px -4px rgba(46, 196, 138, 0.24),
+    0 3px 6px -1px rgba(46, 196, 138, 0.12),
+    inset 3px 3px 6px rgba(255, 255, 255, 0.95),
+    inset -4px -4px 8px rgba(30, 160, 105, 0.22) !important;
+}
+
+.attendance-clay-readiness-card--peach {
+  background: linear-gradient(145deg, #fff3ea 0%, #fedecb 100%) !important;
+  box-shadow:
+    0 10px 22px -4px rgba(245, 150, 105, 0.24),
+    0 3px 6px -1px rgba(245, 150, 105, 0.12),
+    inset 3px 3px 6px rgba(255, 255, 255, 0.95),
+    inset -4px -4px 8px rgba(220, 110, 60, 0.22) !important;
+}
+
+.attendance-clay-readiness-card--lavender {
+  background: linear-gradient(145deg, #f3ebff 0%, #e6d7ff 100%) !important;
+  box-shadow:
+    0 10px 22px -4px rgba(175, 140, 235, 0.24),
+    0 3px 6px -1px rgba(175, 140, 235, 0.12),
+    inset 3px 3px 6px rgba(255, 255, 255, 0.95),
+    inset -4px -4px 8px rgba(130, 95, 205, 0.22) !important;
+}
+
+.attendance-clay-readiness-card__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.attendance-clay-readiness-card__value {
+  font-size: 28px;
+  font-weight: 800;
+  color: #222a3b;
+  letter-spacing: -0.02em;
+}
+
+.attendance-clay-readiness-card__caption {
+  font-size: 12px;
+  font-weight: 600;
+  color: #68758f;
+}
+
+/* Clay Inset Progress Track */
+.attendance-clay-progress-track {
+  width: 100%;
+  height: 12px;
+  background: #edf1f8;
+  border-radius: 999px;
+  overflow: hidden;
+  box-shadow:
+    inset 0 2px 4px rgba(37, 43, 59, 0.1),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.8);
+  position: relative;
+}
+

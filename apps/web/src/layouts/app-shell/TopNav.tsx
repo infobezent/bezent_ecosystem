@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { BezentIcon } from '../../design-system/icons';
-import { Avatar, IconButton, Badge } from '../../design-system/components';
+import { Avatar, IconButton, Badge, BezentWordmark } from '../../design-system/components';
 import { ProfileMenu } from './ProfileMenu';
 import bezentMark from '../../assets/bezent-mark.png';
 import './TopNav.css';
@@ -56,7 +56,7 @@ export function TopNav({
           <img src={bezentMark} alt="" className="top-nav__logo-img" />
         </div>
         <span className="top-nav__wordmark" aria-label="bezent">
-          <span className="top-nav__wordmark-text">bezent</span>
+          <BezentWordmark height={20} className="top-nav__wordmark-svg" />
         </span>
       </div>
 

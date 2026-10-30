@@ -11,7 +11,7 @@
   flex-direction: column;
   align-items: center;
   min-height: 0;
-  padding: 16px 0 12px;
+  padding: 8px 0 6px;
   background: var(--bg-sidebar, var(--bg-header));
   font-family: var(--font-family-base);
   /* No border-right: surface contrast between --bg-sidebar (#F6F8FC) and
@@ -25,10 +25,17 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
   gap: var(--shell-nav-item-gap);
-  padding-bottom: 8px;
+  padding: 6px 0 8px;
   overflow-x: hidden;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.left-sidebar__list::-webkit-scrollbar {
+  display: none;
 }
 
 .left-sidebar__item-wrap {
