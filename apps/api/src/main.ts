@@ -5,6 +5,7 @@ import { backgroundWorkerRunner } from './platform/workers/backgroundWorker.runn
 import { attendanceAutoLockService } from './applications/hrms/attendance/service/attendanceAutoLock.service.js';
 import { attendanceCompOffExpiryService } from './applications/hrms/attendance/service/attendanceCompOffExpiry.service.js';
 import { attendanceMissingPunchDetectorService } from './applications/hrms/attendance/service/attendanceMissingPunchDetector.service.js';
+import { leavePolicyLifecycleService } from './applications/hrms/leave/service/leavePolicyLifecycle.service.js';
 import { syncAllUnlinkedEmployees } from './applications/hrms/employees/service/employeeUserBridge.service.js';
 
 assertProductionAuthConfig();
@@ -26,6 +27,8 @@ async function startServer(): Promise<void> {
     console.log('[workers] Attendance comp-off expiry auto-lapse daemon started');
     attendanceMissingPunchDetectorService.start();
     console.log('[workers] Attendance missing punch detector sweeper started');
+    leavePolicyLifecycleService.start();
+    console.log('[workers] Leave policy lifecycle sweep started');
     try {
       const syncedCount = await syncAllUnlinkedEmployees();
       if (syncedCount > 0) {

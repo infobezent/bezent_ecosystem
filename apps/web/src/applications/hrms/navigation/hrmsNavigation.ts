@@ -159,10 +159,16 @@ export const HRMS_NAV_DESTINATIONS: readonly NavDestination[] = [
     sidebar: true,
     permissionKey: view('recruitment'),
     children: [
+      child('overview', 'Overview', 'dashboard'),
       child('job-openings', 'Job Openings', 'jobOpenings'),
       child('candidates', 'Candidates', 'candidates'),
+      child('pipeline', 'Hiring Pipeline', 'pipeline'),
       child('interviews', 'Interviews', 'interviews'),
+      child('assessments', 'Assessments', 'tasks'),
       child('offers', 'Offers', 'offers'),
+      child('onboarding-handoff', 'Onboarding Handoff', 'onboarding'),
+      child('talent-pool', 'Talent Pool', 'workforce'),
+      child('reports', 'Hiring Reports', 'reports'),
     ],
   },
   {

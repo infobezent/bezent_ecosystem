@@ -49,13 +49,13 @@
   border-color: transparent;
 }
 
-/* ── Status Pills ── */
+/* ── Status Pills — 3D Tactile Clay Pills ── */
 .bezent-status-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   height: 22px;
-  padding: 0 8px;
+  padding: 0 9px;
   border-radius: var(--radius-full);
   font-size: var(--font-caption-size, var(--font-size-xs, 11px));
   font-weight: var(--font-weight-semibold, 600);
@@ -64,6 +64,10 @@
   white-space: nowrap;
   user-select: none;
   border: 1px solid transparent;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.03),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.85),
+    inset 0 -1px 1.5px rgba(0, 0, 0, 0.03);
 }
 
 .bezent-status-pill__dot {
