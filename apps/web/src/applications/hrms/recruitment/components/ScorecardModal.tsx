@@ -70,8 +70,14 @@ export function ScorecardModal({
         { id: 'c2', name: 'Problem Solving & System Design', score: 4.0, maxScore: 5 },
         { id: 'c3', name: 'Communication & Culture Alignment', score: 4.5, maxScore: 5 },
       ],
-      strengths: strengthsRaw.split('\n').map((s) => s.trim()).filter(Boolean),
-      areasForImprovement: improvementsRaw.split('\n').map((s) => s.trim()).filter(Boolean),
+      strengths: strengthsRaw
+        .split('\n')
+        .map((s) => s.trim())
+        .filter(Boolean),
+      areasForImprovement: improvementsRaw
+        .split('\n')
+        .map((s) => s.trim())
+        .filter(Boolean),
       summaryNotes: summaryNotes.trim(),
     };
 
@@ -93,7 +99,9 @@ export function ScorecardModal({
       }
       description={
         <Inline align="center" gap="md" wrap>
-          <span>Candidate: <strong>{interview.candidateName}</strong> ({interview.candidateNumber})</span>
+          <span>
+            Candidate: <strong>{interview.candidateName}</strong> ({interview.candidateNumber})
+          </span>
           <span>•</span>
           <span>{interview.roundName}</span>
           <span>•</span>
@@ -129,21 +137,26 @@ export function ScorecardModal({
                   <Stack gap="none">
                     <span className="bezent-text-xs bezent-text-secondary">Overall Score</span>
                     <span className="bezent-text-3xl bezent-font-bold">
-                      ★ {existing.overallScore.toFixed(1)} <span className="bezent-text-sm bezent-font-normal text-gray-500">/ 5.0</span>
+                      ★ {existing.overallScore.toFixed(1)}{' '}
+                      <span className="bezent-text-sm bezent-font-normal text-gray-500">/ 5.0</span>
                     </span>
                   </Stack>
 
                   <Stack gap="none">
-                    <span className="bezent-text-xs bezent-text-secondary">Hiring Recommendation</span>
-                    <div className="pt-1">
-                      {formatRecommendationBadge(existing.recommendation)}
-                    </div>
+                    <span className="bezent-text-xs bezent-text-secondary">
+                      Hiring Recommendation
+                    </span>
+                    <div className="pt-1">{formatRecommendationBadge(existing.recommendation)}</div>
                   </Stack>
 
                   <Stack gap="none">
                     <span className="bezent-text-xs bezent-text-secondary">Evaluated By</span>
-                    <span className="bezent-font-semibold bezent-text-sm">{existing.interviewerName}</span>
-                    <span className="bezent-text-xs bezent-text-secondary">{existing.submittedAt}</span>
+                    <span className="bezent-font-semibold bezent-text-sm">
+                      {existing.interviewerName}
+                    </span>
+                    <span className="bezent-text-xs bezent-text-secondary">
+                      {existing.submittedAt}
+                    </span>
                   </Stack>
                 </Grid>
               </CardBody>
@@ -160,7 +173,9 @@ export function ScorecardModal({
                         <Stack gap="none">
                           <span className="bezent-font-semibold bezent-text-sm">{crit.name}</span>
                           {crit.notes && (
-                            <span className="bezent-text-xs bezent-text-secondary">{crit.notes}</span>
+                            <span className="bezent-text-xs bezent-text-secondary">
+                              {crit.notes}
+                            </span>
                           )}
                         </Stack>
                         <Badge variant="info" size="md">
@@ -178,7 +193,9 @@ export function ScorecardModal({
             {/* Strengths & Improvements */}
             <Grid columns={2} gap="md">
               <Stack gap="xs">
-                <h4 className="bezent-font-semibold bezent-text-sm text-success-700">Key Strengths</h4>
+                <h4 className="bezent-font-semibold bezent-text-sm text-success-700">
+                  Key Strengths
+                </h4>
                 <ul className="bezent-text-xs bezent-text-secondary list-disc pl-5 space-y-1">
                   {existing.strengths.map((s, idx) => (
                     <li key={idx}>{s}</li>
@@ -187,7 +204,9 @@ export function ScorecardModal({
               </Stack>
 
               <Stack gap="xs">
-                <h4 className="bezent-font-semibold bezent-text-sm text-warning-700">Areas for Growth</h4>
+                <h4 className="bezent-font-semibold bezent-text-sm text-warning-700">
+                  Areas for Growth
+                </h4>
                 <ul className="bezent-text-xs bezent-text-secondary list-disc pl-5 space-y-1">
                   {existing.areasForImprovement.map((a, idx) => (
                     <li key={idx}>{a}</li>

@@ -67,18 +67,14 @@ describe('InterviewsPage', () => {
     );
 
     expect(html).toContain('2026-10-30');
-    expect(html).toContain("Today&#x27;s Schedule");
+    expect(html).toContain('Today&#x27;s Schedule');
     expect(html).toContain('Join Google Meet');
   });
 
   it('renders ScorecardModal with evaluation scores', () => {
     const interview = INITIAL_INTERVIEWS[2]!; // Completed with scorecard
     const html = renderToStaticMarkup(
-      <ScorecardModal
-        interview={interview}
-        isOpen={true}
-        onClose={() => {}}
-      />,
+      <ScorecardModal interview={interview} isOpen={true} onClose={() => {}} />,
     );
 
     expect(html).toContain('Evaluation Scorecard');

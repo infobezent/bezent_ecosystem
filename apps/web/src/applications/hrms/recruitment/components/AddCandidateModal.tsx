@@ -99,9 +99,18 @@ export function AddCandidateModal({
       noticePeriodDays: parseInt(noticePeriodDays, 10) || 30,
       expectedCtcLpa: parseFloat(expectedCtcLpa) || undefined,
       experienceHistory: currentCompany
-        ? [{ company: currentCompany, role: currentDesignation || 'Engineer', duration: '2022 - Present', current: true }]
+        ? [
+            {
+              company: currentCompany,
+              role: currentDesignation || 'Engineer',
+              duration: '2022 - Present',
+              current: true,
+            },
+          ]
         : [],
-      educationHistory: [{ degree: 'B.E. / B.Tech', institution: 'State University', year: '2020' }],
+      educationHistory: [
+        { degree: 'B.E. / B.Tech', institution: 'State University', year: '2020' },
+      ],
       applicationHistory: [
         {
           id: `app-${Date.now()}`,
@@ -307,11 +316,7 @@ export function AddCandidateModal({
             </FormField>
 
             <FormField label="Candidate Pitch / Summary">
-              <Textarea
-                rows={3}
-                value={summary}
-                onChange={(e) => setSummary(e.target.value)}
-              />
+              <Textarea rows={3} value={summary} onChange={(e) => setSummary(e.target.value)} />
             </FormField>
           </Stack>
         </Stack>

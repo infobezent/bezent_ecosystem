@@ -53,7 +53,8 @@ export const INITIAL_HANDOFFS: OnboardingHandoffItem[] = [
       hasDuplicate: false,
     },
     workflowTemplate: 'Standard Product & Design Pre-Boarding',
-    notes: 'Offer letter sent on Oct 28. Waiting for candidate digital signature before initiating case creation.',
+    notes:
+      'Offer letter sent on Oct 28. Waiting for candidate digital signature before initiating case creation.',
   },
   {
     id: 'hnd-3',
@@ -147,6 +148,7 @@ export const INITIAL_HANDOFFS: OnboardingHandoffItem[] = [
       resolutionType: 'rehire',
     },
     workflowTemplate: 'Engineering Re-Hire Fast Track',
-    notes: 'Re-hire identified! Former intern in 2024. Employee code can be re-activated or mapped per company policy.',
+    notes:
+      'Re-hire identified! Former intern in 2024. Employee code can be re-activated or mapped per company policy.',
   },
 ];

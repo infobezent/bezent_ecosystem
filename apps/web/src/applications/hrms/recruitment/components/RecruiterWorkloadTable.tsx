@@ -33,11 +33,14 @@ export function RecruiterWorkloadTable({ workload }: RecruiterWorkloadTableProps
                   Recruiter Throughput &amp; Talent Team Workload
                 </span>
                 <span className="bezent-text-xs bezent-text-secondary">
-                  Active requisitions under management, pipeline volume, and hire velocity per recruiter.
+                  Active requisitions under management, pipeline volume, and hire velocity per
+                  recruiter.
                 </span>
               </Stack>
             </Inline>
-            <Badge variant="neutral" size="sm">3 Active TA Partners</Badge>
+            <Badge variant="neutral" size="sm">
+              3 Active TA Partners
+            </Badge>
           </Inline>
 
           <Divider />
@@ -66,11 +69,7 @@ export function RecruiterWorkloadTable({ workload }: RecruiterWorkloadTableProps
                   <TableRow key={rec.id}>
                     <TableCell>
                       <Inline align="center" gap="sm">
-                        <Avatar
-                          initials={initials}
-                          color={rec.avatarColor}
-                          size="md"
-                        />
+                        <Avatar initials={initials} color={rec.avatarColor} size="md" />
                         <Stack gap="none">
                           <span className="bezent-font-semibold bezent-text-sm">{rec.name}</span>
                           <span className="bezent-text-xs bezent-text-secondary">{rec.role}</span>
@@ -80,7 +79,9 @@ export function RecruiterWorkloadTable({ workload }: RecruiterWorkloadTableProps
 
                     <TableCell>
                       <Inline align="center" gap="xs">
-                        <span className="bezent-font-bold bezent-text-sm">{rec.activeRequisitions}</span>
+                        <span className="bezent-font-bold bezent-text-sm">
+                          {rec.activeRequisitions}
+                        </span>
                         <span className="bezent-text-xs bezent-text-secondary">jobs</span>
                       </Inline>
                     </TableCell>
@@ -95,7 +96,9 @@ export function RecruiterWorkloadTable({ workload }: RecruiterWorkloadTableProps
                     </TableCell>
 
                     <TableCell>
-                      <span className="bezent-text-sm text-gray-700">{rec.interviewsFacilitated}</span>
+                      <span className="bezent-text-sm text-gray-700">
+                        {rec.interviewsFacilitated}
+                      </span>
                     </TableCell>
 
                     <TableCell>

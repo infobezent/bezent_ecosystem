@@ -28,9 +28,7 @@ describe('AssessmentsPage', () => {
   });
 
   it('renders AssessmentMetrics correctly', () => {
-    const html = renderToStaticMarkup(
-      <AssessmentMetrics assessments={INITIAL_ASSESSMENTS} />,
-    );
+    const html = renderToStaticMarkup(<AssessmentMetrics assessments={INITIAL_ASSESSMENTS} />);
 
     expect(html).toContain('Total Assigned');
     expect(html).toContain('In Progress');

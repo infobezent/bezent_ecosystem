@@ -30,7 +30,9 @@ export function ReEngageModal({
 }: ReEngageModalProps) {
   const openJobs = jobOpenings.filter((j) => j.status === 'open');
   const [targetJobId, setTargetJobId] = useState(openJobs[0]?.id || 'job-1');
-  const [fastTrackStage, setFastTrackStage] = useState<'applied' | 'screening' | 'shortlisted' | 'interview'>('shortlisted');
+  const [fastTrackStage, setFastTrackStage] = useState<
+    'applied' | 'screening' | 'shortlisted' | 'interview'
+  >('shortlisted');
   const [outreachChannel, setOutreachChannel] = useState<'email' | 'phone'>('email');
   const [message, setMessage] = useState(
     `Hi ${profile?.fullName || ''},\n\nWe really enjoyed speaking with you during your previous evaluation for BEZENT. A new requisition has opened up that perfectly aligns with your background, and we'd love to fast-track your profile. Would you be open for a quick sync this week?`,
@@ -113,11 +115,7 @@ export function ReEngageModal({
           </FormField>
 
           <FormField label="Outreach Message / Email Body" required>
-            <Textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              rows={5}
-            />
+            <Textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={5} />
           </FormField>
         </Stack>
       </form>

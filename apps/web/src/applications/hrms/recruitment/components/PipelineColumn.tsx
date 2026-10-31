@@ -34,9 +34,7 @@ export function PipelineColumn({
       <CardHeader className="pb-2 border-b border-gray-200/60">
         <Stack gap="xs">
           <Inline justify="between" align="center">
-            <span className="bezent-font-bold bezent-text-sm text-gray-900">
-              {stage.label}
-            </span>
+            <span className="bezent-font-bold bezent-text-sm text-gray-900">{stage.label}</span>
             <Badge variant={stage.badgeVariant} size="sm">
               {candidates.length}
             </Badge>

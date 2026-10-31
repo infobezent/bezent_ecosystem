@@ -12,7 +12,9 @@ export function JobOpeningsMetrics({ jobs }: JobOpeningsMetricsProps) {
   const openPositions = openJobs.reduce((acc, j) => acc + (j.positionsCount - j.filledCount), 0);
   const totalInPipeline = openJobs.reduce((acc, j) => acc + j.totalApplicants, 0);
   const draftJobsCount = jobs.filter((j) => j.status === 'draft').length;
-  const closedOrHoldCount = jobs.filter((j) => j.status === 'closed' || j.status === 'on_hold').length;
+  const closedOrHoldCount = jobs.filter(
+    (j) => j.status === 'closed' || j.status === 'on_hold',
+  ).length;
 
   return (
     <Grid columns={4} gap="md">

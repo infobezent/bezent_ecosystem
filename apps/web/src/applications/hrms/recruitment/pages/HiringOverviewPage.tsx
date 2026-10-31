@@ -25,21 +25,70 @@ export function HiringOverviewPage() {
 
   const openJobs = INITIAL_JOB_OPENINGS.filter((j) => j.status === 'open');
   const totalVacancies = openJobs.reduce((acc, j) => acc + j.positionsCount, 0);
-  const activeCandidates = INITIAL_CANDIDATES.filter((c) => c.currentStage !== 'rejected' && c.currentStage !== 'withdrawn');
+  const activeCandidates = INITIAL_CANDIDATES.filter(
+    (c) => c.currentStage !== 'rejected' && c.currentStage !== 'withdrawn',
+  );
   const interviewsToday = INITIAL_INTERVIEWS.filter((i) => i.scheduledDate === '2026-10-30');
-  const offersPending = INITIAL_OFFERS.filter((o) => o.status === 'pending_approval' || o.status === 'sent');
+  const offersPending = INITIAL_OFFERS.filter(
+    (o) => o.status === 'pending_approval' || o.status === 'sent',
+  );
   const handoffsReady = INITIAL_HANDOFFS.filter((h) => h.status === 'ready_for_handoff');
 
   const navigationShortcuts = [
-    { title: 'Job Openings', desc: 'Requisitions, vacancies & teams', path: '/hrms/recruitment/job-openings', icon: 'jobOpenings' as const },
-    { title: 'Candidate Directory', desc: 'Applicants, resumes & skills', path: '/hrms/recruitment/candidates', icon: 'candidates' as const },
-    { title: 'Hiring Pipeline', desc: '8-stage visual Kanban board', path: '/hrms/recruitment/pipeline', icon: 'pipeline' as const },
-    { title: 'Interviews & Panels', desc: 'Calendar slots & scorecards', path: '/hrms/recruitment/interviews', icon: 'interviews' as const },
-    { title: 'Technical Assessments', desc: 'Coding tests & design projects', path: '/hrms/recruitment/assessments', icon: 'tasks' as const },
-    { title: 'Job Offers & Approvals', desc: 'Compensation bands & sign-offs', path: '/hrms/recruitment/offers', icon: 'offers' as const },
-    { title: 'Onboarding Handoff', desc: 'Bridge to workforce onboarding', path: '/hrms/recruitment/onboarding-handoff', icon: 'onboarding' as const },
-    { title: 'Talent Pool & Network', desc: 'Silver medalists & consent', path: '/hrms/recruitment/talent-pool', icon: 'candidates' as const },
-    { title: 'Hiring Reports & Analytics', desc: 'Time to hire & channel ROI', path: '/hrms/recruitment/reports', icon: 'reports' as const },
+    {
+      title: 'Job Openings',
+      desc: 'Requisitions, vacancies & teams',
+      path: '/hrms/recruitment/job-openings',
+      icon: 'jobOpenings' as const,
+    },
+    {
+      title: 'Candidate Directory',
+      desc: 'Applicants, resumes & skills',
+      path: '/hrms/recruitment/candidates',
+      icon: 'candidates' as const,
+    },
+    {
+      title: 'Hiring Pipeline',
+      desc: '8-stage visual Kanban board',
+      path: '/hrms/recruitment/pipeline',
+      icon: 'pipeline' as const,
+    },
+    {
+      title: 'Interviews & Panels',
+      desc: 'Calendar slots & scorecards',
+      path: '/hrms/recruitment/interviews',
+      icon: 'interviews' as const,
+    },
+    {
+      title: 'Technical Assessments',
+      desc: 'Coding tests & design projects',
+      path: '/hrms/recruitment/assessments',
+      icon: 'tasks' as const,
+    },
+    {
+      title: 'Job Offers & Approvals',
+      desc: 'Compensation bands & sign-offs',
+      path: '/hrms/recruitment/offers',
+      icon: 'offers' as const,
+    },
+    {
+      title: 'Onboarding Handoff',
+      desc: 'Bridge to workforce onboarding',
+      path: '/hrms/recruitment/onboarding-handoff',
+      icon: 'onboarding' as const,
+    },
+    {
+      title: 'Talent Pool & Network',
+      desc: 'Silver medalists & consent',
+      path: '/hrms/recruitment/talent-pool',
+      icon: 'candidates' as const,
+    },
+    {
+      title: 'Hiring Reports & Analytics',
+      desc: 'Time to hire & channel ROI',
+      path: '/hrms/recruitment/reports',
+      icon: 'reports' as const,
+    },
   ];
 
   return (
@@ -49,20 +98,14 @@ export function HiringOverviewPage() {
         subtitle="Enterprise talent acquisition command center: open requisitions, candidate pipeline, interviews today, and offer lifecycle."
         actions={
           <Inline gap="sm">
-            <Button
-              variant="secondary"
-              onClick={() => navigate('/hrms/recruitment/pipeline')}
-            >
+            <Button variant="secondary" onClick={() => navigate('/hrms/recruitment/pipeline')}>
               <Inline align="center" gap="xs">
                 <BezentIcon name="pipeline" size="action" />
                 <span>View Kanban Pipeline</span>
               </Inline>
             </Button>
 
-            <Button
-              variant="primary"
-              onClick={() => navigate('/hrms/recruitment/job-openings')}
-            >
+            <Button variant="primary" onClick={() => navigate('/hrms/recruitment/job-openings')}>
               <Inline align="center" gap="xs">
                 <BezentIcon name="add" size="action" />
                 <span>Post Job Opening</span>
@@ -111,14 +154,16 @@ export function HiringOverviewPage() {
                       >
                         <Stack gap="xs">
                           <Inline align="center" gap="xs">
-                            <BezentIcon name={s.icon} size="action" color="var(--color-primary-600)" />
+                            <BezentIcon
+                              name={s.icon}
+                              size="action"
+                              color="var(--color-primary-600)"
+                            />
                             <span className="bezent-font-semibold bezent-text-xs text-gray-900">
                               {s.title}
                             </span>
                           </Inline>
-                          <span className="bezent-text-xs text-gray-500">
-                            {s.desc}
-                          </span>
+                          <span className="bezent-text-xs text-gray-500">{s.desc}</span>
                         </Stack>
                       </div>
                     ))}
@@ -130,10 +175,7 @@ export function HiringOverviewPage() {
 
           {/* Right Column: Today's Schedule + Live Activity */}
           <Stack gap="lg">
-            <TodayInterviewsWidget
-              interviews={INITIAL_INTERVIEWS}
-              todayDate="2026-10-30"
-            />
+            <TodayInterviewsWidget interviews={INITIAL_INTERVIEWS} todayDate="2026-10-30" />
 
             <RecentActivityWidget />
           </Stack>

@@ -10,7 +10,9 @@ export function TalentMetrics({ talent }: TalentMetricsProps) {
   const total = talent.length;
   const silverMedalists = talent.filter((t) => t.source === 'silver_medalist').length;
   const availableNow = talent.filter((t) => t.status === 'available').length;
-  const expiringConsent = talent.filter((t) => t.consentStatus === 'consent_expiring_soon' || t.consentStatus === 'consent_expired').length;
+  const expiringConsent = talent.filter(
+    (t) => t.consentStatus === 'consent_expiring_soon' || t.consentStatus === 'consent_expired',
+  ).length;
 
   return (
     <Grid columns={4} gap="md">
@@ -68,7 +70,13 @@ export function TalentMetrics({ talent }: TalentMetricsProps) {
           <Stack gap="xs">
             <Inline justify="between" align="center">
               <span className="bezent-text-secondary bezent-text-sm">Consent Action Due</span>
-              <BezentIcon name="security" size="nav" color={expiringConsent > 0 ? 'var(--color-warning-600)' : 'var(--color-neutral-500)'} />
+              <BezentIcon
+                name="security"
+                size="nav"
+                color={
+                  expiringConsent > 0 ? 'var(--color-warning-600)' : 'var(--color-neutral-500)'
+                }
+              />
             </Inline>
             <Inline align="baseline" gap="xs">
               <span className="bezent-text-2xl bezent-font-semibold">{expiringConsent}</span>

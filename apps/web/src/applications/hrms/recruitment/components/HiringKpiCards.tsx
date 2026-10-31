@@ -53,7 +53,9 @@ export function HiringKpiCards({ kpis }: HiringKpiCardsProps) {
               <BezentIcon name="offers" size="nav" color="var(--color-success-600, #16A34A)" />
             </Inline>
             <Inline align="baseline" gap="xs">
-              <span className="bezent-text-2xl bezent-font-semibold">{kpis.offerAcceptanceRate}%</span>
+              <span className="bezent-text-2xl bezent-font-semibold">
+                {kpis.offerAcceptanceRate}%
+              </span>
               <span className="bezent-text-xs text-success-700 font-medium">
                 ({kpis.totalHiresThisQuarter} hires closed)
               </span>
@@ -73,10 +75,10 @@ export function HiringKpiCards({ kpis }: HiringKpiCardsProps) {
               <BezentIcon name="check" size="nav" color="var(--color-primary-600, #4F46E5)" />
             </Inline>
             <Inline align="baseline" gap="xs">
-              <span className="bezent-text-2xl bezent-font-semibold">{kpis.qualityOfHireScore}%</span>
-              <span className="bezent-text-xs text-primary-700 font-medium">
-                scorecard rating
+              <span className="bezent-text-2xl bezent-font-semibold">
+                {kpis.qualityOfHireScore}%
               </span>
+              <span className="bezent-text-xs text-primary-700 font-medium">scorecard rating</span>
             </Inline>
             <span className="bezent-text-xs bezent-text-secondary">
               90-day manager satisfaction index

@@ -28,7 +28,9 @@ export function CandidatesPage() {
 
   // State
   const [candidates, setCandidates] = useState<Candidate[]>(INITIAL_CANDIDATES);
-  const [stageFilter, setStageFilter] = useState<'all' | 'screening' | 'interview' | 'assessment' | 'offer' | 'hired' | 'rejected'>('all');
+  const [stageFilter, setStageFilter] = useState<
+    'all' | 'screening' | 'interview' | 'assessment' | 'offer' | 'hired' | 'rejected'
+  >('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [jobFilter, setJobFilter] = useState<string>(urlJobId);
   const [experienceFilter, setExperienceFilter] = useState<string>('all');
@@ -76,7 +78,10 @@ export function CandidatesPage() {
       // Experience Filter
       if (experienceFilter === 'junior' && cand.totalExperienceYears > 3) {
         return false;
-      } else if (experienceFilter === 'mid' && (cand.totalExperienceYears <= 3 || cand.totalExperienceYears > 7)) {
+      } else if (
+        experienceFilter === 'mid' &&
+        (cand.totalExperienceYears <= 3 || cand.totalExperienceYears > 7)
+      ) {
         return false;
       } else if (experienceFilter === 'senior' && cand.totalExperienceYears <= 7) {
         return false;
@@ -92,7 +97,14 @@ export function CandidatesPage() {
         const matchesJob = cand.appliedJobTitle.toLowerCase().includes(q);
         const matchesSkills = cand.skills.some((s) => s.toLowerCase().includes(q));
 
-        if (!matchesName && !matchesNumber && !matchesEmail && !matchesCompany && !matchesJob && !matchesSkills) {
+        if (
+          !matchesName &&
+          !matchesNumber &&
+          !matchesEmail &&
+          !matchesCompany &&
+          !matchesJob &&
+          !matchesSkills
+        ) {
           return false;
         }
       }
@@ -121,7 +133,9 @@ export function CandidatesPage() {
 
   const handleAddCandidate = (newCand: Candidate) => {
     setCandidates((prev) => [newCand, ...prev]);
-    setBannerNotice(`Successfully added candidate "${newCand.fullName}" (${newCand.candidateNumber}).`);
+    setBannerNotice(
+      `Successfully added candidate "${newCand.fullName}" (${newCand.candidateNumber}).`,
+    );
   };
 
   const handleHandoffToOnboarding = (cand: Candidate) => {
@@ -130,9 +144,7 @@ export function CandidatesPage() {
 
   return (
     <Page>
-      <PageHeader
-        title="Candidate Directory"
-      />
+      <PageHeader title="Candidate Directory" />
 
       <Stack gap="md">
         {bannerNotice && (
@@ -212,11 +224,7 @@ export function CandidatesPage() {
           }
           right={
             <Inline align="center" gap="sm">
-              <Button
-                variant="dark"
-                size="md"
-                onClick={() => setIsAddOpen(true)}
-              >
+              <Button variant="dark" size="md" onClick={() => setIsAddOpen(true)}>
                 <Inline align="center" gap="xs">
                   <BezentIcon name="add" size="action" />
                   <span>Add Candidate</span>

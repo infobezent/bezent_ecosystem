@@ -36,7 +36,9 @@ export function SourceEffectivenessCard({ sources }: SourceEffectivenessCardProp
                 </span>
               </Stack>
             </Inline>
-            <Badge variant="success" size="sm">Top Source: Referrals (19% Conversion)</Badge>
+            <Badge variant="success" size="sm">
+              Top Source: Referrals (19% Conversion)
+            </Badge>
           </Inline>
 
           <Divider />
@@ -56,47 +58,51 @@ export function SourceEffectivenessCard({ sources }: SourceEffectivenessCardProp
             <TableBody>
               {sources.map((s) => (
                 <TableRow key={s.source}>
-                    <TableCell>
-                      <Stack gap="none">
-                        <span className="bezent-font-semibold bezent-text-sm">{s.source}</span>
-                        <span className="bezent-text-xs bezent-text-secondary">{s.channel}</span>
-                      </Stack>
-                    </TableCell>
+                  <TableCell>
+                    <Stack gap="none">
+                      <span className="bezent-font-semibold bezent-text-sm">{s.source}</span>
+                      <span className="bezent-text-xs bezent-text-secondary">{s.channel}</span>
+                    </Stack>
+                  </TableCell>
 
-                    <TableCell>
-                      <span className="bezent-font-semibold bezent-text-sm">{s.candidatesCount}</span>
-                    </TableCell>
+                  <TableCell>
+                    <span className="bezent-font-semibold bezent-text-sm">{s.candidatesCount}</span>
+                  </TableCell>
 
-                    <TableCell>
-                      <span className="bezent-text-sm text-gray-700">{s.interviewedCount}</span>
-                    </TableCell>
+                  <TableCell>
+                    <span className="bezent-text-sm text-gray-700">{s.interviewedCount}</span>
+                  </TableCell>
 
-                    <TableCell>
-                      <span className="bezent-text-sm text-gray-700">{s.offeredCount}</span>
-                    </TableCell>
+                  <TableCell>
+                    <span className="bezent-text-sm text-gray-700">{s.offeredCount}</span>
+                  </TableCell>
 
-                    <TableCell>
-                      <span className="bezent-font-bold bezent-text-sm text-success-700">{s.hiredCount}</span>
-                    </TableCell>
+                  <TableCell>
+                    <span className="bezent-font-bold bezent-text-sm text-success-700">
+                      {s.hiredCount}
+                    </span>
+                  </TableCell>
 
-                    <TableCell>
-                      <Inline align="center" gap="xs">
-                        <span className="bezent-font-semibold bezent-text-sm text-primary-700">
-                          {s.conversionRate}%
-                        </span>
-                        {s.conversionRate >= 15 && (
-                          <Badge variant="success" size="sm">High ROI</Badge>
-                        )}
-                      </Inline>
-                    </TableCell>
-
-                    <TableCell>
-                      <span className="bezent-text-xs bezent-text-secondary">
-                        {s.avgDaysToHire} days avg
+                  <TableCell>
+                    <Inline align="center" gap="xs">
+                      <span className="bezent-font-semibold bezent-text-sm text-primary-700">
+                        {s.conversionRate}%
                       </span>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      {s.conversionRate >= 15 && (
+                        <Badge variant="success" size="sm">
+                          High ROI
+                        </Badge>
+                      )}
+                    </Inline>
+                  </TableCell>
+
+                  <TableCell>
+                    <span className="bezent-text-xs bezent-text-secondary">
+                      {s.avgDaysToHire} days avg
+                    </span>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </Stack>

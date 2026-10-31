@@ -99,11 +99,7 @@ export function OffersTable({
               {/* Candidate */}
               <TableCell>
                 <Inline align="center" gap="sm">
-                  <Avatar
-                    initials={initials}
-                    color={offer.candidateAvatarColor}
-                    size="md"
-                  />
+                  <Avatar initials={initials} color={offer.candidateAvatarColor} size="md" />
                   <Stack gap="none">
                     <span className="bezent-font-semibold bezent-text-sm">
                       {offer.candidateName}
@@ -118,9 +114,7 @@ export function OffersTable({
               {/* Role & Dept */}
               <TableCell>
                 <Stack gap="none">
-                  <span className="bezent-font-medium bezent-text-sm">
-                    {offer.jobTitle}
-                  </span>
+                  <span className="bezent-font-medium bezent-text-sm">{offer.jobTitle}</span>
                   <span className="bezent-text-xs bezent-text-secondary">
                     {offer.department} • {offer.designationLevel}
                   </span>
@@ -140,9 +134,7 @@ export function OffersTable({
               </TableCell>
 
               {/* Status */}
-              <TableCell>
-                {formatOfferStatusPill(offer.status)}
-              </TableCell>
+              <TableCell>{formatOfferStatusPill(offer.status)}</TableCell>
 
               {/* Approvals */}
               <TableCell>
@@ -181,30 +173,18 @@ export function OffersTable({
               {/* Actions */}
               <TableCell>
                 <Inline align="center" gap="xs">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => onSelectOffer(offer)}
-                  >
+                  <Button size="sm" variant="secondary" onClick={() => onSelectOffer(offer)}>
                     View Offer
                   </Button>
 
                   {offer.status === 'pending_approval' && onApproveOffer && (
-                    <Button
-                      size="sm"
-                      variant="primary"
-                      onClick={() => onApproveOffer(offer)}
-                    >
+                    <Button size="sm" variant="primary" onClick={() => onApproveOffer(offer)}>
                       Review
                     </Button>
                   )}
 
                   {offer.status === 'approved' && onSendOffer && (
-                    <Button
-                      size="sm"
-                      variant="primary"
-                      onClick={() => onSendOffer(offer)}
-                    >
+                    <Button size="sm" variant="primary" onClick={() => onSendOffer(offer)}>
                       Send Letter
                     </Button>
                   )}

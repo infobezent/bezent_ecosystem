@@ -11,13 +11,7 @@ export type CandidateStage =
   | 'withdrawn';
 
 export type CandidateSource =
-  | 'linkedin'
-  | 'career_page'
-  | 'referral'
-  | 'agency'
-  | 'naukri'
-  | 'campus'
-  | 'direct';
+  'linkedin' | 'career_page' | 'referral' | 'agency' | 'naukri' | 'campus' | 'direct';
 
 export interface ExperienceEntry {
   company: string;

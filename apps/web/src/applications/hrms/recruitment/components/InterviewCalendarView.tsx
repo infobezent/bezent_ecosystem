@@ -10,10 +10,7 @@ import {
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import type { InterviewSchedule } from '../types/interview';
-import {
-  formatInterviewStatusBadge,
-  formatRecommendationBadge,
-} from './InterviewScheduleTable';
+import { formatInterviewStatusBadge, formatRecommendationBadge } from './InterviewScheduleTable';
 
 export interface InterviewCalendarViewProps {
   interviews: InterviewSchedule[];
@@ -72,12 +69,7 @@ export function InterviewCalendarView({
             {/* Timeline Cards */}
             <Stack gap="sm">
               {items.map((item) => (
-                <Card
-                  key={item.id}
-                  variant="clay"
-                  hoverable
-                  padding="md"
-                >
+                <Card key={item.id} variant="clay" hoverable padding="md">
                   <CardBody>
                     <Inline justify="between" align="start" wrap gap="md">
                       {/* Left: Time + Candidate Info */}
@@ -96,7 +88,11 @@ export function InterviewCalendarView({
                         <Stack gap="xs">
                           <Inline align="center" gap="xs">
                             <Avatar
-                              initials={item.candidateName.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                              initials={item.candidateName
+                                .split(' ')
+                                .map((n) => n[0])
+                                .join('')
+                                .slice(0, 2)}
                               size="sm"
                               color={item.candidateAvatarColor || 'blue'}
                             />

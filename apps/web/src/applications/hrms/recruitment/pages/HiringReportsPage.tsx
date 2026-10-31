@@ -29,7 +29,9 @@ export function HiringReportsPage() {
   const [bannerNotice, setBannerNotice] = useState<string | null>(null);
 
   const handleExport = () => {
-    setBannerNotice('Export generated! Hiring Analytics Report (Q4-FY26-Executive-Summary.csv) ready for download.');
+    setBannerNotice(
+      'Export generated! Hiring Analytics Report (Q4-FY26-Executive-Summary.csv) ready for download.',
+    );
   };
 
   return (

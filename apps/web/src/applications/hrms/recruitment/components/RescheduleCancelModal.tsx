@@ -17,7 +17,13 @@ export interface RescheduleCancelModalProps {
   mode: 'reschedule' | 'cancel';
   isOpen: boolean;
   onClose: () => void;
-  onConfirmReschedule: (interviewId: string, newDate: string, newStart: string, newEnd: string, reason: string) => void;
+  onConfirmReschedule: (
+    interviewId: string,
+    newDate: string,
+    newStart: string,
+    newEnd: string,
+    reason: string,
+  ) => void;
   onConfirmCancel: (interviewId: string, reason: string) => void;
 }
 
@@ -68,10 +74,7 @@ export function RescheduleCancelModal({
           <Button variant="secondary" onClick={onClose}>
             Back
           </Button>
-          <Button
-            variant={isReschedule ? 'primary' : 'danger'}
-            onClick={handleConfirm}
-          >
+          <Button variant={isReschedule ? 'primary' : 'danger'} onClick={handleConfirm}>
             {isReschedule ? 'Confirm Reschedule' : 'Confirm Cancellation'}
           </Button>
         </Inline>
@@ -81,37 +84,21 @@ export function RescheduleCancelModal({
         {isReschedule && (
           <FormGrid columns={2} gap="md">
             <FormField label="New Date" required>
-              <Input
-                type="date"
-                value={newDate}
-                onChange={(e) => setNewDate(e.target.value)}
-              />
+              <Input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} />
             </FormField>
 
             <FormField label="New Slot (Start - End)" required>
               <Inline gap="xs" align="center">
-                <Input
-                  type="time"
-                  value={newStart}
-                  onChange={(e) => setNewStart(e.target.value)}
-                />
+                <Input type="time" value={newStart} onChange={(e) => setNewStart(e.target.value)} />
                 <span>-</span>
-                <Input
-                  type="time"
-                  value={newEnd}
-                  onChange={(e) => setNewEnd(e.target.value)}
-                />
+                <Input type="time" value={newEnd} onChange={(e) => setNewEnd(e.target.value)} />
               </Inline>
             </FormField>
           </FormGrid>
         )}
 
         <FormField label={isReschedule ? 'Reschedule Reason' : 'Cancellation Reason'} required>
-          <Textarea
-            rows={3}
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-          />
+          <Textarea rows={3} value={reason} onChange={(e) => setReason(e.target.value)} />
         </FormField>
       </Stack>
     </Modal>

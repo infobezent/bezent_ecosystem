@@ -33,13 +33,18 @@ export function OfferDetailsModal({
   onSendOffer,
   onInitiateHandoff,
 }: OfferDetailsModalProps) {
-  const [activeTab, setActiveTab] = useState<'compensation' | 'approval' | 'document' | 'handoff'>('compensation');
+  const [activeTab, setActiveTab] = useState<'compensation' | 'approval' | 'document' | 'handoff'>(
+    'compensation',
+  );
 
   if (!offer) return null;
 
   const tabItems = [
     { id: 'compensation', label: 'Compensation & Package' },
-    { id: 'approval', label: `Approval Workflow (${offer.approvalChain.filter((s) => s.status === 'approved').length}/${offer.approvalChain.length})` },
+    {
+      id: 'approval',
+      label: `Approval Workflow (${offer.approvalChain.filter((s) => s.status === 'approved').length}/${offer.approvalChain.length})`,
+    },
     { id: 'document', label: 'Offer Letter & Contracts' },
     { id: 'handoff', label: 'Onboarding Handoff' },
   ];
@@ -55,23 +60,30 @@ export function OfferDetailsModal({
       title={
         <Inline align="center" gap="sm">
           <BezentIcon name="offers" size="action" />
-          <span>{offer.offerNumber} — {offer.candidateName}</span>
+          <span>
+            {offer.offerNumber} — {offer.candidateName}
+          </span>
           {formatOfferStatusPill(offer.status)}
         </Inline>
       }
       description={
         <Inline align="center" gap="md" wrap>
-          <span>Role: <strong>{offer.jobTitle}</strong> ({offer.jobCode})</span>
+          <span>
+            Role: <strong>{offer.jobTitle}</strong> ({offer.jobCode})
+          </span>
           <span>•</span>
           <span>{offer.department}</span>
           <span>•</span>
-          <Badge variant="neutral" size="sm">{offer.designationLevel}</Badge>
+          <Badge variant="neutral" size="sm">
+            {offer.designationLevel}
+          </Badge>
         </Inline>
       }
       footer={
         <Inline justify="between" align="center">
           <span className="bezent-text-xs bezent-text-secondary">
-            Offered CTC: <strong>{formatCtc(comp.totalCtc, offer.currency)}</strong> • Joining: {offer.targetJoiningDate}
+            Offered CTC: <strong>{formatCtc(comp.totalCtc, offer.currency)}</strong> • Joining:{' '}
+            {offer.targetJoiningDate}
           </span>
           <Inline gap="sm">
             <Button variant="secondary" onClick={onClose}>
@@ -143,7 +155,9 @@ export function OfferDetailsModal({
               <Card variant="flat" padding="md">
                 <CardBody>
                   <Stack gap="xs">
-                    <span className="bezent-text-secondary bezent-text-xs">Base Pay (Guaranteed)</span>
+                    <span className="bezent-text-secondary bezent-text-xs">
+                      Base Pay (Guaranteed)
+                    </span>
                     <span className="bezent-text-2xl bezent-font-semibold">
                       {formatCtc(comp.basePay, offer.currency)}
                     </span>
@@ -157,7 +171,9 @@ export function OfferDetailsModal({
               <Card variant="flat" padding="md">
                 <CardBody>
                   <Stack gap="xs">
-                    <span className="bezent-text-secondary bezent-text-xs">Variable / Performance</span>
+                    <span className="bezent-text-secondary bezent-text-xs">
+                      Variable / Performance
+                    </span>
                     <span className="bezent-text-2xl bezent-font-semibold">
                       {formatCtc(comp.performanceBonus, offer.currency)}
                     </span>
@@ -173,33 +189,57 @@ export function OfferDetailsModal({
             <Card variant="flat" padding="md">
               <CardBody>
                 <Stack gap="sm">
-                  <span className="bezent-font-semibold bezent-text-sm">Detailed Salary Breakdown</span>
+                  <span className="bezent-font-semibold bezent-text-sm">
+                    Detailed Salary Breakdown
+                  </span>
                   <Divider />
                   <Grid columns={2} gap="sm">
                     <Inline justify="between" align="center">
-                      <span className="bezent-text-xs bezent-text-secondary">Basic Salary (Monthly / Annual)</span>
-                      <span className="bezent-text-xs bezent-font-medium">{formatCtc(comp.basePay, offer.currency)}</span>
+                      <span className="bezent-text-xs bezent-text-secondary">
+                        Basic Salary (Monthly / Annual)
+                      </span>
+                      <span className="bezent-text-xs bezent-font-medium">
+                        {formatCtc(comp.basePay, offer.currency)}
+                      </span>
                     </Inline>
                     <Inline justify="between" align="center">
-                      <span className="bezent-text-xs bezent-text-secondary">House Rent Allowance (HRA)</span>
-                      <span className="bezent-text-xs bezent-font-medium">{formatCtc(comp.houseRentAllowance, offer.currency)}</span>
+                      <span className="bezent-text-xs bezent-text-secondary">
+                        House Rent Allowance (HRA)
+                      </span>
+                      <span className="bezent-text-xs bezent-font-medium">
+                        {formatCtc(comp.houseRentAllowance, offer.currency)}
+                      </span>
                     </Inline>
                     <Inline justify="between" align="center">
-                      <span className="bezent-text-xs bezent-text-secondary">Special Allowance</span>
-                      <span className="bezent-text-xs bezent-font-medium">{formatCtc(comp.specialAllowance, offer.currency)}</span>
+                      <span className="bezent-text-xs bezent-text-secondary">
+                        Special Allowance
+                      </span>
+                      <span className="bezent-text-xs bezent-font-medium">
+                        {formatCtc(comp.specialAllowance, offer.currency)}
+                      </span>
                     </Inline>
                     <Inline justify="between" align="center">
                       <span className="bezent-text-xs bezent-text-secondary">Statutory Bonus</span>
-                      <span className="bezent-text-xs bezent-font-medium">{formatCtc(comp.statutoryBonus, offer.currency)}</span>
+                      <span className="bezent-text-xs bezent-font-medium">
+                        {formatCtc(comp.statutoryBonus, offer.currency)}
+                      </span>
                     </Inline>
                     <Inline justify="between" align="center">
-                      <span className="bezent-text-xs bezent-text-secondary">Employer Provident Fund (PF)</span>
-                      <span className="bezent-text-xs bezent-font-medium">{formatCtc(comp.providentFundEmployer, offer.currency)}</span>
+                      <span className="bezent-text-xs bezent-text-secondary">
+                        Employer Provident Fund (PF)
+                      </span>
+                      <span className="bezent-text-xs bezent-font-medium">
+                        {formatCtc(comp.providentFundEmployer, offer.currency)}
+                      </span>
                     </Inline>
                     {comp.stockOptionsValue && (
                       <Inline justify="between" align="center">
-                        <span className="bezent-text-xs bezent-text-secondary">ESOPs / Stock Units (Year 1)</span>
-                        <span className="bezent-text-xs bezent-font-medium text-primary-600">{formatCtc(comp.stockOptionsValue, offer.currency)}</span>
+                        <span className="bezent-text-xs bezent-text-secondary">
+                          ESOPs / Stock Units (Year 1)
+                        </span>
+                        <span className="bezent-text-xs bezent-font-medium text-primary-600">
+                          {formatCtc(comp.stockOptionsValue, offer.currency)}
+                        </span>
                       </Inline>
                     )}
                   </Grid>
@@ -224,7 +264,9 @@ export function OfferDetailsModal({
         {/* Tab 2: Approval Chain */}
         {activeTab === 'approval' && (
           <Stack gap="md">
-            <span className="bezent-font-semibold bezent-text-sm">Multi-Tier Offer Approval Chain</span>
+            <span className="bezent-font-semibold bezent-text-sm">
+              Multi-Tier Offer Approval Chain
+            </span>
             <div className="space-y-3">
               {offer.approvalChain.map((step, idx) => (
                 <Card key={step.id} variant="flat" padding="sm">
@@ -251,11 +293,17 @@ export function OfferDetailsModal({
                           </span>
                         )}
                         {step.status === 'approved' ? (
-                          <Badge variant="success" size="sm">Approved</Badge>
+                          <Badge variant="success" size="sm">
+                            Approved
+                          </Badge>
                         ) : step.status === 'rejected' ? (
-                          <Badge variant="danger" size="sm">Rejected</Badge>
+                          <Badge variant="danger" size="sm">
+                            Rejected
+                          </Badge>
                         ) : (
-                          <Badge variant="warning" size="sm">Pending Sign-Off</Badge>
+                          <Badge variant="warning" size="sm">
+                            Pending Sign-Off
+                          </Badge>
                         )}
                       </Inline>
                     </Inline>
@@ -272,7 +320,8 @@ export function OfferDetailsModal({
 
             {isApprovedAll && (
               <Alert variant="success">
-                All designated sign-off authorities have approved this compensation structure. The formal offer letter can be released.
+                All designated sign-off authorities have approved this compensation structure. The
+                formal offer letter can be released.
               </Alert>
             )}
           </Stack>
@@ -334,7 +383,9 @@ export function OfferDetailsModal({
                         Download Signed PDF
                       </a>
                     ) : (
-                      <Badge variant="neutral" size="sm">Unsigned</Badge>
+                      <Badge variant="neutral" size="sm">
+                        Unsigned
+                      </Badge>
                     )}
                   </Inline>
                 </Stack>
@@ -356,22 +407,34 @@ export function OfferDetailsModal({
                     </span>
                   </Inline>
                   <p className="bezent-text-xs text-gray-700">
-                    Per <strong>ADR-009 (Candidate ≠ Employee)</strong>, once a candidate accepts their formal offer, they transition into pre-boarding and background verification before employee record creation.
+                    Per <strong>ADR-009 (Candidate ≠ Employee)</strong>, once a candidate accepts
+                    their formal offer, they transition into pre-boarding and background
+                    verification before employee record creation.
                   </p>
                   <Divider />
                   <Grid columns={2} gap="sm">
                     <Inline justify="between" align="center">
-                      <span className="bezent-text-xs bezent-text-secondary">Target Joining Date:</span>
-                      <span className="bezent-text-xs bezent-font-semibold">{offer.targetJoiningDate}</span>
+                      <span className="bezent-text-xs bezent-text-secondary">
+                        Target Joining Date:
+                      </span>
+                      <span className="bezent-text-xs bezent-font-semibold">
+                        {offer.targetJoiningDate}
+                      </span>
                     </Inline>
                     <Inline justify="between" align="center">
-                      <span className="bezent-text-xs bezent-text-secondary">Designated Department:</span>
-                      <span className="bezent-text-xs bezent-font-semibold">{offer.department}</span>
+                      <span className="bezent-text-xs bezent-text-secondary">
+                        Designated Department:
+                      </span>
+                      <span className="bezent-text-xs bezent-font-semibold">
+                        {offer.department}
+                      </span>
                     </Inline>
                     <Inline justify="between" align="center">
                       <span className="bezent-text-xs bezent-text-secondary">Handoff Status:</span>
                       <span className="bezent-text-xs bezent-font-semibold text-primary-700">
-                        {offer.status === 'accepted' ? 'Ready for Handoff' : 'Offer must be Accepted first'}
+                        {offer.status === 'accepted'
+                          ? 'Ready for Handoff'
+                          : 'Offer must be Accepted first'}
                       </span>
                     </Inline>
                   </Grid>

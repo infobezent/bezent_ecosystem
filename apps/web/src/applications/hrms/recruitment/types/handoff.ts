@@ -1,10 +1,7 @@
 import type { AvatarColor } from '../../../../design-system/components';
 
 export type HandoffStatus =
-  | 'ready_for_handoff'
-  | 'handoff_in_progress'
-  | 'handoff_completed'
-  | 'on_hold';
+  'ready_for_handoff' | 'handoff_in_progress' | 'handoff_completed' | 'on_hold';
 
 export interface DuplicateCheckResult {
   hasDuplicate: boolean;

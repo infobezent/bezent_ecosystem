@@ -27,9 +27,7 @@ describe('CandidatesPage', () => {
   });
 
   it('renders CandidateMetrics with valid counts', () => {
-    const html = renderToStaticMarkup(
-      <CandidateMetrics candidates={INITIAL_CANDIDATES} />,
-    );
+    const html = renderToStaticMarkup(<CandidateMetrics candidates={INITIAL_CANDIDATES} />);
 
     expect(html).toContain('Total Candidates');
     expect(html).toContain('In Pipeline');

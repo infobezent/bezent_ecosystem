@@ -53,9 +53,7 @@ describe('HiringReportsPage', () => {
   });
 
   it('renders StageConversionFunnel with funnel stages and yield rates', () => {
-    const html = renderToStaticMarkup(
-      <StageConversionFunnel steps={INITIAL_STAGE_FUNNEL} />,
-    );
+    const html = renderToStaticMarkup(<StageConversionFunnel steps={INITIAL_STAGE_FUNNEL} />);
 
     expect(html).toContain('Full Pipeline Stage Conversion &amp; Velocity Funnel');
     expect(html).toContain('Applications Received');

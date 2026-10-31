@@ -8,7 +8,9 @@ export interface HandoffMetricsProps {
 
 export function HandoffMetrics({ handoffs }: HandoffMetricsProps) {
   const readyCount = handoffs.filter((h) => h.status === 'ready_for_handoff').length;
-  const inProgressCount = handoffs.filter((h) => h.status === 'handoff_in_progress' || h.status === 'on_hold').length;
+  const inProgressCount = handoffs.filter(
+    (h) => h.status === 'handoff_in_progress' || h.status === 'on_hold',
+  ).length;
   const completedCount = handoffs.filter((h) => h.status === 'handoff_completed').length;
   const duplicateAlerts = handoffs.filter((h) => h.duplicateCheck.hasDuplicate).length;
 
@@ -40,9 +42,7 @@ export function HandoffMetrics({ handoffs }: HandoffMetricsProps) {
             </Inline>
             <Inline align="baseline" gap="xs">
               <span className="bezent-text-2xl bezent-font-semibold">{inProgressCount}</span>
-              <span className="bezent-text-xs bezent-text-secondary">
-                BGV / signature pending
-              </span>
+              <span className="bezent-text-xs bezent-text-secondary">BGV / signature pending</span>
             </Inline>
           </Stack>
         </CardBody>
@@ -70,7 +70,13 @@ export function HandoffMetrics({ handoffs }: HandoffMetricsProps) {
           <Stack gap="xs">
             <Inline justify="between" align="center">
               <span className="bezent-text-secondary bezent-text-sm">Duplicate Check Alerts</span>
-              <BezentIcon name="security" size="nav" color={duplicateAlerts > 0 ? 'var(--color-warning-600)' : 'var(--color-neutral-500)'} />
+              <BezentIcon
+                name="security"
+                size="nav"
+                color={
+                  duplicateAlerts > 0 ? 'var(--color-warning-600)' : 'var(--color-neutral-500)'
+                }
+              />
             </Inline>
             <Inline align="baseline" gap="xs">
               <span className="bezent-text-2xl bezent-font-semibold">{duplicateAlerts}</span>

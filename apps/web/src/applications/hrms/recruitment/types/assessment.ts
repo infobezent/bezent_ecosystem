@@ -6,12 +6,7 @@ export type AssessmentType =
   | 'domain_case_study';
 
 export type AssessmentStatus =
-  | 'assigned'
-  | 'in_progress'
-  | 'submitted'
-  | 'under_review'
-  | 'evaluated'
-  | 'expired';
+  'assigned' | 'in_progress' | 'submitted' | 'under_review' | 'evaluated' | 'expired';
 
 export type AssessmentDecision = 'passed' | 'failed' | 'needs_follow_up';
 

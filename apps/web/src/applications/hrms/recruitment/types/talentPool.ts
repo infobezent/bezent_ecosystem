@@ -1,23 +1,12 @@
 import type { AvatarColor } from '../../../../design-system/components';
 
 export type ConsentStatus =
-  | 'active_consent'
-  | 'consent_expiring_soon'
-  | 'consent_expired'
-  | 'revoked';
+  'active_consent' | 'consent_expiring_soon' | 'consent_expired' | 'revoked';
 
-export type TalentStatus =
-  | 'available'
-  | 'passive'
-  | 'do_not_contact'
-  | 're_engaged';
+export type TalentStatus = 'available' | 'passive' | 'do_not_contact' | 're_engaged';
 
 export type TalentSourceType =
-  | 'silver_medalist'
-  | 'past_applicant'
-  | 'alumni'
-  | 'referral'
-  | 'campus';
+  'silver_medalist' | 'past_applicant' | 'alumni' | 'referral' | 'campus';
 
 export interface EngagementTouchpoint {
   id: string;

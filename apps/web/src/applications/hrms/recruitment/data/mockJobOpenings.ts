@@ -32,10 +32,27 @@ export const INITIAL_JOB_OPENINGS: JobOpening[] = [
       avatarColor: 'blue',
     },
     interviewers: [
-      { name: 'Arun Kumar', role: 'Staff Engineer', email: 'arun.k@bezent.internal', avatarColor: 'green' },
-      { name: 'Divya Nair', role: 'Engineering Manager', email: 'divya.n@bezent.internal', avatarColor: 'pink' },
+      {
+        name: 'Arun Kumar',
+        role: 'Staff Engineer',
+        email: 'arun.k@bezent.internal',
+        avatarColor: 'green',
+      },
+      {
+        name: 'Divya Nair',
+        role: 'Engineering Manager',
+        email: 'divya.n@bezent.internal',
+        avatarColor: 'pink',
+      },
     ],
-    skills: ['React', 'TypeScript', 'Design Systems', 'Microfrontends', 'Performance Optimization', 'Vite'],
+    skills: [
+      'React',
+      'TypeScript',
+      'Design Systems',
+      'Microfrontends',
+      'Performance Optimization',
+      'Vite',
+    ],
     description:
       'We are looking for a passionate Senior Frontend Architect to lead the UI ecosystem and Design System architecture of our modular enterprise platform.',
     responsibilities: [
@@ -90,10 +107,28 @@ export const INITIAL_JOB_OPENINGS: JobOpening[] = [
       avatarColor: 'blue',
     },
     interviewers: [
-      { name: 'Sanjay Verma', role: 'Principal Architect', email: 'sanjay.v@bezent.internal', avatarColor: 'amber' },
-      { name: 'Priya Sundaram', role: 'VP of Engineering', email: 'priya.sundaram@bezent.internal', avatarColor: 'purple' },
+      {
+        name: 'Sanjay Verma',
+        role: 'Principal Architect',
+        email: 'sanjay.v@bezent.internal',
+        avatarColor: 'amber',
+      },
+      {
+        name: 'Priya Sundaram',
+        role: 'VP of Engineering',
+        email: 'priya.sundaram@bezent.internal',
+        avatarColor: 'purple',
+      },
     ],
-    skills: ['Node.js', 'Express', 'Drizzle ORM', 'MySQL', 'React', 'TypeScript', 'Clean Architecture'],
+    skills: [
+      'Node.js',
+      'Express',
+      'Drizzle ORM',
+      'MySQL',
+      'React',
+      'TypeScript',
+      'Clean Architecture',
+    ],
     description:
       'Lead backend domain services and end-to-end multi-tenant enterprise data pipelines for the BEZENT business application suite.',
     responsibilities: [
@@ -146,9 +181,21 @@ export const INITIAL_JOB_OPENINGS: JobOpening[] = [
       avatarColor: 'green',
     },
     interviewers: [
-      { name: 'Lakshmi Narayanan', role: 'Lead UX Researcher', email: 'lakshmi.n@bezent.internal', avatarColor: 'pink' },
+      {
+        name: 'Lakshmi Narayanan',
+        role: 'Lead UX Researcher',
+        email: 'lakshmi.n@bezent.internal',
+        avatarColor: 'pink',
+      },
     ],
-    skills: ['Figma', 'Design Systems', 'User Research', 'Information Architecture', 'Prototyping', 'Accessibility'],
+    skills: [
+      'Figma',
+      'Design Systems',
+      'User Research',
+      'Information Architecture',
+      'Prototyping',
+      'Accessibility',
+    ],
     description:
       'Craft intuitive, beautiful enterprise workflows for our workforce, talent management, and employee self-service experiences.',
     responsibilities: [
@@ -201,7 +248,13 @@ export const INITIAL_JOB_OPENINGS: JobOpening[] = [
       avatarColor: 'green',
     },
     interviewers: [],
-    skills: ['HR Operations', 'Statutory Compliance', 'Employee Onboarding', 'Leave & Attendance Policy', 'HRIS'],
+    skills: [
+      'HR Operations',
+      'Statutory Compliance',
+      'Employee Onboarding',
+      'Leave & Attendance Policy',
+      'HRIS',
+    ],
     description:
       'Manage day-to-day employee lifecycle operations, policy compliance, onboarding handoffs, and people analytics.',
     responsibilities: [
@@ -254,9 +307,20 @@ export const INITIAL_JOB_OPENINGS: JobOpening[] = [
       avatarColor: 'blue',
     },
     interviewers: [
-      { name: 'Ananya Sen', role: 'Head of Content', email: 'ananya.s@bezent.internal', avatarColor: 'purple' },
+      {
+        name: 'Ananya Sen',
+        role: 'Head of Content',
+        email: 'ananya.s@bezent.internal',
+        avatarColor: 'purple',
+      },
     ],
-    skills: ['Product Marketing', 'B2B SaaS', 'GTM Strategy', 'Content Marketing', 'Demand Generation'],
+    skills: [
+      'Product Marketing',
+      'B2B SaaS',
+      'GTM Strategy',
+      'Content Marketing',
+      'Demand Generation',
+    ],
     description:
       'Drive positioning, go-to-market execution, and organic acquisition for BEZENT enterprise platform solutions.',
     responsibilities: [
@@ -308,7 +372,12 @@ export const INITIAL_JOB_OPENINGS: JobOpening[] = [
       avatarColor: 'blue',
     },
     interviewers: [
-      { name: 'Arun Kumar', role: 'Staff Engineer', email: 'arun.k@bezent.internal', avatarColor: 'green' },
+      {
+        name: 'Arun Kumar',
+        role: 'Staff Engineer',
+        email: 'arun.k@bezent.internal',
+        avatarColor: 'green',
+      },
     ],
     skills: ['AWS / GCP', 'Docker', 'Kubernetes', 'Terraform', 'CI/CD Pipelines', 'MySQL Tuning'],
     description:

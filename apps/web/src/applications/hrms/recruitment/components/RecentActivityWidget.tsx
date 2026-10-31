@@ -10,7 +10,12 @@ import { BezentIcon } from '../../../../design-system/icons';
 
 export interface ActivityEvent {
   id: string;
-  type: 'offer_accepted' | 'interview_completed' | 'assessment_passed' | 'handoff_done' | 'candidate_applied';
+  type:
+    | 'offer_accepted'
+    | 'interview_completed'
+    | 'assessment_passed'
+    | 'handoff_done'
+    | 'candidate_applied';
   title: string;
   subtitle: string;
   timestamp: string;
@@ -72,7 +77,11 @@ export const INITIAL_HIRING_ACTIVITIES: ActivityEvent[] = [
   },
 ];
 
-export function RecentActivityWidget({ activities = INITIAL_HIRING_ACTIVITIES }: { activities?: ActivityEvent[] }) {
+export function RecentActivityWidget({
+  activities = INITIAL_HIRING_ACTIVITIES,
+}: {
+  activities?: ActivityEvent[];
+}) {
   return (
     <Card variant="flat" padding="md">
       <CardBody>
@@ -107,9 +116,7 @@ export function RecentActivityWidget({ activities = INITIAL_HIRING_ACTIVITIES }:
                         {act.badgeLabel}
                       </Badge>
                     </Inline>
-                    <span className="bezent-text-xs text-gray-600 mt-0.5">
-                      {act.subtitle}
-                    </span>
+                    <span className="bezent-text-xs text-gray-600 mt-0.5">{act.subtitle}</span>
                     <span className="bezent-text-xs bezent-text-secondary mt-1">
                       By {act.actor} • {act.timestamp}
                     </span>

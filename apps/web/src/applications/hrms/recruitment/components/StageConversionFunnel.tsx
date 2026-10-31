@@ -31,7 +31,9 @@ export function StageConversionFunnel({ steps }: StageConversionFunnelProps) {
                 </span>
               </Stack>
             </Inline>
-            <Badge variant="success" size="sm">Overall Funnel Yield: 3.9%</Badge>
+            <Badge variant="success" size="sm">
+              Overall Funnel Yield: 3.9%
+            </Badge>
           </Inline>
 
           <Divider />
@@ -50,14 +52,20 @@ export function StageConversionFunnel({ steps }: StageConversionFunnelProps) {
                         {idx + 1}
                       </span>
                       <Stack gap="none">
-                        <span className="bezent-font-semibold bezent-text-sm">{step.stageName}</span>
-                        <span className="bezent-text-xs bezent-text-secondary">Stage {idx + 1}</span>
+                        <span className="bezent-font-semibold bezent-text-sm">
+                          {step.stageName}
+                        </span>
+                        <span className="bezent-text-xs bezent-text-secondary">
+                          Stage {idx + 1}
+                        </span>
                       </Stack>
                     </Inline>
 
                     {/* Candidate Count */}
                     <Inline align="baseline" gap="xs">
-                      <span className="bezent-text-xl bezent-font-bold text-gray-900">{step.count}</span>
+                      <span className="bezent-text-xl bezent-font-bold text-gray-900">
+                        {step.count}
+                      </span>
                       <span className="bezent-text-xs bezent-text-secondary">candidates</span>
                     </Inline>
 
@@ -65,7 +73,9 @@ export function StageConversionFunnel({ steps }: StageConversionFunnelProps) {
                     <Inline align="center" gap="xs">
                       <span className="bezent-text-xs bezent-text-secondary">Yield:</span>
                       {isFirst ? (
-                        <Badge variant="neutral" size="sm">Top of Funnel</Badge>
+                        <Badge variant="neutral" size="sm">
+                          Top of Funnel
+                        </Badge>
                       ) : (
                         <Badge variant={passThroughRate >= 60 ? 'success' : 'neutral'} size="sm">
                           {passThroughRate}% retained

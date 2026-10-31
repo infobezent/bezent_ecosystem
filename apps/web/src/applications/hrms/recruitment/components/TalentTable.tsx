@@ -23,15 +23,35 @@ export interface TalentTableProps {
 export function formatConsentBadge(status: ConsentStatus, expiryDate: string) {
   switch (status) {
     case 'active_consent':
-      return <Badge variant="success" size="sm">Active (till {expiryDate.slice(0, 7)})</Badge>;
+      return (
+        <Badge variant="success" size="sm">
+          Active (till {expiryDate.slice(0, 7)})
+        </Badge>
+      );
     case 'consent_expiring_soon':
-      return <Badge variant="warning" size="sm">Expires {expiryDate}</Badge>;
+      return (
+        <Badge variant="warning" size="sm">
+          Expires {expiryDate}
+        </Badge>
+      );
     case 'consent_expired':
-      return <Badge variant="danger" size="sm">Consent Expired</Badge>;
+      return (
+        <Badge variant="danger" size="sm">
+          Consent Expired
+        </Badge>
+      );
     case 'revoked':
-      return <Badge variant="danger" size="sm">Consent Revoked</Badge>;
+      return (
+        <Badge variant="danger" size="sm">
+          Consent Revoked
+        </Badge>
+      );
     default:
-      return <Badge variant="neutral" size="sm">{status}</Badge>;
+      return (
+        <Badge variant="neutral" size="sm">
+          {status}
+        </Badge>
+      );
   }
 }
 
@@ -50,11 +70,7 @@ export function formatTalentStatusPill(status: TalentStatus) {
   }
 }
 
-export function TalentTable({
-  talent,
-  onSelectTalent,
-  onReEngage,
-}: TalentTableProps) {
+export function TalentTable({ talent, onSelectTalent, onReEngage }: TalentTableProps) {
   if (talent.length === 0) {
     return (
       <EmptyState
@@ -91,18 +107,16 @@ export function TalentTable({
               {/* Profile */}
               <TableCell>
                 <Inline align="center" gap="sm">
-                  <Avatar
-                    initials={initials}
-                    color={profile.avatarColor}
-                    size="md"
-                  />
+                  <Avatar initials={initials} color={profile.avatarColor} size="md" />
                   <Stack gap="none">
                     <Inline align="center" gap="xs">
                       <span className="bezent-font-semibold bezent-text-sm">
                         {profile.fullName}
                       </span>
                       {profile.source === 'silver_medalist' && (
-                        <Badge variant="info" size="sm">★ Silver Medalist</Badge>
+                        <Badge variant="info" size="sm">
+                          ★ Silver Medalist
+                        </Badge>
                       )}
                     </Inline>
                     <span className="bezent-text-xs bezent-text-secondary">
@@ -115,9 +129,7 @@ export function TalentTable({
               {/* Current Role & Exp */}
               <TableCell>
                 <Stack gap="none">
-                  <span className="bezent-font-medium bezent-text-sm">
-                    {profile.currentTitle}
-                  </span>
+                  <span className="bezent-font-medium bezent-text-sm">{profile.currentTitle}</span>
                   <span className="bezent-text-xs bezent-text-secondary">
                     {profile.currentCompany} • {profile.experienceYears} yrs exp
                   </span>
@@ -133,7 +145,10 @@ export function TalentTable({
                     </Badge>
                   ))}
                   {profile.skills.slice(0, 2).map((skill) => (
-                    <span key={skill} className="bezent-text-xs bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded">
+                    <span
+                      key={skill}
+                      className="bezent-text-xs bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded"
+                    >
                       {skill}
                     </span>
                   ))}
@@ -163,26 +178,16 @@ export function TalentTable({
               </TableCell>
 
               {/* Status */}
-              <TableCell>
-                {formatTalentStatusPill(profile.status)}
-              </TableCell>
+              <TableCell>{formatTalentStatusPill(profile.status)}</TableCell>
 
               {/* Actions */}
               <TableCell>
                 <Inline align="center" gap="xs">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => onSelectTalent(profile)}
-                  >
+                  <Button size="sm" variant="secondary" onClick={() => onSelectTalent(profile)}>
                     View
                   </Button>
 
-                  <Button
-                    size="sm"
-                    variant="primary"
-                    onClick={() => onReEngage(profile)}
-                  >
+                  <Button size="sm" variant="primary" onClick={() => onReEngage(profile)}>
                     Re-Engage
                   </Button>
                 </Inline>

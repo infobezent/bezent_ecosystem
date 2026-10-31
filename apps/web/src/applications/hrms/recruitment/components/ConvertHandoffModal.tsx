@@ -32,7 +32,9 @@ export function ConvertHandoffModal({
   const [isRehire, setIsRehire] = useState(Boolean(item?.duplicateCheck?.hasDuplicate));
   const [triggerIt, setTriggerIt] = useState(true);
   const [targetDate, setTargetDate] = useState(item?.targetJoiningDate || '2026-11-17');
-  const [notes, setNotes] = useState('Signed offer verified. BGV checks completed. Ready for pre-boarding passport.');
+  const [notes, setNotes] = useState(
+    'Signed offer verified. BGV checks completed. Ready for pre-boarding passport.',
+  );
 
   if (!item) return null;
 
@@ -78,23 +80,31 @@ export function ConvertHandoffModal({
           {/* Candidate Snapshot */}
           <div className="bg-gray-50 p-3 rounded text-sm space-y-1">
             <Inline justify="between" align="center">
-              <span>Candidate: <strong>{item.candidateName}</strong> ({item.candidateNumber})</span>
+              <span>
+                Candidate: <strong>{item.candidateName}</strong> ({item.candidateNumber})
+              </span>
               <span className="text-primary-700 font-semibold">{item.offerNumber}</span>
             </Inline>
-            <div>Role: <strong>{item.jobTitle}</strong> • {item.department} ({item.designationLevel})</div>
-            <div>Email / Phone: {item.candidateEmail} • {item.candidatePhone}</div>
+            <div>
+              Role: <strong>{item.jobTitle}</strong> • {item.department} ({item.designationLevel})
+            </div>
+            <div>
+              Email / Phone: {item.candidateEmail} • {item.candidatePhone}
+            </div>
           </div>
 
           {/* Duplicate Prevention Guard */}
           {item.duplicateCheck.hasDuplicate ? (
             <Alert variant="warning">
               <strong>Duplicate Identity Warning:</strong> Candidate email/PAN matches former record{' '}
-              <strong>{item.duplicateCheck.existingEmployeeCode}</strong> ({item.duplicateCheck.existingEmployeeName}).
-              Conversion will link this record as a <strong>Re-hire</strong> to avoid duplicate employee profiles.
+              <strong>{item.duplicateCheck.existingEmployeeCode}</strong> (
+              {item.duplicateCheck.existingEmployeeName}). Conversion will link this record as a{' '}
+              <strong>Re-hire</strong> to avoid duplicate employee profiles.
             </Alert>
           ) : (
             <Alert variant="success">
-              <strong>Identity Guard Passed:</strong> No duplicate national ID, email, or employee code found in BEZENT workforce database.
+              <strong>Identity Guard Passed:</strong> No duplicate national ID, email, or employee
+              code found in BEZENT workforce database.
             </Alert>
           )}
 
@@ -104,11 +114,26 @@ export function ConvertHandoffModal({
                 value={template}
                 onChange={(e) => setTemplate(e.target.value)}
                 options={[
-                  { value: 'Engineering Standard Pre-Boarding', label: 'Engineering Standard Pre-Boarding' },
-                  { value: 'Engineering Tech Lead Pre-Boarding', label: 'Engineering Tech Lead Pre-Boarding' },
-                  { value: 'Standard Product & Design Pre-Boarding', label: 'Product & Design Pre-Boarding' },
-                  { value: 'Executive & Leadership Onboarding', label: 'Executive & Leadership Onboarding' },
-                  { value: 'General Corporate Pre-Boarding', label: 'General Corporate Pre-Boarding' },
+                  {
+                    value: 'Engineering Standard Pre-Boarding',
+                    label: 'Engineering Standard Pre-Boarding',
+                  },
+                  {
+                    value: 'Engineering Tech Lead Pre-Boarding',
+                    label: 'Engineering Tech Lead Pre-Boarding',
+                  },
+                  {
+                    value: 'Standard Product & Design Pre-Boarding',
+                    label: 'Product & Design Pre-Boarding',
+                  },
+                  {
+                    value: 'Executive & Leadership Onboarding',
+                    label: 'Executive & Leadership Onboarding',
+                  },
+                  {
+                    value: 'General Corporate Pre-Boarding',
+                    label: 'General Corporate Pre-Boarding',
+                  },
                 ]}
               />
             </FormField>
@@ -148,7 +173,9 @@ export function ConvertHandoffModal({
           </FormGrid>
 
           <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs space-y-2">
-            <span className="font-semibold text-blue-900 block">Automated Pre-Boarding Provisions:</span>
+            <span className="font-semibold text-blue-900 block">
+              Automated Pre-Boarding Provisions:
+            </span>
             <label className="flex items-center gap-2 cursor-pointer text-blue-950">
               <input
                 type="checkbox"

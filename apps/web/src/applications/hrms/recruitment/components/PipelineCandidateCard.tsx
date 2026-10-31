@@ -81,14 +81,18 @@ export function PipelineCandidateCard({
               {candidate.appliedJobTitle}
             </span>
             <span className="bezent-text-xs bezent-text-secondary">
-              {candidate.currentCompany ? `${candidate.totalExperienceYears}y at ${candidate.currentCompany}` : `${candidate.totalExperienceYears}y exp`}
+              {candidate.currentCompany
+                ? `${candidate.totalExperienceYears}y at ${candidate.currentCompany}`
+                : `${candidate.totalExperienceYears}y exp`}
             </span>
           </Stack>
 
           {/* Notice Period & CTC */}
           <Inline justify="between" align="center">
             <span className="bezent-text-xs bezent-text-secondary">
-              {candidate.noticePeriodDays === 0 ? 'Immediate' : `${candidate.noticePeriodDays}d notice`}
+              {candidate.noticePeriodDays === 0
+                ? 'Immediate'
+                : `${candidate.noticePeriodDays}d notice`}
             </span>
             {candidate.expectedCtcLpa && (
               <span className="bezent-text-xs bezent-font-medium text-gray-700">
@@ -111,7 +115,12 @@ export function PipelineCandidateCard({
           {/* Stage Progression Controls */}
           <Inline justify="between" align="center" className="pt-1 border-t border-gray-100">
             {canMovePrev ? (
-              <Button size="sm" variant="ghost" onClick={handlePrevStage} title="Move to previous stage">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handlePrevStage}
+                title="Move to previous stage"
+              >
                 <BezentIcon name="edit" size={14} />
               </Button>
             ) : (
@@ -130,7 +139,12 @@ export function PipelineCandidateCard({
             </Button>
 
             {canMoveNext ? (
-              <Button size="sm" variant="primary" onClick={handleNextStage} title="Advance to next stage">
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={handleNextStage}
+                title="Advance to next stage"
+              >
                 <span>Advance</span>
               </Button>
             ) : candidate.currentStage === 'hired' ? (

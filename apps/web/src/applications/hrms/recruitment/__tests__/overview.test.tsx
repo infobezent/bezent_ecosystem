@@ -67,10 +67,7 @@ describe('HiringOverviewPage', () => {
   it('renders TodayInterviewsWidget with panel members and meeting links', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
-        <TodayInterviewsWidget
-          interviews={INITIAL_INTERVIEWS}
-          todayDate="2026-10-30"
-        />
+        <TodayInterviewsWidget interviews={INITIAL_INTERVIEWS} todayDate="2026-10-30" />
       </MemoryRouter>,
     );
 

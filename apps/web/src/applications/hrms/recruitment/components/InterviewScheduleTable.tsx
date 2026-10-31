@@ -29,17 +29,41 @@ export interface InterviewScheduleTableProps {
 export function formatInterviewStatusBadge(status: InterviewStatus) {
   switch (status) {
     case 'scheduled':
-      return <Badge variant="info" showDot>Scheduled</Badge>;
+      return (
+        <Badge variant="info" showDot>
+          Scheduled
+        </Badge>
+      );
     case 'in_progress':
-      return <Badge variant="warning" showDot>In Progress</Badge>;
+      return (
+        <Badge variant="warning" showDot>
+          In Progress
+        </Badge>
+      );
     case 'completed':
-      return <Badge variant="success" showDot>Completed</Badge>;
+      return (
+        <Badge variant="success" showDot>
+          Completed
+        </Badge>
+      );
     case 'rescheduled':
-      return <Badge variant="warning" showDot>Rescheduled</Badge>;
+      return (
+        <Badge variant="warning" showDot>
+          Rescheduled
+        </Badge>
+      );
     case 'cancelled':
-      return <Badge variant="neutral" showDot>Cancelled</Badge>;
+      return (
+        <Badge variant="neutral" showDot>
+          Cancelled
+        </Badge>
+      );
     default:
-      return <Badge variant="neutral" showDot>{status}</Badge>;
+      return (
+        <Badge variant="neutral" showDot>
+          {status}
+        </Badge>
+      );
   }
 }
 
@@ -120,7 +144,11 @@ export function InterviewScheduleTable({
               {/* 1. Candidate Info */}
               <TableCell>
                 <Inline align="center" gap="sm">
-                  <Avatar initials={initials} size="sm" color={item.candidateAvatarColor || 'blue'} />
+                  <Avatar
+                    initials={initials}
+                    size="sm"
+                    color={item.candidateAvatarColor || 'blue'}
+                  />
                   <span className="bezent-table-meta-title">{item.candidateName}</span>
                 </Inline>
               </TableCell>
@@ -153,7 +181,13 @@ export function InterviewScheduleTable({
               <TableCell>
                 <Inline align="center" gap="sm">
                   <Avatar
-                    initials={item.panel[0]?.name.split(' ').map((n) => n[0]).join('').slice(0, 2) || 'IN'}
+                    initials={
+                      item.panel[0]?.name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')
+                        .slice(0, 2) || 'IN'
+                    }
                     size="sm"
                     color={item.panel[0]?.avatarColor || 'blue'}
                   />
@@ -164,9 +198,7 @@ export function InterviewScheduleTable({
               </TableCell>
 
               {/* 6. Status */}
-              <TableCell>
-                {formatInterviewStatusBadge(item.status)}
-              </TableCell>
+              <TableCell>{formatInterviewStatusBadge(item.status)}</TableCell>
 
               {/* 7. Evaluation / Scorecard */}
               <TableCell>

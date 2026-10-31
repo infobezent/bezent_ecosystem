@@ -15,11 +15,7 @@ import { BezentIcon } from '../../../../design-system/icons';
 import { INITIAL_ASSESSMENTS } from '../data/mockAssessments';
 import { INITIAL_CANDIDATES } from '../data/mockCandidates';
 import { INITIAL_JOB_OPENINGS } from '../data/mockJobOpenings';
-import type {
-  AssessmentAssignment,
-  AssessmentDecision,
-  AssessmentType,
-} from '../types/assessment';
+import type { AssessmentAssignment, AssessmentDecision, AssessmentType } from '../types/assessment';
 import { AssessmentMetrics } from '../components/AssessmentMetrics';
 import { AssessmentsTable } from '../components/AssessmentsTable';
 import { AssessmentDetailModal } from '../components/AssessmentDetailModal';
@@ -28,7 +24,9 @@ import { AssignAssessmentModal } from '../components/AssignAssessmentModal';
 export function AssessmentsPage() {
   // State
   const [assessments, setAssessments] = useState<AssessmentAssignment[]>(INITIAL_ASSESSMENTS);
-  const [tabFilter, setTabFilter] = useState<'all' | 'in_progress' | 'under_review' | 'passed' | 'failed'>('all');
+  const [tabFilter, setTabFilter] = useState<
+    'all' | 'in_progress' | 'under_review' | 'passed' | 'failed'
+  >('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [jobFilter, setJobFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState<'all' | AssessmentType>('all');
@@ -42,8 +40,11 @@ export function AssessmentsPage() {
   const counts = useMemo(() => {
     return {
       all: assessments.length,
-      in_progress: assessments.filter((a) => a.status === 'assigned' || a.status === 'in_progress').length,
-      under_review: assessments.filter((a) => a.status === 'submitted' || a.status === 'under_review').length,
+      in_progress: assessments.filter((a) => a.status === 'assigned' || a.status === 'in_progress')
+        .length,
+      under_review: assessments.filter(
+        (a) => a.status === 'submitted' || a.status === 'under_review',
+      ).length,
       passed: assessments.filter((a) => a.status === 'evaluated' && a.decision === 'passed').length,
       failed: assessments.filter((a) => a.status === 'evaluated' && a.decision === 'failed').length,
     };
@@ -133,12 +134,16 @@ export function AssessmentsPage() {
           : a,
       ),
     );
-    setBannerNotice(`Successfully graded assessment for ${selectedAssessment?.candidateName}! Score: ${score}/100 (${decision.toUpperCase()})`);
+    setBannerNotice(
+      `Successfully graded assessment for ${selectedAssessment?.candidateName}! Score: ${score}/100 (${decision.toUpperCase()})`,
+    );
   };
 
   const handleAssignNew = (newAssignment: AssessmentAssignment) => {
     setAssessments((prev) => [newAssignment, ...prev]);
-    setBannerNotice(`Assigned "${newAssignment.title}" to ${newAssignment.candidateName} (Due: ${newAssignment.dueDate}).`);
+    setBannerNotice(
+      `Assigned "${newAssignment.title}" to ${newAssignment.candidateName} (Due: ${newAssignment.dueDate}).`,
+    );
   };
 
   return (
@@ -147,10 +152,7 @@ export function AssessmentsPage() {
         title="Assessments"
         subtitle="Assessment assignments, test status, candidate submissions, and evaluation results."
         actions={
-          <Button
-            variant="primary"
-            onClick={() => setIsAssignOpen(true)}
-          >
+          <Button variant="primary" onClick={() => setIsAssignOpen(true)}>
             <Inline align="center" gap="xs">
               <BezentIcon name="tasks" size="action" />
               <span>Assign Assessment</span>

@@ -19,7 +19,8 @@ export const INITIAL_TALENT_PROFILES: TalentProfile[] = [
       jobTitle: 'Full-Stack Tech Lead',
       appliedDate: '2026-09-15',
       lastStageReached: 'Final Round / Selected',
-      notes: 'Ranked #2 (Silver Medalist). Exceptional architecture depth. Recommended for Q1 engineering expansion.',
+      notes:
+        'Ranked #2 (Silver Medalist). Exceptional architecture depth. Recommended for Q1 engineering expansion.',
     },
     source: 'silver_medalist',
     tags: ['Silver Medalist', 'High Value', 'Architecture Expert', 'FinTech Background'],
@@ -64,7 +65,8 @@ export const INITIAL_TALENT_PROFILES: TalentProfile[] = [
       jobTitle: 'Senior Product Designer',
       appliedDate: '2026-08-20',
       lastStageReached: 'Assessment / Final Review',
-      notes: 'Exceptional craft. Missed on domain preference by slim margin. Retain for future design openings.',
+      notes:
+        'Exceptional craft. Missed on domain preference by slim margin. Retain for future design openings.',
     },
     source: 'silver_medalist',
     tags: ['Silver Medalist', 'Figma Pro', 'B2B SaaS', 'Design Systems'],
@@ -102,7 +104,8 @@ export const INITIAL_TALENT_PROFILES: TalentProfile[] = [
       jobTitle: 'Site Reliability & Cloud DevOps Engineer',
       appliedDate: '2026-10-01',
       lastStageReached: 'Offer Declined',
-      notes: 'Received counter-offer from current company. Expressed willingness to re-evaluate in 6 months.',
+      notes:
+        'Received counter-offer from current company. Expressed willingness to re-evaluate in 6 months.',
     },
     source: 'past_applicant',
     tags: ['Ex-Offer', 'K8s Specialist', 'Cloud Architect'],
@@ -116,7 +119,8 @@ export const INITIAL_TALENT_PROFILES: TalentProfile[] = [
         id: 'eng-4',
         date: '2026-10-25',
         type: 'note',
-        summary: 'Candidate declined offer graciously due to retention match. Left door open for 2027.',
+        summary:
+          'Candidate declined offer graciously due to retention match. Left door open for 2027.',
         contactedBy: 'Mukesh Murugesan',
       },
     ],
@@ -154,7 +158,8 @@ export const INITIAL_TALENT_PROFILES: TalentProfile[] = [
         id: 'eng-5',
         date: '2026-10-15',
         type: 'call',
-        summary: 'Candidate returned from overseas stint and is now actively open to full-time roles.',
+        summary:
+          'Candidate returned from overseas stint and is now actively open to full-time roles.',
         contactedBy: 'Priya Sundaram',
       },
     ],
@@ -216,7 +221,8 @@ export const INITIAL_TALENT_PROFILES: TalentProfile[] = [
       jobTitle: 'Lead Analytics Engineer',
       appliedDate: '2025-11-15',
       lastStageReached: 'Screening Round',
-      notes: 'Consent expiring in 15 days! Retention rule requires sending consent renewal or anonymizing record.',
+      notes:
+        'Consent expiring in 15 days! Retention rule requires sending consent renewal or anonymizing record.',
     },
     source: 'past_applicant',
     tags: ['Data Pipeline', 'Consent Renewal Due', 'BigQuery Pro'],

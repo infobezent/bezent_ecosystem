@@ -17,10 +17,7 @@ export interface TodayInterviewsWidgetProps {
   todayDate: string;
 }
 
-export function TodayInterviewsWidget({
-  interviews,
-  todayDate,
-}: TodayInterviewsWidgetProps) {
+export function TodayInterviewsWidget({ interviews, todayDate }: TodayInterviewsWidgetProps) {
   const navigate = useNavigate();
   const todayList = interviews.filter((i) => i.scheduledDate === todayDate);
 
@@ -59,14 +56,15 @@ export function TodayInterviewsWidget({
           ) : (
             <Stack gap="sm">
               {todayList.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-gray-50 border border-gray-100 rounded p-3"
-                >
+                <div key={item.id} className="bg-gray-50 border border-gray-100 rounded p-3">
                   <Inline justify="between" align="center">
                     <Inline align="center" gap="sm">
                       <Avatar
-                        initials={item.candidateName.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                        initials={item.candidateName
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                          .slice(0, 2)}
                         color={item.candidateAvatarColor}
                         size="md"
                       />

@@ -7,12 +7,10 @@ export interface InterviewMetricsProps {
   todayDate?: string;
 }
 
-export function InterviewMetrics({
-  interviews,
-  todayDate = '2026-10-30',
-}: InterviewMetricsProps) {
+export function InterviewMetrics({ interviews, todayDate = '2026-10-30' }: InterviewMetricsProps) {
   const todayCount = interviews.filter(
-    (i) => i.scheduledDate === todayDate && (i.status === 'scheduled' || i.status === 'in_progress'),
+    (i) =>
+      i.scheduledDate === todayDate && (i.status === 'scheduled' || i.status === 'in_progress'),
   ).length;
 
   const upcomingCount = interviews.filter(

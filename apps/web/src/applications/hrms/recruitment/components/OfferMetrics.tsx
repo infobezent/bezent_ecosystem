@@ -8,10 +8,17 @@ export interface OfferMetricsProps {
 
 export function OfferMetrics({ offers }: OfferMetricsProps) {
   const total = offers.length;
-  const pendingApprovals = offers.filter((o) => o.status === 'pending_approval' || o.status === 'draft').length;
+  const pendingApprovals = offers.filter(
+    (o) => o.status === 'pending_approval' || o.status === 'draft',
+  ).length;
   const awaitingAcceptance = offers.filter((o) => o.status === 'sent').length;
   const accepted = offers.filter((o) => o.status === 'accepted').length;
-  const acceptanceRate = total > 0 ? Math.round((accepted / (accepted + offers.filter((o) => o.status === 'declined').length || 1)) * 100) : 0;
+  const acceptanceRate =
+    total > 0
+      ? Math.round(
+          (accepted / (accepted + offers.filter((o) => o.status === 'declined').length || 1)) * 100,
+        )
+      : 0;
 
   return (
     <Grid columns={4} gap="md">

@@ -38,7 +38,8 @@ export const INITIAL_OFFERS: JobOffer[] = [
         approverEmail: 'mukesh.murugesan@bezent.com',
         status: 'approved',
         actionDate: '2026-10-24',
-        comments: 'Strong technical interview and architecture test score (91/100). Approved at L6 band.',
+        comments:
+          'Strong technical interview and architecture test score (91/100). Approved at L6 band.',
       },
       {
         id: 'app-2',
@@ -61,7 +62,8 @@ export const INITIAL_OFFERS: JobOffer[] = [
     ],
     offerLetterUrl: 'https://docs.bezent.com/offers/OFF-2026-001-Shreya-Sengupta.pdf',
     signedDocumentUrl: 'https://docs.bezent.com/signed/OFF-2026-001-Signed-Shreya.pdf',
-    notes: 'Candidate accepted with no counter-negotiation. Ready for pre-boarding and IT provisioning handoff.',
+    notes:
+      'Candidate accepted with no counter-negotiation. Ready for pre-boarding and IT provisioning handoff.',
     isHandoffCompleted: false,
   },
   {
@@ -274,8 +276,10 @@ export const INITIAL_OFFERS: JobOffer[] = [
         actionDate: '2026-10-18',
       },
     ],
-    declineReason: 'Received an immediate retention match and onsite transfer offer from current employer.',
-    notes: 'Candidate declined graciously on 2026-10-24. Retained in Talent Pool for future high-level cloud initiatives.',
+    declineReason:
+      'Received an immediate retention match and onsite transfer offer from current employer.',
+    notes:
+      'Candidate declined graciously on 2026-10-24. Retained in Talent Pool for future high-level cloud initiatives.',
   },
   {
     id: 'off-6',

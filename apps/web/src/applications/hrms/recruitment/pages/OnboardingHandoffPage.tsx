@@ -23,7 +23,9 @@ export function OnboardingHandoffPage() {
   const [searchParams] = useSearchParams();
 
   const [handoffs, setHandoffs] = useState<OnboardingHandoffItem[]>(INITIAL_HANDOFFS);
-  const [tabFilter, setTabFilter] = useState<'all' | 'ready' | 'pending' | 'completed' | 'alerts'>('all');
+  const [tabFilter, setTabFilter] = useState<'all' | 'ready' | 'pending' | 'completed' | 'alerts'>(
+    'all',
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [deptFilter, setDeptFilter] = useState('all');
 
@@ -38,7 +40,9 @@ export function OnboardingHandoffPage() {
     const offerIdParam = searchParams.get('offerId');
     if (candidateIdParam || offerIdParam) {
       const match = handoffs.find(
-        (h) => (candidateIdParam && h.candidateId === candidateIdParam) || (offerIdParam && h.offerId === offerIdParam),
+        (h) =>
+          (candidateIdParam && h.candidateId === candidateIdParam) ||
+          (offerIdParam && h.offerId === offerIdParam),
       );
       if (match) {
         setSelectedHandoff(match);
@@ -52,7 +56,8 @@ export function OnboardingHandoffPage() {
     return {
       all: handoffs.length,
       ready: handoffs.filter((h) => h.status === 'ready_for_handoff').length,
-      pending: handoffs.filter((h) => h.status === 'handoff_in_progress' || h.status === 'on_hold').length,
+      pending: handoffs.filter((h) => h.status === 'handoff_in_progress' || h.status === 'on_hold')
+        .length,
       completed: handoffs.filter((h) => h.status === 'handoff_completed').length,
       alerts: handoffs.filter((h) => h.duplicateCheck.hasDuplicate).length,
     };
@@ -63,7 +68,11 @@ export function OnboardingHandoffPage() {
     return handoffs.filter((h) => {
       // Tab filter
       if (tabFilter === 'ready' && h.status !== 'ready_for_handoff') return false;
-      if (tabFilter === 'pending' && !(h.status === 'handoff_in_progress' || h.status === 'on_hold')) return false;
+      if (
+        tabFilter === 'pending' &&
+        !(h.status === 'handoff_in_progress' || h.status === 'on_hold')
+      )
+        return false;
       if (tabFilter === 'completed' && h.status !== 'handoff_completed') return false;
       if (tabFilter === 'alerts' && !h.duplicateCheck.hasDuplicate) return false;
 

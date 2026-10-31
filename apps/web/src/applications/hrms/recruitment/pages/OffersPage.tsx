@@ -25,7 +25,9 @@ import { ApproveOfferModal } from '../components/ApproveOfferModal';
 export function OffersPage() {
   const navigate = useNavigate();
   const [offers, setOffers] = useState<JobOffer[]>(INITIAL_OFFERS);
-  const [tabFilter, setTabFilter] = useState<'all' | 'pending' | 'sent' | 'accepted' | 'declined'>('all');
+  const [tabFilter, setTabFilter] = useState<'all' | 'pending' | 'sent' | 'accepted' | 'declined'>(
+    'all',
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [deptFilter, setDeptFilter] = useState('all');
 
@@ -94,7 +96,11 @@ export function OffersPage() {
     setIsApproveOpen(true);
   };
 
-  const handleConfirmApproval = (offerId: string, decision: 'approved' | 'rejected', comments: string) => {
+  const handleConfirmApproval = (
+    offerId: string,
+    decision: 'approved' | 'rejected',
+    comments: string,
+  ) => {
     setOffers((prev) =>
       prev.map((o) => {
         if (o.id !== offerId) return o;
@@ -147,7 +153,9 @@ export function OffersPage() {
 
   const handleCreateOffer = (newOffer: JobOffer) => {
     setOffers((prev) => [newOffer, ...prev]);
-    setBannerNotice(`Created new offer ${newOffer.offerNumber} for ${newOffer.candidateName}. Routed for internal sign-off.`);
+    setBannerNotice(
+      `Created new offer ${newOffer.offerNumber} for ${newOffer.candidateName}. Routed for internal sign-off.`,
+    );
   };
 
   return (
@@ -157,10 +165,7 @@ export function OffersPage() {
         subtitle="Manage offer letters, compensation packages, multi-tier approvals, and track acceptance before onboarding handoff."
         actions={
           <Inline gap="sm">
-            <Button
-              variant="primary"
-              onClick={() => setIsCreateOpen(true)}
-            >
+            <Button variant="primary" onClick={() => setIsCreateOpen(true)}>
               <Inline align="center" gap="xs">
                 <BezentIcon name="add" size="action" />
                 <span>Draft New Offer</span>

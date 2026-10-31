@@ -48,24 +48,56 @@ export function formatSourceLabel(source: CandidateSource): string {
 export function formatCandidateStatusPill(stage: CandidateStage) {
   switch (stage) {
     case 'interview':
-      return <Badge variant="warning" showDot>Interview</Badge>;
+      return (
+        <Badge variant="warning" showDot>
+          Interview
+        </Badge>
+      );
     case 'screening':
     case 'applied':
-      return <Badge variant="info" showDot>Screening</Badge>;
+      return (
+        <Badge variant="info" showDot>
+          Screening
+        </Badge>
+      );
     case 'assessment':
-      return <Badge variant="warning" showDot>Assessment</Badge>;
+      return (
+        <Badge variant="warning" showDot>
+          Assessment
+        </Badge>
+      );
     case 'shortlisted':
-      return <Badge variant="info" showDot>Shortlisted</Badge>;
+      return (
+        <Badge variant="info" showDot>
+          Shortlisted
+        </Badge>
+      );
     case 'offer':
-      return <Badge variant="info" showDot>Offer Extended</Badge>;
+      return (
+        <Badge variant="info" showDot>
+          Offer Extended
+        </Badge>
+      );
     case 'hired':
     case 'selected':
-      return <Badge variant="success" showDot>Hired</Badge>;
+      return (
+        <Badge variant="success" showDot>
+          Hired
+        </Badge>
+      );
     case 'rejected':
     case 'withdrawn':
-      return <Badge variant="danger" showDot>Rejected</Badge>;
+      return (
+        <Badge variant="danger" showDot>
+          Rejected
+        </Badge>
+      );
     default:
-      return <Badge variant="neutral" showDot>{stage}</Badge>;
+      return (
+        <Badge variant="neutral" showDot>
+          {stage}
+        </Badge>
+      );
   }
 }
 
@@ -133,9 +165,7 @@ export function CandidatesTable({
 
                   <Stack gap="none">
                     <span className="bezent-table-meta-title">{cand.appliedJobTitle}</span>
-                    <span className="bezent-table-meta-subtitle">
-                      {cand.appliedJobCode}
-                    </span>
+                    <span className="bezent-table-meta-subtitle">{cand.appliedJobCode}</span>
                   </Stack>
 
                   <Inline justify="between" align="center">
@@ -143,7 +173,9 @@ export function CandidatesTable({
                       <CountryFlag countryCode={cand.locationCountryCode || 'IN'} size="sm" />
                       <span className="bezent-table-meta-subtitle">{cand.location}</span>
                     </Inline>
-                    <span className="bezent-table-meta-title">{cand.totalExperienceYears} yrs exp</span>
+                    <span className="bezent-table-meta-title">
+                      {cand.totalExperienceYears} yrs exp
+                    </span>
                   </Inline>
 
                   <Inline justify="between" align="center">
@@ -186,33 +218,25 @@ export function CandidatesTable({
             <TableRow key={cand.id} onClick={() => onSelectCandidate(cand)}>
               {/* 1. Candidate ID */}
               <TableCell>
-                <span className="bezent-table-meta-dim font-mono">
-                  #{cand.candidateNumber}
-                </span>
+                <span className="bezent-table-meta-dim font-mono">#{cand.candidateNumber}</span>
               </TableCell>
 
               {/* 2. Candidate: Avatar + Full Name */}
               <TableCell>
                 <Inline align="center" gap="sm">
                   <Avatar initials={initials} size="sm" color="blue" />
-                  <span className="bezent-table-meta-title">
-                    {cand.fullName}
-                  </span>
+                  <span className="bezent-table-meta-title">{cand.fullName}</span>
                 </Inline>
               </TableCell>
 
               {/* 3. Applied Role: Title */}
               <TableCell>
-                <span className="bezent-table-meta-title">
-                  {cand.appliedJobTitle}
-                </span>
+                <span className="bezent-table-meta-title">{cand.appliedJobTitle}</span>
               </TableCell>
 
               {/* 4. Experience: Total */}
               <TableCell>
-                <span className="bezent-table-meta-title">
-                  {cand.totalExperienceYears} yrs
-                </span>
+                <span className="bezent-table-meta-title">{cand.totalExperienceYears} yrs</span>
               </TableCell>
 
               {/* 5. Current Location: City only */}
@@ -223,15 +247,11 @@ export function CandidatesTable({
               </TableCell>
 
               {/* 6. Stage: Soft Colored Status Pill */}
-              <TableCell>
-                {formatCandidateStatusPill(cand.currentStage)}
-              </TableCell>
+              <TableCell>{formatCandidateStatusPill(cand.currentStage)}</TableCell>
 
               {/* 7. Applied Date */}
               <TableCell>
-                <span className="bezent-table-meta-dim">
-                  {cand.appliedDate}
-                </span>
+                <span className="bezent-table-meta-dim">{cand.appliedDate}</span>
               </TableCell>
 
               {/* 8. Actions: Ellipsis Action Button */}

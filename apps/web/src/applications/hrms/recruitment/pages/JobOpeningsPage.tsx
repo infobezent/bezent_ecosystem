@@ -99,9 +99,7 @@ export function JobOpeningsPage() {
   };
 
   const handleStatusChange = (jobId: string, newStatus: JobStatus) => {
-    setJobs((prev) =>
-      prev.map((j) => (j.id === jobId ? { ...j, status: newStatus } : j)),
-    );
+    setJobs((prev) => prev.map((j) => (j.id === jobId ? { ...j, status: newStatus } : j)));
     const updated = jobs.find((j) => j.id === jobId);
     if (updated) {
       setBannerNotice(
@@ -117,9 +115,7 @@ export function JobOpeningsPage() {
 
   return (
     <Page>
-      <PageHeader
-        title="Job Openings"
-      />
+      <PageHeader title="Job Openings" />
 
       <Stack gap="lg">
         {bannerNotice && (
@@ -202,11 +198,7 @@ export function JobOpeningsPage() {
           }
           right={
             <Inline align="center" gap="sm">
-              <Button
-                variant="dark"
-                size="md"
-                onClick={() => setIsCreateOpen(true)}
-              >
+              <Button variant="dark" size="md" onClick={() => setIsCreateOpen(true)}>
                 <Inline align="center" gap="xs">
                   <BezentIcon name="add" size="action" />
                   <span>Create Job</span>

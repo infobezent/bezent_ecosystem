@@ -78,11 +78,7 @@ export function HandoffTable({
               {/* Candidate */}
               <TableCell>
                 <Inline align="center" gap="sm">
-                  <Avatar
-                    initials={initials}
-                    color={item.candidateAvatarColor}
-                    size="md"
-                  />
+                  <Avatar initials={initials} color={item.candidateAvatarColor} size="md" />
                   <Stack gap="none">
                     <span className="bezent-font-semibold bezent-text-sm">
                       {item.candidateName}
@@ -97,9 +93,7 @@ export function HandoffTable({
               {/* Role & Dept */}
               <TableCell>
                 <Stack gap="none">
-                  <span className="bezent-font-medium bezent-text-sm">
-                    {item.jobTitle}
-                  </span>
+                  <span className="bezent-font-medium bezent-text-sm">{item.jobTitle}</span>
                   <span className="bezent-text-xs bezent-text-secondary">
                     {item.department} • {item.designationLevel}
                   </span>
@@ -123,16 +117,26 @@ export function HandoffTable({
                 <Stack gap="xs">
                   <Inline align="center" gap="xs">
                     {item.signedOfferReceived ? (
-                      <Badge variant="success" size="sm">Offer Signed</Badge>
+                      <Badge variant="success" size="sm">
+                        Offer Signed
+                      </Badge>
                     ) : (
-                      <Badge variant="warning" size="sm">Offer Unsigned</Badge>
+                      <Badge variant="warning" size="sm">
+                        Offer Unsigned
+                      </Badge>
                     )}
                     {item.bgvStatus === 'cleared' ? (
-                      <Badge variant="success" size="sm">BGV Cleared</Badge>
+                      <Badge variant="success" size="sm">
+                        BGV Cleared
+                      </Badge>
                     ) : item.bgvStatus === 'in_progress' ? (
-                      <Badge variant="info" size="sm">BGV In Progress</Badge>
+                      <Badge variant="info" size="sm">
+                        BGV In Progress
+                      </Badge>
                     ) : (
-                      <Badge variant="neutral" size="sm">BGV Pending</Badge>
+                      <Badge variant="neutral" size="sm">
+                        BGV Pending
+                      </Badge>
                     )}
                   </Inline>
                 </Stack>
@@ -142,13 +146,17 @@ export function HandoffTable({
               <TableCell>
                 {item.duplicateCheck.hasDuplicate ? (
                   <Stack gap="none">
-                    <Badge variant="warning" size="sm">Match Detected</Badge>
+                    <Badge variant="warning" size="sm">
+                      Match Detected
+                    </Badge>
                     <span className="bezent-text-xs text-amber-700 font-medium">
                       Matches {item.duplicateCheck.existingEmployeeCode}
                     </span>
                   </Stack>
                 ) : (
-                  <Badge variant="neutral" size="sm">Clean Record</Badge>
+                  <Badge variant="neutral" size="sm">
+                    Clean Record
+                  </Badge>
                 )}
               </TableCell>
 
@@ -167,20 +175,12 @@ export function HandoffTable({
               {/* Actions */}
               <TableCell>
                 <Inline align="center" gap="xs">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => onSelectHandoff(item)}
-                  >
+                  <Button size="sm" variant="secondary" onClick={() => onSelectHandoff(item)}>
                     View Details
                   </Button>
 
                   {item.status === 'ready_for_handoff' && (
-                    <Button
-                      size="sm"
-                      variant="primary"
-                      onClick={() => onInitiateConversion(item)}
-                    >
+                    <Button size="sm" variant="primary" onClick={() => onInitiateConversion(item)}>
                       Convert to Case
                     </Button>
                   )}

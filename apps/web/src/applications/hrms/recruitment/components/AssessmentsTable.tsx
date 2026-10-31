@@ -118,11 +118,21 @@ export function AssessmentsTable({
               {/* Candidate Info */}
               <TableCell>
                 <Inline align="center" gap="sm">
-                  <Avatar initials={initials} size="md" color={item.candidateAvatarColor || 'blue'} />
+                  <Avatar
+                    initials={initials}
+                    size="md"
+                    color={item.candidateAvatarColor || 'blue'}
+                  />
                   <Stack gap="none">
-                    <span className="bezent-font-semibold bezent-text-sm">{item.candidateName}</span>
-                    <span className="bezent-text-xs bezent-text-secondary">{item.candidateNumber}</span>
-                    <span className="bezent-text-xs bezent-text-secondary">{item.candidateEmail}</span>
+                    <span className="bezent-font-semibold bezent-text-sm">
+                      {item.candidateName}
+                    </span>
+                    <span className="bezent-text-xs bezent-text-secondary">
+                      {item.candidateNumber}
+                    </span>
+                    <span className="bezent-text-xs bezent-text-secondary">
+                      {item.candidateEmail}
+                    </span>
                   </Stack>
                 </Inline>
               </TableCell>
@@ -137,7 +147,9 @@ export function AssessmentsTable({
                     <Badge variant="neutral" size="sm">
                       {formatAssessmentTypeLabel(item.type)}
                     </Badge>
-                    <span className="bezent-text-xs bezent-text-secondary">via {item.platform}</span>
+                    <span className="bezent-text-xs bezent-text-secondary">
+                      via {item.platform}
+                    </span>
                   </Inline>
                   {item.submissionUrl && (
                     <a
@@ -164,10 +176,14 @@ export function AssessmentsTable({
               {/* Timeline */}
               <TableCell>
                 <Stack gap="none">
-                  <span className="bezent-text-xs bezent-text-secondary">Assigned: {item.assignedDate}</span>
+                  <span className="bezent-text-xs bezent-text-secondary">
+                    Assigned: {item.assignedDate}
+                  </span>
                   <span className="bezent-text-xs bezent-font-semibold">Due: {item.dueDate}</span>
                   {item.submittedDate && (
-                    <span className="bezent-text-xs text-success-700">Submitted: {item.submittedDate}</span>
+                    <span className="bezent-text-xs text-success-700">
+                      Submitted: {item.submittedDate}
+                    </span>
                   )}
                 </Stack>
               </TableCell>
@@ -181,7 +197,10 @@ export function AssessmentsTable({
                   <Stack gap="none">
                     <Inline align="center" gap="xs">
                       <span className="bezent-font-bold bezent-text-base">
-                        {item.score} <span className="bezent-text-xs bezent-font-normal text-gray-500">/ {item.maxScore}</span>
+                        {item.score}{' '}
+                        <span className="bezent-text-xs bezent-font-normal text-gray-500">
+                          / {item.maxScore}
+                        </span>
                       </span>
                       {formatDecisionBadge(item.decision)}
                     </Inline>
@@ -203,7 +222,9 @@ export function AssessmentsTable({
                 {item.evaluatorName ? (
                   <Stack gap="none">
                     <span className="bezent-text-xs bezent-font-medium">{item.evaluatorName}</span>
-                    <span className="bezent-text-xs bezent-text-secondary">{item.evaluatorRole}</span>
+                    <span className="bezent-text-xs bezent-text-secondary">
+                      {item.evaluatorRole}
+                    </span>
                   </Stack>
                 ) : (
                   <span className="bezent-text-xs bezent-text-secondary">Unassigned</span>
@@ -213,22 +234,15 @@ export function AssessmentsTable({
               {/* Actions */}
               <TableCell>
                 <Inline gap="xs" align="center">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => onSelectAssessment(item)}
-                  >
+                  <Button size="sm" variant="secondary" onClick={() => onSelectAssessment(item)}>
                     View Details
                   </Button>
-                  {(item.status === 'submitted' || item.status === 'under_review') && onGradeAssessment && (
-                    <Button
-                      size="sm"
-                      variant="primary"
-                      onClick={() => onGradeAssessment(item)}
-                    >
-                      Grade
-                    </Button>
-                  )}
+                  {(item.status === 'submitted' || item.status === 'under_review') &&
+                    onGradeAssessment && (
+                      <Button size="sm" variant="primary" onClick={() => onGradeAssessment(item)}>
+                        Grade
+                      </Button>
+                    )}
                 </Inline>
               </TableCell>
             </TableRow>

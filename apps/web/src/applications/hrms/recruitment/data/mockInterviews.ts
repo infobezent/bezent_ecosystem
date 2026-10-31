@@ -20,8 +20,18 @@ export const INITIAL_INTERVIEWS: InterviewSchedule[] = [
     durationMinutes: 60,
     meetingLink: 'https://meet.google.com/bez-arch-lead',
     panel: [
-      { name: 'Mukesh Murugesan', role: 'Head of Core Platform', email: 'mukesh.m@bezent.internal', avatarColor: 'blue' },
-      { name: 'Sanjay Verma', role: 'Principal Architect', email: 'sanjay.v@bezent.internal', avatarColor: 'amber' },
+      {
+        name: 'Mukesh Murugesan',
+        role: 'Head of Core Platform',
+        email: 'mukesh.m@bezent.internal',
+        avatarColor: 'blue',
+      },
+      {
+        name: 'Sanjay Verma',
+        role: 'Principal Architect',
+        email: 'sanjay.v@bezent.internal',
+        avatarColor: 'amber',
+      },
     ],
   },
   {
@@ -43,7 +53,12 @@ export const INITIAL_INTERVIEWS: InterviewSchedule[] = [
     durationMinutes: 60,
     meetingLink: 'https://meet.google.com/bez-fe-code',
     panel: [
-      { name: 'Arun Kumar', role: 'Staff Engineer', email: 'arun.k@bezent.internal', avatarColor: 'green' },
+      {
+        name: 'Arun Kumar',
+        role: 'Staff Engineer',
+        email: 'arun.k@bezent.internal',
+        avatarColor: 'green',
+      },
     ],
   },
   {
@@ -65,8 +80,18 @@ export const INITIAL_INTERVIEWS: InterviewSchedule[] = [
     durationMinutes: 60,
     meetingLink: 'https://meet.google.com/bez-ux-design',
     panel: [
-      { name: 'Sabin Rahul', role: 'Director of UX', email: 'sabin.r@bezent.internal', avatarColor: 'cyan' },
-      { name: 'Lakshmi Narayanan', role: 'Lead UX Researcher', email: 'lakshmi.n@bezent.internal', avatarColor: 'purple' },
+      {
+        name: 'Sabin Rahul',
+        role: 'Director of UX',
+        email: 'sabin.r@bezent.internal',
+        avatarColor: 'cyan',
+      },
+      {
+        name: 'Lakshmi Narayanan',
+        role: 'Lead UX Researcher',
+        email: 'lakshmi.n@bezent.internal',
+        avatarColor: 'purple',
+      },
     ],
     scorecard: {
       interviewerName: 'Sabin Rahul',
@@ -75,19 +100,41 @@ export const INITIAL_INTERVIEWS: InterviewSchedule[] = [
       overallScore: 4.5,
       recommendation: 'strong_hire',
       criteria: [
-        { id: 'crit-1', name: 'Design Craft & Polish', score: 5, maxScore: 5, notes: 'Exceptional attention to visual rhythm and tokens.' },
-        { id: 'crit-2', name: 'Systemic Thinking & Scalability', score: 4, maxScore: 5, notes: 'Good grasp of multi-brand token layers.' },
-        { id: 'crit-3', name: 'Communication & Critique Defense', score: 5, maxScore: 5, notes: 'Articulate rationale behind layout choices.' },
-        { id: 'crit-4', name: 'User Empathy & Accessibility', score: 4, maxScore: 5, notes: 'Follows WCAG AA standards strictly.' },
+        {
+          id: 'crit-1',
+          name: 'Design Craft & Polish',
+          score: 5,
+          maxScore: 5,
+          notes: 'Exceptional attention to visual rhythm and tokens.',
+        },
+        {
+          id: 'crit-2',
+          name: 'Systemic Thinking & Scalability',
+          score: 4,
+          maxScore: 5,
+          notes: 'Good grasp of multi-brand token layers.',
+        },
+        {
+          id: 'crit-3',
+          name: 'Communication & Critique Defense',
+          score: 5,
+          maxScore: 5,
+          notes: 'Articulate rationale behind layout choices.',
+        },
+        {
+          id: 'crit-4',
+          name: 'User Empathy & Accessibility',
+          score: 4,
+          maxScore: 5,
+          notes: 'Follows WCAG AA standards strictly.',
+        },
       ],
       strengths: [
         'Mastery of Figma component variants and auto-layout.',
         'Clear articulation of enterprise user friction points.',
         'High maturity in receiving feedback.',
       ],
-      areasForImprovement: [
-        'Could deepen knowledge on automated design token CI pipelines.',
-      ],
+      areasForImprovement: ['Could deepen knowledge on automated design token CI pipelines.'],
       summaryNotes:
         'Vignesh is a top-tier product designer who will elevate our Design System primitives and complex table/form UX. Recommend moving immediately to final assessment round.',
     },
@@ -111,7 +158,12 @@ export const INITIAL_INTERVIEWS: InterviewSchedule[] = [
     durationMinutes: 60,
     meetingLink: 'https://meet.google.com/bez-exec-round',
     panel: [
-      { name: 'Priya Sundaram', role: 'VP of Engineering', email: 'priya.sundaram@bezent.internal', avatarColor: 'purple' },
+      {
+        name: 'Priya Sundaram',
+        role: 'VP of Engineering',
+        email: 'priya.sundaram@bezent.internal',
+        avatarColor: 'purple',
+      },
     ],
     scorecard: {
       interviewerName: 'Priya Sundaram',
@@ -129,7 +181,8 @@ export const INITIAL_INTERVIEWS: InterviewSchedule[] = [
         'Pragmatic balancing of engineering velocity with strict token governance.',
       ],
       areasForImprovement: ['None noted.'],
-      summaryNotes: 'Outstanding candidate. Perfect cultural alignment for the core platform team. Approved for offer extension.',
+      summaryNotes:
+        'Outstanding candidate. Perfect cultural alignment for the core platform team. Approved for offer extension.',
     },
   },
   {
@@ -151,7 +204,12 @@ export const INITIAL_INTERVIEWS: InterviewSchedule[] = [
     durationMinutes: 45,
     meetingLink: 'https://meet.google.com/bez-hr-ops',
     panel: [
-      { name: 'Soundhranayaki S', role: 'Head of People Operations', email: 'soundhra.s@bezent.internal', avatarColor: 'pink' },
+      {
+        name: 'Soundhranayaki S',
+        role: 'Head of People Operations',
+        email: 'soundhra.s@bezent.internal',
+        avatarColor: 'pink',
+      },
     ],
     rescheduleReason: 'Candidate requested postponement due to semester exam schedule.',
   },
@@ -174,7 +232,12 @@ export const INITIAL_INTERVIEWS: InterviewSchedule[] = [
     durationMinutes: 60,
     meetingLink: 'https://meet.google.com/bez-devops',
     panel: [
-      { name: 'Arun Kumar', role: 'Staff Engineer', email: 'arun.k@bezent.internal', avatarColor: 'green' },
+      {
+        name: 'Arun Kumar',
+        role: 'Staff Engineer',
+        email: 'arun.k@bezent.internal',
+        avatarColor: 'green',
+      },
     ],
     cancellationReason: 'Both requisition vacancies filled by previous candidate batch.',
   },

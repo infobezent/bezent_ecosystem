@@ -36,12 +36,21 @@ export const INITIAL_CANDIDATES: Candidate[] = [
     currentCtcLpa: 28,
     expectedCtcLpa: 36,
     experienceHistory: [
-      { company: 'Freshworks Inc.', role: 'Lead UI Architect', duration: '2022 - Present', current: true },
+      {
+        company: 'Freshworks Inc.',
+        role: 'Lead UI Architect',
+        duration: '2022 - Present',
+        current: true,
+      },
       { company: 'Zoho Corporation', role: 'Senior Software Engineer', duration: '2019 - 2022' },
       { company: 'Cognizant', role: 'Programmer Analyst', duration: '2016 - 2019' },
     ],
     educationHistory: [
-      { degree: 'B.Tech in Information Technology', institution: 'Anna University, Chennai', year: '2016' },
+      {
+        degree: 'B.Tech in Information Technology',
+        institution: 'Anna University, Chennai',
+        year: '2016',
+      },
     ],
     applicationHistory: [
       {
@@ -52,7 +61,8 @@ export const INITIAL_CANDIDATES: Candidate[] = [
         appliedDate: '24 Oct, 2026',
         stage: 'offer',
         rating: 4.9,
-        feedbackNotes: 'Outstanding system design round. Led the whiteboard token architecture with clarity.',
+        feedbackNotes:
+          'Outstanding system design round. Led the whiteboard token architecture with clarity.',
       },
     ],
     hiringNotes: [
@@ -97,11 +107,20 @@ export const INITIAL_CANDIDATES: Candidate[] = [
     currentCtcLpa: 30,
     expectedCtcLpa: 40,
     experienceHistory: [
-      { company: 'Razorpay', role: 'Senior Backend Engineer', duration: '2021 - Present', current: true },
+      {
+        company: 'Razorpay',
+        role: 'Senior Backend Engineer',
+        duration: '2021 - Present',
+        current: true,
+      },
       { company: 'Flipkart', role: 'Software Development Engineer II', duration: '2019 - 2021' },
     ],
     educationHistory: [
-      { degree: 'B.E. in Computer Science & Engineering', institution: 'Jadavpur University, Kolkata', year: '2019' },
+      {
+        degree: 'B.E. in Computer Science & Engineering',
+        institution: 'Jadavpur University, Kolkata',
+        year: '2019',
+      },
     ],
     applicationHistory: [
       {
@@ -151,7 +170,12 @@ export const INITIAL_CANDIDATES: Candidate[] = [
     currentCtcLpa: 32,
     expectedCtcLpa: 42,
     experienceHistory: [
-      { company: 'Atlassian Global', role: 'Lead Product Designer', duration: '2021 - Present', current: true },
+      {
+        company: 'Atlassian Global',
+        role: 'Lead Product Designer',
+        duration: '2021 - Present',
+        current: true,
+      },
     ],
     educationHistory: [
       { degree: 'B.Des in Interaction Design', institution: 'RMIT University', year: '2018' },
@@ -204,10 +228,19 @@ export const INITIAL_CANDIDATES: Candidate[] = [
     currentCtcLpa: 36,
     expectedCtcLpa: 46,
     experienceHistory: [
-      { company: 'Santander Digital', role: 'Staff SRE', duration: '2020 - Present', current: true },
+      {
+        company: 'Santander Digital',
+        role: 'Staff SRE',
+        duration: '2020 - Present',
+        current: true,
+      },
     ],
     educationHistory: [
-      { degree: 'M.S. in Cloud Computing', institution: 'Polytechnic University of Madrid', year: '2017' },
+      {
+        degree: 'M.S. in Cloud Computing',
+        institution: 'Polytechnic University of Madrid',
+        year: '2017',
+      },
     ],
     applicationHistory: [
       {
@@ -257,10 +290,19 @@ export const INITIAL_CANDIDATES: Candidate[] = [
     currentCtcLpa: 28,
     expectedCtcLpa: 38,
     experienceHistory: [
-      { company: 'GoTo Group', role: 'Lead Platform Engineer', duration: '2021 - Present', current: true },
+      {
+        company: 'GoTo Group',
+        role: 'Lead Platform Engineer',
+        duration: '2021 - Present',
+        current: true,
+      },
     ],
     educationHistory: [
-      { degree: 'B.Comp.Sc in Computer Science', institution: 'University of Indonesia', year: '2019' },
+      {
+        degree: 'B.Comp.Sc in Computer Science',
+        institution: 'University of Indonesia',
+        year: '2019',
+      },
     ],
     applicationHistory: [],
   },

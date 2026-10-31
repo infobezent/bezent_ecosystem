@@ -63,18 +63,24 @@ export function TalentProfileModal({
           <BezentIcon name="candidates" size="action" />
           <span>{profile.fullName}</span>
           {profile.source === 'silver_medalist' && (
-            <Badge variant="info" size="sm">★ Silver Medalist</Badge>
+            <Badge variant="info" size="sm">
+              ★ Silver Medalist
+            </Badge>
           )}
           {formatTalentStatusPill(profile.status)}
         </Inline>
       }
       description={
         <Inline align="center" gap="md" wrap>
-          <span>{profile.currentTitle} at <strong>{profile.currentCompany}</strong></span>
+          <span>
+            {profile.currentTitle} at <strong>{profile.currentCompany}</strong>
+          </span>
           <span>•</span>
           <span>{profile.experienceYears} Years Exp</span>
           <span>•</span>
-          <span>Rating: <strong>{profile.rating} / 5</strong></span>
+          <span>
+            Rating: <strong>{profile.rating} / 5</strong>
+          </span>
         </Inline>
       }
       footer={
@@ -118,13 +124,21 @@ export function TalentProfileModal({
               <CardBody>
                 <Inline align="center" gap="md">
                   <Avatar
-                    initials={profile.fullName.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                    initials={profile.fullName
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')
+                      .slice(0, 2)}
                     color={profile.avatarColor}
                     size="lg"
                   />
                   <Stack gap="none">
-                    <span className="bezent-text-base bezent-font-semibold">{profile.fullName}</span>
-                    <span className="bezent-text-xs bezent-text-secondary">{profile.email} • {profile.phone}</span>
+                    <span className="bezent-text-base bezent-font-semibold">
+                      {profile.fullName}
+                    </span>
+                    <span className="bezent-text-xs bezent-text-secondary">
+                      {profile.email} • {profile.phone}
+                    </span>
                     <span className="bezent-text-xs bezent-text-secondary">{profile.location}</span>
                   </Stack>
                 </Inline>
@@ -139,10 +153,14 @@ export function TalentProfileModal({
                     <span className="bezent-font-semibold bezent-text-sm">
                       Previous Application Context
                     </span>
-                    <Badge variant="neutral" size="sm">Requisition: {profile.previousApplication.jobTitle}</Badge>
+                    <Badge variant="neutral" size="sm">
+                      Requisition: {profile.previousApplication.jobTitle}
+                    </Badge>
                   </Inline>
                   <p className="bezent-text-xs text-gray-700">
-                    Candidate reached <strong>{profile.previousApplication.lastStageReached}</strong> on {profile.previousApplication.appliedDate}.
+                    Candidate reached{' '}
+                    <strong>{profile.previousApplication.lastStageReached}</strong> on{' '}
+                    {profile.previousApplication.appliedDate}.
                   </p>
                   {profile.previousApplication.notes && (
                     <div className="bg-white p-2 rounded text-xs text-gray-600 border border-blue-100 mt-1">
@@ -157,10 +175,15 @@ export function TalentProfileModal({
             <Card variant="flat" padding="md">
               <CardBody>
                 <Stack gap="sm">
-                  <span className="bezent-font-semibold bezent-text-sm">Skill Set &amp; Talent Tags</span>
+                  <span className="bezent-font-semibold bezent-text-sm">
+                    Skill Set &amp; Talent Tags
+                  </span>
                   <div className="flex flex-wrap gap-1.5">
                     {profile.skills.map((skill) => (
-                      <span key={skill} className="bg-blue-50 text-blue-800 text-xs px-2.5 py-1 rounded font-medium">
+                      <span
+                        key={skill}
+                        className="bg-blue-50 text-blue-800 text-xs px-2.5 py-1 rounded font-medium"
+                      >
                         {skill}
                       </span>
                     ))}
@@ -180,7 +203,9 @@ export function TalentProfileModal({
         {activeTab === 'history' && (
           <Stack gap="md">
             <Inline justify="between" align="center">
-              <span className="bezent-font-semibold bezent-text-sm">Nurturing &amp; Contact Touchpoints</span>
+              <span className="bezent-font-semibold bezent-text-sm">
+                Nurturing &amp; Contact Touchpoints
+              </span>
               <Button size="sm" variant="secondary" onClick={() => setIsAddingNote(!isAddingNote)}>
                 {isAddingNote ? 'Cancel' : 'Log Touchpoint'}
               </Button>
@@ -239,17 +264,21 @@ export function TalentProfileModal({
               <CardBody>
                 <Stack gap="sm">
                   <Inline justify="between" align="center">
-                    <span className="bezent-font-semibold bezent-text-sm">Data Retention Policy &amp; DPDP Consent</span>
+                    <span className="bezent-font-semibold bezent-text-sm">
+                      Data Retention Policy &amp; DPDP Consent
+                    </span>
                     {formatConsentBadge(profile.consentStatus, profile.consentExpiryDate)}
                   </Inline>
                   <Divider />
                   <p className="bezent-text-xs text-gray-700">
-                    Candidate granted consent for talent pool retention under <strong>{profile.retentionPolicy}</strong>.
-                    Per statutory regulations, consent expires on <strong>{profile.consentExpiryDate}</strong>.
+                    Candidate granted consent for talent pool retention under{' '}
+                    <strong>{profile.retentionPolicy}</strong>. Per statutory regulations, consent
+                    expires on <strong>{profile.consentExpiryDate}</strong>.
                   </p>
                   {profile.consentStatus === 'consent_expiring_soon' && (
                     <Alert variant="warning">
-                      Consent expires within 30 days. An automated re-consent link has been dispatched to {profile.email}.
+                      Consent expires within 30 days. An automated re-consent link has been
+                      dispatched to {profile.email}.
                     </Alert>
                   )}
                 </Stack>

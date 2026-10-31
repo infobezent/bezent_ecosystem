@@ -13,10 +13,7 @@ import {
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import type { Candidate } from '../types/candidate';
-import type {
-  AssessmentAssignment,
-  AssessmentType,
-} from '../types/assessment';
+import type { AssessmentAssignment, AssessmentType } from '../types/assessment';
 
 export interface AssignAssessmentModalProps {
   isOpen: boolean;
@@ -160,11 +157,7 @@ export function AssignAssessmentModal({
             </FormField>
 
             <FormField label="Due Date" required>
-              <Input
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-              />
+              <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
             </FormField>
 
             <FormField label="Lead Evaluator Name" required>

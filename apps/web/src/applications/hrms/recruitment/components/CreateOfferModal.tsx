@@ -29,10 +29,16 @@ export function CreateOfferModal({
   candidates,
 }: CreateOfferModalProps) {
   const eligibleCandidates = candidates.filter(
-    (c) => c.currentStage === 'interview' || c.currentStage === 'assessment' || c.currentStage === 'selected' || c.currentStage === 'offer',
+    (c) =>
+      c.currentStage === 'interview' ||
+      c.currentStage === 'assessment' ||
+      c.currentStage === 'selected' ||
+      c.currentStage === 'offer',
   );
 
-  const [candidateId, setCandidateId] = useState(eligibleCandidates[0]?.id || candidates[0]?.id || '');
+  const [candidateId, setCandidateId] = useState(
+    eligibleCandidates[0]?.id || candidates[0]?.id || '',
+  );
   const [level, setLevel] = useState('L5 - Senior Specialist');
   const [ctcLpa, setCtcLpa] = useState('28');
   const [baseLpa, setBaseLpa] = useState('16');
@@ -60,7 +66,10 @@ export function CreateOfferModal({
     const hra = Math.round(basePay * 0.4);
     const statutoryBonus = 60000;
     const pf = 80000;
-    const specialAllowance = Math.max(0, totalCtc - (basePay + hra + performanceBonus + stockOptionsValue + statutoryBonus + pf));
+    const specialAllowance = Math.max(
+      0,
+      totalCtc - (basePay + hra + performanceBonus + stockOptionsValue + statutoryBonus + pf),
+    );
 
     const newOffer: JobOffer = {
       id: `off-${Date.now()}`,

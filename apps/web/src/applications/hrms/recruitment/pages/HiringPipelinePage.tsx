@@ -89,9 +89,7 @@ export function HiringPipelinePage() {
     );
     const updated = candidates.find((c) => c.id === candidateId);
     if (updated) {
-      setBannerNotice(
-        `Advanced "${updated.fullName}" to stage: ${newStage.toUpperCase()}.`,
-      );
+      setBannerNotice(`Advanced "${updated.fullName}" to stage: ${newStage.toUpperCase()}.`);
     }
   };
 
@@ -101,7 +99,9 @@ export function HiringPipelinePage() {
   };
 
   const handleHandoffToOnboarding = (cand: Candidate) => {
-    navigate(`/hrms/workforce/onboarding?action=register&candidateName=${encodeURIComponent(cand.fullName)}&candidateEmail=${encodeURIComponent(cand.email)}`);
+    navigate(
+      `/hrms/workforce/onboarding?action=register&candidateName=${encodeURIComponent(cand.fullName)}&candidateEmail=${encodeURIComponent(cand.email)}`,
+    );
   };
 
   return (
@@ -111,19 +111,13 @@ export function HiringPipelinePage() {
         subtitle="Visual stage progression, stage velocity, and requisition pipeline health."
         actions={
           <Inline align="center" gap="sm">
-            <Button
-              variant="secondary"
-              onClick={() => navigate('/hrms/recruitment/candidates')}
-            >
+            <Button variant="secondary" onClick={() => navigate('/hrms/recruitment/candidates')}>
               <Inline align="center" gap="xs">
                 <BezentIcon name="candidates" size="action" />
                 <span>Directory View</span>
               </Inline>
             </Button>
-            <Button
-              variant="primary"
-              onClick={() => setIsAddOpen(true)}
-            >
+            <Button variant="primary" onClick={() => setIsAddOpen(true)}>
               <Inline align="center" gap="xs">
                 <BezentIcon name="add" size="action" />
                 <span>Add Candidate</span>
@@ -147,7 +141,11 @@ export function HiringPipelinePage() {
               <Stack gap="xs">
                 <Inline justify="between" align="center">
                   <span className="bezent-text-secondary bezent-text-sm">Active In Pipeline</span>
-                  <BezentIcon name="pipeline" size="nav" color="var(--color-primary-600, #4F46E5)" />
+                  <BezentIcon
+                    name="pipeline"
+                    size="nav"
+                    color="var(--color-primary-600, #4F46E5)"
+                  />
                 </Inline>
                 <Inline align="baseline" gap="xs">
                   <span className="bezent-text-2xl bezent-font-semibold">{metrics.active}</span>
@@ -165,8 +163,12 @@ export function HiringPipelinePage() {
                   <BezentIcon name="interviews" size="nav" color="var(--color-info-600, #0284C7)" />
                 </Inline>
                 <Inline align="baseline" gap="xs">
-                  <span className="bezent-text-2xl bezent-font-semibold">{metrics.interviewing}</span>
-                  <span className="bezent-text-xs bezent-text-secondary">interview / assessment</span>
+                  <span className="bezent-text-2xl bezent-font-semibold">
+                    {metrics.interviewing}
+                  </span>
+                  <span className="bezent-text-xs bezent-text-secondary">
+                    interview / assessment
+                  </span>
                 </Inline>
               </Stack>
             </CardBody>
@@ -197,7 +199,9 @@ export function HiringPipelinePage() {
                   <BezentIcon name="reports" size="nav" color="var(--color-warning-600, #D97706)" />
                 </Inline>
                 <Inline align="baseline" gap="xs">
-                  <span className="bezent-text-2xl bezent-font-semibold">{metrics.conversionRate}%</span>
+                  <span className="bezent-text-2xl bezent-font-semibold">
+                    {metrics.conversionRate}%
+                  </span>
                   <span className="bezent-text-xs bezent-text-secondary">pipeline-to-offer</span>
                 </Inline>
               </Stack>
@@ -238,7 +242,11 @@ export function HiringPipelinePage() {
                 <Inline align="center" gap="xs">
                   <span>Archived / Rejected</span>
                   <Badge variant="neutral" size="sm">
-                    {candidates.filter((c) => c.currentStage === 'rejected' || c.currentStage === 'withdrawn').length}
+                    {
+                      candidates.filter(
+                        (c) => c.currentStage === 'rejected' || c.currentStage === 'withdrawn',
+                      ).length
+                    }
                   </Badge>
                 </Inline>
               </Button>
@@ -250,9 +258,7 @@ export function HiringPipelinePage() {
         <div className="overflow-x-auto pb-4 pt-1">
           <div className="flex gap-4 items-start min-w-max">
             {ACTIVE_PIPELINE_STAGES.map((stage) => {
-              const stageCandidates = filteredCandidates.filter(
-                (c) => c.currentStage === stage.id,
-              );
+              const stageCandidates = filteredCandidates.filter((c) => c.currentStage === stage.id);
               return (
                 <PipelineColumn
                   key={stage.id}

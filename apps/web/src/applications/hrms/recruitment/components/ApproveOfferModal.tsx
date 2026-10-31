@@ -53,10 +53,7 @@ export function ApproveOfferModal({
           <Button variant="secondary" onClick={onClose}>
             Cancel
           </Button>
-          <Button
-            variant={decision === 'approved' ? 'primary' : 'danger'}
-            onClick={handleSubmit}
-          >
+          <Button variant={decision === 'approved' ? 'primary' : 'danger'} onClick={handleSubmit}>
             Confirm {decision === 'approved' ? 'Approval' : 'Rejection'}
           </Button>
         </Inline>
@@ -65,10 +62,21 @@ export function ApproveOfferModal({
       <form onSubmit={handleSubmit}>
         <Stack gap="md">
           <div className="bg-gray-50 p-3 rounded text-sm space-y-1">
-            <div>Candidate: <strong>{offer.candidateName}</strong></div>
-            <div>Role: <strong>{offer.jobTitle}</strong> ({offer.department})</div>
-            <div>Total Package: <strong className="text-primary-700">{formatCtc(offer.compensation.totalCtc, offer.currency)}</strong></div>
-            <div>Target Joining Date: <strong>{offer.targetJoiningDate}</strong></div>
+            <div>
+              Candidate: <strong>{offer.candidateName}</strong>
+            </div>
+            <div>
+              Role: <strong>{offer.jobTitle}</strong> ({offer.department})
+            </div>
+            <div>
+              Total Package:{' '}
+              <strong className="text-primary-700">
+                {formatCtc(offer.compensation.totalCtc, offer.currency)}
+              </strong>
+            </div>
+            <div>
+              Target Joining Date: <strong>{offer.targetJoiningDate}</strong>
+            </div>
           </div>
 
           <FormField label="Sign-off Decision" required>

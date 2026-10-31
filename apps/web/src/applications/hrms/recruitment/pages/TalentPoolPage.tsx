@@ -20,7 +20,9 @@ import { ReEngageModal } from '../components/ReEngageModal';
 
 export function TalentPoolPage() {
   const [talent, setTalent] = useState<TalentProfile[]>(INITIAL_TALENT_PROFILES);
-  const [tabFilter, setTabFilter] = useState<'all' | 'silver_medalists' | 'available' | 'consent_due'>('all');
+  const [tabFilter, setTabFilter] = useState<
+    'all' | 'silver_medalists' | 'available' | 'consent_due'
+  >('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [skillFilter, setSkillFilter] = useState('all');
 
@@ -35,7 +37,9 @@ export function TalentPoolPage() {
       all: talent.length,
       silver_medalists: talent.filter((t) => t.source === 'silver_medalist').length,
       available: talent.filter((t) => t.status === 'available').length,
-      consent_due: talent.filter((t) => t.consentStatus === 'consent_expiring_soon' || t.consentStatus === 'consent_expired').length,
+      consent_due: talent.filter(
+        (t) => t.consentStatus === 'consent_expiring_soon' || t.consentStatus === 'consent_expired',
+      ).length,
     };
   }, [talent]);
 
@@ -45,7 +49,11 @@ export function TalentPoolPage() {
       // Tab filter
       if (tabFilter === 'silver_medalists' && t.source !== 'silver_medalist') return false;
       if (tabFilter === 'available' && t.status !== 'available') return false;
-      if (tabFilter === 'consent_due' && !(t.consentStatus === 'consent_expiring_soon' || t.consentStatus === 'consent_expired')) return false;
+      if (
+        tabFilter === 'consent_due' &&
+        !(t.consentStatus === 'consent_expiring_soon' || t.consentStatus === 'consent_expired')
+      )
+        return false;
 
       // Skill filter
       if (skillFilter !== 'all' && !t.skills.includes(skillFilter)) return false;

@@ -12,10 +12,7 @@ import {
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import type { Candidate } from '../types/candidate';
-import type {
-  InterviewSchedule,
-  InterviewType,
-} from '../types/interview';
+import type { InterviewSchedule, InterviewType } from '../types/interview';
 
 export interface ScheduleInterviewModalProps {
   isOpen: boolean;
@@ -153,19 +150,11 @@ export function ScheduleInterviewModal({
             </FormField>
 
             <FormField label="Start Time" required>
-              <Input
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-              />
+              <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
             </FormField>
 
             <FormField label="End Time" required>
-              <Input
-                type="time"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-              />
+              <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
             </FormField>
 
             <FormField label="Lead Interviewer Name" required>

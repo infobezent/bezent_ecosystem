@@ -1,24 +1,11 @@
 export type InterviewType =
-  | 'screening'
-  | 'technical'
-  | 'system_design'
-  | 'managerial'
-  | 'cultural_fit'
-  | 'hr';
+  'screening' | 'technical' | 'system_design' | 'managerial' | 'cultural_fit' | 'hr';
 
 export type InterviewStatus =
-  | 'scheduled'
-  | 'in_progress'
-  | 'completed'
-  | 'rescheduled'
-  | 'cancelled';
+  'scheduled' | 'in_progress' | 'completed' | 'rescheduled' | 'cancelled';
 
 export type InterviewRecommendation =
-  | 'strong_hire'
-  | 'hire'
-  | 'lean_hire'
-  | 'lean_no_hire'
-  | 'no_hire';
+  'strong_hire' | 'hire' | 'lean_hire' | 'lean_no_hire' | 'no_hire';
 
 export interface ScorecardCriterion {
   id: string;

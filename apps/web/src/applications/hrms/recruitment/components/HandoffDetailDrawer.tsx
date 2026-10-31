@@ -86,14 +86,22 @@ export function HandoffDetailDrawer({
           <CardBody>
             <Inline align="center" gap="md">
               <Avatar
-                initials={item.candidateName.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                initials={item.candidateName
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join('')
+                  .slice(0, 2)}
                 color={item.candidateAvatarColor}
                 size="lg"
               />
               <Stack gap="none">
                 <span className="bezent-text-base bezent-font-semibold">{item.candidateName}</span>
-                <span className="bezent-text-xs bezent-text-secondary">{item.candidateEmail} • {item.candidatePhone}</span>
-                <span className="bezent-text-xs text-primary-700 font-medium">{item.designationLevel} ({item.location})</span>
+                <span className="bezent-text-xs bezent-text-secondary">
+                  {item.candidateEmail} • {item.candidatePhone}
+                </span>
+                <span className="bezent-text-xs text-primary-700 font-medium">
+                  {item.designationLevel} ({item.location})
+                </span>
               </Stack>
             </Inline>
           </CardBody>
@@ -103,34 +111,52 @@ export function HandoffDetailDrawer({
         <Card variant="flat" padding="md">
           <CardBody>
             <Stack gap="sm">
-              <span className="bezent-font-semibold bezent-text-sm">Pre-Handoff Verification Checklist</span>
+              <span className="bezent-font-semibold bezent-text-sm">
+                Pre-Handoff Verification Checklist
+              </span>
               <Divider />
               <Grid columns={2} gap="sm">
                 <Inline justify="between" align="center">
-                  <span className="bezent-text-xs bezent-text-secondary">Digital Offer Letter:</span>
+                  <span className="bezent-text-xs bezent-text-secondary">
+                    Digital Offer Letter:
+                  </span>
                   {item.signedOfferReceived ? (
-                    <Badge variant="success" size="sm">Signed &amp; Stored</Badge>
+                    <Badge variant="success" size="sm">
+                      Signed &amp; Stored
+                    </Badge>
                   ) : (
-                    <Badge variant="warning" size="sm">Awaiting Signature</Badge>
+                    <Badge variant="warning" size="sm">
+                      Awaiting Signature
+                    </Badge>
                   )}
                 </Inline>
 
                 <Inline justify="between" align="center">
-                  <span className="bezent-text-xs bezent-text-secondary">Background Verification:</span>
+                  <span className="bezent-text-xs bezent-text-secondary">
+                    Background Verification:
+                  </span>
                   {item.bgvStatus === 'cleared' ? (
-                    <Badge variant="success" size="sm">SpringVerify Cleared</Badge>
+                    <Badge variant="success" size="sm">
+                      SpringVerify Cleared
+                    </Badge>
                   ) : (
-                    <Badge variant="info" size="sm">{item.bgvStatus}</Badge>
+                    <Badge variant="info" size="sm">
+                      {item.bgvStatus}
+                    </Badge>
                   )}
                 </Inline>
 
                 <Inline justify="between" align="center">
                   <span className="bezent-text-xs bezent-text-secondary">Target Joining Date:</span>
-                  <span className="bezent-text-xs bezent-font-bold text-primary-700">{item.targetJoiningDate}</span>
+                  <span className="bezent-text-xs bezent-font-bold text-primary-700">
+                    {item.targetJoiningDate}
+                  </span>
                 </Inline>
 
                 <Inline justify="between" align="center">
-                  <span className="bezent-text-xs bezent-text-secondary">Assigned People Partner:</span>
+                  <span className="bezent-text-xs bezent-text-secondary">
+                    Assigned People Partner:
+                  </span>
                   <span className="bezent-text-xs bezent-font-medium">{item.assignedPartner}</span>
                 </Inline>
               </Grid>
@@ -142,12 +168,14 @@ export function HandoffDetailDrawer({
         {item.duplicateCheck.hasDuplicate ? (
           <Alert variant="warning">
             <strong>Duplicate Guard Alert:</strong> Matched former employee record{' '}
-            <strong>{item.duplicateCheck.existingEmployeeCode}</strong> ({item.duplicateCheck.existingEmployeeName}).
-            Will be handled as a Re-hire to preserve historic continuity.
+            <strong>{item.duplicateCheck.existingEmployeeCode}</strong> (
+            {item.duplicateCheck.existingEmployeeName}). Will be handled as a Re-hire to preserve
+            historic continuity.
           </Alert>
         ) : (
           <Alert variant="success">
-            <strong>Duplicate Guard Clear:</strong> Candidate does not collide with any active or inactive employee record in BEZENT.
+            <strong>Duplicate Guard Clear:</strong> Candidate does not collide with any active or
+            inactive employee record in BEZENT.
           </Alert>
         )}
 
@@ -158,9 +186,15 @@ export function HandoffDetailDrawer({
               <Stack gap="xs">
                 <span className="bezent-font-semibold bezent-text-sm">Active Onboarding Case</span>
                 <Inline align="center" gap="md">
-                  <span className="bezent-text-xs text-blue-900 font-mono">Case Code: <strong>{item.onboardingCaseCode}</strong></span>
-                  <span className="bezent-text-xs text-blue-900 font-mono">Assigned Employee Code: <strong>{item.employeeCode}</strong></span>
-                  <span className="bezent-text-xs text-blue-900">Handoff Date: <strong>{item.handoffDate}</strong></span>
+                  <span className="bezent-text-xs text-blue-900 font-mono">
+                    Case Code: <strong>{item.onboardingCaseCode}</strong>
+                  </span>
+                  <span className="bezent-text-xs text-blue-900 font-mono">
+                    Assigned Employee Code: <strong>{item.employeeCode}</strong>
+                  </span>
+                  <span className="bezent-text-xs text-blue-900">
+                    Handoff Date: <strong>{item.handoffDate}</strong>
+                  </span>
                 </Inline>
               </Stack>
             </CardBody>

@@ -13,11 +13,7 @@ import { BezentIcon } from '../../../../design-system/icons';
 import { INITIAL_INTERVIEWS } from '../data/mockInterviews';
 import { INITIAL_CANDIDATES } from '../data/mockCandidates';
 import { INITIAL_JOB_OPENINGS } from '../data/mockJobOpenings';
-import type {
-  InterviewFeedback,
-  InterviewSchedule,
-  InterviewType,
-} from '../types/interview';
+import type { InterviewFeedback, InterviewSchedule, InterviewType } from '../types/interview';
 import { InterviewMetrics } from '../components/InterviewMetrics';
 import { InterviewScheduleTable } from '../components/InterviewScheduleTable';
 import { InterviewCalendarView } from '../components/InterviewCalendarView';
@@ -30,7 +26,9 @@ export function InterviewsPage() {
 
   // State
   const [interviews, setInterviews] = useState<InterviewSchedule[]>(INITIAL_INTERVIEWS);
-  const [tabFilter, setTabFilter] = useState<'all' | 'today' | 'upcoming' | 'completed' | 'archived'>('all');
+  const [tabFilter, setTabFilter] = useState<
+    'all' | 'today' | 'upcoming' | 'completed' | 'archived'
+  >('all');
   const [viewMode, setViewMode] = useState<'table' | 'calendar'>('table');
   const [searchQuery, setSearchQuery] = useState('');
   const [jobFilter, setJobFilter] = useState('all');
@@ -58,9 +56,11 @@ export function InterviewsPage() {
     return {
       all: interviews.length,
       today: interviews.filter((i) => i.scheduledDate === today && i.status !== 'cancelled').length,
-      upcoming: interviews.filter((i) => i.scheduledDate > today && i.status === 'scheduled').length,
+      upcoming: interviews.filter((i) => i.scheduledDate > today && i.status === 'scheduled')
+        .length,
       completed: interviews.filter((i) => i.status === 'completed').length,
-      archived: interviews.filter((i) => i.status === 'rescheduled' || i.status === 'cancelled').length,
+      archived: interviews.filter((i) => i.status === 'rescheduled' || i.status === 'cancelled')
+        .length,
     };
   }, [interviews, today]);
 
@@ -131,12 +131,12 @@ export function InterviewsPage() {
   const handleSubmitScorecard = (interviewId: string, feedback: InterviewFeedback) => {
     setInterviews((prev) =>
       prev.map((i) =>
-        i.id === interviewId
-          ? { ...i, status: 'completed', scorecard: feedback }
-          : i,
+        i.id === interviewId ? { ...i, status: 'completed', scorecard: feedback } : i,
       ),
     );
-    setBannerNotice(`Successfully logged scorecard for ${selectedInterview?.candidateName}! Recommendation: ${feedback.recommendation.toUpperCase()}`);
+    setBannerNotice(
+      `Successfully logged scorecard for ${selectedInterview?.candidateName}! Recommendation: ${feedback.recommendation.toUpperCase()}`,
+    );
   };
 
   const handleOpenReschedule = (interview: InterviewSchedule) => {
@@ -182,9 +182,7 @@ export function InterviewsPage() {
   const handleConfirmCancel = (interviewId: string, reason: string) => {
     setInterviews((prev) =>
       prev.map((i) =>
-        i.id === interviewId
-          ? { ...i, status: 'cancelled', cancellationReason: reason }
-          : i,
+        i.id === interviewId ? { ...i, status: 'cancelled', cancellationReason: reason } : i,
       ),
     );
     setBannerNotice('Interview round has been cancelled.');
@@ -192,14 +190,14 @@ export function InterviewsPage() {
 
   const handleScheduleNew = (newInterview: InterviewSchedule) => {
     setInterviews((prev) => [newInterview, ...prev]);
-    setBannerNotice(`Interview booked for ${newInterview.candidateName} on ${newInterview.scheduledDate} at ${newInterview.startTime}.`);
+    setBannerNotice(
+      `Interview booked for ${newInterview.candidateName} on ${newInterview.scheduledDate} at ${newInterview.startTime}.`,
+    );
   };
 
   return (
     <Page>
-      <PageHeader
-        title="Interviews"
-      />
+      <PageHeader title="Interviews" />
 
       <Stack gap="lg">
         {bannerNotice && (
@@ -282,11 +280,7 @@ export function InterviewsPage() {
           }
           right={
             <Inline align="center" gap="sm">
-              <Button
-                variant="dark"
-                size="md"
-                onClick={() => setIsScheduleOpen(true)}
-              >
+              <Button variant="dark" size="md" onClick={() => setIsScheduleOpen(true)}>
                 <Inline align="center" gap="xs">
                   <BezentIcon name="add" size="action" />
                   <span>Schedule Interview</span>

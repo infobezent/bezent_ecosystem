@@ -17,10 +17,7 @@ import {
   Textarea,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
-import type {
-  AssessmentAssignment,
-  AssessmentDecision,
-} from '../types/assessment';
+import type { AssessmentAssignment, AssessmentDecision } from '../types/assessment';
 import {
   formatAssessmentStatusBadge,
   formatAssessmentTypeLabel,
@@ -31,7 +28,12 @@ export interface AssessmentDetailModalProps {
   assessment: AssessmentAssignment | null;
   isOpen: boolean;
   onClose: () => void;
-  onSaveGrade?: (assessmentId: string, score: number, decision: AssessmentDecision, feedback: string) => void;
+  onSaveGrade?: (
+    assessmentId: string,
+    score: number,
+    decision: AssessmentDecision,
+    feedback: string,
+  ) => void;
   isGradingMode?: boolean;
 }
 
@@ -42,7 +44,9 @@ export function AssessmentDetailModal({
   onSaveGrade,
   isGradingMode = false,
 }: AssessmentDetailModalProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'submission' | 'evaluation' | 'grade'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'submission' | 'evaluation' | 'grade'>(
+    'overview',
+  );
   const [gradeScore, setGradeScore] = useState('90');
   const [gradeDecision, setGradeDecision] = useState<AssessmentDecision>('passed');
   const [gradeFeedback, setGradeFeedback] = useState(
@@ -54,7 +58,11 @@ export function AssessmentDetailModal({
   const tabItems = [
     { id: 'overview', label: 'Brief & Instructions' },
     { id: 'submission', label: 'Candidate Submission' },
-    { id: 'evaluation', label: assessment.score !== undefined ? `Evaluation (Score: ${assessment.score})` : 'Evaluation' },
+    {
+      id: 'evaluation',
+      label:
+        assessment.score !== undefined ? `Evaluation (Score: ${assessment.score})` : 'Evaluation',
+    },
     ...(isGradingMode || assessment.status === 'submitted' || assessment.status === 'under_review'
       ? [{ id: 'grade', label: 'Grade & Review' }]
       : []),
@@ -82,11 +90,15 @@ export function AssessmentDetailModal({
       }
       description={
         <Inline align="center" gap="md" wrap>
-          <span>Candidate: <strong>{assessment.candidateName}</strong> ({assessment.candidateNumber})</span>
+          <span>
+            Candidate: <strong>{assessment.candidateName}</strong> ({assessment.candidateNumber})
+          </span>
           <span>•</span>
           <span>{assessment.jobTitle}</span>
           <span>•</span>
-          <Badge variant="neutral" size="sm">{formatAssessmentTypeLabel(assessment.type)}</Badge>
+          <Badge variant="neutral" size="sm">
+            {formatAssessmentTypeLabel(assessment.type)}
+          </Badge>
         </Inline>
       }
       footer={
@@ -123,7 +135,9 @@ export function AssessmentDetailModal({
                 <CardBody>
                   <Stack gap="none">
                     <span className="bezent-text-xs bezent-text-secondary">Testing Platform</span>
-                    <span className="bezent-font-semibold bezent-text-sm">{assessment.platform}</span>
+                    <span className="bezent-font-semibold bezent-text-sm">
+                      {assessment.platform}
+                    </span>
                   </Stack>
                 </CardBody>
               </Card>
@@ -143,7 +157,9 @@ export function AssessmentDetailModal({
                 <CardBody>
                   <Stack gap="none">
                     <span className="bezent-text-xs bezent-text-secondary">Total Weight</span>
-                    <span className="bezent-font-semibold bezent-text-sm">{assessment.maxScore} points</span>
+                    <span className="bezent-font-semibold bezent-text-sm">
+                      {assessment.maxScore} points
+                    </span>
                   </Stack>
                 </CardBody>
               </Card>
@@ -152,9 +168,12 @@ export function AssessmentDetailModal({
             <Divider />
 
             <Stack gap="xs">
-              <h4 className="bezent-font-semibold bezent-text-sm">Challenge Description & Expectations</h4>
+              <h4 className="bezent-font-semibold bezent-text-sm">
+                Challenge Description & Expectations
+              </h4>
               <p className="bezent-text-sm bezent-text-secondary leading-relaxed">
-                This practical assessment tests candidate problem decomposition, architecture fidelity, and mastery of domain principles under realistic constraints.
+                This practical assessment tests candidate problem decomposition, architecture
+                fidelity, and mastery of domain principles under realistic constraints.
               </p>
             </Stack>
 
@@ -163,10 +182,18 @@ export function AssessmentDetailModal({
                 <CardBody>
                   <Inline justify="between" align="center">
                     <Inline align="center" gap="sm">
-                      <BezentIcon name="explore" size="action" color="var(--color-info-600, #0284C7)" />
+                      <BezentIcon
+                        name="explore"
+                        size="action"
+                        color="var(--color-info-600, #0284C7)"
+                      />
                       <Stack gap="none">
-                        <span className="bezent-font-semibold bezent-text-sm">Challenge Repository / Workspace</span>
-                        <span className="bezent-text-xs bezent-text-secondary">{assessment.testLink}</span>
+                        <span className="bezent-font-semibold bezent-text-sm">
+                          Challenge Repository / Workspace
+                        </span>
+                        <span className="bezent-text-xs bezent-text-secondary">
+                          {assessment.testLink}
+                        </span>
                       </Stack>
                     </Inline>
                     <a
@@ -193,9 +220,15 @@ export function AssessmentDetailModal({
                   <CardBody>
                     <Inline justify="between" align="center">
                       <Inline align="center" gap="sm">
-                        <BezentIcon name="check" size="action" color="var(--color-success-600, #16A34A)" />
+                        <BezentIcon
+                          name="check"
+                          size="action"
+                          color="var(--color-success-600, #16A34A)"
+                        />
                         <Stack gap="none">
-                          <span className="bezent-font-semibold bezent-text-sm">Submitted by Candidate</span>
+                          <span className="bezent-font-semibold bezent-text-sm">
+                            Submitted by Candidate
+                          </span>
                           <span className="bezent-text-xs bezent-text-secondary">
                             Timestamp: {assessment.submittedDate || 'Recently submitted'}
                           </span>
@@ -215,7 +248,9 @@ export function AssessmentDetailModal({
 
                 {assessment.submissionNotes && (
                   <Stack gap="xs">
-                    <h4 className="bezent-font-semibold bezent-text-sm">Candidate Submission Notes</h4>
+                    <h4 className="bezent-font-semibold bezent-text-sm">
+                      Candidate Submission Notes
+                    </h4>
                     <p className="bezent-text-sm bezent-text-secondary bg-gray-50 p-3 rounded-lg border border-gray-100 leading-relaxed">
                       {assessment.submissionNotes}
                     </p>
@@ -226,7 +261,9 @@ export function AssessmentDetailModal({
               <div className="py-12 text-center border-2 border-dashed border-gray-200 rounded-xl">
                 <Stack gap="xs" align="center">
                   <BezentIcon name="clock" size="nav" color="var(--color-warning-600, #D97706)" />
-                  <span className="bezent-font-semibold bezent-text-sm">Awaiting Candidate Submission</span>
+                  <span className="bezent-font-semibold bezent-text-sm">
+                    Awaiting Candidate Submission
+                  </span>
                   <span className="bezent-text-xs bezent-text-secondary">
                     Due on {assessment.dueDate}. Candidate has not submitted their solution yet.
                   </span>
@@ -242,27 +279,37 @@ export function AssessmentDetailModal({
             {assessment.score !== undefined ? (
               <>
                 {/* Score Banner */}
-                <Card variant={assessment.decision === 'passed' ? 'tint-green' : 'flat'} padding="md">
+                <Card
+                  variant={assessment.decision === 'passed' ? 'tint-green' : 'flat'}
+                  padding="md"
+                >
                   <CardBody>
                     <Grid columns={3} gap="md">
                       <Stack gap="none">
                         <span className="bezent-text-xs bezent-text-secondary">Final Score</span>
                         <span className="bezent-text-3xl bezent-font-bold">
-                          {assessment.score} <span className="bezent-text-sm bezent-font-normal text-gray-500">/ {assessment.maxScore}</span>
+                          {assessment.score}{' '}
+                          <span className="bezent-text-sm bezent-font-normal text-gray-500">
+                            / {assessment.maxScore}
+                          </span>
                         </span>
                       </Stack>
 
                       <Stack gap="none">
-                        <span className="bezent-text-xs bezent-text-secondary">Hiring Decision</span>
-                        <div className="pt-1">
-                          {formatDecisionBadge(assessment.decision)}
-                        </div>
+                        <span className="bezent-text-xs bezent-text-secondary">
+                          Hiring Decision
+                        </span>
+                        <div className="pt-1">{formatDecisionBadge(assessment.decision)}</div>
                       </Stack>
 
                       <Stack gap="none">
                         <span className="bezent-text-xs bezent-text-secondary">Evaluated By</span>
-                        <span className="bezent-font-semibold bezent-text-sm">{assessment.evaluatorName}</span>
-                        <span className="bezent-text-xs bezent-text-secondary">{assessment.evaluatedDate}</span>
+                        <span className="bezent-font-semibold bezent-text-sm">
+                          {assessment.evaluatorName}
+                        </span>
+                        <span className="bezent-text-xs bezent-text-secondary">
+                          {assessment.evaluatedDate}
+                        </span>
                       </Stack>
                     </Grid>
                   </CardBody>
@@ -278,9 +325,13 @@ export function AssessmentDetailModal({
                           <CardBody>
                             <Inline justify="between" align="center">
                               <Stack gap="none">
-                                <span className="bezent-font-semibold bezent-text-sm">{crit.name}</span>
+                                <span className="bezent-font-semibold bezent-text-sm">
+                                  {crit.name}
+                                </span>
                                 {crit.notes && (
-                                  <span className="bezent-text-xs bezent-text-secondary">{crit.notes}</span>
+                                  <span className="bezent-text-xs bezent-text-secondary">
+                                    {crit.notes}
+                                  </span>
                                 )}
                               </Stack>
                               <Badge variant="info" size="md">
@@ -310,7 +361,8 @@ export function AssessmentDetailModal({
             ) : (
               <div className="py-12 text-center border-2 border-dashed border-gray-200 rounded-xl">
                 <span className="bezent-text-xs bezent-text-secondary">
-                  Assessment has not been evaluated yet. Click &quot;Grade &amp; Review&quot; to record scores.
+                  Assessment has not been evaluated yet. Click &quot;Grade &amp; Review&quot; to
+                  record scores.
                 </span>
               </div>
             )}

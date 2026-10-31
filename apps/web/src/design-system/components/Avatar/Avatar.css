@@ -23,7 +23,9 @@
     0 2px 4px rgba(0, 0, 0, 0.05),
     inset 0 1px 1.5px rgba(255, 255, 255, 0.8),
     inset 0 -1px 1.5px rgba(0, 0, 0, 0.03);
-  transition: opacity 0.16s ease, transform 0.14s ease;
+  transition:
+    opacity 0.16s ease,
+    transform 0.14s ease;
 }
 
 [data-theme='dark'] .bezent-avatar {

@@ -32,7 +32,9 @@ export function CandidateProfileDrawer({
   onStageChange,
   onHandoffToOnboarding,
 }: CandidateProfileDrawerProps) {
-  const [activeTab, setActiveTab] = useState<'profile' | 'resume' | 'history' | 'actions'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'resume' | 'history' | 'actions'>(
+    'profile',
+  );
   const [targetStage, setTargetStage] = useState<CandidateStage>('interview');
 
   if (!candidate) return null;
@@ -70,14 +72,18 @@ export function CandidateProfileDrawer({
               {formatStageBadge(candidate.currentStage)}
             </Inline>
             <span className="bezent-text-xs bezent-text-secondary">
-              {candidate.candidateNumber} • {candidate.currentCompany ? `${candidate.currentCompany} • ` : ''}{candidate.location}
+              {candidate.candidateNumber} •{' '}
+              {candidate.currentCompany ? `${candidate.currentCompany} • ` : ''}
+              {candidate.location}
             </span>
           </Stack>
         </Inline>
       }
       description={
         <Inline align="center" gap="md" wrap>
-          <span>Applied for: <strong>{candidate.appliedJobTitle}</strong> ({candidate.appliedJobCode})</span>
+          <span>
+            Applied for: <strong>{candidate.appliedJobTitle}</strong> ({candidate.appliedJobCode})
+          </span>
           <span>•</span>
           <span>Source: {formatSourceLabel(candidate.source)}</span>
           <span>•</span>
@@ -129,7 +135,8 @@ export function CandidateProfileDrawer({
                   <Stack gap="none">
                     <span className="bezent-text-xs bezent-text-secondary">Experience</span>
                     <span className="bezent-font-semibold bezent-text-sm">
-                      {candidate.totalExperienceYears} yrs ({candidate.relevantExperienceYears} yrs rel.)
+                      {candidate.totalExperienceYears} yrs ({candidate.relevantExperienceYears} yrs
+                      rel.)
                     </span>
                   </Stack>
                 </CardBody>
@@ -151,7 +158,9 @@ export function CandidateProfileDrawer({
                   <Stack gap="none">
                     <span className="bezent-text-xs bezent-text-secondary">Notice Period</span>
                     <span className="bezent-font-semibold bezent-text-sm">
-                      {candidate.noticePeriodDays === 0 ? 'Immediate' : `${candidate.noticePeriodDays} days`}
+                      {candidate.noticePeriodDays === 0
+                        ? 'Immediate'
+                        : `${candidate.noticePeriodDays} days`}
                     </span>
                   </Stack>
                 </CardBody>
@@ -160,7 +169,9 @@ export function CandidateProfileDrawer({
               <Card variant="clay" padding="none" className="bezent-clay-card--compact">
                 <CardBody>
                   <Stack gap="none">
-                    <span className="bezent-text-xs bezent-text-secondary">CTC (Current / Exp.)</span>
+                    <span className="bezent-text-xs bezent-text-secondary">
+                      CTC (Current / Exp.)
+                    </span>
                     <span className="bezent-font-semibold bezent-text-sm">
                       ₹{candidate.currentCtcLpa || '—'} / ₹{candidate.expectedCtcLpa || '—'} LPA
                     </span>
@@ -185,7 +196,9 @@ export function CandidateProfileDrawer({
                     </Stack>
                     <Stack gap="none">
                       <span className="bezent-text-xs bezent-text-secondary">Current Location</span>
-                      <span className="bezent-text-sm bezent-font-medium">{candidate.location}</span>
+                      <span className="bezent-text-sm bezent-font-medium">
+                        {candidate.location}
+                      </span>
                     </Stack>
                   </Grid>
                 </Stack>
@@ -235,13 +248,25 @@ export function CandidateProfileDrawer({
               <CardBody>
                 <Inline justify="between" align="center">
                   <Inline align="center" gap="sm">
-                    <BezentIcon name="documents" size="action" color="var(--color-info-600, #0284C7)" />
+                    <BezentIcon
+                      name="documents"
+                      size="action"
+                      color="var(--color-info-600, #0284C7)"
+                    />
                     <Stack gap="none">
-                      <span className="bezent-font-semibold bezent-text-sm">{candidate.resumeFileName}</span>
-                      <span className="bezent-text-xs bezent-text-secondary">PDF Document • 2.4 MB • Uploaded on {candidate.appliedDate}</span>
+                      <span className="bezent-font-semibold bezent-text-sm">
+                        {candidate.resumeFileName}
+                      </span>
+                      <span className="bezent-text-xs bezent-text-secondary">
+                        PDF Document • 2.4 MB • Uploaded on {candidate.appliedDate}
+                      </span>
                     </Stack>
                   </Inline>
-                  <Button size="sm" variant="secondary" onClick={() => alert(`Opening resume: ${candidate.resumeFileName}`)}>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => alert(`Opening resume: ${candidate.resumeFileName}`)}
+                  >
                     View Resume
                   </Button>
                 </Inline>
@@ -260,11 +285,19 @@ export function CandidateProfileDrawer({
                       <Inline justify="between" align="center">
                         <Stack gap="none">
                           <span className="bezent-font-semibold bezent-text-sm">{exp.role}</span>
-                          <span className="bezent-text-xs bezent-text-secondary">{exp.company}</span>
+                          <span className="bezent-text-xs bezent-text-secondary">
+                            {exp.company}
+                          </span>
                         </Stack>
                         <Inline align="center" gap="xs">
-                          {exp.current && <Badge variant="success" size="sm">Current</Badge>}
-                          <span className="bezent-text-xs bezent-text-secondary">{exp.duration}</span>
+                          {exp.current && (
+                            <Badge variant="success" size="sm">
+                              Current
+                            </Badge>
+                          )}
+                          <span className="bezent-text-xs bezent-text-secondary">
+                            {exp.duration}
+                          </span>
                         </Inline>
                       </Inline>
                     </CardBody>
@@ -285,9 +318,13 @@ export function CandidateProfileDrawer({
                       <Inline justify="between" align="center">
                         <Stack gap="none">
                           <span className="bezent-font-semibold bezent-text-sm">{edu.degree}</span>
-                          <span className="bezent-text-xs bezent-text-secondary">{edu.institution}</span>
+                          <span className="bezent-text-xs bezent-text-secondary">
+                            {edu.institution}
+                          </span>
                         </Stack>
-                        <span className="bezent-text-xs bezent-text-secondary">Class of {edu.year}</span>
+                        <span className="bezent-text-xs bezent-text-secondary">
+                          Class of {edu.year}
+                        </span>
                       </Inline>
                     </CardBody>
                   </Card>
@@ -308,7 +345,9 @@ export function CandidateProfileDrawer({
                     <Stack gap="xs">
                       <Inline justify="between" align="center">
                         <Stack gap="none">
-                          <span className="bezent-font-semibold bezent-text-sm">{app.jobTitle}</span>
+                          <span className="bezent-font-semibold bezent-text-sm">
+                            {app.jobTitle}
+                          </span>
                           <span className="bezent-text-xs bezent-text-secondary">
                             {app.jobCode} • {app.department} • Applied on {app.appliedDate}
                           </span>
@@ -356,9 +395,12 @@ export function CandidateProfileDrawer({
               <CardBody>
                 <Stack gap="md">
                   <Stack gap="xs">
-                    <span className="bezent-font-semibold bezent-text-sm">Transition Candidate Stage</span>
+                    <span className="bezent-font-semibold bezent-text-sm">
+                      Transition Candidate Stage
+                    </span>
                     <span className="bezent-text-xs bezent-text-secondary">
-                      Current stage: <strong>{candidate.currentStage.toUpperCase()}</strong>. Select a target stage to advance this applicant.
+                      Current stage: <strong>{candidate.currentStage.toUpperCase()}</strong>. Select
+                      a target stage to advance this applicant.
                     </span>
                   </Stack>
 
@@ -390,11 +432,18 @@ export function CandidateProfileDrawer({
                 <CardBody>
                   <Stack gap="xs">
                     <Inline align="center" gap="xs">
-                      <BezentIcon name="onboarding" size="action" color="var(--color-success-600, #16A34A)" />
-                      <span className="bezent-font-semibold bezent-text-sm">Ready for Onboarding Handoff</span>
+                      <BezentIcon
+                        name="onboarding"
+                        size="action"
+                        color="var(--color-success-600, #16A34A)"
+                      />
+                      <span className="bezent-font-semibold bezent-text-sm">
+                        Ready for Onboarding Handoff
+                      </span>
                     </Inline>
                     <p className="bezent-text-xs bezent-text-secondary">
-                      This candidate is marked as Hired. You can directly convert them into an Onboarding Case in BEZENT HRMS without re-entering their data.
+                      This candidate is marked as Hired. You can directly convert them into an
+                      Onboarding Case in BEZENT HRMS without re-entering their data.
                     </p>
                     <Button
                       variant="primary"

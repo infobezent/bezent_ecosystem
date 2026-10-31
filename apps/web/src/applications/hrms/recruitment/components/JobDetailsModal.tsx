@@ -29,7 +29,9 @@ export function JobDetailsModal({
   onClose,
   onNavigateToCandidates,
 }: JobDetailsModalProps) {
-  const [activeTab, setActiveTab] = useState<'details' | 'team' | 'requirements' | 'pipeline'>('details');
+  const [activeTab, setActiveTab] = useState<'details' | 'team' | 'requirements' | 'pipeline'>(
+    'details',
+  );
 
   if (!job) return null;
 
@@ -60,7 +62,9 @@ export function JobDetailsModal({
           <span>•</span>
           <span>{job.location}</span>
           <span>•</span>
-          <Badge variant="neutral" size="sm">{formatWorkplace(job.workplaceType)}</Badge>
+          <Badge variant="neutral" size="sm">
+            {formatWorkplace(job.workplaceType)}
+          </Badge>
         </Inline>
       }
       footer={
@@ -125,7 +129,9 @@ export function JobDetailsModal({
               <Card variant="flat" padding="sm">
                 <CardBody>
                   <Stack gap="xs">
-                    <span className="bezent-text-xs bezent-text-secondary">Offered Compensation</span>
+                    <span className="bezent-text-xs bezent-text-secondary">
+                      Offered Compensation
+                    </span>
                     <span className="bezent-font-semibold bezent-text-base">
                       {job.salaryMin && job.salaryMax
                         ? `${job.currency || 'INR'} ${(job.salaryMin / 100000).toFixed(1)}L - ${(job.salaryMax / 100000).toFixed(1)}L`
@@ -140,7 +146,9 @@ export function JobDetailsModal({
 
             <Stack gap="xs">
               <h4 className="bezent-font-semibold bezent-text-sm">Job Description</h4>
-              <p className="bezent-text-secondary bezent-text-sm leading-relaxed">{job.description}</p>
+              <p className="bezent-text-secondary bezent-text-sm leading-relaxed">
+                {job.description}
+              </p>
             </Stack>
 
             <Stack gap="xs">
@@ -163,17 +171,29 @@ export function JobDetailsModal({
               <Card variant="flat" padding="md">
                 <CardBody>
                   <Stack gap="xs">
-                    <span className="bezent-text-xs bezent-text-secondary">Hiring Manager (Final Approver)</span>
+                    <span className="bezent-text-xs bezent-text-secondary">
+                      Hiring Manager (Final Approver)
+                    </span>
                     <Inline align="center" gap="sm">
                       <Avatar
-                        initials={job.hiringManager.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                        initials={job.hiringManager.name
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                          .slice(0, 2)}
                         color={job.hiringManager.avatarColor || 'purple'}
                         size="md"
                       />
                       <Stack gap="none">
-                        <span className="bezent-font-semibold bezent-text-sm">{job.hiringManager.name}</span>
-                        <span className="bezent-text-xs bezent-text-secondary">{job.hiringManager.role}</span>
-                        <span className="bezent-text-xs bezent-text-secondary">{job.hiringManager.email}</span>
+                        <span className="bezent-font-semibold bezent-text-sm">
+                          {job.hiringManager.name}
+                        </span>
+                        <span className="bezent-text-xs bezent-text-secondary">
+                          {job.hiringManager.role}
+                        </span>
+                        <span className="bezent-text-xs bezent-text-secondary">
+                          {job.hiringManager.email}
+                        </span>
                       </Stack>
                     </Inline>
                   </Stack>
@@ -184,17 +204,29 @@ export function JobDetailsModal({
               <Card variant="flat" padding="md">
                 <CardBody>
                   <Stack gap="xs">
-                    <span className="bezent-text-xs bezent-text-secondary">Lead Talent Partner / Recruiter</span>
+                    <span className="bezent-text-xs bezent-text-secondary">
+                      Lead Talent Partner / Recruiter
+                    </span>
                     <Inline align="center" gap="sm">
                       <Avatar
-                        initials={job.recruiter.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                        initials={job.recruiter.name
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                          .slice(0, 2)}
                         color={job.recruiter.avatarColor || 'blue'}
                         size="md"
                       />
                       <Stack gap="none">
-                        <span className="bezent-font-semibold bezent-text-sm">{job.recruiter.name}</span>
-                        <span className="bezent-text-xs bezent-text-secondary">{job.recruiter.role}</span>
-                        <span className="bezent-text-xs bezent-text-secondary">{job.recruiter.email}</span>
+                        <span className="bezent-font-semibold bezent-text-sm">
+                          {job.recruiter.name}
+                        </span>
+                        <span className="bezent-text-xs bezent-text-secondary">
+                          {job.recruiter.role}
+                        </span>
+                        <span className="bezent-text-xs bezent-text-secondary">
+                          {job.recruiter.email}
+                        </span>
                       </Stack>
                     </Inline>
                   </Stack>
@@ -219,7 +251,11 @@ export function JobDetailsModal({
                       <CardBody>
                         <Inline align="center" gap="sm">
                           <Avatar
-                            initials={inv.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                            initials={inv.name
+                              .split(' ')
+                              .map((n) => n[0])
+                              .join('')
+                              .slice(0, 2)}
                             color={inv.avatarColor || 'cyan'}
                             size="sm"
                           />
@@ -254,7 +290,9 @@ export function JobDetailsModal({
             <Divider />
 
             <Stack gap="xs">
-              <h4 className="bezent-font-semibold bezent-text-sm">Minimum Requirements & Qualifications</h4>
+              <h4 className="bezent-font-semibold bezent-text-sm">
+                Minimum Requirements & Qualifications
+              </h4>
               <ul className="bezent-text-secondary bezent-text-sm list-disc pl-5 space-y-1">
                 {job.requirements.map((req, idx) => (
                   <li key={idx}>{req}</li>
@@ -282,7 +320,9 @@ export function JobDetailsModal({
                 <CardBody>
                   <Stack gap="none">
                     <span className="bezent-text-xs bezent-text-secondary">2. Screening</span>
-                    <span className="bezent-font-bold bezent-text-xl">{job.pipeline.screening}</span>
+                    <span className="bezent-font-bold bezent-text-xl">
+                      {job.pipeline.screening}
+                    </span>
                   </Stack>
                 </CardBody>
               </Card>
@@ -291,7 +331,9 @@ export function JobDetailsModal({
                 <CardBody>
                   <Stack gap="none">
                     <span className="bezent-text-xs bezent-text-secondary">3. Interview</span>
-                    <span className="bezent-font-bold bezent-text-xl">{job.pipeline.interview}</span>
+                    <span className="bezent-font-bold bezent-text-xl">
+                      {job.pipeline.interview}
+                    </span>
                   </Stack>
                 </CardBody>
               </Card>
@@ -300,7 +342,9 @@ export function JobDetailsModal({
                 <CardBody>
                   <Stack gap="none">
                     <span className="bezent-text-xs bezent-text-secondary">4. Assessment</span>
-                    <span className="bezent-font-bold bezent-text-xl">{job.pipeline.assessment}</span>
+                    <span className="bezent-font-bold bezent-text-xl">
+                      {job.pipeline.assessment}
+                    </span>
                   </Stack>
                 </CardBody>
               </Card>

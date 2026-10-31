@@ -28,9 +28,7 @@ describe('JobOpeningsPage', () => {
   });
 
   it('renders JobOpeningsMetrics with correct counts', () => {
-    const html = renderToStaticMarkup(
-      <JobOpeningsMetrics jobs={INITIAL_JOB_OPENINGS} />,
-    );
+    const html = renderToStaticMarkup(<JobOpeningsMetrics jobs={INITIAL_JOB_OPENINGS} />);
 
     expect(html).toContain('Total Requisitions');
     expect(html).toContain('Open Positions');
@@ -73,12 +71,7 @@ describe('JobOpeningsPage', () => {
 
   it('renders CreateJobModal with required fields', () => {
     const html = renderToStaticMarkup(
-      <CreateJobModal
-        isOpen={true}
-        onClose={() => {}}
-        onCreateJob={() => {}}
-        existingCount={6}
-      />,
+      <CreateJobModal isOpen={true} onClose={() => {}} onCreateJob={() => {}} existingCount={6} />,
     );
 
     expect(html).toContain('Create New Job Opening');

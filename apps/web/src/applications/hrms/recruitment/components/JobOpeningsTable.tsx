@@ -39,15 +39,35 @@ export function formatWorkplace(type: WorkplaceType): string {
 export function formatStatusBadge(status: JobStatus) {
   switch (status) {
     case 'open':
-      return <Badge variant="success" showDot>Open</Badge>;
+      return (
+        <Badge variant="success" showDot>
+          Open
+        </Badge>
+      );
     case 'draft':
-      return <Badge variant="neutral" showDot>Draft</Badge>;
+      return (
+        <Badge variant="neutral" showDot>
+          Draft
+        </Badge>
+      );
     case 'on_hold':
-      return <Badge variant="warning" showDot>On Hold</Badge>;
+      return (
+        <Badge variant="warning" showDot>
+          On Hold
+        </Badge>
+      );
     case 'closed':
-      return <Badge variant="danger" showDot>Closed</Badge>;
+      return (
+        <Badge variant="danger" showDot>
+          Closed
+        </Badge>
+      );
     default:
-      return <Badge variant="neutral" showDot>{status}</Badge>;
+      return (
+        <Badge variant="neutral" showDot>
+          {status}
+        </Badge>
+      );
   }
 }
 
@@ -109,7 +129,9 @@ export function JobOpeningsTable({
                       {formatWorkplace(job.workplaceType)}
                     </Badge>
                     <span className="bezent-table-meta-dim">•</span>
-                    <span className="bezent-table-meta-dim capitalize">{job.experienceLevel} level</span>
+                    <span className="bezent-table-meta-dim capitalize">
+                      {job.experienceLevel} level
+                    </span>
                     <span className="bezent-table-meta-dim">•</span>
                     <span className="bezent-table-meta-dim">{job.location}</span>
                   </Inline>
@@ -126,7 +148,9 @@ export function JobOpeningsTable({
                         </Badge>
                       )}
                     </Inline>
-                    <span className="bezent-table-meta-title">{job.totalApplicants} applicants</span>
+                    <span className="bezent-table-meta-title">
+                      {job.totalApplicants} applicants
+                    </span>
                   </Inline>
 
                   <Inline justify="between" align="center">
@@ -162,30 +186,22 @@ export function JobOpeningsTable({
           <TableRow key={job.id} onClick={() => onSelectJob(job)} className="cursor-pointer">
             {/* 1. Job Code */}
             <TableCell>
-              <span className="bezent-table-meta-dim font-mono">
-                #{job.jobCode}
-              </span>
+              <span className="bezent-table-meta-dim font-mono">#{job.jobCode}</span>
             </TableCell>
 
             {/* 2. Job Title */}
             <TableCell>
-              <span className="bezent-table-meta-title">
-                {job.title}
-              </span>
+              <span className="bezent-table-meta-title">{job.title}</span>
             </TableCell>
 
             {/* 3. Department */}
             <TableCell>
-              <span className="bezent-table-meta-title">
-                {job.department}
-              </span>
+              <span className="bezent-table-meta-title">{job.department}</span>
             </TableCell>
 
             {/* 4. Location */}
             <TableCell>
-              <span className="bezent-table-meta-title">
-                {job.location}
-              </span>
+              <span className="bezent-table-meta-title">{job.location}</span>
             </TableCell>
 
             {/* 5. Positions */}
@@ -197,15 +213,11 @@ export function JobOpeningsTable({
 
             {/* 6. Applicants */}
             <TableCell>
-              <span className="bezent-table-meta-title">
-                {job.totalApplicants} applicants
-              </span>
+              <span className="bezent-table-meta-title">{job.totalApplicants} applicants</span>
             </TableCell>
 
             {/* 7. Status */}
-            <TableCell>
-              {formatStatusBadge(job.status)}
-            </TableCell>
+            <TableCell>{formatStatusBadge(job.status)}</TableCell>
 
             {/* 8. Actions */}
             <TableCell onClick={(e) => e.stopPropagation()}>
