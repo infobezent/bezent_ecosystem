@@ -1425,4 +1425,22 @@ export const GLOBAL_ICON_DEFINITIONS: Record<string, IconDefinition> = {
       <line x1="21" y1="9" x2="17" y2="13" />
     </g>
   )),
+  viewList: glyph('viewList', 'List View', (c, sw) => (
+    <g {...S(c, sw)}>
+      <line x1="8" y1="6" x2="21" y2="6" strokeLinecap="round" />
+      <line x1="8" y1="12" x2="21" y2="12" strokeLinecap="round" />
+      <line x1="8" y1="18" x2="21" y2="18" strokeLinecap="round" />
+      <line x1="3" y1="6" x2="3.01" y2="6" strokeLinecap="round" strokeWidth={sw + 0.5} />
+      <line x1="3" y1="12" x2="3.01" y2="12" strokeLinecap="round" strokeWidth={sw + 0.5} />
+      <line x1="3" y1="18" x2="3.01" y2="18" strokeLinecap="round" strokeWidth={sw + 0.5} />
+    </g>
+  )),
+  viewGrid: glyph('viewGrid', 'Grid View', (c, sw) => (
+    <g {...S(c, sw)}>
+      <rect x="3" y="3" width="7" height="7" rx="1.5" />
+      <rect x="14" y="3" width="7" height="7" rx="1.5" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" />
+      <rect x="14" y="14" width="7" height="7" rx="1.5" />
+    </g>
+  )),
 };

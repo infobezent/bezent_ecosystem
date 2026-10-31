@@ -225,7 +225,7 @@
   text-decoration: underline;
 }
 
-/* Search Bar */
+/* Search Bar — 3D Inset Surface */
 .bezent-search-bar {
   display: flex;
   align-items: center;
@@ -233,9 +233,20 @@
   padding: 0 12px;
   height: 36px;
   background-color: var(--bg-surface, #ffffff);
-  border: 1px solid var(--border-default, #cbd5e1);
-  border-radius: var(--radius-sm, 6px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 12px;
   min-width: 240px;
+  box-shadow:
+    inset 0 2px 3px rgba(0, 0, 0, 0.03),
+    0 2px 5px rgba(0, 0, 0, 0.02);
+  transition: all 0.16s ease;
+}
+
+.bezent-search-bar:focus-within {
+  border-color: #3978f6;
+  box-shadow:
+    inset 0 1.5px 2px rgba(0, 0, 0, 0.02),
+    0 0 0 3px rgba(57, 120, 246, 0.14);
 }
 
 .bezent-search-bar__input {

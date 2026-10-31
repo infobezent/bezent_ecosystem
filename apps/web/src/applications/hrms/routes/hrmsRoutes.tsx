@@ -23,6 +23,18 @@ import {
   AttendanceExceptionsPage,
   AttendanceReportsPage,
 } from '../attendance';
+import {
+  HiringOverviewPage,
+  JobOpeningsPage,
+  CandidatesPage,
+  HiringPipelinePage,
+  InterviewsPage,
+  AssessmentsPage,
+  OffersPage,
+  OnboardingHandoffPage,
+  TalentPoolPage,
+  HiringReportsPage,
+} from '../recruitment';
 import { destinationPath } from '../../../shared/utils/navigation';
 import { useAuth } from '../../../platform/auth';
 import { landingPath } from '../../../platform/auth/landing';
@@ -100,7 +112,8 @@ export const hrmsRoutes: RouteObject[] = [
         const isWorkforce = destination.id === 'workforce';
         const isSettings = destination.id === 'settings';
         const isAttendance = destination.id === 'attendance';
-        // Workforce lands on Overview; Attendance lands on Overview.
+        const isRecruitment = destination.id === 'recruitment';
+        // Workforce, Attendance, and Recruitment land on Overview.
         return [
           {
             path: destination.segment,
@@ -110,6 +123,8 @@ export const hrmsRoutes: RouteObject[] = [
               <SettingsPage />
             ) : isAttendance ? (
               <Navigate to="/hrms/attendance/overview" replace />
+            ) : isRecruitment ? (
+              <Navigate to="/hrms/recruitment/overview" replace />
             ) : (
               <ModulePlaceholder
                 application={APPLICATION}
@@ -157,6 +172,26 @@ export const hrmsRoutes: RouteObject[] = [
                 <AttendanceExceptionsPage />
               ) : isAttendance && child.id === 'reports' ? (
                 <AttendanceReportsPage />
+              ) : isRecruitment && child.id === 'overview' ? (
+                <HiringOverviewPage />
+              ) : isRecruitment && child.id === 'job-openings' ? (
+                <JobOpeningsPage />
+              ) : isRecruitment && child.id === 'candidates' ? (
+                <CandidatesPage />
+              ) : isRecruitment && child.id === 'pipeline' ? (
+                <HiringPipelinePage />
+              ) : isRecruitment && child.id === 'interviews' ? (
+                <InterviewsPage />
+              ) : isRecruitment && child.id === 'assessments' ? (
+                <AssessmentsPage />
+              ) : isRecruitment && child.id === 'offers' ? (
+                <OffersPage />
+              ) : isRecruitment && child.id === 'onboarding-handoff' ? (
+                <OnboardingHandoffPage />
+              ) : isRecruitment && child.id === 'talent-pool' ? (
+                <TalentPoolPage />
+              ) : isRecruitment && child.id === 'reports' ? (
+                <HiringReportsPage />
               ) : (
                 <ModulePlaceholder
                   application={APPLICATION}
