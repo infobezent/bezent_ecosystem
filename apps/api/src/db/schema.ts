@@ -1970,6 +1970,7 @@ export const employeeAttendance = mysqlTable(
       'on_leave',
       'holiday',
       'incomplete',
+      'weekly_off',
     ])
       .default('present')
       .notNull(),
@@ -3314,23 +3315,34 @@ export const employeeLeaveBalances = mysqlTable(
     employeeId: varchar('employee_id', { length: 64 })
       .notNull()
       .references(() => employees.id),
-    leaveType: mysqlEnum('leave_type', ['annual', 'sick', 'casual', 'unpaid']).notNull(),
-    totalDays: int('total_days').default(0).notNull(),
-    usedDays: int('used_days').default(0).notNull(),
-    pendingDays: int('pending_days').default(0).notNull(),
+    leaveTypeId: varchar('leave_type_id', { length: 64 })
+      .notNull()
+      .references(() => leaveTypes.id),
+    /** Legacy pre-V1 type; read-only, not written for new balances. */
+    leaveType: mysqlEnum('leave_type', ['annual', 'sick', 'casual', 'unpaid']),
+    totalDays: decimal('total_days', { precision: 6, scale: 2 }).default('0.00').notNull(),
+    usedDays: decimal('used_days', { precision: 6, scale: 2 }).default('0.00').notNull(),
+    pendingDays: decimal('pending_days', { precision: 6, scale: 2 }).default('0.00').notNull(),
+    /** Portion of totalDays carried in from the previous cycle (may expire). */
+    carriedForwardDays: decimal('carried_forward_days', { precision: 6, scale: 2 })
+      .default('0.00')
+      .notNull(),
+    carryForwardExpiresOn: varchar('carry_forward_expires_on', { length: 10 }),
+    /** Calendar year in which the leave cycle starts. */
     year: int('year').notNull(),
+    cycleStartDate: varchar('cycle_start_date', { length: 10 }).notNull(),
+    cycleEndDate: varchar('cycle_end_date', { length: 10 }).notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
   },
   (table) => [
     index('idx_emp_leave_bal_tenant_comp').on(table.tenantId, table.companyId),
     index('idx_emp_leave_bal_employee').on(table.employeeId),
-    uniqueIndex('idx_emp_leave_bal_type_year').on(
-      table.tenantId,
+    uniqueIndex('idx_emp_leave_bal_type_cycle').on(
       table.companyId,
       table.employeeId,
-      table.leaveType,
-      table.year,
+      table.leaveTypeId,
+      table.cycleStartDate,
     ),
   ],
 );
@@ -3352,18 +3364,37 @@ export const employeeLeaveRequests = mysqlTable(
     employeeId: varchar('employee_id', { length: 64 })
       .notNull()
       .references(() => employees.id),
-    leaveType: mysqlEnum('leave_type', ['annual', 'sick', 'casual', 'unpaid']).notNull(),
+    leaveTypeId: varchar('leave_type_id', { length: 64 })
+      .notNull()
+      .references(() => leaveTypes.id),
+    policyId: varchar('policy_id', { length: 64 }),
+    settingsVersionId: varchar('settings_version_id', { length: 64 }),
+    workflowId: varchar('workflow_id', { length: 64 }),
+    /** Approval level currently awaiting action (null once decided). */
+    currentLevel: int('current_level'),
+    submittedByUserId: varchar('submitted_by_user_id', { length: 64 }),
+    /** Legacy pre-V1 type; read-only, not written for new requests. */
+    leaveType: mysqlEnum('leave_type', ['annual', 'sick', 'casual', 'unpaid']),
     startDate: varchar('start_date', { length: 10 }).notNull(),
     endDate: varchar('end_date', { length: 10 }).notNull(),
-    totalDays: int('total_days').notNull(),
+    totalDays: decimal('total_days', { precision: 5, scale: 2 }).notNull(),
     session: mysqlEnum('session', ['first_half', 'second_half']),
     calculationSnapshot: json('calculation_snapshot').$type<Record<string, unknown>>(),
     reason: varchar('reason', { length: 500 }).notNull(),
-    status: mysqlEnum('status', ['pending', 'approved', 'rejected', 'cancelled'])
+    status: mysqlEnum('status', [
+      'pending',
+      'approved',
+      'rejected',
+      'cancelled',
+      'cancellation_pending',
+    ])
       .default('pending')
       .notNull(),
     reviewedByUserId: varchar('reviewed_by_user_id', { length: 64 }),
     rejectionReason: varchar('rejection_reason', { length: 500 }),
+    cancelledByUserId: varchar('cancelled_by_user_id', { length: 64 }),
+    cancellationReason: varchar('cancellation_reason', { length: 500 }),
+    cancelledAt: timestamp('cancelled_at'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
   },
@@ -3372,11 +3403,385 @@ export const employeeLeaveRequests = mysqlTable(
     index('idx_emp_leave_req_employee').on(table.employeeId),
     index('idx_emp_leave_req_status').on(table.status),
     index('idx_emp_leave_req_dates').on(table.startDate, table.endDate),
+    index('idx_emp_leave_req_type').on(table.leaveTypeId),
   ],
 );
 
 export type EmployeeLeaveRequest = typeof employeeLeaveRequests.$inferSelect;
 export type NewEmployeeLeaveRequest = typeof employeeLeaveRequests.$inferInsert;
+
+/**
+ * HRMS Domain: Leave — Balance Ledger V1 (append-only)
+ * Every movement of a balance is a transaction; balance rows are the materialised result.
+ */
+export const leaveBalanceTransactions = mysqlTable(
+  'leave_balance_transactions',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 }).notNull(),
+    employeeId: varchar('employee_id', { length: 64 }).notNull(),
+    leaveTypeId: varchar('leave_type_id', { length: 64 }).notNull(),
+    balanceId: varchar('balance_id', { length: 64 })
+      .notNull()
+      .references(() => employeeLeaveBalances.id, { onDelete: 'cascade' }),
+    cycleStartDate: varchar('cycle_start_date', { length: 10 }).notNull(),
+    txnType: mysqlEnum('txn_type', [
+      'opening',
+      'accrual',
+      'usage_reserve',
+      'usage_release',
+      'usage_confirm',
+      'usage_reversal',
+      'adjustment',
+      'carry_forward_in',
+      'lapse',
+      'encashment',
+    ]).notNull(),
+    days: decimal('days', { precision: 6, scale: 2 }).notNull(),
+    referenceType: varchar('reference_type', { length: 30 }),
+    referenceId: varchar('reference_id', { length: 64 }),
+    reason: varchar('reason', { length: 500 }),
+    createdByUserId: varchar('created_by_user_id', { length: 64 }).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_leave_bal_txn_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_leave_bal_txn_balance').on(table.balanceId),
+    index('idx_leave_bal_txn_employee_type').on(
+      table.employeeId,
+      table.leaveTypeId,
+      table.cycleStartDate,
+    ),
+    index('idx_leave_bal_txn_reference').on(table.referenceType, table.referenceId),
+  ],
+);
+
+export type LeaveBalanceTransaction = typeof leaveBalanceTransactions.$inferSelect;
+export type NewLeaveBalanceTransaction = typeof leaveBalanceTransactions.$inferInsert;
+
+/**
+ * HRMS Domain: Leave — Holiday Calendars V1 (Tab 6)
+ * A calendar covers one leave year (`year` = calendar year in which the cycle starts) and applies
+ * to its mapped locations; employees without a mapped location use the company default calendar.
+ */
+export const holidayCalendars = mysqlTable(
+  'holiday_calendars',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    name: varchar('name', { length: 100 }).notNull(),
+    year: int('year').notNull(),
+    status: mysqlEnum('status', ['draft', 'published']).default('draft').notNull(),
+    isDefault: boolean('is_default').default(false).notNull(),
+    optionalHolidayQuota: int('optional_holiday_quota').default(0).notNull(),
+    /** Incremented on every change after publication. */
+    revision: int('revision').default(0).notNull(),
+    publishedAt: timestamp('published_at'),
+    createdByUserId: varchar('created_by_user_id', { length: 64 }).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_holiday_cal_company_name_year').on(table.companyId, table.name, table.year),
+    index('idx_holiday_cal_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_holiday_cal_year_status').on(table.companyId, table.year, table.status),
+  ],
+);
+
+export type HolidayCalendarRecord = typeof holidayCalendars.$inferSelect;
+export type NewHolidayCalendarRecord = typeof holidayCalendars.$inferInsert;
+
+export const holidayCalendarLocations = mysqlTable(
+  'holiday_calendar_locations',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 }).notNull(),
+    calendarId: varchar('calendar_id', { length: 64 })
+      .notNull()
+      .references(() => holidayCalendars.id, { onDelete: 'cascade' }),
+    locationId: varchar('location_id', { length: 64 })
+      .notNull()
+      .references(() => locations.id, { onDelete: 'cascade' }),
+  },
+  (table) => [
+    uniqueIndex('idx_holiday_cal_loc_unique').on(table.calendarId, table.locationId),
+    index('idx_holiday_cal_loc_location').on(table.companyId, table.locationId),
+  ],
+);
+
+export const holidays = mysqlTable(
+  'holidays',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 }).notNull(),
+    calendarId: varchar('calendar_id', { length: 64 })
+      .notNull()
+      .references(() => holidayCalendars.id, { onDelete: 'cascade' }),
+    date: varchar('date', { length: 10 }).notNull(),
+    name: varchar('name', { length: 100 }).notNull(),
+    type: mysqlEnum('type', ['mandatory', 'optional']).default('mandatory').notNull(),
+    description: varchar('description', { length: 500 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_holidays_calendar_date').on(table.calendarId, table.date),
+    index('idx_holidays_tenant_comp').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type HolidayRecord = typeof holidays.$inferSelect;
+export type NewHolidayRecord = typeof holidays.$inferInsert;
+
+/**
+ * HRMS Domain: Leave — Approval Workflows V1 (Tab 7)
+ */
+export interface LeaveApprovalLevel {
+  approverType: 'reporting_manager' | 'department_head' | 'hr_role' | 'specific_employee';
+  /** Role id for hr_role, employee id for specific_employee. */
+  approverRef: string | null;
+  slaHours: number;
+  onSlaBreach: 'escalate_to_next' | 'notify_only' | 'auto_approve';
+}
+
+export const leaveApprovalWorkflows = mysqlTable(
+  'leave_approval_workflows',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    name: varchar('name', { length: 100 }).notNull(),
+    description: varchar('description', { length: 500 }),
+    isDefault: boolean('is_default').default(false).notNull(),
+    isActive: boolean('is_active').default(true).notNull(),
+    levels: json('levels').$type<LeaveApprovalLevel[]>().notNull(),
+    autoApproveUpToDays: decimal('auto_approve_up_to_days', { precision: 5, scale: 2 }),
+    skipIfApproverIsApplicant: boolean('skip_if_approver_is_applicant').default(true).notNull(),
+    fallbackApproverRoleId: varchar('fallback_approver_role_id', { length: 64 }),
+    cancellationRequiresApproval: boolean('cancellation_requires_approval')
+      .default(false)
+      .notNull(),
+    allowSelfApprovalForHr: boolean('allow_self_approval_for_hr').default(false).notNull(),
+    createdByUserId: varchar('created_by_user_id', { length: 64 }).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_leave_wf_company_name').on(table.companyId, table.name),
+    index('idx_leave_wf_tenant_comp').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type LeaveApprovalWorkflowRecord = typeof leaveApprovalWorkflows.$inferSelect;
+export type NewLeaveApprovalWorkflowRecord = typeof leaveApprovalWorkflows.$inferInsert;
+
+export const leaveRequestApprovals = mysqlTable(
+  'leave_request_approvals',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 }).notNull(),
+    requestId: varchar('request_id', { length: 64 })
+      .notNull()
+      .references(() => employeeLeaveRequests.id, { onDelete: 'cascade' }),
+    purpose: mysqlEnum('purpose', ['approval', 'cancellation']).default('approval').notNull(),
+    level: int('level').notNull(),
+    approverEmployeeId: varchar('approver_employee_id', { length: 64 }),
+    approverRoleId: varchar('approver_role_id', { length: 64 }),
+    /** waiting = a later level not yet reached; pending = awaiting this approver now. */
+    action: mysqlEnum('action', [
+      'pending',
+      'approved',
+      'rejected',
+      'escalated',
+      'skipped',
+      'cancelled',
+      'waiting',
+    ])
+      .default('waiting')
+      .notNull(),
+    actedByUserId: varchar('acted_by_user_id', { length: 64 }),
+    comment: varchar('comment', { length: 500 }),
+    actedAt: timestamp('acted_at'),
+    slaDueAt: timestamp('sla_due_at'),
+    slaBreachedAt: timestamp('sla_breached_at'),
+    onSlaBreach: mysqlEnum('on_sla_breach', ['escalate_to_next', 'notify_only', 'auto_approve'])
+      .default('notify_only')
+      .notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_leave_req_appr_request').on(table.requestId),
+    index('idx_leave_req_appr_queue').on(table.companyId, table.action, table.approverEmployeeId),
+    index('idx_leave_req_appr_role').on(table.companyId, table.action, table.approverRoleId),
+    index('idx_leave_req_appr_sla').on(table.action, table.slaDueAt),
+  ],
+);
+
+export type LeaveRequestApprovalRecord = typeof leaveRequestApprovals.$inferSelect;
+export type NewLeaveRequestApprovalRecord = typeof leaveRequestApprovals.$inferInsert;
+
+/**
+ * HRMS Domain: Leave — Restriction Rules V1 (Tab 5)
+ * Append-only: an edit supersedes the current row and inserts version + 1 under the same rule_key.
+ */
+export const leaveRestrictionRules = mysqlTable(
+  'leave_restriction_rules',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    ruleKey: varchar('rule_key', { length: 64 }).notNull(),
+    version: int('version').default(1).notNull(),
+    ruleType: mysqlEnum('rule_type', [
+      'clubbing',
+      'blackout',
+      'min_notice',
+      'min_gap',
+      'frequency_cap',
+      'team_concurrency',
+    ]).notNull(),
+    name: varchar('name', { length: 100 }).notNull(),
+    config: json('config').$type<Record<string, unknown>>().notNull(),
+    isActive: boolean('is_active').default(true).notNull(),
+    supersededAt: timestamp('superseded_at'),
+    createdByUserId: varchar('created_by_user_id', { length: 64 }).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_leave_restr_key_version').on(table.ruleKey, table.version),
+    index('idx_leave_restr_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_leave_restr_current').on(table.companyId, table.ruleType, table.supersededAt),
+  ],
+);
+
+export type LeaveRestrictionRuleRecord = typeof leaveRestrictionRules.$inferSelect;
+export type NewLeaveRestrictionRuleRecord = typeof leaveRestrictionRules.$inferInsert;
+
+/**
+ * HRMS Domain: Leave — Accrual & Carry Forward Rules V1 (Tab 4), one row per type per effective date.
+ */
+export const leaveAccrualRules = mysqlTable(
+  'leave_accrual_rules',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 }).notNull(),
+    leaveTypeId: varchar('leave_type_id', { length: 64 })
+      .notNull()
+      .references(() => leaveTypes.id),
+    effectiveFrom: varchar('effective_from', { length: 10 }).notNull(),
+    grantMethod: mysqlEnum('grant_method', [
+      'upfront_annual',
+      'monthly',
+      'quarterly',
+      'half_yearly',
+      'manual_only',
+    ])
+      .default('upfront_annual')
+      .notNull(),
+    accrualTiming: mysqlEnum('accrual_timing', ['cycle_start', 'period_start', 'period_end'])
+      .default('period_start')
+      .notNull(),
+    proRataOnJoining: boolean('pro_rata_on_joining').default(true).notNull(),
+    joiningCutoffDay: int('joining_cutoff_day').default(15).notNull(),
+    proRataOnExit: boolean('pro_rata_on_exit').default(true).notNull(),
+    accrueDuringProbation: boolean('accrue_during_probation').default(true).notNull(),
+    backcreditAfterProbation: boolean('backcredit_after_probation').default(false).notNull(),
+    accrueDuringLop: boolean('accrue_during_lop').default(true).notNull(),
+    carryForwardEnabled: boolean('carry_forward_enabled').default(false).notNull(),
+    maxCarryForwardDays: decimal('max_carry_forward_days', { precision: 6, scale: 2 }),
+    maxAccumulationDays: decimal('max_accumulation_days', { precision: 6, scale: 2 }),
+    carryForwardExpiryMonths: int('carry_forward_expiry_months'),
+    lapseRemaining: boolean('lapse_remaining').default(true).notNull(),
+    encashmentEnabled: boolean('encashment_enabled').default(false).notNull(),
+    encashmentTrigger: mysqlEnum('encashment_trigger', ['cycle_end', 'exit', 'both'])
+      .default('cycle_end')
+      .notNull(),
+    minBalanceToRetain: decimal('min_balance_to_retain', { precision: 6, scale: 2 })
+      .default('0.00')
+      .notNull(),
+    maxEncashableDays: decimal('max_encashable_days', { precision: 6, scale: 2 }),
+    encashmentBasis: mysqlEnum('encashment_basis', ['basic', 'gross']).default('basic').notNull(),
+    createdByUserId: varchar('created_by_user_id', { length: 64 }).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_leave_accrual_type_effective').on(table.leaveTypeId, table.effectiveFrom),
+    index('idx_leave_accrual_tenant_comp').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type LeaveAccrualRuleRecord = typeof leaveAccrualRules.$inferSelect;
+export type NewLeaveAccrualRuleRecord = typeof leaveAccrualRules.$inferInsert;
+
+export const leaveCycleCloseRuns = mysqlTable(
+  'leave_cycle_close_runs',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    cycleStartDate: varchar('cycle_start_date', { length: 10 }).notNull(),
+    cycleEndDate: varchar('cycle_end_date', { length: 10 }).notNull(),
+    status: mysqlEnum('status', ['pending', 'reviewed', 'committed'])
+      .default('committed')
+      .notNull(),
+    summary: json('summary').$type<Record<string, unknown>>().notNull(),
+    createdByUserId: varchar('created_by_user_id', { length: 64 }).notNull(),
+    committedByUserId: varchar('committed_by_user_id', { length: 64 }),
+    committedAt: timestamp('committed_at'),
+    reviewedByUserId: varchar('reviewed_by_user_id', { length: 64 }),
+    reviewedAt: timestamp('reviewed_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_leave_cycle_close_company_cycle').on(table.companyId, table.cycleStartDate),
+  ],
+);
+export type LeaveCycleCloseRunRecord = typeof leaveCycleCloseRuns.$inferSelect;
+export type NewLeaveCycleCloseRunRecord = typeof leaveCycleCloseRuns.$inferInsert;
+
+export const leaveEncashmentHandovers = mysqlTable(
+  'leave_encashment_handovers',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 }).notNull(),
+    employeeId: varchar('employee_id', { length: 64 }).notNull(),
+    leaveTypeId: varchar('leave_type_id', { length: 64 }).notNull(),
+    cycleStartDate: varchar('cycle_start_date', { length: 10 }).notNull(),
+    days: decimal('days', { precision: 6, scale: 2 }).notNull(),
+    basis: mysqlEnum('basis', ['basic', 'gross']).notNull(),
+    trigger: mysqlEnum('trigger', ['cycle_end', 'exit']).notNull(),
+    status: mysqlEnum('status', ['pending_payroll', 'processed'])
+      .default('pending_payroll')
+      .notNull(),
+    runId: varchar('run_id', { length: 64 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_leave_encash_unique').on(
+      table.employeeId,
+      table.leaveTypeId,
+      table.cycleStartDate,
+      table.trigger,
+    ),
+    index('idx_leave_encash_company_status').on(table.companyId, table.status),
+  ],
+);
 
 /**
  * HRMS Domain: Employee Self-Service (ESS) — Timesheets
@@ -4541,3 +4946,178 @@ export const companyFeedPosts = mysqlTable(
 
 export type CompanyFeedPost = typeof companyFeedPosts.$inferSelect;
 export type NewCompanyFeedPost = typeof companyFeedPosts.$inferInsert;
+
+/**
+ * HRMS Domain: Workforce — General Settings & Auto-Numbering V1
+ */
+export const workforceGeneralSettings = mysqlTable(
+  'workforce_general_settings',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id, { onDelete: 'cascade' }),
+    generationMode: mysqlEnum('generation_mode', ['automatic', 'manual']).default('automatic').notNull(),
+    idPrefix: varchar('id_prefix', { length: 32 }).default('EMP-').notNull(),
+    idSuffix: varchar('id_suffix', { length: 32 }),
+    sequenceLength: int('sequence_length').default(4).notNull(),
+    startingNumber: int('starting_number').default(1001).notNull(),
+    currentCounter: int('current_counter').default(1000).notNull(),
+    resetFrequency: mysqlEnum('reset_frequency', ['never', 'calendar_year', 'financial_year']).default('never').notNull(),
+    allowManualOverride: boolean('allow_manual_override').default(true).notNull(),
+    preventIdReuse: boolean('prevent_id_reuse').default(true).notNull(),
+    autoProvisionUser: boolean('auto_provision_user').default(true).notNull(),
+    activationTiming: mysqlEnum('activation_timing', ['instant', 'joining_date', 'manual']).default('instant').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_workforce_general_company').on(table.companyId),
+    index('idx_workforce_general_tenant_comp').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type WorkforceGeneralSettings = typeof workforceGeneralSettings.$inferSelect;
+export type NewWorkforceGeneralSettings = typeof workforceGeneralSettings.$inferInsert;
+
+/**
+ * HRMS Domain: Workforce — Employment Types V1
+ */
+export const workforceEmploymentTypes = mysqlTable(
+  'workforce_employment_types',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id, { onDelete: 'cascade' }),
+    code: varchar('code', { length: 32 }).notNull(),
+    name: varchar('name', { length: 128 }).notNull(),
+    description: text('description'),
+    workHoursPerWeek: decimal('work_hours_per_week', { precision: 4, scale: 1 }).default('40.0').notNull(),
+    isBenefitsEligible: boolean('is_benefits_eligible').default(true).notNull(),
+    defaultNoticeDays: int('default_notice_days').default(60).notNull(),
+    isActive: boolean('is_active').default(true).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_workforce_emp_type_comp_code').on(table.companyId, table.code),
+    index('idx_workforce_emp_type_tenant_comp').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type WorkforceEmploymentType = typeof workforceEmploymentTypes.$inferSelect;
+export type NewWorkforceEmploymentType = typeof workforceEmploymentTypes.$inferInsert;
+
+/**
+ * HRMS Domain: Workforce — Probation Policies V1
+ */
+export const workforceProbationPolicies = mysqlTable(
+  'workforce_probation_policies',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id, { onDelete: 'cascade' }),
+    defaultProbationDays: int('default_probation_days').default(90).notNull(),
+    confirmationMode: mysqlEnum('confirmation_mode', ['manager_review', 'auto_confirm']).default('manager_review').notNull(),
+    reminderLeadDays: int('reminder_lead_days').default(14).notNull(),
+    maxExtensionDays: int('max_extension_days').default(90).notNull(),
+    maxExtensionsAllowed: int('max_extensions_allowed').default(1).notNull(),
+    autoGenerateLetter: boolean('auto_generate_letter').default(true).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_workforce_probation_company').on(table.companyId),
+    index('idx_workforce_probation_tenant_comp').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type WorkforceProbationPolicy = typeof workforceProbationPolicies.$inferSelect;
+export type NewWorkforceProbationPolicy = typeof workforceProbationPolicies.$inferInsert;
+
+/**
+ * HRMS Domain: Workforce — Lifecycle & Transfer Policies V1
+ */
+export const workforceLifecyclePolicies = mysqlTable(
+  'workforce_lifecycle_policies',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id, { onDelete: 'cascade' }),
+    requireReleasingManagerApproval: boolean('require_releasing_manager_approval').default(true).notNull(),
+    effectiveDateAlignment: mysqlEnum('effective_date_alignment', ['immediate', 'next_payroll_month', 'custom']).default('next_payroll_month').notNull(),
+    autoReassignShifts: boolean('auto_reassign_shifts').default(true).notNull(),
+    autoReassignLeaveApprover: boolean('auto_reassign_leave_approver').default(true).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_workforce_lifecycle_company').on(table.companyId),
+    index('idx_workforce_lifecycle_tenant_comp').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type WorkforceLifecyclePolicy = typeof workforceLifecyclePolicies.$inferSelect;
+export type NewWorkforceLifecyclePolicy = typeof workforceLifecyclePolicies.$inferInsert;
+
+/**
+ * HRMS Domain: Workforce — Offboarding & Notice Policies V1
+ */
+export const workforceOffboardingPolicies = mysqlTable(
+  'workforce_offboarding_policies',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id, { onDelete: 'cascade' }),
+    probationNoticeDays: int('probation_notice_days').default(15).notNull(),
+    confirmedNoticeDays: int('confirmed_notice_days').default(60).notNull(),
+    leadershipNoticeDays: int('leadership_notice_days').default(90).notNull(),
+    allowNoticeBuyout: boolean('allow_notice_buyout').default(true).notNull(),
+    allowLeaveOffset: boolean('allow_leave_offset').default(true).notNull(),
+    resignationWithdrawalWindowDays: int('resignation_withdrawal_window_days').default(7).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_workforce_offboarding_company').on(table.companyId),
+    index('idx_workforce_offboarding_tenant_comp').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type WorkforceOffboardingPolicy = typeof workforceOffboardingPolicies.$inferSelect;
+export type NewWorkforceOffboardingPolicy = typeof workforceOffboardingPolicies.$inferInsert;
+
+/**
+ * HRMS Domain: Workforce — Clearance Checklist Templates V1
+ */
+export const workforceClearanceChecklistTemplates = mysqlTable(
+  'workforce_clearance_checklist_templates',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id, { onDelete: 'cascade' }),
+    department: mysqlEnum('department', ['it', 'admin', 'finance', 'hr']).notNull(),
+    itemTitle: varchar('item_title', { length: 255 }).notNull(),
+    description: text('description'),
+    isMandatory: boolean('is_mandatory').default(true).notNull(),
+    displayOrder: int('display_order').default(0).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_workforce_clearance_comp_dept').on(table.companyId, table.department),
+  ],
+);
+
+export type WorkforceClearanceChecklistTemplate = typeof workforceClearanceChecklistTemplates.$inferSelect;
+export type NewWorkforceClearanceChecklistTemplate = typeof workforceClearanceChecklistTemplates.$inferInsert;
