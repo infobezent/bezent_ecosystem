@@ -25,7 +25,13 @@ import type {
 } from '../../../../db/schema.js';
 
 export type AttendanceStatus =
-  'present' | 'absent' | 'half_day' | 'on_leave' | 'holiday' | 'incomplete';
+  | 'present'
+  | 'absent'
+  | 'half_day'
+  | 'on_leave'
+  | 'holiday'
+  | 'weekly_off'
+  | 'incomplete';
 export type AttendanceProcessingState =
   'incomplete' | 'pending_review' | 'provisional' | 'finalized' | 'locked';
 
@@ -98,6 +104,8 @@ export interface CalculationInput {
   policy: AttendancePolicy;
   isOnApprovedLeave?: boolean;
   isOnApprovedOd?: boolean;
+  isHoliday?: boolean;
+  holidayName?: string | null;
   isToday?: boolean;
 }
 
@@ -310,6 +318,7 @@ export interface MonthlySummaryEmployeeRow {
     halfDay: number;
     onLeave: number;
     holiday: number;
+    weeklyOff?: number;
     totalWorkedMinutes: number;
     totalLateMinutes: number;
   };

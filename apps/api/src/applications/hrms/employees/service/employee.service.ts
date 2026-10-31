@@ -9,6 +9,7 @@ import {
 import type { EmployeeDetails, PaginatedEmployeesResult } from '../types/employee.types.js';
 import { NotFoundError, ConflictError, BadRequestError } from '../../../../app/errors/AppError.js';
 import { provisionUserForEmployee } from './employeeUserBridge.service.js';
+import { workforceSettingsService } from '../../workforce/service/workforceSettings.service.js';
 
 export class EmployeeService {
   constructor(
@@ -85,28 +86,10 @@ export class EmployeeService {
   async getNextEmployeeNumber(
     tenantId: string,
     companyId: string,
+    tx?: unknown,
   ): Promise<{ employeeNumber: string }> {
-    const prefix = 'EMP-';
-    const existing = await this.repo.listAllNumbers(tenantId, companyId);
-    let maxSeq = 0;
-    for (const num of existing) {
-      const m = num.match(/(\d+)$/);
-      if (m && m[1]) {
-        const val = parseInt(m[1], 10);
-        if (!isNaN(val) && val > maxSeq) {
-          maxSeq = val;
-        }
-      }
-    }
-    const nextSeq = maxSeq + 1;
-    let candidate = `${prefix}${String(nextSeq).padStart(4, '0')}`;
-    const takenSet = new Set(existing);
-    let offset = 0;
-    while (takenSet.has(candidate)) {
-      offset++;
-      candidate = `${prefix}${String(nextSeq + offset).padStart(4, '0')}`;
-    }
-    return { employeeNumber: candidate };
+    const reserved = await workforceSettingsService.reserveNextEmployeeId(tenantId, companyId, tx);
+    return { employeeNumber: reserved.nextId };
   }
 
   async resolveReferral(
@@ -149,32 +132,15 @@ export class EmployeeService {
         ? { ...(input as Record<string, unknown>) }
         : ({} as Record<string, unknown>);
 
-    // Auto-generate employee number if not provided
-    if (!inputObj.employeeNumber) {
-      const generated = await this.getNextEmployeeNumber(tenantId, companyId);
-      inputObj.employeeNumber = generated.employeeNumber;
-    }
+    const isAutoNumber = !inputObj.employeeNumber;
 
-    const validatedDto = validateCreateEmployee(inputObj);
-    const employeeNumber =
-      validatedDto.employeeNumber ||
-      (await this.getNextEmployeeNumber(tenantId, companyId)).employeeNumber;
-    validatedDto.employeeNumber = employeeNumber;
-
-    // 1. Check duplicate employee number within company
-    const existingByNumber = await this.repo.getByEmployeeNumber(
-      tenantId,
-      companyId,
-      employeeNumber,
+    // Validate payload first using a temporary placeholder so that validation
+    // failures do NOT consume an employee sequence number.
+    const validatedDto = validateCreateEmployee(
+      isAutoNumber ? { ...inputObj, employeeNumber: '__TEMP_RESERVED_PLACEHOLDER__' } : inputObj,
     );
-    if (existingByNumber) {
-      throw new ConflictError(
-        `Employee number '${employeeNumber}' is already in use`,
-        'EMPLOYEE_NUMBER_EXISTS',
-      );
-    }
 
-    // 2. Check duplicate email within company
+    // 1. Check duplicate email within company early
     const existingByEmail = await this.repo.getByEmail(tenantId, companyId, validatedDto.email);
     if (existingByEmail) {
       throw new ConflictError(
@@ -183,11 +149,11 @@ export class EmployeeService {
       );
     }
 
-    // 3. Verify organization masters (dept, desig, loc) and reporting manager
+    // 2. Verify organization masters (dept, desig, loc) and reporting manager early
     await this.validateOrgAssignments(tenantId, companyId, validatedDto);
     await this.validateReportingManager(tenantId, companyId, validatedDto.reportingManagerId);
 
-    // 3b. Verify referring employee if referredByEmployeeId is passed
+    // 2b. Verify referring employee early if referredByEmployeeId is passed
     if (validatedDto.referredByEmployeeId) {
       const referring = await this.repo.getById(
         tenantId,
@@ -201,6 +167,27 @@ export class EmployeeService {
         );
       }
     }
+
+    // 3. Atomically reserve sequence or validate provided manual number
+    let employeeNumber: string;
+    if (isAutoNumber) {
+      const generated = await this.getNextEmployeeNumber(tenantId, companyId);
+      employeeNumber = generated.employeeNumber;
+    } else {
+      employeeNumber = validatedDto.employeeNumber!;
+      const existingByNumber = await this.repo.getByEmployeeNumber(
+        tenantId,
+        companyId,
+        employeeNumber,
+      );
+      if (existingByNumber) {
+        throw new ConflictError(
+          `Employee number '${employeeNumber}' is already in use`,
+          'EMPLOYEE_NUMBER_EXISTS',
+        );
+      }
+    }
+    validatedDto.employeeNumber = employeeNumber;
 
     // 3c. Auto-assign referral code for this new employee if none provided
     if (!validatedDto.referralCode) {
@@ -229,8 +216,18 @@ export class EmployeeService {
         })
       : await this.repo.create(tenantId, companyId, validatedDto);
 
-    // Auto-provision User login and company membership if explicitly requested
-    const shouldAutoProvision = Boolean(inputObj.autoProvisionUser || inputObj.enablePortalAccess);
+    // Auto-provision User login and company membership if requested or configured by workforce settings
+    let shouldAutoProvision = Boolean(inputObj.autoProvisionUser || inputObj.enablePortalAccess);
+    if (!shouldAutoProvision && inputObj.autoProvisionUser === undefined) {
+      try {
+        const wfSettings = await workforceSettingsService.getGeneralSettings(tenantId, companyId);
+        if (wfSettings.autoProvisionUser) {
+          shouldAutoProvision = true;
+        }
+      } catch {
+        // workforce settings optional fallback
+      }
+    }
     if (shouldAutoProvision) {
       try {
         await provisionUserForEmployee(tenantId, companyId, {

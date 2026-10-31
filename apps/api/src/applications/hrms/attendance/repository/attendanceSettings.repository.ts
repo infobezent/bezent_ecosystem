@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, inArray, lte, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, isNull, lte, ne, sql } from 'drizzle-orm';
 import { getDb } from '../../../../db/connection.js';
 import {
   attendancePolicies,
@@ -585,50 +585,105 @@ export class AttendanceSettingsRepository {
     effectiveFrom?: string,
   ): Promise<AttendancePolicy> {
     const db = getDb();
-    const existing = await this.getPolicyById(tenantId, companyId, policyId);
-    if (!existing) {
-      throw new Error(`Policy ${policyId} not found`);
-    }
+    return db.transaction(async (tx) => {
+      const [existing] = await tx
+        .select()
+        .from(attendancePolicies)
+        .where(
+          and(
+            eq(attendancePolicies.tenantId, tenantId),
+            eq(attendancePolicies.companyId, companyId),
+            eq(attendancePolicies.id, policyId),
+          ),
+        )
+        .for('update');
 
-    if (existing.status === 'draft') {
-      await db
-        .update(attendancePolicies)
-        .set({
-          status: 'published',
-          effectiveFrom:
-            effectiveFrom || existing.effectiveFrom || new Date().toISOString().slice(0, 10),
-          updatedAt: new Date(),
-        })
-        .where(eq(attendancePolicies.id, policyId));
+      if (!existing) {
+        throw new Error(`Policy ${policyId} not found`);
+      }
 
-      return (await this.getPolicyById(tenantId, companyId, policyId))!;
-    }
+      if (existing.status === 'archived') {
+        throw new Error(`Archived policy ${policyId} cannot be published`);
+      }
 
-    // Existing is already published: archive prior version snapshot and create new active published version
-    const nextVersion = (existing.version ?? 1) + 1;
-    const newId = generateSurrogateId('att_pol');
+      const targetEffectiveFrom =
+        effectiveFrom || existing.effectiveFrom || new Date().toISOString().slice(0, 10);
 
-    await db
-      .update(attendancePolicies)
-      .set({
-        status: 'archived',
-        isActive: false,
+      // Check for overlapping/duplicate effectiveFrom among published policies in same scope
+      const scopeConditions = [
+        eq(attendancePolicies.tenantId, tenantId),
+        eq(attendancePolicies.companyId, companyId),
+        eq(attendancePolicies.scope, existing.scope),
+        eq(attendancePolicies.status, 'published'),
+        eq(attendancePolicies.effectiveFrom, targetEffectiveFrom),
+        ne(attendancePolicies.id, existing.id),
+      ];
+      if (existing.scopeId) {
+        scopeConditions.push(eq(attendancePolicies.scopeId, existing.scopeId));
+      } else {
+        scopeConditions.push(isNull(attendancePolicies.scopeId));
+      }
+
+      const [conflict] = await tx
+        .select({ id: attendancePolicies.id })
+        .from(attendancePolicies)
+        .where(and(...scopeConditions))
+        .limit(1);
+
+      if (conflict) {
+        throw new Error(
+          `A published policy for this scope with effective date ${targetEffectiveFrom} already exists`,
+        );
+      }
+
+      if (existing.status === 'draft') {
+        await tx
+          .update(attendancePolicies)
+          .set({
+            status: 'published',
+            isActive: true,
+            effectiveFrom: targetEffectiveFrom,
+            updatedAt: new Date(),
+          })
+          .where(eq(attendancePolicies.id, policyId));
+
+        const [published] = await tx
+          .select()
+          .from(attendancePolicies)
+          .where(eq(attendancePolicies.id, policyId));
+
+        return published!;
+      }
+
+      // Existing is already published: publish a new version while preserving existing version
+      if (targetEffectiveFrom < existing.effectiveFrom) {
+        throw new Error(
+          `New policy version effective date (${targetEffectiveFrom}) cannot precede current version effective date (${existing.effectiveFrom})`,
+        );
+      }
+
+      const nextVersion = (existing.version ?? 1) + 1;
+      const newId = generateSurrogateId('att_pol');
+
+      // Do NOT archive prior version so historical and pre-effective calculations remain accurate
+      await tx.insert(attendancePolicies).values({
+        ...existing,
+        id: newId,
+        version: nextVersion,
+        status: 'published',
+        isActive: true,
+        effectiveFrom: targetEffectiveFrom,
+        createdAt: new Date(),
         updatedAt: new Date(),
-      })
-      .where(eq(attendancePolicies.id, policyId));
+      });
 
-    await db.insert(attendancePolicies).values({
-      ...existing,
-      id: newId,
-      version: nextVersion,
-      status: 'published',
-      isActive: true,
-      effectiveFrom: effectiveFrom || new Date().toISOString().slice(0, 10),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      const [newVersionRow] = await tx
+        .select()
+        .from(attendancePolicies)
+        .where(eq(attendancePolicies.id, newId));
+
+      return newVersionRow!;
     });
-
-    return (await this.getPolicyById(tenantId, companyId, newId))!;
   }
 
   /* ── 3. Regularization Settings ─────────────────────────────────── */
