@@ -498,6 +498,27 @@ const BASE_PERMISSION_DEFINITIONS: PermissionDefinition[] = [
     'Configure recruitment stages and pipelines.',
     ['hrms.recruitment.settings.manage', 'recruitment.settings.manage'],
   ),
+  hrms(
+    'recruitment',
+    'onboarding_view',
+    'View recruitment onboarding queue',
+    'View candidates and applications ready for workforce onboarding handoff.',
+    ['hrms.recruitment.onboarding.view', 'hrms.recruitment.view'],
+  ),
+  hrms(
+    'recruitment',
+    'onboarding_manage',
+    'Review recruitment onboarding handoff',
+    'Review, edit, and initiate onboarding handoff records for hired candidates.',
+    ['hrms.recruitment.onboarding.manage', 'hrms.recruitment.manage'],
+  ),
+  hrms(
+    'recruitment',
+    'onboarding_confirm',
+    'Confirm onboarding to workforce employee',
+    'Confirm employee creation for hired candidates and bridge them into Workforce.',
+    ['hrms.recruitment.onboarding.confirm', 'hrms.recruitment.manage', 'hrms.employees.create'],
+  ),
   hrms('payroll', 'view', 'View payroll', 'Manage payroll processing and employee pay.', [
     'hrms.payroll.read',
   ]),

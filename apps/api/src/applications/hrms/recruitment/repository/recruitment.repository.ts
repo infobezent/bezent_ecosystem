@@ -8,8 +8,10 @@ import {
   recruitmentActivities,
   recruitmentInterviews,
   recruitmentInterviewInterviewers,
+  recruitmentOnboardings,
   departments,
   designations,
+  locations,
   employees,
   type JobRequisition,
   type NewJobRequisition,
@@ -27,6 +29,9 @@ import {
   type NewRecruitmentInterview,
   type RecruitmentInterviewInterviewer,
   type NewRecruitmentInterviewInterviewer,
+  type RecruitmentOnboarding,
+  type NewRecruitmentOnboarding,
+  type Employee,
 } from '../../../../db/schema.js';
 import { eq, and, desc, asc, like, or, count, type SQL } from 'drizzle-orm';
 import { generateSurrogateId } from '../../../../platform/auth/security.js';
@@ -40,6 +45,7 @@ import type {
   RecruitmentInterviewWithPanel,
   InterviewPanelMemberInput,
 } from '../types/recruitment.types.js';
+import type { OnboardingFilterQuery } from '../types/onboarding.types.js';
 
 type Db = ReturnType<typeof getDb>;
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
@@ -174,6 +180,26 @@ export class RecruitmentRepository {
           eq(designations.id, id),
           eq(designations.tenantId, tenantId),
           eq(designations.companyId, companyId),
+        ),
+      )
+      .limit(1);
+    return row ?? null;
+  }
+
+  async getLocation(
+    tenantId: string,
+    companyId: string,
+    id: string,
+    executor: DbExecutor = getDb(),
+  ) {
+    const [row] = await executor
+      .select()
+      .from(locations)
+      .where(
+        and(
+          eq(locations.id, id),
+          eq(locations.tenantId, tenantId),
+          eq(locations.companyId, companyId),
         ),
       )
       .limit(1);
@@ -1055,6 +1081,200 @@ export class RecruitmentRepository {
         ),
       );
     return this.getInterviewById(tenantId, companyId, id, executor);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Workforce Onboarding Handoff
+  // ---------------------------------------------------------------------------
+
+  async createOnboarding(
+    data: NewRecruitmentOnboarding,
+    executor: DbExecutor = getDb(),
+  ): Promise<RecruitmentOnboarding> {
+    await executor.insert(recruitmentOnboardings).values(data);
+    const [row] = await executor
+      .select()
+      .from(recruitmentOnboardings)
+      .where(
+        and(
+          eq(recruitmentOnboardings.id, data.id),
+          eq(recruitmentOnboardings.tenantId, data.tenantId),
+          eq(recruitmentOnboardings.companyId, data.companyId),
+        ),
+      )
+      .limit(1);
+    if (!row) throw new Error('Failed to retrieve created recruitment onboarding');
+    return row;
+  }
+
+  async getOnboardingById(
+    tenantId: string,
+    companyId: string,
+    id: string,
+    executor: DbExecutor = getDb(),
+  ): Promise<RecruitmentOnboarding | null> {
+    const [row] = await executor
+      .select()
+      .from(recruitmentOnboardings)
+      .where(
+        and(
+          eq(recruitmentOnboardings.id, id),
+          eq(recruitmentOnboardings.tenantId, tenantId),
+          eq(recruitmentOnboardings.companyId, companyId),
+        ),
+      )
+      .limit(1);
+    return row ?? null;
+  }
+
+  async getOnboardingByApplicationId(
+    tenantId: string,
+    companyId: string,
+    applicationId: string,
+    executor: DbExecutor = getDb(),
+  ): Promise<RecruitmentOnboarding | null> {
+    const [row] = await executor
+      .select()
+      .from(recruitmentOnboardings)
+      .where(
+        and(
+          eq(recruitmentOnboardings.applicationId, applicationId),
+          eq(recruitmentOnboardings.tenantId, tenantId),
+          eq(recruitmentOnboardings.companyId, companyId),
+        ),
+      )
+      .limit(1);
+    return row ?? null;
+  }
+
+  async updateOnboarding(
+    tenantId: string,
+    companyId: string,
+    id: string,
+    data: Partial<NewRecruitmentOnboarding>,
+    executor: DbExecutor = getDb(),
+  ): Promise<RecruitmentOnboarding | null> {
+    await executor
+      .update(recruitmentOnboardings)
+      .set(data)
+      .where(
+        and(
+          eq(recruitmentOnboardings.id, id),
+          eq(recruitmentOnboardings.tenantId, tenantId),
+          eq(recruitmentOnboardings.companyId, companyId),
+        ),
+      );
+    return this.getOnboardingById(tenantId, companyId, id, executor);
+  }
+
+  async listOnboardings(
+    tenantId: string,
+    companyId: string,
+    params: OnboardingFilterQuery = {},
+    executor: DbExecutor = getDb(),
+  ): Promise<PaginatedResult<RecruitmentOnboarding>> {
+    const limit = Math.max(1, Math.min(100, Number(params.limit) || 20));
+    const offset = Math.max(0, Number(params.offset) || 0);
+    const page = Math.floor(offset / limit) + 1;
+
+    const conditions: SQL[] = [
+      eq(recruitmentOnboardings.tenantId, tenantId),
+      eq(recruitmentOnboardings.companyId, companyId),
+    ];
+
+    if (params.status) {
+      conditions.push(eq(recruitmentOnboardings.status, params.status));
+    }
+    if (params.departmentId) {
+      conditions.push(eq(recruitmentOnboardings.departmentId, params.departmentId));
+    }
+
+    const whereClause = and(...conditions);
+
+    const [totalRow] = await executor
+      .select({ total: count() })
+      .from(recruitmentOnboardings)
+      .where(whereClause);
+
+    const total = totalRow?.total ?? 0;
+
+    const items = await executor
+      .select()
+      .from(recruitmentOnboardings)
+      .where(whereClause)
+      .orderBy(desc(recruitmentOnboardings.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    return {
+      items,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async getEmployeeByEmail(
+    tenantId: string,
+    companyId: string,
+    email: string,
+    executor: DbExecutor = getDb(),
+  ): Promise<Employee | null> {
+    const [row] = await executor
+      .select()
+      .from(employees)
+      .where(
+        and(
+          eq(employees.tenantId, tenantId),
+          eq(employees.companyId, companyId),
+          eq(employees.email, email.toLowerCase().trim()),
+        ),
+      )
+      .limit(1);
+    return row ?? null;
+  }
+
+  async getEmployeeByPhone(
+    tenantId: string,
+    companyId: string,
+    phone: string,
+    executor: DbExecutor = getDb(),
+  ): Promise<Employee | null> {
+    const [row] = await executor
+      .select()
+      .from(employees)
+      .where(
+        and(
+          eq(employees.tenantId, tenantId),
+          eq(employees.companyId, companyId),
+          eq(employees.phone, phone.trim()),
+        ),
+      )
+      .limit(1);
+    return row ?? null;
+  }
+
+  async getEmployeesByName(
+    tenantId: string,
+    companyId: string,
+    firstName: string,
+    lastName: string,
+    executor: DbExecutor = getDb(),
+  ): Promise<Employee[]> {
+    return executor
+      .select()
+      .from(employees)
+      .where(
+        and(
+          eq(employees.tenantId, tenantId),
+          eq(employees.companyId, companyId),
+          eq(employees.firstName, firstName.trim()),
+          eq(employees.lastName, lastName.trim()),
+        ),
+      );
   }
 }
 

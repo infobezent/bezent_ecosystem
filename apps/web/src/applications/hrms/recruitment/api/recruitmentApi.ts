@@ -644,3 +644,184 @@ export async function recordInterviewFeedback(
   });
   return handleResponse<BackendInterview>(res, 'Failed to record interview feedback');
 }
+
+// -----------------------------------------------------------------------------
+// Onboarding Handoff API Types
+// -----------------------------------------------------------------------------
+
+export interface BackendOnboardingItem {
+  id: string;
+  tenantId: string;
+  companyId: string;
+  candidateId: string;
+  applicationId: string;
+  createdEmployeeId: string | null;
+  status: 'pending_review' | 'ready_for_confirmation' | 'completed' | 'cancelled';
+  targetJoiningDate: string | null;
+  departmentId: string | null;
+  designationId: string | null;
+  locationId: string | null;
+  reportingManagerId: string | null;
+  employmentType: 'full_time' | 'part_time' | 'contract' | 'intern';
+  workflowTemplate: string | null;
+  assignedPartner: string | null;
+  notes: string | null;
+  reviewedByUserId: string | null;
+  reviewedAt: string | null;
+  confirmedByUserId: string | null;
+  confirmedAt: string | null;
+  cancelledByUserId: string | null;
+  cancelledAt: string | null;
+  cancellationReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+  candidate: {
+    id: string;
+    candidateNumber: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string | null;
+    location: string | null;
+    currentCompany: string | null;
+    currentDesignation: string | null;
+  };
+  application: {
+    id: string;
+    stage: string;
+    status: string;
+    appliedAt: string;
+    hiredAt: string | null;
+    requisitionId: string;
+  };
+  requisition?: {
+    id: string;
+    requisitionNumber: string;
+    jobTitle: string;
+    departmentId: string | null;
+    designationId: string | null;
+    locationId: string | null;
+    locationName: string | null;
+    employmentType: string;
+  } | null;
+  createdEmployee?: {
+    id: string;
+    employeeNumber: string;
+    firstName: string;
+    lastName: string | null;
+    email: string;
+  } | null;
+  duplicateCheck?: {
+    hasConflict: boolean;
+    conflictSeverity: 'none' | 'warning' | 'blocking';
+    conflictType?: 'email_exists' | 'phone_exists' | 'name_match' | 'already_onboarded' | null;
+    conflictingEmployeeId?: string | null;
+    conflictingEmployeeNumber?: string | null;
+    conflictingEmployeeName?: string | null;
+    message?: string | null;
+  };
+}
+
+export interface InitiateOnboardingDto {
+  targetJoiningDate?: string;
+  departmentId?: string;
+  designationId?: string;
+  locationId?: string;
+  reportingManagerId?: string;
+  employmentType?: 'full_time' | 'part_time' | 'contract' | 'intern';
+  workflowTemplate?: string;
+  assignedPartner?: string;
+  notes?: string;
+}
+
+export interface ReviewOnboardingDto extends InitiateOnboardingDto {
+  status?: 'pending_review' | 'ready_for_confirmation';
+}
+
+export interface ConfirmOnboardingDto {
+  notes?: string;
+}
+
+// -----------------------------------------------------------------------------
+// Onboarding Handoff API Functions
+// -----------------------------------------------------------------------------
+
+export async function fetchOnboardings(
+  params: {
+    status?: string;
+    departmentId?: string;
+    search?: string;
+    limit?: number;
+    offset?: number;
+  } = {},
+): Promise<PaginatedResponse<BackendOnboardingItem>> {
+  const query = new URLSearchParams();
+  if (params?.status && params.status !== 'all') query.set('status', params.status);
+  if (params?.departmentId && params.departmentId !== 'all') query.set('departmentId', params.departmentId);
+  if (params?.search) query.set('search', params.search);
+  if (params?.limit) query.set('limit', String(params.limit));
+  if (params?.offset) query.set('offset', String(params.offset));
+
+  const qs = query.toString();
+  const res = await authorizedFetch(`${API_BASE}/onboarding${qs ? `?${qs}` : ''}`);
+  return handleResponse<PaginatedResponse<BackendOnboardingItem>>(
+    res,
+    'Failed to fetch onboarding handoff items',
+  );
+}
+
+export async function fetchOnboardingById(id: string): Promise<BackendOnboardingItem> {
+  const res = await authorizedFetch(`${API_BASE}/onboarding/${encodeURIComponent(id)}`);
+  return handleResponse<BackendOnboardingItem>(res, 'Failed to fetch onboarding item');
+}
+
+export async function initiateOnboarding(
+  applicationId: string,
+  dto: InitiateOnboardingDto = {},
+): Promise<BackendOnboardingItem> {
+  const res = await authorizedFetch(
+    `${API_BASE}/applications/${encodeURIComponent(applicationId)}/initiate-onboarding`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dto),
+    },
+  );
+  return handleResponse<BackendOnboardingItem>(res, 'Failed to initiate onboarding handoff');
+}
+
+export async function updateOnboarding(
+  id: string,
+  dto: ReviewOnboardingDto,
+): Promise<BackendOnboardingItem> {
+  const res = await authorizedFetch(`${API_BASE}/onboarding/${encodeURIComponent(id)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dto),
+  });
+  return handleResponse<BackendOnboardingItem>(res, 'Failed to review onboarding handoff');
+}
+
+export async function confirmOnboarding(
+  id: string,
+  dto: ConfirmOnboardingDto = {},
+): Promise<BackendOnboardingItem> {
+  const res = await authorizedFetch(`${API_BASE}/onboarding/${encodeURIComponent(id)}/confirm`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dto),
+  });
+  return handleResponse<BackendOnboardingItem>(res, 'Failed to confirm onboarding to employee');
+}
+
+export async function cancelOnboarding(
+  id: string,
+  reason: string,
+): Promise<BackendOnboardingItem> {
+  const res = await authorizedFetch(`${API_BASE}/onboarding/${encodeURIComponent(id)}/cancel`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reason }),
+  });
+  return handleResponse<BackendOnboardingItem>(res, 'Failed to cancel onboarding handoff');
+}

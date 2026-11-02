@@ -12,7 +12,7 @@ describe('OnboardingHandoffPage', () => {
   it('renders the Onboarding Handoff page header, metrics, toolbar, and table', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
-        <OnboardingHandoffPage />
+        <OnboardingHandoffPage initialHandoffs={INITIAL_HANDOFFS} />
       </MemoryRouter>,
     );
 
@@ -23,6 +23,16 @@ describe('OnboardingHandoffPage', () => {
     expect(html).toContain('Duplicate Check Alerts');
     expect(html).toContain('Shreya Sengupta');
     expect(html).toContain('Rohan Nair');
+  });
+
+  it('renders loading placeholder when initial data is not provided', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <OnboardingHandoffPage />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('Loading onboarding handoff queue');
   });
 
   it('renders HandoffMetrics correctly', () => {

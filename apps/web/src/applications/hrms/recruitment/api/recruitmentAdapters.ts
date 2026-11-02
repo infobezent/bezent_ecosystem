@@ -19,11 +19,13 @@ import type {
   InterviewRecommendation,
   ScheduleInterviewInput,
 } from '../types/interview';
+import type { OnboardingHandoffItem, HandoffStatus } from '../types/handoff';
 import type {
   BackendJobRequisition,
   BackendCandidate,
   BackendApplication,
   BackendInterview,
+  BackendOnboardingItem,
   CreateJobRequisitionDto,
   CreateCandidateDto,
   ScheduleInterviewDto,
@@ -414,5 +416,78 @@ export function adaptFrontendToScheduleInterviewDto(
     locationOrLink: input.meetingLink.trim(),
     panel,
     notes: input.notes?.trim(),
+  };
+}
+
+export function adaptOnboardingToHandoffItem(
+  backend: BackendOnboardingItem,
+): OnboardingHandoffItem {
+  let status: HandoffStatus = 'pending_review' as any;
+  if (backend.status === 'completed') {
+    status = 'handoff_completed';
+  } else if (backend.status === 'ready_for_confirmation') {
+    status = 'ready_for_handoff';
+  } else if (backend.status === 'cancelled') {
+    status = 'on_hold';
+  } else {
+    status = 'handoff_in_progress';
+  }
+
+  const name = `${backend.candidate.firstName} ${backend.candidate.lastName}`.trim();
+
+  const colors: Array<'purple' | 'blue' | 'pink' | 'amber' | 'green' | 'cyan'> = [
+    'purple',
+    'blue',
+    'pink',
+    'amber',
+    'green',
+    'cyan',
+  ];
+  const charCode = name.charCodeAt(0) || 0;
+  const avatarColor = colors[charCode % colors.length] ?? 'purple';
+
+  const hasDuplicate = Boolean(backend.duplicateCheck?.hasConflict);
+  const duplicateCheck = {
+    hasDuplicate,
+    matchField:
+      backend.duplicateCheck?.conflictType === 'email_exists'
+        ? ('email' as const)
+        : ('phone' as const),
+    existingEmployeeId: backend.duplicateCheck?.conflictingEmployeeId ?? undefined,
+    existingEmployeeCode: backend.duplicateCheck?.conflictingEmployeeNumber ?? undefined,
+    existingEmployeeName: backend.duplicateCheck?.conflictingEmployeeName ?? undefined,
+  };
+
+  const offerNumber = `OFF-2026-${backend.application.id.slice(-4).toUpperCase()}`;
+  const caseCode = `ONB-2026-${backend.id.slice(-4).toUpperCase()}`;
+
+  return {
+    id: backend.id,
+    candidateId: backend.candidateId,
+    candidateName: name,
+    candidateEmail: backend.candidate.email,
+    candidatePhone: backend.candidate.phone || 'N/A',
+    candidateNumber: backend.candidate.candidateNumber,
+    candidateAvatarColor: avatarColor,
+    offerId: backend.applicationId,
+    offerNumber,
+    jobId: backend.requisition?.id || backend.application.requisitionId,
+    jobTitle: backend.requisition?.jobTitle || 'Role Title',
+    jobCode: backend.requisition?.requisitionNumber || 'REQ-0001',
+    department: backend.requisition?.departmentId || 'Engineering',
+    location: backend.requisition?.locationName || 'Bangalore HQ',
+    designationLevel: 'Level 4',
+    targetJoiningDate: backend.targetJoiningDate || '2026-11-15',
+    status,
+    signedOfferReceived: true,
+    bgvStatus: 'cleared',
+    assignedPartner: backend.assignedPartner || 'Priya Sundaram',
+    onboardingCaseId: backend.id,
+    onboardingCaseCode: caseCode,
+    employeeCode: backend.createdEmployee?.employeeNumber,
+    handoffDate: backend.confirmedAt ? backend.confirmedAt.slice(0, 10) : undefined,
+    duplicateCheck,
+    workflowTemplate: backend.workflowTemplate || 'Engineering Standard Pre-Boarding',
+    notes: backend.notes || undefined,
   };
 }

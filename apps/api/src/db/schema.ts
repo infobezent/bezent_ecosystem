@@ -5552,3 +5552,81 @@ export type RecruitmentInterviewInterviewer =
   typeof recruitmentInterviewInterviewers.$inferSelect;
 export type NewRecruitmentInterviewInterviewer =
   typeof recruitmentInterviewInterviewers.$inferInsert;
+
+/**
+ * HRMS Domain: Recruitment — Workforce Onboarding Handoff
+ * Represents the bridge between a hired candidate application and the creation of a Workforce Employee record.
+ */
+export const recruitmentOnboardings = mysqlTable(
+  'recruitment_onboardings',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id, { onDelete: 'cascade' }),
+    candidateId: varchar('candidate_id', { length: 64 })
+      .notNull()
+      .references(() => candidates.id, { onDelete: 'cascade' }),
+    applicationId: varchar('application_id', { length: 64 })
+      .notNull()
+      .references(() => candidateApplications.id, { onDelete: 'cascade' }),
+    createdEmployeeId: varchar('created_employee_id', { length: 64 }).references(
+      () => employees.id,
+      { onDelete: 'set null' },
+    ),
+    status: mysqlEnum('status', [
+      'pending_review',
+      'ready_for_confirmation',
+      'completed',
+      'cancelled',
+    ])
+      .default('pending_review')
+      .notNull(),
+    targetJoiningDate: varchar('target_joining_date', { length: 10 }),
+    departmentId: varchar('department_id', { length: 64 }).references(() => departments.id, {
+      onDelete: 'set null',
+    }),
+    designationId: varchar('designation_id', { length: 64 }).references(() => designations.id, {
+      onDelete: 'set null',
+    }),
+    locationId: varchar('location_id', { length: 64 }).references(() => locations.id, {
+      onDelete: 'set null',
+    }),
+    reportingManagerId: varchar('reporting_manager_id', { length: 64 }).references(
+      () => employees.id,
+      { onDelete: 'set null' },
+    ),
+    employmentType: mysqlEnum('employment_type', [
+      'full_time',
+      'part_time',
+      'contract',
+      'intern',
+    ])
+      .default('full_time')
+      .notNull(),
+    workflowTemplate: varchar('workflow_template', { length: 150 }),
+    assignedPartner: varchar('assigned_partner', { length: 255 }),
+    notes: text('notes'),
+    reviewedByUserId: varchar('reviewed_by_user_id', { length: 64 }),
+    reviewedAt: timestamp('reviewed_at'),
+    confirmedByUserId: varchar('confirmed_by_user_id', { length: 64 }),
+    confirmedAt: timestamp('confirmed_at'),
+    cancelledByUserId: varchar('cancelled_by_user_id', { length: 64 }),
+    cancelledAt: timestamp('cancelled_at'),
+    cancellationReason: varchar('cancellation_reason', { length: 500 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_recruitment_onb_comp_app').on(table.companyId, table.applicationId),
+    uniqueIndex('idx_recruitment_onb_comp_emp').on(table.companyId, table.createdEmployeeId),
+    index('idx_recruitment_onb_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_recruitment_onb_candidate').on(table.candidateId),
+    index('idx_recruitment_onb_status').on(table.companyId, table.status),
+  ],
+);
+
+export type RecruitmentOnboarding = typeof recruitmentOnboardings.$inferSelect;
+export type NewRecruitmentOnboarding = typeof recruitmentOnboardings.$inferInsert;
+

@@ -30,6 +30,8 @@ import {
   rescheduleInterview,
   cancelInterview,
   recordInterviewFeedback,
+  fetchOnboardings,
+  confirmOnboarding,
 } from '../api/recruitmentApi';
 import {
   adaptRequisitionToJobOpening,
@@ -39,6 +41,7 @@ import {
   adaptFrontendToCreateCandidateDto,
   adaptFrontendToScheduleInterviewDto,
   adaptBackendStatusToJobStatus,
+  adaptOnboardingToHandoffItem,
 } from '../api/recruitmentAdapters';
 
 describe('Recruitment Frontend Integration — Phase 3.2', () => {
@@ -372,6 +375,82 @@ describe('Recruitment Frontend Integration — Phase 3.2', () => {
         .mockImplementation(mockApiResponse('Unauthorized requisition access', 403));
 
       await expect(fetchJobRequisitions()).rejects.toThrow('Unauthorized requisition access');
+    });
+
+    it('fetches onboarding handoffs and adapts to frontend handoff items', async () => {
+      const mockOnb = {
+        id: 'onb-1',
+        candidateId: 'cand-1',
+        applicationId: 'app-1',
+        status: 'ready_for_confirmation',
+        targetJoiningDate: '2026-11-20',
+        candidate: {
+          id: 'cand-1',
+          candidateNumber: 'CAN-001',
+          firstName: 'Ananya',
+          lastName: 'Sharma',
+          email: 'ananya@example.com',
+          phone: '+91 99999 88888',
+        },
+        application: {
+          id: 'app-1',
+          stage: 'hired',
+          status: 'hired',
+          appliedAt: '2026-10-01',
+          hiredAt: '2026-10-25',
+          requisitionId: 'req-1',
+        },
+        requisition: {
+          id: 'req-1',
+          requisitionNumber: 'REQ-101',
+          jobTitle: 'Senior UI Architect',
+          departmentId: 'Engineering',
+          locationName: 'Bangalore HQ',
+          employmentType: 'full_time',
+        },
+        duplicateCheck: {
+          hasConflict: true,
+          conflictSeverity: 'warning',
+          conflictType: 'phone_exists',
+          conflictingEmployeeNumber: 'EMP-0050',
+        },
+      };
+
+      authorizedFetchSpy = vi
+        .spyOn(sessionModule, 'authorizedFetch')
+        .mockImplementation(mockApiResponse({ items: [mockOnb], pagination: { total: 1 } }));
+
+      const res = await fetchOnboardings();
+      expect(res.items).toHaveLength(1);
+
+      const adapted = adaptOnboardingToHandoffItem(res.items[0]!);
+      expect(adapted.candidateName).toBe('Ananya Sharma');
+      expect(adapted.status).toBe('ready_for_handoff');
+      expect(adapted.duplicateCheck.hasDuplicate).toBe(true);
+      expect(adapted.duplicateCheck.existingEmployeeCode).toBe('EMP-0050');
+    });
+
+    it('confirms onboarding and returns completed employee details', async () => {
+      const mockCompleted = {
+        id: 'onb-2',
+        status: 'completed',
+        createdEmployeeId: 'emp-777',
+        createdEmployee: {
+          id: 'emp-777',
+          employeeNumber: 'EMP-1099',
+          firstName: 'Ananya',
+          lastName: 'Sharma',
+          email: 'ananya@example.com',
+        },
+      };
+
+      authorizedFetchSpy = vi
+        .spyOn(sessionModule, 'authorizedFetch')
+        .mockImplementation(mockApiResponse(mockCompleted));
+
+      const res = await confirmOnboarding('onb-2', { notes: 'Verified and approved.' });
+      expect(res.status).toBe('completed');
+      expect(res.createdEmployee?.employeeNumber).toBe('EMP-1099');
     });
   });
 });

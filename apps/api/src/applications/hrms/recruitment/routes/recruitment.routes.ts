@@ -1,9 +1,11 @@
 import { Router } from 'express';
 import { RecruitmentController } from '../controller/recruitment.controller.js';
+import { RecruitmentOnboardingController } from '../controller/recruitmentOnboarding.controller.js';
 import { requirePermission } from '../../../../platform/access/middleware/access.middleware.js';
 
 export const recruitmentRouter = Router();
 const controller = new RecruitmentController();
+const onboardingController = new RecruitmentOnboardingController();
 
 // -----------------------------------------------------------------------------
 // Job Requisitions
@@ -202,3 +204,43 @@ recruitmentRouter.post(
   requirePermission('hrms.recruitment.interviews_manage'),
   controller.recordFeedback,
 );
+
+// -----------------------------------------------------------------------------
+// Workforce Onboarding Handoff
+// -----------------------------------------------------------------------------
+recruitmentRouter.get(
+  '/hrms/recruitment/onboarding',
+  requirePermission('hrms.recruitment.onboarding_view'),
+  onboardingController.listOnboardings,
+);
+
+recruitmentRouter.get(
+  '/hrms/recruitment/onboarding/:id',
+  requirePermission('hrms.recruitment.onboarding_view'),
+  onboardingController.getOnboardingById,
+);
+
+recruitmentRouter.post(
+  '/hrms/recruitment/applications/:applicationId/initiate-onboarding',
+  requirePermission('hrms.recruitment.onboarding_manage'),
+  onboardingController.initiateOnboarding,
+);
+
+recruitmentRouter.put(
+  '/hrms/recruitment/onboarding/:id',
+  requirePermission('hrms.recruitment.onboarding_manage'),
+  onboardingController.reviewOnboarding,
+);
+
+recruitmentRouter.post(
+  '/hrms/recruitment/onboarding/:id/confirm',
+  requirePermission('hrms.recruitment.onboarding_confirm'),
+  onboardingController.confirmOnboarding,
+);
+
+recruitmentRouter.post(
+  '/hrms/recruitment/onboarding/:id/cancel',
+  requirePermission('hrms.recruitment.onboarding_manage'),
+  onboardingController.cancelOnboarding,
+);
+

@@ -143,6 +143,7 @@ export class EmployeeService {
     tenantId: string,
     companyId: string,
     input: unknown,
+    tx?: unknown,
   ): Promise<EmployeeDetails> {
     const inputObj =
       input && typeof input === 'object'
@@ -216,7 +217,7 @@ export class EmployeeService {
     // 3. Atomically reserve sequence or validate provided manual number
     let employeeNumber: string;
     if (isAutoNumber) {
-      const generated = await this.getNextEmployeeNumber(tenantId, companyId);
+      const generated = await this.getNextEmployeeNumber(tenantId, companyId, tx);
       employeeNumber = generated.employeeNumber;
     } else {
       employeeNumber = validatedDto.employeeNumber!;
@@ -277,7 +278,7 @@ export class EmployeeService {
           );
           return employee;
         })
-      : await this.repo.create(tenantId, companyId, validatedDto);
+      : await this.repo.create(tenantId, companyId, validatedDto, (tx as any));
 
     // Auto-provision User login and company membership if requested or configured by workforce settings
     let shouldAutoProvision = Boolean(inputObj.autoProvisionUser || inputObj.enablePortalAccess);
