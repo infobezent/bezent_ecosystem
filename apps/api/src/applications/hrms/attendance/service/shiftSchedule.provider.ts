@@ -8,6 +8,7 @@ import {
 import type { ShiftSchedule } from '../types/attendance.types.js';
 import { DEFAULT_WORK_SCHEDULE, timeToMinutes } from './attendanceCalculation.service.js';
 import { attendanceSettingsRepository } from '../repository/attendanceSettings.repository.js';
+import { shiftResolutionService } from '../../shifts/service/shiftResolution.service.js';
 
 export interface AssignedShiftDetails {
   isAssigned: boolean;
@@ -62,7 +63,44 @@ export class DefaultShiftScheduleProvider implements ShiftScheduleProvider {
     employeeId: string,
     effectiveCompanyTimezone: string = 'UTC',
     graceMinutes: number = 15,
+    date?: string,
   ): Promise<AssignedShiftDetails> {
+    const targetDate = date || new Date().toISOString().slice(0, 10);
+    try {
+      const resolved = await shiftResolutionService.resolveEmployeeShift(
+        tenantId,
+        companyId,
+        employeeId,
+        targetDate,
+      );
+
+      if (resolved.shift) {
+        const shift = resolved.shift;
+        const startMinutes = timeToMinutes(shift.startTime);
+        const endMinutes = timeToMinutes(shift.endTime);
+        const grossMinutes =
+          endMinutes >= startMinutes ? endMinutes - startMinutes : 1440 - startMinutes + endMinutes;
+        const breakMinutes = (shift.breakMinutes ?? 0) + (shift.lunchMinutes ?? 0);
+        const netMinutes = Math.max(0, grossMinutes - breakMinutes);
+        const requiredHours = Number((netMinutes / 60).toFixed(2));
+
+        return {
+          isAssigned: true,
+          name: shift.name,
+          startTime: shift.startTime,
+          endTime: shift.endTime,
+          requiredHours,
+          graceMinutes: shift.graceMinutes ?? graceMinutes,
+          breakAllowanceMinutes: shift.breakMinutes ?? 60,
+          timeZone: effectiveCompanyTimezone,
+          effectiveTimezone: effectiveCompanyTimezone,
+          workingDays: shift.workingDays ?? [],
+        };
+      }
+    } catch {
+      // Fall through to legacy check if resolution fails
+    }
+
     const raw = await this.getRawSchedule(tenantId, companyId, employeeId);
     if (!raw) {
       return {
@@ -221,6 +259,24 @@ export class DefaultShiftScheduleProvider implements ShiftScheduleProvider {
     enableAutoShiftAllocation?: boolean,
     shiftMatchingWindowMinutes?: number,
   ): Promise<ShiftSchedule> {
+    const effectiveDate = _date || new Date().toISOString().slice(0, 10);
+    try {
+      const resolved = await shiftResolutionService.resolveEmployeeShift(
+        tenantId,
+        companyId,
+        employeeId,
+        effectiveDate,
+        punchInTime,
+        enableAutoShiftAllocation,
+        shiftMatchingWindowMinutes || 60,
+      );
+      if (resolved && resolved.schedule) {
+        return resolved.schedule;
+      }
+    } catch {
+      // Fall through to legacy resolution if database shift resolution is unavailable
+    }
+
     if (enableAutoShiftAllocation && punchInTime) {
       const autoMatched = await this.resolveAutoAllocatedShift(
         tenantId,

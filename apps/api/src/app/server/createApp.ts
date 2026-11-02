@@ -22,6 +22,7 @@ import { leaveAdminRouter } from '../../applications/hrms/leave/routes/leaveAdmi
 import { leaveHolidaysRouter } from '../../applications/hrms/leave/routes/leaveHolidays.routes.js';
 import { leaveOperationsRouter } from '../../applications/hrms/leave/routes/leaveOperations.routes.js';
 import { recruitmentRouter } from '../../applications/hrms/recruitment/routes/recruitment.routes.js';
+import { shiftRouter } from '../../applications/hrms/shifts/routes/shift.routes.js';
 import { platformRouter } from '../../platform/routes.js';
 import { companyAdminRouter } from '../../platform/company-admin/routes/companyAdmin.routes.js';
 import { tenantAdminRouter } from '../../administration/tenant-admin/routes/tenantAdmin.routes.js';
@@ -117,6 +118,7 @@ export function createApp(options?: AppOptions): Express {
   app.use('/api/v1', leaveHolidaysRouter);
   app.use('/api/v1', leaveOperationsRouter);
   app.use('/api/v1', recruitmentRouter);
+  app.use('/api/v1', shiftRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

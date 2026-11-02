@@ -97,6 +97,7 @@ export const MODULE_LABELS: Record<string, string> = {
   payroll: 'Payroll',
   learning: 'Learning',
   shifts: 'Shifts',
+  shift_assignments: 'Shift Assignments',
   career: 'Career Paths',
   compensation: 'Compensation',
   benefits: 'Benefits',
@@ -528,6 +529,24 @@ const BASE_PERMISSION_DEFINITIONS: PermissionDefinition[] = [
   hrms('shifts', 'view', 'View shifts', 'Schedule work shifts, rotations, and rosters.', [
     'hrms.shifts.read',
   ]),
+  hrms('shifts', 'manage', 'Manage shifts', 'Create, update, and manage work shift definitions.', [
+    'hrms.shifts.write',
+    'hrms.shifts.manage',
+  ]),
+  hrms(
+    'shift_assignments',
+    'view',
+    'View shift assignments',
+    'View shift assignments for employees, departments, and locations.',
+    ['hrms.shift_assignments.read', 'hrms.shifts.read'],
+  ),
+  hrms(
+    'shift_assignments',
+    'manage',
+    'Manage shift assignments',
+    'Assign, reassign, and end shifts for employees, departments, and locations.',
+    ['hrms.shift_assignments.write', 'hrms.shift_assignments.manage', 'hrms.shifts.write'],
+  ),
   hrms(
     'career',
     'view',

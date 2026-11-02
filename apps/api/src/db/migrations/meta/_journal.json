@@ -414,6 +414,13 @@
       "when": 1795200000000,
       "tag": "0058_recruitment_workforce_onboarding_handoff",
       "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "5",
+      "when": 1795300000000,
+      "tag": "0059_database_backed_shifts_and_assignments",
+      "breakpoints": true
     }
   ]
 }

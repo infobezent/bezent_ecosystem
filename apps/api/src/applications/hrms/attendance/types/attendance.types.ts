@@ -94,6 +94,10 @@ export interface ShiftSchedule {
   lunchMinutes: number;
   timeZone?: string;
   scheduleRef: string;
+  shiftId?: string;
+  shiftCode?: string;
+  graceMinutes?: number;
+  isOvernight?: boolean;
 }
 
 export interface CalculationInput {

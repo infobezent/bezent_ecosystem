@@ -5630,3 +5630,90 @@ export const recruitmentOnboardings = mysqlTable(
 export type RecruitmentOnboarding = typeof recruitmentOnboardings.$inferSelect;
 export type NewRecruitmentOnboarding = typeof recruitmentOnboardings.$inferInsert;
 
+/**
+ * HRMS Domain: Shifts — Database-backed Shift Management
+ * Defines reusable company work shift templates with timing rules, break allowance, and grace periods.
+ */
+export const hrmsShifts = mysqlTable(
+  'hrms_shifts',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id, { onDelete: 'cascade' }),
+    name: varchar('name', { length: 100 }).notNull(),
+    code: varchar('code', { length: 50 }).notNull(),
+    description: text('description'),
+    startTime: varchar('start_time', { length: 5 }).notNull(), // 'HH:mm'
+    endTime: varchar('end_time', { length: 5 }).notNull(), // 'HH:mm'
+    workingDays: json('working_days').$type<string[]>().notNull(),
+    breakMinutes: int('break_minutes').default(60).notNull(),
+    lunchMinutes: int('lunch_minutes').default(30).notNull(),
+    graceMinutes: int('grace_minutes').default(15).notNull(),
+    isOvernight: boolean('is_overnight').default(false).notNull(),
+    color: varchar('color', { length: 20 }).default('#2563EB'),
+    isActive: boolean('is_active').default(true).notNull(),
+    createdBy: varchar('created_by', { length: 64 }),
+    updatedBy: varchar('updated_by', { length: 64 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_hrms_shifts_comp_code').on(table.companyId, table.code),
+    index('idx_hrms_shifts_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_hrms_shifts_comp_active').on(table.companyId, table.isActive),
+  ],
+);
+
+export type HrmsShift = typeof hrmsShifts.$inferSelect;
+export type NewHrmsShift = typeof hrmsShifts.$inferInsert;
+
+/**
+ * HRMS Domain: Shifts — Shift Assignments
+ * Maps shifts to individual employees, departments, or work locations with effective date windows.
+ */
+export const hrmsShiftAssignments = mysqlTable(
+  'hrms_shift_assignments',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id, { onDelete: 'cascade' }),
+    shiftId: varchar('shift_id', { length: 64 })
+      .notNull()
+      .references(() => hrmsShifts.id, { onDelete: 'cascade' }),
+    assignmentScope: mysqlEnum('assignment_scope', ['employee', 'department', 'location']).notNull(),
+    employeeId: varchar('employee_id', { length: 64 }).references(() => employees.id, {
+      onDelete: 'cascade',
+    }),
+    departmentId: varchar('department_id', { length: 64 }).references(() => departments.id, {
+      onDelete: 'cascade',
+    }),
+    locationId: varchar('location_id', { length: 64 }).references(() => locations.id, {
+      onDelete: 'cascade',
+    }),
+    effectiveStartDate: varchar('effective_start_date', { length: 10 }).notNull(), // 'YYYY-MM-DD'
+    effectiveEndDate: varchar('effective_end_date', { length: 10 }), // 'YYYY-MM-DD', null if indefinite
+    isActive: boolean('is_active').default(true).notNull(),
+    notes: text('notes'),
+    createdBy: varchar('created_by', { length: 64 }),
+    updatedBy: varchar('updated_by', { length: 64 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_hrms_shift_asgn_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_hrms_shift_asgn_shift').on(table.shiftId),
+    index('idx_hrms_shift_asgn_emp').on(table.companyId, table.assignmentScope, table.employeeId),
+    index('idx_hrms_shift_asgn_dept').on(table.companyId, table.assignmentScope, table.departmentId),
+    index('idx_hrms_shift_asgn_loc').on(table.companyId, table.assignmentScope, table.locationId),
+    index('idx_hrms_shift_asgn_dates').on(table.effectiveStartDate, table.effectiveEndDate),
+  ],
+);
+
+export type HrmsShiftAssignment = typeof hrmsShiftAssignments.$inferSelect;
+export type NewHrmsShiftAssignment = typeof hrmsShiftAssignments.$inferInsert;
+
+

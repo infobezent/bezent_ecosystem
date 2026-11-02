@@ -17,6 +17,7 @@ import {
   employees,
   departments,
   employeeWorkSchedules,
+  hrmsShifts,
   type AttendancePolicy,
   type AttendanceRegularizationSettings,
   type AttendanceDevice,
@@ -1630,8 +1631,33 @@ export class AttendanceSettingsRepository {
     const prefs = (row?.alertPreferences ?? {}) as Record<string, unknown>;
     const rawRoster = prefs.shiftRosterConfig as Partial<ShiftRosterSettings> | undefined;
 
-    const baseShifts: CompanyShiftTemplate[] =
-      rawRoster?.shifts && rawRoster.shifts.length > 0 ? rawRoster.shifts : DEFAULT_COMPANY_SHIFTS;
+    const dbShifts = await db
+      .select()
+      .from(hrmsShifts)
+      .where(and(eq(hrmsShifts.tenantId, tenantId), eq(hrmsShifts.companyId, companyId)))
+      .catch(() => []);
+
+    let baseShifts: CompanyShiftTemplate[];
+    if (dbShifts.length > 0) {
+      baseShifts = dbShifts.map((s) => ({
+        id: s.id,
+        name: s.name,
+        code: s.code,
+        startTime: s.startTime,
+        endTime: s.endTime,
+        workingDays: s.workingDays,
+        breakMinutes: s.breakMinutes,
+        lunchMinutes: s.lunchMinutes,
+        graceMinutes: s.graceMinutes,
+        isOvernight: s.isOvernight,
+        color: s.color ?? '#2563EB',
+        description: s.description ?? undefined,
+        isActive: s.isActive,
+      }));
+    } else {
+      baseShifts =
+        rawRoster?.shifts && rawRoster.shifts.length > 0 ? rawRoster.shifts : DEFAULT_COMPANY_SHIFTS;
+    }
 
     // Retrieve active employee counts assigned to each shift from employeeWorkSchedules
     const scheduleCounts = await db
@@ -1772,6 +1798,29 @@ export class AttendanceSettingsRepository {
 
     const updatedShifts = [...current.shifts, newShift];
     await this.updateShiftRosterSettings(tenantId, companyId, { shifts: updatedShifts });
+
+    const db = getDb();
+    await db
+      .insert(hrmsShifts)
+      .values({
+        id: newShift.id,
+        tenantId,
+        companyId,
+        name: newShift.name,
+        code: newShift.code,
+        description: newShift.description,
+        startTime: newShift.startTime,
+        endTime: newShift.endTime,
+        workingDays: newShift.workingDays,
+        breakMinutes: newShift.breakMinutes,
+        lunchMinutes: newShift.lunchMinutes,
+        graceMinutes: newShift.graceMinutes,
+        isOvernight: newShift.isOvernight,
+        color: newShift.color,
+        isActive: newShift.isActive,
+      })
+      .catch(() => null);
+
     return newShift;
   }
 
@@ -1807,6 +1856,34 @@ export class AttendanceSettingsRepository {
 
     current.shifts[index] = updated;
     await this.updateShiftRosterSettings(tenantId, companyId, { shifts: current.shifts });
+
+    const db = getDb();
+    await db
+      .update(hrmsShifts)
+      .set({
+        name: updated.name,
+        code: updated.code,
+        startTime: updated.startTime,
+        endTime: updated.endTime,
+        workingDays: updated.workingDays,
+        breakMinutes: updated.breakMinutes,
+        lunchMinutes: updated.lunchMinutes,
+        graceMinutes: updated.graceMinutes,
+        isOvernight: updated.isOvernight,
+        color: updated.color,
+        description: updated.description,
+        isActive: updated.isActive,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(hrmsShifts.id, shiftId),
+          eq(hrmsShifts.tenantId, tenantId),
+          eq(hrmsShifts.companyId, companyId),
+        ),
+      )
+      .catch(() => null);
+
     return updated;
   }
 
@@ -1817,6 +1894,19 @@ export class AttendanceSettingsRepository {
     if (filtered.length === initialLen) return false;
 
     await this.updateShiftRosterSettings(tenantId, companyId, { shifts: filtered });
+
+    const db = getDb();
+    await db
+      .delete(hrmsShifts)
+      .where(
+        and(
+          eq(hrmsShifts.id, shiftId),
+          eq(hrmsShifts.tenantId, tenantId),
+          eq(hrmsShifts.companyId, companyId),
+        ),
+      )
+      .catch(() => null);
+
     return true;
   }
 }
