@@ -400,6 +400,13 @@
       "when": 1795000000000,
       "tag": "0056_hrms_phase1_business_correctness",
       "breakpoints": true
+    },
+    {
+      "idx": 57,
+      "version": "5",
+      "when": 1795100000000,
+      "tag": "0057_recruitment_foundation_v1",
+      "breakpoints": true
     }
   ]
 }

@@ -5121,3 +5121,434 @@ export const workforceClearanceChecklistTemplates = mysqlTable(
 
 export type WorkforceClearanceChecklistTemplate = typeof workforceClearanceChecklistTemplates.$inferSelect;
 export type NewWorkforceClearanceChecklistTemplate = typeof workforceClearanceChecklistTemplates.$inferInsert;
+
+/**
+ * HRMS Domain: Recruitment — Pipeline Stages
+ */
+export const recruitmentStages = mysqlTable(
+  'recruitment_stages',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id, { onDelete: 'cascade' }),
+    code: varchar('code', { length: 50 }).notNull(),
+    name: varchar('name', { length: 100 }).notNull(),
+    description: varchar('description', { length: 500 }),
+    stageOrder: int('stage_order').default(0).notNull(),
+    stageType: mysqlEnum('stage_type', [
+      'active',
+      'terminal_success',
+      'terminal_rejection',
+      'terminal_withdrawal',
+    ])
+      .default('active')
+      .notNull(),
+    badgeVariant: varchar('badge_variant', { length: 30 }).default('neutral').notNull(),
+    isSystem: boolean('is_system').default(false).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_recruitment_stages_company_code').on(table.companyId, table.code),
+    index('idx_recruitment_stages_tenant_company').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type RecruitmentStage = typeof recruitmentStages.$inferSelect;
+export type NewRecruitmentStage = typeof recruitmentStages.$inferInsert;
+
+/**
+ * HRMS Domain: Recruitment — Job Requisitions
+ */
+export const jobRequisitions = mysqlTable(
+  'job_requisitions',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id, { onDelete: 'cascade' }),
+    requisitionNumber: varchar('requisition_number', { length: 50 }).notNull(),
+    jobTitle: varchar('job_title', { length: 255 }).notNull(),
+    departmentId: varchar('department_id', { length: 64 }).references(() => departments.id, {
+      onDelete: 'set null',
+    }),
+    designationId: varchar('designation_id', { length: 64 }).references(() => designations.id, {
+      onDelete: 'set null',
+    }),
+    locationId: varchar('location_id', { length: 64 }).references(() => locations.id, {
+      onDelete: 'set null',
+    }),
+    locationName: varchar('location_name', { length: 255 }),
+    workplaceType: mysqlEnum('workplace_type', ['on_site', 'hybrid', 'remote'])
+      .default('on_site')
+      .notNull(),
+    employmentType: mysqlEnum('employment_type', [
+      'full_time',
+      'part_time',
+      'contract',
+      'internship',
+    ])
+      .default('full_time')
+      .notNull(),
+    experienceLevel: mysqlEnum('experience_level', [
+      'entry',
+      'mid',
+      'senior',
+      'lead',
+      'executive',
+    ])
+      .default('mid')
+      .notNull(),
+    openings: int('openings').default(1).notNull(),
+    filledCount: int('filled_count').default(0).notNull(),
+    description: text('description'),
+    requirements: json('requirements').$type<string[]>(),
+    responsibilities: json('responsibilities').$type<string[]>(),
+    skills: json('skills').$type<string[]>(),
+    experienceMin: int('experience_min'),
+    experienceMax: int('experience_max'),
+    salaryMin: decimal('salary_min', { precision: 12, scale: 2 }),
+    salaryMax: decimal('salary_max', { precision: 12, scale: 2 }),
+    currency: varchar('currency', { length: 10 }).default('INR').notNull(),
+    hiringManagerId: varchar('hiring_manager_id', { length: 64 }).references(() => employees.id, {
+      onDelete: 'set null',
+    }),
+    recruiterId: varchar('recruiter_id', { length: 64 }).references(() => employees.id, {
+      onDelete: 'set null',
+    }),
+    priority: mysqlEnum('priority', ['low', 'medium', 'high', 'urgent'])
+      .default('medium')
+      .notNull(),
+    status: mysqlEnum('status', [
+      'draft',
+      'pending_approval',
+      'open',
+      'on_hold',
+      'filled',
+      'closed',
+      'cancelled',
+    ])
+      .default('draft')
+      .notNull(),
+    targetCloseDate: varchar('target_close_date', { length: 10 }),
+    approvedAt: timestamp('approved_at'),
+    approvedByUserId: varchar('approved_by_user_id', { length: 64 }),
+    closedAt: timestamp('closed_at'),
+    closedReason: varchar('closed_reason', { length: 500 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_job_requisitions_company_req_num').on(table.companyId, table.requisitionNumber),
+    index('idx_job_requisitions_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_job_requisitions_status').on(table.companyId, table.status),
+    index('idx_job_requisitions_department').on(table.departmentId),
+  ],
+);
+
+export type JobRequisition = typeof jobRequisitions.$inferSelect;
+export type NewJobRequisition = typeof jobRequisitions.$inferInsert;
+
+/**
+ * HRMS Domain: Recruitment — Job Postings
+ */
+export const jobPostings = mysqlTable(
+  'job_postings',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id, { onDelete: 'cascade' }),
+    requisitionId: varchar('requisition_id', { length: 64 })
+      .notNull()
+      .references(() => jobRequisitions.id, { onDelete: 'cascade' }),
+    postingCode: varchar('posting_code', { length: 50 }).notNull(),
+    title: varchar('title', { length: 255 }).notNull(),
+    description: text('description').notNull(),
+    location: varchar('location', { length: 255 }).notNull(),
+    workplaceType: mysqlEnum('workplace_type', ['on_site', 'hybrid', 'remote'])
+      .default('on_site')
+      .notNull(),
+    employmentType: mysqlEnum('employment_type', [
+      'full_time',
+      'part_time',
+      'contract',
+      'internship',
+    ])
+      .default('full_time')
+      .notNull(),
+    publishedAt: timestamp('published_at'),
+    expiresAt: timestamp('expires_at'),
+    status: mysqlEnum('status', ['draft', 'published', 'paused', 'closed'])
+      .default('draft')
+      .notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_job_postings_company_code').on(table.companyId, table.postingCode),
+    index('idx_job_postings_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_job_postings_requisition').on(table.requisitionId),
+    index('idx_job_postings_status').on(table.companyId, table.status),
+  ],
+);
+
+export type JobPosting = typeof jobPostings.$inferSelect;
+export type NewJobPosting = typeof jobPostings.$inferInsert;
+
+/**
+ * HRMS Domain: Recruitment — Candidates
+ */
+export const candidates = mysqlTable(
+  'candidates',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    candidateNumber: varchar('candidate_number', { length: 50 }).notNull(),
+    firstName: varchar('first_name', { length: 100 }).notNull(),
+    lastName: varchar('last_name', { length: 100 }).notNull(),
+    email: varchar('email', { length: 255 }).notNull(),
+    phone: varchar('phone', { length: 50 }),
+    location: varchar('location', { length: 255 }),
+    currentCompany: varchar('current_company', { length: 255 }),
+    currentDesignation: varchar('current_designation', { length: 255 }),
+    totalExperienceYears: decimal('total_experience_years', { precision: 4, scale: 1 }).default(
+      '0.0',
+    ),
+    relevantExperienceYears: decimal('relevant_experience_years', {
+      precision: 4,
+      scale: 1,
+    }).default('0.0'),
+    noticePeriodDays: int('notice_period_days').default(0),
+    currentCtcLpa: decimal('current_ctc_lpa', { precision: 10, scale: 2 }),
+    expectedCtcLpa: decimal('expected_ctc_lpa', { precision: 10, scale: 2 }),
+    skills: json('skills').$type<string[]>(),
+    tags: json('tags').$type<string[]>(),
+    source: mysqlEnum('source', [
+      'linkedin',
+      'career_page',
+      'referral',
+      'agency',
+      'naukri',
+      'campus',
+      'direct',
+      'other',
+    ])
+      .default('direct')
+      .notNull(),
+    referredBy: varchar('referred_by', { length: 255 }),
+    resumeUrl: varchar('resume_url', { length: 500 }),
+    resumeFileName: varchar('resume_file_name', { length: 255 }),
+    summary: text('summary'),
+    status: mysqlEnum('status', ['active', 'archived', 'blacklisted']).default('active').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_candidates_tenant_number').on(table.tenantId, table.candidateNumber),
+    index('idx_candidates_tenant').on(table.tenantId),
+    index('idx_candidates_tenant_email').on(table.tenantId, table.email),
+    index('idx_candidates_tenant_name').on(table.tenantId, table.lastName, table.firstName),
+  ],
+);
+
+export type Candidate = typeof candidates.$inferSelect;
+export type NewCandidate = typeof candidates.$inferInsert;
+
+/**
+ * HRMS Domain: Recruitment — Candidate Applications
+ */
+export const candidateApplications = mysqlTable(
+  'candidate_applications',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id, { onDelete: 'cascade' }),
+    candidateId: varchar('candidate_id', { length: 64 })
+      .notNull()
+      .references(() => candidates.id, { onDelete: 'cascade' }),
+    requisitionId: varchar('requisition_id', { length: 64 })
+      .notNull()
+      .references(() => jobRequisitions.id, { onDelete: 'cascade' }),
+    jobPostingId: varchar('job_posting_id', { length: 64 }).references(() => jobPostings.id, {
+      onDelete: 'set null',
+    }),
+    currentStageId: varchar('current_stage_id', { length: 64 }).references(
+      () => recruitmentStages.id,
+      { onDelete: 'set null' },
+    ),
+    stage: varchar('stage', { length: 50 }).default('applied').notNull(),
+    status: mysqlEnum('status', ['active', 'hired', 'rejected', 'withdrawn'])
+      .default('active')
+      .notNull(),
+    appliedAt: timestamp('applied_at').defaultNow().notNull(),
+    assignedRecruiterId: varchar('assigned_recruiter_id', { length: 64 }).references(
+      () => employees.id,
+      { onDelete: 'set null' },
+    ),
+    rating: int('rating').default(0),
+    rejectionReason: varchar('rejection_reason', { length: 500 }),
+    rejectedAt: timestamp('rejected_at'),
+    withdrawnAt: timestamp('withdrawn_at'),
+    withdrawalReason: varchar('withdrawal_reason', { length: 500 }),
+    hiredAt: timestamp('hired_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_candidate_apps_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_candidate_apps_candidate').on(table.candidateId),
+    index('idx_candidate_apps_requisition').on(table.requisitionId),
+    index('idx_candidate_apps_stage').on(table.companyId, table.stage),
+    index('idx_candidate_apps_status').on(table.companyId, table.status),
+  ],
+);
+
+export type CandidateApplication = typeof candidateApplications.$inferSelect;
+export type NewCandidateApplication = typeof candidateApplications.$inferInsert;
+
+/**
+ * HRMS Domain: Recruitment — Candidate Activity & Notes
+ */
+export const recruitmentActivities = mysqlTable(
+  'recruitment_activities',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id, { onDelete: 'cascade' }),
+    applicationId: varchar('application_id', { length: 64 })
+      .notNull()
+      .references(() => candidateApplications.id, { onDelete: 'cascade' }),
+    candidateId: varchar('candidate_id', { length: 64 })
+      .notNull()
+      .references(() => candidates.id, { onDelete: 'cascade' }),
+    actorUserId: varchar('actor_user_id', { length: 64 }),
+    actorName: varchar('actor_name', { length: 255 }),
+    type: mysqlEnum('type', [
+      'note',
+      'stage_change',
+      'status_change',
+      'recruiter_assigned',
+      'interview_scheduled',
+      'interview_rescheduled',
+      'interview_cancelled',
+      'interview_completed',
+      'rejection',
+      'withdrawal',
+    ]).notNull(),
+    title: varchar('title', { length: 255 }).notNull(),
+    content: text('content'),
+    metadata: json('metadata').$type<Record<string, unknown>>(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_recruitment_act_app').on(table.applicationId, table.createdAt),
+    index('idx_recruitment_act_candidate').on(table.candidateId),
+    index('idx_recruitment_act_tenant_comp').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type RecruitmentActivity = typeof recruitmentActivities.$inferSelect;
+export type NewRecruitmentActivity = typeof recruitmentActivities.$inferInsert;
+
+/**
+ * HRMS Domain: Recruitment — Interviews
+ */
+export const recruitmentInterviews = mysqlTable(
+  'recruitment_interviews',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id, { onDelete: 'cascade' }),
+    applicationId: varchar('application_id', { length: 64 })
+      .notNull()
+      .references(() => candidateApplications.id, { onDelete: 'cascade' }),
+    candidateId: varchar('candidate_id', { length: 64 })
+      .notNull()
+      .references(() => candidates.id, { onDelete: 'cascade' }),
+    roundName: varchar('round_name', { length: 100 }).notNull(),
+    interviewType: mysqlEnum('interview_type', [
+      'screening',
+      'technical',
+      'system_design',
+      'managerial',
+      'cultural_fit',
+      'hr',
+    ])
+      .default('technical')
+      .notNull(),
+    scheduledDate: varchar('scheduled_date', { length: 10 }).notNull(), // YYYY-MM-DD
+    startTime: varchar('start_time', { length: 5 }).notNull(), // HH:MM
+    endTime: varchar('end_time', { length: 5 }).notNull(), // HH:MM
+    durationMinutes: int('duration_minutes').default(60).notNull(),
+    timezone: varchar('timezone', { length: 50 }).default('Asia/Kolkata').notNull(),
+    locationOrLink: varchar('location_or_link', { length: 500 }),
+    status: mysqlEnum('status', ['scheduled', 'in_progress', 'completed', 'rescheduled', 'cancelled'])
+      .default('scheduled')
+      .notNull(),
+    rescheduleReason: varchar('reschedule_reason', { length: 500 }),
+    cancellationReason: varchar('cancellation_reason', { length: 500 }),
+    feedbackStatus: mysqlEnum('feedback_status', ['pending', 'submitted'])
+      .default('pending')
+      .notNull(),
+    feedbackRecommendation: mysqlEnum('feedback_recommendation', [
+      'strong_hire',
+      'hire',
+      'lean_hire',
+      'lean_no_hire',
+      'no_hire',
+    ]),
+    feedbackScore: int('feedback_score'),
+    feedbackNotes: text('feedback_notes'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    index('idx_recruitment_int_app').on(table.applicationId),
+    index('idx_recruitment_int_candidate').on(table.candidateId),
+    index('idx_recruitment_int_comp_date').on(table.companyId, table.scheduledDate),
+    index('idx_recruitment_int_status').on(table.companyId, table.status),
+  ],
+);
+
+export type RecruitmentInterview = typeof recruitmentInterviews.$inferSelect;
+export type NewRecruitmentInterview = typeof recruitmentInterviews.$inferInsert;
+
+/**
+ * HRMS Domain: Recruitment — Interview Panel Members
+ */
+export const recruitmentInterviewInterviewers = mysqlTable(
+  'recruitment_interview_interviewers',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    interviewId: varchar('interview_id', { length: 64 })
+      .notNull()
+      .references(() => recruitmentInterviews.id, { onDelete: 'cascade' }),
+    employeeId: varchar('employee_id', { length: 64 }).references(() => employees.id, {
+      onDelete: 'set null',
+    }),
+    interviewerName: varchar('interviewer_name', { length: 255 }).notNull(),
+    interviewerEmail: varchar('interviewer_email', { length: 255 }),
+    interviewerRole: varchar('interviewer_role', { length: 100 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_recruitment_panel_int').on(table.interviewId),
+    index('idx_recruitment_panel_emp').on(table.employeeId),
+  ],
+);
+
+export type RecruitmentInterviewInterviewer =
+  typeof recruitmentInterviewInterviewers.$inferSelect;
+export type NewRecruitmentInterviewInterviewer =
+  typeof recruitmentInterviewInterviewers.$inferInsert;
