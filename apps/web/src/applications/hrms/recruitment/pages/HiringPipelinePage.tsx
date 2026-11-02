@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Alert,
@@ -8,6 +8,7 @@ import {
   CardBody,
   Grid,
   Inline,
+  LoadingState,
   Page,
   PageHeader,
   SearchInput,
@@ -16,19 +17,38 @@ import {
   Toolbar,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
-import { INITIAL_CANDIDATES } from '../data/mockCandidates';
-import { INITIAL_JOB_OPENINGS } from '../data/mockJobOpenings';
-import type { Candidate, CandidateStage } from '../types/candidate';
+import type { Candidate, CandidateStage, AddCandidateInput } from '../types/candidate';
+import type { JobOpening } from '../types/jobOpening';
 import { ACTIVE_PIPELINE_STAGES, TERMINAL_PIPELINE_STAGES } from '../types/pipeline';
 import { PipelineColumn } from '../components/PipelineColumn';
 import { CandidateProfileDrawer } from '../components/CandidateProfileDrawer';
 import { AddCandidateModal } from '../components/AddCandidateModal';
+import {
+  fetchApplications,
+  fetchCandidates,
+  fetchJobRequisitions,
+  changeApplicationStage,
+  createCandidate,
+  createApplication,
+  adaptCandidateToFrontend,
+  adaptRequisitionToJobOpening,
+  adaptFrontendToCreateCandidateDto,
+} from '../api';
 
-export function HiringPipelinePage() {
+export interface HiringPipelinePageProps {
+  initialCandidates?: Candidate[];
+  initialJobs?: JobOpening[];
+}
+
+export function HiringPipelinePage({ initialCandidates, initialJobs }: HiringPipelinePageProps = {}) {
   const navigate = useNavigate();
 
   // State
-  const [candidates, setCandidates] = useState<Candidate[]>(INITIAL_CANDIDATES);
+  const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates ?? []);
+  const [jobs, setJobs] = useState<JobOpening[]>(initialJobs ?? []);
+  const [isLoading, setIsLoading] = useState<boolean>(!initialCandidates);
+  const [error, setError] = useState<string | null>(null);
+
   const [selectedJobId, setSelectedJobId] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
@@ -36,6 +56,84 @@ export function HiringPipelinePage() {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
   const [bannerNotice, setBannerNotice] = useState<string | null>(null);
+
+  const loadPipelineData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const [appsRes, candsRes, reqsRes] = await Promise.all([
+        fetchApplications({ limit: 1000 }),
+        fetchCandidates({ limit: 1000 }).catch(() => ({ items: [] })),
+        fetchJobRequisitions({ limit: 100 }).catch(() => ({ items: [] })),
+      ]);
+
+      const candMap: Record<string, (typeof candsRes.items)[0]> = {};
+      for (const c of candsRes.items) {
+        candMap[c.id] = c;
+      }
+
+      const adaptedCands: Candidate[] = appsRes.items.map((app) => {
+        const c = app.candidate || candMap[app.candidateId];
+        if (c) {
+          return adaptCandidateToFrontend(c, app);
+        }
+        // Fallback placeholder if candidate record is standalone
+        return {
+          id: app.candidateId,
+          candidateNumber: app.applicationNumber,
+          fullName: 'Applicant',
+          email: 'applicant@bezent.internal',
+          phone: '',
+          location: 'HQ - Chennai',
+          source: 'direct',
+          tags: [],
+          skills: [],
+          appliedJobId: app.requisitionId,
+          appliedJobTitle: app.requisition?.jobTitle || 'Role',
+          appliedJobCode: app.requisition?.requisitionCode || '',
+          currentStage: (app.stage as CandidateStage) || 'applied',
+          rating: app.rating || 4,
+          appliedDate:
+            (app.appliedAt ? app.appliedAt.split('T')[0] : '2026-10-01') || '2026-10-01',
+          resumeFileName: 'Resume.pdf',
+          summary: '',
+          noticePeriodDays: 30,
+          totalExperienceYears: 0,
+          relevantExperienceYears: 0,
+          experienceHistory: [],
+          educationHistory: [],
+          applicationHistory: [
+            {
+              id: app.id,
+              jobTitle: app.requisition?.jobTitle || 'Role',
+              jobCode: app.requisition?.requisitionCode || '',
+              department: app.requisition?.departmentName || 'Engineering',
+              appliedDate:
+                (app.appliedAt ? app.appliedAt.split('T')[0] : '2026-10-01') || '2026-10-01',
+              stage: (app.stage as CandidateStage) || 'applied',
+              rating: app.rating || 4,
+            },
+          ],
+        };
+      });
+
+      const adaptedJobs = reqsRes.items.map((r) => adaptRequisitionToJobOpening(r));
+
+      setCandidates(adaptedCands);
+      setJobs(adaptedJobs);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to load pipeline';
+      setError(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!initialCandidates) {
+      void loadPipelineData();
+    }
+  }, [initialCandidates, loadPipelineData]);
 
   // Conversion & Summary Metrics
   const metrics = useMemo(() => {
@@ -83,19 +181,64 @@ export function HiringPipelinePage() {
     setIsProfileOpen(true);
   };
 
-  const handleStageChange = (candidateId: string, newStage: CandidateStage) => {
-    setCandidates((prev) =>
-      prev.map((c) => (c.id === candidateId ? { ...c, currentStage: newStage } : c)),
-    );
-    const updated = candidates.find((c) => c.id === candidateId);
-    if (updated) {
-      setBannerNotice(`Advanced "${updated.fullName}" to stage: ${newStage.toUpperCase()}.`);
+  const handleStageChange = async (candidateId: string, newStage: CandidateStage) => {
+    const candidate = candidates.find((c) => c.id === candidateId);
+    const appId = candidate?.applicationHistory?.[0]?.id;
+
+    try {
+      if (appId) {
+        await changeApplicationStage(appId, newStage);
+      }
+      setCandidates((prev) =>
+        prev.map((c) => (c.id === candidateId ? { ...c, currentStage: newStage } : c)),
+      );
+      if (candidate) {
+        setBannerNotice(`Advanced "${candidate.fullName}" to stage: ${newStage.toUpperCase()}.`);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to advance stage';
+      setBannerNotice(`Error: ${msg}`);
     }
   };
 
-  const handleAddCandidate = (newCand: Candidate) => {
-    setCandidates((prev) => [newCand, ...prev]);
-    setBannerNotice(`Successfully added candidate "${newCand.fullName}" into pipeline.`);
+  const handleAddCandidate = async (newCand: Candidate) => {
+    try {
+      const dto = adaptFrontendToCreateCandidateDto({
+        fullName: newCand.fullName,
+        email: newCand.email,
+        phone: newCand.phone,
+        location: newCand.location,
+        appliedJobId: newCand.appliedJobId,
+        totalExperienceYears: newCand.totalExperienceYears,
+        currentCompany: newCand.currentCompany,
+        currentDesignation: newCand.currentDesignation,
+        source: newCand.source,
+        referredBy: newCand.referredBy,
+        noticePeriodDays: newCand.noticePeriodDays,
+        currentCtcLpa: newCand.currentCtcLpa,
+        expectedCtcLpa: newCand.expectedCtcLpa,
+        skillsRaw: newCand.skills.join(', '),
+        tagsRaw: newCand.tags.join(', '),
+        summary: newCand.summary,
+        resumeFileName: newCand.resumeFileName,
+      } as AddCandidateInput);
+
+      const created = await createCandidate(dto);
+      let app = null;
+      if (newCand.appliedJobId) {
+        app = await createApplication({
+          candidateId: created.id,
+          requisitionId: newCand.appliedJobId,
+        }).catch(() => null);
+      }
+
+      const adapted = adaptCandidateToFrontend(created, app);
+      setCandidates((prev) => [adapted, ...prev]);
+      setBannerNotice(`Successfully added candidate "${adapted.fullName}" into pipeline.`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to add candidate';
+      setBannerNotice(`Error: ${msg}`);
+    }
   };
 
   const handleHandoffToOnboarding = (cand: Candidate) => {
@@ -131,6 +274,17 @@ export function HiringPipelinePage() {
         {bannerNotice && (
           <Alert variant="info" onDismiss={() => setBannerNotice(null)}>
             {bannerNotice}
+          </Alert>
+        )}
+
+        {error && (
+          <Alert variant="danger">
+            <Inline justify="between" align="center">
+              <span>{error}</span>
+              <Button size="sm" variant="outline" onClick={loadPipelineData}>
+                Retry
+              </Button>
+            </Inline>
           </Alert>
         )}
 
@@ -218,7 +372,7 @@ export function HiringPipelinePage() {
                 onChange={(e) => setSelectedJobId(e.target.value)}
                 options={[
                   { value: 'all', label: 'All Job Requisitions (All Positions)' },
-                  ...INITIAL_JOB_OPENINGS.map((j) => ({
+                  ...jobs.map((j) => ({
                     value: j.id,
                     label: `${j.title} (${j.jobCode})`,
                   })),
@@ -255,27 +409,13 @@ export function HiringPipelinePage() {
         </Toolbar>
 
         {/* 3. Kanban Stage Board (Horizontal Scrollable Flow) */}
-        <div className="overflow-x-auto pb-4 pt-1">
-          <div className="flex gap-4 items-start min-w-max">
-            {ACTIVE_PIPELINE_STAGES.map((stage) => {
-              const stageCandidates = filteredCandidates.filter((c) => c.currentStage === stage.id);
-              return (
-                <PipelineColumn
-                  key={stage.id}
-                  stage={stage}
-                  candidates={stageCandidates}
-                  onSelectCandidate={handleSelectCandidate}
-                  onStageChange={handleStageChange}
-                />
-              );
-            })}
-
-            {/* Optional Terminal Columns */}
-            {showArchived &&
-              TERMINAL_PIPELINE_STAGES.map((stage) => {
-                const stageCandidates = filteredCandidates.filter(
-                  (c) => c.currentStage === stage.id,
-                );
+        {isLoading ? (
+          <LoadingState label="Loading hiring pipeline…" />
+        ) : (
+          <div className="overflow-x-auto pb-4 pt-1">
+            <div className="flex gap-4 items-start min-w-max">
+              {ACTIVE_PIPELINE_STAGES.map((stage) => {
+                const stageCandidates = filteredCandidates.filter((c) => c.currentStage === stage.id);
                 return (
                   <PipelineColumn
                     key={stage.id}
@@ -286,8 +426,26 @@ export function HiringPipelinePage() {
                   />
                 );
               })}
+
+              {/* Optional Terminal Columns */}
+              {showArchived &&
+                TERMINAL_PIPELINE_STAGES.map((stage) => {
+                  const stageCandidates = filteredCandidates.filter(
+                    (c) => c.currentStage === stage.id,
+                  );
+                  return (
+                    <PipelineColumn
+                      key={stage.id}
+                      stage={stage}
+                      candidates={stageCandidates}
+                      onSelectCandidate={handleSelectCandidate}
+                      onStageChange={handleStageChange}
+                    />
+                  );
+                })}
+            </div>
           </div>
-        </div>
+        )}
       </Stack>
 
       {/* Candidate Profile Drawer */}
@@ -307,7 +465,7 @@ export function HiringPipelinePage() {
         isOpen={isAddOpen}
         onClose={() => setIsAddOpen(false)}
         onAddCandidate={handleAddCandidate}
-        jobs={INITIAL_JOB_OPENINGS}
+        jobs={jobs}
         existingCount={candidates.length}
       />
     </Page>

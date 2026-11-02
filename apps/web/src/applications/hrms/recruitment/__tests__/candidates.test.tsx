@@ -13,7 +13,10 @@ describe('CandidatesPage', () => {
   it('renders the Candidates page header, metrics, tabs, and table', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
-        <CandidatesPage />
+        <CandidatesPage
+          initialCandidates={INITIAL_CANDIDATES}
+          initialJobs={INITIAL_JOB_OPENINGS}
+        />
       </MemoryRouter>,
     );
 
@@ -24,6 +27,16 @@ describe('CandidatesPage', () => {
     expect(html).toContain('Aditya Raman');
     expect(html).toContain('CND-2026-001');
     expect(html).toContain('Shreya Sengupta');
+  });
+
+  it('renders loading placeholder when initial data is not provided', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <CandidatesPage />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('Loading candidates');
   });
 
   it('renders CandidateMetrics with valid counts', () => {

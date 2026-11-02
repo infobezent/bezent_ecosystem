@@ -10,12 +10,17 @@ import { ScheduleInterviewModal } from '../components/ScheduleInterviewModal';
 import { RescheduleCancelModal } from '../components/RescheduleCancelModal';
 import { INITIAL_INTERVIEWS } from '../data/mockInterviews';
 import { INITIAL_CANDIDATES } from '../data/mockCandidates';
+import { INITIAL_JOB_OPENINGS } from '../data/mockJobOpenings';
 
 describe('InterviewsPage', () => {
   it('renders the Interviews page header, metrics, tabs, and table', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
-        <InterviewsPage />
+        <InterviewsPage
+          initialInterviews={INITIAL_INTERVIEWS}
+          initialCandidates={INITIAL_CANDIDATES}
+          initialJobs={INITIAL_JOB_OPENINGS}
+        />
       </MemoryRouter>,
     );
 
@@ -26,6 +31,16 @@ describe('InterviewsPage', () => {
     expect(html).toContain('Completed &amp; Evaluated');
     expect(html).toContain('Shreya Sengupta');
     expect(html).toContain('Round 2: Architecture &amp; System Design');
+  });
+
+  it('renders loading placeholder when initial data is not provided', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <InterviewsPage />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('Loading interviews');
   });
 
   it('renders InterviewMetrics with counts', () => {

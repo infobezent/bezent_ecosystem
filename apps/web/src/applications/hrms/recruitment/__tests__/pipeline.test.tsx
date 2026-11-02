@@ -5,13 +5,17 @@ import { HiringPipelinePage } from '../pages/HiringPipelinePage';
 import { PipelineColumn } from '../components/PipelineColumn';
 import { PipelineCandidateCard } from '../components/PipelineCandidateCard';
 import { INITIAL_CANDIDATES } from '../data/mockCandidates';
+import { INITIAL_JOB_OPENINGS } from '../data/mockJobOpenings';
 import { ACTIVE_PIPELINE_STAGES } from '../types/pipeline';
 
 describe('HiringPipelinePage', () => {
   it('renders the Hiring Pipeline page header, conversion metrics, and stage columns', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
-        <HiringPipelinePage />
+        <HiringPipelinePage
+          initialCandidates={INITIAL_CANDIDATES}
+          initialJobs={INITIAL_JOB_OPENINGS}
+        />
       </MemoryRouter>,
     );
 
@@ -25,6 +29,16 @@ describe('HiringPipelinePage', () => {
     expect(html).toContain('Interview');
     expect(html).toContain('Offer');
     expect(html).toContain('Hired');
+  });
+
+  it('renders loading placeholder when initial data is not provided', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <HiringPipelinePage />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('Loading hiring pipeline');
   });
 
   it('renders a PipelineColumn with candidates and stage badge', () => {
