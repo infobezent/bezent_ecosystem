@@ -6,10 +6,20 @@ import {
   validateUpdateEmployee,
   validateListEmployeesParams,
 } from '../validation/employee.schema.js';
-import type { EmployeeDetails, PaginatedEmployeesResult } from '../types/employee.types.js';
+import type { EmployeeDetails, PaginatedEmployeesResult, EmploymentStatus } from '../types/employee.types.js';
 import { NotFoundError, ConflictError, BadRequestError } from '../../../../app/errors/AppError.js';
 import { provisionUserForEmployee } from './employeeUserBridge.service.js';
 import { workforceSettingsService } from '../../workforce/service/workforceSettings.service.js';
+
+function addDays(isoDate: string, days: number): string {
+  const parts = isoDate.split('-').map(Number);
+  const y = parts[0] ?? 2000;
+  const m = parts[1] ?? 1;
+  const d = parts[2] ?? 1;
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  dt.setUTCDate(dt.getUTCDate() + days);
+  return dt.toISOString().slice(0, 10);
+}
 
 export class EmployeeService {
   constructor(
@@ -132,7 +142,9 @@ export class EmployeeService {
         ? { ...(input as Record<string, unknown>) }
         : ({} as Record<string, unknown>);
 
-    const isAutoNumber = !inputObj.employeeNumber;
+    const hasManualNumber =
+      typeof inputObj.employeeNumber === 'string' && inputObj.employeeNumber.trim().length > 0;
+    const isAutoNumber = !hasManualNumber;
 
     // Validate payload first using a temporary placeholder so that validation
     // failures do NOT consume an employee sequence number.
@@ -168,6 +180,32 @@ export class EmployeeService {
       }
     }
 
+    // Fetch workforce general numbering settings for this company
+    const wfGeneralSettings = await workforceSettingsService.getGeneralSettings(
+      tenantId,
+      companyId,
+    );
+
+    // 1. Enforce generationMode: 'manual' (P0)
+    if (wfGeneralSettings.generationMode === 'manual' && !hasManualNumber) {
+      throw new BadRequestError(
+        'Employee number is required when workforce numbering mode is set to manual',
+        'EMPLOYEE_NUMBER_REQUIRED',
+      );
+    }
+
+    // 2. Enforce allowManualOverride: false (P0)
+    if (
+      wfGeneralSettings.generationMode === 'automatic' &&
+      hasManualNumber &&
+      !wfGeneralSettings.allowManualOverride
+    ) {
+      throw new BadRequestError(
+        'Manual employee number override is not permitted by company workforce settings',
+        'MANUAL_NUMBER_OVERRIDE_PROHIBITED',
+      );
+    }
+
     // 3. Atomically reserve sequence or validate provided manual number
     let employeeNumber: string;
     if (isAutoNumber) {
@@ -188,6 +226,24 @@ export class EmployeeService {
       }
     }
     validatedDto.employeeNumber = employeeNumber;
+
+    // 3b. Probation defaulting (P1): Calculate probationEndDate from joiningDate + defaultProbationDays
+    if (validatedDto.employmentStatus === 'probation' && !validatedDto.probationEndDate) {
+      try {
+        const probationPolicy = await workforceSettingsService.getProbationPolicy(
+          tenantId,
+          companyId,
+        );
+        const days = probationPolicy?.defaultProbationDays ?? 90;
+        if (days > 0 && validatedDto.joiningDate) {
+          validatedDto.probationEndDate = addDays(validatedDto.joiningDate, days);
+        }
+      } catch {
+        if (validatedDto.joiningDate) {
+          validatedDto.probationEndDate = addDays(validatedDto.joiningDate, 90);
+        }
+      }
+    }
 
     // 3c. Auto-assign referral code for this new employee if none provided
     if (!validatedDto.referralCode) {
@@ -220,8 +276,7 @@ export class EmployeeService {
     let shouldAutoProvision = Boolean(inputObj.autoProvisionUser || inputObj.enablePortalAccess);
     if (!shouldAutoProvision && inputObj.autoProvisionUser === undefined) {
       try {
-        const wfSettings = await workforceSettingsService.getGeneralSettings(tenantId, companyId);
-        if (wfSettings.autoProvisionUser) {
+        if (wfGeneralSettings.autoProvisionUser) {
           shouldAutoProvision = true;
         }
       } catch {
@@ -300,6 +355,14 @@ export class EmployeeService {
 
     const validatedDto = validateUpdateEmployee(input);
 
+    // Validate employment status transition if status is being updated (P0)
+    if (
+      validatedDto.employmentStatus &&
+      validatedDto.employmentStatus !== existing.employmentStatus
+    ) {
+      this.validateStatusTransition(existing.employmentStatus, validatedDto.employmentStatus);
+    }
+
     // Check email uniqueness if email is changed
     if (validatedDto.email && validatedDto.email !== existing.email) {
       const emailTaken = await this.repo.getByEmail(tenantId, companyId, validatedDto.email);
@@ -327,5 +390,34 @@ export class EmployeeService {
     }
 
     return updated;
+  }
+
+  /**
+   * Validates employee lifecycle state transitions grounded in enterprise HR workflows (P0).
+   * Rejects invalid transitions such as terminated -> active or active -> probation.
+   */
+  private validateStatusTransition(
+    currentStatus: EmploymentStatus,
+    targetStatus: EmploymentStatus,
+  ): void {
+    if (currentStatus === targetStatus) return;
+
+    const allowedTransitions: Record<EmploymentStatus, EmploymentStatus[]> = {
+      pending_activation: ['probation', 'active', 'terminated'],
+      probation: ['active', 'notice', 'terminated', 'suspended', 'resigned'],
+      active: ['notice', 'suspended', 'terminated', 'resigned'],
+      notice: ['active', 'probation', 'resigned', 'terminated'],
+      suspended: ['active', 'probation', 'notice', 'terminated', 'resigned'],
+      resigned: [],
+      terminated: [],
+    };
+
+    const allowed = allowedTransitions[currentStatus] ?? [];
+    if (!allowed.includes(targetStatus)) {
+      throw new BadRequestError(
+        `Invalid employment status transition from '${currentStatus}' to '${targetStatus}'. Direct transition is not permitted by workforce lifecycle rules.`,
+        'INVALID_STATUS_TRANSITION',
+      );
+    }
   }
 }

@@ -9,7 +9,7 @@ import type { AttendanceRepository } from '../attendance/repository/attendance.r
 import { FALLBACK_ATTENDANCE_POLICY } from '../attendance/service/attendancePolicy.service.js';
 import type { AttendancePolicy, ShiftSchedule } from '../attendance/types/attendance.types.js';
 import { EmployeeService } from '../employees/service/employee.service.js';
-import { WorkforceSettingsService } from '../workforce/service/workforceSettings.service.js';
+import { WorkforceSettingsService, workforceSettingsService } from '../workforce/service/workforceSettings.service.js';
 import type { WorkforceSettingsRepository } from '../workforce/repository/workforceSettings.repository.js';
 import { LeaveGeneralSettingsService } from '../leave/service/leaveGeneralSettings.service.js';
 import type { LeaveGeneralSettingsRepository } from '../leave/repository/leaveGeneralSettings.repository.js';
@@ -90,6 +90,26 @@ describe('BEZENT HRMS — Phase 1 Business Correctness Suite', () => {
       };
 
       mockProfileService = {};
+
+      vi.spyOn(workforceSettingsService, 'getGeneralSettings').mockResolvedValue({
+        id: 'wfs_gen_1',
+        tenantId,
+        companyId,
+        generationMode: 'automatic',
+        idPrefix: 'EMP-',
+        idSuffix: null,
+        sequenceLength: 4,
+        startingNumber: 1001,
+        currentCounter: 1000,
+        resetFrequency: 'never',
+        allowManualOverride: true,
+        preventIdReuse: true,
+        autoProvisionUser: true,
+        activationTiming: 'instant',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        nextSuggestedId: 'EMP-1001',
+      });
 
       employeeService = new EmployeeService(
         mockEmployeeRepo,
