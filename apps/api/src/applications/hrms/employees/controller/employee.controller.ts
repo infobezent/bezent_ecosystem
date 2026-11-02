@@ -139,6 +139,10 @@ export class EmployeeController {
         companyContext.companyId,
         requireEmployeeId(req),
         req.body,
+        {
+          userId: req.user?.id,
+          email: req.user?.email,
+        },
       );
 
       res.json({

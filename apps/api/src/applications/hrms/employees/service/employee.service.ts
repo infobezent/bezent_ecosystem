@@ -10,6 +10,12 @@ import type { EmployeeDetails, PaginatedEmployeesResult, EmploymentStatus } from
 import { NotFoundError, ConflictError, BadRequestError } from '../../../../app/errors/AppError.js';
 import { provisionUserForEmployee } from './employeeUserBridge.service.js';
 import { workforceSettingsService } from '../../workforce/service/workforceSettings.service.js';
+import { auditService, AuditService } from '../../../../platform/audit/service/audit.service.js';
+
+export interface EmployeeUpdateActor {
+  userId?: string | null;
+  email?: string | null;
+}
 
 function addDays(isoDate: string, days: number): string {
   const parts = isoDate.split('-').map(Number);
@@ -26,6 +32,7 @@ export class EmployeeService {
     private readonly repo = new EmployeeRepository(),
     private readonly orgRepo = new OrganizationRepository(),
     private readonly profileService = new EmployeeProfileService(),
+    private readonly audit: AuditService = auditService,
   ) {}
 
   private async validateOrgAssignments(
@@ -347,6 +354,7 @@ export class EmployeeService {
     companyId: string,
     id: string,
     input: unknown,
+    actor?: EmployeeUpdateActor | string,
   ): Promise<EmployeeDetails> {
     const existing = await this.repo.getById(tenantId, companyId, id);
     if (!existing) {
@@ -384,12 +392,68 @@ export class EmployeeService {
     }
     await this.validateReportingManager(tenantId, companyId, validatedDto.reportingManagerId);
 
-    const updated = await this.repo.update(tenantId, companyId, id, validatedDto);
-    if (!updated) {
-      throw new NotFoundError(`Employee with ID '${id}' not found`);
+    // Compute changed fields diff (capture previous and new values, exclude unchanged)
+    const previousValues: Record<string, unknown> = {};
+    const newValues: Record<string, unknown> = {};
+    const changedFields: string[] = [];
+
+    for (const [key, val] of Object.entries(validatedDto)) {
+      if (val !== undefined) {
+        const existingVal = ((existing as unknown) as Record<string, unknown>)[key] ?? null;
+        const normalizedVal = val ?? null;
+
+        if (existingVal !== normalizedVal) {
+          previousValues[key] = existingVal;
+          newValues[key] = normalizedVal;
+          changedFields.push(key);
+        }
+      }
     }
 
-    return updated;
+    const actorUserId =
+      typeof actor === 'string'
+        ? actor
+        : actor?.userId ?? null;
+    const actorEmail =
+      typeof actor === 'object' && actor !== null
+        ? actor.email ?? null
+        : null;
+
+    const performUpdate = async (tx?: unknown) => {
+      const updated = await this.repo.update(tenantId, companyId, id, validatedDto, tx as any);
+      if (!updated) {
+        throw new NotFoundError(`Employee with ID '${id}' not found`);
+      }
+
+      if (changedFields.length > 0) {
+        await this.audit.logEvent(
+          {
+            actorUserId,
+            actorEmail,
+            action: 'employee_updated',
+            targetType: 'employee',
+            targetId: id,
+            tenantId,
+            companyId,
+            metadata: {
+              employeeNumber: existing.employeeNumber,
+              changedFields,
+              previousValues,
+              newValues,
+            },
+          },
+          tx,
+        );
+      }
+
+      return updated;
+    };
+
+    if (typeof (this.repo as any).transaction === 'function') {
+      return (this.repo as any).transaction(performUpdate);
+    }
+
+    return performUpdate();
   }
 
   /**
