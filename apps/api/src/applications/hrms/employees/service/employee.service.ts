@@ -229,19 +229,19 @@ export class EmployeeService {
 
     // 3b. Probation defaulting (P1): Calculate probationEndDate from joiningDate + defaultProbationDays
     if (validatedDto.employmentStatus === 'probation' && !validatedDto.probationEndDate) {
-      try {
-        const probationPolicy = await workforceSettingsService.getProbationPolicy(
-          tenantId,
-          companyId,
-        );
-        const days = probationPolicy?.defaultProbationDays ?? 90;
-        if (days > 0 && validatedDto.joiningDate) {
-          validatedDto.probationEndDate = addDays(validatedDto.joiningDate, days);
-        }
-      } catch {
-        if (validatedDto.joiningDate) {
-          validatedDto.probationEndDate = addDays(validatedDto.joiningDate, 90);
-        }
+      const probationPolicy = await workforceSettingsService.getProbationPolicy(
+        tenantId,
+        companyId,
+      );
+      const days =
+        typeof probationPolicy?.defaultProbationDays === 'number' &&
+        !isNaN(probationPolicy.defaultProbationDays) &&
+        probationPolicy.defaultProbationDays >= 0
+          ? probationPolicy.defaultProbationDays
+          : 90;
+
+      if (days > 0 && validatedDto.joiningDate) {
+        validatedDto.probationEndDate = addDays(validatedDto.joiningDate, days);
       }
     }
 

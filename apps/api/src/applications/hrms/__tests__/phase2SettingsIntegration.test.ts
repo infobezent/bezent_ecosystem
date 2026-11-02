@@ -92,6 +92,20 @@ describe('BEZENT HRMS — Phase 2: Settings Integration & Business Logic Enforce
         mockRepo as EmployeeRepository,
         mockOrgRepo as OrganizationRepository,
       );
+
+      vi.spyOn(workforceSettingsService, 'getProbationPolicy').mockResolvedValue({
+        id: 'wpp_p2_1',
+        tenantId,
+        companyId,
+        defaultProbationDays: 90,
+        confirmationMode: 'manager_review',
+        reminderLeadDays: 14,
+        maxExtensionDays: 90,
+        maxExtensionsAllowed: 1,
+        autoGenerateLetter: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
     });
 
     it('requires employeeNumber when generationMode === "manual" and rejects empty number', async () => {
@@ -288,6 +302,20 @@ describe('BEZENT HRMS — Phase 2: Settings Integration & Business Logic Enforce
         mockOrgRepo as OrganizationRepository,
       );
 
+      vi.spyOn(workforceSettingsService, 'getProbationPolicy').mockResolvedValue({
+        id: 'wpp_p2_1',
+        tenantId,
+        companyId,
+        defaultProbationDays: 90,
+        confirmationMode: 'manager_review',
+        reminderLeadDays: 14,
+        maxExtensionDays: 90,
+        maxExtensionsAllowed: 1,
+        autoGenerateLetter: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
       vi.spyOn(workforceSettingsService, 'getGeneralSettings').mockResolvedValue({
         id: 'wgs_1',
         tenantId,
@@ -477,6 +505,20 @@ describe('BEZENT HRMS — Phase 2: Settings Integration & Business Logic Enforce
         mockRepo as EmployeeRepository,
         mockOrgRepo as OrganizationRepository,
       );
+
+      vi.spyOn(workforceSettingsService, 'getProbationPolicy').mockResolvedValue({
+        id: 'wpp_p2_1',
+        tenantId,
+        companyId,
+        defaultProbationDays: 90,
+        confirmationMode: 'manager_review',
+        reminderLeadDays: 14,
+        maxExtensionDays: 90,
+        maxExtensionsAllowed: 1,
+        autoGenerateLetter: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
     });
 
     it('allows valid transition: probation -> active (confirmation)', async () => {
