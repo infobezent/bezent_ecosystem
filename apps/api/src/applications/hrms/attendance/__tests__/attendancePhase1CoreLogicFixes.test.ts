@@ -6,6 +6,8 @@ import {
   employees,
   departments,
   employeeLeaveRequests,
+  employeeLeaveBalances,
+  leaveBalanceTransactions,
   attendanceOnDutyRequests,
   attendanceExceptions,
   attendanceRegularizations,
@@ -51,6 +53,10 @@ describe.skipIf(!isDatabaseConfigured)(
       await db
         .delete(attendanceOnDutyRequests)
         .where(eq(attendanceOnDutyRequests.tenantId, tenantId));
+      await db
+        .delete(leaveBalanceTransactions)
+        .where(eq(leaveBalanceTransactions.tenantId, tenantId));
+      await db.delete(employeeLeaveBalances).where(eq(employeeLeaveBalances.tenantId, tenantId));
       await db.delete(employeeLeaveRequests).where(eq(employeeLeaveRequests.tenantId, tenantId));
       await db
         .delete(attendanceMonthlySummaries)
