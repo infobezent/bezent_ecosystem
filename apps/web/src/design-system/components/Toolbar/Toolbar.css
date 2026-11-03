@@ -42,11 +42,11 @@
   display: flex;
   align-items: center;
   gap: var(--space-1, 4px);
-  background-color: #f1f5f9;
+  background-color: var(--bg-surface, #ffffff);
   padding: 3px;
   border-radius: 8px;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow: none;
+  border: 1px solid var(--border-default, #dde3ea);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
   margin-left: 14px;
 }
 
@@ -68,6 +68,7 @@
 
 .bezent-filter-tab:hover {
   color: var(--text-primary, #0f172a);
+  background-color: rgba(0, 0, 0, 0.04);
 }
 
 .bezent-filter-tab:focus-visible {
@@ -108,11 +109,11 @@
 .bezent-view-toggle {
   display: inline-flex;
   align-items: center;
-  background-color: #f1f5f9;
+  background-color: var(--bg-surface, #ffffff);
   padding: 2.5px;
   border-radius: 8px;
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  box-shadow: none;
+  border: 1px solid var(--border-default, #dde3ea);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
   gap: 2px;
   height: 36px;
   box-sizing: border-box;
@@ -157,7 +158,7 @@
 
 .bezent-view-toggle__btn:hover:not(.is-active) {
   color: var(--text-primary, #0f172a);
-  background: rgba(255, 255, 255, 0.65);
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .bezent-view-toggle__btn:focus-visible {
@@ -237,6 +238,17 @@
 
 [data-theme='dark'] .bezent-filter-toolbar__more {
   border-top-color: rgba(56, 189, 248, 0.2);
+}
+
+[data-theme='dark'] .bezent-filter-tabs,
+[data-theme='dark'] .bezent-view-toggle {
+  background-color: #0f172a;
+  border-color: #1e293b;
+}
+
+[data-theme='dark'] .bezent-filter-tab:hover,
+[data-theme='dark'] .bezent-view-toggle__btn:hover:not(.is-active) {
+  background: rgba(255, 255, 255, 0.06);
 }
 
 /* ── Responsive Toolbar & Filter Tabs ── */
