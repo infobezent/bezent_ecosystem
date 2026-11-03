@@ -391,7 +391,7 @@ describe('EmployeeDirectoryTable', () => {
     }
   });
 
-  it('renders employee avatar image with 3d catalog asset and initials fallback', () => {
+  it('renders employee avatar initials with color palette and accessible label', () => {
     const html = renderToStaticMarkup(
       <EmployeeDirectoryTable
         status="ready"
@@ -400,8 +400,10 @@ describe('EmployeeDirectoryTable', () => {
         onOpenEmployee={noop}
       />,
     );
-    expect(html).toContain('src="/assets/avatars/3d/');
-    expect(html).toContain('alt="Kavya Iyer"');
+    expect(html).toContain('KI');
+    expect(html).toContain('bezent-avatar--purple');
+    expect(html).toContain('aria-label="Kavya Iyer"');
+    expect(html).not.toContain('src="/assets/avatars/3d/');
   });
 
   it('employee name and ID open the canonical profile', () => {

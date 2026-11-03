@@ -24,7 +24,6 @@ import {
   employmentTypeLabel,
   formatDate,
   getAvatarColor,
-  getEmployeeAvatarId,
   getInitials,
 } from '../model/employeeModel';
 
@@ -155,7 +154,6 @@ export function EmployeeDirectoryTable({
         {employees.map((employee, _index) => {
           const isMenuOpen = activeMenuId === employee.id;
           const avatarColor = getAvatarColor(employee.id || employee.employeeNumber);
-          const avatarId = getEmployeeAvatarId(employee.id || employee.employeeNumber);
           const initials = getInitials(employee.fullName);
 
           return (
@@ -172,7 +170,6 @@ export function EmployeeDirectoryTable({
                   <Inline justify="between" align="start">
                     <Inline align="center" gap="sm">
                       <Avatar
-                        avatarId={avatarId}
                         initials={initials}
                         size="md"
                         color={avatarColor}
@@ -300,7 +297,6 @@ export function EmployeeDirectoryTable({
         {employees.map((employee, _index) => {
           const isMenuOpen = activeMenuId === employee.id;
           const avatarColor = getAvatarColor(employee.id || employee.employeeNumber);
-          const avatarId = getEmployeeAvatarId(employee.id || employee.employeeNumber);
           const isNearBottom = _index >= employees.length - 2 && employees.length > 2;
 
           return (
@@ -309,7 +305,6 @@ export function EmployeeDirectoryTable({
               <TableCell>
                 <div className="bezent-table-cell--avatar-meta">
                   <Avatar
-                    avatarId={avatarId}
                     initials={getInitials(employee.fullName)}
                     color={avatarColor}
                     size="md"
