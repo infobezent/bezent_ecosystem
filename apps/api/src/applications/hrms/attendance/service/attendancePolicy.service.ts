@@ -36,7 +36,6 @@ export const FALLBACK_ATTENDANCE_POLICY: AttendancePolicy = {
 };
 
 import { attendanceSettingsService } from './attendanceSettings.service.js';
-import { attendanceSettingsRepository } from '../repository/attendanceSettings.repository.js';
 
 export class AttendancePolicyService {
   async getEffectivePolicy(
@@ -77,25 +76,6 @@ export class AttendancePolicyService {
     const existing = await this.getPolicy(tenantId, companyId);
 
     if (existing.id && existing.id !== 'att_pol_default') {
-      if (existing.status !== 'draft') {
-        const updated = await attendanceSettingsRepository.updatePolicy(
-          tenantId,
-          companyId,
-          existing.id,
-          input,
-        );
-        await attendanceSettingsRepository.recordAuditLog(tenantId, companyId, {
-          category: 'policy',
-          action: 'updated',
-          entityId: existing.id,
-          entityType: 'attendance_policies',
-          previousValues: existing as unknown as Record<string, unknown>,
-          newValues: input as Record<string, unknown>,
-          changedByUserId: userId,
-        });
-        return updated;
-      }
-
       // Route through attendanceSettingsService to strictly enforce policy immutability on published/archived policies (P0)
       return attendanceSettingsService.updatePolicy(
         tenantId,
