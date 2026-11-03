@@ -3,6 +3,10 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import {
   WorkforceKpiCards,
   WorkforceRing,
+  WorkforceSkyline,
+  WorkforceNetwork,
+  OnboardingPathway,
+  ArchiveVault,
   computeWorkforceMonthlyTrends,
 } from '../components/WorkforceKpiCards';
 import type { EmployeeRecord } from '../api/employeesApi';
@@ -129,7 +133,7 @@ describe('WorkforceKpiCards (Number + Mini Trend Chart)', () => {
     );
   });
 
-  it('renders creative enterprise visualizations across all four KPI cards', () => {
+  it('renders clean minimal executive metric cards without cluttered chart illustrations', () => {
     const html = renderToStaticMarkup(
       <WorkforceKpiCards
         kpis={{
@@ -144,26 +148,31 @@ describe('WorkforceKpiCards (Number + Mini Trend Chart)', () => {
       />,
     );
 
-    // Card 01: Workforce Skyline in Total Employees
-    expect(html).toContain('bezent-workforce-skyline');
-    expect(html).toContain('bezent-workforce-skyline__svg');
-    expect(html).toContain('bezent-workforce-skyline__person--hero');
+    // Cards render clean values and titles without right-side chart illustrations
+    expect(html).not.toContain('bezent-trend-kpi-card__chart');
+    expect(html).not.toContain('bezent-workforce-skyline');
+    expect(html).not.toContain('bezent-workforce-network');
+    expect(html).not.toContain('bezent-onboarding-pathway');
+    expect(html).not.toContain('bezent-archive-vault');
+  });
 
-    // Card 02: Connected Network in Active Employees
-    expect(html).toContain('bezent-workforce-network');
-    expect(html).toContain('bezent-workforce-network__svg');
-    expect(html).toContain('bezent-workforce-network__employee-node');
+  it('exports and renders standalone workforce visual components cleanly', () => {
+    const skylineHtml = renderToStaticMarkup(<WorkforceSkyline />);
+    expect(skylineHtml).toContain('bezent-workforce-skyline');
+    expect(skylineHtml).toContain('bezent-workforce-skyline__person--hero');
 
-    // Card 03: Onboarding Pathway in Pending Activation
-    expect(html).toContain('bezent-onboarding-pathway');
-    expect(html).toContain('bezent-onboarding-pathway__svg');
+    const networkHtml = renderToStaticMarkup(<WorkforceNetwork />);
+    expect(networkHtml).toContain('bezent-workforce-network');
+    expect(networkHtml).toContain('bezent-workforce-network__employee-node');
 
-    // Card 04: Offboarded Employee Pass in Inactive Employees
-    expect(html).toContain('bezent-archive-vault');
-    expect(html).toContain('bezent-archive-vault__svg');
-    expect(html).toContain('bezent-archive-vault__badge');
-    expect(html).toContain('bezent-archive-vault__transition');
-    expect(html).toContain('bezent-archive-vault__exit-seal');
+    const pathwayHtml = renderToStaticMarkup(<OnboardingPathway />);
+    expect(pathwayHtml).toContain('bezent-onboarding-pathway');
+
+    const vaultHtml = renderToStaticMarkup(<ArchiveVault />);
+    expect(vaultHtml).toContain('bezent-archive-vault');
+    expect(vaultHtml).toContain('bezent-archive-vault__badge');
+    expect(vaultHtml).toContain('bezent-archive-vault__transition');
+    expect(vaultHtml).toContain('bezent-archive-vault__exit-seal');
   });
 
   it('exports and renders WorkforceRing component cleanly', () => {
@@ -191,8 +200,6 @@ describe('WorkforceKpiCards (Number + Mini Trend Chart)', () => {
 
     // Does NOT render fake growth percentages or fake trend indicators
     expect(html).not.toContain('bezent-trend-kpi-card__trend');
-    // Renders the neutral dashed baseline placeholder
-    expect(html).toContain('stroke-dasharray="3 3"');
     // Renders the subtitles as honest fallback
     expect(html).toContain('Total recorded workforce');
     expect(html).toContain('Confirmed active employees');

@@ -1016,7 +1016,7 @@ interface SingleKpiCardProps {
   accent: 'blue' | 'green' | 'amber' | 'coral';
   icon: BezentIconName;
   tooltip: string;
-  chartType: KpiChartType;
+  chartType?: KpiChartType | null;
   trendResult: TrendCalculationResult;
   loading: boolean;
   isActive: boolean;
@@ -1124,26 +1124,28 @@ function SingleKpiCard({
           )}
         </div>
 
-        <div className="bezent-trend-kpi-card__chart">
-          {chartType === 'workforce-skyline' ? (
-            <WorkforceSkyline />
-          ) : chartType === 'workforce-network' ? (
-            <WorkforceNetwork />
-          ) : chartType === 'onboarding-pathway' ? (
-            <OnboardingPathway />
-          ) : chartType === 'archive-vault' ? (
-            <ArchiveVault />
-          ) : chartType === 'workforce-ring' ? (
-            <WorkforceRing />
-          ) : (
-            <MiniChart
-              data={trendResult.trendData}
-              accent={accent}
-              type={chartType}
-              chartId={`${id}-${chartId}`}
-            />
-          )}
-        </div>
+        {chartType && (
+          <div className="bezent-trend-kpi-card__chart">
+            {chartType === 'workforce-skyline' ? (
+              <WorkforceSkyline />
+            ) : chartType === 'workforce-network' ? (
+              <WorkforceNetwork />
+            ) : chartType === 'onboarding-pathway' ? (
+              <OnboardingPathway />
+            ) : chartType === 'archive-vault' ? (
+              <ArchiveVault />
+            ) : chartType === 'workforce-ring' ? (
+              <WorkforceRing />
+            ) : (
+              <MiniChart
+                data={trendResult.trendData}
+                accent={accent}
+                type={chartType}
+                chartId={`${id}-${chartId}`}
+              />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1180,7 +1182,7 @@ export function WorkforceKpiCards({
       accent: 'blue' as const,
       icon: 'employees' as BezentIconName,
       tooltip: 'Total count of all recorded employees across all statuses.',
-      chartType: 'workforce-skyline' as const,
+      chartType: null,
       trendResult: trends.total,
       statusTab: 'all',
     },
@@ -1192,7 +1194,7 @@ export function WorkforceKpiCards({
       accent: 'green' as const,
       icon: 'userCheck' as BezentIconName,
       tooltip: 'Employees with confirmed active or probation status eligible for daily operations.',
-      chartType: 'workforce-network' as const,
+      chartType: null,
       trendResult: trends.active,
       statusTab: 'active',
     },
@@ -1204,7 +1206,7 @@ export function WorkforceKpiCards({
       accent: 'amber' as const,
       icon: 'onboarding' as BezentIconName,
       tooltip: 'Pre-boarded employees awaiting account activation and first sign-in.',
-      chartType: 'onboarding-pathway' as const,
+      chartType: null,
       trendResult: trends.pendingActivation,
       statusTab: 'pending_activation',
     },
@@ -1216,7 +1218,7 @@ export function WorkforceKpiCards({
       accent: 'coral' as const,
       icon: 'userX' as BezentIconName,
       tooltip: 'Separated employees (terminated, suspended, or resigned) preserved for compliance.',
-      chartType: 'archive-vault' as const,
+      chartType: null,
       trendResult: trends.inactive,
       statusTab: 'inactive',
     },
