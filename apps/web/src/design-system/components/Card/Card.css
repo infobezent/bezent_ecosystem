@@ -799,122 +799,126 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
 }
 
-/* ── Trend KPI Card Deep Vibrant / Dark Variants (Executive SaaS Theme) ── */
+/* ── Trend KPI Card Vibrant Flat Solid Variants (Executive SaaS Theme - Zero Gradient) ── */
 .bezent-trend-kpi-card--blue {
-  background: linear-gradient(145deg, #1d4ed8 0%, #1e3a8a 100%);
-  border-color: #2563eb;
+  background: #25899d;
+  border-color: #25899d;
   box-shadow:
-    0 4px 16px rgba(30, 58, 138, 0.28),
-    0 1px 3px rgba(30, 58, 138, 0.12);
+    0 4px 14px rgba(37, 137, 157, 0.25),
+    0 1px 3px rgba(37, 137, 157, 0.12);
 }
 
 .bezent-trend-kpi-card--blue:hover {
-  /* Keep background consistent - do not darken on hover */
+  background: #25899d;
   transform: translateY(-2px);
   box-shadow:
-    0 6px 20px rgba(30, 58, 138, 0.35),
-    0 2px 6px rgba(30, 58, 138, 0.15);
+    0 6px 20px rgba(37, 137, 157, 0.35),
+    0 2px 6px rgba(37, 137, 157, 0.15);
 }
 
 .bezent-trend-kpi-card--blue.is-active {
-  /* No harsh border line or box-shadow ring on select */
-  border-color: #2563eb;
+  background: #25899d;
+  outline: none;
+  border-color: #25899d;
   box-shadow:
-    0 4px 16px rgba(30, 58, 138, 0.35),
-    0 1px 3px rgba(30, 58, 138, 0.15);
+    0 4px 14px rgba(37, 137, 157, 0.35),
+    0 1px 3px rgba(37, 137, 157, 0.15);
 }
 
 .bezent-trend-kpi-card--green {
-  background: linear-gradient(145deg, #047857 0%, #064e3b 100%);
-  border-color: #059669;
+  background: #7756ff;
+  border-color: #7756ff;
   box-shadow:
-    0 4px 16px rgba(6, 78, 59, 0.28),
-    0 1px 3px rgba(6, 78, 59, 0.12);
+    0 4px 14px rgba(119, 86, 255, 0.25),
+    0 1px 3px rgba(119, 86, 255, 0.12);
 }
 
 .bezent-trend-kpi-card--green:hover {
-  /* Keep background consistent - do not darken on hover */
+  background: #7756ff;
   transform: translateY(-2px);
   box-shadow:
-    0 6px 20px rgba(6, 78, 59, 0.35),
-    0 2px 6px rgba(6, 78, 59, 0.15);
+    0 6px 20px rgba(119, 86, 255, 0.35),
+    0 2px 6px rgba(119, 86, 255, 0.15);
 }
 
 .bezent-trend-kpi-card--green.is-active {
-  /* No harsh border line or box-shadow ring on select */
-  border-color: #059669;
+  background: #7756ff;
+  outline: none;
+  border-color: #7756ff;
   box-shadow:
-    0 4px 16px rgba(6, 78, 59, 0.35),
-    0 1px 3px rgba(6, 78, 59, 0.15);
+    0 4px 14px rgba(119, 86, 255, 0.35),
+    0 1px 3px rgba(119, 86, 255, 0.15);
 }
 
 .bezent-trend-kpi-card--amber {
-  background: linear-gradient(145deg, #b45309 0%, #78350f 100%);
-  border-color: #d97706;
+  background: #2d78af;
+  border-color: #2d78af;
   box-shadow:
-    0 4px 16px rgba(120, 53, 15, 0.28),
-    0 1px 3px rgba(120, 53, 15, 0.12);
+    0 4px 14px rgba(45, 120, 175, 0.25),
+    0 1px 3px rgba(45, 120, 175, 0.12);
 }
 
 .bezent-trend-kpi-card--amber:hover {
-  /* Keep background consistent - do not darken on hover */
+  background: #2d78af;
   transform: translateY(-2px);
   box-shadow:
-    0 6px 20px rgba(120, 53, 15, 0.35),
-    0 2px 6px rgba(120, 53, 15, 0.15);
+    0 6px 20px rgba(45, 120, 175, 0.35),
+    0 2px 6px rgba(45, 120, 175, 0.15);
 }
 
 .bezent-trend-kpi-card--amber.is-active {
-  /* No harsh border line or box-shadow ring on select */
-  border-color: #d97706;
+  background: #2d78af;
+  outline: none;
+  border-color: #2d78af;
   box-shadow:
-    0 4px 16px rgba(120, 53, 15, 0.35),
-    0 1px 3px rgba(120, 53, 15, 0.15);
+    0 4px 14px rgba(45, 120, 175, 0.35),
+    0 1px 3px rgba(45, 120, 175, 0.15);
 }
 
 .bezent-trend-kpi-card--coral {
-  background: linear-gradient(145deg, #be123c 0%, #881337 100%);
-  border-color: #e11d48;
+  background: #fe7446;
+  border-color: #fe7446;
   box-shadow:
-    0 4px 16px rgba(136, 19, 55, 0.28),
-    0 1px 3px rgba(136, 19, 55, 0.12);
+    0 4px 14px rgba(254, 116, 70, 0.25),
+    0 1px 3px rgba(254, 116, 70, 0.12);
 }
 
 .bezent-trend-kpi-card--coral:hover {
-  /* Keep background consistent - do not darken on hover */
+  background: #fe7446;
   transform: translateY(-2px);
   box-shadow:
-    0 6px 20px rgba(136, 19, 55, 0.35),
-    0 2px 6px rgba(136, 19, 55, 0.15);
+    0 6px 20px rgba(254, 116, 70, 0.35),
+    0 2px 6px rgba(254, 116, 70, 0.15);
 }
 
 .bezent-trend-kpi-card--coral.is-active {
-  /* No harsh border line or box-shadow ring on select */
-  border-color: #e11d48;
+  background: #fe7446;
+  outline: none;
+  border-color: #fe7446;
   box-shadow:
-    0 4px 16px rgba(136, 19, 55, 0.35),
-    0 1px 3px rgba(136, 19, 55, 0.15);
+    0 4px 14px rgba(254, 116, 70, 0.35),
+    0 1px 3px rgba(254, 116, 70, 0.15);
 }
 
-/* Dark Mode Tint Overrides for Deep Cards */
+/* Dark Mode Tint Overrides for Solid Flat Cards */
 [data-theme='dark'] .bezent-trend-kpi-card--blue {
-  background: linear-gradient(145deg, #172554 0%, #0f172a 100%);
-  border-color: rgba(96, 165, 250, 0.45);
+  background: #1e6d7d;
+  border-color: #1e6d7d;
 }
 
 [data-theme='dark'] .bezent-trend-kpi-card--green {
-  background: linear-gradient(145deg, #022c22 0%, #0f172a 100%);
-  border-color: rgba(52, 211, 153, 0.45);
+  background: #5b3fd6;
+  border-color: #5b3fd6;
 }
 
 [data-theme='dark'] .bezent-trend-kpi-card--amber {
-  background: linear-gradient(145deg, #451a03 0%, #0f172a 100%);
-  border-color: rgba(251, 191, 36, 0.45);
+  background: #225c85;
+  border-color: #225c85;
 }
 
 [data-theme='dark'] .bezent-trend-kpi-card--coral {
-  background: linear-gradient(145deg, #4c0519 0%, #0f172a 100%);
-  border-color: rgba(251, 113, 133, 0.45);
+  background: #cc5027;
+  border-color: #cc5027;
 }
 
 [data-theme='dark'] .bezent-trend-kpi-card--blue:hover,
@@ -931,12 +935,14 @@
   box-shadow: none;
 }
 
-/* Light Typography & Glowing Elements on Dark Cards */
+/* Crisp White Metric Numbers & Titles on Solid Cards */
 .bezent-trend-kpi-card--blue .bezent-trend-kpi-card__title,
 .bezent-trend-kpi-card--green .bezent-trend-kpi-card__title,
 .bezent-trend-kpi-card--amber .bezent-trend-kpi-card__title,
 .bezent-trend-kpi-card--coral .bezent-trend-kpi-card__title {
-  color: rgba(255, 255, 255, 0.92);
+  color: #ffffff;
+  font-weight: 600;
+  opacity: 0.95;
 }
 
 .bezent-trend-kpi-card--blue .bezent-trend-kpi-card__value,
@@ -944,97 +950,60 @@
 .bezent-trend-kpi-card--amber .bezent-trend-kpi-card__value,
 .bezent-trend-kpi-card--coral .bezent-trend-kpi-card__value {
   color: #ffffff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  font-weight: 700;
+  text-shadow: none;
 }
 
-/* High-Contrast Captions & Trend Indicators (Stable/Up/Down) on Dark Cards */
+/* High-Contrast Captions & Trend Indicators (Stable/Up/Down) on Solid Cards */
 .bezent-trend-kpi-card--blue .bezent-trend-kpi-card__caption,
 .bezent-trend-kpi-card--blue .bezent-trend-kpi-card__trend,
-.bezent-trend-kpi-card--blue .bezent-trend-kpi-card__trend--neutral {
-  color: #dbeafe;
-  font-weight: 500;
-  opacity: 1;
-}
-
-.bezent-trend-kpi-card--blue .bezent-trend-kpi-card__trend--up {
-  color: #86efac;
-  font-weight: 600;
-}
-
-.bezent-trend-kpi-card--blue .bezent-trend-kpi-card__trend--down {
-  color: #fca5a5;
-  font-weight: 600;
-}
-
+.bezent-trend-kpi-card--blue .bezent-trend-kpi-card__trend--neutral,
 .bezent-trend-kpi-card--green .bezent-trend-kpi-card__caption,
 .bezent-trend-kpi-card--green .bezent-trend-kpi-card__trend,
-.bezent-trend-kpi-card--green .bezent-trend-kpi-card__trend--neutral {
-  color: #d1fae5;
-  font-weight: 500;
-  opacity: 1;
-}
-
-.bezent-trend-kpi-card--green .bezent-trend-kpi-card__trend--up {
-  color: #86efac;
-  font-weight: 600;
-}
-
-.bezent-trend-kpi-card--green .bezent-trend-kpi-card__trend--down {
-  color: #fca5a5;
-  font-weight: 600;
-}
-
+.bezent-trend-kpi-card--green .bezent-trend-kpi-card__trend--neutral,
 .bezent-trend-kpi-card--amber .bezent-trend-kpi-card__caption,
 .bezent-trend-kpi-card--amber .bezent-trend-kpi-card__trend,
-.bezent-trend-kpi-card--amber .bezent-trend-kpi-card__trend--neutral {
-  color: #fef3c7;
-  font-weight: 500;
-  opacity: 1;
-}
-
-.bezent-trend-kpi-card--amber .bezent-trend-kpi-card__trend--up {
-  color: #86efac;
-  font-weight: 600;
-}
-
-.bezent-trend-kpi-card--amber .bezent-trend-kpi-card__trend--down {
-  color: #fca5a5;
-  font-weight: 600;
-}
-
+.bezent-trend-kpi-card--amber .bezent-trend-kpi-card__trend--neutral,
 .bezent-trend-kpi-card--coral .bezent-trend-kpi-card__caption,
 .bezent-trend-kpi-card--coral .bezent-trend-kpi-card__trend,
 .bezent-trend-kpi-card--coral .bezent-trend-kpi-card__trend--neutral {
-  color: #ffe4e6;
+  color: rgba(255, 255, 255, 0.9);
   font-weight: 500;
   opacity: 1;
 }
 
+.bezent-trend-kpi-card--blue .bezent-trend-kpi-card__trend--up,
+.bezent-trend-kpi-card--green .bezent-trend-kpi-card__trend--up,
+.bezent-trend-kpi-card--amber .bezent-trend-kpi-card__trend--up,
 .bezent-trend-kpi-card--coral .bezent-trend-kpi-card__trend--up {
-  color: #86efac;
+  color: #a7f3d0;
   font-weight: 600;
 }
 
+.bezent-trend-kpi-card--blue .bezent-trend-kpi-card__trend--down,
+.bezent-trend-kpi-card--green .bezent-trend-kpi-card__trend--down,
+.bezent-trend-kpi-card--amber .bezent-trend-kpi-card__trend--down,
 .bezent-trend-kpi-card--coral .bezent-trend-kpi-card__trend--down {
-  color: #fca5a5;
+  color: #fecdd3;
   font-weight: 600;
 }
 
-/* Light Glassmorphic Icon Badges inside Dark Cards */
+/* Light Frosted Glass Icon Badges inside Solid Cards (Matching Reference Design) */
 .bezent-trend-kpi-card--blue .bezent-trend-kpi-card__icon-badge,
 .bezent-trend-kpi-card--green .bezent-trend-kpi-card__icon-badge,
 .bezent-trend-kpi-card--amber .bezent-trend-kpi-card__icon-badge,
 .bezent-trend-kpi-card--coral .bezent-trend-kpi-card__icon-badge {
-  background: rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.22) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  border-radius: 8px;
 }
 
 .bezent-trend-kpi-card--blue .bezent-trend-kpi-card__info-btn,
 .bezent-trend-kpi-card--green .bezent-trend-kpi-card__info-btn,
 .bezent-trend-kpi-card--amber .bezent-trend-kpi-card__info-btn,
 .bezent-trend-kpi-card--coral .bezent-trend-kpi-card__info-btn {
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .bezent-trend-kpi-card--blue .bezent-trend-kpi-card__info-btn:hover,
