@@ -247,7 +247,9 @@ describe('BEZENT HRMS — Phase 3.3: Recruitment → Workforce Onboarding Handof
       getEmployeeByPhone: vi.fn().mockResolvedValue(null),
       getEmployeesByName: vi.fn().mockResolvedValue([]),
       getDepartment: vi.fn().mockResolvedValue({ id: 'dept_eng', name: 'Engineering' }),
-      getDesignation: vi.fn().mockResolvedValue({ id: 'desig_sr_fe', name: 'Senior Frontend Engineer' }),
+      getDesignation: vi
+        .fn()
+        .mockResolvedValue({ id: 'desig_sr_fe', name: 'Senior Frontend Engineer' }),
       getLocation: vi.fn().mockResolvedValue({ id: 'loc_blr', name: 'Bangalore HQ' }),
       createActivity: vi.fn().mockResolvedValue({ id: 'act_1' }),
     };
@@ -634,7 +636,9 @@ describe('BEZENT HRMS — Phase 3.3: Recruitment → Workforce Onboarding Handof
       });
 
       const res = await request(app)
-        .post(`/api/v1/hrms/recruitment/applications/${sampleHiredApplication.id}/initiate-onboarding`)
+        .post(
+          `/api/v1/hrms/recruitment/applications/${sampleHiredApplication.id}/initiate-onboarding`,
+        )
         .send({ targetJoiningDate: '2026-11-20' });
 
       expect(res.status).toBe(201);

@@ -23,10 +23,7 @@ export interface TransfersLifecycleTabProps {
   onReload: () => void;
 }
 
-export function TransfersLifecycleTab({
-  initialPolicy,
-  onReload,
-}: TransfersLifecycleTabProps) {
+export function TransfersLifecycleTab({ initialPolicy, onReload }: TransfersLifecycleTabProps) {
   const [requireReleasingManagerApproval, setRequireReleasingManagerApproval] = useState(
     initialPolicy.requireReleasingManagerApproval,
   );
@@ -39,9 +36,10 @@ export function TransfersLifecycleTab({
   );
 
   const [saving, setSaving] = useState(false);
-  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(
-    null,
-  );
+  const [statusMessage, setStatusMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   const handleSave = async () => {
     try {
@@ -53,7 +51,10 @@ export function TransfersLifecycleTab({
         autoReassignShifts,
         autoReassignLeaveApprover,
       });
-      setStatusMessage({ type: 'success', text: 'Workforce lifecycle & transfer policy saved successfully.' });
+      setStatusMessage({
+        type: 'success',
+        text: 'Workforce lifecycle & transfer policy saved successfully.',
+      });
       onReload();
     } catch (err) {
       setStatusMessage({
@@ -79,7 +80,8 @@ export function TransfersLifecycleTab({
             <div>
               <CardTitle>Internal Transfers & Lifecycle Governance</CardTitle>
               <CardDescription>
-                Govern internal mobility, department/location movements, dual-manager approvals, and automated operational reassignments.
+                Govern internal mobility, department/location movements, dual-manager approvals, and
+                automated operational reassignments.
               </CardDescription>
             </div>
           </CardHeader>
@@ -90,7 +92,9 @@ export function TransfersLifecycleTab({
                 label="Effective Date Alignment"
                 value={effectiveDateAlignment}
                 onChange={(e) =>
-                  setEffectiveDateAlignment(e.target.value as 'immediate' | 'next_payroll_month' | 'custom')
+                  setEffectiveDateAlignment(
+                    e.target.value as 'immediate' | 'next_payroll_month' | 'custom',
+                  )
                 }
                 options={[
                   { label: 'Next Payroll Cycle / Month Boundary', value: 'next_payroll_month' },

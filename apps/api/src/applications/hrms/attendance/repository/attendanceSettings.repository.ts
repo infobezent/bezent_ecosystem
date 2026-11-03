@@ -1656,7 +1656,9 @@ export class AttendanceSettingsRepository {
       }));
     } else {
       baseShifts =
-        rawRoster?.shifts && rawRoster.shifts.length > 0 ? rawRoster.shifts : DEFAULT_COMPANY_SHIFTS;
+        rawRoster?.shifts && rawRoster.shifts.length > 0
+          ? rawRoster.shifts
+          : DEFAULT_COMPANY_SHIFTS;
     }
 
     // Retrieve active employee counts assigned to each shift from employeeWorkSchedules

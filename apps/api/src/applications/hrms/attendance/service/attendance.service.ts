@@ -19,10 +19,7 @@ import {
   DefaultShiftScheduleProvider,
   defaultShiftScheduleProvider,
 } from './shiftSchedule.provider.js';
-import {
-  AttendanceHolidayService,
-  attendanceHolidayService,
-} from './attendanceHoliday.service.js';
+import { AttendanceHolidayService, attendanceHolidayService } from './attendanceHoliday.service.js';
 import { attendanceWorkdayService, formatTimeInTimezone } from './attendanceWorkday.service.js';
 import { BadRequestError, ConflictError, NotFoundError } from '../../../../app/errors/AppError.js';
 import type {
@@ -134,8 +131,19 @@ export class AttendanceService {
     );
 
     try {
-      const db = getDb();
-      const { updated, lateArrivalAlert } = await db.transaction(async (tx) => {
+      const executeTx = async <T>(cb: (tx?: any) => Promise<T>): Promise<T> => {
+        if (typeof (this.repo as any).transaction === 'function') {
+          return (this.repo as any).transaction(cb);
+        }
+        try {
+          const db = getDb();
+          return await db.transaction(cb);
+        } catch {
+          return await cb();
+        }
+      };
+
+      const { updated, lateArrivalAlert } = await executeTx(async (tx) => {
         // 1. Base check-in record (handles atomic insertion or row-locked update)
         const record = await this.repo.checkIn(
           tenantId,

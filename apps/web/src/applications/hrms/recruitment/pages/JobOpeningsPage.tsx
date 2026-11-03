@@ -270,7 +270,11 @@ export function JobOpeningsPage({ initialJobs }: JobOpeningsPageProps = {}) {
               </Button>
 
               {/* View Mode Toggle: List vs Grid */}
-              <div className="bezent-view-toggle" role="group" aria-label="Job openings view layout switcher">
+              <div
+                className="bezent-view-toggle"
+                role="group"
+                aria-label="Job openings view layout switcher"
+              >
                 <button
                   type="button"
                   className={`bezent-view-toggle__btn ${viewMode === 'list' ? 'is-active' : ''}`}
@@ -294,7 +298,11 @@ export function JobOpeningsPage({ initialJobs }: JobOpeningsPageProps = {}) {
               </div>
 
               {/* Segmented Status Tabs */}
-              <div className="bezent-filter-tabs" role="tablist" aria-label="Filter job openings by status">
+              <div
+                className="bezent-filter-tabs"
+                role="tablist"
+                aria-label="Filter job openings by status"
+              >
                 {tabItems.map((tab) => (
                   <button
                     key={tab.id}

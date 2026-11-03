@@ -61,7 +61,9 @@ export async function reserveNextEmployeeId(): Promise<FormattedNextIdResult> {
   return handleResponse<FormattedNextIdResult>(res, 'Failed to reserve next employee ID');
 }
 
-export async function listEmploymentTypes(activeOnly?: boolean): Promise<WorkforceEmploymentType[]> {
+export async function listEmploymentTypes(
+  activeOnly?: boolean,
+): Promise<WorkforceEmploymentType[]> {
   const url = activeOnly
     ? `${appConfig.apiBaseUrl}/hrms/workforce/settings/employment-types?activeOnly=true`
     : `${appConfig.apiBaseUrl}/hrms/workforce/settings/employment-types`;

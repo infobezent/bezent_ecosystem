@@ -38,7 +38,10 @@ export function InterviewMetrics({ interviews, todayDate = '2026-10-30' }: Inter
           <Inline justify="between" align="center">
             <Stack gap="xs">
               <Inline align="center" gap="xs">
-                <span className="bezent-pulse-stat__dot bezent-pulse-stat__dot--purple" aria-hidden="true" />
+                <span
+                  className="bezent-pulse-stat__dot bezent-pulse-stat__dot--purple"
+                  aria-hidden="true"
+                />
                 <span className="bezent-clay-metric__label">Interviews Today</span>
               </Inline>
               <div className="bezent-clay-metric__value">{todayCount}</div>
@@ -62,7 +65,10 @@ export function InterviewMetrics({ interviews, todayDate = '2026-10-30' }: Inter
           <Inline justify="between" align="center">
             <Stack gap="xs">
               <Inline align="center" gap="xs">
-                <span className="bezent-pulse-stat__dot bezent-pulse-stat__dot--blue" aria-hidden="true" />
+                <span
+                  className="bezent-pulse-stat__dot bezent-pulse-stat__dot--blue"
+                  aria-hidden="true"
+                />
                 <span className="bezent-clay-metric__label">Upcoming Pipeline</span>
               </Inline>
               <div className="bezent-clay-metric__value">{upcomingCount}</div>
@@ -86,7 +92,10 @@ export function InterviewMetrics({ interviews, todayDate = '2026-10-30' }: Inter
           <Inline justify="between" align="center">
             <Stack gap="xs">
               <Inline align="center" gap="xs">
-                <span className="bezent-pulse-stat__dot bezent-pulse-stat__dot--green" aria-hidden="true" />
+                <span
+                  className="bezent-pulse-stat__dot bezent-pulse-stat__dot--green"
+                  aria-hidden="true"
+                />
                 <span className="bezent-clay-metric__label">Completed &amp; Evaluated</span>
               </Inline>
               <div className="bezent-clay-metric__value">{completedWithScorecardCount}</div>
@@ -110,7 +119,10 @@ export function InterviewMetrics({ interviews, todayDate = '2026-10-30' }: Inter
           <Inline justify="between" align="center">
             <Stack gap="xs">
               <Inline align="center" gap="xs">
-                <span className="bezent-pulse-stat__dot bezent-pulse-stat__dot--amber" aria-hidden="true" />
+                <span
+                  className="bezent-pulse-stat__dot bezent-pulse-stat__dot--amber"
+                  aria-hidden="true"
+                />
                 <span className="bezent-clay-metric__label">Pending Feedback</span>
               </Inline>
               <div className="bezent-clay-metric__value">{pendingFeedbackCount}</div>

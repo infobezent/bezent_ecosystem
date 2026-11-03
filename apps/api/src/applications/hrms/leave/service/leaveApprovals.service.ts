@@ -218,12 +218,7 @@ export class LeaveApprovalsService {
         this.resolveApprover(tenantId, companyId, level, employee, workflow),
       ),
     );
-    const isApplicantHr = await this.repo.isEmployeeHr(
-      tenantId,
-      companyId,
-      employee.id,
-      workflow,
-    );
+    const isApplicantHr = await this.repo.isEmployeeHr(tenantId, companyId, employee.id, workflow);
     const plan = planApprovalSteps({
       levels: workflow.levels,
       approvers,

@@ -3,10 +3,7 @@ import {
   recruitmentRepository,
 } from '../repository/recruitment.repository.js';
 import { EmployeeService } from '../../employees/service/employee.service.js';
-import {
-  AuditService,
-  auditService,
-} from '../../../../platform/audit/service/audit.service.js';
+import { AuditService, auditService } from '../../../../platform/audit/service/audit.service.js';
 import { OrganizationRepository } from '../../../../platform/organization/repository/organization.repository.js';
 import { generateSurrogateId } from '../../../../platform/auth/security.js';
 import {
@@ -166,9 +163,7 @@ export class RecruitmentOnboardingService {
     // 1. Verify application exists and belongs to company
     const app = await this.repo.getApplicationById(tenantId, companyId, applicationId);
     if (!app) {
-      throw new NotFoundError(
-        `Application '${applicationId}' not found in this company`,
-      );
+      throw new NotFoundError(`Application '${applicationId}' not found in this company`);
     }
 
     // 2. Validate eligibility: Candidate application MUST be in 'hired' status
@@ -180,7 +175,11 @@ export class RecruitmentOnboardingService {
     }
 
     // 3. Check if onboarding record already exists for this application
-    const existing = await this.repo.getOnboardingByApplicationId(tenantId, companyId, applicationId);
+    const existing = await this.repo.getOnboardingByApplicationId(
+      tenantId,
+      companyId,
+      applicationId,
+    );
     if (existing) {
       if (existing.status === 'completed') {
         throw new ConflictError(
@@ -461,16 +460,24 @@ export class RecruitmentOnboardingService {
 
     await this.repo.updateOnboarding(tenantId, companyId, id, {
       targetJoiningDate: validated.targetJoiningDate ?? onboarding.targetJoiningDate,
-      departmentId: validated.departmentId !== undefined ? validated.departmentId : onboarding.departmentId,
-      designationId: validated.designationId !== undefined ? validated.designationId : onboarding.designationId,
+      departmentId:
+        validated.departmentId !== undefined ? validated.departmentId : onboarding.departmentId,
+      designationId:
+        validated.designationId !== undefined ? validated.designationId : onboarding.designationId,
       locationId: validated.locationId !== undefined ? validated.locationId : onboarding.locationId,
       reportingManagerId:
-        validated.reportingManagerId !== undefined ? validated.reportingManagerId : onboarding.reportingManagerId,
+        validated.reportingManagerId !== undefined
+          ? validated.reportingManagerId
+          : onboarding.reportingManagerId,
       employmentType: validated.employmentType ?? onboarding.employmentType,
       workflowTemplate:
-        validated.workflowTemplate !== undefined ? validated.workflowTemplate : onboarding.workflowTemplate,
+        validated.workflowTemplate !== undefined
+          ? validated.workflowTemplate
+          : onboarding.workflowTemplate,
       assignedPartner:
-        validated.assignedPartner !== undefined ? validated.assignedPartner : onboarding.assignedPartner,
+        validated.assignedPartner !== undefined
+          ? validated.assignedPartner
+          : onboarding.assignedPartner,
       notes: validated.notes !== undefined ? validated.notes : onboarding.notes,
       status: newStatus,
       reviewedByUserId: actor?.userId ?? null,
@@ -562,7 +569,8 @@ export class RecruitmentOnboardingService {
 
       if (duplicateCheck.hasConflict && duplicateCheck.conflictSeverity === 'blocking') {
         throw new ConflictError(
-          duplicateCheck.message || 'Duplicate employee conflict detected. Employee creation blocked.',
+          duplicateCheck.message ||
+            'Duplicate employee conflict detected. Employee creation blocked.',
           'DUPLICATE_EMPLOYEE_CONFLICT',
         );
       }

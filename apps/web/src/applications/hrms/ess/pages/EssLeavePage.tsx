@@ -138,9 +138,7 @@ export function EssLeavePage({
   const [applyLoading, setApplyLoading] = useState(false);
   const [applyError, setApplyError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [leaveTypeId, setLeaveTypeId] = useState(
-    initialWorkspace?.balances[0]?.leaveTypeId || '',
-  );
+  const [leaveTypeId, setLeaveTypeId] = useState(initialWorkspace?.balances[0]?.leaveTypeId || '');
   const [duration, setDuration] = useState<'full' | EssHalfDaySession>('full');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');

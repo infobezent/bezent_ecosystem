@@ -25,13 +25,7 @@ import type {
 } from '../../../../db/schema.js';
 
 export type AttendanceStatus =
-  | 'present'
-  | 'absent'
-  | 'half_day'
-  | 'on_leave'
-  | 'holiday'
-  | 'weekly_off'
-  | 'incomplete';
+  'present' | 'absent' | 'half_day' | 'on_leave' | 'holiday' | 'weekly_off' | 'incomplete';
 export type AttendanceProcessingState =
   'incomplete' | 'pending_review' | 'provisional' | 'finalized' | 'locked';
 

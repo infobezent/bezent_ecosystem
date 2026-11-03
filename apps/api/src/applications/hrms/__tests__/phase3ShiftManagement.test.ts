@@ -122,7 +122,7 @@ describe('BEZENT HRMS — Phase 3.4: Database-backed Shift Management & Attendan
       }),
       createShift: vi.fn().mockImplementation((data) => {
         const id = data.id || 'shf_new_01';
-        const isOvernight = data.isOvernight ?? (data.endTime < data.startTime);
+        const isOvernight = data.isOvernight ?? data.endTime < data.startTime;
         return Promise.resolve({
           ...data,
           id,
@@ -184,7 +184,14 @@ describe('BEZENT HRMS — Phase 3.4: Database-backed Shift Management & Attendan
       }),
       findOverlappingAssignments: vi.fn().mockResolvedValue([]),
       getEmployeeWithOrg: vi.fn().mockImplementation((t, c, id) => {
-        if (t === tenantId && c === companyId && (id === 'emp_001' || id === 'emp_002' || id === 'emp_future' || id === 'emp_precedence_01')) {
+        if (
+          t === tenantId &&
+          c === companyId &&
+          (id === 'emp_001' ||
+            id === 'emp_002' ||
+            id === 'emp_future' ||
+            id === 'emp_precedence_01')
+        ) {
           return Promise.resolve({
             employee: { id, departmentId: 'dept_eng', locationId: 'loc_hq' } as any,
             department: { id: 'dept_eng', name: 'Engineering' } as any,
@@ -206,6 +213,7 @@ describe('BEZENT HRMS — Phase 3.4: Database-backed Shift Management & Attendan
         return Promise.resolve(null);
       }),
       getActiveAssignmentsForDate: vi.fn().mockResolvedValue([]),
+      getLegacySchedule: vi.fn().mockResolvedValue(null),
     };
 
     resolutionService = new ShiftResolutionService(mockRepo as ShiftRepository);
@@ -337,12 +345,7 @@ describe('BEZENT HRMS — Phase 3.4: Database-backed Shift Management & Attendan
       });
 
       await expect(
-        shiftService.deleteShift(
-          tenantId,
-          companyId,
-          sampleGeneralShift.id,
-          'usr_actor',
-        ),
+        shiftService.deleteShift(tenantId, companyId, sampleGeneralShift.id, 'usr_actor'),
       ).rejects.toThrow(ConflictError);
 
       expect(mockRepo.deleteShift).not.toHaveBeenCalled();
@@ -582,7 +585,12 @@ describe('BEZENT HRMS — Phase 3.4: Database-backed Shift Management & Attendan
         deptAsgnWithShift,
       ]);
 
-      const resolved = await resolutionService.resolveEmployeeShift(tenantId, companyId, empId, '2026-11-05');
+      const resolved = await resolutionService.resolveEmployeeShift(
+        tenantId,
+        companyId,
+        empId,
+        '2026-11-05',
+      );
 
       expect(resolved.shift?.code).toBe(empShift.code);
       expect(resolved.schedule.startTime).toBe('10:00');
@@ -619,7 +627,12 @@ describe('BEZENT HRMS — Phase 3.4: Database-backed Shift Management & Attendan
         locAsgnWithShift,
       ]);
 
-      const resolved = await resolutionService.resolveEmployeeShift(tenantId, companyId, empId, '2026-11-05');
+      const resolved = await resolutionService.resolveEmployeeShift(
+        tenantId,
+        companyId,
+        empId,
+        '2026-11-05',
+      );
 
       expect(resolved.shift?.code).toBe(deptShift.code);
       expect(resolved.schedule.startTime).toBe('11:00');
@@ -644,7 +657,12 @@ describe('BEZENT HRMS — Phase 3.4: Database-backed Shift Management & Attendan
 
       vi.mocked(mockRepo.getActiveAssignmentsForDate)!.mockResolvedValue([locAsgnWithShift]);
 
-      const resolved = await resolutionService.resolveEmployeeShift(tenantId, companyId, empId, '2026-11-05');
+      const resolved = await resolutionService.resolveEmployeeShift(
+        tenantId,
+        companyId,
+        empId,
+        '2026-11-05',
+      );
 
       expect(resolved.shift?.code).toBe(locShift.code);
       expect(resolved.schedule.startTime).toBe('08:30');
@@ -663,7 +681,12 @@ describe('BEZENT HRMS — Phase 3.4: Database-backed Shift Management & Attendan
         total: 1,
       });
 
-      const resolved = await resolutionService.resolveEmployeeShift(tenantId, companyId, empId, '2026-11-05');
+      const resolved = await resolutionService.resolveEmployeeShift(
+        tenantId,
+        companyId,
+        empId,
+        '2026-11-05',
+      );
 
       expect(resolved.shift?.code).toBe(sampleGeneralShift.code);
       expect(resolved.resolutionSource).toBe('default_shift');
@@ -898,28 +921,24 @@ describe('BEZENT HRMS — Phase 3.4: Database-backed Shift Management & Attendan
         id: 'shf_created',
       });
 
-      const res = await request(app)
-        .post('/api/v1/hrms/shifts')
-        .send({
-          name: 'General Day Shift',
-          code: 'GEN-01',
-          startTime: '09:00',
-          endTime: '18:00',
-        });
+      const res = await request(app).post('/api/v1/hrms/shifts').send({
+        name: 'General Day Shift',
+        code: 'GEN-01',
+        startTime: '09:00',
+        endTime: '18:00',
+      });
 
       expect(res.status).toBe(201);
       expect(res.body.data.id).toBe('shf_created');
     });
 
     it('5.3 POST /api/v1/hrms/shifts rejects invalid time format with 400', async () => {
-      const res = await request(app)
-        .post('/api/v1/hrms/shifts')
-        .send({
-          name: 'Invalid Shift',
-          code: 'INV-01',
-          startTime: '9:00 AM', // Not HH:mm format
-          endTime: '18:00',
-        });
+      const res = await request(app).post('/api/v1/hrms/shifts').send({
+        name: 'Invalid Shift',
+        code: 'INV-01',
+        startTime: '9:00 AM', // Not HH:mm format
+        endTime: '18:00',
+      });
 
       expect(res.status).toBe(400);
       expect(res.body.error.message).toContain('HH:mm');
@@ -951,14 +970,12 @@ describe('BEZENT HRMS — Phase 3.4: Database-backed Shift Management & Attendan
     it('5.5 POST /api/v1/hrms/shift-assignments returns 201 on valid assignment', async () => {
       vi.spyOn(ShiftService.prototype, 'createAssignment').mockResolvedValue(sampleAssignment);
 
-      const res = await request(app)
-        .post('/api/v1/hrms/shift-assignments')
-        .send({
-          shiftId: sampleGeneralShift.id,
-          assignmentScope: 'employee',
-          targetId: 'emp_001',
-          effectiveStartDate: '2026-11-01',
-        });
+      const res = await request(app).post('/api/v1/hrms/shift-assignments').send({
+        shiftId: sampleGeneralShift.id,
+        assignmentScope: 'employee',
+        targetId: 'emp_001',
+        effectiveStartDate: '2026-11-01',
+      });
 
       expect(res.status).toBe(201);
       expect(res.body.data.id).toBe(sampleAssignment.id);
@@ -981,14 +998,12 @@ describe('BEZENT HRMS — Phase 3.4: Database-backed Shift Management & Attendan
       unauthApp.use('/api/v1', shiftRouter);
       unauthApp.use(errorHandler);
 
-      const res = await request(unauthApp)
-        .post('/api/v1/hrms/shifts')
-        .send({
-          name: 'Unauthorized Shift',
-          code: 'UNAUTH-01',
-          startTime: '09:00',
-          endTime: '18:00',
-        });
+      const res = await request(unauthApp).post('/api/v1/hrms/shifts').send({
+        name: 'Unauthorized Shift',
+        code: 'UNAUTH-01',
+        startTime: '09:00',
+        endTime: '18:00',
+      });
 
       expect(res.status).toBe(403);
     });

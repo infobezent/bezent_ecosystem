@@ -6,6 +6,7 @@ import {
   employees,
   departments,
   locations,
+  employeeWorkSchedules,
   type HrmsShift,
   type NewHrmsShift,
   type HrmsShiftAssignment,
@@ -13,6 +14,7 @@ import {
   type Employee,
   type Department,
   type Location,
+  type EmployeeWorkSchedule,
 } from '../../../../db/schema.js';
 import { generateSurrogateId } from '../../../../platform/auth/security.js';
 import type {
@@ -38,8 +40,7 @@ export class ShiftRepository {
   ): Promise<HrmsShift> {
     const id = data.id || generateSurrogateId('shift');
     const isOvernight =
-      data.isOvernight ??
-      (timeToMinutes(data.endTime) < timeToMinutes(data.startTime));
+      data.isOvernight ?? timeToMinutes(data.endTime) < timeToMinutes(data.startTime);
 
     await executor.insert(hrmsShifts).values({
       ...data,
@@ -151,8 +152,7 @@ export class ShiftRepository {
 
     const startTime = patch.startTime ?? existing.startTime;
     const endTime = patch.endTime ?? existing.endTime;
-    const isOvernight =
-      patch.isOvernight ?? (timeToMinutes(endTime) < timeToMinutes(startTime));
+    const isOvernight = patch.isOvernight ?? timeToMinutes(endTime) < timeToMinutes(startTime);
 
     await executor
       .update(hrmsShifts)
@@ -465,7 +465,11 @@ export class ShiftRepository {
     companyId: string,
     employeeId: string,
     executor: DbExecutor = getDb(),
-  ): Promise<{ employee: Employee; department: Department | null; location: Location | null } | null> {
+  ): Promise<{
+    employee: Employee;
+    department: Department | null;
+    location: Location | null;
+  } | null> {
     const [row] = await executor
       .select({
         employee: employees,
@@ -585,6 +589,26 @@ export class ShiftRepository {
           eq(locations.id, id),
           eq(locations.tenantId, tenantId),
           eq(locations.companyId, companyId),
+        ),
+      )
+      .limit(1);
+    return row ?? null;
+  }
+
+  async getLegacySchedule(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+    executor: DbExecutor = getDb(),
+  ): Promise<EmployeeWorkSchedule | null> {
+    const [row] = await executor
+      .select()
+      .from(employeeWorkSchedules)
+      .where(
+        and(
+          eq(employeeWorkSchedules.tenantId, tenantId),
+          eq(employeeWorkSchedules.companyId, companyId),
+          eq(employeeWorkSchedules.employeeId, employeeId),
         ),
       )
       .limit(1);

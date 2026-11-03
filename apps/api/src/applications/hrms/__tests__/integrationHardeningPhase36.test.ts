@@ -129,13 +129,11 @@ describe('BEZENT HRMS — Phase 3.6: Core Business Logic & Integration Hardening
         getEmployeesByName: vi.fn().mockResolvedValue([]),
         getCandidateById: vi.fn().mockResolvedValue(sampleCandidate),
         getApplicationById: vi.fn().mockResolvedValue(sampleApp),
-        getRequisitionById: vi
-          .fn()
-          .mockResolvedValue({
-            id: 'req_001',
-            title: 'Senior Engineer',
-            requisitionNumber: 'REQ-001',
-          }),
+        getRequisitionById: vi.fn().mockResolvedValue({
+          id: 'req_001',
+          title: 'Senior Engineer',
+          requisitionNumber: 'REQ-001',
+        }),
         updateOnboarding: vi.fn().mockResolvedValue({ ...sampleOnboarding, status: 'completed' }),
         createActivity: vi.fn().mockResolvedValue({ id: 'act_001' }),
         findCandidateByEmail: vi.fn().mockResolvedValue(null),
@@ -458,7 +456,42 @@ describe('BEZENT HRMS — Phase 3.6: Core Business Logic & Integration Hardening
         updateDailyRecord: vi.fn().mockResolvedValue({ id: 'att_001' }),
       };
 
-      attendanceService = new AttendanceService(mockAttendanceRepo as AttendanceRepository);
+      const mockScheduleProvider = {
+        getEmployeeSchedule: vi.fn().mockResolvedValue({
+          workingDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+          startTime: '09:00',
+          endTime: '18:00',
+          breakMinutes: 60,
+          lunchMinutes: 0,
+          timeZone: 'Asia/Kolkata',
+          scheduleRef: 'general_shift',
+        }),
+        isEmployeeOnApprovedLeave: vi.fn().mockResolvedValue(false),
+      };
+
+      const mockSecurityService = {
+        assertPunchAllowed: vi.fn().mockResolvedValue({
+          deviceMetadata: {},
+        }),
+      };
+
+      const mockHolidayService = {
+        resolveHolidayForEmployee: vi.fn().mockResolvedValue({
+          isHoliday: false,
+          holidayName: null,
+        }),
+      };
+
+      attendanceService = new AttendanceService(
+        mockAttendanceRepo as AttendanceRepository,
+        undefined,
+        undefined,
+        mockScheduleProvider as any,
+        mockSecurityService as any,
+        undefined,
+        undefined,
+        mockHolidayService as any,
+      );
     });
 
     it('rejects check-in with NotFoundError if employee does not exist in tenant/company', async () => {

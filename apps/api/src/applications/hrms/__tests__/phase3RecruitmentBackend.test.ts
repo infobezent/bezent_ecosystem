@@ -464,9 +464,9 @@ describe('BEZENT HRMS — Phase 3.1: Recruitment Backend Foundation Suite', () =
   // ===========================================================================
   describe('2. Tenant and Company Isolation', () => {
     it('2.1 blocks cross-tenant access to candidate profiles', async () => {
-      await expect(
-        service.getCandidateById(otherTenantId, sampleCandidate.id),
-      ).rejects.toThrow(NotFoundError);
+      await expect(service.getCandidateById(otherTenantId, sampleCandidate.id)).rejects.toThrow(
+        NotFoundError,
+      );
     });
 
     it('2.2 blocks cross-tenant and cross-company access to job requisitions', async () => {
@@ -913,9 +913,9 @@ describe('BEZENT HRMS — Phase 3.1: Recruitment Backend Foundation Suite', () =
         status: 'closed',
       });
 
-      await expect(
-        service.publishJobPosting(tenantId, companyId, 'pst_001'),
-      ).rejects.toThrow(BadRequestError);
+      await expect(service.publishJobPosting(tenantId, companyId, 'pst_001')).rejects.toThrow(
+        BadRequestError,
+      );
     });
   });
 
@@ -1017,13 +1017,11 @@ describe('BEZENT HRMS — Phase 3.1: Recruitment Backend Foundation Suite', () =
         id: 'cnd_new',
       });
 
-      const res = await request(app)
-        .post('/api/v1/hrms/recruitment/candidates')
-        .send({
-          firstName: 'Sansa',
-          lastName: 'Stark',
-          email: 'sansa.stark@winterfell.org',
-        });
+      const res = await request(app).post('/api/v1/hrms/recruitment/candidates').send({
+        firstName: 'Sansa',
+        lastName: 'Stark',
+        email: 'sansa.stark@winterfell.org',
+      });
 
       expect(res.status).toBe(201);
       expect(res.body.data.id).toBe('cnd_new');
@@ -1045,9 +1043,7 @@ describe('BEZENT HRMS — Phase 3.1: Recruitment Backend Foundation Suite', () =
 
     it('9.4 returns 400 when validation fails on create requisition with empty body', async () => {
       vi.restoreAllMocks();
-      const res = await request(app)
-        .post('/api/v1/hrms/recruitment/requisitions')
-        .send({});
+      const res = await request(app).post('/api/v1/hrms/recruitment/requisitions').send({});
 
       expect(res.status).toBe(400);
       expect(res.body.error.code).toBe('VALIDATION_ERROR');

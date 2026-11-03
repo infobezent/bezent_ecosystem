@@ -72,7 +72,8 @@ export interface CreateShiftAssignmentInput {
 
 export interface ResolvedShiftResult {
   shift: FrontendShift | null;
-  resolutionSource: 'employee' | 'department' | 'location' | 'auto_allocated' | 'legacy_schedule' | 'default_shift';
+  resolutionSource:
+    'employee' | 'department' | 'location' | 'auto_allocated' | 'legacy_schedule' | 'default_shift';
   date: string;
   schedule: {
     workingDays: string[];

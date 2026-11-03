@@ -16,23 +16,11 @@ shiftRouter.get(
   controller.resolveEmployeeShift,
 );
 
-shiftRouter.get(
-  '/hrms/shifts',
-  requirePermission('hrms.shifts.view'),
-  controller.listShifts,
-);
+shiftRouter.get('/hrms/shifts', requirePermission('hrms.shifts.view'), controller.listShifts);
 
-shiftRouter.get(
-  '/hrms/shifts/:id',
-  requirePermission('hrms.shifts.view'),
-  controller.getShiftById,
-);
+shiftRouter.get('/hrms/shifts/:id', requirePermission('hrms.shifts.view'), controller.getShiftById);
 
-shiftRouter.post(
-  '/hrms/shifts',
-  requirePermission('hrms.shifts.manage'),
-  controller.createShift,
-);
+shiftRouter.post('/hrms/shifts', requirePermission('hrms.shifts.manage'), controller.createShift);
 
 shiftRouter.put(
   '/hrms/shifts/:id',

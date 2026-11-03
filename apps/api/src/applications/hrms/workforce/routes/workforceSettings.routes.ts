@@ -1,5 +1,8 @@
 import { Router } from 'express';
-import { WorkforceSettingsController, workforceSettingsController } from '../controller/workforceSettings.controller.js';
+import {
+  WorkforceSettingsController,
+  workforceSettingsController,
+} from '../controller/workforceSettings.controller.js';
 import { requireAnyPermission } from '../../../../platform/access/middleware/access.middleware.js';
 
 export const workforceSettingsRouter = Router();

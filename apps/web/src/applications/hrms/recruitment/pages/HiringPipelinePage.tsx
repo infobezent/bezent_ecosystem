@@ -40,7 +40,10 @@ export interface HiringPipelinePageProps {
   initialJobs?: JobOpening[];
 }
 
-export function HiringPipelinePage({ initialCandidates, initialJobs }: HiringPipelinePageProps = {}) {
+export function HiringPipelinePage({
+  initialCandidates,
+  initialJobs,
+}: HiringPipelinePageProps = {}) {
   const navigate = useNavigate();
 
   // State
@@ -95,8 +98,7 @@ export function HiringPipelinePage({ initialCandidates, initialJobs }: HiringPip
           appliedJobCode: app.requisition?.requisitionCode || '',
           currentStage: (app.stage as CandidateStage) || 'applied',
           rating: app.rating || 4,
-          appliedDate:
-            (app.appliedAt ? app.appliedAt.split('T')[0] : '2026-10-01') || '2026-10-01',
+          appliedDate: (app.appliedAt ? app.appliedAt.split('T')[0] : '2026-10-01') || '2026-10-01',
           resumeFileName: 'Resume.pdf',
           summary: '',
           noticePeriodDays: 30,
@@ -418,7 +420,9 @@ export function HiringPipelinePage({ initialCandidates, initialJobs }: HiringPip
           <div className="overflow-x-auto pb-4 pt-1">
             <div className="flex gap-4 items-start min-w-max">
               {ACTIVE_PIPELINE_STAGES.map((stage) => {
-                const stageCandidates = filteredCandidates.filter((c) => c.currentStage === stage.id);
+                const stageCandidates = filteredCandidates.filter(
+                  (c) => c.currentStage === stage.id,
+                );
                 return (
                   <PipelineColumn
                     key={stage.id}

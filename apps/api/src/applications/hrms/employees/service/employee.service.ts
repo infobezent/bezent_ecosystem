@@ -6,7 +6,11 @@ import {
   validateUpdateEmployee,
   validateListEmployeesParams,
 } from '../validation/employee.schema.js';
-import type { EmployeeDetails, PaginatedEmployeesResult, EmploymentStatus } from '../types/employee.types.js';
+import type {
+  EmployeeDetails,
+  PaginatedEmployeesResult,
+  EmploymentStatus,
+} from '../types/employee.types.js';
 import { NotFoundError, ConflictError, BadRequestError } from '../../../../app/errors/AppError.js';
 import { provisionUserForEmployee } from './employeeUserBridge.service.js';
 import { workforceSettingsService } from '../../workforce/service/workforceSettings.service.js';
@@ -312,14 +316,8 @@ export class EmployeeService {
     }
 
     // 5b. Record employee_created in platform audit logs
-    const actorUserId =
-      typeof actor === 'string'
-        ? actor
-        : actor?.userId ?? null;
-    const actorEmail =
-      typeof actor === 'object' && actor !== null
-        ? actor.email ?? null
-        : null;
+    const actorUserId = typeof actor === 'string' ? actor : (actor?.userId ?? null);
+    const actorEmail = typeof actor === 'object' && actor !== null ? (actor.email ?? null) : null;
 
     await this.audit.logEvent(
       {
@@ -434,7 +432,7 @@ export class EmployeeService {
 
     for (const [key, val] of Object.entries(validatedDto)) {
       if (val !== undefined) {
-        const existingVal = ((existing as unknown) as Record<string, unknown>)[key] ?? null;
+        const existingVal = (existing as unknown as Record<string, unknown>)[key] ?? null;
         const normalizedVal = val ?? null;
 
         if (existingVal !== normalizedVal) {
@@ -445,14 +443,8 @@ export class EmployeeService {
       }
     }
 
-    const actorUserId =
-      typeof actor === 'string'
-        ? actor
-        : actor?.userId ?? null;
-    const actorEmail =
-      typeof actor === 'object' && actor !== null
-        ? actor.email ?? null
-        : null;
+    const actorUserId = typeof actor === 'string' ? actor : (actor?.userId ?? null);
+    const actorEmail = typeof actor === 'object' && actor !== null ? (actor.email ?? null) : null;
 
     const performUpdate = async (tx?: unknown) => {
       const updated = await this.repo.update(tenantId, companyId, id, validatedDto, tx as any);

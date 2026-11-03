@@ -9,7 +9,10 @@ import type { AttendanceRepository } from '../attendance/repository/attendance.r
 import { FALLBACK_ATTENDANCE_POLICY } from '../attendance/service/attendancePolicy.service.js';
 import type { AttendancePolicy, ShiftSchedule } from '../attendance/types/attendance.types.js';
 import { EmployeeService } from '../employees/service/employee.service.js';
-import { WorkforceSettingsService, workforceSettingsService } from '../workforce/service/workforceSettings.service.js';
+import {
+  WorkforceSettingsService,
+  workforceSettingsService,
+} from '../workforce/service/workforceSettings.service.js';
 import type { WorkforceSettingsRepository } from '../workforce/repository/workforceSettings.repository.js';
 import { LeaveGeneralSettingsService } from '../leave/service/leaveGeneralSettings.service.js';
 import type { LeaveGeneralSettingsRepository } from '../leave/repository/leaveGeneralSettings.repository.js';
@@ -111,11 +114,7 @@ describe('BEZENT HRMS — Phase 1 Business Correctness Suite', () => {
         nextSuggestedId: 'EMP-1001',
       });
 
-      employeeService = new EmployeeService(
-        mockEmployeeRepo,
-        mockOrgRepo,
-        mockProfileService,
-      );
+      employeeService = new EmployeeService(mockEmployeeRepo, mockOrgRepo, mockProfileService);
     });
 
     it('W1: reserves atomic, zero-padded, formatted employee IDs adhering to config', async () => {
@@ -141,20 +140,16 @@ describe('BEZENT HRMS — Phase 1 Business Correctness Suite', () => {
       mockEmployeeRepo.getByEmail = vi.fn().mockResolvedValue({ id: 'existing_emp' } as Employee);
 
       await expect(
-        employeeService.createEmployee(
-          tenantId,
-          companyId,
-          {
-            firstName: 'Duplicate',
-            lastName: 'User',
-            email: 'duplicate@example.com',
-            departmentId: 'dept_1',
-            designationId: 'desig_1',
-            locationId: 'loc_1',
-            joiningDate: '2026-10-01',
-            employmentType: 'full_time',
-          },
-        ),
+        employeeService.createEmployee(tenantId, companyId, {
+          firstName: 'Duplicate',
+          lastName: 'User',
+          email: 'duplicate@example.com',
+          departmentId: 'dept_1',
+          designationId: 'desig_1',
+          locationId: 'loc_1',
+          joiningDate: '2026-10-01',
+          employmentType: 'full_time',
+        }),
       ).rejects.toThrow(ConflictError);
 
       // Sequence reservation was not called because validation failed first
@@ -164,25 +159,22 @@ describe('BEZENT HRMS — Phase 1 Business Correctness Suite', () => {
     it('W2: database sequence failure propagates meaningful error and NEVER falls back to EMP-XXXX', async () => {
       // Mock workforceSettingsService inside employee.service to fail
       const workforceModule = await import('../workforce/service/workforceSettings.service.js');
-      vi.spyOn(workforceModule.workforceSettingsService, 'reserveNextEmployeeId').mockRejectedValueOnce(
-        new Error('Deadlock / Connection error'),
-      );
+      vi.spyOn(
+        workforceModule.workforceSettingsService,
+        'reserveNextEmployeeId',
+      ).mockRejectedValueOnce(new Error('Deadlock / Connection error'));
 
       await expect(
-        employeeService.createEmployee(
-          tenantId,
-          companyId,
-          {
-            firstName: 'Bob',
-            lastName: 'Jones',
-            email: 'bob@example.com',
-            departmentId: 'dept_1',
-            designationId: 'desig_1',
-            locationId: 'loc_1',
-            joiningDate: '2026-10-01',
-            employmentType: 'full_time',
-          },
-        ),
+        employeeService.createEmployee(tenantId, companyId, {
+          firstName: 'Bob',
+          lastName: 'Jones',
+          email: 'bob@example.com',
+          departmentId: 'dept_1',
+          designationId: 'desig_1',
+          locationId: 'loc_1',
+          joiningDate: '2026-10-01',
+          employmentType: 'full_time',
+        }),
       ).rejects.toThrow('Deadlock / Connection error');
 
       // Crucial: Employee creation must NOT have been called with a fallback EMP-XXXX number!
@@ -430,9 +422,9 @@ describe('BEZENT HRMS — Phase 1 Business Correctness Suite', () => {
         recordPendingCycleClose: vi.fn().mockResolvedValue('run_pending_1'),
         markRunReviewed: vi.fn().mockResolvedValue(undefined),
         commitCycleClose: vi.fn().mockResolvedValue('run_committed_1'),
-        listCompaniesWithPolicies: vi.fn().mockResolvedValue([
-          { tenantId, companyId, timeZone: 'Asia/Kolkata' },
-        ]),
+        listCompaniesWithPolicies: vi
+          .fn()
+          .mockResolvedValue([{ tenantId, companyId, timeZone: 'Asia/Kolkata' }]),
       };
 
       leaveAccrualService = new LeaveAccrualService(
@@ -498,7 +490,9 @@ describe('BEZENT HRMS — Phase 1 Business Correctness Suite', () => {
     });
 
     it('L2: background year-end sweep creates pending run and never commits balances', async () => {
-      const sweepResult = await leaveAccrualService.runYearEndSweep(new Date('2026-06-01T00:00:00Z'));
+      const sweepResult = await leaveAccrualService.runYearEndSweep(
+        new Date('2026-06-01T00:00:00Z'),
+      );
       expect(sweepResult.pending).toBe(1);
       expect(sweepResult.closed).toBe(0);
 

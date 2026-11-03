@@ -49,7 +49,9 @@ export class ShiftService {
 
     const existingCode = await this.repo.getShiftByCode(tenantId, companyId, validated.code);
     if (existingCode) {
-      throw new ConflictError(`A shift with code '${validated.code}' already exists in this company`);
+      throw new ConflictError(
+        `A shift with code '${validated.code}' already exists in this company`,
+      );
     }
 
     const shift = await this.repo.createShift({
@@ -105,7 +107,11 @@ export class ShiftService {
   ): Promise<{ items: HrmsShift[]; total: number }> {
     // If company has no shifts seeded yet, seed defaults from DEFAULT_COMPANY_SHIFTS
     let result = await this.repo.listShifts(tenantId, companyId, query);
-    if (result.total === 0 && (!query.search || !query.search.trim()) && (!query.status || query.status === 'all')) {
+    if (
+      result.total === 0 &&
+      (!query.search || !query.search.trim()) &&
+      (!query.status || query.status === 'all')
+    ) {
       await this.seedDefaultCompanyShifts(tenantId, companyId);
       result = await this.repo.listShifts(tenantId, companyId, query);
     }
@@ -129,15 +135,10 @@ export class ShiftService {
       }
     }
 
-    const updated = await this.repo.updateShift(
-      tenantId,
-      companyId,
-      id,
-      {
-        ...validated,
-        updatedBy: userId,
-      },
-    );
+    const updated = await this.repo.updateShift(tenantId, companyId, id, {
+      ...validated,
+      updatedBy: userId,
+    });
 
     if (!updated) {
       throw new NotFoundError(`Shift with ID '${id}' was not found`);
@@ -203,7 +204,12 @@ export class ShiftService {
     return updated;
   }
 
-  async deleteShift(tenantId: string, companyId: string, id: string, userId?: string): Promise<boolean> {
+  async deleteShift(
+    tenantId: string,
+    companyId: string,
+    id: string,
+    userId?: string,
+  ): Promise<boolean> {
     const existing = await this.getShiftById(tenantId, companyId, id);
 
     // Prevent deletion if active assignments reference this shift
@@ -324,7 +330,11 @@ export class ShiftService {
     return assignment;
   }
 
-  async getAssignmentById(tenantId: string, companyId: string, id: string): Promise<HrmsShiftAssignment> {
+  async getAssignmentById(
+    tenantId: string,
+    companyId: string,
+    id: string,
+  ): Promise<HrmsShiftAssignment> {
     const asgn = await this.repo.getAssignmentById(tenantId, companyId, id);
     if (!asgn) {
       throw new NotFoundError(`Shift assignment '${id}' was not found`);
@@ -350,8 +360,7 @@ export class ShiftService {
     const validated = validateUpdateAssignment(input);
     const existing = await this.getAssignmentById(tenantId, companyId, id);
 
-    const targetId =
-      existing.employeeId || existing.departmentId || existing.locationId || '';
+    const targetId = existing.employeeId || existing.departmentId || existing.locationId || '';
     const newStart = validated.effectiveStartDate ?? existing.effectiveStartDate;
     const newEnd =
       validated.effectiveEndDate !== undefined
@@ -373,15 +382,10 @@ export class ShiftService {
       }
     }
 
-    const updated = await this.repo.updateAssignment(
-      tenantId,
-      companyId,
-      id,
-      {
-        ...validated,
-        updatedBy: userId,
-      },
-    );
+    const updated = await this.repo.updateAssignment(tenantId, companyId, id, {
+      ...validated,
+      updatedBy: userId,
+    });
 
     if (!updated) {
       throw new NotFoundError(`Shift assignment '${id}' was not found`);
@@ -508,23 +512,25 @@ export class ShiftService {
 
   private async seedDefaultCompanyShifts(tenantId: string, companyId: string): Promise<void> {
     for (const s of DEFAULT_COMPANY_SHIFTS) {
-      await this.repo.createShift({
-        id: s.id,
-        tenantId,
-        companyId,
-        name: s.name,
-        code: s.code,
-        description: s.description,
-        startTime: s.startTime,
-        endTime: s.endTime,
-        workingDays: s.workingDays,
-        breakMinutes: s.breakMinutes,
-        lunchMinutes: s.lunchMinutes,
-        graceMinutes: s.graceMinutes,
-        isOvernight: s.isOvernight,
-        color: s.color || '#2563EB',
-        isActive: s.isActive,
-      }).catch(() => null); // Ignore if exists
+      await this.repo
+        .createShift({
+          id: s.id,
+          tenantId,
+          companyId,
+          name: s.name,
+          code: s.code,
+          description: s.description,
+          startTime: s.startTime,
+          endTime: s.endTime,
+          workingDays: s.workingDays,
+          breakMinutes: s.breakMinutes,
+          lunchMinutes: s.lunchMinutes,
+          graceMinutes: s.graceMinutes,
+          isOvernight: s.isOvernight,
+          color: s.color || '#2563EB',
+          isActive: s.isActive,
+        })
+        .catch(() => null); // Ignore if exists
     }
   }
 }

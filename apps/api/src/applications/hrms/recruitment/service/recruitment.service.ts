@@ -2,10 +2,7 @@ import {
   RecruitmentRepository,
   recruitmentRepository,
 } from '../repository/recruitment.repository.js';
-import {
-  AuditService,
-  auditService,
-} from '../../../../platform/audit/service/audit.service.js';
+import { AuditService, auditService } from '../../../../platform/audit/service/audit.service.js';
 import { generateSurrogateId } from '../../../../platform/auth/security.js';
 import {
   NotFoundError,
@@ -84,25 +81,33 @@ export class RecruitmentService {
     if (validated.departmentId) {
       const dept = await this.repo.getDepartment(tenantId, companyId, validated.departmentId);
       if (!dept) {
-        throw new NotFoundError(`Department with ID '${validated.departmentId}' not found in this company`);
+        throw new NotFoundError(
+          `Department with ID '${validated.departmentId}' not found in this company`,
+        );
       }
     }
     if (validated.designationId) {
       const desig = await this.repo.getDesignation(tenantId, companyId, validated.designationId);
       if (!desig) {
-        throw new NotFoundError(`Designation with ID '${validated.designationId}' not found in this company`);
+        throw new NotFoundError(
+          `Designation with ID '${validated.designationId}' not found in this company`,
+        );
       }
     }
     if (validated.hiringManagerId) {
       const hm = await this.repo.getEmployee(tenantId, companyId, validated.hiringManagerId);
       if (!hm) {
-        throw new NotFoundError(`Hiring manager with ID '${validated.hiringManagerId}' not found in this company`);
+        throw new NotFoundError(
+          `Hiring manager with ID '${validated.hiringManagerId}' not found in this company`,
+        );
       }
     }
     if (validated.recruiterId) {
       const rec = await this.repo.getEmployee(tenantId, companyId, validated.recruiterId);
       if (!rec) {
-        throw new NotFoundError(`Recruiter with ID '${validated.recruiterId}' not found in this company`);
+        throw new NotFoundError(
+          `Recruiter with ID '${validated.recruiterId}' not found in this company`,
+        );
       }
     }
 
@@ -198,12 +203,16 @@ export class RecruitmentService {
     const updatePayload: Partial<JobRequisition> = {};
     if (validated.jobTitle !== undefined) updatePayload.jobTitle = validated.jobTitle;
     if (validated.departmentId !== undefined) updatePayload.departmentId = validated.departmentId;
-    if (validated.designationId !== undefined) updatePayload.designationId = validated.designationId;
+    if (validated.designationId !== undefined)
+      updatePayload.designationId = validated.designationId;
     if (validated.locationId !== undefined) updatePayload.locationId = validated.locationId;
     if (validated.locationName !== undefined) updatePayload.locationName = validated.locationName;
-    if (validated.workplaceType !== undefined) updatePayload.workplaceType = validated.workplaceType;
-    if (validated.employmentType !== undefined) updatePayload.employmentType = validated.employmentType;
-    if (validated.experienceLevel !== undefined) updatePayload.experienceLevel = validated.experienceLevel;
+    if (validated.workplaceType !== undefined)
+      updatePayload.workplaceType = validated.workplaceType;
+    if (validated.employmentType !== undefined)
+      updatePayload.employmentType = validated.employmentType;
+    if (validated.experienceLevel !== undefined)
+      updatePayload.experienceLevel = validated.experienceLevel;
     if (validated.openings !== undefined) updatePayload.openings = validated.openings;
     if (validated.filledCount !== undefined) updatePayload.filledCount = validated.filledCount;
     if (validated.description !== undefined) updatePayload.description = validated.description;
@@ -211,8 +220,10 @@ export class RecruitmentService {
     if (validated.responsibilities !== undefined)
       updatePayload.responsibilities = validated.responsibilities;
     if (validated.skills !== undefined) updatePayload.skills = validated.skills;
-    if (validated.experienceMin !== undefined) updatePayload.experienceMin = validated.experienceMin;
-    if (validated.experienceMax !== undefined) updatePayload.experienceMax = validated.experienceMax;
+    if (validated.experienceMin !== undefined)
+      updatePayload.experienceMin = validated.experienceMin;
+    if (validated.experienceMax !== undefined)
+      updatePayload.experienceMax = validated.experienceMax;
     if (validated.salaryMin !== undefined)
       updatePayload.salaryMin = validated.salaryMin !== null ? String(validated.salaryMin) : null;
     if (validated.salaryMax !== undefined)
@@ -293,7 +304,9 @@ export class RecruitmentService {
 
     const req = await this.getRequisitionById(tenantId, companyId, validated.requisitionId);
     if (req.status === 'closed' || req.status === 'cancelled') {
-      throw new BadRequestError('Cannot create a job posting for a closed or cancelled requisition');
+      throw new BadRequestError(
+        'Cannot create a job posting for a closed or cancelled requisition',
+      );
     }
 
     const id = generateSurrogateId('pst');
@@ -353,7 +366,9 @@ export class RecruitmentService {
 
     // Rule 9: "A job posting cannot be published without a valid requisition."
     if (req.status === 'closed' || req.status === 'cancelled') {
-      throw new BadRequestError('Cannot publish a job posting for a closed or inactive requisition');
+      throw new BadRequestError(
+        'Cannot publish a job posting for a closed or inactive requisition',
+      );
     }
 
     return this.repo.transaction(async (tx) => {
@@ -428,11 +443,7 @@ export class RecruitmentService {
     });
   }
 
-  async getJobPostingById(
-    tenantId: string,
-    companyId: string,
-    id: string,
-  ): Promise<JobPosting> {
+  async getJobPostingById(tenantId: string, companyId: string, id: string): Promise<JobPosting> {
     const posting = await this.repo.getJobPostingById(tenantId, companyId, id);
     if (!posting) {
       throw new NotFoundError(`Job posting with ID '${id}' not found`);
@@ -487,8 +498,14 @@ export class RecruitmentService {
           totalExperienceYears: String(validated.totalExperienceYears ?? 0),
           relevantExperienceYears: String(validated.relevantExperienceYears ?? 0),
           noticePeriodDays: validated.noticePeriodDays,
-          currentCtcLpa: validated.currentCtcLpa !== null && validated.currentCtcLpa !== undefined ? String(validated.currentCtcLpa) : null,
-          expectedCtcLpa: validated.expectedCtcLpa !== null && validated.expectedCtcLpa !== undefined ? String(validated.expectedCtcLpa) : null,
+          currentCtcLpa:
+            validated.currentCtcLpa !== null && validated.currentCtcLpa !== undefined
+              ? String(validated.currentCtcLpa)
+              : null,
+          expectedCtcLpa:
+            validated.expectedCtcLpa !== null && validated.expectedCtcLpa !== undefined
+              ? String(validated.expectedCtcLpa)
+              : null,
           skills: validated.skills,
           tags: validated.tags,
           source: validated.source,
@@ -563,7 +580,8 @@ export class RecruitmentService {
     if (validated.email !== undefined) updatePayload.email = validated.email;
     if (validated.phone !== undefined) updatePayload.phone = validated.phone;
     if (validated.location !== undefined) updatePayload.location = validated.location;
-    if (validated.currentCompany !== undefined) updatePayload.currentCompany = validated.currentCompany;
+    if (validated.currentCompany !== undefined)
+      updatePayload.currentCompany = validated.currentCompany;
     if (validated.currentDesignation !== undefined)
       updatePayload.currentDesignation = validated.currentDesignation;
     if (validated.totalExperienceYears !== undefined)
@@ -785,7 +803,10 @@ export class RecruitmentService {
     } else if (stageRecord?.stageType === 'terminal_rejection' || targetStageCode === 'rejected') {
       newStatus = 'rejected';
       rejectedAt = new Date();
-    } else if (stageRecord?.stageType === 'terminal_withdrawal' || targetStageCode === 'withdrawn') {
+    } else if (
+      stageRecord?.stageType === 'terminal_withdrawal' ||
+      targetStageCode === 'withdrawn'
+    ) {
       newStatus = 'withdrawn';
       withdrawnAt = new Date();
     }
@@ -1018,7 +1039,9 @@ export class RecruitmentService {
     // Verify recruiter employee exists in company
     const recruiter = await this.repo.getEmployee(tenantId, companyId, input.recruiterId);
     if (!recruiter) {
-      throw new NotFoundError(`Recruiter employee with ID '${input.recruiterId}' not found in this company`);
+      throw new NotFoundError(
+        `Recruiter employee with ID '${input.recruiterId}' not found in this company`,
+      );
     }
 
     const activityId = generateSurrogateId('act');

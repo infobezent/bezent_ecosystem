@@ -14,9 +14,7 @@ export interface HolidayResolutionResult {
 }
 
 export class AttendanceHolidayService {
-  constructor(
-    private readonly holidaysService: LeaveHolidaysService = leaveHolidaysService,
-  ) {}
+  constructor(private readonly holidaysService: LeaveHolidaysService = leaveHolidaysService) {}
 
   async resolveHolidayForEmployee(
     tenantId: string,

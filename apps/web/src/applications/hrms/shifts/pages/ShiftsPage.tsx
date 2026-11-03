@@ -58,7 +58,9 @@ export function ShiftsPage({ initialShifts, initialAssignments }: ShiftsPageProp
   const [shiftStatusFilter, setShiftStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
 
   // Assignments state
-  const [assignments, setAssignments] = useState<FrontendShiftAssignment[]>(initialAssignments ?? []);
+  const [assignments, setAssignments] = useState<FrontendShiftAssignment[]>(
+    initialAssignments ?? [],
+  );
   const [assignmentsLoading, setAssignmentsLoading] = useState<boolean>(!initialAssignments);
   const [assignmentsError, setAssignmentsError] = useState<string | null>(null);
   const [asgnScopeFilter, setAsgnScopeFilter] = useState<string>('all');
@@ -449,7 +451,9 @@ export function ShiftsPage({ initialShifts, initialAssignments }: ShiftsPageProp
                 <span className="text-xs uppercase text-slate-500 font-semibold tracking-wider">
                   Active Shifts
                 </span>
-                <CardTitle className="text-2xl font-bold text-emerald-600">{metrics.active}</CardTitle>
+                <CardTitle className="text-2xl font-bold text-emerald-600">
+                  {metrics.active}
+                </CardTitle>
               </Stack>
             </CardHeader>
           </Card>
@@ -602,10 +606,18 @@ export function ShiftsPage({ initialShifts, initialAssignments }: ShiftsPageProp
                         </td>
                         <td>
                           <Inline gap="xs">
-                            <Button size="sm" variant="secondary" onClick={() => handleOpenEditShift(shift)}>
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => handleOpenEditShift(shift)}
+                            >
                               Edit
                             </Button>
-                            <Button size="sm" variant="danger" onClick={() => void handleDeleteShift(shift)}>
+                            <Button
+                              size="sm"
+                              variant="danger"
+                              onClick={() => void handleDeleteShift(shift)}
+                            >
                               Delete
                             </Button>
                           </Inline>
@@ -685,7 +697,9 @@ export function ShiftsPage({ initialShifts, initialAssignments }: ShiftsPageProp
                         <td>
                           <Stack gap="xs">
                             <Inline gap="xs" align="center">
-                              <span className="font-semibold text-slate-900">{asgn.targetName}</span>
+                              <span className="font-semibold text-slate-900">
+                                {asgn.targetName}
+                              </span>
                               {asgn.targetCode && (
                                 <Badge variant="neutral">{asgn.targetCode}</Badge>
                               )}
@@ -715,7 +729,11 @@ export function ShiftsPage({ initialShifts, initialAssignments }: ShiftsPageProp
                             <span>
                               {asgn.shiftStartTime} – {asgn.shiftEndTime}
                             </span>
-                            {asgn.shiftIsOvernight && <Badge variant="info" size="sm">+1d</Badge>}
+                            {asgn.shiftIsOvernight && (
+                              <Badge variant="info" size="sm">
+                                +1d
+                              </Badge>
+                            )}
                           </Inline>
                         </td>
                         <td>
@@ -794,19 +812,11 @@ export function ShiftsPage({ initialShifts, initialAssignments }: ShiftsPageProp
           <Grid columns={2} gap="sm">
             <Stack gap="xs">
               <label className="text-xs font-semibold text-slate-700">Start Time (HH:mm) *</label>
-              <Input
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-              />
+              <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
             </Stack>
             <Stack gap="xs">
               <label className="text-xs font-semibold text-slate-700">End Time (HH:mm) *</label>
-              <Input
-                type="time"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-              />
+              <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
             </Stack>
           </Grid>
 
@@ -871,7 +881,9 @@ export function ShiftsPage({ initialShifts, initialAssignments }: ShiftsPageProp
 
           <Inline gap="xs" align="center">
             <Switch checked={isShiftActive} onChange={() => setIsShiftActive(!isShiftActive)} />
-            <span className="text-xs text-slate-700">Shift is active and available for assignment</span>
+            <span className="text-xs text-slate-700">
+              Shift is active and available for assignment
+            </span>
           </Inline>
 
           <Divider />
@@ -880,7 +892,11 @@ export function ShiftsPage({ initialShifts, initialAssignments }: ShiftsPageProp
             <Button variant="secondary" onClick={() => setIsShiftModalOpen(false)}>
               Cancel
             </Button>
-            <Button variant="primary" onClick={() => void handleSaveShift()} disabled={shiftModalSaving}>
+            <Button
+              variant="primary"
+              onClick={() => void handleSaveShift()}
+              disabled={shiftModalSaving}
+            >
               {shiftModalSaving ? 'Saving…' : 'Save Shift'}
             </Button>
           </Inline>
@@ -910,10 +926,7 @@ export function ShiftsPage({ initialShifts, initialAssignments }: ShiftsPageProp
           <Grid columns={2} gap="sm">
             <Stack gap="xs">
               <label className="text-xs font-semibold text-slate-700">Assignment Scope *</label>
-              <Select
-                value={asgnScope}
-                onChange={(e) => setAsgnScope(e.target.value as any)}
-              >
+              <Select value={asgnScope} onChange={(e) => setAsgnScope(e.target.value as any)}>
                 <option value="employee">Individual Employee</option>
                 <option value="department">Department</option>
                 <option value="location">Work Location</option>
@@ -951,7 +964,9 @@ export function ShiftsPage({ initialShifts, initialAssignments }: ShiftsPageProp
               />
             </Stack>
             <Stack gap="xs">
-              <label className="text-xs font-semibold text-slate-700">Effective End Date (Optional)</label>
+              <label className="text-xs font-semibold text-slate-700">
+                Effective End Date (Optional)
+              </label>
               <Input
                 type="date"
                 value={asgnEndDate}
@@ -975,7 +990,11 @@ export function ShiftsPage({ initialShifts, initialAssignments }: ShiftsPageProp
             <Button variant="secondary" onClick={() => setIsAsgnModalOpen(false)}>
               Cancel
             </Button>
-            <Button variant="primary" onClick={() => void handleSaveAssignment()} disabled={asgnModalSaving}>
+            <Button
+              variant="primary"
+              onClick={() => void handleSaveAssignment()}
+              disabled={asgnModalSaving}
+            >
               {asgnModalSaving ? 'Saving…' : 'Create Assignment'}
             </Button>
           </Inline>

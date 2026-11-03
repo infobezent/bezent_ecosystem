@@ -95,7 +95,13 @@ export class ShiftController {
       const { tenantId, companyId } = getCompanyContext(req);
       const id = requireParam(req, 'id');
       const isActive = req.body?.isActive !== undefined ? Boolean(req.body.isActive) : true;
-      const data = await this.service.setShiftStatus(tenantId, companyId, id, isActive, req.user?.id);
+      const data = await this.service.setShiftStatus(
+        tenantId,
+        companyId,
+        id,
+        isActive,
+        req.user?.id,
+      );
       res.json({ data });
     } catch (err) {
       next(err);
@@ -120,8 +126,18 @@ export class ShiftController {
   listAssignments = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { tenantId, companyId } = getCompanyContext(req);
-      const { scope, shiftId, employeeId, departmentId, locationId, status, effectiveDate, limit, offset, page } =
-        req.query;
+      const {
+        scope,
+        shiftId,
+        employeeId,
+        departmentId,
+        locationId,
+        status,
+        effectiveDate,
+        limit,
+        offset,
+        page,
+      } = req.query;
 
       const effectiveOffset =
         offset !== undefined
@@ -180,7 +196,13 @@ export class ShiftController {
     try {
       const { tenantId, companyId } = getCompanyContext(req);
       const id = requireParam(req, 'id');
-      const data = await this.service.updateAssignment(tenantId, companyId, id, req.body, req.user?.id);
+      const data = await this.service.updateAssignment(
+        tenantId,
+        companyId,
+        id,
+        req.body,
+        req.user?.id,
+      );
       res.json({ data });
     } catch (err) {
       next(err);
@@ -191,7 +213,13 @@ export class ShiftController {
     try {
       const { tenantId, companyId } = getCompanyContext(req);
       const id = requireParam(req, 'id');
-      const data = await this.service.endAssignment(tenantId, companyId, id, req.body, req.user?.id);
+      const data = await this.service.endAssignment(
+        tenantId,
+        companyId,
+        id,
+        req.body,
+        req.user?.id,
+      );
       res.json({ data });
     } catch (err) {
       next(err);
@@ -222,7 +250,8 @@ export class ShiftController {
           ? req.query.date.trim()
           : new Date().toISOString().slice(0, 10);
 
-      const punchInTime = typeof req.query.punchInTime === 'string' ? req.query.punchInTime : undefined;
+      const punchInTime =
+        typeof req.query.punchInTime === 'string' ? req.query.punchInTime : undefined;
       const autoAlloc = req.query.enableAutoShiftAllocation === 'true';
 
       const data = await this.service.resolveEmployeeShift(

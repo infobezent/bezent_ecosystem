@@ -34,7 +34,10 @@ export function CandidateMetrics({ candidates }: CandidateMetricsProps) {
           <Inline justify="between" align="center">
             <Stack gap="xs">
               <Inline align="center" gap="xs">
-                <span className="bezent-pulse-stat__dot bezent-pulse-stat__dot--purple" aria-hidden="true" />
+                <span
+                  className="bezent-pulse-stat__dot bezent-pulse-stat__dot--purple"
+                  aria-hidden="true"
+                />
                 <span className="bezent-clay-metric__label">Total Candidates</span>
               </Inline>
               <div className="bezent-clay-metric__value">{total}</div>
@@ -58,7 +61,10 @@ export function CandidateMetrics({ candidates }: CandidateMetricsProps) {
           <Inline justify="between" align="center">
             <Stack gap="xs">
               <Inline align="center" gap="xs">
-                <span className="bezent-pulse-stat__dot bezent-pulse-stat__dot--blue" aria-hidden="true" />
+                <span
+                  className="bezent-pulse-stat__dot bezent-pulse-stat__dot--blue"
+                  aria-hidden="true"
+                />
                 <span className="bezent-clay-metric__label">In Pipeline</span>
               </Inline>
               <div className="bezent-clay-metric__value">{inPipeline}</div>
@@ -82,7 +88,10 @@ export function CandidateMetrics({ candidates }: CandidateMetricsProps) {
           <Inline justify="between" align="center">
             <Stack gap="xs">
               <Inline align="center" gap="xs">
-                <span className="bezent-pulse-stat__dot bezent-pulse-stat__dot--green" aria-hidden="true" />
+                <span
+                  className="bezent-pulse-stat__dot bezent-pulse-stat__dot--green"
+                  aria-hidden="true"
+                />
                 <span className="bezent-clay-metric__label">Completed &amp; Hired</span>
               </Inline>
               <div className="bezent-clay-metric__value">{offersAndHired}</div>
@@ -106,7 +115,10 @@ export function CandidateMetrics({ candidates }: CandidateMetricsProps) {
           <Inline justify="between" align="center">
             <Stack gap="xs">
               <Inline align="center" gap="xs">
-                <span className="bezent-pulse-stat__dot bezent-pulse-stat__dot--amber" aria-hidden="true" />
+                <span
+                  className="bezent-pulse-stat__dot bezent-pulse-stat__dot--amber"
+                  aria-hidden="true"
+                />
                 <span className="bezent-clay-metric__label">In Process</span>
               </Inline>
               <div className="bezent-clay-metric__value">{inInterview}</div>

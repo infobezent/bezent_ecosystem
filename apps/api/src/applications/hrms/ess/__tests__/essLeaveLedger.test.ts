@@ -225,7 +225,9 @@ describe('ESS Leave Ledger Backend API (Phase 3.5)', () => {
       .onDuplicateKeyUpdate({ set: { status: 'published', isDefault: true } });
 
     // 7. Balances
-    await db.delete(leaveBalanceTransactions).where(eq(leaveBalanceTransactions.employeeId, employeeId));
+    await db
+      .delete(leaveBalanceTransactions)
+      .where(eq(leaveBalanceTransactions.employeeId, employeeId));
     await db.delete(employeeLeaveBalances).where(eq(employeeLeaveBalances.employeeId, employeeId));
 
     await db.insert(employeeLeaveBalances).values([
@@ -419,7 +421,14 @@ describe('ESS Leave Ledger Backend API (Phase 3.5)', () => {
       expect(res.body.data).toBeDefined();
 
       // Verify that NONE of employeeId's transaction IDs appear in otherEmployee's transactions
-      const employee1Ids = ['lbt_test_01', 'lbt_test_02', 'lbt_test_03', 'lbt_test_04', 'lbt_test_05', 'lbt_test_06'];
+      const employee1Ids = [
+        'lbt_test_01',
+        'lbt_test_02',
+        'lbt_test_03',
+        'lbt_test_04',
+        'lbt_test_05',
+        'lbt_test_06',
+      ];
       for (const item of res.body.data.items) {
         expect(employee1Ids).not.toContain(item.id);
         expect([balanceId1, balanceId2]).not.toContain(item.balanceId);
@@ -584,7 +593,9 @@ describe('ESS Leave Ledger Backend API (Phase 3.5)', () => {
     it('filters accurately by date range', async () => {
       const currentYear = new Date().getFullYear();
       const res = await request(app)
-        .get(`/api/v1/ess/leave/transactions?startDate=${currentYear}-02-01&endDate=${currentYear}-02-28`)
+        .get(
+          `/api/v1/ess/leave/transactions?startDate=${currentYear}-02-01&endDate=${currentYear}-02-28`,
+        )
         .set('Authorization', `Bearer ${employeeToken}`)
         .set('x-company-id', companyId);
 

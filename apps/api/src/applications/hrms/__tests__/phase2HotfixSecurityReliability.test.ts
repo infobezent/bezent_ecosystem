@@ -60,12 +60,10 @@ describe('BEZENT HRMS — Phase 2.1 Security & Reliability Hotfix Suite', () => 
       mockPermissions = ['hrms.attendance.view', 'hrms.attendance.regularize'];
       const app = createTestApp();
 
-      const res = await request(app)
-        .put('/api/v1/hrms/attendance/policies')
-        .send({
-          policyName: 'Unauthorized Policy Change',
-          halfDayThresholdHours: 4.5,
-        });
+      const res = await request(app).put('/api/v1/hrms/attendance/policies').send({
+        policyName: 'Unauthorized Policy Change',
+        halfDayThresholdHours: 4.5,
+      });
 
       expect(res.status).toBe(403);
       expect(res.body.error).toBeDefined();
@@ -103,11 +101,9 @@ describe('BEZENT HRMS — Phase 2.1 Security & Reliability Hotfix Suite', () => 
         gracePeriodMinutes: 25,
       });
 
-      const res = await request(app)
-        .put('/api/v1/hrms/attendance/policies')
-        .send({
-          gracePeriodMinutes: 25,
-        });
+      const res = await request(app).put('/api/v1/hrms/attendance/policies').send({
+        gracePeriodMinutes: 25,
+      });
 
       expect(res.status).toBe(200);
       expect(res.body.data.gracePeriodMinutes).toBe(25);
@@ -139,11 +135,9 @@ describe('BEZENT HRMS — Phase 2.1 Security & Reliability Hotfix Suite', () => 
       vi.spyOn(attendancePolicyService, 'getPolicy').mockResolvedValue(publishedPolicy);
       vi.spyOn(attendanceSettingsService, 'getPolicyById').mockResolvedValue(publishedPolicy);
 
-      const res = await request(app)
-        .put('/api/v1/hrms/attendance/policies')
-        .send({
-          gracePeriodMinutes: 30,
-        });
+      const res = await request(app).put('/api/v1/hrms/attendance/policies').send({
+        gracePeriodMinutes: 30,
+      });
 
       expect(res.status).toBe(400);
       expect(res.body.error.code).toBe('POLICY_IMMUTABLE');
@@ -215,7 +209,12 @@ describe('BEZENT HRMS — Phase 2.1 Security & Reliability Hotfix Suite', () => 
     beforeEach(() => {
       mockRepo = {
         create: vi.fn().mockImplementation((_t, _c, dto) =>
-          Promise.resolve({ id: 'emp_hotfix_prob_1', ...dto, createdAt: new Date(), updatedAt: new Date() }),
+          Promise.resolve({
+            id: 'emp_hotfix_prob_1',
+            ...dto,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }),
         ),
         getById: vi.fn().mockResolvedValue(sampleEmployeeDetails),
         getByEmployeeNumber: vi.fn().mockResolvedValue(null),
@@ -232,9 +231,16 @@ describe('BEZENT HRMS — Phase 2.1 Security & Reliability Hotfix Suite', () => 
         }),
       };
 
+      const mockAudit = {
+        logEvent: vi.fn().mockResolvedValue({} as any),
+        getLogs: vi.fn().mockResolvedValue({ items: [], total: 0 }),
+      };
+
       employeeService = new EmployeeService(
         mockRepo as EmployeeRepository,
         mockOrgRepo as OrganizationRepository,
+        undefined,
+        mockAudit as any,
       );
 
       vi.spyOn(workforceSettingsService, 'getGeneralSettings').mockResolvedValue({
@@ -310,9 +316,9 @@ describe('BEZENT HRMS — Phase 2.1 Security & Reliability Hotfix Suite', () => 
       const dbError = new Error('Database connection terminated: ECONNREFUSED on port 3306');
       vi.spyOn(workforceSettingsService, 'getProbationPolicy').mockRejectedValue(dbError);
 
-      await expect(
-        employeeService.createEmployee(tenantId, companyId, baseInput),
-      ).rejects.toThrow('Database connection terminated: ECONNREFUSED on port 3306');
+      await expect(employeeService.createEmployee(tenantId, companyId, baseInput)).rejects.toThrow(
+        'Database connection terminated: ECONNREFUSED on port 3306',
+      );
 
       // Crucial: Employee record must NOT have been created when database lookup failed
       expect(mockRepo.create).not.toHaveBeenCalled();

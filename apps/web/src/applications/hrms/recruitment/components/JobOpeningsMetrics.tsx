@@ -29,7 +29,10 @@ export function JobOpeningsMetrics({ jobs }: JobOpeningsMetricsProps) {
           <Inline justify="between" align="center">
             <Stack gap="xs">
               <Inline align="center" gap="xs">
-                <span className="bezent-pulse-stat__dot bezent-pulse-stat__dot--purple" aria-hidden="true" />
+                <span
+                  className="bezent-pulse-stat__dot bezent-pulse-stat__dot--purple"
+                  aria-hidden="true"
+                />
                 <span className="bezent-clay-metric__label">Total Requisitions</span>
               </Inline>
               <div className="bezent-clay-metric__value">{totalJobs}</div>
@@ -53,7 +56,10 @@ export function JobOpeningsMetrics({ jobs }: JobOpeningsMetricsProps) {
           <Inline justify="between" align="center">
             <Stack gap="xs">
               <Inline align="center" gap="xs">
-                <span className="bezent-pulse-stat__dot bezent-pulse-stat__dot--blue" aria-hidden="true" />
+                <span
+                  className="bezent-pulse-stat__dot bezent-pulse-stat__dot--blue"
+                  aria-hidden="true"
+                />
                 <span className="bezent-clay-metric__label">Open Positions</span>
               </Inline>
               <div className="bezent-clay-metric__value">{openPositions}</div>
@@ -77,7 +83,10 @@ export function JobOpeningsMetrics({ jobs }: JobOpeningsMetricsProps) {
           <Inline justify="between" align="center">
             <Stack gap="xs">
               <Inline align="center" gap="xs">
-                <span className="bezent-pulse-stat__dot bezent-pulse-stat__dot--green" aria-hidden="true" />
+                <span
+                  className="bezent-pulse-stat__dot bezent-pulse-stat__dot--green"
+                  aria-hidden="true"
+                />
                 <span className="bezent-clay-metric__label">Active Candidates</span>
               </Inline>
               <div className="bezent-clay-metric__value">{totalInPipeline}</div>
@@ -101,7 +110,10 @@ export function JobOpeningsMetrics({ jobs }: JobOpeningsMetricsProps) {
           <Inline justify="between" align="center">
             <Stack gap="xs">
               <Inline align="center" gap="xs">
-                <span className="bezent-pulse-stat__dot bezent-pulse-stat__dot--amber" aria-hidden="true" />
+                <span
+                  className="bezent-pulse-stat__dot bezent-pulse-stat__dot--amber"
+                  aria-hidden="true"
+                />
                 <span className="bezent-clay-metric__label">Drafts &amp; On Hold</span>
               </Inline>
               <div className="bezent-clay-metric__value">{draftJobsCount + closedOrHoldCount}</div>

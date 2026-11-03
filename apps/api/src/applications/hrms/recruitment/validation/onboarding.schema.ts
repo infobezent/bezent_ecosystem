@@ -95,7 +95,9 @@ export function validateReviewOnboarding(input: unknown): ReviewOnboardingDto {
   if (obj.status !== undefined && obj.status !== null) {
     const statusStr = String(obj.status).trim();
     if (statusStr !== 'pending_review' && statusStr !== 'ready_for_confirmation') {
-      throw new ValidationError("Status must be either 'pending_review' or 'ready_for_confirmation'");
+      throw new ValidationError(
+        "Status must be either 'pending_review' or 'ready_for_confirmation'",
+      );
     }
     dto.status = statusStr;
   }

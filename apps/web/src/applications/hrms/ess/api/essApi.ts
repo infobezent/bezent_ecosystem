@@ -737,7 +737,8 @@ export const essApi = {
     offset?: number;
   }) => {
     const q = new URLSearchParams();
-    if (params?.leaveTypeId && params.leaveTypeId !== 'all') q.set('leaveTypeId', params.leaveTypeId);
+    if (params?.leaveTypeId && params.leaveTypeId !== 'all')
+      q.set('leaveTypeId', params.leaveTypeId);
     if (params?.txnType && params.txnType !== 'all') q.set('txnType', params.txnType);
     if (params?.direction && params.direction !== 'all') q.set('direction', params.direction);
     if (params?.startDate) q.set('startDate', params.startDate);

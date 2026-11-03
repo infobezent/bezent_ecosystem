@@ -1,13 +1,11 @@
-import { getDb } from '../../../../db/connection.js';
-import {
-  employeeWorkSchedules,
-  type EmployeeWorkSchedule,
-} from '../../../../db/schema.js';
-import { eq, and } from 'drizzle-orm';
+import type { EmployeeWorkSchedule } from '../../../../db/schema.js';
 import { ShiftRepository, shiftRepository } from '../repository/shift.repository.js';
 import type { ResolvedShiftDetail, ShiftResolutionSource } from '../types/shift.types.js';
 import type { ShiftSchedule } from '../../attendance/types/attendance.types.js';
-import { DEFAULT_WORK_SCHEDULE, timeToMinutes } from '../../attendance/service/attendanceCalculation.service.js';
+import {
+  DEFAULT_WORK_SCHEDULE,
+  timeToMinutes,
+} from '../../attendance/service/attendanceCalculation.service.js';
 
 export class ShiftResolutionService {
   constructor(private readonly repo: ShiftRepository = shiftRepository) {}
@@ -114,9 +112,11 @@ export class ShiftResolutionService {
         breakMinutes: legacySchedule.breakMinutes ?? DEFAULT_WORK_SCHEDULE.breakMinutes,
         lunchMinutes: legacySchedule.lunchMinutes ?? DEFAULT_WORK_SCHEDULE.lunchMinutes,
         timeZone: legacySchedule.timeZone ?? DEFAULT_WORK_SCHEDULE.timeZone,
-        scheduleRef: legacySchedule.workSchedule || legacySchedule.workingCalendar || 'work_schedule',
+        scheduleRef:
+          legacySchedule.workSchedule || legacySchedule.workingCalendar || 'work_schedule',
         graceMinutes: 15,
-        isOvernight: timeToMinutes(legacySchedule.endTime) < timeToMinutes(legacySchedule.startTime),
+        isOvernight:
+          timeToMinutes(legacySchedule.endTime) < timeToMinutes(legacySchedule.startTime),
       };
 
       return {
@@ -197,7 +197,10 @@ export class ShiftResolutionService {
     };
   }
 
-  private buildShiftSchedule(shift: NonNullable<ResolvedShiftDetail['shift']>, scheduleRef?: string): ShiftSchedule {
+  private buildShiftSchedule(
+    shift: NonNullable<ResolvedShiftDetail['shift']>,
+    scheduleRef?: string,
+  ): ShiftSchedule {
     return {
       workingDays: shift.workingDays ?? DEFAULT_WORK_SCHEDULE.workingDays,
       startTime: shift.startTime,
@@ -218,20 +221,14 @@ export class ShiftResolutionService {
     companyId: string,
     employeeId: string,
   ): Promise<EmployeeWorkSchedule | null> {
-    const db = getDb();
-    const rows = await db
-      .select()
-      .from(employeeWorkSchedules)
-      .where(
-        and(
-          eq(employeeWorkSchedules.tenantId, tenantId),
-          eq(employeeWorkSchedules.companyId, companyId),
-          eq(employeeWorkSchedules.employeeId, employeeId),
-        ),
-      )
-      .limit(1);
-
-    return rows[0] ?? null;
+    if (typeof this.repo.getLegacySchedule === 'function') {
+      try {
+        return await this.repo.getLegacySchedule(tenantId, companyId, employeeId);
+      } catch {
+        return null;
+      }
+    }
+    return null;
   }
 }
 

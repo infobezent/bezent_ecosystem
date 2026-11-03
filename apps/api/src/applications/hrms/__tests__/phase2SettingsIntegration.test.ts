@@ -84,13 +84,22 @@ describe('BEZENT HRMS — Phase 2: Settings Integration & Business Logic Enforce
           company: { id: companyId, name: 'Audit Company', code: 'AUD' },
           departments: [{ id: 'dept_01', name: 'Engineering', code: 'ENG' }],
           designations: [{ id: 'desig_01', name: 'Software Engineer', code: 'SWE' }],
-          locations: [{ id: 'loc_01', name: 'Bangalore HQ', code: 'BLR', city: 'BLR', country: 'IN' }],
+          locations: [
+            { id: 'loc_01', name: 'Bangalore HQ', code: 'BLR', city: 'BLR', country: 'IN' },
+          ],
         }),
+      };
+
+      const mockAudit = {
+        logEvent: vi.fn().mockResolvedValue({} as any),
+        getLogs: vi.fn().mockResolvedValue({ items: [], total: 0 }),
       };
 
       employeeService = new EmployeeService(
         mockRepo as EmployeeRepository,
         mockOrgRepo as OrganizationRepository,
+        undefined,
+        mockAudit as any,
       );
 
       vi.spyOn(workforceSettingsService, 'getProbationPolicy').mockResolvedValue({
@@ -267,7 +276,9 @@ describe('BEZENT HRMS — Phase 2: Settings Integration & Business Logic Enforce
 
     beforeEach(() => {
       mockRepo = {
-        create: vi.fn().mockImplementation((_t, _c, dto) => Promise.resolve({ id: 'emp_p2_prob', ...dto })),
+        create: vi
+          .fn()
+          .mockImplementation((_t, _c, dto) => Promise.resolve({ id: 'emp_p2_prob', ...dto })),
         getById: vi.fn().mockImplementation((_t, _c, id) =>
           Promise.resolve({
             id,
@@ -293,13 +304,22 @@ describe('BEZENT HRMS — Phase 2: Settings Integration & Business Logic Enforce
           company: { id: companyId, name: 'Audit Company', code: 'AUD' },
           departments: [{ id: 'dept_01', name: 'Engineering', code: 'ENG' }],
           designations: [{ id: 'desig_01', name: 'Software Engineer', code: 'SWE' }],
-          locations: [{ id: 'loc_01', name: 'Bangalore HQ', code: 'BLR', city: 'BLR', country: 'IN' }],
+          locations: [
+            { id: 'loc_01', name: 'Bangalore HQ', code: 'BLR', city: 'BLR', country: 'IN' },
+          ],
         }),
+      };
+
+      const mockAudit = {
+        logEvent: vi.fn().mockResolvedValue({} as any),
+        getLogs: vi.fn().mockResolvedValue({ items: [], total: 0 }),
       };
 
       employeeService = new EmployeeService(
         mockRepo as EmployeeRepository,
         mockOrgRepo as OrganizationRepository,
+        undefined,
+        mockAudit as any,
       );
 
       vi.spyOn(workforceSettingsService, 'getProbationPolicy').mockResolvedValue({
@@ -501,9 +521,16 @@ describe('BEZENT HRMS — Phase 2: Settings Integration & Business Logic Enforce
         }),
       };
 
+      const mockAudit = {
+        logEvent: vi.fn().mockResolvedValue({} as any),
+        getLogs: vi.fn().mockResolvedValue({ items: [], total: 0 }),
+      };
+
       employeeService = new EmployeeService(
         mockRepo as EmployeeRepository,
         mockOrgRepo as OrganizationRepository,
+        undefined,
+        mockAudit as any,
       );
 
       vi.spyOn(workforceSettingsService, 'getProbationPolicy').mockResolvedValue({

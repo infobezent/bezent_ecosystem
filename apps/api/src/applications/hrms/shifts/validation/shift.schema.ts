@@ -187,7 +187,9 @@ export function validateCreateAssignment(input: unknown): CreateShiftAssignmentD
   const targetId =
     (typeof raw.targetId === 'string' ? raw.targetId.trim() : '') ||
     (scope === 'employee' && typeof raw.employeeId === 'string' ? raw.employeeId.trim() : '') ||
-    (scope === 'department' && typeof raw.departmentId === 'string' ? raw.departmentId.trim() : '') ||
+    (scope === 'department' && typeof raw.departmentId === 'string'
+      ? raw.departmentId.trim()
+      : '') ||
     (scope === 'location' && typeof raw.locationId === 'string' ? raw.locationId.trim() : '');
 
   if (!targetId) {

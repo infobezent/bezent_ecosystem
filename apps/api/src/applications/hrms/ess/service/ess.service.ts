@@ -1100,9 +1100,7 @@ export class EssService {
       const ledgerTotal = rows
         .filter((r) => r.balanceId === b.id)
         .reduce(
-          (sum, r) =>
-            sum +
-            Math.round(Number(r.days) * (LEDGER_SIGN[r.txnType] ?? 1) * 100) / 100,
+          (sum, r) => sum + Math.round(Number(r.days) * (LEDGER_SIGN[r.txnType] ?? 1) * 100) / 100,
           0,
         );
       running.set(b.id, Math.round((currentAvailable - ledgerTotal) * 100) / 100);
@@ -1334,9 +1332,7 @@ export class EssService {
           direction: 'debit',
           credit: 0,
           debit: absDays,
-          description: reason
-            ? `Leave forfeited (${reason})`
-            : `Leave forfeited (${dayStr})`,
+          description: reason ? `Leave forfeited (${reason})` : `Leave forfeited (${dayStr})`,
         };
       case 'reversal':
         if (days >= 0) {

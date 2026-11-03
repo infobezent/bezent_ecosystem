@@ -1,8 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import {
-  RecruitmentService,
-  recruitmentService,
-} from '../service/recruitment.service.js';
+import { RecruitmentService, recruitmentService } from '../service/recruitment.service.js';
 import { AppError } from '../../../../app/errors/AppError.js';
 import type { RecruitmentActorContext } from '../types/recruitment.types.js';
 
@@ -304,7 +301,11 @@ export class RecruitmentController {
     }
   };
 
-  changeApplicationStage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  changeApplicationStage = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const ctx = getCompanyContext(req);
       const result = await this.service.changeApplicationStage(

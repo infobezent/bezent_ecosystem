@@ -13,10 +13,7 @@ describe('CandidatesPage', () => {
   it('renders the Candidates page header, metrics, tabs, and table', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
-        <CandidatesPage
-          initialCandidates={INITIAL_CANDIDATES}
-          initialJobs={INITIAL_JOB_OPENINGS}
-        />
+        <CandidatesPage initialCandidates={INITIAL_CANDIDATES} initialJobs={INITIAL_JOB_OPENINGS} />
       </MemoryRouter>,
     );
 

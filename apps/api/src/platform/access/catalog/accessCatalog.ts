@@ -468,7 +468,11 @@ const BASE_PERMISSION_DEFINITIONS: PermissionDefinition[] = [
     'candidates_manage',
     'Manage candidates',
     'Create and update candidate profiles.',
-    ['hrms.candidates.manage', 'recruitment.candidates.manage', 'hrms.recruitment.candidates.manage'],
+    [
+      'hrms.candidates.manage',
+      'recruitment.candidates.manage',
+      'hrms.recruitment.candidates.manage',
+    ],
   ),
   hrms(
     'recruitment',

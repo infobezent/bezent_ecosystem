@@ -82,7 +82,8 @@ export function validateUpdateGeneralSettings(input: unknown): UpdateGeneralSett
       data.resetFrequency !== 'calendar_year' &&
       data.resetFrequency !== 'financial_year'
     ) {
-      errors.resetFrequency = 'resetFrequency must be "never", "calendar_year", or "financial_year"';
+      errors.resetFrequency =
+        'resetFrequency must be "never", "calendar_year", or "financial_year"';
     } else {
       result.resetFrequency = data.resetFrequency;
     }
@@ -191,7 +192,8 @@ export function validateCreateEmploymentType(input: unknown): CreateEmploymentTy
     name: (data.name as string).trim(),
     description: typeof data.description === 'string' ? data.description.trim() : null,
     workHoursPerWeek,
-    isBenefitsEligible: data.isBenefitsEligible !== undefined ? (data.isBenefitsEligible as boolean) : true,
+    isBenefitsEligible:
+      data.isBenefitsEligible !== undefined ? (data.isBenefitsEligible as boolean) : true,
     defaultNoticeDays,
     isActive: data.isActive !== undefined ? (data.isActive as boolean) : true,
   };
@@ -363,7 +365,8 @@ export function validateUpdateLifecyclePolicy(input: unknown): UpdateLifecyclePo
       data.effectiveDateAlignment !== 'next_payroll_month' &&
       data.effectiveDateAlignment !== 'custom'
     ) {
-      errors.effectiveDateAlignment = 'effectiveDateAlignment must be "immediate", "next_payroll_month", or "custom"';
+      errors.effectiveDateAlignment =
+        'effectiveDateAlignment must be "immediate", "next_payroll_month", or "custom"';
     } else {
       result.effectiveDateAlignment = data.effectiveDateAlignment;
     }
@@ -459,7 +462,8 @@ export function validateUpdateOffboardingPolicy(input: unknown): UpdateOffboardi
       data.resignationWithdrawalWindowDays < 0 ||
       data.resignationWithdrawalWindowDays > 90
     ) {
-      errors.resignationWithdrawalWindowDays = 'resignationWithdrawalWindowDays must be an integer between 0 and 90';
+      errors.resignationWithdrawalWindowDays =
+        'resignationWithdrawalWindowDays must be an integer between 0 and 90';
     } else {
       result.resignationWithdrawalWindowDays = data.resignationWithdrawalWindowDays;
     }
@@ -477,7 +481,11 @@ export function validateCreateClearanceTemplate(input: unknown): CreateClearance
   const errors: Record<string, string> = {};
 
   const validDepts = ['it', 'admin', 'finance', 'hr'];
-  if (!data.department || typeof data.department !== 'string' || !validDepts.includes(data.department)) {
+  if (
+    !data.department ||
+    typeof data.department !== 'string' ||
+    !validDepts.includes(data.department)
+  ) {
     errors.department = 'department must be one of "it", "admin", "finance", or "hr"';
   }
 
@@ -489,7 +497,11 @@ export function validateCreateClearanceTemplate(input: unknown): CreateClearance
 
   let displayOrder = 0;
   if (data.displayOrder !== undefined) {
-    if (typeof data.displayOrder !== 'number' || !Number.isInteger(data.displayOrder) || data.displayOrder < 0) {
+    if (
+      typeof data.displayOrder !== 'number' ||
+      !Number.isInteger(data.displayOrder) ||
+      data.displayOrder < 0
+    ) {
       errors.displayOrder = 'displayOrder must be a non-negative integer';
     } else {
       displayOrder = data.displayOrder;
@@ -501,7 +513,10 @@ export function validateCreateClearanceTemplate(input: unknown): CreateClearance
   }
 
   if (Object.keys(errors).length > 0) {
-    throw new ValidationError('Validation failed for creating clearance checklist template', errors);
+    throw new ValidationError(
+      'Validation failed for creating clearance checklist template',
+      errors,
+    );
   }
 
   return {
@@ -513,7 +528,9 @@ export function validateCreateClearanceTemplate(input: unknown): CreateClearance
   };
 }
 
-export function validateUpdateClearanceTemplate(input: unknown): Partial<CreateClearanceTemplateInput> {
+export function validateUpdateClearanceTemplate(
+  input: unknown,
+): Partial<CreateClearanceTemplateInput> {
   const data = asObject(input);
   const errors: Record<string, string> = {};
   const result: Partial<CreateClearanceTemplateInput> = {};
@@ -542,7 +559,11 @@ export function validateUpdateClearanceTemplate(input: unknown): Partial<CreateC
   }
 
   if (data.displayOrder !== undefined) {
-    if (typeof data.displayOrder !== 'number' || !Number.isInteger(data.displayOrder) || data.displayOrder < 0) {
+    if (
+      typeof data.displayOrder !== 'number' ||
+      !Number.isInteger(data.displayOrder) ||
+      data.displayOrder < 0
+    ) {
       errors.displayOrder = 'displayOrder must be a non-negative integer';
     } else {
       result.displayOrder = data.displayOrder;
@@ -558,7 +579,10 @@ export function validateUpdateClearanceTemplate(input: unknown): Partial<CreateC
   }
 
   if (Object.keys(errors).length > 0) {
-    throw new ValidationError('Validation failed for updating clearance checklist template', errors);
+    throw new ValidationError(
+      'Validation failed for updating clearance checklist template',
+      errors,
+    );
   }
 
   return result;

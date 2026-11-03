@@ -81,7 +81,10 @@ export function SettingsPageInner({ initialModule = 'overview' }: SettingsPageIn
             ))}
           </Grid>
         </Stack>
-      ) : activeModule === 'workforce' || activeModule === 'onboarding' || activeModule === 'employees' || activeModule === 'hr-settings' ? (
+      ) : activeModule === 'workforce' ||
+        activeModule === 'onboarding' ||
+        activeModule === 'employees' ||
+        activeModule === 'hr-settings' ? (
         /* View 2: Unified Workforce Settings Workspace (ADR-019) */
         <WorkforceSettingsSection onBack={() => setActiveModule('overview')} />
       ) : (

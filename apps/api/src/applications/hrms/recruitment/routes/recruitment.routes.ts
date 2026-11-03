@@ -243,4 +243,3 @@ recruitmentRouter.post(
   requirePermission('hrms.recruitment.onboarding_manage'),
   onboardingController.cancelOnboarding,
 );
-

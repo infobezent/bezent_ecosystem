@@ -64,9 +64,10 @@ export function GeneralNumberingTab({
   const [activationTiming, setActivationTiming] = useState(initialSettings.activationTiming);
 
   const [savingSettings, setSavingSettings] = useState(false);
-  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(
-    null,
-  );
+  const [statusMessage, setStatusMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   // Employment types modal state
   const [showAddTypeModal, setShowAddTypeModal] = useState(false);
@@ -99,7 +100,10 @@ export function GeneralNumberingTab({
         autoProvisionUser,
         activationTiming,
       });
-      setStatusMessage({ type: 'success', text: 'Workforce auto-numbering and general settings saved successfully.' });
+      setStatusMessage({
+        type: 'success',
+        text: 'Workforce auto-numbering and general settings saved successfully.',
+      });
       onReload();
     } catch (err) {
       setStatusMessage({
@@ -289,7 +293,8 @@ export function GeneralNumberingTab({
             <div>
               <CardTitle>Employment Types Master</CardTitle>
               <CardDescription>
-                Define employment classifications, weekly working hour standards, and default notice periods.
+                Define employment classifications, weekly working hour standards, and default notice
+                periods.
               </CardDescription>
             </div>
             <Button variant="secondary" onClick={() => setShowAddTypeModal(true)}>
@@ -313,7 +318,9 @@ export function GeneralNumberingTab({
             <TableBody>
               {initialEmploymentTypes.map((et) => (
                 <TableRow key={et.id}>
-                  <TableCell><strong>{et.code}</strong></TableCell>
+                  <TableCell>
+                    <strong>{et.code}</strong>
+                  </TableCell>
                   <TableCell>{et.name}</TableCell>
                   <TableCell>{et.workHoursPerWeek} hrs</TableCell>
                   <TableCell>{et.defaultNoticeDays} days</TableCell>

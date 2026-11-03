@@ -452,6 +452,8 @@ describe('EssLeavePage Component — Render & Integration Tests', () => {
     );
 
     expect(html).toContain('No Leave Transactions Recorded');
-    expect(html).toContain('No balance movements (entitlement, accrual, deduction, or adjustment) match the selected criteria.');
+    expect(html).toContain(
+      'No balance movements (entitlement, accrual, deduction, or adjustment) match the selected criteria.',
+    );
   });
 });

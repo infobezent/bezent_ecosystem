@@ -247,7 +247,8 @@ export interface BackendInterview {
 export interface ScheduleInterviewDto {
   applicationId: string;
   roundName: string;
-  interviewType?: 'screening' | 'technical' | 'system_design' | 'managerial' | 'cultural_fit' | 'hr';
+  interviewType?:
+    'screening' | 'technical' | 'system_design' | 'managerial' | 'cultural_fit' | 'hr';
   scheduledDate: string;
   startTime: string;
   endTime: string;
@@ -358,13 +359,18 @@ export async function fetchJobRequisitions(params?: {
   if (params?.page) query.set('page', String(params.page));
   if (params?.limit) query.set('limit', String(params.limit));
   if (params?.status && params.status !== 'all') query.set('status', params.status);
-  if (params?.departmentId && params.departmentId !== 'all') query.set('departmentId', params.departmentId);
-  if (params?.workplaceType && params.workplaceType !== 'all') query.set('workplaceType', params.workplaceType);
+  if (params?.departmentId && params.departmentId !== 'all')
+    query.set('departmentId', params.departmentId);
+  if (params?.workplaceType && params.workplaceType !== 'all')
+    query.set('workplaceType', params.workplaceType);
   if (params?.search) query.set('search', params.search);
 
   const qs = query.toString();
   const res = await authorizedFetch(`${API_BASE}/requisitions${qs ? `?${qs}` : ''}`);
-  return handleResponse<PaginatedResponse<BackendJobRequisition>>(res, 'Failed to fetch job requisitions');
+  return handleResponse<PaginatedResponse<BackendJobRequisition>>(
+    res,
+    'Failed to fetch job requisitions',
+  );
 }
 
 export async function fetchJobRequisitionById(id: string): Promise<BackendJobRequisition> {
@@ -372,7 +378,9 @@ export async function fetchJobRequisitionById(id: string): Promise<BackendJobReq
   return handleResponse<BackendJobRequisition>(res, 'Failed to fetch requisition details');
 }
 
-export async function createJobRequisition(dto: CreateJobRequisitionDto): Promise<BackendJobRequisition> {
+export async function createJobRequisition(
+  dto: CreateJobRequisitionDto,
+): Promise<BackendJobRequisition> {
   const res = await authorizedFetch(`${API_BASE}/requisitions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -381,7 +389,10 @@ export async function createJobRequisition(dto: CreateJobRequisitionDto): Promis
   return handleResponse<BackendJobRequisition>(res, 'Failed to create job requisition');
 }
 
-export async function updateJobRequisition(id: string, dto: UpdateJobRequisitionDto): Promise<BackendJobRequisition> {
+export async function updateJobRequisition(
+  id: string,
+  dto: UpdateJobRequisitionDto,
+): Promise<BackendJobRequisition> {
   const res = await authorizedFetch(`${API_BASE}/requisitions/${encodeURIComponent(id)}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
@@ -390,7 +401,10 @@ export async function updateJobRequisition(id: string, dto: UpdateJobRequisition
   return handleResponse<BackendJobRequisition>(res, 'Failed to update job requisition');
 }
 
-export async function closeJobRequisition(id: string, reason?: string): Promise<BackendJobRequisition> {
+export async function closeJobRequisition(
+  id: string,
+  reason?: string,
+): Promise<BackendJobRequisition> {
   const res = await authorizedFetch(`${API_BASE}/requisitions/${encodeURIComponent(id)}/close`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -476,7 +490,10 @@ export async function createCandidate(dto: CreateCandidateDto): Promise<BackendC
   return handleResponse<BackendCandidate>(res, 'Failed to create candidate');
 }
 
-export async function updateCandidate(id: string, dto: UpdateCandidateDto): Promise<BackendCandidate> {
+export async function updateCandidate(
+  id: string,
+  dto: UpdateCandidateDto,
+): Promise<BackendCandidate> {
   const res = await authorizedFetch(`${API_BASE}/candidates/${encodeURIComponent(id)}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
@@ -497,14 +514,18 @@ export async function fetchApplications(params?: {
   const query = new URLSearchParams();
   if (params?.page) query.set('page', String(params.page));
   if (params?.limit) query.set('limit', String(params.limit));
-  if (params?.requisitionId && params.requisitionId !== 'all') query.set('requisitionId', params.requisitionId);
+  if (params?.requisitionId && params.requisitionId !== 'all')
+    query.set('requisitionId', params.requisitionId);
   if (params?.candidateId) query.set('candidateId', params.candidateId);
   if (params?.stage && params.stage !== 'all') query.set('stage', params.stage);
   if (params?.status && params.status !== 'all') query.set('status', params.status);
 
   const qs = query.toString();
   const res = await authorizedFetch(`${API_BASE}/applications${qs ? `?${qs}` : ''}`);
-  return handleResponse<PaginatedResponse<BackendApplication>>(res, 'Failed to fetch candidate applications');
+  return handleResponse<PaginatedResponse<BackendApplication>>(
+    res,
+    'Failed to fetch candidate applications',
+  );
 }
 
 export async function fetchApplicationById(id: string): Promise<BackendApplication> {
@@ -564,11 +585,14 @@ export async function assignRecruiter(
   id: string,
   recruiterId: string,
 ): Promise<BackendApplication> {
-  const res = await authorizedFetch(`${API_BASE}/applications/${encodeURIComponent(id)}/recruiter`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ recruiterId }),
-  });
+  const res = await authorizedFetch(
+    `${API_BASE}/applications/${encodeURIComponent(id)}/recruiter`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ recruiterId }),
+    },
+  );
   return handleResponse<BackendApplication>(res, 'Failed to assign recruiter');
 }
 
@@ -778,7 +802,8 @@ export async function fetchOnboardings(
 ): Promise<PaginatedResponse<BackendOnboardingItem>> {
   const query = new URLSearchParams();
   if (params?.status && params.status !== 'all') query.set('status', params.status);
-  if (params?.departmentId && params.departmentId !== 'all') query.set('departmentId', params.departmentId);
+  if (params?.departmentId && params.departmentId !== 'all')
+    query.set('departmentId', params.departmentId);
   if (params?.search) query.set('search', params.search);
   if (params?.limit) query.set('limit', String(params.limit));
   if (params?.offset) query.set('offset', String(params.offset));
@@ -835,10 +860,7 @@ export async function confirmOnboarding(
   return handleResponse<BackendOnboardingItem>(res, 'Failed to confirm onboarding to employee');
 }
 
-export async function cancelOnboarding(
-  id: string,
-  reason: string,
-): Promise<BackendOnboardingItem> {
+export async function cancelOnboarding(id: string, reason: string): Promise<BackendOnboardingItem> {
   const res = await authorizedFetch(`${API_BASE}/onboarding/${encodeURIComponent(id)}/cancel`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

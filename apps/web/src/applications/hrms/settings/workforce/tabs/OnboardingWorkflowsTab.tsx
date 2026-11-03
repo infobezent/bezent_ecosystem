@@ -51,7 +51,9 @@ export function OnboardingWorkflowsTab() {
   const [documentsError, setDocumentsError] = useState<string | null>(null);
 
   // Conversion state
-  const [conversionSettings, setConversionSettings] = useState<OnboardingConversionSettings | null>(null);
+  const [conversionSettings, setConversionSettings] = useState<OnboardingConversionSettings | null>(
+    null,
+  );
   const [conversionLoading, setConversionLoading] = useState(false);
   const [conversionSaving, setConversionSaving] = useState(false);
   const [conversionError, setConversionError] = useState<string | null>(null);
@@ -106,7 +108,10 @@ export function OnboardingWorkflowsTab() {
     await loadChecklists();
   };
 
-  const handleUpdateChecklist = async (id: string, payload: UpdateOnboardingChecklistTemplateDto) => {
+  const handleUpdateChecklist = async (
+    id: string,
+    payload: UpdateOnboardingChecklistTemplateDto,
+  ) => {
     await updateChecklistTemplate(id, payload);
     await loadChecklists();
   };
@@ -121,7 +126,10 @@ export function OnboardingWorkflowsTab() {
     await loadDocuments();
   };
 
-  const handleUpdateDocument = async (id: string, payload: UpdateOnboardingDocumentRequirementDto) => {
+  const handleUpdateDocument = async (
+    id: string,
+    payload: UpdateOnboardingDocumentRequirementDto,
+  ) => {
     await updateDocumentRequirement(id, payload);
     await loadDocuments();
   };
@@ -160,8 +168,8 @@ export function OnboardingWorkflowsTab() {
 
       {activeSubTab === 'stages' && <StagesSection />}
 
-      {activeSubTab === 'checklists' && (
-        checklistsLoading ? (
+      {activeSubTab === 'checklists' &&
+        (checklistsLoading ? (
           <LoadingState label="Loading checklist templates..." />
         ) : checklistsError ? (
           <Card variant="flat" padding="lg">
@@ -179,11 +187,10 @@ export function OnboardingWorkflowsTab() {
             onUpdateChecklist={handleUpdateChecklist}
             onDeleteChecklist={handleDeleteChecklist}
           />
-        )
-      )}
+        ))}
 
-      {activeSubTab === 'documents' && (
-        documentsLoading ? (
+      {activeSubTab === 'documents' &&
+        (documentsLoading ? (
           <LoadingState label="Loading document requirements..." />
         ) : documentsError ? (
           <Card variant="flat" padding="lg">
@@ -201,11 +208,10 @@ export function OnboardingWorkflowsTab() {
             onUpdateDocument={handleUpdateDocument}
             onDeleteDocument={handleDeleteDocument}
           />
-        )
-      )}
+        ))}
 
-      {activeSubTab === 'conversion' && (
-        conversionLoading ? (
+      {activeSubTab === 'conversion' &&
+        (conversionLoading ? (
           <LoadingState label="Loading conversion settings..." />
         ) : conversionError ? (
           <Card variant="flat" padding="lg">
@@ -222,8 +228,7 @@ export function OnboardingWorkflowsTab() {
             onSave={handleSaveConversion}
             saving={conversionSaving}
           />
-        )
-      )}
+        ))}
 
       {activeSubTab === 'timing' && <GeneralSettingsSection />}
     </Stack>

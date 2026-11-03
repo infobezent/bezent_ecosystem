@@ -51,8 +51,7 @@ export function planApprovalSteps(input: {
     const approver = input.approvers[i] ?? { employeeId: null, roleId: null };
 
     const isApplicant =
-      approver.roleId === null &&
-      approver.employeeId === input.applicantEmployeeId;
+      approver.roleId === null && approver.employeeId === input.applicantEmployeeId;
 
     const canSelfApprove =
       isApplicant && Boolean(input.allowSelfApprovalForHr && input.isApplicantHr);

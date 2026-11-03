@@ -161,7 +161,10 @@ export function validateCreateJobRequisition(input: unknown): CreateJobRequisiti
   }
 
   if (input.targetCloseDate) {
-    if (typeof input.targetCloseDate !== 'string' || !DATE_REGEX.test(input.targetCloseDate.trim())) {
+    if (
+      typeof input.targetCloseDate !== 'string' ||
+      !DATE_REGEX.test(input.targetCloseDate.trim())
+    ) {
       errors.targetCloseDate = 'Target close date must be in YYYY-MM-DD format';
     }
   }
@@ -186,10 +189,18 @@ export function validateCreateJobRequisition(input: unknown): CreateJobRequisiti
       ? input.responsibilities.map(String)
       : [],
     skills: Array.isArray(input.skills) ? input.skills.map(String) : [],
-    experienceMin: input.experienceMin !== undefined && input.experienceMin !== null ? Number(input.experienceMin) : null,
-    experienceMax: input.experienceMax !== undefined && input.experienceMax !== null ? Number(input.experienceMax) : null,
-    salaryMin: input.salaryMin !== undefined && input.salaryMin !== null ? Number(input.salaryMin) : null,
-    salaryMax: input.salaryMax !== undefined && input.salaryMax !== null ? Number(input.salaryMax) : null,
+    experienceMin:
+      input.experienceMin !== undefined && input.experienceMin !== null
+        ? Number(input.experienceMin)
+        : null,
+    experienceMax:
+      input.experienceMax !== undefined && input.experienceMax !== null
+        ? Number(input.experienceMax)
+        : null,
+    salaryMin:
+      input.salaryMin !== undefined && input.salaryMin !== null ? Number(input.salaryMin) : null,
+    salaryMax:
+      input.salaryMax !== undefined && input.salaryMax !== null ? Number(input.salaryMax) : null,
     currency: input.currency ? String(input.currency).trim().toUpperCase() : 'INR',
     hiringManagerId: input.hiringManagerId ? String(input.hiringManagerId).trim() : null,
     recruiterId: input.recruiterId ? String(input.recruiterId).trim() : null,
@@ -255,7 +266,10 @@ export function validateUpdateJobRequisition(input: unknown): UpdateJobRequisiti
   }
 
   if (input.targetCloseDate) {
-    if (typeof input.targetCloseDate !== 'string' || !DATE_REGEX.test(input.targetCloseDate.trim())) {
+    if (
+      typeof input.targetCloseDate !== 'string' ||
+      !DATE_REGEX.test(input.targetCloseDate.trim())
+    ) {
       errors.targetCloseDate = 'Target close date must be in YYYY-MM-DD format';
     }
   }
@@ -318,7 +332,11 @@ export function validateCreateJobPosting(input: unknown): CreateJobPostingDto {
 
   const errors: Record<string, string> = {};
 
-  if (!input.requisitionId || typeof input.requisitionId !== 'string' || !input.requisitionId.trim()) {
+  if (
+    !input.requisitionId ||
+    typeof input.requisitionId !== 'string' ||
+    !input.requisitionId.trim()
+  ) {
     errors.requisitionId = 'Requisition ID is required';
   }
 
@@ -427,8 +445,14 @@ export function validateCreateCandidate(input: unknown): CreateCandidateDto {
         ? Number(input.relevantExperienceYears)
         : 0,
     noticePeriodDays: input.noticePeriodDays ? Number(input.noticePeriodDays) : 0,
-    currentCtcLpa: input.currentCtcLpa !== undefined && input.currentCtcLpa !== null ? Number(input.currentCtcLpa) : null,
-    expectedCtcLpa: input.expectedCtcLpa !== undefined && input.expectedCtcLpa !== null ? Number(input.expectedCtcLpa) : null,
+    currentCtcLpa:
+      input.currentCtcLpa !== undefined && input.currentCtcLpa !== null
+        ? Number(input.currentCtcLpa)
+        : null,
+    expectedCtcLpa:
+      input.expectedCtcLpa !== undefined && input.expectedCtcLpa !== null
+        ? Number(input.expectedCtcLpa)
+        : null,
     skills: Array.isArray(input.skills) ? input.skills.map(String) : [],
     tags: Array.isArray(input.tags) ? input.tags.map(String) : [],
     source: (input.source as CandidateSource) ?? 'direct',
@@ -522,7 +546,11 @@ export function validateCreateApplication(input: unknown): CreateApplicationDto 
     errors.candidateId = 'Candidate ID is required';
   }
 
-  if (!input.requisitionId || typeof input.requisitionId !== 'string' || !input.requisitionId.trim()) {
+  if (
+    !input.requisitionId ||
+    typeof input.requisitionId !== 'string' ||
+    !input.requisitionId.trim()
+  ) {
     errors.requisitionId = 'Requisition ID is required';
   }
 
@@ -534,7 +562,9 @@ export function validateCreateApplication(input: unknown): CreateApplicationDto 
     candidateId: String(input.candidateId).trim(),
     requisitionId: String(input.requisitionId).trim(),
     jobPostingId: input.jobPostingId ? String(input.jobPostingId).trim() : null,
-    assignedRecruiterId: input.assignedRecruiterId ? String(input.assignedRecruiterId).trim() : null,
+    assignedRecruiterId: input.assignedRecruiterId
+      ? String(input.assignedRecruiterId).trim()
+      : null,
     initialStage: input.initialStage ? String(input.initialStage).trim() : 'applied',
   };
 }
@@ -546,7 +576,11 @@ export function validateScheduleInterview(input: unknown): ScheduleInterviewDto 
 
   const errors: Record<string, string> = {};
 
-  if (!input.applicationId || typeof input.applicationId !== 'string' || !input.applicationId.trim()) {
+  if (
+    !input.applicationId ||
+    typeof input.applicationId !== 'string' ||
+    !input.applicationId.trim()
+  ) {
     errors.applicationId = 'Application ID is required';
   }
 
@@ -554,25 +588,45 @@ export function validateScheduleInterview(input: unknown): ScheduleInterviewDto 
     errors.roundName = 'Round name is required';
   }
 
-  if (!input.scheduledDate || typeof input.scheduledDate !== 'string' || !DATE_REGEX.test(input.scheduledDate.trim())) {
+  if (
+    !input.scheduledDate ||
+    typeof input.scheduledDate !== 'string' ||
+    !DATE_REGEX.test(input.scheduledDate.trim())
+  ) {
     errors.scheduledDate = 'Scheduled date is required and must be in YYYY-MM-DD format';
   }
 
-  if (!input.startTime || typeof input.startTime !== 'string' || !TIME_REGEX.test(input.startTime.trim())) {
+  if (
+    !input.startTime ||
+    typeof input.startTime !== 'string' ||
+    !TIME_REGEX.test(input.startTime.trim())
+  ) {
     errors.startTime = 'Start time is required and must be in HH:MM format';
   }
 
-  if (!input.endTime || typeof input.endTime !== 'string' || !TIME_REGEX.test(input.endTime.trim())) {
+  if (
+    !input.endTime ||
+    typeof input.endTime !== 'string' ||
+    !TIME_REGEX.test(input.endTime.trim())
+  ) {
     errors.endTime = 'End time is required and must be in HH:MM format';
   }
 
-  if (input.startTime && input.endTime && TIME_REGEX.test(String(input.startTime)) && TIME_REGEX.test(String(input.endTime))) {
+  if (
+    input.startTime &&
+    input.endTime &&
+    TIME_REGEX.test(String(input.startTime)) &&
+    TIME_REGEX.test(String(input.endTime))
+  ) {
     if (String(input.endTime) <= String(input.startTime)) {
       errors.endTime = 'Interview end time must be after start time';
     }
   }
 
-  if (input.interviewType !== undefined && !VALID_INTERVIEW_TYPES.includes(input.interviewType as InterviewType)) {
+  if (
+    input.interviewType !== undefined &&
+    !VALID_INTERVIEW_TYPES.includes(input.interviewType as InterviewType)
+  ) {
     errors.interviewType = `Interview type must be one of: ${VALID_INTERVIEW_TYPES.join(', ')}`;
   }
 
@@ -617,19 +671,36 @@ export function validateRescheduleInterview(input: unknown): RescheduleInterview
 
   const errors: Record<string, string> = {};
 
-  if (!input.scheduledDate || typeof input.scheduledDate !== 'string' || !DATE_REGEX.test(input.scheduledDate.trim())) {
+  if (
+    !input.scheduledDate ||
+    typeof input.scheduledDate !== 'string' ||
+    !DATE_REGEX.test(input.scheduledDate.trim())
+  ) {
     errors.scheduledDate = 'Scheduled date must be in YYYY-MM-DD format';
   }
 
-  if (!input.startTime || typeof input.startTime !== 'string' || !TIME_REGEX.test(input.startTime.trim())) {
+  if (
+    !input.startTime ||
+    typeof input.startTime !== 'string' ||
+    !TIME_REGEX.test(input.startTime.trim())
+  ) {
     errors.startTime = 'Start time must be in HH:MM format';
   }
 
-  if (!input.endTime || typeof input.endTime !== 'string' || !TIME_REGEX.test(input.endTime.trim())) {
+  if (
+    !input.endTime ||
+    typeof input.endTime !== 'string' ||
+    !TIME_REGEX.test(input.endTime.trim())
+  ) {
     errors.endTime = 'End time must be in HH:MM format';
   }
 
-  if (input.startTime && input.endTime && TIME_REGEX.test(String(input.startTime)) && TIME_REGEX.test(String(input.endTime))) {
+  if (
+    input.startTime &&
+    input.endTime &&
+    TIME_REGEX.test(String(input.startTime)) &&
+    TIME_REGEX.test(String(input.endTime))
+  ) {
     if (String(input.endTime) <= String(input.startTime)) {
       errors.endTime = 'Interview end time must be after start time';
     }

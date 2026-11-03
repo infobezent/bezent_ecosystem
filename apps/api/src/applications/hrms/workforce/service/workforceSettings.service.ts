@@ -32,10 +32,7 @@ export class WorkforceSettingsService {
   // BUNDLE (ALL-IN-ONE)
   // =========================================================================
 
-  async getSettingsBundle(
-    tenantId: string,
-    companyId: string,
-  ): Promise<WorkforceSettingsBundle> {
+  async getSettingsBundle(tenantId: string, companyId: string): Promise<WorkforceSettingsBundle> {
     const general = await this.getGeneralSettings(tenantId, companyId);
     const employmentTypes = await this.listEmploymentTypes(tenantId, companyId, false);
     const probation = await this.getProbationPolicy(tenantId, companyId);
@@ -85,10 +82,7 @@ export class WorkforceSettingsService {
     };
   }
 
-  async previewNextEmployeeId(
-    tenantId: string,
-    companyId: string,
-  ): Promise<FormattedNextIdResult> {
+  async previewNextEmployeeId(tenantId: string, companyId: string): Promise<FormattedNextIdResult> {
     return this.repository.peekNextSequence(tenantId, companyId);
   }
 
@@ -140,11 +134,7 @@ export class WorkforceSettingsService {
     return this.repository.updateEmploymentType(tenantId, companyId, id, input);
   }
 
-  async deleteEmploymentType(
-    tenantId: string,
-    companyId: string,
-    id: string,
-  ): Promise<boolean> {
+  async deleteEmploymentType(tenantId: string, companyId: string, id: string): Promise<boolean> {
     const existing = await this.repository.getEmploymentTypeById(tenantId, companyId, id);
     if (!existing) {
       throw new NotFoundError(`Employment type with id "${id}" was not found.`);
@@ -156,10 +146,7 @@ export class WorkforceSettingsService {
   // 3. PROBATION POLICY
   // =========================================================================
 
-  async getProbationPolicy(
-    tenantId: string,
-    companyId: string,
-  ): Promise<WorkforceProbationPolicy> {
+  async getProbationPolicy(tenantId: string, companyId: string): Promise<WorkforceProbationPolicy> {
     let policy = await this.repository.getProbationPolicy(tenantId, companyId);
     if (!policy) {
       policy = await this.repository.seedDefaultProbationPolicy(tenantId, companyId);
@@ -179,10 +166,7 @@ export class WorkforceSettingsService {
   // 4. LIFECYCLE & TRANSFER POLICY
   // =========================================================================
 
-  async getLifecyclePolicy(
-    tenantId: string,
-    companyId: string,
-  ): Promise<WorkforceLifecyclePolicy> {
+  async getLifecyclePolicy(tenantId: string, companyId: string): Promise<WorkforceLifecyclePolicy> {
     let policy = await this.repository.getLifecyclePolicy(tenantId, companyId);
     if (!policy) {
       policy = await this.repository.seedDefaultLifecyclePolicy(tenantId, companyId);
@@ -254,11 +238,7 @@ export class WorkforceSettingsService {
     return this.repository.updateClearanceTemplate(tenantId, companyId, id, input);
   }
 
-  async deleteClearanceTemplate(
-    tenantId: string,
-    companyId: string,
-    id: string,
-  ): Promise<boolean> {
+  async deleteClearanceTemplate(tenantId: string, companyId: string, id: string): Promise<boolean> {
     const existing = await this.repository.getClearanceTemplateById(tenantId, companyId, id);
     if (!existing) {
       throw new NotFoundError(`Clearance checklist template with id "${id}" was not found.`);

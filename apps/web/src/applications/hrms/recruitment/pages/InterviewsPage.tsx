@@ -130,9 +130,7 @@ export function InterviewsPage({
         });
       });
 
-      const adaptedCandidates = candItems.map((c) =>
-        adaptCandidateToFrontend(c, appMap[c.id]),
-      );
+      const adaptedCandidates = candItems.map((c) => adaptCandidateToFrontend(c, appMap[c.id]));
 
       const adaptedJobs = reqItems.map((r) => adaptRequisitionToJobOpening(r));
 
@@ -417,7 +415,11 @@ export function InterviewsPage({
               </Button>
 
               {/* View Mode Toggle: Table vs Calendar */}
-              <div className="bezent-view-toggle" role="group" aria-label="Interview view layout switcher">
+              <div
+                className="bezent-view-toggle"
+                role="group"
+                aria-label="Interview view layout switcher"
+              >
                 <button
                   type="button"
                   className={`bezent-view-toggle__btn ${viewMode === 'table' ? 'is-active' : ''}`}
@@ -441,7 +443,11 @@ export function InterviewsPage({
               </div>
 
               {/* Segmented Status Tabs */}
-              <div className="bezent-filter-tabs" role="tablist" aria-label="Filter interviews by status">
+              <div
+                className="bezent-filter-tabs"
+                role="tablist"
+                aria-label="Filter interviews by status"
+              >
                 {tabItems.map((tab) => (
                   <button
                     key={tab.id}

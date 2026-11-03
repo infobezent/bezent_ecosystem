@@ -4958,17 +4958,23 @@ export const workforceGeneralSettings = mysqlTable(
     companyId: varchar('company_id', { length: 64 })
       .notNull()
       .references(() => companies.id, { onDelete: 'cascade' }),
-    generationMode: mysqlEnum('generation_mode', ['automatic', 'manual']).default('automatic').notNull(),
+    generationMode: mysqlEnum('generation_mode', ['automatic', 'manual'])
+      .default('automatic')
+      .notNull(),
     idPrefix: varchar('id_prefix', { length: 32 }).default('EMP-').notNull(),
     idSuffix: varchar('id_suffix', { length: 32 }),
     sequenceLength: int('sequence_length').default(4).notNull(),
     startingNumber: int('starting_number').default(1001).notNull(),
     currentCounter: int('current_counter').default(1000).notNull(),
-    resetFrequency: mysqlEnum('reset_frequency', ['never', 'calendar_year', 'financial_year']).default('never').notNull(),
+    resetFrequency: mysqlEnum('reset_frequency', ['never', 'calendar_year', 'financial_year'])
+      .default('never')
+      .notNull(),
     allowManualOverride: boolean('allow_manual_override').default(true).notNull(),
     preventIdReuse: boolean('prevent_id_reuse').default(true).notNull(),
     autoProvisionUser: boolean('auto_provision_user').default(true).notNull(),
-    activationTiming: mysqlEnum('activation_timing', ['instant', 'joining_date', 'manual']).default('instant').notNull(),
+    activationTiming: mysqlEnum('activation_timing', ['instant', 'joining_date', 'manual'])
+      .default('instant')
+      .notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
   },
@@ -4995,7 +5001,9 @@ export const workforceEmploymentTypes = mysqlTable(
     code: varchar('code', { length: 32 }).notNull(),
     name: varchar('name', { length: 128 }).notNull(),
     description: text('description'),
-    workHoursPerWeek: decimal('work_hours_per_week', { precision: 4, scale: 1 }).default('40.0').notNull(),
+    workHoursPerWeek: decimal('work_hours_per_week', { precision: 4, scale: 1 })
+      .default('40.0')
+      .notNull(),
     isBenefitsEligible: boolean('is_benefits_eligible').default(true).notNull(),
     defaultNoticeDays: int('default_notice_days').default(60).notNull(),
     isActive: boolean('is_active').default(true).notNull(),
@@ -5023,7 +5031,9 @@ export const workforceProbationPolicies = mysqlTable(
       .notNull()
       .references(() => companies.id, { onDelete: 'cascade' }),
     defaultProbationDays: int('default_probation_days').default(90).notNull(),
-    confirmationMode: mysqlEnum('confirmation_mode', ['manager_review', 'auto_confirm']).default('manager_review').notNull(),
+    confirmationMode: mysqlEnum('confirmation_mode', ['manager_review', 'auto_confirm'])
+      .default('manager_review')
+      .notNull(),
     reminderLeadDays: int('reminder_lead_days').default(14).notNull(),
     maxExtensionDays: int('max_extension_days').default(90).notNull(),
     maxExtensionsAllowed: int('max_extensions_allowed').default(1).notNull(),
@@ -5051,8 +5061,16 @@ export const workforceLifecyclePolicies = mysqlTable(
     companyId: varchar('company_id', { length: 64 })
       .notNull()
       .references(() => companies.id, { onDelete: 'cascade' }),
-    requireReleasingManagerApproval: boolean('require_releasing_manager_approval').default(true).notNull(),
-    effectiveDateAlignment: mysqlEnum('effective_date_alignment', ['immediate', 'next_payroll_month', 'custom']).default('next_payroll_month').notNull(),
+    requireReleasingManagerApproval: boolean('require_releasing_manager_approval')
+      .default(true)
+      .notNull(),
+    effectiveDateAlignment: mysqlEnum('effective_date_alignment', [
+      'immediate',
+      'next_payroll_month',
+      'custom',
+    ])
+      .default('next_payroll_month')
+      .notNull(),
     autoReassignShifts: boolean('auto_reassign_shifts').default(true).notNull(),
     autoReassignLeaveApprover: boolean('auto_reassign_leave_approver').default(true).notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -5114,13 +5132,13 @@ export const workforceClearanceChecklistTemplates = mysqlTable(
     displayOrder: int('display_order').default(0).notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
-  (table) => [
-    index('idx_workforce_clearance_comp_dept').on(table.companyId, table.department),
-  ],
+  (table) => [index('idx_workforce_clearance_comp_dept').on(table.companyId, table.department)],
 );
 
-export type WorkforceClearanceChecklistTemplate = typeof workforceClearanceChecklistTemplates.$inferSelect;
-export type NewWorkforceClearanceChecklistTemplate = typeof workforceClearanceChecklistTemplates.$inferInsert;
+export type WorkforceClearanceChecklistTemplate =
+  typeof workforceClearanceChecklistTemplates.$inferSelect;
+export type NewWorkforceClearanceChecklistTemplate =
+  typeof workforceClearanceChecklistTemplates.$inferInsert;
 
 /**
  * HRMS Domain: Recruitment — Pipeline Stages
@@ -5193,13 +5211,7 @@ export const jobRequisitions = mysqlTable(
     ])
       .default('full_time')
       .notNull(),
-    experienceLevel: mysqlEnum('experience_level', [
-      'entry',
-      'mid',
-      'senior',
-      'lead',
-      'executive',
-    ])
+    experienceLevel: mysqlEnum('experience_level', ['entry', 'mid', 'senior', 'lead', 'executive'])
       .default('mid')
       .notNull(),
     openings: int('openings').default(1).notNull(),
@@ -5242,7 +5254,10 @@ export const jobRequisitions = mysqlTable(
     updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
   },
   (table) => [
-    uniqueIndex('idx_job_requisitions_company_req_num').on(table.companyId, table.requisitionNumber),
+    uniqueIndex('idx_job_requisitions_company_req_num').on(
+      table.companyId,
+      table.requisitionNumber,
+    ),
     index('idx_job_requisitions_tenant_comp').on(table.tenantId, table.companyId),
     index('idx_job_requisitions_status').on(table.companyId, table.status),
     index('idx_job_requisitions_department').on(table.departmentId),
@@ -5493,7 +5508,13 @@ export const recruitmentInterviews = mysqlTable(
     durationMinutes: int('duration_minutes').default(60).notNull(),
     timezone: varchar('timezone', { length: 50 }).default('Asia/Kolkata').notNull(),
     locationOrLink: varchar('location_or_link', { length: 500 }),
-    status: mysqlEnum('status', ['scheduled', 'in_progress', 'completed', 'rescheduled', 'cancelled'])
+    status: mysqlEnum('status', [
+      'scheduled',
+      'in_progress',
+      'completed',
+      'rescheduled',
+      'cancelled',
+    ])
       .default('scheduled')
       .notNull(),
     rescheduleReason: varchar('reschedule_reason', { length: 500 }),
@@ -5548,8 +5569,7 @@ export const recruitmentInterviewInterviewers = mysqlTable(
   ],
 );
 
-export type RecruitmentInterviewInterviewer =
-  typeof recruitmentInterviewInterviewers.$inferSelect;
+export type RecruitmentInterviewInterviewer = typeof recruitmentInterviewInterviewers.$inferSelect;
 export type NewRecruitmentInterviewInterviewer =
   typeof recruitmentInterviewInterviewers.$inferInsert;
 
@@ -5597,12 +5617,7 @@ export const recruitmentOnboardings = mysqlTable(
       () => employees.id,
       { onDelete: 'set null' },
     ),
-    employmentType: mysqlEnum('employment_type', [
-      'full_time',
-      'part_time',
-      'contract',
-      'intern',
-    ])
+    employmentType: mysqlEnum('employment_type', ['full_time', 'part_time', 'contract', 'intern'])
       .default('full_time')
       .notNull(),
     workflowTemplate: varchar('workflow_template', { length: 150 }),
@@ -5684,7 +5699,11 @@ export const hrmsShiftAssignments = mysqlTable(
     shiftId: varchar('shift_id', { length: 64 })
       .notNull()
       .references(() => hrmsShifts.id, { onDelete: 'cascade' }),
-    assignmentScope: mysqlEnum('assignment_scope', ['employee', 'department', 'location']).notNull(),
+    assignmentScope: mysqlEnum('assignment_scope', [
+      'employee',
+      'department',
+      'location',
+    ]).notNull(),
     employeeId: varchar('employee_id', { length: 64 }).references(() => employees.id, {
       onDelete: 'cascade',
     }),
@@ -5707,7 +5726,11 @@ export const hrmsShiftAssignments = mysqlTable(
     index('idx_hrms_shift_asgn_tenant_comp').on(table.tenantId, table.companyId),
     index('idx_hrms_shift_asgn_shift').on(table.shiftId),
     index('idx_hrms_shift_asgn_emp').on(table.companyId, table.assignmentScope, table.employeeId),
-    index('idx_hrms_shift_asgn_dept').on(table.companyId, table.assignmentScope, table.departmentId),
+    index('idx_hrms_shift_asgn_dept').on(
+      table.companyId,
+      table.assignmentScope,
+      table.departmentId,
+    ),
     index('idx_hrms_shift_asgn_loc').on(table.companyId, table.assignmentScope, table.locationId),
     index('idx_hrms_shift_asgn_dates').on(table.effectiveStartDate, table.effectiveEndDate),
   ],
@@ -5715,5 +5738,3 @@ export const hrmsShiftAssignments = mysqlTable(
 
 export type HrmsShiftAssignment = typeof hrmsShiftAssignments.$inferSelect;
 export type NewHrmsShiftAssignment = typeof hrmsShiftAssignments.$inferInsert;
-
-

@@ -255,10 +255,7 @@ export class WorkforceSettingsRepository {
     return rows;
   }
 
-  async seedDefaultEmploymentTypes(
-    tenantId: string,
-    companyId: string,
-  ): Promise<void> {
+  async seedDefaultEmploymentTypes(tenantId: string, companyId: string): Promise<void> {
     const defaults: NewWorkforceEmploymentType[] = [
       {
         id: randomUUID(),
@@ -323,9 +320,12 @@ export class WorkforceSettingsRepository {
     ];
 
     for (const item of defaults) {
-      await this.db.insert(workforceEmploymentTypes).values(item).onDuplicateKeyUpdate({
-        set: { updatedAt: new Date() },
-      });
+      await this.db
+        .insert(workforceEmploymentTypes)
+        .values(item)
+        .onDuplicateKeyUpdate({
+          set: { updatedAt: new Date() },
+        });
     }
   }
 
@@ -401,7 +401,8 @@ export class WorkforceSettingsRepository {
 
     if (input.name !== undefined) patch.name = input.name;
     if (input.description !== undefined) patch.description = input.description;
-    if (input.workHoursPerWeek !== undefined) patch.workHoursPerWeek = String(input.workHoursPerWeek);
+    if (input.workHoursPerWeek !== undefined)
+      patch.workHoursPerWeek = String(input.workHoursPerWeek);
     if (input.isBenefitsEligible !== undefined) patch.isBenefitsEligible = input.isBenefitsEligible;
     if (input.defaultNoticeDays !== undefined) patch.defaultNoticeDays = input.defaultNoticeDays;
     if (input.isActive !== undefined) patch.isActive = input.isActive;
@@ -421,11 +422,7 @@ export class WorkforceSettingsRepository {
     return updated!;
   }
 
-  async deleteEmploymentType(
-    tenantId: string,
-    companyId: string,
-    id: string,
-  ): Promise<boolean> {
+  async deleteEmploymentType(tenantId: string, companyId: string, id: string): Promise<boolean> {
     const result = await this.db
       .delete(workforceEmploymentTypes)
       .where(
@@ -684,10 +681,7 @@ export class WorkforceSettingsRepository {
     return rows;
   }
 
-  async seedDefaultClearanceTemplates(
-    tenantId: string,
-    companyId: string,
-  ): Promise<void> {
+  async seedDefaultClearanceTemplates(tenantId: string, companyId: string): Promise<void> {
     const defaults: NewWorkforceClearanceChecklistTemplate[] = [
       // IT
       {
@@ -768,7 +762,8 @@ export class WorkforceSettingsRepository {
         companyId,
         department: 'finance',
         itemTitle: 'Final Salary & Gratuity Calculation',
-        description: 'Calculate encashed leave days, notice shortfall/buyout, and gratuity if eligible',
+        description:
+          'Calculate encashed leave days, notice shortfall/buyout, and gratuity if eligible',
         isMandatory: true,
         displayOrder: 3,
       },
@@ -799,7 +794,8 @@ export class WorkforceSettingsRepository {
         companyId,
         department: 'hr',
         itemTitle: 'Issue Relieving & Experience Letter',
-        description: 'Generate standard relieving documentation post full & final settlement clearance',
+        description:
+          'Generate standard relieving documentation post full & final settlement clearance',
         isMandatory: true,
         displayOrder: 3,
       },
@@ -871,11 +867,7 @@ export class WorkforceSettingsRepository {
     return updated!;
   }
 
-  async deleteClearanceTemplate(
-    tenantId: string,
-    companyId: string,
-    id: string,
-  ): Promise<boolean> {
+  async deleteClearanceTemplate(tenantId: string, companyId: string, id: string): Promise<boolean> {
     await this.db
       .delete(workforceClearanceChecklistTemplates)
       .where(

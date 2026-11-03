@@ -22,11 +22,7 @@ export function OrganizationHierarchyTab() {
         variant="underline"
       />
 
-      {activeSubTab === 'designations' ? (
-        <DesignationsSection />
-      ) : (
-        <JobLevelsGradesSection />
-      )}
+      {activeSubTab === 'designations' ? <DesignationsSection /> : <JobLevelsGradesSection />}
     </Stack>
   );
 }

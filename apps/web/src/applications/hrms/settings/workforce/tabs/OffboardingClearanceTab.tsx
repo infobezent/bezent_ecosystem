@@ -62,9 +62,10 @@ export function OffboardingClearanceTab({
   );
 
   const [savingPolicy, setSavingPolicy] = useState(false);
-  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(
-    null,
-  );
+  const [statusMessage, setStatusMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   // Clearance templates state
   const [deptFilter, setDeptFilter] = useState<'all' | 'it' | 'admin' | 'finance' | 'hr'>('all');
@@ -89,7 +90,10 @@ export function OffboardingClearanceTab({
         allowLeaveOffset,
         resignationWithdrawalWindowDays,
       });
-      setStatusMessage({ type: 'success', text: 'Offboarding & notice policy updated successfully.' });
+      setStatusMessage({
+        type: 'success',
+        text: 'Offboarding & notice policy updated successfully.',
+      });
       onReload();
     } catch (err) {
       setStatusMessage({
@@ -162,7 +166,8 @@ export function OffboardingClearanceTab({
             <div>
               <CardTitle>Notice Period Governance Matrix</CardTitle>
               <CardDescription>
-                Define mandatory notice periods by employment status and resignation withdrawal terms.
+                Define mandatory notice periods by employment status and resignation withdrawal
+                terms.
               </CardDescription>
             </div>
           </CardHeader>
@@ -241,7 +246,8 @@ export function OffboardingClearanceTab({
             <div>
               <CardTitle>Department Clearance Checklist Templates</CardTitle>
               <CardDescription>
-                Define mandatory handover tasks across IT, Administration, Finance, and HR before Full & Final (F&F) settlement.
+                Define mandatory handover tasks across IT, Administration, Finance, and HR before
+                Full & Final (F&F) settlement.
               </CardDescription>
             </div>
             <Button variant="secondary" onClick={() => setShowAddModal(true)}>
@@ -274,7 +280,9 @@ export function OffboardingClearanceTab({
                   <TableCell>
                     <Badge variant="info">{item.department.toUpperCase()}</Badge>
                   </TableCell>
-                  <TableCell><strong>{item.itemTitle}</strong></TableCell>
+                  <TableCell>
+                    <strong>{item.itemTitle}</strong>
+                  </TableCell>
                   <TableCell>{item.description || '—'}</TableCell>
                   <TableCell>
                     {item.isMandatory ? (
@@ -329,9 +337,7 @@ export function OffboardingClearanceTab({
             <Select
               label="Department"
               value={newItemDept}
-              onChange={(e) =>
-                setNewItemDept(e.target.value as 'it' | 'admin' | 'finance' | 'hr')
-              }
+              onChange={(e) => setNewItemDept(e.target.value as 'it' | 'admin' | 'finance' | 'hr')}
               options={[
                 { label: 'IT & Security', value: 'it' },
                 { label: 'Admin & Facilities', value: 'admin' },

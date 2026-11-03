@@ -238,12 +238,7 @@ export class RecruitmentRepository {
     const [row] = await executor
       .select({ count: count() })
       .from(jobRequisitions)
-      .where(
-        and(
-          eq(jobRequisitions.tenantId, tenantId),
-          eq(jobRequisitions.companyId, companyId),
-        ),
-      );
+      .where(and(eq(jobRequisitions.tenantId, tenantId), eq(jobRequisitions.companyId, companyId)));
     const nextSeq = (row?.count ?? 0) + 1;
     const year = new Date().getFullYear();
     return `REQ-${year}-${String(nextSeq).padStart(4, '0')}`;
@@ -394,20 +389,12 @@ export class RecruitmentRepository {
     const [row] = await executor
       .select({ count: count() })
       .from(jobPostings)
-      .where(
-        and(
-          eq(jobPostings.tenantId, tenantId),
-          eq(jobPostings.companyId, companyId),
-        ),
-      );
+      .where(and(eq(jobPostings.tenantId, tenantId), eq(jobPostings.companyId, companyId)));
     const nextSeq = (row?.count ?? 0) + 1;
     return `JOB-${String(nextSeq).padStart(4, '0')}`;
   }
 
-  async createJobPosting(
-    data: NewJobPosting,
-    executor: DbExecutor = getDb(),
-  ): Promise<JobPosting> {
+  async createJobPosting(data: NewJobPosting, executor: DbExecutor = getDb()): Promise<JobPosting> {
     await executor.insert(jobPostings).values(data);
     const created = await this.getJobPostingById(data.tenantId, data.companyId, data.id, executor);
     if (!created) {
@@ -510,10 +497,7 @@ export class RecruitmentRepository {
   // Candidates
   // ---------------------------------------------------------------------------
 
-  async getNextCandidateNumber(
-    tenantId: string,
-    executor: DbExecutor = getDb(),
-  ): Promise<string> {
+  async getNextCandidateNumber(tenantId: string, executor: DbExecutor = getDb()): Promise<string> {
     const [row] = await executor
       .select({ count: count() })
       .from(candidates)
@@ -522,10 +506,7 @@ export class RecruitmentRepository {
     return `CND-${String(nextSeq).padStart(5, '0')}`;
   }
 
-  async createCandidate(
-    data: NewCandidate,
-    executor: DbExecutor = getDb(),
-  ): Promise<Candidate> {
+  async createCandidate(data: NewCandidate, executor: DbExecutor = getDb()): Promise<Candidate> {
     await executor.insert(candidates).values(data);
     const created = await this.getCandidateById(data.tenantId, data.id, executor);
     if (!created) {
@@ -556,10 +537,7 @@ export class RecruitmentRepository {
       .select()
       .from(candidates)
       .where(
-        and(
-          eq(candidates.tenantId, tenantId),
-          eq(candidates.email, email.toLowerCase().trim()),
-        ),
+        and(eq(candidates.tenantId, tenantId), eq(candidates.email, email.toLowerCase().trim())),
       )
       .limit(1);
     return row ?? null;
@@ -824,10 +802,7 @@ export class RecruitmentRepository {
       .select()
       .from(recruitmentStages)
       .where(
-        and(
-          eq(recruitmentStages.tenantId, tenantId),
-          eq(recruitmentStages.companyId, companyId),
-        ),
+        and(eq(recruitmentStages.tenantId, tenantId), eq(recruitmentStages.companyId, companyId)),
       )
       .orderBy(asc(recruitmentStages.stageOrder));
 
@@ -864,10 +839,7 @@ export class RecruitmentRepository {
       .select()
       .from(recruitmentStages)
       .where(
-        and(
-          eq(recruitmentStages.tenantId, tenantId),
-          eq(recruitmentStages.companyId, companyId),
-        ),
+        and(eq(recruitmentStages.tenantId, tenantId), eq(recruitmentStages.companyId, companyId)),
       )
       .orderBy(asc(recruitmentStages.stageOrder));
   }

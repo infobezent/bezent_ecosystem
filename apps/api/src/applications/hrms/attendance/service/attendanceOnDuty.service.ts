@@ -852,7 +852,9 @@ export class AttendanceOnDutyService {
     }
 
     // Prevent self-approval (check both reviewerEmployeeId and reviewerUserId against employee record)
-    const empUserId = await this.odRepo.findEmployeeUserId(existing.employeeId);
+    const empUserId = this.isMockRepo
+      ? ((await (this.mockRepo as any)?.findEmployeeUserId?.(existing.employeeId)) ?? null)
+      : await this.odRepo.findEmployeeUserId(existing.employeeId);
     if (
       (reviewerEmployeeId && reviewerEmployeeId === existing.employeeId) ||
       (reviewerUserId &&

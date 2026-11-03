@@ -19,13 +19,7 @@ import type {
 } from '../types/interview';
 
 export type InterviewSortField =
-  | 'candidate'
-  | 'role'
-  | 'round'
-  | 'slot'
-  | 'interviewer'
-  | 'status'
-  | 'evaluation';
+  'candidate' | 'role' | 'round' | 'slot' | 'interviewer' | 'status' | 'evaluation';
 
 export type InterviewSortDirection = 'asc' | 'desc';
 
@@ -207,11 +201,7 @@ export function InterviewScheduleTable({
 
           <TableHeaderCell
             aria-sort={
-              sortField === 'role'
-                ? sortDirection === 'asc'
-                  ? 'ascending'
-                  : 'descending'
-                : 'none'
+              sortField === 'role' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'
             }
           >
             <button
@@ -269,11 +259,7 @@ export function InterviewScheduleTable({
 
           <TableHeaderCell
             aria-sort={
-              sortField === 'slot'
-                ? sortDirection === 'asc'
-                  ? 'ascending'
-                  : 'descending'
-                : 'none'
+              sortField === 'slot' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'
             }
           >
             <button

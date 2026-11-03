@@ -82,12 +82,7 @@ export interface AssignmentFilterQuery {
 }
 
 export type ShiftResolutionSource =
-  | 'employee'
-  | 'department'
-  | 'location'
-  | 'auto_allocated'
-  | 'legacy_schedule'
-  | 'default_shift';
+  'employee' | 'department' | 'location' | 'auto_allocated' | 'legacy_schedule' | 'default_shift';
 
 export interface ResolvedShiftDetail {
   shift: HrmsShift | null;

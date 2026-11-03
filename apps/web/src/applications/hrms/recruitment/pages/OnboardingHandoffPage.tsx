@@ -337,4 +337,3 @@ export function OnboardingHandoffPage({ initialHandoffs }: OnboardingHandoffPage
 }
 
 export default OnboardingHandoffPage;
-

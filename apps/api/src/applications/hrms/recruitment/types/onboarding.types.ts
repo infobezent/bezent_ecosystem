@@ -7,10 +7,7 @@ import type {
 } from '../../../../db/schema.js';
 
 export type OnboardingStatus =
-  | 'pending_review'
-  | 'ready_for_confirmation'
-  | 'completed'
-  | 'cancelled';
+  'pending_review' | 'ready_for_confirmation' | 'completed' | 'cancelled';
 
 export type OnboardingEmploymentType = 'full_time' | 'part_time' | 'contract' | 'intern';
 

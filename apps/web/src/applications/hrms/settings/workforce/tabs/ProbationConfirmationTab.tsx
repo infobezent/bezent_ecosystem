@@ -42,9 +42,10 @@ export function ProbationConfirmationTab({
   const [autoGenerateLetter, setAutoGenerateLetter] = useState(initialPolicy.autoGenerateLetter);
 
   const [saving, setSaving] = useState(false);
-  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(
-    null,
-  );
+  const [statusMessage, setStatusMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   const handleSave = async () => {
     try {
@@ -58,7 +59,10 @@ export function ProbationConfirmationTab({
         maxExtensionsAllowed,
         autoGenerateLetter,
       });
-      setStatusMessage({ type: 'success', text: 'Probation & confirmation policy updated successfully.' });
+      setStatusMessage({
+        type: 'success',
+        text: 'Probation & confirmation policy updated successfully.',
+      });
       onReload();
     } catch (err) {
       setStatusMessage({
@@ -84,7 +88,8 @@ export function ProbationConfirmationTab({
             <div>
               <CardTitle>Probation & Confirmation Policy</CardTitle>
               <CardDescription>
-                Configure evaluation periods, review reminders, extension caps, and formal confirmation rules.
+                Configure evaluation periods, review reminders, extension caps, and formal
+                confirmation rules.
               </CardDescription>
             </div>
           </CardHeader>

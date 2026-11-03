@@ -16,9 +16,7 @@ import {
 } from '../validation/workforceSettings.schema.js';
 
 export class WorkforceSettingsController {
-  constructor(
-    private readonly service: WorkforceSettingsService = workforceSettingsService,
-  ) {}
+  constructor(private readonly service: WorkforceSettingsService = workforceSettingsService) {}
 
   private getContext(req: Request) {
     const ctx = req.companyContext;
@@ -231,7 +229,9 @@ export class WorkforceSettingsController {
       const { tenantId, companyId } = this.getContext(req);
       const validated = validateCreateClearanceTemplate(req.body);
       const data = await this.service.createClearanceTemplate(tenantId, companyId, validated);
-      res.status(201).json({ data, message: 'Clearance checklist template item created successfully' });
+      res
+        .status(201)
+        .json({ data, message: 'Clearance checklist template item created successfully' });
     } catch (err) {
       next(err);
     }
@@ -254,7 +254,10 @@ export class WorkforceSettingsController {
       const { tenantId, companyId } = this.getContext(req);
       const id = String(req.params.id);
       await this.service.deleteClearanceTemplate(tenantId, companyId, id);
-      res.json({ success: true, message: 'Clearance checklist template item deleted successfully' });
+      res.json({
+        success: true,
+        message: 'Clearance checklist template item deleted successfully',
+      });
     } catch (err) {
       next(err);
     }

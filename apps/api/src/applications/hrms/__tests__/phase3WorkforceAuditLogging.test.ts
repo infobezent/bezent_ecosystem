@@ -212,7 +212,9 @@ describe('BEZENT HRMS — Phase 3.0: Workforce Audit Logging Suite', () => {
     expect(auditCall.metadata?.changedFields).toEqual(['lastName']);
     expect(auditCall.metadata?.previousValues).toEqual({ lastName: 'Scott' });
     expect(auditCall.metadata?.newValues).toEqual({ lastName: 'Scarn' });
-    expect((auditCall.metadata?.previousValues as Record<string, unknown>).firstName).toBeUndefined();
+    expect(
+      (auditCall.metadata?.previousValues as Record<string, unknown>).firstName,
+    ).toBeUndefined();
   });
 
   it('4b. suppresses audit logging when no fields actually changed', async () => {
@@ -349,7 +351,9 @@ describe('BEZENT HRMS — Phase 3.0: Workforce Audit Logging Suite', () => {
     // 1. Employee not found
     vi.mocked(mockRepo.getById!).mockResolvedValueOnce(null);
     await expect(
-      employeeService.updateEmployee(tenantId, companyId, 'non_existent_id', { firstName: 'Ghost' }),
+      employeeService.updateEmployee(tenantId, companyId, 'non_existent_id', {
+        firstName: 'Ghost',
+      }),
     ).rejects.toThrow(NotFoundError);
 
     // 2. Email conflict
@@ -359,7 +363,9 @@ describe('BEZENT HRMS — Phase 3.0: Workforce Audit Logging Suite', () => {
       email: 'taken@example.com',
     });
     await expect(
-      employeeService.updateEmployee(tenantId, companyId, employeeId, { email: 'taken@example.com' }),
+      employeeService.updateEmployee(tenantId, companyId, employeeId, {
+        email: 'taken@example.com',
+      }),
     ).rejects.toThrow(ConflictError);
 
     // 3. Self-reporting manager error
@@ -404,7 +410,9 @@ describe('BEZENT HRMS — Phase 3.0: Workforce Audit Logging Suite', () => {
     const logSpy = vi.spyOn(auditService, 'logEvent');
 
     await expect(
-      employeeService.updateEmployee(tenantId, companyId, employeeId, { employmentStatus: 'active' }),
+      employeeService.updateEmployee(tenantId, companyId, employeeId, {
+        employmentStatus: 'active',
+      }),
     ).rejects.toThrow(BadRequestError);
 
     expect(logSpy).not.toHaveBeenCalled();

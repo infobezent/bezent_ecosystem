@@ -18,13 +18,7 @@ import { BezentIcon } from '../../../../design-system/icons';
 import type { JobOpening, JobStatus, WorkplaceType } from '../types/jobOpening';
 
 export type JobSortField =
-  | 'jobCode'
-  | 'title'
-  | 'department'
-  | 'location'
-  | 'positions'
-  | 'applicants'
-  | 'status';
+  'jobCode' | 'title' | 'department' | 'location' | 'positions' | 'applicants' | 'status';
 
 export type JobSortDirection = 'asc' | 'desc';
 

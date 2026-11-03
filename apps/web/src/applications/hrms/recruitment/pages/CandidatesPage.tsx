@@ -80,9 +80,7 @@ export function CandidatesPage({ initialCandidates, initialJobs }: CandidatesPag
       }
 
       const candItems = candsRes?.items ?? [];
-      const adaptedCands = candItems.map((c) =>
-        adaptCandidateToFrontend(c, appMap[c.id]),
-      );
+      const adaptedCands = candItems.map((c) => adaptCandidateToFrontend(c, appMap[c.id]));
 
       const reqItems = reqsRes?.items ?? [];
       const adaptedJobs = reqItems.map((r) => adaptRequisitionToJobOpening(r));
@@ -307,7 +305,11 @@ export function CandidatesPage({ initialCandidates, initialJobs }: CandidatesPag
               </Button>
 
               {/* View Mode Toggle: List vs Grid */}
-              <div className="bezent-view-toggle" role="group" aria-label="Candidate view layout switcher">
+              <div
+                className="bezent-view-toggle"
+                role="group"
+                aria-label="Candidate view layout switcher"
+              >
                 <button
                   type="button"
                   className={`bezent-view-toggle__btn ${viewMode === 'list' ? 'is-active' : ''}`}
@@ -331,7 +333,11 @@ export function CandidatesPage({ initialCandidates, initialJobs }: CandidatesPag
               </div>
 
               {/* Horizontal Status Filter Tabs */}
-              <div className="bezent-filter-tabs" role="tablist" aria-label="Filter candidates by recruitment stage">
+              <div
+                className="bezent-filter-tabs"
+                role="tablist"
+                aria-label="Filter candidates by recruitment stage"
+              >
                 {statusTabs.map((tab) => (
                   <button
                     key={tab.id}

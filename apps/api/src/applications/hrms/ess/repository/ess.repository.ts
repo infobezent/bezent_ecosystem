@@ -1066,11 +1066,7 @@ export class EssRepository {
   // ---------------------------------------------------------------------------
   // Leave Balance Ledger Transactions
   // ---------------------------------------------------------------------------
-  async getRawLeaveTransactions(
-    tenantId: string,
-    companyId: string,
-    employeeId: string,
-  ) {
+  async getRawLeaveTransactions(tenantId: string, companyId: string, employeeId: string) {
     const db = getDb();
     const [balances, rows] = await Promise.all([
       db

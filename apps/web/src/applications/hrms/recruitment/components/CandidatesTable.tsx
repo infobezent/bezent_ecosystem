@@ -387,11 +387,7 @@ export function CandidatesTable({
                 }`}
                 aria-hidden="true"
               >
-                {sortField === 'totalExperienceYears'
-                  ? sortDirection === 'asc'
-                    ? '▲'
-                    : '▼'
-                  : '⇅'}
+                {sortField === 'totalExperienceYears' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}
               </span>
             </button>
           </TableHeaderCell>

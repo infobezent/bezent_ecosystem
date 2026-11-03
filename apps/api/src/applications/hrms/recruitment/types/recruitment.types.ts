@@ -14,25 +14,12 @@ export type RecruitmentEmploymentType = 'full_time' | 'part_time' | 'contract' |
 export type RecruitmentExperienceLevel = 'entry' | 'mid' | 'senior' | 'lead' | 'executive';
 export type RequisitionPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type RequisitionStatus =
-  | 'draft'
-  | 'pending_approval'
-  | 'open'
-  | 'on_hold'
-  | 'filled'
-  | 'closed'
-  | 'cancelled';
+  'draft' | 'pending_approval' | 'open' | 'on_hold' | 'filled' | 'closed' | 'cancelled';
 
 export type JobPostingStatus = 'draft' | 'published' | 'paused' | 'closed';
 
 export type CandidateSource =
-  | 'linkedin'
-  | 'career_page'
-  | 'referral'
-  | 'agency'
-  | 'naukri'
-  | 'campus'
-  | 'direct'
-  | 'other';
+  'linkedin' | 'career_page' | 'referral' | 'agency' | 'naukri' | 'campus' | 'direct' | 'other';
 
 export type CandidateStatus = 'active' | 'archived' | 'blacklisted';
 export type ApplicationStatus = 'active' | 'hired' | 'rejected' | 'withdrawn';
@@ -50,34 +37,18 @@ export type RecruitmentActivityType =
   | 'withdrawal';
 
 export type InterviewType =
-  | 'screening'
-  | 'technical'
-  | 'system_design'
-  | 'managerial'
-  | 'cultural_fit'
-  | 'hr';
+  'screening' | 'technical' | 'system_design' | 'managerial' | 'cultural_fit' | 'hr';
 
 export type InterviewStatus =
-  | 'scheduled'
-  | 'in_progress'
-  | 'completed'
-  | 'rescheduled'
-  | 'cancelled';
+  'scheduled' | 'in_progress' | 'completed' | 'rescheduled' | 'cancelled';
 
 export type InterviewRecommendation =
-  | 'strong_hire'
-  | 'hire'
-  | 'lean_hire'
-  | 'lean_no_hire'
-  | 'no_hire';
+  'strong_hire' | 'hire' | 'lean_hire' | 'lean_no_hire' | 'no_hire';
 
 export type FeedbackStatus = 'pending' | 'submitted';
 
 export type StageType =
-  | 'active'
-  | 'terminal_success'
-  | 'terminal_rejection'
-  | 'terminal_withdrawal';
+  'active' | 'terminal_success' | 'terminal_rejection' | 'terminal_withdrawal';
 
 export interface RecruitmentActorContext {
   userId?: string | null;
