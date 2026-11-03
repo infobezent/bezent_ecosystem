@@ -456,24 +456,48 @@ export function WorkforceNetwork() {
           <line x1="72" y1="13" x2="72" y2="33" opacity="0.4" />
         </g>
 
-        {/* 4. Peripheral Team Nodes */}
-        <circle cx="10" cy="23" r="2.5" fill="#ecfdf5" stroke="#10b981" strokeWidth="1.2" />
-        <circle cx="10" cy="23" r="1" fill="#10b981" />
+        {/* 4. Peripheral Connected Employee Avatar Nodes */}
+        {/* West Employee Node */}
+        <g className="bezent-workforce-network__employee-node">
+          <circle cx="10" cy="23" r="3.8" fill="#ecfdf5" stroke="#10b981" strokeWidth="0.9" />
+          <circle cx="10" cy="21.9" r="1.1" fill="#059669" />
+          <path d="M 8 25.6 C 8 23.9, 12 23.9, 12 25.6 Z" fill="#059669" />
+        </g>
 
-        <circle cx="84" cy="23" r="2.5" fill="#ecfdf5" stroke="#10b981" strokeWidth="1.2" />
-        <circle cx="84" cy="23" r="1" fill="#10b981" />
+        {/* East Employee Node */}
+        <g className="bezent-workforce-network__employee-node">
+          <circle cx="84" cy="23" r="3.8" fill="#ecfdf5" stroke="#10b981" strokeWidth="0.9" />
+          <circle cx="84" cy="21.9" r="1.1" fill="#059669" />
+          <path d="M 82 25.6 C 82 23.9, 86 23.9, 86 25.6 Z" fill="#059669" />
+        </g>
 
-        <circle cx="22" cy="13" r="3.2" fill="#d1fae5" stroke="#059669" strokeWidth="1.2" />
-        <circle cx="22" cy="13" r="1.3" fill="#047857" />
+        {/* North-West Employee Node */}
+        <g className="bezent-workforce-network__employee-node">
+          <circle cx="22" cy="13" r="4.6" fill="#e6f7ee" stroke="#10b981" strokeWidth="1" />
+          <circle cx="22" cy="11.7" r="1.3" fill="#059669" />
+          <path d="M 19.6 16.2 C 19.6 14.2, 24.4 14.2, 24.4 16.2 Z" fill="#059669" />
+        </g>
 
-        <circle cx="72" cy="13" r="3.2" fill="#d1fae5" stroke="#059669" strokeWidth="1.2" />
-        <circle cx="72" cy="13" r="1.3" fill="#047857" />
+        {/* North-East Employee Node */}
+        <g className="bezent-workforce-network__employee-node">
+          <circle cx="72" cy="13" r="4.6" fill="#e6f7ee" stroke="#10b981" strokeWidth="1" />
+          <circle cx="72" cy="11.7" r="1.3" fill="#059669" />
+          <path d="M 69.6 16.2 C 69.6 14.2, 74.4 14.2, 74.4 16.2 Z" fill="#059669" />
+        </g>
 
-        <circle cx="22" cy="33" r="3.2" fill="#d1fae5" stroke="#059669" strokeWidth="1.2" />
-        <circle cx="22" cy="33" r="1.3" fill="#047857" />
+        {/* South-West Employee Node */}
+        <g className="bezent-workforce-network__employee-node">
+          <circle cx="22" cy="33" r="4.6" fill="#e6f7ee" stroke="#10b981" strokeWidth="1" />
+          <circle cx="22" cy="31.7" r="1.3" fill="#059669" />
+          <path d="M 19.6 36.2 C 19.6 34.2, 24.4 34.2, 24.4 36.2 Z" fill="#059669" />
+        </g>
 
-        <circle cx="72" cy="33" r="3.2" fill="#d1fae5" stroke="#059669" strokeWidth="1.2" />
-        <circle cx="72" cy="33" r="1.3" fill="#047857" />
+        {/* South-East Employee Node */}
+        <g className="bezent-workforce-network__employee-node">
+          <circle cx="72" cy="33" r="4.6" fill="#e6f7ee" stroke="#10b981" strokeWidth="1" />
+          <circle cx="72" cy="31.7" r="1.3" fill="#059669" />
+          <path d="M 69.6 36.2 C 69.6 34.2, 74.4 34.2, 74.4 36.2 Z" fill="#059669" />
+        </g>
 
         {/* 5. Center Active Pulse Hub (Concentric energetic ripples) */}
         <circle cx="47" cy="23" r="11" fill="#10b981" fillOpacity="0.1" />
@@ -494,11 +518,11 @@ export function WorkforceNetwork() {
 }
 
 /**
- * Onboarding Pathway & Welcome Portal Visualization
+ * Onboarding Access Pass & Activation Timer Visualization
  *
- * Implements a 3-step stepping progression path leading toward an open
- * enterprise welcome portal with warm amber/gold lighting, symbolizing
- * new hires stepping into the organization during pre-boarding.
+ * Implements a modern corporate New Hire Smart ID Access Pass paired with
+ * an orbital activation countdown ring and clock, symbolizing newly hired
+ * employees awaiting account activation and first sign-in.
  */
 export function OnboardingPathway() {
   return (
@@ -510,117 +534,146 @@ export function OnboardingPathway() {
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          <linearGradient id="portal-light-grad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stopColor="#fef3c7" stopOpacity="0.05" />
-            <stop offset="1" stopColor="#f59e0b" stopOpacity="0.35" />
+          <linearGradient id="pass-card-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#fffdf5" />
+            <stop offset="1" stopColor="#fef3c7" />
           </linearGradient>
-          <linearGradient id="door-glow-grad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#fbbf24" stopOpacity="0.95" />
-            <stop offset="1" stopColor="#d97706" stopOpacity="0.9" />
-          </linearGradient>
-          <linearGradient id="path-tile-grad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#fef3c7" />
-            <stop offset="1" stopColor="#fde68a" />
-          </linearGradient>
+          <radialGradient id="activation-glow-grad" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stopColor="#f59e0b" stopOpacity="0.25" />
+            <stop offset="1" stopColor="#f59e0b" stopOpacity="0" />
+          </radialGradient>
         </defs>
 
-        {/* 1. Ambient Welcome Light Beam Fan from Portal */}
-        <polygon points="76,8 92,2 92,44 76,38" fill="url(#portal-light-grad)" />
+        {/* 1. Ambient Activation Glow behind timer */}
+        <ellipse cx="76" cy="23" rx="16" ry="16" fill="url(#activation-glow-grad)" />
 
-        {/* 2. Micro Countdown Timer / Pre-boarding Badge at Top-Left */}
-        <g opacity="0.85">
-          <circle cx="16" cy="12" r="5" fill="#fffbeb" stroke="#f59e0b" strokeWidth="1" />
-          <path d="M16 9.5 V12 L18 13.5" stroke="#d97706" strokeWidth="0.9" strokeLinecap="round" />
-        </g>
+        {/* 2. Perspective Ground Shadow under ID Badge */}
+        <ellipse cx="32" cy="41" rx="20" ry="2" fill="#d97706" opacity="0.12" />
 
-        {/* 3. Stepping Pathway Curve (Connecting Trajectory) */}
+        {/* 3. New Hire Corporate Smart ID Card */}
+        {/* Lanyard Clip Slot */}
+        <rect
+          x="28"
+          y="4"
+          width="8"
+          height="4"
+          rx="1.5"
+          fill="#fde68a"
+          stroke="#d97706"
+          strokeWidth="0.8"
+        />
+        <circle cx="32" cy="6" r="0.9" fill="#92400e" />
+
+        {/* Card Body */}
+        <rect
+          x="8"
+          y="7"
+          width="48"
+          height="32"
+          rx="4"
+          fill="url(#pass-card-grad)"
+          stroke="#f59e0b"
+          strokeWidth="1.2"
+        />
+
+        {/* Avatar Photo Frame on Card */}
+        <rect
+          x="13"
+          y="12"
+          width="14"
+          height="16"
+          rx="2.5"
+          fill="#fef3c7"
+          stroke="#fcd34d"
+          strokeWidth="0.8"
+        />
+        {/* New Hire Silhouette inside Photo Frame */}
+        <circle cx="20" cy="17" r="2.2" fill="#d97706" />
+        <path d="M 15.8 26 C 15.8 22.2, 24.2 22.2, 24.2 26 Z" fill="#d97706" />
+
+        {/* Identity Details lines */}
+        <rect x="30" y="13" width="20" height="2.5" rx="1.25" fill="#d97706" />
+        <rect x="30" y="18" width="15" height="2" rx="1" fill="#f59e0b" opacity="0.85" />
+        <rect x="30" y="22.5" width="11" height="1.8" rx="0.9" fill="#fcd34d" />
+
+        {/* Micro Smart Chip */}
+        <rect
+          x="30"
+          y="26.5"
+          width="6"
+          height="5"
+          rx="1"
+          fill="#fef3c7"
+          stroke="#f59e0b"
+          strokeWidth="0.6"
+        />
+        <line x1="33" y1="26.5" x2="33" y2="31.5" stroke="#f59e0b" strokeWidth="0.5" />
+        <line x1="30" y1="29" x2="36" y2="29" stroke="#f59e0b" strokeWidth="0.5" />
+
+        {/* Pending Activation Status Tag */}
+        <rect
+          x="13"
+          y="31"
+          width="21"
+          height="4.5"
+          rx="2"
+          fill="#fffbeb"
+          stroke="#f59e0b"
+          strokeWidth="0.6"
+        />
+        <circle cx="16" cy="33.25" r="1.1" fill="#f59e0b" />
+        <rect x="18.5" y="32.4" width="12" height="1.7" rx="0.8" fill="#b45309" />
+
+        {/* 4. Connecting Trajectory between Badge and Activation Ring */}
         <path
-          d="M 18,34 Q 44,28 72,24"
+          d="M 56 23 L 64 23"
           stroke="#f59e0b"
           strokeWidth="1.2"
           strokeDasharray="2 2"
+          opacity="0.75"
+        />
+        <circle cx="60" cy="23" r="1.3" fill="#d97706" />
+
+        {/* 5. Orbital Activation Countdown Timer */}
+        {/* Background Track */}
+        <circle
+          cx="76"
+          cy="23"
+          r="14"
+          stroke="#fde68a"
+          strokeWidth="2.5"
+          strokeOpacity="0.5"
           fill="none"
-          opacity="0.6"
         />
-
-        {/* 4. Three Perspective Stepping Stones */}
-        <polygon
-          points="10,34 22,30 27,34 15,38"
-          fill="url(#path-tile-grad)"
+        {/* Progress Arc */}
+        <circle
+          cx="76"
+          cy="23"
+          r="14"
           stroke="#f59e0b"
-          strokeWidth="0.8"
-        />
-        <polygon
-          points="28,29 40,25 45,29 33,33"
-          fill="url(#path-tile-grad)"
-          stroke="#f59e0b"
-          strokeWidth="0.9"
-        />
-        <polygon points="46,24 58,20 63,24 51,28" fill="#fcd34d" stroke="#d97706" strokeWidth="1" />
-
-        {/* 5. Stepping Candidate Silhouette on Step 2 moving toward Portal */}
-        <g fill="#d97706">
-          <circle cx="37" cy="16" r="1.8" />
-          <path d="M35 24 L35.8 19.5 C36 18.8 36.6 18.5 37.2 18.5 C37.8 18.5 38.4 18.8 38.6 19.5 L39.4 24 L38.4 24 L38 21.5 L37.5 24 Z" />
-        </g>
-
-        {/* 6. Enterprise Welcome Portal / Open Door */}
-        <rect
-          x="72"
-          y="8"
-          width="16"
-          height="30"
-          rx="2"
-          fill="#fffbeb"
-          stroke="#d97706"
-          strokeWidth="1.4"
-        />
-        <line
-          x1="70"
-          y1="38"
-          x2="90"
-          y2="38"
-          stroke="#b45309"
-          strokeWidth="1.5"
+          strokeWidth="2.8"
           strokeLinecap="round"
+          strokeDasharray="64 88"
+          strokeDashoffset="0"
+          fill="none"
         />
-        <polygon
-          points="72,8 81,11 81,35 72,38"
-          fill="url(#door-glow-grad)"
-          stroke="#b45309"
-          strokeWidth="1"
-        />
-        <circle cx="79" cy="23" r="0.9" fill="#78350f" />
+        <circle cx="76" cy="9" r="2.2" fill="#d97706" stroke="#ffffff" strokeWidth="0.8" />
 
-        {/* 7. Welcoming Radiance Rays */}
-        <line
-          x1="82"
-          y1="14"
-          x2="66"
-          y2="12"
-          stroke="#fbbf24"
-          strokeWidth="0.8"
-          strokeDasharray="2 2"
-          opacity="0.7"
+        {/* Inner Clock Disc */}
+        <circle cx="76" cy="23" r="9" fill="#fffbeb" stroke="#f59e0b" strokeWidth="1" />
+        <path
+          d="M 76 18 V 23 L 79.5 24.5"
+          stroke="#b45309"
+          strokeWidth="1.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
         />
-        <line
-          x1="82"
-          y1="23"
-          x2="63"
-          y2="22"
-          stroke="#fbbf24"
-          strokeWidth="0.8"
-          strokeDasharray="2 2"
-          opacity="0.7"
-        />
-        <line
-          x1="82"
-          y1="31"
-          x2="66"
-          y2="32"
-          stroke="#fbbf24"
-          strokeWidth="0.8"
-          strokeDasharray="2 2"
+
+        {/* 6. Micro Welcome Star Accent */}
+        <polygon
+          points="88,11 89,13 91,14 89,15 88,17 87,15 85,14 87,13"
+          fill="#f59e0b"
           opacity="0.7"
         />
       </svg>

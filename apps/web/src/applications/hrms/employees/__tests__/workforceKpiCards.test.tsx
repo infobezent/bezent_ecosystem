@@ -152,6 +152,7 @@ describe('WorkforceKpiCards (Number + Mini Trend Chart)', () => {
     // Card 02: Connected Network in Active Employees
     expect(html).toContain('bezent-workforce-network');
     expect(html).toContain('bezent-workforce-network__svg');
+    expect(html).toContain('bezent-workforce-network__employee-node');
 
     // Card 03: Onboarding Pathway in Pending Activation
     expect(html).toContain('bezent-onboarding-pathway');

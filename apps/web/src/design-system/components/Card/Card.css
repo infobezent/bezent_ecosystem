@@ -1273,6 +1273,16 @@
   transform: translateY(-1px) scale(1.02);
 }
 
+[data-theme='dark'] .bezent-workforce-network__employee-node circle:first-child {
+  fill: #0d281e;
+  stroke: #34d399;
+}
+
+[data-theme='dark'] .bezent-workforce-network__employee-node circle:nth-child(2),
+[data-theme='dark'] .bezent-workforce-network__employee-node path {
+  fill: #6ee7b7;
+}
+
 /* ── Onboarding Pathway Visualization (Pending Activation Card) ── */
 .bezent-onboarding-pathway {
   width: 94px;
@@ -1297,6 +1307,21 @@
 
 .bezent-trend-kpi-card:hover .bezent-onboarding-pathway__svg {
   transform: translateY(-1px) scale(1.02);
+}
+
+[data-theme='dark'] .bezent-onboarding-pathway__svg rect[fill='url(#pass-card-grad)'] {
+  fill: #1e1305;
+  stroke: #f59e0b;
+}
+
+[data-theme='dark'] .bezent-onboarding-pathway__svg rect[fill='#fef3c7'] {
+  fill: #2a1a08;
+  stroke: #d97706;
+}
+
+[data-theme='dark'] .bezent-onboarding-pathway__svg circle[fill='#fffbeb'] {
+  fill: #1e1305;
+  stroke: #f59e0b;
 }
 
 /* ── Archive Vault Visualization (Inactive Employees Card) ── */
