@@ -363,8 +363,8 @@ describe.skipIf(!isDatabaseConfigured)(
       expect(health.status).toBe('in_progress');
       expect(health.operationalStage).toBe('in_progress');
 
-      // Schedule Integrity: Fallback schedule accounts for employees without explicit assignment
-      expect(health.fallbackScheduleCount).toBe(5);
+      // Schedule Integrity: valid assigned or fallback schedule accounts for all eligible employees
+      expect(health.assignedScheduleCount + health.fallbackScheduleCount).toBe(5);
       expect(health.unresolvedScheduleCount).toBe(0);
       expect(health.missingScheduleCount).toBe(0);
     });

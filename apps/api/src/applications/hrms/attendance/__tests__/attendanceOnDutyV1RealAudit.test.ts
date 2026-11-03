@@ -56,39 +56,59 @@ describe.skipIf(!isDatabaseConfigured)(
         .delete(employeeNotifications)
         .where(inArray(employeeNotifications.employeeId, [empId1, empId2]));
 
-      // Ensure company attendance policy odRules permits 30 days backdated submission for acceptance audit
-      await db
-        .update(attendancePolicies)
-        .set({
-          odRules: {
-            enabled: true,
-            odTypes: [
-              'Client Visit',
-              'Business Trip',
-              'Training / Conference',
-              'Field Assignment',
-              'client_visit',
-              'site_visit',
-              'training',
-              'travel',
-              'branch_visit',
-            ],
-            allowHalfDay: true,
-            allowHourly: true,
-            allowBackdated: true,
-            maxBackdatedDays: 30,
-            backdatedAllowedDays: 30,
-            requiresApproval: true,
-            countAsPresent: true,
-          },
-        })
+      // Ensure company attendance policy odRules permits 365 days backdated submission for acceptance audit
+      const [existingPolicy] = await db
+        .select({ id: attendancePolicies.id })
+        .from(attendancePolicies)
         .where(
           and(
             eq(attendancePolicies.tenantId, tenantId),
             eq(attendancePolicies.companyId, companyId),
             eq(attendancePolicies.scope, 'company'),
           ),
-        );
+        )
+        .limit(1);
+
+      const auditOdRules = {
+        enabled: true,
+        odTypes: [
+          'Client Visit',
+          'Business Trip',
+          'Training / Conference',
+          'Field Assignment',
+          'client_visit',
+          'site_visit',
+          'training',
+          'travel',
+          'branch_visit',
+        ],
+        allowHalfDay: true,
+        allowHourly: true,
+        allowBackdated: true,
+        maxBackdatedDays: 365,
+        backdatedAllowedDays: 365,
+        maxDaysInPast: 365,
+        requiresApproval: true,
+        countAsPresent: true,
+      };
+
+      if (existingPolicy) {
+        await db
+          .update(attendancePolicies)
+          .set({ odRules: auditOdRules })
+          .where(eq(attendancePolicies.id, existingPolicy.id));
+      } else {
+        await db.insert(attendancePolicies).values({
+          id: generateSurrogateId('pol'),
+          tenantId,
+          companyId,
+          policyName: 'Audit Test Company Policy',
+          scope: 'company',
+          effectiveFrom: '2024-01-01',
+          captureMethods: ['web'],
+          odRules: auditOdRules,
+        });
+      }
 
       // Resolve real policy thresholds from development DB
       const effectivePolicy = await attendancePolicyService.getEffectivePolicy(tenantId, companyId);
@@ -169,7 +189,7 @@ describe.skipIf(!isDatabaseConfigured)(
      ══════════════════════════════════════════════════════════════════════ */
     describe('1. Attendance Credit Integrity', () => {
       it('approving full-day OD reconciles attendance without fabricating raw punches', async () => {
-        const pastWorkday = '2026-10-02';
+        const pastWorkday = new Date(Date.now() - 3 * 86400000).toISOString().slice(0, 10);
 
         // 1. Submit OD request
         const createRes = await request(app)
@@ -230,7 +250,7 @@ describe.skipIf(!isDatabaseConfigured)(
       });
 
       it('correctly credits hourly OD duration (does not inflate to 8 hours)', async () => {
-        const workdayHourly = '2026-10-03';
+        const workdayHourly = new Date(Date.now() - 2 * 86400000).toISOString().slice(0, 10);
 
         const createRes = await request(app)
           .post('/api/v1/hrms/attendance/on-duty')
@@ -281,7 +301,7 @@ describe.skipIf(!isDatabaseConfigured)(
       });
 
       it('reconciles partial office attendance + OD without wiping existing punches', async () => {
-        const workdayPartial = '2026-10-04';
+        const workdayPartial = new Date(Date.now() - 4 * 86400000).toISOString().slice(0, 10);
         const db = getDb();
 
         // Seed partial office attendance: check-in 09:00, check-out 13:00 (240 mins)
@@ -364,7 +384,7 @@ describe.skipIf(!isDatabaseConfigured)(
       });
 
       it('ensures repeated processing is strictly idempotent and does not duplicate credit', async () => {
-        const workdayIdem = '2026-10-05';
+        const workdayIdem = new Date(Date.now() - 5 * 86400000).toISOString().slice(0, 10);
 
         const createRes = await request(app)
           .post('/api/v1/hrms/attendance/on-duty')
@@ -529,7 +549,7 @@ describe.skipIf(!isDatabaseConfigured)(
      ══════════════════════════════════════════════════════════════════════ */
     describe('3. Approval Security', () => {
       it('blocks self-approval when reviewer is the requesting employee', async () => {
-        const workday = '2026-10-06';
+        const workday = new Date(Date.now() - 6 * 86400000).toISOString().slice(0, 10);
 
         // 1. Submit request for empId1
         const createRes = await request(app)
@@ -561,7 +581,7 @@ describe.skipIf(!isDatabaseConfigured)(
       });
 
       it('rejects reviewing a request in finalized status', async () => {
-        const workday = '2026-10-07';
+        const workday = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
 
         const createRes = await request(app)
           .post('/api/v1/hrms/attendance/on-duty')
@@ -693,7 +713,7 @@ describe.skipIf(!isDatabaseConfigured)(
      ══════════════════════════════════════════════════════════════════════ */
     describe('5 & 6. End-to-End Lifecycle & System Integrations', () => {
       it('executes full 10-step lifecycle: submit -> assign -> clarify -> approve -> ledger -> exceptions -> notifications', async () => {
-        const workdayLifecycle = '2026-10-09';
+        const workdayLifecycle = new Date(Date.now() - 8 * 86400000).toISOString().slice(0, 10);
         const db = getDb();
 
         // Seed an open exception on this workday (e.g. unexcused missing in punch)
