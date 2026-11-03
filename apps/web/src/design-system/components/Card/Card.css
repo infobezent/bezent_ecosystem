@@ -1350,22 +1350,24 @@
   transform: translateY(-1px) scale(1.02);
 }
 
-[data-theme='dark'] .bezent-archive-vault__person circle,
-[data-theme='dark'] .bezent-archive-vault__person path[fill='#e11d48'] {
-  fill: #fb7185;
+[data-theme='dark'] .bezent-archive-vault__svg rect[fill='url(#offboard-card-grad)'] {
+  fill: #240a10;
+  stroke: #f43f5e;
 }
 
-[data-theme='dark'] .bezent-archive-vault__person path[stroke='#be123c'] {
-  stroke: #fda4af;
-}
-
-[data-theme='dark'] .bezent-archive-vault__briefcase rect {
-  fill: #4c0519;
+[data-theme='dark'] .bezent-archive-vault__svg rect[fill='#ffe4e6'] {
+  fill: #3b0d17;
   stroke: #fb7185;
 }
 
-[data-theme='dark'] .bezent-archive-vault__briefcase path {
-  stroke: #fb7185;
+[data-theme='dark'] .bezent-archive-vault__svg circle[fill='#fff1f2'] {
+  fill: #240a10;
+  stroke: #f43f5e;
+}
+
+[data-theme='dark'] .bezent-archive-vault__svg rect[fill='#fff1f2'] {
+  fill: #240a10;
+  stroke: #f43f5e;
 }
 
 @media (prefers-reduced-motion: reduce) {

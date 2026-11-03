@@ -682,11 +682,11 @@ export function OnboardingPathway() {
 }
 
 /**
- * Departing Professional Visualization (Inactive Employees Card)
+ * Offboarded Employee Pass & Exit Transition Visualization (Inactive Employees Card)
  *
- * Implements a dignified corporate professional with a briefcase walking
- * forward towards a calm sunset horizon, symbolizing employees who have
- * successfully completed their tenure, resigned, or retired.
+ * Implements a dignified Offboarded Employee Smart ID Pass paired with an exit
+ * transition trajectory and outbound completion seal, symbolizing employees who
+ * have successfully transitioned, separated, or graduated to alumni status.
  */
 export function ArchiveVault() {
   return (
@@ -698,135 +698,187 @@ export function ArchiveVault() {
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          <radialGradient id="sunset-glow-grad" cx="50%" cy="50%" r="50%">
-            <stop offset="0" stopColor="#f43f5e" stopOpacity="0.25" />
+          <linearGradient id="offboard-card-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#fffafa" />
+            <stop offset="100%" stopColor="#ffe4e6" />
+          </linearGradient>
+          <radialGradient id="offboard-glow-grad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.22" />
             <stop offset="1" stopColor="#f43f5e" stopOpacity="0" />
           </radialGradient>
         </defs>
 
-        {/* 1. Ambient Horizon Sunset Glow at the Right */}
-        <ellipse cx="66" cy="28" rx="26" ry="16" fill="url(#sunset-glow-grad)" />
+        {/* 1. Ambient Sunset Glow behind exit seal */}
+        <ellipse cx="76" cy="23" rx="16" ry="16" fill="url(#offboard-glow-grad)" />
 
-        {/* 2. Setting Sun / Horizon Arc */}
-        <path
-          d="M 52 38 A 14 14 0 0 1 80 38"
-          stroke="#fda4af"
-          strokeWidth="1.2"
-          strokeDasharray="3 3"
-          fill="none"
-          opacity="0.6"
-        />
-        <circle cx="66" cy="38" r="7" fill="#f43f5e" fillOpacity="0.12" />
+        {/* 2. Ground Shadow under Offboarded ID Badge */}
+        <ellipse cx="32" cy="41" rx="20" ry="2" fill="#e11d48" opacity="0.10" />
 
-        {/* 3. Perspective Horizon Baselines */}
-        <line
-          x1="8"
-          y1="38"
-          x2="88"
-          y2="38"
-          stroke="#fecdd3"
-          strokeWidth="1"
-          strokeLinecap="round"
-        />
-        <line
-          x1="22"
-          y1="41"
-          x2="76"
-          y2="41"
-          stroke="#fecdd3"
+        {/* 3. Offboarded Employee Smart ID Card */}
+        {/* Lanyard Clip Slot */}
+        <rect
+          x="28"
+          y="4"
+          width="8"
+          height="4"
+          rx="1.5"
+          fill="#fecdd3"
+          stroke="#f43f5e"
           strokeWidth="0.8"
-          strokeLinecap="round"
-          opacity="0.6"
+        />
+        <circle cx="32" cy="6" r="0.9" fill="#9f1239" />
+
+        {/* Card Body */}
+        <rect
+          className="bezent-archive-vault__badge"
+          x="8"
+          y="7"
+          width="48"
+          height="32"
+          rx="4"
+          fill="url(#offboard-card-grad)"
+          stroke="#f43f5e"
+          strokeWidth="1.2"
         />
 
-        {/* 4. Ground Perspective Walking Shadow */}
-        <ellipse cx="38" cy="40.5" rx="9" ry="1.8" fill="#e11d48" opacity="0.15" />
+        {/* Avatar Photo Frame on Card */}
+        <rect
+          className="bezent-archive-vault__photo"
+          x="13"
+          y="12"
+          width="14"
+          height="16"
+          rx="2.5"
+          fill="#ffe4e6"
+          stroke="#fda4af"
+          strokeWidth="0.8"
+        />
+        {/* Offboarded Employee Silhouette inside Photo Frame */}
+        <circle cx="20" cy="17" r="2.2" fill="#e11d48" />
+        <path d="M 15.8 26 C 15.8 22.2, 24.2 22.2, 24.2 26 Z" fill="#e11d48" />
 
-        {/* 5. Departing Corporate Professional Silhouette */}
-        <g className="bezent-archive-vault__person">
-          {/* Head */}
-          <circle cx="36" cy="14" r="2.6" fill="#e11d48" />
+        {/* Identity Details lines */}
+        <rect x="30" y="13" width="20" height="2.5" rx="1.25" fill="#e11d48" />
+        <rect x="30" y="18" width="15" height="2" rx="1" fill="#f43f5e" opacity="0.85" />
+        <rect x="30" y="22.5" width="11" height="1.8" rx="0.9" fill="#fda4af" />
 
-          {/* Suit Tie / Collar highlight */}
-          <polygon points="36,16.5 37.2,19 36,23 34.8,19" fill="#fda4af" opacity="0.6" />
+        {/* Offboarding / Alumni Archive Tag */}
+        <rect
+          x="30"
+          y="26.5"
+          width="7"
+          height="4"
+          rx="1"
+          fill="#ffe4e6"
+          stroke="#f43f5e"
+          strokeWidth="0.6"
+        />
+        <line x1="32" y1="28.5" x2="35" y2="28.5" stroke="#f43f5e" strokeWidth="0.6" />
 
-          {/* Torso / Corporate Blazer */}
-          <path
-            d="M 33 18.5 C 34.2 17, 37.8 17, 39 18.5 L 40.5 27 C 40.5 28.5, 38.5 29.5, 36 29.5 C 33.5 29.5, 31.5 28.5, 31.5 27 Z"
-            fill="#e11d48"
+        {/* Inactive / Separated Status Tag at bottom */}
+        <rect
+          x="13"
+          y="31"
+          width="23"
+          height="4.5"
+          rx="2"
+          fill="#fff1f2"
+          stroke="#f43f5e"
+          strokeWidth="0.6"
+        />
+        <circle cx="16" cy="33.25" r="1.1" fill="#f43f5e" />
+        <rect x="18.5" y="32.4" width="14" height="1.7" rx="0.8" fill="#9f1239" />
+
+        {/* 4. Exit Directional Transition Arrow (➡) */}
+        <g className="bezent-archive-vault__transition">
+          <line
+            x1="55"
+            y1="23"
+            x2="64"
+            y2="23"
+            stroke="#f43f5e"
+            strokeWidth="1.2"
+            strokeDasharray="3 3"
+            opacity="0.8"
           />
-
-          {/* Corporate Briefcase held in trailing hand */}
-          <g className="bezent-archive-vault__briefcase">
-            <rect
-              x="25"
-              y="24"
-              width="6.5"
-              height="5"
-              rx="1"
-              fill="#881337"
-              stroke="#e11d48"
-              strokeWidth="0.5"
-            />
-            <path
-              d="M 27 24 V 22.5 C 27 22, 29.5 22, 29.5 22.5 V 24"
-              stroke="#881337"
-              strokeWidth="0.7"
-              fill="none"
-            />
-          </g>
-
-          {/* Walking Legs in forward stride toward the horizon */}
-          {/* Front stepping leg */}
           <path
-            d="M 36.5 29 L 39.5 38.5 L 42.5 39"
-            stroke="#be123c"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            fill="none"
-          />
-          {/* Trailing back leg */}
-          <path
-            d="M 34 29 L 32 35 L 30 38"
-            stroke="#be123c"
-            strokeWidth="2.2"
+            d="M 61.5 20.8 L 64.5 23 L 61.5 25.2"
+            stroke="#e11d48"
+            strokeWidth="1.2"
             strokeLinecap="round"
             strokeLinejoin="round"
             fill="none"
           />
         </g>
 
-        {/* 6. Career Milestone Stars & Farewell Breeze Trajectory */}
+        {/* 5. Offboarded Completion Halo & Exit Portal Seal */}
+        {/* Background Track */}
+        <circle
+          cx="76"
+          cy="23"
+          r="14"
+          stroke="#fecdd3"
+          strokeWidth="2.5"
+          strokeOpacity="0.5"
+          fill="none"
+        />
+        {/* Progress / Completion Arc */}
+        <circle
+          cx="76"
+          cy="23"
+          r="14"
+          stroke="#f43f5e"
+          strokeWidth="2.8"
+          strokeLinecap="round"
+          strokeDasharray="64 88"
+          strokeDashoffset="0"
+          fill="none"
+        />
+        <circle cx="76" cy="9" r="2.2" fill="#e11d48" stroke="#ffffff" strokeWidth="0.8" />
+
+        {/* Inner Exit Seal Disc */}
+        <circle
+          className="bezent-archive-vault__exit-seal"
+          cx="76"
+          cy="23"
+          r="9"
+          fill="#fff1f2"
+          stroke="#f43f5e"
+          strokeWidth="1"
+        />
+
+        {/* Outbound Transition Portal / Logout Exit Icon inside disc */}
+        <path
+          d="M 74 19.5 H 72 C 71.4 19.5, 71 19.9, 71 20.5 V 25.5 C 71 26.1, 71.4 26.5, 72 26.5 H 74"
+          stroke="#9f1239"
+          strokeWidth="1.1"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+        <line
+          x1="73"
+          y1="23"
+          x2="79.5"
+          y2="23"
+          stroke="#9f1239"
+          strokeWidth="1.2"
+          strokeLinecap="round"
+        />
+        <path
+          d="M 77.5 20.8 L 80 23 L 77.5 25.2"
+          stroke="#9f1239"
+          strokeWidth="1.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+
+        {/* 6. Career Milestone Star Accent */}
         <polygon
-          points="76,14 77.2,16 79.5,17 77.2,18 76,20.2 74.8,18 72.5,17 74.8,16"
+          points="88,11 89,13 91,14 89,15 88,17 87,15 85,14 87,13"
           fill="#f43f5e"
           opacity="0.7"
-        />
-        <polygon
-          points="56,10 56.8,11.5 58.5,12 56.8,12.5 56,14 55.2,12.5 53.5,12 55.2,11.5"
-          fill="#fda4af"
-          opacity="0.65"
-        />
-        <circle cx="82" cy="24" r="1.2" fill="#fb7185" opacity="0.6" />
-        <circle cx="18" cy="18" r="1.2" fill="#fda4af" opacity="0.5" />
-
-        {/* Subtle motion breeze lines toward the horizon */}
-        <path
-          d="M 46 22 C 54 20, 60 21, 70 19"
-          stroke="#fda4af"
-          strokeWidth="0.9"
-          strokeDasharray="3 3"
-          fill="none"
-          opacity="0.55"
-        />
-        <path
-          d="M 44 26 C 52 24, 62 25, 74 23"
-          stroke="#fda4af"
-          strokeWidth="0.9"
-          strokeDasharray="3 3"
-          fill="none"
-          opacity="0.55"
         />
       </svg>
     </div>
