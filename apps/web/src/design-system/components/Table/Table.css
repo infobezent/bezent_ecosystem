@@ -5,10 +5,14 @@
 .bezent-table-container {
   width: 100%;
   overflow-x: auto;
-  border: 1px solid var(--table-border, var(--border-default, #dde3ea));
-  border-radius: var(--card-radius, 8px);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 18px;
   background: var(--bg-surface, #ffffff);
-  box-shadow: var(--shadow-card, 0 1px 3px rgba(0, 0, 0, 0.04));
+  box-shadow:
+    0 12px 28px -4px rgba(15, 23, 42, 0.05),
+    0 4px 8px -2px rgba(15, 23, 42, 0.02),
+    inset 0 2px 4px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -3px 5px 0 rgba(15, 23, 42, 0.02);
 }
 
 .bezent-table {
@@ -23,18 +27,18 @@
 
 /* ── Head ── */
 .bezent-table__head {
-  background: var(--bg-surface-secondary, #f0f4f9);
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
 }
 
 .bezent-table__head .bezent-table__th {
-  padding: 10px 14px;
+  padding: 11px 14px;
   font-size: 11.5px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--text-primary, #000000);
+  color: var(--text-primary, #0f172a);
   white-space: nowrap;
-  border-bottom: 1px solid var(--table-head-divider, var(--border-default, #dde3ea));
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
 }
 
 /* ── Body Rows ── */
@@ -114,6 +118,18 @@
   font-weight: 600;
   font-size: 14px;
   color: var(--text-primary, #000000);
+}
+
+.bezent-gender-male {
+  color: #3b82f6;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.bezent-gender-female {
+  color: #ec4899;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 button.bezent-table-meta-title {
@@ -218,23 +234,30 @@ button.bezent-table-link-btn:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
-  border: 1px solid transparent;
-  background: transparent;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  background: #ffffff;
   color: var(--text-secondary, #5f6368);
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
   line-height: 1;
-  transition: all 0.12s ease;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.03),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.9);
+  transition: all 0.14s ease;
 }
 
 .bezent-table-action-btn:hover {
   background: var(--bg-surface-secondary, #f0f4f9);
   color: var(--text-primary, #000000);
   border-color: var(--border-default, #dde3ea);
+  transform: scale(1.06);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.06),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.95);
 }
 
 .bezent-table-action-btn.is-active {

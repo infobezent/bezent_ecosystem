@@ -23,13 +23,18 @@ export class LeaveService {
       employeeId,
       year,
     );
-    return balances.map((b) => ({
-      leaveType: b.leaveType,
-      totalDays: b.totalDays,
-      usedDays: b.usedDays,
-      pendingDays: b.pendingDays,
-      availableDays: Math.max(0, b.totalDays - b.usedDays - b.pendingDays),
-    }));
+    return balances.map((b) => {
+      const total = Number(b.totalDays);
+      const used = Number(b.usedDays);
+      const pending = Number(b.pendingDays);
+      return {
+        leaveType: b.leaveType,
+        totalDays: total,
+        usedDays: used,
+        pendingDays: pending,
+        availableDays: Math.max(0, total - used - pending),
+      };
+    });
   }
 
   async getLeaveRequests(
@@ -88,7 +93,9 @@ export class LeaveService {
         year,
       );
       const balance = balances.find((b) => b.leaveType === input.leaveType);
-      const available = balance ? balance.totalDays - balance.usedDays - balance.pendingDays : 0;
+      const available = balance
+        ? Number(balance.totalDays) - Number(balance.usedDays) - Number(balance.pendingDays)
+        : 0;
 
       const facts: LeaveBalanceRuleFacts = {
         leaveType: input.leaveType,

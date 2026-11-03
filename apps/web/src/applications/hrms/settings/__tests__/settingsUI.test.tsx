@@ -97,13 +97,16 @@ describe('BEZENT Common Portal Settings Center UI', () => {
     expect(html).toContain('Administration');
   });
 
-  it('LeaveSettingsSection renders leave types table', () => {
-    const html = renderToStaticMarkup(<LeaveSettingsSection />);
+  it('LeaveSettingsSection renders general, leave types, and leave policies tabs', () => {
+    const html = renderToStaticMarkup(
+      <AuthProvider>
+        <LeaveSettingsSection />
+      </AuthProvider>,
+    );
 
-    expect(html).toContain('Leave Settings');
-    expect(html).toContain('Annual Leave');
-    expect(html).toContain('Sick Leave');
-    expect(html).toContain('+ Add Leave Type');
+    expect(html).toContain('General Settings');
+    expect(html).toContain('Leave Types');
+    expect(html).toContain('Leave Policies');
   });
 
   it('AttendanceSettingsSection renders check-in rules and attendance modes', () => {

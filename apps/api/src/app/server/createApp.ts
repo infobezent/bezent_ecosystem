@@ -14,6 +14,9 @@ import { employeeDocumentRouter } from '../../applications/hrms/documents/routes
 import { attendanceRouter } from '../../applications/hrms/attendance/routes/attendance.routes.js';
 import { formsRouter } from '../../applications/hrms/settings/forms/routes/forms.route.js';
 import { milestoneRouter } from '../../applications/hrms/milestones/routes/milestone.routes.js';
+import { leaveSettingsRouter } from '../../applications/hrms/leave/routes/leaveGeneralSettings.routes.js';
+import { leaveTypesRouter } from '../../applications/hrms/leave/routes/leaveTypes.routes.js';
+import { leavePoliciesRouter } from '../../applications/hrms/leave/routes/leavePolicies.routes.js';
 import { platformRouter } from '../../platform/routes.js';
 import { companyAdminRouter } from '../../platform/company-admin/routes/companyAdmin.routes.js';
 import { tenantAdminRouter } from '../../administration/tenant-admin/routes/tenantAdmin.routes.js';
@@ -101,6 +104,9 @@ export function createApp(options?: AppOptions): Express {
   app.use('/api/v1', attendanceRouter);
   app.use('/api/v1', formsRouter);
   app.use('/api/v1', milestoneRouter);
+  app.use('/api/v1', leaveSettingsRouter);
+  app.use('/api/v1', leaveTypesRouter);
+  app.use('/api/v1', leavePoliciesRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

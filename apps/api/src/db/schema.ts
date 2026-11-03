@@ -3035,6 +3035,272 @@ export type AttendanceSettingsAuditLog = typeof attendanceSettingsAuditLogs.$inf
 export type NewAttendanceSettingsAuditLog = typeof attendanceSettingsAuditLogs.$inferInsert;
 
 /**
+ * HRMS Domain: Leave — General Settings V1
+ */
+export interface LeaveGeneralSettingsSnapshot {
+  leaveYearCycle: 'calendar_year' | 'financial_year' | 'custom';
+  customYearStartDate: string | null;
+  goLiveDate: string;
+  dayCountingMethod: 'working_days' | 'calendar_days';
+  balancePrecision: 'whole_numbers' | 'half' | 'two_decimals';
+  balanceRoundingRule: 'nearest' | 'round_up' | 'round_down';
+  maxBackdatedDays: number;
+  maxAdvanceBookingDays: number;
+}
+
+export const leaveGeneralSettings = mysqlTable(
+  'leave_general_settings',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    leaveYearCycle: mysqlEnum('leave_year_cycle', ['calendar_year', 'financial_year', 'custom'])
+      .default('calendar_year')
+      .notNull(),
+    customYearStartDate: varchar('custom_year_start_date', { length: 5 }), // 'MM-DD', null if not custom
+    goLiveDate: varchar('go_live_date', { length: 10 }).notNull(), // 'YYYY-MM-DD'
+    dayCountingMethod: mysqlEnum('day_counting_method', ['working_days', 'calendar_days'])
+      .default('working_days')
+      .notNull(),
+    balancePrecision: mysqlEnum('balance_precision', ['whole_numbers', 'half', 'two_decimals'])
+      .default('two_decimals')
+      .notNull(),
+    balanceRoundingRule: mysqlEnum('balance_rounding_rule', ['nearest', 'round_up', 'round_down'])
+      .default('nearest')
+      .notNull(),
+    maxBackdatedDays: int('max_backdated_days').default(7).notNull(),
+    maxAdvanceBookingDays: int('max_advance_booking_days').default(180).notNull(),
+    currentVersionNumber: int('current_version_number').default(1).notNull(),
+    status: mysqlEnum('status', ['pre_activation', 'activated'])
+      .default('pre_activation')
+      .notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_leave_gen_settings_company').on(table.companyId),
+    index('idx_leave_gen_settings_tenant_comp').on(table.tenantId, table.companyId),
+  ],
+);
+
+export type LeaveGeneralSettings = typeof leaveGeneralSettings.$inferSelect;
+export type NewLeaveGeneralSettings = typeof leaveGeneralSettings.$inferInsert;
+
+/**
+ * HRMS Domain: Leave — General Settings Versions V1 (Immutable Append-Only Snapshots)
+ */
+export const leaveGeneralSettingsVersions = mysqlTable(
+  'leave_general_settings_versions',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    versionNumber: int('version_number').notNull(),
+    effectiveFrom: timestamp('effective_from').notNull(),
+    changeReason: varchar('change_reason', { length: 500 }).notNull(),
+    settingsPayload: json('settings_payload').$type<LeaveGeneralSettingsSnapshot>().notNull(),
+    createdByUserId: varchar('created_by_user_id', { length: 64 }).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_leave_gen_versions_comp_ver').on(table.companyId, table.versionNumber),
+    index('idx_leave_gen_versions_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_leave_gen_versions_effective').on(table.companyId, table.effectiveFrom),
+  ],
+);
+
+export type LeaveGeneralSettingsVersion = typeof leaveGeneralSettingsVersions.$inferSelect;
+export type NewLeaveGeneralSettingsVersion = typeof leaveGeneralSettingsVersions.$inferInsert;
+
+/**
+ * HRMS Domain: Leave — Leave Types (Production Schema matching MySQL leave_types table)
+ */
+export const leaveTypes = mysqlTable(
+  'leave_types',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    name: varchar('name', { length: 100 }).notNull(),
+    code: varchar('code', { length: 20 }).notNull(),
+    shortLabel: varchar('short_label', { length: 50 }).notNull(),
+    colorToken: varchar('color_token', { length: 30 }).default('warning').notNull(),
+    description: text('description'),
+    instructions: text('instructions'),
+    category: mysqlEnum('category', [
+      'paid',
+      'unpaid',
+      'statutory',
+      'special_event',
+      'compensatory',
+      'optional_holiday',
+      'loss_of_pay',
+    ])
+      .default('paid')
+      .notNull(),
+    visibleToEmployee: boolean('visible_to_employee').default(true).notNull(),
+    isTracked: boolean('is_tracked').default(true).notNull(),
+    grantMethod: mysqlEnum('grant_method', [
+      'fixed_annual',
+      'periodic_accrual',
+      'per_days_worked',
+      'anniversary',
+      'event_based',
+      'auto_date',
+      'manual_only',
+      'formula',
+    ])
+      .default('fixed_annual')
+      .notNull(),
+    unit: mysqlEnum('unit', ['days', 'half_days', 'hours']).default('days').notNull(),
+    allowHalfDay: boolean('allow_half_day').default(true).notNull(),
+    minPerRequest: decimal('min_per_request', { precision: 5, scale: 2 }).default('1.00').notNull(),
+    maxPerRequest: decimal('max_per_request', { precision: 5, scale: 2 }),
+    maxPerYear: decimal('max_per_year', { precision: 5, scale: 2 }),
+    maxConsecutiveDays: int('max_consecutive_days'),
+    countWeeklyOff: boolean('count_weekly_off').default(false).notNull(),
+    countHolidays: boolean('count_holidays').default(false).notNull(),
+    sandwichRuleEnabled: boolean('sandwich_rule_enabled').default(false).notNull(),
+    documentRequirement: mysqlEnum('document_requirement', [
+      'none',
+      'optional',
+      'mandatory',
+      'mandatory_after_n_days',
+    ])
+      .default('none')
+      .notNull(),
+    documentThresholdDays: int('document_threshold_days'),
+    certificateType: varchar('certificate_type', { length: 100 }),
+    carryForwardEnabled: boolean('carry_forward_enabled').default(false).notNull(),
+    encashmentEnabled: boolean('encashment_enabled').default(false).notNull(),
+    negativeBalanceEnabled: boolean('negative_balance_enabled').default(false).notNull(),
+    negativeBalanceLimit: decimal('negative_balance_limit', { precision: 5, scale: 2 }),
+    countsTowardService: boolean('counts_toward_service').default(true).notNull(),
+    allowedInProbation: boolean('allowed_in_probation').default(true).notNull(),
+    allowedInNoticePeriod: boolean('allowed_in_notice_period').default(false).notNull(),
+    genderEligibility: mysqlEnum('gender_eligibility', ['all', 'female', 'male'])
+      .default('all')
+      .notNull(),
+    attendanceStatusCode: varchar('attendance_status_code', { length: 20 }).default('L').notNull(),
+    countsAsPresent: boolean('counts_as_present').default(false).notNull(),
+    payrollImpact: mysqlEnum('payroll_impact', ['paid', 'unpaid', 'partly_paid'])
+      .default('paid')
+      .notNull(),
+    teamCalendarVisibility: mysqlEnum('team_calendar_visibility', [
+      'leave_type',
+      'generic_leave',
+      'none',
+    ])
+      .default('generic_leave')
+      .notNull(),
+    workflowId: varchar('workflow_id', { length: 64 }),
+    isActive: boolean('is_active').default(true).notNull(),
+    isArchived: boolean('is_archived').default(false).notNull(),
+    effectiveFrom: varchar('effective_from', { length: 10 }).notNull(),
+    effectiveTo: varchar('effective_to', { length: 10 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+    weeklyOffTreatment: varchar('weekly_off_treatment', { length: 20 })
+      .default('inherit')
+      .notNull(),
+    holidayTreatment: varchar('holiday_treatment', { length: 20 }).default('inherit').notNull(),
+    maxPerMonth: decimal('max_per_month', { precision: 5, scale: 2 }),
+  },
+  (table) => [
+    uniqueIndex('idx_leave_types_company_code').on(table.companyId, table.code),
+    index('idx_leave_types_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_leave_types_category').on(table.category),
+    index('idx_leave_types_active').on(table.isActive, table.isArchived),
+  ],
+);
+
+export type LeaveTypeRecord = typeof leaveTypes.$inferSelect;
+export type NewLeaveTypeRecord = typeof leaveTypes.$inferInsert;
+
+/**
+ * HRMS Domain: Leave — Leave Policies V1
+ * Defines organizational leave policies, applicability scopes, effective periods,
+ * and associations with supported leave configurations / types.
+ */
+export const leavePolicies = mysqlTable(
+  'leave_policies',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    name: varchar('name', { length: 100 }).notNull(),
+    code: varchar('code', { length: 20 }).notNull(),
+    description: text('description'),
+    status: mysqlEnum('status', ['draft', 'active', 'scheduled', 'archived'])
+      .default('draft')
+      .notNull(),
+    scope: mysqlEnum('scope', ['company', 'department', 'location', 'employment_type', 'custom'])
+      .default('company')
+      .notNull(),
+    scopeId: varchar('scope_id', { length: 64 }),
+    scopeName: varchar('scope_name', { length: 100 }),
+    effectiveFrom: varchar('effective_from', { length: 10 }).notNull(),
+    effectiveTo: varchar('effective_to', { length: 10 }),
+    linkedLeaveTypeIds: json('linked_leave_type_ids').$type<string[]>().notNull(),
+    priority: int('priority').default(0).notNull(),
+    isActive: boolean('is_active').default(true).notNull(),
+    createdByUserId: varchar('created_by_user_id', { length: 64 }).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_leave_policies_company_code').on(table.companyId, table.code),
+    index('idx_leave_policies_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_leave_policies_status').on(table.status),
+    index('idx_leave_policies_scope').on(table.scope, table.scopeId),
+    index('idx_leave_policies_effective').on(table.effectiveFrom, table.effectiveTo),
+  ],
+);
+
+export type LeavePolicyRecord = typeof leavePolicies.$inferSelect;
+export type NewLeavePolicyRecord = typeof leavePolicies.$inferInsert;
+
+/**
+ * HRMS Domain: Leave — Policy Entitlements V1
+ * Authoritative link between a policy and the leave types it grants, with the annual quota.
+ * `leave_policies.linked_leave_type_ids` is kept as a read-compatible mirror until P2.
+ */
+export const leavePolicyEntitlements = mysqlTable(
+  'leave_policy_entitlements',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 }).notNull(),
+    policyId: varchar('policy_id', { length: 64 })
+      .notNull()
+      .references(() => leavePolicies.id, { onDelete: 'cascade' }),
+    leaveTypeId: varchar('leave_type_id', { length: 64 })
+      .notNull()
+      .references(() => leaveTypes.id),
+    annualQuota: decimal('annual_quota', { precision: 6, scale: 2 }), // null = unlimited (untracked types)
+    maxPerYearOverride: decimal('max_per_year_override', { precision: 6, scale: 2 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idx_leave_pol_ent_policy_type').on(table.policyId, table.leaveTypeId),
+    index('idx_leave_pol_ent_tenant_comp').on(table.tenantId, table.companyId),
+    index('idx_leave_pol_ent_type').on(table.leaveTypeId),
+  ],
+);
+
+export type LeavePolicyEntitlementRecord = typeof leavePolicyEntitlements.$inferSelect;
+export type NewLeavePolicyEntitlementRecord = typeof leavePolicyEntitlements.$inferInsert;
+
+/**
  * HRMS Domain: Employee Self-Service (ESS) — Leave Balances
  */
 export const employeeLeaveBalances = mysqlTable(
@@ -3090,6 +3356,8 @@ export const employeeLeaveRequests = mysqlTable(
     startDate: varchar('start_date', { length: 10 }).notNull(),
     endDate: varchar('end_date', { length: 10 }).notNull(),
     totalDays: int('total_days').notNull(),
+    session: mysqlEnum('session', ['first_half', 'second_half']),
+    calculationSnapshot: json('calculation_snapshot').$type<Record<string, unknown>>(),
     reason: varchar('reason', { length: 500 }).notNull(),
     status: mysqlEnum('status', ['pending', 'approved', 'rejected', 'cancelled'])
       .default('pending')
