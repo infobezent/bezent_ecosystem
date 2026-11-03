@@ -332,9 +332,37 @@ describe('Employees Directory page', () => {
     expect(none).not.toContain('Import');
     expect(none).not.toContain('Export');
   });
+
+  it('renders candidate-style status filter tabs and view mode toggle', () => {
+    const html = renderDirectory();
+    expect(html).toContain('All Employees');
+    expect(html).toContain('Probation');
+    expect(html).toContain('Pending Activation');
+    expect(html).toContain('Separated');
+    expect(html).toContain('bezent-view-toggle');
+    expect(html).toContain('bezent-filter-tabs');
+  });
 });
 
 describe('EmployeeDirectoryTable', () => {
+  it('renders employees in 3D Card Grid View when viewMode="grid"', () => {
+    const html = renderToStaticMarkup(
+      <EmployeeDirectoryTable
+        status="ready"
+        employees={[kavya, arjun]}
+        onRetry={noop}
+        onOpenEmployee={noop}
+        viewMode="grid"
+      />,
+    );
+    expect(html).toContain('Employees Grid View');
+    expect(html).toContain('Kavya Iyer');
+    expect(html).toContain('EMP-0003');
+    expect(html).toContain('Product Manager');
+    expect(html).toContain('Arjun Mehta');
+    expect(html).toContain('EMP-0002');
+    expect(html).toContain('Software Engineer');
+  });
   it('renders real employee records with approved directory columns', () => {
     const html = renderToStaticMarkup(
       <EmployeeDirectoryTable

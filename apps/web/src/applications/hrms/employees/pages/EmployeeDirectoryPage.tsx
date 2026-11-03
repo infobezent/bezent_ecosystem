@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import {
   Alert,
   Button,
+  Card,
+  CardBody,
   Grid,
   Inline,
   Modal,
   Page,
   PageHeader,
-  SearchInput,
   Stack,
   Toolbar,
   Select,
@@ -192,9 +193,35 @@ export function EmployeeDirectoryPage() {
   const [search, setSearch] = useState('');
   const [appliedFilters, setAppliedFilters] = useState<EmployeeFilterState>(EMPTY_FILTER_STATE);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [activeStatusTab, setActiveStatusTab] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number>(PAGE_SIZE);
   const [reloadKey, setReloadKey] = useState(0);
+
+  // Status tabs matching recruitment candidate directory
+  const statusTabs: Array<{ id: string; label: string }> = [
+    { id: 'all', label: 'All Employees' },
+    { id: 'active', label: 'Active' },
+    { id: 'probation', label: 'Probation' },
+    { id: 'pending_activation', label: 'Pending Activation' },
+    { id: 'inactive', label: 'Separated' },
+  ];
+
+  const handleStatusTabChange = (tabId: string) => {
+    setActiveStatusTab(tabId);
+    let statusFilter = '';
+    if (tabId === 'active') statusFilter = 'active';
+    else if (tabId === 'probation') statusFilter = 'probation';
+    else if (tabId === 'pending_activation') statusFilter = 'pending_activation';
+    else if (tabId === 'inactive') statusFilter = 'terminated';
+
+    setAppliedFilters((prev) => ({
+      ...prev,
+      employmentStatus: statusFilter,
+    }));
+    setPage(1);
+  };
 
   // Masters
   const [masters, setMasters] = useState<OrganizationMasters | null>(null);
@@ -417,6 +444,7 @@ export function EmployeeDirectoryPage() {
   const handleResetFilters = () => {
     setSearch('');
     setAppliedFilters(EMPTY_FILTER_STATE);
+    setActiveStatusTab('all');
     setPage(1);
   };
 
@@ -539,141 +567,328 @@ export function EmployeeDirectoryPage() {
         }
       />
 
-      {/* 2. Workforce KPI Cards */}
-      <Grid columns={4} gap="md">
+      {/* 2. Workforce 3D Clay KPI Cards (Matching Recruitment Candidate Directory) */}
+      <Grid columns={4} gap="md" role="region" aria-label="Workforce key metrics">
         {/* Total Employees */}
-        <div className="bezent-kpi-card bezent-kpi-card--blue">
-          <div className="bezent-kpi-card__icon bezent-kpi-card__icon--blue">
-            <BezentIcon name="employees" size={20} />
-          </div>
-          <div className="bezent-kpi-card__info">
-            <p className="bezent-kpi-card__title">Total Employees</p>
-            <p className="bezent-kpi-card__value">
-              {kpis.loading ? (
-                <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-              ) : kpis.total !== null ? (
-                kpis.total
-              ) : (
-                '—'
-              )}
-            </p>
-            <p className="bezent-kpi-card__caption">Total recorded workforce</p>
-          </div>
-        </div>
+        <Card
+          variant="default"
+          padding="none"
+          className="bezent-clay-card--compact bezent-kpi-card bezent-kpi-card--blue"
+          aria-label={`Total Employees: ${kpis.total !== null ? kpis.total : 'Loading'}`}
+        >
+          <CardBody>
+            <Inline justify="between" align="center">
+              <Stack gap="xs">
+                <Inline align="center" gap="xs">
+                  <span
+                    className="bezent-pulse-stat__dot bezent-pulse-stat__dot--purple"
+                    aria-hidden="true"
+                  />
+                  <span className="bezent-clay-metric__label bezent-kpi-card__title">
+                    Total Employees
+                  </span>
+                </Inline>
+                <div className="bezent-clay-metric__value bezent-kpi-card__value">
+                  {kpis.loading ? (
+                    <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
+                  ) : kpis.total !== null ? (
+                    kpis.total
+                  ) : (
+                    '—'
+                  )}
+                </div>
+                <span className="bezent-clay-metric__caption bezent-kpi-card__caption">
+                  Total recorded workforce
+                </span>
+              </Stack>
+              <div
+                className="bezent-clay-icon bezent-clay-icon--purple bezent-kpi-card__icon bezent-kpi-card__icon--blue"
+                aria-hidden="true"
+              >
+                <BezentIcon name="employees" size={20} />
+              </div>
+            </Inline>
+          </CardBody>
+        </Card>
 
         {/* Active Employees */}
-        <div className="bezent-kpi-card bezent-kpi-card--green">
-          <div className="bezent-kpi-card__icon bezent-kpi-card__icon--green">
-            <BezentIcon name="userCheck" size={20} />
-          </div>
-          <div className="bezent-kpi-card__info">
-            <p className="bezent-kpi-card__title">Active Employees</p>
-            <p className="bezent-kpi-card__value">
-              {kpis.loading ? (
-                <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-              ) : kpis.active !== null ? (
-                kpis.active
-              ) : (
-                '—'
-              )}
-            </p>
-            <p className="bezent-kpi-card__caption">Confirmed active & probation</p>
-          </div>
-        </div>
+        <Card
+          variant="default"
+          padding="none"
+          className="bezent-clay-card--compact bezent-kpi-card bezent-kpi-card--green"
+          aria-label={`Active Employees: ${kpis.active !== null ? kpis.active : 'Loading'}`}
+        >
+          <CardBody>
+            <Inline justify="between" align="center">
+              <Stack gap="xs">
+                <Inline align="center" gap="xs">
+                  <span
+                    className="bezent-pulse-stat__dot bezent-pulse-stat__dot--blue"
+                    aria-hidden="true"
+                  />
+                  <span className="bezent-clay-metric__label bezent-kpi-card__title">
+                    Active Employees
+                  </span>
+                </Inline>
+                <div className="bezent-clay-metric__value bezent-kpi-card__value">
+                  {kpis.loading ? (
+                    <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
+                  ) : kpis.active !== null ? (
+                    kpis.active
+                  ) : (
+                    '—'
+                  )}
+                </div>
+                <span className="bezent-clay-metric__caption bezent-kpi-card__caption">
+                  Confirmed active &amp; probation
+                </span>
+              </Stack>
+              <div
+                className="bezent-clay-icon bezent-clay-icon--blue bezent-kpi-card__icon bezent-kpi-card__icon--green"
+                aria-hidden="true"
+              >
+                <BezentIcon name="userCheck" size={20} />
+              </div>
+            </Inline>
+          </CardBody>
+        </Card>
 
         {/* Pending Activation */}
-        <div className="bezent-kpi-card bezent-kpi-card--amber">
-          <div className="bezent-kpi-card__icon bezent-kpi-card__icon--amber">
-            <BezentIcon name="onboarding" size={20} />
-          </div>
-          <div className="bezent-kpi-card__info">
-            <p className="bezent-kpi-card__title">Pending Activation</p>
-            <p className="bezent-kpi-card__value">
-              {kpis.loading ? (
-                <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-              ) : kpis.pendingActivation !== null ? (
-                kpis.pendingActivation
-              ) : (
-                '—'
-              )}
-            </p>
-            <p className="bezent-kpi-card__caption">Pre-boarded awaiting login</p>
-          </div>
-        </div>
+        <Card
+          variant="default"
+          padding="none"
+          className="bezent-clay-card--compact bezent-kpi-card bezent-kpi-card--amber"
+          aria-label={`Pending Activation: ${kpis.pendingActivation !== null ? kpis.pendingActivation : 'Loading'}`}
+        >
+          <CardBody>
+            <Inline justify="between" align="center">
+              <Stack gap="xs">
+                <Inline align="center" gap="xs">
+                  <span
+                    className="bezent-pulse-stat__dot bezent-pulse-stat__dot--amber"
+                    aria-hidden="true"
+                  />
+                  <span className="bezent-clay-metric__label bezent-kpi-card__title">
+                    Pending Activation
+                  </span>
+                </Inline>
+                <div className="bezent-clay-metric__value bezent-kpi-card__value">
+                  {kpis.loading ? (
+                    <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
+                  ) : kpis.pendingActivation !== null ? (
+                    kpis.pendingActivation
+                  ) : (
+                    '—'
+                  )}
+                </div>
+                <span className="bezent-clay-metric__caption bezent-kpi-card__caption">
+                  Pre-boarded awaiting login
+                </span>
+              </Stack>
+              <div
+                className="bezent-clay-icon bezent-clay-icon--amber bezent-kpi-card__icon bezent-kpi-card__icon--amber"
+                aria-hidden="true"
+              >
+                <BezentIcon name="onboarding" size={20} />
+              </div>
+            </Inline>
+          </CardBody>
+        </Card>
 
         {/* Inactive Employees */}
-        <div className="bezent-kpi-card bezent-kpi-card--red">
-          <div className="bezent-kpi-card__icon bezent-kpi-card__icon--red">
-            <BezentIcon name="userX" size={20} />
-          </div>
-          <div className="bezent-kpi-card__info">
-            <p className="bezent-kpi-card__title">Inactive Employees</p>
-            <p className="bezent-kpi-card__value">
-              {kpis.loading ? (
-                <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-              ) : kpis.inactive !== null ? (
-                kpis.inactive
-              ) : (
-                '—'
-              )}
-            </p>
-            <p className="bezent-kpi-card__caption">Terminated, suspended or resigned</p>
-          </div>
-        </div>
+        <Card
+          variant="default"
+          padding="none"
+          className="bezent-clay-card--compact bezent-kpi-card bezent-kpi-card--red"
+          aria-label={`Inactive Employees: ${kpis.inactive !== null ? kpis.inactive : 'Loading'}`}
+        >
+          <CardBody>
+            <Inline justify="between" align="center">
+              <Stack gap="xs">
+                <Inline align="center" gap="xs">
+                  <span
+                    className="bezent-pulse-stat__dot bezent-pulse-stat__dot--red"
+                    aria-hidden="true"
+                  />
+                  <span className="bezent-clay-metric__label bezent-kpi-card__title">
+                    Inactive Employees
+                  </span>
+                </Inline>
+                <div className="bezent-clay-metric__value bezent-kpi-card__value">
+                  {kpis.loading ? (
+                    <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
+                  ) : kpis.inactive !== null ? (
+                    kpis.inactive
+                  ) : (
+                    '—'
+                  )}
+                </div>
+                <span className="bezent-clay-metric__caption bezent-kpi-card__caption">
+                  Terminated, suspended or resigned
+                </span>
+              </Stack>
+              <div
+                className="bezent-clay-icon bezent-clay-icon--red bezent-kpi-card__icon bezent-kpi-card__icon--red"
+                aria-hidden="true"
+              >
+                <BezentIcon name="userX" size={20} />
+              </div>
+            </Inline>
+          </CardBody>
+        </Card>
       </Grid>
 
-      {/* 3. Search & Filter Toolbar directly below KPI Cards (no redundant header) */}
-      <div className="bezent-directory-toolbar">
-        <div className="bezent-directory-toolbar__search">
-          <SearchInput
-            placeholder="Search by name, employee ID, email, department..."
-            shape="rounded"
-            value={search}
-            onChange={(e) => withPageReset(setSearch)(e.target.value)}
-            onClear={() => withPageReset(setSearch)('')}
-            aria-label="Search by name, employee ID, email, department..."
-          />
-        </div>
-        <div className="bezent-directory-toolbar__actions">
-          <div className="bezent-filter-anchor">
+      {/* 3. Candidates-style Search & Action Toolbar with Status Filter Tabs */}
+      <Toolbar
+        left={
+          <Inline align="center" gap="sm" wrap>
+            {/* Compact Search Bar with Icon */}
+            <div className="bezent-search-bar">
+              <BezentIcon name="search" size={16} color="var(--text-secondary, #64748b)" />
+              <input
+                type="search"
+                placeholder="Search by name, employee ID, email, department..."
+                value={search}
+                onChange={(e) => withPageReset(setSearch)(e.target.value)}
+                className="bezent-search-bar__input"
+                aria-label="Search by name, employee ID, email, department..."
+              />
+            </div>
+
+            {/* Filter Toggle Button */}
+            <div className="bezent-filter-anchor">
+              <Button
+                variant={appliedCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
+                size="md"
+                shape="rounded"
+                className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
+                leftIcon={<BezentIcon name="filter" size={16} />}
+                onClick={() => setIsFilterPanelOpen((prev) => !prev)}
+                aria-expanded={isFilterPanelOpen}
+                aria-label="Filters"
+              >
+                <span>Filters</span>
+                {appliedCount > 0 && (
+                  <span className="bezent-btn__filter-count">{appliedCount}</span>
+                )}
+              </Button>
+
+              <EmployeeFilterPanel
+                isOpen={isFilterPanelOpen}
+                onClose={() => setIsFilterPanelOpen(false)}
+                appliedFilters={appliedFilters}
+                onApply={(newFilters) => {
+                  setAppliedFilters(newFilters);
+                  setPage(1);
+                }}
+                masters={masters}
+              />
+            </div>
+
+            {/* Reset Button */}
             <Button
-              variant={appliedCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
+              variant="outline"
               size="md"
               shape="rounded"
-              className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
-              leftIcon={<BezentIcon name="filter" size={16} />}
-              onClick={() => setIsFilterPanelOpen((prev) => !prev)}
+              leftIcon={<BezentIcon name="reset" size={16} />}
+              onClick={handleResetFilters}
+              disabled={!hasActiveFilters}
             >
-              Filters
-              {appliedCount > 0 && <span className="bezent-btn__filter-count">{appliedCount}</span>}
+              Reset
             </Button>
 
-            <EmployeeFilterPanel
-              isOpen={isFilterPanelOpen}
-              onClose={() => setIsFilterPanelOpen(false)}
-              appliedFilters={appliedFilters}
-              onApply={(newFilters) => {
-                setAppliedFilters(newFilters);
-                setPage(1);
-              }}
-              masters={masters}
-            />
-          </div>
+            {/* View Mode Toggle: List vs Grid */}
+            <div
+              className="bezent-view-toggle"
+              role="group"
+              aria-label="Workforce view layout switcher"
+            >
+              <button
+                type="button"
+                className={`bezent-view-toggle__btn ${viewMode === 'list' ? 'is-active' : ''}`}
+                onClick={() => setViewMode('list')}
+                title="List View"
+                aria-label="List View"
+                aria-pressed={viewMode === 'list'}
+              >
+                <BezentIcon name="viewList" size={18} />
+              </button>
+              <button
+                type="button"
+                className={`bezent-view-toggle__btn ${viewMode === 'grid' ? 'is-active' : ''}`}
+                onClick={() => setViewMode('grid')}
+                title="Grid View"
+                aria-label="Grid View"
+                aria-pressed={viewMode === 'grid'}
+              >
+                <BezentIcon name="viewGrid" size={18} />
+              </button>
+            </div>
 
-          <Button
-            variant="outline"
-            size="md"
-            shape="rounded"
-            leftIcon={<BezentIcon name="reset" size={16} />}
-            onClick={handleResetFilters}
-            disabled={!hasActiveFilters}
-          >
-            Reset
-          </Button>
-
-          <span className="bezent-records-text">{`${totalCount} Records`}</span>
-        </div>
-      </div>
+            {/* Horizontal Status Filter Tabs */}
+            <div
+              className="bezent-filter-tabs"
+              role="tablist"
+              aria-label="Filter employees by employment status"
+            >
+              {statusTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeStatusTab === tab.id}
+                  className={`bezent-filter-tab ${activeStatusTab === tab.id ? 'is-active' : ''}`}
+                  onClick={() => handleStatusTabChange(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </Inline>
+        }
+        right={
+          <Inline align="center" gap="sm">
+            <span className="bezent-records-text">{`${totalCount} Records`}</span>
+            {canImport && (
+              <Button
+                variant="outline"
+                size="md"
+                shape="rounded"
+                className="bezent-btn--import"
+                leftIcon={<BezentIcon name="upload" size={16} />}
+                onClick={() => {
+                  setImportFile(null);
+                  setImportStatus(null);
+                  setIsImportModalOpen(true);
+                }}
+              >
+                Import
+              </Button>
+            )}
+            {canExport && (
+              <Button
+                variant="outline"
+                size="md"
+                shape="rounded"
+                className="bezent-btn--export"
+                leftIcon={<BezentIcon name="download" size={16} />}
+                onClick={handleExportCsv}
+              >
+                Export
+              </Button>
+            )}
+            <Button
+              variant="dark"
+              size="md"
+              shape="rounded"
+              leftIcon={<BezentIcon name="add" size="action" />}
+              onClick={() => navigate('/hrms/workforce/onboarding')}
+            >
+              Add Employee
+            </Button>
+          </Inline>
+        }
+      />
 
       {/* Active Filter Chips (rendered below toolbar without pushing down table when empty) */}
       {appliedCount > 0 && (
@@ -810,6 +1025,7 @@ export function EmployeeDirectoryPage() {
           sortColumn={sortColumn}
           sortDirection={sortDirection}
           onSort={handleSort}
+          viewMode={viewMode}
         />
       </div>
 
