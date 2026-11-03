@@ -15,8 +15,18 @@ import type { EssRepository } from '../ess/repository/ess.repository.js';
 import { RecruitmentOnboardingService } from '../recruitment/service/recruitmentOnboarding.service.js';
 import type { RecruitmentRepository } from '../recruitment/repository/recruitment.repository.js';
 import { requireEssAuth } from '../../../platform/auth/middleware/auth.middleware.js';
-import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from '../../../app/errors/AppError.js';
-import type { Employee, RecruitmentOnboarding, Candidate, CandidateApplication } from '../../../db/schema.js';
+import {
+  BadRequestError,
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+} from '../../../app/errors/AppError.js';
+import type {
+  Employee,
+  RecruitmentOnboarding,
+  Candidate,
+  CandidateApplication,
+} from '../../../db/schema.js';
 import type { EmployeeDetails } from '../employees/types/employee.types.js';
 
 describe('BEZENT HRMS — Phase 3.6: Core Business Logic & Integration Hardening Suite', () => {
@@ -119,7 +129,13 @@ describe('BEZENT HRMS — Phase 3.6: Core Business Logic & Integration Hardening
         getEmployeesByName: vi.fn().mockResolvedValue([]),
         getCandidateById: vi.fn().mockResolvedValue(sampleCandidate),
         getApplicationById: vi.fn().mockResolvedValue(sampleApp),
-        getRequisitionById: vi.fn().mockResolvedValue({ id: 'req_001', title: 'Senior Engineer', requisitionNumber: 'REQ-001' }),
+        getRequisitionById: vi
+          .fn()
+          .mockResolvedValue({
+            id: 'req_001',
+            title: 'Senior Engineer',
+            requisitionNumber: 'REQ-001',
+          }),
         updateOnboarding: vi.fn().mockResolvedValue({ ...sampleOnboarding, status: 'completed' }),
         createActivity: vi.fn().mockResolvedValue({ id: 'act_001' }),
         findCandidateByEmail: vi.fn().mockResolvedValue(null),
@@ -203,7 +219,7 @@ describe('BEZENT HRMS — Phase 3.6: Core Business Logic & Integration Hardening
     });
 
     it('prevents duplicate employee creation under simulated concurrent confirmation requests', async () => {
-      let currentState = { ...sampleOnboarding };
+      const currentState = { ...sampleOnboarding };
 
       mockRecruitmentRepo.getOnboardingById.mockImplementation(
         async (_tenantId: string, _compId: string, _id: string, _tx: any, _forUpdate?: boolean) => {
@@ -434,7 +450,9 @@ describe('BEZENT HRMS — Phase 3.6: Core Business Logic & Integration Hardening
         checkDateInLockedPeriod: vi.fn().mockResolvedValue(false),
         checkIn: vi.fn().mockResolvedValue({ id: 'att_001', checkInTime: '09:00:00' }),
         recordPunch: vi.fn().mockResolvedValue({}),
-        updateDailyAttendance: vi.fn().mockResolvedValue({ id: 'att_001', checkInTime: '09:00:00' }),
+        updateDailyAttendance: vi
+          .fn()
+          .mockResolvedValue({ id: 'att_001', checkInTime: '09:00:00' }),
         createRecord: vi.fn().mockResolvedValue({ id: 'att_001', checkInTime: '09:00:00' }),
         updateRecord: vi.fn().mockResolvedValue({ id: 'att_001' }),
         updateDailyRecord: vi.fn().mockResolvedValue({ id: 'att_001' }),
@@ -447,18 +465,17 @@ describe('BEZENT HRMS — Phase 3.6: Core Business Logic & Integration Hardening
       mockAttendanceRepo.getEmployeeRecord.mockResolvedValue(null);
 
       await expect(
-        attendanceService.recordCheckIn(
-          tenantId,
-          companyId,
-          'emp_nonexistent',
-          '2026-11-02',
-          {},
-        ),
+        attendanceService.recordCheckIn(tenantId, companyId, 'emp_nonexistent', '2026-11-02', {}),
       ).rejects.toThrow(NotFoundError);
     });
 
     it('rejects check-in for terminated, resigned, suspended, or pending_activation employees', async () => {
-      const inactiveStatuses = ['terminated', 'resigned', 'suspended', 'pending_activation'] as const;
+      const inactiveStatuses = [
+        'terminated',
+        'resigned',
+        'suspended',
+        'pending_activation',
+      ] as const;
 
       for (const status of inactiveStatuses) {
         mockAttendanceRepo.getEmployeeRecord.mockResolvedValueOnce({
@@ -468,13 +485,7 @@ describe('BEZENT HRMS — Phase 3.6: Core Business Logic & Integration Hardening
         });
 
         await expect(
-          attendanceService.recordCheckIn(
-            tenantId,
-            companyId,
-            'emp_inactive',
-            '2026-11-02',
-            {},
-          ),
+          attendanceService.recordCheckIn(tenantId, companyId, 'emp_inactive', '2026-11-02', {}),
         ).rejects.toThrow(BadRequestError);
       }
     });

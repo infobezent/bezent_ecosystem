@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useSearchParams, useInRouterContext } from 'react-router-dom';
 import {
   Alert,
   Button,
@@ -68,28 +67,35 @@ export const WORKFORCE_SETTINGS_TABS: {
   },
 ];
 
+const VALID_WORKFORCE_TABS = new Set<string>([
+  'general',
+  'organization',
+  'registration-forms',
+  'onboarding-workflows',
+  'probation',
+  'lifecycle',
+  'offboarding',
+]);
+
+function readWorkforceTabFromUrl(): WorkforceTabId | null {
+  if (typeof window === 'undefined') return null;
+  const tab = new URLSearchParams(window.location.search).get('tab');
+  return tab && VALID_WORKFORCE_TABS.has(tab) ? (tab as WorkforceTabId) : null;
+}
+
+function writeWorkforceTabToUrl(tab: WorkforceTabId) {
+  if (typeof window === 'undefined') return;
+  const url = new URL(window.location.href);
+  url.searchParams.set('tab', tab);
+  window.history.replaceState(window.history.state, '', url);
+}
+
 export function WorkforceSettingsSection({
   onBack,
   initialTab = 'general',
 }: WorkforceSettingsSectionProps) {
-  const inRouter = useInRouterContext();
-  const [searchParams, setSearchParams] = inRouter
-    ? useSearchParams()
-    : [new URLSearchParams(), () => {}];
-
-  const tabFromParam = (searchParams.get('tab') as WorkforceTabId) || null;
-  const validTabs: WorkforceTabId[] = [
-    'general',
-    'organization',
-    'registration-forms',
-    'onboarding-workflows',
-    'probation',
-    'lifecycle',
-    'offboarding',
-  ];
-
   const [activeTab, setActiveTab] = useState<WorkforceTabId>(
-    tabFromParam && validTabs.includes(tabFromParam) ? tabFromParam : initialTab,
+    () => readWorkforceTabFromUrl() ?? initialTab,
   );
 
   const [bundle, setBundle] = useState<WorkforceSettingsBundle | null>(null);
@@ -116,16 +122,7 @@ export function WorkforceSettingsSection({
   const handleTabChange = (newTab: string) => {
     const tabId = newTab as WorkforceTabId;
     setActiveTab(tabId);
-    if (inRouter) {
-      setSearchParams(
-        (prev) => {
-          const next = new URLSearchParams(prev);
-          next.set('tab', tabId);
-          return next;
-        },
-        { replace: true },
-      );
-    }
+    writeWorkforceTabToUrl(tabId);
   };
 
   if (loading) {
