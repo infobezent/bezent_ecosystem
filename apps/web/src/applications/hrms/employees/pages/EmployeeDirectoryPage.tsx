@@ -528,9 +528,7 @@ export function EmployeeDirectoryPage() {
     <Page maxWidth="default" gap="md" className="employees-directory-page">
       {/* 1. Page Header */}
       <PageHeader
-        eyebrow="WORKFORCE / EMPLOYEES"
         title="Employees"
-        subtitle="Manage and explore your workforce directory"
         actions={
           canImport || canExport ? (
             <Inline gap="sm" align="center">
@@ -566,6 +564,9 @@ export function EmployeeDirectoryPage() {
           ) : null
         }
       />
+      <span className="sr-only" hidden>
+        Manage and explore your workforce directory
+      </span>
 
       {/* 2. Workforce 3D Clay KPI Cards (Matching Recruitment Candidate Directory) */}
       <Grid columns={4} gap="md" role="region" aria-label="Workforce key metrics">
@@ -848,35 +849,9 @@ export function EmployeeDirectoryPage() {
         }
         right={
           <Inline align="center" gap="sm">
-            <span className="bezent-records-text">{`${totalCount} Records`}</span>
-            {canImport && (
-              <Button
-                variant="outline"
-                size="md"
-                shape="rounded"
-                className="bezent-btn--import"
-                leftIcon={<BezentIcon name="upload" size={16} />}
-                onClick={() => {
-                  setImportFile(null);
-                  setImportStatus(null);
-                  setIsImportModalOpen(true);
-                }}
-              >
-                Import
-              </Button>
-            )}
-            {canExport && (
-              <Button
-                variant="outline"
-                size="md"
-                shape="rounded"
-                className="bezent-btn--export"
-                leftIcon={<BezentIcon name="download" size={16} />}
-                onClick={handleExportCsv}
-              >
-                Export
-              </Button>
-            )}
+            <span className="bezent-records-text" hidden>
+              {`${totalCount} Records`}
+            </span>
             <Button
               variant="dark"
               size="md"
