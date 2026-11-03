@@ -1,6 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { WorkforceKpiCards, computeWorkforceMonthlyTrends } from '../components/WorkforceKpiCards';
+import {
+  WorkforceKpiCards,
+  WorkforceRing,
+  computeWorkforceMonthlyTrends,
+} from '../components/WorkforceKpiCards';
 import type { EmployeeRecord } from '../api/employeesApi';
 
 describe('WorkforceKpiCards (Number + Mini Trend Chart)', () => {
@@ -125,7 +129,7 @@ describe('WorkforceKpiCards (Number + Mini Trend Chart)', () => {
     );
   });
 
-  it('renders smooth area chart for Total Employees and Workforce Ring for Active Employees', () => {
+  it('renders creative enterprise visualizations across all four KPI cards', () => {
     const html = renderToStaticMarkup(
       <WorkforceKpiCards
         kpis={{
@@ -140,12 +144,26 @@ describe('WorkforceKpiCards (Number + Mini Trend Chart)', () => {
       />,
     );
 
-    // SVG elements rendered
-    expect(html).toContain('class="bezent-trend-kpi-card__chart-svg"');
-    // LinearGradient for smooth area in Total Employees
-    expect(html).toContain('<linearGradient');
+    // Card 01: Workforce Skyline in Total Employees
+    expect(html).toContain('bezent-workforce-skyline');
+    expect(html).toContain('bezent-workforce-skyline__svg');
+    expect(html).toContain('bezent-workforce-skyline__person--hero');
 
-    // Workforce Ring in Active Employees
+    // Card 02: Connected Network in Active Employees
+    expect(html).toContain('bezent-workforce-network');
+    expect(html).toContain('bezent-workforce-network__svg');
+
+    // Card 03: Onboarding Pathway in Pending Activation
+    expect(html).toContain('bezent-onboarding-pathway');
+    expect(html).toContain('bezent-onboarding-pathway__svg');
+
+    // Card 04: Compliance Archive Vault in Inactive Employees
+    expect(html).toContain('bezent-archive-vault');
+    expect(html).toContain('bezent-archive-vault__svg');
+  });
+
+  it('exports and renders WorkforceRing component cleanly', () => {
+    const html = renderToStaticMarkup(<WorkforceRing />);
     expect(html).toContain('bezent-workforce-ring');
     expect(html).toContain('bezent-workforce-ring__svg');
     expect(html).toContain('bezent-workforce-ring__bg');
@@ -167,8 +185,8 @@ describe('WorkforceKpiCards (Number + Mini Trend Chart)', () => {
       />,
     );
 
-    // Does NOT render fake growth percentages
-    expect(html).not.toContain('%');
+    // Does NOT render fake growth percentages or fake trend indicators
+    expect(html).not.toContain('bezent-trend-kpi-card__trend');
     // Renders the neutral dashed baseline placeholder
     expect(html).toContain('stroke-dasharray="3 3"');
     // Renders the subtitles as honest fallback

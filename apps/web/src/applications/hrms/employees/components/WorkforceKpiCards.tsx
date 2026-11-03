@@ -158,7 +158,133 @@ interface MiniChartProps {
 }
 
 export type KpiChartType =
-  'smooth-area' | 'vertical-bars' | 'mini-area' | 'subtle-line' | 'workforce-ring';
+  | 'smooth-area'
+  | 'vertical-bars'
+  | 'mini-area'
+  | 'subtle-line'
+  | 'workforce-ring'
+  | 'workforce-skyline'
+  | 'workforce-network'
+  | 'onboarding-pathway'
+  | 'archive-vault';
+
+/**
+ * Workforce Skyline & Silhouette Visualization
+ *
+ * Implements a modern corporate city skyline in gradient cyan/blue with
+ * walking workforce silhouettes in perspective and a central highlighted hero figure,
+ * reflecting enterprise momentum and human capital.
+ */
+export function WorkforceSkyline() {
+  return (
+    <div className="bezent-workforce-skyline" aria-hidden="true">
+      <svg
+        className="bezent-workforce-skyline__svg"
+        viewBox="0 0 96 46"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <linearGradient id="skyline-main-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#2563eb" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#60a5fa" stopOpacity="0.45" />
+          </linearGradient>
+          <linearGradient id="skyline-mid-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.65" />
+            <stop offset="100%" stopColor="#93c5fd" stopOpacity="0.3" />
+          </linearGradient>
+          <linearGradient id="skyline-ground-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#dbeafe" stopOpacity="0.45" />
+            <stop offset="100%" stopColor="#eff6ff" stopOpacity="0.0" />
+          </linearGradient>
+        </defs>
+
+        {/* 1. Distant Architectural Skyline (Far layer) */}
+        <rect x="3" y="10" width="1.5" height="18" fill="#bfdbfe" opacity="0.6" />
+        <rect x="1" y="14" width="5.5" height="14" fill="#bfdbfe" opacity="0.5" />
+        <rect x="9" y="12" width="6" height="16" fill="#bfdbfe" opacity="0.5" />
+        <rect x="47" y="2" width="2" height="26" fill="#93c5fd" opacity="0.7" />
+        <rect x="45.5" y="6" width="5" height="22" fill="#bfdbfe" opacity="0.5" />
+        <rect x="85" y="8" width="1.5" height="20" fill="#bfdbfe" opacity="0.6" />
+        <rect x="83.5" y="12" width="5.5" height="16" fill="#bfdbfe" opacity="0.5" />
+        <rect x="91" y="15" width="4" height="13" fill="#bfdbfe" opacity="0.4" />
+
+        {/* 2. Geometric hexagon architectural watermark behind center */}
+        <polygon
+          points="48,4 62,11 62,25 48,32 34,25 34,11"
+          stroke="#93c5fd"
+          strokeWidth="0.8"
+          strokeDasharray="2 2"
+          fill="none"
+          opacity="0.35"
+        />
+
+        {/* 3. Midground Corporate Buildings (Main Skyline Layer) */}
+        <rect x="8" y="16" width="8" height="12" fill="url(#skyline-mid-grad)" rx="0.5" />
+        <polygon points="17,13 23,13 25,17 17,17" fill="url(#skyline-mid-grad)" />
+        <rect x="17" y="16" width="8" height="12" fill="url(#skyline-main-grad)" rx="0.5" />
+        <rect x="27" y="12" width="9" height="16" fill="url(#skyline-mid-grad)" rx="0.5" />
+        <rect x="38" y="9" width="11" height="19" fill="url(#skyline-main-grad)" rx="0.5" />
+        <polygon points="51,5 57,10 57,28 51,28" fill="url(#skyline-main-grad)" />
+        <rect x="58" y="11" width="10" height="17" fill="url(#skyline-mid-grad)" rx="0.5" />
+        <polygon points="70,12 77,15 77,28 70,28" fill="url(#skyline-main-grad)" />
+        <rect x="78" y="15" width="8" height="13" fill="url(#skyline-mid-grad)" rx="0.5" />
+
+        {/* 4. Perspective Walking Plane Gradient */}
+        <rect x="0" y="24" width="96" height="22" fill="url(#skyline-ground-grad)" />
+
+        {/* 5. Walking Ground Perspective Shadows */}
+        <ellipse cx="48" cy="43.5" rx="4.5" ry="1.2" fill="#2563eb" opacity="0.16" />
+        <ellipse cx="34" cy="41.5" rx="3.5" ry="1" fill="#2563eb" opacity="0.12" />
+        <ellipse cx="62" cy="40.5" rx="3.5" ry="1" fill="#2563eb" opacity="0.12" />
+        <ellipse cx="22" cy="37.5" rx="2.8" ry="0.8" fill="#2563eb" opacity="0.1" />
+        <ellipse cx="74" cy="36.5" rx="2.8" ry="0.8" fill="#2563eb" opacity="0.1" />
+        <ellipse cx="14" cy="33.5" rx="2.2" ry="0.6" fill="#2563eb" opacity="0.08" />
+        <ellipse cx="82" cy="32.5" rx="2.2" ry="0.6" fill="#2563eb" opacity="0.08" />
+
+        {/* 6. Distant Background People (Small Silhouettes) */}
+        <g fill="#60a5fa" opacity="0.6">
+          <circle cx="14" cy="27" r="1.1" />
+          <path d="M12.8 33 L13.5 29 A1 1 0 0 1 14.5 29 L15.2 33 Z" />
+          <circle cx="28" cy="26" r="1.1" />
+          <path d="M26.8 32 L27.5 28 A1 1 0 0 1 28.5 28 L29.2 32 Z" />
+          <circle cx="53" cy="25" r="1.1" />
+          <path d="M51.8 31 L52.5 27 A1 1 0 0 1 53.5 27 L54.2 31 Z" />
+          <circle cx="68" cy="26" r="1.1" />
+          <path d="M66.8 32 L67.5 28 A1 1 0 0 1 68.5 28 L69.2 32 Z" />
+          <circle cx="82" cy="27" r="1.1" />
+          <path d="M80.8 33 L81.5 29 A1 1 0 0 1 82.5 29 L83.2 33 Z" />
+        </g>
+
+        {/* 7. Midground Walking People */}
+        <g fill="#2563eb" opacity="0.85">
+          <circle cx="22" cy="30" r="1.5" />
+          <path d="M20.5 37 L21.2 32.5 A1.3 1.3 0 0 1 22.8 32.5 L23.5 37 L22.8 37 L22.4 34.5 L22 37 Z" />
+          <circle cx="41" cy="29" r="1.5" />
+          <path d="M39.5 36 L40.2 31.5 A1.3 1.3 0 0 1 41.8 31.5 L42.5 36 L41.8 36 L41.4 33.5 L41 36 Z" />
+          <circle cx="55" cy="28.5" r="1.5" />
+          <path d="M53.5 35.5 L54.2 31 A1.3 1.3 0 0 1 55.8 31 L56.5 35.5 L55.8 35.5 L55.4 33 L55 35.5 Z" />
+          <circle cx="74" cy="29.5" r="1.5" />
+          <path d="M72.5 36.5 L73.2 32 A1.3 1.3 0 0 1 74.8 32 L75.5 36.5 L74.8 36.5 L74.4 34 L74 36.5 Z" />
+        </g>
+
+        {/* 8. Foreground Walking Professionals (Strong Silhouettes) */}
+        <g fill="#1d4ed8">
+          <circle cx="34" cy="33" r="1.8" />
+          <path d="M32 41 L32.8 36 C33 35.3 33.7 35 34.4 35 C35.1 35 35.8 35.3 36 36 L36.8 41 L35.8 41 L35.2 38 L34.6 41 Z" />
+          <circle cx="62" cy="32" r="1.8" />
+          <path d="M60 40 L60.8 35 C61 34.3 61.7 34 62.4 34 C63.1 34 63.8 34.3 64 35 L64.8 40 L63.8 40 L63.2 37 L62.6 40 Z" />
+        </g>
+
+        {/* 9. Standout Foreground Hero Figure (White Highlight in Center) */}
+        <g className="bezent-workforce-skyline__person--hero">
+          <circle cx="48" cy="32" r="2.2" />
+          <path d="M45.5 43.5 L46.4 36.8 C46.7 35.8 47.4 35.2 48.3 35.2 C49.2 35.2 49.9 35.8 50.2 36.8 L51.1 43.5 L49.9 43.5 L49.3 39.5 L48.7 43.5 Z" />
+        </g>
+      </svg>
+    </div>
+  );
+}
 
 /**
  * Workforce Ring Visualization
@@ -256,6 +382,364 @@ export function WorkforceRing() {
           <path d="M13.5 13.5a4 4 0 0 0-3.5-3.5" />
           <path d="M11.5 3.5a2.25 2.25 0 0 1 0 4" />
         </g>
+      </svg>
+    </div>
+  );
+}
+
+/**
+ * Workforce Network Visualization
+ *
+ * Implements a connected team network in emerald green & soft mint,
+ * featuring an active central pulsing hub linked to surrounding team nodes,
+ * representing synchronized, real-time workforce collaboration.
+ */
+export function WorkforceNetwork() {
+  return (
+    <div className="bezent-workforce-network" aria-hidden="true">
+      <svg
+        className="bezent-workforce-network__svg"
+        viewBox="0 0 94 46"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <radialGradient id="network-glow-grad" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stopColor="#10b981" stopOpacity="0.22" />
+            <stop offset="1" stopColor="#10b981" stopOpacity="0" />
+          </radialGradient>
+          <linearGradient id="network-line-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stopColor="#34d399" stopOpacity="0.3" />
+            <stop offset="0.5" stopColor="#10b981" stopOpacity="0.8" />
+            <stop offset="1" stopColor="#34d399" stopOpacity="0.3" />
+          </linearGradient>
+        </defs>
+
+        {/* 1. Ambient Emerald Radial Glow */}
+        <ellipse cx="47" cy="23" rx="44" ry="20" fill="url(#network-glow-grad)" />
+
+        {/* 2. Geometric Hexagonal / Orbital Grid Boundary */}
+        <polygon
+          points="47,4 72,13 72,33 47,42 22,33 22,13"
+          stroke="#10b981"
+          strokeWidth="0.75"
+          strokeDasharray="2 3"
+          fill="none"
+          opacity="0.35"
+        />
+
+        {/* 3. Interconnecting Mesh Link Lines */}
+        <g stroke="#10b981" strokeWidth="1" opacity="0.6">
+          <line x1="47" y1="23" x2="22" y2="13" />
+          <line x1="47" y1="23" x2="72" y2="13" />
+          <line x1="47" y1="23" x2="22" y2="33" />
+          <line x1="47" y1="23" x2="72" y2="33" />
+          <line x1="47" y1="23" x2="10" y2="23" strokeDasharray="2 2" opacity="0.5" />
+          <line x1="47" y1="23" x2="84" y2="23" strokeDasharray="2 2" opacity="0.5" />
+          <line
+            x1="22"
+            y1="13"
+            x2="72"
+            y2="13"
+            stroke="url(#network-line-grad)"
+            strokeWidth="0.8"
+          />
+          <line
+            x1="22"
+            y1="33"
+            x2="72"
+            y2="33"
+            stroke="url(#network-line-grad)"
+            strokeWidth="0.8"
+          />
+          <line x1="22" y1="13" x2="22" y2="33" opacity="0.4" />
+          <line x1="72" y1="13" x2="72" y2="33" opacity="0.4" />
+        </g>
+
+        {/* 4. Peripheral Team Nodes */}
+        <circle cx="10" cy="23" r="2.5" fill="#ecfdf5" stroke="#10b981" strokeWidth="1.2" />
+        <circle cx="10" cy="23" r="1" fill="#10b981" />
+
+        <circle cx="84" cy="23" r="2.5" fill="#ecfdf5" stroke="#10b981" strokeWidth="1.2" />
+        <circle cx="84" cy="23" r="1" fill="#10b981" />
+
+        <circle cx="22" cy="13" r="3.2" fill="#d1fae5" stroke="#059669" strokeWidth="1.2" />
+        <circle cx="22" cy="13" r="1.3" fill="#047857" />
+
+        <circle cx="72" cy="13" r="3.2" fill="#d1fae5" stroke="#059669" strokeWidth="1.2" />
+        <circle cx="72" cy="13" r="1.3" fill="#047857" />
+
+        <circle cx="22" cy="33" r="3.2" fill="#d1fae5" stroke="#059669" strokeWidth="1.2" />
+        <circle cx="22" cy="33" r="1.3" fill="#047857" />
+
+        <circle cx="72" cy="33" r="3.2" fill="#d1fae5" stroke="#059669" strokeWidth="1.2" />
+        <circle cx="72" cy="33" r="1.3" fill="#047857" />
+
+        {/* 5. Center Active Pulse Hub (Concentric energetic ripples) */}
+        <circle cx="47" cy="23" r="11" fill="#10b981" fillOpacity="0.1" />
+        <circle cx="47" cy="23" r="8" fill="#10b981" fillOpacity="0.2" />
+        <circle cx="47" cy="23" r="5.2" fill="#059669" stroke="#ffffff" strokeWidth="1" />
+        {/* Active checkmark inside center */}
+        <path
+          d="M45 23 L46.5 24.5 L49 21.5"
+          stroke="#ffffff"
+          strokeWidth="1.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+      </svg>
+    </div>
+  );
+}
+
+/**
+ * Onboarding Pathway & Welcome Portal Visualization
+ *
+ * Implements a 3-step stepping progression path leading toward an open
+ * enterprise welcome portal with warm amber/gold lighting, symbolizing
+ * new hires stepping into the organization during pre-boarding.
+ */
+export function OnboardingPathway() {
+  return (
+    <div className="bezent-onboarding-pathway" aria-hidden="true">
+      <svg
+        className="bezent-onboarding-pathway__svg"
+        viewBox="0 0 94 46"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <linearGradient id="portal-light-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stopColor="#fef3c7" stopOpacity="0.05" />
+            <stop offset="1" stopColor="#f59e0b" stopOpacity="0.35" />
+          </linearGradient>
+          <linearGradient id="door-glow-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#fbbf24" stopOpacity="0.95" />
+            <stop offset="1" stopColor="#d97706" stopOpacity="0.9" />
+          </linearGradient>
+          <linearGradient id="path-tile-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#fef3c7" />
+            <stop offset="1" stopColor="#fde68a" />
+          </linearGradient>
+        </defs>
+
+        {/* 1. Ambient Welcome Light Beam Fan from Portal */}
+        <polygon points="76,8 92,2 92,44 76,38" fill="url(#portal-light-grad)" />
+
+        {/* 2. Micro Countdown Timer / Pre-boarding Badge at Top-Left */}
+        <g opacity="0.85">
+          <circle cx="16" cy="12" r="5" fill="#fffbeb" stroke="#f59e0b" strokeWidth="1" />
+          <path d="M16 9.5 V12 L18 13.5" stroke="#d97706" strokeWidth="0.9" strokeLinecap="round" />
+        </g>
+
+        {/* 3. Stepping Pathway Curve (Connecting Trajectory) */}
+        <path
+          d="M 18,34 Q 44,28 72,24"
+          stroke="#f59e0b"
+          strokeWidth="1.2"
+          strokeDasharray="2 2"
+          fill="none"
+          opacity="0.6"
+        />
+
+        {/* 4. Three Perspective Stepping Stones */}
+        <polygon
+          points="10,34 22,30 27,34 15,38"
+          fill="url(#path-tile-grad)"
+          stroke="#f59e0b"
+          strokeWidth="0.8"
+        />
+        <polygon
+          points="28,29 40,25 45,29 33,33"
+          fill="url(#path-tile-grad)"
+          stroke="#f59e0b"
+          strokeWidth="0.9"
+        />
+        <polygon points="46,24 58,20 63,24 51,28" fill="#fcd34d" stroke="#d97706" strokeWidth="1" />
+
+        {/* 5. Stepping Candidate Silhouette on Step 2 moving toward Portal */}
+        <g fill="#d97706">
+          <circle cx="37" cy="16" r="1.8" />
+          <path d="M35 24 L35.8 19.5 C36 18.8 36.6 18.5 37.2 18.5 C37.8 18.5 38.4 18.8 38.6 19.5 L39.4 24 L38.4 24 L38 21.5 L37.5 24 Z" />
+        </g>
+
+        {/* 6. Enterprise Welcome Portal / Open Door */}
+        <rect
+          x="72"
+          y="8"
+          width="16"
+          height="30"
+          rx="2"
+          fill="#fffbeb"
+          stroke="#d97706"
+          strokeWidth="1.4"
+        />
+        <line
+          x1="70"
+          y1="38"
+          x2="90"
+          y2="38"
+          stroke="#b45309"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+        <polygon
+          points="72,8 81,11 81,35 72,38"
+          fill="url(#door-glow-grad)"
+          stroke="#b45309"
+          strokeWidth="1"
+        />
+        <circle cx="79" cy="23" r="0.9" fill="#78350f" />
+
+        {/* 7. Welcoming Radiance Rays */}
+        <line
+          x1="82"
+          y1="14"
+          x2="66"
+          y2="12"
+          stroke="#fbbf24"
+          strokeWidth="0.8"
+          strokeDasharray="2 2"
+          opacity="0.7"
+        />
+        <line
+          x1="82"
+          y1="23"
+          x2="63"
+          y2="22"
+          stroke="#fbbf24"
+          strokeWidth="0.8"
+          strokeDasharray="2 2"
+          opacity="0.7"
+        />
+        <line
+          x1="82"
+          y1="31"
+          x2="66"
+          y2="32"
+          stroke="#fbbf24"
+          strokeWidth="0.8"
+          strokeDasharray="2 2"
+          opacity="0.7"
+        />
+      </svg>
+    </div>
+  );
+}
+
+/**
+ * Secure Compliance Archive Vault Visualization
+ *
+ * Implements an enterprise archive record vault and compliance security shield
+ * in coral & rose accents, symbolizing separated or inactive workforce records
+ * preserved securely for legal, audit, and historical compliance.
+ */
+export function ArchiveVault() {
+  return (
+    <div className="bezent-archive-vault" aria-hidden="true">
+      <svg
+        className="bezent-archive-vault__svg"
+        viewBox="0 0 94 46"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <linearGradient id="vault-chest-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#fff1f2" />
+            <stop offset="1" stopColor="#ffe4e6" />
+          </linearGradient>
+          <linearGradient id="shield-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#f43f5e" />
+            <stop offset="1" stopColor="#be123c" />
+          </linearGradient>
+          <radialGradient id="vault-glow-grad" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stopColor="#f43f5e" stopOpacity="0.16" />
+            <stop offset="1" stopColor="#f43f5e" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+
+        {/* 1. Ambient Protective Radial Glow */}
+        <ellipse cx="47" cy="24" rx="42" ry="19" fill="url(#vault-glow-grad)" />
+
+        {/* 2. Protective Orbital Boundary Ring */}
+        <ellipse
+          cx="47"
+          cy="24"
+          rx="38"
+          ry="17"
+          stroke="#fb7185"
+          strokeWidth="0.8"
+          strokeDasharray="3 3"
+          fill="none"
+          opacity="0.35"
+        />
+
+        {/* 3. Base Ground Shelf */}
+        <rect x="18" y="38" width="58" height="3" rx="1.5" fill="#fecdd3" opacity="0.8" />
+
+        {/* 4. Archival Record Folder Tabs (Poking out of the vault) */}
+        <path
+          d="M27 15 V10.5 C27 9.5 28 8.5 29 8.5 H37 C38 8.5 39 9.5 39 10.5 V15"
+          fill="#fecdd3"
+          stroke="#f43f5e"
+          strokeWidth="0.8"
+        />
+        <path
+          d="M41 15 V8 C41 7 42 6 43 6 H51 C52 6 53 7 53 8 V15"
+          fill="#fda4af"
+          stroke="#f43f5e"
+          strokeWidth="0.9"
+        />
+        <path
+          d="M55 15 V10 C55 9 56 8 57 8 H65 C66 8 67 9 67 10 V15"
+          fill="#fecdd3"
+          stroke="#f43f5e"
+          strokeWidth="0.8"
+        />
+
+        {/* 5. Enterprise Filing Vault Body */}
+        <rect
+          x="23"
+          y="14"
+          width="48"
+          height="24"
+          rx="3"
+          fill="url(#vault-chest-grad)"
+          stroke="#f43f5e"
+          strokeWidth="1.2"
+        />
+
+        {/* Vault Upper Trim Accent */}
+        <line x1="23" y1="18.5" x2="71" y2="18.5" stroke="#fda4af" strokeWidth="0.8" />
+
+        {/* Vault Handle / Index Slot */}
+        <rect x="39" y="21" width="16" height="3.5" rx="1.75" fill="#f43f5e" fillOpacity="0.2" />
+        <line
+          x1="42"
+          y1="22.75"
+          x2="52"
+          y2="22.75"
+          stroke="#be123c"
+          strokeWidth="0.9"
+          strokeLinecap="round"
+        />
+
+        {/* 6. Central Compliance Security Shield & Checkmark Seal */}
+        <path
+          d="M47 26.5 L53.5 29 V33.5 C53.5 37 50.5 39.5 47 40.5 C43.5 39.5 40.5 37 40.5 33.5 V29 Z"
+          fill="url(#shield-grad)"
+          stroke="#ffffff"
+          strokeWidth="0.8"
+        />
+        <path
+          d="M44.5 33.5 L46.2 35.2 L49.5 31.5"
+          stroke="#ffffff"
+          strokeWidth="1.1"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
       </svg>
     </div>
   );
@@ -501,7 +985,15 @@ function SingleKpiCard({
         </div>
 
         <div className="bezent-trend-kpi-card__chart">
-          {chartType === 'workforce-ring' ? (
+          {chartType === 'workforce-skyline' ? (
+            <WorkforceSkyline />
+          ) : chartType === 'workforce-network' ? (
+            <WorkforceNetwork />
+          ) : chartType === 'onboarding-pathway' ? (
+            <OnboardingPathway />
+          ) : chartType === 'archive-vault' ? (
+            <ArchiveVault />
+          ) : chartType === 'workforce-ring' ? (
             <WorkforceRing />
           ) : (
             <MiniChart
@@ -522,10 +1014,10 @@ function SingleKpiCard({
  * Number + Mini Trend Chart (Premium Enterprise UI)
  *
  * Implements the 4 canonical workforce KPI cards:
- * 1. Total Employees (Blue #3B82F6, smooth line/area chart)
- * 2. Active Employees (Green #10B981, vertical bar chart)
- * 3. Pending Activation (Amber #F59E0B, compact line/area chart)
- * 4. Inactive Employees (Coral #F97373, subtle line chart)
+ * 1. Total Employees (Blue #3B82F6, Workforce Skyline & silhouettes)
+ * 2. Active Employees (Green #10B981, Connected Team Network & Pulse)
+ * 3. Pending Activation (Amber #F59E0B, Onboarding Pathway & Portal)
+ * 4. Inactive Employees (Coral #F97373, Secure Compliance Archive Vault)
  */
 export function WorkforceKpiCards({
   kpis,
@@ -548,7 +1040,7 @@ export function WorkforceKpiCards({
       accent: 'blue' as const,
       icon: 'employees' as BezentIconName,
       tooltip: 'Total count of all recorded employees across all statuses.',
-      chartType: 'smooth-area' as const,
+      chartType: 'workforce-skyline' as const,
       trendResult: trends.total,
       statusTab: 'all',
     },
@@ -560,7 +1052,7 @@ export function WorkforceKpiCards({
       accent: 'green' as const,
       icon: 'userCheck' as BezentIconName,
       tooltip: 'Employees with confirmed active or probation status eligible for daily operations.',
-      chartType: 'workforce-ring' as const,
+      chartType: 'workforce-network' as const,
       trendResult: trends.active,
       statusTab: 'active',
     },
@@ -572,7 +1064,7 @@ export function WorkforceKpiCards({
       accent: 'amber' as const,
       icon: 'onboarding' as BezentIconName,
       tooltip: 'Pre-boarded employees awaiting account activation and first sign-in.',
-      chartType: 'mini-area' as const,
+      chartType: 'onboarding-pathway' as const,
       trendResult: trends.pendingActivation,
       statusTab: 'pending_activation',
     },
@@ -584,7 +1076,7 @@ export function WorkforceKpiCards({
       accent: 'coral' as const,
       icon: 'userX' as BezentIconName,
       tooltip: 'Separated employees (terminated, suspended, or resigned) preserved for compliance.',
-      chartType: 'subtle-line' as const,
+      chartType: 'archive-vault' as const,
       trendResult: trends.inactive,
       statusTab: 'inactive',
     },
