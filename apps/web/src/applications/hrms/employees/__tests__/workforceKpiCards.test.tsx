@@ -245,7 +245,7 @@ describe('WorkforceKpiCards (Number + Mini Trend Chart)', () => {
     expect(html).toContain('<div class="bezent-trend-kpi-card__value">0</div>');
   });
 
-  it('highlights the active card based on activeStatusTab', () => {
+  it('highlights the active card based on activeStatusTab and renders pastel tone classes', () => {
     const html = renderToStaticMarkup(
       <WorkforceKpiCards
         kpis={{
@@ -259,7 +259,11 @@ describe('WorkforceKpiCards (Number + Mini Trend Chart)', () => {
       />,
     );
 
-    expect(html).toContain('bezent-trend-kpi-card is-active');
+    expect(html).toContain('bezent-trend-kpi-card--blue');
+    expect(html).toContain('bezent-trend-kpi-card--green');
+    expect(html).toContain('bezent-trend-kpi-card--amber');
+    expect(html).toContain('bezent-trend-kpi-card--coral');
+    expect(html).toContain('is-active');
   });
 
   describe('computeWorkforceMonthlyTrends helper', () => {

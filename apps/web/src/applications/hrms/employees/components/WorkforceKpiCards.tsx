@@ -911,7 +911,7 @@ function SingleKpiCard({
       role="region"
       tabIndex={onClick ? 0 : undefined}
       aria-label={`${title}: ${value !== null ? value : 'Loading'}`}
-      className={`bezent-trend-kpi-card ${isActive ? 'is-active' : ''}`}
+      className={`bezent-trend-kpi-card bezent-trend-kpi-card--${accent} ${isActive ? 'is-active' : ''}`}
       onClick={onClick}
       onKeyDown={handleKeyDown}
     >
