@@ -176,33 +176,35 @@
   transform: scale(0.98);
 }
 
-/* Dark / Brand Navy (matches active tab & toggles #071e49) */
+/* Dark / Brand Navy (updated to brand light blue secondary match) */
 .bezent-btn--dark {
-  background: var(--bezent-toggle-active-bg, #071e49);
-  color: #ffffff;
-  border-color: var(--bezent-toggle-active-bg, #071e49);
+  background: var(--bg-hover, #c2e7ff);
+  color: var(--text-brand, #001d35);
+  border-color: transparent;
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(7, 30, 73, 0.18);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .bezent-btn--dark:hover:not(:disabled) {
-  background: var(--bezent-toggle-active-hover, #041430);
-  border-color: var(--bezent-toggle-active-hover, #041430);
-  color: #ffffff;
-  transform: none;
-  box-shadow: 0 2px 6px rgba(7, 30, 73, 0.25);
+  background: #a8dbfc;
+  border-color: transparent;
+  color: var(--text-brand, #001d35);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.06);
 }
 
 .bezent-btn--dark:active:not(:disabled) {
-  background: #020c20;
-  border-color: #020c20;
+  background: #90d0fa;
+  border-color: transparent;
   transform: scale(0.98);
 }
 
 .bezent-btn--dark .bezent-material-icon,
 .bezent-btn--dark .bezent-duotone-icon,
 .bezent-btn--dark svg {
-  color: #ffffff;
+  color: var(--text-brand, #001d35);
   fill: currentColor;
 }
 

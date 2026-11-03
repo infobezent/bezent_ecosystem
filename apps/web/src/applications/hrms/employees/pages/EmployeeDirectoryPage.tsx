@@ -853,7 +853,7 @@ export function EmployeeDirectoryPage() {
               {`${totalCount} Records`}
             </span>
             <Button
-              variant="dark"
+              variant="secondary"
               size="md"
               shape="rounded"
               leftIcon={<BezentIcon name="add" size="action" />}
