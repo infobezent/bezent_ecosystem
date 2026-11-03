@@ -528,7 +528,7 @@ export function EmployeeDirectoryPage() {
     <Page maxWidth="default" gap="md" className="employees-directory-page">
       {/* 1. Page Header */}
       <PageHeader
-        title="Employees"
+        title="Employee Directory"
         actions={
           canImport || canExport ? (
             <Inline gap="sm" align="center">

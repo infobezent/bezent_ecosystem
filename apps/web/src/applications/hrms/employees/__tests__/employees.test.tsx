@@ -253,7 +253,7 @@ describe('HRMS routing for Workforce & Administration compatibility', () => {
 describe('Employees Directory page', () => {
   it('renders header, description, search, filters and a loading state', () => {
     const html = renderDirectory();
-    expect(html).toContain('Employees');
+    expect(html).toContain('Employee Directory');
     expect(html).toContain('Manage and explore your workforce directory');
     expect(html).toContain('Import');
     expect(html).toContain('Export');
@@ -262,7 +262,6 @@ describe('Employees Directory page', () => {
     expect(html).toContain('Pending Activation');
     expect(html).toContain('Inactive Employees');
     expect(html).not.toContain('On Leave');
-    expect(html).not.toContain('Employee Directory');
     expect(html).toContain('Search by name, employee ID, email, department...');
     expect(html).toContain('Filters');
     expect(html).toContain('Reset');
