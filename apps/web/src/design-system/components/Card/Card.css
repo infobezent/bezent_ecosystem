@@ -754,11 +754,11 @@
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-default, #e2e8f0);
   border-radius: var(--radius-lg, 12px);
-  padding: 18px 20px;
+  padding: 13px 18px;
   box-shadow:
     0 1px 3px rgba(15, 23, 42, 0.04),
     0 1px 2px rgba(15, 23, 42, 0.02);
-  min-height: 124px;
+  min-height: 104px;
   box-sizing: border-box;
   transition:
     border-color 0.16s ease,
@@ -784,8 +784,8 @@
 }
 
 .bezent-trend-kpi-card.is-active {
-  border-color: var(--accent-primary, #3b82f6);
-  box-shadow: 0 0 0 1px var(--accent-primary, #3b82f6);
+  /* Active outline and border line removed per user requirement */
+  outline: none;
 }
 
 [data-theme='dark'] .bezent-trend-kpi-card {
@@ -799,126 +799,213 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
 }
 
-/* ── Trend KPI Card Pastel Tone Variants (Subtle, Light, Premium Look) ── */
+/* ── Trend KPI Card Deep Vibrant / Dark Variants (Executive SaaS Theme) ── */
 .bezent-trend-kpi-card--blue {
-  background: #f4f8fe;
-  border-color: #dbeafe;
+  background: linear-gradient(145deg, #1d4ed8 0%, #1e3a8a 100%);
+  border-color: #2563eb;
+  box-shadow:
+    0 4px 16px rgba(30, 58, 138, 0.28),
+    0 1px 3px rgba(30, 58, 138, 0.12);
 }
 
 .bezent-trend-kpi-card--blue:hover {
-  background: #edf5ff;
-  border-color: #bfdbfe;
+  /* Keep background consistent - do not darken on hover */
+  transform: translateY(-2px);
   box-shadow:
-    0 4px 14px rgba(37, 99, 235, 0.07),
-    0 1px 3px rgba(37, 99, 235, 0.04);
+    0 6px 20px rgba(30, 58, 138, 0.35),
+    0 2px 6px rgba(30, 58, 138, 0.15);
 }
 
 .bezent-trend-kpi-card--blue.is-active {
-  border-color: #3b82f6;
+  /* No harsh border line or box-shadow ring on select */
+  border-color: #2563eb;
   box-shadow:
-    0 0 0 1.5px #3b82f6,
-    0 4px 12px rgba(37, 99, 235, 0.1);
+    0 4px 16px rgba(30, 58, 138, 0.35),
+    0 1px 3px rgba(30, 58, 138, 0.15);
 }
 
 .bezent-trend-kpi-card--green {
-  background: #f2faf5;
-  border-color: #d1fae5;
+  background: linear-gradient(145deg, #047857 0%, #064e3b 100%);
+  border-color: #059669;
+  box-shadow:
+    0 4px 16px rgba(6, 78, 59, 0.28),
+    0 1px 3px rgba(6, 78, 59, 0.12);
 }
 
 .bezent-trend-kpi-card--green:hover {
-  background: #eaf7ef;
-  border-color: #a7f3d0;
+  /* Keep background consistent - do not darken on hover */
+  transform: translateY(-2px);
   box-shadow:
-    0 4px 14px rgba(16, 185, 129, 0.07),
-    0 1px 3px rgba(16, 185, 129, 0.04);
+    0 6px 20px rgba(6, 78, 59, 0.35),
+    0 2px 6px rgba(6, 78, 59, 0.15);
 }
 
 .bezent-trend-kpi-card--green.is-active {
-  border-color: #10b981;
+  /* No harsh border line or box-shadow ring on select */
+  border-color: #059669;
   box-shadow:
-    0 0 0 1.5px #10b981,
-    0 4px 12px rgba(16, 185, 129, 0.1);
+    0 4px 16px rgba(6, 78, 59, 0.35),
+    0 1px 3px rgba(6, 78, 59, 0.15);
 }
 
 .bezent-trend-kpi-card--amber {
-  background: #fffbf2;
-  border-color: #fde68a;
+  background: linear-gradient(145deg, #b45309 0%, #78350f 100%);
+  border-color: #d97706;
+  box-shadow:
+    0 4px 16px rgba(120, 53, 15, 0.28),
+    0 1px 3px rgba(120, 53, 15, 0.12);
 }
 
 .bezent-trend-kpi-card--amber:hover {
-  background: #fef6e5;
-  border-color: #fed7aa;
+  /* Keep background consistent - do not darken on hover */
+  transform: translateY(-2px);
   box-shadow:
-    0 4px 14px rgba(245, 158, 11, 0.07),
-    0 1px 3px rgba(245, 158, 11, 0.04);
+    0 6px 20px rgba(120, 53, 15, 0.35),
+    0 2px 6px rgba(120, 53, 15, 0.15);
 }
 
 .bezent-trend-kpi-card--amber.is-active {
-  border-color: #f59e0b;
+  /* No harsh border line or box-shadow ring on select */
+  border-color: #d97706;
   box-shadow:
-    0 0 0 1.5px #f59e0b,
-    0 4px 12px rgba(245, 158, 11, 0.1);
+    0 4px 16px rgba(120, 53, 15, 0.35),
+    0 1px 3px rgba(120, 53, 15, 0.15);
 }
 
 .bezent-trend-kpi-card--coral {
-  background: #fff5f5;
-  border-color: #fecdd3;
+  background: linear-gradient(145deg, #be123c 0%, #881337 100%);
+  border-color: #e11d48;
+  box-shadow:
+    0 4px 16px rgba(136, 19, 55, 0.28),
+    0 1px 3px rgba(136, 19, 55, 0.12);
 }
 
 .bezent-trend-kpi-card--coral:hover {
-  background: #fee7e7;
-  border-color: #fda4af;
+  /* Keep background consistent - do not darken on hover */
+  transform: translateY(-2px);
   box-shadow:
-    0 4px 14px rgba(244, 63, 94, 0.07),
-    0 1px 3px rgba(244, 63, 94, 0.04);
+    0 6px 20px rgba(136, 19, 55, 0.35),
+    0 2px 6px rgba(136, 19, 55, 0.15);
 }
 
 .bezent-trend-kpi-card--coral.is-active {
-  border-color: #f43f5e;
+  /* No harsh border line or box-shadow ring on select */
+  border-color: #e11d48;
   box-shadow:
-    0 0 0 1.5px #f43f5e,
-    0 4px 12px rgba(244, 63, 94, 0.1);
+    0 4px 16px rgba(136, 19, 55, 0.35),
+    0 1px 3px rgba(136, 19, 55, 0.15);
 }
 
-/* Dark Mode Subtle Pastels / Tints */
+/* Dark Mode Tint Overrides for Deep Cards */
 [data-theme='dark'] .bezent-trend-kpi-card--blue {
-  background: #0f1c30;
-  border-color: rgba(59, 130, 246, 0.28);
-}
-
-[data-theme='dark'] .bezent-trend-kpi-card--blue:hover {
-  background: #13233c;
-  border-color: rgba(96, 165, 250, 0.42);
+  background: linear-gradient(145deg, #172554 0%, #0f172a 100%);
+  border-color: rgba(96, 165, 250, 0.45);
 }
 
 [data-theme='dark'] .bezent-trend-kpi-card--green {
-  background: #0c231a;
-  border-color: rgba(16, 185, 129, 0.28);
-}
-
-[data-theme='dark'] .bezent-trend-kpi-card--green:hover {
-  background: #102d21;
-  border-color: rgba(52, 211, 153, 0.42);
+  background: linear-gradient(145deg, #022c22 0%, #0f172a 100%);
+  border-color: rgba(52, 211, 153, 0.45);
 }
 
 [data-theme='dark'] .bezent-trend-kpi-card--amber {
-  background: #241b0b;
-  border-color: rgba(245, 158, 11, 0.28);
-}
-
-[data-theme='dark'] .bezent-trend-kpi-card--amber:hover {
-  background: #2f220d;
-  border-color: rgba(251, 191, 36, 0.42);
+  background: linear-gradient(145deg, #451a03 0%, #0f172a 100%);
+  border-color: rgba(251, 191, 36, 0.45);
 }
 
 [data-theme='dark'] .bezent-trend-kpi-card--coral {
-  background: #241116;
-  border-color: rgba(244, 63, 94, 0.28);
+  background: linear-gradient(145deg, #4c0519 0%, #0f172a 100%);
+  border-color: rgba(251, 113, 133, 0.45);
 }
 
+[data-theme='dark'] .bezent-trend-kpi-card--blue:hover,
+[data-theme='dark'] .bezent-trend-kpi-card--green:hover,
+[data-theme='dark'] .bezent-trend-kpi-card--amber:hover,
 [data-theme='dark'] .bezent-trend-kpi-card--coral:hover {
-  background: #2e151b;
-  border-color: rgba(251, 113, 133, 0.42);
+  transform: translateY(-2px);
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card--blue.is-active,
+[data-theme='dark'] .bezent-trend-kpi-card--green.is-active,
+[data-theme='dark'] .bezent-trend-kpi-card--amber.is-active,
+[data-theme='dark'] .bezent-trend-kpi-card--coral.is-active {
+  box-shadow: none;
+}
+
+/* Light Typography & Glowing Elements on Dark Cards */
+.bezent-trend-kpi-card--blue .bezent-trend-kpi-card__title,
+.bezent-trend-kpi-card--green .bezent-trend-kpi-card__title,
+.bezent-trend-kpi-card--amber .bezent-trend-kpi-card__title,
+.bezent-trend-kpi-card--coral .bezent-trend-kpi-card__title {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.bezent-trend-kpi-card--blue .bezent-trend-kpi-card__value,
+.bezent-trend-kpi-card--green .bezent-trend-kpi-card__value,
+.bezent-trend-kpi-card--amber .bezent-trend-kpi-card__value,
+.bezent-trend-kpi-card--coral .bezent-trend-kpi-card__value {
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.bezent-trend-kpi-card--blue .bezent-trend-kpi-card__caption {
+  color: #bfdbfe;
+}
+
+.bezent-trend-kpi-card--green .bezent-trend-kpi-card__caption {
+  color: #a7f3d0;
+}
+
+.bezent-trend-kpi-card--amber .bezent-trend-kpi-card__caption {
+  color: #fde68a;
+}
+
+.bezent-trend-kpi-card--coral .bezent-trend-kpi-card__caption {
+  color: #fecdd3;
+}
+
+/* Light Glassmorphic Icon Badges inside Dark Cards */
+.bezent-trend-kpi-card--blue .bezent-trend-kpi-card__icon-badge,
+.bezent-trend-kpi-card--green .bezent-trend-kpi-card__icon-badge,
+.bezent-trend-kpi-card--amber .bezent-trend-kpi-card__icon-badge,
+.bezent-trend-kpi-card--coral .bezent-trend-kpi-card__icon-badge {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.bezent-trend-kpi-card--blue .bezent-trend-kpi-card__info-btn,
+.bezent-trend-kpi-card--green .bezent-trend-kpi-card__info-btn,
+.bezent-trend-kpi-card--amber .bezent-trend-kpi-card__info-btn,
+.bezent-trend-kpi-card--coral .bezent-trend-kpi-card__info-btn {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.bezent-trend-kpi-card--blue .bezent-trend-kpi-card__info-btn:hover,
+.bezent-trend-kpi-card--green .bezent-trend-kpi-card__info-btn:hover,
+.bezent-trend-kpi-card--amber .bezent-trend-kpi-card__info-btn:hover,
+.bezent-trend-kpi-card--coral .bezent-trend-kpi-card__info-btn:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.16);
+}
+
+/* Clean High-Contrast Avatar Nodes in Active Green Card */
+.bezent-trend-kpi-card--green .bezent-workforce-network__employee-node circle:first-child {
+  fill: #ffffff;
+  stroke: #34d399;
+}
+
+.bezent-trend-kpi-card--green .bezent-workforce-network__employee-node circle:nth-child(2),
+.bezent-trend-kpi-card--green .bezent-workforce-network__employee-node path {
+  fill: #064e3b;
+}
+
+/* Crisp Transition in Inactive Rose Card */
+.bezent-trend-kpi-card--coral .bezent-archive-vault__transition line {
+  stroke: #fecdd3;
+}
+
+.bezent-trend-kpi-card--coral .bezent-archive-vault__transition path {
+  stroke: #ffffff;
 }
 
 /* Header Row: Top-left icon + title, Top-right info tooltip button */
@@ -927,7 +1014,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .bezent-trend-kpi-card__title-group {
@@ -941,9 +1028,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
   flex-shrink: 0;
 }
 
@@ -1032,7 +1119,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
 }
 
@@ -1045,7 +1132,7 @@
 }
 
 .bezent-trend-kpi-card__value {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
   line-height: 1.1;
   color: var(--text-primary, #0f172a);
@@ -1095,8 +1182,8 @@
 
 /* Right Mini Chart Container */
 .bezent-trend-kpi-card__chart {
-  width: 94px;
-  height: 46px;
+  width: 86px;
+  height: 42px;
   flex-shrink: 0;
   display: flex;
   align-items: flex-end;
@@ -1187,8 +1274,8 @@
 
 /* ── Workforce Skyline & Silhouette Visualization (Total Employees Card) ── */
 .bezent-workforce-skyline {
-  width: 94px;
-  height: 46px;
+  width: 86px;
+  height: 42px;
   display: inline-flex;
   align-items: flex-end;
   justify-content: flex-end;
@@ -1249,8 +1336,8 @@
 
 /* ── Workforce Network Visualization (Active Employees Card) ── */
 .bezent-workforce-network {
-  width: 94px;
-  height: 46px;
+  width: 86px;
+  height: 42px;
   display: inline-flex;
   align-items: center;
   justify-content: flex-end;
@@ -1285,8 +1372,8 @@
 
 /* ── Onboarding Pathway Visualization (Pending Activation Card) ── */
 .bezent-onboarding-pathway {
-  width: 94px;
-  height: 46px;
+  width: 86px;
+  height: 42px;
   display: inline-flex;
   align-items: center;
   justify-content: flex-end;
@@ -1326,8 +1413,8 @@
 
 /* ── Archive Vault Visualization (Inactive Employees Card) ── */
 .bezent-archive-vault {
-  width: 94px;
-  height: 46px;
+  width: 86px;
+  height: 42px;
   display: inline-flex;
   align-items: center;
   justify-content: flex-end;
