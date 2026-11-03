@@ -158,9 +158,11 @@ describe('WorkforceKpiCards (Number + Mini Trend Chart)', () => {
     expect(html).toContain('bezent-onboarding-pathway');
     expect(html).toContain('bezent-onboarding-pathway__svg');
 
-    // Card 04: Compliance Archive Vault in Inactive Employees
+    // Card 04: Departing Professional in Inactive Employees
     expect(html).toContain('bezent-archive-vault');
     expect(html).toContain('bezent-archive-vault__svg');
+    expect(html).toContain('bezent-archive-vault__person');
+    expect(html).toContain('bezent-archive-vault__briefcase');
   });
 
   it('exports and renders WorkforceRing component cleanly', () => {

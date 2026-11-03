@@ -1350,6 +1350,24 @@
   transform: translateY(-1px) scale(1.02);
 }
 
+[data-theme='dark'] .bezent-archive-vault__person circle,
+[data-theme='dark'] .bezent-archive-vault__person path[fill='#e11d48'] {
+  fill: #fb7185;
+}
+
+[data-theme='dark'] .bezent-archive-vault__person path[stroke='#be123c'] {
+  stroke: #fda4af;
+}
+
+[data-theme='dark'] .bezent-archive-vault__briefcase rect {
+  fill: #4c0519;
+  stroke: #fb7185;
+}
+
+[data-theme='dark'] .bezent-archive-vault__briefcase path {
+  stroke: #fb7185;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .bezent-workforce-network__svg,
   .bezent-onboarding-pathway__svg,

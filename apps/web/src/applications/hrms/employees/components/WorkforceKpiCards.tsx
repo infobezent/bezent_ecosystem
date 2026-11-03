@@ -682,11 +682,11 @@ export function OnboardingPathway() {
 }
 
 /**
- * Secure Compliance Archive Vault Visualization
+ * Departing Professional Visualization (Inactive Employees Card)
  *
- * Implements an enterprise archive record vault and compliance security shield
- * in coral & rose accents, symbolizing separated or inactive workforce records
- * preserved securely for legal, audit, and historical compliance.
+ * Implements a dignified corporate professional with a briefcase walking
+ * forward towards a calm sunset horizon, symbolizing employees who have
+ * successfully completed their tenure, resigned, or retired.
  */
 export function ArchiveVault() {
   return (
@@ -698,100 +698,135 @@ export function ArchiveVault() {
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          <linearGradient id="vault-chest-grad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#fff1f2" />
-            <stop offset="1" stopColor="#ffe4e6" />
-          </linearGradient>
-          <linearGradient id="shield-grad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#f43f5e" />
-            <stop offset="1" stopColor="#be123c" />
-          </linearGradient>
-          <radialGradient id="vault-glow-grad" cx="50%" cy="50%" r="50%">
-            <stop offset="0" stopColor="#f43f5e" stopOpacity="0.16" />
+          <radialGradient id="sunset-glow-grad" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stopColor="#f43f5e" stopOpacity="0.25" />
             <stop offset="1" stopColor="#f43f5e" stopOpacity="0" />
           </radialGradient>
         </defs>
 
-        {/* 1. Ambient Protective Radial Glow */}
-        <ellipse cx="47" cy="24" rx="42" ry="19" fill="url(#vault-glow-grad)" />
+        {/* 1. Ambient Horizon Sunset Glow at the Right */}
+        <ellipse cx="66" cy="28" rx="26" ry="16" fill="url(#sunset-glow-grad)" />
 
-        {/* 2. Protective Orbital Boundary Ring */}
-        <ellipse
-          cx="47"
-          cy="24"
-          rx="38"
-          ry="17"
-          stroke="#fb7185"
-          strokeWidth="0.8"
+        {/* 2. Setting Sun / Horizon Arc */}
+        <path
+          d="M 52 38 A 14 14 0 0 1 80 38"
+          stroke="#fda4af"
+          strokeWidth="1.2"
           strokeDasharray="3 3"
           fill="none"
-          opacity="0.35"
+          opacity="0.6"
         />
+        <circle cx="66" cy="38" r="7" fill="#f43f5e" fillOpacity="0.12" />
 
-        {/* 3. Base Ground Shelf */}
-        <rect x="18" y="38" width="58" height="3" rx="1.5" fill="#fecdd3" opacity="0.8" />
-
-        {/* 4. Archival Record Folder Tabs (Poking out of the vault) */}
-        <path
-          d="M27 15 V10.5 C27 9.5 28 8.5 29 8.5 H37 C38 8.5 39 9.5 39 10.5 V15"
-          fill="#fecdd3"
-          stroke="#f43f5e"
-          strokeWidth="0.8"
-        />
-        <path
-          d="M41 15 V8 C41 7 42 6 43 6 H51 C52 6 53 7 53 8 V15"
-          fill="#fda4af"
-          stroke="#f43f5e"
-          strokeWidth="0.9"
-        />
-        <path
-          d="M55 15 V10 C55 9 56 8 57 8 H65 C66 8 67 9 67 10 V15"
-          fill="#fecdd3"
-          stroke="#f43f5e"
-          strokeWidth="0.8"
-        />
-
-        {/* 5. Enterprise Filing Vault Body */}
-        <rect
-          x="23"
-          y="14"
-          width="48"
-          height="24"
-          rx="3"
-          fill="url(#vault-chest-grad)"
-          stroke="#f43f5e"
-          strokeWidth="1.2"
-        />
-
-        {/* Vault Upper Trim Accent */}
-        <line x1="23" y1="18.5" x2="71" y2="18.5" stroke="#fda4af" strokeWidth="0.8" />
-
-        {/* Vault Handle / Index Slot */}
-        <rect x="39" y="21" width="16" height="3.5" rx="1.75" fill="#f43f5e" fillOpacity="0.2" />
+        {/* 3. Perspective Horizon Baselines */}
         <line
-          x1="42"
-          y1="22.75"
-          x2="52"
-          y2="22.75"
-          stroke="#be123c"
-          strokeWidth="0.9"
+          x1="8"
+          y1="38"
+          x2="88"
+          y2="38"
+          stroke="#fecdd3"
+          strokeWidth="1"
           strokeLinecap="round"
+        />
+        <line
+          x1="22"
+          y1="41"
+          x2="76"
+          y2="41"
+          stroke="#fecdd3"
+          strokeWidth="0.8"
+          strokeLinecap="round"
+          opacity="0.6"
         />
 
-        {/* 6. Central Compliance Security Shield & Checkmark Seal */}
+        {/* 4. Ground Perspective Walking Shadow */}
+        <ellipse cx="38" cy="40.5" rx="9" ry="1.8" fill="#e11d48" opacity="0.15" />
+
+        {/* 5. Departing Corporate Professional Silhouette */}
+        <g className="bezent-archive-vault__person">
+          {/* Head */}
+          <circle cx="36" cy="14" r="2.6" fill="#e11d48" />
+
+          {/* Suit Tie / Collar highlight */}
+          <polygon points="36,16.5 37.2,19 36,23 34.8,19" fill="#fda4af" opacity="0.6" />
+
+          {/* Torso / Corporate Blazer */}
+          <path
+            d="M 33 18.5 C 34.2 17, 37.8 17, 39 18.5 L 40.5 27 C 40.5 28.5, 38.5 29.5, 36 29.5 C 33.5 29.5, 31.5 28.5, 31.5 27 Z"
+            fill="#e11d48"
+          />
+
+          {/* Corporate Briefcase held in trailing hand */}
+          <g className="bezent-archive-vault__briefcase">
+            <rect
+              x="25"
+              y="24"
+              width="6.5"
+              height="5"
+              rx="1"
+              fill="#881337"
+              stroke="#e11d48"
+              strokeWidth="0.5"
+            />
+            <path
+              d="M 27 24 V 22.5 C 27 22, 29.5 22, 29.5 22.5 V 24"
+              stroke="#881337"
+              strokeWidth="0.7"
+              fill="none"
+            />
+          </g>
+
+          {/* Walking Legs in forward stride toward the horizon */}
+          {/* Front stepping leg */}
+          <path
+            d="M 36.5 29 L 39.5 38.5 L 42.5 39"
+            stroke="#be123c"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+          />
+          {/* Trailing back leg */}
+          <path
+            d="M 34 29 L 32 35 L 30 38"
+            stroke="#be123c"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+          />
+        </g>
+
+        {/* 6. Career Milestone Stars & Farewell Breeze Trajectory */}
+        <polygon
+          points="76,14 77.2,16 79.5,17 77.2,18 76,20.2 74.8,18 72.5,17 74.8,16"
+          fill="#f43f5e"
+          opacity="0.7"
+        />
+        <polygon
+          points="56,10 56.8,11.5 58.5,12 56.8,12.5 56,14 55.2,12.5 53.5,12 55.2,11.5"
+          fill="#fda4af"
+          opacity="0.65"
+        />
+        <circle cx="82" cy="24" r="1.2" fill="#fb7185" opacity="0.6" />
+        <circle cx="18" cy="18" r="1.2" fill="#fda4af" opacity="0.5" />
+
+        {/* Subtle motion breeze lines toward the horizon */}
         <path
-          d="M47 26.5 L53.5 29 V33.5 C53.5 37 50.5 39.5 47 40.5 C43.5 39.5 40.5 37 40.5 33.5 V29 Z"
-          fill="url(#shield-grad)"
-          stroke="#ffffff"
-          strokeWidth="0.8"
+          d="M 46 22 C 54 20, 60 21, 70 19"
+          stroke="#fda4af"
+          strokeWidth="0.9"
+          strokeDasharray="3 3"
+          fill="none"
+          opacity="0.55"
         />
         <path
-          d="M44.5 33.5 L46.2 35.2 L49.5 31.5"
-          stroke="#ffffff"
-          strokeWidth="1.1"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          d="M 44 26 C 52 24, 62 25, 74 23"
+          stroke="#fda4af"
+          strokeWidth="0.9"
+          strokeDasharray="3 3"
           fill="none"
+          opacity="0.55"
         />
       </svg>
     </div>
