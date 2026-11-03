@@ -117,12 +117,78 @@ export interface EssTodayAttendance {
   timezone?: string;
 }
 
+/** A leave type the employee can apply for, with its balance in the current leave cycle. */
 export interface EssLeaveBalanceItem {
-  leaveType: 'annual' | 'sick' | 'casual' | 'unpaid';
-  totalDays: number;
+  leaveTypeId: string;
+  leaveTypeCode: string;
+  leaveTypeName: string;
+  colorToken: string;
+  isTracked: boolean;
+  allowHalfDay: boolean;
+  instructions: string | null;
+  cycleStartDate: string;
+  cycleEndDate: string;
+  /** null when the type is not tracked (unlimited). */
+  totalDays: number | null;
   usedDays: number;
   pendingDays: number;
-  availableDays: number;
+  availableDays: number | null;
+}
+
+export type EssHalfDaySession = 'first_half' | 'second_half';
+
+export interface EssLeaveTransactionItem {
+  id: string;
+  balanceId: string;
+  leaveTypeId: string;
+  leaveTypeName: string;
+  leaveTypeCode: string;
+  colorToken?: string;
+  cycleStartDate: string;
+  txnType: string;
+  direction: 'credit' | 'debit';
+  days: number;
+  credit: number;
+  debit: number;
+  runningBalance: number;
+  transactionDate: string;
+  effectiveDate: string;
+  description: string;
+  referenceType?: string | null;
+  referenceId?: string | null;
+  reason?: string | null;
+  createdBy?: string | null;
+  createdAt: string;
+}
+
+export interface EssLeaveTransactionsResponse {
+  items: EssLeaveTransactionItem[];
+  pagination: {
+    total: number;
+    limit: number;
+    offset: number;
+    page: number;
+    pages: number;
+  };
+  balances: EssLeaveBalanceItem[];
+}
+
+/** A leave approval step assigned to the signed-in employee. */
+export interface EssLeaveApprovalItem {
+  approvalId: string;
+  requestId: string;
+  level: number;
+  purpose: 'approval' | 'cancellation';
+  slaDueAt: string | null;
+  employeeName: string;
+  employeeNumber: string;
+  leaveTypeName: string;
+  leaveTypeCode: string;
+  startDate: string;
+  endDate: string;
+  totalDays: number;
+  session: string | null;
+  reason: string;
 }
 
 export interface EssNotification {
@@ -255,10 +321,14 @@ export interface EssDashboardData {
 
 export interface EssLeaveRequest {
   id: string;
-  leaveType: 'annual' | 'sick' | 'casual' | 'unpaid';
+  leaveTypeId: string;
+  leaveTypeCode: string;
+  leaveTypeName: string;
+  colorToken: string;
   startDate: string;
   endDate: string;
   totalDays: number;
+  session: EssHalfDaySession | null;
   reason: string;
   status: 'pending' | 'approved' | 'rejected' | 'cancelled';
   createdAt: string;
@@ -624,17 +694,61 @@ export const essApi = {
   // Leave
   getLeave: () =>
     req<{
+      policy: { id: string; name: string } | null;
+      cycle: { start: string; end: string; label: string };
       balances: EssLeaveBalanceItem[];
       requests: EssLeaveRequest[];
-      holidays: Array<{ name: string; date: string; dayOfWeek: string }>;
+      holidays: Array<{ name: string; date: string; dayOfWeek: string; type: string }>;
+      holidayCalendarMissing: boolean;
+      optionalHolidayQuota: number;
     }>('/leave'),
+  getLeaveApprovals: () => req<EssLeaveApprovalItem[]>('/leave/approvals'),
+  approveLeave: (approvalId: string, comment?: string) =>
+    req<{ status: string }>(`/leave/approvals/${approvalId}/approve`, {
+      method: 'POST',
+      body: JSON.stringify({ comment }),
+    }),
+  rejectLeave: (approvalId: string, comment: string) =>
+    req<{ status: string }>(`/leave/approvals/${approvalId}/reject`, {
+      method: 'POST',
+      body: JSON.stringify({ comment }),
+    }),
   applyLeave: (payload: {
-    leaveType: 'annual' | 'sick' | 'casual' | 'unpaid';
+    leaveTypeId: string;
     startDate: string;
     endDate: string;
     reason: string;
-  }) => req<EssLeaveRequest>('/leave/apply', { method: 'POST', body: JSON.stringify(payload) }),
-  cancelLeave: (id: string) => req<EssLeaveRequest>(`/leave/${id}/cancel`, { method: 'POST' }),
+    session?: EssHalfDaySession | null;
+  }) =>
+    req<{ id: string; totalDays: string }>('/leave/apply', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  cancelLeave: (id: string) =>
+    req<{ id: string; status: string }>(`/leave/${id}/cancel`, { method: 'POST' }),
+  getLeaveTransactions: (params?: {
+    leaveTypeId?: string;
+    txnType?: string;
+    direction?: string;
+    startDate?: string;
+    endDate?: string;
+    page?: number;
+    limit?: number;
+    offset?: number;
+  }) => {
+    const q = new URLSearchParams();
+    if (params?.leaveTypeId && params.leaveTypeId !== 'all')
+      q.set('leaveTypeId', params.leaveTypeId);
+    if (params?.txnType && params.txnType !== 'all') q.set('txnType', params.txnType);
+    if (params?.direction && params.direction !== 'all') q.set('direction', params.direction);
+    if (params?.startDate) q.set('startDate', params.startDate);
+    if (params?.endDate) q.set('endDate', params.endDate);
+    if (params?.page) q.set('page', String(params.page));
+    if (params?.limit) q.set('limit', String(params.limit));
+    if (params?.offset !== undefined) q.set('offset', String(params.offset));
+    const qs = q.toString();
+    return req<EssLeaveTransactionsResponse>(`/leave/transactions${qs ? `?${qs}` : ''}`);
+  },
 
   // Timesheets
   getTimesheets: () => req<{ timesheets: EssTimesheet[] }>('/timesheets'),

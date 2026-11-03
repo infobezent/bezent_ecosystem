@@ -18,6 +18,7 @@ import { generateSurrogateId } from '../../../../platform/auth/security.js';
 import { hrmsTestHeaders } from '../../../../platform/__tests__/support/testSession.js';
 import { attendanceOverviewService } from '../service/attendanceOverview.service.js';
 import type { CompanyAccess } from '../../../../platform/access/types/access.types.js';
+import { ensureLeaveTypeId } from '../../leave/__tests__/support/leaveTestTypes.js';
 
 describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Overview V1.0 Test Suite', () => {
   const tenantId = 'tenant_overview_v1';
@@ -208,10 +209,10 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Overview V1.0
         tenantId,
         companyId,
         employeeId: empActive2,
-        leaveType: 'annual',
+        leaveTypeId: await ensureLeaveTypeId(tenantId, companyId, 'AL'),
         startDate: testDate,
         endDate: testDate,
-        totalDays: 1,
+        totalDays: '1.00',
         status: 'approved',
         reason: 'Personal appointment',
       })

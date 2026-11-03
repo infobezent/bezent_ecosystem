@@ -160,10 +160,58 @@ export class EssController {
     }
   };
 
+  getLeaveTransactions = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = await this.service.getLeaveTransactions(req.employeeContext!, req.query);
+      res.status(200).json({ data });
+    } catch (err) {
+      next(err);
+    }
+  };
+
   applyLeave = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const request = await this.service.applyLeave(req.employeeContext!, req.body);
+      const request = await this.service.applyLeave(req.employeeContext!, req.body, req.user?.id);
       res.status(201).json({ data: request });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  getLeaveApprovals = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = await this.service.getLeaveApprovals(req.employeeContext!, req.user?.id);
+      res.status(200).json({ data });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  approveLeave = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = await this.service.decideLeaveApproval(
+        req.employeeContext!,
+        req.user?.id,
+        String(req.params.approvalId),
+        'approved',
+        req.body?.comment,
+      );
+      res.status(200).json({ data });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  rejectLeave = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = await this.service.decideLeaveApproval(
+        req.employeeContext!,
+        req.user?.id,
+        String(req.params.approvalId),
+        'rejected',
+        req.body?.comment,
+      );
+      res.status(200).json({ data });
     } catch (err) {
       next(err);
     }
@@ -171,7 +219,11 @@ export class EssController {
 
   cancelLeave = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await this.service.cancelLeave(req.employeeContext!, requireRecordId(req));
+      const result = await this.service.cancelLeave(
+        req.employeeContext!,
+        requireRecordId(req),
+        req.user?.id,
+      );
       res.status(200).json({ data: result });
     } catch (err) {
       next(err);

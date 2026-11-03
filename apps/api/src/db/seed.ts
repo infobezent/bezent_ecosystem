@@ -20,6 +20,10 @@ import {
   tenantModules,
   employeePersonalDetails,
   employeeLeaveBalances,
+  leaveBalanceTransactions,
+  leaveTypes,
+  holidayCalendars,
+  holidays,
   employeeTasks,
   employeeNotifications,
   tenantAdmins,
@@ -38,6 +42,7 @@ import {
 } from './schema.js';
 import { and, eq } from 'drizzle-orm';
 import { createUnusableCredential } from '../platform/auth/security.js';
+import { leaveDefaultsService } from '../applications/hrms/leave/service/leaveDefaults.service.js';
 
 /**
  * Deterministic Development Seed Script
@@ -902,47 +907,94 @@ export async function seedDatabase() {
       .where(eq(employeePersonalDetails.employeeId, 'emp_demo_002'));
   }
 
-  // Initial Leave Balances for 2026
+  // Default leave types + Standard Leave Policy, then initial 2026 balances for Arjun
+  await leaveDefaultsService.ensureDefaultLeaveSetup(tenantId, companyId);
+
+  // Published default holiday calendars for the current and next calendar year (Leave Tab 6)
+  for (const calYear of [new Date().getFullYear(), new Date().getFullYear() + 1]) {
+    const calendarId = `hcal_demo_${calYear}`;
+    const existingCal = await db
+      .select({ id: holidayCalendars.id })
+      .from(holidayCalendars)
+      .where(eq(holidayCalendars.id, calendarId));
+    if (existingCal.length > 0) continue;
+    await db.insert(holidayCalendars).values({
+      id: calendarId,
+      tenantId,
+      companyId,
+      name: 'Company Holidays',
+      year: calYear,
+      status: 'published',
+      isDefault: true,
+      optionalHolidayQuota: 2,
+      publishedAt: new Date(),
+      createdByUserId: 'system',
+    });
+    const demoHolidays: Array<[string, string, 'mandatory' | 'optional']> = [
+      ['01-26', 'Republic Day', 'mandatory'],
+      ['05-01', 'May Day', 'mandatory'],
+      ['08-15', 'Independence Day', 'mandatory'],
+      ['10-02', 'Gandhi Jayanti', 'mandatory'],
+      ['12-25', 'Christmas Day', 'mandatory'],
+      ['03-14', 'Holi', 'optional'],
+    ];
+    await db.insert(holidays).values(
+      demoHolidays.map(([md, name, type]) => ({
+        id: `hol_demo_${calYear}_${md}`,
+        tenantId,
+        companyId,
+        calendarId,
+        date: `${calYear}-${md}`,
+        name,
+        type,
+      })),
+    );
+  }
   const existingLeaveBal = await db
     .select()
     .from(employeeLeaveBalances)
     .where(eq(employeeLeaveBalances.employeeId, 'emp_demo_002'));
   if (existingLeaveBal.length === 0) {
-    await db.insert(employeeLeaveBalances).values([
-      {
-        id: 'lvb_demo_01',
+    const demoTypes = await db
+      .select({ id: leaveTypes.id, code: leaveTypes.code })
+      .from(leaveTypes)
+      .where(eq(leaveTypes.companyId, companyId));
+    const typeId = (code: string) => demoTypes.find((t) => t.code === code)?.id;
+    const demoBalances = [
+      { id: 'lvb_demo_01', code: 'AL', totalDays: '18.00', usedDays: '3.00' },
+      { id: 'lvb_demo_02', code: 'SL', totalDays: '12.00', usedDays: '1.00' },
+      { id: 'lvb_demo_03', code: 'CL', totalDays: '6.00', usedDays: '0.00' },
+    ].filter((b) => typeId(b.code));
+    for (const b of demoBalances) {
+      await db.insert(employeeLeaveBalances).values({
+        id: b.id,
         tenantId,
         companyId,
         employeeId: 'emp_demo_002',
-        leaveType: 'annual',
-        totalDays: 18,
-        usedDays: 3,
-        pendingDays: 0,
+        leaveTypeId: typeId(b.code)!,
+        totalDays: b.totalDays,
+        usedDays: b.usedDays,
+        pendingDays: '0.00',
         year: 2026,
-      },
-      {
-        id: 'lvb_demo_02',
+        cycleStartDate: '2026-01-01',
+        cycleEndDate: '2026-12-31',
+      });
+      await db.insert(leaveBalanceTransactions).values({
+        id: `lbt_seed_${b.id}`,
         tenantId,
         companyId,
         employeeId: 'emp_demo_002',
-        leaveType: 'sick',
-        totalDays: 12,
-        usedDays: 1,
-        pendingDays: 0,
-        year: 2026,
-      },
-      {
-        id: 'lvb_demo_03',
-        tenantId,
-        companyId,
-        employeeId: 'emp_demo_002',
-        leaveType: 'casual',
-        totalDays: 6,
-        usedDays: 0,
-        pendingDays: 0,
-        year: 2026,
-      },
-    ]);
+        leaveTypeId: typeId(b.code)!,
+        balanceId: b.id,
+        cycleStartDate: '2026-01-01',
+        txnType: 'opening',
+        days: b.totalDays,
+        referenceType: 'seed',
+        referenceId: null,
+        reason: `Seeded balance (used ${b.usedDays})`,
+        createdByUserId: 'system',
+      });
+    }
   }
 
   // Initial Task for Arjun

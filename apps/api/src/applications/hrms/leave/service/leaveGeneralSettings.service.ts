@@ -50,15 +50,16 @@ export class LeaveGeneralSettingsService {
     hasScheduledFutureVersion: boolean;
   }> {
     const now = new Date();
-    const [row, activeVersion, latestPublished, today] = await Promise.all([
+    const [row, activeVersion, latestPublished, { today, defaultGoLive }] = await Promise.all([
       this.repo.getSettings(tenantId, companyId),
       this.repo.getActiveVersionAtTimestamp(tenantId, companyId, now),
       this.repo.getLatestPublishedVersion(tenantId, companyId),
-      this.companyToday(tenantId, companyId),
+      this.companyDates(tenantId, companyId),
     ]);
 
     const effective: LeaveGeneralSettingsSnapshot =
-      activeVersion?.settingsPayload ?? (row ? snapshotOf(row) : defaultSettingsSnapshot(today));
+      activeVersion?.settingsPayload ??
+      (row ? snapshotOf(row) : defaultSettingsSnapshot(defaultGoLive));
     const status = await this.resolveStatus(tenantId, companyId, row, effective.goLiveDate, today);
 
     const settings: LeaveGeneralSettingsData = {
@@ -96,15 +97,15 @@ export class LeaveGeneralSettingsService {
   }> {
     const input = this.validateInput(rawInput);
 
-    const [row, latest, today] = await Promise.all([
+    const [row, latest, { today, defaultGoLive }] = await Promise.all([
       this.repo.getSettings(tenantId, companyId),
       this.repo.getLatestPublishedVersion(tenantId, companyId),
-      this.companyToday(tenantId, companyId),
+      this.companyDates(tenantId, companyId),
     ]);
 
-    // Immutability is checked against the latest published version, not the cached row.
+    const hasLiveRecords = await this.repo.hasLiveLeaveRecords(tenantId, companyId);
     const baseline: LeaveGeneralSettingsSnapshot =
-      latest?.settingsPayload ?? (row ? snapshotOf(row) : defaultSettingsSnapshot(today));
+      latest?.settingsPayload ?? (row ? snapshotOf(row) : defaultSettingsSnapshot(defaultGoLive));
     const status = await this.resolveStatus(tenantId, companyId, row, baseline.goLiveDate, today);
 
     if (status === 'activated') {
@@ -124,9 +125,12 @@ export class LeaveGeneralSettingsService {
       }
     }
 
+    const targetGoLive = input.goLiveDate || baseline.goLiveDate || defaultGoLive;
+    const willBeActivated = today >= targetGoLive || hasLiveRecords;
+
     const result = await this.repo.publishNewVersion(tenantId, companyId, input, userId, {
-      markActivated: status === 'activated' && row?.status !== 'activated',
-      defaultGoLiveDate: today,
+      markActivated: willBeActivated,
+      defaultGoLiveDate: defaultGoLive,
     });
 
     await this.audit.logEvent({
@@ -212,12 +216,23 @@ export class LeaveGeneralSettingsService {
     }
   }
 
-  private async companyToday(tenantId: string, companyId: string): Promise<string> {
-    const tz = await this.repo.getCompanyTimezone(tenantId, companyId);
-    return localDateInTimezone(tz);
+  /** Company-local today, and the default go-live: the first publish date (today) (spec §C.3). */
+  private async companyDates(
+    tenantId: string,
+    companyId: string,
+  ): Promise<{ today: string; defaultGoLive: string }> {
+    const profile = await this.repo.getCompanyProfile(tenantId, companyId);
+    const tz = profile?.timeZone ?? null;
+    const today = localDateInTimezone(tz);
+    return { today, defaultGoLive: today };
   }
 
-  /** Activated once persisted, once company-local today reaches go-live, or once live records exist. */
+  /**
+   * Activated once live leave records exist, once an existing persisted row is marked activated,
+   * or once company-local today reaches a persisted row's go-live date.
+   * If no persisted row exists and no live records exist, the company is in pre_activation,
+   * allowing first-time configuration of financial-year or calendar-year cycle.
+   */
   private async resolveStatus(
     tenantId: string,
     companyId: string,
@@ -225,11 +240,12 @@ export class LeaveGeneralSettingsService {
     goLiveDate: string,
     today: string,
   ): Promise<LeaveSettingsStatus> {
-    if (row?.status === 'activated') return 'activated';
+    const hasLiveRecords = await this.repo.hasLiveLeaveRecords(tenantId, companyId);
+    if (hasLiveRecords) return 'activated';
+    if (!row) return 'pre_activation';
+    if (row.status === 'activated') return 'activated';
     if (today >= goLiveDate) return 'activated';
-    return (await this.repo.hasLiveLeaveRecords(tenantId, companyId))
-      ? 'activated'
-      : 'pre_activation';
+    return 'pre_activation';
   }
 
   private validateInput(input: UpdateLeaveGeneralSettingsInput): UpdateLeaveGeneralSettingsInput {

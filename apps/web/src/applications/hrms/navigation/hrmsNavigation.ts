@@ -209,10 +209,14 @@ export const HRMS_NAV_DESTINATIONS: readonly NavDestination[] = [
     quickAccess: true,
     permissionKey: view('leave'),
     children: [
-      child('summary', 'Leave Summary', 'leave'),
-      child('apply', 'Apply Leave', 'plusSign'),
-      child('approvals', 'Leave Approvals', 'approvals'),
+      child('overview', 'Overview', 'dashboard'),
+      child('requests', 'Leave Requests', 'requests'),
+      child('approvals', 'Approvals', 'approvals'),
+      child('calendar', 'Team Calendar', 'employees'),
+      child('balances', 'Leave Balances', 'reports'),
       child('holidays', 'Holiday Calendar', 'calendar'),
+      child('year-end', 'Year-End & Encashment', 'payroll'),
+      child('reports', 'Reports', 'reports'),
     ],
   },
   {

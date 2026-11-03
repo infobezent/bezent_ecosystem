@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { EmployeeService } from '../service/employee.service.js';
 import type { EmployeeRepository } from '../repository/employee.repository.js';
 import type { OrganizationRepository } from '../../../../platform/organization/repository/organization.repository.js';
+import { workforceSettingsService } from '../../workforce/service/workforceSettings.service.js';
 import { validateCreateEmployee } from '../validation/employee.schema.js';
 import {
   validateEmployeeRecordDetails,
@@ -25,6 +26,27 @@ describe('Employee Registration Features & Invariants', () => {
     let service: EmployeeService;
 
     beforeEach(() => {
+      vi.spyOn(workforceSettingsService, 'getGeneralSettings').mockResolvedValue({
+        id: 'wfs_001',
+        tenantId,
+        companyId,
+        generationMode: 'automatic',
+        idPrefix: 'EMP-',
+        idSuffix: null,
+        sequenceLength: 4,
+        startingNumber: 1,
+        currentCounter: 0,
+        resetFrequency: 'never',
+        allowManualOverride: true,
+        preventIdReuse: true,
+        autoProvisionUser: false,
+        activationTiming: 'instant',
+        nextSuggestedId: 'EMP-0001',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+      vi.spyOn(workforceSettingsService, 'getProbationPolicy').mockResolvedValue(null as any);
+
       mockRepo = {
         listAllNumbers: vi.fn(),
         getByEmployeeNumber: vi.fn(),
@@ -39,26 +61,50 @@ describe('Employee Registration Features & Invariants', () => {
           locations: [],
         }),
       };
+      const mockAudit = {
+        logEvent: vi.fn().mockResolvedValue({} as any),
+        getLogs: vi.fn().mockResolvedValue({ items: [], total: 0 }),
+      };
       service = new EmployeeService(
         mockRepo as EmployeeRepository,
         mockOrgRepo as OrganizationRepository,
+        undefined,
+        mockAudit as any,
       );
     });
 
     it('generates next sequential number when no employee number exists', async () => {
       vi.mocked(mockRepo.listAllNumbers!).mockResolvedValue([]);
+      vi.spyOn(workforceSettingsService, 'reserveNextEmployeeId').mockResolvedValueOnce({
+        nextId: 'EMP-0001',
+        prefix: 'EMP-',
+        sequenceNumber: 1,
+        suffix: null,
+      });
       const result = await service.getNextEmployeeNumber(tenantId, companyId);
       expect(result.employeeNumber).toBe('EMP-0001');
     });
 
     it('increments highest sequence found among existing employee numbers', async () => {
       vi.mocked(mockRepo.listAllNumbers!).mockResolvedValue(['EMP-0001', 'EMP-0004', 'EMP-0002']);
+      vi.spyOn(workforceSettingsService, 'reserveNextEmployeeId').mockResolvedValueOnce({
+        nextId: 'EMP-0005',
+        prefix: 'EMP-',
+        sequenceNumber: 5,
+        suffix: null,
+      });
       const result = await service.getNextEmployeeNumber(tenantId, companyId);
       expect(result.employeeNumber).toBe('EMP-0005');
     });
 
     it('auto-assigns employeeNumber on createEmployee if omitted', async () => {
       vi.mocked(mockRepo.listAllNumbers!).mockResolvedValue(['EMP-0010']);
+      vi.spyOn(workforceSettingsService, 'reserveNextEmployeeId').mockResolvedValueOnce({
+        nextId: 'EMP-0011',
+        prefix: 'EMP-',
+        sequenceNumber: 11,
+        suffix: null,
+      });
       vi.mocked(mockRepo.getByEmployeeNumber!).mockResolvedValue(null);
       vi.mocked(mockRepo.getByEmail!).mockResolvedValue(null);
       vi.mocked(mockRepo.create!).mockImplementation(

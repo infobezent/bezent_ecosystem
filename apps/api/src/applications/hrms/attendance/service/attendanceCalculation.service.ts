@@ -73,25 +73,47 @@ export class AttendanceCalculationService {
       return String(d).toLowerCase() === dayName.toLowerCase();
     });
 
-    // 2. Off-day / Weekend handling
-    if (!isWorkingDay && !checkInTime && !checkOutTime) {
-      return {
-        status: 'holiday',
-        processingState: 'finalized',
-        workedMinutes: 0,
-        lateMinutes: 0,
-        earlyMinutes: 0,
-        isLate: false,
-        isEarlyExit: false,
-        isMissingPunch: false,
-        isPayrollReady: true,
-        shiftScheduleRef: schedule.scheduleRef,
-        calculationMetadata: { dayName, isWorkingDay: false },
-      };
-    }
-
-    // 3. No punches recorded on working day
+    // 2. Off-day / Public Holiday handling (Priority 2 & 3 when no punches present)
     if (!checkInTime && !checkOutTime) {
+      // 2a. Public Holiday (Priority 2)
+      if (input.isHoliday) {
+        return {
+          status: 'holiday',
+          processingState: 'finalized',
+          workedMinutes: 0,
+          lateMinutes: 0,
+          earlyMinutes: 0,
+          isLate: false,
+          isEarlyExit: false,
+          isMissingPunch: false,
+          isPayrollReady: true,
+          shiftScheduleRef: schedule.scheduleRef,
+          calculationMetadata: {
+            dayName,
+            isHoliday: true,
+            holidayName: input.holidayName ?? 'Public Holiday',
+          },
+        };
+      }
+
+      // 2b. Weekly Off / Non-working day (Priority 3)
+      if (!isWorkingDay) {
+        return {
+          status: 'weekly_off',
+          processingState: 'finalized',
+          workedMinutes: 0,
+          lateMinutes: 0,
+          earlyMinutes: 0,
+          isLate: false,
+          isEarlyExit: false,
+          isMissingPunch: false,
+          isPayrollReady: true,
+          shiftScheduleRef: schedule.scheduleRef,
+          calculationMetadata: { dayName, isWorkingDay: false, isWeeklyOff: true },
+        };
+      }
+
+      // 3. No punches recorded on working day (Priority 4)
       return {
         status: 'absent',
         processingState: 'finalized',

@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import {
   Badge,
   Card,
@@ -15,6 +16,11 @@ import {
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import type { JobOpening, JobStatus, WorkplaceType } from '../types/jobOpening';
+
+export type JobSortField =
+  'jobCode' | 'title' | 'department' | 'location' | 'positions' | 'applicants' | 'status';
+
+export type JobSortDirection = 'asc' | 'desc';
 
 export interface JobOpeningsTableProps {
   jobs: JobOpening[];
@@ -77,6 +83,54 @@ export function JobOpeningsTable({
   onStatusChange,
   viewMode = 'list',
 }: JobOpeningsTableProps) {
+  const [sortField, setSortField] = useState<JobSortField>('jobCode');
+  const [sortDirection, setSortDirection] = useState<JobSortDirection>('asc');
+
+  const handleSort = (field: JobSortField) => {
+    if (sortField === field) {
+      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const sortedJobs = useMemo(() => {
+    const list = [...jobs];
+    list.sort((a, b) => {
+      let comparison = 0;
+      switch (sortField) {
+        case 'jobCode':
+          comparison = (a.jobCode || '').localeCompare(b.jobCode || '', undefined, {
+            numeric: true,
+          });
+          break;
+        case 'title':
+          comparison = (a.title || '').localeCompare(b.title || '');
+          break;
+        case 'department':
+          comparison = (a.department || '').localeCompare(b.department || '');
+          break;
+        case 'location':
+          comparison = (a.location || '').localeCompare(b.location || '');
+          break;
+        case 'positions':
+          comparison = (a.positionsCount ?? 0) - (b.positionsCount ?? 0);
+          break;
+        case 'applicants':
+          comparison = (a.totalApplicants ?? 0) - (b.totalApplicants ?? 0);
+          break;
+        case 'status':
+          comparison = (a.status || '').localeCompare(b.status || '');
+          break;
+        default:
+          comparison = 0;
+      }
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+    return list;
+  }, [jobs, sortField, sortDirection]);
+
   if (jobs.length === 0) {
     return (
       <EmptyState
@@ -87,16 +141,16 @@ export function JobOpeningsTable({
     );
   }
 
-  // 3D Grid Cards View
+  // Grid Cards View
   if (viewMode === 'grid') {
     return (
       <Grid columns={3} gap="md">
-        {jobs.map((job) => {
+        {sortedJobs.map((job) => {
           const isFilled = job.filledCount >= job.positionsCount && job.positionsCount > 0;
           return (
             <Card
               key={job.id}
-              variant="clay"
+              variant="default"
               padding="md"
               hoverable
               onClick={() => onSelectJob(job)}
@@ -171,18 +225,228 @@ export function JobOpeningsTable({
     <Table hoverable>
       <TableHead>
         <TableRow>
-          <TableHeaderCell>Job Code ⇅</TableHeaderCell>
-          <TableHeaderCell>Job Title ⇅</TableHeaderCell>
-          <TableHeaderCell>Department ⇅</TableHeaderCell>
-          <TableHeaderCell>Location ⇅</TableHeaderCell>
-          <TableHeaderCell>Positions ⇅</TableHeaderCell>
-          <TableHeaderCell>Applicants ⇅</TableHeaderCell>
-          <TableHeaderCell>Status ⇅</TableHeaderCell>
+          <TableHeaderCell
+            aria-sort={
+              sortField === 'jobCode'
+                ? sortDirection === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
+          >
+            <button
+              type="button"
+              className={`bezent-table-th-sortable ${
+                sortField === 'jobCode' ? 'bezent-table-th-sortable--active' : ''
+              }`}
+              onClick={() => handleSort('jobCode')}
+              aria-label={`Sort by Job Code ${
+                sortField === 'jobCode' && sortDirection === 'asc' ? 'descending' : 'ascending'
+              }`}
+            >
+              <span>Job Code</span>
+              <span
+                className={`bezent-table-sort-arrow ${
+                  sortField === 'jobCode' ? 'bezent-table-sort-arrow--active' : ''
+                }`}
+                aria-hidden="true"
+              >
+                {sortField === 'jobCode' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
+            </button>
+          </TableHeaderCell>
+
+          <TableHeaderCell
+            aria-sort={
+              sortField === 'title'
+                ? sortDirection === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
+          >
+            <button
+              type="button"
+              className={`bezent-table-th-sortable ${
+                sortField === 'title' ? 'bezent-table-th-sortable--active' : ''
+              }`}
+              onClick={() => handleSort('title')}
+              aria-label={`Sort by Job Title ${
+                sortField === 'title' && sortDirection === 'asc' ? 'descending' : 'ascending'
+              }`}
+            >
+              <span>Job Title</span>
+              <span
+                className={`bezent-table-sort-arrow ${
+                  sortField === 'title' ? 'bezent-table-sort-arrow--active' : ''
+                }`}
+                aria-hidden="true"
+              >
+                {sortField === 'title' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
+            </button>
+          </TableHeaderCell>
+
+          <TableHeaderCell
+            aria-sort={
+              sortField === 'department'
+                ? sortDirection === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
+          >
+            <button
+              type="button"
+              className={`bezent-table-th-sortable ${
+                sortField === 'department' ? 'bezent-table-th-sortable--active' : ''
+              }`}
+              onClick={() => handleSort('department')}
+              aria-label={`Sort by Department ${
+                sortField === 'department' && sortDirection === 'asc' ? 'descending' : 'ascending'
+              }`}
+            >
+              <span>Department</span>
+              <span
+                className={`bezent-table-sort-arrow ${
+                  sortField === 'department' ? 'bezent-table-sort-arrow--active' : ''
+                }`}
+                aria-hidden="true"
+              >
+                {sortField === 'department' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
+            </button>
+          </TableHeaderCell>
+
+          <TableHeaderCell
+            aria-sort={
+              sortField === 'location'
+                ? sortDirection === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
+          >
+            <button
+              type="button"
+              className={`bezent-table-th-sortable ${
+                sortField === 'location' ? 'bezent-table-th-sortable--active' : ''
+              }`}
+              onClick={() => handleSort('location')}
+              aria-label={`Sort by Location ${
+                sortField === 'location' && sortDirection === 'asc' ? 'descending' : 'ascending'
+              }`}
+            >
+              <span>Location</span>
+              <span
+                className={`bezent-table-sort-arrow ${
+                  sortField === 'location' ? 'bezent-table-sort-arrow--active' : ''
+                }`}
+                aria-hidden="true"
+              >
+                {sortField === 'location' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
+            </button>
+          </TableHeaderCell>
+
+          <TableHeaderCell
+            aria-sort={
+              sortField === 'positions'
+                ? sortDirection === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
+          >
+            <button
+              type="button"
+              className={`bezent-table-th-sortable ${
+                sortField === 'positions' ? 'bezent-table-th-sortable--active' : ''
+              }`}
+              onClick={() => handleSort('positions')}
+              aria-label={`Sort by Positions ${
+                sortField === 'positions' && sortDirection === 'asc' ? 'descending' : 'ascending'
+              }`}
+            >
+              <span>Positions</span>
+              <span
+                className={`bezent-table-sort-arrow ${
+                  sortField === 'positions' ? 'bezent-table-sort-arrow--active' : ''
+                }`}
+                aria-hidden="true"
+              >
+                {sortField === 'positions' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
+            </button>
+          </TableHeaderCell>
+
+          <TableHeaderCell
+            aria-sort={
+              sortField === 'applicants'
+                ? sortDirection === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
+          >
+            <button
+              type="button"
+              className={`bezent-table-th-sortable ${
+                sortField === 'applicants' ? 'bezent-table-th-sortable--active' : ''
+              }`}
+              onClick={() => handleSort('applicants')}
+              aria-label={`Sort by Applicants ${
+                sortField === 'applicants' && sortDirection === 'asc' ? 'descending' : 'ascending'
+              }`}
+            >
+              <span>Applicants</span>
+              <span
+                className={`bezent-table-sort-arrow ${
+                  sortField === 'applicants' ? 'bezent-table-sort-arrow--active' : ''
+                }`}
+                aria-hidden="true"
+              >
+                {sortField === 'applicants' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
+            </button>
+          </TableHeaderCell>
+
+          <TableHeaderCell
+            aria-sort={
+              sortField === 'status'
+                ? sortDirection === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
+          >
+            <button
+              type="button"
+              className={`bezent-table-th-sortable ${
+                sortField === 'status' ? 'bezent-table-th-sortable--active' : ''
+              }`}
+              onClick={() => handleSort('status')}
+              aria-label={`Sort by Status ${
+                sortField === 'status' && sortDirection === 'asc' ? 'descending' : 'ascending'
+              }`}
+            >
+              <span>Status</span>
+              <span
+                className={`bezent-table-sort-arrow ${
+                  sortField === 'status' ? 'bezent-table-sort-arrow--active' : ''
+                }`}
+                aria-hidden="true"
+              >
+                {sortField === 'status' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
+            </button>
+          </TableHeaderCell>
+
           <TableHeaderCell>Actions</TableHeaderCell>
         </TableRow>
       </TableHead>
       <TableBody>
-        {jobs.map((job) => (
+        {sortedJobs.map((job) => (
           <TableRow key={job.id} onClick={() => onSelectJob(job)} className="cursor-pointer">
             {/* 1. Job Code */}
             <TableCell>

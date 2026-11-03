@@ -12,7 +12,7 @@ describe('JobOpeningsPage', () => {
   it('renders the Job Openings page header, metrics, tabs, and table', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
-        <JobOpeningsPage />
+        <JobOpeningsPage initialJobs={INITIAL_JOB_OPENINGS} />
       </MemoryRouter>,
     );
 
@@ -25,6 +25,16 @@ describe('JobOpeningsPage', () => {
     expect(html).toContain('Senior Frontend Architect');
     expect(html).toContain('JOB-2026-001');
     expect(html).toContain('Full-Stack Tech Lead');
+  });
+
+  it('renders loading placeholder when initial data is not provided', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <JobOpeningsPage />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('Loading job openings');
   });
 
   it('renders JobOpeningsMetrics with correct counts', () => {

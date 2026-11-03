@@ -64,26 +64,3 @@ export interface UpdateLeaveGeneralSettingsInput {
   effectiveFrom?: string | Date;
   expectedCurrentVersionNumber: number;
 }
-
-export interface ScheduleBreakdownItem {
-  date: string;
-  isWeeklyOff: boolean;
-  isHoliday: boolean;
-  holidayCode: string | null;
-  chargedDays: number;
-  exclusionReasons: string[];
-}
-
-export interface LeaveCalculationSnapshot {
-  calculationId: string;
-  settingsVersionId: string;
-  versionNumber: number;
-  calculationTimestampUtc: string;
-  companyTimezone: string;
-  dayCountingMethod: DayCountingMethod;
-  calculatedDurationDays: number;
-  halfDaySession: HalfDaySession | null;
-  requestedStartDate: string;
-  requestedEndDate: string;
-  scheduleBreakdown: ScheduleBreakdownItem[];
-}

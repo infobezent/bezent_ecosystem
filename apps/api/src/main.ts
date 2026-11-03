@@ -6,6 +6,7 @@ import { attendanceAutoLockService } from './applications/hrms/attendance/servic
 import { attendanceCompOffExpiryService } from './applications/hrms/attendance/service/attendanceCompOffExpiry.service.js';
 import { attendanceMissingPunchDetectorService } from './applications/hrms/attendance/service/attendanceMissingPunchDetector.service.js';
 import { leavePolicyLifecycleService } from './applications/hrms/leave/service/leavePolicyLifecycle.service.js';
+import { leaveJobsService } from './applications/hrms/leave/service/leaveJobs.service.js';
 import { syncAllUnlinkedEmployees } from './applications/hrms/employees/service/employeeUserBridge.service.js';
 
 assertProductionAuthConfig();
@@ -29,6 +30,8 @@ async function startServer(): Promise<void> {
     console.log('[workers] Attendance missing punch detector sweeper started');
     leavePolicyLifecycleService.start();
     console.log('[workers] Leave policy lifecycle sweep started');
+    leaveJobsService.start();
+    console.log('[workers] Leave approval SLA and balance sweeps started');
     try {
       const syncedCount = await syncAllUnlinkedEmployees();
       if (syncedCount > 0) {

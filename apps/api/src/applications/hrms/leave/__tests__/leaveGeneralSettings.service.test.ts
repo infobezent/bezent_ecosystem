@@ -31,7 +31,10 @@ describe('LeaveGeneralSettingsService — Unit Tests', () => {
       ensureDefaultSettings: vi.fn().mockResolvedValue(sampleSettings),
       getSettings: vi.fn().mockResolvedValue(sampleSettings),
       hasLiveLeaveRecords: vi.fn().mockResolvedValue(false),
-      getCompanyTimezone: vi.fn().mockResolvedValue('Asia/Kolkata'),
+      getCompanyProfile: vi.fn().mockResolvedValue({
+        timeZone: 'Asia/Kolkata',
+        createdAt: new Date('2026-01-15T00:00:00Z'),
+      }),
       publishNewVersion: vi.fn(),
       getActiveVersionAtTimestamp: vi.fn().mockResolvedValue(null),
       getLatestPublishedVersion: vi.fn().mockResolvedValue(null),

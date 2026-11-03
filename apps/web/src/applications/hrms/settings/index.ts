@@ -22,4 +22,5 @@ export { DepartmentsPage } from './pages/DepartmentsPage';
 export { DesignationsPage } from './pages/DesignationsPage';
 export { WorkLocationsPage } from './pages/WorkLocationsPage';
 export { JobLevelsGradesPage } from './pages/JobLevelsGradesPage';
-export { DashboardSettingsSection, EmployeesSettingsSection, HRSettingsSection } from './general';
+export { DashboardSettingsSection } from './general';
+export { WorkforceSettingsSection } from './workforce';

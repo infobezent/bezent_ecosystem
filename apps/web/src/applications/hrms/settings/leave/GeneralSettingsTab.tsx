@@ -21,10 +21,10 @@ import {
   Alert,
   Spinner,
   FormField,
-  PageHeader,
   EmptyState,
   Divider,
 } from '../../../../design-system/components';
+import { LeaveSettingsHeader } from './LeaveSettingsHeader';
 import { BezentIcon } from '../../../../design-system/icons';
 import {
   fetchLeaveGeneralSettings,
@@ -324,9 +324,10 @@ export function GeneralSettingsTab({
   const isActivated = serverSettings?.status === 'activated';
 
   return (
-    <Stack gap="xl">
+    <Stack gap="lg">
       {/* 1. Page Header with Title, Status Badges, and Action Bar */}
-      <PageHeader
+      <LeaveSettingsHeader
+        icon="settings"
         title="General Settings"
         badge={
           <Inline gap="xs" align="center">

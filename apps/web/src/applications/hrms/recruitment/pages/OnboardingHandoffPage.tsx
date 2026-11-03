@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Alert,
+  Button,
   Inline,
+  LoadingState,
   Page,
   PageHeader,
   SearchInput,
@@ -17,12 +19,26 @@ import { HandoffMetrics } from '../components/HandoffMetrics';
 import { HandoffTable } from '../components/HandoffTable';
 import { ConvertHandoffModal } from '../components/ConvertHandoffModal';
 import { HandoffDetailDrawer } from '../components/HandoffDetailDrawer';
+import {
+  fetchOnboardings,
+  confirmOnboarding,
+  updateOnboarding,
+  adaptOnboardingToHandoffItem,
+} from '../api';
 
-export function OnboardingHandoffPage() {
+export interface OnboardingHandoffPageProps {
+  initialHandoffs?: OnboardingHandoffItem[];
+}
+
+export function OnboardingHandoffPage({ initialHandoffs }: OnboardingHandoffPageProps = {}) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const [handoffs, setHandoffs] = useState<OnboardingHandoffItem[]>(INITIAL_HANDOFFS);
+  const [handoffs, setHandoffs] = useState<OnboardingHandoffItem[]>(initialHandoffs ?? []);
+  const [isLoading, setIsLoading] = useState<boolean>(!initialHandoffs);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [tabFilter, setTabFilter] = useState<'all' | 'ready' | 'pending' | 'completed' | 'alerts'>(
     'all',
   );
@@ -33,6 +49,27 @@ export function OnboardingHandoffPage() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isConvertOpen, setIsConvertOpen] = useState(false);
   const [bannerNotice, setBannerNotice] = useState<string | null>(null);
+
+  const loadHandoffData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await fetchOnboardings({ limit: 100 });
+      const adapted = res.items.map((item) => adaptOnboardingToHandoffItem(item));
+      setHandoffs(adapted);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to load onboarding handoffs';
+      setError(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!initialHandoffs) {
+      void loadHandoffData();
+    }
+  }, [initialHandoffs, loadHandoffData]);
 
   // If candidateId or offerId in URL, open conversion modal automatically
   useEffect(() => {
@@ -106,33 +143,82 @@ export function OnboardingHandoffPage() {
     setIsConvertOpen(true);
   };
 
-  const handleConfirmHandoff = (input: ConvertHandoffInput) => {
-    const caseNum = `ONB-2026-0${Math.floor(80 + Math.random() * 20)}`;
-    const empCode = input.isRehire
-      ? selectedHandoff?.duplicateCheck?.existingEmployeeCode || 'EMP-REHIRE'
-      : `EMP-2026-1${Math.floor(40 + Math.random() * 20)}`;
-
-    setHandoffs((prev) =>
-      prev.map((h) => {
-        if (h.id !== input.handoffId) return h;
-        return {
-          ...h,
-          status: 'handoff_completed',
+  const handleConfirmHandoff = async (input: ConvertHandoffInput) => {
+    setIsSubmitting(true);
+    try {
+      // If live backend record
+      if (!input.handoffId.startsWith('mock-')) {
+        await updateOnboarding(input.handoffId, {
+          targetJoiningDate: input.targetJoiningDate,
           assignedPartner: input.assignedPartner,
           workflowTemplate: input.workflowTemplate,
-          targetJoiningDate: input.targetJoiningDate,
-          onboardingCaseId: `case-${Date.now()}`,
-          onboardingCaseCode: caseNum,
-          employeeCode: empCode,
-          handoffDate: new Date().toISOString().slice(0, 10),
-          notes: `${h.notes ? `${h.notes} | ` : ''}${input.notes || 'Handoff confirmed.'}`,
-        };
-      }),
-    );
+          notes: input.notes,
+          status: 'ready_for_confirmation',
+        });
 
-    setBannerNotice(
-      `Successfully initialized Onboarding Case ${caseNum} for ${selectedHandoff?.candidateName}. Designated Employee Code: ${empCode}.`,
-    );
+        const res = await confirmOnboarding(input.handoffId, {
+          notes: input.notes,
+        });
+
+        const empCode = res.createdEmployee?.employeeNumber || 'EMP-NEW';
+        const caseNum = `ONB-2026-${res.id.slice(-4).toUpperCase()}`;
+
+        setHandoffs((prev) =>
+          prev.map((h) => {
+            if (h.id !== input.handoffId) return h;
+            return {
+              ...h,
+              status: 'handoff_completed',
+              assignedPartner: input.assignedPartner,
+              workflowTemplate: input.workflowTemplate,
+              targetJoiningDate: input.targetJoiningDate,
+              onboardingCaseId: res.id,
+              onboardingCaseCode: caseNum,
+              employeeCode: empCode,
+              handoffDate: new Date().toISOString().slice(0, 10),
+              notes: `${h.notes ? `${h.notes} | ` : ''}${input.notes || 'Handoff confirmed.'}`,
+            };
+          }),
+        );
+
+        setBannerNotice(
+          `Successfully initialized Onboarding Case ${caseNum} for ${selectedHandoff?.candidateName || 'Candidate'}. Designated Employee Code: ${empCode}.`,
+        );
+      } else {
+        // Fallback mock flow for offline test fixtures
+        const caseNum = `ONB-2026-0${Math.floor(80 + Math.random() * 20)}`;
+        const empCode = input.isRehire
+          ? selectedHandoff?.duplicateCheck?.existingEmployeeCode || 'EMP-REHIRE'
+          : `EMP-2026-1${Math.floor(40 + Math.random() * 20)}`;
+
+        setHandoffs((prev) =>
+          prev.map((h) => {
+            if (h.id !== input.handoffId) return h;
+            return {
+              ...h,
+              status: 'handoff_completed',
+              assignedPartner: input.assignedPartner,
+              workflowTemplate: input.workflowTemplate,
+              targetJoiningDate: input.targetJoiningDate,
+              onboardingCaseId: `case-${Date.now()}`,
+              onboardingCaseCode: caseNum,
+              employeeCode: empCode,
+              handoffDate: new Date().toISOString().slice(0, 10),
+              notes: `${h.notes ? `${h.notes} | ` : ''}${input.notes || 'Handoff confirmed.'}`,
+            };
+          }),
+        );
+
+        setBannerNotice(
+          `Successfully initialized Onboarding Case ${caseNum} for ${selectedHandoff?.candidateName}. Designated Employee Code: ${empCode}.`,
+        );
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to confirm handoff';
+      setBannerNotice(`Error: ${msg}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleOpenWorkforceOnboarding = (item: OnboardingHandoffItem) => {
@@ -150,6 +236,17 @@ export function OnboardingHandoffPage() {
         {bannerNotice && (
           <Alert variant="success" onDismiss={() => setBannerNotice(null)}>
             {bannerNotice}
+          </Alert>
+        )}
+
+        {error && (
+          <Alert variant="danger">
+            <Inline justify="between" align="center" className="w-full">
+              <span>{error}</span>
+              <Button size="sm" variant="secondary" onClick={() => void loadHandoffData()}>
+                Retry
+              </Button>
+            </Inline>
           </Alert>
         )}
 
@@ -201,12 +298,16 @@ export function OnboardingHandoffPage() {
         </Toolbar>
 
         {/* 4. Table */}
-        <HandoffTable
-          handoffs={filteredHandoffs}
-          onSelectHandoff={handleSelectHandoff}
-          onInitiateConversion={handleInitiateConversion}
-          onOpenWorkforceOnboarding={handleOpenWorkforceOnboarding}
-        />
+        {isLoading ? (
+          <LoadingState label="Loading onboarding handoff queue…" />
+        ) : (
+          <HandoffTable
+            handoffs={filteredHandoffs}
+            onSelectHandoff={handleSelectHandoff}
+            onInitiateConversion={handleInitiateConversion}
+            onOpenWorkforceOnboarding={handleOpenWorkforceOnboarding}
+          />
+        )}
       </Stack>
 
       {/* Convert Modal */}

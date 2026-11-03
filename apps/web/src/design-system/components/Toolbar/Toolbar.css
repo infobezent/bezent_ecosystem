@@ -37,18 +37,16 @@
   gap: var(--space-3);
 }
 
-/* Segmented Filter Tabs — 3D Recessed Clay Track */
+/* Segmented Filter Tabs — Clean Enterprise Tabs */
 .bezent-filter-tabs {
   display: flex;
   align-items: center;
   gap: var(--space-1, 4px);
   background-color: #f1f5f9;
-  padding: 4px;
-  border-radius: 12px;
+  padding: 3px;
+  border-radius: 8px;
   border: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow:
-    inset 0 2px 4px rgba(0, 0, 0, 0.04),
-    0 1px 2px rgba(255, 255, 255, 0.9);
+  box-shadow: none;
   margin-left: 14px;
 }
 
@@ -56,7 +54,7 @@
   background: transparent;
   border: none;
   padding: 6px 14px;
-  border-radius: 9px;
+  border-radius: 6px;
   font-size: var(--font-tab-size, var(--font-size-md, 13px));
   font-weight: var(--font-tab-weight, 500);
   line-height: var(--font-tab-line-height, var(--line-height-snug, 1.375));
@@ -72,15 +70,18 @@
   color: var(--text-primary, #0f172a);
 }
 
+.bezent-filter-tab:focus-visible {
+  outline: 2px solid var(--border-focus, #38bdf8);
+  outline-offset: 2px;
+}
+
 .bezent-filter-tab.is-active,
 .bezent-filter-tab--active {
   background-color: var(--bezent-toggle-active-bg, #071e49);
   color: #ffffff !important;
   font-weight: var(--font-weight-semibold, 600);
-  box-shadow:
-    0 4px 10px rgba(7, 30, 73, 0.22),
-    inset 0 1px 2px rgba(255, 255, 255, 0.25);
-  transform: translateY(-0.5px);
+  box-shadow: 0 1px 2px rgba(7, 30, 73, 0.15);
+  transform: none;
 }
 
 .bezent-filter-tab-count {
@@ -97,17 +98,15 @@
   color: var(--text-primary, #001d35);
 }
 
-/* ── Modern Segmented View Mode Toggle (Linear / macOS Grade) ── */
+/* ── Modern Segmented View Mode Toggle ── */
 .bezent-view-toggle {
   display: inline-flex;
   align-items: center;
   background-color: #f1f5f9;
   padding: 2.5px;
-  border-radius: 9px;
+  border-radius: 8px;
   border: 1px solid rgba(226, 232, 240, 0.9);
-  box-shadow:
-    inset 0 1.5px 3px rgba(0, 0, 0, 0.04),
-    0 1px 1px rgba(255, 255, 255, 0.9);
+  box-shadow: none;
   gap: 2px;
   height: 36px;
   box-sizing: border-box;
@@ -155,6 +154,11 @@
   background: rgba(255, 255, 255, 0.65);
 }
 
+.bezent-view-toggle__btn:focus-visible {
+  outline: 2px solid var(--border-focus, #38bdf8);
+  outline-offset: 2px;
+}
+
 .bezent-view-toggle__btn:hover:not(.is-active) .bezent-material-icon {
   color: var(--text-primary, #0f172a) !important;
 }
@@ -162,10 +166,8 @@
 .bezent-view-toggle__btn.is-active {
   background-color: var(--bezent-toggle-active-bg, #071e49);
   color: #ffffff !important;
-  box-shadow:
-    0 2px 6px -1px rgba(7, 30, 73, 0.28),
-    inset 0 1px 1.5px rgba(255, 255, 255, 0.25);
-  transform: translateY(-0.5px);
+  box-shadow: 0 1px 2px rgba(7, 30, 73, 0.2);
+  transform: none;
 }
 
 .bezent-view-toggle__btn.is-active .bezent-material-icon {
@@ -224,4 +226,33 @@
 
 [data-theme='dark'] .bezent-filter-toolbar__more {
   border-top-color: rgba(56, 189, 248, 0.2);
+}
+
+/* ── Responsive Toolbar & Filter Tabs ── */
+@media (max-width: 1024px) {
+  .bezent-filter-tabs {
+    margin-left: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .bezent-filter-tabs::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .bezent-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3, 12px);
+  }
+  .bezent-toolbar__left {
+    width: 100%;
+  }
+  .bezent-toolbar__right {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }

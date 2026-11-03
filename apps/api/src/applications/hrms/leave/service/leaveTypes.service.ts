@@ -1,5 +1,9 @@
 import { LeaveTypesRepository, leaveTypesRepository } from '../repository/leaveTypes.repository.js';
 import {
+  LeaveApprovalsRepository,
+  leaveApprovalsRepository,
+} from '../repository/leaveApprovals.repository.js';
+import {
   LeavePoliciesRepository,
   leavePoliciesRepository,
 } from '../repository/leavePolicies.repository.js';
@@ -73,7 +77,28 @@ export class LeaveTypesService {
       'findInForcePoliciesLinkingLeaveType' | 'getCompanyTimezone'
     > = leavePoliciesRepository,
     private readonly audit: Pick<AuditService, 'logEvent'> = auditService,
+    private readonly workflows: Pick<
+      LeaveApprovalsRepository,
+      'findWorkflow'
+    > = leaveApprovalsRepository,
   ) {}
+
+  /** Approval workflow override (Tab 7): must be an active workflow of the company, or null. */
+  private async resolveWorkflowId(
+    tenantId: string,
+    companyId: string,
+    value: unknown,
+    existing: string | null,
+  ): Promise<string | null> {
+    if (value === undefined) return existing;
+    if (value === null || value === '') return null;
+    if (typeof value !== 'string') throw new BadRequestError('Workflow must be a workflow id.');
+    const workflow = await this.workflows.findWorkflow(tenantId, companyId, value);
+    if (!workflow || !workflow.isActive) {
+      throw new BadRequestError('Selected approval workflow was not found or is inactive.');
+    }
+    return workflow.id;
+  }
 
   async listLeaveTypes(
     tenantId: string,
@@ -123,6 +148,7 @@ export class LeaveTypesService {
     );
     const fields = this.buildFields(dto, null, today);
     await this.assertUnique(tenantId, companyId, fields.name, fields.code);
+    const workflowId = await this.resolveWorkflowId(tenantId, companyId, dto.workflowId, null);
 
     const created = await this.withDuplicateGuard(() =>
       this.repo.create({
@@ -131,7 +157,7 @@ export class LeaveTypesService {
         companyId,
         ...fields,
         isArchived: false,
-        workflowId: null,
+        workflowId,
       }),
     );
     await this.logAudit(userId, 'leave_type_created', created, {});
@@ -159,7 +185,7 @@ export class LeaveTypesService {
       }
     }
     if (fields.code !== existing.code) {
-      const usage = await this.repo.checkUsage(tenantId, companyId, existing.code);
+      const usage = await this.repo.checkUsage(tenantId, companyId, existing.id);
       if (usage.inUse) {
         throw new BadRequestError(
           `The code of "${existing.name}" cannot change because it is used by ${usage.requestCount} request(s) and ${usage.balanceCount} balance record(s).`,
@@ -177,8 +203,15 @@ export class LeaveTypesService {
     const changed = (Object.keys(fields) as Array<keyof LeaveTypeFields>).filter(
       (k) => String(fields[k] ?? '') !== String(existing[k] ?? ''),
     );
+    const workflowId = await this.resolveWorkflowId(
+      tenantId,
+      companyId,
+      dto.workflowId,
+      existing.workflowId,
+    );
+    if (workflowId !== existing.workflowId) changed.push('workflowId' as keyof LeaveTypeFields);
     const updated = await this.withDuplicateGuard(() =>
-      this.repo.update(tenantId, companyId, id, fields),
+      this.repo.update(tenantId, companyId, id, { ...fields, workflowId }),
     );
     await this.logAudit(userId, 'leave_type_updated', updated, { fieldsUpdated: changed });
     return updated;
@@ -198,7 +231,7 @@ export class LeaveTypesService {
     const active = bool(isActive, 'isActive');
     const existing = await this.getLeaveTypeById(tenantId, companyId, id);
     const [usage, linkedPolicies] = await Promise.all([
-      this.repo.checkUsage(tenantId, companyId, existing.code),
+      this.repo.checkUsage(tenantId, companyId, existing.id),
       this.policiesRepo.findInForcePoliciesLinkingLeaveType(tenantId, companyId, id),
     ]);
 

@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Button,
   Inline,
+  LoadingState,
   Page,
   PageHeader,
   Select,
@@ -10,22 +11,55 @@ import {
   Toolbar,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
-import { INITIAL_INTERVIEWS } from '../data/mockInterviews';
-import { INITIAL_CANDIDATES } from '../data/mockCandidates';
-import { INITIAL_JOB_OPENINGS } from '../data/mockJobOpenings';
-import type { InterviewFeedback, InterviewSchedule, InterviewType } from '../types/interview';
+import type {
+  InterviewFeedback,
+  InterviewSchedule,
+  InterviewType,
+  ScheduleInterviewInput,
+} from '../types/interview';
+import type { Candidate } from '../types/candidate';
+import type { JobOpening } from '../types/jobOpening';
 import { InterviewMetrics } from '../components/InterviewMetrics';
 import { InterviewScheduleTable } from '../components/InterviewScheduleTable';
 import { InterviewCalendarView } from '../components/InterviewCalendarView';
 import { ScorecardModal } from '../components/ScorecardModal';
 import { ScheduleInterviewModal } from '../components/ScheduleInterviewModal';
 import { RescheduleCancelModal } from '../components/RescheduleCancelModal';
+import {
+  fetchInterviews,
+  fetchApplications,
+  fetchCandidates,
+  fetchJobRequisitions,
+  scheduleInterview,
+  rescheduleInterview,
+  cancelInterview,
+  recordInterviewFeedback,
+  adaptInterviewToSchedule,
+  adaptCandidateToFrontend,
+  adaptRequisitionToJobOpening,
+  adaptFrontendToScheduleInterviewDto,
+} from '../api';
 
-export function InterviewsPage() {
+export interface InterviewsPageProps {
+  initialInterviews?: InterviewSchedule[];
+  initialCandidates?: Candidate[];
+  initialJobs?: JobOpening[];
+}
+
+export function InterviewsPage({
+  initialInterviews,
+  initialCandidates,
+  initialJobs,
+}: InterviewsPageProps = {}) {
   const today = '2026-10-30';
 
   // State
-  const [interviews, setInterviews] = useState<InterviewSchedule[]>(INITIAL_INTERVIEWS);
+  const [interviews, setInterviews] = useState<InterviewSchedule[]>(initialInterviews ?? []);
+  const [candidates, setCandidates] = useState<Candidate[]>(initialCandidates ?? []);
+  const [jobs, setJobs] = useState<JobOpening[]>(initialJobs ?? []);
+  const [isLoading, setIsLoading] = useState<boolean>(!initialInterviews);
+  const [error, setError] = useState<string | null>(null);
+
   const [tabFilter, setTabFilter] = useState<
     'all' | 'today' | 'upcoming' | 'completed' | 'archived'
   >('all');
@@ -50,6 +84,72 @@ export function InterviewsPage() {
     mode: 'reschedule',
     isOpen: false,
   });
+
+  const loadInterviewsData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const [interviewsRes, appsRes, candsRes, reqsRes] = await Promise.all([
+        fetchInterviews({ limit: 500 }),
+        fetchApplications({ limit: 1000 }).catch(() => ({ items: [] })),
+        fetchCandidates({ limit: 1000 }).catch(() => ({ items: [] })),
+        fetchJobRequisitions({ limit: 100 }).catch(() => ({ items: [] })),
+      ]);
+
+      const candItems = candsRes?.items ?? [];
+      const candMap: Record<string, (typeof candItems)[0]> = {};
+      for (const c of candItems) {
+        candMap[c.id] = c;
+      }
+
+      const reqItems = reqsRes?.items ?? [];
+      const reqMap: Record<string, (typeof reqItems)[0]> = {};
+      for (const r of reqItems) {
+        reqMap[r.id] = r;
+      }
+
+      const appItems = appsRes?.items ?? [];
+      const appMap: Record<string, (typeof appItems)[0]> = {};
+      for (const a of appItems) {
+        appMap[a.id] = a;
+      }
+
+      const interviewItems = interviewsRes?.items ?? [];
+      const adaptedInterviews = interviewItems.map((item) => {
+        const app = item.application || appMap[item.applicationId];
+        const cand = app?.candidate || (app ? candMap[app.candidateId] : undefined);
+        const req = app?.requisition || (app ? reqMap[app.requisitionId] : undefined);
+
+        return adaptInterviewToSchedule(item, {
+          candidateName: cand ? `${cand.firstName} ${cand.lastName}`.trim() : undefined,
+          candidateNumber: cand?.candidateNumber,
+          candidateEmail: cand?.email,
+          jobTitle: req?.jobTitle,
+          jobCode: req?.requisitionCode || req?.requisitionNumber,
+          jobId: req?.id,
+        });
+      });
+
+      const adaptedCandidates = candItems.map((c) => adaptCandidateToFrontend(c, appMap[c.id]));
+
+      const adaptedJobs = reqItems.map((r) => adaptRequisitionToJobOpening(r));
+
+      setInterviews(adaptedInterviews);
+      setCandidates(adaptedCandidates);
+      setJobs(adaptedJobs);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to load interviews';
+      setError(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!initialInterviews) {
+      void loadInterviewsData();
+    }
+  }, [initialInterviews, loadInterviewsData]);
 
   // Tab Counts
   const counts = useMemo(() => {
@@ -128,15 +228,26 @@ export function InterviewsPage() {
     setIsScorecardOpen(true);
   };
 
-  const handleSubmitScorecard = (interviewId: string, feedback: InterviewFeedback) => {
-    setInterviews((prev) =>
-      prev.map((i) =>
-        i.id === interviewId ? { ...i, status: 'completed', scorecard: feedback } : i,
-      ),
-    );
-    setBannerNotice(
-      `Successfully logged scorecard for ${selectedInterview?.candidateName}! Recommendation: ${feedback.recommendation.toUpperCase()}`,
-    );
+  const handleSubmitScorecard = async (interviewId: string, feedback: InterviewFeedback) => {
+    try {
+      await recordInterviewFeedback(interviewId, {
+        recommendation: feedback.recommendation,
+        score: feedback.overallScore,
+        notes: feedback.summaryNotes,
+      });
+
+      setInterviews((prev) =>
+        prev.map((i) =>
+          i.id === interviewId ? { ...i, status: 'completed', scorecard: feedback } : i,
+        ),
+      );
+      setBannerNotice(
+        `Successfully logged scorecard for ${selectedInterview?.candidateName}! Recommendation: ${feedback.recommendation.toUpperCase()}`,
+      );
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to record feedback';
+      setBannerNotice(`Error: ${msg}`);
+    }
   };
 
   const handleOpenReschedule = (interview: InterviewSchedule) => {
@@ -155,44 +266,95 @@ export function InterviewsPage() {
     });
   };
 
-  const handleConfirmReschedule = (
+  const handleConfirmReschedule = async (
     interviewId: string,
     newDate: string,
     newStart: string,
     newEnd: string,
     reason: string,
   ) => {
-    setInterviews((prev) =>
-      prev.map((i) =>
-        i.id === interviewId
-          ? {
-              ...i,
-              status: 'rescheduled',
-              scheduledDate: newDate,
-              startTime: newStart,
-              endTime: newEnd,
-              rescheduleReason: reason,
-            }
-          : i,
-      ),
-    );
-    setBannerNotice(`Interview rescheduled to ${newDate} at ${newStart}.`);
+    try {
+      await rescheduleInterview(interviewId, {
+        scheduledDate: newDate,
+        startTime: newStart,
+        endTime: newEnd,
+        reason,
+      });
+
+      setInterviews((prev) =>
+        prev.map((i) =>
+          i.id === interviewId
+            ? {
+                ...i,
+                status: 'rescheduled',
+                scheduledDate: newDate,
+                startTime: newStart,
+                endTime: newEnd,
+                rescheduleReason: reason,
+              }
+            : i,
+        ),
+      );
+      setBannerNotice(`Interview rescheduled to ${newDate} at ${newStart}.`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to reschedule interview';
+      setBannerNotice(`Error: ${msg}`);
+    }
   };
 
-  const handleConfirmCancel = (interviewId: string, reason: string) => {
-    setInterviews((prev) =>
-      prev.map((i) =>
-        i.id === interviewId ? { ...i, status: 'cancelled', cancellationReason: reason } : i,
-      ),
-    );
-    setBannerNotice('Interview round has been cancelled.');
+  const handleConfirmCancel = async (interviewId: string, reason: string) => {
+    try {
+      await cancelInterview(interviewId, reason);
+
+      setInterviews((prev) =>
+        prev.map((i) =>
+          i.id === interviewId ? { ...i, status: 'cancelled', cancellationReason: reason } : i,
+        ),
+      );
+      setBannerNotice('Interview round has been cancelled.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to cancel interview';
+      setBannerNotice(`Error: ${msg}`);
+    }
   };
 
-  const handleScheduleNew = (newInterview: InterviewSchedule) => {
-    setInterviews((prev) => [newInterview, ...prev]);
-    setBannerNotice(
-      `Interview booked for ${newInterview.candidateName} on ${newInterview.scheduledDate} at ${newInterview.startTime}.`,
-    );
+  const handleScheduleNew = async (newInterview: InterviewSchedule) => {
+    try {
+      const cand = candidates.find((c) => c.id === newInterview.candidateId);
+      const appId = cand?.applicationHistory?.[0]?.id || `app-${newInterview.candidateId}`;
+
+      const dto = adaptFrontendToScheduleInterviewDto(
+        {
+          candidateId: newInterview.candidateId,
+          roundName: newInterview.roundName,
+          interviewType: newInterview.interviewType,
+          scheduledDate: newInterview.scheduledDate,
+          startTime: newInterview.startTime,
+          endTime: newInterview.endTime,
+          meetingLink: newInterview.meetingLink,
+          panelNamesRaw: newInterview.panel.map((p) => p.name).join(', '),
+        } as ScheduleInterviewInput,
+        appId,
+      );
+
+      const created = await scheduleInterview(dto);
+      const adapted = adaptInterviewToSchedule(created, {
+        candidateName: newInterview.candidateName,
+        candidateNumber: newInterview.candidateNumber,
+        candidateEmail: newInterview.candidateEmail,
+        jobTitle: newInterview.jobTitle,
+        jobCode: newInterview.jobCode,
+        jobId: newInterview.jobId,
+      });
+
+      setInterviews((prev) => [adapted, ...prev]);
+      setBannerNotice(
+        `Interview booked for ${adapted.candidateName} on ${adapted.scheduledDate} at ${adapted.startTime}.`,
+      );
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to schedule interview';
+      setBannerNotice(`Error: ${msg}`);
+    }
   };
 
   return (
@@ -206,19 +368,30 @@ export function InterviewsPage() {
           </Alert>
         )}
 
-        {/* 1. 3D Clay Metrics Banner */}
+        {error && (
+          <Alert variant="danger">
+            <Inline justify="between" align="center">
+              <span>{error}</span>
+              <Button size="sm" variant="outline" onClick={loadInterviewsData}>
+                Retry
+              </Button>
+            </Inline>
+          </Alert>
+        )}
+
+        {/* 1. Metrics Banner */}
         <InterviewMetrics interviews={interviews} todayDate={today} />
 
-        {/* 2. Unified 3D Toolbar: Search, View Mode, Status Tabs & Actions */}
+        {/* 2. Unified Toolbar: Search, View Mode, Status Tabs & Actions */}
         <Toolbar
           left={
             <Inline align="center" gap="sm" wrap>
-              {/* 3D Search Bar */}
+              {/* Search Bar */}
               <div className="bezent-search-bar">
                 <BezentIcon name="search" size={16} color="var(--text-secondary, #64748b)" />
                 <input
                   type="search"
-                  placeholder="Search candidate, role, round, or panel member..."
+                  placeholder="Search candidate, role, round, panel..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="bezent-search-bar__input"
@@ -231,6 +404,9 @@ export function InterviewsPage() {
                 variant={showFilters ? 'dark' : 'outline'}
                 size="md"
                 onClick={() => setShowFilters((prev) => !prev)}
+                aria-expanded={showFilters}
+                aria-controls="interviews-filter-panel"
+                aria-label="Toggle interview filters"
               >
                 <Inline align="center" gap="xs">
                   <BezentIcon name="filter" size="action" />
@@ -239,13 +415,18 @@ export function InterviewsPage() {
               </Button>
 
               {/* View Mode Toggle: Table vs Calendar */}
-              <div className="bezent-view-toggle" role="group" aria-label="View layout switcher">
+              <div
+                className="bezent-view-toggle"
+                role="group"
+                aria-label="Interview view layout switcher"
+              >
                 <button
                   type="button"
                   className={`bezent-view-toggle__btn ${viewMode === 'table' ? 'is-active' : ''}`}
                   onClick={() => setViewMode('table')}
                   title="Table View"
                   aria-label="Table View"
+                  aria-pressed={viewMode === 'table'}
                 >
                   <BezentIcon name="viewList" size={18} />
                 </button>
@@ -255,17 +436,24 @@ export function InterviewsPage() {
                   onClick={() => setViewMode('calendar')}
                   title="Calendar View"
                   aria-label="Calendar View"
+                  aria-pressed={viewMode === 'calendar'}
                 >
                   <BezentIcon name="calendar" size={18} />
                 </button>
               </div>
 
-              {/* 3D Recessed Segmented Status Tabs */}
-              <div className="bezent-filter-tabs">
+              {/* Segmented Status Tabs */}
+              <div
+                className="bezent-filter-tabs"
+                role="tablist"
+                aria-label="Filter interviews by status"
+              >
                 {tabItems.map((tab) => (
                   <button
                     key={tab.id}
                     type="button"
+                    role="tab"
+                    aria-selected={tabFilter === tab.id}
                     className={`bezent-filter-tab ${tabFilter === tab.id ? 'is-active' : ''}`}
                     onClick={() => setTabFilter(tab.id as typeof tabFilter)}
                   >
@@ -292,35 +480,39 @@ export function InterviewsPage() {
 
         {/* Collapsible Filter Row when "Filter" button is clicked */}
         {showFilters && (
-          <Inline align="center" gap="md" wrap>
-            <Select
-              value={jobFilter}
-              onChange={(e) => setJobFilter(e.target.value)}
-              options={[
-                { value: 'all', label: 'All Job Requisitions' },
-                ...INITIAL_JOB_OPENINGS.map((j) => ({
-                  value: j.id,
-                  label: `${j.title} (${j.jobCode})`,
-                })),
-              ]}
-            />
+          <div id="interviews-filter-panel" role="region" aria-label="Interview filters">
+            <Inline align="center" gap="md" wrap>
+              <Select
+                value={jobFilter}
+                onChange={(e) => setJobFilter(e.target.value)}
+                options={[
+                  { value: 'all', label: 'All Job Requisitions' },
+                  ...jobs.map((j) => ({
+                    value: j.id,
+                    label: `${j.title} (${j.jobCode})`,
+                  })),
+                ]}
+              />
 
-            <Select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value as typeof typeFilter)}
-              options={[
-                { value: 'all', label: 'All Interview Types' },
-                { value: 'technical', label: 'Technical Coding' },
-                { value: 'system_design', label: 'System Design' },
-                { value: 'managerial', label: 'Managerial' },
-                { value: 'cultural_fit', label: 'Cultural Fit' },
-              ]}
-            />
-          </Inline>
+              <Select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value as typeof typeFilter)}
+                options={[
+                  { value: 'all', label: 'All Interview Types' },
+                  { value: 'technical', label: 'Technical Coding' },
+                  { value: 'system_design', label: 'System Design' },
+                  { value: 'managerial', label: 'Managerial' },
+                  { value: 'cultural_fit', label: 'Cultural Fit' },
+                ]}
+              />
+            </Inline>
+          </div>
         )}
 
         {/* 3. Content: Table or Calendar */}
-        {viewMode === 'table' ? (
+        {isLoading ? (
+          <LoadingState label="Loading interviews…" />
+        ) : viewMode === 'table' ? (
           <InterviewScheduleTable
             interviews={filteredInterviews}
             todayDate={today}
@@ -356,7 +548,7 @@ export function InterviewsPage() {
         isOpen={isScheduleOpen}
         onClose={() => setIsScheduleOpen(false)}
         onSchedule={handleScheduleNew}
-        candidates={INITIAL_CANDIDATES}
+        candidates={candidates}
       />
 
       {/* Reschedule / Cancel Modal */}

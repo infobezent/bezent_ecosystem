@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Alert,
   Button,
   Inline,
+  LoadingState,
   Page,
   PageHeader,
   Select,
@@ -11,18 +12,33 @@ import {
   Toolbar,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
-import { INITIAL_JOB_OPENINGS } from '../data/mockJobOpenings';
 import type { JobOpening, JobStatus, JobStatusFilter, WorkplaceType } from '../types/jobOpening';
 import { JobOpeningsMetrics } from '../components/JobOpeningsMetrics';
 import { JobOpeningsTable } from '../components/JobOpeningsTable';
 import { JobDetailsModal } from '../components/JobDetailsModal';
 import { CreateJobModal } from '../components/CreateJobModal';
+import {
+  fetchJobRequisitions,
+  fetchApplications,
+  createJobRequisition,
+  updateJobRequisition,
+  closeJobRequisition,
+  adaptRequisitionToJobOpening,
+  adaptFrontendToCreateJobDto,
+} from '../api';
+import type { CreateJobInput } from '../types/jobOpening';
 
-export function JobOpeningsPage() {
+export interface JobOpeningsPageProps {
+  initialJobs?: JobOpening[];
+}
+
+export function JobOpeningsPage({ initialJobs }: JobOpeningsPageProps = {}) {
   const navigate = useNavigate();
 
   // State
-  const [jobs, setJobs] = useState<JobOpening[]>(INITIAL_JOB_OPENINGS);
+  const [jobs, setJobs] = useState<JobOpening[]>(initialJobs ?? []);
+  const [isLoading, setIsLoading] = useState<boolean>(!initialJobs);
+  const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<JobStatusFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('all');
@@ -33,6 +49,49 @@ export function JobOpeningsPage() {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [bannerNotice, setBannerNotice] = useState<string | null>(null);
+
+  const loadJobOpenings = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const [reqsResponse, appsResponse] = await Promise.all([
+        fetchJobRequisitions({ limit: 100 }),
+        fetchApplications({ limit: 1000 }).catch(() => ({ items: [] })),
+      ]);
+
+      const appCounts: Record<string, { total: number; pipeline: Record<string, number> }> = {};
+      const appItems = appsResponse?.items ?? [];
+      for (const app of appItems) {
+        const reqId = app.requisitionId;
+        const entry = appCounts[reqId] ?? { total: 0, pipeline: {} };
+        entry.total += 1;
+        const stage = app.stage || 'applied';
+        entry.pipeline[stage] = (entry.pipeline[stage] || 0) + 1;
+        appCounts[reqId] = entry;
+      }
+
+      const reqItems = reqsResponse?.items ?? [];
+      const adaptedJobs = reqItems.map((req) =>
+        adaptRequisitionToJobOpening(req, {
+          totalApplicants: appCounts[req.id]?.total ?? 0,
+          pipeline: appCounts[req.id]?.pipeline,
+        }),
+      );
+
+      setJobs(adaptedJobs);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to load job openings';
+      setError(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!initialJobs) {
+      void loadJobOpenings();
+    }
+  }, [initialJobs, loadJobOpenings]);
 
   // Status Tab Counts
   const counts = useMemo(() => {
@@ -98,19 +157,59 @@ export function JobOpeningsPage() {
     setIsDetailsOpen(true);
   };
 
-  const handleStatusChange = (jobId: string, newStatus: JobStatus) => {
-    setJobs((prev) => prev.map((j) => (j.id === jobId ? { ...j, status: newStatus } : j)));
-    const updated = jobs.find((j) => j.id === jobId);
-    if (updated) {
-      setBannerNotice(
-        `Job "${updated.title}" status changed to ${newStatus.replace('_', ' ').toUpperCase()}.`,
-      );
+  const handleStatusChange = async (jobId: string, newStatus: JobStatus) => {
+    try {
+      if (newStatus === 'closed') {
+        await closeJobRequisition(jobId, 'Closed from recruitment overview');
+      } else {
+        await updateJobRequisition(jobId, { status: newStatus });
+      }
+      setJobs((prev) => prev.map((j) => (j.id === jobId ? { ...j, status: newStatus } : j)));
+      const updated = jobs.find((j) => j.id === jobId);
+      if (updated) {
+        setBannerNotice(
+          `Job "${updated.title}" status changed to ${newStatus.replace('_', ' ').toUpperCase()}.`,
+        );
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to update job status';
+      setBannerNotice(`Error: ${msg}`);
     }
   };
 
-  const handleCreateJob = (newJob: JobOpening) => {
-    setJobs((prev) => [newJob, ...prev]);
-    setBannerNotice(`Successfully created job opening "${newJob.title}" (${newJob.jobCode}).`);
+  const handleCreateJob = async (newJob: JobOpening) => {
+    try {
+      const dto = adaptFrontendToCreateJobDto({
+        title: newJob.title,
+        jobCode: newJob.jobCode,
+        department: newJob.department,
+        location: newJob.location,
+        workplaceType: newJob.workplaceType,
+        employmentType: newJob.employmentType,
+        experienceLevel: newJob.experienceLevel,
+        status: newJob.status,
+        positionsCount: newJob.positionsCount,
+        targetCloseDate: newJob.targetCloseDate,
+        salaryMin: newJob.salaryMin,
+        salaryMax: newJob.salaryMax,
+        currency: newJob.currency,
+        hiringManagerName: newJob.hiringManager.name,
+        hiringManagerRole: newJob.hiringManager.role,
+        recruiterName: newJob.recruiter.name,
+        skillsRaw: newJob.skills.join(', '),
+        description: newJob.description,
+        responsibilitiesRaw: newJob.responsibilities.join('\n'),
+        requirementsRaw: newJob.requirements.join('\n'),
+      } as CreateJobInput);
+
+      const created = await createJobRequisition(dto);
+      const adapted = adaptRequisitionToJobOpening(created);
+      setJobs((prev) => [adapted, ...prev]);
+      setBannerNotice(`Successfully created job opening "${adapted.title}" (${adapted.jobCode}).`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to create job opening';
+      setBannerNotice(`Error: ${msg}`);
+    }
   };
 
   return (
@@ -124,14 +223,25 @@ export function JobOpeningsPage() {
           </Alert>
         )}
 
-        {/* 1. 3D Clay Metrics Banner */}
+        {error && (
+          <Alert variant="danger">
+            <Inline justify="between" align="center">
+              <span>{error}</span>
+              <Button size="sm" variant="outline" onClick={loadJobOpenings}>
+                Retry
+              </Button>
+            </Inline>
+          </Alert>
+        )}
+
+        {/* 1. Metrics Banner */}
         <JobOpeningsMetrics jobs={jobs} />
 
-        {/* 2. Unified 3D Toolbar: Search, View Mode, Status Tabs & Actions */}
+        {/* 2. Unified Toolbar: Search, View Mode, Status Tabs & Actions */}
         <Toolbar
           left={
             <Inline align="center" gap="sm" wrap>
-              {/* 3D Search Bar */}
+              {/* Search Bar */}
               <div className="bezent-search-bar">
                 <BezentIcon name="search" size={16} color="var(--text-secondary, #64748b)" />
                 <input
@@ -149,6 +259,9 @@ export function JobOpeningsPage() {
                 variant={showFilters ? 'dark' : 'outline'}
                 size="md"
                 onClick={() => setShowFilters((prev) => !prev)}
+                aria-expanded={showFilters}
+                aria-controls="jobs-filter-panel"
+                aria-label="Toggle job filter options"
               >
                 <Inline align="center" gap="xs">
                   <BezentIcon name="filter" size="action" />
@@ -157,13 +270,18 @@ export function JobOpeningsPage() {
               </Button>
 
               {/* View Mode Toggle: List vs Grid */}
-              <div className="bezent-view-toggle" role="group" aria-label="View layout switcher">
+              <div
+                className="bezent-view-toggle"
+                role="group"
+                aria-label="Job openings view layout switcher"
+              >
                 <button
                   type="button"
                   className={`bezent-view-toggle__btn ${viewMode === 'list' ? 'is-active' : ''}`}
                   onClick={() => setViewMode('list')}
                   title="List View"
                   aria-label="List View"
+                  aria-pressed={viewMode === 'list'}
                 >
                   <BezentIcon name="viewList" size={18} />
                 </button>
@@ -173,17 +291,24 @@ export function JobOpeningsPage() {
                   onClick={() => setViewMode('grid')}
                   title="Grid View"
                   aria-label="Grid View"
+                  aria-pressed={viewMode === 'grid'}
                 >
                   <BezentIcon name="viewGrid" size={18} />
                 </button>
               </div>
 
-              {/* 3D Recessed Segmented Status Tabs */}
-              <div className="bezent-filter-tabs">
+              {/* Segmented Status Tabs */}
+              <div
+                className="bezent-filter-tabs"
+                role="tablist"
+                aria-label="Filter job openings by status"
+              >
                 {tabItems.map((tab) => (
                   <button
                     key={tab.id}
                     type="button"
+                    role="tab"
+                    aria-selected={statusFilter === tab.id}
                     className={`bezent-filter-tab ${statusFilter === tab.id ? 'is-active' : ''}`}
                     onClick={() => setStatusFilter(tab.id as JobStatusFilter)}
                   >
@@ -210,36 +335,42 @@ export function JobOpeningsPage() {
 
         {/* Collapsible Filter Row when "Filter" button is clicked */}
         {showFilters && (
-          <Inline align="center" gap="md" wrap>
-            <Select
-              value={departmentFilter}
-              onChange={(e) => setDepartmentFilter(e.target.value)}
-              options={departments.map((d) => ({
-                value: d,
-                label: d === 'all' ? 'All Departments' : d,
-              }))}
-            />
+          <div id="jobs-filter-panel" role="region" aria-label="Job filters">
+            <Inline align="center" gap="md" wrap>
+              <Select
+                value={departmentFilter}
+                onChange={(e) => setDepartmentFilter(e.target.value)}
+                options={departments.map((d) => ({
+                  value: d,
+                  label: d === 'all' ? 'All Departments' : d,
+                }))}
+              />
 
-            <Select
-              value={workplaceFilter}
-              onChange={(e) => setWorkplaceFilter(e.target.value as typeof workplaceFilter)}
-              options={[
-                { value: 'all', label: 'All Workplace Types' },
-                { value: 'remote', label: 'Remote' },
-                { value: 'hybrid', label: 'Hybrid' },
-                { value: 'on_site', label: 'On-site' },
-              ]}
-            />
-          </Inline>
+              <Select
+                value={workplaceFilter}
+                onChange={(e) => setWorkplaceFilter(e.target.value as typeof workplaceFilter)}
+                options={[
+                  { value: 'all', label: 'All Workplace Types' },
+                  { value: 'remote', label: 'Remote' },
+                  { value: 'hybrid', label: 'Hybrid' },
+                  { value: 'on_site', label: 'On-site' },
+                ]}
+              />
+            </Inline>
+          </div>
         )}
 
         {/* 3. Table / Grid Area */}
-        <JobOpeningsTable
-          jobs={filteredJobs}
-          onSelectJob={handleSelectJob}
-          onStatusChange={handleStatusChange}
-          viewMode={viewMode}
-        />
+        {isLoading ? (
+          <LoadingState label="Loading job openings…" />
+        ) : (
+          <JobOpeningsTable
+            jobs={filteredJobs}
+            onSelectJob={handleSelectJob}
+            onStatusChange={handleStatusChange}
+            viewMode={viewMode}
+          />
+        )}
       </Stack>
 
       {/* Details Modal */}

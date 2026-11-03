@@ -80,7 +80,7 @@ export class AttendanceMonthlySummaryEngineService {
     let leaveDays = 0;
     let onDutyDays = 0;
     let weeklyOffDays = 0;
-    const holidayDays = 0;
+    let holidayDays = 0;
     let actualWorkedMinutes = 0;
     let policyCreditedMinutes = 0;
     let lateOccurrences = 0;
@@ -157,7 +157,35 @@ export class AttendanceMonthlySummaryEngineService {
         processingIssues++;
       }
 
-      if (isWeeklyOff) {
+      if (dailyAtt?.status === 'holiday') {
+        holidayDays++;
+        dailyRecords.push({
+          date: dateStr,
+          dayOfWeek: dayOfWeekName,
+          shiftId: sources.schedule?.workSchedule ?? undefined,
+          shiftName: sources.schedule?.workSchedule ?? 'Standard',
+          scheduleStartTime: shiftStartTime,
+          scheduleEndTime: shiftEndTime,
+          scheduledMinutes: 0,
+          classification: 'holiday',
+          actualWorkedMinutes: dailyAtt?.workedMinutes ?? 0,
+          policyCreditedMinutes: 0,
+          onDutyMinutes: 0,
+          isLate: false,
+          lateMinutes: 0,
+          isEarlyExit: false,
+          earlyExitMinutes: 0,
+          hasException: openExceptions.length > 0,
+          exceptionTypes: openExceptions.map((e) => e.exceptionType),
+          hasPendingRegularization: pendingRegs.length > 0,
+          isLocked: isPeriodLocked,
+          isFuture,
+          rawAttendanceId: dailyAtt?.id,
+        });
+        continue;
+      }
+
+      if (dailyAtt?.status === 'weekly_off' || (isWeeklyOff && !dailyAtt)) {
         weeklyOffDays++;
         dailyRecords.push({
           date: dateStr,
@@ -322,7 +350,7 @@ export class AttendanceMonthlySummaryEngineService {
         policyCreditedMinutes: dayCreditedMins,
         onDutyMinutes: dayOdMins,
         onDutyStatus: odWorkday?.processingStatus,
-        leaveType: leaveRequest?.leaveType ?? undefined,
+        leaveType: leaveRequest?.leaveTypeCode ?? undefined,
         leaveMinutes: dayLeaveMins,
         isLate,
         lateMinutes: dailyAtt?.lateMinutes ?? 0,

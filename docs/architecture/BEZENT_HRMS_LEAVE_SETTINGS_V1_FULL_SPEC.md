@@ -438,32 +438,35 @@ UI shows edit controls only when the user holds `settings_manage` (now wired for
 
 ## 12. Open Product Owner Decisions
 
-| #   | Decision needed                                                                      | Recommendation                                                       |
-| --- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
-| D1  | Quota location: policy entitlement (per type per group) vs leave type `max_per_year` | **Policy entitlement**; type `max_per_year` = hard ceiling           |
-| D2  | Accrual & CF configured per leave type (company-wide) or per policy × type           | **Per leave type** in V1; per-policy override in V2                  |
-| D3  | Drop `custom` policy scope from V1                                                   | **Yes, drop** (no rule builder exists)                               |
-| D4  | Policy resolution order                                                              | **employment_type > location > department > company**, then priority |
-| D5  | Seed default leave types + "Standard Leave Policy" for existing companies            | **Yes**, preserving today's 18/6/12 quotas                           |
-| D6  | Max approval levels in V1                                                            | **2** (manager → HR)                                                 |
-| D7  | Include team-concurrency restriction in V1                                           | **Warn-only** in V1                                                  |
-| D8  | Can `hrms.leave.view` (managers) read settings                                       | **No** — settings read needs `settings_view`                         |
-| D9  | Encashment in V1                                                                     | **Handover record only**, no amount                                  |
-| D10 | Optional holidays consume a separate quota (Tab 6) instead of a leave balance        | **Yes**                                                              |
+| #   | Decision needed                                                                      | Recommendation                                                                                                                                                                                                                                      |
+| --- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | Quota location: policy entitlement (per type per group) vs leave type `max_per_year` | **Policy entitlement**; type `max_per_year` = hard ceiling                                                                                                                                                                                          |
+| D2  | Accrual & CF configured per leave type (company-wide) or per policy × type           | **Per leave type** in V1; per-policy override in V2                                                                                                                                                                                                 |
+| D3  | Drop `custom` policy scope from V1                                                   | **Yes, drop** (no rule builder exists)                                                                                                                                                                                                              |
+| D4  | Policy resolution order                                                              | **employment_type > location > department > company**, then priority                                                                                                                                                                                |
+| D5  | Seed default leave types + "Standard Leave Policy" for existing companies            | **Yes**, preserving today's 18/6/12 quotas                                                                                                                                                                                                          |
+| D6  | Max approval levels in V1                                                            | **2** (manager → HR)                                                                                                                                                                                                                                |
+| D7  | Include team-concurrency restriction in V1                                           | **Warn-only** in V1                                                                                                                                                                                                                                 |
+| D8  | Can `hrms.leave.view` (managers) read settings                                       | **No** — settings read needs `settings_view`                                                                                                                                                                                                        |
+| D9  | Encashment in V1                                                                     | **Handover record only**, no amount                                                                                                                                                                                                                 |
+| D10 | Optional holidays consume a separate quota (Tab 6) instead of a leave balance        | **Yes**                                                                                                                                                                                                                                             |
+| D11 | Employee has no work schedule under `working_days` (decided 2026-10-30 for P2)       | **Use the company default shift** (first attendance roster shift, else General Shift Mon–Fri) and record `scheduleSource: company_default` in the calculation snapshot. Supersedes the "block" rule of General Settings Correction I for this case. |
+| D12 | Holidays before Tab 6 exists (decided 2026-10-30 for P2)                             | **Treat as no holidays** and record `holidayCalendar: not_configured`. Once Tab 6 ships, a missing calendar blocks as per Correction I.                                                                                                             |
+| D13 | Mandatory documents before upload support exists (decided 2026-10-30 for P2)         | **Allow and flag**: request carries `documentRequired: true` in its snapshot; enforcement arrives with document upload.                                                                                                                             |
 
 ---
 
 ## 13. Implementation Plan (one PR per phase, after approval)
 
-| Phase  | Scope                                                                                                                                       | Depends on |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| **P0** | Merge-blocker fixes (done): migrations, policies loop, `canManage`, formatting                                                              | —          |
-| **P1** | Hardening of Tabs 1–3 per §3.1, §4, §5 (validation, transactions, scope ids, overlap fixes, lifecycle job, entitlements table)              | P0 — done  |
-| **P2** | Shared Leave Core §2: `leave_type_id`, decimals, ledger, seed + backfill migration, single `LeaveService`, request pipeline steps 1–7, 9–11 | P1         |
-| **P3** | Tab 6 Holidays + replace ESS hardcoded holidays; working-days counting live                                                                 | P2         |
-| **P4** | Tab 7 Approval Workflow + HR queue API/UI + attendance `on_leave` sync                                                                      | P2         |
-| **P5** | Tab 5 Restrictions (pipeline step 8)                                                                                                        | P2         |
-| **P6** | Tab 4 Accrual, Carry Forward, cycle-close job, dry run                                                                                      | P2, P3     |
+| Phase  | Scope                                                                                                                                              | Depends on |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| **P0** | Merge-blocker fixes (done): migrations, policies loop, `canManage`, formatting                                                                     | —          |
+| **P1** | Hardening of Tabs 1–3 per §3.1, §4, §5 (validation, transactions, scope ids, overlap fixes, lifecycle job, entitlements table)                     | P0 — done  |
+| **P2** | (done) Shared Leave Core §2: `leave_type_id`, decimals, ledger, seed + backfill migration, single `LeaveService`, request pipeline steps 1–7, 9–11 | P1         |
+| **P3** | (done) Tab 6 Holidays + replace ESS hardcoded holidays; working-days counting live                                                                 | P2         |
+| **P4** | (done) Tab 7 Approval Workflow + HR queue API/UI + attendance `on_leave` sync                                                                      | P2         |
+| **P5** | (done) Tab 5 Restrictions (pipeline step 8)                                                                                                        | P2         |
+| **P6** | (done) Tab 4 Accrual, Carry Forward, cycle-close job, dry run                                                                                      | P2, P3     |
 
 Each phase ships with migrations verified on a fresh database, API + UI tests, and passes
 `typecheck · lint · format:check · test · build`.

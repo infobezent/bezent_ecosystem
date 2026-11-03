@@ -35,6 +35,17 @@ import {
   TalentPoolPage,
   HiringReportsPage,
 } from '../recruitment';
+import { ShiftsPage } from '../shifts/pages/ShiftsPage';
+import {
+  LeaveOverviewPage,
+  LeaveRequestsPage,
+  LeaveApprovalsPage,
+  LeaveTeamCalendarPage,
+  LeaveBalancesPage,
+  LeaveHolidayCalendarPage,
+  LeaveYearEndPage,
+  LeaveReportsPage,
+} from '../leave';
 import { destinationPath } from '../../../shared/utils/navigation';
 import { useAuth } from '../../../platform/auth';
 import { landingPath } from '../../../platform/auth/landing';
@@ -113,7 +124,9 @@ export const hrmsRoutes: RouteObject[] = [
         const isSettings = destination.id === 'settings';
         const isAttendance = destination.id === 'attendance';
         const isRecruitment = destination.id === 'recruitment';
-        // Workforce, Attendance, and Recruitment land on Overview.
+        const isLeave = destination.id === 'leave';
+        const isShifts = destination.id === 'shifts';
+        // Workforce, Attendance, Recruitment, and Leave land on Overview.
         return [
           {
             path: destination.segment,
@@ -125,6 +138,10 @@ export const hrmsRoutes: RouteObject[] = [
               <Navigate to="/hrms/attendance/overview" replace />
             ) : isRecruitment ? (
               <Navigate to="/hrms/recruitment/overview" replace />
+            ) : isLeave ? (
+              <Navigate to="/hrms/leave/overview" replace />
+            ) : isShifts ? (
+              <ShiftsPage />
             ) : (
               <ModulePlaceholder
                 application={APPLICATION}
@@ -192,6 +209,22 @@ export const hrmsRoutes: RouteObject[] = [
                 <TalentPoolPage />
               ) : isRecruitment && child.id === 'reports' ? (
                 <HiringReportsPage />
+              ) : isLeave && child.id === 'overview' ? (
+                <LeaveOverviewPage />
+              ) : isLeave && child.id === 'requests' ? (
+                <LeaveRequestsPage />
+              ) : isLeave && child.id === 'approvals' ? (
+                <LeaveApprovalsPage />
+              ) : isLeave && child.id === 'calendar' ? (
+                <LeaveTeamCalendarPage />
+              ) : isLeave && child.id === 'balances' ? (
+                <LeaveBalancesPage />
+              ) : isLeave && child.id === 'holidays' ? (
+                <LeaveHolidayCalendarPage />
+              ) : isLeave && child.id === 'year-end' ? (
+                <LeaveYearEndPage />
+              ) : isLeave && child.id === 'reports' ? (
+                <LeaveReportsPage />
               ) : (
                 <ModulePlaceholder
                   application={APPLICATION}

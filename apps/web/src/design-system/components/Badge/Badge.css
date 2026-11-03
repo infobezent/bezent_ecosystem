@@ -49,7 +49,7 @@
   border-color: transparent;
 }
 
-/* ── Status Pills — 3D Tactile Clay Pills ── */
+/* ── Status Pills — Clean Enterprise Pills ── */
 .bezent-status-pill {
   display: inline-flex;
   align-items: center;
@@ -64,10 +64,7 @@
   white-space: nowrap;
   user-select: none;
   border: 1px solid transparent;
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.03),
-    inset 0 1px 1.5px rgba(255, 255, 255, 0.85),
-    inset 0 -1px 1.5px rgba(0, 0, 0, 0.03);
+  box-shadow: none;
 }
 
 .bezent-status-pill__dot {
