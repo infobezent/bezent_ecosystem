@@ -31,7 +31,7 @@ export function InterviewMetrics({ interviews, todayDate = '2026-10-30' }: Inter
       <Card
         variant="default"
         padding="none"
-        className="bezent-clay-card--compact"
+        className="bezent-clay-card--compact bezent-clay-card--purple"
         aria-label={`Interviews Today: ${todayCount}, Active rounds scheduled for today`}
       >
         <CardBody>
@@ -58,7 +58,7 @@ export function InterviewMetrics({ interviews, todayDate = '2026-10-30' }: Inter
       <Card
         variant="default"
         padding="none"
-        className="bezent-clay-card--compact"
+        className="bezent-clay-card--compact bezent-clay-card--blue"
         aria-label={`Upcoming Pipeline: ${upcomingCount}, Scheduled rounds ahead`}
       >
         <CardBody>
@@ -85,7 +85,7 @@ export function InterviewMetrics({ interviews, todayDate = '2026-10-30' }: Inter
       <Card
         variant="default"
         padding="none"
-        className="bezent-clay-card--compact"
+        className="bezent-clay-card--compact bezent-clay-card--green"
         aria-label={`Completed & Evaluated: ${completedWithScorecardCount}, Scorecards logged`}
       >
         <CardBody>
@@ -112,7 +112,7 @@ export function InterviewMetrics({ interviews, todayDate = '2026-10-30' }: Inter
       <Card
         variant="default"
         padding="none"
-        className="bezent-clay-card--compact"
+        className="bezent-clay-card--compact bezent-clay-card--amber"
         aria-label={`Pending Feedback: ${pendingFeedbackCount}, Evaluations needed`}
       >
         <CardBody>

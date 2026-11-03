@@ -574,7 +574,7 @@ export function EmployeeDirectoryPage() {
         <Card
           variant="default"
           padding="none"
-          className="bezent-clay-card--compact bezent-kpi-card bezent-kpi-card--blue"
+          className="bezent-clay-card--compact bezent-clay-card--purple bezent-kpi-card bezent-kpi-card--purple"
           aria-label={`Total Employees: ${kpis.total !== null ? kpis.total : 'Loading'}`}
         >
           <CardBody>
@@ -603,7 +603,7 @@ export function EmployeeDirectoryPage() {
                 </span>
               </Stack>
               <div
-                className="bezent-clay-icon bezent-clay-icon--purple bezent-kpi-card__icon bezent-kpi-card__icon--blue"
+                className="bezent-clay-icon bezent-clay-icon--purple bezent-kpi-card__icon bezent-kpi-card__icon--purple"
                 aria-hidden="true"
               >
                 <BezentIcon name="employees" size={20} />
@@ -616,7 +616,7 @@ export function EmployeeDirectoryPage() {
         <Card
           variant="default"
           padding="none"
-          className="bezent-clay-card--compact bezent-kpi-card bezent-kpi-card--green"
+          className="bezent-clay-card--compact bezent-clay-card--blue bezent-kpi-card bezent-kpi-card--blue"
           aria-label={`Active Employees: ${kpis.active !== null ? kpis.active : 'Loading'}`}
         >
           <CardBody>
@@ -645,7 +645,7 @@ export function EmployeeDirectoryPage() {
                 </span>
               </Stack>
               <div
-                className="bezent-clay-icon bezent-clay-icon--blue bezent-kpi-card__icon bezent-kpi-card__icon--green"
+                className="bezent-clay-icon bezent-clay-icon--blue bezent-kpi-card__icon bezent-kpi-card__icon--blue"
                 aria-hidden="true"
               >
                 <BezentIcon name="userCheck" size={20} />
@@ -658,7 +658,7 @@ export function EmployeeDirectoryPage() {
         <Card
           variant="default"
           padding="none"
-          className="bezent-clay-card--compact bezent-kpi-card bezent-kpi-card--amber"
+          className="bezent-clay-card--compact bezent-clay-card--amber bezent-kpi-card bezent-kpi-card--amber"
           aria-label={`Pending Activation: ${kpis.pendingActivation !== null ? kpis.pendingActivation : 'Loading'}`}
         >
           <CardBody>
@@ -700,7 +700,7 @@ export function EmployeeDirectoryPage() {
         <Card
           variant="default"
           padding="none"
-          className="bezent-clay-card--compact bezent-kpi-card bezent-kpi-card--red"
+          className="bezent-clay-card--compact bezent-clay-card--red bezent-kpi-card bezent-kpi-card--red"
           aria-label={`Inactive Employees: ${kpis.inactive !== null ? kpis.inactive : 'Loading'}`}
         >
           <CardBody>
