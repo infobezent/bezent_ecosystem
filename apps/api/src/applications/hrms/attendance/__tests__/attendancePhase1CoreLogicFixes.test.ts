@@ -1,7 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import request from 'supertest';
-import { eq, inArray } from 'drizzle-orm';
-import { createApp } from '../../../../app/server/createApp.js';
+import { eq } from 'drizzle-orm';
 import { isDatabaseConfigured, getDb } from '../../../../db/connection.js';
 import {
   employeeAttendance,
@@ -13,6 +11,7 @@ import {
   attendanceRegularizations,
   attendanceMonthlySummaries,
   employeeNotifications,
+  employeeWorkSchedules,
 } from '../../../../db/schema.js';
 import { generateSurrogateId } from '../../../../platform/auth/security.js';
 import { hrmsTestHeaders } from '../../../../platform/__tests__/support/testSession.js';
@@ -37,10 +36,8 @@ describe.skipIf(!isDatabaseConfigured)(
     const todayStr = new Date().toISOString().slice(0, 10);
     const pastDateStr = '2026-10-01';
 
-    let headers: Record<string, string>;
-
     beforeAll(async () => {
-      headers = await hrmsTestHeaders(companyId, tenantId);
+      await hrmsTestHeaders(companyId, tenantId);
       await hrmsTestHeaders(otherCompanyId, tenantId);
       const db = getDb();
 
@@ -58,6 +55,7 @@ describe.skipIf(!isDatabaseConfigured)(
         .delete(attendanceMonthlySummaries)
         .where(eq(attendanceMonthlySummaries.tenantId, tenantId));
       await db.delete(employeeNotifications).where(eq(employeeNotifications.tenantId, tenantId));
+      await db.delete(employeeWorkSchedules).where(eq(employeeWorkSchedules.tenantId, tenantId));
       await db.delete(employees).where(eq(employees.tenantId, tenantId));
       await db.delete(departments).where(eq(departments.tenantId, tenantId));
 
@@ -113,6 +111,30 @@ describe.skipIf(!isDatabaseConfigured)(
           email: 'evan.p1@bezent.test',
         },
       ]);
+
+      // 2b. Seed Work Schedules with all 7 days active so test behavior is calendar/day-of-week neutral
+      await db.insert(employeeWorkSchedules).values(
+        [emp1, emp2, emp3, emp4, emp5].map((empId) => ({
+          employeeId: empId,
+          tenantId,
+          companyId,
+          workingCalendar: 'standard',
+          workSchedule: 'general_shift',
+          workingDays: [
+            'Monday',
+            'Tuesday',
+            'Wednesday',
+            'Thursday',
+            'Friday',
+            'Saturday',
+            'Sunday',
+          ],
+          startTime: '09:00',
+          endTime: '18:00',
+          breakMinutes: 0,
+          lunchMinutes: 0,
+        })),
+      );
 
       // 3. Seed Attendance Records for today
       await db.insert(employeeAttendance).values([
