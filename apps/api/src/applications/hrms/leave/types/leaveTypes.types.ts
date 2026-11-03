@@ -76,6 +76,8 @@ export interface CreateLeaveTypeDto {
   effectiveFrom?: string;
   effectiveTo?: string | null;
   isActive?: boolean;
+  /** Approval workflow override; null uses the company default. */
+  workflowId?: string | null;
 }
 
 export type UpdateLeaveTypeDto = Partial<CreateLeaveTypeDto>;

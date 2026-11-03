@@ -19,6 +19,10 @@ import {
   DefaultShiftScheduleProvider,
   defaultShiftScheduleProvider,
 } from './shiftSchedule.provider.js';
+import {
+  AttendanceHolidayService,
+  attendanceHolidayService,
+} from './attendanceHoliday.service.js';
 import { attendanceWorkdayService, formatTimeInTimezone } from './attendanceWorkday.service.js';
 import { BadRequestError, ConflictError, NotFoundError } from '../../../../app/errors/AppError.js';
 import type {
@@ -60,6 +64,7 @@ export class AttendanceService {
     private readonly securityService: AttendanceSecurityService = attendanceSecurityService,
     private readonly manualEntryService: AttendanceManualEntryService = attendanceManualEntryService,
     private readonly alertService: AttendanceAlertService = attendanceAlertService,
+    private readonly holidayService: AttendanceHolidayService = attendanceHolidayService,
   ) {}
 
   getCurrentTimeString(now: Date = new Date(), timeZone?: string): string {
@@ -87,6 +92,19 @@ export class AttendanceService {
     date: string,
     input: CheckInInput,
   ): Promise<{ record: EmployeeAttendance; checkInTime: string }> {
+    // 0. Verify employee existence and active status in tenant & company
+    const employee = await this.repo.getEmployeeRecord(tenantId, companyId, employeeId);
+    if (!employee) {
+      throw new NotFoundError(`Employee with ID '${employeeId}' not found`);
+    }
+    const ineligibleStatuses = ['terminated', 'resigned', 'suspended', 'pending_activation'];
+    if (ineligibleStatuses.includes(employee.employmentStatus)) {
+      throw new BadRequestError(
+        `Cannot record attendance for employee with status '${employee.employmentStatus}'`,
+        'EMPLOYEE_INACTIVE',
+      );
+    }
+
     // 1. Check payroll lock before mutation
     const isLocked = await this.repo.checkDateInLockedPeriod(tenantId, companyId, date, date);
     if (isLocked) {
@@ -146,10 +164,11 @@ export class AttendanceService {
         );
 
         // 3. Calculation engine
-        const [schedule, policy, onLeave] = await Promise.all([
+        const [schedule, policy, onLeave, holidayRes] = await Promise.all([
           this.scheduleProvider.getEmployeeSchedule(tenantId, companyId, employeeId, date),
           this.policyService.getEffectivePolicy(tenantId, companyId, date, employeeId),
           this.scheduleProvider.isEmployeeOnApprovedLeave(tenantId, companyId, employeeId, date),
+          this.holidayService.resolveHolidayForEmployee(tenantId, companyId, employeeId, date),
         ]);
 
         const calc = this.calculator.calculate({
@@ -159,6 +178,8 @@ export class AttendanceService {
           schedule,
           policy,
           isOnApprovedLeave: onLeave,
+          isHoliday: holidayRes.isHoliday,
+          holidayName: holidayRes.holidayName,
           isToday: true,
         });
 
@@ -299,10 +320,11 @@ export class AttendanceService {
         await this.repo.checkOut(todayAtt.id, checkOutTime, tx);
 
         // 3. Calculation engine
-        const [schedule, policy, onLeave] = await Promise.all([
+        const [schedule, policy, onLeave, holidayRes] = await Promise.all([
           this.scheduleProvider.getEmployeeSchedule(tenantId, companyId, employeeId, date),
           this.policyService.getEffectivePolicy(tenantId, companyId, date, employeeId),
           this.scheduleProvider.isEmployeeOnApprovedLeave(tenantId, companyId, employeeId, date),
+          this.holidayService.resolveHolidayForEmployee(tenantId, companyId, employeeId, date),
         ]);
 
         const calc = this.calculator.calculate({
@@ -312,6 +334,8 @@ export class AttendanceService {
           schedule,
           policy,
           isOnApprovedLeave: onLeave,
+          isHoliday: holidayRes.isHoliday,
+          holidayName: holidayRes.holidayName,
           isToday: true,
         });
 
@@ -573,7 +597,7 @@ export class AttendanceService {
 
     for (const empId of employeeIds) {
       try {
-        const [schedule, policy, onLeave, punches] = await Promise.all([
+        const [schedule, policy, onLeave, punches, holidayRes] = await Promise.all([
           this.scheduleProvider.getEmployeeSchedule(tenantId, companyId, empId, date),
           this.policyService.getEffectivePolicy(tenantId, companyId, date, empId),
           this.scheduleProvider.isEmployeeOnApprovedLeave(tenantId, companyId, empId, date),
@@ -582,6 +606,7 @@ export class AttendanceService {
             date,
             limit: 50,
           }),
+          this.holidayService.resolveHolidayForEmployee(tenantId, companyId, empId, date),
         ]);
 
         // Find earliest IN punch and latest OUT punch
@@ -610,6 +635,8 @@ export class AttendanceService {
           schedule,
           policy,
           isOnApprovedLeave: onLeave,
+          isHoliday: holidayRes.isHoliday,
+          holidayName: holidayRes.holidayName,
           isToday,
         });
 
@@ -997,6 +1024,22 @@ export class AttendanceService {
           : 'Employee ID and date are required for correction',
       );
     }
+
+    // Validate target employee belongs to tenant & company and is not inactive
+    const targetEmployee = await this.repo.getEmployeeRecord(tenantId, companyId, input.employeeId);
+    if (!targetEmployee) {
+      throw new NotFoundError(
+        `Employee with ID '${input.employeeId}' not found in the selected company`,
+      );
+    }
+    const ineligibleStatuses = ['terminated', 'resigned', 'suspended', 'pending_activation'];
+    if (ineligibleStatuses.includes(targetEmployee.employmentStatus)) {
+      throw new BadRequestError(
+        `Cannot manually modify attendance for employee with status '${targetEmployee.employmentStatus}'`,
+        'EMPLOYEE_INACTIVE',
+      );
+    }
+
     const reason = input.reason?.trim() || 'Manual correction';
 
     const isLocked = await this.repo.checkDateInLockedPeriod(
@@ -1036,10 +1079,16 @@ export class AttendanceService {
     }
 
     // 2. Calculate new metrics
-    const [schedule, policy, onLeave] = await Promise.all([
+    const [schedule, policy, onLeave, holidayRes] = await Promise.all([
       this.scheduleProvider.getEmployeeSchedule(tenantId, companyId, input.employeeId, input.date),
       this.policyService.getEffectivePolicy(tenantId, companyId, input.date, input.employeeId),
       this.scheduleProvider.isEmployeeOnApprovedLeave(
+        tenantId,
+        companyId,
+        input.employeeId,
+        input.date,
+      ),
+      this.holidayService.resolveHolidayForEmployee(
         tenantId,
         companyId,
         input.employeeId,
@@ -1054,6 +1103,8 @@ export class AttendanceService {
       schedule,
       policy,
       isOnApprovedLeave: onLeave,
+      isHoliday: holidayRes.isHoliday,
+      holidayName: holidayRes.holidayName,
       isToday: false,
     });
 

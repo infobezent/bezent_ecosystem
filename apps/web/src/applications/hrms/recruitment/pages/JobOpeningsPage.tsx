@@ -60,7 +60,8 @@ export function JobOpeningsPage({ initialJobs }: JobOpeningsPageProps = {}) {
       ]);
 
       const appCounts: Record<string, { total: number; pipeline: Record<string, number> }> = {};
-      for (const app of appsResponse.items) {
+      const appItems = appsResponse?.items ?? [];
+      for (const app of appItems) {
         const reqId = app.requisitionId;
         const entry = appCounts[reqId] ?? { total: 0, pipeline: {} };
         entry.total += 1;
@@ -69,7 +70,8 @@ export function JobOpeningsPage({ initialJobs }: JobOpeningsPageProps = {}) {
         appCounts[reqId] = entry;
       }
 
-      const adaptedJobs = reqsResponse.items.map((req) =>
+      const reqItems = reqsResponse?.items ?? [];
+      const adaptedJobs = reqItems.map((req) =>
         adaptRequisitionToJobOpening(req, {
           totalApplicants: appCounts[req.id]?.total ?? 0,
           pipeline: appCounts[req.id]?.pipeline,

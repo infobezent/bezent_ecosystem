@@ -60,7 +60,11 @@ export class RecruitmentController {
         ctx.companyId,
         req.query as Record<string, unknown>,
       );
-      res.json(result);
+      res.json({
+        data: result.items,
+        pagination: result.pagination,
+        items: result.items,
+      });
     } catch (err) {
       next(err);
     }
@@ -139,7 +143,11 @@ export class RecruitmentController {
         ctx.companyId,
         req.query as Record<string, unknown>,
       );
-      res.json(result);
+      res.json({
+        data: result.items,
+        pagination: result.pagination,
+        items: result.items,
+      });
     } catch (err) {
       next(err);
     }
@@ -210,7 +218,11 @@ export class RecruitmentController {
         ctx.tenantId,
         req.query as Record<string, unknown>,
       );
-      res.json(result);
+      res.json({
+        data: result.items,
+        pagination: result.pagination,
+        items: result.items,
+      });
     } catch (err) {
       next(err);
     }
@@ -268,7 +280,11 @@ export class RecruitmentController {
         ctx.companyId,
         req.query as Record<string, unknown>,
       );
-      res.json(result);
+      res.json({
+        data: result.items,
+        pagination: result.pagination,
+        items: result.items,
+      });
     } catch (err) {
       next(err);
     }
@@ -427,7 +443,11 @@ export class RecruitmentController {
         ctx.companyId,
         req.query as Record<string, unknown>,
       );
-      res.json(result);
+      res.json({
+        data: result.items,
+        pagination: result.pagination,
+        items: result.items,
+      });
     } catch (err) {
       next(err);
     }

@@ -309,7 +309,28 @@ async function handleResponse<T>(res: Response, defaultErrorMsg: string): Promis
     throw new Error(message);
   }
   const json = await res.json();
-  return json.data as T;
+  if (json && typeof json === 'object') {
+    // 1. Paginated response at root: { items: [...], pagination: {...} }
+    if (Array.isArray(json.items)) {
+      return json as T;
+    }
+    // 2. Paginated response with data array: { data: [...], pagination: {...} }
+    if (Array.isArray(json.data) && json.pagination) {
+      return {
+        items: json.data,
+        pagination: json.pagination,
+      } as unknown as T;
+    }
+    // 3. Paginated response wrapped in data: { data: { items: [...], pagination: {...} } }
+    if (json.data && typeof json.data === 'object' && Array.isArray((json.data as any).items)) {
+      return json.data as T;
+    }
+    // 4. Standard data envelope: { data: ... }
+    if (json.data !== undefined) {
+      return json.data as T;
+    }
+  }
+  return json as T;
 }
 
 const API_BASE = `${appConfig.apiBaseUrl}/hrms/recruitment`;

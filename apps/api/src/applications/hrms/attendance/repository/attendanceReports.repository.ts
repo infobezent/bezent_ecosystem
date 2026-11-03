@@ -10,6 +10,7 @@ import {
   attendanceOnDutyRequests,
   attendanceOvertimeRequests,
   employeeLeaveRequests,
+  leaveTypes,
   auditLogs,
   attendanceSavedReports,
   attendanceReportGenerations,
@@ -742,7 +743,7 @@ export class AttendanceReportsRepository {
       .select({
         id: employeeLeaveRequests.id,
         employeeId: employeeLeaveRequests.employeeId,
-        leaveType: employeeLeaveRequests.leaveType,
+        leaveTypeName: leaveTypes.name,
         startDate: employeeLeaveRequests.startDate,
         endDate: employeeLeaveRequests.endDate,
         totalDays: employeeLeaveRequests.totalDays,
@@ -753,6 +754,7 @@ export class AttendanceReportsRepository {
         departmentName: departments.name,
       })
       .from(employeeLeaveRequests)
+      .innerJoin(leaveTypes, eq(leaveTypes.id, employeeLeaveRequests.leaveTypeId))
       .innerJoin(employees, eq(employeeLeaveRequests.employeeId, employees.id))
       .leftJoin(departments, eq(employees.departmentId, departments.id))
       .where(and(...conditions))
@@ -762,10 +764,10 @@ export class AttendanceReportsRepository {
       employeeId: r.employeeCode || r.employeeId,
       employeeName: `${r.firstName} ${r.lastName || ''}`.trim(),
       department: r.departmentName ?? 'Unassigned',
-      leaveType: capitalize(r.leaveType),
+      leaveType: r.leaveTypeName,
       leaveStart: r.startDate,
       leaveEnd: r.endDate,
-      approvedLeaveEquivalentDays: r.totalDays,
+      approvedLeaveEquivalentDays: Number(r.totalDays),
       attendanceCoverage: r.status === 'approved' ? 'Full Day Protected' : 'Pending Verification',
       overlapConflictStatus: 'No Conflict',
       approvalStatus: capitalize(r.status),

@@ -69,7 +69,7 @@ export function InterviewCalendarView({
             {/* Timeline Cards */}
             <Stack gap="sm">
               {items.map((item) => (
-                <Card key={item.id} variant="clay" hoverable padding="md">
+                <Card key={item.id} variant="default" hoverable padding="md">
                   <CardBody>
                     <Inline justify="between" align="start" wrap gap="md">
                       {/* Left: Time + Candidate Info */}

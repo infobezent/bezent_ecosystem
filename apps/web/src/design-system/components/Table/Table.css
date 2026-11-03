@@ -5,14 +5,10 @@
 .bezent-table-container {
   width: 100%;
   overflow-x: auto;
-  border: 1px solid rgba(226, 232, 240, 0.85);
-  border-radius: 18px;
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: 8px;
   background: var(--bg-surface, #ffffff);
-  box-shadow:
-    0 12px 28px -4px rgba(15, 23, 42, 0.05),
-    0 4px 8px -2px rgba(15, 23, 42, 0.02),
-    inset 0 2px 4px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -3px 5px 0 rgba(15, 23, 42, 0.02);
+  box-shadow: var(--card-shadow, 0 1px 3px rgba(0, 0, 0, 0.04));
 }
 
 .bezent-table {
@@ -27,7 +23,7 @@
 
 /* ── Head ── */
 .bezent-table__head {
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  background: #f8fafc;
 }
 
 .bezent-table__head .bezent-table__th {
@@ -234,19 +230,17 @@ button.bezent-table-link-btn:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
-  border: 1px solid rgba(226, 232, 240, 0.85);
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--border-default, #dde3ea);
   background: #ffffff;
   color: var(--text-secondary, #5f6368);
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
   line-height: 1;
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.03),
-    inset 0 1px 1.5px rgba(255, 255, 255, 0.9);
+  box-shadow: none;
   transition: all 0.14s ease;
 }
 
@@ -254,10 +248,8 @@ button.bezent-table-link-btn:hover {
   background: var(--bg-surface-secondary, #f0f4f9);
   color: var(--text-primary, #000000);
   border-color: var(--border-default, #dde3ea);
-  transform: scale(1.06);
-  box-shadow:
-    0 4px 8px rgba(0, 0, 0, 0.06),
-    inset 0 1px 1.5px rgba(255, 255, 255, 0.95);
+  transform: none;
+  box-shadow: none;
 }
 
 .bezent-table-action-btn.is-active {
@@ -590,7 +582,7 @@ button.bezent-table-link-btn:hover {
   justify-content: center;
   color: #94a3b8;
   font-size: 11px;
-  opacity: 0;
+  opacity: 0.55;
   transition:
     opacity 0.15s ease,
     color 0.14s ease,
@@ -598,7 +590,7 @@ button.bezent-table-link-btn:hover {
 }
 
 .bezent-table-th-sortable:hover .bezent-table-sort-arrow {
-  opacity: 0.55;
+  opacity: 0.85;
   color: #475569;
 }
 
@@ -622,11 +614,11 @@ button.bezent-table-link-btn:hover {
 
 [data-theme='dark'] .bezent-table-sort-arrow {
   color: #64748b;
-  opacity: 0;
+  opacity: 0.55;
 }
 
 [data-theme='dark'] .bezent-table-th-sortable:hover .bezent-table-sort-arrow {
-  opacity: 0.65;
+  opacity: 0.85;
   color: #cbd5e1;
 }
 

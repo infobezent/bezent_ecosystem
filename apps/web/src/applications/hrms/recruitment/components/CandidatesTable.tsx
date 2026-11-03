@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import {
   Avatar,
   Badge,
@@ -17,6 +18,17 @@ import {
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import type { Candidate, CandidateSource, CandidateStage } from '../types/candidate';
+
+export type CandidateSortField =
+  | 'candidateNumber'
+  | 'fullName'
+  | 'appliedJobTitle'
+  | 'totalExperienceYears'
+  | 'location'
+  | 'currentStage'
+  | 'appliedDate';
+
+export type SortDirection = 'asc' | 'desc';
 
 export interface CandidatesTableProps {
   candidates: Candidate[];
@@ -108,6 +120,60 @@ export function CandidatesTable({
   onSelectCandidate,
   viewMode = 'list',
 }: CandidatesTableProps) {
+  const [sortField, setSortField] = useState<CandidateSortField>('candidateNumber');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+
+  const handleSort = (field: CandidateSortField) => {
+    if (sortField === field) {
+      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const sortedCandidates = useMemo(() => {
+    const list = [...candidates];
+    list.sort((a, b) => {
+      let comparison = 0;
+      switch (sortField) {
+        case 'candidateNumber':
+          comparison = (a.candidateNumber || '').localeCompare(b.candidateNumber || '', undefined, {
+            numeric: true,
+          });
+          break;
+        case 'fullName':
+          comparison = a.fullName.localeCompare(b.fullName);
+          break;
+        case 'appliedJobTitle':
+          comparison = (a.appliedJobTitle || '').localeCompare(b.appliedJobTitle || '');
+          break;
+        case 'totalExperienceYears':
+          comparison = (a.totalExperienceYears ?? 0) - (b.totalExperienceYears ?? 0);
+          break;
+        case 'location': {
+          const locA = (a.location?.split(',')[0] ?? a.location ?? '').trim();
+          const locB = (b.location?.split(',')[0] ?? b.location ?? '').trim();
+          comparison = locA.localeCompare(locB);
+          break;
+        }
+        case 'currentStage':
+          comparison = (a.currentStage || '').localeCompare(b.currentStage || '');
+          break;
+        case 'appliedDate': {
+          const timeA = a.appliedDate ? new Date(a.appliedDate).getTime() : 0;
+          const timeB = b.appliedDate ? new Date(b.appliedDate).getTime() : 0;
+          comparison = timeA - timeB;
+          break;
+        }
+        default:
+          comparison = 0;
+      }
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+    return list;
+  }, [candidates, sortField, sortDirection]);
+
   if (candidates.length === 0) {
     return (
       <EmptyState
@@ -122,7 +188,7 @@ export function CandidatesTable({
   if (viewMode === 'grid') {
     return (
       <Grid columns={3} gap="md">
-        {candidates.map((cand) => {
+        {sortedCandidates.map((cand) => {
           const initials = cand.fullName
             .split(' ')
             .map((n) => n[0])
@@ -132,7 +198,7 @@ export function CandidatesTable({
           return (
             <Card
               key={cand.id}
-              variant="clay"
+              variant="default"
               padding="md"
               hoverable
               onClick={() => onSelectCandidate(cand)}
@@ -196,18 +262,238 @@ export function CandidatesTable({
     <Table hoverable>
       <TableHead>
         <TableRow>
-          <TableHeaderCell>Candidate ID ⇅</TableHeaderCell>
-          <TableHeaderCell>Candidate ⇅</TableHeaderCell>
-          <TableHeaderCell>Applied Role ⇅</TableHeaderCell>
-          <TableHeaderCell>Experience ⇅</TableHeaderCell>
-          <TableHeaderCell>Current Location ⇅</TableHeaderCell>
-          <TableHeaderCell>Stage ⇅</TableHeaderCell>
-          <TableHeaderCell>Applied Date ⇅</TableHeaderCell>
+          <TableHeaderCell
+            aria-sort={
+              sortField === 'candidateNumber'
+                ? sortDirection === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
+          >
+            <button
+              type="button"
+              className={`bezent-table-th-sortable ${
+                sortField === 'candidateNumber' ? 'bezent-table-th-sortable--active' : ''
+              }`}
+              onClick={() => handleSort('candidateNumber')}
+              aria-label={`Sort by Candidate ID ${
+                sortField === 'candidateNumber' && sortDirection === 'asc'
+                  ? 'descending'
+                  : 'ascending'
+              }`}
+            >
+              <span>Candidate ID</span>
+              <span
+                className={`bezent-table-sort-arrow ${
+                  sortField === 'candidateNumber' ? 'bezent-table-sort-arrow--active' : ''
+                }`}
+                aria-hidden="true"
+              >
+                {sortField === 'candidateNumber' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
+            </button>
+          </TableHeaderCell>
+
+          <TableHeaderCell
+            aria-sort={
+              sortField === 'fullName'
+                ? sortDirection === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
+          >
+            <button
+              type="button"
+              className={`bezent-table-th-sortable ${
+                sortField === 'fullName' ? 'bezent-table-th-sortable--active' : ''
+              }`}
+              onClick={() => handleSort('fullName')}
+              aria-label={`Sort by Candidate ${
+                sortField === 'fullName' && sortDirection === 'asc' ? 'descending' : 'ascending'
+              }`}
+            >
+              <span>Candidate</span>
+              <span
+                className={`bezent-table-sort-arrow ${
+                  sortField === 'fullName' ? 'bezent-table-sort-arrow--active' : ''
+                }`}
+                aria-hidden="true"
+              >
+                {sortField === 'fullName' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
+            </button>
+          </TableHeaderCell>
+
+          <TableHeaderCell
+            aria-sort={
+              sortField === 'appliedJobTitle'
+                ? sortDirection === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
+          >
+            <button
+              type="button"
+              className={`bezent-table-th-sortable ${
+                sortField === 'appliedJobTitle' ? 'bezent-table-th-sortable--active' : ''
+              }`}
+              onClick={() => handleSort('appliedJobTitle')}
+              aria-label={`Sort by Applied Role ${
+                sortField === 'appliedJobTitle' && sortDirection === 'asc'
+                  ? 'descending'
+                  : 'ascending'
+              }`}
+            >
+              <span>Applied Role</span>
+              <span
+                className={`bezent-table-sort-arrow ${
+                  sortField === 'appliedJobTitle' ? 'bezent-table-sort-arrow--active' : ''
+                }`}
+                aria-hidden="true"
+              >
+                {sortField === 'appliedJobTitle' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
+            </button>
+          </TableHeaderCell>
+
+          <TableHeaderCell
+            aria-sort={
+              sortField === 'totalExperienceYears'
+                ? sortDirection === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
+          >
+            <button
+              type="button"
+              className={`bezent-table-th-sortable ${
+                sortField === 'totalExperienceYears' ? 'bezent-table-th-sortable--active' : ''
+              }`}
+              onClick={() => handleSort('totalExperienceYears')}
+              aria-label={`Sort by Experience ${
+                sortField === 'totalExperienceYears' && sortDirection === 'asc'
+                  ? 'descending'
+                  : 'ascending'
+              }`}
+            >
+              <span>Experience</span>
+              <span
+                className={`bezent-table-sort-arrow ${
+                  sortField === 'totalExperienceYears' ? 'bezent-table-sort-arrow--active' : ''
+                }`}
+                aria-hidden="true"
+              >
+                {sortField === 'totalExperienceYears'
+                  ? sortDirection === 'asc'
+                    ? '▲'
+                    : '▼'
+                  : '⇅'}
+              </span>
+            </button>
+          </TableHeaderCell>
+
+          <TableHeaderCell
+            aria-sort={
+              sortField === 'location'
+                ? sortDirection === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
+          >
+            <button
+              type="button"
+              className={`bezent-table-th-sortable ${
+                sortField === 'location' ? 'bezent-table-th-sortable--active' : ''
+              }`}
+              onClick={() => handleSort('location')}
+              aria-label={`Sort by Current Location ${
+                sortField === 'location' && sortDirection === 'asc' ? 'descending' : 'ascending'
+              }`}
+            >
+              <span>Current Location</span>
+              <span
+                className={`bezent-table-sort-arrow ${
+                  sortField === 'location' ? 'bezent-table-sort-arrow--active' : ''
+                }`}
+                aria-hidden="true"
+              >
+                {sortField === 'location' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
+            </button>
+          </TableHeaderCell>
+
+          <TableHeaderCell
+            aria-sort={
+              sortField === 'currentStage'
+                ? sortDirection === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
+          >
+            <button
+              type="button"
+              className={`bezent-table-th-sortable ${
+                sortField === 'currentStage' ? 'bezent-table-th-sortable--active' : ''
+              }`}
+              onClick={() => handleSort('currentStage')}
+              aria-label={`Sort by Stage ${
+                sortField === 'currentStage' && sortDirection === 'asc' ? 'descending' : 'ascending'
+              }`}
+            >
+              <span>Stage</span>
+              <span
+                className={`bezent-table-sort-arrow ${
+                  sortField === 'currentStage' ? 'bezent-table-sort-arrow--active' : ''
+                }`}
+                aria-hidden="true"
+              >
+                {sortField === 'currentStage' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
+            </button>
+          </TableHeaderCell>
+
+          <TableHeaderCell
+            aria-sort={
+              sortField === 'appliedDate'
+                ? sortDirection === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
+          >
+            <button
+              type="button"
+              className={`bezent-table-th-sortable ${
+                sortField === 'appliedDate' ? 'bezent-table-th-sortable--active' : ''
+              }`}
+              onClick={() => handleSort('appliedDate')}
+              aria-label={`Sort by Applied Date ${
+                sortField === 'appliedDate' && sortDirection === 'asc' ? 'descending' : 'ascending'
+              }`}
+            >
+              <span>Applied Date</span>
+              <span
+                className={`bezent-table-sort-arrow ${
+                  sortField === 'appliedDate' ? 'bezent-table-sort-arrow--active' : ''
+                }`}
+                aria-hidden="true"
+              >
+                {sortField === 'appliedDate' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
+            </button>
+          </TableHeaderCell>
+
           <TableHeaderCell>Actions</TableHeaderCell>
         </TableRow>
       </TableHead>
       <TableBody>
-        {candidates.map((cand) => {
+        {sortedCandidates.map((cand) => {
           const initials = cand.fullName
             .split(' ')
             .map((n) => n[0])

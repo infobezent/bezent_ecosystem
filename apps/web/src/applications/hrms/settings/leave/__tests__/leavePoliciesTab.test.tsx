@@ -23,10 +23,9 @@ describe('LeavePoliciesTab UI Component — Unit & Render Tests', () => {
       <LeavePoliciesTab initialData={DEFAULT_LEAVE_POLICIES_RESPONSE} />,
     );
 
-    expect(html).toContain('Total Policies');
-    expect(html).toContain('Active Policies');
-    expect(html).toContain('Draft Policies');
-    expect(html).toContain('Scheduled Policies');
+    expect(html).toContain('In Force');
+    expect(html).toContain('Draft &amp; Scheduled');
+    expect(html).toContain('Uncovered Employees');
     expect(html).toContain('2');
   });
 

@@ -67,6 +67,14 @@ export class LeaveTypesRepository {
   /**
    * Aggregates summary counters for the company's leave types.
    */
+  /** All leave types of the company, including archived ones. */
+  async findAllForCompany(tenantId: string, companyId: string): Promise<LeaveTypeRecord[]> {
+    return getDb()
+      .select()
+      .from(leaveTypes)
+      .where(and(eq(leaveTypes.tenantId, tenantId), eq(leaveTypes.companyId, companyId)));
+  }
+
   async getSummary(tenantId: string, companyId: string): Promise<LeaveTypeSummary> {
     const db = getDb();
     const all = await db
@@ -229,59 +237,38 @@ export class LeaveTypesRepository {
     return this.update(tenantId, companyId, id, { isActive });
   }
 
-  /**
-   * Checks whether this leave type is referenced by employee leave requests or balances.
-   */
+  /** Counts requests and balances that reference this leave type. */
   async checkUsage(
     tenantId: string,
     companyId: string,
-    code: string,
+    leaveTypeId: string,
   ): Promise<{ inUse: boolean; requestCount: number; balanceCount: number }> {
     const db = getDb();
-    const normalized = code.trim().toLowerCase();
-
-    // Map code to existing enum value if applicable
-    let enumVal: 'annual' | 'sick' | 'casual' | 'unpaid' | null = null;
-    if (normalized === 'cl' || normalized === 'casual') enumVal = 'casual';
-    else if (normalized === 'sl' || normalized === 'sick') enumVal = 'sick';
-    else if (normalized === 'el' || normalized === 'al' || normalized === 'annual')
-      enumVal = 'annual';
-    else if (normalized === 'lwp' || normalized === 'unpaid') enumVal = 'unpaid';
-
-    let requestCount = 0;
-    let balanceCount = 0;
-
-    if (enumVal) {
-      const [reqRow] = await db
+    const [[reqRow], [balRow]] = await Promise.all([
+      db
         .select({ val: count() })
         .from(employeeLeaveRequests)
         .where(
           and(
             eq(employeeLeaveRequests.tenantId, tenantId),
             eq(employeeLeaveRequests.companyId, companyId),
-            eq(employeeLeaveRequests.leaveType, enumVal),
+            eq(employeeLeaveRequests.leaveTypeId, leaveTypeId),
           ),
-        );
-      requestCount = Number(reqRow?.val || 0);
-
-      const [balRow] = await db
+        ),
+      db
         .select({ val: count() })
         .from(employeeLeaveBalances)
         .where(
           and(
             eq(employeeLeaveBalances.tenantId, tenantId),
             eq(employeeLeaveBalances.companyId, companyId),
-            eq(employeeLeaveBalances.leaveType, enumVal),
+            eq(employeeLeaveBalances.leaveTypeId, leaveTypeId),
           ),
-        );
-      balanceCount = Number(balRow?.val || 0);
-    }
-
-    return {
-      inUse: requestCount > 0 || balanceCount > 0,
-      requestCount,
-      balanceCount,
-    };
+        ),
+    ]);
+    const requestCount = Number(reqRow?.val || 0);
+    const balanceCount = Number(balRow?.val || 0);
+    return { inUse: requestCount > 0 || balanceCount > 0, requestCount, balanceCount };
   }
 }
 

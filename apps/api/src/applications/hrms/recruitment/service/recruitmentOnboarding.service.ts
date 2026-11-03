@@ -507,9 +507,9 @@ export class RecruitmentOnboardingService {
   ): Promise<RecruitmentOnboardingDetail> {
     const validated = validateConfirmOnboarding(input);
 
-    return this.repo.transaction(async (tx) => {
-      // 1. Fetch onboarding record inside transaction
-      const onboarding = await this.repo.getOnboardingById(tenantId, companyId, id, tx);
+    await this.repo.transaction(async (tx) => {
+      // 1. Fetch onboarding record inside transaction with row lock
+      const onboarding = await this.repo.getOnboardingById(tenantId, companyId, id, tx, true);
       if (!onboarding) {
         throw new NotFoundError(`Onboarding record '${id}' not found`);
       }
@@ -650,9 +650,9 @@ export class RecruitmentOnboardingService {
         },
         tx,
       );
-
-      return this.getOnboardingById(tenantId, companyId, id);
     });
+
+    return this.getOnboardingById(tenantId, companyId, id);
   }
 
   // ---------------------------------------------------------------------------

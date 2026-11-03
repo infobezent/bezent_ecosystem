@@ -19,6 +19,12 @@ type Db = ReturnType<typeof getDb>;
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 type DbExecutor = Db | Tx;
 
+/**
+ * MySQL TIMESTAMP columns round to whole seconds; flooring "now" keeps a version stored as effective
+ * immediately from appearing effective only in the future (e.g. 12:00:00.7 rounding to 12:00:01).
+ */
+const nowToSecond = () => new Date(Math.floor(Date.now() / 1000) * 1000);
+
 export const INITIAL_VERSION_REASON =
   'Initial company leave general settings provisioning (Version 1).';
 
@@ -54,12 +60,20 @@ export class LeaveGeneralSettingsRepository {
   }
 
   async getCompanyTimezone(tenantId: string, companyId: string): Promise<string | null> {
+    return (await this.getCompanyProfile(tenantId, companyId))?.timeZone ?? null;
+  }
+
+  /** Timezone and creation instant; the creation date is the default go-live (spec §C.3). */
+  async getCompanyProfile(
+    tenantId: string,
+    companyId: string,
+  ): Promise<{ timeZone: string | null; createdAt: Date } | null> {
     const db = getDb();
     const [row] = await db
-      .select({ timeZone: companies.timeZone })
+      .select({ timeZone: companies.timeZone, createdAt: companies.createdAt })
       .from(companies)
       .where(and(eq(companies.tenantId, tenantId), eq(companies.id, companyId)));
-    return row?.timeZone ?? null;
+    return row ?? null;
   }
 
   /**
@@ -109,7 +123,7 @@ export class LeaveGeneralSettingsRepository {
       tenantId,
       companyId,
       versionNumber: 1,
-      effectiveFrom: new Date(),
+      effectiveFrom: nowToSecond(),
       changeReason: INITIAL_VERSION_REASON,
       settingsPayload: snapshot,
       createdByUserId: userId,
@@ -247,7 +261,7 @@ export class LeaveGeneralSettingsRepository {
           );
         }
 
-        const now = new Date();
+        const now = nowToSecond();
         const effectiveFromDate = input.effectiveFrom ? new Date(input.effectiveFrom) : now;
 
         if (latestVersion) {

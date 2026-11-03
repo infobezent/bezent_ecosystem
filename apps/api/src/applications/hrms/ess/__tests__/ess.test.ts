@@ -11,6 +11,8 @@ import {
   employees,
   employeeAttendance,
   employeeLeaveRequests,
+  employeeLeaveBalances,
+  holidayCalendars,
   departments,
   designations,
   employeeActions,
@@ -212,6 +214,24 @@ describe('Employee Self Service (ESS) Backend API (Phase 3)', () => {
     // Clean any prior test attendance/leaves/actions
     await db.delete(employeeAttendance).where(eq(employeeAttendance.employeeId, employeeId));
     await db.delete(employeeLeaveRequests).where(eq(employeeLeaveRequests.employeeId, employeeId));
+    await db.delete(employeeLeaveBalances).where(eq(employeeLeaveBalances.employeeId, employeeId));
+
+    // A published default holiday calendar (Leave Tab 6) is required for working-day leave counting.
+    for (const year of [new Date().getUTCFullYear(), new Date().getUTCFullYear() + 1]) {
+      await db
+        .insert(holidayCalendars)
+        .values({
+          id: `hcal_ess_test_${year}`,
+          tenantId,
+          companyId,
+          name: 'ESS Test Holidays',
+          year,
+          status: 'published',
+          isDefault: true,
+          createdByUserId: 'system',
+        })
+        .onDuplicateKeyUpdate({ set: { status: 'published', isDefault: true } });
+    }
     await db.delete(employeeActions).where(eq(employeeActions.tenantId, tenantId));
 
     // 6. Test Career Actions
@@ -661,70 +681,123 @@ describe('Employee Self Service (ESS) Backend API (Phase 3)', () => {
 
   describe('Leave Management', () => {
     let createdLeaveId: string;
+    let casualLeaveTypeId: string;
 
-    it('fetches leave balances and history', async () => {
-      const res = await request(app)
+    // Upcoming Thursday/Friday at least two weeks out, so the dates never age out of the
+    // booking windows and always contain exactly two working days.
+    const isoDay = (d: Date) => d.toISOString().slice(0, 10);
+    const thursday = (() => {
+      const d = new Date(Date.now() + 14 * 86_400_000);
+      while (d.getUTCDay() !== 4) d.setUTCDate(d.getUTCDate() + 1);
+      return d;
+    })();
+    const thu = isoDay(thursday);
+    const fri = isoDay(new Date(thursday.getTime() + 86_400_000));
+    const sat = isoDay(new Date(thursday.getTime() + 2 * 86_400_000));
+
+    const getWorkspace = () =>
+      request(app)
         .get('/api/v1/ess/leave')
         .set('Authorization', `Bearer ${employeeToken}`)
         .set('X-Company-Id', companyId);
-
-      expect(res.status).toBe(200);
-      expect(res.body.data.balances.length).toBeGreaterThan(0);
-      expect(Array.isArray(res.body.data.holidays)).toBe(true);
-    });
-
-    it('rejects leave when end date precedes start date', async () => {
-      const res = await request(app)
+    const apply = (body: Record<string, unknown>) =>
+      request(app)
         .post('/api/v1/ess/leave/apply')
         .set('Authorization', `Bearer ${employeeToken}`)
         .set('X-Company-Id', companyId)
-        .send({
-          leaveType: 'annual',
-          startDate: '2026-11-20',
-          endDate: '2026-11-15',
-          reason: 'Vacation',
-        });
+        .send(body);
+
+    it('fetches policy balances (default leave setup is provisioned on first access)', async () => {
+      const res = await getWorkspace();
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.policy?.name).toBe('Standard Leave Policy');
+      const codes = res.body.data.balances.map((b: { leaveTypeCode: string }) => b.leaveTypeCode);
+      expect(codes).toEqual(expect.arrayContaining(['AL', 'CL', 'SL', 'LOP']));
+      expect(Array.isArray(res.body.data.holidays)).toBe(true);
+
+      const casual = res.body.data.balances.find(
+        (b: { leaveTypeCode: string }) => b.leaveTypeCode === 'CL',
+      );
+      expect(casual.totalDays).toBe(6);
+      casualLeaveTypeId = casual.leaveTypeId;
+    });
+
+    it('rejects leave when end date precedes start date', async () => {
+      const res = await apply({
+        leaveTypeId: casualLeaveTypeId,
+        startDate: fri,
+        endDate: thu,
+        reason: 'Vacation',
+      });
 
       expect(res.status).toBe(400);
       expect(res.body.error.message).toContain('precede');
     });
 
-    it('submits a valid leave application', async () => {
-      const res = await request(app)
-        .post('/api/v1/ess/leave/apply')
-        .set('Authorization', `Bearer ${employeeToken}`)
-        .set('X-Company-Id', companyId)
-        .send({
-          leaveType: 'casual',
-          startDate: '2026-12-10',
-          endDate: '2026-12-11',
-          reason: 'Personal family occasion',
-        });
+    it('rejects an unknown leave type', async () => {
+      const res = await apply({
+        leaveTypeId: 'lvt_does_not_exist',
+        startDate: thu,
+        endDate: thu,
+        reason: 'Vacation',
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.code).toBe('LEAVE_TYPE_INACTIVE');
+    });
+
+    it('submits a valid leave application and reserves the working days', async () => {
+      // Thu..Sat: Saturday is a weekly off under the default Mon–Fri schedule.
+      const res = await apply({
+        leaveTypeId: casualLeaveTypeId,
+        startDate: thu,
+        endDate: sat,
+        reason: 'Personal family occasion',
+      });
 
       expect(res.status).toBe(201);
       expect(res.body.data.id).toBeDefined();
-      expect(res.body.data.totalDays).toBe(2);
+      expect(Number(res.body.data.totalDays)).toBe(2);
       expect(res.body.data.status).toBe('pending');
+      expect(res.body.data.calculationSnapshot.scheduleSource).toBe('company_default');
       createdLeaveId = res.body.data.id;
+
+      const ws = await getWorkspace();
+      const casual = ws.body.data.balances.find(
+        (b: { leaveTypeId: string }) => b.leaveTypeId === casualLeaveTypeId,
+      );
+      expect(casual.pendingDays).toBe(2);
+      expect(casual.availableDays).toBe(4);
     });
 
     it('rejects overlapping leave requests with 409', async () => {
-      const res = await request(app)
-        .post('/api/v1/ess/leave/apply')
-        .set('Authorization', `Bearer ${employeeToken}`)
-        .set('X-Company-Id', companyId)
-        .send({
-          leaveType: 'casual',
-          startDate: '2026-12-11',
-          endDate: '2026-12-12',
-          reason: 'Conflict test',
-        });
+      const res = await apply({
+        leaveTypeId: casualLeaveTypeId,
+        startDate: fri,
+        endDate: fri,
+        reason: 'Conflict test',
+      });
 
       expect(res.status).toBe(409);
       expect(res.body.error.message).toContain('overlaps');
     });
 
-    it('cancels a pending leave request', async () => {
+    it('enforces the yearly ceiling of the leave type', async () => {
+      const nextMonday = isoDay(new Date(thursday.getTime() + 4 * 86_400_000));
+      const twoWeeksLater = isoDay(new Date(thursday.getTime() + 15 * 86_400_000));
+      const res = await apply({
+        leaveTypeId: casualLeaveTypeId,
+        startDate: nextMonday,
+        endDate: twoWeeksLater,
+        reason: 'Exceeds casual leave ceiling',
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error.code).toBe('LEAVE_MAX_PER_YEAR');
+    });
+
+    it('cancels a pending leave request and releases its days', async () => {
       const res = await request(app)
         .post(`/api/v1/ess/leave/${createdLeaveId}/cancel`)
         .set('Authorization', `Bearer ${employeeToken}`)
@@ -732,6 +805,27 @@ describe('Employee Self Service (ESS) Backend API (Phase 3)', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.data.status).toBe('cancelled');
+
+      const ws = await getWorkspace();
+      const casual = ws.body.data.balances.find(
+        (b: { leaveTypeId: string }) => b.leaveTypeId === casualLeaveTypeId,
+      );
+      expect(casual.pendingDays).toBe(0);
+      expect(casual.availableDays).toBe(6);
+    });
+
+    it('accepts a single-date half day', async () => {
+      const res = await apply({
+        leaveTypeId: casualLeaveTypeId,
+        startDate: thu,
+        endDate: thu,
+        session: 'second_half',
+        reason: 'Afternoon appointment',
+      });
+
+      expect(res.status).toBe(201);
+      expect(Number(res.body.data.totalDays)).toBe(0.5);
+      expect(res.body.data.session).toBe('second_half');
     });
   });
 

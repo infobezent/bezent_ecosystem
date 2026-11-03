@@ -72,17 +72,20 @@ export function CandidatesPage({ initialCandidates, initialJobs }: CandidatesPag
       ]);
 
       const appMap: Record<string, (typeof appsRes.items)[0]> = {};
-      for (const app of appsRes.items) {
+      const appItems = appsRes?.items ?? [];
+      for (const app of appItems) {
         if (!appMap[app.candidateId]) {
           appMap[app.candidateId] = app;
         }
       }
 
-      const adaptedCands = candsRes.items.map((c) =>
+      const candItems = candsRes?.items ?? [];
+      const adaptedCands = candItems.map((c) =>
         adaptCandidateToFrontend(c, appMap[c.id]),
       );
 
-      const adaptedJobs = reqsRes.items.map((r) => adaptRequisitionToJobOpening(r));
+      const reqItems = reqsRes?.items ?? [];
+      const adaptedJobs = reqItems.map((r) => adaptRequisitionToJobOpening(r));
 
       setCandidates(adaptedCands);
       setJobs(adaptedJobs);

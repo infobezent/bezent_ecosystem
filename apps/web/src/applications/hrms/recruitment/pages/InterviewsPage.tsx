@@ -96,22 +96,26 @@ export function InterviewsPage({
         fetchJobRequisitions({ limit: 100 }).catch(() => ({ items: [] })),
       ]);
 
-      const candMap: Record<string, (typeof candsRes.items)[0]> = {};
-      for (const c of candsRes.items) {
+      const candItems = candsRes?.items ?? [];
+      const candMap: Record<string, (typeof candItems)[0]> = {};
+      for (const c of candItems) {
         candMap[c.id] = c;
       }
 
-      const reqMap: Record<string, (typeof reqsRes.items)[0]> = {};
-      for (const r of reqsRes.items) {
+      const reqItems = reqsRes?.items ?? [];
+      const reqMap: Record<string, (typeof reqItems)[0]> = {};
+      for (const r of reqItems) {
         reqMap[r.id] = r;
       }
 
-      const appMap: Record<string, (typeof appsRes.items)[0]> = {};
-      for (const a of appsRes.items) {
+      const appItems = appsRes?.items ?? [];
+      const appMap: Record<string, (typeof appItems)[0]> = {};
+      for (const a of appItems) {
         appMap[a.id] = a;
       }
 
-      const adaptedInterviews = interviewsRes.items.map((item) => {
+      const interviewItems = interviewsRes?.items ?? [];
+      const adaptedInterviews = interviewItems.map((item) => {
         const app = item.application || appMap[item.applicationId];
         const cand = app?.candidate || (app ? candMap[app.candidateId] : undefined);
         const req = app?.requisition || (app ? reqMap[app.requisitionId] : undefined);
@@ -126,11 +130,11 @@ export function InterviewsPage({
         });
       });
 
-      const adaptedCandidates = candsRes.items.map((c) =>
+      const adaptedCandidates = candItems.map((c) =>
         adaptCandidateToFrontend(c, appMap[c.id]),
       );
 
-      const adaptedJobs = reqsRes.items.map((r) => adaptRequisitionToJobOpening(r));
+      const adaptedJobs = reqItems.map((r) => adaptRequisitionToJobOpening(r));
 
       setInterviews(adaptedInterviews);
       setCandidates(adaptedCandidates);

@@ -34,8 +34,12 @@ essRouter.get('/attendance/regularizations', essController.getAttendanceRegulari
 
 // 4. Leave
 essRouter.get('/leave', essController.getLeaveWorkspace);
+essRouter.get('/leave/transactions', essController.getLeaveTransactions);
 essRouter.post('/leave/apply', essController.applyLeave);
 essRouter.post('/leave/:id/cancel', essController.cancelLeave);
+essRouter.get('/leave/approvals', essController.getLeaveApprovals);
+essRouter.post('/leave/approvals/:approvalId/approve', essController.approveLeave);
+essRouter.post('/leave/approvals/:approvalId/reject', essController.rejectLeave);
 
 // 5. Timesheets
 essRouter.get('/timesheets', essController.getTimesheets);

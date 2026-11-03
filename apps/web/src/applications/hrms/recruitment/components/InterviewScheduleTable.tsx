@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import {
   Avatar,
   Badge,
@@ -16,6 +17,17 @@ import type {
   InterviewSchedule,
   InterviewStatus,
 } from '../types/interview';
+
+export type InterviewSortField =
+  | 'candidate'
+  | 'role'
+  | 'round'
+  | 'slot'
+  | 'interviewer'
+  | 'status'
+  | 'evaluation';
+
+export type InterviewSortDirection = 'asc' | 'desc';
 
 export interface InterviewScheduleTableProps {
   interviews: InterviewSchedule[];
@@ -92,6 +104,61 @@ export function InterviewScheduleTable({
   onReschedule,
   onCancel,
 }: InterviewScheduleTableProps) {
+  const [sortField, setSortField] = useState<InterviewSortField>('slot');
+  const [sortDirection, setSortDirection] = useState<InterviewSortDirection>('asc');
+
+  const handleSort = (field: InterviewSortField) => {
+    if (sortField === field) {
+      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const sortedInterviews = useMemo(() => {
+    const list = [...interviews];
+    list.sort((a, b) => {
+      let comparison = 0;
+      switch (sortField) {
+        case 'candidate':
+          comparison = (a.candidateName || '').localeCompare(b.candidateName || '');
+          break;
+        case 'role':
+          comparison = (a.jobTitle || '').localeCompare(b.jobTitle || '');
+          break;
+        case 'round':
+          comparison = (a.roundName || '').localeCompare(b.roundName || '');
+          break;
+        case 'slot': {
+          const dateA = `${a.scheduledDate} ${a.startTime || ''}`;
+          const dateB = `${b.scheduledDate} ${b.startTime || ''}`;
+          comparison = dateA.localeCompare(dateB);
+          break;
+        }
+        case 'interviewer': {
+          const nameA = a.panel[0]?.name || '';
+          const nameB = b.panel[0]?.name || '';
+          comparison = nameA.localeCompare(nameB);
+          break;
+        }
+        case 'status':
+          comparison = (a.status || '').localeCompare(b.status || '');
+          break;
+        case 'evaluation': {
+          const scoreA = a.scorecard?.overallScore ?? -1;
+          const scoreB = b.scorecard?.overallScore ?? -1;
+          comparison = scoreA - scoreB;
+          break;
+        }
+        default:
+          comparison = 0;
+      }
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+    return list;
+  }, [interviews, sortField, sortDirection]);
+
   if (interviews.length === 0) {
     return (
       <EmptyState
@@ -107,18 +174,228 @@ export function InterviewScheduleTable({
     <Table hoverable>
       <TableHead>
         <TableRow>
-          <TableHeaderCell>Candidate ⇅</TableHeaderCell>
-          <TableHeaderCell>Applied Role ⇅</TableHeaderCell>
-          <TableHeaderCell>Interview Round ⇅</TableHeaderCell>
-          <TableHeaderCell>Scheduled Slot ⇅</TableHeaderCell>
-          <TableHeaderCell>Interviewer ⇅</TableHeaderCell>
-          <TableHeaderCell>Status ⇅</TableHeaderCell>
-          <TableHeaderCell>Evaluation ⇅</TableHeaderCell>
+          <TableHeaderCell
+            aria-sort={
+              sortField === 'candidate'
+                ? sortDirection === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
+          >
+            <button
+              type="button"
+              className={`bezent-table-th-sortable ${
+                sortField === 'candidate' ? 'bezent-table-th-sortable--active' : ''
+              }`}
+              onClick={() => handleSort('candidate')}
+              aria-label={`Sort by Candidate ${
+                sortField === 'candidate' && sortDirection === 'asc' ? 'descending' : 'ascending'
+              }`}
+            >
+              <span>Candidate</span>
+              <span
+                className={`bezent-table-sort-arrow ${
+                  sortField === 'candidate' ? 'bezent-table-sort-arrow--active' : ''
+                }`}
+                aria-hidden="true"
+              >
+                {sortField === 'candidate' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
+            </button>
+          </TableHeaderCell>
+
+          <TableHeaderCell
+            aria-sort={
+              sortField === 'role'
+                ? sortDirection === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
+          >
+            <button
+              type="button"
+              className={`bezent-table-th-sortable ${
+                sortField === 'role' ? 'bezent-table-th-sortable--active' : ''
+              }`}
+              onClick={() => handleSort('role')}
+              aria-label={`Sort by Applied Role ${
+                sortField === 'role' && sortDirection === 'asc' ? 'descending' : 'ascending'
+              }`}
+            >
+              <span>Applied Role</span>
+              <span
+                className={`bezent-table-sort-arrow ${
+                  sortField === 'role' ? 'bezent-table-sort-arrow--active' : ''
+                }`}
+                aria-hidden="true"
+              >
+                {sortField === 'role' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
+            </button>
+          </TableHeaderCell>
+
+          <TableHeaderCell
+            aria-sort={
+              sortField === 'round'
+                ? sortDirection === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
+          >
+            <button
+              type="button"
+              className={`bezent-table-th-sortable ${
+                sortField === 'round' ? 'bezent-table-th-sortable--active' : ''
+              }`}
+              onClick={() => handleSort('round')}
+              aria-label={`Sort by Interview Round ${
+                sortField === 'round' && sortDirection === 'asc' ? 'descending' : 'ascending'
+              }`}
+            >
+              <span>Interview Round</span>
+              <span
+                className={`bezent-table-sort-arrow ${
+                  sortField === 'round' ? 'bezent-table-sort-arrow--active' : ''
+                }`}
+                aria-hidden="true"
+              >
+                {sortField === 'round' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
+            </button>
+          </TableHeaderCell>
+
+          <TableHeaderCell
+            aria-sort={
+              sortField === 'slot'
+                ? sortDirection === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
+          >
+            <button
+              type="button"
+              className={`bezent-table-th-sortable ${
+                sortField === 'slot' ? 'bezent-table-th-sortable--active' : ''
+              }`}
+              onClick={() => handleSort('slot')}
+              aria-label={`Sort by Scheduled Slot ${
+                sortField === 'slot' && sortDirection === 'asc' ? 'descending' : 'ascending'
+              }`}
+            >
+              <span>Scheduled Slot</span>
+              <span
+                className={`bezent-table-sort-arrow ${
+                  sortField === 'slot' ? 'bezent-table-sort-arrow--active' : ''
+                }`}
+                aria-hidden="true"
+              >
+                {sortField === 'slot' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
+            </button>
+          </TableHeaderCell>
+
+          <TableHeaderCell
+            aria-sort={
+              sortField === 'interviewer'
+                ? sortDirection === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
+          >
+            <button
+              type="button"
+              className={`bezent-table-th-sortable ${
+                sortField === 'interviewer' ? 'bezent-table-th-sortable--active' : ''
+              }`}
+              onClick={() => handleSort('interviewer')}
+              aria-label={`Sort by Interviewer ${
+                sortField === 'interviewer' && sortDirection === 'asc' ? 'descending' : 'ascending'
+              }`}
+            >
+              <span>Interviewer</span>
+              <span
+                className={`bezent-table-sort-arrow ${
+                  sortField === 'interviewer' ? 'bezent-table-sort-arrow--active' : ''
+                }`}
+                aria-hidden="true"
+              >
+                {sortField === 'interviewer' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
+            </button>
+          </TableHeaderCell>
+
+          <TableHeaderCell
+            aria-sort={
+              sortField === 'status'
+                ? sortDirection === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
+          >
+            <button
+              type="button"
+              className={`bezent-table-th-sortable ${
+                sortField === 'status' ? 'bezent-table-th-sortable--active' : ''
+              }`}
+              onClick={() => handleSort('status')}
+              aria-label={`Sort by Status ${
+                sortField === 'status' && sortDirection === 'asc' ? 'descending' : 'ascending'
+              }`}
+            >
+              <span>Status</span>
+              <span
+                className={`bezent-table-sort-arrow ${
+                  sortField === 'status' ? 'bezent-table-sort-arrow--active' : ''
+                }`}
+                aria-hidden="true"
+              >
+                {sortField === 'status' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
+            </button>
+          </TableHeaderCell>
+
+          <TableHeaderCell
+            aria-sort={
+              sortField === 'evaluation'
+                ? sortDirection === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
+          >
+            <button
+              type="button"
+              className={`bezent-table-th-sortable ${
+                sortField === 'evaluation' ? 'bezent-table-th-sortable--active' : ''
+              }`}
+              onClick={() => handleSort('evaluation')}
+              aria-label={`Sort by Evaluation ${
+                sortField === 'evaluation' && sortDirection === 'asc' ? 'descending' : 'ascending'
+              }`}
+            >
+              <span>Evaluation</span>
+              <span
+                className={`bezent-table-sort-arrow ${
+                  sortField === 'evaluation' ? 'bezent-table-sort-arrow--active' : ''
+                }`}
+                aria-hidden="true"
+              >
+                {sortField === 'evaluation' ? (sortDirection === 'asc' ? '▲' : '▼') : '⇅'}
+              </span>
+            </button>
+          </TableHeaderCell>
+
           <TableHeaderCell>Actions</TableHeaderCell>
         </TableRow>
       </TableHead>
       <TableBody>
-        {interviews.map((item) => {
+        {sortedInterviews.map((item) => {
           const initials = item.candidateName
             .split(' ')
             .map((n) => n[0])

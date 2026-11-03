@@ -17,8 +17,8 @@ import {
 import { BezentIcon } from '../../../../design-system/icons';
 import { useAuth } from '../../../../platform/auth';
 import { SETTINGS_MODULE_CARDS, type SettingsModuleId } from '../types/settingsCenter';
-import { DashboardSettingsSection, EmployeesSettingsSection, HRSettingsSection } from '../general';
-import { AdministrationSettingsSection } from '../administration';
+import { DashboardSettingsSection } from '../general';
+import { WorkforceSettingsSection } from '../workforce/WorkforceSettingsSection';
 import { LeaveSettingsSection } from '../leave';
 import { AttendanceSettingsSection } from '../attendance';
 import { TimesheetsSettingsSection } from '../timesheets';
@@ -81,9 +81,9 @@ export function SettingsPageInner({ initialModule = 'overview' }: SettingsPageIn
             ))}
           </Grid>
         </Stack>
-      ) : activeModule === 'onboarding' ? (
-        /* View 2: Administration Workspace (Image 2 Approved Hierarchy) */
-        <AdministrationSettingsSection onBack={() => setActiveModule('overview')} />
+      ) : activeModule === 'workforce' || activeModule === 'onboarding' || activeModule === 'employees' || activeModule === 'hr-settings' ? (
+        /* View 2: Unified Workforce Settings Workspace (ADR-019) */
+        <WorkforceSettingsSection onBack={() => setActiveModule('overview')} />
       ) : (
         /* View 3: Other Module Configuration Workspaces */
         <Stack gap="lg">
@@ -109,8 +109,6 @@ export function SettingsPageInner({ initialModule = 'overview' }: SettingsPageIn
             {activeModule === 'attendance' && <AttendanceSettingsSection />}
             {activeModule === 'timesheets' && <TimesheetsSettingsSection />}
             {activeModule === 'performance' && <PerformanceSettingsSection />}
-            {activeModule === 'employees' && <EmployeesSettingsSection />}
-            {activeModule === 'hr-settings' && <HRSettingsSection />}
             {activeModule === 'milestones' && <MilestonesSettingsSection />}
           </div>
         </Stack>
@@ -123,13 +121,16 @@ function RoutedSettingsPage() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const isWorkflowSettings = location.pathname.includes('onboarding/workflow-settings');
-  const hasOnboardingParam =
+  const isWorkforceSettings =
+    searchParams.get('module') === 'workforce' ||
     searchParams.get('module') === 'onboarding' ||
+    searchParams.get('module') === 'employees' ||
+    searchParams.get('module') === 'hr-settings' ||
     searchParams.get('tab') === 'onboarding' ||
     searchParams.has('sub');
   const requestedModule = SETTINGS_MODULE_CARDS.find((m) => m.id === searchParams.get('module'));
   const initialModule: SettingsModuleId =
-    isWorkflowSettings || hasOnboardingParam ? 'onboarding' : (requestedModule?.id ?? 'overview');
+    isWorkflowSettings || isWorkforceSettings ? 'workforce' : (requestedModule?.id ?? 'overview');
   return <SettingsPageInner initialModule={initialModule} />;
 }
 

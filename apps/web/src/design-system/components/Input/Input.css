@@ -225,7 +225,7 @@
   text-decoration: underline;
 }
 
-/* Search Bar — 3D Inset Surface */
+/* Search Bar — Clean Enterprise Input */
 .bezent-search-bar {
   display: flex;
   align-items: center;
@@ -233,20 +233,25 @@
   padding: 0 12px;
   height: 36px;
   background-color: var(--bg-surface, #ffffff);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  border-radius: 12px;
-  min-width: 240px;
-  box-shadow:
-    inset 0 2px 3px rgba(0, 0, 0, 0.03),
-    0 2px 5px rgba(0, 0, 0, 0.02);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: 8px;
+  min-width: 220px;
+  max-width: 320px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
   transition: all 0.16s ease;
+}
+
+@media (max-width: 640px) {
+  .bezent-search-bar {
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+  }
 }
 
 .bezent-search-bar:focus-within {
   border-color: #3978f6;
-  box-shadow:
-    inset 0 1.5px 2px rgba(0, 0, 0, 0.02),
-    0 0 0 3px rgba(57, 120, 246, 0.14);
+  box-shadow: 0 0 0 2px rgba(57, 120, 246, 0.14);
 }
 
 .bezent-search-bar__input {

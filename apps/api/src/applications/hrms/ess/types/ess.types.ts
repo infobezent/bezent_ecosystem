@@ -1,3 +1,4 @@
+import type { ApplyLeaveInput, LeaveBalanceSummary } from '../../leave/types/leave.types.js';
 import type { EmployeeAttendance } from '../../attendance/types/attendance.types.js';
 
 export interface EssEmployeeSummary {
@@ -109,13 +110,8 @@ export interface EssTodayAttendance {
   timezone?: string;
 }
 
-export interface EssLeaveBalanceItem {
-  leaveType: 'annual' | 'sick' | 'casual' | 'unpaid';
-  totalDays: number;
-  usedDays: number;
-  pendingDays: number;
-  availableDays: number;
-}
+/** Leave balances come from the leave domain's workspace. */
+export type EssLeaveBalanceItem = LeaveBalanceSummary;
 
 export interface EssMonthlyAttendanceSnapshot {
   presentDays: number;
@@ -412,11 +408,53 @@ export interface EssAttendanceRegularizationDto {
   createdAt: string;
 }
 
-export interface ApplyLeaveInput {
-  leaveType: 'annual' | 'sick' | 'casual' | 'unpaid';
-  startDate: string;
-  endDate: string;
-  reason: string;
+export type { ApplyLeaveInput };
+
+export interface EssLeaveTransactionItem {
+  id: string;
+  balanceId: string;
+  leaveTypeId: string;
+  leaveTypeName: string;
+  leaveTypeCode: string;
+  colorToken?: string;
+  cycleStartDate: string;
+  txnType: string;
+  direction: 'credit' | 'debit';
+  days: number;
+  credit: number;
+  debit: number;
+  runningBalance: number;
+  transactionDate: string;
+  effectiveDate: string;
+  description: string;
+  referenceType?: string | null;
+  referenceId?: string | null;
+  reason?: string | null;
+  createdBy?: string | null;
+  createdAt: string;
+}
+
+export interface EssLeaveTransactionsQuery {
+  page?: number | string;
+  limit?: number | string;
+  offset?: number | string;
+  leaveTypeId?: string;
+  txnType?: string;
+  direction?: 'credit' | 'debit' | 'all';
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface EssLeaveTransactionsResult {
+  items: EssLeaveTransactionItem[];
+  pagination: {
+    total: number;
+    limit: number;
+    offset: number;
+    page: number;
+    pages: number;
+  };
+  balances: EssLeaveBalanceItem[];
 }
 
 export interface LogTimesheetInput {

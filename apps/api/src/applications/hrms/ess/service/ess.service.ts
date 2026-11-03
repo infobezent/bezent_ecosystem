@@ -1,3 +1,4 @@
+import { leaveService, type LeaveService } from '../../leave/service/leave.service.js';
 import { EssRepository } from '../repository/ess.repository.js';
 import { milestoneRepository } from '../../milestones/repository/milestone.repository.js';
 import { attendanceService } from '../../attendance/service/attendance.service.js';
@@ -31,10 +32,19 @@ import type {
   EssDocumentDto,
   EssProfileChangeRequestDto,
   EssFeedPost,
+  EssLeaveTransactionItem,
+  EssLeaveTransactionsQuery,
+  EssLeaveTransactionsResult,
 } from '../types/ess.types.js';
 
 export class EssService {
-  constructor(private readonly repo: EssRepository = new EssRepository()) {}
+  constructor(
+    private readonly repo: EssRepository = new EssRepository(),
+    private readonly leave: Pick<
+      LeaveService,
+      'getWorkspace' | 'applyLeave' | 'cancelLeave' | 'getApprovalQueue' | 'decideApproval'
+    > = leaveService,
+  ) {}
 
   private getCurrentTimeString(): string {
     const now = new Date();
@@ -50,7 +60,7 @@ export class EssService {
       await Promise.all([
         this.repo.getEmployeeSummary(ctx.id),
         this.getAttendanceWorkspace(ctx),
-        this.repo.ensureDefaultLeaveBalances(ctx.tenantId, ctx.companyId, ctx.id, currentYear),
+        this.leave.getWorkspace(ctx.tenantId, ctx.companyId, ctx.id),
         this.repo.getRequests(ctx.tenantId, ctx.companyId, ctx.id),
         this.repo.getTasks(ctx.tenantId, ctx.companyId, ctx.id),
         this.repo.getNotifications(ctx.tenantId, ctx.companyId, ctx.id),
@@ -64,22 +74,13 @@ export class EssService {
     const assignedTasksCount = allTasks.filter((t) => t.status !== 'completed').length;
     const unreadNotificationsCount = notifications.filter((n) => !n.isRead).length;
 
-    const leaveBalanceItems = balances.map((b) => ({
-      leaveType: b.leaveType,
-      totalDays: b.totalDays,
-      usedDays: b.usedDays,
-      pendingDays: b.pendingDays,
-      availableDays: Math.max(0, b.totalDays - b.usedDays - b.pendingDays),
-    }));
+    const leaveBalanceItems = balances.balances;
 
-    const upcomingHolidays = [
-      { name: 'Republic Day', date: `${currentYear}-01-26`, dayOfWeek: 'Monday' },
-      { name: 'May Day / Labor Day', date: `${currentYear}-05-01`, dayOfWeek: 'Friday' },
-      { name: 'Independence Day', date: `${currentYear}-08-15`, dayOfWeek: 'Saturday' },
-      { name: 'Gandhi Jayanti', date: `${currentYear}-10-02`, dayOfWeek: 'Friday' },
-      { name: 'Diwali', date: `${currentYear}-11-08`, dayOfWeek: 'Sunday' },
-      { name: 'Christmas Day', date: `${currentYear}-12-25`, dayOfWeek: 'Friday' },
-    ];
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const upcomingHolidays = balances.holidays
+      .filter((h) => h.date >= todayStr)
+      .slice(0, 6)
+      .map(({ name, date, dayOfWeek }) => ({ name, date, dayOfWeek }));
 
     // Monthly attendance calculations
     const presentCount = attWorkspace.summary.presentDays;
@@ -1058,104 +1059,356 @@ export class EssService {
   }
 
   async getLeaveWorkspace(ctx: EmployeeContext) {
-    const currentYear = new Date().getFullYear();
-    const [balances, requests] = await Promise.all([
-      this.repo.ensureDefaultLeaveBalances(ctx.tenantId, ctx.companyId, ctx.id, currentYear),
-      this.repo.getLeaveRequests(ctx.tenantId, ctx.companyId, ctx.id),
+    return this.leave.getWorkspace(ctx.tenantId, ctx.companyId, ctx.id);
+  }
+
+  async getLeaveTransactions(
+    ctx: EmployeeContext,
+    query: EssLeaveTransactionsQuery = {},
+  ): Promise<EssLeaveTransactionsResult> {
+    const [raw, workspace] = await Promise.all([
+      this.repo.getRawLeaveTransactions(ctx.tenantId, ctx.companyId, ctx.id),
+      this.leave.getWorkspace(ctx.tenantId, ctx.companyId, ctx.id),
     ]);
 
-    const formattedBalances = balances.map((b) => ({
-      leaveType: b.leaveType,
-      totalDays: b.totalDays,
-      usedDays: b.usedDays,
-      pendingDays: b.pendingDays,
-      availableDays: Math.max(0, b.totalDays - b.usedDays - b.pendingDays),
-    }));
+    const { balances, rows } = raw;
 
-    const upcomingHolidays = [
-      { name: 'Republic Day', date: `${currentYear}-01-26`, dayOfWeek: 'Monday' },
-      { name: 'May Day / Labor Day', date: `${currentYear}-05-01`, dayOfWeek: 'Friday' },
-      { name: 'Independence Day', date: `${currentYear}-08-15`, dayOfWeek: 'Saturday' },
-      { name: 'Gandhi Jayanti', date: `${currentYear}-10-02`, dayOfWeek: 'Friday' },
-      { name: 'Diwali', date: `${currentYear}-11-08`, dayOfWeek: 'Sunday' },
-      { name: 'Christmas Day', date: `${currentYear}-12-25`, dayOfWeek: 'Friday' },
-    ];
+    const LEDGER_SIGN: Record<string, number> = {
+      opening: 1,
+      accrual: 1,
+      carry_forward_in: 1,
+      carry_forward_out: -1,
+      usage_reserve: -1,
+      usage_release: 1,
+      usage_confirm: 0,
+      usage_reversal: 1,
+      adjustment: 1,
+      lapse: -1,
+      encashment: -1,
+      manual_credit: 1,
+      manual_debit: -1,
+      forfeit: -1,
+      reversal: 1,
+    };
+
+    const running = new Map<string, number>();
+    for (const b of balances) {
+      const totalDays = Number(b.totalDays || 0);
+      const usedDays = Number(b.usedDays || 0);
+      const pendingDays = Number(b.pendingDays || 0);
+      const currentAvailable = Math.round((totalDays - usedDays - pendingDays) * 100) / 100;
+      const ledgerTotal = rows
+        .filter((r) => r.balanceId === b.id)
+        .reduce(
+          (sum, r) =>
+            sum +
+            Math.round(Number(r.days) * (LEDGER_SIGN[r.txnType] ?? 1) * 100) / 100,
+          0,
+        );
+      running.set(b.id, Math.round((currentAvailable - ledgerTotal) * 100) / 100);
+    }
+
+    const enrichedItems: EssLeaveTransactionItem[] = rows.map((r) => {
+      const rawDays = Number(r.days);
+      const effect = Math.round(rawDays * (LEDGER_SIGN[r.txnType] ?? 1) * 100) / 100;
+      const runningAvail = Math.round(((running.get(r.balanceId) ?? 0) + effect) * 100) / 100;
+      running.set(r.balanceId, runningAvail);
+
+      const meta = this.formatTransactionDescription(
+        r.txnType,
+        r.leaveTypeName,
+        rawDays,
+        r.reason,
+        r.referenceType,
+      );
+
+      const createdBy =
+        r.actorFirstName || r.actorLastName
+          ? `${r.actorFirstName || ''} ${r.actorLastName || ''}`.trim()
+          : r.createdByUserId === 'system'
+            ? 'System'
+            : 'HR';
+
+      const txnDateStr = r.createdAt
+        ? new Date(r.createdAt).toISOString().slice(0, 10)
+        : r.cycleStartDate;
+
+      return {
+        id: r.id,
+        balanceId: r.balanceId,
+        leaveTypeId: r.leaveTypeId,
+        leaveTypeName: r.leaveTypeName,
+        leaveTypeCode: r.leaveTypeCode,
+        colorToken: r.colorToken,
+        cycleStartDate: r.cycleStartDate,
+        txnType: r.txnType,
+        direction: meta.direction,
+        days: rawDays,
+        credit: meta.credit,
+        debit: meta.debit,
+        runningBalance: runningAvail,
+        transactionDate: txnDateStr,
+        effectiveDate: r.cycleStartDate,
+        description: meta.description,
+        referenceType: r.referenceType,
+        referenceId: r.referenceId,
+        reason: r.reason,
+        createdBy,
+        createdAt: r.createdAt ? new Date(r.createdAt).toISOString() : new Date().toISOString(),
+      };
+    });
+
+    // Order descending by transaction time, tie-breaking by id
+    enrichedItems.sort((a, b) => {
+      const timeA = new Date(a.createdAt).getTime();
+      const timeB = new Date(b.createdAt).getTime();
+      if (timeB !== timeA) return timeB - timeA;
+      return b.id.localeCompare(a.id);
+    });
+
+    // Filter
+    let filtered = enrichedItems;
+    if (query.leaveTypeId && query.leaveTypeId.trim() && query.leaveTypeId !== 'all') {
+      filtered = filtered.filter((item) => item.leaveTypeId === query.leaveTypeId?.trim());
+    }
+    if (query.txnType && query.txnType.trim() && query.txnType !== 'all') {
+      filtered = filtered.filter((item) => item.txnType === query.txnType?.trim());
+    }
+    if (query.direction && query.direction !== 'all') {
+      filtered = filtered.filter((item) => item.direction === query.direction);
+    }
+    if (query.startDate && query.startDate.trim()) {
+      filtered = filtered.filter((item) => item.transactionDate >= query.startDate!.trim());
+    }
+    if (query.endDate && query.endDate.trim()) {
+      filtered = filtered.filter((item) => item.transactionDate <= query.endDate!.trim());
+    }
+
+    const total = filtered.length;
+    const limit = Math.max(1, Math.min(100, Number(query.limit) || 20));
+    const page = Math.max(1, Number(query.page) || 1);
+    const offset = query.offset !== undefined ? Number(query.offset) : (page - 1) * limit;
+    const pagedItems = filtered.slice(offset, offset + limit);
+    const pages = Math.ceil(total / limit) || 1;
 
     return {
-      balances: formattedBalances,
-      requests,
-      holidays: upcomingHolidays,
+      items: pagedItems,
+      pagination: {
+        total,
+        limit,
+        offset,
+        page,
+        pages,
+      },
+      balances: workspace.balances,
     };
   }
 
-  async applyLeave(ctx: EmployeeContext, input: ApplyLeaveInput) {
-    if (!input.startDate || !input.endDate || !input.leaveType || !input.reason) {
-      throw new BadRequestError('Start date, end date, leave type, and reason are required');
+  private formatTransactionDescription(
+    txnType: string,
+    leaveTypeName: string,
+    days: number,
+    reason?: string | null,
+    _referenceType?: string | null,
+  ): { description: string; direction: 'credit' | 'debit'; credit: number; debit: number } {
+    const absDays = Math.abs(days);
+    const dayStr = `${absDays} day${absDays === 1 ? '' : 's'}`;
+
+    switch (txnType) {
+      case 'opening':
+        return {
+          direction: 'credit',
+          credit: absDays,
+          debit: 0,
+          description: `${leaveTypeName} opening entitlement credited`,
+        };
+      case 'accrual':
+        return {
+          direction: 'credit',
+          credit: absDays,
+          debit: 0,
+          description: reason
+            ? `${leaveTypeName} accrual credited (${reason})`
+            : `${leaveTypeName} accrual credited`,
+        };
+      case 'carry_forward_in':
+        return {
+          direction: 'credit',
+          credit: absDays,
+          debit: 0,
+          description: `Carry-forward balance from previous cycle credited (${dayStr})`,
+        };
+      case 'usage_reserve':
+        return {
+          direction: 'debit',
+          credit: 0,
+          debit: absDays,
+          description: reason
+            ? `Leave requested (${dayStr} reserved) - ${reason}`
+            : `Leave requested (${dayStr} reserved pending approval)`,
+        };
+      case 'usage_confirm':
+        return {
+          direction: 'debit',
+          credit: 0,
+          debit: absDays,
+          description: `Leave request approved (${dayStr} deducted)`,
+        };
+      case 'usage_release':
+        return {
+          direction: 'credit',
+          credit: absDays,
+          debit: 0,
+          description: reason
+            ? `Leave reservation released (${dayStr} restored) - ${reason}`
+            : `Leave reservation released (${dayStr} restored)`,
+        };
+      case 'usage_reversal':
+        return {
+          direction: 'credit',
+          credit: absDays,
+          debit: 0,
+          description: `Approved leave cancelled (${dayStr} restored to balance)`,
+        };
+      case 'adjustment':
+        if (days >= 0) {
+          return {
+            direction: 'credit',
+            credit: absDays,
+            debit: 0,
+            description: reason
+              ? `HR balance adjustment credited (${reason})`
+              : `HR balance adjustment credited (${dayStr})`,
+          };
+        } else {
+          return {
+            direction: 'debit',
+            credit: 0,
+            debit: absDays,
+            description: reason
+              ? `HR balance adjustment debited (${reason})`
+              : `HR balance adjustment debited (${dayStr})`,
+          };
+        }
+      case 'lapse':
+        return {
+          direction: 'debit',
+          credit: 0,
+          debit: absDays,
+          description: `Unused leave lapsed/expired at cycle close (${dayStr})`,
+        };
+      case 'encashment':
+        return {
+          direction: 'debit',
+          credit: 0,
+          debit: absDays,
+          description: `Leave encashment payout deducted (${dayStr})`,
+        };
+      case 'manual_credit':
+        return {
+          direction: 'credit',
+          credit: absDays,
+          debit: 0,
+          description: reason
+            ? `Manual leave balance credit (${reason})`
+            : `Manual leave balance credit (${dayStr})`,
+        };
+      case 'manual_debit':
+        return {
+          direction: 'debit',
+          credit: 0,
+          debit: absDays,
+          description: reason
+            ? `Manual leave balance debit (${reason})`
+            : `Manual leave balance debit (${dayStr})`,
+        };
+      case 'carry_forward_out':
+        return {
+          direction: 'debit',
+          credit: 0,
+          debit: absDays,
+          description: `Carry-forward balance transferred out (${dayStr})`,
+        };
+      case 'forfeit':
+        return {
+          direction: 'debit',
+          credit: 0,
+          debit: absDays,
+          description: reason
+            ? `Leave forfeited (${reason})`
+            : `Leave forfeited (${dayStr})`,
+        };
+      case 'reversal':
+        if (days >= 0) {
+          return {
+            direction: 'credit',
+            credit: absDays,
+            debit: 0,
+            description: reason
+              ? `Leave transaction reversed (${reason})`
+              : `Leave transaction reversed (${dayStr} restored)`,
+          };
+        } else {
+          return {
+            direction: 'debit',
+            credit: 0,
+            debit: absDays,
+            description: reason
+              ? `Leave transaction reversed (${reason})`
+              : `Leave transaction reversed (${dayStr} deducted)`,
+          };
+        }
+      default:
+        return {
+          direction: days >= 0 ? 'credit' : 'debit',
+          credit: days >= 0 ? absDays : 0,
+          debit: days < 0 ? absDays : 0,
+          description: reason || `${leaveTypeName} balance transaction (${dayStr})`,
+        };
     }
+  }
 
-    const start = new Date(input.startDate);
-    const end = new Date(input.endDate);
+  /** Leave approvals assigned to this employee (as manager, department head or role holder). */
+  async getLeaveApprovals(ctx: EmployeeContext, userId: string | undefined) {
+    if (!userId) return [];
+    return this.leave.getApprovalQueue(ctx.tenantId, ctx.companyId, userId, false, 'mine');
+  }
 
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-      throw new BadRequestError('Invalid date format provided');
-    }
-    if (end < start) {
-      throw new BadRequestError('End date cannot precede start date');
-    }
+  async decideLeaveApproval(
+    ctx: EmployeeContext,
+    userId: string | undefined,
+    approvalId: string,
+    decision: 'approved' | 'rejected',
+    comment: unknown,
+  ) {
+    if (!userId) throw new BadRequestError('A signed-in user is required to decide approvals.');
+    return this.leave.decideApproval(
+      ctx.tenantId,
+      ctx.companyId,
+      userId,
+      false,
+      approvalId,
+      decision,
+      comment,
+    );
+  }
 
-    // Inclusive days count
-    const diffTime = Math.abs(end.getTime() - start.getTime());
-    const totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-
-    // Check overlapping leave
-    const overlap = await this.repo.findOverlappingLeave(
+  async applyLeave(ctx: EmployeeContext, input: ApplyLeaveInput, actorUserId?: string) {
+    const request = await this.leave.applyLeave(
       ctx.tenantId,
       ctx.companyId,
       ctx.id,
-      input.startDate,
-      input.endDate,
+      actorUserId || ctx.id,
+      input,
     );
-    if (overlap) {
-      throw new ConflictError(
-        `Leave request overlaps with an existing ${overlap.status} leave (${overlap.startDate} to ${overlap.endDate})`,
-      );
-    }
-
-    // Check balance for non-unpaid leaves
-    if (input.leaveType !== 'unpaid') {
-      const year = start.getFullYear();
-      const balances = await this.repo.ensureDefaultLeaveBalances(
-        ctx.tenantId,
-        ctx.companyId,
-        ctx.id,
-        year,
-      );
-      const balance = balances.find((b) => b.leaveType === input.leaveType);
-      const available = balance ? balance.totalDays - balance.usedDays - balance.pendingDays : 0;
-      if (available < totalDays) {
-        throw new BadRequestError(
-          `Insufficient ${input.leaveType} leave balance. Available: ${available} day(s), Requested: ${totalDays} day(s)`,
-        );
-      }
-    }
-
-    const request = await this.repo.createLeaveRequest({
-      tenantId: ctx.tenantId,
-      companyId: ctx.companyId,
-      employeeId: ctx.id,
-      leaveType: input.leaveType,
-      startDate: input.startDate,
-      endDate: input.endDate,
-      totalDays,
-      reason: input.reason.trim(),
-    });
+    const totalDays = Number(request.totalDays);
 
     await this.repo.createNotification({
       tenantId: ctx.tenantId,
       companyId: ctx.companyId,
       employeeId: ctx.id,
       title: 'Leave Application Submitted',
-      message: `Your application for ${totalDays} day(s) of ${input.leaveType} leave has been submitted.`,
+      message: `Your leave application for ${totalDays} day(s) has been submitted.`,
       type: 'info',
       link: '/ess/leave',
     });
@@ -1163,8 +1416,14 @@ export class EssService {
     return request;
   }
 
-  async cancelLeave(ctx: EmployeeContext, leaveId: string) {
-    const updated = await this.repo.cancelLeaveRequest(leaveId, ctx.id);
+  async cancelLeave(ctx: EmployeeContext, leaveId: string, actorUserId?: string) {
+    const updated = await this.leave.cancelLeave(
+      ctx.tenantId,
+      ctx.companyId,
+      ctx.id,
+      leaveId,
+      actorUserId || ctx.id,
+    );
     await this.repo.createNotification({
       tenantId: ctx.tenantId,
       companyId: ctx.companyId,

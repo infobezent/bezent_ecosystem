@@ -21,6 +21,7 @@ import {
 } from '../../../../db/schema.js';
 import { hashPassword } from '../../../../platform/auth/security.js';
 import { hrmsTestHeaders } from '../../../../platform/__tests__/support/testSession.js';
+import { ensureLeaveTypeId } from '../../leave/__tests__/support/leaveTestTypes.js';
 
 describe.skipIf(!isDatabaseConfigured)(
   'BEZENT HRMS — Attendance Monthly Summary V1.0 Real DB & API Audit',
@@ -289,10 +290,10 @@ describe.skipIf(!isDatabaseConfigured)(
         tenantId,
         companyId,
         employeeId: empId1,
-        leaveType: 'casual',
+        leaveTypeId: await ensureLeaveTypeId(tenantId, companyId, 'CL'),
         startDate: '2026-09-02',
         endDate: '2026-09-02',
-        totalDays: 1,
+        totalDays: '1.00',
         status: 'approved',
         reason: 'Personal errand',
       });

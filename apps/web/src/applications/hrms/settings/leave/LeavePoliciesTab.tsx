@@ -1,11 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Card,
-  CardTitle,
   CardDescription,
   Stack,
   Inline,
-  Grid,
   Button,
   Select,
   SearchInput,
@@ -20,8 +18,8 @@ import {
   Spinner,
   Modal,
   EmptyState,
-  PageHeader,
 } from '../../../../design-system/components';
+import { LeaveSettingsHeader } from './LeaveSettingsHeader';
 import type {
   LeavePolicyItem,
   LeavePoliciesSummary,
@@ -40,6 +38,7 @@ import {
 import { fetchLeaveTypes } from './api/leaveTypesApi';
 import { fetchOrganizationMasters } from '../../api/organizationMastersApi';
 import { LeavePolicyDrawer } from './LeavePolicyDrawer';
+import { LeaveStatGrid } from './LeaveStatGrid';
 
 export interface LeavePoliciesTabProps {
   initialData?: LeavePoliciesListResponse;
@@ -227,9 +226,10 @@ export function LeavePoliciesTab({
   const hasActiveFilters = Boolean(search || statusFilter !== 'all' || scopeFilter !== 'all');
 
   return (
-    <Stack gap="xl">
+    <Stack gap="lg">
       {/* 1. Header Toolbar — Clean Apple / Linear Settings Style */}
-      <PageHeader
+      <LeaveSettingsHeader
+        icon="documents"
         title="Leave Policies"
         subtitle="Define and manage leave rules for your workforce."
         badge={
@@ -256,37 +256,33 @@ export function LeavePoliciesTab({
         }
       />
 
-      {/* 2. Dynamic Metric Summary Cards — strictly rendered only when backed by API data */}
       {summary && (
-        <Grid columns={4} gap="md">
-          <Card padding="md">
-            <Stack gap="xs">
-              <CardDescription>Total Policies</CardDescription>
-              <CardTitle>{summary.total}</CardTitle>
-            </Stack>
-          </Card>
-
-          <Card padding="md" variant="tint-blue">
-            <Stack gap="xs">
-              <CardDescription>Active Policies</CardDescription>
-              <CardTitle>{summary.active}</CardTitle>
-            </Stack>
-          </Card>
-
-          <Card padding="md">
-            <Stack gap="xs">
-              <CardDescription>Draft Policies</CardDescription>
-              <CardTitle>{summary.draft}</CardTitle>
-            </Stack>
-          </Card>
-
-          <Card padding="md">
-            <Stack gap="xs">
-              <CardDescription>Scheduled Policies</CardDescription>
-              <CardTitle>{summary.scheduled}</CardTitle>
-            </Stack>
-          </Card>
-        </Grid>
+        <LeaveStatGrid
+          stats={[
+            { label: 'Policies', value: summary.total, caption: 'Defined', icon: 'documents' },
+            {
+              label: 'Active',
+              value: summary.active,
+              caption: 'In Force',
+              icon: 'check',
+              tone: 'green',
+            },
+            {
+              label: 'Draft & Scheduled',
+              value: summary.draft + summary.scheduled,
+              caption: `${summary.draft} Draft · ${summary.scheduled} Scheduled`,
+              icon: 'clock',
+              tone: 'blue',
+            },
+            {
+              label: 'Uncovered Employees',
+              value: summary.employeesWithoutPolicy,
+              caption: 'Without Policy',
+              icon: 'employees',
+              tone: summary.employeesWithoutPolicy > 0 ? 'red' : 'purple',
+            },
+          ]}
+        />
       )}
 
       {summary && summary.employeesWithoutPolicy > 0 && (
@@ -449,10 +445,15 @@ export function LeavePoliciesTab({
 
                     {/* Effective Period */}
                     <TableCell>
-                      <span>
-                        {pol.effectiveFrom}{' '}
-                        {pol.effectiveTo ? `to ${pol.effectiveTo}` : '(Ongoing)'}
-                      </span>
+                      {/* The seeded default policy is effective from 2000-01-01, i.e. since go-live. */}
+                      <Stack gap="none">
+                        <span>
+                          {pol.effectiveFrom <= '2000-01-01' ? 'Since go-live' : pol.effectiveFrom}
+                        </span>
+                        <CardDescription>
+                          {pol.effectiveTo ? `until ${pol.effectiveTo}` : 'Ongoing'}
+                        </CardDescription>
+                      </Stack>
                     </TableCell>
 
                     {/* Linked Types */}

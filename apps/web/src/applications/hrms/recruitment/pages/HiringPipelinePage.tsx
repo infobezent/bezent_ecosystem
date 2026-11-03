@@ -67,12 +67,14 @@ export function HiringPipelinePage({ initialCandidates, initialJobs }: HiringPip
         fetchJobRequisitions({ limit: 100 }).catch(() => ({ items: [] })),
       ]);
 
-      const candMap: Record<string, (typeof candsRes.items)[0]> = {};
-      for (const c of candsRes.items) {
+      const candItems = candsRes?.items ?? [];
+      const candMap: Record<string, (typeof candItems)[0]> = {};
+      for (const c of candItems) {
         candMap[c.id] = c;
       }
 
-      const adaptedCands: Candidate[] = appsRes.items.map((app) => {
+      const appItems = appsRes?.items ?? [];
+      const adaptedCands: Candidate[] = appItems.map((app) => {
         const c = app.candidate || candMap[app.candidateId];
         if (c) {
           return adaptCandidateToFrontend(c, app);
@@ -117,7 +119,8 @@ export function HiringPipelinePage({ initialCandidates, initialJobs }: HiringPip
         };
       });
 
-      const adaptedJobs = reqsRes.items.map((r) => adaptRequisitionToJobOpening(r));
+      const reqItems = reqsRes?.items ?? [];
+      const adaptedJobs = reqItems.map((r) => adaptRequisitionToJobOpening(r));
 
       setCandidates(adaptedCands);
       setJobs(adaptedJobs);

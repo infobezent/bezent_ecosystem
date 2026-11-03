@@ -278,6 +278,48 @@ and invitations no longer grant access.
 
 **Approval:** explicit, given by the user on 2026-09-29 per Article 4.
 
+<a id="adr-019"></a>
+
+### ADR-019 — Unification of HRMS Workforce Settings Hub (Retiring Legacy Administration & Mock Employee Settings)
+
+**Context:** Historical HR settings had fragmented, non-persistent cards:
+an "Administration" card (`id: 'onboarding'`) that housed Forms and Onboarding
+alongside an empty `EmployeeNumberingSection` placeholder; a mock "Employees"
+card with hardcoded client state and a dummy `setTimeout` save; and a mock
+"HR Settings" card. The operational sidebar navigation already uses the
+canonical concept **Workforce** (`/hrms/workforce/*`: Directory, Onboarding,
+Transfers, Promotions, Offboarding, Records). Critical enterprise policies for
+Probation, Notice Periods, and Transfer Approvals lacked database persistence
+and configuration surfaces.
+
+**Decision:**
+
+1. **Unify all workforce configuration into one authoritative domain** —
+   `Workforce Settings` (`/hrms/settings?module=workforce`), mirroring the
+   rigor of Leave Settings (ADR-014).
+2. **Retire and delete dead mock screens** — `EmployeesSettingsSection.tsx`
+   and `HRSettingsSection.tsx` are removed. The Settings Hub card registry
+   is updated to replace the 3 fragmented cards (`onboarding`, `employees`,
+   `hr-settings`) with a single **Workforce** card (`id: 'workforce'`).
+3. **Canonical 7-Tab Architecture** in `apps/web/src/applications/hrms/settings/workforce/`:
+   - Tab 1: General & Auto-Numbering (ID sequence generator, employment types, work models, auto-provisioning).
+   - Tab 2: Organization & Hierarchy (Designations, job levels, grades, reporting rules).
+   - Tab 3: Registration & Custom Forms (Employee Registration Form builder & field editor).
+   - Tab 4: Onboarding Workflows (Pre-boarding, dynamic stages, checklists, document requirements).
+   - Tab 5: Probation & Confirmation (Probation duration, review workflow, extensions).
+   - Tab 6: Transfers & Lifecycle (Movement types, dual-manager approvals, effective dates).
+   - Tab 7: Offboarding & Clearance (Notice period matrix, buyout rules, 4-department No Dues clearance).
+4. **Real Database Persistence** — Schema migrations add MySQL persistence for
+   employee numbering sequences, employment types, probation policies,
+   lifecycle policies, and offboarding/clearance matrices with strict tenant
+   and company isolation.
+
+**Consequences:** Eliminates confusing terminology and mock screens. Ensures
+1:1 semantic alignment between the operational Workforce module and its
+administrative settings hub.
+
+**Approval:** explicit, approved by the user on 2026-10-31 per Article 4.
+
 ## Recording a new ADR
 
 Adding ADR-017 and beyond follows the process defined in

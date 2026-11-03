@@ -130,7 +130,7 @@ export function CandidateProfileDrawer({
           <Stack gap="md">
             {/* Quick Metrics */}
             <Grid columns={4} gap="sm">
-              <Card variant="clay" padding="none" className="bezent-clay-card--compact">
+              <Card variant="default" padding="none" className="bezent-clay-card--compact">
                 <CardBody>
                   <Stack gap="none">
                     <span className="bezent-text-xs bezent-text-secondary">Experience</span>
@@ -142,7 +142,7 @@ export function CandidateProfileDrawer({
                 </CardBody>
               </Card>
 
-              <Card variant="clay" padding="none" className="bezent-clay-card--compact">
+              <Card variant="default" padding="none" className="bezent-clay-card--compact">
                 <CardBody>
                   <Stack gap="none">
                     <span className="bezent-text-xs bezent-text-secondary">Current Company</span>
@@ -153,7 +153,7 @@ export function CandidateProfileDrawer({
                 </CardBody>
               </Card>
 
-              <Card variant="clay" padding="none" className="bezent-clay-card--compact">
+              <Card variant="default" padding="none" className="bezent-clay-card--compact">
                 <CardBody>
                   <Stack gap="none">
                     <span className="bezent-text-xs bezent-text-secondary">Notice Period</span>
@@ -166,7 +166,7 @@ export function CandidateProfileDrawer({
                 </CardBody>
               </Card>
 
-              <Card variant="clay" padding="none" className="bezent-clay-card--compact">
+              <Card variant="default" padding="none" className="bezent-clay-card--compact">
                 <CardBody>
                   <Stack gap="none">
                     <span className="bezent-text-xs bezent-text-secondary">

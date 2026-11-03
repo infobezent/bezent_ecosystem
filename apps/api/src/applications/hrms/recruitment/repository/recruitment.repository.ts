@@ -1112,8 +1112,9 @@ export class RecruitmentRepository {
     companyId: string,
     id: string,
     executor: DbExecutor = getDb(),
+    forUpdate: boolean = false,
   ): Promise<RecruitmentOnboarding | null> {
-    const [row] = await executor
+    const query = executor
       .select()
       .from(recruitmentOnboardings)
       .where(
@@ -1124,6 +1125,12 @@ export class RecruitmentRepository {
         ),
       )
       .limit(1);
+
+    if (forUpdate && typeof (query as any).for === 'function') {
+      (query as any).for('update');
+    }
+
+    const [row] = await query;
     return row ?? null;
   }
 

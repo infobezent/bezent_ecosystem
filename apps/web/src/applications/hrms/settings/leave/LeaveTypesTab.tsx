@@ -1,11 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Card,
-  CardTitle,
   CardDescription,
   Stack,
   Inline,
-  Grid,
   Button,
   Select,
   SearchInput,
@@ -20,8 +18,8 @@ import {
   Spinner,
   Modal,
   EmptyState,
-  PageHeader,
 } from '../../../../design-system/components';
+import { LeaveSettingsHeader } from './LeaveSettingsHeader';
 import type {
   LeaveTypeItem,
   LeaveTypeSummary,
@@ -36,6 +34,17 @@ import {
   changeLeaveTypeStatus,
 } from './api/leaveTypesApi';
 import { LeaveTypeDrawer } from './LeaveTypeDrawer';
+import { LeaveStatGrid } from './LeaveStatGrid';
+
+const CATEGORY_LABELS: Record<string, string> = {
+  paid: 'Paid',
+  unpaid: 'Unpaid',
+  statutory: 'Statutory',
+  special_event: 'Special Event',
+  compensatory: 'Compensatory Off',
+  optional_holiday: 'Optional Holiday',
+  loss_of_pay: 'Loss of Pay',
+};
 
 export interface LeaveTypesTabProps {
   initialData?: LeaveTypesListResponse;
@@ -168,9 +177,10 @@ export function LeaveTypesTab({ initialData, canManage = true }: LeaveTypesTabPr
   const hasActiveFilters = Boolean(search || statusFilter !== 'all' || paidFilter !== 'all');
 
   return (
-    <Stack gap="xl">
+    <Stack gap="lg">
       {/* 1. Header Toolbar — Clean Apple / Linear Settings Style */}
-      <PageHeader
+      <LeaveSettingsHeader
+        icon="leave"
         title="Leave Types"
         subtitle="Manage the types of leave available to employees."
         badge={
@@ -196,30 +206,33 @@ export function LeaveTypesTab({ initialData, canManage = true }: LeaveTypesTabPr
         }
       />
 
-      {/* 2. Dynamic Metric Summary Cards — rendered strictly when backed by API data */}
       {summary && (
-        <Grid columns={3} gap="md">
-          <Card padding="md">
-            <Stack gap="xs">
-              <CardDescription>Total Leave Types</CardDescription>
-              <CardTitle>{summary.total}</CardTitle>
-            </Stack>
-          </Card>
-
-          <Card padding="md" variant="tint-blue">
-            <Stack gap="xs">
-              <CardDescription>Active Leave Types</CardDescription>
-              <CardTitle>{summary.active}</CardTitle>
-            </Stack>
-          </Card>
-
-          <Card padding="md">
-            <Stack gap="xs">
-              <CardDescription>Inactive Leave Types</CardDescription>
-              <CardTitle>{summary.inactive}</CardTitle>
-            </Stack>
-          </Card>
-        </Grid>
+        <LeaveStatGrid
+          stats={[
+            { label: 'Leave Types', value: summary.total, caption: 'Configured', icon: 'leave' },
+            {
+              label: 'Active',
+              value: summary.active,
+              caption: 'Bookable',
+              icon: 'check',
+              tone: 'green',
+            },
+            {
+              label: 'Paid',
+              value: items.filter((lt) => lt.payrollImpact === 'paid').length,
+              caption: 'Salary Protected',
+              icon: 'payroll',
+              tone: 'blue',
+            },
+            {
+              label: 'Inactive',
+              value: summary.inactive,
+              caption: 'Hidden',
+              icon: 'warning',
+              tone: summary.inactive > 0 ? 'red' : 'purple',
+            },
+          ]}
+        />
       )}
 
       {/* Global Alerts for Success & Error Notifications */}
@@ -375,7 +388,7 @@ export function LeaveTypesTab({ initialData, canManage = true }: LeaveTypesTabPr
                     {/* Category */}
                     <TableCell>
                       <span className="bezent-status-pill__label">
-                        {lt.category.replace('_', ' ')}
+                        {CATEGORY_LABELS[lt.category] ?? lt.category}
                       </span>
                     </TableCell>
 

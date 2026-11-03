@@ -144,6 +144,7 @@ export class EmployeeService {
     companyId: string,
     input: unknown,
     tx?: unknown,
+    actor?: EmployeeUpdateActor | string,
   ): Promise<EmployeeDetails> {
     const inputObj =
       input && typeof input === 'object'
@@ -269,16 +270,18 @@ export class EmployeeService {
 
     // 5. Create the employee and its detail records in one transaction
     const created = hasDetails
-      ? await this.profileService.runInTransaction(async (tx) => {
-          const employee = await this.repo.create(tenantId, companyId, validatedDto, tx);
+      ? await this.profileService.runInTransaction(async (innerTx) => {
+          const employee = await this.repo.create(tenantId, companyId, validatedDto, innerTx);
           await this.profileService.writeDetails(
-            tx,
+            innerTx,
             { tenantId, companyId, employeeId: employee.id },
             details,
           );
           return employee;
         })
-      : await this.repo.create(tenantId, companyId, validatedDto, (tx as any));
+      : tx
+        ? await this.repo.create(tenantId, companyId, validatedDto, tx as any)
+        : await this.repo.create(tenantId, companyId, validatedDto);
 
     // Auto-provision User login and company membership if requested or configured by workforce settings
     let shouldAutoProvision = Boolean(inputObj.autoProvisionUser || inputObj.enablePortalAccess);
@@ -307,6 +310,37 @@ export class EmployeeService {
         );
       }
     }
+
+    // 5b. Record employee_created in platform audit logs
+    const actorUserId =
+      typeof actor === 'string'
+        ? actor
+        : actor?.userId ?? null;
+    const actorEmail =
+      typeof actor === 'object' && actor !== null
+        ? actor.email ?? null
+        : null;
+
+    await this.audit.logEvent(
+      {
+        actorUserId,
+        actorEmail,
+        action: 'employee_created',
+        targetType: 'employee',
+        targetId: created.id,
+        tenantId,
+        companyId,
+        metadata: {
+          employeeNumber: created.employeeNumber,
+          email: created.email,
+          firstName: created.firstName,
+          lastName: created.lastName,
+          employmentStatus: created.employmentStatus,
+          joiningDate: created.joiningDate,
+        },
+      },
+      tx,
+    );
 
     // 6. Return full detailed representation
     const fullDetails = await this.repo.getById(tenantId, companyId, created.id);

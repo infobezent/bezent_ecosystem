@@ -17,6 +17,7 @@ import { generateSurrogateId } from '../../../../platform/auth/security.js';
 import { hrmsTestHeaders } from '../../../../platform/__tests__/support/testSession.js';
 import { attendanceOverviewService } from '../service/attendanceOverview.service.js';
 import { attendanceRepository } from '../repository/attendance.repository.js';
+import { ensureLeaveTypeId } from '../../leave/__tests__/support/leaveTestTypes.js';
 
 describe.skipIf(!isDatabaseConfigured)(
   'BEZENT HRMS — Phase 1 Core Attendance Logic & Data Accuracy Regression Suite',
@@ -186,10 +187,10 @@ describe.skipIf(!isDatabaseConfigured)(
         tenantId,
         companyId,
         employeeId: emp4,
-        leaveType: 'annual',
+        leaveTypeId: await ensureLeaveTypeId(tenantId, companyId, 'AL'),
         startDate: todayStr,
         endDate: todayStr,
-        totalDays: 1,
+        totalDays: '1.00',
         reason: 'Annual Leave',
         status: 'approved',
       });

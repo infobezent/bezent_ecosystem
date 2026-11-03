@@ -12,7 +12,6 @@ leaveTypesRouter.use(
       'hrms.leave.settings.manage',
       'hrms.settings.view',
       'hrms.settings.manage',
-      'hrms.leave.view',
     ],
     'hrms.leave.settings.manage',
   ),

@@ -1,10 +1,14 @@
-import { eq, and, desc, inArray } from 'drizzle-orm';
+import { eq, and, desc, asc, inArray, sql } from 'drizzle-orm';
 import { getDb } from '../../../../db/connection.js';
 import {
   employees,
   departments,
   designations,
   locations,
+  users,
+  leaveBalanceTransactions,
+  leaveTypes,
+  employeeLeaveBalances,
   employeePersonalDetails,
   employeeFamilyMembers,
   employeeEmergencyContacts,
@@ -19,8 +23,6 @@ import {
   employeeActions,
   attendanceRegularizations,
   type EmployeeAttendance,
-  type EmployeeLeaveBalance,
-  type EmployeeLeaveRequest,
   type EmployeeTimesheet,
   type EmployeeDocument,
   type EmployeeRequest,
@@ -42,14 +44,10 @@ import {
   attendanceRepository,
   AttendanceRepository,
 } from '../../attendance/repository/attendance.repository.js';
-import { leaveRepository, LeaveRepository } from '../../leave/repository/leave.repository.js';
 import { alias } from 'drizzle-orm/mysql-core';
 
 export class EssRepository {
-  constructor(
-    private readonly attendanceRepo: AttendanceRepository = attendanceRepository,
-    private readonly leaveRepo: LeaveRepository = leaveRepository,
-  ) {}
+  constructor(private readonly attendanceRepo: AttendanceRepository = attendanceRepository) {}
   async getEmployeeSummary(employeeId: string): Promise<EssEmployeeSummary | null> {
     const db = getDb();
     const manager = alias(employees, 'reporting_manager');
@@ -568,60 +566,6 @@ export class EssRepository {
     return this.attendanceRepo.getEmployeeDayPunches(tenantId, companyId, employeeId, date);
   }
 
-  // ── Leave Domain (Delegated to applications/hrms/leave) ───────────────────
-  async getLeaveBalances(
-    tenantId: string,
-    companyId: string,
-    employeeId: string,
-    year: number,
-  ): Promise<EmployeeLeaveBalance[]> {
-    return this.leaveRepo.getLeaveBalances(tenantId, companyId, employeeId, year);
-  }
-
-  async ensureDefaultLeaveBalances(
-    tenantId: string,
-    companyId: string,
-    employeeId: string,
-    year: number,
-  ): Promise<EmployeeLeaveBalance[]> {
-    return this.leaveRepo.ensureDefaultLeaveBalances(tenantId, companyId, employeeId, year);
-  }
-
-  async getLeaveRequests(
-    tenantId: string,
-    companyId: string,
-    employeeId: string,
-  ): Promise<EmployeeLeaveRequest[]> {
-    return this.leaveRepo.getLeaveRequests(tenantId, companyId, employeeId);
-  }
-
-  async findOverlappingLeave(
-    tenantId: string,
-    companyId: string,
-    employeeId: string,
-    startDate: string,
-    endDate: string,
-  ): Promise<EmployeeLeaveRequest | null> {
-    return this.leaveRepo.findOverlappingLeave(tenantId, companyId, employeeId, startDate, endDate);
-  }
-
-  async createLeaveRequest(data: {
-    tenantId: string;
-    companyId: string;
-    employeeId: string;
-    leaveType: 'annual' | 'sick' | 'casual' | 'unpaid';
-    startDate: string;
-    endDate: string;
-    totalDays: number;
-    reason: string;
-  }): Promise<EmployeeLeaveRequest> {
-    return this.leaveRepo.createLeaveRequest(data);
-  }
-
-  async cancelLeaveRequest(id: string, employeeId: string): Promise<EmployeeLeaveRequest> {
-    return this.leaveRepo.cancelLeaveRequest(id, employeeId);
-  }
-
   // Timesheets
   async getTimesheets(
     tenantId: string,
@@ -1117,5 +1061,60 @@ export class EssRepository {
         ),
       )
       .orderBy(desc(attendanceRegularizations.submittedAt));
+  }
+
+  // ---------------------------------------------------------------------------
+  // Leave Balance Ledger Transactions
+  // ---------------------------------------------------------------------------
+  async getRawLeaveTransactions(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+  ) {
+    const db = getDb();
+    const [balances, rows] = await Promise.all([
+      db
+        .select()
+        .from(employeeLeaveBalances)
+        .where(
+          and(
+            eq(employeeLeaveBalances.tenantId, tenantId),
+            eq(employeeLeaveBalances.companyId, companyId),
+            eq(employeeLeaveBalances.employeeId, employeeId),
+          ),
+        ),
+      db
+        .select({
+          id: leaveBalanceTransactions.id,
+          balanceId: leaveBalanceTransactions.balanceId,
+          leaveTypeId: leaveBalanceTransactions.leaveTypeId,
+          leaveTypeName: leaveTypes.name,
+          leaveTypeCode: leaveTypes.code,
+          colorToken: leaveTypes.colorToken,
+          cycleStartDate: leaveBalanceTransactions.cycleStartDate,
+          txnType: leaveBalanceTransactions.txnType,
+          days: leaveBalanceTransactions.days,
+          referenceType: leaveBalanceTransactions.referenceType,
+          referenceId: leaveBalanceTransactions.referenceId,
+          reason: leaveBalanceTransactions.reason,
+          createdByUserId: leaveBalanceTransactions.createdByUserId,
+          actorFirstName: users.firstName,
+          actorLastName: users.lastName,
+          createdAt: leaveBalanceTransactions.createdAt,
+        })
+        .from(leaveBalanceTransactions)
+        .innerJoin(leaveTypes, eq(leaveTypes.id, leaveBalanceTransactions.leaveTypeId))
+        .leftJoin(users, eq(users.id, leaveBalanceTransactions.createdByUserId))
+        .where(
+          and(
+            eq(leaveBalanceTransactions.tenantId, tenantId),
+            eq(leaveBalanceTransactions.companyId, companyId),
+            eq(leaveBalanceTransactions.employeeId, employeeId),
+          ),
+        )
+        .orderBy(asc(leaveBalanceTransactions.createdAt), asc(leaveBalanceTransactions.id)),
+    ]);
+
+    return { balances, rows };
   }
 }

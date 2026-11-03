@@ -19,6 +19,7 @@ import {
   Divider,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
+import { workflowsApi } from './api/leaveAdminApi';
 import type {
   LeaveTypeItem,
   CreateLeaveTypeDto,
@@ -134,6 +135,7 @@ interface FormState {
   effectiveFrom: string;
   effectiveTo: string;
   isActive: boolean;
+  workflowId: string;
 }
 
 const EMPTY_FORM: FormState = {
@@ -171,6 +173,7 @@ const EMPTY_FORM: FormState = {
   effectiveFrom: '',
   effectiveTo: '',
   isActive: true,
+  workflowId: '',
 };
 
 const asText = (v: string | number | null | undefined) =>
@@ -214,6 +217,7 @@ function formFromItem(item: LeaveTypeItem): FormState {
     effectiveFrom: item.effectiveFrom,
     effectiveTo: item.effectiveTo ?? '',
     isActive: item.isActive,
+    workflowId: item.workflowId ?? '',
   };
 }
 
@@ -276,6 +280,17 @@ export function LeaveTypeDrawer({
   const isEditing = mode === 'edit';
 
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [workflows, setWorkflows] = useState<
+    Array<{ id: string; name: string; isDefault: boolean }>
+  >([]);
+
+  useEffect(() => {
+    if (!isOpen || isViewing) return;
+    workflowsApi
+      .list()
+      .then((list) => setWorkflows(list.filter((w) => w.isActive)))
+      .catch(() => setWorkflows([]));
+  }, [isOpen, isViewing]);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -443,6 +458,7 @@ export function LeaveTypeDrawer({
         countsAsPresent: form.countsAsPresent,
         countsTowardService: form.countsTowardService,
         teamCalendarVisibility: form.teamCalendarVisibility,
+        workflowId: form.workflowId || null,
         effectiveFrom: form.effectiveFrom || undefined,
         effectiveTo: form.effectiveTo || null,
         isActive: form.isActive,
@@ -1166,6 +1182,27 @@ export function LeaveTypeDrawer({
                       checked={form.countsTowardService}
                       onChange={(v) => set('countsTowardService', v)}
                     />
+
+                    <FormField
+                      label="Approval Workflow"
+                      htmlFor="ltWorkflow"
+                      helperText="Leave empty to use the company default workflow."
+                    >
+                      <Select
+                        id="ltWorkflow"
+                        value={form.workflowId}
+                        onChange={(e) => set('workflowId', e.target.value)}
+                      >
+                        <option value="">Company default</option>
+                        {workflows
+                          .filter((w) => !w.isDefault)
+                          .map((w) => (
+                            <option key={w.id} value={w.id}>
+                              {w.name}
+                            </option>
+                          ))}
+                      </Select>
+                    </FormField>
 
                     <FormField label="Team Calendar" htmlFor="teamCalendarVisibility">
                       <Select

@@ -130,7 +130,7 @@ describe('AttendanceCalculationService', () => {
       expect(result.isMissingPunch).toBe(true);
     });
 
-    it('marks holiday on non-working day without punches', () => {
+    it('marks weekly_off on non-working day without punches', () => {
       const result = service.calculate({
         date: '2026-10-10', // Saturday
         checkInTime: null,
@@ -139,9 +139,26 @@ describe('AttendanceCalculationService', () => {
         policy: FALLBACK_ATTENDANCE_POLICY,
       });
 
+      expect(result.status).toBe('weekly_off');
+      expect(result.isLate).toBe(false);
+      expect(result.workedMinutes).toBe(0);
+    });
+
+    it('marks holiday on public holiday even on scheduled working day', () => {
+      const result = service.calculate({
+        date: '2026-10-02', // Gandhi Jayanti (Friday - normal working day)
+        checkInTime: null,
+        checkOutTime: null,
+        schedule: DEFAULT_WORK_SCHEDULE, // Mon-Fri
+        policy: FALLBACK_ATTENDANCE_POLICY,
+        isHoliday: true,
+        holidayName: 'Gandhi Jayanti',
+      });
+
       expect(result.status).toBe('holiday');
       expect(result.isLate).toBe(false);
       expect(result.workedMinutes).toBe(0);
+      expect(result.calculationMetadata?.holidayName).toBe('Gandhi Jayanti');
     });
 
     it('marks absent on working day with zero punches', () => {

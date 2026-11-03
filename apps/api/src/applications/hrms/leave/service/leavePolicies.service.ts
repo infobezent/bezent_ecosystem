@@ -594,7 +594,7 @@ export class LeavePoliciesService {
     }
   }
 
-  private async countEmployeesWithoutPolicy(tenantId: string, companyId: string): Promise<number> {
+  async countEmployeesWithoutPolicy(tenantId: string, companyId: string): Promise<number> {
     const today = await this.companyToday(tenantId, companyId);
     const [candidates, staff] = await Promise.all([
       this.repo.findPoliciesInForceOn(tenantId, companyId, today),

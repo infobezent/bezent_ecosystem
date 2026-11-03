@@ -17,9 +17,8 @@ describe('LeaveTypesTab UI Component — Unit & Render Tests', () => {
   it('renders dynamic summary indicator cards', () => {
     const html = renderToStaticMarkup(<LeaveTypesTab initialData={DEFAULT_LEAVE_TYPES_RESPONSE} />);
 
-    expect(html).toContain('Total Leave Types');
-    expect(html).toContain('Active Leave Types');
-    expect(html).toContain('Inactive Leave Types');
+    expect(html).toContain('Bookable');
+    expect(html).toContain('Hidden');
     expect(html).toContain('3');
   });
 
