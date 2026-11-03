@@ -746,6 +746,249 @@
   color: #64748b;
 }
 
+/* ── Premium Enterprise Number + Mini Trend Chart KPI Card ── */
+.bezent-trend-kpi-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-default, #e2e8f0);
+  border-radius: var(--radius-lg, 12px);
+  padding: 18px 20px;
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.04),
+    0 1px 2px rgba(15, 23, 42, 0.02);
+  min-height: 124px;
+  box-sizing: border-box;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.16s ease;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+}
+
+.bezent-trend-kpi-card:hover {
+  border-color: #cbd5e1;
+  box-shadow:
+    0 4px 12px rgba(15, 23, 42, 0.06),
+    0 2px 4px rgba(15, 23, 42, 0.02);
+  transform: translateY(-1px);
+}
+
+.bezent-trend-kpi-card:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent-primary, #3b82f6);
+}
+
+.bezent-trend-kpi-card.is-active {
+  border-color: var(--accent-primary, #3b82f6);
+  box-shadow: 0 0 0 1px var(--accent-primary, #3b82f6);
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card {
+  background: #0f172a;
+  border-color: #1e293b;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card:hover {
+  border-color: #334155;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* Header Row: Top-left icon + title, Top-right info tooltip button */
+.bezent-trend-kpi-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.bezent-trend-kpi-card__title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.bezent-trend-kpi-card__icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  flex-shrink: 0;
+}
+
+.bezent-trend-kpi-card__icon-badge--blue {
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+}
+
+.bezent-trend-kpi-card__icon-badge--green {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+}
+
+.bezent-trend-kpi-card__icon-badge--amber {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}
+
+.bezent-trend-kpi-card__icon-badge--coral {
+  background: rgba(244, 63, 94, 0.12);
+  color: #e11d48;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__icon-badge--blue {
+  background: rgba(59, 130, 246, 0.24);
+  color: #93c5fd;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__icon-badge--green {
+  background: rgba(16, 185, 129, 0.24);
+  color: #86efac;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__icon-badge--amber {
+  background: rgba(245, 158, 11, 0.24);
+  color: #fcd34d;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__icon-badge--coral {
+  background: rgba(244, 63, 94, 0.24);
+  color: #fda4af;
+}
+
+.bezent-trend-kpi-card__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary, #475569);
+  line-height: 1.3;
+  margin: 0;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__title {
+  color: #94a3b8;
+}
+
+.bezent-trend-kpi-card__info-btn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  margin: -4px;
+  cursor: pointer;
+  color: #94a3b8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.bezent-trend-kpi-card__info-btn:hover {
+  color: #475569;
+  background-color: #f1f5f9;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__info-btn:hover {
+  color: #f1f5f9;
+  background-color: #1e293b;
+}
+
+/* Content Body: Split layout with Left numbers/captions and Right mini chart */
+.bezent-trend-kpi-card__body {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+}
+
+.bezent-trend-kpi-card__metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.bezent-trend-kpi-card__value {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text-primary, #0f172a);
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__value {
+  color: #f8fafc;
+}
+
+.bezent-trend-kpi-card__caption {
+  font-size: 12px;
+  color: var(--text-tertiary, #94a3b8);
+  line-height: 1.35;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__caption {
+  color: #64748b;
+}
+
+/* Trend Indicator Pill (Bottom-left) */
+.bezent-trend-kpi-card__trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.bezent-trend-kpi-card__trend--up {
+  color: #16a34a;
+}
+
+.bezent-trend-kpi-card__trend--down {
+  color: #dc2626;
+}
+
+.bezent-trend-kpi-card__trend--neutral {
+  color: #64748b;
+}
+
+/* Right Mini Chart Container */
+.bezent-trend-kpi-card__chart {
+  width: 88px;
+  height: 42px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  overflow: visible;
+}
+
+.bezent-trend-kpi-card__chart-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  display: block;
+}
+
 /* ── Directory Search Toolbar & Records Badge ── */
 .bezent-directory-toolbar {
   display: flex;

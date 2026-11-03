@@ -45,6 +45,7 @@ import {
   type SortColumn,
   type SortDirection,
 } from '../components/EmployeeDirectoryTable';
+import { WorkforceKpiCards } from '../components/WorkforceKpiCards';
 
 const PAGE_SIZE = 25;
 
@@ -568,176 +569,13 @@ export function EmployeeDirectoryPage() {
         Manage and explore your workforce directory
       </span>
 
-      {/* 2. Workforce 3D Clay KPI Cards (Matching Recruitment Candidate Directory) */}
-      <Grid columns={4} gap="md" role="region" aria-label="Workforce key metrics">
-        {/* Total Employees */}
-        <Card
-          variant="default"
-          padding="none"
-          className="bezent-clay-card--compact bezent-clay-card--purple bezent-kpi-card bezent-kpi-card--purple"
-          aria-label={`Total Employees: ${kpis.total !== null ? kpis.total : 'Loading'}`}
-        >
-          <CardBody>
-            <Inline justify="between" align="center">
-              <Stack gap="xs">
-                <Inline align="center" gap="xs">
-                  <span
-                    className="bezent-pulse-stat__dot bezent-pulse-stat__dot--purple"
-                    aria-hidden="true"
-                  />
-                  <span className="bezent-clay-metric__label bezent-kpi-card__title">
-                    Total Employees
-                  </span>
-                </Inline>
-                <div className="bezent-clay-metric__value bezent-kpi-card__value">
-                  {kpis.loading ? (
-                    <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-                  ) : kpis.total !== null ? (
-                    kpis.total
-                  ) : (
-                    '—'
-                  )}
-                </div>
-                <span className="bezent-clay-metric__caption bezent-kpi-card__caption">
-                  Total recorded workforce
-                </span>
-              </Stack>
-              <div
-                className="bezent-clay-icon bezent-clay-icon--purple bezent-kpi-card__icon bezent-kpi-card__icon--purple"
-                aria-hidden="true"
-              >
-                <BezentIcon name="employees" size={20} />
-              </div>
-            </Inline>
-          </CardBody>
-        </Card>
-
-        {/* Active Employees */}
-        <Card
-          variant="default"
-          padding="none"
-          className="bezent-clay-card--compact bezent-clay-card--blue bezent-kpi-card bezent-kpi-card--blue"
-          aria-label={`Active Employees: ${kpis.active !== null ? kpis.active : 'Loading'}`}
-        >
-          <CardBody>
-            <Inline justify="between" align="center">
-              <Stack gap="xs">
-                <Inline align="center" gap="xs">
-                  <span
-                    className="bezent-pulse-stat__dot bezent-pulse-stat__dot--blue"
-                    aria-hidden="true"
-                  />
-                  <span className="bezent-clay-metric__label bezent-kpi-card__title">
-                    Active Employees
-                  </span>
-                </Inline>
-                <div className="bezent-clay-metric__value bezent-kpi-card__value">
-                  {kpis.loading ? (
-                    <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-                  ) : kpis.active !== null ? (
-                    kpis.active
-                  ) : (
-                    '—'
-                  )}
-                </div>
-                <span className="bezent-clay-metric__caption bezent-kpi-card__caption">
-                  Confirmed active &amp; probation
-                </span>
-              </Stack>
-              <div
-                className="bezent-clay-icon bezent-clay-icon--blue bezent-kpi-card__icon bezent-kpi-card__icon--blue"
-                aria-hidden="true"
-              >
-                <BezentIcon name="userCheck" size={20} />
-              </div>
-            </Inline>
-          </CardBody>
-        </Card>
-
-        {/* Pending Activation */}
-        <Card
-          variant="default"
-          padding="none"
-          className="bezent-clay-card--compact bezent-clay-card--amber bezent-kpi-card bezent-kpi-card--amber"
-          aria-label={`Pending Activation: ${kpis.pendingActivation !== null ? kpis.pendingActivation : 'Loading'}`}
-        >
-          <CardBody>
-            <Inline justify="between" align="center">
-              <Stack gap="xs">
-                <Inline align="center" gap="xs">
-                  <span
-                    className="bezent-pulse-stat__dot bezent-pulse-stat__dot--amber"
-                    aria-hidden="true"
-                  />
-                  <span className="bezent-clay-metric__label bezent-kpi-card__title">
-                    Pending Activation
-                  </span>
-                </Inline>
-                <div className="bezent-clay-metric__value bezent-kpi-card__value">
-                  {kpis.loading ? (
-                    <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-                  ) : kpis.pendingActivation !== null ? (
-                    kpis.pendingActivation
-                  ) : (
-                    '—'
-                  )}
-                </div>
-                <span className="bezent-clay-metric__caption bezent-kpi-card__caption">
-                  Pre-boarded awaiting login
-                </span>
-              </Stack>
-              <div
-                className="bezent-clay-icon bezent-clay-icon--amber bezent-kpi-card__icon bezent-kpi-card__icon--amber"
-                aria-hidden="true"
-              >
-                <BezentIcon name="onboarding" size={20} />
-              </div>
-            </Inline>
-          </CardBody>
-        </Card>
-
-        {/* Inactive Employees */}
-        <Card
-          variant="default"
-          padding="none"
-          className="bezent-clay-card--compact bezent-clay-card--red bezent-kpi-card bezent-kpi-card--red"
-          aria-label={`Inactive Employees: ${kpis.inactive !== null ? kpis.inactive : 'Loading'}`}
-        >
-          <CardBody>
-            <Inline justify="between" align="center">
-              <Stack gap="xs">
-                <Inline align="center" gap="xs">
-                  <span
-                    className="bezent-pulse-stat__dot bezent-pulse-stat__dot--red"
-                    aria-hidden="true"
-                  />
-                  <span className="bezent-clay-metric__label bezent-kpi-card__title">
-                    Inactive Employees
-                  </span>
-                </Inline>
-                <div className="bezent-clay-metric__value bezent-kpi-card__value">
-                  {kpis.loading ? (
-                    <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-                  ) : kpis.inactive !== null ? (
-                    kpis.inactive
-                  ) : (
-                    '—'
-                  )}
-                </div>
-                <span className="bezent-clay-metric__caption bezent-kpi-card__caption">
-                  Terminated, suspended or resigned
-                </span>
-              </Stack>
-              <div
-                className="bezent-clay-icon bezent-clay-icon--red bezent-kpi-card__icon bezent-kpi-card__icon--red"
-                aria-hidden="true"
-              >
-                <BezentIcon name="userX" size={20} />
-              </div>
-            </Inline>
-          </CardBody>
-        </Card>
-      </Grid>
+      {/* 2. Workforce KPI Cards (Number + Mini Trend Chart - Premium Enterprise UI) */}
+      <WorkforceKpiCards
+        kpis={kpis}
+        employees={directory.employees}
+        activeStatusTab={activeStatusTab}
+        onSelectStatusTab={handleStatusTabChange}
+      />
 
       {/* 3. Candidates-style Search & Action Toolbar with Status Filter Tabs */}
       <Toolbar
