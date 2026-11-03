@@ -157,6 +157,110 @@ interface MiniChartProps {
   chartId: string;
 }
 
+export type KpiChartType =
+  'smooth-area' | 'vertical-bars' | 'mini-area' | 'subtle-line' | 'workforce-ring';
+
+/**
+ * Workforce Ring Visualization
+ *
+ * Implements a clean circular ring using segmented arcs, BEZENT emerald green (#168653)
+ * and soft mint (#B7E8CF) palette with a central UsersRound employee-group icon.
+ */
+export function WorkforceRing() {
+  return (
+    <div className="bezent-workforce-ring" aria-hidden="true">
+      <svg
+        className="bezent-workforce-ring__svg"
+        viewBox="0 0 48 48"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {/* Soft mint circular backdrop */}
+        <circle cx="24" cy="24" r="22" className="bezent-workforce-ring__bg" />
+
+        {/* Subtle background track */}
+        <circle
+          cx="24"
+          cy="24"
+          r="18"
+          stroke="var(--bezent-ring-track, #b7e8cf)"
+          strokeWidth="3"
+          strokeOpacity="0.4"
+        />
+
+        {/* Segment 1: Primary Emerald arc (Top-right) */}
+        <circle
+          cx="24"
+          cy="24"
+          r="18"
+          stroke="var(--bezent-ring-primary, #168653)"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          strokeDasharray="28 85.1"
+          strokeDashoffset="0"
+          className="bezent-workforce-ring__segment"
+        />
+
+        {/* Segment 2: Primary Emerald arc (Bottom-right) */}
+        <circle
+          cx="24"
+          cy="24"
+          r="18"
+          stroke="var(--bezent-ring-primary, #168653)"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          strokeDasharray="24 89.1"
+          strokeDashoffset="-34"
+          className="bezent-workforce-ring__segment"
+        />
+
+        {/* Segment 3: Soft Mint arc (Bottom-left) */}
+        <circle
+          cx="24"
+          cy="24"
+          r="18"
+          stroke="var(--bezent-ring-mint, #b7e8cf)"
+          strokeWidth="3.2"
+          strokeLinecap="round"
+          strokeDasharray="22 91.1"
+          strokeDashoffset="-64"
+          className="bezent-workforce-ring__segment"
+        />
+
+        {/* Segment 4: Accent dot / subtle cap segment (Top-left) */}
+        <circle
+          cx="24"
+          cy="24"
+          r="18"
+          stroke="var(--bezent-ring-primary, #168653)"
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          strokeDasharray="2 111.1"
+          strokeDashoffset="-92"
+          className="bezent-workforce-ring__segment"
+        />
+
+        {/* Central UsersRound Employee-Group Icon */}
+        <g
+          className="bezent-workforce-ring__icon"
+          transform="translate(16, 16)"
+          stroke="var(--bezent-ring-primary, #168653)"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          {/* Main User in front */}
+          <path d="M12.5 13.5a4.5 4.5 0 0 0-9 0" />
+          <circle cx="8" cy="5.5" r="2.75" />
+          {/* Secondary User behind */}
+          <path d="M13.5 13.5a4 4 0 0 0-3.5-3.5" />
+          <path d="M11.5 3.5a2.25 2.25 0 0 1 0 4" />
+        </g>
+      </svg>
+    </div>
+  );
+}
+
 const ACCENT_COLORS: Record<'blue' | 'green' | 'amber' | 'coral', string> = {
   blue: '#3b82f6',
   green: '#10b981',
@@ -288,7 +392,7 @@ interface SingleKpiCardProps {
   accent: 'blue' | 'green' | 'amber' | 'coral';
   icon: BezentIconName;
   tooltip: string;
-  chartType: 'smooth-area' | 'vertical-bars' | 'mini-area' | 'subtle-line';
+  chartType: KpiChartType;
   trendResult: TrendCalculationResult;
   loading: boolean;
   isActive: boolean;
@@ -397,12 +501,16 @@ function SingleKpiCard({
         </div>
 
         <div className="bezent-trend-kpi-card__chart">
-          <MiniChart
-            data={trendResult.trendData}
-            accent={accent}
-            type={chartType}
-            chartId={`${id}-${chartId}`}
-          />
+          {chartType === 'workforce-ring' ? (
+            <WorkforceRing />
+          ) : (
+            <MiniChart
+              data={trendResult.trendData}
+              accent={accent}
+              type={chartType}
+              chartId={`${id}-${chartId}`}
+            />
+          )}
         </div>
       </div>
     </div>
@@ -452,7 +560,7 @@ export function WorkforceKpiCards({
       accent: 'green' as const,
       icon: 'userCheck' as BezentIconName,
       tooltip: 'Employees with confirmed active or probation status eligible for daily operations.',
-      chartType: 'vertical-bars' as const,
+      chartType: 'workforce-ring' as const,
       trendResult: trends.active,
       statusTab: 'active',
     },

@@ -989,6 +989,80 @@
   display: block;
 }
 
+/* ── Workforce Ring Visualization (Active Employees Card) ── */
+:root {
+  --bezent-ring-primary: #168653;
+  --bezent-ring-mint: #b7e8cf;
+  --bezent-ring-bg: #eaf7ef;
+  --bezent-ring-track: #b7e8cf;
+}
+
+[data-theme='dark'] {
+  --bezent-ring-primary: #86efac;
+  --bezent-ring-mint: rgba(183, 232, 207, 0.5);
+  --bezent-ring-bg: rgba(22, 134, 83, 0.2);
+  --bezent-ring-track: rgba(183, 232, 207, 0.25);
+}
+
+.bezent-workforce-ring {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.bezent-workforce-ring__svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  display: block;
+  transform-origin: center;
+  animation: bezent-ring-entrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.bezent-workforce-ring__bg {
+  fill: var(--bezent-ring-bg, #eaf7ef);
+  transition: fill 0.16s ease;
+}
+
+.bezent-trend-kpi-card:hover .bezent-workforce-ring__bg {
+  fill: #dcfce7;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card:hover .bezent-workforce-ring__bg {
+  fill: rgba(22, 134, 83, 0.3);
+}
+
+.bezent-workforce-ring__icon {
+  transform-origin: center;
+  transition: transform 0.16s ease;
+}
+
+.bezent-trend-kpi-card:hover .bezent-workforce-ring__icon {
+  transform: scale(1.08);
+}
+
+@keyframes bezent-ring-entrance {
+  from {
+    transform: rotate(-90deg) scale(0.9);
+    opacity: 0.3;
+  }
+  to {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bezent-workforce-ring__svg {
+    animation: none;
+  }
+}
+
 /* ── Directory Search Toolbar & Records Badge ── */
 .bezent-directory-toolbar {
   display: flex;

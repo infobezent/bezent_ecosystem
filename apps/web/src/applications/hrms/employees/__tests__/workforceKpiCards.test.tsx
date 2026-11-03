@@ -125,7 +125,7 @@ describe('WorkforceKpiCards (Number + Mini Trend Chart)', () => {
     );
   });
 
-  it('renders smooth area chart for Total Employees and bar chart for Active Employees with real data', () => {
+  it('renders smooth area chart for Total Employees and Workforce Ring for Active Employees', () => {
     const html = renderToStaticMarkup(
       <WorkforceKpiCards
         kpis={{
@@ -142,11 +142,15 @@ describe('WorkforceKpiCards (Number + Mini Trend Chart)', () => {
 
     // SVG elements rendered
     expect(html).toContain('class="bezent-trend-kpi-card__chart-svg"');
-    // LinearGradient for smooth area
+    // LinearGradient for smooth area in Total Employees
     expect(html).toContain('<linearGradient');
-    // Vertical bars have rect elements with rx="2"
-    expect(html).toContain('<rect');
-    expect(html).toContain('rx="2"');
+
+    // Workforce Ring in Active Employees
+    expect(html).toContain('bezent-workforce-ring');
+    expect(html).toContain('bezent-workforce-ring__svg');
+    expect(html).toContain('bezent-workforce-ring__bg');
+    expect(html).toContain('bezent-workforce-ring__segment');
+    expect(html).toContain('bezent-workforce-ring__icon');
   });
 
   it('renders clean neutral dashed baseline placeholder when historical data is missing or empty', () => {
