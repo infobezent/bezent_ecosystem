@@ -903,8 +903,50 @@ function generateSmoothCurve(pts: { x: number; y: number }[]): string {
  * Implements clean, crisp translucent white sparkline curves and stepped bars
  * designed to overlay seamlessly on vibrant solid background KPI cards.
  */
-function MiniChart({ data, type, chartId }: MiniChartProps) {
+function MiniChart({ data, accent = 'blue', type, chartId }: MiniChartProps) {
   const gradId = `spark-grad-${chartId}`;
+
+  const themeColors: Record<
+    'blue' | 'green' | 'amber' | 'coral',
+    {
+      primary: string;
+      halo: string;
+      disc: string;
+      icon: string;
+      fillOpacity: number;
+    }
+  > = {
+    blue: {
+      primary: '#2563eb',
+      halo: 'rgba(37, 99, 235, 0.16)',
+      disc: '#2563eb',
+      icon: '#ffffff',
+      fillOpacity: 0.2,
+    },
+    green: {
+      primary: '#059669',
+      halo: 'rgba(5, 150, 105, 0.16)',
+      disc: '#059669',
+      icon: '#ffffff',
+      fillOpacity: 0.2,
+    },
+    amber: {
+      primary: '#d97706',
+      halo: 'rgba(217, 119, 6, 0.16)',
+      disc: '#d97706',
+      icon: '#ffffff',
+      fillOpacity: 0.22,
+    },
+    coral: {
+      primary: '#e11d48',
+      halo: 'rgba(225, 29, 72, 0.16)',
+      disc: '#e11d48',
+      icon: '#ffffff',
+      fillOpacity: 0.16,
+    },
+  };
+
+  const theme = themeColors[accent] || themeColors.blue;
 
   // 1. Stepped Queue Bars (Pending Activation / In-Progress queue)
   if (type === 'vertical-bars') {
@@ -943,25 +985,19 @@ function MiniChart({ data, type, chartId }: MiniChartProps) {
           y1="10"
           x2="69"
           y2="10"
-          stroke="rgba(255, 255, 255, 0.4)"
+          stroke={theme.primary}
+          strokeOpacity="0.35"
           strokeWidth="1.2"
           strokeDasharray="3 3"
           strokeLinecap="round"
         />
 
-        {/* Micro Frosted Employee Pin Badge at Horizon (Style A) */}
+        {/* Micro Employee Pin Badge at Horizon (Style A) */}
         <g className="bezent-trend-kpi-card__chart-badge" aria-hidden="true">
-          <circle cx={77} cy={10} r={8.5} fill="rgba(255, 255, 255, 0.15)" />
-          <circle
-            cx={77}
-            cy={10}
-            r={6.5}
-            fill="rgba(255, 255, 255, 0.28)"
-            stroke="#ffffff"
-            strokeWidth="1"
-          />
-          <circle cx={77} cy={7.8} r={1.8} fill="#ffffff" />
-          <path d="M 73.8 14.2 C 73.8 11.2, 80.2 11.2, 80.2 14.2 Z" fill="#ffffff" />
+          <circle cx={77} cy={10} r={8.5} fill={theme.halo} />
+          <circle cx={77} cy={10} r={6.5} fill={theme.disc} stroke="#ffffff" strokeWidth="1" />
+          <circle cx={77} cy={7.8} r={1.8} fill={theme.icon} />
+          <path d="M 73.8 14.2 C 73.8 11.2, 80.2 11.2, 80.2 14.2 Z" fill={theme.icon} />
         </g>
 
         {/* Stepped Queue Micro-Bars */}
@@ -973,7 +1009,7 @@ function MiniChart({ data, type, chartId }: MiniChartProps) {
             width={8}
             height={b.height}
             rx={2}
-            fill="#ffffff"
+            fill={theme.primary}
             fillOpacity={b.opacity}
           />
         ))}
@@ -1031,45 +1067,45 @@ function MiniChart({ data, type, chartId }: MiniChartProps) {
         <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
           <stop
             offset="0%"
-            stopColor="#ffffff"
-            stopOpacity={type === 'subtle-line' ? 0.14 : 0.26}
+            stopColor={theme.primary}
+            stopOpacity={type === 'subtle-line' ? 0.14 : theme.fillOpacity}
           />
-          <stop offset="100%" stopColor="#ffffff" stopOpacity="0.0" />
+          <stop offset="100%" stopColor={theme.primary} stopOpacity="0.0" />
         </linearGradient>
       </defs>
 
       {/* Translucent Soft Glow Fill under Curve */}
       <path d={areaPath} fill={`url(#${gradId})`} />
 
-      {/* Crisp White Wave Stroke */}
+      {/* Crisp Semantic Wave Stroke */}
       <path
         d={linePath}
         fill="none"
-        stroke="#ffffff"
+        stroke={theme.primary}
         strokeWidth={type === 'subtle-line' ? 2 : 2.2}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
 
-      {/* Micro Frosted Employee / Person Badge (Style A) */}
+      {/* Micro Employee / Person Badge (Style A) */}
       <g className="bezent-trend-kpi-card__chart-badge" aria-hidden="true">
         {/* Outer Halo */}
-        <circle cx={lastPt.x} cy={lastPt.y} r={8.5} fill="rgba(255, 255, 255, 0.15)" />
-        {/* Frosted Glass Disc */}
+        <circle cx={lastPt.x} cy={lastPt.y} r={8.5} fill={theme.halo} />
+        {/* Badge Disc */}
         <circle
           cx={lastPt.x}
           cy={lastPt.y}
           r={6.5}
-          fill="rgba(255, 255, 255, 0.28)"
+          fill={theme.disc}
           stroke="#ffffff"
           strokeWidth="1"
         />
         {/* Miniature Person: Head */}
-        <circle cx={lastPt.x} cy={lastPt.y - 2.2} r={1.8} fill="#ffffff" />
+        <circle cx={lastPt.x} cy={lastPt.y - 2.2} r={1.8} fill={theme.icon} />
         {/* Miniature Person: Shoulders */}
         <path
           d={`M ${lastPt.x - 3.2} ${lastPt.y + 4.2} C ${lastPt.x - 3.2} ${lastPt.y + 1.2}, ${lastPt.x + 3.2} ${lastPt.y + 1.2}, ${lastPt.x + 3.2} ${lastPt.y + 4.2} Z`}
-          fill="#ffffff"
+          fill={theme.icon}
         />
       </g>
     </svg>

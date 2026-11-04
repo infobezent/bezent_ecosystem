@@ -587,8 +587,6 @@ export function EmployeeDirectoryPage() {
       <WorkforceKpiCards
         kpis={kpis}
         employees={allCompanyEmployees.length > 0 ? allCompanyEmployees : directory.employees}
-        activeStatusTab={activeStatusTab}
-        onSelectStatusTab={handleStatusTabChange}
       />
 
       {/* 3. Candidates-style Search & Action Toolbar with Status Filter Tabs */}
