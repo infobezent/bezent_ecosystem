@@ -3870,3 +3870,415 @@
 [data-theme='dark'] .bezent-action-queue-card .bezent-card__body::-webkit-scrollbar-thumb {
   background: #475569;
 }
+
+/* ==========================================================================
+   Executive Pending Actions Command Hub (Generic Design System Primitive)
+   Matches high-end mockup with squircle icon, bell chip, pill tabs,
+   left-stripe action rows, ice-blue review triggers & wide action banner
+   ========================================================================== */
+
+.bezent-pending-card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 20px 22px 18px 22px;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+[data-theme='dark'] .bezent-pending-card {
+  background: #0f172a;
+  border-color: #1e293b;
+  box-shadow: none;
+}
+
+/* Header */
+.bezent-pending-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.bezent-pending-card__identity {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.bezent-pending-card__icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  border: 1px solid #fed7aa;
+  color: #c2410c;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(234, 88, 12, 0.08);
+}
+
+[data-theme='dark'] .bezent-pending-card__icon-badge {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+}
+
+.bezent-pending-card__title-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bezent-pending-card__title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+  margin: 0;
+  line-height: 1.2;
+}
+
+[data-theme='dark'] .bezent-pending-card__title {
+  color: #f8fafc;
+}
+
+.bezent-pending-card__subtitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-pending-card__subtitle {
+  color: #94a3b8;
+}
+
+.bezent-pending-card__bell-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #c2410c;
+  font-size: 12.5px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .bezent-pending-card__bell-pill {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+}
+
+/* Filter Navigation Pill Tabs */
+.bezent-pending-card__tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 10px;
+}
+
+[data-theme='dark'] .bezent-pending-card__tabs {
+  border-bottom-color: #1e293b;
+}
+
+.bezent-pending-card__tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  background: #f1f5f9;
+  border: 1px solid transparent;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  white-space: nowrap;
+}
+
+.bezent-pending-card__tab:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.bezent-pending-card__tab--active {
+  background: #fff7ed;
+  color: #c2410c;
+  border-color: #fed7aa;
+  font-weight: 700;
+}
+
+.bezent-pending-card__tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9999px;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.bezent-pending-card__tab--active .bezent-pending-card__tab-count {
+  background: #ffffff;
+  color: #c2410c;
+  box-shadow: 0 1px 2px rgba(234, 88, 12, 0.1);
+}
+
+[data-theme='dark'] .bezent-pending-card__tab {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-pending-card__tab:hover {
+  background: #334155;
+  color: #f8fafc;
+}
+
+[data-theme='dark'] .bezent-pending-card__tab--active {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+[data-theme='dark'] .bezent-pending-card__tab-count {
+  background: #334155;
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .bezent-pending-card__tab--active .bezent-pending-card__tab-count {
+  background: #0f172a;
+  color: #fbbf24;
+}
+
+/* Action Rows List */
+.bezent-pending-card__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bezent-pending-card__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 16px 11px 18px;
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
+  border-radius: 14px;
+  transition: all 0.16s ease;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+}
+
+.bezent-pending-card__item:hover {
+  border-color: #cbd5e1;
+  background: #fafbfc;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+  transform: translateY(-1px);
+}
+
+/* Left Accent Stripe */
+.bezent-pending-card__item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  background: #f97316;
+}
+
+.bezent-pending-card__item--amber::before {
+  background: #f59e0b;
+}
+
+.bezent-pending-card__item--blue::before {
+  background: #3b82f6;
+}
+
+.bezent-pending-card__item--green::before {
+  background: #10b981;
+}
+
+.bezent-pending-card__item--purple::before {
+  background: #9333ea;
+}
+
+.bezent-pending-card__item--coral::before {
+  background: #f43f5e;
+}
+
+.bezent-pending-card__item-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.bezent-pending-card__item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.bezent-pending-card__item-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.bezent-pending-card__employee-name {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.015em;
+}
+
+[data-theme='dark'] .bezent-pending-card__employee-name {
+  color: #f8fafc;
+}
+
+.bezent-pending-card__code-badge {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  background: #f1f5f9;
+  color: #475569;
+  padding: 1.5px 7px;
+  border-radius: 6px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+[data-theme='dark'] .bezent-pending-card__code-badge {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+.bezent-pending-card__type-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 9px;
+  border-radius: 9999px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #c2410c;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+[data-theme='dark'] .bezent-pending-card__type-pill {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+}
+
+.bezent-pending-card__item-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+[data-theme='dark'] .bezent-pending-card__item-meta {
+  color: #94a3b8;
+}
+
+/* Action Review Button (Ice Blue Tint with Dark Blue Text) */
+.bezent-pending-card__review-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: 10px;
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+  color: #0369a1;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  flex-shrink: 0;
+}
+
+.bezent-pending-card__review-btn:hover {
+  background: #bae6fd;
+  border-color: #7dd3fc;
+  color: #0c4a6e;
+  transform: translateX(2px);
+}
+
+[data-theme='dark'] .bezent-pending-card__review-btn {
+  background: rgba(14, 165, 233, 0.15);
+  border-color: rgba(14, 165, 233, 0.3);
+  color: #38bdf8;
+}
+
+[data-theme='dark'] .bezent-pending-card__review-btn:hover {
+  background: rgba(14, 165, 233, 0.25);
+  border-color: rgba(14, 165, 233, 0.5);
+  color: #7dd3fc;
+}
+
+/* Wide Footer Action Banner */
+.bezent-pending-card__footer-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 18px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fff7ed 0%, #ffedd5 100%);
+  border: 1px solid #fed7aa;
+  color: #c2410c;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  box-sizing: border-box;
+}
+
+.bezent-pending-card__footer-btn:hover {
+  background: linear-gradient(180deg, #ffedd5 0%, #fed7aa 100%);
+  border-color: #fdba74;
+  color: #9a3412;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.12);
+}
+
+[data-theme='dark'] .bezent-pending-card__footer-btn {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+}
+
+[data-theme='dark'] .bezent-pending-card__footer-btn:hover {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #fde68a;
+}

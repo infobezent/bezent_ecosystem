@@ -891,131 +891,134 @@ export function WorkforceOverviewPage({
       <Grid columns={2} gap="md">
         {/* ================= LEFT COLUMN ================= */}
         <Stack gap="md">
-          {/* A. Pending Actions */}
-          <Card className="bezent-action-queue-card" padding="sm">
-            <CardHeader>
-              <Inline justify="between" align="center">
-                <Inline gap="xs" align="center">
-                  <CardTitle>Pending Actions</CardTitle>
-                  {pendingActions.length > 0 ? (
-                    <Badge variant="warning" size="sm">
-                      {pendingActions.length} Actions
-                    </Badge>
-                  ) : (
-                    <Badge variant="success" size="sm">
-                      All Clear
-                    </Badge>
-                  )}
-                </Inline>
+          {/* A. Pending Actions Command Hub */}
+          <div className="bezent-pending-card">
+            <div className="bezent-pending-card__header">
+              <div className="bezent-pending-card__identity">
+                <div className="bezent-pending-card__icon-badge">
+                  <BezentIcon name="schedule" size={24} />
+                </div>
+                <div className="bezent-pending-card__title-box">
+                  <h3 className="bezent-pending-card__title">Pending Actions</h3>
+                  <p className="bezent-pending-card__subtitle">Requires your attention</p>
+                </div>
+              </div>
 
-                {pendingActions.length > 0 && (
-                  <div className="bezent-action-filter-bar">
-                    <button
-                      type="button"
-                      className={`bezent-action-filter-pill ${pendingFilter === 'all' ? 'bezent-action-filter-pill--active' : ''}`}
-                      onClick={() => setPendingFilter('all')}
-                    >
-                      All <span className="bezent-action-filter-count">{pendingCounts.all}</span>
-                    </button>
-                    <button
-                      type="button"
-                      className={`bezent-action-filter-pill ${pendingFilter === 'transfer' ? 'bezent-action-filter-pill--active' : ''}`}
-                      onClick={() => setPendingFilter('transfer')}
-                    >
-                      Transfers <span className="bezent-action-filter-count">{pendingCounts.transfer}</span>
-                    </button>
-                    <button
-                      type="button"
-                      className={`bezent-action-filter-pill ${pendingFilter === 'document' ? 'bezent-action-filter-pill--active' : ''}`}
-                      onClick={() => setPendingFilter('document')}
-                    >
-                      Docs <span className="bezent-action-filter-count">{pendingCounts.document}</span>
-                    </button>
-                    <button
-                      type="button"
-                      className={`bezent-action-filter-pill ${pendingFilter === 'probation' ? 'bezent-action-filter-pill--active' : ''}`}
-                      onClick={() => setPendingFilter('probation')}
-                    >
-                      Probation <span className="bezent-action-filter-count">{pendingCounts.probation}</span>
-                    </button>
-                  </div>
-                )}
-              </Inline>
-            </CardHeader>
-            <CardBody>
-              {loading ? (
-                <LoadingState label="Loading…" minHeight="sm" />
-              ) : filteredPendingActions.length === 0 ? (
-                <EmptyState
-                  size="compact"
-                  variant="documents"
-                  title="All caught up"
-                  description="No pending actions awaiting review."
-                />
-              ) : (
-                <Stack gap="xs">
-                  {filteredPendingActions.map((item) => {
-                    const accentClass =
-                      item.type === 'transfer'
-                        ? 'bezent-action-row--blue'
-                        : item.type === 'promotion'
-                          ? 'bezent-action-row--green'
-                          : item.type === 'offboarding'
-                            ? 'bezent-action-row--coral'
-                            : item.type === 'probation'
-                              ? 'bezent-action-row--amber'
-                              : 'bezent-action-row--purple';
+              <div className="bezent-pending-card__bell-pill">
+                <BezentIcon name="schedule" size={15} />
+                <span>{pendingActions.length} Pending</span>
+              </div>
+            </div>
 
-                    const badgeVariant =
-                      item.type === 'transfer'
-                        ? 'info'
-                        : item.type === 'promotion'
-                          ? 'success'
-                          : item.type === 'offboarding'
-                            ? 'danger'
-                            : item.type === 'probation'
-                              ? 'warning'
-                              : 'neutral';
+            {pendingActions.length > 0 && (
+              <div className="bezent-pending-card__tabs">
+                <button
+                  type="button"
+                  className={`bezent-pending-card__tab ${pendingFilter === 'all' ? 'bezent-pending-card__tab--active' : ''}`}
+                  onClick={() => setPendingFilter('all')}
+                >
+                  Pending Actions <span className="bezent-pending-card__tab-count">{pendingCounts.all}</span>
+                </button>
+                <button
+                  type="button"
+                  className={`bezent-pending-card__tab ${pendingFilter === 'transfer' ? 'bezent-pending-card__tab--active' : ''}`}
+                  onClick={() => setPendingFilter('transfer')}
+                >
+                  Transfers <span className="bezent-pending-card__tab-count">{pendingCounts.transfer}</span>
+                </button>
+                <button
+                  type="button"
+                  className={`bezent-pending-card__tab ${pendingFilter === 'probation' ? 'bezent-pending-card__tab--active' : ''}`}
+                  onClick={() => setPendingFilter('probation')}
+                >
+                  Probation <span className="bezent-pending-card__tab-count">{pendingCounts.probation}</span>
+                </button>
+                <button
+                  type="button"
+                  className={`bezent-pending-card__tab ${pendingFilter === 'document' ? 'bezent-pending-card__tab--active' : ''}`}
+                  onClick={() => setPendingFilter('document')}
+                >
+                  Feedback / Docs <span className="bezent-pending-card__tab-count">{pendingCounts.document}</span>
+                </button>
+              </div>
+            )}
 
-                    return (
-                      <div
-                        key={`${item.type}-${item.id}`}
-                        className={`bezent-action-row ${accentClass}`}
-                      >
-                        <Inline gap="sm" align="center">
-                          <EmployeeCartoonAvatar employeeName={item.employeeName} size="sm" />
-                          <Stack gap="none">
-                            <Inline gap="xs" align="center">
-                              <span className="bezent-table-meta-title">{item.employeeName}</span>
-                              {item.employeeNumber && (
-                                <span className="bezent-action-row__code">{item.employeeNumber}</span>
-                              )}
-                              <Badge variant={badgeVariant} size="sm">
-                                {item.title}
-                              </Badge>
-                            </Inline>
-                            <span className="bezent-action-row__meta-chip">
-                              <BezentIcon name="schedule" size={12} />
-                              {item.subtitle}
+            {loading ? (
+              <LoadingState label="Loading actions…" minHeight="sm" />
+            ) : filteredPendingActions.length === 0 ? (
+              <EmptyState
+                size="compact"
+                variant="documents"
+                title="All caught up"
+                description="No pending actions awaiting review."
+              />
+            ) : (
+              <div className="bezent-pending-card__list">
+                {filteredPendingActions.map((item) => {
+                  const accentClass =
+                    item.type === 'transfer'
+                      ? 'bezent-pending-card__item--blue'
+                      : item.type === 'promotion'
+                        ? 'bezent-pending-card__item--green'
+                        : item.type === 'offboarding'
+                          ? 'bezent-pending-card__item--coral'
+                          : item.type === 'probation'
+                            ? 'bezent-pending-card__item--amber'
+                            : 'bezent-pending-card__item--purple';
+
+                  return (
+                    <div
+                      key={`${item.type}-${item.id}`}
+                      className={`bezent-pending-card__item ${accentClass}`}
+                    >
+                      <div className="bezent-pending-card__item-info">
+                        <EmployeeCartoonAvatar employeeName={item.employeeName} size="sm" />
+                        <div className="bezent-pending-card__item-main">
+                          <div className="bezent-pending-card__item-top">
+                            <span className="bezent-pending-card__employee-name">
+                              {item.employeeName}
                             </span>
-                          </Stack>
-                        </Inline>
-
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          rightIcon={<BezentIcon name="chevronRight" size={13} />}
-                          onClick={() => navigate(item.targetRoute)}
-                        >
-                          Review
-                        </Button>
+                            {item.employeeNumber && (
+                              <span className="bezent-pending-card__code-badge">
+                                {item.employeeNumber}
+                              </span>
+                            )}
+                            <span className="bezent-pending-card__type-pill">
+                              ↗ {item.title}
+                            </span>
+                          </div>
+                          <span className="bezent-pending-card__item-meta">
+                            <BezentIcon name="calendar" size={13} />
+                            <span>{item.subtitle}</span>
+                          </span>
+                        </div>
                       </div>
-                    );
-                  })}
-                </Stack>
-              )}
-            </CardBody>
-          </Card>
+
+                      <button
+                        type="button"
+                        className="bezent-pending-card__review-btn"
+                        onClick={() => navigate(item.targetRoute)}
+                      >
+                        <span>Review</span>
+                        <BezentIcon name="chevronRight" size={13} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {pendingActions.length > 0 && (
+              <button
+                type="button"
+                className="bezent-pending-card__footer-btn"
+                onClick={() => navigate('/hrms/workforce/transfers')}
+              >
+                <span>View all {pendingActions.length} actions</span>
+                <BezentIcon name="arrowRight" size={16} />
+              </button>
+            )}
+          </div>
 
           {/* B. New Hire & Onboarding Radar */}
           <Card padding="sm">
