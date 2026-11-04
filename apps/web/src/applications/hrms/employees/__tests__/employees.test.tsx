@@ -257,10 +257,7 @@ describe('Employees Directory page', () => {
     expect(html).toContain('Manage and explore your workforce directory');
     expect(html).toContain('Import');
     expect(html).toContain('Export');
-    expect(html).toContain('Total Employees');
-    expect(html).toContain('Active Employees');
-    expect(html).toContain('Pending Activation');
-    expect(html).toContain('Inactive Employees');
+    expect(html).not.toContain('Total Employees');
     expect(html).not.toContain('On Leave');
     expect(html).toContain('Search by name, employee ID, email, department...');
     expect(html).toContain('Filters');
@@ -290,10 +287,9 @@ describe('Employees Directory page', () => {
     expect(html).toMatch(/<button[^>]*disabled[^>]*>.*Reset.*<\/button>/s);
   });
 
-  it('renders skeleton shimmer placeholders for KPI metrics while loading', () => {
+  it('does not render KPI cards on the clean employee directory layout', () => {
     const html = renderDirectory();
-    expect(html).toContain('bezent-kpi-card__skeleton');
-    expect(html).toContain('aria-label="Loading metric"');
+    expect(html).not.toContain('bezent-kpi-card');
   });
 
   it('renders "—" fallback when KPI metric counts are unavailable', () => {

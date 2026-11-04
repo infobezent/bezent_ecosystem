@@ -3,9 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import {
   Alert,
   Button,
-  Card,
-  CardBody,
-  Grid,
   Inline,
   Modal,
   Page,
@@ -45,7 +42,6 @@ import {
   type SortColumn,
   type SortDirection,
 } from '../components/EmployeeDirectoryTable';
-import { WorkforceKpiCards } from '../components/WorkforceKpiCards';
 
 const PAGE_SIZE = 25;
 
@@ -54,16 +50,6 @@ interface DirectoryState {
   employees: EmployeeRecord[];
   pagination: PaginationMetadata | null;
   error: string | null;
-}
-
-interface WorkforceKpis {
-  total: number | null;
-  active: number | null;
-  pendingActivation: number | null;
-  newJoiners: number | null;
-  inactive: number | null;
-  loading: boolean;
-  error: boolean;
 }
 
 function getPaginationItems(currentPage: number, totalPages: number): (number | 'ellipsis')[] {
@@ -235,20 +221,6 @@ export function EmployeeDirectoryPage() {
     error: null,
   });
 
-  // KPI company-wide baseline workforce (persistent across table filter tab switches)
-  const [allCompanyEmployees, setAllCompanyEmployees] = useState<EmployeeRecord[]>([]);
-
-  // KPI Metrics state
-  const [kpis, setKpis] = useState<WorkforceKpis>({
-    total: null,
-    active: null,
-    pendingActivation: null,
-    newJoiners: null,
-    inactive: null,
-    loading: true,
-    error: false,
-  });
-
   // Import dialog state
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
@@ -329,71 +301,7 @@ export function EmployeeDirectoryPage() {
     };
   }, [reloadKey]);
 
-  // 2. Fetch Workforce KPI Metrics from real, authorized backend APIs
-  useEffect(() => {
-    let active = true;
-
-    async function loadWorkforceKpis() {
-      try {
-        const [
-          totalRes,
-          activeRes,
-          probationRes,
-          pendingActivationRes,
-          terminatedRes,
-          suspendedRes,
-          resignedRes,
-        ] = await Promise.allSettled([
-          fetchEmployees({ pageSize: 1 }),
-          fetchEmployees({ employmentStatus: 'active', pageSize: 1 }),
-          fetchEmployees({ employmentStatus: 'probation', pageSize: 1 }),
-          fetchEmployees({ employmentStatus: 'pending_activation', pageSize: 1 }),
-          fetchEmployees({ employmentStatus: 'terminated', pageSize: 1 }),
-          fetchEmployees({ employmentStatus: 'suspended', pageSize: 1 }),
-          fetchEmployees({ employmentStatus: 'resigned', pageSize: 1 }),
-        ]);
-
-        if (!active) return;
-
-        const computed = computeWorkforceKpiValues({
-          totalItems: totalRes.status === 'fulfilled' ? totalRes.value.pagination.totalItems : null,
-          activeItems:
-            activeRes.status === 'fulfilled' ? activeRes.value.pagination.totalItems : null,
-          probationItems:
-            probationRes.status === 'fulfilled' ? probationRes.value.pagination.totalItems : null,
-          pendingActivationItems:
-            pendingActivationRes.status === 'fulfilled'
-              ? pendingActivationRes.value.pagination.totalItems
-              : null,
-          terminatedItems:
-            terminatedRes.status === 'fulfilled' ? terminatedRes.value.pagination.totalItems : null,
-          suspendedItems:
-            suspendedRes.status === 'fulfilled' ? suspendedRes.value.pagination.totalItems : null,
-          resignedItems:
-            resignedRes.status === 'fulfilled' ? resignedRes.value.pagination.totalItems : null,
-          employees: [],
-          companyTimezone: companyPreferences?.timezone,
-        });
-
-        setKpis({
-          ...computed,
-          loading: false,
-          error: computed.total === null && computed.active === null,
-        });
-      } catch {
-        if (!active) return;
-        setKpis((prev) => ({ ...prev, loading: false, error: true }));
-      }
-    }
-
-    loadWorkforceKpis();
-
-    return () => {
-      active = false;
-    };
-  }, [reloadKey, companyPreferences?.timezone]);
-
-  // 3. Fetch directory employees (paginated + filtered)
+  // 2. Fetch directory employees (paginated + filtered)
   useEffect(() => {
     let active = true;
     setDirectory((prev) => ({ ...prev, status: 'loading', error: null }));
@@ -419,17 +327,6 @@ export function EmployeeDirectoryPage() {
             pagination: res.pagination,
             error: null,
           });
-
-          // Preserve un-filtered company workforce baseline for KPI summary cards
-          if (
-            !search.trim() &&
-            appliedFilters.departmentIds.length === 0 &&
-            appliedFilters.locationIds.length === 0 &&
-            !appliedFilters.employmentType &&
-            !appliedFilters.employmentStatus
-          ) {
-            setAllCompanyEmployees(res.data);
-          }
         })
         .catch((err: unknown) => {
           if (!active) return;
@@ -583,13 +480,7 @@ export function EmployeeDirectoryPage() {
         Manage and explore your workforce directory
       </span>
 
-      {/* 2. Workforce KPI Cards (Number + Mini Trend Chart - Premium Enterprise UI) */}
-      <WorkforceKpiCards
-        kpis={kpis}
-        employees={allCompanyEmployees.length > 0 ? allCompanyEmployees : directory.employees}
-      />
-
-      {/* 3. Candidates-style Search & Action Toolbar with Status Filter Tabs */}
+      {/* 2. Candidates-style Search & Action Toolbar with Status Filter Tabs */}
       <Toolbar
         left={
           <Inline align="center" gap="sm" wrap>
