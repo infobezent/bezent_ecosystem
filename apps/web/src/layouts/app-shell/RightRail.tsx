@@ -74,6 +74,7 @@ export function RightRail({
                   type="button"
                   className="right-rail__ai-btn"
                   aria-label="BEZENT AI"
+                  title="BEZENT AI"
                   onClick={onAI}
                   onMouseEnter={() => setAiHovered(true)}
                   onMouseLeave={() => setAiHovered(false)}
@@ -89,6 +90,7 @@ export function RightRail({
                   type="button"
                   className="right-rail__action-btn"
                   aria-label="Quick Create"
+                  title="Quick Create"
                   onClick={onQuickCreate || onCompose}
                   onMouseEnter={() => setCreateHovered(true)}
                   onMouseLeave={() => setCreateHovered(false)}
@@ -127,6 +129,7 @@ export function RightRail({
                     type="button"
                     className="bezent-right-rail-btn"
                     aria-label="Get add-ons"
+                    title="Get add-ons"
                     onClick={onAddon}
                     onMouseEnter={() => setAddonHovered(true)}
                     onMouseLeave={() => setAddonHovered(false)}
@@ -150,6 +153,7 @@ export function RightRail({
                   type="button"
                   className="bezent-right-rail-btn"
                   aria-label="Settings"
+                  title="Settings"
                   onClick={onAccountSettings}
                   onMouseEnter={() => setSettingsHovered(true)}
                   onMouseLeave={() => setSettingsHovered(false)}
@@ -167,6 +171,7 @@ export function RightRail({
                 type="button"
                 className="right-rail__collapse"
                 aria-label="Collapse utility panel"
+                title="Collapse utility panel"
                 onClick={() => onOpenChange(false)}
               >
                 <BezentIcon
@@ -207,6 +212,7 @@ function RailButton({
         type="button"
         data-item-id={id}
         aria-label={label}
+        title={label}
         aria-pressed={active}
         className={`bezent-right-rail-btn ${active ? 'is-active' : ''}`.trim()}
         onClick={onClick}
@@ -246,6 +252,7 @@ function ThemeButton({
         type="button"
         className={`right-rail__theme ${isArcPulse ? 'is-arc-pulse' : ''}`.trim()}
         aria-label={label}
+        title={label}
         onClick={handleClick}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}

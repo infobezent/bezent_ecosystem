@@ -32,6 +32,7 @@ import { actionTypeLabel } from '../../employee-administration/model/actionCatal
 interface OverviewMetrics {
   totalEmployees: number;
   activeEmployees: number;
+  probationEmployees: number;
   onboarding: number;
   pendingApprovals: number;
   upcomingChanges: number;
@@ -48,6 +49,8 @@ interface PendingItem {
   employeeNumber?: string;
   date?: string;
   targetRoute: string;
+  urgencyText?: string;
+  urgencyLevel?: 'overdue' | 'urgent' | 'upcoming' | 'distant';
 }
 
 interface ActivityItem {
@@ -188,6 +191,49 @@ function getOnboardingReadiness(stage: string): {
     case 'preboarding':
     default:
       return { pct: 30, variant: 'warning' };
+  }
+}
+
+function getRelativeUrgency(targetDateStr?: string): {
+  text: string;
+  level: 'overdue' | 'urgent' | 'upcoming' | 'distant';
+} {
+  if (!targetDateStr) return { text: '', level: 'distant' };
+  const target = new Date(targetDateStr);
+  if (isNaN(target.getTime())) return { text: '', level: 'distant' };
+
+  const now = new Date();
+  target.setHours(0, 0, 0, 0);
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diffTime = target.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0) {
+    return {
+      text: `${Math.abs(diffDays)}d overdue`,
+      level: 'overdue',
+    };
+  } else if (diffDays === 0) {
+    return {
+      text: 'Due today',
+      level: 'urgent',
+    };
+  } else if (diffDays <= 7) {
+    return {
+      text: `in ${diffDays}d`,
+      level: 'urgent',
+    };
+  } else if (diffDays <= 30) {
+    return {
+      text: `in ${diffDays}d`,
+      level: 'upcoming',
+    };
+  } else {
+    const diffMonths = Math.round(diffDays / 30);
+    return {
+      text: `in ${diffMonths}mo`,
+      level: 'distant',
+    };
   }
 }
 
@@ -416,6 +462,9 @@ export function WorkforceOverviewPage({
         const deptChange = action.changes?.find((c) => c.field === 'departmentId');
         const desigChange = action.changes?.find((c) => c.field === 'designationId');
 
+        const actionDate = action.createdAt || action.effectiveDate;
+        const urgency = getRelativeUrgency(actionDate);
+
         pendingList.push({
           id: action.id,
           type,
@@ -428,12 +477,15 @@ export function WorkforceOverviewPage({
           employeeId: action.employeeId,
           employeeName: action.employeeName,
           employeeNumber: action.employeeNumber,
-          date: action.createdAt || action.effectiveDate,
+          date: actionDate,
           targetRoute: route,
+          urgencyText: urgency.text,
+          urgencyLevel: urgency.level,
         });
       }
 
       for (const doc of pendingDocItems) {
+        const urgency = getRelativeUrgency(doc.createdAt);
         pendingList.push({
           id: doc.id,
           type: 'document',
@@ -444,10 +496,17 @@ export function WorkforceOverviewPage({
           employeeNumber: doc.employeeNumber,
           date: doc.createdAt,
           targetRoute: '/hrms/workforce/records',
+          urgencyText: urgency.text,
+          urgencyLevel: urgency.level,
         });
       }
 
-      for (const pEmp of workforce.filter((e) => e.employmentStatus === 'probation')) {
+      const probationPendingList = workforce.filter((e) => e.employmentStatus === 'probation');
+      const probationCount = probationPendingList.length;
+
+      for (const pEmp of probationPendingList) {
+        const targetDate = pEmp.probationEndDate || pEmp.joiningDate;
+        const urgency = getRelativeUrgency(targetDate);
         pendingList.push({
           id: `prob-action-${pEmp.id}`,
           type: 'probation',
@@ -458,16 +517,21 @@ export function WorkforceOverviewPage({
           employeeId: pEmp.id,
           employeeName: pEmp.fullName,
           employeeNumber: pEmp.employeeNumber,
-          date: pEmp.probationEndDate || pEmp.joiningDate,
+          date: targetDate,
           targetRoute: `/hrms/workforce/employees`,
+          urgencyText: urgency.text,
+          urgencyLevel: urgency.level,
         });
       }
+
+      const totalPendingCount = pendingActionCount + pendingDocCount + probationCount;
 
       setMetrics({
         totalEmployees,
         activeEmployees,
+        probationEmployees: probationCount,
         onboarding,
-        pendingApprovals: pendingActionCount + pendingDocCount,
+        pendingApprovals: totalPendingCount,
         upcomingChanges,
         offboarding,
       });
@@ -594,6 +658,14 @@ export function WorkforceOverviewPage({
               {loading && !metrics ? '—' : (metrics?.totalEmployees ?? 0)}
             </div>
             <p className="bezent-wave-kpi-card__subtitle">Total Employees</p>
+            {metrics && (
+              <span
+                className="bezent-wave-kpi-card__breakdown-pill"
+                title={`${metrics.activeEmployees} Active · ${metrics.probationEmployees} Probation`}
+              >
+                {metrics.activeEmployees} Active · {metrics.probationEmployees} Probation
+              </span>
+            )}
           </div>
 
           <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
@@ -700,33 +772,45 @@ export function WorkforceOverviewPage({
             <p className="bezent-wave-kpi-card__subtitle">Onboarding</p>
           </div>
 
-          <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
-            <defs>
-              <linearGradient id="wave-grad-purple" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#9333ea" stopOpacity="0.18" />
-                <stop offset="100%" stopColor="#9333ea" stopOpacity="0.01" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M 0,24 C 30,24 55,20 85,22 C 105,24 116,21 126,21 L 126,34 L 0,34 Z"
-              fill="url(#wave-grad-purple)"
-            />
-            <path
-              d="M 0,24 C 30,24 55,20 85,22 C 105,24 116,21 126,21"
-              stroke="#9333ea"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-            <g transform="translate(126, 21)">
-              <circle className="bezent-wave-kpi-card__avatar-disc" cx="0" cy="0" r="7" stroke="#9333ea" strokeWidth="1.5" />
-              <circle cx="0" cy="-2" r="2.2" fill="#9333ea" />
-              <path d="M -4,4.5 C -3.6,2.2 -1.8,1.2 0,1.2 C 1.8,1.2 3.6,2.2 4,4.5 Z" fill="#9333ea" />
-            </g>
-          </svg>
+          {(metrics?.onboarding ?? 0) === 0 ? (
+            <div className="bezent-wave-kpi-card__empty-state">
+              <span className="bezent-wave-kpi-card__empty-chip">Stable · 0 cases</span>
+            </div>
+          ) : (
+            <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
+              <defs>
+                <linearGradient id="wave-grad-purple" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#9333ea" stopOpacity="0.18" />
+                  <stop offset="100%" stopColor="#9333ea" stopOpacity="0.01" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M 0,24 C 30,24 55,20 85,22 C 105,24 116,21 126,21 L 126,34 L 0,34 Z"
+                fill="url(#wave-grad-purple)"
+              />
+              <path
+                d="M 0,24 C 30,24 55,20 85,22 C 105,24 116,21 126,21"
+                stroke="#9333ea"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+              <g transform="translate(126, 21)">
+                <circle className="bezent-wave-kpi-card__avatar-disc" cx="0" cy="0" r="7" stroke="#9333ea" strokeWidth="1.5" />
+                <circle cx="0" cy="-2" r="2.2" fill="#9333ea" />
+                <path d="M -4,4.5 C -3.6,2.2 -1.8,1.2 0,1.2 C 1.8,1.2 3.6,2.2 4,4.5 Z" fill="#9333ea" />
+              </g>
+            </svg>
+          )}
 
           <div className="bezent-wave-kpi-card__trend">
-            <span className="bezent-wave-kpi-card__trend--neutral">→ 0%</span>
-            <span className="bezent-wave-kpi-card__trend-label">vs last month</span>
+            {(metrics?.onboarding ?? 0) === 0 ? (
+              <span className="bezent-wave-kpi-card__trend--neutral">No change</span>
+            ) : (
+              <>
+                <span className="bezent-wave-kpi-card__trend--neutral">→ 0%</span>
+                <span className="bezent-wave-kpi-card__trend-label">vs last month</span>
+              </>
+            )}
           </div>
         </div>
 
@@ -752,33 +836,42 @@ export function WorkforceOverviewPage({
             <p className="bezent-wave-kpi-card__subtitle">Pending Approvals</p>
           </div>
 
-          <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
-            <defs>
-              <linearGradient id="wave-grad-amber" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.18" />
-                <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.01" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M 0,26 C 30,26 60,25 90,24 C 108,23 118,20 126,20 L 126,34 L 0,34 Z"
-              fill="url(#wave-grad-amber)"
-            />
-            <path
-              d="M 0,26 C 30,26 60,25 90,24 C 108,23 118,20 126,20"
-              stroke="#f59e0b"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-            <g transform="translate(126, 20)">
-              <circle className="bezent-wave-kpi-card__avatar-disc" cx="0" cy="0" r="7" stroke="#f59e0b" strokeWidth="1.5" />
-              <circle cx="0" cy="-2" r="2.2" fill="#f59e0b" />
-              <path d="M -4,4.5 C -3.6,2.2 -1.8,1.2 0,1.2 C 1.8,1.2 3.6,2.2 4,4.5 Z" fill="#f59e0b" />
-            </g>
-          </svg>
+          {(metrics?.pendingApprovals ?? 0) === 0 ? (
+            <div className="bezent-wave-kpi-card__empty-state">
+              <span className="bezent-wave-kpi-card__empty-chip">All caught up · 0 pending</span>
+            </div>
+          ) : (
+            <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
+              <defs>
+                <linearGradient id="wave-grad-amber" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.18" />
+                  <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.01" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M 0,26 C 30,26 60,25 90,24 C 108,23 118,20 126,20 L 126,34 L 0,34 Z"
+                fill="url(#wave-grad-amber)"
+              />
+              <path
+                d="M 0,26 C 30,26 60,25 90,24 C 108,23 118,20 126,20"
+                stroke="#f59e0b"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+              <g transform="translate(126, 20)">
+                <circle className="bezent-wave-kpi-card__avatar-disc" cx="0" cy="0" r="7" stroke="#f59e0b" strokeWidth="1.5" />
+                <circle cx="0" cy="-2" r="2.2" fill="#f59e0b" />
+                <path d="M -4,4.5 C -3.6,2.2 -1.8,1.2 0,1.2 C 1.8,1.2 3.6,2.2 4,4.5 Z" fill="#f59e0b" />
+              </g>
+            </svg>
+          )}
 
           <div className="bezent-wave-kpi-card__trend">
-            <span className="bezent-wave-kpi-card__trend--neutral">→ 0%</span>
-            <span className="bezent-wave-kpi-card__trend-label">vs last month</span>
+            {(metrics?.pendingApprovals ?? 0) === 0 ? (
+              <span className="bezent-wave-kpi-card__trend--neutral">No change</span>
+            ) : (
+              <span className="bezent-wave-kpi-card__trend--up">Action required</span>
+            )}
           </div>
         </div>
 
@@ -804,33 +897,45 @@ export function WorkforceOverviewPage({
             <p className="bezent-wave-kpi-card__subtitle">Upcoming Changes</p>
           </div>
 
-          <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
-            <defs>
-              <linearGradient id="wave-grad-indigo" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.18" />
-                <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.01" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M 0,25 C 35,25 70,24 95,23 C 110,22 118,20 126,20 L 126,34 L 0,34 Z"
-              fill="url(#wave-grad-indigo)"
-            />
-            <path
-              d="M 0,25 C 35,25 70,24 95,23 C 110,22 118,20 126,20"
-              stroke="#3b82f6"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-            <g transform="translate(126, 20)">
-              <circle className="bezent-wave-kpi-card__avatar-disc" cx="0" cy="0" r="7" stroke="#3b82f6" strokeWidth="1.5" />
-              <circle cx="0" cy="-2" r="2.2" fill="#3b82f6" />
-              <path d="M -4,4.5 C -3.6,2.2 -1.8,1.2 0,1.2 C 1.8,1.2 3.6,2.2 4,4.5 Z" fill="#3b82f6" />
-            </g>
-          </svg>
+          {(metrics?.upcomingChanges ?? 0) === 0 ? (
+            <div className="bezent-wave-kpi-card__empty-state">
+              <span className="bezent-wave-kpi-card__empty-chip">Stable · 0 scheduled</span>
+            </div>
+          ) : (
+            <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
+              <defs>
+                <linearGradient id="wave-grad-indigo" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.18" />
+                  <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.01" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M 0,25 C 35,25 70,24 95,23 C 110,22 118,20 126,20 L 126,34 L 0,34 Z"
+                fill="url(#wave-grad-indigo)"
+              />
+              <path
+                d="M 0,25 C 35,25 70,24 95,23 C 110,22 118,20 126,20"
+                stroke="#3b82f6"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+              <g transform="translate(126, 20)">
+                <circle className="bezent-wave-kpi-card__avatar-disc" cx="0" cy="0" r="7" stroke="#3b82f6" strokeWidth="1.5" />
+                <circle cx="0" cy="-2" r="2.2" fill="#3b82f6" />
+                <path d="M -4,4.5 C -3.6,2.2 -1.8,1.2 0,1.2 C 1.8,1.2 3.6,2.2 4,4.5 Z" fill="#3b82f6" />
+              </g>
+            </svg>
+          )}
 
           <div className="bezent-wave-kpi-card__trend">
-            <span className="bezent-wave-kpi-card__trend--neutral">→ 0%</span>
-            <span className="bezent-wave-kpi-card__trend-label">vs last month</span>
+            {(metrics?.upcomingChanges ?? 0) === 0 ? (
+              <span className="bezent-wave-kpi-card__trend--neutral">No change</span>
+            ) : (
+              <>
+                <span className="bezent-wave-kpi-card__trend--neutral">→ 0%</span>
+                <span className="bezent-wave-kpi-card__trend-label">vs last month</span>
+              </>
+            )}
           </div>
         </div>
 
@@ -856,33 +961,45 @@ export function WorkforceOverviewPage({
             <p className="bezent-wave-kpi-card__subtitle">Offboarding</p>
           </div>
 
-          <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
-            <defs>
-              <linearGradient id="wave-grad-coral" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.18" />
-                <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.01" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M 0,24 C 35,24 70,24 95,23 C 110,23 118,21 126,21 L 126,34 L 0,34 Z"
-              fill="url(#wave-grad-coral)"
-            />
-            <path
-              d="M 0,24 C 35,24 70,24 95,23 C 110,23 118,21 126,21"
-              stroke="#f43f5e"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-            <g transform="translate(126, 21)">
-              <circle className="bezent-wave-kpi-card__avatar-disc" cx="0" cy="0" r="7" stroke="#f43f5e" strokeWidth="1.5" />
-              <circle cx="0" cy="-2" r="2.2" fill="#f43f5e" />
-              <path d="M -4,4.5 C -3.6,2.2 -1.8,1.2 0,1.2 C 1.8,1.2 3.6,2.2 4,4.5 Z" fill="#f43f5e" />
-            </g>
-          </svg>
+          {(metrics?.offboarding ?? 0) === 0 ? (
+            <div className="bezent-wave-kpi-card__empty-state">
+              <span className="bezent-wave-kpi-card__empty-chip">Stable · 0 exits</span>
+            </div>
+          ) : (
+            <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
+              <defs>
+                <linearGradient id="wave-grad-coral" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.18" />
+                  <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.01" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M 0,24 C 35,24 70,24 95,23 C 110,23 118,21 126,21 L 126,34 L 0,34 Z"
+                fill="url(#wave-grad-coral)"
+              />
+              <path
+                d="M 0,24 C 35,24 70,24 95,23 C 110,23 118,21 126,21"
+                stroke="#f43f5e"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+              <g transform="translate(126, 21)">
+                <circle className="bezent-wave-kpi-card__avatar-disc" cx="0" cy="0" r="7" stroke="#f43f5e" strokeWidth="1.5" />
+                <circle cx="0" cy="-2" r="2.2" fill="#f43f5e" />
+                <path d="M -4,4.5 C -3.6,2.2 -1.8,1.2 0,1.2 C 1.8,1.2 3.6,2.2 4,4.5 Z" fill="#f43f5e" />
+              </g>
+            </svg>
+          )}
 
           <div className="bezent-wave-kpi-card__trend">
-            <span className="bezent-wave-kpi-card__trend--neutral">→ 0%</span>
-            <span className="bezent-wave-kpi-card__trend-label">vs last month</span>
+            {(metrics?.offboarding ?? 0) === 0 ? (
+              <span className="bezent-wave-kpi-card__trend--neutral">No change</span>
+            ) : (
+              <>
+                <span className="bezent-wave-kpi-card__trend--neutral">→ 0%</span>
+                <span className="bezent-wave-kpi-card__trend-label">vs last month</span>
+              </>
+            )}
           </div>
         </div>
       </Grid>
@@ -917,28 +1034,31 @@ export function WorkforceOverviewPage({
                   className={`bezent-pending-card__tab ${pendingFilter === 'all' ? 'bezent-pending-card__tab--active' : ''}`}
                   onClick={() => setPendingFilter('all')}
                 >
-                  Pending Actions <span className="bezent-pending-card__tab-count">{pendingCounts.all}</span>
+                  All <span className="bezent-pending-card__tab-count">{pendingCounts.all}</span>
                 </button>
                 <button
                   type="button"
-                  className={`bezent-pending-card__tab ${pendingFilter === 'transfer' ? 'bezent-pending-card__tab--active' : ''}`}
-                  onClick={() => setPendingFilter('transfer')}
-                >
-                  Transfers <span className="bezent-pending-card__tab-count">{pendingCounts.transfer}</span>
-                </button>
-                <button
-                  type="button"
-                  className={`bezent-pending-card__tab ${pendingFilter === 'probation' ? 'bezent-pending-card__tab--active' : ''}`}
-                  onClick={() => setPendingFilter('probation')}
+                  className={`bezent-pending-card__tab ${pendingFilter === 'probation' ? 'bezent-pending-card__tab--active' : ''} ${pendingCounts.probation === 0 ? 'bezent-pending-card__tab--empty' : ''}`}
+                  onClick={() => pendingCounts.probation > 0 && setPendingFilter('probation')}
+                  disabled={pendingCounts.probation === 0}
                 >
                   Probation <span className="bezent-pending-card__tab-count">{pendingCounts.probation}</span>
                 </button>
                 <button
                   type="button"
-                  className={`bezent-pending-card__tab ${pendingFilter === 'document' ? 'bezent-pending-card__tab--active' : ''}`}
-                  onClick={() => setPendingFilter('document')}
+                  className={`bezent-pending-card__tab ${pendingFilter === 'transfer' ? 'bezent-pending-card__tab--active' : ''} ${pendingCounts.transfer === 0 ? 'bezent-pending-card__tab--empty' : ''}`}
+                  onClick={() => pendingCounts.transfer > 0 && setPendingFilter('transfer')}
+                  disabled={pendingCounts.transfer === 0}
                 >
-                  Feedback / Docs <span className="bezent-pending-card__tab-count">{pendingCounts.document}</span>
+                  Transfers <span className="bezent-pending-card__tab-count">{pendingCounts.transfer}</span>
+                </button>
+                <button
+                  type="button"
+                  className={`bezent-pending-card__tab ${pendingFilter === 'document' ? 'bezent-pending-card__tab--active' : ''} ${pendingCounts.document === 0 ? 'bezent-pending-card__tab--empty' : ''}`}
+                  onClick={() => pendingCounts.document > 0 && setPendingFilter('document')}
+                  disabled={pendingCounts.document === 0}
+                >
+                  Docs <span className="bezent-pending-card__tab-count">{pendingCounts.document}</span>
                 </button>
               </div>
             )}
@@ -990,6 +1110,13 @@ export function WorkforceOverviewPage({
                           <span className="bezent-pending-card__item-meta">
                             <BezentIcon name="calendar" size={13} />
                             <span>{item.subtitle}</span>
+                            {item.urgencyText && (
+                              <span
+                                className={`bezent-pending-card__urgency-pill bezent-pending-card__urgency-pill--${item.urgencyLevel}`}
+                              >
+                                {item.urgencyText}
+                              </span>
+                            )}
                           </span>
                         </div>
                       </div>
