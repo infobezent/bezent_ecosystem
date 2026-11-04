@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Alert,
@@ -178,8 +178,7 @@ export interface WorkforceOverviewPageProps {
 
 /**
  * Workforce → Overview Page (Command Center)
- * Inspired by Workday, Zoho People, Salesforce Work.com, and greytHR.
- * Central control tower for employee activity, workforce changes, demographics, and pending actions.
+ * Creative, Smart, and Premium Enterprise UI/UX inspired by Workday, Zoho People, Salesforce, and greytHR.
  */
 export function WorkforceOverviewPage({
   title = 'Workforce Overview',
@@ -193,6 +192,7 @@ export function WorkforceOverviewPage({
 
   const [metrics, setMetrics] = useState<OverviewMetrics | null>(null);
   const [pendingActions, setPendingActions] = useState<PendingItem[]>([]);
+  const [pendingFilter, setPendingFilter] = useState<'all' | 'transfer' | 'promotion' | 'document' | 'probation'>('all');
   const [recentActivities, setRecentActivities] = useState<ActivityItem[]>([]);
   const [departmentStats, setDepartmentStats] = useState<DepartmentStat[]>([]);
   const [milestones, setMilestones] = useState<MilestoneItem[]>([]);
@@ -286,11 +286,11 @@ export function WorkforceOverviewPage({
       const workforce =
         workforceListRes.status === 'fulfilled' ? workforceListRes.value.data : [];
 
-      // 1. Department Breakdown (Workday style)
+      // 1. Department Breakdown (Workday Analytics style)
       const deptCountMap = new Map<string, number>();
       const totalBase = workforce.length || totalEmployees || 1;
       for (const emp of workforce) {
-        const dept = emp.departmentName || 'General / Operations';
+        const dept = emp.departmentName || 'General Operations';
         deptCountMap.set(dept, (deptCountMap.get(dept) || 0) + 1);
       }
       const depts: DepartmentStat[] = Array.from(deptCountMap.entries())
@@ -433,7 +433,7 @@ export function WorkforceOverviewPage({
         offboarding,
       });
 
-      setPendingActions(pendingList.slice(0, 6));
+      setPendingActions(pendingList.slice(0, 8));
 
       // Construct Recent Activity List (Rippling style)
       const recentActions =
@@ -484,9 +484,15 @@ export function WorkforceOverviewPage({
     };
   }, [reloadKey]);
 
+  // Smart Filtered Action Center List
+  const filteredPendingActions = useMemo(() => {
+    if (pendingFilter === 'all') return pendingActions;
+    return pendingActions.filter((item) => item.type === pendingFilter);
+  }, [pendingActions, pendingFilter]);
+
   return (
     <Page maxWidth="full" gap="lg">
-      {/* 1. Page Header (Command Center Navigation) */}
+      {/* 1. Page Header (Command Center Navigation & Live Pulse) */}
       <PageHeader
         eyebrow="HRMS · Workforce"
         title={title}
@@ -631,10 +637,13 @@ export function WorkforceOverviewPage({
         </div>
       </Grid>
 
-      {/* 3. Quick Action Launchpad (Salesforce Work.com Standard) */}
+      {/* 3. Quick Action Launchpad (Creative & Smart Action Launcher) */}
       <Stack gap="sm">
         <Inline justify="between" align="center">
-          <h3 className="bezent-card__title">Quick Actions</h3>
+          <Inline gap="xs" align="center">
+            <h3 className="bezent-card__title">Quick Actions</h3>
+            <Badge variant="neutral" size="sm">Smart Hub</Badge>
+          </Inline>
           <span className="bezent-table-meta-subtitle">Frequent administrative operations</span>
         </Inline>
         <Grid columns={4} gap="md">
@@ -679,17 +688,51 @@ export function WorkforceOverviewPage({
                 <CardTitle>Pending Actions</CardTitle>
                 {pendingActions.length > 0 && (
                   <Badge variant="warning" size="sm">
-                    {pendingActions.length}
+                    {pendingActions.length} Action{pendingActions.length > 1 ? 's' : ''}
                   </Badge>
                 )}
               </Inline>
               <span className="bezent-table-meta-subtitle">Requires HR review or sign-off</span>
             </Inline>
+
+            {/* Smart Category Filter Tabs */}
+            {pendingActions.length > 0 && (
+              <Inline gap="xs" align="center">
+                <Button
+                  variant={pendingFilter === 'all' ? 'secondary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setPendingFilter('all')}
+                >
+                  All ({pendingActions.length})
+                </Button>
+                <Button
+                  variant={pendingFilter === 'transfer' ? 'secondary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setPendingFilter('transfer')}
+                >
+                  Transfers
+                </Button>
+                <Button
+                  variant={pendingFilter === 'document' ? 'secondary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setPendingFilter('document')}
+                >
+                  Documents
+                </Button>
+                <Button
+                  variant={pendingFilter === 'probation' ? 'secondary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setPendingFilter('probation')}
+                >
+                  Probations
+                </Button>
+              </Inline>
+            )}
           </CardHeader>
           <CardBody>
             {loading ? (
               <LoadingState label="Loading pending actions…" minHeight="sm" />
-            ) : pendingActions.length === 0 ? (
+            ) : filteredPendingActions.length === 0 ? (
               <EmptyState
                 size="compact"
                 variant="documents"
@@ -698,7 +741,7 @@ export function WorkforceOverviewPage({
               />
             ) : (
               <Stack gap="sm">
-                {pendingActions.map((item) => (
+                {filteredPendingActions.map((item) => (
                   <Card key={`${item.type}-${item.id}`} variant="flat" padding="sm">
                     <Inline justify="between" align="center">
                       <Inline gap="sm" align="center">
