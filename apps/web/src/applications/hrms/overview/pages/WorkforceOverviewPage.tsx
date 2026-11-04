@@ -996,11 +996,12 @@ export function WorkforceOverviewPage({
 
                       <button
                         type="button"
-                        className="bezent-pending-card__review-btn"
+                        className="bezent-pending-card__action-arrow"
                         onClick={() => navigate(item.targetRoute)}
+                        title={`Review ${item.employeeName}`}
+                        aria-label={`Review ${item.employeeName}`}
                       >
-                        <span>Review</span>
-                        <BezentIcon name="chevronRight" size={13} />
+                        <BezentIcon name="arrowRight" size={15} />
                       </button>
                     </div>
                   );
@@ -1009,14 +1010,16 @@ export function WorkforceOverviewPage({
             )}
 
             {pendingActions.length > 0 && (
-              <button
-                type="button"
-                className="bezent-pending-card__footer-btn"
-                onClick={() => navigate('/hrms/workforce/transfers')}
-              >
-                <span>View all {pendingActions.length} actions</span>
-                <BezentIcon name="arrowRight" size={16} />
-              </button>
+              <div className="bezent-pending-card__footer">
+                <button
+                  type="button"
+                  className="bezent-pending-card__footer-link"
+                  onClick={() => navigate('/hrms/workforce/transfers')}
+                >
+                  <span>View all {pendingActions.length} actions</span>
+                  <BezentIcon name="arrowRight" size={14} />
+                </button>
+              </div>
             )}
           </div>
 
