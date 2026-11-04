@@ -892,7 +892,7 @@ export function WorkforceOverviewPage({
         {/* ================= LEFT COLUMN ================= */}
         <Stack gap="md">
           {/* A. Pending Actions */}
-          <Card padding="sm">
+          <Card className="bezent-action-queue-card" padding="sm">
             <CardHeader>
               <Inline justify="between" align="center">
                 <Inline gap="xs" align="center">

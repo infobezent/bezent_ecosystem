@@ -3372,6 +3372,7 @@
   overflow: hidden;
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   min-width: 0;
+  height: 146px;
   cursor: pointer;
 }
 
@@ -3756,13 +3757,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 11px 14px 11px 16px;
+  min-height: 54px;
+  padding: 8px 14px 8px 16px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   transition: all 0.16s ease;
   overflow: hidden;
   box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .bezent-action-row:hover {
@@ -3839,4 +3842,31 @@
 [data-theme='dark'] .bezent-action-row__code {
   background: #1e293b;
   color: #94a3b8;
+}
+
+/* Fixed-Size Action Queue Card (Pending Actions / Approvals) */
+.bezent-action-queue-card {
+  height: 275px;
+  display: flex;
+  flex-direction: column;
+}
+
+.bezent-action-queue-card .bezent-card__body {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 2px;
+}
+
+.bezent-action-queue-card .bezent-card__body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.bezent-action-queue-card .bezent-card__body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+[data-theme='dark'] .bezent-action-queue-card .bezent-card__body::-webkit-scrollbar-thumb {
+  background: #475569;
 }
