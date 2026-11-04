@@ -658,14 +658,6 @@ export function WorkforceOverviewPage({
               {loading && !metrics ? '—' : (metrics?.totalEmployees ?? 0)}
             </div>
             <p className="bezent-wave-kpi-card__subtitle">Total Employees</p>
-            {metrics && (
-              <span
-                className="bezent-wave-kpi-card__breakdown-pill"
-                title={`${metrics.activeEmployees} Active · ${metrics.probationEmployees} Probation`}
-              >
-                {metrics.activeEmployees} Active · {metrics.probationEmployees} Probation
-              </span>
-            )}
           </div>
 
           <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
@@ -693,8 +685,9 @@ export function WorkforceOverviewPage({
           </svg>
 
           <div className="bezent-wave-kpi-card__trend">
-            <span className="bezent-wave-kpi-card__trend--up">↑ +6.7%</span>
-            <span className="bezent-wave-kpi-card__trend-label">vs last month</span>
+            <span className="bezent-wave-kpi-card__trend--up">
+              {metrics ? `${metrics.activeEmployees} Active · ${metrics.probationEmployees} Probation` : '14 Active · 2 Probation'}
+            </span>
           </div>
         </div>
 
@@ -772,45 +765,33 @@ export function WorkforceOverviewPage({
             <p className="bezent-wave-kpi-card__subtitle">Onboarding</p>
           </div>
 
-          {(metrics?.onboarding ?? 0) === 0 ? (
-            <div className="bezent-wave-kpi-card__empty-state">
-              <span className="bezent-wave-kpi-card__empty-chip">Stable · 0 cases</span>
-            </div>
-          ) : (
-            <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
-              <defs>
-                <linearGradient id="wave-grad-purple" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#9333ea" stopOpacity="0.18" />
-                  <stop offset="100%" stopColor="#9333ea" stopOpacity="0.01" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M 0,24 C 30,24 55,20 85,22 C 105,24 116,21 126,21 L 126,34 L 0,34 Z"
-                fill="url(#wave-grad-purple)"
-              />
-              <path
-                d="M 0,24 C 30,24 55,20 85,22 C 105,24 116,21 126,21"
-                stroke="#9333ea"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              <g transform="translate(126, 21)">
-                <circle className="bezent-wave-kpi-card__avatar-disc" cx="0" cy="0" r="7" stroke="#9333ea" strokeWidth="1.5" />
-                <circle cx="0" cy="-2" r="2.2" fill="#9333ea" />
-                <path d="M -4,4.5 C -3.6,2.2 -1.8,1.2 0,1.2 C 1.8,1.2 3.6,2.2 4,4.5 Z" fill="#9333ea" />
-              </g>
-            </svg>
-          )}
+          <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
+            <defs>
+              <linearGradient id="wave-grad-purple" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#9333ea" stopOpacity="0.18" />
+                <stop offset="100%" stopColor="#9333ea" stopOpacity="0.01" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M 0,24 C 30,24 55,20 85,22 C 105,24 116,21 126,21 L 126,34 L 0,34 Z"
+              fill="url(#wave-grad-purple)"
+            />
+            <path
+              d="M 0,24 C 30,24 55,20 85,22 C 105,24 116,21 126,21"
+              stroke="#9333ea"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <g transform="translate(126, 21)">
+              <circle className="bezent-wave-kpi-card__avatar-disc" cx="0" cy="0" r="7" stroke="#9333ea" strokeWidth="1.5" />
+              <circle cx="0" cy="-2" r="2.2" fill="#9333ea" />
+              <path d="M -4,4.5 C -3.6,2.2 -1.8,1.2 0,1.2 C 1.8,1.2 3.6,2.2 4,4.5 Z" fill="#9333ea" />
+            </g>
+          </svg>
 
           <div className="bezent-wave-kpi-card__trend">
-            {(metrics?.onboarding ?? 0) === 0 ? (
-              <span className="bezent-wave-kpi-card__trend--neutral">No change</span>
-            ) : (
-              <>
-                <span className="bezent-wave-kpi-card__trend--neutral">→ 0%</span>
-                <span className="bezent-wave-kpi-card__trend-label">vs last month</span>
-              </>
-            )}
+            <span className="bezent-wave-kpi-card__trend--neutral">→ 0%</span>
+            <span className="bezent-wave-kpi-card__trend-label">vs last month</span>
           </div>
         </div>
 
@@ -836,42 +817,32 @@ export function WorkforceOverviewPage({
             <p className="bezent-wave-kpi-card__subtitle">Pending Approvals</p>
           </div>
 
-          {(metrics?.pendingApprovals ?? 0) === 0 ? (
-            <div className="bezent-wave-kpi-card__empty-state">
-              <span className="bezent-wave-kpi-card__empty-chip">All caught up · 0 pending</span>
-            </div>
-          ) : (
-            <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
-              <defs>
-                <linearGradient id="wave-grad-amber" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.18" />
-                  <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.01" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M 0,26 C 30,26 60,25 90,24 C 108,23 118,20 126,20 L 126,34 L 0,34 Z"
-                fill="url(#wave-grad-amber)"
-              />
-              <path
-                d="M 0,26 C 30,26 60,25 90,24 C 108,23 118,20 126,20"
-                stroke="#f59e0b"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              <g transform="translate(126, 20)">
-                <circle className="bezent-wave-kpi-card__avatar-disc" cx="0" cy="0" r="7" stroke="#f59e0b" strokeWidth="1.5" />
-                <circle cx="0" cy="-2" r="2.2" fill="#f59e0b" />
-                <path d="M -4,4.5 C -3.6,2.2 -1.8,1.2 0,1.2 C 1.8,1.2 3.6,2.2 4,4.5 Z" fill="#f59e0b" />
-              </g>
-            </svg>
-          )}
+          <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
+            <defs>
+              <linearGradient id="wave-grad-amber" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.18" />
+                <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.01" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M 0,26 C 30,26 60,25 90,24 C 108,23 118,20 126,20 L 126,34 L 0,34 Z"
+              fill="url(#wave-grad-amber)"
+            />
+            <path
+              d="M 0,26 C 30,26 60,25 90,24 C 108,23 118,20 126,20"
+              stroke="#f59e0b"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <g transform="translate(126, 20)">
+              <circle className="bezent-wave-kpi-card__avatar-disc" cx="0" cy="0" r="7" stroke="#f59e0b" strokeWidth="1.5" />
+              <circle cx="0" cy="-2" r="2.2" fill="#f59e0b" />
+              <path d="M -4,4.5 C -3.6,2.2 -1.8,1.2 0,1.2 C 1.8,1.2 3.6,2.2 4,4.5 Z" fill="#f59e0b" />
+            </g>
+          </svg>
 
           <div className="bezent-wave-kpi-card__trend">
-            {(metrics?.pendingApprovals ?? 0) === 0 ? (
-              <span className="bezent-wave-kpi-card__trend--neutral">No change</span>
-            ) : (
-              <span className="bezent-wave-kpi-card__trend--up">Action required</span>
-            )}
+            <span className="bezent-wave-kpi-card__trend--up">Action required</span>
           </div>
         </div>
 
@@ -897,45 +868,33 @@ export function WorkforceOverviewPage({
             <p className="bezent-wave-kpi-card__subtitle">Upcoming Changes</p>
           </div>
 
-          {(metrics?.upcomingChanges ?? 0) === 0 ? (
-            <div className="bezent-wave-kpi-card__empty-state">
-              <span className="bezent-wave-kpi-card__empty-chip">Stable · 0 scheduled</span>
-            </div>
-          ) : (
-            <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
-              <defs>
-                <linearGradient id="wave-grad-indigo" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.18" />
-                  <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.01" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M 0,25 C 35,25 70,24 95,23 C 110,22 118,20 126,20 L 126,34 L 0,34 Z"
-                fill="url(#wave-grad-indigo)"
-              />
-              <path
-                d="M 0,25 C 35,25 70,24 95,23 C 110,22 118,20 126,20"
-                stroke="#3b82f6"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              <g transform="translate(126, 20)">
-                <circle className="bezent-wave-kpi-card__avatar-disc" cx="0" cy="0" r="7" stroke="#3b82f6" strokeWidth="1.5" />
-                <circle cx="0" cy="-2" r="2.2" fill="#3b82f6" />
-                <path d="M -4,4.5 C -3.6,2.2 -1.8,1.2 0,1.2 C 1.8,1.2 3.6,2.2 4,4.5 Z" fill="#3b82f6" />
-              </g>
-            </svg>
-          )}
+          <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
+            <defs>
+              <linearGradient id="wave-grad-indigo" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.18" />
+                <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.01" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M 0,25 C 35,25 70,24 95,23 C 110,22 118,20 126,20 L 126,34 L 0,34 Z"
+              fill="url(#wave-grad-indigo)"
+            />
+            <path
+              d="M 0,25 C 35,25 70,24 95,23 C 110,22 118,20 126,20"
+              stroke="#3b82f6"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <g transform="translate(126, 20)">
+              <circle className="bezent-wave-kpi-card__avatar-disc" cx="0" cy="0" r="7" stroke="#3b82f6" strokeWidth="1.5" />
+              <circle cx="0" cy="-2" r="2.2" fill="#3b82f6" />
+              <path d="M -4,4.5 C -3.6,2.2 -1.8,1.2 0,1.2 C 1.8,1.2 3.6,2.2 4,4.5 Z" fill="#3b82f6" />
+            </g>
+          </svg>
 
           <div className="bezent-wave-kpi-card__trend">
-            {(metrics?.upcomingChanges ?? 0) === 0 ? (
-              <span className="bezent-wave-kpi-card__trend--neutral">No change</span>
-            ) : (
-              <>
-                <span className="bezent-wave-kpi-card__trend--neutral">→ 0%</span>
-                <span className="bezent-wave-kpi-card__trend-label">vs last month</span>
-              </>
-            )}
+            <span className="bezent-wave-kpi-card__trend--neutral">→ 0%</span>
+            <span className="bezent-wave-kpi-card__trend-label">vs last month</span>
           </div>
         </div>
 
@@ -961,45 +920,33 @@ export function WorkforceOverviewPage({
             <p className="bezent-wave-kpi-card__subtitle">Offboarding</p>
           </div>
 
-          {(metrics?.offboarding ?? 0) === 0 ? (
-            <div className="bezent-wave-kpi-card__empty-state">
-              <span className="bezent-wave-kpi-card__empty-chip">Stable · 0 exits</span>
-            </div>
-          ) : (
-            <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
-              <defs>
-                <linearGradient id="wave-grad-coral" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.18" />
-                  <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.01" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M 0,24 C 35,24 70,24 95,23 C 110,23 118,21 126,21 L 126,34 L 0,34 Z"
-                fill="url(#wave-grad-coral)"
-              />
-              <path
-                d="M 0,24 C 35,24 70,24 95,23 C 110,23 118,21 126,21"
-                stroke="#f43f5e"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              <g transform="translate(126, 21)">
-                <circle className="bezent-wave-kpi-card__avatar-disc" cx="0" cy="0" r="7" stroke="#f43f5e" strokeWidth="1.5" />
-                <circle cx="0" cy="-2" r="2.2" fill="#f43f5e" />
-                <path d="M -4,4.5 C -3.6,2.2 -1.8,1.2 0,1.2 C 1.8,1.2 3.6,2.2 4,4.5 Z" fill="#f43f5e" />
-              </g>
-            </svg>
-          )}
+          <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
+            <defs>
+              <linearGradient id="wave-grad-coral" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.18" />
+                <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.01" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M 0,24 C 35,24 70,24 95,23 C 110,23 118,21 126,21 L 126,34 L 0,34 Z"
+              fill="url(#wave-grad-coral)"
+            />
+            <path
+              d="M 0,24 C 35,24 70,24 95,23 C 110,23 118,21 126,21"
+              stroke="#f43f5e"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <g transform="translate(126, 21)">
+              <circle className="bezent-wave-kpi-card__avatar-disc" cx="0" cy="0" r="7" stroke="#f43f5e" strokeWidth="1.5" />
+              <circle cx="0" cy="-2" r="2.2" fill="#f43f5e" />
+              <path d="M -4,4.5 C -3.6,2.2 -1.8,1.2 0,1.2 C 1.8,1.2 3.6,2.2 4,4.5 Z" fill="#f43f5e" />
+            </g>
+          </svg>
 
           <div className="bezent-wave-kpi-card__trend">
-            {(metrics?.offboarding ?? 0) === 0 ? (
-              <span className="bezent-wave-kpi-card__trend--neutral">No change</span>
-            ) : (
-              <>
-                <span className="bezent-wave-kpi-card__trend--neutral">→ 0%</span>
-                <span className="bezent-wave-kpi-card__trend-label">vs last month</span>
-              </>
-            )}
+            <span className="bezent-wave-kpi-card__trend--neutral">→ 0%</span>
+            <span className="bezent-wave-kpi-card__trend-label">vs last month</span>
           </div>
         </div>
       </Grid>
