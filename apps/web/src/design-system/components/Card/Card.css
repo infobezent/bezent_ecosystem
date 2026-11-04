@@ -1205,6 +1205,15 @@
   transform: translateY(-1px) scale(1.02);
 }
 
+.bezent-trend-kpi-card__chart-badge {
+  transform-origin: center;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bezent-trend-kpi-card:hover .bezent-trend-kpi-card__chart-badge {
+  transform: scale(1.15);
+}
+
 /* ── Workforce Ring Visualization (Active Employees Card) ── */
 :root {
   --bezent-ring-primary: #168653;

@@ -915,7 +915,7 @@ function MiniChart({ data, type, chartId }: MiniChartProps) {
           return data.slice(-5).map((val, idx) => {
             const h = val > 0 ? Math.max(6, (val / max) * 24) : 4;
             return {
-              x: 8 + idx * 15,
+              x: 6 + idx * 14,
               y: 36 - h,
               height: h,
               opacity: idx === data.length - 1 ? 0.95 : 0.35 + (idx / 5) * 0.45,
@@ -923,11 +923,11 @@ function MiniChart({ data, type, chartId }: MiniChartProps) {
           });
         })()
       : [
-          { x: 8, y: 28, height: 8, opacity: 0.3 },
-          { x: 23, y: 22, height: 14, opacity: 0.45 },
-          { x: 38, y: 16, height: 20, opacity: 0.75 },
-          { x: 53, y: 23, height: 13, opacity: 0.45 },
-          { x: 68, y: 28, height: 8, opacity: 0.3 },
+          { x: 6, y: 28, height: 8, opacity: 0.3 },
+          { x: 20, y: 22, height: 14, opacity: 0.45 },
+          { x: 34, y: 16, height: 20, opacity: 0.75 },
+          { x: 48, y: 23, height: 13, opacity: 0.45 },
+          { x: 62, y: 28, height: 8, opacity: 0.3 },
         ];
 
     return (
@@ -937,18 +937,32 @@ function MiniChart({ data, type, chartId }: MiniChartProps) {
         aria-hidden="true"
         preserveAspectRatio="none"
       >
-        {/* Subtle Queue Target Horizon */}
+        {/* Target Queue Horizon Line */}
         <line
           x1="6"
           y1="10"
-          x2="78"
+          x2="69"
           y2="10"
           stroke="rgba(255, 255, 255, 0.4)"
           strokeWidth="1.2"
           strokeDasharray="3 3"
           strokeLinecap="round"
         />
-        <circle cx="78" cy="10" r="2" fill="rgba(255, 255, 255, 0.8)" />
+
+        {/* Micro Frosted Employee Pin Badge at Horizon (Style A) */}
+        <g className="bezent-trend-kpi-card__chart-badge" aria-hidden="true">
+          <circle cx={77} cy={10} r={8.5} fill="rgba(255, 255, 255, 0.15)" />
+          <circle
+            cx={77}
+            cy={10}
+            r={6.5}
+            fill="rgba(255, 255, 255, 0.28)"
+            stroke="#ffffff"
+            strokeWidth="1"
+          />
+          <circle cx={77} cy={7.8} r={1.8} fill="#ffffff" />
+          <path d="M 73.8 14.2 C 73.8 11.2, 80.2 11.2, 80.2 14.2 Z" fill="#ffffff" />
+        </g>
 
         {/* Stepped Queue Micro-Bars */}
         {barConfigs.map((b, i) => (
@@ -956,9 +970,9 @@ function MiniChart({ data, type, chartId }: MiniChartProps) {
             key={i}
             x={b.x}
             y={b.y}
-            width={9}
+            width={8}
             height={b.height}
-            rx={2.5}
+            rx={2}
             fill="#ffffff"
             fillOpacity={b.opacity}
           />
@@ -967,37 +981,37 @@ function MiniChart({ data, type, chartId }: MiniChartProps) {
     );
   }
 
-  // 2. Smooth Wave Curves (Always smooth, organic, and executive across all tabs)
+  // 2. Smooth Wave Curves (Total = smooth-area, Active = mini-area, Inactive = subtle-line)
   let points: { x: number; y: number }[] = [];
 
   if (type === 'mini-area') {
     // Active Employees: Healthy undulating operational pulse wave (Always smooth!)
     points = [
       { x: 4, y: 24 },
-      { x: 20, y: 18 },
-      { x: 36, y: 26 },
-      { x: 52, y: 13 },
-      { x: 68, y: 19 },
-      { x: 84, y: 11 },
+      { x: 19, y: 18 },
+      { x: 34, y: 26 },
+      { x: 49, y: 13 },
+      { x: 63, y: 19 },
+      { x: 77, y: 11 },
     ];
   } else if (type === 'subtle-line') {
     // Inactive Employees: Calm compliance baseline curve settling softly
     points = [
       { x: 4, y: 15 },
-      { x: 24, y: 20 },
-      { x: 44, y: 27 },
-      { x: 64, y: 29 },
-      { x: 84, y: 29 },
+      { x: 22, y: 20 },
+      { x: 41, y: 26 },
+      { x: 59, y: 29 },
+      { x: 77, y: 29 },
     ];
   } else {
     // Total Employees: Steady upward growth sparkline wave (Always smooth!)
     points = [
       { x: 4, y: 28 },
-      { x: 20, y: 25 },
-      { x: 36, y: 22 },
-      { x: 52, y: 20 },
-      { x: 68, y: 15 },
-      { x: 84, y: 11 },
+      { x: 19, y: 25 },
+      { x: 34, y: 22 },
+      { x: 49, y: 20 },
+      { x: 63, y: 15 },
+      { x: 77, y: 11 },
     ];
   }
 
@@ -1037,11 +1051,27 @@ function MiniChart({ data, type, chartId }: MiniChartProps) {
         strokeLinejoin="round"
       />
 
-      {/* Outer Halo on End Point */}
-      <circle cx={lastPt.x} cy={lastPt.y} r={6} fill="#ffffff" opacity={0.25} />
-
-      {/* Bright Endpoint Highlight Dot */}
-      <circle cx={lastPt.x} cy={lastPt.y} r={3} fill="#ffffff" />
+      {/* Micro Frosted Employee / Person Badge (Style A) */}
+      <g className="bezent-trend-kpi-card__chart-badge" aria-hidden="true">
+        {/* Outer Halo */}
+        <circle cx={lastPt.x} cy={lastPt.y} r={8.5} fill="rgba(255, 255, 255, 0.15)" />
+        {/* Frosted Glass Disc */}
+        <circle
+          cx={lastPt.x}
+          cy={lastPt.y}
+          r={6.5}
+          fill="rgba(255, 255, 255, 0.28)"
+          stroke="#ffffff"
+          strokeWidth="1"
+        />
+        {/* Miniature Person: Head */}
+        <circle cx={lastPt.x} cy={lastPt.y - 2.2} r={1.8} fill="#ffffff" />
+        {/* Miniature Person: Shoulders */}
+        <path
+          d={`M ${lastPt.x - 3.2} ${lastPt.y + 4.2} C ${lastPt.x - 3.2} ${lastPt.y + 1.2}, ${lastPt.x + 3.2} ${lastPt.y + 1.2}, ${lastPt.x + 3.2} ${lastPt.y + 4.2} Z`}
+          fill="#ffffff"
+        />
+      </g>
     </svg>
   );
 }
