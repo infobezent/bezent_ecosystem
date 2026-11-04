@@ -140,4 +140,19 @@ describe('Workforce Overview Page', () => {
     expect(html).toContain('Upcoming Milestones &amp; Celebrations');
     expect(html).toContain('Requires HR review or sign-off');
   });
+
+  it('renders New Hire & Onboarding Radar and Today\'s Availability pulse cards', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <WorkforceOverviewPage />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('New Hire &amp; Onboarding Radar');
+    expect(html).toContain("Today&#x27;s Availability");
+    expect(html).toContain('In Office');
+    expect(html).toContain('On-Duty');
+    expect(html).toContain('On Leave');
+    expect(html).toContain('Remote');
+  });
 });
