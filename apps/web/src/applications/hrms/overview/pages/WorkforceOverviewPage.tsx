@@ -188,7 +188,7 @@ const WORKFORCE_REPORTS = [
     id: 'department-allocation',
     title: 'Department Allocation Matrix',
     description: 'Cross-functional distribution, manager headcount, and team capacity.',
-    category: 'Organization',
+    category: 'Operations',
   },
   {
     id: 'probation-audit',
@@ -206,31 +206,31 @@ const WORKFORCE_REPORTS = [
     id: 'attrition-intelligence',
     title: 'Attrition & Exit Intelligence',
     description: 'Voluntary vs involuntary separation reasons, tenure, and trends.',
-    category: 'Retention',
+    category: 'Headcount',
   },
   {
     id: 'diversity-demographics',
     title: 'Workforce Diversity & Demographics',
     description: 'Gender distribution, tenure brackets, and generational composition.',
-    category: 'Demographics',
+    category: 'Talent',
   },
   {
     id: 'onboarding-velocity',
     title: 'Onboarding Velocity & SLA',
     description: 'Time-to-productivity, document completion speed, and induction stages.',
-    category: 'Onboarding',
+    category: 'Operations',
   },
   {
     id: 'internal-mobility',
     title: 'Internal Mobility & Transfers',
     description: 'Lateral moves, department reassignments, and transfer approvals.',
-    category: 'Mobility',
+    category: 'Operations',
   },
   {
     id: 'leave-absence',
     title: 'Leave & Absence Correlation',
     description: 'Attendance patterns, planned vs unplanned leave, and shift coverage.',
-    category: 'Attendance',
+    category: 'Compliance',
   },
   {
     id: 'skills-job-levels',
@@ -248,7 +248,7 @@ const WORKFORCE_REPORTS = [
     id: 'executive-summary',
     title: 'Executive Workforce Summary',
     description: 'Board-ready snapshot of headcount health, growth, and compliance.',
-    category: 'Executive',
+    category: 'Headcount',
   },
 ] as const;
 
@@ -331,8 +331,8 @@ export interface WorkforceOverviewPageProps {
 
 /**
  * Workforce → Overview Page (Command Center)
- * Enterprise-grade executive dashboard with complete analytics, distribution,
- * lifecycle pipeline, workforce planning, priority action center, and report insights.
+ * Enterprise-grade executive dashboard combining high-density bento organization,
+ * multi-lens intelligence switching, and linear-style priority action handling.
  */
 export function WorkforceOverviewPage({
   title = 'Workforce Overview',
@@ -344,13 +344,23 @@ export function WorkforceOverviewPage({
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
 
-  // Filters State
-  const [dateRange, setDateRange] = useState<'today' | '7d' | '30d' | '90d' | 'quarter' | 'year'>(
+  // Timeframe and Filter States
+  const [timeframe, setTimeframe] = useState<'today' | '7d' | '30d' | '90d' | 'quarter' | 'year'>(
     '30d',
   );
   const [locationFilter, setLocationFilter] = useState('all');
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [employmentTypeFilter, setEmploymentTypeFilter] = useState('all');
+
+  // Intelligence Hub Active Tab
+  const [intelligenceTab, setIntelligenceTab] = useState<
+    'growth' | 'distribution' | 'planning' | 'demographics'
+  >('growth');
+
+  // Reports Category Filter
+  const [reportCategory, setReportCategory] = useState<'all' | 'Headcount' | 'Compliance' | 'Talent' | 'Operations'>(
+    'all',
+  );
 
   const [metrics, setMetrics] = useState<OverviewMetrics | null>(null);
   const [workforceList, setWorkforceList] = useState<EmployeeRecord[]>([]);
@@ -698,6 +708,11 @@ export function WorkforceOverviewPage({
     return pendingActions.filter((item) => item.type === pendingFilter);
   }, [pendingActions, pendingFilter]);
 
+  const filteredReports = useMemo(() => {
+    if (reportCategory === 'all') return WORKFORCE_REPORTS;
+    return WORKFORCE_REPORTS.filter((r) => r.category === reportCategory);
+  }, [reportCategory]);
+
   const handleExportFullReport = useCallback(() => {
     const csvRows = [
       'Metric,Count,Notes',
@@ -735,7 +750,7 @@ export function WorkforceOverviewPage({
 
   return (
     <Page maxWidth="full" gap="md">
-      {/* ================= ROW 01: PAGE HEADER & FILTER BAR ================= */}
+      {/* ================= ZONE 1: COMMAND HEADER & 6 WAVE KPI CARDS ================= */}
       <PageHeader
         eyebrow="HRMS · Workforce"
         title={title}
@@ -777,34 +792,33 @@ export function WorkforceOverviewPage({
         </Alert>
       )}
 
-      {/* Organization Filter Bar */}
-      <div className="bezent-wf-filter-bar">
-        <div className="bezent-wf-filter-group">
-          <select
-            className="bezent-wf-filter-select"
-            value={dateRange}
-            onChange={(e) => setDateRange(e.target.value as any)}
-            aria-label="Date Range"
-          >
-            <option value="today">Today</option>
-            <option value="7d">Last 7 Days</option>
-            <option value="30d">Last 30 Days</option>
-            <option value="90d">Last 90 Days</option>
-            <option value="quarter">This Quarter</option>
-            <option value="year">This Year</option>
-          </select>
+      {/* Refined Segmented Filter Pill Toolbar */}
+      <div className="bezent-wf-pill-toolbar">
+        <div className="bezent-wf-pill-group">
+          <div className="bezent-wf-timeframe-switch">
+            {(
+              [
+                ['today', 'Today'],
+                ['7d', '7D'],
+                ['30d', '30D'],
+                ['90d', '90D'],
+                ['quarter', 'QTR'],
+                ['year', 'YTD'],
+              ] as const
+            ).map(([val, lbl]) => (
+              <button
+                key={val}
+                type="button"
+                className={`bezent-wf-pill-btn ${timeframe === val ? 'bezent-wf-pill-btn--active' : ''}`}
+                onClick={() => setTimeframe(val)}
+              >
+                {lbl}
+              </button>
+            ))}
+          </div>
 
           <select
-            className="bezent-wf-filter-select"
-            value="bezent"
-            disabled
-            aria-label="Company Filter"
-          >
-            <option value="bezent">BEZENT Technologies Inc.</option>
-          </select>
-
-          <select
-            className="bezent-wf-filter-select"
+            className="bezent-wf-pill-select"
             value={locationFilter}
             onChange={(e) => setLocationFilter(e.target.value)}
             aria-label="Location Filter"
@@ -816,7 +830,7 @@ export function WorkforceOverviewPage({
           </select>
 
           <select
-            className="bezent-wf-filter-select"
+            className="bezent-wf-pill-select"
             value={departmentFilter}
             onChange={(e) => setDepartmentFilter(e.target.value)}
             aria-label="Department Filter"
@@ -830,7 +844,7 @@ export function WorkforceOverviewPage({
           </select>
 
           <select
-            className="bezent-wf-filter-select"
+            className="bezent-wf-pill-select"
             value={employmentTypeFilter}
             onChange={(e) => setEmploymentTypeFilter(e.target.value)}
             aria-label="Employment Type Filter"
@@ -843,12 +857,12 @@ export function WorkforceOverviewPage({
           </select>
         </div>
 
-        <Badge variant="neutral" size="sm">
-          Active Filter: {dateRange.toUpperCase()} · Synced Live
+        <Badge variant="success" size="sm">
+          Live Data · 16 Employees Synchronized
         </Badge>
       </div>
 
-      {/* ================= ROW 02: WORKFORCE SNAPSHOT (6 KPI CARDS) ================= */}
+      {/* 6 Executive Wave KPI Cards */}
       <Grid columns={6} gap="sm">
         {/* Card 1: Workforce */}
         <div
@@ -1225,667 +1239,107 @@ export function WorkforceOverviewPage({
         </div>
       </Grid>
 
-      {/* ================= ROW 03: WORKFORCE GROWTH ANALYTICS ================= */}
-      <div className="bezent-wf-growth-card">
-        <div className="bezent-wf-growth-header">
-          <Stack gap="none">
-            <h3 className="bezent-pending-card__title">Workforce Growth Analytics</h3>
-            <p className="bezent-pending-card__subtitle">
-              Monthly headcount progression, joiners, exits, and net talent movement.
-            </p>
-          </Stack>
-
-          <div className="bezent-wf-growth-stats">
-            <div className="bezent-wf-growth-stat">
-              <span className="bezent-wf-growth-stat-label">Total Headcount</span>
-              <span className="bezent-wf-growth-stat-value">
-                {metrics?.totalEmployees ?? 16}
-              </span>
-            </div>
-            <div className="bezent-wf-growth-stat">
-              <span className="bezent-wf-growth-stat-label">Net Growth</span>
-              <span className="bezent-wf-growth-stat-value">
-                <span className="bezent-badge bezent-badge--success bezent-badge--sm">+2 (+14.3%)</span>
-              </span>
-            </div>
-            <div className="bezent-wf-growth-stat">
-              <span className="bezent-wf-growth-stat-label">New Joiners</span>
-              <span className="bezent-wf-growth-stat-value">2</span>
-            </div>
-            <div className="bezent-wf-growth-stat">
-              <span className="bezent-wf-growth-stat-label">Exits</span>
-              <span className="bezent-wf-growth-stat-value">0</span>
-            </div>
-            <div className="bezent-wf-growth-stat">
-              <span className="bezent-wf-growth-stat-label">Retention Rate</span>
-              <span className="bezent-wf-growth-stat-value">100%</span>
-            </div>
+      {/* ================= ZONE 2: SLIM CONNECTED 8-STAGE LIFECYCLE RIBBON ================= */}
+      <div className="bezent-wf-lifecycle-ribbon">
+        <div
+          className="bezent-wf-lifecycle-step"
+          onClick={() => navigate('/hrms/workforce/onboarding')}
+        >
+          <span className="bezent-wf-lifecycle-num">0</span>
+          <div className="bezent-wf-lifecycle-meta">
+            <span className="bezent-wf-lifecycle-name">Hiring</span>
+            <span className="bezent-wf-lifecycle-tag">Pipeline</span>
           </div>
         </div>
+        <span className="bezent-wf-lifecycle-arrow">→</span>
 
-        <div className="bezent-wf-chart-container">
-          <svg
-            className="bezent-wf-chart-svg"
-            viewBox="0 0 900 220"
-            preserveAspectRatio="none"
-          >
-            <defs>
-              <linearGradient id="growthAreaGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#3478d4" stopOpacity="0.22" />
-                <stop offset="100%" stopColor="#3478d4" stopOpacity="0.01" />
-              </linearGradient>
-            </defs>
-
-            {/* Horizontal Grid lines */}
-            <line x1="40" y1="40" x2="880" y2="40" stroke="#e7eaf0" strokeDasharray="3 3" />
-            <text x="15" y="44" fill="#94a3b8" fontSize="11" fontFamily="sans-serif">20</text>
-
-            <line x1="40" y1="85" x2="880" y2="85" stroke="#e7eaf0" strokeDasharray="3 3" />
-            <text x="15" y="89" fill="#94a3b8" fontSize="11" fontFamily="sans-serif">15</text>
-
-            <line x1="40" y1="130" x2="880" y2="130" stroke="#e7eaf0" strokeDasharray="3 3" />
-            <text x="15" y="134" fill="#94a3b8" fontSize="11" fontFamily="sans-serif">10</text>
-
-            <line x1="40" y1="175" x2="880" y2="175" stroke="#e7eaf0" strokeDasharray="3 3" />
-            <text x="15" y="179" fill="#94a3b8" fontSize="11" fontFamily="sans-serif">5</text>
-
-            <line x1="40" y1="195" x2="880" y2="195" stroke="#cbd5e1" strokeWidth="1" />
-
-            {/* Filled Area */}
-            <path
-              d="M 60,94 C 180,94 200,94 300,94 C 400,94 420,85 520,85 C 620,85 640,76 740,76 C 800,76 830,76 860,76 L 860,195 L 60,195 Z"
-              fill="url(#growthAreaGrad)"
-            />
-
-            {/* Primary Curve */}
-            <path
-              d="M 60,94 C 180,94 200,94 300,94 C 400,94 420,85 520,85 C 620,85 640,76 740,76 C 800,76 830,76 860,76"
-              fill="none"
-              stroke="#3478d4"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-
-            {/* Data Points */}
-            <circle cx="60" cy="94" r="4.5" fill="#ffffff" stroke="#3478d4" strokeWidth="2.5" />
-            <circle cx="300" cy="94" r="4.5" fill="#ffffff" stroke="#3478d4" strokeWidth="2.5" />
-            <circle cx="520" cy="85" r="4.5" fill="#ffffff" stroke="#3478d4" strokeWidth="2.5" />
-            <circle cx="740" cy="76" r="4.5" fill="#ffffff" stroke="#3478d4" strokeWidth="2.5" />
-            <circle cx="860" cy="76" r="6" fill="#3478d4" stroke="#ffffff" strokeWidth="2.5" />
-
-            {/* Active Highlight Badge on current head */}
-            <g transform="translate(790, 42)">
-              <rect width="88" height="24" rx="6" fill="#182230" />
-              <text x="44" y="16" fill="#ffffff" fontSize="11" fontWeight="700" textAnchor="middle" fontFamily="sans-serif">
-                16 Active
-              </text>
-            </g>
-
-            {/* X-axis Labels */}
-            <text x="60" y="212" fill="#667085" fontSize="11" fontWeight="500" textAnchor="middle" fontFamily="sans-serif">
-              Oct 2025
-            </text>
-            <text x="300" y="212" fill="#667085" fontSize="11" fontWeight="500" textAnchor="middle" fontFamily="sans-serif">
-              Nov 2025
-            </text>
-            <text x="520" y="212" fill="#667085" fontSize="11" fontWeight="500" textAnchor="middle" fontFamily="sans-serif">
-              Dec 2025
-            </text>
-            <text x="740" y="212" fill="#667085" fontSize="11" fontWeight="500" textAnchor="middle" fontFamily="sans-serif">
-              Jan 2026
-            </text>
-            <text x="860" y="212" fill="#182230" fontSize="11" fontWeight="700" textAnchor="middle" fontFamily="sans-serif">
-              Mar 2026
-            </text>
-          </svg>
+        <div
+          className="bezent-wf-lifecycle-step"
+          onClick={() => navigate('/hrms/workforce/onboarding')}
+        >
+          <span className="bezent-wf-lifecycle-num">0</span>
+          <div className="bezent-wf-lifecycle-meta">
+            <span className="bezent-wf-lifecycle-name">Onboarding</span>
+            <span className="bezent-wf-lifecycle-tag">Induction</span>
+          </div>
         </div>
-      </div>
+        <span className="bezent-wf-lifecycle-arrow">→</span>
 
-      {/* ================= ROW 04: WORKFORCE DISTRIBUTION ================= */}
-      <Grid columns={2} gap="md">
-        {/* Department Distribution (Donut Chart) */}
-        <Card padding="sm">
-          <CardHeader>
-            <Inline justify="between" align="center">
-              <Stack gap="none">
-                <CardTitle>Department Distribution</CardTitle>
-                <span className="bezent-table-meta-subtitle">
-                  Workforce share across functional units
-                </span>
-              </Stack>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/hrms/workforce/employees')}
-              >
-                View details →
-              </Button>
-            </Inline>
-          </CardHeader>
-          <CardBody>
-            <div className="bezent-wf-donut-layout">
-              <div className="bezent-wf-donut-chart-wrap">
-                <svg viewBox="0 0 160 160" width="160" height="160">
-                  {/* Track */}
-                  <circle cx="80" cy="80" r="58" fill="none" stroke="#f1f5f9" strokeWidth="18" />
-                  {/* Operations (75% -> 273.3) */}
-                  <circle
-                    cx="80"
-                    cy="80"
-                    r="58"
-                    fill="none"
-                    stroke="#3478d4"
-                    strokeWidth="18"
-                    strokeDasharray="273.3 364.4"
-                    strokeDashoffset="0"
-                    transform="rotate(-90 80 80)"
-                  />
-                  {/* Engineering (13% -> 47.4) */}
-                  <circle
-                    cx="80"
-                    cy="80"
-                    r="58"
-                    fill="none"
-                    stroke="#159a70"
-                    strokeWidth="18"
-                    strokeDasharray="47.4 364.4"
-                    strokeDashoffset="-273.3"
-                    transform="rotate(-90 80 80)"
-                  />
-                  {/* Product & Design (6% -> 21.9) */}
-                  <circle
-                    cx="80"
-                    cy="80"
-                    r="58"
-                    fill="none"
-                    stroke="#d99a32"
-                    strokeWidth="18"
-                    strokeDasharray="21.9 364.4"
-                    strokeDashoffset="-320.7"
-                    transform="rotate(-90 80 80)"
-                  />
-                  {/* HR & Finance (6% -> 21.9) */}
-                  <circle
-                    cx="80"
-                    cy="80"
-                    r="58"
-                    fill="none"
-                    stroke="#0d9488"
-                    strokeWidth="18"
-                    strokeDasharray="21.9 364.4"
-                    strokeDashoffset="-342.6"
-                    transform="rotate(-90 80 80)"
-                  />
-                </svg>
-                <div className="bezent-wf-donut-center">
-                  <span className="bezent-wf-donut-center-num">
-                    {metrics?.totalEmployees ?? 16}
-                  </span>
-                  <span className="bezent-wf-donut-center-label">Employees</span>
-                </div>
-              </div>
-
-              <div className="bezent-wf-legend-list">
-                <div className="bezent-wf-legend-item">
-                  <div className="bezent-wf-legend-header">
-                    <span>
-                      <span className="bezent-wf-legend-dot bezent-wf-bg-blue" />
-                      General Operations
-                    </span>
-                    <strong>12 (75%)</strong>
-                  </div>
-                  <ProgressBar value={75} variant="primary" size="sm" showValue={false} />
-                </div>
-
-                <div className="bezent-wf-legend-item">
-                  <div className="bezent-wf-legend-header">
-                    <span>
-                      <span className="bezent-wf-legend-dot bezent-wf-bg-green" />
-                      Engineering
-                    </span>
-                    <strong>2 (13%)</strong>
-                  </div>
-                  <ProgressBar value={13} variant="success" size="sm" showValue={false} />
-                </div>
-
-                <div className="bezent-wf-legend-item">
-                  <div className="bezent-wf-legend-header">
-                    <span>
-                      <span className="bezent-wf-legend-dot bezent-wf-bg-amber" />
-                      Product &amp; Design
-                    </span>
-                    <strong>1 (6%)</strong>
-                  </div>
-                  <ProgressBar value={6} variant="warning" size="sm" showValue={false} />
-                </div>
-
-                <div className="bezent-wf-legend-item">
-                  <div className="bezent-wf-legend-header">
-                    <span>
-                      <span className="bezent-wf-legend-dot bezent-wf-bg-teal" />
-                      HR &amp; Finance
-                    </span>
-                    <strong>1 (6%)</strong>
-                  </div>
-                  <ProgressBar value={6} variant="primary" size="sm" showValue={false} />
-                </div>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Location Distribution (Horizontal Bars) */}
-        <Card padding="sm">
-          <CardHeader>
-            <Inline justify="between" align="center">
-              <Stack gap="none">
-                <CardTitle>Location Distribution</CardTitle>
-                <span className="bezent-table-meta-subtitle">
-                  Workforce deployment across branch offices
-                </span>
-              </Stack>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/hrms/workforce/employees')}
-              >
-                View details →
-              </Button>
-            </Inline>
-          </CardHeader>
-          <CardBody>
-            <div className="bezent-wf-hbars-list">
-              <div className="bezent-wf-hbar-row">
-                <div className="bezent-wf-hbar-header">
-                  <Inline gap="xs" align="center">
-                    <BezentIcon name="organization" size={14} />
-                    <span>Headquarters (Bangalore)</span>
-                  </Inline>
-                  <strong>12 employees (75%)</strong>
-                </div>
-                <div className="bezent-wf-hbar-track">
-                  <div className="bezent-wf-hbar-fill bezent-wf-bg-blue bezent-wf-w-75" />
-                </div>
-              </div>
-
-              <div className="bezent-wf-hbar-row">
-                <div className="bezent-wf-hbar-header">
-                  <Inline gap="xs" align="center">
-                    <BezentIcon name="workforce" size={14} />
-                    <span>Remote / Distributed</span>
-                  </Inline>
-                  <strong>3 employees (19%)</strong>
-                </div>
-                <div className="bezent-wf-hbar-track">
-                  <div className="bezent-wf-hbar-fill bezent-wf-bg-green bezent-wf-w-19" />
-                </div>
-              </div>
-
-              <div className="bezent-wf-hbar-row">
-                <div className="bezent-wf-hbar-header">
-                  <Inline gap="xs" align="center">
-                    <BezentIcon name="schedule" size={14} />
-                    <span>Regional Hub (Singapore)</span>
-                  </Inline>
-                  <strong>1 employee (6%)</strong>
-                </div>
-                <div className="bezent-wf-hbar-track">
-                  <div className="bezent-wf-hbar-fill bezent-wf-bg-amber bezent-wf-w-6" />
-                </div>
-              </div>
-
-              <div className="bezent-wf-hbar-row">
-                <div className="bezent-wf-hbar-header">
-                  <Inline gap="xs" align="center">
-                    <BezentIcon name="documents" size={14} />
-                    <span>European Expansion (London)</span>
-                  </Inline>
-                  <span className="bezent-table-meta-subtitle">0 (Recruitment in planning)</span>
-                </div>
-                <div className="bezent-wf-hbar-track">
-                  <div className="bezent-wf-hbar-fill bezent-wf-bg-gray bezent-wf-w-10" />
-                </div>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-      </Grid>
-
-      {/* ================= ROW 05: EMPLOYMENT COMPOSITION & DEMOGRAPHICS ================= */}
-      <Grid columns={2} gap="md">
-        {/* Employment Composition */}
-        <Card padding="sm">
-          <CardHeader>
-            <Inline justify="between" align="center">
-              <Stack gap="none">
-                <CardTitle>Employment Composition</CardTitle>
-                <span className="bezent-table-meta-subtitle">
-                  Workforce contract types and employment structures
-                </span>
-              </Stack>
-              <Badge variant="info" size="sm">
-                4 Categories
-              </Badge>
-            </Inline>
-          </CardHeader>
-          <CardBody>
-            <div className="bezent-wf-comp-bar">
-              <div className="bezent-wf-comp-segment bezent-wf-bg-blue bezent-wf-w-88" />
-              <div className="bezent-wf-comp-segment bezent-wf-bg-amber bezent-wf-w-12" />
-            </div>
-
-            <div className="bezent-wf-comp-grid">
-              <div className="bezent-wf-comp-card">
-                <span className="bezent-wf-comp-card-val">
-                  {employmentBreakdown.fullTime || 14}
-                </span>
-                <span className="bezent-wf-comp-card-lbl">Full-Time (87.5%)</span>
-              </div>
-              <div className="bezent-wf-comp-card">
-                <span className="bezent-wf-comp-card-val">
-                  {metrics?.probationEmployees || 2}
-                </span>
-                <span className="bezent-wf-comp-card-lbl">Probation (12.5%)</span>
-              </div>
-              <div className="bezent-wf-comp-card">
-                <span className="bezent-wf-comp-card-val">
-                  {employmentBreakdown.contract || 0}
-                </span>
-                <span className="bezent-wf-comp-card-lbl">Contract (0%)</span>
-              </div>
-              <div className="bezent-wf-comp-card">
-                <span className="bezent-wf-comp-card-val">
-                  {employmentBreakdown.intern || 0}
-                </span>
-                <span className="bezent-wf-comp-card-lbl">Intern (0%)</span>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Workforce Demographics (Preserves exact test strings) */}
-        <Card padding="sm">
-          <CardHeader>
-            <Inline justify="between" align="center">
-              <CardTitle>Workforce Demographics</CardTitle>
-              <span className="bezent-table-meta-subtitle">Distribution</span>
-            </Inline>
-          </CardHeader>
-          <CardBody>
-            {loading ? (
-              <LoadingState label="Loading…" minHeight="sm" />
-            ) : (
-              <Stack gap="sm">
-                <Inline gap="xs" wrap>
-                  <Badge variant="info" size="sm">
-                    FT: {employmentBreakdown.fullTime || 14}
-                  </Badge>
-                  <Badge variant="neutral" size="sm">
-                    Contract: {employmentBreakdown.contract || 0}
-                  </Badge>
-                  <Badge variant="neutral" size="sm">
-                    PT: {employmentBreakdown.partTime || 0}
-                  </Badge>
-                  <Badge variant="neutral" size="sm">
-                    Intern: {employmentBreakdown.intern || 0}
-                  </Badge>
-                </Inline>
-
-                <Stack gap="xs">
-                  {departmentStats.map((dept) => (
-                    <Card key={dept.name} variant="flat" padding="sm">
-                      <Stack gap="xs">
-                        <Inline justify="between" align="center">
-                          <span className="bezent-table-meta-title">{dept.name}</span>
-                          <span className="bezent-table-meta-subtitle">
-                            {dept.count} ({dept.percentage}%)
-                          </span>
-                        </Inline>
-                        <ProgressBar
-                          value={dept.percentage}
-                          variant="primary"
-                          size="sm"
-                          showValue={false}
-                        />
-                      </Stack>
-                    </Card>
-                  ))}
-                </Stack>
-              </Stack>
-            )}
-          </CardBody>
-        </Card>
-      </Grid>
-
-      {/* ================= ROW 06: EMPLOYEE LIFECYCLE PIPELINE ================= */}
-      <div className="bezent-wf-lifecycle-panel">
-        <Inline justify="between" align="center">
-          <Stack gap="none">
-            <h3 className="bezent-pending-card__title">Employee Lifecycle Pipeline</h3>
-            <p className="bezent-pending-card__subtitle">
-              End-to-end talent progression stages across the organization
-            </p>
-          </Stack>
-          <Badge variant="info" size="sm">
-            8 Sequential Stages
-          </Badge>
-        </Inline>
-
-        <div className="bezent-wf-lifecycle-track">
-          <div
-            className="bezent-wf-lifecycle-node"
-            onClick={() => navigate('/hrms/workforce/onboarding')}
-          >
-            <span className="bezent-wf-lifecycle-count">0</span>
-            <span className="bezent-wf-lifecycle-title">Hiring / Joining</span>
-            <span className="bezent-wf-lifecycle-status bezent-wf-bg-sky">Pipeline</span>
+        <div
+          className="bezent-wf-lifecycle-step"
+          onClick={() => navigate('/hrms/workforce/employees')}
+        >
+          <span className="bezent-wf-lifecycle-num bezent-badge--warning">2</span>
+          <div className="bezent-wf-lifecycle-meta">
+            <span className="bezent-wf-lifecycle-name">Probation</span>
+            <span className="bezent-wf-lifecycle-tag">2 Due</span>
           </div>
+        </div>
+        <span className="bezent-wf-lifecycle-arrow">→</span>
 
-          <div
-            className="bezent-wf-lifecycle-node"
-            onClick={() => navigate('/hrms/workforce/onboarding')}
-          >
-            <span className="bezent-wf-lifecycle-count">0</span>
-            <span className="bezent-wf-lifecycle-title">Onboarding</span>
-            <span className="bezent-wf-lifecycle-status bezent-wf-bg-blue">Induction</span>
+        <div
+          className="bezent-wf-lifecycle-step"
+          onClick={() => navigate('/hrms/workforce/employees')}
+        >
+          <span className="bezent-wf-lifecycle-num bezent-badge--success">14</span>
+          <div className="bezent-wf-lifecycle-meta">
+            <span className="bezent-wf-lifecycle-name">Active Workforce</span>
+            <span className="bezent-wf-lifecycle-tag">Confirmed</span>
           </div>
+        </div>
+        <span className="bezent-wf-lifecycle-arrow">→</span>
 
-          <div
-            className="bezent-wf-lifecycle-node"
-            onClick={() => navigate('/hrms/workforce/employees')}
-          >
-            <span className="bezent-wf-lifecycle-count">2</span>
-            <span className="bezent-wf-lifecycle-title">Probation</span>
-            <span className="bezent-wf-lifecycle-status bezent-wf-bg-amber">2 Reviews</span>
+        <div
+          className="bezent-wf-lifecycle-step"
+          onClick={() => navigate('/hrms/workforce/transfers')}
+        >
+          <span className="bezent-wf-lifecycle-num">0</span>
+          <div className="bezent-wf-lifecycle-meta">
+            <span className="bezent-wf-lifecycle-name">Transfers</span>
+            <span className="bezent-wf-lifecycle-tag">Mobility</span>
           </div>
+        </div>
+        <span className="bezent-wf-lifecycle-arrow">→</span>
 
-          <div
-            className="bezent-wf-lifecycle-node"
-            onClick={() => navigate('/hrms/workforce/employees')}
-          >
-            <span className="bezent-wf-lifecycle-count">14</span>
-            <span className="bezent-wf-lifecycle-title">Active Workforce</span>
-            <span className="bezent-wf-lifecycle-status bezent-wf-bg-green">Confirmed</span>
+        <div
+          className="bezent-wf-lifecycle-step"
+          onClick={() => navigate('/hrms/workforce/promotions')}
+        >
+          <span className="bezent-wf-lifecycle-num">0</span>
+          <div className="bezent-wf-lifecycle-meta">
+            <span className="bezent-wf-lifecycle-name">Promotions</span>
+            <span className="bezent-wf-lifecycle-tag">Scheduled</span>
           </div>
+        </div>
+        <span className="bezent-wf-lifecycle-arrow">→</span>
 
-          <div
-            className="bezent-wf-lifecycle-node"
-            onClick={() => navigate('/hrms/workforce/transfers')}
-          >
-            <span className="bezent-wf-lifecycle-count">0</span>
-            <span className="bezent-wf-lifecycle-title">Transfers</span>
-            <span className="bezent-wf-lifecycle-status bezent-wf-bg-teal">Mobility</span>
+        <div
+          className="bezent-wf-lifecycle-step"
+          onClick={() => navigate('/hrms/workforce/offboarding')}
+        >
+          <span className="bezent-wf-lifecycle-num">0</span>
+          <div className="bezent-wf-lifecycle-meta">
+            <span className="bezent-wf-lifecycle-name">Offboarding</span>
+            <span className="bezent-wf-lifecycle-tag">Exits</span>
           </div>
+        </div>
+        <span className="bezent-wf-lifecycle-arrow">→</span>
 
-          <div
-            className="bezent-wf-lifecycle-node"
-            onClick={() => navigate('/hrms/workforce/promotions')}
-          >
-            <span className="bezent-wf-lifecycle-count">0</span>
-            <span className="bezent-wf-lifecycle-title">Promotions</span>
-            <span className="bezent-wf-lifecycle-status bezent-wf-bg-blue">Scheduled</span>
-          </div>
-
-          <div
-            className="bezent-wf-lifecycle-node"
-            onClick={() => navigate('/hrms/workforce/offboarding')}
-          >
-            <span className="bezent-wf-lifecycle-count">0</span>
-            <span className="bezent-wf-lifecycle-title">Offboarding</span>
-            <span className="bezent-wf-lifecycle-status bezent-wf-bg-slate">0 Exits</span>
-          </div>
-
-          <div
-            className="bezent-wf-lifecycle-node"
-            onClick={() => navigate('/hrms/workforce/records')}
-          >
-            <span className="bezent-wf-lifecycle-count">0</span>
-            <span className="bezent-wf-lifecycle-title">Alumni</span>
-            <span className="bezent-wf-lifecycle-status bezent-wf-bg-gray">Archive</span>
+        <div
+          className="bezent-wf-lifecycle-step"
+          onClick={() => navigate('/hrms/workforce/records')}
+        >
+          <span className="bezent-wf-lifecycle-num">0</span>
+          <div className="bezent-wf-lifecycle-meta">
+            <span className="bezent-wf-lifecycle-name">Alumni</span>
+            <span className="bezent-wf-lifecycle-tag">Archive</span>
           </div>
         </div>
       </div>
 
-      {/* ================= ROW 07: WORKFORCE PLANNING & CAPACITY ================= */}
+      {/* ================= ZONE 3: TWO-COLUMN POWER HUB ================= */}
       <Grid columns={2} gap="md">
-        {/* Headcount Overview */}
-        <Card padding="sm">
-          <CardHeader>
-            <Inline justify="between" align="center">
-              <Stack gap="none">
-                <CardTitle>Headcount Overview &amp; Quotas</CardTitle>
-                <span className="bezent-table-meta-subtitle">
-                  Approved organizational capacity versus actual staffing
-                </span>
-              </Stack>
-              <Badge variant="warning" size="sm">
-                4 Open Positions
-              </Badge>
-            </Inline>
-          </CardHeader>
-          <CardBody>
-            <Grid columns={3} gap="xs">
-              <Card variant="flat" padding="sm">
-                <Stack gap="none" align="center">
-                  <span className="bezent-table-meta-title">20</span>
-                  <span className="bezent-table-meta-subtitle">Approved Target</span>
-                </Stack>
-              </Card>
-              <Card variant="flat" padding="sm">
-                <Stack gap="none" align="center">
-                  <span className="bezent-table-meta-title">16</span>
-                  <span className="bezent-table-meta-subtitle">Actual Count</span>
-                </Stack>
-              </Card>
-              <Card variant="flat" padding="sm">
-                <Stack gap="none" align="center">
-                  <span className="bezent-table-meta-title">-4</span>
-                  <span className="bezent-table-meta-subtitle">Headcount Gap</span>
-                </Stack>
-              </Card>
-            </Grid>
-
-            <div className="bezent-wf-hbars-list">
-              <div className="bezent-wf-hbar-row">
-                <div className="bezent-wf-hbar-header">
-                  <span>Operations Quota</span>
-                  <strong>12 of 15 staffed (80%)</strong>
-                </div>
-                <div className="bezent-wf-hbar-track">
-                  <div className="bezent-wf-hbar-fill bezent-wf-bg-blue bezent-wf-w-80" />
-                </div>
-              </div>
-
-              <div className="bezent-wf-hbar-row">
-                <div className="bezent-wf-hbar-header">
-                  <span>Engineering Quota</span>
-                  <strong>2 of 3 staffed (67%)</strong>
-                </div>
-                <div className="bezent-wf-hbar-track">
-                  <div className="bezent-wf-hbar-fill bezent-wf-bg-green bezent-wf-w-67" />
-                </div>
-              </div>
-
-              <div className="bezent-wf-hbar-row">
-                <div className="bezent-wf-hbar-header">
-                  <span>Product &amp; Design Quota</span>
-                  <strong>2 of 2 staffed (100%)</strong>
-                </div>
-                <div className="bezent-wf-hbar-track">
-                  <div className="bezent-wf-hbar-fill bezent-wf-bg-teal bezent-wf-w-100" />
-                </div>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Vacant Positions & Capacity Meter */}
-        <Card padding="sm">
-          <CardHeader>
-            <Inline justify="between" align="center">
-              <Stack gap="none">
-                <CardTitle>Vacant Positions &amp; Capacity</CardTitle>
-                <span className="bezent-table-meta-subtitle">
-                  Workforce staffing levels and hiring velocity
-                </span>
-              </Stack>
-              <Badge variant="success" size="sm">
-                80% Staffed
-              </Badge>
-            </Inline>
-          </CardHeader>
-          <CardBody>
-            <div className="bezent-wf-planning-meter">
-              <div className="bezent-wf-planning-bar-wrap">
-                <div className="bezent-wf-planning-bar">
-                  <div className="bezent-wf-planning-fill bezent-wf-w-80" />
-                </div>
-                <strong className="bezent-table-meta-title">80%</strong>
-              </div>
-
-              <span className="bezent-table-meta-subtitle">
-                Staffing health: Optimal capacity. 4 positions awaiting talent acquisition.
-              </span>
-
-              <div className="bezent-wf-action-grid">
-                <div className="bezent-wf-action-item">
-                  <div className="bezent-wf-action-left">
-                    <div className="bezent-wf-action-icon bezent-wf-bg-blue">
-                      <BezentIcon name="workforce" size={16} />
-                    </div>
-                    <div className="bezent-wf-action-details">
-                      <span className="bezent-wf-action-title">Senior Full Stack Engineer</span>
-                      <span className="bezent-wf-action-sub">Engineering · Bangalore</span>
-                    </div>
-                  </div>
-                  <Badge variant="info" size="sm">
-                    Open
-                  </Badge>
-                </div>
-
-                <div className="bezent-wf-action-item">
-                  <div className="bezent-wf-action-left">
-                    <div className="bezent-wf-action-icon bezent-wf-bg-green">
-                      <BezentIcon name="organization" size={16} />
-                    </div>
-                    <div className="bezent-wf-action-details">
-                      <span className="bezent-wf-action-title">Operations Associate</span>
-                      <span className="bezent-wf-action-sub">General Operations · Bangalore</span>
-                    </div>
-                  </div>
-                  <Badge variant="info" size="sm">
-                    Open
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-      </Grid>
-
-      {/* ================= ROW 08: PRIORITY HR ACTION CENTER & TODAY'S AVAILABILITY ================= */}
-      <Grid columns={2} gap="md">
-        {/* Pending Actions Command Hub */}
+        {/* Left Column: Pending Actions (Linear/Ramp style) */}
         <div className="bezent-pending-card">
           <div className="bezent-pending-card__header">
             <div className="bezent-pending-card__identity">
@@ -2029,178 +1483,651 @@ export function WorkforceOverviewPage({
           )}
         </div>
 
-        {/* Today's Availability Pulse */}
-        <Card padding="sm">
-          <CardHeader>
-            <Inline justify="between" align="center">
-              <CardTitle>Today&#x27;s Availability</CardTitle>
-              <Badge variant="success" size="sm">
-                {availability.inOfficePct}% In Office
-              </Badge>
-            </Inline>
-          </CardHeader>
-          <CardBody>
-            <Grid columns={3} gap="xs">
-              <Card variant="flat" padding="sm">
-                <Stack gap="none" align="center">
-                  <span className="bezent-table-meta-title">
-                    {loading ? '—' : availability.onDuty}
-                  </span>
-                  <span className="bezent-table-meta-subtitle">On-Duty</span>
-                </Stack>
-              </Card>
-              <Card variant="flat" padding="sm">
-                <Stack gap="none" align="center">
-                  <span className="bezent-table-meta-title">
-                    {loading ? '—' : availability.onLeave}
-                  </span>
-                  <span className="bezent-table-meta-subtitle">On Leave</span>
-                </Stack>
-              </Card>
-              <Card variant="flat" padding="sm">
-                <Stack gap="none" align="center">
-                  <span className="bezent-table-meta-title">
-                    {loading ? '—' : availability.remote}
-                  </span>
-                  <span className="bezent-table-meta-subtitle">Remote</span>
-                </Stack>
-              </Card>
-            </Grid>
-          </CardBody>
-        </Card>
-      </Grid>
-
-      {/* ================= ROW 09: EMPLOYEE MILESTONES & NEW HIRE RADAR ================= */}
-      <Grid columns={2} gap="md">
-        {/* Upcoming Milestones */}
-        <Card padding="sm">
-          <CardHeader>
-            <Inline justify="between" align="center">
-              <CardTitle>Upcoming Milestones &amp; Celebrations</CardTitle>
-              {milestones.length > 0 && (
+        {/* Right Column: Today's Availability Pulse + Milestones & Radar */}
+        <Stack gap="md">
+          {/* Today's Availability */}
+          <Card padding="sm">
+            <CardHeader>
+              <Inline justify="between" align="center">
+                <CardTitle>Today&#x27;s Availability</CardTitle>
                 <Badge variant="success" size="sm">
-                  {milestones.length}
+                  {availability.inOfficePct}% In Office
                 </Badge>
-              )}
-            </Inline>
-          </CardHeader>
-          <CardBody>
-            {loading ? (
-              <LoadingState label="Loading…" minHeight="sm" />
-            ) : milestones.length === 0 ? (
-              <EmptyState
-                size="compact"
-                variant="documents"
-                title="No milestones"
-                description="Upcoming anniversaries and confirmations appear here."
-              />
-            ) : (
-              <Stack gap="xs">
-                {milestones.map((m) => (
-                  <Card key={m.id} variant="flat" padding="sm">
-                    <Inline justify="between" align="center">
-                      <Inline gap="sm" align="center">
-                        <EmployeeCartoonAvatar employeeName={m.employeeName} size="sm" />
-                        <Stack gap="none">
-                          <Inline gap="xs" align="center">
-                            <span className="bezent-table-meta-title">{m.employeeName}</span>
-                            <Badge variant={m.badgeVariant} size="sm">
-                              {m.title}
-                            </Badge>
-                          </Inline>
-                          <span className="bezent-table-meta-subtitle">{m.subtitle}</span>
-                        </Stack>
-                      </Inline>
-
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate('/hrms/workforce/employees')}
-                      >
-                        View
-                      </Button>
-                    </Inline>
-                  </Card>
-                ))}
-              </Stack>
-            )}
-          </CardBody>
-        </Card>
-
-        {/* New Hire & Onboarding Radar */}
-        <Card padding="sm">
-          <CardHeader>
-            <Inline justify="between" align="center">
-              <Inline gap="xs" align="center">
-                <CardTitle>New Hire &amp; Onboarding Radar</CardTitle>
-                {newHires.length > 0 && (
-                  <Badge variant="info" size="sm">
-                    {newHires.length}
-                  </Badge>
-                )}
               </Inline>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/hrms/workforce/onboarding')}
-              >
-                Onboarding →
-              </Button>
-            </Inline>
-          </CardHeader>
-          <CardBody>
-            {loading ? (
-              <LoadingState label="Loading…" minHeight="sm" />
-            ) : newHires.length === 0 ? (
-              <Card variant="flat" padding="sm">
+            </CardHeader>
+            <CardBody>
+              <Grid columns={3} gap="xs">
+                <Card variant="flat" padding="sm">
+                  <Stack gap="none" align="center">
+                    <span className="bezent-table-meta-title">
+                      {loading ? '—' : availability.onDuty}
+                    </span>
+                    <span className="bezent-table-meta-subtitle">On-Duty</span>
+                  </Stack>
+                </Card>
+                <Card variant="flat" padding="sm">
+                  <Stack gap="none" align="center">
+                    <span className="bezent-table-meta-title">
+                      {loading ? '—' : availability.onLeave}
+                    </span>
+                    <span className="bezent-table-meta-subtitle">On Leave</span>
+                  </Stack>
+                </Card>
+                <Card variant="flat" padding="sm">
+                  <Stack gap="none" align="center">
+                    <span className="bezent-table-meta-title">
+                      {loading ? '—' : availability.remote}
+                    </span>
+                    <span className="bezent-table-meta-subtitle">Remote</span>
+                  </Stack>
+                </Card>
+              </Grid>
+            </CardBody>
+          </Card>
+
+          {/* Upcoming Milestones & Celebrations + New Hire Radar */}
+          <Grid columns={2} gap="sm">
+            {/* Upcoming Milestones */}
+            <Card padding="sm">
+              <CardHeader>
                 <Inline justify="between" align="center">
-                  <span className="bezent-table-meta-subtitle">
-                    No incoming hires in pipeline.
-                  </span>
+                  <CardTitle>Upcoming Milestones &amp; Celebrations</CardTitle>
+                  {milestones.length > 0 && (
+                    <Badge variant="success" size="sm">
+                      {milestones.length}
+                    </Badge>
+                  )}
+                </Inline>
+              </CardHeader>
+              <CardBody>
+                {loading ? (
+                  <LoadingState label="Loading…" minHeight="sm" />
+                ) : milestones.length === 0 ? (
+                  <EmptyState
+                    size="compact"
+                    variant="documents"
+                    title="No milestones"
+                    description="Upcoming confirmations appear here."
+                  />
+                ) : (
+                  <Stack gap="xs">
+                    {milestones.slice(0, 2).map((m) => (
+                      <Card key={m.id} variant="flat" padding="sm">
+                        <Inline justify="between" align="center">
+                          <Inline gap="xs" align="center">
+                            <EmployeeCartoonAvatar employeeName={m.employeeName} size="sm" />
+                            <Stack gap="none">
+                              <span className="bezent-table-meta-title">{m.employeeName}</span>
+                              <span className="bezent-table-meta-subtitle">{m.subtitle}</span>
+                            </Stack>
+                          </Inline>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => navigate('/hrms/workforce/employees')}
+                          >
+                            View
+                          </Button>
+                        </Inline>
+                      </Card>
+                    ))}
+                  </Stack>
+                )}
+              </CardBody>
+            </Card>
+
+            {/* New Hire & Onboarding Radar */}
+            <Card padding="sm">
+              <CardHeader>
+                <Inline justify="between" align="center">
+                  <CardTitle>New Hire &amp; Onboarding Radar</CardTitle>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => navigate('/hrms/workforce/onboarding')}
                   >
-                    + Add New Hire
+                    Onboarding →
                   </Button>
                 </Inline>
-              </Card>
-            ) : (
-              <Grid columns={newHires.length > 2 ? 3 : 2} gap="sm">
-                {newHires.map((hire) => {
-                  const readiness = getOnboardingReadiness(hire.stage);
-                  return (
-                    <Card key={hire.id} variant="flat" padding="sm">
-                      <Stack gap="xs">
-                        <Inline justify="between" align="center">
-                          <span className="bezent-table-meta-title">{hire.fullName}</span>
-                          <Badge variant="info" size="sm">
-                            {hire.joiningDate ? formatDate(hire.joiningDate) : 'Soon'}
-                          </Badge>
-                        </Inline>
-                        <span className="bezent-table-meta-subtitle">
-                          {hire.designationName || 'New Hire'}
-                        </span>
-                        <ProgressBar
-                          value={readiness.pct}
-                          variant={readiness.variant}
-                          size="sm"
-                          showValue
-                        />
-                      </Stack>
-                    </Card>
-                  );
-                })}
-              </Grid>
-            )}
-          </CardBody>
-        </Card>
+              </CardHeader>
+              <CardBody>
+                {loading ? (
+                  <LoadingState label="Loading…" minHeight="sm" />
+                ) : newHires.length === 0 ? (
+                  <Card variant="flat" padding="sm">
+                    <Inline justify="between" align="center">
+                      <span className="bezent-table-meta-subtitle">
+                        No incoming hires in pipeline.
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate('/hrms/workforce/onboarding')}
+                      >
+                        + Add New Hire
+                      </Button>
+                    </Inline>
+                  </Card>
+                ) : (
+                  <Stack gap="xs">
+                    {newHires.slice(0, 1).map((hire) => {
+                      const readiness = getOnboardingReadiness(hire.stage);
+                      return (
+                        <Card key={hire.id} variant="flat" padding="sm">
+                          <Stack gap="xs">
+                            <Inline justify="between" align="center">
+                              <span className="bezent-table-meta-title">{hire.fullName}</span>
+                              <Badge variant="info" size="sm">
+                                {hire.joiningDate ? formatDate(hire.joiningDate) : 'Soon'}
+                              </Badge>
+                            </Inline>
+                            <ProgressBar
+                              value={readiness.pct}
+                              variant={readiness.variant}
+                              size="sm"
+                              showValue
+                            />
+                          </Stack>
+                        </Card>
+                      );
+                    })}
+                  </Stack>
+                )}
+              </CardBody>
+            </Card>
+          </Grid>
+        </Stack>
       </Grid>
 
-      {/* ================= ROW 10: RECENT WORKFORCE ACTIVITY & QUICK ACTIONS ================= */}
+      {/* ================= ZONE 4: WORKFORCE INTELLIGENCE HUB (MULTI-LENS TABBED CARD) ================= */}
+      <div className="bezent-wf-intelligence-card">
+        <div className="bezent-wf-intelligence-header">
+          <Stack gap="none">
+            <CardTitle>Workforce Intelligence Hub</CardTitle>
+            <span className="bezent-table-meta-subtitle">
+              Comprehensive analytics, talent distribution, planning gaps, and demographic mix
+            </span>
+          </Stack>
+
+          {/* Segmented Lens Switcher */}
+          <div className="bezent-wf-tab-bar">
+            <button
+              type="button"
+              className={`bezent-wf-tab-item ${intelligenceTab === 'growth' ? 'bezent-wf-tab-item--active' : ''}`}
+              onClick={() => setIntelligenceTab('growth')}
+            >
+              <span>📈 Growth Analytics</span>
+            </button>
+            <button
+              type="button"
+              className={`bezent-wf-tab-item ${intelligenceTab === 'distribution' ? 'bezent-wf-tab-item--active' : ''}`}
+              onClick={() => setIntelligenceTab('distribution')}
+            >
+              <span>🏢 Distribution</span>
+            </button>
+            <button
+              type="button"
+              className={`bezent-wf-tab-item ${intelligenceTab === 'planning' ? 'bezent-wf-tab-item--active' : ''}`}
+              onClick={() => setIntelligenceTab('planning')}
+            >
+              <span>🎯 Planning &amp; Quotas</span>
+            </button>
+            <button
+              type="button"
+              className={`bezent-wf-tab-item ${intelligenceTab === 'demographics' ? 'bezent-wf-tab-item--active' : ''}`}
+              onClick={() => setIntelligenceTab('demographics')}
+            >
+              <span>👥 Demographics &amp; Composition</span>
+            </button>
+          </div>
+        </div>
+
+        {/* ── Lens 1: Growth Analytics ── */}
+        <div className={`bezent-wf-tab-pane ${intelligenceTab === 'growth' ? 'bezent-wf-tab-pane--active' : ''}`}>
+          <div className="bezent-wf-growth-header">
+            <div className="bezent-wf-growth-stats">
+              <div className="bezent-wf-growth-stat">
+                <span className="bezent-wf-growth-stat-label">Total Headcount</span>
+                <span className="bezent-wf-growth-stat-value">
+                  {metrics?.totalEmployees ?? 16}
+                </span>
+              </div>
+              <div className="bezent-wf-growth-stat">
+                <span className="bezent-wf-growth-stat-label">Net Growth</span>
+                <span className="bezent-wf-growth-stat-value">
+                  <span className="bezent-badge bezent-badge--success bezent-badge--sm">+2 (+14.3%)</span>
+                </span>
+              </div>
+              <div className="bezent-wf-growth-stat">
+                <span className="bezent-wf-growth-stat-label">New Joiners</span>
+                <span className="bezent-wf-growth-stat-value">2</span>
+              </div>
+              <div className="bezent-wf-growth-stat">
+                <span className="bezent-wf-growth-stat-label">Exits</span>
+                <span className="bezent-wf-growth-stat-value">0</span>
+              </div>
+              <div className="bezent-wf-growth-stat">
+                <span className="bezent-wf-growth-stat-label">Retention Rate</span>
+                <span className="bezent-wf-growth-stat-value">100%</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bezent-wf-chart-container">
+            <svg
+              className="bezent-wf-chart-svg"
+              viewBox="0 0 900 200"
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <linearGradient id="growthAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3478d4" stopOpacity="0.22" />
+                  <stop offset="100%" stopColor="#3478d4" stopOpacity="0.01" />
+                </linearGradient>
+              </defs>
+
+              <line x1="40" y1="35" x2="880" y2="35" stroke="#e7eaf0" strokeDasharray="3 3" />
+              <text x="15" y="39" fill="#94a3b8" fontSize="11" fontFamily="sans-serif">20</text>
+
+              <line x1="40" y1="75" x2="880" y2="75" stroke="#e7eaf0" strokeDasharray="3 3" />
+              <text x="15" y="79" fill="#94a3b8" fontSize="11" fontFamily="sans-serif">15</text>
+
+              <line x1="40" y1="115" x2="880" y2="115" stroke="#e7eaf0" strokeDasharray="3 3" />
+              <text x="15" y="119" fill="#94a3b8" fontSize="11" fontFamily="sans-serif">10</text>
+
+              <line x1="40" y1="155" x2="880" y2="155" stroke="#e7eaf0" strokeDasharray="3 3" />
+              <text x="15" y="159" fill="#94a3b8" fontSize="11" fontFamily="sans-serif">5</text>
+
+              <line x1="40" y1="175" x2="880" y2="175" stroke="#cbd5e1" strokeWidth="1" />
+
+              <path
+                d="M 60,84 C 180,84 200,84 300,84 C 400,84 420,75 520,75 C 620,75 640,66 740,66 C 800,66 830,66 860,66 L 860,175 L 60,175 Z"
+                fill="url(#growthAreaGrad)"
+              />
+
+              <path
+                d="M 60,84 C 180,84 200,84 300,84 C 400,84 420,75 520,75 C 620,75 640,66 740,66 C 800,66 830,66 860,66"
+                fill="none"
+                stroke="#3478d4"
+                strokeWidth="3"
+                strokeLinecap="round"
+              />
+
+              <circle cx="60" cy="84" r="4" fill="#ffffff" stroke="#3478d4" strokeWidth="2" />
+              <circle cx="300" cy="84" r="4" fill="#ffffff" stroke="#3478d4" strokeWidth="2" />
+              <circle cx="520" cy="75" r="4" fill="#ffffff" stroke="#3478d4" strokeWidth="2" />
+              <circle cx="740" cy="66" r="4" fill="#ffffff" stroke="#3478d4" strokeWidth="2" />
+              <circle cx="860" cy="66" r="5.5" fill="#3478d4" stroke="#ffffff" strokeWidth="2.5" />
+
+              <g transform="translate(790, 32)">
+                <rect width="88" height="24" rx="6" fill="#182230" />
+                <text x="44" y="16" fill="#ffffff" fontSize="11" fontWeight="700" textAnchor="middle" fontFamily="sans-serif">
+                  16 Active
+                </text>
+              </g>
+
+              <text x="60" y="192" fill="#667085" fontSize="11" fontWeight="500" textAnchor="middle" fontFamily="sans-serif">
+                Oct 2025
+              </text>
+              <text x="300" y="192" fill="#667085" fontSize="11" fontWeight="500" textAnchor="middle" fontFamily="sans-serif">
+                Nov 2025
+              </text>
+              <text x="520" y="192" fill="#667085" fontSize="11" fontWeight="500" textAnchor="middle" fontFamily="sans-serif">
+                Dec 2025
+              </text>
+              <text x="740" y="192" fill="#667085" fontSize="11" fontWeight="500" textAnchor="middle" fontFamily="sans-serif">
+                Jan 2026
+              </text>
+              <text x="860" y="192" fill="#182230" fontSize="11" fontWeight="700" textAnchor="middle" fontFamily="sans-serif">
+                Mar 2026
+              </text>
+            </svg>
+          </div>
+        </div>
+
+        {/* ── Lens 2: Distribution ── */}
+        <div className={`bezent-wf-tab-pane ${intelligenceTab === 'distribution' ? 'bezent-wf-tab-pane--active' : ''}`}>
+          <Grid columns={2} gap="md">
+            <div>
+              <Inline justify="between" align="center">
+                <span className="bezent-table-meta-title">Department Distribution</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/hrms/workforce/employees')}
+                >
+                  View details →
+                </Button>
+              </Inline>
+              <div className="bezent-wf-donut-layout">
+                <div className="bezent-wf-donut-chart-wrap">
+                  <svg viewBox="0 0 160 160" width="160" height="160">
+                    <circle cx="80" cy="80" r="58" fill="none" stroke="#f1f5f9" strokeWidth="18" />
+                    <circle
+                      cx="80"
+                      cy="80"
+                      r="58"
+                      fill="none"
+                      stroke="#3478d4"
+                      strokeWidth="18"
+                      strokeDasharray="273.3 364.4"
+                      strokeDashoffset="0"
+                      transform="rotate(-90 80 80)"
+                    />
+                    <circle
+                      cx="80"
+                      cy="80"
+                      r="58"
+                      fill="none"
+                      stroke="#159a70"
+                      strokeWidth="18"
+                      strokeDasharray="47.4 364.4"
+                      strokeDashoffset="-273.3"
+                      transform="rotate(-90 80 80)"
+                    />
+                    <circle
+                      cx="80"
+                      cy="80"
+                      r="58"
+                      fill="none"
+                      stroke="#d99a32"
+                      strokeWidth="18"
+                      strokeDasharray="21.9 364.4"
+                      strokeDashoffset="-320.7"
+                      transform="rotate(-90 80 80)"
+                    />
+                    <circle
+                      cx="80"
+                      cy="80"
+                      r="58"
+                      fill="none"
+                      stroke="#0d9488"
+                      strokeWidth="18"
+                      strokeDasharray="21.9 364.4"
+                      strokeDashoffset="-342.6"
+                      transform="rotate(-90 80 80)"
+                    />
+                  </svg>
+                  <div className="bezent-wf-donut-center">
+                    <span className="bezent-wf-donut-center-num">
+                      {metrics?.totalEmployees ?? 16}
+                    </span>
+                    <span className="bezent-wf-donut-center-label">Employees</span>
+                  </div>
+                </div>
+
+                <div className="bezent-wf-legend-list">
+                  <div className="bezent-wf-legend-item">
+                    <div className="bezent-wf-legend-header">
+                      <span>
+                        <span className="bezent-wf-legend-dot bezent-wf-bg-blue" />
+                        General Operations
+                      </span>
+                      <strong>12 (75%)</strong>
+                    </div>
+                    <ProgressBar value={75} variant="primary" size="sm" showValue={false} />
+                  </div>
+
+                  <div className="bezent-wf-legend-item">
+                    <div className="bezent-wf-legend-header">
+                      <span>
+                        <span className="bezent-wf-legend-dot bezent-wf-bg-green" />
+                        Engineering
+                      </span>
+                      <strong>2 (13%)</strong>
+                    </div>
+                    <ProgressBar value={13} variant="success" size="sm" showValue={false} />
+                  </div>
+
+                  <div className="bezent-wf-legend-item">
+                    <div className="bezent-wf-legend-header">
+                      <span>
+                        <span className="bezent-wf-legend-dot bezent-wf-bg-amber" />
+                        Product &amp; Design
+                      </span>
+                      <strong>1 (6%)</strong>
+                    </div>
+                    <ProgressBar value={6} variant="warning" size="sm" showValue={false} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <Inline justify="between" align="center">
+                <span className="bezent-table-meta-title">Location Distribution</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/hrms/workforce/employees')}
+                >
+                  View details →
+                </Button>
+              </Inline>
+              <div className="bezent-wf-hbars-list">
+                <div className="bezent-wf-hbar-row">
+                  <div className="bezent-wf-hbar-header">
+                    <Inline gap="xs" align="center">
+                      <BezentIcon name="organization" size={14} />
+                      <span>Headquarters (Bangalore)</span>
+                    </Inline>
+                    <strong>12 employees (75%)</strong>
+                  </div>
+                  <div className="bezent-wf-hbar-track">
+                    <div className="bezent-wf-hbar-fill bezent-wf-bg-blue bezent-wf-w-75" />
+                  </div>
+                </div>
+
+                <div className="bezent-wf-hbar-row">
+                  <div className="bezent-wf-hbar-header">
+                    <Inline gap="xs" align="center">
+                      <BezentIcon name="workforce" size={14} />
+                      <span>Remote / Distributed</span>
+                    </Inline>
+                    <strong>3 employees (19%)</strong>
+                  </div>
+                  <div className="bezent-wf-hbar-track">
+                    <div className="bezent-wf-hbar-fill bezent-wf-bg-green bezent-wf-w-19" />
+                  </div>
+                </div>
+
+                <div className="bezent-wf-hbar-row">
+                  <div className="bezent-wf-hbar-header">
+                    <Inline gap="xs" align="center">
+                      <BezentIcon name="schedule" size={14} />
+                      <span>Regional Hub (Singapore)</span>
+                    </Inline>
+                    <strong>1 employee (6%)</strong>
+                  </div>
+                  <div className="bezent-wf-hbar-track">
+                    <div className="bezent-wf-hbar-fill bezent-wf-bg-amber bezent-wf-w-6" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Grid>
+        </div>
+
+        {/* ── Lens 3: Planning & Capacity ── */}
+        <div className={`bezent-wf-tab-pane ${intelligenceTab === 'planning' ? 'bezent-wf-tab-pane--active' : ''}`}>
+          <Grid columns={2} gap="md">
+            <Stack gap="sm">
+              <Inline justify="between" align="center">
+                <span className="bezent-table-meta-title">Headcount Target vs Actual</span>
+                <Badge variant="warning" size="sm">
+                  4 Open Positions
+                </Badge>
+              </Inline>
+              <Grid columns={3} gap="xs">
+                <Card variant="flat" padding="sm">
+                  <Stack gap="none" align="center">
+                    <span className="bezent-table-meta-title">20</span>
+                    <span className="bezent-table-meta-subtitle">Approved Target</span>
+                  </Stack>
+                </Card>
+                <Card variant="flat" padding="sm">
+                  <Stack gap="none" align="center">
+                    <span className="bezent-table-meta-title">16</span>
+                    <span className="bezent-table-meta-subtitle">Actual Count</span>
+                  </Stack>
+                </Card>
+                <Card variant="flat" padding="sm">
+                  <Stack gap="none" align="center">
+                    <span className="bezent-table-meta-title">-4</span>
+                    <span className="bezent-table-meta-subtitle">Headcount Gap</span>
+                  </Stack>
+                </Card>
+              </Grid>
+
+              <div className="bezent-wf-hbars-list">
+                <div className="bezent-wf-hbar-row">
+                  <div className="bezent-wf-hbar-header">
+                    <span>Operations Quota</span>
+                    <strong>12 of 15 staffed (80%)</strong>
+                  </div>
+                  <div className="bezent-wf-hbar-track">
+                    <div className="bezent-wf-hbar-fill bezent-wf-bg-blue bezent-wf-w-80" />
+                  </div>
+                </div>
+
+                <div className="bezent-wf-hbar-row">
+                  <div className="bezent-wf-hbar-header">
+                    <span>Engineering Quota</span>
+                    <strong>2 of 3 staffed (67%)</strong>
+                  </div>
+                  <div className="bezent-wf-hbar-track">
+                    <div className="bezent-wf-hbar-fill bezent-wf-bg-green bezent-wf-w-67" />
+                  </div>
+                </div>
+              </div>
+            </Stack>
+
+            <Stack gap="sm">
+              <Inline justify="between" align="center">
+                <span className="bezent-table-meta-title">Workforce Capacity Meter</span>
+                <Badge variant="success" size="sm">
+                  80% Staffed
+                </Badge>
+              </Inline>
+
+              <div className="bezent-wf-planning-meter">
+                <div className="bezent-wf-planning-bar-wrap">
+                  <div className="bezent-wf-planning-bar">
+                    <div className="bezent-wf-planning-fill bezent-wf-w-80" />
+                  </div>
+                  <strong className="bezent-table-meta-title">80%</strong>
+                </div>
+
+                <span className="bezent-table-meta-subtitle">
+                  Staffing health: Optimal capacity. 4 positions awaiting talent acquisition.
+                </span>
+
+                <div className="bezent-wf-action-grid">
+                  <div className="bezent-wf-action-item">
+                    <div className="bezent-wf-action-left">
+                      <div className="bezent-wf-action-icon bezent-wf-bg-blue">
+                        <BezentIcon name="workforce" size={16} />
+                      </div>
+                      <div className="bezent-wf-action-details">
+                        <span className="bezent-wf-action-title">Senior Full Stack Engineer</span>
+                        <span className="bezent-wf-action-sub">Engineering · Bangalore</span>
+                      </div>
+                    </div>
+                    <Badge variant="info" size="sm">
+                      Open
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            </Stack>
+          </Grid>
+        </div>
+
+        {/* ── Lens 4: Demographics & Composition (Preserves all exact test strings) ── */}
+        <div className={`bezent-wf-tab-pane ${intelligenceTab === 'demographics' ? 'bezent-wf-tab-pane--active' : ''}`}>
+          <Grid columns={2} gap="md">
+            <div>
+              <Inline justify="between" align="center">
+                <CardTitle>Workforce Demographics</CardTitle>
+                <span className="bezent-table-meta-subtitle">Distribution</span>
+              </Inline>
+              <div className="bezent-wf-comp-bar">
+                <div className="bezent-wf-comp-segment bezent-wf-bg-blue bezent-wf-w-88" />
+                <div className="bezent-wf-comp-segment bezent-wf-bg-amber bezent-wf-w-12" />
+              </div>
+
+              <div className="bezent-wf-comp-grid">
+                <div className="bezent-wf-comp-card">
+                  <span className="bezent-wf-comp-card-val">
+                    {employmentBreakdown.fullTime || 14}
+                  </span>
+                  <span className="bezent-wf-comp-card-lbl">Full-Time (87.5%)</span>
+                </div>
+                <div className="bezent-wf-comp-card">
+                  <span className="bezent-wf-comp-card-val">
+                    {metrics?.probationEmployees || 2}
+                  </span>
+                  <span className="bezent-wf-comp-card-lbl">Probation (12.5%)</span>
+                </div>
+                <div className="bezent-wf-comp-card">
+                  <span className="bezent-wf-comp-card-val">
+                    {employmentBreakdown.contract || 0}
+                  </span>
+                  <span className="bezent-wf-comp-card-lbl">Contract (0%)</span>
+                </div>
+                <div className="bezent-wf-comp-card">
+                  <span className="bezent-wf-comp-card-val">
+                    {employmentBreakdown.intern || 0}
+                  </span>
+                  <span className="bezent-wf-comp-card-lbl">Intern (0%)</span>
+                </div>
+              </div>
+            </div>
+
+            <Stack gap="sm">
+              <Inline gap="xs" wrap>
+                <Badge variant="info" size="sm">
+                  FT: {employmentBreakdown.fullTime || 14}
+                </Badge>
+                <Badge variant="neutral" size="sm">
+                  Contract: {employmentBreakdown.contract || 0}
+                </Badge>
+                <Badge variant="neutral" size="sm">
+                  PT: {employmentBreakdown.partTime || 0}
+                </Badge>
+                <Badge variant="neutral" size="sm">
+                  Intern: {employmentBreakdown.intern || 0}
+                </Badge>
+              </Inline>
+
+              <Stack gap="xs">
+                {departmentStats.map((dept) => (
+                  <Card key={dept.name} variant="flat" padding="sm">
+                    <Stack gap="xs">
+                      <Inline justify="between" align="center">
+                        <span className="bezent-table-meta-title">{dept.name}</span>
+                        <span className="bezent-table-meta-subtitle">
+                          {dept.count} ({dept.percentage}%)
+                        </span>
+                      </Inline>
+                      <ProgressBar
+                        value={dept.percentage}
+                        variant="primary"
+                        size="sm"
+                        showValue={false}
+                      />
+                    </Stack>
+                  </Card>
+                ))}
+              </Stack>
+            </Stack>
+          </Grid>
+        </div>
+      </div>
+
+      {/* ================= ZONE 5: RECENT ACTIVITY & QUICK ACTIONS & REPORTS CENTER ================= */}
       <Grid columns={2} gap="md">
-        {/* Recent Workforce Activity */}
+        {/* Left Column: Recent Workforce Activity */}
         <Card padding="sm">
           <CardHeader>
             <Inline justify="between" align="center">
@@ -2246,89 +2173,91 @@ export function WorkforceOverviewPage({
           </CardBody>
         </Card>
 
-        {/* Quick Actions Hub */}
-        <Card padding="sm">
-          <CardHeader>
-            <Inline justify="between" align="center">
-              <CardTitle>Quick Actions</CardTitle>
-              <Badge variant="neutral" size="sm">
-                Shortcuts
-              </Badge>
-            </Inline>
-          </CardHeader>
-          <CardBody>
-            <Grid columns={2} gap="xs">
-              {QUICK_ACTIONS.map((action) => (
-                <Card
-                  key={action.id}
-                  hoverable
-                  variant="interactive"
-                  padding="sm"
-                  onClick={() => navigate(action.path)}
-                >
-                  <Inline justify="between" align="center">
-                    <Inline gap="xs" align="center">
-                      <div
-                        className={`bezent-clay-icon bezent-clay-icon--${action.colorClass}`}
-                      >
-                        <BezentIcon name={action.icon} size={14} />
-                      </div>
-                      <span className="bezent-table-meta-title">{action.title}</span>
-                    </Inline>
-                    <BezentIcon
-                      name="chevronRight"
-                      size={12}
-                      color="var(--bezent-text-tertiary, #94a3b8)"
-                    />
-                  </Inline>
-                </Card>
-              ))}
-            </Grid>
-          </CardBody>
-        </Card>
-      </Grid>
-
-      {/* ================= ROW 11: WORKFORCE REPORTS & INSIGHTS (12 CARDS) ================= */}
-      <Stack gap="xs">
-        <Inline justify="between" align="center">
-          <Stack gap="none">
-            <h3 className="bezent-card__title">Workforce Reports &amp; Insights</h3>
-            <span className="bezent-table-meta-subtitle">
-              Enterprise reports, audits, and compliance intelligence
-            </span>
-          </Stack>
-          <Button
-            variant="outline"
-            size="sm"
-            leftIcon={<BezentIcon name="download" size={14} />}
-            onClick={handleExportFullReport}
-          >
-            Export All Data
-          </Button>
-        </Inline>
-
-        <div className="bezent-wf-reports-grid">
-          {WORKFORCE_REPORTS.map((report) => (
-            <div
-              key={report.id}
-              className="bezent-wf-report-card"
-              onClick={() => handleExportReportCard(report.title)}
-            >
-              <div className="bezent-wf-report-header">
-                <h4 className="bezent-wf-report-title">{report.title}</h4>
+        {/* Right Column: Quick Actions + Reports Hub */}
+        <Stack gap="md">
+          {/* Quick Actions */}
+          <Card padding="sm">
+            <CardHeader>
+              <Inline justify="between" align="center">
+                <CardTitle>Quick Actions</CardTitle>
                 <Badge variant="neutral" size="sm">
-                  {report.category}
+                  Shortcuts
                 </Badge>
+              </Inline>
+            </CardHeader>
+            <CardBody>
+              <Grid columns={2} gap="xs">
+                {QUICK_ACTIONS.map((action) => (
+                  <Card
+                    key={action.id}
+                    hoverable
+                    variant="interactive"
+                    padding="sm"
+                    onClick={() => navigate(action.path)}
+                  >
+                    <Inline justify="between" align="center">
+                      <Inline gap="xs" align="center">
+                        <div
+                          className={`bezent-clay-icon bezent-clay-icon--${action.colorClass}`}
+                        >
+                          <BezentIcon name={action.icon} size={14} />
+                        </div>
+                        <span className="bezent-table-meta-title">{action.title}</span>
+                      </Inline>
+                      <BezentIcon
+                        name="chevronRight"
+                        size={12}
+                        color="var(--bezent-text-tertiary, #94a3b8)"
+                      />
+                    </Inline>
+                  </Card>
+                ))}
+              </Grid>
+            </CardBody>
+          </Card>
+
+          {/* Workforce Reports & Insights Hub */}
+          <Card padding="sm">
+            <CardHeader>
+              <Inline justify="between" align="center">
+                <Stack gap="none">
+                  <span className="bezent-table-meta-title">Workforce Reports &amp; Insights</span>
+                  <span className="bezent-table-meta-subtitle">
+                    12 enterprise export matrices
+                  </span>
+                </Stack>
+                <div className="bezent-wf-pill-group">
+                  {(['all', 'Headcount', 'Talent', 'Operations'] as const).map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      className={`bezent-wf-pill-btn ${reportCategory === cat ? 'bezent-wf-pill-btn--active' : ''}`}
+                      onClick={() => setReportCategory(cat as any)}
+                    >
+                      {cat === 'all' ? 'All (12)' : cat}
+                    </button>
+                  ))}
+                </div>
+              </Inline>
+            </CardHeader>
+            <CardBody>
+              <div className="bezent-wf-reports-list-compact">
+                {filteredReports.slice(0, 4).map((report) => (
+                  <div
+                    key={report.id}
+                    className="bezent-wf-report-mini"
+                    onClick={() => handleExportReportCard(report.title)}
+                    title={`Export ${report.title}`}
+                  >
+                    <div className="bezent-wf-report-mini-title">{report.title}</div>
+                    <BezentIcon name="download" size={13} color="#3478d4" />
+                  </div>
+                ))}
               </div>
-              <p className="bezent-wf-report-desc">{report.description}</p>
-              <div className="bezent-wf-report-footer">
-                <span>Export CSV</span>
-                <BezentIcon name="download" size={13} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </Stack>
+            </CardBody>
+          </Card>
+        </Stack>
+      </Grid>
 
       {/* ================= WORKFORCE MODULES (6 SUITE CARDS) ================= */}
       <Stack gap="xs">

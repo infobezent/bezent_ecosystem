@@ -4470,6 +4470,345 @@
    Full content, analytics, distribution, lifecycle, planning, actions & reports
    ========================================================================== */
 
+/* ── Refined Segmented Filter Pill Toolbar ── */
+.bezent-wf-pill-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 8px 14px;
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
+}
+
+[data-theme='dark'] .bezent-wf-pill-toolbar {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-pill-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.bezent-wf-timeframe-switch {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  gap: 2px;
+}
+
+[data-theme='dark'] .bezent-wf-timeframe-switch {
+  background: #1e293b;
+}
+
+.bezent-wf-pill-btn {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #667085;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bezent-wf-pill-btn:hover {
+  color: #182230;
+}
+
+.bezent-wf-pill-btn--active {
+  background: #ffffff;
+  color: #182230;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+[data-theme='dark'] .bezent-wf-pill-btn {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-wf-pill-btn--active {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.bezent-wf-pill-select {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 7px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  font-size: 11.5px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bezent-wf-pill-select:hover {
+  border-color: #cbd5e1;
+  background: #ffffff;
+}
+
+[data-theme='dark'] .bezent-wf-pill-select {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+/* ── Connected 8-Stage Lifecycle Ribbon (Slim & Modern) ── */
+.bezent-wf-lifecycle-ribbon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
+  position: relative;
+  overflow-x: auto;
+  gap: 12px;
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-ribbon {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-lifecycle-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.bezent-wf-lifecycle-step:hover {
+  background: #f8fafc;
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-step:hover {
+  background: #1e293b;
+}
+
+.bezent-wf-lifecycle-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: #182230;
+  background: #f1f5f9;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-num {
+  background: #1e293b;
+  color: #ffffff;
+}
+
+.bezent-wf-lifecycle-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.bezent-wf-lifecycle-name {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #182230;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-name {
+  color: #ffffff;
+}
+
+.bezent-wf-lifecycle-tag {
+  font-size: 10px;
+  font-weight: 600;
+  color: #667085;
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-tag {
+  color: #94a3b8;
+}
+
+.bezent-wf-lifecycle-arrow {
+  color: #cbd5e1;
+  font-size: 13px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+/* ── Unified Workforce Intelligence Hub (Multi-Lens Tabbed Card) ── */
+.bezent-wf-intelligence-card {
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
+}
+
+[data-theme='dark'] .bezent-wf-intelligence-card {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-intelligence-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.bezent-wf-tab-bar {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px;
+  background: #f1f5f9;
+  border-radius: 9px;
+  gap: 3px;
+}
+
+[data-theme='dark'] .bezent-wf-tab-bar {
+  background: #1e293b;
+}
+
+.bezent-wf-tab-item {
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #667085;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bezent-wf-tab-item:hover {
+  color: #182230;
+}
+
+.bezent-wf-tab-item--active {
+  background: #ffffff;
+  color: #182230;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+[data-theme='dark'] .bezent-wf-tab-item {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-wf-tab-item--active {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.bezent-wf-tab-pane {
+  display: none;
+}
+
+.bezent-wf-tab-pane--active {
+  display: block;
+}
+
+
+/* ── Reports & Insights Hub ── */
+.bezent-wf-reports-hub {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bezent-wf-reports-filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bezent-wf-reports-list-compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+.bezent-wf-report-mini {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 1px solid #e7eaf0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bezent-wf-report-mini:hover {
+  background: #ffffff;
+  border-color: #3478d4;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(52, 120, 212, 0.08);
+}
+
+[data-theme='dark'] .bezent-wf-report-mini {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .bezent-wf-report-mini:hover {
+  border-color: #3478d4;
+  background: #0f172a;
+}
+
+.bezent-wf-report-mini-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #182230;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 190px;
+}
+
+[data-theme='dark'] .bezent-wf-report-mini-title {
+  color: #ffffff;
+}
+
 /* ── Filter Bar & Controls ── */
 .bezent-wf-filter-bar {
   display: flex;
