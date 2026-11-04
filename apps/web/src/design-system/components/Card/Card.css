@@ -3355,7 +3355,7 @@
 
 /* ==========================================================================
    Wave Sparkline KPI Metric Card (Generic Design System Primitive)
-   Clean, squircle cards with soft gradient wash, vector wave & trend chip
+   Sharp, crisp executive cards with clean gradient wash, vector wave & employee icon node
    ========================================================================== */
 
 .bezent-wave-kpi-card {
@@ -3363,52 +3363,52 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  border-radius: 18px;
-  padding: 14px 16px 12px 16px;
+  border-radius: 8px;
+  padding: 13px 15px 11px 15px;
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.03);
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03);
   box-sizing: border-box;
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
   min-width: 0;
   cursor: pointer;
 }
 
 .bezent-wave-kpi-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04);
 }
 
-/* Color Themes: Soft Translucent Gradient Wash */
+/* Color Themes: Crisp Tinted Sheen */
 .bezent-wave-kpi-card--blue {
-  background: linear-gradient(135deg, #f0f7ff 0%, #e8f2fe 100%);
-  border-color: #d0e2fb;
+  background: linear-gradient(180deg, #f8fbff 0%, #edf5fe 100%);
+  border-color: #bfdbfe;
 }
 
 .bezent-wave-kpi-card--green {
-  background: linear-gradient(135deg, #f0fbf5 0%, #e6f7ee 100%);
-  border-color: #c6ebd7;
+  background: linear-gradient(180deg, #f8fdfa 0%, #edfcf3 100%);
+  border-color: #bbf7d0;
 }
 
 .bezent-wave-kpi-card--purple {
-  background: linear-gradient(135deg, #f8f2ff 0%, #f0e6fe 100%);
-  border-color: #e2d2fc;
+  background: linear-gradient(180deg, #faf7ff 0%, #f4ecfe 100%);
+  border-color: #e9d5ff;
 }
 
 .bezent-wave-kpi-card--amber {
-  background: linear-gradient(135deg, #fff7ed 0%, #fef0dd 100%);
-  border-color: #fbdab5;
+  background: linear-gradient(180deg, #fffcf7 0%, #fef5ea 100%);
+  border-color: #fed7aa;
 }
 
 .bezent-wave-kpi-card--indigo {
-  background: linear-gradient(135deg, #f0f6ff 0%, #e5f0fe 100%);
-  border-color: #cce0fc;
+  background: linear-gradient(180deg, #f8faff 0%, #edf3fe 100%);
+  border-color: #c7d2fe;
 }
 
 .bezent-wave-kpi-card--coral {
-  background: linear-gradient(135deg, #fff1f2 0%, #fee4e7 100%);
-  border-color: #fbcad0;
+  background: linear-gradient(180deg, #fff8f8 0%, #fef0f2 100%);
+  border-color: #fecdd3;
 }
 
 /* Dark mode theme overrides */
@@ -3419,33 +3419,33 @@
 }
 
 [data-theme='dark'] .bezent-wave-kpi-card--blue {
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.12) 0%, rgba(37, 99, 235, 0.04) 100%), #0f172a;
-  border-color: rgba(59, 130, 246, 0.3);
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.12) 0%, rgba(37, 99, 235, 0.04) 100%), #0f172a;
+  border-color: rgba(59, 130, 246, 0.4);
 }
 
 [data-theme='dark'] .bezent-wave-kpi-card--green {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.04) 100%), #0f172a;
-  border-color: rgba(16, 185, 129, 0.3);
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.04) 100%), #0f172a;
+  border-color: rgba(16, 185, 129, 0.4);
 }
 
 [data-theme='dark'] .bezent-wave-kpi-card--purple {
-  background: linear-gradient(135deg, rgba(147, 51, 234, 0.12) 0%, rgba(147, 51, 234, 0.04) 100%), #0f172a;
-  border-color: rgba(147, 51, 234, 0.3);
+  background: linear-gradient(180deg, rgba(147, 51, 234, 0.12) 0%, rgba(147, 51, 234, 0.04) 100%), #0f172a;
+  border-color: rgba(147, 51, 234, 0.4);
 }
 
 [data-theme='dark'] .bezent-wave-kpi-card--amber {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(245, 158, 11, 0.04) 100%), #0f172a;
-  border-color: rgba(245, 158, 11, 0.3);
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.12) 0%, rgba(245, 158, 11, 0.04) 100%), #0f172a;
+  border-color: rgba(245, 158, 11, 0.4);
 }
 
 [data-theme='dark'] .bezent-wave-kpi-card--indigo {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(99, 102, 241, 0.04) 100%), #0f172a;
-  border-color: rgba(99, 102, 241, 0.3);
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.12) 0%, rgba(99, 102, 241, 0.04) 100%), #0f172a;
+  border-color: rgba(99, 102, 241, 0.4);
 }
 
 [data-theme='dark'] .bezent-wave-kpi-card--coral {
-  background: linear-gradient(135deg, rgba(244, 63, 94, 0.12) 0%, rgba(244, 63, 94, 0.04) 100%), #0f172a;
-  border-color: rgba(244, 63, 94, 0.3);
+  background: linear-gradient(180deg, rgba(244, 63, 94, 0.12) 0%, rgba(244, 63, 94, 0.04) 100%), #0f172a;
+  border-color: rgba(244, 63, 94, 0.4);
 }
 
 /* Header Row */
@@ -3454,13 +3454,13 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .bezent-wave-kpi-card__identity {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   min-width: 0;
 }
 
@@ -3468,47 +3468,47 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
   flex-shrink: 0;
 }
 
 .bezent-wave-kpi-card--blue .bezent-wave-kpi-card__icon-badge {
-  background: #bfdbfe;
+  background: #dbeafe;
   color: #1d4ed8;
 }
 
 .bezent-wave-kpi-card--green .bezent-wave-kpi-card__icon-badge {
-  background: #bbf7d0;
+  background: #dcfce7;
   color: #15803d;
 }
 
 .bezent-wave-kpi-card--purple .bezent-wave-kpi-card__icon-badge {
-  background: #e9d5ff;
+  background: #f3e8ff;
   color: #7e22ce;
 }
 
 .bezent-wave-kpi-card--amber .bezent-wave-kpi-card__icon-badge {
-  background: #fed7aa;
+  background: #ffedd5;
   color: #c2410c;
 }
 
 .bezent-wave-kpi-card--indigo .bezent-wave-kpi-card__icon-badge {
-  background: #c7d2fe;
+  background: #e0e7ff;
   color: #4338ca;
 }
 
 .bezent-wave-kpi-card--coral .bezent-wave-kpi-card__icon-badge {
-  background: #fecdd3;
+  background: #ffe4e6;
   color: #be123c;
 }
 
 .bezent-wave-kpi-card__title {
   font-size: 13px;
   font-weight: 700;
-  color: #1e293b;
-  letter-spacing: -0.01em;
+  color: #0f172a;
+  letter-spacing: -0.015em;
   margin: 0;
   white-space: nowrap;
 }
@@ -3521,20 +3521,20 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(15, 23, 42, 0.08);
   color: #64748b;
   font-size: 11px;
   flex-shrink: 0;
-  transition: transform 0.16s ease, background-color 0.16s ease;
+  transition: transform 0.16s ease, background-color 0.16s ease, color 0.16s ease;
 }
 
 [data-theme='dark'] .bezent-wave-kpi-card__arrow {
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.12);
   color: #94a3b8;
 }
 
@@ -3546,7 +3546,7 @@
 
 /* Metric Body */
 .bezent-wave-kpi-card__body {
-  margin: 2px 0 6px 0;
+  margin: 2px 0 4px 0;
 }
 
 .bezent-wave-kpi-card__value {
@@ -3554,7 +3554,7 @@
   font-weight: 800;
   line-height: 1.1;
   color: #0f172a;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   margin: 0;
 }
 
@@ -3563,9 +3563,9 @@
 }
 
 .bezent-wave-kpi-card__subtitle {
-  font-size: 11.5px;
+  font-size: 11px;
   color: #64748b;
-  font-weight: 500;
+  font-weight: 600;
   margin: 2px 0 0 0;
   white-space: nowrap;
   overflow: hidden;
@@ -3579,10 +3579,10 @@
 /* Sparkline Wave Container */
 .bezent-wave-kpi-card__sparkline {
   width: 100%;
-  height: 32px;
+  height: 34px;
   display: block;
   overflow: visible;
-  margin: 2px 0 6px 0;
+  margin: 3px 0 5px 0;
 }
 
 /* Trend Indicator Chip */
@@ -3600,14 +3600,14 @@
   color: #15803d;
   background: rgba(22, 163, 74, 0.1);
   padding: 1.5px 6px;
-  border-radius: 5px;
+  border-radius: 4px;
 }
 
 .bezent-wave-kpi-card__trend--neutral {
   color: #64748b;
   background: rgba(100, 116, 139, 0.1);
   padding: 1.5px 6px;
-  border-radius: 5px;
+  border-radius: 4px;
 }
 
 .bezent-wave-kpi-card__trend-label {
@@ -3615,4 +3615,13 @@
   color: #94a3b8;
   font-weight: 500;
   margin-left: 3px;
+}
+
+/* Sparkline Wave Avatar Node Disc */
+.bezent-wave-kpi-card__avatar-disc {
+  fill: #ffffff;
+}
+
+[data-theme='dark'] .bezent-wave-kpi-card__avatar-disc {
+  fill: #1e293b;
 }
