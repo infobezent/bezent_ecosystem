@@ -792,278 +792,177 @@
   transform: none;
 }
 
-/* ── Fixed & Stable Card Variants (Identical on Default, Hover, and Active) ── */
+/* ── The Apple & Stripe Executive (Pure White + Solid Micro-Jewel Badges) ── */
 .bezent-trend-kpi-card--blue,
 .bezent-trend-kpi-card--blue:hover,
-.bezent-trend-kpi-card--blue.is-active {
-  background: #f0f7ff;
-  border-color: #bfdbfe;
-  box-shadow: none;
-  transform: none;
-}
-
+.bezent-trend-kpi-card--blue.is-active,
 .bezent-trend-kpi-card--green,
 .bezent-trend-kpi-card--green:hover,
-.bezent-trend-kpi-card--green.is-active {
-  background: #f0fdf4;
-  border-color: #bbf7d0;
-  box-shadow: none;
-  transform: none;
-}
-
+.bezent-trend-kpi-card--green.is-active,
 .bezent-trend-kpi-card--amber,
 .bezent-trend-kpi-card--amber:hover,
-.bezent-trend-kpi-card--amber.is-active {
-  background: #fef9c3;
-  border-color: #fde68a;
-  box-shadow: none;
-  transform: none;
-}
-
+.bezent-trend-kpi-card--amber.is-active,
 .bezent-trend-kpi-card--coral,
 .bezent-trend-kpi-card--coral:hover,
 .bezent-trend-kpi-card--coral.is-active {
-  background: #ffe4e6;
-  border-color: #fecdd3;
+  background: #ffffff;
+  border: 1px solid var(--border-default, #e2e8f0);
   box-shadow: none;
   transform: none;
 }
 
-/* Dark Mode Muted Deep Pastel Overrides (Stable on Default, Hover, and Active) */
+/* Dark Mode Pure Dark Card Surfaces */
 [data-theme='dark'] .bezent-trend-kpi-card--blue,
 [data-theme='dark'] .bezent-trend-kpi-card--blue:hover,
-[data-theme='dark'] .bezent-trend-kpi-card--blue.is-active {
-  background: #0d1b2a;
-  border-color: #1e3a8a;
-  box-shadow: none;
-  transform: none;
-}
-
+[data-theme='dark'] .bezent-trend-kpi-card--blue.is-active,
 [data-theme='dark'] .bezent-trend-kpi-card--green,
 [data-theme='dark'] .bezent-trend-kpi-card--green:hover,
-[data-theme='dark'] .bezent-trend-kpi-card--green.is-active {
-  background: #092318;
-  border-color: #065f46;
-  box-shadow: none;
-  transform: none;
-}
-
+[data-theme='dark'] .bezent-trend-kpi-card--green.is-active,
 [data-theme='dark'] .bezent-trend-kpi-card--amber,
 [data-theme='dark'] .bezent-trend-kpi-card--amber:hover,
-[data-theme='dark'] .bezent-trend-kpi-card--amber.is-active {
-  background: #251707;
-  border-color: #78350f;
-  box-shadow: none;
-  transform: none;
-}
-
+[data-theme='dark'] .bezent-trend-kpi-card--amber.is-active,
 [data-theme='dark'] .bezent-trend-kpi-card--coral,
 [data-theme='dark'] .bezent-trend-kpi-card--coral:hover,
 [data-theme='dark'] .bezent-trend-kpi-card--coral.is-active {
-  background: #260c14;
-  border-color: #881337;
+  background: #0f172a;
+  border-color: #1e293b;
   box-shadow: none;
   transform: none;
 }
 
-[data-theme='dark'] .bezent-trend-kpi-card--blue:hover,
-[data-theme='dark'] .bezent-trend-kpi-card--green:hover,
-[data-theme='dark'] .bezent-trend-kpi-card--amber:hover,
-[data-theme='dark'] .bezent-trend-kpi-card--coral:hover {
-  transform: translateY(-2px);
-  box-shadow: none;
-}
-
-[data-theme='dark'] .bezent-trend-kpi-card--blue.is-active,
-[data-theme='dark'] .bezent-trend-kpi-card--green.is-active,
-[data-theme='dark'] .bezent-trend-kpi-card--amber.is-active,
-[data-theme='dark'] .bezent-trend-kpi-card--coral.is-active {
-  box-shadow: none;
-}
-
-/* Titles: Crisp Semantic Deep Tones (Clear, High-Contrast) */
-.bezent-trend-kpi-card--blue .bezent-trend-kpi-card__title {
-  color: #1e40af;
-  font-weight: 600;
-}
-
-.bezent-trend-kpi-card--green .bezent-trend-kpi-card__title {
-  color: #166534;
-  font-weight: 600;
-}
-
-.bezent-trend-kpi-card--amber .bezent-trend-kpi-card__title {
-  color: #92400e;
-  font-weight: 600;
-}
-
-.bezent-trend-kpi-card--coral .bezent-trend-kpi-card__title {
-  color: #9f1239;
-  font-weight: 600;
-}
-
-[data-theme='dark'] .bezent-trend-kpi-card--blue .bezent-trend-kpi-card__title {
-  color: #93c5fd;
-}
-
-[data-theme='dark'] .bezent-trend-kpi-card--green .bezent-trend-kpi-card__title {
-  color: #86efac;
-}
-
-[data-theme='dark'] .bezent-trend-kpi-card--amber .bezent-trend-kpi-card__title {
-  color: #fcd34d;
-}
-
-[data-theme='dark'] .bezent-trend-kpi-card--coral .bezent-trend-kpi-card__title {
-  color: #fda4af;
-}
-
-/* Metric Value: Crisp Dark Slate 900 in Light Mode, Slate 50 in Dark Mode */
-.bezent-trend-kpi-card--blue .bezent-trend-kpi-card__value,
-.bezent-trend-kpi-card--green .bezent-trend-kpi-card__value,
-.bezent-trend-kpi-card--amber .bezent-trend-kpi-card__value,
-.bezent-trend-kpi-card--coral .bezent-trend-kpi-card__value {
-  color: #0f172a;
+/* Titles: Uppercase Micro-Label (Stripe / Apple Style) */
+.bezent-trend-kpi-card__title {
+  font-size: 11.5px;
   font-weight: 700;
-  text-shadow: none;
+  color: var(--text-secondary, #64748b);
+  line-height: 1.3;
+  margin: 0;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
-[data-theme='dark'] .bezent-trend-kpi-card--blue .bezent-trend-kpi-card__value,
-[data-theme='dark'] .bezent-trend-kpi-card--green .bezent-trend-kpi-card__value,
-[data-theme='dark'] .bezent-trend-kpi-card--amber .bezent-trend-kpi-card__value,
-[data-theme='dark'] .bezent-trend-kpi-card--coral .bezent-trend-kpi-card__value {
-  color: #f8fafc;
-}
-
-/* Captions & Subtitles: Slate 600 in Light Mode, Slate 400 in Dark */
-.bezent-trend-kpi-card--blue .bezent-trend-kpi-card__caption,
-.bezent-trend-kpi-card--green .bezent-trend-kpi-card__caption,
-.bezent-trend-kpi-card--amber .bezent-trend-kpi-card__caption,
-.bezent-trend-kpi-card--coral .bezent-trend-kpi-card__caption {
-  color: #475569;
-  font-weight: 500;
-}
-
-[data-theme='dark'] .bezent-trend-kpi-card--blue .bezent-trend-kpi-card__caption,
-[data-theme='dark'] .bezent-trend-kpi-card--green .bezent-trend-kpi-card__caption,
-[data-theme='dark'] .bezent-trend-kpi-card--amber .bezent-trend-kpi-card__caption,
-[data-theme='dark'] .bezent-trend-kpi-card--coral .bezent-trend-kpi-card__caption {
+[data-theme='dark'] .bezent-trend-kpi-card__title {
   color: #94a3b8;
 }
 
+/* Metric Value: Bold Charcoal / Dark Slate (30px) */
+.bezent-trend-kpi-card__value {
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text-primary, #0f172a);
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__value {
+  color: #f8fafc;
+}
+
+/* Captions & Subtitles */
+.bezent-trend-kpi-card__caption {
+  font-size: 11.5px;
+  color: var(--text-tertiary, #94a3b8);
+  line-height: 1.35;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__caption {
+  color: #64748b;
+}
+
 /* Trend Indicators (Up, Down, Neutral) */
-.bezent-trend-kpi-card--blue .bezent-trend-kpi-card__trend--neutral,
-.bezent-trend-kpi-card--green .bezent-trend-kpi-card__trend--neutral,
-.bezent-trend-kpi-card--amber .bezent-trend-kpi-card__trend--neutral,
-.bezent-trend-kpi-card--coral .bezent-trend-kpi-card__trend--neutral {
-  color: #475569;
+.bezent-trend-kpi-card__trend--neutral {
+  color: #64748b;
   font-weight: 500;
 }
 
-.bezent-trend-kpi-card--blue .bezent-trend-kpi-card__trend--up,
-.bezent-trend-kpi-card--green .bezent-trend-kpi-card__trend--up,
-.bezent-trend-kpi-card--amber .bezent-trend-kpi-card__trend--up,
-.bezent-trend-kpi-card--coral .bezent-trend-kpi-card__trend--up {
+.bezent-trend-kpi-card__trend--up {
   color: #15803d;
   font-weight: 600;
 }
 
-.bezent-trend-kpi-card--blue .bezent-trend-kpi-card__trend--down,
-.bezent-trend-kpi-card--green .bezent-trend-kpi-card__trend--down,
-.bezent-trend-kpi-card--amber .bezent-trend-kpi-card__trend--down,
-.bezent-trend-kpi-card--coral .bezent-trend-kpi-card__trend--down {
+.bezent-trend-kpi-card__trend--down {
   color: #b91c1c;
   font-weight: 600;
 }
 
-/* Semantic Tinted Icon Badges inside Pastel Cards */
+/* Solid Micro-Jewel Icon Badges (Matching Concept 1 Mockup) */
+.bezent-trend-kpi-card__icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  flex-shrink: 0;
+}
+
 .bezent-trend-kpi-card--blue .bezent-trend-kpi-card__icon-badge {
-  background: #dbeafe !important;
-  color: #1d4ed8 !important;
-  border: 1px solid rgba(37, 99, 235, 0.22) !important;
-  border-radius: 8px;
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border: none !important;
 }
 
 .bezent-trend-kpi-card--green .bezent-trend-kpi-card__icon-badge {
-  background: #dcfce7 !important;
-  color: #15803d !important;
-  border: 1px solid rgba(5, 150, 105, 0.22) !important;
-  border-radius: 8px;
+  background: #059669 !important;
+  color: #ffffff !important;
+  border: none !important;
 }
 
 .bezent-trend-kpi-card--amber .bezent-trend-kpi-card__icon-badge {
-  background: #fef3c7 !important;
-  color: #b45309 !important;
-  border: 1px solid rgba(217, 119, 6, 0.22) !important;
-  border-radius: 8px;
+  background: #d97706 !important;
+  color: #ffffff !important;
+  border: none !important;
 }
 
 .bezent-trend-kpi-card--coral .bezent-trend-kpi-card__icon-badge {
-  background: #ffe4e6 !important;
-  color: #be123c !important;
-  border: 1px solid rgba(225, 29, 72, 0.22) !important;
-  border-radius: 8px;
+  background: #e11d48 !important;
+  color: #ffffff !important;
+  border: none !important;
 }
 
 [data-theme='dark'] .bezent-trend-kpi-card--blue .bezent-trend-kpi-card__icon-badge {
-  background: rgba(37, 99, 235, 0.28) !important;
-  color: #93c5fd !important;
-  border-color: rgba(147, 197, 253, 0.3) !important;
+  background: #3b82f6 !important;
+  color: #ffffff !important;
 }
 
 [data-theme='dark'] .bezent-trend-kpi-card--green .bezent-trend-kpi-card__icon-badge {
-  background: rgba(5, 150, 105, 0.28) !important;
-  color: #86efac !important;
-  border-color: rgba(134, 239, 172, 0.3) !important;
+  background: #10b981 !important;
+  color: #ffffff !important;
 }
 
 [data-theme='dark'] .bezent-trend-kpi-card--amber .bezent-trend-kpi-card__icon-badge {
-  background: rgba(217, 119, 6, 0.28) !important;
-  color: #fcd34d !important;
-  border-color: rgba(252, 211, 77, 0.3) !important;
+  background: #f59e0b !important;
+  color: #ffffff !important;
 }
 
 [data-theme='dark'] .bezent-trend-kpi-card--coral .bezent-trend-kpi-card__icon-badge {
-  background: rgba(225, 29, 72, 0.28) !important;
-  color: #fda4af !important;
-  border-color: rgba(253, 164, 175, 0.3) !important;
+  background: #f43f5e !important;
+  color: #ffffff !important;
 }
 
-/* Info Tooltip Buttons */
-.bezent-trend-kpi-card--blue .bezent-trend-kpi-card__info-btn {
-  color: #3b82f6;
+/* Info Tooltip Button (Subtle Slate Icon) */
+.bezent-trend-kpi-card__info-btn {
+  color: #cbd5e1;
 }
 
-.bezent-trend-kpi-card--green .bezent-trend-kpi-card__info-btn {
-  color: #10b981;
+.bezent-trend-kpi-card__info-btn:hover {
+  color: #64748b;
+  background-color: #f1f5f9;
 }
 
-.bezent-trend-kpi-card--amber .bezent-trend-kpi-card__info-btn {
-  color: #d97706;
+[data-theme='dark'] .bezent-trend-kpi-card__info-btn {
+  color: #475569;
 }
 
-.bezent-trend-kpi-card--coral .bezent-trend-kpi-card__info-btn {
-  color: #e11d48;
-}
-
-.bezent-trend-kpi-card--blue .bezent-trend-kpi-card__info-btn:hover {
-  color: #1d4ed8;
-  background-color: #dbeafe;
-}
-
-.bezent-trend-kpi-card--green .bezent-trend-kpi-card__info-btn:hover {
-  color: #047857;
-  background-color: #dcfce7;
-}
-
-.bezent-trend-kpi-card--amber .bezent-trend-kpi-card__info-btn:hover {
-  color: #92400e;
-  background-color: #fef3c7;
-}
-
-.bezent-trend-kpi-card--coral .bezent-trend-kpi-card__info-btn:hover {
-  color: #9f1239;
-  background-color: #ffe4e6;
+[data-theme='dark'] .bezent-trend-kpi-card__info-btn:hover {
+  color: #94a3b8;
+  background-color: #1e293b;
 }
 
 /* Clean High-Contrast Avatar Nodes in Active Green Card */

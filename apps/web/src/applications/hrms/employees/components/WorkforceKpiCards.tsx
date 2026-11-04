@@ -911,38 +911,28 @@ function MiniChart({ data, accent = 'blue', type, chartId }: MiniChartProps) {
     {
       primary: string;
       halo: string;
-      disc: string;
-      icon: string;
       fillOpacity: number;
     }
   > = {
     blue: {
       primary: '#2563eb',
-      halo: 'rgba(37, 99, 235, 0.16)',
-      disc: '#2563eb',
-      icon: '#ffffff',
-      fillOpacity: 0.2,
+      halo: 'rgba(37, 99, 235, 0.15)',
+      fillOpacity: 0.16,
     },
     green: {
       primary: '#059669',
-      halo: 'rgba(5, 150, 105, 0.16)',
-      disc: '#059669',
-      icon: '#ffffff',
-      fillOpacity: 0.2,
+      halo: 'rgba(5, 150, 105, 0.15)',
+      fillOpacity: 0.16,
     },
     amber: {
       primary: '#d97706',
-      halo: 'rgba(217, 119, 6, 0.16)',
-      disc: '#d97706',
-      icon: '#ffffff',
-      fillOpacity: 0.22,
+      halo: 'rgba(217, 119, 6, 0.15)',
+      fillOpacity: 0.18,
     },
     coral: {
       primary: '#e11d48',
-      halo: 'rgba(225, 29, 72, 0.16)',
-      disc: '#e11d48',
-      icon: '#ffffff',
-      fillOpacity: 0.16,
+      halo: 'rgba(225, 29, 72, 0.15)',
+      fillOpacity: 0.14,
     },
   };
 
@@ -950,27 +940,14 @@ function MiniChart({ data, accent = 'blue', type, chartId }: MiniChartProps) {
 
   // 1. Stepped Queue Bars (Pending Activation / In-Progress queue)
   if (type === 'vertical-bars') {
-    const hasDynamic = Array.isArray(data) && data.length >= 2 && Math.max(...data) > 0;
-    const barConfigs = hasDynamic
-      ? (() => {
-          const max = Math.max(...data, 1);
-          return data.slice(-5).map((val, idx) => {
-            const h = val > 0 ? Math.max(6, (val / max) * 24) : 4;
-            return {
-              x: 6 + idx * 14,
-              y: 36 - h,
-              height: h,
-              opacity: idx === data.length - 1 ? 0.95 : 0.35 + (idx / 5) * 0.45,
-            };
-          });
-        })()
-      : [
-          { x: 6, y: 28, height: 8, opacity: 0.3 },
-          { x: 20, y: 22, height: 14, opacity: 0.45 },
-          { x: 34, y: 16, height: 20, opacity: 0.75 },
-          { x: 48, y: 23, height: 13, opacity: 0.45 },
-          { x: 62, y: 28, height: 8, opacity: 0.3 },
-        ];
+    const barConfigs = [
+      { x: 30, y: 30, height: 6, opacity: 0.25 },
+      { x: 40, y: 26, height: 10, opacity: 0.4 },
+      { x: 50, y: 22, height: 14, opacity: 0.6 },
+      { x: 60, y: 18, height: 18, opacity: 0.8 },
+      { x: 70, y: 14, height: 22, opacity: 0.95 },
+    ];
+    const peakPt = { x: 73.5, y: 14 };
 
     return (
       <svg
@@ -979,26 +956,17 @@ function MiniChart({ data, accent = 'blue', type, chartId }: MiniChartProps) {
         aria-hidden="true"
         preserveAspectRatio="none"
       >
-        {/* Target Queue Horizon Line */}
+        {/* Subtle Horizon Baseline */}
         <line
-          x1="6"
-          y1="10"
-          x2="69"
-          y2="10"
+          x1="22"
+          y1="36"
+          x2="80"
+          y2="36"
           stroke={theme.primary}
-          strokeOpacity="0.35"
-          strokeWidth="1.2"
-          strokeDasharray="3 3"
+          strokeOpacity="0.2"
+          strokeWidth="1"
           strokeLinecap="round"
         />
-
-        {/* Micro Employee Pin Badge at Horizon (Style A) */}
-        <g className="bezent-trend-kpi-card__chart-badge" aria-hidden="true">
-          <circle cx={77} cy={10} r={8.5} fill={theme.halo} />
-          <circle cx={77} cy={10} r={6.5} fill={theme.disc} stroke="#ffffff" strokeWidth="1" />
-          <circle cx={77} cy={7.8} r={1.8} fill={theme.icon} />
-          <path d="M 73.8 14.2 C 73.8 11.2, 80.2 11.2, 80.2 14.2 Z" fill={theme.icon} />
-        </g>
 
         {/* Stepped Queue Micro-Bars */}
         {barConfigs.map((b, i) => (
@@ -1006,54 +974,93 @@ function MiniChart({ data, accent = 'blue', type, chartId }: MiniChartProps) {
             key={i}
             x={b.x}
             y={b.y}
-            width={8}
+            width={7}
             height={b.height}
             rx={2}
             fill={theme.primary}
             fillOpacity={b.opacity}
           />
         ))}
+
+        {/* Micro Frosted Person Pin Badge (Floating above tallest bar) */}
+        <g className="bezent-trend-kpi-card__chart-badge" aria-hidden="true">
+          <circle cx={peakPt.x} cy={peakPt.y - 6} r={7.5} fill={theme.halo} />
+          <circle
+            cx={peakPt.x}
+            cy={peakPt.y - 6}
+            r={5.5}
+            fill="#ffffff"
+            stroke="#cbd5e1"
+            strokeWidth="0.8"
+          />
+          <circle cx={peakPt.x} cy={peakPt.y - 7.6} r={1.5} fill="#64748b" />
+          <path
+            d={`M ${peakPt.x - 2.4} ${peakPt.y - 2.8} C ${peakPt.x - 2.4} ${peakPt.y - 4.8}, ${peakPt.x + 2.4} ${peakPt.y - 4.8}, ${peakPt.x + 2.4} ${peakPt.y - 2.8} Z`}
+            fill="#64748b"
+          />
+          <circle cx={peakPt.x} cy={peakPt.y} r={2} fill={theme.primary} />
+        </g>
       </svg>
     );
   }
 
-  // 2. Smooth Wave Curves (Total = smooth-area, Active = mini-area, Inactive = subtle-line)
+  // 2. Inactive Employees: Clean Sleek Horizontal Baseline (Matching Mockup)
+  if (type === 'subtle-line') {
+    return (
+      <svg
+        className="bezent-trend-kpi-card__chart-svg"
+        viewBox="0 0 88 40"
+        aria-hidden="true"
+        preserveAspectRatio="none"
+      >
+        <line
+          x1="16"
+          y1="26"
+          x2="80"
+          y2="26"
+          stroke={theme.primary}
+          strokeWidth="2.2"
+          strokeLinecap="round"
+        />
+      </svg>
+    );
+  }
+
+  // 3. Smooth Wave Curves (Total = smooth-area, Active = mini-area)
   let points: { x: number; y: number }[] = [];
+  let peakIndex = 5;
 
   if (type === 'mini-area') {
-    // Active Employees: Healthy undulating operational pulse wave (Always smooth!)
+    // Active Employees: Vibrant operational pulse wave (Peak at center)
     points = [
-      { x: 4, y: 24 },
-      { x: 19, y: 18 },
-      { x: 34, y: 26 },
-      { x: 49, y: 13 },
-      { x: 63, y: 19 },
-      { x: 77, y: 11 },
+      { x: 4, y: 26 },
+      { x: 18, y: 26 },
+      { x: 28, y: 21 },
+      { x: 38, y: 28 },
+      { x: 50, y: 12 }, // High Peak
+      { x: 62, y: 31 },
+      { x: 72, y: 21 },
+      { x: 80, y: 26 },
     ];
-  } else if (type === 'subtle-line') {
-    // Inactive Employees: Calm compliance baseline curve settling softly
-    points = [
-      { x: 4, y: 15 },
-      { x: 22, y: 20 },
-      { x: 41, y: 26 },
-      { x: 59, y: 29 },
-      { x: 77, y: 29 },
-    ];
+    peakIndex = 4;
   } else {
-    // Total Employees: Steady upward growth sparkline wave (Always smooth!)
+    // Total Employees: Steady upward growth sparkline wave (Peak at x=68)
     points = [
       { x: 4, y: 28 },
-      { x: 19, y: 25 },
-      { x: 34, y: 22 },
-      { x: 49, y: 20 },
-      { x: 63, y: 15 },
-      { x: 77, y: 11 },
+      { x: 18, y: 22 },
+      { x: 32, y: 18 },
+      { x: 44, y: 24 },
+      { x: 56, y: 19 },
+      { x: 68, y: 12 }, // Peak
+      { x: 80, y: 20 },
     ];
+    peakIndex = 5;
   }
 
   const linePath = generateSmoothCurve(points);
   const firstPt = points[0]!;
   const lastPt = points[points.length - 1]!;
+  const peakPt = points[peakIndex] || lastPt;
   const areaPath = `${linePath} L ${lastPt.x} 40 L ${firstPt.x} 40 Z`;
 
   return (
@@ -1065,11 +1072,7 @@ function MiniChart({ data, accent = 'blue', type, chartId }: MiniChartProps) {
     >
       <defs>
         <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-          <stop
-            offset="0%"
-            stopColor={theme.primary}
-            stopOpacity={type === 'subtle-line' ? 0.14 : theme.fillOpacity}
-          />
+          <stop offset="0%" stopColor={theme.primary} stopOpacity={theme.fillOpacity} />
           <stop offset="100%" stopColor={theme.primary} stopOpacity="0.0" />
         </linearGradient>
       </defs>
@@ -1082,31 +1085,32 @@ function MiniChart({ data, accent = 'blue', type, chartId }: MiniChartProps) {
         d={linePath}
         fill="none"
         stroke={theme.primary}
-        strokeWidth={type === 'subtle-line' ? 2 : 2.2}
+        strokeWidth="2.2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
 
-      {/* Micro Employee / Person Badge (Style A) */}
+      {/* Micro Frosted Person Pin Badge sitting right at the curve peak */}
       <g className="bezent-trend-kpi-card__chart-badge" aria-hidden="true">
-        {/* Outer Halo */}
-        <circle cx={lastPt.x} cy={lastPt.y} r={8.5} fill={theme.halo} />
-        {/* Badge Disc */}
+        {/* Soft Drop Halo */}
+        <circle cx={peakPt.x} cy={peakPt.y - 6} r={7.5} fill={theme.halo} />
+        {/* Frosted White Disc */}
         <circle
-          cx={lastPt.x}
-          cy={lastPt.y}
-          r={6.5}
-          fill={theme.disc}
-          stroke="#ffffff"
-          strokeWidth="1"
+          cx={peakPt.x}
+          cy={peakPt.y - 6}
+          r={5.5}
+          fill="#ffffff"
+          stroke="#cbd5e1"
+          strokeWidth="0.8"
         />
-        {/* Miniature Person: Head */}
-        <circle cx={lastPt.x} cy={lastPt.y - 2.2} r={1.8} fill={theme.icon} />
-        {/* Miniature Person: Shoulders */}
+        {/* Miniature Person Silhouette (Head & Shoulders) */}
+        <circle cx={peakPt.x} cy={peakPt.y - 7.6} r={1.5} fill="#64748b" />
         <path
-          d={`M ${lastPt.x - 3.2} ${lastPt.y + 4.2} C ${lastPt.x - 3.2} ${lastPt.y + 1.2}, ${lastPt.x + 3.2} ${lastPt.y + 1.2}, ${lastPt.x + 3.2} ${lastPt.y + 4.2} Z`}
-          fill={theme.icon}
+          d={`M ${peakPt.x - 2.4} ${peakPt.y - 2.8} C ${peakPt.x - 2.4} ${peakPt.y - 4.8}, ${peakPt.x + 2.4} ${peakPt.y - 4.8}, ${peakPt.x + 2.4} ${peakPt.y - 2.8} Z`}
+          fill="#64748b"
         />
+        {/* Bright Highlight Dot on the curve line */}
+        <circle cx={peakPt.x} cy={peakPt.y} r={2} fill={theme.primary} />
       </g>
     </svg>
   );
@@ -1318,7 +1322,7 @@ export function WorkforceKpiCards({
       id: 'inactive',
       title: 'Inactive Employees',
       value: kpis.inactive,
-      subtitle: 'Terminated, suspended or resigned',
+      subtitle: 'Terminated or separated',
       accent: 'coral' as const,
       icon: 'userX' as BezentIconName,
       tooltip: 'Separated employees (terminated, suspended, or resigned) preserved for compliance.',
