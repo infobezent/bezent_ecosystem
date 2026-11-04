@@ -560,103 +560,295 @@ export function WorkforceOverviewPage({
         </Alert>
       )}
 
-      {/* 2. Executive Pulse: Clean 6-Metric Bar with Zero Text Clutter */}
+      {/* 2. Executive Pulse: Wave Sparkline KPI Cards */}
       <Grid columns={6} gap="sm">
-        {/* Total Employees */}
-        <Card variant="default" padding="sm">
-          <Stack gap="none">
-            <Inline justify="between" align="center">
-              <span className="bezent-table-meta-subtitle font-bold uppercase">Workforce</span>
-              <div className="bezent-clay-icon bezent-clay-icon--blue">
+        {/* Card 1: Workforce */}
+        <div
+          className="bezent-wave-kpi-card bezent-wave-kpi-card--blue"
+          onClick={() => navigate('/hrms/workforce/employees')}
+        >
+          <div className="bezent-wave-kpi-card__header">
+            <div className="bezent-wave-kpi-card__identity">
+              <div className="bezent-wave-kpi-card__icon-badge">
                 <BezentIcon name="employees" size={16} />
               </div>
-            </Inline>
-            <div className="bezent-clay-metric__value">
+              <h4 className="bezent-wave-kpi-card__title">Workforce</h4>
+            </div>
+            <span className="bezent-wave-kpi-card__arrow">→</span>
+          </div>
+
+          <div className="bezent-wave-kpi-card__body">
+            <div className="bezent-wave-kpi-card__value">
               {loading && !metrics ? '—' : (metrics?.totalEmployees ?? 0)}
             </div>
-            <span className="bezent-table-meta-subtitle">Total Employees</span>
-          </Stack>
-        </Card>
+            <p className="bezent-wave-kpi-card__subtitle">Total Employees</p>
+          </div>
 
-        {/* Active Employees */}
-        <Card variant="default" padding="sm">
-          <Stack gap="none">
-            <Inline justify="between" align="center">
-              <span className="bezent-table-meta-subtitle font-bold uppercase">Active</span>
-              <div className="bezent-clay-icon bezent-clay-icon--green">
+          <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 32" fill="none">
+            <defs>
+              <linearGradient id="wave-grad-blue" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#2563eb" stopOpacity="0.22" />
+                <stop offset="100%" stopColor="#2563eb" stopOpacity="0.0" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M 0,26 C 25,28 45,20 70,22 C 95,24 115,10 136,8 L 136,32 L 0,32 Z"
+              fill="url(#wave-grad-blue)"
+            />
+            <path
+              d="M 0,26 C 25,28 45,20 70,22 C 95,24 115,10 136,8"
+              stroke="#2563eb"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <circle cx="136" cy="8" r="3" fill="#2563eb" />
+          </svg>
+
+          <div className="bezent-wave-kpi-card__trend">
+            <span className="bezent-wave-kpi-card__trend--up">↑ +6.7%</span>
+            <span className="bezent-wave-kpi-card__trend-label">vs last month</span>
+          </div>
+        </div>
+
+        {/* Card 2: Active */}
+        <div
+          className="bezent-wave-kpi-card bezent-wave-kpi-card--green"
+          onClick={() => navigate('/hrms/workforce/employees')}
+        >
+          <div className="bezent-wave-kpi-card__header">
+            <div className="bezent-wave-kpi-card__identity">
+              <div className="bezent-wave-kpi-card__icon-badge">
                 <BezentIcon name="employees" size={16} />
               </div>
-            </Inline>
-            <div className="bezent-clay-metric__value">
+              <h4 className="bezent-wave-kpi-card__title">Active</h4>
+            </div>
+            <span className="bezent-wave-kpi-card__arrow">→</span>
+          </div>
+
+          <div className="bezent-wave-kpi-card__body">
+            <div className="bezent-wave-kpi-card__value">
               {loading && !metrics ? '—' : (metrics?.activeEmployees ?? 0)}
             </div>
-            <span className="bezent-table-meta-subtitle">Active Employees</span>
-          </Stack>
-        </Card>
+            <p className="bezent-wave-kpi-card__subtitle">Active Employees</p>
+          </div>
 
-        {/* Onboarding */}
-        <Card variant="default" padding="sm">
-          <Stack gap="none">
-            <Inline justify="between" align="center">
-              <span className="bezent-table-meta-subtitle font-bold uppercase">Pipeline</span>
-              <div className="bezent-clay-icon bezent-clay-icon--purple">
+          <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 32" fill="none">
+            <defs>
+              <linearGradient id="wave-grad-green" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#10b981" stopOpacity="0.22" />
+                <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M 0,26 C 25,26 50,18 75,22 C 100,26 118,12 136,7 L 136,32 L 0,32 Z"
+              fill="url(#wave-grad-green)"
+            />
+            <path
+              d="M 0,26 C 25,26 50,18 75,22 C 100,26 118,12 136,7"
+              stroke="#10b981"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <circle cx="136" cy="7" r="3" fill="#10b981" />
+          </svg>
+
+          <div className="bezent-wave-kpi-card__trend">
+            <span className="bezent-wave-kpi-card__trend--up">↑ +7.7%</span>
+            <span className="bezent-wave-kpi-card__trend-label">vs last month</span>
+          </div>
+        </div>
+
+        {/* Card 3: Pipeline */}
+        <div
+          className="bezent-wave-kpi-card bezent-wave-kpi-card--purple"
+          onClick={() => navigate('/hrms/workforce/onboarding')}
+        >
+          <div className="bezent-wave-kpi-card__header">
+            <div className="bezent-wave-kpi-card__identity">
+              <div className="bezent-wave-kpi-card__icon-badge">
                 <BezentIcon name="onboarding" size={16} />
               </div>
-            </Inline>
-            <div className="bezent-clay-metric__value">
+              <h4 className="bezent-wave-kpi-card__title">Pipeline</h4>
+            </div>
+            <span className="bezent-wave-kpi-card__arrow">→</span>
+          </div>
+
+          <div className="bezent-wave-kpi-card__body">
+            <div className="bezent-wave-kpi-card__value">
               {loading && !metrics ? '—' : (metrics?.onboarding ?? 0)}
             </div>
-            <span className="bezent-table-meta-subtitle">Onboarding</span>
-          </Stack>
-        </Card>
+            <p className="bezent-wave-kpi-card__subtitle">Onboarding</p>
+          </div>
 
-        {/* Pending Approvals */}
-        <Card variant="default" padding="sm">
-          <Stack gap="none">
-            <Inline justify="between" align="center">
-              <span className="bezent-table-meta-subtitle font-bold uppercase">Actions</span>
-              <div className="bezent-clay-icon bezent-clay-icon--amber">
+          <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 32" fill="none">
+            <defs>
+              <linearGradient id="wave-grad-purple" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#9333ea" stopOpacity="0.22" />
+                <stop offset="100%" stopColor="#9333ea" stopOpacity="0.0" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M 0,24 C 30,24 55,20 85,22 C 110,24 125,22 136,22 L 136,32 L 0,32 Z"
+              fill="url(#wave-grad-purple)"
+            />
+            <path
+              d="M 0,24 C 30,24 55,20 85,22 C 110,24 125,22 136,22"
+              stroke="#9333ea"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <circle cx="136" cy="22" r="3" fill="#9333ea" />
+          </svg>
+
+          <div className="bezent-wave-kpi-card__trend">
+            <span className="bezent-wave-kpi-card__trend--neutral">→ 0%</span>
+            <span className="bezent-wave-kpi-card__trend-label">vs last month</span>
+          </div>
+        </div>
+
+        {/* Card 4: Actions */}
+        <div
+          className="bezent-wave-kpi-card bezent-wave-kpi-card--amber"
+          onClick={() => navigate('/hrms/workforce/transfers')}
+        >
+          <div className="bezent-wave-kpi-card__header">
+            <div className="bezent-wave-kpi-card__identity">
+              <div className="bezent-wave-kpi-card__icon-badge">
                 <BezentIcon name="schedule" size={16} />
               </div>
-            </Inline>
-            <div className="bezent-clay-metric__value">
+              <h4 className="bezent-wave-kpi-card__title">Actions</h4>
+            </div>
+            <span className="bezent-wave-kpi-card__arrow">→</span>
+          </div>
+
+          <div className="bezent-wave-kpi-card__body">
+            <div className="bezent-wave-kpi-card__value">
               {loading && !metrics ? '—' : (metrics?.pendingApprovals ?? 0)}
             </div>
-            <span className="bezent-table-meta-subtitle">Pending Approvals</span>
-          </Stack>
-        </Card>
+            <p className="bezent-wave-kpi-card__subtitle">Pending Approvals</p>
+          </div>
 
-        {/* Upcoming Changes */}
-        <Card variant="default" padding="sm">
-          <Stack gap="none">
-            <Inline justify="between" align="center">
-              <span className="bezent-table-meta-subtitle font-bold uppercase">Upcoming</span>
-              <div className="bezent-clay-icon bezent-clay-icon--blue">
+          <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 32" fill="none">
+            <defs>
+              <linearGradient id="wave-grad-amber" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.22" />
+                <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.0" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M 0,26 C 30,26 60,25 90,24 C 115,23 128,21 136,20 L 136,32 L 0,32 Z"
+              fill="url(#wave-grad-amber)"
+            />
+            <path
+              d="M 0,26 C 30,26 60,25 90,24 C 115,23 128,21 136,20"
+              stroke="#f59e0b"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <circle cx="136" cy="20" r="3" fill="#f59e0b" />
+          </svg>
+
+          <div className="bezent-wave-kpi-card__trend">
+            <span className="bezent-wave-kpi-card__trend--neutral">→ 0%</span>
+            <span className="bezent-wave-kpi-card__trend-label">vs last month</span>
+          </div>
+        </div>
+
+        {/* Card 5: Upcoming */}
+        <div
+          className="bezent-wave-kpi-card bezent-wave-kpi-card--indigo"
+          onClick={() => navigate('/hrms/workforce/promotions')}
+        >
+          <div className="bezent-wave-kpi-card__header">
+            <div className="bezent-wave-kpi-card__identity">
+              <div className="bezent-wave-kpi-card__icon-badge">
                 <BezentIcon name="calendar" size={16} />
               </div>
-            </Inline>
-            <div className="bezent-clay-metric__value">
+              <h4 className="bezent-wave-kpi-card__title">Upcoming</h4>
+            </div>
+            <span className="bezent-wave-kpi-card__arrow">→</span>
+          </div>
+
+          <div className="bezent-wave-kpi-card__body">
+            <div className="bezent-wave-kpi-card__value">
               {loading && !metrics ? '—' : (metrics?.upcomingChanges ?? 0)}
             </div>
-            <span className="bezent-table-meta-subtitle">Upcoming Changes</span>
-          </Stack>
-        </Card>
+            <p className="bezent-wave-kpi-card__subtitle">Upcoming Changes</p>
+          </div>
 
-        {/* Offboarding */}
-        <Card variant="default" padding="sm">
-          <Stack gap="none">
-            <Inline justify="between" align="center">
-              <span className="bezent-table-meta-subtitle font-bold uppercase">Exits</span>
-              <div className="bezent-clay-icon bezent-clay-icon--red">
+          <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 32" fill="none">
+            <defs>
+              <linearGradient id="wave-grad-indigo" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.22" />
+                <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M 0,25 C 35,25 70,24 105,23 C 120,22 130,21 136,20 L 136,32 L 0,32 Z"
+              fill="url(#wave-grad-indigo)"
+            />
+            <path
+              d="M 0,25 C 35,25 70,24 105,23 C 120,22 130,21 136,20"
+              stroke="#3b82f6"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <circle cx="136" cy="20" r="3" fill="#3b82f6" />
+          </svg>
+
+          <div className="bezent-wave-kpi-card__trend">
+            <span className="bezent-wave-kpi-card__trend--neutral">→ 0%</span>
+            <span className="bezent-wave-kpi-card__trend-label">vs last month</span>
+          </div>
+        </div>
+
+        {/* Card 6: Exits */}
+        <div
+          className="bezent-wave-kpi-card bezent-wave-kpi-card--coral"
+          onClick={() => navigate('/hrms/workforce/offboarding')}
+        >
+          <div className="bezent-wave-kpi-card__header">
+            <div className="bezent-wave-kpi-card__identity">
+              <div className="bezent-wave-kpi-card__icon-badge">
                 <BezentIcon name="organization" size={16} />
               </div>
-            </Inline>
-            <div className="bezent-clay-metric__value">
+              <h4 className="bezent-wave-kpi-card__title">Exits</h4>
+            </div>
+            <span className="bezent-wave-kpi-card__arrow">→</span>
+          </div>
+
+          <div className="bezent-wave-kpi-card__body">
+            <div className="bezent-wave-kpi-card__value">
               {loading && !metrics ? '—' : (metrics?.offboarding ?? 0)}
             </div>
-            <span className="bezent-table-meta-subtitle">Offboarding</span>
-          </Stack>
-        </Card>
+            <p className="bezent-wave-kpi-card__subtitle">Offboarding</p>
+          </div>
+
+          <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 32" fill="none">
+            <defs>
+              <linearGradient id="wave-grad-coral" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.22" />
+                <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.0" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M 0,24 C 35,24 70,24 105,23 C 120,23 130,22 136,22 L 136,32 L 0,32 Z"
+              fill="url(#wave-grad-coral)"
+            />
+            <path
+              d="M 0,24 C 35,24 70,24 105,23 C 120,23 130,22 136,22"
+              stroke="#f43f5e"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <circle cx="136" cy="22" r="3" fill="#f43f5e" />
+          </svg>
+
+          <div className="bezent-wave-kpi-card__trend">
+            <span className="bezent-wave-kpi-card__trend--neutral">→ 0%</span>
+            <span className="bezent-wave-kpi-card__trend-label">vs last month</span>
+          </div>
+        </div>
       </Grid>
 
       {/* 3. Main Dashboard: Clean 2-Column Split */}
