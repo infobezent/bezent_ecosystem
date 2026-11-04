@@ -587,8 +587,8 @@ export function WorkforceOverviewPage({
           <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
             <defs>
               <linearGradient id="wave-grad-blue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#2563eb" stopOpacity="0.22" />
-                <stop offset="100%" stopColor="#2563eb" stopOpacity="0.0" />
+                <stop offset="0%" stopColor="#2563eb" stopOpacity="0.18" />
+                <stop offset="100%" stopColor="#2563eb" stopOpacity="0.01" />
               </linearGradient>
             </defs>
             <path
@@ -639,8 +639,8 @@ export function WorkforceOverviewPage({
           <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
             <defs>
               <linearGradient id="wave-grad-green" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#10b981" stopOpacity="0.22" />
-                <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+                <stop offset="0%" stopColor="#10b981" stopOpacity="0.18" />
+                <stop offset="100%" stopColor="#10b981" stopOpacity="0.01" />
               </linearGradient>
             </defs>
             <path
@@ -691,8 +691,8 @@ export function WorkforceOverviewPage({
           <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
             <defs>
               <linearGradient id="wave-grad-purple" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#9333ea" stopOpacity="0.22" />
-                <stop offset="100%" stopColor="#9333ea" stopOpacity="0.0" />
+                <stop offset="0%" stopColor="#9333ea" stopOpacity="0.18" />
+                <stop offset="100%" stopColor="#9333ea" stopOpacity="0.01" />
               </linearGradient>
             </defs>
             <path
@@ -743,8 +743,8 @@ export function WorkforceOverviewPage({
           <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
             <defs>
               <linearGradient id="wave-grad-amber" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.22" />
-                <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.0" />
+                <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.18" />
+                <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.01" />
               </linearGradient>
             </defs>
             <path
@@ -795,8 +795,8 @@ export function WorkforceOverviewPage({
           <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
             <defs>
               <linearGradient id="wave-grad-indigo" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.22" />
-                <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.0" />
+                <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.18" />
+                <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.01" />
               </linearGradient>
             </defs>
             <path
@@ -847,8 +847,8 @@ export function WorkforceOverviewPage({
           <svg className="bezent-wave-kpi-card__sparkline" viewBox="0 0 140 34" fill="none">
             <defs>
               <linearGradient id="wave-grad-coral" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.22" />
-                <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.0" />
+                <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.18" />
+                <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.01" />
               </linearGradient>
             </defs>
             <path

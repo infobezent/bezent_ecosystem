@@ -3363,52 +3363,88 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  border-radius: 8px;
-  padding: 13px 15px 11px 15px;
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03);
+  border-radius: 14px;
+  padding: 14px 16px 12px 16px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
   box-sizing: border-box;
   overflow: hidden;
-  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   min-width: 0;
   cursor: pointer;
 }
 
 .bezent-wave-kpi-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04);
 }
 
-/* Color Themes: Crisp Tinted Sheen */
+/* Color Themes: Ethereal Corner Aura on Luminous White Surface */
 .bezent-wave-kpi-card--blue {
-  background: linear-gradient(180deg, #f8fbff 0%, #edf5fe 100%);
+  background:
+    radial-gradient(circle at 94% 6%, rgba(219, 234, 254, 0.75) 0%, rgba(239, 246, 255, 0.35) 42%, rgba(255, 255, 255, 0) 72%),
+    #ffffff;
   border-color: #bfdbfe;
 }
 
+.bezent-wave-kpi-card--blue .bezent-wave-kpi-card__arrow {
+  color: #2563eb;
+}
+
 .bezent-wave-kpi-card--green {
-  background: linear-gradient(180deg, #f8fdfa 0%, #edfcf3 100%);
+  background:
+    radial-gradient(circle at 94% 6%, rgba(209, 250, 229, 0.75) 0%, rgba(236, 253, 245, 0.35) 42%, rgba(255, 255, 255, 0) 72%),
+    #ffffff;
   border-color: #bbf7d0;
 }
 
+.bezent-wave-kpi-card--green .bezent-wave-kpi-card__arrow {
+  color: #059669;
+}
+
 .bezent-wave-kpi-card--purple {
-  background: linear-gradient(180deg, #faf7ff 0%, #f4ecfe 100%);
+  background:
+    radial-gradient(circle at 94% 6%, rgba(243, 232, 255, 0.8) 0%, rgba(250, 245, 255, 0.35) 42%, rgba(255, 255, 255, 0) 72%),
+    #ffffff;
   border-color: #e9d5ff;
 }
 
+.bezent-wave-kpi-card--purple .bezent-wave-kpi-card__arrow {
+  color: #7c3aed;
+}
+
 .bezent-wave-kpi-card--amber {
-  background: linear-gradient(180deg, #fffcf7 0%, #fef5ea 100%);
+  background:
+    radial-gradient(circle at 94% 6%, rgba(254, 237, 213, 0.8) 0%, rgba(255, 247, 237, 0.35) 42%, rgba(255, 255, 255, 0) 72%),
+    #ffffff;
   border-color: #fed7aa;
 }
 
+.bezent-wave-kpi-card--amber .bezent-wave-kpi-card__arrow {
+  color: #d97706;
+}
+
 .bezent-wave-kpi-card--indigo {
-  background: linear-gradient(180deg, #f8faff 0%, #edf3fe 100%);
+  background:
+    radial-gradient(circle at 94% 6%, rgba(224, 231, 255, 0.8) 0%, rgba(238, 242, 255, 0.35) 42%, rgba(255, 255, 255, 0) 72%),
+    #ffffff;
   border-color: #c7d2fe;
 }
 
+.bezent-wave-kpi-card--indigo .bezent-wave-kpi-card__arrow {
+  color: #3b82f6;
+}
+
 .bezent-wave-kpi-card--coral {
-  background: linear-gradient(180deg, #fff8f8 0%, #fef0f2 100%);
+  background:
+    radial-gradient(circle at 94% 6%, rgba(254, 226, 226, 0.8) 0%, rgba(255, 241, 242, 0.35) 42%, rgba(255, 255, 255, 0) 72%),
+    #ffffff;
   border-color: #fecdd3;
+}
+
+.bezent-wave-kpi-card--coral .bezent-wave-kpi-card__arrow {
+  color: #e11d48;
 }
 
 /* Dark mode theme overrides */
@@ -3419,33 +3455,45 @@
 }
 
 [data-theme='dark'] .bezent-wave-kpi-card--blue {
-  background: linear-gradient(180deg, rgba(37, 99, 235, 0.12) 0%, rgba(37, 99, 235, 0.04) 100%), #0f172a;
-  border-color: rgba(59, 130, 246, 0.4);
+  background:
+    radial-gradient(circle at 94% 6%, rgba(37, 99, 235, 0.22) 0%, rgba(37, 99, 235, 0.05) 42%, transparent 72%),
+    #0f172a;
+  border-color: rgba(59, 130, 246, 0.35);
 }
 
 [data-theme='dark'] .bezent-wave-kpi-card--green {
-  background: linear-gradient(180deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.04) 100%), #0f172a;
-  border-color: rgba(16, 185, 129, 0.4);
+  background:
+    radial-gradient(circle at 94% 6%, rgba(16, 185, 129, 0.22) 0%, rgba(16, 185, 129, 0.05) 42%, transparent 72%),
+    #0f172a;
+  border-color: rgba(16, 185, 129, 0.35);
 }
 
 [data-theme='dark'] .bezent-wave-kpi-card--purple {
-  background: linear-gradient(180deg, rgba(147, 51, 234, 0.12) 0%, rgba(147, 51, 234, 0.04) 100%), #0f172a;
-  border-color: rgba(147, 51, 234, 0.4);
+  background:
+    radial-gradient(circle at 94% 6%, rgba(147, 51, 234, 0.22) 0%, rgba(147, 51, 234, 0.05) 42%, transparent 72%),
+    #0f172a;
+  border-color: rgba(147, 51, 234, 0.35);
 }
 
 [data-theme='dark'] .bezent-wave-kpi-card--amber {
-  background: linear-gradient(180deg, rgba(245, 158, 11, 0.12) 0%, rgba(245, 158, 11, 0.04) 100%), #0f172a;
-  border-color: rgba(245, 158, 11, 0.4);
+  background:
+    radial-gradient(circle at 94% 6%, rgba(245, 158, 11, 0.22) 0%, rgba(245, 158, 11, 0.05) 42%, transparent 72%),
+    #0f172a;
+  border-color: rgba(245, 158, 11, 0.35);
 }
 
 [data-theme='dark'] .bezent-wave-kpi-card--indigo {
-  background: linear-gradient(180deg, rgba(99, 102, 241, 0.12) 0%, rgba(99, 102, 241, 0.04) 100%), #0f172a;
-  border-color: rgba(99, 102, 241, 0.4);
+  background:
+    radial-gradient(circle at 94% 6%, rgba(99, 102, 241, 0.22) 0%, rgba(99, 102, 241, 0.05) 42%, transparent 72%),
+    #0f172a;
+  border-color: rgba(99, 102, 241, 0.35);
 }
 
 [data-theme='dark'] .bezent-wave-kpi-card--coral {
-  background: linear-gradient(180deg, rgba(244, 63, 94, 0.12) 0%, rgba(244, 63, 94, 0.04) 100%), #0f172a;
-  border-color: rgba(244, 63, 94, 0.4);
+  background:
+    radial-gradient(circle at 94% 6%, rgba(244, 63, 94, 0.22) 0%, rgba(244, 63, 94, 0.05) 42%, transparent 72%),
+    #0f172a;
+  border-color: rgba(244, 63, 94, 0.35);
 }
 
 /* Header Row */
@@ -3521,27 +3569,26 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.85);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ffffff;
   border: 1px solid rgba(15, 23, 42, 0.08);
-  color: #64748b;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
   font-size: 11px;
+  font-weight: 700;
   flex-shrink: 0;
-  transition: transform 0.16s ease, background-color 0.16s ease, color 0.16s ease;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
 }
 
 [data-theme='dark'] .bezent-wave-kpi-card__arrow {
-  background: rgba(255, 255, 255, 0.08);
+  background: #1e293b;
   border-color: rgba(255, 255, 255, 0.12);
-  color: #94a3b8;
 }
 
 .bezent-wave-kpi-card:hover .bezent-wave-kpi-card__arrow {
   transform: translateX(2px);
-  background: #ffffff;
-  color: #0f172a;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
 }
 
 /* Metric Body */
