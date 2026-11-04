@@ -18,7 +18,7 @@ import {
 } from '../../../../design-system/components';
 import { EmployeeCartoonAvatar } from '../../../../design-system/components/EmployeeCartoonAvatar';
 import { BezentIcon, type BezentIconName } from '../../../../design-system/icons';
-import { fetchEmployees } from '../../employees/api/employeesApi';
+import { fetchEmployees, type EmployeeRecord } from '../../employees/api/employeesApi';
 import { fetchNewHiresPaginated } from '../../onboarding/api/onboardingApi';
 import {
   fetchEmployeeActions,
@@ -39,7 +39,7 @@ interface OverviewMetrics {
 
 interface PendingItem {
   id: string;
-  type: 'transfer' | 'promotion' | 'offboarding' | 'document';
+  type: 'transfer' | 'promotion' | 'offboarding' | 'document' | 'probation';
   title: string;
   subtitle: string;
   employeeId?: string;
@@ -58,6 +58,66 @@ interface ActivityItem {
   statusVariant: 'success' | 'warning' | 'info' | 'neutral' | 'danger';
   date: string;
 }
+
+interface DepartmentStat {
+  name: string;
+  count: number;
+  percentage: number;
+}
+
+interface MilestoneItem {
+  id: string;
+  type: 'anniversary' | 'probation';
+  employeeName: string;
+  employeeNumber?: string;
+  departmentName?: string;
+  title: string;
+  subtitle: string;
+  date: string;
+  badgeVariant: 'success' | 'warning' | 'info';
+}
+
+interface EmploymentBreakdown {
+  fullTime: number;
+  contract: number;
+  partTime: number;
+  intern: number;
+}
+
+const QUICK_ACTIONS = [
+  {
+    id: 'onboard',
+    title: 'Add Employee / New Hire',
+    description: 'Initiate induction & preboarding case',
+    icon: 'onboarding' as BezentIconName,
+    path: '/hrms/workforce/onboarding',
+    colorClass: 'blue',
+  },
+  {
+    id: 'directory',
+    title: 'Workforce Directory',
+    description: 'Search, filter, and view team profiles',
+    icon: 'employees' as BezentIconName,
+    path: '/hrms/workforce/employees',
+    colorClass: 'green',
+  },
+  {
+    id: 'transfer',
+    title: 'Initiate Transfer',
+    description: 'Department, manager, or location change',
+    icon: 'organization' as BezentIconName,
+    path: '/hrms/workforce/transfers',
+    colorClass: 'indigo',
+  },
+  {
+    id: 'promotion',
+    title: 'Initiate Promotion',
+    description: 'Designation and career level revision',
+    icon: 'workforce' as BezentIconName,
+    path: '/hrms/workforce/promotions',
+    colorClass: 'purple',
+  },
+] as const;
 
 const WORKFORCE_MODULES = [
   {
@@ -117,8 +177,9 @@ export interface WorkforceOverviewPageProps {
 }
 
 /**
- * Workforce → Overview Page
- * Central control tower for employee activity, workforce changes, and pending actions.
+ * Workforce → Overview Page (Command Center)
+ * Inspired by Workday, Zoho People, Salesforce Work.com, and greytHR.
+ * Central control tower for employee activity, workforce changes, demographics, and pending actions.
  */
 export function WorkforceOverviewPage({
   title = 'Workforce Overview',
@@ -133,6 +194,14 @@ export function WorkforceOverviewPage({
   const [metrics, setMetrics] = useState<OverviewMetrics | null>(null);
   const [pendingActions, setPendingActions] = useState<PendingItem[]>([]);
   const [recentActivities, setRecentActivities] = useState<ActivityItem[]>([]);
+  const [departmentStats, setDepartmentStats] = useState<DepartmentStat[]>([]);
+  const [milestones, setMilestones] = useState<MilestoneItem[]>([]);
+  const [employmentBreakdown, setEmploymentBreakdown] = useState<EmploymentBreakdown>({
+    fullTime: 0,
+    contract: 0,
+    partTime: 0,
+    intern: 0,
+  });
 
   const reload = useCallback(() => setReloadKey((k) => k + 1), []);
 
@@ -141,24 +210,26 @@ export function WorkforceOverviewPage({
     setLoading(true);
     setError(null);
 
-    // Fetch metrics and records across all Workforce domains in parallel
+    // Fetch real metrics and records across all Workforce domains in parallel
     Promise.allSettled([
-      // 0. Total Employees
+      // 0. Total Employees (count)
       fetchEmployees({ pageSize: 1 }),
-      // 1. Active Employees
+      // 1. Active Employees (count)
       fetchEmployees({ employmentStatus: 'active', pageSize: 1 }),
-      // 2. Onboarding Cases
-      fetchNewHiresPaginated({ pageSize: 1 }),
+      // 2. Onboarding Cases (count & cases)
+      fetchNewHiresPaginated({ pageSize: 5 }),
       // 3. Pending Employee Actions
       fetchEmployeeActions({ status: 'pending', pageSize: 10 }),
       // 4. Overall Actions for Upcoming status count
       fetchEmployeeActions({ pageSize: 1 }),
       // 5. Offboarding Separations
-      fetchEmployeeActions({ category: 'separation', pageSize: 1 }),
+      fetchEmployeeActions({ category: 'separation', pageSize: 5 }),
       // 6. Documents Pending Verification
       fetchDocuments({ view: 'pending_review', pageSize: 10 }),
-      // 7. Recent Employee Actions (for Activity)
+      // 7. Recent Employee Actions (for Activity Stream)
       fetchEmployeeActions({ pageSize: 10 }),
+      // 8. Full workforce snapshot for Demographics, Celebrations & Probation tracking
+      fetchEmployees({ pageSize: 100 }),
     ]).then((results) => {
       if (!active) return;
 
@@ -171,9 +242,10 @@ export function WorkforceOverviewPage({
         offboardingRes,
         pendingDocsRes,
         recentActionsRes,
+        workforceListRes,
       ] = results;
 
-      // Extract Metrics
+      // Extract Core Headcount Metrics
       const totalEmployees =
         totalEmpRes.status === 'fulfilled' ? totalEmpRes.value.pagination.totalItems : 0;
       const activeEmployees =
@@ -210,21 +282,82 @@ export function WorkforceOverviewPage({
             pendingDocsRes.value.pagination.totalItems)
           : 0;
 
-      const totalPending = pendingActionCount + pendingDocCount;
+      // Process Workforce Snapshot (Demographics, Milestones, Probations)
+      const workforce =
+        workforceListRes.status === 'fulfilled' ? workforceListRes.value.data : [];
 
-      setMetrics({
-        totalEmployees,
-        activeEmployees,
-        onboarding,
-        pendingApprovals: totalPending,
-        upcomingChanges,
-        offboarding,
+      // 1. Department Breakdown (Workday style)
+      const deptCountMap = new Map<string, number>();
+      const totalBase = workforce.length || totalEmployees || 1;
+      for (const emp of workforce) {
+        const dept = emp.departmentName || 'General / Operations';
+        deptCountMap.set(dept, (deptCountMap.get(dept) || 0) + 1);
+      }
+      const depts: DepartmentStat[] = Array.from(deptCountMap.entries())
+        .map(([name, count]) => ({
+          name,
+          count,
+          percentage: Math.max(1, Math.round((count / totalBase) * 100)),
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+      setDepartmentStats(depts);
+
+      // 2. Employment Type Composition
+      setEmploymentBreakdown({
+        fullTime: workforce.filter((e) => e.employmentType === 'full_time').length,
+        contract: workforce.filter((e) => e.employmentType === 'contract').length,
+        partTime: workforce.filter((e) => e.employmentType === 'part_time').length,
+        intern: workforce.filter((e) => e.employmentType === 'intern').length,
       });
 
-      // Construct Pending Actions List
+      // 3. Celebrations & Milestones (BambooHR & greytHR style)
+      const currentMonth = new Date().getMonth();
+      const currentYear = new Date().getFullYear();
+      const milestoneList: MilestoneItem[] = [];
+
+      for (const emp of workforce) {
+        // A. Work Anniversaries this month
+        if (emp.joiningDate) {
+          const jDate = new Date(emp.joiningDate);
+          const jYear = jDate.getFullYear();
+          if (!isNaN(jDate.getTime()) && jDate.getMonth() === currentMonth && currentYear > jYear) {
+            const years = currentYear - jYear;
+            milestoneList.push({
+              id: `anniv-${emp.id}`,
+              type: 'anniversary',
+              employeeName: emp.fullName,
+              employeeNumber: emp.employeeNumber,
+              departmentName: emp.departmentName || undefined,
+              title: `${years} Year${years > 1 ? 's' : ''} Work Anniversary`,
+              subtitle: `Joined ${formatDate(emp.joiningDate)}`,
+              date: emp.joiningDate,
+              badgeVariant: 'success',
+            });
+          }
+        }
+
+        // B. Approaching Probation Confirmations (greytHR style)
+        if (emp.employmentStatus === 'probation' || (emp.probationEndDate && !emp.confirmationDate)) {
+          milestoneList.push({
+            id: `prob-${emp.id}`,
+            type: 'probation',
+            employeeName: emp.fullName,
+            employeeNumber: emp.employeeNumber,
+            departmentName: emp.departmentName || undefined,
+            title: 'Probation Confirmation Due',
+            subtitle: emp.probationEndDate ? `Target: ${formatDate(emp.probationEndDate)}` : 'Eligible for employment confirmation',
+            date: emp.probationEndDate || emp.joiningDate,
+            badgeVariant: 'warning',
+          });
+        }
+      }
+      setMilestones(milestoneList.slice(0, 6));
+
+      // 4. Construct Comprehensive Pending Actions Queue ("Needs Attention" - Zoho & greytHR)
       const pendingList: PendingItem[] = [];
 
-      // 1. Pending Employee Actions
+      // A. Pending Employee Actions (Transfers, Promotions, Exits)
       for (const action of pendingActionItems) {
         let type: PendingItem['type'] = 'transfer';
         let route = '/hrms/workforce/transfers';
@@ -257,7 +390,7 @@ export function WorkforceOverviewPage({
         });
       }
 
-      // 2. Pending Documents
+      // B. Pending Documents Awaiting HR Verification
       for (const doc of pendingDocItems) {
         pendingList.push({
           id: doc.id,
@@ -274,9 +407,35 @@ export function WorkforceOverviewPage({
         });
       }
 
+      // C. Probation Confirmation Actions
+      for (const pEmp of workforce.filter((e) => e.employmentStatus === 'probation')) {
+        pendingList.push({
+          id: `prob-action-${pEmp.id}`,
+          type: 'probation',
+          title: 'Probation Confirmation Review',
+          subtitle: pEmp.probationEndDate ? `Due by ${formatDate(pEmp.probationEndDate)}` : 'Eligible for permanent status confirmation',
+          employeeId: pEmp.id,
+          employeeName: pEmp.fullName,
+          employeeNumber: pEmp.employeeNumber,
+          date: pEmp.probationEndDate || pEmp.joiningDate,
+          targetRoute: `/hrms/workforce/employees`,
+        });
+      }
+
+      const totalPending = pendingActionCount + pendingDocCount;
+
+      setMetrics({
+        totalEmployees,
+        activeEmployees,
+        onboarding,
+        pendingApprovals: totalPending,
+        upcomingChanges,
+        offboarding,
+      });
+
       setPendingActions(pendingList.slice(0, 6));
 
-      // Construct Recent Activity List
+      // Construct Recent Activity List (Rippling style)
       const recentActions =
         recentActionsRes.status === 'fulfilled' ? recentActionsRes.value.data : [];
       const activities: ActivityItem[] = recentActions.map((action: EmployeeActionListItem) => {
@@ -327,7 +486,7 @@ export function WorkforceOverviewPage({
 
   return (
     <Page maxWidth="full" gap="lg">
-      {/* 1. Page Header */}
+      {/* 1. Page Header (Command Center Navigation) */}
       <PageHeader
         eyebrow="HRMS · Workforce"
         title={title}
@@ -335,12 +494,19 @@ export function WorkforceOverviewPage({
         actions={
           <Inline gap="sm" align="center">
             <Button
-              variant="secondary"
+              variant="outline"
               leftIcon={<BezentIcon name="schedule" size={16} />}
               onClick={reload}
               disabled={loading}
             >
               Refresh
+            </Button>
+            <Button
+              variant="secondary"
+              leftIcon={<BezentIcon name="add" size={16} />}
+              onClick={() => navigate('/hrms/workforce/onboarding')}
+            >
+              Add Employee
             </Button>
           </Inline>
         }
@@ -352,7 +518,7 @@ export function WorkforceOverviewPage({
         </Alert>
       )}
 
-      {/* 2. Summary KPI Cards (6 Key Metrics) */}
+      {/* 2. Executive Pulse: 6 Core Workforce KPI Cards (Workday & BambooHR Standard) */}
       <Grid columns={3} gap="md">
         {/* Total Employees */}
         <div className="bezent-kpi-card bezent-kpi-card--blue">
@@ -465,9 +631,47 @@ export function WorkforceOverviewPage({
         </div>
       </Grid>
 
-      {/* 3. Middle Section: Pending Actions & Recent Workforce Activity */}
+      {/* 3. Quick Action Launchpad (Salesforce Work.com Standard) */}
+      <Stack gap="sm">
+        <Inline justify="between" align="center">
+          <h3 className="bezent-card__title">Quick Actions</h3>
+          <span className="bezent-table-meta-subtitle">Frequent administrative operations</span>
+        </Inline>
+        <Grid columns={4} gap="md">
+          {QUICK_ACTIONS.map((action) => (
+            <Card
+              key={action.id}
+              hoverable
+              variant="interactive"
+              padding="md"
+              onClick={() => navigate(action.path)}
+            >
+              <Stack gap="sm">
+                <Inline justify="between" align="center">
+                  <div
+                    className={`bezent-kpi-card__icon bezent-kpi-card__icon--${action.colorClass}`}
+                  >
+                    <BezentIcon name={action.icon} size={20} />
+                  </div>
+                  <BezentIcon
+                    name="chevronRight"
+                    size={16}
+                    color="var(--bezent-text-tertiary, #94a3b8)"
+                  />
+                </Inline>
+                <Stack gap="none">
+                  <h4 className="bezent-card__title">{action.title}</h4>
+                  <p className="bezent-card__desc">{action.description}</p>
+                </Stack>
+              </Stack>
+            </Card>
+          ))}
+        </Grid>
+      </Stack>
+
+      {/* 4. Core Operational Grid: Action Center (Zoho & greytHR) + Demographics (Workday) */}
       <Grid columns={2} gap="md">
-        {/* Left: Pending Actions */}
+        {/* Left: Pending Actions / Urgent Action Center ("Needs Your Attention") */}
         <Card padding="md">
           <CardHeader>
             <Inline justify="between" align="center">
@@ -479,6 +683,7 @@ export function WorkforceOverviewPage({
                   </Badge>
                 )}
               </Inline>
+              <span className="bezent-table-meta-subtitle">Requires HR review or sign-off</span>
             </Inline>
           </CardHeader>
           <CardBody>
@@ -514,7 +719,9 @@ export function WorkforceOverviewPage({
                                     ? 'success'
                                     : item.type === 'offboarding'
                                       ? 'danger'
-                                      : 'neutral'
+                                      : item.type === 'probation'
+                                        ? 'warning'
+                                        : 'neutral'
                               }
                               size="sm"
                             >
@@ -540,11 +747,142 @@ export function WorkforceOverviewPage({
           </CardBody>
         </Card>
 
+        {/* Right: Workforce Demographics & Distribution (Workday Analytics) */}
+        <Card padding="md">
+          <CardHeader>
+            <Inline justify="between" align="center">
+              <CardTitle>Workforce Demographics</CardTitle>
+              <span className="bezent-table-meta-subtitle">Department &amp; employment distribution</span>
+            </Inline>
+          </CardHeader>
+          <CardBody>
+            {loading ? (
+              <LoadingState label="Loading demographics…" minHeight="sm" />
+            ) : (
+              <Stack gap="md">
+                {/* Employment Type Pills */}
+                <Stack gap="xs">
+                  <span className="bezent-table-meta-subtitle font-bold uppercase">
+                    Employment Composition
+                  </span>
+                  <Inline gap="xs" wrap>
+                    <Badge variant="info" size="md">
+                      Full-Time: {employmentBreakdown.fullTime}
+                    </Badge>
+                    <Badge variant="neutral" size="md">
+                      Contract: {employmentBreakdown.contract}
+                    </Badge>
+                    <Badge variant="neutral" size="md">
+                      Part-Time: {employmentBreakdown.partTime}
+                    </Badge>
+                    <Badge variant="neutral" size="md">
+                      Interns: {employmentBreakdown.intern}
+                    </Badge>
+                  </Inline>
+                </Stack>
+
+                {/* Top Departments Distribution */}
+                <Stack gap="sm">
+                  <span className="bezent-table-meta-subtitle font-bold uppercase">
+                    Top Departments Headcount
+                  </span>
+                  {departmentStats.length === 0 ? (
+                    <span className="bezent-table-meta-subtitle">No department records yet</span>
+                  ) : (
+                    departmentStats.map((dept) => (
+                      <Card key={dept.name} variant="flat" padding="sm">
+                        <Inline justify="between" align="center">
+                          <span className="bezent-table-meta-title">{dept.name}</span>
+                          <Inline gap="xs" align="center">
+                            <span className="bezent-table-meta-subtitle">
+                              {dept.count} {dept.count === 1 ? 'employee' : 'employees'}
+                            </span>
+                            <Badge variant="info" size="sm">
+                              {dept.percentage}%
+                            </Badge>
+                          </Inline>
+                        </Inline>
+                      </Card>
+                    ))
+                  )}
+                </Stack>
+              </Stack>
+            )}
+          </CardBody>
+        </Card>
+      </Grid>
+
+      {/* 5. Culture & Activity Grid: Upcoming Milestones (greytHR/Zoho) + Activity Stream (Rippling) */}
+      <Grid columns={2} gap="md">
+        {/* Left: Upcoming Milestones & Celebrations */}
+        <Card padding="md">
+          <CardHeader>
+            <Inline justify="between" align="center">
+              <Inline gap="xs" align="center">
+                <CardTitle>Upcoming Milestones &amp; Celebrations</CardTitle>
+                {milestones.length > 0 && (
+                  <Badge variant="success" size="sm">
+                    {milestones.length}
+                  </Badge>
+                )}
+              </Inline>
+              <span className="bezent-table-meta-subtitle">Anniversaries &amp; Confirmations</span>
+            </Inline>
+          </CardHeader>
+          <CardBody>
+            {loading ? (
+              <LoadingState label="Loading celebrations…" minHeight="sm" />
+            ) : milestones.length === 0 ? (
+              <EmptyState
+                size="compact"
+                variant="documents"
+                title="No milestones this month"
+                description="Upcoming work anniversaries, birthdays, and probation confirmations will appear here."
+              />
+            ) : (
+              <Stack gap="sm">
+                {milestones.map((m) => (
+                  <Card key={m.id} variant="flat" padding="sm">
+                    <Inline justify="between" align="center">
+                      <Inline gap="sm" align="center">
+                        <EmployeeCartoonAvatar employeeName={m.employeeName} size="sm" />
+                        <Stack gap="none">
+                          <Inline gap="xs" align="center">
+                            <span className="bezent-table-meta-title">{m.employeeName}</span>
+                            {m.departmentName && (
+                              <span className="bezent-table-meta-subtitle">
+                                · {m.departmentName}
+                              </span>
+                            )}
+                            <Badge variant={m.badgeVariant} size="sm">
+                              {m.title}
+                            </Badge>
+                          </Inline>
+                          <span className="bezent-table-meta-subtitle">{m.subtitle}</span>
+                        </Stack>
+                      </Inline>
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate('/hrms/workforce/employees')}
+                      >
+                        View Profile
+                      </Button>
+                    </Inline>
+                  </Card>
+                ))}
+              </Stack>
+            )}
+          </CardBody>
+        </Card>
+
         {/* Right: Recent Workforce Activity */}
         <Card padding="md">
           <CardHeader>
             <Inline justify="between" align="center">
               <CardTitle>Recent Workforce Activity</CardTitle>
+              <span className="bezent-table-meta-subtitle">Live organizational movements</span>
             </Inline>
           </CardHeader>
           <CardBody>
@@ -585,7 +923,7 @@ export function WorkforceOverviewPage({
         </Card>
       </Grid>
 
-      {/* 4. Workforce Module Shortcuts */}
+      {/* 6. Workforce Module Navigation Shortcuts */}
       <Stack gap="sm">
         <h3 className="bezent-card__title">Workforce Modules</h3>
         <Grid columns={3} gap="md">

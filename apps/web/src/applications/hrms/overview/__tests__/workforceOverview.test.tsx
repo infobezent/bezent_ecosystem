@@ -114,4 +114,30 @@ describe('Workforce Overview Page', () => {
 
     expect(html).toContain('Refresh');
   });
+
+  it('renders Quick Actions launchpad with 4 primary operational shortcuts', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <WorkforceOverviewPage />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('Quick Actions');
+    expect(html).toContain('Add Employee / New Hire');
+    expect(html).toContain('Workforce Directory');
+    expect(html).toContain('Initiate Transfer');
+    expect(html).toContain('Initiate Promotion');
+  });
+
+  it('renders Workforce Demographics and Upcoming Milestones & Celebrations cards', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <WorkforceOverviewPage />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('Workforce Demographics');
+    expect(html).toContain('Upcoming Milestones &amp; Celebrations');
+    expect(html).toContain('Requires HR review or sign-off');
+  });
 });
