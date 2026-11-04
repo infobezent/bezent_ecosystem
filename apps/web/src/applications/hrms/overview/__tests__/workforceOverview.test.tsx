@@ -18,36 +18,19 @@ describe('Workforce Overview Page', () => {
     expect(html).toContain('HRMS · Workforce');
   });
 
-  it('renders all 6 approved KPI summary cards with captions', () => {
+  it('renders all 6 approved KPI summary cards cleanly', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <WorkforceOverviewPage />
       </MemoryRouter>,
     );
 
-    // 1. Total Employees
     expect(html).toContain('Total Employees');
-    expect(html).toContain('Total workforce headcount');
-
-    // 2. Active Employees
     expect(html).toContain('Active Employees');
-    expect(html).toContain('Active employment status');
-
-    // 3. Onboarding
     expect(html).toContain('Onboarding');
-    expect(html).toContain('In preboarding &amp; induction');
-
-    // 4. Pending Approvals
     expect(html).toContain('Pending Approvals');
-    expect(html).toContain('Awaiting review or verification');
-
-    // 5. Upcoming Changes
     expect(html).toContain('Upcoming Changes');
-    expect(html).toContain('Approved future-dated transfers &amp; promotions');
-
-    // 6. Offboarding
     expect(html).toContain('Offboarding');
-    expect(html).toContain('Ongoing exits &amp; notice periods');
   });
 
   it('renders Pending Actions and Recent Workforce Activity sections', () => {
@@ -61,7 +44,7 @@ describe('Workforce Overview Page', () => {
     expect(html).toContain('Recent Workforce Activity');
   });
 
-  it('renders all 6 Workforce module shortcuts with correct descriptions', () => {
+  it('renders all 6 Workforce module shortcuts with clean concise descriptions', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <WorkforceOverviewPage />
@@ -72,37 +55,27 @@ describe('Workforce Overview Page', () => {
 
     // Employees
     expect(html).toContain('Employees');
-    expect(html).toContain(
-      'Directory, employee profiles, department mapping, and organization hierarchy.',
-    );
+    expect(html).toContain('Profiles &amp; hierarchy');
 
     // Onboarding
-    expect(html).toContain(
-      'Preboarding stages, induction checklists, documents, and new hire conversion.',
-    );
+    expect(html).toContain('Onboarding');
+    expect(html).toContain('Preboarding &amp; induction');
 
     // Transfers
     expect(html).toContain('Transfers');
-    expect(html).toContain(
-      'Internal job mobility, department changes, reporting manager, and location moves.',
-    );
+    expect(html).toContain('Internal mobility');
 
     // Promotions
     expect(html).toContain('Promotions');
-    expect(html).toContain(
-      'Designation advancements, career grade elevations, and compensation revisions.',
-    );
+    expect(html).toContain('Designations &amp; levels');
 
     // Offboarding
-    expect(html).toContain(
-      'Exit requests, notice periods, departmental clearances, and final settlements.',
-    );
+    expect(html).toContain('Offboarding');
+    expect(html).toContain('Exits &amp; clearances');
 
     // Records
     expect(html).toContain('Records');
-    expect(html).toContain(
-      'Centralized employee documents, compliance credentials, and verification status.',
-    );
+    expect(html).toContain('Compliance &amp; documents');
   });
 
   it('renders the header action with Refresh button', () => {
@@ -123,10 +96,10 @@ describe('Workforce Overview Page', () => {
     );
 
     expect(html).toContain('Quick Actions');
-    expect(html).toContain('Add Employee / New Hire');
-    expect(html).toContain('Workforce Directory');
-    expect(html).toContain('Initiate Transfer');
-    expect(html).toContain('Initiate Promotion');
+    expect(html).toContain('Add Employee');
+    expect(html).toContain('Directory');
+    expect(html).toContain('Transfer');
+    expect(html).toContain('Promotion');
   });
 
   it('renders Workforce Demographics and Upcoming Milestones & Celebrations cards', () => {
@@ -138,7 +111,6 @@ describe('Workforce Overview Page', () => {
 
     expect(html).toContain('Workforce Demographics');
     expect(html).toContain('Upcoming Milestones &amp; Celebrations');
-    expect(html).toContain('Requires HR review or sign-off');
   });
 
   it('renders New Hire & Onboarding Radar and Today\'s Availability pulse cards', () => {
