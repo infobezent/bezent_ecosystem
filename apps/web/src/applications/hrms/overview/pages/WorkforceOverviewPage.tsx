@@ -599,165 +599,118 @@ export function WorkforceOverviewPage({
         </Alert>
       )}
 
-      {/* 2. Executive Pulse: 6 Core Workforce KPI Cards (Workday & BambooHR Standard) */}
-      <Grid columns={3} gap="md">
+      {/* 2. Executive Pulse: Sleek Modern Scorecards in 1 Compact Row (No Pastel Wash) */}
+      <Grid columns={6} gap="sm">
         {/* Total Employees */}
-        <div className="bezent-kpi-card bezent-kpi-card--blue">
-          <div className="bezent-kpi-card__icon bezent-kpi-card__icon--blue">
-            <BezentIcon name="employees" size={20} />
-          </div>
-          <div className="bezent-kpi-card__info">
-            <p className="bezent-kpi-card__title">Total Employees</p>
-            <p className="bezent-kpi-card__value">
-              {loading && !metrics ? (
-                <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-              ) : (
-                (metrics?.totalEmployees ?? 0)
-              )}
-            </p>
-            <p className="bezent-kpi-card__caption">Total workforce headcount</p>
-          </div>
-        </div>
+        <Card variant="default" padding="sm">
+          <Stack gap="xs">
+            <Inline justify="between" align="center">
+              <span className="bezent-table-meta-subtitle font-bold uppercase">
+                Total Employees
+              </span>
+              <div className="bezent-clay-icon bezent-clay-icon--blue">
+                <BezentIcon name="employees" size={16} />
+              </div>
+            </Inline>
+            <div className="bezent-clay-metric__value">
+              {loading && !metrics ? '—' : (metrics?.totalEmployees ?? 0)}
+            </div>
+            <p className="bezent-table-meta-subtitle">Total workforce headcount</p>
+          </Stack>
+        </Card>
 
         {/* Active Employees */}
-        <div className="bezent-kpi-card bezent-kpi-card--green">
-          <div className="bezent-kpi-card__icon bezent-kpi-card__icon--green">
-            <BezentIcon name="employees" size={20} />
-          </div>
-          <div className="bezent-kpi-card__info">
-            <p className="bezent-kpi-card__title">Active Employees</p>
-            <p className="bezent-kpi-card__value">
-              {loading && !metrics ? (
-                <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-              ) : (
-                (metrics?.activeEmployees ?? 0)
-              )}
-            </p>
-            <p className="bezent-kpi-card__caption">Active employment status</p>
-          </div>
-        </div>
+        <Card variant="default" padding="sm">
+          <Stack gap="xs">
+            <Inline justify="between" align="center">
+              <span className="bezent-table-meta-subtitle font-bold uppercase">
+                Active Employees
+              </span>
+              <div className="bezent-clay-icon bezent-clay-icon--green">
+                <BezentIcon name="employees" size={16} />
+              </div>
+            </Inline>
+            <div className="bezent-clay-metric__value">
+              {loading && !metrics ? '—' : (metrics?.activeEmployees ?? 0)}
+            </div>
+            <p className="bezent-table-meta-subtitle">Active employment status</p>
+          </Stack>
+        </Card>
 
-        {/* In Onboarding */}
-        <div className="bezent-kpi-card bezent-kpi-card--purple">
-          <div className="bezent-kpi-card__icon bezent-kpi-card__icon--purple">
-            <BezentIcon name="onboarding" size={20} />
-          </div>
-          <div className="bezent-kpi-card__info">
-            <p className="bezent-kpi-card__title">Onboarding</p>
-            <p className="bezent-kpi-card__value">
-              {loading && !metrics ? (
-                <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-              ) : (
-                (metrics?.onboarding ?? 0)
-              )}
-            </p>
-            <p className="bezent-kpi-card__caption">In preboarding &amp; induction</p>
-          </div>
-        </div>
+        {/* Onboarding */}
+        <Card variant="default" padding="sm">
+          <Stack gap="xs">
+            <Inline justify="between" align="center">
+              <span className="bezent-table-meta-subtitle font-bold uppercase">Onboarding</span>
+              <div className="bezent-clay-icon bezent-clay-icon--purple">
+                <BezentIcon name="onboarding" size={16} />
+              </div>
+            </Inline>
+            <div className="bezent-clay-metric__value">
+              {loading && !metrics ? '—' : (metrics?.onboarding ?? 0)}
+            </div>
+            <p className="bezent-table-meta-subtitle">In preboarding &amp; induction</p>
+          </Stack>
+        </Card>
 
         {/* Pending Approvals */}
-        <div className="bezent-kpi-card bezent-kpi-card--amber">
-          <div className="bezent-kpi-card__icon bezent-kpi-card__icon--amber">
-            <BezentIcon name="schedule" size={20} />
-          </div>
-          <div className="bezent-kpi-card__info">
-            <p className="bezent-kpi-card__title">Pending Approvals</p>
-            <p className="bezent-kpi-card__value">
-              {loading && !metrics ? (
-                <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-              ) : (
-                (metrics?.pendingApprovals ?? 0)
-              )}
-            </p>
-            <p className="bezent-kpi-card__caption">Awaiting review or verification</p>
-          </div>
-        </div>
+        <Card variant="default" padding="sm">
+          <Stack gap="xs">
+            <Inline justify="between" align="center">
+              <span className="bezent-table-meta-subtitle font-bold uppercase">
+                Pending Approvals
+              </span>
+              <div className="bezent-clay-icon bezent-clay-icon--amber">
+                <BezentIcon name="schedule" size={16} />
+              </div>
+            </Inline>
+            <div className="bezent-clay-metric__value">
+              {loading && !metrics ? '—' : (metrics?.pendingApprovals ?? 0)}
+            </div>
+            <p className="bezent-table-meta-subtitle">Awaiting review or verification</p>
+          </Stack>
+        </Card>
 
         {/* Upcoming Changes */}
-        <div className="bezent-kpi-card bezent-kpi-card--indigo">
-          <div className="bezent-kpi-card__icon bezent-kpi-card__icon--indigo">
-            <BezentIcon name="calendar" size={20} />
-          </div>
-          <div className="bezent-kpi-card__info">
-            <p className="bezent-kpi-card__title">Upcoming Changes</p>
-            <p className="bezent-kpi-card__value">
-              {loading && !metrics ? (
-                <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-              ) : (
-                (metrics?.upcomingChanges ?? 0)
-              )}
-            </p>
-            <p className="bezent-kpi-card__caption">
+        <Card variant="default" padding="sm">
+          <Stack gap="xs">
+            <Inline justify="between" align="center">
+              <span className="bezent-table-meta-subtitle font-bold uppercase">
+                Upcoming Changes
+              </span>
+              <div className="bezent-clay-icon bezent-clay-icon--blue">
+                <BezentIcon name="calendar" size={16} />
+              </div>
+            </Inline>
+            <div className="bezent-clay-metric__value">
+              {loading && !metrics ? '—' : (metrics?.upcomingChanges ?? 0)}
+            </div>
+            <p className="bezent-table-meta-subtitle">
               Approved future-dated transfers &amp; promotions
             </p>
-          </div>
-        </div>
+          </Stack>
+        </Card>
 
-        {/* In Offboarding */}
-        <div className="bezent-kpi-card bezent-kpi-card--rose">
-          <div className="bezent-kpi-card__icon bezent-kpi-card__icon--rose">
-            <BezentIcon name="organization" size={20} />
-          </div>
-          <div className="bezent-kpi-card__info">
-            <p className="bezent-kpi-card__title">Offboarding</p>
-            <p className="bezent-kpi-card__value">
-              {loading && !metrics ? (
-                <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-              ) : (
-                (metrics?.offboarding ?? 0)
-              )}
-            </p>
-            <p className="bezent-kpi-card__caption">Ongoing exits &amp; notice periods</p>
-          </div>
-        </div>
+        {/* Offboarding */}
+        <Card variant="default" padding="sm">
+          <Stack gap="xs">
+            <Inline justify="between" align="center">
+              <span className="bezent-table-meta-subtitle font-bold uppercase">Offboarding</span>
+              <div className="bezent-clay-icon bezent-clay-icon--red">
+                <BezentIcon name="organization" size={16} />
+              </div>
+            </Inline>
+            <div className="bezent-clay-metric__value">
+              {loading && !metrics ? '—' : (metrics?.offboarding ?? 0)}
+            </div>
+            <p className="bezent-table-meta-subtitle">Ongoing exits &amp; notice periods</p>
+          </Stack>
+        </Card>
       </Grid>
 
-      {/* 3. Quick Action Launchpad (Creative & Smart Action Launcher) */}
-      <Stack gap="sm">
-        <Inline justify="between" align="center">
-          <Inline gap="xs" align="center">
-            <h3 className="bezent-card__title">Quick Actions</h3>
-            <Badge variant="neutral" size="sm">
-              Smart Hub
-            </Badge>
-          </Inline>
-          <span className="bezent-table-meta-subtitle">Frequent administrative operations</span>
-        </Inline>
-        <Grid columns={4} gap="md">
-          {QUICK_ACTIONS.map((action) => (
-            <Card
-              key={action.id}
-              hoverable
-              variant="interactive"
-              padding="md"
-              onClick={() => navigate(action.path)}
-            >
-              <Stack gap="sm">
-                <Inline justify="between" align="center">
-                  <div
-                    className={`bezent-kpi-card__icon bezent-kpi-card__icon--${action.colorClass}`}
-                  >
-                    <BezentIcon name={action.icon} size={20} />
-                  </div>
-                  <BezentIcon
-                    name="chevronRight"
-                    size={16}
-                    color="var(--bezent-text-tertiary, #94a3b8)"
-                  />
-                </Inline>
-                <Stack gap="none">
-                  <h4 className="bezent-card__title">{action.title}</h4>
-                  <p className="bezent-card__desc">{action.description}</p>
-                </Stack>
-              </Stack>
-            </Card>
-          ))}
-        </Grid>
-      </Stack>
-
-      {/* 4. Core Operational Grid (2-Column Command Deck) */}
+      {/* 3. Core Operational Grid (2-Column Command Deck - Immediate High-Density View) */}
       <Grid columns={2} gap="md">
-        {/* ================= LEFT COLUMN: WORKSTREAM RADAR ================= */}
+        {/* ================= LEFT COLUMN: OPERATIONAL WORKSTREAM ================= */}
         <Stack gap="md">
           {/* A. Pending Actions / Urgent Action Center ("Needs Your Attention") */}
           <Card padding="md">
@@ -894,12 +847,23 @@ export function WorkforceOverviewPage({
               {loading ? (
                 <LoadingState label="Loading new hires radar…" minHeight="sm" />
               ) : newHires.length === 0 ? (
-                <EmptyState
-                  size="compact"
-                  variant="documents"
-                  title="No new hires currently in pipeline"
-                  description="Incoming talent joining dates and preboarding readiness tracks will appear here."
-                />
+                <Card variant="flat" padding="sm">
+                  <Inline justify="between" align="center">
+                    <Stack gap="none">
+                      <span className="bezent-table-meta-title">Onboarding Pipeline Clear</span>
+                      <span className="bezent-table-meta-subtitle">
+                        No pending joiners currently in preboarding.
+                      </span>
+                    </Stack>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => navigate('/hrms/workforce/onboarding')}
+                    >
+                      + Add New Hire
+                    </Button>
+                  </Inline>
+                </Card>
               ) : (
                 <Grid columns={newHires.length > 2 ? 3 : 2} gap="sm">
                   {newHires.map((hire) => {
@@ -978,7 +942,7 @@ export function WorkforceOverviewPage({
           </Card>
         </Stack>
 
-        {/* ================= RIGHT COLUMN: INTELLIGENCE & DEMOGRAPHICS ================= */}
+        {/* ================= RIGHT COLUMN: INTELLIGENCE & SHORTCUTS ================= */}
         <Stack gap="md">
           {/* A. Today's Availability Pulse (greytHR & BambooHR) */}
           <Card padding="md">
@@ -1035,7 +999,56 @@ export function WorkforceOverviewPage({
             </CardBody>
           </Card>
 
-          {/* B. Workforce Demographics (Workday Analytics) */}
+          {/* B. Quick Actions Hub (Compact 2x2 Launchpad directly in Viewport) */}
+          <Card padding="md">
+            <CardHeader>
+              <Inline justify="between" align="center">
+                <Inline gap="xs" align="center">
+                  <CardTitle>Quick Actions</CardTitle>
+                  <Badge variant="neutral" size="sm">
+                    Smart Hub
+                  </Badge>
+                </Inline>
+                <span className="bezent-table-meta-subtitle">Operational shortcuts</span>
+              </Inline>
+            </CardHeader>
+            <CardBody>
+              <Grid columns={2} gap="sm">
+                {QUICK_ACTIONS.map((action) => (
+                  <Card
+                    key={action.id}
+                    hoverable
+                    variant="interactive"
+                    padding="sm"
+                    onClick={() => navigate(action.path)}
+                  >
+                    <Stack gap="xs">
+                      <Inline justify="between" align="center">
+                        <div
+                          className={`bezent-clay-icon bezent-clay-icon--${action.colorClass}`}
+                        >
+                          <BezentIcon name={action.icon} size={16} />
+                        </div>
+                        <BezentIcon
+                          name="chevronRight"
+                          size={14}
+                          color="var(--bezent-text-tertiary, #94a3b8)"
+                        />
+                      </Inline>
+                      <Stack gap="none">
+                        <span className="bezent-table-meta-title">{action.title}</span>
+                        <span className="bezent-table-meta-subtitle">
+                          {action.description}
+                        </span>
+                      </Stack>
+                    </Stack>
+                  </Card>
+                ))}
+              </Grid>
+            </CardBody>
+          </Card>
+
+          {/* C. Workforce Demographics (Workday Analytics) */}
           <Card padding="md">
             <CardHeader>
               <Inline justify="between" align="center">
@@ -1109,7 +1122,7 @@ export function WorkforceOverviewPage({
             </CardBody>
           </Card>
 
-          {/* C. Upcoming Milestones & Celebrations (BambooHR / greytHR) */}
+          {/* D. Upcoming Milestones & Celebrations (BambooHR / greytHR) */}
           <Card padding="md">
             <CardHeader>
               <Inline justify="between" align="center">
@@ -1176,33 +1189,33 @@ export function WorkforceOverviewPage({
         </Stack>
       </Grid>
 
-      {/* 5. Workforce Module Navigation Shortcuts */}
+      {/* 4. Workforce Module Navigation Shortcuts (Full-Width Suite Grid) */}
       <Stack gap="sm">
         <h3 className="bezent-card__title">Workforce Modules</h3>
-        <Grid columns={3} gap="md">
+        <Grid columns={6} gap="sm">
           {WORKFORCE_MODULES.map((mod) => (
             <Card
               key={mod.id}
               hoverable
               variant="interactive"
-              padding="md"
+              padding="sm"
               onClick={() => navigate(mod.path)}
             >
-              <Stack gap="sm">
+              <Stack gap="xs">
                 <Inline justify="between" align="center">
-                  <div className={`bezent-kpi-card__icon bezent-kpi-card__icon--${mod.colorClass}`}>
-                    <BezentIcon name={mod.icon as BezentIconName} size={20} />
+                  <div className={`bezent-clay-icon bezent-clay-icon--${mod.colorClass}`}>
+                    <BezentIcon name={mod.icon as BezentIconName} size={18} />
                   </div>
                   <BezentIcon
                     name="chevronRight"
-                    size={16}
+                    size={14}
                     color="var(--bezent-text-tertiary, #94a3b8)"
                   />
                 </Inline>
 
-                <Stack gap="xs">
-                  <h4 className="bezent-card__title">{mod.title}</h4>
-                  <p className="bezent-card__desc">{mod.description}</p>
+                <Stack gap="none">
+                  <span className="bezent-table-meta-title">{mod.title}</span>
+                  <span className="bezent-table-meta-subtitle">{mod.description}</span>
                 </Stack>
               </Stack>
             </Card>
