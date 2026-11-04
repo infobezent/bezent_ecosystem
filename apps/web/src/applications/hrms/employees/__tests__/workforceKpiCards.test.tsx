@@ -148,8 +148,9 @@ describe('WorkforceKpiCards (Number + Mini Trend Chart)', () => {
       />,
     );
 
-    // Cards render clean values and titles without right-side chart illustrations
-    expect(html).not.toContain('bezent-trend-kpi-card__chart');
+    // Cards render clean values and titles with minimalist sparkline wave charts, without cluttered illustrations
+    expect(html).toContain('bezent-trend-kpi-card__chart');
+    expect(html).toContain('bezent-trend-kpi-card__chart-svg');
     expect(html).not.toContain('bezent-workforce-skyline');
     expect(html).not.toContain('bezent-workforce-network');
     expect(html).not.toContain('bezent-onboarding-pathway');

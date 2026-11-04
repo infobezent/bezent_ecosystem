@@ -885,125 +885,174 @@ export function ArchiveVault() {
   );
 }
 
-const ACCENT_COLORS: Record<'blue' | 'green' | 'amber' | 'coral', string> = {
-  blue: '#3b82f6',
-  green: '#10b981',
-  amber: '#f59e0b',
-  coral: '#f97373',
-};
+function generateSmoothCurve(pts: { x: number; y: number }[]): string {
+  if (pts.length === 0) return '';
+  let d = `M ${pts[0]!.x} ${pts[0]!.y}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i]!;
+    const p1 = pts[i + 1]!;
+    const cpx = (p0.x + p1.x) / 2;
+    d += ` C ${cpx} ${p0.y}, ${cpx} ${p1.y}, ${p1.x} ${p1.y}`;
+  }
+  return d;
+}
 
-function MiniChart({ data, accent, type, chartId }: MiniChartProps) {
-  const accentHex = ACCENT_COLORS[accent];
+/**
+ * Minimalist Executive Sparkline Wave (Idea 1)
+ *
+ * Implements clean, crisp translucent white sparkline curves and stepped bars
+ * designed to overlay seamlessly on vibrant solid background KPI cards.
+ */
+function MiniChart({ data, type, chartId }: MiniChartProps) {
+  const gradId = `spark-grad-${chartId}`;
 
-  // If no trend data or insufficient points, render clean neutral placeholder
-  if (!data || data.length < 2) {
+  // 1. Stepped Queue Bars (Pending Activation / In-Progress queue)
+  if (type === 'vertical-bars') {
+    const hasDynamic = Array.isArray(data) && data.length >= 2 && Math.max(...data) > 0;
+    const barConfigs = hasDynamic
+      ? (() => {
+          const max = Math.max(...data, 1);
+          return data.slice(-5).map((val, idx) => {
+            const h = val > 0 ? Math.max(6, (val / max) * 24) : 4;
+            return {
+              x: 8 + idx * 15,
+              y: 36 - h,
+              height: h,
+              opacity: idx === data.length - 1 ? 0.95 : 0.35 + (idx / 5) * 0.45,
+            };
+          });
+        })()
+      : [
+          { x: 8, y: 28, height: 8, opacity: 0.3 },
+          { x: 23, y: 22, height: 14, opacity: 0.45 },
+          { x: 38, y: 16, height: 20, opacity: 0.75 },
+          { x: 53, y: 23, height: 13, opacity: 0.45 },
+          { x: 68, y: 28, height: 8, opacity: 0.3 },
+        ];
+
     return (
       <svg
         className="bezent-trend-kpi-card__chart-svg"
-        viewBox="0 0 88 42"
+        viewBox="0 0 88 40"
         aria-hidden="true"
         preserveAspectRatio="none"
       >
+        {/* Subtle Queue Target Horizon */}
         <line
           x1="6"
-          y1="24"
-          x2="82"
-          y2="24"
-          stroke="var(--border-default, #cbd5e1)"
-          strokeWidth="1.5"
+          y1="10"
+          x2="78"
+          y2="10"
+          stroke="rgba(255, 255, 255, 0.4)"
+          strokeWidth="1.2"
           strokeDasharray="3 3"
           strokeLinecap="round"
-          opacity="0.65"
         />
-        <circle cx="82" cy="24" r="2.5" fill="var(--border-default, #cbd5e1)" opacity="0.8" />
+        <circle cx="78" cy="10" r="2" fill="rgba(255, 255, 255, 0.8)" />
+
+        {/* Stepped Queue Micro-Bars */}
+        {barConfigs.map((b, i) => (
+          <rect
+            key={i}
+            x={b.x}
+            y={b.y}
+            width={9}
+            height={b.height}
+            rx={2.5}
+            fill="#ffffff"
+            fillOpacity={b.opacity}
+          />
+        ))}
       </svg>
     );
   }
 
-  if (type === 'vertical-bars') {
-    const max = Math.max(...data, 1);
-    const count = data.length;
-    const barWidth = 7;
-    const totalBarWidth = count * barWidth;
-    const gap = (88 - totalBarWidth) / (count + 1);
+  // 2. Smooth Wave Curves (Total = smooth-area, Active = mini-area, Inactive = subtle-line)
+  const hasDynamicVariance =
+    Array.isArray(data) && data.length >= 2 && Math.max(...data) !== Math.min(...data);
 
-    return (
-      <svg
-        className="bezent-trend-kpi-card__chart-svg"
-        viewBox="0 0 88 42"
-        aria-hidden="true"
-        preserveAspectRatio="none"
-      >
-        {data.map((val, idx) => {
-          const height = val > 0 ? Math.max(5, (val / max) * 30) : 3;
-          const x = gap + idx * (barWidth + gap);
-          const y = 38 - height;
-          const opacity = idx === count - 1 ? 1 : 0.35 + (idx / count) * 0.55;
+  let points: { x: number; y: number }[] = [];
 
-          return (
-            <rect
-              key={idx}
-              x={x}
-              y={y}
-              width={barWidth}
-              height={height}
-              rx="2"
-              fill={accentHex}
-              fillOpacity={opacity}
-            />
-          );
-        })}
-      </svg>
-    );
+  if (hasDynamicVariance) {
+    const min = Math.min(...data!);
+    const max = Math.max(...data!);
+    const range = max - min || 1;
+    points = data!.map((val, idx) => ({
+      x: 4 + (idx / (data!.length - 1)) * 80,
+      y: 32 - ((val - min) / range) * 22,
+    }));
+  } else if (type === 'mini-area') {
+    // Active Employees: Healthy undulating operational pulse wave
+    points = [
+      { x: 4, y: 24 },
+      { x: 20, y: 18 },
+      { x: 36, y: 26 },
+      { x: 52, y: 13 },
+      { x: 68, y: 19 },
+      { x: 84, y: 11 },
+    ];
+  } else if (type === 'subtle-line') {
+    // Inactive Employees: Calm compliance baseline curve settling softly
+    points = [
+      { x: 4, y: 15 },
+      { x: 24, y: 20 },
+      { x: 44, y: 27 },
+      { x: 64, y: 29 },
+      { x: 84, y: 29 },
+    ];
+  } else {
+    // Total Employees: Steady upward growth sparkline wave
+    points = [
+      { x: 4, y: 28 },
+      { x: 20, y: 25 },
+      { x: 36, y: 22 },
+      { x: 52, y: 20 },
+      { x: 68, y: 15 },
+      { x: 84, y: 11 },
+    ];
   }
 
-  // Smooth Area & Line charts
-  const min = Math.min(...data);
-  const max = Math.max(...data);
-  const range = max - min || 1;
-
-  const points = data.map((val, idx) => ({
-    x: 4 + (idx / (data.length - 1)) * 80,
-    y: max === min ? 21 : 34 - ((val - min) / range) * 24,
-  }));
-
-  let pathD = `M ${points[0]!.x} ${points[0]!.y}`;
-  for (let i = 0; i < points.length - 1; i++) {
-    const p0 = points[i]!;
-    const p1 = points[i + 1]!;
-    const cpx = (p0.x + p1.x) / 2;
-    pathD += ` C ${cpx} ${p0.y}, ${cpx} ${p1.y}, ${p1.x} ${p1.y}`;
-  }
-
-  const linePath = pathD;
-  const lastPt = points[points.length - 1]!;
+  const linePath = generateSmoothCurve(points);
   const firstPt = points[0]!;
-  const areaPath = `${linePath} L ${lastPt.x} 42 L ${firstPt.x} 42 Z`;
-  const gradId = `kpi-grad-${chartId}`;
+  const lastPt = points[points.length - 1]!;
+  const areaPath = `${linePath} L ${lastPt.x} 40 L ${firstPt.x} 40 Z`;
 
   return (
     <svg
       className="bezent-trend-kpi-card__chart-svg"
-      viewBox="0 0 88 42"
+      viewBox="0 0 88 40"
       aria-hidden="true"
       preserveAspectRatio="none"
     >
       <defs>
         <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={accentHex} stopOpacity="0.25" />
-          <stop offset="100%" stopColor={accentHex} stopOpacity="0.0" />
+          <stop
+            offset="0%"
+            stopColor="#ffffff"
+            stopOpacity={type === 'subtle-line' ? 0.14 : 0.26}
+          />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0.0" />
         </linearGradient>
       </defs>
+
+      {/* Translucent Soft Glow Fill under Curve */}
       <path d={areaPath} fill={`url(#${gradId})`} />
+
+      {/* Crisp White Wave Stroke */}
       <path
         d={linePath}
         fill="none"
-        stroke={accentHex}
-        strokeWidth="2"
+        stroke="#ffffff"
+        strokeWidth={type === 'subtle-line' ? 2 : 2.2}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx={lastPt.x} cy={lastPt.y} r="2.5" fill={accentHex} />
+
+      {/* Outer Halo on End Point */}
+      <circle cx={lastPt.x} cy={lastPt.y} r={6} fill="#ffffff" opacity={0.25} />
+
+      {/* Bright Endpoint Highlight Dot */}
+      <circle cx={lastPt.x} cy={lastPt.y} r={3} fill="#ffffff" />
     </svg>
   );
 }
@@ -1182,7 +1231,7 @@ export function WorkforceKpiCards({
       accent: 'blue' as const,
       icon: 'employees' as BezentIconName,
       tooltip: 'Total count of all recorded employees across all statuses.',
-      chartType: null,
+      chartType: 'smooth-area' as const,
       trendResult: trends.total,
       statusTab: 'all',
     },
@@ -1194,7 +1243,7 @@ export function WorkforceKpiCards({
       accent: 'green' as const,
       icon: 'userCheck' as BezentIconName,
       tooltip: 'Employees with confirmed active or probation status eligible for daily operations.',
-      chartType: null,
+      chartType: 'mini-area' as const,
       trendResult: trends.active,
       statusTab: 'active',
     },
@@ -1206,7 +1255,7 @@ export function WorkforceKpiCards({
       accent: 'amber' as const,
       icon: 'onboarding' as BezentIconName,
       tooltip: 'Pre-boarded employees awaiting account activation and first sign-in.',
-      chartType: null,
+      chartType: 'vertical-bars' as const,
       trendResult: trends.pendingActivation,
       statusTab: 'pending_activation',
     },
@@ -1218,7 +1267,7 @@ export function WorkforceKpiCards({
       accent: 'coral' as const,
       icon: 'userX' as BezentIconName,
       tooltip: 'Separated employees (terminated, suspended, or resigned) preserved for compliance.',
-      chartType: null,
+      chartType: 'subtle-line' as const,
       trendResult: trends.inactive,
       statusTab: 'inactive',
     },

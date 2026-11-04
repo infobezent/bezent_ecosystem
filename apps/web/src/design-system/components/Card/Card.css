@@ -1198,6 +1198,11 @@
   height: 100%;
   overflow: visible;
   display: block;
+  transition: transform 0.2s ease;
+}
+
+.bezent-trend-kpi-card:hover .bezent-trend-kpi-card__chart-svg {
+  transform: translateY(-1px) scale(1.02);
 }
 
 /* ── Workforce Ring Visualization (Active Employees Card) ── */
