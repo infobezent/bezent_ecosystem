@@ -3672,3 +3672,171 @@
 [data-theme='dark'] .bezent-wave-kpi-card__avatar-disc {
   fill: #1e293b;
 }
+
+/* ==========================================================================
+   Executive Action Queue & Action Items (Generic Design System Primitive)
+   Clean, interactive action items for Pending queues, Approvals, & Reviews
+   ========================================================================== */
+
+.bezent-action-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.bezent-action-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  border: 1px solid transparent;
+  color: #64748b;
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  line-height: 1.2;
+}
+
+.bezent-action-filter-pill:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.bezent-action-filter-pill--active {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.bezent-action-filter-count {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(15, 23, 42, 0.08);
+  color: inherit;
+}
+
+.bezent-action-filter-pill--active .bezent-action-filter-count {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+[data-theme='dark'] .bezent-action-filter-pill {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-action-filter-pill:hover {
+  background: #334155;
+  color: #ffffff;
+}
+
+[data-theme='dark'] .bezent-action-filter-pill--active {
+  background: #0f172a;
+  border-color: #475569;
+  color: #ffffff;
+}
+
+[data-theme='dark'] .bezent-action-filter-pill--active .bezent-action-filter-count {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+/* Action Queue Item Row */
+.bezent-action-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px 11px 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  transition: all 0.16s ease;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.bezent-action-row:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04);
+}
+
+/* Colored Left Accent Stripe */
+.bezent-action-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3.5px;
+  border-radius: 4px 0 0 4px;
+}
+
+.bezent-action-row--amber::before {
+  background: #f59e0b;
+}
+
+.bezent-action-row--blue::before {
+  background: #3b82f6;
+}
+
+.bezent-action-row--green::before {
+  background: #10b981;
+}
+
+.bezent-action-row--purple::before {
+  background: #9333ea;
+}
+
+.bezent-action-row--coral::before {
+  background: #f43f5e;
+}
+
+.bezent-action-row__meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.bezent-action-row__code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  background: #f1f5f9;
+  color: #475569;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+[data-theme='dark'] .bezent-action-row {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+[data-theme='dark'] .bezent-action-row:hover {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .bezent-action-row__meta-chip {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-action-row__code {
+  background: #1e293b;
+  color: #94a3b8;
+}

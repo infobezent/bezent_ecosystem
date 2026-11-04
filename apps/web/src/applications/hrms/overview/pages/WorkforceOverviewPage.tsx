@@ -519,8 +519,20 @@ export function WorkforceOverviewPage({
     };
   }, [reloadKey]);
 
+  const pendingCounts = useMemo(() => {
+    return {
+      all: pendingActions.length,
+      transfer: pendingActions.filter((i) => i.type === 'transfer' || i.type === 'promotion').length,
+      document: pendingActions.filter((i) => i.type === 'document').length,
+      probation: pendingActions.filter((i) => i.type === 'probation').length,
+    };
+  }, [pendingActions]);
+
   const filteredPendingActions = useMemo(() => {
     if (pendingFilter === 'all') return pendingActions;
+    if (pendingFilter === 'transfer') {
+      return pendingActions.filter((item) => item.type === 'transfer' || item.type === 'promotion');
+    }
     return pendingActions.filter((item) => item.type === pendingFilter);
   }, [pendingActions, pendingFilter]);
 
@@ -885,44 +897,48 @@ export function WorkforceOverviewPage({
               <Inline justify="between" align="center">
                 <Inline gap="xs" align="center">
                   <CardTitle>Pending Actions</CardTitle>
-                  {pendingActions.length > 0 && (
+                  {pendingActions.length > 0 ? (
                     <Badge variant="warning" size="sm">
-                      {pendingActions.length}
+                      {pendingActions.length} Actions
+                    </Badge>
+                  ) : (
+                    <Badge variant="success" size="sm">
+                      All Clear
                     </Badge>
                   )}
                 </Inline>
 
                 {pendingActions.length > 0 && (
-                  <Inline gap="xs" align="center">
-                    <Button
-                      variant={pendingFilter === 'all' ? 'secondary' : 'ghost'}
-                      size="sm"
+                  <div className="bezent-action-filter-bar">
+                    <button
+                      type="button"
+                      className={`bezent-action-filter-pill ${pendingFilter === 'all' ? 'bezent-action-filter-pill--active' : ''}`}
                       onClick={() => setPendingFilter('all')}
                     >
-                      All
-                    </Button>
-                    <Button
-                      variant={pendingFilter === 'transfer' ? 'secondary' : 'ghost'}
-                      size="sm"
+                      All <span className="bezent-action-filter-count">{pendingCounts.all}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`bezent-action-filter-pill ${pendingFilter === 'transfer' ? 'bezent-action-filter-pill--active' : ''}`}
                       onClick={() => setPendingFilter('transfer')}
                     >
-                      Transfers
-                    </Button>
-                    <Button
-                      variant={pendingFilter === 'document' ? 'secondary' : 'ghost'}
-                      size="sm"
+                      Transfers <span className="bezent-action-filter-count">{pendingCounts.transfer}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`bezent-action-filter-pill ${pendingFilter === 'document' ? 'bezent-action-filter-pill--active' : ''}`}
                       onClick={() => setPendingFilter('document')}
                     >
-                      Docs
-                    </Button>
-                    <Button
-                      variant={pendingFilter === 'probation' ? 'secondary' : 'ghost'}
-                      size="sm"
+                      Docs <span className="bezent-action-filter-count">{pendingCounts.document}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`bezent-action-filter-pill ${pendingFilter === 'probation' ? 'bezent-action-filter-pill--active' : ''}`}
                       onClick={() => setPendingFilter('probation')}
                     >
-                      Probation
-                    </Button>
-                  </Inline>
+                      Probation <span className="bezent-action-filter-count">{pendingCounts.probation}</span>
+                    </button>
+                  </div>
                 )}
               </Inline>
             </CardHeader>
@@ -938,48 +954,64 @@ export function WorkforceOverviewPage({
                 />
               ) : (
                 <Stack gap="xs">
-                  {filteredPendingActions.map((item) => (
-                    <Card key={`${item.type}-${item.id}`} variant="flat" padding="sm">
-                      <Inline justify="between" align="center">
+                  {filteredPendingActions.map((item) => {
+                    const accentClass =
+                      item.type === 'transfer'
+                        ? 'bezent-action-row--blue'
+                        : item.type === 'promotion'
+                          ? 'bezent-action-row--green'
+                          : item.type === 'offboarding'
+                            ? 'bezent-action-row--coral'
+                            : item.type === 'probation'
+                              ? 'bezent-action-row--amber'
+                              : 'bezent-action-row--purple';
+
+                    const badgeVariant =
+                      item.type === 'transfer'
+                        ? 'info'
+                        : item.type === 'promotion'
+                          ? 'success'
+                          : item.type === 'offboarding'
+                            ? 'danger'
+                            : item.type === 'probation'
+                              ? 'warning'
+                              : 'neutral';
+
+                    return (
+                      <div
+                        key={`${item.type}-${item.id}`}
+                        className={`bezent-action-row ${accentClass}`}
+                      >
                         <Inline gap="sm" align="center">
                           <EmployeeCartoonAvatar employeeName={item.employeeName} size="sm" />
                           <Stack gap="none">
                             <Inline gap="xs" align="center">
                               <span className="bezent-table-meta-title">{item.employeeName}</span>
-                              <Badge
-                                variant={
-                                  item.type === 'transfer'
-                                    ? 'info'
-                                    : item.type === 'promotion'
-                                      ? 'success'
-                                      : item.type === 'offboarding'
-                                        ? 'danger'
-                                        : item.type === 'probation'
-                                          ? 'warning'
-                                          : 'neutral'
-                                }
-                                size="sm"
-                              >
+                              {item.employeeNumber && (
+                                <span className="bezent-action-row__code">{item.employeeNumber}</span>
+                              )}
+                              <Badge variant={badgeVariant} size="sm">
                                 {item.title}
                               </Badge>
                             </Inline>
-                            <span className="bezent-table-meta-subtitle">
-                              {item.employeeNumber ? `${item.employeeNumber} · ` : ''}
+                            <span className="bezent-action-row__meta-chip">
+                              <BezentIcon name="schedule" size={12} />
                               {item.subtitle}
                             </span>
                           </Stack>
                         </Inline>
 
                         <Button
-                          variant="outline"
+                          variant="secondary"
                           size="sm"
+                          rightIcon={<BezentIcon name="chevronRight" size={13} />}
                           onClick={() => navigate(item.targetRoute)}
                         >
                           Review
                         </Button>
-                      </Inline>
-                    </Card>
-                  ))}
+                      </div>
+                    );
+                  })}
                 </Stack>
               )}
             </CardBody>
