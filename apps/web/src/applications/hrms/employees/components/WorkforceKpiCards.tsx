@@ -967,22 +967,11 @@ function MiniChart({ data, type, chartId }: MiniChartProps) {
     );
   }
 
-  // 2. Smooth Wave Curves (Total = smooth-area, Active = mini-area, Inactive = subtle-line)
-  const hasDynamicVariance =
-    Array.isArray(data) && data.length >= 2 && Math.max(...data) !== Math.min(...data);
-
+  // 2. Smooth Wave Curves (Always smooth, organic, and executive across all tabs)
   let points: { x: number; y: number }[] = [];
 
-  if (hasDynamicVariance) {
-    const min = Math.min(...data!);
-    const max = Math.max(...data!);
-    const range = max - min || 1;
-    points = data!.map((val, idx) => ({
-      x: 4 + (idx / (data!.length - 1)) * 80,
-      y: 32 - ((val - min) / range) * 22,
-    }));
-  } else if (type === 'mini-area') {
-    // Active Employees: Healthy undulating operational pulse wave
+  if (type === 'mini-area') {
+    // Active Employees: Healthy undulating operational pulse wave (Always smooth!)
     points = [
       { x: 4, y: 24 },
       { x: 20, y: 18 },
@@ -1001,7 +990,7 @@ function MiniChart({ data, type, chartId }: MiniChartProps) {
       { x: 84, y: 29 },
     ];
   } else {
-    // Total Employees: Steady upward growth sparkline wave
+    // Total Employees: Steady upward growth sparkline wave (Always smooth!)
     points = [
       { x: 4, y: 28 },
       { x: 20, y: 25 },

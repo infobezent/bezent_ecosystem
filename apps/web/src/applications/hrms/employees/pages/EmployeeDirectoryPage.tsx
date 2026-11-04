@@ -235,6 +235,9 @@ export function EmployeeDirectoryPage() {
     error: null,
   });
 
+  // KPI company-wide baseline workforce (persistent across table filter tab switches)
+  const [allCompanyEmployees, setAllCompanyEmployees] = useState<EmployeeRecord[]>([]);
+
   // KPI Metrics state
   const [kpis, setKpis] = useState<WorkforceKpis>({
     total: null,
@@ -416,6 +419,17 @@ export function EmployeeDirectoryPage() {
             pagination: res.pagination,
             error: null,
           });
+
+          // Preserve un-filtered company workforce baseline for KPI summary cards
+          if (
+            !search.trim() &&
+            appliedFilters.departmentIds.length === 0 &&
+            appliedFilters.locationIds.length === 0 &&
+            !appliedFilters.employmentType &&
+            !appliedFilters.employmentStatus
+          ) {
+            setAllCompanyEmployees(res.data);
+          }
         })
         .catch((err: unknown) => {
           if (!active) return;
@@ -572,7 +586,7 @@ export function EmployeeDirectoryPage() {
       {/* 2. Workforce KPI Cards (Number + Mini Trend Chart - Premium Enterprise UI) */}
       <WorkforceKpiCards
         kpis={kpis}
-        employees={directory.employees}
+        employees={allCompanyEmployees.length > 0 ? allCompanyEmployees : directory.employees}
         activeStatusTab={activeStatusTab}
         onSelectStatusTab={handleStatusTabChange}
       />
