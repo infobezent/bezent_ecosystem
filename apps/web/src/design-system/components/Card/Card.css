@@ -4464,3 +4464,614 @@
   background: rgba(245, 158, 11, 0.15);
   color: #fde68a;
 }
+
+/* ==========================================================================
+   BEZENT Enterprise Workforce Command Center — Modern SaaS Layout System
+   Full content, analytics, distribution, lifecycle, planning, actions & reports
+   ========================================================================== */
+
+/* ── Filter Bar & Controls ── */
+.bezent-wf-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 18px;
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+}
+
+[data-theme='dark'] .bezent-wf-filter-bar {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bezent-wf-filter-select {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #182230;
+  font-size: 12.5px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.bezent-wf-filter-select:hover {
+  border-color: #cbd5e1;
+  background: #ffffff;
+}
+
+.bezent-wf-filter-select:focus {
+  border-color: #3478d4;
+  box-shadow: 0 0 0 2px rgba(52, 120, 212, 0.15);
+}
+
+[data-theme='dark'] .bezent-wf-filter-select {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+/* ── Growth Analytics Chart Panel ── */
+.bezent-wf-growth-card {
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme='dark'] .bezent-wf-growth-card {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-growth-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.bezent-wf-growth-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.bezent-wf-growth-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bezent-wf-growth-stat-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #667085;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+[data-theme='dark'] .bezent-wf-growth-stat-label {
+  color: #94a3b8;
+}
+
+.bezent-wf-growth-stat-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: #182230;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+[data-theme='dark'] .bezent-wf-growth-stat-value {
+  color: #ffffff;
+}
+
+.bezent-wf-chart-container {
+  width: 100%;
+  height: 220px;
+  position: relative;
+}
+
+.bezent-wf-chart-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* ── Distribution Charts (Donut & Horizontal Bars) ── */
+.bezent-wf-donut-layout {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.bezent-wf-donut-chart-wrap {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  flex-shrink: 0;
+}
+
+.bezent-wf-donut-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.bezent-wf-donut-center-num {
+  font-size: 22px;
+  font-weight: 800;
+  color: #182230;
+  line-height: 1;
+}
+
+[data-theme='dark'] .bezent-wf-donut-center-num {
+  color: #ffffff;
+}
+
+.bezent-wf-donut-center-label {
+  font-size: 10.5px;
+  color: #667085;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.bezent-wf-legend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-width: 180px;
+}
+
+.bezent-wf-legend-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bezent-wf-legend-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+}
+
+.bezent-wf-legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 7px;
+  flex-shrink: 0;
+}
+
+.bezent-wf-hbars-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.bezent-wf-hbar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bezent-wf-hbar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+}
+
+.bezent-wf-hbar-track {
+  width: 100%;
+  height: 7px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+[data-theme='dark'] .bezent-wf-hbar-track {
+  background: #1e293b;
+}
+
+.bezent-wf-hbar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+/* ── Employment Composition & Demographics ── */
+.bezent-wf-comp-bar {
+  display: flex;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  width: 100%;
+  margin-bottom: 14px;
+  background: #f1f5f9;
+}
+
+.bezent-wf-comp-segment {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.bezent-wf-comp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.bezent-wf-comp-card {
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 1px solid #e7eaf0;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+[data-theme='dark'] .bezent-wf-comp-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.bezent-wf-comp-card-val {
+  font-size: 16px;
+  font-weight: 700;
+  color: #182230;
+}
+
+[data-theme='dark'] .bezent-wf-comp-card-val {
+  color: #ffffff;
+}
+
+.bezent-wf-comp-card-lbl {
+  font-size: 11.5px;
+  color: #667085;
+  font-weight: 500;
+}
+
+/* ── Employee Lifecycle Pipeline ── */
+.bezent-wf-lifecycle-panel {
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-panel {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-lifecycle-track {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 10px;
+  position: relative;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+@media (max-width: 1100px) {
+  .bezent-wf-lifecycle-track {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .bezent-wf-lifecycle-track {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.bezent-wf-lifecycle-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 12px 10px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e7eaf0;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  position: relative;
+}
+
+.bezent-wf-lifecycle-node:hover {
+  background: #ffffff;
+  border-color: #3478d4;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 120, 212, 0.1);
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-node {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-node:hover {
+  background: #0f172a;
+  border-color: #3478d4;
+}
+
+.bezent-wf-lifecycle-count {
+  font-size: 20px;
+  font-weight: 800;
+  color: #182230;
+  line-height: 1.1;
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-count {
+  color: #ffffff;
+}
+
+.bezent-wf-lifecycle-title {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #475569;
+  margin-top: 4px;
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-title {
+  color: #cbd5e1;
+}
+
+.bezent-wf-lifecycle-status {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 6px;
+}
+
+/* ── Workforce Planning & Headcount Gaps ── */
+.bezent-wf-planning-meter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bezent-wf-planning-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bezent-wf-planning-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  overflow: hidden;
+}
+
+[data-theme='dark'] .bezent-wf-planning-bar {
+  background: #1e293b;
+}
+
+.bezent-wf-planning-fill {
+  height: 100%;
+  background: #3478d4;
+  border-radius: 4px;
+}
+
+/* ── Priority Action Center ── */
+.bezent-wf-action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.bezent-wf-action-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: #f8fafc;
+  border: 1px solid #e7eaf0;
+  border-radius: 12px;
+  transition: all 0.16s ease;
+}
+
+.bezent-wf-action-item:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.05);
+}
+
+[data-theme='dark'] .bezent-wf-action-item {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.bezent-wf-action-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.bezent-wf-action-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bezent-wf-action-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bezent-wf-action-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #182230;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme='dark'] .bezent-wf-action-title {
+  color: #ffffff;
+}
+
+.bezent-wf-action-sub {
+  font-size: 11.5px;
+  color: #667085;
+}
+
+[data-theme='dark'] .bezent-wf-action-sub {
+  color: #94a3b8;
+}
+
+/* ── Reports & Insights Grid ── */
+.bezent-wf-reports-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.bezent-wf-report-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 12px;
+  transition: all 0.16s ease;
+  cursor: pointer;
+  height: 120px;
+  box-sizing: border-box;
+}
+
+.bezent-wf-report-card:hover {
+  border-color: #3478d4;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(52, 120, 212, 0.08);
+}
+
+[data-theme='dark'] .bezent-wf-report-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .bezent-wf-report-card:hover {
+  border-color: #3478d4;
+}
+
+.bezent-wf-report-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bezent-wf-report-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #182230;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-wf-report-title {
+  color: #ffffff;
+}
+
+.bezent-wf-report-desc {
+  font-size: 11.5px;
+  color: #667085;
+  margin: 4px 0 0 0;
+  line-height: 1.3;
+}
+
+[data-theme='dark'] .bezent-wf-report-desc {
+  color: #94a3b8;
+}
+
+.bezent-wf-report-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #3478d4;
+}
+
+/* ── Width & Color Utilities for zero-inline-style components ── */
+.bezent-wf-w-6 { width: 6%; }
+.bezent-wf-w-10 { width: 10%; }
+.bezent-wf-w-12 { width: 12.5%; }
+.bezent-wf-w-13 { width: 13%; }
+.bezent-wf-w-19 { width: 19%; }
+.bezent-wf-w-20 { width: 20%; }
+.bezent-wf-w-25 { width: 25%; }
+.bezent-wf-w-30 { width: 30%; }
+.bezent-wf-w-40 { width: 40%; }
+.bezent-wf-w-50 { width: 50%; }
+.bezent-wf-w-60 { width: 60%; }
+.bezent-wf-w-67 { width: 67%; }
+.bezent-wf-w-70 { width: 70%; }
+.bezent-wf-w-75 { width: 75%; }
+.bezent-wf-w-80 { width: 80%; }
+.bezent-wf-w-88 { width: 87.5%; }
+.bezent-wf-w-90 { width: 90%; }
+.bezent-wf-w-100 { width: 100%; }
+
+.bezent-wf-bg-blue { background: #3478d4; }
+.bezent-wf-bg-green { background: #159a70; }
+.bezent-wf-bg-amber { background: #d99a32; }
+.bezent-wf-bg-red { background: #d9534f; }
+.bezent-wf-bg-teal { background: #0d9488; }
+.bezent-wf-bg-slate { background: #64748b; }
+.bezent-wf-bg-sky { background: #0284c7; }
+.bezent-wf-bg-gray { background: #94a3b8; }
+
+
