@@ -10,7 +10,13 @@ import { DocumentsPage } from '../documents';
 import { RecordsPage } from '../records';
 import { WorkforceOverviewPage } from '../overview';
 import { SettingsPage } from '../settings';
-import { EmployeeDirectoryPage, EmployeeProfilePage, EMPLOYEES_PATH } from '../employees';
+import {
+  EmployeeDirectoryPage,
+  EmployeeProfilePage,
+  EmployeeImportPage,
+  EmployeeImportHistoryPage,
+  EMPLOYEES_PATH,
+} from '../employees';
 import {
   AttendanceOverviewPage,
   DailyAttendanceLogPage,
@@ -241,6 +247,15 @@ export const hrmsRoutes: RouteObject[] = [
       {
         path: 'attendance/policies',
         element: <Navigate to="/hrms/settings?module=attendance" replace />,
+      },
+      // Bulk Employee Import & History
+      {
+        path: 'workforce/employees/import',
+        element: <EmployeeImportPage />,
+      },
+      {
+        path: 'workforce/employees/import/history',
+        element: <EmployeeImportHistoryPage />,
       },
       // Canonical Employee Profile (under Workforce and legacy Administration)
       {

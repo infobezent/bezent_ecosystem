@@ -5738,3 +5738,90 @@ export const hrmsShiftAssignments = mysqlTable(
 
 export type HrmsShiftAssignment = typeof hrmsShiftAssignments.$inferSelect;
 export type NewHrmsShiftAssignment = typeof hrmsShiftAssignments.$inferInsert;
+
+/**
+ * Workforce: Employee Bulk Imports
+ * Tracks import batches, file metadata, counts, options, and status.
+ */
+export const employeeImports = mysqlTable(
+  'employee_imports',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    tenantId: varchar('tenant_id', { length: 64 }).notNull(),
+    companyId: varchar('company_id', { length: 64 })
+      .notNull()
+      .references(() => companies.id),
+    fileName: varchar('file_name', { length: 255 }).notNull(),
+    fileFormat: mysqlEnum('file_format', ['xlsx', 'csv']).notNull(),
+    fileSize: int('file_size').notNull(),
+    totalRecords: int('total_records').default(0).notNull(),
+    validRecords: int('valid_records').default(0).notNull(),
+    errorRecords: int('error_records').default(0).notNull(),
+    duplicateRecords: int('duplicate_records').default(0).notNull(),
+    importedRecords: int('imported_records').default(0).notNull(),
+    status: mysqlEnum('status', [
+      'pending',
+      'validating',
+      'validated',
+      'processing',
+      'completed',
+      'completed_with_errors',
+      'failed',
+      'cancelled',
+    ])
+      .default('pending')
+      .notNull(),
+    options: json('options').$type<{
+      skipDuplicates?: boolean;
+      sendInvitations?: boolean;
+      autoGenerateId?: boolean;
+    }>(),
+    createdByUserId: varchar('created_by_user_id', { length: 64 }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    completedAt: timestamp('completed_at'),
+  },
+  (table) => [
+    index('idx_employee_imports_tenant_company').on(table.tenantId, table.companyId),
+    index('idx_employee_imports_status').on(table.status),
+    index('idx_employee_imports_created_at').on(table.createdAt),
+  ],
+);
+
+export type EmployeeImport = typeof employeeImports.$inferSelect;
+export type NewEmployeeImport = typeof employeeImports.$inferInsert;
+
+/**
+ * Workforce: Employee Bulk Import Rows & Error Audit Details
+ * Tracks row-level validation results, error categories, and raw payload.
+ */
+export const employeeImportRows = mysqlTable(
+  'employee_import_rows',
+  {
+    id: varchar('id', { length: 64 }).primaryKey(),
+    importId: varchar('import_id', { length: 64 })
+      .notNull()
+      .references(() => employeeImports.id, { onDelete: 'cascade' }),
+    rowNumber: int('row_number').notNull(),
+    employeeName: varchar('employee_name', { length: 255 }),
+    employeeNumber: varchar('employee_number', { length: 100 }),
+    workEmail: varchar('work_email', { length: 255 }),
+    status: mysqlEnum('status', ['valid', 'error', 'duplicate', 'imported', 'skipped']).notNull(),
+    issues: json('issues').$type<
+      Array<{
+        category: 'required' | 'format' | 'duplicate' | 'reference';
+        field: string;
+        message: string;
+      }>
+    >(),
+    rawData: json('raw_data').$type<Record<string, unknown>>(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_import_rows_import_id').on(table.importId),
+    index('idx_import_rows_status').on(table.status),
+    index('idx_import_rows_row_number').on(table.importId, table.rowNumber),
+  ],
+);
+
+export type EmployeeImportRow = typeof employeeImportRows.$inferSelect;
+export type NewEmployeeImportRow = typeof employeeImportRows.$inferInsert;

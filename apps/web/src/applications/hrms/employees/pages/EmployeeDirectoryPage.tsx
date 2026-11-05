@@ -593,11 +593,7 @@ export function EmployeeDirectoryPage() {
                 label="Import"
                 variant="ghost"
                 tooltipDirection="down"
-                onClick={() => {
-                  setImportFile(null);
-                  setImportStatus(null);
-                  setIsImportModalOpen(true);
-                }}
+                onClick={() => navigate('/hrms/workforce/employees/import')}
               >
                 <BezentIcon name="upload" size={18} />
               </IconButton>
