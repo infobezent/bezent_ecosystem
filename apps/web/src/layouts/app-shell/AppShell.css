@@ -61,7 +61,7 @@
   min-width: 0;
   min-height: 0;
   overflow: auto;
-  background: var(--bg-surface, #ffffff);
+  background: var(--bg-workspace-canvas, #eeeeee);
   margin: 4px 6px 4px 4px;
   border-radius: 8px;
   border: 1px solid rgba(15, 23, 42, 0.08);

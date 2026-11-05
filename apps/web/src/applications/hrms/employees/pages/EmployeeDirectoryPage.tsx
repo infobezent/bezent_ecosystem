@@ -3,14 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import {
   Alert,
   Button,
+  IconButton,
   Inline,
   Modal,
   Page,
   PageHeader,
   Stack,
   Toolbar,
-  Select,
-  Label,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import {
@@ -30,7 +29,6 @@ import {
   fetchOrganizationMasters,
   type OrganizationMasters,
 } from '../../api/organizationMastersApi';
-import { usePreferences } from '../../../../shared/preferences/PreferencesContext';
 import { useOptionalAuth } from '../../../../platform/auth';
 import {
   EMPLOYMENT_STATUS_LABELS,
@@ -43,7 +41,9 @@ import {
   type SortDirection,
 } from '../components/EmployeeDirectoryTable';
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE_OPTIONS = [30, 60, 90] as const;
+type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];
+const DEFAULT_PAGE_SIZE: PageSizeOption = 30;
 
 interface DirectoryState {
   status: 'loading' | 'error' | 'ready';
@@ -170,7 +170,6 @@ export function computeWorkforceKpiValues({
 export function EmployeeDirectoryPage() {
   const navigate = useNavigate();
   const [, startTransition] = useTransition();
-  const { companyPreferences } = usePreferences();
   const auth = useOptionalAuth();
 
   const canImport = auth ? auth.can('hrms.employees.create') : true;
@@ -183,8 +182,25 @@ export function EmployeeDirectoryPage() {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [activeStatusTab, setActiveStatusTab] = useState<string>('all');
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState<number>(PAGE_SIZE);
+  const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
   const [reloadKey, setReloadKey] = useState(0);
+
+  const currentSizeIndex = PAGE_SIZE_OPTIONS.indexOf(pageSize as PageSizeOption);
+  const handlePrevPageSize = () => {
+    const nextIdx = currentSizeIndex > 0 ? currentSizeIndex - 1 : 0;
+    const newSize = PAGE_SIZE_OPTIONS[nextIdx] ?? DEFAULT_PAGE_SIZE;
+    setPageSize(newSize);
+    setPage(1);
+  };
+  const handleNextPageSize = () => {
+    const nextIdx =
+      currentSizeIndex < PAGE_SIZE_OPTIONS.length - 1
+        ? currentSizeIndex + 1
+        : PAGE_SIZE_OPTIONS.length - 1;
+    const newSize = PAGE_SIZE_OPTIONS[nextIdx] ?? DEFAULT_PAGE_SIZE;
+    setPageSize(newSize);
+    setPage(1);
+  };
 
   // Status tabs matching recruitment candidate directory
   const statusTabs: Array<{ id: string; label: string }> = [
@@ -195,18 +211,22 @@ export function EmployeeDirectoryPage() {
     { id: 'inactive', label: 'Separated' },
   ];
 
+  const getTabStatus = (tabId: string): EmploymentStatus | undefined => {
+    if (tabId === 'active') return 'active';
+    if (tabId === 'probation') return 'probation';
+    if (tabId === 'pending_activation') return 'pending_activation';
+    if (tabId === 'inactive') return 'terminated';
+    return undefined;
+  };
+
   const handleStatusTabChange = (tabId: string) => {
     setActiveStatusTab(tabId);
-    let statusFilter = '';
-    if (tabId === 'active') statusFilter = 'active';
-    else if (tabId === 'probation') statusFilter = 'probation';
-    else if (tabId === 'pending_activation') statusFilter = 'pending_activation';
-    else if (tabId === 'inactive') statusFilter = 'terminated';
-
-    setAppliedFilters((prev) => ({
-      ...prev,
-      employmentStatus: statusFilter,
-    }));
+    if (appliedFilters.employmentStatus) {
+      setAppliedFilters((prev) => ({
+        ...prev,
+        employmentStatus: '',
+      }));
+    }
     setPage(1);
   };
 
@@ -272,6 +292,11 @@ export function EmployeeDirectoryPage() {
             sensitivity: 'base',
           });
           break;
+        case 'location':
+          comparison = (a.locationName || '').localeCompare(b.locationName || '', undefined, {
+            sensitivity: 'base',
+          });
+          break;
         case 'employment':
           comparison = (a.employmentType || '').localeCompare(b.employmentType || '', undefined, {
             sensitivity: 'base',
@@ -306,6 +331,9 @@ export function EmployeeDirectoryPage() {
     let active = true;
     setDirectory((prev) => ({ ...prev, status: 'loading', error: null }));
 
+    const effectiveStatus =
+      (appliedFilters.employmentStatus as EmploymentStatus) || getTabStatus(activeStatusTab);
+
     const timer = setTimeout(() => {
       fetchEmployees({
         search: search.trim() || undefined,
@@ -313,7 +341,7 @@ export function EmployeeDirectoryPage() {
           appliedFilters.departmentIds.length > 0 ? appliedFilters.departmentIds : undefined,
         locationIds: appliedFilters.locationIds.length > 0 ? appliedFilters.locationIds : undefined,
         employmentType: (appliedFilters.employmentType as EmploymentType) || undefined,
-        employmentStatus: (appliedFilters.employmentStatus as EmploymentStatus) || undefined,
+        employmentStatus: effectiveStatus,
         joiningDateFrom: appliedFilters.joiningDateFrom || undefined,
         joiningDateTo: appliedFilters.joiningDateTo || undefined,
         page,
@@ -342,7 +370,7 @@ export function EmployeeDirectoryPage() {
       active = false;
       clearTimeout(timer);
     };
-  }, [search, appliedFilters, page, pageSize, reloadKey]);
+  }, [search, appliedFilters, activeStatusTab, page, pageSize, reloadKey]);
 
   const withPageReset =
     <T,>(setter: (value: T) => void) =>
@@ -361,13 +389,16 @@ export function EmployeeDirectoryPage() {
   };
 
   const appliedCount = countActiveFilters(appliedFilters);
-  const hasActiveFilters = Boolean(search.trim() || appliedCount > 0);
+  const hasActiveFilters = Boolean(search.trim() || appliedCount > 0 || activeStatusTab !== 'all');
   const pagination = directory.pagination;
   const totalCount = pagination ? pagination.totalItems : directory.employees.length;
 
   // 4. Authorized CSV Export honoring active filters and current tenant
   const handleExportCsv = async () => {
     try {
+      const effectiveStatus =
+        (appliedFilters.employmentStatus as EmploymentStatus) || getTabStatus(activeStatusTab);
+
       // Export up to 500 records matching current search and filters
       const res = await fetchEmployees({
         search: search.trim() || undefined,
@@ -375,7 +406,7 @@ export function EmployeeDirectoryPage() {
           appliedFilters.departmentIds.length > 0 ? appliedFilters.departmentIds : undefined,
         locationIds: appliedFilters.locationIds.length > 0 ? appliedFilters.locationIds : undefined,
         employmentType: (appliedFilters.employmentType as EmploymentType) || undefined,
-        employmentStatus: (appliedFilters.employmentStatus as EmploymentStatus) || undefined,
+        employmentStatus: effectiveStatus,
         joiningDateFrom: appliedFilters.joiningDateFrom || undefined,
         joiningDateTo: appliedFilters.joiningDateTo || undefined,
         page: 1,
@@ -439,43 +470,7 @@ export function EmployeeDirectoryPage() {
   return (
     <Page maxWidth="default" gap="md" className="employees-directory-page">
       {/* 1. Page Header */}
-      <PageHeader
-        title="Employee Directory"
-        actions={
-          canImport || canExport ? (
-            <Inline gap="sm" align="center">
-              {canImport && (
-                <Button
-                  variant="outline"
-                  size="md"
-                  shape="rounded"
-                  className="bezent-btn--import"
-                  leftIcon={<BezentIcon name="upload" size={16} />}
-                  onClick={() => {
-                    setImportFile(null);
-                    setImportStatus(null);
-                    setIsImportModalOpen(true);
-                  }}
-                >
-                  Import
-                </Button>
-              )}
-              {canExport && (
-                <Button
-                  variant="secondary"
-                  size="md"
-                  shape="rounded"
-                  className="bezent-btn--export"
-                  leftIcon={<BezentIcon name="download" size={16} />}
-                  onClick={handleExportCsv}
-                >
-                  Export
-                </Button>
-              )}
-            </Inline>
-          ) : null
-        }
-      />
+      <PageHeader title="Employee Directory" />
       <span className="sr-only" hidden>
         Manage and explore your workforce directory
       </span>
@@ -483,7 +478,7 @@ export function EmployeeDirectoryPage() {
       {/* 2. Candidates-style Search & Action Toolbar with Status Filter Tabs */}
       <Toolbar
         left={
-          <Inline align="center" gap="sm" wrap>
+          <Inline align="center" gap="sm">
             {/* Compact Search Bar with Icon */}
             <div className="bezent-search-bar">
               <BezentIcon name="search" size={16} color="var(--text-secondary, #64748b)" />
@@ -589,19 +584,42 @@ export function EmployeeDirectoryPage() {
           </Inline>
         }
         right={
-          <Inline align="center" gap="sm">
+          <Inline align="center" gap="xs">
             <span className="bezent-records-text" hidden>
               {`${totalCount} Records`}
             </span>
-            <Button
-              variant="secondary"
-              size="md"
-              shape="rounded"
-              leftIcon={<BezentIcon name="add" size="action" />}
+            {canImport && (
+              <IconButton
+                label="Import"
+                variant="ghost"
+                tooltipDirection="down"
+                onClick={() => {
+                  setImportFile(null);
+                  setImportStatus(null);
+                  setIsImportModalOpen(true);
+                }}
+              >
+                <BezentIcon name="upload" size={18} />
+              </IconButton>
+            )}
+            {canExport && (
+              <IconButton
+                label="Export"
+                variant="ghost"
+                tooltipDirection="down"
+                onClick={handleExportCsv}
+              >
+                <BezentIcon name="download" size={18} />
+              </IconButton>
+            )}
+            <IconButton
+              label="Add Employee"
+              variant="solid"
+              tooltipDirection="down"
               onClick={() => navigate('/hrms/workforce/onboarding')}
             >
-              Add Employee
-            </Button>
+              <BezentIcon name="add" size={18} />
+            </IconButton>
           </Inline>
         }
       />
@@ -725,11 +743,12 @@ export function EmployeeDirectoryPage() {
         </div>
       )}
 
-      {/* 4. Employee Table Card */}
-      <div className="bezent-table-card">
+      {/* 4. Employee Table / Grid Area */}
+      <div className={viewMode === 'list' ? 'bezent-table-card' : undefined}>
         <EmployeeDirectoryTable
           status={directory.status}
           employees={sortedEmployees}
+          totalCount={totalCount}
           error={directory.error}
           activeMenuId={activeActionMenuId}
           onToggleMenu={(id) => setActiveActionMenuId((prev) => (prev === id ? null : id))}
@@ -759,28 +778,39 @@ export function EmployeeDirectoryPage() {
           }
           right={
             <Inline gap="lg" align="center">
-              <Inline gap="xs" align="center">
-                <Label htmlFor="employees-page-size" size="sm">
-                  Rows per page:
-                </Label>
-                <Select
-                  id="employees-page-size"
-                  size="sm"
-                  width="auto"
-                  placement="top"
-                  value={String(pageSize)}
-                  onChange={(e) => {
-                    setPageSize(Number(e.target.value));
-                    setPage(1);
-                  }}
-                  options={[
-                    { value: '25', label: '25' },
-                    { value: '50', label: '50' },
-                    { value: '100', label: '100' },
-                  ]}
-                  aria-label="Rows per page"
-                />
-              </Inline>
+              {/* Stepper Rows per Page Control (Single number, no dropdown) */}
+              <div
+                className="bezent-page-size-stepper"
+                role="group"
+                aria-label="Rows per page selector"
+              >
+                <span className="bezent-page-size-stepper__label">Rows per page:</span>
+                <div className="bezent-page-size-stepper__box">
+                  <button
+                    type="button"
+                    className="bezent-page-size-stepper__btn"
+                    disabled={currentSizeIndex <= 0}
+                    onClick={handlePrevPageSize}
+                    title="Fewer rows per page (30, 60, 90)"
+                    aria-label="Fewer rows per page"
+                  >
+                    −
+                  </button>
+                  <span className="bezent-page-size-stepper__val" aria-live="polite">
+                    {pageSize}
+                  </span>
+                  <button
+                    type="button"
+                    className="bezent-page-size-stepper__btn"
+                    disabled={currentSizeIndex >= PAGE_SIZE_OPTIONS.length - 1}
+                    onClick={handleNextPageSize}
+                    title="More rows per page (30, 60, 90)"
+                    aria-label="More rows per page"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
               <div className="bezent-pagination">
                 <button
                   type="button"

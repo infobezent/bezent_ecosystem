@@ -337,6 +337,12 @@ describe('Employees Directory page', () => {
     expect(html).toContain('bezent-view-toggle');
     expect(html).toContain('bezent-filter-tabs');
   });
+
+  it('does not render active filter chips or increment filter count badge on default view', () => {
+    const html = renderDirectory();
+    expect(html).not.toContain('bezent-btn__filter-count');
+    expect(html).not.toContain('bezent-active-chips-strip');
+  });
 });
 
 describe('EmployeeDirectoryTable', () => {
