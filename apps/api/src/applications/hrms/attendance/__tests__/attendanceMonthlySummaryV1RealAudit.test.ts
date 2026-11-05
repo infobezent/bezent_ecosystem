@@ -16,6 +16,7 @@ import {
   attendanceExceptions,
   employeeNotifications,
   employeeWorkSchedules,
+  employeeLeaveBalances,
   employees,
   users,
 } from '../../../../db/schema.js';
@@ -87,6 +88,9 @@ describe.skipIf(!isDatabaseConfigured)(
       await db
         .delete(employeeWorkSchedules)
         .where(inArray(employeeWorkSchedules.employeeId, [empId1, empId2]));
+      await db
+        .delete(employeeLeaveBalances)
+        .where(inArray(employeeLeaveBalances.employeeId, [empId1, empId2]));
       await db.delete(employees).where(inArray(employees.id, [empId1, empId2]));
       await db.delete(users).where(inArray(users.id, [reviewerUserId, emp1UserId, emp2UserId]));
 
@@ -232,6 +236,9 @@ describe.skipIf(!isDatabaseConfigured)(
       await db
         .delete(employeeWorkSchedules)
         .where(inArray(employeeWorkSchedules.employeeId, [empId1, empId2]));
+      await db
+        .delete(employeeLeaveBalances)
+        .where(inArray(employeeLeaveBalances.employeeId, [empId1, empId2]));
       await db.delete(employees).where(inArray(employees.id, [empId1, empId2]));
       await db.delete(users).where(inArray(users.id, [reviewerUserId, emp1UserId, emp2UserId]));
     });

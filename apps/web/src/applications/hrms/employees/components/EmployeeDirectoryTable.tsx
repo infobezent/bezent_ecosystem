@@ -286,10 +286,10 @@ export function EmployeeDirectoryTable({
       <TableHead>
         <TableRow>
           {renderSortHeader('employee', 'Employee')}
-          {renderSortHeader('department', 'Department')}
-          {renderSortHeader('employment', 'Employment')}
-          {renderSortHeader('joinedDate', 'Joined Date')}
-          {renderSortHeader('status', 'Status')}
+          <TableHeaderCell>Department</TableHeaderCell>
+          <TableHeaderCell>Employment</TableHeaderCell>
+          <TableHeaderCell>Joined Date</TableHeaderCell>
+          <TableHeaderCell>Status</TableHeaderCell>
           <TableHeaderCell className="bezent-table-col--actions">Actions</TableHeaderCell>
         </TableRow>
       </TableHead>

@@ -3367,10 +3367,15 @@
   padding: 14px 16px 14px 16px;
   background-color: #ffffff;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+  box-shadow:
+    0 2px 8px rgba(15, 23, 42, 0.04),
+    0 1px 2px rgba(15, 23, 42, 0.02);
   box-sizing: border-box;
   overflow: hidden;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
   min-width: 0;
   height: 174px;
   cursor: pointer;
@@ -3378,7 +3383,9 @@
 
 .bezent-wave-kpi-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04);
+  box-shadow:
+    0 8px 24px rgba(15, 23, 42, 0.08),
+    0 2px 6px rgba(15, 23, 42, 0.04);
 }
 
 /* Color Themes: Luminous Soft Pastel Glassmorphic Surfaces */
@@ -3445,42 +3452,72 @@
 
 [data-theme='dark'] .bezent-wave-kpi-card--blue {
   background:
-    radial-gradient(circle at 94% 6%, rgba(37, 99, 235, 0.22) 0%, rgba(37, 99, 235, 0.05) 42%, transparent 72%),
+    radial-gradient(
+      circle at 94% 6%,
+      rgba(37, 99, 235, 0.22) 0%,
+      rgba(37, 99, 235, 0.05) 42%,
+      transparent 72%
+    ),
     #0f172a;
   border-color: rgba(59, 130, 246, 0.35);
 }
 
 [data-theme='dark'] .bezent-wave-kpi-card--green {
   background:
-    radial-gradient(circle at 94% 6%, rgba(16, 185, 129, 0.22) 0%, rgba(16, 185, 129, 0.05) 42%, transparent 72%),
+    radial-gradient(
+      circle at 94% 6%,
+      rgba(16, 185, 129, 0.22) 0%,
+      rgba(16, 185, 129, 0.05) 42%,
+      transparent 72%
+    ),
     #0f172a;
   border-color: rgba(16, 185, 129, 0.35);
 }
 
 [data-theme='dark'] .bezent-wave-kpi-card--purple {
   background:
-    radial-gradient(circle at 94% 6%, rgba(147, 51, 234, 0.22) 0%, rgba(147, 51, 234, 0.05) 42%, transparent 72%),
+    radial-gradient(
+      circle at 94% 6%,
+      rgba(147, 51, 234, 0.22) 0%,
+      rgba(147, 51, 234, 0.05) 42%,
+      transparent 72%
+    ),
     #0f172a;
   border-color: rgba(147, 51, 234, 0.35);
 }
 
 [data-theme='dark'] .bezent-wave-kpi-card--amber {
   background:
-    radial-gradient(circle at 94% 6%, rgba(245, 158, 11, 0.22) 0%, rgba(245, 158, 11, 0.05) 42%, transparent 72%),
+    radial-gradient(
+      circle at 94% 6%,
+      rgba(245, 158, 11, 0.22) 0%,
+      rgba(245, 158, 11, 0.05) 42%,
+      transparent 72%
+    ),
     #0f172a;
   border-color: rgba(245, 158, 11, 0.35);
 }
 
 [data-theme='dark'] .bezent-wave-kpi-card--indigo {
   background:
-    radial-gradient(circle at 94% 6%, rgba(99, 102, 241, 0.22) 0%, rgba(99, 102, 241, 0.05) 42%, transparent 72%),
+    radial-gradient(
+      circle at 94% 6%,
+      rgba(99, 102, 241, 0.22) 0%,
+      rgba(99, 102, 241, 0.05) 42%,
+      transparent 72%
+    ),
     #0f172a;
   border-color: rgba(99, 102, 241, 0.35);
 }
 
 [data-theme='dark'] .bezent-wave-kpi-card--coral {
   background:
-    radial-gradient(circle at 94% 6%, rgba(244, 63, 94, 0.22) 0%, rgba(244, 63, 94, 0.05) 42%, transparent 72%),
+    radial-gradient(
+      circle at 94% 6%,
+      rgba(244, 63, 94, 0.22) 0%,
+      rgba(244, 63, 94, 0.05) 42%,
+      transparent 72%
+    ),
     #0f172a;
   border-color: rgba(244, 63, 94, 0.35);
 }
@@ -3567,7 +3604,10 @@
   font-size: 13px;
   font-weight: 700;
   flex-shrink: 0;
-  transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    background-color 0.16s ease;
 }
 
 [data-theme='dark'] .bezent-wave-kpi-card__arrow {
@@ -3920,7 +3960,9 @@
   border: 1px solid #e2e8f0;
   border-radius: 18px;
   padding: 20px 22px 18px 22px;
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+  box-shadow:
+    0 4px 20px -2px rgba(15, 23, 42, 0.05),
+    0 2px 6px -1px rgba(15, 23, 42, 0.02);
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -4732,7 +4774,6 @@
   display: block;
 }
 
-
 /* ── Reports & Insights Hub ── */
 .bezent-wf-reports-hub {
   display: flex;
@@ -4981,8 +5022,10 @@
 
 .bezent-wf-legend-item {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .bezent-wf-legend-header {
@@ -5374,574 +5417,625 @@
 }
 
 /* ── Width & Color Utilities for zero-inline-style components ── */
-.bezent-wf-w-6 { width: 6%; }
-.bezent-wf-w-10 { width: 10%; }
-.bezent-wf-w-12 { width: 12.5%; }
-.bezent-wf-w-13 { width: 13%; }
-.bezent-wf-w-19 { width: 19%; }
-.bezent-wf-w-20 { width: 20%; }
-.bezent-wf-w-25 { width: 25%; }
-.bezent-wf-w-30 { width: 30%; }
-.bezent-wf-w-40 { width: 40%; }
-.bezent-wf-w-50 { width: 50%; }
-.bezent-wf-w-60 { width: 60%; }
-.bezent-wf-w-67 { width: 67%; }
-.bezent-wf-w-70 { width: 70%; }
-.bezent-wf-w-75 { width: 75%; }
-.bezent-wf-w-80 { width: 80%; }
-.bezent-wf-w-88 { width: 87.5%; }
-.bezent-wf-w-90 { width: 90%; }
-.bezent-wf-w-100 { width: 100%; }
-
-.bezent-wf-bg-blue { background: #3478d4; }
-.bezent-wf-bg-green { background: #159a70; }
-.bezent-wf-bg-amber { background: #d99a32; }
-.bezent-wf-bg-red { background: #d9534f; }
-.bezent-wf-bg-teal { background: #0d9488; }
-.bezent-wf-bg-slate { background: #64748b; }
-.bezent-wf-bg-sky { background: #0284c7; }
-.bezent-wf-bg-gray { background: #94a3b8; }
-
-/* =====================================================================
- * BEZENT WORKFORCE COMMAND CENTER — MASTER REFERENCE DESIGN V2
- * ===================================================================== */
-
-.bezent-wf-master-page {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+.bezent-wf-w-6 {
+  width: 6%;
+}
+.bezent-wf-w-10 {
+  width: 10%;
+}
+.bezent-wf-w-12 {
+  width: 12.5%;
+}
+.bezent-wf-w-13 {
+  width: 13%;
+}
+.bezent-wf-w-19 {
+  width: 19%;
+}
+.bezent-wf-w-20 {
+  width: 20%;
+}
+.bezent-wf-w-25 {
+  width: 25%;
+}
+.bezent-wf-w-30 {
+  width: 30%;
+}
+.bezent-wf-w-40 {
+  width: 40%;
+}
+.bezent-wf-w-50 {
+  width: 50%;
+}
+.bezent-wf-w-60 {
+  width: 60%;
+}
+.bezent-wf-w-67 {
+  width: 67%;
+}
+.bezent-wf-w-70 {
+  width: 70%;
+}
+.bezent-wf-w-75 {
+  width: 75%;
+}
+.bezent-wf-w-80 {
+  width: 80%;
+}
+.bezent-wf-w-88 {
+  width: 87.5%;
+}
+.bezent-wf-w-90 {
+  width: 90%;
+}
+.bezent-wf-w-100 {
   width: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
-  box-sizing: border-box;
 }
 
-/* ── Top Header & Filter Controls ── */
-.bezent-wf-master-header {
-  display: flex;
+.bezent-wf-bg-blue {
+  background: #3478d4;
+}
+.bezent-wf-bg-green {
+  background: #159a70;
+}
+.bezent-wf-bg-amber {
+  background: #d99a32;
+}
+.bezent-wf-bg-red {
+  background: #d9534f;
+}
+.bezent-wf-bg-teal {
+  background: #0d9488;
+}
+.bezent-wf-bg-slate {
+  background: #64748b;
+}
+.bezent-wf-bg-sky {
+  background: #0284c7;
+}
+.bezent-wf-bg-gray {
+  background: #94a3b8;
+}
+
+/* ── Workforce Header Title & Help Popover Trigger ── */
+.bezent-wf-title-row {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px;
-  padding: 4px 0 2px 0;
+  gap: 10px;
 }
 
-.bezent-wf-master-header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.bezent-wf-master-header-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
-  background: #eff6ff;
-  color: #2563eb;
+.bezent-wf-help-trigger {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.08);
 }
 
-[data-theme='dark'] .bezent-wf-master-header-icon {
-  background: rgba(37, 99, 235, 0.15);
-  color: #60a5fa;
-}
-
-.bezent-wf-master-header-text {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.bezent-wf-master-header-title {
-  font-size: 21px;
-  font-weight: 800;
-  color: #182230;
-  letter-spacing: -0.02em;
-  margin: 0;
-  line-height: 1.2;
-}
-
-[data-theme='dark'] .bezent-wf-master-header-title {
-  color: #f8fafc;
-}
-
-.bezent-wf-master-header-subtitle {
-  font-size: 13px;
-  color: #64748b;
-  margin: 0;
-  line-height: 1.35;
-}
-
-[data-theme='dark'] .bezent-wf-master-header-subtitle {
-  color: #94a3b8;
-}
-
-.bezent-wf-master-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.bezent-wf-master-select-pill {
-  appearance: none;
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
-  padding: 7px 30px 7px 12px;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: #334155;
-  cursor: pointer;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2364748b'%3e%3cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 9px center;
-  background-size: 14px;
-  transition: all 0.15s ease;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
-}
-
-.bezent-wf-master-select-pill:hover {
-  border-color: #cbd5e1;
-  background-color: #f8fafc;
-}
-
-[data-theme='dark'] .bezent-wf-master-select-pill {
-  background-color: #1e293b;
-  border-color: #334155;
-  color: #e2e8f0;
-}
-
-.bezent-wf-master-btn-outline {
+.bezent-wf-help-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: #ffffff;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #f1f5f9;
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 7px 14px;
-  font-size: 12.5px;
+  color: #64748b;
+  font-size: 10px;
   font-weight: 600;
-  color: #334155;
   cursor: pointer;
-  transition: all 0.15s ease;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
+  padding: 0;
+  transition: all 0.16s ease;
+  line-height: 1;
+  user-select: none;
+  align-self: center;
 }
 
-.bezent-wf-master-btn-outline:hover {
-  background: #f8fafc;
-  border-color: #94a3b8;
-}
-
-[data-theme='dark'] .bezent-wf-master-btn-outline {
-  background: #1e293b;
-  border-color: #334155;
-  color: #e2e8f0;
-}
-
-.bezent-wf-master-btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #2563eb;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  padding: 7px 16px;
-  font-size: 12.5px;
-  font-weight: 600;
+.bezent-wf-help-btn:hover,
+.bezent-wf-help-btn:focus-visible {
+  background: #3478d4;
+  border-color: #3478d4;
   color: #ffffff;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+  transform: scale(1.08);
 }
 
-.bezent-wf-master-btn-primary:hover {
-  background: #1d4ed8;
-  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+.bezent-wf-help-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 320px;
+  background: #182230;
+  color: #f8fafc;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  box-shadow:
+    0 10px 25px -5px rgba(15, 23, 42, 0.25),
+    0 4px 10px -2px rgba(15, 23, 42, 0.1);
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
 }
 
-/* ── Row 1: 6 KPI Cards ── */
-.bezent-wf-master-kpi-grid {
+.bezent-wf-help-trigger:hover .bezent-wf-help-popover,
+.bezent-wf-help-trigger:focus-within .bezent-wf-help-popover,
+.bezent-wf-help-popover--visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.bezent-wf-help-popover::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 8px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent #182230 transparent;
+}
+
+/* ── Executive 6 KPI Cards (Mockup Tier 1) ── */
+.bezent-exec-kpi-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 12px;
+  gap: 14px;
+  width: 100%;
 }
 
 @media (max-width: 1280px) {
-  .bezent-wf-master-kpi-grid {
+  .bezent-exec-kpi-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-@media (max-width: 640px) {
-  .bezent-wf-master-kpi-grid {
+@media (max-width: 768px) {
+  .bezent-exec-kpi-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-.bezent-wf-master-kpi-card {
+@media (max-width: 480px) {
+  .bezent-exec-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bezent-exec-kpi-card {
+  position: relative;
   background: #ffffff;
   border: 1px solid #e7eaf0;
   border-radius: 12px;
-  padding: 14px 16px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 124px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+  min-height: 140px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
-  transition: all 0.16s ease;
-  position: relative;
 }
 
-.bezent-wf-master-kpi-card:hover {
+.bezent-exec-kpi-card:hover {
+  transform: translateY(-2px);
+  background: #ffffff;
   border-color: #cbd5e1;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
-  transform: translateY(-1.5px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
 }
 
-[data-theme='dark'] .bezent-wf-master-kpi-card {
+[data-theme='dark'] .bezent-exec-kpi-card {
   background: #1e293b;
   border-color: #334155;
+  box-shadow: none;
 }
 
-[data-theme='dark'] .bezent-wf-master-kpi-card:hover {
+[data-theme='dark'] .bezent-exec-kpi-card:hover {
+  background: #24344d;
   border-color: #475569;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 
-.bezent-wf-master-kpi-top {
+.bezent-exec-kpi-card__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 12px;
 }
 
-.bezent-wf-master-kpi-icon-badge {
+.bezent-exec-kpi-card__icon-badge {
   width: 32px;
   height: 32px;
   border-radius: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
-.bezent-wf-master-kpi-icon-badge--blue {
-  background: #eff6ff;
+.bezent-exec-kpi-card__icon-badge--blue {
+  background: #e8f1fc;
   color: #2563eb;
 }
 
-.bezent-wf-master-kpi-icon-badge--green {
-  background: #ecfdf5;
-  color: #10b981;
+.bezent-exec-kpi-card__icon-badge--green {
+  background: #e6f7ef;
+  color: #159a70;
 }
 
-.bezent-wf-master-kpi-icon-badge--amber {
-  background: #fffbeb;
-  color: #f59e0b;
+.bezent-exec-kpi-card__icon-badge--amber {
+  background: #fff4e6;
+  color: #ea580c;
 }
 
-.bezent-wf-master-kpi-icon-badge--coral {
-  background: #fff1f2;
-  color: #f43f5e;
+.bezent-exec-kpi-card__icon-badge--red {
+  background: #fef2f2;
+  color: #dc2626;
 }
 
-.bezent-wf-master-kpi-icon-badge--indigo {
-  background: #eef2ff;
-  color: #6366f1;
+.bezent-exec-kpi-card__icon-badge--purple {
+  background: #f3e8ff;
+  color: #7c3aed;
 }
 
-.bezent-wf-master-kpi-icon-badge--cyan {
-  background: #ecfeff;
+.bezent-exec-kpi-card__icon-badge--teal {
+  background: #e6fffa;
   color: #0d9488;
 }
 
-.bezent-wf-master-kpi-dots {
+.bezent-exec-kpi-card__more {
   color: #94a3b8;
-  font-size: 14px;
-  cursor: pointer;
+  font-size: 16px;
+  letter-spacing: 1px;
   line-height: 1;
+  transition: color 0.15s ease;
 }
 
-.bezent-wf-master-kpi-body {
-  margin-top: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.bezent-exec-kpi-card:hover .bezent-exec-kpi-card__more {
+  color: #475569;
 }
 
-.bezent-wf-master-kpi-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: #64748b;
-  white-space: nowrap;
+.bezent-exec-kpi-card__main {
+  margin-bottom: 14px;
 }
 
-[data-theme='dark'] .bezent-wf-master-kpi-title {
-  color: #94a3b8;
-}
-
-.bezent-wf-master-kpi-val {
-  font-size: 23px;
+.bezent-exec-kpi-card__value {
+  font-size: 24px;
   font-weight: 800;
   color: #182230;
-  line-height: 1.1;
-  letter-spacing: -0.01em;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
-[data-theme='dark'] .bezent-wf-master-kpi-val {
+[data-theme='dark'] .bezent-exec-kpi-card__value {
   color: #f8fafc;
 }
 
-.bezent-wf-master-kpi-bottom {
+.bezent-exec-kpi-card__title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #475569;
+  margin-top: 4px;
+  line-height: 1.25;
+}
+
+[data-theme='dark'] .bezent-exec-kpi-card__title {
+  color: #94a3b8;
+}
+
+.bezent-exec-kpi-card__footer {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: auto;
 }
 
-.bezent-wf-master-kpi-trend {
-  font-size: 11px;
+.bezent-exec-kpi-card__trend {
+  font-size: 11.5px;
   font-weight: 600;
-  white-space: nowrap;
+  line-height: 1.2;
 }
 
-.bezent-wf-master-kpi-trend--up {
-  color: #10b981;
+.bezent-exec-kpi-card__trend--up {
+  color: #159a70;
 }
 
-.bezent-wf-master-kpi-trend--down {
-  color: #f43f5e;
+.bezent-exec-kpi-card__trend--down {
+  color: #dc2626;
 }
 
-.bezent-wf-master-kpi-trend--neutral {
+.bezent-exec-kpi-card__trend--neutral {
   color: #64748b;
 }
 
-.bezent-wf-master-kpi-visual {
-  width: 54px;
-  height: 28px;
+[data-theme='dark'] .bezent-exec-kpi-card__trend--neutral {
+  color: #94a3b8;
+}
+
+.bezent-exec-kpi-card__visual {
+  display: inline-flex;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+/* Micro bar chart */
+.bezent-micro-bars {
   display: flex;
   align-items: flex-end;
-  justify-content: flex-end;
+  gap: 2.5px;
+  height: 26px;
 }
 
-/* ── Row 2: Two Large Analytics Panels (58fr / 42fr) ── */
-.bezent-wf-master-analytics-grid {
+.bezent-micro-bar {
+  width: 3.5px;
+  border-radius: 2px 2px 0 0;
+  background: #3478d4;
+}
+
+.bezent-micro-bar--red {
+  background: #f87171;
+}
+
+.bezent-micro-bar--h1 {
+  height: 10px;
+}
+.bezent-micro-bar--h2 {
+  height: 16px;
+}
+.bezent-micro-bar--h3 {
+  height: 12px;
+}
+.bezent-micro-bar--h4 {
+  height: 20px;
+}
+.bezent-micro-bar--h5 {
+  height: 26px;
+}
+
+.bezent-micro-bar--r1 {
+  height: 14px;
+}
+.bezent-micro-bar--r2 {
+  height: 8px;
+}
+.bezent-micro-bar--r3 {
+  height: 18px;
+}
+.bezent-micro-bar--r4 {
+  height: 12px;
+}
+.bezent-micro-bar--r5 {
+  height: 22px;
+}
+
+/* Micro ring chart */
+.bezent-micro-ring {
+  width: 28px;
+  height: 28px;
+}
+
+/* ── Workforce Analytics: Donut Distribution Section ── */
+.bezent-wf-analytics-grid {
   display: grid;
-  grid-template-columns: 58fr 42fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
+  width: 100%;
 }
 
-@media (max-width: 1080px) {
-  .bezent-wf-master-analytics-grid {
+@media (max-width: 1024px) {
+  .bezent-wf-analytics-grid {
     grid-template-columns: 1fr;
   }
 }
 
-.bezent-wf-master-panel {
+.bezent-wf-donut-card {
+  position: relative;
   background: #ffffff;
   border: 1px solid #e7eaf0;
   border-radius: 14px;
-  padding: 18px 20px;
+  padding: 20px 22px;
+  box-sizing: border-box;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  min-height: 350px;
 }
 
-[data-theme='dark'] .bezent-wf-master-panel {
-  background: #1e293b;
-  border-color: #334155;
+[data-theme='dark'] .bezent-wf-donut-card {
+  background: #0f172a;
+  border-color: #1e293b;
 }
 
-.bezent-wf-master-panel-header {
+.bezent-wf-donut-card__header {
+  margin-bottom: 16px;
+}
+
+.bezent-wf-donut-card__header-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 14px;
+  gap: 12px;
 }
 
-.bezent-wf-master-panel-title-group {
-  display: flex;
+.bezent-wf-donut-card__link {
+  font-size: 12px;
+  font-weight: 600;
+  color: #3478d4;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
+  transition: color 0.15s ease;
+  white-space: nowrap;
 }
 
-.bezent-wf-master-panel-title {
+.bezent-wf-donut-card__link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+[data-theme='dark'] .bezent-wf-donut-card__link {
+  color: #60a5fa;
+}
+
+.bezent-wf-donut-card__title {
   font-size: 15px;
   font-weight: 700;
   color: #182230;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-[data-theme='dark'] .bezent-wf-master-panel-title {
+[data-theme='dark'] .bezent-wf-donut-card__title {
   color: #f8fafc;
 }
 
-.bezent-wf-master-panel-link {
+.bezent-wf-donut-card__desc {
   font-size: 12px;
-  font-weight: 600;
-  color: #2563eb;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+  color: #64748b;
+  margin: 4px 0 0 0;
+  line-height: 1.4;
 }
 
-.bezent-wf-master-panel-link:hover {
-  text-decoration: underline;
+[data-theme='dark'] .bezent-wf-donut-card__desc {
+  color: #94a3b8;
 }
 
-/* Left Panel: Growth & Donut Subgrid */
-.bezent-wf-master-growth-subgrid {
+.bezent-wf-donut-card__body {
   display: grid;
-  grid-template-columns: 50fr 25fr 25fr;
-  gap: 16px;
-  align-items: flex-start;
+  grid-template-columns: 140px 1fr;
+  gap: 20px;
+  align-items: center;
+  flex: 1;
 }
 
-@media (max-width: 860px) {
-  .bezent-wf-master-growth-subgrid {
+@media (max-width: 640px) {
+  .bezent-wf-donut-card__body {
     grid-template-columns: 1fr;
+    justify-items: center;
   }
 }
 
-.bezent-wf-master-chart-col {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.bezent-wf-master-chart-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.bezent-wf-master-sub-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: #334155;
-}
-
-[data-theme='dark'] .bezent-wf-master-sub-title {
-  color: #cbd5e1;
-}
-
-.bezent-wf-master-legend-dots {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 10.5px;
-  color: #64748b;
-}
-
-.bezent-wf-master-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.bezent-wf-master-donut-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 10px;
-}
-
-.bezent-wf-master-donut-wrap {
+.bezent-wf-donut-wrap {
   position: relative;
-  width: 96px;
-  height: 96px;
+  width: 136px;
+  height: 136px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.bezent-wf-master-donut-center {
+.bezent-wf-donut-center {
   position: absolute;
-  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  text-align: center;
+  pointer-events: none;
 }
 
-.bezent-wf-master-donut-val {
-  font-size: 15px;
+.bezent-wf-donut-center__count {
+  font-size: 22px;
   font-weight: 800;
   color: #182230;
-  line-height: 1;
+  line-height: 1.1;
 }
 
-[data-theme='dark'] .bezent-wf-master-donut-val {
-  color: #f8fafc;
+[data-theme='dark'] .bezent-wf-donut-center__count {
+  color: #ffffff;
 }
 
-.bezent-wf-master-donut-lbl {
-  font-size: 10px;
+.bezent-wf-donut-center__label {
+  font-size: 11px;
+  font-weight: 600;
   color: #64748b;
-  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.bezent-wf-master-mini-legend {
+[data-theme='dark'] .bezent-wf-donut-center__label {
+  color: #94a3b8;
+}
+
+.bezent-wf-ranking-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 10px;
   width: 100%;
-  font-size: 11px;
+}
+
+.bezent-wf-ranking-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.bezent-wf-ranking-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+}
+
+.bezent-wf-ranking-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.bezent-wf-ranking-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: #f1f5f9;
   color: #475569;
+  flex-shrink: 0;
 }
 
-.bezent-wf-master-mini-legend-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-/* Right Panel: Composition Subgrid */
-.bezent-wf-master-comp-subgrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-}
-
-@media (max-width: 640px) {
-  .bezent-wf-master-comp-subgrid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.bezent-wf-master-comp-col {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.bezent-wf-master-bar-item {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.bezent-wf-master-bar-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 11px;
-  color: #334155;
-  font-weight: 500;
-}
-
-[data-theme='dark'] .bezent-wf-master-bar-meta {
+[data-theme='dark'] .bezent-wf-ranking-badge {
+  background: #1e293b;
   color: #cbd5e1;
 }
 
-.bezent-wf-master-bar-track {
+.bezent-wf-ranking-name {
+  font-weight: 600;
+  color: #182230;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme='dark'] .bezent-wf-ranking-name {
+  color: #f8fafc;
+}
+
+.bezent-wf-ranking-count {
+  font-weight: 700;
+  color: #334155;
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .bezent-wf-ranking-count {
+  color: #cbd5e1;
+}
+
+.bezent-wf-ranking-track {
   width: 100%;
   height: 6px;
   border-radius: 3px;
@@ -5949,371 +6043,2063 @@
   overflow: hidden;
 }
 
-[data-theme='dark'] .bezent-wf-master-bar-track {
-  background: #334155;
+[data-theme='dark'] .bezent-wf-ranking-track {
+  background: #1e293b;
 }
 
-.bezent-wf-master-bar-fill {
+.bezent-wf-ranking-fill {
   height: 100%;
   border-radius: 3px;
+  transition: width 0.3s ease;
 }
 
-/* ── Row 3: Connected 8-Stage Lifecycle Ribbon ── */
-.bezent-wf-master-lifecycle-card {
-  background: #ffffff;
-  border: 1px solid #e7eaf0;
-  border-radius: 14px;
-  padding: 16px 20px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+.bezent-wf-ranking-fill--0 {
+  background: #3478d4;
+}
+.bezent-wf-ranking-fill--1 {
+  background: #159a70;
+}
+.bezent-wf-ranking-fill--2 {
+  background: #d99a32;
+}
+.bezent-wf-ranking-fill--3 {
+  background: #0d9488;
+}
+.bezent-wf-ranking-fill--4 {
+  background: #64748b;
 }
 
-[data-theme='dark'] .bezent-wf-master-lifecycle-card {
-  background: #1e293b;
-  border-color: #334155;
-}
-
-.bezent-wf-master-lifecycle-ribbon {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 4px;
-  margin-top: 10px;
-  overflow-x: auto;
-  padding-bottom: 2px;
-}
-
-.bezent-wf-master-stage-step {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 6px 10px;
-  border-radius: 8px;
-  transition: background 0.14s ease;
-  flex-shrink: 0;
-}
-
-.bezent-wf-master-stage-step:hover {
-  background: #f8fafc;
-}
-
-[data-theme='dark'] .bezent-wf-master-stage-step:hover {
-  background: #334155;
-}
-
-.bezent-wf-master-stage-icon {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  flex-shrink: 0;
-}
-
-.bezent-wf-master-stage-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.bezent-wf-master-stage-name {
-  font-size: 12px;
-  font-weight: 700;
-  color: #182230;
-  white-space: nowrap;
-}
-
-[data-theme='dark'] .bezent-wf-master-stage-name {
-  color: #f8fafc;
-}
-
-.bezent-wf-master-stage-count {
-  font-size: 11px;
-  font-weight: 600;
-  color: #64748b;
-}
-
-.bezent-wf-master-stage-arrow {
-  color: #cbd5e1;
-  font-size: 14px;
-  flex-shrink: 0;
-}
-
-/* ── Row 4: 3-Column Operational Command Center ── */
-.bezent-wf-master-ops-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
-@media (max-width: 960px) {
-  .bezent-wf-master-ops-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.bezent-wf-master-action-badge-count {
-  background: #ef4444;
-  color: #ffffff;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 1px 6px;
-  border-radius: 10px;
-  margin-left: 6px;
-}
-
-.bezent-wf-master-action-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  background: #f8fafc;
-  border: 1px solid #e7eaf0;
-  border-radius: 10px;
-  transition: all 0.15s ease;
-  cursor: pointer;
-}
-
-.bezent-wf-master-action-item:hover {
-  background: #ffffff;
-  border-color: #cbd5e1;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
-}
-
-[data-theme='dark'] .bezent-wf-master-action-item {
-  background: #0f172a;
-  border-color: #334155;
-}
-
-.bezent-wf-master-action-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.bezent-wf-master-action-title {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-[data-theme='dark'] .bezent-wf-master-action-title {
-  color: #f1f5f9;
-}
-
-.bezent-wf-master-action-tag-high {
-  background: #fef2f2;
-  color: #ef4444;
-  font-size: 10.5px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 6px;
-}
-
-.bezent-wf-master-action-tag-med {
-  background: #fffbeb;
-  color: #f59e0b;
-  font-size: 10.5px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 6px;
-}
-
-.bezent-wf-master-milestone-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 10px;
-  background: #ffffff;
-  border: 1px solid #f1f5f9;
-  border-radius: 10px;
-  transition: all 0.15s ease;
-}
-
-.bezent-wf-master-milestone-item:hover {
-  border-color: #e2e8f0;
-  background: #f8fafc;
-}
-
-[data-theme='dark'] .bezent-wf-master-milestone-item {
-  background: #0f172a;
-  border-color: #334155;
-}
-
-.bezent-wf-master-milestone-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.bezent-wf-master-milestone-meta {
-  display: flex;
-  flex-direction: column;
-}
-
-.bezent-wf-master-milestone-name {
-  font-size: 12.5px;
-  font-weight: 700;
-  color: #1e293b;
-}
-
-[data-theme='dark'] .bezent-wf-master-milestone-name {
-  color: #f8fafc;
-}
-
-.bezent-wf-master-milestone-role {
-  font-size: 11px;
-  color: #64748b;
-}
-
-.bezent-wf-master-milestone-tag {
-  font-size: 11px;
-  font-weight: 600;
-  color: #475569;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.bezent-wf-master-milestone-date-pill {
-  background: #eff6ff;
-  color: #2563eb;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 6px;
-  white-space: nowrap;
-}
-
-/* ── Row 5: 2-Column Bottom Operational & Reports Deck ── */
-.bezent-wf-master-bottom-grid {
-  display: grid;
-  grid-template-columns: 55fr 45fr;
-  gap: 16px;
-}
-
-@media (max-width: 960px) {
-  .bezent-wf-master-bottom-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.bezent-wf-master-activity-row {
+/* ── Supporting Insights Strip ── */
+.bezent-wf-insights-strip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  gap: 8px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #f1f5f9;
 }
 
 @media (max-width: 640px) {
-  .bezent-wf-master-activity-row {
+  .bezent-wf-insights-strip {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-.bezent-wf-master-activity-card {
-  padding: 10px 12px;
+[data-theme='dark'] .bezent-wf-insights-strip {
+  border-top-color: #1e293b;
+}
+
+.bezent-wf-insight-chip {
+  background: #f8fafc;
+  border: 1px solid #e7eaf0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+[data-theme='dark'] .bezent-wf-insight-chip {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.bezent-wf-insight-chip__label {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme='dark'] .bezent-wf-insight-chip__label {
+  color: #94a3b8;
+}
+
+.bezent-wf-insight-chip__val {
+  font-size: 12px;
+  font-weight: 700;
+  color: #182230;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme='dark'] .bezent-wf-insight-chip__val {
+  color: #ffffff;
+}
+
+/* ── Tier 3: Workforce Composition (3-Column Grid) ── */
+.bezent-wf-composition-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+@media (max-width: 1200px) {
+  .bezent-wf-composition-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bezent-wf-composition-card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  padding: 20px 22px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 380px;
+}
+
+[data-theme='dark'] .bezent-wf-composition-card {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-stacked-svg {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+/* ── Tier 4: Workforce Planning Master Command Deck ── */
+.bezent-wf-planning-panel {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  padding: 22px 24px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+  width: 100%;
+}
+
+[data-theme='dark'] .bezent-wf-planning-panel {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-planning-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.bezent-wf-planning-title-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bezent-wf-planning-title {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #182230;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+[data-theme='dark'] .bezent-wf-planning-title {
+  color: #f8fafc;
+}
+
+.bezent-wf-planning-desc {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+[data-theme='dark'] .bezent-wf-planning-desc {
+  color: #94a3b8;
+}
+
+/* 1. Headcount Overview Strip (5 items) */
+.bezent-wf-planning-kpis-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 900px) {
+  .bezent-wf-planning-kpis-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.bezent-wf-planning-kpi-item {
   background: #f8fafc;
   border: 1px solid #e7eaf0;
   border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+[data-theme='dark'] .bezent-wf-planning-kpi-item {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.bezent-wf-planning-kpi-left {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  cursor: pointer;
+  gap: 2px;
+}
+
+.bezent-wf-planning-kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+[data-theme='dark'] .bezent-wf-planning-kpi-label {
+  color: #94a3b8;
+}
+
+.bezent-wf-planning-kpi-val {
+  font-size: 20px;
+  font-weight: 800;
+  color: #182230;
+  line-height: 1.1;
+}
+
+[data-theme='dark'] .bezent-wf-planning-kpi-val {
+  color: #ffffff;
+}
+
+.bezent-wf-planning-kpi-val--red {
+  color: #dc2626;
+}
+
+.bezent-wf-planning-kpi-val--green {
+  color: #159a70;
+}
+
+.bezent-wf-planning-ring-wrap {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bezent-wf-planning-ring-txt {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #182230;
+}
+
+[data-theme='dark'] .bezent-wf-planning-ring-txt {
+  color: #ffffff;
+}
+
+/* 2 & 4 Split */
+.bezent-wf-planning-split {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+@media (max-width: 1024px) {
+  .bezent-wf-planning-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bezent-wf-planning-subpanel {
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+[data-theme='dark'] .bezent-wf-planning-subpanel {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.bezent-wf-planning-subhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bezent-wf-planning-subtitle {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #182230;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-wf-planning-subtitle {
+  color: #f8fafc;
+}
+
+.bezent-wf-planning-subtag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+[data-theme='dark'] .bezent-wf-planning-subtag {
+  background: #0f172a;
+  color: #cbd5e1;
+}
+
+/* Department Capacity Bars */
+.bezent-wf-cap-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bezent-wf-cap-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bezent-wf-cap-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+}
+
+.bezent-wf-cap-name {
+  font-weight: 600;
+  color: #182230;
+}
+
+[data-theme='dark'] .bezent-wf-cap-name {
+  color: #f8fafc;
+}
+
+.bezent-wf-cap-ratio {
+  color: #64748b;
+  font-size: 11.5px;
+  margin-left: 6px;
+}
+
+.bezent-wf-cap-status {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #3478d4;
+}
+
+.bezent-wf-cap-status--gap {
+  color: #d97706;
+}
+
+/* Hiring Requirements Priority List */
+.bezent-wf-hiring-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bezent-wf-hiring-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 1px solid #e7eaf0;
+  border-radius: 8px;
+  gap: 12px;
   transition: all 0.15s ease;
 }
 
-.bezent-wf-master-activity-card:hover {
+.bezent-wf-hiring-item:hover {
   background: #ffffff;
   border-color: #cbd5e1;
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
 }
 
-[data-theme='dark'] .bezent-wf-master-activity-card {
+[data-theme='dark'] .bezent-wf-hiring-item {
   background: #0f172a;
   border-color: #334155;
 }
 
-.bezent-wf-master-activity-top {
+.bezent-wf-hiring-left {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bezent-wf-hiring-role {
+  font-size: 13px;
   font-weight: 600;
-  color: #475569;
-}
-
-.bezent-wf-master-activity-emp {
-  font-size: 12px;
-  font-weight: 700;
   color: #182230;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-[data-theme='dark'] .bezent-wf-master-activity-emp {
+[data-theme='dark'] .bezent-wf-hiring-role {
   color: #f8fafc;
 }
 
-.bezent-wf-master-activity-time {
-  font-size: 10.5px;
+.bezent-wf-hiring-meta {
+  font-size: 11px;
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-wf-hiring-meta {
   color: #94a3b8;
 }
 
-/* Reports 6-Circle Launcher */
-.bezent-wf-master-reports-row {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
+.bezent-wf-hiring-right {
+  display: flex;
+  align-items: center;
   gap: 8px;
-  margin-top: 10px;
+  flex-shrink: 0;
 }
 
-.bezent-wf-master-report-btn {
+.bezent-wf-priority-pill {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.bezent-wf-priority-pill--critical {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.bezent-wf-priority-pill--high {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.bezent-wf-priority-pill--medium {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.bezent-wf-priority-pill--low {
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.bezent-wf-hiring-period {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ── Tier 5: Employee Lifecycle Segmented Pipeline ── */
+.bezent-wf-lifecycle-box {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  padding: 20px 22px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+  width: 100%;
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-box {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-lifecycle-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.bezent-wf-lifecycle-bar-wrap {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.bezent-wf-lifecycle-svg {
+  width: 100%;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.bezent-wf-lifecycle-grid-5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .bezent-wf-lifecycle-grid-5 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.bezent-wf-stage-node {
+  background: #f8fafc;
+  border: 1px solid #e7eaf0;
+  border-radius: 12px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 6px;
-  background: transparent;
-  border: none;
+  gap: 8px;
   cursor: pointer;
-  padding: 4px;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.bezent-wf-master-report-circle {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: #f0f7ff;
-  color: #2563eb;
-  border: 1px solid #dbeafe;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.16s ease;
-}
-
-.bezent-wf-master-report-btn:hover .bezent-wf-master-report-circle {
-  background: #2563eb;
-  color: #ffffff;
+.bezent-wf-stage-node:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.05);
 }
 
-[data-theme='dark'] .bezent-wf-master-report-circle {
+[data-theme='dark'] .bezent-wf-stage-node {
   background: #1e293b;
   border-color: #334155;
-  color: #60a5fa;
 }
 
-.bezent-wf-master-report-title {
-  font-size: 10.5px;
+[data-theme='dark'] .bezent-wf-stage-node:hover {
+  background: #0f172a;
+  border-color: #3478d4;
+}
+
+.bezent-wf-stage-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bezent-wf-stage-icon--blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.bezent-wf-stage-icon--teal {
+  background: #f0fdfa;
+  color: #0d9488;
+}
+
+.bezent-wf-stage-icon--amber {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.bezent-wf-stage-icon--green {
+  background: #f0fdf4;
+  color: #159a70;
+}
+
+.bezent-wf-stage-icon--rose {
+  background: #fef2f2;
+  color: #e11d48;
+}
+
+.bezent-wf-stage-count {
+  font-size: 22px;
+  font-weight: 800;
+  color: #182230;
+  line-height: 1.1;
+}
+
+[data-theme='dark'] .bezent-wf-stage-count {
+  color: #ffffff;
+}
+
+.bezent-wf-stage-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-wf-stage-name {
+  color: #cbd5e1;
+}
+
+.bezent-wf-stage-badge {
+  font-size: 11px;
   font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 12px;
+  background: #e2e8f0;
   color: #475569;
-  line-height: 1.2;
 }
 
-[data-theme='dark'] .bezent-wf-master-report-title {
+[data-theme='dark'] .bezent-wf-stage-badge {
+  background: #334155;
+  color: #e2e8f0;
+}
+
+/* ── Tier 6: HR Action Center ── */
+.bezent-wf-action-card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  padding: 20px 22px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+  width: 100%;
+}
+
+[data-theme='dark'] .bezent-wf-action-card {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-action-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.bezent-wf-action-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bezent-wf-action-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #182230;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+[data-theme='dark'] .bezent-wf-action-title {
+  color: #f8fafc;
+}
+
+.bezent-wf-action-desc {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-wf-action-desc {
   color: #94a3b8;
 }
 
+.bezent-wf-action-summary-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
 
+.bezent-wf-action-summary-badge--caught-up {
+  background: #ecfdf5;
+  color: #059669;
+  border-color: #a7f3d0;
+}
 
+[data-theme='dark'] .bezent-wf-action-summary-badge {
+  background: #1e293b;
+  color: #60a5fa;
+  border-color: #3b82f6;
+}
+
+[data-theme='dark'] .bezent-wf-action-summary-badge--caught-up {
+  background: #064e3b;
+  color: #34d399;
+  border-color: #059669;
+}
+
+.bezent-wf-action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bezent-wf-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e7eaf0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.bezent-wf-action-row:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+[data-theme='dark'] .bezent-wf-action-row {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .bezent-wf-action-row:hover {
+  background: #0f172a;
+  border-color: #38bdf8;
+}
+
+.bezent-wf-action-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.bezent-wf-action-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bezent-wf-action-icon--rose {
+  background: #ffe4e6;
+  color: #e11d48;
+}
+.bezent-wf-action-icon--amber {
+  background: #fef3c7;
+  color: #d97706;
+}
+.bezent-wf-action-icon--blue {
+  background: #dbeafe;
+  color: #2563eb;
+}
+.bezent-wf-action-icon--teal {
+  background: #ccfbf1;
+  color: #0d9488;
+}
+.bezent-wf-action-icon--purple {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+.bezent-wf-action-icon--slate {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+[data-theme='dark'] .bezent-wf-action-icon--rose {
+  background: #881337;
+  color: #fda4af;
+}
+[data-theme='dark'] .bezent-wf-action-icon--amber {
+  background: #78350f;
+  color: #fde68a;
+}
+[data-theme='dark'] .bezent-wf-action-icon--blue {
+  background: #1e3a8a;
+  color: #93c5fd;
+}
+[data-theme='dark'] .bezent-wf-action-icon--teal {
+  background: #134e4a;
+  color: #5eead4;
+}
+[data-theme='dark'] .bezent-wf-action-icon--purple {
+  background: #4c1d95;
+  color: #c4b5fd;
+}
+[data-theme='dark'] .bezent-wf-action-icon--slate {
+  background: #334155;
+  color: #cbd5e1;
+}
+
+.bezent-wf-action-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bezent-wf-action-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #182230;
+  line-height: 1.3;
+}
+
+[data-theme='dark'] .bezent-wf-action-name {
+  color: #f8fafc;
+}
+
+.bezent-wf-action-sub {
+  font-size: 11.5px;
+  color: #64748b;
+  line-height: 1.3;
+}
+
+[data-theme='dark'] .bezent-wf-action-sub {
+  color: #94a3b8;
+}
+
+.bezent-wf-action-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.bezent-wf-action-priority {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.bezent-wf-action-priority--urgent {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.bezent-wf-action-priority--high {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.bezent-wf-action-priority--medium {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.bezent-wf-action-priority--attention {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+[data-theme='dark'] .bezent-wf-action-priority--urgent {
+  background: #7f1d1d;
+  color: #fca5a5;
+}
+[data-theme='dark'] .bezent-wf-action-priority--high {
+  background: #78350f;
+  color: #fde68a;
+}
+[data-theme='dark'] .bezent-wf-action-priority--medium {
+  background: #0c4a6e;
+  color: #7dd3fc;
+}
+[data-theme='dark'] .bezent-wf-action-priority--attention {
+  background: #334155;
+  color: #cbd5e1;
+}
+
+.bezent-wf-action-count {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0f172a;
+  background: #ffffff;
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+[data-theme='dark'] .bezent-wf-action-count {
+  background: #0f172a;
+  color: #f8fafc;
+  border-color: #334155;
+}
+
+.bezent-wf-action-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.bezent-wf-action-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px 16px;
+  gap: 8px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+}
+
+[data-theme='dark'] .bezent-wf-action-empty {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.bezent-wf-action-empty-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #ecfdf5;
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.bezent-wf-action-empty-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #182230;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-wf-action-empty-title {
+  color: #f8fafc;
+}
+
+.bezent-wf-action-empty-desc {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-wf-action-empty-desc {
+  color: #94a3b8;
+}
+
+/* ── Tier 7: Recent Workforce Activity Vertical Timeline ── */
+.bezent-wf-timeline-card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  padding: 22px 24px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+  width: 100%;
+}
+
+[data-theme='dark'] .bezent-wf-timeline-card {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-timeline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 12px;
+}
+
+.bezent-wf-timeline-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bezent-wf-timeline-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #182230;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+[data-theme='dark'] .bezent-wf-timeline-title {
+  color: #f8fafc;
+}
+
+.bezent-wf-timeline-desc {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-wf-timeline-desc {
+  color: #94a3b8;
+}
+
+.bezent-wf-timeline-wrap {
+  position: relative;
+  padding-left: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.bezent-wf-timeline-track-line {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 10px;
+  width: 2px;
+  background: #e2e8f0;
+}
+
+[data-theme='dark'] .bezent-wf-timeline-track-line {
+  background: #334155;
+}
+
+.bezent-wf-timeline-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bezent-wf-timeline-dot {
+  position: absolute;
+  left: -28px;
+  top: 1px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 2px #e2e8f0;
+  z-index: 1;
+}
+
+[data-theme='dark'] .bezent-wf-timeline-dot {
+  border-color: #0f172a;
+  box-shadow: 0 0 0 2px #334155;
+}
+
+.bezent-wf-timeline-dot--blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+.bezent-wf-timeline-dot--teal {
+  background: #f0fdfa;
+  color: #0d9488;
+}
+.bezent-wf-timeline-dot--amber {
+  background: #fffbeb;
+  color: #d97706;
+}
+.bezent-wf-timeline-dot--green {
+  background: #f0fdf4;
+  color: #159a70;
+}
+.bezent-wf-timeline-dot--purple {
+  background: #faf5ff;
+  color: #7c3aed;
+}
+.bezent-wf-timeline-dot--rose {
+  background: #fef2f2;
+  color: #e11d48;
+}
+
+[data-theme='dark'] .bezent-wf-timeline-dot--blue {
+  background: #1e3a8a;
+  color: #93c5fd;
+}
+[data-theme='dark'] .bezent-wf-timeline-dot--teal {
+  background: #134e4a;
+  color: #5eead4;
+}
+[data-theme='dark'] .bezent-wf-timeline-dot--amber {
+  background: #78350f;
+  color: #fde68a;
+}
+[data-theme='dark'] .bezent-wf-timeline-dot--green {
+  background: #064e3b;
+  color: #6ee7b7;
+}
+[data-theme='dark'] .bezent-wf-timeline-dot--purple {
+  background: #4c1d95;
+  color: #c4b5fd;
+}
+[data-theme='dark'] .bezent-wf-timeline-dot--rose {
+  background: #881337;
+  color: #fda4af;
+}
+
+.bezent-wf-timeline-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bezent-wf-timeline-main-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.bezent-wf-timeline-text-block {
+  display: inline;
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
+.bezent-wf-timeline-emp-name {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+[data-theme='dark'] .bezent-wf-timeline-emp-name {
+  color: #f8fafc;
+}
+
+.bezent-wf-timeline-activity-desc {
+  font-weight: 500;
+  color: #334155;
+}
+
+[data-theme='dark'] .bezent-wf-timeline-activity-desc {
+  color: #cbd5e1;
+}
+
+.bezent-wf-timeline-dept-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 1px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .bezent-wf-timeline-dept-tag {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+.bezent-wf-timeline-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-wf-timeline-meta-row {
+  color: #94a3b8;
+}
+
+.bezent-wf-timeline-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bezent-wf-timeline-actor {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bezent-wf-timeline-dot-sep {
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .bezent-wf-timeline-dot-sep {
+  color: #475569;
+}
+
+/* ==========================================================================
+   ✨ Unified & Simplified Workforce Overview Architecture (Mockup Spec) ✨
+   ========================================================================== */
+
+.bezent-wf-simplified-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+/* ── Top Header Controls & Filters ── */
+.bezent-wf-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bezent-wf-filter-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: 20px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-secondary, #475569);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.bezent-wf-filter-pill-btn:hover {
+  background: var(--bg-hover, #f8fafc);
+  border-color: var(--border-strong, #cbd5e1);
+  color: var(--text-primary, #0f172a);
+}
+
+[data-theme='dark'] .bezent-wf-filter-pill-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .bezent-wf-filter-pill-btn:hover {
+  background: #334155;
+  color: #f8fafc;
+}
+
+/* ── Accessible Visually Hidden Utility ── */
+.bezent-visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* ── Mega Section Card ── */
+.bezent-wf-mega-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+}
+
+[data-theme='dark'] .bezent-wf-mega-card {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.bezent-wf-mega-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bezent-wf-mega-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bezent-wf-mega-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eff6ff;
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+.bezent-wf-mega-icon--teal {
+  background: #f0fdfa;
+  color: #0d9488;
+}
+.bezent-wf-mega-icon--purple {
+  background: #faf5ff;
+  color: #7c3aed;
+}
+.bezent-wf-mega-icon--amber {
+  background: #fffbeb;
+  color: #d97706;
+}
+.bezent-wf-mega-icon--rose {
+  background: #fef2f2;
+  color: #e11d48;
+}
+
+[data-theme='dark'] .bezent-wf-mega-icon {
+  background: #1e3a8a;
+  color: #93c5fd;
+}
+[data-theme='dark'] .bezent-wf-mega-icon--teal {
+  background: #134e4a;
+  color: #5eead4;
+}
+[data-theme='dark'] .bezent-wf-mega-icon--purple {
+  background: #4c1d95;
+  color: #c4b5fd;
+}
+[data-theme='dark'] .bezent-wf-mega-icon--amber {
+  background: #78350f;
+  color: #fde68a;
+}
+[data-theme='dark'] .bezent-wf-mega-icon--rose {
+  background: #881337;
+  color: #fda4af;
+}
+
+.bezent-wf-mega-headings {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bezent-wf-mega-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-wf-mega-title {
+  color: #f8fafc;
+}
+
+.bezent-wf-mega-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary, #64748b);
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-wf-mega-subtitle {
+  color: #94a3b8;
+}
+
+.bezent-wf-mega-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #2563eb;
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bezent-wf-mega-link:hover {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+[data-theme='dark'] .bezent-wf-mega-link {
+  color: #60a5fa;
+}
+
+[data-theme='dark'] .bezent-wf-mega-link:hover {
+  background: rgba(37, 99, 235, 0.15);
+}
+
+/* ── Mega Card 1: Workforce Analytics 2-Column Grid ── */
+.bezent-wf-analytics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+@media (max-width: 960px) {
+  .bezent-wf-analytics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bezent-wf-analytics-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bezent-wf-col-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-primary, #1e293b);
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-wf-col-title {
+  color: #f1f5f9;
+}
+
+.bezent-wf-donut-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.bezent-wf-donut-legend-list {
+  flex: 1;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.bezent-wf-legend-item {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  font-size: 13px;
+  line-height: 1.4;
+  gap: 12px;
+  width: 100%;
+}
+
+.bezent-wf-legend-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary, #334155);
+}
+
+[data-theme='dark'] .bezent-wf-legend-left {
+  color: #cbd5e1;
+}
+
+.bezent-wf-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bezent-wf-legend-val {
+  font-weight: 600;
+  color: var(--text-primary, #0f172a);
+}
+
+[data-theme='dark'] .bezent-wf-legend-val {
+  color: #f8fafc;
+}
+
+/* ── Mega Card 2: Workforce Composition 3-Column Grid ── */
+.bezent-wf-composition-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 28px;
+}
+
+@media (max-width: 1080px) {
+  .bezent-wf-composition-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bezent-wf-bars-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bezent-wf-bar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.bezent-wf-bar-label {
+  min-width: 95px;
+  font-weight: 500;
+  color: var(--text-secondary, #475569);
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .bezent-wf-bar-label {
+  color: #94a3b8;
+}
+
+.bezent-wf-bar-track {
+  flex: 1;
+  height: 7px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+[data-theme='dark'] .bezent-wf-bar-track {
+  background: #1e293b;
+}
+
+.bezent-wf-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.bezent-wf-bar-val {
+  min-width: 54px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--text-primary, #0f172a);
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .bezent-wf-bar-val {
+  color: #f8fafc;
+}
+
+/* ── Mega Card 3: Workforce Planning ── */
+.bezent-wf-planning-chips {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 900px) {
+  .bezent-wf-planning-chips {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.bezent-wf-planning-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 8px;
+}
+
+[data-theme='dark'] .bezent-wf-planning-chip {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.bezent-wf-chip-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eff6ff;
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+.bezent-wf-chip-icon--green {
+  background: #ecfdf5;
+  color: #059669;
+}
+.bezent-wf-chip-icon--orange {
+  background: #fff7ed;
+  color: #ea580c;
+}
+.bezent-wf-chip-icon--red {
+  background: #fef2f2;
+  color: #dc2626;
+}
+.bezent-wf-chip-icon--teal {
+  background: #f0fdfa;
+  color: #0d9488;
+}
+
+[data-theme='dark'] .bezent-wf-chip-icon {
+  background: #1e3a8a;
+  color: #93c5fd;
+}
+[data-theme='dark'] .bezent-wf-chip-icon--green {
+  background: #064e3b;
+  color: #6ee7b7;
+}
+[data-theme='dark'] .bezent-wf-chip-icon--orange {
+  background: #7c2d12;
+  color: #fdba74;
+}
+[data-theme='dark'] .bezent-wf-chip-icon--red {
+  background: #7f1d1d;
+  color: #fca5a5;
+}
+[data-theme='dark'] .bezent-wf-chip-icon--teal {
+  background: #134e4a;
+  color: #5eead4;
+}
+
+.bezent-wf-chip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.bezent-wf-chip-label {
+  font-size: 11px;
+  color: var(--text-secondary, #64748b);
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .bezent-wf-chip-label {
+  color: #94a3b8;
+}
+
+.bezent-wf-chip-val {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+}
+
+[data-theme='dark'] .bezent-wf-chip-val {
+  color: #f8fafc;
+}
+
+.bezent-wf-planning-split {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 32px;
+}
+
+@media (max-width: 960px) {
+  .bezent-wf-planning-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bezent-wf-dept-headcount-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.bezent-wf-dept-headcount-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary, #1e293b);
+}
+
+[data-theme='dark'] .bezent-wf-dept-headcount-top {
+  color: #f1f5f9;
+}
+
+.bezent-wf-dept-bar-track {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+[data-theme='dark'] .bezent-wf-dept-bar-track {
+  background: #334155;
+}
+
+.bezent-wf-dept-bar-fill {
+  height: 100%;
+  background: #2563eb;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+/* Hiring Table in Planning */
+.bezent-wf-hiring-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.bezent-wf-hiring-table th {
+  text-align: left;
+  padding: 6px 10px;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+  border-bottom: 1px solid var(--border-subtle, #f1f5f9);
+}
+
+[data-theme='dark'] .bezent-wf-hiring-table th {
+  color: #94a3b8;
+  border-bottom-color: #1e293b;
+}
+
+.bezent-wf-hiring-table td {
+  padding: 10px;
+  border-bottom: 1px solid var(--border-subtle, #f8fafc);
+  color: var(--text-primary, #1e293b);
+}
+
+[data-theme='dark'] .bezent-wf-hiring-table td {
+  border-bottom-color: #1e293b;
+  color: #cbd5e1;
+}
+
+.bezent-wf-priority-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.bezent-wf-priority-pill--high {
+  color: #dc2626;
+  background: #fef2f2;
+}
+.bezent-wf-priority-pill--medium {
+  color: #d97706;
+  background: #fffbeb;
+}
+.bezent-wf-priority-pill--low {
+  color: #059669;
+  background: #ecfdf5;
+}
+
+[data-theme='dark'] .bezent-wf-priority-pill--high {
+  background: rgba(220, 38, 38, 0.2);
+  color: #fca5a5;
+}
+[data-theme='dark'] .bezent-wf-priority-pill--medium {
+  background: rgba(217, 119, 6, 0.2);
+  color: #fde68a;
+}
+[data-theme='dark'] .bezent-wf-priority-pill--low {
+  background: rgba(5, 150, 105, 0.2);
+  color: #6ee7b7;
+}
+
+.bezent-wf-status-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.bezent-wf-status-pill--open {
+  background: #eff6ff;
+  color: #2563eb;
+}
+.bezent-wf-status-pill--planned {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-wf-status-pill--open {
+  background: #1e3a8a;
+  color: #93c5fd;
+}
+[data-theme='dark'] .bezent-wf-status-pill--planned {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+/* ── Mega Card 4: Employee Lifecycle Connected Chevrons ── */
+.bezent-wf-chevrons-container {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  gap: 6px;
+  border-radius: 8px;
+  background: transparent;
+}
+
+.bezent-wf-chevron-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 14px;
+  position: relative;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.bezent-wf-chevron-item--first {
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%);
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.bezent-wf-chevron-item--mid {
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%, 16px 50%);
+}
+
+.bezent-wf-chevron-item--last {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 16px 50%);
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.bezent-wf-action-item__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.bezent-wf-action-item__right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.bezent-wf-action-count-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+[data-theme='dark'] .bezent-wf-action-count-pill {
+  background: #7f1d1d;
+  color: #fca5a5;
+}
+
+.bezent-wf-chevron-item--blue {
+  background: #eef6ff;
+  color: #2563eb;
+}
+.bezent-wf-chevron-item--green {
+  background: #ecfdf5;
+  color: #059669;
+}
+.bezent-wf-chevron-item--amber {
+  background: #fffbeb;
+  color: #d97706;
+}
+.bezent-wf-chevron-item--purple {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+.bezent-wf-chevron-item--rose {
+  background: #fef2f2;
+  color: #e11d48;
+}
+
+[data-theme='dark'] .bezent-wf-chevron-item--blue {
+  background: #1e3a8a;
+  color: #bfdbfe;
+}
+[data-theme='dark'] .bezent-wf-chevron-item--green {
+  background: #064e3b;
+  color: #a7f3d0;
+}
+[data-theme='dark'] .bezent-wf-chevron-item--amber {
+  background: #78350f;
+  color: #fde68a;
+}
+[data-theme='dark'] .bezent-wf-chevron-item--purple {
+  background: #4c1d95;
+  color: #ddd6fe;
+}
+[data-theme='dark'] .bezent-wf-chevron-item--rose {
+  background: #881337;
+  color: #fecdd3;
+}
+
+.bezent-wf-chevron-item:hover {
+  filter: brightness(0.96);
+  transform: translateY(-1px);
+}
+
+.bezent-wf-chevron-icon {
+  margin-bottom: 4px;
+}
+
+.bezent-wf-chevron-num {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.bezent-wf-chevron-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #475569);
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .bezent-wf-chevron-label {
+  color: #cbd5e1;
+}
+
+/* ── Bottom 3-Column Split: Action Center + Activity + Mascot ── */
+.bezent-wf-bottom-split {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr 0.85fr;
+  gap: 20px;
+  align-items: stretch;
+}
+
+@media (max-width: 1080px) {
+  .bezent-wf-bottom-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mascot / Culture Card */
+.bezent-wf-mascot-card {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  border: 1px solid #d1fae5;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme='dark'] .bezent-wf-mascot-card {
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+  border-color: #047857;
+}
+
+.bezent-wf-speech-bubble {
+  background: #ffffff;
+  color: #1e293b;
+  padding: 8px 14px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  margin-bottom: 14px;
+  position: relative;
+}
+
+[data-theme='dark'] .bezent-wf-speech-bubble {
+  background: #334155;
+  color: #f8fafc;
+}
+
+.bezent-wf-speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px 6px 0;
+  border-style: solid;
+  border-color: #ffffff transparent;
+  display: block;
+  width: 0;
+}
+
+[data-theme='dark'] .bezent-wf-speech-bubble::after {
+  border-color: #334155 transparent;
+}
+
+.bezent-wf-mascot-img {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+  transition: transform 0.25s ease;
+}
+
+.bezent-wf-mascot-card:hover .bezent-wf-mascot-img {
+  transform: scale(1.05);
+}
+
+/* ── Footer Metadata Row ── */
+.bezent-wf-footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-tertiary, #94a3b8);
+  padding: 12px 4px 24px;
+  border-top: 1px solid var(--border-subtle, #f1f5f9);
+}
+
+[data-theme='dark'] .bezent-wf-footer-row {
+  border-top-color: #1e293b;
+  color: #64748b;
+}
+
+.bezent-wf-footer-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bezent-wf-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+}

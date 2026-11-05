@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { WorkforceOverviewPage } from '../pages/WorkforceOverviewPage';
 
 describe('Workforce Overview Page', () => {
-  it('renders page header with title, subtitle, and eyebrow', () => {
+  it('renders page header with title and info popover trigger', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <WorkforceOverviewPage />
@@ -12,13 +12,10 @@ describe('Workforce Overview Page', () => {
     );
 
     expect(html).toContain('Workforce Overview');
-    expect(html).toContain(
-      'Your central view of employee activity, workforce changes, and pending actions.',
-    );
-    expect(html).toContain('HRMS · Workforce');
+    expect(html).toContain('bezent-wf-help-btn');
   });
 
-  it('renders all 6 approved KPI summary cards cleanly', () => {
+  it('renders Tier 1: all 6 Executive KPI summary cards cleanly', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <WorkforceOverviewPage />
@@ -27,104 +24,92 @@ describe('Workforce Overview Page', () => {
 
     expect(html).toContain('Total Employees');
     expect(html).toContain('Active Employees');
-    expect(html).toContain('Onboarding');
-    expect(html).toContain('Pending Approvals');
-    expect(html).toContain('Upcoming Changes');
-    expect(html).toContain('Offboarding');
+    expect(html).toContain('New Joiners');
+    expect(html).toContain('Employee Exits');
+    expect(html).toContain('Retention Rate');
+    expect(html).toContain('Workforce Growth');
   });
 
-  it('renders Pending Actions and Recent Workforce Activity sections', () => {
+  it('renders Tier 2: 01. Department Distribution & 02. Location Distribution', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <WorkforceOverviewPage />
       </MemoryRouter>,
     );
 
-    expect(html).toContain('Pending Actions');
+    expect(html).toContain('01. Department Distribution');
+    expect(html).toContain('02. Location Distribution');
+    expect(html).toContain('Largest Department');
+    expect(html).toContain('Largest Location');
+  });
+
+  it('renders Tier 3: Workforce Composition cards', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <WorkforceOverviewPage />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('1. Employment Type');
+    expect(html).toContain('2. Experience Distribution');
+    expect(html).toContain('3. Job Level Distribution');
+  });
+
+  it('renders Tier 4: Workforce Planning command deck and insights', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <WorkforceOverviewPage />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('Workforce Planning');
+    expect(html).toContain('Approved Headcount');
+    expect(html).toContain('Current Headcount');
+    expect(html).toContain('Open Positions');
+    expect(html).toContain('Headcount Gap');
+    expect(html).toContain('Utilization');
+    expect(html).toContain('Department Headcount &amp; Capacity');
+    expect(html).toContain('Hiring Requirements');
+    expect(html).toContain('Highest Staffing Gap');
+  });
+
+  it('renders Tier 5: Employee Lifecycle segmented pipeline', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <WorkforceOverviewPage />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('Employee Lifecycle');
+    expect(html).toContain(
+      'Track workforce progression through hiring, onboarding, probation, confirmation, and alumni stages.',
+    );
+    expect(html).toContain('bezent-wf-lifecycle-box');
+  });
+
+  it('renders Tier 6: HR Action Center compact action card and structure cleanly', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <WorkforceOverviewPage />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('HR Action Center');
+    expect(html).toContain('bezent-wf-action-card');
+    expect(html).toContain(
+      'Immediate pending actions requiring HR team attention, signoff, and compliance review.',
+    );
+  });
+
+  it('renders Tier 7: Recent Workforce Activity vertical timeline cleanly', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <WorkforceOverviewPage />
+      </MemoryRouter>,
+    );
+
     expect(html).toContain('Recent Workforce Activity');
-  });
-
-  it('renders all 6 Workforce module shortcuts with clean concise descriptions', () => {
-    const html = renderToStaticMarkup(
-      <MemoryRouter>
-        <WorkforceOverviewPage />
-      </MemoryRouter>,
-    );
-
-    expect(html).toContain('Workforce Modules');
-
-    // Employees
-    expect(html).toContain('Employees');
-    expect(html).toContain('Profiles &amp; hierarchy');
-
-    // Onboarding
-    expect(html).toContain('Onboarding');
-    expect(html).toContain('Preboarding &amp; induction');
-
-    // Transfers
-    expect(html).toContain('Transfers');
-    expect(html).toContain('Internal mobility');
-
-    // Promotions
-    expect(html).toContain('Promotions');
-    expect(html).toContain('Designations &amp; levels');
-
-    // Offboarding
-    expect(html).toContain('Offboarding');
-    expect(html).toContain('Exits &amp; clearances');
-
-    // Records
-    expect(html).toContain('Records');
-    expect(html).toContain('Compliance &amp; documents');
-  });
-
-  it('renders the header action with Refresh button', () => {
-    const html = renderToStaticMarkup(
-      <MemoryRouter>
-        <WorkforceOverviewPage />
-      </MemoryRouter>,
-    );
-
-    expect(html).toContain('Refresh');
-  });
-
-  it('renders Quick Actions launchpad with 4 primary operational shortcuts', () => {
-    const html = renderToStaticMarkup(
-      <MemoryRouter>
-        <WorkforceOverviewPage />
-      </MemoryRouter>,
-    );
-
-    expect(html).toContain('Quick Actions');
-    expect(html).toContain('Add Employee');
-    expect(html).toContain('Directory');
-    expect(html).toContain('Transfer');
-    expect(html).toContain('Promotion');
-  });
-
-  it('renders Workforce Demographics and Upcoming Milestones & Celebrations cards', () => {
-    const html = renderToStaticMarkup(
-      <MemoryRouter>
-        <WorkforceOverviewPage />
-      </MemoryRouter>,
-    );
-
-    expect(html).toContain('Workforce Demographics');
-    expect(html).toContain('Upcoming Milestones &amp; Celebrations');
-  });
-
-  it('renders New Hire & Onboarding Radar and Today\'s Availability pulse cards', () => {
-    const html = renderToStaticMarkup(
-      <MemoryRouter>
-        <WorkforceOverviewPage />
-      </MemoryRouter>,
-    );
-
-    expect(html).toContain('New Hire &amp; Onboarding Radar');
-    expect(html).toContain("Today&#x27;s Availability");
-    expect(html).toContain('In Office');
-    expect(html).toContain('On-Duty');
-    expect(html).toContain('On Leave');
-    expect(html).toContain('Remote');
+    expect(html).toContain('bezent-wf-timeline-card');
+    expect(html).toContain('bezent-wf-timeline-track-line');
   });
 });
