@@ -1650,7 +1650,7 @@
 .bezent-filter-panel {
   position: absolute;
   top: calc(100% + 10px);
-  right: 0;
+  left: 0;
   width: 480px;
   max-width: calc(100vw - 32px);
   background: var(--bg-card, #ffffff);
@@ -1666,11 +1666,16 @@
   animation: bezentFilterPanelFadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.bezent-filter-panel--right {
+  left: auto;
+  right: 0;
+}
+
 .bezent-filter-panel::before {
   content: '';
   position: absolute;
   top: -6px;
-  right: 48px;
+  left: 28px;
   width: 10px;
   height: 10px;
   background: var(--bg-card, #ffffff);
@@ -1678,6 +1683,11 @@
   border-top: 1px solid var(--border-default, #e2e8f0);
   transform: rotate(45deg);
   z-index: 101;
+}
+
+.bezent-filter-panel--right::before {
+  left: auto;
+  right: 48px;
 }
 
 @keyframes bezentFilterPanelFadeIn {

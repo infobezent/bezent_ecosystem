@@ -27,7 +27,7 @@
   --bezent-logo-text: #202938;
   --primary: #dcebff;
   --primary-accent: #3978f6;
-  --app-canvas: #edf0f5;
+  --app-canvas: #ffffff;
   --workspace: #ffffff;
 
   /* Premium Pastel Enterprise Tokens */
@@ -56,6 +56,7 @@
 
   /* Surfaces */
   --bg-app: var(--app-canvas);
+  --bg-workspace-canvas: #eeeeee;
   --bg-surface: var(--workspace);
   --bg-surface-secondary: #f0f4f9;
   --bg-card: #ffffff;
@@ -371,6 +372,7 @@
 
   /* Surfaces Hierarchy — Deep Midnight Navy */
   --bg-app: #020b1c;
+  --bg-workspace-canvas: #061633;
   --bg-surface: #061633;
   --bg-surface-secondary: #081b3a;
   --bg-card: #081b3a;

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Alert,
   Button,
+  IconButton,
   Inline,
   Modal,
   Page,
@@ -439,43 +440,7 @@ export function EmployeeDirectoryPage() {
   return (
     <Page maxWidth="default" gap="md" className="employees-directory-page">
       {/* 1. Page Header */}
-      <PageHeader
-        title="Employee Directory"
-        actions={
-          canImport || canExport ? (
-            <Inline gap="sm" align="center">
-              {canImport && (
-                <Button
-                  variant="outline"
-                  size="md"
-                  shape="rounded"
-                  className="bezent-btn--import"
-                  leftIcon={<BezentIcon name="upload" size={16} />}
-                  onClick={() => {
-                    setImportFile(null);
-                    setImportStatus(null);
-                    setIsImportModalOpen(true);
-                  }}
-                >
-                  Import
-                </Button>
-              )}
-              {canExport && (
-                <Button
-                  variant="secondary"
-                  size="md"
-                  shape="rounded"
-                  className="bezent-btn--export"
-                  leftIcon={<BezentIcon name="download" size={16} />}
-                  onClick={handleExportCsv}
-                >
-                  Export
-                </Button>
-              )}
-            </Inline>
-          ) : null
-        }
-      />
+      <PageHeader title="Employee Directory" />
       <span className="sr-only" hidden>
         Manage and explore your workforce directory
       </span>
@@ -483,7 +448,7 @@ export function EmployeeDirectoryPage() {
       {/* 2. Candidates-style Search & Action Toolbar with Status Filter Tabs */}
       <Toolbar
         left={
-          <Inline align="center" gap="sm" wrap>
+          <Inline align="center" gap="sm">
             {/* Compact Search Bar with Icon */}
             <div className="bezent-search-bar">
               <BezentIcon name="search" size={16} color="var(--text-secondary, #64748b)" />
@@ -589,19 +554,42 @@ export function EmployeeDirectoryPage() {
           </Inline>
         }
         right={
-          <Inline align="center" gap="sm">
+          <Inline align="center" gap="xs">
             <span className="bezent-records-text" hidden>
               {`${totalCount} Records`}
             </span>
-            <Button
-              variant="secondary"
-              size="md"
-              shape="rounded"
-              leftIcon={<BezentIcon name="add" size="action" />}
+            {canImport && (
+              <IconButton
+                label="Import"
+                variant="ghost"
+                tooltipDirection="down"
+                onClick={() => {
+                  setImportFile(null);
+                  setImportStatus(null);
+                  setIsImportModalOpen(true);
+                }}
+              >
+                <BezentIcon name="upload" size={18} />
+              </IconButton>
+            )}
+            {canExport && (
+              <IconButton
+                label="Export"
+                variant="ghost"
+                tooltipDirection="down"
+                onClick={handleExportCsv}
+              >
+                <BezentIcon name="download" size={18} />
+              </IconButton>
+            )}
+            <IconButton
+              label="Add Employee"
+              variant="solid"
+              tooltipDirection="down"
               onClick={() => navigate('/hrms/workforce/onboarding')}
             >
-              Add Employee
-            </Button>
+              <BezentIcon name="add" size={18} />
+            </IconButton>
           </Inline>
         }
       />

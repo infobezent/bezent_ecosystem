@@ -11,7 +11,7 @@
   justify-content: space-between;
   height: var(--shell-topbar-height, 50px);
   padding: 0 16px;
-  background: var(--app-canvas, #f6f8fc);
+  background: var(--bg-header, var(--app-canvas, #ffffff));
   border-bottom: none;
   box-sizing: border-box;
   font-family: var(--font-family-base);
