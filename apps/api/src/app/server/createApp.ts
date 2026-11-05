@@ -6,6 +6,7 @@ import { notFoundHandler } from '../middleware/notFound.js';
 import { errorHandler } from '../errors/errorHandler.js';
 import { organizationCompatibilityRouter } from '../../applications/hrms/routes/organizationCompatibility.routes.js';
 import { workforceRouter } from '../../applications/hrms/workforce/routes/workforce.routes.js';
+import { workforceSettingsRouter } from '../../applications/hrms/workforce/routes/workforceSettings.routes.js';
 import { onboardingRouter } from '../../applications/hrms/onboarding/routes/onboarding.route.js';
 import { onboardingSettingsRouter } from '../../applications/hrms/settings/onboarding/routes/settings.route.js';
 import { employeeRouter } from '../../applications/hrms/employees/routes/employee.route.js';
@@ -14,6 +15,14 @@ import { employeeDocumentRouter } from '../../applications/hrms/documents/routes
 import { attendanceRouter } from '../../applications/hrms/attendance/routes/attendance.routes.js';
 import { formsRouter } from '../../applications/hrms/settings/forms/routes/forms.route.js';
 import { milestoneRouter } from '../../applications/hrms/milestones/routes/milestone.routes.js';
+import { leaveSettingsRouter } from '../../applications/hrms/leave/routes/leaveGeneralSettings.routes.js';
+import { leaveTypesRouter } from '../../applications/hrms/leave/routes/leaveTypes.routes.js';
+import { leavePoliciesRouter } from '../../applications/hrms/leave/routes/leavePolicies.routes.js';
+import { leaveAdminRouter } from '../../applications/hrms/leave/routes/leaveAdmin.routes.js';
+import { leaveHolidaysRouter } from '../../applications/hrms/leave/routes/leaveHolidays.routes.js';
+import { leaveOperationsRouter } from '../../applications/hrms/leave/routes/leaveOperations.routes.js';
+import { recruitmentRouter } from '../../applications/hrms/recruitment/routes/recruitment.routes.js';
+import { shiftRouter } from '../../applications/hrms/shifts/routes/shift.routes.js';
 import { platformRouter } from '../../platform/routes.js';
 import { companyAdminRouter } from '../../platform/company-admin/routes/companyAdmin.routes.js';
 import { tenantAdminRouter } from '../../administration/tenant-admin/routes/tenantAdmin.routes.js';
@@ -92,6 +101,7 @@ export function createApp(options?: AppOptions): Express {
   app.use('/api/v1/hrms', requirePlatformAuth, requireApplicationAccess('hrms', 'hrms'));
 
   app.use('/api/v1', workforceRouter);
+  app.use('/api/v1', workforceSettingsRouter);
   app.use('/api/v1', organizationCompatibilityRouter);
   app.use('/api/v1', onboardingRouter);
   app.use('/api/v1', onboardingSettingsRouter);
@@ -101,6 +111,14 @@ export function createApp(options?: AppOptions): Express {
   app.use('/api/v1', attendanceRouter);
   app.use('/api/v1', formsRouter);
   app.use('/api/v1', milestoneRouter);
+  app.use('/api/v1', leaveSettingsRouter);
+  app.use('/api/v1', leaveTypesRouter);
+  app.use('/api/v1', leavePoliciesRouter);
+  app.use('/api/v1', leaveAdminRouter);
+  app.use('/api/v1', leaveHolidaysRouter);
+  app.use('/api/v1', leaveOperationsRouter);
+  app.use('/api/v1', recruitmentRouter);
+  app.use('/api/v1', shiftRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

@@ -1,6 +1,7 @@
 export type SettingsModuleId =
   | 'overview'
   | 'dashboard'
+  | 'workforce'
   | 'onboarding'
   | 'leave'
   | 'attendance'
@@ -25,10 +26,11 @@ export const SETTINGS_MODULE_CARDS: SettingsModuleCard[] = [
     icon: 'dashboard',
   },
   {
-    id: 'onboarding',
-    name: 'Administration',
-    description: 'Configure Administration forms, such as the Employee Registration form.',
-    icon: 'onboarding',
+    id: 'workforce',
+    name: 'Workforce',
+    description:
+      'Configure auto-numbering series, hierarchy, forms, onboarding workflows, probation, transfers, and clearance.',
+    icon: 'users',
   },
   {
     id: 'leave',
@@ -53,18 +55,6 @@ export const SETTINGS_MODULE_CARDS: SettingsModuleCard[] = [
     name: 'Performance',
     description: 'Configure performance fields, rating options, review cycles, and goals.',
     icon: 'performance',
-  },
-  {
-    id: 'employees',
-    name: 'Employees',
-    description: 'Configure employee information, custom fields, designations, and options.',
-    icon: 'employees',
-  },
-  {
-    id: 'hr-settings',
-    name: 'HR Settings',
-    description: 'Manage employee change requests and published company policies.',
-    icon: 'hrSettings',
   },
   {
     id: 'milestones',

@@ -1,23 +1,25 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import request from 'supertest';
-import { eq, inArray } from 'drizzle-orm';
-import { createApp } from '../../../../app/server/createApp.js';
+import { eq } from 'drizzle-orm';
 import { isDatabaseConfigured, getDb } from '../../../../db/connection.js';
 import {
   employeeAttendance,
   employees,
   departments,
   employeeLeaveRequests,
+  employeeLeaveBalances,
+  leaveBalanceTransactions,
   attendanceOnDutyRequests,
   attendanceExceptions,
   attendanceRegularizations,
   attendanceMonthlySummaries,
   employeeNotifications,
+  employeeWorkSchedules,
 } from '../../../../db/schema.js';
 import { generateSurrogateId } from '../../../../platform/auth/security.js';
 import { hrmsTestHeaders } from '../../../../platform/__tests__/support/testSession.js';
 import { attendanceOverviewService } from '../service/attendanceOverview.service.js';
 import { attendanceRepository } from '../repository/attendance.repository.js';
+import { ensureLeaveTypeId } from '../../leave/__tests__/support/leaveTestTypes.js';
 
 describe.skipIf(!isDatabaseConfigured)(
   'BEZENT HRMS — Phase 1 Core Attendance Logic & Data Accuracy Regression Suite',
@@ -37,10 +39,8 @@ describe.skipIf(!isDatabaseConfigured)(
     const todayStr = new Date().toISOString().slice(0, 10);
     const pastDateStr = '2026-10-01';
 
-    let headers: Record<string, string>;
-
     beforeAll(async () => {
-      headers = await hrmsTestHeaders(companyId, tenantId);
+      await hrmsTestHeaders(companyId, tenantId);
       await hrmsTestHeaders(otherCompanyId, tenantId);
       const db = getDb();
 
@@ -53,11 +53,16 @@ describe.skipIf(!isDatabaseConfigured)(
       await db
         .delete(attendanceOnDutyRequests)
         .where(eq(attendanceOnDutyRequests.tenantId, tenantId));
+      await db
+        .delete(leaveBalanceTransactions)
+        .where(eq(leaveBalanceTransactions.tenantId, tenantId));
+      await db.delete(employeeLeaveBalances).where(eq(employeeLeaveBalances.tenantId, tenantId));
       await db.delete(employeeLeaveRequests).where(eq(employeeLeaveRequests.tenantId, tenantId));
       await db
         .delete(attendanceMonthlySummaries)
         .where(eq(attendanceMonthlySummaries.tenantId, tenantId));
       await db.delete(employeeNotifications).where(eq(employeeNotifications.tenantId, tenantId));
+      await db.delete(employeeWorkSchedules).where(eq(employeeWorkSchedules.tenantId, tenantId));
       await db.delete(employees).where(eq(employees.tenantId, tenantId));
       await db.delete(departments).where(eq(departments.tenantId, tenantId));
 
@@ -114,6 +119,30 @@ describe.skipIf(!isDatabaseConfigured)(
         },
       ]);
 
+      // 2b. Seed Work Schedules with all 7 days active so test behavior is calendar/day-of-week neutral
+      await db.insert(employeeWorkSchedules).values(
+        [emp1, emp2, emp3, emp4, emp5].map((empId) => ({
+          employeeId: empId,
+          tenantId,
+          companyId,
+          workingCalendar: 'standard',
+          workSchedule: 'general_shift',
+          workingDays: [
+            'Monday',
+            'Tuesday',
+            'Wednesday',
+            'Thursday',
+            'Friday',
+            'Saturday',
+            'Sunday',
+          ],
+          startTime: '09:00',
+          endTime: '18:00',
+          breakMinutes: 0,
+          lunchMinutes: 0,
+        })),
+      );
+
       // 3. Seed Attendance Records for today
       await db.insert(employeeAttendance).values([
         {
@@ -164,10 +193,10 @@ describe.skipIf(!isDatabaseConfigured)(
         tenantId,
         companyId,
         employeeId: emp4,
-        leaveType: 'annual',
+        leaveTypeId: await ensureLeaveTypeId(tenantId, companyId, 'AL'),
         startDate: todayStr,
         endDate: todayStr,
-        totalDays: 1,
+        totalDays: '1.00',
         reason: 'Annual Leave',
         status: 'approved',
       });
@@ -341,8 +370,8 @@ describe.skipIf(!isDatabaseConfigured)(
       expect(health.status).toBe('in_progress');
       expect(health.operationalStage).toBe('in_progress');
 
-      // Schedule Integrity: Fallback schedule accounts for employees without explicit assignment
-      expect(health.fallbackScheduleCount).toBe(5);
+      // Schedule Integrity: valid assigned or fallback schedule accounts for all eligible employees
+      expect(health.assignedScheduleCount + health.fallbackScheduleCount).toBe(5);
       expect(health.unresolvedScheduleCount).toBe(0);
       expect(health.missingScheduleCount).toBe(0);
     });

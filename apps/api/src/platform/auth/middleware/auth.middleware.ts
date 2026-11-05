@@ -176,7 +176,12 @@ export async function requireEssAuth(req: Request, _res: Response, next: NextFun
       );
     }
 
-    if (emp.employmentStatus === 'terminated' || emp.employmentStatus === 'suspended') {
+    if (
+      emp.employmentStatus === 'terminated' ||
+      emp.employmentStatus === 'suspended' ||
+      emp.employmentStatus === 'resigned' ||
+      emp.employmentStatus === 'pending_activation'
+    ) {
       throw new ForbiddenError('Employee account is inactive or suspended', 'EMPLOYEE_INACTIVE');
     }
 

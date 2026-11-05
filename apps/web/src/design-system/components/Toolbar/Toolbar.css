@@ -37,21 +37,24 @@
   gap: var(--space-3);
 }
 
-/* Segmented Filter Tabs */
+/* Segmented Filter Tabs — Clean Enterprise Tabs */
 .bezent-filter-tabs {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  background-color: var(--bg-surface-secondary, #f1f5f9);
-  padding: var(--space-1);
-  border-radius: var(--radius-md);
+  gap: var(--space-1, 4px);
+  background-color: #f1f5f9;
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: none;
+  margin-left: 14px;
 }
 
 .bezent-filter-tab {
   background: transparent;
   border: none;
   padding: 6px 14px;
-  border-radius: var(--radius-sm);
+  border-radius: 6px;
   font-size: var(--font-tab-size, var(--font-size-md, 13px));
   font-weight: var(--font-tab-weight, 500);
   line-height: var(--font-tab-line-height, var(--line-height-snug, 1.375));
@@ -60,21 +63,25 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-1-5);
-  transition:
-    background-color 140ms ease,
-    color 140ms ease;
+  transition: all 140ms ease;
 }
 
 .bezent-filter-tab:hover {
   color: var(--text-primary, #0f172a);
 }
 
+.bezent-filter-tab:focus-visible {
+  outline: 2px solid var(--border-focus, #38bdf8);
+  outline-offset: 2px;
+}
+
 .bezent-filter-tab.is-active,
 .bezent-filter-tab--active {
-  background-color: var(--bg-surface, #ffffff);
-  color: var(--text-primary, #0f172a);
+  background-color: var(--bezent-toggle-active-bg, #071e49);
+  color: #ffffff !important;
   font-weight: var(--font-weight-semibold, 600);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px rgba(7, 30, 73, 0.15);
+  transform: none;
 }
 
 .bezent-filter-tab-count {
@@ -89,6 +96,82 @@
 .bezent-filter-tab--active .bezent-filter-tab-count {
   background-color: var(--bg-hover, #c2e7ff);
   color: var(--text-primary, #001d35);
+}
+
+/* ── Modern Segmented View Mode Toggle ── */
+.bezent-view-toggle {
+  display: inline-flex;
+  align-items: center;
+  background-color: #f1f5f9;
+  padding: 2.5px;
+  border-radius: 8px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: none;
+  gap: 2px;
+  height: 36px;
+  box-sizing: border-box;
+}
+
+.bezent-view-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, #64748b);
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+}
+
+/* ── Toolbar Action Buttons Height Alignment (36px) ── */
+.bezent-toolbar .bezent-btn {
+  height: 36px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.bezent-view-toggle__btn .bezent-material-icon {
+  font-size: 19px;
+  width: 19px;
+  height: 19px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.16s ease;
+}
+
+.bezent-view-toggle__btn:not(.is-active) .bezent-material-icon {
+  color: var(--text-secondary, #64748b) !important;
+}
+
+.bezent-view-toggle__btn:hover:not(.is-active) {
+  color: var(--text-primary, #0f172a);
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.bezent-view-toggle__btn:focus-visible {
+  outline: 2px solid var(--border-focus, #38bdf8);
+  outline-offset: 2px;
+}
+
+.bezent-view-toggle__btn:hover:not(.is-active) .bezent-material-icon {
+  color: var(--text-primary, #0f172a) !important;
+}
+
+.bezent-view-toggle__btn.is-active {
+  background-color: var(--bezent-toggle-active-bg, #071e49);
+  color: #ffffff !important;
+  box-shadow: 0 1px 2px rgba(7, 30, 73, 0.2);
+  transform: none;
+}
+
+.bezent-view-toggle__btn.is-active .bezent-material-icon {
+  color: #ffffff !important;
 }
 
 /* ── Compact Filter Toolbar Grid ── */
@@ -143,4 +226,33 @@
 
 [data-theme='dark'] .bezent-filter-toolbar__more {
   border-top-color: rgba(56, 189, 248, 0.2);
+}
+
+/* ── Responsive Toolbar & Filter Tabs ── */
+@media (max-width: 1024px) {
+  .bezent-filter-tabs {
+    margin-left: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .bezent-filter-tabs::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .bezent-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3, 12px);
+  }
+  .bezent-toolbar__left {
+    width: 100%;
+  }
+  .bezent-toolbar__right {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }

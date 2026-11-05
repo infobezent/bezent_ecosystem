@@ -2300,10 +2300,11 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: var(--bg-surface-secondary, #f0f4f9);
+  background: var(--bg-surface, #ffffff);
   padding: 3px;
   border-radius: 8px;
   border: 1px solid var(--border-default, #dde3ea);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .onboarding-page__tab,
@@ -2331,9 +2332,16 @@
 .onboarding-page__tab--active,
 .onboarding-page__tab.is-active,
 .bezent-filter-tab.is-active {
-  background: var(--bezent-toggle-active-bg, #071e49);
-  color: #ffffff !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  background: var(--bg-hover, #c2e7ff);
+  color: var(--text-brand, #001d35) !important;
+  box-shadow: 0 1px 2px rgba(0, 29, 53, 0.08);
+}
+
+.onboarding-page__tab--active:hover,
+.onboarding-page__tab.is-active:hover,
+.bezent-filter-tab.is-active:hover {
+  background: #a8dbfc;
+  color: var(--text-brand, #001d35) !important;
 }
 
 .onboarding-page__tab-count,
@@ -2349,8 +2357,8 @@
 .onboarding-page__tab--active .onboarding-page__tab-count,
 .onboarding-page__tab.is-active .bezent-filter-tab-count,
 .bezent-filter-tab.is-active .bezent-filter-tab-count {
-  background: rgba(255, 255, 255, 0.2);
-  color: #ffffff;
+  background: rgba(0, 29, 53, 0.12);
+  color: var(--text-brand, #001d35);
 }
 
 /* Person Table Cell */

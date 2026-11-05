@@ -3231,6 +3231,7 @@ export class AttendanceRepository {
         halfDay: 0,
         onLeave: 0,
         holiday: 0,
+        weeklyOff: 0,
         totalWorkedMinutes: 0,
         totalLateMinutes: 0,
       };
@@ -3253,6 +3254,7 @@ export class AttendanceRepository {
           else if (att.status === 'half_day') totals.halfDay++;
           else if (att.status === 'on_leave') totals.onLeave++;
           else if (att.status === 'holiday') totals.holiday++;
+          else if (att.status === 'weekly_off') totals.weeklyOff++;
 
           totals.totalWorkedMinutes += att.workedMinutes;
           totals.totalLateMinutes += att.lateMinutes;
@@ -3269,7 +3271,7 @@ export class AttendanceRepository {
             isLate: false,
             isMissingPunch: false,
           };
-          if (isWeekend) totals.holiday++;
+          if (isWeekend) totals.weeklyOff++;
           else totals.absent++;
         }
       }
@@ -3652,6 +3654,32 @@ export class AttendanceRepository {
 
     if (rows.length === 0) return null;
     return rows[0]!;
+  }
+
+  async getEmployeeRecord(
+    tenantId: string,
+    companyId: string,
+    employeeId: string,
+    tx?: DbClient,
+  ): Promise<{ id: string; employmentStatus: string; employeeNumber: string } | null> {
+    const db = tx ?? getDb();
+    const [emp] = await db
+      .select({
+        id: employees.id,
+        employmentStatus: employees.employmentStatus,
+        employeeNumber: employees.employeeNumber,
+      })
+      .from(employees)
+      .where(
+        and(
+          eq(employees.tenantId, tenantId),
+          eq(employees.companyId, companyId),
+          eq(employees.id, employeeId),
+        ),
+      )
+      .limit(1);
+
+    return emp ?? null;
   }
 }
 

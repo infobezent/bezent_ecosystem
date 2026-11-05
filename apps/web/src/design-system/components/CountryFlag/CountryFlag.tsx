@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { getCountry, getCountryFlagEmoji } from '../../../shared/globalization';
+import { getCountry } from '../../../shared/globalization';
 import './CountryFlag.css';
 
 export type CountryFlagSize = 'sm' | 'md' | 'lg';
@@ -35,9 +35,7 @@ export const CountryFlag = memo(function CountryFlag({
       title={accessibleName}
     >
       {codeLower ? (
-        <span className={`fi fi-${codeLower} bezent-country-flag__icon`} aria-hidden="true">
-          {country?.flagEmoji || getCountryFlagEmoji(countryCode)}
-        </span>
+        <span className={`fi fi-${codeLower} bezent-country-flag__icon`} aria-hidden="true" />
       ) : (
         <span className="bezent-country-flag__emoji" aria-hidden="true">
           🌐

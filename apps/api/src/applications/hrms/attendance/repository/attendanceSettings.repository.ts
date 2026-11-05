@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, inArray, lte, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, isNull, lte, ne, sql } from 'drizzle-orm';
 import { getDb } from '../../../../db/connection.js';
 import {
   attendancePolicies,
@@ -17,6 +17,7 @@ import {
   employees,
   departments,
   employeeWorkSchedules,
+  hrmsShifts,
   type AttendancePolicy,
   type AttendanceRegularizationSettings,
   type AttendanceDevice,
@@ -585,50 +586,105 @@ export class AttendanceSettingsRepository {
     effectiveFrom?: string,
   ): Promise<AttendancePolicy> {
     const db = getDb();
-    const existing = await this.getPolicyById(tenantId, companyId, policyId);
-    if (!existing) {
-      throw new Error(`Policy ${policyId} not found`);
-    }
+    return db.transaction(async (tx) => {
+      const [existing] = await tx
+        .select()
+        .from(attendancePolicies)
+        .where(
+          and(
+            eq(attendancePolicies.tenantId, tenantId),
+            eq(attendancePolicies.companyId, companyId),
+            eq(attendancePolicies.id, policyId),
+          ),
+        )
+        .for('update');
 
-    if (existing.status === 'draft') {
-      await db
-        .update(attendancePolicies)
-        .set({
-          status: 'published',
-          effectiveFrom:
-            effectiveFrom || existing.effectiveFrom || new Date().toISOString().slice(0, 10),
-          updatedAt: new Date(),
-        })
-        .where(eq(attendancePolicies.id, policyId));
+      if (!existing) {
+        throw new Error(`Policy ${policyId} not found`);
+      }
 
-      return (await this.getPolicyById(tenantId, companyId, policyId))!;
-    }
+      if (existing.status === 'archived') {
+        throw new Error(`Archived policy ${policyId} cannot be published`);
+      }
 
-    // Existing is already published: archive prior version snapshot and create new active published version
-    const nextVersion = (existing.version ?? 1) + 1;
-    const newId = generateSurrogateId('att_pol');
+      const targetEffectiveFrom =
+        effectiveFrom || existing.effectiveFrom || new Date().toISOString().slice(0, 10);
 
-    await db
-      .update(attendancePolicies)
-      .set({
-        status: 'archived',
-        isActive: false,
+      // Check for overlapping/duplicate effectiveFrom among published policies in same scope
+      const scopeConditions = [
+        eq(attendancePolicies.tenantId, tenantId),
+        eq(attendancePolicies.companyId, companyId),
+        eq(attendancePolicies.scope, existing.scope),
+        eq(attendancePolicies.status, 'published'),
+        eq(attendancePolicies.effectiveFrom, targetEffectiveFrom),
+        ne(attendancePolicies.id, existing.id),
+      ];
+      if (existing.scopeId) {
+        scopeConditions.push(eq(attendancePolicies.scopeId, existing.scopeId));
+      } else {
+        scopeConditions.push(isNull(attendancePolicies.scopeId));
+      }
+
+      const [conflict] = await tx
+        .select({ id: attendancePolicies.id })
+        .from(attendancePolicies)
+        .where(and(...scopeConditions))
+        .limit(1);
+
+      if (conflict) {
+        throw new Error(
+          `A published policy for this scope with effective date ${targetEffectiveFrom} already exists`,
+        );
+      }
+
+      if (existing.status === 'draft') {
+        await tx
+          .update(attendancePolicies)
+          .set({
+            status: 'published',
+            isActive: true,
+            effectiveFrom: targetEffectiveFrom,
+            updatedAt: new Date(),
+          })
+          .where(eq(attendancePolicies.id, policyId));
+
+        const [published] = await tx
+          .select()
+          .from(attendancePolicies)
+          .where(eq(attendancePolicies.id, policyId));
+
+        return published!;
+      }
+
+      // Existing is already published: publish a new version while preserving existing version
+      if (targetEffectiveFrom < existing.effectiveFrom) {
+        throw new Error(
+          `New policy version effective date (${targetEffectiveFrom}) cannot precede current version effective date (${existing.effectiveFrom})`,
+        );
+      }
+
+      const nextVersion = (existing.version ?? 1) + 1;
+      const newId = generateSurrogateId('att_pol');
+
+      // Do NOT archive prior version so historical and pre-effective calculations remain accurate
+      await tx.insert(attendancePolicies).values({
+        ...existing,
+        id: newId,
+        version: nextVersion,
+        status: 'published',
+        isActive: true,
+        effectiveFrom: targetEffectiveFrom,
+        createdAt: new Date(),
         updatedAt: new Date(),
-      })
-      .where(eq(attendancePolicies.id, policyId));
+      });
 
-    await db.insert(attendancePolicies).values({
-      ...existing,
-      id: newId,
-      version: nextVersion,
-      status: 'published',
-      isActive: true,
-      effectiveFrom: effectiveFrom || new Date().toISOString().slice(0, 10),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      const [newVersionRow] = await tx
+        .select()
+        .from(attendancePolicies)
+        .where(eq(attendancePolicies.id, newId));
+
+      return newVersionRow!;
     });
-
-    return (await this.getPolicyById(tenantId, companyId, newId))!;
   }
 
   /* ── 3. Regularization Settings ─────────────────────────────────── */
@@ -1575,8 +1631,35 @@ export class AttendanceSettingsRepository {
     const prefs = (row?.alertPreferences ?? {}) as Record<string, unknown>;
     const rawRoster = prefs.shiftRosterConfig as Partial<ShiftRosterSettings> | undefined;
 
-    const baseShifts: CompanyShiftTemplate[] =
-      rawRoster?.shifts && rawRoster.shifts.length > 0 ? rawRoster.shifts : DEFAULT_COMPANY_SHIFTS;
+    const dbShifts = await db
+      .select()
+      .from(hrmsShifts)
+      .where(and(eq(hrmsShifts.tenantId, tenantId), eq(hrmsShifts.companyId, companyId)))
+      .catch(() => []);
+
+    let baseShifts: CompanyShiftTemplate[];
+    if (dbShifts.length > 0) {
+      baseShifts = dbShifts.map((s) => ({
+        id: s.id,
+        name: s.name,
+        code: s.code,
+        startTime: s.startTime,
+        endTime: s.endTime,
+        workingDays: s.workingDays,
+        breakMinutes: s.breakMinutes,
+        lunchMinutes: s.lunchMinutes,
+        graceMinutes: s.graceMinutes,
+        isOvernight: s.isOvernight,
+        color: s.color ?? '#2563EB',
+        description: s.description ?? undefined,
+        isActive: s.isActive,
+      }));
+    } else {
+      baseShifts =
+        rawRoster?.shifts && rawRoster.shifts.length > 0
+          ? rawRoster.shifts
+          : DEFAULT_COMPANY_SHIFTS;
+    }
 
     // Retrieve active employee counts assigned to each shift from employeeWorkSchedules
     const scheduleCounts = await db
@@ -1717,6 +1800,29 @@ export class AttendanceSettingsRepository {
 
     const updatedShifts = [...current.shifts, newShift];
     await this.updateShiftRosterSettings(tenantId, companyId, { shifts: updatedShifts });
+
+    const db = getDb();
+    await db
+      .insert(hrmsShifts)
+      .values({
+        id: newShift.id,
+        tenantId,
+        companyId,
+        name: newShift.name,
+        code: newShift.code,
+        description: newShift.description,
+        startTime: newShift.startTime,
+        endTime: newShift.endTime,
+        workingDays: newShift.workingDays,
+        breakMinutes: newShift.breakMinutes,
+        lunchMinutes: newShift.lunchMinutes,
+        graceMinutes: newShift.graceMinutes,
+        isOvernight: newShift.isOvernight,
+        color: newShift.color,
+        isActive: newShift.isActive,
+      })
+      .catch(() => null);
+
     return newShift;
   }
 
@@ -1752,6 +1858,34 @@ export class AttendanceSettingsRepository {
 
     current.shifts[index] = updated;
     await this.updateShiftRosterSettings(tenantId, companyId, { shifts: current.shifts });
+
+    const db = getDb();
+    await db
+      .update(hrmsShifts)
+      .set({
+        name: updated.name,
+        code: updated.code,
+        startTime: updated.startTime,
+        endTime: updated.endTime,
+        workingDays: updated.workingDays,
+        breakMinutes: updated.breakMinutes,
+        lunchMinutes: updated.lunchMinutes,
+        graceMinutes: updated.graceMinutes,
+        isOvernight: updated.isOvernight,
+        color: updated.color,
+        description: updated.description,
+        isActive: updated.isActive,
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(hrmsShifts.id, shiftId),
+          eq(hrmsShifts.tenantId, tenantId),
+          eq(hrmsShifts.companyId, companyId),
+        ),
+      )
+      .catch(() => null);
+
     return updated;
   }
 
@@ -1762,6 +1896,19 @@ export class AttendanceSettingsRepository {
     if (filtered.length === initialLen) return false;
 
     await this.updateShiftRosterSettings(tenantId, companyId, { shifts: filtered });
+
+    const db = getDb();
+    await db
+      .delete(hrmsShifts)
+      .where(
+        and(
+          eq(hrmsShifts.id, shiftId),
+          eq(hrmsShifts.tenantId, tenantId),
+          eq(hrmsShifts.companyId, companyId),
+        ),
+      )
+      .catch(() => null);
+
     return true;
   }
 }

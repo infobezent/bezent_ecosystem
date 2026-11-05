@@ -19,6 +19,7 @@
   flex-shrink: 0;
   user-select: none;
   overflow: hidden;
+  box-shadow: none;
   transition: opacity 0.16s ease;
 }
 

@@ -393,13 +393,18 @@ export class EmployeeRepository {
     };
   }
 
+  async transaction<T>(fn: (tx: DbExecutor) => Promise<T>): Promise<T> {
+    return getDb().transaction(fn as any);
+  }
+
   async update(
     tenantId: string,
     companyId: string,
     id: string,
     dto: UpdateEmployeeDto,
+    executor: DbExecutor = getDb(),
   ): Promise<EmployeeDetails | null> {
-    const db = getDb();
+    const db = executor;
 
     const updateValues: Partial<NewEmployee> = {};
     if (dto.firstName !== undefined) updateValues.firstName = dto.firstName;
@@ -432,7 +437,7 @@ export class EmployeeRepository {
         );
     }
 
-    return this.getById(tenantId, companyId, id);
+    return this.getById(tenantId, companyId, id, db);
   }
 
   /**

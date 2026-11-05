@@ -309,6 +309,118 @@
       "when": 1792700000000,
       "tag": "0043_department_unique_hierarchy",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "5",
+      "when": 1793800000000,
+      "tag": "0044_leave_general_settings_v1",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "5",
+      "when": 1793900000000,
+      "tag": "0045_leave_types_v1",
+      "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "5",
+      "when": 1794000000000,
+      "tag": "0046_leave_policies_v1",
+      "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "5",
+      "when": 1794100000000,
+      "tag": "0047_leave_types_half_day_gender_v1",
+      "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "5",
+      "when": 1794200000000,
+      "tag": "0048_leave_policy_entitlements_v1",
+      "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "5",
+      "when": 1794300000000,
+      "tag": "0049_leave_core_v1",
+      "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "5",
+      "when": 1794400000000,
+      "tag": "0050_leave_holidays_v1",
+      "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "5",
+      "when": 1794500000000,
+      "tag": "0051_leave_approval_v1",
+      "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "5",
+      "when": 1794600000000,
+      "tag": "0052_leave_restrictions_v1",
+      "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "5",
+      "when": 1794700000000,
+      "tag": "0053_leave_accrual_v1",
+      "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "5",
+      "when": 1794800000000,
+      "tag": "0054_leave_operations_v1",
+      "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "5",
+      "when": 1794900000000,
+      "tag": "0055_workforce_settings_core_v1",
+      "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "5",
+      "when": 1795000000000,
+      "tag": "0056_hrms_phase1_business_correctness",
+      "breakpoints": true
+    },
+    {
+      "idx": 57,
+      "version": "5",
+      "when": 1795100000000,
+      "tag": "0057_recruitment_foundation_v1",
+      "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "5",
+      "when": 1795200000000,
+      "tag": "0058_recruitment_workforce_onboarding_handoff",
+      "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "5",
+      "when": 1795300000000,
+      "tag": "0059_database_backed_shifts_and_assignments",
+      "breakpoints": true
     }
   ]
 }

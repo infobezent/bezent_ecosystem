@@ -49,13 +49,13 @@
   border-color: transparent;
 }
 
-/* ── Status Pills ── */
+/* ── Status Pills — Clean Enterprise Pills ── */
 .bezent-status-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   height: 22px;
-  padding: 0 8px;
+  padding: 0 9px;
   border-radius: var(--radius-full);
   font-size: var(--font-caption-size, var(--font-size-xs, 11px));
   font-weight: var(--font-weight-semibold, 600);
@@ -64,6 +64,7 @@
   white-space: nowrap;
   user-select: none;
   border: 1px solid transparent;
+  box-shadow: none;
 }
 
 .bezent-status-pill__dot {

@@ -11,6 +11,7 @@ import {
   employeeAttendance,
   attendanceOnDutyWorkdays,
   employeeLeaveRequests,
+  leaveTypes,
   attendanceRegularizations,
   attendanceExceptions,
   employeeWorkSchedules,
@@ -447,8 +448,9 @@ export class AttendanceMonthlySummaryRepository {
           ),
         ),
       db
-        .select()
+        .select({ request: employeeLeaveRequests, leaveTypeCode: leaveTypes.code })
         .from(employeeLeaveRequests)
+        .innerJoin(leaveTypes, eq(leaveTypes.id, employeeLeaveRequests.leaveTypeId))
         .where(
           and(
             eq(employeeLeaveRequests.tenantId, tenantId),
@@ -458,7 +460,8 @@ export class AttendanceMonthlySummaryRepository {
             lte(employeeLeaveRequests.startDate, endDate),
             gte(employeeLeaveRequests.endDate, startDate),
           ),
-        ),
+        )
+        .then((rows) => rows.map((r) => ({ ...r.request, leaveTypeCode: r.leaveTypeCode }))),
       db
         .select()
         .from(attendanceRegularizations)

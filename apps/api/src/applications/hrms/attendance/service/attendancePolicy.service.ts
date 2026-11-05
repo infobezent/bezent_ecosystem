@@ -71,65 +71,32 @@ export class AttendancePolicyService {
     tenantId: string,
     companyId: string,
     input: UpdateAttendancePolicyInput,
+    userId?: string,
   ): Promise<AttendancePolicy> {
-    const db = getDb();
     const existing = await this.getPolicy(tenantId, companyId);
 
     if (existing.id && existing.id !== 'att_pol_default') {
-      await db
-        .update(attendancePolicies)
-        .set({
-          policyName: input.policyName ?? existing.policyName,
-          captureMethods: input.captureMethods ?? existing.captureMethods,
-          gracePeriodMinutes: input.gracePeriodMinutes ?? existing.gracePeriodMinutes,
-          halfDayThresholdHours:
-            input.halfDayThresholdHours !== undefined
-              ? Number(input.halfDayThresholdHours).toFixed(2)
-              : existing.halfDayThresholdHours,
-          fullDayThresholdHours:
-            input.fullDayThresholdHours !== undefined
-              ? Number(input.fullDayThresholdHours).toFixed(2)
-              : existing.fullDayThresholdHours,
-          missingPunchPolicy: input.missingPunchPolicy ?? existing.missingPunchPolicy,
-          allowRegularization: input.allowRegularization ?? existing.allowRegularization,
-          regularizationCutoffDays:
-            input.regularizationCutoffDays ?? existing.regularizationCutoffDays,
-          requiresApproval: input.requiresApproval ?? existing.requiresApproval,
-          effectiveFrom: input.effectiveFrom ?? existing.effectiveFrom,
-        })
-        .where(eq(attendancePolicies.id, existing.id));
-
-      const [updated] = await db
-        .select()
-        .from(attendancePolicies)
-        .where(eq(attendancePolicies.id, existing.id));
-      return updated!;
+      // Route through attendanceSettingsService to strictly enforce policy immutability on published/archived policies (P0)
+      return attendanceSettingsService.updatePolicy(
+        tenantId,
+        companyId,
+        existing.id,
+        input,
+        userId,
+      );
     }
 
-    const id = generateSurrogateId('att_pol');
-    const newPolicy = {
-      id,
+    return attendanceSettingsService.createPolicy(
       tenantId,
       companyId,
-      policyName: input.policyName ?? 'Standard Attendance Policy',
-      captureMethods: input.captureMethods ?? ['web', 'mobile', 'biometric'],
-      gracePeriodMinutes: input.gracePeriodMinutes ?? 15,
-      halfDayThresholdHours: Number(input.halfDayThresholdHours ?? 4).toFixed(2),
-      fullDayThresholdHours: Number(input.fullDayThresholdHours ?? 8).toFixed(2),
-      missingPunchPolicy: input.missingPunchPolicy ?? 'flag_exception',
-      allowRegularization: input.allowRegularization ?? true,
-      regularizationCutoffDays: input.regularizationCutoffDays ?? 7,
-      requiresApproval: input.requiresApproval ?? true,
-      effectiveFrom: input.effectiveFrom ?? new Date().toISOString().slice(0, 10),
-      isActive: true,
-    };
-
-    await db.insert(attendancePolicies).values(newPolicy);
-    const [created] = await db
-      .select()
-      .from(attendancePolicies)
-      .where(eq(attendancePolicies.id, id));
-    return created!;
+      {
+        policyName: input.policyName ?? 'Standard Corporate Attendance Policy',
+        scope: 'company',
+        status: 'draft',
+        ...input,
+      },
+      userId,
+    );
   }
 }
 

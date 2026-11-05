@@ -199,8 +199,13 @@ describe.skipIf(!isDatabaseConfigured)('Administrative Attendance API', () => {
           fullDayThresholdHours: 8.5,
         });
 
-      expect(updateRes.status).toBe(200);
-      expect(updateRes.body.data.gracePeriodMinutes).toBe(20);
+      if (getRes.body.data.status === 'published' || getRes.body.data.status === 'archived') {
+        expect(updateRes.status).toBe(400);
+        expect(updateRes.body.error.code).toBe('POLICY_IMMUTABLE');
+      } else {
+        expect(updateRes.status).toBe(200);
+        expect(updateRes.body.data.gracePeriodMinutes).toBe(20);
+      }
     });
 
     it('exports attendance CSV reports', async () => {

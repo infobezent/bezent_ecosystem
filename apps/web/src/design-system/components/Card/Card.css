@@ -97,6 +97,231 @@
     0 10px 24px -8px rgba(15, 23, 42, 0.06);
 }
 
+/* ── Enterprise Metric Cards & Surface Containers ── */
+.bezent-card--clay,
+.bezent-clay-card {
+  position: relative;
+  border-radius: 10px;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-default, #dde3ea);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.bezent-card--clay.bezent-card--hoverable,
+.bezent-card--clay[onclick],
+.bezent-card--clay[role='button'] {
+  cursor: pointer;
+}
+
+.bezent-card--clay:hover,
+.bezent-clay-card:hover {
+  transform: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  border-color: #cbd5e1;
+}
+
+/* Card Pastel Variants (Clean Flat Accent & Light Tone) */
+.bezent-clay-card--purple,
+.bezent-kpi-card--purple,
+.bezent-clay-card:has(.bezent-clay-icon--purple),
+.bezent-clay-card:has(.bezent-pulse-stat__dot--purple),
+.bezent-kpi-card:has(.bezent-kpi-card__icon--purple) {
+  background: #faf5ff;
+  border-color: #ede5ff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.bezent-clay-card--purple:hover,
+.bezent-kpi-card--purple:hover,
+.bezent-clay-card:has(.bezent-clay-icon--purple):hover {
+  border-color: #ddd6fe;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.bezent-clay-card--blue,
+.bezent-kpi-card--blue,
+.bezent-clay-card:has(.bezent-clay-icon--blue),
+.bezent-clay-card:has(.bezent-pulse-stat__dot--blue),
+.bezent-kpi-card:has(.bezent-kpi-card__icon--blue) {
+  background: #f0f7ff;
+  border-color: #dbeafe;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.bezent-clay-card--blue:hover,
+.bezent-kpi-card--blue:hover,
+.bezent-clay-card:has(.bezent-clay-icon--blue):hover {
+  border-color: #bfdbfe;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.bezent-clay-card--green,
+.bezent-kpi-card--green,
+.bezent-clay-card:has(.bezent-clay-icon--green),
+.bezent-clay-card:has(.bezent-pulse-stat__dot--green),
+.bezent-kpi-card:has(.bezent-kpi-card__icon--green) {
+  background: #f0fdf4;
+  border-color: #dcfce7;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.bezent-clay-card--green:hover,
+.bezent-kpi-card--green:hover,
+.bezent-clay-card:has(.bezent-clay-icon--green):hover {
+  border-color: #bbf7d0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.bezent-clay-card--amber,
+.bezent-kpi-card--amber,
+.bezent-clay-card:has(.bezent-clay-icon--amber),
+.bezent-clay-card:has(.bezent-pulse-stat__dot--amber),
+.bezent-kpi-card:has(.bezent-kpi-card__icon--amber) {
+  background: #fff7ed;
+  border-color: #ffedd5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.bezent-clay-card--amber:hover,
+.bezent-kpi-card--amber:hover,
+.bezent-clay-card:has(.bezent-clay-icon--amber):hover {
+  border-color: #fed7aa;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.bezent-clay-card--red,
+.bezent-kpi-card--red,
+.bezent-clay-card:has(.bezent-clay-icon--red),
+.bezent-clay-card:has(.bezent-pulse-stat__dot--red),
+.bezent-kpi-card:has(.bezent-kpi-card__icon--red) {
+  background: #fef2f2;
+  border-color: #fecaca;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.bezent-clay-card--red:hover,
+.bezent-kpi-card--red:hover,
+.bezent-clay-card:has(.bezent-clay-icon--red):hover {
+  border-color: #fca5a5;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Enterprise Icon Pill */
+.bezent-clay-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  background: #f1f5f9;
+  color: #071e49;
+  border: 1px solid #e2e8f0;
+  box-shadow: none;
+  transition: none;
+}
+
+.bezent-clay-card:hover .bezent-clay-icon {
+  transform: none;
+}
+
+.bezent-clay-icon--purple {
+  background: #faf5ff;
+  color: #7e22ce;
+  border-color: #ede5ff;
+}
+
+.bezent-clay-icon--blue {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #dbeafe;
+}
+
+.bezent-clay-icon--green {
+  background: #f0fdf4;
+  color: #15803d;
+  border-color: #dcfce7;
+}
+
+.bezent-clay-icon--amber {
+  background: #fff7ed;
+  color: #c2410c;
+  border-color: #ffedd5;
+}
+
+.bezent-clay-icon--red {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+/* Metric Value & Labels */
+.bezent-clay-metric__value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.bezent-clay-metric__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.bezent-clay-metric__caption {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-tertiary, #94a3b8);
+  line-height: 1.2;
+}
+
+.bezent-clay-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #f1f5f9;
+  box-shadow: none;
+}
+
+/* ── Compact Metric Card Modifier ── */
+.bezent-clay-card--compact {
+  padding: 16px 20px !important;
+  min-height: 80px;
+  border-radius: 10px;
+}
+
+.bezent-clay-card--compact .bezent-clay-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+.bezent-clay-card--compact .bezent-clay-metric__value {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.bezent-clay-card--compact .bezent-clay-metric__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+}
+
 /* ── Sub-sections ── */
 .bezent-card__header {
   display: flex;
@@ -381,58 +606,80 @@
 }
 
 .bezent-kpi-card__icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: transform 0.16s ease;
+  transition:
+    transform 0.16s ease,
+    background-color 0.16s ease;
 }
 
 .bezent-kpi-card:hover .bezent-kpi-card__icon {
-  transform: scale(1.04);
+  transform: scale(1.05);
 }
 
 .bezent-kpi-card__icon--blue {
-  background-color: #ebf3ff;
-  color: #0052ff;
+  background-color: #c2dbfe !important;
+  color: #001d35 !important;
+  border: 1px solid rgba(147, 197, 253, 0.45);
 }
 
 .bezent-kpi-card__icon--green {
-  background-color: #dcfce7;
-  color: #16a34a;
+  background-color: #a3e9c0 !important;
+  color: #064e3b !important;
+  border: 1px solid rgba(110, 231, 183, 0.45);
 }
 
 .bezent-kpi-card__icon--purple {
-  background-color: #f3e8ff;
-  color: #9333ea;
+  background-color: #dcc7fd !important;
+  color: #4c1d95 !important;
+  border: 1px solid rgba(192, 132, 252, 0.45);
+}
+
+.bezent-kpi-card__icon--amber {
+  background-color: #fcd3a7 !important;
+  color: #7c2d12 !important;
+  border: 1px solid rgba(253, 186, 116, 0.45);
 }
 
 .bezent-kpi-card__icon--red {
-  background-color: #fee2e2;
-  color: #ef4444;
+  background-color: #fca5a5 !important;
+  color: #7f1d1d !important;
+  border: 1px solid rgba(248, 113, 113, 0.45);
 }
 
 [data-theme='dark'] .bezent-kpi-card__icon--blue {
-  background-color: rgba(0, 82, 255, 0.2);
-  color: #60a5fa;
+  background-color: rgba(37, 99, 235, 0.28) !important;
+  color: #93c5fd !important;
+  border: 1px solid rgba(37, 99, 235, 0.4);
 }
 
 [data-theme='dark'] .bezent-kpi-card__icon--green {
-  background-color: rgba(22, 163, 74, 0.2);
-  color: #4ade80;
+  background-color: rgba(22, 163, 74, 0.28) !important;
+  color: #86efac !important;
+  border: 1px solid rgba(22, 163, 74, 0.4);
 }
 
 [data-theme='dark'] .bezent-kpi-card__icon--purple {
-  background-color: rgba(147, 51, 234, 0.2);
-  color: #c084fc;
+  background-color: rgba(147, 51, 234, 0.28) !important;
+  color: #c084fc !important;
+  border: 1px solid rgba(147, 51, 234, 0.4);
+}
+
+[data-theme='dark'] .bezent-kpi-card__icon--amber {
+  background-color: rgba(217, 119, 6, 0.28) !important;
+  color: #fcd34d !important;
+  border: 1px solid rgba(217, 119, 6, 0.4);
 }
 
 [data-theme='dark'] .bezent-kpi-card__icon--red {
-  background-color: rgba(239, 68, 68, 0.2);
-  color: #f87171;
+  background-color: rgba(239, 68, 68, 0.28) !important;
+  color: #fca5a5 !important;
+  border: 1px solid rgba(239, 68, 68, 0.4);
 }
 
 .bezent-kpi-card__info {
@@ -479,6 +726,715 @@
 
 [data-theme='dark'] .bezent-kpi-card__caption {
   color: #64748b;
+}
+
+/* ── Premium Enterprise Number + Mini Trend Chart KPI Card ── */
+.bezent-trend-kpi-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-default, #e2e8f0);
+  border-radius: var(--radius-lg, 12px);
+  padding: 13px 18px;
+  box-shadow: none;
+  min-height: 104px;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+  text-align: left;
+  user-select: none;
+}
+
+.bezent-trend-kpi-card:hover {
+  border-color: inherit;
+  box-shadow: none;
+  transform: none;
+}
+
+.bezent-trend-kpi-card:focus-visible {
+  outline: none;
+}
+
+.bezent-trend-kpi-card.is-active {
+  outline: none;
+  box-shadow: none;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card {
+  background: #0f172a;
+  border-color: #1e293b;
+  box-shadow: none;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card:hover {
+  border-color: inherit;
+  box-shadow: none;
+  transform: none;
+}
+
+/* ── The Apple & Stripe Executive (Pure White + Solid Micro-Jewel Badges) ── */
+.bezent-trend-kpi-card--blue,
+.bezent-trend-kpi-card--blue:hover,
+.bezent-trend-kpi-card--blue.is-active,
+.bezent-trend-kpi-card--green,
+.bezent-trend-kpi-card--green:hover,
+.bezent-trend-kpi-card--green.is-active,
+.bezent-trend-kpi-card--amber,
+.bezent-trend-kpi-card--amber:hover,
+.bezent-trend-kpi-card--amber.is-active,
+.bezent-trend-kpi-card--coral,
+.bezent-trend-kpi-card--coral:hover,
+.bezent-trend-kpi-card--coral.is-active {
+  background: #ffffff;
+  border: 1px solid var(--border-default, #e2e8f0);
+  box-shadow: none;
+  transform: none;
+}
+
+/* Dark Mode Pure Dark Card Surfaces */
+[data-theme='dark'] .bezent-trend-kpi-card--blue,
+[data-theme='dark'] .bezent-trend-kpi-card--blue:hover,
+[data-theme='dark'] .bezent-trend-kpi-card--blue.is-active,
+[data-theme='dark'] .bezent-trend-kpi-card--green,
+[data-theme='dark'] .bezent-trend-kpi-card--green:hover,
+[data-theme='dark'] .bezent-trend-kpi-card--green.is-active,
+[data-theme='dark'] .bezent-trend-kpi-card--amber,
+[data-theme='dark'] .bezent-trend-kpi-card--amber:hover,
+[data-theme='dark'] .bezent-trend-kpi-card--amber.is-active,
+[data-theme='dark'] .bezent-trend-kpi-card--coral,
+[data-theme='dark'] .bezent-trend-kpi-card--coral:hover,
+[data-theme='dark'] .bezent-trend-kpi-card--coral.is-active {
+  background: #0f172a;
+  border-color: #1e293b;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Titles: Uppercase Micro-Label (Stripe / Apple Style) */
+.bezent-trend-kpi-card__title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-secondary, #64748b);
+  line-height: 1.3;
+  margin: 0;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__title {
+  color: #94a3b8;
+}
+
+/* Metric Value: Bold Charcoal / Dark Slate (30px) */
+.bezent-trend-kpi-card__value {
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text-primary, #0f172a);
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__value {
+  color: #f8fafc;
+}
+
+/* Captions & Subtitles */
+.bezent-trend-kpi-card__caption {
+  font-size: 11.5px;
+  color: var(--text-tertiary, #94a3b8);
+  line-height: 1.35;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__caption {
+  color: #64748b;
+}
+
+/* Trend Indicators (Up, Down, Neutral) */
+.bezent-trend-kpi-card__trend--neutral {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.bezent-trend-kpi-card__trend--up {
+  color: #15803d;
+  font-weight: 600;
+}
+
+.bezent-trend-kpi-card__trend--down {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+/* Solid Micro-Jewel Icon Badges (Matching Concept 1 Mockup) */
+.bezent-trend-kpi-card__icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  flex-shrink: 0;
+}
+
+.bezent-trend-kpi-card--blue .bezent-trend-kpi-card__icon-badge {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.bezent-trend-kpi-card--green .bezent-trend-kpi-card__icon-badge {
+  background: #059669 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.bezent-trend-kpi-card--amber .bezent-trend-kpi-card__icon-badge {
+  background: #d97706 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.bezent-trend-kpi-card--coral .bezent-trend-kpi-card__icon-badge {
+  background: #e11d48 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card--blue .bezent-trend-kpi-card__icon-badge {
+  background: #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card--green .bezent-trend-kpi-card__icon-badge {
+  background: #10b981 !important;
+  color: #ffffff !important;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card--amber .bezent-trend-kpi-card__icon-badge {
+  background: #f59e0b !important;
+  color: #ffffff !important;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card--coral .bezent-trend-kpi-card__icon-badge {
+  background: #f43f5e !important;
+  color: #ffffff !important;
+}
+
+/* Info Tooltip Button (Subtle Slate Icon) */
+.bezent-trend-kpi-card__info-btn {
+  color: #cbd5e1;
+}
+
+.bezent-trend-kpi-card__info-btn:hover {
+  color: #64748b;
+  background-color: #f1f5f9;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__info-btn {
+  color: #475569;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__info-btn:hover {
+  color: #94a3b8;
+  background-color: #1e293b;
+}
+
+/* Clean High-Contrast Avatar Nodes in Active Green Card */
+.bezent-trend-kpi-card--green .bezent-workforce-network__employee-node circle:first-child {
+  fill: #ffffff;
+  stroke: #34d399;
+}
+
+.bezent-trend-kpi-card--green .bezent-workforce-network__employee-node circle:nth-child(2),
+.bezent-trend-kpi-card--green .bezent-workforce-network__employee-node path {
+  fill: #064e3b;
+}
+
+/* Crisp Transition in Inactive Rose Card */
+.bezent-trend-kpi-card--coral .bezent-archive-vault__transition line {
+  stroke: #fecdd3;
+}
+
+.bezent-trend-kpi-card--coral .bezent-archive-vault__transition path {
+  stroke: #ffffff;
+}
+
+/* Header Row: Top-left icon + title, Top-right info tooltip button */
+.bezent-trend-kpi-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.bezent-trend-kpi-card__title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.bezent-trend-kpi-card__icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.bezent-trend-kpi-card__icon-badge--blue {
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+}
+
+.bezent-trend-kpi-card__icon-badge--green {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+}
+
+.bezent-trend-kpi-card__icon-badge--amber {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}
+
+.bezent-trend-kpi-card__icon-badge--coral {
+  background: rgba(244, 63, 94, 0.12);
+  color: #e11d48;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__icon-badge--blue {
+  background: rgba(59, 130, 246, 0.24);
+  color: #93c5fd;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__icon-badge--green {
+  background: rgba(16, 185, 129, 0.24);
+  color: #86efac;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__icon-badge--amber {
+  background: rgba(245, 158, 11, 0.24);
+  color: #fcd34d;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__icon-badge--coral {
+  background: rgba(244, 63, 94, 0.24);
+  color: #fda4af;
+}
+
+.bezent-trend-kpi-card__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary, #475569);
+  line-height: 1.3;
+  margin: 0;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__title {
+  color: #94a3b8;
+}
+
+.bezent-trend-kpi-card__info-btn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  margin: -4px;
+  cursor: pointer;
+  color: #94a3b8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.bezent-trend-kpi-card__info-btn:hover {
+  color: #475569;
+  background-color: #f1f5f9;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__info-btn:hover {
+  color: #f1f5f9;
+  background-color: #1e293b;
+}
+
+/* Content Body: Split layout with Left numbers/captions and Right mini chart */
+.bezent-trend-kpi-card__body {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.bezent-trend-kpi-card__metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.bezent-trend-kpi-card__value {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text-primary, #0f172a);
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__value {
+  color: #f8fafc;
+}
+
+.bezent-trend-kpi-card__caption {
+  font-size: 12px;
+  color: var(--text-tertiary, #94a3b8);
+  line-height: 1.35;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card__caption {
+  color: #64748b;
+}
+
+/* Trend Indicator Pill (Bottom-left) */
+.bezent-trend-kpi-card__trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.bezent-trend-kpi-card__trend--up {
+  color: #16a34a;
+}
+
+.bezent-trend-kpi-card__trend--down {
+  color: #dc2626;
+}
+
+.bezent-trend-kpi-card__trend--neutral {
+  color: #64748b;
+}
+
+/* Right Mini Chart Container */
+.bezent-trend-kpi-card__chart {
+  width: 86px;
+  height: 42px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  overflow: visible;
+}
+
+.bezent-trend-kpi-card__chart-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.bezent-trend-kpi-card:hover .bezent-trend-kpi-card__chart-svg {
+  transform: none;
+}
+
+.bezent-trend-kpi-card__chart-badge {
+  transform-origin: center;
+}
+
+.bezent-trend-kpi-card:hover .bezent-trend-kpi-card__chart-badge {
+  transform: none;
+}
+
+/* ── Workforce Ring Visualization (Active Employees Card) ── */
+:root {
+  --bezent-ring-primary: #168653;
+  --bezent-ring-mint: #b7e8cf;
+  --bezent-ring-bg: #eaf7ef;
+  --bezent-ring-track: #b7e8cf;
+}
+
+[data-theme='dark'] {
+  --bezent-ring-primary: #86efac;
+  --bezent-ring-mint: rgba(183, 232, 207, 0.5);
+  --bezent-ring-bg: rgba(22, 134, 83, 0.2);
+  --bezent-ring-track: rgba(183, 232, 207, 0.25);
+}
+
+.bezent-workforce-ring {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.bezent-workforce-ring__svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  display: block;
+  transform-origin: center;
+  animation: bezent-ring-entrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.bezent-workforce-ring__bg {
+  fill: var(--bezent-ring-bg, #eaf7ef);
+  transition: fill 0.16s ease;
+}
+
+.bezent-trend-kpi-card:hover .bezent-workforce-ring__bg {
+  fill: #dcfce7;
+}
+
+[data-theme='dark'] .bezent-trend-kpi-card:hover .bezent-workforce-ring__bg {
+  fill: rgba(22, 134, 83, 0.3);
+}
+
+.bezent-workforce-ring__icon {
+  transform-origin: center;
+  transition: transform 0.16s ease;
+}
+
+.bezent-trend-kpi-card:hover .bezent-workforce-ring__icon {
+  transform: scale(1.08);
+}
+
+@keyframes bezent-ring-entrance {
+  from {
+    transform: rotate(-90deg) scale(0.9);
+    opacity: 0.3;
+  }
+  to {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bezent-workforce-ring__svg {
+    animation: none;
+  }
+}
+
+/* ── Workforce Skyline & Silhouette Visualization (Total Employees Card) ── */
+.bezent-workforce-skyline {
+  width: 86px;
+  height: 42px;
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  position: relative;
+  flex-shrink: 0;
+  overflow: visible;
+  user-select: none;
+}
+
+.bezent-workforce-skyline__svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  display: block;
+  transform-origin: bottom right;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bezent-trend-kpi-card:hover .bezent-workforce-skyline__svg {
+  transform: translateY(-1px) scale(1.02);
+}
+
+.bezent-workforce-skyline__building--distant {
+  fill: #bfdbfe;
+  opacity: 0.55;
+}
+
+.bezent-workforce-skyline__building--main {
+  fill: url(#skyline-main-grad);
+  opacity: 0.85;
+}
+
+.bezent-workforce-skyline__person {
+  fill: #2563eb;
+  transition: transform 0.2s ease;
+}
+
+.bezent-workforce-skyline__person--hero {
+  fill: #ffffff;
+  stroke: #3b82f6;
+  stroke-width: 0.5;
+}
+
+[data-theme='dark'] .bezent-workforce-skyline__building--distant {
+  fill: #1e3a8a;
+  opacity: 0.6;
+}
+
+[data-theme='dark'] .bezent-workforce-skyline__person {
+  fill: #93c5fd;
+}
+
+[data-theme='dark'] .bezent-workforce-skyline__person--hero {
+  fill: #ffffff;
+  stroke: #60a5fa;
+  stroke-width: 0.5;
+}
+
+/* ── Workforce Network Visualization (Active Employees Card) ── */
+.bezent-workforce-network {
+  width: 86px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+  flex-shrink: 0;
+  overflow: visible;
+  user-select: none;
+}
+
+.bezent-workforce-network__svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  display: block;
+  transform-origin: center right;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bezent-trend-kpi-card:hover .bezent-workforce-network__svg {
+  transform: translateY(-1px) scale(1.02);
+}
+
+[data-theme='dark'] .bezent-workforce-network__employee-node circle:first-child {
+  fill: #0d281e;
+  stroke: #34d399;
+}
+
+[data-theme='dark'] .bezent-workforce-network__employee-node circle:nth-child(2),
+[data-theme='dark'] .bezent-workforce-network__employee-node path {
+  fill: #6ee7b7;
+}
+
+/* ── Onboarding Pathway Visualization (Pending Activation Card) ── */
+.bezent-onboarding-pathway {
+  width: 86px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+  flex-shrink: 0;
+  overflow: visible;
+  user-select: none;
+}
+
+.bezent-onboarding-pathway__svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  display: block;
+  transform-origin: center right;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bezent-trend-kpi-card:hover .bezent-onboarding-pathway__svg {
+  transform: translateY(-1px) scale(1.02);
+}
+
+[data-theme='dark'] .bezent-onboarding-pathway__svg rect[fill='url(#pass-card-grad)'] {
+  fill: #1e1305;
+  stroke: #f59e0b;
+}
+
+[data-theme='dark'] .bezent-onboarding-pathway__svg rect[fill='#fef3c7'] {
+  fill: #2a1a08;
+  stroke: #d97706;
+}
+
+[data-theme='dark'] .bezent-onboarding-pathway__svg circle[fill='#fffbeb'] {
+  fill: #1e1305;
+  stroke: #f59e0b;
+}
+
+/* ── Archive Vault Visualization (Inactive Employees Card) ── */
+.bezent-archive-vault {
+  width: 86px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+  flex-shrink: 0;
+  overflow: visible;
+  user-select: none;
+}
+
+.bezent-archive-vault__svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  display: block;
+  transform-origin: center right;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bezent-trend-kpi-card:hover .bezent-archive-vault__svg {
+  transform: translateY(-1px) scale(1.02);
+}
+
+[data-theme='dark'] .bezent-archive-vault__svg rect[fill='url(#offboard-card-grad)'] {
+  fill: #240a10;
+  stroke: #f43f5e;
+}
+
+[data-theme='dark'] .bezent-archive-vault__svg rect[fill='#ffe4e6'] {
+  fill: #3b0d17;
+  stroke: #fb7185;
+}
+
+[data-theme='dark'] .bezent-archive-vault__svg circle[fill='#fff1f2'] {
+  fill: #240a10;
+  stroke: #f43f5e;
+}
+
+[data-theme='dark'] .bezent-archive-vault__svg rect[fill='#fff1f2'] {
+  fill: #240a10;
+  stroke: #f43f5e;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bezent-workforce-network__svg,
+  .bezent-onboarding-pathway__svg,
+  .bezent-archive-vault__svg {
+    transform: none !important;
+  }
 }
 
 /* ── Directory Search Toolbar & Records Badge ── */
@@ -2377,4 +3333,4755 @@
 
 .bezent-trend-legend__dot--warn {
   background: #f59e0b;
+}
+
+/* ==========================================================================
+   Wave Sparkline KPI Metric Card (Generic Design System Primitive)
+   Sharp, crisp executive cards with clean gradient wash, vector wave & employee icon node
+   ========================================================================== */
+
+.bezent-wave-kpi-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 16px;
+  padding: 14px 16px 14px 16px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow:
+    0 2px 8px rgba(15, 23, 42, 0.04),
+    0 1px 2px rgba(15, 23, 42, 0.02);
+  box-sizing: border-box;
+  overflow: hidden;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+  min-width: 0;
+  height: 174px;
+  cursor: pointer;
+}
+
+.bezent-wave-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 24px rgba(15, 23, 42, 0.08),
+    0 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+/* Color Themes: Luminous Soft Pastel Glassmorphic Surfaces */
+.bezent-wave-kpi-card--blue {
+  background: linear-gradient(145deg, #f0f7ff 0%, #e6f0fa 60%, #edf5ff 100%);
+  border-color: #bfdbfe;
+}
+
+.bezent-wave-kpi-card--blue .bezent-wave-kpi-card__arrow {
+  color: #2563eb;
+}
+
+.bezent-wave-kpi-card--green {
+  background: linear-gradient(145deg, #f0fbf5 0%, #e6f6ee 60%, #edf9f2 100%);
+  border-color: #bbf7d0;
+}
+
+.bezent-wave-kpi-card--green .bezent-wave-kpi-card__arrow {
+  color: #059669;
+}
+
+.bezent-wave-kpi-card--purple {
+  background: linear-gradient(145deg, #f0fdf7 0%, #e6f9f0 60%, #edfbf4 100%);
+  border-color: #a7f3d0;
+}
+
+.bezent-wave-kpi-card--purple .bezent-wave-kpi-card__arrow {
+  color: #059669;
+}
+
+.bezent-wave-kpi-card--amber {
+  background: linear-gradient(145deg, #fffcf5 0%, #fef3e2 60%, #fff7eb 100%);
+  border-color: #fed7aa;
+}
+
+.bezent-wave-kpi-card--amber .bezent-wave-kpi-card__arrow {
+  color: #d97706;
+}
+
+.bezent-wave-kpi-card--indigo {
+  background: linear-gradient(145deg, #f4f7ff 0%, #ebf1fe 60%, #f0f5ff 100%);
+  border-color: #c7d2fe;
+}
+
+.bezent-wave-kpi-card--indigo .bezent-wave-kpi-card__arrow {
+  color: #3b82f6;
+}
+
+.bezent-wave-kpi-card--coral {
+  background: linear-gradient(145deg, #fff5f6 0%, #fee7ea 60%, #fff0f2 100%);
+  border-color: #fecdd3;
+}
+
+.bezent-wave-kpi-card--coral .bezent-wave-kpi-card__arrow {
+  color: #e11d48;
+}
+
+/* Dark mode theme overrides */
+[data-theme='dark'] .bezent-wave-kpi-card {
+  background: #0f172a;
+  border-color: #1e293b;
+  box-shadow: none;
+}
+
+[data-theme='dark'] .bezent-wave-kpi-card--blue {
+  background:
+    radial-gradient(
+      circle at 94% 6%,
+      rgba(37, 99, 235, 0.22) 0%,
+      rgba(37, 99, 235, 0.05) 42%,
+      transparent 72%
+    ),
+    #0f172a;
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+[data-theme='dark'] .bezent-wave-kpi-card--green {
+  background:
+    radial-gradient(
+      circle at 94% 6%,
+      rgba(16, 185, 129, 0.22) 0%,
+      rgba(16, 185, 129, 0.05) 42%,
+      transparent 72%
+    ),
+    #0f172a;
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+[data-theme='dark'] .bezent-wave-kpi-card--purple {
+  background:
+    radial-gradient(
+      circle at 94% 6%,
+      rgba(147, 51, 234, 0.22) 0%,
+      rgba(147, 51, 234, 0.05) 42%,
+      transparent 72%
+    ),
+    #0f172a;
+  border-color: rgba(147, 51, 234, 0.35);
+}
+
+[data-theme='dark'] .bezent-wave-kpi-card--amber {
+  background:
+    radial-gradient(
+      circle at 94% 6%,
+      rgba(245, 158, 11, 0.22) 0%,
+      rgba(245, 158, 11, 0.05) 42%,
+      transparent 72%
+    ),
+    #0f172a;
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+[data-theme='dark'] .bezent-wave-kpi-card--indigo {
+  background:
+    radial-gradient(
+      circle at 94% 6%,
+      rgba(99, 102, 241, 0.22) 0%,
+      rgba(99, 102, 241, 0.05) 42%,
+      transparent 72%
+    ),
+    #0f172a;
+  border-color: rgba(99, 102, 241, 0.35);
+}
+
+[data-theme='dark'] .bezent-wave-kpi-card--coral {
+  background:
+    radial-gradient(
+      circle at 94% 6%,
+      rgba(244, 63, 94, 0.22) 0%,
+      rgba(244, 63, 94, 0.05) 42%,
+      transparent 72%
+    ),
+    #0f172a;
+  border-color: rgba(244, 63, 94, 0.35);
+}
+
+/* Header Row */
+.bezent-wave-kpi-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 6px;
+}
+
+.bezent-wave-kpi-card__identity {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.bezent-wave-kpi-card__icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.bezent-wave-kpi-card--blue .bezent-wave-kpi-card__icon-badge {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.bezent-wave-kpi-card--green .bezent-wave-kpi-card__icon-badge {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.bezent-wave-kpi-card--purple .bezent-wave-kpi-card__icon-badge {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
+
+.bezent-wave-kpi-card--amber .bezent-wave-kpi-card__icon-badge {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.bezent-wave-kpi-card--indigo .bezent-wave-kpi-card__icon-badge {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.bezent-wave-kpi-card--coral .bezent-wave-kpi-card__icon-badge {
+  background: #ffe4e6;
+  color: #be123c;
+}
+
+.bezent-wave-kpi-card__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.015em;
+  margin: 0;
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .bezent-wave-kpi-card__title {
+  color: #f1f5f9;
+}
+
+.bezent-wave-kpi-card__arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    background-color 0.16s ease;
+}
+
+[data-theme='dark'] .bezent-wave-kpi-card__arrow {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.bezent-wave-kpi-card:hover .bezent-wave-kpi-card__arrow {
+  transform: translateX(2px);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+}
+
+/* Metric Body */
+.bezent-wave-kpi-card__body {
+  margin: 2px 0 2px 0;
+}
+
+.bezent-wave-kpi-card__value {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-wave-kpi-card__value {
+  color: #ffffff;
+}
+
+.bezent-wave-kpi-card__subtitle {
+  font-size: 12px;
+  color: #475569;
+  font-weight: 600;
+  margin: 2px 0 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme='dark'] .bezent-wave-kpi-card__subtitle {
+  color: #94a3b8;
+}
+
+.bezent-wave-kpi-card__breakdown-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #0284c7;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 4px;
+  padding: 1px 6px;
+  margin-top: 3px;
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .bezent-wave-kpi-card__breakdown-pill {
+  background: rgba(2, 132, 199, 0.15);
+  border-color: rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+}
+
+/* Empty State / No change indicator for zero values */
+.bezent-wave-kpi-card__empty-state {
+  width: 100%;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  margin: 2px 0 4px 0;
+}
+
+.bezent-wave-kpi-card__empty-chip {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: -0.01em;
+}
+
+[data-theme='dark'] .bezent-wave-kpi-card__empty-chip {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+/* Sparkline Wave Container */
+.bezent-wave-kpi-card__sparkline {
+  width: 100%;
+  height: 30px;
+  display: block;
+  overflow: visible;
+  margin: 2px 0 4px 0;
+}
+
+/* Trend Indicator Chip */
+.bezent-wave-kpi-card__trend {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  line-height: 1.2;
+  margin-top: auto;
+}
+
+.bezent-wave-kpi-card__trend--up {
+  color: #15803d;
+  background: rgba(22, 163, 74, 0.1);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.bezent-wave-kpi-card__trend--neutral {
+  color: #475569;
+  background: rgba(100, 116, 139, 0.12);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.bezent-wave-kpi-card__trend-label {
+  font-size: 11px;
+  color: #475569;
+  font-weight: 500;
+  margin-left: 3px;
+}
+
+[data-theme='dark'] .bezent-wave-kpi-card__trend-label {
+  color: #94a3b8;
+}
+
+/* Sparkline Wave Avatar Node Disc */
+.bezent-wave-kpi-card__avatar-disc {
+  fill: #ffffff;
+}
+
+[data-theme='dark'] .bezent-wave-kpi-card__avatar-disc {
+  fill: #1e293b;
+}
+
+/* ==========================================================================
+   Executive Action Queue & Action Items (Generic Design System Primitive)
+   Clean, interactive action items for Pending queues, Approvals, & Reviews
+   ========================================================================== */
+
+.bezent-action-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.bezent-action-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  border: 1px solid transparent;
+  color: #64748b;
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  line-height: 1.2;
+}
+
+.bezent-action-filter-pill:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.bezent-action-filter-pill--active {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.bezent-action-filter-count {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(15, 23, 42, 0.08);
+  color: inherit;
+}
+
+.bezent-action-filter-pill--active .bezent-action-filter-count {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+[data-theme='dark'] .bezent-action-filter-pill {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-action-filter-pill:hover {
+  background: #334155;
+  color: #ffffff;
+}
+
+[data-theme='dark'] .bezent-action-filter-pill--active {
+  background: #0f172a;
+  border-color: #475569;
+  color: #ffffff;
+}
+
+[data-theme='dark'] .bezent-action-filter-pill--active .bezent-action-filter-count {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+/* Action Queue Item Row */
+.bezent-action-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 54px;
+  padding: 8px 14px 8px 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  transition: all 0.16s ease;
+  overflow: hidden;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.bezent-action-row:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04);
+}
+
+/* Colored Left Accent Stripe */
+.bezent-action-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3.5px;
+  border-radius: 4px 0 0 4px;
+}
+
+.bezent-action-row--amber::before {
+  background: #f59e0b;
+}
+
+.bezent-action-row--blue::before {
+  background: #3b82f6;
+}
+
+.bezent-action-row--green::before {
+  background: #10b981;
+}
+
+.bezent-action-row--purple::before {
+  background: #9333ea;
+}
+
+.bezent-action-row--coral::before {
+  background: #f43f5e;
+}
+
+.bezent-action-row__meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.bezent-action-row__code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  background: #f1f5f9;
+  color: #475569;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+[data-theme='dark'] .bezent-action-row {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+[data-theme='dark'] .bezent-action-row:hover {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .bezent-action-row__meta-chip {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-action-row__code {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+/* Fixed-Size Action Queue Card (Pending Actions / Approvals) */
+.bezent-action-queue-card {
+  height: 275px;
+  display: flex;
+  flex-direction: column;
+}
+
+.bezent-action-queue-card .bezent-card__body {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 2px;
+}
+
+.bezent-action-queue-card .bezent-card__body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.bezent-action-queue-card .bezent-card__body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+[data-theme='dark'] .bezent-action-queue-card .bezent-card__body::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+/* ==========================================================================
+   Executive Pending Actions Command Hub (Generic Design System Primitive)
+   Matches high-end mockup with squircle icon, bell chip, pill tabs,
+   left-stripe action rows, ice-blue review triggers & wide action banner
+   ========================================================================== */
+
+.bezent-pending-card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 20px 22px 18px 22px;
+  box-shadow:
+    0 4px 20px -2px rgba(15, 23, 42, 0.05),
+    0 2px 6px -1px rgba(15, 23, 42, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 380px;
+  box-sizing: border-box;
+}
+
+[data-theme='dark'] .bezent-pending-card {
+  background: #0f172a;
+  border-color: #1e293b;
+  box-shadow: none;
+}
+
+/* Header */
+.bezent-pending-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.bezent-pending-card__identity {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.bezent-pending-card__icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  border: 1px solid #fed7aa;
+  color: #c2410c;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(234, 88, 12, 0.08);
+}
+
+[data-theme='dark'] .bezent-pending-card__icon-badge {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+}
+
+.bezent-pending-card__title-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bezent-pending-card__title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+  margin: 0;
+  line-height: 1.2;
+}
+
+[data-theme='dark'] .bezent-pending-card__title {
+  color: #f8fafc;
+}
+
+.bezent-pending-card__subtitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-pending-card__subtitle {
+  color: #94a3b8;
+}
+
+.bezent-pending-card__bell-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #c2410c;
+  font-size: 12.5px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .bezent-pending-card__bell-pill {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+}
+
+/* Filter Navigation Pill Tabs */
+.bezent-pending-card__tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 10px;
+}
+
+[data-theme='dark'] .bezent-pending-card__tabs {
+  border-bottom-color: #1e293b;
+}
+
+.bezent-pending-card__tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  background: #f1f5f9;
+  border: 1px solid transparent;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  white-space: nowrap;
+}
+
+.bezent-pending-card__tab:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.bezent-pending-card__tab--active {
+  background: #fff7ed;
+  color: #c2410c;
+  border-color: #fed7aa;
+  font-weight: 700;
+}
+
+.bezent-pending-card__tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9999px;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.bezent-pending-card__tab--active .bezent-pending-card__tab-count {
+  background: #ffffff;
+  color: #c2410c;
+  box-shadow: 0 1px 2px rgba(234, 88, 12, 0.1);
+}
+
+.bezent-pending-card__tab--empty {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.bezent-pending-card__tab--empty:hover {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.bezent-pending-card__tab--empty .bezent-pending-card__tab-count {
+  background: transparent;
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-pending-card__tab {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-pending-card__tab:hover {
+  background: #334155;
+  color: #f8fafc;
+}
+
+[data-theme='dark'] .bezent-pending-card__tab--active {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+[data-theme='dark'] .bezent-pending-card__tab-count {
+  background: #334155;
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .bezent-pending-card__tab--active .bezent-pending-card__tab-count {
+  background: #0f172a;
+  color: #fbbf24;
+}
+
+/* Action Rows List */
+.bezent-pending-card__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.bezent-pending-card__list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.bezent-pending-card__list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+[data-theme='dark'] .bezent-pending-card__list::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.bezent-pending-card__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 16px 11px 18px;
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
+  border-radius: 14px;
+  transition: all 0.16s ease;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+}
+
+.bezent-pending-card__item:hover {
+  border-color: #cbd5e1;
+  background: #fafbfc;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+  transform: translateY(-1px);
+}
+
+/* Left Accent Stripe */
+.bezent-pending-card__item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  background: #f97316;
+}
+
+.bezent-pending-card__item--amber::before {
+  background: #f59e0b;
+}
+
+.bezent-pending-card__item--blue::before {
+  background: #3b82f6;
+}
+
+.bezent-pending-card__item--green::before {
+  background: #10b981;
+}
+
+.bezent-pending-card__item--purple::before {
+  background: #9333ea;
+}
+
+.bezent-pending-card__item--coral::before {
+  background: #f43f5e;
+}
+
+.bezent-pending-card__item-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.bezent-pending-card__item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.bezent-pending-card__item-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.bezent-pending-card__employee-name {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.015em;
+}
+
+[data-theme='dark'] .bezent-pending-card__employee-name {
+  color: #f8fafc;
+}
+
+.bezent-pending-card__code-badge {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11.5px;
+  background: #f1f5f9;
+  color: #334155;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  border: 1px solid #e2e8f0;
+}
+
+[data-theme='dark'] .bezent-pending-card__code-badge {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+.bezent-pending-card__type-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 9px;
+  border-radius: 9999px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #c2410c;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+[data-theme='dark'] .bezent-pending-card__type-pill {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+}
+
+.bezent-pending-card__item-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #475569;
+  font-weight: 500;
+  flex-wrap: wrap;
+}
+
+[data-theme='dark'] .bezent-pending-card__item-meta {
+  color: #cbd5e1;
+}
+
+/* Relative Urgency Pill */
+.bezent-pending-card__urgency-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1.5px 7px;
+  border-radius: 9999px;
+  line-height: 1.2;
+}
+
+.bezent-pending-card__urgency-pill--urgent {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.bezent-pending-card__urgency-pill--overdue {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+.bezent-pending-card__urgency-pill--upcoming {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.bezent-pending-card__urgency-pill--distant {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+[data-theme='dark'] .bezent-pending-card__urgency-pill--urgent {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fcd34d;
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+[data-theme='dark'] .bezent-pending-card__urgency-pill--overdue {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+[data-theme='dark'] .bezent-pending-card__urgency-pill--upcoming {
+  background: rgba(2, 132, 199, 0.2);
+  color: #7dd3fc;
+  border-color: rgba(2, 132, 199, 0.4);
+}
+
+[data-theme='dark'] .bezent-pending-card__urgency-pill--distant {
+  background: #1e293b;
+  color: #94a3b8;
+  border-color: #334155;
+}
+
+/* Action Review Button (Ice Blue Tint with Dark Blue Text) */
+.bezent-pending-card__review-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: 10px;
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+  color: #0369a1;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  flex-shrink: 0;
+}
+
+.bezent-pending-card__review-btn:hover {
+  background: #bae6fd;
+  border-color: #7dd3fc;
+  color: #0c4a6e;
+  transform: translateX(2px);
+}
+
+[data-theme='dark'] .bezent-pending-card__review-btn {
+  background: rgba(14, 165, 233, 0.15);
+  border-color: rgba(14, 165, 233, 0.3);
+  color: #38bdf8;
+}
+
+[data-theme='dark'] .bezent-pending-card__review-btn:hover {
+  background: rgba(14, 165, 233, 0.25);
+  border-color: rgba(14, 165, 233, 0.5);
+  color: #7dd3fc;
+}
+
+/* Action Arrow Trigger Button (Replaces bulky text review button) */
+.bezent-pending-card__action-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  flex-shrink: 0;
+}
+
+.bezent-pending-card__item:hover .bezent-pending-card__action-arrow,
+.bezent-pending-card__action-arrow:hover {
+  background: #0284c7;
+  border-color: #0284c7;
+  color: #ffffff;
+  transform: translateX(3px);
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);
+}
+
+[data-theme='dark'] .bezent-pending-card__action-arrow {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-pending-card__item:hover .bezent-pending-card__action-arrow,
+[data-theme='dark'] .bezent-pending-card__action-arrow:hover {
+  background: #0284c7;
+  border-color: #38bdf8;
+  color: #ffffff;
+}
+
+/* Bottom Right Footer Link */
+.bezent-pending-card__footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+  padding-top: 6px;
+  width: 100%;
+}
+
+.bezent-pending-card__footer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: #c2410c;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: all 0.16s ease;
+}
+
+.bezent-pending-card__footer-link:hover {
+  color: #9a3412;
+  background: #fff7ed;
+  transform: translateX(2px);
+}
+
+[data-theme='dark'] .bezent-pending-card__footer-link {
+  color: #fbbf24;
+}
+
+[data-theme='dark'] .bezent-pending-card__footer-link:hover {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fde68a;
+}
+
+/* ==========================================================================
+   BEZENT Enterprise Workforce Command Center — Modern SaaS Layout System
+   Full content, analytics, distribution, lifecycle, planning, actions & reports
+   ========================================================================== */
+
+/* ── Refined Segmented Filter Pill Toolbar ── */
+.bezent-wf-pill-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 8px 14px;
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
+}
+
+[data-theme='dark'] .bezent-wf-pill-toolbar {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-pill-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.bezent-wf-timeframe-switch {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  gap: 2px;
+}
+
+[data-theme='dark'] .bezent-wf-timeframe-switch {
+  background: #1e293b;
+}
+
+.bezent-wf-pill-btn {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #667085;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bezent-wf-pill-btn:hover {
+  color: #182230;
+}
+
+.bezent-wf-pill-btn--active {
+  background: #ffffff;
+  color: #182230;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+[data-theme='dark'] .bezent-wf-pill-btn {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-wf-pill-btn--active {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.bezent-wf-pill-select {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 7px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  font-size: 11.5px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bezent-wf-pill-select:hover {
+  border-color: #cbd5e1;
+  background: #ffffff;
+}
+
+[data-theme='dark'] .bezent-wf-pill-select {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+/* ── Connected 8-Stage Lifecycle Ribbon (Slim & Modern) ── */
+.bezent-wf-lifecycle-ribbon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
+  position: relative;
+  overflow-x: auto;
+  gap: 12px;
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-ribbon {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-lifecycle-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.bezent-wf-lifecycle-step:hover {
+  background: #f8fafc;
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-step:hover {
+  background: #1e293b;
+}
+
+.bezent-wf-lifecycle-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: #182230;
+  background: #f1f5f9;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-num {
+  background: #1e293b;
+  color: #ffffff;
+}
+
+.bezent-wf-lifecycle-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.bezent-wf-lifecycle-name {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #182230;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-name {
+  color: #ffffff;
+}
+
+.bezent-wf-lifecycle-tag {
+  font-size: 10px;
+  font-weight: 600;
+  color: #667085;
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-tag {
+  color: #94a3b8;
+}
+
+.bezent-wf-lifecycle-arrow {
+  color: #cbd5e1;
+  font-size: 13px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+/* ── Unified Workforce Intelligence Hub (Multi-Lens Tabbed Card) ── */
+.bezent-wf-intelligence-card {
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
+}
+
+[data-theme='dark'] .bezent-wf-intelligence-card {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-intelligence-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.bezent-wf-tab-bar {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px;
+  background: #f1f5f9;
+  border-radius: 9px;
+  gap: 3px;
+}
+
+[data-theme='dark'] .bezent-wf-tab-bar {
+  background: #1e293b;
+}
+
+.bezent-wf-tab-item {
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #667085;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bezent-wf-tab-item:hover {
+  color: #182230;
+}
+
+.bezent-wf-tab-item--active {
+  background: #ffffff;
+  color: #182230;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+[data-theme='dark'] .bezent-wf-tab-item {
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .bezent-wf-tab-item--active {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.bezent-wf-tab-pane {
+  display: none;
+}
+
+.bezent-wf-tab-pane--active {
+  display: block;
+}
+
+/* ── Reports & Insights Hub ── */
+.bezent-wf-reports-hub {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bezent-wf-reports-filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bezent-wf-reports-list-compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+.bezent-wf-report-mini {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 1px solid #e7eaf0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bezent-wf-report-mini:hover {
+  background: #ffffff;
+  border-color: #3478d4;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(52, 120, 212, 0.08);
+}
+
+[data-theme='dark'] .bezent-wf-report-mini {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .bezent-wf-report-mini:hover {
+  border-color: #3478d4;
+  background: #0f172a;
+}
+
+.bezent-wf-report-mini-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #182230;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 190px;
+}
+
+[data-theme='dark'] .bezent-wf-report-mini-title {
+  color: #ffffff;
+}
+
+/* ── Filter Bar & Controls ── */
+.bezent-wf-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 18px;
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+}
+
+[data-theme='dark'] .bezent-wf-filter-bar {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bezent-wf-filter-select {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #182230;
+  font-size: 12.5px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.bezent-wf-filter-select:hover {
+  border-color: #cbd5e1;
+  background: #ffffff;
+}
+
+.bezent-wf-filter-select:focus {
+  border-color: #3478d4;
+  box-shadow: 0 0 0 2px rgba(52, 120, 212, 0.15);
+}
+
+[data-theme='dark'] .bezent-wf-filter-select {
+  background: #1e293b;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+/* ── Growth Analytics Chart Panel ── */
+.bezent-wf-growth-card {
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme='dark'] .bezent-wf-growth-card {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-growth-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.bezent-wf-growth-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.bezent-wf-growth-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bezent-wf-growth-stat-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #667085;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+[data-theme='dark'] .bezent-wf-growth-stat-label {
+  color: #94a3b8;
+}
+
+.bezent-wf-growth-stat-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: #182230;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+[data-theme='dark'] .bezent-wf-growth-stat-value {
+  color: #ffffff;
+}
+
+.bezent-wf-chart-container {
+  width: 100%;
+  height: 220px;
+  position: relative;
+}
+
+.bezent-wf-chart-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* ── Distribution Charts (Donut & Horizontal Bars) ── */
+.bezent-wf-donut-layout {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.bezent-wf-donut-chart-wrap {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  flex-shrink: 0;
+}
+
+.bezent-wf-donut-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.bezent-wf-donut-center-num {
+  font-size: 22px;
+  font-weight: 800;
+  color: #182230;
+  line-height: 1;
+}
+
+[data-theme='dark'] .bezent-wf-donut-center-num {
+  color: #ffffff;
+}
+
+.bezent-wf-donut-center-label {
+  font-size: 10.5px;
+  color: #667085;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.bezent-wf-legend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-width: 180px;
+}
+
+.bezent-wf-legend-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bezent-wf-legend-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+}
+
+.bezent-wf-legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 7px;
+  flex-shrink: 0;
+}
+
+.bezent-wf-hbars-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.bezent-wf-hbar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bezent-wf-hbar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+}
+
+.bezent-wf-hbar-track {
+  width: 100%;
+  height: 7px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+[data-theme='dark'] .bezent-wf-hbar-track {
+  background: #1e293b;
+}
+
+.bezent-wf-hbar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+/* ── Employment Composition & Demographics ── */
+.bezent-wf-comp-bar {
+  display: flex;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  width: 100%;
+  margin-bottom: 14px;
+  background: #f1f5f9;
+}
+
+.bezent-wf-comp-segment {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.bezent-wf-comp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.bezent-wf-comp-card {
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 1px solid #e7eaf0;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+[data-theme='dark'] .bezent-wf-comp-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.bezent-wf-comp-card-val {
+  font-size: 16px;
+  font-weight: 700;
+  color: #182230;
+}
+
+[data-theme='dark'] .bezent-wf-comp-card-val {
+  color: #ffffff;
+}
+
+.bezent-wf-comp-card-lbl {
+  font-size: 11.5px;
+  color: #667085;
+  font-weight: 500;
+}
+
+/* ── Employee Lifecycle Pipeline ── */
+.bezent-wf-lifecycle-panel {
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-panel {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-lifecycle-track {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 10px;
+  position: relative;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+@media (max-width: 1100px) {
+  .bezent-wf-lifecycle-track {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .bezent-wf-lifecycle-track {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.bezent-wf-lifecycle-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 12px 10px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e7eaf0;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  position: relative;
+}
+
+.bezent-wf-lifecycle-node:hover {
+  background: #ffffff;
+  border-color: #3478d4;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 120, 212, 0.1);
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-node {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-node:hover {
+  background: #0f172a;
+  border-color: #3478d4;
+}
+
+.bezent-wf-lifecycle-count {
+  font-size: 20px;
+  font-weight: 800;
+  color: #182230;
+  line-height: 1.1;
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-count {
+  color: #ffffff;
+}
+
+.bezent-wf-lifecycle-title {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #475569;
+  margin-top: 4px;
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-title {
+  color: #cbd5e1;
+}
+
+.bezent-wf-lifecycle-status {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 6px;
+}
+
+/* ── Workforce Planning & Headcount Gaps ── */
+.bezent-wf-planning-meter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bezent-wf-planning-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bezent-wf-planning-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  overflow: hidden;
+}
+
+[data-theme='dark'] .bezent-wf-planning-bar {
+  background: #1e293b;
+}
+
+.bezent-wf-planning-fill {
+  height: 100%;
+  background: #3478d4;
+  border-radius: 4px;
+}
+
+/* ── Priority Action Center ── */
+.bezent-wf-action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.bezent-wf-action-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: #f8fafc;
+  border: 1px solid #e7eaf0;
+  border-radius: 12px;
+  transition: all 0.16s ease;
+}
+
+.bezent-wf-action-item:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.05);
+}
+
+[data-theme='dark'] .bezent-wf-action-item {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.bezent-wf-action-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.bezent-wf-action-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bezent-wf-action-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bezent-wf-action-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #182230;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme='dark'] .bezent-wf-action-title {
+  color: #ffffff;
+}
+
+.bezent-wf-action-sub {
+  font-size: 11.5px;
+  color: #667085;
+}
+
+[data-theme='dark'] .bezent-wf-action-sub {
+  color: #94a3b8;
+}
+
+/* ── Reports & Insights Grid ── */
+.bezent-wf-reports-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.bezent-wf-report-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 12px;
+  transition: all 0.16s ease;
+  cursor: pointer;
+  height: 120px;
+  box-sizing: border-box;
+}
+
+.bezent-wf-report-card:hover {
+  border-color: #3478d4;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(52, 120, 212, 0.08);
+}
+
+[data-theme='dark'] .bezent-wf-report-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .bezent-wf-report-card:hover {
+  border-color: #3478d4;
+}
+
+.bezent-wf-report-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bezent-wf-report-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #182230;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-wf-report-title {
+  color: #ffffff;
+}
+
+.bezent-wf-report-desc {
+  font-size: 11.5px;
+  color: #667085;
+  margin: 4px 0 0 0;
+  line-height: 1.3;
+}
+
+[data-theme='dark'] .bezent-wf-report-desc {
+  color: #94a3b8;
+}
+
+.bezent-wf-report-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #3478d4;
+}
+
+/* ── Width & Color Utilities for zero-inline-style components ── */
+.bezent-wf-w-6 {
+  width: 6%;
+}
+.bezent-wf-w-10 {
+  width: 10%;
+}
+.bezent-wf-w-12 {
+  width: 12.5%;
+}
+.bezent-wf-w-13 {
+  width: 13%;
+}
+.bezent-wf-w-19 {
+  width: 19%;
+}
+.bezent-wf-w-20 {
+  width: 20%;
+}
+.bezent-wf-w-25 {
+  width: 25%;
+}
+.bezent-wf-w-30 {
+  width: 30%;
+}
+.bezent-wf-w-40 {
+  width: 40%;
+}
+.bezent-wf-w-50 {
+  width: 50%;
+}
+.bezent-wf-w-60 {
+  width: 60%;
+}
+.bezent-wf-w-67 {
+  width: 67%;
+}
+.bezent-wf-w-70 {
+  width: 70%;
+}
+.bezent-wf-w-75 {
+  width: 75%;
+}
+.bezent-wf-w-80 {
+  width: 80%;
+}
+.bezent-wf-w-88 {
+  width: 87.5%;
+}
+.bezent-wf-w-90 {
+  width: 90%;
+}
+.bezent-wf-w-100 {
+  width: 100%;
+}
+
+.bezent-wf-bg-blue {
+  background: #3478d4;
+}
+.bezent-wf-bg-green {
+  background: #159a70;
+}
+.bezent-wf-bg-amber {
+  background: #d99a32;
+}
+.bezent-wf-bg-red {
+  background: #d9534f;
+}
+.bezent-wf-bg-teal {
+  background: #0d9488;
+}
+.bezent-wf-bg-slate {
+  background: #64748b;
+}
+.bezent-wf-bg-sky {
+  background: #0284c7;
+}
+.bezent-wf-bg-gray {
+  background: #94a3b8;
+}
+
+/* ── Workforce Header Title & Help Popover Trigger ── */
+.bezent-wf-title-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bezent-wf-help-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bezent-wf-help-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.16s ease;
+  line-height: 1;
+  user-select: none;
+  align-self: center;
+}
+
+.bezent-wf-help-btn:hover,
+.bezent-wf-help-btn:focus-visible {
+  background: #3478d4;
+  border-color: #3478d4;
+  color: #ffffff;
+  transform: scale(1.08);
+}
+
+.bezent-wf-help-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 320px;
+  background: #182230;
+  color: #f8fafc;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  box-shadow:
+    0 10px 25px -5px rgba(15, 23, 42, 0.25),
+    0 4px 10px -2px rgba(15, 23, 42, 0.1);
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
+}
+
+.bezent-wf-help-trigger:hover .bezent-wf-help-popover,
+.bezent-wf-help-trigger:focus-within .bezent-wf-help-popover,
+.bezent-wf-help-popover--visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.bezent-wf-help-popover::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 8px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent #182230 transparent;
+}
+
+/* ── Executive 6 KPI Cards (Mockup Tier 1) ── */
+.bezent-exec-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14px;
+  width: 100%;
+}
+
+@media (max-width: 1280px) {
+  .bezent-exec-kpi-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .bezent-exec-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .bezent-exec-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bezent-exec-kpi-card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 140px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.bezent-exec-kpi-card:hover {
+  transform: translateY(-2px);
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+}
+
+[data-theme='dark'] .bezent-exec-kpi-card {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: none;
+}
+
+[data-theme='dark'] .bezent-exec-kpi-card:hover {
+  background: #24344d;
+  border-color: #475569;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.bezent-exec-kpi-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.bezent-exec-kpi-card__icon-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bezent-exec-kpi-card__icon-badge--blue {
+  background: #e8f1fc;
+  color: #2563eb;
+}
+
+.bezent-exec-kpi-card__icon-badge--green {
+  background: #e6f7ef;
+  color: #159a70;
+}
+
+.bezent-exec-kpi-card__icon-badge--amber {
+  background: #fff4e6;
+  color: #ea580c;
+}
+
+.bezent-exec-kpi-card__icon-badge--red {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.bezent-exec-kpi-card__icon-badge--purple {
+  background: #f3e8ff;
+  color: #7c3aed;
+}
+
+.bezent-exec-kpi-card__icon-badge--teal {
+  background: #e6fffa;
+  color: #0d9488;
+}
+
+.bezent-exec-kpi-card__more {
+  color: #94a3b8;
+  font-size: 16px;
+  letter-spacing: 1px;
+  line-height: 1;
+  transition: color 0.15s ease;
+}
+
+.bezent-exec-kpi-card:hover .bezent-exec-kpi-card__more {
+  color: #475569;
+}
+
+.bezent-exec-kpi-card__main {
+  margin-bottom: 14px;
+}
+
+.bezent-exec-kpi-card__value {
+  font-size: 24px;
+  font-weight: 800;
+  color: #182230;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+[data-theme='dark'] .bezent-exec-kpi-card__value {
+  color: #f8fafc;
+}
+
+.bezent-exec-kpi-card__title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #475569;
+  margin-top: 4px;
+  line-height: 1.25;
+}
+
+[data-theme='dark'] .bezent-exec-kpi-card__title {
+  color: #94a3b8;
+}
+
+.bezent-exec-kpi-card__footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.bezent-exec-kpi-card__trend {
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.bezent-exec-kpi-card__trend--up {
+  color: #159a70;
+}
+
+.bezent-exec-kpi-card__trend--down {
+  color: #dc2626;
+}
+
+.bezent-exec-kpi-card__trend--neutral {
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-exec-kpi-card__trend--neutral {
+  color: #94a3b8;
+}
+
+.bezent-exec-kpi-card__visual {
+  display: inline-flex;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+/* Micro bar chart */
+.bezent-micro-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2.5px;
+  height: 26px;
+}
+
+.bezent-micro-bar {
+  width: 3.5px;
+  border-radius: 2px 2px 0 0;
+  background: #3478d4;
+}
+
+.bezent-micro-bar--red {
+  background: #f87171;
+}
+
+.bezent-micro-bar--h1 {
+  height: 10px;
+}
+.bezent-micro-bar--h2 {
+  height: 16px;
+}
+.bezent-micro-bar--h3 {
+  height: 12px;
+}
+.bezent-micro-bar--h4 {
+  height: 20px;
+}
+.bezent-micro-bar--h5 {
+  height: 26px;
+}
+
+.bezent-micro-bar--r1 {
+  height: 14px;
+}
+.bezent-micro-bar--r2 {
+  height: 8px;
+}
+.bezent-micro-bar--r3 {
+  height: 18px;
+}
+.bezent-micro-bar--r4 {
+  height: 12px;
+}
+.bezent-micro-bar--r5 {
+  height: 22px;
+}
+
+/* Micro ring chart */
+.bezent-micro-ring {
+  width: 28px;
+  height: 28px;
+}
+
+/* ── Workforce Analytics: Donut Distribution Section ── */
+.bezent-wf-analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .bezent-wf-analytics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bezent-wf-donut-card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  padding: 20px 22px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 350px;
+}
+
+[data-theme='dark'] .bezent-wf-donut-card {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-donut-card__header {
+  margin-bottom: 16px;
+}
+
+.bezent-wf-donut-card__header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bezent-wf-donut-card__link {
+  font-size: 12px;
+  font-weight: 600;
+  color: #3478d4;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.15s ease;
+  white-space: nowrap;
+}
+
+.bezent-wf-donut-card__link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+[data-theme='dark'] .bezent-wf-donut-card__link {
+  color: #60a5fa;
+}
+
+.bezent-wf-donut-card__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #182230;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+[data-theme='dark'] .bezent-wf-donut-card__title {
+  color: #f8fafc;
+}
+
+.bezent-wf-donut-card__desc {
+  font-size: 12px;
+  color: #64748b;
+  margin: 4px 0 0 0;
+  line-height: 1.4;
+}
+
+[data-theme='dark'] .bezent-wf-donut-card__desc {
+  color: #94a3b8;
+}
+
+.bezent-wf-donut-card__body {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 20px;
+  align-items: center;
+  flex: 1;
+}
+
+@media (max-width: 640px) {
+  .bezent-wf-donut-card__body {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+}
+
+.bezent-wf-donut-wrap {
+  position: relative;
+  width: 136px;
+  height: 136px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bezent-wf-donut-center {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+.bezent-wf-donut-center__count {
+  font-size: 22px;
+  font-weight: 800;
+  color: #182230;
+  line-height: 1.1;
+}
+
+[data-theme='dark'] .bezent-wf-donut-center__count {
+  color: #ffffff;
+}
+
+.bezent-wf-donut-center__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+[data-theme='dark'] .bezent-wf-donut-center__label {
+  color: #94a3b8;
+}
+
+.bezent-wf-ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.bezent-wf-ranking-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.bezent-wf-ranking-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+}
+
+.bezent-wf-ranking-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.bezent-wf-ranking-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  color: #475569;
+  flex-shrink: 0;
+}
+
+[data-theme='dark'] .bezent-wf-ranking-badge {
+  background: #1e293b;
+  color: #cbd5e1;
+}
+
+.bezent-wf-ranking-name {
+  font-weight: 600;
+  color: #182230;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme='dark'] .bezent-wf-ranking-name {
+  color: #f8fafc;
+}
+
+.bezent-wf-ranking-count {
+  font-weight: 700;
+  color: #334155;
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .bezent-wf-ranking-count {
+  color: #cbd5e1;
+}
+
+.bezent-wf-ranking-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #f1f5f9;
+  overflow: hidden;
+}
+
+[data-theme='dark'] .bezent-wf-ranking-track {
+  background: #1e293b;
+}
+
+.bezent-wf-ranking-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.bezent-wf-ranking-fill--0 {
+  background: #3478d4;
+}
+.bezent-wf-ranking-fill--1 {
+  background: #159a70;
+}
+.bezent-wf-ranking-fill--2 {
+  background: #d99a32;
+}
+.bezent-wf-ranking-fill--3 {
+  background: #0d9488;
+}
+.bezent-wf-ranking-fill--4 {
+  background: #64748b;
+}
+
+/* ── Supporting Insights Strip ── */
+.bezent-wf-insights-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #f1f5f9;
+}
+
+@media (max-width: 640px) {
+  .bezent-wf-insights-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+[data-theme='dark'] .bezent-wf-insights-strip {
+  border-top-color: #1e293b;
+}
+
+.bezent-wf-insight-chip {
+  background: #f8fafc;
+  border: 1px solid #e7eaf0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+[data-theme='dark'] .bezent-wf-insight-chip {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.bezent-wf-insight-chip__label {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme='dark'] .bezent-wf-insight-chip__label {
+  color: #94a3b8;
+}
+
+.bezent-wf-insight-chip__val {
+  font-size: 12px;
+  font-weight: 700;
+  color: #182230;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme='dark'] .bezent-wf-insight-chip__val {
+  color: #ffffff;
+}
+
+/* ── Tier 3: Workforce Composition (3-Column Grid) ── */
+.bezent-wf-composition-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+@media (max-width: 1200px) {
+  .bezent-wf-composition-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bezent-wf-composition-card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  padding: 20px 22px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 380px;
+}
+
+[data-theme='dark'] .bezent-wf-composition-card {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-stacked-svg {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+/* ── Tier 4: Workforce Planning Master Command Deck ── */
+.bezent-wf-planning-panel {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  padding: 22px 24px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+  width: 100%;
+}
+
+[data-theme='dark'] .bezent-wf-planning-panel {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-planning-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.bezent-wf-planning-title-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bezent-wf-planning-title {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #182230;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+[data-theme='dark'] .bezent-wf-planning-title {
+  color: #f8fafc;
+}
+
+.bezent-wf-planning-desc {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+[data-theme='dark'] .bezent-wf-planning-desc {
+  color: #94a3b8;
+}
+
+/* 1. Headcount Overview Strip (5 items) */
+.bezent-wf-planning-kpis-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 900px) {
+  .bezent-wf-planning-kpis-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.bezent-wf-planning-kpi-item {
+  background: #f8fafc;
+  border: 1px solid #e7eaf0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+[data-theme='dark'] .bezent-wf-planning-kpi-item {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.bezent-wf-planning-kpi-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bezent-wf-planning-kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+[data-theme='dark'] .bezent-wf-planning-kpi-label {
+  color: #94a3b8;
+}
+
+.bezent-wf-planning-kpi-val {
+  font-size: 20px;
+  font-weight: 800;
+  color: #182230;
+  line-height: 1.1;
+}
+
+[data-theme='dark'] .bezent-wf-planning-kpi-val {
+  color: #ffffff;
+}
+
+.bezent-wf-planning-kpi-val--red {
+  color: #dc2626;
+}
+
+.bezent-wf-planning-kpi-val--green {
+  color: #159a70;
+}
+
+.bezent-wf-planning-ring-wrap {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bezent-wf-planning-ring-txt {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #182230;
+}
+
+[data-theme='dark'] .bezent-wf-planning-ring-txt {
+  color: #ffffff;
+}
+
+/* 2 & 4 Split */
+.bezent-wf-planning-split {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+@media (max-width: 1024px) {
+  .bezent-wf-planning-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bezent-wf-planning-subpanel {
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+[data-theme='dark'] .bezent-wf-planning-subpanel {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.bezent-wf-planning-subhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bezent-wf-planning-subtitle {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #182230;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-wf-planning-subtitle {
+  color: #f8fafc;
+}
+
+.bezent-wf-planning-subtag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+[data-theme='dark'] .bezent-wf-planning-subtag {
+  background: #0f172a;
+  color: #cbd5e1;
+}
+
+/* Department Capacity Bars */
+.bezent-wf-cap-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bezent-wf-cap-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bezent-wf-cap-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+}
+
+.bezent-wf-cap-name {
+  font-weight: 600;
+  color: #182230;
+}
+
+[data-theme='dark'] .bezent-wf-cap-name {
+  color: #f8fafc;
+}
+
+.bezent-wf-cap-ratio {
+  color: #64748b;
+  font-size: 11.5px;
+  margin-left: 6px;
+}
+
+.bezent-wf-cap-status {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #3478d4;
+}
+
+.bezent-wf-cap-status--gap {
+  color: #d97706;
+}
+
+/* Hiring Requirements Priority List */
+.bezent-wf-hiring-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bezent-wf-hiring-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 1px solid #e7eaf0;
+  border-radius: 8px;
+  gap: 12px;
+  transition: all 0.15s ease;
+}
+
+.bezent-wf-hiring-item:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme='dark'] .bezent-wf-hiring-item {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+.bezent-wf-hiring-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bezent-wf-hiring-role {
+  font-size: 13px;
+  font-weight: 600;
+  color: #182230;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme='dark'] .bezent-wf-hiring-role {
+  color: #f8fafc;
+}
+
+.bezent-wf-hiring-meta {
+  font-size: 11px;
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-wf-hiring-meta {
+  color: #94a3b8;
+}
+
+.bezent-wf-hiring-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.bezent-wf-priority-pill {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.bezent-wf-priority-pill--critical {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.bezent-wf-priority-pill--high {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.bezent-wf-priority-pill--medium {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.bezent-wf-priority-pill--low {
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.bezent-wf-hiring-period {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ── Tier 5: Employee Lifecycle Segmented Pipeline ── */
+.bezent-wf-lifecycle-box {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  padding: 20px 22px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+  width: 100%;
+}
+
+[data-theme='dark'] .bezent-wf-lifecycle-box {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-lifecycle-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.bezent-wf-lifecycle-bar-wrap {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.bezent-wf-lifecycle-svg {
+  width: 100%;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.bezent-wf-lifecycle-grid-5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .bezent-wf-lifecycle-grid-5 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.bezent-wf-stage-node {
+  background: #f8fafc;
+  border: 1px solid #e7eaf0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bezent-wf-stage-node:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.05);
+}
+
+[data-theme='dark'] .bezent-wf-stage-node {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .bezent-wf-stage-node:hover {
+  background: #0f172a;
+  border-color: #3478d4;
+}
+
+.bezent-wf-stage-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bezent-wf-stage-icon--blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.bezent-wf-stage-icon--teal {
+  background: #f0fdfa;
+  color: #0d9488;
+}
+
+.bezent-wf-stage-icon--amber {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.bezent-wf-stage-icon--green {
+  background: #f0fdf4;
+  color: #159a70;
+}
+
+.bezent-wf-stage-icon--rose {
+  background: #fef2f2;
+  color: #e11d48;
+}
+
+.bezent-wf-stage-count {
+  font-size: 22px;
+  font-weight: 800;
+  color: #182230;
+  line-height: 1.1;
+}
+
+[data-theme='dark'] .bezent-wf-stage-count {
+  color: #ffffff;
+}
+
+.bezent-wf-stage-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-wf-stage-name {
+  color: #cbd5e1;
+}
+
+.bezent-wf-stage-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 12px;
+  background: #e2e8f0;
+  color: #475569;
+}
+
+[data-theme='dark'] .bezent-wf-stage-badge {
+  background: #334155;
+  color: #e2e8f0;
+}
+
+/* ── Tier 6: HR Action Center ── */
+.bezent-wf-action-card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  padding: 20px 22px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+  width: 100%;
+}
+
+[data-theme='dark'] .bezent-wf-action-card {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-action-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.bezent-wf-action-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bezent-wf-action-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #182230;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+[data-theme='dark'] .bezent-wf-action-title {
+  color: #f8fafc;
+}
+
+.bezent-wf-action-desc {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-wf-action-desc {
+  color: #94a3b8;
+}
+
+.bezent-wf-action-summary-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+.bezent-wf-action-summary-badge--caught-up {
+  background: #ecfdf5;
+  color: #059669;
+  border-color: #a7f3d0;
+}
+
+[data-theme='dark'] .bezent-wf-action-summary-badge {
+  background: #1e293b;
+  color: #60a5fa;
+  border-color: #3b82f6;
+}
+
+[data-theme='dark'] .bezent-wf-action-summary-badge--caught-up {
+  background: #064e3b;
+  color: #34d399;
+  border-color: #059669;
+}
+
+.bezent-wf-action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bezent-wf-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e7eaf0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.bezent-wf-action-row:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+[data-theme='dark'] .bezent-wf-action-row {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme='dark'] .bezent-wf-action-row:hover {
+  background: #0f172a;
+  border-color: #38bdf8;
+}
+
+.bezent-wf-action-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.bezent-wf-action-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bezent-wf-action-icon--rose {
+  background: #ffe4e6;
+  color: #e11d48;
+}
+.bezent-wf-action-icon--amber {
+  background: #fef3c7;
+  color: #d97706;
+}
+.bezent-wf-action-icon--blue {
+  background: #dbeafe;
+  color: #2563eb;
+}
+.bezent-wf-action-icon--teal {
+  background: #ccfbf1;
+  color: #0d9488;
+}
+.bezent-wf-action-icon--purple {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+.bezent-wf-action-icon--slate {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+[data-theme='dark'] .bezent-wf-action-icon--rose {
+  background: #881337;
+  color: #fda4af;
+}
+[data-theme='dark'] .bezent-wf-action-icon--amber {
+  background: #78350f;
+  color: #fde68a;
+}
+[data-theme='dark'] .bezent-wf-action-icon--blue {
+  background: #1e3a8a;
+  color: #93c5fd;
+}
+[data-theme='dark'] .bezent-wf-action-icon--teal {
+  background: #134e4a;
+  color: #5eead4;
+}
+[data-theme='dark'] .bezent-wf-action-icon--purple {
+  background: #4c1d95;
+  color: #c4b5fd;
+}
+[data-theme='dark'] .bezent-wf-action-icon--slate {
+  background: #334155;
+  color: #cbd5e1;
+}
+
+.bezent-wf-action-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bezent-wf-action-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #182230;
+  line-height: 1.3;
+}
+
+[data-theme='dark'] .bezent-wf-action-name {
+  color: #f8fafc;
+}
+
+.bezent-wf-action-sub {
+  font-size: 11.5px;
+  color: #64748b;
+  line-height: 1.3;
+}
+
+[data-theme='dark'] .bezent-wf-action-sub {
+  color: #94a3b8;
+}
+
+.bezent-wf-action-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.bezent-wf-action-priority {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.bezent-wf-action-priority--urgent {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.bezent-wf-action-priority--high {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.bezent-wf-action-priority--medium {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.bezent-wf-action-priority--attention {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+[data-theme='dark'] .bezent-wf-action-priority--urgent {
+  background: #7f1d1d;
+  color: #fca5a5;
+}
+[data-theme='dark'] .bezent-wf-action-priority--high {
+  background: #78350f;
+  color: #fde68a;
+}
+[data-theme='dark'] .bezent-wf-action-priority--medium {
+  background: #0c4a6e;
+  color: #7dd3fc;
+}
+[data-theme='dark'] .bezent-wf-action-priority--attention {
+  background: #334155;
+  color: #cbd5e1;
+}
+
+.bezent-wf-action-count {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0f172a;
+  background: #ffffff;
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+[data-theme='dark'] .bezent-wf-action-count {
+  background: #0f172a;
+  color: #f8fafc;
+  border-color: #334155;
+}
+
+.bezent-wf-action-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.bezent-wf-action-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px 16px;
+  gap: 8px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+}
+
+[data-theme='dark'] .bezent-wf-action-empty {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.bezent-wf-action-empty-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #ecfdf5;
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.bezent-wf-action-empty-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #182230;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-wf-action-empty-title {
+  color: #f8fafc;
+}
+
+.bezent-wf-action-empty-desc {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-wf-action-empty-desc {
+  color: #94a3b8;
+}
+
+/* ── Tier 7: Recent Workforce Activity Vertical Timeline ── */
+.bezent-wf-timeline-card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  padding: 22px 24px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+  width: 100%;
+}
+
+[data-theme='dark'] .bezent-wf-timeline-card {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+.bezent-wf-timeline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 12px;
+}
+
+.bezent-wf-timeline-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bezent-wf-timeline-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #182230;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+[data-theme='dark'] .bezent-wf-timeline-title {
+  color: #f8fafc;
+}
+
+.bezent-wf-timeline-desc {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-wf-timeline-desc {
+  color: #94a3b8;
+}
+
+.bezent-wf-timeline-wrap {
+  position: relative;
+  padding-left: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.bezent-wf-timeline-track-line {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 10px;
+  width: 2px;
+  background: #e2e8f0;
+}
+
+[data-theme='dark'] .bezent-wf-timeline-track-line {
+  background: #334155;
+}
+
+.bezent-wf-timeline-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bezent-wf-timeline-dot {
+  position: absolute;
+  left: -28px;
+  top: 1px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 2px #e2e8f0;
+  z-index: 1;
+}
+
+[data-theme='dark'] .bezent-wf-timeline-dot {
+  border-color: #0f172a;
+  box-shadow: 0 0 0 2px #334155;
+}
+
+.bezent-wf-timeline-dot--blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+.bezent-wf-timeline-dot--teal {
+  background: #f0fdfa;
+  color: #0d9488;
+}
+.bezent-wf-timeline-dot--amber {
+  background: #fffbeb;
+  color: #d97706;
+}
+.bezent-wf-timeline-dot--green {
+  background: #f0fdf4;
+  color: #159a70;
+}
+.bezent-wf-timeline-dot--purple {
+  background: #faf5ff;
+  color: #7c3aed;
+}
+.bezent-wf-timeline-dot--rose {
+  background: #fef2f2;
+  color: #e11d48;
+}
+
+[data-theme='dark'] .bezent-wf-timeline-dot--blue {
+  background: #1e3a8a;
+  color: #93c5fd;
+}
+[data-theme='dark'] .bezent-wf-timeline-dot--teal {
+  background: #134e4a;
+  color: #5eead4;
+}
+[data-theme='dark'] .bezent-wf-timeline-dot--amber {
+  background: #78350f;
+  color: #fde68a;
+}
+[data-theme='dark'] .bezent-wf-timeline-dot--green {
+  background: #064e3b;
+  color: #6ee7b7;
+}
+[data-theme='dark'] .bezent-wf-timeline-dot--purple {
+  background: #4c1d95;
+  color: #c4b5fd;
+}
+[data-theme='dark'] .bezent-wf-timeline-dot--rose {
+  background: #881337;
+  color: #fda4af;
+}
+
+.bezent-wf-timeline-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bezent-wf-timeline-main-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.bezent-wf-timeline-text-block {
+  display: inline;
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
+.bezent-wf-timeline-emp-name {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+[data-theme='dark'] .bezent-wf-timeline-emp-name {
+  color: #f8fafc;
+}
+
+.bezent-wf-timeline-activity-desc {
+  font-weight: 500;
+  color: #334155;
+}
+
+[data-theme='dark'] .bezent-wf-timeline-activity-desc {
+  color: #cbd5e1;
+}
+
+.bezent-wf-timeline-dept-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 1px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .bezent-wf-timeline-dept-tag {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+.bezent-wf-timeline-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-wf-timeline-meta-row {
+  color: #94a3b8;
+}
+
+.bezent-wf-timeline-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bezent-wf-timeline-actor {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bezent-wf-timeline-dot-sep {
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .bezent-wf-timeline-dot-sep {
+  color: #475569;
+}
+
+/* ==========================================================================
+   ✨ Unified & Simplified Workforce Overview Architecture (Mockup Spec) ✨
+   ========================================================================== */
+
+.bezent-wf-simplified-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+/* ── Top Header Controls & Filters ── */
+.bezent-wf-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bezent-wf-filter-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  border-radius: 20px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-secondary, #475569);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.bezent-wf-filter-pill-btn:hover {
+  background: var(--bg-hover, #f8fafc);
+  border-color: var(--border-strong, #cbd5e1);
+  color: var(--text-primary, #0f172a);
+}
+
+[data-theme='dark'] .bezent-wf-filter-pill-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+[data-theme='dark'] .bezent-wf-filter-pill-btn:hover {
+  background: #334155;
+  color: #f8fafc;
+}
+
+/* ── Accessible Visually Hidden Utility ── */
+.bezent-visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* ── Mega Section Card ── */
+.bezent-wf-mega-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+}
+
+[data-theme='dark'] .bezent-wf-mega-card {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.bezent-wf-mega-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bezent-wf-mega-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bezent-wf-mega-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eff6ff;
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+.bezent-wf-mega-icon--teal {
+  background: #f0fdfa;
+  color: #0d9488;
+}
+.bezent-wf-mega-icon--purple {
+  background: #faf5ff;
+  color: #7c3aed;
+}
+.bezent-wf-mega-icon--amber {
+  background: #fffbeb;
+  color: #d97706;
+}
+.bezent-wf-mega-icon--rose {
+  background: #fef2f2;
+  color: #e11d48;
+}
+
+[data-theme='dark'] .bezent-wf-mega-icon {
+  background: #1e3a8a;
+  color: #93c5fd;
+}
+[data-theme='dark'] .bezent-wf-mega-icon--teal {
+  background: #134e4a;
+  color: #5eead4;
+}
+[data-theme='dark'] .bezent-wf-mega-icon--purple {
+  background: #4c1d95;
+  color: #c4b5fd;
+}
+[data-theme='dark'] .bezent-wf-mega-icon--amber {
+  background: #78350f;
+  color: #fde68a;
+}
+[data-theme='dark'] .bezent-wf-mega-icon--rose {
+  background: #881337;
+  color: #fda4af;
+}
+
+.bezent-wf-mega-headings {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bezent-wf-mega-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-wf-mega-title {
+  color: #f8fafc;
+}
+
+.bezent-wf-mega-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary, #64748b);
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-wf-mega-subtitle {
+  color: #94a3b8;
+}
+
+.bezent-wf-mega-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #2563eb;
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.bezent-wf-mega-link:hover {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+[data-theme='dark'] .bezent-wf-mega-link {
+  color: #60a5fa;
+}
+
+[data-theme='dark'] .bezent-wf-mega-link:hover {
+  background: rgba(37, 99, 235, 0.15);
+}
+
+/* ── Mega Card 1: Workforce Analytics 2-Column Grid ── */
+.bezent-wf-analytics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+@media (max-width: 960px) {
+  .bezent-wf-analytics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bezent-wf-analytics-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bezent-wf-col-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-primary, #1e293b);
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-wf-col-title {
+  color: #f1f5f9;
+}
+
+.bezent-wf-donut-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.bezent-wf-donut-legend-list {
+  flex: 1;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.bezent-wf-legend-item {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  font-size: 13px;
+  line-height: 1.4;
+  gap: 12px;
+  width: 100%;
+}
+
+.bezent-wf-legend-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary, #334155);
+}
+
+[data-theme='dark'] .bezent-wf-legend-left {
+  color: #cbd5e1;
+}
+
+.bezent-wf-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bezent-wf-legend-val {
+  font-weight: 600;
+  color: var(--text-primary, #0f172a);
+}
+
+[data-theme='dark'] .bezent-wf-legend-val {
+  color: #f8fafc;
+}
+
+/* ── Mega Card 2: Workforce Composition 3-Column Grid ── */
+.bezent-wf-composition-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 28px;
+}
+
+@media (max-width: 1080px) {
+  .bezent-wf-composition-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bezent-wf-bars-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bezent-wf-bar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.bezent-wf-bar-label {
+  min-width: 95px;
+  font-weight: 500;
+  color: var(--text-secondary, #475569);
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .bezent-wf-bar-label {
+  color: #94a3b8;
+}
+
+.bezent-wf-bar-track {
+  flex: 1;
+  height: 7px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+[data-theme='dark'] .bezent-wf-bar-track {
+  background: #1e293b;
+}
+
+.bezent-wf-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.bezent-wf-bar-val {
+  min-width: 54px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--text-primary, #0f172a);
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .bezent-wf-bar-val {
+  color: #f8fafc;
+}
+
+/* ── Mega Card 3: Workforce Planning ── */
+.bezent-wf-planning-chips {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 900px) {
+  .bezent-wf-planning-chips {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.bezent-wf-planning-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 8px;
+}
+
+[data-theme='dark'] .bezent-wf-planning-chip {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.bezent-wf-chip-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eff6ff;
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+.bezent-wf-chip-icon--green {
+  background: #ecfdf5;
+  color: #059669;
+}
+.bezent-wf-chip-icon--orange {
+  background: #fff7ed;
+  color: #ea580c;
+}
+.bezent-wf-chip-icon--red {
+  background: #fef2f2;
+  color: #dc2626;
+}
+.bezent-wf-chip-icon--teal {
+  background: #f0fdfa;
+  color: #0d9488;
+}
+
+[data-theme='dark'] .bezent-wf-chip-icon {
+  background: #1e3a8a;
+  color: #93c5fd;
+}
+[data-theme='dark'] .bezent-wf-chip-icon--green {
+  background: #064e3b;
+  color: #6ee7b7;
+}
+[data-theme='dark'] .bezent-wf-chip-icon--orange {
+  background: #7c2d12;
+  color: #fdba74;
+}
+[data-theme='dark'] .bezent-wf-chip-icon--red {
+  background: #7f1d1d;
+  color: #fca5a5;
+}
+[data-theme='dark'] .bezent-wf-chip-icon--teal {
+  background: #134e4a;
+  color: #5eead4;
+}
+
+.bezent-wf-chip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.bezent-wf-chip-label {
+  font-size: 11px;
+  color: var(--text-secondary, #64748b);
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .bezent-wf-chip-label {
+  color: #94a3b8;
+}
+
+.bezent-wf-chip-val {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+}
+
+[data-theme='dark'] .bezent-wf-chip-val {
+  color: #f8fafc;
+}
+
+.bezent-wf-planning-split {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 32px;
+}
+
+@media (max-width: 960px) {
+  .bezent-wf-planning-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bezent-wf-dept-headcount-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.bezent-wf-dept-headcount-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary, #1e293b);
+}
+
+[data-theme='dark'] .bezent-wf-dept-headcount-top {
+  color: #f1f5f9;
+}
+
+.bezent-wf-dept-bar-track {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+[data-theme='dark'] .bezent-wf-dept-bar-track {
+  background: #334155;
+}
+
+.bezent-wf-dept-bar-fill {
+  height: 100%;
+  background: #2563eb;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+/* Hiring Table in Planning */
+.bezent-wf-hiring-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.bezent-wf-hiring-table th {
+  text-align: left;
+  padding: 6px 10px;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+  border-bottom: 1px solid var(--border-subtle, #f1f5f9);
+}
+
+[data-theme='dark'] .bezent-wf-hiring-table th {
+  color: #94a3b8;
+  border-bottom-color: #1e293b;
+}
+
+.bezent-wf-hiring-table td {
+  padding: 10px;
+  border-bottom: 1px solid var(--border-subtle, #f8fafc);
+  color: var(--text-primary, #1e293b);
+}
+
+[data-theme='dark'] .bezent-wf-hiring-table td {
+  border-bottom-color: #1e293b;
+  color: #cbd5e1;
+}
+
+.bezent-wf-priority-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.bezent-wf-priority-pill--high {
+  color: #dc2626;
+  background: #fef2f2;
+}
+.bezent-wf-priority-pill--medium {
+  color: #d97706;
+  background: #fffbeb;
+}
+.bezent-wf-priority-pill--low {
+  color: #059669;
+  background: #ecfdf5;
+}
+
+[data-theme='dark'] .bezent-wf-priority-pill--high {
+  background: rgba(220, 38, 38, 0.2);
+  color: #fca5a5;
+}
+[data-theme='dark'] .bezent-wf-priority-pill--medium {
+  background: rgba(217, 119, 6, 0.2);
+  color: #fde68a;
+}
+[data-theme='dark'] .bezent-wf-priority-pill--low {
+  background: rgba(5, 150, 105, 0.2);
+  color: #6ee7b7;
+}
+
+.bezent-wf-status-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.bezent-wf-status-pill--open {
+  background: #eff6ff;
+  color: #2563eb;
+}
+.bezent-wf-status-pill--planned {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-wf-status-pill--open {
+  background: #1e3a8a;
+  color: #93c5fd;
+}
+[data-theme='dark'] .bezent-wf-status-pill--planned {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+/* ── Mega Card 4: Employee Lifecycle Connected Chevrons ── */
+.bezent-wf-chevrons-container {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  gap: 6px;
+  border-radius: 8px;
+  background: transparent;
+}
+
+.bezent-wf-chevron-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 14px;
+  position: relative;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.bezent-wf-chevron-item--first {
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%);
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.bezent-wf-chevron-item--mid {
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%, 16px 50%);
+}
+
+.bezent-wf-chevron-item--last {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 16px 50%);
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.bezent-wf-action-item__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.bezent-wf-action-item__right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.bezent-wf-action-count-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+[data-theme='dark'] .bezent-wf-action-count-pill {
+  background: #7f1d1d;
+  color: #fca5a5;
+}
+
+.bezent-wf-chevron-item--blue {
+  background: #eef6ff;
+  color: #2563eb;
+}
+.bezent-wf-chevron-item--green {
+  background: #ecfdf5;
+  color: #059669;
+}
+.bezent-wf-chevron-item--amber {
+  background: #fffbeb;
+  color: #d97706;
+}
+.bezent-wf-chevron-item--purple {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+.bezent-wf-chevron-item--rose {
+  background: #fef2f2;
+  color: #e11d48;
+}
+
+[data-theme='dark'] .bezent-wf-chevron-item--blue {
+  background: #1e3a8a;
+  color: #bfdbfe;
+}
+[data-theme='dark'] .bezent-wf-chevron-item--green {
+  background: #064e3b;
+  color: #a7f3d0;
+}
+[data-theme='dark'] .bezent-wf-chevron-item--amber {
+  background: #78350f;
+  color: #fde68a;
+}
+[data-theme='dark'] .bezent-wf-chevron-item--purple {
+  background: #4c1d95;
+  color: #ddd6fe;
+}
+[data-theme='dark'] .bezent-wf-chevron-item--rose {
+  background: #881337;
+  color: #fecdd3;
+}
+
+.bezent-wf-chevron-item:hover {
+  filter: brightness(0.96);
+  transform: translateY(-1px);
+}
+
+.bezent-wf-chevron-icon {
+  margin-bottom: 4px;
+}
+
+.bezent-wf-chevron-num {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.bezent-wf-chevron-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #475569);
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .bezent-wf-chevron-label {
+  color: #cbd5e1;
+}
+
+/* ── Bottom 3-Column Split: Action Center + Activity + Mascot ── */
+.bezent-wf-bottom-split {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr 0.85fr;
+  gap: 20px;
+  align-items: stretch;
+}
+
+@media (max-width: 1080px) {
+  .bezent-wf-bottom-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mascot / Culture Card */
+.bezent-wf-mascot-card {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  border: 1px solid #d1fae5;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme='dark'] .bezent-wf-mascot-card {
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+  border-color: #047857;
+}
+
+.bezent-wf-speech-bubble {
+  background: #ffffff;
+  color: #1e293b;
+  padding: 8px 14px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  margin-bottom: 14px;
+  position: relative;
+}
+
+[data-theme='dark'] .bezent-wf-speech-bubble {
+  background: #334155;
+  color: #f8fafc;
+}
+
+.bezent-wf-speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px 6px 0;
+  border-style: solid;
+  border-color: #ffffff transparent;
+  display: block;
+  width: 0;
+}
+
+[data-theme='dark'] .bezent-wf-speech-bubble::after {
+  border-color: #334155 transparent;
+}
+
+.bezent-wf-mascot-img {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+  transition: transform 0.25s ease;
+}
+
+.bezent-wf-mascot-card:hover .bezent-wf-mascot-img {
+  transform: scale(1.05);
+}
+
+/* ── Footer Metadata Row ── */
+.bezent-wf-footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-tertiary, #94a3b8);
+  padding: 12px 4px 24px;
+  border-top: 1px solid var(--border-subtle, #f1f5f9);
+}
+
+[data-theme='dark'] .bezent-wf-footer-row {
+  border-top-color: #1e293b;
+  color: #64748b;
+}
+
+.bezent-wf-footer-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bezent-wf-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
 }

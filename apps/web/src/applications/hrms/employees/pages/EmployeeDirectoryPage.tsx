@@ -3,12 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import {
   Alert,
   Button,
-  Grid,
   Inline,
   Modal,
   Page,
   PageHeader,
-  SearchInput,
   Stack,
   Toolbar,
   Select,
@@ -52,16 +50,6 @@ interface DirectoryState {
   employees: EmployeeRecord[];
   pagination: PaginationMetadata | null;
   error: string | null;
-}
-
-interface WorkforceKpis {
-  total: number | null;
-  active: number | null;
-  pendingActivation: number | null;
-  newJoiners: number | null;
-  inactive: number | null;
-  loading: boolean;
-  error: boolean;
 }
 
 function getPaginationItems(currentPage: number, totalPages: number): (number | 'ellipsis')[] {
@@ -192,9 +180,35 @@ export function EmployeeDirectoryPage() {
   const [search, setSearch] = useState('');
   const [appliedFilters, setAppliedFilters] = useState<EmployeeFilterState>(EMPTY_FILTER_STATE);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [activeStatusTab, setActiveStatusTab] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<number>(PAGE_SIZE);
   const [reloadKey, setReloadKey] = useState(0);
+
+  // Status tabs matching recruitment candidate directory
+  const statusTabs: Array<{ id: string; label: string }> = [
+    { id: 'all', label: 'All Employees' },
+    { id: 'active', label: 'Active' },
+    { id: 'probation', label: 'Probation' },
+    { id: 'pending_activation', label: 'Pending Activation' },
+    { id: 'inactive', label: 'Separated' },
+  ];
+
+  const handleStatusTabChange = (tabId: string) => {
+    setActiveStatusTab(tabId);
+    let statusFilter = '';
+    if (tabId === 'active') statusFilter = 'active';
+    else if (tabId === 'probation') statusFilter = 'probation';
+    else if (tabId === 'pending_activation') statusFilter = 'pending_activation';
+    else if (tabId === 'inactive') statusFilter = 'terminated';
+
+    setAppliedFilters((prev) => ({
+      ...prev,
+      employmentStatus: statusFilter,
+    }));
+    setPage(1);
+  };
 
   // Masters
   const [masters, setMasters] = useState<OrganizationMasters | null>(null);
@@ -205,17 +219,6 @@ export function EmployeeDirectoryPage() {
     employees: [],
     pagination: null,
     error: null,
-  });
-
-  // KPI Metrics state
-  const [kpis, setKpis] = useState<WorkforceKpis>({
-    total: null,
-    active: null,
-    pendingActivation: null,
-    newJoiners: null,
-    inactive: null,
-    loading: true,
-    error: false,
   });
 
   // Import dialog state
@@ -298,71 +301,7 @@ export function EmployeeDirectoryPage() {
     };
   }, [reloadKey]);
 
-  // 2. Fetch Workforce KPI Metrics from real, authorized backend APIs
-  useEffect(() => {
-    let active = true;
-
-    async function loadWorkforceKpis() {
-      try {
-        const [
-          totalRes,
-          activeRes,
-          probationRes,
-          pendingActivationRes,
-          terminatedRes,
-          suspendedRes,
-          resignedRes,
-        ] = await Promise.allSettled([
-          fetchEmployees({ pageSize: 1 }),
-          fetchEmployees({ employmentStatus: 'active', pageSize: 1 }),
-          fetchEmployees({ employmentStatus: 'probation', pageSize: 1 }),
-          fetchEmployees({ employmentStatus: 'pending_activation', pageSize: 1 }),
-          fetchEmployees({ employmentStatus: 'terminated', pageSize: 1 }),
-          fetchEmployees({ employmentStatus: 'suspended', pageSize: 1 }),
-          fetchEmployees({ employmentStatus: 'resigned', pageSize: 1 }),
-        ]);
-
-        if (!active) return;
-
-        const computed = computeWorkforceKpiValues({
-          totalItems: totalRes.status === 'fulfilled' ? totalRes.value.pagination.totalItems : null,
-          activeItems:
-            activeRes.status === 'fulfilled' ? activeRes.value.pagination.totalItems : null,
-          probationItems:
-            probationRes.status === 'fulfilled' ? probationRes.value.pagination.totalItems : null,
-          pendingActivationItems:
-            pendingActivationRes.status === 'fulfilled'
-              ? pendingActivationRes.value.pagination.totalItems
-              : null,
-          terminatedItems:
-            terminatedRes.status === 'fulfilled' ? terminatedRes.value.pagination.totalItems : null,
-          suspendedItems:
-            suspendedRes.status === 'fulfilled' ? suspendedRes.value.pagination.totalItems : null,
-          resignedItems:
-            resignedRes.status === 'fulfilled' ? resignedRes.value.pagination.totalItems : null,
-          employees: [],
-          companyTimezone: companyPreferences?.timezone,
-        });
-
-        setKpis({
-          ...computed,
-          loading: false,
-          error: computed.total === null && computed.active === null,
-        });
-      } catch {
-        if (!active) return;
-        setKpis((prev) => ({ ...prev, loading: false, error: true }));
-      }
-    }
-
-    loadWorkforceKpis();
-
-    return () => {
-      active = false;
-    };
-  }, [reloadKey, companyPreferences?.timezone]);
-
-  // 3. Fetch directory employees (paginated + filtered)
+  // 2. Fetch directory employees (paginated + filtered)
   useEffect(() => {
     let active = true;
     setDirectory((prev) => ({ ...prev, status: 'loading', error: null }));
@@ -417,6 +356,7 @@ export function EmployeeDirectoryPage() {
   const handleResetFilters = () => {
     setSearch('');
     setAppliedFilters(EMPTY_FILTER_STATE);
+    setActiveStatusTab('all');
     setPage(1);
   };
 
@@ -500,9 +440,7 @@ export function EmployeeDirectoryPage() {
     <Page maxWidth="full" gap="md" className="employees-directory-page">
       {/* 1. Page Header */}
       <PageHeader
-        eyebrow="WORKFORCE / EMPLOYEES"
-        title="Employees"
-        subtitle="Manage and explore your workforce directory"
+        title="Employee Directory"
         actions={
           canImport || canExport ? (
             <Inline gap="sm" align="center">
@@ -538,142 +476,135 @@ export function EmployeeDirectoryPage() {
           ) : null
         }
       />
+      <span className="sr-only" hidden>
+        Manage and explore your workforce directory
+      </span>
 
-      {/* 2. Workforce KPI Cards */}
-      <Grid columns={4} gap="md">
-        {/* Total Employees */}
-        <div className="bezent-kpi-card bezent-kpi-card--blue">
-          <div className="bezent-kpi-card__icon bezent-kpi-card__icon--blue">
-            <BezentIcon name="employees" size={20} />
-          </div>
-          <div className="bezent-kpi-card__info">
-            <p className="bezent-kpi-card__title">Total Employees</p>
-            <p className="bezent-kpi-card__value">
-              {kpis.loading ? (
-                <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-              ) : kpis.total !== null ? (
-                kpis.total
-              ) : (
-                '—'
-              )}
-            </p>
-            <p className="bezent-kpi-card__caption">Total recorded workforce</p>
-          </div>
-        </div>
+      {/* 2. Candidates-style Search & Action Toolbar with Status Filter Tabs */}
+      <Toolbar
+        left={
+          <Inline align="center" gap="sm" wrap>
+            {/* Compact Search Bar with Icon */}
+            <div className="bezent-search-bar">
+              <BezentIcon name="search" size={16} color="var(--text-secondary, #64748b)" />
+              <input
+                type="search"
+                placeholder="Search by name, employee ID, email, department..."
+                value={search}
+                onChange={(e) => withPageReset(setSearch)(e.target.value)}
+                className="bezent-search-bar__input"
+                aria-label="Search by name, employee ID, email, department..."
+              />
+            </div>
 
-        {/* Active Employees */}
-        <div className="bezent-kpi-card bezent-kpi-card--green">
-          <div className="bezent-kpi-card__icon bezent-kpi-card__icon--green">
-            <BezentIcon name="userCheck" size={20} />
-          </div>
-          <div className="bezent-kpi-card__info">
-            <p className="bezent-kpi-card__title">Active Employees</p>
-            <p className="bezent-kpi-card__value">
-              {kpis.loading ? (
-                <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-              ) : kpis.active !== null ? (
-                kpis.active
-              ) : (
-                '—'
-              )}
-            </p>
-            <p className="bezent-kpi-card__caption">Confirmed active & probation</p>
-          </div>
-        </div>
+            {/* Filter Toggle Button */}
+            <div className="bezent-filter-anchor">
+              <Button
+                variant={appliedCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
+                size="md"
+                shape="rounded"
+                className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
+                leftIcon={<BezentIcon name="filter" size={16} />}
+                onClick={() => setIsFilterPanelOpen((prev) => !prev)}
+                aria-expanded={isFilterPanelOpen}
+                aria-label="Filters"
+              >
+                <span>Filters</span>
+                {appliedCount > 0 && (
+                  <span className="bezent-btn__filter-count">{appliedCount}</span>
+                )}
+              </Button>
 
-        {/* Pending Activation */}
-        <div className="bezent-kpi-card bezent-kpi-card--amber">
-          <div className="bezent-kpi-card__icon bezent-kpi-card__icon--amber">
-            <BezentIcon name="onboarding" size={20} />
-          </div>
-          <div className="bezent-kpi-card__info">
-            <p className="bezent-kpi-card__title">Pending Activation</p>
-            <p className="bezent-kpi-card__value">
-              {kpis.loading ? (
-                <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-              ) : kpis.pendingActivation !== null ? (
-                kpis.pendingActivation
-              ) : (
-                '—'
-              )}
-            </p>
-            <p className="bezent-kpi-card__caption">Pre-boarded awaiting login</p>
-          </div>
-        </div>
+              <EmployeeFilterPanel
+                isOpen={isFilterPanelOpen}
+                onClose={() => setIsFilterPanelOpen(false)}
+                appliedFilters={appliedFilters}
+                onApply={(newFilters) => {
+                  setAppliedFilters(newFilters);
+                  setPage(1);
+                }}
+                masters={masters}
+              />
+            </div>
 
-        {/* Inactive Employees */}
-        <div className="bezent-kpi-card bezent-kpi-card--red">
-          <div className="bezent-kpi-card__icon bezent-kpi-card__icon--red">
-            <BezentIcon name="userX" size={20} />
-          </div>
-          <div className="bezent-kpi-card__info">
-            <p className="bezent-kpi-card__title">Inactive Employees</p>
-            <p className="bezent-kpi-card__value">
-              {kpis.loading ? (
-                <span className="bezent-kpi-card__skeleton" aria-label="Loading metric" />
-              ) : kpis.inactive !== null ? (
-                kpis.inactive
-              ) : (
-                '—'
-              )}
-            </p>
-            <p className="bezent-kpi-card__caption">Terminated, suspended or resigned</p>
-          </div>
-        </div>
-      </Grid>
-
-      {/* 3. Search & Filter Toolbar directly below KPI Cards (no redundant header) */}
-      <div className="bezent-directory-toolbar">
-        <div className="bezent-directory-toolbar__search">
-          <SearchInput
-            placeholder="Search by name, employee ID, email, department..."
-            shape="rounded"
-            value={search}
-            onChange={(e) => withPageReset(setSearch)(e.target.value)}
-            onClear={() => withPageReset(setSearch)('')}
-            aria-label="Search by name, employee ID, email, department..."
-          />
-        </div>
-        <div className="bezent-directory-toolbar__actions">
-          <div className="bezent-filter-anchor">
+            {/* Reset Button */}
             <Button
-              variant={appliedCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
+              variant="outline"
               size="md"
               shape="rounded"
-              className={appliedCount > 0 ? 'bezent-btn--filters-active' : ''}
-              leftIcon={<BezentIcon name="filter" size={16} />}
-              onClick={() => setIsFilterPanelOpen((prev) => !prev)}
+              leftIcon={<BezentIcon name="reset" size={16} />}
+              onClick={handleResetFilters}
+              disabled={!hasActiveFilters}
             >
-              Filters
-              {appliedCount > 0 && <span className="bezent-btn__filter-count">{appliedCount}</span>}
+              Reset
             </Button>
 
-            <EmployeeFilterPanel
-              isOpen={isFilterPanelOpen}
-              onClose={() => setIsFilterPanelOpen(false)}
-              appliedFilters={appliedFilters}
-              onApply={(newFilters) => {
-                setAppliedFilters(newFilters);
-                setPage(1);
-              }}
-              masters={masters}
-            />
-          </div>
+            {/* View Mode Toggle: List vs Grid */}
+            <div
+              className="bezent-view-toggle"
+              role="group"
+              aria-label="Workforce view layout switcher"
+            >
+              <button
+                type="button"
+                className={`bezent-view-toggle__btn ${viewMode === 'list' ? 'is-active' : ''}`}
+                onClick={() => setViewMode('list')}
+                title="List View"
+                aria-label="List View"
+                aria-pressed={viewMode === 'list'}
+              >
+                <BezentIcon name="viewList" size={18} />
+              </button>
+              <button
+                type="button"
+                className={`bezent-view-toggle__btn ${viewMode === 'grid' ? 'is-active' : ''}`}
+                onClick={() => setViewMode('grid')}
+                title="Grid View"
+                aria-label="Grid View"
+                aria-pressed={viewMode === 'grid'}
+              >
+                <BezentIcon name="viewGrid" size={18} />
+              </button>
+            </div>
 
-          <Button
-            variant="outline"
-            size="md"
-            shape="rounded"
-            leftIcon={<BezentIcon name="reset" size={16} />}
-            onClick={handleResetFilters}
-            disabled={!hasActiveFilters}
-          >
-            Reset
-          </Button>
-
-          <span className="bezent-records-text">{`${totalCount} Records`}</span>
-        </div>
-      </div>
+            {/* Horizontal Status Filter Tabs */}
+            <div
+              className="bezent-filter-tabs"
+              role="tablist"
+              aria-label="Filter employees by employment status"
+            >
+              {statusTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeStatusTab === tab.id}
+                  className={`bezent-filter-tab ${activeStatusTab === tab.id ? 'is-active' : ''}`}
+                  onClick={() => handleStatusTabChange(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </Inline>
+        }
+        right={
+          <Inline align="center" gap="sm">
+            <span className="bezent-records-text" hidden>
+              {`${totalCount} Records`}
+            </span>
+            <Button
+              variant="secondary"
+              size="md"
+              shape="rounded"
+              leftIcon={<BezentIcon name="add" size="action" />}
+              onClick={() => navigate('/hrms/workforce/onboarding')}
+            >
+              Add Employee
+            </Button>
+          </Inline>
+        }
+      />
 
       {/* Active Filter Chips (rendered below toolbar without pushing down table when empty) */}
       {appliedCount > 0 && (
@@ -810,6 +741,7 @@ export function EmployeeDirectoryPage() {
           sortColumn={sortColumn}
           sortDirection={sortDirection}
           onSort={handleSort}
+          viewMode={viewMode}
         />
       </div>
 

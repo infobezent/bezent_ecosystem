@@ -38,7 +38,7 @@ describe('Design System PhoneInput Component', () => {
   it('renders country flag icon next to country code', () => {
     const html = renderToStaticMarkup(<PhoneInput countryCode="+91" />);
 
-    expect(html).toContain('🇮🇳');
+    expect(html).toContain('fi-in');
     expect(html).toContain('bezent-phone-input-flag');
   });
 });

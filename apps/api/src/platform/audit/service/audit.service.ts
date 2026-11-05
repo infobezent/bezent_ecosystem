@@ -19,6 +19,23 @@ const SENSITIVE_KEYS = new Set([
   'code',
   'otpcode',
   'cookie',
+  // Sensitive financial, banking and statutory identifiers
+  'accountnumber',
+  'account_number',
+  'bankaccount',
+  'bank_account',
+  'pan',
+  'pannumber',
+  'pan_number',
+  'aadhaar',
+  'aadhaarnumber',
+  'aadhaar_number',
+  'ssn',
+  'socialsecuritynumber',
+  'nationalid',
+  'national_id',
+  'taxid',
+  'tax_id',
 ]);
 
 function sanitizeMetadata(
@@ -41,12 +58,15 @@ function sanitizeMetadata(
 export class AuditService {
   constructor(private readonly repo: AuditRepository = auditRepository) {}
 
-  async logEvent(event: AuditEventInput): Promise<AuditLogRecord> {
+  async logEvent(event: AuditEventInput, executor?: any): Promise<AuditLogRecord> {
     const sanitizedMetadata = sanitizeMetadata(event.metadata);
-    return this.repo.record({
-      ...event,
-      metadata: sanitizedMetadata,
-    });
+    return this.repo.record(
+      {
+        ...event,
+        metadata: sanitizedMetadata,
+      },
+      executor,
+    );
   }
 
   async getLogs(filter: AuditLogFilter): Promise<{ items: AuditLogRecord[]; total: number }> {

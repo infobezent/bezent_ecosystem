@@ -471,12 +471,14 @@ export function EssDashboardPage() {
                 const colorVariant = idx === 0 ? 'blue' : idx === 1 ? 'mint' : 'lavender';
                 return (
                   <div
-                    key={bal.leaveType}
+                    key={bal.leaveTypeId}
                     className={`ess-leave-quota-card ess-leave-quota-card--${colorVariant}`}
                   >
-                    <div className="ess-leave-quota-number">{bal.availableDays}</div>
-                    <div className="ess-leave-quota-label">{bal.leaveType.toUpperCase()} LEAVE</div>
-                    <div className="ess-leave-quota-sub">Days Available</div>
+                    <div className="ess-leave-quota-number">{bal.availableDays ?? '—'}</div>
+                    <div className="ess-leave-quota-label">{bal.leaveTypeName.toUpperCase()}</div>
+                    <div className="ess-leave-quota-sub">
+                      {bal.availableDays === null ? 'No limit' : 'Days Available'}
+                    </div>
                   </div>
                 );
               })}

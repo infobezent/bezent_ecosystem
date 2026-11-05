@@ -590,7 +590,12 @@ export class AttendanceController {
   updatePolicy = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { tenantId, companyId } = req.companyContext!;
-      const policy = await this.policyService.updatePolicy(tenantId, companyId, req.body);
+      const policy = await this.policyService.updatePolicy(
+        tenantId,
+        companyId,
+        req.body,
+        req.user?.id,
+      );
       res.json({ data: policy });
     } catch (err) {
       next(err);

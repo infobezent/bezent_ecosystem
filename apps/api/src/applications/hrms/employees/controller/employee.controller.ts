@@ -117,6 +117,11 @@ export class EmployeeController {
         companyContext.tenantId,
         companyContext.companyId,
         req.body,
+        undefined,
+        {
+          userId: req.user?.id,
+          email: req.user?.email,
+        },
       );
 
       res.status(201).json({
@@ -139,6 +144,10 @@ export class EmployeeController {
         companyContext.companyId,
         requireEmployeeId(req),
         req.body,
+        {
+          userId: req.user?.id,
+          email: req.user?.email,
+        },
       );
 
       res.json({

@@ -253,16 +253,12 @@ describe('HRMS routing for Workforce & Administration compatibility', () => {
 describe('Employees Directory page', () => {
   it('renders header, description, search, filters and a loading state', () => {
     const html = renderDirectory();
-    expect(html).toContain('Employees');
+    expect(html).toContain('Employee Directory');
     expect(html).toContain('Manage and explore your workforce directory');
     expect(html).toContain('Import');
     expect(html).toContain('Export');
-    expect(html).toContain('Total Employees');
-    expect(html).toContain('Active Employees');
-    expect(html).toContain('Pending Activation');
-    expect(html).toContain('Inactive Employees');
+    expect(html).not.toContain('Total Employees');
     expect(html).not.toContain('On Leave');
-    expect(html).not.toContain('Employee Directory');
     expect(html).toContain('Search by name, employee ID, email, department...');
     expect(html).toContain('Filters');
     expect(html).toContain('Reset');
@@ -291,10 +287,9 @@ describe('Employees Directory page', () => {
     expect(html).toMatch(/<button[^>]*disabled[^>]*>.*Reset.*<\/button>/s);
   });
 
-  it('renders skeleton shimmer placeholders for KPI metrics while loading', () => {
+  it('does not render KPI cards on the clean employee directory layout', () => {
     const html = renderDirectory();
-    expect(html).toContain('bezent-kpi-card__skeleton');
-    expect(html).toContain('aria-label="Loading metric"');
+    expect(html).not.toContain('bezent-kpi-card');
   });
 
   it('renders "—" fallback when KPI metric counts are unavailable', () => {
@@ -332,9 +327,37 @@ describe('Employees Directory page', () => {
     expect(none).not.toContain('Import');
     expect(none).not.toContain('Export');
   });
+
+  it('renders candidate-style status filter tabs and view mode toggle', () => {
+    const html = renderDirectory();
+    expect(html).toContain('All Employees');
+    expect(html).toContain('Probation');
+    expect(html).toContain('Pending Activation');
+    expect(html).toContain('Separated');
+    expect(html).toContain('bezent-view-toggle');
+    expect(html).toContain('bezent-filter-tabs');
+  });
 });
 
 describe('EmployeeDirectoryTable', () => {
+  it('renders employees in 3D Card Grid View when viewMode="grid"', () => {
+    const html = renderToStaticMarkup(
+      <EmployeeDirectoryTable
+        status="ready"
+        employees={[kavya, arjun]}
+        onRetry={noop}
+        onOpenEmployee={noop}
+        viewMode="grid"
+      />,
+    );
+    expect(html).toContain('Employees Grid View');
+    expect(html).toContain('Kavya Iyer');
+    expect(html).toContain('EMP-0003');
+    expect(html).toContain('Product Manager');
+    expect(html).toContain('Arjun Mehta');
+    expect(html).toContain('EMP-0002');
+    expect(html).toContain('Software Engineer');
+  });
   it('renders real employee records with approved directory columns', () => {
     const html = renderToStaticMarkup(
       <EmployeeDirectoryTable
@@ -364,7 +387,7 @@ describe('EmployeeDirectoryTable', () => {
     }
   });
 
-  it('renders employee avatar image with 3d catalog asset and initials fallback', () => {
+  it('renders employee avatar initials with color palette and accessible label', () => {
     const html = renderToStaticMarkup(
       <EmployeeDirectoryTable
         status="ready"
@@ -373,8 +396,10 @@ describe('EmployeeDirectoryTable', () => {
         onOpenEmployee={noop}
       />,
     );
-    expect(html).toContain('src="/assets/avatars/3d/');
-    expect(html).toContain('alt="Kavya Iyer"');
+    expect(html).toContain('KI');
+    expect(html).toContain('bezent-avatar--purple');
+    expect(html).toContain('aria-label="Kavya Iyer"');
+    expect(html).not.toContain('src="/assets/avatars/3d/');
   });
 
   it('employee name and ID open the canonical profile', () => {

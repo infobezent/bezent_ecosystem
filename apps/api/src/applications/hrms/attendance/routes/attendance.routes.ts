@@ -8,7 +8,10 @@ import { attendanceReportsController } from '../controller/attendanceReports.con
 import { attendanceOverviewController } from '../controller/attendanceOverview.controller.js';
 import { attendanceOvertimeController } from '../controller/attendanceOvertime.controller.js';
 import { attendanceCompOffController } from '../controller/attendanceCompOff.controller.js';
-import { requireReadWrite } from '../../../../platform/access/middleware/access.middleware.js';
+import {
+  requireReadWrite,
+  requirePermission,
+} from '../../../../platform/access/middleware/access.middleware.js';
 
 export const attendanceRouter = Router();
 
@@ -476,7 +479,11 @@ attendanceRouter.get('/hrms/attendance/reports/export', attendanceController.exp
 
 // 9. Legacy Policies Configuration (Backward Compatibility)
 attendanceRouter.get('/hrms/attendance/policies', attendanceController.getPolicy);
-attendanceRouter.put('/hrms/attendance/policies', attendanceController.updatePolicy);
+attendanceRouter.put(
+  '/hrms/attendance/policies',
+  requirePermission('hrms.settings.manage'),
+  attendanceController.updatePolicy,
+);
 
 // 10. Attendance Settings V1.0 Endpoints
 attendanceRouter.use(

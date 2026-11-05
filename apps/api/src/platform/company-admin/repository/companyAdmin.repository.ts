@@ -14,7 +14,7 @@ import {
   onboardingGeneralSettings,
   onboardingFieldConfigs,
   onboardingStageConfigs,
-  employeeLeaveBalances,
+  leaveTypes,
   employeeWorkSchedules,
   type Company,
   type NewMembership,
@@ -462,9 +462,15 @@ export class CompanyAdminRepository {
       );
 
     const leaveRows = await db
-      .selectDistinct({ leaveType: employeeLeaveBalances.leaveType })
-      .from(employeeLeaveBalances)
-      .where(eq(employeeLeaveBalances.companyId, companyId));
+      .select({ leaveType: leaveTypes.name })
+      .from(leaveTypes)
+      .where(
+        and(
+          eq(leaveTypes.companyId, companyId),
+          eq(leaveTypes.isActive, true),
+          eq(leaveTypes.isArchived, false),
+        ),
+      );
 
     const scheduleRows = await db
       .selectDistinct({ workSchedule: employeeWorkSchedules.workSchedule })

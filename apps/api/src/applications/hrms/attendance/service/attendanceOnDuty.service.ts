@@ -325,7 +325,11 @@ export class AttendanceOnDutyService {
         new Date(`${todayStr}T00:00:00Z`).getTime() -
         new Date(`${input.startDate}T00:00:00Z`).getTime();
       const daysAgo = Math.ceil(msDiff / (1000 * 60 * 60 * 24));
-      const maxBackdated = odRules?.backdatedAllowedDays ?? odRules?.maxBackdatedDays ?? 14;
+      const maxBackdated =
+        odRules?.backdatedAllowedDays ??
+        odRules?.maxBackdatedDays ??
+        (odRules as { maxDaysInPast?: number } | null | undefined)?.maxDaysInPast ??
+        14;
       if (daysAgo > maxBackdated) {
         throw new BadRequestError(
           `Backdated requests older than ${maxBackdated} days are not permitted by policy (requested: ${daysAgo} days ago)`,
@@ -848,7 +852,9 @@ export class AttendanceOnDutyService {
     }
 
     // Prevent self-approval (check both reviewerEmployeeId and reviewerUserId against employee record)
-    const empUserId = await this.odRepo.findEmployeeUserId(existing.employeeId);
+    const empUserId = this.isMockRepo
+      ? ((await (this.mockRepo as any)?.findEmployeeUserId?.(existing.employeeId)) ?? null)
+      : await this.odRepo.findEmployeeUserId(existing.employeeId);
     if (
       (reviewerEmployeeId && reviewerEmployeeId === existing.employeeId) ||
       (reviewerUserId &&

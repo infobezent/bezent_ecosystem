@@ -8,6 +8,9 @@ import {
   employees,
   departments,
   employeeLeaveRequests,
+  employeeLeaveBalances,
+  leaveBalanceTransactions,
+  employeeWorkSchedules,
   attendanceOnDutyRequests,
   attendanceExceptions,
   attendanceRegularizations,
@@ -18,6 +21,7 @@ import { generateSurrogateId } from '../../../../platform/auth/security.js';
 import { hrmsTestHeaders } from '../../../../platform/__tests__/support/testSession.js';
 import { attendanceOverviewService } from '../service/attendanceOverview.service.js';
 import type { CompanyAccess } from '../../../../platform/access/types/access.types.js';
+import { ensureLeaveTypeId } from '../../leave/__tests__/support/leaveTestTypes.js';
 
 describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Overview V1.0 Test Suite', () => {
   const tenantId = 'tenant_overview_v1';
@@ -51,11 +55,16 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Overview V1.0
     await db
       .delete(attendanceOnDutyRequests)
       .where(eq(attendanceOnDutyRequests.tenantId, tenantId));
+    await db
+      .delete(leaveBalanceTransactions)
+      .where(eq(leaveBalanceTransactions.tenantId, tenantId));
+    await db.delete(employeeLeaveBalances).where(eq(employeeLeaveBalances.tenantId, tenantId));
     await db.delete(employeeLeaveRequests).where(eq(employeeLeaveRequests.tenantId, tenantId));
     await db
       .delete(attendanceMonthlySummaries)
       .where(eq(attendanceMonthlySummaries.tenantId, tenantId));
     await db.delete(employeeNotifications).where(eq(employeeNotifications.tenantId, tenantId));
+    await db.delete(employeeWorkSchedules).where(eq(employeeWorkSchedules.tenantId, tenantId));
     await db.delete(employees).where(eq(employees.tenantId, tenantId));
     await db.delete(departments).where(eq(departments.tenantId, tenantId));
 
@@ -208,10 +217,10 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Overview V1.0
         tenantId,
         companyId,
         employeeId: empActive2,
-        leaveType: 'annual',
+        leaveTypeId: await ensureLeaveTypeId(tenantId, companyId, 'AL'),
         startDate: testDate,
         endDate: testDate,
-        totalDays: 1,
+        totalDays: '1.00',
         status: 'approved',
         reason: 'Personal appointment',
       })

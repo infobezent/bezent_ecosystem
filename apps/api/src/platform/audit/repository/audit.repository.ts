@@ -5,8 +5,8 @@ import type { AuditEventInput, AuditLogFilter, AuditLogRecord } from '../types/a
 import { generateSurrogateId } from '../../auth/security.js';
 
 export class AuditRepository {
-  async record(event: AuditEventInput): Promise<AuditLogRecord> {
-    const db = getDb();
+  async record(event: AuditEventInput, executor?: any): Promise<AuditLogRecord> {
+    const db = executor ?? getDb();
     const id = generateSurrogateId('aud');
     await db.insert(auditLogs).values({
       id,

@@ -16,11 +16,13 @@ import {
   attendanceExceptions,
   employeeNotifications,
   employeeWorkSchedules,
+  employeeLeaveBalances,
   employees,
   users,
 } from '../../../../db/schema.js';
 import { hashPassword } from '../../../../platform/auth/security.js';
 import { hrmsTestHeaders } from '../../../../platform/__tests__/support/testSession.js';
+import { ensureLeaveTypeId } from '../../leave/__tests__/support/leaveTestTypes.js';
 
 describe.skipIf(!isDatabaseConfigured)(
   'BEZENT HRMS — Attendance Monthly Summary V1.0 Real DB & API Audit',
@@ -86,6 +88,9 @@ describe.skipIf(!isDatabaseConfigured)(
       await db
         .delete(employeeWorkSchedules)
         .where(inArray(employeeWorkSchedules.employeeId, [empId1, empId2]));
+      await db
+        .delete(employeeLeaveBalances)
+        .where(inArray(employeeLeaveBalances.employeeId, [empId1, empId2]));
       await db.delete(employees).where(inArray(employees.id, [empId1, empId2]));
       await db.delete(users).where(inArray(users.id, [reviewerUserId, emp1UserId, emp2UserId]));
 
@@ -231,6 +236,9 @@ describe.skipIf(!isDatabaseConfigured)(
       await db
         .delete(employeeWorkSchedules)
         .where(inArray(employeeWorkSchedules.employeeId, [empId1, empId2]));
+      await db
+        .delete(employeeLeaveBalances)
+        .where(inArray(employeeLeaveBalances.employeeId, [empId1, empId2]));
       await db.delete(employees).where(inArray(employees.id, [empId1, empId2]));
       await db.delete(users).where(inArray(users.id, [reviewerUserId, emp1UserId, emp2UserId]));
     });
@@ -289,10 +297,10 @@ describe.skipIf(!isDatabaseConfigured)(
         tenantId,
         companyId,
         employeeId: empId1,
-        leaveType: 'casual',
+        leaveTypeId: await ensureLeaveTypeId(tenantId, companyId, 'CL'),
         startDate: '2026-09-02',
         endDate: '2026-09-02',
-        totalDays: 1,
+        totalDays: '1.00',
         status: 'approved',
         reason: 'Personal errand',
       });

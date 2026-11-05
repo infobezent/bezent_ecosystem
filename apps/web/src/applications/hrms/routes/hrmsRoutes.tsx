@@ -23,6 +23,29 @@ import {
   AttendanceExceptionsPage,
   AttendanceReportsPage,
 } from '../attendance';
+import {
+  HiringOverviewPage,
+  JobOpeningsPage,
+  CandidatesPage,
+  HiringPipelinePage,
+  InterviewsPage,
+  AssessmentsPage,
+  OffersPage,
+  OnboardingHandoffPage,
+  TalentPoolPage,
+  HiringReportsPage,
+} from '../recruitment';
+import { ShiftsPage } from '../shifts/pages/ShiftsPage';
+import {
+  LeaveOverviewPage,
+  LeaveRequestsPage,
+  LeaveApprovalsPage,
+  LeaveTeamCalendarPage,
+  LeaveBalancesPage,
+  LeaveHolidayCalendarPage,
+  LeaveYearEndPage,
+  LeaveReportsPage,
+} from '../leave';
 import { destinationPath } from '../../../shared/utils/navigation';
 import { useAuth } from '../../../platform/auth';
 import { landingPath } from '../../../platform/auth/landing';
@@ -100,7 +123,10 @@ export const hrmsRoutes: RouteObject[] = [
         const isWorkforce = destination.id === 'workforce';
         const isSettings = destination.id === 'settings';
         const isAttendance = destination.id === 'attendance';
-        // Workforce lands on Overview; Attendance lands on Overview.
+        const isRecruitment = destination.id === 'recruitment';
+        const isLeave = destination.id === 'leave';
+        const isShifts = destination.id === 'shifts';
+        // Workforce, Attendance, Recruitment, and Leave land on Overview.
         return [
           {
             path: destination.segment,
@@ -110,6 +136,12 @@ export const hrmsRoutes: RouteObject[] = [
               <SettingsPage />
             ) : isAttendance ? (
               <Navigate to="/hrms/attendance/overview" replace />
+            ) : isRecruitment ? (
+              <Navigate to="/hrms/recruitment/overview" replace />
+            ) : isLeave ? (
+              <Navigate to="/hrms/leave/overview" replace />
+            ) : isShifts ? (
+              <ShiftsPage />
             ) : (
               <ModulePlaceholder
                 application={APPLICATION}
@@ -157,6 +189,42 @@ export const hrmsRoutes: RouteObject[] = [
                 <AttendanceExceptionsPage />
               ) : isAttendance && child.id === 'reports' ? (
                 <AttendanceReportsPage />
+              ) : isRecruitment && child.id === 'overview' ? (
+                <HiringOverviewPage />
+              ) : isRecruitment && child.id === 'job-openings' ? (
+                <JobOpeningsPage />
+              ) : isRecruitment && child.id === 'candidates' ? (
+                <CandidatesPage />
+              ) : isRecruitment && child.id === 'pipeline' ? (
+                <HiringPipelinePage />
+              ) : isRecruitment && child.id === 'interviews' ? (
+                <InterviewsPage />
+              ) : isRecruitment && child.id === 'assessments' ? (
+                <AssessmentsPage />
+              ) : isRecruitment && child.id === 'offers' ? (
+                <OffersPage />
+              ) : isRecruitment && child.id === 'onboarding-handoff' ? (
+                <OnboardingHandoffPage />
+              ) : isRecruitment && child.id === 'talent-pool' ? (
+                <TalentPoolPage />
+              ) : isRecruitment && child.id === 'reports' ? (
+                <HiringReportsPage />
+              ) : isLeave && child.id === 'overview' ? (
+                <LeaveOverviewPage />
+              ) : isLeave && child.id === 'requests' ? (
+                <LeaveRequestsPage />
+              ) : isLeave && child.id === 'approvals' ? (
+                <LeaveApprovalsPage />
+              ) : isLeave && child.id === 'calendar' ? (
+                <LeaveTeamCalendarPage />
+              ) : isLeave && child.id === 'balances' ? (
+                <LeaveBalancesPage />
+              ) : isLeave && child.id === 'holidays' ? (
+                <LeaveHolidayCalendarPage />
+              ) : isLeave && child.id === 'year-end' ? (
+                <LeaveYearEndPage />
+              ) : isLeave && child.id === 'reports' ? (
+                <LeaveReportsPage />
               ) : (
                 <ModulePlaceholder
                   application={APPLICATION}

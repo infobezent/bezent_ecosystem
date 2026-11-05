@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { EmployeeService } from '../service/employee.service.js';
 import type { EmployeeRepository } from '../repository/employee.repository.js';
 import type { OrganizationRepository } from '../../../../platform/organization/repository/organization.repository.js';
+import { workforceSettingsService } from '../../workforce/service/workforceSettings.service.js';
 import { ConflictError, NotFoundError, BadRequestError } from '../../../../app/errors/AppError.js';
 import type { Employee } from '../../../../db/schema.js';
 import type { EmployeeDetails } from '../types/employee.types.js';
@@ -81,6 +82,27 @@ describe('EmployeeService', () => {
   };
 
   beforeEach(() => {
+    vi.spyOn(workforceSettingsService, 'getGeneralSettings').mockResolvedValue({
+      id: 'wfs_001',
+      tenantId,
+      companyId,
+      generationMode: 'manual',
+      idPrefix: 'EMP-',
+      idSuffix: null,
+      sequenceLength: 4,
+      startingNumber: 1001,
+      currentCounter: 1000,
+      resetFrequency: 'never',
+      allowManualOverride: true,
+      preventIdReuse: true,
+      autoProvisionUser: false,
+      activationTiming: 'instant',
+      nextSuggestedId: 'EMP-1001',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    vi.spyOn(workforceSettingsService, 'getProbationPolicy').mockResolvedValue(null as any);
+
     mockRepo = {
       create: vi.fn(),
       getById: vi.fn(),
@@ -101,9 +123,16 @@ describe('EmployeeService', () => {
       }),
     };
 
+    const mockAudit = {
+      logEvent: vi.fn().mockResolvedValue({} as any),
+      getLogs: vi.fn().mockResolvedValue({ items: [], total: 0 }),
+    };
+
     service = new EmployeeService(
       mockRepo as EmployeeRepository,
       mockOrgRepo as OrganizationRepository,
+      undefined,
+      mockAudit as any,
     );
   });
 

@@ -428,6 +428,8 @@ describe('BEZENT HRMS — Missing Punch Classification, Payroll Boundary & On-Du
           ],
           requirePreApproval: false,
           maxDaysInPast: 180,
+          backdatedAllowedDays: 180,
+          maxBackdatedDays: 180,
           maxDaysInAdvance: 30,
           enableHalfDayOd: true,
           enableHourlyOd: true,

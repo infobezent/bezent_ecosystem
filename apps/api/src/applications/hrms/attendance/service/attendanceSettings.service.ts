@@ -229,48 +229,61 @@ export class AttendanceSettingsService {
     companyId: string,
     input: Partial<UpdateAttendancePolicyInput> | AttendancePolicy,
     isCreate = false,
+    prev?: AttendancePolicy | null,
   ): Promise<void> {
     if (isCreate) {
       if (!input.policyName || !input.policyName.trim()) {
         throw new BadRequestError('Policy name is required');
       }
-      if (input.scope === 'department') {
-        if (!input.scopeId || !input.scopeId.trim()) {
-          throw new BadRequestError('Department ID is required for department policy override');
-        }
-        const valid = await this.repo.validateScopeId(
-          tenantId,
-          companyId,
-          'department',
-          input.scopeId,
-        );
-        if (!valid) {
-          throw new BadRequestError(
-            `Department ${input.scopeId} does not exist or does not belong to this company`,
-          );
-        }
+    }
+
+    const effectiveScope = input.scope ?? prev?.scope ?? 'company';
+    const effectiveScopeId = input.scopeId !== undefined ? input.scopeId : (prev?.scopeId ?? null);
+
+    if (effectiveScope === 'department') {
+      if (!effectiveScopeId || !effectiveScopeId.trim()) {
+        throw new BadRequestError('Department ID is required for department policy override');
       }
-      if (input.scope === 'employee') {
-        if (!input.scopeId || !input.scopeId.trim()) {
-          throw new BadRequestError('Employee ID is required for employee policy override');
-        }
-        const valid = await this.repo.validateScopeId(
-          tenantId,
-          companyId,
-          'employee',
-          input.scopeId,
+      const valid = await this.repo.validateScopeId(
+        tenantId,
+        companyId,
+        'department',
+        effectiveScopeId,
+      );
+      if (!valid) {
+        throw new BadRequestError(
+          `Department ${effectiveScopeId} does not exist or does not belong to this company`,
         );
-        if (!valid) {
-          throw new BadRequestError(
-            `Employee ${input.scopeId} does not exist or does not belong to this company`,
-          );
-        }
+      }
+    }
+    if (effectiveScope === 'employee') {
+      if (!effectiveScopeId || !effectiveScopeId.trim()) {
+        throw new BadRequestError('Employee ID is required for employee policy override');
+      }
+      const valid = await this.repo.validateScopeId(
+        tenantId,
+        companyId,
+        'employee',
+        effectiveScopeId,
+      );
+      if (!valid) {
+        throw new BadRequestError(
+          `Employee ${effectiveScopeId} does not exist or does not belong to this company`,
+        );
       }
     }
 
-    // Threshold validation on top-level hours if present
-    const halfDay = Number(input.halfDayThresholdHours ?? 0);
-    const fullDay = Number(input.fullDayThresholdHours ?? 0);
+    // Threshold validation on merged top-level hours
+    const halfDay = Number(
+      input.halfDayThresholdHours !== undefined
+        ? input.halfDayThresholdHours
+        : (prev?.halfDayThresholdHours ?? 0),
+    );
+    const fullDay = Number(
+      input.fullDayThresholdHours !== undefined
+        ? input.fullDayThresholdHours
+        : (prev?.fullDayThresholdHours ?? 0),
+    );
     if (fullDay > 0 && halfDay > 0 && fullDay <= halfDay) {
       throw new BadRequestError(
         'Full day minimum hours must be greater than half day minimum hours',
@@ -281,9 +294,10 @@ export class AttendanceSettingsService {
       throw new BadRequestError('Grace period minutes cannot be negative');
     }
 
-    // Validate classificationRules if provided
-    if (input.classificationRules) {
-      const cr = input.classificationRules as unknown as ClassificationRulesConfig;
+    // Validate classificationRules if provided or merged
+    const rawCr = input.classificationRules ?? prev?.classificationRules;
+    if (rawCr) {
+      const cr = rawCr as unknown as ClassificationRulesConfig;
       if (cr.thresholdMode === 'fixed_hours') {
         const full = cr.minHoursForPresent ?? fullDay;
         const half = cr.minHoursForHalfDay ?? halfDay;
@@ -365,10 +379,25 @@ export class AttendanceSettingsService {
 
     let companyPolicy = all.find((p) => p.scope === 'company');
     if (!companyPolicy) {
+      // Find the earliest published company policy to apply as baseline for historical dates
+      // rather than mutating the database on read during resolution!
+      const allCompany = await this.repo.listPolicies(tenantId, companyId, {
+        scope: 'company',
+        status: 'published',
+      });
+      if (allCompany.length > 0) {
+        allCompany.sort((a, b) => a.effectiveFrom.localeCompare(b.effectiveFrom));
+        companyPolicy = allCompany[0];
+      }
+    }
+    if (!companyPolicy) {
+      const genSettings = await this.repo.getGeneralSettings(tenantId, companyId);
+      const trackingStart = genSettings?.trackingStartDate || '2000-01-01';
       companyPolicy = await this.repo.createPolicy(tenantId, companyId, {
         policyName: 'Standard Corporate Attendance Policy',
         scope: 'company',
         status: 'published',
+        effectiveFrom: trackingStart,
         halfDayThresholdHours: 4.0,
         fullDayThresholdHours: 8.0,
         gracePeriodMinutes: 15,
@@ -493,8 +522,19 @@ export class AttendanceSettingsService {
     userId?: string,
     clientIp?: string,
   ): Promise<AttendancePolicy> {
-    await this.validatePolicyInput(tenantId, companyId, input, false);
     const prev = await this.getPolicyById(tenantId, companyId, policyId);
+    if (!prev) {
+      throw new NotFoundError(`Policy ${policyId} not found`);
+    }
+
+    if (prev.status === 'published' || prev.status === 'archived') {
+      throw new BadRequestError(
+        `Cannot edit a ${prev.status} attendance policy directly. Published and archived policies are immutable. Create a new draft or publish a new version.`,
+        'POLICY_IMMUTABLE',
+      );
+    }
+
+    await this.validatePolicyInput(tenantId, companyId, input, false, prev);
     const updated = await this.repo.updatePolicy(tenantId, companyId, policyId, input);
 
     await this.repo.recordAuditLog(tenantId, companyId, {
@@ -523,7 +563,14 @@ export class AttendanceSettingsService {
       throw new BadRequestError('A change reason is required when publishing an attendance policy');
     }
     const prev = await this.getPolicyById(tenantId, companyId, policyId);
-    await this.validatePolicyInput(tenantId, companyId, prev, false);
+    if (!prev) {
+      throw new NotFoundError(`Policy ${policyId} not found`);
+    }
+    if (prev.status === 'archived') {
+      throw new BadRequestError('Archived policies cannot be published', 'POLICY_ARCHIVED');
+    }
+
+    await this.validatePolicyInput(tenantId, companyId, prev, false, prev);
 
     const published = await this.repo.publishPolicy(
       tenantId,
@@ -535,7 +582,7 @@ export class AttendanceSettingsService {
     await this.repo.recordAuditLog(tenantId, companyId, {
       category: 'policy',
       action: 'published',
-      entityId: policyId,
+      entityId: published.id,
       entityType: 'attendance_policies',
       previousValues: prev as unknown as Record<string, unknown>,
       newValues: {

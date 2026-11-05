@@ -94,18 +94,26 @@ export class AttendanceWorkdayService {
    */
   async resolveTimezone(tenantId: string, companyId: string, employeeId?: string): Promise<string> {
     if (employeeId) {
-      const schedule = await defaultShiftScheduleProvider.getRawSchedule(
-        tenantId,
-        companyId,
-        employeeId,
-      );
-      if (schedule?.timeZone && isValidTimezone(schedule.timeZone)) {
-        return schedule.timeZone;
+      try {
+        const schedule = await defaultShiftScheduleProvider.getRawSchedule(
+          tenantId,
+          companyId,
+          employeeId,
+        );
+        if (schedule?.timeZone && isValidTimezone(schedule.timeZone)) {
+          return schedule.timeZone;
+        }
+      } catch {
+        // Fall through to general settings or default
       }
     }
-    const settings = await this.settingsRepo.getGeneralSettings(tenantId, companyId);
-    if (settings?.timezone && isValidTimezone(settings.timezone)) {
-      return settings.timezone;
+    try {
+      const settings = await this.settingsRepo.getGeneralSettings(tenantId, companyId);
+      if (settings?.timezone && isValidTimezone(settings.timezone)) {
+        return settings.timezone;
+      }
+    } catch {
+      // Fall through to default
     }
     return 'UTC';
   }

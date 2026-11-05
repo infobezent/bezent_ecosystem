@@ -8,8 +8,6 @@ import { LeaveSettingsSection } from '../leave/LeaveSettingsSection';
 import { AttendanceSettingsSection } from '../attendance/AttendanceSettingsSection';
 import { TimesheetsSettingsSection } from '../timesheets/TimesheetsSettingsSection';
 import { PerformanceSettingsSection } from '../performance/PerformanceSettingsSection';
-import { EmployeesSettingsSection } from '../general/EmployeesSettingsSection';
-import { HRSettingsSection } from '../general/HRSettingsSection';
 import { CustomFieldsProvider } from '../context/CustomFieldsContext';
 import { hrmsRoutes } from '../../routes/hrmsRoutes';
 // SettingsPage shows the signed-in session's active company.
@@ -28,35 +26,32 @@ describe('BEZENT Common Portal Settings Center UI', () => {
     expect(html).not.toContain('settings-page__domain-nav');
   });
 
-  it('SettingsPage renders Administration hierarchy without generic Settings header when activeModule is onboarding', () => {
+  it('SettingsPage renders Workforce Settings workspace when activeModule is workforce or onboarding', () => {
     const html = renderToStaticMarkup(
       <AuthProvider>
-        <SettingsPageInner initialModule="onboarding" />
+        <SettingsPageInner initialModule="workforce" />
       </AuthProvider>,
     );
 
-    expect(html).toContain('Administration');
-    expect(html).toContain('Configure employee administration and onboarding settings.');
+    // Initial loading or loaded state for Workforce Settings
+    expect(html).toContain('Loading Workforce Settings...');
     expect(html).not.toContain('Configure and manage settings across the BEZENT portal.');
   });
 
-  it('SettingsPage Overview view displays Administration module card', () => {
+  it('SettingsPage Overview view displays unified Workforce module card', () => {
     const html = renderToStaticMarkup(
       <AuthProvider>
         <SettingsPage />
       </AuthProvider>,
     );
 
-    expect(html).toContain('Administration');
-    expect(html).toContain(
-      'Configure Administration forms, such as the Employee Registration form.',
-    );
+    expect(html).toContain('Workforce');
+    expect(html).toContain('Configure auto-numbering series');
     expect(html).toContain('Leave');
     expect(html).toContain('Attendance');
     expect(html).toContain('Timesheets');
     expect(html).toContain('Performance');
-    expect(html).toContain('Employees');
-    expect(html).toContain('HR Settings');
+    expect(html).toContain('Milestones &amp; Rewards');
   });
 
   it('hrmsRoutes routes /hrms/settings to real SettingsPage', () => {
@@ -97,13 +92,16 @@ describe('BEZENT Common Portal Settings Center UI', () => {
     expect(html).toContain('Administration');
   });
 
-  it('LeaveSettingsSection renders leave types table', () => {
-    const html = renderToStaticMarkup(<LeaveSettingsSection />);
+  it('LeaveSettingsSection renders general, leave types, and leave policies tabs', () => {
+    const html = renderToStaticMarkup(
+      <AuthProvider>
+        <LeaveSettingsSection />
+      </AuthProvider>,
+    );
 
-    expect(html).toContain('Leave Settings');
-    expect(html).toContain('Annual Leave');
-    expect(html).toContain('Sick Leave');
-    expect(html).toContain('+ Add Leave Type');
+    expect(html).toContain('General Settings');
+    expect(html).toContain('Leave Types');
+    expect(html).toContain('Leave Policies');
   });
 
   it('AttendanceSettingsSection renders check-in rules and attendance modes', () => {
@@ -129,22 +127,5 @@ describe('BEZENT Common Portal Settings Center UI', () => {
     expect(html).toContain('Performance Settings');
     expect(html).toContain('Default Rating Scale');
     expect(html).toContain('Leadership &amp; Ownership');
-  });
-
-  it('EmployeesSettingsSection renders departments and employment types', () => {
-    const html = renderToStaticMarkup(<EmployeesSettingsSection />);
-
-    expect(html).toContain('Employees Settings');
-    expect(html).toContain('Engineering');
-    expect(html).toContain('Full-Time Permanent');
-  });
-
-  it('HRSettingsSection renders employee change requests and company policies', () => {
-    const html = renderToStaticMarkup(<HRSettingsSection />);
-
-    expect(html).toContain('HR Settings &amp; Governance');
-    expect(html).toContain('Employee Change Requests');
-    expect(html).toContain('Company Policies');
-    expect(html).toContain('Sarah Jenkins');
   });
 });
