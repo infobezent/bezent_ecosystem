@@ -8,6 +8,9 @@ import {
   employees,
   departments,
   employeeLeaveRequests,
+  employeeLeaveBalances,
+  leaveBalanceTransactions,
+  employeeWorkSchedules,
   attendanceOnDutyRequests,
   attendanceExceptions,
   attendanceRegularizations,
@@ -52,11 +55,16 @@ describe.skipIf(!isDatabaseConfigured)('BEZENT HRMS — Attendance Overview V1.0
     await db
       .delete(attendanceOnDutyRequests)
       .where(eq(attendanceOnDutyRequests.tenantId, tenantId));
+    await db
+      .delete(leaveBalanceTransactions)
+      .where(eq(leaveBalanceTransactions.tenantId, tenantId));
+    await db.delete(employeeLeaveBalances).where(eq(employeeLeaveBalances.tenantId, tenantId));
     await db.delete(employeeLeaveRequests).where(eq(employeeLeaveRequests.tenantId, tenantId));
     await db
       .delete(attendanceMonthlySummaries)
       .where(eq(attendanceMonthlySummaries.tenantId, tenantId));
     await db.delete(employeeNotifications).where(eq(employeeNotifications.tenantId, tenantId));
+    await db.delete(employeeWorkSchedules).where(eq(employeeWorkSchedules.tenantId, tenantId));
     await db.delete(employees).where(eq(employees.tenantId, tenantId));
     await db.delete(departments).where(eq(departments.tenantId, tenantId));
 

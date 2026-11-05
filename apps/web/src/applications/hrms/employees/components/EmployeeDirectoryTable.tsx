@@ -1,9 +1,13 @@
 import {
   Alert,
   Avatar,
-  Badge,
   Button,
+  Card,
+  CardBody,
+  CountryFlag,
   EmptyState,
+  Grid,
+  Inline,
   LoadingState,
   Stack,
   StatusBadge,
@@ -17,12 +21,9 @@ import {
 import { BezentIcon } from '../../../../design-system/icons';
 import type { EmployeeRecord } from '../api/employeesApi';
 import {
-  EMPLOYMENT_STATUS_LABELS,
-  employmentStatusVariant,
   employmentTypeLabel,
   formatDate,
   getAvatarColor,
-  getEmployeeAvatarId,
   getInitials,
 } from '../model/employeeModel';
 
@@ -50,6 +51,8 @@ export interface EmployeeDirectoryTableProps {
   sortDirection?: SortDirection;
   /** Callback when a sortable column header is clicked */
   onSort?: (column: SortColumn) => void;
+  /** Layout mode: list table or 3D cards grid (matches Candidates directory) */
+  viewMode?: 'list' | 'grid';
 }
 
 /** Canonical Employee Directory table. */
@@ -67,6 +70,7 @@ export function EmployeeDirectoryTable({
   sortColumn = null,
   sortDirection = 'asc',
   onSort,
+  viewMode = 'list',
 }: EmployeeDirectoryTableProps) {
   const toggleMenu = (id: string) => {
     onToggleMenu?.(id);
@@ -143,26 +147,157 @@ export function EmployeeDirectoryTable({
     );
   }
 
+  // Grid View layout matching Recruitment Candidates directory
+  if (viewMode === 'grid') {
+    return (
+      <Grid columns={3} gap="md" aria-label="Employees Grid View">
+        {employees.map((employee, _index) => {
+          const isMenuOpen = activeMenuId === employee.id;
+          const avatarColor = getAvatarColor(employee.id || employee.employeeNumber);
+          const initials = getInitials(employee.fullName);
+
+          return (
+            <Card
+              key={employee.id}
+              variant="default"
+              padding="md"
+              hoverable
+              onClick={() => onOpenEmployee(employee.id)}
+            >
+              <CardBody>
+                <Stack gap="sm">
+                  {/* Top: Avatar + Name & ID + Context Action */}
+                  <Inline justify="between" align="start">
+                    <Inline align="center" gap="sm">
+                      <Avatar
+                        initials={initials}
+                        size="md"
+                        color={avatarColor}
+                        alt={employee.fullName}
+                      />
+                      <Stack gap="none">
+                        <button
+                          type="button"
+                          className="bezent-table-meta-title"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpenEmployee(employee.id);
+                          }}
+                          aria-label={`Open profile of ${employee.fullName}`}
+                        >
+                          {employee.fullName}
+                        </button>
+                        <span className="bezent-table-meta-subtitle font-mono">
+                          {employee.employeeNumber}
+                        </span>
+                      </Stack>
+                    </Inline>
+                    <div className="bezent-table-action-menu">
+                      <button
+                        type="button"
+                        className={`bezent-table-action-btn ${isMenuOpen ? 'is-active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleMenu(employee.id);
+                        }}
+                        title="Actions"
+                        aria-label={`Actions for ${employee.fullName}`}
+                      >
+                        <BezentIcon name="more" size={16} />
+                      </button>
+                      {isMenuOpen && (
+                        <div
+                          className="bezent-table-action-menu__dropdown"
+                          role="menu"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            type="button"
+                            role="menuitem"
+                            className="bezent-table-action-menu__item"
+                            onClick={() => {
+                              toggleMenu(employee.id);
+                              onOpenEmployee(employee.id);
+                            }}
+                          >
+                            <BezentIcon name="employees" size={16} />
+                            View Profile
+                          </button>
+                          {onEditEmployee && (
+                            <button
+                              type="button"
+                              role="menuitem"
+                              className="bezent-table-action-menu__item"
+                              onClick={() => {
+                                toggleMenu(employee.id);
+                                onEditEmployee(employee.id);
+                              }}
+                            >
+                              <BezentIcon name="edit" size={16} />
+                              Edit Details
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </Inline>
+
+                  {/* Middle: Designation & Department */}
+                  <Stack gap="none">
+                    <span className="bezent-table-meta-title">
+                      {employee.designationName || 'Team Member'}
+                    </span>
+                    <span className="bezent-table-meta-subtitle">
+                      {employee.departmentName || '—'}
+                    </span>
+                  </Stack>
+
+                  {/* Location & Employment Type */}
+                  <Inline justify="between" align="center">
+                    <Inline align="center" gap="xs">
+                      <CountryFlag countryCode="IN" size="sm" />
+                      <span className="bezent-table-meta-subtitle">
+                        {employee.locationName || 'Main Campus'}
+                      </span>
+                    </Inline>
+                    <span className="bezent-table-meta-title">
+                      {employmentTypeLabel(employee.employmentType)}
+                    </span>
+                  </Inline>
+
+                  {/* Footer: Status Badge + Joined Date */}
+                  <Inline justify="between" align="center">
+                    <StatusBadge status={employee.employmentStatus} size="sm" showDot />
+                    <span className="bezent-table-meta-dim">
+                      {formatDate(employee.joiningDate)}
+                    </span>
+                  </Inline>
+                </Stack>
+              </CardBody>
+            </Card>
+          );
+        })}
+      </Grid>
+    );
+  }
+
   return (
     <Table hoverable aria-label="Employees">
       <TableHead>
         <TableRow>
           {renderSortHeader('employee', 'Employee')}
-          {renderSortHeader('department', 'Department')}
-          {renderSortHeader('employment', 'Employment')}
-          {renderSortHeader('joinedDate', 'Joined Date')}
-          {renderSortHeader('status', 'Status')}
+          <TableHeaderCell>Department</TableHeaderCell>
+          <TableHeaderCell>Employment</TableHeaderCell>
+          <TableHeaderCell>Joined Date</TableHeaderCell>
+          <TableHeaderCell>Status</TableHeaderCell>
           <TableHeaderCell className="bezent-table-col--actions">Actions</TableHeaderCell>
         </TableRow>
       </TableHead>
       <TableBody>
-        {employees.map((employee, index) => {
-          const statusVariant = employmentStatusVariant(employee.employmentStatus);
-          const statusText = EMPLOYMENT_STATUS_LABELS[employee.employmentStatus];
+        {employees.map((employee, _index) => {
           const isMenuOpen = activeMenuId === employee.id;
           const avatarColor = getAvatarColor(employee.id || employee.employeeNumber);
-          const avatarId = getEmployeeAvatarId(employee.id || employee.employeeNumber);
-          const isNearBottom = index >= employees.length - 2 && employees.length > 2;
+          const isNearBottom = _index >= employees.length - 2 && employees.length > 2;
 
           return (
             <TableRow key={employee.id} className={isMenuOpen ? 'is-menu-open' : ''}>
@@ -170,7 +305,6 @@ export function EmployeeDirectoryTable({
               <TableCell>
                 <div className="bezent-table-cell--avatar-meta">
                   <Avatar
-                    avatarId={avatarId}
                     initials={getInitials(employee.fullName)}
                     color={avatarColor}
                     size="md"
