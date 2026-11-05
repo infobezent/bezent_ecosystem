@@ -27,12 +27,15 @@ import {
   getInitials,
 } from '../model/employeeModel';
 
-export type SortColumn = 'employee' | 'department' | 'employment' | 'joinedDate' | 'status';
+export type SortColumn =
+  'employee' | 'department' | 'location' | 'employment' | 'joinedDate' | 'status';
 export type SortDirection = 'asc' | 'desc';
 
 export interface EmployeeDirectoryTableProps {
   status: 'loading' | 'error' | 'ready';
   employees: EmployeeRecord[];
+  /** Total count of employees across pagination (displayed in table header) */
+  totalCount?: number;
   error?: string | null;
   /** Optional active action menu ID */
   activeMenuId?: string | null;
@@ -59,6 +62,7 @@ export interface EmployeeDirectoryTableProps {
 export function EmployeeDirectoryTable({
   status,
   employees,
+  totalCount,
   error,
   activeMenuId = null,
   onToggleMenu,
@@ -285,8 +289,12 @@ export function EmployeeDirectoryTable({
     <Table hoverable aria-label="Employees">
       <TableHead>
         <TableRow>
-          {renderSortHeader('employee', 'Employee')}
+          {renderSortHeader(
+            'employee',
+            totalCount !== undefined ? `Employee (${totalCount})` : 'Employee',
+          )}
           <TableHeaderCell>Department</TableHeaderCell>
+          <TableHeaderCell>Work Location</TableHeaderCell>
           <TableHeaderCell>Employment</TableHeaderCell>
           <TableHeaderCell>Joined Date</TableHeaderCell>
           <TableHeaderCell>Status</TableHeaderCell>
@@ -336,6 +344,9 @@ export function EmployeeDirectoryTable({
 
               {/* Department */}
               <TableCell>{employee.departmentName ?? '—'}</TableCell>
+
+              {/* Work Location */}
+              <TableCell>{employee.locationName ?? '—'}</TableCell>
 
               {/* Employment Type */}
               <TableCell>{employmentTypeLabel(employee.employmentType)}</TableCell>

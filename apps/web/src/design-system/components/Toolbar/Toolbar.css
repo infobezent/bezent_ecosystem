@@ -6,8 +6,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--space-4);
+  flex-wrap: nowrap;
+  gap: var(--space-3, 12px);
   width: 100%;
 }
 
@@ -26,15 +26,18 @@
 .bezent-toolbar__left {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-3);
+  flex-wrap: nowrap;
+  flex: 1;
+  min-width: 0;
+  gap: var(--space-2, 8px);
 }
 
 .bezent-toolbar__right {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-3);
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  gap: var(--space-2, 8px);
 }
 
 /* Segmented Filter Tabs — Clean Enterprise Tabs */
@@ -77,10 +80,10 @@
 
 .bezent-filter-tab.is-active,
 .bezent-filter-tab--active {
-  background-color: var(--bezent-toggle-active-bg, #071e49);
-  color: #ffffff !important;
+  background-color: var(--bg-hover, #c2e7ff);
+  color: var(--text-brand, #001d35) !important;
   font-weight: var(--font-weight-semibold, 600);
-  box-shadow: 0 1px 2px rgba(7, 30, 73, 0.15);
+  box-shadow: 0 1px 2px rgba(0, 29, 53, 0.08);
   transform: none;
 }
 
@@ -135,6 +138,33 @@
   font-size: 13px;
 }
 
+.bezent-toolbar .bezent-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #ffffff;
+  color: var(--text-secondary, #64748b);
+}
+
+.bezent-toolbar .bezent-icon-btn:hover:not(:disabled) {
+  background: #f8fafc;
+  color: var(--text-primary, #0f172a);
+  border-color: #cbd5e1;
+}
+
+.bezent-toolbar .bezent-icon-btn--solid {
+  background: var(--primary, #d3e3fd);
+  border-color: transparent;
+  color: var(--nav-label-active, #041e49);
+}
+
+.bezent-toolbar .bezent-icon-btn--solid:hover:not(:disabled) {
+  background: #c2e7ff;
+  border-color: transparent;
+  color: var(--nav-label-active, #041e49);
+}
+
 .bezent-view-toggle__btn .bezent-material-icon {
   font-size: 19px;
   width: 19px;
@@ -164,14 +194,23 @@
 }
 
 .bezent-view-toggle__btn.is-active {
-  background-color: var(--bezent-toggle-active-bg, #071e49);
-  color: #ffffff !important;
-  box-shadow: 0 1px 2px rgba(7, 30, 73, 0.2);
+  background-color: var(--bg-hover, #c2e7ff);
+  color: var(--text-brand, #001d35) !important;
+  box-shadow: 0 1px 2px rgba(0, 29, 53, 0.08);
   transform: none;
 }
 
+.bezent-view-toggle__btn.is-active:hover {
+  background-color: #a8dbfc;
+  color: var(--text-brand, #001d35) !important;
+}
+
 .bezent-view-toggle__btn.is-active .bezent-material-icon {
-  color: #ffffff !important;
+  color: var(--text-brand, #001d35) !important;
+}
+
+.bezent-view-toggle__btn.is-active:hover .bezent-material-icon {
+  color: var(--text-brand, #001d35) !important;
 }
 
 /* ── Compact Filter Toolbar Grid ── */
