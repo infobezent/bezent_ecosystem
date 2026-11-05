@@ -13,6 +13,7 @@ import {
   TableRow,
   TableHeaderCell,
   TableCell,
+  Divider,
 } from '../../../../../design-system';
 import { downloadTemplate } from '../../api/employeeImportApi';
 
@@ -47,16 +48,16 @@ const STRUCTURE_DATA: SheetStructureRow[] = [
 export const ImportStepDownloadTemplate: React.FC<ImportStepDownloadTemplateProps> = ({
   onContinueToUpload,
 }) => {
-  const [downloadingType, setDownloadingType] = useState<string | null>(null);
+  const [downloadingFormat, setDownloadingFormat] = useState<'xlsx' | 'csv' | null>(null);
 
-  const handleDownload = async (type: 'basic' | 'complete', format: 'xlsx' | 'csv') => {
+  const handleDownload = async (format: 'xlsx' | 'csv') => {
     try {
-      setDownloadingType(`${type}-${format}`);
-      const blob = await downloadTemplate(type, format);
+      setDownloadingFormat(format);
+      const blob = await downloadTemplate('complete', format);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `bezent-employee-template-${type}.${format}`;
+      link.download = `bezent-employee-template.${format}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -64,189 +65,215 @@ export const ImportStepDownloadTemplate: React.FC<ImportStepDownloadTemplateProp
     } catch (err) {
       console.error('Template download error:', err);
     } finally {
-      setDownloadingType(null);
+      setDownloadingFormat(null);
     }
   };
 
   return (
     <Stack gap="xl">
+      {/* Step Header */}
       <Stack gap="xs">
         <h3 className="bezent-heading-md">Step 01 – Download Employee Template</h3>
         <p className="bezent-text-secondary">
-          Get the official BEZENT employee import template, fill in employee details, and upload it
-          to create employee profiles in bulk.
+          Download the official BEZENT employee import spreadsheet, fill in employee details, and
+          upload it to create employee profiles in bulk.
         </p>
       </Stack>
 
-      {/* Template Cards */}
-      <Grid columns={2} gap="lg">
-        {/* Basic Template Card */}
-        <Card variant="default" padding="lg">
-          <Stack gap="md">
-            <Inline justify="between" align="center">
-              <Inline gap="sm" align="center">
-                <BezentIcon name="file" size={24} />
-                <h4 className="bezent-heading-sm">Basic Employee Template</h4>
-              </Inline>
-              <Badge variant="success">Recommended for Quick Import</Badge>
+      {/* Modern Zoho People Style Hero Card */}
+      <Card variant="default" padding="lg">
+        <Stack gap="lg">
+          {/* Card Header */}
+          <Inline justify="between" align="center" wrap>
+            <Inline gap="md" align="center">
+              <BezentIcon name="documents" size={32} />
+              <Stack gap="none">
+                <h4 className="bezent-heading-sm">Official BEZENT Employee Import Template</h4>
+                <p className="bezent-text-secondary bezent-text-sm">
+                  Standardized template with predefined column headers, validation rules, and live
+                  company masters.
+                </p>
+              </Stack>
             </Inline>
 
-            <p className="bezent-text-secondary">
-              Essential employee information for fast bulk workforce creation with core identity,
-              department, and joining date details.
-            </p>
+            <Badge variant="success">Official Standard Template</Badge>
+          </Inline>
 
-            <Stack gap="xs">
-              <span className="bezent-text-muted bezent-font-semibold">Included Fields:</span>
-              <Inline gap="xs" wrap>
-                <Badge variant="neutral">Employee ID</Badge>
-                <Badge variant="neutral">First Name</Badge>
-                <Badge variant="neutral">Middle Name</Badge>
-                <Badge variant="neutral">Last Name</Badge>
-                <Badge variant="neutral">Work Email</Badge>
-                <Badge variant="neutral">Phone Number</Badge>
-                <Badge variant="neutral">Department</Badge>
-                <Badge variant="neutral">Designation</Badge>
-                <Badge variant="neutral">Work Location</Badge>
-                <Badge variant="neutral">Date of Joining</Badge>
-                <Badge variant="neutral">Employment Type</Badge>
-              </Inline>
-            </Stack>
+          <Divider />
 
-            <Inline gap="sm">
+          {/* Field Breakdown Categories */}
+          <Stack gap="md">
+            <span className="bezent-text-sm bezent-font-semibold">Template Fields Overview:</span>
+
+            <Grid columns={3} gap="md">
+              {/* Mandatory Fields */}
+              <Card variant="flat" padding="md">
+                <Stack gap="xs">
+                  <Inline justify="between" align="center">
+                    <strong className="bezent-text-sm">Mandatory Fields</strong>
+                    <Badge variant="danger">Required (*)</Badge>
+                  </Inline>
+                  <p className="bezent-text-secondary bezent-text-sm">
+                    Must be present for every employee record:
+                  </p>
+                  <Inline gap="xs" wrap>
+                    <Badge variant="neutral">First Name *</Badge>
+                    <Badge variant="neutral">Date of Joining *</Badge>
+                    <Badge variant="neutral">Employment Type *</Badge>
+                    <Badge variant="neutral">Employee Status *</Badge>
+                  </Inline>
+                </Stack>
+              </Card>
+
+              {/* Master References */}
+              <Card variant="flat" padding="md">
+                <Stack gap="xs">
+                  <Inline justify="between" align="center">
+                    <strong className="bezent-text-sm">Company References</strong>
+                    <Badge variant="info">Master Data</Badge>
+                  </Inline>
+                  <p className="bezent-text-secondary bezent-text-sm">
+                    Validated against live company settings:
+                  </p>
+                  <Inline gap="xs" wrap>
+                    <Badge variant="neutral">Department</Badge>
+                    <Badge variant="neutral">Designation</Badge>
+                    <Badge variant="neutral">Work Location</Badge>
+                    <Badge variant="neutral">Reporting Manager ID</Badge>
+                  </Inline>
+                </Stack>
+              </Card>
+
+              {/* Optional Extended Fields */}
+              <Card variant="flat" padding="md">
+                <Stack gap="xs">
+                  <Inline justify="between" align="center">
+                    <strong className="bezent-text-sm">Optional Sections</strong>
+                    <Badge variant="neutral">Leave Blank if Empty</Badge>
+                  </Inline>
+                  <p className="bezent-text-secondary bezent-text-sm">
+                    Fill if available or leave empty:
+                  </p>
+                  <Inline gap="xs" wrap>
+                    <Badge variant="neutral">Middle & Last Name</Badge>
+                    <Badge variant="neutral">Personal Contacts</Badge>
+                    <Badge variant="neutral">Address & City</Badge>
+                    <Badge variant="neutral">Emergency Contacts</Badge>
+                    <Badge variant="neutral">Job Level & Skills</Badge>
+                  </Inline>
+                </Stack>
+              </Card>
+            </Grid>
+          </Stack>
+
+          <Divider />
+
+          {/* Download Action Strip */}
+          <Inline justify="between" align="center" wrap>
+            <Inline gap="sm" align="center">
               <Button
                 variant="primary"
-                disabled={downloadingType !== null}
-                onClick={() => handleDownload('basic', 'xlsx')}
+                size="md"
+                disabled={downloadingFormat !== null}
+                onClick={() => handleDownload('xlsx')}
               >
                 <BezentIcon name="download" size={16} />
-                {downloadingType === 'basic-xlsx' ? 'Downloading...' : 'Download Basic (XLSX)'}
+                {downloadingFormat === 'xlsx'
+                  ? 'Downloading Excel...'
+                  : 'Download Template (Excel XLSX)'}
               </Button>
               <Button
                 variant="secondary"
-                disabled={downloadingType !== null}
-                onClick={() => handleDownload('basic', 'csv')}
+                size="md"
+                disabled={downloadingFormat !== null}
+                onClick={() => handleDownload('csv')}
               >
                 <BezentIcon name="download" size={16} />
-                {downloadingType === 'basic-csv' ? 'Downloading...' : 'Download CSV'}
+                {downloadingFormat === 'csv' ? 'Downloading CSV...' : 'Download CSV Template'}
               </Button>
             </Inline>
+
+            <span className="bezent-text-secondary bezent-text-sm">
+              Works with Microsoft Excel, Google Sheets, LibreOffice, and Apple Numbers.
+            </span>
+          </Inline>
+        </Stack>
+      </Card>
+
+      {/* Two Column Layout: Guidelines & Structure */}
+      <Grid columns={2} gap="lg">
+        {/* Important Guidelines */}
+        <Card variant="flat" padding="lg">
+          <Stack gap="md">
+            <Inline gap="sm" align="center">
+              <BezentIcon name="tasks" size={20} />
+              <h4 className="bezent-heading-sm">Essential Import Guidelines</h4>
+            </Inline>
+
+            <Stack gap="sm" className="bezent-text-sm">
+              <p>
+                <strong>1. Do not rename or remove column headers:</strong> BEZENT relies on
+                predefined headers in row 1 for instant matching without manual field mapping.
+              </p>
+              <p>
+                <strong>2. Enter one employee per row:</strong> Add employee records starting from
+                row 2 onwards. Avoid empty gap rows.
+              </p>
+              <p>
+                <strong>3. Date format:</strong> All date columns (Joining Date, Birth Date,
+                Confirmation Date) must strictly follow <code>YYYY-MM-DD</code> (e.g.{' '}
+                <code>2026-01-15</code>).
+              </p>
+              <p>
+                <strong>4. Optional columns can be left blank:</strong> If information is
+                unavailable, leave the cell empty. BEZENT will safely skip empty optional fields.
+              </p>
+              <p>
+                <strong>5. Master data matching:</strong> Department, Designation, and Work Location
+                must match your active company records or will be flagged during validation.
+              </p>
+            </Stack>
           </Stack>
         </Card>
 
-        {/* Complete Template Card */}
-        <Card variant="default" padding="lg">
+        {/* Structure Breakdown */}
+        <Card variant="flat" padding="lg">
           <Stack gap="md">
-            <Inline justify="between" align="center">
-              <Inline gap="sm" align="center">
-                <BezentIcon name="folder" size={24} />
-                <h4 className="bezent-heading-sm">Complete Employee Template</h4>
-              </Inline>
-              <Badge variant="info">Comprehensive</Badge>
+            <Inline gap="sm" align="center">
+              <BezentIcon name="organization" size={20} />
+              <h4 className="bezent-heading-sm">Workbook Structure</h4>
             </Inline>
 
-            <p className="bezent-text-secondary">
-              Full lifecycle workforce template supporting employment terms, personal contacts,
-              emergency contacts, probation and additional custom HR attributes.
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableHeaderCell>Sheet Name</TableHeaderCell>
+                  <TableHeaderCell>Purpose</TableHeaderCell>
+                  <TableHeaderCell>Contents</TableHeaderCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {STRUCTURE_DATA.map((row) => (
+                  <TableRow key={row.sheet}>
+                    <TableCell>
+                      <strong>{row.sheet}</strong>
+                    </TableCell>
+                    <TableCell>{row.purpose}</TableCell>
+                    <TableCell>{row.fields}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+
+            <p className="bezent-text-secondary bezent-text-sm">
+              Note: Do not delete or rename the <em>Instructions</em> or <em>Reference Data</em>{' '}
+              sheets inside the workbook.
             </p>
-
-            <Stack gap="xs">
-              <span className="bezent-text-muted bezent-font-semibold">Included Sections:</span>
-              <Inline gap="xs" wrap>
-                <Badge variant="neutral">Basic Information</Badge>
-                <Badge variant="neutral">Employment & Dates</Badge>
-                <Badge variant="neutral">Address & Residence</Badge>
-                <Badge variant="neutral">Emergency Contacts</Badge>
-                <Badge variant="neutral">Job Level & Skills</Badge>
-              </Inline>
-            </Stack>
-
-            <Inline gap="sm">
-              <Button
-                variant="primary"
-                disabled={downloadingType !== null}
-                onClick={() => handleDownload('complete', 'xlsx')}
-              >
-                <BezentIcon name="download" size={16} />
-                {downloadingType === 'complete-xlsx'
-                  ? 'Downloading...'
-                  : 'Download Complete (XLSX)'}
-              </Button>
-              <Button
-                variant="secondary"
-                disabled={downloadingType !== null}
-                onClick={() => handleDownload('complete', 'csv')}
-              >
-                <BezentIcon name="download" size={16} />
-                {downloadingType === 'complete-csv' ? 'Downloading...' : 'Download CSV'}
-              </Button>
-            </Inline>
           </Stack>
         </Card>
       </Grid>
 
-      {/* Template Instructions & Rules */}
-      <Card variant="flat" padding="lg">
-        <Stack gap="md">
-          <h4 className="bezent-heading-sm">Before Filling the Template:</h4>
-          <Grid columns={2} gap="md">
-            <Stack gap="xs">
-              <p>
-                <strong>1. Do not rename or remove column headers:</strong> BEZENT relies on
-                predefined headers for instant matching without manual mapping.
-              </p>
-              <p>
-                <strong>2. Enter one employee per row:</strong> Each row represents a single
-                independent employee record.
-              </p>
-              <p>
-                <strong>3. Follow the specified date format:</strong> Dates must strictly adhere to{' '}
-                <code>YYYY-MM-DD</code> (e.g. 2026-01-15).
-              </p>
-            </Stack>
-            <Stack gap="xs">
-              <p>
-                <strong>4. Use valid master names:</strong> Department, Designation, and Work
-                Location must match the Reference Data sheet.
-              </p>
-              <p>
-                <strong>5. Leave optional fields blank:</strong> If information is unavailable or
-                employee ID is auto-generated, leave cell empty.
-              </p>
-              <p>
-                <strong>6. Preserve reference sheets:</strong> Do not modify or delete the
-                Instructions or Reference Data sheets.
-              </p>
-            </Stack>
-          </Grid>
-        </Stack>
-      </Card>
-
-      {/* Structure Table */}
-      <Stack gap="sm">
-        <h4 className="bezent-heading-sm">Template Workbook Structure</h4>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableHeaderCell>Sheet Name</TableHeaderCell>
-              <TableHeaderCell>Purpose</TableHeaderCell>
-              <TableHeaderCell>Contents / Rules</TableHeaderCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {STRUCTURE_DATA.map((row) => (
-              <TableRow key={row.sheet}>
-                <TableCell>
-                  <strong>{row.sheet}</strong>
-                </TableCell>
-                <TableCell>{row.purpose}</TableCell>
-                <TableCell>{row.fields}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Stack>
-
+      {/* Bottom Navigation */}
       {onContinueToUpload && (
         <Inline justify="end">
           <Button variant="primary" size="lg" onClick={onContinueToUpload}>

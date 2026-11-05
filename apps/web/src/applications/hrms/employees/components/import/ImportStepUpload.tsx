@@ -10,22 +10,25 @@ import {
   Switch,
   Alert,
 } from '../../../../../design-system';
-import type { ImportOptions } from '../../api/employeeImportApi';
+import { downloadTemplate, type ImportOptions } from '../../api/employeeImportApi';
 
 interface ImportStepUploadProps {
   onFileValidated: (file: File, options: ImportOptions) => void;
   isValidating: boolean;
   error?: string | null;
+  onNavigateToTemplate?: () => void;
 }
 
 export const ImportStepUpload: React.FC<ImportStepUploadProps> = ({
   onFileValidated,
   isValidating,
   error,
+  onNavigateToTemplate,
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // Configuration options
   const [skipDuplicates, setSkipDuplicates] = useState(true);
@@ -33,6 +36,25 @@ export const ImportStepUpload: React.FC<ImportStepUploadProps> = ({
   const [autoGenerateId, setAutoGenerateId] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDownloadSample = async () => {
+    try {
+      setIsDownloading(true);
+      const blob = await downloadTemplate('complete', 'xlsx');
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `bezent-employee-template.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Download error:', err);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   const handleFileChange = (file: File | null) => {
     setLocalError(null);
@@ -86,12 +108,28 @@ export const ImportStepUpload: React.FC<ImportStepUploadProps> = ({
 
   return (
     <Stack gap="xl">
-      <Stack gap="xs">
-        <h3 className="bezent-heading-md">Step 02 – Upload Employee File</h3>
-        <p className="bezent-text-secondary">
-          Upload your completed BEZENT employee template to begin the automated data verification.
-        </p>
-      </Stack>
+      {/* Step Header & Quick Download Action */}
+      <Inline justify="between" align="start" wrap>
+        <Stack gap="xs">
+          <h3 className="bezent-heading-md">Step 02 – Upload Employee File</h3>
+          <p className="bezent-text-secondary">
+            Upload your completed BEZENT employee template to begin automated data verification.
+          </p>
+        </Stack>
+
+        <Inline gap="xs" align="center">
+          <Button variant="ghost" size="sm" disabled={isDownloading} onClick={handleDownloadSample}>
+            <BezentIcon name="download" size={16} />
+            {isDownloading ? 'Downloading...' : 'Download Template (XLSX)'}
+          </Button>
+          {onNavigateToTemplate && (
+            <Button variant="ghost" size="sm" onClick={onNavigateToTemplate}>
+              <BezentIcon name="documents" size={16} />
+              View Guidelines
+            </Button>
+          )}
+        </Inline>
+      </Inline>
 
       {(localError || error) && (
         <Alert variant="danger" title="Upload Validation Error">
@@ -147,21 +185,21 @@ export const ImportStepUpload: React.FC<ImportStepUploadProps> = ({
         /* Selected File Card */
         <Card variant="default" padding="lg">
           <Stack gap="md">
-            <Inline justify="between" align="center">
+            <Inline justify="between" align="center" wrap>
               <Inline gap="md" align="center">
-                <BezentIcon name="file" size={32} />
+                <BezentIcon name="documents" size={32} />
                 <Stack gap="xs">
                   <h4 className="bezent-heading-sm">{selectedFile.name}</h4>
-                  <Inline gap="sm">
-                    <span className="bezent-text-secondary">
-                      Size: {formatFileSize(selectedFile.size)}
+                  <Inline gap="sm" wrap>
+                    <span className="bezent-text-secondary bezent-text-sm">
+                      Size: <strong>{formatFileSize(selectedFile.size)}</strong>
                     </span>
                     <span>•</span>
-                    <span className="bezent-text-secondary">
-                      Format: {selectedFile.name.split('.').pop()?.toUpperCase()}
+                    <span className="bezent-text-secondary bezent-text-sm">
+                      Format: <strong>{selectedFile.name.split('.').pop()?.toUpperCase()}</strong>
                     </span>
                     <span>•</span>
-                    <span className="bezent-text-secondary">Ready for automated validation</span>
+                    <Badge variant="success">Ready for Automated Validation</Badge>
                   </Inline>
                 </Stack>
               </Inline>
@@ -183,8 +221,8 @@ export const ImportStepUpload: React.FC<ImportStepUploadProps> = ({
                   disabled={isValidating}
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  <BezentIcon name="refresh" size={16} />
-                  Replace
+                  <BezentIcon name="add" size={16} />
+                  Replace File
                 </Button>
               </Inline>
             </Inline>
@@ -197,7 +235,7 @@ export const ImportStepUpload: React.FC<ImportStepUploadProps> = ({
         <Stack gap="lg">
           <Stack gap="xs">
             <h4 className="bezent-heading-sm">Import Configuration</h4>
-            <p className="bezent-text-secondary">
+            <p className="bezent-text-secondary bezent-text-sm">
               Configure how BEZENT handles duplicates, employee IDs, and onboarding invitations.
             </p>
           </Stack>
@@ -206,7 +244,7 @@ export const ImportStepUpload: React.FC<ImportStepUploadProps> = ({
             <Card variant="flat" padding="md">
               <Stack gap="sm">
                 <Inline justify="between" align="center">
-                  <strong>Skip duplicate records</strong>
+                  <strong className="bezent-text-sm">Skip duplicate records</strong>
                   <Switch
                     checked={skipDuplicates}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -224,7 +262,7 @@ export const ImportStepUpload: React.FC<ImportStepUploadProps> = ({
             <Card variant="flat" padding="md">
               <Stack gap="sm">
                 <Inline justify="between" align="center">
-                  <strong>Auto-generate Employee IDs</strong>
+                  <strong className="bezent-text-sm">Auto-generate IDs</strong>
                   <Switch
                     checked={autoGenerateId}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -241,7 +279,7 @@ export const ImportStepUpload: React.FC<ImportStepUploadProps> = ({
             <Card variant="flat" padding="md">
               <Stack gap="sm">
                 <Inline justify="between" align="center">
-                  <strong>Send employee invitations</strong>
+                  <strong className="bezent-text-sm">Send invitations</strong>
                   <Switch
                     checked={sendInvitations}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>

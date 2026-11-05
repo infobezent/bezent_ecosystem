@@ -16,7 +16,7 @@ export class EmployeeImportController {
         throw new AppError('Context not resolved', 400, 'CONTEXT_MISSING');
       }
 
-      const type = (req.query.type as string) === 'complete' ? 'complete' : 'basic';
+      const type = (req.query.type as string) === 'basic' ? 'basic' : 'complete';
       const format = (req.query.format as string) === 'csv' ? 'csv' : 'xlsx';
 
       if (format === 'csv') {

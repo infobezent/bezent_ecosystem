@@ -75,7 +75,7 @@ export const EmployeeImportPage: React.FC = () => {
     <Page>
       <PageHeader
         title="Import Employees"
-        subtitle="Easily import multiple employee records into BEZENT using the official employee import template."
+        subtitle="Bulk create employee profiles using the official BEZENT employee import spreadsheet."
         actions={
           <Inline gap="sm">
             <Button
@@ -101,11 +101,11 @@ export const EmployeeImportPage: React.FC = () => {
       />
 
       <Stack gap="lg">
-        {/* Import Info Banner */}
+        {/* Import Information Bar */}
         <Card variant="flat" padding="sm">
           <Inline justify="between" align="center" wrap>
             <Inline gap="md" align="center" wrap>
-              <span className="bezent-text-sm bezent-font-semibold">Import Information:</span>
+              <span className="bezent-text-sm bezent-font-semibold">Import Specifications:</span>
               <span className="bezent-text-sm bezent-text-secondary">
                 Supported Formats: <strong>XLSX, CSV</strong>
               </span>
@@ -115,40 +115,62 @@ export const EmployeeImportPage: React.FC = () => {
               </span>
               <span>•</span>
               <span className="bezent-text-sm bezent-text-secondary">
-                Max Records: <strong>1,000 per import</strong>
+                Max Capacity: <strong>1,000 records / batch</strong>
               </span>
               <span>•</span>
               <span className="bezent-text-sm bezent-text-secondary">
-                Scope: <strong>Selected Company</strong>
+                Scope: <strong>Active Company</strong>
               </span>
             </Inline>
 
-            <Badge variant="neutral">Predefined Template Approach</Badge>
+            <Badge variant="neutral">Unified Predefined Template</Badge>
           </Inline>
         </Card>
 
-        {/* Step Indicator Pills */}
+        {/* Interactive Stepper Navigation (Zoho People Style) */}
         <Card variant="default" padding="sm">
-          <Inline justify="between" align="center">
-            <Inline gap="sm" align="center">
-              <Badge variant={step === 'template' ? 'info' : 'neutral'}>
-                1. Template & Guidelines
-              </Badge>
+          <Inline justify="between" align="center" wrap>
+            <Inline gap="xs" align="center" wrap>
+              <Button
+                variant={step === 'template' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => setStep('template')}
+              >
+                1. Download Template
+              </Button>
               <span className="bezent-text-muted">→</span>
-              <Badge variant={step === 'upload' ? 'info' : summary ? 'success' : 'neutral'}>
+              <Button
+                variant={step === 'upload' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => setStep('upload')}
+              >
                 2. Upload File
-              </Badge>
+              </Button>
               <span className="bezent-text-muted">→</span>
-              <Badge variant={step === 'preview' ? 'info' : result ? 'success' : 'neutral'}>
+              <Button
+                variant={step === 'preview' ? 'secondary' : 'ghost'}
+                size="sm"
+                disabled={!summary}
+                onClick={() => summary && setStep('preview')}
+              >
                 3. Validation & Preview
-              </Badge>
+              </Button>
               <span className="bezent-text-muted">→</span>
-              <Badge variant={step === 'results' ? 'success' : 'neutral'}>4. Import Results</Badge>
+              <Badge variant={step === 'results' ? 'success' : 'neutral'}>
+                4. Results & Summary
+              </Badge>
             </Inline>
 
-            {step !== 'template' && (
+            {step === 'preview' && (
               <Button variant="ghost" size="sm" onClick={() => setStep('upload')}>
+                <BezentIcon name="chevron-left" size={14} />
                 Back to Upload
+              </Button>
+            )}
+            {step === 'upload' && (
+              <Button variant="ghost" size="sm" onClick={() => setStep('template')}>
+                <BezentIcon name="documents" size={14} />
+                Template Guidelines
               </Button>
             )}
           </Inline>
@@ -164,6 +186,7 @@ export const EmployeeImportPage: React.FC = () => {
             onFileValidated={handleFileValidated}
             isValidating={isValidating}
             error={validationError}
+            onNavigateToTemplate={() => setStep('template')}
           />
         )}
 

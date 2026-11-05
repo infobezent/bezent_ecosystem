@@ -113,7 +113,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
 }
 
 export async function downloadTemplate(
-  type: 'basic' | 'complete' = 'basic',
+  type: 'basic' | 'complete' = 'complete',
   format: 'xlsx' | 'csv' = 'xlsx',
 ): Promise<Blob> {
   const res = await authorizedFetch(
