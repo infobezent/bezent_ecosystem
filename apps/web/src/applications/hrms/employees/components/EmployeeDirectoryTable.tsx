@@ -293,8 +293,8 @@ export function EmployeeDirectoryTable({
             'employee',
             totalCount !== undefined ? `Employee (${totalCount})` : 'Employee',
           )}
-          {renderSortHeader('department', 'Department')}
-          {renderSortHeader('location', 'Work Location')}
+          <TableHeaderCell>Department</TableHeaderCell>
+          <TableHeaderCell>Work Location</TableHeaderCell>
           <TableHeaderCell>Employment</TableHeaderCell>
           <TableHeaderCell>Joined Date</TableHeaderCell>
           <TableHeaderCell>Status</TableHeaderCell>
