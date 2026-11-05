@@ -731,7 +731,12 @@ export function AttendanceOverviewPage() {
                                   );
                                 })}
                               {/* 3D Elevated Center Disc */}
-                              <circle cx={85} cy={85} r={46} className="attendance-clay-donut-center" />
+                              <circle
+                                cx={85}
+                                cy={85}
+                                r={46}
+                                className="attendance-clay-donut-center"
+                              />
                               {/* Center Total Text */}
                               <text
                                 x="50%"
