@@ -27,7 +27,7 @@ export function CandidateMetrics({ candidates }: CandidateMetricsProps) {
       <Card
         variant="default"
         padding="none"
-        className="bezent-clay-card--compact bezent-clay-card--purple"
+        className="bezent-clay-card--compact"
         aria-label={`Total Candidates: ${total}, Total active applicant pool`}
       >
         <CardBody>
@@ -54,7 +54,7 @@ export function CandidateMetrics({ candidates }: CandidateMetricsProps) {
       <Card
         variant="default"
         padding="none"
-        className="bezent-clay-card--compact bezent-clay-card--blue"
+        className="bezent-clay-card--compact"
         aria-label={`In Pipeline: ${inPipeline}, Screening to assessment stages`}
       >
         <CardBody>
@@ -81,7 +81,7 @@ export function CandidateMetrics({ candidates }: CandidateMetricsProps) {
       <Card
         variant="default"
         padding="none"
-        className="bezent-clay-card--compact bezent-clay-card--green"
+        className="bezent-clay-card--compact"
         aria-label={`Completed & Hired: ${offersAndHired}, Offers extended or joined`}
       >
         <CardBody>
@@ -108,7 +108,7 @@ export function CandidateMetrics({ candidates }: CandidateMetricsProps) {
       <Card
         variant="default"
         padding="none"
-        className="bezent-clay-card--compact bezent-clay-card--amber"
+        className="bezent-clay-card--compact"
         aria-label={`In Process: ${inInterview}, Active in interview rounds`}
       >
         <CardBody>

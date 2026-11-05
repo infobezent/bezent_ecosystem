@@ -22,7 +22,7 @@ export function JobOpeningsMetrics({ jobs }: JobOpeningsMetricsProps) {
       <Card
         variant="default"
         padding="none"
-        className="bezent-clay-card--compact bezent-clay-card--purple"
+        className="bezent-clay-card--compact"
         aria-label={`Total Requisitions: ${totalJobs}, All created job postings`}
       >
         <CardBody>
@@ -49,7 +49,7 @@ export function JobOpeningsMetrics({ jobs }: JobOpeningsMetricsProps) {
       <Card
         variant="default"
         padding="none"
-        className="bezent-clay-card--compact bezent-clay-card--blue"
+        className="bezent-clay-card--compact"
         aria-label={`Open Positions: ${openPositions}, Vacancies to fulfill`}
       >
         <CardBody>
@@ -76,7 +76,7 @@ export function JobOpeningsMetrics({ jobs }: JobOpeningsMetricsProps) {
       <Card
         variant="default"
         padding="none"
-        className="bezent-clay-card--compact bezent-clay-card--green"
+        className="bezent-clay-card--compact"
         aria-label={`Active Candidates: ${totalInPipeline}, Applicants across pipelines`}
       >
         <CardBody>
@@ -103,7 +103,7 @@ export function JobOpeningsMetrics({ jobs }: JobOpeningsMetricsProps) {
       <Card
         variant="default"
         padding="none"
-        className="bezent-clay-card--compact bezent-clay-card--amber"
+        className="bezent-clay-card--compact"
         aria-label={`Drafts & On Hold: ${draftJobsCount + closedOrHoldCount}, Inactive or paused`}
       >
         <CardBody>
