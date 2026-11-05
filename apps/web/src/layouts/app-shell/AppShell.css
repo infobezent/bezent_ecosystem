@@ -24,6 +24,10 @@
   --app-shell-rail-width: var(--shell-right-rail-width);
 }
 
+.app-shell--rail-open .app-shell__workspace {
+  margin-right: 12px;
+}
+
 /* Overlay utility drawer */
 .app-shell__drawer {
   position: absolute;

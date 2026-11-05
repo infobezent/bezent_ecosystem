@@ -66,3 +66,4 @@ export * from './Avatar';
 export * from './EmployeeCartoonAvatar';
 export * from './Card';
 export * from './Logo/BezentLogo';
+export * from './Logo/BezentWordmark';

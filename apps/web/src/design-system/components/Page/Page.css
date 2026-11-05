@@ -11,11 +11,11 @@
   width: 100%;
   margin: 0 auto;
   box-sizing: border-box;
-  padding: 16px 20px 32px 20px;
+  padding: 20px 32px 32px 32px;
 }
 
 .bezent-page--max-width-default {
-  max-width: 1380px;
+  max-width: min(100%, 1680px);
 }
 
 .bezent-page--max-width-narrow {
@@ -23,7 +23,7 @@
 }
 
 .bezent-page--max-width-full {
-  max-width: 1440px;
+  max-width: min(100%, 1680px);
 }
 
 .bezent-page > .bezent-stack:last-child {
