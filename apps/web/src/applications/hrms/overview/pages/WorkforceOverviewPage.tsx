@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Page, PageHeader, ProgressBar } from '../../../../design-system/components';
 import { BezentIcon, type BezentIconName } from '../../../../design-system/icons';
+import { EmployeesKpiCard } from '../components/EmployeesKpiCard';
 import raccoonEmployeesImg from '../../../../assets/raccoon_employees.png';
 import { fetchEmployees, type EmployeeRecord } from '../../employees/api/employeesApi';
 import { fetchNewHiresPaginated } from '../../onboarding/api/onboardingApi';
@@ -159,6 +160,20 @@ export function WorkforceOverviewPage({
     growthPct: 14.3,
     netGrowth: 2,
     activePct: 87.5,
+  });
+
+  const [employeeStatusBreakdown, setEmployeeStatusBreakdown] = useState<{
+    total: number;
+    active: number;
+    probation: number;
+    pending: number;
+    separated: number;
+  }>({
+    total: 1248,
+    active: 1186,
+    probation: 32,
+    pending: 12,
+    separated: 18,
   });
 
   // Department & Location Analytics States
@@ -357,6 +372,29 @@ export function WorkforceOverviewPage({
         netGrowth,
         activePct: isNaN(activePct) ? 0 : activePct,
       });
+
+      const activeEmployeesFromList = fullList.filter(
+        (e) => e.employmentStatus === 'active' || e.employmentStatus === 'notice',
+      ).length;
+      const pendingEmployees = fullList.filter(
+        (e) => e.employmentStatus === 'pending_activation',
+      ).length;
+      const separatedEmployees = fullList.filter(
+        (e) =>
+          e.employmentStatus === 'terminated' ||
+          e.employmentStatus === 'resigned' ||
+          e.employmentStatus === 'suspended',
+      ).length;
+
+      if (fullList.length > 0) {
+        setEmployeeStatusBreakdown({
+          total: totalEmployees || fullList.length,
+          active: activeEmployeesFromList,
+          probation: probationEmployees,
+          pending: pendingEmployees,
+          separated: separatedEmployees,
+        });
+      }
 
       const totalBase = fullList.length || totalEmployees || 1;
       setTotalWorkforceCount(totalBase);
@@ -1033,29 +1071,23 @@ export function WorkforceOverviewPage({
 
         {/* ── Tier 1: 6 Executive KPI Cards ── */}
         <div className="bezent-exec-kpi-grid">
-          {/* Card 1: Total Employees */}
-          <div
-            className="bezent-exec-kpi-card"
+          {/* Card 1: Interactive Employees Workforce Ring KPI Card */}
+          <EmployeesKpiCard
+            total={employeeStatusBreakdown.total}
+            active={employeeStatusBreakdown.active}
+            probation={employeeStatusBreakdown.probation}
+            pending={employeeStatusBreakdown.pending}
+            separated={employeeStatusBreakdown.separated}
+            loading={loading}
             onClick={() => navigate('/hrms/workforce/employees')}
-            title="Complete registered workforce"
-          >
-            <div className="bezent-exec-kpi-card__top">
-              <div className="bezent-exec-kpi-card__icon-badge bezent-exec-kpi-card__icon-badge--blue">
-                <BezentIcon name="employees" size={17} />
-              </div>
-            </div>
-            <div className="bezent-exec-kpi-card__main">
-              <div className="bezent-exec-kpi-card__value">
-                {loading ? '—' : kpiData.totalEmployees.toLocaleString()}
-              </div>
-              <div className="bezent-exec-kpi-card__title">Total Employees</div>
-            </div>
-            <div className="bezent-exec-kpi-card__footer">
-              <span className="bezent-exec-kpi-card__trend bezent-exec-kpi-card__trend--up">
-                ↑ +8.4% vs last month
-              </span>
-            </div>
-          </div>
+            onSegmentClick={(_id, queryStatus) => {
+              if (queryStatus) {
+                navigate(`/hrms/workforce/employees?status=${queryStatus}`);
+              } else {
+                navigate('/hrms/workforce/employees');
+              }
+            }}
+          />
 
           {/* Card 2: Active Employees */}
           <div
