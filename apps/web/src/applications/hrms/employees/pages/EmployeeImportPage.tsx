@@ -1,16 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Page,
-  PageHeader,
-  Card,
-  Button,
-  Stack,
-  Inline,
-  Badge,
-  BezentIcon,
-} from '../../../../design-system';
-import { ImportStepDownloadTemplate } from '../components/import/ImportStepDownloadTemplate';
+import { Page, PageHeader, Button, Stack, Inline, BezentIcon } from '../../../../design-system';
 import { ImportStepUpload } from '../components/import/ImportStepUpload';
 import { ImportStepValidationPreview } from '../components/import/ImportStepValidationPreview';
 import { ImportStepProcessing } from '../components/import/ImportStepProcessing';
@@ -23,12 +13,13 @@ import {
   type ImportOptions,
 } from '../api/employeeImportApi';
 
-type StepId = 'template' | 'upload' | 'preview' | 'processing' | 'results';
+type StepId = 'upload' | 'preview' | 'processing' | 'results';
 
 export const EmployeeImportPage: React.FC = () => {
   const navigate = useNavigate();
 
-  const [step, setStep] = useState<StepId>('template');
+  // Initial step directly lands on the clean Upload workspace (matching Zoho People)
+  const [step, setStep] = useState<StepId>('upload');
   const [isValidating, setIsValidating] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [summary, setSummary] = useState<ValidationSummary | null>(null);
@@ -68,32 +59,42 @@ export const EmployeeImportPage: React.FC = () => {
     setSummary(null);
     setResult(null);
     setValidationError(null);
-    setStep('template');
+    setStep('upload');
   };
 
   return (
     <Page>
+      {/* Clean, distraction-free header matching Zoho People */}
       <PageHeader
-        title="Import Employees"
-        subtitle="Bulk create employee profiles using the official BEZENT employee import spreadsheet."
+        title={step === 'preview' ? 'Import — Data Validation & Preview' : 'Import'}
+        subtitle={
+          step === 'preview'
+            ? 'Review automated validation results and verify workforce records before importing.'
+            : undefined
+        }
         actions={
-          <Inline gap="sm">
-            <Button
-              variant={step === 'template' ? 'secondary' : 'ghost'}
-              onClick={() => setStep('template')}
-            >
-              <BezentIcon name="download" size={16} />
-              Download Template
-            </Button>
+          <Inline gap="sm" align="center">
+            {step === 'preview' && (
+              <Button variant="ghost" size="sm" onClick={() => setStep('upload')}>
+                <BezentIcon name="chevron-left" size={14} />
+                Back to Upload
+              </Button>
+            )}
             <Button
               variant="ghost"
+              size="sm"
               onClick={() => navigate('/hrms/workforce/employees/import/history')}
             >
-              <BezentIcon name="history" size={16} />
+              <BezentIcon name="history" size={14} />
               Import History
             </Button>
-            <Button variant="outline" onClick={() => navigate('/hrms/workforce/employees')}>
-              <BezentIcon name="close" size={16} />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/hrms/workforce/employees')}
+              aria-label="Close import"
+            >
+              <BezentIcon name="close" size={14} />
               Close
             </Button>
           </Inline>
@@ -101,92 +102,13 @@ export const EmployeeImportPage: React.FC = () => {
       />
 
       <Stack gap="lg">
-        {/* Import Information Bar */}
-        <Card variant="flat" padding="sm">
-          <Inline justify="between" align="center" wrap>
-            <Inline gap="md" align="center" wrap>
-              <span className="bezent-text-sm bezent-font-semibold">Import Specifications:</span>
-              <span className="bezent-text-sm bezent-text-secondary">
-                Supported Formats: <strong>XLSX, CSV</strong>
-              </span>
-              <span>•</span>
-              <span className="bezent-text-sm bezent-text-secondary">
-                Max File Size: <strong>10 MB</strong>
-              </span>
-              <span>•</span>
-              <span className="bezent-text-sm bezent-text-secondary">
-                Max Capacity: <strong>1,000 records / batch</strong>
-              </span>
-              <span>•</span>
-              <span className="bezent-text-sm bezent-text-secondary">
-                Scope: <strong>Active Company</strong>
-              </span>
-            </Inline>
-
-            <Badge variant="neutral">Unified Predefined Template</Badge>
-          </Inline>
-        </Card>
-
-        {/* Interactive Stepper Navigation (Zoho People Style) */}
-        <Card variant="default" padding="sm">
-          <Inline justify="between" align="center" wrap>
-            <Inline gap="xs" align="center" wrap>
-              <Button
-                variant={step === 'template' ? 'secondary' : 'ghost'}
-                size="sm"
-                onClick={() => setStep('template')}
-              >
-                1. Download Template
-              </Button>
-              <span className="bezent-text-muted">→</span>
-              <Button
-                variant={step === 'upload' ? 'secondary' : 'ghost'}
-                size="sm"
-                onClick={() => setStep('upload')}
-              >
-                2. Upload File
-              </Button>
-              <span className="bezent-text-muted">→</span>
-              <Button
-                variant={step === 'preview' ? 'secondary' : 'ghost'}
-                size="sm"
-                disabled={!summary}
-                onClick={() => summary && setStep('preview')}
-              >
-                3. Validation & Preview
-              </Button>
-              <span className="bezent-text-muted">→</span>
-              <Badge variant={step === 'results' ? 'success' : 'neutral'}>
-                4. Results & Summary
-              </Badge>
-            </Inline>
-
-            {step === 'preview' && (
-              <Button variant="ghost" size="sm" onClick={() => setStep('upload')}>
-                <BezentIcon name="chevron-left" size={14} />
-                Back to Upload
-              </Button>
-            )}
-            {step === 'upload' && (
-              <Button variant="ghost" size="sm" onClick={() => setStep('template')}>
-                <BezentIcon name="documents" size={14} />
-                Template Guidelines
-              </Button>
-            )}
-          </Inline>
-        </Card>
-
         {/* Dynamic Step Content */}
-        {step === 'template' && (
-          <ImportStepDownloadTemplate onContinueToUpload={() => setStep('upload')} />
-        )}
-
         {step === 'upload' && (
           <ImportStepUpload
             onFileValidated={handleFileValidated}
             isValidating={isValidating}
             error={validationError}
-            onNavigateToTemplate={() => setStep('template')}
+            onCancel={() => navigate('/hrms/workforce/employees')}
           />
         )}
 
