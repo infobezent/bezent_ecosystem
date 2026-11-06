@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, useTransition } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Alert,
   Button,
@@ -40,6 +40,7 @@ import {
   type SortColumn,
   type SortDirection,
 } from '../components/EmployeeDirectoryTable';
+import { EmployeeImportModal } from '../components/import';
 
 const PAGE_SIZE_OPTIONS = [30, 60, 90] as const;
 type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];
@@ -241,10 +242,36 @@ export function EmployeeDirectoryPage() {
     error: null,
   });
 
-  // Import dialog state
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [importFile, setImportFile] = useState<File | null>(null);
-  const [importStatus, setImportStatus] = useState<string | null>(null);
+  // Import dialog state (synced with URL query parameter for standalone popup)
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [isImportModalOpen, setIsImportModalOpen] = useState(
+    () => searchParams.get('action') === 'import',
+  );
+
+  useEffect(() => {
+    if (searchParams.get('action') === 'import') {
+      setIsImportModalOpen(true);
+    }
+  }, [searchParams]);
+
+  const handleOpenImport = () => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set('action', 'import');
+      return next;
+    });
+    setIsImportModalOpen(true);
+  };
+
+  const handleCloseImport = () => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete('action');
+      return next;
+    });
+    setIsImportModalOpen(false);
+  };
+
   const [activeActionMenuId, setActiveActionMenuId] = useState<string | null>(null);
 
   // Close contextual row action menu when clicking outside
@@ -593,7 +620,7 @@ export function EmployeeDirectoryPage() {
                 label="Import"
                 variant="ghost"
                 tooltipDirection="down"
-                onClick={() => navigate('/hrms/workforce/employees/import')}
+                onClick={handleOpenImport}
               >
                 <BezentIcon name="upload" size={18} />
               </IconButton>
@@ -848,60 +875,20 @@ export function EmployeeDirectoryPage() {
         />
       )}
 
-      {/* Import Modal */}
-      <Modal
+      {/* Standalone Zoho-Style Bulk Employee Import Modal */}
+      <EmployeeImportModal
         isOpen={isImportModalOpen}
-        onClose={() => setIsImportModalOpen(false)}
-        title="Import Employees"
-        description="Upload a CSV file with workforce employee records for bulk import."
-        footer={
-          <Inline gap="sm" justify="end">
-            <Button variant="outline" size="sm" onClick={() => setIsImportModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              disabled={!importFile}
-              onClick={() => {
-                if (!importFile) return;
-                setImportStatus(
-                  `File "${importFile.name}" selected (${(importFile.size / 1024).toFixed(1)} KB). Bulk employee import API endpoint will process these records with duplicate detection.`,
-                );
-              }}
-            >
-              Process Import
-            </Button>
-          </Inline>
-        }
-      >
-        <Stack gap="md">
-          <p className="bezent-dialog-hint">
-            Ensure your CSV columns match the workforce format:{' '}
-            <code>
-              First Name, Last Name, Email, Joining Date, Department, Designation, Employment Type
-            </code>
-            .
-          </p>
-
-          <input
-            type="file"
-            accept=".csv"
-            aria-label="Upload CSV file"
-            onChange={(e) => {
-              const file = e.target.files?.[0] || null;
-              setImportFile(file);
-              setImportStatus(null);
-            }}
-          />
-
-          {importStatus && (
-            <Alert variant="info" title="Import Status">
-              {importStatus}
-            </Alert>
-          )}
-        </Stack>
-      </Modal>
+        onClose={handleCloseImport}
+        onImportSuccess={() => {
+          handleCloseImport();
+          setPage(1);
+          reload();
+        }}
+        onNavigateHistory={() => {
+          handleCloseImport();
+          navigate('/hrms/workforce/employees/import/history');
+        }}
+      />
     </Page>
   );
 }

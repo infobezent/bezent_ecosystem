@@ -1388,6 +1388,18 @@ export const GLOBAL_ICON_DEFINITIONS: Record<string, IconDefinition> = {
       <polyline points="3 3 3 8 8 8" fill="none" />
     </g>
   )),
+  history: glyph('history', 'History', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" fill="none" />
+      <polyline points="3 3 3 8 8 8" fill="none" />
+      <polyline
+        points="12 7 12 12 15 15"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
+  )),
   lock: glyph('lock', 'Lock', (c, sw) => (
     <g {...S(c, sw)}>
       <rect x="3" y="11" width="18" height="11" rx="2" ry="2" fill="none" />
