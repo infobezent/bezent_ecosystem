@@ -127,95 +127,14 @@ function formatTimelineDate(dateStr: string | null | undefined): string {
   }
 }
 
-const DONUT_COLORS_DEPT = ['#3875f6', '#10b981', '#f59e0b', '#a78bfa', '#94a3b8'];
-const DONUT_COLOR_CLASSES_DEPT = ['blue', 'green', 'amber', 'purple', 'gray'];
+const DONUT_COLORS_DEPT = ['#93c5fd', '#86efac', '#c4b5fd', '#f9a8d4', '#bae6fd'];
+const DONUT_COLOR_CLASSES_DEPT = ['blue', 'green', 'purple', 'pink', 'blue'];
 
-const DONUT_COLORS_LOC = ['#10b981', '#3875f6', '#f59e0b', '#a78bfa', '#94a3b8'];
-const DONUT_COLOR_CLASSES_LOC = ['green', 'blue', 'amber', 'purple', 'gray'];
+const DONUT_COLORS_LOC = ['#86efac', '#93c5fd', '#c4b5fd', '#f9a8d4', '#bbf7d0'];
+const DONUT_COLOR_CLASSES_LOC = ['green', 'blue', 'purple', 'pink', 'green'];
 
-const DONUT_COLORS_EMP = ['#7c3aed', '#10b981', '#f59e0b', '#a78bfa', '#94a3b8'];
-const DONUT_COLOR_CLASSES_EMP = ['purple', 'green', 'amber', 'blue', 'gray'];
-
-const PERSON_BODY_PATH =
-  'M 11.5 14.5 C 9.5 15.2, 6.5 16.5, 5 18 C 3.8 19.5, 3 23, 3 29 C 3 30.8, 4 31.8, 4.75 31.8 C 5.5 31.8, 6.5 30.8, 6.5 29 L 6.5 21 C 6.5 20, 7.5 19.5, 8.5 20 L 9 20.5 L 9 33 L 19 33 L 19 20.5 L 19.5 20 C 20.5 19.5, 21.5 20, 21.5 21 L 21.5 29 C 21.5 30.8, 22.5 31.8, 23.25 31.8 C 24 31.8, 25 30.8, 25 29 C 25 23, 24.2 19.5, 23 18 C 21.5 16.5, 18.5 15.2, 16.5 14.5 Z';
-
-interface PersonInfographicChartProps {
-  id: string;
-  percentage: number;
-  color: string;
-  width?: number;
-  height?: number;
-  title?: string;
-}
-
-/**
- * Human pictogram infographic indicator: hip-up / half-body outline with a
- * vertical liquid/level percentage fill from the hip upward to head.
- */
-function PersonInfographicChart({
-  id,
-  percentage,
-  color,
-  width = 32,
-  height = 41,
-  title,
-}: PersonInfographicChartProps) {
-  const clampedPct = Math.max(0, Math.min(100, Math.round(percentage)));
-  // Total span from y=2 (top of head) to y=33 (bottom of hip) = 31px
-  const fillH = (clampedPct / 100) * 31;
-  const fillY = 33 - fillH;
-
-  return (
-    <svg
-      width={width}
-      height={height}
-      viewBox="0 0 28 36"
-      className="bezent-person-chart"
-      aria-label={`${clampedPct}% filled workforce indicator`}
-      role="img"
-    >
-      {title && <title>{title}</title>}
-      <defs>
-        <clipPath id={`wf-person-clip-${id}`}>
-          <rect x="0" y={fillY} width="28" height={fillH} />
-        </clipPath>
-        <linearGradient id={`wf-person-grad-${id}`} x1="0" y1="1" x2="0" y2="0">
-          <stop offset="0%" stopColor={color} stopOpacity="1" />
-          <stop offset="100%" stopColor={color} stopOpacity="0.88" />
-        </linearGradient>
-      </defs>
-
-      {/* Base / Unfilled outline & subtle tinted background */}
-      <g
-        fill="rgba(241, 245, 249, 0.75)"
-        stroke={color}
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="bezent-person-chart__base"
-      >
-        <circle cx="14" cy="7" r="5" />
-        <path d={PERSON_BODY_PATH} />
-      </g>
-
-      {/* Percentage Fill from hip upwards */}
-      {clampedPct > 0 && (
-        <g
-          clipPath={`url(#wf-person-clip-${id})`}
-          fill={`url(#wf-person-grad-${id})`}
-          stroke={color}
-          strokeWidth="1.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="bezent-person-chart__fill"
-        >
-          <circle cx="14" cy="7" r="5" />
-          <path d={PERSON_BODY_PATH} />
-        </g>
-      )}
-    </svg>
-  );
-}
+const DONUT_COLORS_EMP = ['#c4b5fd', '#86efac', '#93c5fd', '#f9a8d4', '#e9d5ff'];
+const DONUT_COLOR_CLASSES_EMP = ['purple', 'green', 'blue', 'pink', 'purple'];
 
 /**
  * Workforce → Overview Page (Premium Executive Command Center)
@@ -300,7 +219,7 @@ export function WorkforceOverviewPage({
       name: 'New Joiners',
       count: 2,
       percentage: 10,
-      color: '#3875f6',
+      color: '#93c5fd',
       iconClass: 'blue',
       iconName: 'onboarding',
       path: '/hrms/workforce/onboarding',
@@ -310,7 +229,7 @@ export function WorkforceOverviewPage({
       name: 'Onboarding',
       count: 2,
       percentage: 10,
-      color: '#059669',
+      color: '#86efac',
       iconClass: 'green',
       iconName: 'milestones',
       path: '/hrms/workforce/onboarding',
@@ -320,8 +239,8 @@ export function WorkforceOverviewPage({
       name: 'Probation',
       count: 2,
       percentage: 10,
-      color: '#d97706',
-      iconClass: 'amber',
+      color: '#c4b5fd',
+      iconClass: 'purple',
       iconName: 'documents',
       path: '/hrms/workforce/employees',
     },
@@ -330,9 +249,9 @@ export function WorkforceOverviewPage({
       name: 'Confirmed',
       count: 14,
       percentage: 70,
-      color: '#7c3aed',
-      iconClass: 'purple',
-      iconName: 'employees',
+      color: '#f9a8d4',
+      iconClass: 'pink',
+      iconName: 'badge',
       path: '/hrms/workforce/employees',
     },
     {
@@ -340,8 +259,8 @@ export function WorkforceOverviewPage({
       name: 'Exited',
       count: 0,
       percentage: 0,
-      color: '#e11d48',
-      iconClass: 'red',
+      color: '#bae6fd',
+      iconClass: 'blue',
       iconName: 'logOut',
       path: '/hrms/workforce/offboarding',
     },
@@ -562,7 +481,7 @@ export function WorkforceOverviewPage({
           empTypeCounts.set('Full-Time', (empTypeCounts.get('Full-Time') || 0) + 1);
         }
       }
-      const empTypePalette = ['#3875f6', '#10b981', '#f59e0b', '#8b5cf6', '#94a3b8'];
+      const empTypePalette = ['#93c5fd', '#86efac', '#c4b5fd', '#f9a8d4', '#bae6fd'];
       let colorIdx = 0;
       const empTypeArr: CompItem[] = [];
       for (const [name, count] of empTypeCounts.entries()) {
@@ -570,18 +489,18 @@ export function WorkforceOverviewPage({
           name,
           count,
           percentage: Math.round((count / totalBase) * 100),
-          color: empTypePalette[colorIdx++ % empTypePalette.length] || '#3875f6',
+          color: empTypePalette[colorIdx++ % empTypePalette.length] || '#93c5fd',
         });
       }
       setEmpTypeItems(empTypeArr);
 
       // 2. Professional Experience Distribution
       const expBuckets = [
-        { name: 'Fresher (0-1y)', count: 0, min: 0, max: 1, color: '#8b5cf6' },
-        { name: 'Junior (1-3y)', count: 0, min: 1, max: 3, color: '#3875f6' },
-        { name: 'Mid-Level (3-5y)', count: 0, min: 3, max: 5, color: '#10b981' },
-        { name: 'Senior (5-10y)', count: 0, min: 5, max: 10, color: '#f59e0b' },
-        { name: 'Expert (10+y)', count: 0, min: 10, max: 100, color: '#94a3b8' },
+        { name: 'Fresher (0-1y)', count: 0, min: 0, max: 1, color: '#c4b5fd' },
+        { name: 'Junior (1-3y)', count: 0, min: 1, max: 3, color: '#93c5fd' },
+        { name: 'Mid-Level (3-5y)', count: 0, min: 3, max: 5, color: '#86efac' },
+        { name: 'Senior (5-10y)', count: 0, min: 5, max: 10, color: '#f9a8d4' },
+        { name: 'Expert (10+y)', count: 0, min: 10, max: 100, color: '#bae6fd' },
       ];
       let totalTenureMonths = 0;
       const nowTime = new Date().getTime();
@@ -675,7 +594,7 @@ export function WorkforceOverviewPage({
           icCount++;
         }
       }
-      const jobLevelColors = ['#94a3b8', '#94a3b8', '#94a3b8', '#3875f6', '#8b5cf6', '#94a3b8'];
+      const jobLevelColors = ['#93c5fd', '#86efac', '#c4b5fd', '#f9a8d4', '#bae6fd', '#e9d5ff'];
       let jColorIdx = 0;
       const jobArr: CompItem[] = [];
       for (const [name, count] of jobLevelCounts.entries()) {
@@ -683,7 +602,7 @@ export function WorkforceOverviewPage({
           name,
           count,
           percentage: Math.round((count / totalBase) * 100),
-          color: jobLevelColors[jColorIdx++ % jobLevelColors.length] || '#8b5cf6',
+          color: jobLevelColors[jColorIdx++ % jobLevelColors.length] || '#c4b5fd',
         });
       }
       setJobLevelItems(jobArr);
@@ -784,7 +703,7 @@ export function WorkforceOverviewPage({
           name: 'New Joiners',
           count: newJoiners,
           percentage: totalLifecycle > 0 ? Math.round((newJoiners / totalLifecycle) * 100) : 10,
-          color: '#3875f6',
+          color: '#93c5fd',
           iconClass: 'blue',
           iconName: 'onboarding',
           path: '/hrms/workforce/onboarding',
@@ -795,7 +714,7 @@ export function WorkforceOverviewPage({
           count: onboardingCount,
           percentage:
             totalLifecycle > 0 ? Math.round((onboardingCount / totalLifecycle) * 100) : 10,
-          color: '#059669',
+          color: '#86efac',
           iconClass: 'green',
           iconName: 'milestones',
           path: '/hrms/workforce/onboarding',
@@ -806,8 +725,8 @@ export function WorkforceOverviewPage({
           count: probationEmployees,
           percentage:
             totalLifecycle > 0 ? Math.round((probationEmployees / totalLifecycle) * 100) : 10,
-          color: '#d97706',
-          iconClass: 'amber',
+          color: '#c4b5fd',
+          iconClass: 'purple',
           iconName: 'documents',
           path: '/hrms/workforce/employees',
         },
@@ -817,9 +736,9 @@ export function WorkforceOverviewPage({
           count: confirmedEmployees,
           percentage:
             totalLifecycle > 0 ? Math.round((confirmedEmployees / totalLifecycle) * 100) : 70,
-          color: '#7c3aed',
-          iconClass: 'purple',
-          iconName: 'employees',
+          color: '#f9a8d4',
+          iconClass: 'pink',
+          iconName: 'badge',
           path: '/hrms/workforce/employees',
         },
         {
@@ -827,9 +746,9 @@ export function WorkforceOverviewPage({
           name: 'Exited',
           count: exits,
           percentage: totalLifecycle > 0 ? Math.round((exits / totalLifecycle) * 100) : 0,
-          color: '#e11d48',
-          iconClass: 'red',
-          iconName: 'logOut',
+          color: '#bae6fd',
+          iconClass: 'blue',
+          iconName: 'exit',
           path: '/hrms/workforce/offboarding',
         },
       ];
@@ -1052,54 +971,9 @@ export function WorkforceOverviewPage({
   const internItem = empTypeItems.find((i) => i.name === 'Intern');
   const activeTypesCount = empTypeItems.filter((i) => i.count > 0).length || 1;
 
-  // ── Executive KPI Person Infographic Chart Calculations ──
-  const totalEmpFillPct =
-    approvedHeadcount > 0
-      ? Math.min(100, Math.round((kpiData.totalEmployees / approvedHeadcount) * 100))
-      : 80;
-  const activeEmpFillPct = kpiData.activePct;
-  const newJoinersFillPct =
-    kpiData.totalEmployees > 0
-      ? Math.max(
-          10,
-          Math.min(100, Math.round((kpiData.newJoiners / kpiData.totalEmployees) * 100 * 2)),
-        )
-      : 15;
-  const exitsFillPct =
-    kpiData.totalEmployees > 0
-      ? Math.min(100, Math.round((kpiData.exits / kpiData.totalEmployees) * 100))
-      : 0;
-  const retentionFillPct = Math.min(100, Math.round(kpiData.retentionRate));
-  const growthFillPct = Math.min(
-    100,
-    Math.max(15, Math.round(50 + (kpiData.growthPct >= 0 ? kpiData.growthPct * 2 : 0))),
-  );
-
   return (
     <Page maxWidth="full" gap="md">
       <div className="bezent-wf-simplified-wrapper">
-        {/* SVG Gradient Definitions for Sparklines */}
-        <svg width="0" height="0" className="bezent-wf-defs-svg" aria-hidden="true">
-          <defs>
-            <linearGradient id="wf-sparkline-blue" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#3875f6" stopOpacity="0.25" />
-              <stop offset="100%" stopColor="#3875f6" stopOpacity="0" />
-            </linearGradient>
-            <linearGradient id="wf-sparkline-purple" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#7c5cfc" stopOpacity="0.25" />
-              <stop offset="100%" stopColor="#7c5cfc" stopOpacity="0" />
-            </linearGradient>
-            <linearGradient id="wf-sparkline-teal" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#0d9488" stopOpacity="0.25" />
-              <stop offset="100%" stopColor="#0d9488" stopOpacity="0" />
-            </linearGradient>
-            <linearGradient id="wf-sparkline-green" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.25" />
-              <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-        </svg>
-
         {/* ── Page Header & Filter Controls ── */}
         <PageHeader
           title={
@@ -1167,14 +1041,8 @@ export function WorkforceOverviewPage({
           >
             <div className="bezent-exec-kpi-card__top">
               <div className="bezent-exec-kpi-card__icon-badge bezent-exec-kpi-card__icon-badge--blue">
-                <BezentIcon name="employees" size={18} />
+                <BezentIcon name="employees" size={17} />
               </div>
-              <PersonInfographicChart
-                id="kpi-total-emp"
-                percentage={totalEmpFillPct}
-                color="#3875f6"
-                title={`${totalEmpFillPct}% capacity fill`}
-              />
             </div>
             <div className="bezent-exec-kpi-card__main">
               <div className="bezent-exec-kpi-card__value">
@@ -1197,14 +1065,8 @@ export function WorkforceOverviewPage({
           >
             <div className="bezent-exec-kpi-card__top">
               <div className="bezent-exec-kpi-card__icon-badge bezent-exec-kpi-card__icon-badge--green">
-                <BezentIcon name="schedule" size={18} />
+                <BezentIcon name="schedule" size={17} />
               </div>
-              <PersonInfographicChart
-                id="kpi-active-emp"
-                percentage={activeEmpFillPct}
-                color="#10b981"
-                title={`${activeEmpFillPct}% of total`}
-              />
             </div>
             <div className="bezent-exec-kpi-card__main">
               <div className="bezent-exec-kpi-card__value">
@@ -1227,14 +1089,8 @@ export function WorkforceOverviewPage({
           >
             <div className="bezent-exec-kpi-card__top">
               <div className="bezent-exec-kpi-card__icon-badge bezent-exec-kpi-card__icon-badge--amber">
-                <BezentIcon name="onboarding" size={18} />
+                <BezentIcon name="onboarding" size={17} />
               </div>
-              <PersonInfographicChart
-                id="kpi-new-joiners"
-                percentage={newJoinersFillPct}
-                color="#f59e0b"
-                title={`${newJoinersFillPct}% additions`}
-              />
             </div>
             <div className="bezent-exec-kpi-card__main">
               <div className="bezent-exec-kpi-card__value">
@@ -1257,14 +1113,8 @@ export function WorkforceOverviewPage({
           >
             <div className="bezent-exec-kpi-card__top">
               <div className="bezent-exec-kpi-card__icon-badge bezent-exec-kpi-card__icon-badge--red">
-                <BezentIcon name="checkOut" size={18} />
+                <BezentIcon name="checkOut" size={17} />
               </div>
-              <PersonInfographicChart
-                id="kpi-exits"
-                percentage={exitsFillPct}
-                color="#f43f5e"
-                title={`${exitsFillPct}% departures`}
-              />
             </div>
             <div className="bezent-exec-kpi-card__main">
               <div className="bezent-exec-kpi-card__value">
@@ -1287,14 +1137,8 @@ export function WorkforceOverviewPage({
           >
             <div className="bezent-exec-kpi-card__top">
               <div className="bezent-exec-kpi-card__icon-badge bezent-exec-kpi-card__icon-badge--purple">
-                <BezentIcon name="employees" size={18} />
+                <BezentIcon name="employees" size={17} />
               </div>
-              <PersonInfographicChart
-                id="kpi-retention"
-                percentage={retentionFillPct}
-                color="#8b5cf6"
-                title={`${retentionFillPct}% retention`}
-              />
             </div>
             <div className="bezent-exec-kpi-card__main">
               <div className="bezent-exec-kpi-card__value">
@@ -1317,14 +1161,8 @@ export function WorkforceOverviewPage({
           >
             <div className="bezent-exec-kpi-card__top">
               <div className="bezent-exec-kpi-card__icon-badge bezent-exec-kpi-card__icon-badge--green">
-                <BezentIcon name="milestones" size={18} />
+                <BezentIcon name="milestones" size={17} />
               </div>
-              <PersonInfographicChart
-                id="kpi-growth"
-                percentage={growthFillPct}
-                color="#10b981"
-                title={`${growthFillPct}% growth momentum`}
-              />
             </div>
             <div className="bezent-exec-kpi-card__main">
               <div className="bezent-exec-kpi-card__value">
@@ -1343,7 +1181,7 @@ export function WorkforceOverviewPage({
         {/* ── Tier 2: 01. Department Distribution & 02. Location Distribution (2 Separate Cards) ── */}
         <div className="bezent-wf-tier2-grid">
           {/* Card 1: 01. Department Distribution */}
-          <div className="bezent-wf-feature-card bezent-wf-feature-card--purple">
+          <div className="bezent-wf-feature-card">
             <div className="bezent-wf-feature-card__header">
               <div className="bezent-wf-feature-card__icon bezent-wf-feature-card__icon--purple">
                 <BezentIcon name="organization" size={18} />
@@ -1367,7 +1205,7 @@ export function WorkforceOverviewPage({
                     accumulatedDeptPct += dept.percentage;
                     const color =
                       dept.rank === 5
-                        ? '#94a3b8'
+                        ? DONUT_COLORS_DEPT[4]
                         : DONUT_COLORS_DEPT[idx % DONUT_COLORS_DEPT.length];
                     return (
                       <circle
@@ -1396,7 +1234,7 @@ export function WorkforceOverviewPage({
                 {departmentDisplay.map((dept, idx) => {
                   const colorClass =
                     dept.rank === 5
-                      ? 'gray'
+                      ? DONUT_COLOR_CLASSES_DEPT[4]
                       : DONUT_COLOR_CLASSES_DEPT[idx % DONUT_COLOR_CLASSES_DEPT.length];
                   return (
                     <div key={dept.name} className="bezent-wf-legend-item">
@@ -1443,7 +1281,7 @@ export function WorkforceOverviewPage({
           </div>
 
           {/* Card 2: 02. Location Distribution */}
-          <div className="bezent-wf-feature-card bezent-wf-feature-card--mint">
+          <div className="bezent-wf-feature-card">
             <div className="bezent-wf-feature-card__header">
               <div className="bezent-wf-feature-card__icon bezent-wf-feature-card__icon--mint">
                 <BezentIcon name="schedule" size={18} />
@@ -1465,7 +1303,9 @@ export function WorkforceOverviewPage({
                     const offset = -((accumulatedLocPct / 100) * DONUT_CIRCUMFERENCE);
                     accumulatedLocPct += loc.percentage;
                     const color =
-                      loc.rank === 5 ? '#94a3b8' : DONUT_COLORS_LOC[idx % DONUT_COLORS_LOC.length];
+                      loc.rank === 5
+                        ? DONUT_COLORS_LOC[4]
+                        : DONUT_COLORS_LOC[idx % DONUT_COLORS_LOC.length];
                     return (
                       <circle
                         key={loc.name}
@@ -1493,7 +1333,7 @@ export function WorkforceOverviewPage({
                 {locationDisplay.map((loc, idx) => {
                   const colorClass =
                     loc.rank === 5
-                      ? 'gray'
+                      ? DONUT_COLOR_CLASSES_LOC[4]
                       : DONUT_COLOR_CLASSES_LOC[idx % DONUT_COLOR_CLASSES_LOC.length];
                   return (
                     <div key={loc.name} className="bezent-wf-legend-item">
@@ -1541,7 +1381,7 @@ export function WorkforceOverviewPage({
         {/* ── Tier 3: Workforce Composition (3 Separate Cards) ── */}
         <div className="bezent-wf-tier3-grid">
           {/* Card 1: 1. Employment Type */}
-          <div className="bezent-wf-feature-card bezent-wf-feature-card--purple">
+          <div className="bezent-wf-feature-card">
             <div className="bezent-wf-feature-card__header">
               <div className="bezent-wf-feature-card__icon bezent-wf-feature-card__icon--purple">
                 <BezentIcon name="documents" size={18} />
@@ -1631,7 +1471,7 @@ export function WorkforceOverviewPage({
           </div>
 
           {/* Card 2: 2. Experience Distribution */}
-          <div className="bezent-wf-feature-card bezent-wf-feature-card--blue">
+          <div className="bezent-wf-feature-card">
             <div className="bezent-wf-feature-card__header">
               <div className="bezent-wf-feature-card__icon bezent-wf-feature-card__icon--blue">
                 <BezentIcon name="schedule" size={18} />
@@ -1693,7 +1533,7 @@ export function WorkforceOverviewPage({
           </div>
 
           {/* Card 3: 3. Job Level Distribution */}
-          <div className="bezent-wf-feature-card bezent-wf-feature-card--purple">
+          <div className="bezent-wf-feature-card">
             <div className="bezent-wf-feature-card__header">
               <div className="bezent-wf-feature-card__icon bezent-wf-feature-card__icon--purple">
                 <BezentIcon name="organization" size={18} />
@@ -1836,7 +1676,7 @@ export function WorkforceOverviewPage({
                 <div className="bezent-wf-legend-left">
                   <span className="bezent-wf-legend-dot bezent-wf-bg-blue" />
                   <span className="bezent-wf-chip-label">Current</span>
-                  <span className="bezent-wf-legend-dot bezent-wf-bg-gray" />
+                  <span className="bezent-wf-legend-dot bezent-wf-bg-purple" />
                   <span className="bezent-wf-chip-label">Approved</span>
                 </div>
               </div>
@@ -1971,22 +1811,22 @@ export function WorkforceOverviewPage({
             >
               <defs>
                 <linearGradient id="wf-lifecycle-wave-fill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.12" />
-                  <stop offset="60%" stopColor="#6366f1" stopOpacity="0.03" />
-                  <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
+                  <stop offset="0%" stopColor="#c4b5fd" stopOpacity="0.1" />
+                  <stop offset="60%" stopColor="#93c5fd" stopOpacity="0.03" />
+                  <stop offset="100%" stopColor="#f9a8d4" stopOpacity="0" />
                 </linearGradient>
 
                 <linearGradient id="wf-lifecycle-backwave-fill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#c084fc" stopOpacity="0.08" />
-                  <stop offset="100%" stopColor="#818cf8" stopOpacity="0" />
+                  <stop offset="0%" stopColor="#c4b5fd" stopOpacity="0.08" />
+                  <stop offset="100%" stopColor="#93c5fd" stopOpacity="0" />
                 </linearGradient>
 
                 <linearGradient id="wf-lifecycle-wave-stroke" x1="0" y1="0" x2="1" y2="0">
                   <stop offset="0%" stopColor="#93c5fd" />
                   <stop offset="25%" stopColor="#86efac" />
-                  <stop offset="50%" stopColor="#fde047" />
-                  <stop offset="72%" stopColor="#a855f7" />
-                  <stop offset="100%" stopColor="#fda4af" />
+                  <stop offset="50%" stopColor="#c4b5fd" />
+                  <stop offset="75%" stopColor="#f9a8d4" />
+                  <stop offset="100%" stopColor="#bae6fd" />
                 </linearGradient>
 
                 {/* Card Pastel Fill Gradients */}
@@ -2003,19 +1843,19 @@ export function WorkforceOverviewPage({
                 </linearGradient>
 
                 <linearGradient id="wf-card-grad-2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#fef3c7" stopOpacity="0.8" />
+                  <stop offset="0%" stopColor="#ede9fe" stopOpacity="0.85" />
                   <stop offset="40%" stopColor="#f8fafc" stopOpacity="0.94" />
                   <stop offset="100%" stopColor="#ffffff" stopOpacity="0.98" />
                 </linearGradient>
 
                 <linearGradient id="wf-card-grad-3" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#ede9fe" stopOpacity="0.92" />
-                  <stop offset="35%" stopColor="#faf5ff" stopOpacity="0.96" />
+                  <stop offset="0%" stopColor="#fce7f3" stopOpacity="0.85" />
+                  <stop offset="35%" stopColor="#fdf2f8" stopOpacity="0.95" />
                   <stop offset="100%" stopColor="#ffffff" stopOpacity="0.98" />
                 </linearGradient>
 
                 <linearGradient id="wf-card-grad-4" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#ffe4e6" stopOpacity="0.8" />
+                  <stop offset="0%" stopColor="#e0f2fe" stopOpacity="0.8" />
                   <stop offset="40%" stopColor="#f8fafc" stopOpacity="0.94" />
                   <stop offset="100%" stopColor="#ffffff" stopOpacity="0.98" />
                 </linearGradient>
