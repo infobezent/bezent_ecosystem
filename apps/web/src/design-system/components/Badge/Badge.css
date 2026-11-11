@@ -79,33 +79,63 @@
   text-transform: capitalize;
 }
 
-/* Variants using exact theme tokens */
+/* Variants using Workforce SaaS pastel-outline tokens */
 .bezent-status-pill--success {
-  background: var(--status-success-bg, #ecfdf5);
-  color: var(--status-success-fg, #059669);
-  border-color: rgba(16, 185, 129, 0.2);
+  background: #f0fdfa;
+  color: #0f766e;
+  border-color: #ccfbf1;
 }
 
 .bezent-status-pill--warning {
-  background: var(--status-warning-bg, #fef3c7);
-  color: var(--status-warning-fg, #b45309);
-  border-color: rgba(245, 158, 11, 0.2);
+  background: #fffbeb;
+  color: #b45309;
+  border-color: #fde68a;
 }
 
 .bezent-status-pill--danger {
-  background: var(--status-danger-bg, #fee2e2);
-  color: var(--status-danger-fg, #b91c1c);
-  border-color: rgba(239, 68, 68, 0.2);
+  background: #fff1f2;
+  color: #be123c;
+  border-color: #fecdd3;
 }
 
 .bezent-status-pill--info {
-  background: var(--status-info-bg, #eff6ff);
-  color: var(--status-info-fg, #1d4ed8);
-  border-color: rgba(59, 130, 246, 0.2);
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #dbeafe;
 }
 
 .bezent-status-pill--neutral {
-  background: var(--status-neutral-bg, #f1f4f9);
-  color: var(--status-neutral-fg, #5f6368);
-  border-color: var(--border-default, #dde3ea);
+  background: #f8fafc;
+  color: #475569;
+  border-color: #e9eaf4;
+}
+
+[data-theme='dark'] .bezent-status-pill--success {
+  background: rgba(20, 184, 166, 0.16);
+  color: #5eead4;
+  border-color: rgba(45, 212, 191, 0.35);
+}
+
+[data-theme='dark'] .bezent-status-pill--warning {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fcd34d;
+  border-color: rgba(251, 191, 36, 0.35);
+}
+
+[data-theme='dark'] .bezent-status-pill--danger {
+  background: rgba(244, 63, 94, 0.16);
+  color: #fda4af;
+  border-color: rgba(251, 113, 133, 0.35);
+}
+
+[data-theme='dark'] .bezent-status-pill--info {
+  background: rgba(59, 130, 246, 0.16);
+  color: #93c5fd;
+  border-color: rgba(96, 165, 250, 0.35);
+}
+
+[data-theme='dark'] .bezent-status-pill--neutral {
+  background: #1e293b;
+  color: #cbd5e1;
+  border-color: #334155;
 }

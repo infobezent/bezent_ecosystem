@@ -153,7 +153,7 @@ export function JobDetailsModal({
 
             <Stack gap="xs">
               <h4 className="bezent-font-semibold bezent-text-sm">Key Responsibilities</h4>
-              <ul className="bezent-text-secondary bezent-text-sm list-disc pl-5 space-y-1">
+              <ul className="bezent-text-secondary bezent-text-sm bezent-hiring-list">
                 {job.responsibilities.map((resp, idx) => (
                   <li key={idx}>{resp}</li>
                 ))}
@@ -293,7 +293,7 @@ export function JobDetailsModal({
               <h4 className="bezent-font-semibold bezent-text-sm">
                 Minimum Requirements & Qualifications
               </h4>
-              <ul className="bezent-text-secondary bezent-text-sm list-disc pl-5 space-y-1">
+              <ul className="bezent-text-secondary bezent-text-sm bezent-hiring-list">
                 {job.requirements.map((req, idx) => (
                   <li key={idx}>{req}</li>
                 ))}

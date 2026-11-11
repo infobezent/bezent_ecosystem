@@ -157,13 +157,13 @@ export function TalentProfileModal({
                       Requisition: {profile.previousApplication.jobTitle}
                     </Badge>
                   </Inline>
-                  <p className="bezent-text-xs text-gray-700">
+                  <p className="bezent-text-xs bezent-text-secondary">
                     Candidate reached{' '}
                     <strong>{profile.previousApplication.lastStageReached}</strong> on{' '}
                     {profile.previousApplication.appliedDate}.
                   </p>
                   {profile.previousApplication.notes && (
-                    <div className="bg-white p-2 rounded text-xs text-gray-600 border border-blue-100 mt-1">
+                    <div className="bezent-hiring-quote-box bezent-text-xs">
                       &quot;{profile.previousApplication.notes}&quot;
                     </div>
                   )}
@@ -178,12 +178,9 @@ export function TalentProfileModal({
                   <span className="bezent-font-semibold bezent-text-sm">
                     Skill Set &amp; Talent Tags
                   </span>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="bezent-hiring-chip-group">
                     {profile.skills.map((skill) => (
-                      <span
-                        key={skill}
-                        className="bg-blue-50 text-blue-800 text-xs px-2.5 py-1 rounded font-medium"
-                      >
+                      <span key={skill} className="bezent-hiring-chip bezent-hiring-chip--teal">
                         {skill}
                       </span>
                     ))}
@@ -233,18 +230,16 @@ export function TalentProfileModal({
               </Card>
             )}
 
-            <div className="space-y-2">
+            <div className="bezent-hiring-stack-sm">
               {profile.engagementHistory.map((eng) => (
                 <Card key={eng.id} variant="flat" padding="sm">
                   <CardBody>
                     <Inline justify="between" align="center">
                       <Inline align="center" gap="sm">
-                        <span className="text-xs uppercase font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                        <span className="bezent-hiring-chip bezent-hiring-chip--caps">
                           {eng.type}
                         </span>
-                        <span className="bezent-text-xs bezent-font-semibold text-gray-800">
-                          {eng.summary}
-                        </span>
+                        <span className="bezent-text-xs bezent-font-semibold">{eng.summary}</span>
                       </Inline>
                       <span className="bezent-text-xs bezent-text-secondary">
                         {eng.date} by {eng.contactedBy}
@@ -270,7 +265,7 @@ export function TalentProfileModal({
                     {formatConsentBadge(profile.consentStatus, profile.consentExpiryDate)}
                   </Inline>
                   <Divider />
-                  <p className="bezent-text-xs text-gray-700">
+                  <p className="bezent-text-xs bezent-text-secondary">
                     Candidate granted consent for talent pool retention under{' '}
                     <strong>{profile.retentionPolicy}</strong>. Per statutory regulations, consent
                     expires on <strong>{profile.consentExpiryDate}</strong>.

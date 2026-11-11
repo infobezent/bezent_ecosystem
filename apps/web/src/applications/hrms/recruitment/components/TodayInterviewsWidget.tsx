@@ -27,7 +27,7 @@ export function TodayInterviewsWidget({ interviews, todayDate }: TodayInterviews
         <Stack gap="md">
           <Inline justify="between" align="center">
             <Inline align="center" gap="sm">
-              <BezentIcon name="interviews" size="action" color="var(--color-primary-600)" />
+              <BezentIcon name="interviews" size="action" color="#0d9488" />
               <Stack gap="none">
                 <span className="bezent-font-semibold bezent-text-base">
                   Today&apos;s Interviews ({todayList.length})
@@ -50,13 +50,13 @@ export function TodayInterviewsWidget({ interviews, todayDate }: TodayInterviews
           <Divider />
 
           {todayList.length === 0 ? (
-            <div className="text-center py-4 text-xs text-gray-500">
+            <div className="bezent-hiring-empty-line bezent-text-xs bezent-text-secondary">
               No interview rounds scheduled for today.
             </div>
           ) : (
             <Stack gap="sm">
               {todayList.map((item) => (
-                <div key={item.id} className="bg-gray-50 border border-gray-100 rounded p-3">
+                <div key={item.id} className="bezent-hiring-item">
                   <Inline justify="between" align="center">
                     <Inline align="center" gap="sm">
                       <Avatar
@@ -72,7 +72,7 @@ export function TodayInterviewsWidget({ interviews, todayDate }: TodayInterviews
                         <span className="bezent-font-semibold bezent-text-sm">
                           {item.candidateName}
                         </span>
-                        <span className="bezent-text-xs text-primary-700 font-medium">
+                        <span className="bezent-text-xs bezent-font-medium bezent-hiring-accent">
                           {item.roundName}
                         </span>
                         <span className="bezent-text-xs bezent-text-secondary">
@@ -90,7 +90,7 @@ export function TodayInterviewsWidget({ interviews, todayDate }: TodayInterviews
                           href={item.meetingLink}
                           target="_blank"
                           rel="noreferrer"
-                          className="bezent-text-xs text-primary-600 hover:underline flex items-center gap-1"
+                          className="bezent-text-xs bezent-hiring-link"
                         >
                           Join Google Meet
                         </a>

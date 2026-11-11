@@ -19,9 +19,9 @@
   height: 42px;
   padding: 0 8px 0 12px;
   background: var(--bg-surface, #ffffff);
-  border: 1px solid var(--border-default, #dde3ea);
-  border-radius: var(--radius-sm, 6px);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  border: 1px solid #e9eaf4;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(32, 45, 75, 0.03);
   transition:
     border-color 0.16s cubic-bezier(0.16, 1, 0.3, 1),
     box-shadow 0.16s cubic-bezier(0.16, 1, 0.3, 1),
@@ -30,12 +30,12 @@
 }
 
 .bezent-time-picker-box:hover:not(.is-disabled) {
-  border-color: var(--border-focus, #7cc4fa);
+  border-color: #5eead4;
 }
 
 .bezent-time-picker-wrapper.is-focused .bezent-time-picker-box {
-  border-color: var(--border-focus, #7cc4fa);
-  box-shadow: 0 0 0 1px var(--border-focus, #7cc4fa);
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.14);
 }
 
 .bezent-time-picker-wrapper.has-error .bezent-time-picker-box {
@@ -94,9 +94,9 @@
 
 .bezent-time-segment-input:focus,
 .bezent-time-segment-input.is-active {
-  background: var(--color-primary-light, #eff6ff);
-  border-color: var(--color-primary-border, #bfdbfe);
-  color: var(--accent-interactive, #1a73e8);
+  background: #f0fdfa;
+  border-color: #5eead4;
+  color: #0f766e;
   font-weight: 600;
 }
 
@@ -151,12 +151,12 @@
 }
 
 .bezent-time-step-btn:hover {
-  background: var(--color-primary-light, #eff6ff);
-  border-color: var(--color-primary-border, #bfdbfe);
-  color: var(--accent-interactive, #1a73e8);
+  background: #f0fdfa;
+  border-color: #5eead4;
+  color: #0f766e;
 }
 
 .bezent-time-step-btn:active {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: #ccfbf1;
+  color: #115e59;
 }

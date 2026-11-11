@@ -61,7 +61,7 @@ export function ApproveOfferModal({
     >
       <form onSubmit={handleSubmit}>
         <Stack gap="md">
-          <div className="bg-gray-50 p-3 rounded text-sm space-y-1">
+          <div className="bezent-hiring-note-box bezent-text-sm bezent-hiring-stack-sm">
             <div>
               Candidate: <strong>{offer.candidateName}</strong>
             </div>
@@ -70,7 +70,7 @@ export function ApproveOfferModal({
             </div>
             <div>
               Total Package:{' '}
-              <strong className="text-primary-700">
+              <strong className="bezent-hiring-accent">
                 {formatCtc(offer.compensation.totalCtc, offer.currency)}
               </strong>
             </div>

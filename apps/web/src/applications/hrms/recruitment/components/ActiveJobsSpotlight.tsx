@@ -25,7 +25,7 @@ export function ActiveJobsSpotlight({ jobs }: ActiveJobsSpotlightProps) {
         <Stack gap="md">
           <Inline justify="between" align="center">
             <Inline align="center" gap="sm">
-              <BezentIcon name="jobOpenings" size="action" color="var(--color-primary-600)" />
+              <BezentIcon name="jobOpenings" size="action" color="#0d9488" />
               <Stack gap="none">
                 <span className="bezent-font-semibold bezent-text-base">
                   Active Requisitions Spotlight
@@ -51,15 +51,13 @@ export function ActiveJobsSpotlight({ jobs }: ActiveJobsSpotlightProps) {
             {openJobs.map((job) => (
               <div
                 key={job.id}
-                className="bg-gray-50 border border-gray-100 rounded p-3 hover:border-primary-300 transition-colors cursor-pointer"
+                className="bezent-hiring-item bezent-hiring-item--interactive"
                 onClick={() => navigate(`/hrms/recruitment/pipeline?jobId=${job.id}`)}
               >
                 <Inline justify="between" align="center">
                   <Stack gap="none">
                     <Inline align="center" gap="xs">
-                      <span className="bezent-font-semibold bezent-text-sm text-gray-900">
-                        {job.title}
-                      </span>
+                      <span className="bezent-font-semibold bezent-text-sm">{job.title}</span>
                       <Badge variant="success">Active</Badge>
                     </Inline>
                     <span className="bezent-text-xs bezent-text-secondary">
@@ -69,7 +67,7 @@ export function ActiveJobsSpotlight({ jobs }: ActiveJobsSpotlightProps) {
 
                   <Inline align="center" gap="md">
                     <Stack gap="none" align="end">
-                      <span className="bezent-font-bold bezent-text-sm text-primary-700">
+                      <span className="bezent-font-bold bezent-text-sm bezent-hiring-accent">
                         {job.positionsCount} {job.positionsCount === 1 ? 'vacancy' : 'vacancies'}
                       </span>
                       <span className="bezent-text-xs bezent-text-secondary">

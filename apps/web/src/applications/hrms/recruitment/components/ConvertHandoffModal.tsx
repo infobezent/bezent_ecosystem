@@ -78,12 +78,12 @@ export function ConvertHandoffModal({
       <form onSubmit={handleSubmit}>
         <Stack gap="lg">
           {/* Candidate Snapshot */}
-          <div className="bg-gray-50 p-3 rounded text-sm space-y-1">
+          <div className="bezent-hiring-note-box bezent-text-sm bezent-hiring-stack-sm">
             <Inline justify="between" align="center">
               <span>
                 Candidate: <strong>{item.candidateName}</strong> ({item.candidateNumber})
               </span>
-              <span className="text-primary-700 font-semibold">{item.offerNumber}</span>
+              <span className="bezent-hiring-accent bezent-font-semibold">{item.offerNumber}</span>
             </Inline>
             <div>
               Role: <strong>{item.jobTitle}</strong> • {item.department} ({item.designationLevel})
@@ -172,11 +172,11 @@ export function ConvertHandoffModal({
             </FormField>
           </FormGrid>
 
-          <div className="bg-blue-50 border border-blue-200 rounded p-3 text-xs space-y-2">
-            <span className="font-semibold text-blue-900 block">
+          <div className="bezent-hiring-callout-box bezent-text-xs bezent-hiring-stack-sm">
+            <span className="bezent-font-semibold bezent-hiring-accent">
               Automated Pre-Boarding Provisions:
             </span>
-            <label className="flex items-center gap-2 cursor-pointer text-blue-950">
+            <label className="bezent-hiring-callout-check">
               <input
                 type="checkbox"
                 checked={triggerIt}
@@ -184,7 +184,7 @@ export function ConvertHandoffModal({
               />
               <span>Trigger IT hardware requisition (MacBook Pro / Peripheral kit)</span>
             </label>
-            <label className="flex items-center gap-2 cursor-pointer text-blue-950">
+            <label className="bezent-hiring-callout-check">
               <input type="checkbox" defaultChecked />
               <span>Send Pre-Boarding Portal invitation email to candidate</span>
             </label>
