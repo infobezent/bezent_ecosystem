@@ -28,31 +28,46 @@ describe('Workforce Overview Page', () => {
     expect(html).toContain('Employee Exits');
     expect(html).toContain('Retention Rate');
     expect(html).toContain('Workforce Growth');
+    expect(html).toContain('bezent-exec-kpi-card--blue');
+    expect(html).toContain('bezent-exec-kpi-card--teal');
+    expect(html).toContain('bezent-exec-kpi-card--amber');
+    expect(html).toContain('bezent-exec-kpi-card--red');
+    expect(html).toContain('bezent-exec-kpi-card--purple');
   });
 
-  it('renders Tier 2: 01. Department Distribution & 02. Location Distribution', () => {
+  it('renders Tier 2: compact 3-line distribution chart card and live breakdown panel', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <WorkforceOverviewPage />
       </MemoryRouter>,
     );
 
+    expect(html).toContain('bezent-wf-tier2-split');
+    expect(html).toContain('bezent-wf-trend-card');
+    expect(html).toContain('bezent-wf-dist-detail-card');
+    expect(html).toContain('bezent-wf-trend-svg');
+    expect(html).toContain('bezent-wf-trend-dull-line');
+    expect(html).not.toContain('bezent-wf-trend-tooltip-bg');
     expect(html).toContain('01. Department Distribution');
     expect(html).toContain('02. Location Distribution');
+    expect(html).toContain('03. Employment Type');
+    expect(html).toContain('Day');
+    expect(html).toContain('Month');
+    expect(html).toContain('Year');
     expect(html).toContain('Largest Department');
-    expect(html).toContain('Largest Location');
+    expect(html).toContain('Total Departments');
   });
 
-  it('renders Tier 3: Workforce Composition cards', () => {
+  it('renders Tier 3: 2-column Experience & Job Level Distribution cards', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <WorkforceOverviewPage />
       </MemoryRouter>,
     );
 
-    expect(html).toContain('1. Employment Type');
-    expect(html).toContain('2. Experience Distribution');
-    expect(html).toContain('3. Job Level Distribution');
+    expect(html).toContain('bezent-wf-tier3-grid--two');
+    expect(html).toContain('1. Experience Distribution');
+    expect(html).toContain('2. Job Level Distribution');
   });
 
   it('renders Tier 4: Workforce Planning command deck and insights', () => {

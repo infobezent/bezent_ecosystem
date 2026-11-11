@@ -100,13 +100,13 @@
 
 /* Hover state (when not disabled) */
 .bezent-checkbox-wrapper:hover:not(.bezent-checkbox-wrapper--disabled) .bezent-checkbox__box {
-  border-color: var(--accent-interactive, #1a73e8);
+  border-color: #14b8a6;
 }
 
 /* Checked state */
 .bezent-checkbox__input:checked ~ .bezent-checkbox__box {
-  background: var(--accent-interactive, #1a73e8);
-  border-color: var(--accent-interactive, #1a73e8);
+  background: #14b8a6;
+  border-color: #14b8a6;
 }
 
 .bezent-checkbox__input:checked ~ .bezent-checkbox__box .bezent-checkbox__checkmark {
@@ -116,8 +116,8 @@
 
 /* Indeterminate state */
 .bezent-checkbox__input:indeterminate ~ .bezent-checkbox__box {
-  background: var(--accent-interactive, #1a73e8);
-  border-color: var(--accent-interactive, #1a73e8);
+  background: #14b8a6;
+  border-color: #14b8a6;
 }
 
 .bezent-checkbox__input:indeterminate ~ .bezent-checkbox__box .bezent-checkbox__indeterminate {
@@ -126,8 +126,8 @@
 
 /* Focus ring (accessible keyboard navigation) */
 .bezent-checkbox__input:focus-visible ~ .bezent-checkbox__box {
-  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.25);
-  border-color: var(--accent-interactive, #1a73e8);
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.22);
+  border-color: #14b8a6;
 }
 
 /* Disabled states */

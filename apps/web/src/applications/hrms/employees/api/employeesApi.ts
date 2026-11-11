@@ -411,3 +411,37 @@ export async function updateEmployeeSection(
 
   return (body as { data: EmployeeProfile }).data;
 }
+
+export type DistributionTrendGranularity = 'day' | 'month' | 'year';
+
+export interface DistributionTrendSlice {
+  primary: number;
+  other: number;
+}
+
+export interface DistributionTrendPoint {
+  label: string;
+  fullLabel: string;
+  department: DistributionTrendSlice;
+  location: DistributionTrendSlice;
+  employment: DistributionTrendSlice;
+}
+
+export interface DistributionTrendsResponse {
+  granularity: DistributionTrendGranularity;
+  metricUnit: string;
+  primaryDeptLabel: string;
+  primaryLocLabel: string;
+  primaryEmpLabel: string;
+  points: DistributionTrendPoint[];
+}
+
+export async function fetchEmployeeDistributionTrends(
+  granularity: DistributionTrendGranularity,
+): Promise<DistributionTrendsResponse> {
+  const params = new URLSearchParams({ granularity });
+  const body = await request<{ data: DistributionTrendsResponse }>(
+    `/hrms/employees/distribution-trends?${params.toString()}`,
+  );
+  return body.data;
+}

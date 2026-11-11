@@ -1,9 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Page, PageHeader, ProgressBar } from '../../../../design-system/components';
 import { BezentIcon, type BezentIconName } from '../../../../design-system/icons';
 import raccoonEmployeesImg from '../../../../assets/raccoon_employees.png';
-import { fetchEmployees, type EmployeeRecord } from '../../employees/api/employeesApi';
+import {
+  fetchEmployees,
+  fetchEmployeeDistributionTrends,
+  type DistributionTrendsResponse,
+  type EmployeeRecord,
+} from '../../employees/api/employeesApi';
 import { fetchNewHiresPaginated } from '../../onboarding/api/onboardingApi';
 import { fetchEmployeeActions } from '../../employee-administration/api/employeeAdministrationApi';
 import { leaveOperationsApi } from '../../leave/api/leaveOperationsApi';
@@ -127,14 +132,224 @@ function formatTimelineDate(dateStr: string | null | undefined): string {
   }
 }
 
-const DONUT_COLORS_DEPT = ['#93c5fd', '#86efac', '#c4b5fd', '#f9a8d4', '#bae6fd'];
-const DONUT_COLOR_CLASSES_DEPT = ['blue', 'green', 'purple', 'pink', 'blue'];
+type DistributionTabKey = 'department' | 'location' | 'employment';
+type TimeGranularityKey = 'day' | 'month' | 'year';
 
-const DONUT_COLORS_LOC = ['#86efac', '#93c5fd', '#c4b5fd', '#f9a8d4', '#bbf7d0'];
-const DONUT_COLOR_CLASSES_LOC = ['green', 'blue', 'purple', 'pink', 'green'];
+interface DimensionSeriesValues {
+  primary: number;
+  other: number;
+}
 
-const DONUT_COLORS_EMP = ['#c4b5fd', '#86efac', '#93c5fd', '#f9a8d4', '#e9d5ff'];
-const DONUT_COLOR_CLASSES_EMP = ['purple', 'green', 'blue', 'pink', 'purple'];
+interface MultiDimensionTrendPoint {
+  label: string;
+  fullLabel: string;
+  department: DimensionSeriesValues;
+  location: DimensionSeriesValues;
+  employment: DimensionSeriesValues;
+}
+
+const DIST_SERIES_OPTIONS: Array<{
+  key: DistributionTabKey;
+  shortLabel: string;
+  heading: string;
+}> = [
+  { key: 'department', shortLabel: 'Dept', heading: '01. Department Distribution' },
+  { key: 'location', shortLabel: 'Location', heading: '02. Location Distribution' },
+  { key: 'employment', shortLabel: 'Employment', heading: '03. Employment Type' },
+];
+
+function parseIsoDayEndTs(isoDate: string): number {
+  const clean = isoDate.slice(0, 10);
+  const ts = new Date(`${clean}T23:59:59`).getTime();
+  return isNaN(ts) ? 0 : ts;
+}
+
+function formatDayShort(d: Date): string {
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function formatDayFull(d: Date): string {
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+/**
+ * Computes real Day-wise, Month-wise, or Year-wise series for ALL 3 dimensions
+ * simultaneously from fetched EmployeeRecord items so all 3 lines live on one graph.
+ */
+function buildMultiDimensionTrendSeries(
+  employees: EmployeeRecord[],
+  granularity: TimeGranularityKey,
+  primaryDeptName: string,
+  primaryLocName: string,
+): MultiDimensionTrendPoint[] {
+  const now = new Date();
+  const todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const todayEndTs = parseIsoDayEndTs(todayIso);
+
+  interface CutoffBucket {
+    label: string;
+    fullLabel: string;
+    cutoffTs: number;
+  }
+
+  const buckets: CutoffBucket[] = [];
+
+  if (granularity === 'year') {
+    const currentYear = now.getFullYear();
+    const earliestYear = employees.reduce((minY, emp) => {
+      if (!emp.joiningDate) return minY;
+      const y = Number(emp.joiningDate.slice(0, 4));
+      return !isNaN(y) && y > 2000 && y < minY ? y : minY;
+    }, currentYear - 4);
+    const startYear = Math.max(currentYear - 5, Math.min(earliestYear, currentYear - 4));
+    for (let yr = startYear; yr <= currentYear; yr++) {
+      const cutoffTs =
+        yr === currentYear ? todayEndTs : new Date(yr, 11, 31, 23, 59, 59, 999).getTime();
+      buckets.push({
+        label: String(yr),
+        fullLabel: `FY ${yr}`,
+        cutoffTs,
+      });
+    }
+  } else if (granularity === 'month') {
+    const curYear = now.getFullYear();
+    const curMonth = now.getMonth();
+    for (let offset = 6; offset >= 0; offset--) {
+      const target = new Date(curYear, curMonth - offset, 1);
+      const yr = target.getFullYear();
+      const mo = target.getMonth();
+      const isCurrentMonth = yr === curYear && mo === curMonth;
+      const monthEndTs = isCurrentMonth
+        ? todayEndTs
+        : new Date(yr, mo + 1, 0, 23, 59, 59, 999).getTime();
+      const shortMonth = target.toLocaleDateString('en-US', { month: 'short' });
+      const label =
+        offset === 6 || mo === 0 ? `${shortMonth} '${String(yr).slice(-2)}` : shortMonth;
+      const fullLabel = target.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      buckets.push({ label, fullLabel, cutoffTs: monthEndTs });
+    }
+  } else {
+    const sevenDaysAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+    const sevenDaysAgoTs = sevenDaysAgo.getTime();
+    const eventDatesSet = new Set<string>();
+    for (const emp of employees) {
+      if (emp.joiningDate) {
+        const iso = emp.joiningDate.slice(0, 10);
+        if (iso <= todayIso) eventDatesSet.add(iso);
+      }
+      if (emp.lastWorkingDate) {
+        const iso = emp.lastWorkingDate.slice(0, 10);
+        if (iso <= todayIso) eventDatesSet.add(iso);
+      }
+    }
+    const sortedEvents = Array.from(eventDatesSet).sort();
+    const recentEvents = sortedEvents.filter((iso) => parseIsoDayEndTs(iso) >= sevenDaysAgoTs);
+
+    if (recentEvents.length >= 2 || sortedEvents.length < 2) {
+      for (let offset = 6; offset >= 0; offset--) {
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - offset);
+        const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        buckets.push({
+          label: formatDayShort(d),
+          fullLabel: formatDayFull(d),
+          cutoffTs: parseIsoDayEndTs(iso),
+        });
+      }
+    } else {
+      const selected = sortedEvents.slice(-6);
+      if (!selected.includes(todayIso)) {
+        selected.push(todayIso);
+      }
+      while (selected.length < 5) {
+        const firstDate = new Date(`${selected[0]}T12:00:00`);
+        firstDate.setDate(firstDate.getDate() - 1);
+        const prevIso = `${firstDate.getFullYear()}-${String(firstDate.getMonth() + 1).padStart(2, '0')}-${String(firstDate.getDate()).padStart(2, '0')}`;
+        selected.unshift(prevIso);
+      }
+      for (const iso of selected.slice(-7)) {
+        const d = new Date(`${iso}T12:00:00`);
+        buckets.push({
+          label: formatDayShort(d),
+          fullLabel: formatDayFull(d),
+          cutoffTs: parseIsoDayEndTs(iso),
+        });
+      }
+    }
+  }
+
+  return buckets.map((bucket) => {
+    let deptPrimary = 0;
+    let deptOther = 0;
+    let locPrimary = 0;
+    let locOther = 0;
+    let empPrimary = 0;
+    let empOther = 0;
+
+    for (const emp of employees) {
+      if (emp.joiningDate) {
+        const joinTs = new Date(`${emp.joiningDate.slice(0, 10)}T00:00:00`).getTime();
+        if (!isNaN(joinTs) && joinTs > bucket.cutoffTs) continue;
+      }
+      if (emp.lastWorkingDate) {
+        const exitTs = new Date(`${emp.lastWorkingDate.slice(0, 10)}T23:59:59`).getTime();
+        if (!isNaN(exitTs) && exitTs < bucket.cutoffTs) continue;
+      }
+
+      if ((emp.departmentName || 'General Operations') === primaryDeptName) deptPrimary++;
+      else deptOther++;
+
+      if ((emp.locationName || 'Bangalore HQ') === primaryLocName) locPrimary++;
+      else locOther++;
+
+      const t = emp.employmentType ? emp.employmentType.toLowerCase() : 'full_time';
+      const isFullTime =
+        !t.includes('part') &&
+        !t.includes('contract') &&
+        !t.includes('intern') &&
+        !t.includes('temp');
+      if (isFullTime) empPrimary++;
+      else empOther++;
+    }
+
+    return {
+      label: bucket.label,
+      fullLabel: bucket.fullLabel,
+      department: { primary: deptPrimary, other: deptOther },
+      location: { primary: locPrimary, other: locOther },
+      employment: { primary: empPrimary, other: empOther },
+    };
+  });
+}
+
+function computeYAxisTicks(maxVal: number): number[] {
+  const safeMax = Math.max(1, maxVal);
+  const candidateSteps = [1, 2, 4, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 150, 200, 500];
+  let step = candidateSteps.find((s) => s * 5 >= safeMax);
+  if (!step) {
+    step = Math.ceil(safeMax / 5 / 100) * 100;
+  }
+  return [0, step, step * 2, step * 3, step * 4, step * 5];
+}
+
+function buildSmoothSplinePath(pts: Array<{ x: number; y: number }>): string {
+  if (pts.length === 0) return '';
+  const first = pts[0];
+  if (!first) return '';
+  let d = `M ${first.x.toFixed(1)} ${first.y.toFixed(1)}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i];
+    const p1 = pts[i + 1];
+    if (!p0 || !p1) continue;
+    const midX = (p0.x + p1.x) / 2;
+    d += ` C ${midX.toFixed(1)} ${p0.y.toFixed(1)}, ${midX.toFixed(1)} ${p1.y.toFixed(1)}, ${p1.x.toFixed(1)} ${p1.y.toFixed(1)}`;
+  }
+  return d;
+}
+
+function truncateTooltipText(text: string, maxLen: number): string {
+  if (text.length <= maxLen) return text;
+  return `${text.slice(0, Math.max(1, maxLen - 1))}…`;
+}
 
 /**
  * Workforce → Overview Page (Premium Executive Command Center)
@@ -148,6 +363,12 @@ export function WorkforceOverviewPage({
   const navigate = useNavigate();
   const [showHelp, setShowHelp] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [employeesList, setEmployeesList] = useState<EmployeeRecord[]>([]);
+  const [activeDistTab, setActiveDistTab] = useState<DistributionTabKey>('department');
+  const [distGranularity, setDistGranularity] = useState<TimeGranularityKey>('day');
+  const [activeTrendIdx, setActiveTrendIdx] = useState<number | null>(null);
+  const [apiTrendData, setApiTrendData] = useState<DistributionTrendsResponse | null>(null);
+  const [trendError, setTrendError] = useState<string | null>(null);
 
   const [kpiData, setKpiData] = useState<OverviewKPIData>({
     totalEmployees: 16,
@@ -229,8 +450,8 @@ export function WorkforceOverviewPage({
       name: 'Onboarding',
       count: 2,
       percentage: 10,
-      color: '#86efac',
-      iconClass: 'green',
+      color: '#14b8a6',
+      iconClass: 'teal',
       iconName: 'milestones',
       path: '/hrms/workforce/onboarding',
     },
@@ -273,6 +494,30 @@ export function WorkforceOverviewPage({
 
   // ── Recent Workforce Activity States ──
   const [activities, setActivities] = useState<WorkforceActivityItem[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    setTrendError(null);
+
+    fetchEmployeeDistributionTrends(distGranularity)
+      .then((res) => {
+        if (active) {
+          setApiTrendData(res);
+        }
+      })
+      .catch((err) => {
+        if (active) {
+          setApiTrendData(null);
+          setTrendError(
+            err instanceof Error ? err.message : 'Unable to load workforce distribution trends',
+          );
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [distGranularity]);
 
   useEffect(() => {
     let active = true;
@@ -323,6 +568,7 @@ export function WorkforceOverviewPage({
           : 0;
 
       const fullList: EmployeeRecord[] = listRes.status === 'fulfilled' ? listRes.value.data : [];
+      setEmployeesList(fullList);
       const probationEmployees = fullList.filter((e) => e.employmentStatus === 'probation').length;
       const confirmedEmployees =
         fullList.filter((e) => e.employmentStatus === 'active' || e.confirmationDate !== null)
@@ -481,7 +727,7 @@ export function WorkforceOverviewPage({
           empTypeCounts.set('Full-Time', (empTypeCounts.get('Full-Time') || 0) + 1);
         }
       }
-      const empTypePalette = ['#93c5fd', '#86efac', '#c4b5fd', '#f9a8d4', '#bae6fd'];
+      const empTypePalette = ['#93c5fd', '#14b8a6', '#c4b5fd', '#f9a8d4', '#bae6fd'];
       let colorIdx = 0;
       const empTypeArr: CompItem[] = [];
       for (const [name, count] of empTypeCounts.entries()) {
@@ -498,7 +744,7 @@ export function WorkforceOverviewPage({
       const expBuckets = [
         { name: 'Fresher (0-1y)', count: 0, min: 0, max: 1, color: '#c4b5fd' },
         { name: 'Junior (1-3y)', count: 0, min: 1, max: 3, color: '#93c5fd' },
-        { name: 'Mid-Level (3-5y)', count: 0, min: 3, max: 5, color: '#86efac' },
+        { name: 'Mid-Level (3-5y)', count: 0, min: 3, max: 5, color: '#14b8a6' },
         { name: 'Senior (5-10y)', count: 0, min: 5, max: 10, color: '#f9a8d4' },
         { name: 'Expert (10+y)', count: 0, min: 10, max: 100, color: '#bae6fd' },
       ];
@@ -594,7 +840,7 @@ export function WorkforceOverviewPage({
           icCount++;
         }
       }
-      const jobLevelColors = ['#93c5fd', '#86efac', '#c4b5fd', '#f9a8d4', '#bae6fd', '#e9d5ff'];
+      const jobLevelColors = ['#93c5fd', '#14b8a6', '#c4b5fd', '#f9a8d4', '#bae6fd', '#e9d5ff'];
       let jColorIdx = 0;
       const jobArr: CompItem[] = [];
       for (const [name, count] of jobLevelCounts.entries()) {
@@ -714,8 +960,8 @@ export function WorkforceOverviewPage({
           count: onboardingCount,
           percentage:
             totalLifecycle > 0 ? Math.round((onboardingCount / totalLifecycle) * 100) : 10,
-          color: '#86efac',
-          iconClass: 'green',
+          color: '#14b8a6',
+          iconClass: 'teal',
           iconName: 'milestones',
           path: '/hrms/workforce/onboarding',
         },
@@ -880,7 +1126,7 @@ export function WorkforceOverviewPage({
           } else if (action.actionType === 'confirm_employee') {
             description = `completed probation and was confirmed permanent.`;
             iconName = 'approvals';
-            iconClass = 'green';
+            iconClass = 'teal';
           } else if (action.actionType === 'resignation' || action.actionType === 'termination') {
             description = `completed departure separation.`;
             iconName = 'organization';
@@ -961,15 +1207,158 @@ export function WorkforceOverviewPage({
     };
   }, []);
 
-  const DONUT_CIRCUMFERENCE = 289;
-  let accumulatedDeptPct = 0;
-  let accumulatedLocPct = 0;
-  let accumulatedEmpTypePct = 0;
-
   const fullTimeItem = empTypeItems.find((i) => i.name === 'Full-Time');
   const contractItem = empTypeItems.find((i) => i.name === 'Contract');
   const internItem = empTypeItems.find((i) => i.name === 'Intern');
   const activeTypesCount = empTypeItems.filter((i) => i.count > 0).length || 1;
+
+  const primaryDeptName = largestDeptInfo?.name || 'General Operations';
+  const primaryLocName = largestLocInfo?.name || 'Bangalore HQ';
+  const trendDeptLabel = apiTrendData?.primaryDeptLabel ?? primaryDeptName;
+  const trendLocLabel = apiTrendData?.primaryLocLabel ?? primaryLocName;
+  const trendEmpLabel = apiTrendData?.primaryEmpLabel ?? 'Full-Time';
+
+  const distDimensionConfig = useMemo(() => {
+    if (activeDistTab === 'department') {
+      return {
+        title: '01. Department Distribution',
+        subtitle: 'Employee distribution across departments within the organization.',
+        iconName: 'organization' as const,
+        primaryLabel: trendDeptLabel,
+        secondaryLabel: 'Other Departments',
+        breakdownItems: departmentDisplay.map((d) => ({
+          name: d.name,
+          count: d.count,
+          percentage: d.percentage,
+        })),
+      };
+    }
+    if (activeDistTab === 'location') {
+      return {
+        title: '02. Location Distribution',
+        subtitle: 'Employee distribution across company branches and work locations.',
+        iconName: 'schedule' as const,
+        primaryLabel: trendLocLabel,
+        secondaryLabel: 'Other Locations',
+        breakdownItems: locationDisplay.map((l) => ({
+          name: l.name,
+          count: l.count,
+          percentage: l.percentage,
+        })),
+      };
+    }
+    return {
+      title: '03. Employment Type',
+      subtitle: 'Workforce mix across different contract and work arrangements.',
+      iconName: 'documents' as const,
+      primaryLabel: trendEmpLabel,
+      secondaryLabel: 'Contract & Flexible',
+      breakdownItems: empTypeItems.map((e) => ({
+        name: e.name,
+        count: e.count,
+        percentage: e.percentage,
+      })),
+    };
+  }, [
+    activeDistTab,
+    trendDeptLabel,
+    departmentDisplay,
+    trendLocLabel,
+    locationDisplay,
+    trendEmpLabel,
+    empTypeItems,
+  ]);
+
+  const trendPoints = useMemo<MultiDimensionTrendPoint[]>(() => {
+    if (
+      apiTrendData &&
+      apiTrendData.granularity === distGranularity &&
+      apiTrendData.points.length > 0
+    ) {
+      return apiTrendData.points;
+    }
+    return buildMultiDimensionTrendSeries(
+      trendError ? [] : employeesList,
+      distGranularity,
+      primaryDeptName,
+      primaryLocName,
+    );
+  }, [apiTrendData, trendError, employeesList, distGranularity, primaryDeptName, primaryLocName]);
+
+  const chartGeometry = useMemo(() => {
+    const leftPad = 38;
+    const rightPad = 624;
+    const plotStart = 54;
+    const plotEnd = 608;
+    const topPad = 20;
+    const bottomY = 194;
+    const chartHeight = bottomY - topPad;
+    const plotWidth = plotEnd - plotStart;
+
+    const maxSeriesVal = Math.max(
+      1,
+      ...trendPoints.flatMap((p) => [
+        p.department.primary,
+        p.location.primary,
+        p.employment.primary,
+      ]),
+    );
+    const yTicks = computeYAxisTicks(maxSeriesVal);
+    const yMax = yTicks[yTicks.length - 1] || 5;
+
+    const mapped = trendPoints.map((pt, idx) => {
+      const x =
+        trendPoints.length <= 1
+          ? plotStart + plotWidth / 2
+          : plotStart + (idx / (trendPoints.length - 1)) * plotWidth;
+      const toY = (val: number) => bottomY - (Math.max(0, val) / yMax) * chartHeight;
+      return {
+        ...pt,
+        x,
+        ys: {
+          department: toY(pt.department.primary),
+          location: toY(pt.location.primary),
+          employment: toY(pt.employment.primary),
+        },
+      };
+    });
+
+    const buildLinePath = (key: DistributionTabKey) =>
+      buildSmoothSplinePath(mapped.map((m) => ({ x: m.x, y: m.ys[key] })));
+
+    const paths: Record<DistributionTabKey, string> = {
+      department: buildLinePath('department'),
+      location: buildLinePath('location'),
+      employment: buildLinePath('employment'),
+    };
+
+    const firstMapped = mapped[0];
+    const lastMapped = mapped[mapped.length - 1];
+    const activePath = paths[activeDistTab];
+    const activeAreaPath =
+      activePath && firstMapped && lastMapped
+        ? `${activePath} L ${lastMapped.x.toFixed(1)} ${bottomY} L ${firstMapped.x.toFixed(1)} ${bottomY} Z`
+        : '';
+
+    const hlIdx =
+      activeTrendIdx !== null && activeTrendIdx >= 0 && activeTrendIdx < mapped.length
+        ? activeTrendIdx
+        : null;
+
+    return {
+      leftPad,
+      rightPad,
+      topPad,
+      bottomY,
+      chartHeight,
+      yTicks,
+      yMax,
+      mapped,
+      paths,
+      activeAreaPath,
+      hlIdx,
+    };
+  }, [trendPoints, activeDistTab, activeTrendIdx]);
 
   return (
     <Page maxWidth="full" gap="md">
@@ -1035,7 +1424,7 @@ export function WorkforceOverviewPage({
         <div className="bezent-exec-kpi-grid">
           {/* Card 1: Total Employees */}
           <div
-            className="bezent-exec-kpi-card"
+            className="bezent-exec-kpi-card bezent-exec-kpi-card--blue"
             onClick={() => navigate('/hrms/workforce/employees')}
             title="Complete registered workforce"
           >
@@ -1059,12 +1448,12 @@ export function WorkforceOverviewPage({
 
           {/* Card 2: Active Employees */}
           <div
-            className="bezent-exec-kpi-card"
+            className="bezent-exec-kpi-card bezent-exec-kpi-card--teal"
             onClick={() => navigate('/hrms/workforce/employees')}
             title="Current active workforce"
           >
             <div className="bezent-exec-kpi-card__top">
-              <div className="bezent-exec-kpi-card__icon-badge bezent-exec-kpi-card__icon-badge--green">
+              <div className="bezent-exec-kpi-card__icon-badge bezent-exec-kpi-card__icon-badge--teal">
                 <BezentIcon name="schedule" size={17} />
               </div>
             </div>
@@ -1083,7 +1472,7 @@ export function WorkforceOverviewPage({
 
           {/* Card 3: New Joiners */}
           <div
-            className="bezent-exec-kpi-card"
+            className="bezent-exec-kpi-card bezent-exec-kpi-card--amber"
             onClick={() => navigate('/hrms/workforce/onboarding')}
             title="Employee additions in period"
           >
@@ -1107,7 +1496,7 @@ export function WorkforceOverviewPage({
 
           {/* Card 4: Employee Exits */}
           <div
-            className="bezent-exec-kpi-card"
+            className="bezent-exec-kpi-card bezent-exec-kpi-card--red"
             onClick={() => navigate('/hrms/workforce/offboarding')}
             title="Employee departures in period"
           >
@@ -1131,7 +1520,7 @@ export function WorkforceOverviewPage({
 
           {/* Card 5: Retention Rate */}
           <div
-            className="bezent-exec-kpi-card"
+            className="bezent-exec-kpi-card bezent-exec-kpi-card--purple"
             onClick={() => navigate('/hrms/workforce/employees')}
             title="Workforce stability & retention"
           >
@@ -1155,12 +1544,12 @@ export function WorkforceOverviewPage({
 
           {/* Card 6: Workforce Growth */}
           <div
-            className="bezent-exec-kpi-card"
+            className="bezent-exec-kpi-card bezent-exec-kpi-card--teal"
             onClick={() => navigate('/hrms/workforce/employees')}
             title="Net workforce expansion"
           >
             <div className="bezent-exec-kpi-card__top">
-              <div className="bezent-exec-kpi-card__icon-badge bezent-exec-kpi-card__icon-badge--green">
+              <div className="bezent-exec-kpi-card__icon-badge bezent-exec-kpi-card__icon-badge--teal">
                 <BezentIcon name="milestones" size={17} />
               </div>
             </div>
@@ -1178,306 +1567,484 @@ export function WorkforceOverviewPage({
           </div>
         </div>
 
-        {/* ── Tier 2: 01. Department Distribution & 02. Location Distribution (2 Separate Cards) ── */}
-        <div className="bezent-wf-tier2-grid">
-          {/* Card 1: 01. Department Distribution */}
-          <div className="bezent-wf-feature-card">
-            <div className="bezent-wf-feature-card__header">
-              <div className="bezent-wf-feature-card__icon bezent-wf-feature-card__icon--purple">
-                <BezentIcon name="organization" size={18} />
-              </div>
-              <div>
-                <h3 className="bezent-wf-feature-card__title">01. Department Distribution</h3>
-                <p className="bezent-wf-feature-card__subtitle">
-                  Analyze employee distribution across different departments within the
-                  organization.
-                </p>
-              </div>
-            </div>
+        {/* ── Tier 2: Compact 3-Line Graph Card (Exact Reference Proportions) + Live Breakdown Card ── */}
+        <div className="bezent-wf-tier2-split">
+          {/* Left Card: Exact Guide-Performance Style 3-Line Chart (1 Highlighted + 2 Dull) */}
+          <div className="bezent-wf-feature-card bezent-wf-trend-card">
+            <div className="bezent-wf-trend-header">
+              <h3 className="bezent-wf-trend-title">{distDimensionConfig.title}</h3>
 
-            <div className="bezent-wf-donut-legend-row">
-              <div className="bezent-wf-donut-wrap">
-                <svg viewBox="0 0 120 120" width="132" height="132">
-                  <circle cx="60" cy="60" r="46" fill="none" stroke="#f1f5f9" strokeWidth="15" />
-                  {departmentDisplay.map((dept, idx) => {
-                    const dash = (dept.percentage / 100) * DONUT_CIRCUMFERENCE;
-                    const offset = -((accumulatedDeptPct / 100) * DONUT_CIRCUMFERENCE);
-                    accumulatedDeptPct += dept.percentage;
-                    const color =
-                      dept.rank === 5
-                        ? DONUT_COLORS_DEPT[4]
-                        : DONUT_COLORS_DEPT[idx % DONUT_COLORS_DEPT.length];
-                    return (
-                      <circle
-                        key={dept.name}
-                        cx="60"
-                        cy="60"
-                        r="46"
-                        fill="none"
-                        stroke={color}
-                        strokeWidth="15"
-                        strokeDasharray={`${dash} ${DONUT_CIRCUMFERENCE}`}
-                        strokeDashoffset={offset}
-                        transform="rotate(-90 60 60)"
-                      />
-                    );
-                  })}
-                </svg>
-                <div className="bezent-wf-donut-center">
-                  <span className="bezent-wf-donut-center__count">{totalWorkforceCount}</span>
-                  <span className="bezent-wf-donut-center__label">TOTAL</span>
-                </div>
-              </div>
-
-              {/* Clean Single-Row Legend List */}
-              <div className="bezent-wf-donut-legend-list">
-                {departmentDisplay.map((dept, idx) => {
-                  const colorClass =
-                    dept.rank === 5
-                      ? DONUT_COLOR_CLASSES_DEPT[4]
-                      : DONUT_COLOR_CLASSES_DEPT[idx % DONUT_COLOR_CLASSES_DEPT.length];
+              <div
+                className="bezent-wf-trend-legend"
+                role="tablist"
+                aria-label="Workforce Distribution Series"
+              >
+                {DIST_SERIES_OPTIONS.map((opt) => {
+                  const isActive = activeDistTab === opt.key;
                   return (
-                    <div key={dept.name} className="bezent-wf-legend-item">
-                      <span className="bezent-wf-legend-left">
-                        <span className={`bezent-wf-legend-dot bezent-wf-bg-${colorClass}`} />
-                        <span>{dept.name}</span>
-                      </span>
-                      <span className="bezent-wf-legend-val">
-                        {dept.count} ({dept.percentage}%)
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* 4 Summary Metrics Chips */}
-            <div className="bezent-wf-summary-chips-row">
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label" title="Largest Department">
-                  Largest<span className="bezent-visually-hidden"> Department</span>
-                </span>
-                <span className="bezent-wf-summary-chip__val">
-                  {largestDeptInfo ? `${largestDeptInfo.name} (${largestDeptInfo.count})` : '—'}
-                </span>
-              </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Smallest</span>
-                <span className="bezent-wf-summary-chip__val">
-                  {smallestDeptInfo ? `${smallestDeptInfo.name} (${smallestDeptInfo.count})` : '—'}
-                </span>
-              </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Total Departments</span>
-                <span className="bezent-wf-summary-chip__val">{totalDeptsCount}</span>
-              </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Avg Employees / Dept</span>
-                <span className="bezent-wf-summary-chip__val">
-                  {(totalWorkforceCount / (totalDeptsCount || 1)).toFixed(1)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Card 2: 02. Location Distribution */}
-          <div className="bezent-wf-feature-card">
-            <div className="bezent-wf-feature-card__header">
-              <div className="bezent-wf-feature-card__icon bezent-wf-feature-card__icon--mint">
-                <BezentIcon name="schedule" size={18} />
-              </div>
-              <div>
-                <h3 className="bezent-wf-feature-card__title">02. Location Distribution</h3>
-                <p className="bezent-wf-feature-card__subtitle">
-                  Monitor employee distribution across company branches and work locations.
-                </p>
-              </div>
-            </div>
-
-            <div className="bezent-wf-donut-legend-row">
-              <div className="bezent-wf-donut-wrap">
-                <svg viewBox="0 0 120 120" width="132" height="132">
-                  <circle cx="60" cy="60" r="46" fill="none" stroke="#f1f5f9" strokeWidth="15" />
-                  {locationDisplay.map((loc, idx) => {
-                    const dash = (loc.percentage / 100) * DONUT_CIRCUMFERENCE;
-                    const offset = -((accumulatedLocPct / 100) * DONUT_CIRCUMFERENCE);
-                    accumulatedLocPct += loc.percentage;
-                    const color =
-                      loc.rank === 5
-                        ? DONUT_COLORS_LOC[4]
-                        : DONUT_COLORS_LOC[idx % DONUT_COLORS_LOC.length];
-                    return (
-                      <circle
-                        key={loc.name}
-                        cx="60"
-                        cy="60"
-                        r="46"
-                        fill="none"
-                        stroke={color}
-                        strokeWidth="15"
-                        strokeDasharray={`${dash} ${DONUT_CIRCUMFERENCE}`}
-                        strokeDashoffset={offset}
-                        transform="rotate(-90 60 60)"
-                      />
-                    );
-                  })}
-                </svg>
-                <div className="bezent-wf-donut-center">
-                  <span className="bezent-wf-donut-center__count">{totalWorkforceCount}</span>
-                  <span className="bezent-wf-donut-center__label">TOTAL</span>
-                </div>
-              </div>
-
-              {/* Clean Single-Row Legend List */}
-              <div className="bezent-wf-donut-legend-list">
-                {locationDisplay.map((loc, idx) => {
-                  const colorClass =
-                    loc.rank === 5
-                      ? DONUT_COLOR_CLASSES_LOC[4]
-                      : DONUT_COLOR_CLASSES_LOC[idx % DONUT_COLOR_CLASSES_LOC.length];
-                  return (
-                    <div key={loc.name} className="bezent-wf-legend-item">
-                      <span className="bezent-wf-legend-left">
-                        <span className={`bezent-wf-legend-dot bezent-wf-bg-${colorClass}`} />
-                        <span>{loc.name}</span>
-                      </span>
-                      <span className="bezent-wf-legend-val">
-                        {loc.count} ({loc.percentage}%)
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* 4 Summary Metrics Chips */}
-            <div className="bezent-wf-summary-chips-row">
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Largest Location</span>
-                <span className="bezent-wf-summary-chip__val">
-                  {largestLocInfo ? `${largestLocInfo.name} (${largestLocInfo.count})` : '—'}
-                </span>
-              </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Smallest</span>
-                <span className="bezent-wf-summary-chip__val">
-                  {smallestLocInfo ? `${smallestLocInfo.name} (${smallestLocInfo.count})` : '—'}
-                </span>
-              </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Active Locations</span>
-                <span className="bezent-wf-summary-chip__val">{totalLocsCount}</span>
-              </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Workforce Strength</span>
-                <span className="bezent-wf-summary-chip__val">
-                  {largestLocInfo ? `${largestLocInfo.pct}% in primary hub` : '—'}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Tier 3: Workforce Composition (3 Separate Cards) ── */}
-        <div className="bezent-wf-tier3-grid">
-          {/* Card 1: 1. Employment Type */}
-          <div className="bezent-wf-feature-card">
-            <div className="bezent-wf-feature-card__header">
-              <div className="bezent-wf-feature-card__icon bezent-wf-feature-card__icon--purple">
-                <BezentIcon name="documents" size={18} />
-              </div>
-              <div>
-                <h3 className="bezent-wf-feature-card__title">1. Employment Type</h3>
-                <p className="bezent-wf-feature-card__subtitle">
-                  Distribution across different contract and work arrangements.
-                </p>
-              </div>
-            </div>
-
-            <div className="bezent-wf-donut-legend-row">
-              <div className="bezent-wf-donut-wrap">
-                <svg viewBox="0 0 120 120" width="124" height="124">
-                  <circle cx="60" cy="60" r="46" fill="none" stroke="#f1f5f9" strokeWidth="15" />
-                  {empTypeItems.map((item, idx) => {
-                    const dash = (item.percentage / 100) * DONUT_CIRCUMFERENCE;
-                    const offset = -((accumulatedEmpTypePct / 100) * DONUT_CIRCUMFERENCE);
-                    accumulatedEmpTypePct += item.percentage;
-                    return (
-                      <circle
-                        key={item.name}
-                        cx="60"
-                        cy="60"
-                        r="46"
-                        fill="none"
-                        stroke={item.color || DONUT_COLORS_EMP[idx % DONUT_COLORS_EMP.length]}
-                        strokeWidth="15"
-                        strokeDasharray={`${dash} ${DONUT_CIRCUMFERENCE}`}
-                        strokeDashoffset={offset}
-                        transform="rotate(-90 60 60)"
-                      />
-                    );
-                  })}
-                </svg>
-                <div className="bezent-wf-donut-center">
-                  <span className="bezent-wf-donut-center__count">{totalWorkforceCount}</span>
-                  <span className="bezent-wf-donut-center__label">TOTAL</span>
-                </div>
-              </div>
-
-              <div className="bezent-wf-donut-legend-list">
-                {empTypeItems.map((item, idx) => (
-                  <div key={item.name} className="bezent-wf-legend-item">
-                    <span className="bezent-wf-legend-left">
+                    <button
+                      key={opt.key}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      aria-label={opt.heading}
+                      title={`View ${opt.heading}`}
+                      className={`bezent-wf-trend-legend__btn ${isActive ? 'bezent-wf-trend-legend__btn--active' : ''}`}
+                      onClick={() => setActiveDistTab(opt.key)}
+                    >
                       <span
-                        className={`bezent-wf-legend-dot bezent-wf-bg-${DONUT_COLOR_CLASSES_EMP[idx % DONUT_COLOR_CLASSES_EMP.length]}`}
+                        className={`bezent-wf-trend-legend__dot ${isActive ? 'bezent-wf-trend-legend__dot--active' : 'bezent-wf-trend-legend__dot--dull'}`}
                       />
-                      <span>{item.name}</span>
-                    </span>
-                    <span className="bezent-wf-legend-val">
+                      <span>{opt.shortLabel}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="bezent-wf-granularity-wrap">
+                <span className="bezent-wf-sort-label">Sort by</span>
+                <div
+                  className="bezent-wf-granularity-pill"
+                  role="group"
+                  aria-label="Timeframe separation"
+                >
+                  <span className="bezent-wf-granularity-cal">
+                    <BezentIcon name="calendar" size={13} />
+                  </span>
+                  <button
+                    type="button"
+                    aria-pressed={distGranularity === 'day'}
+                    className={`bezent-wf-granularity-btn ${distGranularity === 'day' ? 'bezent-wf-granularity-btn--active' : ''}`}
+                    onClick={() => {
+                      setDistGranularity('day');
+                      setActiveTrendIdx(null);
+                    }}
+                  >
+                    Day
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={distGranularity === 'month'}
+                    className={`bezent-wf-granularity-btn ${distGranularity === 'month' ? 'bezent-wf-granularity-btn--active' : ''}`}
+                    onClick={() => {
+                      setDistGranularity('month');
+                      setActiveTrendIdx(null);
+                    }}
+                  >
+                    Month
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={distGranularity === 'year'}
+                    className={`bezent-wf-granularity-btn ${distGranularity === 'year' ? 'bezent-wf-granularity-btn--active' : ''}`}
+                    onClick={() => {
+                      setDistGranularity('year');
+                      setActiveTrendIdx(null);
+                    }}
+                  >
+                    Year
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="bezent-wf-trend-canvas-wrap">
+              {trendError ? (
+                <p className="bezent-wf-feature-card__subtitle" role="status">
+                  {trendError}
+                </p>
+              ) : null}
+              <svg
+                viewBox="0 0 640 228"
+                className="bezent-wf-trend-svg"
+                role="img"
+                aria-label={`${distDimensionConfig.title} ${distGranularity} multi-line trend graph`}
+                onMouseMove={(e) => {
+                  const svgRect = e.currentTarget.getBoundingClientRect();
+                  if (svgRect.width <= 0 || chartGeometry.mapped.length === 0) return;
+                  const svgX = ((e.clientX - svgRect.left) / svgRect.width) * 640;
+                  let bestIdx = 0;
+                  let bestDist = Infinity;
+                  chartGeometry.mapped.forEach((pt, idx) => {
+                    const dist = Math.abs(pt.x - svgX);
+                    if (dist < bestDist) {
+                      bestDist = dist;
+                      bestIdx = idx;
+                    }
+                  });
+                  setActiveTrendIdx(bestIdx);
+                }}
+                onMouseLeave={() => setActiveTrendIdx(null)}
+              >
+                <defs>
+                  <linearGradient id="wf-trend-teal-area" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#14b8a6" stopOpacity="0.18" />
+                    <stop offset="85%" stopColor="#14b8a6" stopOpacity="0.03" />
+                    <stop offset="100%" stopColor="#14b8a6" stopOpacity="0" />
+                  </linearGradient>
+                  <filter id="wf-trend-tooltip-shadow" x="-15%" y="-15%" width="130%" height="140%">
+                    <feDropShadow
+                      dx="0"
+                      dy="8"
+                      stdDeviation="7"
+                      floodColor="#0f172a"
+                      floodOpacity="0.22"
+                    />
+                  </filter>
+                  <filter id="wf-trend-dot-shadow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feDropShadow
+                      dx="0"
+                      dy="2"
+                      stdDeviation="2.5"
+                      floodColor="#0f172a"
+                      floodOpacity="0.18"
+                    />
+                  </filter>
+                </defs>
+
+                {/* Y-Axis Ticks & Dashed Horizontal Gridlines */}
+                {chartGeometry.yTicks.map((tick) => {
+                  const yPos =
+                    chartGeometry.bottomY - (tick / chartGeometry.yMax) * chartGeometry.chartHeight;
+                  return (
+                    <g key={tick}>
+                      <text
+                        x={chartGeometry.leftPad - 10}
+                        y={yPos + 4}
+                        textAnchor="end"
+                        className="bezent-wf-trend-axis-label"
+                      >
+                        {tick}
+                      </text>
+                      <line
+                        x1={chartGeometry.leftPad}
+                        x2={chartGeometry.rightPad}
+                        y1={yPos}
+                        y2={yPos}
+                        strokeDasharray={tick === 0 ? undefined : '4 4'}
+                        className={
+                          tick === 0 ? 'bezent-wf-trend-baseline' : 'bezent-wf-trend-gridline'
+                        }
+                      />
+                    </g>
+                  );
+                })}
+
+                {/* Active Series Soft Teal Area Fill */}
+                {chartGeometry.activeAreaPath ? (
+                  <path d={chartGeometry.activeAreaPath} fill="url(#wf-trend-teal-area)" />
+                ) : null}
+
+                {/* Interactive Date Hit Columns (behind clickable curve lines) */}
+                {chartGeometry.mapped.map((pt, idx) => {
+                  const prevPt = chartGeometry.mapped[idx - 1];
+                  const nextPt = chartGeometry.mapped[idx + 1];
+                  const leftEdge = prevPt ? (prevPt.x + pt.x) / 2 : chartGeometry.leftPad;
+                  const rightEdge = nextPt ? (pt.x + nextPt.x) / 2 : chartGeometry.rightPad;
+                  return (
+                    <rect
+                      key={`hit-${pt.label}-${idx}`}
+                      x={leftEdge}
+                      y={chartGeometry.topPad}
+                      width={Math.max(14, rightEdge - leftEdge)}
+                      height={chartGeometry.chartHeight + 24}
+                      fill="transparent"
+                      className="bezent-wf-trend-hit-col"
+                      onMouseEnter={() => setActiveTrendIdx(idx)}
+                    />
+                  );
+                })}
+
+                {/* Two Dull Background Lines (Clickable to Highlight & Switch Heading/Content) */}
+                {DIST_SERIES_OPTIONS.filter((opt) => opt.key !== activeDistTab).map((opt) => {
+                  const dPath = chartGeometry.paths[opt.key];
+                  if (!dPath) return null;
+                  return (
+                    <g
+                      key={opt.key}
+                      className="bezent-wf-trend-line-group"
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Select ${opt.heading} line`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveDistTab(opt.key);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setActiveDistTab(opt.key);
+                        }
+                      }}
+                    >
+                      <title>{`Click to switch to ${opt.heading}`}</title>
+                      <path d={dPath} className="bezent-wf-trend-dull-line" />
+                      <path d={dPath} className="bezent-wf-trend-line-hit" pointerEvents="stroke" />
+                    </g>
+                  );
+                })}
+
+                {/* Highlighted Active Line (Solid Rich Teal) */}
+                {chartGeometry.paths[activeDistTab] ? (
+                  <path
+                    d={chartGeometry.paths[activeDistTab]}
+                    fill="none"
+                    stroke="#14b8a6"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    pointerEvents="none"
+                  />
+                ) : null}
+
+                {/* X-Axis Labels */}
+                {chartGeometry.mapped.map((pt, idx) => (
+                  <text
+                    key={`${pt.label}-${idx}`}
+                    x={pt.x}
+                    y={216}
+                    textAnchor="middle"
+                    className={`bezent-wf-trend-axis-label ${idx === chartGeometry.hlIdx ? 'bezent-wf-trend-axis-label--active' : ''}`}
+                  >
+                    {pt.label}
+                  </text>
+                ))}
+
+                {/* Active Halo Dot & Dark Floating Tooltip Card (Visible only while hovering) */}
+                {(() => {
+                  const hlPt =
+                    chartGeometry.hlIdx !== null
+                      ? chartGeometry.mapped[chartGeometry.hlIdx]
+                      : undefined;
+                  if (!hlPt) return null;
+                  const activeSeriesY = hlPt.ys[activeDistTab];
+                  const activeVals = hlPt[activeDistTab];
+                  const tipW = 184;
+                  const tipH = 82;
+                  const tipX =
+                    hlPt.x > 360
+                      ? Math.max(chartGeometry.leftPad + 4, hlPt.x - tipW - 14)
+                      : Math.min(chartGeometry.rightPad - tipW - 4, hlPt.x + 14);
+                  const tipY = Math.max(
+                    8,
+                    Math.min(chartGeometry.bottomY - tipH - 6, activeSeriesY - tipH / 2),
+                  );
+                  return (
+                    <g className="bezent-wf-trend-active-group">
+                      <line
+                        x1={hlPt.x}
+                        x2={hlPt.x}
+                        y1={chartGeometry.topPad}
+                        y2={chartGeometry.bottomY}
+                        strokeDasharray="3 3"
+                        className="bezent-wf-trend-guide-line"
+                      />
+                      <circle
+                        cx={hlPt.x}
+                        cy={activeSeriesY}
+                        r={6}
+                        fill="#ffffff"
+                        filter="url(#wf-trend-dot-shadow)"
+                      />
+                      <circle cx={hlPt.x} cy={activeSeriesY} r={3.2} fill="#14b8a6" />
+
+                      <g
+                        transform={`translate(${tipX.toFixed(1)}, ${tipY.toFixed(1)})`}
+                        filter="url(#wf-trend-tooltip-shadow)"
+                      >
+                        <rect
+                          width={tipW}
+                          height={tipH}
+                          rx={11}
+                          className="bezent-wf-trend-tooltip-bg"
+                        />
+                        <text x={13} y={22} className="bezent-wf-trend-tooltip-date">
+                          {hlPt.fullLabel}
+                        </text>
+                        <circle cx={167} cy={14} r={1.15} fill="#64748b" />
+                        <circle cx={167} cy={18.5} r={1.15} fill="#64748b" />
+                        <circle cx={167} cy={23} r={1.15} fill="#64748b" />
+                        <line
+                          x1={13}
+                          x2={tipW - 13}
+                          y1={32}
+                          y2={32}
+                          className="bezent-wf-trend-tooltip-divider"
+                        />
+                        <circle cx={18} cy={48} r={3} fill="#14b8a6" />
+                        <text x={27} y={52} className="bezent-wf-trend-tooltip-name">
+                          {truncateTooltipText(distDimensionConfig.primaryLabel, 16)}
+                        </text>
+                        <text
+                          x={tipW - 13}
+                          y={52}
+                          textAnchor="end"
+                          className="bezent-wf-trend-tooltip-val-teal"
+                        >
+                          {activeVals.primary}
+                          {apiTrendData ? 'h' : ''}
+                        </text>
+                        <circle cx={18} cy={67} r={3} fill="#94a3b8" />
+                        <text x={27} y={71} className="bezent-wf-trend-tooltip-name">
+                          {truncateTooltipText(distDimensionConfig.secondaryLabel, 16)}
+                        </text>
+                        <text
+                          x={tipW - 13}
+                          y={71}
+                          textAnchor="end"
+                          className="bezent-wf-trend-tooltip-val-sec"
+                        >
+                          {activeVals.other}
+                          {apiTrendData ? 'h' : ''}
+                        </text>
+                      </g>
+                    </g>
+                  );
+                })()}
+              </svg>
+            </div>
+          </div>
+
+          {/* Right Card: Dynamic Breakdown & Summary Panel for Selected Graph Line */}
+          <div className="bezent-wf-feature-card bezent-wf-dist-detail-card">
+            <div className="bezent-wf-dist-detail-top">
+              <div className="bezent-wf-feature-card__header">
+                <div className="bezent-wf-feature-card__icon bezent-wf-feature-card__icon--teal">
+                  <BezentIcon name={distDimensionConfig.iconName} size={18} />
+                </div>
+                <div>
+                  <h3 className="bezent-wf-feature-card__title">{distDimensionConfig.title}</h3>
+                  <p className="bezent-wf-feature-card__subtitle">{distDimensionConfig.subtitle}</p>
+                </div>
+              </div>
+              <span className="bezent-wf-dist-total-badge">{totalWorkforceCount} Total</span>
+            </div>
+
+            <div className="bezent-wf-bars-list">
+              {distDimensionConfig.breakdownItems.slice(0, 5).map((item, idx) => {
+                const variants: ('success' | 'primary' | 'info' | 'warning' | 'primary')[] = [
+                  'success',
+                  'primary',
+                  'info',
+                  'warning',
+                  'primary',
+                ];
+                return (
+                  <div key={item.name} className="bezent-wf-bar-row">
+                    <span className="bezent-wf-bar-label">{item.name}</span>
+                    <div className="bezent-wf-bar-track">
+                      <ProgressBar
+                        value={item.percentage}
+                        max={100}
+                        size="sm"
+                        variant={variants[idx % variants.length]}
+                      />
+                    </div>
+                    <span className="bezent-wf-bar-val">
                       {item.count} ({item.percentage}%)
                     </span>
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
 
-            {/* 4 Summary Chips */}
-            <div className="bezent-wf-summary-chips-row">
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Full-Time</span>
-                <span className="bezent-wf-summary-chip__val">
-                  {fullTimeItem
-                    ? `${fullTimeItem.count} (${fullTimeItem.percentage}%)`
-                    : '16 (100%)'}
-                </span>
+            {activeDistTab === 'department' ? (
+              <div className="bezent-wf-summary-chips-row">
+                <div className="bezent-wf-summary-chip">
+                  <span className="bezent-wf-summary-chip__label" title="Largest Department">
+                    Largest<span className="bezent-visually-hidden"> Department</span>
+                  </span>
+                  <span className="bezent-wf-summary-chip__val">
+                    {largestDeptInfo ? `${largestDeptInfo.name} (${largestDeptInfo.count})` : '—'}
+                  </span>
+                </div>
+                <div className="bezent-wf-summary-chip">
+                  <span className="bezent-wf-summary-chip__label">Smallest</span>
+                  <span className="bezent-wf-summary-chip__val">
+                    {smallestDeptInfo
+                      ? `${smallestDeptInfo.name} (${smallestDeptInfo.count})`
+                      : '—'}
+                  </span>
+                </div>
+                <div className="bezent-wf-summary-chip">
+                  <span className="bezent-wf-summary-chip__label">Total Departments</span>
+                  <span className="bezent-wf-summary-chip__val">{totalDeptsCount}</span>
+                </div>
+                <div className="bezent-wf-summary-chip">
+                  <span className="bezent-wf-summary-chip__label">Avg Employees / Dept</span>
+                  <span className="bezent-wf-summary-chip__val">
+                    {(totalWorkforceCount / (totalDeptsCount || 1)).toFixed(1)}
+                  </span>
+                </div>
               </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Contract</span>
-                <span className="bezent-wf-summary-chip__val">
-                  {contractItem ? `${contractItem.count} (${contractItem.percentage}%)` : '0 (0%)'}
-                </span>
+            ) : activeDistTab === 'location' ? (
+              <div className="bezent-wf-summary-chips-row">
+                <div className="bezent-wf-summary-chip">
+                  <span className="bezent-wf-summary-chip__label">Largest Location</span>
+                  <span className="bezent-wf-summary-chip__val">
+                    {largestLocInfo ? `${largestLocInfo.name} (${largestLocInfo.count})` : '—'}
+                  </span>
+                </div>
+                <div className="bezent-wf-summary-chip">
+                  <span className="bezent-wf-summary-chip__label">Smallest</span>
+                  <span className="bezent-wf-summary-chip__val">
+                    {smallestLocInfo ? `${smallestLocInfo.name} (${smallestLocInfo.count})` : '—'}
+                  </span>
+                </div>
+                <div className="bezent-wf-summary-chip">
+                  <span className="bezent-wf-summary-chip__label">Active Locations</span>
+                  <span className="bezent-wf-summary-chip__val">{totalLocsCount}</span>
+                </div>
+                <div className="bezent-wf-summary-chip">
+                  <span className="bezent-wf-summary-chip__label">Workforce Strength</span>
+                  <span className="bezent-wf-summary-chip__val">
+                    {largestLocInfo ? `${largestLocInfo.pct}% in primary hub` : '—'}
+                  </span>
+                </div>
               </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Interns</span>
-                <span className="bezent-wf-summary-chip__val">
-                  {internItem ? `${internItem.count} (${internItem.percentage}%)` : '0 (0%)'}
-                </span>
+            ) : (
+              <div className="bezent-wf-summary-chips-row">
+                <div className="bezent-wf-summary-chip">
+                  <span className="bezent-wf-summary-chip__label">Full-Time</span>
+                  <span className="bezent-wf-summary-chip__val">
+                    {fullTimeItem
+                      ? `${fullTimeItem.count} (${fullTimeItem.percentage}%)`
+                      : '16 (100%)'}
+                  </span>
+                </div>
+                <div className="bezent-wf-summary-chip">
+                  <span className="bezent-wf-summary-chip__label">Contract</span>
+                  <span className="bezent-wf-summary-chip__val">
+                    {contractItem
+                      ? `${contractItem.count} (${contractItem.percentage}%)`
+                      : '0 (0%)'}
+                  </span>
+                </div>
+                <div className="bezent-wf-summary-chip">
+                  <span className="bezent-wf-summary-chip__label">Interns</span>
+                  <span className="bezent-wf-summary-chip__val">
+                    {internItem ? `${internItem.count} (${internItem.percentage}%)` : '0 (0%)'}
+                  </span>
+                </div>
+                <div className="bezent-wf-summary-chip">
+                  <span className="bezent-wf-summary-chip__label">Active Types</span>
+                  <span className="bezent-wf-summary-chip__val">{activeTypesCount} of 5</span>
+                </div>
               </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Active Types</span>
-                <span className="bezent-wf-summary-chip__val">{activeTypesCount} of 5</span>
-              </div>
-            </div>
+            )}
           </div>
+        </div>
 
-          {/* Card 2: 2. Experience Distribution */}
+        {/* ── Tier 3: Workforce Composition (2 Side-by-Side Bar Cards) ── */}
+        <div className="bezent-wf-tier3-grid bezent-wf-tier3-grid--two">
+          {/* Card 1: 1. Experience Distribution */}
           <div className="bezent-wf-feature-card">
             <div className="bezent-wf-feature-card__header">
               <div className="bezent-wf-feature-card__icon bezent-wf-feature-card__icon--blue">
                 <BezentIcon name="schedule" size={18} />
               </div>
               <div>
-                <h3 className="bezent-wf-feature-card__title">2. Experience Distribution</h3>
+                <h3 className="bezent-wf-feature-card__title">1. Experience Distribution</h3>
                 <p className="bezent-wf-feature-card__subtitle">
                   Workforce distribution based on employees&apos; professional tenure.
                 </p>
@@ -1532,14 +2099,14 @@ export function WorkforceOverviewPage({
             </div>
           </div>
 
-          {/* Card 3: 3. Job Level Distribution */}
+          {/* Card 2: 2. Job Level Distribution */}
           <div className="bezent-wf-feature-card">
             <div className="bezent-wf-feature-card__header">
               <div className="bezent-wf-feature-card__icon bezent-wf-feature-card__icon--purple">
                 <BezentIcon name="organization" size={18} />
               </div>
               <div>
-                <h3 className="bezent-wf-feature-card__title">3. Job Level Distribution</h3>
+                <h3 className="bezent-wf-feature-card__title">2. Job Level Distribution</h3>
                 <p className="bezent-wf-feature-card__subtitle">
                   Workforce hierarchy structure across seniority levels.
                 </p>
@@ -1627,7 +2194,7 @@ export function WorkforceOverviewPage({
             </div>
 
             <div className="bezent-wf-planning-chip">
-              <div className="bezent-wf-chip-icon bezent-wf-chip-icon--green">
+              <div className="bezent-wf-chip-icon bezent-wf-chip-icon--teal">
                 <BezentIcon name="schedule" size={16} />
               </div>
               <div className="bezent-wf-chip-content">
@@ -1823,10 +2390,10 @@ export function WorkforceOverviewPage({
 
                 <linearGradient id="wf-lifecycle-wave-stroke" x1="0" y1="0" x2="1" y2="0">
                   <stop offset="0%" stopColor="#93c5fd" />
-                  <stop offset="25%" stopColor="#86efac" />
+                  <stop offset="25%" stopColor="#14b8a6" />
                   <stop offset="50%" stopColor="#c4b5fd" />
                   <stop offset="75%" stopColor="#f9a8d4" />
-                  <stop offset="100%" stopColor="#bae6fd" />
+                  <stop offset="100%" stopColor="#e0f2fe" />
                 </linearGradient>
 
                 {/* Card Pastel Fill Gradients */}
@@ -1837,7 +2404,7 @@ export function WorkforceOverviewPage({
                 </linearGradient>
 
                 <linearGradient id="wf-card-grad-1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#d1fae5" stopOpacity="0.8" />
+                  <stop offset="0%" stopColor="#ccfbf1" stopOpacity="0.8" />
                   <stop offset="40%" stopColor="#f8fafc" stopOpacity="0.94" />
                   <stop offset="100%" stopColor="#ffffff" stopOpacity="0.98" />
                 </linearGradient>

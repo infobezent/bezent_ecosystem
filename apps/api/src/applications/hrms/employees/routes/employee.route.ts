@@ -16,6 +16,11 @@ employeeRouter.get(
   controller.listEmployees,
 );
 employeeRouter.get(
+  '/hrms/employees/distribution-trends',
+  requirePermission('hrms.employees.read'),
+  controller.getDistributionTrends,
+);
+employeeRouter.get(
   '/hrms/employees/next-number',
   requirePermission('hrms.employees.create'),
   controller.getNextEmployeeNumber,

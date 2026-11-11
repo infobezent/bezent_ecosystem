@@ -21,42 +21,46 @@
 
 .bezent-progress-bar__track {
   width: 100%;
-  height: 6px;
-  background-color: var(--bg-surface-secondary, #e2e8f0);
+  height: 8px;
+  background-color: #f1f5f9;
   border-radius: 9999px;
   overflow: hidden;
   position: relative;
 }
 
 .bezent-progress-bar--sm .bezent-progress-bar__track {
-  height: 4px;
+  height: 6px;
 }
 
 .bezent-progress-bar--lg .bezent-progress-bar__track {
-  height: 8px;
+  height: 10px;
 }
 
 .bezent-progress-bar__fill {
   height: 100%;
   border-radius: 9999px;
-  transition: width 0.3s ease;
-  background-color: var(--accent-primary, #1a73e8);
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  background-color: #14b8a6;
 }
 
 .bezent-progress-bar__fill--success {
-  background-color: #16a34a;
+  background-color: #14b8a6;
 }
 
 .bezent-progress-bar__fill--warning {
-  background-color: #d97706;
+  background-color: #f59e0b;
 }
 
 .bezent-progress-bar__fill--danger {
-  background-color: #dc2626;
+  background-color: #f43f5e;
 }
 
 .bezent-progress-bar__fill--info {
-  background-color: #0284c7;
+  background-color: #38bdf8;
+}
+
+[data-theme='dark'] .bezent-progress-bar__track {
+  background-color: #0f172a;
 }
 
 /* Width steps */

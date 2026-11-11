@@ -40,7 +40,7 @@ import {
   attendanceOvertimePolicies,
   employeeAttendance,
 } from './schema.js';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, like } from 'drizzle-orm';
 import { createUnusableCredential } from '../platform/auth/security.js';
 import { leaveDefaultsService } from '../applications/hrms/leave/service/leaveDefaults.service.js';
 
@@ -594,6 +594,247 @@ export async function seedDatabase() {
       probationEndDate: '2027-01-20',
       confirmationDate: null,
       employmentStatus: 'probation' as const,
+      employmentType: 'full_time' as const,
+    },
+    {
+      id: 'emp_demo_005',
+      employeeNumber: 'EMP-0105',
+      firstName: 'Vikram',
+      lastName: 'Nair',
+      email: 'vikram.nair@bezent-demo.example',
+      departmentId: 'dept_eng_01',
+      designationId: 'desig_se_01',
+      locationId: 'loc_rem_01',
+      reportingManagerId: 'emp_demo_002',
+      joiningDate: '2021-06-15',
+      probationEndDate: '2021-12-15',
+      confirmationDate: '2021-12-15',
+      employmentStatus: 'active' as const,
+      employmentType: 'contract' as const,
+    },
+    {
+      id: 'emp_demo_006',
+      employeeNumber: 'EMP-0106',
+      firstName: 'Meera',
+      lastName: 'Krishnan',
+      email: 'meera.krishnan@bezent-demo.example',
+      departmentId: 'dept_eng_01',
+      designationId: 'desig_se_01',
+      locationId: 'loc_blr_01',
+      reportingManagerId: 'emp_demo_002',
+      joiningDate: '2021-11-01',
+      probationEndDate: '2022-05-01',
+      confirmationDate: '2022-05-01',
+      employmentStatus: 'active' as const,
+      employmentType: 'contract' as const,
+    },
+    {
+      id: 'emp_demo_007',
+      employeeNumber: 'EMP-0107',
+      firstName: 'Divya',
+      lastName: 'Subramanian',
+      email: 'divya.subramanian@bezent-demo.example',
+      departmentId: 'dept_prod_01',
+      designationId: 'desig_pm_01',
+      locationId: 'loc_chn_01',
+      reportingManagerId: 'emp_demo_001',
+      joiningDate: '2021-08-10',
+      probationEndDate: '2022-02-10',
+      confirmationDate: '2022-02-10',
+      employmentStatus: 'active' as const,
+      employmentType: 'part_time' as const,
+    },
+    {
+      id: 'emp_demo_008',
+      employeeNumber: 'EMP-0108',
+      firstName: 'Aditya',
+      lastName: 'Prakash',
+      email: 'aditya.prakash@bezent-demo.example',
+      departmentId: 'dept_prod_01',
+      designationId: 'desig_pm_01',
+      locationId: 'loc_chn_01',
+      reportingManagerId: 'emp_demo_001',
+      joiningDate: '2021-05-18',
+      probationEndDate: '2021-11-18',
+      confirmationDate: '2021-11-18',
+      employmentStatus: 'active' as const,
+      employmentType: 'full_time' as const,
+    },
+    {
+      id: 'emp_demo_009',
+      employeeNumber: 'EMP-0109',
+      firstName: 'Varun',
+      lastName: 'Kapoor',
+      email: 'varun.kapoor@bezent-demo.example',
+      departmentId: 'dept_hr_01',
+      designationId: 'desig_hr_01',
+      locationId: 'loc_blr_01',
+      reportingManagerId: 'emp_demo_001',
+      joiningDate: '2026-02-01',
+      probationEndDate: '2026-08-01',
+      confirmationDate: null,
+      employmentStatus: 'probation' as const,
+      employmentType: 'intern' as const,
+    },
+    {
+      id: 'emp_demo_010',
+      employeeNumber: 'EMP-0110',
+      firstName: 'Kiran',
+      lastName: 'Raj',
+      email: 'kiran.raj@bezent-demo.example',
+      departmentId: 'dept_fin_01',
+      designationId: 'desig_fa_01',
+      locationId: 'loc_chn_01',
+      reportingManagerId: 'emp_demo_001',
+      joiningDate: '2021-10-12',
+      probationEndDate: '2022-04-12',
+      confirmationDate: '2022-04-12',
+      employmentStatus: 'active' as const,
+      employmentType: 'contract' as const,
+    },
+    {
+      id: 'emp_demo_011',
+      employeeNumber: 'EMP-0111',
+      firstName: 'Rohan',
+      lastName: 'Kulkarni',
+      email: 'rohan.kulkarni@bezent-demo.example',
+      departmentId: 'dept_eng_01',
+      designationId: 'desig_se_01',
+      locationId: 'loc_rem_01',
+      reportingManagerId: 'emp_demo_002',
+      joiningDate: '2022-01-05',
+      probationEndDate: '2022-07-05',
+      confirmationDate: '2022-07-05',
+      employmentStatus: 'active' as const,
+      employmentType: 'part_time' as const,
+    },
+    {
+      id: 'emp_demo_012',
+      employeeNumber: 'EMP-0112',
+      firstName: 'Anitha',
+      lastName: 'Rao',
+      email: 'anitha.rao@bezent-demo.example',
+      departmentId: 'dept_fin_01',
+      designationId: 'desig_fa_01',
+      locationId: 'loc_blr_01',
+      reportingManagerId: 'emp_demo_001',
+      joiningDate: '2021-09-01',
+      probationEndDate: '2022-03-01',
+      confirmationDate: '2022-03-01',
+      employmentStatus: 'active' as const,
+      employmentType: 'full_time' as const,
+    },
+    {
+      id: 'emp_demo_013',
+      employeeNumber: 'EMP-0113',
+      firstName: 'Sneha',
+      lastName: 'Deshmukh',
+      email: 'sneha.deshmukh@bezent-demo.example',
+      departmentId: 'dept_eng_01',
+      designationId: 'desig_se_01',
+      locationId: 'loc_blr_01',
+      reportingManagerId: 'emp_demo_002',
+      joiningDate: '2022-01-10',
+      probationEndDate: '2022-07-10',
+      confirmationDate: '2022-07-10',
+      employmentStatus: 'active' as const,
+      employmentType: 'intern' as const,
+    },
+    {
+      id: 'emp_demo_014',
+      employeeNumber: 'EMP-0114',
+      firstName: 'Deepak',
+      lastName: 'Sharma',
+      email: 'deepak.sharma@bezent-demo.example',
+      departmentId: 'dept_fin_01',
+      designationId: 'desig_fa_01',
+      locationId: 'loc_rem_01',
+      reportingManagerId: 'emp_demo_001',
+      joiningDate: '2021-12-01',
+      probationEndDate: '2022-06-01',
+      confirmationDate: '2022-06-01',
+      employmentStatus: 'active' as const,
+      employmentType: 'full_time' as const,
+    },
+    {
+      id: 'emp_demo_015',
+      employeeNumber: 'EMP-0115',
+      firstName: 'Neha',
+      lastName: 'Joshi',
+      email: 'neha.joshi@bezent-demo.example',
+      departmentId: 'dept_prod_01',
+      designationId: 'desig_pm_01',
+      locationId: 'loc_blr_01',
+      reportingManagerId: 'emp_demo_001',
+      joiningDate: '2022-01-02',
+      probationEndDate: '2022-07-02',
+      confirmationDate: '2022-07-02',
+      employmentStatus: 'active' as const,
+      employmentType: 'full_time' as const,
+    },
+    {
+      id: 'emp_demo_016',
+      employeeNumber: 'EMP-0116',
+      firstName: 'Pooja',
+      lastName: 'Natarajan',
+      email: 'pooja.natarajan@bezent-demo.example',
+      departmentId: 'dept_prod_01',
+      designationId: 'desig_pm_01',
+      locationId: 'loc_chn_01',
+      reportingManagerId: 'emp_demo_001',
+      joiningDate: '2022-01-03',
+      probationEndDate: '2022-07-03',
+      confirmationDate: '2022-07-03',
+      employmentStatus: 'active' as const,
+      employmentType: 'contract' as const,
+    },
+    {
+      id: 'emp_demo_017',
+      employeeNumber: 'EMP-0117',
+      firstName: 'Harish',
+      lastName: 'Sundaram',
+      email: 'harish.sundaram@bezent-demo.example',
+      departmentId: 'dept_hr_01',
+      designationId: 'desig_hr_01',
+      locationId: 'loc_chn_01',
+      reportingManagerId: 'emp_demo_001',
+      joiningDate: '2022-01-08',
+      probationEndDate: '2022-07-08',
+      confirmationDate: '2022-07-08',
+      employmentStatus: 'active' as const,
+      employmentType: 'intern' as const,
+    },
+    {
+      id: 'emp_demo_018',
+      employeeNumber: 'EMP-0118',
+      firstName: 'Siddharth',
+      lastName: 'Menon',
+      email: 'siddharth.menon@bezent-demo.example',
+      departmentId: 'dept_eng_01',
+      designationId: 'desig_se_01',
+      locationId: 'loc_rem_01',
+      reportingManagerId: 'emp_demo_002',
+      joiningDate: '2021-07-01',
+      probationEndDate: '2022-01-01',
+      confirmationDate: '2022-01-01',
+      employmentStatus: 'active' as const,
+      employmentType: 'contract' as const,
+    },
+    {
+      id: 'emp_demo_019',
+      employeeNumber: 'EMP-0119',
+      firstName: 'Shruti',
+      lastName: 'Balaji',
+      email: 'shruti.balaji@bezent-demo.example',
+      departmentId: 'dept_fin_01',
+      designationId: 'desig_fa_01',
+      locationId: 'loc_chn_01',
+      reportingManagerId: 'emp_demo_001',
+      joiningDate: '2021-11-20',
+      probationEndDate: '2022-05-20',
+      confirmationDate: '2022-05-20',
+      employmentStatus: 'active' as const,
+      employmentType: 'full_time' as const,
     },
   ];
 
@@ -604,7 +845,7 @@ export async function seedDatabase() {
         ...e,
         tenantId,
         companyId,
-        employmentType: 'full_time',
+        employmentType: ('employmentType' in e ? e.employmentType : undefined) ?? 'full_time',
       });
     }
   }
@@ -1764,7 +2005,277 @@ export async function seedDatabase() {
     });
   }
 
+  await seedWorkforceDistributionTrends(tenantId, companyId);
+
   console.log('[Seed] Database seeded successfully for BEZENT Demo Pvt Ltd.');
+}
+
+/**
+ * Seeds non-overlapping shift logs across Engineering, Chennai (HQ), Full-Time,
+ * and shared cohorts so Department, Location, and Employment Type curves naturally
+ * undulate and cross across trailing days, months, and years.
+ */
+export async function seedWorkforceDistributionTrends(
+  tenantId = 'tenant_demo_01',
+  companyId = 'comp_demo_01',
+): Promise<void> {
+  const db = getDb();
+  await db
+    .delete(employeeAttendance)
+    .where(
+      and(eq(employeeAttendance.companyId, companyId), like(employeeAttendance.id, 'att_tr_%')),
+    );
+
+  const now = new Date();
+  const curY = now.getFullYear();
+  const curM = now.getMonth();
+  const curD = now.getDate();
+
+  interface SeedAttRow {
+    id: string;
+    tenantId: string;
+    companyId: string;
+    employeeId: string;
+    date: string;
+    checkInTime: string;
+    checkOutTime: string;
+    status: 'present' | 'half_day';
+    workLocation: 'office' | 'remote';
+    workedMinutes: number;
+    lateMinutes: number;
+    isLate: boolean;
+    shiftScheduleRef: string;
+  }
+
+  const trendRows: SeedAttRow[] = [];
+  const usedEmpDates = new Set<string>();
+
+  const pushAttRow = (
+    employeeId: string,
+    date: string,
+    hours: number,
+    workLocation: 'office' | 'remote' = 'office',
+  ) => {
+    const dedupeKey = `${employeeId}:${date}`;
+    if (hours <= 0 || usedEmpDates.has(dedupeKey)) return;
+    usedEmpDates.add(dedupeKey);
+    const workedMinutes = Math.round(hours * 60);
+    const empShort = employeeId.replace('emp_demo_', '');
+    const endHour = 9 + Math.min(11, Math.round(hours));
+    trendRows.push({
+      id: `att_tr_${empShort}_${date.replace(/-/g, '')}`,
+      tenantId,
+      companyId,
+      employeeId,
+      date,
+      checkInTime: '09:00',
+      checkOutTime: `${String(endHour).padStart(2, '0')}:00`,
+      status: hours < 6 ? 'half_day' : 'present',
+      workLocation,
+      workedMinutes,
+      lateMinutes: 0,
+      isLate: false,
+      shiftScheduleRef: 'General Shift · 09:00–18:00',
+    });
+  };
+
+  // Day granularity: trailing 7 consecutive days (offset -6 .. 0)
+  // Dept (Engineering): [13, 5, 25, 42, 24, 10, 28]
+  // Loc (Chennai (HQ)): [28, 18, 5, 5, 16, 23, 18]
+  // Emp (Full-Time):    [19, 31, 14, 21, 35, 17, 9]
+  const dayAllocations: Array<{
+    offset: number;
+    entries: Array<[string, number, 'office' | 'remote']>;
+  }> = [
+    {
+      offset: -6,
+      entries: [
+        ['emp_demo_005', 7, 'remote'],
+        ['emp_demo_006', 6, 'office'],
+        ['emp_demo_001', 7, 'office'],
+        ['emp_demo_008', 6, 'office'],
+        ['emp_demo_019', 6, 'office'],
+        ['emp_demo_007', 9, 'office'],
+      ],
+    },
+    {
+      offset: -5,
+      entries: [
+        ['emp_demo_006', 5, 'office'],
+        ['emp_demo_001', 9, 'office'],
+        ['emp_demo_008', 9, 'office'],
+        ['emp_demo_004', 7, 'remote'],
+        ['emp_demo_012', 6, 'office'],
+      ],
+    },
+    {
+      offset: -4,
+      entries: [
+        ['emp_demo_005', 8, 'remote'],
+        ['emp_demo_006', 9, 'office'],
+        ['emp_demo_011', 8, 'remote'],
+        ['emp_demo_001', 5, 'office'],
+        ['emp_demo_012', 9, 'office'],
+      ],
+    },
+    {
+      offset: -3,
+      entries: [
+        ['emp_demo_005', 9, 'remote'],
+        ['emp_demo_006', 9, 'office'],
+        ['emp_demo_011', 8, 'remote'],
+        ['emp_demo_013', 8, 'office'],
+        ['emp_demo_018', 8, 'remote'],
+        ['emp_demo_008', 5, 'office'],
+        ['emp_demo_004', 8, 'remote'],
+        ['emp_demo_012', 8, 'office'],
+      ],
+    },
+    {
+      offset: -2,
+      entries: [
+        ['emp_demo_005', 8, 'remote'],
+        ['emp_demo_006', 8, 'office'],
+        ['emp_demo_013', 8, 'office'],
+        ['emp_demo_001', 8, 'office'],
+        ['emp_demo_008', 8, 'office'],
+        ['emp_demo_004', 7, 'remote'],
+        ['emp_demo_012', 6, 'office'],
+        ['emp_demo_014', 6, 'remote'],
+      ],
+    },
+    {
+      offset: -1,
+      entries: [
+        ['emp_demo_005', 5, 'remote'],
+        ['emp_demo_011', 5, 'remote'],
+        ['emp_demo_001', 9, 'office'],
+        ['emp_demo_008', 8, 'office'],
+        ['emp_demo_007', 6, 'office'],
+      ],
+    },
+    {
+      offset: 0,
+      entries: [
+        ['emp_demo_005', 7, 'remote'],
+        ['emp_demo_006', 7, 'office'],
+        ['emp_demo_011', 7, 'remote'],
+        ['emp_demo_013', 7, 'office'],
+        ['emp_demo_001', 9, 'office'],
+        ['emp_demo_007', 9, 'office'],
+      ],
+    },
+  ];
+
+  for (const bucket of dayAllocations) {
+    const dt = new Date(Date.UTC(curY, curM, curD + bucket.offset));
+    const isoDate = dt.toISOString().slice(0, 10);
+    for (const [empId, hrs, workLoc] of bucket.entries) {
+      pushAttRow(empId, isoDate, hrs, workLoc);
+    }
+  }
+
+  // Helper that distributes totalHours cleanly across multiple distinct dates inside a month/year pool
+  const distributePoolHours = (
+    pool: Array<{ empId: string; workLoc: 'office' | 'remote' }>,
+    dates: string[],
+    targetHours: number,
+  ) => {
+    let remaining = targetHours;
+    for (const date of dates) {
+      for (const member of pool) {
+        if (remaining <= 0) return;
+        const hrs = Math.min(8, remaining);
+        pushAttRow(member.empId, date, hrs, member.workLoc);
+        remaining -= hrs;
+      }
+    }
+  };
+
+  const eOnlyPool: Array<{ empId: string; workLoc: 'office' | 'remote' }> = [
+    { empId: 'emp_demo_005', workLoc: 'remote' },
+    { empId: 'emp_demo_006', workLoc: 'office' },
+    { empId: 'emp_demo_011', workLoc: 'remote' },
+    { empId: 'emp_demo_013', workLoc: 'office' },
+    { empId: 'emp_demo_018', workLoc: 'remote' },
+  ];
+  const cfPool: Array<{ empId: string; workLoc: 'office' | 'remote' }> = [
+    { empId: 'emp_demo_008', workLoc: 'office' },
+    { empId: 'emp_demo_019', workLoc: 'office' },
+    { empId: 'emp_demo_001', workLoc: 'office' },
+  ];
+  const cOnlyPool: Array<{ empId: string; workLoc: 'office' | 'remote' }> = [
+    { empId: 'emp_demo_007', workLoc: 'office' },
+    { empId: 'emp_demo_010', workLoc: 'office' },
+    { empId: 'emp_demo_016', workLoc: 'office' },
+    { empId: 'emp_demo_017', workLoc: 'office' },
+  ];
+  const fOnlyPool: Array<{ empId: string; workLoc: 'office' | 'remote' }> = [
+    { empId: 'emp_demo_012', workLoc: 'office' },
+    { empId: 'emp_demo_014', workLoc: 'remote' },
+    { empId: 'emp_demo_015', workLoc: 'office' },
+  ];
+
+  // Month granularity: offsets -6 .. -1 (trailing months before current month)
+  const monthSpecs = [
+    { offset: -6, eOnly: 52, cf: 78, cOnly: 37, fOnly: 0 },
+    { offset: -5, eOnly: 24, cf: 78, cOnly: 0, fOnly: 50 },
+    { offset: -4, eOnly: 108, cf: 28, cOnly: 0, fOnly: 34 },
+    { offset: -3, eOnly: 168, cf: 32, cOnly: 0, fOnly: 60 },
+    { offset: -2, eOnly: 64, cf: 86, cOnly: 48, fOnly: 0 },
+    { offset: -1, eOnly: 12, cf: 0, cOnly: 24, fOnly: 0 },
+  ];
+
+  for (const spec of monthSpecs) {
+    const dt = new Date(Date.UTC(curY, curM + spec.offset, 1));
+    const ym = `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, '0')}`;
+    const safeDates = Array.from(
+      { length: 7 },
+      (_, idx) => `${ym}-${String(22 + idx).padStart(2, '0')}`,
+    );
+    distributePoolHours(eOnlyPool, safeDates, spec.eOnly);
+    distributePoolHours(cfPool, safeDates, spec.cf);
+    distributePoolHours(cOnlyPool, safeDates, spec.cOnly);
+    distributePoolHours(fOnlyPool, safeDates, spec.fOnly);
+  }
+
+  // Year granularity: historical years -4 .. -1 (2022 .. 2025 relative to current year)
+  const cfHistoricPool = cfPool.slice(0, 2); // 008 & 019 joined in 2021
+  const yearSpecs = [
+    { offset: -4, eOnly: 260, cf: 310, cOnly: 110, fOnly: 0 },
+    { offset: -3, eOnly: 180, cf: 240, cOnly: 0, fOnly: 280 },
+    { offset: -2, eOnly: 540, cf: 210, cOnly: 0, fOnly: 150 },
+    { offset: -1, eOnly: 310, cf: 240, cOnly: 340, fOnly: 0 },
+  ];
+
+  for (const spec of yearSpecs) {
+    const year = curY + spec.offset;
+    const yearDates: string[] = [];
+    for (let month = 2; month <= 8; month++) {
+      for (let day = 2; day <= 14; day += 3) {
+        yearDates.push(`${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
+      }
+    }
+    distributePoolHours(eOnlyPool, yearDates, spec.eOnly);
+    distributePoolHours(cfHistoricPool, yearDates, spec.cf);
+    distributePoolHours(cOnlyPool, yearDates, spec.cOnly);
+    distributePoolHours(fOnlyPool, yearDates, spec.fOnly);
+  }
+
+  for (const row of trendRows) {
+    await db
+      .insert(employeeAttendance)
+      .values(row)
+      .onDuplicateKeyUpdate({
+        set: {
+          checkInTime: row.checkInTime,
+          checkOutTime: row.checkOutTime,
+          status: row.status,
+          workLocation: row.workLocation,
+          workedMinutes: row.workedMinutes,
+        },
+      });
+  }
 }
 
 if (process.argv[1]?.endsWith('seed.ts') || process.argv[1]?.endsWith('seed.js')) {

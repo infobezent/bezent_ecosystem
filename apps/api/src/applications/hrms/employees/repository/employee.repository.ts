@@ -5,6 +5,7 @@ import {
   departments,
   designations,
   locations,
+  employeeAttendance,
   type Employee,
   type NewEmployee,
 } from '../../../../db/schema.js';
@@ -16,6 +17,8 @@ import type {
   EmployeeDetails,
   ListEmployeesParams,
   PaginatedEmployeesResult,
+  DistributionTrendGranularity,
+  DistributionTrendsResult,
 } from '../types/employee.types.js';
 
 type Db = ReturnType<typeof getDb>;
@@ -485,5 +488,226 @@ export class EmployeeRepository {
       );
 
     return (result[0]?.affectedRows ?? 0) > 0;
+  }
+
+  /**
+   * Aggregates real logged attendance hours across Department, Location, and
+   * Employment Type buckets for the workforce distribution trend spline chart.
+   */
+  async getDistributionTrends(
+    tenantId: string,
+    companyId: string,
+    granularity: DistributionTrendGranularity,
+  ): Promise<DistributionTrendsResult> {
+    const db = getDb();
+    const { buckets, rangeStart, rangeEnd } = buildTrendBuckets(granularity, new Date());
+
+    const rows = await db
+      .select({
+        date: employeeAttendance.date,
+        workedMinutes: employeeAttendance.workedMinutes,
+        departmentName: departments.name,
+        locationName: locations.name,
+        employmentType: employees.employmentType,
+      })
+      .from(employeeAttendance)
+      .innerJoin(employees, eq(employeeAttendance.employeeId, employees.id))
+      .leftJoin(departments, eq(employees.departmentId, departments.id))
+      .leftJoin(locations, eq(employees.locationId, locations.id))
+      .where(
+        and(
+          eq(employeeAttendance.tenantId, tenantId),
+          eq(employeeAttendance.companyId, companyId),
+          gte(employeeAttendance.date, rangeStart),
+          lte(employeeAttendance.date, rangeEnd),
+        ),
+      );
+
+    const deptTotals = new Map<string, number>();
+    const locTotals = new Map<string, number>();
+    const empTotals = new Map<string, number>();
+
+    const normalized = rows.map((row) => {
+      const mins = Math.max(0, Number(row.workedMinutes ?? 0));
+      const dept = row.departmentName ?? 'General Operations';
+      const loc = row.locationName ?? 'Bangalore HQ';
+      const emp = formatEmploymentTypeLabel(row.employmentType);
+
+      deptTotals.set(dept, (deptTotals.get(dept) ?? 0) + mins);
+      locTotals.set(loc, (locTotals.get(loc) ?? 0) + mins);
+      empTotals.set(emp, (empTotals.get(emp) ?? 0) + mins);
+
+      const bucketKey =
+        granularity === 'day'
+          ? row.date
+          : granularity === 'month'
+            ? row.date.slice(0, 7)
+            : row.date.slice(0, 4);
+
+      return { bucketKey, mins, dept, loc, emp };
+    });
+
+    const primaryDeptLabel = pickTopBucketLabel(deptTotals, 'Engineering');
+    const primaryLocLabel = pickTopBucketLabel(locTotals, 'Chennai (HQ)');
+    const primaryEmpLabel = empTotals.has('Full-Time')
+      ? 'Full-Time'
+      : pickTopBucketLabel(empTotals, 'Full-Time');
+
+    const bucketMap = new Map(
+      buckets.map((b) => [
+        b.key,
+        {
+          deptPrimaryMins: 0,
+          deptOtherMins: 0,
+          locPrimaryMins: 0,
+          locOtherMins: 0,
+          empPrimaryMins: 0,
+          empOtherMins: 0,
+        },
+      ]),
+    );
+
+    for (const item of normalized) {
+      const acc = bucketMap.get(item.bucketKey);
+      if (!acc) continue;
+
+      if (item.dept === primaryDeptLabel) acc.deptPrimaryMins += item.mins;
+      else acc.deptOtherMins += item.mins;
+
+      if (item.loc === primaryLocLabel) acc.locPrimaryMins += item.mins;
+      else acc.locOtherMins += item.mins;
+
+      if (item.emp === primaryEmpLabel) acc.empPrimaryMins += item.mins;
+      else acc.empOtherMins += item.mins;
+    }
+
+    return {
+      granularity,
+      metricUnit: 'hrs',
+      primaryDeptLabel,
+      primaryLocLabel,
+      primaryEmpLabel,
+      points: buckets.map((b) => {
+        const acc = bucketMap.get(b.key)!;
+        return {
+          label: b.label,
+          fullLabel: b.fullLabel,
+          department: {
+            primary: Math.round(acc.deptPrimaryMins / 60),
+            other: Math.round(acc.deptOtherMins / 60),
+          },
+          location: {
+            primary: Math.round(acc.locPrimaryMins / 60),
+            other: Math.round(acc.locOtherMins / 60),
+          },
+          employment: {
+            primary: Math.round(acc.empPrimaryMins / 60),
+            other: Math.round(acc.empOtherMins / 60),
+          },
+        };
+      }),
+    };
+  }
+}
+
+interface TrendBucket {
+  key: string;
+  label: string;
+  fullLabel: string;
+}
+
+function buildTrendBuckets(
+  granularity: DistributionTrendGranularity,
+  now: Date,
+): { buckets: TrendBucket[]; rangeStart: string; rangeEnd: string } {
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  const d = now.getDate();
+
+  if (granularity === 'day') {
+    const buckets: TrendBucket[] = [];
+    for (let offset = -6; offset <= 0; offset++) {
+      const utc = new Date(Date.UTC(y, m, d + offset));
+      const key = utc.toISOString().slice(0, 10);
+      const label = utc.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        timeZone: 'UTC',
+      });
+      const fullLabel = utc.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        timeZone: 'UTC',
+      });
+      buckets.push({ key, label, fullLabel });
+    }
+    return {
+      buckets,
+      rangeStart: buckets[0]!.key,
+      rangeEnd: buckets[buckets.length - 1]!.key,
+    };
+  }
+
+  if (granularity === 'month') {
+    const buckets: TrendBucket[] = [];
+    for (let offset = -6; offset <= 0; offset++) {
+      const utc = new Date(Date.UTC(y, m + offset, 1));
+      const key = `${utc.getUTCFullYear()}-${String(utc.getUTCMonth() + 1).padStart(2, '0')}`;
+      const shortMonth = utc.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' });
+      const shortYear = String(utc.getUTCFullYear()).slice(-2);
+      const fullLabel = utc.toLocaleDateString('en-US', {
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'UTC',
+      });
+      buckets.push({ key, label: `${shortMonth} '${shortYear}`, fullLabel });
+    }
+    const lastBucketYearMonth = buckets[buckets.length - 1]!.key;
+    const [ly, lm] = lastBucketYearMonth.split('-').map(Number);
+    const lastDay = new Date(Date.UTC(ly!, lm!, 0)).getUTCDate();
+    return {
+      buckets,
+      rangeStart: `${buckets[0]!.key}-01`,
+      rangeEnd: `${lastBucketYearMonth}-${String(lastDay).padStart(2, '0')}`,
+    };
+  }
+
+  const buckets: TrendBucket[] = [];
+  for (let offset = -4; offset <= 0; offset++) {
+    const yr = String(y + offset);
+    buckets.push({ key: yr, label: yr, fullLabel: `Year ${yr}` });
+  }
+  return {
+    buckets,
+    rangeStart: `${buckets[0]!.key}-01-01`,
+    rangeEnd: `${buckets[buckets.length - 1]!.key}-12-31`,
+  };
+}
+
+function pickTopBucketLabel(totals: Map<string, number>, fallback: string): string {
+  let bestLabel = fallback;
+  let bestVal = -1;
+  for (const [label, mins] of totals.entries()) {
+    if (mins > bestVal) {
+      bestVal = mins;
+      bestLabel = label;
+    }
+  }
+  return bestLabel;
+}
+
+function formatEmploymentTypeLabel(raw: string): string {
+  switch (raw) {
+    case 'full_time':
+      return 'Full-Time';
+    case 'part_time':
+      return 'Part-Time';
+    case 'contract':
+      return 'Contract';
+    case 'intern':
+      return 'Intern';
+    default:
+      return raw;
   }
 }
