@@ -3,6 +3,7 @@ import {
   validateCreateEmployee,
   validateUpdateEmployee,
   validateListEmployeesParams,
+  validateDistributionTrendsQuery,
 } from '../validation/employee.schema.js';
 import type { EmploymentType, EmploymentStatus } from '../types/employee.types.js';
 import { ValidationError } from '../../../../app/errors/AppError.js';
@@ -205,6 +206,24 @@ describe('Employee Validation Schema', () => {
 
       expect(params.page).toBe(1);
       expect(params.pageSize).toBe(25);
+    });
+  });
+
+  describe('validateDistributionTrendsQuery', () => {
+    it('defaults to month when granularity is omitted', () => {
+      expect(validateDistributionTrendsQuery({})).toBe('month');
+    });
+
+    it('accepts day, month, and year granularities case-insensitively', () => {
+      expect(validateDistributionTrendsQuery({ granularity: 'DAY' })).toBe('day');
+      expect(validateDistributionTrendsQuery({ granularity: 'month' })).toBe('month');
+      expect(validateDistributionTrendsQuery({ granularity: 'Year' })).toBe('year');
+    });
+
+    it('throws ValidationError for unsupported granularity values', () => {
+      expect(() => validateDistributionTrendsQuery({ granularity: 'quarter' })).toThrow(
+        ValidationError,
+      );
     });
   });
 });

@@ -6,6 +6,7 @@ import type {
   EmploymentType,
   EmploymentStatus,
   SourceOfHire,
+  DistributionTrendGranularity,
 } from '../types/employee.types.js';
 
 export const VALID_SOURCES_OF_HIRE: SourceOfHire[] = [
@@ -497,4 +498,23 @@ export function validateListEmployeesParams(input: Record<string, unknown>): Lis
   }
 
   return params;
+}
+
+export const VALID_DISTRIBUTION_GRANULARITIES: DistributionTrendGranularity[] = [
+  'day',
+  'month',
+  'year',
+];
+
+export function validateDistributionTrendsQuery(
+  input: Record<string, unknown>,
+): DistributionTrendGranularity {
+  const raw = typeof input.granularity === 'string' ? input.granularity.trim().toLowerCase() : '';
+  if (!raw) return 'month';
+  if (VALID_DISTRIBUTION_GRANULARITIES.includes(raw as DistributionTrendGranularity)) {
+    return raw as DistributionTrendGranularity;
+  }
+  throw new ValidationError('Invalid granularity parameter', {
+    granularity: `Granularity must be one of: ${VALID_DISTRIBUTION_GRANULARITIES.join(', ')}`,
+  });
 }
