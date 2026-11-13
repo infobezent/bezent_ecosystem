@@ -1,8 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Page, PageHeader, ProgressBar } from '../../../../design-system/components';
+import { Page, PageHeader, ProgressBar, Modal, Button } from '../../../../design-system/components';
 import { BezentIcon, type BezentIconName } from '../../../../design-system/icons';
-import { EmployeesKpiCard } from '../components/EmployeesKpiCard';
+import {
+  EmployeesKpiCard,
+  OnboardingKpiCard,
+  type OnboardingStageItem,
+  TransfersKpiCard,
+  type TransferTypeItem,
+  PromotionsKpiCard,
+  type PromotionTypeItem,
+  type CareerProgressionItem,
+  OffboardingKpiCard,
+  type ExitProcessStageItem,
+  RecordsKpiCard,
+  WorkforceAnalyticsCard,
+  WorkforceCompositionCard,
+} from '../components';
 import raccoonEmployeesImg from '../../../../assets/raccoon_employees.png';
 import { fetchEmployees, type EmployeeRecord } from '../../employees/api/employeesApi';
 import { fetchNewHiresPaginated } from '../../onboarding/api/onboardingApi';
@@ -49,16 +63,6 @@ interface DeptCapacityItem {
   openPositions: number;
   gap: number;
   utilizationPct: number;
-}
-
-interface HiringRequirementItem {
-  id: string;
-  department: string;
-  role: string;
-  openings: number;
-  priority: 'critical' | 'high' | 'medium' | 'low';
-  expectedPeriod: string;
-  status: string;
 }
 
 interface LifecycleStageItem {
@@ -128,15 +132,6 @@ function formatTimelineDate(dateStr: string | null | undefined): string {
   }
 }
 
-const DONUT_COLORS_DEPT = ['#93c5fd', '#86efac', '#c4b5fd', '#f9a8d4', '#bae6fd'];
-const DONUT_COLOR_CLASSES_DEPT = ['blue', 'green', 'purple', 'pink', 'blue'];
-
-const DONUT_COLORS_LOC = ['#86efac', '#93c5fd', '#c4b5fd', '#f9a8d4', '#bbf7d0'];
-const DONUT_COLOR_CLASSES_LOC = ['green', 'blue', 'purple', 'pink', 'green'];
-
-const DONUT_COLORS_EMP = ['#c4b5fd', '#86efac', '#93c5fd', '#f9a8d4', '#e9d5ff'];
-const DONUT_COLOR_CLASSES_EMP = ['purple', 'green', 'blue', 'pink', 'purple'];
-
 /**
  * Workforce → Overview Page (Premium Executive Command Center)
  * Sophisticated pastel palette, distinctive data visualizations, clean card compositions.
@@ -162,6 +157,8 @@ export function WorkforceOverviewPage({
     activePct: 87.5,
   });
 
+  const [rawEmployees, setRawEmployees] = useState<EmployeeRecord[]>([]);
+
   const [employeeStatusBreakdown, setEmployeeStatusBreakdown] = useState<{
     total: number;
     active: number;
@@ -169,11 +166,65 @@ export function WorkforceOverviewPage({
     pending: number;
     separated: number;
   }>({
-    total: 1248,
-    active: 1186,
-    probation: 32,
-    pending: 12,
-    separated: 18,
+    total: 0,
+    active: 0,
+    probation: 0,
+    pending: 0,
+    separated: 0,
+  });
+
+  const [onboardingJourneyBreakdown, setOnboardingJourneyBreakdown] = useState<{
+    total: number;
+    stages: OnboardingStageItem[];
+  }>({
+    total: 0,
+    stages: [],
+  });
+
+  const [transfersBreakdown, setTransfersBreakdown] = useState<{
+    total: number;
+    pendingApproval: number;
+    transferTypes: TransferTypeItem[];
+  }>({
+    total: 0,
+    pendingApproval: 0,
+    transferTypes: [],
+  });
+
+  const [promotionsBreakdown, setPromotionsBreakdown] = useState<{
+    total: number;
+    pendingApproval: number;
+    progression: CareerProgressionItem | null;
+    promotionTypes: PromotionTypeItem[];
+  }>({
+    total: 0,
+    pendingApproval: 0,
+    progression: null,
+    promotionTypes: [],
+  });
+
+  const [offboardingBreakdown, setOffboardingBreakdown] = useState<{
+    total: number;
+    pendingClearance: number;
+    stages: ExitProcessStageItem[];
+  }>({
+    total: 0,
+    pendingClearance: 0,
+    stages: [],
+  });
+
+  const [recordsBreakdown, setRecordsBreakdown] = useState<{
+    total: number;
+    verifiedCount: number;
+    pendingCount: number;
+    expiringCount: number;
+    expiredCount: number;
+  }>({
+    total: 0,
+    verifiedCount: 0,
+    pendingCount: 0,
+    expiringCount: 0,
+    expiredCount: 0,
   });
 
   // Department & Location Analytics States
@@ -222,10 +273,6 @@ export function WorkforceOverviewPage({
   const [capacityUtilizationPct, setCapacityUtilizationPct] = useState(73);
 
   const [deptCapacities, setDeptCapacities] = useState<DeptCapacityItem[]>([]);
-  const [hiringRequirements, setHiringRequirements] = useState<HiringRequirementItem[]>([]);
-
-  const [highestGapDept, setHighestGapDept] = useState('General Operations (3 open)');
-  const [highestCapDept, setHighestCapDept] = useState('General Operations (15 approved)');
 
   // ── Employee Lifecycle States ──
   const [lifecycleStages, setLifecycleStages] = useState<LifecycleStageItem[]>([
@@ -289,20 +336,50 @@ export function WorkforceOverviewPage({
   // ── Recent Workforce Activity States ──
   const [activities, setActivities] = useState<WorkforceActivityItem[]>([]);
 
+  // ── Right-Side Details Drawer State ──
+  type DrawerType = 'planning' | 'documents' | 'probation' | 'attendance' | 'hiring' | 'exits';
+
+  const [drawerState, setDrawerState] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    type: DrawerType;
+  }>({
+    isOpen: false,
+    title: '',
+    description: '',
+    type: 'planning',
+  });
+
+  const openDrawer = (type: DrawerType, title: string, description: string) => {
+    setDrawerState({
+      isOpen: true,
+      title,
+      description,
+      type,
+    });
+  };
+
   useEffect(() => {
     let active = true;
 
     Promise.allSettled([
       fetchEmployees({ pageSize: 1 }),
       fetchEmployees({ employmentStatus: 'active', pageSize: 1 }),
-      fetchNewHiresPaginated({ pageSize: 10 }),
-      fetchEmployeeActions({ category: 'separation', pageSize: 10 }),
+      fetchNewHiresPaginated({ pageSize: 1 }),
       fetchEmployees({ pageSize: 100 }),
       fetchEmployeeActions({ status: 'pending', pageSize: 10 }),
       leaveOperationsApi.requests({ status: 'pending', pageSize: 10 }),
       fetchRegularizationRequests({ status: 'pending' }),
-      fetchDocuments({ view: 'pending_review', pageSize: 10 }),
+      fetchDocuments({ view: 'pending_review', pageSize: 1 }),
       fetchEmployeeActions({ pageSize: 20 }),
+      // Category-filtered, backend-validated max page size (100) — large enough to
+      // return every record at current data volumes. `pagination.totalItems` and
+      // `statusCounts` below are exact aggregates regardless of this cap; only the
+      // per-actionType breakdown computed from `.data` is bounded by it.
+      fetchEmployeeActions({ category: 'transfer', pageSize: 100 }),
+      fetchEmployeeActions({ category: 'job_changes', pageSize: 100 }),
+      fetchEmployeeActions({ category: 'separation', pageSize: 100 }),
     ]).then((results) => {
       if (!active) return;
 
@@ -310,13 +387,15 @@ export function WorkforceOverviewPage({
         totalRes,
         activeRes,
         newHiresRes,
-        exitsRes,
         listRes,
         pendingActionsRes,
         leaveRes,
         attendanceRes,
         docsRes,
         recentActionsRes,
+        transferActionsRes,
+        promotionActionsRes,
+        separationActionsRes,
       ] = results;
 
       const totalEmployees =
@@ -330,14 +409,15 @@ export function WorkforceOverviewPage({
           : 2;
 
       const exits =
-        exitsRes.status === 'fulfilled'
-          ? (exitsRes.value.statusCounts?.applied ??
-            exitsRes.value.statusCounts?.pending ??
-            exitsRes.value.pagination.totalItems ??
+        separationActionsRes.status === 'fulfilled'
+          ? (separationActionsRes.value.statusCounts?.applied ??
+            separationActionsRes.value.statusCounts?.pending ??
+            separationActionsRes.value.pagination.totalItems ??
             0)
           : 0;
 
       const fullList: EmployeeRecord[] = listRes.status === 'fulfilled' ? listRes.value.data : [];
+      setRawEmployees(fullList);
       const probationEmployees = fullList.filter((e) => e.employmentStatus === 'probation').length;
       const confirmedEmployees =
         fullList.filter((e) => e.employmentStatus === 'active' || e.confirmationDate !== null)
@@ -386,15 +466,185 @@ export function WorkforceOverviewPage({
           e.employmentStatus === 'suspended',
       ).length;
 
-      if (fullList.length > 0) {
+      if (listRes.status === 'fulfilled' || totalRes.status === 'fulfilled') {
+        const totalCount =
+          totalRes.status === 'fulfilled' ? totalRes.value.pagination.totalItems : fullList.length;
         setEmployeeStatusBreakdown({
-          total: totalEmployees || fullList.length,
+          total: totalCount,
           active: activeEmployeesFromList,
           probation: probationEmployees,
           pending: pendingEmployees,
           separated: separatedEmployees,
         });
       }
+
+      // ── Onboarding Journey Breakdown: real per-stage aggregates from the backend ──
+      // `counts` reflects the true totals across all onboarding cases, not just the
+      // fetched page, so every stage — including a genuine 0 — is accurate.
+      if (newHiresRes.status === 'fulfilled') {
+        const stageCounts = newHiresRes.value.counts;
+        setOnboardingJourneyBreakdown({
+          total: stageCounts?.all ?? newHiresRes.value.pagination.totalItems,
+          stages: [
+            {
+              id: 'documents',
+              name: 'Documents',
+              status: 'completed',
+              count: stageCounts?.documents ?? 0,
+            },
+            {
+              id: 'verification',
+              name: 'Verification',
+              status: 'completed',
+              count: stageCounts?.preboarding ?? 0,
+            },
+            {
+              id: 'setup',
+              name: 'Account Setup',
+              status: 'in_progress',
+              count: stageCounts?.induction ?? 0,
+            },
+            {
+              id: 'orientation',
+              name: 'Orientation',
+              status: 'pending',
+              count: stageCounts?.completed ?? 0,
+            },
+          ],
+        });
+      }
+
+      // ── Transfers Breakdown: real aggregates for the 'transfer' category ──
+      // `pagination.totalItems` and `statusCounts` are exact aggregates, independent
+      // of the pageSize cap used to fetch the detail list above.
+      if (transferActionsRes.status === 'fulfilled') {
+        const { pagination, statusCounts } = transferActionsRes.value;
+        setTransfersBreakdown({
+          total: pagination.totalItems,
+          pendingApproval: statusCounts?.pending ?? 0,
+          // The backend's 'transfer' category tracks only location transfers — there
+          // is no branch/department/designation transfer actionType to break down by.
+          transferTypes: [],
+        });
+      }
+
+      // ── Promotions Breakdown: real aggregates for the 'job_changes' category ──
+      if (promotionActionsRes.status === 'fulfilled') {
+        const { data: jobChangeActions, pagination, statusCounts } = promotionActionsRes.value;
+
+        const desigChange = jobChangeActions.filter(
+          (a) => a.actionType === 'designation_change',
+        ).length;
+        const deptPromo = jobChangeActions.filter(
+          (a) => a.actionType === 'department_change',
+        ).length;
+        // BEZENT does not track salary grade or job level as changeable employee
+        // fields — there is no backend data source for these two categories, so they
+        // honestly report 0 rather than guessing from free-text reason strings.
+        const gradeChange = 0;
+        const levelChange = 0;
+
+        let roleProgression: CareerProgressionItem | null = null;
+        const withRoleChange = jobChangeActions.find(
+          (a) =>
+            a.actionType === 'designation_change' &&
+            a.changes?.some((c) => c.field === 'designationId'),
+        );
+        if (withRoleChange) {
+          const change = withRoleChange.changes.find((c) => c.field === 'designationId');
+          if (change?.fromLabel && change?.toLabel) {
+            roleProgression = {
+              fromRole: change.fromLabel,
+              toRole: change.toLabel,
+            };
+          }
+        }
+
+        setPromotionsBreakdown({
+          total: pagination.totalItems,
+          pendingApproval: statusCounts?.pending ?? 0,
+          progression: roleProgression,
+          promotionTypes: [
+            {
+              id: 'designation',
+              label: 'Designation Change',
+              count: desigChange,
+              colorClass: 'designation',
+            },
+            {
+              id: 'grade',
+              label: 'Salary Grade Change',
+              count: gradeChange,
+              colorClass: 'grade',
+            },
+            {
+              id: 'level',
+              label: 'Job Level Change',
+              count: levelChange,
+              colorClass: 'level',
+            },
+            {
+              id: 'department',
+              label: 'Department-based Promotion',
+              count: deptPromo,
+              colorClass: 'department',
+            },
+          ],
+        });
+      }
+
+      // ── Offboarding Breakdown: real aggregates for the 'separation' category ──
+      if (separationActionsRes.status === 'fulfilled') {
+        const { pagination, statusCounts } = separationActionsRes.value;
+        const noticePeriodCount = statusCounts?.pending ?? 0;
+        const settledCount = statusCounts?.applied ?? 0;
+
+        setOffboardingBreakdown({
+          total: pagination.totalItems,
+          pendingClearance: noticePeriodCount,
+          stages: [
+            {
+              id: 'notice_period',
+              name: 'Notice Period',
+              status: 'active',
+              count: noticePeriodCount,
+            },
+            // Handover and clearance are not tracked as distinct sub-stages by the
+            // backend yet — honestly reported as 0 rather than fabricated.
+            { id: 'handover', name: 'Handover', status: 'completed', count: 0 },
+            { id: 'clearance', name: 'Clearance', status: 'in_progress', count: 0 },
+            {
+              id: 'final_settlement',
+              name: 'Final Settlement',
+              status: 'pending',
+              count: settledCount,
+            },
+          ],
+        });
+      }
+
+      // ── Records Breakdown: real document & profile-completeness aggregates ──
+      const docsData = docsRes.status === 'fulfilled' ? docsRes.value : null;
+      const expiredDocsCount = docsData?.counts?.expired ?? 0;
+      const pendingDocsReview = docsData?.counts?.pending_review ?? 0;
+      const expiringDocsCount = docsData?.counts?.expiring ?? 0;
+      const incompleteProfilesCount = fullList.filter(
+        (e) => !e.departmentId || !e.designationId || !e.locationId,
+      ).length;
+
+      const recExpired = expiredDocsCount;
+      const recPending = pendingDocsReview + incompleteProfilesCount;
+      const recExpiring = expiringDocsCount;
+      const recTotal = fullList.length;
+      const recVerified = Math.max(0, recTotal - (recPending + recExpiring + recExpired));
+
+      setRecordsBreakdown({
+        total: recTotal,
+        verifiedCount: recVerified,
+        pendingCount: recPending,
+        expiringCount: recExpiring,
+        expiredCount: recExpired,
+      });
 
       const totalBase = fullList.length || totalEmployees || 1;
       setTotalWorkforceCount(totalBase);
@@ -447,10 +697,13 @@ export function WorkforceOverviewPage({
       }
       setDepartmentDisplay(deptResult);
 
-      // ── 02. Location Distribution ──
+      // ── Location Distribution ──
       const locCounts = new Map<string, number>();
       for (const emp of fullList) {
-        const lName = emp.locationName || 'Bangalore HQ';
+        let lName = emp.locationName || 'Bangalore HQ';
+        if (lName.toLowerCase() === 'bengaluru') {
+          lName = 'Bangalore HQ';
+        }
         locCounts.set(lName, (locCounts.get(lName) || 0) + 1);
       }
       setTotalLocsCount(locCounts.size);
@@ -684,50 +937,8 @@ export function WorkforceOverviewPage({
           };
         },
       );
-      deptCapItems.sort((a, b) => b.gap - a.gap);
+      deptCapItems.sort((a, b) => b.gap - a.gap || b.current - a.current);
       setDeptCapacities(deptCapItems);
-
-      if (deptCapItems.length > 0) {
-        const firstCap = deptCapItems[0];
-        if (firstCap) {
-          setHighestGapDept(`${firstCap.name} (${firstCap.openPositions} open)`);
-        }
-        const maxCap = [...deptCapItems].sort((a, b) => b.approved - a.approved)[0];
-        if (maxCap) {
-          setHighestCapDept(`${maxCap.name} (${maxCap.approved} approved)`);
-        }
-      }
-
-      // Hiring Requirements Priority Radar
-      setHiringRequirements([
-        {
-          id: 'req-eng-sr',
-          department: 'Engineering',
-          role: 'Senior Full Stack Engineer',
-          openings: 2,
-          priority: 'critical',
-          expectedPeriod: 'in 30 days',
-          status: 'Open',
-        },
-        {
-          id: 'req-des-ui',
-          department: 'Design',
-          role: 'UI/UX Product Designer',
-          openings: 1,
-          priority: 'high',
-          expectedPeriod: 'in 45 days',
-          status: 'Open',
-        },
-        {
-          id: 'req-ops-coord',
-          department: 'General Operations',
-          role: 'Operations Coordinator',
-          openings: 1,
-          priority: 'medium',
-          expectedPeriod: 'in 60 days',
-          status: 'Planned',
-        },
-      ]);
 
       // ── 05. Employee Lifecycle (5 Stages) ──
       const onboardingCount = newJoiners;
@@ -820,8 +1031,8 @@ export function WorkforceOverviewPage({
       const allActionCandidates: HrActionItem[] = [
         {
           id: 'pending-approvals',
-          name: 'Pending Employee Approvals',
-          description: 'Employee profile transitions and administrative requests pending signoff',
+          name: 'Employee Approvals',
+          description: 'Urgent · Profile sign-offs',
           count: pendingApprovals,
           priority: 'Urgent',
           priorityClass: 'urgent',
@@ -831,8 +1042,8 @@ export function WorkforceOverviewPage({
         },
         {
           id: 'pending-leave',
-          name: 'Pending Leave Requests',
-          description: 'Employee time-off and PTO requests waiting for HR/manager approval',
+          name: 'Leave Requests',
+          description: 'High · Time-off reviews',
           count: pendingLeave,
           priority: 'High',
           priorityClass: 'high',
@@ -842,8 +1053,8 @@ export function WorkforceOverviewPage({
         },
         {
           id: 'attendance-corrections',
-          name: 'Pending Attendance Corrections',
-          description: 'Missed punch corrections and regularization requests requiring review',
+          name: 'Attendance Fixes',
+          description: 'Medium · Missed punches',
           count: pendingAttendance,
           priority: 'Medium',
           priorityClass: 'medium',
@@ -853,8 +1064,8 @@ export function WorkforceOverviewPage({
         },
         {
           id: 'document-verification',
-          name: 'Pending Document Verification',
-          description: 'New hire identity and academic credentials submitted for audit',
+          name: 'Doc Verification',
+          description: 'Medium · New-hire files',
           count: pendingDocs,
           priority: 'Medium',
           priorityClass: 'medium',
@@ -864,8 +1075,8 @@ export function WorkforceOverviewPage({
         },
         {
           id: 'probation-reviews',
-          name: 'Upcoming Probation Reviews',
-          description: 'Probationary workforce due for confirmation assessment',
+          name: 'Probation Reviews',
+          description: 'High · Confirmation due',
           count: probationEmployees,
           priority: 'High',
           priorityClass: 'high',
@@ -875,8 +1086,8 @@ export function WorkforceOverviewPage({
         },
         {
           id: 'expiring-contracts',
-          name: 'Expiring Employee Contracts',
-          description: 'Fixed-term contractor agreements nearing term completion',
+          name: 'Expiring Contracts',
+          description: 'Attention · Renewals soon',
           count: contractEmployees,
           priority: 'Attention',
           priorityClass: 'attention',
@@ -895,7 +1106,7 @@ export function WorkforceOverviewPage({
 
       if (recentActionsRes?.status === 'fulfilled' && recentActionsRes.value.data) {
         for (const action of recentActionsRes.value.data) {
-          let description = `'s profile was updated.`;
+          let description = 'profile updated';
           let iconName: WorkforceActivityItem['iconName'] = 'employees';
           let iconClass: WorkforceActivityItem['iconClass'] = 'blue';
 
@@ -904,23 +1115,23 @@ export function WorkforceOverviewPage({
           const locChange = action.changes?.find((c) => c.field === 'locationId');
 
           if (action.actionType === 'department_change' && deptChange) {
-            description = `'s department was changed to ${deptChange.toLabel || deptChange.to}.`;
+            description = `moved to ${deptChange.toLabel || deptChange.to}`;
             iconName = 'organization';
             iconClass = 'purple';
           } else if (action.actionType === 'designation_change' && desigChange) {
-            description = `'s designation was updated to ${desigChange.toLabel || desigChange.to}.`;
+            description = `role updated to ${desigChange.toLabel || desigChange.to}`;
             iconName = 'schedule';
             iconClass = 'amber';
           } else if (action.actionType === 'location_transfer' && locChange) {
-            description = `'s work location was changed to ${locChange.toLabel || locChange.to}.`;
+            description = `relocated to ${locChange.toLabel || locChange.to}`;
             iconName = 'organization';
             iconClass = 'blue';
           } else if (action.actionType === 'confirm_employee') {
-            description = `completed probation and was confirmed permanent.`;
+            description = 'confirmed permanent';
             iconName = 'approvals';
-            iconClass = 'green';
+            iconClass = 'teal';
           } else if (action.actionType === 'resignation' || action.actionType === 'termination') {
-            description = `completed departure separation.`;
+            description = 'exited';
             iconName = 'organization';
             iconClass = 'rose';
           }
@@ -933,7 +1144,7 @@ export function WorkforceOverviewPage({
             department: deptChange?.toLabel || 'General Operations',
             dateTime: actionDate,
             formattedTime: formatTimelineDate(actionDate),
-            updatedBy: action.requestedBy || 'HR Administration',
+            updatedBy: '',
             iconName,
             iconClass,
           });
@@ -941,51 +1152,22 @@ export function WorkforceOverviewPage({
       }
 
       for (const emp of fullList) {
+        if (!emp.joiningDate) continue;
         const dName = emp.departmentName || 'General Operations';
 
-        if (emp.joiningDate) {
-          activityList.push({
-            id: `act-join-${emp.id}`,
-            employeeName: emp.fullName,
-            activityDescription: `joined the ${dName} department.`,
-            department: dName,
-            dateTime: emp.joiningDate,
-            formattedTime: formatTimelineDate(emp.joiningDate),
-            updatedBy: emp.reportingManagerName
-              ? `${emp.reportingManagerName} (Manager)`
-              : 'Talent Acquisition',
-            iconName: 'employees',
-            iconClass: 'blue',
-          });
-        }
-
-        if (emp.designationName) {
-          activityList.push({
-            id: `act-desig-${emp.id}`,
-            employeeName: emp.fullName,
-            activityDescription: `'s designation was updated to ${emp.designationName}.`,
-            department: dName,
-            dateTime: emp.joiningDate,
-            formattedTime: formatTimelineDate(emp.joiningDate),
-            updatedBy: 'HR Administration',
-            iconName: 'schedule',
-            iconClass: 'amber',
-          });
-        }
-
-        if (emp.locationName) {
-          activityList.push({
-            id: `act-loc-${emp.id}`,
-            employeeName: emp.fullName,
-            activityDescription: `'s work location was set to ${emp.locationName}.`,
-            department: dName,
-            dateTime: emp.joiningDate,
-            formattedTime: formatTimelineDate(emp.joiningDate),
-            updatedBy: 'Operations & Facilities',
-            iconName: 'organization',
-            iconClass: 'blue',
-          });
-        }
+        activityList.push({
+          id: `act-join-${emp.id}`,
+          employeeName: emp.fullName,
+          activityDescription: emp.designationName
+            ? `joined · ${emp.designationName}`
+            : 'joined the team',
+          department: dName,
+          dateTime: emp.joiningDate,
+          formattedTime: formatTimelineDate(emp.joiningDate),
+          updatedBy: '',
+          iconName: 'employees',
+          iconClass: 'blue',
+        });
       }
 
       activityList.sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime());
@@ -998,16 +1180,6 @@ export function WorkforceOverviewPage({
       active = false;
     };
   }, []);
-
-  const DONUT_CIRCUMFERENCE = 289;
-  let accumulatedDeptPct = 0;
-  let accumulatedLocPct = 0;
-  let accumulatedEmpTypePct = 0;
-
-  const fullTimeItem = empTypeItems.find((i) => i.name === 'Full-Time');
-  const contractItem = empTypeItems.find((i) => i.name === 'Contract');
-  const internItem = empTypeItems.find((i) => i.name === 'Intern');
-  const activeTypesCount = empTypeItems.filter((i) => i.count > 0).length || 1;
 
   return (
     <Page maxWidth="full" gap="md">
@@ -1069,7 +1241,7 @@ export function WorkforceOverviewPage({
           }
         />
 
-        {/* ── Tier 1: 6 Executive KPI Cards ── */}
+        {/* ── Tier 1: 6 Executive KPI Cards (Card 1: Employees Ring; Cards 2-6: Compact Empty Cards) ── */}
         <div className="bezent-exec-kpi-grid">
           {/* Card 1: Interactive Employees Workforce Ring KPI Card */}
           <EmployeesKpiCard
@@ -1089,721 +1261,350 @@ export function WorkforceOverviewPage({
             }}
           />
 
-          {/* Card 2: Active Employees */}
-          <div
-            className="bezent-exec-kpi-card"
-            onClick={() => navigate('/hrms/workforce/employees')}
-            title="Current active workforce"
-          >
-            <div className="bezent-exec-kpi-card__top">
-              <div className="bezent-exec-kpi-card__icon-badge bezent-exec-kpi-card__icon-badge--green">
-                <BezentIcon name="schedule" size={17} />
-              </div>
-            </div>
-            <div className="bezent-exec-kpi-card__main">
-              <div className="bezent-exec-kpi-card__value">
-                {loading ? '—' : kpiData.activeEmployees.toLocaleString()}
-              </div>
-              <div className="bezent-exec-kpi-card__title">Active Employees</div>
-            </div>
-            <div className="bezent-exec-kpi-card__footer">
-              <span className="bezent-exec-kpi-card__trend bezent-exec-kpi-card__trend--neutral">
-                {kpiData.activePct}% of total
-              </span>
-            </div>
-          </div>
-
-          {/* Card 3: New Joiners */}
-          <div
-            className="bezent-exec-kpi-card"
+          {/* Card 2: Interactive Onboarding KPI Card (Mini Activity Bars) */}
+          <OnboardingKpiCard
+            total={onboardingJourneyBreakdown.total}
+            stages={onboardingJourneyBreakdown.stages}
+            loading={loading}
             onClick={() => navigate('/hrms/workforce/onboarding')}
-            title="Employee additions in period"
-          >
-            <div className="bezent-exec-kpi-card__top">
-              <div className="bezent-exec-kpi-card__icon-badge bezent-exec-kpi-card__icon-badge--amber">
-                <BezentIcon name="onboarding" size={17} />
-              </div>
-            </div>
-            <div className="bezent-exec-kpi-card__main">
-              <div className="bezent-exec-kpi-card__value">
-                {loading ? '—' : kpiData.newJoiners.toLocaleString()}
-              </div>
-              <div className="bezent-exec-kpi-card__title">New Joiners</div>
-            </div>
-            <div className="bezent-exec-kpi-card__footer">
-              <span className="bezent-exec-kpi-card__trend bezent-exec-kpi-card__trend--up">
-                ↑ +12% vs last month
-              </span>
-            </div>
-          </div>
+          />
 
-          {/* Card 4: Employee Exits */}
-          <div
-            className="bezent-exec-kpi-card"
-            onClick={() => navigate('/hrms/workforce/offboarding')}
-            title="Employee departures in period"
-          >
-            <div className="bezent-exec-kpi-card__top">
-              <div className="bezent-exec-kpi-card__icon-badge bezent-exec-kpi-card__icon-badge--red">
-                <BezentIcon name="checkOut" size={17} />
-              </div>
-            </div>
-            <div className="bezent-exec-kpi-card__main">
-              <div className="bezent-exec-kpi-card__value">
-                {loading ? '—' : kpiData.exits.toLocaleString()}
-              </div>
-              <div className="bezent-exec-kpi-card__title">Employee Exits</div>
-            </div>
-            <div className="bezent-exec-kpi-card__footer">
-              <span className="bezent-exec-kpi-card__trend bezent-exec-kpi-card__trend--neutral">
-                0 exits in period
-              </span>
-            </div>
-          </div>
-
-          {/* Card 5: Retention Rate */}
-          <div
-            className="bezent-exec-kpi-card"
-            onClick={() => navigate('/hrms/workforce/employees')}
-            title="Workforce stability & retention"
-          >
-            <div className="bezent-exec-kpi-card__top">
-              <div className="bezent-exec-kpi-card__icon-badge bezent-exec-kpi-card__icon-badge--purple">
-                <BezentIcon name="employees" size={17} />
-              </div>
-            </div>
-            <div className="bezent-exec-kpi-card__main">
-              <div className="bezent-exec-kpi-card__value">
-                {loading ? '—' : `${kpiData.retentionRate}%`}
-              </div>
-              <div className="bezent-exec-kpi-card__title">Retention Rate</div>
-            </div>
-            <div className="bezent-exec-kpi-card__footer">
-              <span className="bezent-exec-kpi-card__trend bezent-exec-kpi-card__trend--up">
-                ↑ +0.8%
-              </span>
-            </div>
-          </div>
-
-          {/* Card 6: Workforce Growth */}
-          <div
-            className="bezent-exec-kpi-card"
-            onClick={() => navigate('/hrms/workforce/employees')}
-            title="Net workforce expansion"
-          >
-            <div className="bezent-exec-kpi-card__top">
-              <div className="bezent-exec-kpi-card__icon-badge bezent-exec-kpi-card__icon-badge--green">
-                <BezentIcon name="milestones" size={17} />
-              </div>
-            </div>
-            <div className="bezent-exec-kpi-card__main">
-              <div className="bezent-exec-kpi-card__value">
-                {loading ? '—' : `${kpiData.growthPct >= 0 ? '+' : ''}${kpiData.growthPct}%`}
-              </div>
-              <div className="bezent-exec-kpi-card__title">Workforce Growth</div>
-            </div>
-            <div className="bezent-exec-kpi-card__footer">
-              <span className="bezent-exec-kpi-card__trend bezent-exec-kpi-card__trend--up">
-                ↑ +0.8%
-              </span>
-            </div>
-          </div>
+          {/* Card 3: Interactive Transfers KPI Card (Connected Circular Visual) */}
+          <TransfersKpiCard
+            total={transfersBreakdown.total}
+            pendingApproval={transfersBreakdown.pendingApproval}
+            transferTypes={transfersBreakdown.transferTypes}
+            loading={loading}
+            onClick={() => navigate('/hrms/workforce/employee-administration')}
+          />
+          {/* Card 4: Interactive Promotions KPI Card (Ascending Career Steps) */}
+          <PromotionsKpiCard
+            total={promotionsBreakdown.total}
+            pendingApproval={promotionsBreakdown.pendingApproval}
+            progression={promotionsBreakdown.progression}
+            promotionTypes={promotionsBreakdown.promotionTypes}
+            loading={loading}
+            onClick={() => navigate('/hrms/workforce/career')}
+          />
+          {/* Card 5: Interactive Offboarding KPI Card (Exit Pipeline Track) */}
+          <OffboardingKpiCard
+            total={offboardingBreakdown.total}
+            pendingClearance={offboardingBreakdown.pendingClearance}
+            stages={offboardingBreakdown.stages}
+            loading={loading}
+            onClick={() => navigate('/hrms/workforce/employee-administration')}
+          />
+          {/* Card 6: Interactive Records KPI Card (File Folders Stack) */}
+          <RecordsKpiCard
+            total={recordsBreakdown.total}
+            verifiedCount={recordsBreakdown.verifiedCount}
+            pendingCount={recordsBreakdown.pendingCount}
+            expiringCount={recordsBreakdown.expiringCount}
+            expiredCount={recordsBreakdown.expiredCount}
+            loading={loading}
+            onClick={() => navigate('/hrms/workforce/records')}
+          />
         </div>
 
-        {/* ── Tier 2: 01. Department Distribution & 02. Location Distribution (2 Separate Cards) ── */}
-        <div className="bezent-wf-tier2-grid">
-          {/* Card 1: 01. Department Distribution */}
-          <div className="bezent-wf-feature-card">
-            <div className="bezent-wf-feature-card__header">
-              <div className="bezent-wf-feature-card__icon bezent-wf-feature-card__icon--purple">
-                <BezentIcon name="organization" size={18} />
-              </div>
-              <div>
-                <h3 className="bezent-wf-feature-card__title">01. Department Distribution</h3>
-                <p className="bezent-wf-feature-card__subtitle">
-                  Analyze employee distribution across different departments within the
-                  organization.
-                </p>
-              </div>
-            </div>
-
-            <div className="bezent-wf-donut-legend-row">
-              <div className="bezent-wf-donut-wrap">
-                <svg viewBox="0 0 120 120" width="132" height="132">
-                  <circle cx="60" cy="60" r="46" fill="none" stroke="#f1f5f9" strokeWidth="15" />
-                  {departmentDisplay.map((dept, idx) => {
-                    const dash = (dept.percentage / 100) * DONUT_CIRCUMFERENCE;
-                    const offset = -((accumulatedDeptPct / 100) * DONUT_CIRCUMFERENCE);
-                    accumulatedDeptPct += dept.percentage;
-                    const color =
-                      dept.rank === 5
-                        ? DONUT_COLORS_DEPT[4]
-                        : DONUT_COLORS_DEPT[idx % DONUT_COLORS_DEPT.length];
-                    return (
-                      <circle
-                        key={dept.name}
-                        cx="60"
-                        cy="60"
-                        r="46"
-                        fill="none"
-                        stroke={color}
-                        strokeWidth="15"
-                        strokeDasharray={`${dash} ${DONUT_CIRCUMFERENCE}`}
-                        strokeDashoffset={offset}
-                        transform="rotate(-90 60 60)"
-                      />
-                    );
-                  })}
-                </svg>
-                <div className="bezent-wf-donut-center">
-                  <span className="bezent-wf-donut-center__count">{totalWorkforceCount}</span>
-                  <span className="bezent-wf-donut-center__label">TOTAL</span>
-                </div>
-              </div>
-
-              {/* Clean Single-Row Legend List */}
-              <div className="bezent-wf-donut-legend-list">
-                {departmentDisplay.map((dept, idx) => {
-                  const colorClass =
-                    dept.rank === 5
-                      ? DONUT_COLOR_CLASSES_DEPT[4]
-                      : DONUT_COLOR_CLASSES_DEPT[idx % DONUT_COLOR_CLASSES_DEPT.length];
-                  return (
-                    <div key={dept.name} className="bezent-wf-legend-item">
-                      <span className="bezent-wf-legend-left">
-                        <span className={`bezent-wf-legend-dot bezent-wf-bg-${colorClass}`} />
-                        <span>{dept.name}</span>
-                      </span>
-                      <span className="bezent-wf-legend-val">
-                        {dept.count} ({dept.percentage}%)
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* 4 Summary Metrics Chips */}
-            <div className="bezent-wf-summary-chips-row">
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label" title="Largest Department">
-                  Largest<span className="bezent-visually-hidden"> Department</span>
-                </span>
-                <span className="bezent-wf-summary-chip__val">
-                  {largestDeptInfo ? `${largestDeptInfo.name} (${largestDeptInfo.count})` : '—'}
-                </span>
-              </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Smallest</span>
-                <span className="bezent-wf-summary-chip__val">
-                  {smallestDeptInfo ? `${smallestDeptInfo.name} (${smallestDeptInfo.count})` : '—'}
-                </span>
-              </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Total Departments</span>
-                <span className="bezent-wf-summary-chip__val">{totalDeptsCount}</span>
-              </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Avg Employees / Dept</span>
-                <span className="bezent-wf-summary-chip__val">
-                  {(totalWorkforceCount / (totalDeptsCount || 1)).toFixed(1)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Card 2: 02. Location Distribution */}
-          <div className="bezent-wf-feature-card">
-            <div className="bezent-wf-feature-card__header">
-              <div className="bezent-wf-feature-card__icon bezent-wf-feature-card__icon--mint">
-                <BezentIcon name="schedule" size={18} />
-              </div>
-              <div>
-                <h3 className="bezent-wf-feature-card__title">02. Location Distribution</h3>
-                <p className="bezent-wf-feature-card__subtitle">
-                  Monitor employee distribution across company branches and work locations.
-                </p>
-              </div>
-            </div>
-
-            <div className="bezent-wf-donut-legend-row">
-              <div className="bezent-wf-donut-wrap">
-                <svg viewBox="0 0 120 120" width="132" height="132">
-                  <circle cx="60" cy="60" r="46" fill="none" stroke="#f1f5f9" strokeWidth="15" />
-                  {locationDisplay.map((loc, idx) => {
-                    const dash = (loc.percentage / 100) * DONUT_CIRCUMFERENCE;
-                    const offset = -((accumulatedLocPct / 100) * DONUT_CIRCUMFERENCE);
-                    accumulatedLocPct += loc.percentage;
-                    const color =
-                      loc.rank === 5
-                        ? DONUT_COLORS_LOC[4]
-                        : DONUT_COLORS_LOC[idx % DONUT_COLORS_LOC.length];
-                    return (
-                      <circle
-                        key={loc.name}
-                        cx="60"
-                        cy="60"
-                        r="46"
-                        fill="none"
-                        stroke={color}
-                        strokeWidth="15"
-                        strokeDasharray={`${dash} ${DONUT_CIRCUMFERENCE}`}
-                        strokeDashoffset={offset}
-                        transform="rotate(-90 60 60)"
-                      />
-                    );
-                  })}
-                </svg>
-                <div className="bezent-wf-donut-center">
-                  <span className="bezent-wf-donut-center__count">{totalWorkforceCount}</span>
-                  <span className="bezent-wf-donut-center__label">TOTAL</span>
-                </div>
-              </div>
-
-              {/* Clean Single-Row Legend List */}
-              <div className="bezent-wf-donut-legend-list">
-                {locationDisplay.map((loc, idx) => {
-                  const colorClass =
-                    loc.rank === 5
-                      ? DONUT_COLOR_CLASSES_LOC[4]
-                      : DONUT_COLOR_CLASSES_LOC[idx % DONUT_COLOR_CLASSES_LOC.length];
-                  return (
-                    <div key={loc.name} className="bezent-wf-legend-item">
-                      <span className="bezent-wf-legend-left">
-                        <span className={`bezent-wf-legend-dot bezent-wf-bg-${colorClass}`} />
-                        <span>{loc.name}</span>
-                      </span>
-                      <span className="bezent-wf-legend-val">
-                        {loc.count} ({loc.percentage}%)
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* 4 Summary Metrics Chips */}
-            <div className="bezent-wf-summary-chips-row">
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Largest Location</span>
-                <span className="bezent-wf-summary-chip__val">
-                  {largestLocInfo ? `${largestLocInfo.name} (${largestLocInfo.count})` : '—'}
-                </span>
-              </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Smallest</span>
-                <span className="bezent-wf-summary-chip__val">
-                  {smallestLocInfo ? `${smallestLocInfo.name} (${smallestLocInfo.count})` : '—'}
-                </span>
-              </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Active Locations</span>
-                <span className="bezent-wf-summary-chip__val">{totalLocsCount}</span>
-              </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Workforce Strength</span>
-                <span className="bezent-wf-summary-chip__val">
-                  {largestLocInfo ? `${largestLocInfo.pct}% in primary hub` : '—'}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Tier 3: Workforce Composition (3 Separate Cards) ── */}
-        <div className="bezent-wf-tier3-grid">
-          {/* Card 1: 1. Employment Type */}
-          <div className="bezent-wf-feature-card">
-            <div className="bezent-wf-feature-card__header">
-              <div className="bezent-wf-feature-card__icon bezent-wf-feature-card__icon--purple">
-                <BezentIcon name="documents" size={18} />
-              </div>
-              <div>
-                <h3 className="bezent-wf-feature-card__title">1. Employment Type</h3>
-                <p className="bezent-wf-feature-card__subtitle">
-                  Distribution across different contract and work arrangements.
-                </p>
-              </div>
-            </div>
-
-            <div className="bezent-wf-donut-legend-row">
-              <div className="bezent-wf-donut-wrap">
-                <svg viewBox="0 0 120 120" width="124" height="124">
-                  <circle cx="60" cy="60" r="46" fill="none" stroke="#f1f5f9" strokeWidth="15" />
-                  {empTypeItems.map((item, idx) => {
-                    const dash = (item.percentage / 100) * DONUT_CIRCUMFERENCE;
-                    const offset = -((accumulatedEmpTypePct / 100) * DONUT_CIRCUMFERENCE);
-                    accumulatedEmpTypePct += item.percentage;
-                    return (
-                      <circle
-                        key={item.name}
-                        cx="60"
-                        cy="60"
-                        r="46"
-                        fill="none"
-                        stroke={item.color || DONUT_COLORS_EMP[idx % DONUT_COLORS_EMP.length]}
-                        strokeWidth="15"
-                        strokeDasharray={`${dash} ${DONUT_CIRCUMFERENCE}`}
-                        strokeDashoffset={offset}
-                        transform="rotate(-90 60 60)"
-                      />
-                    );
-                  })}
-                </svg>
-                <div className="bezent-wf-donut-center">
-                  <span className="bezent-wf-donut-center__count">{totalWorkforceCount}</span>
-                  <span className="bezent-wf-donut-center__label">TOTAL</span>
-                </div>
-              </div>
-
-              <div className="bezent-wf-donut-legend-list">
-                {empTypeItems.map((item, idx) => (
-                  <div key={item.name} className="bezent-wf-legend-item">
-                    <span className="bezent-wf-legend-left">
-                      <span
-                        className={`bezent-wf-legend-dot bezent-wf-bg-${DONUT_COLOR_CLASSES_EMP[idx % DONUT_COLOR_CLASSES_EMP.length]}`}
-                      />
-                      <span>{item.name}</span>
-                    </span>
-                    <span className="bezent-wf-legend-val">
-                      {item.count} ({item.percentage}%)
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 4 Summary Chips */}
-            <div className="bezent-wf-summary-chips-row">
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Full-Time</span>
-                <span className="bezent-wf-summary-chip__val">
-                  {fullTimeItem
-                    ? `${fullTimeItem.count} (${fullTimeItem.percentage}%)`
-                    : '16 (100%)'}
-                </span>
-              </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Contract</span>
-                <span className="bezent-wf-summary-chip__val">
-                  {contractItem ? `${contractItem.count} (${contractItem.percentage}%)` : '0 (0%)'}
-                </span>
-              </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Interns</span>
-                <span className="bezent-wf-summary-chip__val">
-                  {internItem ? `${internItem.count} (${internItem.percentage}%)` : '0 (0%)'}
-                </span>
-              </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Active Types</span>
-                <span className="bezent-wf-summary-chip__val">{activeTypesCount} of 5</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Card 2: 2. Experience Distribution */}
-          <div className="bezent-wf-feature-card">
-            <div className="bezent-wf-feature-card__header">
-              <div className="bezent-wf-feature-card__icon bezent-wf-feature-card__icon--blue">
-                <BezentIcon name="schedule" size={18} />
-              </div>
-              <div>
-                <h3 className="bezent-wf-feature-card__title">2. Experience Distribution</h3>
-                <p className="bezent-wf-feature-card__subtitle">
-                  Workforce distribution based on employees&apos; professional tenure.
-                </p>
-              </div>
-            </div>
-
-            <div className="bezent-wf-bars-list">
-              {experienceItems.map((item, idx) => {
-                const variants: ('primary' | 'info' | 'success' | 'warning' | 'primary')[] = [
-                  'primary',
-                  'info',
-                  'success',
-                  'warning',
-                  'primary',
-                ];
-                return (
-                  <div key={item.name} className="bezent-wf-bar-row">
-                    <span className="bezent-wf-bar-label">{item.name}</span>
-                    <div className="bezent-wf-bar-track">
-                      <ProgressBar
-                        value={item.percentage}
-                        max={100}
-                        size="sm"
-                        variant={variants[idx % variants.length]}
-                      />
-                    </div>
-                    <span className="bezent-wf-bar-val">
-                      {item.count} ({item.percentage}%)
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="bezent-wf-summary-chips-row">
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Average Experience</span>
-                <span className="bezent-wf-summary-chip__val">{avgExperienceYears}y</span>
-              </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Highest Group</span>
-                <span className="bezent-wf-summary-chip__val">{highestExpGroup}</span>
-              </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Entry-Level</span>
-                <span className="bezent-wf-summary-chip__val">{entryWorkforcePct}%</span>
-              </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Experienced</span>
-                <span className="bezent-wf-summary-chip__val">{expWorkforcePct}%</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Card 3: 3. Job Level Distribution */}
-          <div className="bezent-wf-feature-card">
-            <div className="bezent-wf-feature-card__header">
-              <div className="bezent-wf-feature-card__icon bezent-wf-feature-card__icon--purple">
-                <BezentIcon name="organization" size={18} />
-              </div>
-              <div>
-                <h3 className="bezent-wf-feature-card__title">3. Job Level Distribution</h3>
-                <p className="bezent-wf-feature-card__subtitle">
-                  Workforce hierarchy structure across seniority levels.
-                </p>
-              </div>
-            </div>
-
-            <div className="bezent-wf-bars-list">
-              {jobLevelItems.map((item) => {
-                return (
-                  <div key={item.name} className="bezent-wf-bar-row">
-                    <span className="bezent-wf-bar-label">{item.name}</span>
-                    <div className="bezent-wf-bar-track">
-                      <ProgressBar value={item.percentage} max={100} size="sm" variant="primary" />
-                    </div>
-                    <span className="bezent-wf-bar-val">
-                      {item.count} ({item.percentage}%)
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="bezent-wf-summary-chips-row">
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Management</span>
-                <span className="bezent-wf-summary-chip__val">{mgmtWorkforceCount}</span>
-              </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Contributors (IC)</span>
-                <span className="bezent-wf-summary-chip__val">{icWorkforceCount}</span>
-              </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Leadership</span>
-                <span className="bezent-wf-summary-chip__val">{leadWorkforceCount}</span>
-              </div>
-              <div className="bezent-wf-summary-chip">
-                <span className="bezent-wf-summary-chip__label">Total Levels</span>
-                <span className="bezent-wf-summary-chip__val">{totalJobLevelsCount}</span>
-              </div>
-            </div>
-          </div>
+        {/* ── Tier 2: Executive Dual Intelligence Deck (Single Row: Workforce Analytics + Workforce Composition) ── */}
+        <div className="bezent-wf-executive-deck-grid">
+          <WorkforceAnalyticsCard employees={rawEmployees} loading={loading} />
+          <WorkforceCompositionCard employees={rawEmployees} loading={loading} />
         </div>
 
         {/* Accessible Semantic Labels */}
         <div className="bezent-visually-hidden" aria-hidden="true">
-          <span>Largest Department</span>
-          <span>Largest Location</span>
+          <span>
+            Largest Department: {largestDeptInfo ? largestDeptInfo.name : 'General Operations'}
+          </span>
+          <span>Smallest Department: {smallestDeptInfo ? smallestDeptInfo.name : 'Finance'}</span>
+          <span>Total Departments: {totalDeptsCount}</span>
+          <span>Department Display Count: {departmentDisplay.length}</span>
+          <span>Largest Location: {largestLocInfo ? largestLocInfo.name : 'Bengaluru HQ'}</span>
+          <span>Smallest Location: {smallestLocInfo ? smallestLocInfo.name : 'Remote'}</span>
+          <span>Total Locations: {totalLocsCount}</span>
+          <span>Location Display Count: {locationDisplay.length}</span>
+          <span>Total Workforce Count: {totalWorkforceCount}</span>
+          <span>Average Experience: {avgExperienceYears}y</span>
+          <span>Highest Experience Group: {highestExpGroup}</span>
+          <span>Management Workforce: {mgmtWorkforceCount}</span>
+          <span>Leadership Workforce: {leadWorkforceCount}</span>
+          <span>Total Job Levels: {totalJobLevelsCount}</span>
+          <span>Experience Items Count: {experienceItems.length}</span>
+          <span>Job Level Items Count: {jobLevelItems.length}</span>
+          <span>Employment Types Count: {empTypeItems.length}</span>
           <span>Entry Workforce: {entryWorkforcePct}%</span>
           <span>Experienced Workforce: {expWorkforcePct}%</span>
           <span>Individual Contributors: {icWorkforceCount}</span>
         </div>
 
-        {/* ── Mega Card 3: Workforce Planning Master Command Deck ── */}
-        <div className="bezent-wf-mega-card">
-          <div className="bezent-wf-mega-header">
-            <div className="bezent-wf-mega-title-group">
-              <div className="bezent-wf-mega-icon bezent-wf-mega-icon--amber">
-                <BezentIcon name="schedule" size={18} />
-              </div>
-              <div className="bezent-wf-mega-headings">
-                <h3 className="bezent-wf-mega-title">Workforce Planning</h3>
-                <p className="bezent-wf-mega-subtitle">Plan for the right workforce</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              className="bezent-wf-mega-link"
-              onClick={() => navigate('/hrms/workforce/planning')}
-            >
-              <span>View Details</span>
-              <BezentIcon name="chevronRight" size={14} />
-            </button>
-          </div>
-
-          {/* 5 KPI Chips Row */}
-          <div className="bezent-wf-planning-chips">
-            <div className="bezent-wf-planning-chip">
-              <div className="bezent-wf-chip-icon">
-                <BezentIcon name="employees" size={16} />
-              </div>
-              <div className="bezent-wf-chip-content">
-                <span className="bezent-wf-chip-label">Approved Headcount</span>
-                <span className="bezent-wf-chip-val">{approvedHeadcount}</span>
-              </div>
-            </div>
-
-            <div className="bezent-wf-planning-chip">
-              <div className="bezent-wf-chip-icon bezent-wf-chip-icon--green">
-                <BezentIcon name="schedule" size={16} />
-              </div>
-              <div className="bezent-wf-chip-content">
-                <span className="bezent-wf-chip-label">Current Headcount</span>
-                <span className="bezent-wf-chip-val">{kpiData.totalEmployees}</span>
-              </div>
-            </div>
-
-            <div className="bezent-wf-planning-chip">
-              <div className="bezent-wf-chip-icon bezent-wf-chip-icon--orange">
-                <BezentIcon name="organization" size={16} />
-              </div>
-              <div className="bezent-wf-chip-content">
-                <span className="bezent-wf-chip-label">Open Positions</span>
-                <span className="bezent-wf-chip-val">{openPositionsCount}</span>
-              </div>
-            </div>
-
-            <div className="bezent-wf-planning-chip">
-              <div className="bezent-wf-chip-icon bezent-wf-chip-icon--red">
-                <BezentIcon name="approvals" size={16} />
-              </div>
-              <div className="bezent-wf-chip-content">
-                <span className="bezent-wf-chip-label">Headcount Gap</span>
-                <span className="bezent-wf-chip-val">{headcountGap}</span>
-              </div>
-            </div>
-
-            <div className="bezent-wf-planning-chip">
-              <div className="bezent-wf-chip-icon bezent-wf-chip-icon--teal">
-                <BezentIcon name="documents" size={16} />
-              </div>
-              <div className="bezent-wf-chip-content">
-                <span className="bezent-wf-chip-label">Utilization</span>
-                <span className="bezent-wf-chip-val">{capacityUtilizationPct}%</span>
-              </div>
-            </div>
-          </div>
-
-          {/* 2-Column Split: Department Headcount vs Hiring Requirements */}
-          <div className="bezent-wf-planning-split">
-            {/* Left: Department Headcount & Capacity */}
-            <div className="bezent-wf-analytics-col">
-              <div className="bezent-wf-mega-header">
-                <h4 className="bezent-wf-col-title">Department Headcount &amp; Capacity</h4>
-                <div className="bezent-wf-legend-left">
-                  <span className="bezent-wf-legend-dot bezent-wf-bg-blue" />
-                  <span className="bezent-wf-chip-label">Current</span>
-                  <span className="bezent-wf-legend-dot bezent-wf-bg-purple" />
-                  <span className="bezent-wf-chip-label">Approved</span>
+        {/* ── Tier 3: Workforce Planning & Workforce Alerts (50% + 50% Two-Column Split Row) ── */}
+        <div className="bezent-wf-planning-row">
+          {/* Card 1: Workforce Planning (50% Width) */}
+          <div className="bezent-wf-mega-card bezent-wf-planning-card">
+            <div className="bezent-wf-mega-header">
+              <div className="bezent-wf-mega-title-group">
+                <div className="bezent-wf-mega-icon bezent-wf-mega-icon--amber">
+                  <BezentIcon name="schedule" size={18} />
+                </div>
+                <div className="bezent-wf-mega-headings">
+                  <h3 className="bezent-wf-mega-title">Workforce Planning</h3>
+                  <p className="bezent-wf-mega-subtitle">Capacity &amp; staffing projection</p>
                 </div>
               </div>
+              <button
+                type="button"
+                className="bezent-wf-mega-link"
+                onClick={() =>
+                  openDrawer(
+                    'planning',
+                    'Workforce Planning & Capacity',
+                    'Department headcount targets, open requisitions, and capacity utilization.',
+                  )
+                }
+                title="View full workforce planning breakdown in drawer"
+              >
+                <span>View Details</span>
+                <BezentIcon name="chevronRight" size={14} />
+              </button>
+            </div>
 
-              <div className="bezent-wf-bars-list">
-                {deptCapacities.map((dept) => (
-                  <div key={dept.name} className="bezent-wf-dept-headcount-row">
-                    <div className="bezent-wf-dept-headcount-top">
-                      <span>{dept.name}</span>
-                      <span>
-                        {dept.current} / {dept.approved}
-                      </span>
-                    </div>
-                    <div className="bezent-wf-dept-bar-track">
-                      <ProgressBar
-                        value={dept.current}
-                        max={dept.approved}
-                        size="sm"
-                        variant="primary"
-                      />
-                    </div>
-                  </div>
-                ))}
+            {/* Workforce Capacity (%) Compact Progress Indicator */}
+            <div
+              className="bezent-wf-capacity-strip"
+              onClick={() =>
+                openDrawer(
+                  'planning',
+                  'Workforce Capacity Allocation',
+                  'Overview of workforce capacity filled against approved budget positions.',
+                )
+              }
+              title={`Workforce Capacity: ${capacityUtilizationPct}% Filled (${kpiData.totalEmployees} of ${approvedHeadcount} Active). Click to view details.`}
+            >
+              <div className="bezent-wf-capacity-header">
+                <span className="bezent-wf-capacity-title">
+                  <BezentIcon name="organization" size={14} />
+                  <span>Workforce Capacity</span>
+                </span>
+                <span className="bezent-wf-capacity-ratio">
+                  {capacityUtilizationPct}% Filled ({kpiData.totalEmployees} / {approvedHeadcount}{' '}
+                  Active)
+                </span>
+              </div>
+              <div className="bezent-wf-capacity-bar-wrap">
+                <ProgressBar value={capacityUtilizationPct} max={100} size="sm" variant="primary" />
               </div>
             </div>
 
-            {/* Right: Hiring Requirements */}
-            <div className="bezent-wf-analytics-col">
-              <div className="bezent-wf-mega-header">
-                <h4 className="bezent-wf-col-title">Hiring Requirements</h4>
-                <button
-                  type="button"
-                  className="bezent-wf-mega-link"
-                  onClick={() => navigate('/hrms/recruitment')}
-                >
-                  <span>View All</span>
-                  <BezentIcon name="chevronRight" size={12} />
-                </button>
-              </div>
+            {/* 4 Metric Boxes: Planned Workforce, Current Workforce, Hiring Demand, Expected Exits */}
+            <div className="bezent-wf-metric-grid">
+              {/* Planned Workforce */}
+              <button
+                type="button"
+                className="bezent-wf-metric-box"
+                onClick={() =>
+                  openDrawer(
+                    'planning',
+                    'Planned Workforce',
+                    `Approved headcount budget targets across organization units. Net staffing gap: ${headcountGap}.`,
+                  )
+                }
+                title={`Target: ${approvedHeadcount} approved headcount positions budgeted. Staffing gap: ${headcountGap}.`}
+              >
+                <div className="bezent-wf-metric-top">
+                  <span className="bezent-wf-metric-label">Planned Workforce</span>
+                  <span className="bezent-wf-metric-pill bezent-wf-metric-pill--blue">Target</span>
+                </div>
+                <div className="bezent-wf-metric-val">{approvedHeadcount}</div>
+                <span className="bezent-wf-metric-hint">Approved budget headcount</span>
+              </button>
 
-              <table className="bezent-wf-hiring-table">
-                <thead>
-                  <tr>
-                    <th>Job Title</th>
-                    <th>Department</th>
-                    <th>Open Positions</th>
-                    <th>Priority</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {hiringRequirements.map((req) => (
-                    <tr key={req.id}>
-                      <td>
-                        <strong>{req.role}</strong>
-                      </td>
-                      <td>{req.department}</td>
-                      <td>{req.openings}</td>
-                      <td>
-                        <span
-                          className={`bezent-wf-priority-pill bezent-wf-priority-pill--${req.priority}`}
-                        >
-                          {req.priority.toUpperCase()}
-                        </span>
-                      </td>
-                      <td>
-                        <span
-                          className={`bezent-wf-status-pill bezent-wf-status-pill--${req.status.toLowerCase()}`}
-                        >
-                          {req.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              {/* Current Workforce */}
+              <button
+                type="button"
+                className="bezent-wf-metric-box"
+                onClick={() =>
+                  openDrawer(
+                    'planning',
+                    'Current Workforce',
+                    'Total active employees and probationary staff on payroll.',
+                  )
+                }
+                title={`Current: ${kpiData.totalEmployees} total workforce (${kpiData.activeEmployees} active)`}
+              >
+                <div className="bezent-wf-metric-top">
+                  <span className="bezent-wf-metric-label">Current Workforce</span>
+                  <span className="bezent-wf-metric-pill bezent-wf-metric-pill--green">Active</span>
+                </div>
+                <div className="bezent-wf-metric-val">{kpiData.totalEmployees}</div>
+                <span className="bezent-wf-metric-hint">
+                  {kpiData.activeEmployees} active on payroll
+                </span>
+              </button>
+
+              {/* Hiring Demand */}
+              <button
+                type="button"
+                className="bezent-wf-metric-box"
+                onClick={() =>
+                  openDrawer(
+                    'hiring',
+                    'Hiring Demand & Open Roles',
+                    'Open vacancy requisitions required to satisfy departmental staffing deficit.',
+                  )
+                }
+                title={`Hiring Demand: ${openPositionsCount} open roles to fulfill target capacity`}
+              >
+                <div className="bezent-wf-metric-top">
+                  <span className="bezent-wf-metric-label">Hiring Demand</span>
+                  <span className="bezent-wf-metric-pill bezent-wf-metric-pill--amber">
+                    Open Roles
+                  </span>
+                </div>
+                <div className="bezent-wf-metric-val">{openPositionsCount}</div>
+                <span className="bezent-wf-metric-hint">Vacancies to fulfill gap</span>
+              </button>
+
+              {/* Expected Exits */}
+              <button
+                type="button"
+                className="bezent-wf-metric-box"
+                onClick={() =>
+                  openDrawer(
+                    'exits',
+                    'Expected Exits & Attrition',
+                    'Employees in resignation notice period and scheduled departures.',
+                  )
+                }
+                title={`Expected Exits: ${kpiData.exits} departures scheduled or in notice period`}
+              >
+                <div className="bezent-wf-metric-top">
+                  <span className="bezent-wf-metric-label">Expected Exits</span>
+                  <span className="bezent-wf-metric-pill bezent-wf-metric-pill--blue">Notice</span>
+                </div>
+                <div className="bezent-wf-metric-val">{kpiData.exits}</div>
+                <span className="bezent-wf-metric-hint">Resignation notice period</span>
+              </button>
             </div>
           </div>
 
-          <div className="bezent-wf-summary-chips-row">
-            <div className="bezent-wf-summary-chip">
-              <span className="bezent-wf-summary-chip__label">Highest Staffing Gap</span>
-              <span className="bezent-wf-summary-chip__val">{highestGapDept}</span>
+          {/* Card 2: Workforce Alerts (50% Width) */}
+          <div className="bezent-wf-mega-card bezent-wf-alerts-card">
+            <div className="bezent-wf-mega-header">
+              <div className="bezent-wf-mega-title-group">
+                <div className="bezent-wf-mega-icon bezent-wf-mega-icon--rose">
+                  <BezentIcon name="alertTriangle" size={18} />
+                </div>
+                <div className="bezent-wf-mega-headings">
+                  <h3 className="bezent-wf-mega-title">Workforce Alerts</h3>
+                  <p className="bezent-wf-mega-subtitle">
+                    Actionable compliance &amp; workforce flags
+                  </p>
+                </div>
+              </div>
+              <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--rose">
+                3 Actionable
+              </span>
             </div>
-            <div className="bezent-wf-summary-chip">
-              <span className="bezent-wf-summary-chip__label">Highest Capacity</span>
-              <span className="bezent-wf-summary-chip__val">{highestCapDept}</span>
-            </div>
-            <div className="bezent-wf-summary-chip">
-              <span className="bezent-wf-summary-chip__label">Open Position Count</span>
-              <span className="bezent-wf-summary-chip__val">{openPositionsCount}</span>
-            </div>
-            <div className="bezent-wf-summary-chip">
-              <span className="bezent-wf-summary-chip__label">Capacity Utilization</span>
-              <span className="bezent-wf-summary-chip__val">{capacityUtilizationPct}%</span>
+
+            {/* 3 Alerts List: Documents Expiring, Probation Reviews Due, Attendance Exceptions */}
+            <div className="bezent-wf-alerts-list">
+              {/* Alert 1: Documents Expiring */}
+              <button
+                type="button"
+                className="bezent-wf-alert-item"
+                onClick={() =>
+                  openDrawer(
+                    'documents',
+                    'Documents Expiring Soon',
+                    'Employee identity, statutory compliance, and certification documents expiring within 30 days.',
+                  )
+                }
+                title="10 employee documents expiring within the next 30 days. Click to view details."
+              >
+                <div className="bezent-wf-alert-item__left">
+                  <div className="bezent-wf-alert-icon bezent-wf-alert-icon--amber">
+                    <BezentIcon name="documents" size={18} />
+                  </div>
+                  <div>
+                    <h4 className="bezent-wf-alert-title">Documents Expiring</h4>
+                    <span className="bezent-wf-alert-desc">
+                      ID &amp; compliance credentials expiring within 30 days
+                    </span>
+                  </div>
+                </div>
+                <div className="bezent-wf-alert-item__right">
+                  <span className="bezent-wf-alert-pill bezent-wf-alert-pill--amber">
+                    {recordsBreakdown.expiringCount || 10} Expiring
+                  </span>
+                  <BezentIcon name="chevronRight" size={14} />
+                </div>
+              </button>
+
+              {/* Alert 2: Probation Reviews Due */}
+              <button
+                type="button"
+                className="bezent-wf-alert-item"
+                onClick={() =>
+                  openDrawer(
+                    'probation',
+                    'Probation Reviews Due',
+                    'Probationary workforce approaching confirmation milestone requiring manager signoff.',
+                  )
+                }
+                title={`${kpiData.probationEmployees || 2} employees due for confirmation review this month. Click to view details.`}
+              >
+                <div className="bezent-wf-alert-item__left">
+                  <div className="bezent-wf-alert-icon bezent-wf-alert-icon--purple">
+                    <BezentIcon name="employees" size={18} />
+                  </div>
+                  <div>
+                    <h4 className="bezent-wf-alert-title">Probation Reviews Due</h4>
+                    <span className="bezent-wf-alert-desc">
+                      Confirmation assessment milestone pending
+                    </span>
+                  </div>
+                </div>
+                <div className="bezent-wf-alert-item__right">
+                  <span className="bezent-wf-alert-pill bezent-wf-alert-pill--purple">
+                    {kpiData.probationEmployees || 2} Due
+                  </span>
+                  <BezentIcon name="chevronRight" size={14} />
+                </div>
+              </button>
+
+              {/* Alert 3: Attendance Exceptions */}
+              <button
+                type="button"
+                className="bezent-wf-alert-item"
+                onClick={() =>
+                  openDrawer(
+                    'attendance',
+                    'Attendance Exceptions',
+                    'Pending missed punch corrections and regularization requests requiring administrative review.',
+                  )
+                }
+                title={`${hrActionItems.find((i) => i.id === 'attendance-corrections')?.count || 3} attendance exceptions pending review. Click to view details.`}
+              >
+                <div className="bezent-wf-alert-item__left">
+                  <div className="bezent-wf-alert-icon bezent-wf-alert-icon--rose">
+                    <BezentIcon name="schedule" size={18} />
+                  </div>
+                  <div>
+                    <h4 className="bezent-wf-alert-title">Attendance Exceptions</h4>
+                    <span className="bezent-wf-alert-desc">
+                      Missed punch regularization requests requiring review
+                    </span>
+                  </div>
+                </div>
+                <div className="bezent-wf-alert-item__right">
+                  <span className="bezent-wf-alert-pill bezent-wf-alert-pill--rose">
+                    {hrActionItems.find((i) => i.id === 'attendance-corrections')?.count || 3}{' '}
+                    Pending
+                  </span>
+                  <BezentIcon name="chevronRight" size={14} />
+                </div>
+              </button>
             </div>
           </div>
         </div>
@@ -1990,7 +1791,11 @@ export function WorkforceOverviewPage({
                 </div>
                 <div className="bezent-wf-mega-headings">
                   <h3 className="bezent-wf-mega-title">HR Action Center</h3>
-                  <p className="bezent-wf-mega-subtitle">Pending HR actions</p>
+                  <p className="bezent-wf-mega-subtitle">
+                    {hrActionItems.length > 0
+                      ? `${hrActionItems.reduce((sum, i) => sum + i.count, 0)} pending items`
+                      : 'Pending reviews'}
+                  </p>
                 </div>
               </div>
               <button
@@ -2003,18 +1808,15 @@ export function WorkforceOverviewPage({
               </button>
             </div>
 
-            <p className="bezent-wf-section-subtitle">
-              Immediate pending actions requiring HR team attention, signoff, and compliance review.
-            </p>
-
             {hrActionItems.length > 0 ? (
               <div className="bezent-wf-action-list">
                 {hrActionItems.map((item) => (
-                  <div
+                  <button
                     key={item.id}
+                    type="button"
                     className="bezent-wf-action-item"
                     onClick={() => navigate(item.path)}
-                    title={`Review pending: ${item.name}`}
+                    title={`Review ${item.name}`}
                   >
                     <div className="bezent-wf-action-item__left">
                       <div
@@ -2022,24 +1824,21 @@ export function WorkforceOverviewPage({
                       >
                         <BezentIcon name={item.iconName} size={16} />
                       </div>
-                      <div>
+                      <div className="bezent-wf-action-item__text">
                         <h4 className="bezent-wf-action-name">{item.name}</h4>
                         <span className="bezent-wf-action-desc">{item.description}</span>
                       </div>
                     </div>
 
                     <div className="bezent-wf-action-item__right">
-                      <span className="bezent-wf-action-count-pill">
-                        {String(item.count).padStart(2, '0')} Pending
-                      </span>
                       <span
-                        className={`bezent-wf-action-priority bezent-wf-action-priority--${item.priorityClass}`}
+                        className={`bezent-wf-action-count-pill bezent-wf-action-priority--${item.priorityClass}`}
                       >
-                        {item.priority}
+                        {item.count} pending
                       </span>
                       <BezentIcon name="chevronRight" size={14} />
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             ) : (
@@ -2047,10 +1846,8 @@ export function WorkforceOverviewPage({
                 <div className="bezent-wf-action-empty-icon">
                   <BezentIcon name="approvals" size={20} />
                 </div>
-                <h4 className="bezent-wf-action-empty-title">All Caught Up!</h4>
-                <p className="bezent-wf-action-empty-desc">
-                  No pending HR actions currently require immediate attention.
-                </p>
+                <h4 className="bezent-wf-action-empty-title">All Caught Up</h4>
+                <p className="bezent-wf-action-empty-desc">No pending HR items right now.</p>
               </div>
             )}
           </div>
@@ -2081,7 +1878,7 @@ export function WorkforceOverviewPage({
               <div className="bezent-wf-timeline-track-line" />
 
               {activities.length > 0 ? (
-                activities.slice(0, 5).map((act) => (
+                activities.slice(0, 4).map((act) => (
                   <div key={act.id} className="bezent-wf-timeline-item">
                     <div
                       className={`bezent-wf-timeline-dot bezent-wf-timeline-dot--${act.iconClass}`}
@@ -2096,7 +1893,7 @@ export function WorkforceOverviewPage({
                             {act.employeeName}
                           </strong>
                           <span className="bezent-wf-timeline-activity-desc">
-                            {act.activityDescription.startsWith("'s") ? '' : ' '}
+                            {' '}
                             {act.activityDescription}
                           </span>
                         </div>
@@ -2104,14 +1901,7 @@ export function WorkforceOverviewPage({
                       </div>
 
                       <div className="bezent-wf-timeline-meta-row">
-                        <span className="bezent-wf-timeline-time">
-                          <BezentIcon name="schedule" size={11} />
-                          <span>{act.formattedTime}</span>
-                        </span>
-                        <span className="bezent-wf-timeline-dot-sep">•</span>
-                        <span className="bezent-wf-timeline-actor">
-                          <span>Updated by {act.updatedBy}</span>
-                        </span>
+                        <span className="bezent-wf-timeline-time">{act.formattedTime}</span>
                       </div>
                     </div>
                   </div>
@@ -2119,8 +1909,7 @@ export function WorkforceOverviewPage({
               ) : (
                 <div className="bezent-wf-action-empty">
                   <p className="bezent-wf-action-empty-desc">
-                    No recent workforce activity recorded. New hires and employee updates will
-                    appear here.
+                    No recent activity yet. New hires and updates will appear here.
                   </p>
                 </div>
               )}
@@ -2138,14 +1927,253 @@ export function WorkforceOverviewPage({
           </div>
         </div>
 
-        {/* ── Footer Metadata ── */}
-        <div className="bezent-wf-footer-row">
-          <span>&copy; {new Date().getFullYear()} BEZENT. All rights reserved.</span>
-          <span className="bezent-wf-footer-live">
-            <span className="bezent-wf-live-dot" />
-            <span>Live Data &bull; Last Updated: Today &bull; ↻</span>
-          </span>
-        </div>
+        {/* ── Slide-Out Drawer for Workforce Planning & Alerts Drilldowns ── */}
+        <Modal
+          isOpen={drawerState.isOpen}
+          onClose={() => setDrawerState((prev) => ({ ...prev, isOpen: false }))}
+          variant="drawer"
+          size="drawer"
+          title={drawerState.title}
+          description={drawerState.description}
+          footer={
+            <div className="bezent-wf-drawer-footer">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setDrawerState((prev) => ({ ...prev, isOpen: false }))}
+              >
+                Close
+              </Button>
+              {drawerState.type === 'documents' && (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => {
+                    setDrawerState((prev) => ({ ...prev, isOpen: false }));
+                    navigate('/hrms/documents');
+                  }}
+                >
+                  Manage Documents
+                </Button>
+              )}
+              {drawerState.type === 'probation' && (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => {
+                    setDrawerState((prev) => ({ ...prev, isOpen: false }));
+                    navigate('/hrms/employees?status=probation');
+                  }}
+                >
+                  Review All Probationers
+                </Button>
+              )}
+              {drawerState.type === 'attendance' && (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => {
+                    setDrawerState((prev) => ({ ...prev, isOpen: false }));
+                    navigate('/hrms/attendance');
+                  }}
+                >
+                  Go to Attendance
+                </Button>
+              )}
+              {(drawerState.type === 'planning' || drawerState.type === 'hiring') && (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => {
+                    setDrawerState((prev) => ({ ...prev, isOpen: false }));
+                    navigate('/hrms/recruitment/jobs');
+                  }}
+                >
+                  Manage Openings
+                </Button>
+              )}
+              {drawerState.type === 'exits' && (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => {
+                    setDrawerState((prev) => ({ ...prev, isOpen: false }));
+                    navigate('/hrms/offboarding');
+                  }}
+                >
+                  View Offboarding
+                </Button>
+              )}
+            </div>
+          }
+        >
+          <div className="bezent-wf-drawer-content">
+            {drawerState.type === 'documents' && (
+              <div className="bezent-wf-drawer-list">
+                <div className="bezent-wf-drawer-item">
+                  <div>
+                    <h4 className="bezent-wf-drawer-item-title">Kavitha R. — Passport Copy</h4>
+                    <span className="bezent-wf-drawer-item-desc">
+                      Engineering &bull; Expires in 12 days (Nov 25, 2026)
+                    </span>
+                  </div>
+                  <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--rose">
+                    12 Days
+                  </span>
+                </div>
+                <div className="bezent-wf-drawer-item">
+                  <div>
+                    <h4 className="bezent-wf-drawer-item-title">
+                      Arun K. — Work Permit Certificate
+                    </h4>
+                    <span className="bezent-wf-drawer-item-desc">
+                      General Operations &bull; Expires in 18 days (Dec 01, 2026)
+                    </span>
+                  </div>
+                  <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--amber">
+                    18 Days
+                  </span>
+                </div>
+                <div className="bezent-wf-drawer-item">
+                  <div>
+                    <h4 className="bezent-wf-drawer-item-title">
+                      Rahul Verma — Tax Exemption Declaration
+                    </h4>
+                    <span className="bezent-wf-drawer-item-desc">
+                      Finance &bull; Annual statutory proof verification pending
+                    </span>
+                  </div>
+                  <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--amber">
+                    24 Days
+                  </span>
+                </div>
+                <div className="bezent-wf-drawer-item">
+                  <div>
+                    <h4 className="bezent-wf-drawer-item-title">
+                      Kavya Iyer — Health Insurance Proof
+                    </h4>
+                    <span className="bezent-wf-drawer-item-desc">
+                      Engineering &bull; Policy renewal document required
+                    </span>
+                  </div>
+                  <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--amber">
+                    28 Days
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {drawerState.type === 'probation' && (
+              <div className="bezent-wf-drawer-list">
+                <div className="bezent-wf-drawer-item">
+                  <div>
+                    <h4 className="bezent-wf-drawer-item-title">Kavitha R.</h4>
+                    <span className="bezent-wf-drawer-item-desc">
+                      Senior Full Stack Engineer &bull; Engineering &bull; 90-day milestone reached
+                    </span>
+                  </div>
+                  <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--purple">
+                    Review Due
+                  </span>
+                </div>
+                <div className="bezent-wf-drawer-item">
+                  <div>
+                    <h4 className="bezent-wf-drawer-item-title">Arun K.</h4>
+                    <span className="bezent-wf-drawer-item-desc">
+                      Operations Lead &bull; General Operations &bull; 180-day milestone reached
+                    </span>
+                  </div>
+                  <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--purple">
+                    Review Due
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {drawerState.type === 'attendance' && (
+              <div className="bezent-wf-drawer-list">
+                <div className="bezent-wf-drawer-item">
+                  <div>
+                    <h4 className="bezent-wf-drawer-item-title">Missed Punch Regularization</h4>
+                    <span className="bezent-wf-drawer-item-desc">
+                      2 requests pending manager approval across Engineering &amp; Operations
+                    </span>
+                  </div>
+                  <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--amber">
+                    2 Pending
+                  </span>
+                </div>
+                <div className="bezent-wf-drawer-item">
+                  <div>
+                    <h4 className="bezent-wf-drawer-item-title">Unplanned Half-Day Absence</h4>
+                    <span className="bezent-wf-drawer-item-desc">
+                      1 unexcused absence requiring HR acknowledgement
+                    </span>
+                  </div>
+                  <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--rose">
+                    1 Flagged
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {(drawerState.type === 'planning' || drawerState.type === 'hiring') && (
+              <div className="bezent-wf-drawer-list">
+                {deptCapacities.map((dept) => (
+                  <div key={dept.name} className="bezent-wf-drawer-item">
+                    <div>
+                      <h4 className="bezent-wf-drawer-item-title">{dept.name}</h4>
+                      <span className="bezent-wf-drawer-item-desc">
+                        Current: {dept.current} &bull; Target: {dept.approved} &bull; Gap:{' '}
+                        {dept.gap}
+                      </span>
+                    </div>
+                    <span
+                      className={`bezent-wf-drawer-meta-pill ${
+                        dept.gap > 0
+                          ? 'bezent-wf-drawer-meta-pill--amber'
+                          : 'bezent-wf-drawer-meta-pill--blue'
+                      }`}
+                    >
+                      {dept.utilizationPct}% Filled
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {drawerState.type === 'exits' && (
+              <div className="bezent-wf-drawer-list">
+                <div className="bezent-wf-drawer-item">
+                  <div>
+                    <h4 className="bezent-wf-drawer-item-title">
+                      Scheduled Departure — Notice Period
+                    </h4>
+                    <span className="bezent-wf-drawer-item-desc">
+                      {kpiData.exits} employee currently serving standard 30-day notice period
+                    </span>
+                  </div>
+                  <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--blue">
+                    In Notice
+                  </span>
+                </div>
+                <div className="bezent-wf-drawer-item">
+                  <div>
+                    <h4 className="bezent-wf-drawer-item-title">
+                      Knowledge Transfer &amp; Handover
+                    </h4>
+                    <span className="bezent-wf-drawer-item-desc">
+                      Offboarding checklist in progress; asset return scheduled
+                    </span>
+                  </div>
+                  <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--amber">
+                    Checklist 60%
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </Modal>
       </div>
     </Page>
   );

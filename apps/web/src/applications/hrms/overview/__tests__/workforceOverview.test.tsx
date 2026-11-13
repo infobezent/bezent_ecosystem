@@ -23,54 +23,80 @@ describe('Workforce Overview Page', () => {
     );
 
     expect(html).toContain('Total Employees');
-    expect(html).toContain('Active Employees');
-    expect(html).toContain('New Joiners');
-    expect(html).toContain('Employee Exits');
-    expect(html).toContain('Retention Rate');
-    expect(html).toContain('Workforce Growth');
+    expect(html).toContain('Employees Onboarding');
+    expect(html).toContain('Total Transfers');
+    expect(html).toContain('Total Promotions');
+    expect(html).toContain('Employees in Offboarding');
+    expect(html).toContain('Workforce Compliance');
   });
 
-  it('renders Tier 2: 01. Department Distribution & 02. Location Distribution', () => {
+  it('renders Workforce Analytics unified card with category and dynamic filters', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <WorkforceOverviewPage />
       </MemoryRouter>,
     );
 
-    expect(html).toContain('01. Department Distribution');
-    expect(html).toContain('02. Location Distribution');
+    expect(html).toContain('Workforce Analytics');
+    expect(html).toContain('Distribution');
+    expect(html).toContain('Growth');
+    expect(html).toContain('Retention');
+  });
+
+  it('renders Tier 2: Executive Dual Deck with Workforce Analytics and Workforce Composition in one row', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <WorkforceOverviewPage />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('bezent-wf-executive-deck-grid');
+    expect(html).toContain('Workforce Analytics');
+    expect(html).toContain('Workforce Composition');
     expect(html).toContain('Largest Department');
     expect(html).toContain('Largest Location');
   });
 
-  it('renders Tier 3: Workforce Composition cards', () => {
+  it('renders Workforce Composition single card with demographics and filter dropdowns', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <WorkforceOverviewPage />
       </MemoryRouter>,
     );
 
-    expect(html).toContain('1. Employment Type');
-    expect(html).toContain('2. Experience Distribution');
-    expect(html).toContain('3. Job Level Distribution');
+    expect(html).toContain('Workforce Composition');
+    expect(html).toContain('Gender');
+    expect(html).toContain('Age Group');
+    expect(html).toContain('Experience');
+    expect(html).toContain('Tenure');
+    expect(html).toContain('Employment Status');
   });
 
-  it('renders Tier 4: Workforce Planning command deck and insights', () => {
+  it('renders Tier 4: Workforce Planning and Workforce Alerts 50/50 command row', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <WorkforceOverviewPage />
       </MemoryRouter>,
     );
 
+    // 50% + 50% two-column layout row
+    expect(html).toContain('bezent-wf-planning-row');
+    expect(html).toContain('bezent-wf-planning-card');
+    expect(html).toContain('bezent-wf-alerts-card');
+
+    // Card 1: Workforce Planning
     expect(html).toContain('Workforce Planning');
-    expect(html).toContain('Approved Headcount');
-    expect(html).toContain('Current Headcount');
-    expect(html).toContain('Open Positions');
-    expect(html).toContain('Headcount Gap');
-    expect(html).toContain('Utilization');
-    expect(html).toContain('Department Headcount &amp; Capacity');
-    expect(html).toContain('Hiring Requirements');
-    expect(html).toContain('Highest Staffing Gap');
+    expect(html).toContain('Workforce Capacity');
+    expect(html).toContain('Planned Workforce');
+    expect(html).toContain('Current Workforce');
+    expect(html).toContain('Hiring Demand');
+    expect(html).toContain('Expected Exits');
+
+    // Card 2: Workforce Alerts
+    expect(html).toContain('Workforce Alerts');
+    expect(html).toContain('Documents Expiring');
+    expect(html).toContain('Probation Reviews Due');
+    expect(html).toContain('Attendance Exceptions');
   });
 
   it('renders Tier 5: Employee Lifecycle segmented pipeline', () => {
@@ -96,9 +122,7 @@ describe('Workforce Overview Page', () => {
 
     expect(html).toContain('HR Action Center');
     expect(html).toContain('bezent-wf-action-card');
-    expect(html).toContain(
-      'Immediate pending actions requiring HR team attention, signoff, and compliance review.',
-    );
+    expect(html).toContain('Pending reviews');
   });
 
   it('renders Tier 7: Recent Workforce Activity vertical timeline cleanly', () => {

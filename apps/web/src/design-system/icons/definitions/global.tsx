@@ -1310,6 +1310,17 @@ export const GLOBAL_ICON_DEFINITIONS: Record<string, IconDefinition> = {
       <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" />
     </g>
   )),
+  location: glyph('location', 'Location Pin', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+      <circle cx="12" cy="10" r="3" />
+    </g>
+  )),
+  sync: glyph('sync', 'Sync', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+    </g>
+  )),
   user: glyph('user', 'User', (c, sw) => (
     <g {...S(c, sw)}>
       <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
@@ -1435,6 +1446,42 @@ export const GLOBAL_ICON_DEFINITIONS: Record<string, IconDefinition> = {
       <circle cx="8.5" cy="7" r="4" />
       <line x1="17" y1="9" x2="21" y2="13" />
       <line x1="21" y1="9" x2="17" y2="13" />
+    </g>
+  )),
+  userRound: glyph('userRound', 'User round', (c, sw) => (
+    <g {...S(c, sw)}>
+      <circle cx="12" cy="8" r="5" />
+      <path d="M20 21a8 8 0 0 0-16 0" />
+    </g>
+  )),
+  userRoundCheck: glyph('userRoundCheck', 'User round check', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M2 21a8 8 0 0 1 13.292-6" />
+      <circle cx="10" cy="8" r="5" />
+      <path d="m16 19 2 2 4-4" />
+    </g>
+  )),
+  userRoundClock: glyph('userRoundClock', 'User round clock', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M2 21a8 8 0 0 1 10.434-7.62" />
+      <circle cx="10" cy="8" r="5" />
+      <circle cx="17.5" cy="17.5" r="4.5" />
+      <polyline points="17.5 15.5 17.5 17.5 19 18.5" />
+    </g>
+  )),
+  userRoundPlus: glyph('userRoundPlus', 'User round plus', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M2 21a8 8 0 0 1 13.292-6" />
+      <circle cx="10" cy="8" r="5" />
+      <line x1="19" y1="16" x2="19" y2="22" />
+      <line x1="16" y1="19" x2="22" y2="19" />
+    </g>
+  )),
+  userRoundMinus: glyph('userRoundMinus', 'User round minus', (c, sw) => (
+    <g {...S(c, sw)}>
+      <path d="M2 21a8 8 0 0 1 13.292-6" />
+      <circle cx="10" cy="8" r="5" />
+      <line x1="22" y1="19" x2="16" y2="19" />
     </g>
   )),
   viewList: glyph('viewList', 'List View', (c, sw) => (
