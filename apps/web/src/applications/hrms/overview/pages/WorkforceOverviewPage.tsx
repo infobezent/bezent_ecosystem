@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Page, PageHeader, ProgressBar, Modal, Button } from '../../../../design-system/components';
+import {
+  Page,
+  PageHeader,
+  ProgressBar,
+  Modal,
+  Button,
+  Select,
+  type SelectOption,
+} from '../../../../design-system/components';
 import { BezentIcon, type BezentIconName } from '../../../../design-system/icons';
 import {
   EmployeesKpiCard,
@@ -24,6 +32,10 @@ import { fetchEmployeeActions } from '../../employee-administration/api/employee
 import { leaveOperationsApi } from '../../leave/api/leaveOperationsApi';
 import { fetchRegularizationRequests } from '../../attendance/api/attendanceApi';
 import { fetchDocuments } from '../../documents/api/documentsApi';
+import {
+  fetchOrganizationMasters,
+  type OrganizationMasters,
+} from '../../api/organizationMastersApi';
 
 export interface WorkforceOverviewPageProps {
   title?: string;
@@ -132,6 +144,53 @@ function formatTimelineDate(dateStr: string | null | undefined): string {
   }
 }
 
+type TimePeriodKey =
+  'last_30_days' | 'last_3_months' | 'last_6_months' | 'last_12_months' | 'this_year' | 'all_time';
+
+const TIME_PERIOD_OPTIONS: SelectOption[] = [
+  { value: 'last_30_days', label: 'Last 30 Days' },
+  { value: 'last_3_months', label: 'Last 3 Months' },
+  { value: 'last_6_months', label: 'Last 6 Months' },
+  { value: 'last_12_months', label: 'Last 12 Months' },
+  { value: 'this_year', label: 'This Year' },
+  { value: 'all_time', label: 'All Time' },
+];
+
+function toIsoDate(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * Converts a time-period selection into an inclusive ISO date range for
+ * event-dated ("flow") queries — e.g. action effectiveDate or onboarding
+ * joiningDate. Returns null for 'all_time' (no range filter). Never applied
+ * to stock metrics (current headcount, open onboarding cases, document
+ * compliance snapshot) — those are point-in-time, not period-bound.
+ */
+function getDateRangeForPeriod(period: TimePeriodKey): { from: string; to: string } | null {
+  if (period === 'all_time') return null;
+  const to = new Date();
+  const from = new Date(to);
+  switch (period) {
+    case 'last_30_days':
+      from.setDate(from.getDate() - 30);
+      break;
+    case 'last_3_months':
+      from.setMonth(from.getMonth() - 3);
+      break;
+    case 'last_6_months':
+      from.setMonth(from.getMonth() - 6);
+      break;
+    case 'last_12_months':
+      from.setFullYear(from.getFullYear() - 1);
+      break;
+    case 'this_year':
+      from.setMonth(0, 1);
+      break;
+  }
+  return { from: toIsoDate(from), to: toIsoDate(to) };
+}
+
 /**
  * Workforce → Overview Page (Premium Executive Command Center)
  * Sophisticated pastel palette, distinctive data visualizations, clean card compositions.
@@ -144,6 +203,36 @@ export function WorkforceOverviewPage({
   const navigate = useNavigate();
   const [showHelp, setShowHelp] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // ── Global Filters (Time Period / Location / Department) ──
+  const [timePeriod, setTimePeriod] = useState<TimePeriodKey>('last_6_months');
+  const [locationId, setLocationId] = useState<string>('');
+  const [departmentId, setDepartmentId] = useState<string>('');
+  const [orgMasters, setOrgMasters] = useState<OrganizationMasters | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    fetchOrganizationMasters()
+      .then((masters) => {
+        if (active) setOrgMasters(masters);
+      })
+      .catch(() => {
+        // Filter dropdowns degrade to "All Locations"/"All Departments" only;
+        // the rest of the page still loads from its own independent fetches.
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const locationOptions: SelectOption[] = [
+    { value: '', label: 'All Locations' },
+    ...(orgMasters?.locations.map((l) => ({ value: l.id, label: l.name })) ?? []),
+  ];
+  const departmentOptions: SelectOption[] = [
+    { value: '', label: 'All Departments' },
+    ...(orgMasters?.departments.map((d) => ({ value: d.id, label: d.name })) ?? []),
+  ];
 
   const [kpiData, setKpiData] = useState<OverviewKPIData>({
     totalEmployees: 16,
@@ -362,27 +451,46 @@ export function WorkforceOverviewPage({
 
   useEffect(() => {
     let active = true;
+    setLoading(true);
+
+    // Structural scope (Location/Department) applies to every fetch below —
+    // it narrows "which employees" regardless of metric shape. The selected
+    // Time Period only narrows event-dated ("flow") queries: actions
+    // (effectiveDate) and the activity feed. It is deliberately NOT applied to
+    // current headcount, open onboarding cases, "pending" queues, or document
+    // compliance — those are point-in-time snapshots, not period-bound.
+    const scope = {
+      departmentId: departmentId || undefined,
+      locationId: locationId || undefined,
+    };
+    const dateRange = getDateRangeForPeriod(timePeriod);
+    const eventScope = {
+      ...scope,
+      effectiveDateFrom: dateRange?.from,
+      effectiveDateTo: dateRange?.to,
+    };
 
     Promise.allSettled([
-      fetchEmployees({ pageSize: 1 }),
-      fetchEmployees({ employmentStatus: 'active', pageSize: 1 }),
+      fetchEmployees({ pageSize: 1, ...scope }),
+      fetchEmployees({ employmentStatus: 'active', pageSize: 1, ...scope }),
       // The onboarding endpoint only accepts pageSize 25/50/100 — 25 is the smallest
       // valid value. `counts`/`pagination.totalItems` are full-dataset aggregates
       // regardless of pageSize, so this stays cheap while satisfying validation.
-      fetchNewHiresPaginated({ pageSize: 25 }),
-      fetchEmployees({ pageSize: 100 }),
-      fetchEmployeeActions({ status: 'pending', pageSize: 10 }),
-      leaveOperationsApi.requests({ status: 'pending', pageSize: 10 }),
+      fetchNewHiresPaginated({ pageSize: 25, ...scope }),
+      fetchEmployees({ pageSize: 100, ...scope }),
+      // Pending queues are always "currently pending" — not time-period scoped.
+      fetchEmployeeActions({ status: 'pending', pageSize: 1, ...scope }),
+      leaveOperationsApi.requests({ status: 'pending', pageSize: 10, ...scope }),
       fetchRegularizationRequests({ status: 'pending' }),
-      fetchDocuments({ view: 'pending_review', pageSize: 1 }),
-      fetchEmployeeActions({ pageSize: 20 }),
+      fetchDocuments({ view: 'pending_review', pageSize: 1, departmentId: scope.departmentId }),
+      fetchEmployeeActions({ pageSize: 20, ...eventScope }),
       // Category-filtered, backend-validated max page size (100) — large enough to
       // return every record at current data volumes. `pagination.totalItems` and
       // `statusCounts` below are exact aggregates regardless of this cap; only the
       // per-actionType breakdown computed from `.data` is bounded by it.
-      fetchEmployeeActions({ category: 'transfer', pageSize: 100 }),
-      fetchEmployeeActions({ category: 'job_changes', pageSize: 100 }),
-      fetchEmployeeActions({ category: 'separation', pageSize: 100 }),
+      fetchEmployeeActions({ category: 'transfer', pageSize: 100, ...eventScope }),
+      fetchEmployeeActions({ category: 'job_changes', pageSize: 100, ...eventScope }),
+      fetchEmployeeActions({ category: 'separation', pageSize: 100, ...eventScope }),
     ]).then((results) => {
       if (!active) return;
 
@@ -518,13 +626,16 @@ export function WorkforceOverviewPage({
       }
 
       // ── Transfers Breakdown: real aggregates for the 'transfer' category ──
-      // `pagination.totalItems` and `statusCounts` are exact aggregates, independent
-      // of the pageSize cap used to fetch the detail list above.
+      // `total` is scoped by Location/Department + the selected Time Period
+      // (effectiveDate). `pendingApproval` comes from the separate, non-period
+      // `pendingActionsRes` fetch — "pending" is always a current queue, not a
+      // historical window.
       if (transferActionsRes.status === 'fulfilled') {
-        const { pagination, statusCounts } = transferActionsRes.value;
+        const pendingByCategory =
+          pendingActionsRes.status === 'fulfilled' ? pendingActionsRes.value.counts : null;
         setTransfersBreakdown({
-          total: pagination.totalItems,
-          pendingApproval: statusCounts?.pending ?? 0,
+          total: transferActionsRes.value.pagination.totalItems,
+          pendingApproval: pendingByCategory?.transfer ?? 0,
           // The backend's 'transfer' category tracks only location transfers — there
           // is no branch/department/designation transfer actionType to break down by.
           transferTypes: [],
@@ -533,7 +644,9 @@ export function WorkforceOverviewPage({
 
       // ── Promotions Breakdown: real aggregates for the 'job_changes' category ──
       if (promotionActionsRes.status === 'fulfilled') {
-        const { data: jobChangeActions, pagination, statusCounts } = promotionActionsRes.value;
+        const { data: jobChangeActions, pagination } = promotionActionsRes.value;
+        const pendingByCategory =
+          pendingActionsRes.status === 'fulfilled' ? pendingActionsRes.value.counts : null;
 
         const desigChange = jobChangeActions.filter(
           (a) => a.actionType === 'designation_change',
@@ -565,7 +678,7 @@ export function WorkforceOverviewPage({
 
         setPromotionsBreakdown({
           total: pagination.totalItems,
-          pendingApproval: statusCounts?.pending ?? 0,
+          pendingApproval: pendingByCategory?.job_changes ?? 0,
           progression: roleProgression,
           promotionTypes: [
             {
@@ -597,9 +710,15 @@ export function WorkforceOverviewPage({
       }
 
       // ── Offboarding Breakdown: real aggregates for the 'separation' category ──
+      // `total`/`settledCount` are scoped by Location/Department + Time Period
+      // (effectiveDate). `noticePeriodCount` comes from the separate, non-period
+      // `pendingActionsRes` fetch — employees currently serving notice are a
+      // present-tense queue, not a historical window.
       if (separationActionsRes.status === 'fulfilled') {
         const { pagination, statusCounts } = separationActionsRes.value;
-        const noticePeriodCount = statusCounts?.pending ?? 0;
+        const pendingByCategory =
+          pendingActionsRes.status === 'fulfilled' ? pendingActionsRes.value.counts : null;
+        const noticePeriodCount = pendingByCategory?.separation ?? 0;
         const settledCount = statusCounts?.applied ?? 0;
 
         setOffboardingBreakdown({
@@ -1182,7 +1301,7 @@ export function WorkforceOverviewPage({
     return () => {
       active = false;
     };
-  }, []);
+  }, [timePeriod, locationId, departmentId]);
 
   return (
     <Page maxWidth="full" gap="md">
@@ -1213,33 +1332,33 @@ export function WorkforceOverviewPage({
           }
           actions={
             <div className="bezent-wf-header-controls">
-              <button
-                type="button"
-                className="bezent-wf-filter-pill-btn"
+              <Select
+                size="sm"
+                width="auto"
+                aria-label="Filter by timeframe"
                 title="Filter by timeframe"
-              >
-                <BezentIcon name="schedule" size={14} />
-                <span>Last 6 Months</span>
-                <BezentIcon name="chevronDown" size={12} />
-              </button>
-              <button
-                type="button"
-                className="bezent-wf-filter-pill-btn"
+                value={timePeriod}
+                options={TIME_PERIOD_OPTIONS}
+                onChange={(e) => setTimePeriod(e.target.value as TimePeriodKey)}
+              />
+              <Select
+                size="sm"
+                width="auto"
+                aria-label="Filter by location"
                 title="Filter by location"
-              >
-                <BezentIcon name="organization" size={14} />
-                <span>All Locations</span>
-                <BezentIcon name="chevronDown" size={12} />
-              </button>
-              <button
-                type="button"
-                className="bezent-wf-filter-pill-btn"
+                value={locationId}
+                options={locationOptions}
+                onChange={(e) => setLocationId(e.target.value)}
+              />
+              <Select
+                size="sm"
+                width="auto"
+                aria-label="Filter by department"
                 title="Filter by department"
-              >
-                <BezentIcon name="employees" size={14} />
-                <span>All Departments</span>
-                <BezentIcon name="chevronDown" size={12} />
-              </button>
+                value={departmentId}
+                options={departmentOptions}
+                onChange={(e) => setDepartmentId(e.target.value)}
+              />
             </div>
           }
         />
