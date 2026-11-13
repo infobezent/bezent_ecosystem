@@ -378,6 +378,10 @@ export function validateListEmployeeActionsQuery(
     params.departmentId = input.departmentId.trim();
   }
 
+  if (typeof input.locationId === 'string' && input.locationId.trim()) {
+    params.locationId = input.locationId.trim();
+  }
+
   if (
     typeof input.effectiveDateFrom === 'string' &&
     isValidIsoDate(input.effectiveDateFrom.trim())

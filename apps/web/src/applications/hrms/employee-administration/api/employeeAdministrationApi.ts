@@ -139,6 +139,7 @@ export interface ListEmployeeActionsQuery {
   status?: EmployeeActionStatus;
   employeeId?: string;
   departmentId?: string;
+  locationId?: string;
   effectiveDateFrom?: string;
   effectiveDateTo?: string;
   search?: string;
