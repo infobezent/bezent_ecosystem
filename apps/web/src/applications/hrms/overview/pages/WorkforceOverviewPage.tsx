@@ -237,15 +237,15 @@ export function WorkforceOverviewPage({
   ];
 
   const [kpiData, setKpiData] = useState<OverviewKPIData>({
-    totalEmployees: 16,
-    activeEmployees: 14,
-    probationEmployees: 2,
-    newJoiners: 2,
+    totalEmployees: 0,
+    activeEmployees: 0,
+    probationEmployees: 0,
+    newJoiners: 0,
     exits: 0,
-    retentionRate: 100,
-    growthPct: 14.3,
-    netGrowth: 2,
-    activePct: 87.5,
+    retentionRate: 0,
+    growthPct: 0,
+    netGrowth: 0,
+    activePct: 0,
   });
 
   const [rawEmployees, setRawEmployees] = useState<EmployeeRecord[]>([]);
@@ -339,7 +339,7 @@ export function WorkforceOverviewPage({
     null,
   );
 
-  const [totalWorkforceCount, setTotalWorkforceCount] = useState(16);
+  const [totalWorkforceCount, setTotalWorkforceCount] = useState(0);
 
   // Workforce Composition States
   const [empTypeItems, setEmpTypeItems] = useState<CompItem[]>([]);
@@ -370,8 +370,8 @@ export function WorkforceOverviewPage({
     {
       id: 'new-joiners',
       name: 'New Joiners',
-      count: 2,
-      percentage: 10,
+      count: 0,
+      percentage: 0,
       color: '#93c5fd',
       iconClass: 'blue',
       iconName: 'onboarding',
@@ -380,8 +380,8 @@ export function WorkforceOverviewPage({
     {
       id: 'onboarding',
       name: 'Onboarding',
-      count: 2,
-      percentage: 10,
+      count: 0,
+      percentage: 0,
       color: '#86efac',
       iconClass: 'green',
       iconName: 'milestones',
@@ -390,8 +390,8 @@ export function WorkforceOverviewPage({
     {
       id: 'probation',
       name: 'Probation',
-      count: 2,
-      percentage: 10,
+      count: 0,
+      percentage: 0,
       color: '#c4b5fd',
       iconClass: 'purple',
       iconName: 'documents',
@@ -400,8 +400,8 @@ export function WorkforceOverviewPage({
     {
       id: 'confirmed',
       name: 'Confirmed',
-      count: 14,
-      percentage: 70,
+      count: 0,
+      percentage: 0,
       color: '#f9a8d4',
       iconClass: 'pink',
       iconName: 'badge',
@@ -418,7 +418,7 @@ export function WorkforceOverviewPage({
       path: '/hrms/workforce/offboarding',
     },
   ]);
-  const [totalLifecycleVolume, setTotalLifecycleVolume] = useState(20);
+  const [totalLifecycleVolume, setTotalLifecycleVolume] = useState(0);
   const [hoveredStageId, setHoveredStageId] = useState<string | null>(null);
 
   // ── HR Action Center States ──
@@ -1041,7 +1041,7 @@ export function WorkforceOverviewPage({
       setMgmtWorkforceCount(mgmtCount);
       setIcWorkforceCount(icCount);
       setLeadWorkforceCount(leadCount);
-      setTotalJobLevelsCount(jobArr.filter((j) => j.count > 0).length || 2);
+      setTotalJobLevelsCount(jobArr.filter((j) => j.count > 0).length);
 
       // ── 04. Workforce Planning Calculations ──
       const calculatedApproved = Math.max(22, totalBase + 6);
@@ -1085,14 +1085,14 @@ export function WorkforceOverviewPage({
       const onboardingCount = newJoiners;
       const totalLifecycle =
         newJoiners + onboardingCount + probationEmployees + confirmedEmployees + exits;
-      setTotalLifecycleVolume(totalLifecycle || 20);
+      setTotalLifecycleVolume(totalLifecycle);
 
       const stageItems: LifecycleStageItem[] = [
         {
           id: 'new-joiners',
           name: 'New Joiners',
           count: newJoiners,
-          percentage: totalLifecycle > 0 ? Math.round((newJoiners / totalLifecycle) * 100) : 10,
+          percentage: totalLifecycle > 0 ? Math.round((newJoiners / totalLifecycle) * 100) : 0,
           color: '#93c5fd',
           iconClass: 'blue',
           iconName: 'onboarding',
@@ -1102,8 +1102,7 @@ export function WorkforceOverviewPage({
           id: 'onboarding',
           name: 'Onboarding',
           count: onboardingCount,
-          percentage:
-            totalLifecycle > 0 ? Math.round((onboardingCount / totalLifecycle) * 100) : 10,
+          percentage: totalLifecycle > 0 ? Math.round((onboardingCount / totalLifecycle) * 100) : 0,
           color: '#86efac',
           iconClass: 'green',
           iconName: 'milestones',
@@ -1114,7 +1113,7 @@ export function WorkforceOverviewPage({
           name: 'Probation',
           count: probationEmployees,
           percentage:
-            totalLifecycle > 0 ? Math.round((probationEmployees / totalLifecycle) * 100) : 10,
+            totalLifecycle > 0 ? Math.round((probationEmployees / totalLifecycle) * 100) : 0,
           color: '#c4b5fd',
           iconClass: 'purple',
           iconName: 'documents',
@@ -1125,7 +1124,7 @@ export function WorkforceOverviewPage({
           name: 'Confirmed',
           count: confirmedEmployees,
           percentage:
-            totalLifecycle > 0 ? Math.round((confirmedEmployees / totalLifecycle) * 100) : 70,
+            totalLifecycle > 0 ? Math.round((confirmedEmployees / totalLifecycle) * 100) : 0,
           color: '#f9a8d4',
           iconClass: 'pink',
           iconName: 'badge',
