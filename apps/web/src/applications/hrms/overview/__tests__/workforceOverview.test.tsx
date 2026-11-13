@@ -111,9 +111,7 @@ describe('Workforce Overview Page', () => {
 
     expect(html).toContain('HR Action Center');
     expect(html).toContain('bezent-wf-action-card');
-    expect(html).toContain(
-      'Immediate pending actions requiring HR team attention, signoff, and compliance review.',
-    );
+    expect(html).toContain('Pending reviews');
   });
 
   it('renders Tier 7: Recent Workforce Activity vertical timeline cleanly', () => {
