@@ -124,7 +124,7 @@ export function OffersTable({
               {/* Compensation */}
               <TableCell>
                 <Stack gap="none">
-                  <span className="bezent-font-bold bezent-text-sm text-primary-700">
+                  <span className="bezent-font-bold bezent-text-sm bezent-hiring-accent">
                     {formatCtc(offer.compensation.totalCtc, offer.currency)}
                   </span>
                   <span className="bezent-text-xs bezent-text-secondary">
@@ -144,7 +144,7 @@ export function OffersTable({
                       {approvedSteps} of {totalSteps} signed
                     </span>
                     {approvedSteps === totalSteps && (
-                      <BezentIcon name="check" size="action" color="var(--color-success-600)" />
+                      <BezentIcon name="check" size="action" color="#16A34A" />
                     )}
                   </Inline>
                   <span className="bezent-text-xs bezent-text-secondary">
@@ -160,7 +160,7 @@ export function OffersTable({
                 <Stack gap="none">
                   <Inline align="center" gap="xs">
                     <span className="bezent-text-xs bezent-text-secondary">Join:</span>
-                    <span className="bezent-text-xs bezent-font-semibold text-success-700">
+                    <span className="bezent-text-xs bezent-font-semibold bezent-hiring-success-text">
                       {offer.targetJoiningDate}
                     </span>
                   </Inline>

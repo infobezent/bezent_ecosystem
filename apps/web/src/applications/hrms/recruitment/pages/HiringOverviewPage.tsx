@@ -149,21 +149,15 @@ export function HiringOverviewPage() {
                     {navigationShortcuts.map((s) => (
                       <div
                         key={s.path}
-                        className="p-3 bg-gray-50 border border-gray-100 rounded hover:border-primary-400 hover:bg-white transition-all cursor-pointer"
+                        className="bezent-hiring-shortcut"
                         onClick={() => navigate(s.path)}
                       >
                         <Stack gap="xs">
                           <Inline align="center" gap="xs">
-                            <BezentIcon
-                              name={s.icon}
-                              size="action"
-                              color="var(--color-primary-600)"
-                            />
-                            <span className="bezent-font-semibold bezent-text-xs text-gray-900">
-                              {s.title}
-                            </span>
+                            <BezentIcon name={s.icon} size="action" color="#0d9488" />
+                            <span className="bezent-font-semibold bezent-text-xs">{s.title}</span>
                           </Inline>
-                          <span className="bezent-text-xs text-gray-500">{s.desc}</span>
+                          <span className="bezent-text-xs bezent-text-secondary">{s.desc}</span>
                         </Stack>
                       </div>
                     ))}

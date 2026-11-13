@@ -26,7 +26,7 @@ export function SourceEffectivenessCard({ sources }: SourceEffectivenessCardProp
         <Stack gap="md">
           <Inline justify="between" align="center">
             <Inline align="center" gap="sm">
-              <BezentIcon name="reports" size="action" color="var(--color-primary-600)" />
+              <BezentIcon name="reports" size="action" color="#0d9488" />
               <Stack gap="none">
                 <span className="bezent-font-semibold bezent-text-base">
                   Candidate Source Effectiveness &amp; Channel ROI
@@ -70,22 +70,22 @@ export function SourceEffectivenessCard({ sources }: SourceEffectivenessCardProp
                   </TableCell>
 
                   <TableCell>
-                    <span className="bezent-text-sm text-gray-700">{s.interviewedCount}</span>
+                    <span className="bezent-text-sm">{s.interviewedCount}</span>
                   </TableCell>
 
                   <TableCell>
-                    <span className="bezent-text-sm text-gray-700">{s.offeredCount}</span>
+                    <span className="bezent-text-sm">{s.offeredCount}</span>
                   </TableCell>
 
                   <TableCell>
-                    <span className="bezent-font-bold bezent-text-sm text-success-700">
+                    <span className="bezent-font-bold bezent-text-sm bezent-hiring-success-text">
                       {s.hiredCount}
                     </span>
                   </TableCell>
 
                   <TableCell>
                     <Inline align="center" gap="xs">
-                      <span className="bezent-font-semibold bezent-text-sm text-primary-700">
+                      <span className="bezent-font-semibold bezent-text-sm bezent-hiring-accent">
                         {s.conversionRate}%
                       </span>
                       {s.conversionRate >= 15 && (

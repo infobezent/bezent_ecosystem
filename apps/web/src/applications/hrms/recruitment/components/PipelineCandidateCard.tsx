@@ -52,7 +52,7 @@ export function PipelineCandidateCard({
     <Card
       variant="flat"
       padding="sm"
-      className="cursor-pointer hover:border-primary-400 transition-all shadow-xs"
+      className="bezent-hiring-cand-card"
       onClick={() => onSelectCandidate(candidate)}
     >
       <CardBody>
@@ -62,9 +62,7 @@ export function PipelineCandidateCard({
             <Inline align="center" gap="xs">
               <Avatar initials={initials} size="sm" color="blue" />
               <Stack gap="none">
-                <span className="bezent-font-semibold bezent-text-sm leading-tight">
-                  {candidate.fullName}
-                </span>
+                <span className="bezent-font-semibold bezent-text-sm">{candidate.fullName}</span>
                 <span className="bezent-text-xs bezent-text-secondary">
                   {candidate.candidateNumber}
                 </span>
@@ -77,9 +75,7 @@ export function PipelineCandidateCard({
 
           {/* Applied Job Info */}
           <Stack gap="none">
-            <span className="bezent-text-xs bezent-font-medium text-gray-800 line-clamp-1">
-              {candidate.appliedJobTitle}
-            </span>
+            <span className="bezent-text-xs bezent-font-medium">{candidate.appliedJobTitle}</span>
             <span className="bezent-text-xs bezent-text-secondary">
               {candidate.currentCompany
                 ? `${candidate.totalExperienceYears}y at ${candidate.currentCompany}`
@@ -95,7 +91,7 @@ export function PipelineCandidateCard({
                 : `${candidate.noticePeriodDays}d notice`}
             </span>
             {candidate.expectedCtcLpa && (
-              <span className="bezent-text-xs bezent-font-medium text-gray-700">
+              <span className="bezent-text-xs bezent-font-semibold bezent-hiring-accent">
                 ₹{candidate.expectedCtcLpa}L
               </span>
             )}
@@ -113,7 +109,7 @@ export function PipelineCandidateCard({
           )}
 
           {/* Stage Progression Controls */}
-          <Inline justify="between" align="center" className="pt-1 border-t border-gray-100">
+          <Inline justify="between" align="center" className="bezent-hiring-cand-card__footer">
             {canMovePrev ? (
               <Button
                 size="sm"

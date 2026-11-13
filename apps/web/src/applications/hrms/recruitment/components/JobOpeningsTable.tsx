@@ -447,7 +447,11 @@ export function JobOpeningsTable({
       </TableHead>
       <TableBody>
         {sortedJobs.map((job) => (
-          <TableRow key={job.id} onClick={() => onSelectJob(job)} className="cursor-pointer">
+          <TableRow
+            key={job.id}
+            onClick={() => onSelectJob(job)}
+            className="bezent-hiring-clickable"
+          >
             {/* 1. Job Code */}
             <TableCell>
               <span className="bezent-table-meta-dim font-mono">#{job.jobCode}</span>

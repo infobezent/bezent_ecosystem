@@ -21,7 +21,7 @@ export function StageConversionFunnel({ steps }: StageConversionFunnelProps) {
         <Stack gap="md">
           <Inline justify="between" align="center">
             <Inline align="center" gap="sm">
-              <BezentIcon name="pipeline" size="action" color="var(--color-primary-600)" />
+              <BezentIcon name="pipeline" size="action" color="#0d9488" />
               <Stack gap="none">
                 <span className="bezent-font-semibold bezent-text-base">
                   Full Pipeline Stage Conversion &amp; Velocity Funnel
@@ -44,13 +44,11 @@ export function StageConversionFunnel({ steps }: StageConversionFunnelProps) {
               const isFirst = idx === 0;
 
               return (
-                <div key={step.stageId} className="bg-gray-50 border border-gray-100 rounded p-3">
+                <div key={step.stageId} className="bezent-hiring-item">
                   <Grid columns={4} gap="md">
                     {/* Stage Name */}
                     <Inline align="center" gap="sm">
-                      <span className="w-6 h-6 rounded-full bg-primary-100 text-primary-700 text-xs font-bold flex items-center justify-center">
-                        {idx + 1}
-                      </span>
+                      <span className="bezent-hiring-step-badge">{idx + 1}</span>
                       <Stack gap="none">
                         <span className="bezent-font-semibold bezent-text-sm">
                           {step.stageName}
@@ -63,9 +61,7 @@ export function StageConversionFunnel({ steps }: StageConversionFunnelProps) {
 
                     {/* Candidate Count */}
                     <Inline align="baseline" gap="xs">
-                      <span className="bezent-text-xl bezent-font-bold text-gray-900">
-                        {step.count}
-                      </span>
+                      <span className="bezent-text-xl bezent-font-bold">{step.count}</span>
                       <span className="bezent-text-xs bezent-text-secondary">candidates</span>
                     </Inline>
 
@@ -86,7 +82,7 @@ export function StageConversionFunnel({ steps }: StageConversionFunnelProps) {
                     {/* Stage Duration */}
                     <Inline justify="end" align="center" gap="xs">
                       <span className="bezent-text-xs bezent-text-secondary">Avg Duration:</span>
-                      <span className="bezent-text-xs bezent-font-semibold text-primary-700">
+                      <span className="bezent-text-xs bezent-font-semibold bezent-hiring-accent">
                         {step.avgStageDays} days
                       </span>
                     </Inline>

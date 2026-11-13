@@ -402,7 +402,7 @@ export function InterviewScheduleTable({
                   onViewScorecard(item);
                 }
               }}
-              className="cursor-pointer"
+              className="bezent-hiring-clickable"
             >
               {/* 1. Candidate Info */}
               <TableCell>
@@ -471,7 +471,7 @@ export function InterviewScheduleTable({
                       e.stopPropagation();
                       onViewScorecard(item);
                     }}
-                    className="cursor-pointer inline-flex"
+                    className="bezent-hiring-inline-trigger"
                     title="View Scorecard"
                   >
                     <Badge variant="success" size="sm" showDot>
@@ -484,7 +484,7 @@ export function InterviewScheduleTable({
                       e.stopPropagation();
                       onLogScorecard(item);
                     }}
-                    className="cursor-pointer inline-flex"
+                    className="bezent-hiring-inline-trigger"
                     title="Log Scorecard"
                   >
                     <Badge variant="warning" size="sm" showDot>
