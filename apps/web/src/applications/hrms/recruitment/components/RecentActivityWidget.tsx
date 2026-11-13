@@ -88,7 +88,7 @@ export function RecentActivityWidget({
         <Stack gap="md">
           <Inline justify="between" align="center">
             <Inline align="center" gap="sm">
-              <BezentIcon name="tasks" size="action" color="#0d9488" />
+              <BezentIcon name="tasks" size="action" color="var(--color-primary-600)" />
               <Stack gap="none">
                 <span className="bezent-font-semibold bezent-text-base">
                   Recent Hiring Activity
@@ -105,17 +105,19 @@ export function RecentActivityWidget({
 
           <Stack gap="sm">
             {activities.map((act) => (
-              <div key={act.id} className="bezent-hiring-item">
+              <div key={act.id} className="bg-gray-50 border border-gray-100 rounded p-2.5">
                 <Inline justify="between" align="start">
-                  <Stack gap="xs">
+                  <Stack gap="none">
                     <Inline align="center" gap="xs">
-                      <span className="bezent-font-semibold bezent-text-sm">{act.title}</span>
+                      <span className="bezent-font-semibold bezent-text-sm text-gray-900">
+                        {act.title}
+                      </span>
                       <Badge variant={act.badgeVariant} size="sm">
                         {act.badgeLabel}
                       </Badge>
                     </Inline>
-                    <span className="bezent-text-xs bezent-text-secondary">{act.subtitle}</span>
-                    <span className="bezent-text-xs bezent-text-secondary">
+                    <span className="bezent-text-xs text-gray-600 mt-0.5">{act.subtitle}</span>
+                    <span className="bezent-text-xs bezent-text-secondary mt-1">
                       By {act.actor} • {act.timestamp}
                     </span>
                   </Stack>

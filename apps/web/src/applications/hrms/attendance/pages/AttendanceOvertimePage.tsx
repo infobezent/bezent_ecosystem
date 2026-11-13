@@ -740,7 +740,7 @@ export function AttendanceOvertimePage() {
         <Grid columns={estimatedCost !== null ? 5 : 4} gap="sm">
           {/* Card 1: Pending Approval */}
           <div
-            className={`bezent-kpi-card bezent-kpi-card--amber ${statusFilter === 'pending' ? 'is-active' : ''}`}
+            className={`bezent-kpi-card ${statusFilter === 'pending' ? 'is-active' : ''}`}
             onClick={() => {
               setStatusFilter((curr) => (curr === 'pending' ? 'all' : 'pending'));
               setPage(1);
@@ -759,7 +759,7 @@ export function AttendanceOvertimePage() {
 
           {/* Card 2: Approved Hours */}
           <div
-            className={`bezent-kpi-card bezent-kpi-card--green ${statusFilter === 'approved' ? 'is-active' : ''}`}
+            className={`bezent-kpi-card ${statusFilter === 'approved' ? 'is-active' : ''}`}
             onClick={() => {
               setStatusFilter((curr) => (curr === 'approved' ? 'all' : 'approved'));
               setPage(1);
@@ -778,7 +778,7 @@ export function AttendanceOvertimePage() {
 
           {/* Card 3: Paid in Payroll */}
           <div
-            className={`bezent-kpi-card bezent-kpi-card--blue ${settlementFilter === 'payable' ? 'is-active' : ''}`}
+            className={`bezent-kpi-card ${settlementFilter === 'payable' ? 'is-active' : ''}`}
             onClick={() => {
               setSettlementFilter((curr) => (curr === 'payable' ? 'all' : 'payable'));
               setPage(1);
@@ -797,7 +797,7 @@ export function AttendanceOvertimePage() {
 
           {/* Card 4: Converted to Comp-Off */}
           <div
-            className={`bezent-kpi-card bezent-kpi-card--purple ${settlementFilter === 'comp_off' ? 'is-active' : ''}`}
+            className={`bezent-kpi-card ${settlementFilter === 'comp_off' ? 'is-active' : ''}`}
             onClick={() => {
               setSettlementFilter((curr) => (curr === 'comp_off' ? 'all' : 'comp_off'));
               setPage(1);
@@ -816,10 +816,7 @@ export function AttendanceOvertimePage() {
 
           {/* Card 5: Estimated Cost (Conditional) */}
           {estimatedCost !== null && (
-            <div
-              className="bezent-kpi-card bezent-kpi-card--red"
-              title="Estimated total overtime cost in INR"
-            >
+            <div className="bezent-kpi-card" title="Estimated total overtime cost in INR">
               <div className="bezent-kpi-card__header">
                 <span className="bezent-kpi-card__title">Estimated Cost</span>
               </div>

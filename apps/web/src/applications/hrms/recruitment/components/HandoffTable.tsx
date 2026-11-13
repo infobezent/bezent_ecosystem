@@ -103,7 +103,7 @@ export function HandoffTable({
               {/* Target Joining */}
               <TableCell>
                 <Stack gap="none">
-                  <span className="bezent-font-semibold bezent-text-sm bezent-hiring-accent">
+                  <span className="bezent-font-semibold bezent-text-sm text-primary-700">
                     {item.targetJoiningDate}
                   </span>
                   <span className="bezent-text-xs bezent-text-secondary">
@@ -149,7 +149,7 @@ export function HandoffTable({
                     <Badge variant="warning" size="sm">
                       Match Detected
                     </Badge>
-                    <span className="bezent-text-xs bezent-hiring-warning-text bezent-font-medium">
+                    <span className="bezent-text-xs text-amber-700 font-medium">
                       Matches {item.duplicateCheck.existingEmployeeCode}
                     </span>
                   </Stack>

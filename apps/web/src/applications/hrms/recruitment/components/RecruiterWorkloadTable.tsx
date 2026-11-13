@@ -27,7 +27,7 @@ export function RecruiterWorkloadTable({ workload }: RecruiterWorkloadTableProps
         <Stack gap="md">
           <Inline justify="between" align="center">
             <Inline align="center" gap="sm">
-              <BezentIcon name="workforce" size="action" color="#0d9488" />
+              <BezentIcon name="workforce" size="action" color="var(--color-primary-600)" />
               <Stack gap="none">
                 <span className="bezent-font-semibold bezent-text-base">
                   Recruiter Throughput &amp; Talent Team Workload
@@ -88,7 +88,7 @@ export function RecruiterWorkloadTable({ workload }: RecruiterWorkloadTableProps
 
                     <TableCell>
                       <Inline align="center" gap="xs">
-                        <span className="bezent-font-semibold bezent-text-sm bezent-hiring-accent">
+                        <span className="bezent-font-semibold bezent-text-sm text-primary-700">
                           {rec.activePipelineCandidates}
                         </span>
                         <span className="bezent-text-xs bezent-text-secondary">candidates</span>
@@ -96,15 +96,17 @@ export function RecruiterWorkloadTable({ workload }: RecruiterWorkloadTableProps
                     </TableCell>
 
                     <TableCell>
-                      <span className="bezent-text-sm">{rec.interviewsFacilitated}</span>
+                      <span className="bezent-text-sm text-gray-700">
+                        {rec.interviewsFacilitated}
+                      </span>
                     </TableCell>
 
                     <TableCell>
-                      <span className="bezent-text-sm">{rec.offersReleased}</span>
+                      <span className="bezent-text-sm text-gray-700">{rec.offersReleased}</span>
                     </TableCell>
 
                     <TableCell>
-                      <span className="bezent-font-bold bezent-text-sm bezent-hiring-success-text">
+                      <span className="bezent-font-bold bezent-text-sm text-success-700">
                         {rec.hiresClosed}
                       </span>
                     </TableCell>

@@ -182,7 +182,11 @@ export function AssessmentDetailModal({
                 <CardBody>
                   <Inline justify="between" align="center">
                     <Inline align="center" gap="sm">
-                      <BezentIcon name="explore" size="action" color="#0d9488" />
+                      <BezentIcon
+                        name="explore"
+                        size="action"
+                        color="var(--color-info-600, #0284C7)"
+                      />
                       <Stack gap="none">
                         <span className="bezent-font-semibold bezent-text-sm">
                           Challenge Repository / Workspace
@@ -216,7 +220,11 @@ export function AssessmentDetailModal({
                   <CardBody>
                     <Inline justify="between" align="center">
                       <Inline align="center" gap="sm">
-                        <BezentIcon name="check" size="action" color="#16A34A" />
+                        <BezentIcon
+                          name="check"
+                          size="action"
+                          color="var(--color-success-600, #16A34A)"
+                        />
                         <Stack gap="none">
                           <span className="bezent-font-semibold bezent-text-sm">
                             Submitted by Candidate
@@ -243,16 +251,16 @@ export function AssessmentDetailModal({
                     <h4 className="bezent-font-semibold bezent-text-sm">
                       Candidate Submission Notes
                     </h4>
-                    <p className="bezent-text-sm bezent-text-secondary bezent-hiring-note-box">
+                    <p className="bezent-text-sm bezent-text-secondary bg-gray-50 p-3 rounded-lg border border-gray-100 leading-relaxed">
                       {assessment.submissionNotes}
                     </p>
                   </Stack>
                 )}
               </>
             ) : (
-              <div className="bezent-hiring-empty-dashed">
+              <div className="py-12 text-center border-2 border-dashed border-gray-200 rounded-xl">
                 <Stack gap="xs" align="center">
-                  <BezentIcon name="clock" size="nav" color="#D97706" />
+                  <BezentIcon name="clock" size="nav" color="var(--color-warning-600, #D97706)" />
                   <span className="bezent-font-semibold bezent-text-sm">
                     Awaiting Candidate Submission
                   </span>
@@ -281,7 +289,7 @@ export function AssessmentDetailModal({
                         <span className="bezent-text-xs bezent-text-secondary">Final Score</span>
                         <span className="bezent-text-3xl bezent-font-bold">
                           {assessment.score}{' '}
-                          <span className="bezent-text-sm bezent-text-secondary">
+                          <span className="bezent-text-sm bezent-font-normal text-gray-500">
                             / {assessment.maxScore}
                           </span>
                         </span>
@@ -291,9 +299,7 @@ export function AssessmentDetailModal({
                         <span className="bezent-text-xs bezent-text-secondary">
                           Hiring Decision
                         </span>
-                        <div className="bezent-hiring-pad-top">
-                          {formatDecisionBadge(assessment.decision)}
-                        </div>
+                        <div className="pt-1">{formatDecisionBadge(assessment.decision)}</div>
                       </Stack>
 
                       <Stack gap="none">
@@ -345,7 +351,7 @@ export function AssessmentDetailModal({
                     <Divider />
                     <Stack gap="xs">
                       <h4 className="bezent-font-semibold bezent-text-sm">Evaluator Feedback</h4>
-                      <p className="bezent-text-sm bezent-text-secondary bezent-hiring-note-box">
+                      <p className="bezent-text-sm bezent-text-secondary bg-gray-50 p-3 rounded-lg border border-gray-100 leading-relaxed">
                         {assessment.evaluatorFeedback}
                       </p>
                     </Stack>
@@ -353,7 +359,7 @@ export function AssessmentDetailModal({
                 )}
               </>
             ) : (
-              <div className="bezent-hiring-empty-dashed">
+              <div className="py-12 text-center border-2 border-dashed border-gray-200 rounded-xl">
                 <span className="bezent-text-xs bezent-text-secondary">
                   Assessment has not been evaluated yet. Click &quot;Grade &amp; Review&quot; to
                   record scores.

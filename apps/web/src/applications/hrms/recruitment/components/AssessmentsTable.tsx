@@ -156,7 +156,7 @@ export function AssessmentsTable({
                       href={item.submissionUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="bezent-text-xs bezent-hiring-link"
+                      className="bezent-text-xs text-primary-600 hover:underline flex items-center gap-1"
                     >
                       <BezentIcon name="documents" size={12} />
                       <span>View Submission Link</span>
@@ -181,7 +181,7 @@ export function AssessmentsTable({
                   </span>
                   <span className="bezent-text-xs bezent-font-semibold">Due: {item.dueDate}</span>
                   {item.submittedDate && (
-                    <span className="bezent-text-xs bezent-hiring-success-text">
+                    <span className="bezent-text-xs text-success-700">
                       Submitted: {item.submittedDate}
                     </span>
                   )}
@@ -198,7 +198,7 @@ export function AssessmentsTable({
                     <Inline align="center" gap="xs">
                       <span className="bezent-font-bold bezent-text-base">
                         {item.score}{' '}
-                        <span className="bezent-text-xs bezent-text-secondary">
+                        <span className="bezent-text-xs bezent-font-normal text-gray-500">
                           / {item.maxScore}
                         </span>
                       </span>

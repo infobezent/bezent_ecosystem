@@ -17,7 +17,7 @@
   gap: 12px;
   width: 100%;
   box-sizing: border-box;
-  border-radius: 10px;
+  border-radius: 6px;
   border: 1px solid transparent;
   color: var(--text-primary, #1f1f1f);
   cursor: pointer;
@@ -26,8 +26,7 @@
   outline: none;
   transition:
     background-color 0.14s ease,
-    border-color 0.14s ease,
-    color 0.14s ease;
+    border-color 0.14s ease;
 }
 
 .bezent-selectable-list__item--md {
@@ -39,17 +38,16 @@
 }
 
 .bezent-selectable-list__item:hover:not(.is-disabled):not(.is-selected) {
-  background: #f0fdfa;
+  background: var(--bg-hover, #c2e7ff);
 }
 
 .bezent-selectable-list__item.is-selected {
-  background: #f0fdfa;
-  border-color: #99f6e4;
-  color: #0f766e;
+  background: var(--bg-selected, #c2e7ff);
+  border-color: var(--border-focus, #1a73e8);
 }
 
 .bezent-selectable-list__item:focus-visible {
-  outline: 2px solid #14b8a6;
+  outline: 2px solid var(--border-focus, #1a73e8);
   outline-offset: 1px;
 }
 

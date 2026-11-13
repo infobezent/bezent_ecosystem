@@ -125,8 +125,8 @@
 
 .bezent-step-tab.is-active,
 .bezent-step-tab--active {
-  color: #0d9488;
-  border-bottom-color: #14b8a6;
+  color: var(--accent-interactive, #1a73e8);
+  border-bottom-color: var(--accent-interactive, #1a73e8);
   font-weight: 600;
 }
 
@@ -155,9 +155,8 @@
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
-  background-color: #f0fdfa;
-  color: #0f766e;
-  border: 1px solid #99f6e4;
+  background-color: var(--bg-hover, #c2e7ff);
+  color: var(--text-primary, #001d35);
   border-radius: 9999px;
   font-size: 12px;
   font-weight: 600;
@@ -248,23 +247,23 @@
   height: 32px;
   padding: 0 14px;
   background-color: var(--bg-surface, #ffffff);
-  color: #20263a;
-  border: 1px solid #e9eaf4;
-  border-radius: 10px;
+  color: var(--brand-primary, #041e49);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-md, 8px);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 1px 2px rgba(32, 45, 75, 0.04);
+  box-shadow: 0 1px 2px rgba(4, 30, 73, 0.06);
   transition: all 150ms ease;
 }
 
 .bezent-btn-draft:hover {
-  background-color: #f0fdfa;
-  border-color: #14b8a6;
-  color: #0f766e;
+  background-color: var(--bg-surface-secondary, #f0f4f9);
+  border-color: var(--border-focus, #1a73e8);
+  color: var(--brand-primary, #041e49);
 }
 
 .bezent-btn-cancel {

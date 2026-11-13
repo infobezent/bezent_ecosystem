@@ -16,12 +16,12 @@ export function TalentMetrics({ talent }: TalentMetricsProps) {
 
   return (
     <Grid columns={4} gap="md">
-      <Card className="bezent-clay-card bezent-clay-card--purple" padding="md">
+      <Card variant="flat" padding="md">
         <CardBody>
           <Stack gap="xs">
             <Inline justify="between" align="center">
               <span className="bezent-text-secondary bezent-text-sm">Total Talent Network</span>
-              <BezentIcon name="candidates" size="nav" color="#4F46E5" />
+              <BezentIcon name="candidates" size="nav" color="var(--color-primary-600, #4F46E5)" />
             </Inline>
             <Inline align="baseline" gap="xs">
               <span className="bezent-text-2xl bezent-font-semibold">{total}</span>
@@ -31,16 +31,16 @@ export function TalentMetrics({ talent }: TalentMetricsProps) {
         </CardBody>
       </Card>
 
-      <Card className="bezent-clay-card bezent-clay-card--blue" padding="md">
+      <Card variant="tint-blue" padding="md">
         <CardBody>
           <Stack gap="xs">
             <Inline justify="between" align="center">
               <span className="bezent-text-secondary bezent-text-sm">Silver Medalists</span>
-              <BezentIcon name="dashboard" size="nav" color="#0d9488" />
+              <BezentIcon name="dashboard" size="nav" color="var(--color-info-600, #0284C7)" />
             </Inline>
             <Inline align="baseline" gap="xs">
               <span className="bezent-text-2xl bezent-font-semibold">{silverMedalists}</span>
-              <span className="bezent-text-xs bezent-hiring-accent bezent-font-medium">
+              <span className="bezent-text-xs text-primary-700 bezent-font-medium">
                 high-priority runner-ups
               </span>
             </Inline>
@@ -48,16 +48,16 @@ export function TalentMetrics({ talent }: TalentMetricsProps) {
         </CardBody>
       </Card>
 
-      <Card className="bezent-clay-card bezent-clay-card--green" padding="md">
+      <Card variant="tint-green" padding="md">
         <CardBody>
           <Stack gap="xs">
             <Inline justify="between" align="center">
               <span className="bezent-text-secondary bezent-text-sm">Ready to Re-Engage</span>
-              <BezentIcon name="check" size="nav" color="#16A34A" />
+              <BezentIcon name="check" size="nav" color="var(--color-success-600, #16A34A)" />
             </Inline>
             <Inline align="baseline" gap="xs">
               <span className="bezent-text-2xl bezent-font-semibold">{availableNow}</span>
-              <span className="bezent-text-xs bezent-hiring-success-text bezent-font-medium">
+              <span className="bezent-text-xs text-success-700 bezent-font-medium">
                 actively open candidates
               </span>
             </Inline>
@@ -65,10 +65,7 @@ export function TalentMetrics({ talent }: TalentMetricsProps) {
         </CardBody>
       </Card>
 
-      <Card
-        className={`bezent-clay-card ${expiringConsent > 0 ? 'bezent-clay-card--amber' : 'bezent-clay-card--purple'}`}
-        padding="md"
-      >
+      <Card variant="flat" padding="md">
         <CardBody>
           <Stack gap="xs">
             <Inline justify="between" align="center">
@@ -76,12 +73,14 @@ export function TalentMetrics({ talent }: TalentMetricsProps) {
               <BezentIcon
                 name="security"
                 size="nav"
-                color={expiringConsent > 0 ? '#D97706' : '#64748b'}
+                color={
+                  expiringConsent > 0 ? 'var(--color-warning-600)' : 'var(--color-neutral-500)'
+                }
               />
             </Inline>
             <Inline align="baseline" gap="xs">
               <span className="bezent-text-2xl bezent-font-semibold">{expiringConsent}</span>
-              <span className="bezent-text-xs bezent-hiring-warning-text bezent-font-medium">
+              <span className="bezent-text-xs text-amber-700 bezent-font-medium">
                 {expiringConsent > 0 ? 'renewal required soon' : 'all compliant'}
               </span>
             </Inline>

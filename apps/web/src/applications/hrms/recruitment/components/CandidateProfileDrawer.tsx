@@ -130,11 +130,7 @@ export function CandidateProfileDrawer({
           <Stack gap="md">
             {/* Quick Metrics */}
             <Grid columns={4} gap="sm">
-              <Card
-                variant="default"
-                padding="none"
-                className="bezent-clay-card bezent-clay-card--compact"
-              >
+              <Card variant="default" padding="none" className="bezent-clay-card--compact">
                 <CardBody>
                   <Stack gap="none">
                     <span className="bezent-text-xs bezent-text-secondary">Experience</span>
@@ -146,11 +142,7 @@ export function CandidateProfileDrawer({
                 </CardBody>
               </Card>
 
-              <Card
-                variant="default"
-                padding="none"
-                className="bezent-clay-card bezent-clay-card--compact"
-              >
+              <Card variant="default" padding="none" className="bezent-clay-card--compact">
                 <CardBody>
                   <Stack gap="none">
                     <span className="bezent-text-xs bezent-text-secondary">Current Company</span>
@@ -161,11 +153,7 @@ export function CandidateProfileDrawer({
                 </CardBody>
               </Card>
 
-              <Card
-                variant="default"
-                padding="none"
-                className="bezent-clay-card bezent-clay-card--compact"
-              >
+              <Card variant="default" padding="none" className="bezent-clay-card--compact">
                 <CardBody>
                   <Stack gap="none">
                     <span className="bezent-text-xs bezent-text-secondary">Notice Period</span>
@@ -178,11 +166,7 @@ export function CandidateProfileDrawer({
                 </CardBody>
               </Card>
 
-              <Card
-                variant="default"
-                padding="none"
-                className="bezent-clay-card bezent-clay-card--compact"
-              >
+              <Card variant="default" padding="none" className="bezent-clay-card--compact">
                 <CardBody>
                   <Stack gap="none">
                     <span className="bezent-text-xs bezent-text-secondary">
@@ -264,7 +248,11 @@ export function CandidateProfileDrawer({
               <CardBody>
                 <Inline justify="between" align="center">
                   <Inline align="center" gap="sm">
-                    <BezentIcon name="documents" size="action" color="#0d9488" />
+                    <BezentIcon
+                      name="documents"
+                      size="action"
+                      color="var(--color-info-600, #0284C7)"
+                    />
                     <Stack gap="none">
                       <span className="bezent-font-semibold bezent-text-sm">
                         {candidate.resumeFileName}
@@ -374,7 +362,7 @@ export function CandidateProfileDrawer({
                         </Inline>
                       </Inline>
                       {app.feedbackNotes && (
-                        <p className="bezent-text-xs bezent-text-secondary bezent-hiring-note-box">
+                        <p className="bezent-text-xs bezent-text-secondary bg-gray-50 p-2 rounded">
                           <strong>Feedback:</strong> {app.feedbackNotes}
                         </p>
                       )}
@@ -389,7 +377,7 @@ export function CandidateProfileDrawer({
                 <Divider />
                 <Stack gap="xs">
                   <h4 className="bezent-font-semibold bezent-text-sm">Internal Hiring Notes</h4>
-                  <ul className="bezent-text-xs bezent-text-secondary bezent-hiring-list">
+                  <ul className="bezent-text-xs bezent-text-secondary list-disc pl-5 space-y-1">
                     {candidate.hiringNotes.map((note, idx) => (
                       <li key={idx}>{note}</li>
                     ))}
@@ -444,7 +432,11 @@ export function CandidateProfileDrawer({
                 <CardBody>
                   <Stack gap="xs">
                     <Inline align="center" gap="xs">
-                      <BezentIcon name="onboarding" size="action" color="#16A34A" />
+                      <BezentIcon
+                        name="onboarding"
+                        size="action"
+                        color="var(--color-success-600, #16A34A)"
+                      />
                       <span className="bezent-font-semibold bezent-text-sm">
                         Ready for Onboarding Handoff
                       </span>

@@ -138,14 +138,17 @@ export function TalentTable({ talent, onSelectTalent, onReEngage }: TalentTableP
 
               {/* Skills & Tags */}
               <TableCell>
-                <div className="bezent-hiring-chip-group">
+                <div className="flex flex-wrap gap-1 max-w-xs">
                   {profile.tags.slice(0, 2).map((tag) => (
                     <Badge key={tag} variant="neutral" size="sm">
                       {tag}
                     </Badge>
                   ))}
                   {profile.skills.slice(0, 2).map((skill) => (
-                    <span key={skill} className="bezent-hiring-chip">
+                    <span
+                      key={skill}
+                      className="bezent-text-xs bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded"
+                    >
                       {skill}
                     </span>
                   ))}

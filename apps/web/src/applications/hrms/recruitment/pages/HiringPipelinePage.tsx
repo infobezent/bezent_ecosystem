@@ -295,12 +295,16 @@ export function HiringPipelinePage({
 
         {/* 1. Summary Metrics Banner */}
         <Grid columns={4} gap="md">
-          <Card className="bezent-clay-card bezent-clay-card--purple" padding="md">
+          <Card variant="flat" padding="md">
             <CardBody>
               <Stack gap="xs">
                 <Inline justify="between" align="center">
                   <span className="bezent-text-secondary bezent-text-sm">Active In Pipeline</span>
-                  <BezentIcon name="pipeline" size="nav" color="#4F46E5" />
+                  <BezentIcon
+                    name="pipeline"
+                    size="nav"
+                    color="var(--color-primary-600, #4F46E5)"
+                  />
                 </Inline>
                 <Inline align="baseline" gap="xs">
                   <span className="bezent-text-2xl bezent-font-semibold">{metrics.active}</span>
@@ -310,12 +314,12 @@ export function HiringPipelinePage({
             </CardBody>
           </Card>
 
-          <Card className="bezent-clay-card bezent-clay-card--blue" padding="md">
+          <Card variant="tint-blue" padding="md">
             <CardBody>
               <Stack gap="xs">
                 <Inline justify="between" align="center">
                   <span className="bezent-text-secondary bezent-text-sm">In Evaluation</span>
-                  <BezentIcon name="interviews" size="nav" color="#0d9488" />
+                  <BezentIcon name="interviews" size="nav" color="var(--color-info-600, #0284C7)" />
                 </Inline>
                 <Inline align="baseline" gap="xs">
                   <span className="bezent-text-2xl bezent-font-semibold">
@@ -329,12 +333,12 @@ export function HiringPipelinePage({
             </CardBody>
           </Card>
 
-          <Card className="bezent-clay-card bezent-clay-card--green" padding="md">
+          <Card variant="tint-green" padding="md">
             <CardBody>
               <Stack gap="xs">
                 <Inline justify="between" align="center">
                   <span className="bezent-text-secondary bezent-text-sm">Offers & Hires</span>
-                  <BezentIcon name="offers" size="nav" color="#16A34A" />
+                  <BezentIcon name="offers" size="nav" color="var(--color-success-600, #16A34A)" />
                 </Inline>
                 <Inline align="baseline" gap="xs">
                   <span className="bezent-text-2xl bezent-font-semibold">
@@ -346,12 +350,12 @@ export function HiringPipelinePage({
             </CardBody>
           </Card>
 
-          <Card className="bezent-clay-card bezent-clay-card--amber" padding="md">
+          <Card variant="flat" padding="md">
             <CardBody>
               <Stack gap="xs">
                 <Inline justify="between" align="center">
                   <span className="bezent-text-secondary bezent-text-sm">Conversion Rate</span>
-                  <BezentIcon name="reports" size="nav" color="#D97706" />
+                  <BezentIcon name="reports" size="nav" color="var(--color-warning-600, #D97706)" />
                 </Inline>
                 <Inline align="baseline" gap="xs">
                   <span className="bezent-text-2xl bezent-font-semibold">
@@ -413,8 +417,8 @@ export function HiringPipelinePage({
         {isLoading ? (
           <LoadingState label="Loading hiring pipeline…" />
         ) : (
-          <div className="bezent-hiring-board-scroll">
-            <div className="bezent-hiring-board-track">
+          <div className="overflow-x-auto pb-4 pt-1">
+            <div className="flex gap-4 items-start min-w-max">
               {ACTIVE_PIPELINE_STAGES.map((stage) => {
                 const stageCandidates = filteredCandidates.filter(
                   (c) => c.currentStage === stage.id,

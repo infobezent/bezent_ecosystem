@@ -2,7 +2,7 @@
  * BEZENT Design System — Universal Forms & Data Collection Styles
  *
  * Consistent typography, uniform font sizes, semantic tokens, grid alignments,
- * and button/toggle color system (#f0fdfa secondary, #0d9488 primary & toggles).
+ * and button/toggle color system (#c2e7ff secondary, #071e49 primary & toggles).
  */
 
 /* ─── 1. Uniform Typography & Color Palette ──────────────────────────────── */
@@ -17,19 +17,11 @@
   --form-font-size-badge: 12px;
 
   /* Theme Button & Toggle Palette */
-  --bezent-btn-sec-bg: #f0fdfa;
-  --bezent-btn-sec-hover: #ccfbf1;
-  --bezent-btn-sec-text: #0f766e;
-  --bezent-toggle-active-bg: #0d9488;
-  --bezent-toggle-active-hover: #0f766e;
-}
-
-[data-theme='dark'] {
-  --bezent-btn-sec-bg: rgba(20, 184, 166, 0.16);
-  --bezent-btn-sec-hover: rgba(20, 184, 166, 0.25);
-  --bezent-btn-sec-text: #5eead4;
-  --bezent-toggle-active-bg: #14b8a6;
-  --bezent-toggle-active-hover: #2dd4bf;
+  --bezent-btn-sec-bg: #c2e7ff;
+  --bezent-btn-sec-hover: #a8dbfc;
+  --bezent-btn-sec-text: #071e49;
+  --bezent-toggle-active-bg: #071e49;
+  --bezent-toggle-active-hover: #041430;
 }
 
 /* ─── 2. Core Form Field & Control Primitives ─────────────────────────────── */
@@ -85,8 +77,8 @@
   height: 38px;
   padding: 0 12px;
   background: var(--bg-surface, #ffffff);
-  border: 1px solid #e9eaf4;
-  border-radius: 10px;
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-md, 8px);
   color: var(--text-primary, #000000);
   font: inherit;
   font-size: var(--form-font-size-input, 14px);
@@ -102,7 +94,7 @@
 .personal-info__input:hover:not(:disabled):not([readonly]),
 .working-hours-section__input:hover:not(:disabled):not([readonly]),
 .accounts-section__input:hover:not(:disabled):not([readonly]) {
-  border-color: #5eead4;
+  border-color: var(--border-focus, #7cc4fa);
 }
 
 .employee-registration__input:focus,
@@ -113,8 +105,8 @@
 .skills-section__input:focus,
 .emergency-contact-section__input:focus {
   outline: none;
-  border-color: #14b8a6;
-  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
+  border-color: var(--border-focus, #7cc4fa);
+  box-shadow: none;
 }
 
 .employee-registration__input--disabled,
@@ -147,8 +139,8 @@
   height: 38px;
   padding: 0 32px 0 12px;
   background: var(--bg-surface, #ffffff);
-  border: 1px solid #e9eaf4;
-  border-radius: 10px;
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-md, 8px);
   color: var(--text-primary, #000000);
   font: inherit;
   font-size: var(--form-font-size-input, 14px);
@@ -166,15 +158,15 @@
 .employee-registration__select:hover:not(:disabled),
 .working-hours-section__select:hover:not(:disabled),
 .accounts-section__select:hover:not(:disabled) {
-  border-color: #5eead4;
+  border-color: var(--border-focus, #1a73e8);
 }
 
 .employee-registration__select:focus,
 .working-hours-section__select:focus,
 .accounts-section__select:focus {
   outline: none;
-  border-color: #14b8a6;
-  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.14);
+  border-color: var(--border-focus, #1a73e8);
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.18);
 }
 
 .employee-registration__select:disabled {
@@ -249,8 +241,8 @@
   min-height: 72px;
   padding: 8px 12px;
   background: var(--bg-surface, #ffffff);
-  border: 1px solid #e9eaf4;
-  border-radius: 10px;
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-md, 8px);
   color: var(--text-primary, #000000);
   font: inherit;
   font-size: var(--form-font-size-input, 14px);
@@ -265,14 +257,14 @@
 
 .employee-registration__textarea:hover:not(:disabled),
 .emergency-contact-section__textarea:hover:not(:disabled) {
-  border-color: #5eead4;
+  border-color: var(--border-focus, #1a73e8);
 }
 
 .employee-registration__textarea:focus,
 .emergency-contact-section__textarea:focus {
   outline: none;
-  border-color: #14b8a6;
-  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.14);
+  border-color: var(--border-focus, #1a73e8);
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.18);
 }
 
 /* ─── 5. Section Headers & Banners ───────────────────────────────────────── */
@@ -281,18 +273,18 @@
   align-items: center;
   gap: 14px;
   padding: 14px 18px;
-  background: var(--bg-card, #f8fafc);
-  border: 1px solid #e9eaf4;
-  border-radius: 14px;
+  background: var(--bg-card, #f0f4f9);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-md, 8px);
   margin-bottom: 20px;
 }
 
 .employee-registration__section-icon-badge {
   width: 40px;
   height: 40px;
-  border-radius: 10px;
-  background: var(--bezent-btn-sec-bg, #f0fdfa);
-  color: var(--bezent-btn-sec-text, #0f766e);
+  border-radius: var(--radius-sm, 6px);
+  background: var(--bezent-btn-sec-bg, #c2e7ff);
+  color: var(--bezent-btn-sec-text, #071e49);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1045,17 +1037,17 @@
   justify-content: center;
   gap: 8px;
   padding: 24px;
-  background: var(--bg-surface-secondary, #f8fafc);
-  border: 2px dashed #cbd5e1;
-  border-radius: 14px;
+  background: var(--bg-surface-secondary, #f0f4f9);
+  border: 2px dashed var(--border-default, #dde3ea);
+  border-radius: var(--radius-md, 8px);
   cursor: pointer;
   text-align: center;
   transition: all 0.15s ease;
 }
 
 .documents-section__photo-placeholder-box:hover {
-  background: #f0fdfa;
-  border-color: #14b8a6;
+  background: var(--bg-hover, #c2e7ff);
+  border-color: var(--border-focus, #1a73e8);
 }
 
 .documents-section__photo-placeholder-text {
@@ -1089,13 +1081,12 @@
 }
 
 .working-hours-section__day-chip:hover {
-  border-color: #14b8a6;
-  background: #f0fdfa;
+  border-color: var(--border-focus, #1a73e8);
 }
 
 .working-hours-section__day-chip--active {
-  background: var(--bezent-toggle-active-bg, #0d9488);
-  border-color: var(--bezent-toggle-active-bg, #0d9488);
+  background: var(--bezent-toggle-active-bg, #071e49);
+  border-color: var(--bezent-toggle-active-bg, #071e49);
   color: #ffffff;
 }
 
@@ -1290,20 +1281,20 @@
   align-items: flex-start;
   gap: 10px;
   padding: 10px 12px;
-  border: 1px solid #e9eaf4;
-  border-radius: 12px;
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: 8px;
   background: var(--bg-surface, #ffffff);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .online-access-section__module-card:hover {
-  border-color: #14b8a6;
+  border-color: var(--border-focus, #1a73e8);
 }
 
 .online-access-section__module-card--active {
-  border-color: #14b8a6;
-  background: #f0fdfa;
+  border-color: var(--border-focus, #1a73e8);
+  background: var(--bg-surface-secondary, #f0f4f9);
 }
 
 .online-access-section__module-name {
@@ -2276,21 +2267,21 @@
   gap: 6px;
   padding: 6px 12px;
   background: var(--bg-surface, #ffffff);
-  color: #20263a;
-  border: 1px solid #e9eaf4;
-  border-radius: 10px;
+  color: var(--brand-primary, #041e49);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-md, 8px);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(32, 45, 75, 0.04);
+  box-shadow: 0 1px 2px rgba(4, 30, 73, 0.06);
   transition: all 0.15s ease;
 }
 
 .onboarding-page__drafts-btn:hover,
 .bezent-btn-draft:hover {
-  background: #f0fdfa;
-  border-color: #14b8a6;
-  color: #0f766e;
+  background: var(--bg-surface-secondary, #f0f4f9);
+  border-color: var(--border-focus, #1a73e8);
+  color: var(--brand-primary, #041e49);
 }
 
 .onboarding-page__btn-content {
@@ -2464,8 +2455,8 @@
   margin-top: 16px;
   padding: 12px 16px;
   background: var(--bg-surface, #ffffff);
-  border: 1px solid #e9eaf4;
-  border-radius: 14px;
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-md, 8px);
 }
 
 .new-hire-modal__error-alert {
@@ -2473,7 +2464,7 @@
   background: #fee2e2;
   border: 1px solid #fca5a5;
   color: #b91c1c;
-  border-radius: 10px;
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
   margin-bottom: 12px;
@@ -2490,22 +2481,22 @@
   width: 28px;
   height: 28px;
   padding: 0;
-  background: var(--bezent-btn-sec-bg, #f0fdfa);
-  color: var(--bezent-btn-sec-text, #0f766e);
-  border: 1px solid #99f6e4;
-  border-radius: 8px;
+  background: var(--bezent-btn-sec-bg, #c2e7ff);
+  color: var(--bezent-btn-sec-text, #071e49);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm, 6px);
   cursor: pointer;
   transition: all 0.15s ease;
   flex-shrink: 0;
 }
 
 .admin-builder-action-btn:hover:not(:disabled) {
-  background: var(--bezent-btn-sec-hover, #ccfbf1);
-  color: var(--bezent-btn-sec-text, #0f766e);
+  background: var(--bezent-btn-sec-hover, #a8dbfc);
+  color: var(--bezent-btn-sec-text, #071e49);
 }
 
 .admin-builder-action-btn:active:not(:disabled) {
-  background: #99f6e4;
+  background: #90d0fa;
 }
 
 .admin-builder-action-btn:disabled {
@@ -2544,12 +2535,12 @@
 }
 
 [data-theme='dark'] .admin-builder-action-btn {
-  background: var(--bezent-btn-sec-bg, rgba(20, 184, 166, 0.16));
-  color: var(--bezent-btn-sec-text, #5eead4);
+  background: var(--bezent-btn-sec-bg, #1a273b);
+  color: var(--bezent-btn-sec-text, #c2e7ff);
 }
 
 [data-theme='dark'] .admin-builder-action-btn:hover:not(:disabled) {
-  background: var(--bezent-btn-sec-hover, rgba(20, 184, 166, 0.25));
+  background: var(--bezent-btn-sec-hover, #233550);
 }
 
 [data-theme='dark'] .admin-builder-action-btn:disabled {

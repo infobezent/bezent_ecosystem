@@ -142,7 +142,7 @@ export function OfferDetailsModal({
                 <CardBody>
                   <Stack gap="xs">
                     <span className="bezent-text-secondary bezent-text-xs">Annual Gross CTC</span>
-                    <span className="bezent-text-2xl bezent-font-bold bezent-hiring-accent">
+                    <span className="bezent-text-2xl bezent-font-bold text-primary-700">
                       {formatCtc(comp.totalCtc, offer.currency)}
                     </span>
                     <span className="bezent-text-xs bezent-text-secondary">
@@ -237,7 +237,7 @@ export function OfferDetailsModal({
                         <span className="bezent-text-xs bezent-text-secondary">
                           ESOPs / Stock Units (Year 1)
                         </span>
-                        <span className="bezent-text-xs bezent-font-medium bezent-hiring-accent">
+                        <span className="bezent-text-xs bezent-font-medium text-primary-600">
                           {formatCtc(comp.stockOptionsValue, offer.currency)}
                         </span>
                       </Inline>
@@ -267,13 +267,15 @@ export function OfferDetailsModal({
             <span className="bezent-font-semibold bezent-text-sm">
               Multi-Tier Offer Approval Chain
             </span>
-            <div className="bezent-hiring-stack-sm">
+            <div className="space-y-3">
               {offer.approvalChain.map((step, idx) => (
                 <Card key={step.id} variant="flat" padding="sm">
                   <CardBody>
                     <Inline justify="between" align="center">
                       <Inline align="center" gap="sm">
-                        <span className="bezent-hiring-step-badge">{idx + 1}</span>
+                        <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center bezent-text-xs bezent-font-bold text-gray-700">
+                          {idx + 1}
+                        </span>
                         <Stack gap="none">
                           <span className="bezent-font-semibold bezent-text-sm">
                             {step.approverRole}: {step.approverName}
@@ -307,7 +309,7 @@ export function OfferDetailsModal({
                     </Inline>
 
                     {step.comments && (
-                      <div className="bezent-hiring-note-box bezent-text-xs">
+                      <div className="mt-2 text-xs text-gray-600 bg-gray-50 p-2 rounded">
                         &quot;{step.comments}&quot;
                       </div>
                     )}
@@ -333,7 +335,7 @@ export function OfferDetailsModal({
                 <Stack gap="sm">
                   <Inline justify="between" align="center">
                     <Inline align="center" gap="sm">
-                      <BezentIcon name="documents" size="action" color="#0d9488" />
+                      <BezentIcon name="documents" size="action" color="var(--color-primary-600)" />
                       <Stack gap="none">
                         <span className="bezent-font-semibold bezent-text-sm">
                           Standard Enterprise Offer Letter ({offer.offerNumber}.pdf)
@@ -359,7 +361,7 @@ export function OfferDetailsModal({
 
                   <Inline justify="between" align="center">
                     <Inline align="center" gap="sm">
-                      <BezentIcon name="check" size="action" color="#16A34A" />
+                      <BezentIcon name="check" size="action" color="var(--color-success-600)" />
                       <Stack gap="none">
                         <span className="bezent-font-semibold bezent-text-sm">
                           Digitally Signed Acceptance Copy
@@ -399,12 +401,12 @@ export function OfferDetailsModal({
               <CardBody>
                 <Stack gap="sm">
                   <Inline align="center" gap="sm">
-                    <BezentIcon name="onboarding" size="action" color="#0d9488" />
+                    <BezentIcon name="onboarding" size="action" color="var(--color-primary-600)" />
                     <span className="bezent-font-semibold bezent-text-base">
                       Bridge to BEZENT Onboarding (`onboarding_cases`)
                     </span>
                   </Inline>
-                  <p className="bezent-text-xs bezent-text-secondary">
+                  <p className="bezent-text-xs text-gray-700">
                     Per <strong>ADR-009 (Candidate ≠ Employee)</strong>, once a candidate accepts
                     their formal offer, they transition into pre-boarding and background
                     verification before employee record creation.
@@ -429,7 +431,7 @@ export function OfferDetailsModal({
                     </Inline>
                     <Inline justify="between" align="center">
                       <span className="bezent-text-xs bezent-text-secondary">Handoff Status:</span>
-                      <span className="bezent-text-xs bezent-font-semibold bezent-hiring-accent">
+                      <span className="bezent-text-xs bezent-font-semibold text-primary-700">
                         {offer.status === 'accepted'
                           ? 'Ready for Handoff'
                           : 'Offer must be Accepted first'}
@@ -438,7 +440,7 @@ export function OfferDetailsModal({
                   </Grid>
 
                   {offer.status === 'accepted' && (
-                    <div className="bezent-hiring-pad-top">
+                    <div className="pt-2">
                       <Button
                         variant="primary"
                         onClick={() => {

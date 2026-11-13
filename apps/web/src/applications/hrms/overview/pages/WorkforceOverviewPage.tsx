@@ -1028,8 +1028,8 @@ export function WorkforceOverviewPage({
       const allActionCandidates: HrActionItem[] = [
         {
           id: 'pending-approvals',
-          name: 'Pending Employee Approvals',
-          description: 'Employee profile transitions and administrative requests pending signoff',
+          name: 'Employee Approvals',
+          description: 'Urgent · Profile sign-offs',
           count: pendingApprovals,
           priority: 'Urgent',
           priorityClass: 'urgent',
@@ -1039,8 +1039,8 @@ export function WorkforceOverviewPage({
         },
         {
           id: 'pending-leave',
-          name: 'Pending Leave Requests',
-          description: 'Employee time-off and PTO requests waiting for HR/manager approval',
+          name: 'Leave Requests',
+          description: 'High · Time-off reviews',
           count: pendingLeave,
           priority: 'High',
           priorityClass: 'high',
@@ -1050,8 +1050,8 @@ export function WorkforceOverviewPage({
         },
         {
           id: 'attendance-corrections',
-          name: 'Pending Attendance Corrections',
-          description: 'Missed punch corrections and regularization requests requiring review',
+          name: 'Attendance Fixes',
+          description: 'Medium · Missed punches',
           count: pendingAttendance,
           priority: 'Medium',
           priorityClass: 'medium',
@@ -1061,8 +1061,8 @@ export function WorkforceOverviewPage({
         },
         {
           id: 'document-verification',
-          name: 'Pending Document Verification',
-          description: 'New hire identity and academic credentials submitted for audit',
+          name: 'Doc Verification',
+          description: 'Medium · New-hire files',
           count: pendingDocs,
           priority: 'Medium',
           priorityClass: 'medium',
@@ -1072,8 +1072,8 @@ export function WorkforceOverviewPage({
         },
         {
           id: 'probation-reviews',
-          name: 'Upcoming Probation Reviews',
-          description: 'Probationary workforce due for confirmation assessment',
+          name: 'Probation Reviews',
+          description: 'High · Confirmation due',
           count: probationEmployees,
           priority: 'High',
           priorityClass: 'high',
@@ -1083,8 +1083,8 @@ export function WorkforceOverviewPage({
         },
         {
           id: 'expiring-contracts',
-          name: 'Expiring Employee Contracts',
-          description: 'Fixed-term contractor agreements nearing term completion',
+          name: 'Expiring Contracts',
+          description: 'Attention · Renewals soon',
           count: contractEmployees,
           priority: 'Attention',
           priorityClass: 'attention',
@@ -1103,7 +1103,7 @@ export function WorkforceOverviewPage({
 
       if (recentActionsRes?.status === 'fulfilled' && recentActionsRes.value.data) {
         for (const action of recentActionsRes.value.data) {
-          let description = `'s profile was updated.`;
+          let description = 'profile updated';
           let iconName: WorkforceActivityItem['iconName'] = 'employees';
           let iconClass: WorkforceActivityItem['iconClass'] = 'blue';
 
@@ -1112,23 +1112,23 @@ export function WorkforceOverviewPage({
           const locChange = action.changes?.find((c) => c.field === 'locationId');
 
           if (action.actionType === 'department_change' && deptChange) {
-            description = `'s department was changed to ${deptChange.toLabel || deptChange.to}.`;
+            description = `moved to ${deptChange.toLabel || deptChange.to}`;
             iconName = 'organization';
             iconClass = 'purple';
           } else if (action.actionType === 'designation_change' && desigChange) {
-            description = `'s designation was updated to ${desigChange.toLabel || desigChange.to}.`;
+            description = `role updated to ${desigChange.toLabel || desigChange.to}`;
             iconName = 'schedule';
             iconClass = 'amber';
           } else if (action.actionType === 'location_transfer' && locChange) {
-            description = `'s work location was changed to ${locChange.toLabel || locChange.to}.`;
+            description = `relocated to ${locChange.toLabel || locChange.to}`;
             iconName = 'organization';
             iconClass = 'blue';
           } else if (action.actionType === 'confirm_employee') {
-            description = `completed probation and was confirmed permanent.`;
+            description = 'confirmed permanent';
             iconName = 'approvals';
             iconClass = 'teal';
           } else if (action.actionType === 'resignation' || action.actionType === 'termination') {
-            description = `completed departure separation.`;
+            description = 'exited';
             iconName = 'organization';
             iconClass = 'rose';
           }
@@ -1141,7 +1141,7 @@ export function WorkforceOverviewPage({
             department: deptChange?.toLabel || 'General Operations',
             dateTime: actionDate,
             formattedTime: formatTimelineDate(actionDate),
-            updatedBy: action.requestedBy || 'HR Administration',
+            updatedBy: '',
             iconName,
             iconClass,
           });
@@ -1149,51 +1149,22 @@ export function WorkforceOverviewPage({
       }
 
       for (const emp of fullList) {
+        if (!emp.joiningDate) continue;
         const dName = emp.departmentName || 'General Operations';
 
-        if (emp.joiningDate) {
-          activityList.push({
-            id: `act-join-${emp.id}`,
-            employeeName: emp.fullName,
-            activityDescription: `joined the ${dName} department.`,
-            department: dName,
-            dateTime: emp.joiningDate,
-            formattedTime: formatTimelineDate(emp.joiningDate),
-            updatedBy: emp.reportingManagerName
-              ? `${emp.reportingManagerName} (Manager)`
-              : 'Talent Acquisition',
-            iconName: 'employees',
-            iconClass: 'blue',
-          });
-        }
-
-        if (emp.designationName) {
-          activityList.push({
-            id: `act-desig-${emp.id}`,
-            employeeName: emp.fullName,
-            activityDescription: `'s designation was updated to ${emp.designationName}.`,
-            department: dName,
-            dateTime: emp.joiningDate,
-            formattedTime: formatTimelineDate(emp.joiningDate),
-            updatedBy: 'HR Administration',
-            iconName: 'schedule',
-            iconClass: 'amber',
-          });
-        }
-
-        if (emp.locationName) {
-          activityList.push({
-            id: `act-loc-${emp.id}`,
-            employeeName: emp.fullName,
-            activityDescription: `'s work location was set to ${emp.locationName}.`,
-            department: dName,
-            dateTime: emp.joiningDate,
-            formattedTime: formatTimelineDate(emp.joiningDate),
-            updatedBy: 'Operations & Facilities',
-            iconName: 'organization',
-            iconClass: 'blue',
-          });
-        }
+        activityList.push({
+          id: `act-join-${emp.id}`,
+          employeeName: emp.fullName,
+          activityDescription: emp.designationName
+            ? `joined · ${emp.designationName}`
+            : 'joined the team',
+          department: dName,
+          dateTime: emp.joiningDate,
+          formattedTime: formatTimelineDate(emp.joiningDate),
+          updatedBy: '',
+          iconName: 'employees',
+          iconClass: 'blue',
+        });
       }
 
       activityList.sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime());
@@ -1751,6 +1722,7 @@ export function WorkforceOverviewPage({
                       fill="transparent"
                       className="bezent-wf-trend-hit-col"
                       onMouseEnter={() => setActiveTrendIdx(idx)}
+                      onClick={() => setActiveTrendIdx(idx)}
                     />
                   );
                 })}
@@ -1812,10 +1784,8 @@ export function WorkforceOverviewPage({
 
                 {/* Active Halo Dot & Dark Floating Tooltip Card (Visible only while hovering) */}
                 {(() => {
-                  const hlPt =
-                    chartGeometry.hlIdx !== null
-                      ? chartGeometry.mapped[chartGeometry.hlIdx]
-                      : undefined;
+                  if (chartGeometry.hlIdx === null) return null;
+                  const hlPt = chartGeometry.mapped[chartGeometry.hlIdx];
                   if (!hlPt) return null;
                   const activeSeriesY = hlPt.ys[activeDistTab];
                   const activeVals = hlPt[activeDistTab];
@@ -2525,7 +2495,11 @@ export function WorkforceOverviewPage({
                 </div>
                 <div className="bezent-wf-mega-headings">
                   <h3 className="bezent-wf-mega-title">HR Action Center</h3>
-                  <p className="bezent-wf-mega-subtitle">Pending HR actions</p>
+                  <p className="bezent-wf-mega-subtitle">
+                    {hrActionItems.length > 0
+                      ? `${hrActionItems.reduce((sum, i) => sum + i.count, 0)} pending items`
+                      : 'Pending reviews'}
+                  </p>
                 </div>
               </div>
               <button
@@ -2538,18 +2512,15 @@ export function WorkforceOverviewPage({
               </button>
             </div>
 
-            <p className="bezent-wf-section-subtitle">
-              Immediate pending actions requiring HR team attention, signoff, and compliance review.
-            </p>
-
             {hrActionItems.length > 0 ? (
               <div className="bezent-wf-action-list">
                 {hrActionItems.map((item) => (
-                  <div
+                  <button
                     key={item.id}
+                    type="button"
                     className="bezent-wf-action-item"
                     onClick={() => navigate(item.path)}
-                    title={`Review pending: ${item.name}`}
+                    title={`Review ${item.name}`}
                   >
                     <div className="bezent-wf-action-item__left">
                       <div
@@ -2557,24 +2528,21 @@ export function WorkforceOverviewPage({
                       >
                         <BezentIcon name={item.iconName} size={16} />
                       </div>
-                      <div>
+                      <div className="bezent-wf-action-item__text">
                         <h4 className="bezent-wf-action-name">{item.name}</h4>
                         <span className="bezent-wf-action-desc">{item.description}</span>
                       </div>
                     </div>
 
                     <div className="bezent-wf-action-item__right">
-                      <span className="bezent-wf-action-count-pill">
-                        {String(item.count).padStart(2, '0')} Pending
-                      </span>
                       <span
-                        className={`bezent-wf-action-priority bezent-wf-action-priority--${item.priorityClass}`}
+                        className={`bezent-wf-action-count-pill bezent-wf-action-priority--${item.priorityClass}`}
                       >
-                        {item.priority}
+                        {item.count} pending
                       </span>
                       <BezentIcon name="chevronRight" size={14} />
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             ) : (
@@ -2582,10 +2550,8 @@ export function WorkforceOverviewPage({
                 <div className="bezent-wf-action-empty-icon">
                   <BezentIcon name="approvals" size={20} />
                 </div>
-                <h4 className="bezent-wf-action-empty-title">All Caught Up!</h4>
-                <p className="bezent-wf-action-empty-desc">
-                  No pending HR actions currently require immediate attention.
-                </p>
+                <h4 className="bezent-wf-action-empty-title">All Caught Up</h4>
+                <p className="bezent-wf-action-empty-desc">No pending HR items right now.</p>
               </div>
             )}
           </div>
@@ -2616,7 +2582,7 @@ export function WorkforceOverviewPage({
               <div className="bezent-wf-timeline-track-line" />
 
               {activities.length > 0 ? (
-                activities.slice(0, 5).map((act) => (
+                activities.slice(0, 4).map((act) => (
                   <div key={act.id} className="bezent-wf-timeline-item">
                     <div
                       className={`bezent-wf-timeline-dot bezent-wf-timeline-dot--${act.iconClass}`}
@@ -2631,7 +2597,7 @@ export function WorkforceOverviewPage({
                             {act.employeeName}
                           </strong>
                           <span className="bezent-wf-timeline-activity-desc">
-                            {act.activityDescription.startsWith("'s") ? '' : ' '}
+                            {' '}
                             {act.activityDescription}
                           </span>
                         </div>
@@ -2639,14 +2605,7 @@ export function WorkforceOverviewPage({
                       </div>
 
                       <div className="bezent-wf-timeline-meta-row">
-                        <span className="bezent-wf-timeline-time">
-                          <BezentIcon name="schedule" size={11} />
-                          <span>{act.formattedTime}</span>
-                        </span>
-                        <span className="bezent-wf-timeline-dot-sep">•</span>
-                        <span className="bezent-wf-timeline-actor">
-                          <span>Updated by {act.updatedBy}</span>
-                        </span>
+                        <span className="bezent-wf-timeline-time">{act.formattedTime}</span>
                       </div>
                     </div>
                   </div>
@@ -2654,8 +2613,7 @@ export function WorkforceOverviewPage({
               ) : (
                 <div className="bezent-wf-action-empty">
                   <p className="bezent-wf-action-empty-desc">
-                    No recent workforce activity recorded. New hires and employee updates will
-                    appear here.
+                    No recent activity yet. New hires and updates will appear here.
                   </p>
                 </div>
               )}

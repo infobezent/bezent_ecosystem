@@ -22,9 +22,9 @@
   align-items: center;
   width: 100%;
   background: var(--bg-surface, #ffffff);
-  border: 1px solid #e9eaf4;
-  border-radius: 10px;
-  box-shadow: 0 1px 2px rgba(32, 45, 75, 0.02);
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
   transition:
     border-color 0.16s cubic-bezier(0.16, 1, 0.3, 1),
     box-shadow 0.16s cubic-bezier(0.16, 1, 0.3, 1),
@@ -32,18 +32,18 @@
 }
 
 .bezent-input-box:hover:not(.is-disabled) {
-  border-color: #5eead4;
+  border-color: var(--border-focus, #7cc4fa);
 }
 
 .bezent-input-box:focus-within {
-  border-color: #14b8a6;
-  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
+  border-color: var(--border-focus, #7cc4fa);
+  box-shadow: none;
 }
 
 /* ── Sizes ── */
 .bezent-input-wrapper--sm .bezent-input-box {
   height: 32px;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .bezent-input-wrapper--sm .bezent-input-field {
@@ -53,7 +53,7 @@
 
 .bezent-input-wrapper--md .bezent-input-box {
   height: 42px;
-  border-radius: 10px;
+  border-radius: 6px;
 }
 
 .bezent-input-wrapper--md .bezent-input-field {
@@ -63,7 +63,7 @@
 
 .bezent-input-wrapper--lg .bezent-input-box {
   height: 46px;
-  border-radius: 12px;
+  border-radius: 8px;
 }
 
 .bezent-input-wrapper--lg .bezent-input-field {
@@ -113,7 +113,7 @@
   top: 50%;
   transform: translateY(-50%);
   font-size: 13px;
-  color: #0d9488;
+  color: var(--accent-interactive, #1a73e8);
   pointer-events: none;
 }
 
@@ -121,10 +121,10 @@
 .bezent-btn-addon {
   height: 40px;
   padding: 0 14px;
-  background-color: #f0fdfa;
-  border: 1px solid #99f6e4;
-  border-radius: 10px;
-  color: #0f766e;
+  background-color: var(--color-primary-light, #eff6ff);
+  border: 1px solid var(--color-primary-border, #bfdbfe);
+  border-radius: var(--radius-sm, 6px);
+  color: var(--accent-interactive, #1a73e8);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -137,16 +137,16 @@
 }
 
 .bezent-btn-addon:hover {
-  background-color: #ccfbf1;
-  border-color: #5eead4;
+  background-color: #dbeafe;
+  border-color: #93c5fd;
 }
 
 /* Pill Select (e.g. Entity Picker with Chip) */
 .bezent-pill-select {
   width: 100%;
   height: 40px;
-  border: 1px solid #e9eaf4;
-  border-radius: 10px;
+  border: 1px solid var(--border-default, #cbd5e1);
+  border-radius: var(--radius-sm, 6px);
   background-color: var(--bg-surface, #ffffff);
   display: flex;
   align-items: center;
@@ -172,8 +172,8 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background-color: #ccfbf1;
-  color: #0f766e;
+  background-color: #dbeafe;
+  color: #1d4ed8;
   font-size: 10px;
   font-weight: 700;
   display: flex;
@@ -199,7 +199,7 @@
 .bezent-pill-search-btn {
   background: none;
   border: none;
-  color: #0d9488;
+  color: var(--accent-interactive, #1a73e8);
   font-size: 14px;
   cursor: pointer;
   padding: 0;
@@ -211,7 +211,7 @@
   width: 100%;
   text-align: right;
   margin-top: 4px;
-  color: #0d9488;
+  color: var(--accent-interactive, #1a73e8);
   font-size: 12px;
   font-weight: 600;
   background: none;
@@ -233,12 +233,12 @@
   padding: 0 12px;
   height: 36px;
   background-color: var(--bg-surface, #ffffff);
-  border: 1px solid #e9eaf4;
-  border-radius: 10px;
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: 8px;
   min-width: 240px;
   width: 330px;
   max-width: 400px;
-  box-shadow: 0 1px 2px rgba(32, 45, 75, 0.03);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
   transition: all 0.16s ease;
 }
 
@@ -251,8 +251,8 @@
 }
 
 .bezent-search-bar:focus-within {
-  border-color: #14b8a6;
-  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.14);
+  border-color: #3978f6;
+  box-shadow: 0 0 0 2px rgba(57, 120, 246, 0.14);
 }
 
 .bezent-search-bar__input {
@@ -389,13 +389,13 @@
 }
 
 .bezent-search-box:hover {
-  background: #f1f5f9;
-  border-color: #e9eaf4;
+  background: #e9eff8;
+  border-color: var(--border-default, #dde3ea);
 }
 
 .bezent-search-box:focus-within {
   background: var(--bg-surface, #ffffff);
-  border-color: #14b8a6;
+  border-color: var(--border-focus, #1a73e8);
 }
 
 .bezent-search-field::placeholder,
@@ -422,8 +422,8 @@
 }
 
 .bezent-search-clear-btn:hover {
-  background: #f0fdfa;
-  color: #0f766e;
+  background: var(--bg-hover, #c2e7ff);
+  color: var(--icon-active, #041e49);
 }
 
 .bezent-search-clear-btn:active {
@@ -482,14 +482,14 @@
   height: 42px;
   padding: 0 14px;
   background: var(--bg-surface, #ffffff);
-  border: 1px solid #e9eaf4;
-  border-radius: 10px;
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-sm, 6px);
   color: var(--text-primary, #000000);
   font: inherit;
   font-size: var(--form-font-size-input, 13.5px);
   font-weight: 400;
   box-sizing: border-box;
-  box-shadow: 0 1px 2px rgba(32, 45, 75, 0.02);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
   transition:
     border-color 0.16s cubic-bezier(0.16, 1, 0.3, 1),
     box-shadow 0.16s cubic-bezier(0.16, 1, 0.3, 1);
@@ -498,8 +498,8 @@
 .bezent-input:focus,
 .bezent-select:focus {
   outline: none;
-  border-color: #14b8a6;
-  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
+  border-color: var(--border-focus, #7cc4fa);
+  box-shadow: none;
 }
 
 .bezent-input:disabled,
@@ -514,15 +514,15 @@
   min-height: 80px;
   padding: 10px 14px;
   background: var(--bg-surface, #ffffff);
-  border: 1px solid #e9eaf4;
-  border-radius: 10px;
+  border: 1px solid var(--border-default, #dde3ea);
+  border-radius: var(--radius-sm, 6px);
   color: var(--text-primary, #000000);
   font: inherit;
   font-size: var(--form-font-size-input, 13.5px);
   font-weight: 400;
   box-sizing: border-box;
   resize: vertical;
-  box-shadow: 0 1px 2px rgba(32, 45, 75, 0.02);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
   transition:
     border-color 0.16s cubic-bezier(0.16, 1, 0.3, 1),
     box-shadow 0.16s cubic-bezier(0.16, 1, 0.3, 1);
@@ -530,8 +530,8 @@
 
 .bezent-textarea:focus {
   outline: none;
-  border-color: #14b8a6;
-  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
+  border-color: var(--border-focus, #7cc4fa);
+  box-shadow: none;
 }
 
 /* ── Pill Shape for Search Inputs (Enterprise Reference) ── */
@@ -551,8 +551,8 @@
 
 .bezent-input-wrapper--pill .bezent-input-box:focus-within {
   background-color: #ffffff;
-  border-color: #14b8a6;
-  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.16);
+  border-color: #7cc4fa;
+  box-shadow: 0 0 0 3px rgba(124, 196, 250, 0.25);
 }
 
 .bezent-input-wrapper--pill .bezent-search-field {

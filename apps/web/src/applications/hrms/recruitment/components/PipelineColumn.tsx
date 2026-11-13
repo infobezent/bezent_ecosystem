@@ -29,24 +29,26 @@ export function PipelineColumn({
     <Card
       variant={isTerminalSuccess ? 'tint-green' : 'flat'}
       padding="sm"
-      className="bezent-hiring-column"
+      className="min-w-[280px] max-w-[320px] flex-shrink-0 bg-gray-50/70 border border-gray-200/80 rounded-xl"
     >
-      <CardHeader className="bezent-hiring-column__header">
+      <CardHeader className="pb-2 border-b border-gray-200/60">
         <Stack gap="xs">
           <Inline justify="between" align="center">
-            <span className="bezent-font-bold bezent-text-sm">{stage.label}</span>
+            <span className="bezent-font-bold bezent-text-sm text-gray-900">{stage.label}</span>
             <Badge variant={stage.badgeVariant} size="sm">
               {candidates.length}
             </Badge>
           </Inline>
-          <span className="bezent-text-xs bezent-text-secondary">{stage.description}</span>
+          <span className="bezent-text-xs bezent-text-secondary line-clamp-1">
+            {stage.description}
+          </span>
         </Stack>
       </CardHeader>
 
-      <CardBody className="bezent-hiring-column__body">
+      <CardBody className="pt-2">
         <Stack gap="sm">
           {candidates.length === 0 ? (
-            <div className="bezent-hiring-empty-dashed bezent-hiring-empty-dashed--compact">
+            <div className="py-6 text-center border-2 border-dashed border-gray-200 rounded-lg">
               <span className="bezent-text-xs bezent-text-secondary">
                 No candidates in {stage.label}
               </span>

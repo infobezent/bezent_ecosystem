@@ -99,7 +99,7 @@ export function HandoffDetailDrawer({
                 <span className="bezent-text-xs bezent-text-secondary">
                   {item.candidateEmail} • {item.candidatePhone}
                 </span>
-                <span className="bezent-text-xs bezent-hiring-accent bezent-font-semibold">
+                <span className="bezent-text-xs text-primary-700 font-medium">
                   {item.designationLevel} ({item.location})
                 </span>
               </Stack>
@@ -148,7 +148,7 @@ export function HandoffDetailDrawer({
 
                 <Inline justify="between" align="center">
                   <span className="bezent-text-xs bezent-text-secondary">Target Joining Date:</span>
-                  <span className="bezent-text-xs bezent-font-bold bezent-hiring-accent">
+                  <span className="bezent-text-xs bezent-font-bold text-primary-700">
                     {item.targetJoiningDate}
                   </span>
                 </Inline>
@@ -186,13 +186,13 @@ export function HandoffDetailDrawer({
               <Stack gap="xs">
                 <span className="bezent-font-semibold bezent-text-sm">Active Onboarding Case</span>
                 <Inline align="center" gap="md">
-                  <span className="bezent-text-xs bezent-hiring-accent">
+                  <span className="bezent-text-xs text-blue-900 font-mono">
                     Case Code: <strong>{item.onboardingCaseCode}</strong>
                   </span>
-                  <span className="bezent-text-xs bezent-hiring-accent">
+                  <span className="bezent-text-xs text-blue-900 font-mono">
                     Assigned Employee Code: <strong>{item.employeeCode}</strong>
                   </span>
-                  <span className="bezent-text-xs bezent-hiring-accent">
+                  <span className="bezent-text-xs text-blue-900">
                     Handoff Date: <strong>{item.handoffDate}</strong>
                   </span>
                 </Inline>
@@ -202,7 +202,7 @@ export function HandoffDetailDrawer({
         )}
 
         {item.notes && (
-          <div className="bezent-hiring-note-box bezent-text-xs">
+          <div className="text-xs text-gray-600 bg-gray-50 p-2.5 rounded">
             <strong>Audit Notes:</strong> {item.notes}
           </div>
         )}

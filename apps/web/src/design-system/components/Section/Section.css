@@ -81,10 +81,9 @@
 .bezent-section-icon-badge {
   width: 44px;
   height: 44px;
-  border-radius: 12px;
-  background-color: #f0fdfa;
-  color: #0d9488;
-  border: 1px solid #99f6e4;
+  border-radius: 6px;
+  background-color: var(--color-primary-light, #eff6ff);
+  color: var(--color-primary, #2563eb);
   display: flex;
   align-items: center;
   justify-content: center;

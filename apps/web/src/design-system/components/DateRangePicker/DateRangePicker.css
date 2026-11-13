@@ -39,8 +39,8 @@
 .bezent-date-range-trigger:focus-visible,
 .bezent-date-range-trigger.is-open {
   outline: none;
-  border-color: #14b8a6;
-  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.14);
+  border-color: var(--primary-accent, #1a73e8);
+  box-shadow: 0 0 0 2px var(--focus-ring, rgba(26, 115, 232, 0.2));
 }
 
 .bezent-date-range-trigger:disabled {
@@ -104,8 +104,7 @@
 }
 
 .bezent-date-range-preset-btn:hover {
-  background-color: #f0fdfa;
-  color: #0f766e;
+  background-color: var(--bg-hover, #c2e7ff);
 }
 
 /* Calendar Section */
@@ -163,15 +162,15 @@
 
 .bezent-date-range-month-select:hover,
 .bezent-date-range-year-select:hover {
-  background-color: #f0fdfa;
-  border-color: #99f6e4;
+  background-color: var(--bg-hover, #c2e7ff);
+  border-color: var(--border-default, #dadce0);
 }
 
 .bezent-date-range-month-select:focus,
 .bezent-date-range-year-select:focus {
   outline: none;
-  border-color: #14b8a6;
-  box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.16);
+  border-color: var(--primary-accent, #1a73e8);
+  box-shadow: 0 0 0 2px var(--focus-ring, rgba(26, 115, 232, 0.2));
 }
 
 .bezent-date-range-title {
@@ -189,14 +188,14 @@
   padding: 0;
   background: none;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-sm, 4px);
   color: var(--text-secondary);
   cursor: pointer;
 }
 
 .bezent-date-range-nav-btn:hover {
-  background-color: #f0fdfa;
-  color: #0f766e;
+  background-color: var(--bg-hover, #c2e7ff);
+  color: var(--text-primary);
 }
 
 .bezent-date-range-grid {
@@ -227,12 +226,11 @@
 }
 
 .bezent-date-range-day:hover:not(:disabled) {
-  background-color: #f0fdfa;
-  color: #0f766e;
+  background-color: var(--bg-hover, #c2e7ff);
 }
 
 .bezent-date-range-day.is-start {
-  background-color: #0d9488;
+  background-color: var(--primary-accent, #1a73e8);
   color: #ffffff;
   border-top-left-radius: 50%;
   border-bottom-left-radius: 50%;
@@ -240,7 +238,7 @@
 }
 
 .bezent-date-range-day.is-end {
-  background-color: #0d9488;
+  background-color: var(--primary-accent, #1a73e8);
   color: #ffffff;
   border-top-right-radius: 50%;
   border-bottom-right-radius: 50%;
@@ -248,8 +246,8 @@
 }
 
 .bezent-date-range-day.is-in-range:not(.is-start):not(.is-end) {
-  background-color: #f0fdfa;
-  color: #0f766e;
+  background-color: var(--bg-selected, #e8f0fe);
+  color: var(--primary-accent, #1a73e8);
 }
 
 .bezent-date-range-day.is-outside-month {
@@ -269,14 +267,13 @@
   border: none;
   padding: 4px 8px;
   font-size: var(--font-size-xs, 12px);
-  color: #0d9488;
+  color: var(--primary-accent, #1a73e8);
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: var(--radius-sm, 4px);
 }
 
 .bezent-date-range-action-btn:hover {
-  background-color: #f0fdfa;
-  color: #0f766e;
+  background-color: var(--bg-hover, #c2e7ff);
 }
 
 .bezent-date-range-error {

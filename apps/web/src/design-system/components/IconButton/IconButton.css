@@ -56,31 +56,30 @@
 .bezent-icon-btn--solid {
   width: 36px;
   height: 36px;
-  border-radius: 10px;
-  background: #f0fdfa;
-  color: #0f766e;
-  border: 1px solid #99f6e4;
-  box-shadow: 0 2px 6px rgba(20, 184, 166, 0.1);
+  border-radius: 6px;
+  background: var(--primary, #d3e3fd);
+  color: var(--nav-label-active, #041e49);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
   transition:
     background-color 0.16s ease,
-    border-color 0.16s ease,
     box-shadow 0.16s ease,
     transform 0.12s ease;
 }
 
 .bezent-icon-btn--solid:hover:not(:disabled) {
-  background: #ccfbf1;
-  border-color: #5eead4;
-  box-shadow: 0 4px 10px rgba(20, 184, 166, 0.18);
+  background: #c2e7ff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
   transform: translateY(-1px) scale(1.04);
 }
 
 .bezent-icon-btn--solid:active:not(:disabled) {
-  background: #99f6e4;
+  background: #b3defa;
   transform: scale(0.96);
 }
 
 .bezent-icon-btn:focus-visible {
-  outline: 2px solid #14b8a6;
+  outline: 2px solid var(--border-focus);
   outline-offset: 2px;
 }
