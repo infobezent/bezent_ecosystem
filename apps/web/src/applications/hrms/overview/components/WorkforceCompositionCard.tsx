@@ -4,11 +4,7 @@ import { Select, type SelectOption, Button } from '../../../../design-system/com
 import type { EmployeeRecord } from '../../employees/api/employeesApi';
 
 export type CompositionDimension =
-  | 'gender'
-  | 'age_group'
-  | 'experience'
-  | 'tenure'
-  | 'employment_status';
+  'gender' | 'age_group' | 'experience' | 'tenure' | 'employment_status';
 
 export interface CompositionCategoryItem {
   id: string;
@@ -69,10 +65,7 @@ const COMPOSITION_DIMENSION_OPTIONS: SelectOption[] = [
 ];
 
 // Fallback demo data for when employees prop is unprovided
-const FALLBACK_COMPOSITION_DATA: Record<
-  CompositionDimension,
-  { name: string; count: number }[]
-> = {
+const FALLBACK_COMPOSITION_DATA: Record<CompositionDimension, { name: string; count: number }[]> = {
   gender: [
     { name: 'Male', count: 712 },
     { name: 'Female', count: 486 },
@@ -112,15 +105,12 @@ const FALLBACK_COMPOSITION_DATA: Record<
  * Calculates tenure category from effective organization joining date.
  */
 function resolveTenureCategory(joiningDateStr?: string | null): string {
-  if (!joiningDateStr) return '1–3 Years';
+  if (!joiningDateStr) return 'Unknown';
   const joining = new Date(joiningDateStr);
-  if (isNaN(joining.getTime())) return '1–3 Years';
+  if (isNaN(joining.getTime())) return 'Unknown';
 
   const now = new Date();
-  const diffDays = Math.max(
-    0,
-    (now.getTime() - joining.getTime()) / (1000 * 60 * 60 * 24),
-  );
+  const diffDays = Math.max(0, (now.getTime() - joining.getTime()) / (1000 * 60 * 60 * 24));
   const diffMonths = diffDays / 30.4375;
   const diffYears = diffDays / 365.25;
 
@@ -132,19 +122,16 @@ function resolveTenureCategory(joiningDateStr?: string | null): string {
 }
 
 /**
- * Calculates age group category from employee's date of birth.
+ * Calculates age group category from employee's date of birth. Returns
+ * 'Unknown' rather than guessing when date of birth is not on record —
+ * never silently invents an age distribution.
  */
-function resolveAgeCategory(
-  dobStr?: string | null,
-  fallbackIdx = 0,
-): string {
+function resolveAgeCategory(dobStr?: string | null): string {
   if (dobStr) {
     const dob = new Date(dobStr);
     if (!isNaN(dob.getTime())) {
       const now = new Date();
-      const age = Math.floor(
-        (now.getTime() - dob.getTime()) / (1000 * 60 * 60 * 24 * 365.25),
-      );
+      const age = Math.floor((now.getTime() - dob.getTime()) / (1000 * 60 * 60 * 24 * 365.25));
       if (age < 25) return 'Under 25';
       if (age <= 34) return '25–34';
       if (age <= 44) return '35–44';
@@ -152,18 +139,18 @@ function resolveAgeCategory(
       return '55+';
     }
   }
-  // Realistic age distribution fallback when DOB is pending HR verification
-  const buckets = ['25–34', '25–34', '35–44', 'Under 25', '45–54', '25–34', '35–44'];
-  return buckets[fallbackIdx % buckets.length] || '25–34';
+  return 'Unknown';
 }
 
 /**
- * Resolves professional experience category from recorded total experience.
+ * Resolves professional experience category from recorded total experience,
+ * falling back to a designation-seniority inference (a real signal) only
+ * when total experience isn't recorded. Returns 'Unknown' rather than
+ * guessing when neither signal is available.
  */
 function resolveExperienceCategory(
   expYears?: string | number | null,
   desigName?: string | null,
-  fallbackIdx = 0,
 ): string {
   if (expYears !== undefined && expYears !== null && expYears !== '') {
     const val = Number(expYears);
@@ -179,7 +166,12 @@ function resolveExperienceCategory(
   // Derive from designation seniority where separate prior work history is unverified
   if (desigName) {
     const d = desigName.toLowerCase();
-    if (d.includes('intern') || d.includes('junior') || d.includes('trainee') || d.includes('entry')) {
+    if (
+      d.includes('intern') ||
+      d.includes('junior') ||
+      d.includes('trainee') ||
+      d.includes('entry')
+    ) {
       return '0–2 Years';
     }
     if (d.includes('senior') || d.includes('sr.')) {
@@ -191,11 +183,9 @@ function resolveExperienceCategory(
     if (d.includes('director') || d.includes('head') || d.includes('vp') || d.includes('chief')) {
       return '15+ Years';
     }
-    return '3–5 Years';
   }
 
-  const buckets = ['3–5 Years', '6–10 Years', '0–2 Years', '3–5 Years', '11–15 Years'];
-  return buckets[fallbackIdx % buckets.length] || '3–5 Years';
+  return 'Unknown';
 }
 
 /**
@@ -213,10 +203,7 @@ function resolveGenderCategory(genderStr?: string | null): string {
 /**
  * Normalizes employment lifecycle status mutually exclusively.
  */
-function resolveEmploymentStatusCategory(
-  status?: string | null,
-  onLeave = false,
-): string {
+function resolveEmploymentStatusCategory(status?: string | null, onLeave = false): string {
   if (onLeave) return 'On Leave';
   if (status === 'probation') return 'Probation';
   if (status === 'notice') return 'Notice Period';
@@ -250,8 +237,7 @@ export const WorkforceCompositionCard: React.FC<WorkforceCompositionCardProps> =
   const initialDim: CompositionDimension =
     controlledDimension || (selectedOption === 'gender' ? 'gender' : 'gender');
 
-  const [internalDimension, setInternalDimension] =
-    useState<CompositionDimension>(initialDim);
+  const [internalDimension, setInternalDimension] = useState<CompositionDimension>(initialDim);
   const activeDimension = controlledDimension ?? internalDimension;
 
   const [internalFilter, setInternalFilter] = useState<string>('all');
@@ -369,9 +355,7 @@ export const WorkforceCompositionCard: React.FC<WorkforceCompositionCardProps> =
     return active;
   }, [employees, activeFilter]);
 
-  const totalActiveCount = employees
-    ? filteredActiveEmployees.length
-    : 1248;
+  const totalActiveCount = employees ? filteredActiveEmployees.length : 1248;
 
   // ─────────────────────────────────────────────────────────────
   // Process Active Composition Dimension
@@ -415,10 +399,10 @@ export const WorkforceCompositionCard: React.FC<WorkforceCompositionCardProps> =
       countsMap.set('45–54', 0);
       countsMap.set('55+', 0);
 
-      filteredActiveEmployees.forEach((emp, idx) => {
-        const cat = resolveAgeCategory(emp.dateOfBirth, idx);
+      for (const emp of filteredActiveEmployees) {
+        const cat = resolveAgeCategory(emp.dateOfBirth);
         countsMap.set(cat, (countsMap.get(cat) || 0) + 1);
-      });
+      }
     } else if (activeDimension === 'experience') {
       countsMap.set('0–2 Years', 0);
       countsMap.set('3–5 Years', 0);
@@ -426,14 +410,10 @@ export const WorkforceCompositionCard: React.FC<WorkforceCompositionCardProps> =
       countsMap.set('11–15 Years', 0);
       countsMap.set('15+ Years', 0);
 
-      filteredActiveEmployees.forEach((emp, idx) => {
-        const cat = resolveExperienceCategory(
-          emp.totalExperienceYears,
-          emp.designationName,
-          idx,
-        );
+      for (const emp of filteredActiveEmployees) {
+        const cat = resolveExperienceCategory(emp.totalExperienceYears, emp.designationName);
         countsMap.set(cat, (countsMap.get(cat) || 0) + 1);
-      });
+      }
     } else if (activeDimension === 'tenure') {
       countsMap.set('Under 6 Months', 0);
       countsMap.set('6–12 Months', 0);
@@ -502,9 +482,7 @@ export const WorkforceCompositionCard: React.FC<WorkforceCompositionCardProps> =
               aria-label="Composition By"
               value={activeDimension}
               options={COMPOSITION_DIMENSION_OPTIONS}
-              onChange={(e) =>
-                handleDimensionChange(e.target.value as CompositionDimension)
-              }
+              onChange={(e) => handleDimensionChange(e.target.value as CompositionDimension)}
             />
           </div>
 
@@ -570,14 +548,7 @@ export const WorkforceCompositionCard: React.FC<WorkforceCompositionCardProps> =
           <div className="bezent-wf-comp-donut-split">
             <div className="bezent-wf-comp-donut-wrap">
               <svg viewBox="0 0 120 120" className="bezent-wf-comp-donut-svg">
-                <circle
-                  cx="60"
-                  cy="60"
-                  r="46"
-                  fill="none"
-                  stroke="#f1f5f9"
-                  strokeWidth="15"
-                />
+                <circle cx="60" cy="60" r="46" fill="none" stroke="#f1f5f9" strokeWidth="15" />
                 {(() => {
                   let accumulatedPct = 0;
                   return categoryItems.map((item) => {
@@ -636,10 +607,7 @@ export const WorkforceCompositionCard: React.FC<WorkforceCompositionCardProps> =
                       >
                         <circle cx="4" cy="4" r="4" fill={item.color} />
                       </svg>
-                      <span
-                        className="bezent-wf-comp-donut-legend-name"
-                        title={item.name}
-                      >
+                      <span className="bezent-wf-comp-donut-legend-name" title={item.name}>
                         {item.name}
                       </span>
                     </div>
@@ -647,9 +615,7 @@ export const WorkforceCompositionCard: React.FC<WorkforceCompositionCardProps> =
                       <span className="bezent-wf-comp-donut-legend-count">
                         {item.count.toLocaleString()}
                       </span>
-                      <span className="bezent-wf-comp-donut-legend-pct">
-                        ({item.percentage}%)
-                      </span>
+                      <span className="bezent-wf-comp-donut-legend-pct">({item.percentage}%)</span>
                     </div>
                   </div>
                 );

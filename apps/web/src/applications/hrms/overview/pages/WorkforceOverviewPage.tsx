@@ -31,7 +31,9 @@ import { fetchNewHiresPaginated } from '../../onboarding/api/onboardingApi';
 import { fetchEmployeeActions } from '../../employee-administration/api/employeeAdministrationApi';
 import { leaveOperationsApi } from '../../leave/api/leaveOperationsApi';
 import { fetchRegularizationRequests } from '../../attendance/api/attendanceApi';
-import { fetchDocuments } from '../../documents/api/documentsApi';
+import type { RegularizationItem } from '../../attendance/types/attendance.types';
+import { fetchDocuments, type EmployeeDocument } from '../../documents/api/documentsApi';
+import type { EmployeeActionListItem } from '../../employee-administration/api/employeeAdministrationApi';
 import {
   fetchOrganizationMasters,
   type OrganizationMasters,
@@ -425,6 +427,11 @@ export function WorkforceOverviewPage({
   // ── Recent Workforce Activity States ──
   const [activities, setActivities] = useState<WorkforceActivityItem[]>([]);
 
+  // ── Right-Side Details Drawer Data (real records, no fabricated employees) ──
+  const [expiringDocuments, setExpiringDocuments] = useState<EmployeeDocument[]>([]);
+  const [regularizationItems, setRegularizationItems] = useState<RegularizationItem[]>([]);
+  const [recentSeparations, setRecentSeparations] = useState<EmployeeActionListItem[]>([]);
+
   // ── Right-Side Details Drawer State ──
   type DrawerType = 'planning' | 'documents' | 'probation' | 'attendance' | 'hiring' | 'exits';
 
@@ -483,6 +490,8 @@ export function WorkforceOverviewPage({
       leaveOperationsApi.requests({ status: 'pending', pageSize: 10, ...scope }),
       fetchRegularizationRequests({ status: 'pending' }),
       fetchDocuments({ view: 'pending_review', pageSize: 1, departmentId: scope.departmentId }),
+      // Real rows (not just counts) for the Documents Expiring alert drawer.
+      fetchDocuments({ view: 'expiring', pageSize: 10, departmentId: scope.departmentId }),
       fetchEmployeeActions({ pageSize: 20, ...eventScope }),
       // Category-filtered, backend-validated max page size (100) — large enough to
       // return every record at current data volumes. `pagination.totalItems` and
@@ -503,6 +512,7 @@ export function WorkforceOverviewPage({
         leaveRes,
         attendanceRes,
         docsRes,
+        expiringDocsRes,
         recentActionsRes,
         transferActionsRes,
         promotionActionsRes,
@@ -510,14 +520,14 @@ export function WorkforceOverviewPage({
       ] = results;
 
       const totalEmployees =
-        totalRes.status === 'fulfilled' ? totalRes.value.pagination.totalItems : 16;
+        totalRes.status === 'fulfilled' ? totalRes.value.pagination.totalItems : 0;
       const activeEmployees =
-        activeRes.status === 'fulfilled' ? activeRes.value.pagination.totalItems : 14;
+        activeRes.status === 'fulfilled' ? activeRes.value.pagination.totalItems : 0;
 
       const newJoiners =
         newHiresRes.status === 'fulfilled'
-          ? (newHiresRes.value.counts?.all ?? newHiresRes.value.pagination.totalItems ?? 2)
-          : 2;
+          ? (newHiresRes.value.counts?.all ?? newHiresRes.value.pagination.totalItems ?? 0)
+          : 0;
 
       const exits =
         separationActionsRes.status === 'fulfilled'
@@ -536,7 +546,7 @@ export function WorkforceOverviewPage({
 
       // Percentage of total workforce
       const activePct =
-        totalEmployees > 0 ? Math.round((activeEmployees / totalEmployees) * 1000) / 10 : 87.5;
+        totalEmployees > 0 ? Math.round((activeEmployees / totalEmployees) * 1000) / 10 : 0;
 
       // Retention Rate
       const periodStartHeadcount = Math.max(1, totalEmployees - (newJoiners - exits));
@@ -558,7 +568,7 @@ export function WorkforceOverviewPage({
         probationEmployees,
         newJoiners,
         exits,
-        retentionRate: isNaN(retentionRate) ? 100 : retentionRate,
+        retentionRate: isNaN(retentionRate) ? 0 : retentionRate,
         growthPct: isNaN(growthPct) ? 0 : growthPct,
         netGrowth,
         activePct: isNaN(activePct) ? 0 : activePct,
@@ -768,13 +778,24 @@ export function WorkforceOverviewPage({
         expiredCount: recExpired,
       });
 
+      // ── Drawer source data: real records only, never fabricated employees ──
+      setExpiringDocuments(
+        expiringDocsRes.status === 'fulfilled' ? expiringDocsRes.value.data : [],
+      );
+      setRegularizationItems(attendanceRes.status === 'fulfilled' ? attendanceRes.value : []);
+      setRecentSeparations(
+        separationActionsRes.status === 'fulfilled' ? separationActionsRes.value.data : [],
+      );
+
       const totalBase = fullList.length || totalEmployees || 1;
       setTotalWorkforceCount(totalBase);
 
       // ── 01. Department Distribution ──
+      // A missing departmentName is a real, distinct state (no department
+      // assigned) — never relabeled as an invented department.
       const deptCounts = new Map<string, number>();
       for (const emp of fullList) {
-        const dName = emp.departmentName || 'General Operations';
+        const dName = emp.departmentName || 'Unassigned';
         deptCounts.set(dName, (deptCounts.get(dName) || 0) + 1);
       }
       setTotalDeptsCount(deptCounts.size);
@@ -820,12 +841,11 @@ export function WorkforceOverviewPage({
       setDepartmentDisplay(deptResult);
 
       // ── Location Distribution ──
+      // A missing locationName is a real, distinct state (no location
+      // assigned) — never relabeled as an invented location.
       const locCounts = new Map<string, number>();
       for (const emp of fullList) {
-        let lName = emp.locationName || 'Bangalore HQ';
-        if (lName.toLowerCase() === 'bengaluru') {
-          lName = 'Bangalore HQ';
-        }
+        const lName = emp.locationName || 'Unassigned';
         locCounts.set(lName, (locCounts.get(lName) || 0) + 1);
       }
       setTotalLocsCount(locCounts.size);
@@ -917,19 +937,18 @@ export function WorkforceOverviewPage({
       ];
       let totalTenureMonths = 0;
       const nowTime = new Date().getTime();
+      let employeesWithKnownTenure = 0;
       for (const emp of fullList) {
-        let tenureYears = 1.2;
-        if (emp.joiningDate) {
-          const jDate = new Date(emp.joiningDate);
-          if (!isNaN(jDate.getTime())) {
-            const months = Math.max(
-              0,
-              (nowTime - jDate.getTime()) / (1000 * 60 * 60 * 24 * 30.4375),
-            );
-            tenureYears = months / 12;
-            totalTenureMonths += months;
-          }
-        }
+        // joiningDate is a required field, but guard against an unparseable
+        // value rather than guessing a tenure for the bucketing below.
+        const jDate = new Date(emp.joiningDate);
+        if (isNaN(jDate.getTime())) continue;
+
+        const months = Math.max(0, (nowTime - jDate.getTime()) / (1000 * 60 * 60 * 24 * 30.4375));
+        const tenureYears = months / 12;
+        totalTenureMonths += months;
+        employeesWithKnownTenure += 1;
+
         const b0 = expBuckets[0];
         const b1 = expBuckets[1];
         const b2 = expBuckets[2];
@@ -948,7 +967,7 @@ export function WorkforceOverviewPage({
         color: b.color,
       }));
       setExperienceItems(expArr);
-      const avgY = (totalTenureMonths / (fullList.length || 1) / 12).toFixed(1);
+      const avgY = (totalTenureMonths / (employeesWithKnownTenure || 1) / 12).toFixed(1);
       setAvgExperienceYears(avgY);
       const highestBucket = [...expArr].sort((a, b) => b.count - a.count)[0];
       setHighestExpGroup(highestBucket ? highestBucket.name : 'Fresher (0-1y)');
@@ -1259,11 +1278,12 @@ export function WorkforceOverviewPage({
           }
 
           const actionDate = action.appliedAt || action.createdAt || action.effectiveDate;
+          const actionEmployee = fullList.find((e) => e.id === action.employeeId);
           activityList.push({
             id: `act-action-${action.id}`,
             employeeName: action.employeeName,
             activityDescription: description,
-            department: deptChange?.toLabel || 'General Operations',
+            department: deptChange?.toLabel || actionEmployee?.departmentName || 'Unassigned',
             dateTime: actionDate,
             formattedTime: formatTimelineDate(actionDate),
             updatedBy: '',
@@ -1275,7 +1295,7 @@ export function WorkforceOverviewPage({
 
       for (const emp of fullList) {
         if (!emp.joiningDate) continue;
-        const dName = emp.departmentName || 'General Operations';
+        const dName = emp.departmentName || 'Unassigned';
 
         activityList.push({
           id: `act-join-${emp.id}`,
@@ -1436,14 +1456,14 @@ export function WorkforceOverviewPage({
 
         {/* Accessible Semantic Labels */}
         <div className="bezent-visually-hidden" aria-hidden="true">
+          <span>Largest Department: {largestDeptInfo ? largestDeptInfo.name : 'Unassigned'}</span>
           <span>
-            Largest Department: {largestDeptInfo ? largestDeptInfo.name : 'General Operations'}
+            Smallest Department: {smallestDeptInfo ? smallestDeptInfo.name : 'Unassigned'}
           </span>
-          <span>Smallest Department: {smallestDeptInfo ? smallestDeptInfo.name : 'Finance'}</span>
           <span>Total Departments: {totalDeptsCount}</span>
           <span>Department Display Count: {departmentDisplay.length}</span>
-          <span>Largest Location: {largestLocInfo ? largestLocInfo.name : 'Bengaluru HQ'}</span>
-          <span>Smallest Location: {smallestLocInfo ? smallestLocInfo.name : 'Remote'}</span>
+          <span>Largest Location: {largestLocInfo ? largestLocInfo.name : 'Unassigned'}</span>
+          <span>Smallest Location: {smallestLocInfo ? smallestLocInfo.name : 'Unassigned'}</span>
           <span>Total Locations: {totalLocsCount}</span>
           <span>Location Display Count: {locationDisplay.length}</span>
           <span>Total Workforce Count: {totalWorkforceCount}</span>
@@ -1625,7 +1645,14 @@ export function WorkforceOverviewPage({
                 </div>
               </div>
               <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--rose">
-                3 Actionable
+                {
+                  [
+                    recordsBreakdown.expiringCount,
+                    kpiData.probationEmployees,
+                    regularizationItems.length,
+                  ].filter((c) => c > 0).length
+                }{' '}
+                Actionable
               </span>
             </div>
 
@@ -1642,7 +1669,7 @@ export function WorkforceOverviewPage({
                     'Employee identity, statutory compliance, and certification documents expiring within 30 days.',
                   )
                 }
-                title="10 employee documents expiring within the next 30 days. Click to view details."
+                title={`${recordsBreakdown.expiringCount} employee document(s) expiring within the next 30 days. Click to view details.`}
               >
                 <div className="bezent-wf-alert-item__left">
                   <div className="bezent-wf-alert-icon bezent-wf-alert-icon--amber">
@@ -1657,7 +1684,7 @@ export function WorkforceOverviewPage({
                 </div>
                 <div className="bezent-wf-alert-item__right">
                   <span className="bezent-wf-alert-pill bezent-wf-alert-pill--amber">
-                    {recordsBreakdown.expiringCount || 10} Expiring
+                    {recordsBreakdown.expiringCount} Expiring
                   </span>
                   <BezentIcon name="chevronRight" size={14} />
                 </div>
@@ -1674,7 +1701,7 @@ export function WorkforceOverviewPage({
                     'Probationary workforce approaching confirmation milestone requiring manager signoff.',
                   )
                 }
-                title={`${kpiData.probationEmployees || 2} employees due for confirmation review this month. Click to view details.`}
+                title={`${kpiData.probationEmployees} employee(s) currently on probation. Click to view details.`}
               >
                 <div className="bezent-wf-alert-item__left">
                   <div className="bezent-wf-alert-icon bezent-wf-alert-icon--purple">
@@ -1689,7 +1716,7 @@ export function WorkforceOverviewPage({
                 </div>
                 <div className="bezent-wf-alert-item__right">
                   <span className="bezent-wf-alert-pill bezent-wf-alert-pill--purple">
-                    {kpiData.probationEmployees || 2} Due
+                    {kpiData.probationEmployees} Due
                   </span>
                   <BezentIcon name="chevronRight" size={14} />
                 </div>
@@ -1706,7 +1733,7 @@ export function WorkforceOverviewPage({
                     'Pending missed punch corrections and regularization requests requiring administrative review.',
                   )
                 }
-                title={`${hrActionItems.find((i) => i.id === 'attendance-corrections')?.count || 3} attendance exceptions pending review. Click to view details.`}
+                title={`${regularizationItems.length} attendance exception(s) pending review. Click to view details.`}
               >
                 <div className="bezent-wf-alert-item__left">
                   <div className="bezent-wf-alert-icon bezent-wf-alert-icon--rose">
@@ -1721,8 +1748,7 @@ export function WorkforceOverviewPage({
                 </div>
                 <div className="bezent-wf-alert-item__right">
                   <span className="bezent-wf-alert-pill bezent-wf-alert-pill--rose">
-                    {hrActionItems.find((i) => i.id === 'attendance-corrections')?.count || 3}{' '}
-                    Pending
+                    {regularizationItems.length} Pending
                   </span>
                   <BezentIcon name="chevronRight" size={14} />
                 </div>
@@ -2132,110 +2158,101 @@ export function WorkforceOverviewPage({
           <div className="bezent-wf-drawer-content">
             {drawerState.type === 'documents' && (
               <div className="bezent-wf-drawer-list">
-                <div className="bezent-wf-drawer-item">
-                  <div>
-                    <h4 className="bezent-wf-drawer-item-title">Kavitha R. — Passport Copy</h4>
-                    <span className="bezent-wf-drawer-item-desc">
-                      Engineering &bull; Expires in 12 days (Nov 25, 2026)
-                    </span>
-                  </div>
-                  <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--rose">
-                    12 Days
+                {expiringDocuments.length === 0 ? (
+                  <span className="bezent-wf-drawer-item-desc">
+                    No documents are currently expiring soon.
                   </span>
-                </div>
-                <div className="bezent-wf-drawer-item">
-                  <div>
-                    <h4 className="bezent-wf-drawer-item-title">
-                      Arun K. — Work Permit Certificate
-                    </h4>
-                    <span className="bezent-wf-drawer-item-desc">
-                      General Operations &bull; Expires in 18 days (Dec 01, 2026)
-                    </span>
-                  </div>
-                  <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--amber">
-                    18 Days
-                  </span>
-                </div>
-                <div className="bezent-wf-drawer-item">
-                  <div>
-                    <h4 className="bezent-wf-drawer-item-title">
-                      Rahul Verma — Tax Exemption Declaration
-                    </h4>
-                    <span className="bezent-wf-drawer-item-desc">
-                      Finance &bull; Annual statutory proof verification pending
-                    </span>
-                  </div>
-                  <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--amber">
-                    24 Days
-                  </span>
-                </div>
-                <div className="bezent-wf-drawer-item">
-                  <div>
-                    <h4 className="bezent-wf-drawer-item-title">
-                      Kavya Iyer — Health Insurance Proof
-                    </h4>
-                    <span className="bezent-wf-drawer-item-desc">
-                      Engineering &bull; Policy renewal document required
-                    </span>
-                  </div>
-                  <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--amber">
-                    28 Days
-                  </span>
-                </div>
+                ) : (
+                  expiringDocuments.map((doc) => {
+                    const daysLeft = doc.expiryDate
+                      ? Math.max(
+                          0,
+                          Math.ceil(
+                            (new Date(doc.expiryDate).getTime() - Date.now()) /
+                              (1000 * 60 * 60 * 24),
+                          ),
+                        )
+                      : null;
+                    return (
+                      <div key={doc.id} className="bezent-wf-drawer-item">
+                        <div>
+                          <h4 className="bezent-wf-drawer-item-title">
+                            {doc.employeeName} &mdash; {doc.documentName}
+                          </h4>
+                          <span className="bezent-wf-drawer-item-desc">
+                            {doc.departmentName || 'Unassigned'}
+                            {daysLeft !== null
+                              ? ` • Expires in ${daysLeft} day${daysLeft === 1 ? '' : 's'}`
+                              : ' • Expiry date not recorded'}
+                          </span>
+                        </div>
+                        {daysLeft !== null && (
+                          <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--amber">
+                            {daysLeft} Days
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
               </div>
             )}
 
             {drawerState.type === 'probation' && (
               <div className="bezent-wf-drawer-list">
-                <div className="bezent-wf-drawer-item">
-                  <div>
-                    <h4 className="bezent-wf-drawer-item-title">Kavitha R.</h4>
-                    <span className="bezent-wf-drawer-item-desc">
-                      Senior Full Stack Engineer &bull; Engineering &bull; 90-day milestone reached
-                    </span>
-                  </div>
-                  <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--purple">
-                    Review Due
-                  </span>
-                </div>
-                <div className="bezent-wf-drawer-item">
-                  <div>
-                    <h4 className="bezent-wf-drawer-item-title">Arun K.</h4>
-                    <span className="bezent-wf-drawer-item-desc">
-                      Operations Lead &bull; General Operations &bull; 180-day milestone reached
-                    </span>
-                  </div>
-                  <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--purple">
-                    Review Due
-                  </span>
-                </div>
+                {(() => {
+                  const probationers = rawEmployees.filter(
+                    (e) => e.employmentStatus === 'probation',
+                  );
+                  if (probationers.length === 0) {
+                    return (
+                      <span className="bezent-wf-drawer-item-desc">
+                        No employees are currently on probation.
+                      </span>
+                    );
+                  }
+                  return probationers.map((emp) => (
+                    <div key={emp.id} className="bezent-wf-drawer-item">
+                      <div>
+                        <h4 className="bezent-wf-drawer-item-title">{emp.fullName}</h4>
+                        <span className="bezent-wf-drawer-item-desc">
+                          {emp.designationName || 'Unassigned role'} &bull;{' '}
+                          {emp.departmentName || 'Unassigned'}
+                          {emp.probationEndDate
+                            ? ` • Ends ${new Date(emp.probationEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+                            : ''}
+                        </span>
+                      </div>
+                      <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--purple">
+                        Review Due
+                      </span>
+                    </div>
+                  ));
+                })()}
               </div>
             )}
 
             {drawerState.type === 'attendance' && (
               <div className="bezent-wf-drawer-list">
-                <div className="bezent-wf-drawer-item">
-                  <div>
-                    <h4 className="bezent-wf-drawer-item-title">Missed Punch Regularization</h4>
-                    <span className="bezent-wf-drawer-item-desc">
-                      2 requests pending manager approval across Engineering &amp; Operations
-                    </span>
-                  </div>
-                  <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--amber">
-                    2 Pending
+                {regularizationItems.length === 0 ? (
+                  <span className="bezent-wf-drawer-item-desc">
+                    No attendance regularization requests are pending.
                   </span>
-                </div>
-                <div className="bezent-wf-drawer-item">
-                  <div>
-                    <h4 className="bezent-wf-drawer-item-title">Unplanned Half-Day Absence</h4>
-                    <span className="bezent-wf-drawer-item-desc">
-                      1 unexcused absence requiring HR acknowledgement
-                    </span>
-                  </div>
-                  <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--rose">
-                    1 Flagged
-                  </span>
-                </div>
+                ) : (
+                  regularizationItems.map((item) => (
+                    <div key={item.id} className="bezent-wf-drawer-item">
+                      <div>
+                        <h4 className="bezent-wf-drawer-item-title">{item.employeeName}</h4>
+                        <span className="bezent-wf-drawer-item-desc">
+                          {item.departmentName || 'Unassigned'} &bull; {item.reason}
+                        </span>
+                      </div>
+                      <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--amber">
+                        Pending
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
             )}
 
@@ -2266,32 +2283,39 @@ export function WorkforceOverviewPage({
 
             {drawerState.type === 'exits' && (
               <div className="bezent-wf-drawer-list">
-                <div className="bezent-wf-drawer-item">
-                  <div>
-                    <h4 className="bezent-wf-drawer-item-title">
-                      Scheduled Departure — Notice Period
-                    </h4>
-                    <span className="bezent-wf-drawer-item-desc">
-                      {kpiData.exits} employee currently serving standard 30-day notice period
-                    </span>
-                  </div>
-                  <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--blue">
-                    In Notice
+                {recentSeparations.length === 0 ? (
+                  <span className="bezent-wf-drawer-item-desc">
+                    No separations in the selected scope and time period.
                   </span>
-                </div>
-                <div className="bezent-wf-drawer-item">
-                  <div>
-                    <h4 className="bezent-wf-drawer-item-title">
-                      Knowledge Transfer &amp; Handover
-                    </h4>
-                    <span className="bezent-wf-drawer-item-desc">
-                      Offboarding checklist in progress; asset return scheduled
-                    </span>
-                  </div>
-                  <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--amber">
-                    Checklist 60%
-                  </span>
-                </div>
+                ) : (
+                  recentSeparations.map((action) => {
+                    const isPending = action.status === 'pending';
+                    const isApplied = action.status === 'applied';
+                    return (
+                      <div key={action.id} className="bezent-wf-drawer-item">
+                        <div>
+                          <h4 className="bezent-wf-drawer-item-title">{action.employeeName}</h4>
+                          <span className="bezent-wf-drawer-item-desc">
+                            {action.actionType === 'resignation' ? 'Resignation' : 'Termination'}
+                            {' • '}
+                            {formatTimelineDate(action.effectiveDate)}
+                          </span>
+                        </div>
+                        <span
+                          className={`bezent-wf-drawer-meta-pill ${
+                            isPending
+                              ? 'bezent-wf-drawer-meta-pill--blue'
+                              : isApplied
+                                ? 'bezent-wf-drawer-meta-pill--amber'
+                                : 'bezent-wf-drawer-meta-pill--rose'
+                          }`}
+                        >
+                          {isPending ? 'In Notice' : isApplied ? 'Settled' : 'Cancelled'}
+                        </span>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             )}
           </div>

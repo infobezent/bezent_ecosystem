@@ -157,17 +157,59 @@ const FALLBACK_GROWTH_DATA: Record<GrowthTimeFilter, GrowthDataPoint[]> = {
     { label: 'Week 44', joiners: 8, exits: 2, net: 6, beginningHeadcount: 1244, growthRate: 0.5 },
   ],
   monthly: [
-    { label: 'Jun 2026', joiners: 18, exits: 3, net: 15, beginningHeadcount: 1180, growthRate: 1.3 },
-    { label: 'Jul 2026', joiners: 24, exits: 4, net: 20, beginningHeadcount: 1195, growthRate: 1.7 },
+    {
+      label: 'Jun 2026',
+      joiners: 18,
+      exits: 3,
+      net: 15,
+      beginningHeadcount: 1180,
+      growthRate: 1.3,
+    },
+    {
+      label: 'Jul 2026',
+      joiners: 24,
+      exits: 4,
+      net: 20,
+      beginningHeadcount: 1195,
+      growthRate: 1.7,
+    },
     { label: 'Aug 2026', joiners: 14, exits: 5, net: 9, beginningHeadcount: 1215, growthRate: 0.7 },
-    { label: 'Sep 2026', joiners: 22, exits: 2, net: 20, beginningHeadcount: 1224, growthRate: 1.6 },
-    { label: 'Oct 2026', joiners: 19, exits: 4, net: 15, beginningHeadcount: 1244, growthRate: 1.2 },
-    { label: 'Nov 2026', joiners: 16, exits: 2, net: 14, beginningHeadcount: 1259, growthRate: 1.1 },
+    {
+      label: 'Sep 2026',
+      joiners: 22,
+      exits: 2,
+      net: 20,
+      beginningHeadcount: 1224,
+      growthRate: 1.6,
+    },
+    {
+      label: 'Oct 2026',
+      joiners: 19,
+      exits: 4,
+      net: 15,
+      beginningHeadcount: 1244,
+      growthRate: 1.2,
+    },
+    {
+      label: 'Nov 2026',
+      joiners: 16,
+      exits: 2,
+      net: 14,
+      beginningHeadcount: 1259,
+      growthRate: 1.1,
+    },
   ],
   yearly: [
     { label: '2023', joiners: 140, exits: 28, net: 112, beginningHeadcount: 850, growthRate: 13.2 },
     { label: '2024', joiners: 185, exits: 32, net: 153, beginningHeadcount: 962, growthRate: 15.9 },
-    { label: '2025', joiners: 210, exits: 36, net: 174, beginningHeadcount: 1115, growthRate: 15.6 },
+    {
+      label: '2025',
+      joiners: 210,
+      exits: 36,
+      net: 174,
+      beginningHeadcount: 1115,
+      growthRate: 15.6,
+    },
     { label: '2026', joiners: 113, exits: 20, net: 93, beginningHeadcount: 1289, growthRate: 7.2 },
   ],
 };
@@ -194,7 +236,6 @@ const FALLBACK_RETENTION_DATA: Record<RetentionTimeFilter, RetentionDataPoint[]>
     { label: '2026', retentionRate: 94.2, attritionRate: 5.8, retained: 1269, separated: 20 },
   ],
 };
-
 
 /**
  * Resolves job level from designation name.
@@ -386,11 +427,9 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
 
       let key = 'Other';
       if (activeDistributionBy === 'department') {
-        key = emp.departmentName || 'General Operations';
+        key = emp.departmentName || 'Unassigned';
       } else if (activeDistributionBy === 'branch') {
-        let loc = emp.locationName || 'Bangalore HQ';
-        if (loc.toLowerCase() === 'bengaluru') loc = 'Bangalore HQ';
-        key = loc;
+        key = emp.locationName || 'Unassigned';
       } else if (activeDistributionBy === 'employment_type') {
         const typeMap: Record<string, string> = {
           full_time: 'Full-Time',
@@ -655,12 +694,7 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
   // Growth Coordinates
   const maxGrowthVal = Math.max(
     6,
-    Math.round(
-      Math.max(
-        ...growthSeries.map((d) => Math.max(d.joiners, d.exits)),
-        1,
-      ) * 1.3,
-    ),
+    Math.round(Math.max(...growthSeries.map((d) => Math.max(d.joiners, d.exits)), 1) * 1.3),
   );
 
   const growthPoints = growthSeries.map((pt, idx) => {
@@ -686,9 +720,7 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
       ? `${pathJoinersLine} L ${lastGrowth.x.toFixed(1)} ${plotBottom} L ${firstGrowth.x.toFixed(1)} ${plotBottom} Z`
       : '';
 
-  const pathExitsLine = buildSmoothSplinePath(
-    growthPoints.map((p) => ({ x: p.x, y: p.yExits })),
-  );
+  const pathExitsLine = buildSmoothSplinePath(growthPoints.map((p) => ({ x: p.x, y: p.yExits })));
   const pathExitsArea =
     pathExitsLine && firstGrowth && lastGrowth
       ? `${pathExitsLine} L ${lastGrowth.x.toFixed(1)} ${plotBottom} L ${firstGrowth.x.toFixed(1)} ${plotBottom} Z`
@@ -799,9 +831,7 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
                 aria-label="Time Period"
                 value={activeRetentionPeriod}
                 options={RETENTION_PERIOD_OPTIONS}
-                onChange={(e) =>
-                  handleRetentionPeriodChange(e.target.value as RetentionTimeFilter)
-                }
+                onChange={(e) => handleRetentionPeriodChange(e.target.value as RetentionTimeFilter)}
               />
             </div>
           )}
@@ -818,709 +848,745 @@ export const WorkforceAnalyticsCard: React.FC<WorkforceAnalyticsCardProps> = ({
             <div className="bezent-wf-analytics-skeleton-bar bezent-wf-analytics-skeleton-bar--chart" />
           </div>
         ) : error ? (
-        <div className="bezent-wf-analytics-error" role="alert">
-          <div className="bezent-wf-analytics-error__icon">
-            <BezentIcon name="warning" size={24} />
+          <div className="bezent-wf-analytics-error" role="alert">
+            <div className="bezent-wf-analytics-error__icon">
+              <BezentIcon name="warning" size={24} />
+            </div>
+            <h4 className="bezent-wf-analytics-error__title">Failed to load workforce analytics</h4>
+            <p className="bezent-wf-analytics-error__desc">
+              {typeof error === 'string'
+                ? error
+                : error?.message || 'A network error occurred while aggregating analytics data.'}
+            </p>
+            {onRetry && (
+              <Button size="sm" variant="secondary" onClick={onRetry}>
+                Retry Analytics Query
+              </Button>
+            )}
           </div>
-          <h4 className="bezent-wf-analytics-error__title">Failed to load workforce analytics</h4>
-          <p className="bezent-wf-analytics-error__desc">
-            {typeof error === 'string'
-              ? error
-              : error?.message || 'A network error occurred while aggregating analytics data.'}
-          </p>
-          {onRetry && (
-            <Button size="sm" variant="secondary" onClick={onRetry}>
-              Retry Analytics Query
-            </Button>
-          )}
-        </div>
-      ) : isDataEmpty ? (
-        <div className="bezent-wf-analytics-empty">
-          <div className="bezent-wf-analytics-empty__icon">
-            <BezentIcon name="reports" size={24} />
+        ) : isDataEmpty ? (
+          <div className="bezent-wf-analytics-empty">
+            <div className="bezent-wf-analytics-empty__icon">
+              <BezentIcon name="reports" size={24} />
+            </div>
+            <h4 className="bezent-wf-analytics-empty__title">No Employee Data Available</h4>
+            <p className="bezent-wf-analytics-empty__desc">
+              No active employee records match the selected organization filter criteria.
+            </p>
           </div>
-          <h4 className="bezent-wf-analytics-empty__title">No Employee Data Available</h4>
-          <p className="bezent-wf-analytics-empty__desc">
-            No active employee records match the selected organization filter criteria.
-          </p>
-        </div>
-      ) : (
-        <>
-          {/* ─────────────────────────────────────────────────────────────
+        ) : (
+          <>
+            {/* ─────────────────────────────────────────────────────────────
               VIEW A: Workforce Distribution (Donut Chart + Dimensions)
              ───────────────────────────────────────────────────────────── */}
-          {activeCategory === 'distribution' && (
-            <>
-              {/* Donut Chart & Legend Split View */}
-              <div className="bezent-wf-distribution-split">
-                {/* Donut Canvas */}
-                <div className="bezent-wf-donut-analytics-wrap">
-                  <svg viewBox="0 0 120 120" className="bezent-wf-donut-analytics-svg">
-                    {/* Background Ring */}
-                    <circle cx="60" cy="60" r="46" fill="none" stroke="#f1f5f9" strokeWidth="15" />
+            {activeCategory === 'distribution' && (
+              <>
+                {/* Donut Chart & Legend Split View */}
+                <div className="bezent-wf-distribution-split">
+                  {/* Donut Canvas */}
+                  <div className="bezent-wf-donut-analytics-wrap">
+                    <svg viewBox="0 0 120 120" className="bezent-wf-donut-analytics-svg">
+                      {/* Background Ring */}
+                      <circle
+                        cx="60"
+                        cy="60"
+                        r="46"
+                        fill="none"
+                        stroke="#f1f5f9"
+                        strokeWidth="15"
+                      />
 
-                    {/* Slices */}
+                      {/* Slices */}
+                      {distributionSegments.map((seg) => {
+                        const dash = (seg.percentage / 100) * DONUT_CIRCUMFERENCE;
+                        const offset = -((accumulatedPct / 100) * DONUT_CIRCUMFERENCE);
+                        accumulatedPct += seg.percentage;
+                        const isHovered = hoveredSlice === seg.name;
+
+                        return (
+                          <circle
+                            key={seg.name}
+                            cx="60"
+                            cy="60"
+                            r="46"
+                            fill="none"
+                            stroke={seg.color}
+                            strokeWidth={isHovered ? 18 : 15}
+                            strokeDasharray={`${dash} ${DONUT_CIRCUMFERENCE}`}
+                            strokeDashoffset={offset}
+                            opacity={hoveredSlice && !isHovered ? 0.45 : 1}
+                            className="bezent-wf-donut-analytics-slice"
+                            onMouseEnter={() => setHoveredSlice(seg.name)}
+                            onMouseLeave={() => setHoveredSlice(null)}
+                          />
+                        );
+                      })}
+                    </svg>
+
+                    <div className="bezent-wf-donut-analytics-center">
+                      <span className="bezent-wf-donut-analytics-count">
+                        {totalDistributionEmployees.toLocaleString()}
+                      </span>
+                      <span className="bezent-wf-donut-analytics-label">Total Employees</span>
+                    </div>
+                  </div>
+
+                  {/* Legend Cards Grid */}
+                  <div className="bezent-wf-distribution-legend-grid">
                     {distributionSegments.map((seg) => {
-                      const dash = (seg.percentage / 100) * DONUT_CIRCUMFERENCE;
-                      const offset = -((accumulatedPct / 100) * DONUT_CIRCUMFERENCE);
-                      accumulatedPct += seg.percentage;
                       const isHovered = hoveredSlice === seg.name;
-
                       return (
-                        <circle
+                        <div
                           key={seg.name}
-                          cx="60"
-                          cy="60"
-                          r="46"
-                          fill="none"
-                          stroke={seg.color}
-                          strokeWidth={isHovered ? 18 : 15}
-                          strokeDasharray={`${dash} ${DONUT_CIRCUMFERENCE}`}
-                          strokeDashoffset={offset}
-                          opacity={hoveredSlice && !isHovered ? 0.45 : 1}
-                          className="bezent-wf-donut-analytics-slice"
+                          className={`bezent-wf-distribution-legend-card ${isHovered ? 'bezent-wf-distribution-legend-card--hovered' : ''}`}
                           onMouseEnter={() => setHoveredSlice(seg.name)}
                           onMouseLeave={() => setHoveredSlice(null)}
-                        />
+                        >
+                          <div className="bezent-wf-distribution-legend-left">
+                            <svg
+                              className="bezent-wf-legend-dot"
+                              width="8"
+                              height="8"
+                              viewBox="0 0 8 8"
+                              aria-hidden="true"
+                            >
+                              <circle cx="4" cy="4" r="4" fill={seg.color} />
+                            </svg>
+                            <span className="bezent-wf-distribution-legend-name" title={seg.name}>
+                              {seg.name}
+                            </span>
+                          </div>
+                          <div className="bezent-wf-distribution-legend-right">
+                            <span className="bezent-wf-distribution-legend-count">
+                              {seg.count.toLocaleString()}
+                            </span>
+                            <span className="bezent-wf-distribution-legend-pct">
+                              ({seg.percentage}%)
+                            </span>
+                          </div>
+                        </div>
                       );
                     })}
-                  </svg>
+                  </div>
+                </div>
+              </>
+            )}
 
-                  <div className="bezent-wf-donut-analytics-center">
-                    <span className="bezent-wf-donut-analytics-count">
-                      {totalDistributionEmployees.toLocaleString()}
-                    </span>
-                    <span className="bezent-wf-donut-analytics-label">Total Employees</span>
+            {/* ─────────────────────────────────────────────────────────────
+              VIEW B: Workforce Growth (Smooth Spline Curve + Modern Design)
+             ───────────────────────────────────────────────────────────── */}
+            {activeCategory === 'growth' && (
+              <div className="bezent-wf-analytics-chart-container">
+                {/* Legend Row */}
+                <div className="bezent-wf-analytics-chart-legend">
+                  <div className="bezent-wf-chart-legend-item">
+                    <span className="bezent-wf-legend-dot bezent-wf-legend-dot--emerald" />
+                    <span className="bezent-wf-chart-legend-text">Joiners</span>
+                  </div>
+                  <div className="bezent-wf-chart-legend-item">
+                    <span className="bezent-wf-legend-dot bezent-wf-legend-dot--rose" />
+                    <span className="bezent-wf-chart-legend-text">Exits</span>
                   </div>
                 </div>
 
-                {/* Legend Cards Grid */}
-                <div className="bezent-wf-distribution-legend-grid">
-                  {distributionSegments.map((seg) => {
-                    const isHovered = hoveredSlice === seg.name;
+                <svg
+                  viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+                  className="bezent-wf-line-chart-svg bezent-wf-trend-svg"
+                  role="img"
+                  aria-label="Workforce Growth Line Chart"
+                  onMouseMove={(e) => {
+                    const svgRect = e.currentTarget.getBoundingClientRect();
+                    if (svgRect.width <= 0 || growthPoints.length === 0) return;
+                    const svgX = ((e.clientX - svgRect.left) / svgRect.width) * chartWidth;
+                    let bestIdx = 0;
+                    let bestDist = Infinity;
+                    growthPoints.forEach((pt, idx) => {
+                      const dist = Math.abs(pt.x - svgX);
+                      if (dist < bestDist) {
+                        bestDist = dist;
+                        bestIdx = idx;
+                      }
+                    });
+                    setHoveredPointIdx(bestIdx);
+                  }}
+                  onMouseLeave={() => setHoveredPointIdx(null)}
+                >
+                  <defs>
+                    <linearGradient id={gradJoinersId} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#10b981" stopOpacity="0.22" />
+                      <stop offset="85%" stopColor="#10b981" stopOpacity="0.03" />
+                      <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+                    </linearGradient>
+                    <linearGradient id={gradExitsId} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#ef4444" stopOpacity="0.16" />
+                      <stop offset="85%" stopColor="#ef4444" stopOpacity="0.02" />
+                      <stop offset="100%" stopColor="#ef4444" stopOpacity="0.0" />
+                    </linearGradient>
+                    <filter
+                      id="wf-analytics-dot-shadow"
+                      x="-50%"
+                      y="-50%"
+                      width="200%"
+                      height="200%"
+                    >
+                      <feDropShadow
+                        dx="0"
+                        dy="2"
+                        stdDeviation="2.5"
+                        floodColor="#0f172a"
+                        floodOpacity="0.18"
+                      />
+                    </filter>
+                    <filter
+                      id="wf-analytics-tooltip-shadow"
+                      x="-15%"
+                      y="-15%"
+                      width="130%"
+                      height="140%"
+                    >
+                      <feDropShadow
+                        dx="0"
+                        dy="8"
+                        stdDeviation="7"
+                        floodColor="#0f172a"
+                        floodOpacity="0.22"
+                      />
+                    </filter>
+                  </defs>
+
+                  {/* Y-Axis Grid Lines & Labels */}
+                  {[0.25, 0.5, 0.75, 1.0].map((frac) => {
+                    const y = plotBottom - frac * plotH;
+                    const val = Math.round(frac * maxGrowthVal);
                     return (
-                      <div
-                        key={seg.name}
-                        className={`bezent-wf-distribution-legend-card ${isHovered ? 'bezent-wf-distribution-legend-card--hovered' : ''}`}
-                        onMouseEnter={() => setHoveredSlice(seg.name)}
-                        onMouseLeave={() => setHoveredSlice(null)}
-                      >
-                        <div className="bezent-wf-distribution-legend-left">
-                          <svg
-                            className="bezent-wf-legend-dot"
-                            width="8"
-                            height="8"
-                            viewBox="0 0 8 8"
-                            aria-hidden="true"
-                          >
-                            <circle cx="4" cy="4" r="4" fill={seg.color} />
-                          </svg>
-                          <span className="bezent-wf-distribution-legend-name" title={seg.name}>
-                            {seg.name}
-                          </span>
-                        </div>
-                        <div className="bezent-wf-distribution-legend-right">
-                          <span className="bezent-wf-distribution-legend-count">
-                            {seg.count.toLocaleString()}
-                          </span>
-                          <span className="bezent-wf-distribution-legend-pct">
-                            ({seg.percentage}%)
-                          </span>
-                        </div>
-                      </div>
+                      <g key={frac}>
+                        <line
+                          x1={plotLeft}
+                          y1={y}
+                          x2={plotRight}
+                          y2={y}
+                          strokeDasharray="4 4"
+                          className="bezent-wf-trend-gridline"
+                        />
+                        <text
+                          x={plotLeft - 10}
+                          y={y + 3.5}
+                          textAnchor="end"
+                          className="bezent-wf-trend-axis-label"
+                        >
+                          {val}
+                        </text>
+                      </g>
                     );
                   })}
-                </div>
-              </div>
-            </>
-          )}
 
-          {/* ─────────────────────────────────────────────────────────────
-              VIEW B: Workforce Growth (Smooth Spline Curve + Modern Design)
-             ───────────────────────────────────────────────────────────── */}
-          {activeCategory === 'growth' && (
-            <div className="bezent-wf-analytics-chart-container">
-              {/* Legend Row */}
-              <div className="bezent-wf-analytics-chart-legend">
-                <div className="bezent-wf-chart-legend-item">
-                  <span className="bezent-wf-legend-dot bezent-wf-legend-dot--emerald" />
-                  <span className="bezent-wf-chart-legend-text">Joiners</span>
-                </div>
-                <div className="bezent-wf-chart-legend-item">
-                  <span className="bezent-wf-legend-dot bezent-wf-legend-dot--rose" />
-                  <span className="bezent-wf-chart-legend-text">Exits</span>
-                </div>
-              </div>
+                  {/* Solid Baseline */}
+                  <line
+                    x1={plotLeft}
+                    y1={plotBottom}
+                    x2={plotRight}
+                    y2={plotBottom}
+                    className="bezent-wf-trend-baseline"
+                  />
+                  <text
+                    x={plotLeft - 10}
+                    y={plotBottom + 3.5}
+                    textAnchor="end"
+                    className="bezent-wf-trend-axis-label"
+                  >
+                    0
+                  </text>
 
-              <svg
-                viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-                className="bezent-wf-line-chart-svg bezent-wf-trend-svg"
-                role="img"
-                aria-label="Workforce Growth Line Chart"
-                onMouseMove={(e) => {
-                  const svgRect = e.currentTarget.getBoundingClientRect();
-                  if (svgRect.width <= 0 || growthPoints.length === 0) return;
-                  const svgX = ((e.clientX - svgRect.left) / svgRect.width) * chartWidth;
-                  let bestIdx = 0;
-                  let bestDist = Infinity;
-                  growthPoints.forEach((pt, idx) => {
-                    const dist = Math.abs(pt.x - svgX);
-                    if (dist < bestDist) {
-                      bestDist = dist;
-                      bestIdx = idx;
-                    }
-                  });
-                  setHoveredPointIdx(bestIdx);
-                }}
-                onMouseLeave={() => setHoveredPointIdx(null)}
-              >
-                <defs>
-                  <linearGradient id={gradJoinersId} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10b981" stopOpacity="0.22" />
-                    <stop offset="85%" stopColor="#10b981" stopOpacity="0.03" />
-                    <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
-                  </linearGradient>
-                  <linearGradient id={gradExitsId} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#ef4444" stopOpacity="0.16" />
-                    <stop offset="85%" stopColor="#ef4444" stopOpacity="0.02" />
-                    <stop offset="100%" stopColor="#ef4444" stopOpacity="0.0" />
-                  </linearGradient>
-                  <filter id="wf-analytics-dot-shadow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feDropShadow
-                      dx="0"
-                      dy="2"
-                      stdDeviation="2.5"
-                      floodColor="#0f172a"
-                      floodOpacity="0.18"
-                    />
-                  </filter>
-                  <filter id="wf-analytics-tooltip-shadow" x="-15%" y="-15%" width="130%" height="140%">
-                    <feDropShadow
-                      dx="0"
-                      dy="8"
-                      stdDeviation="7"
-                      floodColor="#0f172a"
-                      floodOpacity="0.22"
-                    />
-                  </filter>
-                </defs>
+                  {/* Joiners Area & Smooth Spline Line */}
+                  {pathJoinersArea && <path d={pathJoinersArea} fill={`url(#${gradJoinersId})`} />}
+                  {pathJoinersLine && (
+                    <path d={pathJoinersLine} className="bezent-wf-series-line--joiners" />
+                  )}
 
-                {/* Y-Axis Grid Lines & Labels */}
-                {[0.25, 0.5, 0.75, 1.0].map((frac) => {
-                  const y = plotBottom - frac * plotH;
-                  const val = Math.round(frac * maxGrowthVal);
-                  return (
-                    <g key={frac}>
-                      <line
-                        x1={plotLeft}
-                        y1={y}
-                        x2={plotRight}
-                        y2={y}
-                        strokeDasharray="4 4"
-                        className="bezent-wf-trend-gridline"
+                  {/* Exits Area & Smooth Spline Line */}
+                  {pathExitsArea && <path d={pathExitsArea} fill={`url(#${gradExitsId})`} />}
+                  {pathExitsLine && (
+                    <path d={pathExitsLine} className="bezent-wf-series-line--exits" />
+                  )}
+
+                  {/* Interactive Date Hit Columns (seamless column hover detection) */}
+                  {growthPoints.map((pt, idx) => {
+                    const prevPt = growthPoints[idx - 1];
+                    const nextPt = growthPoints[idx + 1];
+                    const leftEdge = prevPt ? (prevPt.x + pt.x) / 2 : plotLeft;
+                    const rightEdge = nextPt ? (pt.x + nextPt.x) / 2 : plotRight;
+                    return (
+                      <rect
+                        key={`hit-${pt.data.label}-${idx}`}
+                        x={leftEdge}
+                        y={plotTop}
+                        width={Math.max(16, rightEdge - leftEdge)}
+                        height={plotH + 28}
+                        className="bezent-wf-trend-hit-col"
+                        onMouseEnter={() => setHoveredPointIdx(idx)}
                       />
+                    );
+                  })}
+
+                  {/* X-axis Labels */}
+                  {growthPoints.map((pt, idx) => {
+                    const isActive = hoveredPointIdx === idx;
+                    return (
                       <text
-                        x={plotLeft - 10}
-                        y={y + 3.5}
-                        textAnchor="end"
-                        className="bezent-wf-trend-axis-label"
+                        key={pt.data.label}
+                        x={pt.x}
+                        y={plotBottom + 20}
+                        textAnchor="middle"
+                        className={`bezent-wf-trend-axis-label ${isActive ? 'bezent-wf-trend-axis-label--active' : ''}`}
                       >
-                        {val}
+                        {pt.data.label}
                       </text>
+                    );
+                  })}
+
+                  {/* Active Hover Crosshair, Dots & Tooltip Card */}
+                  {activeGrowthHover && (
+                    <g className="bezent-wf-trend-active-group">
+                      {/* Vertical Dashed Guide line */}
+                      <line
+                        x1={activeGrowthHover.x}
+                        y1={plotTop}
+                        x2={activeGrowthHover.x}
+                        y2={plotBottom}
+                        strokeDasharray="3 3"
+                        className="bezent-wf-trend-guide-line"
+                      />
+
+                      {/* Joiner Marker: White Ring + Drop Shadow + Emerald Center */}
+                      <circle
+                        cx={activeGrowthHover.x}
+                        cy={activeGrowthHover.yJoiners}
+                        r={6}
+                        fill="#ffffff"
+                        filter="url(#wf-analytics-dot-shadow)"
+                      />
+                      <circle
+                        cx={activeGrowthHover.x}
+                        cy={activeGrowthHover.yJoiners}
+                        r={3.2}
+                        fill="#10b981"
+                      />
+
+                      {/* Exit Marker: White Ring + Drop Shadow + Rose Center */}
+                      <circle
+                        cx={activeGrowthHover.x}
+                        cy={activeGrowthHover.yExits}
+                        r={6}
+                        fill="#ffffff"
+                        filter="url(#wf-analytics-dot-shadow)"
+                      />
+                      <circle
+                        cx={activeGrowthHover.x}
+                        cy={activeGrowthHover.yExits}
+                        r={3.2}
+                        fill="#ef4444"
+                      />
+
+                      {/* Modern Floating Tooltip Card */}
+                      {(() => {
+                        const tipW = 156;
+                        const tipH = 88;
+                        const tipX =
+                          activeGrowthHover.x > chartWidth / 2
+                            ? Math.max(plotLeft + 4, activeGrowthHover.x - tipW - 14)
+                            : Math.min(plotRight - tipW - 4, activeGrowthHover.x + 14);
+                        const tipY = Math.max(
+                          plotTop + 4,
+                          Math.min(
+                            plotBottom - tipH - 6,
+                            Math.min(activeGrowthHover.yJoiners, activeGrowthHover.yExits) -
+                              tipH / 2,
+                          ),
+                        );
+
+                        return (
+                          <g
+                            transform={`translate(${tipX.toFixed(1)}, ${tipY.toFixed(1)})`}
+                            filter="url(#wf-analytics-tooltip-shadow)"
+                          >
+                            <rect
+                              width={tipW}
+                              height={tipH}
+                              rx={10}
+                              className="bezent-wf-trend-tooltip-bg"
+                            />
+                            <text x={12} y={20} className="bezent-wf-trend-tooltip-date">
+                              {activeGrowthHover.data.label}
+                            </text>
+                            <line
+                              x1={12}
+                              x2={tipW - 12}
+                              y1={29}
+                              y2={29}
+                              className="bezent-wf-trend-tooltip-divider"
+                            />
+                            {/* Joiners Row */}
+                            <circle cx={18} cy={44} r={3} fill="#10b981" />
+                            <text x={26} y={48} className="bezent-wf-trend-tooltip-name">
+                              Joiners
+                            </text>
+                            <text
+                              x={tipW - 12}
+                              y={48}
+                              textAnchor="end"
+                              className="bezent-wf-trend-tooltip-val-teal"
+                            >
+                              +{activeGrowthHover.data.joiners}
+                            </text>
+
+                            {/* Exits Row */}
+                            <circle cx={18} cy={61} r={3} fill="#ef4444" />
+                            <text x={26} y={65} className="bezent-wf-trend-tooltip-name">
+                              Exits
+                            </text>
+                            <text
+                              x={tipW - 12}
+                              y={65}
+                              textAnchor="end"
+                              className="bezent-wf-trend-tooltip-val-sec"
+                            >
+                              -{activeGrowthHover.data.exits}
+                            </text>
+
+                            {/* Net Row */}
+                            <circle cx={18} cy={77} r={3} fill="#38bdf8" />
+                            <text x={26} y={80} className="bezent-wf-trend-tooltip-name">
+                              Net Change
+                            </text>
+                            <text
+                              x={tipW - 12}
+                              y={80}
+                              textAnchor="end"
+                              className="bezent-wf-trend-tooltip-val-net"
+                            >
+                              {activeGrowthHover.data.net >= 0
+                                ? `+${activeGrowthHover.data.net}`
+                                : activeGrowthHover.data.net}
+                            </text>
+                          </g>
+                        );
+                      })()}
                     </g>
-                  );
-                })}
+                  )}
+                </svg>
+              </div>
+            )}
 
-                {/* Solid Baseline */}
-                <line
-                  x1={plotLeft}
-                  y1={plotBottom}
-                  x2={plotRight}
-                  y2={plotBottom}
-                  className="bezent-wf-trend-baseline"
-                />
-                <text
-                  x={plotLeft - 10}
-                  y={plotBottom + 3.5}
-                  textAnchor="end"
-                  className="bezent-wf-trend-axis-label"
-                >
-                  0
-                </text>
-
-                {/* Joiners Area & Smooth Spline Line */}
-                {pathJoinersArea && <path d={pathJoinersArea} fill={`url(#${gradJoinersId})`} />}
-                {pathJoinersLine && (
-                  <path d={pathJoinersLine} className="bezent-wf-series-line--joiners" />
-                )}
-
-                {/* Exits Area & Smooth Spline Line */}
-                {pathExitsArea && <path d={pathExitsArea} fill={`url(#${gradExitsId})`} />}
-                {pathExitsLine && (
-                  <path d={pathExitsLine} className="bezent-wf-series-line--exits" />
-                )}
-
-                {/* Interactive Date Hit Columns (seamless column hover detection) */}
-                {growthPoints.map((pt, idx) => {
-                  const prevPt = growthPoints[idx - 1];
-                  const nextPt = growthPoints[idx + 1];
-                  const leftEdge = prevPt ? (prevPt.x + pt.x) / 2 : plotLeft;
-                  const rightEdge = nextPt ? (pt.x + nextPt.x) / 2 : plotRight;
-                  return (
-                    <rect
-                      key={`hit-${pt.data.label}-${idx}`}
-                      x={leftEdge}
-                      y={plotTop}
-                      width={Math.max(16, rightEdge - leftEdge)}
-                      height={plotH + 28}
-                      className="bezent-wf-trend-hit-col"
-                      onMouseEnter={() => setHoveredPointIdx(idx)}
-                    />
-                  );
-                })}
-
-                {/* X-axis Labels */}
-                {growthPoints.map((pt, idx) => {
-                  const isActive = hoveredPointIdx === idx;
-                  return (
-                    <text
-                      key={pt.data.label}
-                      x={pt.x}
-                      y={plotBottom + 20}
-                      textAnchor="middle"
-                      className={`bezent-wf-trend-axis-label ${isActive ? 'bezent-wf-trend-axis-label--active' : ''}`}
-                    >
-                      {pt.data.label}
-                    </text>
-                  );
-                })}
-
-                {/* Active Hover Crosshair, Dots & Tooltip Card */}
-                {activeGrowthHover && (
-                  <g className="bezent-wf-trend-active-group">
-                    {/* Vertical Dashed Guide line */}
-                    <line
-                      x1={activeGrowthHover.x}
-                      y1={plotTop}
-                      x2={activeGrowthHover.x}
-                      y2={plotBottom}
-                      strokeDasharray="3 3"
-                      className="bezent-wf-trend-guide-line"
-                    />
-
-                    {/* Joiner Marker: White Ring + Drop Shadow + Emerald Center */}
-                    <circle
-                      cx={activeGrowthHover.x}
-                      cy={activeGrowthHover.yJoiners}
-                      r={6}
-                      fill="#ffffff"
-                      filter="url(#wf-analytics-dot-shadow)"
-                    />
-                    <circle
-                      cx={activeGrowthHover.x}
-                      cy={activeGrowthHover.yJoiners}
-                      r={3.2}
-                      fill="#10b981"
-                    />
-
-                    {/* Exit Marker: White Ring + Drop Shadow + Rose Center */}
-                    <circle
-                      cx={activeGrowthHover.x}
-                      cy={activeGrowthHover.yExits}
-                      r={6}
-                      fill="#ffffff"
-                      filter="url(#wf-analytics-dot-shadow)"
-                    />
-                    <circle
-                      cx={activeGrowthHover.x}
-                      cy={activeGrowthHover.yExits}
-                      r={3.2}
-                      fill="#ef4444"
-                    />
-
-                    {/* Modern Floating Tooltip Card */}
-                    {(() => {
-                      const tipW = 156;
-                      const tipH = 88;
-                      const tipX =
-                        activeGrowthHover.x > chartWidth / 2
-                          ? Math.max(plotLeft + 4, activeGrowthHover.x - tipW - 14)
-                          : Math.min(plotRight - tipW - 4, activeGrowthHover.x + 14);
-                      const tipY = Math.max(
-                        plotTop + 4,
-                        Math.min(
-                          plotBottom - tipH - 6,
-                          Math.min(activeGrowthHover.yJoiners, activeGrowthHover.yExits) - tipH / 2,
-                        ),
-                      );
-
-                      return (
-                        <g
-                          transform={`translate(${tipX.toFixed(1)}, ${tipY.toFixed(1)})`}
-                          filter="url(#wf-analytics-tooltip-shadow)"
-                        >
-                          <rect
-                            width={tipW}
-                            height={tipH}
-                            rx={10}
-                            className="bezent-wf-trend-tooltip-bg"
-                          />
-                          <text x={12} y={20} className="bezent-wf-trend-tooltip-date">
-                            {activeGrowthHover.data.label}
-                          </text>
-                          <line
-                            x1={12}
-                            x2={tipW - 12}
-                            y1={29}
-                            y2={29}
-                            className="bezent-wf-trend-tooltip-divider"
-                          />
-                          {/* Joiners Row */}
-                          <circle cx={18} cy={44} r={3} fill="#10b981" />
-                          <text x={26} y={48} className="bezent-wf-trend-tooltip-name">
-                            Joiners
-                          </text>
-                          <text
-                            x={tipW - 12}
-                            y={48}
-                            textAnchor="end"
-                            className="bezent-wf-trend-tooltip-val-teal"
-                          >
-                            +{activeGrowthHover.data.joiners}
-                          </text>
-
-                          {/* Exits Row */}
-                          <circle cx={18} cy={61} r={3} fill="#ef4444" />
-                          <text x={26} y={65} className="bezent-wf-trend-tooltip-name">
-                            Exits
-                          </text>
-                          <text
-                            x={tipW - 12}
-                            y={65}
-                            textAnchor="end"
-                            className="bezent-wf-trend-tooltip-val-sec"
-                          >
-                            -{activeGrowthHover.data.exits}
-                          </text>
-
-                          {/* Net Row */}
-                          <circle cx={18} cy={77} r={3} fill="#38bdf8" />
-                          <text x={26} y={80} className="bezent-wf-trend-tooltip-name">
-                            Net Change
-                          </text>
-                          <text
-                            x={tipW - 12}
-                            y={80}
-                            textAnchor="end"
-                            className="bezent-wf-trend-tooltip-val-net"
-                          >
-                            {activeGrowthHover.data.net >= 0
-                              ? `+${activeGrowthHover.data.net}`
-                              : activeGrowthHover.data.net}
-                          </text>
-                        </g>
-                      );
-                    })()}
-                  </g>
-                )}
-              </svg>
-            </div>
-          )}
-
-          {/* ─────────────────────────────────────────────────────────────
+            {/* ─────────────────────────────────────────────────────────────
               VIEW C: Retention & Attrition (Smooth Spline Curve + Modern Design)
              ───────────────────────────────────────────────────────────── */}
-          {activeCategory === 'retention' && (
-            <div className="bezent-wf-analytics-chart-container">
-              {/* Legend Row */}
-              <div className="bezent-wf-analytics-chart-legend">
-                <div className="bezent-wf-chart-legend-item">
-                  <span className="bezent-wf-legend-dot bezent-wf-legend-dot--emerald" />
-                  <span className="bezent-wf-chart-legend-text">Retention Rate</span>
+            {activeCategory === 'retention' && (
+              <div className="bezent-wf-analytics-chart-container">
+                {/* Legend Row */}
+                <div className="bezent-wf-analytics-chart-legend">
+                  <div className="bezent-wf-chart-legend-item">
+                    <span className="bezent-wf-legend-dot bezent-wf-legend-dot--emerald" />
+                    <span className="bezent-wf-chart-legend-text">Retention Rate</span>
+                  </div>
+                  <div className="bezent-wf-chart-legend-item">
+                    <span className="bezent-wf-legend-dot bezent-wf-legend-dot--amber" />
+                    <span className="bezent-wf-chart-legend-text">Attrition Rate</span>
+                  </div>
                 </div>
-                <div className="bezent-wf-chart-legend-item">
-                  <span className="bezent-wf-legend-dot bezent-wf-legend-dot--amber" />
-                  <span className="bezent-wf-chart-legend-text">Attrition Rate</span>
-                </div>
-              </div>
 
-              <svg
-                viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-                className="bezent-wf-line-chart-svg bezent-wf-trend-svg"
-                role="img"
-                aria-label="Workforce Retention & Attrition Line Chart"
-                onMouseMove={(e) => {
-                  const svgRect = e.currentTarget.getBoundingClientRect();
-                  if (svgRect.width <= 0 || retentionPoints.length === 0) return;
-                  const svgX = ((e.clientX - svgRect.left) / svgRect.width) * chartWidth;
-                  let bestIdx = 0;
-                  let bestDist = Infinity;
-                  retentionPoints.forEach((pt, idx) => {
-                    const dist = Math.abs(pt.x - svgX);
-                    if (dist < bestDist) {
-                      bestDist = dist;
-                      bestIdx = idx;
-                    }
-                  });
-                  setHoveredPointIdx(bestIdx);
-                }}
-                onMouseLeave={() => setHoveredPointIdx(null)}
-              >
-                <defs>
-                  <linearGradient id={gradRetentionId} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10b981" stopOpacity="0.22" />
-                    <stop offset="85%" stopColor="#10b981" stopOpacity="0.03" />
-                    <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
-                  </linearGradient>
-                  <linearGradient id={gradAttritionId} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.16" />
-                    <stop offset="85%" stopColor="#f59e0b" stopOpacity="0.02" />
-                    <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.0" />
-                  </linearGradient>
-                  <filter id="wf-analytics-dot-shadow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feDropShadow
-                      dx="0"
-                      dy="2"
-                      stdDeviation="2.5"
-                      floodColor="#0f172a"
-                      floodOpacity="0.18"
-                    />
-                  </filter>
-                  <filter id="wf-analytics-tooltip-shadow" x="-15%" y="-15%" width="130%" height="140%">
-                    <feDropShadow
-                      dx="0"
-                      dy="8"
-                      stdDeviation="7"
-                      floodColor="#0f172a"
-                      floodOpacity="0.22"
-                    />
-                  </filter>
-                </defs>
-
-                {/* Y-Axis Grid Lines & Labels */}
-                {[25, 50, 75, 100].map((rate) => {
-                  const y = plotBottom - (rate / maxRetentionVal) * plotH;
-                  return (
-                    <g key={rate}>
-                      <line
-                        x1={plotLeft}
-                        y1={y}
-                        x2={plotRight}
-                        y2={y}
-                        strokeDasharray="4 4"
-                        className="bezent-wf-trend-gridline"
-                      />
-                      <text
-                        x={plotLeft - 10}
-                        y={y + 3.5}
-                        textAnchor="end"
-                        className="bezent-wf-trend-axis-label"
-                      >
-                        {rate}%
-                      </text>
-                    </g>
-                  );
-                })}
-
-                {/* Solid Baseline */}
-                <line
-                  x1={plotLeft}
-                  y1={plotBottom}
-                  x2={plotRight}
-                  y2={plotBottom}
-                  className="bezent-wf-trend-baseline"
-                />
-                <text
-                  x={plotLeft - 10}
-                  y={plotBottom + 3.5}
-                  textAnchor="end"
-                  className="bezent-wf-trend-axis-label"
+                <svg
+                  viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+                  className="bezent-wf-line-chart-svg bezent-wf-trend-svg"
+                  role="img"
+                  aria-label="Workforce Retention & Attrition Line Chart"
+                  onMouseMove={(e) => {
+                    const svgRect = e.currentTarget.getBoundingClientRect();
+                    if (svgRect.width <= 0 || retentionPoints.length === 0) return;
+                    const svgX = ((e.clientX - svgRect.left) / svgRect.width) * chartWidth;
+                    let bestIdx = 0;
+                    let bestDist = Infinity;
+                    retentionPoints.forEach((pt, idx) => {
+                      const dist = Math.abs(pt.x - svgX);
+                      if (dist < bestDist) {
+                        bestDist = dist;
+                        bestIdx = idx;
+                      }
+                    });
+                    setHoveredPointIdx(bestIdx);
+                  }}
+                  onMouseLeave={() => setHoveredPointIdx(null)}
                 >
-                  0%
-                </text>
-
-                {/* Retention Area & Smooth Spline Line */}
-                {pathRetentionArea && <path d={pathRetentionArea} fill={`url(#${gradRetentionId})`} />}
-                {pathRetentionLine && (
-                  <path d={pathRetentionLine} className="bezent-wf-series-line--retention" />
-                )}
-
-                {/* Attrition Area & Smooth Spline Line */}
-                {pathAttritionArea && <path d={pathAttritionArea} fill={`url(#${gradAttritionId})`} />}
-                {pathAttritionLine && (
-                  <path d={pathAttritionLine} className="bezent-wf-series-line--attrition" />
-                )}
-
-                {/* Interactive Date Hit Columns (seamless column hover detection) */}
-                {retentionPoints.map((pt, idx) => {
-                  const prevPt = retentionPoints[idx - 1];
-                  const nextPt = retentionPoints[idx + 1];
-                  const leftEdge = prevPt ? (prevPt.x + pt.x) / 2 : plotLeft;
-                  const rightEdge = nextPt ? (pt.x + nextPt.x) / 2 : plotRight;
-                  return (
-                    <rect
-                      key={`hit-${pt.data.label}-${idx}`}
-                      x={leftEdge}
-                      y={plotTop}
-                      width={Math.max(16, rightEdge - leftEdge)}
-                      height={plotH + 28}
-                      className="bezent-wf-trend-hit-col"
-                      onMouseEnter={() => setHoveredPointIdx(idx)}
-                    />
-                  );
-                })}
-
-                {/* X-axis Labels */}
-                {retentionPoints.map((pt, idx) => {
-                  const isActive = hoveredPointIdx === idx;
-                  return (
-                    <text
-                      key={pt.data.label}
-                      x={pt.x}
-                      y={plotBottom + 20}
-                      textAnchor="middle"
-                      className={`bezent-wf-trend-axis-label ${isActive ? 'bezent-wf-trend-axis-label--active' : ''}`}
+                  <defs>
+                    <linearGradient id={gradRetentionId} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#10b981" stopOpacity="0.22" />
+                      <stop offset="85%" stopColor="#10b981" stopOpacity="0.03" />
+                      <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+                    </linearGradient>
+                    <linearGradient id={gradAttritionId} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.16" />
+                      <stop offset="85%" stopColor="#f59e0b" stopOpacity="0.02" />
+                      <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.0" />
+                    </linearGradient>
+                    <filter
+                      id="wf-analytics-dot-shadow"
+                      x="-50%"
+                      y="-50%"
+                      width="200%"
+                      height="200%"
                     >
-                      {pt.data.label}
-                    </text>
-                  );
-                })}
+                      <feDropShadow
+                        dx="0"
+                        dy="2"
+                        stdDeviation="2.5"
+                        floodColor="#0f172a"
+                        floodOpacity="0.18"
+                      />
+                    </filter>
+                    <filter
+                      id="wf-analytics-tooltip-shadow"
+                      x="-15%"
+                      y="-15%"
+                      width="130%"
+                      height="140%"
+                    >
+                      <feDropShadow
+                        dx="0"
+                        dy="8"
+                        stdDeviation="7"
+                        floodColor="#0f172a"
+                        floodOpacity="0.22"
+                      />
+                    </filter>
+                  </defs>
 
-                {/* Active Hover Crosshair, Dots & Tooltip Card */}
-                {activeRetentionHover && (
-                  <g className="bezent-wf-trend-active-group">
-                    {/* Vertical Dashed Guide line */}
-                    <line
-                      x1={activeRetentionHover.x}
-                      y1={plotTop}
-                      x2={activeRetentionHover.x}
-                      y2={plotBottom}
-                      strokeDasharray="3 3"
-                      className="bezent-wf-trend-guide-line"
-                    />
-
-                    {/* Retention Marker: White Ring + Drop Shadow + Emerald Center */}
-                    <circle
-                      cx={activeRetentionHover.x}
-                      cy={activeRetentionHover.yRetention}
-                      r={6}
-                      fill="#ffffff"
-                      filter="url(#wf-analytics-dot-shadow)"
-                    />
-                    <circle
-                      cx={activeRetentionHover.x}
-                      cy={activeRetentionHover.yRetention}
-                      r={3.2}
-                      fill="#10b981"
-                    />
-
-                    {/* Attrition Marker: White Ring + Drop Shadow + Amber Center */}
-                    <circle
-                      cx={activeRetentionHover.x}
-                      cy={activeRetentionHover.yAttrition}
-                      r={6}
-                      fill="#ffffff"
-                      filter="url(#wf-analytics-dot-shadow)"
-                    />
-                    <circle
-                      cx={activeRetentionHover.x}
-                      cy={activeRetentionHover.yAttrition}
-                      r={3.2}
-                      fill="#f59e0b"
-                    />
-
-                    {/* Modern Floating Tooltip Card */}
-                    {(() => {
-                      const tipW = 162;
-                      const tipH = 88;
-                      const tipX =
-                        activeRetentionHover.x > chartWidth / 2
-                          ? Math.max(plotLeft + 4, activeRetentionHover.x - tipW - 14)
-                          : Math.min(plotRight - tipW - 4, activeRetentionHover.x + 14);
-                      const tipY = Math.max(
-                        plotTop + 4,
-                        Math.min(
-                          plotBottom - tipH - 6,
-                          Math.min(
-                            activeRetentionHover.yRetention,
-                            activeRetentionHover.yAttrition,
-                          ) -
-                            tipH / 2,
-                        ),
-                      );
-
-                      return (
-                        <g
-                          transform={`translate(${tipX.toFixed(1)}, ${tipY.toFixed(1)})`}
-                          filter="url(#wf-analytics-tooltip-shadow)"
+                  {/* Y-Axis Grid Lines & Labels */}
+                  {[25, 50, 75, 100].map((rate) => {
+                    const y = plotBottom - (rate / maxRetentionVal) * plotH;
+                    return (
+                      <g key={rate}>
+                        <line
+                          x1={plotLeft}
+                          y1={y}
+                          x2={plotRight}
+                          y2={y}
+                          strokeDasharray="4 4"
+                          className="bezent-wf-trend-gridline"
+                        />
+                        <text
+                          x={plotLeft - 10}
+                          y={y + 3.5}
+                          textAnchor="end"
+                          className="bezent-wf-trend-axis-label"
                         >
-                          <rect
-                            width={tipW}
-                            height={tipH}
-                            rx={10}
-                            className="bezent-wf-trend-tooltip-bg"
-                          />
-                          <text x={12} y={20} className="bezent-wf-trend-tooltip-date">
-                            {activeRetentionHover.data.label}
-                          </text>
-                          <line
-                            x1={12}
-                            x2={tipW - 12}
-                            y1={29}
-                            y2={29}
-                            className="bezent-wf-trend-tooltip-divider"
-                          />
-                          {/* Retention Rate Row */}
-                          <circle cx={18} cy={44} r={3} fill="#10b981" />
-                          <text x={26} y={48} className="bezent-wf-trend-tooltip-name">
-                            Retention Rate
-                          </text>
-                          <text
-                            x={tipW - 12}
-                            y={48}
-                            textAnchor="end"
-                            className="bezent-wf-trend-tooltip-val-teal"
-                          >
-                            {activeRetentionHover.data.retentionRate}%
-                          </text>
+                          {rate}%
+                        </text>
+                      </g>
+                    );
+                  })}
 
-                          {/* Attrition Rate Row */}
-                          <circle cx={18} cy={61} r={3} fill="#f59e0b" />
-                          <text x={26} y={65} className="bezent-wf-trend-tooltip-name">
-                            Attrition Rate
-                          </text>
-                          <text
-                            x={tipW - 12}
-                            y={65}
-                            textAnchor="end"
-                            className="bezent-wf-trend-tooltip-val-sec"
-                          >
-                            {activeRetentionHover.data.attritionRate}%
-                          </text>
+                  {/* Solid Baseline */}
+                  <line
+                    x1={plotLeft}
+                    y1={plotBottom}
+                    x2={plotRight}
+                    y2={plotBottom}
+                    className="bezent-wf-trend-baseline"
+                  />
+                  <text
+                    x={plotLeft - 10}
+                    y={plotBottom + 3.5}
+                    textAnchor="end"
+                    className="bezent-wf-trend-axis-label"
+                  >
+                    0%
+                  </text>
 
-                          {/* Retained Staff Row */}
-                          <circle cx={18} cy={77} r={3} fill="#60a5fa" />
-                          <text x={26} y={80} className="bezent-wf-trend-tooltip-name">
-                            Retained Staff
-                          </text>
-                          <text
-                            x={tipW - 12}
-                            y={80}
-                            textAnchor="end"
-                            className="bezent-wf-trend-tooltip-val-net"
+                  {/* Retention Area & Smooth Spline Line */}
+                  {pathRetentionArea && (
+                    <path d={pathRetentionArea} fill={`url(#${gradRetentionId})`} />
+                  )}
+                  {pathRetentionLine && (
+                    <path d={pathRetentionLine} className="bezent-wf-series-line--retention" />
+                  )}
+
+                  {/* Attrition Area & Smooth Spline Line */}
+                  {pathAttritionArea && (
+                    <path d={pathAttritionArea} fill={`url(#${gradAttritionId})`} />
+                  )}
+                  {pathAttritionLine && (
+                    <path d={pathAttritionLine} className="bezent-wf-series-line--attrition" />
+                  )}
+
+                  {/* Interactive Date Hit Columns (seamless column hover detection) */}
+                  {retentionPoints.map((pt, idx) => {
+                    const prevPt = retentionPoints[idx - 1];
+                    const nextPt = retentionPoints[idx + 1];
+                    const leftEdge = prevPt ? (prevPt.x + pt.x) / 2 : plotLeft;
+                    const rightEdge = nextPt ? (pt.x + nextPt.x) / 2 : plotRight;
+                    return (
+                      <rect
+                        key={`hit-${pt.data.label}-${idx}`}
+                        x={leftEdge}
+                        y={plotTop}
+                        width={Math.max(16, rightEdge - leftEdge)}
+                        height={plotH + 28}
+                        className="bezent-wf-trend-hit-col"
+                        onMouseEnter={() => setHoveredPointIdx(idx)}
+                      />
+                    );
+                  })}
+
+                  {/* X-axis Labels */}
+                  {retentionPoints.map((pt, idx) => {
+                    const isActive = hoveredPointIdx === idx;
+                    return (
+                      <text
+                        key={pt.data.label}
+                        x={pt.x}
+                        y={plotBottom + 20}
+                        textAnchor="middle"
+                        className={`bezent-wf-trend-axis-label ${isActive ? 'bezent-wf-trend-axis-label--active' : ''}`}
+                      >
+                        {pt.data.label}
+                      </text>
+                    );
+                  })}
+
+                  {/* Active Hover Crosshair, Dots & Tooltip Card */}
+                  {activeRetentionHover && (
+                    <g className="bezent-wf-trend-active-group">
+                      {/* Vertical Dashed Guide line */}
+                      <line
+                        x1={activeRetentionHover.x}
+                        y1={plotTop}
+                        x2={activeRetentionHover.x}
+                        y2={plotBottom}
+                        strokeDasharray="3 3"
+                        className="bezent-wf-trend-guide-line"
+                      />
+
+                      {/* Retention Marker: White Ring + Drop Shadow + Emerald Center */}
+                      <circle
+                        cx={activeRetentionHover.x}
+                        cy={activeRetentionHover.yRetention}
+                        r={6}
+                        fill="#ffffff"
+                        filter="url(#wf-analytics-dot-shadow)"
+                      />
+                      <circle
+                        cx={activeRetentionHover.x}
+                        cy={activeRetentionHover.yRetention}
+                        r={3.2}
+                        fill="#10b981"
+                      />
+
+                      {/* Attrition Marker: White Ring + Drop Shadow + Amber Center */}
+                      <circle
+                        cx={activeRetentionHover.x}
+                        cy={activeRetentionHover.yAttrition}
+                        r={6}
+                        fill="#ffffff"
+                        filter="url(#wf-analytics-dot-shadow)"
+                      />
+                      <circle
+                        cx={activeRetentionHover.x}
+                        cy={activeRetentionHover.yAttrition}
+                        r={3.2}
+                        fill="#f59e0b"
+                      />
+
+                      {/* Modern Floating Tooltip Card */}
+                      {(() => {
+                        const tipW = 162;
+                        const tipH = 88;
+                        const tipX =
+                          activeRetentionHover.x > chartWidth / 2
+                            ? Math.max(plotLeft + 4, activeRetentionHover.x - tipW - 14)
+                            : Math.min(plotRight - tipW - 4, activeRetentionHover.x + 14);
+                        const tipY = Math.max(
+                          plotTop + 4,
+                          Math.min(
+                            plotBottom - tipH - 6,
+                            Math.min(
+                              activeRetentionHover.yRetention,
+                              activeRetentionHover.yAttrition,
+                            ) -
+                              tipH / 2,
+                          ),
+                        );
+
+                        return (
+                          <g
+                            transform={`translate(${tipX.toFixed(1)}, ${tipY.toFixed(1)})`}
+                            filter="url(#wf-analytics-tooltip-shadow)"
                           >
-                            {activeRetentionHover.data.retained} Active
-                          </text>
-                        </g>
-                      );
-                    })()}
-                  </g>
-                )}
-              </svg>
-            </div>
-          )}
-        </>
-      )}
+                            <rect
+                              width={tipW}
+                              height={tipH}
+                              rx={10}
+                              className="bezent-wf-trend-tooltip-bg"
+                            />
+                            <text x={12} y={20} className="bezent-wf-trend-tooltip-date">
+                              {activeRetentionHover.data.label}
+                            </text>
+                            <line
+                              x1={12}
+                              x2={tipW - 12}
+                              y1={29}
+                              y2={29}
+                              className="bezent-wf-trend-tooltip-divider"
+                            />
+                            {/* Retention Rate Row */}
+                            <circle cx={18} cy={44} r={3} fill="#10b981" />
+                            <text x={26} y={48} className="bezent-wf-trend-tooltip-name">
+                              Retention Rate
+                            </text>
+                            <text
+                              x={tipW - 12}
+                              y={48}
+                              textAnchor="end"
+                              className="bezent-wf-trend-tooltip-val-teal"
+                            >
+                              {activeRetentionHover.data.retentionRate}%
+                            </text>
+
+                            {/* Attrition Rate Row */}
+                            <circle cx={18} cy={61} r={3} fill="#f59e0b" />
+                            <text x={26} y={65} className="bezent-wf-trend-tooltip-name">
+                              Attrition Rate
+                            </text>
+                            <text
+                              x={tipW - 12}
+                              y={65}
+                              textAnchor="end"
+                              className="bezent-wf-trend-tooltip-val-sec"
+                            >
+                              {activeRetentionHover.data.attritionRate}%
+                            </text>
+
+                            {/* Retained Staff Row */}
+                            <circle cx={18} cy={77} r={3} fill="#60a5fa" />
+                            <text x={26} y={80} className="bezent-wf-trend-tooltip-name">
+                              Retained Staff
+                            </text>
+                            <text
+                              x={tipW - 12}
+                              y={80}
+                              textAnchor="end"
+                              className="bezent-wf-trend-tooltip-val-net"
+                            >
+                              {activeRetentionHover.data.retained} Active
+                            </text>
+                          </g>
+                        );
+                      })()}
+                    </g>
+                  )}
+                </svg>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
