@@ -366,7 +366,10 @@ export function WorkforceOverviewPage({
     Promise.allSettled([
       fetchEmployees({ pageSize: 1 }),
       fetchEmployees({ employmentStatus: 'active', pageSize: 1 }),
-      fetchNewHiresPaginated({ pageSize: 1 }),
+      // The onboarding endpoint only accepts pageSize 25/50/100 — 25 is the smallest
+      // valid value. `counts`/`pagination.totalItems` are full-dataset aggregates
+      // regardless of pageSize, so this stays cheap while satisfying validation.
+      fetchNewHiresPaginated({ pageSize: 25 }),
       fetchEmployees({ pageSize: 100 }),
       fetchEmployeeActions({ status: 'pending', pageSize: 10 }),
       leaveOperationsApi.requests({ status: 'pending', pageSize: 10 }),
