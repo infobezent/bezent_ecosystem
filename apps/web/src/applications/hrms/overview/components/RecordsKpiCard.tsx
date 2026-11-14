@@ -130,22 +130,9 @@ export const RecordsKpiCard: React.FC<RecordsKpiCardProps> = ({
     }
   }
 
-  let dynamicColorModifier = 'bezent-exec-kpi-card--green';
-  if (hoveredItem) {
-    if (hoveredItem.id === 'verified') {
-      dynamicColorModifier = 'bezent-exec-kpi-card--dynamic-active';
-    } else if (hoveredItem.id === 'pending') {
-      dynamicColorModifier = 'bezent-exec-kpi-card--dynamic-probation';
-    } else if (hoveredItem.id === 'expiring') {
-      dynamicColorModifier = 'bezent-exec-kpi-card--dynamic-pending';
-    } else {
-      dynamicColorModifier = 'bezent-exec-kpi-card--dynamic-separated';
-    }
-  }
-
   return (
     <div
-      className={`bezent-exec-kpi-card bezent-exec-kpi-card--records ${dynamicColorModifier}`}
+      className="bezent-exec-kpi-card bezent-exec-kpi-card--records"
       onClick={onClick}
       role="region"
       aria-label="Workforce Compliance and Records"

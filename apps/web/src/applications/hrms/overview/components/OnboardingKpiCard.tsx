@@ -65,7 +65,7 @@ function describeArc(x: number, y: number, radius: number, startAngle: number, e
   return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${arcSweep} 1 ${end.x} ${end.y}`;
 }
 
-const STAGE_FALLBACK_COLORS = ['#3b82f6', '#0ea5e9', '#f59e0b', '#8b5cf6'];
+const STAGE_FALLBACK_COLORS = ['#1d4ed8', '#2563eb', '#38bdf8', '#7dd3fc'];
 
 /**
  * Premium Enterprise Onboarding KPI Card (Circular Arrival Ring)
@@ -123,10 +123,10 @@ export const OnboardingKpiCard: React.FC<OnboardingKpiCardProps> = ({
   const effectiveTotal =
     total !== undefined ? total : effectiveStages.reduce((sum, s) => sum + (s.count || 0), 0);
 
-  // Balanced equal arc distribution across a 285° span with 5° gaps (viewBox="0 0 60 60", R=21)
+  // Balanced equal arc distribution across a 285° span with 26° gaps (viewBox="0 0 60 60", R=21)
   // Mirrors Offboarding geometry: all stage arcs are equally distributed so each color is equally visible
   const totalArcSpan = 285;
-  const gap = 5;
+  const gap = 26;
   const numStages = effectiveStages.length || 4;
   const totalGaps = (numStages - 1) * gap;
   const availableSpan = Math.max(60, totalArcSpan - totalGaps);
@@ -210,28 +210,9 @@ export const OnboardingKpiCard: React.FC<OnboardingKpiCardProps> = ({
     iconModifierClass = 'bezent-kpi-arrival-icon--center';
   }
 
-  let dynamicColorModifier = 'bezent-exec-kpi-card--teal';
-  if (isArrowHovered) {
-    dynamicColorModifier = 'bezent-exec-kpi-card--dynamic-active';
-  } else if (hoveredArc) {
-    if (hoveredArc.id === 'documents' || hoveredArc.id.includes('w1')) {
-      dynamicColorModifier = 'bezent-exec-kpi-card--dynamic-pending';
-    } else if (hoveredArc.id === 'verification' || hoveredArc.id.includes('w2')) {
-      dynamicColorModifier = 'bezent-exec-kpi-card--dynamic-teal';
-    } else if (
-      hoveredArc.id === 'induction' ||
-      hoveredArc.id.includes('w3') ||
-      hoveredArc.id === 'setup'
-    ) {
-      dynamicColorModifier = 'bezent-exec-kpi-card--dynamic-probation';
-    } else {
-      dynamicColorModifier = 'bezent-exec-kpi-card--dynamic-promotions';
-    }
-  }
-
   return (
     <div
-      className={`bezent-exec-kpi-card bezent-exec-kpi-card--onboarding ${dynamicColorModifier}`}
+      className="bezent-exec-kpi-card bezent-exec-kpi-card--onboarding"
       onClick={onClick}
       role="region"
       aria-label="Employees Onboarding"
@@ -359,7 +340,7 @@ export const OnboardingKpiCard: React.FC<OnboardingKpiCardProps> = ({
                   y1={9}
                   x2={47}
                   y2={9}
-                  stroke="#10b981"
+                  stroke="#2563eb"
                   strokeWidth={4.8}
                   strokeLinecap="round"
                   className="bezent-kpi-arrival-arrow-stem bezent-kpi-onboarding-arrow-stem"
@@ -368,7 +349,7 @@ export const OnboardingKpiCard: React.FC<OnboardingKpiCardProps> = ({
                 {/* Sleek, solid horizontal arrowhead pointing towards the left in visual space */}
                 <polygon
                   points="53.5,9 46.5,5.2 46.5,12.8"
-                  fill="#10b981"
+                  fill="#2563eb"
                   className="bezent-kpi-arrival-arrowhead bezent-kpi-onboarding-arrowhead"
                 />
               </g>

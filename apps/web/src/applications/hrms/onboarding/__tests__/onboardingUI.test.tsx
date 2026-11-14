@@ -84,10 +84,8 @@ describe('HRMS Onboarding UI Components & Pages', () => {
     expect(html).toContain('Manage new hires from pre-joining through employee creation.');
     expect(html).toContain('Add New Hire');
 
-    // Real Summary Metrics (strictly accurate, omitting unsupported joining soon/attention required)
-    expect(html).toContain('Total New Hires');
-    expect(html).toContain('In Progress');
-    expect(html).toContain('Completed');
+    // Streamlined layout (summary KPI cards removed to match employee directory)
+    expect(html).not.toContain('Total New Hires');
 
     // Stage Filter Tabs
     expect(html).toContain('All');

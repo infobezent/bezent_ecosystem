@@ -2,8 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Avatar,
   Badge,
+  Card,
+  CardBody,
   EmptyState,
+  Grid,
+  Inline,
   LoadingState,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -20,7 +25,7 @@ import {
   changeValueLabel,
   formatDate,
 } from '../../employee-administration/model/actionCatalog';
-import { getAvatarColor, getEmployeeAvatarId } from '../../employees/model/employeeModel';
+import { getAvatarColor } from '../../employees/model/employeeModel';
 
 export interface PromotionsTableProps {
   status: 'loading' | 'error' | 'ready';
@@ -35,6 +40,7 @@ export interface PromotionsTableProps {
   onOpenEmployee: (employeeId: string) => void;
   onInitiatePromotion?: () => void;
   onClearFilters?: () => void;
+  viewMode?: 'list' | 'grid';
 }
 
 function getInitials(name: string): string {
@@ -58,6 +64,7 @@ export const PromotionsTable: React.FC<PromotionsTableProps> = ({
   onOpenEmployee,
   onInitiatePromotion,
   onClearFilters,
+  viewMode = 'list',
 }) => {
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const tableRef = useRef<HTMLDivElement>(null);
@@ -126,6 +133,163 @@ export const PromotionsTable: React.FC<PromotionsTableProps> = ({
     );
   }
 
+  // Grid View Mode matching Employee Directory / Candidates layout
+  if (viewMode === 'grid') {
+    return (
+      <Grid columns={3} gap="md" aria-label="Promotions Grid View">
+        {items.map((action) => {
+          const isMenuOpen = activeMenuId === action.id;
+          const avatarColor = getAvatarColor(action.employeeId || action.employeeNumber);
+          const initials = getInitials(action.employeeName);
+          const roleChange = action.changes.find((c) => c.field === 'designationId');
+          const deptChange = action.changes.find((c) => c.field === 'departmentId');
+          const isPending = action.status === 'pending';
+          const canApply = isPending && action.effectiveDate <= today;
+
+          return (
+            <Card
+              key={action.id}
+              variant="default"
+              padding="md"
+              hoverable
+              onClick={() => onOpenAction(action.id)}
+            >
+              <CardBody>
+                <Stack gap="sm">
+                  {/* Top: Avatar + Name & ID + Context Action */}
+                  <Inline justify="between" align="start">
+                    <Inline align="center" gap="sm">
+                      <Avatar
+                        initials={initials}
+                        size="md"
+                        color={avatarColor}
+                        alt={action.employeeName}
+                      />
+                      <Stack gap="none">
+                        <button
+                          type="button"
+                          className="bezent-table-meta-title"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpenAction(action.id);
+                          }}
+                          aria-label={`Open promotion details for ${action.employeeName}`}
+                        >
+                          {action.employeeName}
+                        </button>
+                        <span className="bezent-table-meta-subtitle font-mono">
+                          {action.employeeNumber}
+                        </span>
+                      </Stack>
+                    </Inline>
+                    <div className="bezent-table-action-menu">
+                      <button
+                        type="button"
+                        className={`bezent-table-action-btn ${isMenuOpen ? 'is-active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveMenuId((prev) => (prev === action.id ? null : action.id));
+                        }}
+                        title="Actions"
+                        aria-label={`Actions for promotion of ${action.employeeName}`}
+                      >
+                        <BezentIcon name="more" size={16} />
+                      </button>
+                      {isMenuOpen && (
+                        <div
+                          className="bezent-table-action-menu__dropdown"
+                          role="menu"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            type="button"
+                            role="menuitem"
+                            className="bezent-table-action-menu__item"
+                            onClick={() => {
+                              setActiveMenuId(null);
+                              onOpenAction(action.id);
+                            }}
+                          >
+                            <BezentIcon name="eye" size={16} />
+                            View Promotion Details
+                          </button>
+                          {canApply && (
+                            <button
+                              type="button"
+                              role="menuitem"
+                              className="bezent-table-action-menu__item"
+                              onClick={() => {
+                                setActiveMenuId(null);
+                                onApplyAction(action);
+                              }}
+                            >
+                              <BezentIcon name="checkCircle" size={16} />
+                              Apply Promotion
+                            </button>
+                          )}
+                          {isPending && (
+                            <button
+                              type="button"
+                              role="menuitem"
+                              className="bezent-table-action-menu__item bezent-table-action-menu__item--danger"
+                              onClick={() => {
+                                setActiveMenuId(null);
+                                onCancelAction(action);
+                              }}
+                            >
+                              <BezentIcon name="close" size={16} />
+                              Cancel Promotion
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            role="menuitem"
+                            className="bezent-table-action-menu__item"
+                            onClick={() => {
+                              setActiveMenuId(null);
+                              onOpenEmployee(action.employeeId);
+                            }}
+                          >
+                            <BezentIcon name="employees" size={16} />
+                            View Employee Profile
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </Inline>
+
+                  {/* Role Transition */}
+                  <Stack gap="none">
+                    <span className="bezent-table-meta-title">
+                      {roleChange
+                        ? `${changeValueLabel(roleChange, 'from')} → ${changeValueLabel(roleChange, 'to')}`
+                        : actionTypeLabel(action.actionType)}
+                    </span>
+                    {deptChange ? (
+                      <span className="bezent-table-meta-subtitle">
+                        {`${changeValueLabel(deptChange, 'from')} → ${changeValueLabel(deptChange, 'to')}`}
+                      </span>
+                    ) : null}
+                  </Stack>
+
+                  {/* Footer: Status Badge + Effective Date */}
+                  <Inline justify="between" align="center">
+                    <Badge variant={actionStatusVariant(action.status)} size="sm">
+                      {ACTION_STATUS_LABELS[action.status]}
+                    </Badge>
+                    <span className="bezent-table-meta-dim">
+                      {formatDate(action.effectiveDate)}
+                    </span>
+                  </Inline>
+                </Stack>
+              </CardBody>
+            </Card>
+          );
+        })}
+      </Grid>
+    );
+  }
+
   return (
     <div ref={tableRef}>
       <Table hoverable aria-label="Promotions directory">
@@ -154,15 +318,13 @@ export const PromotionsTable: React.FC<PromotionsTableProps> = ({
             const canApply = isPending && action.effectiveDate <= today;
 
             const avatarColor = getAvatarColor(action.employeeId || action.employeeNumber);
-            const avatarId = getEmployeeAvatarId(action.employeeId || action.employeeNumber);
 
             return (
-              <TableRow key={action.id}>
+              <TableRow key={action.id} className={isMenuOpen ? 'is-menu-open' : ''}>
                 {/* Employee Name + Avatar */}
                 <TableCell>
                   <div className="bezent-table-cell--avatar-meta">
                     <Avatar
-                      avatarId={avatarId}
                       initials={getInitials(action.employeeName)}
                       color={avatarColor}
                       size="md"
@@ -193,7 +355,7 @@ export const PromotionsTable: React.FC<PromotionsTableProps> = ({
                 <TableCell>
                   <button
                     type="button"
-                    className="bezent-table-meta-subtitle"
+                    className="bezent-table-meta-subtitle font-mono"
                     onClick={() => onOpenEmployee(action.employeeId)}
                     aria-label={`Open profile of employee ${action.employeeNumber}`}
                   >
@@ -250,9 +412,12 @@ export const PromotionsTable: React.FC<PromotionsTableProps> = ({
 
                 {/* Status Badge */}
                 <TableCell>
-                  <Badge variant={actionStatusVariant(action.status)} size="sm">
-                    {ACTION_STATUS_LABELS[action.status]}
-                  </Badge>
+                  <span
+                    className={`bezent-status-pill bezent-status-pill--${actionStatusVariant(action.status)}`}
+                  >
+                    <span className="bezent-status-pill__dot" aria-hidden="true" />
+                    <span>{ACTION_STATUS_LABELS[action.status]}</span>
+                  </span>
                 </TableCell>
 
                 {/* Actions Menu */}

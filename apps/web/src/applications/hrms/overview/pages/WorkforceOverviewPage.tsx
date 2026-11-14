@@ -419,7 +419,6 @@ export function WorkforceOverviewPage({
     },
   ]);
   const [totalLifecycleVolume, setTotalLifecycleVolume] = useState(0);
-  const [hoveredStageId, setHoveredStageId] = useState<string | null>(null);
 
   // ── HR Action Center States ──
   const [hrActionItems, setHrActionItems] = useState<HrActionItem[]>([]);
@@ -1852,41 +1851,31 @@ export function WorkforceOverviewPage({
               <path
                 d="M 30.0 101.4 C 39.3 98.6, 48.7 95.5, 58.0 92.0 C 77.7 84.6, 97.3 75.2, 117.0 76.0 C 133.0 76.7, 149.0 84.2, 165.0 94.0 C 178.0 102.0, 191.0 111.5, 204.0 114.8 L 204.0 240 A 16 16 0 0 1 188 256 L 46 256 A 16 16 0 0 1 30 240 Z"
                 fill="url(#wf-card-grad-0)"
-                className={`bezent-wf-svg-card bezent-wf-svg-card--0 ${hoveredStageId === 'new-joiners' ? 'bezent-wf-svg-card--hovered' : ''}`}
-                onMouseEnter={() => setHoveredStageId('new-joiners')}
-                onMouseLeave={() => setHoveredStageId(null)}
+                className="bezent-wf-svg-card bezent-wf-svg-card--0"
               />
               {/* Card 1: Onboarding */}
               <path
                 d="M 222.0 114.8 C 235.0 111.6, 248.0 102.1, 261.0 94.0 C 277.0 84.0, 293.0 76.0, 309.0 76.0 C 325.0 76.0, 341.0 84.1, 357.0 94.0 C 370.0 102.1, 383.0 111.3, 396.0 114.7 L 396.0 240 A 16 16 0 0 1 380 256 L 238 256 A 16 16 0 0 1 222 240 Z"
                 fill="url(#wf-card-grad-1)"
-                className={`bezent-wf-svg-card bezent-wf-svg-card--1 ${hoveredStageId === 'onboarding' ? 'bezent-wf-svg-card--hovered' : ''}`}
-                onMouseEnter={() => setHoveredStageId('onboarding')}
-                onMouseLeave={() => setHoveredStageId(null)}
+                className="bezent-wf-svg-card bezent-wf-svg-card--1"
               />
               {/* Card 2: Probation */}
               <path
                 d="M 414.0 115.1 C 427.0 112.3, 440.0 103.7, 453.0 97.0 C 469.0 88.7, 485.0 83.3, 501.0 84.0 C 519.0 84.8, 537.0 93.5, 555.0 93.0 C 566.0 92.7, 577.0 88.9, 588.0 83.2 L 588.0 240 A 16 16 0 0 1 572 256 L 430 256 A 16 16 0 0 1 414 240 Z"
                 fill="url(#wf-card-grad-2)"
-                className={`bezent-wf-svg-card bezent-wf-svg-card--2 ${hoveredStageId === 'probation' ? 'bezent-wf-svg-card--hovered' : ''}`}
-                onMouseEnter={() => setHoveredStageId('probation')}
-                onMouseLeave={() => setHoveredStageId(null)}
+                className="bezent-wf-svg-card bezent-wf-svg-card--2"
               />
               {/* Card 3: Confirmed (The Peak!) */}
               <path
                 d="M 606.0 72.3 C 609.0 70.3, 612.0 68.2, 615.0 66.0 C 641.0 47.3, 667.0 24.4, 693.0 26.0 C 713.7 27.3, 734.3 44.0, 755.0 64.0 C 763.3 72.1, 771.7 80.7, 780.0 87.7 L 780.0 240 A 16 16 0 0 1 764 256 L 622 256 A 16 16 0 0 1 606 240 Z"
                 fill="url(#wf-card-grad-3)"
-                className={`bezent-wf-svg-card bezent-wf-svg-card--3 ${hoveredStageId === 'confirmed' ? 'bezent-wf-svg-card--hovered' : ''}`}
-                onMouseEnter={() => setHoveredStageId('confirmed')}
-                onMouseLeave={() => setHoveredStageId(null)}
+                className="bezent-wf-svg-card bezent-wf-svg-card--3"
               />
               {/* Card 4: Exited */}
               <path
                 d="M 798.0 99.7 C 800.3 100.7, 802.7 101.5, 805.0 102.0 C 818.3 104.9, 831.7 98.3, 845.0 94.0 C 858.3 89.7, 871.7 87.7, 885.0 88.0 C 903.3 88.4, 921.7 93.3, 940.0 97.0 C 950.7 99.1, 961.3 100.8, 972.0 102.3 L 972.0 240 A 16 16 0 0 1 956 256 L 814 256 A 16 16 0 0 1 798 240 Z"
                 fill="url(#wf-card-grad-4)"
-                className={`bezent-wf-svg-card bezent-wf-svg-card--4 ${hoveredStageId === 'exited' ? 'bezent-wf-svg-card--hovered' : ''}`}
-                onMouseEnter={() => setHoveredStageId('exited')}
-                onMouseLeave={() => setHoveredStageId(null)}
+                className="bezent-wf-svg-card bezent-wf-svg-card--4"
               />
 
               {/* 3. Single Continuous Ultra-Smooth Wave Stroke Line */}
@@ -1906,11 +1895,8 @@ export function WorkforceOverviewPage({
               {lifecycleStages.map((stg, idx) => (
                 <div
                   key={stg.id}
-                  className={`bezent-wf-pillar bezent-wf-pillar--${idx} bezent-wf-pillar--${stg.iconClass} bezent-wf-chevron-item ${hoveredStageId === stg.id ? 'bezent-wf-pillar--hovered' : ''}`}
+                  className={`bezent-wf-pillar bezent-wf-pillar--${idx} bezent-wf-pillar--${stg.iconClass} bezent-wf-chevron-item`}
                   onClick={() => navigate(stg.path)}
-                  onMouseEnter={() => setHoveredStageId(stg.id)}
-                  onMouseLeave={() => setHoveredStageId(null)}
-                  title={`${stg.name}: ${stg.count} employees (${stg.percentage}%)`}
                 >
                   <div className="bezent-wf-pillar-icon bezent-wf-chevron-icon">
                     <BezentIcon name={stg.iconName as BezentIconName} size={18} />

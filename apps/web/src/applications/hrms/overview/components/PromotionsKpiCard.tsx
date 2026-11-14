@@ -130,24 +130,9 @@ export const PromotionsKpiCard: React.FC<PromotionsKpiCardProps> = ({
     tooltipText = `Promotions: ${effectiveTotal} total (${effectivePending} pending)`;
   }
 
-  let dynamicColorModifier = 'bezent-exec-kpi-card--purple';
-  if (hoveredStep) {
-    if (hoveredStep.colorClass === 'department') {
-      dynamicColorModifier = 'bezent-exec-kpi-card--dynamic-teal';
-    } else if (hoveredStep.colorClass === 'level') {
-      dynamicColorModifier = 'bezent-exec-kpi-card--dynamic-pending';
-    } else if (hoveredStep.colorClass === 'grade') {
-      dynamicColorModifier = 'bezent-exec-kpi-card--dynamic-indigo';
-    } else {
-      dynamicColorModifier = 'bezent-exec-kpi-card--dynamic-promotions';
-    }
-  } else if (isArrowHovered) {
-    dynamicColorModifier = 'bezent-exec-kpi-card--dynamic-promotions';
-  }
-
   return (
     <div
-      className={`bezent-exec-kpi-card bezent-exec-kpi-card--promotions ${dynamicColorModifier}`}
+      className="bezent-exec-kpi-card bezent-exec-kpi-card--promotions"
       onClick={onClick}
       role="region"
       aria-label="Total Promotions"

@@ -39,7 +39,7 @@ import {
   fetchGeneralSettings,
 } from '../api/attendanceApi';
 import { fetchDepartments, fetchWorkLocations } from '../../api/organizationMastersApi';
-import { getEmployeeAvatarId, getAvatarColor } from '../../employees/model/employeeModel';
+import { getAvatarColor } from '../../employees/model/employeeModel';
 import type {
   DailyAttendanceItem,
   DailyLogSummaryCounters,
@@ -1251,7 +1251,6 @@ export function DailyAttendanceLogPage() {
                       <TableCell>
                         <div className="bezent-table-cell--avatar-meta">
                           <Avatar
-                            avatarId={getEmployeeAvatarId(item.employeeId)}
                             initials={initials}
                             color={getAvatarColor(item.employeeId)}
                             size="md"

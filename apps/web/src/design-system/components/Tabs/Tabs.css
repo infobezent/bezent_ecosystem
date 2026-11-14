@@ -42,7 +42,7 @@
 }
 
 .bezent-tab.is-active {
-  color: #0f766e;
+  color: #041e49;
   font-weight: 700;
 }
 
@@ -66,7 +66,7 @@
 }
 
 .bezent-tabs--underline .bezent-tab.is-active::after {
-  background: #14b8a6;
+  background: #1a73e8;
 }
 
 /* Pills variant */
@@ -85,10 +85,10 @@
 }
 
 .bezent-tabs--pills .bezent-tab.is-active {
-  background: #f0fdfa;
-  color: #0f766e;
-  border-color: #99f6e4;
-  box-shadow: 0 1px 3px rgba(20, 184, 166, 0.12);
+  background: #edf5fd;
+  color: #041e49;
+  border-color: #a8dbfc;
+  box-shadow: 0 1px 3px rgba(4, 30, 73, 0.12);
 }
 
 /* Tab count badge */
@@ -108,12 +108,12 @@
 }
 
 .bezent-tab.is-active .bezent-tab__count {
-  background: #ccfbf1;
-  color: #0f766e;
+  background: #c2e7ff;
+  color: #041e49;
 }
 
 .bezent-tab:focus-visible {
-  outline: 2px solid #14b8a6;
+  outline: 2px solid var(--accent-interactive, #1a73e8);
   outline-offset: 2px;
 }
 
@@ -130,11 +130,11 @@
 }
 
 [data-theme='dark'] .bezent-tab.is-active {
-  color: #5eead4;
+  color: #7fc4fd;
 }
 
 [data-theme='dark'] .bezent-tabs--underline .bezent-tab.is-active::after {
-  background: #2dd4bf;
+  background: #38bdf8;
 }
 
 [data-theme='dark'] .bezent-tabs--pills .bezent-tab:hover:not(:disabled) {
@@ -142,9 +142,9 @@
 }
 
 [data-theme='dark'] .bezent-tabs--pills .bezent-tab.is-active {
-  background: rgba(20, 184, 166, 0.16);
-  color: #5eead4;
-  border-color: rgba(45, 212, 191, 0.35);
+  background: rgba(22, 131, 255, 0.16);
+  color: #7fc4fd;
+  border-color: rgba(127, 196, 253, 0.35);
 }
 
 [data-theme='dark'] .bezent-tab__count {
@@ -153,8 +153,8 @@
 }
 
 [data-theme='dark'] .bezent-tab.is-active .bezent-tab__count {
-  background: rgba(20, 184, 166, 0.25);
-  color: #5eead4;
+  background: rgba(22, 131, 255, 0.25);
+  color: #7fc4fd;
 }
 
 .bezent-tab:disabled {

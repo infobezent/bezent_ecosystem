@@ -94,21 +94,15 @@ describe('OffboardingPage', () => {
     expect(html).not.toContain('Import');
   });
 
-  it('renders the 4 KPI Summary Cards using Workforce tinted cards', () => {
+  it('renders without summary cards matching the employee directory layout', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <OffboardingPage />
       </MemoryRouter>,
     );
 
-    expect(html).toContain('Total Offboarding');
-    expect(html).toContain('Pending Approval');
-    expect(html).toContain('In Notice Period');
-    expect(html).toContain('Completed Exits');
-    expect(html).toContain('bezent-kpi-card--blue');
-    expect(html).toContain('bezent-kpi-card--amber');
-    expect(html).toContain('bezent-kpi-card--purple');
-    expect(html).toContain('bezent-kpi-card--green');
+    expect(html).not.toContain('Total Offboarding');
+    expect(html).not.toContain('bezent-kpi-card');
   });
 
   it('renders search input and toolbar controls', () => {

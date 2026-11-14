@@ -99,19 +99,14 @@ describe('Onboarding Main Page Architecture & Components', () => {
     expect(html).toContain('Add New Hire');
   });
 
-  it('renders real summary metric cards and omits unreliable cards (joining soon / attention required)', () => {
+  it('omits summary cards to match the streamlined employee directory layout', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <OnboardingPage />
       </MemoryRouter>,
     );
 
-    // Derived strictly from case count data
-    expect(html).toContain('Total New Hires');
-    expect(html).toContain('In Progress');
-    expect(html).toContain('Completed');
-
-    // Omitted for V1 because they cannot be reliably derived from the current domain model
+    expect(html).not.toContain('Total New Hires');
     expect(html).not.toContain('Joining Soon');
     expect(html).not.toContain('Attention Required');
   });

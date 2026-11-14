@@ -41,7 +41,7 @@ import {
   lockAttendancePeriod,
 } from '../api/attendanceApi';
 import { fetchDepartments } from '../../api/organizationMastersApi';
-import { getEmployeeAvatarId, getAvatarColor } from '../../employees/model/employeeModel';
+import { getAvatarColor } from '../../employees/model/employeeModel';
 import type {
   MonthlySummaryRow,
   MonthlySummaryCounters,
@@ -1117,7 +1117,6 @@ export function MonthlyAttendanceSummaryPage() {
                       <TableCell>
                         <div className="bezent-table-cell--avatar-meta">
                           <Avatar
-                            avatarId={getEmployeeAvatarId(row.employeeId)}
                             initials={
                               row.employeeName ? row.employeeName.slice(0, 2).toUpperCase() : 'EM'
                             }
@@ -1337,7 +1336,6 @@ export function MonthlyAttendanceSummaryPage() {
               <Inline justify="between" align="center">
                 <Inline gap="sm" align="center">
                   <Avatar
-                    avatarId={getEmployeeAvatarId(drawerSummary.employeeId)}
                     initials={drawerSummary.employeeName.slice(0, 2).toUpperCase()}
                     color={getAvatarColor(drawerSummary.employeeId)}
                     alt={drawerSummary.employeeName}

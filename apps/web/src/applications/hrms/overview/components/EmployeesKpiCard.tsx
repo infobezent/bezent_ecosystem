@@ -119,7 +119,7 @@ export const EmployeesKpiCard: React.FC<EmployeesKpiCardProps> = ({
   const cy = 39;
   const radius = 32;
   const strokeWidth = customStrokeWidth ?? 7.2;
-  const gap = 6; // 6 degree angular gap between segments
+  const gap = 26; // 26 degree angular gap provides a generous 7.3px visible space between rounded caps
   const minAngle = 8; // Minimum visual arc for non-zero segments to allow hover
 
   const nonZeroSegments = segments.filter((s) => s.count > 0);
@@ -160,11 +160,6 @@ export const EmployeesKpiCard: React.FC<EmployeesKpiCardProps> = ({
       ? 'bezent-kpi-ring-icon-wrapper--active bezent-kpi-ring-active'
       : 'bezent-kpi-ring-icon-wrapper--default bezent-kpi-ring-default';
 
-  // Dynamic card color modifier: matches hovered segment color, defaults to green (100% active)
-  const dynamicColorModifier = hoveredSegment
-    ? `bezent-exec-kpi-card--dynamic-${hoveredSegment.id}`
-    : 'bezent-exec-kpi-card--green';
-
   let tooltipText = '';
   if (hoveredSegment) {
     const pct = effectiveTotal > 0 ? Math.round((hoveredSegment.count / effectiveTotal) * 100) : 0;
@@ -175,7 +170,7 @@ export const EmployeesKpiCard: React.FC<EmployeesKpiCardProps> = ({
 
   return (
     <div
-      className={`bezent-exec-kpi-card bezent-exec-kpi-card--employees ${dynamicColorModifier}`}
+      className="bezent-exec-kpi-card bezent-exec-kpi-card--employees"
       onClick={onClick}
       role="region"
       aria-label="Total Employees"
