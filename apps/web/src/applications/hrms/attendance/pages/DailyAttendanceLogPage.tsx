@@ -25,7 +25,6 @@ import {
   Alert,
   EmptyState,
   Avatar,
-  StatusBadge,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
@@ -724,11 +723,11 @@ export function DailyAttendanceLogPage() {
           <Alert variant={bulkBannerMessage.type}>{bulkBannerMessage.text}</Alert>
         )}
 
-        {/* ── Summary Counters Strip (4 Spacious Cards matching Employee Directory) ── */}
+        {/* ── Summary Counters Strip (4 Spacious Pastel Cards matching Workforce & Attendance Overview) ── */}
         <Grid columns={4} gap="md">
           {/* Scheduled */}
           <div
-            className={`bezent-kpi-card bezent-kpi-card--interactive bezent-kpi-card--blue ${appliedFilters.status === 'scheduled' ? 'is-active' : ''}`}
+            className={`bezent-exec-kpi-card bezent-exec-kpi-card--blue ${appliedFilters.status === 'scheduled' ? 'is-active' : ''}`}
             onClick={() => {
               setAppliedFilters((curr) => ({
                 ...curr,
@@ -749,20 +748,25 @@ export function DailyAttendanceLogPage() {
             role="button"
             tabIndex={0}
             title="Filter by Scheduled"
+            aria-label="Filter by Scheduled"
           >
-            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--blue">
-              <BezentIcon name="workforce" size={20} />
+            <div className="bezent-kpi-header-group">
+              <div className="bezent-kpi-heading-row">
+                <span className="bezent-kpi-heading-text">Scheduled</span>
+              </div>
+              <div className="bezent-kpi-metric-block">
+                <div className="bezent-kpi-value-text">{counters.scheduled}</div>
+              </div>
             </div>
-            <div className="bezent-kpi-card__info">
-              <p className="bezent-kpi-card__title">Scheduled</p>
-              <p className="bezent-kpi-card__value">{counters.scheduled}</p>
-              <p className="bezent-kpi-card__caption">Expected workforce</p>
+            <div className="bezent-kpi-sub-pill bezent-kpi-sub-pill--onboarding">
+              <span className="bezent-kpi-sub-pill-dot" />
+              <span>Shift Roster Active</span>
             </div>
           </div>
 
           {/* Present */}
           <div
-            className={`bezent-kpi-card bezent-kpi-card--interactive bezent-kpi-card--green ${appliedFilters.status === 'present' ? 'is-active' : ''}`}
+            className={`bezent-exec-kpi-card bezent-exec-kpi-card--employees ${appliedFilters.status === 'present' ? 'is-active' : ''}`}
             onClick={() => {
               setAppliedFilters((curr) => ({
                 ...curr,
@@ -783,20 +787,29 @@ export function DailyAttendanceLogPage() {
             role="button"
             tabIndex={0}
             title="Filter by Present"
+            aria-label="Filter by Present"
           >
-            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--green">
-              <BezentIcon name="check" size={20} />
+            <div className="bezent-kpi-header-group">
+              <div className="bezent-kpi-heading-row">
+                <span className="bezent-kpi-heading-text">Present</span>
+              </div>
+              <div className="bezent-kpi-metric-block">
+                <div className="bezent-kpi-value-text">{counters.present}</div>
+              </div>
             </div>
-            <div className="bezent-kpi-card__info">
-              <p className="bezent-kpi-card__title">Present</p>
-              <p className="bezent-kpi-card__value">{counters.present}</p>
-              <p className="bezent-kpi-card__caption">Confirmed checked-in</p>
+            <div className="bezent-kpi-sub-pill bezent-kpi-sub-pill--active">
+              <span className="bezent-kpi-sub-pill-dot" />
+              <span>
+                {counters.scheduled > 0
+                  ? `${Math.round((counters.present / counters.scheduled) * 100)}% Attendance Rate`
+                  : 'Confirmed Checked-In'}
+              </span>
             </div>
           </div>
 
           {/* Absent */}
           <div
-            className={`bezent-kpi-card bezent-kpi-card--interactive bezent-kpi-card--red ${appliedFilters.status === 'absent' ? 'is-active' : ''}`}
+            className={`bezent-exec-kpi-card bezent-exec-kpi-card--offboarding ${appliedFilters.status === 'absent' ? 'is-active' : ''}`}
             onClick={() => {
               setAppliedFilters((curr) => ({
                 ...curr,
@@ -817,20 +830,29 @@ export function DailyAttendanceLogPage() {
             role="button"
             tabIndex={0}
             title="Filter by Absent"
+            aria-label="Filter by Absent"
           >
-            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--red">
-              <BezentIcon name="close" size={20} />
+            <div className="bezent-kpi-header-group">
+              <div className="bezent-kpi-heading-row">
+                <span className="bezent-kpi-heading-text">Absent</span>
+              </div>
+              <div className="bezent-kpi-metric-block">
+                <div className="bezent-kpi-value-text">{counters.absent}</div>
+              </div>
             </div>
-            <div className="bezent-kpi-card__info">
-              <p className="bezent-kpi-card__title">Absent</p>
-              <p className="bezent-kpi-card__value">{counters.absent}</p>
-              <p className="bezent-kpi-card__caption">Not checked-in</p>
+            <div className="bezent-kpi-sub-pill bezent-kpi-sub-pill--offboarding">
+              <span className="bezent-kpi-sub-pill-dot" />
+              <span>
+                {counters.scheduled > 0
+                  ? `${Math.round((counters.absent / counters.scheduled) * 100)}% Absenteeism`
+                  : 'Not Checked-In'}
+              </span>
             </div>
           </div>
 
           {/* Pending Review */}
           <div
-            className={`bezent-kpi-card bezent-kpi-card--interactive bezent-kpi-card--orange ${
+            className={`bezent-exec-kpi-card bezent-exec-kpi-card--promotions ${
               appliedFilters.processingState === 'pending_processing' ||
               appliedFilters.processingState === 'pending_review' ||
               appliedFilters.status === 'pending_review'
@@ -867,14 +889,19 @@ export function DailyAttendanceLogPage() {
             role="button"
             tabIndex={0}
             title="Filter by Pending Review"
+            aria-label="Filter by Pending Review"
           >
-            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--orange">
-              <BezentIcon name="tasks" size={20} />
+            <div className="bezent-kpi-header-group">
+              <div className="bezent-kpi-heading-row">
+                <span className="bezent-kpi-heading-text">Pending Review</span>
+              </div>
+              <div className="bezent-kpi-metric-block">
+                <div className="bezent-kpi-value-text">{counters.pendingReview}</div>
+              </div>
             </div>
-            <div className="bezent-kpi-card__info">
-              <p className="bezent-kpi-card__title">Pending Review</p>
-              <p className="bezent-kpi-card__value">{counters.pendingReview}</p>
-              <p className="bezent-kpi-card__caption">Exceptions awaiting action</p>
+            <div className="bezent-kpi-sub-pill bezent-kpi-sub-pill--promotions">
+              <span className="bezent-kpi-sub-pill-dot" />
+              <span>Exceptions & Queue</span>
             </div>
           </div>
         </Grid>
