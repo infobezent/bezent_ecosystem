@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
@@ -62,7 +63,7 @@ describe('HRMS Attendance Module V1 Frontend', () => {
   });
 
   describe('Attendance Navigation and Flyout', () => {
-    it('defines exactly the 10 canonical Attendance flyout items in hrmsNavigation', () => {
+    it('defines exactly the 5 canonical Attendance flyout hubs in hrmsNavigation', () => {
       const attendanceNav = hrmsNavigation.destinations.find((item) => item.id === 'attendance');
       expect(attendanceNav).toBeDefined();
       expect(attendanceNav?.children).toBeDefined();
@@ -71,14 +72,27 @@ describe('HRMS Attendance Module V1 Frontend', () => {
       expect(childIds).toEqual([
         'overview',
         'daily-log',
-        'monthly-summary',
-        'punch-logs',
         'regularization',
-        'on-duty',
-        'overtime',
-        'comp-off',
         'exceptions',
         'reports',
+      ]);
+    });
+
+    it('groups the Daily/Monthly/Punch Logs pages under the Attendance hub via aliases', () => {
+      const attendanceNav = hrmsNavigation.destinations.find((item) => item.id === 'attendance');
+      const hub = attendanceNav?.children?.find((c) => c.id === 'daily-log');
+      expect(hub?.label).toBe('Attendance');
+      expect(hub?.aliases).toEqual(['attendance/monthly-summary', 'attendance/punch-logs']);
+    });
+
+    it('groups the Regularization/On-Duty/Overtime/Comp-Off pages under the Requests hub via aliases', () => {
+      const attendanceNav = hrmsNavigation.destinations.find((item) => item.id === 'attendance');
+      const hub = attendanceNav?.children?.find((c) => c.id === 'regularization');
+      expect(hub?.label).toBe('Requests');
+      expect(hub?.aliases).toEqual([
+        'attendance/on-duty',
+        'attendance/overtime',
+        'attendance/comp-off',
       ]);
     });
 
@@ -109,9 +123,50 @@ describe('HRMS Attendance Module V1 Frontend', () => {
       expect(paths).toContain('attendance/punch-logs');
       expect(paths).toContain('attendance/regularization');
       expect(paths).toContain('attendance/on-duty');
+      expect(paths).toContain('attendance/overtime');
+      expect(paths).toContain('attendance/comp-off');
       expect(paths).toContain('attendance/exceptions');
       expect(paths).toContain('attendance/reports');
       expect(paths).toContain('attendance/policies'); // Redirect to HR Settings
+    });
+
+    it('keeps all 7 original tab-group URLs routed to their original pages', () => {
+      const rootRoute = hrmsRoutes[0]!;
+      const children = rootRoute.children!;
+      const pageOf = (path: string) =>
+        (children.find((c) => c.path === path)?.element as ReactElement | undefined)?.type;
+
+      expect(pageOf('attendance/daily-log')).toBe(DailyAttendanceLogPage);
+      expect(pageOf('attendance/monthly-summary')).toBe(MonthlyAttendanceSummaryPage);
+      expect(pageOf('attendance/punch-logs')).toBe(PunchLogsPage);
+      expect(pageOf('attendance/regularization')).toBe(AttendanceRegularizationPage);
+      expect(pageOf('attendance/on-duty')).toBe(AttendanceOnDutyPage);
+      expect(pageOf('attendance/overtime')).toBe(AttendanceOvertimePage);
+      expect(pageOf('attendance/comp-off')).toBe(AttendanceCompOffPage);
+    });
+
+    it('adds /hrms/attendance/records and /hrms/attendance/requests as hub entry redirects', () => {
+      const rootRoute = hrmsRoutes[0]!;
+      const children = rootRoute.children!;
+
+      const recordsRoute = children.find((c) => c.path === 'attendance/records');
+      const requestsRoute = children.find((c) => c.path === 'attendance/requests');
+      expect(recordsRoute).toBeDefined();
+      expect(requestsRoute).toBeDefined();
+
+      const recordsHtml = renderToStaticMarkup(
+        <MemoryRouter>{recordsRoute!.element}</MemoryRouter>,
+      );
+      const requestsHtml = renderToStaticMarkup(
+        <MemoryRouter>{requestsRoute!.element}</MemoryRouter>,
+      );
+      // <Navigate> renders nothing itself; assert the redirect target via props.
+      expect((recordsRoute!.element as ReactElement).props.to).toBe('/hrms/attendance/daily-log');
+      expect((requestsRoute!.element as ReactElement).props.to).toBe(
+        '/hrms/attendance/regularization',
+      );
+      expect(recordsHtml).toBe('');
+      expect(requestsHtml).toBe('');
     });
   });
 

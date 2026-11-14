@@ -26,6 +26,7 @@ import {
   EmptyState,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
+import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
 import {
   fetchOnDutyWorkspace,
   fetchOnDutyDetails,
@@ -633,7 +634,7 @@ export function AttendanceOnDutyPage() {
     <Page>
       {/* 1. Header & Actions Strip */}
       <PageHeader
-        breadcrumbs={<span>Attendance / On-Duty</span>}
+        breadcrumbs={<span>Attendance › Requests › On-Duty</span>}
         title={
           <span>
             On-Duty (OD)
@@ -715,6 +716,8 @@ export function AttendanceOnDutyPage() {
           </Inline>
         }
       />
+
+      <AttendanceSectionTabs group="requests" />
 
       <Stack gap="md">
         {/* 2. Six Compact Summary Counters Strip (~78px height, 1 row) */}

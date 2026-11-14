@@ -40,6 +40,7 @@ import {
   EmptyState,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
+import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
 import {
   fetchOvertimeOverview,
   fetchOvertimeRequests,
@@ -653,7 +654,7 @@ export function AttendanceOvertimePage() {
     <Page maxWidth="default" gap="md">
       {/* ── 1. Page Header (Spec Section 1) ── */}
       <PageHeader
-        eyebrow="Attendance › Overtime"
+        eyebrow="Attendance › Requests › Overtime"
         title="Overtime"
         subtitle="Review overtime hours and choose how each record is settled."
         actions={
@@ -713,6 +714,8 @@ export function AttendanceOvertimePage() {
           </Inline>
         }
       />
+
+      <AttendanceSectionTabs group="requests" />
 
       <Stack gap="md">
         {/* Banner Notification */}

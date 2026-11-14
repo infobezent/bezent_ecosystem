@@ -42,6 +42,7 @@ import {
   EmptyState,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
+import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
 import {
   fetchCompOffOverview,
   fetchCompOffRequests,
@@ -741,7 +742,7 @@ export function AttendanceCompOffPage() {
     <Page maxWidth="default" gap="md">
       {/* ── 1. Page Header (Spec Section 1) ── */}
       <PageHeader
-        eyebrow="Attendance › Comp-Off"
+        eyebrow="Attendance › Requests › Comp-Off"
         title="Comp-Off"
         subtitle="Track comp-off earned, used and expired for each employee."
         actions={
@@ -789,6 +790,8 @@ export function AttendanceCompOffPage() {
           </Inline>
         }
       />
+
+      <AttendanceSectionTabs group="requests" />
 
       <Stack gap="md">
         {/* Banner Notification */}

@@ -51,7 +51,7 @@ describe('BEZENT HRMS — Punch Logs V1.0 Frontend Page', () => {
     );
 
     expect(html).toContain('Punch Logs');
-    expect(html).toContain('Attendance › Punch Logs');
+    expect(html).toContain('Attendance › Attendance › Punch Logs');
     expect(html).toContain('Review every raw punch captured from devices, web and mobile.');
     expect(html).toContain('Event Time');
     expect(html).toContain('Workday');
