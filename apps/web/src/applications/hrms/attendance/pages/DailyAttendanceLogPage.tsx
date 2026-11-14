@@ -647,9 +647,7 @@ export function DailyAttendanceLogPage() {
   return (
     <Page>
       {/* ── Page Header ── */}
-      <PageHeader title="Attendance" />
-
-      <AttendanceSectionTabs group="records" />
+      <PageHeader title="Attendance" actions={<AttendanceSectionTabs group="records" />} />
 
       <Stack gap="md">
         {/* Section 8: Locked Month Warning Banner */}
