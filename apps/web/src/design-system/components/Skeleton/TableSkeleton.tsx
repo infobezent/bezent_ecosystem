@@ -7,18 +7,33 @@ export interface TableSkeletonProps {
   columns?: number;
   /** Whether the first column has an avatar/badge layout (default: true) */
   hasAvatarFirstCol?: boolean;
+  /** Optional accessible status label for screen readers & testing */
+  label?: string;
 }
 
 export function TableSkeleton({
   rows = 5,
   columns = 6,
   hasAvatarFirstCol = true,
+  label,
 }: TableSkeletonProps) {
   const rowList = Array.from({ length: rows }, (_, i) => i);
-  const remainingCols = Array.from({ length: Math.max(1, columns - (hasAvatarFirstCol ? 1 : 0)) }, (_, i) => i);
+  const remainingCols = Array.from(
+    { length: Math.max(1, columns - (hasAvatarFirstCol ? 1 : 0)) },
+    (_, i) => i,
+  );
 
   return (
-    <tbody className="bezent-table-body bezent-table-skeleton-body">
+    <tbody
+      className="bezent-table-body bezent-table-skeleton-body"
+      aria-busy="true"
+      aria-label={label}
+    >
+      {label && (
+        <tr className="bezent-sr-only">
+          <td colSpan={columns}>{label}</td>
+        </tr>
+      )}
       {rowList.map((rowIndex) => (
         <tr key={`skel-row-${rowIndex}`} className="bezent-table-row bezent-table-skeleton-row">
           {hasAvatarFirstCol && (

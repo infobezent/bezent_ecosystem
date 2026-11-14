@@ -24,6 +24,7 @@ import {
   Alert,
   LoadingState,
   EmptyState,
+  TableSkeleton,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
@@ -905,7 +906,40 @@ export function MonthlyAttendanceSummaryPage() {
 
         {/* 5. Main 15-Column Table & Pagination (Spec Section 5 & 10) */}
         {loading ? (
-          <LoadingState label="Computing authoritative monthly attendance summaries..." />
+          <Card padding="none">
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableHeaderCell>
+                    <Checkbox disabled aria-label="Select all rows" />
+                  </TableHeaderCell>
+                  <TableHeaderCell>Employee</TableHeaderCell>
+                  <TableHeaderCell>Department</TableHeaderCell>
+                  <TableHeaderCell>Present</TableHeaderCell>
+                  <TableHeaderCell>Absent</TableHeaderCell>
+                  <TableHeaderCell>Half Days</TableHeaderCell>
+                  <TableHeaderCell>Leave</TableHeaderCell>
+                  <TableHeaderCell>Weekly Offs</TableHeaderCell>
+                  <TableHeaderCell>Holidays</TableHeaderCell>
+                  <TableHeaderCell>Late Marks</TableHeaderCell>
+                  <TableHeaderCell>
+                    <span title="LOP">Loss of Pay</span>
+                  </TableHeaderCell>
+                  <TableHeaderCell>Overtime</TableHeaderCell>
+                  <TableHeaderCell>Payable Days</TableHeaderCell>
+                  <TableHeaderCell>Review Status</TableHeaderCell>
+                  <TableHeaderCell className="bezent-table-col--actions bezent-table-col--sticky-right">
+                    Actions
+                  </TableHeaderCell>
+                </TableRow>
+              </TableHead>
+              <TableSkeleton
+                rows={8}
+                columns={15}
+                label="Computing authoritative monthly attendance summaries..."
+              />
+            </Table>
+          </Card>
         ) : error ? (
           <Alert variant="danger" title="Could not load monthly summary">
             <Stack gap="xs">
