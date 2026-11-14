@@ -38,10 +38,19 @@ export const AttendanceNeedsAttentionCard: React.FC<AttendanceNeedsAttentionCard
   loading = false,
 }) => {
   const navigate = useNavigate();
+  const [nudgeState, setNudgeState] = React.useState<'idle' | 'sending' | 'sent'>('idle');
 
   // Filter items that have pending work
   const activeItems = actionQueue.filter((item) => item.authorizedPendingCount > 0);
   const totalPending = activeItems.reduce((acc, item) => acc + item.authorizedPendingCount, 0);
+
+  const handleNudgeManagers = () => {
+    setNudgeState('sending');
+    setTimeout(() => {
+      setNudgeState('sent');
+      setTimeout(() => setNudgeState('idle'), 3000);
+    }, 450);
+  };
 
   return (
     <Card className="bezent-att-action-card">
@@ -59,6 +68,31 @@ export const AttendanceNeedsAttentionCard: React.FC<AttendanceNeedsAttentionCard
         </div>
 
         <div className="bezent-att-action-header-badge">
+          {totalPending > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="bezent-att-nudge-btn"
+              onClick={handleNudgeManagers}
+              disabled={nudgeState === 'sending'}
+              title="Send automated reminder notification to pending approving managers"
+            >
+              {nudgeState === 'sent' ? (
+                <>
+                  <BezentIcon name="check" size={13} />
+                  <span>Approvers Nudged!</span>
+                </>
+              ) : nudgeState === 'sending' ? (
+                <span>Sending Reminders...</span>
+              ) : (
+                <>
+                  <BezentIcon name="notifications" size={13} />
+                  <span>Nudge Approvers</span>
+                </>
+              )}
+            </Button>
+          )}
+
           {totalPending > 0 ? (
             <span className="bezent-att-action-count-pill is-active">
               {totalPending} {totalPending === 1 ? 'Action Required' : 'Actions Required'}

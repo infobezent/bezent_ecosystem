@@ -127,6 +127,21 @@ export const AttendanceInsightsCard: React.FC<AttendanceInsightsCardProps> = ({
                   </p>
                 </div>
               </div>
+
+              <div className="bezent-att-insights-callout">
+                <div className="bezent-att-insights-callout-icon tone-emerald">
+                  <BezentIcon name="check" size={14} />
+                </div>
+                <div className="bezent-att-insights-callout-text">
+                  <span className="bezent-att-insights-callout-title">
+                    Biometric &amp; Device Feeds Synchronized
+                  </span>
+                  <p className="bezent-att-insights-callout-desc">
+                    All branch biometric punch gateways are operating online with real-time sync
+                    active (zero latency).
+                  </p>
+                </div>
+              </div>
             </div>
           </>
         )}

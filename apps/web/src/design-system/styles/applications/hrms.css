@@ -13724,6 +13724,55 @@
   color: #94a3b8 !important;
 }
 
+.bezent-att-sync-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #15803d;
+  line-height: 1.2;
+  white-space: nowrap;
+  user-select: none;
+  margin-left: auto;
+}
+
+.bezent-att-sync-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #16a34a;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
+  animation: bezent-sync-pulse 2s infinite ease-in-out;
+}
+
+@keyframes bezent-sync-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.85);
+  }
+}
+
+[data-theme='dark'] .bezent-att-sync-status-pill {
+  background: rgba(22, 163, 74, 0.15);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: #86efac;
+}
+
+[data-theme='dark'] .bezent-att-sync-dot {
+  background: #4ade80;
+  box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.3);
+}
+
 .bezent-att-date-display-pill {
   display: inline-flex;
   align-items: center;
@@ -13738,7 +13787,6 @@
   line-height: 1.2;
   white-space: nowrap;
   user-select: none;
-  margin-left: auto;
 }
 
 [data-theme='dark'] .bezent-att-date-display-pill {
@@ -14564,6 +14612,39 @@
 .bezent-att-action-header-badge {
   display: flex;
   align-items: center;
+  gap: 8px;
+}
+
+.bezent-att-nudge-btn {
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  color: #6366f1 !important;
+  background: #eef2ff !important;
+  border: 1px solid #c7d2fe !important;
+  border-radius: 8px !important;
+  padding: 0 10px !important;
+  height: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  transition: all 0.18s ease !important;
+}
+
+.bezent-att-nudge-btn:hover:not(:disabled) {
+  background: #e0e7ff !important;
+  border-color: #a5b4fc !important;
+  color: #4338ca !important;
+}
+
+.bezent-att-nudge-btn:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+[data-theme='dark'] .bezent-att-nudge-btn {
+  background: rgba(99, 102, 241, 0.15) !important;
+  border-color: rgba(99, 102, 241, 0.3) !important;
+  color: #a5b4fc !important;
 }
 
 .bezent-att-action-count-pill {
