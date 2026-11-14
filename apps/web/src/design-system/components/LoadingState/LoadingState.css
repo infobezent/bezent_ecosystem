@@ -40,19 +40,34 @@
 
 /* ─── Branded Enterprise Splash Variant ───────────────────────────────────── */
 .bezent-loading-state--branded {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 99999;
+  background-color: var(--bg-surface, #ffffff);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 20px;
-  animation: bezentSplashFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  padding: 0;
+  margin: 0;
 }
 
-@keyframes bezentSplashFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+[data-theme='dark'] .bezent-loading-state--branded {
+  background-color: #090d16;
+}
+
+.bezent-loading-state--branded .bezent-loading-state__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  margin: 0;
+}
+
+[data-theme='dark'] .bezent-loading-state--branded .bezent-loading-state__label {
+  color: #94a3b8;
 }
 
 .bezent-loading-state__logo-wrap {

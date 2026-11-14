@@ -13,7 +13,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   const location = useLocation();
 
   if (status === 'loading') {
-    return <LoadingState variant="branded" label="Restoring your session…" fill minHeight="lg" />;
+    return <LoadingState variant="branded" label="Initializing BEZENT Workspace…" />;
   }
   if (status === 'error') {
     const alertConfig = (() => {
