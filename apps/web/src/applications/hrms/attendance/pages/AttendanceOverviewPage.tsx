@@ -440,6 +440,12 @@ export function AttendanceOverviewPage({
                   Reset
                 </Button>
               )}
+
+              {/* Active Date Display Pill */}
+              <div className="bezent-att-date-display-pill" title="Selected Date">
+                <BezentIcon name="calendar" size={13} />
+                <span>{dateRange.label}</span>
+              </div>
             </div>
           }
         />
