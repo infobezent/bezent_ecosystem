@@ -12,6 +12,7 @@ import {
   TableHead,
   TableHeaderCell,
   TableRow,
+  TableSkeleton,
 } from '../../../../design-system/components';
 import type { EmployeeRecord } from '../api/employeeAdministrationApi';
 import {
@@ -43,7 +44,22 @@ export function ProbationQueue({
   onOpenEmployee,
 }: ProbationQueueProps) {
   if (status === 'loading') {
-    return <LoadingState label="Loading employees on probation…" minHeight="sm" />;
+    return (
+      <Table hoverable aria-label="Employees on probation">
+        <TableHead>
+          <TableRow>
+            <TableHeaderCell>Employee</TableHeaderCell>
+            <TableHeaderCell>Employee ID</TableHeaderCell>
+            <TableHeaderCell>Joining Date</TableHeaderCell>
+            <TableHeaderCell>Confirmation Due Date</TableHeaderCell>
+            <TableHeaderCell>Reporting Manager</TableHeaderCell>
+            <TableHeaderCell>Status</TableHeaderCell>
+            <TableHeaderCell>Actions</TableHeaderCell>
+          </TableRow>
+        </TableHead>
+        <TableSkeleton rows={8} columns={7} label="Loading employees on probation…" />
+      </Table>
+    );
   }
 
   if (status === 'error') {

@@ -18,6 +18,7 @@ import {
   TableCell,
   EmptyState,
   LoadingState,
+  TableSkeleton,
 } from '../../../../design-system';
 import {
   fetchImportHistory,
@@ -147,7 +148,19 @@ export const EmployeeImportHistoryPage: React.FC = () => {
         {/* History Table */}
         <Card variant="default" padding="lg">
           {loading ? (
-            <LoadingState label="Loading import history..." />
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableHeaderCell>Import Date & Time</TableHeaderCell>
+                  <TableHeaderCell>File Name</TableHeaderCell>
+                  <TableHeaderCell>Format & Size</TableHeaderCell>
+                  <TableHeaderCell>Status</TableHeaderCell>
+                  <TableHeaderCell>Records (Total / OK / Errors)</TableHeaderCell>
+                  <TableHeaderCell>Actions</TableHeaderCell>
+                </TableRow>
+              </TableHead>
+              <TableSkeleton rows={5} columns={6} label="Loading import history..." />
+            </Table>
           ) : error ? (
             <EmptyState
               title="Failed to Load History"

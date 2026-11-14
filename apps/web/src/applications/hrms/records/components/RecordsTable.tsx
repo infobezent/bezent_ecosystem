@@ -17,6 +17,7 @@ import {
   TableHead,
   TableHeaderCell,
   TableRow,
+  TableSkeleton,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import type { EmployeeDocument } from '../../documents/api/documentsApi';
@@ -56,7 +57,23 @@ export function RecordsTable({
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
   if (status === 'loading') {
-    return <LoadingState label="Loading employee records…" minHeight="md" />;
+    return (
+      <Table hoverable aria-label="Employee records directory">
+        <TableHead>
+          <TableRow>
+            <TableHeaderCell>Record / Document Name</TableHeaderCell>
+            <TableHeaderCell>Employee</TableHeaderCell>
+            <TableHeaderCell>Category</TableHeaderCell>
+            <TableHeaderCell>Department</TableHeaderCell>
+            <TableHeaderCell>Uploaded Date</TableHeaderCell>
+            <TableHeaderCell>Expiry Date</TableHeaderCell>
+            <TableHeaderCell>Verification Status</TableHeaderCell>
+            <TableHeaderCell>Actions</TableHeaderCell>
+          </TableRow>
+        </TableHead>
+        <TableSkeleton rows={8} columns={8} label="Loading employee records…" />
+      </Table>
+    );
   }
 
   if (status === 'error') {
