@@ -26,6 +26,7 @@ import {
   EmptyState,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
+import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
 import {
   fetchMonthlySummaryWorkspace,
   fetchMonthlySummaryById,
@@ -569,7 +570,7 @@ export function MonthlyAttendanceSummaryPage() {
     <Page>
       {/* 1. Page Header (Spec Section 1) */}
       <PageHeader
-        eyebrow="Attendance › Monthly Summary"
+        eyebrow="Attendance › Attendance › Monthly"
         title="Monthly Summary"
         subtitle="Review each employee’s month-end attendance and send it to payroll."
         actions={
@@ -638,6 +639,8 @@ export function MonthlyAttendanceSummaryPage() {
           </Inline>
         }
       />
+
+      <AttendanceSectionTabs group="records" />
 
       <Stack gap="md">
         {/* Frozen Period Warning Banner (Spec Section 8) */}

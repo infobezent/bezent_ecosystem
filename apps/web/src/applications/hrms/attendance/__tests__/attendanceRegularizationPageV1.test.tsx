@@ -62,7 +62,7 @@ describe('BEZENT HRMS — Attendance Regularization V1.0 Frontend Workspace', ()
     });
   });
 
-  it('renders PageHeader with Attendance / Regularization breadcrumb, Export, and New Request actions', () => {
+  it('renders PageHeader with Attendance › Requests › Regularization breadcrumb, Export, and New Request actions', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <AttendanceRegularizationPage />
@@ -70,7 +70,7 @@ describe('BEZENT HRMS — Attendance Regularization V1.0 Frontend Workspace', ()
     );
 
     expect(html).toContain('Regularization');
-    expect(html).toContain('Attendance / Regularization');
+    expect(html).toContain('Attendance › Requests › Regularization');
     expect(html).toContain('Submit, review and manage attendance correction requests');
     expect(html).toContain('Export');
     expect(html).toContain('New Request');

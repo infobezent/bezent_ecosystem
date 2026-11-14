@@ -82,7 +82,7 @@ describe('BEZENT HRMS — Attendance On-Duty V1.0 Frontend Workspace', () => {
     });
   });
 
-  it('renders PageHeader with Attendance / On-Duty breadcrumb, Export, and New Request actions', () => {
+  it('renders PageHeader with Attendance › Requests › On-Duty breadcrumb, Export, and New Request actions', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <AttendanceOnDutyPage />
@@ -90,7 +90,7 @@ describe('BEZENT HRMS — Attendance On-Duty V1.0 Frontend Workspace', () => {
     );
 
     expect(html).toContain('On-Duty (OD)');
-    expect(html).toContain('Attendance / On-Duty');
+    expect(html).toContain('Attendance › Requests › On-Duty');
     expect(html).toContain('Export');
     expect(html).toContain('New Request');
   });

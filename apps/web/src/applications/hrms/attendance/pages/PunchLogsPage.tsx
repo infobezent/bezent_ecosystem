@@ -27,6 +27,7 @@ import {
   Textarea,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
+import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
 import {
   fetchPunchLogs,
   fetchPunchDetails,
@@ -551,7 +552,7 @@ export function PunchLogsPage() {
     <Page>
       {/* ── 1. Page Header (Spec Section 1) ── */}
       <PageHeader
-        eyebrow="Attendance › Punch Logs"
+        eyebrow="Attendance › Attendance › Punch Logs"
         title="Punch Logs"
         subtitle="Review every raw punch captured from devices, web and mobile."
         actions={
@@ -623,6 +624,8 @@ export function PunchLogsPage() {
           </Inline>
         }
       />
+
+      <AttendanceSectionTabs group="records" />
 
       <Stack gap="md">
         {/* Banner Notification */}

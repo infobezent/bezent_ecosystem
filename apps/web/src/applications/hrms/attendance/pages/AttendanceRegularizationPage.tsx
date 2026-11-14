@@ -27,6 +27,7 @@ import {
   EmptyState,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
+import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
 import {
   fetchRegularizationWorkspace,
   fetchRegularizationDetails,
@@ -596,7 +597,7 @@ export function AttendanceRegularizationPage() {
     <Page>
       {/* 1. Header & Actions Strip */}
       <PageHeader
-        breadcrumbs={<span>Attendance / Regularization</span>}
+        breadcrumbs={<span>Attendance › Requests › Regularization</span>}
         title={
           <span>
             Regularization
@@ -668,6 +669,8 @@ export function AttendanceRegularizationPage() {
           </Inline>
         }
       />
+
+      <AttendanceSectionTabs group="requests" />
 
       <Stack gap="md">
         {/* 2. Six Compact Summary Counters Strip (~78px height, 1 row) */}

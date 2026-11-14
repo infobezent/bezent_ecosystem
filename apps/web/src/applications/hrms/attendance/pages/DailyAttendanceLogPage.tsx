@@ -28,6 +28,7 @@ import {
   StatusBadge,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
+import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
 import {
   fetchDailyAttendanceLogV1,
   fetchEmployeeDailyDetail,
@@ -623,7 +624,7 @@ export function DailyAttendanceLogPage() {
     <Page>
       {/* ── Page Header (Spec Section 1) ── */}
       <PageHeader
-        eyebrow="Attendance › Daily Attendance"
+        eyebrow="Attendance › Attendance › Daily"
         title="Daily Attendance"
         subtitle="Review and correct each employee’s attendance for the selected date."
         actions={
@@ -704,6 +705,8 @@ export function DailyAttendanceLogPage() {
           </Inline>
         }
       />
+
+      <AttendanceSectionTabs group="records" />
 
       <Stack gap="md">
         {/* Section 8: Locked Month Warning Banner */}
