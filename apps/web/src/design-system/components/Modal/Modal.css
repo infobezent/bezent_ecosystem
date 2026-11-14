@@ -69,6 +69,11 @@
   max-width: 960px;
 }
 
+.bezent-modal--2xl {
+  width: 90vw;
+  max-width: 1140px;
+}
+
 .bezent-modal--workspace {
   width: 96vw;
   max-width: calc(100vw - 40px);

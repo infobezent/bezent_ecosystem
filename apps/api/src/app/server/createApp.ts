@@ -10,6 +10,7 @@ import { workforceSettingsRouter } from '../../applications/hrms/workforce/route
 import { onboardingRouter } from '../../applications/hrms/onboarding/routes/onboarding.route.js';
 import { onboardingSettingsRouter } from '../../applications/hrms/settings/onboarding/routes/settings.route.js';
 import { employeeRouter } from '../../applications/hrms/employees/routes/employee.route.js';
+import { employeeImportRouter } from '../../applications/hrms/employees/import/routes/employeeImport.routes.js';
 import { employeeActionRouter } from '../../applications/hrms/employee-administration/routes/employeeAction.route.js';
 import { employeeDocumentRouter } from '../../applications/hrms/documents/routes/employeeDocument.route.js';
 import { attendanceRouter } from '../../applications/hrms/attendance/routes/attendance.routes.js';
@@ -106,6 +107,7 @@ export function createApp(options?: AppOptions): Express {
   app.use('/api/v1', onboardingRouter);
   app.use('/api/v1', onboardingSettingsRouter);
   app.use('/api/v1', employeeRouter);
+  app.use('/api/v1', employeeImportRouter);
   app.use('/api/v1', employeeActionRouter);
   app.use('/api/v1', employeeDocumentRouter);
   app.use('/api/v1', attendanceRouter);

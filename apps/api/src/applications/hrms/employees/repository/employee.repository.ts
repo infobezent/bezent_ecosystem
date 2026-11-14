@@ -5,6 +5,7 @@ import {
   departments,
   designations,
   locations,
+  employeePersonalDetails,
   employeeAttendance,
   type Employee,
   type NewEmployee,
@@ -65,6 +66,8 @@ const detailSelection = {
   designationName: designations.name,
   locationId: employees.locationId,
   locationName: locations.name,
+  gender: employeePersonalDetails.gender,
+  dateOfBirth: employeePersonalDetails.dateOfBirth,
   reportingManagerId: employees.reportingManagerId,
   reportingManagerFirstName: manager.firstName,
   reportingManagerLastName: manager.lastName,
@@ -162,6 +165,14 @@ export class EmployeeRepository {
           eq(employees.referredByEmployeeId, referredBy.id),
           eq(referredBy.tenantId, tenantId),
           eq(referredBy.companyId, companyId),
+        ),
+      )
+      .leftJoin(
+        employeePersonalDetails,
+        and(
+          eq(employees.id, employeePersonalDetails.employeeId),
+          eq(employeePersonalDetails.tenantId, tenantId),
+          eq(employeePersonalDetails.companyId, companyId),
         ),
       );
   }

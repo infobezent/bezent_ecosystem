@@ -23,69 +23,80 @@ describe('Workforce Overview Page', () => {
     );
 
     expect(html).toContain('Total Employees');
-    expect(html).toContain('Active Employees');
-    expect(html).toContain('New Joiners');
-    expect(html).toContain('Employee Exits');
-    expect(html).toContain('Retention Rate');
-    expect(html).toContain('Workforce Growth');
-    expect(html).toContain('bezent-exec-kpi-card--blue');
-    expect(html).toContain('bezent-exec-kpi-card--teal');
-    expect(html).toContain('bezent-exec-kpi-card--amber');
-    expect(html).toContain('bezent-exec-kpi-card--red');
-    expect(html).toContain('bezent-exec-kpi-card--purple');
+    expect(html).toContain('Employees Onboarding');
+    expect(html).toContain('Total Transfers');
+    expect(html).toContain('Total Promotions');
+    expect(html).toContain('Employees in Offboarding');
+    expect(html).toContain('Workforce Compliance');
   });
 
-  it('renders Tier 2: compact 3-line distribution chart card and live breakdown panel', () => {
+  it('renders Workforce Analytics unified card with category and dynamic filters', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <WorkforceOverviewPage />
       </MemoryRouter>,
     );
 
-    expect(html).toContain('bezent-wf-tier2-split');
-    expect(html).toContain('bezent-wf-trend-card');
-    expect(html).toContain('bezent-wf-dist-detail-card');
-    expect(html).toContain('bezent-wf-trend-svg');
-    expect(html).toContain('bezent-wf-trend-dull-line');
-    expect(html).not.toContain('bezent-wf-trend-tooltip-bg');
-    expect(html).toContain('01. Department Distribution');
-    expect(html).toContain('02. Location Distribution');
-    expect(html).toContain('03. Employment Type');
-    expect(html).toContain('Day');
-    expect(html).toContain('Month');
-    expect(html).toContain('Year');
+    expect(html).toContain('Workforce Analytics');
+    expect(html).toContain('Distribution');
+    expect(html).toContain('Growth');
+    expect(html).toContain('Retention');
+  });
+
+  it('renders Tier 2: Executive Dual Deck with Workforce Analytics and Workforce Composition in one row', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <WorkforceOverviewPage />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('bezent-wf-executive-deck-grid');
+    expect(html).toContain('Workforce Analytics');
+    expect(html).toContain('Workforce Composition');
     expect(html).toContain('Largest Department');
-    expect(html).toContain('Total Departments');
+    expect(html).toContain('Largest Location');
   });
 
-  it('renders Tier 3: 2-column Experience & Job Level Distribution cards', () => {
+  it('renders Workforce Composition single card with demographics and filter dropdowns', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <WorkforceOverviewPage />
       </MemoryRouter>,
     );
 
-    expect(html).toContain('bezent-wf-tier3-grid--two');
-    expect(html).toContain('1. Experience Distribution');
-    expect(html).toContain('2. Job Level Distribution');
+    expect(html).toContain('Workforce Composition');
+    expect(html).toContain('Gender');
+    expect(html).toContain('Age Group');
+    expect(html).toContain('Experience');
+    expect(html).toContain('Tenure');
+    expect(html).toContain('Employment Status');
   });
 
-  it('renders Tier 4: Workforce Planning command deck and insights', () => {
+  it('renders Tier 4: Workforce Planning and Workforce Alerts 50/50 command row', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <WorkforceOverviewPage />
       </MemoryRouter>,
     );
 
+    // 50% + 50% two-column layout row
+    expect(html).toContain('bezent-wf-planning-row');
+    expect(html).toContain('bezent-wf-planning-card');
+    expect(html).toContain('bezent-wf-alerts-card');
+
+    // Card 1: Workforce Planning
     expect(html).toContain('Workforce Planning');
-    expect(html).toContain('Approved Headcount');
-    expect(html).toContain('Current Headcount');
-    expect(html).toContain('Open Positions');
-    expect(html).toContain('Headcount Gap');
-    expect(html).toContain('Utilization');
-    expect(html).toContain('Department Headcount &amp; Capacity');
-    expect(html).toContain('Hiring Requirements');
-    expect(html).toContain('Highest Staffing Gap');
+    expect(html).toContain('Workforce Capacity');
+    expect(html).toContain('Planned Workforce');
+    expect(html).toContain('Current Workforce');
+    expect(html).toContain('Hiring Demand');
+    expect(html).toContain('Expected Exits');
+
+    // Card 2: Workforce Alerts
+    expect(html).toContain('Workforce Alerts');
+    expect(html).toContain('Documents Expiring');
+    expect(html).toContain('Probation Reviews Due');
+    expect(html).toContain('Attendance Exceptions');
   });
 
   it('renders Tier 5: Employee Lifecycle segmented pipeline', () => {
