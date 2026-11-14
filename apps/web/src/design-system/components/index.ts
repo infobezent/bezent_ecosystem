@@ -51,6 +51,8 @@ export * from './Tooltip';
 export * from './Spinner';
 export * from './LoadingState';
 export * from './ProgressBar';
+export * from './TopProgressBar';
+export * from './Skeleton';
 
 /* ─── Overlay ─────────────────────────────────────────────────────────────── */
 export * from './Modal';

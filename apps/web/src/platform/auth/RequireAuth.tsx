@@ -13,7 +13,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   const location = useLocation();
 
   if (status === 'loading') {
-    return <LoadingState label="Restoring your session…" fill />;
+    return <LoadingState variant="branded" label="Restoring your session…" fill minHeight="lg" />;
   }
   if (status === 'error') {
     const alertConfig = (() => {

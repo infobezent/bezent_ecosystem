@@ -24,6 +24,7 @@ import {
   EmptyState,
   Avatar,
   Textarea,
+  TableSkeleton,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
@@ -913,7 +914,26 @@ export function PunchLogsPage() {
 
         {/* ── 10. Empty & Error States / 5. Main Table (Spec Section 5 & 10) ── */}
         {loading ? (
-          <LoadingState label="Fetching attendance punch events..." />
+          <Card padding="none">
+            <Table compact hoverable>
+              <TableHead>
+                <TableRow>
+                  <TableHeaderCell className="bezent-table-col--select">
+                    <Checkbox disabled aria-label="Select all rows" />
+                  </TableHeaderCell>
+                  <TableHeaderCell>Employee</TableHeaderCell>
+                  <TableHeaderCell>Punch Time</TableHeaderCell>
+                  <TableHeaderCell>Direction</TableHeaderCell>
+                  <TableHeaderCell>Source</TableHeaderCell>
+                  <TableHeaderCell>Device</TableHeaderCell>
+                  <TableHeaderCell>Location</TableHeaderCell>
+                  <TableHeaderCell>Result</TableHeaderCell>
+                  <TableHeaderCell className="bezent-table-col--actions">Actions</TableHeaderCell>
+                </TableRow>
+              </TableHead>
+              <TableSkeleton rows={8} columns={9} />
+            </Table>
+          </Card>
         ) : error ? (
           <Alert variant="danger" title="Could not load punch logs">
             <span>Something went wrong while loading.</span>

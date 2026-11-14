@@ -10,6 +10,9 @@ import {
   Select,
   Toolbar,
   Inline,
+  Skeleton,
+  TableSkeleton,
+  TopProgressBar,
 } from '../index';
 import * as RootDesignSystem from '../../index';
 
@@ -232,6 +235,61 @@ describe('Design System Core Primitives', () => {
       expect(html).toContain('Loading directory…');
       expect(html).toContain('aria-busy="true"');
     });
+
+    it('renders branded splash variant with logo and progress track', () => {
+      const html = renderToStaticMarkup(
+        <LoadingState variant="branded" label="Initializing workspace…" fill />,
+      );
+      expect(html).toContain('bezent-loading-state--branded');
+      expect(html).toContain('bezent-loading-state__logo-wrap');
+      expect(html).toContain('bezent-loading-state__track');
+      expect(html).toContain('Initializing workspace…');
+    });
+  });
+
+  describe('Skeleton', () => {
+    it('renders shimmer skeleton placeholder with wave animation', () => {
+      const html = renderToStaticMarkup(
+        <Skeleton variant="text" animation="wave" width="md" height="sm" />,
+      );
+      expect(html).toContain('bezent-skeleton');
+      expect(html).toContain('bezent-skeleton--text');
+      expect(html).toContain('bezent-skeleton--wave');
+      expect(html).toContain('bezent-skeleton--w-md');
+      expect(html).toContain('bezent-skeleton--h-sm');
+      expect(html).toContain('aria-hidden="true"');
+    });
+
+    it('renders circular avatar skeleton', () => {
+      const html = renderToStaticMarkup(<Skeleton variant="circular" width="xs" height="xs" />);
+      expect(html).toContain('bezent-skeleton--circular');
+    });
+
+    it('renders TableSkeleton with specified rows and columns', () => {
+      const html = renderToStaticMarkup(
+        <table>
+          <TableSkeleton rows={4} columns={5} />
+        </table>,
+      );
+      expect(html).toContain('bezent-table-skeleton-body');
+      expect(html).toContain('bezent-table-skeleton-row');
+      expect(html).toContain('bezent-table-skeleton-cell');
+    });
+  });
+
+  describe('TopProgressBar', () => {
+    it('renders slim top progress bar with active state', () => {
+      const html = renderToStaticMarkup(<TopProgressBar active />);
+      expect(html).toContain('bezent-top-progress');
+      expect(html).toContain('is-active');
+      expect(html).toContain('bezent-top-progress__bar');
+    });
+
+    it('renders inactive bar when active is false', () => {
+      const html = renderToStaticMarkup(<TopProgressBar active={false} />);
+      expect(html).toContain('bezent-top-progress');
+      expect(html).not.toContain('is-active');
+    });
   });
 
   describe('Root Design System Barrel', () => {
@@ -244,6 +302,9 @@ describe('Design System Core Primitives', () => {
       expect(RootDesignSystem.Checkbox).toBeDefined();
       expect(RootDesignSystem.Spinner).toBeDefined();
       expect(RootDesignSystem.LoadingState).toBeDefined();
+      expect(RootDesignSystem.Skeleton).toBeDefined();
+      expect(RootDesignSystem.TableSkeleton).toBeDefined();
+      expect(RootDesignSystem.TopProgressBar).toBeDefined();
       expect(RootDesignSystem.BezentIcon).toBeDefined();
     });
   });

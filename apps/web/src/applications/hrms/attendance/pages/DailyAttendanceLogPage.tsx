@@ -25,6 +25,7 @@ import {
   Alert,
   EmptyState,
   Avatar,
+  TableSkeleton,
 } from '../../../../design-system/components';
 import { BezentIcon } from '../../../../design-system/icons';
 import { AttendanceSectionTabs } from '../components/AttendanceSectionTabs';
@@ -994,7 +995,33 @@ export function DailyAttendanceLogPage() {
 
         {/* ── Table & Pagination (Spec Section 4 & 9) ── */}
         {loading ? (
-          <LoadingState label="Loading daily attendance records..." />
+          <Card padding="none">
+            <Table compact hoverable>
+              <TableHead>
+                <TableRow>
+                  <TableHeaderCell className="bezent-table-col--select">
+                    <Checkbox disabled aria-label="Select all" />
+                  </TableHeaderCell>
+                  <TableHeaderCell>Employee</TableHeaderCell>
+                  <TableHeaderCell>Shift</TableHeaderCell>
+                  <TableHeaderCell>In</TableHeaderCell>
+                  <TableHeaderCell>Out</TableHeaderCell>
+                  <TableHeaderCell>Hours</TableHeaderCell>
+                  <TableHeaderCell>Break</TableHeaderCell>
+                  <TableHeaderCell>Status</TableHeaderCell>
+                  <TableHeaderCell>Late</TableHeaderCell>
+                  <TableHeaderCell>Early Out</TableHeaderCell>
+                  <TableHeaderCell>Overtime</TableHeaderCell>
+                  <TableHeaderCell>Source</TableHeaderCell>
+                  <TableHeaderCell>Remarks</TableHeaderCell>
+                  <TableHeaderCell className="bezent-table-col--actions bezent-table-col--sticky-right">
+                    Actions
+                  </TableHeaderCell>
+                </TableRow>
+              </TableHead>
+              <TableSkeleton rows={8} columns={14} />
+            </Table>
+          </Card>
         ) : error ? (
           <Alert variant="danger" title="Could not load attendance">
             <Stack gap="xs">
