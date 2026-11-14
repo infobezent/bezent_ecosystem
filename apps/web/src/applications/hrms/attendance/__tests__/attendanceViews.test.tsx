@@ -179,7 +179,7 @@ describe('HRMS Attendance Module V1 Frontend', () => {
       );
       expect(html).toContain('Attendance Overview');
       expect(html).toContain(
-        'Workforce operations, exception triage, and monthly payroll readiness',
+        'Monitor daily attendance and manage workforce attendance activities.',
       );
     });
 
