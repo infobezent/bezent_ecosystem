@@ -566,81 +566,35 @@ export function MonthlyAttendanceSummaryPage() {
     }
   };
 
+  const getPaginationItems = (currentPage: number, total: number): (number | 'ellipsis')[] => {
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+    const pages: (number | 'ellipsis')[] = [];
+    if (currentPage <= 4) {
+      for (let i = 1; i <= 5; i++) pages.push(i);
+      pages.push('ellipsis');
+      pages.push(total);
+    } else if (currentPage >= total - 3) {
+      pages.push(1);
+      pages.push('ellipsis');
+      for (let i = total - 4; i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      pages.push('ellipsis');
+      pages.push(currentPage - 1);
+      pages.push(currentPage);
+      pages.push(currentPage + 1);
+      pages.push('ellipsis');
+      pages.push(total);
+    }
+    return pages;
+  };
+
   return (
     <Page>
-      {/* 1. Page Header (Spec Section 1) */}
-      <PageHeader
-        eyebrow="Attendance › Attendance › Monthly"
-        title="Monthly Summary"
-        subtitle="Review each employee’s month-end attendance and send it to payroll."
-        actions={
-          <Inline gap="sm" align="center">
-            {/* Period Selector */}
-            <Inline gap="xs" align="center">
-              <span className="bezent-filter-strip-label">Period:</span>
-              <Button
-                variant="outline"
-                size="md"
-                shape="rounded"
-                onClick={handlePrevMonth}
-                aria-label="Previous month"
-              >
-                <BezentIcon name="chevronLeft" size={14} />
-              </Button>
-              <Input
-                type="month"
-                aria-label="Period"
-                value={selectedMonth}
-                onChange={(e) => {
-                  setSelectedMonth(e.target.value);
-                  setPage(1);
-                  setSelectedIds(new Set());
-                }}
-              />
-              <Button
-                variant="outline"
-                size="md"
-                shape="rounded"
-                onClick={handleNextMonth}
-                aria-label="Next month"
-              >
-                <BezentIcon name="chevronRight" size={14} />
-              </Button>
-            </Inline>
-
-            {/* Secondary Button: Export */}
-            <Button
-              variant="secondary"
-              size="md"
-              shape="rounded"
-              leftIcon={<BezentIcon name="download" size={16} />}
-              onClick={() => setShowExportModal(true)}
-            >
-              Export
-            </Button>
-
-            {/* Primary Button: Freeze Period (Spec Section 8) */}
-            <Button
-              variant="primary"
-              size="md"
-              shape="rounded"
-              disabled={!isFreezeReady || isPeriodFrozen}
-              title={
-                isPeriodFrozen
-                  ? `${formatMonthYear(selectedMonth)} is frozen for payroll.`
-                  : !isFreezeReady
-                    ? 'All employees must be approved before freezing.'
-                    : 'Freeze Period'
-              }
-              onClick={() => setShowFreezeModal(true)}
-            >
-              Freeze Period
-            </Button>
-          </Inline>
-        }
-      />
-
-      <AttendanceSectionTabs group="records" />
+      {/* 1. Page Header (Unified Attendance Navigation) */}
+      <PageHeader title="Attendance" actions={<AttendanceSectionTabs group="records" />} />
 
       <Stack gap="md">
         {/* Frozen Period Warning Banner (Spec Section 8) */}
@@ -657,147 +611,20 @@ export function MonthlyAttendanceSummaryPage() {
         {/* Dynamic Status Notification Banner */}
         {bannerMessage && <Alert variant={bannerMessage.type}>{bannerMessage.text}</Alert>}
 
-        {/* 3. Summary Cards Strip (Spec Section 3) */}
-        <Grid columns={6} gap="md">
-          {/* 1. Employees */}
-          <div
-            className={`bezent-kpi-card bezent-kpi-card--interactive bezent-kpi-card--blue ${reviewStatusFilter === 'all' && activeCounter === null ? 'is-active' : ''}`}
-            onClick={() => {
-              setReviewStatusFilter('all');
-              setActiveCounter(null);
-              setPage(1);
-            }}
-            role="button"
-            tabIndex={0}
-            title="Total recorded workforce"
-          >
-            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--blue">
-              <BezentIcon name="employees" size={20} />
+        {/* 4. Unified Single-Line Directory Toolbar */}
+        <div className="bezent-directory-toolbar bezent-att-directory-toolbar">
+          <div className="bezent-att-toolbar-left">
+            <div className="bezent-att-search">
+              <SearchInput
+                placeholder="Search name or ID"
+                aria-label="Search by name or employee ID"
+                shape="rounded"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onClear={() => setSearch('')}
+              />
             </div>
-            <div className="bezent-kpi-card__info">
-              <p className="bezent-kpi-card__title">Employees</p>
-              <p className="bezent-kpi-card__value">{counters.totalEmployees}</p>
-              <p className="bezent-kpi-card__caption">Total workforce</p>
-            </div>
-          </div>
 
-          {/* 2. Pending */}
-          <div
-            className={`bezent-kpi-card bezent-kpi-card--interactive bezent-kpi-card--amber ${reviewStatusFilter === 'pending' ? 'is-active' : ''}`}
-            onClick={() => {
-              setReviewStatusFilter((c) => (c === 'pending' ? 'all' : 'pending'));
-              setActiveCounter(null);
-              setPage(1);
-            }}
-            role="button"
-            tabIndex={0}
-            title="Attendance summaries awaiting review"
-          >
-            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--amber">
-              <BezentIcon name="clock" size={20} />
-            </div>
-            <div className="bezent-kpi-card__info">
-              <p className="bezent-kpi-card__title">Pending</p>
-              <p className="bezent-kpi-card__value">
-                {counters.pending ?? counters.needsReview ?? 0}
-              </p>
-              <p className="bezent-kpi-card__caption">Awaiting review</p>
-            </div>
-          </div>
-
-          {/* 3. Approved */}
-          <div
-            className={`bezent-kpi-card bezent-kpi-card--interactive bezent-kpi-card--green ${reviewStatusFilter === 'approved' ? 'is-active' : ''}`}
-            onClick={() => {
-              setReviewStatusFilter((c) => (c === 'approved' ? 'all' : 'approved'));
-              setActiveCounter(null);
-              setPage(1);
-            }}
-            role="button"
-            tabIndex={0}
-            title="Reviewed and ready for payroll"
-          >
-            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--green">
-              <BezentIcon name="check" size={20} />
-            </div>
-            <div className="bezent-kpi-card__info">
-              <p className="bezent-kpi-card__title">Approved</p>
-              <p className="bezent-kpi-card__value">
-                {counters.approved ?? counters.readyForPayroll ?? 0}
-              </p>
-              <p className="bezent-kpi-card__caption">Ready for payroll</p>
-            </div>
-          </div>
-
-          {/* 4. Frozen */}
-          <div
-            className={`bezent-kpi-card bezent-kpi-card--interactive bezent-kpi-card--purple ${reviewStatusFilter === 'frozen' ? 'is-active' : ''}`}
-            onClick={() => {
-              setReviewStatusFilter((c) => (c === 'frozen' ? 'all' : 'frozen'));
-              setActiveCounter(null);
-              setPage(1);
-            }}
-            role="button"
-            tabIndex={0}
-            title="Locked for payroll"
-          >
-            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--purple">
-              <BezentIcon name="lock" size={20} />
-            </div>
-            <div className="bezent-kpi-card__info">
-              <p className="bezent-kpi-card__title">Frozen</p>
-              <p className="bezent-kpi-card__value">{counters.frozen ?? counters.locked ?? 0}</p>
-              <p className="bezent-kpi-card__caption">Locked for payroll</p>
-            </div>
-          </div>
-
-          {/* 5. Loss of Pay Days */}
-          <div
-            className="bezent-kpi-card bezent-kpi-card--red"
-            title="Total unpaid loss of pay days across workforce"
-          >
-            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--red">
-              <BezentIcon name="close" size={20} />
-            </div>
-            <div className="bezent-kpi-card__info">
-              <p className="bezent-kpi-card__title">Loss of Pay Days</p>
-              <p className="bezent-kpi-card__value">{formatDays(counters.lossOfPayDays)}</p>
-              <p className="bezent-kpi-card__caption">Total unpaid days</p>
-            </div>
-          </div>
-
-          {/* 6. Overtime Hours */}
-          <div
-            className="bezent-kpi-card bezent-kpi-card--blue"
-            title="Total credited overtime hours"
-          >
-            <div className="bezent-kpi-card__icon bezent-kpi-card__icon--blue">
-              <BezentIcon name="tasks" size={20} />
-            </div>
-            <div className="bezent-kpi-card__info">
-              <p className="bezent-kpi-card__title">Overtime Hours</p>
-              <p className="bezent-kpi-card__value">
-                {counters.overtimeHours ? `${counters.overtimeHours}h` : '0h'}
-              </p>
-              <p className="bezent-kpi-card__caption">Approved overtime</p>
-            </div>
-          </div>
-        </Grid>
-
-        {/* 4. Filter Bar (Spec Section 4 — Workforce Directory Floating Filter Pattern) */}
-        <div className="bezent-directory-toolbar">
-          <div className="bezent-directory-toolbar__search">
-            <SearchInput
-              placeholder="Search by name or employee ID"
-              aria-label="Search"
-              shape="rounded"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onClear={() => setSearch('')}
-            />
-          </div>
-
-          <div className="bezent-directory-toolbar__actions">
             <div className="bezent-filter-anchor">
               <Button
                 variant={appliedFilterCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
@@ -921,10 +748,77 @@ export function MonthlyAttendanceSummaryPage() {
                 shape="rounded"
                 leftIcon={<BezentIcon name="reset" size={14} />}
                 onClick={handleResetFilters}
+                title="Reset all active filters"
               >
-                Reset Filters
+                Reset
               </Button>
             )}
+          </div>
+
+          <div className="bezent-directory-toolbar__actions bezent-att-toolbar-actions">
+            {/* Period Selector */}
+            <div className="bezent-att-workday-nav">
+              <Button
+                variant="outline"
+                size="md"
+                shape="rounded"
+                onClick={handlePrevMonth}
+                aria-label="Previous month"
+                title="Previous month"
+              >
+                <BezentIcon name="chevronLeft" size={14} />
+              </Button>
+              <Input
+                type="month"
+                aria-label="Period"
+                value={selectedMonth}
+                onChange={(e) => {
+                  setSelectedMonth(e.target.value);
+                  setPage(1);
+                  setSelectedIds(new Set());
+                }}
+              />
+              <Button
+                variant="outline"
+                size="md"
+                shape="rounded"
+                onClick={handleNextMonth}
+                aria-label="Next month"
+                title="Next month"
+              >
+                <BezentIcon name="chevronRight" size={14} />
+              </Button>
+            </div>
+
+            {/* Export: Icon Only */}
+            <Button
+              variant="outline"
+              size="md"
+              shape="rounded"
+              onClick={() => setShowExportModal(true)}
+              aria-label="Export Attendance Monthly Summary"
+              title="Export Attendance Monthly Summary"
+            >
+              <BezentIcon name="download" size={16} />
+            </Button>
+
+            {/* Primary Button: Freeze Period */}
+            <Button
+              variant="primary"
+              size="md"
+              shape="rounded"
+              disabled={!isFreezeReady || isPeriodFrozen}
+              title={
+                isPeriodFrozen
+                  ? `${formatMonthYear(selectedMonth)} is frozen for payroll.`
+                  : !isFreezeReady
+                    ? 'All employees must be approved before freezing.'
+                    : 'Freeze Period'
+              }
+              onClick={() => setShowFreezeModal(true)}
+            >
+              Freeze Period
+            </Button>
 
             <span className="bezent-records-badge">{totalCount} Records</span>
           </div>
@@ -1291,31 +1185,52 @@ export function MonthlyAttendanceSummaryPage() {
               </TableBody>
             </Table>
 
-            {/* Pagination Controls */}
-            <div className="bezent-table-footer">
-              <Inline justify="between" align="center">
-                <span className="bezent-card__desc">
-                  Showing {rows.length} of {totalCount} records (Page {page} of {totalPages})
-                </span>
-                <Inline gap="xs" align="center">
-                  <Button
-                    variant="secondary"
-                    size="sm"
+            {/* Table Footer: Clean Records Summary & Enterprise Pagination */}
+            <div className="bezent-att-table-footer">
+              <span className="bezent-att-table-footer-info" aria-live="polite">
+                {totalPages <= 1
+                  ? `Showing all ${rows.length} ${rows.length === 1 ? 'record' : 'records'}`
+                  : `Showing ${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, totalCount)} of ${totalCount} records`}
+              </span>
+
+              {totalPages > 1 && (
+                <div className="bezent-pagination" role="navigation" aria-label="Pagination">
+                  <button
+                    type="button"
+                    className="bezent-pagination__btn"
                     disabled={page <= 1}
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    aria-label="Previous page"
                   >
-                    Previous
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
+                    ‹
+                  </button>
+                  {getPaginationItems(page, totalPages).map((item, idx) =>
+                    item === 'ellipsis' ? (
+                      <span key={`ellipsis-${idx}`} className="bezent-pagination__ellipsis">
+                        …
+                      </span>
+                    ) : (
+                      <button
+                        key={`page-${item}`}
+                        type="button"
+                        className={`bezent-pagination__btn ${item === page ? 'is-active' : ''}`}
+                        onClick={() => setPage(item)}
+                      >
+                        {item}
+                      </button>
+                    ),
+                  )}
+                  <button
+                    type="button"
+                    className="bezent-pagination__btn"
                     disabled={page >= totalPages}
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    aria-label="Next page"
                   >
-                    Next
-                  </Button>
-                </Inline>
-              </Inline>
+                    ›
+                  </button>
+                </div>
+              )}
             </div>
           </Card>
         )}

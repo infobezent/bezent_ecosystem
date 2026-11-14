@@ -5,7 +5,6 @@ import {
   Card,
   Stack,
   Inline,
-  Grid,
   Button,
   Badge,
   Table,
@@ -548,84 +547,35 @@ export function PunchLogsPage() {
     [],
   );
 
+  const getPaginationItems = (currentPage: number, total: number): (number | 'ellipsis')[] => {
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+    const pages: (number | 'ellipsis')[] = [];
+    if (currentPage <= 4) {
+      for (let i = 1; i <= 5; i++) pages.push(i);
+      pages.push('ellipsis');
+      pages.push(total);
+    } else if (currentPage >= total - 3) {
+      pages.push(1);
+      pages.push('ellipsis');
+      for (let i = total - 4; i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      pages.push('ellipsis');
+      pages.push(currentPage - 1);
+      pages.push(currentPage);
+      pages.push(currentPage + 1);
+      pages.push('ellipsis');
+      pages.push(total);
+    }
+    return pages;
+  };
+
   return (
     <Page>
-      {/* ── 1. Page Header (Spec Section 1) ── */}
-      <PageHeader
-        eyebrow="Attendance › Attendance › Punch Logs"
-        title="Punch Logs"
-        subtitle="Review every raw punch captured from devices, web and mobile."
-        actions={
-          <Inline gap="sm" align="center">
-            {/* Date Range Inputs */}
-            <Inline gap="xs" align="center">
-              <span className="bezent-table-meta-subtitle">Date Range:</span>
-              <Input
-                type="date"
-                value={dateFrom}
-                onChange={(e) => {
-                  setDateFrom(e.target.value);
-                  setPage(1);
-                }}
-                aria-label="Start date"
-              />
-              <span className="bezent-card__desc">to</span>
-              <Input
-                type="date"
-                value={dateTo}
-                onChange={(e) => {
-                  setDateTo(e.target.value);
-                  setPage(1);
-                }}
-                aria-label="End date"
-              />
-            </Inline>
-
-            {/* Date Basis Toggle with Spec Tooltips */}
-            <div className="bezent-segmented-toggle">
-              <button
-                type="button"
-                className={`bezent-segmented-toggle__btn ${
-                  dateInterpretation === 'event_timestamp' ? 'is-active' : ''
-                }`}
-                onClick={() => {
-                  setDateInterpretation('event_timestamp');
-                  setPage(1);
-                }}
-                title="Event Time: Filter by the exact time the punch was made. Matches Punch Time in the table."
-              >
-                Event Time
-              </button>
-              <button
-                type="button"
-                className={`bezent-segmented-toggle__btn ${
-                  dateInterpretation === 'workday' ? 'is-active' : ''
-                }`}
-                onClick={() => {
-                  setDateInterpretation('workday');
-                  setPage(1);
-                }}
-                title="Workday: Filter by the attendance date the punch belongs to. Night shift punches after midnight stay on the shift's workday."
-              >
-                Workday
-              </button>
-            </div>
-
-            {/* Secondary Button: Export */}
-            <Button
-              variant="outline"
-              size="md"
-              shape="rounded"
-              leftIcon={<BezentIcon name="download" size={16} />}
-              onClick={() => setExportModalOpen(true)}
-            >
-              Export
-            </Button>
-          </Inline>
-        }
-      />
-
-      <AttendanceSectionTabs group="records" />
+      {/* ── 1. Page Header (Unified Attendance Navigation) ── */}
+      <PageHeader title="Attendance" actions={<AttendanceSectionTabs group="records" />} />
 
       <Stack gap="md">
         {/* Banner Notification */}
@@ -635,120 +585,20 @@ export function PunchLogsPage() {
           </Alert>
         )}
 
-        {/* ── 2. Summary Cards (Spec Section 2) ── */}
-        <Grid columns={5} gap="sm">
-          {/* Card 1: Total Punches */}
-          <div
-            className={`bezent-kpi-card ${resultFilter === 'all' ? 'is-active' : ''}`}
-            onClick={() => {
-              setResultFilter('all');
-              setPage(1);
-            }}
-            title="Total raw punches captured in selected date range"
-            role="button"
-            tabIndex={0}
-          >
-            <div className="bezent-kpi-card__header">
-              <span className="bezent-kpi-card__title">Total Punches</span>
+        {/* ── Unified Single-Line Directory Toolbar ── */}
+        <div className="bezent-directory-toolbar bezent-att-directory-toolbar">
+          <div className="bezent-att-toolbar-left">
+            <div className="bezent-att-search">
+              <SearchInput
+                value={search}
+                shape="rounded"
+                aria-label="Search by name or employee ID"
+                placeholder="Search name or ID"
+                onChange={(e) => setSearch(e.target.value)}
+                onClear={() => setSearch('')}
+              />
             </div>
-            <div className="bezent-kpi-card__value-row">
-              <span className="bezent-kpi-card__value">{counters.total}</span>
-            </div>
-          </div>
 
-          {/* Card 2: Accepted */}
-          <div
-            className={`bezent-kpi-card ${resultFilter === 'accepted' ? 'is-active' : ''}`}
-            onClick={() => {
-              setResultFilter((curr) => (curr === 'accepted' ? 'all' : 'accepted'));
-              setPage(1);
-            }}
-            title="Punches counted in the day's attendance"
-            role="button"
-            tabIndex={0}
-          >
-            <div className="bezent-kpi-card__header">
-              <span className="bezent-kpi-card__title">Accepted</span>
-            </div>
-            <div className="bezent-kpi-card__value-row">
-              <span className="bezent-kpi-card__value">{counters.valid}</span>
-            </div>
-          </div>
-
-          {/* Card 3: Flagged */}
-          <div
-            className={`bezent-kpi-card ${resultFilter === 'flagged' ? 'is-active' : ''}`}
-            onClick={() => {
-              setResultFilter((curr) => (curr === 'flagged' ? 'all' : 'flagged'));
-              setPage(1);
-            }}
-            title="Needs review before it is counted"
-            role="button"
-            tabIndex={0}
-          >
-            <div className="bezent-kpi-card__header">
-              <span className="bezent-kpi-card__title">Flagged</span>
-            </div>
-            <div className="bezent-kpi-card__value-row">
-              <span className="bezent-kpi-card__value">
-                {counters.needsReview + counters.unmatched}
-              </span>
-            </div>
-          </div>
-
-          {/* Card 4: Rejected */}
-          <div
-            className={`bezent-kpi-card ${resultFilter === 'rejected' ? 'is-active' : ''}`}
-            onClick={() => {
-              setResultFilter((curr) => (curr === 'rejected' ? 'all' : 'rejected'));
-              setPage(1);
-            }}
-            title="Not counted in attendance"
-            role="button"
-            tabIndex={0}
-          >
-            <div className="bezent-kpi-card__header">
-              <span className="bezent-kpi-card__title">Rejected</span>
-            </div>
-            <div className="bezent-kpi-card__value-row">
-              <span className="bezent-kpi-card__value">{counters.duplicates}</span>
-            </div>
-          </div>
-
-          {/* Card 5: Failed to Process */}
-          <div
-            className={`bezent-kpi-card ${resultFilter === 'failed' ? 'is-active' : ''}`}
-            onClick={() => {
-              setResultFilter((curr) => (curr === 'failed' ? 'all' : 'failed'));
-              setPage(1);
-            }}
-            title="Could not be processed. Retry or investigate."
-            role="button"
-            tabIndex={0}
-          >
-            <div className="bezent-kpi-card__header">
-              <span className="bezent-kpi-card__title">Failed to Process</span>
-            </div>
-            <div className="bezent-kpi-card__value-row">
-              <span className="bezent-kpi-card__value">{counters.processingFailed}</span>
-            </div>
-          </div>
-        </Grid>
-
-        {/* ── 3. Filter Bar (Spec Section 3 — Workforce Directory Pattern) ── */}
-        <div className="bezent-directory-toolbar">
-          <div className="bezent-directory-toolbar__search">
-            <SearchInput
-              value={search}
-              shape="rounded"
-              aria-label="Search by name or employee ID"
-              placeholder="Search by name or employee ID"
-              onChange={(e) => setSearch(e.target.value)}
-              onClear={() => setSearch('')}
-            />
-          </div>
-
-          <div className="bezent-directory-toolbar__actions">
             <div className="bezent-filter-anchor">
               <Button
                 variant={appliedFilterCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
@@ -902,10 +752,78 @@ export function PunchLogsPage() {
                 shape="rounded"
                 leftIcon={<BezentIcon name="reset" size={14} />}
                 onClick={handleResetFilters}
+                title="Reset all active filters"
               >
-                Reset Filters
+                Reset
               </Button>
             )}
+          </div>
+
+          <div className="bezent-directory-toolbar__actions bezent-att-toolbar-actions">
+            {/* Date Range Inputs */}
+            <div className="bezent-att-workday-nav">
+              <Input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => {
+                  setDateFrom(e.target.value);
+                  setPage(1);
+                }}
+                aria-label="Start date"
+              />
+              <span className="bezent-filter-strip-label">to</span>
+              <Input
+                type="date"
+                value={dateTo}
+                onChange={(e) => {
+                  setDateTo(e.target.value);
+                  setPage(1);
+                }}
+                aria-label="End date"
+              />
+            </div>
+
+            {/* Date Basis Toggle */}
+            <div className="bezent-segmented-toggle">
+              <button
+                type="button"
+                className={`bezent-segmented-toggle__btn ${
+                  dateInterpretation === 'event_timestamp' ? 'is-active' : ''
+                }`}
+                onClick={() => {
+                  setDateInterpretation('event_timestamp');
+                  setPage(1);
+                }}
+                title="Event Time: Filter by the exact time the punch was made."
+              >
+                Event Time
+              </button>
+              <button
+                type="button"
+                className={`bezent-segmented-toggle__btn ${
+                  dateInterpretation === 'workday' ? 'is-active' : ''
+                }`}
+                onClick={() => {
+                  setDateInterpretation('workday');
+                  setPage(1);
+                }}
+                title="Workday: Filter by the attendance date the punch belongs to."
+              >
+                Workday
+              </button>
+            </div>
+
+            {/* Export: Icon Only */}
+            <Button
+              variant="outline"
+              size="md"
+              shape="rounded"
+              onClick={() => setExportModalOpen(true)}
+              aria-label="Export Punch Logs"
+              title="Export Punch Logs"
+            >
+              <BezentIcon name="download" size={16} />
+            </Button>
 
             <span className="bezent-records-badge">{totalCount} Records</span>
           </div>
@@ -1219,40 +1137,55 @@ export function PunchLogsPage() {
                 })}
               </TableBody>
             </Table>
-          </Card>
-        )}
 
-        {/* ── Pagination Controls ── */}
-        {totalCount > 0 && (
-          <Inline justify="between" align="center">
-            <span className="bezent-card__desc">
-              Showing {(page - 1) * limit + 1}–{Math.min(page * limit, totalCount)} of {totalCount}{' '}
-              punches
-            </span>
-            <Inline gap="xs" align="center">
-              <Button
-                variant="outline"
-                size="sm"
-                shape="rounded"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page <= 1}
-              >
-                Previous
-              </Button>
-              <span className="bezent-table-meta-title">
-                Page {page} of {totalPages}
+            {/* Table Footer: Clean Records Summary & Enterprise Pagination */}
+            <div className="bezent-att-table-footer">
+              <span className="bezent-att-table-footer-info" aria-live="polite">
+                {totalPages <= 1
+                  ? `Showing all ${items.length} ${items.length === 1 ? 'record' : 'records'}`
+                  : `Showing ${(page - 1) * limit + 1}–${Math.min(page * limit, totalCount)} of ${totalCount} records`}
               </span>
-              <Button
-                variant="outline"
-                size="sm"
-                shape="rounded"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page >= totalPages}
-              >
-                Next
-              </Button>
-            </Inline>
-          </Inline>
+
+              {totalPages > 1 && (
+                <div className="bezent-pagination" role="navigation" aria-label="Pagination">
+                  <button
+                    type="button"
+                    className="bezent-pagination__btn"
+                    disabled={page <= 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    aria-label="Previous page"
+                  >
+                    ‹
+                  </button>
+                  {getPaginationItems(page, totalPages).map((item, idx) =>
+                    item === 'ellipsis' ? (
+                      <span key={`ellipsis-${idx}`} className="bezent-pagination__ellipsis">
+                        …
+                      </span>
+                    ) : (
+                      <button
+                        key={`page-${item}`}
+                        type="button"
+                        className={`bezent-pagination__btn ${item === page ? 'is-active' : ''}`}
+                        onClick={() => setPage(item)}
+                      >
+                        {item}
+                      </button>
+                    ),
+                  )}
+                  <button
+                    type="button"
+                    className="bezent-pagination__btn"
+                    disabled={page >= totalPages}
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    aria-label="Next page"
+                  >
+                    ›
+                  </button>
+                </div>
+              )}
+            </div>
+          </Card>
         )}
 
         {/* ── 7. Punch Detail Drawer (Spec Section 7) ── */}

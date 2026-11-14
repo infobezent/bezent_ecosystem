@@ -43,33 +43,30 @@ describe('BEZENT HRMS — Punch Logs V1.0 Frontend Page', () => {
     });
   });
 
-  it('renders PageHeader with compact title and breadcrumbs', () => {
+  it('renders PageHeader with Attendance title and navigation tabs', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <PunchLogsPage />
       </MemoryRouter>,
     );
 
+    expect(html).toContain('Attendance');
     expect(html).toContain('Punch Logs');
-    expect(html).toContain('Attendance › Attendance › Punch Logs');
-    expect(html).toContain('Review every raw punch captured from devices, web and mobile.');
     expect(html).toContain('Event Time');
     expect(html).toContain('Workday');
-    expect(html).toContain('Export');
+    expect(html).toContain('Export Punch Logs');
   });
 
-  it('renders exactly all five summary counters', () => {
+  it('renders unified directory toolbar controls and records badge', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <PunchLogsPage />
       </MemoryRouter>,
     );
 
-    expect(html).toContain('Total Punches');
-    expect(html).toContain('Accepted');
-    expect(html).toContain('Flagged');
-    expect(html).toContain('Rejected');
-    expect(html).toContain('Failed to Process');
+    expect(html).toContain('Search name or ID');
+    expect(html).toContain('Filters');
+    expect(html).toContain('Records');
   });
 
   it('renders primary filter bar controls', () => {
