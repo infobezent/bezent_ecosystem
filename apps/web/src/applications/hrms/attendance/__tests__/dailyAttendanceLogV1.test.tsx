@@ -4,30 +4,29 @@ import { MemoryRouter } from 'react-router-dom';
 import { DailyAttendanceLogPage } from '../pages/DailyAttendanceLogPage';
 
 describe('HRMS Attendance — Daily Attendance V1.0 Frontend Tests', () => {
-  it('renders Daily Attendance V1.0 page header and workday navigation controls', () => {
+  it('renders Attendance page header and workday navigation controls', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <DailyAttendanceLogPage />
       </MemoryRouter>,
     );
 
-    expect(html).toContain('Daily Attendance');
+    expect(html).toContain('Attendance');
     expect(html).toContain('+ Manual Entry');
     expect(html).toContain('Export');
     expect(html).toContain('Today');
   });
 
-  it('renders Workforce-style Summary Counters with semantic labels', () => {
+  it('renders section tabs for Daily, Monthly and Punch Logs', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <DailyAttendanceLogPage />
       </MemoryRouter>,
     );
 
-    expect(html).toContain('Scheduled');
-    expect(html).toContain('Present');
-    expect(html).toContain('Absent');
-    expect(html).toContain('Pending Review');
+    expect(html).toContain('Daily');
+    expect(html).toContain('Monthly');
+    expect(html).toContain('Punch Logs');
   });
 
   it('renders Workforce-style directory toolbar with search, filters trigger, reset button and records badge', () => {

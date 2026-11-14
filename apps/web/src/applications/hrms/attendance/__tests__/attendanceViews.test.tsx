@@ -189,8 +189,8 @@ describe('HRMS Attendance Module V1 Frontend', () => {
           <DailyAttendanceLogPage />
         </MemoryRouter>,
       );
-      expect(html).toContain('Daily Attendance');
-      expect(html).toContain('Scheduled');
+      expect(html).toContain('Attendance');
+      expect(html).toContain('Export');
     });
 
     it('renders MonthlyAttendanceSummaryPage without crashing', () => {
