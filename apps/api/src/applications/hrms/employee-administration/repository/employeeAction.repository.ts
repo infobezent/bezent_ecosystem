@@ -181,6 +181,7 @@ export class EmployeeActionRepository {
     if (params.status) shared.push(eq(employeeActions.status, params.status));
     if (params.employeeId) shared.push(eq(employeeActions.employeeId, params.employeeId));
     if (params.departmentId) shared.push(eq(employees.departmentId, params.departmentId));
+    if (params.locationId) shared.push(eq(employees.locationId, params.locationId));
     if (params.effectiveDateFrom)
       shared.push(gte(employeeActions.effectiveDate, params.effectiveDateFrom));
     if (params.effectiveDateTo)
@@ -222,6 +223,7 @@ export class EmployeeActionRepository {
     }
     if (params.employeeId) statusConditions.push(eq(employeeActions.employeeId, params.employeeId));
     if (params.departmentId) statusConditions.push(eq(employees.departmentId, params.departmentId));
+    if (params.locationId) statusConditions.push(eq(employees.locationId, params.locationId));
     if (params.effectiveDateFrom)
       statusConditions.push(gte(employeeActions.effectiveDate, params.effectiveDateFrom));
     if (params.effectiveDateTo)

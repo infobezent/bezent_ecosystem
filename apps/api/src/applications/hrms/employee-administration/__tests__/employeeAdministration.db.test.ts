@@ -728,6 +728,33 @@ describe('HRMS Employee Administration API (MySQL)', () => {
     expect(res.body.pagination).toMatchObject({ page: 1, totalItems: 1 });
   });
 
+  it("filters the action queue by the employee's location", async () => {
+    const employeeAtFirstLocation = await createEmployee({ locationId: masters.locations[0]!.id });
+    const employeeAtSecondLocation = await createEmployee({ locationId: masters.locations[1]!.id });
+    await createAction({
+      employeeId: employeeAtFirstLocation.id,
+      actionType: 'resignation',
+      reason: 'Resigned',
+      values: { lastWorkingDate: '2026-03-31' },
+    });
+    await createAction({
+      employeeId: employeeAtSecondLocation.id,
+      actionType: 'resignation',
+      reason: 'Resigned',
+      values: { lastWorkingDate: '2026-03-31' },
+    });
+
+    const res = await hrms
+      .get('/api/v1/hrms/employee-actions')
+      .query({ locationId: masters.locations[1]!.id });
+    expect(res.status).toBe(200);
+    const employeeIds = res.body.data.map((a: { employeeId: string }) => a.employeeId);
+    // Other fixtures in this suite may also sit at locations[1], so assert
+    // inclusion/exclusion rather than an exact result set.
+    expect(employeeIds).toContain(employeeAtSecondLocation.id);
+    expect(employeeIds).not.toContain(employeeAtFirstLocation.id);
+  });
+
   it('lists probation employees with confirmation due date and reporting manager', async () => {
     const manager = await createEmployee();
     const employee = await createEmployee({

@@ -69,6 +69,9 @@ export interface EmployeeListItem {
   designationName: string | null;
   locationId: string | null;
   locationName: string | null;
+  gender?: string | null;
+  dateOfBirth?: string | null;
+  totalExperienceYears?: string | number | null;
   reportingManagerId: string | null;
   reportingManagerName: string | null;
   referralCode: string | null;

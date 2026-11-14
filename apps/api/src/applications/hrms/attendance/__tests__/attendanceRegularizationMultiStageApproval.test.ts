@@ -47,10 +47,16 @@ describe.skipIf(!isDatabaseConfigured)(
     let employeeToken: string;
     let orphanToken: string;
 
-    const workday1 = '2026-10-14';
-    const workday2 = '2026-10-15';
-    const workday3 = '2026-10-16';
-    const workdayOrphan = '2026-10-17';
+    const getPastWorkday = (daysAgo: number) => {
+      const d = new Date();
+      d.setUTCDate(d.getUTCDate() - daysAgo);
+      return d.toISOString().slice(0, 10);
+    };
+
+    const workday1 = getPastWorkday(4);
+    const workday2 = getPastWorkday(3);
+    const workday3 = getPastWorkday(2);
+    const workdayOrphan = getPastWorkday(1);
 
     beforeAll(async () => {
       const db = getDb();

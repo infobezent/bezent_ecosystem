@@ -421,6 +421,13 @@
       "when": 1795300000000,
       "tag": "0059_database_backed_shifts_and_assignments",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "5",
+      "when": 1793879354004,
+      "tag": "0060_workforce_employee_bulk_import",
+      "breakpoints": true
     }
   ]
 }

@@ -33,6 +33,9 @@ export interface EmployeeRecord {
   designationName: string | null;
   locationId: string | null;
   locationName: string | null;
+  gender?: string | null;
+  dateOfBirth?: string | null;
+  totalExperienceYears?: string | number | null;
   reportingManagerId: string | null;
   reportingManagerName: string | null;
   joiningDate: string;

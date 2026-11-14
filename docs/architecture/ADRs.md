@@ -320,6 +320,66 @@ administrative settings hub.
 
 **Approval:** explicit, approved by the user on 2026-10-31 per Article 4.
 
+<a id="adr-020"></a>
+
+### ADR-020 — Department Approved Headcount as a real, configurable data source
+
+**Context:** The Workforce Overview's "Workforce Planning" section (Department
+Staffing Health: Current Headcount, Approved Headcount, Capacity Utilization,
+Staffing Gap) has no real backend source for "approved headcount" — there is
+no such concept anywhere in the schema. The page currently fabricates it
+(`Math.max(22, currentHeadcount + 6)` company-wide, and a hardcoded
+`{'General Operations': 15, Engineering: 3, Finance: 2, 'Human Resources': 2}`
+map per department), which violates the zero-fabrication requirement this
+page is otherwise now held to. There is no honest way to compute this metric
+without a real place for HR to record a department's budgeted headcount.
+
+**Decision:**
+
+1. **New additive table `department_headcount_budgets`**
+   `(id, tenant_id, company_id, department_id, approved_headcount, updated_by_user_id, created_at, updated_at)`,
+   tenant/company isolated, one row per `(company_id, department_id)` —
+   a current snapshot, not a revision history (matches how every other
+   workforce setting in ADR-019's hub is modeled; a history ledger can be a
+   later addition if trending is actually needed). `approved_headcount` is a
+   non-negative integer. A department with no row has **no approved
+   headcount recorded** — the Overview must show that department's target as
+   unavailable/empty (e.g. "Not Set"), never 0 and never a guessed number.
+2. **Backend capability** under the existing `hrms/workforce` domain,
+   standard layered architecture (routes → controller → service →
+   repository), Zod-validated, tenant/company scoped like every other HRMS
+   endpoint:
+   - `GET /hrms/workforce/staffing-budgets` — list every active department
+     with its current headcount (computed live from `employees`) and its
+     `approvedHeadcount` (`null` when unset), gated by the existing
+     `hrms.workforce.view` permission.
+   - `PUT /hrms/workforce/staffing-budgets/:departmentId` — upsert one
+     department's `approvedHeadcount`, gated by the existing
+     `hrms.workforce.manage` permission.
+3. **Workforce Overview wiring**: the Planning card reads each department's
+   current headcount against its own real `approvedHeadcount` when set.
+   Departments with no budget row are excluded from the company-wide
+   aggregate (never contribute a fabricated number to it), and the card
+   says so when one or more departments are unset, rather than silently
+   understating or overstating the total.
+4. **Settings UI**: a new tab or section inside the existing Workforce
+   Settings hub (ADR-019) where HR can view and edit each department's
+   approved headcount — without this, the schema/API have no way to be
+   populated and the Overview would simply show "Not Set" everywhere
+   indefinitely.
+
+**Consequences:** Adds one table via an additive Drizzle migration; no
+existing column is dropped or altered. Until HR populates it through the new
+settings UI, the Workforce Overview's Planning card legitimately shows "Not
+Set" / unavailable for approved headcount, capacity utilization, and staffing
+gap — this is correct, honest behavior per the task's own rule ("if no
+backend source exists, implement it" / "do not compromise data accuracy to
+make the dashboard look populated"), not a regression from the previous
+(fabricated) always-populated card.
+
+**Approval:** _pending — awaiting explicit user approval per Article 4
+before any implementation begins._
+
 ## Recording a new ADR
 
 Adding ADR-017 and beyond follows the process defined in
