@@ -82,9 +82,9 @@
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background-color: #f0fdfa;
-  color: #0d9488;
-  border: 1px solid #99f6e4;
+  background-color: var(--teal-50);
+  color: var(--teal-600);
+  border: 1px solid var(--teal-200);
   display: flex;
   align-items: center;
   justify-content: center;

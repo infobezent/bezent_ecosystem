@@ -47,10 +47,10 @@
 
 .bezent-page-header__title {
   margin: 0;
-  font-size: 24px;
-  font-weight: 700;
+  font-size: var(--font-page-title-size, 24px);
+  font-weight: var(--font-page-title-weight, 700);
   color: var(--text-primary, #000000);
-  letter-spacing: -0.03em;
+  letter-spacing: var(--font-page-title-spacing, -0.025em);
   line-height: 1.2;
 }
 
@@ -136,14 +136,6 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-tertiary);
-}
-
-.employees-directory-page .bezent-page-header__title {
-  font-size: 24px;
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  line-height: 1.2;
-  color: var(--text-primary);
 }
 
 .employees-directory-page .bezent-page-header__subtitle {

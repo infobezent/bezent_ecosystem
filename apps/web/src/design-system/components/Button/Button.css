@@ -171,19 +171,19 @@
 /* Text */
 .bezent-btn--text {
   background: transparent;
-  color: var(--accent-interactive, #1a73e8);
+  color: var(--accent-interactive, var(--blue-interactive));
   padding-left: 8px;
   padding-right: 8px;
 }
 
 .bezent-btn--text:hover:not(:disabled) {
   background: var(--bg-hover, #c2e7ff);
-  color: var(--accent-interactive, #1a73e8);
+  color: var(--accent-interactive, var(--blue-interactive));
 }
 
 .bezent-btn--text:active:not(:disabled) {
   background: var(--accent-subtle, #e8f0fe);
-  color: var(--accent-interactive, #1a73e8);
+  color: var(--accent-interactive, var(--blue-interactive));
   transform: scale(0.98);
 }
 
@@ -262,7 +262,7 @@
 }
 
 .bezent-btn:focus-visible {
-  outline: 2px solid var(--border-focus, #1a73e8);
+  outline: 2px solid var(--border-focus, var(--blue-interactive));
   outline-offset: 2px;
 }
 

@@ -61,7 +61,7 @@
 .bezent-focus-carousel__nav-btn:hover:not(:disabled) {
   background: var(--bg-hover, #c2e7ff);
   color: var(--brand-primary, #041e49);
-  border-color: var(--border-focus, #1a73e8);
+  border-color: var(--border-focus, var(--blue-interactive));
 }
 
 .bezent-focus-carousel__nav-btn:disabled {

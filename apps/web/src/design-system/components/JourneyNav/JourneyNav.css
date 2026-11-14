@@ -97,13 +97,13 @@
 }
 
 .bezent-journey-step:hover:not(:disabled) .bezent-journey-step__indicator {
-  border-color: #14b8a6;
-  color: #0f766e;
+  border-color: var(--teal-500);
+  color: var(--teal-700);
 }
 
 .bezent-journey-step:focus-visible {
-  border-color: #14b8a6;
-  box-shadow: 0 0 0 2px #ccfbf1;
+  border-color: var(--teal-500);
+  box-shadow: 0 0 0 2px var(--teal-100);
 }
 
 /* Step Indicator & Numeral */
@@ -154,16 +154,16 @@
 }
 
 .bezent-journey-step.is-completed .bezent-journey-step__indicator {
-  background: #f0fdfa;
-  border-color: #14b8a6;
-  color: #0f766e;
+  background: var(--teal-50);
+  border-color: var(--teal-500);
+  color: var(--teal-700);
 }
 
 /* ─── Active Step — Rich Teal SaaS Highlight ───────────────────────── */
 .bezent-journey-step.is-active {
   background: var(--bg-surface, #ffffff);
-  border-color: #99f6e4;
-  color: #0f766e;
+  border-color: var(--teal-200);
+  color: var(--teal-700);
   font-weight: 600;
   box-shadow:
     0 2px 6px -1px rgba(20, 184, 166, 0.1),
@@ -171,14 +171,14 @@
 }
 
 .bezent-journey-step.is-active .bezent-journey-step__indicator {
-  background: #0d9488;
-  border-color: #0d9488;
+  background: var(--teal-600);
+  border-color: var(--teal-600);
   color: #ffffff;
-  box-shadow: 0 0 0 3px #f0fdfa;
+  box-shadow: 0 0 0 3px var(--teal-50);
 }
 
 .bezent-journey-step.is-active .bezent-journey-step__label {
-  color: #0f766e;
+  color: var(--teal-700);
   font-weight: 600;
 }
 
@@ -187,7 +187,7 @@
   position: absolute;
   inset: -3px;
   border-radius: 50%;
-  border: 1.5px solid #14b8a6;
+  border: 1.5px solid var(--teal-500);
   opacity: 0.6;
   pointer-events: none;
   animation: bezentStepPulse 2.4s cubic-bezier(0.24, 0, 0.38, 1) infinite;

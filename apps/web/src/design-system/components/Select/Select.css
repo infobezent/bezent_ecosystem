@@ -67,13 +67,13 @@
 }
 
 .bezent-select-box:hover:not(.is-disabled) {
-  border-color: #5eead4;
+  border-color: var(--teal-300);
 }
 
 .bezent-select-box:focus-visible,
 .bezent-select-box.is-active {
   outline: none;
-  border-color: #14b8a6;
+  border-color: var(--teal-500);
   box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
 }
 
@@ -231,8 +231,8 @@
 }
 
 .bezent-select-option.is-selected {
-  background: #f0fdfa;
-  color: #0f766e;
+  background: var(--teal-50);
+  color: var(--teal-700);
   font-weight: 600;
 }
 
@@ -257,7 +257,7 @@
   height: 16px;
   font-size: 13px;
   font-weight: 700;
-  color: #0d9488;
+  color: var(--teal-600);
   flex-shrink: 0;
 }
 
@@ -311,5 +311,5 @@
 
 [data-theme='dark'] .bezent-select-option.is-selected {
   background: rgba(20, 184, 166, 0.24);
-  color: #5eead4;
+  color: var(--teal-300);
 }

@@ -163,7 +163,7 @@
 
 .right-rail__group .bezent-right-rail-btn.is-active {
   background: rgba(22, 131, 255, 0.12);
-  color: #1a73e8;
+  color: var(--blue-interactive);
 }
 
 .right-rail__divider {
@@ -211,7 +211,7 @@
 
 /* Specific Google companion app icon colors */
 .bezent-right-rail-btn[data-item-id='calendar'] {
-  color: #1a73e8;
+  color: var(--blue-interactive);
 }
 
 .bezent-right-rail-btn[data-item-id='notes'] {
@@ -219,11 +219,11 @@
 }
 
 .bezent-right-rail-btn[data-item-id='tasks'] {
-  color: #1a73e8;
+  color: var(--blue-interactive);
 }
 
 .bezent-right-rail-btn[data-item-id='approvals'] {
-  color: #1a73e8;
+  color: var(--blue-interactive);
 }
 
 .bezent-right-rail-btn:hover {

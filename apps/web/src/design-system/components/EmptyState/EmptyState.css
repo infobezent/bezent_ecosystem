@@ -90,13 +90,13 @@
   font-size: var(--font-button-size, var(--font-size-md, 13px));
   font-weight: var(--font-weight-semibold, 600);
   border-radius: 10px;
-  border: 1px solid #0d9488;
+  border: 1px solid var(--teal-600);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  background: #0d9488;
+  background: var(--teal-600);
   color: #ffffff;
   box-shadow: 0 2px 6px rgba(13, 148, 136, 0.18);
   transition:
@@ -114,8 +114,8 @@
 
 .bezent-empty-state__primary-action:hover {
   transform: translateY(-1.5px);
-  background: #0f766e;
-  border-color: #0f766e;
+  background: var(--teal-700);
+  border-color: var(--teal-700);
   color: #ffffff;
   box-shadow: 0 6px 14px -2px rgba(13, 148, 136, 0.25);
 }
@@ -152,9 +152,9 @@
 }
 
 .bezent-empty-state__secondary-action:hover {
-  background: #f0fdfa;
-  border-color: #99f6e4;
-  color: #0f766e;
+  background: var(--teal-50);
+  border-color: var(--teal-200);
+  color: var(--teal-700);
 }
 
 .bezent-empty-state__tagline {
@@ -173,39 +173,39 @@
   width: 18px;
   height: 2px;
   border-radius: 1px;
-  background: #99f6e4;
+  background: var(--teal-200);
   margin-bottom: 8px;
 }
 
 .bezent-empty-state__primary-action:focus-visible,
 .bezent-empty-state__secondary-action:focus-visible {
-  outline: 2px solid #14b8a6;
+  outline: 2px solid var(--teal-500);
   outline-offset: 2px;
 }
 
 /* ── Dark Mode Empty State Accents ───────────────────────────────────── */
 
 [data-theme='dark'] .bezent-empty-state__tagline {
-  color: #5eead4;
+  color: var(--teal-300);
   letter-spacing: 0.14em;
   opacity: 0.9;
 }
 
 [data-theme='dark'] .bezent-empty-state__tagline-dash {
-  background: #14b8a6;
+  background: var(--teal-500);
   box-shadow: 0 0 8px rgba(20, 184, 166, 0.5);
 }
 
 [data-theme='dark'] .bezent-empty-state__primary-action {
-  background: #14b8a6;
-  border-color: #14b8a6;
+  background: var(--teal-500);
+  border-color: var(--teal-500);
   color: #042f2e;
   box-shadow: 0 4px 14px rgba(20, 184, 166, 0.25);
 }
 
 [data-theme='dark'] .bezent-empty-state__primary-action:hover {
-  background: #2dd4bf;
-  border-color: #2dd4bf;
+  background: var(--teal-400);
+  border-color: var(--teal-400);
   color: #042f2e;
   box-shadow: 0 6px 18px rgba(45, 212, 191, 0.35);
 }
