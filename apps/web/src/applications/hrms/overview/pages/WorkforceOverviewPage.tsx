@@ -1482,25 +1482,31 @@ export function WorkforceOverviewPage({
         {/* ── Tier 3: Workforce Planning & Workforce Alerts (50% + 50% Two-Column Split Row) ── */}
         <div className="bezent-wf-planning-row">
           {/* Card 1: Workforce Planning (50% Width) */}
-          <div className="bezent-wf-mega-card bezent-wf-planning-card">
-            <div className="bezent-wf-mega-header">
-              <div className="bezent-wf-mega-title-group">
-                <div className="bezent-wf-mega-icon bezent-wf-mega-icon--amber">
+          <div
+            className="bezent-wf-planning-card"
+            role="region"
+            aria-label="Workforce Planning Executive Card"
+          >
+            <div className="bezent-wf-planning-card__top">
+              <div className="bezent-wf-planning-card__header-left">
+                <div className="bezent-wf-planning-card__icon" aria-hidden="true">
                   <BezentIcon name="schedule" size={18} />
                 </div>
-                <div className="bezent-wf-mega-headings">
-                  <h3 className="bezent-wf-mega-title">Workforce Planning</h3>
-                  <p className="bezent-wf-mega-subtitle">Capacity &amp; staffing projection</p>
+                <div>
+                  <h3 className="bezent-wf-planning-card__title">Workforce Planning</h3>
+                  <p className="bezent-wf-planning-card__desc">
+                    Capacity &amp; staffing projection
+                  </p>
                 </div>
               </div>
               <button
                 type="button"
-                className="bezent-wf-mega-link"
+                className="bezent-wf-card-header-link"
                 onClick={() =>
                   openDrawer(
                     'planning',
                     'Workforce Planning & Capacity',
-                    'Department headcount targets, open requisitions, and capacity utilization.',
+                    `Department headcount targets, open requisitions, and capacity utilization. Net staffing gap: ${headcountGap}.`,
                   )
                 }
                 title="View full workforce planning breakdown in drawer"
@@ -1510,140 +1516,133 @@ export function WorkforceOverviewPage({
               </button>
             </div>
 
-            {/* Workforce Capacity (%) Compact Progress Indicator */}
-            <div
-              className="bezent-wf-capacity-strip"
-              onClick={() =>
-                openDrawer(
-                  'planning',
-                  'Workforce Capacity Allocation',
-                  'Overview of workforce capacity filled against approved budget positions.',
-                )
-              }
-              title={`Workforce Capacity: ${capacityUtilizationPct}% Filled (${kpiData.totalEmployees} of ${approvedHeadcount} Active). Click to view details.`}
-            >
-              <div className="bezent-wf-capacity-header">
-                <span className="bezent-wf-capacity-title">
-                  <BezentIcon name="organization" size={14} />
-                  <span>Workforce Capacity</span>
-                </span>
-                <span className="bezent-wf-capacity-ratio">
-                  {capacityUtilizationPct}% Filled ({kpiData.totalEmployees} / {approvedHeadcount}{' '}
-                  Active)
-                </span>
-              </div>
-              <div className="bezent-wf-capacity-bar-wrap">
-                <ProgressBar value={capacityUtilizationPct} max={100} size="sm" variant="primary" />
-              </div>
-            </div>
-
-            {/* 4 Metric Boxes: Planned Workforce, Current Workforce, Hiring Demand, Expected Exits */}
-            <div className="bezent-wf-metric-grid">
-              {/* Planned Workforce */}
-              <button
-                type="button"
-                className="bezent-wf-metric-box"
-                onClick={() =>
-                  openDrawer(
-                    'planning',
-                    'Planned Workforce',
-                    `Approved headcount budget targets across organization units. Net staffing gap: ${headcountGap}.`,
-                  )
-                }
-                title={`Target: ${approvedHeadcount} approved headcount positions budgeted. Staffing gap: ${headcountGap}.`}
-              >
-                <div className="bezent-wf-metric-top">
-                  <span className="bezent-wf-metric-label">Planned Workforce</span>
-                  <span className="bezent-wf-metric-pill bezent-wf-metric-pill--blue">Target</span>
+            {/* Workforce Planning Content Body */}
+            <div className="bezent-wf-planning-body">
+              {/* Primary Section: Current Workforce, Planned Workforce, Workforce Capacity (%) */}
+              <div className="bezent-wf-plan-primary">
+                <div className="bezent-wf-plan-stats-row">
+                  <div className="bezent-wf-plan-stat">
+                    <span className="bezent-wf-plan-stat-label">Current Workforce</span>
+                    <span className="bezent-wf-plan-stat-val">{kpiData.totalEmployees}</span>
+                  </div>
+                  <div className="bezent-wf-plan-stat">
+                    <span className="bezent-wf-plan-stat-label">Planned Workforce</span>
+                    <span className="bezent-wf-plan-stat-val">{approvedHeadcount}</span>
+                  </div>
+                  <div className="bezent-wf-plan-stat">
+                    <span className="bezent-wf-plan-stat-label">Workforce Capacity</span>
+                    <span className="bezent-wf-plan-stat-val bezent-wf-plan-stat-val--blue">
+                      {capacityUtilizationPct}%
+                    </span>
+                  </div>
                 </div>
-                <div className="bezent-wf-metric-val">{approvedHeadcount}</div>
-                <span className="bezent-wf-metric-hint">Approved budget headcount</span>
-              </button>
 
-              {/* Current Workforce */}
-              <button
-                type="button"
-                className="bezent-wf-metric-box"
-                onClick={() =>
-                  openDrawer(
-                    'planning',
-                    'Current Workforce',
-                    'Total active employees and probationary staff on payroll.',
-                  )
-                }
-                title={`Current: ${kpiData.totalEmployees} total workforce (${kpiData.activeEmployees} active)`}
-              >
-                <div className="bezent-wf-metric-top">
-                  <span className="bezent-wf-metric-label">Current Workforce</span>
-                  <span className="bezent-wf-metric-pill bezent-wf-metric-pill--green">Active</span>
+                {/* Simple Horizontal Progress Bar */}
+                <div
+                  className="bezent-wf-plan-progress-wrap"
+                  onClick={() =>
+                    openDrawer(
+                      'planning',
+                      'Workforce Capacity Allocation',
+                      `Overview of workforce capacity filled against approved budget positions. Net staffing gap: ${headcountGap}.`,
+                    )
+                  }
+                  title={`Workforce Capacity: ${capacityUtilizationPct}% Filled (${kpiData.totalEmployees} of ${approvedHeadcount} Active). Staffing gap: ${headcountGap}. Click to view details.`}
+                >
+                  <ProgressBar
+                    value={capacityUtilizationPct}
+                    max={100}
+                    size="sm"
+                    variant="primary"
+                  />
                 </div>
-                <div className="bezent-wf-metric-val">{kpiData.totalEmployees}</div>
-                <span className="bezent-wf-metric-hint">
-                  {kpiData.activeEmployees} active on payroll
-                </span>
-              </button>
 
-              {/* Hiring Demand */}
-              <button
-                type="button"
-                className="bezent-wf-metric-box"
-                onClick={() =>
-                  openDrawer(
-                    'hiring',
-                    'Hiring Demand & Open Roles',
-                    'Open vacancy requisitions required to satisfy departmental staffing deficit.',
-                  )
-                }
-                title={`Hiring Demand: ${openPositionsCount} open roles to fulfill target capacity`}
-              >
-                <div className="bezent-wf-metric-top">
-                  <span className="bezent-wf-metric-label">Hiring Demand</span>
-                  <span className="bezent-wf-metric-pill bezent-wf-metric-pill--amber">
-                    Open Roles
+                <div className="bezent-wf-plan-capacity-meta">
+                  <span className="bezent-wf-plan-gap-text">
+                    {Math.abs(headcountGap)} positions{' '}
+                    {headcountGap <= 0 ? 'deficit to budget' : 'surplus'}
+                  </span>
+                  <span className="bezent-wf-plan-ratio-text">
+                    {kpiData.totalEmployees} / {approvedHeadcount} Filled
                   </span>
                 </div>
-                <div className="bezent-wf-metric-val">{openPositionsCount}</div>
-                <span className="bezent-wf-metric-hint">Vacancies to fulfill gap</span>
-              </button>
+              </div>
 
-              {/* Expected Exits */}
-              <button
-                type="button"
-                className="bezent-wf-metric-box"
-                onClick={() =>
-                  openDrawer(
-                    'exits',
-                    'Expected Exits & Attrition',
-                    'Employees in resignation notice period and scheduled departures.',
-                  )
-                }
-                title={`Expected Exits: ${kpiData.exits} departures scheduled or in notice period`}
-              >
-                <div className="bezent-wf-metric-top">
-                  <span className="bezent-wf-metric-label">Expected Exits</span>
-                  <span className="bezent-wf-metric-pill bezent-wf-metric-pill--blue">Notice</span>
-                </div>
-                <div className="bezent-wf-metric-val">{kpiData.exits}</div>
-                <span className="bezent-wf-metric-hint">Resignation notice period</span>
-              </button>
+              <div className="bezent-wf-plan-divider" />
+
+              {/* Secondary Section: Hiring Demand, Expected Exits */}
+              <div className="bezent-wf-plan-secondary">
+                <button
+                  type="button"
+                  className="bezent-wf-plan-sec-stat"
+                  onClick={() =>
+                    openDrawer(
+                      'hiring',
+                      'Hiring Demand & Open Roles',
+                      'Open vacancy requisitions required to satisfy departmental staffing deficit.',
+                    )
+                  }
+                  title={`Hiring Demand: ${openPositionsCount} open positions required to satisfy departmental deficit. Click to view openings.`}
+                >
+                  <span className="bezent-wf-plan-stat-label">Hiring Demand</span>
+                  <div className="bezent-wf-plan-sec-stat-main">
+                    <span className="bezent-wf-plan-stat-val bezent-wf-plan-stat-val--amber">
+                      {openPositionsCount}
+                    </span>
+                    <span className="bezent-wf-plan-sec-pill bezent-wf-plan-sec-pill--amber">
+                      Open Roles
+                    </span>
+                  </div>
+                  <span className="bezent-wf-plan-sec-hint">Active hiring requisitions</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="bezent-wf-plan-sec-stat"
+                  onClick={() =>
+                    openDrawer(
+                      'exits',
+                      'Expected Exits & Attrition',
+                      'Employees in resignation notice period and scheduled departures.',
+                    )
+                  }
+                  title={`Expected Exits: ${kpiData.exits} departures scheduled or in notice period. Click to view offboarding.`}
+                >
+                  <span className="bezent-wf-plan-stat-label">Expected Exits</span>
+                  <div className="bezent-wf-plan-sec-stat-main">
+                    <span className="bezent-wf-plan-stat-val">{kpiData.exits}</span>
+                    <span className="bezent-wf-plan-sec-pill bezent-wf-plan-sec-pill--blue">
+                      Notice
+                    </span>
+                  </div>
+                  <span className="bezent-wf-plan-sec-hint">Notice period scheduled</span>
+                </button>
+              </div>
             </div>
           </div>
 
           {/* Card 2: Workforce Alerts (50% Width) */}
-          <div className="bezent-wf-mega-card bezent-wf-alerts-card">
-            <div className="bezent-wf-mega-header">
-              <div className="bezent-wf-mega-title-group">
-                <div className="bezent-wf-mega-icon bezent-wf-mega-icon--rose">
+          <div
+            className="bezent-wf-alerts-card"
+            role="region"
+            aria-label="Workforce Alerts Executive Card"
+          >
+            <div className="bezent-wf-planning-card__top">
+              <div className="bezent-wf-planning-card__header-left">
+                <div
+                  className="bezent-wf-planning-card__icon bezent-wf-planning-card__icon--rose"
+                  aria-hidden="true"
+                >
                   <BezentIcon name="alertTriangle" size={18} />
                 </div>
-                <div className="bezent-wf-mega-headings">
-                  <h3 className="bezent-wf-mega-title">Workforce Alerts</h3>
-                  <p className="bezent-wf-mega-subtitle">
+                <div>
+                  <h3 className="bezent-wf-planning-card__title">Workforce Alerts</h3>
+                  <p className="bezent-wf-planning-card__desc">
                     Actionable compliance &amp; workforce flags
                   </p>
                 </div>
               </div>
-              <span className="bezent-wf-drawer-meta-pill bezent-wf-drawer-meta-pill--rose">
+              <span className="bezent-wf-clean-alert-badge bezent-wf-clean-alert-badge--rose">
                 {
                   [
                     recordsBreakdown.expiringCount,
@@ -1655,12 +1654,12 @@ export function WorkforceOverviewPage({
               </span>
             </div>
 
-            {/* 3 Alerts List: Documents Expiring, Probation Reviews Due, Attendance Exceptions */}
-            <div className="bezent-wf-alerts-list">
+            {/* 3 Alerts List: Clean horizontal rows with subtle separators */}
+            <div className="bezent-wf-alerts-clean-list">
               {/* Alert 1: Documents Expiring */}
               <button
                 type="button"
-                className="bezent-wf-alert-item"
+                className="bezent-wf-clean-alert-row"
                 onClick={() =>
                   openDrawer(
                     'documents',
@@ -1670,19 +1669,19 @@ export function WorkforceOverviewPage({
                 }
                 title={`${recordsBreakdown.expiringCount} employee document(s) expiring within the next 30 days. Click to view details.`}
               >
-                <div className="bezent-wf-alert-item__left">
-                  <div className="bezent-wf-alert-icon bezent-wf-alert-icon--amber">
-                    <BezentIcon name="documents" size={18} />
+                <div className="bezent-wf-clean-alert-left">
+                  <div className="bezent-wf-clean-alert-icon bezent-wf-clean-alert-icon--amber">
+                    <BezentIcon name="documents" size={16} />
                   </div>
-                  <div>
-                    <h4 className="bezent-wf-alert-title">Documents Expiring</h4>
-                    <span className="bezent-wf-alert-desc">
+                  <div className="bezent-wf-clean-alert-text">
+                    <h4 className="bezent-wf-clean-alert-title">Documents Expiring</h4>
+                    <span className="bezent-wf-clean-alert-desc">
                       ID &amp; compliance credentials expiring within 30 days
                     </span>
                   </div>
                 </div>
-                <div className="bezent-wf-alert-item__right">
-                  <span className="bezent-wf-alert-pill bezent-wf-alert-pill--amber">
+                <div className="bezent-wf-clean-alert-right">
+                  <span className="bezent-wf-clean-alert-badge bezent-wf-clean-alert-badge--amber">
                     {recordsBreakdown.expiringCount} Expiring
                   </span>
                   <BezentIcon name="chevronRight" size={14} />
@@ -1692,7 +1691,7 @@ export function WorkforceOverviewPage({
               {/* Alert 2: Probation Reviews Due */}
               <button
                 type="button"
-                className="bezent-wf-alert-item"
+                className="bezent-wf-clean-alert-row"
                 onClick={() =>
                   openDrawer(
                     'probation',
@@ -1702,19 +1701,19 @@ export function WorkforceOverviewPage({
                 }
                 title={`${kpiData.probationEmployees} employee(s) currently on probation. Click to view details.`}
               >
-                <div className="bezent-wf-alert-item__left">
-                  <div className="bezent-wf-alert-icon bezent-wf-alert-icon--purple">
-                    <BezentIcon name="employees" size={18} />
+                <div className="bezent-wf-clean-alert-left">
+                  <div className="bezent-wf-clean-alert-icon bezent-wf-clean-alert-icon--purple">
+                    <BezentIcon name="employees" size={16} />
                   </div>
-                  <div>
-                    <h4 className="bezent-wf-alert-title">Probation Reviews Due</h4>
-                    <span className="bezent-wf-alert-desc">
+                  <div className="bezent-wf-clean-alert-text">
+                    <h4 className="bezent-wf-clean-alert-title">Probation Reviews Due</h4>
+                    <span className="bezent-wf-clean-alert-desc">
                       Confirmation assessment milestone pending
                     </span>
                   </div>
                 </div>
-                <div className="bezent-wf-alert-item__right">
-                  <span className="bezent-wf-alert-pill bezent-wf-alert-pill--purple">
+                <div className="bezent-wf-clean-alert-right">
+                  <span className="bezent-wf-clean-alert-badge bezent-wf-clean-alert-badge--purple">
                     {kpiData.probationEmployees} Due
                   </span>
                   <BezentIcon name="chevronRight" size={14} />
@@ -1724,7 +1723,7 @@ export function WorkforceOverviewPage({
               {/* Alert 3: Attendance Exceptions */}
               <button
                 type="button"
-                className="bezent-wf-alert-item"
+                className="bezent-wf-clean-alert-row"
                 onClick={() =>
                   openDrawer(
                     'attendance',
@@ -1734,19 +1733,19 @@ export function WorkforceOverviewPage({
                 }
                 title={`${regularizationItems.length} attendance exception(s) pending review. Click to view details.`}
               >
-                <div className="bezent-wf-alert-item__left">
-                  <div className="bezent-wf-alert-icon bezent-wf-alert-icon--rose">
-                    <BezentIcon name="schedule" size={18} />
+                <div className="bezent-wf-clean-alert-left">
+                  <div className="bezent-wf-clean-alert-icon bezent-wf-clean-alert-icon--rose">
+                    <BezentIcon name="schedule" size={16} />
                   </div>
-                  <div>
-                    <h4 className="bezent-wf-alert-title">Attendance Exceptions</h4>
-                    <span className="bezent-wf-alert-desc">
+                  <div className="bezent-wf-clean-alert-text">
+                    <h4 className="bezent-wf-clean-alert-title">Attendance Exceptions</h4>
+                    <span className="bezent-wf-clean-alert-desc">
                       Missed punch regularization requests requiring review
                     </span>
                   </div>
                 </div>
-                <div className="bezent-wf-alert-item__right">
-                  <span className="bezent-wf-alert-pill bezent-wf-alert-pill--rose">
+                <div className="bezent-wf-clean-alert-right">
+                  <span className="bezent-wf-clean-alert-badge bezent-wf-clean-alert-badge--rose">
                     {regularizationItems.length} Pending
                   </span>
                   <BezentIcon name="chevronRight" size={14} />

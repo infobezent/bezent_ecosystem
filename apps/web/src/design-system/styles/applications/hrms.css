@@ -6902,13 +6902,23 @@
   width: 58px;
   height: 10px;
   border-radius: 999px;
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.06) 25%, rgba(0, 0, 0, 0.12) 50%, rgba(0, 0, 0, 0.06) 75%);
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.06) 25%,
+    rgba(0, 0, 0, 0.12) 50%,
+    rgba(0, 0, 0, 0.06) 75%
+  );
   background-size: 200% 100%;
   animation: bezent-wf-shimmer 1.5s infinite;
 }
 
 [data-theme='dark'] .bezent-kpi-pill-skeleton {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.08) 25%, rgba(255, 255, 255, 0.18) 50%, rgba(255, 255, 255, 0.08) 75%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.08) 25%,
+    rgba(255, 255, 255, 0.18) 50%,
+    rgba(255, 255, 255, 0.08) 75%
+  );
   background-size: 200% 100%;
 }
 
@@ -6922,7 +6932,9 @@
   filter: blur(14px);
   opacity: 0.14;
   z-index: 0;
-  transition: opacity 0.25s ease, filter 0.25s ease;
+  transition:
+    opacity 0.25s ease,
+    filter 0.25s ease;
 }
 
 .bezent-exec-kpi-card:hover .bezent-kpi-ambient-glow {
@@ -6930,11 +6942,21 @@
   filter: blur(16px);
 }
 
-.bezent-kpi-ambient-glow--emerald { background: #10b981; }
-.bezent-kpi-ambient-glow--cyan { background: #0ea5e9; }
-.bezent-kpi-ambient-glow--amber { background: #f59e0b; }
-.bezent-kpi-ambient-glow--purple { background: #8b5cf6; }
-.bezent-kpi-ambient-glow--red { background: #ef4444; }
+.bezent-kpi-ambient-glow--emerald {
+  background: #10b981;
+}
+.bezent-kpi-ambient-glow--cyan {
+  background: #0ea5e9;
+}
+.bezent-kpi-ambient-glow--amber {
+  background: #f59e0b;
+}
+.bezent-kpi-ambient-glow--purple {
+  background: #8b5cf6;
+}
+.bezent-kpi-ambient-glow--red {
+  background: #ef4444;
+}
 
 /* Empty KPI Card placeholder slot */
 .bezent-exec-kpi-card--empty {
@@ -7286,7 +7308,8 @@
 }
 
 @keyframes bezent-ring-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.45));
   }
@@ -7711,12 +7734,16 @@
   stroke: #10b981;
   stroke-width: 4.8;
   stroke-linecap: round;
-  transition: stroke 0.2s ease, filter 0.2s ease;
+  transition:
+    stroke 0.2s ease,
+    filter 0.2s ease;
 }
 
 .bezent-kpi-arrival-arrowhead {
   fill: #10b981;
-  transition: fill 0.2s ease, filter 0.2s ease;
+  transition:
+    fill 0.2s ease,
+    filter 0.2s ease;
 }
 
 [data-theme='dark'] .bezent-kpi-arrival-arrow-stem {
@@ -8350,12 +8377,16 @@
   stroke: #4f46e5;
   stroke-width: 2.7;
   stroke-linecap: round;
-  transition: stroke 0.2s ease, filter 0.2s ease;
+  transition:
+    stroke 0.2s ease,
+    filter 0.2s ease;
 }
 
 .bezent-kpi-promotions-arrowhead {
   fill: #4f46e5;
-  transition: fill 0.2s ease, filter 0.2s ease;
+  transition:
+    fill 0.2s ease,
+    filter 0.2s ease;
 }
 
 [data-theme='dark'] .bezent-kpi-promotions-arrow-shaft,
@@ -8925,21 +8956,45 @@
 }
 
 /* Clean Folder Color Tones (Back & Front Scoop) */
-.bezent-kpi-folder-item--expired .folder-back { fill: #f97316; }
-.bezent-kpi-folder-item--expired .folder-front { fill: #ea580c; }
-.bezent-kpi-folder-item--expired .doc-badge { fill: #f97316; }
+.bezent-kpi-folder-item--expired .folder-back {
+  fill: #f97316;
+}
+.bezent-kpi-folder-item--expired .folder-front {
+  fill: #ea580c;
+}
+.bezent-kpi-folder-item--expired .doc-badge {
+  fill: #f97316;
+}
 
-.bezent-kpi-folder-item--expiring .folder-back { fill: #0ea5e9; }
-.bezent-kpi-folder-item--expiring .folder-front { fill: #0284c7; }
-.bezent-kpi-folder-item--expiring .doc-badge { fill: #0ea5e9; }
+.bezent-kpi-folder-item--expiring .folder-back {
+  fill: #0ea5e9;
+}
+.bezent-kpi-folder-item--expiring .folder-front {
+  fill: #0284c7;
+}
+.bezent-kpi-folder-item--expiring .doc-badge {
+  fill: #0ea5e9;
+}
 
-.bezent-kpi-folder-item--verified .folder-back { fill: #10b981; }
-.bezent-kpi-folder-item--verified .folder-front { fill: #059669; }
-.bezent-kpi-folder-item--verified .doc-badge { fill: #10b981; }
+.bezent-kpi-folder-item--verified .folder-back {
+  fill: #10b981;
+}
+.bezent-kpi-folder-item--verified .folder-front {
+  fill: #059669;
+}
+.bezent-kpi-folder-item--verified .doc-badge {
+  fill: #10b981;
+}
 
-.bezent-kpi-folder-item--pending .folder-back { fill: #f59e0b; }
-.bezent-kpi-folder-item--pending .folder-front { fill: #d97706; }
-.bezent-kpi-folder-item--pending .doc-badge { fill: #f59e0b; }
+.bezent-kpi-folder-item--pending .folder-back {
+  fill: #f59e0b;
+}
+.bezent-kpi-folder-item--pending .folder-front {
+  fill: #d97706;
+}
+.bezent-kpi-folder-item--pending .doc-badge {
+  fill: #f59e0b;
+}
 
 /* Subtle folder hover glow */
 .bezent-kpi-folder-item--expired:hover .bezent-kpi-folder-visual,
@@ -8963,14 +9018,30 @@
 }
 
 /* Dark Theme Overrides */
-[data-theme='dark'] .bezent-kpi-folder-item--expired .folder-back { fill: #fb923c; }
-[data-theme='dark'] .bezent-kpi-folder-item--expired .folder-front { fill: #ea580c; }
-[data-theme='dark'] .bezent-kpi-folder-item--expiring .folder-back { fill: #38bdf8; }
-[data-theme='dark'] .bezent-kpi-folder-item--expiring .folder-front { fill: #0284c7; }
-[data-theme='dark'] .bezent-kpi-folder-item--verified .folder-back { fill: #34d399; }
-[data-theme='dark'] .bezent-kpi-folder-item--verified .folder-front { fill: #059669; }
-[data-theme='dark'] .bezent-kpi-folder-item--pending .folder-back { fill: #fbbf24; }
-[data-theme='dark'] .bezent-kpi-folder-item--pending .folder-front { fill: #d97706; }
+[data-theme='dark'] .bezent-kpi-folder-item--expired .folder-back {
+  fill: #fb923c;
+}
+[data-theme='dark'] .bezent-kpi-folder-item--expired .folder-front {
+  fill: #ea580c;
+}
+[data-theme='dark'] .bezent-kpi-folder-item--expiring .folder-back {
+  fill: #38bdf8;
+}
+[data-theme='dark'] .bezent-kpi-folder-item--expiring .folder-front {
+  fill: #0284c7;
+}
+[data-theme='dark'] .bezent-kpi-folder-item--verified .folder-back {
+  fill: #34d399;
+}
+[data-theme='dark'] .bezent-kpi-folder-item--verified .folder-front {
+  fill: #059669;
+}
+[data-theme='dark'] .bezent-kpi-folder-item--pending .folder-back {
+  fill: #fbbf24;
+}
+[data-theme='dark'] .bezent-kpi-folder-item--pending .folder-front {
+  fill: #d97706;
+}
 
 [data-theme='dark'] .bezent-kpi-folder-item--expired:hover .bezent-kpi-folder-visual,
 [data-theme='dark'] .bezent-kpi-folder-item--expired.is-hovered .bezent-kpi-folder-visual {
@@ -9162,7 +9233,9 @@
   border: none;
   padding: 0;
   cursor: pointer;
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 
 .bezent-kpi-journey-segment--completed,
@@ -9207,23 +9280,49 @@
 }
 
 /* Transfers Segments */
-.bezent-kpi-transfer-segment--branch { fill: #2563eb; }
-.bezent-kpi-transfer-segment--location { fill: #10b981; }
-.bezent-kpi-transfer-segment--department { fill: #f59e0b; }
-.bezent-kpi-transfer-segment--designation { fill: #0d9488; }
-.bezent-kpi-transfer-segment--empty { fill: #e2e8f0; }
+.bezent-kpi-transfer-segment--branch {
+  fill: #2563eb;
+}
+.bezent-kpi-transfer-segment--location {
+  fill: #10b981;
+}
+.bezent-kpi-transfer-segment--department {
+  fill: #f59e0b;
+}
+.bezent-kpi-transfer-segment--designation {
+  fill: #0d9488;
+}
+.bezent-kpi-transfer-segment--empty {
+  fill: #e2e8f0;
+}
 
 /* Promotions Segments */
-.bezent-kpi-promotion-segment--designation { fill: #0ea5e9; }
-.bezent-kpi-promotion-segment--grade { fill: #3b82f6; }
-.bezent-kpi-promotion-segment--level { fill: #6366f1; }
-.bezent-kpi-promotion-segment--department { fill: #8b5cf6; }
-.bezent-kpi-promotion-segment--empty { fill: #e2e8f0; }
+.bezent-kpi-promotion-segment--designation {
+  fill: #0ea5e9;
+}
+.bezent-kpi-promotion-segment--grade {
+  fill: #3b82f6;
+}
+.bezent-kpi-promotion-segment--level {
+  fill: #6366f1;
+}
+.bezent-kpi-promotion-segment--department {
+  fill: #8b5cf6;
+}
+.bezent-kpi-promotion-segment--empty {
+  fill: #e2e8f0;
+}
 
 /* Compliance Segments */
-.bezent-kpi-compliance-segment--compliant { fill: #10b981; }
-.bezent-kpi-compliance-segment--attention { fill: #f59e0b; }
-.bezent-kpi-compliance-segment--empty { fill: #e2e8f0; }
+.bezent-kpi-compliance-segment--compliant {
+  fill: #10b981;
+}
+.bezent-kpi-compliance-segment--attention {
+  fill: #f59e0b;
+}
+.bezent-kpi-compliance-segment--empty {
+  fill: #e2e8f0;
+}
 
 /* Footers */
 .bezent-kpi-journey-footer,
@@ -9908,7 +10007,9 @@
   padding: 18px 22px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.04),
+    0 1px 2px rgba(15, 23, 42, 0.02);
   min-height: 250px;
   transition: all 0.2s ease;
 }
@@ -10101,7 +10202,9 @@
 }
 
 .bezent-wf-donut-analytics-slice {
-  transition: stroke-width 0.2s ease, opacity 0.2s ease;
+  transition:
+    stroke-width 0.2s ease,
+    opacity 0.2s ease;
   cursor: pointer;
 }
 
@@ -10644,7 +10747,9 @@
   padding: 18px 22px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.04),
+    0 1px 2px rgba(15, 23, 42, 0.02);
   min-height: 250px;
   transition: all 0.2s ease;
 }
@@ -10854,7 +10959,9 @@
 }
 
 .bezent-wf-comp-donut-slice {
-  transition: stroke-width 0.2s ease, opacity 0.2s ease;
+  transition:
+    stroke-width 0.2s ease,
+    opacity 0.2s ease;
   cursor: pointer;
 }
 
@@ -11186,282 +11293,356 @@
   }
 }
 
-/* ── Workforce Planning & Workforce Alerts (50% + 50% Two-Column Split Row) ── */
+/* ── Tier 3: Executive Two-Column Command Deck (Workforce Planning + Workforce Alerts) ── */
 .bezent-wf-planning-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px;
   align-items: stretch;
+  margin-bottom: 24px;
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 1100px) {
   .bezent-wf-planning-row {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 }
 
+/* Card Shell — Matches .bezent-wf-analytics-card & .bezent-wf-comp-card exactly */
 .bezent-wf-planning-card,
 .bezent-wf-alerts-card {
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 16px;
+  padding: 18px 22px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 400px;
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.04),
+    0 1px 2px rgba(15, 23, 42, 0.02);
+  min-height: 290px;
   height: 100%;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
 }
 
-/* ── Card 1: Workforce Planning ── */
-.bezent-wf-capacity-strip {
-  padding: 14px 18px;
-  background: #f8fafc;
-  border-radius: 14px;
-  border: 1px solid #e9eaf4;
+[data-theme='dark'] .bezent-wf-planning-card,
+[data-theme='dark'] .bezent-wf-alerts-card {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: none;
+}
+
+/* Top Header */
+.bezent-wf-planning-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   margin-bottom: 16px;
-  cursor: pointer;
-  transition:
-    background-color 0.16s ease,
-    border-color 0.16s ease,
-    box-shadow 0.16s ease;
 }
 
-.bezent-wf-capacity-strip:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-  box-shadow: 0 4px 14px rgba(32, 45, 75, 0.04);
-}
-
-[data-theme='dark'] .bezent-wf-capacity-strip {
-  background: #1e293b;
-  border-color: #334155;
-}
-
-[data-theme='dark'] .bezent-wf-capacity-strip:hover {
-  background: #24344d;
-  border-color: #475569;
-}
-
-.bezent-wf-capacity-header {
+.bezent-wf-planning-card__header-left {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
-.bezent-wf-capacity-title {
-  font-size: 13px;
-  font-weight: 650;
-  color: #20263a;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-[data-theme='dark'] .bezent-wf-capacity-title {
-  color: #f8fafc;
-}
-
-.bezent-wf-capacity-ratio {
-  font-size: 12px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: #2563eb;
-}
-
-[data-theme='dark'] .bezent-wf-capacity-ratio {
-  color: #93c5fd;
-}
-
-.bezent-wf-capacity-bar-wrap {
-  width: 100%;
-  margin-top: 6px;
-}
-
-/* 2x2 Metric Grid inside Workforce Planning */
-.bezent-wf-metric-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 12px;
-  flex: 1;
+  min-width: 0;
 }
 
-.bezent-wf-metric-box {
-  width: 100%;
-  font: inherit;
-  text-align: left;
-  padding: 14px 16px;
-  background: #f8fafc;
-  border: 1px solid #e9eaf4;
-  border-radius: 14px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  cursor: pointer;
-  transition:
-    background-color 0.16s ease,
-    border-color 0.16s ease,
-    box-shadow 0.16s ease;
-  position: relative;
-}
-
-.bezent-wf-metric-box:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-  box-shadow: 0 4px 14px rgba(32, 45, 75, 0.05);
-}
-
-.bezent-wf-metric-box:focus-visible {
-  outline: 2px solid #2563eb;
-  outline-offset: 2px;
-}
-
-[data-theme='dark'] .bezent-wf-metric-box {
-  background: #1e293b;
-  border-color: #334155;
-}
-
-[data-theme='dark'] .bezent-wf-metric-box:hover {
-  background: #24344d;
-  border-color: #475569;
-}
-
-.bezent-wf-metric-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-
-.bezent-wf-metric-label {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: #64748b;
-}
-
-[data-theme='dark'] .bezent-wf-metric-label {
-  color: #94a3b8;
-}
-
-.bezent-wf-metric-val {
-  font-size: 24px;
-  font-weight: 750;
-  color: #20263a;
-  line-height: 1.1;
-  font-variant-numeric: tabular-nums;
-  margin: 2px 0 4px;
-}
-
-[data-theme='dark'] .bezent-wf-metric-val {
-  color: #f8fafc;
-}
-
-.bezent-wf-metric-hint {
-  font-size: 11.5px;
-  color: #788197;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-[data-theme='dark'] .bezent-wf-metric-hint {
-  color: #94a3b8;
-}
-
-.bezent-wf-metric-pill {
-  font-size: 10px;
-  font-weight: 750;
-  padding: 2px 7px;
-  border-radius: 999px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.bezent-wf-metric-pill--amber {
-  background: #fffbeb;
-  color: #b45309;
-  border: 1px solid #fef3c7;
-}
-
-.bezent-wf-metric-pill--blue {
+.bezent-wf-planning-card__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   background: #eff6ff;
   color: #2563eb;
-  border: 1px solid #bfdbfe;
+  border: 1px solid #dbeafe;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.bezent-wf-metric-pill--green {
-  background: #ecfdf5;
-  color: #059669;
-  border: 1px solid #d1fae5;
+.bezent-wf-planning-card__icon--rose {
+  background: #fff1f2;
+  color: #e11d48;
+  border-color: #ffe4e6;
 }
 
-[data-theme='dark'] .bezent-wf-metric-pill--amber {
-  background: rgba(217, 119, 6, 0.22);
-  color: #fde68a;
-  border-color: rgba(217, 119, 6, 0.35);
-}
-
-[data-theme='dark'] .bezent-wf-metric-pill--blue {
-  background: rgba(37, 99, 235, 0.22);
+[data-theme='dark'] .bezent-wf-planning-card__icon {
+  background: rgba(37, 99, 235, 0.2);
   color: #93c5fd;
   border-color: rgba(37, 99, 235, 0.35);
 }
 
-[data-theme='dark'] .bezent-wf-metric-pill--green {
-  background: rgba(5, 150, 105, 0.22);
-  color: #6ee7b7;
-  border-color: rgba(5, 150, 105, 0.35);
+[data-theme='dark'] .bezent-wf-planning-card__icon--rose {
+  background: rgba(225, 29, 72, 0.2);
+  color: #fda4af;
+  border-color: rgba(225, 29, 72, 0.35);
 }
 
-/* ── Card 2: Workforce Alerts List ── */
-.bezent-wf-alerts-list {
+.bezent-wf-planning-card__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+
+[data-theme='dark'] .bezent-wf-planning-card__title {
+  color: #f8fafc;
+}
+
+.bezent-wf-planning-card__desc {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  margin: 2px 0 0;
+  line-height: 1.35;
+}
+
+[data-theme='dark'] .bezent-wf-planning-card__desc {
+  color: #94a3b8;
+}
+
+.bezent-wf-card-header-link {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #2563eb;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.bezent-wf-card-header-link:hover {
+  background: #eff6ff;
+}
+
+[data-theme='dark'] .bezent-wf-card-header-link {
+  color: #93c5fd;
+}
+
+[data-theme='dark'] .bezent-wf-card-header-link:hover {
+  background: rgba(37, 99, 235, 0.2);
+}
+
+/* ── Card 1: Workforce Planning Body ── */
+.bezent-wf-planning-body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  justify-content: space-between;
   flex: 1;
 }
 
-.bezent-wf-alert-item {
+.bezent-wf-plan-primary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bezent-wf-plan-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.bezent-wf-plan-stat {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.bezent-wf-plan-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+[data-theme='dark'] .bezent-wf-plan-stat-label {
+  color: #94a3b8;
+}
+
+.bezent-wf-plan-stat-val {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  margin-top: 3px;
+  letter-spacing: -0.02em;
+}
+
+[data-theme='dark'] .bezent-wf-plan-stat-val {
+  color: #f8fafc;
+}
+
+.bezent-wf-plan-stat-val--blue {
+  color: #2563eb;
+}
+
+[data-theme='dark'] .bezent-wf-plan-stat-val--blue {
+  color: #93c5fd;
+}
+
+.bezent-wf-plan-progress-wrap {
   width: 100%;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.bezent-wf-plan-capacity-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+[data-theme='dark'] .bezent-wf-plan-capacity-meta {
+  color: #94a3b8;
+}
+
+.bezent-wf-plan-ratio-text {
+  font-weight: 600;
+  color: #2563eb;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-theme='dark'] .bezent-wf-plan-ratio-text {
+  color: #93c5fd;
+}
+
+.bezent-wf-plan-divider {
+  border: none;
+  border-top: 1px solid #f1f5f9;
+  margin: 14px 0;
+}
+
+[data-theme='dark'] .bezent-wf-plan-divider {
+  border-top-color: #334155;
+}
+
+.bezent-wf-plan-secondary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.bezent-wf-plan-sec-stat {
   font: inherit;
+  background: transparent;
+  border: none;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.bezent-wf-plan-sec-stat:hover {
+  background: #f8fafc;
+}
+
+[data-theme='dark'] .bezent-wf-plan-sec-stat:hover {
+  background: #24344d;
+}
+
+.bezent-wf-plan-sec-stat-main {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 3px;
+}
+
+.bezent-wf-plan-sec-pill {
+  font-size: 10.5px;
+  font-weight: 650;
+  padding: 2px 7px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.bezent-wf-plan-sec-pill--amber {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.bezent-wf-plan-sec-pill--blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+[data-theme='dark'] .bezent-wf-plan-sec-pill--amber {
+  background: rgba(217, 119, 6, 0.25);
+  color: #fde68a;
+}
+
+[data-theme='dark'] .bezent-wf-plan-sec-pill--blue {
+  background: rgba(37, 99, 235, 0.25);
+  color: #93c5fd;
+}
+
+.bezent-wf-plan-sec-hint {
+  font-size: 11.5px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+/* ── Card 2: Workforce Alerts Clean Rows ── */
+.bezent-wf-alerts-clean-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.bezent-wf-clean-alert-row {
+  font: inherit;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #f1f5f9;
   text-align: left;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  padding: 16px 18px;
-  background: #f8fafc;
-  border: 1px solid #e9eaf4;
-  border-radius: 14px;
+  gap: 12px;
+  padding: 12px 6px;
   cursor: pointer;
-  transition:
-    background-color 0.16s ease,
-    border-color 0.16s ease,
-    box-shadow 0.16s ease;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+  width: 100%;
 }
 
-.bezent-wf-alert-item:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-  box-shadow: 0 4px 14px rgba(32, 45, 75, 0.05);
+.bezent-wf-clean-alert-row:last-child {
+  border-bottom: none;
 }
 
-.bezent-wf-alert-item:focus-visible {
-  outline: 2px solid #2563eb;
-  outline-offset: 2px;
+.bezent-wf-clean-alert-row:hover {
+  background: #f8fafc;
 }
 
-[data-theme='dark'] .bezent-wf-alert-item {
-  background: #1e293b;
-  border-color: #334155;
+[data-theme='dark'] .bezent-wf-clean-alert-row {
+  border-bottom-color: #334155;
 }
 
-[data-theme='dark'] .bezent-wf-alert-item:hover {
+[data-theme='dark'] .bezent-wf-clean-alert-row:hover {
   background: #24344d;
-  border-color: #475569;
 }
 
-.bezent-wf-alert-item__left {
+.bezent-wf-clean-alert-left {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -11469,113 +11650,120 @@
   flex: 1;
 }
 
-.bezent-wf-alert-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+.bezent-wf-clean-alert-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.bezent-wf-alert-icon--amber {
-  background: #fffbeb;
+.bezent-wf-clean-alert-icon--amber {
+  background: #fef3c7;
   color: #d97706;
 }
 
-.bezent-wf-alert-icon--purple {
-  background: #f5f3ff;
+.bezent-wf-clean-alert-icon--purple {
+  background: #ede9fe;
   color: #7c3aed;
 }
 
-.bezent-wf-alert-icon--rose {
-  background: #fdf2f8;
-  color: #db2777;
+.bezent-wf-clean-alert-icon--rose {
+  background: #ffe4e6;
+  color: #e11d48;
 }
 
-[data-theme='dark'] .bezent-wf-alert-icon--amber {
+[data-theme='dark'] .bezent-wf-clean-alert-icon--amber {
   background: rgba(217, 119, 6, 0.22);
   color: #fde68a;
 }
 
-[data-theme='dark'] .bezent-wf-alert-icon--purple {
+[data-theme='dark'] .bezent-wf-clean-alert-icon--purple {
   background: rgba(124, 58, 237, 0.22);
   color: #c4b5fd;
 }
 
-[data-theme='dark'] .bezent-wf-alert-icon--rose {
-  background: rgba(219, 39, 119, 0.22);
-  color: #f9a8d4;
+[data-theme='dark'] .bezent-wf-clean-alert-icon--rose {
+  background: rgba(225, 29, 72, 0.22);
+  color: #fda4af;
 }
 
-.bezent-wf-alert-title {
+.bezent-wf-clean-alert-text {
+  min-width: 0;
+}
+
+.bezent-wf-clean-alert-title {
   font-size: 13.5px;
   font-weight: 650;
-  color: #20263a;
+  color: #1e293b;
   margin: 0;
-  line-height: 1.3;
+  line-height: 1.25;
 }
 
-[data-theme='dark'] .bezent-wf-alert-title {
+[data-theme='dark'] .bezent-wf-clean-alert-title {
   color: #f8fafc;
 }
 
-.bezent-wf-alert-desc {
-  font-size: 12px;
+.bezent-wf-clean-alert-desc {
+  font-size: 11.5px;
+  font-weight: 500;
   color: #64748b;
+  margin: 2px 0 0;
   display: block;
-  margin-top: 2px;
-  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-[data-theme='dark'] .bezent-wf-alert-desc {
+[data-theme='dark'] .bezent-wf-clean-alert-desc {
   color: #94a3b8;
 }
 
-.bezent-wf-alert-item__right {
+.bezent-wf-clean-alert-right {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-shrink: 0;
   color: #94a3b8;
 }
 
-.bezent-wf-alert-pill {
-  font-size: 11.5px;
+.bezent-wf-clean-alert-badge {
+  font-size: 11px;
   font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  padding: 4px 10px;
+  padding: 3px 8px;
   border-radius: 999px;
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-.bezent-wf-alert-pill--amber {
+.bezent-wf-clean-alert-badge--amber {
   background: #fef3c7;
   color: #b45309;
 }
 
-.bezent-wf-alert-pill--purple {
+.bezent-wf-clean-alert-badge--purple {
   background: #ede9fe;
   color: #6d28d9;
 }
 
-.bezent-wf-alert-pill--rose {
+.bezent-wf-clean-alert-badge--rose {
   background: #ffe4e6;
   color: #be123c;
 }
 
-[data-theme='dark'] .bezent-wf-alert-pill--amber {
+[data-theme='dark'] .bezent-wf-clean-alert-badge--amber {
   background: rgba(217, 119, 6, 0.25);
   color: #fde68a;
 }
 
-[data-theme='dark'] .bezent-wf-alert-pill--purple {
+[data-theme='dark'] .bezent-wf-clean-alert-badge--purple {
   background: rgba(124, 58, 237, 0.25);
   color: #c4b5fd;
 }
 
-[data-theme='dark'] .bezent-wf-alert-pill--rose {
+[data-theme='dark'] .bezent-wf-clean-alert-badge--rose {
   background: rgba(225, 29, 72, 0.25);
   color: #fda4af;
 }

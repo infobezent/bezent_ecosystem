@@ -123,18 +123,18 @@ export const OnboardingKpiCard: React.FC<OnboardingKpiCardProps> = ({
   const effectiveTotal =
     total !== undefined ? total : effectiveStages.reduce((sum, s) => sum + (s.count || 0), 0);
 
-  // Proportional arc distribution across a 285° span with 5° gaps (viewBox="0 0 60 60", R=21)
-  // Mirrors Offboarding geometry: currentAngle starts at 345° and sweeps clockwise
+  // Balanced equal arc distribution across a 285° span with 5° gaps (viewBox="0 0 60 60", R=21)
+  // Mirrors Offboarding geometry: all stage arcs are equally distributed so each color is equally visible
   const totalArcSpan = 285;
   const gap = 5;
   const numStages = effectiveStages.length || 4;
   const totalGaps = (numStages - 1) * gap;
   const availableSpan = Math.max(60, totalArcSpan - totalGaps);
+  const equalSweep = availableSpan / numStages;
 
   let currentAngle = 345;
   const arcs = effectiveStages.map((stage, idx) => {
-    const fraction = effectiveTotal > 0 ? stage.count / effectiveTotal : 1 / numStages;
-    const sweep = Math.max(16, fraction * availableSpan);
+    const sweep = equalSweep;
     const startAngle = currentAngle;
     const endAngle = currentAngle + sweep;
     currentAngle = endAngle + gap;
