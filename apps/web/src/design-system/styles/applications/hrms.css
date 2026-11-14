@@ -14659,6 +14659,73 @@
   color: #a5b4fc !important;
 }
 
+.bezent-att-table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-top: 1px solid #f1f5f9;
+  background: #ffffff;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.bezent-att-table-footer-info {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+  user-select: none;
+}
+
+/* ── Unified Daily Attendance Toolbar ── */
+.bezent-att-directory-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.bezent-att-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bezent-att-toolbar-left .bezent-att-search {
+  width: 240px;
+  max-width: 250px;
+  flex-shrink: 0;
+}
+
+.bezent-att-workday-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bezent-att-workday-nav .bezent-input {
+  width: 140px;
+}
+
+.bezent-att-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+[data-theme='dark'] .bezent-att-table-footer {
+  background: #1e293b;
+  border-top-color: #334155;
+}
+
+[data-theme='dark'] .bezent-att-table-footer-info {
+  color: #94a3b8;
+}
+
 .bezent-att-action-count-pill {
   font-size: 11px;
   font-weight: 700;

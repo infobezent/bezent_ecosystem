@@ -606,6 +606,31 @@ export function DailyAttendanceLogPage() {
     );
   };
 
+  const getPaginationItems = (currentPage: number, total: number): (number | 'ellipsis')[] => {
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+    const pages: (number | 'ellipsis')[] = [];
+    if (currentPage <= 4) {
+      for (let i = 1; i <= 5; i++) pages.push(i);
+      pages.push('ellipsis');
+      pages.push(total);
+    } else if (currentPage >= total - 3) {
+      pages.push(1);
+      pages.push('ellipsis');
+      for (let i = total - 4; i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      pages.push('ellipsis');
+      pages.push(currentPage - 1);
+      pages.push(currentPage);
+      pages.push(currentPage + 1);
+      pages.push('ellipsis');
+      pages.push(total);
+    }
+    return pages;
+  };
+
   const appliedCount = countActiveAttendanceFilters(appliedFilters);
   const hasActiveFilters = Boolean(search.trim() || appliedCount > 0);
   const isMonthLocked = items.length > 0 && items.every((i) => i.processingState === 'locked');
@@ -622,86 +647,7 @@ export function DailyAttendanceLogPage() {
   return (
     <Page>
       {/* ── Page Header ── */}
-      <PageHeader
-        title="Attendance"
-        actions={
-          <Inline gap="sm" align="center">
-            {/* Workday navigation */}
-            <Inline gap="xs" align="center">
-              <span className="bezent-filter-strip-label">Date:</span>
-              <Button
-                variant="outline"
-                size="md"
-                shape="rounded"
-                onClick={handlePrevDay}
-                aria-label="Previous workday"
-              >
-                <BezentIcon name="chevronLeft" size={14} />
-              </Button>
-              <Input
-                type="date"
-                aria-label="Date"
-                value={date}
-                onChange={(e) => {
-                  setDate(e.target.value);
-                  setPage(1);
-                }}
-              />
-              <Button
-                variant="outline"
-                size="md"
-                shape="rounded"
-                onClick={handleNextDay}
-                aria-label="Next workday"
-              >
-                <BezentIcon name="chevronRight" size={14} />
-              </Button>
-              <Button variant="outline" size="md" shape="rounded" onClick={handleToday}>
-                Today
-              </Button>
-            </Inline>
-
-            {/* Export & Actions */}
-            <Button
-              variant="secondary"
-              size="md"
-              shape="rounded"
-              leftIcon={<BezentIcon name="download" size={16} />}
-              onClick={() => downloadAttendanceCsv('daily', { date })}
-            >
-              Export
-            </Button>
-
-            {generalSettings?.manualEntryAllowed !== false && (
-              <Button
-                variant="secondary"
-                size="md"
-                shape="rounded"
-                onClick={() => handleOpenManualEntry()}
-              >
-                + Manual Entry
-              </Button>
-            )}
-
-            <Button
-              variant="primary"
-              size="md"
-              shape="rounded"
-              disabled={isMonthLocked || (counters.pendingReview === 0 && counters.scheduled === 0)}
-              title={
-                isMonthLocked
-                  ? 'Locked for payroll'
-                  : counters.pendingReview === 0 && counters.scheduled === 0
-                    ? 'Select a date with pending records to finalize.'
-                    : 'Finalize Day'
-              }
-              onClick={() => setFinalizeModalOpen(true)}
-            >
-              Finalize Day
-            </Button>
-          </Inline>
-        }
-      />
+      <PageHeader title="Attendance" />
 
       <AttendanceSectionTabs group="records" />
 
@@ -721,20 +667,22 @@ export function DailyAttendanceLogPage() {
           <Alert variant={bulkBannerMessage.type}>{bulkBannerMessage.text}</Alert>
         )}
 
-        {/* ── Search & Filter Toolbar directly below KPI Cards (Workforce Directory Pattern) ── */}
-        <div className="bezent-directory-toolbar">
-          <div className="bezent-directory-toolbar__search">
-            <SearchInput
-              value={search}
-              shape="rounded"
-              aria-label="Search by name or employee ID"
-              onChange={(e) => setSearch(e.target.value)}
-              onClear={() => setSearch('')}
-              placeholder="Search by name or employee ID"
-            />
-          </div>
+        {/* ── Unified Single-Line Attendance Toolbar ── */}
+        <div className="bezent-directory-toolbar bezent-att-directory-toolbar">
+          <div className="bezent-att-toolbar-left">
+            {/* 1. Compact Search Bar */}
+            <div className="bezent-att-search">
+              <SearchInput
+                value={search}
+                shape="rounded"
+                aria-label="Search by name or employee ID"
+                onChange={(e) => setSearch(e.target.value)}
+                onClear={() => setSearch('')}
+                placeholder="Search name or ID"
+              />
+            </div>
 
-          <div className="bezent-directory-toolbar__actions">
+            {/* 2. Filters & Reset (Placed next to Search) */}
             <div className="bezent-filter-anchor">
               <Button
                 variant={appliedCount > 0 || isFilterPanelOpen ? 'secondary' : 'outline'}
@@ -770,10 +718,94 @@ export function DailyAttendanceLogPage() {
               leftIcon={<BezentIcon name="reset" size={16} />}
               onClick={handleResetFilters}
               disabled={!hasActiveFilters}
+              title="Reset all active filters"
             >
               Reset
             </Button>
+          </div>
 
+          <div className="bezent-directory-toolbar__actions bezent-att-toolbar-actions">
+            {/* 1. Date Navigation Controls (Swapped to right side) */}
+            <div className="bezent-att-workday-nav">
+              <Button
+                variant="outline"
+                size="md"
+                shape="rounded"
+                onClick={handlePrevDay}
+                aria-label="Previous workday"
+                title="Previous workday"
+              >
+                <BezentIcon name="chevronLeft" size={14} />
+              </Button>
+              <Input
+                type="date"
+                aria-label="Date"
+                value={date}
+                onChange={(e) => {
+                  setDate(e.target.value);
+                  setPage(1);
+                }}
+              />
+              <Button
+                variant="outline"
+                size="md"
+                shape="rounded"
+                onClick={handleNextDay}
+                aria-label="Next workday"
+                title="Next workday"
+              >
+                <BezentIcon name="chevronRight" size={14} />
+              </Button>
+              <Button variant="outline" size="md" shape="rounded" onClick={handleToday}>
+                Today
+              </Button>
+            </div>
+
+            {/* 2. Export: Icon Only per user instruction */}
+            <Button
+              variant="outline"
+              size="md"
+              shape="rounded"
+              onClick={() => downloadAttendanceCsv('daily', { date })}
+              aria-label="Export Daily Attendance CSV"
+              title="Export Daily Attendance CSV"
+            >
+              <BezentIcon name="download" size={16} />
+            </Button>
+
+            {/* 3. Manual Entry: Pencil Icon Only per user instruction */}
+            {generalSettings?.manualEntryAllowed !== false && (
+              <Button
+                variant="outline"
+                size="md"
+                shape="rounded"
+                onClick={() => handleOpenManualEntry()}
+                aria-label="Manual Attendance Entry"
+                title="Manual Attendance Entry"
+              >
+                <BezentIcon name="edit" size={16} />
+              </Button>
+            )}
+
+            {/* 4. Finalize Day */}
+            <Button
+              variant="primary"
+              size="md"
+              shape="rounded"
+              disabled={isMonthLocked || (counters.pendingReview === 0 && counters.scheduled === 0)}
+              title={
+                isMonthLocked
+                  ? 'Locked for payroll'
+                  : counters.pendingReview === 0 && counters.scheduled === 0
+                    ? 'Select a date with pending records to finalize.'
+                    : 'Finalize Day'
+              }
+              onClick={() => setFinalizeModalOpen(true)}
+            >
+              Finalize Day
+            </Button>
+
+            {/* 5. Records Badge */}
             <span className="bezent-records-badge">{totalCount} Records</span>
           </div>
         </div>
@@ -1256,34 +1288,53 @@ export function DailyAttendanceLogPage() {
               </TableBody>
             </Table>
 
-            {/* Pagination Controls */}
-            <Toolbar
-              left={
-                <span className="bezent-card__desc">
-                  Showing {items.length} of {totalCount} records (Page {page} of {totalPages})
-                </span>
-              }
-              right={
-                <Inline gap="xs" align="center">
-                  <Button
-                    variant="secondary"
-                    size="sm"
+            {/* Table Footer: Clean Records Summary & Enterprise Pagination */}
+            <div className="bezent-att-table-footer">
+              <span className="bezent-att-table-footer-info" aria-live="polite">
+                {totalPages <= 1
+                  ? `Showing all ${items.length} ${items.length === 1 ? 'record' : 'records'}`
+                  : `Showing ${(page - 1) * limit + 1}–${Math.min(page * limit, totalCount)} of ${totalCount} records`}
+              </span>
+
+              {totalPages > 1 && (
+                <div className="bezent-pagination" role="navigation" aria-label="Pagination">
+                  <button
+                    type="button"
+                    className="bezent-pagination__btn"
                     disabled={page <= 1}
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    aria-label="Previous page"
                   >
-                    Previous
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
+                    ‹
+                  </button>
+                  {getPaginationItems(page, totalPages).map((item, idx) =>
+                    item === 'ellipsis' ? (
+                      <span key={`ellipsis-${idx}`} className="bezent-pagination__ellipsis">
+                        …
+                      </span>
+                    ) : (
+                      <button
+                        key={`page-${item}`}
+                        type="button"
+                        className={`bezent-pagination__btn ${item === page ? 'is-active' : ''}`}
+                        onClick={() => setPage(item)}
+                      >
+                        {item}
+                      </button>
+                    ),
+                  )}
+                  <button
+                    type="button"
+                    className="bezent-pagination__btn"
                     disabled={page >= totalPages}
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    aria-label="Next page"
                   >
-                    Next
-                  </Button>
-                </Inline>
-              }
-            />
+                    ›
+                  </button>
+                </div>
+              )}
+            </div>
           </Card>
         )}
 

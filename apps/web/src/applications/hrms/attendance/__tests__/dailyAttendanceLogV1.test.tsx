@@ -12,8 +12,8 @@ describe('HRMS Attendance — Daily Attendance V1.0 Frontend Tests', () => {
     );
 
     expect(html).toContain('Attendance');
-    expect(html).toContain('+ Manual Entry');
-    expect(html).toContain('Export');
+    expect(html).toContain('Manual Attendance Entry');
+    expect(html).toContain('Export Daily Attendance CSV');
     expect(html).toContain('Today');
   });
 
